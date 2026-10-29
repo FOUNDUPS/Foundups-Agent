@@ -61,7 +61,8 @@ function assertManifestContract() {
     'holo_index.py',
     'modules/communication/moltbot_bridge/src/openclaw_dae.py',
     'modules/foundups/src/foundup_registry_loader.py',
-    'modules/platform_integration/linkedin_agent/src/linkedin_agent.py'
+    'modules/platform_integration/linkedin_agent/src/linkedin_agent.py',
+    'modules/platform_integration/social_media_orchestrator/src/petition_campaign.py'
   ]) {
     assert(manifest.required_runtime_files.includes(sentinel), sentinel);
   }
@@ -237,6 +238,46 @@ function assertConfigurationMigrationPrecedence() {
   );
 }
 
+function assertRuntimeFileCountBoundary() {
+  for (const member of [
+    'modules/infrastructure/dependency_launcher/src/lm_studio_startup.py',
+    'modules/platform_integration/youtube_shorts_scheduler/src/schedule_inventory.py',
+    'modules/infrastructure/wsp_core/src/wsp_domain_policy.py'
+  ]) {
+    assert(manifest.required_runtime_files.includes(member));
+  }
+  assert(manifest.required_runtime_files.includes(
+    'modules/foundups/simulator/economics/_token_numeric.py'
+  ));
+  assert(manifest.required_runtime_files.includes(
+    'modules/communication/livechat/src/engagement_lifecycle.py'
+  ));
+  assert(manifest.required_runtime_files.includes(
+    'modules/communication/livechat/src/operator_command_queue.py'
+  ));
+  for (const name of ['reddog_effect_consensus_proof.py', 'reddog_current_effect_signing_authority.py', 'reddog_external_signer_authoritative_use_lease.py']) {
+    assert(manifest.required_runtime_files.includes(`modules/communication/moltbot_bridge/src/${name}`));
+  }
+  const validator = require('../backend_compatibility_manifest');
+  const candidate = JSON.parse(JSON.stringify(manifest));
+  const addMember = (index) => {
+    const member = `modules/infrastructure/wre_core/src/cap_fixture_${index}.py`;
+    candidate.required_runtime_files.push(member);
+    candidate.required_runtime_sha256[member] = '0'.repeat(64);
+  };
+  while (candidate.required_runtime_files.length < 1477) {
+    addMember(candidate.required_runtime_files.length);
+  }
+  assert.strictEqual(candidate.required_runtime_files.length, 1477);
+  assert.deepStrictEqual(validator.validateManifest(candidate), []);
+  addMember(1477);
+  assert.strictEqual(candidate.required_runtime_files.length, 1478);
+  assert.deepStrictEqual(validator.validateManifest(candidate), [
+    'backend_runtime_file_contract_mismatch'
+  ]);
+}
+
+assertRuntimeFileCountBoundary();
 assertManifestContract();
 assertPinnedDigest();
 assertRuntimeOrdering();

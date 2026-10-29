@@ -7,6 +7,88 @@
 
 ## Public API
 
+### Source-backed editorial package
+
+```python
+content_orchestrator.prepare_campaign(brief: dict) -> dict
+async def execute_content_campaign(params: dict[str, str]) -> dict
+```
+
+The existing SOCIAL adapter accepts `social campaign content action=prepare
+dry_run=true brief='<JSON>'`. Inline input is bounded to64KiB with unique JSON
+keys. `social_content_brief.v1` requires an explicit brand projection, audience,
+objective, CTA, source excerpts, topics and offset-aware calendar parameters.
+Returns `social_content_package.v1`: deterministic editorial priorities,
+deduplicated evidence, source-preserving drafts, proposed UTC slots, review
+requirements and measurement join keys. See [the full contract](docs/CONTENT_CAMPAIGN.md).
+
+All evidence remains supplied/unverified. Brand rules and locale are carried for
+review, not automatically applied. Package revision is not signed authority;
+no account is selected, no source/credential/config is fetched and no model,
+scheduler, storage, browser or publisher runs. Unknown/live parameters reject.
+Length checks are raw Unicode prechecks; provider validation remains pending.
+Overlength drafts return no publishable content, preserving source text/links.
+
+### Petition intake plan
+
+```python
+async def execute_petition_campaign(params: dict[str, str]) -> dict
+```
+
+Owner: `src/petition_campaign.py`; the existing SOCIAL campaign adapter dispatches
+`social campaign petition`. Parameters: `action` (`preview`/`plan`), `dry_run`
+(`true` only), `petition_url`, `campaign_id`, `title`, `platforms`. Unknown or
+duplicate command parameters, unsupported operations and invalid public URLs
+reject. Conversational launch phrases route only to the effect-free petition
+branch, never the other existing publishers.
+
+Returns `petition_campaign_plan.v1` with `awaiting_petition_url` or `intake_ready`,
+canonical campaign identity, an in-memory brief projection and pending phases.
+All accounts/platforms are disabled; URL/identity/source/policy verification is
+pending. `plan_revision` is not a signature or execution job. The leaf reads no
+host config and performs no model, network, browser, storage or publication effect.
+Outer CLI/runtime audit and admission behavior remains outside that guarantee.
+Account creation, persistence, draft generation, publishing, analytics and local
+browser qualification remain separate. See [the runbook](docs/PETITION_CAMPAIGN.md).
+
+### AntifaFM campaign pilot
+
+```python
+async def execute_antifafm_campaign(
+    params: dict[str, str], *, settings=None, client=None, drafter=None, db_path=None
+) -> dict
+
+async def post_verified_x(
+    content: str, account: XAccount, campaign_id: str, job_id: str, *,
+    client, expected_user_id: str, db_path, dry_run: bool = True
+) -> dict
+```
+
+The campaign entry is `src/antifafm_campaign.py`; the existing SOCIAL router
+delegates to it. Actions: `preview`, `check_account`, `review_mentions`,
+`draft_reply`, `publish`. Accepted string parameters: `action`, `account`,
+`dry_run`, `post_id`, `limit`, `job_id`, `content`. Unknown keys, malformed
+AntifaFM command tokens and duplicate parameters reject. The default account is
+`move2japan`, default dry-run is true, and publishing requires an explicit stable
+job ID plus enabled private configuration. The other account labels are
+`foundups` and `antifafm`, each explicitly provider-ID-bound.
+
+Preview returns before host configuration, model, API or ledger access. Read
+operations require `dry_run=false` but can run with publication disabled. They
+verify account identity and return source-linked `draft_reply`, `skip` or
+`review_required` decisions; `review_complete` does not prove a usable draft.
+Context is at most five connected posts and 2,400 serialized characters; drafts
+are at most 280 characters. There is no reply publication action.
+
+`post_verified_x` is an API-only method and module helper in
+`src/unified_x_interface.py`. Live success requires durable `verified` or
+`already_verified` provider readback. Known IDs retry retrieval only; uncertain
+creates remain claimed. The campaign returns `publication_verified`; its
+`no_publication_performed` field is nullable after entering a live publisher.
+One new job per provider account/campaign per 24 hours is allowed; unresolved
+claims hold new jobs. Existing stream rows are unchanged. See the
+[runbook](docs/ANTIFAFM_CAMPAIGN.md) for configuration, status and recovery details.
+
 ### Core Classes
 - `SocialMediaOrchestrator`: Main orchestration service for unified social media management
 - `OAuthCoordinator`: Centralized OAuth management for all social platforms
@@ -279,6 +361,52 @@ action = scheduler.understand_command(
 # Execute pending actions
 results = await scheduler.execute_pending_actions()
 ```
+
+`execute_pending_actions()` returns attempted `(action_id, result)` pairs. Check
+the corresponding action's `status` and `error`; a returned pair alone does not
+mean success. `executed` means the local reminder was logged, or a stream-posting
+dependency returned a coherent `PostResponse` reporting success for every
+requested platform. It does not establish independently verified delivery.
+
+Posting targets must be a nonempty list of supported, unique platform values.
+They are validated and captured before awaiting the dependency; the dependency
+receives a separate list. Empty, duplicate, unknown or non-list targets fail
+before posting. Overlapping natural-language matches can produce duplicates and
+are rejected explicitly. Non-stream posts, stream checks, messages, code and
+custom actions remain unsupported and fail without invoking an effect adapter.
+
+The response must contain a nonempty list of actual `PostResult` values with
+boolean success fields, valid unique platforms exactly covering the captured
+targets, and integer success/failure counts matching those results. Failed,
+partial, empty or malformed responses mark the action failed, retain the original
+response in both the returned tuple and `action.result`, and set `action.error`.
+Dependency exceptions retain the existing failed/error return path. Failed
+actions are terminal within the pending-only loop; no automatic retry is added.
+
+`save_schedule()` projects known `PostResponse` values into archival JSON:
+request ID, ordered platform results (success/platform/message/timestamp/URL),
+counts and response timestamp. Enum values and ISO timestamps are preserved;
+live response objects are unchanged. On reload, results remain JSON dictionaries,
+not reconstructed typed responses. Existing JSON-compatible results remain valid.
+
+The entire schedule is serialized before calling the existing shared atomic
+writer at the configured schedule path. Unsupported objects reject before file
+publication. Before-replacement failures preserve old bytes; after replacement,
+a parent-directory sync failure can leave complete new JSON visible while
+durability is uncertain. No temporary files are intentionally retained.
+
+The shared writer uses same-directory temporary files. On POSIX, replacement
+files have mode0600 and a newly created leaf parent uses0700; existing destination
+permissions are not preserved. Windows publication uses the existing helper but
+is not proven by the Linux hosted fixture. Symlinks, concurrent writers and
+power-loss behavior are outside this acceptance scope.
+
+`save_schedule()` still returns `None` and logs errors; callers do not consume
+a persistence acknowledgement. In-memory completion is not a durable receipt.
+A failed save can leave a prior pending record, which may execute after restart.
+This repair does not add retries or provide exactly-once delivery.
+The [caller/reload characterization](tests/README.md#caller-acknowledgement-and-reload-characterization--2026-09-28)
+fixes nine synthetic observations; passing witnesses do not change these API guarantees.
 
 ### Human Scheduling Interface (012 Mode)
 ```python

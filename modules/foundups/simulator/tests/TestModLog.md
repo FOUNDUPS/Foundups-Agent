@@ -1,6 +1,279 @@
+## FoundUps selected numeric source closure — 2026-10-25
+
+Pre-edit WSP15 allocation16/P0 in the numeric plan permits exactly one required
+private arithmetic member. Runtime1470->1471; the existing explicit Node boundary
+now accepts1471 and rejects1472. The old boundary oracle first failed its
+1470 expected-count assertion on actual1471, before calling the validator.
+That RED is an oracle-count mismatch, not evidence of old-validator execution. All328KiB manifest,2MiB/source and32MiB total caps remain unchanged.
+Only token_economics.py's existing LF digest changes, plus _token_numeric.py.
+The alignment test owner is outside runtime membership: an initial parent
+measurement assertion wrongly expected its digest, before any pins changed.
+
+Canonical write/check, all8 existing generator cases and3 existing Node
+compatibility/preflight/blocked-recovery entrypoints pass. Existing Python pin
+and JS pin advance together. All1614 evidence hashes stay stable after deliberate
+write/cap edits; zero instrumented Python/Node network or dotenv attempts.
+No generator/source-discovery algorithm, runtime authority, dependency or API
+change. Evidence count1614 differs from actual1471 runtime members.
+
+Exact commands, IDs, timings and source maps are external under
+foundups-numeric-source-closure-f3jex_4s and in the numeric portable receipt.
+Known38 metadata findings are proposed, pending independent review:37 sources/
+contexts unchanged and1 known arithmetic-source SHA256 value changed. No blanket
+rule/path exemption, unknown finding approval, OS isolation, installed-runtime
+promotion, real chain effect or additional economic coverage follows.
+
+## 2026-10-25 — Numeric admission chronology and combined closure
+
+Existing test_alignment_and_tokenomics.py retains its6 original function ASTs,
+imports and module docstring;223 new controls are added. The initial unchanged
+pure numeric baseline3 passes. Exact-AST projected RED phases:200 cases184F/16P,
+218 cases200F/18P,219 cases200F/19P,225 cases206F/19P. The225 inventory included
+one false negative: update_adoption(work_completed=None) means no increment.
+First candidate224P/1F exposed it. Only that pair changed to its positive existing
+contract; all13 other None controls remain. Corrected original-source replay
+AFTER authoring205F/20P is not retroactive test-first proof. Corrected225 passes.
+
+A real valid-integer normalization regression was then independently reproduced.
+New226 inventory225P/1F preceded the strict-admission-then-float correction;
+final focused226 passes. No assertion or economic substitution in projection.
+Three unrelated original cases were deferred only in these projected runs.
+Independent28 pass; an earlier external enum class-identity oracle25P/3F was
+corrected to compare name/value while preserving all numeric/state assertions.
+
+Fresh actual whole-simulator633 passes at oldf11 source. After numeric commit
+dc844e3ba and main6fe merge89486886f, combined736 passes in60.00s with all6
+originals and8 adjacent cases. Only a blank EOF line was removed before commit;
+complete test AST stayed identical. Exactly the existing SSE cases are excluded:
+- test_sse_server.py::test_sim_events_endpoint_denies_without_invite_key
+- test_sse_server.py::test_health_endpoint_denies_when_protected
+- test_sse_server.py::test_health_endpoint_allows_with_valid_invite
+
+Combined receipt root: C:/Users/user/AppData/Local/Temp/foundups-numeric-combined-main-807cjgzp/.
+All169 simulator/FAM and8 central source hashes stayed stable;13532 SQLite
+connections were scratch/memory. Real central singleton uses scratch data_dir
+before FAM construction; no start/callback replacement. Zero instrumented
+network/dotenv/checkout-write attempts; default central store stat comparison
+unchanged. Older runners without explicit central confinement are not relabeled.
+Inherited runner-only FAM directory redirect and Holo/Qwen enrichment None are
+disclosed; assertions, authority and arithmetic execute unchanged. Two inherited
+inactive asyncio warnings remain. Counts overlap; no full coverage, OS-isolated
+promotion, provider/chain effects or funded settlement claim.
+
 # Simulator Tests ModLog
 
+## 2026-10-25 — Derived source-binding qualification after reconciliation
+
+Original211 focused/513 simulator/21 independent runs remain at actual base
+b6d2cf316; those product tests were not rerun or relabeled after parent merged
+main f11d7559746 at d9a57ab1d. Fresh checks are canonical manifest --write/--check,
+the unchanged scripts/tests/test_generate_reddog_backend_manifest.py eight cases,
+and the existing Node backend compatibility contract/preflight/blocked recovery
+entrypoints. All pass; generator8 takes97.68s wrapper/96.64s pytest with two
+inherited inactive asyncio config warnings. Counts are not added to earlier
+product coverage and do not establish installed/runtime or real-chain behavior.
+
+Runtime member set stays1470 and only BTC/Mesa LF source digests change.
+All328KiB manifest,2MiB/source,32MiB total and1471-member rejection limits remain.
+The three existing manifest/pin files alone were staged for index consistency.
+All168 original raw simulator/FAM hashes still match. Qualification freezes1613
+files including existing extension JS and generator/pins as extra evidence;
+this does not expand runtime membership. Instrumented network/dotenv attempts0;
+Python/Node guards are not OS isolation.
+
+Exact commands, case IDs, warnings, staged delta and raw run receipts:
+C:/Users/user/AppData/Local/Temp/foundups-btc-source-closure-6b08022181194325a9f2eea110484734/.
+Prior epoch source-closure evidence retained JUnit8 but not exact argv, a preserved
+historical metadata gap. Current portable BTC receipt rebinds repository context
+to f11d7559 while preserving original b6 execution and parent merge provenance.
+The38 old reviewed metadata contexts have a proposal only; no scanner/ledger
+approval, source/member/cap expansion or additional test-coverage claim.
+
+## 2026-10-25 — BTC content/realm replay integrity,14/P1
+
+Pre-authoring plan: `docs/architecture/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.md`.
+Only existing BTC/runtime test owners changed. Original unchanged baseline18 pass.
+Initial RED104 cases produced85 failures/19 passes:84 desired failures and one
+legacy-fixture SQL setup error. A separate read-only mode/path control also failed
+before product edits. Initial candidate105 produced104 passes plus that fixture
+setup error (13 values for12 columns), preserved rather than called product proof.
+
+After candidate authoring, the SQL fixture was corrected. Candidate bytes were
+saved externally; original source bytes were temporarily restored and the same
+105-case set produced86 failures/19 passes; finally restored exact candidate bytes.
+This is an effective corrected-fixture negative control AFTER candidate authoring,
+not retroactive test-first proof. Four later literal-string-subclass controls
+failed before their corresponding strict-type fix. All original artifacts remain.
+
+Transaction/response-loss and concurrent migration coverage exposed a real WAL
+initialization race: focused205 had204 passes/one SQLite BUSY failure. A bounded
+BUSY/LOCKED retry around journal initialization repaired it. First candidate then
+passed205 focused and507 affected simulator cases, with stable hashes and no
+guarded network. Parent review subsequently reproduced two independently valid
+current rows in an unsupported table without UNIQUE; replay selected one row.
+Six new schema controls all failed before constructor validation, then passed.
+Do not use the earlier205/507 as evidence for that repair.
+
+Final repaired source: **211 focused pass** (113 BTC+8 runtime+88 epoch+2 parameters),
+**513 simulator pass**,0 failures/skips and2 inherited inactive-asyncio warnings.
+The full run deselects exactly:
+
+- `test_sse_server.py::test_sim_events_endpoint_denies_without_invite_key`
+- `test_sse_server.py::test_health_endpoint_denies_when_protected`
+- `test_sse_server.py::test_health_endpoint_allows_with_valid_invite`
+
+Independent source review and21 held-outs pass on the repaired freeze. An initial
+external probe had20 passes/one overly strict Windows path-spelling assertion:
+ordinary/extended Win32 spellings referred to the same physical SQLite file.
+The original receipt/script and4×8 samefile diagnostic are preserved; only that
+external oracle changed to physical file identity, then the exact21 IDs replayed.
+No product/test oracle was changed for it. No first-candidate independent held-outs
+executed; its preparation record explicitly records zero executed.
+
+All runs use qualified `O:/Foundups-Agent/.venv/Scripts/python.exe -B -X utf8`,
+disabled dotenv/plugin/cache/bytecode, HF/HOLO offline settings, external TEMP/DB/
+daemon paths and instrumented socket/DNS guards. Existing external FAM Holo/Qwen
+enrichment helpers return None; authorization/accounting/assertions are unchanged.
+Full closure hashes every simulator/FAM Python file; focused runs hash seven
+owned/adjacent sources/tests. These are Python guards, not OS sandbox proof.
+An initial full-runner preparation replacement error happened before pytest;
+`full_runner_setup_note.txt` preserves it. No product/test change resulted.
+
+External evidence root:
+`C:/Users/user/AppData/Local/Temp/foundups-btc-integrity-66ec354025ab428fb077504226ef6662/`.
+Every run subdirectory stores exact commands, collected IDs/phase outcomes,
+warnings, source hashes, guard attempts and complete output:
+`baseline`, `red`, `red_config`, `green_initial`, `red_corrected`,
+`red_literal_types`, `green_focused`, `green_wal`, `green_freeze`,
+`simulator_closure`, `red_schema`, `green_schema`, `simulator_closure_schema`.
+Independent qualified receipt:
+`C:/Users/user/AppData/Local/Temp/foundups-btc-independent-qualified-e27d3467bd534777a74ee3318f6c548a/receipt.json`.
+Parent supplied-schema witness:
+`C:/Users/user/AppData/Local/Temp/foundups-btc-parent-schema-8hk6mqpt/receipt.json`.
+
+Public signatures and15 original BTC oracles remain; the non-mock coercion oracle
+is deliberately replaced and fixtures explicitly use current v2. No source
+authenticity/Merkle-entitlement, signing, broadcast, real finality or financial
+policy is added. Hosted CI, generated closure/security review and main readback
+for this candidate remain parent-owned.
+
+## 2026-10-25 — P0C test-first epoch commitment integrity
+
+Final parent qualification of the repaired source:410 simulator cases pass in
+55.18s; exactly3 named SSE HTTP cases are deselected, with zero guarded network
+attempts and168 stable source hashes. Independent replay passes41 held-outs on
+the repaired freeze. Counts overlap with106 focused/adjacent cases and are not
+added. Portable commands, IDs, source snapshots and exclusions are in the
+[epoch receipt](../../../../docs/architecture/receipts/FOUNDUPS_EPOCH_COMMITMENT_20261025.json)
+and its companion inventory.
+
+Changed-owner statement coverage is205/213 (96.24%), measured over the existing
+106-case selection plus an unchanged copy of the existing independent11-case
+publication probe. The106-only measurement was86%; an earlier inherited
+livechat configuration collected no data and supports no coverage claim.
+No coverage-driven product or test edits were made. This is neither whole-module
+coverage nor formal WSP6 OS-isolated promotion qualification.
+
+Derived source-closure qualification:8 unchanged generator cases pass in79.64s
+with2 inherited inactive asyncio warnings;3 existing Node compatibility entrypoints
+exit0. Independent review verifies all1470 staged normalized blobs, both pins and
+unchanged caps. Canonical registry is current (1769 files/273 quarantined).
+The owned branch parent is verified squash-main92ae36900; alignment preserved
+the index, working diff and status because its source tree equals reviewed352fab3bb.
+Fresh dedicated-PR hosted security/CI and main readback remain required.
+
+The following entries preserve test-first and first-candidate history.
+
+Baseline unchanged three-file owner set:20 passed. Added84 adversarial cases in
+the existing commitment test file, preserving its module docstring and both
+original test bodies/oracles; desired RED:84 failed,2 passed. Only then changed
+the existing ledger. Candidate GREEN:104 passed (86 commitment plus18 unchanged
+connector/runtime cases), zero failures/skips, two inherited inactive asyncio
+option warnings, zero guarded network attempts and stable in-run source hashes.
+
+Independent review found a private list/index divergence in `verify_chain` on
+the first frozen product hash `93461746ab3cda4cacef387242d21a98219689cf8c78c6ab36ec026d4a1ba61d`.
+It could check the original indexed entry while a different listed entry carried
+either a stale or recomputed hash. No public mutation/import path was found;
+scope is a latent integrity-checker limitation, not an authorization bypass.
+Two controls were appended without changing the existing86 cases:
+
+- `test_verify_chain_rejects_private_list_index_divergence[stale-hash]`
+- `test_verify_chain_rejects_private_list_index_divergence[recomputed-hash]`
+
+Both failed before product correction (`red_chain_index/receipt.json`). The
+minimal checker correction validates list/index cardinality and canonical entry
+consistency and recomputes the listed entry's hash. Repaired GREEN:
+**106 passed** (88 ledger+18 unchanged adjacent), zero failures/skips, two
+inherited inactive asyncio warnings, zero guarded network attempts and stable
+in-run hashes (`green_chain_index/receipt.json`,1.65s). Both directories are under
+the same external scratch root below and preserve full outputs/inventories.
+Repaired raw product hash:
+`970a8faaf2127db2c2c89160c109d9c6e1a05fc1db6a66935af31fb08350469f`;
+test hash `d89bcf1503bd9e77a3f0e263c60ad6280ad2cb70f94d76ffcf3ee84c086a2751`.
+The original104 and parent-reported30 independent held-outs belong to the old
+candidate; repaired independent acceptance/publication remain parent-owned.
+
+Runner: existing `O:/Foundups-Agent/.venv/Scripts/python.exe -B -X utf8`;
+`PYTHONDONTWRITEBYTECODE=1`, plugin autoload/dotenv reads disabled, cacheprovider
+off, `-o addopts=`, `--confcutdir <root>/modules/foundups`, per-run external
+TEMP/TMP/DB/pytest/FAMDaemon paths, socket/DNS guards. As in the prior simulator
+closure, runner-only FAM adapter Holo/Qwen enrichment returns None; authorization,
+accounting and assertion paths are unchanged. This is an instrumented Python
+boundary, not an OS network sandbox. No model/provider/chain/signer call.
+
+Exact external artifacts under host temporary storage:
+`foundups-p0c-b7a84ca3c2834328b35bddbc18eee168/{baseline,red,green_candidate}/receipt.json`
+and `output.txt`; `run_offline.py` records full command arguments, every collected
+node/phase/outcome, failure details, warnings and before/after hashes. Baseline
+and GREEN nodes: this file's sibling `test_epoch_ledger_settlement_commitment.py`,
+`test_btc_anchor_connector.py`, `test_layer_d_anchor_runtime.py`. RED selected
+only the commitment owner. An initial runner import named the wrong FAM adapter
+before pytest; it was corrected and recorded in `runner_setup_note.txt` before
+the successful baseline. No product defect or test result is attributed to it.
+
+Coverage includes actual claim tampering, absent/wrong trusted checkpoints,
+odd-sized trees, malformed paths, bool/nonfinite/negative/coercible inputs,
+canonical equivalent numbers without integer rounding, epoch replay/order,
+exposed mutable references, injected tree-build failure and concurrent conflicts.
+V2 remains pending evidence; old connector migration and economic conservation
+are separate gates. Parent independent review/held-out checks and publication
+are not claimed by this candidate run.
+
+## 2026-10-25 — FAM host-context compatibility
+
+Existing `test_fam_lifecycle_flow.py` covers the normal bridge flow plus wrong
+verifier/treasury IDs and legacy role substitution. No new test file. Combined
+FAM+simulator closure: 690 passed (366 FAM,324 simulator), no skips or failures,
+three unchanged SSE HTTP cases deselected, two inherited config warnings,
+zero guarded network attempts and168 stable Python source hashes.
+
+Command, exact inventory, explicit excluded IDs and runner-only Holo/Qwen/
+FAMDaemon isolation are in the
+[delivery receipt](../../../../docs/architecture/receipts/FOUNDUPS_FX_CHAIN_DELIVERY_20261025.json)
+and [FAM test log](../../agent_market/tests/TestModLog.md).
+The baseline292 and focused181 runs overlap; counts are not additive. Parent's
+independent115 FAM permission/verification cases also pass without help patches.
+This proves local bridge compatibility, not live SSE, authentication or payment.
+
 ## Test Modification Log (WSP 22 Compliance)
+
+### 2026-10-21 — Genesis denomination and floating reserve regression
+
+**Command**:
+- `python -B -m pytest -q -o addopts= -p no:cacheprovider modules/foundups/simulator/tests/test_btc_reserve_semantics.py modules/foundups/simulator/tests/test_docs_contract_alignment.py`
+- `python -B modules/infrastructure/wre_core/scripts/generate_test_registry.py --check`
+
+**Status**:
+- `12/12 PASSED` in the owned checkout, including all existing legacy API cases; canonical registry current (1,740 test files, 270 quarantined).
+- Negative controls: forcing the circulating BTC value to the genesis ratio failed only `test_ups_value_btc_floats_after_circulation_exists`; restoring the incorrect one-sat architecture statement failed only `test_tokenomics_genesis_example_matches_btc_reserve_constant`. Both runs had 11 passes and one expected failure, with zero errors/skips.
+- Restored both mutated files to their exact prior bytes, then reran the focused suite: `12/12 PASSED`. No negative-control mutation remains.
+
+**Coverage**:
+- Reused the existing reserve-semantics and docs-alignment files. Preserved the original genesis ratio/value and legacy alias cases; added non-genesis reserve-growth assertions and a direct architecture denomination comparison.
+- Canonical registry regeneration changed only the reserve test's module-docstring description. Tests use existing dependencies and do not validate live finance, deployment or the entire simulator suite. WSP 22/50/97.
+
+---
 
 ### 2026-02-22 - Submission checklist determinism verification
 **Command**:

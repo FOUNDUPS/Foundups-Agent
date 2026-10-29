@@ -25,12 +25,14 @@ from modules.ai_intelligence.video_indexer.src.action_surface import (
     BROWSER_PORTS,
     IMPLEMENTED_ACTION_IDS,
     REGISTERED_ONLY_ACTION_IDS,
+    StudioAskPortfolioCycleInput,
     StudioAskSingleVideoInput,
     StudioAskSingleVideoOutput,
     VideoIndexAction,
     parse_video_id,
     port_for_browser,
     run_action,
+    run_studio_ask_portfolio_cycle,
     run_studio_ask_single_video,
 )
 from modules.ai_intelligence.video_indexer.src.studio_ask_indexer import AskResult
@@ -65,17 +67,20 @@ def test_single_video_is_implemented_id():
     assert VideoIndexAction.STUDIO_ASK_SINGLE_VIDEO in IMPLEMENTED_ACTION_IDS
 
 
-def test_registered_only_ids_present_not_implemented():
+def test_action_ids_partition_implemented_and_registered_only():
     expected_registered = {
-        VideoIndexAction.STUDIO_ASK_CHANNEL_CYCLE,
-        VideoIndexAction.STUDIO_ASK_DAEMON_CYCLE,
         VideoIndexAction.GEMINI_API_SINGLE_VIDEO,
         VideoIndexAction.WHISPER_LOCAL_TRANSCRIPT,
         VideoIndexAction.SHORTS_SCHEDULER_CONSUME,
     }
-    assert expected_registered.issubset(set(REGISTERED_ONLY_ACTION_IDS))
-    # single_video must NOT be in the registered-only set.
-    assert VideoIndexAction.STUDIO_ASK_SINGLE_VIDEO not in REGISTERED_ONLY_ACTION_IDS
+    expected_implemented = {
+        VideoIndexAction.STUDIO_ASK_SINGLE_VIDEO,
+        VideoIndexAction.STUDIO_ASK_CHANNEL_CYCLE,
+        VideoIndexAction.STUDIO_ASK_DAEMON_CYCLE,
+        VideoIndexAction.STUDIO_ASK_PORTFOLIO_CYCLE,
+    }
+    assert expected_registered == set(REGISTERED_ONLY_ACTION_IDS)
+    assert expected_implemented == set(IMPLEMENTED_ACTION_IDS)
     # All declared IDs are covered by impl + registered-only, no overlap.
     assert set(ALL_ACTION_IDS) == set(IMPLEMENTED_ACTION_IDS) | set(REGISTERED_ONLY_ACTION_IDS)
 
@@ -95,6 +100,28 @@ def test_shorts_scheduler_consume_is_separate_registered_id():
 def test_unknown_action_id_raises():
     with pytest.raises(ValueError):
         asyncio.run(run_action("video_index.does.not.exist"))
+
+
+def test_portfolio_cycle_groups_three_channels_by_browser(monkeypatch):
+    async def fake_cycle(**kwargs):
+        return {
+            "total_indexed": len(kwargs["channels"]),
+            "channels": {
+                channel_id: {"failed": 0} for channel_id in kwargs["channels"]
+            },
+        }
+
+    monkeypatch.setattr(A, "_connect_attached_driver", lambda browser: f"driver:{browser}")
+    monkeypatch.setattr(
+        "modules.ai_intelligence.video_indexer.src.studio_ask_indexer.run_video_indexing_cycle",
+        fake_cycle,
+    )
+    out = asyncio.run(
+        run_studio_ask_portfolio_cycle(StudioAskPortfolioCycleInput())
+    )
+    assert out["success"] is True
+    assert out["total_indexed"] == 3
+    assert set(out["browsers"]) == {"chrome", "edge"}
 
 
 # =============================================================================

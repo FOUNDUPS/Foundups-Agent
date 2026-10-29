@@ -1,0 +1,26 @@
+{
+  "schema": "jp_call_work_order_result.v1",
+  "task_id": null,
+  "status": "pending",
+  "candidate_commit": null,
+  "integrated_commit": null,
+  "dependency_evidence": [],
+  "deliverable_summary": null,
+  "edits_or_actions": [],
+  "wsp_compliance": {
+    "gate_evidence": [],
+    "coherence_measured": null,
+    "wsp97_evidence": []
+  },
+  "validation": [],
+  "acceptance_results": [],
+  "external_effects": [],
+  "private_evidence_references": [],
+  "blockers": [],
+  "tokens_used": null,
+  "next_best_step": null,
+  "review": {
+    "accepted_by": null,
+    "accepted_at": null
+  }
+}

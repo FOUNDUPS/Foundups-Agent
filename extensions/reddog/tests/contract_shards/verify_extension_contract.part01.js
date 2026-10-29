@@ -258,7 +258,7 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
 assert.strictEqual(pkg.version, '0.4.141', 'package version must be 0.4.141');
 includes(extensionJs, "const EXTENSION_VERSION = '0.4.141'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'reddog', 'package id must be canonical RedDog in 0.4.0');
-assert.strictEqual(pkg.displayName, 'RedDog - FoundUps Architect', 'display name must be canonical RedDog');
+assert.strictEqual(pkg.displayName, 'RedDog - FoundUps Interface', 'display name must be canonical RedDog');
 includes(JSON.stringify(pkg), 'RedDog: Open', 'canonical command title must use RedDog');
 includes(JSON.stringify(pkg), 'foundupsFusion.open', 'legacy command alias must be retained for 0.4.0 migration');
 includes(JSON.stringify(pkg), 'reddog.enableResidentArchitectSession', 'canonical resident session setting missing');
@@ -303,9 +303,9 @@ assert(
   operationsIntercept >= 0 && conversationPromptAssembly >= 0 && operationsIntercept < conversationPromptAssembly,
   'operations control must intercept before WSP prompt/Fusion assembly'
 );
-includes(readme, 'RedDog is the lightweight fast\ninteraction/exchange surface; 0102 is the principal-scoped Digital Twin', 'README product identity boundary missing');
+includes(readme, 'RedDog is not 0102. The principal-scoped 0102 Digital Twin provides deep cognition and orchestration behind RedDog.', 'README product identity boundary missing');
 includes(iface, 'Fusion is one internal reasoning mode, not the product identity', 'INTERFACE mode identity statement missing');
-includes(roadmap, 'RedDog is the resident FoundUps architect identity and conversation product across thin-client surfaces.', 'ROADMAP product identity statement missing');
+includes(roadmap, 'fast interaction/exchange surface; 0102 is the principal-scoped Digital Twin', 'ROADMAP product identity statement missing');
 includes(extensionJs, 'id="reddogWorkingTrail"', 'working trail DOM missing');
 includes(extensionJs, 'data-reddog-pixel', 'trail pixel attribute missing');
 includes(fusionProgressJs, "command: 'progress'", 'progress command shape missing');

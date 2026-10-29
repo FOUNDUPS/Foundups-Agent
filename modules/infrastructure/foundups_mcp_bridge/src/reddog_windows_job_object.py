@@ -9,11 +9,24 @@ import os
 
 JOB_OBJECT_EXTENDED_LIMIT_INFORMATION_CLASS = 9
 JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE = 0x00002000
+JOB_OBJECT_LIMIT_JOB_MEMORY = 0x00000200
 CREATE_SUSPENDED = 0x00000004
 TH32CS_SNAPTHREAD = 0x00000004
 THREAD_SUSPEND_RESUME = 0x0002
 _DWORD_FAILURE = 0xFFFFFFFF
 _INVALID_HANDLE_VALUE = ctypes.c_void_p(-1).value
+_SIZE_T_MAX = (1 << (8 * ctypes.sizeof(ctypes.c_size_t))) - 1
+
+
+def validate_job_memory_limit(value: int | None) -> int | None:
+    """Validate an optional Windows aggregate committed-memory limit in bytes."""
+    if value is None:
+        return None
+    if type(value) is not int or not 0 < value <= _SIZE_T_MAX:
+        raise ValueError("bounded child job memory limit invalid")
+    if os.name != "nt":
+        raise ValueError("bounded child job memory limit unsupported")
+    return value
 
 
 class _IoCounters(ctypes.Structure):
@@ -118,12 +131,16 @@ class WindowsKillOnCloseJob:
             raise ctypes.WinError(error)
 
 
-def _configured_job(library) -> WindowsKillOnCloseJob:
+def _configured_job(library, job_memory_limit_bytes=None) -> WindowsKillOnCloseJob:
+    limit = validate_job_memory_limit(job_memory_limit_bytes)
     handle = library.CreateJobObjectW(None, None)
     if not handle:
         raise ctypes.WinError(ctypes.get_last_error())
     limits = _ExtendedLimitInformation()
     limits.basic_limit_information.limit_flags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+    if limit is not None:
+        limits.basic_limit_information.limit_flags |= JOB_OBJECT_LIMIT_JOB_MEMORY
+        limits.job_memory_limit = limit
     if not library.SetInformationJobObject(
         handle, JOB_OBJECT_EXTENDED_LIMIT_INFORMATION_CLASS,
         ctypes.byref(limits), ctypes.sizeof(limits),
@@ -169,16 +186,20 @@ def _resume_only_thread(library, thread_id: int) -> None:
         raise OSError("bounded child suspended thread state invalid")
 
 
-def attach_windows_kill_on_close_job(process) -> WindowsKillOnCloseJob | None:
-    """Attach a suspended Windows child to a kill-on-close job, then resume."""
+def attach_windows_kill_on_close_job(
+    process, *, job_memory_limit_bytes: int | None = None,
+) -> WindowsKillOnCloseJob | None:
+    """Configure and attach a suspended child before resuming its only thread."""
 
+    limit = validate_job_memory_limit(job_memory_limit_bytes)
     if os.name != "nt":
         return None
     process_handle = int(getattr(process, "_handle", 0) or 0)
     if process_handle <= 0:
         raise OSError("bounded child process handle unavailable")
     library = _kernel32()
-    job = _configured_job(library)
+    memory_options = {} if limit is None else {"job_memory_limit_bytes": limit}
+    job = _configured_job(library, **memory_options)
     try:
         if not library.AssignProcessToJobObject(
             wintypes.HANDLE(job._handle), wintypes.HANDLE(process_handle),
@@ -194,5 +215,5 @@ def attach_windows_kill_on_close_job(process) -> WindowsKillOnCloseJob | None:
 
 __all__ = [
     "attach_windows_kill_on_close_job", "CREATE_SUSPENDED",
-    "WindowsKillOnCloseJob",
+    "WindowsKillOnCloseJob", "validate_job_memory_limit",
 ]

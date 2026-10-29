@@ -19,7 +19,6 @@ Usage:
 import logging
 from typing import Optional, List
 from modules.infrastructure.shared_utilities.youtube_channel_registry import group_channels_by_browser, get_channel_by_key
-from modules.platform_integration.youtube_shorts_scheduler.src.peak_window import get_peak_slots_et
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +95,7 @@ def _save_schedule_cache(cache: dict) -> None:
         print(f"[CACHE] Warning: could not save schedule cache: {e}")
 
 
-def _should_skip_channel(channel_key: str, cache: dict) -> bool:
+def _should_skip_channel(channel_key: str, cache: dict, *, channel_id: str = None) -> bool:
     """
     Return True if this channel had 0 unlisted videos on the last cycle
     AND the cooldown hasn't expired yet.
@@ -107,6 +106,9 @@ def _should_skip_channel(channel_key: str, cache: dict) -> bool:
     entry = cache.get(channel_key)
     if not entry:
         return False  # Never checked → must process
+    expected = channel_id or (get_channel_by_key(channel_key) or {}).get("id")
+    if not expected or entry.get("channel_id") != expected or entry.get("inventory_complete") is not True:
+        return False
 
     last_unlisted = entry.get("last_unlisted_count", -1)
     last_ts = entry.get("last_checked_ts", 0)
@@ -117,9 +119,12 @@ def _should_skip_channel(channel_key: str, cache: dict) -> bool:
     return False
 
 
-def _record_channel_result(channel_key: str, cache: dict, unlisted_count: int, skipped_count: int) -> None:
+def _record_channel_result(channel_key: str, cache: dict, unlisted_count: int, skipped_count: int,
+                           *, channel_id: str = None, inventory_complete: bool = False) -> None:
     """Record this cycle's result for future pre-checks."""
     cache[channel_key] = {
+        "channel_id": channel_id or (get_channel_by_key(channel_key) or {}).get("id"),
+        "inventory_complete": inventory_complete is True,
         "last_unlisted_count": unlisted_count,
         "last_skipped_count": skipped_count,
         "last_checked_ts": _time.time(),
@@ -714,20 +719,14 @@ def run_shorts_scheduler(
         # This prevents collisions when the JSON tracker is stale.
         if mode == "schedule":
             try:
-                dom.navigate_to_shorts(channel_id, "SCHEDULED")
-                time.sleep(2)
-                scheduled_all = []
-                while True:
-                    scheduled_all.extend(dom.get_scheduled_videos())
-                    if dom.has_next_page():
-                        dom.click_next_page()
-                        time.sleep(1)
-                    else:
-                        break
-                tracker.sync_from_youtube(scheduled_all)
+                if dom.navigate_to_shorts_with_fallback(channel_id, "SCHEDULED"):
+                    inventory = dom.read_scheduled_inventory(channel_id)
+                    if not tracker.sync_from_youtube(inventory.get("videos", []), inventory=inventory):
+                        print("[SYNC] Scheduled inventory is incomplete; existing tracker retained")
+                else:
+                    print("[SYNC] Scheduled filter not verified; existing tracker retained")
             except Exception:
-                # Proceed with existing tracker state (degraded but functional)
-                pass
+                print("[SYNC] Scheduled inventory unavailable; existing tracker retained")
         
         # Layer 1: Navigate and filter
         print("\n[LAYER 1] Navigating to unlisted shorts...")
@@ -920,6 +919,23 @@ def run_selenium_test(test_name: str) -> bool:
         return False
 
 
+async def _has_schedule_target_access(swapper, channel_key: str, expected_channel_id: str) -> bool:
+    """Bind the shared account verifier to the canonical registry identity."""
+    try:
+        channel = get_channel_by_key(channel_key)
+        if (not isinstance(expected_channel_id, str) or not expected_channel_id
+                or not channel or channel.get("id") != expected_channel_id):
+            return False
+        name = {"move2japan": "Move2Japan", "undaodu": "UnDaoDu",
+                "foundups": "FoundUps", "antifafm": "antifaFM"}.get(channel_key)
+        if not name or swapper.CHANNELS.get(name, {}).get("id") != channel["id"]:
+            return False
+        return await swapper._ensure_target_access(name, navigate_to_comments=False,
+                                                  expected_channel_id=expected_channel_id) is True
+    except Exception:
+        return False
+
+
 def run_multi_channel_scheduler(
     browser: str = "edge",
     mode: str = "schedule",
@@ -948,6 +964,7 @@ def run_multi_channel_scheduler(
     from selenium import webdriver
     from selenium.webdriver.chrome.options import Options as ChromeOptions
     from selenium.webdriver.edge.options import Options as EdgeOptions
+    from modules.platform_integration.youtube_shorts_scheduler.src.peak_window import get_peak_slots_et
     
     # Reuse LEGO blocks from multi_channel_coordinator (oops detection)
     from modules.communication.livechat.src.multi_channel_coordinator import (
@@ -1087,7 +1104,8 @@ def run_multi_channel_scheduler(
         "antifafm": "antifaFM",
     }
 
-    # Process each channel with rotation
+    attempted_channel_ids = set()
+    # Process each canonical receiving channel at most once in this rotation.
     for i, channel_key in enumerate(channels):
         # 2026-02-01: STOP SIGNAL — if caller set stop_event, abort gracefully.
         # This prevents thread leak: when Phase 3 timeout fires in the DAE loop,
@@ -1100,9 +1118,20 @@ def run_multi_channel_scheduler(
         print(f"\n[CHANNEL {i+1}/{len(channels)}] Processing {channel_key.upper()}")
         print("-" * 40)
 
+        channel_config = get_channel_by_key(channel_key) or {}
+        expected_channel_id = channel_config.get("id")
+        if not isinstance(expected_channel_id, str) or not expected_channel_id:
+            results["channels"][channel_key] = {"error": "channel_identity_unconfigured", "total_errors": 1}
+            vitals.record_channel(processed=False)
+            continue
+        if expected_channel_id in attempted_channel_ids:
+            results.setdefault("duplicate_channel_entries", []).append(channel_key)
+            continue
+        attempted_channel_ids.add(expected_channel_id)
+
         # 2026-01-30: PRE-CHECK — skip channels that had 0 unlisted videos recently.
         # Avoids a 30s account-swap + navigate + filter round-trip for nothing.
-        if _should_skip_channel(channel_key, schedule_cache):
+        if _should_skip_channel(channel_key, schedule_cache, channel_id=expected_channel_id):
             cache_entry = schedule_cache.get(channel_key, {})
             mins_ago = (_time.time() - cache_entry.get("last_checked_ts", 0)) / 60
             cooldown_mins = _SKIP_COOLDOWN_SECONDS / 60
@@ -1114,22 +1143,40 @@ def run_multi_channel_scheduler(
             vitals.record_channel(processed=True)
             continue
 
-        # Switch account if not first channel
-        if i > 0:
-            print(f"[SWITCH] Switching to {channel_key}...")
-            try:
-                swapper = TarsAccountSwapper(driver)
-                target_name = _DISPLAY_NAMES.get(channel_key, channel_key)
+        # The first channel needs the same access proof as later channels.
+        # Failed access must stay outside the broad scheduling/CPS fallback.
+        target_name = _DISPLAY_NAMES.get(channel_key, channel_key)
+        try:
+            swapper = TarsAccountSwapper(driver)
+            switch_ok = asyncio.run(swapper.swap_to(target_name, navigate_to_comments=False))
+            access_ok = switch_ok is True and asyncio.run(_has_schedule_target_access(swapper, channel_key, expected_channel_id))
+        except Exception:
+            access_ok = False
+        if not access_ok:
+            result = {"error": "receiving_channel_not_verified", "total_errors": 1,
+                      "requested_channel_id": expected_channel_id}
+            fallback = CHANNEL_FALLBACKS.get(target_name)
+            if fallback:
+                # Never change the requested label after binding its scheduler.
+                # The fallback gets its own canonical rotation entry and budget.
+                result["fallback_deferred_to"] = fallback
+            results["channels"][channel_key] = result
+            print(f"[BLOCKED] {channel_key}: receiving account not verified; no scheduling attempted")
+            vitals.record_channel(processed=False)
+            continue
 
-                switch_ok = asyncio.run(swapper.swap_to(target_name, navigate_to_comments=False))
-                if not switch_ok:
-                    print(f"[WARN] Account switch may have failed, attempting schedule anyway...")
-            except Exception as e:
-                print(f"[WARN] Account switch error: {e}")
-
+        # Exceptions after entering a writer have an unknown outcome; they do
+        # not authorize a second writer against the same channel.
+        cycle_started = False
         # Run scheduler for this channel
         try:
             scheduler = YouTubeShortsScheduler(channel_key, dry_run=dry_run)
+            if (scheduler.channel_id != expected_channel_id
+                    or scheduler.config.get("id") != expected_channel_id
+                    or scheduler.tracker.channel_id != expected_channel_id):
+                results["channels"][channel_key] = {"error": "scheduler_channel_binding_mismatch", "total_errors": 1}
+                vitals.record_channel(processed=False)
+                continue
             scheduler.driver = driver  # Reuse existing driver
             scheduler.dom = None  # Will be created on first use
 
@@ -1142,37 +1189,32 @@ def run_multi_channel_scheduler(
                 print(f"[OOPS] 🚨 Permission error detected for {channel_key}")
                 vitals.record_oops()  # Track oops event
                 
-                # Try fallback channel (bidirectional)
-                target_name = _DISPLAY_NAMES.get(channel_key, channel_key)
-                fallback_channel = CHANNEL_FALLBACKS.get(target_name)
-                if fallback_channel:
-                    print(f"[FALLBACK] Trying {fallback_channel}...")
-                    fallback_key = fallback_channel.lower()
-                    swapper = TarsAccountSwapper(driver)
-                    switch_ok = asyncio.run(swapper.swap_to(fallback_channel, navigate_to_comments=False))
-                    if switch_ok and not _is_oops_page(driver):
-                        print(f"[FALLBACK] ✅ Switched to {fallback_channel}")
-                        channel_key = fallback_key
-                        vitals.record_fallback(success=True)
-                    else:
-                        print(f"[FALLBACK] ❌ Failed - skipping channel")
-                        vitals.record_fallback(success=False)
-                        vitals.record_channel(processed=False)
-                        results["channels"][channel_key] = {"error": "oops_page_no_fallback"}
-                        continue
-                else:
-                    print(f"[OOPS] No fallback available - skipping {channel_key}")
-                    vitals.record_channel(processed=False)
-                    results["channels"][channel_key] = {"error": "oops_page"}
-                    continue
+                results["channels"][channel_key] = {"error": "oops_page", "total_errors": 1,
+                    "fallback_deferred_to": CHANNEL_FALLBACKS.get(target_name)}
+                vitals.record_channel(processed=False)
+                continue
+
+            if not asyncio.run(_has_schedule_target_access(swapper, channel_key, expected_channel_id)):
+                results["channels"][channel_key] = {"error": "receiving_channel_changed", "total_errors": 1}
+                vitals.record_channel(processed=False)
+                continue
 
             # SHORTS_SCHEDULE_ROTATION_FAIRNESS_PHASE1: cap THIS channel to the
             # per-pass budget so we schedule ~3 days then rotate. max_videos only
             # limits the count inside run_scheduling_cycle (no other behavior).
             pass_budget = min(max_per_channel, per_channel_per_pass)
+            cycle_started = True
             channel_results = asyncio.run(
                 scheduler.run_scheduling_cycle(max_videos=pass_budget)
             )
+            if (not isinstance(channel_results, dict)
+                    or channel_results.get("channel_id") != expected_channel_id
+                    or not asyncio.run(_has_schedule_target_access(swapper, channel_key, expected_channel_id))):
+                results["channels"][channel_key] = {"error": "post_cycle_receiving_channel_not_verified",
+                    "requested_channel_id": expected_channel_id, "total_errors": 1,
+                    "outcome": "unverified", "reported_cycle": channel_results}
+                continue
+            channel_results["requested_channel_id"] = expected_channel_id
             results["channels"][channel_key] = channel_results
             
             # Track vitals
@@ -1198,7 +1240,11 @@ def run_multi_channel_scheduler(
             # "unlisted_found" = total videos the scheduler saw (scheduled + skipped + errors).
             # If 0, the channel had no unlisted content at all → skip next cycle.
             unlisted_found = scheduled + errors + len(channel_results.get("skipped", []))
-            _record_channel_result(channel_key, schedule_cache, unlisted_found, len(channel_results.get("skipped", [])))
+            inventory_complete = channel_results.get("inventory_complete") is True
+            if unlisted_found > 0 or inventory_complete:
+                _record_channel_result(channel_key, schedule_cache, unlisted_found,
+                    len(channel_results.get("skipped", [])), channel_id=expected_channel_id,
+                    inventory_complete=inventory_complete)
             
             # 2026-02-05: VIDEO PROCESSING PASS -- process Videos tab for channels
             # that produce uploads (vlogs), not just shorts (FFCPLN songs).
@@ -1216,6 +1262,10 @@ def run_multi_channel_scheduler(
             # behavior, does NOT create new navigation outside the existing pass.
             # Addendum F: VIDEO_PASS_PRIORITY_ONLY_NO_VIDEO_BEHAVIOR_CHANGE.
             video_processing_enabled = os.getenv("YT_VIDEO_PROCESSING_ENABLED", "false").lower() in ("1", "true", "yes")
+            if video_processing_enabled and not asyncio.run(_has_schedule_target_access(swapper, channel_key, expected_channel_id)):
+                channel_results["video_pass_error"] = "receiving_channel_changed"
+                channel_results["total_errors"] = channel_results.get("total_errors", 0) + 1
+                continue
             if video_processing_enabled:
                 # YOUTUBE_ROTATION_UNIFIED_SHORTS_VIDEOS_SIGNAL_PHASE1 priority gate:
                 # If _pass_video_ranking has an entry for this channel with
@@ -1243,8 +1293,9 @@ def run_multi_channel_scheduler(
                             from modules.platform_integration.youtube_shorts_scheduler.src.schedule_tracker import ScheduleTracker
 
                             vps = ContentPageScheduler(driver)
-                            if vps.navigate_to_content(channel_key, content_type="upload", visibility="UNLISTED"):
-                                vps_tracker = ScheduleTracker(channel_key)
+                            if (vps.navigate_to_content(channel_key, content_type="upload", visibility="UNLISTED")
+                                    and asyncio.run(_has_schedule_target_access(swapper, channel_key, expected_channel_id))):
+                                vps_tracker = ScheduleTracker(expected_channel_id)
                                 vps_config = None
                                 try:
                                     from modules.platform_integration.youtube_shorts_scheduler.src.channel_config import get_channel_config
@@ -1308,6 +1359,14 @@ def run_multi_channel_scheduler(
                                     )
                                 )
 
+                                vps_results["requested_channel_id"] = expected_channel_id
+                                vps_results["channel_id"] = expected_channel_id
+                                if not asyncio.run(_has_schedule_target_access(swapper, channel_key, expected_channel_id)):
+                                    results["channels"][f"{channel_key}_videos"] = {
+                                        "error": "post_cycle_receiving_channel_not_verified", "total_errors": 1,
+                                        "requested_channel_id": expected_channel_id, "outcome": "unverified",
+                                        "reported_cycle": vps_results}
+                                    continue
                                 vps_scheduled = vps_results.get("total_scheduled", 0)
                                 vps_errors = vps_results.get("total_errors", 0)
                                 print(f"[VIDEO] {channel_key}: {vps_scheduled} videos scheduled, {vps_errors} errors")
@@ -1353,20 +1412,24 @@ def run_multi_channel_scheduler(
             print(f"[ERROR] {channel_key} failed: {e}")
             vitals.record_op(success=False)
             vitals.record_channel(processed=False)
-            results["channels"][channel_key] = {"error": str(e)}
+            results["channels"][channel_key] = {"error": str(e), "total_errors": 1,
+                "requested_channel_id": expected_channel_id,
+                "outcome": "unverified" if cycle_started else "not_submitted"}
 
             # 2026-02-01: CONTENT PAGE FALLBACK — if per-video scheduling fails,
             # try the Content Page Scheduler (inline popup from video list table).
             cps_enabled = os.getenv("YT_CPS_FALLBACK_ENABLED", "true").lower() in ("1", "true", "yes")
-            if cps_enabled and not dry_run:
+            if (cps_enabled and not dry_run and not cycle_started
+                    and asyncio.run(_has_schedule_target_access(swapper, channel_key, expected_channel_id))):
                 print(f"[FALLBACK] Trying Content Page Scheduler for {channel_key}...")
                 try:
                     from modules.platform_integration.youtube_shorts_scheduler.src.content_page_scheduler import ContentPageScheduler
                     from modules.platform_integration.youtube_shorts_scheduler.src.schedule_tracker import ScheduleTracker
 
                     cps = ContentPageScheduler(driver)
-                    if cps.navigate_to_content(channel_key, visibility="UNLISTED"):
-                        cps_tracker = ScheduleTracker(channel_key)
+                    if (cps.navigate_to_content(channel_key, visibility="UNLISTED")
+                            and asyncio.run(_has_schedule_target_access(swapper, channel_key, expected_channel_id))):
+                        cps_tracker = ScheduleTracker(expected_channel_id)
                         cps_config = None
                         try:
                             from modules.platform_integration.youtube_shorts_scheduler.src.channel_config import get_channel_config
@@ -1390,6 +1453,12 @@ def run_multi_channel_scheduler(
                             )
                         )
 
+                        cps_results["requested_channel_id"] = expected_channel_id
+                        cps_results["channel_id"] = expected_channel_id
+                        if not asyncio.run(_has_schedule_target_access(swapper, channel_key, expected_channel_id)):
+                            results["channels"][channel_key].update({"outcome": "unverified",
+                                "requested_channel_id": expected_channel_id, "reported_cycle": cps_results})
+                            continue
                         cps_scheduled = cps_results.get("total_scheduled", 0)
                         cps_errors = cps_results.get("total_errors", 0)
                         print(f"[FALLBACK] CPS result: {cps_scheduled} scheduled, {cps_errors} errors")
@@ -1420,15 +1489,18 @@ def run_multi_channel_scheduler(
                 audit_result = audit_cps.audit_calendar(channel_key_audit, max_per_day=8)
                 conflicts = len(audit_result.get("conflicts", []))
                 heavy_days = len(audit_result.get("heavy_days", []))
-                total_scheduled = audit_result.get("total_scheduled", 0)
-                print(f"[AUDIT] {channel_key_audit}: {total_scheduled} scheduled, {conflicts} conflicts, {heavy_days} heavy days")
+                if audit_result.get("status") == "complete":
+                    total_scheduled = audit_result.get("total_scheduled")
+                    print(f"[AUDIT] {channel_key_audit}: {total_scheduled} scheduled, {conflicts} conflicts, {heavy_days} heavy days")
+                else:
+                    print(f"[AUDIT] {channel_key_audit}: incomplete inventory; scheduled total unknown")
                 results["channels"].setdefault(channel_key_audit, {})["audit"] = audit_result
             except Exception as audit_err:
                 print(f"[AUDIT] {channel_key_audit} audit failed: {audit_err}")
 
     # Summary
     print("\n" + "=" * 60)
-    print("[SUMMARY] Multi-Channel Scheduling Complete")
+    print("[SUMMARY] Multi-Channel Scheduling Results")
     print("=" * 60)
     total_scheduled = 0
     total_errors = 0

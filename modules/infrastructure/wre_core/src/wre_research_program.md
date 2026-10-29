@@ -9,9 +9,9 @@ You must modify only the literal configuration variables inside
 `wre_research_target.py`. The evaluator parses the file as data and does not
 import or execute it. Specifically:
 1. `AGENT_ALLOCATION`: A dictionary of task allocation fractions by agent type (keys: basic_search, openclaw_lite, openclaw, gotjunk_browse, gotjunk, cabr_validator).
-   - **Constraint**: The values in `AGENT_ALLOCATION` must sum to exactly `1.0`.
+   - **Constraint**: Each value must be a finite number in `[0.0, 1.0]`, and the values must sum to `1.0` (evaluator absolute rounding tolerance: `1e-9`). Booleans are not numbers for this contract.
 2. `AGENT_PREMIUM_MULTIPLIERS`: A dictionary of premium markups applied on top of the base compute cost for each agent.
-   - **Constraint**: Multipliers must be between `1.0` and `5.0`. Higher multipliers increase compute revenue but might reduce demand (simulated).
+   - **Constraint**: Multipliers must be finite numbers between `1.0` and `5.0`; booleans are invalid. Higher multipliers increase compute revenue but might reduce demand (simulated).
 
 ## Rules and Constraints
 - Only output valid, clean Python source containing the two literal dictionaries.
@@ -19,6 +19,7 @@ import or execute it. Specifically:
 - Do not include imports, function calls, file access, network access, shell
   access, or any side-effecting code.
 - Ensure all dictionary keys are fully populated.
+- Use the declared agent types. The evaluator rejects names absent from the existing compute-cost catalog before simulation.
 
 ## Current Target Format Reference
 

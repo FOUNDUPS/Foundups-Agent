@@ -3,6 +3,20 @@
 Status: work order only; not completion or execution authority by itself.
 Origin: external principal 012. Role: 0102 architect/engineer.
 
+2026-10-06 reconciliation: #1680 and #1641 remained unmerged. Read the
+[fresh-main salvage audit](../../../../docs/audits/architecture/REDDOG_HOST_RECOVERY_RECONCILIATION_20261006.md)
+and replacement PR before relying on host recovery. The bounded source contract
+now supports leases/recovery; resident startup/heartbeat/shutdown and physical
+provider fencing remain separate activation work. Do not re-port stale generated
+manifests or interpret a passed unit test as a live host.
+
+012's AutoPost attention requirement remains: `DORMANT -> hold -> ATTENDING ->
+release -> DORMANT`. Camera preview, local Liquid vision, recording, Lick consent
+and publishing are separate from RedDog attention; recording lock must not keep
+RedDog watching/listening after release. The September audit found Lick client
+and provenance work; recheck current AutoPost main before its next bounded slice.
+PR #1648's website/OpenRouter/D1 work requires public-session parity review.
+
 Canonical navigation: [RedDog documentation map](../../../../docs/REDDOG_DOCUMENTATION_MAP.md) ·
 [public admission contract](../REDDOG_PUBLIC_SURFACE_ADMISSION.md) ·
 [test inventory](../../../../modules/communication/moltbot_bridge/tests/public_surface/README.md).

@@ -1,103 +1,117 @@
-# video_comments Test Suite
+# video_comments Tests
 
-**Test Coverage:** Partial (existing tests available)
-**Framework:** pytest + unittest
+## 2026-10-29 repair selectors
 
-## [EXISTING] Available Tests
+The follow-up private-livechat fallback selection is 88 semantic + 16 submission
+history cases (104 total, plus 12 subtests), with the original context 53 retained
+as a separate selector. Semantic tests also execute both real MessageProcessor
+call sites, busy-lock behavior, comment serialization, async heartbeat/timeout,
+late result discard and cancellation before subsequent provider stages. Provider
+calls are fixtures. Timeout cannot kill a running thread or HTTP call; it bounds
+the caller's wait and invalidates later work. The existing separate operator
+queue/lifecycle/control-plane selection passes 116 and stdlib inspection 15.
 
-| Test File | Purpose | Status |
-|-----------|---------|--------|
-| `test_llm_integration.py` | WSP FMAS tests for LLM comment generation | ✅ Available |
-| `test_reply_to_comment.py` | YouTube API reply capability demo | ✅ Available |
-| `test_classifier_pipeline.py` | Commenter classification tests | ✅ Available |
-| `test_like_single_comment.py` | Single comment like/heart test | ✅ Available |
-| `test_poc_dialogue.py` | PoC dialogue flow test | ✅ Available |
-| `test_post_comment.py` | Comment posting test | ✅ Available |
-| `test_move2japan_access.py` | Move2Japan channel access test | ✅ Available |
+With the environment isolation below, also run `test_reply_semantic_assessment.py`
+and `test_reply_submission_history.py` explicitly with pytest. They cover actual
+assessment/write/review ordering, supplied-fact snapshots, format/model-role
+rejection, private enqueue/activation, post-delay livechat guards, real SQLite
+restart/concurrent claims and exact production JavaScript against a synthetic DOM.
+The existing `test_chat_manifest_inspection.py` stdlib selector remains separate.
+Model judgments and DOMs are fixtures; these do not certify live inference or
+current YouTube selectors. CI binds the new case inventory separately from the
+original 53-case context selection.
 
-## [TEST] Test Categories
+This directory mixes local regression tests, stateful classification checks, and
+live YouTube/model integration demos. A `test_*.py` filename does not establish an
+offline boundary. Select an explicitly reviewed file; do not use a blanket
+`pytest tests/` run as offline validation.
 
-### Unit Tests (test_*.py)
-- test_[module_name].py - Core functionality tests
-- test_integration.py - Integration tests (when applicable)
+[TestModLog.md](TestModLog.md) inventories all eight pre-existing test files and
+the PR #1759 reader tests, including effects and incomplete mock boundaries.
+The missing inventory was recovered during review on 2026-10-22, after reader
+test authoring and execution.
 
-### Test Structure
-```
-tests/
-������ __init__.py              # Test package
-������ README.md               # This file
-������ test_[module_name].py   # Main test file
-������ TestModLog.md          # Test evolution log
-```
+## Bounded shared-context reader tests
 
-## [RUN] Running Tests
+Run from the repository root with the existing qualified Python environment:
 
-### All Tests
-```bash
-cd modules/communication/video_comments
-python -m pytest tests/
-```
-
-### Specific Test
-```bash
-cd modules/communication/video_comments
-python -m pytest tests/test_[module_name].py
-```
-
-### With Coverage
-```bash
-cd modules/communication/video_comments
-python -m pytest --cov=src --cov-report=html tests/
+```powershell
+$env:PYTHONDONTWRITEBYTECODE = "1"
+$env:PYTHONUTF8 = "1"
+$env:PYTHON_DOTENV_DISABLED = "1"
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD = "1"
+python -B -m pytest --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider -o addopts= modules/communication/video_comments/tests/test_commenting_control_plane.py -q --tb=short
 ```
 
-## [COVERAGE] Coverage Requirements
+This file uses temporary shared/legacy state and a controlled clock. It exercises
+the actual queue resolver and reader, schema/type/expiry boundaries, shared
+precedence, legacy fallback, and local edits during an active shared context
+followed by expiry or clearing. The relative-path case supplies a temporary
+checkout root; it does not assume the checkout and temporary directory share a
+Windows drive.
 
-**WSP 13 Compliance Target:** >=90% coverage
+Measured result: **53 passed, zero failures/errors/skips** under Windows CPython
+3.12.2. Six persistence regressions failed before the legacy-only mutation
+repair and passed afterward. This is local fixture validation, not live delivery,
+model inference, native-worker, or OS sandbox evidence. Exact history and receipt
+locations are in the TestModLog.
 
-### Current Status
-- **Lines:** 0%
-- **Functions:** 0%
-- **Branches:** 0%
+## Other test surfaces
 
-### Coverage Areas Required
-- [ ] Core functionality
-- [ ] Error handling
-- [ ] Edge cases
-- [ ] Integration points
+- `test_classifier_pipeline.py` writes through the real profile store without a
+  temporary database fixture.
+- `test_llm_integration.py` and `test_ytr1_runtime_hardening.py` mock selected
+  collaborators. Their constructors/imports and environment-dependent paths need
+  separate qualification before calling a whole-file run offline.
+- `test_like_single_comment.py`, `test_move2japan_access.py`,
+  `test_poc_dialogue.py`, `test_post_comment.py`, and `test_reply_to_comment.py`
+  authenticate or operate against YouTube. Some publish comments/replies or start
+  ongoing monitoring. They are outside the bounded reader invocation.
 
-## [CONFIG] Test Configuration
+Those eight files were inventoried from source, not executed in this reader
+slice. Review their boundaries and the authorized operational scope before
+running them. The inventory grants no new execution authority.
 
-### pytest.ini (if needed)
-```ini
-[tool:pytest]
-testpaths = tests
-python_files = test_*.py
-python_classes = Test*
-python_functions = test_*
-addopts = -v --tb=short
+## Coverage and maintenance
+
+No line, function, or branch coverage measurement was produced for this slice.
+The WSP 13 target remains at least 90%; no aggregate suite pass or coverage claim
+is made here.
+
+Before adding or expanding tests, read the TestModLog, this README, and the
+nearest existing tests. Extend the existing contract when possible and update
+the inventory/history in the same slice (WSP 22 and WSP 97 section 1.2B).
+
+## PR1478 context pipeline reconciliation
+
+Run only this separately reviewed selector with Node available:
+
+```powershell
+$env:PYTHONDONTWRITEBYTECODE = "1"
+$env:PYTHONUTF8 = "1"
+$env:PYTHON_DOTENV_DISABLED = "1"
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD = "1"
+python -B -m pytest --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider -o addopts= modules/communication/video_comments/tests/test_reply_context_pipeline.py -q --tb=short
 ```
 
-## [CASES] Test Cases (TODO)
+**53 passed, zero failures/errors/skips** locally with Python 3.12.2 and
+Node 24.11.1. The private loader compiles complete production definitions and
+injects controlled collaborators; package import and constructor lifecycle are
+excluded. Actual extraction JavaScript executes against synthetic Node rows.
+The preserved original seven assertions are extended with timeout, overlapping
+generations, stale/discarded attribution, malformed labels, no-post decisions,
+full-prompt fallback, explicit Grok opt-in, helper adapters, missing metadata and
+conflicting/duplicate video IDs. Existing command/context selectors separately
+pass 116 cases; overlapping counts are not a coverage percentage.
 
-### Basic Functionality
-- [ ] Test initialization
-- [ ] Test main methods
-- [ ] Test configuration handling
+The existing Windows/Ubuntu CI job selects this file, pins Node 24.22.1, uploads
+JUnit and requires the reviewed 53-case identity with no skips. Hosted results
+must be observed separately. The canonical registry still quarantines this file
+from broad automatic collection (`module_scope_local_function_invocation`,
+process capability); this explicit selector does not waive that classification.
 
-### Error Conditions
-- [ ] Test invalid inputs
-- [ ] Test missing dependencies
-- [ ] Test network failures (if applicable)
-
-### Integration Tests
-- [ ] Test with dependent modules
-- [ ] Test end-to-end workflows
-- [ ] Test performance requirements
-
-## [EVOLUTION] Test Evolution Log
-
-See TestModLog.md for detailed test development history.
-
----
-
-**WSP 13 Testing Compliance:** Structure Complete, Implementation Pending
+No real models, browser, account, profile database or posting were used. Fixture
+boundaries are not an OS sandbox. A timeout does not kill an active provider
+thread; later callers can remain blocked behind it. Full application startup,
+live Studio selector behavior and native RSI remain separately unqualified.
+The original PR's 23-pass blanket command is historical, not an approved run.

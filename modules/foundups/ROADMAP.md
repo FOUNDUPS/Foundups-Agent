@@ -9,8 +9,14 @@ implementation sources of truth:
 - `modules/foundups/agent_market/ROADMAP.md`
 - `modules/foundups/simulator/ROADMAP.md`
 - `modules/foundups/agent/ROADMAP.md`
+- [p.fMALL roadmap](pfmall/ROADMAP.md) — discovery/presentation and the proposed
+  shared mobile creator live-studio integration sequence.
+- [AutoPost roadmap](https://github.com/FOUNDUPS/autopost/blob/main/ROADMAP.md#phase-4b--autopost-live-mode-planned)
+  — external camera/publishing product and proposed Live mode.
 - `modules/foundups/docs/FOUNDUPS_PAVS_IRONCLAW_AGENT_BUILDER_DIGITAL_TWIN_ROADMAP.md`
 - `modules/foundups/social_twin/ROADMAP.md`
+- `modules/foundups/detect_ai/ROADMAP.md` - AmIBot: registered, hidden and specified;
+  autonomous-build G0 remains blocked on shared admission/runtime prerequisites.
 
 ## First-Principles Constraints
 1. No market claims without an auditable event/state trail.
@@ -18,6 +24,41 @@ implementation sources of truth:
 3. No member-only surface without fail-closed access gating at API/SSE layer.
 4. No UI promise without read models fed by canonical events.
 5. No phase promotion without concatenated tests and updated module docs.
+
+## Private AutoPost item capture (updated 2026-10-23)
+
+The [shared handoff](pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md) is the continuation
+entry for Shop clothing and GetK-style evidence. AutoPost captures originals;
+its existing media store remains authoritative for local bytes. Item grouping
+types are specified, while grouping UI/persistence, authenticated shared-media
+attachment, private item writer and Mall garment projection remain missing.
+
+Follow [pfmall C1-C3](pfmall/ROADMAP.md#private-item-capture--2026-10-23) and the
+external [AutoPost roadmap](https://github.com/FOUNDUPS/autopost/blob/main/ROADMAP.md).
+Public Shop/vending decisions are deferred. Do not put captures into static
+catalogs/media or repurpose the public GotJunk endpoint. No parallel camera,
+identity store, marketplace backend or per-garment FoundUp is required.
+
+## Mobile Creator Studio Planning (updated 2026-10-18)
+
+The current Mall owner is `modules/foundups/pfmall`, with the member UI in
+`public/member/`. The [mobile studio contract](docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md)
+connects it to external AutoPost, the existing camera/publishing product.
+AutoPost's selectable Live mode is the vehicle; a new media adapter first proves
+foreground browser WebRTC through a relay, then selects native integration if
+measured requirements justify it. The separately authenticated creator-session
+service supplies durable control. Existing file upload, catalog/player and
+AntifaFM patterns do not establish that general creator live service.
+
+The [API register](docs/mobile_studio/PFMALL_CREATOR_LIVE_API_CONSTRAINTS.md)
+records current broadcast/input reuse, quota, OAuth, channel/embed eligibility
+and recovery constraints. The [machine outcome](docs/mobile_studio/mobile_studio_outcome.v1.json)
+defines MS0–MS5 (including MS2A/MS2B) and AC01–AC11. MS0 is documentation; implementation
+starts through a separately admitted MS1 control slice or MS2A attended feasibility
+slice with verified control/relay prerequisites. Integrated MS2 promotion still
+requires completed MS1, MS2A and MS2B. This is a P1 planning item
+(WSP 15 score 14), with no change to existing P0 work, registry identities,
+execution authority, payment systems or deployed behavior.
 
 ## Layered Delivery Model (Occam Cake)
 

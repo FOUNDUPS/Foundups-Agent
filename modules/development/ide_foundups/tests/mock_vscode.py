@@ -125,7 +125,7 @@ StatusBarAlignment.Left = 1
 StatusBarAlignment.Right = 2
 
 TreeItemCollapsibleState = Mock()
-TreeItemCollapsibleState.None = 0
+setattr(TreeItemCollapsibleState, "None", 0)
 TreeItemCollapsibleState.Collapsed = 1
 TreeItemCollapsibleState.Expanded = 2
 

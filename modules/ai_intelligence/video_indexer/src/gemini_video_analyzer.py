@@ -33,7 +33,11 @@ from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 from datetime import datetime
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+except ImportError:  # Core parsing/storage helpers do not require python-dotenv.
+    def load_dotenv(*_args, **_kwargs):
+        return False
 
 logger = logging.getLogger(__name__)
 try:
@@ -145,6 +149,7 @@ class GeminiAnalysisResult:
             "indexed_at": self.analyzed_at.isoformat(),
             "indexer": "gemini",
             "model": self.model_used,
+            "transcript_source": "gemini_summary",
             "audio": {
                 "segments": [
                     {
@@ -168,6 +173,12 @@ class GeminiAnalysisResult:
                 "key_points": self.key_points,
                 "summary": self.summary,
                 "content_category": self.content_category,
+                # Gemini supplies semantic descriptions, not a word-for-word
+                # transcript. Keep these records searchable, but never treat
+                # them as ground-truth speech for Red Dog weight training.
+                "retrieval_eligible": True,
+                "training_eligible": False,
+                "training_exclusion_reason": "gemini_summary_not_verbatim",
             },
             "clips": {
                 "candidates": [],  # Generate from segments separately
@@ -472,13 +483,16 @@ Identify any actionable items or announcements."""
 
         Per WSP 48: Enable recursive learning from repairs.
         """
-        if self._pattern_memory is None and PatternMemory is not None:
+        # Parsing tests and repair-only callers may construct the analyzer with
+        # ``__new__`` to avoid initializing the optional Gemini SDK. Treat a
+        # missing attribute exactly like the normal lazy ``None`` state.
+        if getattr(self, "_pattern_memory", None) is None and PatternMemory is not None:
             try:
                 self._pattern_memory = PatternMemory()
                 logger.debug("[GEMINI-VIDEO] WRE PatternMemory initialized")
             except Exception as e:
                 logger.warning(f"[GEMINI-VIDEO] WRE PatternMemory init failed: {e}")
-        return self._pattern_memory
+        return getattr(self, "_pattern_memory", None)
 
     def _store_repair_outcome(
         self,
@@ -951,6 +965,7 @@ def save_analysis_result(
     output_dir: str = "memory/video_index",
     channel: str = "undaodu",
     index_to_holoindex: bool = True,
+    merge_existing: bool = False,
 ) -> str:
     """
     Save analysis result to video index storage and optionally HoloIndex.
@@ -960,6 +975,8 @@ def save_analysis_result(
         output_dir: Base directory for video index
         channel: Channel name for subdirectory
         index_to_holoindex: Also index to ChromaDB for semantic search
+        merge_existing: Preserve an existing canonical manifest and attach this
+            result under ``gemini_enrichment`` instead of overwriting it.
 
     Returns:
         Path to saved file
@@ -970,8 +987,25 @@ def save_analysis_result(
     filename = f"{result.video_id}.json"
     filepath = output_path / filename
 
+    payload = result.to_index_format()
+    if merge_existing and filepath.exists():
+        try:
+            existing = json.loads(filepath.read_text(encoding="utf-8"))
+            if isinstance(existing, dict):
+                existing["gemini_enrichment"] = payload
+                existing.setdefault("metadata", {})["gemini_enriched_at"] = (
+                    result.analyzed_at.isoformat()
+                )
+                payload = existing
+        except (OSError, json.JSONDecodeError, TypeError) as exc:
+            logger.warning(
+                "[GEMINI-VIDEO] Existing manifest unreadable; replacing %s: %s",
+                filepath,
+                exc,
+            )
+
     with open(filepath, "w", encoding="utf-8") as f:
-        json.dump(result.to_index_format(), f, indent=2, ensure_ascii=False)
+        json.dump(payload, f, indent=2, ensure_ascii=False)
 
     logger.info(f"[GEMINI-VIDEO] Saved index: {filepath}")
 

@@ -164,6 +164,16 @@
           "pattern": "^[a-z0-9_]+$",
           "description": "Canonical identifier (lowercase, underscores, digits)"
         },
+        "brand_context_path": {
+          "type": ["string", "null"],
+          "description": "Optional repo-relative brand context; branding only, no execution authority."
+        },
+        "public_discovery_alias": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+$",
+          "not": { "pattern": "[^a-z0-9_]" },
+          "description": "Optional shell discovery slug; globally unique against every canonical ID and alias. Never a tenant identity."
+        },
         "display_name": {
           "type": "string",
           "maxLength": 64,

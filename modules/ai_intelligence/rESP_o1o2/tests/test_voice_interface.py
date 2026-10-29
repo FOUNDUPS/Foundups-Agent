@@ -1,4 +1,4 @@
-﻿"""Smoke test for src.voice_interface."""
+"""Smoke test for src.voice_interface."""
 
 import sys
 from pathlib import Path

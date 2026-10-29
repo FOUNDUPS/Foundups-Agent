@@ -80,202 +80,46 @@ This skill classifies video content to determine the appropriate description tem
 
 ## Instructions (For AI Agent)
 
-### 1. CHANNEL_IDENTITY_CHECK
-**Rule**: IF channel_key is known THEN establish baseline template, ELSE default to ffcpln
+This legacy classifier is a candidate-label helper, not authority to change
+metadata. Its executor may still return channel/title heuristic labels; the
+shared content-evidence gate must validate these before scheduling metadata edits.
 
-**Steps**:
-1. Extract `channel_key` from context
-2. Map to baseline template:
-   - `move2japan` → baseline `ffcpln`
-   - `ravingantifa` → baseline `ffcpln`
-   - `foundups` → baseline `startup_tech`
-   - `undaodu` → baseline `mindfulness`
-3. This is ONLY the baseline - video content can override
+1. Resolve exact channel/video identity and existing analyzer evidence.
+2. Reject failed, stub, title-only, mismatched or incomplete evidence for metadata
+   generation. Preserve existing metadata and report `evidence_required`.
+3. Classify the observed content, not the channel. Political words, hashtags,
+   duration, absent speech or a failed transcript never establish music.
+4. Require supported audio/visual evidence for music. A spoken political clip
+   remains speech/news/commentary even when its title contains FFCPLN markers.
+5. If evidence is insufficient or ambiguous, retain an unknown candidate rather
+   than supplying a channel-wide template. Feed supported labels and provenance
+   into `content_generator.py`'s matched-evidence gate.
+6. Log heuristic output separately from validated content. A legacy pattern score
+   is not proof that a video was understood or that publishing is authorized.
 
-**Expected Pattern**: `channel_baseline_set=True`
-
-**Examples**:
-- channel_key="move2japan" → baseline="ffcpln"
-- channel_key="foundups" → baseline="startup_tech"
-- channel_key="unknown" → baseline="ffcpln" (default)
-
----
-
-### 2. FFCPLN_MARKER_DETECTION
-**Rule**: IF video contains FFCPLN markers THEN content_type=ffcpln_music, ELSE continue
-
-**Steps**:
-1. Check video_title for FFCPLN markers:
-   - Exact: "ffcpln", "FFCPLN"
-   - Pattern: "#FFCPLN", "Fake Fuck Christian", "Pedo-lovin Nazi"
-2. Check transcript (if available) for Suno song markers:
-   - "fake fuck christian", "pedo_lovin nazi", "pedo lovin nazi"
-3. If ANY marker found → classify as `ffcpln_music`
-
-**Expected Pattern**: `ffcpln_marker_check=True`
-
-**Examples**:
-- title="FFCPLN Anthem - Anti-MAGA Song" → content_type=ffcpln_music
-- title="My trip to Tokyo" → continue to next check
-- transcript contains "fake fuck christian pedo lovin nazi" → content_type=ffcpln_music (Suno AI song)
+The taxonomy above describes the legacy prototype's output,
+not permission to bypass the evidence gate or silently use its fallback template.
 
 ---
 
-### 3. NEWS_PROTEST_DETECTION
-**Rule**: IF video contains news/protest markers AND channel is political THEN content_type=ffcpln_news
+## Forward-review cases
 
-**Steps**:
-1. Check for news keywords in title/transcript:
-   - Breaking: "breaking", "exposed", "leaked"
-   - ICE: "ice", "raid", "deportation", "immigration"
-   - Protest: "protest", "arrest", "cruelty"
-2. If news markers found AND channel in [move2japan, ravingantifa] → classify as `ffcpln_news`
+| Evidence | Required scheduling behavior |
+|---|---|
+| Title contains FFCPLN; no valid analyzer evidence | Preserve metadata; require evidence. |
+| Gemini music stub or failed transcript | Reject as content evidence. |
+| Matched transcript of political commentary | Ground description in speech; do not infer music. |
+| Matched valid audio/visual evidence of a song | Music label may be used within the shared evidence gate. |
+| Channel fallback disagrees with actual clip | Discard fallback for metadata generation. |
 
-**Expected Pattern**: `news_marker_check=True`
+These are workflow acceptance cases, not claims that the legacy classifier
+executor has been retrained. Existing executor heuristic scores describe its own
+classification process only. The metadata write boundary is the shared validated
+video-evidence path; do not call a static description template directly from a
+heuristic label.
 
-**Examples**:
-- title="BREAKING: ICE Raids Chicago" on move2japan → content_type=ffcpln_news
-- title="ICE cruelty exposed" on foundups → continue (foundups is startup channel)
+## Workflow handoff
 
----
-
-### 4. STARTUP_TECH_DETECTION
-**Rule**: IF video contains startup/tech markers AND channel is foundups THEN content_type=startup_tech
-
-**Steps**:
-1. Check for startup keywords:
-   - Core: "startup", "entrepreneur", "founder", "venture"
-   - Tech: "AI", "pAVS", "autonomous", "agent"
-   - Business: "business", "innovation", "investment"
-2. If startup markers found AND channel=foundups → classify as `startup_tech`
-
-**Expected Pattern**: `startup_marker_check=True`
-
-**Examples**:
-- title="Building AI Agents with pAVS" on foundups → content_type=startup_tech
-- title="Startup tips" on move2japan → use baseline (ffcpln)
-
----
-
-### 5. MINDFULNESS_DETECTION
-**Rule**: IF video contains mindfulness markers AND channel is undaodu THEN content_type=mindfulness
-
-**Steps**:
-1. Check for mindfulness keywords:
-   - Core: "mindfulness", "meditation", "zen", "peace"
-   - Eastern: "tao", "dao", "wu wei", "non-doing"
-   - Wellness: "breathe", "calm", "present", "awareness"
-2. If mindfulness markers found AND channel=undaodu → classify as `mindfulness`
-
-**Expected Pattern**: `mindfulness_marker_check=True`
-
-**Examples**:
-- title="Morning Meditation Music" on undaodu → content_type=mindfulness
-- title="Zen coding tips" on foundups → use baseline (startup_tech)
-
----
-
-### 6. FALLBACK_CLASSIFICATION
-**Rule**: IF no specific markers detected THEN use channel baseline
-
-**Steps**:
-1. If no specific content type matched in steps 2-5
-2. Use channel baseline from step 1
-3. Log classification confidence as "baseline_fallback"
-
-**Expected Pattern**: `fallback_applied=True` OR `specific_classification=True`
-
-**Examples**:
-- title="Random video" on move2japan → content_type=ffcpln (baseline)
-- title="Hello World" on foundups → content_type=startup_tech (baseline)
-
----
-
-## Expected Patterns Summary
-
-Pattern fidelity scoring expects these patterns logged:
-
-```json
-{
-  "execution_id": "exec_001",
-  "skill": "gemma_content_type_classifier",
-  "patterns": {
-    "channel_baseline_set": true,
-    "ffcpln_marker_check": true,
-    "news_marker_check": true,
-    "startup_marker_check": true,
-    "mindfulness_marker_check": true,
-    "fallback_applied": false,
-    "specific_classification": true
-  },
-  "result": {
-    "content_type": "ffcpln_music",
-    "description_template": "ffcpln",
-    "confidence": 0.95,
-    "method": "ffcpln_marker_detection"
-  }
-}
-```
-
-**Fidelity Calculation**: `(patterns_executed / total_patterns)`
-
----
-
-## Benchmark Test Cases
-
-### Test Set 1: FFCPLN Music Detection (10 cases)
-1. Input: `{title: "#FFCPLN Burns MAGA", channel: "move2japan"}` → Expected: `ffcpln_music` (Reason: FFCPLN hashtag)
-2. Input: `{title: "Anti-Fascist Anthem", channel: "ravingantifa"}` → Expected: `ffcpln_music` (Reason: antifa + political channel)
-3. Input: `{transcript: "fake fuck christian pedo lovin nazi", channel: "move2japan"}` → Expected: `ffcpln_music` (Reason: Suno marker)
-4. Input: `{title: "MAGA Won't Like This", channel: "move2japan"}` → Expected: `ffcpln_music` (Reason: anti-MAGA on political channel)
-
-### Test Set 2: News/Protest Detection (5 cases)
-1. Input: `{title: "BREAKING: ICE Raids Chicago", channel: "move2japan"}` → Expected: `ffcpln_news`
-2. Input: `{title: "ICE Deportation Cruelty Exposed", channel: "ravingantifa"}` → Expected: `ffcpln_news`
-3. Input: `{title: "Protest at Border", channel: "move2japan"}` → Expected: `ffcpln_news`
-
-### Test Set 3: Startup/Tech Detection (5 cases)
-1. Input: `{title: "Building AI Agents with pAVS", channel: "foundups"}` → Expected: `startup_tech`
-2. Input: `{title: "Startup Lessons Learned", channel: "foundups"}` → Expected: `startup_tech`
-3. Input: `{title: "Random video", channel: "foundups"}` → Expected: `startup_tech` (baseline)
-
-### Test Set 4: Mindfulness Detection (5 cases)
-1. Input: `{title: "Morning Meditation", channel: "undaodu"}` → Expected: `mindfulness`
-2. Input: `{title: "Wu Wei - The Art of Non-Doing", channel: "undaodu"}` → Expected: `mindfulness`
-3. Input: `{title: "Random video", channel: "undaodu"}` → Expected: `mindfulness` (baseline)
-
-### Test Set 5: Cross-Channel Edge Cases (5 cases)
-1. Input: `{title: "Meditation for Entrepreneurs", channel: "foundups"}` → Expected: `startup_tech` (channel trumps content)
-2. Input: `{title: "FFCPLN", channel: "foundups"}` → Expected: `ffcpln_music` (explicit marker overrides)
-3. Input: `{title: "Startup Tips", channel: "move2japan"}` → Expected: `ffcpln` (baseline for political channel)
-
-**Total**: 30 test cases across 5 categories
-
----
-
-## Success Criteria
-
-- Pattern fidelity >= 90%
-- Outcome quality >= 85%
-- Zero false negatives on FFCPLN marker detection (critical for political content)
-- False positive rate < 5% for non-political channels
-- Classification time < 10ms (Gemma fast path)
-
----
-
-## Integration Point
-
-**Current Code** (`content_generator.py`):
-```python
-# BEFORE (static config):
-template = channel_config.get("description_template", "ffcpln")
-description = get_standard_description(template)
-
-# AFTER (skill-driven):
-from modules.platform_integration.youtube_shorts_scheduler.skillz.gemma_content_type_classifier.executor import classify_content
-result = classify_content(title=video_title, channel=channel_key, metadata=index_json)
-template = result["description_template"]
-description = get_standard_description(template)
-```
-
-**WSP Compliance**: WSP 95 (SKILLz Wardrobe), WSP 77 (Agent Coordination), WSP 27 (Phase 0 KNOWLEDGE)
+Follow the [shared scheduling workflow](../README.md) for ordered inputs,
+outputs, evidence gates and resume boundaries. This skill retains its own
+permissions and prototype status; linkage does not expand authority.

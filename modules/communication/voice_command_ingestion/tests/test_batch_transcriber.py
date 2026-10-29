@@ -1,4 +1,4 @@
-﻿import numpy as np
+import numpy as np
 from dataclasses import dataclass
 
 from modules.communication.voice_command_ingestion import (

@@ -1,5 +1,21 @@
 # Video Comments - Autonomous YouTube Engagement Module
 
+The 2026-10-29 commenting repair uses an explicit meaning assessment before
+writing and a separate review of the final reply against the original comment
+and supplied facts. UI-TARS is restricted to visual inspection. Private themes
+enter the writing prompt; they are never appended as slogans or announcements.
+Stable Studio comment/video/channel identity and restart-safe SQLite attempt
+records guard submission. See [the repair and Windows handoff](docs/CHAT_MANIFEST_REPAIR_20261029.md).
+Offline qualification and live delivery are separate evidence states.
+The same generator also serves the private livechat fallback through an explicit
+surface: general-role LM Studio HTTP only, scoped themes and final reviewed
+`@mention` text. Stored-comment defaults, history and provider fallbacks remain.
+
+> PR1478 reconciliation (2026-10-23): 53 focused offline cases and 116 adjacent
+> command/context cases pass locally; publication checks remain separate.
+> Historical completion/live-test labels below are not current deployment,
+> provider admission, or native RSI evidence. See tests/TestModLog.md.
+
 **Domain:** communication
 **Status:** MVP (PoC Validated → Production)
 **WSP Compliance:** Compliant
@@ -65,7 +81,9 @@ This module enables autonomous YouTube comment engagement through quantum-entang
 - [x] **Troll Classification**: MAGA troll detection via GrokGreetingGenerator + heuristics
 - [x] **Hostile Pattern Detection**: Sentiment-based classification for non-MAGA hostility ("don't come back", "gtfo", etc.)
 - [x] **Whack-a-MAGA Responses**: Uses troll mockery responses for trolls
-- [x] **Dynamic Reply Generation**: Context-aware replies via Grok (preferred) or LM Studio fallback
+- [x] **Grounded Reply Generation**: Exact Studio-row comment/video context through LM Studio or embedded general Qwen
+- [x] **Context Integrity Gate**: Skip posting when only a generic template is available (legacy opt-in: `YT_ALLOW_GENERIC_REPLY_FALLBACK=true`)
+- [ ] **Governed OpenRouter Reply Runner**: Extend RedDog's autonomous policy/runtime-binding/provider-evidence pattern to short-form replies; no per-comment 012 approval
 
 ### Phase 3: YouTube DAE Integration 📋 PLANNED
 - [ ] **AutoModeratorDAE Hook**: When YouTube DAE launches, trigger comment check
@@ -75,7 +93,7 @@ This module enables autonomous YouTube comment engagement through quantum-entang
 - [ ] **Launch via main.py**: Option to enable comment engagement with YouTube DAE
 
 ### Phase 4: Autonomous Intelligence 🔮 FUTURE
-- [ ] **LLM Response Generation**: Use GPT/Claude for contextual replies
+- [x] **Local LLM Response Generation**: General Qwen receives the full grounded prompt
 - [ ] **Sentiment Analysis**: Classify comment sentiment before responding
 - [ ] **Pattern Learning**: Learn from successful engagement patterns
 - [ ] **Cross-Platform Memory**: Remember users across YouTube, X, LinkedIn
@@ -199,7 +217,8 @@ dae.close()
 
 ## [DEPENDENCIES] Prerequisites
 
-- **LM Studio** serving `ui-tars-1.5-7b` on `http://127.0.0.1:1234`
+- **LM Studio** on `http://127.0.0.1:1234` for the local model service (general Qwen for replies; UI-TARS remains a vision role)
+- **Embedded fallback model** resolved by `resolve_general_model_path()` when LM Studio is unavailable
 - **Chrome** with `--remote-debugging-port=9222`
 - **Signed into** YouTube Studio with target channel
 - **Selenium WebDriver** (ChromeDriver)

@@ -118,30 +118,31 @@ class DAEEventStore:
         Retries up to 3 times on sequence_id collision (multi-process race).
         """
         with self._lock:
-            try:
-                if self._is_duplicate(event.dedupe_key):
-                    return (False, f"duplicate: {event.dedupe_key}")
+            for attempt in range(_retry, max(_retry, 3) + 1):
+                try:
+                    if self._is_duplicate(event.dedupe_key):
+                        return (False, f"duplicate: {event.dedupe_key}")
 
-                if event.sequence_id == 0:
-                    event.sequence_id = self._next_sequence_id()
+                    if event.sequence_id == 0:
+                        event.sequence_id = self._next_sequence_id()
 
-                self._write_jsonl(event)
-                self._write_sqlite(event)
+                    self._write_jsonl(event)
+                    self._write_sqlite(event)
 
-                logger.debug(
-                    "[DAE-STORE] Written | seq=%d type=%s dae=%s",
-                    event.sequence_id, event.event_type.value, event.dae_id,
-                )
-                return (True, "ok")
+                    logger.debug(
+                        "[DAE-STORE] Written | seq=%d type=%s dae=%s",
+                        event.sequence_id, event.event_type.value, event.dae_id,
+                    )
+                    return (True, "ok")
 
-            except Exception as e:
-                # Retry on sequence_id collision (multi-process race condition)
-                if "UNIQUE constraint failed: dae_events.sequence_id" in str(e) and _retry < 3:
-                    logger.warning("[DAE-STORE] Sequence collision, retrying (%d/3)...", _retry + 1)
-                    event.sequence_id = 0  # Reset to get fresh sequence_id
-                    return self.write(event, _retry=_retry + 1)
-                logger.error("[DAE-STORE] Write failed: %s", e)
-                return (False, f"error: {e}")
+                except Exception as e:
+                    # Retry on sequence_id collision (multi-process race condition)
+                    if "UNIQUE constraint failed: dae_events.sequence_id" in str(e) and attempt < 3:
+                        logger.warning("[DAE-STORE] Sequence collision, retrying (%d/3)...", attempt + 1)
+                        event.sequence_id = 0  # Reset to get fresh sequence_id
+                        continue
+                    logger.error("[DAE-STORE] Write failed: %s", e)
+                    return (False, f"error: {e}")
 
     def _is_duplicate(self, dedupe_key: str) -> bool:
         with self._connect() as conn:

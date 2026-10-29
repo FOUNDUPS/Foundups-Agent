@@ -1,4 +1,4 @@
-﻿from modules.foundups.agent_market.src.exceptions import ValidationError
+from modules.foundups.agent_market.src.exceptions import ValidationError
 from modules.foundups.agent_market.src.models import DistributionPost, Foundup, Payout, Proof, Task
 
 

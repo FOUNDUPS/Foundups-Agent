@@ -201,3 +201,425 @@ def test_worktree_proof_requires_registered_git_worktree(tmp_path: Path, failure
 
     receipt = _execute(repo, runtime, chain_mutator=mutate)
     _assert_missing_anchor_block(receipt)
+
+
+@pytest.mark.parametrize("execute", [False, True], ids=["readiness-only", "execute-requested"])
+def test_blocked_canary_never_invokes_deferred_callbacks(tmp_path: Path, monkeypatch, execute: bool) -> None:
+    """Current readiness rejection does not exercise downstream mutations."""
+    from datetime import datetime
+    from unittest.mock import Mock
+
+    from modules.communication.moltbot_bridge.src import reddog_verified_pattern_memory_sink as sink
+    from modules.communication.moltbot_bridge.tests import reddog_resident_live_canary_test_support as support
+
+    repo, runtime = _roots(tmp_path)
+    support._write_pre_state(repo, runtime)
+    chain_path = runtime / "resident_queue_chain_results.json"
+    before = chain_path.read_bytes()
+    chain_mutator = Mock(side_effect=AssertionError("chain mutation must not run"))
+    pattern_mutator = Mock(side_effect=AssertionError("database mutation must not run"))
+    memory_constructor = Mock(side_effect=AssertionError("PatternMemory must not open"))
+    monkeypatch.setattr(sink, "PatternMemory", memory_constructor)
+    runner = Mock(wraps=support._runner(
+        repo, runtime, chain_mutator=chain_mutator, pattern_db_mutator=pattern_mutator
+    ))
+
+    receipt = support.run_reddog_resident_live_canary(
+        **support._kwargs(repo, runtime), execute=execute,
+        confirmation=support.LIVE_CANARY_CONFIRMATION,
+        queue_item_id=support.QUEUE_ID, control_loop_runner=runner,
+        now=lambda: datetime.fromisoformat(support.NOW),
+    )
+
+    _assert_missing_anchor_block(receipt)
+    assert receipt.status == "BLOCKED"
+    assert receipt.execution_requested is execute
+    assert receipt.execution_invoked is False
+    runner.assert_not_called()
+    chain_mutator.assert_not_called()
+    pattern_mutator.assert_not_called()
+    memory_constructor.assert_not_called()
+    assert chain_path.read_bytes() == before
+    assert not (runtime / "pattern_memory.db").exists()
+
+
+@pytest.mark.parametrize(
+    ("mutation", "expected_blockers"),
+    [
+        ("prestate", ("resident_chain_not_complete", "new_chain_store_receipt_not_observed")),
+        ("schema", ("chain_results_schema_mismatch",)),
+        ("revision", ("chain_results_revision_invalid",)),
+    ],
+    ids=["incomplete-prestate", "schema-mismatch", "revision-mismatch"],
+)
+def test_uninvoked_chain_leaf_reports_specific_blockers(tmp_path: Path, mutation: str, expected_blockers) -> None:
+    """Exercise pure chain checks without admitting or executing a canary."""
+    from modules.communication.moltbot_bridge.src import reddog_resident_live_canary_evidence as evidence
+    from modules.communication.moltbot_bridge.tests import reddog_resident_live_canary_test_support as support
+
+    repo, runtime = _roots(tmp_path)
+    state = support._write_pre_state(repo, runtime)
+    chain_path = runtime / "resident_queue_chain_results.json"
+    before = chain_path.read_bytes()
+    previous_revision = state["revision"]
+    if mutation == "schema":
+        state["schema_version"] = "wrong"
+    elif mutation == "revision":
+        state["revision"] = "sha256:" + "0" * 64
+    invocation = evidence.CanaryInvocationEvidence(
+        confirmed=False, invoked=False, blockers=("synthetic_evidence_only",),
+        control_result={}, control_receipt={}, control_receipt_id=None,
+        previous_revision=previous_revision, observed_revision=state["revision"],
+        pre_chain_receipt_ids=evidence.chain_receipt_ids(state),
+        work_state=support._snapshot(), chain_state=state,
+    )
+
+    plan, blockers = evidence._chain_evidence(invocation, support.QUEUE_ID, support.NOW)
+
+    assert blockers == expected_blockers
+    assert (plan is not None) is (mutation == "prestate")
+    assert invocation.invoked is False
+    assert chain_path.read_bytes() == before
+
+
+def _synthetic_final_receipt_inputs():
+    """Build structural inputs, not an admitted invocation or planner result."""
+    from dataclasses import replace
+    from modules.communication.moltbot_bridge.src.reddog_resident_live_canary_evidence import CanaryInvocationEvidence
+    from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestration_plan import (
+        NEXT_QUEUE_CHAIN_COMPLETE, NEXT_QUEUE_PATTERN_MEMORY_ADMISSION_INVOKE,
+        RESIDENT_QUEUE_ORCHESTRATION_PLAN_COMPLETE, RESIDENT_QUEUE_ORCHESTRATION_PLAN_READY,
+        ResidentQueueOrchestrationPlan,
+    )
+    from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
+        resident_queue_chain_receipt_id,
+    )
+
+    previous = ResidentQueueOrchestrationPlan(
+        accepted=True, status=RESIDENT_QUEUE_ORCHESTRATION_PLAN_READY,
+        plan_id="synthetic-previous-plan", selected_queue_item_id="synthetic-queue",
+        selected_slice="SYNTHETIC_RECEIPT", current_stage="pattern_memory_admission",
+        next_action=NEXT_QUEUE_PATTERN_MEMORY_ADMISSION_INVOKE,
+    )
+    final = replace(
+        previous, status=RESIDENT_QUEUE_ORCHESTRATION_PLAN_COMPLETE,
+        plan_id="synthetic-final-plan", current_stage=None, next_action=NEXT_QUEUE_CHAIN_COMPLETE,
+    )
+    transition = {
+        "queue_item_id": final.selected_queue_item_id, "selected_slice": final.selected_slice,
+        "recorded_stage": "pattern_memory_admission", "previous_plan_id": previous.plan_id,
+        "next_plan_id": final.plan_id,
+    }
+    receipt = {
+        **transition, "receipt_id": resident_queue_chain_receipt_id(**transition),
+        "next_action": NEXT_QUEUE_CHAIN_COMPLETE, "store_revision": "sha256:" + "2" * 64,
+    }
+    seen_id = resident_queue_chain_receipt_id(
+        **{**transition, "previous_plan_id": "synthetic-older-plan"}
+    )
+    invocation = CanaryInvocationEvidence(
+        confirmed=False, invoked=False, blockers=("synthetic_evidence_only",),
+        control_result={}, control_receipt={}, control_receipt_id=None,
+        previous_revision="sha256:" + "1" * 64, observed_revision=receipt["store_revision"],
+        pre_chain_receipt_ids=frozenset({seen_id}), work_state={},
+        chain_state={"receipts": [receipt]},
+    )
+    return invocation, previous, final
+
+
+_FINAL_RECEIPT_TRANSITION_BLOCKER = "final_chain_store_receipt_transition_mismatch"
+
+
+@pytest.mark.parametrize(
+    ("target", "field", "value", "expected_blocker"),
+    [
+        pytest.param("none", None, None, None, id="structural-control"),
+        pytest.param("seen", None, None, "new_chain_store_receipt_not_observed", id="no-new-receipt"),
+        pytest.param("old-final", None, None, "final_chain_store_receipt_not_new", id="final-already-observed"),
+        pytest.param("remove", "recorded_stage", None, "new_chain_store_receipt_malformed", id="malformed-shape"),
+        pytest.param("receipt", "queue_item_id", "other-queue", "new_chain_store_receipt_envelope_mismatch", id="queue-mismatch"),
+        pytest.param("receipt", "selected_slice", "OTHER_SLICE", "new_chain_store_receipt_envelope_mismatch", id="slice-mismatch"),
+        pytest.param("receipt", "store_revision", "other-revision", "new_chain_store_receipt_revision_mismatch", id="revision-mismatch"),
+        pytest.param("receipt", "recorded_stage", "other-stage", _FINAL_RECEIPT_TRANSITION_BLOCKER, id="wrong-stage"),
+        pytest.param("receipt", "previous_plan_id", "other-previous", _FINAL_RECEIPT_TRANSITION_BLOCKER, id="wrong-previous-plan"),
+        pytest.param("receipt", "next_plan_id", "other-final", _FINAL_RECEIPT_TRANSITION_BLOCKER, id="wrong-next-plan"),
+        pytest.param("receipt", "next_action", "OTHER_ACTION", _FINAL_RECEIPT_TRANSITION_BLOCKER, id="wrong-next-action"),
+        pytest.param("receipt", "receipt_id", "sha256:" + "9" * 64, _FINAL_RECEIPT_TRANSITION_BLOCKER, id="wrong-derived-id"),
+        pytest.param("previous", "accepted", False, _FINAL_RECEIPT_TRANSITION_BLOCKER, id="previous-rejected"),
+        pytest.param("previous", "status", "OTHER_STATUS", _FINAL_RECEIPT_TRANSITION_BLOCKER, id="previous-wrong-status"),
+        pytest.param("previous", "current_stage", "other-stage", _FINAL_RECEIPT_TRANSITION_BLOCKER, id="previous-wrong-stage"),
+        pytest.param("previous", "next_action", "OTHER_ACTION", _FINAL_RECEIPT_TRANSITION_BLOCKER, id="previous-wrong-action"),
+    ],
+)
+def test_final_chain_receipt_predicate_is_structural_and_nonmutating(target, field, value, expected_blocker) -> None:
+    from copy import deepcopy
+    from dataclasses import replace
+    from modules.communication.moltbot_bridge.src.reddog_resident_live_canary_evidence import (
+        _new_chain_receipt_blockers,
+    )
+
+    invocation, previous, final = _synthetic_final_receipt_inputs()
+    receipt = invocation.chain_state["receipts"][0]
+    if target == "seen":
+        invocation = replace(invocation, pre_chain_receipt_ids=frozenset({receipt["receipt_id"]}))
+    elif target == "old-final":
+        invocation.chain_state["receipts"].append(
+            {**receipt, "receipt_id": next(iter(invocation.pre_chain_receipt_ids))}
+        )
+    elif target == "remove":
+        receipt.pop(field)
+    elif target == "receipt":
+        receipt[field] = value
+    elif target == "previous":
+        previous = replace(previous, **{field: value})
+    before = deepcopy((invocation, previous, final))
+
+    blockers = _new_chain_receipt_blockers(invocation, previous, final)
+
+    assert blockers == (() if expected_blocker is None else (expected_blocker,))
+    assert (invocation, previous, final) == before
+    assert invocation.invoked is False
+    assert invocation.confirmed is False
+
+
+
+def _synthetic_pattern_readback_inputs(tmp_path, record_overrides, storage):
+    """Seed only an explicit disposable DB; this is not sink activation."""
+    import sqlite3
+    from dataclasses import replace
+    from modules.communication.moltbot_bridge.tests.test_reddog_verified_pattern_memory_sink import (
+        _record, _seed_active,
+    )
+    from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_pattern_memory_admission_invoke import (
+        QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_ACCEPT,
+    )
+
+    repo, runtime = tmp_path / "repo", tmp_path / "runtime"
+    repo.mkdir()
+    runtime.mkdir()
+    original = _record()
+    record = {**original, **record_overrides}
+    invocation, _, final = _synthetic_final_receipt_inputs()
+    assert invocation.invoked is False
+    plan = replace(final, selected_slice=original["slice_name"])
+    draft = {
+        "work_order_id": original["work_order_id"], "slice_name": original["slice_name"],
+        "head": original["candidate_head_sha"],
+    }
+    worktree = {"head": original["candidate_head_sha"]}
+    record_id = reddog_verified_pattern_memory_record_id(record)
+    admission_id, digest = canonical_pattern_memory_admission_identity(record, record_id)
+    stage = {
+        "decision": QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_ACCEPT,
+        "pattern_memory_write_performed": True, "no_merge_performed": True,
+        "receipt": {"admission_id": admission_id, "pattern_memory_record_id": record_id,
+                    "record_digest": digest},
+    }
+    db_path = runtime / "pattern_memory.db"
+    if storage != "absent":
+        _seed_active(db_path, record_id, record)
+    if storage == "deleted":
+        connection = sqlite3.connect(db_path)
+        try:
+            connection.execute("DELETE FROM skill_outcomes WHERE execution_id = ?", (record_id,))
+            connection.commit()
+        finally:
+            connection.close()
+    return repo, runtime, record, plan, draft, worktree, stage
+
+
+def _pattern_readback_skill_rows(db_path):
+    """Snapshot logical outcomes, not schema/seed writes or raw DB bytes."""
+    import sqlite3
+
+    if not db_path.is_file():
+        return None
+    connection = sqlite3.connect(db_path)
+    try:
+        return tuple(connection.execute("SELECT * FROM skill_outcomes ORDER BY execution_id"))
+    finally:
+        connection.close()
+
+
+@pytest.mark.parametrize(
+    ("target", "field", "value"),
+    [
+        pytest.param("control", None, None, id="canonical-synthetic-record"),
+        pytest.param("remove", "admission_id", None, id="missing-admission-id"),
+        pytest.param("remove", "pattern_memory_record_id", None, id="missing-record-id"),
+        pytest.param("remove", "record_digest", None, id="missing-record-digest"),
+        pytest.param("storage", None, "absent", id="database-absent"),
+        pytest.param("storage", None, "deleted", id="record-deleted"),
+        pytest.param("receipt", "admission_id", "pattern_memory_admission_" + "0" * 16, id="admission-identity-mismatch"),
+        pytest.param("receipt", "record_digest", "sha256:" + "0" * 64, id="record-digest-mismatch"),
+        pytest.param("record", "work_order_id", "other-work-order", id="reidentified-wrong-ticket"),
+        pytest.param("record", "slice_name", "OTHER_SLICE", id="reidentified-wrong-slice"),
+        pytest.param("record", "candidate_head_sha", "f" * 40, id="reidentified-wrong-commit"),
+        pytest.param("plan", None, None, id="plan-absent"),
+        pytest.param("plan", "selected_slice", "OTHER_SLICE", id="plan-slice-mismatch"),
+        pytest.param("draft", "slice_name", "OTHER_SLICE", id="draft-slice-mismatch"),
+        pytest.param("draft", "head", "f" * 40, id="draft-head-mismatch"),
+        pytest.param("worktree", "head", "f" * 40, id="worktree-head-mismatch"),
+        pytest.param("stage", "decision", "REJECT", id="stage-rejected"),
+        pytest.param("stage", "pattern_memory_write_performed", False, id="write-not-performed"),
+        pytest.param("stage", "no_merge_performed", False, id="no-merge-not-confirmed"),
+    ],
+)
+def test_pattern_readback_leaf_requires_receipt_and_context(tmp_path, target, field, value) -> None:
+    """Real disposable readback qualifies this leaf, not a live canary proof."""
+    from copy import deepcopy
+    from dataclasses import replace
+    from modules.communication.moltbot_bridge.src.reddog_resident_live_canary_evidence import (
+        _pattern_memory_evidence,
+    )
+
+    overrides = {field: value} if target == "record" else {}
+    storage = value if target == "storage" else "present"
+    repo, runtime, record, plan, draft, worktree, stage = _synthetic_pattern_readback_inputs(
+        tmp_path, overrides, storage,
+    )
+    receipt = stage["receipt"]
+    if target == "remove":
+        receipt.pop(field)
+    elif target == "receipt":
+        receipt[field] = value
+    elif target == "plan":
+        plan = None if field is None else replace(plan, **{field: value})
+    elif target in ("draft", "worktree", "stage"):
+        {"draft": draft, "worktree": worktree, "stage": stage}[target][field] = value
+    if target == "record":
+        assert canonical_pattern_memory_admission_identity(record, receipt["pattern_memory_record_id"]) == (
+            receipt["admission_id"], receipt["record_digest"],
+        )
+    stages = {"pattern_memory_admission": stage}
+    before = deepcopy((stages, record, plan, draft, worktree))
+    db_path = runtime / "pattern_memory.db"
+    rows_before = _pattern_readback_skill_rows(db_path)
+
+    result = _pattern_memory_evidence(stages, repo, runtime, plan, draft, worktree)
+
+    assert result == {
+        "blockers": () if target == "control" else ("highest_profile_completion_evidence_missing",),
+        "admission_id": receipt.get("admission_id"),
+        "record_id": receipt.get("pattern_memory_record_id"),
+        "record_digest": receipt.get("record_digest"),
+    }
+    assert (stages, record, plan, draft, worktree) == before
+    assert _pattern_readback_skill_rows(db_path) == rows_before
+    if storage == "absent":
+        assert not db_path.exists()
+
+
+
+def _synthetic_registered_worktree_stages(isolated, head):
+    """Build leaf evidence only, without admitting a worktree-create operation."""
+    return {
+        "worktree_create": {
+            "decision": "QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_ACCEPT",
+            "worktree_create_result": {
+                "decision": "WORKTREE_CREATE_ACCEPT", "worktree_path": str(isolated),
+            },
+        },
+        "verified_draft_pr_publish": {
+            "publish_result": {"receipt": {"verified_head_sha": head}},
+        },
+        "held_out_regression_gate": {
+            "gate_result": {"receipt": {"candidate_head_sha": head}},
+        },
+    }
+
+
+def _mutate_registered_worktree_inputs(case, stages, repo, runtime, isolated, monkeypatch):
+    from modules.communication.moltbot_bridge.tests.reddog_resident_live_canary_test_support import _git
+
+    stage = stages["worktree_create"]
+    result = stage["worktree_create_result"]
+    draft = stages["verified_draft_pr_publish"]["publish_result"]["receipt"]
+    held = stages["held_out_regression_gate"]["gate_result"]["receipt"]
+    if case == "stage-rejected":
+        stage["decision"] = "REJECT"
+    elif case == "result-rejected":
+        result["decision"] = "REJECT"
+    elif case == "path-missing":
+        result.pop("worktree_path")
+    elif case == "non-git-directory":
+        nongit = runtime / "nongit"
+        nongit.mkdir()
+        result["worktree_path"] = str(nongit)
+    elif case == "repository-root":
+        result["worktree_path"] = str(repo)
+    elif case == "foreign-repository":
+        foreign_parent = runtime / "foreign"
+        foreign_parent.mkdir()
+        foreign, _ = _roots(foreign_parent)
+        assert _git(foreign, "rev-parse", "--is-inside-work-tree") == "true"
+        foreign_head = _git(foreign, "rev-parse", "HEAD")
+        result["worktree_path"] = str(foreign)
+        draft["verified_head_sha"] = held["candidate_head_sha"] = foreign_head
+    elif case == "forged-matching-lineage":
+        draft["verified_head_sha"] = held["candidate_head_sha"] = "0" * 40
+    elif case == "draft-held-disagreement":
+        held["candidate_head_sha"] = "0" * 40
+    elif case == "relative-registered-path":
+        monkeypatch.chdir(runtime.parent)
+        result["worktree_path"] = str(isolated.relative_to(runtime.parent.resolve()))
+
+
+def _registered_worktree_snapshot(repo, isolated):
+    from modules.communication.moltbot_bridge.tests.reddog_resident_live_canary_test_support import _git
+
+    return (
+        _git(repo, "rev-parse", "HEAD"), _git(isolated, "rev-parse", "HEAD"),
+        _git(repo, "worktree", "list", "--porcelain"),
+    )
+
+
+@pytest.mark.parametrize(
+    ("case", "accepted", "head_observed"),
+    [
+        pytest.param("registered-external-control", True, True, id="registered-external-control"),
+        pytest.param("stage-rejected", False, False, id="stage-rejected"),
+        pytest.param("result-rejected", False, False, id="result-rejected"),
+        pytest.param("path-missing", False, False, id="path-missing"),
+        pytest.param("non-git-directory", False, False, id="non-git-directory"),
+        pytest.param("repository-root", False, True, id="repository-root"),
+        pytest.param("foreign-repository", False, False, id="foreign-repository"),
+        pytest.param("forged-matching-lineage", False, True, id="forged-matching-lineage"),
+        pytest.param("draft-held-disagreement", False, True, id="draft-held-disagreement"),
+        pytest.param("relative-registered-path", False, True, id="relative-registered-path"),
+    ],
+)
+def test_registered_worktree_leaf_requires_local_registry_and_head(
+    tmp_path, monkeypatch, case, accepted, head_observed,
+) -> None:
+    """Real disposable Git consistency is not admitted native execution."""
+    from copy import deepcopy
+    from unittest.mock import Mock
+    from modules.communication.moltbot_bridge.src import reddog_resident_live_canary_evidence as evidence
+    from modules.communication.moltbot_bridge.tests.reddog_resident_live_canary_test_support import (
+        _create_registered_worktree,
+    )
+
+    repo, runtime = _roots(tmp_path)
+    isolated, head = _create_registered_worktree(repo, runtime)
+    assert head != "0" * 40
+    stages = _synthetic_registered_worktree_stages(isolated, head)
+    original_cwd = Path.cwd()
+    with monkeypatch.context() as scoped:
+        _mutate_registered_worktree_inputs(case, stages, repo, runtime, isolated, scoped)
+        before = deepcopy(stages)
+        git_before = _registered_worktree_snapshot(repo, isolated)
+        registry_lookup = Mock(side_effect=AssertionError("early rejection must not read registry"))
+        if case in ("stage-rejected", "result-rejected", "path-missing"):
+            scoped.setattr(evidence, "_registered_worktree_head", registry_lookup)
+
+        result = evidence._worktree_evidence(stages, repo)
+
+        assert result == {
+            "blockers": () if accepted else ("isolated_worktree_evidence_missing",),
+            "head": head if head_observed else None,
+        }
+        assert stages == before
+        assert _registered_worktree_snapshot(repo, isolated) == git_before
+        registry_lookup.assert_not_called()
+    assert Path.cwd() == original_cwd

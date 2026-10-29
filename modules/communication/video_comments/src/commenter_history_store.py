@@ -12,11 +12,16 @@ It is not intended for cross-service use without explicit integration.
 
 from __future__ import annotations
 
+import hashlib
+import json
+import os
 import sqlite3
+from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from uuid import uuid4
 
 
 MEMORY_DIR = Path(__file__).resolve().parents[1] / "memory"
@@ -91,16 +96,20 @@ class CommenterHistoryStore:
     - Fast retrieval of last N interactions per commenter
     """
 
-    def __init__(self, db_path: Path = DB_PATH) -> None:
-        self.db_path = Path(db_path)
+    def __init__(self, db_path: Optional[Path] = None) -> None:
+        self.db_path = Path(db_path or os.getenv("YT_COMMENT_HISTORY_DB", str(DB_PATH))).expanduser().resolve()
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._ensure_schema()
 
-    def _get_connection(self) -> sqlite3.Connection:
+    @contextmanager
+    def _get_connection(self):
         conn = sqlite3.connect(self.db_path, isolation_level=None, timeout=10.0)
         conn.execute("PRAGMA journal_mode=WAL")
         conn.execute("PRAGMA synchronous=NORMAL")
-        return conn
+        try:
+            yield conn
+        finally:
+            conn.close()
 
     def _ensure_schema(self) -> None:
         with self._get_connection() as conn:
@@ -127,6 +136,109 @@ class CommenterHistoryStore:
                 ON commenter_interactions(commenter_key, created_at DESC)
                 """
             )
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS reply_attempts (
+                    attempt_id TEXT PRIMARY KEY,
+                    target_key TEXT NOT NULL,
+                    original_context TEXT NOT NULL,
+                    reply_text TEXT NOT NULL,
+                    status TEXT NOT NULL CHECK(status IN ('unknown', 'verified', 'not_submitted')),
+                    evidence TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                )
+            """)
+            conn.execute("""
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_reply_attempt_active_target
+                ON reply_attempts(target_key) WHERE status IN ('unknown', 'verified')
+            """)
+
+    @staticmethod
+    def reply_target_key(original_context: Dict[str, Any]) -> str:
+        """Identify a real thread independently of the generated draft or its row position."""
+        required = ("_target_channel_id", "video_id", "comment_id", "text")
+        if not isinstance(original_context, dict) or any(
+            not isinstance(original_context.get(key), str) or not original_context[key].strip()
+            for key in required
+        ):
+            raise ValueError("stable_comment_identity_required")
+        author = original_context.get("author_handle") or original_context.get("author_name")
+        if not isinstance(author, str) or author.strip().lower() in ("", "unknown", "@unknown"):
+            raise ValueError("stable_comment_author_required")
+        identity = [original_context[key] for key in required[:3]]
+        return hashlib.sha256(json.dumps(identity, ensure_ascii=False).encode("utf-8")).hexdigest()
+
+    def begin_reply_attempt(self, original_context: Dict[str, Any], reply_text: str) -> Optional[str]:
+        """Durably reserve before browser work; unknown survives crashes and new drafts."""
+        target_key = self.reply_target_key(original_context)
+        if not isinstance(reply_text, str) or not reply_text.strip():
+            raise ValueError("nonempty_reply_required")
+        attempt_id, now = uuid4().hex, _utc_now_iso()
+        with self._get_connection() as conn:
+            conn.execute("PRAGMA synchronous=FULL")
+            cursor = conn.execute("""
+                INSERT OR IGNORE INTO reply_attempts
+                (attempt_id, target_key, original_context, reply_text, status, evidence, created_at, updated_at)
+                VALUES (?, ?, ?, ?, 'unknown', '{}', ?, ?)
+            """, (attempt_id, target_key, json.dumps(original_context, ensure_ascii=False), reply_text, now, now))
+        return attempt_id if cursor.rowcount == 1 else None
+
+    def finish_reply_attempt(self, attempt_id: str, status: str, evidence: Dict[str, Any]) -> None:
+        """Only explicit no-click evidence releases a reservation; unknown never expires."""
+        if status not in ("unknown", "verified", "not_submitted"):
+            raise ValueError("invalid_reply_attempt_status")
+        with self._get_connection() as conn:
+            conn.execute("PRAGMA synchronous=FULL")
+            conn.execute("BEGIN IMMEDIATE")
+            cursor = conn.execute("""
+                UPDATE reply_attempts SET status = ?, evidence = ?, updated_at = ?
+                WHERE attempt_id = ? AND status = 'unknown'
+            """, (status, json.dumps(evidence, ensure_ascii=False), _utc_now_iso(), attempt_id))
+            if cursor.rowcount != 1:
+                raise ValueError("reply_attempt_not_pending")
+            if status == 'verified':
+                original_json, reply = conn.execute(
+                    "SELECT original_context, reply_text FROM reply_attempts WHERE attempt_id = ?", (attempt_id,)).fetchone()
+                original = json.loads(original_json)
+                handle = original.get('author_handle') or original['author_name']
+                channel = original.get('channel_id')
+                conn.execute("""
+                    INSERT INTO commenter_interactions
+                    (commenter_key, commenter_handle, commenter_channel_id, comment_text, reply_text,
+                     liked, hearted, replied, commenter_type, created_at)
+                    VALUES (?, ?, ?, ?, ?, 0, 0, 1, 'unknown', ?)
+                """, (make_commenter_key(channel_id=channel, handle=handle), _normalize_handle(handle),
+                      channel, original['text'], reply, _utc_now_iso()))
+            conn.commit()
+
+    def get_reply_attempts(self, original_context: Dict[str, Any]) -> List[Dict[str, Any]]:
+        with self._get_connection() as conn:
+            rows = conn.execute("""
+                SELECT attempt_id, status, original_context, reply_text, evidence, created_at, updated_at
+                FROM reply_attempts WHERE target_key = ? ORDER BY created_at
+            """, (self.reply_target_key(original_context),)).fetchall()
+        return [dict(attempt_id=row[0], status=row[1], original_context=json.loads(row[2]),
+                     reply_text=row[3], evidence=json.loads(row[4]), created_at=row[5], updated_at=row[6])
+                for row in rows]
+
+    def append_reply_evidence(self, attempt_id: str, inspection: Dict[str, Any]) -> None:
+        """Attach bounded private post inspection without changing reservation status."""
+        if not isinstance(inspection, dict):
+            raise ValueError("inspection_must_be_an_object")
+        encoded = json.dumps(inspection, ensure_ascii=False, allow_nan=False)
+        if len(encoded.encode('utf-8')) > 16384:
+            raise ValueError("inspection_evidence_too_large")
+        with self._get_connection() as conn:
+            conn.execute("PRAGMA synchronous=FULL")
+            conn.execute("BEGIN IMMEDIATE")
+            row = conn.execute("SELECT evidence FROM reply_attempts WHERE attempt_id = ?", (attempt_id,)).fetchone()
+            if row is None:
+                raise ValueError("reply_attempt_not_found")
+            evidence = json.loads(row[0])
+            evidence['post_inspection'] = json.loads(encoded)
+            conn.execute("UPDATE reply_attempts SET evidence = ?, updated_at = ? WHERE attempt_id = ?",
+                         (json.dumps(evidence, ensure_ascii=False), _utc_now_iso(), attempt_id))
+            conn.commit()
 
     def record_interaction(
         self,

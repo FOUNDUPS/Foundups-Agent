@@ -42,6 +42,9 @@ from typing import Any, Dict, List, Optional
 # WSP 62 Refactoring: Extracted modules for size compliance (absolute imports for subprocess compatibility)
 from modules.communication.video_comments.skillz.tars_like_heart_reply.src.reply_executor import BrowserReplyExecutor
 from modules.communication.video_comments.skillz.tars_like_heart_reply.src.comment_processor import CommentProcessor
+from modules.communication.video_comments.skillz.tars_like_heart_reply.src.comment_row_context import (
+    create_comment_processor, comment_event_payload,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -684,22 +687,7 @@ class CommentEngagementDAE:
             logger.info("[DAE-CONNECT] Reply executor initialized")
 
             # Initialize comment processor (WSP 62 refactoring Phase 2)
-            self.comment_processor = CommentProcessor(
-                driver=self.driver,
-                human=self.human,
-                stats=self.stats,
-                reply_executor=self.reply_executor,
-                selectors=self.SELECTORS,
-                vision_descriptions=self.VISION_DESCRIPTIONS,
-                use_vision=self.use_vision,
-                use_dom=True,
-                ui_tars_bridge=None,  # Will be set after vision connection
-                check_moderators=self.check_moderators,
-                mod_lookup=self.mod_lookup,
-                reply_debug_tags=self.reply_debug_tags,
-                video_title=self.video_title,  # NEW (2025-12-30): Video context for alignment detection
-                session_id=self.session_id,  # Pre-action snapshots + action switch telemetry
-            )
+            self.comment_processor = create_comment_processor(self, CommentProcessor)
             logger.info("[DAE-CONNECT] Comment processor initialized")
         except Exception as e:
             logger.error(f"[DAE-CONNECT] Browser entanglement failed: {e}")
@@ -998,6 +986,10 @@ class CommentEngagementDAE:
                 use_intelligent_reply=use_intelligent_reply
             )
             all_results.append(result)
+            if not result.get('reply') and result.get('reply_submission_status') in {'unknown', 'verified'}:
+                logger.warning('[REPLY-INSPECT] Halting session for outcome reconciliation; no automatic retry')
+                result['halted_for_reconciliation'] = True
+                break
 
             # FAM DAEmon: Publish comment engagement event (Training Mode observability)
             if FAM_DAEMON_AVAILABLE and not result.get('no_comment_exists'):
@@ -1011,23 +1003,10 @@ class CommentEngagementDAE:
                     else:
                         event_type = FAMEventType.COMMENT_IGNORED
 
-                    fam_payload = {
-                        'session_id': self.session_id,
-                        'comment_idx': total_processed + 1,
-                        'commenter_handle': result.get('commenter_handle') or result.get('author_name', 'Unknown'),
-                        'commenter_channel_id': result.get('commenter_channel_id'),
-                        'classification': result.get('commenter_type', 'unknown'),
-                        'comment_text': result.get('comment_text', '')[:500],  # Truncate for storage
-                        'like': result.get('like', False),
-                        'heart': result.get('heart', False),
-                        'reply': result.get('reply', False),
-                        'reply_text_posted': result.get('reply_text_posted', ''),
-                        'reply_source': result.get('reply_source', 'bot'),
-                        'llm_source': result.get('llm_source', 'unknown'),  # NEW (2026-02-21): Track which LLM/skill generated reply
-                        'video_id': self.video_id,
-                        'channel_id': self.channel_id,
-                        'timestamp': datetime.now().isoformat(),
-                    }
+                    fam_payload = comment_event_payload(
+                        result, self.session_id, total_processed + 1,
+                        self.channel_id, datetime.now().isoformat(),
+                    )
                     fam.publish(event_type, fam_payload)
                     logger.debug(f"[DAE][FAM] Published {event_type.value}: {result.get('commenter_handle')}")
                 except Exception as e:
@@ -1098,25 +1077,10 @@ class CommentEngagementDAE:
                             else:
                                 event_type = FAMEventType.COMMENT_IGNORED
 
-                            fam_payload = {
-                                'session_id': self.session_id,
-                                'comment_idx': f"{total_processed}.{nested_idx}",  # Parent.Nested format
-                                'commenter_handle': nested_result.get('commenter_handle') or nested_result.get('author_name', 'Unknown'),
-                                'commenter_channel_id': nested_result.get('commenter_channel_id'),
-                                'classification': nested_result.get('commenter_type', 'unknown'),
-                                'comment_text': nested_result.get('comment_text', '')[:500],
-                                'like': nested_result.get('like', False),
-                                'heart': nested_result.get('heart', False),
-                                'reply': nested_result.get('reply', False),
-                                'reply_text_posted': nested_result.get('reply_text_posted', ''),
-                                'reply_source': nested_result.get('reply_source', 'bot'),
-                                'llm_source': nested_result.get('llm_source', 'unknown'),  # NEW (2026-02-21): Track LLM source
-                                'is_nested': True,
-                                'parent_comment_idx': total_processed,
-                                'video_id': self.video_id,
-                                'channel_id': self.channel_id,
-                                'timestamp': datetime.now().isoformat(),
-                            }
+                            fam_payload = comment_event_payload(
+                                nested_result, self.session_id, f"{total_processed}.{nested_idx}",
+                                self.channel_id, datetime.now().isoformat(), parent_idx=total_processed,
+                            )
                             fam.publish(event_type, fam_payload)
                         logger.debug(f"[DAE][FAM] Published {len(nested_results)} nested reply events")
                     except Exception as e:
@@ -1416,3 +1380,4 @@ async def execute_skill(
         )
     finally:
         dae.close()
+

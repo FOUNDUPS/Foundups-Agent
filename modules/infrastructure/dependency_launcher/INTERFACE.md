@@ -7,12 +7,17 @@
 
 ## Public API
 
-### `ensure_dependencies(require_lm_studio: bool = True) -> Dict[str, bool]`
+### `ensure_dependencies(require_lm_studio: bool = True, *, model_key: Optional[str] = None) -> Dict[str, bool]`
 
 Ensure all dependencies are running before DAE starts.
 
 **Parameters:**
-- `require_lm_studio`: Whether LM Studio is required (default: True)
+- `require_lm_studio`: Whether native server/selected-model readiness is required (default: True).
+- `model_key`: Exact native installed key. Default preserves the UI-TARS vision check;
+  YouTube language/DOM startup passes its explicit General key from
+  `LM_STUDIO_NATIVE_MODEL_KEY` or the unchanged `QWEN_MODEL_ID` default.
+- Returned `lm_studio=True` proves only the requested readiness at observation;
+  server-only checks and General readiness do not certify a vision model.
 
 **Returns:**
 ```python
@@ -50,18 +55,35 @@ Launch Chrome with remote debugging port.
 
 ---
 
-### `launch_lm_studio() -> Tuple[bool, str]`
+### `launch_lm_studio(load_model: bool = True, *, model_key: Optional[str] = None) -> Tuple[bool, str]`
 
-Launch LM Studio for UI-TARS vision.
+The existing facade delegates bounded server startup to `src/lm_studio_startup.py`.
+The optional `model_key` is an exact native key, not an OpenAI listing alias.
+Without it, `load_model=True` checks the existing UI-TARS key; false checks only
+native server reachability. An explicit key always requests exact residency.
 
-**Returns:**
-- `(True, "LM Studio started on port 1234")` on success
-- `(False, "error message")` on failure
+Compatibility change: the legacy flag is verification-only. Startup deliberately
+stops calling `load_all_models()`; those legacy helper APIs remain available but
+are not part of this qualified route. Installed-but-unloaded, missing, multiple
+resident instances, malformed inventory and identity mismatch are not-ready.
+Models must be loaded explicitly outside this server-startup layer.
 
-**Behavior:**
-- Creates detached process (non-blocking)
-- Waits up to 120 seconds for API to respond
-- Note: Model must be loaded manually in LM Studio
+Warm native readiness succeeds without CLI/process discovery. Cold startup
+requires the existing `lms` CLI, complete known process state, and the lifecycle
+owner's exact node lock from `lm_studio_node_lock_identity(base_url)`. Existing
+GUI/daemon processes may receive only `server start`; cold headless startup may
+run `daemon up` first. Cold GUI spawning is explicitly refused/manual action:
+persisted GUI autostart/LAN settings are outside this qualification. An already-
+running GUI remains eligible for an explicit CLI server command. Every server
+command binds `127.0.0.1` explicitly. Each command times out after30 seconds;
+API polling after30 seconds. These are per-phase limits, not a global startup
+deadline. Nonzero/timeout/unknown state returns failure without an alternate
+runtime. It never stops a shared server or model process.
+
+The lock serializes participating startup/model operations, not unrelated
+external GUI actions. No automatic model ownership, continuous health guarantee,
+full main.py startup or scheduler qualification is claimed.
+
 
 ---
 
@@ -98,7 +120,7 @@ Check if Chrome debug port is responding.
 
 ### `is_lm_studio_running() -> bool`
 
-Check if LM Studio API is responding.
+Check native LM Studio HTTP inventory reachability; a TCP listener or OpenAI-compatible listing is insufficient. Does not assert selected-model residency.
 
 ---
 
@@ -193,6 +215,61 @@ integrity, not signer identity, so composed envelopes are explicitly marked
 `INTEGRITY_ONLY`. A future authenticated source-admission owner remains
 required before `CURRENT`, update action, or promotion authority is possible.
 
+### Signed expectation projection contract — qualification, 2026-09-22
+
+This is the next-owner contract, not an implemented API or an admission grant.
+The existing composer above still accepts only integrity-checked v1 receipts.
+Qualification baseline: `7ff0ccde76414caaefaefdd29e6d7b21ff2abf79`.
+
+| Required slot | Existing evidence owner | Unresolved mapping; fail-closed disposition |
+|---|---|---|
+| `qwen_general` | AI Gateway runtime policy, signed selection/binding and `role_bindings` | No declared task/surface/role-to-slot mapping. Require exact model ID, provider, role, task family and runtime surface; principal status does not imply this slot. |
+| `qwen_code` | Same AI Gateway owners | No declared mapping. Implementer status or a model name containing “code” does not imply this slot. |
+| `inference_backend` | Dependency-launcher installed-inventory/supply owner; AI Gateway only supplies model/provider evidence | Unsupported by the current MODEL/PANEL signed-evidence schema. A provider identifies a route, not an engine build or installed artifact. Keep unsupported until software provenance and its authority owner are qualified. |
+
+**Named decision dependency.** Before source work, the AI Gateway policy owner
+(`model_runtime_binding.py::ModelRuntimeBindingPolicy`) and the WRE supply
+producer feeding `build_runtime_compatibility_supply` must agree an explicit,
+versioned mapping keyed by task family and runtime surface, with exact role,
+model/provider identity and immutable binding/selection evidence. The existing
+policy has no compatibility-slot field: this paragraph does not add one.
+The dependency-launcher inventory owner must separately define the backend
+artifact identity and software-provenance verifier. Do not infer mappings,
+populate placeholder expectations, add installer powers to MODEL/PANEL signers,
+or introduce a second authentication system. Partial mappings cannot satisfy
+the composer's exact three-expectation requirement.
+
+**Proposed use-time boundary.** Reuse AI Gateway's
+`ModelRuntimeBindingUseTimeVerifier.verify` with serialized original evidence,
+the trusted current clock, current key resolver/trust/revocation state and exact
+binding/selection. Verification rehydrates signed inputs and compares the
+persisted artifact. The verifier holds mappings supplied at construction: it
+calls the current-time callback and key resolver but does not reload trust files.
+The owner must supply current trust/policy inputs at projection; reusing a
+long-lived verifier with a stale trust payload is insufficient. The lower-level
+one-shot capability consumer checks identity
+and digests; it does not itself refresh time or key state. Never treat a cached
+successful verification as current after a wait, retry or authority change.
+The next implementation packet must bind the projection point to fresh
+verification and define rejection of expiry/key-epoch change between capture and
+projection, including cleanup on every failure path. Atomic cross-store trust
+revocation is not established by the current API.
+
+An advisory must not borrow or consume another dispatcher's capability. If the
+qualified design uses a newly issued, private verification capability, discard
+it in `finally` through `discard_verified_runtime_binding_capability`; never
+persist, return, cache or accumulate it as advisory data. Dispatch must obtain
+its own fresh verification. A capability-free verification projection would
+require an explicit existing-owner API decision and independent qualification.
+
+**Compatibility invariant.** Preserve current v1 supply, source-receipt and
+envelope serialization/digests and `INTEGRITY_ONLY`/`NOT_READY` behavior until
+a separately reviewed versioned consumer contract exists. Authentic model
+evidence alone cannot authenticate installed OpenClaw/Hermes binaries, latest
+release provenance, backend artifacts, canary/rollback, or update admission.
+The [fixed acceptance matrix](tests/README.md#signed-expectation-projection-acceptance-matrix)
+separates current owner checks from the unimplemented cross-owner path.
+
 ### `publish_runtime_compatibility_evidence(...) -> Path`
 
 Validates the composed evidence and uses the canonical runtime-artifact safety
@@ -209,23 +286,43 @@ validation failure returns nonzero. It never installs or invokes a component.
 
 ### `run_wsl_agent_runtime_advisory(...)`
 
-On Windows, probes the canonical `Ubuntu-24.04` WSL distribution using exact,
-shell-free argument vectors for `/usr/local/bin/openclaw --version` and
-`/usr/local/bin/hermes --version`. The optional
+On Windows, inspects registration/base metadata for the canonical `Ubuntu-24.04`
+WSL distribution. Explicit command mode uses exact shell-free argument vectors
+for `/usr/local/bin/openclaw --version` and `/usr/local/bin/hermes --version`. The optional
 `FOUNDUPS_AGENT_WSL_EXPECTED_BASE` binding rejects a distro registration that
 has moved away from its operator-approved storage location.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `FOUNDUPS_AGENT_WSL_RUNTIME_ENABLED` | `0` | Explicitly enable the advisory probe |
+| `FOUNDUPS_AGENT_WSL_COMMAND_PROBE_ENABLED` | `0` | Additionally opt into installed version commands; may start WSL/services |
 | `FOUNDUPS_AGENT_WSL_DISTRO` | `Ubuntu-24.04` | Exact WSL distribution name |
 | `FOUNDUPS_AGENT_WSL_EXPECTED_BASE` | empty | Optional expected Windows distro base path |
 
-The advisory does not install, update, onboard, start, stop, or dispatch either
-agent. It is disabled by default because invoking a version command executes the
-installed program. Its receipt is explicitly unauthenticated availability
-evidence, never authority. When enabled, each component has a ten-second
-timeout. A failed probe is `NOT_READY` evidence and never denies menu access.
+The advisory has no install, update, onboarding, service-management or job-dispatch
+command. It is disabled by default and that path makes no host calls, even if
+the command flag alone is set. Enable-only mode validates distro/registration/base
+and returns `NOT_READY`, empty components and `command_probe_disabled`. Invalid
+bindings retain their existing reasons. This mode never invokes the command runner
+or trusted WSL executable resolver.
+
+With both controls enabled, it executes installed programs and may start a
+stopped WSL distribution and its configured services. Command mode therefore
+does not guarantee absence of lifecycle effects.
+Its receipt is explicitly unauthenticated availability evidence, never authority.
+Each component has a ten-second timeout. A failed probe is `NOT_READY` evidence
+and never denies menu access.
+
+The command-mode boolean is captured before the registry callback; callback
+mutation cannot upgrade a metadata request or change that invocation's selected
+mode. This is trusted configuration selection, not live revocation or a signed
+effect-use lease. Disabled receipts remain byte-compatible; explicit command
+results retain existing semantics. Enable-only configurations deliberately change
+from executing version commands to metadata-only `NOT_READY`.
+
+The [mode contract](ROADMAP.md#wsl-advisory-lifecycle-boundary--2026-09-20) does not
+rely on a running-state precheck, which cannot establish strict no-start behavior
+across a later `--exec`. Injected tests do not prove live runtime health or admission.
 
 ### `resolve_trusted_wsl_executable() -> Path | None`
 

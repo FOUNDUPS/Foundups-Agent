@@ -1,11 +1,114 @@
 # Video Comments - ModLog
 
+## 2026-10-29 — Scoped reuse for the private livechat fallback
+
+WSP00/10/11/22/50/77/84/97. Extend the existing generator/inspector with an
+explicit `reply_surface`, retaining stored comments as the default. Livechat uses
+only the queue's livechat context, requires semantic input and exact local HTTP
+source/review receipts, and cannot enter embedded Qwen/cloud/templates. Surface
+mismatch fails closed. Cancellation checks bracket provider stages and follow
+preparatory reads; busy livechat locks fail immediately while comments retain
+blocking serialization. The existing reply context helper normalizes prompt
+theme fields without replacing queue ownership or full native sender snapshots.
+
+The existing semantic selector now has 88 cases; paired with unchanged 16-case
+submission history it passes 104 cases and 12 subtests. Original context 53,
+adjacent queue/context 116 and separate inspection 15 also pass. Tests use actual
+source definitions with fixture providers and synthetic browser data; no paid
+calls, public messages or DAE startup. See the existing repair handoff for source,
+Holo freshness, timeout limits, model QA and publication boundaries. Independent
+review's malformed native-theme finding was reproduced by six controls before
+repair; both livechat entry points now reject normalization failure before inference.
+
+## 2026-10-29 — Windows source repair and durable submission ownership
+
+WSP00/5/6/10/11/22/50/84/97. Preserve the dirty August PC checkout; repair the
+existing PR in an isolated checkout at its verified head. Independent review
+identified wrong-row identity, collapsed-reply false readback, restart uncertainty,
+role-selection, theme-freshness and evidence-retention gaps. Existing owners now
+assess meaning before response strategy, retain supplied factual context for
+review, enforce the general-role selection, recheck the private theme at submit,
+and bind full original identity on the exact Studio origin. The history owner
+persists claims before browser action, exact review/context, new creator reply IDs
+and unique screenshot evidence; unknown outcomes block future attempts across
+restarts. Verified interaction history commits with the delivery receipt.
+Nested submission stays disabled. See the repair handoff for packaging and runtime
+evidence; local source/test success does not establish deployed or live behavior.
+
+## 2026-10-29 — Private chat manifest and inspected replies (draft candidate)
+
+WSP 00/15/22/50/84/96/97. Extend existing queue, context reader, generator, Skillz processor and executor; no parallel scheduler or command inbox. `set_context` now activates private context without a public send; `announce` retains explicit publishing. Live-chat and stored-comment language routes consume theme context before generation. The signature hook no longer appends operator wording. Source command identity is carried into comment evidence, and an expired/replaced theme rejects an old draft.
+
+General-language routes reject GUI/audio/embedding model names, including explicit UI-TARS selections. Keyword-only stance assertions become unknown. A separate language-review call evaluates the final candidate; failed/malformed review blocks posting. Top-level posting binds the original row and rechecks identity before submission, requires exact entered text and new creator-reply readback, captures a screenshot and optionally verifies through UI-TARS. Global submit fallbacks are removed. Uncertain outcomes halt the session; unqualified nested submission is blocked.
+
+15 bounded stdlib cases pass; materialized Python sources parse. This is a draft source checkpoint, not signed model-role admission, independent verifier approval, deployment, native RSI or live YouTube evidence. See `modules/communication/video_comments/docs/CHAT_MANIFEST_REPAIR_20261029.md` for exact remaining gates, including full-runtime manifest regeneration, durable uncertainty across restarts and live-selector qualification.
+
+
 **Module:** communication/video_comments
 **WSP Reference:** WSP 22 (ModLog Protocol)
 
 ---
 
 ## Change Log
+
+### 2026-10-23 — Reconcile PR1478 context and generation provenance
+
+WSP00/15/22/50/84/97; C3/I4/D4/Impact4=15/P1. Reuse the existing PR and
+three runtime owners, preserving its original head in ancestry. Current main
+contains the newer PR1759 shared-context reader and test inventory; those
+contracts remain intact. The original three runtime blobs had not changed
+between the PR base and current main.
+
+The historical proposal adds row-specific video/channel context, full-prompt
+local/general-Qwen routing, history/VoiceMemory and a default no-generic reply
+gate. Its reported 7/11/23-pass runs are historical claims, not current receipts.
+Source audit found a shared-source race and substring-label acceptance gap.
+Reproduced and repaired generation/source races, permissive labels, discarded
+provider attribution and wrong-row/ambiguous video links. The processor uses an
+immutable per-generation snapshot, cancels queued expired work, and keeps generic
+legacy opt-in distinct from source evidence. Grok opt-in now gates the call too.
+Two cohesive helpers own prompt/personality and row context; all three runtime
+files shrink, all seven previously growing long functions shrink, and no new
+function exceeds 50 lines. Existing oversized debt remains explicit.
+
+Local results: 53 focused cases and 116 adjacent command/context cases pass.
+The original seven assertions, 96 prompt comparisons and ten personality
+comparisons are preserved. The existing runtime generator adds exactly the two
+helpers (1451 to 1453 members), with unchanged 324 KiB byte limit and new cap-plus-
+one rejection. Both digest pins are regenerated. The registry is 1749 files/271
+quarantined; its new test remains quarantined for broad collection. The existing
+Windows/Ubuntu CI job explicitly selects it and rejects missing/changed/skipped
+cases. Publication/main verification remain separate
+closure gates. Independent final review accepts source behavior and helper
+wiring, including held-out/mutation controls and 128 full-prompt comparisons.
+Eight manifest tests and the Node compatibility/package contracts pass locally;
+all 1453 runtime source hashes and both pins were independently recomputed.
+See tests/TestModLog.md for evidence and limitations.
+
+Governed Holo retrieval again rejects authority-root/head mismatch; freshness
+UNKNOWN and index gap remain. Exact Git/lexical fallback includes current module
+and test contracts. memory/README.md and requirements.txt are absent; no guessed
+replacement or new memory store. No live browser, model, account, reply, native
+worker or RSI activation. Existing reconciliation receipts own measured outcomes.
+
+
+### 2026-10-22 — PR1759 shared-context consumption repair
+
+WSP 00/5/6/11/15/22/50/84/97. Reuse the existing queue's configured path resolver
+so changing CWD cannot split the writer from its consumer. Reject malformed
+schema/surfaces/message and nonfinite, boolean, string or expired timestamps;
+preserve the legacy fallback. Legacy mutators read only legacy storage so shared expiring context cannot leak into permanent broadcast state; six regression cases reproduced that leak before repair. New cohesive reader test
+file: 53 offline cases pass, including real queue/resolver integration. Four
+original malformed acceptance failures were reproduced before the repair.
+This is no live engagement, runtime-authority or RSI completion claim.
+
+### 2026-09-15 - Shared 012 Manifest Context
+
+- `commenting_control_plane.load_broadcast()` now resolves the active,
+  unexpired shared 012 manifest context for the `comments` surface before its
+  legacy module-local broadcast file.
+- This preserves the existing reply-generation injection and removes the need
+  for a separate operator update path.
 
 ### 2026-04-19 - YTR1: YouTube Reply Runtime Hardening Phase 1
 
@@ -3394,3 +3497,18 @@ YT_UI_SNAPSHOT_DIR="O:/tmp/ui_action_snapshots"
   - an alias resolved from environment: `move2japan`, `undaodu`, `ravingantifa`
 - Added env key for the new channel id:
   - `RAVINGANTIFA_CHANNEL_ID=UCVSmg5aOhP4tnQ9KFUg97qA`
+
+# 2026-10-29 — Bind account access to native identity and requested surface
+
+WSP 22/50/84/97. Extend the existing account-swap Skillz owner: require native
+channel/HTTPS Studio path agreement and a known permission observation. Keep
+comments as the default and honor content mode through every OOPS recovery
+branch. Scheduler admission carries its frozen canonical receiving ID through
+the same verifier. Unknown access cannot authorize a scheduling fallback.
+
+Validation is offline, with real verifier/recovery methods and mocked browser
+collaborators, under a credential-free child environment and effect guards.
+The scheduler rotation tests include useful admitted channels, denied first
+switches, immutable identities, owner/receipt/cache binding and all recovery
+surface branches. No live account, schedule or comment was changed.
+

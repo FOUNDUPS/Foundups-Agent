@@ -81,6 +81,12 @@ class SovereignAuthorizationEvidenceResolver(Protocol):
     ) -> SovereignAuthorizationEvidence | None: ...
 
 
+from .reddog_effect_sovereign_contract import (
+    EffectSovereignAuthorizationEvidence, ParentBoundEffectSovereignAuthorizationEvidence,
+    _effect_sovereign_shape_valid,
+)
+
+
 @dataclass(frozen=True, slots=True)
 class ElevatedConsensusPolicy:
     policy_receipt_id: str
@@ -136,9 +142,19 @@ def elevated_consensus_policy_valid(policy: object) -> bool:
     )
 
 
+def _effect_policy_matches(context, policy) -> bool:
+    return elevated_consensus_policy_valid(policy) and all((
+        context.consensus_policy_digest == policy.policy_digest,
+        context.required_approvals == policy.minimum_approvals,
+        context.required_roles == policy.required_roles,
+        context.expires_at - context.issued_at <= policy.maximum_ttl_seconds,
+    ))
+
+
 __all__ = [
     "AuthorRuntimeEvidence",
     "AuthorRuntimeEvidenceResolver",
+    "EffectSovereignAuthorizationEvidence",
     "ElevatedConsensusPolicy",
     "ElevatedConsensusPolicyResolver",
     "ReviewerKeyAuthority",

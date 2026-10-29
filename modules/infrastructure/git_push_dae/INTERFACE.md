@@ -1,5 +1,47 @@
 # GitPushDAE Interface Documentation
 
+## Queue/default contract — 2026-10-04
+
+This supersedes the Sept28 default-dispatch contract below.
+
+- CLI with no mode flag, or `--enqueue-only`: append one event and exit0 before
+  importing the router; no dispatch result is written.
+- Explicit `--dispatch`: retain the existing queue-then-dispatch behavior,
+  result/error correlation and exit0/1 semantics. Exit0 is not delivery evidence.
+- Both flags in either order, or unsupported `--dispatch-direct`: argparse
+  exits2 before Git context collection, event creation or router effects.
+- `run_runner(..., enqueue_only=True)` is the default; callers requesting the
+  existing dispatch behavior must explicitly pass `enqueue_only=False`.
+- Spool schema, payload/dedupe fields, default paths and dispatch implementation
+  are unchanged. No spool consumer, replay admission or deduplication is added.
+
+Observed shared hook modes without a mode flag now queue only, including `sync`.
+No shared hook, import-path or account configuration is changed.
+
+## Post-commit runner contract — 2026-09-28
+
+Existing owner: `scripts/post_commit_social_runner.py`.
+
+- CLI: `--repo-root`, `--events-file`, `--results-file`, `--enqueue-only`.
+  `--dispatch-direct` is not supported; argparse exits 2 before runner work.
+- `main()` resolves the repository root and defaults the two JSONL files to
+  `memory/git_push_events.jsonl` and `memory/git_push_dispatch_results.jsonl`.
+- `run_runner(..., enqueue_only=False)` builds and appends one current-commit
+  event. Explicit enqueue-only returns 0 before importing or constructing a router.
+- Default dispatch calls the existing getter, constructs the router and awaits
+  `handle_event("git_push", event["payload"])`. It appends the returned value and
+  returns 0; that exit code does not independently prove social delivery.
+- A caught dispatch exception appends its text under `error` with the same dedupe
+  key and returns 1. Event construction/spool errors occur outside that catch.
+- The current `git_push:<branch>:<short hash>` key is recorded; this runner does
+  not consume its spool or enforce deduplication merely by naming the key.
+
+The six [hosted entrypoint controls](tests/README.md#runner-entrypoint-evidence--2026-09-28)
+passed6/6 on the candidate with independent original-artifact review; exact
+final-head/main checks remain pending. They preserve production source and substitute
+only a synthetic router namespace. A fake result has `delivered=false` explicitly.
+No real dependency readiness, delivery, replay policy or native RSI is established.
+
 ## Public API
 
 ### GitPushDAE Class

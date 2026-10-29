@@ -1,5 +1,26 @@
 # LiveChat
 
+The private-theme route retains reviewed Grok replies and uses the existing local
+general-language assessment/writer/reviewer if Grok is unavailable or rejects a
+draft. The fallback requires LM Studio HTTP, keeps livechat scope and full native
+theme snapshots, and reviews the final `@mention` within 200 characters. Existing
+engagement/cooldown decisions precede the ten-second threaded wait; late results
+are discarded and busy shared generation/review locks reject immediately. See
+[the interface](INTERFACE.md) and [repair handoff](../video_comments/docs/CHAT_MANIFEST_REPAIR_20261029.md)
+for cancellation limits and remaining live qualification.
+
+## Current bounded live handoff
+
+PR841 preserves independent Chrome/Edge comment loops during a confirmed API live
+session while awaiting the matching channel's owned work before polling. The default
+termination call still shuts down the full supervisor. The session reservation
+survives an absent/stale file signal and is cleared on exit. See [INTERFACE](INTERFACE.md)
+and [offline acceptance](tests/README.md) for the actual ownership boundary.
+
+Subprocess workers are reaped; threads cannot be force-stopped and can keep a handoff
+waiting. Failed cleanup remains blocking. This does not prove systemwide browser
+quiescence, independent CommunityMonitor shutdown, live delivery or native authoring.
+
 ## [U+1F3E2] WSP Enterprise Domain: `communication`
 
 **WSP Compliance Status**: [OK] **COMPLIANT** with WSP Framework  

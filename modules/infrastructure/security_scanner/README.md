@@ -1,3 +1,17 @@
+## Scan completion and coverage (2026-10-10)
+
+Only documented success/finding exits and recognized JSON schemas count as
+completed scans. Authentication, configuration, runtime and malformed-report
+failures return `success=False`; Semgrep coverage errors also set
+`report.scan_success=False` while retaining valid findings. A zero finding count
+never overrides failed coverage. Snyk `test` provides dependency (SCA) scanning,
+not Snyk Code SAST; Semgrep supplies the SAST path.
+
+Trivy explicitly enables `vuln,secret,misconfig`. Normalized findings carry
+`finding_type`, `file_path`, and `line_number`. Secret match/code/content values
+are excluded from normalized reports; only rule, severity, and location are
+retained. Available executables do not prove authentication or complete coverage.
+
 # Security Scanner
 
 Autonomous CLI-based vulnerability scanning via snyk, trivy, and semgrep.

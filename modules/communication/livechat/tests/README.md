@@ -1,5 +1,64 @@
 # LiveChat Module Test Suite
 
+The 2026-10-29 private-theme fallback and bounded MessageProcessor checks reuse
+`modules/communication/video_comments/tests/test_reply_semantic_assessment.py`
+(from this directory: `../../video_comments/tests/`). See that module's
+tests README and this TestModLog for the explicit offline selector and boundaries.
+
+## Bounded confirmed-handoff acceptance (PR841)
+
+Run the two explicitly scoped files; do not collect historical live integrations:
+
+```powershell
+$env:PYTHONDONTWRITEBYTECODE='1'
+$env:PYTHON_DOTENV_DISABLED='1'
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+python -B -m pytest modules/communication/livechat/tests/test_live_handoff_selective_cancellation.py modules/communication/livechat/tests/test_engagement_runner_lifecycle.py --import-mode=importlib -o addopts= -p no:cacheprovider -p pytest_asyncio.plugin -q
+```
+
+Frozen local source result: **81 passed** on CPython3.12.2, with26 inherited
+`datetime.utcnow` deprecation warnings. Six external single-change controls reject
+14 cases for missing confirmed guard, settlement, retained failed ownership,
+heartbeat cleanup, process reaping or thread completion. Fixtures are restored
+exactly; original failures are preserved in `refresh/841-qualification`.
+
+The original PR841 file owns actual DAE/coordinator/browser flows; its companion
+owns subprocess/thread/rotation lifetime checks and shared safe source loaders.
+The complete lifecycle helper runs with its own imports/globals. Heavy owner methods
+are compiled unchanged from source, while provider/browser/telemetry/DB boundaries
+are explicit substitutes. Disposable children run only generated local scripts;
+controlled thread workers terminate through test events. Host credentials/config are
+not inherited by those process fixtures. Tests include racing spawn acquisition,
+terminate/kill/wait/drain ordering, other-browser survival before polling, missing/
+stale file signals, dynamic identity, fallback/retry paths, unknown-mode waiting,
+repeated cancellation, failed-cleanup retention, concurrent sessions and #848 indexing.
+
+These tests are not a complete package import/startup or installed-host qualification.
+They do not exercise independent CommunityMonitor work, live APIs/accounts/models,
+browser-side rollback/global quiescence or native RSI. Linux CI selects the
+same two files in the existing YouTube batch. Original-source and mutation controls
+are retained externally; they are not additional passing runtime cases.
+
+## Bounded operator command acceptance (PR1759)
+
+Run only the offline owners below with plugin autoload and dotenv loading disabled:
+
+```powershell
+$env:PYTHONDONTWRITEBYTECODE='1'
+$env:PYTHON_DOTENV_DISABLED='1'
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+python -B -m pytest --import-mode=importlib -p pytest_asyncio.plugin -q modules/communication/livechat/tests/test_operator_command_queue.py modules/communication/livechat/tests/test_operator_command_lifecycle.py modules/communication/video_comments/tests/test_commenting_control_plane.py
+```
+
+CPython 3.12, pytest 9.0.3 and pytest-asyncio 1.3.0: 116 cases passed locally.
+CI selects these paths on Windows and Linux. The queue and comment reader run
+with disposable files and fake senders. Child processes exercise real OS locks
+and process death. Lifecycle and heartbeat methods are compiled from current
+source with effectful dependencies replaced: these tests do not establish
+full DAE imports/startup, YouTube delivery, sandbox confinement or native RSI.
+Do not collect the entire historical suite as an offline validation shortcut;
+some tests are manual/live integrations.
+
 # [U+1F300] Windsurf Protocol (WSP) Recursive Prompt
 
 **0102 Directive**:  
@@ -111,4 +170,4 @@ python -m pytest modules/livechat/tests/ --cov=modules.livechat.src --cov-report
 - Viewer tracking tests added to test the `_update_viewer_count` method, including successful updates and handling of various error conditions 
 - Logging tests consolidated in test_livechat_logging.py, including comprehensive tests for the `_log_to_user_file` method with tests for success cases, file errors, directory creation errors, and JSON serialization errors 
 - Auto-moderation tests created in test_livechat_auto_moderation.py, covering the AutoModerator class functionality, integration with LiveChatListener, banned phrase detection, timeout logic, API error handling, and cooldown management
-- All specialized test files have been fully consolidated, with their functionality moved to the appropriate modular test files 
+- All specialized test files have been fully consolidated, with their functionality moved to the appropriate modular test files

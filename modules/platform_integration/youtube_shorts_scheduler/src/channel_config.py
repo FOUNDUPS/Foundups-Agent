@@ -1,4 +1,4 @@
-﻿"""
+"""
 Channel Configuration for YouTube Shorts Scheduler
 
 Multi-channel support driven by the shared YouTube channel registry.
@@ -23,6 +23,8 @@ import socket
 
 from modules.infrastructure.shared_utilities.youtube_channel_registry import get_channels
 
+from .peak_window import get_peak_slots_et, is_move2japan
+
 # Browser ports
 CHROME_PORT = 9222
 EDGE_PORT = 9223
@@ -38,6 +40,8 @@ def _build_channel_config() -> Dict[str, Dict[str, Any]]:
             continue
         browser = ch.get("browser") or {}
         shorts = ch.get("shorts") or {}
+        if is_move2japan(ch.get("id", "")):
+            shorts = {**shorts, "time_slots": get_peak_slots_et(ch["id"]), "max_per_day": 8}
         channels[key] = {
             "id": ch.get("id"),
             "name": ch.get("name"),

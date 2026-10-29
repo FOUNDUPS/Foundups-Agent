@@ -1,5 +1,134 @@
 # foundups_mcp_bridge TestModLog
 
+## 2026-10-26: FastMCP 3.4.11 exact-contract candidate
+
+- Retain the existing 49-case Windows compatibility selection and exact quartet
+  comparison. Update only the reviewed FastMCP version in the existing isolated
+  query candidate regression; no skip condition or assertion is weakened.
+- Disposable Linux Python 3.12.14: 28 passed, 19 existing Windows-only skips,
+  two Windows-owned HTTP lifecycle cases explicitly deselected. The actual
+  candidate interpreter passes the launcher capability probe and pip check.
+- These Linux results do not replace the required 49/49, zero-skips Windows
+  lifecycle gate. The original requirement-only PR2190 failure remains recorded
+  at Actions run 40148256348, job 121034152544 (45 passed, 4 failed).
+
+## [2026-10-19] MCP 1.30.0 coordinated dependency contract
+
+- Updated the existing exact launcher dependency assertion to MCP 1.30.0;
+  the inert query candidate still admits only packaging 26.0, disjoint from
+  the launcher quartet. Existing version-drift rejection remains intact.
+- Fresh external CPython 3.12.14 copy-based venv with the declared quartet and
+  pytest 9.0.3: launcher, HTTP server and candidate-binding selection yielded
+  **28 passed, 19 skipped, 2 deselected in 3.00s**. The two deselected owned HTTP
+  cases and 19 skipped platform cases require Windows; this is partial coverage.
+  Used `-B`, disabled plugin autoload/cacheprovider, `--noconftest`, importlib
+  mode and an external basetemp. The real candidate version probe also passed.
+- Initial full-selection attempts: **28 passed, 19 skipped, 2 errors**, first
+  because uv's symlink interpreter was rejected, then because Linux lacks the
+  required System32 observer. No production service was launched. Do not count
+  these as passing lifecycle tests or aggregate repeated counts.
+- The unchanged Windows CI gate still requires all **49** cases without skips,
+  including real authentication, allowlist, concurrency and owned cleanup.
+  Hosted verification remains pending at this source checkpoint. WSP22/50/71/97.
+
+## [2026-10-04] Hosted observer correction
+
+First PR2057 head9f74a627 passed46 controls but failed both live cases: fixed
+PowerShell Get-NetTCPConnection exceeded10s before any protocol request. Both
+owned children terminated with one lock release/no cleanup errors; the owned
+VHD detached. This is an observed hosted fixture failure, not a passing release.
+
+Replaced only the test observer with fixed System32 netstat numeric TCP/PID
+projection, following the existing security sentinel's Windows row format.
+Exact host/port/listening state, a single captured PID and live process remain
+mandatory. No raw endpoint table is persisted. The1MiB character limit applies
+after capture; it is not a streaming memory bound. Polls share a15s startup
+window with each command capped at10s/remaining time.
+
+All prior48 test-function ASTs are unchanged. One new projection control covers
+foreign/wildcard/malformed/multiple-owner rows. Its first run failed because the
+test author's PID replacement also changed the port; only that input was fixed.
+Final47 nonlistener +2 live cases pass; original46 control IDs/order are intact.
+No additional model call or production change. Hosted replacement result pending.
+
+## [2026-10-04] Paired runtime, startup hooks and cleanup
+
+Frozen before repair:44 nonlistener criteria yielded40pass/4fail against original
+source; repaired startup/version handling passed44/44. An earlier harness attempt
+had28pass/3fail/2skip due missing PyWin32 startup and symlink privilege; it was
+not accepted compatibility evidence. The first two-case live invocation yielded
+one pass, one failure plus its teardown error. The first startup exception type
+was not retained and remains unknown; fixture emergency cleanup terminated only
+its owned PID28932. The other owned PID13492 completed normal fixture cleanup.
+
+Two new frozen post-spawn controls then reproduced44pass/2fail on46 cases.
+The one local worker proposal was rejected without execution. Coordinator repair
+passes the identical46 cases, and revised live diagnostics pass both HTTP cases:
+48 distinct criteria total, not the sum of repeated attempts. The live timeout
+change affects metadata observation only; auth, tool allowlist, ownership and
+cleanup assertions remain. The frozen cleanup cases stayed unchanged after worker
+output; the later hosted observer repair is recorded above. Symlink-or-junction fallback retains the same reparse-point rejection.
+
+Exact commands, source hashes, XML, typed PID/cleanup observations and all failed
+attempts are preserved under `outputs/rsi-mcp-runtime-qualification-20261004`.
+Both final phases use the existing bounded child/Job owner, a disposable candidate
+copy and2GiB ceiling. Local test durations are in their individual receipts.
+CI separately requires all48/no skips on a fresh hosted Windows runtime; hosted
+execution remains pending. No production runtime activation or native admission.
+
+## [2026-10-02] Optional Windows aggregate Job memory qualification
+
+- Frozen before implementation: 29 deterministic missing-API cases represent
+  one capability gap, not 29 independent defects. Candidate selection retains
+  19 original no-child cases alongside them; two Windows allocation controls
+  remain separately selected. The initial packet preserved the original
+  9,901-byte prefix; the later overflow-oracle correction is recorded below.
+- The first audit attempt stopped in pytest setup with a denied DLL load and
+  no executed case/test child; it is not a product assertion failure. The
+  versioned repair excludes optional interactive readline, retains the exact
+  kernel32-only DLL allowance, and records future denied DLL basenames. The
+  original failure did not identify its DLL; pyreadline's user32 dependency is
+  the source-grounded explanation, not an observed DLL name.
+- Revised baseline: 29 expected missing-API failures, zero errors/skips/test
+  children in 1.781s. The first candidate produced 48 passing assertions but
+  an invalid harness receipt: nine pytest current-temp symlink attempts were
+  denied. That attempt is preserved and is not accepted qualification.
+- Revised candidate: 48 passed in 2.047s with a valid harness receipt. The
+  initial two Windows controls failed the compound parent assertion with no
+  guard denials or source drift. Return code, oversized output, and read-failure
+  components were not recorded separately. A separately reviewed one-case
+  diagnostic then failed before allocation: the immediate nested Job reported
+  `0x3000` flags and zero memory limit. It does not retroactively prove the exact
+  failures of the first two controls.
+- The physical fixture now reuses existing `current_process_image_path`,
+  avoiding the venv redirector's nested Job. With the same 128 MiB limit,
+  V4 passed both controls in 1.203s parent time: 1 MiB commit/release succeeds,
+  256 MiB commit rejects; zero errors/skips/guard denials and stable bindings.
+- The first connected selection produced 11 passes / one failure in 75.61s.
+  The original stdout-overflow test incorrectly required zero exit even though
+  the unchanged runner deliberately terminates an oversized live writer.
+  Both it and the maintenance equivalent now require `output_read_failed is
+  False`, retaining overflow and exact-length assertions. The corrected four
+  process cases pass in 6.77s pytest / 8.656s parent time with stable bindings.
+  All eight manifest cases passed in the first selection and were not rerun.
+- Final local evidence is 62 distinct passing cases (48 + 2 + 4 + 8), not one
+  62-case invocation. Audit receipts are retained in the external
+  `20261002-rsi-child-memory` lane. Publication and hosted CI remain pending;
+  no native model/runtime admission or RSI gain follows. WSP 00/15/22/50/62/97.
+
+## [2026-09-14] Dependency candidate and immutable-query qualification
+
+- Base `1173d1ab5e4af8a0e3cbe5381bcd30cf0e865ac3`: `test_mcp_launcher_http.py`, `test_mcp_server_sse.py`, `test_holo_query_snapshot_store.py`: **38 passed, 2 deselected in 7.87s**. Includes a temporary real-Chroma export and subsequent immutable-reader query.
+- Fresh external venv with FastMCP 3.2.0, MCP 1.28.1, Pydantic 2.12.3, Uvicorn 0.38.0, pytest 9.0.3 and pytest-asyncio 1.3.0: the first two suites **25 passed, 2 deselected in 3.68s**. This repeats the same 25 MCP cases; there are 38 distinct passing cases across both environments, not 63 distinct cases.
+- Both use `-B`, importlib mode, disabled plugin autoload/cacheprovider, explicit async plugin and external temporary/DB paths. Both exclude `test_protocol_readiness_canary_auth_and_concurrency_lifecycle` and `test_canary_rejects_unauthenticated_connection`; no fixed-port service was started. Exact paired live lifecycle/closure/admission is unverified.
+- PyPI wheel-only dry runs: FastMCP-only quartet fails resolution; MCP-only and paired quartets resolve. No shared package or test-source changes. Commands, source fingerprints and environment evidence are recorded in the existing RSI baseline under `dependency_qualification_continuation_20260914`. WSP 22, 50, 97.
+
+## [2026-09-13] Existing Windows runtime-selection regression
+
+- `test_reddog_sealed_holo_runtime.py -k 'trusted_holo_site_packages or actual_windows_primary_checkout'`: **2 passed, 16 deselected in 0.39s**. Vetted primary-checkout venv, `-B`, disabled plugin autoload, explicit async plugin, isolated temporary/cache paths and importlib mode.
+- Covers synthetic checkout/version rejection and the real primary checkout's vetted dependency path. No test source changed; no provider, maintenance or product test was selected.
+- Separate normal Holo query restored CURRENT/no-gap at matched reference `78b79c36`; this is not current-main or exact-runtime-closure acceptance. WSP 22, 50, 97.
+
 ## [2026-08-30] Held builder child falsification
 
 - Captured authentic RED collection before implementation: both new focused

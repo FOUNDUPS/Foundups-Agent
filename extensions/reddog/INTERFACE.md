@@ -1,4 +1,122 @@
+## 2026-10-29: Measured Windows manifest byte-bound amendment
+
+The actual two-helper closure is 334,056 LF bytes / 337,083 CRLF bytes, 187
+bytes above the previous 329 KiB ceiling. The unchanged Python and Node
+Windows-size tests rejected it (Python: seven pass / one fail). Preserve that
+failure; raise only the serialized-manifest bound to the smallest covering
+whole KiB: 330 KiB / 337,920 bytes, a 1,024-byte increase with 837-byte CRLF
+headroom. This separately reviewed resource-contract amendment supersedes the
+initial unchanged-manifest-size assumption. The consumer and both Python
+bounds agree; Node's actual LF/CRLF and exact maximum/+1 assertions are intact.
+The 1477/1478 member boundary, exact digest/source hashes, 2 MiB/file and 32 MiB
+total limits remain. JSON layout is unchanged. This is a post-read/pre-parse
+limit, not a preallocation bound or live-runtime qualification. No independent
+human/agent review is claimed. WSP 6/11/22/50/97.
+
 # RedDog Interface
+
+## Combined canonical-domain source closure - 2026-10-29
+
+The canonical WSP-domain leaf joins the accepted startup and inventory source
+members. Current closure accepts 1,475 and rejects 1,476, preserving all three
+required member assertions and the unchanged 329 KiB/2 MiB/32 MiB byte caps.
+This is source/package compatibility only; the dated entries below retain their
+respective historical counts and authority limits.
+
+## Native startup and qualified inventory closure - 2026-10-29
+
+The existing dependency-launcher startup owner and scheduled-inventory owner add
+exactly two required runtime files. The generated closure admits 1,474 members
+and rejects 1,475; both new members are asserted by the existing boundary test.
+The 329 KiB manifest, 2 MiB individual-file and 32 MiB aggregate caps are
+unchanged. This binds source/package bytes; installed services, browser selectors
+and live scheduling remain separate qualifications.
+
+## Petition planning source closure — 2026-10-27
+
+The generated backend closure includes the effect-free petition planning leaf
+and rebinds the existing social adapter/controller. It now admits exactly1,472
+members and rejects1,473; the independent LF/CRLF manifest cap is329KiB.
+The new manifest is332,892 LF bytes /335,909 CRLF bytes, exceeding the previous
+328KiB CRLF ceiling by37 bytes. Individual2MiB and aggregate32MiB caps remain.
+This is a source/package contract, not host installation or campaign authority.
+The dated sections below describe their respective historical source revisions.
+
+## FoundUps authorization source closure — 2026-10-25
+
+The source backend manifest includes `agent_market/src/authorization.py` and
+rebinds the four existing FAM/simulator members changed by PR2188. Its exact
+member ceiling is 1,470; the existing boundary test rejects 1,471. The 328 KiB
+LF/CRLF manifest, 2 MiB individual and 32 MiB aggregate byte limits stay fixed.
+This source closure grants no installed-runtime, signer or effect authority.
+
+## PR1792 reusable brand grounding candidate — 2026-10-25
+
+An optional registry `brand_context_path` names public, tracked JSON validated
+against `modules/foundups/brand_context.schema.json`. The existing resolver
+uses the declared parent/child names and aliases; `public_discovery_alias`
+retains its separate discovery meaning. The parent registry identity and
+manifest still determine mutation scope. Brand context grants no authority.
+
+Declared invalid/private paths, linked components, multiply linked files,
+untracked/dirty context or schema, duplicate child IDs and aliases belonging
+to different identities reject. Two selected child references are ambiguous.
+No-context legacy receipts remain valid; new fallback fields must agree with
+the parent registry. The backend rechecks current content and selected child
+against `matched_reference`. Its UTF-8 receipt hashing matches the existing
+Node producer for this schema, including Japanese strings; this is not a
+general cross-language canonical-JSON specification. File checks are use-time
+validation, not an atomic filesystem capability against hostile concurrent edits.
+
+The reusable helper is included through the existing package closure owner.
+The local candidate has 66 runtime members and 70 packaged files, with the
+unchanged 1 MiB package bound. Protected registry/payload, website and skill
+activation from original PR1792 remain separate and unqualified.
+
+## PR841 backend closure boundary
+
+The exact runtime-file ceiling is 1,451, admitting only the newly imported
+`modules/communication/livechat/src/engagement_lifecycle.py` beyond the prior
+1,450-member closure. Existing manifest validation accepts 1,451 members and
+rejects 1,452. Manifest 324 KiB, per-file 2 MiB and total 32 MiB byte bounds,
+schema, digest checks, identity and admission authority are unchanged. This
+source-contract qualification grants no installed-host or runtime authorization.
+
+## Principal Activity Ledger candidate — PR1638
+
+`principal_activity_extension_adapter` owns local capture, context and status
+through the existing Principal Memex command-registration seam. Data remains
+under `globalStorageUri/principal-activity-ledger`; the key remains in VS Code
+SecretStorage. These local commands grant no external disclosure or execution
+authority. Installed-host operation is `IMPLEMENTED_NOT_VALIDATED`.
+
+- `ensureKey(secretStorage, scopedRoot)` now requires an existing absolute
+  storage root. An unscoped call rejects. All existing ledger files under that
+  root must authenticate with the stored key; missing, malformed or wrong keys
+  fail closed. Different roots sharing a secret slot remain unqualified.
+- `openLedger(context, principal)` supplies that scope. Same-root key operations
+  serialize locally and coordinate with cooperating processes. A busy or
+  abandoned lock rejects; there is no automatic lock stealing.
+- `PrincipalActivityLedger.append(event)` authenticates existing records before
+  extending the chain. A receipt requires the complete record write and flush
+  to succeed. An exception may leave bytes and does not authorize replay.
+- `events()` authenticates payloads. `verifyChain()` checks envelope consistency
+  only; neither proves that a valid tail was not removed.
+- `context({project, contact, limit})` identifies commitments associated with
+  matching history and applies their latest state from the entire principal
+  ledger, in append order. Filtering/windowing cannot resurrect a completion;
+  a later reopen replaces it. Recent events and open commitments each retain
+  at most `limit` entries, clamped to 1–200.
+- `contextPacket()` additionally bounds serialized output and reports when
+  entries were removed. Its `event_count` describes the pre-byte-cap recent
+  event selection, not the number left after byte truncation.
+- `open_commitment_count` counts all relevant, currently open IDs before caps;
+  `open_commitments_truncated` reports loss from either the item or byte cap.
+  The broader `truncated` flag also includes commitment truncation. An existing
+  empty/blank/partial ledger rejects; an I/O failure does not authorize reset.
+
+See [architecture and recovery boundaries](docs/PRINCIPAL_ACTIVITY_LEDGER_ARCHITECTURE.md)
+and [the integration receipt](docs/PRINCIPAL_ACTIVITY_LEDGER_INTEGRATION_RECEIPT.md).
 
 ## Model routing and evaluation fallback
 
@@ -312,7 +430,7 @@ Git, Python subprocess, worker-thread, and materialized backend behavior; these
 capability flags are a fail-closed compatibility boundary, not a permission
 grant.
 
-The distributable surface is pinned to 67 files: 63 runtime files derived from
+The distributable surface is pinned to 69 files: 65 runtime files derived from
 the static relative-require closure plus the two dynamic workers and Python
 bootstrap, and four public metadata/assets (`LICENSE`, `README.md`, `package.json`,
 `icon.png`). The packaged license text must canonically match the repository
@@ -322,7 +440,7 @@ editor files, prior VSIX files, and `.vscodeignore` do not cross the package
 boundary. The release group runs the deterministic installed-VSCE listing
 twice; the default fast tier performs static validation only.
 The listed regular-file closure is additionally capped at 1 MiB raw. Git
-attributes materialize all 66 text entries as LF on every host and keep the PNG
+attributes materialize all 68 text entries as LF on every host and keep the PNG
 binary. `reddog_package_surface_receipt.v2` emits file/byte/cap fields plus the
 governing effective EOL-policy digest, sorted member-content digest, LF mode,
 and text/binary counts. CR bytes or an effective attribute override fail before

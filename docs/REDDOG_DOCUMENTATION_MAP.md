@@ -1,5 +1,7 @@
 # RedDog Documentation Map
 
+**System planning parent:** [Root RSI roadmap](../ROADMAP.md). [Dispatch and model-cost runbook](operations/RSI_SWARM_DISPATCH.md). These sequence cross-system work; the product and runtime authorities below retain their scope.
+
 Status: canonical navigation entry point
 
 Use this map before broad text search. A 2026-08-30 inventory found 376
@@ -14,18 +16,21 @@ not mean RedDog has 376 canonical specifications.
 | What RedDog is becoming | `docs/REDDOG_OUTCOME_VISION.md` | Product North Star; future statements are not implementation claims |
 | RedDog identity boundary | `extensions/reddog/ARCHITECTURE.md` | Canonical invariant: RedDog fast surface != 0102 deep Digital Twin |
 | Fast RedDog + deep 0102 cognition split | `docs/architecture/REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md` | Cross-domain architecture vision; not implementation truth |
+| Hybrid tickets, bounded teams and active-012 feedback into 3V | [Hybrid architecture decision](architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md), [R24](roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md), [R25](roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md) | Cross-domain implementation plan; not live federation or voting authority |
 | Current extension/runtime truth | `extensions/reddog/README.md` | Current product/runtime status |
 | Public extension contract | `extensions/reddog/INTERFACE.md` | Supported interface and authority boundary |
 | Delivery sequence and gaps | `extensions/reddog/ROADMAP.md` | Planned and completed product work |
 | Recurring human connection | `extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md` | Non-biometric PoC implemented; broader confidence ladder specified; not deployed |
 | Public guest caps, timeouts and Lick Verification input | `extensions/reddog/docs/REDDOG_PUBLIC_SURFACE_ADMISSION.md` | Guest and non-biometric Lick isolated boundary; unmounted, not deployed; not private 0102 access |
 | Public host and AutoPost/site integration work order | `extensions/reddog/docs/prompts/WSP97_REDDOG_PUBLIC_SURFACE_REMOTE_PROMPT.md` | Remaining implementation/activation gates; never completion evidence |
+| Host-recovery salvage and stranded PR closure | [2026-10-06 reconciliation](audits/architecture/REDDOG_HOST_RECOVERY_RECONCILIATION_20261006.md) | Exact-base audit, owned scope and validation; not resident activation |
 | Contact/relationship memory | `extensions/reddog/docs/CONTACT_MEMORY_ARCHITECTURE.md` | Architecture vision; specified, not implemented |
-| Mosh Pit activity projection | `extensions/reddog/docs/MOSH_PIT_ACTIVITY_MEMORY_ARCHITECTURE.md` | Existing inputs only; unified renderer not implemented |
+| Moshpit activity projection | `extensions/reddog/docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md` | Existing inputs only; unified renderer not implemented |
 | Memex projection emitter | `extensions/reddog/docs/MEMEX_PROJECTION_EMITTER_ARCHITECTURE.md` | Product contract; specified, not implemented |
 | Memex emitter implementation work order | `extensions/reddog/docs/prompts/WSP97_M2M_MEMEX_EMITTER_IMPLEMENTATION_PROMPT.md` | Work order; never completion evidence |
 | FoundUps/second-brain architecture | `docs/architecture/REDDOG_FOUNDUPS_SECOND_BRAIN_ARCHITECTURE.md` | Architecture decision context |
 | Phase-1 alignment findings | `docs/audits/architecture/REDDOG_CANONICAL_ARCHITECTURE_ALIGNMENT_PHASE1.md` | Evidence audit, not runtime authority |
+| Current-main WSP 15 / WSP 97 audit and ranked queue | `docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md` | Point-in-time evidence and PR disposition; not runtime authority |
 | Lick/Gemini/rESP findings | `docs/audits/architecture/REDDOG_LICK_HANDSHAKE_AUDIT_PHASE1.md` | Historical evidence audit, not runtime or patent-status authority |
 | Public member digital-twin contract | `public/member/RED_DOG_DIGITAL_TWIN_CONTRACT.md` | Public-surface contract |
 | FoundUps domain integration | `modules/foundups/docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md` | FoundUps domain navigation |

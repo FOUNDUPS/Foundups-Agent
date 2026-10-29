@@ -18,6 +18,7 @@ re-index HoloIndex.
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping, Optional, Protocol
@@ -47,6 +48,10 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_bounde
     QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_REJECT,
     invoke_reddog_wre_queue_authorized_bounded_worker_pilot,
 )
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
+    canonical_full_work_order_digest,
+)
+from .reddog_authority_profile_rehydration import snapshot_authority_profile_m2m
 
 
 BOUNDED_WORKER_PILOT_STAGE_KEY = "bounded_worker_pilot"
@@ -67,6 +72,7 @@ FAIL_MODEL_RUNTIME_VERIFICATION_REJECTED = (
     "FAIL_MODEL_RUNTIME_VERIFICATION_REJECTED"
 )
 FAIL_ARTIFACT_GENERATION_REQUEST_CONFLICT = "FAIL_ARTIFACT_GENERATION_REQUEST_CONFLICT"
+FAIL_ARTIFACT_GENERATION_WORK_ORDER_BINDING = "FAIL_ARTIFACT_GENERATION_WORK_ORDER_BINDING"
 FAIL_PILOT_DRYRUN_BINDING_REJECTED = "FAIL_PILOT_DRYRUN_BINDING_REJECTED"
 FAIL_PILOT_DRYRUN_BINDING_CONFLICT = "FAIL_PILOT_DRYRUN_BINDING_CONFLICT"
 
@@ -288,8 +294,18 @@ class ResidentQueueBoundedWorkerPilotStageHandler:
         supplied = _mapping(self.artifact_generation_request)
         if not supplied and not self.artifact_generation_request_binding_enabled:
             return _reject(FAIL_ARTIFACT_CONTENTS_MISSING)
+        authority = _mapping(_mapping(stages.get("authority_runtime")).get("authority_result"))
+        work_authority = _mapping(authority.get("work_authority"))
+        try:
+            # Derive from the same detached contents compared to signed admission.
+            admitted_order = snapshot_authority_profile_m2m(deepcopy(dict(work_order)))
+            work_order_digest = canonical_full_work_order_digest(admitted_order)
+        except (TypeError, ValueError, RecursionError):
+            return _reject(FAIL_ARTIFACT_GENERATION_WORK_ORDER_BINDING)
+        if work_authority.get("work_order_digest") != work_order_digest:
+            return _reject(FAIL_ARTIFACT_GENERATION_WORK_ORDER_BINDING)
         derived = _derive_artifact_generation_request(
-            work_order=work_order,
+            work_order=admitted_order,
             stage_results=stages,
             repo_root=self.repo_root,
             holoindex_evidence=self.holoindex_evidence,
@@ -466,6 +482,7 @@ def _artifact_generation_request_payload(
     model_selection_receipt: Mapping[str, Any],
 ) -> dict[str, Any]:
     return {
+        **({"m2m_envelope": plan["m2m_envelope"]} if "m2m_envelope" in plan else {}),
         "explicit_artifact_generation_requested": True,
         "work_order_id": str(work_order.get("work_order_id") or ""),
         "slice_name": str(work_order.get("requested_operation") or plan.get("operation") or ""),
@@ -473,7 +490,7 @@ def _artifact_generation_request_payload(
         "planned_artifacts": planned_artifacts,
         "evidence_context": json.dumps(
             {
-                "task_summary": task_summary,
+                **({} if "m2m_envelope" in plan else {"task_summary": task_summary}),
                 "holoindex_evidence": dict(evidence),
                 "holoindex_evidence_refs": _list(work_order.get("holoindex_evidence_refs")),
             },
@@ -556,6 +573,7 @@ __all__ = [
     "BOUNDED_WORKER_PILOT_STAGE_KEY",
     "FAIL_ARTIFACT_GENERATION_REJECTED",
     "FAIL_ARTIFACT_GENERATION_REQUEST_CONFLICT",
+    "FAIL_ARTIFACT_GENERATION_WORK_ORDER_BINDING",
     "FAIL_ARTIFACT_GENERATOR_MISSING",
     "FAIL_MODEL_RUNTIME_VERIFIER_MISSING",
     "FAIL_MODEL_RUNTIME_VERIFICATION_REJECTED",

@@ -183,10 +183,16 @@ def signer_runtime_generation_binding_from_manifest(
 ) -> SignerRuntimeGenerationBinding:
     """Project one validated profile's launch digests into generation state."""
 
+    from .reddog_runtime_artifact_manifest_contract import (INITIAL_SCHEMAS, REQUIRED_INSTALLED_GRANT_RUNTIME_ARTIFACTS)
+    if manifest.get("schema_version") in INITIAL_SCHEMAS and (
+        type(generation) is not int or generation != 1
+    ):
+        raise ValueError("initial_manifest_generation_invalid")
+
     required = required_runtime_artifacts_for(manifest)
     if required == REQUIRED_RUNTIME_ARTIFACTS:
         config_name, run_packet_name = required[-2:]
-    elif required == REQUIRED_GRANT_AUTHORITY_RUNTIME_ARTIFACTS:
+    elif required in (REQUIRED_GRANT_AUTHORITY_RUNTIME_ARTIFACTS, REQUIRED_INSTALLED_GRANT_RUNTIME_ARTIFACTS):
         config_name = GRANT_AUTHORITY_SERVICE_CONFIG
         run_packet_name = GRANT_AUTHORITY_SERVICE_RUN_PACKET
     else:
@@ -200,6 +206,10 @@ def signer_runtime_generation_binding_from_manifest(
     run_packet = descriptors.get(run_packet_name)
     if not config or not run_packet:
         raise RuntimeArtifactManifestError("manifest_launch_artifacts_missing")
+    if required == REQUIRED_INSTALLED_GRANT_RUNTIME_ARTIFACTS and (
+        manifest["signer_service_config_digest"] != config["content_digest"]
+    ):
+        raise RuntimeArtifactManifestError("initial_grant_config_binding_mismatch")
     return SignerRuntimeGenerationBinding(
         generation=generation,
         manifest_id=str(manifest["manifest_id"]),

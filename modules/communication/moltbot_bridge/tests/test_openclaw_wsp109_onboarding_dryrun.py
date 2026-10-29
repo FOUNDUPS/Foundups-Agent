@@ -45,7 +45,7 @@ class TestWSP109OnboardingGated:
     def test_onboard_dispatch_returns_not_ready_handoff(self):
         """Dispatching an onboarding prompt returns a NOT_READY genesis handoff and
         does NOT reach fam_adapter (no launch)."""
-        mock_intent = MagicMock()
+        mock_intent = MagicMock(metadata={}, payload=None)
         mock_intent.raw_message = self.ONBOARD_MSG
         mock_intent.sender = "012"
         mock_intent.is_authorized_commander = True
@@ -78,18 +78,27 @@ class TestWSP109OnboardingGated:
 class TestFoundupGenesisGate:
     """FOUNDUP dispatch invokes the genesis validator before any launch."""
 
-    def test_dispatch_foundup_invokes_genesis_validator(self):
-        """dispatch_foundup now references validate_genesis_envelope (gate wired)."""
+    def test_dispatch_foundup_invokes_genesis_validator(self, monkeypatch):
+        """An authorized onboarding request reaches the gate and cannot queue absent data."""
         from modules.communication.moltbot_bridge.src import (
             openclaw_foundup_orchestrator,
         )
 
-        source = inspect.getsource(openclaw_foundup_orchestrator.dispatch_foundup)
-        assert "validate_genesis_envelope" in source
+        dispatch = openclaw_foundup_orchestrator
+        monkeypatch.setattr(dispatch, "_FOUNDUP_JOB_QUEUE", [])
+        gate = dispatch.OpenClawFoundUpOrchestrator()
+        monkeypatch.setattr(dispatch, "_orchestrator", gate)
+        intent = MagicMock(metadata={}, payload=None, raw_message="onboard foundup shield",
+                           sender="012", is_authorized_commander=True)
+        with patch.object(gate, "validate_genesis_envelope",
+                          wraps=gate.validate_genesis_envelope) as validate:
+            assert "NOT_READY" in dispatch.dispatch_foundup(None, intent)
+        validate.assert_called_once_with({}, actor_id="012")
+        assert dispatch.get_job_queue() == []
 
     def test_launch_msg_is_gated_not_fam_passthrough(self):
         """A bare 'launch foundup' message is gated (NOT_READY), not handed to FAM."""
-        mock_intent = MagicMock()
+        mock_intent = MagicMock(metadata={}, payload=None)
         mock_intent.raw_message = "launch foundup Shield with token SHLD"
         mock_intent.sender = "012"
         mock_intent.is_authorized_commander = True
@@ -140,7 +149,7 @@ class TestDualParserConverged:
 
         for msg in ("create foundup Shield", "create foundup job for Shield"):
             clear_job_queue()
-            mock_intent = MagicMock()
+            mock_intent = MagicMock(metadata={}, payload=None)
             mock_intent.raw_message = msg
             mock_intent.sender = "012"
             mock_intent.is_authorized_commander = True

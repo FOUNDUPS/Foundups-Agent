@@ -1,5 +1,124 @@
 # Livechat Module - ModLog
 
+## 2026-10-29 — Select General readiness for language/DOM startup
+
+- Existing Phase-2 dependency call passes exact `LM_STUDIO_NATIVE_MODEL_KEY`,
+  otherwise unchanged `QWEN_MODEL_ID` General default. Removed the misleading
+  UI-TARS-ready log from a General startup check. DOM actions remain available;
+  explicit vision readiness is separate. Existing caller file does not grow.
+- Two isolated executions of the actual Phase-2 AST node prove configured native
+  key/default forwarding without importing/starting the DAE. Included in the
+  launcher's49 startup cases within94 actual-source offline checks; not a full
+  main.py or live-runtime qualification.
+- WSP11/22/50/62/84/97; no model, browser, service or scheduler action.
+
+
+## 2026-10-29 — Bounded local fallback for private livechat themes
+
+WSP00/10/11/22/50/77/84/97. Retain reviewed Grok success and reuse the existing
+general-language generator after unavailable/empty/failed/rejected themed output.
+The explicit livechat surface permits LM Studio HTTP only; comments keep their
+default scoped/legacy reader and serialized provider behavior. Bind author,
+receiving channel and stream identity, including the existing generator cache.
+Review the exact final mention within 200 characters and carry a deep full native
+theme snapshot into the existing sender's post-delay guard.
+
+Both existing eligible caller sites use a ten-second threaded await and cancellation
+event. Busy livechat generation/review locks reject immediately. Expired/changed
+themes and late results fail closed; cancellation prevents subsequent stages but
+cannot kill an active provider call. Themed mode survives theme clearing during
+the await, preventing an unreviewed fallback. Deterministic selectors pass 104
+semantic/history cases (12 subtests), original context 53, adjacent queue/context
+116 and separate stdlib inspection 15. These are distinct fixture/source scopes,
+not public delivery or cloud-account repair. Independent review and actual local
+model QA remain separate acceptance evidence in the repair handoff. Subsequent
+review reproduced malformed native source/handle fields bypassing normalization;
+both entry points now reject them before providers, with six reproducing controls.
+The refreshed selection is 88 semantic + 16 history cases.
+
+## 2026-10-29 — Private activation and inspected livechat themes
+
+WSP00/10/11/22/50/84/97. The existing queue receives atomic producer appends under
+its ledger lock; acknowledgements/state remain queue-owned. Private set_context
+does not require a public sender, while existing automation/dry-run gates remain.
+Themed livechat drafts use bounded language review and preserve exact text/theme
+through the existing sender, which rechecks after delays immediately before API
+submission. Existing engagement/cooldown decisions precede generation, and review
+failure cannot fall back to template banter. Source and fixture verification do
+not prove real live delivery or model-role admission.
+
+## 2026-10-29 — Private chat manifest and inspected replies (draft candidate)
+
+WSP 00/15/22/50/84/96/97. Extend existing queue, context reader, generator, Skillz processor and executor; no parallel scheduler or command inbox. `set_context` now activates private context without a public send; `announce` retains explicit publishing. Live-chat and stored-comment language routes consume theme context before generation. The signature hook no longer appends operator wording. Source command identity is carried into comment evidence, and an expired/replaced theme rejects an old draft.
+
+General-language routes reject GUI/audio/embedding model names, including explicit UI-TARS selections. Keyword-only stance assertions become unknown. A separate language-review call evaluates the final candidate; failed/malformed review blocks posting. Top-level posting binds the original row and rechecks identity before submission, requires exact entered text and new creator-reply readback, captures a screenshot and optionally verifies through UI-TARS. Global submit fallbacks are removed. Uncertain outcomes halt the session; unqualified nested submission is blocked.
+
+15 bounded stdlib cases pass; materialized Python sources parse. This is a draft source checkpoint, not signed model-role admission, independent verifier approval, deployment, native RSI or live YouTube evidence. See `modules/communication/video_comments/docs/CHAT_MANIFEST_REPAIR_20261029.md` for exact remaining gates, including full-runtime manifest regeneration, durable uncertainty across restarts and live-selector qualification.
+
+
+## 2026-10-23 - PR841 owned live-session handoff
+
+WSP 00/5/6/10/11/15/22/50/62/84/91/97; C4/I4/D4/Impact4 = 16/P0.
+Reconciles original `92f0e019` with main `9105fa59`, preserving original ancestry.
+Confirmed API identity now excludes matching work beyond the advisory signal TTL.
+Both coordinator and enabled rotation retain owned tasks across spawn, cancellation,
+thread completion and cleanup failure; polling waits for matching settlement while
+other browser work continues. Default shutdown still cancels and awaits both loops.
+Direct restart/inbox-clear calls share the same ownership; Edge retries keep port9223.
+Concurrent session admission and heartbeat cleanup remain explicit.
+
+WSP62 review rejected the first oversized draft. One cohesive local lifecycle helper
+now holds functions over the existing owners' fields; no new orchestrator/store is
+introduced. DAE/coordinator source debt decreases, inherited oversized functions do
+not grow, and tests reuse the proposed PR841 location plus one approved companion.
+No exemption, scheduler, runtime limit or financial/authentication policy is waived.
+
+Tests execute current source methods and complete helper code with explicit boundary
+substitutions, real disposable Python children, fake processes and controlled workers.
+Initial fixture failures and independent cleanup failures remain in external
+`refresh/841-qualification`; tests/README and TestModLog record final commands/results.
+This is Codex-authored bounded local evidence, not native Hermes/OpenClaw/WRE outcome
+proof or operational YouTube acceptance. Thread non-preemptibility, independent
+CommunityMonitor activity, browser rollback and singleton-checkpoint concurrency
+remain limits. Existing #848/#1759/#782 behavior is preserved.
+
+## 2026-10-22 — PR1759 crash/replay, context and lifecycle closure
+
+WSP 00/5/6/10/11/15/22/50/84/91/97; C4/I4/D4/Impact4 = 16/P0.
+Reconciled the original 13-path proposal onto current main rather than adding
+another dispatcher. Existing JSON ledger now persists a claim before effects,
+reuses the runtime operation lock, rejects corruption/payload-ID drift, and
+keeps uncertain attempts terminal. Deferred context has fixed expiry and cannot
+resurrect after a later context/clear command. Gates precede activation; dry-run
+and sender acceptance are accurately labeled. Checkout-rooted shared paths
+match the comment reader. `run()` owns cancellation/await of its watcher while
+preserving the original DAE body. Heartbeat remains observational only.
+
+116 offline cases pass across queue/process recovery, source-bound lifecycle and
+actual shared reader; tests/README records boundaries. Windows/Linux CI selects
+these three files explicitly. Native YouTube delivery, remote admission and
+end-to-end RSI remain unverified. The September exactly-once claim below is
+historical and superseded by the documented uncertain-outcome contract.
+
+Fresh-main reconciliation at `87aa241b` retains the reviewed runtime/test bytes.
+124 combined runtime/manifest cases pass locally. Generated bindings include
+the intervening main changes without changing member count or byte limits.
+Publication, hosted checks and installed operation remain separate gates.
+
+## 2026-09-15 - Operator Command Plane Phase 1
+
+**WSP:** 22, 50, 77, 91, 97
+
+- Added a local, atomic JSON operator-command inbox plus acknowledgement ledger.
+- Heartbeat checks it on its existing cadence and includes the latest result in JSONL telemetry.
+- Initial actions are intentionally narrow: `status` and gated live-chat `announce`. No JSON command can invoke an LLM, shell, browser, or code edit.
+- Added an assumption audit and focused unit tests for dispatch, rejection, and exactly-once acknowledgement behavior.
+- Follow-up: renamed the runtime inbox to the `012 manifest` and moved its
+  watcher outside optional AI-overseer monitoring; unavailable LiveChat now
+  defers an announcement instead of consuming it.
+- Added `set_context`: a bounded, expiring shared directive for live-chat and
+  stored-video comment output surfaces.
+
 This log tracks changes specific to the **livechat** module in the **communication** enterprise domain.
 
 ## WSP 22 ModLog Protocol
@@ -4701,60 +4820,10 @@ YouTube bot now operates as conscious 0102 entity guiding users toward awakening
 *Generated by DocumentationAgent - WSP 54 Agent Coordination*  
 *Enterprise Domain: Communication | Module: livechat*
 
-## 2025-07-10T22:54:07.410410 - WRE Session Update
+## Archived legacy WRE session and completed rename records
 
-**Session ID**: wre_20250710_225407
-**Action**: Automated ModLog update via ModLogManager
-**Component**: livechat
-**Status**: [OK] Updated
-**WSP 22**: Traceable narrative maintained
-
----
-
-## 2025-07-10T22:54:07.627669 - WRE Session Update
-
-**Session ID**: wre_20250710_225407
-**Action**: Automated ModLog update via ModLogManager
-**Component**: livechat
-**Status**: [OK] Updated
-**WSP 22**: Traceable narrative maintained
-
----
-
-## 2025-07-10T22:57:18.229907 - WRE Session Update
-
-**Session ID**: wre_20250710_225717
-**Action**: Automated ModLog update via ModLogManager
-**Component**: livechat
-**Status**: [OK] Updated
-**WSP 22**: Traceable narrative maintained
-
----
-
-## 2025-07-10T22:57:18.709779 - WRE Session Update
-
-**Session ID**: wre_20250710_225717
-**Action**: Automated ModLog update via ModLogManager
-**Component**: livechat
-**Status**: [OK] Updated
-**WSP 22**: Traceable narrative maintained
-
----
-
-## Module Rename and Test Import Updates
-
-**Action**: Updated test imports to reflect module rename
-**Context**: Module was renamed from `livechat.py` to `livechat_core.py` (containing `LiveChatCore` class)
-**Changes**:
-- Updated 14 test files to import `LiveChatCore` from `livechat_core.py`
-- Tests now use: `from modules.communication.livechat.src.livechat_core import LiveChatCore as LiveChatListener`
-- Maintains backward compatibility by aliasing `LiveChatCore` as `LiveChatListener` in tests
-**WSP Compliance**: 
-- WSP 84: Verified existing modules before any changes
-- WSP 57: Maintained naming coherence
-- WSP 22: ModLog updated
-
----
+Four July10 WRE session records and the following completed rename/import entry
+are preserved verbatim in [the legacy archive](_archive/completed/ModLog_legacy_WRE_sessions_2025-07.md).
 
 ## Intelligent Throttling and Recursive Improvements
 
@@ -4841,3 +4910,4 @@ YouTube bot now operates as conscious 0102 entity guiding users toward awakening
 - `modules/communication/livechat/tests/test_party_command.py`
 
 **Status**: [OK] `!party` now routes correctly and runs safely without blocking the poll loop.
+

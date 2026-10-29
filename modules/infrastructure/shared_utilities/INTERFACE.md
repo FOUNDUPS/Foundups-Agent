@@ -1,8 +1,18 @@
 # shared_utilities Interface Specification
 
+### `lm_studio_node_lock_identity(base_url: str) -> str`
+
+Additive export from `lm_studio_model_lifecycle.py` for existing explicit server
+startup. Returns the existing `lm-studio-node:<digest>` identity computed from
+the canonical `loopback:<port>` node identity with the same JSON/SHA256 protocol.
+Loopback aliases share the same lock. It does not acquire a lock or grant model,
+server, or dispatch authority. Existing managed transactions use this helper;
+lock scope digests, journals, normalization, leases and cleanup remain unchanged.
+
+
 **WSP 11 Compliance:** Complete
-**Last Updated:** 2026-08-22
-**Version:** 0.5.0
+**Last Updated:** 2026-10-11
+**Version:** 0.5.1
 
 ## [OVERVIEW] Module Overview
 
@@ -59,6 +69,13 @@ LMStudioBackend.create_native_chat(
     max_response_bytes=...,
 )
 ```
+
+`reasoning` defaults to `"off"` as before. Explicit `None` omits this optional
+wire field for a caller-selected model that does not support reasoning controls.
+Omission means the server's model default, not a guarantee that reasoning is
+disabled. Callers must inspect capabilities and record the selected control;
+there is no automatic retry, capability substitution or provider fallback.
+See [the native API contract](https://lmstudio.ai/docs/developer/rest/chat).
 
 Native inventory exposes `SERVER_UNREACHABLE`, `NOT_INSTALLED`,
 `INSTALLED_NOT_RESIDENT`, and `RESIDENT`; OpenAI-compatible `/v1/models` is not

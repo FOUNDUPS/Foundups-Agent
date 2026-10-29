@@ -1,0 +1,486 @@
+{
+  "schema_version": 1,
+  "review_date": "2026-10-25",
+  "status": "independently_reviewed_exact_bindings",
+  "scope": "Five observed metadata/public-identifier findings in PR2188 CI job121022325878; no wildcard exclusions",
+  "candidate_head": "73af4af5b3c93153c366ec256b3223bac44f9585",
+  "pre_execution_allocation": {
+    "complexity": 1,
+    "importance": 4,
+    "deferability": 5,
+    "impact": 4,
+    "total": 14,
+    "priority": "P1",
+    "need": "Resolve a real publication gate without disabling detection or changing the reviewed product snapshot",
+    "budget": "Existing exact fingerprint ledger, this evidence file and existing gate regressions only",
+    "deferral": "Blocks reviewed PR delivery; defer additional product layers until the gate is resolved"
+  },
+  "constraints": [
+    "No credential values retained or displayed",
+    "No scanner rule, gate, path class or generic hexadecimal exclusion",
+    "Each exception binds exact path, complete file SHA256, rule and line",
+    "Keep history coverage and review all five findings before ledger mutation"
+  ],
+  "findings": [
+    {
+      "path": "docs/architecture/receipts/FOUNDUPS_FX_CHAIN_DELIVERY_20261025.json",
+      "rule": "generic-api-key",
+      "line": 375,
+      "fingerprint": "26652d489b5d5dbc2e5ca232f35102a1f495a1ec5b76b9c451d7438278d43871",
+      "verification": "Measured SHA256 source bytes; exact current file digest equality independently verified"
+    },
+    {
+      "path": "docs/architecture/receipts/FOUNDUPS_FX_CHAIN_DELIVERY_20261025.json",
+      "rule": "generic-api-key",
+      "line": 381,
+      "fingerprint": "a94731cd014901cab331c71bc98221bc6ebb03f164a4e23d7210a535547032c8",
+      "verification": "Measured SHA256 source bytes; exact current file digest equality independently verified"
+    },
+    {
+      "path": "docs/architecture/receipts/FOUNDUPS_FX_CHAIN_DELIVERY_20261025.json",
+      "rule": "generic-api-key",
+      "line": 460,
+      "fingerprint": "ff8d9671350a5303724fb35f34b2c40a5a808cafd522a01136c61db076467a5b",
+      "verification": "Measured SHA256 source bytes; exact current file digest equality independently verified"
+    },
+    {
+      "path": "docs/architecture/receipts/FOUNDUPS_FX_CHAIN_DELIVERY_20261025.json",
+      "rule": "generic-api-key",
+      "line": 480,
+      "fingerprint": "8e19289901f8ba8984803cb09f68ce79f7212841701186971c0cb6e5771256b9",
+      "verification": "Measured SHA256 source bytes; exact current file digest equality independently verified"
+    },
+    {
+      "path": "public/index.html",
+      "rule": "generic-api-key",
+      "line": 75,
+      "fingerprint": "f6b19f6eb8167140c0f53a86608e54350bf5d171f6871fb8f59cd63696608891",
+      "verification": "Unchanged frontend publishable identifier; exact prior blob finding already reviewed; only navigation changed"
+    }
+  ],
+  "prior_ledger_sha256": "938cb3e8a21c87002b17a1081647bf0e29851925d4299ba42300869f8f82428e",
+  "prior_ledger_entries": 1814,
+  "independent_reviewer": "/root/blockchain_architecture",
+  "primary_public_identifier_reference": "https://clerk.com/docs/guides/secure/rotate-api-keys",
+  "final_ledger_entries": 1819,
+  "source_digest_provenance": "Four measurement values hash Windows checkout bytes, including CRLF; they are not raw Git-blob SHA values. Normalized source contents match the candidate. Exception fingerprints instead bind exact committed file bytes.",
+  "fresh_scan_required": "Hosted tracked-tree and introduced-history scans must pass on the repaired head; this review is not a new scanner result.",
+  "local_gate_regressions": {
+    "initial": {
+      "counts": {
+        "failed": 3,
+        "passed": 17
+      },
+      "limitation": "Windows cp932 decoding and bare bash resolves to unavailable WSL shell"
+    },
+    "utf8": {
+      "counts": {
+        "passed": 19,
+        "failed": 1
+      },
+      "network_attempts": 0,
+      "remaining_failure": "test_gotjunk_missing_headers_and_http_error_fail invokes bare bash; Windows resolves system WSL shell despite PATH. No source or test oracle altered."
+    },
+    "publication_gate": "Fresh Linux hosted regressions and full tracked-tree/introduced-history scans required before merge."
+  },
+  "scope_guard": "Only exact five observed findings; scanner, fingerprint algorithm and security regression source unchanged.",
+  "manifest_followup": {
+    "candidate_head": "80cccc3f7c94cc867a1ccfd469e53daa9efd5190",
+    "comparison_base": "03035b4f5c92202c93bc6f1675a86eee4f10d50e",
+    "job_id": 121027671790,
+    "pre_execution_allocation": {
+      "complexity": 1,
+      "importance": 4,
+      "deferability": 5,
+      "impact": 4,
+      "sum": 14,
+      "priority": "P1",
+      "record": "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md"
+    },
+    "observed_scan": {
+      "unreviewed_tree": 38,
+      "reviewed_tree": 76,
+      "unreviewed_history": 0,
+      "reviewed_history": 4,
+      "hosted_gate_regression_passed": 20
+    },
+    "verification": "All 38 are unchanged source-integrity entries; exact referenced frozen Git blobs rehash after LF normalization, equal main source blobs, with unique unchanged five-line contexts and each prior fingerprint approved once on main.",
+    "independent_reviewer": "/root/blockchain_architecture/btc_anchor_audit",
+    "prior_ledger_entries": 1858,
+    "final_ledger_entries": 1896,
+    "findings": [
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":1593,"source_path":"holo_index/memex_access_policy_receipt.py","fingerprint":"bf6a7135f7f3bd2d55e956f4d44b685a38aaadd4014769f61506109172d7db35","prior_line":1592,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":1727,"source_path":"modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_auth_provider.py","fingerprint":"52e4e99b2b21c3a911728e8c416a418d3a018d07d8b343140f77e570c16ffd08","prior_line":1726,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":1767,"source_path":"modules/ai_intelligence/pqn_alignment/src/council/api.py","fingerprint":"7753d12f59e3cf12c72455bc7f970ff93d3e8438aab9132e67def9943087cb32","prior_line":1766,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":1768,"source_path":"modules/ai_intelligence/pqn_alignment/src/detector/api.py","fingerprint":"ca19cbec94b285ed143f013a274e741ca5826687b1ba4880b30586d99f9abcf5","prior_line":1767,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":1770,"source_path":"modules/ai_intelligence/pqn_alignment/src/io/api.py","fingerprint":"869866411075a0b4c5044809fb4ed12c0bf6bd3b45031f2db443f563f80f2ca9","prior_line":1769,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":1775,"source_path":"modules/ai_intelligence/pqn_alignment/src/sweep/api.py","fingerprint":"c12a2a62c65a5cb53384a182e8d08e6603e4ef8b0e6a4d277a8b284cf061534a","prior_line":1774,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"discord-api-token","line":1833,"source_path":"modules/communication/livechat/src/discord_status_pusher.py","fingerprint":"06e1015a4016f6ded09c2b908ab0f6d3f3d125553f5f172a095c37859371abcf","prior_line":1832,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":1877,"source_path":"modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_authenticity.py","fingerprint":"9d7932b5d08b820255cd9c55d1df14f73619d38b23f1bf9dbb3a92b057f37005","prior_line":1876,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":1955,"source_path":"modules/communication/moltbot_bridge/src/reddog_architect_proposal_authenticity.py","fingerprint":"0ade0423ee07c225353ce415585d0f64d8f1d0b9700979eed8cd5e2366055381","prior_line":1954,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":1993,"source_path":"modules/communication/moltbot_bridge/src/reddog_conversation_scope_authentication.py","fingerprint":"29b5a91f6edff3868878871b9ab8bdc259f0e8d0cbf22b604d3cfa26ac9659c3","prior_line":1992,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":2008,"source_path":"modules/communication/moltbot_bridge/src/reddog_conversation_session_credential.py","fingerprint":"2afab7631fab996cac5bf9c5f4838d649bc0cb736301682575680d68b1b4e15a","prior_line":2007,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":2081,"source_path":"modules/communication/moltbot_bridge/src/reddog_hermes_api_confinement.py","fingerprint":"d3d611ffa81675becf28d29ba7290546e063e623e54d95ee19b954e0ef621f0a","prior_line":2080,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":2082,"source_path":"modules/communication/moltbot_bridge/src/reddog_hermes_api_event_log.py","fingerprint":"75b7bd793355390b77a6c5dc3ff9a3e978b81003adbaf526da72915a8b79b33a","prior_line":2081,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":2083,"source_path":"modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py","fingerprint":"e67f34a385c611eee1b81229489fced9990807b275bc092e9d4ea420cbbca68d","prior_line":2082,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":2084,"source_path":"modules/communication/moltbot_bridge/src/reddog_hermes_api_transport.py","fingerprint":"8b435a0d67eaa26cf38c16eb7ac481eee0b80723f1948707815ea08fa19b0ed3","prior_line":2083,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":2224,"source_path":"modules/communication/moltbot_bridge/src/reddog_signer_independent_secret_grant_binding.py","fingerprint":"9066a94db4f9d5a0627802fbccf7a88898f56629c56a9ead40032e7d217915b6","prior_line":2223,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":2225,"source_path":"modules/communication/moltbot_bridge/src/reddog_signer_independent_secret_grant_provider.py","fingerprint":"3a071b1e463f12d59887a257dcb05b5f03f86f20fefbbf9b7be7e30b6e467093","prior_line":2224,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":2228,"source_path":"modules/communication/moltbot_bridge/src/reddog_signer_key_provider_dryrun.py","fingerprint":"98271a8f22ee8fdb72aa0b6b4d19e2e25ed7fdbe0e1c358b19646fc6c10c0c73","prior_line":2227,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":2255,"source_path":"modules/communication/moltbot_bridge/src/reddog_signer_secret_access_grant.py","fingerprint":"f508da4631a84f08ae38e60b595b5d70c447776d0c80884496014a4de55a1628","prior_line":2254,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":2256,"source_path":"modules/communication/moltbot_bridge/src/reddog_signer_secret_access_grant_contract.py","fingerprint":"e3e3c47d3bb2cf67a899ccc6a5ab1cbb4d94e5cc000727f31a73053e061f7065","prior_line":2255,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":2260,"source_path":"modules/communication/moltbot_bridge/src/reddog_signer_secret_grant_issuance.py","fingerprint":"3ca408a9708e3a302e0bccc2292855a1c61e1ef53ed00f01dbd480a55a3d6db1","prior_line":2259,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":2272,"source_path":"modules/communication/moltbot_bridge/src/reddog_signer_socket_peer_credential_attestor.py","fingerprint":"53ed8609bde30d5eff122102aa8b0434ee9c14ce8568985a4c7b6c68bf6666fb","prior_line":2271,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":2419,"source_path":"modules/foundups/pfmall/api.py","fingerprint":"fe40b248bdea06b764883249b91a35d309e4c0f66fc419815b8e39622b8be9ae","prior_line":2417,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":2475,"source_path":"modules/foundups/simulator/economics/token_economics.py","fingerprint":"77c5e6469b78c76ca8f4b264e57ac32e18a7ec463a74b4043caeb7067bd74d34","prior_line":2473,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":2714,"source_path":"modules/infrastructure/oauth_management/src/oauth_manager.py","fingerprint":"41ba8bf2a685c9350315d518d58799a605fb3ec5438e8b754a9de22bd3ca9318","prior_line":2712,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":2720,"source_path":"modules/infrastructure/secrets_mcp/src/op_cli_secret_resolver.py","fingerprint":"15c2eed8d7410af13aa2590a08521e9564e4a7c207bcb27dd8342a07e2d1b441","prior_line":2718,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":2721,"source_path":"modules/infrastructure/secrets_mcp/src/secrets_mcp.py","fingerprint":"7d6b994c0196436328f9a1c15ea33b044d76ae5e92b8db9b02d838668a0c40a1","prior_line":2719,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":2722,"source_path":"modules/infrastructure/secrets_mcp/src/systemd_credential_secret_resolver.py","fingerprint":"92408be183df15f10a2f2464c60b490ec3035a33344c1c013c6cd3f46e42133c","prior_line":2720,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":2727,"source_path":"modules/infrastructure/shared_utilities/key_hygiene.py","fingerprint":"73a2d4e67c1d086c2f9dfcdcca11f0e3883759d04c2b3b341da5902630cf5dd6","prior_line":2725,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"discord-api-token","line":2859,"source_path":"modules/platform_integration/antifafm_broadcaster/src/discord_voice_output.py","fingerprint":"623799ec868637ced698dfcf9f906d12690c909ac413d18bc17ec594b4bcff76","prior_line":2857,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":2872,"source_path":"modules/platform_integration/github_integration/src/github_api_client.py","fingerprint":"96aa455b39a28edc40b994ea16af41d1f6939d4d48d28f70365f4a1a89d7b230","prior_line":2870,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":2916,"source_path":"modules/platform_integration/social_media_orchestrator/src/oauth/oauth_coordinator.py","fingerprint":"d1eb2418fbc59318458bd1e980451df2fd6b2a0f4aa355f75246df635b036d8c","prior_line":2914,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":2939,"source_path":"modules/platform_integration/utilities/oauth_management/src/oauth_manager.py","fingerprint":"f22fc65b84e2708c1ffd43f15aac1104aec8425b3511a25f2ccf3b7f8836b3dd","prior_line":2937,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":2946,"source_path":"modules/platform_integration/youtube_api_operations/src/youtube_api_operations.py","fingerprint":"ddc611407e0321d55d09b43a43976d36dfa3aaf31fd5b24efd9830ab9effd495","prior_line":2944,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":2950,"source_path":"modules/platform_integration/youtube_auth/src/oauth_browser.py","fingerprint":"6dcc4371790c7ad47e7db9a7e4b09df3a9ba853b7d1674689dcf77ecd7d25bdb","prior_line":2948,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":2951,"source_path":"modules/platform_integration/youtube_auth/src/oauth_health.py","fingerprint":"813b5aacd41bf3cd4c803fa6cc6a577d9bd0f37a252522ee135ce60b06e7eb60","prior_line":2949,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":2955,"source_path":"modules/platform_integration/youtube_auth/src/youtube_auth.py","fingerprint":"74500b60197fbad6e65331bb9e04eea282a931959afccf5cd42bb37348d71a11","prior_line":2953,"prior_reviewed":true,"source_rehashed":true},
+      {"path":"scripts/reddog_backend_manifest.json","rule":"generic-api-key","line":3005,"source_path":"utils/oauth_manager.py","fingerprint":"7c1115471c410f3ab4830b27201393dcbe8992f97cd1c47071532af494abbf0a","prior_line":3003,"prior_reviewed":true,"source_rehashed":true}
+    ],
+    "constraints": "Only these 38 exact new whole-file/rule/line bindings; no scanner, scope, algorithm, test, manifest or unknown finding changes; no matched values retained.",
+    "fresh_scan_required": true,
+    "publication_branch_scope": "Commit only this evidence, reviewed-findings ledger and existing FoundUps delivery plan; P0C source/test work remains uncommitted and excluded."
+  },
+  "intake_reference_manifest_and_fixture_review": {
+    "status": "parent_and_source_bound_review_complete_fresh_hosted_scans_required",
+    "reviewed_source_commit": "41a2b79476ba429c9fe9586a869d303e47242afd",
+    "observed_hosted_merge_ref": "9638b4335241aa2c3be61c64ef01f6092dcbb8f3",
+    "observed_run": 40178518337,
+    "observed_job": 121124347560,
+    "tracked_tree_unreviewed": 40,
+    "history_unreviewed": 0,
+    "reviewer": "/root/simulator_economics",
+    "reviewer_disclosure": "This worker authored the intake mapper/new preservation tests. This review is restricted to actual hosted generated metadata and the unchanged preexisting synthetic fixture; it is not independent mapper acceptance.",
+    "independent_report_sha256": "eafc16874638954691621b8516fcdaee9ff5a0e4c0ef577bfadcdadeed17e45c",
+    "parent_reconstructed_all40_exact_bindings_and39_source_hashes": true,
+    "fixture_context": "Unchanged invalid-input parameter of test_hostile_payload_fields_rejected; line108 becomes150 after added tests. No literal retained.",
+    "source_transport_correction": "Use decoded Git blob identity; the initial raw-response test fingerprint is invalid and not approved.",
+    "canonical_digest": "f427e16b8ad90a2e10602005aedf1ed6db9a64f3af0df8bece01d3e2a96bbed6",
+    "runtime_members": 1471,
+    "prior_entries": 2220,
+    "final_entries": 2260,
+    "findings": [
+      {
+        "path": "modules/ai_intelligence/ai_overseer/tests/test_foundup_launch_request.py",
+        "line": 150,
+        "rule": "generic-api-key",
+        "fingerprint": "96442837e97161a300c16d78a8b41779200eeaee57cb05697674f61f95c45234",
+        "prior_fingerprint": "b977daa8761a8ca21737270547d39f1c7b99362756944c8108d5293197667b1f"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 1594,
+        "rule": "generic-api-key",
+        "fingerprint": "e5ec03942e7a9333bb24a313a75852c25e8d73051138be68c679d0e2107c4295",
+        "prior_fingerprint": "d93b66fd9ec242e47607e7b8e80a9e3165aa3d45d26d748c22944a49546923ec"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 1728,
+        "rule": "generic-api-key",
+        "fingerprint": "feb1cc20ee72724fa379fdfdcea594f42554280af1329329b354c97d1e2de16b",
+        "prior_fingerprint": "b3178cb204531323c8c4f9c35085979bb6127e451a1643b6de5c330ae4de3402"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 1768,
+        "rule": "generic-api-key",
+        "fingerprint": "e802bd9f7d5cf83da38ed95c9bada841e0ecb12cb670b72e11236f1652c59b4b",
+        "prior_fingerprint": "dd4867078b4b55b3df4f6b55ad5c4611cbcc4998debf197a9e85fe38c6e69d57"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 1769,
+        "rule": "generic-api-key",
+        "fingerprint": "bbd94f593641ddad9904a6fe123e22350cad5307c1d0ee9ec9d6402b379362f4",
+        "prior_fingerprint": "fc078439883b91323e2feac552e6543291f95a17c31fcb758fe39a505341318f"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 1771,
+        "rule": "generic-api-key",
+        "fingerprint": "e89d2000b47c7fa8cc3881ee8fd963cc39263c6ce392640601e2dbe9ce70a69f",
+        "prior_fingerprint": "fe3e64ed630ae19f276cae6dff988b43c7ebf4d82f738f621ee54a85e555f3b3"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 1776,
+        "rule": "generic-api-key",
+        "fingerprint": "c6e12f6e3509ccd4a17ea0dbe6256d641f558d893605e4c610a78b3573c87c85",
+        "prior_fingerprint": "80f7acdc558b4f39c7864e4356b517f4f0b842980314122ed8906cb5c774e5ac"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 1834,
+        "rule": "discord-api-token",
+        "fingerprint": "3bd04eca905a0f07dd1e2671e533d05004d6a379aa6e73f4f76ce0e474f1ba57",
+        "prior_fingerprint": "54f0988dd3d37cfc8dc096865ac2abe4a901a8012f23757d0c3ee35f839ce1b3"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 1878,
+        "rule": "generic-api-key",
+        "fingerprint": "0838c4ad29003e0151e737f15ae26ce9cc449ddf16ad91ca542db64b9b091026",
+        "prior_fingerprint": "0b1bf5602a50046a2edd5691d3368662494d30d839a411f7e012ec97088cd216"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 1956,
+        "rule": "generic-api-key",
+        "fingerprint": "84e0743176a0e442a23fff3127a6c2592067c4593752086546aee2ad1b5c0c52",
+        "prior_fingerprint": "8b2bde3fe9a9bdd92108e6d028282f80743f34daa214b287a430e02362c13102"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 1994,
+        "rule": "generic-api-key",
+        "fingerprint": "c1ba97fe5e2203c5b38ba8041c1a0e10b68efade85ae4bfef53cd9d453c35e32",
+        "prior_fingerprint": "03ee0df97eb6070ae67684f94e611c76a37596d59695b604b68f3bb4514fb237"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2009,
+        "rule": "generic-api-key",
+        "fingerprint": "bee77cd6eac05963d4a4f99f0f30841bc6bb44d5fc468af0d1b9052874b50fe1",
+        "prior_fingerprint": "22c339c1bb7da02bed0dfbe245cb06a7da3fd12ca5a988f9ba02a3fee7980287"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2082,
+        "rule": "generic-api-key",
+        "fingerprint": "9667678ba572231ef0a0b66c32c3e0253c3133e394b30a9079f236bb72099bcc",
+        "prior_fingerprint": "ffa5ff41bcdbb5ece4ba108f79323b2a1b52c9d3b649b34d680844f9e7a98486"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2083,
+        "rule": "generic-api-key",
+        "fingerprint": "38ea16570b46472e0ec9c05630f067874c2ebe8390bbf94d7a3723b6f793c308",
+        "prior_fingerprint": "cbad723aa259c20424d2ab4d8539a06c3debd1206c36fc47d0f3318b60bc9cfe"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2084,
+        "rule": "generic-api-key",
+        "fingerprint": "0dd28858a65731d5ecfa2631ed9c170eed98c02c2554d3b96d4c34875d43bb17",
+        "prior_fingerprint": "b7bbef86658c68e0c3e6592d756c8c8e1e56450787a30658998b2885d277670d"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2085,
+        "rule": "generic-api-key",
+        "fingerprint": "db54c0c30d042655a90cc271c81e57f60dc7d3eb426a3d8a9d88900770c83b4a",
+        "prior_fingerprint": "36b0a3cb1ae059ee98bf0d6b670d1c795f0164b717138d8ffc1ef4ecb749d62e"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2225,
+        "rule": "generic-api-key",
+        "fingerprint": "80bc023d6786c3571b7a4118de878a6eaa69b1782473a6b47bdbb515ff9adf94",
+        "prior_fingerprint": "121585df8c1583c60f9f3e576dc0f02fc794fb827aa16e5053269fbcb1edada7"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2226,
+        "rule": "generic-api-key",
+        "fingerprint": "88a1ab18bf9049dd4a5e9d8788b68098219373c965a775a8bb7f70ec2dc78df5",
+        "prior_fingerprint": "bee760546404354c2cc9f5825931e081f8c24933bcce1c5238166a1eb136143d"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2229,
+        "rule": "generic-api-key",
+        "fingerprint": "ff7218770a34c57fa591bd00c1e8e552ecefc8a0c152cab0d567ab59ad3aea1e",
+        "prior_fingerprint": "90e22db8108aaccabf28d4f79e63ab8c1c46ad6afdcb4e509d1793efb793a16e"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2256,
+        "rule": "generic-api-key",
+        "fingerprint": "bea36f8358a45c903e395a0006e0d8ed4f46e6704c92e323e9d4d1bcb36bf7b9",
+        "prior_fingerprint": "886878da3e31a1cffec8d42f261579b3bd0f719a8646577ea0e505b000d56d56"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2257,
+        "rule": "generic-api-key",
+        "fingerprint": "4e38977261c7dc0029bdfbdd503fd6c8df6ab68ab3958cf3a18569de26a231eb",
+        "prior_fingerprint": "585ddb7c530390c30f36db4c4cc4fa3a006700c4e0ad4d2ffe3adb90f999b557"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2261,
+        "rule": "generic-api-key",
+        "fingerprint": "e96149eeb6f7a1d423ce5ee4c9de85a5968dff6bfddcf0e7d50fee470bd1622c",
+        "prior_fingerprint": "19c57d3c8c08d4c051dfdbe668aa1159d543caebe33c12d79aa7a1bedf847cfc"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2273,
+        "rule": "generic-api-key",
+        "fingerprint": "950a0665dba0e263a9c6461710d81232510996ac8771134807ee6d2024339445",
+        "prior_fingerprint": "48804cae40b696c7b63991cd39280966e3712ecea667642e3edab1a18ab08780"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2420,
+        "rule": "generic-api-key",
+        "fingerprint": "ec7b35890325830dbf36991c95f730ef2cc468c3496d7dde72650cd8c897e65f",
+        "prior_fingerprint": "078644965f570d8ccdc99968a092ed4330af8d5214fa4b2c0468d80940ae2b28"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2444,
+        "rule": "generic-api-key",
+        "fingerprint": "9ae33738434eca502a4902af8d75d3607cb56b3ff2ec64898fa61e2c34288b25",
+        "prior_fingerprint": "6e3cbadccb107b8511b21cf2686827bb85b3286ef2ccb1ba48934a09f2900b41"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2477,
+        "rule": "generic-api-key",
+        "fingerprint": "52ff2ea13d06402ae801680fbcf2b6b012cd9c473290da251886075d4ddff6af",
+        "prior_fingerprint": "062195a2e02c970259e76615a8e0475d77860fbf396e3618ea8f9d972fe093aa"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2716,
+        "rule": "generic-api-key",
+        "fingerprint": "4bf42dad596b51cfd9a7a53568f7779a203bae517c7e9c612bc7f1a8a8cfae68",
+        "prior_fingerprint": "515a466bd994585e9e226b85f82395dfd6ed6519afdd3b2c63ced95d592130ae"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2722,
+        "rule": "generic-api-key",
+        "fingerprint": "8175cca904db3d1f00c973f46dbfc8f13592c4f7649fc6668a279fa4bbf3e3e1",
+        "prior_fingerprint": "11df14470918a13ab9d01ff4d77b96f21b55b60342807dd401b0a9acc521b7fe"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2723,
+        "rule": "generic-api-key",
+        "fingerprint": "ade0434c4cd670421a5151b1de682e16827dc2fdc1a54b6dca8f52243886ebf0",
+        "prior_fingerprint": "1c4c33ef0d858800f5b10674bf3686080eff83ebc4d7648bad13a8e6c35915e0"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2724,
+        "rule": "generic-api-key",
+        "fingerprint": "7cdce8eb65a5bbd22c3dfaad2b816d807835fd1761352f6661b72f1acd7e1a03",
+        "prior_fingerprint": "b20f5d42172406968fa2dcdb5ed6fce3a7bf672f1ef3fa15ef30a7b00c7b3975"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2729,
+        "rule": "generic-api-key",
+        "fingerprint": "03714cc0b2b6a429fe27f889481b07e4446458bf301ce76fceab92be3a9d20c9",
+        "prior_fingerprint": "43010712232ccc9f592059b595f0849d94163636ac9cf0e206baaa46ce79ba87"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2861,
+        "rule": "discord-api-token",
+        "fingerprint": "95a419f11aa26e20a6f8998ff6de1b06de8db93bd694ed63d69895bca5b1f76b",
+        "prior_fingerprint": "dec0f5c88767c4f23228e0beea992f4388b69fd33437366b6be3f31310ebc22b"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2874,
+        "rule": "generic-api-key",
+        "fingerprint": "d4233e422d92d827e95fa5bf20ee3225d9bb3832cbcd0ddc8018efa12f782d7e",
+        "prior_fingerprint": "5ead1d6f9980c3b4ecdacee810d90032c198aa07d4d3a4b23b831bf4099a0556"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2918,
+        "rule": "generic-api-key",
+        "fingerprint": "a862fb01ca8e78ab4e47a288cffd3b989ccddc9fb1d97e55ce3f731a1b603f3e",
+        "prior_fingerprint": "054f5801d376eb656cb8161827745fcf96e2e735e127819e472175671daf7880"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2941,
+        "rule": "generic-api-key",
+        "fingerprint": "4b8473b663a49982f9d2e576eb2c9ef5e6a93153590a19c186f8d7695c116fa5",
+        "prior_fingerprint": "9146c780b3c743cac6ec45616952a6ceb1bd8a22c428352d909b958d65fc92d4"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2948,
+        "rule": "generic-api-key",
+        "fingerprint": "360a535b6f27669c2d00a10be546fbd2fbd524f96ab4401b6639a4f0e97f5710",
+        "prior_fingerprint": "167384d42e3087987ab3a258b09cfc57a87afbfa524fbdd50e3fd5506cadf7d8"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2952,
+        "rule": "generic-api-key",
+        "fingerprint": "0f5d3e7ee6b24ae3c93c4f0aa6e81d20519e1fb6d6019623b74adde66af9113c",
+        "prior_fingerprint": "11810149eb632357e0e0a4c4078fedd241454e524d4095acba740fef8c29ce44"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2953,
+        "rule": "generic-api-key",
+        "fingerprint": "735379dfc1bc6baeb1b406717a43ce2fb06357cc71d2caf2452ee9287df987ad",
+        "prior_fingerprint": "61eb1ca99d412a0ba10cd00ce327f71a4e648a50638357e1607c1e8d4f3d191f"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 2957,
+        "rule": "generic-api-key",
+        "fingerprint": "1455714a565c580cce32d3974fe49c3afb5287367ac1da8b68725e0f15b94ced",
+        "prior_fingerprint": "6e858ad1f8d2456bc699cfe89769df6ace8ae300f8d142cb41fdb3d16b58b2d8"
+      },
+      {
+        "path": "scripts/reddog_backend_manifest.json",
+        "line": 3007,
+        "rule": "generic-api-key",
+        "fingerprint": "1a2b926f72be077584831eebf427e9eb08b4f55bd90dbb69097833e8b7e45a7c",
+        "prior_fingerprint": "8a16ae0277fb7bfe0e839be09585eb5cde6983683d39908712d878859f2cebba"
+      }
+    ],
+    "limits": [
+      "No source, oracle, scanner, scope, rule or fingerprint algorithm change.",
+      "Only these actual40 findings receive exact bindings; no unknown finding approval.",
+      "Fresh hosted tree/history gates remain required. GitGuardian is separate."
+    ],
+    "whole_file_sha256": {
+      "modules/ai_intelligence/ai_overseer/tests/test_foundup_launch_request.py": "9addb41dd7272150f67c2f94b8912b96ceb75e66eef22e44763c20ed3a7507ee",
+      "scripts/reddog_backend_manifest.json": "0ac00c948cc4ec4c30727f7856ddc500acb63220858f5eeddf983d7d5034f27c"
+    }
+  },
+  "algorand_unsigned_probe_review": {
+    "review_date": "2026-10-25",
+    "allocation": "C1/I4/D5/Impact4=14/P1; three existing security metadata owners only",
+    "candidate_head": "24a094fec078bad65313a6aca81d8fd2875ed3ec",
+    "security_job_id": 121109366122,
+    "observed_tree_unreviewed": 1,
+    "observed_history_unreviewed": 1,
+    "path": "modules/platform_integration/algorand/tests/test_unsigned_asa_probe.py",
+    "rule": "generic-api-key",
+    "line": 28,
+    "introduced_commit": "22d20a743d30822b12f390c74efbe0a80b55acdf",
+    "git_blob_sha1": "82d92cb6d22b567da15141dbef0912c38b313524",
+    "whole_git_lf_sha256": "b25b8cbbcd04c27baa7600fb1336601d9d17bace1fb371a41227322296a3a5a7",
+    "fingerprint": "bfc2ddb9c3b962562d8d561ea59b50c0c537ab80ed8a7264252db921a211f7fc",
+    "classification": "Synthetic public Algorand address: bytes range(65,97) plus last four SHA512_256 checksum bytes, Base32 encoded. No private key. Existing golden requests use only declared expected_auth_address. Current and introduced file bytes equal.",
+    "independent_review_path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-asa-auth-exact-fingerprint-review-7grsxec3\\review.json",
+    "independent_review_sha256": "19f05e6b5b7867d71626a2189f31b0a47121e427067afb28ea85c9aa09ad2051",
+    "prior_entries": 2220,
+    "final_entries": 2221,
+    "scope": "One exact path/whole-file/rule/line fingerprint; no test/oracle/scanner/gate/exclusion changes. Fresh hosted scans required. GitGuardian38965909 remains separate and unresolved."
+  }
+}

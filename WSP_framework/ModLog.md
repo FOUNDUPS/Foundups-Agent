@@ -1,3 +1,73 @@
+## 2026-10-29: WSP85 current root ownership and preservation boundaries
+
+Clarify foundational root ownership instead of a historical ten-file ceiling,
+name temporary/prompt artifacts, and require preservation and ownership review
+before relocation. Document the existing validator as an immediate-child,
+read-only classifier; proposed hooks are not installed enforcement. Mirror the
+numbered framework/knowledge protocol. WSP81 class: NOTIFICATION_REQUIRED;
+012 notified in this authorized audit-repair chat. Core foundational-only intent,
+WSP status and priorities remain unchanged; no automatic deletion is authorized.
+Base: main0d537a1f. Six root-validator cases, exact protocol mirror equality,
+relocation/link preservation and whitespace checks pass. Runtime manifest and
+test registry remain current and unchanged. Hosted/main/Holo acceptance remains
+pending; historical source remains
+in Git and recovery is a focused revert. WSP22/50/64/81/85/97.
+
+## 2026-10-29: WSP26 cryptographic claim correction
+
+Factual correction under explicit blockchain-security research direction;
+WSP15 C1/I4/D4/Impact4=13/P1. Retain the economic design while distinguishing
+Falcon State Proofs, native PQ accounts, Ed25519/multisig and consensus security.
+Remove unsupported universal/uniqueness/probability and automatic-bridge claims;
+reuse dated primary sources in the existing FX venue research document.
+Synchronize both numbered WSP26 copies per WSP81. Classify as a section/source
+clarification with 012 notification; no core economic, status or budget change.
+Base:362b4c62a665bd6c594904e39d974a7187a12649. Before publication require exact
+mirror equality, NAV syntax/data-only diff, link and scope readback; no runtime
+or cryptographic qualification is asserted. Recovery: focused Git revert.
+
+## 2026-10-29: WSP62 historical missing-expiry completion policy
+
+Specify the narrow first stage of F4a: an existing temporary exemption may
+record only its already-past review-quarter boundary, with every other field
+and limit unchanged. It remains expired debt. Require exact-base policy in
+both mirrors; reject renewal, new exemptions and candidate-authored authority.
+No audit implementation or exemption entry changes in this slice:
+`SPECIFIED_NOT_IMPLEMENTED`. WSP81 class: NOTIFICATION_REQUIRED (section and
+compliance clarification); 012 notified during the authorized audit repair.
+Base: `f304ba799f8fa835f0b5127efabe9e724315e3c8`. The numbered framework and
+knowledge files are synchronized; historical content is retained in Git.
+Recovery: focused revert. WSP22/50/62/64/81/97.
+
+Validation: exact mirror equality and whitespace checks pass. Existing
+`test_foundup_route_wsp62_exemptions.py`: five tests pass, one fails because
+the unchanged verifier is 591 lines against its unchanged 586-line ceiling.
+Git blob comparison proves the test, target and both exemption registries
+match the exact base. That inherited size debt remains open; no limit was raised.
+
+## 2026-10-13: WSP71 security review ownership and candidate triage
+
+Added sections 5.4–5.5 under 012's explicit direction to repair security gaps
+and enhance the existing WSP. 0102 owns routine evidence and remediation;
+012 receives material decisions, not a report-download task. Require source,
+PR base/head and deployment binding, truthful coverage, bounded exceptions,
+and credential-safe historical triage. Framework/knowledge copies synchronized
+per WSP81; pre-change content remains recoverable from main 4095ad9. Existing
+permission/production boundaries remain in force. Related implementation:
+CI stacked-branch trigger and existing secret-gate regression suite. WSP22/71/81/97.
+
+## 2026-09-29: WSP48 measurement scalar and provenance clarification
+
+Synchronize both existing WSP48 copies: typed finite metrics, integer counts,
+explicit unknowns and scope-limited formal verification. The verified Chen/Wang/Qu
+survey v2 motivates the hierarchy; FoundUps defines its own measurement bundle.
+
+- **2026-09-25**: **WSP 48 verification hierarchy and RSI measurement alignment** — Added the research-backed verification hierarchy (intrinsic signal < learned judge < execution feedback < formal verifier), kept human research judgment as the unresolved direction-setting boundary, and defined the minimal machine-readable RSI measurement bundle. Current WRE AutoResearcher is explicitly classified as execution feedback with no independent/held-out/activation/retained-generation proof and `production_rsi_eligible=false`. Framework/knowledge WSP 48 mirrors remain byte-identical. This is evidence/truth alignment, not a production RSI completion claim. (WSP 22/48/50/81/97)
+- **2026-09-13**: **R10 compact action preservation** — Aligned WSP 99 and its existing exact knowledge mirror with the optional explicit `A` field in the existing compiler. Legacy packets remain readable; default IMPLEMENT cannot establish action fidelity. Parsed scope/action and decompiled action now govern the existing gate. 158 focused tests pass after 99 pre-repair failures. No status, sovereignty, execution permission or full-prose fidelity claim. WSP 81 operational correction under 012’s instruction to rectify drift; recovery is a focused Git revert. Deterministic local evidence replaces unnecessary model analysis for this narrow defect. (WSP 22/50/81/97/99)
+- **2026-09-13**: **R03 vetted interpreter selection** — Corrected only WSP 00 retrieval recipe/context after bounded diagnostics found the ambient Python base excluded vetted NumPy. Reused the primary checkout venv with the selected source helper; matched-reference CURRENT/no-gap retrieval restored, current-main qualification remains open. Regenerated canonical-agent projection and synchronized the exact knowledge mirror. Existing runtime-selection tests: 2 passed / 16 deselected. WSP 81 operational clarification under existing 012 direction; no state semantics, status, budget, runtime code or sovereignty change. (WSP 00/22/50/81/87/97)
+- **2026-09-13**: **R03 retrieval entry alignment** — Replaced raw search/inline reindex bootstrap instructions with the existing source-bound owner helper and explicit local-bundle fallback. A primary checkout is not necessarily current main; search misses do not justify duplicate modules or fabricated Tier-0 stubs. Synchronized the exact WSP 00 knowledge mirror. WSP 97 comparison found the owner/selector/bundle/repair paths already implemented; 81 existing contract tests pass. Live semantic readiness remains unproved. WSP 81 classification: operational clarification and cross-reference additions under 012's instruction to continue and rectify drift; no state semantics, status, budget or sovereignty change. Separate PR #1636 remains untouched. Recovery: focused Git revert. (WSP 00/22/50/81/87/97)
+- **2026-09-13**: **R02 runtime-enforcement clarification** — Linked the 26-packet enforcement map from WSP_CORE and the catalog; corrected WSP 46 missing-asset fallback and scoped old completion/token claims to historical reports. Clarified normative prose versus executable proof without changing status, budgets, sovereignty or WSP 00 semantics. Synchronized all three knowledge mirrors, including the WSP 73 catalog row missed by the earlier `95f28fff4` (#1631) framework correction; WSP 73 already states that corrected identity boundary. Existing focused WRE boundary selection: 18 passed / 96 deselected. R02 remains partial pending historical-row dispositions and independently bound review. WSP 81 classification: clarification and cross-reference additions under the existing 012 direction to rectify drift; recovery is focused Git review/revert. No runtime change. (WSP 22/46/50/81/95/97)
+- **2026-09-10**: Added narrow WSP 00/97 navigation to the canonical root RSI roadmap and synchronized both knowledge mirrors. The roadmap owns sequencing only; no state-machine, execution-policy, priority-budget or runtime change. Preserved the separate state-semantics repair lane. Root ModLog and the dated RSI audit integration record carry validation. (WSP 00/15/22/50/81/83/97)
 - **2026-08-30**: **WSP 71 RedDog Lick Security Reference** - Added a narrow
   security boundary for the external RedDog Lick product handshake. The Lick
   remains outside WSP and grants no credential or authority; WSP 71 now
@@ -46,6 +116,8 @@
 - **2025-10-06 13:28:03**: WSP Documentation Guardian performed ASCII remediation on 7 files
 - **2025-10-06 13:27:26**: WSP Documentation Guardian performed ASCII remediation on 162 files
 # WSP Framework ModLog
+
+- **2026-09-22**: **WSP 10 Terminal Work Closure Gate** - Added a mandatory `complete` versus `blocked` terminal state for every agent-owned slice. Ordinary success now requires finishing authorized validation, PR/merge, publication, live verification, and cleanup stages instead of handing an open PR or pending deployment back to 012. Added explicit owned-worktree inventory and cleanup evidence while preserving all unowned or ambiguous dirty lanes. WSP 15: C2/I5/D5/Impact4 = 16/P0. Updated the canonical 0102 instructions, generated Codex projection, master-index mirrors, and projection regression coverage. Slice: WSP10_TERMINAL_WORK_CLOSURE_PHASE1. Labels: WSP_POLICY_REPAIR, DOCS_AND_CONTRACT_TEST, NO_RUNTIME_CHANGE. (WSP 10/15/22/34/50/64/81/97 applied)
 
 - **2026-08-26**: **RedDog/0102 Canonical Architecture Alignment** - Reworked
   WSP 73 into the current RedDog identity, conversation, Memex, model-routing,

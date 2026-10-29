@@ -11,6 +11,14 @@ MODULE_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = Path(__file__).resolve().parents[3]
 MANIFEST_PATH = MODULE_ROOT / "foundup_manifest.json"
 REGISTRY_PATH = REPO_ROOT / "foundups" / "foundup_registry.json"
+WRE_SKILLS_REGISTRY_PATH = REPO_ROOT / "infrastructure" / "wre_core" / "skillz" / "skills_registry_v2.json"
+REPOSITORY_ROOT = Path(__file__).resolve().parents[4]
+MOSHPIT_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_moshpit" / "SKILLz.md"
+FUKUI_PROCEDURE_SKILL_PATH = MODULE_ROOT / "skillz" / "fukui_city_procedure" / "SKILLz.md"
+FUNDING_PPP_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_funding_ppp_intelligence" / "SKILLz.md"
+CONTACT_LEDGER_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_contact_ledger" / "SKILLz.md"
+WORK_ORCHESTRATOR_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_work_orchestrator" / "SKILLz.md"
+REDDOG_CORRESPONDENCE_SKILL_PATH = REPOSITORY_ROOT / "modules" / "communication" / "moltbot_bridge" / "skillz" / "reddog_correspondence_state" / "SKILLz.md"
 FRONTEND_ROOT = MODULE_ROOT / "frontend"
 
 
@@ -46,6 +54,210 @@ def test_no_token_is_invented_for_the_campaign() -> None:
     assert entry["token_symbol"] is None
 
 
+
+
+def test_yumori_moshpit_skill_is_wre_registered_and_projected() -> None:
+    registry = load_json(WRE_SKILLS_REGISTRY_PATH)
+    assert registry["total_skills"] == len(registry["skills"])
+
+    entry = registry["skills"]["yumori_moshpit"]
+    assert entry["location"] == "modules/foundups/esingularity/skillz/yumori_moshpit"
+    assert entry["promotion_state"] == "prototype"
+    assert entry["intent_type"] == "DECISION"
+    assert entry["primary_agent"] == "0102"
+
+    skill = MOSHPIT_SKILL_PATH.read_text(encoding="utf-8")
+    assert "name: yumori_moshpit" in skill
+    assert "promotion_state: prototype" in skill
+    assert "YUMORI Moshpit" in skill
+    assert "0102 Moshpit" in skill
+    assert "reverse chronological within each day" in skill
+    assert "https://docs.google.com/document/d/1Le5foHxTHWa8QMAfqTJ0PZFUULw3oNgJTgghlXaHEYM/edit" in skill
+    assert "is the canonical YUMORI campaign ledger" in skill
+    assert "Do not create or maintain a parallel Markdown, DOCX, Library, or repository campaign ledger." in skill
+    # Both canonical Docs must use native content mutation; private-log failures stay observable.
+    assert "## Private 0102 Moshpit native write parity" in skill
+    assert "applies **equally to both**" in skill
+    assert "0102 Moshpit — Agent Learning & Action Log" in skill
+    assert "documents.batchUpdate" in skill
+    assert "exact returned connector error code/message" in skill
+    assert "one pending learning-log delta" in skill
+    assert "do not create a parallel log" in skill
+    assert "Branch-protection “required” status alone is never sufficient evidence." in skill
+    assert "Never merge while any RELEVANT_BLOCKING workflow is pending, cancelled, or failed." in skill
+
+    # These protect the operator policy; they do not execute live Docs ordering.
+    ordering = skill.split("## Ordering rule", 1)[1].split("\n## ", 1)[0]
+    assert "**end/completion time**" in ordering
+    assert "Do not sort from times merely mentioned inside the body" in ordering
+    assert "If an event's own time is unknown, do not invent one" in ordering
+    assert "every moved event has an established effective event time" in ordering
+    write_procedure = skill.split("## Write procedure", 1)[1].split("\n## ", 1)[0]
+    assert "standalone `HEADING_2` paragraph" in write_procedure
+    assert "standalone `NORMAL_TEXT` paragraph beginning with `•`" in write_procedure
+    assert "no paragraph contains multiple activity bullets" in write_procedure
+    assert "verify the whole current-day block after mutation" in write_procedure
+    assert "Do not rewrite or reorder historical event text" in write_procedure
+
+    for projection in (
+        REPOSITORY_ROOT / ".agents" / "skills" / "yumori-moshpit" / "SKILL.md",
+        REPOSITORY_ROOT / ".claude" / "skills" / "yumori-moshpit" / "SKILL.md",
+    ):
+        projected = projection.read_text(encoding="utf-8")
+        assert "modules/foundups/esingularity/skillz/yumori_moshpit/SKILLz.md" in projected
+
+    assert not (MODULE_ROOT / "skills" / "yumori-moshpit" / "SKILL.md").exists()
+
+
+def test_yumori_operational_skills_are_registered_and_projected() -> None:
+    registry = load_json(WRE_SKILLS_REGISTRY_PATH)
+    assert registry["total_skills"] == len(registry["skills"])
+
+    fukui = registry["skills"]["fukui_city_procedure"]
+    assert fukui["location"] == "modules/foundups/esingularity/skillz/fukui_city_procedure"
+    assert fukui["primary_agent"] == "0102"
+    assert fukui["intent_type"] == "DECISION"
+
+    funding = registry["skills"]["yumori_funding_ppp_intelligence"]
+    assert funding["location"] == "modules/foundups/esingularity/skillz/yumori_funding_ppp_intelligence"
+    assert funding["primary_agent"] == "0102"
+    assert funding["intent_type"] == "RESEARCH"
+
+    correspondence = registry["skills"]["yumori_contact_ledger"]
+    assert correspondence["location"] == "modules/foundups/esingularity/skillz/yumori_contact_ledger"
+    assert correspondence["primary_agent"] == "0102"
+    assert correspondence["intent_type"] == "MAINTENANCE"
+    assert correspondence["version"] == "0.8.0"
+
+    work_orchestrator = registry["skills"]["yumori_work_orchestrator"]
+    assert work_orchestrator["location"] == "modules/foundups/esingularity/skillz/yumori_work_orchestrator"
+    assert work_orchestrator["primary_agent"] == "0102"
+    assert work_orchestrator["intent_type"] == "DECISION"
+    assert work_orchestrator["version"] == "0.2.0"
+
+    reddog_state = registry["skills"]["reddog_correspondence_state"]
+    assert reddog_state["location"] == "modules/communication/moltbot_bridge/skillz/reddog_correspondence_state"
+    assert reddog_state["primary_agent"] == "0102"
+    assert reddog_state["intent_type"] == "MAINTENANCE"
+
+    fukui_text = FUKUI_PROCEDURE_SKILL_PATH.read_text(encoding="utf-8")
+    assert "reddog_recipient_preflight/SKILLz.md" in fukui_text
+    assert "BLOCKED_ON_OFFICIAL_TEMPLATE" in fukui_text
+    assert "BUDGET_PROPOSED -> BUDGET_APPROVED" in fukui_text
+    assert "Copy the same media BCC list from last time." in fukui_text
+    assert "Projection tabs such as Media" in fukui_text
+    assert "plain committee correspondence" in fukui_text
+    assert "canonical 0102 proxy voice" not in fukui_text
+
+    funding_text = FUNDING_PPP_SKILL_PATH.read_text(encoding="utf-8")
+    assert "name: yumori_funding_ppp_intelligence" in funding_text
+    assert "VERIFIED PROGRAM" in funding_text
+    assert "AWARDED" in funding_text
+
+    correspondence_text = CONTACT_LEDGER_SKILL_PATH.read_text(encoding="utf-8")
+    assert "\nversion: 0.8.1\n" in correspondence_text
+    assert "communication_policy_revision: 2026-10-26" in correspondence_text
+    current_voice, human_fallback = correspondence_text.split(
+        "## External voice modes — principal directive 2026-10-26", 1
+    )[1].split(
+        "### Human/committee-authored correspondence — 2026-10-06 fallback", 1
+    )
+    current_voice = " ".join(current_voice.split())
+    assert (
+        "2026-10-06 plain committee policy is retained for actual human/committee-authored "
+        "messages and formal applicant channels"
+    ) in current_voice
+    for mode in ("AI_OPERATOR", "HUMAN_COMMITTEE", "OFFICIAL_FORM"):
+        assert f"- `{mode}`:" in current_voice
+    assert "explicitly admitted by a current authority" in current_voice
+    assert "Michael TroutのAIアシスタント「0102」" in current_voice
+    assert (
+        "not a fabricated human sender, employee, legal representative, or registered Japanese subsidiary"
+    ) in current_voice
+    assert "No personal human first-person claim and no representation of human review." in current_voice
+    assert "012-directed writing sent as Michael or the actual preparatory committee" in current_voice
+    assert "do not inject an unwanted AI/proxy preface or sign-off" in current_voice
+    assert "Neither mode can override required fields." in current_voice
+    assert "Always answer direct AI-assistance questions truthfully." in current_voice
+    assert (
+        "Changing the voice does not retroactively alter historical Sent, current recipient policy, "
+        "legal authority, authorization, or #1779."
+    ) in current_voice
+    assert (
+        "Unattended `REDDOG_AUTO` SEND is still HOLD-only until the sender-boundary service "
+        "is deployed and independently verified."
+    ) in current_voice
+    assert (
+        "A human-directed Work send is a separate transaction with fresh preflight, not perpetual authorization."
+    ) in current_voice
+    assert "do not open with" in human_fallback
+    assert "0102です" in human_fallback
+    assert "Default sign-off: `YUMORI.me設立準備委員会`." in human_fallback
+    assert "Default sign-off:\n\n`0102`" not in correspondence_text
+    assert "signature_only_0102_default" not in correspondence_text
+    assert "monk_third_person_reference" not in correspondence_text
+    assert "Answer direct" in correspondence_text
+    assert "questions about AI assistance truthfully" in correspondence_text
+    assert "A required representative/translator field on an official form is not optional branding" in correspondence_text
+    assert "Do not remove `AI` from legitimate project descriptions" in correspondence_text
+    assert "Never imply that 0102 personally performed a field action completed by the monk." in correspondence_text
+    assert "RED DOG CANDIDATE" in correspondence_text
+    assert "Correspondence State Capsule" in correspondence_text
+    assert "Build the capsule **before** `create_draft`" in correspondence_text
+    assert "outbound_since_latest_inbound" in correspondence_text
+    assert "new_delta_not_previously_sent" in correspondence_text
+    assert "BLOCK_THIRD_FOLLOWUP" in correspondence_text
+    assert "Gmail remains transaction truth" in correspondence_text
+    assert "not another Moshpit or another contact database" in correspondence_text
+    assert "reddog_correspondence_state/SKILLz.md" in correspondence_text
+    assert "native correspondence store is the durable M2M continuity layer" in correspondence_text
+    assert "**Assume-Sent invariant:**" in correspondence_text
+    assert "Only a complete `NO_SENT_MATCH_IN_CHECKED_SCOPE` result permits progression" in correspondence_text
+    assert "repeat the Sent check even when it was already performed earlier in the same session" in correspondence_text
+    assert "Provider-Sent integrity incidents still count as Sent for duplicate and follow-up suppression." in correspondence_text
+    assert "Capital Targets" in correspondence_text
+    assert "Capital People" in correspondence_text
+    assert "1ST_DEGREE_VERIFIED" in correspondence_text
+    assert "NEEDS_NETWORK_RECON" in correspondence_text
+    assert "Mutual-network crawl" in correspondence_text
+    assert "never guess email patterns" in correspondence_text
+    assert "CONNECT_CANDIDATE" in correspondence_text
+    assert "ChatGPT Work / Cloud Browser" in correspondence_text
+
+    work_text = WORK_ORCHESTRATOR_SKILL_PATH.read_text(encoding="utf-8")
+    assert "YUMORI WORK HANDOFF" in work_text
+    assert "MPS = Complexity + Importance + Deferability + Impact" in work_text
+    assert "Capital-network expansion protocol" in work_text
+    assert "Capital Targets" in work_text
+    assert "Capital People" in work_text
+    assert "1ST_DEGREE_VERIFIED" in work_text
+    assert "mutual connections" in work_text
+    assert "Visible Contact Info is a routable candidate, not send authorization." in work_text
+    assert "No mass blast." in work_text
+
+    reddog_text = REDDOG_CORRESPONDENCE_SKILL_PATH.read_text(encoding="utf-8")
+    assert "Provider systems remain transaction truth." in reddog_text
+    assert "The state cache never grants permission to send." in reddog_text
+    assert "Do not create a correspondence Moshpit" in reddog_text
+    assert "RedDogCorrespondenceStateStore" in reddog_text
+
+    for slug, canonical in (
+        ("reddog-correspondence-state", "modules/communication/moltbot_bridge/skillz/reddog_correspondence_state/SKILLz.md"),
+        ("fukui-city-procedure", "modules/foundups/esingularity/skillz/fukui_city_procedure/SKILLz.md"),
+        ("yumori-funding-ppp-intelligence", "modules/foundups/esingularity/skillz/yumori_funding_ppp_intelligence/SKILLz.md"),
+        ("yumori-contact-ledger", "modules/foundups/esingularity/skillz/yumori_contact_ledger/SKILLz.md"),
+        ("yumori-work-orchestrator", "modules/foundups/esingularity/skillz/yumori_work_orchestrator/SKILLz.md"),
+    ):
+        for root in (".agents", ".claude"):
+            projected = (REPOSITORY_ROOT / root / "skills" / slug / "SKILL.md").read_text(encoding="utf-8")
+            assert canonical in projected
+            if slug == "yumori-contact-ledger":
+                assert "committee correspondence" in projected
+                assert "Default sign-off is `0102`" not in projected
+                assert "0102 writes as proxy" not in projected
+
+
+
 def test_sites_configuration_and_primary_routes_are_present() -> None:
     hosting = load_json(FRONTEND_ROOT / ".openai" / "hosting.json")
     package = load_json(FRONTEND_ROOT / "package.json")
@@ -56,43 +268,53 @@ def test_sites_configuration_and_primary_routes_are_present() -> None:
         assert (FRONTEND_ROOT / route).is_file()
 
 
-def test_existing_ticker_receives_one_new_deck_notification() -> None:
+
+def test_existing_ticker_receives_one_deck_notification() -> None:
     page = read("app/page.tsx")
     ticker = read("components/CampaignTicker.tsx")
+    status = load_json(FRONTEND_ROOT / "content" / "current-field-status.json")
     assert page.count("<CampaignTicker />") == 1
     assert "<YumoriPresentation />" in page
-    assert "{ label: 'NEW', text: 'YUMORI / COG DC 10枚のプレゼンを見る', href: '#yumori-deck' }" in ticker
+    assert "label: { ja: 'NEW', en: 'NEW', pt: 'NOVO' }" in ticker
+    assert "YUMORI / COG DC 10枚のプレゼンを見る" in ticker
     assert ticker.count("href: '#yumori-deck'") == 1
-    for existing_label in ("VISIT", "LISTEN", "LEARN", "EXPLORE", "CONNECT", "JOIN", "ACT"):
-        assert f"label: '{existing_label}'" in ticker
+    for existing_label in ("PPP/PFI", "市議会", "市長", "声を届ける", "VISIT", "LISTEN", "LEARN", "EXPLORE", "JOIN"):
+        assert f"ja: '{existing_label}'" in ticker
+    assert "CONNECT" not in ticker and "Monk" not in ticker
+    assert "https://yumori.me/vote-no#council" in ticker
+    assert "https://yumori.me/vote-no#mayor" in ticker
+    assert "https://yumori.me/vote-no#contact" in ticker
+    assert "width <= 600 ? 10 : width <= 1200 ? 20 : 32" in ticker
+    assert status["href"] == "https://yumori.me/"
 
 
-def test_deck_has_ten_japanese_canonical_slides_and_derived_languages() -> None:
-    content = read("content/yumori-presentation.ts")
+def test_fullscreen_vision_has_ten_japanese_first_slides_and_derived_languages() -> None:
+    content = read("content/yumori-vision.ts")
     component = read("components/YumoriPresentation.tsx")
-    japanese_block = content.split("export const yumoriEn", 1)[0]
-    assert len(re.findall(r"\n\s+id: '[a-z-]+'", japanese_block)) == 10
-    assert "CANONICAL SOURCE STATE: Japanese" in content
-    assert "export const yumoriEn" in content
-    assert "export const yumoriPt" in content
-    assert "Concept image transitioning from a Fukui rice field" in content
-    assert "Imagem conceitual passando de um arrozal de Fukui" in content
+    source_block = content.split("export const visionUi", 1)[0]
+    assert len(re.findall(r"\n\s+id: '[a-z-]+'", source_block)) == 10
+    for locale in ("ja", "en", "pt"):
+        assert f"{locale}:" in content
+    assert "getYumoriVisionSlides" in content
     assert "data-yumori-localized" in component
     assert "MutationObserver" in component
-    assert "const visualLabels" in component
+    assert "vision=1" not in component  # URLSearchParams is used rather than hard-coded query text.
+    assert "url.searchParams.get('vision') === '1'" in component
 
 
-def test_canonical_propositions_and_progressive_disclosure_are_present() -> None:
-    content = read("content/yumori-presentation.ts")
+def test_current_vision_propositions_and_progressive_disclosure_are_present() -> None:
+    content = read("content/yumori-vision.ts")
     component = read("components/YumoriPresentation.tsx")
     for proposition in (
-        "コンピュートは、この温泉を救い、この地域を再生し、日本を変える力になれるだろうか。",
-        "壊す前に、この資産の価値を測っただろうか。",
-        "データセンターは、コンピュートを育てる田んぼだ。",
-        "なぜ、その熱を捨てるのか。",
-        "一つの資産。いくつもの経済。",
-        "福井は、自分たちのコンピュートで何をつくるのか。",
-        "毎夜、違う風景。",
+        "壊す前に、未来を比べる。",
+        "なぜ15.8億円を使って、選択肢を壊すのか。",
+        "毎夜、違う景色。",
+        "24時間温泉。大きな露天風呂。滞在したくなる場所。",
+        "コンピュートは、新しい「田んぼ」だ。",
+        "熱を捨てない。地域へ戻す。",
+        "60のFoundUpプロジェクト。1チーム最大3人。あとはAI。",
+        "福井の課題から、福井のFoundUpをつくる。",
+        "福井から、日本の分散型コンピュートへ。",
         "建物は、まだ立っている。選択肢も、まだ残っている。",
     ):
         assert proposition in content
@@ -101,17 +323,35 @@ def test_canonical_propositions_and_progressive_disclosure_are_present() -> None
     assert "slide.link.href" in component
 
 
+
+def test_fullscreen_deck_uses_real_building_sprite_and_accessible_controls() -> None:
+    component = read("components/YumoriPresentation.tsx")
+    css = read("components/YumoriPresentation.module.css")
+    vision = read("content/yumori-vision.ts")
+    assert "src={slide.image}" in component
+    assert "alt={slide.alt}" in component
+    for image in re.findall(r"image: '(/[^']+)'", vision):
+        assert (FRONTEND_ROOT / "public" / image.removeprefix("/")).is_file()
+    assert "object-fit: cover" in css
+    assert "ArrowLeft" in component and "ArrowRight" in component and "Escape" in component
+    assert "prefers-reduced-motion: reduce" in component
+    assert "SWIPE_DISTANCE = 55" in component
+    assert "AUTOPLAY_MS = 9000" in component
+    assert "https://yumori.me" in component
+    assert "href: '/reports/jhr#jhr-003'" in read("components/CampaignTicker.tsx")
+
+
 def test_cog_dc_and_floor_model_match_current_truth_boundary() -> None:
     page = read("app/page.tsx")
-    content = read("content/yumori-presentation.ts")
-    combined = page + content
+    vision = read("content/yumori-vision.ts")
+    polisher = read("components/JapaneseSurfacePolisher.tsx")
+    combined = page + vision + polisher
     for required in (
-        "COMMUNITY-OWNED GREEN DATA CENTER",
         "私たちのCOG DCコンピュート",
         "THIRD FLOOR · EMERGING",
         "TOP FLOOR · ADVANCED",
         "SEPARATE INFRASTRUCTURE",
-        "IDEA → PROJECT → FOUNDUP → VALIDATED FOUNDUP → INDEPENDENT AI-NATIVE BUSINESS",
+        "地下をジム・休憩・回復",
     ):
         assert required in combined
     for obsolete in ("2ND FLOOR · LEARN", "4TH FLOOR · LAUNCH"):
@@ -120,27 +360,16 @@ def test_cog_dc_and_floor_model_match_current_truth_boundary() -> None:
 
 
 def test_economic_claims_are_labeled_and_arithmetic_is_sound() -> None:
-    content = read("content/yumori-presentation.ts")
-    assert 129_649 * 1_000 == 129_649_000
-    assert 129_649 * 5_546 == 719_033_354
-    for label in ("VERIFIED", "REPORTED", "MODELLED", "PROJECT RANGE", "PROJECT VISION"):
-        assert label in content
-    assert "予測ではありません" in content
-    assert "予算・契約額ではありません" in content
-    assert "施工者見積もり未取得" in content
+    vision = read("content/yumori-vision.ts")
+    assert not (FRONTEND_ROOT / "content" / "yumori-presentation.ts").exists()
+    assert "報告資料：将来の解体見込み 約15.8億円。確定契約額ではありません。" in vision
+    assert "公表資料：2018年度利用者 129,649人。" in vision
+    assert "再利用の事業性、資金調達、工事費は検証中です。" in vision
+    assert "5年売上 約53.7億円" not in vision
+    assert "5年累計FCFE 約19.4億円" not in vision
 
 
-def test_autoplay_is_optional_and_pauses_for_interaction() -> None:
-    component = read("components/YumoriPresentation.tsx")
-    assert "prefers-reduced-motion: reduce" in component
-    assert "onFocusCapture={() => setPlaying(false)}" in component
-    assert "onWheel={() => setPlaying(false)}" in component
-    assert "setPlaying(false); pointerStart.current" in component
-    assert "Math.abs(distance) > 55" in component
-    assert "AUTOPLAY_MS = 9000" in component
-
-
-def test_deck_assets_and_outreach_sources_are_present() -> None:
+def test_existing_public_assets_and_local_sources_remain_present() -> None:
     for asset in (
         "public/yumori-compute-field.png",
         "public/yumori-autonomous-agriculture.png",
@@ -148,22 +377,287 @@ def test_deck_assets_and_outreach_sources_are_present() -> None:
         "public/satellite-view.jpeg",
     ):
         assert (FRONTEND_ROOT / asset).is_file()
-    component = read("components/YumoriPresentation.tsx")
+    page = read("app/page.tsx")
     for source in (
         "https://www.dsai.u-fukui.ac.jp/system/",
-        "https://www.eng.u-fukui.ac.jp/graduate_school/knowledge_society/his/research/index.html",
-        "https://haselab.fuis.u-fukui.ac.jp/",
-        "https://www.fukui-ut.ac.jp/robotics/",
-        "https://www.fpu.ac.jp/faculty_members/d000000f.html",
+        "https://www.pref.fukui.lg.jp/doc/021037/service/service.html",
+        "https://www.pref.fukui.lg.jp/doc/chisangi/fukusat/suisen_syokai.html",
+        "https://kigyoritti.pref.fukui.lg.jp/outline/technical",
+        "https://www.digital-kakejiku.com/",
     ):
-        assert source in component
-    assert "参加・支持を示すものではありません" in component
+        assert source in page
+    assert "長谷川章氏の参加は未承認" in page
 
 
 def test_future_route_is_utf8_and_uses_cog_dc_compute() -> None:
     future = read("app/future/page.tsx")
     assert "福井に、" in future
     assert "私たちのCOG DCコンピュート" in future
-    assert "まず約1 MWを検討単位" in future
+    assert "最初から容量を決めて建てません" in future
+    assert "必要量だけ導入" in future
     assert "容量、時期、費用、熱利用、収益は未確定" in future
     assert not re.search(r"縺|蜿|蝓|譛|險育", future)
+
+def test_esingularity_post_vote_ppp_position_is_aligned_and_multilingual() -> None:
+    page = read("app/page.tsx")
+    switcher = read("components/LanguageSwitcher.tsx")
+    vision = read("content/yumori-vision.ts")
+    vote_no = read("app/vote-no/page.tsx")
+    current_surfaces = page + switcher + vision
+
+    assert "すかっとランド九頭竜 湯守（YUMORI.me）設立準備委員会" in page
+    assert "9月25日の採決は終了しました。" in page
+    assert "PPP/PFIの官民連携ルート" in page
+    assert "令和8年度の財産有効活用民間提案制度は別制度" in page
+    assert "予算の可決と、解体工事の実施、YUMORI案の採否は別の判断です。" in page
+    assert "この記載は設立準備委員会の見解であり、福井市の公式見解ではありません。" in page
+    assert 'id="finance"' in page
+    assert "基本ケースでは後続整備に追加資本が必要です。" in page
+    assert "関係者用FIN（閲覧権限が必要）" in page
+    assert "資金計画の検証" in switcher
+
+    for url in (
+        "https://yumori.me/vote-no",
+        "https://yumori.info",
+        "https://docs.google.com/document/d/1yeO6-6_mTLW8QswosVKmCVCHSRgWiacq-7FL7-9clsE/edit",
+        "https://ppp.yumori.info",
+        "https://fin.yumori.info",
+    ):
+        assert url in page
+
+    for obsolete in (
+        "解体準備は進めても、",
+        "代案の扉は閉じない",
+        "議会に正式な条件変更を求める",
+        "条件達成で資金の振替審査へ",
+        "解体を止め、比較の時間を確保する",
+    ):
+        assert obsolete not in current_surfaces
+
+    assert "/ Updated September 28, 2026" in switcher
+    assert "/ Atualizado em 28 de setembro de 2026" in switcher
+    assert "See the Preparatory Committee’s current request and evidence" in switcher
+    assert "Ver o pedido atual e as evidências do Comitê Preparatório" in switcher
+    assert "Policy, economics & reuse evidence (03)" in switcher
+    assert "Evidências de política, economia e reutilização (03)" in switcher
+    assert "Budget approval, execution of demolition work, and adoption of the YUMORI proposal are separate decisions." in switcher
+    assert "A aprovação do orçamento, a execução da demolição e a adoção da proposta YUMORI são decisões separadas." in switcher
+
+    assert "現在の要請と根拠を見る" in vision
+    assert "https://yumori.me/vote-no" in vision
+    assert "PPP/PFI public-private route" in vision
+    assert "via público-privada PPP/PFI" in vision
+
+    # Preserve the historical record while making the supersession explicit.
+    assert "履歴注記" in vote_no
+    assert "その後撤回" in vote_no
+    assert "9月25日の反対票要請も採決終了により歴史的記録" in vote_no
+    assert "現在はPPP/PFIによる解体案と再利用案の比較検証" in vote_no
+
+
+
+def test_yumori_stt_protected_vocabulary_has_no_current_surface_artifacts() -> None:
+    source_of_truth = read("audit/SOURCE_OF_TRUTH.md")
+    current_surfaces = "\n".join(
+        (
+            read("app/page.tsx"),
+            read("content/yumori-vision.ts"),
+            read("components/LanguageSwitcher.tsx"),
+        )
+    )
+
+    assert "STT / transcription protected vocabulary" in source_of_truth
+    for required in (
+        "旧すかっとランド九頭竜",
+        "Sukatto Land Kuzuryu",
+        "YUMORI.me",
+        "eSingularity",
+        "COGDC",
+        "AI交番",
+        "旧下宇坂小学校",
+        "旧羽生小学校",
+    ):
+        assert required in source_of_truth
+        assert required in (source_of_truth + current_surfaces)
+
+    for forbidden in (
+        "Scott Lando",
+        "Kazuri",
+        "Kazury",
+        "Kuzuri",
+        "Kuzuru",
+        "Owarasa",
+        "すかっとらんど九頭竜",
+        "cubicle restaurant",
+    ):
+        assert forbidden not in current_surfaces
+
+
+def test_candidate_site_registry_is_demand_led_and_capacity_unverified() -> None:
+    registry = (MODULE_ROOT / "docs" / "CANDIDATE_SITE_REGISTRY.md").read_text(encoding="utf-8")
+    for required in (
+        "Site 1 — 旧すかっとランド九頭竜",
+        "Site 2 — 旧下宇坂小学校",
+        "Site 3 — 旧羽生小学校",
+        "**Do not choose MW first.**",
+        "initial-priority, grid-first school node candidate",
+        "Compute capacity: **UNVERIFIED**",
+        "financial-floor equivalent",
+        "1w00eZcfUMyaNu_wwQEf_GVNHpQamYScRdpB_QGecFJ0",
+    ):
+        assert required in registry
+    for superseded in (
+        "Initial design target for inquiry: **5 MW**",
+        "10 MW and 20 MW",
+        "approximately 1 MW initial target",
+    ):
+        assert superseded not in registry
+    assert "Only `AWARDED` grants may reduce base-case financing need." in registry
+
+
+
+def test_directed_work_policy_preserves_auto_containment_and_all_send_checks():
+    text = CONTACT_LEDGER_SKILL_PATH.read_text(encoding="utf-8")
+    for required in (
+        "012_DIRECTED_WORK", "REDDOG_AUTO", "HOLD_ENGINEERING",
+        "An open", "#1779 alone is not a blocker in this lane",
+        "Do not ask again for authorization", "principal_instruction_ref",
+        "cannot be copied into a later automated run", "engineering holds",
+        "recipient BLOCK results still win", "reddog_recipient_preflight",
+        "exact To/CC/BCC", "not resolution of #1779",
+        "do not create an Akita identity",
+    ):
+        assert required in text
+    work = WORK_ORCHESTRATOR_SKILL_PATH.read_text(encoding="utf-8")
+    assert "execution_origin: 012_DIRECTED_WORK | REDDOG_AUTO | UNKNOWN" in work
+    assert "Do not require" in work and "an undeployed Red Dog signer" in work
+
+
+def test_correspondence_origin_schema_never_grants_send_authority():
+    from modules.communication.moltbot_bridge.src.reddog_correspondence_execution_mode import (
+        CorrespondenceExecutionContext, correspondence_execution_mode,
+    )
+    cases = (
+        ({"origin": "012_DIRECTED_WORK", "work_item_id": "current-reply",
+          "principal_instruction_ref": "012:current-session:send-directive", "explicit_send_requested": True},
+         "WORK_DIRECTED_CHECKS_REQUIRED"),
+        ({"origin": "012_DIRECTED_WORK", "work_item_id": "current-reply", "explicit_send_requested": True},
+         "HOLD_MISSING_012_DIRECTION"),
+        ({"origin": "012_DIRECTED_WORK", "principal_instruction_ref": "instruction", "explicit_send_requested": True},
+         "HOLD_MISSING_012_DIRECTION"),
+        ({"origin": "012_DIRECTED_WORK", "work_item_id": "reply", "principal_instruction_ref": "instruction"},
+         "HOLD_MISSING_012_DIRECTION"),
+        ({"origin": "REDDOG_AUTO", "work_item_id": "reply", "principal_instruction_ref": "old-work-directive",
+          "explicit_send_requested": True}, "REDDOG_BOUNDARY_REQUIRED"),
+        ({"origin": "UNKNOWN"}, "HOLD_UNKNOWN_ORIGIN"),
+        ({"origin": "made-up"}, "HOLD_UNKNOWN_ORIGIN"),
+        ({"origin": "012_DIRECTED_WORK", "work_item_id": "reply", "principal_instruction_ref": "instruction",
+          "explicit_send_requested": True, "engineering_hold": True}, "HOLD_ENGINEERING"),
+        ({"origin": "REDDOG_AUTO", "engineering_hold": True}, "HOLD_ENGINEERING"),
+    )
+    for args, expected in cases:
+        result = correspondence_execution_mode(CorrespondenceExecutionContext(**args))
+        assert result == expected
+        assert result not in {"SEND", "VERIFIED_SENT"}
+
+
+def test_phone_skill_is_human_led_plain_and_truthful_with_identical_projection():
+    canonical = (REPOSITORY_ROOT / ".claude/skills/reddog-phone-conversation/SKILL.md").read_text(encoding="utf-8")
+    projection = (REPOSITORY_ROOT / ".agents/skills/reddog-phone-conversation/SKILL.md").read_text(encoding="utf-8")
+    assert canonical == projection
+    for required in (
+        "Default mode: HUMAN_LED", "TRANSLATION_AUDIO", "human principal conducts the call",
+        "no mandatory AI/proxy introduction", "Answer direct questions about AI or synthetic",
+        "stop direct synthetic participation", "after refusal", "Do not conceal identity",
+        "Silence and gaps are not evidence of speech", "Phone A's outbound microphone",
+        "does not lift #1779", "Skillz/Wardrobe/Rolodex", "WSP_97_System_Execution_Prompting_Protocol.md",
+    ):
+        assert required in canonical
+    for obsolete in (
+        "the monk's disclosed AI representative", "Introduce the AI role and principal accurately",
+        "AIアシスタントの0102です", "0102's role: disclosed AI representative", "mosh-pit",
+    ):
+        assert obsolete not in canonical
+    opening = canonical.split("### Plain opening", 1)[1].split("### Optional translation audio", 1)[0]
+    spoken = next(line for line in opening.splitlines() if line.startswith("`YUMORI."))
+    assert "YUMORI.me設立準備委員会です。" in spoken
+    for label in ("0102", "AI", "代理", "digital twin"):
+        assert label not in spoken
+
+
+
+def test_reddog_email_link_source_quality_policy() -> None:
+    """Regression: social syndication, giant URLs and HOLD archive text stay out of mail."""
+    generic = REDDOG_CORRESPONDENCE_SKILL_PATH.read_text(encoding="utf-8")
+    yumori = CONTACT_LEDGER_SKILL_PATH.read_text(encoding="utf-8")
+    document_audit = (
+        MODULE_ROOT / "skillz" / "recipient_document_audit" / "SKILLz.md"
+    ).read_text(encoding="utf-8")
+
+    # This checks the documented operator policy, not a deployed Gmail interceptor.
+    assert "Recipient-facing link/source and HOLD-content gate" in generic
+    assert "No giant naked links" in generic
+    assert "percent-encoded URLs" in generic
+    assert "Internal-only text never escapes" in generic
+    assert "final rendered plain-text/HTML MIME" in generic
+    assert "Gmail provider success or a" in generic
+
+    assert "Website-first publication links" in yumori
+    assert "https://esingularity.ai/reports/jhr" in yumori
+    assert "LinkedIn newsletters are" in yumori
+    assert "secondary syndication" in yumori
+    assert "the production website served **JHR #001 only**" in yumori
+    assert "Do not assert that #003" in yumori
+    assert "内部保管・このまま送信しない" in yumori
+    assert "unrelated" in yumori
+
+    assert "publisher-owned" in document_audit
+    assert "long," in document_audit
+    assert "percent-encoded bare URLs" in document_audit
+    assert "never\n  cite the live website as #003" in document_audit
+    assert "SUPERSEDED／送信禁止" in document_audit
+
+def test_yumori_work_orchestrator_defines_resident_rsi_canary() -> None:
+    """Resident YUMORI must compose existing memory/provider owners, not a new agent stack."""
+    text = WORK_ORCHESTRATOR_SKILL_PATH.read_text(encoding="utf-8")
+    for required in (
+        "Resident RSI canary — target autonomous loop",
+        "FoundUp scope `esingularity_001`",
+        "operational FoundUp Memex snapshot supply",
+        "Brain for durable consolidated understanding",
+        "Breadcrumbs for recent episodic",
+        "Gmail / LinkedIn / other providers as transaction truth",
+        "WRE PatternMemory / verified outcomes",
+        "Resident cycle contract",
+        "Autonomous effect ladder",
+        "Model and research workers",
+        "OpenRouter / Fusion is a candidate advisory intelligence layer",
+        "privacy/redaction gate",
+        "AI Gateway model AutoResearch",
+        "WRE AutoResearcher only for the bounded configuration/compute-ROI target",
+        "REDDOG_AUTO",
+        "#1779 host deployment closure",
+        "Autonomous Gmail operating loop",
+        "RESPOND",
+        "RESEARCH_MORE",
+        "reddog_recipient_preflight",
+        "No mass blast.",
+        "Autonomous partner discovery and unblocking",
+        "search existing Contacts, Gmail and LinkedIn",
+        "RSI learning contract",
+        "Retained improvement test",
+        "a later,",
+        "unseen YUMORI cycle",
+        "012 interventions required and why",
+        "cost per verified useful outcome",
+    ):
+        assert required in text
+
+    assert "Do not create a\nseparate YUMORI daemon" in text
+    for forbidden in (
+        "new store for YUMORI memory",
+        "auto-send regardless of #1779",
+        "raw private Gmail bodies may be sent to OpenRouter",
+    ):
+        assert forbidden not in text
+
