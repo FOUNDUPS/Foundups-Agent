@@ -1,5 +1,16 @@
 # Algorand module change log
 
+## 2026-10-29 — JSON framing convergence allocation
+
+Before merging child6b679c988: preserve its exact204-line formatter,52 ordinary
+tests, v2 inventory/release guard and dependency lock. Parentfc1a8576b retains
+the reviewed trust bootstrap and all current main362b metadata. Reuse the single
+existing codec owner; no new behavior, test framework or signer. Budget: <=14
+log lines plus exact metadata union; retain all current ledger entries and only
+the child's already source-reviewed fixture binding. Require independent static
+union review and fresh hosted52/security gates, then parent/main convergence.
+Existing13/P1 priority applies. Historical results are not new-head qualification.
+
 ## 2026-10-29 — Current-main blockchain convergence
 
 Publication repair allocation, before mutation: head487531fd passed the28-case
