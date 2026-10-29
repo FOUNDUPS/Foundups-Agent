@@ -642,3 +642,16 @@ rechecked against exact Git source and prior reviews. Retain the earlier 2,027
 records and append only those 38 (2,065 total); the changelog review remains
 valid. Independent evidence: `rsi-parent-bootstrap-independent-main-union-review-20261025.json`
 in the same evidence directory. Combined-source hosted acceptance remains required.
+## PR2206 synthetic public-address review — 2026-10-25
+
+Security job121109366122 reports one unreviewed tree occurrence and one introduced
+history occurrence: `generic-api-key`, Algorand test file line28 `AUTH`.
+Parent and independent review confirm current24a094 and introduced22d20a have
+identical Git blob82d92cb6d22b567da15141dbef0912c38b313524. The fixture is a public
+address reproducible from bytes65..96 and the public SHA512/256 checksum; both
+preserved golden requests use it only as declared expected authorization address.
+
+Append only its exact whole-file/rule/line fingerprint, retaining all2220 existing
+records (2221 total). Evidence is appended to reviewed-foundups-fx-evidence.json.
+No test/oracle bytes, scanner rules, exclusions, gate or history coverage changes.
+Fresh hosted scans remain required. Separate GitGuardian38965909 is unresolved.
