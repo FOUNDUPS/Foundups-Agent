@@ -21,6 +21,8 @@ registry/manifest/pins and exact security evidence only. Run the existing intent
 SQLite/migration/pending-payout and connected domain tests in disposable storage;
 qualify fresh hosted security/main and independent source/metadata preservation.
 No installed runtime activation, credentials, provider, signing or chain effects.
+Fresh focused173 and connected351 cases pass (overlapping scopes); sources stable.
+Current registry is1781/260; unchanged manifest confirms no runtime admission.
 
 ## 2026-10-25 — Opt-in local TestNet probe intents
 

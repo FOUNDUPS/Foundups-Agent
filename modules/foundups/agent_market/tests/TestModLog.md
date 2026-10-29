@@ -1,5 +1,16 @@
 # TestModLog - tests
 
+## 2026-10-29 — Intent convergence against delivered codec main
+
+Existing four-owner focus passes173 cases (93 intent plus80 compatibility).
+Ten-owner connected run passes351; includes173, not an additive total.
+No failures/errors/skips; per-run source hashes are stable. Reused the external
+isolated Python runner with credential-stripped environment, denied socket events
+and SQLite connections limited to explicit scratch or memory. This is not native
+or OS confinement, whole-runtime closure, signer or network qualification.
+Product/test behavior is the original reviewed intent layer; main's BOM repairs
+are preserved. Fresh hosted/current-main qualification remains a separate gate.
+
 ## 2026-10-25 — Local TestNet probe-intent qualification
 
 - Pre-runtime 16/P0 contract; separate docs/evidence packaging 14/P1. Qualified
