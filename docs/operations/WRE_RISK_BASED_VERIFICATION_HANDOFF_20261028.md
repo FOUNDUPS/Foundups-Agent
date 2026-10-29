@@ -2,6 +2,22 @@
 Date: 2026-10-28. Status: **handoff only; implementation not authorized by this document alone**.
 Repository: `FOUNDUPS/Foundups-Agent`. Execution mode: Codex / ChatGPT Work, with repository access.
 
+## Reconciled status — 2026-10-29
+
+The bounded preflight and evidence-downgrade repair in this packet has already
+landed through [PR #2250](https://github.com/FOUNDUPS/Foundups-Agent/pull/2250),
+merge `913924ce731ce5490f359845d2f176c2d91ea8f5`. The current
+[WRE roadmap](../../modules/infrastructure/wre_core/ROADMAP.md#current-verification-integration--2026-10-28)
+and [interface](../../modules/infrastructure/wre_core/INTERFACE.md#risk-verification-preflight-contract--2026-10-28)
+record that implementation and its acceptance boundaries. Tasks A–E below are
+the preserved original execution packet, not a request to rebuild the landed
+slice or a claim that all integration edges are complete.
+
+The remaining work is authenticated native worker consumption, accepted outcome,
+controlled promotion/rollback and measured later benefit. CI efficiency needs a
+same-source, equal-inventory comparison; its benefit is not established by this
+handoff. Keep these gates with their existing owners and authority.
+
 ## Mission
 Integrate the existing risk-based test-impact planning and verifier evidence into the authorized WRE/RSI worker completion lifecycle without a new scheduler, memory store, or self-authorizing judge. Optimize verified improvement per unit of compute while preserving non-bypassable safety, security and release gates. Do not mistake CI queueing for a universal requirement to run all workflows on every agent change.
 
@@ -11,7 +27,7 @@ Integrate the existing risk-based test-impact planning and verifier evidence int
 3. `docs/operations/RSI_SWARM_DISPATCH.md`, `docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md`, `docs/architecture/REDDOG_EPHEMERAL_AUTHORITY_WORKER_ROUTING.md`, `docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md`, `docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md`.
 4. `modules/infrastructure/wre_core/src/wre_test_impact_differential_gate.py`, `wre_test_registry_impact_binding.py`, `wre_test_registry_scope_plan.py`, `wre_test_registry_differential_plan_runtime.py`, `wre_test_differential_runtime.py`, `wre_test_differential_verification.py`, `skill_execution_truth.py`; inspect corresponding tests and interfaces.
 5. `modules/ai_intelligence/ai_gateway/README.md`, `INTERFACE.md`, `ROADMAP.md`; `modules/foundups/agent/src/swarm_dispatch_integration.py`; `modules/foundups/agent_market/src/task_pipeline.py`; HoloIndex retrieval and freshness contracts.
-6. `modules/foundups/eduit/docs/TILE_PRODUCTION_RSI.md` and Storytime PRs #2244, #2245, #2246, #2247 as regression motivation, **not** global architecture owners.
+6. `modules/foundups/eduit/docs/TILE_PRODUCTION_RSI.md` and Storytime PRs #2244, #2245, #2246 as regression motivation, **not** global architecture owners.
 
 ## Verified architectural observations from source review
 - WRE has deterministic impact classes `ISOLATED/MODULAR/SYSTEMIC` and test suite scopes `FOCUSED/MODULE_CLOSURE/DEPENDENCY_CLOSURE/FULL_REPOSITORY`. The registry projection produces an exact-SHA plan **without executing tests**.

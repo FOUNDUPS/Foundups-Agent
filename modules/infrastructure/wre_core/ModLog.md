@@ -1,3 +1,36 @@
+## 2026-10-29 — Reconcile risk-verification handoff with landed implementation
+
+Retain PR #2248's original execution packet and dispatch reference; resolve the
+roadmap overlap by preserving PR #2250's newer implementation/status table.
+The handoff now links that landed slice and names the remaining native outcome,
+promotion/rollback and measured-benefit gates. No runtime or authority changes.
+Validation: all relative Markdown file targets in the handoff and changed
+roadmap link resolve; diff whitespace check passed. Hosted checks remain a
+separate merge gate. WSP 10/22/48/50/84/97.
+
+## 2026-10-28 — Preserve risk-based verification through execution and completion
+
+Reused the existing differential policy, scope resolver, evidence producer and
+slice verifier. Complete preflight now rejects invalid checks before execution;
+declared/bound policies cannot disappear at final verification. Independent
+review found and reproduced four additional stale/protected/release/audit
+escalation gaps; the existing required-suite function now governs preflight too.
+Ordinary absent/empty-policy compatibility and local-only authority rejection
+are preserved. CI gains a separate bounded connected-regression job.
+
+Baseline 44 independent failures, then four escalation failures; corrected
+connected selection 384 pass, with overlapping independent 93-pass review.
+No hosted/merge/native-execution claim is implied by local counts. Details and
+exact commands: [TestModLog](tests/TestModLog.md#2026-10-28--risk-verification-preflight-and-downgrade-regressions).
+Research and next gates are reconciled into existing roadmap/hybrid owners.
+WSP00/5/6/11/15/22/48/50/62/84/95/97; WSP15 15/P1.
+No paid provider call, worker grant, memory learning or production promotion.
+
+Hosted secret scan required 38 exact reviewed-metadata rebindings after the
+manifest byte identity changed. Independent review confirmed all 38 matched
+unchanged, previously reviewed public source hashes. Historical identities stay;
+no scanner rule or coverage change. See TestModLog for failed-run provenance.
+
 ## 2026-10-22 — Re-review unchanged generated hash metadata
 
 PR #2175 secret scan reported 38 existing manifest metadata findings after the

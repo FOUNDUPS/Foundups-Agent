@@ -1,6 +1,52 @@
-## Risk-based verification integration handoff — 2026-10-28
+## Current verification integration — 2026-10-28
 
-See [WRE verification ownership, evidence boundaries and Prometheus M2M execution packet](../../../docs/operations/WRE_RISK_BASED_VERIFICATION_HANDOFF_20261028.md). Existing test-impact projection and differential execution are separate from authenticated worker completion and RSI promotion. This cross-reference does not activate a new worker or claim end-to-end integration.
+Source baseline: `4afb9284d32e9af24f578fda91063114263d5a39`.
+This selection supersedes the older "Current selection" below for the
+risk-verification lane only. [PR2248](https://github.com/FOUNDUPS/Foundups-Agent/pull/2248)
+is the [preserved handoff](../../../docs/operations/WRE_RISK_BASED_VERIFICATION_HANDOFF_20261028.md);
+its planning document is not runtime admission.
+
+WSP15: C3/I4/D4/Impact4 = **15/P1**. Reconcile the existing policy-to-execution
+connection before optimizing broad CI scheduling. Reuse wins over a new router,
+scheduler, memory store or supervisor. The nine-suite connected selection
+passes 384 cases locally; independent source/test review passes an overlapping
+93 cases. See [TestModLog](tests/TestModLog.md#2026-10-28--risk-verification-preflight-and-downgrade-regressions).
+
+| Connection | Classification | Current evidence and remaining boundary |
+|---|---|---|
+| WRE test-impact planning | IMPLEMENTED | `wre_test_impact_differential_gate.py` derives required scope deterministically; mandatory escalation is preserved. |
+| Registry and dependency selection | IMPLEMENTED | `wre_test_registry_differential_plan_runtime.py` verifies exact revisions, registry, recognized dependency/config parity and bounded shards. This is not a general dependency graph. |
+| Differential execution | IMPLEMENTED | `wre_test_differential_runtime.py` runs the trusted collector against archived parent/candidate trees. This is local execution, not OS-confined native authority. |
+| Independent outcome verification | TESTED_ONLY | Resident producer/capability/verifier wiring exists. New controls prevent a declared/bound policy from falling back to ordinary results. Local-only differential receipts still fail final acceptance. |
+| AI Gateway compute routing | IMPLEMENTED | Existing campaign admission, configured gateway and benchmark owners remain. This deterministic slice requires no model selection or provider calls; it does not qualify current live routes. |
+| Hybrid worker coordination | SPECIFIED | Existing AgentDB/resident queue owns tickets; the integrated hybrid team model remains unproved. Reuse [hybrid architecture](../../../docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md#verification-and-swarm-research-reconciliation--2026-10-28). |
+| WRE PatternMemory | IMPLEMENTED | The registry executor records `telemetry_projection`; loaded-skill bindings and real SQLite retention exist. A projection is not a learned improvement or promotion receipt. |
+| WSP97 completion | TESTED_ONLY | Existing merge-sentinel contracts cover failed/pending CI and exact-main identity. Hosted checks, squash merge and post-merge readback remain separate per-PR evidence. |
+| WSP48 improvement retention | BLOCKED | Generic `recursive_improvement/src/learning.py::apply_improvement` still fails closed. No authenticated activation, rollback and later-use benefit for this loop is demonstrated here. |
+
+**Closed in this slice:** complete policy/check-plan preflight before commands;
+bound-policy substitution/omission rejection; mandatory full-scope escalation;
+final-verifier downgrade rejection; additive parallel CI coverage for planner,
+producer, resident caller, final verifier and exact-main prerequisite contracts.
+No existing CI/security/release check is removed or weakened.
+
+**Next eligible layer:** measure the existing canonical shard projection and
+current CI critical path on the same exact source. Propose disjoint parallel
+batches with unchanged test inventory, mandatory checks and final aggregation;
+compare wall time, runner-minutes, accepted results, retries and escaped defects.
+WSP15 C3/I4/D3/Impact4 = 14/P1; an experiment cannot promote its own acceptance
+criteria. Do not claim savings from a shorter selected suite alone.
+
+Observed reference: [CI run 40624168626, test job 122605013062](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/40624168626/job/122605013062)
+took 525s. Signing composition 81s, startup/policy 64s, dependency cache 74s and
+dependency installation 65s are distinct contributors. These are observed step
+durations from a single reference run, not a before/after performance estimate.
+
+**Still blocked:** authenticated OS-isolated consumption of projected shards,
+accepted native worker outcome, controlled promotion/rollback, later measured
+retained benefit and bounded continuation. More unit tests do not close these
+gates. The bridge's existing runtime/admission owners supply the missing
+evidence; do not mint grants or replace them.
 
 ## Skill-feedback lineage checkpoint — 2026-10-22
 

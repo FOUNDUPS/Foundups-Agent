@@ -1,7 +1,7 @@
 ---
 name: interactive_experience_review
 description: Audit and iteratively repair audience-specific games and web interfaces, including EDUIT Storytime timing, touch controls, learning cues, scoring and feedback. Use before implementation and after inspecting each changed output.
-version: 0.2.0
+version: 0.2.1
 intent_type: AUDIT
 promotion_state: prototype
 ---
@@ -105,3 +105,20 @@ When adding a Python test, stage its owned path before running the existing
 `modules/infrastructure/wre_core/scripts/generate_test_registry.py --write`,
 then `--check`; review the exact generated delta before committing. CI exposed
 this missing integration step during the five-tile contract milestone.
+
+## Mandatory mobile thumb-reach and visual regression gate (2026-10-28)
+For every child-facing control, modal and fullscreen state, ask: **Can a child or parent holding a phone in one hand reach this with the thumb without changing grip?** Put dismiss/exit/close at bottom-right (safe-area aware), with at least 48×48 CSS-pixel target, no overlap with game controls and keyboard/screen-reader alternatives. Confirm portrait and landscape, phone and tablet, plus reduced-motion. Test both right-handed thumb reach and an accessible alternate for left-handed users. Language flags must expose a visually obvious selected state and `aria-pressed`, verified in all locales. Score digits and HUD sizes must remain invariant under locale changes (including Japanese), while text is localized. Cave fractures must look like cracks within soil/roof material, not dangling roots in open air; validate screenshot against actual material geometry. Capture before/after mobile screenshots, a regression test or reproducible manual receipt, and next-tile transfer evidence before promoting this as an RSI rule. The criterion is global for FoundUps mobile UI; keep the implementation review in this existing EDUIT skill until WSP97 routes it to the shared mobile review owner.
+
+## Deployed-baseline phone regression gate
+Before a viewer repair, compare the exact previous and current deployed source,
+not only repository main. Freeze the expected scene-area floor and every visible
+control's minimum bounds; run that oracle against a retained broken baseline.
+Prove one active rail in marking mode, no overlap/clipping and center-point hit
+targets, then inspect rendered art. A full-size panel around a tiny video fails.
+Use one fullscreen layout owner; inspect selector specificity before adding rules.
+Test nonzero visualViewport offsets, scroll/resize/foreground, missing API and
+browser zoom separately. Keep normal page zoom and install identity stable.
+Recheck drawings and clocks through rotation and entry/exit, plus normal controls,
+lock, repeat and root/manifest launch. Label injected safe areas and event fixtures
+separately from native devices. Retain failed baselines, repairs and independent
+judgment in the existing product receipt; forward-test on the next actual tile.
