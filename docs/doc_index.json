@@ -431,9 +431,9 @@
           "doc_dae"
         ],
         "entry_points": [
-          "SUPERADMIN_ONBOARDING.md",
+          "docs/SUPERADMIN_ONBOARDING.md",
           "CONTRIBUTING.md",
-          ".prompt_reddog_always_holoindex_grounding_phase1.md",
+          "extensions/reddog/docs/prompts/always_holoindex_grounding_phase1.md",
           "ModLog.md",
           "AGENTS.md",
           "CLAUDE.md",
@@ -1722,14 +1722,14 @@
           "doc_dae"
         ],
         "entry_points": [
-          ".prompt_reddog_always_holoindex_grounding_phase1.md",
+          "extensions/reddog/docs/prompts/always_holoindex_grounding_phase1.md",
           "AGENTS.md",
           "CLAUDE.md",
           "CONTRIBUTING.md",
           "ModLog.md",
           "README.md",
           "ROADMAP.md",
-          "SUPERADMIN_ONBOARDING.md",
+          "docs/SUPERADMIN_ONBOARDING.md",
           "docs/README.md",
           "prompt/Prometheus.md",
           "templates/module_readme_template.md",
@@ -2879,9 +2879,9 @@
           "doc_dae"
         ],
         "entry_points": [
-          "SUPERADMIN_ONBOARDING.md",
+          "docs/SUPERADMIN_ONBOARDING.md",
           "CONTRIBUTING.md",
-          ".prompt_reddog_always_holoindex_grounding_phase1.md",
+          "extensions/reddog/docs/prompts/always_holoindex_grounding_phase1.md",
           "ModLog.md",
           "AGENTS.md",
           "CLAUDE.md",
@@ -6820,9 +6820,9 @@
           "doc_dae"
         ],
         "entry_points": [
-          "SUPERADMIN_ONBOARDING.md",
+          "docs/SUPERADMIN_ONBOARDING.md",
           "CONTRIBUTING.md",
-          ".prompt_reddog_always_holoindex_grounding_phase1.md",
+          "extensions/reddog/docs/prompts/always_holoindex_grounding_phase1.md",
           "ModLog.md",
           "AGENTS.md",
           "CLAUDE.md",
@@ -10602,9 +10602,9 @@
           "doc_dae"
         ],
         "entry_points": [
-          "SUPERADMIN_ONBOARDING.md",
+          "docs/SUPERADMIN_ONBOARDING.md",
           "CONTRIBUTING.md",
-          ".prompt_reddog_always_holoindex_grounding_phase1.md",
+          "extensions/reddog/docs/prompts/always_holoindex_grounding_phase1.md",
           "ModLog.md",
           "AGENTS.md",
           "CLAUDE.md",
@@ -10850,9 +10850,9 @@
           "doc_dae"
         ],
         "entry_points": [
-          "SUPERADMIN_ONBOARDING.md",
+          "docs/SUPERADMIN_ONBOARDING.md",
           "CONTRIBUTING.md",
-          ".prompt_reddog_always_holoindex_grounding_phase1.md",
+          "extensions/reddog/docs/prompts/always_holoindex_grounding_phase1.md",
           "ModLog.md",
           "AGENTS.md",
           "CLAUDE.md",
@@ -11300,9 +11300,9 @@
           "doc_dae"
         ],
         "entry_points": [
-          "SUPERADMIN_ONBOARDING.md",
+          "docs/SUPERADMIN_ONBOARDING.md",
           "CONTRIBUTING.md",
-          ".prompt_reddog_always_holoindex_grounding_phase1.md",
+          "extensions/reddog/docs/prompts/always_holoindex_grounding_phase1.md",
           "ModLog.md",
           "AGENTS.md",
           "CLAUDE.md",
@@ -11955,7 +11955,7 @@
           "doc_dae"
         ],
         "entry_points": [
-          "SUPERADMIN_ONBOARDING.md",
+          "docs/SUPERADMIN_ONBOARDING.md",
           "ModLog.md",
           "AGENTS.md",
           "modules/communication/moltbot_bridge/ModLog.md",
@@ -11983,7 +11983,7 @@
           "doc_dae"
         ],
         "entry_points": [
-          "SUPERADMIN_ONBOARDING.md",
+          "docs/SUPERADMIN_ONBOARDING.md",
           "modules/foundups/simulator/ModLog.md",
           "modules/foundups/simulator/README.md",
           "modules/foundups/simulator/economics/INVESTOR_ECONOMICS.md",
@@ -12007,7 +12007,7 @@
           "doc_dae"
         ],
         "entry_points": [
-          "SUPERADMIN_ONBOARDING.md",
+          "docs/SUPERADMIN_ONBOARDING.md",
           "modules/ai_intelligence/pqn_alignment/ROADMAP.md",
           "modules/communication/moltbot_bridge/workspace/ORACLE_MISSION.md",
           "modules/communication/moltbot_bridge/workspace/SOUL.md",
@@ -12030,9 +12030,9 @@
           "doc_dae"
         ],
         "entry_points": [
-          "SUPERADMIN_ONBOARDING.md",
+          "docs/SUPERADMIN_ONBOARDING.md",
           "CONTRIBUTING.md",
-          ".prompt_reddog_always_holoindex_grounding_phase1.md",
+          "extensions/reddog/docs/prompts/always_holoindex_grounding_phase1.md",
           "ModLog.md",
           "AGENTS.md",
           "CLAUDE.md",
@@ -12060,7 +12060,7 @@
           "doc_dae"
         ],
         "entry_points": [
-          "SUPERADMIN_ONBOARDING.md",
+          "docs/SUPERADMIN_ONBOARDING.md",
           "docs/vocabulary/README.md"
         ]
       },
@@ -12078,7 +12078,7 @@
           "doc_dae"
         ],
         "entry_points": [
-          "SUPERADMIN_ONBOARDING.md",
+          "docs/SUPERADMIN_ONBOARDING.md",
           "docs/vocabulary/README.md"
         ]
       },

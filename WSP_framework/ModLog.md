@@ -1,3 +1,18 @@
+## 2026-10-29: WSP85 current root ownership and preservation boundaries
+
+Clarify foundational root ownership instead of a historical ten-file ceiling,
+name temporary/prompt artifacts, and require preservation and ownership review
+before relocation. Document the existing validator as an immediate-child,
+read-only classifier; proposed hooks are not installed enforcement. Mirror the
+numbered framework/knowledge protocol. WSP81 class: NOTIFICATION_REQUIRED;
+012 notified in this authorized audit-repair chat. Core foundational-only intent,
+WSP status and priorities remain unchanged; no automatic deletion is authorized.
+Base: main0d537a1f. Six root-validator cases, exact protocol mirror equality,
+relocation/link preservation and whitespace checks pass. Runtime manifest and
+test registry remain current and unchanged. Hosted/main/Holo acceptance remains
+pending; historical source remains
+in Git and recovery is a focused revert. WSP22/50/64/81/85/97.
+
 ## 2026-10-29: WSP26 cryptographic claim correction
 
 Factual correction under explicit blockchain-security research direction;

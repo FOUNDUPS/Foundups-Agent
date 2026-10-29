@@ -1,92 +1,22 @@
-# system_health_monitor Test Suite
+# System health tool tests
 
-**Test Coverage:** 0% (implementation needed)
-**Last Run:** Never
-**Framework:** pytest
+[`test_wsp_85_validator.py`](test_wsp_85_validator.py) is the bounded offline
+root-validator owner. Its disposable directories cover foundational configuration,
+misplaced scripts, temporary/prompt artifacts and escaped Windows drive names.
+Content-preservation assertions check that classification does not delete work.
 
-## [TEST] Test Categories
+From the repository root with the existing qualified Python and pytest:
 
-### Unit Tests (test_*.py)
-- test_[module_name].py - Core functionality tests
-- test_integration.py - Integration tests (when applicable)
-
-### Test Structure
-```
-tests/
-„¥„Ÿ„Ÿ __init__.py              # Test package
-„¥„Ÿ„Ÿ README.md               # This file
-„¥„Ÿ„Ÿ test_[module_name].py   # Main test file
-„¤„Ÿ„Ÿ TestModLog.md          # Test evolution log
+```text
+python -B -m pytest -q -c NUL --noconftest --import-mode=importlib -o pythonpath=. -p no:cacheprovider modules/infrastructure/system_health_monitor/tests/test_wsp_85_validator.py
 ```
 
-## [RUN] Running Tests
+Use `/dev/null` instead of `NUL` on POSIX and disable automatic pytest plugin
+loading in the caller environment. This selection does not establish analyzer
+coverage, live service health, whole-repository compliance or deletion safety.
 
-### All Tests
-```bash
-cd modules/infrastructure/system_health_monitor
-python -m pytest tests/
-```
-
-### Specific Test
-```bash
-cd modules/infrastructure/system_health_monitor
-python -m pytest tests/test_[module_name].py
-```
-
-### With Coverage
-```bash
-cd modules/infrastructure/system_health_monitor
-python -m pytest --cov=src --cov-report=html tests/
-```
-
-## [COVERAGE] Coverage Requirements
-
-**WSP 13 Compliance Target:** >=90% coverage
-
-### Current Status
-- **Lines:** 0%
-- **Functions:** 0%
-- **Branches:** 0%
-
-### Coverage Areas Required
-- [ ] Core functionality
-- [ ] Error handling
-- [ ] Edge cases
-- [ ] Integration points
-
-## [CONFIG] Test Configuration
-
-### pytest.ini (if needed)
-```ini
-[tool:pytest]
-testpaths = tests
-python_files = test_*.py
-python_classes = Test*
-python_functions = test_*
-addopts = -v --tb=short
-```
-
-## [CASES] Test Cases (TODO)
-
-### Basic Functionality
-- [ ] Test initialization
-- [ ] Test main methods
-- [ ] Test configuration handling
-
-### Error Conditions
-- [ ] Test invalid inputs
-- [ ] Test missing dependencies
-- [ ] Test network failures (if applicable)
-
-### Integration Tests
-- [ ] Test with dependent modules
-- [ ] Test end-to-end workflows
-- [ ] Test performance requirements
-
-## [EVOLUTION] Test Evolution Log
-
-See TestModLog.md for detailed test development history.
-
----
-
-**WSP 13 Testing Compliance:** Structure Complete, Implementation Pending
+`system_integration_test.py` and `detailed_workflow_test.py` are legacy manual
+drivers with authentication, stream/chat and social-publishing paths. Do not run
+them as an incidental part of root cleanup. Their existence is not passing
+offline test evidence. Historical generated coverage percentages and placeholder
+test filenames have been replaced with this actual test scope.

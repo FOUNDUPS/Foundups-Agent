@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from modules.infrastructure.system_health_monitor.src.wsp_85_validator import (
     WSP85Validator,
 )
@@ -34,3 +36,31 @@ def test_validator_flags_root_check_and_fix_scripts(tmp_path):
 
     assert "check_port_sentinel.py" in prohibited
     assert "fix_openclaw_auth.py" in prohibited
+
+
+@pytest.mark.parametrize('name', ['tmp_probe.txt', '.prompt_reddog_example.md'])
+def test_temporary_root_artifact_is_reported_without_mutation(tmp_path, name):
+    path = tmp_path / name
+    path.write_bytes(b'preserve this authored content\n')
+    result = WSP85Validator(str(tmp_path)).scan_root_directory()
+    assert str(path) in result['prohibited_files']
+    assert path.read_bytes() == b'preserve this authored content\n'
+
+
+def test_foundational_root_contracts_are_not_unknown(tmp_path):
+    names = ['AGENTS.md', 'MEMORY.md', 'requirements-trust-bootstrap.txt',
+             '.gitmodules', '.gitattributes', 'wsp_62_exemptions.yaml']
+    for name in names:
+        (tmp_path / name).write_bytes(b'fixture\n')
+    result = WSP85Validator(str(tmp_path)).scan_root_directory()
+    assert result == {'prohibited_files': [], 'prohibited_dirs': [], 'unknown_files': []}
+    assert sorted(p.name for p in tmp_path.iterdir()) == sorted(names)
+
+
+def test_escaped_drive_directory_is_reported_without_removal(tmp_path):
+    path = tmp_path / 'C\uf03aUsersfixture'
+    path.mkdir()
+    (path / 'keep.txt').write_bytes(b'preserved\n')
+    result = WSP85Validator(str(tmp_path)).scan_root_directory()
+    assert str(path) in result['prohibited_dirs']
+    assert (path / 'keep.txt').read_bytes() == b'preserved\n'
