@@ -2,6 +2,42 @@
 
 ## PR reconciliation — 2026-10-29
 
+**Latest accepted slice:** #2264, head `976842bb0`, base `01b87f0ea`, squash
+`3ad0eddc85c7e7a216a6a78182bcd2a1a32ef2d5`. All 24 latest logical PR checks and
+five workflows triggered on the resulting main passed. CodeQL's initial opaque
+helper alert was corrected with typed location metadata; no rule was suppressed.
+Fresh owner evidence matches source/workspace/authority at main3ad, CURRENT/no-gap,
+generation `9b6b555c59de1cccbc1e51b87fc6f92195f39c452c47b786c189db57966eca27`.
+The two owned maintenance runtimes stopped. F7a is closed; older pending text
+below is historical. Twelve owned PRs have now landed. Snapshot 06:04 UTC: 36 open.
+
+**Current slice:** `agent/audit-readonly-compliance-20261029`, exact base main3ad.
+Replace WSPComplianceChecker traversal/database initialization with bounded Git
+inventory and explicit incomplete results; bind the GitHub audit adapter to the
+correct shared checkout root. Frozen desired baseline 31 failures/8 controls;
+candidate 39 passes. Actual read-only main3ad inspection: 14.11 seconds, unchanged
+Git status, one explicitly uninspected Hermes submodule. Refresh runtime hashes,
+registry and security evidence, then hosted/main checks before closing this slice.
+No unrelated successor PR is opened while owned acceptance remains unfinished.
+
+Current validation: 173 audit tests plus 28 subtests, 24 runtime/consumer tests,
+62 registry tests and three Node suites passed. Mode 2: 0 errors/127 warnings/306
+advisories. Registry 1785/260 preserves all previous rows. Runtime membership 1472
+is unchanged; only the checker source hash changes. The 38 unchanged prior-reviewed
+source hashes are rebound to the new manifest bytes; all 2667 previous bindings
+remain. Fresh hosted checks and resulting-main/Holo acceptance remain required.
+
+**Additional retained work:** #1648's unique public-chat/accounting/membership
+work needs a split and current-main reconciliation; its old lock would downgrade
+Next/React. Offline client acceptance passed, but D1/ingress/deployment are not
+validated here. Its dated public knowledge packet was not fully live-fact-checked.
+#2234's coalition page is a candidate for isolated frontend validation; shared-host
+partner links need checking. #1998's monthly notice still calls 2026-10-13 the
+next meeting; repair stale copy/contracts before integration. All original work
+remains preserved. Current tracked placement evidence shows only economy and
+telemetry as noncanonical domain directories; other names in the supplied audit
+included local, untracked state. Do not migrate or delete such state blindly.
+
 **Latest owned acceptance:** #2263, squash
 `01b87f0ea569144c754d9f45ff8449b3f04d4dbe`, from accepted head
 `d007f045d71692d3520cb18763e67127cc04962f` and base `dedb0e032`.

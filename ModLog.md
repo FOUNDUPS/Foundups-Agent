@@ -1,3 +1,18 @@
+## 2026-10-29 — Bound compliance scans and bind the audit checkout
+
+F7a #2264 is merged as 3ad0eddc8 after 24 logical PR checks; all five resulting-main
+workflows passed. The fresh owner query is CURRENT/no-gap at that exact main.
+This closes the twelfth PR merged by the reconciliation lane; 36 remain open.
+
+The next layer removes WSPComplianceChecker's implicit pattern database and
+recursive local traversal. It uses bounded tracked inventory, explicit incomplete
+results, current size hints and honest documentation presence. The GitHub adapter
+now binds scanner/workflow roots to the same checkout. Frozen acceptance is
+31 failed/8 passed on main3ad and 39 passed on the candidate. A real read-only
+main3ad scan finished in 14.11 seconds with unchanged Git status and one explicit
+uninspected submodule. This does not establish broad test/security/deployment
+acceptance. WSP 3/5/6/11/12/22/50/57/60/62/63/71/87/97.
+
 ## 2026-10-29 — Repair FMAS scan scope and misleading clean summaries
 
 The owned audit slice uses Git-tracked module source for secret hints, excludes
