@@ -1,5 +1,19 @@
 # FMAS Test Suite
 
+## Tracked secret hints and final status — 2026-10-29
+
+`test_secret_scan.py` uses temporary Git repositories and synthetic strings.
+It covers expression false positives, retained literal hints, tracked test
+fixtures, untracked-file exclusion, environment filenames without content reads,
+missing Git inventory, unreadable/invalid/oversized/redirected sources, unchanged
+files and accurate warning/advisory/baseline-difference summaries. It neither
+scans real credentials nor invokes Mode 1's external scanners.
+
+On main `01b87f0ea`, the new acceptance cases report 19 failures and 11 passing
+controls. The candidate's five-owner CI selection passes 134 tests plus
+28 subtests. This is bounded scanner validation, not whole-repository security
+clearance. See [the scanner scope](../README.md).
+
 This folder contains tests for the Foundups Modular Audit System (FMAS). These tests verify functionality related to module structure checking, test existence verification, and baseline comparison.
 
 Historical expiry coverage binds both baseline policy mirrors, tests all four

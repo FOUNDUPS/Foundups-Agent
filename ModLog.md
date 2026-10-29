@@ -1,3 +1,16 @@
+## 2026-10-29 — Repair FMAS scan scope and misleading clean summaries
+
+The owned audit slice uses Git-tracked module source for secret hints, excludes
+environment content, reports incomplete reads and keeps tracked tests in scope.
+Quoted literals replace expression-based false positives. Audit summaries retain
+warnings/advisories/baseline differences instead of calling them no findings.
+Hosted security rules and reviewed-finding records are unchanged. Synthetic
+acceptance reproduces 19 failures/11 controls on main01b; the candidate's focused
+CI selection passes 134 tests plus 28 subtests. Registry gains one test owner;
+the resident runtime manifest is unchanged. WSP5/6/22/50/62/71/84/97.
+The filesystem/SQLite compliance checker and canonical-domain follow-up remain
+separate work; this slice is not whole-repository audit or security clearance.
+
 ## 2026-10-29 — Cryptographic claims correction allocation
 
 Before applying the separate WSP26 correction patch: WSP15 C1/I4/D4/Impact4=13/P1.
