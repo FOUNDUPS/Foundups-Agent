@@ -1,5 +1,19 @@
 # ModLog - FoundUps Agent Market
 
+## 2026-10-29 — Exact quantity admission before launch effects
+
+WSP00/6/11/15/22/50/77/84/97; allocated17/P0 before tests/product.
+Eight existing model quantity guards now require built-in int, excluding bool
+and deceptive subclasses. Reused the optional Task constructor before launch
+adapter calls and removed reward int coercion; failure audit behavior remains.
+Preserved all53 prior cases/oracles; frozen desired controls reproduced27 failures,
+then the same132 focused cases and333 connected cases passed (overlapping scopes).
+Independent review accepted source and evidence; static backend manifest retains
+the same members and changes only these two source hashes. No runtime activation.
+No signer, provider, broadcast or settlement. Compute dictionary/ORM ingress,
+controller-level independence, funded limits and immutable chain attempts remain
+unqualified. Hosted and resulting-main qualification are publication gates.
+
 ## 2026-10-25 — P0B host authorization and independent proof admission
 
 - WSP00/6/11/15/22/50/84/97; pre-authoring C4/I5/D5/Impact5=19/P0.

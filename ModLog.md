@@ -1,3 +1,13 @@
+## 2026-10-29 — Blockchain prerequisite: exact quantity admission
+
+FAM rejects ambiguous domain quantities and validates an initial task before
+launch adapters. Frozen controls reproduced27 failures; repaired source passes
+132 focused and333 connected cases, with all53 prior cases/oracles preserved.
+Independent source/result review accepted. Existing manifest changes only the
+two production hashes; no installed-runtime activation or chain effects.
+The17/P0 allocation and remaining controller/funding/signing gates are recorded
+in the FoundUps FX/chain delivery plan. Hosted/main qualification remains pending.
+
 ## 2026-10-29 — F1 syntax/encoding and audit parser repair
 
 The first hosted test job stopped at a stale generated test registry after

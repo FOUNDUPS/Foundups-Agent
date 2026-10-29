@@ -11,6 +11,16 @@ FoundUps Agent Market exposes stable contracts for launching tokenized FoundUps 
 
 ## Core Schemas
 
+Quantity validation requires `type(value) is int` for TokenTerms.max_supply,
+Task.reward_amount, Payout.amount, ComputePlan.monthly_credit_allocation,
+ComputeWallet.credit_balance/reserved_credits, ComputeLedgerEntry.amount and
+ComputeSession.credits_debited. Existing positive/nonnegative minima are unchanged;
+no upper bound or asset denomination is established by these constructors.
+LaunchOrchestrator preserves the raw initial reward and validates the planned Task
+before domain adapter calls. Invalid input returns a failed LaunchResult with no
+created artifacts; the existing launch.failed audit event remains. This is not
+whole-launch rollback or validation of separate compute dictionary/ORM ingress.
+
 ### Foundup
 ```python
 Foundup(

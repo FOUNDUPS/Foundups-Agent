@@ -1,4 +1,14 @@
 ﻿# ROADMAP - FoundUps Agent Market
+## Exact quantity admission — 2026-10-29
+
+Implemented eight constructor type guards and optional-task validation before
+launch adapter effects. Frozen acceptance reproduced 27 failures, then passed
+132 focused and 333 connected cases (overlapping scopes); independent review
+accepted source and test preservation. Hosted/main publication remains separate.
+Next P0 gates: authenticated controller independence, funded aggregate caps,
+asset units/range, durable attempt/reissue ownership, signing and confirmation.
+Separate compute dictionary/ORM inputs are not qualified by this change.
+
 ## Pre-chain safety delivery — 2026-10-25
 
 - [x] P0A: reject invalid/unavailable/disconnected requested or default token

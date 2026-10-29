@@ -43,6 +43,12 @@ immutable intent/artifact/reissue state, signer and finality remain independent
 P0 gates. No provider, account/key generation, signing, broadcast or funds.
 Execution is deterministic local source/testing plus CI, not resident authority.
 
+Execution receipt: baseline53 passed; frozen desired132 reproduced27 failures;
+same132 then passed, as did the connected333 (includes132). Independent source/
+result review accepted preservation and pre-adapter refusal. Static manifest has
+the same members and only the two reviewed source hashes changed. No runtime
+activation. Source publication and exact-head/main gates remain outstanding.
+
 ## Member host bootstrap allocation — 2026-10-26, before authoring
 
 WSP15 C3/I4/D4/Impact4=15/P1; WSP00/3/6/11/22/49/50/62/71/77/84/97/109.

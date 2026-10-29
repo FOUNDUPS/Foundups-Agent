@@ -3,6 +3,15 @@
 ## Purpose
 FoundUps Agent Market (FAM) is the outer layer for launching tokenized FoundUps and coordinating agent swarms through a task to proof to verification to payout pipeline.
 
+### Exact quantity admission — 2026-10-29
+
+Domain quantity constructors require built-in integers: booleans, numeric strings,
+floats and integer subclasses are invalid. Positive/nonnegative minima remain.
+Launch validates its optional initial task before registry, token or repository
+adapter calls; an invalid reward returns the existing failed launch/audit result.
+Separate compute dictionary/ORM ingress, asset units and funded caps remain
+unqualified. This admission boundary does not sign or settle a chain payment.
+
 ## CABR Canonical Intent
 
 - CABR = Consensus-Driven Autonomous Benefit Rate (also referred to as Collective Autonomous Benefit Rate).

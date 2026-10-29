@@ -2,6 +2,13 @@
 
 ## Privileged operations (P0B)
 
+Exact quantity controls reuse test_schemas.py for eight fields, coercible types,
+booleans, deceptive integer subclasses and unchanged integer minimum boundaries.
+test_orchestrator.py rejects invalid initial rewards with zero calls to registry,
+token, repository and task adapters, preserving the failure audit event.
+The132-case focused inventory is included in the333-case connected run; do not
+add overlapping totals. TestModLog records RED and source-bound evidence limits.
+
 Existing permission and transaction tests supply host contexts explicitly; never
 add a fixture that grants authority from the actor or profile under test. Cover
 absent/wrong principal/scope/role, self-verification, stored legacy bindings,

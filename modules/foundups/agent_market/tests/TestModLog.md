@@ -13,6 +13,13 @@ and local audit event. Freeze desired tests before changing product sources.
 Domain-schema coverage does not qualify separate compute dictionary/ORM ingress,
 asset units, funded caps, controller independence, signing or chain settlement.
 
+Frozen desired run:105 passed/27 failed; candidate: same132 IDs all passed.
+Connected eight-owner run:333 passed, no failures/errors/skips; includes132.
+All53 old case IDs/oracles preserved. Independent source/result review accepted;
+reviewer did not rerun product. External isolated Python runner denies socket
+audit events, but does not establish native/OS confinement or full import closure.
+Manifest regenerated separately; only the two reviewed source hashes changed.
+
 ## 2026-10-25 — P0B explicit authority and independent stored proof
 
 - Baseline: 292 connected FAM/lifecycle cases passed before test/product edits.
