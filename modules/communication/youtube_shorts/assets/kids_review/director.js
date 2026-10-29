@@ -57,7 +57,7 @@ function expand(el,on){
  document.querySelectorAll('.expanded').forEach(n=>n.classList.remove('expanded'));
  if(on)el.classList.add('expanded');document.body.classList.toggle('focused',on);
  for(const [panel,id,label] of [[videoPanel,'full-video','video'],[gamePanel,'full-game','game']]){const active=panel.classList.contains('expanded'),button=$(id);button.setAttribute('aria-expanded',String(active));button.setAttribute('aria-label',(active?'Collapse ':'Expand ')+label);button.innerHTML=active?collapseIcon:expandIcon;}
- for(const sibling of document.querySelector('main').children){if(on&&sibling!==el)sibling.setAttribute('inert','');else sibling.removeAttribute('inert');}
+ for(const sibling of document.querySelector('main').children){if(on&&sibling!==el&&sibling.id!=='languages')sibling.setAttribute('inert','');else sibling.removeAttribute('inert');}
  if(on)el.querySelector('.expand-button').focus({preventScroll:true});else if(focusReturn?.isConnected){focusReturn.focus({preventScroll:true});focusReturn=null;}
  viewport();
 }
