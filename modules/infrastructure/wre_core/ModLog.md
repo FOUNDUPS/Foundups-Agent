@@ -1,3 +1,13 @@
+## 2026-10-29 — Reconcile the YouTube registry with current main
+
+Combined main `68562f2c8ca4749e360e76758183319d54988879` with the accepted
+YouTube repair `6c655690a7a6ef1f761ed3632be78bd59ffea48a`. Retained both
+conflicting ModLog entries and regenerated the registry through its existing
+owner: 1,779 files / 275 quarantined, including the incoming Hornet Hunter test.
+No classification rule, YouTube runtime source, backend manifest, digest pin or
+security ledger changed. Repository integration and live verification remain
+separate gates. WSP 10/22/50/84/97.
+
 ## 2026-10-29 — Register the YouTube reply repair tests
 
 Regenerated the canonical Git-tracked registry with its existing generator after
@@ -7,6 +17,16 @@ quarantine rule, collection or authority contract changed. The existing registry
 and differential-runtime selection passes 50 cases on Windows. The YouTube CI
 owner separately runs the bounded offline repair selections; registry presence
 does not establish live model or YouTube delivery. WSP 5/6/22/50/97.
+
+## 2026-10-29 — Reconcile risk-verification handoff with landed implementation
+
+Retain PR #2248's original execution packet and dispatch reference; resolve the
+roadmap overlap by preserving PR #2250's newer implementation/status table.
+The handoff now links that landed slice and names the remaining native outcome,
+promotion/rollback and measured-benefit gates. No runtime or authority changes.
+Validation: all relative Markdown file targets in the handoff and changed
+roadmap link resolve; diff whitespace check passed. Hosted checks remain a
+separate merge gate. WSP 10/22/48/50/84/97.
 
 ## 2026-10-28 — Preserve risk-based verification through execution and completion
 

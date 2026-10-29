@@ -1,5 +1,11 @@
 # Testing Evolution Log - IDE FoundUps (VSCode Multi-Agent Extension)
 
+## 2026-10-29 — PR 1346 manifest/lock reconciliation
+
+- Structural comparison: only the root `ws` requirement changes from `^8.13.0` to `^8.21.0`; all resolved package records, including `ws 8.22.0`, are unchanged from main.
+- `npm ci --ignore-scripts --dry-run --no-audit --no-fund`: exit 0; 236 planned packages; no installation or scripts.
+- No extension build or runtime acceptance claimed. Existing compile debt remains documented in the module ModLog.
+
 ## [CELEBRATE] **LATEST UPDATE - PERFECT WSP 5 COMPLIANCE ACHIEVED!** [OK]
 
 ### **ULTIMATE SUCCESS: 100% Pass Rate**
