@@ -1,4 +1,4 @@
-﻿"""Smoke test for src.quantum_cognitive_engine."""
+"""Smoke test for src.quantum_cognitive_engine."""
 
 import sys
 from pathlib import Path

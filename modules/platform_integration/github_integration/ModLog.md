@@ -1,5 +1,14 @@
 # GitHub Integration Module Log
 
+## 2026-10-29 — Adapter workflow signature syntax repair
+
+Make agent_id, session_id and cube_type required keyword-only arguments after
+optional inputs in GitHubAPIAdapter.trigger_workflow. The old declaration was
+invalid Python. Byte-source parsing and isolated signature binding pass:
+inputs remains optional and omitting any identity argument rejects. Existing
+adapter transport is still mocked; no workflow or provider request was made.
+GitHubAPIClient observation contracts are unchanged. WSP 11/22/50/97.
+
 ## 2026-10-26 — Bound observation HTTP before project-control integration
 
 WSP00/6/11/15/22/50/62/71/84/97;11/P2. Extend the existing client with private

@@ -17,6 +17,12 @@ First-principles MCP server manager providing auto-discovery, status tracking, a
 
 ## Recent Changes
 
+### 2026-10-29 — Gateway example syntax repair
+
+Removed a malformed nested print in the guarded gateway example. Byte-source
+AST inspection now parses the module; no MCP process or model was started.
+This is syntax acceptance, not gateway runtime qualification. WSP 22/50/97.
+
 ### V003 - MCPA5: All-Surface Discovery Expansion (Truthful S1/S2/S3 Reporting)
 
 **Type**: Discovery expansion (no lifecycle change)

@@ -1,4 +1,4 @@
-﻿"""Chain-Agnostic Token Factory Adapter for FoundUps Agent Market.
+"""Chain-Agnostic Token Factory Adapter for FoundUps Agent Market.
 
 Provides a unified interface for token deployment across multiple chains
 without vendor lock-in. Implements the TokenFactoryAdapter contract.

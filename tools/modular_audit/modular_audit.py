@@ -1028,7 +1028,7 @@ class _QualifiedFunctionVisitor(ast.NodeVisitor):
 
 def _function_sizes(file_path):
     """Return qualified Python function sizes for WSP 62 ceiling checks."""
-    tree = ast.parse(file_path.read_text(encoding="utf-8"))
+    tree = ast.parse(file_path.read_bytes(), filename=str(file_path))
     visitor = _QualifiedFunctionVisitor()
     visitor.visit(tree)
     return visitor.sizes
