@@ -10,6 +10,7 @@ import asyncio
 import dataclasses
 import json
 import logging
+import math
 import os
 from pathlib import Path
 import random
@@ -61,7 +62,7 @@ def _load_definitions(name, relative):
     module.__dict__.update(
         asyncio=asyncio, dataclass=dataclasses.dataclass, Enum=Enum, wraps=wraps,
         RLock=RLock, Event=Event, logger=logging.getLogger(name), os=os,
-        random=random, Path=Path, time=time, json=json,
+        random=random, Path=Path, time=time, json=json, math=math,
         requests=SimpleNamespace(post=_deny_dependency, get=_deny_dependency),
         sqlite3=SimpleNamespace(connect=_deny_dependency),
         resolve_general_model_path=_deny_dependency,
@@ -83,6 +84,8 @@ processor_module = _load_definitions(
     "_reply_context_processor", "modules/communication/video_comments/skillz/tars_like_heart_reply/src/comment_processor.py")
 generator_module.build_grounded_prompt = context_module.build_grounded_prompt
 generator_module.select_channel_personality = context_module.select_channel_personality
+generator_module.is_general_reply_model = context_module.is_general_reply_model
+generator_module.parse_reply_review = context_module.parse_reply_review
 processor_module.extract_row_comment_data = row_module.extract_comment_data
 IntelligentReplyGenerator = generator_module.IntelligentReplyGenerator
 CommentProcessor = processor_module.CommentProcessor
@@ -125,6 +128,7 @@ def _bare_generator():
     generator._last_llm_source = None
     generator._generation_lock = RLock()
     generator._current_content_analysis = None
+    generator._load_reply_theme = lambda: None
     generator._load_personalization_context = lambda **_: "Prior topic: mutual aid"
     generator._load_voice_memory_context = (
         lambda comment_text, video_title=None: "Verified channel position: build cooperatively"
@@ -284,6 +288,7 @@ def _fake_generation(monkeypatch, text, source):
         return text
     generator.generate_reply = generate
     generator._add_0102_signature = lambda text, **_: text + " 0102"
+    generator.inspect_reply = lambda *args: {'approved': True, 'reason': 'fixture_review'}
     monkeypatch.setattr(processor_module, "get_reply_generator", lambda: generator)
     monkeypatch.setattr(processor_module, "INTELLIGENT_REPLIES_AVAILABLE", True)
     return generator
@@ -310,10 +315,16 @@ def _offline_processor(monkeypatch):
     processor._thinking_heartbeat = heartbeat
     processor.stats = {"replies": 0}
     posted = []
-    async def execute(index, text):
+    async def execute(index, text, **kwargs):
         posted.append((index, text))
         return True
-    processor.reply_executor = SimpleNamespace(execute_reply=execute)
+    processor.reply_executor = SimpleNamespace(execute_reply=execute, last_submission_status='verified')
+    async def inspect_posted(*args):
+        return True
+    processor._inspect_posted_reply = inspect_posted
+    async def inspect_draft(*args):
+        return {'approved': True, 'reason': 'fixture_review'}
+    processor._inspect_reply = inspect_draft
     return processor, posted
 
 
@@ -334,7 +345,7 @@ def test_processor_cannot_borrow_later_provider_source(monkeypatch):
 def test_processor_receipt_stays_bound_after_post_await(monkeypatch):
     generator = _fake_generation(monkeypatch, "Grounded 0102", "qwen")
     processor, posted = _offline_processor(monkeypatch)
-    async def execute(index, text):
+    async def execute(index, text, **kwargs):
         posted.append((index, text))
         generator._last_llm_source = "template"
         return True
@@ -581,7 +592,7 @@ def test_event_payload_retains_receipt_without_inventing_video(parent):
 def test_local_service_has_full_prompt_and_bounded_qwen_fallback(monkeypatch, service_ok):
     generator = _bare_generator()
     generator.lm_studio_available = True
-    generator.lm_studio_model_id = "fixture-model"
+    generator.lm_studio_model_id = "qwen3-fixture"
     calls = []
     def post(url, **kwargs):
         calls.append((url, kwargs))
@@ -614,3 +625,4 @@ def test_actual_dom_script_requires_unique_video_id(second_id, expected_id):
     assert result["video_url"] == (first_url if expected_id else None)
     assert result["video_title"] == ("Metadata title" if expected_id else None)
     assert result["text"] == "specific comment"
+

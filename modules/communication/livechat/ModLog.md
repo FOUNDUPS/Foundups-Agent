@@ -1,5 +1,14 @@
 # Livechat Module - ModLog
 
+## 2026-10-29 — Private chat manifest and inspected replies (draft candidate)
+
+WSP 00/15/22/50/84/96/97. Extend existing queue, context reader, generator, Skillz processor and executor; no parallel scheduler or command inbox. `set_context` now activates private context without a public send; `announce` retains explicit publishing. Live-chat and stored-comment language routes consume theme context before generation. The signature hook no longer appends operator wording. Source command identity is carried into comment evidence, and an expired/replaced theme rejects an old draft.
+
+General-language routes reject GUI/audio/embedding model names, including explicit UI-TARS selections. Keyword-only stance assertions become unknown. A separate language-review call evaluates the final candidate; failed/malformed review blocks posting. Top-level posting binds the original row and rechecks identity before submission, requires exact entered text and new creator-reply readback, captures a screenshot and optionally verifies through UI-TARS. Global submit fallbacks are removed. Uncertain outcomes halt the session; unqualified nested submission is blocked.
+
+15 bounded stdlib cases pass; materialized Python sources parse. This is a draft source checkpoint, not signed model-role admission, independent verifier approval, deployment, native RSI or live YouTube evidence. See `modules/communication/video_comments/docs/CHAT_MANIFEST_REPAIR_20261029.md` for exact remaining gates, including full-runtime manifest regeneration, durable uncertainty across restarts and live-selector qualification.
+
+
 ## 2026-10-23 - PR841 owned live-session handoff
 
 WSP 00/5/6/10/11/15/22/50/62/84/91/97; C4/I4/D4/Impact4 = 16/P0.
@@ -4854,3 +4863,4 @@ are preserved verbatim in [the legacy archive](_archive/completed/ModLog_legacy_
 - `modules/communication/livechat/tests/test_party_command.py`
 
 **Status**: [OK] `!party` now routes correctly and runs safely without blocking the poll loop.
+

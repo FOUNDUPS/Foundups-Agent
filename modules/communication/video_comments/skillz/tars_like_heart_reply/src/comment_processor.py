@@ -1291,8 +1291,21 @@ class CommentProcessor:
                     tag = "[AI]" if used_intelligent else "[TMPL]"
                     reply_text_to_post = f"{tag} {reply_text_to_post}"
 
+                # Inspect the final text, including any suffixes, before submission.
+                review = await self._inspect_reply(comment_data, reply_text_to_post)
+                results['reply_review'] = review
+                if not review.get('approved'):
+                    results['errors'].append(review.get('reason', 'review_rejected'))
+                    action_plan['reply']['reason'] = 'review_rejected'
+                    return results
+
                 logger.info(f"  [REPLY] Executing reply via execute_reply()...")
-                reply_ok = await self.reply_executor.execute_reply(comment_idx, reply_text_to_post)
+                comment_data['_target_channel_id'] = self.target_channel_id
+                reply_ok = await self.reply_executor.execute_reply(
+                    comment_idx, reply_text_to_post, expected_comment=comment_data)
+                results['reply_submission_status'] = self.reply_executor.last_submission_status
+                if reply_ok:
+                    reply_ok = await self._inspect_posted_reply(comment_idx, reply_text_to_post, results)
 
                 results['reply'] = bool(reply_ok)
                 # Training Mode: Capture reply text for transcript (Task 3)
@@ -1300,6 +1313,8 @@ class CommentProcessor:
                     results['reply_text_posted'] = reply_text_to_post
                     results['reply_source'] = 'bot'  # vs '012_manual' for training
                     results['llm_source'] = reply_source
+                    results['theme_source_command_id'] = (comment_data.get('_reply_theme') or {}).get('source_command_id')
+                    results['delivery_verified'] = True
                     logger.info(f"  [REPLY] LLM source: {reply_source}")
                 self.stats['replies'] += 1 if results['reply'] else 0
                 logger.info(f"  [REPLY] {'OK' if results['reply'] else 'FAIL'}")
@@ -1389,6 +1404,7 @@ class CommentProcessor:
                                   with_source=True, cancel_event=generation_cancel),
                 timeout=10.0,
             )
+            comment_data['_reply_theme'] = getattr(generation, 'theme', None)
             return generation.text, generation.source
         except asyncio.TimeoutError:
             logger.warning("[HARD-THINK] Layer 2 TIMEOUT (10s) - skipping this generation")
@@ -1401,6 +1417,32 @@ class CommentProcessor:
             hb_stop.set()
             if not hb_task.done():
                 await hb_task
+
+    async def _inspect_posted_reply(self, comment_idx, reply_text, results):
+        try:
+            snapshot = self.driver.get_screenshot_as_png()
+            path = self._snap_dir / f'{self.session_id}_c{comment_idx}_reply_posted.png'
+            path.write_bytes(snapshot)
+            results['reply_inspection_screenshot'] = str(path)
+            if self.use_vision:
+                if not self.ui_tars_bridge:
+                    return False
+                result = await self.ui_tars_bridge.verify(
+                    description='posted creator reply matching this exact text: ' + json.dumps(reply_text),
+                    driver=self.driver, timeout=15)
+                return bool(result.success and result.confidence >= 0.8)
+            return True  # Exact owner/text DOM readback already passed.
+        except Exception as exc:
+            logger.warning('[REPLY-INSPECT] Screenshot/vision unavailable: %s', type(exc).__name__)
+            return False
+
+    async def _inspect_reply(self, comment_data, reply_text):
+        try:
+            return await asyncio.wait_for(asyncio.to_thread(
+                get_reply_generator().inspect_reply, dict(comment_data), reply_text), timeout=5)
+        except Exception as exc:
+            logger.warning('[REPLY-INSPECT] No approval: %s', type(exc).__name__)
+            return {'approved': False, 'reason': 'review_unavailable'}
 
     def _generate_intelligent_reply(self, comment_data: Dict[str, Any], *, with_source=False, cancel_event=None):
         """
@@ -1514,3 +1556,4 @@ class CommentProcessor:
                 logger.error(f"  [VISION-ACTION] ❌ Vision error on attempt {attempt}: {e}")
                 
         return False
+

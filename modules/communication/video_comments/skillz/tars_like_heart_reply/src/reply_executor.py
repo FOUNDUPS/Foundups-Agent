@@ -11,6 +11,7 @@ import asyncio
 import logging
 import os
 import random
+from uuid import uuid4
 from typing import Any, Dict, List
 
 # YTR1: Import for stale element recovery
@@ -287,86 +288,73 @@ class BrowserReplyExecutor:
         return results
 
     async def execute_nested_reply(self, parent_thread_idx: int, reply_idx: int, reply_text: str) -> bool:
-        """Execute reply to a nested reply (relative positioning)."""
-        try:
-            # Open reply box for nested reply
-            opened = self.driver.execute_script("""
-                const threadIdx = arguments[0];
-                const replyIdx = arguments[1];
-                const threads = document.querySelectorAll('ytcp-comment-thread');
-                const thread = threads[threadIdx];
-                if (!thread) return false;
+        # Nested rows have no qualified identity/readback contract yet.
+        logger.warning('[REPLY-INSPECT] Nested submission blocked pending identity qualification')
+        return False
+    def _bind_reply_target(self, comment_idx, expected, marker, selector=None):
+        return self.driver.execute_script(r'''
+            const row = document.querySelectorAll(arguments[0])[arguments[1]];
+            const expected = arguments[2], marker = arguments[3];
+            if (!row || !expected || !expected.text || !expected.author_name) return false;
+            const norm = value => (value || '').replace(/\s+/g, ' ').trim();
+            const text = row.querySelector('yt-formatted-string#content-text, #content-text');
+            const author = row.querySelector('#author-text, ytcp-comment-author');
+            if (!text || !author || norm(text.textContent) !== norm(expected.text) ||
+                norm(author.textContent).replace(/^@/, '') !== norm(expected.author_handle || expected.author_name).replace(/^@/, '')) return false;
+            if (!expected._target_channel_id || !location.pathname.startsWith('/channel/' + expected._target_channel_id + '/')) return false;
+            if (marker) row.setAttribute('data-0102-reply-target', marker);
+            return true;
+        ''', selector or self.selectors['comment_thread'], comment_idx - 1, expected, marker)
 
-                const repliesContainer = thread.querySelector('ytcp-comment-replies');
-                if (!repliesContainer) return false;
+    def _posted_reply_count(self, selector, reply_text):
+        return self.driver.execute_script(r'''
+            const row = document.querySelector(arguments[0]);
+            if (!row || !row.isConnected) return null;
+            const norm = value => (value || '').replace(/\s+/g, ' ').trim();
+            const replies = row.querySelector('ytcp-comment-replies, [class*="replies-renderer"]');
+            if (!replies) return 0;
+            let count = 0;
+            for (const text of replies.querySelectorAll('[id="content-text"]')) {
+                const reply = text.closest('ytcp-comment, ytcp-comment-view, ytcp-comment-view-model');
+                if (reply && reply.querySelector('[class*="creator-badge"], [aria-label*="owner"], [aria-label*="Owner"]') && norm(text.textContent) === norm(arguments[1])) count++;
+            }
+            return count;
+        ''', selector, reply_text)
 
-                const replyElements = repliesContainer.querySelectorAll(
-                    'ytcp-comment-replies[class*="expanded"]'
-                );
-                const reply = replyElements[replyIdx];
-                if (!reply) return false;
-
-                const replyBtn = reply.querySelector('[id*="reply-button"] button');
-                if (!replyBtn) return false;
-
-                replyBtn.click();
-                return true;
-            """, parent_thread_idx - 1, reply_idx)
-
-            if not opened:
-                return False
-
-            delay = (self.human.human_delay(1.5, 0.6) if self.human else 1.5) * self.delay_multiplier
-            await asyncio.sleep(delay)
-
-            # Type reply (same as parent comment logic)
-            typed = self.driver.execute_script("""
-                const threadIdx = arguments[0];
-                const replyIdx = arguments[1];
-                const text = arguments[2];
-                const threads = document.querySelectorAll('ytcp-comment-thread');
-                const thread = threads[threadIdx];
-                if (!thread) return false;
-
-                # Find the reply's textarea (it appears after clicking Reply button)
-                const textarea = thread.querySelector('textarea[id*="textarea"]');
-                if (!textarea) return false;
-
-                textarea.value = text;
-                textarea.dispatchEvent(new Event('input', {bubbles: true}));
-                return true;
-            """, parent_thread_idx - 1, reply_idx, reply_text)
-
-            if not typed:
-                return False
-
-            # 2026-02-04: Reduced pre-submit delay from 1.0s→0.5s
-            delay = (self.human.human_delay(0.5, 0.3) if self.human else 0.5) * self.delay_multiplier
-            await asyncio.sleep(delay)
-
-            # Submit reply
-            submitted = self.driver.execute_script("""
-                const threadIdx = arguments[0];
-                const threads = document.querySelectorAll('ytcp-comment-thread');
-                const thread = threads[threadIdx];
-                if (!thread) return false;
-
-                const submitBtn = thread.querySelector('[id*="submit-button"] button');
-                if (!submitBtn) return false;
-
-                submitBtn.click();
-                return true;
-            """, parent_thread_idx - 1)
-
-            return bool(submitted)
-
-        except Exception as e:
-            logger.warning(f"[NESTED] Reply execution failed: {e}")
+    async def execute_reply(self, comment_idx: int, reply_text: str, *, expected_comment=None) -> bool:
+        """Bind the original row, submit once, and require new owner-text readback."""
+        self.last_submission_status = 'not_attempted'
+        marker = uuid4().hex
+        selector = f'[data-0102-reply-target="{marker}"]'
+        if not self._bind_reply_target(comment_idx, expected_comment, marker):
             return False
+        before = self._posted_reply_count(selector, reply_text)
+        if before is None or before > 0:
+            return False  # Already present or ambiguous; never post a duplicate.
+        self.last_submission_status = 'unknown'
+        try:
+            if not await self._execute_reply_unverified(1, reply_text, thread_selector=selector,
+                                                      expected_comment=expected_comment):
+                return False
+            for _ in range(10):
+                count = self._posted_reply_count(selector, reply_text)
+                if count is not None and count > before:
+                    self.last_submission_status = 'verified'
+                    return True
+                await asyncio.sleep(0.5)
+            return False
+        except Exception as exc:
+            logger.warning('[REPLY-INSPECT] Outcome uncertain: %s', type(exc).__name__)
+            return False
+        finally:
+            try:
+                self.driver.execute_script("const row=document.querySelector(arguments[0]); if(row) row.removeAttribute('data-0102-reply-target');", selector)
+            except Exception:
+                pass  # Preserve the observed outcome if the page disappeared.
 
-    async def execute_reply(self, comment_idx: int, reply_text: str) -> bool:
+    async def _execute_reply_unverified(self, comment_idx: int, reply_text: str, *, thread_selector=None, expected_comment=None) -> bool:
         """Execute reply flow: Open box -> Type -> Submit."""
-        thread_selector = self.selectors["comment_thread"]
+        thread_selector = thread_selector or self.selectors["comment_thread"]
         try:
             from modules.infrastructure.foundups_selenium.src.human_behavior import get_0102_behavior_interface
             behavior_profile = get_0102_behavior_interface(default="0102")
@@ -703,7 +691,7 @@ class BrowserReplyExecutor:
             # VERIFY text was entered
             entered_text = self.driver.execute_script("return arguments[0].textContent", textarea)
 
-            if not entered_text or len(entered_text.strip()) < len(reply_text.strip()) * 0.5:
+            if not entered_text or ' '.join(entered_text.split()) != ' '.join(reply_text.split()):
                 logger.error(f"[DAEMON][REPLY-EXEC] ❌ Verification FAILED! Expected {len(reply_text)} chars, got {len(entered_text) if entered_text else 0}")
                 logger.error(f"[DAEMON][REPLY-EXEC]   Expected: '{reply_text[:50]}...'")
                 logger.error(f"[DAEMON][REPLY-EXEC]   Got: '{entered_text[:50] if entered_text else ''}...'")
@@ -723,6 +711,8 @@ class BrowserReplyExecutor:
             await asyncio.sleep(0.4 * self.delay_multiplier)
 
         # Submit - HARDENED 2026-01-18: Multiple selector strategies + text-based fallback
+        if not self._bind_reply_target(1, expected_comment, None, selector=thread_selector):
+            return False  # A virtualized row may have changed while typing.
         submit_result = self.driver.execute_script(
             """
             const threadSelector = arguments[0];
@@ -767,7 +757,6 @@ class BrowserReplyExecutor:
             // Strategy 1: Direct ID selectors (legacy working paths)
             submitBtn = thread.querySelector('#submit-button button');
             if (!submitBtn) submitBtn = thread.querySelector('ytcp-button#submit-button button');
-            if (!submitBtn) submitBtn = document.querySelector('ytcp-comment-creator #submit-button button');
 
             // Strategy 2: Look for Reply button in comment-creator section
             if (!submitBtn) {
@@ -790,14 +779,6 @@ class BrowserReplyExecutor:
                 submitBtn = findButtonByText(thread, 'Reply');
             }
 
-            // Strategy 6: Global search in comment creator (when thread scope fails)
-            if (!submitBtn) {
-                const globalCreator = document.querySelector('ytcp-comment-creator');
-                if (globalCreator) {
-                    submitBtn = globalCreator.querySelector('#submit-button button');
-                    if (!submitBtn) submitBtn = findButtonByText(globalCreator, 'Reply');
-                }
-            }
 
             if (submitBtn && !submitBtn.disabled) {
                 // FORCE CLICK: dispatch mouse events for custom element compatibility
@@ -823,3 +804,4 @@ class BrowserReplyExecutor:
             return False
 
         return True
+

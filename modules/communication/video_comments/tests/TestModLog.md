@@ -1,5 +1,13 @@
 # video_comments TestModLog
 
+## 2026-10-29 — Private chat-manifest and reply-inspection candidate
+
+New explicit stdlib selector: `python -B -m unittest discover -s modules/communication/video_comments/tests -p test_chat_manifest_inspection.py -v`.
+15 cases pass locally on CPython 3.12 with no third-party packages. Complete source definitions are compiled with controlled collaborators; temporary queue files are real. Providers, browser readback and the queue lock are fixtures. The actual no-post path is exercised for a rejected draft. Tests reproduce UI-TARS model rejection, uncertain stance, malformed/low-scoring reviews, private context activation, replay suppression, explicit announcements, theme prompt consumption and click-without-readback rejection. These are offline regressions, not observed model quality, Chrome selectors, durable crash safety, or live delivery.
+
+The original 53-case selector is retained; its fixtures are adapted for role validation and the new review/posting boundary, without claiming those fixtures test the inspector. Its full run and the 116 adjacent cases remain unrun here because pytest is unavailable. The broad registry and exact-case CI admission still require the owning runtime's qualification. No historical pass count is reused as a current result.
+
+
 ## 2026-10-23 — PR1478 source-bound offline reconciliation
 
 Base `0d3f715bb475c6451e8f23243f43f1adf057cb0f`; original PR head
@@ -129,3 +137,4 @@ correction are explicit; no index rebuild or model call was used.
 
 Applicable ownership: WSP 22 (test history), WSP 50 (source verification),
 WSP 84 (reuse), and WSP 97 section 1.2B (inventory before test authoring).
+

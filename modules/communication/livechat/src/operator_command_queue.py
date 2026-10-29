@@ -47,6 +47,25 @@ def resolve_manifest_state_path() -> Path:
     return _resolve_path(os.getenv("YT_012_MANIFEST_STATE_FILE", DEFAULT_STATE_FILE))
 
 
+def load_active_theme(surface: str):
+    """Read private, unexpired context for one surface without mutating receipts."""
+    try:
+        raw = OperatorCommandQueue._read_json(resolve_manifest_state_path(), {'version': 1})
+        context = raw.get('active_context')
+        if not isinstance(context, dict) or surface not in ALLOWED_CONTEXT_SURFACES:
+            return None
+        surfaces, expiry = context.get('surfaces'), context.get('expires_at_unix')
+        message = context.get('message')
+        if (not isinstance(surfaces, list) or not surfaces
+                or any(not isinstance(s, str) or s not in ALLOWED_CONTEXT_SURFACES for s in surfaces)
+                or surface not in surfaces or not _finite_number(expiry) or expiry <= time.time()
+                or not isinstance(message, str) or not message.strip() or len(message) > MAX_MESSAGE_LENGTH):
+            return None
+        return dict(context)
+    except (OSError, ValueError, TypeError, OverflowError):
+        return None
+
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -258,8 +277,13 @@ class OperatorCommandQueue:
                        "expires_at_unix": expires, "source_command_id": command["id"]}
             self._atomic_write(self.state_path, {"version": 1, "active_context": context})
             result["context"] = context
+            # Context is private behavioral guidance. Only announce publishes.
+            result["context_activated"] = True
+            result["public_message_sent"] = False
+            return {"status": "accepted", "result": result}
         if "livechat" not in surfaces:
             return {"status": "accepted", "result": result}
         sent = await sender(message.strip(), response_type="operator")
         result.update(sender_accepted=sent is True, delivery_verified=False)
         return {"status": "accepted" if sent is True else "unknown", "result": result}
+

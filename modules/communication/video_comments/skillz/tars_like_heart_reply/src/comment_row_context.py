@@ -179,7 +179,7 @@ COMMENT_ROW_SCRIPT = r"""
                 }
 
                 return {
-                    text: text.substring(0, 500),
+                    text: text,
                     author_name: authorName,
                     author_handle: authorHandle,
                     channel_id: channelId,
@@ -259,9 +259,14 @@ def comment_event_payload(result, session_id, comment_idx, channel_id, timestamp
         'reply_text_posted': result.get('reply_text_posted', ''),
         'reply_source': result.get('reply_source', 'bot'),
         'llm_source': result.get('llm_source', 'unknown'),
+        'reply_review': result.get('reply_review'),
+        'reply_submission_status': result.get('reply_submission_status', 'not_attempted'),
+        'delivery_verified': result.get('delivery_verified', False),
+        'theme_source_command_id': result.get('theme_source_command_id'),
         'video_id': result.get('video_id'), 'video_title': result.get('video_title'),
         'channel_id': channel_id, 'timestamp': timestamp,
     }
     if parent_idx is not None:
         payload.update(is_nested=True, parent_comment_idx=parent_idx)
     return payload
+
