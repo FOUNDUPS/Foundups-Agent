@@ -17,3 +17,9 @@ body.embedded .hotspot span{display:none}
 #ending{background:transparent;align-items:flex-end;padding-bottom:16px;gap:12px;font-size:clamp(30px,7vw,64px);color:#173f43}#ending>span{background:#fff4d9;padding:8px 20px;border-radius:22px;box-shadow:0 3px 0 #173f4333}#ending button{min-width:56px;min-height:56px;background:#ffe18a;color:#173f43;border-radius:18px;font-size:28px;padding:8px 16px}.rescue-hit{min-width:48px;min-height:48px}
 
 #ending{font-size:clamp(22px,5vw,48px)}#ending button{min-width:64px;min-height:64px}.rescue-hit{border-radius:50%}#ending>span{padding:4px 10px}
+
+/* Rescue ending: keep centered message clear of score at lower left; thumb-reachable replay. */
+#ending{inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 8% 17%;pointer-events:none;gap:12px}
+#ending>span{max-width:85%;text-align:center;font-size:clamp(24px,5vw,46px);line-height:1.12}
+#ending button{pointer-events:auto;align-self:flex-end;margin-right:clamp(12px,9%,90px)!important;min-width:clamp(76px,12vw,112px);min-height:clamp(76px,12vw,112px);font-size:clamp(38px,6vw,58px)}
+@media(max-width:500px){#ending{padding-bottom:21%;}#ending>span{font-size:clamp(22px,6vw,34px)}}
