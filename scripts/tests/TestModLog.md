@@ -11,8 +11,21 @@ The original 53-case reply-context inventory is unchanged. Local repair selectio
 The existing security/credential selection passes all 75 cases with UTF-8 mode
 and an explicit Git Bash adapter for the Linux-shell workflow fixture on this
 Windows host. The plain native run's unavailable WSL-launcher failure is retained;
-no assertion or scanner rule was changed. Backend manifest and pin regeneration
-uses the existing full-checkout generator; final checks are recorded below.
+no assertion or scanner rule was changed.
+
+At frozen source `9b50dae1c3e57f224ebbe53a2840de42f218e5fa`, the existing
+full-checkout generator produces the unchanged 1,472-member closure at canonical
+digest `4fd3be5f1b0c25cc4cadfd3c2785662ac3ceeb14cd918fbef49c4812955fccc5`.
+Both existing pins advance together. All eight original manifest cases pass,
+including staged-index integrity. The three existing Node compatibility,
+preflight and blocked-recovery entrypoints pass; package surface remains
+70 files / 979,415 bytes under its unchanged 1 MiB cap.
+
+The earlier 7-pass/1-parity-failure run detected a subsequent source edit and was
+superseded by regeneration. A Windows CRLF archive scan was discarded; the final
+explicit Git-LF scan verifies every finding-bearing file against its Git object.
+Independent metadata review and fresh hosted tree/history checks remain distinct
+from local package and model evidence. WSP 5/6/10/22/50/97.
 
 ## 2026-10-26 — GitHub client source binding
 
