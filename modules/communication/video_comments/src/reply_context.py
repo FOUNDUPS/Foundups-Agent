@@ -5,6 +5,20 @@ import json
 import math
 
 
+def normalize_reply_theme(theme):
+    """Reduce a queue-owned theme to bounded prompt context without changing its owner."""
+    if not isinstance(theme, dict):
+        return None
+    message, handles = theme.get('message'), theme.get('handles', [])
+    source = theme.get('source_command_id')
+    if (not isinstance(message, str) or not message.strip() or len(message) > 500
+            or not isinstance(handles, list) or len(handles) > 20
+            or any(not isinstance(handle, str) or len(handle) > 200 for handle in handles)
+            or (source is not None and (not isinstance(source, str) or not 1 <= len(source) <= 200))):
+        return None
+    return {'message': message, 'handles': list(handles), 'source_command_id': source}
+
+
 def is_general_reply_model(model_id):
     """Conservative role allowlist; a loaded GUI/audio model is not a writer."""
     if not isinstance(model_id, str) or not model_id.strip():

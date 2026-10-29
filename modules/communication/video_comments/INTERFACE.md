@@ -9,6 +9,18 @@ the answer. Content-neutral cooldown, repetition and recent-reply controls remai
 `ReplyGenerationResult(text, source, theme=None, context=None)` retains the
 generation's supplied history, verified memory, assessment and private theme.
 Inspection receives that snapshot plus the original author/channel/video.
+`generate_reply_with_source(..., reply_surface='comments', cancel_event=None)`
+keeps comments as the default, with existing history/cooldown and legacy reader
+behavior. The explicit `livechat` surface requires semantic context, reads only
+the livechat queue scope and records that surface in its receipt. Invalid surfaces
+and inspection/receipt surface mismatches fail closed. `inspect_reply` accepts
+`cancel_event`; `_reply_surface` selects the matching freshness reader.
+
+The livechat reuse path permits only general-role LM Studio HTTP calls (each has
+a three-second request timeout), rejects a busy generation/review lock and skips
+embedded Qwen/cloud/template fallbacks. Comments retain serialized blocking
+access and their existing provider chain. Cancellation is checked before provider
+dispatch and after returned results; it cannot terminate an active HTTP request.
 Explicit and discovered LM Studio writers must match `resolve_general_model_path`
 as well as the conservative role filter. This is source routing, not a signed
 provider-admission receipt or measured model quality.
