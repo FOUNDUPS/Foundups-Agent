@@ -160,7 +160,7 @@ if(api())chooseAppearance(chosenAppearance);
 
 // Optional enhancement: older/offline clients keep a usable original dialog.
 import('./storybook.mjs').then(({mountStorybook})=>{
- storybook=mountStorybook({dialog:introDialog,video,narration,beforePlay:()=>api()?.pause(),onFinish:finishStoryIntro});
+ storybook=mountStorybook({dialog:introDialog,video,narration,beforePlay:()=>api()?.pause(),onFinish:()=>{finishStoryIntro();setTimeout(()=>{if(!introDialog.open)video.play().catch(()=>{const playButton=$('video-play');playButton?.focus({preventScroll:true});});},380);}});
  window.storytimeStorybook=storybook;
  if(introDialog.open)storybook.open();
 }).catch(()=>{const note=document.createElement('p');note.textContent='Story pages are unavailable. The game and original introduction still work.';introDialog.querySelector('.intro-actions').before(note);});
