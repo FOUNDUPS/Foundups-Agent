@@ -1,3 +1,25 @@
+## Combined startup, inventory and WSP-domain closure - 2026-10-29
+
+Merge verified canonical-domain main without changing the accepted YouTube
+production or CI child guard. Existing canonical generation combines the two
+owned YouTube members with `wsp_domain_policy.py`: 1,475 members, accepting 1,475
+and refusing 1,476 in the existing boundary owner. Both pins bind canonical
+digest `31a721be`; manifest LF/CRLF sizes are 333,548/336,571 bytes. All byte caps
+remain 329 KiB/2 MiB/32 MiB. Preserve both preceding-lane records below; neither
+was an installed-runtime admission. WSP 3/5/6/15/22/50/62/97.
+
+## Native startup and scheduled inventory source closure - 2026-10-29
+
+WSP 5/6/15/22/50/62/97. Allocate exactly two required members within the existing
+dependency-launcher and scheduler owners: `lm_studio_startup.py` and
+`schedule_inventory.py`. Canonical generation yields 1,474 members and 333,352
+LF bytes. Both digest pins advance together. The existing Node boundary now
+accepts exactly 1,474 and refuses 1,475; the old 1,472 validator first produced
+the expected controlled refusal. Keep the 329 KiB manifest, 2 MiB/file and
+32 MiB total limits unchanged. Compatibility, preflight, blocked-recovery and
+package-manifest Node owners pass. No installed-runtime or public-effect
+authority follows from this source/package binding.
+
 ## Shared WSP domain policy source binding — 2026-10-29
 
 WSP 3/5/6/22/50/84/97. The backend closure adds only

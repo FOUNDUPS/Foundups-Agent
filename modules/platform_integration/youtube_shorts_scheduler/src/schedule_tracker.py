@@ -442,13 +442,20 @@ class ScheduleTracker:
             all_ids.extend(ids)
         return all_ids
 
-    def sync_from_youtube(self, scheduled_videos: List[Dict]):
+    def sync_from_youtube(self, scheduled_videos: List[Dict], *, inventory: Optional[Dict] = None) -> bool:
         """
         Sync tracker with actual YouTube schedule.
 
         Args:
-            scheduled_videos: List of dicts with date key from DOM scrape
+            scheduled_videos: Qualified exact slots from the inventory receipt
+            inventory: Complete channel/filter/pagination proof; required for reset
         """
+        from .schedule_inventory import qualified_inventory
+
+        if not isinstance(scheduled_videos, list) or not qualified_inventory(inventory, self.channel_id, scheduled_videos):
+            logger.warning("[TRACKER] Refusing sync without complete matching scheduled inventory")
+            return False
+
         # Reset current schedule
         self.schedule = {}
         self.video_ids = {}
@@ -468,3 +475,4 @@ class ScheduleTracker:
 
         self.save()
         logger.info(f"[TRACKER] Synced {len(scheduled_videos)} videos from YouTube")
+        return True

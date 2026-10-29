@@ -204,6 +204,25 @@ jobs:
             modules/communication/voice_command_ingestion/tests/test_transcript_language.py \
             modules/communication/voice_command_ingestion/tests/test_voice_command_ingestion.py \
             modules/ai_intelligence/video_indexer/tests/test_audio_transcript_language.py
+      - name: Verify 94 offline native startup controls in a minimal child
+        run: python -I -B .github/scripts/youtube_repair_offline.py --suite startup
+      - name: Verify 102 qualified inventory controls in a separate minimal child
+        run: python -I -B .github/scripts/youtube_repair_offline.py --suite inventory
+      - name: Verify 35 rotation controls in a separate minimal child
+        run: python -I -B .github/scripts/youtube_repair_offline.py --suite rotation
+      - name: Preserve sanitized offline repair inventories
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: youtube-repair-offline-results
+          path: |
+            ${{ runner.temp }}/youtube-repair-startup/summary.json
+            ${{ runner.temp }}/youtube-repair-startup/results.xml
+            ${{ runner.temp }}/youtube-repair-inventory/summary.json
+            ${{ runner.temp }}/youtube-repair-inventory/results.xml
+            ${{ runner.temp }}/youtube-repair-rotation/summary.json
+            ${{ runner.temp }}/youtube-repair-rotation/results.xml
+          if-no-files-found: error
       - name: Verify stream checker global and local quota boundaries
         run: python -B modules/platform_integration/stream_resolver/tests/test_no_quota_stream_checker.py -v
       - name: Verify live handoff and owned worker settlement

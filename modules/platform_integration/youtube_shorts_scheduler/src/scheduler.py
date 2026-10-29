@@ -426,12 +426,17 @@ class YouTubeShortsScheduler:
                     auto_heal = False
                 audit_report = auditor.run_audit(auto_heal=auto_heal)
                 results["audit"] = {
-                    "healthy": audit_report.get("healthy", False),
+                    "status": audit_report.get("status", "failed"),
+                    "healthy": audit_report.get("healthy"),
+                    "total_scheduled": audit_report.get("total_scheduled"),
+                    "observed_scheduled_count": audit_report.get("observed_scheduled_count", 0),
                     "false_positives": len(audit_report.get("false_positives", [])),
                     "time_collisions": len(audit_report.get("time_collisions", [])),
                     "healed": len(audit_report.get("healed", [])),
                 }
-                if not audit_report.get("healthy"):
+                if audit_report.get("status") != "complete":
+                    logger.warning("[SCHEDULER] Post-cycle audit incomplete; total and calendar health unknown")
+                elif audit_report.get("healthy") is False:
                     logger.warning(
                         f"[SCHEDULER] Post-cycle audit found issues: "
                         f"{len(audit_report.get('false_positives', []))} false positives, "
@@ -1031,27 +1036,18 @@ class YouTubeShortsScheduler:
             # Quick timeout for sync navigation - don't block main scheduling
             logger.info("[SCHEDULER] Syncing with YouTube schedule (experimental)...")
 
-            # Navigate to scheduled filter (with fallback for robustness)
-            if not self.dom.navigate_to_shorts_with_fallback(self.channel_id, "SCHEDULED"):
+            from .content_page_scheduler import ContentPageScheduler
+            from .schedule_inventory import qualified_inventory
+
+            if not ContentPageScheduler(self.driver, self.dom).navigate_to_scheduled(self.channel_key):
                 logger.debug("[SCHEDULER] SCHEDULED filter not available, using local tracker")
                 return
-            await asyncio.sleep(2)
-
-            # Get all scheduled videos (paginate if needed)
-            all_scheduled = []
-            while True:
-                scheduled = self.dom.get_scheduled_videos()
-                all_scheduled.extend(scheduled)
-
-                if self.dom.has_next_page():
-                    self.dom.click_next_page()
-                    await asyncio.sleep(1)
-                else:
-                    break
-
-            # Sync to tracker
-            self.tracker.sync_from_youtube(all_scheduled)
-            logger.info(f"[SCHEDULER] Synced {len(all_scheduled)} scheduled videos")
+            inventory = self.dom.read_scheduled_inventory(self.channel_id)
+            if not qualified_inventory(inventory, self.channel_id):
+                logger.warning("[SCHEDULER] Scheduled inventory incomplete; tracker sync refused")
+                return
+            if self.tracker.sync_from_youtube(inventory["videos"], inventory=inventory):
+                logger.info("[SCHEDULER] Synced %s qualified scheduled videos", inventory["total_scheduled"])
 
         except Exception as e:
             logger.debug(f"[SCHEDULER] Sync skipped: {e}")

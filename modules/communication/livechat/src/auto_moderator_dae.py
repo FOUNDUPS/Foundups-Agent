@@ -1891,16 +1891,16 @@ class AutoModeratorDAE:
         # Phase -2: Launch dependencies (Chrome + LM Studio for comment engagement)
         if _env_truthy("YT_DEPS_AUTO_LAUNCH", "true"):
             try:
-                from modules.infrastructure.dependency_launcher.src.dae_dependencies import ensure_dependencies
-                # Require LM Studio so UI-TARS vision is available before engagement
-                dep_status = await ensure_dependencies(require_lm_studio=True)
+                from modules.infrastructure.dependency_launcher.src.dae_dependencies import QWEN_MODEL_ID, ensure_dependencies
+                # Language/DOM startup selects General; vision is a separate role.
+                dep_status = await ensure_dependencies(require_lm_studio=True, model_key=os.getenv("LM_STUDIO_NATIVE_MODEL_KEY") or QWEN_MODEL_ID)
                 if not dep_status.get('chrome'):
                     logger.warning("[DEPS] Chrome not ready - comment engagement may fail")
                     logger.warning("[DEPS] Manual launch: chrome --remote-debugging-port=9222")
                 if dep_status.get('lm_studio'):
-                    logger.info("[DEPS] LM Studio ready (UI-TARS vision enabled on port 1234)")
+                    logger.info("[DEPS] LM Studio selected General model ready")
                 else:
-                    logger.warning("[DEPS] LM Studio not ready - falling back to DOM-only actions")
+                    logger.warning("[DEPS] LM Studio General model not ready; DOM actions remain available")
             except ImportError:
                 logger.debug("[DEPS] Dependency launcher not available")
             except Exception as e:

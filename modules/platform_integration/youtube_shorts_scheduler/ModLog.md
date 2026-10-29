@@ -1,5 +1,45 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-10-29 — Qualified calendar reads and canonical receiving-account rotation
+
+WSP11/22/50/62/84/97. Existing DOM/CPS/auditor/tracker owners now share one
+bounded scheduled-inventory reader; a small sibling holds parsing/pagination to
+avoid extending the DOM monolith. Reused the Skillz chip-bar filter and existing
+shadow traversal pattern. Require native+URL channel binding, actual scheduled
+chip, first/later/final pagination proof and explicit scheduled date/time from
+visibility or schedule-labeled modern Date cells/tooltips. Both established
+native channel locations are supported; conflicting IDs are refused.
+Upload dates, parse failure and failed filters cannot become clean zero.
+Retain observed rows/coverage; partial/unknown cannot purge/reset tracker state,
+produce automatic calendar repair input, or establish a zero cache.
+Repair consumers reject forged-complete/unbound slot lists. Independent review
+also caught numeric video IDs and invalid expected channels; exact string
+identity checks and negative controls now protect collector and sinks.
+
+S1 actual-source bounded selection:102 passed, zero failures/errors/skips
+(86 inventory/consumer,9 existing visibility,7 post-audit breadcrumb). Process,
+network/SQLite effects were denied and writes confined to private external
+fixtures. Synthetic useful positive/qualified-empty inputs pass; installed DOM
+selectors remain unqualified, including unlabeled Date-column-only slots.
+Final sink review also rejected non-list sync inputs before any in-memory reset;
+None/tuple controls preserve both tracker dictionaries and file bytes.
+Legacy visibility readers retain chip-type scoping after shadow traversal, so
+Title/search values containing Unlisted/Scheduled cannot grant filter authority.
+
+Rotation freezes receiving ID and verifies first/later access via native ID,
+Studio path and known permission. Scheduler/config/tracker/alternate receipts/
+cache bind to that ID; failed/unknown access bypasses writers. Permission
+fallback is deferred to its canonical once-per-ID visit. Unbound/incomplete zero
+caches no longer suppress channels. S1 and S2 are separately reviewed local
+layers, with synthetic offline inputs; no live schedule/content modification or
+full main.py qualification is claimed.
+
+Retrieval: owner Holo query returned `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`,
+`freshness=UNKNOWN`, `index_gap_detected=true`; no semantic hits accepted or
+reindex performed. Direct current owner docs and saved daemon-log diagnosis
+supplied the missing artifacts. Deduplicated to existing filter/extraction/
+account/history owners; historical live claims remain dated and are not new QA.
+
 ## 2026-10-26 — Compose existing scheduling skills and recover remote runbook
 
 Connect audit, coverage, selected-batch evidence, metadata, allocation, save,

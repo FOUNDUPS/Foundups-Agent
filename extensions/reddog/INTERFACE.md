@@ -1,5 +1,22 @@
 # RedDog Interface
 
+## Combined canonical-domain source closure - 2026-10-29
+
+The canonical WSP-domain leaf joins the accepted startup and inventory source
+members. Current closure accepts 1,475 and rejects 1,476, preserving all three
+required member assertions and the unchanged 329 KiB/2 MiB/32 MiB byte caps.
+This is source/package compatibility only; the dated entries below retain their
+respective historical counts and authority limits.
+
+## Native startup and qualified inventory closure - 2026-10-29
+
+The existing dependency-launcher startup owner and scheduled-inventory owner add
+exactly two required runtime files. The generated closure admits 1,474 members
+and rejects 1,475; both new members are asserted by the existing boundary test.
+The 329 KiB manifest, 2 MiB individual-file and 32 MiB aggregate caps are
+unchanged. This binds source/package bytes; installed services, browser selectors
+and live scheduling remain separate qualifications.
+
 ## Petition planning source closure — 2026-10-27
 
 The generated backend closure includes the effect-free petition planning leaf

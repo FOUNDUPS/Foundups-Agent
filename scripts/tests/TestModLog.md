@@ -1,3 +1,31 @@
+## 2026-10-29 - Current-main bounded-audit integration
+
+Verified main `34b05f48` contributes two audit test owners, giving canonical
+registry 1,789 files / 260 quarantined and superseding the pre-merge 1,787 count.
+Accepted runtime membership (1,474), source digests, both pins and CI helper
+bytes are unchanged. Current-owner security and narrow canonical/index checks
+have separate private receipts; no live pip-audit/Bandit/npm execution or
+whole-repository security clearance follows from synthetic audit acceptance.
+
+## 2026-10-29 - Native startup and scheduled inventory packaging
+
+Canonical registry generation/check gives 1,787 files, 260 quarantined, after
+reviewed test-only lazy fixture corrections restore collectability without a
+classifier exception. Backend generation/check gives exactly 1,474 runtime
+members; both pins and the existing 1,474-accept/1,475-reject Node boundary bind
+the two approved members with unchanged byte caps. Four Node/package owners
+pass; the controlled old-cap refusal remains private evidence.
+
+The existing selected YouTube CI job gains three fixed, separate child suites:
+startup 94, inventory 102 and rotation 35. Actual-source adapter replays pass
+all three with no errors/skips and the accepted case hashes. Children use a
+fixed credential-free environment, private temp/profile/registry and write/effect
+guards installed before application imports. Current AST classification and
+fresh child ownership are checked; negative gate probes reject stale unit JSON,
+checkout ancestors and missing/foreign markers before pytest. Only sanitized
+result XML/summary artifacts are uploaded; raw diagnostics remain private.
+These offline checks do not qualify installed browser selectors or live effects.
+
 # Script test inventory
 
 ## 2026-10-29 — Bind the reviewed local private-theme route

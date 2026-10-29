@@ -1,5 +1,36 @@
 # Dependency Launcher Module - ModLog
 
+## 2026-10-29 — Local bounded native server startup layer
+
+- Retained the existing facade and legacy model helper APIs; extracted bounded
+  startup into one sibling to reduce the existing monolith. Prefer headless CLI;
+  require known process state, the existing lifecycle node lock, checked command
+  exits/timeouts and explicit loopback bind. Uncertain failures never launch an
+  alternate runtime. Cold GUI spawning is refused/manual action after independent
+  review found persisted GUI autostart/LAN settings unqualified. Existing GUI
+  native reuse and explicit CLI loopback start remain supported. External GUI
+  owners remain outside this coordination lock.
+- Native HTTP and exact selected residency replace TCP/fuzzy readiness. The
+  legacy `load_model` startup flag now verifies without calling automatic model
+  helpers. Missing models are not-ready/manual action; no persistent preload
+  service or model lifecycle ownership was added.
+- Forward explicit native keys through `ensure_dependencies`; YouTube General
+  selection uses `LM_STUDIO_NATIVE_MODEL_KEY` or unchanged qwen3.5-4b default.
+  Explicit vision callers retain UI-TARS checks; General does not certify vision.
+- Actual owned-source selection passed94 cases (49 startup,21 routing/boundary,
+  24 lifecycle), zero failures/skips. Real effect APIs were denied; test journals
+  and OS-lock namespaces were private. The corrected harness uses an explicit
+  credential-free child environment and constant-message effect denials; mock
+  assertions do not serialize kwargs. The earlier49 draft cases overlap.
+  Independent review remains separate; no live startup,
+  model action, main.py execution, remote publication or scheduler result claimed.
+- Retrieval: task-source Holo returned `HOLOINDEX_MAINTENANCE_ACTIVE`; lexical
+  bundle bound clean01b87f0e, UNKNOWN freshness/index-gap retained. Direct owner
+  contracts replaced noisy unrelated hits. Both Gemini sources match, tests are
+  AST-equivalent; differing historical docs were not copied wholesale.
+- WSP00/10/11/22/50/62/84/97. Local-only work; root owns publication and runtime.
+
+
 **Module:** infrastructure/dependency_launcher
 **WSP Reference:** WSP 22 (ModLog Protocol)
 

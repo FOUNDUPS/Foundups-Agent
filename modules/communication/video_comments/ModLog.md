@@ -3498,3 +3498,17 @@ YT_UI_SNAPSHOT_DIR="O:/tmp/ui_action_snapshots"
 - Added env key for the new channel id:
   - `RAVINGANTIFA_CHANNEL_ID=UCVSmg5aOhP4tnQ9KFUg97qA`
 
+# 2026-10-29 — Bind account access to native identity and requested surface
+
+WSP 22/50/84/97. Extend the existing account-swap Skillz owner: require native
+channel/HTTPS Studio path agreement and a known permission observation. Keep
+comments as the default and honor content mode through every OOPS recovery
+branch. Scheduler admission carries its frozen canonical receiving ID through
+the same verifier. Unknown access cannot authorize a scheduling fallback.
+
+Validation is offline, with real verifier/recovery methods and mocked browser
+collaborators, under a credential-free child environment and effect guards.
+The scheduler rotation tests include useful admitted channels, denied first
+switches, immutable identities, owner/receipt/cache binding and all recovery
+surface branches. No live account, schedule or comment was changed.
+
