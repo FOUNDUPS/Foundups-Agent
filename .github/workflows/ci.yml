@@ -1089,6 +1089,8 @@ jobs:
           tools/modular_audit/tests/test_modular_audit.py
           tools/modular_audit/tests/test_fmas_mode2.py
           tools/modular_audit/tests/test_secret_scan.py
+          tools/modular_audit/tests/test_external_audit.py
+          tools/modular_audit/tests/test_tracked_audit.py
           modules/infrastructure/wsp_core/tests/test_wsp_compliance_checker.py
           modules/infrastructure/wre_core/tests/test_fmas_health_triage.py
           modules/communication/moltbot_bridge/tests/test_reddog_wsp62_security_repair_exemptions.py::test_interface_contract_pages_need_no_size_exemption

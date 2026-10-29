@@ -2,30 +2,36 @@
 
 ## PR reconciliation — 2026-10-29
 
-**Latest accepted slice:** #2264, head `976842bb0`, base `01b87f0ea`, squash
-`3ad0eddc85c7e7a216a6a78182bcd2a1a32ef2d5`. All 24 latest logical PR checks and
-five workflows triggered on the resulting main passed. CodeQL's initial opaque
-helper alert was corrected with typed location metadata; no rule was suppressed.
-Fresh owner evidence matches source/workspace/authority at main3ad, CURRENT/no-gap,
-generation `9b6b555c59de1cccbc1e51b87fc6f92195f39c452c47b786c189db57966eca27`.
-The two owned maintenance runtimes stopped. F7a is closed; older pending text
-below is historical. Twelve owned PRs have now landed. Snapshot 06:04 UTC: 36 open.
+**Latest accepted slice:** #2265, head `e2dc7e414`, base `3ad0eddc8`, squash
+`77b8248017aae2673a9f8fad6a0bc095635ee97b`. All 25 current logical PR checks
+and six resulting-main workflows passed. Holo source/workspace/authority all
+match main77b, CURRENT/no-gap, generation
+`6950d91db04b19909036cb031b7f7764af71b7f5c079060c385da6b7ec624260`.
+Both owned maintenance runtimes stopped. F7b closes the thirteenth owned merge;
+older pending paragraphs below are historical. The original backlog remains
+preserved; the last pre-successor snapshot was 36 open PRs.
 
-**Current slice:** `agent/audit-readonly-compliance-20261029`, exact base main3ad.
-Replace WSPComplianceChecker traversal/database initialization with bounded Git
-inventory and explicit incomplete results; bind the GitHub audit adapter to the
-correct shared checkout root. Frozen desired baseline 31 failures/8 controls;
-candidate 39 passes. Actual read-only main3ad inspection: 14.11 seconds, unchanged
-Git status, one explicitly uninspected Hermes submodule. Refresh runtime hashes,
-registry and security evidence, then hosted/main checks before closing this slice.
-No unrelated successor PR is opened while owned acceptance remains unfinished.
+**Current slice:** `agent/audit-root-security-20261029`, exact base main77b.
+F7c runs each applicable external scanner once at repository scope, retains
+exit-1 vulnerability results, rejects failed/partial output, reports accurate
+severity, and uses tracked Mode 1 structure/explicit Bandit targets. Installed
+Python dependencies and the root npm lock are explicit limited scopes. Existing
+Mode 2/optional WSP62 discovery remains outside the new bounded inventory claim.
+Monitoring replaces the obsolete data_processing domain constant; no migrations.
 
-Current validation: 173 audit tests plus 28 subtests, 24 runtime/consumer tests,
-62 registry tests and three Node suites passed. Mode 2: 0 errors/127 warnings/306
-advisories. Registry 1785/260 preserves all previous rows. Runtime membership 1472
-is unchanged; only the checker source hash changes. The 38 unchanged prior-reviewed
-source hashes are rebound to the new manifest bytes; all 2667 previous bindings
-remain. Fresh hosted checks and resulting-main/Holo acceptance remain required.
+Six existing-entrypoint defects reproduce on the base. Seventy-two integrated cases
+pass; old subprocess mocks were deliberately adapted to the bounded WRE runner,
+not called byte-identical red/green fixtures. Eight-owner audit selection:
+245 passed plus 28 subtests. Exact-base Mode 2: 0 errors/127 warnings/306 advisories.
+No live external scanner/network audit, installation, source repair, deployment,
+global collection or independent reviewer is claimed. Registry/runtime/source
+checks and hosted/main/Holo close-out must complete before a successor PR.
+Registry 1787/260 preserves all 1785 prior rows and adds two unit owners; 62
+registry/impact tests pass. Runtime manifest remains byte-identical (1472 members,
+canonical digest 60fc85a9670dca2fba2cbfe745e7852d9b757c1364b80ae837ab664b6e36096f).
+Actual structural-only main77b scan: 7224 admitted files, 158 evidenced blocks and eight unresolved containers,
+three environment paths excluded, 4.69 seconds, unchanged Git status; no external
+scanner launched. Hosted/main/Holo acceptance remains required.
 
 **Additional retained work:** #1648's unique public-chat/accounting/membership
 work needs a split and current-main reconciliation; its old lock would downgrade

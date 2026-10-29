@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1787,
+  "total_tests": 1789,
   "quarantined_tests": 260,
   "tests": [
     {
@@ -24858,6 +24858,22 @@
       "description": ""
     },
     {
+      "id": "test::tools::modular_audit::tests::test_external_audit",
+      "path": "tools/modular_audit/tests/test_external_audit.py",
+      "owner": "tools",
+      "suite_class": "unit",
+      "shard_id": "tools-unit",
+      "capabilities": [
+        "import_path_mutation",
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Synthetic JSON only; no external audit process or network request."
+    },
+    {
       "id": "test::tools::modular_audit::tests::test_fmas_mode2",
       "path": "tools/modular_audit/tests/test_fmas_mode2.py",
       "owner": "tools",
@@ -24978,6 +24994,22 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Synthetic-only acceptance tests for FMAS scan scope and honest summaries."
+    },
+    {
+      "id": "test::tools::modular_audit::tests::test_tracked_audit",
+      "path": "tools/modular_audit/tests/test_tracked_audit.py",
+      "owner": "tools",
+      "suite_class": "unit",
+      "shard_id": "tools-unit",
+      "capabilities": [
+        "import_path_mutation",
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Synthetic metadata/INI boundaries only; never runs Bandit."
     },
     {
       "id": "test::tools::shared::tests::test_pagination",
