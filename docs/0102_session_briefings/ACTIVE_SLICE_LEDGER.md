@@ -1,5 +1,48 @@
 # Active Slice Ledger
 
+## Video proposal reconciliation and editorial close-out — 2026-10-29
+
+**Latest accepted slice:** #2238, reviewed head `0f3ad898fa`, base `45aa97ba84`,
+squash `c2d4c26f7a76168467b7ed4fc3a8b7518f55eff3`, exact reviewed-tree match. All 41 PR
+checks and 22 main checks across 5 observed workflows passed. Fresh Holo
+source/workspace/authority match this main, CURRENT/no-gap, generation
+`0dfd220b1a0dc567dfc9a372ada778b8aa90188cddfd0512fc80a8e068aedb54`.
+Both owned maintenance runtimes stopped. Twenty-one owned merges are accepted;
+this includes repair PRs and does not equal the number of original backlog items.
+The 12:40 UTC inventory has 35 open PRs, eleven drafts. #2238 is removed through
+merge; all retained heads match the preceding inventory. Original PR ancestry,
+shared PC work and the dated archives are preserved.
+
+**Current slice:** existing #1667, original head `93efc4f39a`, through
+`agent/yumori-work-order-reconciliation-20261029`. Preserve its full useful
+proposal and all original campaign-date counts/schema/flow blocks. Use canonical
+Moshpit terminology/filename and architecture path. Correct channel/portfolio/
+bounded-daemon wiring descriptions from actual source; retain the existing JSON
+and SQLite metadata owners. The campaign extractor and candidate projection
+remain SPECIFIED_NOT_IMPLEMENTED, and the unified Moshpit renderer is not wired.
+Authenticated visibility is distinct from disclosure authority; Studio/model
+text is untrusted data and OBSERVED needs supporting source/timestamps. A future
+live acceptance proposal is not an action grant or dispatch.
+
+**Evidence:** current-main45aa Holo retrieval is CURRENT/no-gap with required
+module artifacts. Optional planning/runbook/memory artifacts are absent. The
+actual action/test/architecture owners outrank adjacent shorts/public-member
+hits; direct source reads verify the claims. All affected owner trees are
+identical on integration mainc2d4. Prepared-text hashes, all three original
+schema/flow blocks, every original campaign-date count, five existing owner paths
+and the canonical relative link pass. Module doc bodies and runtime/test/security
+metadata are unchanged. The initial three-file changed scan has zero findings.
+This is documentation validation; no new runtime test or live result is claimed.
+Final hosted, resulting-main and Holo gates remain required for this candidate.
+
+**Follow-ons:** retain the other original PRs and active Story Time/blockchain
+lanes, remaining PC artifacts, F6b/F8/F9 and dependency follow-ups. The separate
+YouTube lane keeps its own live-runtime gates; this proposal does not operate it.
+Previously blocked ignored frontend folders and both owned checkouts remain.
+No main-folder reset, unowned cleanup, public posting or provider access.
+WSP 11/22/50/60/84/87/97.
+
+
 ## Editorial PR reconciliation and root close-out — 2026-10-29
 
 **Latest accepted slice:** #2273, reviewed head `8f8e0f83ec`, base `0d537a1f89`,
