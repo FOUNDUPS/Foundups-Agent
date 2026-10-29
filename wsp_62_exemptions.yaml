@@ -71,6 +71,7 @@ exemptions:
       separate governed archive operation.
     threshold_override: 58000
     temporary: true
+    expires_on: "2026-09-30"
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
     remediation: >-

@@ -7,6 +7,32 @@ Independent source/result review accepted. Existing manifest changes only the
 two production hashes; no installed-runtime activation or chain effects.
 The17/P0 allocation and remaining controller/funding/signing gates are recorded
 in the FoundUps FX/chain delivery plan. Hosted/main qualification remains pending.
+## 2026-10-29 — F4a enforcement, interface preservation and F3 cache repair
+
+Policy #2258 merged at ade6bca85470159bef0e447353e9c0b91628a704, preserving
+concurrent YouTube #2259. All 23 PR checks and all four resulting-main source
+workflows passed. Governed Holo maintenance and a separate query prove CURRENT,
+no gap and matching source/workspace/authority at that revision, generation
+9cba0a7721354209baef3460a20244e78b329a0603b5779fe85f997b1e112adb.
+Both owned maintenance runtimes stopped. Port18800 was already absent before
+this maintenance admission; no action was taken against that external service.
+
+Implement policy-bound overdue-expiry completion in the existing audit owner,
+add six derived historical dates without renewals, remove two resolved bridge
+exemptions, and preserve the oversized interface across five linked pages.
+All original text/headings survive; no execution contract changes. Local
+bounded suite: 103 pass plus 28 subtests. Static module errors fall 89 -> 81
+(all remaining errors are legacy test syntax defects); exact-base size audit
+has zero candidate errors. Four inherited expiry tests still fail. Hosted and
+resulting-main acceptance for this implementation remains pending.
+
+Git's commit-graph chain referenced two missing cache files. Rebuilt through
+`git commit-graph write --reachable --split=replace --no-progress`; native
+verification passes and the warning is gone. No source, branch or shared
+checkout was reset. This repairs the observed cache fault, not an unverified
+historical permission issue. WSP 5/11/22/50/62/81/84/97.
+
+
 ## 2026-10-29 — F4a policy groundwork and F1 main acceptance
 
 F1 #2257 merged at `f304ba799f8fa835f0b5127efabe9e724315e3c8` after 25 passing

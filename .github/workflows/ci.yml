@@ -1058,6 +1058,20 @@ jobs:
           pip install pytest pytest-cov
           pip install -r requirements.txt
 
+      - name: Verify audit expiry and exact-base authority contracts
+        env:
+          PYTHONUTF8: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHON_DOTENV_DISABLED: '1'
+        run: >-
+          python -B -m pytest -q -c /dev/null --noconftest --import-mode=importlib
+          -o pythonpath=. -p no:cacheprovider
+          tools/modular_audit/tests/test_modular_audit.py
+          tools/modular_audit/tests/test_fmas_mode2.py
+          modules/infrastructure/wre_core/tests/test_fmas_health_triage.py
+          modules/communication/moltbot_bridge/tests/test_reddog_wsp62_security_repair_exemptions.py::test_interface_contract_pages_need_no_size_exemption
+
       - name: Verify canonical test registry
         run: |
           python modules/infrastructure/wre_core/scripts/generate_test_registry.py --check
