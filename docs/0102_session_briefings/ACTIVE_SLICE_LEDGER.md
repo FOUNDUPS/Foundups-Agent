@@ -2,6 +2,45 @@
 
 ## PR reconciliation — 2026-10-29
 
+**Latest acceptance:** F1 #2257 is merged at
+`f304ba799f8fa835f0b5127efabe9e724315e3c8`: 25 PR checks and all six observed
+resulting-main source workflows passed. The final AST scan covers 4220 module
+Python files, zero production parser failures and 81 legacy test failures.
+The generated registry is current (1779 files / 260 quarantined); 28 registry
+tests and 85 affected safe-suite tests pass. These are bounded validations,
+not a claim that all module tests or live runtimes work.
+
+**Current queue snapshot:** 38 open PRs, comprising 37 retained original rows
+and concurrent Storytime #2256. YouTube #2254 merged separately at `887c09dd2`
+and was reconciled into F1. Earlier counts below are historical snapshots.
+
+**Current Holo proof:** exact main `f304ba799f` is CURRENT/no-gap, source,
+workspace and authority agree, generation
+`bf26960cc9b61fe8492c5b09051308d5d83d61a01de4b5ce040af08b0c5d4407`.
+Maintenance stopped both owned runtimes; the pre-existing port18800 service
+remains. A query using the primary checkout's helper still correctly rejects
+its old dirty source. Use the current CLAUDE task-helper procedure.
+
+**Next owned slice:** `agent/wsp62-expiry-policy-20261029`, based on this main,
+adds only the historical missing-expiry completion contract to both WSP62
+mirrors. Status: SPECIFIED_NOT_IMPLEMENTED. Acceptance: exact mirrors, preserved
+existing authority/ceiling rules, hosted checks and resulting-main verification.
+Then implement the rule against that immutable base with adversarial tests,
+repair eligible metadata and split the oversized bridge interface. Do not renew
+expired debt or raise its limits.
+
+The existing WRE exemption suite reports five passes and one inherited failure:
+`wre_autonomous_slice_verifier_runtime.py` is 591 lines against a 586-line
+ceiling. Test/source/registries match the exact F1 base. Track that debt with
+the subsequent F4 inventory; the policy-only slice does not erase it.
+
+**F4 retrieval evaluation:** fresh semantic hits were noisy (general governance
+ranked before exemption tests, including one UTF-16 display artifact). No
+duplicate hit was used. The tools-directory bundle truthfully lacks module
+README/INTERFACE; use the existing test README, tools log and canonical WSP62
+contract instead of generating empty module stubs. Direct source review and
+NAVIGATION/catalog checks supply the exact owner. No model execution claimed.
+
 **Owner:** 0102 architect, PR reconciliation lane. This is a dated queue snapshot,
 not live GitHub state or permission to overwrite concurrent product lanes.
 The separate YouTube chat retains its runtime work. Verify current heads and
