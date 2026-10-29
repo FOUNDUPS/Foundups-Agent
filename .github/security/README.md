@@ -12,6 +12,22 @@ bindings. The combined runtime list is unchanged; its eleven F1 source changes
 remove leading BOMs only. Scanner rules, scope, exclusions and fingerprint
 behavior are unchanged. Fresh final tree/history checks remain required.
 
+## Private livechat theme route manifest rebind — 2026-10-29
+
+At integrated source `02d26d74a0dc3d6b0e79da9f3b65d45b22cb937b`, the pinned
+Gitleaks 8.30.1 canonical Git-LF scan reports 171 findings: 133 exact prior
+reviews and 38 renewed manifest bindings. Author and independent reviewer each
+verified all finding-bearing archive bytes against Git objects, all 1,472
+runtime hashes, and the 38 unique unchanged metadata lines with exact prior
+approvals at incoming main `f304ba799f8fa835f0b5127efabe9e724315e3c8`.
+
+Preserve all 2,571 incoming approvals and append only those 38 exact bindings.
+The canonical backend digest is
+`d90542671bc1be9d8297a5153540a0ad4b397214b9a9003c1ee985566f2be3a6`.
+No scanner rule, exclusion, coverage or fingerprint behavior changes. This is
+public source-integrity metadata review; final tree/history checks and hosted
+verification remain separate from model qualification or YouTube delivery.
+
 ## PR2254 YouTube reply manifest rebind — 2026-10-29
 
 The checksum-verified Gitleaks 8.30.1 full Git-LF tree scan at source

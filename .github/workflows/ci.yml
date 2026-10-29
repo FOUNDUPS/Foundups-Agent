@@ -137,7 +137,7 @@ jobs:
           assert cases and not any(list(root.iter(tag)) for tag in ('failure', 'error', 'skipped'))
           names = sorted(case.get('name') for case in cases)
           digest = hashlib.sha256('\n'.join(names).encode()).hexdigest()
-          assert len(cases) == 41 and digest == '749231f87a938ee30520fc74e8c87548771193d7621625fd20d292ecdf47a242', (len(cases), digest)
+          assert len(cases) == 104 and digest == '831e155cd5a850cf0bae533878269c6ab6382fbd3884f608d73cd62a806d1aa8', (len(cases), digest)
       - name: Preserve reply repair results
         if: always()
         uses: actions/upload-artifact@v4
