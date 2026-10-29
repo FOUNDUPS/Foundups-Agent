@@ -25,3 +25,9 @@ The frozen candidate has 39 passing cases; the same acceptance on main3ad has
 31 failures and 8 passing controls. Baseline reproduction explicitly denies the
 old PatternMemory constructor so it cannot create a real database. See
 [TestModLog.md](TestModLog.md). These tests do not validate other WSP core engines.
+
+The subsequent F6a policy layer adds ten cases in the same test owner (49 total).
+These bind the shared constants to both WSP 3 mirrors and exercise real scanner
+behavior for data-only containers and suppressions, immutable compatibility
+aliases, root-contract/src/tests evidence, reserved names, generator inputs and
+pure-policy no-IO calls. They do not authorize physical directory migrations.

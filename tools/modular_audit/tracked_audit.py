@@ -6,11 +6,14 @@ import stat
 from modules.infrastructure.wre_core.src.wre_git_bounded_io import (
     git_read_environment, run_bounded_stdout,
 )
+from modules.infrastructure.wsp_core.src.wsp_domain_policy import (
+    RESERVED_BLOCK_NAMES as RESERVED, evidenced_module_roots,
+    unqualified_module_containers,
+)
 
 MAX_PATHS = 100000
 MAX_MANIFEST_BYTES = 8 * 1024 * 1024
 ROOT_MANIFESTS = frozenset({'requirements.txt', 'package.json', 'package-lock.json'})
-RESERVED = frozenset({'src', 'tests', 'docs', 'memory', 'skills', 'skillz'})
 
 
 @dataclass(frozen=True)
@@ -99,18 +102,8 @@ def read_tracked_inventory(root):
 
 
 def module_roots(files, exceptions):
-    roots = set()
-    for relative in files:
-        parts = relative.split('/')
-        if parts[0] != 'modules' or len(parts) < 3:
-            continue
-        if parts[1] in exceptions:
-            roots.add('/'.join(parts[:2]))
-        elif (len(parts) >= 4 and parts[2] not in RESERVED and not parts[2].startswith('.')
-              and ((len(parts) >= 5 and parts[3] in {'src', 'tests'})
-                   or (len(parts) == 4 and parts[3] in {'README.md', 'INTERFACE.md'}))):
-            roots.add('/'.join(parts[:3]))
-    return sorted(roots)
+    """Compatibility list result; the pure WSP core policy owns classification."""
+    return list(evidenced_module_roots(files, exceptions))
 
 
 def structural_findings(inventory, domains, exceptions):
@@ -130,11 +123,8 @@ def structural_findings(inventory, domains, exceptions):
                  and p.split('/')[1] not in exceptions and p.split('/')[2] in {'src', 'tests'}}
     findings.extend(f"WARNING: Domain-level source/tests need an owned block: '{p}'" for p in sorted(misplaced))
     roots = module_roots(files, exceptions)
-    containers = {'/'.join(p.split('/')[:3]) for p in files if p.startswith('modules/')
-                  and p.count('/') >= 3 and p.split('/')[1] not in exceptions
-                  and p.split('/')[2] not in RESERVED and not p.split('/')[2].startswith('.')}
     findings.extend(f"WARNING: Tracked container lacks src/tests/root-contract evidence: '{p}'"
-                    for p in sorted(containers - set(roots)))
+                    for p in unqualified_module_containers(files, exceptions))
     for module in roots:
         name = module.removeprefix('modules/')
         owned = {p.removeprefix(module + '/') for p in files if p.startswith(module + '/')}

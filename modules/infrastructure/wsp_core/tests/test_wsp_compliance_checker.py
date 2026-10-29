@@ -3,6 +3,7 @@ import asyncio
 import ast
 import hashlib
 from pathlib import Path
+import re
 import sqlite3
 import subprocess
 import sys
@@ -280,3 +281,68 @@ def test_github_consumer_binds_scanner_and_workflow_to_the_same_repository(repo,
     assert manager.project_root == selected
     assert manager.checker.project_root == selected
     assert manager.wre_integration.project_root == selected
+
+
+def test_data_container_does_not_acquire_module_document_requirements(repo):
+    put(repo, 'modules/telemetry/feedback/session.json', '{}\n')
+    rows = scan(repo)
+    for kind in ('DOCUMENTATION', 'TESTING', 'DEPENDENCY', 'NAMING_COHERENCE'):
+        assert not rows_of(rows, kind)
+    assert any(r.affected_files == ['modules/telemetry/feedback']
+               and 'root-contract evidence' in r.description for r in rows)
+
+
+def test_unqualified_container_remains_visible_under_module_suppression(repo):
+    put(repo, 'modules/foundups/intake/docs/OUTCOME.md', 'intake evidence\n')
+    rows = scan(repo, known_false_positives=[('module', 'intake')])
+    assert len(rows) == 1 and rows[0].affected_files == ['modules/foundups/intake']
+    assert rows[0].violation_type.name == 'ARCHITECTURE' and not rows[0].auto_fixable
+
+
+def test_both_auditors_share_immutable_domain_and_exception_objects():
+    from tools.modular_audit import modular_audit as audit
+    from tools.modular_audit import tracked_audit as tracked
+    assert audit.ENTERPRISE_DOMAINS is checker_module.CORE_DOMAINS
+    assert audit.ARCHITECTURAL_EXCEPTIONS is checker_module.ARCHITECTURAL_EXCEPTIONS
+    assert tracked.RESERVED is checker_module.RESERVED_BLOCK_NAMES
+    for values in (audit.ENTERPRISE_DOMAINS, audit.ARCHITECTURAL_EXCEPTIONS, tracked.RESERVED):
+        assert isinstance(values, frozenset)
+        with pytest.raises(AttributeError):
+            values.add('unreviewed_domain')
+
+
+@pytest.mark.parametrize('owner', ['WSP_framework', 'WSP_knowledge'])
+def test_shared_policy_matches_canonical_wsp3_mirrors(owner):
+    from modules.infrastructure.wsp_core.src import wsp_domain_policy as policy
+    text = (ROOT / owner / 'src/WSP_3_Enterprise_Domain_Organization.md').read_text(encoding='utf-8')
+    section = text.split('## 3. Core Domains', 1)[1].split('### 3.1', 1)[0]
+    assert frozenset(re.findall(r'^- \*\*([a-z_]+)/\*\*:', section, flags=re.M)) == policy.CORE_DOMAINS
+    assert 'monitoring' in policy.CORE_DOMAINS and 'data_processing' not in policy.CORE_DOMAINS
+    exception = text.split('### 5.1 WRE Core Engine', 1)[1].split('## 6.', 1)[0]
+    assert '**Location**: `modules/wre_core/`' in exception
+
+
+@pytest.mark.parametrize('evidence', ['src/service.py', 'tests/test_service.py', 'README.md', 'INTERFACE.md'])
+def test_contract_evidence_promotes_container_without_changing_other_scope(evidence):
+    from modules.infrastructure.wsp_core.src import wsp_domain_policy as policy
+    paths = ['modules/foundups/intake/docs/OUTCOME.md',
+             'modules/infrastructure/src/domain_service.py',
+             'modules/communication/tests/test_domain.py',
+             'modules/infrastructure/docs/README.md',
+             'modules/infrastructure/.private/src/service.py',
+             'modules/wre_core/README.md', f'modules/monitoring/health/{evidence}']
+    assert policy.evidenced_module_roots(iter(paths)) == ('modules/monitoring/health', 'modules/wre_core')
+    assert policy.unqualified_module_containers(iter(paths)) == ('modules/foundups/intake',)
+    paths.append('modules/foundups/intake/INTERFACE.md')
+    assert policy.unqualified_module_containers(iter(paths)) == ()
+    assert 'modules/foundups/intake' in policy.evidenced_module_roots(iter(paths))
+
+
+def test_pure_policy_preserves_explicit_exception_without_io():
+    from modules.infrastructure.wsp_core.src import wsp_domain_policy as policy
+    with patch.object(Path, 'open', side_effect=AssertionError('content read')):
+        with patch.object(Path, 'lstat', side_effect=AssertionError('metadata read')):
+            with patch.object(subprocess, 'run', side_effect=AssertionError('process')):
+                paths = ['modules/legacy/notes.md', 'modules/data_processing/data/session.json']
+                assert policy.evidenced_module_roots(paths, {'legacy'}) == ('modules/legacy',)
+                assert policy.unqualified_module_containers(paths, {'legacy'}) == ('modules/data_processing/data',)

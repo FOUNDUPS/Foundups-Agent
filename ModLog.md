@@ -1,3 +1,17 @@
+## 2026-10-29 — Align structural auditors with one WSP 3 policy
+
+F7c #2266 is merged as 34b05f48d after all 24 logical PR checks and all five
+resulting-main workflows passed. Fresh Holo source/workspace/authority all bind
+that main, CURRENT/no-gap; the governed controller stopped both owned runtimes.
+This closes the fourteenth owned merge. Unique original PR work remains preserved.
+
+F6a shares the existing canonical domain and module-evidence rule between FMAS
+and WSPComplianceChecker. Unqualified data/intake containers remain ownership
+hints without fabricated module contracts. Three base regressions reproduce;
+the focused candidate selection passes 83 cases. No directory migration or
+live operation is part of this layer. Remaining acceptance is recorded with
+the owning module and active ledger. WSP 3/5/6/11/22/49/50/60/64/84/87/97.
+
 ## 2026-10-29 — Run external audits once and report incomplete inspection
 
 F7b #2265 is merged as 77b824801 after all 25 current PR checks and all six

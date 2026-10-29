@@ -2,6 +2,35 @@
 
 ## PR reconciliation — 2026-10-29
 
+**Latest accepted slice:** #2266, head `632c49293`, base `77b824801`, squash
+`34b05f48d74f55c09a542db44efb8ba271a8fe56`. All 24 logical PR checks and five
+resulting-main workflows passed. Holo source/workspace/authority all match that
+main, CURRENT/no-gap, generation
+`c5e7a1a1fd2943d180f1ed275f3f70260f35f09ae3274834c106dcd2525ace4a`.
+Both owned maintenance runtimes stopped. Fourteen owned merges are closed.
+The original queue remains preserved; 36 other PRs remain in the latest snapshot.
+
+**Current slice:** `agent/audit-domain-policy-20261029`, exact base main34b.
+F6a shares immutable WSP 3 domains/exceptions and module-evidence classification
+between the existing WSP core checker and FMAS. Data-only containers remain
+explicit ownership hints without fabricated module contracts. No physical moves,
+Holo authority changes, deployment or independent reviewer are claimed. Three
+frozen regressions fail on the base and pass unchanged on the candidate; the
+focused checker/FMAS/regression selection passes 83 tests. Broader audit: 255
+passed plus 28 subtests; runtime/idle-consumer: 24 passed; three Node suites passed.
+Exact-base Mode 2: 0 errors/127 warnings/306 advisories. Registry remains current
+at 1787/260. The 1473-member closure adds only the pure helper; exact digest pins
+and the 1473-accept/1474-reject boundary are validated. Thirty-nine exact source-hash
+metadata findings are reviewed, preserving 2705 prior bindings and all security
+rules. Hosted and resulting-main/Holo acceptance are still pending.
+
+**Prepared follow-ons:** seven source-reviewed missing README drafts are retained
+outside the checkout. Root artifact evidence preserves the malformed tracked
+Firestore file and all original bytes; no concurrent local state is deleted.
+Further domain migrations and monolith decomposition remain separately scoped work.
+
+## Earlier reconciliation notes (historical)
+
 **Latest accepted slice:** #2265, head `e2dc7e414`, base `3ad0eddc8`, squash
 `77b8248017aae2673a9f8fad6a0bc095635ee97b`. All 25 current logical PR checks
 and six resulting-main workflows passed. Holo source/workspace/authority all
