@@ -1134,6 +1134,17 @@ jobs:
           -p no:cacheprovider
           modules/communication/moltbot_bridge/tests/test_openclaw_ollama_contract.py
 
+      - name: Verify read-only root artifact classification
+        env:
+          PYTHONUTF8: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHON_DOTENV_DISABLED: '1'
+        run: >-
+          python -B -m pytest -q -c /dev/null --noconftest --import-mode=importlib
+          -o pythonpath=. -p no:cacheprovider
+          modules/infrastructure/system_health_monitor/tests/test_wsp_85_validator.py
+
       - name: Run Mall GotJunk public listing acceptance
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'

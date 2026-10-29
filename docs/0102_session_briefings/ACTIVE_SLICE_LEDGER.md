@@ -1,5 +1,54 @@
 # Active Slice Ledger
 
+## Root artifacts and Ollama close-out — 2026-10-29
+
+**Latest accepted slice:** #2272, head `d8bc9565e`, base `cb2271228`, squash
+`0d537a1f89c0510fd4c18f64c304f425f0d14a26`. All 24 PR checks and 22 resulting-main checks
+across five observed workflows passed. Fresh source/workspace/authority match
+that main, CURRENT/no-gap, generation
+`f4c0763f83d672dc3d11f8779d6742d1b91543f56afc35a72db18bb49cbaecc0`.
+Both owned maintenance runtimes stopped. Nineteen owned merges are accepted.
+These checks do not qualify a live local model or provider session.
+The 11:34 UTC GitHub snapshot has 36 open PRs, eleven drafts. Of 34 heads
+comparable with the earlier inventory, only #2210 changed, to
+`d8c8f516344c10f54a283c8421190b2b9b082685`; its active blockchain owner retains
+that lane. Earlier review evidence is not acceptance for its newer head.
+
+**Current slice:** `agent/root-artifact-reconciliation-20261029`, based on that
+main. Move twelve tracked root artifacts into existing docs/module/archive owners;
+retain eleven exact Git blobs and the original onboarding body with only reviewed
+links and a historical notice. Six files in the escaped E-drive folder were
+tracked old Holo snapshots, not untracked clutter. Their 2446998 Git bytes and
+pre/post Windows filesystem hashes are preserved. No pickle loading, active
+index replacement or Firebase binding change. The original PC folder is untouched.
+
+Extend the existing read-only WSP85Validator, reuse its two tests and the four
+frozen regressions, and replace generated owner/test descriptions with actual
+effects and limits. All six tests pass; twenty-one exact index references and
+twenty-seven local links are checked. The current owned-checkout root-name scan
+has no findings, which is not content, whole-repository or service certification.
+The test registry (1791/260), runtime manifest (1475), digest pins, separate
+analyzer/scaffold and deployment configuration are unchanged. Mirror WSP85's
+foundational-owner and preservation clarification under WSP81 notification;
+there is no new automatic cleanup authority or installed enforcement service.
+
+**Retrieval/preservation:** fresh semantic cb227 evidence identified the owner;
+pre-edit main0d537 lexical retrieval is explicitly workspace-bound UNKNOWN/gap
+while parent refresh was pending. Required bundle artifacts exist; optional
+roadmap/log/memory artifacts are absent, and direct source/test inspection fills
+the grouped retrieval's missing test hit. Unrelated paper hits are deprioritized.
+The shared dirty PC checkout and broader archive remain intact. Source-bound
+review, containment, tests and scanner checks precede this slice's publication;
+fresh hosted and resulting-main/Holo acceptance are still required.
+
+**Follow-ons:** continue retained original PR reconciliation, individual historical
+PC workstream disposition and F6b/F8/F9 audit work. Keep active Story Time and
+blockchain owners separate. The 24 dependency alerts still need their bounded
+follow-up; no blind dependency override is applied. Ignored frontend build paths
+remain after the automatic approval review block, and both owned checkouts remain
+in use. WSP6/11/22/50/64/71/81/84/85/90/97.
+
+
 ## Ollama recovery and preflight close-out — 2026-10-29
 
 **Latest accepted slice:** #2271, head `4ad900e06`, base `3a4de0b54`, squash

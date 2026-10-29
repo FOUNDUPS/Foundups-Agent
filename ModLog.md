@@ -1,3 +1,29 @@
+## 2026-10-29 — Preserve root artifacts and qualify the existing classifier
+
+Ollama recovery #2272 merged as 0d537a1f89c0510fd4c18f64c304f425f0d14a26.
+All 24 PR checks and 22 resulting-main checks across five observed workflows
+passed. Fresh Holo source/workspace/authority match that main, CURRENT/no-gap;
+both owned maintenance runtimes stopped. Nineteen owned merges now have main/Holo
+acceptance. Live Ollama installation/readiness and provider behavior are not
+established by those code checks.
+
+The F5 root slice preserves twelve tracked files in their documented owner/archive
+locations. Eleven retain exact Git bytes; the old onboarding body receives a
+historical notice and six link corrections. Twenty-one index references and
+twenty-seven local links are checked. The escaped E-drive directory contains six
+tracked historical Holo snapshots, contrary to the pasted audit's untracked
+classification; all 2446998 Git bytes are retained. No pickle/vector execution,
+live-index replacement or deployment reconfiguration occurs.
+
+The existing root validator adds temporary/prompt and escaped-drive classification
+and recognizes six existing foundational files. Two old tests plus four frozen
+regressions pass. The registry stays current at 1791/260; the unchanged 1475-member
+manifest passes source-derived verification. Both WSP85 copies agree, preserving
+foundational-only placement and adding explicit ownership/preservation limits.
+Current owned-checkout root-name findings are empty; that is not whole-repository
+content or operational acceptance. Shared PC artifacts and other chats stay intact.
+Hosted/main/Holo acceptance for this new slice remains pending. WSP6/11/22/50/64/71/81/84/85/90/97.
+
 ## 2026-10-29 — Recover local Ollama fallback configuration
 
 Preflight repair #2271 merged as cb227122828f60d58b50de1046abb09ae31a0929.
