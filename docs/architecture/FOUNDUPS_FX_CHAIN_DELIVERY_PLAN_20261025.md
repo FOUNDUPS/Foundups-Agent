@@ -2,6 +2,40 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## Blockchain return and codec convergence allocation — 2026-10-29
+
+WSP15 C2/I4/D4/Impact4=14/P1; WSP3/6/11/15/22/50/62/71/77/84/97.
+012 explicitly returns this lane to blockchain delivery and current cryptographic/
+agent threat research. Source baseline f304ba799; GitGuardian incidents38958604,
+38962564 and38965909 are individually verified public metadata/fixture false
+positives, with fresh successful app checks. That removes their incident hold,
+not current-main convergence, image or real-chain qualification requirements.
+
+First concrete slice: reconcile the still-unique unsigned codec PR2206 and its
+exact24fb851 source with current main. Preserve all28 named test methods, golden
+vectors, strict ten-field unsigned wire allowlist and effect-denying qualification.
+Reuse the existing workflow, canonical registry generator and exact reviewed-
+finding owner; preserve every newer main security/CI change. Do not port a stale
+whole registry, receipt, manifest or scanner policy. Classify/review shared-file
+overlap and require fresh exact-head gates and resulting-main readback.
+
+No new signer, signature algorithm, account, funding, provider/client, mint,
+broadcast, reward conversion or settlement is allocated. Native Falcon support,
+ordinary account signatures, consensus and State Proofs require distinct current
+evidence; a public address, source digest or algorithm name grants no authority.
+Controller-level verifier independence and durable exact-artifact/attempt/reissue
+admission remain P0 prerequisites before reward or signer promotion.
+
+Budget: codec and28-case oracle sources remain byte-identical; registry changes
+are generated only. Resolve existing shared log/navigation/security records by
+source-preserving combination, with independent review. Module README/INTERFACE/
+ROADMAP/ModLog and test logs <=18 added lines each for dated current facts; this
+plan <=42 added lines, root ModLog <=12. Preserve all historical test failures.
+Execution is source integration and credential-free format tests, not resident
+WRE activation or a cryptographic/security certification. Manual integration and
+deterministic checks are needed because model inference cannot prove canonical
+bytes, unique nonces, SQLite rollback, independent control or network finality.
+
 ## Member host bootstrap allocation — 2026-10-26, before authoring
 
 WSP15 C3/I4/D4/Impact4=15/P1; WSP00/3/6/11/22/49/50/62/71/77/84/97/109.
