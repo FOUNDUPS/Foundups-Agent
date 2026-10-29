@@ -1,5 +1,26 @@
 # ModLog - FoundUps Agent Market
 
+## 2026-10-29 — Existing TestNet intent convergence allocation
+
+Before merging PR2202/cb794d47c onto delivered codec main4c433502e:
+reuse its reviewed immutable PREPARED intent facade, additive migration3/row,
+93 intent controls and existing SQLite compatibility owner. No new signer or
+alternate ledger. Existing16/P0 contract; convergence C2/I4/D4/Impact4=14/P1.
+Preserve all newer main sources, including BOM normalization and security rules.
+Retrieval uses pinned Git, module/interface/roadmap/test logs and existing source;
+module memory/README and requirements.txt are absent, not invented. Historical
+qualification is retained separately from the fresh connected acceptance below.
+Merge only exact prior reviewed fingerprints; unknown findings remain denied.
+Regenerate the current canonical registry through its owner: add one test owner,
+preserve every main entry/classification. Existing manifest includes ORM and
+migrations; regenerate it and both existing digest pins, preserving membership
+and caps. Require source review before any new finding binding is appended.
+Budget: no new product/test behavior, <=24 log and <=12 test-log lines, derived
+registry/manifest/pins and exact security evidence only. Run the existing intent,
+SQLite/migration/pending-payout and connected domain tests in disposable storage;
+qualify fresh hosted security/main and independent source/metadata preservation.
+No installed runtime activation, credentials, provider, signing or chain effects.
+
 ## 2026-10-25 — P0B host authorization and independent proof admission
 
 - WSP00/6/11/15/22/50/84/97; pre-authoring C4/I5/D5/Impact5=19/P0.
