@@ -1,5 +1,10 @@
 # EDUIT execution roadmap
 
+## Phone storybook and narration correction — 2026-10-29
+
+The existing PR #2256 now includes a follow-up phone-first correction: the first-visit storybook fills nearly the available portrait viewport, uses large short text and a taller picture, retains left/right swipe and Previous/Next, and explicit autoplay reads pages before handing off to the MP4. Browser playback restrictions can block automatic video sound, in which case the existing large Play control receives focus. Skip/Close do not auto-start video. The iPad retains its separate responsive layout. The upper fullscreen context on phones is bounded to avoid an oversized dirt strip; game physics, score, artwork scale and hit geometry remain unchanged. This is source implementation, not verified physical-device acceptance or a published Sites version. English browser TTS remains device-voice dependent; native iPad audible testing, all-locale audio and prerecorded production voices are separate acceptance gaps.
+
+
 > **Canonical 2026-10-28 handoff:** [Storytime conversation audit and Prometheus M2M handoff](docs/STORYTIME_RSI_CONVERSATION_AUDIT_AND_HANDOFF.md) is the current decision register. It supersedes conflicting historical statements below about video+game-only tiles, Earn Stars buttons, forced three-round quizzes, and autonomous runtime status. Existing site work is owned by a separate session; this PR documentation change must not overwrite that session's UI work.
 ## EDUIT vision / Storytime Evolution map — 2026-10-28
 
