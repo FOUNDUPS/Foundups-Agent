@@ -63,9 +63,9 @@ function draw(){
  $('message').textContent=over?(saved===5?'Everyone is safe!':saved?`${saved} / 5 saved · ${state.score} points`:locales[locale].over):'';
  $('start').hidden=state.phase!=='ready';$('retry').hidden=!over;$('pause').hidden=!['playing','celebrating'].includes(state.phase);$('time').textContent='';
  let end=$('ending');if(!end){end=document.createElement('div');end.id='ending';stage.parentElement.append(end);}
- end.hidden=!over;if(over){end.replaceChildren();const text=document.createElement('span');text.textContent=saved===5?'Everyone is safe!':saved?`${saved} / 5 ★ ${state.score}`:locales[locale].over;text.setAttribute('aria-label',saved?`${saved} of 5 shrews saved, ${state.score} points`:locales[locale].over);const button=document.createElement('button');button.textContent='↻';button.setAttribute('aria-label',locales[locale].again);button.onclick=()=>act('retry');button.style.cssText='margin-left:auto;min-height:56px;min-width:64px;animation:eduitReplayPulse 1.5s ease-in-out infinite';end.append(text,button);}
+ end.hidden=!over;if(over){end.replaceChildren();const text=document.createElement('span');text.textContent=saved===5?'Everyone is safe!':saved?`${saved} / 5 ★ ${state.score}`:locales[locale].over;text.setAttribute('aria-label',saved?`${saved} of 5 shrews saved, ${state.score} points`:locales[locale].over);const button=document.createElement('button');button.textContent='↻';button.setAttribute('aria-label',locales[locale].again);button.onclick=()=>act('retry');button.style.cssText='animation:eduitReplayPulse 1.5s ease-in-out infinite';end.append(text,button);}
 }
-function frame(now){const dt=last?Math.min((now-last)/1000,.1):0;last=now;if(!paused&&!document.hidden&&['playing','celebrating'].includes(state.phase)){state=advance(state,'tick',dt);draw();}requestAnimationFrame(frame);}
+function frame(now){const dt=last?Math.min((now-last)/1000,.1):0;last=now;if(!paused&&!document.hidden&&['playing','celebrating'].includes(state.phase)){state=advance(state,'tick',dt*(state.practice?1:Math.min(1.24,1+0.08*Math.max(0,(state.round||1)-1))));draw();}requestAnimationFrame(frame);}
 window.storytimeReview={setAppearance(value){
  const available=artwork.appearances;
  if(typeof value!=='string'||!available||!Object.hasOwn(available,value))return null;
