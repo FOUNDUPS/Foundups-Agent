@@ -1,0 +1,157 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "db44f8be3374785341d1c237ec61da774444eb14"
+  },
+  "execution_id": "REDDOG_HOLO_POSTMERGE_RUNTIME_LIVENESS_PHASE2",
+  "execution_plane": "local_tools_and_wsp00_subagents",
+  "outcome": "completed",
+  "system_verdict": {
+    "slice": "exact_task_liveness_claim_integrity_and_owner_acquisition",
+    "candidate_branch": "fix/holoindex-postmerge-runtime-liveness-phase1",
+    "exact_current_main_replay": "required_after_merge",
+    "candidate_contract": "verified",
+    "maintenance_freshness_self_repair": "working_at_base_commit_only",
+    "current_exact_main_maintenance_rsi_accepted": false,
+    "retrieval_quality_rsi": "not_operational",
+    "holoindex_a_grade": "blocked",
+    "runtime_environment_exact_closure_verified": false,
+    "external_authority_effect_lease_fenced": false,
+    "live_route_changed": false,
+    "release_version": "0.4.129"
+  },
+  "wsp15_allocation": {
+    "complexity": 4,
+    "importance": 5,
+    "deferability": 5,
+    "impact": 5,
+    "total": 19,
+    "priority": "P0",
+    "decision": "close task admission, observation, completion, and release integrity before exact-main replay; retain retrieval and external-effect blockers"
+  },
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_1_The_WSP_Framework.md",
+      "WSP_framework/src/WSP_5_Test_Coverage_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_34_Git_Operations_Protocol.md",
+      "WSP_framework/src/WSP_40_Architectural_Coherence_Protocol.md",
+      "WSP_framework/src/WSP_47_Module_Violation_Tracking_Protocol.md",
+      "WSP_framework/src/WSP_48_Recursive_Self_Improvement_Protocol.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_57_System_Wide_Naming_Coherence_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_64_Violation_Prevention_Protocol.md",
+      "WSP_framework/src/WSP_83_Documentation_Tree_Attachment_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "WSP_00 strict awakening passed at coherence 0.739 before this phase.",
+      "A governed Holo query at the base returned CURRENT, no gap, no reindex, first attempt, generation sha256:b5a138e0; the later independent query returned the same binding in 3.812 seconds.",
+      "The retrieval was useful but duplicated current and orphan test documentation; source and canonical module docs governed the uncommitted overlay.",
+      "Holo retrieval located the existing AgentDB claim and completion contracts before extraction; README, INTERFACE, ModLog, test README, TestModLog, WSP registry, and closest tests were read before edits."
+    ],
+    "research": [
+      "Three independent WSP_00/WSP_97 audits examined runtime authority, test gaps, and documentation truth.",
+      "The prior claim digest omitted claim identity and expiry, and completion did not fence lease expiry atomically.",
+      "The first Python package repair used pkgutil.extend_path and could admit foreign top-level scripts directories.",
+      "WSP_48 requires observation, analysis, enhancement, validation, integration, assessment, measurable improvement, rollback, sandboxing, and recursive validation; Holo currently reaches observation/benchmark/proposal evidence only.",
+      "Legacy Holo documentation independently surfaced production-ready, sub-200ms, and automatic-learning claims contradicted by governed measurements and missing promotion authority; those current-looking claims were corrected.",
+      "The smallest repair was one shared v2 claim contract plus an exact pytest-only namespace alias, not a second lease or package system."
+    ],
+    "micro_pass": [
+      "The affected Python selection passed 309 tests, including three real writer-contention expiry falsifiers and one PostgreSQL row-lock seam regression.",
+      "The independent backend manifest shard passed 8 tests and check mode reproduced 1,363 files at sha256:6160d5be6d36e2e3b3cccea8630b2d316dff093cfe6d5dccdc88a1e45fdaffd8.",
+      "The WSP_62 suite passed 16 tests; AgentDB ratcheted from 3,129 to 3,080 lines and the claim module is 200 lines with no function above 50.",
+      "After rebase, the canonical registry is 1,607 tests with 268 quarantined entries; registry, differential, and Holo indexing selection passed 52 tests.",
+      "Fast 14-member, conversation 32-test, contract 3-member, deterministic package, and contract-shard tiers passed."
+    ],
+    "macro_pass": [
+      "The final exact-byte exhaustive RedDog release passed all four groups in 202.154 seconds without a group or release timeout.",
+      "The 18-shard contract has 6,942 lines and 492 assertions at sha256:772c72ece00cff28ba5082d0af5b2b9d201cf281e681440dfd7cd877e50aa6f0.",
+      "The exact 67-file package is 945,990 bytes at sha256:5d7a7f254548e881906a07cb3bccf24bf0d1f9b24fb0b9fb12f9c60499461e93.",
+      "O:/RedDog-Releases/reddog-0.4.129.vsix is 275,700 bytes at sha256:7e9bad6a3e0260a0376e9314821f351e5a5b6cfcb81717fc020892b6c39f4d1e; inspection found 69 entries, 67 package members, no duplicate or unsafe names, and zero source-byte mismatches.",
+      "A broad database audit separately produced 131 passing tests and exposed inherited Chroma handle/corruption failures plus two documented quantum-test failures; those are retained as separate debt.",
+      "No live route, Holo maintenance, reindex, model/provider call, Hermes dispatch, extension install, or promotion occurred in candidate validation."
+    ],
+    "hard_think": [
+      "The v2 digest is deterministic integrity under trusted AgentDB/CAS; it is not a MAC or signature against an arbitrary database writer.",
+      "SQLite BEGIN IMMEDIATE precedes claim, start, and completion clock evaluation; PostgreSQL composes FOR UPDATE into each task-row SELECT, while live PostgreSQL contention remains unproven. SQLite crossing-expiry writer-contention regressions fail closed.",
+      "An expiry fence at task completion does not cancel an already-running external authority transaction or prove the lease again at every route CAS.",
+      "Maintenance freshness RSI restores an exact-main query generation; it cannot propose, independently evaluate, promote, canary, roll back, or learn retrieval changes.",
+      "Latest public retrieval metrics are Recall@8 1.0, MRR 0.9167, and nDCG@8 0.8718 against an all-metrics 0.95 floor, so A-grade fails on measured quality as well as authority closure."
+    ],
+    "dialectic_sweep": [
+      "Hashing only task content was smaller but allowed claim identity and expiry substitution; complete claim context had to enter one canonical digest.",
+      "Rejecting every expired completion would break exact idempotent replay; only a recorded completion at or before expiry may replay afterward.",
+      "Extending a namespace generically made tests import but admitted foreign paths; the exact repository-root alias preserves only the intended compatibility seam.",
+      "Calling freshness repair full RSI would erase the proposer/evaluator/admission/promotion/canary/rollback/outcome-learning gap; the receipt keeps those states separate."
+    ],
+    "first_principles": [
+      "A task starts only with one exact active v2 claim whose assigned time equals issued time and whose duration is in 1..7,500 seconds.",
+      "The first completion must cross the AgentDB transaction boundary before expiry; exact replay remains valid only when stored completion preceded expiry.",
+      "Controller proof cycles are deterministic, bounded to 0..31, and cannot widen the fixed two-proof controller limit.",
+      "Candidate completion is insufficient: rebase, merge, exact-current-main replay, immutable-replica reproof, and clean authority/control checkouts remain required."
+    ],
+    "execute": [
+      "holo_index/owner_acquisition_contract.py",
+      "holo_index/query_receipt.py",
+      "modules/infrastructure/database/src/holoindex_postmerge_claim_contract.py",
+      "modules/infrastructure/database/src/agent_db.py",
+      "modules/infrastructure/database/src/holoindex_postmerge_task_namespace.py",
+      "modules/infrastructure/database/tests/test_holoindex_postmerge_claim_atomicity.py",
+      "modules/communication/moltbot_bridge/src/holoindex_postmerge_runtime_liveness.py",
+      "modules/communication/moltbot_bridge/src/holoindex_postmerge_runtime_controller.py",
+      "modules/communication/moltbot_bridge/scripts/__init__.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_owner_acquisition.py",
+      "scripts/reddog_holoindex_owner_query_once.py",
+      "scripts/reddog_backend_manifest.json",
+      "extensions/reddog/package.json"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_1",
+    "WSP_5",
+    "WSP_6",
+    "WSP_15",
+    "WSP_22",
+    "WSP_34",
+    "WSP_40",
+    "WSP_47",
+    "WSP_48",
+    "WSP_50",
+    "WSP_57",
+    "WSP_62",
+    "WSP_64",
+    "WSP_83",
+    "WSP_84",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/infrastructure/REDDOG_HOLO_POSTMERGE_RUNTIME_LIVENESS_WSP97_EXECUTION_RECEIPT_PHASE2.json",
+    "WSP_knowledge/WSP_Test_Registry.json",
+    "holo_index/README.md",
+    "holo_index/ROADMAP.md",
+    "holo_index/ModLog.md",
+    "modules/communication/moltbot_bridge/README.md",
+    "modules/communication/moltbot_bridge/INTERFACE.md",
+    "modules/communication/moltbot_bridge/ROADMAP.md",
+    "modules/communication/moltbot_bridge/ModLog.md",
+    "modules/infrastructure/database/README.md",
+    "modules/infrastructure/database/INTERFACE.md",
+    "modules/infrastructure/database/ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/README.md",
+    "modules/infrastructure/foundups_mcp_bridge/INTERFACE.md",
+    "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+    "extensions/reddog/README.md",
+    "extensions/reddog/ROADMAP.md",
+    "extensions/reddog/ModLog.md",
+    "extensions/reddog/tests/README.md",
+    "extensions/reddog/tests/TestModLog.md"
+  ]
+}

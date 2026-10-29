@@ -1,14 +1,4 @@
-"""RedDog signed-authority worker dispatch dry-run planner.
-
-Slice: REDDOG_SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_PHASE1
-
-This module consumes an accepted queue authority verification result, the
-signed authority runtime payload, and the authoritative WSP15 allocation
-receipt. It emits deterministic worker-dispatch intents only. It does not
-register workers, spawn workers, enqueue OpenClaw, dispatch Hermes, run shell
-commands, mutate the repository, publish PRs, settle rewards, or re-index
-HoloIndex.
-"""
+"""Plan worker intents from verified signed authority without side effects."""
 
 from __future__ import annotations
 
@@ -17,14 +7,30 @@ import json
 from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, List, Mapping, Sequence, Tuple
 
+from modules.communication.moltbot_bridge.src.reddog_queue_model_runtime_authority import (
+    model_runtime_authority_fields,
+    model_runtime_authority_values_valid,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     AUTHORITY_ISSUED,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_bindings import (
+    optional_authority_binding_values_valid,
+    progressive_stage_authority_fields,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_runtime_invoke import (
     QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_verification_invoke import (
     QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT,
+)
+from modules.communication.moltbot_bridge.src.reddog_worker_dispatch_authority_binding import (
+    authority_verification_binding_matches,
+    recorded_authority_verification_binding,
+)
+from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
+    allocation_changed_paths_match,
+    priority_for_mps_total,
 )
 
 
@@ -34,13 +40,14 @@ SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_ACCEPT = (
 SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_REJECT = (
     "SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_REJECT"
 )
-
-
 class SignedAuthorityWorkerDispatchDryRunReason:
     EXPLICIT_REQUEST_MISSING = "REJECT_EXPLICIT_SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_MISSING"
     AUTHORITY_VERIFICATION_NOT_ACCEPTED = "REJECT_AUTHORITY_VERIFICATION_NOT_ACCEPTED"
     AUTHORITY_RUNTIME_NOT_ACCEPTED = "REJECT_AUTHORITY_RUNTIME_NOT_ACCEPTED"
     AUTHORITY_PAYLOAD_MISSING = "REJECT_AUTHORITY_PAYLOAD_MISSING"
+    AUTHORITY_VERIFICATION_DIGEST_MISMATCH = (
+        "REJECT_AUTHORITY_VERIFICATION_DIGEST_MISMATCH"
+    )
     WSP15_ALLOCATION_MISSING = "REJECT_WSP15_ALLOCATION_MISSING"
     WSP15_ALLOCATION_MALFORMED = "REJECT_WSP15_ALLOCATION_MALFORMED"
     WSP15_RECEIPT_ID_MISMATCH = "REJECT_WSP15_RECEIPT_ID_MISMATCH"
@@ -48,7 +55,15 @@ class SignedAuthorityWorkerDispatchDryRunReason:
     WSP15_PRIORITY_MISMATCH = "REJECT_WSP15_PRIORITY_MISMATCH"
     WSP15_MPS_TOTAL_MISMATCH = "REJECT_WSP15_MPS_TOTAL_MISMATCH"
     WSP15_REASONING_TIER_MISMATCH = "REJECT_WSP15_REASONING_TIER_MISMATCH"
+    WSP15_CHANGED_PATHS_MISMATCH = "REJECT_WSP15_CHANGED_PATHS_MISMATCH"
     MODEL_RUNTIME_BINDING_MISMATCH = "REJECT_MODEL_RUNTIME_BINDING_MISMATCH"
+    MEMEX_SUPPLY_BINDING_MISMATCH = "REJECT_MEMEX_SUPPLY_BINDING_MISMATCH"
+    ARCHITECT_FIX_PUBLICATION_BINDING_MISMATCH = (
+        "REJECT_ARCHITECT_FIX_PUBLICATION_BINDING_MISMATCH"
+    )
+    PROGRESSIVE_STAGE_BINDING_MISMATCH = (
+        "REJECT_PROGRESSIVE_STAGE_BINDING_MISMATCH"
+    )
     QUEUE_MUTATION_NOT_ALLOWED = "REJECT_QUEUE_MUTATION_NOT_ALLOWED"
     HERMES_EXECUTION_NOT_ALLOWED = "REJECT_HERMES_EXECUTION_NOT_ALLOWED"
     WORKER_PLAN_EMPTY = "REJECT_WORKER_PLAN_EMPTY"
@@ -57,7 +72,6 @@ class SignedAuthorityWorkerDispatchDryRunReason:
 @dataclass(frozen=True)
 class WorkerDispatchIntent:
     """One planned worker assignment intent. This is not a worker invocation."""
-
     intent_id: str
     role: str
     worker_runtime: str
@@ -67,8 +81,19 @@ class WorkerDispatchIntent:
     requested_operation: str
     wsp15_allocation_receipt_id: str
     wsp15_allocation_digest: str
+    progressive_policy_stage_receipt_id: str
+    progressive_policy_stage_digest: str
     model_runtime_binding_receipt_id: str = ""
     model_runtime_binding_digest: str = ""
+    model_runtime_binding_verification_receipt_id: str = ""
+    model_runtime_binding_verification_digest: str = ""
+    memex_supply_receipt_id: str = ""
+    memex_supply_digest: str = ""
+    architect_fix_publication_receipt_id: str = ""
+    architect_fix_publication_binding_digest: str = ""
+    verified_work_authority_digest: str = ""
+    authority_verification_receipt_id: str = ""
+    authority_verification_receipt_digest: str = ""
     dry_run_only: bool = True
     no_worker_spawn_performed: bool = True
     no_openclaw_enqueue_performed: bool = True
@@ -89,8 +114,19 @@ class SignedAuthorityWorkerDispatchDryRunReceipt:
     wsp15_priority: str
     wsp15_mps_total: int
     wsp15_reasoning_tier: str
+    progressive_policy_stage_receipt_id: str
+    progressive_policy_stage_digest: str
     model_runtime_binding_receipt_id: str
     model_runtime_binding_digest: str
+    model_runtime_binding_verification_receipt_id: str
+    model_runtime_binding_verification_digest: str
+    memex_supply_receipt_id: str
+    memex_supply_digest: str
+    architect_fix_publication_receipt_id: str
+    architect_fix_publication_binding_digest: str
+    verified_work_authority_digest: str
+    authority_verification_receipt_id: str
+    authority_verification_receipt_digest: str
     dispatch_intent_count: int
     dispatch_intents: Tuple[WorkerDispatchIntent, ...]
     no_worker_spawn_performed: bool = True
@@ -108,6 +144,12 @@ class SignedAuthorityWorkerDispatchDryRunReceipt:
         payload = asdict(self)
         payload["dispatch_intents"] = [intent.to_dict() for intent in self.dispatch_intents]
         return payload
+
+
+WORKER_DISPATCH_INTENT_FIELDS = frozenset(WorkerDispatchIntent.__dataclass_fields__)
+WORKER_DISPATCH_RECEIPT_FIELDS = frozenset(
+    SignedAuthorityWorkerDispatchDryRunReceipt.__dataclass_fields__
+)
 
 
 @dataclass(frozen=True)
@@ -161,18 +203,6 @@ def _reject(
     )
 
 
-def _valid_priority_for_mps(priority: str, mps_total: int) -> bool:
-    if mps_total >= 18:
-        return priority == "P0"
-    if mps_total >= 14:
-        return priority == "P1"
-    if mps_total >= 10:
-        return priority == "P2"
-    if mps_total >= 7:
-        return priority == "P3"
-    return priority == "P4"
-
-
 def _validate_allocation(allocation: Mapping[str, Any]) -> List[str]:
     reasons: List[str] = []
     if not allocation:
@@ -187,7 +217,7 @@ def _validate_allocation(allocation: Mapping[str, Any]) -> List[str]:
         or priority not in {"P0", "P1", "P2", "P3", "P4"}
         or tier not in {"REGULAR", "HIGH", "ULTRA"}
         or type(total) is not int
-        or not _valid_priority_for_mps(priority, total)
+        or priority != priority_for_mps_total(total)
         or not worker_plan
     ):
         reasons.append(SignedAuthorityWorkerDispatchDryRunReason.WSP15_ALLOCATION_MALFORMED)
@@ -202,8 +232,8 @@ def _build_intents(
     *,
     work_authority: Mapping[str, Any],
     allocation: Mapping[str, Any],
+    authority_binding: Mapping[str, str],
 ) -> Tuple[WorkerDispatchIntent, ...]:
-    worker_plan = _mapping(allocation.get("worker_plan"))
     intents: List[WorkerDispatchIntent] = []
     base = {
         "work_order_id": str(work_authority["work_order_id"]),
@@ -211,20 +241,25 @@ def _build_intents(
         "requested_operation": str(work_authority["requested_operation"]),
         "wsp15_allocation_receipt_id": str(allocation["receipt_id"]),
         "wsp15_allocation_digest": _digest(allocation),
-        "model_runtime_binding_receipt_id": str(work_authority.get("model_runtime_binding_receipt_id") or ""),
-        "model_runtime_binding_digest": str(work_authority.get("model_runtime_binding_digest") or ""),
+        **progressive_stage_authority_fields(work_authority),
+        **model_runtime_authority_fields(work_authority),
+        "memex_supply_receipt_id": str(work_authority.get("memex_supply_receipt_id") or ""),
+        "memex_supply_digest": str(work_authority.get("memex_supply_digest") or ""),
+        "architect_fix_publication_receipt_id": str(
+            work_authority.get("architect_fix_publication_receipt_id") or ""
+        ),
+        "architect_fix_publication_binding_digest": str(work_authority.get("architect_fix_publication_binding_digest") or ""),
+        "verified_work_authority_digest": authority_binding[
+            "verified_work_authority_digest"
+        ],
+        "authority_verification_receipt_id": authority_binding[
+            "authority_verification_receipt_id"
+        ],
+        "authority_verification_receipt_digest": authority_binding[
+            "authority_verification_receipt_digest"
+        ],
     }
-
-    roles: List[tuple[str, str, str]] = []
-    coding_count = int(worker_plan.get("coding_worker_count") or 0)
-    active_bounded_code_workers = 1 if coding_count > 0 else 0
-    for index in range(active_bounded_code_workers):
-        roles.append((f"coding_worker_{index + 1}", "0102", "bounded_code_change"))
-    if worker_plan.get("openclaw_candidate") is True and coding_count <= 0:
-        roles.append(("openclaw_candidate", "openclaw", "candidate_queue_review"))
-    if coding_count > 0:
-        roles.append(("queue_stage_worker", "openclaw", "queue_stage_progress"))
-
+    roles = derive_worker_dispatch_roles(allocation)
     for role, runtime, capability in roles:
         seed = {
             **base,
@@ -244,6 +279,71 @@ def _build_intents(
     return tuple(intents)
 
 
+def _optional_authority_fields(
+    work_authority: Mapping[str, Any],
+    reasons: List[str],
+) -> Dict[str, str]:
+    model_fields = model_runtime_authority_fields(work_authority)
+    if not model_runtime_authority_values_valid(work_authority):
+        reasons.append(SignedAuthorityWorkerDispatchDryRunReason.MODEL_RUNTIME_BINDING_MISMATCH)
+    memex_id = work_authority.get("memex_supply_receipt_id")
+    memex_digest = work_authority.get("memex_supply_digest")
+    if not optional_authority_binding_values_valid(memex_id, memex_digest):
+        reasons.append(SignedAuthorityWorkerDispatchDryRunReason.MEMEX_SUPPLY_BINDING_MISMATCH)
+    publication_id = str(work_authority.get("architect_fix_publication_receipt_id") or "")
+    publication_digest = str(work_authority.get("architect_fix_publication_binding_digest") or "")
+    if bool(publication_id) != bool(publication_digest) or (
+        publication_id
+        and not (
+            publication_id.startswith("sha256:")
+            and publication_digest.startswith("sha256:")
+        )
+    ):
+        reasons.append(SignedAuthorityWorkerDispatchDryRunReason.ARCHITECT_FIX_PUBLICATION_BINDING_MISMATCH)
+    stage_fields = progressive_stage_authority_fields(work_authority)
+    if not stage_fields:
+        reasons.append(
+            SignedAuthorityWorkerDispatchDryRunReason.PROGRESSIVE_STAGE_BINDING_MISMATCH
+        )
+    return {
+        **model_fields,
+        "memex_supply_receipt_id": str(memex_id or ""),
+        "memex_supply_digest": str(memex_digest or ""),
+        "architect_fix_publication_receipt_id": publication_id,
+        "architect_fix_publication_binding_digest": publication_digest,
+        **stage_fields,
+    }
+
+
+def derive_worker_dispatch_roles(
+    allocation: Mapping[str, Any],
+) -> Tuple[tuple[str, str, str], ...]:
+    """Derive the only worker roles authorized by a WSP 15 allocation."""
+
+    requested_operation = str(allocation.get("requested_operation") or "")
+    if requested_operation.startswith("signed_0102_readonly_review:"):
+        return (("fusion_lead", "0102", "architect_review"),)
+    worker_plan = _mapping(allocation.get("worker_plan"))
+    roles: List[tuple[str, str, str]] = []
+    coding_count = int(worker_plan.get("coding_worker_count") or 0)
+    active_bounded_code_workers = 1 if coding_count > 0 else 0
+    for index in range(active_bounded_code_workers):
+        roles.append((f"coding_worker_{index + 1}", "0102", "bounded_code_change"))
+    if coding_count > 0 and worker_plan.get("independent_verifier_required") is True:
+        roles.append(
+            (
+                "independent_slice_verifier",
+                "openclaw",
+                "independent_slice_verification",
+            )
+        )
+    if worker_plan.get("openclaw_candidate") is True and coding_count <= 0:
+        roles.append(("openclaw_candidate", "openclaw", "candidate_queue_review"))
+    if coding_count > 0:
+        roles.append(("queue_stage_worker", "openclaw", "queue_stage_progress"))
+    return tuple(roles)
+
+
 def plan_reddog_signed_authority_worker_dispatch_dry_run(
     *,
     explicit_signed_authority_worker_dispatch_dryrun_requested: bool,
@@ -252,13 +352,11 @@ def plan_reddog_signed_authority_worker_dispatch_dry_run(
     wsp15_allocation_receipt: Mapping[str, Any],
 ) -> SignedAuthorityWorkerDispatchDryRunResult:
     """Plan worker dispatch from accepted signed authority without dispatching workers."""
-
     if explicit_signed_authority_worker_dispatch_dryrun_requested is not True:
         return _reject(
             [SignedAuthorityWorkerDispatchDryRunReason.EXPLICIT_REQUEST_MISSING],
             explicit_requested=False,
         )
-
     verification = _mapping(queue_authority_verification_result)
     verification_result = _mapping(verification.get("verification_result"))
     if (
@@ -269,7 +367,6 @@ def plan_reddog_signed_authority_worker_dispatch_dry_run(
             [SignedAuthorityWorkerDispatchDryRunReason.AUTHORITY_VERIFICATION_NOT_ACCEPTED],
             explicit_requested=True,
         )
-
     runtime = _mapping(queue_authority_runtime_result)
     authority = _mapping(runtime.get("authority_result"))
     receipt = _mapping(authority.get("receipt"))
@@ -282,11 +379,24 @@ def plan_reddog_signed_authority_worker_dispatch_dry_run(
             [SignedAuthorityWorkerDispatchDryRunReason.AUTHORITY_RUNTIME_NOT_ACCEPTED],
             explicit_requested=True,
         )
-
     work_authority = _mapping(authority.get("work_authority"))
     if not work_authority:
         return _reject(
             [SignedAuthorityWorkerDispatchDryRunReason.AUTHORITY_PAYLOAD_MISSING],
+            explicit_requested=True,
+        )
+    authority_binding = recorded_authority_verification_binding(
+        runtime,
+        verification,
+    )
+    if not authority_verification_binding_matches(
+        verification,
+        authority_binding,
+    ):
+        return _reject(
+            [
+                SignedAuthorityWorkerDispatchDryRunReason.AUTHORITY_VERIFICATION_DIGEST_MISMATCH
+            ],
             explicit_requested=True,
         )
 
@@ -307,19 +417,19 @@ def plan_reddog_signed_authority_worker_dispatch_dry_run(
         reasons.append(SignedAuthorityWorkerDispatchDryRunReason.WSP15_MPS_TOTAL_MISMATCH)
     if str(work_authority.get("wsp15_reasoning_tier") or "") != str(allocation["reasoning_tier"]):
         reasons.append(SignedAuthorityWorkerDispatchDryRunReason.WSP15_REASONING_TIER_MISMATCH)
-    runtime_binding_id = str(work_authority.get("model_runtime_binding_receipt_id") or "")
-    runtime_binding_digest = str(work_authority.get("model_runtime_binding_digest") or "")
-    if bool(runtime_binding_id) != bool(runtime_binding_digest):
-        reasons.append(SignedAuthorityWorkerDispatchDryRunReason.MODEL_RUNTIME_BINDING_MISMATCH)
-    if runtime_binding_id and (
-        not runtime_binding_id.startswith("reddog_model_runtime_binding:")
-        or not runtime_binding_digest.startswith("sha256:")
-    ):
-        reasons.append(SignedAuthorityWorkerDispatchDryRunReason.MODEL_RUNTIME_BINDING_MISMATCH)
+    if not allocation_changed_paths_match(work_authority, allocation):
+        reasons.append(
+            SignedAuthorityWorkerDispatchDryRunReason.WSP15_CHANGED_PATHS_MISMATCH
+        )
+    optional_fields = _optional_authority_fields(work_authority, reasons)
     if reasons:
         return _reject(reasons, explicit_requested=True)
 
-    intents = _build_intents(work_authority=work_authority, allocation=allocation)
+    intents = _build_intents(
+        work_authority=work_authority,
+        allocation=allocation,
+        authority_binding=authority_binding,
+    )
     if not intents:
         return _reject(
             [SignedAuthorityWorkerDispatchDryRunReason.WORKER_PLAN_EMPTY],
@@ -330,8 +440,8 @@ def plan_reddog_signed_authority_worker_dispatch_dry_run(
         "work_order_id": work_authority["work_order_id"],
         "wsp15_allocation_receipt_id": allocation_receipt_id,
         "wsp15_allocation_digest": allocation_digest,
-        "model_runtime_binding_receipt_id": runtime_binding_id,
-        "model_runtime_binding_digest": runtime_binding_digest,
+        **optional_fields,
+        **authority_binding,
         "dispatch_intent_ids": [intent.intent_id for intent in intents],
     }
     receipt = SignedAuthorityWorkerDispatchDryRunReceipt(
@@ -344,8 +454,16 @@ def plan_reddog_signed_authority_worker_dispatch_dry_run(
         wsp15_priority=str(allocation["priority"]),
         wsp15_mps_total=int(allocation["mps_total"]),
         wsp15_reasoning_tier=str(allocation["reasoning_tier"]),
-        model_runtime_binding_receipt_id=runtime_binding_id,
-        model_runtime_binding_digest=runtime_binding_digest,
+        **optional_fields,
+        verified_work_authority_digest=authority_binding[
+            "verified_work_authority_digest"
+        ],
+        authority_verification_receipt_id=authority_binding[
+            "authority_verification_receipt_id"
+        ],
+        authority_verification_receipt_digest=authority_binding[
+            "authority_verification_receipt_digest"
+        ],
         dispatch_intent_count=len(intents),
         dispatch_intents=intents,
     )
@@ -365,5 +483,8 @@ __all__ = [
     "SignedAuthorityWorkerDispatchDryRunReceipt",
     "SignedAuthorityWorkerDispatchDryRunResult",
     "WorkerDispatchIntent",
+    "WORKER_DISPATCH_INTENT_FIELDS",
+    "WORKER_DISPATCH_RECEIPT_FIELDS",
+    "derive_worker_dispatch_roles",
     "plan_reddog_signed_authority_worker_dispatch_dry_run",
 ]

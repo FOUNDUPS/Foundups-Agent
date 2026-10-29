@@ -100,6 +100,10 @@ def main() -> int:
             policy_gate_receipt=_mapping(payload.get("policy_gate_receipt")),
             signed_receipt_chain_result=_mapping(payload.get("signed_receipt_chain_result")),
             valve_decision=_mapping(payload.get("valve_decision")),
+            registered_foundup_target_receipt=_mapping(
+                payload.get("registered_foundup_target_receipt")
+            ),
+            repo_root=Path(str(payload.get("repo_root") or REPO_ROOT)).resolve(),
             writer=None,
             seen_live_enqueue_keys=_seen_keys(payload.get("seen_live_enqueue_keys")),
         )

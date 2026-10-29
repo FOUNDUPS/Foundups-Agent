@@ -1,3 +1,81 @@
+## 2026-10-18: AntifaFM listener context and verified X pilot
+
+- New bounded contract: default preview cannot reach configuration, credentials,
+  a provider, the local model or the publication ledger. Existing CLI gate/audit
+  behavior remains outside this leaf guarantee.
+- Separate `test_antifafm_campaign.py` covers the new campaign and conversation
+  reader, using provider/model doubles and inline thread dispatch. It does not
+  duplicate scheduler or publication-store tests. Cases cover account identity,
+  listener initiation, parent/quote relationships, incomplete/error responses,
+  command validation, and uncertain publication outcomes.
+- `test_verified_x_publication.py` independently exercises actual disposable
+  SQLite claims/readback and denied-I/O real-package imports. No live provider,
+  account, model, browser, message, or daemon is exercised.
+- Final connected selection passed **86 tests and 32 subtests** with
+  `--import-mode=importlib --noconftest -c /dev/null`, plugin autoload/cache/bytecode
+  disabled; exact four-file command is in tests/README.md. An initial combined
+  collection without importlib mode hit duplicate `tests` package names and ran
+  no tests; corrected collection passed. The skill validator and diff check pass.
+  Prior scheduler evidence below is unchanged. No actual model quality or live
+  delivery is inferred from these provider/model doubles.
+
+## 2026-09-28: Verify scheduler caller/reload characterization
+
+- Candidate `8e3c526a2a` passed51/51 methods (57 finite inputs),0 failures/errors/skips in [CI36412636624](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36412636624). All25 exact file records and nine caller records were independently reviewed; all ten PR checks and CI/CodeQL passed. Three normal controls and six failure-boundary witnesses passed against unchanged production. Final-head/main checks and owned closure remain receipt-bound.
+- A pre-replace failure returns an in-memory created action absent after reload, an executed action reattempted by a fresh fake dependency, or a cancelled reminder executed after reload. Post-replace errors retain new visible state but leave durability uncertain. No production repair or retained RSI is claimed.
+
+## 2026-09-28: Qualify scheduler caller acknowledgement and reload
+
+- WSP00/5/6/15/22/50/62/84/97: fresh14/P1 selection after PR1943 verified main closure; preserve its42 fixed methods/48 inputs.
+- Extend the same fixture with nine current-behavior cases across create/execute/cancel and normal/pre-/post-replace publication. Observe exact returns/logs/file bytes/reload and bounded fake replay. Production unchanged.
+- Named hosted selection is51 methods/57 finite inputs;25 file and9 caller records. Existing50 test bodies unchanged, including8 unselected legacy methods. Fixture/effect review and hosted results pending; no host-local application tests or live effects.
+- WSP62: bounded955-line cohesive file in guideline range; new helpers<=50lines, new class<=200. Existing loader/fixture reused, no new module or exemption. Further growth requires fresh cohesion/decomposition review.
+
+## 2026-09-28: Validate scheduler safe publication under fixed controls
+
+- WSP00/5/6/15/22/50/62/84/97: Baseline `5d0da3625d` in [CI36401910480](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36401910480) ran42 methods:29 passed,13 failed with15 assertion failures,0 errors/skips. The identical fixture against candidate `8f36929dc0` in [CI36402439857](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36402439857) passed42/42 methods (48 finite inputs),0 failures/errors/skips; all16 file-evidence records were hash-checked. Candidate CI/CodeQL and all10 PR checks passed. Final reviewed-head/main checks and owned closure remain receipt-bound.
+- Reuse17-line explicit posting-result projection and unchanged atomic writer. Live response/disposition and load/return contracts remain unchanged. Positive evidence is synthetic execution feedback, not independent external delivery, crash proof or retained RSI. Save acknowledgement/restart replay and Windows behavior remain unqualified.
+
+## 2026-09-28: Implement bounded schedule publication repair
+
+- WSP15=15/P1; WSP97/84 reuse the existing scheduler and unchanged shared atomic writer. Project explicit PostResponse fields without mutating the live object, then serialize the full schedule before any destination write.
+- Preserve action disposition, original response identity, JSON archival reload and existing logged-error/None return. Use configured parent rather than hardcoded memory. Before-replace failure preserves old bytes; after-replace sync failure can leave new complete bytes with uncertain durability.
+- Frozen42-method/48-input hosted acceptance is unchanged; baseline/candidate results pending. No local application execution or live posting. Caller acknowledgement, restart replay safety, Windows publication and retained RSI remain open.
+
+## 2026-09-28: Freeze scheduler safe-publication acceptance
+
+- WSP00/5/6/15/22/50/62/84/97: existing save-owner repair scores15/P1 after verified PR1942 closure at main12663d7e4f.
+- Freeze42 methods/48 finite inputs in the existing source-bound fixture and named hosted CI selection. Preserve26 completion and8 unselected legacy bodies. Disposable-file effects and exact publication failure seams require independent review.
+- Production source is unchanged at baseline. Validation is pending; no passing repair, native RSI, external delivery or persistence acknowledgement claim.
+
+## 2026-09-28: Qualify real scheduler save/load behavior
+
+- WSP00/5/6/15/22/50/62/84/97: C2/I4/D4/Impact4=14/P1 after current ownership/source reconciliation. Reuse the existing scheduler test/CI owners; no production persistence repair.
+- PR1941 is merged/main-verified at `6acb3f55c2`: the frozen26 methods/32 inputs passed on final PR CI36380808132 and main CI36381188667; both CodeQL runs passed. Its owned branch/worktree were retired after recovery preservation.
+- Freeze six independently reviewed cases: two round-trip controls and four typed-result serialization/reload witnesses, including future-action preservation in memory versus invalid file replacement. Preserve all 26 completion methods,32 existing inputs and eight unselected legacy bodies.
+- Actual save/load effects stay under one disposable directory per case. Exact before/after synthetic bytes and hashes are retained in hosted output. Clock/logger/cwd are restored before scratch deletion; no real posting, account or runtime activation.
+- Candidate `e8e06ea86f` passed all 32 methods / 38 fixed inputs in [CI36390957294](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36390957294), with zero failures/errors/skips. All six exact file-evidence records were verified: two valid controls and four serialization/reload defect witnesses. CI and CodeQL passed; final integrated-head and merged-main validation remain receipt-bound.
+- Passing witnesses establish the characterized defect, not corrected persistence, external delivery, native admission or retained RSI. Exact PR/main and cleanup evidence remains in the canonical backlog closure receipt.
+
+## 2026-09-28: Freeze scheduler completion repair acceptance
+
+- PR1936 qualification is closed: all13 fixed witnesses passed on reviewed PR and merged main `cd7e62d680`; source was unchanged. Its nine misleading-success witnesses are defects, not verified posting.
+- Reuse the same inert loader, denied constructor, fixed clock, memory actions and save spy. Correct the13 prior scenario oracles, add8 malformed-response controls,4 invalid-target controls and1 target-mutation control:26 test methods /32 fixed input cases including finite container/counter variants.
+- Old `claims_success` / `still_claims_executed` methods now use `rejects_unsupported` / `rejects_preserving_response` names for the same five unsupported and four negative stream scenarios. Reminder, complete success, dependency exception and no-due controls remain; eight legacy bodies are unchanged and unselected.
+- Acceptance is frozen before production edits. No host-local application execution is qualified. The existing hosted command remains `python -I -B modules/platform_integration/social_media_orchestrator/tests/test_autonomous_scheduler.py TestExecutionEvidence -v`; fixture/effect review and exact red/green receipts govern results.
+- Hosted baseline CI36379506634 at `34ed9b69ae` ran the frozen26 methods/32 inputs: 5 methods passed,21 failed with27 assertion failures,0 errors/skips. This reproduces incorrect completion against unchanged production source. Repaired candidate `9bc31ed6e0` passed the identical26 methods/32 inputs in CI36380266749 (0 failures/errors/skips); CI and CodeQL succeeded. Final integrated-head and merged-main validation remain required; exact closure is receipt-bound.
+- Status/result/error, original response identity, save requests, success/failure logs and terminal no-retry are observed in memory only. No delivery, durable persistence, native admission, retained RSI or authority expansion is inferred. WSP00/5/6/15/22/50/62/84/97.
+
+## 2026-09-28: Fixed scheduler execution-evidence qualification
+
+- Initial PR1936 CI stopped at the stale canonical test registry; all13 scheduler cases were skipped. Refresh the existing generated registry and rerun the same frozen cases; no successful execution is inferred.
+
+- WSP 00/5/6/15/22/50/62/84/97; existing `test_autonomous_scheduler.py` extended after retrieving this log, tests README and actual scheduler/producer source. No new test file or production implementation.
+- Add 13 independently specified current-behavior witnesses: five non-effect branches, local reminder, five stream-result shapes, exception and no-due batch. Actual enum/dataclass declarations and unchanged scheduler leaf; private imports, denied constructor, fixed time, awaited spy and memory-only bookkeeping.
+- Preserve all eight legacy test bodies; they are excluded from this qualification and cannot invoke the real constructor through the new fixture. A successful characterization is evidence of observed behavior, including defects, not a truthful-posting acceptance pass.
+- Exact command: `python -I -B modules/platform_integration/social_media_orchestrator/tests/test_autonomous_scheduler.py TestExecutionEvidence -v`. Reuse one named step in existing CI. Execution results, original logs and independent review remain in the canonical queue's closure receipt; no result claimed at preparation.
+- No account, browser, provider, native worker or real database/save/load operation is tested. The save spy proves only a requested bookkeeping call.
+
 ﻿# social_media_orchestrator Test Execution Log
 
 ## WSP 34 Test Documentation Protocol

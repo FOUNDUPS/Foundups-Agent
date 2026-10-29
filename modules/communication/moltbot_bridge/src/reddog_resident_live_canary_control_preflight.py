@@ -23,12 +23,14 @@ from modules.communication.moltbot_bridge.src.reddog_signer_control_loop_anchor 
 
 def verify_live_canary_control_prestate(
     *,
+    repo_root: Path,
     runtime_root: Path,
     receipts: Sequence[Mapping[str, Any]],
     authority_profile: Mapping[str, Any],
     authority_profile_source: Mapping[str, Any],
     expected_source_receipt_id: str,
     signer_anchor_path: Path,
+    signer_anchor_root: Path,
 ) -> None:
     validate_authority_profile_source(
         authority_profile_source, expected_source_receipt_id
@@ -38,7 +40,9 @@ def verify_live_canary_control_prestate(
     )
     verify_control_receipt_chain_against_profile(receipts, authority_profile)
     _, _, head = load_control_receipt_head(
-        runtime_root / "authority_runtime_state.json"
+        runtime_root / "authority_runtime_state.json",
+        runtime_root=runtime_root,
+        repo_root=repo_root,
     )
     current_ids, child_receipts, child_evidence = _chain_evidence(receipts)
     if head is None:
@@ -55,6 +59,8 @@ def verify_live_canary_control_prestate(
     )
     _verify_signer_anchor(
         signer_anchor_path,
+        runtime_root=signer_anchor_root,
+        repo_root=repo_root,
         receipts=receipts,
         current_ids=current_ids,
         child_receipts=child_receipts,
@@ -90,12 +96,18 @@ def _chain_evidence(
 def _verify_signer_anchor(
     path: Path,
     *,
+    runtime_root: Path,
+    repo_root: Path,
     receipts: Sequence[Mapping[str, Any]],
     current_ids: tuple[str, ...],
     child_receipts: tuple[str, ...],
     child_evidence: tuple[str, ...],
 ) -> None:
-    state = AtomicSignerControlLoopAnchorStore(path).load()
+    state = AtomicSignerControlLoopAnchorStore(
+        path,
+        runtime_root=runtime_root,
+        repo_root=repo_root,
+    ).load()
     if not state:
         raise ValueError("signer_control_loop_anchor_missing")
     if (

@@ -40,10 +40,41 @@ def _commit(store: AtomicSignerControlLoopAnchorStore, payload: dict[str, object
     )
 
 
+def _store(tmp_path: Path) -> AtomicSignerControlLoopAnchorStore:
+    repo = tmp_path / "repo"
+    repo.mkdir(exist_ok=True)
+    return AtomicSignerControlLoopAnchorStore(
+        tmp_path / "signer" / "anchor.json",
+        runtime_root=tmp_path / "signer",
+        repo_root=repo,
+    )
+
+
+def test_anchor_store_rejects_linked_runtime_path(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    real = runtime / "real"
+    real.mkdir()
+    linked = runtime / "linked"
+    try:
+        linked.symlink_to(real, target_is_directory=True)
+    except OSError as exc:
+        pytest.skip(f"symlink creation unavailable: {exc}")
+
+    with pytest.raises(ValueError, match="path_link_rejected"):
+        AtomicSignerControlLoopAnchorStore(
+            linked / "anchor.json",
+            runtime_root=runtime,
+            repo_root=repo,
+        )
+
+
 def test_anchor_rejects_resident_rollback_but_allows_exact_recovery(
     tmp_path: Path,
 ) -> None:
-    store = AtomicSignerControlLoopAnchorStore(tmp_path / "signer" / "anchor.json")
+    store = _store(tmp_path)
     first = _payload(1)
     second = _payload(2, "receipt-1")
     _commit(store, first)
@@ -64,7 +95,7 @@ def test_anchor_rejects_resident_rollback_but_allows_exact_recovery(
 
 
 def test_anchor_rejects_reused_child_evidence(tmp_path: Path) -> None:
-    store = AtomicSignerControlLoopAnchorStore(tmp_path / "signer" / "anchor.json")
+    store = _store(tmp_path)
     first = _payload(1)
     _commit(store, first)
     second = _payload(2, "receipt-1")
@@ -77,7 +108,7 @@ def test_anchor_rejects_reused_child_evidence(tmp_path: Path) -> None:
 
 def test_anchor_state_tamper_fails_closed(tmp_path: Path) -> None:
     path = tmp_path / "signer" / "anchor.json"
-    store = AtomicSignerControlLoopAnchorStore(path)
+    store = _store(tmp_path)
     _commit(store, _payload(1))
     path.write_text('{"schema_version":"forged"}\n', encoding="utf-8")
     with pytest.raises(ValueError, match="state_invalid"):

@@ -17,15 +17,29 @@ import re
 import shutil
 import subprocess
 from datetime import datetime
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing import Any, Dict, Iterable, List, Mapping, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .holo_index import HoloIndex
 
 # Re-use the module-level timeout helper already in holo_index.py
 from .holo_index import _run_with_timeout, HOLO_ENCODE_TIMEOUT
-
+from .collection_injections import (
+    Tier0IncompleteError,
+    Tier0LookupError,
+    inject_module_tier0_candidates as _inject_module_tier0_candidates,
+)
+from .collection_search import CollectionSearchOps, search_collection
+from holo_index.module_intent_snapshot import (
+    ModuleIntentSnapshotError,
+    load_module_intent_paths,
+)
+from holo_index.document_truth import current_truth_rank, query_requests_current_truth
+from holo_index.tier0_retrieval import infer_explicit_module_target
 logger = logging.getLogger(__name__)
+
+_CURRENT_TRUTH_DOC_CANDIDATE_MULTIPLIER = 4
+_MAX_CURRENT_TRUTH_DOC_CANDIDATES = 80
 
 
 # ---------------------------------------------------------------------------
@@ -39,6 +53,15 @@ def _tokenize_query(query: str) -> List[str]:
 
 def _strict_semantic_owner(holo: "HoloIndex") -> bool:
     return bool(getattr(holo, "strict_semantic_owner", False))
+
+
+def _safe_search_error_code(error: Exception) -> str:
+    """Return only exact-type, low-cardinality producer error codes."""
+    return {
+        Tier0IncompleteError: "HOLOINDEX_TIER0_INCOMPLETE",
+        Tier0LookupError: "HOLOINDEX_TIER0_LOOKUP_FAILED",
+        ModuleIntentSnapshotError: "HOLOINDEX_MODULE_INTENT_SNAPSHOT_UNAVAILABLE",
+    }.get(type(error), "HOLOINDEX_SEARCH_FAILED")
 
 
 # Slice-priority label → numeric weight (used when metadata stores P0/P1/.../P4 strings
@@ -803,195 +826,147 @@ def _rg_symbol_search(project_root, query: str, limit: int) -> List[Dict[str, An
 # Collection search (vector + hybrid scoring)
 # ---------------------------------------------------------------------------
 
+def _token_keyword_score(query: str, meta: Dict[str, Any]) -> float:
+    """Score exact and normalized query tokens against bounded metadata."""
+    fields = {
+        "title": ((meta.get("title") or "").lower(), 2.0),
+        "symbol": ((meta.get("symbol") or "").lower(), 3.0),
+        "summary": ((meta.get("summary") or "").lower(), 0.5),
+        "keywords": ((meta.get("keywords") or "").lower(), 1.25),
+        "test_id": ((meta.get("test_id") or "").lower(), 3.0),
+        "capabilities": ((meta.get("capabilities") or "").lower(), 1.5),
+    }
+    path = (meta.get("path") or "").lower()
+    normalized_path = _normalize_for_match(path)
+    score = 0.0
+    for token in set(query.lower().split()):
+        if not token:
+            continue
+        score += sum(weight for value, weight in fields.values() if token in value)
+        if token in path or _normalize_for_match(token) in normalized_path:
+            score += 1.0
+    return score
+
+
+def _vector_result(
+    kind: str, query: str, doc_type_filter: str, doc: str,
+    meta: Dict[str, Any], distance: Any,
+) -> Dict[str, Any] | None:
+    """Convert one vector row into a scored public-hit candidate."""
+    provenance = meta.get("_retrieval_provenance")
+    exact = provenance == "exact_metadata"
+    similarity = None if exact else 1.0 / (1.0 + float(distance))
+    if similarity is not None and similarity < float(
+        os.getenv("HOLO_MIN_SIMILARITY", "0.35")
+    ):
+        return None
+    doc_type = meta.get("type", "other")
+    if doc_type_filter != "all" and not doc_type.startswith(doc_type_filter):
+        return None
+    title = (meta.get("title") or "").lower()
+    path = (meta.get("path") or "").lower()
+    score = _token_keyword_score(query, meta)
+    score += _wsp_number_match_boost(query, path, title)
+    score += _wsp_alias_match_boost(query, path, title)
+    score += _slice_id_match_boost(query, path, title, meta.get("slice_id", ""))
+    if doc_type == "work_ledger_slice":
+        score += _work_ledger_combined_boost(query, meta)
+    score += _trade_path_boost(query, path)
+    score += _trade_alias_keyword_boost(query, path, title, doc or "")
+    return _format_hit(
+        kind, meta, doc, similarity, score, _coerce_priority(meta),
+        retrieval_provenance="exact_metadata" if exact else None,
+    )
+
+
+def _vector_search_ops() -> CollectionSearchOps:
+    """Bind search-engine policy callbacks without a circular import."""
+    return CollectionSearchOps(
+        strict_owner=_strict_semantic_owner,
+        lexical_search=_lexical_search_collection,
+        run_with_timeout=_run_with_timeout,
+        resolve_alias_wsps=_resolve_alias_wsp_numbers,
+        extract_wsp_numbers=_extract_wsp_numbers,
+        score_result=_vector_result,
+        encode_timeout=HOLO_ENCODE_TIMEOUT,
+    )
+
+
 def _search_collection(
-    holo: "HoloIndex",
-    collection,
-    query: str,
-    limit: int,
-    kind: str,
-    doc_type_filter: str = "all",
+    holo: "HoloIndex", collection, query: str, limit: int, kind: str,
+    doc_type_filter: str = "all", module_path_hint: str | None = None,
+    module_context_hits: Iterable[Mapping[str, object]] = (),
+    module_registry_hits: Iterable[Mapping[str, object]] | None = None,
+    metadata_where: Mapping[str, object] | None = None,
 ) -> List[Dict[str, Any]]:
-    """Search a ChromaDB *collection* using vector embeddings with hybrid keyword scoring.
+    """Search a collection through the bounded vector-search pipeline."""
+    return search_collection(
+        holo, collection, query, limit, kind, doc_type_filter,
+        module_path_hint, _vector_search_ops(), module_context_hits,
+        module_registry_hits, metadata_where,
+    )
 
-    Falls back to lexical search when the embedding model is unavailable.
-    """
-    if collection is None:
-        return []
 
+def _module_intent(
+    holo: "HoloIndex", query: str,
+) -> tuple[str | None, tuple[dict[str, str], ...] | None]:
+    """Resolve full paths directly or names against the pinned Git tree."""
+    explicit_path = infer_explicit_module_target(query, ())
+    if explicit_path:
+        return explicit_path, None
     try:
-        collection_count = collection.count()
+        paths = load_module_intent_paths(holo.project_root)
+    except ModuleIntentSnapshotError:
+        if _strict_semantic_owner(holo):
+            raise
+        holo._log_agent_action(
+            "Module intent catalog unavailable; Tier-0 name promotion suppressed",
+            "WARN",
+        )
+        return None, ()
+    registry = tuple({"path": path} for path in paths)
+    return infer_explicit_module_target(query, registry), registry
+
+
+def _docs_search(
+    holo: "HoloIndex", collection: Any, query: str, limit: int,
+    context_hits: Iterable[Mapping[str, object]],
+    module_target: str | None,
+    registry_hits: Iterable[Mapping[str, object]] | None,
+) -> List[Dict[str, Any]]:
+    """Search docs with generation-stable module intent policy."""
+    try:
+        candidate_limit = limit
+        if query_requests_current_truth(query):
+            candidate_limit = min(
+                _MAX_CURRENT_TRUTH_DOC_CANDIDATES,
+                limit * _CURRENT_TRUTH_DOC_CANDIDATE_MULTIPLIER,
+            )
+        candidates = _search_collection(
+            holo, collection, query, candidate_limit, kind="docs",
+            module_path_hint=module_target,
+            module_context_hits=context_hits,
+            module_registry_hits=registry_hits,
+        )
+        if query_requests_current_truth(query):
+            summaries = _search_collection(
+                holo, collection, query, candidate_limit, kind="docs",
+                module_path_hint=module_target,
+                module_context_hits=context_hits,
+                module_registry_hits=registry_hits,
+                metadata_where={"record_kind": "document_summary"},
+            )
+            candidates.extend(summaries)
+            candidates = sorted(
+                candidates,
+                key=lambda item: current_truth_rank(query, item),
+                reverse=True,
+            )
+        return _merge_hits(candidates, [], limit)
     except Exception:
         if _strict_semantic_owner(holo):
-            raise RuntimeError("HOLOINDEX_STRICT_COLLECTION_COUNT_FAILED")
+            raise
         return []
-    if collection_count == 0:
-        if _strict_semantic_owner(holo):
-            raise RuntimeError("HOLOINDEX_STRICT_COLLECTION_EMPTY")
-        return []
-
-    # TQ3: select the embedder routed for this specific collection. The
-    # resolver honors ``holo.routing_active`` and the available embedders,
-    # so a missing int8 backend degrades truthfully to fp32 (never silent).
-    from .backend_routing import resolve_backend_for_collection
-
-    embedders = getattr(holo, "embedders", None) or None
-    collection_name = getattr(collection, "name", "") or ""
-    routing_active = bool(getattr(holo, "routing_active", False))
-    backend_key = resolve_backend_for_collection(
-        collection_name,
-        routing_active=routing_active,
-        available_backends=embedders,
-    )
-    model = None
-    if embedders is not None:
-        model = embedders.get(backend_key)
-    if model is None:
-        # Fallback to the legacy single-model attribute (tests monkeypatch it).
-        model = getattr(holo, "model", None)
-    if model is None:
-        if _strict_semantic_owner(holo):
-            raise RuntimeError("HOLOINDEX_STRICT_EMBEDDING_MODEL_UNAVAILABLE")
-        holo._log_agent_action(
-            "Embedding model not available - semantic search degraded to lexical. "
-            "Knowledge/paper results may be missing. Check HOLO_MODEL_IMPORT_TIMEOUT if cold-process.",
-            "WARN"
-        )
-        return _lexical_search_collection(holo, collection, query, limit, kind, doc_type_filter)
-
-    # WSP 97: Encode with timeout to prevent indefinite hangs
-    if _strict_semantic_owner(holo):
-        # The owner executor owns the absolute deadline and poisons the process
-        # on timeout. An inner abandoned thread would leave this backend
-        # reusable after an unknown encoder state.
-        embedding = model.encode(query, show_progress_bar=False).tolist()
-    else:
-        embedding = _run_with_timeout(
-            lambda: model.encode(query, show_progress_bar=False).tolist(),
-            timeout_sec=HOLO_ENCODE_TIMEOUT,
-            default=None,
-            error_msg="model.encode() timed out",
-        )
-    if embedding is None:
-        if _strict_semantic_owner(holo):
-            raise RuntimeError("HOLOINDEX_STRICT_EMBEDDING_FAILED")
-        holo._log_agent_action("Encoding timed out - falling back to lexical search", "WARN")
-        return _lexical_search_collection(holo, collection, query, limit, kind, doc_type_filter)
-
-    results = collection.query(query_embeddings=[embedding], n_results=limit)
-
-    docs = results.get("documents", [[]])[0]
-    metas = results.get("metadatas", [[]])[0]
-    dists = results.get("distances", [[]])[0]
-
-    # HIA5: Inject alias-matched WSP docs that vector search missed.
-    # WSP_97 sits at vector position 94/116 for natural-language queries,
-    # so it never appears in the top-N vector results.  When the query
-    # matches a registered alias phrase we fetch the target WSP directly
-    # from the collection and splice it into the candidate pool.
-    if kind == "wsp":
-        alias_wsps = _resolve_alias_wsp_numbers(query)
-        if alias_wsps:
-            existing_paths = {(m.get("path") or "").lower() for m in metas}
-            try:
-                all_data = collection.get(include=["documents", "metadatas"])
-                all_docs_list = all_data.get("documents", [])
-                all_metas_list = all_data.get("metadatas", [])
-                alias_set = set(alias_wsps)
-                for j, ameta in enumerate(all_metas_list):
-                    apath = (ameta.get("path") or "").lower()
-                    if apath in existing_paths:
-                        continue
-                    atitle = (ameta.get("title") or "").lower()
-                    target_wsps = set(
-                        _extract_wsp_numbers(apath)
-                        + _extract_wsp_numbers(atitle)
-                    )
-                    if alias_set & target_wsps:
-                        docs.append(all_docs_list[j])
-                        metas.append(ameta)
-                        dists.append(1.5)  # Neutral; keyword boost ranks
-                        existing_paths.add(apath)
-            except Exception:
-                pass  # Collection read failed — degrade silently
-
-    doc_count = len(docs)
-    if doc_count == 0:
-        return []
-
-    min_similarity = float(os.getenv("HOLO_MIN_SIMILARITY", "0.35"))
-
-    raw_results: List[Dict[str, Any]] = []
-    for i in range(doc_count):
-        doc = docs[i]
-        meta = metas[i]
-        distance = dists[i]
-
-        similarity = 1.0 / (1.0 + float(distance))
-
-        if similarity < min_similarity:
-            continue
-        doc_type = meta.get("type", "other")
-        priority = _coerce_priority(meta)
-
-        keyword_score = 0.0
-        ql = query.lower()
-        title = (meta.get("title") or "").lower()
-        path = (meta.get("path") or "").lower()
-        summary = (meta.get("summary") or "").lower()
-        keywords = (meta.get("keywords") or "").lower()
-        test_id = (meta.get("test_id") or "").lower()
-        capabilities = (meta.get("capabilities") or "").lower()
-
-        # HIA6B: Normalized path for fuzzy matching (holoindex ≈ holo_index)
-        path_normalized = _normalize_for_match(path)
-
-        for token in set(ql.split()):
-            if not token:
-                continue
-            if token in title:
-                keyword_score += 2.0
-            if token in path:
-                keyword_score += 1.0
-            elif _normalize_for_match(token) in path_normalized:
-                # HIA6B: Fuzzy path match (underscore-normalized)
-                keyword_score += 1.0
-            if token in summary:
-                keyword_score += 0.5
-            if token in keywords:
-                keyword_score += 1.25
-            if token in test_id:
-                keyword_score += 3.0
-            if token in capabilities:
-                keyword_score += 1.5
-
-        # HIA4B: WSP number exact match boost
-        keyword_score += _wsp_number_match_boost(query, path, title)
-        # HIA5: WSP alias phrase match boost
-        keyword_score += _wsp_alias_match_boost(query, path, title)
-        # HXA Audit Fix: Slice ID exact match boost
-        meta_slice_id = meta.get("slice_id", "")
-        keyword_score += _slice_id_match_boost(query, path, title, meta_slice_id)
-        # Work Ledger boost: PR, worker, branch, status, foundup_id
-        if doc_type == "work_ledger_slice":
-            keyword_score += _work_ledger_combined_boost(query, meta)
-        # HIA6: Trade/FoundUp alias and path boost
-        keyword_score += _trade_path_boost(query, path)
-        keyword_score += _trade_alias_keyword_boost(query, path, title, doc or "")
-
-        if doc_type_filter != "all" and not doc_type.startswith(doc_type_filter):
-            continue
-
-        result = _format_hit(kind, meta, doc, similarity, keyword_score, priority)
-        raw_results.append(result)
-
-    raw_results.sort(key=lambda x: x["_sort_key"], reverse=True)
-
-    formatted = []
-    for result in raw_results[:limit]:
-        result_copy = result.copy()
-        del result_copy["_sort_key"]
-        formatted.append(result_copy)
-    return formatted
 
 
 # ---------------------------------------------------------------------------
@@ -1132,15 +1107,18 @@ def _format_hit(
     kind: str,
     meta: Dict[str, Any],
     doc: str,
-    similarity: float,
+    similarity: float | None,
     keyword_score: float,
     priority: int,
+    *,
+    retrieval_provenance: str | None = None,
 ) -> Dict[str, Any]:
     """Build a single search hit dict with ``_sort_key`` for ranking.
 
     HIA2: Optionally includes ``confidence`` when HOLO_EMIT_CONFIDENCE=1.
     """
-    sim_str = f"{similarity * 100:.1f}%"
+    sim_str = None if similarity is None else f"{similarity * 100:.1f}%"
+    rank_similarity = similarity or 0.0
     emit_conf = _emit_confidence()
 
     if kind == "code":
@@ -1152,10 +1130,10 @@ def _format_hit(
             "cube": meta.get("cube"),
             "type": result_type,
             "priority": priority,
-            "_sort_key": (0.5 * priority + 0.3 * similarity + 0.2 * keyword_score, similarity, priority),
+            "_sort_key": (0.5 * priority + 0.3 * rank_similarity + 0.2 * keyword_score, rank_similarity, priority),
         }
         if emit_conf:
-            result["confidence"] = _compute_confidence(similarity, keyword_score, result_type)
+            result["confidence"] = _compute_confidence(rank_similarity, keyword_score, result_type)
         return result
 
     if kind == "test":
@@ -1167,10 +1145,10 @@ def _format_hit(
             "similarity": sim_str,
             "type": "test",
             "priority": priority,
-            "_sort_key": (0.5 * priority + 0.3 * similarity + 0.2 * keyword_score, similarity, priority),
+            "_sort_key": (0.5 * priority + 0.3 * rank_similarity + 0.2 * keyword_score, rank_similarity, priority),
         }
         if emit_conf:
-            result["confidence"] = _compute_confidence(similarity, keyword_score, "test")
+            result["confidence"] = _compute_confidence(rank_similarity, keyword_score, "test")
         return result
 
     if kind == "skill":
@@ -1184,10 +1162,10 @@ def _format_hit(
             "similarity": sim_str,
             "type": "skillz",
             "priority": priority,
-            "_sort_key": (0.6 * priority + 0.3 * similarity + 0.1 * keyword_score, similarity, priority),
+            "_sort_key": (0.6 * priority + 0.3 * rank_similarity + 0.1 * keyword_score, rank_similarity, priority),
         }
         if emit_conf:
-            result["confidence"] = _compute_confidence(similarity, keyword_score, "skillz")
+            result["confidence"] = _compute_confidence(rank_similarity, keyword_score, "skillz")
         return result
 
     # HXA Audit Fix: Explicit docs/knowledge handlers to ensure path is always populated
@@ -1203,10 +1181,12 @@ def _format_hit(
             "similarity": sim_str,
             "type": result_type,
             "priority": priority,
-            "_sort_key": (0.5 * priority + 0.3 * similarity + 0.2 * keyword_score, similarity, priority),
+            "_sort_key": (0.5 * priority + 0.3 * rank_similarity + 0.2 * keyword_score, rank_similarity, priority),
         }
+        if retrieval_provenance is not None:
+            result["retrieval_provenance"] = retrieval_provenance
         if emit_conf:
-            result["confidence"] = _compute_confidence(similarity, keyword_score, result_type)
+            result["confidence"] = _compute_confidence(rank_similarity, keyword_score, result_type)
         return result
 
     # WSP / default
@@ -1220,10 +1200,10 @@ def _format_hit(
         "cube": meta.get("cube"),
         "type": result_type,
         "priority": priority,
-        "_sort_key": (0.5 * priority + 0.3 * similarity + 0.2 * keyword_score, similarity, priority),
+        "_sort_key": (0.5 * priority + 0.3 * rank_similarity + 0.2 * keyword_score, rank_similarity, priority),
     }
     if emit_conf:
-        result["confidence"] = _compute_confidence(similarity, keyword_score, result_type)
+        result["confidence"] = _compute_confidence(rank_similarity, keyword_score, result_type)
     return result
 
 
@@ -1300,6 +1280,10 @@ def execute_search(
         knowledge_collection = getattr(holo, "knowledge_collection", None)
         # Work Ledger collection
         work_ledger_collection = getattr(holo, "work_ledger_collection", None)
+        tier0_module_target = None
+        module_registry_hits = None
+        if doc_type_filter in ["docs", "all"] and docs_collection is not None:
+            tier0_module_target, module_registry_hits = _module_intent(holo, query)
 
         # Search code index
         if doc_type_filter in ["code", "all"] and code_collection is not None:
@@ -1329,12 +1313,12 @@ def execute_search(
 
         # CFZ4: Search Docs index (module/root docs)
         if doc_type_filter in ["docs", "all"] and docs_collection is not None:
-            try:
-                docs_hits = _search_collection(holo, docs_collection, query, limit, kind="docs")
-            except Exception:
-                if _strict_semantic_owner(holo):
-                    raise
-                docs_hits = []
+            docs_hits = _docs_search(
+                holo, docs_collection, query, limit,
+                (*code_hits, *test_hits, *symbol_results),
+                tier0_module_target,
+                module_registry_hits,
+            )
 
         # CFZ4: Search Knowledge index (papers/research)
         if doc_type_filter in ["knowledge", "all"] and knowledge_collection is not None:
@@ -1428,6 +1412,7 @@ def execute_search(
                 "quality_gate": _quality_gate(
                     getattr(holo, "embedding_backend", "unknown")
                 ),
+                "tier0_module_target": tier0_module_target,
                 # TQ3: per-collection routing truth (WSP 97). When
                 # routing_active=True, embedding_backend="routed" and the
                 # per-collection claim lives in collection_backend_map.
@@ -1449,7 +1434,8 @@ def execute_search(
         return payload
 
     except Exception as e:
-        holo._log_agent_action(f"Search error: {str(e)}", "ERROR")
+        error = _safe_search_error_code(e)
+        holo._log_agent_action(f"Search error: {error}", "ERROR")
         return {
             "code_hits": [],
             "wsp_hits": [],
@@ -1461,5 +1447,5 @@ def execute_search(
             "knowledge": [],
             "work_ledger_hits": [],
             "work_ledger": [],
-            "metadata": {"error": str(e)},
+            "metadata": {"error": error},
         }

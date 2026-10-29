@@ -7,6 +7,157 @@
 
 ## Change Log
 
+### 2026-09-22: Qualify signed runtime-expectation projection
+
+- WSP00/15/22/50/62/84/97/99;13/P1. Extended existing INTERFACE/ROADMAP/test
+  documentation with exact mapping, use-time verification and capability
+  disposal requirements, plus a fixed synthetic acceptance matrix.
+- Current AI Gateway signed MODEL/PANEL evidence does not declare the general/
+  code compatibility slots or an installed inference-engine artifact. Named
+  existing policy/supply/inventory owners must resolve these before source work.
+- Existing49 security/supplier/receipt cases pass locally. This is owner-level
+  verification, not end-to-end projection or production cryptographic proof.
+  Source/tests/v1 receipts remain unchanged; no update, provider or service ran.
+  Independent review and exact publication state: canonical RSI backlog.
+
+### 2026-09-20: Default WSL availability checks to metadata-only
+
+- Added a separate default-off `FOUNDUPS_AGENT_WSL_COMMAND_PROBE_ENABLED` control
+  in the existing probe. Enable-only calls validate registration/base and return
+  `NOT_READY` without command execution; both controls opt into the existing
+  version path. Existing enable-only configurations intentionally change behavior.
+- Capture mode before resolver callbacks. Preserve disabled receipt bytes,
+  explicit-mode parsing/commands, trusted resolver exports, fail-soft callers and
+  existing structural guards; source remains238 lines. No new runtime authority.
+- Local43 focused and four connected checks pass; exact red/green, independent
+  review and remote state live in the canonical RSI backlog. Added the missing
+  WSP97-required TestModLog inventory; generated registry changes only this
+  suite's corrected description. No live WSL, update, provider or FoundUp effects.
+  WSP00/15/22/50/62/84/97/99; selected source12/P2.
+
+### 2026-09-20: Qualify the WSL advisory lifecycle boundary
+
+- WSP15 13/P1 contract qualification complete locally; source/test behavior is
+  unchanged. Corrected current README/INTERFACE/ROADMAP claims: enabled version
+  commands execute programs and may cold-start WSL/services; disabled remains
+  no-host-access. A running-state precheck cannot eliminate the later-exec race.
+- Existing 25 tests pass; seven external injected witnesses pass with zero real
+  WSL calls. Independent contract/caller reviews accept the separate 12/P2 next
+  repair: default-off command opt-in within the same owner, preserving Gateway
+  exports, fail-soft startup, receipt limits and structural guards.
+- The new control is not implemented. No runtime/update/provider activation,
+  main wiring, new module/skill or AmIBot work is included. Exact evidence and
+  fresh selection are in the canonical RSI backlog. WSP00/15/22/50/62/97/99.
+
+### 2026-09-13: Recognize installed OpenClaw numeric release suffix
+
+- RSI readiness inspection found the existing WSL advisory rejected installed
+  `OpenClaw 2026.7.1-2 (0790d9f)` while the existing Gateway command transport
+  successfully returned that version. Extended only the existing version regex
+  to accept numeric release suffixes; preserved full-match output filtering.
+- Extended existing positive and content-rejection tests: two new suffix cases
+  failed before the repair; 68 focused WSL/Gateway tests passed afterward.
+  A fresh version-only WSL probe reports both OpenClaw and Hermes available.
+- PASS remains unverified availability, not service health or model/dispatch
+  authority. No install, provider inference, service reconfiguration or new
+  module. WSP 22, 50, 84, 97; R07 readiness groundwork.
+
+---
+
+### 2026-08-05: Runtime compatibility test clock consistency
+
+- Removed a calendar-bound fixture failure by composing publication evidence at
+  the test's current instant.
+- Preserved the wall-clock production API and all integrity-only, nonblocking,
+  no-update authority boundaries. (WSP 15/22/50/97)
+
+---
+
+### 2026-08-02: Trusted WSL resolver exported for upstream agent dispatch
+
+- Exported the existing System32-only WSL executable resolver for reuse by the
+  bounded OpenClaw Gateway command transport.
+- Preserved the prior injected test seam and the read-only advisory behavior.
+- No PATH lookup, shell execution, package update, Gateway lifecycle action,
+  or ambient agent authority was added. (WSP 22/50/62/84/97)
+
+---
+
+### 2026-08-02: Canonical E-Drive WSL Agent Runtime Binding
+
+**Slice:** `OPENCLAW_HERMES_WSL_RUNTIME_LOCATION_BINDING_PHASE1`
+
+- Added a read-only, shell-free probe for exact OpenClaw and Hermes executables
+  inside the named `Ubuntu-24.04` WSL distribution.
+- Added an optional expected-base-path check so a stale or broken WSL
+  registration reports `NOT_READY` before component probes.
+- Wired the probe into the existing nonblocking runtime-compatibility startup
+  boundary; menu access remains available on all probe failures.
+- Kept the executable probe opt-in, resolved `wsl.exe` only from Windows
+  System32, and constrained output to normalized product version lines.
+- Boundary: no package installation/update, onboarding, gateway start, worker
+  dispatch, repository mutation, or authority expansion.
+- WSP references: WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 84, WSP 97.
+
+Focused validation covers distro/component allowlists, base-path mismatch,
+missing components, content-free failures, shell/network/update denial, and
+startup fail-soft behavior.
+
+---
+
+### 2026-08-02: Governed Runtime Compatibility Evidence Supplier
+
+**Slice:** `OPENCLAW_HERMES_QWEN_GOVERNED_FRESHNESS_EVIDENCE_SUPPLIER_PHASE1`
+
+- Extended the existing OpenClaw ecosystem watchlist refresh instead of
+  creating a second network updater.
+- Added exact installed-observation and expected-binding source receipts with
+  recomputed IDs, bounded ASCII fields, TTL/future-skew checks, and exact
+  component-set enforcement.
+- Restricted network retrieval to the official OpenClaw and Hermes latest
+  release API endpoints, with redirect and response-size rejection.
+- Required Qwen general, Qwen code, and inference-backend expectations to come
+  from promoted runtime-binding references rather than model-name inference.
+- Reused the canonical runtime-artifact safety layer for confined reads and
+  descriptor-verified, locked replacement outside the repository.
+- Boundary: advisory evidence only; no install/update, command execution,
+  model load, route change, HoloIndex mutation, or update authority.
+- Truth boundary: source self-hashes prove integrity, not signer identity.
+  Integrity-only envelopes can report `OBSERVED_MATCH`/`OBSERVED_DRIFT`, but
+  the overall receipt remains `NOT_READY` with
+  `evidence_authentication_not_verified`; recomputed hashes never yield
+  authenticated `CURRENT`.
+- Rejected supply/output path aliasing before retrieval and added a regression
+  that exercises the production redirect-handler construction.
+- WSP references: WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 84, WSP 97.
+
+Focused validation covers recomputed-hash forgery, tampering, expiry,
+source-set mismatch, unofficial release URLs, redirects, oversized responses,
+prior-cache preservation, path aliasing, and the absence of
+execution/model-loading surfaces.
+
+---
+
+### 2026-08-02: OpenClaw/Hermes/Qwen Runtime Compatibility Advisory
+
+**Slice:** `OPENCLAW_HERMES_QWEN_RUNTIME_FRESHNESS_AND_COMPATIBILITY_RECEIPT_PHASE1`
+
+- Added a typed, digest-bound compatibility receipt for OpenClaw, Hermes,
+  general/coding Qwen bindings, and the inference backend.
+- Added a bounded off-repo evidence loader and a nonblocking startup advisory.
+- Reused the existing WRE ecosystem-watchlist and model-promotion direction;
+  this slice does not create another updater or model selector.
+- Fail-closed evidence rules cover schema, self-integrity, TTL, future timestamps,
+  duplicate/missing components, component verification, and allowlisted scope.
+- Boundary: no network, package update, model download/load, inference, route
+  mutation, process execution, HoloIndex maintenance, or startup blocking.
+- WSP references: WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 84, WSP 97.
+
+Focused validation: receipt/advisory tests plus the full `main.py` startup
+bootstrap suite.
+
+---
+
 ### 2026-06-17: Non-Destructive Attach Recovery - Open a Tab, Do NOT Kill (Phase 1)
 
 **By:** 0102 (Worker-Lane: ATTACH-AUTHOR)

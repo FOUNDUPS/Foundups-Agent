@@ -16,6 +16,8 @@ trigger:
 ---
 # LinkedIn Post Hunter Skill
 
+Follow the [LinkedIn master](../../../../platform_integration/linkedin_agent/docs/LINKEDIN_ACTIVITY_ROUTING.md). This is bounded discovery, not permission to engage or run every four hours. Keyword matches and historical target authors are leads, not evidence or an approved target list. Read complete posts/context, deduplicate and route selected items to agentic reply. Revalidate UI selectors; Work uses the advertised browser skill, not these Selenium examples.
+
 **WSP Reference:** WSP 96 (WRE Skills Protocol)
 **Status:** VALIDATED (DOM-First)
 **Last Validated:** 2026-02-24

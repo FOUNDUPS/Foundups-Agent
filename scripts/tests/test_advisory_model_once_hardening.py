@@ -8,6 +8,7 @@ import os
 import sys
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest import mock
 from urllib.error import HTTPError
 
@@ -34,22 +35,103 @@ def _passed_gate(*, prompt: str = "redacted-prompt", context: str | None = None)
     )
 
 
-def _invoke_bridge_main(payload: dict, *, api_key: str = "test-key") -> tuple[int, dict]:
+def _ready_runtime_receipt(payload: dict):
+    lead = str(payload.get("lead_model") or payload.get("model") or "")
+    mode = str(payload.get("mode") or "")
+    panel = tuple(
+        bridge._panel_models(payload.get("panel_models"))
+        if mode in {"foundups_fusion", "openrouter_fusion_alias"}
+        else ()
+    )
+    return SimpleNamespace(
+        status=bridge.MODEL_RUNTIME_BINDING_READY,
+        accepted=True,
+        principal_model=lead,
+        panel_models=panel,
+        role_bindings=tuple(
+            [{"role": "principal", "provider": "openrouter", "model_id": lead}]
+            + [
+                {"role": f"critic_{index}", "provider": "openrouter", "model_id": model}
+                for index, model in enumerate(panel, 1)
+            ]
+        ),
+        binding_receipt_id="binding:test",
+        topology_resolution_receipt_id="verified_model_runtime_topology:test",
+        topology_verification_receipt_id="verified_model_runtime_binding:test",
+        topology_valid_until=1_900_000_000,
+    )
+
+
+def _invoke_bridge_main(
+    payload: dict, *, api_key: str = "test-key", runtime_receipt=None
+) -> tuple[int, dict]:
     stdin_bytes = json.dumps(payload, ensure_ascii=False).encode("utf-8")
     stdin_buffer = io.BytesIO(stdin_bytes)
     stdout = io.StringIO()
     fake_stdin = mock.Mock()
     fake_stdin.buffer = stdin_buffer
+    receipt = runtime_receipt or _ready_runtime_receipt(payload)
     with mock.patch("sys.stdin", fake_stdin), mock.patch("sys.stdout", stdout), mock.patch.dict(
         os.environ, {bridge.ENV_API_KEY: api_key}, clear=False
-    ):
+    ), mock.patch.object(bridge, "query_model_runtime_binding", return_value=receipt):
         rc = bridge.main()
     return rc, json.loads(stdout.getvalue())
 
 
 class AdvisoryBridgeHardeningTests(unittest.TestCase):
-    def _invoke_main(self, payload: dict, *, api_key: str = "test-key") -> tuple[int, dict]:
-        return _invoke_bridge_main(payload, api_key=api_key)
+    def _invoke_main(
+        self, payload: dict, *, api_key: str = "test-key", runtime_receipt=None
+    ) -> tuple[int, dict]:
+        return _invoke_bridge_main(
+            payload, api_key=api_key, runtime_receipt=runtime_receipt
+        )
+
+    def test_unknown_mode_rejects_before_query_or_network(self) -> None:
+        with mock.patch.object(bridge, "query_model_runtime_binding") as query, mock.patch.object(
+            bridge, "_openrouter_urlopen"
+        ) as network:
+            route, reason = bridge._verified_runtime_route(
+                {"mode": "unknown", "lead_model": "z-ai/glm-5.2"}
+            )
+        self.assertIsNone(route)
+        self.assertEqual(reason, "model_runtime_topology_mode_unsupported")
+        query.assert_not_called()
+        network.assert_not_called()
+
+    def test_unconfigured_runtime_rejects_before_network(self) -> None:
+        blocked = SimpleNamespace(
+            status="UNCONFIGURED", accepted=False, role_bindings=()
+        )
+        with mock.patch.object(bridge, "_openrouter_urlopen") as network:
+            _rc, out = self._invoke_main(
+                {
+                    "mode": "openrouter_single",
+                    "prompt": "012 work focus",
+                    "lead_model": "z-ai/glm-5.2",
+                },
+                runtime_receipt=blocked,
+            )
+        self.assertFalse(out.get("ok"))
+        self.assertEqual(out.get("reason"), "model_runtime_topology_not_ready")
+        self.assertFalse(out.get("made_network_call"))
+        network.assert_not_called()
+
+    def test_non_openrouter_resolved_provider_rejects_before_network(self) -> None:
+        payload = {
+            "mode": "openrouter_single",
+            "prompt": "012 work focus",
+            "lead_model": "z-ai/glm-5.2",
+        }
+        receipt = _ready_runtime_receipt(payload)
+        receipt.role_bindings = (
+            {"role": "principal", "provider": "openai", "model_id": "z-ai/glm-5.2"},
+        )
+        with mock.patch.object(bridge, "_openrouter_urlopen") as network:
+            _rc, out = self._invoke_main(payload, runtime_receipt=receipt)
+        self.assertFalse(out.get("ok"))
+        self.assertEqual(out.get("reason"), "model_runtime_topology_provider_unsupported")
+        self.assertFalse(out.get("made_network_call"))
+        network.assert_not_called()
 
     def test_panel_models_capped_at_six(self) -> None:
         models = bridge._panel_models(["m" + str(i) for i in range(12)])
@@ -61,9 +143,10 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         self.assertTrue(truncated)
         self.assertEqual(len(models), bridge.MAX_PANEL_MODELS)
 
-    def test_default_panel_keeps_kimi_code_and_adds_kimi_k3(self) -> None:
-        self.assertIn("moonshotai/kimi-k2.7-code", bridge.DEFAULT_PANEL_MODELS)
+    def test_default_panel_uses_current_qwen_challenger_and_kimi_k3(self) -> None:
+        self.assertIn("qwen/qwen3.8-max", bridge.DEFAULT_PANEL_MODELS)
         self.assertIn("moonshotai/kimi-k3", bridge.DEFAULT_PANEL_MODELS)
+        self.assertNotIn("moonshotai/kimi-k2.7-code", bridge.DEFAULT_PANEL_MODELS)
         self.assertEqual(bridge.KIMI_K3_PANEL_MAX_TOKENS, 4096)
 
     def test_kimi_k3_completion_uses_mandatory_max_reasoning_without_temperature(self) -> None:
@@ -102,7 +185,7 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
                 raise item
             return io.BytesIO(item)
 
-        with mock.patch("urllib.request.urlopen", side_effect=fake_urlopen):
+        with mock.patch.object(bridge, "_openrouter_urlopen", side_effect=fake_urlopen):
             data, meta = bridge._post_openrouter("key", {"model": "x", "messages": []}, 30)
 
         self.assertEqual(len(calls), 2)
@@ -118,7 +201,7 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
             calls.append({"body": request.data.decode("utf-8")})
             raise HTTPError("https://x", 400, "bad", {}, io.BytesIO(b'{"error":{"message":"bad"}}'))
 
-        with mock.patch("urllib.request.urlopen", side_effect=fake_urlopen):
+        with mock.patch.object(bridge, "_openrouter_urlopen", side_effect=fake_urlopen):
             with self.assertRaises(HTTPError) as ctx:
                 bridge._post_openrouter("key", {"model": "x", "messages": []}, 30)
 
@@ -141,8 +224,8 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
                 raise item
             return io.BytesIO(item)
 
-        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch(
-            "urllib.request.urlopen", side_effect=fake_urlopen
+        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch.object(
+            bridge, "_openrouter_urlopen", side_effect=fake_urlopen
         ):
             _rc, out = self._invoke_main(
                 {
@@ -170,8 +253,8 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
             call_count["n"] += 1
             raise HTTPError("https://x", 400, "bad", {}, io.BytesIO(b'{"error":{"message":"bad"}}'))
 
-        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch(
-            "urllib.request.urlopen", side_effect=fake_urlopen
+        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch.object(
+            bridge, "_openrouter_urlopen", side_effect=fake_urlopen
         ):
             _rc, out = self._invoke_main(
                 {
@@ -187,6 +270,25 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         self.assertEqual(out.get("reason"), "http_error")
         self.assertNotEqual(out.get("reason"), "retry_exhausted")
         self.assertEqual(out.get("retry_count", 0), 0)
+        self.assertNotIn("redacted_task_prompt", out)
+        self.assertTrue(out.get("redacted_task_prompt_digest", "").startswith("sha256:"))
+
+    def test_single_timeout_returns_only_gate_redacted_task_prompt_digest(self) -> None:
+        gate_mock = mock.Mock(return_value=_passed_gate(prompt="task-only-sentinel"))
+        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch.object(
+            bridge, "_chat_completion", side_effect=TimeoutError("timed out")
+        ):
+            _rc, out = self._invoke_main(
+                {
+                    "mode": "openrouter_single",
+                    "prompt": "012 work focus",
+                    "lead_model": "z-ai/glm-5.2",
+                }
+            )
+        self.assertFalse(out.get("ok"))
+        self.assertEqual(out.get("reason"), "timeout")
+        self.assertNotIn("redacted_task_prompt", out)
+        self.assertTrue(out.get("redacted_task_prompt_digest", "").startswith("sha256:"))
 
     def test_redaction_blocked_zero_network_calls(self) -> None:
         gate_mock = mock.Mock(
@@ -219,6 +321,8 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         self.assertFalse(out.get("ok"))
         self.assertEqual(out.get("reason"), "redaction_blocked")
         self.assertEqual(out.get("retry_count"), 0)
+        self.assertNotIn("redacted_task_prompt", out)
+        self.assertNotIn("redacted_task_prompt_digest", out)
 
     def test_main_panel_models_truncated_in_review_packet(self) -> None:
         gate_mock = mock.Mock(return_value=_passed_gate())
@@ -294,13 +398,60 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
             )
         self.assertFalse(result["ok"])
         self.assertEqual(result["reason"], "fusion_quorum_lead_missing")
-        self.assertEqual(len(calls), 1)
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(
+            result["review_packet"]["fusion_panel_quorum"]["lead_semantic_retry_count"],
+            1,
+        )
+
+    def test_fusion_quorum_semantic_retry_recovers_none_lead(self) -> None:
+        lead_calls = 0
+
+        def fake_chat(api_key, model, messages, **kwargs):  # noqa: ANN001, ARG001
+            nonlocal lead_calls
+            system = str(messages[0]["content"])
+            if "Lead pass" in system:
+                lead_calls += 1
+                if lead_calls == 1:
+                    return "None", {"retry_count": 0}
+                return "## Decision\nProceed\n\nEvidence docs/present.md:1", {"retry_count": 0}
+            if "Panel critic pass" in system:
+                return (
+                    "Challenge: the evidence claim is unsupported and the WSP_15 "
+                    "priority order needs verification.",
+                    {"retry_count": 0},
+                )
+            return "## Decision\nProceed\n\n## WSP_15 Priority\nP1", {"retry_count": 0}
+
+        with mock.patch.object(bridge, "_chat_completion", side_effect=fake_chat):
+            result = bridge._run_foundups_fusion(
+                "key",
+                "prompt\n\n### Required direct-read target: docs/present.md\ncontent",
+                [],
+                {
+                    "lead_model": "lead-model",
+                    "panel_models": ["critic-a"],
+                    "required_target_paths": ["docs/present.md"],
+                    "_redacted_evidence_context": "### Required direct-read target: docs/present.md\ncontent",
+                },
+            )
+        self.assertTrue(result["ok"])
+        self.assertEqual(lead_calls, 2)
+        self.assertEqual(
+            result["review_packet"]["fusion_panel_quorum"]["lead_semantic_retry_count"],
+            1,
+        )
 
     def test_fusion_quorum_requires_critic_challenge_to_framing_and_priority(self) -> None:
+        retry_models: list[str] = []
+
         def fake_chat(api_key, model, messages, **kwargs):  # noqa: ANN001, ARG001
             system = str(messages[0]["content"])
             if "Lead pass" in system:
                 return "## Decision\nProceed\n\nEvidence docs/present.md:1", {"retry_count": 0}
+            if "Independent defensive evidence review" in system:
+                retry_models.append(model)
+                return "Looks generally reasonable.", {"retry_count": 0}
             if "Panel critic pass" in system:
                 return "Looks generally reasonable.", {"retry_count": 0}
             return "Synthesis should not run", {"retry_count": 0}
@@ -321,6 +472,174 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         self.assertEqual(result["reason"], "fusion_quorum_challenging_critic_missing")
         quorum = result["review_packet"]["fusion_panel_quorum"]
         self.assertEqual(quorum["challenging_critics"], [])
+        self.assertEqual(retry_models, ["critic-a", "critic-b"])
+        self.assertEqual(quorum["critic_challenge_retry_models"], ["critic-a", "critic-b"])
+
+    def test_fusion_quorum_targeted_critic_retry_can_recover(self) -> None:
+        def fake_chat(api_key, model, messages, **kwargs):  # noqa: ANN001, ARG001
+            system = str(messages[0]["content"])
+            if "Lead pass" in system:
+                return "## Decision\nProceed\n\nEvidence docs/present.md:1", {"retry_count": 0}
+            if "Independent defensive evidence review" in system:
+                return (
+                    "Challenge: the framing assumes complete evidence and the WSP_15 "
+                    "priority order should defer execution pending verification.",
+                    {"retry_count": 0},
+                )
+            if "Panel critic pass" in system:
+                return "No material challenge: framing and priority appear sound.", {"retry_count": 0}
+            return "## Decision\nProceed\n\n## WSP_15 Priority\nP1", {"retry_count": 0}
+
+        with mock.patch.object(bridge, "_chat_completion", side_effect=fake_chat):
+            result = bridge._run_foundups_fusion(
+                "key",
+                "prompt\n\n### Required direct-read target: docs/present.md\ncontent",
+                [],
+                {
+                    "lead_model": "lead-model",
+                    "panel_models": ["critic-a"],
+                    "required_target_paths": ["docs/present.md"],
+                    "_redacted_evidence_context": "### Required direct-read target: docs/present.md\ncontent",
+                },
+            )
+        self.assertTrue(result["ok"])
+        quorum = result["review_packet"]["fusion_panel_quorum"]
+        self.assertEqual(quorum["challenging_critics"], ["critic-a"])
+        self.assertEqual(quorum["critic_challenge_retry_models"], ["critic-a"])
+
+    def test_fusion_quorum_preserves_retry_challenge_after_long_initial_response(self) -> None:
+        synthesis_prompts: list[str] = []
+        accepted_challenge = (
+            "Challenge: the evidence framing lacks an exact receipt, so the WSP_15 "
+            "priority order must verify it before implementation."
+        )
+
+        def fake_chat(api_key, model, messages, **kwargs):  # noqa: ANN001, ARG001
+            system = str(messages[0]["content"])
+            if "Lead pass" in system:
+                return "## Decision\nProceed\n\nEvidence docs/present.md:1", {"retry_count": 0}
+            if "Independent defensive evidence review" in system:
+                return accepted_challenge, {"retry_count": 0}
+            if "Panel critic pass" in system:
+                return "No material challenge: " + ("x" * 9000), {"retry_count": 0}
+            synthesis_prompts.append(str(messages[1]["content"]))
+            return "## Decision\nProceed\n\n## WSP_15 Priority\nP1", {"retry_count": 0}
+
+        with mock.patch.object(bridge, "_chat_completion", side_effect=fake_chat):
+            result = bridge._run_foundups_fusion(
+                "key",
+                "prompt\n\n### Required direct-read target: docs/present.md\ncontent",
+                [],
+                {
+                    "lead_model": "lead-model",
+                    "panel_models": ["critic-a"],
+                    "required_target_paths": ["docs/present.md"],
+                    "_redacted_evidence_context": "### Required direct-read target: docs/present.md\ncontent",
+                },
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(len(synthesis_prompts), 1)
+        self.assertIn(accepted_challenge, synthesis_prompts[0])
+
+    def test_challenge_outside_synthesis_bound_never_satisfies_quorum(self) -> None:
+        hidden_challenge = (
+            "Challenge: "
+            + ("x" * bridge.SYNTHESIS_CRITIC_CHAR_LIMIT)
+            + " evidence WSP_15 priority"
+        )
+        self.assertFalse(bridge._critic_challenges_framing_and_priority(hidden_challenge))
+
+    def test_fusion_quorum_retry_prefers_critic_with_usable_initial_response(self) -> None:
+        retry_models: list[str] = []
+
+        def fake_chat(api_key, model, messages, **kwargs):  # noqa: ANN001, ARG001
+            system = str(messages[0]["content"])
+            if "Lead pass" in system:
+                return "## Decision\nProceed\n\nEvidence docs/present.md:1", {"retry_count": 0}
+            if "Independent defensive evidence review" in system:
+                retry_models.append(model)
+                return (
+                    "Challenge: the evidence is incomplete and WSP_15 should defer "
+                    "implementation until the missing runtime proof is verified.",
+                    {"retry_count": 0},
+                )
+            if "Panel critic pass" in system and model == "critic-a":
+                raise HTTPError("https://example.invalid", 503, "blocked", {}, None)
+            if "Panel critic pass" in system:
+                return "The proposal is generally reasonable.", {"retry_count": 0}
+            return "## Decision\nProceed\n\n## WSP_15 Priority\nP1", {"retry_count": 0}
+
+        with mock.patch.object(bridge, "_chat_completion", side_effect=fake_chat):
+            result = bridge._run_foundups_fusion(
+                "key",
+                "prompt\n\n### Required direct-read target: docs/present.md\ncontent",
+                [],
+                {
+                    "lead_model": "lead-model",
+                    "panel_models": ["critic-a", "critic-b"],
+                    "required_target_paths": ["docs/present.md"],
+                    "_redacted_evidence_context": "### Required direct-read target: docs/present.md\ncontent",
+                },
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(retry_models, ["critic-b"])
+        quorum = result["review_packet"]["fusion_panel_quorum"]
+        self.assertEqual(quorum["challenging_critics"], ["critic-b"])
+        self.assertEqual(quorum["critic_challenge_retry_models"], ["critic-b"])
+
+    def test_fusion_quorum_retry_fails_over_after_provider_abstention(self) -> None:
+        retry_models: list[str] = []
+
+        def fake_chat(api_key, model, messages, **kwargs):  # noqa: ANN001, ARG001
+            system = str(messages[0]["content"])
+            if "Lead pass" in system:
+                return "## Decision\nProceed\n\nEvidence docs/present.md:1", {"retry_count": 0}
+            if "Independent defensive evidence review" in system:
+                retry_models.append(model)
+                if model == "critic-a":
+                    return "None", {"retry_count": 0}
+                return (
+                    "Challenge: the evidence framing lacks a runtime receipt, so the "
+                    "WSP_15 priority order must verify that receipt before implementation.",
+                    {"retry_count": 0},
+                )
+            if "Panel critic pass" in system:
+                return "No material challenge: framing and priority appear sound.", {"retry_count": 0}
+            return "## Decision\nProceed\n\n## WSP_15 Priority\nP1", {"retry_count": 0}
+
+        with mock.patch.object(bridge, "_chat_completion", side_effect=fake_chat):
+            result = bridge._run_foundups_fusion(
+                "key",
+                "prompt\n\n### Required direct-read target: docs/present.md\ncontent",
+                [],
+                {
+                    "lead_model": "lead-model",
+                    "panel_models": ["critic-a", "critic-b", "critic-c"],
+                    "required_target_paths": ["docs/present.md"],
+                    "_redacted_evidence_context": "### Required direct-read target: docs/present.md\ncontent",
+                },
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(retry_models, ["critic-a", "critic-b"])
+        quorum = result["review_packet"]["fusion_panel_quorum"]
+        self.assertEqual(quorum["challenging_critics"], ["critic-b"])
+        self.assertEqual(quorum["critic_challenge_retry_models"], ["critic-a", "critic-b"])
+        self.assertEqual(quorum["abstaining_critics"], ["critic-a"])
+
+    def test_no_material_challenge_prefix_never_satisfies_quorum(self) -> None:
+        self.assertFalse(
+            bridge._critic_challenges_framing_and_priority(
+                "No material challenge: the framing, evidence, and WSP_15 priority are sound."
+            )
+        )
+        self.assertFalse(
+            bridge._critic_challenges_framing_and_priority(
+                "The framing and WSP_15 priority are sound; I challenge nothing material."
+            )
+        )
 
     def test_fusion_quorum_passes_with_challenge_and_blocks_synthesis_failure(self) -> None:
         def fake_chat(api_key, model, messages, **kwargs):  # noqa: ANN001, ARG001
@@ -329,7 +648,7 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
                 return "## Decision\nProceed\n\nEvidence docs/present.md:1", {"retry_count": 0}
             if "Panel critic pass" in system:
                 return (
-                    "I challenge the framing and the WSP_15 priority order because the "
+                    "Challenge: the framing and the WSP_15 priority order are unsafe because the "
                     "scope may overclaim evidence.",
                     {"retry_count": 0},
                 )
@@ -390,7 +709,7 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
                 return "## Decision\nProceed\n\nEvidence docs/present.md:1", {"retry_count": 0}
             if "Panel critic pass" in system:
                 return (
-                    "I challenge the framing and WSP_15 priority because the sequence "
+                    "Challenge: the framing and WSP_15 priority are unsafe because the sequence "
                     "could hide a missing gate.",
                     {"retry_count": 0},
                 )
@@ -507,7 +826,7 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
             item = responses.pop(0)
             return io.BytesIO(item)
 
-        with mock.patch("urllib.request.urlopen", side_effect=fake_urlopen):
+        with mock.patch.object(bridge, "_openrouter_urlopen", side_effect=fake_urlopen):
             _rc, out = self._invoke_main(
                 {
                     "mode": "openrouter_single",
@@ -553,7 +872,7 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         def fake_urlopen(request, timeout=0):  # noqa: ARG001
             return io.BytesIO(responses.pop(0))
 
-        with mock.patch("urllib.request.urlopen", side_effect=fake_urlopen):
+        with mock.patch.object(bridge, "_openrouter_urlopen", side_effect=fake_urlopen):
             _rc, out = self._invoke_main(
                 {
                     "mode": "openrouter_single",
@@ -583,7 +902,7 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         def fake_urlopen(request, timeout=0):  # noqa: ARG001
             return io.BytesIO(responses.pop(0))
 
-        with mock.patch("urllib.request.urlopen", side_effect=fake_urlopen):
+        with mock.patch.object(bridge, "_openrouter_urlopen", side_effect=fake_urlopen):
             _rc, out = self._invoke_main(
                 {
                     "mode": "openrouter_single",
@@ -619,8 +938,8 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         def fake_urlopen(request, timeout=0):  # noqa: ARG001
             return io.BytesIO(responses.pop(0))
 
-        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch(
-            "urllib.request.urlopen", side_effect=fake_urlopen
+        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch.object(
+            bridge, "_openrouter_urlopen", side_effect=fake_urlopen
         ):
             self._invoke_main(
                 {
@@ -651,8 +970,8 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         def fake_urlopen(request, timeout=0):  # noqa: ARG001
             return io.BytesIO(responses.pop(0))
 
-        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch(
-            "urllib.request.urlopen", side_effect=fake_urlopen
+        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch.object(
+            bridge, "_openrouter_urlopen", side_effect=fake_urlopen
         ):
             self._invoke_main(
                 {
@@ -676,8 +995,8 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         def fake_urlopen(request, timeout=0):  # noqa: ARG001
             return io.BytesIO(responses.pop(0))
 
-        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch(
-            "urllib.request.urlopen", side_effect=fake_urlopen
+        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch.object(
+            bridge, "_openrouter_urlopen", side_effect=fake_urlopen
         ):
             self._invoke_main(
                 {
@@ -703,8 +1022,8 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         def fake_urlopen(request, timeout=0):  # noqa: ARG001
             return io.BytesIO(responses.pop(0))
 
-        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch(
-            "urllib.request.urlopen", side_effect=fake_urlopen
+        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch.object(
+            bridge, "_openrouter_urlopen", side_effect=fake_urlopen
         ):
             self._invoke_main(
                 {
@@ -725,15 +1044,7 @@ class KimiK3RuntimeBudgetTests(unittest.TestCase):
     """Focused coverage for K3 provider budgets and truthful role receipts."""
 
     def _invoke_main(self, payload: dict) -> tuple[int, dict]:
-        stdin_bytes = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-        fake_stdin = mock.Mock()
-        fake_stdin.buffer = io.BytesIO(stdin_bytes)
-        stdout = io.StringIO()
-        with mock.patch("sys.stdin", fake_stdin), mock.patch("sys.stdout", stdout), mock.patch.dict(
-            os.environ, {bridge.ENV_API_KEY: "test-key"}, clear=False
-        ):
-            rc = bridge.main()
-        return rc, json.loads(stdout.getvalue())
+        return _invoke_bridge_main(payload)
 
     def test_kimi_k3_completion_applies_4096_floor(self) -> None:
         post = mock.Mock(

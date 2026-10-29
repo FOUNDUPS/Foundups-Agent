@@ -18,6 +18,7 @@ from holo_index.freshness_receipt import (
     read_git_head_sha,
     write_freshness_receipt,
 )
+from holo_index.repository_state import repository_root_digest
 from holo_index.source_scope import canonical_source_scope_id
 from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime import (
     HoloIndexReadOnlyQueryAdapter,
@@ -36,15 +37,23 @@ HOLO_BASELINE_COLLECTIONS = (
     "navigation_knowledge",
 )
 SERVICE_TOKEN = "test-token-" + "x" * 32
+REPLICA_BINDING = {
+    "query_replica_descriptor_digest": "sha256:" + "c" * 64,
+    "query_replica_generation_id": "sha256:" + "d" * 64,
+    "query_replica_id": "sha256:" + "e" * 64,
+    "query_replica_path_identity_digest": "sha256:" + "f" * 64,
+}
 
 
 @pytest.fixture(autouse=True)
 def _clean_repository_state(monkeypatch):
-    clean_state = lambda root: SimpleNamespace(
-        proven_clean=True,
-        head_sha=read_git_head_sha(root),
-        error="",
-    )
+    def clean_state(root):
+        return SimpleNamespace(
+            proven_clean=True,
+            head_sha=read_git_head_sha(root),
+            error="",
+        )
+
     monkeypatch.setattr(owner_query_client, "read_repository_state", clean_state)
 
 
@@ -216,7 +225,7 @@ def _poisoned_owner_payload(head_sha: str) -> dict:
     }
 
 
-def _replacement_owner_payload(head_sha: str) -> dict:
+def _replacement_owner_payload(head_sha: str, root_digest: str) -> dict:
     return {
         "schema_version": "holoindex_query_service.v1",
         "ok": True,
@@ -229,15 +238,19 @@ def _replacement_owner_payload(head_sha: str) -> dict:
         "freshness_generation_id": "generation-new",
         "freshness_receipt_digest": "sha256:receipt-new",
         "repo_head_sha": head_sha,
+        "repo_root_digest": root_digest,
         "retrieval_mode": "semantic",
+        "retrieval_runtime_ranker_digest": "sha256:" + "c" * 64,
         "raw_result": {
             "wsp_hits": [{"path": "WSP_framework/src/WSP_97.md"}],
         },
+        **REPLICA_BINDING,
     }
 
 
 def _poison_then_success_transport(
     head_sha: str,
+    root_digest: str,
     authorizations: list[str],
 ):
     attempts: list[int] = []
@@ -255,7 +268,7 @@ def _poison_then_success_transport(
                 {},
                 io.BytesIO(json.dumps(payload).encode("utf-8")),
             )
-        return _HTTPResponse(_replacement_owner_payload(head_sha))
+        return _HTTPResponse(_replacement_owner_payload(head_sha, root_digest))
 
     return transport, attempts
 
@@ -272,6 +285,7 @@ def test_private_owner_poison_timeout_restarts_and_retries_once(
     authorizations: list[str] = []
     transport, attempts = _poison_then_success_transport(
         head_sha,
+        repository_root_digest(repo_root),
         authorizations,
     )
 
@@ -388,8 +402,11 @@ def test_holoindex_owner_service_client_rejects_missing_generation_binding(
                 "index_gap_detected": False,
                 "no_holoindex_reindex_performed": True,
                 "repo_head_sha": head_sha,
+                "repo_root_digest": repository_root_digest(repo_root),
                 "retrieval_mode": "semantic",
+                "retrieval_runtime_ranker_digest": "sha256:" + "c" * 64,
                 "raw_result": {"wsp_hits": []},
+                **REPLICA_BINDING,
             }
         ),
     )
@@ -478,10 +495,13 @@ def test_holoindex_owner_service_rejects_repository_change_during_query(
                 "index_gap_detected": False,
                 "no_holoindex_reindex_performed": True,
                 "repo_head_sha": expected_head,
+                "repo_root_digest": repository_root_digest(tmp_path),
                 "freshness_generation_id": "sha256:" + "a" * 64,
                 "freshness_receipt_digest": "sha256:" + "b" * 64,
                 "retrieval_mode": "semantic",
+                "retrieval_runtime_ranker_digest": "sha256:" + "c" * 64,
                 "raw_result": {"wsp_hits": []},
+                **REPLICA_BINDING,
             }
         ),
     )

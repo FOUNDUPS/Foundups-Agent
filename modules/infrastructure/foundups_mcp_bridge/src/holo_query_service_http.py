@@ -7,10 +7,14 @@ import argparse
 import json
 import os
 import socket
+import threading
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 from urllib.parse import urlsplit
+
+from holo_index.repository_state import runtime_repository_root
 
 from .holo_query_service import (
     DEFAULT_BIND_HOST,
@@ -22,6 +26,13 @@ from .holo_query_service import (
     TOKEN_TOO_SHORT_ERROR,
     HoloIndexQueryOwnerService,
     validate_bind_host,
+)
+from .reddog_holoindex_query_replica_descriptor import (
+    QueryReplicaDescriptorError,
+)
+from .reddog_holoindex_acceptance_guards import (
+    AcceptanceGuardError,
+    prove_existing_isolated_store,
 )
 
 try:
@@ -47,6 +58,9 @@ def _http_status(result: Mapping[str, Any]) -> int:
         "QUERY_QUEUE_TIMEOUT": 503,
         "OWNER_BUSY": 503,
         "SEMANTIC_BACKEND_UNAVAILABLE": 503,
+        "HOLOINDEX_MODULE_INTENT_SNAPSHOT_UNAVAILABLE": 503,
+        "HOLOINDEX_TIER0_INCOMPLETE": 409,
+        "HOLOINDEX_TIER0_LOOKUP_FAILED": 503,
         "SEMANTIC_CANARY_EMPTY": 503,
         "HEALTH_UNAVAILABLE": 503,
         "MISSING_GENERATION_BINDING": 409,
@@ -64,7 +78,7 @@ def _new_fastapi_owner(
     if FastAPI is None or JSONResponse is None:
         raise RuntimeError("FASTAPI_DEPENDENCY_UNAVAILABLE_USE_STDLIB_RUNTIME")
     owner = service or HoloIndexQueryOwnerService(
-        repo_root=Path(__file__).resolve().parents[4]
+        repo_root=runtime_repository_root(Path(__file__).resolve().parents[4])
     )
     application = FastAPI(
         title="Private HoloIndex Query Owner",
@@ -220,7 +234,82 @@ def _parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--host", default=DEFAULT_BIND_HOST)
     parser.add_argument("--port", type=int, default=DEFAULT_PORT)
+    parser.add_argument("--parent-pid", type=int, default=0)
+    parser.add_argument("--canonical-ssd-path", default="")
+    parser.add_argument("--query-replica-root", default="")
     return parser
+
+
+def _wait_for_windows_parent_exit(parent_pid: int) -> None:
+    import ctypes
+    from ctypes import wintypes
+
+    synchronize = 0x00100000
+    infinite = 0xFFFFFFFF
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel32.OpenProcess.argtypes = (wintypes.DWORD, wintypes.BOOL, wintypes.DWORD)
+    kernel32.OpenProcess.restype = wintypes.HANDLE
+    kernel32.WaitForSingleObject.argtypes = (wintypes.HANDLE, wintypes.DWORD)
+    kernel32.WaitForSingleObject.restype = wintypes.DWORD
+    kernel32.CloseHandle.argtypes = (wintypes.HANDLE,)
+    kernel32.CloseHandle.restype = wintypes.BOOL
+    handle = kernel32.OpenProcess(synchronize, False, int(parent_pid))
+    if not handle:
+        return
+    try:
+        kernel32.WaitForSingleObject(handle, infinite)
+    finally:
+        kernel32.CloseHandle(handle)
+
+
+def _wait_for_parent_exit(parent_pid: int) -> None:
+    if os.getppid() != parent_pid:
+        return
+    if os.name == "nt":
+        _wait_for_windows_parent_exit(parent_pid)
+        return
+    while os.getppid() == parent_pid:
+        time.sleep(0.25)
+
+
+def _start_parent_process_watchdog(
+    parent_pid: int,
+    *,
+    wait_for_parent_exit: Any = _wait_for_parent_exit,
+    terminate_process: Any = os._exit,
+) -> threading.Thread:
+    """Exit the private owner after its exact supervisor process terminates."""
+
+    def wait_for_parent() -> None:
+        try:
+            wait_for_parent_exit(parent_pid)
+        except Exception:
+            pass
+        terminate_process(0)
+
+    thread = threading.Thread(
+        target=wait_for_parent,
+        name="holoindex-owner-parent-watchdog",
+        daemon=True,
+    )
+    thread.start()
+    return thread
+
+
+def _serve_owner(owner: HoloIndexQueryOwnerService, host: str, port: int) -> None:
+    if FastAPI is not None:
+        import uvicorn
+        uvicorn.run(
+            create_holo_query_app(owner), host=host, port=port, workers=1,
+            access_log=False, log_level="warning",
+        )
+        return
+    server = create_stdlib_server(owner, host=host, port=port)
+    try:
+        server.serve_forever()
+    finally:
+        server.server_close()
+        owner.close()
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -233,6 +322,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if not 1 <= int(args.port) <= 65_535:
         print("HOLOINDEX_QUERY_SERVICE_INVALID_PORT")
         return 2
+    if int(args.parent_pid) < 0:
+        print("HOLOINDEX_QUERY_SERVICE_INVALID_PARENT_PID")
+        return 2
     token = str(os.environ.pop(TOKEN_ENV, "") or "").strip()
     if not token:
         print("HOLOINDEX_QUERY_SERVICE_TOKEN_REQUIRED")
@@ -240,31 +332,32 @@ def main(argv: Sequence[str] | None = None) -> int:
     if len(token) < MIN_BEARER_TOKEN_CHARS:
         print(TOKEN_TOO_SHORT_ERROR)
         return 2
-    owner = HoloIndexQueryOwnerService(
-        repo_root=Path(__file__).resolve().parents[4],
-        bearer_token=token,
-    )
-    if FastAPI is not None:
-        import uvicorn
-        uvicorn.run(
-            create_holo_query_app(owner),
-            host=host,
-            port=int(args.port),
-            workers=1,
-            access_log=False,
-            log_level="warning",
+    repo_root = runtime_repository_root(Path(__file__).resolve().parents[4])
+    if not args.canonical_ssd_path or not args.query_replica_root:
+        print("HOLOINDEX_QUERY_REPLICA_REQUIRED")
+        return 2
+    try:
+        replica_proof = prove_existing_isolated_store(
+            args.query_replica_root,
+            canonical_store=args.canonical_ssd_path,
+            repo_roots=(repo_root,),
         )
-    else:
-        server = create_stdlib_server(
-            owner,
-            host=host,
-            port=int(args.port),
+    except (AcceptanceGuardError, QueryReplicaDescriptorError, OSError, ValueError):
+        print("HOLOINDEX_QUERY_REPLICA_INVALID")
+        return 2
+    if args.parent_pid:
+        _start_parent_process_watchdog(int(args.parent_pid))
+    try:
+        owner = HoloIndexQueryOwnerService(
+            repo_root=repo_root,
+            canonical_ssd_path=args.canonical_ssd_path,
+            query_replica_root_proof=replica_proof,
+            bearer_token=token,
         )
-        try:
-            server.serve_forever()
-        finally:
-            server.server_close()
-            owner.close()
+    except (QueryReplicaDescriptorError, OSError, ValueError):
+        print("HOLOINDEX_QUERY_REPLICA_INVALID")
+        return 2
+    _serve_owner(owner, host, int(args.port))
     return 0
 
 
@@ -278,6 +371,8 @@ __all__ = [
     "app",
     "create_holo_query_app",
     "create_stdlib_server",
+    "_start_parent_process_watchdog",
+    "_wait_for_parent_exit",
     "main",
 ]
 

@@ -39,11 +39,18 @@ class ControlLoopAnchorStore(Protocol):
 class AtomicSignerControlLoopAnchorStore:
     """Persist the signer high-water witness outside resident runtime state."""
 
-    def __init__(self, path: Path | str) -> None:
-        self.path = Path(path).resolve()
+    def __init__(
+        self,
+        path: Path | str,
+        *,
+        runtime_root: Path | str,
+        repo_root: Path | str,
+    ) -> None:
+        self.path = Path(path)
         self._store = AtomicJsonAuthorityRuntimeStore(
             self.path,
-            allowed_root=self.path.parent,
+            allowed_root=runtime_root,
+            repo_root=repo_root,
         )
 
     def prepare(self, payload: Mapping[str, Any]) -> ControlLoopAnchorPreparation:

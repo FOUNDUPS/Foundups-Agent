@@ -364,7 +364,7 @@ def check_module_exists(holo: "HoloIndex", module_name: str) -> Dict[str, Any]:
     Returns:
         Dict with exists, path, compliance info, and recommendation.
     """
-    project_root = Path(__file__).resolve().parents[2]
+    project_root = Path(holo.project_root).resolve(strict=False)
     normalized = module_name.strip().strip("/\\")
     normalized = normalized.replace("\\", "/")
 

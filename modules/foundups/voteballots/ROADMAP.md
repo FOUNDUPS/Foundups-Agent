@@ -1,168 +1,220 @@
-# Vote/Ballots FoundUp — Roadmap
+# Vote/Ballots FoundUp - Roadmap
 
-**Version**: 0.1.0  
-**Date**: 2026-04-21  
-**Status**: Design  
+**Status**: Internal PoC chain complete; public PoC reopen pending  
+**Current module version**: 0.6.0  
+**Truth authority**: WSP 97 + `VOTE_POC_CHAIN_OBSERVATION_SNAPSHOT_PHASE1.md`
 
 ---
 
 ## Current State
 
-Architecture designed. No implementation.
+The original design roadmap is stale.
+
+### Complete
+- FEC adapter PoC slice
+- candidate entity resolution
+- funding summary
+- confidence scoring
+- quick answer
+- shell payload integration
+- 6/6 implementation slices merged
+- 303 Vote tests recorded passing in the canonical closure snapshot
+
+### Not Complete
+- public Vote landing/app activation
+- live public data wiring beyond current safe/mock boundaries
+- locality/race/candidate roster UX
+- registry/manifest status reconciliation
+- Mall/portfolio promotion
+- prototype features
+- official or non-binding blockchain ballot execution
 
 ---
 
-## Phase 1: Core Pipeline (MVP)
+## Phase 0 - Truth / Status Reconciliation
 
-**Target**: Q3 2026  
-**Goal**: Basic candidate lookup with FEC data
+**Goal**: reopen Vote without inheriting stale labels or duplicating infrastructure.
 
-### Deliverables
+### Required
+- [ ] HoloIndex retrieval with the exact queries in `docs/intake/INTAKE_SOURCE.md`
+- [ ] verify current six-slice code/tests against closure snapshot
+- [ ] reconcile README/module state vs manifest/registry `SPECIFIED_NOT_IMPLEMENTED` / `idea` labels
+- [ ] audit current public catalog/portfolio state
+- [ ] run WSP 109 duplicate/reuse preflight
+- [ ] classify AutoPost/GotJunk/Liberty Alert/blockchain reuse surfaces
 
-- [ ] Entity resolution hook (FEC candidate database)
-- [ ] Finance record hook (FEC API integration)
-- [ ] Confidence scoring hook (WSP 97 rubric)
-- [ ] Basic report generation (text only)
-- [ ] Unit tests for all hooks
-- [ ] Golden test dataset (10 candidates)
-
-### Success Criteria
-
-- Entity resolution accuracy > 95% on golden set
-- FEC data retrieval < 5s latency
-- Confidence labels applied to all claims
-- Human review triggers functional
+### Boundary
+Docs/audit first. Runtime registry/manifest promotion occurs only in its own tested slice.
 
 ---
 
-## Phase 2: Investigation Layer
+## Phase 1 - Public PoC: Ballot Intelligence Funnel
 
-**Target**: Q4 2026  
-**Goal**: Web investigation and source verification
+**Goal**: make the public FoundUp landing immediately useful without requiring member access.
 
-### Deliverables
+### Primary User Experience
+- [ ] activate canonical public Vote landing under WSP 102/104
+- [ ] locality/context resolver with permission + manual fallback
+- [ ] relevant race/candidate roster
+- [ ] candidate cards with minimal funding/influence evidence
+- [ ] confidence + provenance + trail-stop state
+- [ ] candidate evidence drill-down
+- [ ] RedDog conversational handoff
+- [ ] capture/scan research entry using reusable capture contract where available
+- [ ] existing pfMALL/member/invite gate for deeper capabilities
 
-- [ ] Web investigation hook
-- [ ] Source verification hook
-- [ ] Contradiction detector hook
-- [ ] Attack detection hook (ad classification)
-- [ ] Ad ingestion hook (Meta/Google APIs)
-- [ ] Adversarial test suite
+### Existing Core Reused
+- FEC adapter
+- entity resolution
+- funding summary
+- confidence scoring
+- quick answer
+- shell payload contract
 
-### Success Criteria
+### Reopen Criteria
+- V1 if live FEC/API behavior is activated
+- V2 for public route/entry activation
+- V3 only when registry/catalog promotion is justified
+- V8 if shell payload contract changes
 
-- Source credibility scoring calibrated
-- False positive rate (foreign funding) < 0.1%
-- Attack topic classification accuracy > 85%
+### Success Condition
+A public user can reach Vote, identify the relevant election/candidate context or receive an explicit data-gap state, inspect funding evidence, and follow the receipts without encountering a member gate.
 
----
-
-## Phase 3: Funding Trace
-
-**Target**: Q1 2027  
-**Goal**: Committee hierarchy and dark money detection
-
-### Deliverables
-
-- [ ] Funding trace hook (multi-hop)
-- [ ] Shell structure detector
-- [ ] Policy influence analyzer
-- [ ] Funding graph visualization
-- [ ] Trail termination markers
-- [ ] Integration tests with real data
-
-### Success Criteria
-
-- Trace depth up to 5 hops
-- Shell structure detection > 70% recall
-- Dark money estimates bounded and labeled
+### Explicit Non-Goals
+- official ballot casting
+- blockchain vote execution
+- registration remediation
+- influencer analytics/amplification
+- resilience rings or mesh logistics
+- candidate recommendation / targeted persuasion
 
 ---
 
-## Phase 4: User Experience
+## Phase 2 - Prototype A: Candidate Record + Scorecard
 
-**Target**: Q2 2027  
-**Goal**: Speech input and challenge system
+**Goal**: deepen candidate understanding after public PoC works.
 
-### Deliverables
+- [ ] voting/legislative history adapters where applicable
+- [ ] public actions and public communications evidence
+- [ ] neutral scorecard/radar dimensions with receipts
+- [ ] funding exposure
+- [ ] influence/capture risk
+- [ ] governance record
+- [ ] communication risk
+- [ ] user-selected issue/constituent alignment
+- [ ] evidence strength
 
-- [ ] Speech-to-text hook (Whisper integration)
-- [ ] Challenge/correction hook
-- [ ] Human review queue
-- [ ] Report generation (all formats)
-- [ ] Model routing optimization
-- [ ] End-to-end tests
-
-### Success Criteria
-
-- Speech transcription accuracy > 90%
-- Challenge processing < 24h
-- Average report latency < 30s
+Every score axis must expose source evidence and confidence. No automatic endorsement/ranking.
 
 ---
 
-## Phase 5: Production Launch
+## Phase 3 - Prototype B: Discovery
 
-**Target**: Q3 2027  
-**Goal**: Public availability
+**Goal**: make pfMALL the place to discover civic channels/voices/content.
 
-### Deliverables
+- [ ] rising/local/issue-specific channel discovery
+- [ ] video/content browsing inside the existing shell
+- [ ] RedDog conversational discovery
+- [ ] explicit user feedback loops
+- [ ] channel evidence/usefulness metadata
 
-- [ ] pfMALL listing
-- [ ] PWA shell integration
-- [ ] Monitoring and alerting
-- [ ] Rate limiting and abuse prevention
-- [ ] Documentation (user-facing)
-- [ ] Load testing
-
-### Success Criteria
-
-- 99.9% uptime
-- Human review rate 5-15%
-- No hallucinated accusations in production
+No political microtargeting or conversion optimization.
 
 ---
 
-## Dependencies
+## Phase 4 - Prototype C: Non-Binding Cryptographic Parallel Ballot
 
-### Blocking
+**Goal**: create a predecessor/proving ground for auditable voting and governance primitives.
 
-| Dependency | Owner | Status |
-|------------|-------|--------|
-| FEC API key | Ops | Not started |
-| State API access | Ops | Not started |
-| Meta Ad Library access | Ops | Not started |
-| Whisper model deployment | Infrastructure | Available |
+- [ ] audit WSP 96/WSP 100/current blockchain modules through HoloIndex
+- [ ] define participant/credential contract
+- [ ] define privacy boundary between identity and selection
+- [ ] prevent duplicate/unauthorized preference signals within experiment rules
+- [ ] generate cryptographically auditable receipt/tally evidence
+- [ ] clearly label all signals NON-BINDING / NOT AN OFFICIAL ELECTION BALLOT
+- [ ] expose aggregate direction without exposing individual choices
+- [ ] threat-model coercion, linkage, replay, Sybil, key loss, and recovery
 
-### Non-Blocking
-
-| Dependency | Notes |
-|------------|-------|
-| pfMALL shell | Can develop without full shell |
-| Stake gate | Not required for MVP |
+Do not build a new blockchain by default. Reuse the canonical FoundUps governance/blockchain substrate if the audit proves it suitable.
 
 ---
 
-## Risks
+## Phase 5 - Prototype D: Registration Assurance
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| FEC API rate limits | Medium | Implement caching, batch requests |
-| State data inconsistency | Medium | Standardize parsing, note gaps |
-| Model hallucination | High | WSP 97 confidence labeling, human review |
-| Defamation claims | High | Strict evidence requirements, challenge system |
-| Political bias accusations | High | Transparent methodology, source-only claims |
+**Goal**: let consenting participants know when authoritative registration data may require attention.
 
----
+- [ ] jurisdiction/official-source adapter architecture
+- [ ] opt-in identity and privacy model
+- [ ] minimal retained personal data
+- [ ] periodic status checks with user-controlled cadence/policy
+- [ ] CURRENT / ATTENTION_REQUIRED / UNKNOWN evidence states
+- [ ] source + timestamp shown to user
+- [ ] compliance review before any official communication/remediation automation
 
-## Out of Scope (This Roadmap)
-
-- Real-time election night tracking
-- Ballot initiative analysis
-- International elections
-- Campaign strategy recommendations
-- Predictive analytics
+No silent registration changes and no autonomous official submission/mailing in the initial prototype.
 
 ---
 
-*0102 pArtifact: Phased approach to political transparency. Evidence-first, no hallucinations, human review for dangerous claims.*
+## Phase 6 - Prototype E: Voter Resilience
+
+**Goal**: expose voting-access friction and later support protected local resilience workflows.
+
+Reuse candidates already evidenced:
+- GotJunk map/geolocation/PWA scaffolding
+- Liberty Alert GeoPoint / alert / MeshNetwork / AlertBroadcaster
+- existing gate/auth patterns
+
+Potential staged capabilities:
+- [ ] public locality/friction evidence cards
+- [ ] verified/inferred/unknown anomaly ledger
+- [ ] gated alerts
+- [ ] gated local support/coordination after compliance/security review
+
+Do not duplicate GotJunk/Liberty Alert primitives without a reuse decision.
+
+---
+
+## Phase 7 - SmartDAO Governance Extraction
+
+**Goal**: move proven generic governance primitives out of Vote-specific ownership.
+
+- [ ] support / mandate signal contract
+- [ ] reusable cryptographic vote-verification interface
+- [ ] governance event/audit contract
+- [ ] SmartDAO integration under current escalation/governance protocols
+- [ ] tokenization/valuation hooks only after governing WSP gates
+
+VOTE remains the civic proving FoundUp. Shared governance code belongs in the architecture selected by current WSP/codebase authority.
+
+---
+
+## Cross-Cutting Work
+
+### Compliance / Trust
+- political/election compliance preflight before jurisdiction-sensitive releases
+- privacy and security review for identity/location/registration/ballot data
+- WSP 97 truth-state enforcement
+- no targeted persuasion or microtargeting
+
+### Reuse Discipline
+Before each slice:
+1. HoloIndex retrieval using explicit query parameters
+2. registry/module/catalog/portfolio check where relevant
+3. direct code validation
+4. REUSE / EXTEND / EXTRACT_SHARED / NEW decision
+5. WSP 15 prioritization
+6. atomic implementation/test slice
+
+---
+
+## Canonical Intake Packet
+
+See `docs/intake/`:
+- `OUTCOME.md`
+- `SOLUTION.md`
+- `PAIN.md`
+- `POC_SCOPE.md`
+- `PROTOTYPE_GATE.md`
+- `SKILLS_MAP.md`
+- `FOUNDUP_MANIFEST_DRAFT.md`
+- `INTAKE_SOURCE.md`

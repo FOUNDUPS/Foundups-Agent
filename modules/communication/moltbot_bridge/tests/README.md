@@ -1,4 +1,2065 @@
+## Installed HIGH source integration — 2026-10-23
+
+PR #2181 reconciles preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+The prior `beb46b3` local checkpoint passed 400 cases with six platform skips,
+plus separate manifest (8), Node (3 commands) and independent (12) checks. Hosted CI then found an oversized selection
+module and malformed-schema exception; its Linux startup step did not run.
+The repair extracts the existing private lease into one 95-line owner, retains
+canonical aliases and 200/50-line caps, rejects non-string schemas, and updates the
+unknown-version test while preserving v10 LOW/v11 HIGH scope separation.
+Repaired source passes 410 cases with four Windows platform skips across 15
+non-overlapping suites; independent review passes 21 separate held-out/boundary
+checks. Manifest (8) and Node compatibility (3 commands) also pass. Fresh hosted
+Linux and publication gates remain required; earlier source counts are historical.
+Native author admission, activation and retained improvement remain unproved.
+
+Candidate `174955143d` subsequently passed two isolated credential-free installed
+profiles. Independent review rehashed all 2,701 installed files (1,264 source /
+1,437 runtime), confirmed 18 imports and four absent-owner entrypoint rejections,
+and observed both temporary units absent after cleanup. This validates bounded
+runtime closure and confinement; it does not authenticate a HIGH job or execute
+a native author. The first incomplete export was rejected and remains preserved.
+
+Both hosted runs at `174955143d` reached the POSIX fence tests: 1,001 passed,
+two failed and one skipped. Children could not import the pytest-assigned module
+name; neither failed run proved lock behavior. The repair moves the unchanged
+probe into existing test support and uses its canonical import, retaining spawn,
+the same-inode oracle and all timeout/cleanup limits. The full 47-suite Linux
+selection now passes 1,003 cases with one Windows-only skip; both actual process
+cases pass. Independent Linux review passes the two originals and two effective
+lock-removal controls. These overlapping scopes are not added. The documented
+local DrvFS collection boundary differs from CI; fresh exact-head hosted gates
+remain required. Production/runtime bytes and the manifest are unchanged, so
+the installed result remains explicitly bound to `174955143d`, not relabeled
+as authenticated execution or a final-main installation.
+
+The current acceptance selection must retain installed-work and both HIGH
+service suites, all five live-lease suites, LOW/startup, v12/v13 model/nonce,
+parent/effect, initial-enrollment and permission regressions. Preserve main's
+inside-fence clock regression. Actual collection determines the final count;
+Windows skips do not prove Linux same-inode/process behavior. Use the existing
+qualified interpreters, explicit root/confcutdir and short external temporary
+paths. No live service, model, account or real credential is needed for this
+source qualification. Installed admission and retained-use evidence remain open.
+
+## Installed HIGH service qualification
+
+Run `test_reddog_installed_high_service.py` and `test_reddog_installed_high_service_signing.py` with LOW service, startup custody, installed work-manifest, permission, parent-model and live-lease suites. `installed_high_service_test_support.py` reuses actual signed-model/parent/effect, factory and nonce fixtures; installation/current-input, OS, initial permission/root oracle and frozen-clock seams are synthetic. Verify actual Ed25519 signature, durable commit/replay rejection, no nested request fence, missing/corrupt model/proof rejection before custody, and post-sign drift/failed-exit withholding without rollback claims. The signed-manifest guard test replaces only the full runtime guard with a recorder/rejection seam; it is not native qualification.
+
+Use `-B`, `PYTHONDONTWRITEBYTECODE=1`, explicit `--rootdir=. --confcutdir=. --noconftest`, and no cache provider. On Windows use a short owned external `--basetemp` (for example `O:/RedDog-Builder-Artifacts/rsi-hi-<run-id>`) distinct from the report directory: the nested second manifest fixture can exceed259 path characters in a long evidence directory. Retain any original failure; shortening only temporary storage is environment repair, not a source fix. Retain external exact hashes and XML/logs. No native authority/provider effects are claimed.
+
+## Non-initial installed metadata qualification
+
+`test_reddog_installed_work_admission.py` reuses real signed manifest/E0 and
+filesystem artifact owners with explicit synthetic OS/current-selection seams.
+Retain initial installed-manifest, static E0, archive, authenticated binding,
+permission and startup compatibility suites. Require generation-1/v10 rejection
+for work scope, cross-domain signature rejection, swapped issuer/target binding,
+artifact/source/repo substitution, current-owner/time drift and failed lease exit.
+The static contract unknown-version fixture now uses v12 because v11 is supported.
+
+Run with an explicit checkout `--rootdir`, `--noconftest`, `-p no:cacheprovider`
+and bytecode disabled; preserve raw failures and exact source bindings externally.
+Historical 2026-10-20 checkpoint: that connected run retained two unchanged
+startup-test size failures and generated integrity was pending integration.
+The current 2026-10-23 results above supersede that source-validation status.
+Source metadata tests and independent controls do not establish installed HIGH
+activation, authentic input supply, native admission or publication.
+
+## Live generation scope and protected consensus nonce qualification
+
+Retain the full legacy current-generation model-pair regression and the
+actual signed-model gate for both v12 and full v13 owners. A nonce-only
+test selection misses compatibility at this consumer boundary.
+
+Run the five `test_reddog_live_lease_{scope,composition,current_use,generation,process}.py`
+suites alongside the six existing nonce and connected parent/effect/model/factory
+suites. Keep explicit pytest root/confcutdir and independent temporary databases.
+Use actual signed files and MAC/SQLite transactions; label synthetic OS, owner,
+permission and credential seams. Exercise foreign/stale scopes, bad clocks,
+proof/model tampering with unchanged owner, withdrawal and post-commit rejection.
+The Linux process suite proves actual same-inode blocking/release with a bounded
+test-only watchdog; it does not provision installed HIGH authority.
+
+Historical 2026-10-20 source validation: 390 passed, 9 platform skips, zero failures/errors
+across 25 suites in 389.797s. Separate Linux process controls: 2 passed without
+skips in 29.394s, using the actual same-inode generation lock and signed files
+with synthetic admission/installation seams. Independent core review: 16 unique
+held-outs passed. These are not current merged-source Linux results. Counts
+overlap and are not additive. Original fixture failures
+and the bounded nested-lock red control remain in external evidence.
+
+The existing authenticated startup CI selection includes all five suites. Native
+installed HIGH acceptance still requires protected policy/source and model data
+composition plus genuine admission inputs. See TestModLog for preserved nonce
+history and dispatch for exact frozen receipts and generated inventory.
+
+### Historical nonce-only qualification checkpoint — 2026-10-20
+
+Exercise the v13 nonce/custody suites with existing state, current owner/E0,
+parent/effect, model, issuer custody and legacy LOW regressions. Use real
+disposable MAC/SQLite files and signed model/policy inputs; label OS/installation
+seams. Require restart/replay, cross-instance handle rejection, corrupt or absent
+state, one-step recovery, withdrawal, expiry and failed commit/cleanup controls.
+Pin an explicit pytest repository root and independent temporary databases.
+Connected 437/3 platform skips and independent 21 controls exercise this source
+component. Current generated runtime includes custody only; authority/current
+owner are not yet imported or qualified installed runtime.
+Installed HIGH acceptance additionally requires a real Linux same-inode locking
+test across reserve, pre-sign validation, commit and rollback under the actual
+permission wrapper. Passing the adapter tests alone does not meet that gate.
+
+## Exact parent-consent connection
+
+The authenticated startup CI retains three parent-consent and six parent-consensus/model
+suites (`test_reddog_parent_consensus_{domains,composition,transport,signer,use_time}.py`
+and `test_reddog_parent_model_inputs.py`); retain connected effect/generation/custody/rate
+and elevated-consensus checks. The bounded resident-chain CI selects the existing
+`test_reddog_governed_execution_valve_production_wiring.py`: its eight bootstrap cases
+keep real resolver/parent/model verification, explicit earlier evidence seams, and no lease.
+With `test_reddog_parent_consensus_use_time.py`, local qualification is 34 pass/one Windows
+symlink skip; [TestModLog](TestModLog.md#parent-authority-bootstrap-forwarding--2026-10-25)
+records the guarded command, baseline and fixture boundaries. Signed domains, proof bounds,
+expiry/clock/reservation checks and actual Linux process tests remain; no native RSI is proved.
+
+## AntifaFM campaign route — 2026-10-18
+
+`test_social_campaign_adapter.py` preserves the research route and checks the
+real AntifaFM default preview, rejected targeting parameters and malformed or
+duplicate command tokens. The connected offline campaign/drafter/publisher
+selection and its importlib-mode command are documented in
+`modules/platform_integration/social_media_orchestrator/tests/README.md`.
+No action CLI loop, live DAE, provider or messaging operation is invoked.
+
+## Installed consumer/runtime integration
+
+Run installed-manifest consumer, issuer startup/service, separate rate-store and
+runtime-guard suites together with current enrollment/target regressions. Run
+ordinary positive credential fixtures as a nonroot Linux account; they bind its
+positive UID/GID. Run explicit two-UID native tests and root-owned guard fixtures
+with root separately. Preserve skips/failures; do not weaken production UID checks.
+Synthetic admission and credential-free guard probes are not native worker proof.
+
+## Installed issuer contract qualification
+
+Run `test_reddog_grant_installed_source_contract.py` and
+`test_reddog_signer_installed_policy.py` with existing initial manifest, archive,
+E0 static, authenticated binding and permission suites. The new tests exercise
+inert bundle/hash ordering and rejection boundaries, not native admission.
+
+## Protected issuer custody qualification
+
+Run `test_reddog_grant_startup_custody.py` and
+`test_reddog_grant_custody_owner_versions.py` with issuer service, root LOAD,
+permission rehydration, target protected-use, model-verifier and owner-version
+regressions. Existing CI selects these alongside the connected signing owners.
+OS custody/owner/isolation seams are explicit; production E0, signatures,
+credential resolver lifetime, replay stores and protocol routing are exercised.
+These tests do not prove installed credentials, a native service or RSI gain.
+
+## Issuer-only root LOAD qualification
+
+The signing CI selection includes `test_foundup_verified_outcome_root_grant_load.py`,
+`test_reddog_grant_root_load_rpc.py` and the resident socket regression alongside
+the issuer composition. Run current permission rehydration and legacy root
+revocation suites too. The real two-process LOAD tests preserve the old-order
+deadlock control and check policy/generation/expiry drift. Synthetic installation
+seams remain explicit; passing tests do not prove installed worker admission.
+
+The same grant-aware signing CI selection includes
+`test_reddog_signer_key_epoch_use_durable_authority.py`. Run it with root LOAD,
+root-protected composition, installed grant consumer and permission rehydration.
+Current-time cases sample inside the durable fence and recheck after snapshot/root
+LOAD and permission verification; explicit stale caller epochs must still reject.
+Cover observed rollback, snapshot/receipt expiry, identity drift and post-action
+rejection. A rejected result does not undo arbitrary callback effects. Independent
+native held-outs use real SQLite/flock/source with synthetic root/signing/clock
+fixtures; TestModLog records author 207 and separate independent 17 passes, not an
+additive unique count. Preserve the earlier fixture failures and unproved live-clock
+cause, plus Windows encoding/shell and corrected Linux runner failures as evidence.
+
+## Callable LOW grant service qualification
+
+`test_reddog_grant_authority_service.py` is selected by the existing
+`Run RedDog grant-aware signing composition regression` CI step. Run it with
+current permission rehydration, authenticated manifest binding, independent
+provider, LOW RPC, ephemeral backend and socket protocol/resident/client suites.
+The canonical registry generator owns its classification and shard membership.
+
+Coverage includes missing dependencies, non-LOW/foreign/malformed requests,
+owner/profile/custody substitution, permission failure including fence exit,
+process-isolation rejection and durable rate across fresh backends. The Linux
+positive exchanges an actual AF_UNIX request in a same-process thread and
+verifies disposable signatures and cleanup. Its peer attribution, root ownership,
+current admission, isolation, revocation and custody are synthetic. This is
+transport/composition coverage, not an admitted independent native issuer.
+Windows explicitly skips that Linux-only exchange.
+
+Resident transport regressions additionally use distinct Linux processes and real
+kernel peer attribution to verify listener lifetime, socket cleanup and replacement
+preservation. Passive wrappers observe descriptor lifetime while real cleanup runs.
+The existing closed-listener replacement test remains unchanged. Unsupported native
+platform checks keep explicit skips; no skip replaces a failing Linux assertion.
+
+## Grant bootstrap and LOW RPC qualification
+
+The existing CI `Run RedDog grant-aware signing composition regression` includes
+`test_reddog_signer_low_grant_rpc.py` beside the independent provider and E0 static
+contracts. The existing startup-policy selection already includes authenticated
+grant manifest binding and WSP71 permission rehydration. Run these suites together
+for the combined change; retain the effect and elevated provider regressions.
+
+The Linux RPC suite uses two distinct processes, the production AF_UNIX
+server/client and a real same-inode `LOCK_EX`. Its six cases demonstrate bounded
+old-order timeout, successful issuance, caller-use fencing and late policy,
+generation or expiry rejection. Authentication callbacks and keys are explicitly
+synthetic. The tests prove transport/locking behavior, not independently installed
+grant authority. They skip on Windows. Unit regressions also cover refreshed
+selection timestamps, stable identity drift, final expiry and clean lease exits.
+V9 tests retain legacy golden hashes, all retained authority fields, required
+future permission fields, full signatures and exact-Git provenance rejection.
+
+## Initial handshake producer-to-consumer qualification
+
+The existing CI `Run RedDog grant-aware signing composition regression` now
+includes configuration supply, run-packet supply and E0 static contracts beside
+the ephemeral factory, handshake, per-sign backend and protected-use suites.
+Use its exact path list for connected verification. Initial tests cover strict
+schema/type/scope/root separation and reject non-handshake requests before
+grant consumption or key resolution. Connected fixtures verify real disposable
+signatures and durable replay; root selection, packet attachment, OS transport,
+credentials, service loop and clocks are injected. Grants are helper-signed,
+not issued by a live independent grant service. Do not claim native startup.
+Independent held-out cases and commands are retained in the dispatch runbook.
+
+## Initial manifest producer-to-consumer qualification
+
+The CI step `Run initial enrollment producer and consumer contracts` selects
+`test_reddog_initial_runtime_manifest_authority.py` and
+`test_reddog_initial_enrollment_artifact_bounds.py` with legacy signed manifests,
+authority freshness, atomic provisioning/recovery, activation leases, current
+selection, system-service owner readers, authenticated grant binding and existing
+bootstrap/store/isolation/resolver suites. Run the same paths using the existing
+`python -B -m pytest --noconftest --import-mode=importlib -p pytest_asyncio.plugin
+-p no:cacheprovider -q` command. Do not infer native execution from mocked OS or
+custody seams in these tests.
+
+Artifact-bound regressions cover approval, installed descriptor and source files
+above 64 KiB, reject bytes above 1 MiB, and preserve ordinary owner 64 KiB rejection.
+The existing privileged installed-runtime CI step also runs this suite as Linux
+root, so protected-file cases execute; ordinary nonroot selection skips them.
+Synthetic authority remains explicit.
+
+Retained held-out cases cover expiry while waiting for publication, initial
+manifest rejection at generation2, source/capability mismatch, Linux process and
+inode qualification, FIFO/ancestry ordering and descriptor cleanup. Actual Linux
+systemd/immutable-inode/mmap and separate-process component evidence is recorded
+in the existing RSI dispatch runbook. Windows-specific sharing tests retain
+their explicit platform skips on Linux. Native worker admission is a later gate.
+
+## Initial writer qualification
+
+Run `test_reddog_signer_runtime_generation_bootstrap_authority.py` together with
+`test_reddog_sqlite_monotonic_authority_store.py` and the signer/anchor/provisioning
+suites. Fixtures use real disposable storage with explicitly synthetic root policy
+and custody; they do not constitute runtime admission. The existing CI bootstrap
+step includes both files. External Linux probes separately exercise actual systemd
+custody, protected installation and public verification; see the dispatch evidence.
+
+## Initial anchor and high-water bootstrap tests — 2026-10-14
+
+Run these together with `python -B -m pytest --noconftest --import-mode=importlib
+-p pytest_asyncio.plugin -p no:cacheprovider -q`:
+
+- `modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_generation_bootstrap_signer.py`
+- `modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_generation_anchor.py`
+- `modules/communication/moltbot_bridge/tests/test_reddog_atomic_signer_runtime_generation_high_water.py`
+- `modules/communication/moltbot_bridge/tests/test_reddog_signer_process_isolation_gate.py`
+- `modules/infrastructure/secrets_mcp/tests/test_systemd_credential_secret_resolver.py`
+
+The76 cases cover v1 and v2 with real Ed25519 operations with substituted custody/root-read/
+isolation boundaries. V2 adds canonical initial forms, authenticated-revision
+derivation, cross-schema rejection, header mutation and two-signature expiry.
+The real disposable store test covers prepare/abort/witness/commit. They prove policy scope, immutable state, altered inputs,
+key mismatch, clock rollback/expiry, and permission expiry during resolution and
+policy reads. They do not establish OS confinement or native admission. Separate
+real systemd component evidence is recorded in RSI_SWARM_DISPATCH; it does not
+qualify the full service/package startup. CI explicitly runs the connected suite.
+
+## Canary provider closure tests — 2026-10-13
+
+Select `test_reddog_resident_live_canary.py`,
+`test_reddog_resident_live_canary_integration.py` and
+`test_reddog_resident_live_canary_provider_readiness.py` together using
+`--noconftest --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider`.
+Controls cover provider preservation, invalid configuration, confined credential
+checks, environment restoration and refusal to invoke without authority.
+Fresh-base Windows result: 133 passed/2 skipped. Hosted Linux validation remains
+pending; neither fixture result establishes native worker admission.
+
+## Proposal startup connection — current checkpoint, 2026-10-07
+
+Existing materializer/adapters reused; real proposal packet supply and public
+startup composition now pass connected113tests under explicit enrollment/OS/transport
+fixtures. Missing/empty stores still reject before service entry or target-key reads.
+Publication pending. Native enrollment and the worker/evaluator/retention/later-use
+loop remain unproven. See ModLog for failures, repairs and exact-source receipts.
+
+## Deferred proposal activation — current checkpoint, 2026-10-07
+
+PR2098 is merged/main-verified at1e220147c; its prior publication-pending entries
+are historical. Next16/P0 extends the existing deferred factory/runtime.
+Local connected119pass/2skip now covers owner/grant handshake and proposal
+composition under synthetic selection/transport. Native packet supply remains unqualified. No native RSI or retention claim. See current
+ModLog/INTERFACE for boundaries, review findings and exact evidence.
+
+## Current-generation Memex checkpoint — 2026-10-07
+
+The existing retained-evidence consumer is locally qualified: connected168pass
+and valve routing1pass; independent source review cleared the reproduced
+principal-provider identity defect. Native proposal packet/grant provisioning
+remains blocked by two explicit guards. Publication pending; fixture qualification
+is not autonomous RSI. See INTERFACE, ModLog and test evidence for boundaries.
+Next: re-observe the existing principal/replay adapter owners, then select one
+bounded admitted integration. No repeated broad audit or failed model retry.
+
+## Current-generation model consumer checkpoint — 2026-10-07
+
+Existing producer/collector/valve wiring is locally qualified with disposable
+model signatures and explicit principal/peer seams. Connected89pass including the real
+collector; source review cleared the reproduced clock rollback. See
+INTERFACE/ModLog and existing current-generation runtime/use-time test files.
+Native admission and retained RSI remain unproven; publication pending.
+
+## Model input authority checkpoint — 2026-10-07
+
+Protected owner v8 supply is locally qualified; current-generation resident
+consumption and native admission remain pending. See INTERFACE/ModLog and
+`tests/test_reddog_signer_system_service_startup_authority.py` for the existing
+API,22 input/lifetime controls,3 real-signature controls and v7/v8 startup compatibility. No model or
+provider calls are needed for these tests.
+
+## Fresh peer consumer controls — 2026-10-07
+
+Existing generation use-time suite adds23 adversarial cases for rotation, stale
+peer, substitutions, bad clocks, absent grants, missing OS evidence and mutation.
+Existing real-generation suite adds renewal and manifest-expiry controls using
+the actual selection producer; profile/process and handshake are substituted.
+Initial API baseline23fail; first focused52pass/1skip missed two review defects.
+The first expiry baseline was invalid (fixture KeyError). Corrected real-producer
+baseline2fail/0errors reproduces both intended failures against review-pinned source.
+Connected123pass/1fixturefail/5skip; corrected affected pair2pass with production
+bytes unchanged. All prior failed runs remain recorded.
+Independent recheck confirms both repairs; no live grant or native RSI claim.
+
+## Peer prerequisites — 2026-10-07
+
+Reuse owner-loader, current-generation binding, healthcheck and mutual-handshake
+suites. Windows82passed/5skipped; Linux healthcheck29passed/0skipped. Linux cases
+use real AF_UNIX/SO_PEERCRED with disposable signatures and synthetic signer
+audit fields. They establish OS peer rejection, not native signer enrollment.
+Grant tests establish forwarding/no fallback, not authorization of a real grant.
+Saved baseline/intermediate failures and exact commands are in the existing
+RSI evidence directory (`peer-preconditions-execution.json`). Linux source hashes
+were stable; test-only EOF guard was added after the Windows run started and is
+covered by the final Linux run. No unchanged connected-suite rerun required.
+
+## Principal generation connection — 2026-10-07
+
+Existing current-generation runtime/use-time suites cover key/provider/identity,
+repo/FoundUp scope, absent evidence, altered artifacts, expiry, mutable inputs,
+serialized claims and mismatched work receipts. Consumer controls preserve six
+other gates. Connected six-file run100pass/1 Windows platform skip; exact source
+hashes and historical failures are in `principal-generation-connected-execution.json`
+under the current RSI evidence directory. No native worker admission is claimed.
+
+## Shared-backend test selection — PR2090
+
+Include `test_reddog_conversation_scope_durable_authentication_wsp62.py` with the
+existing effect/consensus/provider selection. Hosted CI caught backend678>675
+that the earlier selection missed. Preserve this guard; current extraction yields
+674 lines. Expanded selection707/707 passed; source/log review is separate from
+independent test execution. Evidence: `effect-signing-ci-structure-repair.xml` in
+the current RSI evidence directory.
+
+## Effect lifetime boundary regression — 2026-10-07
+
+Existing effect signing tests now reproduce and repair excessive grant lifetime,
+independent root acceptance of that lifetime, and delayed target use. Frozen
+baseline3fail/1pass becomes passing within697 connected Windows cases. Seven
+missing/type/range cases also reject before nonce consumption. Evidence:
+`outputs/rsi-permission-evidence-20261006/effect-expiry-{baseline,focused,connected}.xml`.
+
+## Effect signing composition regression — 2026-10-07
+
+Run `test_reddog_effect_signing_composition.py`, `test_reddog_effect_signing_grant.py`
+and `test_reddog_effect_signing_lease.py` with the existing consensus/consent/reviewer
+and provider suites. Shared fixture: `reddog_effect_signing_test_support.py`.
+Covers exact target and one-use permissions, invalid evidence, expiry during
+reservation/commit, clean fence exit before RPC, owner rotation, cleanup failure,
+held-fence API rejection, real grant signatures and final lease consumption.
+The full Windows selection passed 687 cases; dedicated Linux-root qualification
+requires its own fixture and was not run. Evidence is in
+`outputs/rsi-permission-evidence-20261006/effect-signing-connected-windows.{xml,log}`.
+
+
+## Provider issuance regression — 2026-10-06
+
+The frozen composed test observes whether each target call still holds the
+provider owner lease. It failed twice in the baseline chain, then passes after
+the issuance handoff repair. The HIGH chain uses explicit synthetic admission;
+it is not native authority. Provider tests retain legacy lease lifetime and add
+clean/failed exit cases. Adapter tests reject issuance exceptions, invalid grants
+and lease-only providers before target dispatch. Connected94/94 pass in26.13s;
+commands and source review are in `outputs/rsi-permission-evidence-20261006/`.
+Production target admission and later retained RSI benefit remain separate gates.
+
+## Authenticated public startup regression — 2026-10-06
+
+Separate actual-OS qualification at `50008b241` passes using synthetic authority:
+real DynamicUser/systemd custody, production isolation/public entrypoints and
+Unix peer transport; missing grant rejection, one verified signature and nonce
+replay rejection. Exactly one target sign and six root RPCs, both services exit0,
+complete owned cleanup. Source-bound driver, observations and failed attempts:
+`outputs/rsi-permission-evidence-20261006/linux-public-startup-20261005T231947/`.
+This local experiment is not hosted CI, authentic enrollment or native RSI.
+
+`test_reddog_signer_system_service_entrypoint.py::test_public_v7_startup_real_generation_grant_signature_and_replay`
+uses the public entrypoint, signed artifact generation, current E0 validation,
+deferred dependency materialization, root protocol handlers and durable replay.
+It verifies one valid signature and rejects missing/replayed grants. OS ownership,
+credential delivery, isolation and socket transport are controlled fixtures;
+this is source integration, not actual OS admission.
+
+Replay performs two authenticated revocation LOAD checks before nonce rejection;
+the test distinguishes their proof-key reads from forbidden repeated target
+signing and ACQUIRE/FINISH. The original overly broad no-read assertion and
+its correction are preserved in `outputs/rsi-permission-evidence-20261006/`.
+Connected entrypoint/resolver/bootstrap selection:104pass/2platform skips.
+Separate existing Linux authority runner:8pass, stable source. Authentic
+enrollment, native local-worker improvement and retained gain remain open.
+
+## Permission evidence type regression — 2026-10-05
+
+The existing systemd reference-pair test now includes twelve permission inputs.
+Only literal `True` permits the two controlled resolver reads. False and malformed
+inputs require permission denial and zero reads. The unchanged-production baseline
+failed six of twelve cases. Separate frozen held-out cases cover both reference
+schemes and caller-defined truthiness/equality methods; baseline failed all eight.
+Evidence: `outputs/rsi-startup-custody-20261005/permission-input-audit`.
+Candidate validation and publication status are recorded in TestModLog/ModLog.
+These are synthetic credential tests, not native admission or secret provisioning.
+
+## Local credential provider regression — 2026-10-05
+
+The existing key-provider tests cover systemd reference pairs, permission denial
+without reads and malformed/mixed references. Existing resolver-supply tests cover
+lazy explicit backend selection and invalid owner/binding/mixed runner rejection.
+`modules/infrastructure/secrets_mcp/tests/test_systemd_credential_secret_resolver.py`
+uses controlled OS fixtures for lifetime, ACL, file identity, symlink, size, encoding
+and audit-callback negatives. These tests do not prove actual systemd delivery.
+
+The separate local public-canary experiment exercised the real class under an
+isolated nonroot systemd unit: valid read, expired rejection without a value,
+wrong requester rejection and cleanup. It also preserves the initial group-shape
+failure that prompted strict fd-bound ACL validation. Source-bound results:
+`outputs/rsi-startup-custody-20261005`; focused206:204pass/2skip and connected152:
+151pass/1skip. Existing hosted grant-aware regression now includes resolver tests;
+hosted CI does not replay the privileged local canary.
+
+## Bootstrap grant-admission forwarding — 2026-10-05
+
+WSP15 selects14/P1 (C2/I4/D5/Impact3) at main4d03a0f1. The existing runtime
+bootstrap now forwards optional `secret_grant_admission` unchanged to the
+existing grant-aware runtime after selection and isolation. Default `None`
+preserves legacy behavior. Two frozen integration cases previously rejected the
+keyword; both now pass. Two gate-order cases also pass; connected479:472pass/7skip.
+The positive fixture substitutes outer selection/peer attachment, while executing
+actual lower grant validation, protected use, signature verification and replay
+rejection. Independent source/log review is distinct from independent execution.
+
+One bounded local Qwen3.5 proposal was rejected unchanged (incorrect plumbing);
+the four-line repair is coordinator-authored. No criteria were relaxed. Actual
+public startup still lacks authenticated dependency supply and credential custody.
+Evidence: `outputs/rsi-local-custody-20261005`; canonical backlog
+`bootstrap_grant_forwarding_20261005`. Publication pending; native RSI incomplete.
+
+## Direct revocation proof regression — 2026-10-05
+
+One added test retains the independently frozen control-key LOAD rejection;
+correct48/48 versus controlled-fault47pass/1expected failure. Existing runtime
+and tests are unchanged. This is a coordinator/team repair after0/2 accepted
+local proposals. Connected475:468pass/7skip; publication pending. See module ModLog
+and canonical backlog `control_proof_regression_20261005` for evidence.
+
+## Separate protected-use control proof — 2026-10-05
+
+**Closure verified:** PR2068 merged at `724bb684e5e46302a6e7cd2cf9473e1db661650b`.
+Hosted474:471pass/3skip; exact-main CI37254048948 and CodeQL37254048507 succeeded.
+Later merged-source19/19 passed. Governed OpenClaw/WRE refresh completed442.5s;
+CURRENT/no-gap query took44.615s, one attempt/no retry. Historical6task/18event
+rows are unchanged, now7/21. Independent maintenance review and normal owned-lane
+retirement are complete; branch, bundle and ignored-file archive are preserved.
+This closes source/retrieval retention, not native worker admission or key custody.
+
+Earlier source-qualification record (historical):
+
+Two legacy custody controls pass. The17 new cases cover v2 identity/context
+binding, strict nested fields, mixed versions, real-router two-key proofs and
+preserved work proofs. Initial17fail reflect unsupported v2 shape, not17 distinct
+defects. Independent review strengthened malformed cases with identity-only
+validation so stale grant signatures cannot mask missing field checks. Candidate
+17pass; connected17-suite regression474:467pass/7platform skips,0fail/errors.
+Source review approved; publication pending. Test key access
+inside the callback is not actual resolver execution or native key custody.
+Exact evidence: `outputs/rsi-control-auth-20261005`; see module ModLog.
+
+CI37252460162 found a Windows-only mocked socket path in the newly included
+authority-service suite (42fail/90setup errors). The two substituted-transport
+paths now derive the platform root; production checks and assertions are
+unchanged. Linux hosted validation must pass on the corrected head.
+
+## Owner-bound lazy signer composition — 2026-10-05
+
+Existing signer runtime now has explicit one-target grant-aware composition;
+the public system-service entrypoint/default remains unchanged. Independent
+review/test failures drove callback-only generation locking, owner/store/oracle
+binding and a pre-sign lifetime/local-revocation recheck. Final connected:
+277pass/4platform skips,0fail/errors;14 suites selected in CI. Native setup and
+autonomous RSI remain open. See module ModLog and canonical RSI backlog
+`signer_lazy_owner_composition_20261005` for exact evidence and failure history.
+
+## Factory peer-instance propagation — 2026-10-05
+
+The existing factory test owner has14 frozen cases: original8 plus6 new handshake
+cases. Baseline10pass/4 missing-keyword failures; candidate14pass, no errors/skips.
+The direct valid control and unbound rejection establish fixture validity.
+Successive factory-built backends produce verified signatures; altered input and
+session/generation/profile substitutions reject. No existing test AST changed.
+
+Nine-suite connected selection:127pass/4skip of131, with normal package imports.
+Windows lacks AF_UNIX for one real-socket test; two symlink-privilege cases and
+one Linux-only case also skip. Original focused-harness attempt119pass/8fail/4skip
+is preserved; its URI/subprocess restrictions did not identify source defects.
+CI selects all nine suites. Scope is synthetic source qualification, not peer
+credential provenance, genuine vault access, service activation or native RSI.
+Exact commands and receipt hashes are in backlog `signer_factory_peer_binding_20261005`.
+The previous grant-digest slice PR2065 is merged/main-verified with hosted111/111.
+
+## Authenticated effect consent — 2026-10-04
+
+Local source qualification:97/97 and connected328/328 pass. The original95-case
+baseline failed on absent APIs; two later independent-review regressions failed
+before repair. Original criteria remain unchanged. See the module ModLog and
+canonical RSI backlog `authenticated_effect_consent_20261004` for exact commands,
+source bindings and test-provenance limits. Native effect admission and hosted
+publication are separate gates; retain fail-closed defaults.
+
+## Supplied effect-sovereign evidence — 2026-10-04
+
+Selected14/P1 (C3/I4/D4/Impact3), extending only the existing consensus policy
+and evidence owners. The new frozen record and matcher bind supplied approval
+references to the recomputed parent, full signing target, effect and policy,
+with exact types, bounded identity text and complete lifetime coverage.
+A true match authenticates nothing and grants no permission. Trusted production
+provenance, effect permits and native admission remain separate work.
+
+Independent frozen baseline:83 missing-API failures; candidate83/83 pass.
+Connected242/242 pass, including the83; zero errors/skips and unchanged criteria.
+Existing function/class ASTs are unchanged; both runtime files remain within
+200 lines and functions within50. One local Qwen call supplied only the lifetime
+helper, whose integrated AST is unchanged. Its prospective format and static
+scope pass; the coordinator supplied the formula and wrote the outer matcher.
+SDK telemetry:642 input/81 output tokens;53.281s parent elapsed;0 paid calls.
+Total cost and retained gain are unknown. No automatic learning or runtime grant.
+
+Exact-source review and publication are separate gates. Canonical evidence:
+`current_observation.effect_sovereign_binding_20261004` in the RSI backlog;
+PC artifacts: `outputs/rsi-effect-sovereign-binding-20261004`. WSP00/5/6/11/15/
+22/48/50/62/84/97/99. Next: authenticate supplied effect evidence through the
+existing owner, then qualify the effect-specific permit/provider composition.
+
+## Effect request preparation — 2026-10-04
+
+13/P1 source prerequisite: existing issuer preparation now feeds the canonical
+effect-binding surface before authorization. Local43/43 and connected78/78
+pass. PR2058 merged at00e0c044f with11 successful PR checks and both exact-main workflows successful;495 effect-boundary and49 MCP cases passed. Owned lane retired with recovery preserved. Local Qwen content required
+coordinator formatting recovery and caller integration; raw format remains a
+failure. Native authority is not activated. See canonical RSI backlog
+`effect_request_preparation_20261004` and module ModLog for evidence and limits.
+
+## Offline scanner environment — 2026-10-04
+
+Four frozen environment cases plus eight prior controls: corrected baseline4 fail/8 pass; candidate12 pass.
+Connected scanner/manifest/admission run:64 pass,3 skip,83 deselected. CI runs the same selection.
+The old missing-scanner mock now covers the full locator; initial accidental scanner launch is preserved with unknown external effects.
+See [module change record](../ModLog.md#offline-scanner-environment--2026-10-04) and canonical backlog for exact receipts.
+
+## Current-generation quorum acceptance — 2026-10-04
+
+Independent author froze48 cases before production edits. Baseline:47 failures,
+1 pass, zero errors/skips/unexpected failures.45 failures represent the missing
+plural entry point; two reproduce the existing late input-mutation and unbounded
+runtime snapshot-call gaps. The unchanged single-review positive passed.
+
+Candidate:153 selected cases pass; broader466-case consensus/reviewer/designation/
+signer/replay/structure suite passes, no errors/skips. These selections overlap.
+Positive fixtures use two distinct test-only Ed25519 keys, model/runtime bindings
+and roles. Assertions cover exact signature inputs, one lease/artifact read,
+one runtime resolution per reviewer, every evidence reference, same-object reuse,
+key/runtime/manifest/selection/context expiry, owner/finish-clock mutations,
+whole-set rejection, cleanup failures, interrupts and invalid input before owner
+selection. Actual OS owner provenance remains the separate existing eight-case
+Linux path; these portable fixtures substitute owner/lease/runtime boundaries.
+
+New test/support leaves preserve200-line and50-line function caps; actual
+inventory31→33 only. Existing guarded CI adds the48 exact cases (452 total),
+without relaxing audit rules. Earlier local Windows guarded collection failures
+belong to PR2048; no retry or new local guarded success is claimed here.
+Registry1674 files/270 quarantined is inventory, not a pass count. Source review,
+integrity and hosted publication evidence remain separate.
+
+Frozen hashes/IDs, baseline and candidate XML/logs:
+`O:/Foundups-Agent/outputs/rsi-current-generation-quorum-20261004/`.
+
+## Bounded effect-review quorum qualification — 2026-10-04
+
+A separate worker froze 63 acceptance cases before production edits. Original
+source: 63 expected missing-API failures, zero errors/skips (26 original cases
+deselected). Candidate: all 63 pass, and all 315 connected consensus, signer,
+author-runtime, nonce/transaction, composed-e2e and structure cases pass locally.
+The 63 cases and prior 70-case split check overlap that 315-case run.
+
+Tests cover 1/2/8 reviews, 8192/8193-byte envelopes, roles/counts, duplicated
+identity/key/model/runtime, author exclusions, tampered or stale evidence,
+invalid extras and exact signing preimages/resolver call counts. Inert resolver
+fixtures do not establish deployed independence. One arbitrary-sovereign-digest
+positive deliberately preserves the distinction from sovereign authorization.
+
+The original reviewer file was restored exactly. Frozen test function/decorator
+ASTs and all case parameters moved unchanged into two bounded test leaves;
+existing 200-line/50-line limits remain. Broader validation initially found two
+structural failures (208 passed), then three missing-import failures after the
+move (301 passed). One missing `_digest` import was repaired; expectations were
+not changed. Exact movement/attempt receipts remain in
+`O:/Foundups-Agent/outputs/rsi-review-quorum-20261004/`.
+
+Existing guarded CI explicitly adds 63 quorum cases and ten old-domain
+verification/signer regressions; its seven structure checks were already present.
+Eight staged manifest tests and the Node compatibility contract passed. Two
+local attempts at the exact guarded CI script stopped during collection (three
+errors each): isolated default Python lacked jsonschema; the qualified Windows
+interpreter failed an asyncio import (base_events undefined). These are not executed
+acceptance cases. Guard controls remain unchanged; hosted Linux is required.
+Hosted/main results remain separate. The canonical registry now has 1673 test
+files, 270 quarantined; inventory counts are not passing test counts.
+
+
+## Connected reviewer authority qualification — 2026-10-01
+
+Final registry: 1672 files, 270 quarantined. The dedicated Linux fixture now
+rejects unsupported collection before importing its helpers; the existing static
+classifier marks it operational/noncollectable. Its explicit eight-case CI path
+remains mandatory. Candidate-3 also passed198; candidate-4 reruns the same198
+after this collection guard changed a bound source file.
+
+Local candidate-4 passed **198/198**, zero failures/errors/skips, exact cases,
+stable source samples and no unexpected guard denials. The selection combines
+86 designation/composition/artifact/supplier cases, 15 owner/readiness cases,
+2 existing-owner consumer cases and 95 prior controls. Earlier 196-case attempts
+remain recorded as 183 passes/13 guard failures and 193 passes/3 guard failures;
+bounded fixture/import-closure corrections preceded the successful run.
+
+Portable composition uses real ephemeral test-only Ed25519 signatures and actual
+parsers/effect verification while substituting owner reads/generation leases.
+It therefore cannot qualify OS ownership. Separate mandatory Linux selection is
+five real-root cases (positive, wrong UID, writable owner, symlink, anchor tamper)
+plus the existing transport v3/v4/v5 cases. Every new negative first reaches a
+connected positive. Anchor corruption is not valid signed-generation rotation;
+transport fixture seams do not prove live socket services.
+
+CI selects **331 portable + 8 Linux cases; hosted results pending**. The Linux
+runner requires isolated assertion-enabled root Python, a disposable `/root`
+fixture, cleared environment, explicit eight nodes and a four-minute workflow
+limit. It confines test databases/writes and denies network/providers/processes
+through Python guards; this is not OS containment. Sources are sampled before
+and after execution, not made immutable. Actual installed runtime provenance,
+quorum/effect permission, native admission and retained gain remain unqualified.
+
+Frozen plans, source reviews, exact XML/logs and all attempts are retained under
+`O:/Foundups-Agent-audits/20261001-rsi-reviewer-authority-composition/`.
+PR #2013's earlier crypto prerequisite is closed at `c9d1273`; historical pending
+statements below describe their original checkpoints, not current closure.
+
+## Real Ed25519 effect-review qualification — 2026-10-01
+
+`test_reddog_elevated_authority_consensus_effect_crypto.py` adds 6 independently
+authored cases using disposable in-memory keys and the real public verifier.
+Each case asserts the backend was called with an independently serialized exact
+preimage. One valid signature accepts; payload/signature/key tampering, delegated
+prefix and unrelated-message signatures reject. Private keys are never serialized.
+Missing cryptography fails collection; CI explicitly installs 46.0.7. This extends
+the earlier 82 recording-verifier controls without changing their meaning.
+
+Local reviewed 95-case command: qualified Python `-I -S -B` runs
+`O:/Foundups-Agent-audits/20261001-rsi-reviewer-key-implementation/execute_tests.py candidate`;
+the controller invokes the 90-second `-I -B` runner with frozen exact node IDs.
+Results: 95 passed,0 failures/errors/skips; source samples stable, no unexpected
+guard denials or database opens. Python audit constraints are not OS isolation.
+Hosted 228 selection/publication receipts are separate. Supplied resolver records
+remain synthetic; real test signatures do not authenticate production provenance,
+the planned inner designation, quorum, worker admission or retained RSI benefit.
+
+## Effect-review verifier qualification — 2026-10-01
+
+The new effect-review test siblings freeze 82 connected cases with recording
+inert resolvers and signature verifier, independent canonical preimage checks,
+strict wire/policy/context rejection and reviewer/evidence exclusions. No
+private-key/signing/provider/store/runtime constructor is called. Baseline82
+missing-API failures → candidate82 passes; existing140 hosted selections retained
+with 82 new exact nodes. Hosted results pending. Local reviewed tests use Python
+audit constraints, not an OS sandbox or an admitted WRE impact-plan execution.
+Fixtures cannot supply authentic production authority or retained RSI benefit.
+
+## Effect-context correlation qualification — 2026-10-01
+
+`test_reddog_elevated_authority_consensus_effect_correlation.py` freezes 43 cases:
+positive boundaries, malformed typed contexts, time bounds, stale B fields,
+consistently valid changed targets and actual parent/target substitutions.
+Reuses the existing pure `_binding_inputs`/golden fixture, never signing helpers.
+Baseline 43 missing-API assertion failures → candidate 43 passes; no errors/skips.
+Old 97 CI nodes remain unchanged; the 43 exact new nodes make 140, hosted pending.
+Local execution uses reviewed Python audit constraints, not an OS sandbox or WRE
+runtime admission. Synthetic positive correlation is not authentic approval.
+
+## Inert effect-context qualification — 2026-10-01
+
+`test_reddog_elevated_authority_consensus_effect_context.py` contains47 frozen
+data-only cases. Golden bytes/digest, immutable round-trip, exact field bounds,
+8192/8193-byte boundary, malformed wire/manual contexts and past/future values
+are tested without clock/admission semantics. No signing fixtures are imported.
+Baseline47 failures were explicit missing-API assertions, not collection errors
+or an old security bypass. Candidate47passes; zero errors/skips in both runs.
+
+Exact local commands: qualified Python `-I -S -B` runs the reviewed audit
+`execute_tests.py baseline` / `execute_tests.py candidate`; it launches the
+90-second `-I -B` guarded pytest selection in `run_contract_tests.py`.
+Frozen IDs/oracles, manifests, original XML/logs and receipts are under
+`O:/Foundups-Agent-audits/20261001-rsi-effect-context/`.
+Independent source/runner/result review is separate from test execution.
+Python guards are not OS isolation; sampled hashes are not immutable execution.
+
+Existing CI qualification preserves all50 prior nodes and adds47 exact IDs;
+hosted97 pending. All seven structural checks remain, only exact leaf inventory
+counts increase; size limits unchanged. Registry generation uses the existing
+auto_test_registry_audit skill:1662 files/269 quarantined, new leaf collectable
+as unit. Runtime approval, worker admission and retained benefit are not tested.
+
+## Existing consensus structural gates — 2026-10-01
+
+Closed the previously recorded201-line helper debt by removing one blank line
+from `reddog_elevated_consensus_e2e_support.py`; AST unchanged, now200 lines.
+The test oracle `test_reddog_elevated_authority_consensus_structure.py` is
+unchanged. Direct invocation of its seven stdlib-only static functions gave
+baseline6 pass/1 size failure, candidate7 pass/0 fail, stable source samples.
+No pytest collection, test helper import, signing or runtime invocation occurred
+locally. Reproduce with the receipt-bound `observe_and_check.py` in the audit
+directory; baseline/candidate receipts preserve function names and source hashes.
+
+Existing CI now includes the seven exact structure nodes alongside the unchanged
+11 domain and32 binding cases, retaining its source/audit/XML checks (50 total).
+Hosted execution is pending. These structural checks do not establish authentic
+approval, worker admission or retained RSI benefit. PR#2003's prior43-case PR
+and main runs passed; its initial manifest failure remains historical evidence.
+
+WSP5/6/15/22/50/62/84/97. Evidence:
+`O:/Foundups-Agent-audits/20261001-rsi-consensus-structure/`.
+
+## Pure effect-target binding qualification — 2026-10-01
+
+Static validation: registry current (1661 files,269 quarantined); source checks
+and changed-file bounds pass. The global test-module size check still fails on
+untouched `reddog_elevated_consensus_e2e_support.py` (201 lines at base and
+current against200). Recorded separately at7/P3; no gate weakened.
+
+`test_reddog_elevated_authority_consensus_canonicalization.py` now contains 32
+new pure-binding cases plus its four unchanged original cases. Local execution
+selected only the new 32 IDs from the pre-implementation `test-plan.json`.
+The original cases call a signing helper and were excluded from this no-signing
+budget. The earlier 31-case plan is preserved as `test-plan-v1.json`; independent
+review added one valid HIGH/live_enqueue rejection before either run.
+
+The frozen suite checks independently calculated golden P/T/E/B values, parent
+projection, different parent/requester identities, immutability, both work-order
+fields, declared time bounds, exact typed target/no-proof rules, canonical
+expected-target substitutions, and malformed B. The live_enqueue control first
+asserts existing lease-validator acceptance, then tests the new worktree-only
+boundary. Boolean/integer/float expected-payload controls compare distinct
+canonical signing bytes without inventing numeric SigningRequest fields.
+
+Observed local results on the identical test bytes and IDs:
+
+| Run | Passed | Failed | Errors | Skipped |
+|---|---:|---:|---:|---:|
+| Baseline | 0 | 32 | 0 | 0 |
+| Candidate | 32 | 0 | 0 | 0 |
+
+Every baseline failure was the expected in-test missing-API assertion; collection
+succeeded. This is a new-feature control, not evidence of an old authority bypass.
+Candidate XML and receipt agree on all 32 names and outcomes. Before/after pins
+were stable, no unexpected denial occurred, and SQLite open count was zero.
+Independent source/execution approval is recorded in
+`execution-review-candidate.json`; it is not a second test execution.
+
+Fixtures construct inert parent data directly and replace the test-only public
+key helper before reusing the pure lease payload builder. They invoke no signing,
+permit, operational store, external provider or model. The Python audit guards
+are not an OS sandbox; source hash samples do not establish immutable execution,
+and `observed_source_read_bindings` includes hash reads rather than only imports.
+Exhaustive timestamp/TTL/skew permutations remain outside this finite selection.
+
+The existing guarded CI step is being extended to retain the previous eleven
+controls and these 32 IDs, for 43 selected cases. Hosted results are pending.
+Structural B agreement is not authenticated approval, successful issuance,
+worker admission, held-out benefit or retained RSI improvement. Evidence:
+`O:/Foundups-Agent-audits/20261001-rsi-effect-binding/`; API contract:
+[Single-effect proof handoff](../INTERFACE.md#single-effect-proof-handoff-design--2026-10-01).
+
+## Effect-lease consensus qualification — 2026-10-01
+
+PR#2001 closure is now verified: head `6ec636219f04cfd49af6280b2ad27b8e4daefe0f`,
+main `a555687186568e8b74fdfebe037081b077ec8581`; exact eleven cases passed in
+[PR CI36804752624](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36804752624)
+and [main CI36805404497](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36805404497).
+All ten PR checks and main CodeQL passed. Original failed attempts below remain
+historical evidence. This documentation slice runs no application tests and
+claims no additional passing cases. The next pure binding contract is defined
+in [the existing interface](../INTERFACE.md#single-effect-proof-handoff-design--2026-10-01).
+
+Hosted attempt [CI36803912390](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36803912390)
+stopped at collection (two errors, zero selected case bodies) because `jsonschema`
+was absent before this new step. Setup now pins `jsonschema==4.26.0`, the locally
+qualified version within the existing `modules/foundups/requirements.txt` range.
+The dependency installs before the guarded test process. Test IDs, assertions
+and production sources were unchanged; the successful hosted retry and main
+results are recorded above. Original failed log/XML/receipt are preserved.
+
+The finite existing-owner qualification passed **11/11 local cases**, with zero
+failures, errors or skips. HIGH/ULTRA effect requests are valid in their own
+contract but cannot enter the actual independent grant provider without its
+typed consensus permit. The client rejects the effect role, and the existing
+delegated pair remains valid while effect substitutions fail. No production
+policy was changed; this is measured rejection/domain evidence, not successful
+issuer composition, native admission or retained RSI improvement.
+
+The first attempt stopped at collection (exit4, one collection error, zero case
+bodies): pytest accessed an empty package initializer omitted from the source
+inventory. A separately reviewed retry added only that binding; all eleven
+case IDs, expectations and production sources stayed fixed. No database opened
+and no unexpected guard denial occurred on the retry. Downstream counters stayed
+untouched except for the declared local clock/provider identity calls.
+
+Existing CI now selects these exact eleven cases with namespace isolation and
+the same Python audit constraints. Hosted results are recorded separately after
+execution. These constraints are not OS isolation or general native containment;
+model-framework imports are denied, while reviewed dependency imports remain.
+Source hashes are sampled before/after. The inherited local receipt field
+`loaded_source_bindings` includes hash-check reads and is **not an import trace**;
+CI uses the accurate `observed_source_read_bindings` name.
+
+Evidence: `O:/Foundups-Agent-audits/20261001-rsi-effect-consensus/` and canonical
+backlog `current_observation.effect_consensus_qualification_20261001`.
+
+Next WSP15 13/P1: Specify the existing-owner effect-lease consensus proof handoff before any compatibility repair. No runtime activation is granted.
+
+## 2026-09-30: Post-development correspondence contract coverage
+
+The existing recipient-preflight test owner now has74 cases: original48 unchanged
+plus26 frozen cases. Sixteen combine all eight cached-state validation errors
+with invalid list/bytes observations; ten cover opaque Unicode equality/difference,
+tuple/complex/nonfinite-number spelling collisions and literal positive controls.
+
+Same suite on isolated real-leaf SQLite: defective62pass/12fail (old40/8,new22/4),
+generated74pass and reference74pass. Exact predicted failure IDs matched; no
+errors/skips or unexpected denied effects. Separate author and verifier; candidate
+was visible, so this is post-development validation, not a blinded benchmark.
+No production method change or model call. Existing CI already runs this file;
+hosted/source closure is recorded in RSI backlog `current_observation.contract_transfer_20260930`.
+WSP00/5/6/15/22/48/50/97. Evidence `O:/Foundups-Agent-audits/20260930-rsi-contract-transfer/`.
+
+## Watermark evidence regression — 2026-09-29
+
+The existing `test_reddog_recipient_preflight.py` now has 48 cases: all 29 prior cases
+plus 19 fixed controls. Seven non-string observations and empty/empty evidence
+must refresh. Exact literal strings and opaque whitespace remain positive controls;
+numeric/whitespace normalization is forbidden. Stale/unknown freshness still
+refreshes, and invalid observation does not suppress a cached digest error.
+Successful reads leave stored rows/events unchanged.
+
+Same test bytes/IDs: baseline 40 passed/8 failed, candidate 48 passed; zero errors/skips.
+Local runner uses real state/recipient/database leaves and disposable SQLite,
+isolating eager package initializers and denying network/process/provider actions.
+It is a reviewed-test guard, not an OS sandbox. Existing CI selects the complete
+file. Independent replay, exact source bindings and hosted/publication status are
+in the canonical RSI backlog `correspondence_watermark_20260929` and its receipts.
+No provider delivery, PostgreSQL, concurrency or retained RSI benefit is claimed.
+
+## Persisted correspondence read acceptance — 2026-09-28
+
+The existing recipient-preflight owner now has29 case IDs (21 test functions): all20 original cases plus nine persisted-read cases. Reuse its isolated SQLite fixture and named CI step. `-s` retains synthetic `CORRESPONDENCE_READ_EVIDENCE` records with actual imported-source SHA, returned state/errors and before/after row/event snapshots. No live correspondence records enter the fixture.
+
+The unchanged production baseline `55649b08dd` ran29 case IDs:22 passed and7 failed in [CI36440777022](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36440777022). The identical fixture against `0f8b3047c8` passed29/29 with zero failures, errors or skips in [CI36442000632](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36442000632) (0.97s). Independent review checked original output, implementation hashes, fixed IDs, matching digests and unchanged persisted rows/events. All ten candidate PR checks and CI/CodeQL passed.
+
+Final-head/main checks and owned closure remain bound to the canonical backlog publication receipt. These are synthetic SQLite regression results; provider delivery, PostgreSQL, concurrency, held-out generalization, native admission and retained RSI improvement are not established. Local application tests:0.
+
+## Correspondence and projection test entrypoints
+
+`test_reddog_recipient_preflight.py` runs explicitly in normal CI; the RedDog
+fast tier runs Node tests. Preserve isolated SQLite fixtures, disabled plugins
+and conftest, and disposable DB/temp paths. The 20-case September 28 selection
+was a historical baseline, not the current inventory. Exact receipts remain in
+the [RSI backlog](../../../../docs/roadmaps/rsi_swarm_backlog.json) and TestModLog.
+Neither roundtrip success nor these fixtures prove live sending or retained RSI.
+
+`test_moshpit_projection.py` exercises the unmounted/unregistered projection,
+renderer and query seam. Run the dedicated `moshpit-projection.yml` workflow's
+normal-import guard and exact selected suite; retain its collection, XML, source
+hashes, failures and effect-denial record. Cover source-read/release expiry,
+disclosure, bounds, date precision and escaping. No database/provider calls are
+allowed. Original skill discovery remains required in #1648, not skipped here.
+See [TestModLog](TestModLog.md#pr1645-projection-layer-inventory--2026-10-23)
+for the pre-edit inventory and actual qualification outcome.
+
+## Supervisor-requester connected acceptance — 2026-09-27
+
+Documentation correction only: test code, registry, workflow and existing effects
+are unchanged. PR1923 is merged/main-verified at `5578f7bd`;252 parent/254 candidate
+cases passed on PR/main, original artifacts were independently reviewed, and the
+owned lane retired. The current documentation regression expects254/254 identical
+IDs; it supplies no new production-supervision evidence.
+
+Before implementation, freeze the [authenticated handoff contract](../INTERFACE.md#authenticated-handoff-and-canonical-consumption-specified-not-wired).
+Then extend the existing observer/lifecycle/generation-race owners with a connected
+producer-to-requester-local-consumer fixture, retaining all existing tests:
+
+- Positive: admitted supervisor observation, independently expected requester and
+  profile, actual requester handshake correlation, local issuance and one-use
+  consumption through the real registered lifecycle consumer.
+- Negative: wrong observer issuer, requester, profile/key/epoch, generation,
+  manager/unit/invocation, process/start, namespace or socket; forged boundary,
+  serialized handle/receipt, swapped response or injected audit callback.
+- Temporal controls: challenge replay, expiry, denied observation, process/socket/
+  generation drift before and after handshake; rejection prevents promotion.
+- Preserve default/audit APIs, strict registered provenance, identity-rejection
+  consumption order, resource bounds and signer isolation. Do not duplicate the
+  existing forged-requester unit test as a substitute for connected evidence.
+
+Inert transport fixtures qualify source behavior only. Deployment visibility,
+authenticated IPC and real cross-UID operation need separately admitted disposable
+qualification. Unsupported conditions fail closed; neither a skip nor a digest
+grants authority. No host candidate execution or privilege/service activation.
+
+## Cross-process visibility qualification — 2026-09-27
+
+PR1922 is merged/main-verified at `d6f9458b`:188 parent/252 candidate cases
+passed on PR and main, independent original artifacts and all CI/CodeQL passed,
+and its owned lane retired. This supersedes its prepared/pending text below.
+
+Two parametrized cases extend the same observer suite; all252 old selected case
+IDs/bodies remain. Reuse `reddog_unix_socket_test_support.py`, now explicitly
+hosting child-process fixtures as well as inert wire fixtures. The canonical
+registry declares both network and process capabilities. No production or CI
+workflow change; expected252 parent/254 candidate, not yet observed at preparation.
+
+With the existing hosted opt-in, create one same-UID Python child per condition
+in an owned `RUNNER_TEMP` directory. Fixed stdlib-only text uses exact
+`sys.executable -I -B -c`, cwd there, env only `LC_ALL=C`, close_fds and no shell.
+Child owns one AF_UNIX listener, disables core dumps, sets/reads back its own
+dumpability to1 or0, and keeps that FD until STOP/timeout. No connect/accept,
+signer/key/provider/service, UID/GID/capability/sysctl/namespace/ptracer changes.
+
+Require non-root matching real/effective/saved credentials, absent CAP_SYS_PTRACE
+and same singleton PID/namespace views. Readable-child proof uses unmodified
+default discovery and concrete-cookie recheck, matched with independent child
+fstat and parent lstat/device fields. Nondumpable-child proof requires exact FD
+readlink EACCES/EPERM plus the production wrapper's PermissionError context.
+Identical snapshots before/after and Popen liveness reject disappearance as proof.
+
+Each JSON snapshot is at most4096 bytes with a10-second parent deadline; child
+waits at most15 seconds for each fixed CHECK/STOP command. Normal exit waits5s;
+exception cleanup kills only this still-live child and waits5s, then closes pipes
+and removes its directory. Blocking OS calls are not a hard wall-clock guarantee.
+JUnit `process_socket_visibility` retains identities, permissions, source digest,
+kernel/view and cleanup facts. Unsupported capability fails qualification;
+skips are not hosted success. No host candidate tests or collection.
+
+This isolates the dumpability boundary using same-UID disposable children. It
+does not satisfy the full public observer's distinct-requester-UID rule or
+authenticate a supervisor, issuer, signer or native RSI run. Do not weaken signer
+isolation to manufacture a positive result. The next scope follows actual evidence.
+Sources: [procfs access](https://man7.org/linux/man-pages/man5/proc_pid_fd.5.html),
+[dumpability](https://man7.org/linux/man-pages/man2/PR_SET_DUMPABLE.2const.html).
+
+## Connected socket mapping qualification — 2026-09-27
+
+Reuse the existing observer test owner and identical lifecycle CI path selection.
+PR1921 closed at `c417ccc17`:186 parent/188 candidate passed on PR and main,
+independently inspected original JUnit, all required checks green, owned lane
+retired. This supersedes its preparation-time pending text below.
+
+The candidate preserves the30 previous observer case IDs and all158 adjacent
+case IDs. FakeBackend now separates socket303 from pathname202. Intentional
+changes are the expanded kernel-only source boundary, backend fixture methods,
+and replacement of duplicate test parsers with the production query. Historical
+integer-comparison output is explicitly a replay of the old algorithm, never
+the repaired observer result. Both old kernel oracles remain.
+
+New controls cover framing/error correlation, namespace/PID view, concrete-cookie
+and FD continuity, duplicate/unrelated sockets, ambiguity, widths, deadlines and
+actual bounded-scandir overflow. Inert binary fixture helpers live in
+`reddog_unix_socket_test_support.py` to preserve the existing675-line test-owner
+limit; this is not a new test suite or runtime service. Both new files are listed
+in the existing WSP62 inventory. Canonical registry/manifest generators decide
+whether projection changes are required; no dependency or authority is added.
+
+One new hosted-only case invokes the actual production association seam over
+its own held FD, verifies a concrete-cookie recheck, then rejects a replaced
+pathname. The inherited opt-in and RUNNER_TEMP confinement remain. Only owned
+listeners and exact kernel queries occur; no connect/accept/signer/provider/key.
+JUnit `production_socket_association` records independent held-fstat/path-lstat
+fields for recomputation. Other new cases use inert transports/procfs fixtures.
+No candidate tests or collection execute on the host. Unsupported hosted
+capability fails qualification; skips are not success.
+
+The shared clock contract is monotonic; nonfinite/expired values reject. The
+deadline bounds acceptance, not all syscall wall time or an arbitrary injected
+clock. This does not qualify cross-process/UID visibility, authentic supervisor
+policy, atomic lifetime, native admission or retained RSI. Actual case counts,
+failures, reviews and exact-head closure are in the canonical backlog receipts.
+
+## Hosted socket identity characterization — 2026-09-27
+
+Two cases extend `test_reddog_external_signer_os_observer.py`, preserving all28
+earlier cases and their fixtures: `test_hosted_kernel_vfs_identity_survives_unlink_rebind`
+and `test_hosted_kernel_rejects_changed_socket_cookie`. No new test owner.
+
+The existing hosted lifecycle selection adds this suite for identical parent/
+candidate paths:186 parent/188 candidate cases expected at source preparation.
+`FOUNDUPS_SOCKET_KERNEL_CHARACTERIZATION=1` selects the reviewed experiment;
+it is not an authorization token. Without opt-in the two cases skip before any
+kernel effect. With opt-in, missing Linux/netlink/runner capability or unsupported
+inode width fails qualification; skips cannot count as successful hosted proof.
+No candidate tests or collection run under the host principal.
+
+Each case uses its own short `TemporaryDirectory` under `RUNNER_TEMP`, held
+AF_UNIX stream listener FDs and exact local NETLINK_SOCK_DIAG requests, never a
+socket dump or a signer/service. Queries request only VFS metadata, with one
+4096-byte datagram and2-second deadline each. No connect/accept, provider, keys,
+privilege changes or explicit module/service management. The kernel may implicitly
+load its diagnostic family on first request. Context managers close every FD and
+remove the exact owned temporary directory on success or failure. Registry
+`network` capability declares these effects; production import restrictions remain.
+
+Oracles compare held FD socket identity/cookie with VFS inode and decoded kernel
+device numbers. The first case keeps an old socket open while unlinking/rebinding
+the same pathname, then rechecks both associations. The second requires a changed
+concrete cookie to produce correlated kernel `-ESTALE`, while the authentic cookie
+still resolves. Check sender port0, reply header local port/sequence, exact size,
+type, family/stream/listen state, queried inode, cookie and VFS attribute bounds.
+No matching pathname or coincident integer is accepted as ownership evidence.
+
+JUnit `socket_kernel_characterization` properties record kernel/machine, this
+process's namespace handles, identities/cookies and old-helper diagnostic outcome.
+Neither old-helper acceptance nor rejection is a desired-production oracle.
+The Linux UAPI gives VFS inode before device and encodes kernel dev_t as12 major/
+20 minor bits; do not copy the reversed field order in the rendered manual.
+
+Results characterize same-process held descriptors on the recorded runner only.
+Cross-process ownership, FD transfer/reuse, different namespaces, malformed-input
+rejection corpus, production parser/backend, supervisor issuance, atomic lifetime
+and native authority remain unqualified. Source prepared; inspect exact-head CI
+artifacts and closure receipts in the canonical RSI backlog for actual results.
+
+## OS observer qualification gap — 2026-09-27
+
+Historical202/202 fixture alias and production inode conflation were repaired in
+PR1922. PR1923 added same-UID dumpability evidence; current fixtures distinguish
+socket303 from pathname202. Do not reopen those closed qualifications. The open
+gap is authenticated cross-UID supervisor observation into the real requester-local
+lifecycle consumer; use the connected acceptance above. Neither prior fixture
+success nor the hosted permission denial supplies that authority.
+
+## Healthcheck requester regression — 2026-09-27
+
+Reuse `test_reddog_signer_socket_service_healthcheck.py`; its seven old bodies
+remain unchanged. A module-only synthetic OS fixture makes effective identity
+independent of the host. Fourteen new cases cover two mapped UIDs, six pre-connect
+rejections, four malformed explicit inputs, explicit identity without local APIs
+and unrestricted GIDs. Fake real IDs and supplementary groups must not win.
+
+The existing hosted `lifecycle-dependency-selection` job adds this suite to its
+identical parent/candidate path selection:144 parent /158 candidate authored
+cases. Fresh execution is pending at preparation; inspect exact JUnit case IDs,
+not aggregate counts alone. No candidate tests/collection run under the host
+principal. Fixtures use synthetic keys/connectors and disposable roots; the
+existing unavailable-socket case targets only a nonexistent temporary path.
+No live signer, native worker or kernel-attestation proof is claimed.
+
+## Lifecycle dependency selection regression — 2026-09-27
+
+Reuse admission and generation-race owners with signer-current-generation,
+queue-use-time and only mutual-peer-handshake's
+`test_handshake_modules_follow_wsp62_boundaries` node. The whole handshake suite
+contains a socket test and is not this selection. Existing CI runs identical
+file/node selections from the event's exact parent/base and candidate in hosted
+Ubuntu/Python3.12, with conftests/plugin autoload disabled and disposable roots.
+JUnit and pytest/cryptography versions are retained as
+`lifecycle-dependency-selection`; host-principal candidate execution is excluded.
+
+Parent selection has113 authored cases; candidate137 includes24 additions.
+All parent IDs remain, with the consumer-signature assertion deliberately extended.
+Five default modes and nine injected/wrapped/falsey modes use the real factory
+with only its private consume builder replaced; no admit occurs in this seam.
+This proves selection/registered dispatch, not a real canonical capability.
+Other controls use ordinary injected opaque test handles to prove rejection
+preserves legacy consumption, exact-bool validation, alias capture and public
+method bypass. Existing expiry/replay/identity/generation controls remain.
+
+Fixtures write disposable files/SQLite, generate/sign with ephemeral keys and
+perform disposable Git commands through connected generation tests. They do not
+activate a live signer, socket, provider or resident effect. Hosted results, not
+these prospective counts, govern acceptance; no native/provenance claim follows.
+
+## Use-time generation acquisition — 2026-09-23
+
+`test_reddog_signer_current_generation_use_time_binding.py` retains all seven
+supplier-result scenarios with a consistent synthetic positive and four rejection
+controls. Real binding validators/collector remain; only signature/current-generation
+results and the injected clock are synthetic. 15 fixed cases pass locally and
+independently; eight existing queue/resolver regressions pass. Rejected bindings
+retain all ten anchors and invoke neither clock nor generation verifier; a clean
+typed generation result leaves exactly seven anchors and no effect lease.
+
+Disposable artifacts reuse the canonical queue and valve suppliers. Historical
+fixture/runner failures and exact case identities are in the canonical RSI backlog.
+These results establish local behavior, not authenticated admission or native RSI.
+
+## Resident canary evidence reachability — 2026-09-23
+
+PR1877/1879/1880/1882 closed callback/chain, generation, final-receipt and
+PatternMemory qualifications at their exact sources. Current worktree evidence
+adds10 direct cases; the fixed12-case run includes two unchanged blocked-callback
+controls. Both local and independent runs pass the same12 cases using actual
+disposable Git registries, linked worktrees and HEAD readers. Exact blockers and
+observed heads distinguish early rejection, unregistered paths and lineage or
+isolation failures. Stages, repository/worktree HEAD and registry are unchanged.
+Production/shared fixtures and previous definitions are preserved. These tests
+establish local structural consistency, not authenticated creation, native
+execution, race-proof isolation or retained benefit. Python guards are diagnostic;
+all fixture effects stay in explicit external disposable paths. Exact bindings,
+test receipts and the freshly ranked next action are in the canonical RSI backlog.
+
+### Windows fixture runner lessons — 2026-09-27
+
+The historical PR1877 callback/chain qualification exposed four runner failures
+before product acceptance. Reuse these lessons only after fresh source, runtime
+and effect review; the archived runner pins a retired worktree and historical
+interpreter path and is not a current invocation recipe.
+
+| Failure | Reviewed correction |
+|---|---|
+| Capture initialization had no permitted temporary directory; zero tests ran. | Allocate a fresh owned capture directory before guarded pytest; bind `TEMP`, `TMP`, `TMPDIR` and `tempfile.tempdir`. `--basetemp` alone did not cover capture startup. |
+| Inherited pytest logging wrote outside the owned evidence directory; zero tests ran. | Override `log_file` to an owned artifact path, alongside the fresh capture directory. Preserve the write guard. |
+| Windows subprocess audit supplied a null executable and serialized command line; all 15 fixtures failed before Git launch. | Validate original explicit argv at `Popen` entry, pin the qualified Git executable, and compare audited executable/command line/cwd against the pending launch. Preserve finite operation/target restrictions. |
+| Extended local-drive paths caused 13 denials; replacing `Popen` with a function broke two `asyncio` imports. | Preserve class shape through subclassing. Normalize supported extended local-drive paths before and after resolution, retain owned-path containment and the described UNC/device rejection, and use fresh artifact paths. |
+
+The unchanged 15 unique cases then passed in primary and independent runs, with
+165 real disposable Git commands per run, zero denied events, 16 deselected cases
+and two known configuration warnings. The historical verifier authored the final
+harness corrections; the coordinator separately reviewed them. Product tests
+were authored separately and frozen. This is finite compatibility evidence:
+Python hooks are diagnostics, not OS/process confinement or general Windows
+namespace/race safety. No live provider, native admission, concurrent-worker
+qualification, automatic lesson reuse or retained RSI benefit is established.
+
+Use the existing WRE [isolation gate](../../../infrastructure/wre_core/tests/README.md#isolation-gate),
+[bounded Git I/O tier](../../../infrastructure/wre_core/tests/README.md#bounded-git-io-tier),
+[exact-ID collector](../../../infrastructure/wre_core/src/wre_pytest_exact_id_collector.py)
+and [differential runtime](../../../infrastructure/wre_core/src/wre_test_differential_runtime.py)
+as their respective owners. The [canonical backlog](../../../../docs/roadmaps/rsi_swarm_backlog.json)
+binds preserved attempts, corrections and successful receipts; this documentation
+retention sprint adds no runner or tests and reruns no historical test cases.
+
+## RSI adapter acquisition and LinkedIn previews
+
+`test_dae_runtime_adapter.py`:28 frozen `test_dae_acquisition_` regressions;
+original13 unchanged/deselected. Baseline26fail/2pass; candidate and independent
+runs pass28, with two known config warnings each. Both getters inert, eager bridge
+namespace replaced, daemon imports forbidden. [Contract](../INTERFACE.md), hashes
+and XML are in the [RSI backlog](../../../../docs/roadmaps/rsi_swarm_backlog.json).
+
+LinkedIn preview retains54 shared plus session cases:77 pass locally/independently
+(baseline15fail/62pass); original18 preserved/deselected, two known warnings. Reuse
+existing inert fixtures/runners with disabled plugin autoload/cache, `-B`, cleared
+addopts and unique staging; adapter runner also enforces `-I`. No live/OS proof.
+
+## LinkedIn dry-run repair — 2026-09-22
+
+The existing adapter suite now has54 fixed `test_linkedin_dry_run_` cases, evolving
+the previous11 characterizations against their separate safety contract. Use the
+same reviewed inert-package runner and unique external staging for baseline,
+candidate and independent replay; disable plugin autoload/cache. Original18 class
+tests remain unchanged/deselected. Scope includes all write-label forwarding,
+early direct-like import/constructor prohibition, exact previews, delegated-route
+control and fake live/error/close envelopes. It does not certify every action or
+the active-event-loop wrapper fallback. Exact runner/XML are in the root backlog.
+Baseline29 failures/25 passes becomes54 passes locally and independently; two
+disabled-plugin configuration warnings per run, no skips/errors. The original
+qualification below is historical, not a request to retain unsafe expectations.
+
+## LinkedIn dry-run qualification — 2026-09-22
+
+Select the11 standalone `test_linkedin_dry_run_characterizes_` cases in
+`test_linkedin_social_adapter.py`; original18 class tests are unchanged and
+deselected for this bounded run. Run synchronously with plugin autoload disabled,
+`-B`, `-o addopts=`, no pytest cache and a unique external temporary directory.
+Before collection, supply an inert `moltbot_bridge.src` namespace with its real
+source path, avoiding the eager OpenClaw/webhook package initializer. Each test
+injects the exact lazy browser module with inert constructor/action/close spies.
+The reviewed runner and exact invocation are bound in the root RSI backlog.
+
+These tests deliberately characterize missing guards: nested false survives
+outer default/true; direct likes reach fake writes despite dry-run. Reply preview
+suppresses writes only after construction. Passing does not certify production
+safety. The existing LinkedIn review workflow declares a separate future oracle:
+direct-like preview before browser import/construction and zero writes. A source
+repair must explicitly evolve affected characterization expectations against that
+contract; never preserve unsafe behavior merely to keep the tests green.
+
+## Registered lifecycle consumption — 2026-09-22
+
+The existing lifecycle-generation-race suite owns producer identity and registered-consumer adversarial cases, reusing admission fixtures. Run it with admission, signer-generation and queue-use-time suites plus `test_handshake_modules_follow_wsp62_boundaries`; keep identical baseline/candidate selection. Verify early rejection preserves handles, valid owned mismatches spend them, and public dispatch cannot substitute ownership. Use the externally guarded disposable runner linked by the root backlog; no live signer/provider proof is implied.
+
+## Signer lifecycle identity provenance — 2026-09-22
+
+Reuse the lifecycle-admission and lifecycle-generation-race suites plus the existing signer-generation and queue-use-time suites. Preserve identity fields/digests, reject malformed matching identities, and retain foreign-capability, replay, expiry and generation checks. Use disposable generation/SQLite fixtures and fake health/OS observations; no live signer or gate admission is proved. Exact isolated commands, guard limits and 50-case baseline versus 64-case connected results are bound in the root RSI backlog.
+
+## Call-local skill-safety regression evidence — 2026-09-21
+
+- Extend the two existing safety/boundary suites: legacy Boolean plus literal detail mode, nested publication, policy drift, RESEARCH, four callback-stable projections and malformed pair rejection before downstream work. Preserve original assertions, module docstrings and import capabilities.
+- Run the externally qualified `run_guarded_suites.py focused <unique_label>` with the qualified Python -B interpreter. Author141pass/one platform directory-link skip; independent141pass/one skip overlaps. Two existing real-child scan cases excluded by exact name. No broad DAE/service or runtime certification.
+- Initial baseline62fail/79pass/one skip contained26 blocked Windows asyncio self-pipe binds and36 API expectations; corrected baseline59fail/82pass/one skip isolates36 API,7 keyword migration,12 malformed rejection and4 consumer witnesses. Failures and runner revisions are retained.
+- Harness permits only source-bound stdlib Proactor loopback self-pipes, records them separately, and denies product network/DB/child effects. Constructor peripheral adapters are inert/disposable; real policy/wrapper/process are exercised. Scope, commands, hashes and package checks: root backlog current_observation.
+
 # Tests - OpenClaw Bridge
+
+## Governed raw-context integrity
+
+Run the four existing bounded runtime/authority and OpenClaw/Hermes provider
+suites with isolated imports and disposable state. Canonical cases seal the raw
+context before actual opaque issuance; assert altered/partial bindings reject
+before fake effects. Capture real redaction and final fake provider framing.
+Keep legacy absence, 24,000/24,001 bounds, replay and callback mutation checks.
+The two system-transport subprocess tests require their separate process boundary;
+they are excluded from the fake-only evidence. Exact commands/results and the two
+connected resident-queue suites are bound in the root RSI backlog.
+
+## FoundUp job seam fixtures
+
+`test_e2e_foundup_job_seam.py` reuses the canonical synthetic manifest factory in
+`modules/foundups/agent/tests/test_foundup_manifest_validator.py`. Its fixture
+temporarily changes cwd to an external temporary repository and supplies
+`Path(".")`: the real validator rejects absolute roots outside its checkout.
+Only the Hermes builder is mocked. Assert its exact canonical path calls;
+missing manifests and mismatched FoundUp IDs must reject before construction.
+Non-dry-run status simulation is not live execution or completed verification.
+For mixed AI Overseer runs set `AI_OVERSEER_HEAVY_TESTS=1` and use importlib mode
+so the sibling suites execute rather than inheriting collection skips.
+
+## Omitted seed-plan selection
+
+Use the existing bootstrap suite: omitted/None/empty/matching/conflicting inputs,
+legacy byte oracle, raw-only receipt, single-read mutation and output preservation.
+The actual fake-model producer feeds fresh canonical receipts to this bootstrap;
+give its input FoundUp-local scope before admission and matching disposable Memex/
+principal evidence. Do not rewrite receipt identities to make fixtures pass.
+Explicit-input snapshots and downstream scope failures must remain covered.
+
+## Actual determination serialization coverage
+
+The existing exact-schema suite reuses the backend fake-model and in-memory-store
+fixtures to exercise real producer, top-level result and persisted receipt output.
+An absent/None proposal plan must remain omitted and validate; empty/full plans
+remain explicit and detached. Explicit wire null still rejects. Compare proposal,
+determination and candidate lineage before/after with identical fixture inputs;
+keep checkout-bound byte oracles external rather than freezing a local path in CI.
+No provider, real sandbox, stored-record migration or automatic forwarding is tested.
+
+## Direct profile/proposal ingress coverage
+
+Use the existing exact-schema and model-runtime bootstrap suites. Matching plans
+must remain identical at root and both projected proposal locations. Rejection must
+precede direct store reads and bootstrap capability/probe/lock/recovery; check file
+bytes and file inventory. Cover receipt-wrapper selection, absent-plan callback
+mutation, canonical scalar distinctions, explicit empty plans and declared scope.
+Run existing bounded packet preflight before generic profile traversal; malformed
+plan/packet/invariant mappings must reject without invoking their methods.
+Sign the final selected determination bytes before wrapping it, and use the existing
+verified model-runtime fixture. These are disposable integration fixtures, not live
+worker admission. Local connected/publication coverage is 571 + 32 distinct tests.
+
+## Receipt-to-seed lineage coverage
+
+Reuse the existing seed/bootstrap suites and determination rebind fixture. Cover
+canonical equality, lineage tampering, explicit scope mirrors, snapshots, malformed
+callbacks and overridden presence methods. Ensure the fixture receipt's operation
+matches its own plan before testing downstream seed scope. Author 553 passes;
+independent 471 plus 139 probes overlap. The publication long-path regression requires
+a root satisfying its unchanged <260 final-file and >260 temporary-file conditions;
+other suites can use short roots. Preserve failed evidence and existing golden bytes.
+
+## Explicit proposal-plan coverage
+
+Reuse the existing proposal admission and exact profile-schema tests plus the seed
+supplier/bootstrap fixtures. Check all three legacy golden wires, explicit empty
+plans, typed canonical packets, digest tampering, mutation detachment, known receipt
+mirrors, wildcard/denied paths and non-plain ancestors at both embedded locations.
+Independent 395-case runs overlap; do not sum them as distinct coverage. Existing
+backend fixtures additionally prove persistence binds the full proposal digest.
+
+Keep generated manifest writes and staging complete before starting dependent
+packaging tests. Use a short, unique external pytest temp root for the resident-loop
+suite: the long audit-directory root produced five FileNotFoundError rejections;
+all 64 cases pass with one platform skip at the short root. Preserve both receipts.
+Commands, exact-source hashes, independent findings and limits are recorded in
+`docs/roadmaps/rsi_swarm_backlog.json#current_observation`. These fixtures do not
+establish live OpenClaw/Hermes admission or runtime RSI retention.
+
+## Explicit seed-plan coverage
+
+Reuse the two existing seed supplier/bootstrap test files and current source/schema
+fixtures. Baseline 47 failed/22 passed; final 69 pass. Independent 320 includes 52
+external cases and overlaps the focused run. The pre-change seed byte oracle,
+typed packet, receipt/nonce rules, both callback snapshots and unchanged existing
+output on rejection are checked. Lane artifacts use separate subdirectories.
+Commands/hashes and the package-closure correction are in the current backlog.
+
+## Canonical M2M generation and provider coverage
+
+Reuse existing runtime/authority/handler/integration and three-provider fixtures.
+Keep absent-field golden bytes, exact typed canonical wire and original I/O/F,
+24,000-character combined boundaries, supplied/redacted drift, sealed-pair errors,
+copied/original/replayed handles and post-signature tamper rejection. Callback
+fixtures require the admitted request snapshot; tuple→list repair cannot reuse a
+handle after canonical rejection. Assert zero preflight/provider effects on denial.
+692 connected passes/one AF_UNIX skip; two unchanged WSP62 failures remain explicit.
+Use distinct author-*, generation-* and provider-* artifact names per lane; a
+collision required evidence reconstruction during this sprint. Commands, hashes,
+rejections and independent review live in the backlog current observation.
+These local fixtures do not qualify live runtime, full context or native child tasks.
+
+## Generation admission regressions
+
+Reuse `test_reddog_resident_queue_bounded_worker_model_authority.py` and its
+existing stage fixture. Bind the finalized order before tampering; never update
+the admitted digest afterward. Thirteen negative cases require zero verifier,
+issuer, generator and writer calls; one case protects detached nested contents.
+The existing model-runtime integration adds two final signed-order changes.
+Author connected selection: **115 passed**. Exact commands, independent review
+and environment limits are in `current_observation` in the system backlog.
+These disposable signing/model fixtures do not establish live admission.
+
+## Current workspace verdict checks
+
+Reuse `test_skill_safety_guard.py`: six nested-call fixtures cover pass/fail and
+all three result paths; fourteen policy cases cover changes and unchanged controls.
+The callback schedules interleaving at diagnostic publication; it is not a real
+DAE thread/process soak. Scanner results remain injected. Before: 18 failed /
+61 passed / one skip. Connected: 211 passed / four existing link skips, including
+79 passes / one skip in this file. Prior TTL/manifest cases remain covered.
+Two duplicate cache-control/enforcement fixture pairs are parameterized; the file
+is 658 lines. Use the existing external temp/database isolation instructions.
+Commands, failures and limits: `workspace_verdict_handoff_continuation_20260915`.
+
+## Scanner report ownership
+
+Extend `test_skill_safety_guard.py` and its existing scanner/manifest helpers.
+The suite adds reentrant and two-process verdict isolation, interrupted workspace
+cleanup and allocation/publication failures. Scanner subprocess results are injected.
+Final connected subset: 40 passed/one link skip; seven connected files: 166/four skips.
+Exact commands and limits: `scan_report_ownership_continuation_20260915` in the
+canonical RSI baseline. The retained report path is latest diagnostics only.
+
+## Activation recovery
+
+Extend the existing `test_foundup_memex_verified_outcome_adversarial.py` for commit
+and readback faults. It imports the single-use publisher and real JSON/SQLite
+fixtures from the existing runtime-authority and sink suites. The new 23 cases
+cover lost replies, competing revisions/winners, missing durable success, current
+memory loss, cancellation and unreadable state; original tests remain intact.
+
+**204 connected tests, 8 manifest tests and 15 fast groups pass.** Use the exact
+files, environment, arguments and fingerprints in `activation_recovery_continuation_20260914`
+in the existing RSI baseline. The Windows tests inject storage-call faults and use
+signature doubles; cross-store acceptance, process/volume failure and admitted
+runtime composition need separate evidence. Previous checkpoint counts below
+retain their source and environment scope.
+
+## Accepted-memory visibility
+
+The existing `test_foundup_memex_verified_outcome_runtime_authority.py` now binds
+its real authority store to the existing PatternMemory reader/seed fixture.
+Fifteen new cases cover the composed failed-write exposure, unbound and invalid
+sources, staging versus accepted records, changed/missing/unreadable content,
+post-commit uncertainty, exact retry and cancellation. Existing signature/replay
+assertions remain; five setup definitions now supply the required memory evidence.
+
+The 64-case suite is included in **181 connected passing tests**. **8 manifest tests
+and 15 fast groups** pass separately. Exact file selections, arguments, source and
+artifact fingerprints are in `acceptance_visibility_continuation_20260914` in the
+existing RSI baseline. Use its qualified Python, external temp/database roots and
+`REDDOG_TEST_SITE_PACKAGES` for the extension tier. These are disposable store tests
+with signature doubles; cross-store atomicity and runtime admission remain open.
+
+## Competing full-response writer processes
+
+Reuse `test_root_record_process_race_preserves_one_durable_response` in the existing
+root service suite. Two spawned child PIDs coordinate with a barrier and commit
+identical or conflicting signed records through the real handler/disposable stores.
+Assert exact accepted counts, one durable digest, winner-only retries, unchanged
+payload, reopened root read and consumed authorization. Child/queue cleanup is bounded.
+
+Full service suite plus three existing guards: **138 passed / one Linux-only skip
+in 76.65s**. The focused seven cases overlap this total. Commands, IDs, fingerprints
+and environment are in `process_race_continuation_20260914` in the existing RSI
+baseline. The file remains 1,497 lines by reusing the existing factory in the older
+reservation test; eight attempts/four workers are preserved. Peer ownership is
+injected on Windows; privileged service, physical-volume failure and exhaustive
+scheduling remain outside this proof. Earlier checkpoint gaps below are historical.
+
+## Writer-process response recovery
+
+Reuse `test_root_record_recovers_after_writer_process_exit` in the existing
+`test_foundup_verified_outcome_root_authority_service.py`. The canonical-imported
+spawn target receives public fixture context and the already signed request.
+Four cases cover clean exit and abrupt exits after payload commit, primary terminal
+write, and built reply. Exact exit codes, pre-recovery mirror states, reopened
+request retries, payload identity and consumed authorization are asserted.
+
+Full service suite plus three unchanged size guards: **136 passed / one Linux-only
+skip in 71.44s**. Exact command, case IDs and environment are in
+`process_exit_continuation_20260914` in the existing RSI baseline. Use external O:
+temp/DB roots, `-B`, explicit async plugin and disabled cache/plugin autoload.
+This validates selected writer-process failures; current read permission, competing
+full-record processes, physical-volume failure and privileged-service proof remain open.
+
+## Root-owned committed-response retrieval
+
+Reuse `test_foundup_verified_outcome_root_authority_service.py` and its existing
+`record_commit_inputs` fixture. Thirty new cases cover exact bytes after reopening,
+pending/missing/conflicting evidence, foreign pins, generation types and rotation,
+time/ownership rejection, cancellation, concurrent reads and one-sided recovery.
+The proposed read RPC remains rejected; storage retrieval is not read admission.
+Nine connected suites plus three existing size guards pass 348 tests / one Linux-only
+skip. Exact commands and scope: `root_record_read_continuation_20260914` in the RSI
+baseline. Windows ownership/peer checks remain injected; no physical failure proof.
+
+## Root commitment and mirror restoration
+
+The existing root service suite now covers v2 wire/proof separation, complete
+64 KiB enclosing requests, current authority on initial/repeated commits, exact
+reservation/event binding, changed valid responses, lost acknowledgments,
+write/cancellation/partial-mirror failures, competing state instances and restart.
+The signing suite shares its existing pending-response fixture; no new test file.
+Nine connected suites plus three size guards: 318 passed / one Linux-root skip.
+Commands and limits: `mirror_restoration_continuation_20260914` in the existing RSI baseline observations.
+Whole-mirror deletion now recovers either side after exact store reopening at
+sequences 1, 2 and 5; v1/v2 commitment retry preserves the original terminal state.
+The monotonic-store suite checks witness/destination identity, disjoint roots,
+exact checkpoints, conflicts, cancellation, source changes and concurrent copying.
+Generic CAS and readonly reader implementations remain unchanged. Both-mirror
+loss and unavailable signed bytes without a retained copy remain fail-closed.
+Windows tests inject ownership/peer decisions; production process/volume recovery,
+Linux ownership, independently authorized readback and retained learning remain unproved.
+
+## Pending outcome-response storage
+
+The existing `test_reddog_ed25519_verified_outcome_signing.py` has 22 new pending
+storage cases (94 total signing/record/storage cases). Real disposable SQLite
+mirrors and Ed25519 signatures are reused; the fixture captures bytes before v1
+finalization. Two ownership tests inject the decision on Windows. Test names and
+exact commands/results are in `pending_response_continuation_20260914` in
+`docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json`.
+Coverage includes exact-byte retry, write/cancellation/mirror failures, file loss,
+changed generation/reservation/digest/expiry, terminal rejection, conflicting or
+unanchored rows, real count/complete-byte limits and concurrent state instances.
+Future root RPC/readback tests belong in the existing root service/client suites;
+the signing file is in WSP 62's 1000–1500-line review window. No production Linux
+ownership, live runtime, process-kill recovery or activation is claimed here.
+
+## Immutable outcome-response record contracts
+
+Reuse `test_reddog_ed25519_verified_outcome_signing.py`: 51 additional cases
+cover exact-byte/context/digest binding, real Ed25519/co-signed history, malformed
+types and anchor identifiers, changed signing input, unknown/duplicate fields,
+independent expected digest, deep/oversize JSON, exact 64 KiB limit, caller mutation,
+and preservation of consumed root authority. The root peer/transport boundary is
+injected; real production ownership and process death remain unproven.
+
+Focused command: `python -B -m pytest modules/communication/moltbot_bridge/tests/test_reddog_ed25519_verified_outcome_signing.py --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider -q`.
+The final nine-suite command and disposable environment are in
+`docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json` →
+`response_record_continuation_20260914`: **294 passed / one Linux-root skip**.
+
+## Signer response handoff and validation
+
+`test_reddog_ed25519_verified_outcome_signing.py` now owns the composed
+outcome-backend/root-store interruption contract and shared publisher-response
+validation cases. Four new root-backed cases use real disposable SQLite stores,
+fresh client reconstruction and a receipt-domain signing counter. Sixteen new
+validation cases use real Ed25519 receipt/audit signatures; only the explicit
+verifier-result negative cases inject a verifier double. No production UID or
+actual process-death claim follows from these fixtures.
+
+With the qualified/disposable environment below, run:
+
+```powershell
+python -B -m pytest modules/communication/moltbot_bridge/tests/test_reddog_ed25519_verified_outcome_signing.py modules/communication/moltbot_bridge/tests/test_reddog_ed25519_signer_backend.py modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority_service.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_queue_binding.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_authenticity.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_adversarial.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_pattern_memory_admission_handler.py --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider --basetemp=O:/Foundups-Agent-audits/20260909-rsi/response-handoff-20260914/integration-fixed --tb=short -q
+```
+
+Result: **207 passed / one Linux-root skip in 31.12s**. The existing original
+test and its assertions remain unchanged. Durable record schema, authorized
+readback and OS-process recovery acceptance are still specified in the runbook.
+
+## Root commit acknowledgment recovery
+
+Extend `test_foundup_verified_outcome_root_authority_service.py` for this contract.
+Its 17 added cases cover exact terminal acknowledgment, identical request retry,
+four concurrent acknowledgments, changed reservation/digest rejection, fresh
+revocation/expiry after a lost reply, protocol errors, cancellation and exhaustion.
+The existing process-pool test uses a canonical callable import for Windows spawn;
+its eight attempts must still produce exactly one reservation winner.
+
+With the qualified/disposable environment below, the connected command is:
+
+```powershell
+python -B -m pytest modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority_service.py modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority.py modules/communication/moltbot_bridge/tests/test_reddog_ed25519_verified_outcome_signing.py modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority_service_entrypoint.py modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_runtime_binding.py modules/communication/moltbot_bridge/tests/test_reddog_signer_root_protected_use_composition.py --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider --basetemp=O:/Foundups-Agent-audits/20260909-rsi/outcome-response-20260914/connected-after --tb=short -q
+```
+
+Result: **115 passed / 1 Linux-root skip in 36.42s**. Real disposable SQLite
+stores and Ed25519 fixtures run behind an injected socket transport/peer boundary.
+This does not prove production isolation or recovery of a full signer response
+after process death. The focused 17-case selection passed in 8.18s.
+
+## Publication commit recovery
+
+The existing runtime-authority file adds 16 cases for bounded revision retries,
+unrelated state preservation, lost commit acknowledgments, competing staged/active
+publications, invalid winners, absent durable evidence, cancellation and signer
+rejection. The six-suite command under **Immutable publication retry** passed
+**118 tests in 15.96s**; the focused runtime-authority file passed 49 in 13.81s.
+Fault injection uses real disposable atomic JSON stores and digest signer/verifier
+doubles. Each candidate signs once; competing fixtures perform a separate publish.
+Controlled interleavings are not production competing-process or power-loss proof.
+Existing child-interpreter retry checks remain separate from recovery before any
+envelope is durable, which is still open.
+
+## Recorded admission event time
+
+Extend the existing queue-binding and chain-store suites for recording/replay
+changes. They cover stable receipt timestamps, later atomic snapshot reloads,
+duplicate stages, invalid clocks, mismatched/ambiguous receipts and canonical
+snapshot tampering. The store suite reuses the planner's governed fixture while
+retaining rejection of its old fixture without progressive-stage binding.
+Its process-pool callable uses the canonical module import for spawn portability.
+
+The connected command, with the qualified/disposable environment below, is:
+
+```powershell
+python -B -m pytest modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_queue_binding.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_chain_results_store.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_orchestration_plan.py modules/communication/moltbot_bridge/tests/test_reddog_main_resident_queue_serial_loop_bootstrap.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary.py modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary_integration.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_next_stage_dispatch.py --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider -q
+```
+
+PR1721 checkpoint result: 214 passed / four skipped in 99.49s. Symlink/AF_UNIX host
+limitations remain; synthetic/injected authority fixtures do not prove production
+activation, signed clock provenance or cross-store crash recovery.
+
+## Immutable publication retry
+
+The existing runtime-authority fixture now covers separate-interpreter retries
+for staged and active evidence, no second signing use, exact stored bytes,
+publisher identity/key drift, rehashed invalid signatures/issuance/extra fields,
+and expiry/revocation after retry. Reuse the connected selection:
+
+```powershell
+python -B -m pytest modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_queue_binding.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_authenticity.py modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_adversarial.py modules/communication/moltbot_bridge/tests/test_reddog_ed25519_verified_outcome_signing.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_pattern_memory_admission_handler.py --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider -q
+```
+
+Use the qualified interpreter and disposable environment below. The original
+publication-retry checkpoint passed 91 tests in 13.08s; the expanded selection is
+reported above. Restart tests use digest signer/verifier
+doubles and an actual child interpreter; they do not prove production signer
+isolation, queue timestamp stability or cross-store memory acceptance.
+
+## Authority-to-memory composition baseline
+
+Reuse these existing suites before implementing the R11 connection plan:
+
+```powershell
+python -B -m pytest modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py modules/communication/moltbot_bridge/tests/test_reddog_signer_root_protected_use_composition.py modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_manifest_selection_loader.py --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider -q
+```
+
+Use the qualified interpreter, `PYTHONDONTWRITEBYTECODE=1`, `PYTHONUTF8=1`,
+`PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`, and explicit disposable O:-resident
+TEMP/TMP/database/basetemp paths. On Windows the Linux ownership case skips;
+the 2026-09-14 selection passed 46 tests with that one skip. Reopening a store
+inside one process is not a real process-restart test.
+
+The composed failure probe and required R11-A–F acceptance cases are recorded
+in the [connection checkpoint](../../../../docs/operations/RSI_SWARM_DISPATCH.md#authority-to-memory-connection-checkpoint--2026-09-14)
+and `tests/TestModLog.md`. Its signer/verifier are test doubles; the live sink
+remains closed. Extend the existing runtime-authority, queue-binding and
+admission-handler tests when implementing the corresponding substep.
+
+## Verified-outcome staging and replay
+
+`test_reddog_verified_pattern_memory_sink.py` covers controlled competing
+SQLite inserts, immutable input snapshots, before/after-commit retry, existing
+row conflicts and staging/recall separation. Active-row cases reject canonical
+boolean/numeric/signed-zero mismatches while a matching fixture-seeded row
+retains its ID and readback. Use its existing admission and
+handler tests to check the next boundary:
+
+```powershell
+python -B -m pytest modules/communication/moltbot_bridge/tests/test_reddog_verified_pattern_memory_sink.py modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_authorized_pattern_memory_admission_invoke.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_pattern_memory_admission_handler.py -q
+```
+
+These tests use explicit disposable databases and injected callbacks. They do
+not activate production memory or prove power-loss/sustained concurrency behavior.
+
+## Exact-main post-merge lifecycle
+
+`test_reddog_holoindex_owner_query_root_binding.py` proves all post-completion,
+incident-recheck, CURRENT-coordination, and blocked-recovery queries enter through
+the original workspace/control root while results remain classified against the
+independently captured authority. The authority selector separately proves a
+configured authority equal to the workspace is rejected. The focused root and
+affected lifecycle selection is 190 passed. Merged exact-main `da558d51` passed
+the repaired controller on its first real OpenClaw transaction; a fresh owner
+query and full 33-artifact post-query verification retained the exact binding.
+That live result is commit-bound and does not prove runtime closure or A-grade.
+
+`test_reddog_holoindex_incident_repair_runtime.py` also proves the exact-main
+freshness transition can be repaired before owner acquisition: only a bound
+zero-attempt `REPO_HEAD_MISMATCH` reproduced by an independent fixed query may
+reach the canonical post-merge task. Wrong attempt count, receipt HEAD, or
+stale-reason evidence rejects before coordination. The independent query
+cannot substitute a different repairable error, a receipt-bound result of the
+same error, or different stale HEAD/generation/freshness/reason evidence. The
+ordinary shared owner classifier rejects this unreceipted pre-owner result.
+Merged exact main `09e98fff` then exercised that exact path through the real
+OpenClaw/WRE task. The resulting governed query was CURRENT/no-gap/no-reindex
+on attempt one and all 33 replica artifacts reverified unchanged. This is live
+acceptance for the named commit, not a replacement for these falsifiers or an
+A-grade/RSI claim.
+
+`test_holoindex_postmerge_runtime_owner_proof.py` owns the distinct
+post-completion readiness contract. It proves one fully receipt-bound exhausted
+transient can receive exactly one immediate reproof on acquisition cycles zero
+then one, both queries share the remaining transaction/300-second budget, and
+two transients remain terminal. Cycle telemetry must match its sealed receipt.
+Rejected authority, stale/deterministic/malformed/forged results, wrong
+completion generation or freshness digest, zero/consumed budgets, and
+`KeyboardInterrupt`/`SystemExit` all reject without weakening owned-runtime
+cleanup. It also pins the controller below the communication WSP_62 ceiling.
+
+`test_holoindex_postmerge_runtime_admission.py` proves missing dispatch-chain
+imports reject before coordination, exact-task registration waits only for live
+readiness, short admission bounds reject stalls, and a healthy 2,400-second
+execution remains inside the canonical 7,500-second v2 integrity-bound lease.
+`test_holoindex_postmerge_runtime_liveness.py` separately falsifies broker
+death, terminal/retry task state, request/authority/claim drift, wrong assignee,
+expired claims, and invalid completed state. Database claim regressions bind ID,
+issued time, expiry, assignment time, and digest; reject late first completion;
+and preserve exact post-expiry replay. Three claim-clock contention falsifiers
+raise the affected Python surface to 309 passed.
+
+`test_holoindex_postmerge_runtime_controller.py` proves dirty/non-main
+admission closes before query effects, an already-CURRENT owner starts no
+runtime, transaction-owned OpenClaw runtimes start and stop in dependency order,
+pre-existing broker runtimes remain resident, direct register-only bootstrap
+touches no ambient autostart flags, the exact task ID reaches Holo-only launch,
+exact completion generation equals the final owner receipt, and a
+still-live owned thread turns apparent success into rejection.
+
+The same file proves the canonical-store controller lease rejects contention,
+both lost-start races reject without claiming foreign ownership, every accepted
+OWNER_READY path repeats the exact-main Git proof, and final-Git interrupts
+become fixed rejections after cleanup. Owned supervisors receive the explicit
+`holoindex_postmerge_only` mode; supervisor coverage proves hostile ambient
+flags cannot activate self-audit or any non-Holo task family.
+Bound-poller tests prove exact bind/release/rebind identity and no independent
+coordinator scheduling. Controller cases prove pre-existing release and owned
+binding retention through stop. Launch tests prove same-root/Holo-only
+attestation and fail-closed full dependency preflight.
+Direct execute-gate cases additionally prove forged and structurally malformed
+plans cannot bypass the Holo-only triage boundary or escape its fixed rejection.
+Those focused cases live in
+`test_openclaw_supervisor_holoindex_postmerge.py`; the inherited supervisor
+test host remains below its base line count instead of ratcheting WSP 62 debt.
+
+The launch/supervisor regressions independently prove register-only bootstrap
+directly registers exactly two OpenClaw specs, starts nothing, and leaves
+hostile ambient autostart flags unchanged. A generic completed task row remains
+insufficient, malformed exact-head bindings reject, and a canonical atomic
+completion receipt succeeds.
+`test_openclaw_maintenance_selector.py` also proves this self-hosting task family
+does not recursively build a Holo execution bundle before it can be claimed.
+
+## Resident governed Holo usability
+
+`test_reddog_generation_bound_holoindex_query_adapter.py` proves the resident
+adapter preserves the owner-loaded runtime ranker digest in its safe result and
+receipt. Owner client tests reject missing or malformed ranker attestations.
+adapter admits a separate committed same-HEAD authority for both clean and
+overlaid callers, while a workspace authority with an overlay and unknown
+authority labels still fail closed. It also proves the child reuses the owner
+supervisor's runtime/site-packages, scrubs ambient secrets before `-S -B`, and retains the 60-second parent,
+57-second operation, and three-second cleanup bounds. The focused suite is 25
+passed; the expanded adapter/worker/one-shot/supervisor matrix is 428 passed / 1 skipped. The
+historical commit-bound canary at
+`61c2c3003bc4c2086f105f4c39effd499a026627` returned CURRENT with two scoped
+hits and no reindex in 32.5 seconds; it did not mutate Holo or the repository
+and does not authorize the candidate or any later commit.
+The candidate's earlier 60-second cold one-shot timed out twice. A later
+base-bound governed query passed on attempt one inside the 300-second CLI wall;
+this proves base usability, not exact-current-main readiness or scale.
+
+## Main bootstrap WSP 62 extraction
+
+The existing authority exact-schema suite now covers list, tuple, empty, and
+invalid mapping-list rehydration with exact nested rejection order. The
+existing bootstrap and durable-authentication WSP 62 suites prove the extracted
+result module stays bounded, the original public symbols retain exact identity,
+cold imports work in either order, and the remaining 432-line orchestration
+entrypoint cannot grow. No parallel test file or runtime authority was added.
+
+## FoundUp Memex learning-candidate gate
+
+`test_foundup_memex_learning_candidate.py` proves deterministic read-only
+candidate projection from exact FoundUp/snapshot/source receipts. Its positive
+and adversarial cases cover contradiction preservation, supersession pointers,
+proposed salience/confidence, reconstruction fidelity, forged and cross-FoundUp
+receipts, governed-research fail-closed behavior, verified-outcome HEAD binding,
+ambiguous outcome-receipt rejection, proposal-bound local-resigning rejection,
+canonical Unicode/time/score output, immutable result receipts, pre-dedup
+collection bounds, exact view receipt/invariant enforcement,
+tampering, secret text, invalid/overflowing scores, extreme timestamps, nested
+callback-bearing values, future evidence/proposals, hostile runtime types, and
+nested source/view callbacks, safe fallback attribute access, exact evidence
+closure, oversized/cumulative nested keys and values, storage/network/model
+import prohibitions.
+
+```powershell
+python -m pytest modules/communication/moltbot_bridge/tests/test_foundup_memex_learning_candidate.py -q
+```
+
+## Resident conversation admission and request idempotency
+
+`test_reddog_resident_conversation_new_scope_admission.py` proves the separate
+trusted empty-ID TURN aggregate: exact v2 intent/request/grounding/FoundUp
+binding before credential use, required E0 signer context, generation-lease
+lifetime, one-use authority consumption, content-minimized scope persistence,
+authenticated exact replay, divergent nonce conflict, expiry, concurrency, and
+stable failure projection. Production-shaped signed-session cases deliberately
+change the intent-derived session binding and prove one stable signed session
+cannot split one nonce into multiple scopes. The aggregate neither journals nor
+executes the first turn and contains no handler/model/worker/CAS effect wiring.
+
+`test_reddog_resident_conversation_first_turn_resolution.py` owns the distinct
+durable-link aggregate. It proves explicit v2/source-vs-derived request digest
+semantics, two separately registered FoundUp authority siblings, content-free
+storage, exact restart and scope-only crash recovery, related-key and nonce
+divergence rejection, concurrent convergence, authenticated replay through a
+later signed scope revision, signed immutable E0 request-identity commitment,
+full-row journal rewrite rejection, atomic same-authority replay consumption,
+and WSP 62/effect ceilings. It does not test handler execution or conversation
+CAS.
+
+`test_reddog_resident_conversation_scope_binding.py` uses the existing
+temporary SQLite AgentDB fixture and opaque conversation capabilities. It
+proves existing TURN/STATUS/CANCEL admission, content-free output, zero
+mutation, one-use consumption, exact revision/turn checks, expiry, missing
+state, current principal-signed E0 scope, forged/cross-session/cross-principal
+authority, attacker-rehashed record tampering, dependency failure, and WSP 62
+file/function limits.
+
+`test_reddog_resident_conversation_request_journal.py` proves the admission
+service: atomic live-parent consumption and opaque proof issuance, constructed-binding
+and unregistered-parent forgery rejection,
+content-free reservation, restart-safe exact replay, divergent/concurrent
+collision rejection, scope-expiry/change fencing, TURN/STATUS/CANCEL behavior,
+malformed store closure, and WSP 62 limits. The companion
+`test_reddog_resident_conversation_request_journal_store.py` proves unified
+mapping rows, portable PostgreSQL row locks/UPSERT SQL, SQLite serialization,
+global/per-conversation capacity, store-owned-clock expiry/backdating, direct
+store admission rejection, and JSON/digest/all-index-column corruption.
+The production-shaped fixture also exposed and now guards prior positional-row
+drift in signed pending conversation scope. No test executes a handler or
+reserves conversation CAS.
+
+`test_reddog_resident_conversation_admission.py` proves the current-session
+aggregate holds the signed-session lease across binding and reservation,
+passes the exact authority-source inputs without exposing them in results or
+storage, and consumes the verified parent. It covers restart replay, pre-lease
+malformed/new-scope rejection, stable and unexpected source failures,
+directly allocated opaque authority, cross-session mismatch, journal failure,
+direct E0 session transplant, hostile record mapping, and WSP 62/effect-wiring
+boundaries. The authority source is replaced only by
+a controlled context-manager fixture; its independent production suite owns
+generation/config/socket/signature verification.
+
+```powershell
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_scope_binding.py modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_request_journal.py modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_request_journal_store.py modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_admission.py -q
+```
+
+```powershell
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_new_scope_admission.py -q --basetemp O:\reddog-test-runtime\pytest-new-scope
+```
+
+```powershell
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_first_turn_resolution.py -q --basetemp O:\reddog-test-runtime\pytest-first-turn
+```
+
+## HoloIndex owner replica response contracts
+
+`test_reddog_holoindex_owner_client_transport.py` proves a successful owner
+response retains all four exact replica fields and fails closed when any field
+is missing. `scripts/tests/test_reddog_holoindex_owner_query_once.py` proves a
+valid-but-different returned replica cannot be bound to the verified route.
+`test_reddog_generation_bound_holoindex_query_adapter.py` additionally proves
+the resident default uses the one-shot contract, filters before limiting,
+removes raw/semantic/nested receipt bodies and arbitrary fields, rejects every
+split binding, serializes concurrent lifecycles, bounds lock wait, rejects
+hostile timeouts, and enforces the production child-process wall. The one-shot
+suite independently proves its shared lifecycle lock and strict CLI deadline.
+The canonical worker matrix also preserves the legacy direct/query/transport
+adapter export so existing diagnostic callers remain import-compatible while
+fresh resident workers use the generation-bound default.
+
+```powershell
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_holoindex_owner_client_transport.py modules/communication/moltbot_bridge/tests/test_reddog_holoindex_direct_query_boundary.py modules/communication/moltbot_bridge/tests/test_reddog_holoindex_receipt_binding.py modules/communication/moltbot_bridge/tests/test_reddog_holoindex_query_boundary.py -q
+```
+
+## WSP 62 decomposition coverage
+
+`test_reddog_runtime_module_static_boundaries.py` preserves the resident-loop
+and signed-worker executor effect/import prohibitions extracted from the large
+integration matrices. `test_reddog_wsp62_security_repair_exemptions.py` also
+caps the architect promotion and queue-loop decomposition modules at 500 file
+lines and 50 lines per function, without a new exemption.
+
+## Verified model-topology consumers
+
+The model runtime query, bounded runtime, authority, provider bootstrap,
+OpenClaw, Hermes, and resident integration matrices prove exact
+role/provider/model preservation with explicit availability. Negative coverage
+includes stale evidence, missing/unavailable providers, replay, retargeting,
+payload mismatch, and wrong provider; each path asserts zero network/process
+egress where applicable.
+
+## Current upstream worker providers
+
+`test_reddog_hermes_api_artifact_provider.py` uses fakes for API `0.20.4`, one stable completed leaf,
+paired delegate-only telemetry, empty child file arrays, ordered completion, zero skills and unchanged policy.
+Its 24 stop/three terminal variants keep parent-only observation/abort flags false while retaining possible effects,
+withheld artifacts, receipt rehydration and bootstrap effect propagation; they do not prove real child termination.
+`test_reddog_openclaw_gateway_artifact_provider.py` proves OpenClaw
+`2026.7.1-2` service/plugin identity, WSL cold-start-safe RPC ordering, exact
+sandbox policy, signed provider-prefixed routing, and bounded non-empty artifact
+output on canonical relative paths.
+
+```powershell
+python -m pytest -q `
+  modules/communication/moltbot_bridge/tests/test_reddog_hermes_api_artifact_provider.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_openclaw_gateway_artifact_provider.py
+```
+
+## Governed repository-state v2 intake
+
+`test_reddog_operational_context_snapshot.py` covers the digest-only executable
+v1 receipt accepted from JavaScript, exact readiness/repository schemas, and
+rejection of incomplete identities, malformed or boolean numeric fields,
+signature/verifier containment drift, raw paths, and non-Windows shape drift.
+The production snapshot module remains free of `subprocess` and bare Git.
+
+## Grant-profile atomic runtime provisioning
+
+```powershell
+python -m pytest -q `
+  modules/communication/moltbot_bridge/tests/test_reddog_grant_runtime_atomic_provisioning.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_atomic_provisioning.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_atomic_provisioning_recovery.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_atomic_provisioning_wsp62.py
+```
+
+The matrix proves the existing atomic provisioner can admit exactly one
+source-policy-capability-bound grant profile, activate only its three artifacts,
+bind config/run-packet bytes into durable generation state, reject config-v1
+downgrade and alternate committed source maps, detect owner replacement during
+commit, and serialize compliant rotation. It starts no service and grants no
+secret, worker, repository, PR, or merge authority.
+
+## Root-owned grant-service source-policy authority
+
+```powershell
+python -m pytest -q `
+  modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_source_policy_authority.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_grant_authority_client_supply.py
+```
+
+The matrix proves exact owner-config v4 source-map binding, cross-repository
+and stale-policy rejection, opaque capability confinement, and continued v3/v4
+grant-client support. It performs no archive build, service launch, secret
+resolution, repository effect, or HoloIndex mutation.
+
+## Grant-authority executable archive validation
+
+```powershell
+python -m pytest -q `
+  modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_service_archive_validation.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_service_authenticated_manifest_binding.py
+```
+
+The matrix proves deterministic archive bytes, production and use-time
+validation, exact member/manifest binding, direct static-import reference
+checks, common loader-alias rejection, standard-library shadow rejection,
+beyond-top-level relative-import and control-path rejection, and the fixed
+non-generator callable entrypoint ABI. It does not prove Git provenance, interpreter
+identity, Python sandboxing, hermetic process isolation, service lifecycle, secret resolution, or
+live authority.
+
+## Grant-authority WSP 71 permission rehydration
+
+```powershell
+python -m pytest -q `
+  modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_wsp71_permission_rehydration.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_signer_secret_grant_revocation_durable_authority.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_signer_root_protected_use_composition.py
+```
+
+The matrix proves root-generation binding, canonical receipt rehydration,
+real config/manifest verification, same-lease callback use under the matching
+durable revocation fence, role-separated generation authority, and rejection
+of self-rehash, wrong-policy oracle use, repository-permission substitution,
+path/symlink replacement, duplicate keys, trailing bytes, canonical-prefix
+tails, non-ASCII and oversized input. It performs no secret resolution, service
+startup, socket connection, or worker effect.
+
+## Authenticated grant-service manifest binding
+
+```powershell
+python -m pytest -q `
+  modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_service_authenticated_manifest_binding.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_signed_runtime_artifact_manifest.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_signer_owner_controlled_e0_admission.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_signer_owner_e0_static_contract.py
+```
+
+The matrix proves v1/v5 compatibility, v2/v6 grant-service binding, central
+signer-domain admission, exact config/run-packet schemas, all-artifact use-time
+rehydration, archive-tail replacement rejection, pairwise key-reference
+separation, signed-policy substitution rejection, and secret-free output. It
+does not start a grant service, resolve WSP 71 values,
+dispatch a worker, or grant repository authority.
+
+## Independent grant-authority client supply
+
+```powershell
+python -m pytest -q `
+  modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_grant_authority_client_supply.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_isolated_signer_socket_client.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_isolated_signer_socket_client_linux.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_manifest_selection_loader.py
+```
+
+The matrix proves authenticated current-generation policy admission, exact
+owner-config binding, disjoint signer/outcome/replay/revocation roots, socket
+link rejection and inode pinning, protected ancestry, Linux connected-peer
+UID/GID, attacker-rehashed policy rejection, and no request during client
+construction. It does not start a grant service, resolve a secret, compose a
+signer, or grant work.
+
+## Signer system-service WSP 71 resolver
+
+```powershell
+python -m pytest -q `
+  modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_wsp71_resolver_supply.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_entrypoint.py `
+  modules/infrastructure/secrets_mcp/tests/test_op_cli_secret_resolver.py
+```
+
+The matrix proves owner-ID binding, fixed executable policy, fail-closed
+unsafe/missing executable handling, in-memory secret use, and no shell or
+secret persistence. The supply remains uncomposed and claims no grant issuance,
+service deployment, or live worker authority.
+
+## Canonical elevated-authority consensus capability
+
+```powershell
+python -m pytest `
+  modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_capability.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_verification.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_signer.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_structure.py -q
+```
+
+The matrix proves exact two-child capability use, strict proof rehydration,
+reviewer/key/model/runtime independence, current policy and sovereign binding,
+signer-side full-grant verification, replay and concurrent admission closure,
+and bounded production/test modules and functions without shell, network, or
+crypto-key generation.
+It does not claim authenticated production authority supply or signer-service
+composition.
+
+## Independent signer secret-grant provider
+
+`python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_secret_grant_provider.py -q`
+
+The matrix covers canonical signing, durable concurrent rate limits, distinct
+caller and beneficiary identities, generation lease lifetime, authority and
+replay-store substitution, signed grant-authority key-epoch substitution,
+exact owner-policy schema, audit-attestation tampering, elevated-tier closure
+and WSP 62 boundaries.
+
+## Root-served signer revocation
+
+```powershell
+python -m pytest modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_revocation_service.py modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_revocation_hardening.py modules/communication/moltbot_bridge/tests/test_reddog_signer_secret_grant_revocation_durable_authority.py -q
+```
+
+The matrix integrates current signed E0 policy admission, signed revocation
+snapshots, durable primary/witness state, root high-water state, opaque client
+transport and kernel-peer/root-service validation. It rejects arbitrary
+bindings, policy drift, forged/cross-operation proofs, wrong peers, stale time,
+missing witnesses, tampered snapshots, stale replay, response substitution and
+fabricated capabilities. It proves exact retry and concurrent convergence and
+enforces WSP 62 without an exemption. It does not activate protected signing.
+
+## External authoritative-use lease
+
+```powershell
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_external_signer_authoritative_use_lease.py modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_lease_contract_security.py modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_lease_adversarial.py modules/communication/moltbot_bridge/tests/test_reddog_isolated_signer_socket_client.py modules/communication/moltbot_bridge/tests/test_reddog_isolated_signer_socket_protocol.py modules/communication/moltbot_bridge/tests/test_reddog_ed25519_signer_backend.py modules/communication/moltbot_bridge/tests/test_reddog_signer_secret_access_grant.py modules/communication/moltbot_bridge/tests/test_reddog_signer_resolve_per_sign_backend.py modules/communication/moltbot_bridge/tests/test_reddog_signer_mutual_peer_handshake.py modules/communication/moltbot_bridge/tests/test_reddog_external_signer_lifecycle_admission.py modules/communication/moltbot_bridge/tests/test_reddog_signer_current_generation_use_time_binding.py modules/communication/moltbot_bridge/tests/test_reddog_execution_valve_queue_use_time_binding.py modules/communication/moltbot_bridge/tests/test_reddog_extension_wre_operational_spine_invoke.py modules/communication/moltbot_bridge/tests/test_reddog_wre_operational_spine.py -q
+```
+
+This matrix validates the external-signer exact-effect primitive without
+activating any repository, worker, queue, shell, PR, merge, or indexing effect.
+It includes a composed socket-v2/E0/resolve-per-sign/issuer/WRE regression and
+attacks for local signer substitution, split replay roots, generation overrun,
+clock rollback, canonicalization, replay, and effect substitution.
 
 ## Coverage Goals
 - Intent classification and routing behavior.
@@ -28,6 +2089,48 @@ Optional custom args:
 .\modules\communication\moltbot_bridge\tests\run_tests.ps1 -PytestArgs @("-q", "-k", "skill_safety")
 ```
 
+Focused authenticated conversation-scope runtime:
+```powershell
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_conversation_scope_authentication.py modules/communication/moltbot_bridge/tests/test_reddog_authenticated_conversation_scope_state.py modules/communication/moltbot_bridge/tests/test_reddog_conversation_scope_tamper_and_rotation.py -q
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_conversation_session_authority_source.py modules/communication/moltbot_bridge/tests/test_reddog_resident_architect_session_bridge.py -q
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_principal_memex_live_resident_source_supply.py modules/communication/moltbot_bridge/tests/test_reddog_principal_memex_backend_architect_integration.py modules/communication/moltbot_bridge/tests/test_reddog_resident_architect_durable_agentdb_cycle.py -q
+```
+
+This suite uses a temporary SQLite AgentDB-shaped store plus current-checkout
+FoundUp and grounding receipts. It covers restart recovery, one-use opaque
+authentication, HMAC rotation, recomputed-hash tampering, cross-principal,
+cross-session and cross-FoundUp rejection, stale grounding, expiry, CAS and
+concurrent updates. It performs no provider call, dispatch, repository write,
+HoloIndex reindex, signing operation, PR, or merge.
+
+The Principal Memex matrix additionally proves that a pre-issued disclosure is
+removed before resident intent persistence, uses a distinct one-use Principal
+scope, is not consumed by duplicate/active/cancelled cycles, reaches only the
+final architect model as the signed subset/order of bounded public decisions,
+is expiry-checked immediately before invocation, and cannot grant FoundUp or
+work authority.
+
+Focused conversation-to-work promotion:
+```powershell
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_conversation_work_promotion.py modules/communication/moltbot_bridge/tests/test_reddog_backend_architect_determination_runtime.py modules/communication/moltbot_bridge/tests/test_reddog_architect_fix_signed_wsp15_work_order_promotion.py -q
+```
+
+This matrix proves backend pre-model context binding, immutable pending proposal
+CAS, one-use capability admission, principal-signature ordering, FoundUp scope,
+stale-record rejection, and compatibility with the existing signed WSP 15
+promotion path. It does not dispatch a worker or mutate repository content.
+
+Focused owner-controlled signer E0 admission:
+```powershell
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_signer_owner_controlled_e0_admission.py modules/communication/moltbot_bridge/tests/test_reddog_signer_owner_e0_static_contract.py -q
+```
+
+This suite uses only temporary runtime roots and generated public/private test
+keys. It proves exact selection-tuple binding and fail-closed admission;
+manifest-bound principal authority and generation-fenced consumption are also
+covered. It does not resolve secrets, start a signer, bind a socket, or write
+the repo.
+
 Focused RedDog WRE operational spine:
 ```powershell
 python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_wre_operational_spine.py modules/communication/moltbot_bridge/tests/test_reddog_wre_worktree_create.py modules/communication/moltbot_bridge/tests/test_reddog_wre_execution_valve.py modules/communication/moltbot_bridge/tests/test_reddog_wre_executor_dryrun.py modules/communication/moltbot_bridge/tests/test_reddog_work_order_runtime_invocation.py -q
@@ -45,7 +2148,95 @@ injected no-network test double. One bounded Python subprocess proves
 interprocess lock exclusion. It does not start a signer, call OpenRouter, push
 a branch, or create a PR.
 
+Current-policy fixtures must project the legacy serial-loop snapshot through
+the canonical queue WSP_15 allocation and governed progressive-stage helpers.
+Manifest authority uses one exact edit operation, selected slice, and file
+path; scalar or wildcard stand-ins are not valid live-canary evidence.
+
 Focused canonical execution-valve supplier/evaluator:
 ```powershell
 python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_execution_valve_environment_supply.py modules/communication/moltbot_bridge/tests/test_reddog_wre_execution_valve.py -q
 ```
+
+Focused signer resolve-per-sign E0 boundary:
+
+The synthetic grant/crypto matrix in `test_reddog_signer_resolve_per_sign_backend.py`
+uses an explicitly named unit backend to isolate grant consumption, revocation,
+resolution and response checks. It is not authenticated owner-admission evidence.
+Its frozen factory-rejection cases still instantiate the exact production class.
+The admitted socket runtime suite covers real owner leases, consuming-boundary
+identity, instance-method substitution, current binding, root ACQUIRE/FINISH
+ordering and replay with synthetic enrolled keys and transport fixtures.
+
+The HIGH elevated-consensus and effect-issuer composition tests explicitly
+parameterize `synthetic_owner_unit`: only the synthetic unit route accepts their
+ownerless fixtures. The exact production route must reject and issue no authority
+or effect lease. Their original orchestration assertions remain useful but do
+not establish authenticated HIGH/effect admission. That capability remains an
+open roadmap prerequisite. LOW runtime/factory and concurrent revocation tests
+use the actual owner-leased constructor rather than the unit adapter.
+
+```powershell
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_signer_secret_grant_revocation_contract.py modules/communication/moltbot_bridge/tests/test_reddog_signer_secret_grant_revocation_durable_authority.py modules/communication/moltbot_bridge/tests/test_reddog_signer_secret_access_grant.py modules/communication/moltbot_bridge/tests/test_reddog_isolated_signer_socket_protocol.py modules/communication/moltbot_bridge/tests/test_reddog_signer_resolve_per_sign_backend.py modules/communication/moltbot_bridge/tests/test_reddog_signer_wsp71_ephemeral_backend_factory.py -q
+```
+
+`test_reddog_signer_wsp71_ephemeral_backend_factory.py` also composes the real
+factory, resolve-per-sign backend and socket-v2 handler with a signed synthetic
+LOW readonly grant. It observes durable consume-before-resolve and verifies the
+exact signature. Six rejection controls trap secret extraction on invalid
+reference/hash metadata, original mock mode, denial and expiry. These fixtures
+do not establish live vault access, authentic principal enrollment or deployed
+service wiring. The CI grant-aware signing step additionally runs key-provider,
+runtime-wiring, system-service entrypoint, resolver-supply and conversation
+regressions. The shared test helper uses explicit per-test native roots, derives
+default socket/anchor paths from effective roots and preserves explicit negative
+overrides. Production path checks are unchanged.
+
+The revocation-contract cases use only signed test fixtures. They prove exact
+authority/generation/store binding and attacker-rehash rejection. The durable
+authority cases use temporary disjoint SQLite roots to prove monotonic publish,
+both crash recoveries, status/metadata/witness tamper rejection, expiry,
+one-winner concurrency, and lock coverage across the protected callback. They
+do not issue grants, activate E0, resolve secrets, start a signer, bind a socket,
+mutate a repository, detect coordinated two-domain rollback, or reindex
+HoloIndex.
+
+Focused architect-FIX two-phase publication:
+```powershell
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_architect_fix_promotion_publication.py modules/communication/moltbot_bridge/tests/test_reddog_architect_fix_signed_wsp15_work_order_promotion.py modules/communication/moltbot_bridge/tests/test_reddog_architect_proposal_verified_authority.py modules/communication/moltbot_bridge/tests/test_reddog_authoritative_work_state_refresh_runtime.py modules/communication/moltbot_bridge/tests/test_reddog_authority_profile_source_artifact_supply.py modules/communication/moltbot_bridge/tests/test_reddog_execution_valve_environment_supply.py modules/communication/moltbot_bridge/tests/test_reddog_execution_valve_runtime_artifact_locking.py modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_config_supply.py modules/communication/moltbot_bridge/tests/test_reddog_resident_control_loop_signing_context.py modules/communication/moltbot_bridge/tests/test_reddog_main_architect_fix_promotion_bootstrap.py modules/communication/moltbot_bridge/tests/test_reddog_wsp62_security_repair_exemptions.py -q
+```
+
+The main-bootstrap selection proves the exact query-replica capability reaches
+owner binding verification and that route-resolution failure occurs before
+verification or publication. Fixtures that exercise later promotion authority
+inject an inert route capability rather than weakening production resolution.
+
+Cross-process resident FIX promotion claim:
+
+```bash
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_agentdb_fix_promotion_claim.py -q
+```
+
+The claim suite includes stale-owner fencing, monotonic reclaim revisions,
+promotion-receipt completion binding, supplier short-circuiting, and exact
+handoff lineage. Artifact-handoff tests separately reject aliased output paths
+before either artifact is written.
+
+The publication suite proves the exact fail-closed sequence:
+`PREPARED -> immutable inert artifact -> COMMITTED state -> fixed inert cache`.
+Recovery never advances PREPARED and never emits signer, queue, claim, shell,
+worktree, OpenClaw, or execution-valve authority.
+Signer regressions also require the explicitly selected durable authoritative
+work state and reject missing state, split-path substitution, marker and
+queue/claim stripping, or injected state that differs from the durable payload.
+## Persisted HoloIndex admission recovery — 2026-10-05
+
+`test_holoindex_persisted_resume.py` has 29 frozen cases for durable bindings,
+pointer/authority rejection and existing retry timing/budget. Baseline: 28
+missing-API failures and one generic stale-index rejection pass. Candidate: 29
+pass. Six separate controller cases cover lease/preflight ordering, incident
+retention, exact-task runtime startup, retry-wait without startup, interruption
+and failed cleanup. The connected 181-case selection passes without errors/skips.
+Ports use in-memory DB/Git/runtime doubles; no live maintenance is proved.
+Original failing runs, frozen criteria and commands are retained under
+`outputs/rsi-holo-grounding-20261005`. CI runs the connected selection.

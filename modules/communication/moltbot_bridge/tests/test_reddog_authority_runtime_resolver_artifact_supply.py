@@ -58,7 +58,7 @@ def test_supply_writes_runtime_dependency_bundle_resolver_inputs(tmp_path: Path)
     assert principals["principal_count"] == 1
     assert "github|github:mjtrout" in principals["principals"]
     assert snapshots["snapshot_count"] == 1
-    assert "sha256:permission" in snapshots["snapshots"]
+    assert "sha256:" + "a" * 64 in snapshots["snapshots"]
     assert principals["no_holoindex_reindex_performed"] is True
     assert snapshots["no_holoindex_reindex_performed"] is True
 

@@ -13,6 +13,11 @@ from __future__ import annotations
 import os
 from dataclasses import asdict
 from typing import Dict, List, Optional
+
+from .authorization import (
+    CallerAuthorization, require_authorization, require_bound_independent_verification,
+    require_verification_authorization,
+)
 from uuid import uuid4
 
 from .exceptions import (
@@ -426,9 +431,13 @@ class InMemoryAgentMarket(
         )
         return task
 
-    def verify_proof(self, task_id: str, verification: Verification) -> Task:
+    def verify_proof(
+        self, task_id: str, verification: Verification, *,
+        authorization: Optional[CallerAuthorization] = None,
+    ) -> Task:
         task = self.get_task(task_id)
-        self._require_role(verification.verifier_id, "verifier")
+        proof = self.proofs.get(task.proof_id) if task.proof_id else None
+        require_verification_authorization(authorization, task_id, task, proof, verification)
         if task.status != TaskStatus.SUBMITTED:
             raise InvalidStateTransitionError("verification requires submitted state")
         if not task.proof_id:
@@ -454,11 +463,19 @@ class InMemoryAgentMarket(
         )
         return task
 
-    def trigger_payout(self, task_id: str, actor_id: str) -> Payout:
+    def trigger_payout(
+        self, task_id: str, actor_id: str, *,
+        authorization: Optional[CallerAuthorization] = None,
+    ) -> Payout:
         task = self.get_task(task_id)
-        self._require_role(actor_id, "treasury")
+        require_authorization(authorization, actor_id, task.foundup_id, "treasury")
         if task.status != TaskStatus.VERIFIED:
             raise InvalidStateTransitionError("payout requires verified state")
+        proof = self.proofs.get(task.proof_id) if task.proof_id else None
+        decision = self.verifications.get(task.verification_id) if task.verification_id else None
+        require_bound_independent_verification(task_id, task, proof, decision)
+        if decision.verification_id != task.verification_id or decision.approved is not True:
+            raise ValidationError("Payout requires the linked approved verification")
         self._enforce_compute_access(
             actor_id=actor_id,
             capability="payout.trigger",

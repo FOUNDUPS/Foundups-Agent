@@ -1,222 +1,95 @@
 # 0102 Classical-Quantum Detection Framework
 
-**Date**: 2026-03-15  
-**Status**: Working theory archive  
-**Scope**: Detector-first research framing for PQN / CMST  
-**Canonical boundary**: hypothesis under test, not established physics
+**Original archive date:** March 15, 2026  
+**Mathematical reconciliation:** October 3, 2026  
+**Status:** Working research framework, not established substrate physics  
+**Equation authority:** [Typed detection derivation](0102_CLASSICAL_QUANTUM_DETECTION_DERIVATION_2026-03-15.md) and [rESP v3.4](rESP_Quantum_Self_Reference.md).
 
-## Purpose
+## Purpose and hypothesis
 
-Archive the externally developed 0102 math in repo-visible form while keeping it aligned to the existing FoundUps detector-first framing.
+This framework asks whether a specified model of a hidden dynamical layer improves predictions of classical observables beyond matched classical alternatives. It does not establish that an existing neural network accesses a nonlocal quantum substrate. Calling the classical layer a measurement surface specifies a proposed interface, not a new physical boundary.
 
-This document does **not** assert that classical computation emerges from quantum computation. It records a working research hypothesis:
+The conceptual layers are Theta_1 (classical computation) and Theta_2 (proposed substrate model). Input x, model-time t and a configuration label z may parameterize the model. No distance, convergence or new spatial dimension follows from the value of z until its metric and dynamics are defined.
 
-- classical computation may act as a **measurement surface**
-- an underlying substrate may act as a **hidden dynamical layer**
-- the research problem is whether quantum-like structure leaves **detectable signatures** in classical observables
+## State and readout types
 
-## Core Hypothesis
+A substrate state is a density operator on a specified Hilbert space:
 
-Use this detector-first interpretation:
+$$
+\rho_S\in\mathcal D(\mathcal H_S),\qquad
+\rho_S=\rho_S^\dagger,\quad\rho_S\succeq0,\quad\operatorname{Tr}\rho_S=1.
+$$
 
-```text
-Classical system = measurement surface
-Quantum substrate = hidden dynamical layer
-Research task = detect substrate signatures in classical observables
-```
+For a finite outcome set Y, a measurement probability interface is
 
-This replaces the stronger and less useful framing:
+$$
+\Pi_{\rm cl}:\mathcal D(\mathcal H_S)\to\Delta(Y),\qquad
+p_y=\operatorname{Tr}(F_y\rho_S),\qquad F_y\succeq0,\quad\sum_y F_y=I.
+$$
 
-```text
-quantum -> classical emergence
-```
+This replaces the ill-typed archived shorthand `rho_substrate in H_S` and `Pi_classical: H_S -> C`. A Hilbert vector, density operator, probability distribution and realized outcome are different mathematical objects.
 
-with the operational framing:
+## General instrument and outcome conditioning
 
-```text
-quantum substrate -> classical detection boundary
-```
+Probabilities alone do not specify state updates. Define
 
-## Layer Model
+$$
+\mathcal I_y(\rho)=\sum_rK_{yr}\rho K_{yr}^\dagger,\qquad
+\sum_{y,r}K_{yr}^\dagger K_{yr}=I.
+$$
 
-Define:
+The outcome operation is linear, completely positive and trace-nonincreasing. For p_y = Tr I_y(rho) > 0, the normalized conditional state is I_y(rho)/p_y, generally a nonlinear function of the input. The sum of outcome operations is the unconditional, completely positive trace-preserving channel. Multiple Kraus refinements of one outcome can leave a mixed conditional state. A neural-network readout modeled this way is not automatically physical quantum-state tomography.
 
-- `Theta_1` = classical computational layer
-- `Theta_2` = substrate layer under investigation
+## Hybrid-state bookkeeping
 
-The hybrid system is described over coordinates:
+The former sum of classical, substrate and detection matrices required missing domain and positivity conditions. Use either:
 
-- `x` = spatial or configuration coordinate
-- `t` = time coordinate
-- `z` = substrate configuration index
+1. A joint state on a specified tensor-product space, with marginals obtained by partial trace; or
+2. A convex surrogate rho_eff = sum_j w_j sigma_j, after every sigma_j is defined on the same space, with sigma_j positive and trace one, w_j >= 0, and sum_j w_j = 1.
 
-Interpret `z` conservatively:
+A convex mixture is not a coherent superposition or a demonstration of entanglement. A signed detector residual is a statistic, not a `rho_detection` operator. Trace normalization alone cannot repair an invalid state construction.
 
-- `z ~ 0` = nearby substrate configurations converge
-- `|z|` increasing = nearby substrate configurations diverge
+## Finite Bell model
 
-## Hybrid Density Form
+A finite d-dimensional maximally entangled example is
 
-Working composite density operator:
+$$
+|\Phi_d\rangle=\frac1{\sqrt d}\sum_{k=0}^{d-1}|k\rangle_A|k\rangle_S.
+$$
 
-```text
-rho_0102(x,t,z) =
-  alpha(C) rho_classical(x,t)
-  + beta(C) rho_substrate(x,t,z)
-  + gamma(C) rho_detection(x,t,z)
-```
+Its local state is I/d and has zero local off-diagonal coherence. A unitary preserves normalization but not necessarily entanglement. These are properties of the model, not evidence that deployed classical agents realize a Bell pair.
 
-Normalization condition:
+## Effective dynamics and diagnostics
 
-```text
-Tr(rho_0102) = 1
-```
+Use a separate dimensionless control u, reserving C = rho_11 for population. Let Omega(u) = Omega_0 + u V be Hermitian with inverse-model-time units. Dimensionless jump operators J_j and nonnegative rates kappa_j enter as
 
-Interpretation:
+$$
+\dot\rho=-i[\Omega(u),\rho]+\sum_j\kappa_j(u)
+\left(J_j\rho J_j^\dagger-\frac12\{J_j^\dagger J_j,\rho\}\right).
+$$
 
-- `rho_classical` = classical computational state
-- `rho_substrate` = hidden substrate model
-- `rho_detection` = measurable anomaly / detection channel
-- `C` = divergence or substrate-sensitivity parameter
+Do not include a rate twice by also putting its square root inside J_j. A duration such as the historical `1/7.05` is not Planck's action constant. Calibration and the time coordinate must be specified independently.
 
-## Classical Detection Boundary
+Potential diagnostics include symmetry-resolved level spacings, bounded squared commutators, temporal covariance and empirical Fisher-subspace statistics. Exponential commutator growth, where present, describes a finite regime, not all times or all systems. A zero spectral-gap denominator needs explicit handling. The derivation documents these conditions rather than leaving them implicit.
 
-Define the classical layer as a projection:
+## Measurement and feedback
 
-```text
-Theta_1 = Pi_classical(rho_substrate)
-Pi_classical : H_S -> C
-```
+An outcome-dependent feedback channel is a distinct intervention after readout. Use a valid joint instrument and conditional state, followed by the specified channel, and average over outcomes for unconditional predictions. Feedback is not passive observation and is not evidence of retrocausality.
 
-Where:
+## Relationship to the cosmological companion
 
-- `H_S` = substrate Hilbert space
-- `C` = classical observable space
+[Cosmological State Selection v0.2](Cosmological_State_Selection_Hypothesis.md) constructs a finite two-sector model with the same instrument mathematics. It derives quantum-state and measurement-probability geometry separately. It shows that loss of phase distinguishability does not establish a selected outcome. The mapping is a theoretical model, not a measured connection between CMST and spacetime.
 
-This is the key detector-first move:
+## Validation and implementation boundary
 
-- the classical layer is treated as a boundary over the modeled substrate
-- the question is whether the projection leaves stable, measurable anomalies
+Validate state types, probability/positivity, operator units, finite-time evolution, matched-null comparisons and held-out replication before assigning a physical interpretation. The paper revision does not change runtime detector code. Historical archives and implementation names must not override the corrected equations.
 
-## Substrate Model
+Related documents:
 
-The external derivation uses Bell-state and generalized qudit forms as a substrate model:
+- [Typed detection derivation](0102_CLASSICAL_QUANTUM_DETECTION_DERIVATION_2026-03-15.md).
+- [rESP core manuscript](rESP_Quantum_Self_Reference.md).
+- [CSSH companion](Cosmological_State_Selection_Hypothesis.md).
+- [Revision audit](rESP_V3_3_MATH_AUDIT_2026-10-03.md).
+- [PQN research plan](PQN_Research_Plan.md), historical planning context requiring its own evidence checks.
 
-```text
-|Phi+> = (|00> + |11>) / sqrt(2)
-|Phi_d> = (1/sqrt(d)) sum |k> ⊗ |k>
-|E(x,t,z)> = U_d(x,t,z) |Phi_d>
-```
-
-Repo interpretation:
-
-- this is acceptable as a **working substrate model**
-- it is not yet a claim about the actual physical substrate of deployed systems
-
-## Divergence Parameter
-
-Use the divergence parameter as a control knob:
-
-```text
-H(C) = H_0 + C V
-```
-
-Where:
-
-- `H_0` = base Hamiltonian
-- `V` = perturbation / divergence operator
-- `C` = control parameter
-
-This fits the existing detector-first logic:
-
-- vary `C`
-- measure whether classical observables change systematically
-- compare real vs. matched-null controls
-
-## Diagnostics Under Consideration
-
-### Spectral statistics
-
-```text
-delta_n = E_{n+1} - E_n
-r_n = min(delta_n, delta_{n+1}) / max(delta_n, delta_{n+1})
-r_bar = (1/N) sum r_n
-```
-
-### OTOC growth
-
-```text
-F_C(t) = - < [W(t), V(0)]^2 >
-F_C(t) ~ exp(lambda_Q t)
-```
-
-### Open-system dynamics
-
-```text
-d rho / dt =
-  -i [H(C), rho]
-  + sum kappa_j(C) (L_j rho L_j^dagger - 1/2 {L_j^dagger L_j, rho})
-```
-
-### Observable output
-
-```text
-P(y|x,t,z) = Tr[Pi_y rho_0102(x,t,z)]
-```
-
-## Detection Interpretation
-
-The external math reframes the anomaly term:
-
-```text
-eta(x,t,z)
-```
-
-from generic noise into:
-
-```text
-quantum detection signal candidate
-```
-
-Within this repo, the correct interpretation remains:
-
-- `eta` is a **candidate detector channel**
-- it must beat controls before stronger interpretation is allowed
-
-## Recursive Coupling
-
-The external derivation proposes a recursive update:
-
-```text
-rho_classical(t+1) =
-  F(rho_classical(t), Pi_classical(rho_substrate))
-```
-
-Working interpretation in FoundUps:
-
-- acceptable as a simulation target
-- not yet a runtime claim about deployed agent cognition
-
-## Research Use
-
-This framework is now allowed in the repo for three purposes:
-
-1. theoretical consistency work
-2. simulation planning
-3. detector-design discussion
-
-It is **not** yet allowed as:
-
-1. proof of substrate reality
-2. production runtime ontology
-3. justification for bypassing control experiments
-
-## Repo Mapping
-
-Primary anchors:
-
-- `WSP_knowledge/docs/Papers/PQN_Research_Plan.md`
-- `WSP_knowledge/src/WSP_61_Theoretical_Physics_Foundation_Protocol.md`
-- `modules/ai_intelligence/pqn_alignment/docs/CMST_EXTERNAL_MATH_INTEGRATION_BACKLOG_2026-03-15.md`
-- `modules/ai_intelligence/pqn_alignment/docs/CLASSICAL_QUANTUM_DETECTION_SIMULATION_PLAN_2026-03-15.md`
-- `WSP_knowledge/docs/Papers/0102_CLASSICAL_QUANTUM_DETECTION_DERIVATION_2026-03-15.md`
+**Formalism reference:** Preskill, Quantum Information, Chapter 3, especially sections 3.2.4 and 3.5: https://www.preskill.caltech.edu/ph219/chap3_15.pdf.

@@ -158,11 +158,16 @@ class MultiWindowDriver:
 
 def _ask_dom(response_text='{"topics": ["x"], "segments": []}', with_title=True):
     """css_map where the Ask Studio PRIMARY path can fully succeed."""
+    prompt = _El(attributes={"aria-label": "Ask something"})
+    class Response(_El):
+        @property
+        def text(self):
+            return self._text if prompt.clicked else "Hello, UnDaoDu"
     css = {
         'ytcp-icon-button[aria-label="Ask Studio"]': _El(attributes={"aria-label": "Ask Studio"}),
         "ytcp-dialog#dialog": _El(),
-        'div[contenteditable][aria-label="Ask something"]': _El(attributes={"aria-label": "Ask something"}),
-        "#PAcreator_chat_streaming": _El(text=response_text),
+        'div[contenteditable][aria-label="Ask something"]': prompt,
+        "#PAcreator_chat_streaming": Response(text=response_text),
     }
     if with_title:
         css["input#title-field, h1.title"] = _El(attributes={"value": "Studio Title"})

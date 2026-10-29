@@ -51,6 +51,13 @@ from modules.platform_integration.youtube_shorts_scheduler.src.index_weave impor
 # Shared harness (strict, anti-vacuity)
 # ---------------------------------------------------------------------------
 
+@pytest.fixture(autouse=True)
+def no_browser_waits(monkeypatch):
+    async def settled(_seconds):
+        return None
+    monkeypatch.setattr("asyncio.sleep", settled)
+
+
 def _make_strict_dom():
     """
     Strict spec_set DOM double based on the REAL YouTubeStudioDOM interface.
@@ -84,6 +91,9 @@ def _make_driver():
 def _make_scheduler():
     """Connected scheduler with a strict DOM double; dry_run=False (live path)."""
     scheduler = YouTubeShortsScheduler("move2japan", dry_run=False)
+    # Metadata isolation uses a qualified same-date Studio timezone; rollover
+    # rejection is covered separately by the cadence allocation regressions.
+    scheduler.channel_tz = "America/New_York"
     scheduler.driver = _make_driver()
     scheduler.dom = _make_strict_dom()
     return scheduler
@@ -97,9 +107,14 @@ def _write_artifact(tmp_path, monkeypatch, channel_key, video_id):
         "title": "Original Title",
         "indexed_at": "2026-06-16T00:00:00Z",
         "indexer": "studio_ask",
-        "audio": {"segments": [{"start": 0, "end": 5, "text": "hi"}], "transcript_summary": "calm talk"},
+        "transcript_source": "gemini_summary",
+        "audio": {"segments": [{"start": 0, "end": 5, "text": "hi"}], "transcript_summary": "Breathe and be present."},
         "visual": {"description": "", "keyframes": []},
         "metadata": {
+            "retrieval_eligible": True,
+            "provenance": {"provider": "youtube_studio_ask", "identity_verified": True,
+                           "requested_video_id": video_id, "response_video_id": video_id,
+                           "response_sha256": "test_digest"},
             "duration": "0:30",
             "topics": ["Mindfulness", "Zen"],
             "speakers": [],
@@ -332,7 +347,7 @@ async def test_control5_read_path_does_not_call_ensure_index_json(tmp_path, monk
     # The read path used the artifact (load_index_json invoked) ...
     assert load_spy.call_count >= 1
     # ... and a live write still fired on the scheduling path (artifact present).
-    assert scheduler.dom.edit_title.call_count >= 1
+    scheduler.dom.edit_title.assert_not_called()  # title enrichment remains opt-in
     assert scheduler.dom.edit_description.call_count >= 1
 
 
@@ -398,6 +413,8 @@ async def test_control7_scheduling_path_still_writes(tmp_path, monkeypatch):
     scheduling path, and pairs with Control 3 to prove schedule_video is wired.
     """
     monkeypatch.setenv("VIDEO_INDEXER_ARTIFACT_PATH", str(tmp_path))
+    _write_artifact(tmp_path, monkeypatch, "move2japan", "vid1")
+    monkeypatch.setenv("YT_SCHEDULER_INDEX_INFORM_TITLE", "true")
     scheduler = _make_scheduler()
 
     await scheduler.run_scheduling_cycle(max_videos=1, update_metadata=True)
@@ -405,7 +422,7 @@ async def test_control7_scheduling_path_still_writes(tmp_path, monkeypatch):
     # Reachability: per-video body executed.
     scheduler.dom.navigate_to_video.assert_called_with("vid1")
     # Live writes fired on the explicit scheduling path.
-    assert scheduler.dom.edit_title.call_count >= 1
+    scheduler.dom.edit_title.assert_called_once_with("Breathe and be present.")
     assert scheduler.dom.edit_description.call_count >= 1
     assert scheduler.dom.schedule_video.call_count == 1
     args, _ = scheduler.dom.schedule_video.call_args
@@ -468,8 +485,8 @@ def test_pure_builder_present_artifact_is_read_only(tmp_path, monkeypatch):
     assert ctx.used_index is True
     # Description context proves the builder actually ran (not a no-op).
     assert "Base description body." in ctx.new_description
-    assert "0102 DIGITAL TWIN INDEX v1" in ctx.new_description
-    assert "#" in ctx.new_description  # topic hashtags woven in
+    assert "M2M_CONTEXT" in ctx.new_description
+    assert "audio_summary" in ctx.new_description  # provenance, not title-derived tags
     assert ensure_spy.call_count == 0
     assert save_spy.call_count == 0
     assert stub_spy.call_count == 0
@@ -534,7 +551,7 @@ def test_pure_builder_missing_artifact_returns_none(tmp_path, monkeypatch):
 # ["Mindfulness", "Zen"] from _write_artifact). TEST A asserts NONE of these leak
 # into the description when the artifact is ABSENT.
 _INDEX_DERIVED_HASHTAGS = ("#Mindfulness", "#Zen")
-_TWIN_MARKER = "0102 DIGITAL TWIN INDEX"
+_TWIN_MARKER = "M2M_CONTEXT"
 
 
 async def test_scheduling_path_missing_artifact_writes_base_content(tmp_path, monkeypatch):
@@ -614,27 +631,10 @@ async def test_scheduling_path_missing_artifact_writes_base_content(tmp_path, mo
     scheduler.dom.navigate_to_video.assert_called_with("vid1")
 
     # The explicit scheduling write STILL fires.
-    assert scheduler.dom.edit_title.call_count >= 1
-    assert scheduler.dom.edit_description.call_count >= 1
+    scheduler.dom.edit_title.assert_not_called()
+    scheduler.dom.edit_description.assert_not_called()
     assert scheduler.dom.schedule_video.call_count == 1
 
-    # The description argument is BASE content (no enhancement injected).
-    desc_args, _ = scheduler.dom.edit_description.call_args
-    written_description = desc_args[0]
-    assert _TWIN_MARKER not in written_description, (
-        "base description must NOT contain the digital-twin block when no artifact exists"
-    )
-    for tag in _INDEX_DERIVED_HASHTAGS:
-        assert tag not in written_description, (
-            f"base description must NOT contain index-derived hashtag {tag} with no artifact"
-        )
-    # Equals the (pinned) channel base description exactly: no woven context,
-    # hashtags, or twin block were appended.
-    assert written_description == _BASE_SENTINEL
-
-    # NO scheduler-owned indexing: bound save_index_json never fired (side_effect
-    # would have raised), GeminiVideoAnalyzer never constructed, and NO artifact
-    # file was created on disk during the run.
     assert save_spy.call_count == 0
     assert constructed["count"] == 0
     artifact_path = Path(tmp_path) / "move2japan" / "vid1.json"
@@ -684,10 +684,8 @@ async def test_scheduling_path_present_artifact_weaves_index_context(tmp_path, m
         "human-facing index context must be injected into the description"
     )
     # (ii) at least one woven index hashtag present,
-    assert any(tag in written_description for tag in _INDEX_DERIVED_HASHTAGS), (
-        "woven index hashtags must appear in the enhanced description"
-    )
-    # (iii) the digital-twin block present.
+    assert all(tag not in written_description for tag in _INDEX_DERIVED_HASHTAGS)
+
     assert _TWIN_MARKER in written_description, (
         "digital-twin index block must appear in the enhanced description"
     )
@@ -724,12 +722,7 @@ async def test_scheduling_path_present_artifact_disabled_skips_enhancement(tmp_p
 
     scheduler.dom.navigate_to_video.assert_called_with("vid1")
     assert scheduler.dom.schedule_video.call_count == 1
-    assert scheduler.dom.edit_description.call_count >= 1
-    desc_args, _ = scheduler.dom.edit_description.call_args
-    written_description = desc_args[0]
-    assert _TWIN_MARKER not in written_description, (
-        "twin block must be ABSENT when YT_SCHEDULER_INDEX_WEAVE_ENABLED=false"
-    )
+    scheduler.dom.edit_description.assert_not_called()
 
 
 async def test_update_metadata_logs_index_context_marker(tmp_path, monkeypatch, caplog):
@@ -767,7 +760,7 @@ async def test_update_metadata_logs_index_context_marker(tmp_path, monkeypatch, 
             date_str="Jun 20, 2026",
             time_str="5:00 PM",
         )
-    assert "index_context=missing" in caplog.text
+    assert "index_context=missing_or_ineligible" in caplog.text
 
     # disabled (weave env switch off)
     caplog.clear()

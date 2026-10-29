@@ -1,4 +1,174 @@
+## FoundUps selected numeric source closure — 2026-10-25
+
+Pre-edit WSP15 allocation16/P0 in the numeric plan permits exactly one required
+private arithmetic member. Runtime1470->1471; the existing explicit Node boundary
+now accepts1471 and rejects1472. The old boundary oracle first failed its
+1470 expected-count assertion on actual1471, before calling the validator.
+That RED is an oracle-count mismatch, not evidence of old-validator execution. All328KiB manifest,2MiB/source and32MiB total caps remain unchanged.
+Only token_economics.py's existing LF digest changes, plus _token_numeric.py.
+The alignment test owner is outside runtime membership: an initial parent
+measurement assertion wrongly expected its digest, before any pins changed.
+
+Canonical write/check, all8 existing generator cases and3 existing Node
+compatibility/preflight/blocked-recovery entrypoints pass. Existing Python pin
+and JS pin advance together. All1614 evidence hashes stay stable after deliberate
+write/cap edits; zero instrumented Python/Node network or dotenv attempts.
+No generator/source-discovery algorithm, runtime authority, dependency or API
+change. Evidence count1614 differs from actual1471 runtime members.
+
+Exact commands, IDs, timings and source maps are external under
+foundups-numeric-source-closure-f3jex_4s and in the numeric portable receipt.
+Known38 metadata findings are proposed, pending independent review:37 sources/
+contexts unchanged and1 known arithmetic-source SHA256 value changed. No blanket
+rule/path exemption, unknown finding approval, OS isolation, installed-runtime
+promotion, real chain effect or additional economic coverage follows.
+
+## 2026-10-25 — Work/stake/unstake numeric admission candidate
+
+WSP00/6/11/15/22/50/62/84/97; pre-code15/P1 and revised pure extraction
+allocation are in docs/architecture/FOUNDUPS_NUMERIC_ADMISSION_20261025.md.
+Current contracts/consumers preceded edits; Holo authority mismatch remains
+explicit. Strict built-in quantities and at-use fees, prospective finite balances
+and pure shared preflight reject before selected mutations. Preserve valid fees,
+references, double-work math, float normalization after strict admission and
+insufficient-funds outcomes. Composite success logs now follow assignments;
+unknown valid-insufficient work defers registry insertion.
+
+Core shrinks1375->1351 lines; one private156-line scalar owner is required.
+Focused226 and independent28 pass. Initial full633 predates BTC main; fresh
+combined-main736 passes against merge89486886f, including all6 originals and8
+adjacent cases, with exactly3 inherited SSE HTTP exclusions. Counts overlap.
+Zero instrumented network/dotenv/checkout writes; all13532 SQLite connections
+scratch/memory, central source stable and default store stats unchanged. Guards
+are process instrumentation, not OS isolation. No new unit/aggregate-cap policy,
+concurrent or outer-batch atomicity, custody or funded settlement is claimed.
+
+## 2026-10-25 — Reconciled BTC/Mesa runtime source closure
+
+WSP15 derived16/P0 (C2/I5/D5/Impact4) allocation precedes regeneration in the
+BTC architecture plan. Parent integration uses main f11d7559746 at merge
+d9a57ab1d; original211/513/21 mock-test evidence retains actual base b6d2cf316.
+All168 raw simulator/FAM source hashes still match that tested freeze.
+
+Canonical RedDog regeneration changes exactly the BTC connector/Mesa normalized
+digests;1470 members and all byte/+1 limits remain fixed. Both existing pins
+advance together. Unchanged generator8 and three existing Node entrypoints pass
+with stable source snapshots and zero guarded network/dotenv attempts. No new
+simulator test run, product behavior, installed runtime, authority or chain effect.
+Three binding paths are staged only; parent owns commit/push and publication.
+
+The portable receipt distinguishes current base/merge context from old test
+execution. A38-record known-metadata rebinding proof is proposed externally,
+pending independent approval and fresh hosted scan; the finding ledger is
+untouched. Exact commands/hashes/limits belong in the existing test log/receipt.
+
+## 2026-10-25 — Mock BTC content/realm replay integrity
+
+WSP00/6/11/15/22/50/62/84/97; pre-authoring allocation14/P1 is recorded in
+`docs/architecture/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.md`. Owner retrieval
+remained authority-head-mismatched with no reindex; current docs/consumers and
+degraded direct-source retrieval preceded edits. Optional mock infrastructure
+is not presented as an Algorand transfer prerequisite.
+
+The existing connector now stores a detached full-v2 canonical payload, realm,
+format and digest; serializes pure mock admission; rejects conflicting/unknown/
+legacy/unresolved identities; preserves same-content force and first confirmation
+history; and validates stored receipts before simulated confirmation. Selected
+non-mock modes and invalid Mesa modes reject rather than becoming simulation.
+Configured mode/path and singleton explicit selection cannot silently retarget.
+Legacy columns/rows remain visible and unclassified, without identity backfill.
+
+Parent review reproduced replay success from a supplied unsupported schema with
+two current rows and no business-key uniqueness. Six desired controls failed
+before the minimal constructor schema check. Required columns/types, primary key,
+nullability and full canonical uniqueness now validate before additive migration;
+no rebuild/drop occurs. Scope is unsupported persisted state, not an ordinary
+canonical-schema public mutation. Connector563→399 lines; its class435→161.
+Only Mesa's existing builder changes; no dependency, backend or financial policy.
+
+Repaired focused211, affected simulator513 and independent21 pass, with zero
+guarded network and stable source hashes. Exactly3 existing SSE HTTP cases remain
+excluded. Counts overlap. First-candidate205/507, initial fixture/runner failures,
+WAL initialization race and review history remain in tests/TestModLog.md.
+Parent verified prior epoch PR2192 main convergence; BTC publication/CI/readback
+remain parent-owned. No BTC/Algorand signer, transfer or confirmation is delivered.
+
+## 2026-10-25 — P0C epoch commitment integrity
+
+WSP00/6/11/15/22/50/62/84/97; pre-authoring allocation is
+`docs/architecture/FOUNDUPS_EPOCH_COMMITMENT_HARDENING_20261025.md`, C3/I5/D5/Impact5=18/P0.
+The current Holo owner query remained authority-head-mismatched; direct source,
+live consumers and all six module memory owners preceded the change. Generated
+training JSON was duplicate/stale retrieval noise, not contract evidence.
+
+The existing ledger now binds v2 leaves/nodes/empty roots to their context and
+requires external root/FoundUp/epoch/participant expectations. It preserves exact
+large integers, rejects invalid amounts, freezes nested snapshots, builds before
+publishing under a lock, accepts exact old retries and rejects conflicting or
+out-of-order new epochs. Anchors reuse finalized time. The same owner shrank;
+no helper file, second ledger, connector or financial policy was introduced.
+
+Unchanged baseline:20 passes. New tests first:84 failures plus the two original
+passes. Candidate focused/adjacent closure:104 passes, zero guarded network
+attempts and no source drift. Exact inventory/isolation/artifacts are in
+tests/TestModLog.md. Original test docstring and both test bodies/oracles remain.
+Independent review, publication and main readback are parent-owned gates.
+
+Independent review then found a latent `verify_chain` checker defect: replacing
+a private list entry while retaining the original epoch index could certify the
+indexed entry instead of the listed one. Public frozen/tuple properties expose
+no write path and no persisted import exists; this was not a demonstrated public
+authorization bypass. Two appended controls, with stale and recomputed hashes,
+both failed against the first frozen candidate before correction. The checker
+now checks list/index cardinality and canonical-entry consistency plus the actual
+listed entry hash. Repaired focused/adjacent closure:106 passes (88 ledger+18
+adjacent), zero guarded network attempts and no in-run source drift. The earlier
+104-case and parent-reported30 held-out results qualify only the first candidate;
+they are not repair evidence. See the new raw receipt paths in tests/TestModLog.
+
+Final parent repaired-source qualification:410 simulator cases pass with3 named
+SSE HTTP exclusions; independent replay passes41 held-outs. Counts overlap.
+The changed ledger owner has205/213 statements covered over existing focused
+and independent publication cases; no whole-module coverage or OS-isolated
+promotion claim. Original two test ASTs and module docstring remain identical.
+The portable epoch receipt and test log bind exact IDs, source hashes and limits.
+Existing backend manifest/pins rebind only this owner with1470 members and all
+caps unchanged; eight generator cases and three Node entrypoints pass. Dedicated
+PR, new-head hosted gates and main readback remain pending.
+
+This is process-local pre-settlement evidence. Old connector rows/version
+migration, durable work-source replay protection, aggregate supply, CABR epoch
+allowance and confirmed settlement remain open. No chain/provider/signer call.
+
+## 2026-10-25 — Explicit simulation authority at the FAM bridge
+
+WSP00/6/11/15/22/50/84/97; shared P0B C4/I5/D5/Impact5=19/P0 allocation.
+The existing bridge passes fixed host simulation identities and exact FoundUp
+role grants to FAM's new default-deny verification/payout boundary. Existing
+lifecycle tests remain; impostor actor IDs and legacy-role overrides cannot
+supply authority. No schema, issuer, chain operation or new orchestration plane.
+
+Combined closure: 690 FAM/simulator passes, three unchanged SSE HTTP cases
+excluded, zero network attempts. Parent independently passed115 FAM authority/
+verification controls. Test inventory/isolation is in tests/TestModLog.md.
+Fresh simulator Markdown refresh occurred after compatibility authoring; source
+and callsites were inspected before. The timing gap is preserved in the receipt.
+
+## 2026-10-22 — CA trust build protection
+
+WSP12/22/97. Container build dependency downloads now use the reviewed
+incident-fixed runtime/trust bootstrap; build contexts and entrypoints remain.
+See `docs/audits/security/PYTHON_CA_TRUST_20261022.md` for scope and checks.
+No production image rebuild or rollout is claimed.
+
 # Simulator ModLog
+
+## 2026-10-21 — UPS genesis denomination regression closure
+
+- Retained PR #941's architecture correction: the existing default of 100,000 UPS per BTC implies 1,000 sats per UPS at genesis. No reserve, fee, token or financial-policy implementation changed.
+- Extended the existing reserve test to verify a non-genesis circulating value after reserve growth. Extended the existing docs-alignment case to read the architecture's denomination and check it against the reserve constant; corrected the test README's coverage description.
+- Regenerated the canonical test registry: only the existing reserve test's description changed. The owning checkout passed all 12 reserve/docs cases; a fixed-genesis-value mutation and a reverted one-sat architecture statement each failed exactly the intended case. Exact source restoration returned all 12 cases to passing.
+- WSP 00 gate passed; HoloIndex returned `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH` with UNKNOWN freshness/index gap, so review used exact main/PR source. WSP 15/22/50/97. Validation is offline simulator/documentation evidence, not live token, deployment or financial-operation acceptance; current hosted checks and main readback remain closure gates.
 
 ## 2026-06-14 - Nomenclature Alignment: Universal Compute Account (UCA) & internal flows
 

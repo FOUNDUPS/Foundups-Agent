@@ -1,0 +1,85 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "1dc016fc3223244cfc37efd2a4fea4022118c342"
+  },
+  "execution_id": "HOLOINDEX_RANKED_STREAM_TIER0_PHASE1",
+  "execution_plane": "local_tools_and_wsp00_subagents",
+  "outcome": "completed",
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_48_Recursive_Self_Improvement_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "A governed owner query was CURRENT at exact base 1dc016fc with no index gap or reindex, but the fixed public benchmark measured Recall@8 1.0, MRR 0.91666667, nDCG@8 0.93198851, and p95 4.483 seconds; all six cases reported runtime_environment_exact_closure_verified=false.",
+      "The stage query's collection-local code_hits correctly ranked m2m_compression_sentinel.py first at 50.6 percent and skills_registry.py second at 51.0 percent. Owner flattening globally re-sorted raw similarity and reversed that producer judgment.",
+      "A broad governed RSI query failed closed at modules/ai_intelligence/holo_dae because its Tier-0 README.md and INTERFACE.md were absent. Direct inspection proved the legacy launcher still constructs AutonomousHoloDAE, which can construct HoloIndex and auto-reindex.",
+      "Three read-only WSP_00/WSP_97 subagents independently returned A-grade NO-GO and RSI NO-GO, confirmed the producer-rank defect, runtime-closure gap, legacy launcher drift, and missing authenticated proposer/evaluator/admission/promotion loop."
+    ],
+    "research": [
+      "Read the owner response composer, producer search outputs, runtime binding, benchmark evaluator, HoloDAE launcher/tests, module documentation, RedDog release contracts, generated backend closure, and canonical test registry before accepting changes.",
+      "Governed Holo retrieval was relevant for module docs but noisy and duplicated for exact control-plane sources; the missing HoloDAE Tier-0 pair was a real strict-query usability blocker rather than a reason to weaken Tier-0 enforcement.",
+      "The qwen_roadmap_auditor_prototype skill was read and used only as a roadmap/completion audit aid; prototype example claims were not accepted as evidence."
+    ],
+    "micro_pass": [
+      "Replaced owner-wide raw-score sorting with a deterministic k-way merge of producer-ranked typed streams. Current-truth authority can reorder within a stream, while raw similarity cannot reverse the producer's ordinary rank.",
+      "Added generic producer-rank, cross-stream score, current-truth, Tier-0, and deduplication falsifiers without benchmark-query or path hardcoding.",
+      "Added truthful HoloDAE README/INTERFACE contracts that label the launcher compatibility-only, disclose runtime_reindex_allowed=false at the broker boundary, and explicitly state retrieval RSI is not operational.",
+      "Made synthetic owner and runtime-identity tests independent of the host's two site-packages roots while retaining dedicated ambiguous-root fail-closed coverage."
+    ],
+    "macro_pass": [
+      "Focused Holo, bridge, and HoloDAE validation passed 246 tests. The complete bridge suite passed 1188 with 14 expected skips and no failures in 512.60 seconds.",
+      "The canonical test registry is current at 1608 test files and 268 quarantines. The backend closure check passes at 1365 files with canonical digest 64e314c2931b18752d0b81009ee56d6b48adcbb11b9d6e8ea4f3fa63dc9b77d3.",
+      "RedDog 0.4.132 fast, conversation, package, contract, candidate WSP_62, backend compatibility, and exhaustive four-group release gates pass. Exhaustive wall was 203.191 seconds with no timeout.",
+      "The inspected VSIX contains package version 0.4.132, 69 safe entries, exact extension.js source equality, and zero credential-pattern members; it is 275728 bytes at sha256:f40ed659c68533bfdf889e0fc850d720b9594f6bf785fe0748ec89c20a25e40b."
+    ],
+    "hard_think": [
+      "WSP_15 scored exact runtime closure and independent RSI control authority as P0, producer-rank quality integration as P0, and HoloDAE Tier-0 repair as P0 because the latter blocked governed retrieval itself.",
+      "The smallest scalable rank repair is a generic stream merge: preserve each producer's partial order and compare only stream heads. Query-specific boosts or benchmark path rules were rejected.",
+      "Legacy HoloDAE launcher migration is a separate P0 transaction because changing runtime ownership, reindex behavior, and broker lifecycle in the ranking PR would cross authority boundaries."
+    ],
+    "dialectic_sweep": [
+      "Global raw-score order is simple but discards producer knowledge; preserving every bucket wholesale prevents useful cross-type ranking. K-way head comparison preserves both constraints.",
+      "Adding Tier-0 docs makes broad governed queries usable but cannot make the disclosed legacy launcher safe. Documentation and executable authority remain separate claims.",
+      "A green VSIX release proves packaging and contracts, not exact dependency byte closure or RSI. A-grade and RSI remain NO-GO until exact-main post-merge measurement and the missing control loop pass independently.",
+      "The first exhaustive release correctly rejected stale 0.4.131 assertions. All explicit current-version pins, canonical shard identity, backend digest, and package identity were rotated before the accepted replay."
+    ],
+    "first_principles": [
+      "A search owner may combine independently ranked evidence streams but must not silently reverse a producer's ordered result on an incomparable raw score.",
+      "A-grade means reproducible current retrieval, passing fixed quality and latency floors, exact runtime closure, and honest failure boundaries; partial metric success is insufficient.",
+      "Operational RSI requires an authenticated propose-evaluate-admit-promote-observe-rollback loop bound to exact candidates and production outcomes. Evaluation-only AutoResearch is not RSI.",
+      "RedDog remains a governed consumer and orchestrator; Holo query, maintenance, reindex, evaluator admission, and ranker promotion authorities must stay explicit and separable."
+    ],
+    "execute": [
+      "Branch codex/holo-ranked-stream-merge",
+      "modules/infrastructure/foundups_mcp_bridge/src/holo_query_service_response.py",
+      "modules/ai_intelligence/holo_dae/README.md",
+      "modules/ai_intelligence/holo_dae/INTERFACE.md",
+      "scripts/reddog_backend_manifest.json",
+      "extensions/reddog/package.json",
+      "extensions/reddog/tests/contract_shards/manifest.json",
+      "O:/RedDog-Releases/reddog-0.4.132.vsix (275728 bytes; sha256:f40ed659c68533bfdf889e0fc850d720b9594f6bf785fe0748ec89c20a25e40b; 69 safe entries; exact extension source equality; zero credential-pattern members)"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_15",
+    "WSP_48",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/infrastructure/HOLOINDEX_RANKED_STREAM_TIER0_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+    "holo_index/ModLog.md",
+    "holo_index/tests/TestModLog.md",
+    "modules/ai_intelligence/holo_dae/ModLog.md",
+    "modules/ai_intelligence/holo_dae/tests/TestModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/TestModLog.md",
+    "extensions/reddog/ModLog.md",
+    "extensions/reddog/tests/TestModLog.md",
+    "ModLog.md"
+  ]
+}

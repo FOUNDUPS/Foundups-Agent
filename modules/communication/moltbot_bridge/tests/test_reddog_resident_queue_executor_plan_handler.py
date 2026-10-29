@@ -110,7 +110,6 @@ def _snapshot() -> dict[str, object]:
             "evidence_refs": ["claim:claim-1", "freshness:fresh-1"],
             "no_execution_performed": True,
         },
-        prompt_text="RedDog resident queue executor plan worktree authority",
     )
     return {
         "schema_version": "reddog_authoritative_work_state.v1",

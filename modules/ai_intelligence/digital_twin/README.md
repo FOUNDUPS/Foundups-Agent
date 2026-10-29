@@ -1,5 +1,60 @@
 # Digital Twin Module
 
+## Product boundary
+
+RedDog is the lightweight, low-latency interaction, exchange, and attention
+surface through which 012 communicates with the principal-scoped 0102 Digital
+Twin. RedDog is not 0102. The two are distinct components in one continuous
+conversational relationship: RedDog owns immediacy and presentation; 0102 owns
+deep cognition and orchestration. RedDog services may host the relationship's
+runtime, but no single process owns it. The Principal Memex is the bounded
+cognition substrate that may help 0102 understand 012; it is neither the
+Digital Twin nor operational authority.
+
+`conversation_plane_contract.py` and `conversation_plane.py` implement the
+deterministic foreground conversation contract. Interaction intent, reasoning
+depth, and effect ceiling are independent. Unknown text defaults to
+`CHAT / FAST / NONE`; risk may raise reasoning but never effects; conversation
+text can emit at most a proposal and cannot authorize bounded execution.
+The contract performs no model, memory, HoloIndex, database, repository, or
+network operation.
+
+`resident_conversation_transport_contract.py` defines the next transport-neutral
+boundary for `TURN`, `STATUS`, and `CANCEL`. It accepts only content, opaque
+digest bindings, CAS revision, nonce/idempotency, and a maximum five-minute
+validity window. Principal, FoundUp, credential, provider/model, effect, and
+work-authority fields are deliberately outside the client envelope and must be
+derived and revalidated by the resident host. The communication layer now has
+current-generation aggregates for both existing conversations and trusted
+empty-ID TURN resolution. Existing requests receive a durable content-free
+replay reservation; new scope creation verifies exact intent, grounding,
+registered FoundUp, signed session identity, E0 persistence, and exact recovery,
+then an explicit v2 journal row binds the original empty-ID request digest to
+the derived conversation ID/revision 0 under the same generation lease.
+The client contract itself still adds no listener, persistence, authentication,
+model call, or effect. The first new-conversation TURN is durably linked but not
+executed; live adapters remain gated on host wiring and immediate-CAS operation
+handlers.
+
+`principal_memex_projection.py` implements the first structural, read-only
+Principal Memex projection. It validates provenance identifiers, canonical
+content/item/projection digests, principal isolation, sensitivity, and
+projection-level supersession relationships. Public digest recomputation does
+not authenticate a source. The projection is explicitly `STRUCTURAL_ONLY` and
+`runtime_admissible=false`: it performs no persistence, model-context
+admission, FoundUp projection, HoloIndex write, or work authorization.
+
+The resident backend may now admit a projection only when it derives the
+projection from the exact current principal-scoped AgentDB conversation record,
+consumes the matching signed conversation-scope capability, and verifies a
+separate principal-signed one-use disclosure bound to the selected model
+runtime. Only public accepted `operator_statement` decisions are exposed to
+the backend architect model. This is authenticated cognition context, not work
+authority or a durable Principal Memex source.
+
+The existing social comment/voice pipeline below remains a Digital Twin
+application. Its voice memory is not the canonical Principal Memex.
+
 **WSP Compliance**: WSP 49 (Module Structure), WSP 77 (Agent Coordination)
 
 ## Purpose
@@ -28,6 +83,41 @@ vm = VoiceMemory()
 vm.build_index("data/voice_corpus/", "data/voice_index/")
 ```
 
+## AntifaFM station reply drafts
+
+`CommentDrafter.for_station()` creates a station-only drafter without constructing
+human voice memory or style guardrails. It reuses the configured `LocalLLM` Qwen
+path and calls the local backend's `create_chat_completion()` with a separate
+system policy and untrusted conversation JSON. Initialize it once and use
+`draft_station_reply()` for listener-initiated music/station questions or feedback.
+
+```python
+from modules.ai_intelligence.digital_twin.src.comment_drafter import CommentDrafter
+
+drafter = CommentDrafter.for_station()
+decision = drafter.draft_station_reply(
+    "@AntifaFM Where can I listen?",
+    context_url="https://example.org/posts/42",
+    reply_to_id="42",
+    initiated_by_listener=True,  # Established by the caller, not conversation text.
+)
+```
+
+The result is `skip`, `draft_reply`, or `review_required`; it never publishes.
+Context is limited to 2,400 characters and drafts to 280 characters. Drafts
+disclose 0102 as an AI agent for UnDaoDu, retain the caller's source URL and reply
+target, and include the station link only when relevant. The policy permits only
+the supplied station facts and excludes political persuasion, abuse, unrelated
+engagement, and unsupported catalogue/licensing claims. Missing models, mock
+mode, inference failures, and malformed decisions require review with no reply;
+there is no station template fallback. See [INTERFACE.md](INTERFACE.md) for the
+full contract and publication flags.
+
+The focused drafter suite passed 39 offline cases on 2026-10-18. Its fixture chat
+backend verifies request construction, output handling, and limits; it does not
+establish the semantic quality of an actual local model. No live inference or
+publication was performed for that result.
+
 ## Architecture
 
 ```
@@ -43,9 +133,10 @@ Phase 3: Tool-Use Training
 - **Decisioning**: `decision_policy.py` determines comment / like / ignore
 - **Scheduling**: Orchestrated through LinkedIn modules (scheduler + social media DAE)
 
-## YouTube Concatenation (Live Chat + Studio + Scheduling)
+## YouTube application direction (legacy lane)
 
-- **Live Chat**: Digital Twin becomes primary response engine (BanterEngine fallback only)
+- **Live Chat**: planned Digital Twin response integration; not established by
+  the conversation-plane phase
 - **Studio Comments**: Digital Twin drafts + decisions for comment replies
 - **Scheduling**: Index weave signals utility routing
   - 012 voice → Digital Twin memory
@@ -59,8 +150,11 @@ Phase 3: Tool-Use Training
 | `voice_memory.py` | RAG index with FAISS/TF-IDF |
 | `style_guardrails.py` | Banned phrases, length, emoji rules |
 | `comment_drafter.py` | RAG → LLM → Guardrails pipeline |
+| `station_reply_decision.py` | Bounded station reply decisions with no publication |
 | `decision_policy.py` | Comment/like/ignore heuristics |
 | `trajectory_logger.py` | JSONL training data collector |
+| `conversation_plane.py` | Deterministic intent/depth/effect classification |
+| `resident_conversation_transport_contract.py` | Strict zero-authority turn/status/cancel envelope |
 
 ## Pipeline
 
@@ -108,8 +202,10 @@ set VOICE_MEMORY_VIDEO_INDEX=0
 
 ## Vision System (V0.5.0)
 
-### Autonomous Vision Agent
-0102 runs as a standalone vision-based agent at `E:\0102_Digital_Twin\`.
+### Historical external vision prototype
+An external prototype was documented at `E:\0102_Digital_Twin\`. Its current
+runtime/deployment state was not verified by the conversation-plane phase and
+it is not the canonical RedDog host or work authority.
 
 ### Quick Start
 ```bash

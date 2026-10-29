@@ -1,1051 +1,1093 @@
-# wre_core Interface Specification
+## Risk-verification preflight contract — 2026-10-28
 
-**WSP 11 Compliance:** Phase 3 Complete ✅
-**Last Updated:** 2026-03-25
-**Version:** 0.7.2
+`wre_test_differential_runtime.validate_test_impact_policy_binding(request)`
+returns `(differential_requested, rejection_reasons)` without executing commands
+or authenticating authority. It reuses the existing v1 policy schema, scope
+resolver and `required_test_suite_kind` policy function.
 
-## Overview
+Absence and the resident adapter's empty mapping retain ordinary-check
+compatibility. Explicit null/nonmapping policies reject. When a work order is
+bound, its policy cannot be omitted, introduced or substituted downstream.
+Stale dependency, protected authority, release and periodic-audit signals require
+a full-scope plan. An incompatible plan rejects; the verifier never rewrites
+the admitted policy to make it pass.
 
-`wre_core` is the wardrobe for native skills. It discovers `modules/*/skills/**/SKILL.md`, validates metadata, executes skills via local Qwen inference, validates output with Gemma, and records pattern fidelity for recursive evolution. `.claude/skills/` remains the prototype space; WRE promotes validated skills into production.
+`execute_independent_test_evidence` validates the entire bounded check list
+before any command: allowed argv, policy, scope, exactly one differential
+pytest request and matching selection. Invalid plans produce no check records
+or command/differential calls. Runtime check failures still prevent differential
+execution. The final slice verifier separately rejects missing, empty or
+malformed differential evidence when the policy requires it.
 
-**Phase 3 Status**: HoloDAE integration + autonomous skill execution COMPLETE
+No schema version changes. One-use capability, exact-source binding,
+self-verification, security/held-out closure and local-only authority rejection
+remain in force. Neither this helper nor serialization grants execution,
+merge or retention authority.
 
-## 2026-02-19 API Alignment Delta
+## Skill-feedback source binding — 2026-10-22
 
-- Discovery implementations MUST support both `SKILLz.md` (preferred) and `SKILL.md` (legacy fallback).
-- Discovery path inference MUST treat both `.../skills/...` and `.../skillz/...` as production wardrobes.
-- `PatternMemory(db_path=...)` MUST create isolated storage (no shared singleton reuse).
-- `WREMasterOrchestrator` compatibility API:
-  - `register_plugin(plugin_instance)` and `register_plugin("name", plugin_instance)` are both supported.
-  - `get_plugin(plugin_name)` returns registered plugin or `None`.
-  - `validate_module_path(path)` validates module existence under repo root.
-- Runtime storage override:
-  - `WRE_PATTERN_MEMORY_DB=<path>` binds orchestrator runtime storage to explicit DB path.
+For non-telemetry dispatched outcomes, the coordinator owns `_skill_binding`
+in both `result` and the existing `SkillOutcome.output_result` JSON. Its v1
+fields are `schema_version=wre_skill_execution_binding.v1`, `execution_id`,
+`loaded_skill_sha256` (`sha256:` plus SHA-256 of the complete loaded text encoded
+as UTF-8), and `scanner_admission_fingerprint` (the separate admission receipt's
+64-character lowercase hex digest, or null if unavailable/invalid). Any
+producer-supplied value at this key is replaced without mutating that producer's
+object. Nonserializable payloads retain `record_unavailable=non_json_value` plus
+the coordinator binding; legacy serializable result fields remain top-level.
 
-## Public API
+`evolve_skill()` derives variation `parent_version` from the same exact loaded
+text supplied to it. Historical rows with `current` remain historical/ambiguous;
+no migration invents their source. These hashes identify content, not provenance,
+correctness, scanner-to-loaded-text equivalence, activation or independent
+verification. The direct compatibility method supplies no scanner claim.
 
-### create_foundup Scaffold Route
+Telemetry stays outside skill outcomes/variations. Failure recall and evolution
+thresholds remain unchanged. Moshpit ingestion, cross-version history filtering,
+authenticated evaluation, activation/rollback and later-use benefit remain open.
 
-`route_foundup_job()` admits `create_foundup` only to `HERMES_SCAFFOLD` with explicit dry-run, `new_scaffold`, canonical genesis/scaffold digests, and matching genesis/job identity. Its frozen `RouteEnvelope.scaffold_request` is the canonical immutable request passed to `ScaffoldAdapter.plan(request)`; no mutable job crosses that boundary. The consumer canonical-JSON detaches evidence, revalidates returned identity and both lineage digests, returns `SIMULATED` evidence only on success, and maps malformed adapters to stable redacted blocked results. It never calls the generic Hermes executor, a live writer/provider, registry mutation, or worktree API.
+## Security scan coverage contract (2026-10-10)
 
-Adapter `ok`, `reason_code`, and `reason_human` controls must be JSON scalar
-types (`bool`, `str`, `str`) before dispatch uses them. Route identifiers reject
-path traversal plus every Unicode `Cc` and `Cf` control. Internal router
-failures expose only `FAIL_INTERNAL` / `Internal routing error` and a generic
-structured log event.
+The `security_scan` executor distinguishes `completed`, `partial`, `error`, and
+`tool_unavailable`. Aggregate `partial` means some evidence completed or findings
+were retained but requested coverage is incomplete; all attempted tools failing
+without findings is `error`. CLI exits: 0 complete/no gate, 1 complete/012 gate,
+2 incomplete coverage (including unavailable tools). Findings remain available
+for policy escalation even in partial reports, with type and source location.
 
-The public route entrypoint delegates to the bounded decision module. Its
-public function and every decision helper are at or below the WSP 62
-75-line function limit; remaining inherited router/consumer debt is governed
-by exact no-growth module exemptions.
+SEC9 status includes `scans_completed`, `scans_partial`, and `scans_failed`; live errors cannot
+become `completed`. Dry-run/report-only calls remain proposals and never execute.
+SEC4 proposes scans for website/application/test source and modern lockfiles;
+these changes do not enroll any scheduler or runtime.
 
-### FoundUp Job Model-Capability Projection
+## Measured-zero fidelity — P15 contract
 
-`get_foundup_job_model_capability_profile(requested_action)` returns one
-frozen `foundup_job_model_capability_profile.v1` artifact for each canonical
-FoundUp action. Profile IDs are SHA-256 digests of canonical JSON including
-explicit nulls. Provider-capable profile requirements remain `None` until a
-production authority supplies them; create/queue use empty/false/zero values
-only to state that provider capability is not applicable.
+`PatternMemory.get_skill_fidelity_stats(skill_name, days=30) -> dict` keeps its
+existing fields, queries, time windows and rounding. Measured zero is retained
+for overall, recent and older means. Only `None` means absence: overall uses 0.5;
+an empty temporal window uses the overall mean. `success_rate` still counts
+fidelity >= 0.7, independently of execution-success flags. Ranking weights and
+`SkillSelector` are unchanged. These values describe structural fidelity,
+not authenticated effects or model fitness. Nine frozen and 42 disjoint controls
+pass locally. PR2062 is merged/main-verified; separate retained/control/recovery
+observations confirm positive → zero control → positive on unchanged saved rows.
+This is retained consumer behavior, not worker learning or effect authority.
 
-`resolve_foundup_job_model_capability_projection(...)` is a deterministic,
-read-only resolver. It accepts only an exact runtime-binding receipt plus its
-canonical artifact digest, calls
-`rehydrate_model_runtime_binding_receipt()`, and maps only keys emitted by
-`to_reddog_bridge_payload()`. Stable decisions are `not_applicable`,
-`unbound_dry_run`, `bound`, and `rejected`; rejection reasons are sorted and
-deduplicated. `provider_call_admission` is always `not_evaluated`.
+## Named registry-scope telemetry — P14 contract
 
-`FoundUpJobConsumer` invokes this admission seam only for
-`requested_action="validate_foundup"`. Dry-run validation may dispatch while
-unbound, a valid bound projection is serialized on `ConsumerResult`, and a
-rejected or live-unbound projection blocks before Hermes. All other consumer
-actions leave `model_capability_projection=None`.
+Source-qualified contract with independently reviewed actual scanner,
+projection and private-persistence observation; PR2061 is merged/main-verified. Existing `auto_test_registry_audit` v2.3 supports the
+named `operation="project_scope"` with a `request` containing `base_sha`,
+`head_sha`, `expected_changed_paths` and `projection_input`. Only existing
+reserved `parent_continuity_context` is additionally accepted. Caller roots,
+commands, results, receipts, `skill_name` and `agent` do not authorize dispatch.
+The adjacent executor derives its own checkout and delegates once to existing
+`produce_registry_scope_projection`; temporary commit materialization remains
+inside that owner. It does not regenerate the canonical registry or run tests.
 
-The consumer constructor accepts a
-`TrustedModelRuntimeBindingResolver(ModelRuntimeBindingLookup)` dependency.
-It returns either `None` or a `TrustedModelRuntimeBindingArtifact` containing
-the persisted receipt mapping, canonical artifact digest, and non-empty
-provenance label. Implementations are trust anchors and must resolve through
-the existing outside-repository confined runtime-binding artifact supply.
-This seam does not read files.
+`normalize_registry_scope_projection(value, *, request) -> dict | None` in
+`src/skill_execution_truth.py` validates bounded builtin report data, request
+bindings, non-execution flags and the canonical projection ID, then detaches
+accepted data. This is validation, not authentication or independent scope proof.
+The public named result separates `telemetry_completed`, `telemetry_status`,
+`projection` and `observation_persisted` from false `success`,
+`execution_success` and `_effect_evidence`. Persistence failure preserves the
+projection and returns a stable `observation_error`; it does not retry.
 
-`FoundUpJob.payload` is never consulted for model-binding authority. Any
-binding-like keys there are removed while constructing a detached canonical
-`FoundUpJob` snapshot before the trusted lookup. Projection and Hermes both
-consume that snapshot, closing the mutable-ingress interval. Canonical
-normalization rejects hostile mappings, non-finite numbers, tuples and other
-non-JSON recursive types without exposing exception text. Runtime receipt
-rehydration proves integrity; it cannot establish the honesty of a malicious
-injected resolver, which remains an explicit out-of-scope residual.
+Registry/frontmatter, scanner, bundle, load and A/B gates remain. The named
+single/ReAct path stops before fallback, fidelity evaluation, `SkillOutcome`,
+evolution, variation and AgentDB breadcrumbs. Existing scanner counters remain;
+one `PatternMemory.record_learning_event(event_type="telemetry_projection")`
+records only execution/projection identifiers, base/head, status and bounded
+reasons. It supplies no quality, learning, permit or native admission evidence.
+Other effect/proposal paths and the manual registry CLI retain their contracts.
 
-### Data Structures
+The [checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#named-registry-scope-telemetry--p14-checkpoint) binds the accepted design and
+qualification evidence. Shapes/digest types and identity-only builtin traversal
+are covered by39 additive controls; original75 criteria remain unchanged.
+Stable connected validation passes306 with two Windows link skips. The initial
+source-drifted run remains historical. The separate PC observation produces
+a155-shard-per-side projection and persists one projected event, with false effect success.
+Two earlier rejected attempts remain recorded; isolated scanner2.2.0 and short
+owned TEMP qualify this environment, not native authority or automatic updates.
+
+## Prototype CodeAct file containment — 2026-10-04
+
+The existing read-file action checks resolved Path components before reading.
+Sibling directories sharing the repository's name prefix are outside. Nested,
+normalized within-root and missing-file behavior remains. A denied read returns
+an error and existing orchestration stops later actions while retaining earlier
+successful outputs. This is not atomic symlink-race protection, an OS sandbox,
+or public WRE CodeAct admission; that prototype boundary remains blocked.
+
+## Local proposal framing — 2026-10-04
+
+The existing local proposal wrapper asks for a proposal using the skill's required
+output format. It no longer adds an execution directive or an unconditional
+structured-response instruction. Exact skill text, ordinary JSON context and
+reserved continuity omission remain unchanged. This affects raw/native caller
+prompt framing only; profile, limits, cleanup and quarantine are unchanged.
+Model format adherence and semantic correctness still require verification.
+
+## Prototype CodeAct shell result — 2026-10-04
+
+Direct `CodeActExecutor` shell actions return an error containing the numeric
+status on every nonzero subprocess exit, without raw failure stdout/stderr or
+capture. Existing pre/main/post orchestration stops at that error, retains
+earlier outputs and does not count the failed action as completed. Zero exits
+retain stripped stdout capture; stderr warnings alone do not cause failure.
+This does not admit the prototype through `WREMasterOrchestrator`.
+
+## Explicit local-model ownership — 2026-10-01
+
+`QwenInferenceEngine.close() -> None` detaches its model and clears initialized
+state before invoking the captured model's `close()`. No model is a safe no-op;
+an owned model is closed even when initialized is false. Repeated/reentrant
+explicit close does not retry the captured resource, including after failure.
+Native cleanup `Exception` logs only its type and raises stable
+`RuntimeError("Qwen model cleanup failed")` with suppressed exception context.
+Generation itself retains the engine for direct callers; those callers own
+explicit close. Concurrent ownership and native partial-constructor cleanup
+are not qualified by this contract.
+
+The existing WRE local adapter closes every successfully constructed per-call
+engine in `finally`, in raw and native-chat modes. Rejected configuration or
+construction creates no ownership. Cleanup `Exception` invalidates a proposal
+as `local_model_unavailable`; primary failures keep their existing result.
+A primary interruption propagates while cleanup is attempted. A `BaseException`
+raised by cleanup itself is not normalized. Generated text remains
+`success=False`, `_effect_evidence=False`; cleanup confers no execution authority.
+
+## Opt-in local native-chat proposals
+
+`WREMasterOrchestrator(*, local_proposal_mode="raw",
+local_native_chat_profile=None)` validates configuration before constructing
+collaborators. `execute_local_skill_inference` accepts corresponding keyword-only
+`proposal_mode` and `native_chat_profile` arguments. Raw mode requires no profile.
+Native mode requires exactly `runtime_version="0.3.20"` and `template_sha256`
+(64 lowercase hexadecimal characters). Configuration is copied, never taken
+from skill text or input context, and does not confer runtime authority.
+
+The engine's `generate_chat_response(prompt, system_prompt=None, *,
+runtime_version, template_sha256)` checks observed runtime, required formatter
+capabilities and actual model template digest. It renders system/user messages
+once with `enable_thinking=False`, then verifies positive integer limits and
+`input_tokens + max_tokens <= min(actual_context, configured_context)`.
+The per-call handler uses that same rendering and the qualified formatter's
+EOS text/token criteria, with an empty caller stop list (`stop=[]`). Markdown
+`###` content is not a native stop delimiter. The output cap remains in force;
+the default raw route keeps its existing stop list. The call does not replace
+persistent model handlers. This is a qualified optional
+profile, not a promise for every GGUF/template or the declared0.2.72 runtime.
+
+Master configuration errors raise a stable `ValueError` before collaborators;
+adapter failures preserve existing structured failure output. Engine exceptions
+return `Error: Qwen chat response generation failed` and log only exception type.
+Text remains `success=False`, `_effect_evidence=False`: admission, execution,
+acceptance and retention remain separate existing gates. No automatic activation.
+
+## Merge sentinel prerequisite contract — 2026-09-27
+
+`run_main_merge_sentinel(repo_root, force=False)` keeps its dictionary interface.
+`passed` means startup may continue; it is not merge verification. Failed branch
+resolution, empty/detached branch, unavailable/empty/unrecognizable worktree
+inventory, failed/dirty status and failed fetch all return `merged=False`.
+For these failures, `passed` is false only when
+`GIT_MAIN_MERGE_SENTINEL_ENFORCED` is enabled. Dirty status includes untracked
+files even when Git configuration normally hides them.
+
+Fixed new error values: `named_branch_required`, `worktree_discovery_failed`,
+`working_tree_status_failed`, `working_tree_dirty`, `fetch_failed`.
+The existing branch-resolution and other-main-worktree errors are preserved.
+Default-disabled and already-main calls retain their early skip behavior.
+The private worktree helper uses `None` for unavailable discovery, distinct
+from a readable inventory with no competing main checkout.
+
+The post-merge cleanup check also explicitly includes untracked files and runs
+before local branch-force, checkout or explicit branch deletion. New errors
+`cleanup_working_tree_dirty` and `cleanup_status_failed` return immediately,
+with `passed = not ENFORCED`. The compatibility field `merged=True` means only
+that a remote command reported success; it does not mean verified main, complete
+cleanup or rollback. The helper neither auto-stashes/pops work nor supplies
+`--delete-branch` to GitHub CLI. After successful synchronization and checkout,
+`GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH=1` (also its unset default) now returns
+`cleanup_deletion_unqualified`, appends a blocked-deletion action and sets
+`passed = not ENFORCED`. The helper issues no branch-deletion commands, retains
+prior actions and keeps `merged=True` as remote-command success only. Explicit
+`DELETE_BRANCH=0` leaves the successful no-delete path unchanged. `force=True`
+bypasses enablement only, never this gate. This does not prove a remote branch
+still exists after independent server-side deletion.
+
+After the initial cleanup status guard, fetch explicitly from origin
+`refs/heads/main` into `refs/remotes/origin/main`, resolve that ref as a commit,
+and capture one full 40/64-character hexadecimal object ID. Read status again
+after the fetch/resolution, then update local main using the captured ID.
+Fetch, resolution, status or branch-update failure stops before checkout and
+explicit deletion; there is no cached-target fallback.
+If checkout itself fails, `cleanup_checkout_failed` is returned with the failure
+message in actions and `passed = not ENFORCED`. The earlier local-main update
+is retained; no rollback or later deletion is attempted. `merged=True` still
+means only prior remote-command success. The existing startup error display
+consumes this structured field without a caller change.
+
+New synchronization errors are `cleanup_fetch_failed`,
+`cleanup_commit_resolution_failed` and `cleanup_main_update_failed`.
+Late status failures reuse `cleanup_working_tree_dirty`/`cleanup_status_failed`.
+All preserve `merged=True` as prior remote-command success only and
+`passed = not ENFORCED`; no rollback is implied. Commit peeling, not the string
+shape alone, checks commit type. Local branch-force uses the captured ID.
+
+These are snapshots, not an atomic worktree/ref lock. Ref movement before
+commit capture and worktree/ref changes after the final status remain races.
+The fetch updates the remote-tracking ref even if a later check blocks local
+main. Freshness does not prove intended content, checks or merge authority.
+Direct/backup pushes, unchecked PR merging, main readback and server-side
+auto-delete remain open. Automatic branch retirement is blocked pending a
+qualified combined containment/expected-ref/worktree-ownership contract.
+Default-off remains required; this does not certify WSP 97 terminal convergence
+or authorize native RSI.
+
+# WRE Core Interface
+
+## Advisory AutoResearcher startup display
+
+`read_research_report_summary(report_path, expected_baseline_sha256, *,
+max_age_seconds=86400)` in `src/dashboard_alerts.py` reads one explicitly selected
+local `invocation-*/report.json`. The expected lowercase SHA-256 identifies the
+baseline text selected by the caller; it is not authenticated producer/oracle
+identity. No directory scan or implicit latest-report selection occurs.
+
+The reader rejects relative/UNC/device paths, nonregular final files, oversized
+input (actual read capped at 1 MiB + 1), duplicate JSON fields, invalid schema,
+source/path/invocation mismatch, incomplete/aborted/cleanup-failed reports,
+inconsistent counters/history, nonfinite metrics and impossible gain accounting.
+Valid zero-attempt runs and completed runs containing failed attempts remain
+diagnostics. Positive gain requires an accepted attempt and vice versa.
+
+The age limit must be a finite positive number, excluding bool. Future/expired
+file mtime gives `unknown`; current mtime is only **file age**, never authenticated
+execution freshness. A caller must supply a trusted local regular-file location;
+mapped/network storage, ancestor links and hostile path replacement are not
+confined by this helper, and synchronous filesystem latency has no hard bound.
+
+Output is `unknown` with a fixed reason, or `unverified_diagnostic` with attempts,
+outcome counts, reported fitness delta, verification-signal class and file age.
+The reader now requires a consistent `wre_rsi_measurements.v1` bundle and
+classifies this producer as `execution_feedback`; it rejects stronger
+self-asserted classes, independent/held-out claims, production-RSI eligibility,
+or non-null verification/retention/resource/rollback/generation evidence.
+Independent verification, retained improvements and actual resource usage remain
+`None`. This checks displayed accounting and RSI truth labels, not economic
+validity or the complete report/proposal/program provenance.
+
+Mixed slash network-style prefixes (`/\\` and `\\/`) are rejected lexically on
+all hosts, before filesystem access.
+
+Measurement scalar hardening (2026-09-29): nested counters require integers,
+policy flags require Booleans, and fitness/gain numbers exclude Booleans.
+Finite integer/float fitness representations remain interoperable. Absolute
+gain is `best - baseline` in simulator fitness units (higher is better);
+relative gain is the dimensionless fraction `gain / abs(baseline)`, not a
+percentage. A zero baseline requires explicit `null`; negative baselines use
+their magnitude. Nonfinite derived relative gain rejects as `unknown`.
+The five unavailable verification/resource/rollback/retention fields must also
+be present as `null`. Complete PR #1903 v1 reports already provide these fields;
+partial bundles reject rather than silently gaining the same status. These
+checks validate diagnostic accounting, not authentication or economic validity.
+
+`print_research_report_summary()` reads `WRE_RESEARCH_REPORT_PATH` and
+`WRE_RESEARCH_BASELINE_SHA256`, then prints sanitized advisory output without raw
+paths/content/errors. `main.py:run_wre_dashboard_preflight` invokes it when that
+preflight is enabled, preserving existing health enforcement. Unconfigured or
+bad reports remain unknown; reading never constructs a researcher, model,
+PatternMemory, queue or resolution event, and writes no report. Existing health
+checks may still initialize memory and dispatch events under their own contract.
+No campaign, retention, queue admission, scheduled cycle or promotion is enabled.
+
+**Version:** 0.8.0
+**Status:** Execution-truth hardening implemented; production RSI incomplete
+
+This document describes current callable contracts. Historical promoter,
+automatic rollback, automatic reindex, and model-autonomy sketches are not
+public implementation truth.
+
+## Authority boundary
+
+A WRE return value is an execution record, not repository, Git, network,
+external-service, or production-promotion authority. 012 remains sovereign.
+Callers must preserve the narrower authority of the work item and runtime
+binding.
+
+## Outcome recording and retention
+
+`ratchet_verified_outcome(...)` requires finite nonnegative numeric cost/latency
+values, with an integer `total_tokens` (Boolean/string coercion is rejected).
+Verifier and accepted-publication receipts must match the requested work/slice;
+publication must name the same verifier receipt. Accepted outcomes require an
+explicit true acceptance receipt and no contradictory failure receipt.
+Invalid evidence is ineligible for memory; secret-marker payloads are not
+stored, and affected receipt labels are redacted.
+
+Recorder identity seed v2 includes all retained receipt groups, including cost,
+latency, full publication and Holo evidence. Store/sink acknowledgments must be
+nonempty strings. Deep copies isolate callback arguments and the local store;
+callback failure does not change the evidence identity. The JSONL store refuses
+non-finite JSON. Its stored record is a pre-callback snapshot; the returned
+receipt carries final acknowledgment status. This is not an atomic transaction,
+replay guard, crash-recovery proof or authenticated storage receipt.
+
+`evaluate_held_out_recursive_improvement_regression_gate(...)` requires an
+accepted, eligible, not-yet-written ratchet outcome, matching work/slice/verifier
+and exact `verification_digest`. Test counts must be positive integers and the
+failure count must be the integer zero; malformed values cannot imply a pass. Its v2 identity binds
+the full input evidence. Old minimal hand-written fixtures must supply the
+fields already produced by the real recorder; missing fields fail closed.
+
+The existing bridge `invoke_reddog_wre_queue_authorized_pattern_memory_admission(...)`
+also isolates sink input and rejects empty/non-string acknowledgments through
+its existing `SINK_WRITE_FAILED` result. These contracts describe local
+consistency and acknowledged callbacks, not authentication of a caller's
+receipt map or proof that an external sink committed exactly once. Keep earlier
+receipt versions as historical evidence; do not rewrite them in place.
+
+## ROC research evaluator and dry-run producer
+
+`src/wre_research_evaluator.py` exposes `load_target_config_from_source(source)`,
+`load_target_config(path)`, `snapshot_cost_catalog(cost_catalog=None)`,
+`snapshot_comparison_basis()` and
+`evaluate_target(path, *, cost_catalog=None, comparison_basis=None)`. The loader uses AST literal
+evaluation; it does not import or execute the target. Metric dictionaries accept
+finite integers/floats with string keys, excluding booleans. Unusable numeric
+maps return empty dictionaries through the existing loader contract.
+
+Before simulation, `evaluate_target` rejects missing/invalid maps, agent names
+outside the captured cost catalog (default: `AGENT_INFRASTRUCTURE_COSTS`),
+allocation fractions outside `[0, 1]`,
+totals not equal to one within absolute `1e-9` (zero relative tolerance), and
+multipliers outside `[1, 5]`. These input guards return an `error`, finite
+negative `fitness`, and false compute/ROI flags. Valid known-agent subsets,
+zero allocations and the existing default multiplier of one remain supported.
+The producer's program may require a narrower, fully populated target. Invalid
+syntax or non-literal expressions can still raise through the loader; callers
+must retain the existing exception-handling boundary.
+
+`WREAutoResearcher(..., results_dir=parent)` treats `results_dir` as an output
+parent. The instance's `results_dir` names a newly allocated `run-*` child;
+`working_target_path` names `target/<original basename>` and `results_path` names
+the run's `results.tsv`. Initialization reports the results path. The default parent
+remains `<system temp>/wre_autoresearch_runs`. Reusing a parent creates a separate
+run instead of resuming or sharing the previous target/log. Callers must use the
+instance paths; existing artifacts under the parent are not migrated or deleted.
+Parents resolving inside `REPO_ROOT` reject before mkdir. This is local namespace
+isolation under a stable filesystem, not process isolation or runtime admission.
+
+Only literal `dry_run=True` is implemented. Constructor and call preflight reject
+other values with `NotImplementedError("SPECIFIED_NOT_IMPLEMENTED")`; truthy
+non-booleans cannot select a mode. The producer checks mode around the proposal
+backend and after the loop. Detected drift aborts through the existing terminal
+report path. A change during evaluation can first become a `crashed` outcome,
+then abort at the mode gate; no injected live commit is called. `_commit()` only
+records planned operations and also rejects unsupported mode when called directly.
+Cleanup always attempts scratch restoration, regardless of the current flag.
+`report["dry_run"]` is the initial literal-True selection expressed as a boolean;
+it is descriptive, not authority. Arbitrary host Python and injected runner code
+are outside this local guard's sandbox claim. Live mode remains unimplemented.
+
+Construction writes scratch from the target text captured by `read_text`, without
+a second live-source read. Each `run()` freezes the current `original_code` text
+before report allocation. It prepares scratch from that snapshot before baseline
+evaluation; the first proposal and terminal cleanup use the same snapshot even
+if a callback later changes `original_code`. A caller changing that field before
+a later run supplies that later invocation's baseline. Sequential reuse discards
+leftover scratch. Preparation failure aborts before an evaluator entry; cleanup
+is still attempted. Same-instance concurrency remains unsupported.
+
+`max_iterations` must be a non-negative built-in integer; booleans and other
+types reject before constructor output/model work and before run baseline
+execution. Each run snapshots the cap for its loop, progress and returned report.
+Zero requests no proposal attempts and still evaluates one valid baseline.
+
+`run()` retains baseline/optimized/improvement/history/dry_run accounting and
+returns the same mapping saved in its invocation's `report.json` after successful
+cleanup and publication. Python exceptions still propagate; when reporting is
+available an aborted mapping is published before propagation.
+
+| Field | Meaning |
+|---|---|
+| `schema` | `wre_auto_research_report.v1`; local diagnostic, not signed authority |
+| `invocation_id`, `report_path` | Distinct `invocation-*` namespace within the instance run directory and its JSON path |
+| `status`, `stop_reason` | `completed`/`attempt_limit` or `aborted` with `error`/`interrupted`; completion does not imply improvement |
+| `phase`, `failure`, `cleanup_failure` | Last work phase and available error types; original exception chains still propagate |
+| `cleanup` | `restored`, `failed` or `not_performed`; output failure after restoration still aborts without denying restored bytes |
+| `attempts_requested` | Valid cap frozen at invocation entry; `None` for a rejected mutated invalid cap |
+| `attempts_started`, `iterations_run` | Entered proposal attempts, including missing and unfinished proposals |
+| `attempts_finished`, `outcome_counts` | Recorded history outcomes; an aborted started attempt may have no finished outcome |
+| `baseline_evaluations`, `candidate_evaluations` | Actual evaluator entries, including calls that raise; zero before entry |
+| `baseline`, `optimized`, `improvement` | Available metrics and local difference; no valid best means `None` for optimized/improvement |
+| `baseline_input_sha256` | SHA-256 of the invocation's captured baseline text encoded as UTF-8; constructor reads normalize newlines. Describes prepared input even on abort before evaluation; not raw source bytes, program/oracle identity or authenticated provenance |
+| `proposal_inputs` | Per-invocation ordered list of `{iteration, proposal_input_sha256}` for nonempty text reaching candidate preparation. SHA-256 covers returned Unicode content encoded as UTF-8 before scratch write/diff; no raw proposal content is added to this field |
+| `program_inputs` | Ordered local attempted-call records: `{iteration, call_ordinal, program_input_sha256, identity_error}`; ordinal starts at one per invocation. Digest covers the rendered instruction text used in that call, encoded as UTF-8 |
+| `independently_verified`, `retained_improvements`, `resource_usage` | `None`; no evidence from this producer |
+| `rsi_measurements` | `wre_rsi_measurements.v1`: verification class, baseline/best fitness, absolute/relative gain, candidate/outcome counts and explicit unknowns for independent verification, resource usage, activation rollback and successive-generation gain. Current AutoResearcher class is `execution_feedback`, not formal verification; `production_rsi_eligible=false`. |
+
+Outcome keys remain `no_proposal`, `accepted`, `rejected`, `failed_validation`,
+`crashed`. History/TSV record missing proposals with blank metric cells. `crashed`
+may include evaluation or later acceptance/logging failures. Best metrics advance
+only after acceptance recording succeeds; accepted info names previous fitness.
+
+Cost comparability repair, 2026-09-23: each invocation captures immutable numeric
+unit totals and catalog names after mode/report preparation, before baseline
+evaluation. Baseline and candidates consume the same captured values; replacement,
+in-place cost mutation and membership changes cannot alter this cost basis.
+Capture failure aborts in `cost_capture` with zero evaluator entries, preserving
+the existing terminal report and cleanup path. Later invocations refresh costs;
+separate instances do not share a snapshot. Same-instance concurrency remains
+unsupported, and capture is not atomic against concurrent mutation of globals.
+
+`snapshot_cost_catalog(None)` reads current catalog totals; an explicit mapping
+is copied and never falls back to globals through truthiness. Nonempty string-key
+mappings with finite nonnegative integer/float totals are accepted; booleans,
+non-numeric, negative, nonfinite and float-overflow values raise `ValueError`
+before simulation. Zero cost remains valid and still records performed tasks.
+Only aggregate totals are validated, not their five source components. The
+calculator accepts the same keyword and owns a copied immutable mapping. Valid
+one-argument evaluator calls still capture current costs independently.
+
+PR1895 preserves historical cost-only false acceptance; PR1896 freezes those
+consumed cost values. PR1897 preserves eight historical profile-only false gains
+of five points with unchanged candidate text. The current guard rejects persistent
+profile changes in those cases without changing their metrics or acceptance oracle.
+
+Profile drift guard, 2026-09-24: `snapshot_comparison_basis()` returns an immutable
+JSON string of primitive values. It describes ordered effective tier distribution,
+tier presence/prices, subscription margin, angel subscription/OPO inputs and average
+stake default, DEX fee, consumed activity defaults, inherited constructor burn and
+SATS_PER_USD bookkeeping. The basis uses the values imported by the actual consumer
+and definition-bound method defaults. Explicitly overridden subscriber/angel/task
+defaults, unused agent mix/compute margin and unused constructor BTC price are not
+dependencies. A nonempty bound distribution takes precedence over the live global;
+an empty/None default uses the current fallback. Missing tiers differ from zero
+prices, distribution order is preserved, and integer precision is not discarded.
+
+Numeric profile values must be finite integers/floats excluding booleans. This
+validates comparability, not economic bounds or model correctness. Even a finite
+SATS change conservatively rejects bookkeeping drift although the eight returned
+scores may be equal. Missing/invalid profile inputs fail capture. No global values
+are overwritten and no shared economic method is changed.
+
+An invocation captures costs in `cost_capture`, then the profile in
+`comparison_capture`, before incrementing `baseline_evaluations`. Profile capture
+failure aborts with zero evaluator entries through normal report/cleanup handling.
+The same captured string is checked before each evaluator call performs simulation
+and after it returns metrics. A persistent change raises `ValueError` containing
+`comparison basis`; candidate failure records the existing `crashed` outcome,
+blank TSV metrics, unchanged best metrics and scratch rollback. If simulation
+raises, the existing exception path already prevents acceptance. Later invocations
+recapture; separate nested instances do not share a basis.
+
+Only omitted/None `comparison_basis` opts out for legacy direct calls. Explicit
+empty strings, other types or a mismatching string raise; they do not silently
+recapture or disable checks. The string is a local comparison value, not an
+authenticated hash, report receipt or stable public serialization contract.
+Frozen cost values remain a separate input and are not re-read by this guard.
+
+Before/after sampling is not atomic and does not make simulation consume an
+immutable profile. A value changed and restored inside simulation can evade checks;
+the fixed ABA control documents that remaining false gain. Same-instance concurrency
+is unsupported; no broader concurrency, source/oracle authentication, economic
+validity, runtime admission, promotion or retained-learning claim follows. The
+report schema and its independent-verification/retention fields are unchanged.
+
+`proposal_inputs` is separate from finished `history`: a subsequent preparation,
+diff or evaluation interruption can leave an input record without an outcome.
+Equal text has the same digest; iteration and invocation distinguish attempts.
+The list resets for each invocation. The existing falsy/no-proposal branch remains;
+truthy non-text values raise `TypeError` in `candidate_preparation` before write,
+diff or candidate evaluation. `str` subclasses remain accepted; hashing uses the
+built-in UTF-8 encoder rather than an overridden `encode` method. Encoding failure
+produces no record. Mode rejection before preparation also produces no record,
+even if a backend returned text. Digests do not identify raw model wire, normalized
+scratch bytes or the later evaluator input, and do not authenticate a proposal.
+
+`program_inputs` records the locally rendered instruction string immediately
+before invoking the resolved backend method. Rendering preserves the original
+empty-format semantics once, including custom format results, and the same text
+supplies prompt and digest. Backend failures/interruption and later mode rejection
+retain the entry. Formatting or backend-lookup failure before invocation has no
+entry. Multiple backend calls within one proposal have distinct invocation-wide
+ordinals. Heuristic, zero-attempt and overridden proposal paths that bypass the
+LLM method leave an empty list. Direct calls outside `run()` have no collector.
+The scoped collector restores its prior value or absence on every Python exit.
+An unencodable instruction records null digest and `UnicodeEncodeError`, without
+suppressing the backend call; otherwise `identity_error` is null. This describes
+an attempted local call, not provider receipt, raw program bytes, the full prompt,
+model/oracle/environment identity, authenticated provenance or retained learning.
+
+Each sequential call reserves a distinct subdirectory, stages complete JSON in
+`report.tmp`, then replaces `report.json` in that directory after cleanup settles.
+Allocation errors still attempt cleanup. Serialization/write/publication errors
+propagate, preserving earlier exception context; no completed return follows.
+Previous invocation files remain unchanged. Missing JSON, partial TSV or temporary
+files cannot certify completion; do not read temporary files as terminal evidence.
+The existing TSV still combines repeated-call groups and is not invocation-qualified.
+Abrupt process death/power loss, same-instance concurrency, authenticated source/
+oracle/environment identity, freshness, resource measurement and launch reading
+remain unqualified. This artifact creates no runtime or promotion authority.
+
+`WREAutoResearcher.run()` consumes those errors through its existing
+`failed_validation`/restore path. The negative-allocation regression proves it
+keeps baseline metrics and does not record a planned commit for the invalid
+proposal. Non-dry-run execution remains `SPECIFIED_NOT_IMPLEMENTED`.
+
+The 2026-09-14 lifecycle correction wraps `run()` in final scratch restoration
+for normal returns and Python exception exits, including `KeyboardInterrupt`.
+When the baseline evaluator returns an `error`, it logs `failed_baseline` at
+iteration zero and raises `ValueError` before proposal generation. Parse errors
+also propagate before proposals. `_rollback()` attempts the local file restore
+even if the injected runner fails; runner and file-write failures still surface
+to the caller, with Python exception chaining preserving earlier errors.
+Restoration runs before its status message, so broken output cannot skip it.
+No successful result is returned when cleanup or status output raises. This is local scratch
+recovery, not durable recovery after process termination, storage failure or
+authenticated production activation.
+
+This evaluator scores the fixed simulation; it does not authenticate runtime
+authority, establish real economic outcomes or serve as a generic code judge.
+
+## WREMasterOrchestrator
 
 ```python
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Dict, List, Optional
-
-@dataclass
-class WRESkill:
-    """Immutable skill descriptor (trainable weight)."""
-    skill_id: str              # e.g. youtube_moderation.v1
-    path: Path                 # Path to SKILL.md
-    agents: List[str]          # ['qwen', 'gemma', 'ui_tars']
-    wsp_chain: List[str]       # ['WSP 50', 'WSP 64', 'WSP 77']
-    domains: List[str]         # ['streaming', 'compliance']
-    version: str               # 1.0.0
-    pattern_fidelity: float    # Last recorded score (0.0-1.0)
-```
-
-```python
-@dataclass
-class SkillSession:
-    """Runtime binding of a skill to an execution request."""
-    skill: WRESkill
-    context: Dict[str, str]        # Task metadata (module, intent, run_id)
-    tokens_budget: int             # Target 50-200 per WSP 75
-    feedback_hook: Optional[str]   # Path to metrics sink
-```
-
-### Core Services
-
-```python
-class WRESkillsRegistry:
-    def discover(self, roots: Optional[List[Path]] = None) -> List[WRESkill]:
-        """Scan for SKILL.md files, parse YAML frontmatter, validate WSP citations."""
-
-    def refresh(self) -> None:
-        """Hot reload registry when files change (Occam: glob + hash, no DB)."""
-
-    def get(self, skill_id: str) -> Optional[WRESkill]:
-        """Return skill by id/version."""
-```
-
-```python
-class WRESkillLoader:
-    def __init__(self, registry: WRESkillsRegistry) -> None:
-        self.registry = registry
-
-    def mount(self, skill_id: str, task: Dict[str, str]) -> SkillSession:
-        """Create SkillSession for Qwen/Gemma. Raises WREInvalidSkill on failure."""
-
-    def record_feedback(self, session: SkillSession, fidelity: float, notes: str) -> None:
-        """Persist pattern fidelity to recursive_improvement/metrics."""
-```
-
-```python
-class WRESkillPromoter:
-    def promote(self, prototype_path: Path, target_module: Path) -> WRESkill:
-        """
-        Copy `.claude/skills/.../SKILL.md` into module wardrobe, stamp CHANGELOG,
-        register with registry. Uses WSP 50 approval before activation.
-        """
-```
-
-### Phase 1: Libido Monitor & Pattern Memory (NEW - v0.3.0)
-
-```python
-from enum import Enum
-from typing import Dict, List, Optional
-from dataclasses import dataclass
-from datetime import datetime
-
-class LibidoSignal(Enum):
-    """Pattern activation frequency control signals"""
-    CONTINUE = "continue"      # Frequency OK, proceed with execution
-    THROTTLE = "throttle"      # Hit max frequency, skip execution
-    ESCALATE = "escalate"      # Below min frequency, force execution
-
-class GemmaLibidoMonitor:
-    """
-    Pattern frequency sensor - monitors skill activation frequency.
-
-    IBM Typewriter Analogy: Paper feed sensor that monitors typing frequency.
-    Gemma (270M) provides <10ms binary classification: CONTINUE, THROTTLE, or ESCALATE.
-
-    Per WSP 96 v1.3: Micro Chain-of-Thought paradigm.
-    """
-
-    def __init__(
-        self,
-        history_size: int = 100,
-        default_min_frequency: int = 1,
-        default_max_frequency: int = 5,
-        default_cooldown_seconds: int = 600
-    ) -> None:
-        """Initialize libido monitor with frequency thresholds."""
-
-    def should_execute(
-        self,
-        skill_name: str,
-        execution_id: str,
-        force: bool = False
-    ) -> LibidoSignal:
-        """
-        Check if skill should execute based on pattern frequency.
-
-        Returns:
-            LibidoSignal.CONTINUE - Proceed with execution
-            LibidoSignal.THROTTLE - Skip execution (too frequent)
-            LibidoSignal.ESCALATE - Force execution (below minimum)
-        """
-
-    def record_execution(
-        self,
-        skill_name: str,
-        agent: str,
-        execution_id: str,
-        fidelity_score: Optional[float] = None
-    ) -> None:
-        """Record skill execution in pattern history."""
-
-    def validate_step_fidelity(
-        self,
-        step_output: Dict,
-        expected_patterns: List[str]
-    ) -> float:
-        """
-        Gemma validates if Qwen followed skill instructions for a single step.
-
-        Per WSP 96 v1.3: Micro Chain-of-Thought paradigm.
-        Each step in skill execution is validated before proceeding.
-
-        Args:
-            step_output: Qwen's output for this step (dict with keys)
-            expected_patterns: List of required output keys/patterns
-
-        Returns:
-            Fidelity score (0.0-1.0)
-        """
-
-    def get_skill_statistics(self, skill_name: str) -> Dict:
-        """Get execution statistics for a skill."""
-
-    def set_thresholds(
-        self,
-        skill_name: str,
-        min_frequency: int,
-        max_frequency: int,
-        cooldown_seconds: int
-    ) -> None:
-        """Set custom thresholds for a skill."""
-
-    def export_history(self, output_path: Path) -> None:
-        """Export pattern history to JSON for analysis."""
-
-@dataclass
-class SkillOutcome:
-    """
-    Record of skill execution outcome for recursive learning.
-
-    Per WSP 96: Skills are trainable weights that evolve.
-    """
-    execution_id: str
-    skill_name: str
-    agent: str                  # qwen, gemma, grok, ui-tars
-    timestamp: str              # ISO format
-    input_context: str          # JSON string
-    output_result: str          # JSON string
-    success: bool
-    pattern_fidelity: float     # 0.0-1.0 from Gemma validation
-    outcome_quality: float      # 0.0-1.0 correctness score
-    execution_time_ms: int
-    step_count: int             # Number of steps in micro chain-of-thought
-    failed_at_step: Optional[int] = None
-    notes: Optional[str] = None
-
-class PatternMemory:
-    """
-    SQLite storage for skill outcomes and recursive learning.
-
-    Per WSP 60: Enable recall instead of computation.
-    Per WSP 48: Store outcomes for self-improvement.
-
-    Database Schema:
-    - skill_outcomes: Execution records
-    - skill_variations: A/B test variations
-    - learning_events: Pattern improvement events
-
-    Known producers (2026-02):
-    - WRE master orchestrator execution pipeline
-    - OpenClawDAE validation/remember phase
-    - Standalone Claw action runner (`modules.communication.moltbot_bridge.src.action_cli`)
-    """
-
-    def __init__(self, db_path: Optional[Path] = None) -> None:
-        """Initialize pattern memory database."""
-
-    def store_outcome(self, outcome: SkillOutcome) -> None:
-        """Store skill execution outcome."""
-
-    def recall_successful_patterns(
-        self,
-        skill_name: str,
-        min_fidelity: float = 0.90,
-        limit: int = 10
-    ) -> List[Dict]:
-        """
-        Recall successful execution patterns for a skill.
-
-        Per WSP 60: Recall instead of compute (50-200 tokens vs 5000+)
-
-        Returns:
-            List of successful execution records sorted by fidelity DESC
-        """
-
-    def recall_failure_patterns(
-        self,
-        skill_name: str,
-        max_fidelity: float = 0.70,
-        limit: int = 10
-    ) -> List[Dict]:
-        """Recall failed execution patterns for learning."""
-
-    def get_skill_metrics(self, skill_name: str, days: int = 7) -> Dict:
-        """
-        Get aggregated metrics for a skill over time period.
-
-        Returns:
-            Dict with avg_fidelity, success_rate, execution_count, etc.
-        """
-
-    def store_variation(
-        self,
-        variation_id: str,
-        skill_name: str,
-        variation_content: str,
-        parent_version: Optional[str] = None,
-        created_by: str = "qwen"
-    ) -> None:
-        """Store skill variation for A/B testing."""
-
-    def record_learning_event(
-        self,
-        event_id: str,
-        skill_name: str,
-        event_type: str,
-        description: str,
-        before_fidelity: Optional[float] = None,
-        after_fidelity: Optional[float] = None,
-        variation_id: Optional[str] = None,
-        continuity_id: Optional[str] = None,
-        parent_continuity_id: Optional[str] = None,
-        execution_id: Optional[str] = None
-    ) -> None:
-        """
-        Record learning event for skill evolution tracking with continuity lineage.
-
-        Event types: variation_created, variation_promoted, threshold_tuned, rollback
-
-        Per WSP 91: Observability with continuity metadata
-        Per WSP 97: Answers "what work led to this evolved skill?"
-
-        Args:
-            continuity_id: Links event to continuity work chain
-            parent_continuity_id: Parent continuity for lineage tracking
-            execution_id: Execution ID that triggered this evolution
-        """
-
-    def get_evolution_history(self, skill_name: str) -> List[Dict]:
-        """Get evolution history for a skill (includes continuity metadata)."""
-
-    def get_evolution_by_continuity(
-        self,
-        continuity_id: str,
-        include_children: bool = False
-    ) -> List[Dict]:
-        """
-        Get evolution events linked to a continuity chain.
-
-        Per WSP 91: Answer "what work led to this evolved skill?"
-
-        Args:
-            continuity_id: Continuity ID to query
-            include_children: If True, also return events where this is the parent
-
-        Returns:
-            List of learning events linked to this continuity chain
-        """
-
-    def get_evolution_by_execution(self, execution_id: str) -> List[Dict]:
-        """
-        Get evolution events triggered by a specific execution.
-
-        Args:
-            execution_id: Execution ID to query
-
-        Returns:
-            List of learning events triggered by this execution
-        """
-
-    def close(self) -> None:
-        """Close database connection."""
-
-class WREMasterOrchestrator:
-    """
-    Central hub integrating libido monitor, pattern memory, and skills loader.
-
-    Per WSP 96 v1.3: Full WRE Skills Wardrobe execution pipeline.
-    """
-
-    def __init__(self) -> None:
-        """Initialize orchestrator with all WRE components."""
-        # Original components
-        self.pattern_memory: PatternMemory
-        self.wsp_validator: WSPValidator
-        self.plugins: Dict[str, OrchestratorPlugin]
-
-        # Phase 1 components (NEW in v0.3.0)
-        self.libido_monitor: GemmaLibidoMonitor
-        self.sqlite_memory: PatternMemory
-        self.skills_loader: WRESkillsLoader
-
-    def execute_skill(
-        self,
-        skill_name: str,
-        agent: str,
-        input_context: Dict,
-        force: bool = False
-    ) -> Dict:
-        """
-        Execute skill with libido monitoring and outcome storage.
-
-        Pipeline:
-        1. Check libido (should we execute now?)
-        2. Load skill instructions
-        3. Execute skill (Qwen/Gemma coordination)
-        4. Calculate execution time
-        5. Validate with Gemma (pattern fidelity)
-        6. Record execution in libido monitor
-        7. Store outcome in pattern memory
-
-        Args:
-            skill_name: Name of skill to execute
-            agent: Agent to execute skill (qwen, gemma, grok, ui-tars)
-            input_context: Input parameters for skill
-            force: Force execution regardless of libido (0102 override)
-
-        Returns:
-            Dict with success, pattern_fidelity, execution_id, execution_time_ms
-        """
-
-    def validate_module_path(self, module_path: Path) -> bool:
-        """Validate module path exists."""
-
-    def register_plugin(self, name: str, plugin: OrchestratorPlugin) -> None:
-        """Register orchestrator plugin."""
-
-    def get_plugin(self, name: str) -> Optional[OrchestratorPlugin]:
-        """Get registered plugin by name."""
-```
-
-### Phase 2: Filesystem Skills Discovery (NEW - v0.4.0)
-
-```python
-from pathlib import Path
-from typing import List, Dict, Any
-from dataclasses import dataclass
-
-@dataclass
-class DiscoveredSkill:
-    """Filesystem-discovered skill (may not be in registry yet)"""
-    skill_path: Path
-    skill_name: str
-    agents: List[str]
-    intent_type: str
-    version: str
-    promotion_state: str  # Inferred from location
-    wsp_chain: List[str]
-    metadata: Dict[str, Any]
-
-class WRESkillsDiscovery:
-    """
-    Filesystem-based skills discovery for WRE Phase 2
-
-    Scans filesystem for SKILL.md files without requiring skills_registry.json.
-    Enables dynamic skill discovery and automatic promotion state inference.
-
-    Per WSP 96 v1.3: Skills are discovered from filesystem, not hardcoded registry.
-    """
-
-    def __init__(self, repo_root: Optional[Path] = None) -> None:
-        """Initialize skills discovery with repository root."""
-
-    def discover_all_skills(self) -> List[DiscoveredSkill]:
-        """
-        Scan filesystem for all SKILL.md files
-
-        Scan Patterns:
-        - modules/*/*/skills/**/SKILL.md (production skills)
-        - .claude/skills/**/SKILL.md (prototype skills)
-        - holo_index/skills/**/SKILL.md (holo skills)
-
-        Returns:
-            List of discovered skills (both registered and unregistered)
-        """
-
-    def discover_by_agent(self, agent_type: str) -> List[DiscoveredSkill]:
-        """
-        Discover skills for specific agent
-
-        Args:
-            agent_type: Agent filter (qwen, gemma, grok, ui-tars)
-
-        Returns:
-            Filtered list of skills
-        """
-
-    def discover_by_module(self, module_path: str) -> List[DiscoveredSkill]:
-        """
-        Discover skills for specific module
-
-        Args:
-            module_path: Module path (e.g., "modules/communication/livechat")
-
-        Returns:
-            Skills belonging to that module
-        """
-
-    def discover_production_ready(self, min_fidelity: float = 0.90) -> List[DiscoveredSkill]:
-        """
-        Discover skills ready for production promotion
-
-        Args:
-            min_fidelity: Minimum pattern fidelity threshold
-
-        Returns:
-            Production-ready skills
-        """
-
-    def export_discovered_to_registry(
-        self,
-        output_path: Path,
-        discovered_skills: List[DiscoveredSkill]
-    ) -> None:
-        """
-        Export discovered skills to registry JSON format
-
-        Args:
-            output_path: Where to write registry JSON
-            discovered_skills: Skills to export
-        """
-```
-
-### Skills 2.0 Hygiene API (NEW - v0.7.1)
-
-```python
-from dataclasses import dataclass, field
-from typing import List, Optional
-
-@dataclass
-class SkillHygieneStatus:
-    """Result of skill hygiene check per Skills 2.0 specification."""
-    skill_name: str
-    is_healthy: bool
-    is_retired: bool = False
-    retirement_date: Optional[str] = None
-    missing_category: bool = False
-    category: Optional[str] = None
-    has_evals: bool = False
-    issues: List[str] = field(default_factory=list)
-
-# Extended SkillMetadata with Skills 2.0 fields
-@dataclass
-class SkillMetadata:
-    """Skill descriptor with Skills 2.0 hygiene fields."""
-    name: str
-    description: str
-    primary_agent: str
-    intent_type: str
-    promotion_state: str
-    location: Path
-    pattern_fidelity_threshold: float
-    # Skills 2.0 hygiene fields
-    category: str = "workflow"              # workflow | capability-uplift
-    retirement_date: str = ""               # ISO date or empty
-    has_evals: bool = False                 # Has eval test cases
-
-# Extended DiscoveredSkill with Skills 2.0 fields
-@dataclass
-class DiscoveredSkill:
-    """Filesystem-discovered skill with hygiene fields."""
-    skill_path: Path
-    skill_name: str
-    agents: List[str]
-    intent_type: str
-    version: str
-    promotion_state: str
-    wsp_chain: List[str]
-    metadata: Dict[str, Any]
-    # Skills 2.0 hygiene fields
-    category: str = "workflow"
-    retirement_date: str = ""
-    has_evals: bool = False
-```
-
-#### WRESkillsLoader Hygiene Methods
-
-```python
-class WRESkillsLoader:
-    """Extended with Skills 2.0 hygiene enforcement."""
-
-    def check_skill_hygiene(self, skill_name: str) -> SkillHygieneStatus:
-        """
-        Check skill hygiene per Skills 2.0 specification.
-
-        Validates:
-        - retirement_date: If set and past, skill is retired
-        - category: Must be 'workflow' or 'capability-uplift'
-        - evals: Presence of eval test cases
-
-        Returns:
-            SkillHygieneStatus with is_healthy=True if all checks pass
-        """
-
-    def _is_retired(self, retirement_date: Optional[str]) -> bool:
-        """
-        Check if retirement_date indicates skill is retired.
-
-        Args:
-            retirement_date: ISO date string, 'null', '', or None
-
-        Returns:
-            True if date is in the past, False otherwise
-        """
-
-    def list_healthy_skills(self) -> List[str]:
-        """
-        List skill names that pass hygiene checks.
-
-        Excludes:
-        - Retired skills (retirement_date in past)
-        - Skills with invalid/missing category
-
-        Returns:
-            List of healthy skill names
-        """
-
-    def discover_healthy_skills(self) -> List[SkillMetadata]:
-        """
-        Discover and return only healthy skills.
-
-        Returns:
-            List of SkillMetadata for skills passing hygiene checks
-        """
-
-    def load_skill(
-        self,
-        skill_name: str,
-        agent: str,
-        enforce_hygiene: bool = True
-    ) -> str:
-        """
-        Load skill content with hygiene enforcement.
-
-        Args:
-            skill_name: Name of skill to load
-            agent: Agent requesting the skill
-            enforce_hygiene: If True (default), raises ValueError for retired skills
-
-        Returns:
-            Skill content string
-
-        Raises:
-            ValueError: If enforce_hygiene=True and skill is retired
-        """
-```
-
-#### WRESkillsDiscovery Hygiene Methods
-
-```python
-class WRESkillsDiscovery:
-    """Extended with Skills 2.0 hygiene filtering."""
-
-    def _is_retired(self, retirement_date: Optional[str]) -> bool:
-        """Check if retirement_date indicates skill is retired."""
-
-    def discover_healthy_skills(self) -> List[DiscoveredSkill]:
-        """
-        Discover skills that pass hygiene checks.
-
-        Filters out:
-        - Retired skills (retirement_date in past)
-        - Skills with invalid category (not workflow/capability-uplift)
-
-        Returns:
-            List of healthy DiscoveredSkill instances
-        """
-```
-
-#### Valid Categories
-
-```python
-VALID_SKILL_CATEGORIES = {"workflow", "capability-uplift"}
-```
-
-- **workflow**: Standard operational skills (permanent)
-- **capability-uplift**: Gap-filling skills (deprecated once capability goes native)
-
-### Phase 3: HoloDAE Integration (NEW - v0.6.0)
-
-```python
-from typing import Dict, Any, List
-
-class HoloDAECoordinator:
-    """
-    HoloDAE monitoring coordinator with WRE Skills integration.
-
-    Per WSP 96 v1.3 Phase 3: Autonomous skill execution based on health checks.
-    """
-
-    def check_git_health(self) -> Dict[str, Any]:
-        """
-        Check git repository health for autonomous skill triggering.
-
-        Returns:
-            Dict containing:
-            - uncommitted_changes (int): Number of uncommitted files
-            - files_changed (List[str]): List of changed files (first 10)
-            - time_since_last_commit (int): Seconds since last commit
-            - trigger_skill (Optional[str]): Skill to trigger (e.g., "qwen_gitpush")
-            - healthy (bool): True if uncommitted_changes < 20
-
-        Trigger Conditions:
-            - Triggers qwen_gitpush if >5 files AND >1 hour since last commit
-        """
-
-    def check_daemon_health(self) -> Dict[str, Any]:
-        """
-        Check daemon health status for autonomous monitoring.
-
-        Returns:
-            Dict containing:
-            - youtube_dae_running (bool): YouTube DAE status
-            - mcp_daemon_running (bool): MCP daemon status
-            - unhealthy_daemons (List[str]): List of unhealthy daemon names
-            - trigger_skill (Optional[str]): Skill to trigger (e.g., "daemon_health_monitor")
-            - healthy (bool): True if no unhealthy daemons
-        """
-
-    def check_wsp_compliance(self) -> Dict[str, Any]:
-        """
-        Check WSP protocol compliance for autonomous validation.
-
-        Returns:
-            Dict containing:
-            - violations_found (int): Number of WSP violations
-            - violation_details (List[Dict]): Details of each violation
-            - trigger_skill (Optional[str]): Skill to trigger (e.g., "wsp_compliance_fixer")
-            - healthy (bool): True if no violations
-        """
-
-    def _check_wre_triggers(self, result: 'MonitoringResult') -> List[Dict[str, Any]]:
-        """
-        Check monitoring result for WRE skill trigger conditions.
-
-        Analyzes health checks and determines if any skills should be triggered.
-
-        Args:
-            result: Monitoring result from _monitoring_loop()
-
-        Returns:
-            List of trigger dicts, each containing:
-            - skill_name (str): Name of skill to execute
-            - agent (str): Agent to execute skill (qwen, gemma, etc.)
-            - input_context (Dict): Input parameters for skill
-            - trigger_reason (str): Why skill was triggered
-            - priority (str): Execution priority (high, medium, low)
-        """
-
-    def _execute_wre_skills(self, triggers: List[Dict[str, Any]]) -> None:
-        """
-        Execute WRE skills based on monitoring triggers.
-
-        Loads WRE Master Orchestrator and executes each triggered skill.
-        Logs success/throttle/error for each execution.
-
-        Args:
-            triggers: List of skill triggers from _check_wre_triggers()
-        """
-```
-
-### Error Model
-
-```python
-class WREInterfaceError(Exception): ...
-class WREInvalidSkill(WREInterfaceError): ...
-class WREValidationError(WREInterfaceError): ...
-class WREPromotionError(WREInterfaceError): ...
-```
-
-## Usage
-
-### Basic Skill Mount
-```python
-from modules.infrastructure.wre_core import WRESkillsRegistry, WRESkillLoader
-
-registry = WRESkillsRegistry()
-registry.refresh()
-
-loader = WRESkillLoader(registry)
-
-session = loader.mount(
-    skill_id="youtube_moderation.v1",
-    task={
-        "module": "modules/communication/livechat",
-        "intent": "stream_start_watchdog",
-        "run_id": "2025-10-20T09:58:00Z"
-    }
+from modules.infrastructure.wre_core.wre_master_orchestrator import (
+    WREMasterOrchestrator,
 )
 
-qwen.apply_skill(session)   # Executes workflow at 50-200 tokens
-```
-
-### Recording Pattern Fidelity
-```python
-loader.record_feedback(
-    session,
-    fidelity=0.92,
-    notes="Gemma scoring PASS (intent coverage + escalation rule triggered)."
+wre = WREMasterOrchestrator()
+result = wre.execute_skill(
+    skill_name="auto_test_registry_audit",
+    agent="qwen",
+    input_context={"scope": "registered-tests"},
+    force=False,
 )
 ```
 
-### Promoting from `.claude/skills`
-```python
-from modules.infrastructure.wre_core import WRESkillPromoter
+### `execute_skill(skill_name, agent, input_context, force=False) -> dict`
 
-promoter = WRESkillPromoter()
-production_skill = promoter.promote(
-    prototype_path=Path(".claude/skills/youtube_moderation_prototype/SKILL.md"),
-    target_module=Path("modules/communication/livechat/skills/youtube_moderation")
+Routes either one admitted attempt or the bounded ReAct wrapper according to
+runtime configuration.
+
+The legacy `recall_pattern()` compatibility surface is fail closed by default.
+It requires independently injected WSP verification and violation-prevention
+callbacks, and it returns only a pre-registered pattern. It is not an execution
+or compliance authority for RedDog Skillz.
+
+Common success fields:
+
+- `execution_id: str`
+- `skill_name: str`
+- `agent: str`
+- `success: bool`
+- `pattern_fidelity: float`
+- `execution_time_ms: int`
+- `result: dict`
+
+Common fail-closed fields:
+
+- `success: false`
+- `blocked: true` when admission prevented dispatch
+- `blocked_by: str`
+- `reason: str` containing stable redacted text
+
+Known `blocked_by` values include `wre_skill_scan`, `skill_load`, and
+`ab_variant_binding`.
+
+## Bounded Git byte I/O
+
+`run_bounded_stdout(argv, *, cwd, max_bytes, timeout_s, environment=None,
+stdin_bytes=None) -> bytes` captures stdout under an exact byte ceiling. Optional
+binary stdin is limited to 8 MiB and is written concurrently with stdout reads
+so `git cat-file --batch` cannot deadlock on full pipes. Timeout, output
+overflow, early child exit/broken pipe, reader/writer failure, and nonzero exit
+all terminate or fail closed; process pipes and named I/O threads are closed.
+
+`run_bounded_stdout_file(...)` retains the same stdout/time behavior and does
+not accept stdin. These helpers grant no repository, mutation, commit, or Git
+trust authority; callers must supply their own sanitized environment, exact
+executable/repository binding, and object validation.
+
+### `execute_skill_with_reasoning(...) -> dict`
+
+Adds:
+
+- `execution_success: bool`: exact effect execution evidence existed;
+- `success: bool`: execution success plus requested fidelity acceptance;
+- `_react_metadata.iterations`;
+- `_react_metadata.max_iterations`;
+- `_react_metadata.all_attempts`;
+- `_react_metadata.early_success`.
+
+Retry exhaustion with low fidelity returns `success: false`.
+
+## WRESkillsLoader
+
+```python
+from modules.infrastructure.wre_core.skillz.wre_skills_loader import WRESkillsLoader
+
+loader = WRESkillsLoader(repo_root=repo_root)
+path = loader.resolve_skill_file("auto_test_registry_audit")
+content = loader.load_skill("auto_test_registry_audit", "qwen")
+metadata = loader.get_skill_metadata("auto_test_registry_audit")
+```
+
+### Runtime invariants
+
+- Registry locations are checkout-relative.
+- `SKILLz.md` is preferred; `SKILL.md` is compatibility fallback.
+- Link, junction, reparse, traversal, drive, and checkout-escape paths fail.
+- Hygiene executes before every cache return.
+- Cached filtered content is bound to the current source SHA-256.
+- `enforce_hygiene=False` is diagnostic and grants no production execution.
+
+## Production admission
+
+```python
+from modules.infrastructure.wre_core.src.registered_skill_executor import (
+    validate_runtime_skill_admission,
+)
+
+ok, message = validate_runtime_skill_admission(
+    skills_loader=loader,
+    skill_name="auto_test_registry_audit",
 )
 ```
 
-## Configuration
+Admission requires exact production registry/frontmatter agreement for
+`name`, `version`, `intent_type`, and `promotion_state`.
+
+`admit_runtime_skill(...) -> (ok, message, fingerprint)` binds the current
+Skillz bundle, manifest verification and required/enforced scanner result.
+The fingerprint belongs to that invocation and is `None` on failure. The same
+explicit parameters remain available through `ensure_runtime_skill_safety(...)`,
+which forwards to this owner and preserves its original `(ok, message)` result. An exact bundle uses Cisco `scan` with `SKILLz.md`; a wardrobe root uses
+`scan-all --recursive`. Its cache key changes when Skillz, executor, or
+manifest bytes change.
+
+The cache key also includes `max_severity`. A refresh reserves a pending slot
+and invalidates the prior result before calling the scanner. Within one shared
+mapping, a pending scan for that directory blocks further admission; readers
+cannot use its previous success. Only the owning slot can publish. Exceptions,
+including cancellation, release the slot without restoring the old receipt.
+
+Mapping operations use a short-held module lock. Scanning runs outside that
+lock. Each mapping retains at most 128 entries, evicting oldest completed entries
+first; pending slots are never evicted and exhausted pending capacity blocks.
+Callers share it through these owner functions, not raw concurrent mutation.
+Separate mappings/processes are not serialized; [the bridge scanner](../../communication/moltbot_bridge/README.md#skill-safety-gate-cisco-skill-scanner) owns private report files per call.
+
+The coordinator carries the fingerprint returned by `admit_runtime_skill()` in
+its execution call and passes it explicitly to the registered executor. It does
+not consult shared skill-name admission state or perform a second cache lookup.
+`admitted_runtime_fingerprint(..., max_severity="medium")` remains a legacy cache
+observation, not per-execution admission or a TTL validator. Neither API creates
+a signed permission, independent scan authentication or revocation lifetime.
+Complete coordinator concurrency and signed runtime admission remain separate.
+
+## Programmatic executor
 
 ```python
-WRE_SKILLS_CONFIG = {
-    "watch_paths": [
-        "modules/**/skills/**/SKILL.md",
-        ".claude/skills/**/SKILL.md"
+from modules.infrastructure.wre_core.src.registered_skill_executor import (
+    resolve_registered_skill_executor,
+    dispatch_registered_skill_executor,
+)
+```
+
+`resolve_registered_skill_executor()` returns only the regular adjacent
+`executor.py` under the exact registered Skillz directory.
+
+`dispatch_registered_skill_executor()` requires the exact bundle fingerprint
+that passed the scanner. It captures the current bundle, rejects a fingerprint
+change, and validates the captured executor against the captured adjacent
+manifest before compiling those same bytes. A successful executor result has
+this minimum shape:
+
+```python
+{
+    "success": True,
+    "output": "...",
+    "effect_receipts": [
+        {"receipt_id": "stable-id", "effect_type": "bounded-effect"}
     ],
-    "metadata_required": ["skill_id", "version", "agents", "dependencies", "wsp_chain"],
-    "pattern_threshold": 0.90,   # Minimum fidelity before promotion
-    "metrics_dir": "modules/infrastructure/wre_core/recursive_improvement/metrics",
-    "promotion_log": "modules/infrastructure/wre_core/skills/CHANGELOG.md"
 }
 ```
 
-### Environment Hooks
-- `WRE_SKILLS_AUTO_REFRESH` (`true`/`false`) – enable watcher thread
-- `WRE_SKILLS_MAX_TOKENS` (default `200`) – cap per execution
-- `WRE_SKILLS_SANDBOX` (`true`/`false`) – dry-run promotion without copying files
+`success` must be an exact built-in Boolean. Missing/malformed receipts,
+reported failure, compile/import failure, or an exception returns stable
+failure with `_effect_evidence: false`. Raw exception text is not returned or
+logged.
 
-## Dependencies
+Typed receipts are necessary execution evidence; they are not an independent
+production verifier or promoter.
 
-| Dependency | Purpose |
-|------------|---------|
-| `pyyaml` | Parse SKILL.md frontmatter |
-| `watchdog` | Optional filesystem watcher for hot reload |
-| `jsonschema` (future) | Validate advanced skill metadata |
-| `modules.infrastructure.recursive_improvement` | Persist metrics |
-| `modules.holo_index` | Re-index skills after promotion (WSP 50) |
-
-## Testing
-
-```bash
-cd modules/infrastructure/wre_core
-python -m pytest tests/test_skills_registry.py
-python -m pytest tests/test_skill_loader.py
-```
-
-### Coverage Goals
-- Registry discovery paths (≥ 95%)
-- Metadata validation (≥ 90%)
-- Promotion happy path + failure modes (≥ 90%)
-- Feedback persistence (≥ 90%)
-
-## Performance Expectations
-
-| Operation | Target |
-|-----------|--------|
-| Registry refresh | < 300 ms for 200 skills |
-| Skill mount | < 50 ms |
-| Feedback write | < 20 ms |
-
-## Error Handling
-
-- **WREInvalidSkill** – Missing metadata, unsupported agent, or invalid WSP chain
-- **WREValidationError** – Promotion blocked by WSP 50 / WSP 64 guard
-- **WREPromotionError** – Filesystem issues during prototype → wardrobe copy
-
-## Version History
-
-### 0.7.1 (2026-03-25) - Skills 2.0 Hygiene Enforcement
-- **IMPLEMENTED**: `SkillHygieneStatus` dataclass for hygiene check results
-- **EXTENDED**: `SkillMetadata` with Skills 2.0 fields (category, retirement_date, has_evals)
-- **EXTENDED**: `DiscoveredSkill` with Skills 2.0 fields
-- **IMPLEMENTED**: `check_skill_hygiene()` - Full hygiene validation
-- **IMPLEMENTED**: `_is_retired()` - ISO date retirement detection
-- **IMPLEMENTED**: `list_healthy_skills()` - Filter healthy skills by name
-- **IMPLEMENTED**: `discover_healthy_skills()` - Filter healthy SkillMetadata/DiscoveredSkill
-- **UPDATED**: `load_skill()` with `enforce_hygiene` parameter (blocks retired skills)
-- **ADDED**: `test_wre_skills_loader_hygiene.py` (18 tests - ALL PASSED)
-- **ADDED**: `TestSkillsHygiene` class in discovery tests (7 tests - ALL PASSED)
-- **DOCUMENTED**: Valid categories: workflow, capability-uplift
-
-### 0.5.0 (2025-10-24) - Phase 2 Complete
-- **IMPLEMENTED**: `_execute_skill_with_qwen()` - Local Qwen inference integration (wre_master_orchestrator.py:282-383)
-- **INTEGRATED**: QwenInferenceEngine from holo_index/qwen_advisor/llm_engine.py
-- **FIXED**: Gemma validation API to use correct signature (step_output + expected_patterns)
-- **ADDED**: Graceful fallback if llama-cpp-python or model files unavailable
-- **ADDED**: Filesystem watcher (start_watcher/stop_watcher) for hot reload
-- **ADDED**: test_qwen_inference_wiring.py (4 integration tests - ALL PASSED)
-- **UPDATED**: requirements.txt to document llama-cpp-python dependency
-- **UPDATED**: ModLog.md with Phase 2 completion details
-- **UPDATED**: INTERFACE.md (v0.4.0 → v0.5.0)
-
-### 0.4.0 (2025-10-24) - Phase 2 Filesystem Discovery
-- **IMPLEMENTED**: `WRESkillsDiscovery` - Filesystem scanner for SKILL.md files (416 lines)
-- **IMPLEMENTED**: `discover_all_skills()` - Scans modules/*/*/skills/**/SKILL.md, .claude/skills/**/SKILL.md, holo_index/skills/**/SKILL.md
-- **IMPLEMENTED**: `discover_by_agent()`, `discover_by_module()`, `discover_production_ready()` filtering
-- **ADDED**: YAML frontmatter parsing (handles both string and list agents)
-- **ADDED**: Markdown header fallback parsing
-- **ADDED**: Promotion state inference from filesystem path
-- **ADDED**: WSP chain extraction via regex
-- **UPDATED**: ModLog.md with Phase 2 entry
-- **UPDATED**: INTERFACE.md (v0.3.0 → v0.4.0)
-
-### 0.3.0 (2025-10-24) - Phase 1 Complete
-- **IMPLEMENTED**: `GemmaLibidoMonitor` - Pattern frequency sensor (<10ms binary classification)
-- **IMPLEMENTED**: `PatternMemory` - SQLite recursive learning storage (skill_outcomes, skill_variations, learning_events)
-- **IMPLEMENTED**: `WREMasterOrchestrator.execute_skill()` - Full execution pipeline with libido monitoring
-- **ADDED**: Comprehensive test suites (test_libido_monitor.py, test_pattern_memory.py, test_wre_master_orchestrator.py)
-- **ADDED**: requirements.txt for WSP 49 compliance
-- **UPDATED**: ModLog.md entries for wre_core and git_push_dae
-- **DOCUMENTED**: Micro chain-of-thought paradigm (WSP 96 v1.3)
-
-### 0.2.0 (2025-10-20)
-- Drafted skills-aware API (`WRESkillsRegistry`, `WRESkillLoader`, `WRESkillPromoter`)
-- Added configuration schema and promotion workflow
-- Documented feedback loop for pattern fidelity scoring
-
-### 0.1.0 (2025-09-25)
-- Initial placeholder interface for WSP 11 compliance
-
-## Development Notes
-
-### Phase 1 ✅ (Completed 2025-10-24)
-- [x] Libido monitor, pattern memory, execute_skill() pipeline
-- [x] Comprehensive test coverage (65+ tests)
-- [x] WSP 5, WSP 22, WSP 49 compliance
-
-### Phase 2 ✅ (Completed 2025-10-24)
-- [x] Filesystem skills discovery implemented (wre_skills_discovery.py)
-- [x] Filesystem watcher for hot reload (start_watcher/stop_watcher)
-- [x] Wired execute_skill() to local Qwen inference (_execute_skill_with_qwen)
-- [x] Graceful fallback if llama-cpp-python unavailable
-- [x] Fixed Gemma validation API integration
-- [x] Created test_wre_skills_discovery.py (20+ tests)
-- [x] Created test_qwen_inference_wiring.py (4 integration tests - ALL PASSED)
-- [x] Documentation updated (ModLog, INTERFACE, requirements.txt)
-
-### Phase 3 (Roadmap)
-- [ ] Convergence loop (autonomous skill promotion based on fidelity)
-- [ ] Add Gemma/Grok/UI-TARS inference support (currently Qwen only)
-- [ ] MCP server integration (if remote inference needed)
-- [ ] Promotion CLI helpers
-- [ ] Real-world skill execution validation
-
----
-
-### Memory Preflight Guard (NEW - v0.7.0)
+## Local inference
 
 ```python
-from pathlib import Path
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass
-
-@dataclass
-class ArtifactInfo:
-    """Information about a single memory artifact."""
-    path: str
-    relative_path: str
-    tier: int               # 0, 1, or 2
-    required: bool          # True for Tier-0 mandatory artifacts
-    exists: bool
-    last_updated: Optional[str]
-    why_retrieved: str
-
-@dataclass
-class MemoryBundle:
-    """Structured memory bundle for orchestration."""
-    module_path: str
-    artifacts: List[ArtifactInfo]
-    missing_required: List[str]
-    missing_optional: List[str]
-    duplication_rate_proxy: float
-    ordering_confidence: Optional[float]
-    staleness_risk: Optional[str]
-    tier0_complete: bool
-    preflight_passed: bool
-    stubs_created: List[str]
-    requested_retrieval_mode: str
-    retrieval_mode: str
-    embedding_backend: str
-    routing_active: bool
-    semantic_requirement_met: bool
-
-class MemoryPreflightGuard:
-    """
-    Enforces WSP_CORE Memory System by requiring tiered retrieval
-    and Tier-0 artifact presence before code-changing operations.
-
-    Per WSP_CORE Section 3: Mandatory Start-of-Work Loop
-    Per WSP_00 Section 3.4: Post-Awakening Operational Protocol
-
-    Environment Variables:
-        WRE_MEMORY_PREFLIGHT_ENABLED: Enable preflight (default: true)
-        WRE_MEMORY_AUTOSTUB_TIER0: Auto-create stubs (default: false)
-        WRE_MEMORY_ALLOW_DEGRADED: Allow with warnings (default: false)
-        WRE_HOLO_RETRIEVAL_MODE: semantic (default) or explicit lexical opt-down
-    """
-
-    def __init__(self, project_root: Optional[Path] = None) -> None:
-        """Initialize Memory Preflight Guard."""
-
-    def run_preflight(self, module_path: str) -> MemoryBundle:
-        """
-        Run memory preflight check for a module.
-
-        Executes WSP_CORE Start-of-Work Loop:
-        1. Tiered retrieval (Tier 0 -> 1 -> 2)
-        2. Evaluate retrieval quality
-        3. Auto-stub Tier-0 if enabled and missing
-        4. Return structured Memory Bundle
-
-        Args:
-            module_path: Relative path to module
-
-        Returns:
-            MemoryBundle with retrieval results
-
-        Raises:
-            MemoryPreflightError: If Tier-0 is missing or required semantic retrieval degraded
-        """
-
-class MemoryPreflightError(Exception):
-    """Raised when memory preflight check fails."""
-    missing_files: List[str]
-    module_path: str
-    required_action: str
-
-def check_memory_preflight(module_path: str) -> MemoryBundle:
-    """Convenience function to run memory preflight check."""
-
-def require_memory_preflight(func):
-    """Decorator to enforce memory preflight before operations."""
+from modules.infrastructure.wre_core.src.local_skill_inference import (
+    execute_local_skill_inference,
+)
 ```
 
-**First Principles:** Keep the wardrobe simple. One registry, one loader, one promoter. Everything else (versioning, A/B tests, telemetry) builds on top after the entry point works.
+The implemented local path supports Qwen proposal generation. It always
+returns `success: false`, `_effect_evidence: false`, and either a
+`proposal` or a stable `error_code`. Model text never proves effects.
+
+Unsupported agent: `unsupported_local_agent`.
+Unavailable/import/init/generation failure: `local_model_unavailable`.
+Generated proposal: `unverified_model_proposal`.
+
+Local proposal and master reflection prompt builders omit only the reserved
+`parent_continuity_context` key from JSON. The original mapping/object is not
+modified; lineage consumption remains separate. No `default=str` coercion or
+generic serializer is added. Ordinary task values keep their prior encoding;
+unrelated nonserializable values remain errors.
+
+## PatternMemory
+
+Every `PatternMemory(db_path=None)` or explicit-path instance owns a separate
+SQLite connection. Construct, use and close it on the same worker thread;
+foreign-thread database operations raise `sqlite3.ProgrammingError`. Default
+instances share the database path and committed records, not a live connection,
+transaction or close lifecycle. The previous process-global alias is removed.
+
+DaemonSelfAuditLoop owns one handle for each _increment_counter call. After a
+successful factory return it always attempts close on the calling thread,
+including write failure or BaseException propagation. Ordinary factory/write/
+close exceptions remain fail-soft. Disabled telemetry invokes no factory.
+The daemon retains no connection; stop never closes a worker's connection.
+A timed-out stop does not mean an in-flight operation completed or stopped.
+
+Use one handle per work item; do not pass a cached handle across worker handoff
+or thread restart. This is a connection ownership boundary, not a transaction
+pool, async-task isolation, authenticated memory write or atomic R11 acceptance.
+Existing mutators still commit individually; multi-call acceptance needs its own
+independently bound transaction participant.
+
+`PatternMemory.store_outcome()` records actual post-dispatch execution
+success and structural fidelity. `outcome_quality` remains `0.0` until an
+independent authenticated evaluator supplies quality evidence.
+
+`recall_failure_patterns()` returns only explicitly unsuccessful outcomes
+(`success = 0`) at or below its inclusive `max_fidelity` threshold. Structural
+fidelity alone does not classify an execution as failed. Skill filtering,
+ascending fidelity/descending timestamp ordering and the result limit remain
+unchanged; high-fidelity failures require a correspondingly higher cutoff.
+
+`stage_variation_candidate(variation_id)` sets a non-production
+`candidate_ready` state. `promote_variation()` is a fail-closed compatibility
+method until the independent signed promoter is implemented.
+
+Generic runtime A/B selection is blocked while authenticated
+candidate/runtime binding is absent. Generic evolution stores variations but
+does not auto-schedule a runtime test. A statistical test requires exact named
+variants, exact-Boolean outcomes, and the configured sample target in each arm;
+its durable winner label is nomination evidence only.
+
+`evolve_skill()` returns `True` only when a proposal variation was actually
+stored. Execution results expose `evolution_attempted` separately from
+`variation_created`; `evolution_triggered` remains a compatibility alias for
+the latter. Stored proposals are not independent evaluation or promotion.
+
+## Master-orchestrator compatibility surface
+
+The following existing callables remain supported with bounded authority:
+
+- `register_plugin()` / `get_plugin()`: in-process compatibility plugins;
+- `validate_module_path()`: accepts only existing directories inside the exact
+  checkout;
+- `execute()`: legacy pattern recall crosses both injected WSP callbacks, but
+  plugin dispatch remains blocked because those callbacks authenticate neither
+  executors nor effects; direct Holo names the governed owner-query route and
+  other plugins must migrate to WSP 95 admission;
+- `select_skill_tot()` / `find_skill_candidates()`: candidate selection only;
+- `execute_skill()`: WSP 95 admitted generic Skillz entry point;
+- `execute_codeact_skill()`: compatibility API that always returns a
+  `codeact_prototype_boundary` block;
+- `evolve_skill()`: stores only a non-production proposal candidate;
+- `get_skill_statistics()`: historical structural/outcome observations;
+- `get_metrics()`: observed component counts; it explicitly reports
+  `token_reduction_measured: false` and contains no synthetic reduction claim.
+
+`WRESkillsLoader` retains `list_skills()`, `discover_skills()`,
+`discover_healthy_skills()`, `load_skill()`, `resolve_skill_file()`,
+`get_skill_metadata()`, `check_skill_hygiene()`, `inject_skill_into_prompt()`,
+`has_skill()`, `list_healthy_skills()`, `get_skill_location()`, and
+`reload_registry()`. Registry locations remain checkout-relative and metadata
+loading is fail-closed for non-mapping YAML roots. `get_skill_location()` is a
+location resolver only; it is not production admission.
+
+`PatternMemory` retains these callable groups:
+
+- outcomes: `store_outcome()`, `recall_successful_patterns()`,
+  `recall_failure_patterns()`, `get_skill_metrics()`;
+- false-positive records: `record_false_positive()`, `is_false_positive()`,
+  `get_false_positive_reason()`;
+- evolution and continuity: `store_variation()`, `record_learning_event()`,
+  `get_evolution_history()`, `get_evolution_by_continuity()`,
+  `get_evolution_by_execution()`;
+- counters and retrieval observations: `increment_counter()`, `get_counter()`,
+  `get_telemetry_dashboard()`, `record_retrieval()`,
+  `get_retrieval_stats()`;
+- relationship and selection evidence: `add_skill_edge()`,
+  `get_related_skills()`, `get_skill_graph()`, `transfer_learning()`,
+  `get_skill_fidelity_stats()`, `rank_skills_for_context()`;
+- lifecycle: `close()`.
+
+These storage surfaces do not authenticate effects or grant runtime/promotion
+authority. Historical fidelity and ranking are proposal inputs, not production
+selection proof.
+
+## Filesystem discovery compatibility
+
+`WRESkillsDiscovery` remains callable through
+`skillz/wre_skills_discovery.py`. It exposes `discover_all_skills()`,
+`discover_by_agent()`, `discover_by_module()`, `discover_production_ready()`,
+`discover_healthy_skills()`, `export_discovered_to_registry()`,
+`start_watcher()`, `stop_watcher()`, `load_command_rolodex()`,
+`discover_orphan_clis()`, `suggest_skillz_md_for_orphan()`, and
+`get_orphan_reduction_progress()`.
+
+Discovery and generated registry/Skillz suggestions are diagnostic inventory.
+`export_discovered_to_registry()` writes only the explicit caller-selected
+output path; it is not the canonical production registry. The watcher can call
+the callback supplied by its caller. These surfaces do not satisfy WSP 95
+admission, execute a bundle, authenticate an effect, or promote an artifact.
+
+## Structural fidelity
+
+`GemmaLibidoMonitor.validate_step_fidelity()` is a structural-key check. It
+does not prove correctness, effect success, outcome quality, security, or
+promotion readiness. The class name is historical and does not prove a live
+Gemma model invocation.
+
+## Recursive-improvement compatibility
+
+`RecursiveLearningEngine.process_error()` produces durable pattern, solution,
+and improvement proposals. `apply_improvement()` is intentionally fail closed:
+it returns `False`, keeps `applied=False`, and records
+`application_status=blocked_unimplemented`. Its public metrics keep
+`tokens_saved=None` and `token_reduction_measured=False`. This prototype does
+not edit, evaluate, promote, activate, or roll back artifacts.
+
+## FMAS / WSP 62 health admission
+
+```python
+from modules.infrastructure.wre_core.src.fmas_health_triage import (
+    run_wsp62_health_audit,
+)
+
+result = run_wsp62_health_audit(
+    candidate_repo_root=repo_root,
+    baseline_repo_root=exact_merge_base_checkout,  # optional
+    candidate_job_limit=50,
+)
+```
+
+The candidate must be a clean Git checkout. The optional baseline must pass
+FMAS exact merge-base authority. The imported canonical scanner must be a
+regular, non-reparse file inside the candidate. Pre/post HEAD, tool, and
+tracked-inventory checks reject drift observable at either gate. This is a
+proposal-only detection boundary, not a filesystem lock: a transient
+mutate/scan/restore race is not excluded and no result is execution authority.
+
+`result.receipt` binds the producer observation count/digest, all exclusion
+reason counts, authoritative finding-set digest, dispositions, selected IDs,
+stable proposal digest, candidate/baseline HEADs, and scanner digest. Receipt
+maps/IDs are immutable snapshots; `validate_health_audit_result()` recomputes
+receipt, finding, audit, and mutable-job evidence identities before consumption.
+Only exact-HEAD tracked WSP 62
+observations enter the authoritative finding set. Excluded ignored, malformed,
+or non-WSP62 observations remain visible through receipt counts and cannot be
+silently dropped without changing the receipt identity.
+
+Without a baseline, `CRITICAL`/`ERROR` size observations are `health_debt` and
+emit no jobs. With an authoritative baseline, only candidate-attributed
+`ERROR` findings may emit capped PENDING/dry-run jobs. This API does not call a
+model, persist or mutate a queue, dispatch OpenClaw/Hermes, edit source, or
+promote an artifact.
+
+`parse_fmas_finding()` and `parse_fmas_strings()` are compatibility parsers,
+not WSP 62 authority. Both quarantine direct WSP 62 input. The internal
+normalized factory is used only after the health gate has admitted evidence.
+`RedDogDirector` never marks direct FMAS input ready-to-advance.
+
+`WSP15Priority` is a legacy compatibility name for qualitative execution-risk
+hints. It is not the canonical numeric C/I/D/Impact MPS contract and must not
+be used as a signed WSP 15 allocation receipt.
+
+## Monitor compatibility
+
+`WREMonitor` exposes `track_api_call()`, `track_stream_transition()`,
+`track_pattern_learned()`, `track_action_experience()`, and `track_error()` for
+caller-supplied observations; these methods do not authenticate their inputs.
+`get_status()` returns current counters, `save_report()` writes a local report,
+`stop()` stops monitoring and saves that report, and `get_monitor()` returns the
+process-global monitor.
+
+The monitor records observations and produces suggestions. Its historical
+`apply_improvement()`, `_apply_quota_improvement()`, and
+`_apply_stream_improvement()` surfaces are fail-closed compatibility methods:
+they return `False`, write no configuration, append no applied-effect record,
+and require a future WSP 95 admitted executor with a typed effect receipt.
+Dashboard token efficiency remains `None` until authenticated usage evidence
+exists; legacy improvement records are displayed as unverified.
+
+## FoundUp job surfaces
+
+The FoundUp job router/consumer contracts are separate from generic Skillz
+execution. They provide typed envelopes, stable route decisions, queue
+retention, capability projection, and dry-run OpenClaw/Hermes adapters. Current
+dry-run success is simulated evidence only; it is not live provider or
+filesystem effect proof.
+
+See the focused source interfaces and tests for:
+
+- `src/foundup_job_router.py`
+- `src/foundup_job_consumer.py`
+- `src/foundup_job_contract.py`
+- `src/foundup_job_model_capability_projection.py`
+- `src/wre_autonomous_slice_verifier_runtime.py`
+
+### Consumer force-dry boundary
+
+`execute_foundup_job(job, *, force_dry_run=False)` preserves the existing
+one-argument singleton path. The keyword must be a literal boolean; invalid types
+raise `TypeError` before selecting or constructing an executor. True constructs
+`HermesJobExecutor(dry_run=True)` with ordinary safe defaults for that call.
+It neither mutates nor copies the warmed global executor's tools, custom root,
+custom validator, controlled-harness or adapter flags. False grants no live authority.
+
+`FoundUpJobConsumer.consume_one` snapshots its mode before job lookup, routing and
+binding callbacks, then uses that value for model admission and Hermes dispatch.
+Original job flags remain independent validation/action-guard input. Default
+capability-validator identity and nonce history are shared across fresh executors;
+the warmed singleton and any custom validator retain their state.
+
+Normal workspace discovery applies to the fresh executor; bind an owned root for
+tests. Dry-run evidence can write files. Validation, model admission, token/action
+guards and live-delegation blocks remain active, so not every job reaches simulation.
+Constructor cost is unmeasured. This is configuration isolation, not an OS sandbox
+or runtime admission. The [roadmap](ROADMAP.md#consumer-dry-run-isolation-qualification--2026-09-21)
+records the baseline witness, repair and verification limits.
+
+## Test differential and independent verification
+
+`load_canonical_test_registry()`, `collect_registered_test_shards()`,
+`make_test_impact_plan()`, `make_test_run_snapshot()`, and
+`evaluate_test_differential()` preserve the canonical registry/shard and
+candidate-vs-base integrity contracts. Collection imports test modules and is
+diagnostic execution, not an OS sandbox or promotion authority. Differential
+receipts reject binding drift, removed coverage, weaker candidate results, and
+evidence below the derived tier; authentication remains a separate boundary.
+
+`verify_autonomous_slice_runtime()` remains the independent verifier boundary.
+When assurance lineage is declared, its request, durable reservation, exact
+artifact, verifier identity, work order, operational snapshot, WSP 15
+allocation, and terminal receipt must agree. The independently recorded
+`trusted_work_authority_digest` cannot be copied from the author request.
+Verifier, CI, CodeQL, and red-team evidence do not independently publish or
+promote an artifact.
+
+## Self-audit scan observations
+
+`DaemonSelfAuditLoop.scan_once() -> int` retains the synchronous count and
+exception contract. `scan_once_with_status() -> dict` adds a detached result for
+that exact attempt; ordinary scan exceptions become failed results, while
+interrupts still propagate. `get_scan_status() -> dict` reads detached diagnostic
+state and does not initiate scanning. The constructor accepts a keyword-only
+`monotonic_clock` for deterministic age validation.
+
+An attempt reports its process-local `attempt_id`, `outcome`, `coverage`,
+`event_count`, bounded `error_codes`, start/completion monotonic timestamps,
+`sampled_at_monotonic`, `clock_valid`, `last_success`, and `last_success_age_sec`. Outcomes distinguish
+`never_scanned`, `running`, `completed`, `partial`, and `failed`. Raised or
+unfinished scans have an unknown count; a returned partial scan keeps the count
+actually observed. Error metadata contains no raw exception or log payload.
+
+Coverage is `unknown`, `bounded`, `known_partial`, or `no_inputs`. Completed
+bounded scanning includes a successful zero-findings pass; it never proves full
+repository coverage. Failed/partial attempts and empty input discovery do not
+refresh the last successful bounded-input scan. Invalid, nonfinite, negative or
+backward start/completion readings prevent that attempt from replacing success;
+a later valid sample can still report the prior success age. An invalid sampling
+reading makes age unknown without erasing an already qualified completion.
+The clock tracks a high-water mark across failed attempts too. No TTL or
+categorical healthy/fresh/stale verdict is supplied: such policy belongs to the
+consuming owner. Monotonic values and attempt IDs are not durable identifiers.
+
+`observe_self_audit_status(loop, enabled=...)` supplies the OpenClaw compatibility
+projection. OpenClaw consumes the returned attempt directly, preserving its
+existing integer metric. Disabled, absent, failed and legacy status-unavailable
+owners remain distinct. Malformed additive results never trigger a second scan;
+legacy integer-only owners retain their compatibility path. These observations
+do not grant remediation, dispatch, promotion or reward authority. See the
+[monitor contract](../../../docs/DAEMON_ARCHITECTURE_MAP.md#self-audit-scan-qualification--2026-09-22)
+and focused scan-status tests for qualification boundaries.
+
+## Self-audit diagnostic outcomes
+
+The opt-in `verify_dae_event_store` policy checks SQLite structure; its existing
+`(True, "event_store_verified")` return and `dae_event_store_health.json` report
+are preserved. Neither establishes repair of a failed write or JSONL parity.
+
+Eligible invocations use `self_audit_diagnostic_attempts`, including calls that
+return cooldown or missing-store results. Only the exact verification action,
+literal True flag and exact `event_store_verified` result add
+`self_audit_diagnostic_success` and feedback `diagnostic_successes`. A False flag
+does not identify whether verification ran or completed; no diagnostic failure
+count is inferred. Last-result observation remains available.
+
+Every outcome for that action stays outside repair attempt/success/failure
+counters and feedback. Historical repair counts and their score are preserved;
+they are not retrospectively corrected. A diagnostic result cannot suppress
+repeated-fault escalation, even if it contains another legacy success marker.
+Existing thresholds, cooldown and disabled process-dispatch gates still apply.
+Other legacy policy outcomes retain their prior behavior, except the SQLite
+marker alone no longer earns repair success for an unrelated action. The existing
+microphone/start markers are compatibility behavior, not proof of causal repair.
+
+The focused diagnostic tests use inert collaborators and disposable SQLite
+fixtures. They establish local accounting and escalation behavior, not live
+monitoring, authenticated verification, retained learning or native RSI readiness.
+
+## Configuration
+
+| Variable | Meaning |
+|---|---|
+| `WRE_REACT_MODE` | Enable bounded ReAct wrapper |
+| `WRE_REACT_MAX_ITER` | Retry attempts clamped to `1..10` |
+| `WRE_REACT_FIDELITY` | Acceptance threshold clamped to `0..1` |
+| `WRE_PATTERN_MEMORY_DB` | Explicit PatternMemory database path |
+| `WRE_AGENTIC_RAG` | Legacy flag; `1` is blocked until the governed Holo owner adapter exists |
+| `WRE_CODEACT_ENABLED` | Legacy flag; CodeAct remains blocked as a non-admitted prototype |
+| `WRE_SKILL_SCAN_REQUIRED` | Must remain `1`; `0` blocks production Skillz admission |
+| `WRE_SKILL_SCAN_ENFORCED` | Must remain `1`; `0` blocks production Skillz admission |
+| `WRE_SKILL_SCAN_ALWAYS` | Disable scanner cache reuse |
+| `WRE_SKILL_SCAN_TTL_SEC` | Content-bound cache TTL |
+| `WRE_SKILL_SCAN_MAX_SEVERITY` | Scanner severity policy |
+| `FOUNDUPS_DB_PATH` | AgentDB/breadcrumb database path |
+
+Production defaults require and enforce the Skillz scanner. Tests must set
+explicit non-production database and temporary paths.
+
+## Not implemented or not proven
+
+- authenticated independent outcome evaluator for generic Skillz;
+- durable signed production promoter;
+- automatic production artifact mutation or governed rollback;
+- HoloIndex promotion activation;
+- authenticated A/B candidate/runtime execution binding;
+- governed generation-bound Holo owner retrieval adapter;
+- WSP 95 admission/effect receipts for generic CodeAct;
+- Gemma/Grok/UI-TARS generic local execution;
+- hundred-agent distributed scheduler;
+- production end-to-end RSI canary.
+
+The current contract is fail-closed at these boundaries.

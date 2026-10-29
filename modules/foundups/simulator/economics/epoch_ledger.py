@@ -1,528 +1,336 @@
-"""Epoch Ledger - Auditable Distribution Records (WSP 26 Section 15).
+"""Immutable simulator epoch evidence and context-bound Merkle claims.
 
-Implements transparent, cryptographically verifiable epoch distribution records:
-
-FEATURES:
-- Append-only chain (blockchain-lite)
-- Merkle root per epoch for batch verification
-- IPFS pinning for decentralized storage (optional)
-- FAM daemon integration for event sourcing
-
-LEDGER CHAIN:
-- Each entry contains hash of previous entry (tamper detection)
-- Entry hash = SHA-256(epoch + timestamp + pools + rewards + prev_hash)
-- Chain validity verifiable by anyone with access
-
-MERKLE TREE:
-- Leaf nodes: hash of (participant_id, amount) pairs
-- Root provides O(log n) verification of individual rewards
-- Enables "prove my reward" without revealing others
-
-ACCESS TIERS:
-- Public: Merkle roots only
-- Participant: Own rewards + epoch summaries
-- Validator: Full epoch entries
-- Auditor: Full ledger + Merkle proofs
-
-Reference: WSP 26 Section 15, WSP 29 (CABR integration)
+The v2 Python simulator encoding is not a chain amount-unit specification.
+Amounts retain their existing units; inclusion proves neither funded entitlement
+nor unique work consumption. Commitments remain pre-settlement evidence. Existing
+BTC connector rows are not migrated to this changed hash format.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, replace
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, Tuple
+from threading import RLock
+from types import MappingProxyType
+from typing import Dict, List, Mapping, Optional, Tuple
 import hashlib
 import json
+import math
 
 
-@dataclass
+FORMAT_VERSION = "foundups.epoch.v2"
+Tree = Tuple[Tuple[str, ...], ...]
+
+
+def _number(value):
+    """Normalize equivalent built-in numbers without rounding integers."""
+    if type(value) not in (int, float):
+        raise ValueError("epoch amount must be a built-in number")
+    if type(value) is float and not math.isfinite(value):
+        raise ValueError("epoch amount must be finite")
+    if value < 0:
+        raise ValueError("epoch amount must be nonnegative")
+    return int(value) if type(value) is float and value.is_integer() else value
+
+
+def _identifier(value):
+    if type(value) is not str or not value.strip():
+        raise ValueError("epoch identity must be a nonempty string")
+    return value
+
+
+def _epoch(value):
+    if type(value) is not int or value < 0:
+        raise ValueError("epoch must be a nonnegative built-in integer")
+    return value
+
+
+def _amounts(value):
+    if type(value) is not dict:
+        raise ValueError("epoch amounts must be a dictionary")
+    return {_identifier(key): _number(amount) for key, amount in value.items()}
+
+
+def _digest(payload):
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def _leaf(foundup_id, epoch, participant_id, amount):
+    return _digest({"format_version": FORMAT_VERSION, "kind": "reward",
+                    "foundup_id": _identifier(foundup_id), "epoch": _epoch(epoch),
+                    "participant_id": _identifier(participant_id), "amount": _number(amount)})
+
+
+def _node(left, right):
+    return _digest({"format_version": FORMAT_VERSION, "kind": "node",
+                    "left": left, "right": right})
+
+
+def _build_tree(foundup_id, epoch, rewards):
+    leaves = tuple(_leaf(foundup_id, epoch, pid, amount) for pid, amount in sorted(rewards.items()))
+    if not leaves:
+        return ((_digest({"format_version": FORMAT_VERSION, "kind": "empty",
+                          "foundup_id": foundup_id, "epoch": epoch}),),)
+    levels = [leaves]
+    while len(levels[-1]) > 1:
+        level = levels[-1]
+        padded = level + (level[-1],) if len(level) % 2 else level
+        levels.append(tuple(_node(padded[i], padded[i + 1]) for i in range(0, len(padded), 2)))
+    return tuple(levels)
+
+
+def _is_hash(value):
+    return type(value) is str and len(value) == 64 and all(c in "0123456789abcdef" for c in value)
+
+
+@dataclass(frozen=True)
 class EpochEntry:
-    """Single epoch distribution record.
-
-    Forms one link in the epoch ledger chain. Each entry
-    cryptographically links to its predecessor.
-    """
+    """Finalized snapshot; the historical total_fi_distributed name retains its units."""
 
     epoch_number: int
-    timestamp: str  # ISO 8601
+    timestamp: str
     total_fi_distributed: float
-    pool_allocations: Dict[str, float]  # un/dao/du/network/fund amounts
-    participant_rewards: Dict[str, float]  # participant_id → amount
-    entry_hash: str = ""  # SHA-256 of this entry (computed after creation)
-    prev_hash: str = "genesis"  # Link to previous entry
+    pool_allocations: Mapping[str, float]
+    participant_rewards: Mapping[str, float]
+    entry_hash: str = ""
+    prev_hash: str = "genesis"
+    foundup_id: str = ""
+    format_version: str = FORMAT_VERSION
+
+    def __post_init__(self):
+        object.__setattr__(self, "pool_allocations", MappingProxyType(dict(self.pool_allocations)))
+        object.__setattr__(self, "participant_rewards", MappingProxyType(dict(self.participant_rewards)))
 
     def compute_hash(self) -> str:
-        """Compute deterministic hash of this entry.
-
-        Uses sorted keys to ensure consistent hashing regardless
-        of dict ordering.
-        """
-        payload = json.dumps(
-            {
-                "epoch": self.epoch_number,
-                "timestamp": self.timestamp,
-                "total": self.total_fi_distributed,
-                "pools": self.pool_allocations,
-                "rewards": sorted(self.participant_rewards.items()),
-                "prev": self.prev_hash,
-            },
-            sort_keys=True,
-        )
-        return hashlib.sha256(payload.encode()).hexdigest()
+        return _digest({"format_version": self.format_version, "foundup_id": self.foundup_id,
+                        "epoch": self.epoch_number, "timestamp": self.timestamp,
+                        "total": self.total_fi_distributed, "pools": dict(self.pool_allocations),
+                        "rewards": sorted(self.participant_rewards.items()), "prev": self.prev_hash})
 
     def to_dict(self) -> Dict:
-        """Export for JSON serialization."""
-        return {
-            "epoch_number": self.epoch_number,
-            "timestamp": self.timestamp,
-            "total_fi_distributed": self.total_fi_distributed,
-            "pool_allocations": self.pool_allocations,
-            "participant_count": len(self.participant_rewards),
-            "entry_hash": self.entry_hash,
-            "prev_hash": self.prev_hash,
-        }
+        """Return a detached JSON summary, preserving reward privacy."""
+        return {"epoch_number": self.epoch_number, "timestamp": self.timestamp,
+                "total_fi_distributed": self.total_fi_distributed,
+                "pool_allocations": dict(self.pool_allocations),
+                "participant_count": len(self.participant_rewards),
+                "entry_hash": self.entry_hash, "prev_hash": self.prev_hash,
+                "foundup_id": self.foundup_id, "format_version": self.format_version}
 
 
-@dataclass
+@dataclass(frozen=True)
 class MerkleProof:
-    """Merkle proof for verifying a single participant's reward."""
+    """Untrusted inclusion evidence; expectations must come from a trusted checkpoint."""
 
     participant_id: str
     amount: float
     leaf_hash: str
-    proof_path: List[Tuple[str, str]]  # (sibling_hash, direction)
+    proof_path: Tuple[Tuple[str, str], ...]
     merkle_root: str
     epoch_number: int
+    foundup_id: str = ""
+    format_version: str = FORMAT_VERSION
 
-    def verify(self) -> bool:
-        """Verify this proof against the stored Merkle root."""
-        current = self.leaf_hash
-
-        for sibling_hash, direction in self.proof_path:
-            if direction == "left":
-                combined = sibling_hash + current
-            else:
-                combined = current + sibling_hash
-            current = hashlib.sha256(combined.encode()).hexdigest()
-
-        return current == self.merkle_root
+    def verify(self, *, expected_root: str, expected_foundup_id: str,
+               expected_epoch: int, expected_participant_id: str) -> bool:
+        """Verify this amount/subject against external root and context expectations."""
+        try:
+            if (type(self.format_version) is not str or self.format_version != FORMAT_VERSION
+                    or _identifier(self.foundup_id) != _identifier(expected_foundup_id)
+                    or _epoch(self.epoch_number) != _epoch(expected_epoch)
+                    or _identifier(self.participant_id) != _identifier(expected_participant_id)
+                    or not all(_is_hash(value) for value in (self.leaf_hash, self.merkle_root, expected_root))
+                    or self.merkle_root != expected_root or type(self.proof_path) not in (tuple, list)):
+                return False
+            current = _leaf(self.foundup_id, self.epoch_number, self.participant_id, self.amount)
+            if current != self.leaf_hash:
+                return False
+            for step in self.proof_path:
+                if type(step) not in (tuple, list) or len(step) != 2:
+                    return False
+                sibling, direction = step
+                if not _is_hash(sibling) or type(direction) is not str or direction not in ("left", "right"):
+                    return False
+                current = _node(sibling, current) if direction == "left" else _node(current, sibling)
+            return current == expected_root
+        except (TypeError, ValueError, OverflowError):
+            return False
 
 
 class EpochLedger:
-    """Auditable ledger of all epoch distributions.
-
-    Maintains a cryptographic chain of epoch distribution records.
-    Each epoch generates:
-    - Entry hash (links to chain)
-    - Merkle root (enables individual reward verification)
-
-    Example usage:
-        ledger = EpochLedger("foundup_001")
-
-        # Record epoch (integrates with PoolDistributor)
-        entry = ledger.record_epoch(
-            epoch=1,
-            total=1000.0,
-            pool_allocations={"un": 600, "dao": 160, "du": 40, ...},
-            participant_rewards={"alice": 100, "bob": 50, ...}
-        )
-
-        # Verify chain integrity
-        assert ledger.verify_chain()
-
-        # Get Merkle proof for participant
-        proof = ledger.get_merkle_proof(1, "alice")
-        assert proof.verify()
-    """
+    """Process-local finalized epoch evidence; this is not durable settlement state."""
 
     def __init__(self, foundup_id: str):
-        """Initialize ledger for a FoundUp.
+        self._foundup_id = _identifier(foundup_id)
+        self._entries: List[EpochEntry] = []
+        self._by_epoch: Dict[int, EpochEntry] = {}
+        self._roots: Dict[int, str] = {}
+        self._trees: Dict[int, Tree] = {}
+        self._lock = RLock()
 
-        Args:
-            foundup_id: FoundUp this ledger tracks
-        """
-        self.foundup_id = foundup_id
-        self.entries: List[EpochEntry] = []
-        self.merkle_roots: Dict[int, str] = {}  # epoch → merkle root
-        self.merkle_trees: Dict[int, List[List[str]]] = {}  # epoch → tree levels
+    @property
+    def foundup_id(self):
+        return self._foundup_id
 
-    def record_epoch(
-        self,
-        epoch: int,
-        total: float,
-        pool_allocations: Dict[str, float],
-        participant_rewards: Dict[str, float],
-    ) -> EpochEntry:
-        """Record an epoch distribution to the ledger.
+    @property
+    def entries(self):
+        with self._lock:
+            return tuple(self._entries)
 
-        Args:
-            epoch: Epoch number
-            total: Total F_i distributed
-            pool_allocations: Dict of pool name → amount
-            participant_rewards: Dict of participant_id → reward amount
+    @property
+    def merkle_roots(self):
+        with self._lock:
+            return MappingProxyType(dict(self._roots))
 
-        Returns:
-            The created EpochEntry with computed hashes
-        """
-        prev_hash = self.entries[-1].entry_hash if self.entries else "genesis"
+    @property
+    def merkle_trees(self):
+        with self._lock:
+            return MappingProxyType(dict(self._trees))
 
-        entry = EpochEntry(
-            epoch_number=epoch,
-            timestamp=datetime.now(timezone.utc).isoformat(),
-            total_fi_distributed=total,
-            pool_allocations=pool_allocations,
-            participant_rewards=participant_rewards,
-            entry_hash="",  # Computed below
-            prev_hash=prev_hash,
-        )
-        entry.entry_hash = entry.compute_hash()
-
-        self.entries.append(entry)
-        self._build_merkle_tree(entry)
-
-        return entry
+    def record_epoch(self, epoch: int, total: float, pool_allocations: Dict[str, float],
+                     participant_rewards: Dict[str, float]) -> EpochEntry:
+        """Finalize once, accepting only exact normalized retries of an existing epoch."""
+        epoch, total = _epoch(epoch), _number(total)
+        pools, rewards = _amounts(pool_allocations), _amounts(participant_rewards)
+        with self._lock:
+            existing = self._by_epoch.get(epoch)
+            if existing is not None:
+                if (existing.total_fi_distributed == total and existing.pool_allocations == pools
+                        and existing.participant_rewards == rewards):
+                    return existing
+                raise ValueError("epoch finalization conflicts with existing content")
+            if self._entries and epoch <= self._entries[-1].epoch_number:
+                raise ValueError("new epoch must increase; gaps are allowed")
+            entry = EpochEntry(epoch, datetime.now(timezone.utc).isoformat(), total, pools, rewards,
+                               prev_hash=self._entries[-1].entry_hash if self._entries else "genesis",
+                               foundup_id=self.foundup_id)
+            tree = _build_tree(self.foundup_id, epoch, rewards)
+            entry = replace(entry, entry_hash=entry.compute_hash())
+            self._entries.append(entry)
+            self._by_epoch[epoch] = entry
+            self._trees[epoch], self._roots[epoch] = tree, tree[-1][0]
+            return entry
 
     def record_from_distribution(self, distribution) -> EpochEntry:
-        """Record from an EpochDistribution object (pool_distribution.py).
-
-        Args:
-            distribution: EpochDistribution from PoolDistributor
-
-        Returns:
-            The created EpochEntry
-        """
-        return self.record_epoch(
-            epoch=distribution.epoch,
-            total=distribution.total_rewards,
-            pool_allocations={
-                "un": distribution.un_pool,
-                "dao": distribution.dao_pool,
-                "du": distribution.du_pool,
-                "network": distribution.network_pool,
-                "fund": distribution.fund_pool,
-            },
-            participant_rewards=distribution.participant_rewards,
-        )
-
-    def _build_merkle_tree(self, entry: EpochEntry) -> str:
-        """Build Merkle tree for participant rewards.
-
-        Creates full tree structure for proof generation.
-
-        Args:
-            entry: EpochEntry to build tree for
-
-        Returns:
-            Merkle root hash
-        """
-        # Create leaf nodes: hash of (participant_id, amount) pairs
-        sorted_rewards = sorted(entry.participant_rewards.items())
-        leaves = [
-            hashlib.sha256(f"{pid}:{amt}".encode()).hexdigest()
-            for pid, amt in sorted_rewards
-        ]
-
-        if not leaves:
-            merkle_root = hashlib.sha256(b"empty_epoch").hexdigest()
-            self.merkle_roots[entry.epoch_number] = merkle_root
-            self.merkle_trees[entry.epoch_number] = [[merkle_root]]
-            return merkle_root
-
-        # Build tree bottom-up, storing each level
-        tree_levels = [leaves]
-
-        current_level = leaves
-        while len(current_level) > 1:
-            # Pad with duplicate if odd
-            if len(current_level) % 2 == 1:
-                current_level = current_level + [current_level[-1]]
-
-            # Hash pairs
-            next_level = [
-                hashlib.sha256((current_level[i] + current_level[i + 1]).encode()).hexdigest()
-                for i in range(0, len(current_level), 2)
-            ]
-            tree_levels.append(next_level)
-            current_level = next_level
-
-        merkle_root = current_level[0]
-        self.merkle_roots[entry.epoch_number] = merkle_root
-        self.merkle_trees[entry.epoch_number] = tree_levels
-
-        return merkle_root
+        return self.record_epoch(distribution.epoch, distribution.total_rewards,
+                                 {"un": distribution.un_pool, "dao": distribution.dao_pool,
+                                  "du": distribution.du_pool, "network": distribution.network_pool,
+                                  "fund": distribution.fund_pool}, distribution.participant_rewards)
 
     def get_merkle_proof(self, epoch: int, participant_id: str) -> Optional[MerkleProof]:
-        """Generate Merkle proof for a participant's reward.
-
-        Args:
-            epoch: Epoch number
-            participant_id: Participant to generate proof for
-
-        Returns:
-            MerkleProof if found, None otherwise
-        """
-        # Find entry
-        entry = None
-        for e in self.entries:
-            if e.epoch_number == epoch:
-                entry = e
-                break
-
-        if entry is None or participant_id not in entry.participant_rewards:
-            return None
-
-        amount = entry.participant_rewards[participant_id]
-        tree_levels = self.merkle_trees.get(epoch)
-        if not tree_levels:
-            return None
-
-        # Find leaf index
-        sorted_rewards = sorted(entry.participant_rewards.items())
         try:
-            leaf_index = [pid for pid, _ in sorted_rewards].index(participant_id)
+            epoch, participant_id = _epoch(epoch), _identifier(participant_id)
         except ValueError:
             return None
-
-        leaf_hash = hashlib.sha256(f"{participant_id}:{amount}".encode()).hexdigest()
-
-        # Build proof path
-        proof_path: List[Tuple[str, str]] = []
-        index = leaf_index
-
-        for level in tree_levels[:-1]:  # Exclude root
-            # Pad level if needed
-            padded_level = level[:]
-            if len(padded_level) % 2 == 1:
-                padded_level = padded_level + [padded_level[-1]]
-
-            # Get sibling
-            if index % 2 == 0:
-                sibling_index = index + 1
-                direction = "right"
-            else:
-                sibling_index = index - 1
-                direction = "left"
-
-            if sibling_index < len(padded_level):
-                proof_path.append((padded_level[sibling_index], direction))
-
-            index = index // 2
-
-        return MerkleProof(
-            participant_id=participant_id,
-            amount=amount,
-            leaf_hash=leaf_hash,
-            proof_path=proof_path,
-            merkle_root=self.merkle_roots[epoch],
-            epoch_number=epoch,
-        )
+        with self._lock:
+            entry = self._by_epoch.get(epoch)
+            if entry is None or participant_id not in entry.participant_rewards:
+                return None
+            tree = self._trees[epoch]
+            index = sorted(entry.participant_rewards).index(participant_id)
+            leaf, path = tree[0][index], []
+            for level in tree[:-1]:
+                sibling = index - 1 if index % 2 else min(index + 1, len(level) - 1)
+                path.append((level[sibling], "left" if index % 2 else "right"))
+                index //= 2
+            return MerkleProof(participant_id, entry.participant_rewards[participant_id], leaf,
+                               tuple(path), self._roots[epoch], epoch, self.foundup_id)
 
     def verify_entry(self, epoch_number: int) -> bool:
-        """Verify the integrity of a specific epoch entry.
-
-        Args:
-            epoch_number: Epoch to verify
-
-        Returns:
-            True if entry hash is valid
-        """
-        for entry in self.entries:
-            if entry.epoch_number == epoch_number:
-                return entry.entry_hash == entry.compute_hash()
-        return False
+        with self._lock:
+            entry = self._by_epoch.get(epoch_number) if type(epoch_number) is int else None
+            return bool(entry and entry.entry_hash == entry.compute_hash()
+                        and self._trees[epoch_number] == _build_tree(self.foundup_id, epoch_number, entry.participant_rewards)
+                        and self._roots[epoch_number] == self._trees[epoch_number][-1][0])
 
     def verify_chain(self) -> bool:
-        """Verify the entire ledger chain integrity.
-
-        Checks:
-        - Each entry's hash is correct
-        - Each entry's prev_hash matches previous entry
-
-        Returns:
-            True if entire chain is valid
-        """
-        for i, entry in enumerate(self.entries):
-            # Verify entry hash
-            if entry.entry_hash != entry.compute_hash():
+        with self._lock:
+            if len(self._entries) != len(self._by_epoch):
                 return False
-
-            # Verify chain linkage
-            if i == 0:
-                if entry.prev_hash != "genesis":
+            previous, epoch = "genesis", -1
+            for entry in self._entries:
+                if (entry.prev_hash != previous or entry.epoch_number <= epoch
+                        or entry.foundup_id != self.foundup_id or entry.format_version != FORMAT_VERSION
+                        or self._by_epoch.get(entry.epoch_number) is not entry
+                        or entry.entry_hash != entry.compute_hash()
+                        or not self.verify_entry(entry.epoch_number)):
                     return False
-            else:
-                if entry.prev_hash != self.entries[i - 1].entry_hash:
-                    return False
-
-        return True
+                previous, epoch = entry.entry_hash, entry.epoch_number
+            return True
 
     def get_audit_summary(self) -> Dict:
-        """Generate audit summary for the entire ledger.
+        with self._lock:
+            return {"foundup_id": self.foundup_id, "total_epochs": len(self._entries),
+                    "total_fi_distributed": sum(e.total_fi_distributed for e in self._entries),
+                    "unique_participants": len({pid for e in self._entries for pid in e.participant_rewards}),
+                    "latest_merkle_root": self._roots[self._entries[-1].epoch_number] if self._entries else "none",
+                    "chain_valid": self.verify_chain(),
+                    "first_epoch": self._entries[0].epoch_number if self._entries else None,
+                    "last_epoch": self._entries[-1].epoch_number if self._entries else None}
 
-        Returns:
-            Summary dict with key metrics and chain status
-        """
-        return {
-            "foundup_id": self.foundup_id,
-            "total_epochs": len(self.entries),
-            "total_fi_distributed": sum(e.total_fi_distributed for e in self.entries),
-            "unique_participants": len(
-                set(pid for e in self.entries for pid in e.participant_rewards.keys())
-            ),
-            "latest_merkle_root": (
-                self.merkle_roots.get(self.entries[-1].epoch_number, "none")
-                if self.entries
-                else "none"
-            ),
-            "chain_valid": self.verify_chain(),
-            "first_epoch": self.entries[0].epoch_number if self.entries else None,
-            "last_epoch": self.entries[-1].epoch_number if self.entries else None,
-        }
-
-    def get_participant_history(
-        self, participant_id: str, limit: int = 50
-    ) -> List[Dict]:
-        """Get reward history for a participant.
-
-        Args:
-            participant_id: Participant to query
-            limit: Maximum entries to return
-
-        Returns:
-            List of epoch summaries with this participant's rewards
-        """
-        history = []
-        for entry in reversed(self.entries):
-            if participant_id in entry.participant_rewards:
-                history.append({
-                    "epoch": entry.epoch_number,
-                    "timestamp": entry.timestamp,
-                    "reward": entry.participant_rewards[participant_id],
-                    "total_distributed": entry.total_fi_distributed,
-                })
-                if len(history) >= limit:
-                    break
-        return history
+    def get_participant_history(self, participant_id: str, limit: int = 50) -> List[Dict]:
+        with self._lock:
+            history = []
+            for entry in reversed(self._entries):
+                if participant_id in entry.participant_rewards:
+                    history.append({"epoch": entry.epoch_number, "timestamp": entry.timestamp,
+                                    "reward": entry.participant_rewards[participant_id],
+                                    "total_distributed": entry.total_fi_distributed})
+                    if len(history) >= limit:
+                        break
+            return history
 
     def anchor_to_chain(self, epoch: int) -> Optional[str]:
-        """Generate anchor data for on-chain publishing.
-
-        Creates a compact hash suitable for Bitcoin OP_RETURN
-        or other anchoring mechanisms.
-
-        Args:
-            epoch: Epoch to anchor
-
-        Returns:
-            40-character hex string for OP_RETURN, or None if epoch not found
-        """
-        merkle_root = self.merkle_roots.get(epoch)
-        if not merkle_root:
-            return None
-
-        anchor_data = {
-            "protocol": "pAVS-v1",
-            "type": "epoch_anchor",
-            "foundup": self.foundup_id,
-            "epoch": epoch,
-            "merkle_root": merkle_root,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        }
-
-        # 20-byte OP_RETURN payload (40 hex chars)
-        op_return_hex = hashlib.sha256(
-            json.dumps(anchor_data, sort_keys=True).encode()
-        ).hexdigest()[:40]
-
-        return op_return_hex
+        """Prepare stable 20-byte anchor data; do not publish or migrate connector rows."""
+        with self._lock:
+            entry = self._by_epoch.get(epoch) if type(epoch) is int else None
+            if entry is None:
+                return None
+            return _digest({"format_version": FORMAT_VERSION, "protocol": "pAVS-v1",
+                            "type": "epoch_anchor", "foundup": self.foundup_id, "epoch": epoch,
+                            "merkle_root": self._roots[epoch], "entry_hash": entry.entry_hash,
+                            "timestamp": entry.timestamp})[:40]
 
     def prepare_settlement_commitment(self, epoch: int) -> Optional[Dict]:
-        """Prepare pre-settlement evidence for external blockchain anchoring.
-
-        This payload is intentionally off-chain. Final settlement remains pending
-        until an external anchor connector publishes it and returns tx metadata.
-        """
-        anchor_hex = self.anchor_to_chain(epoch)
-        if not anchor_hex:
-            return None
-
-        entry = next((e for e in self.entries if e.epoch_number == epoch), None)
-        if entry is None:
-            return None
-
-        return {
-            "status": "pre_settlement",
-            "wsp_78_layer": "D_pending",
-            "requires": "external_btc_anchor_connector",
-            "foundup_id": self.foundup_id,
-            "epoch": epoch,
-            "anchor_hex": anchor_hex,
-            "merkle_root": self.merkle_roots.get(epoch),
-            "entry_hash": entry.entry_hash,
-            "total_distributed": entry.total_fi_distributed,
-            "participant_count": len(entry.participant_rewards),
-            "timestamp": entry.timestamp,
-        }
+        """Return detached pre-settlement evidence, not a confirmed payment receipt."""
+        with self._lock:
+            entry = self._by_epoch.get(epoch) if type(epoch) is int else None
+            if entry is None:
+                return None
+            return {"status": "pre_settlement", "wsp_78_layer": "D_pending",
+                    "requires": "external_btc_anchor_connector", "foundup_id": self.foundup_id,
+                    "epoch": epoch, "anchor_hex": self.anchor_to_chain(epoch),
+                    "merkle_root": self._roots[epoch], "entry_hash": entry.entry_hash,
+                    "total_distributed": entry.total_fi_distributed,
+                    "participant_count": len(entry.participant_rewards), "timestamp": entry.timestamp,
+                    "format_version": FORMAT_VERSION}
 
     def anchor_epoch(self, epoch: int, force: bool = False) -> Optional[Dict]:
-        """Anchor epoch to blockchain via Layer-D connector.
-
-        Convenience method that combines prepare_settlement_commitment()
-        with BTCAnchorConnector.publish_commitment().
-
-        Args:
-            epoch: Epoch number to anchor
-            force: Force re-anchor even if already anchored
-
-        Returns:
-            Anchor result dict, or None if commitment not available
-        """
+        """Existing optional connector handoff; non-mock migration remains a separate gate."""
         commitment = self.prepare_settlement_commitment(epoch)
         if commitment is None:
             return None
-
         try:
             from .btc_anchor_connector import get_anchor_connector
-
-            connector = get_anchor_connector()
-            return connector.publish_commitment(commitment, force=force)
+            return get_anchor_connector().publish_commitment(commitment, force=force)
         except ImportError:
-            # Anchor connector not available
-            return {
-                "success": False,
-                "error": "btc_anchor_connector not available",
-                "foundup_id": self.foundup_id,
-                "epoch": epoch,
-            }
+            return {"success": False, "error": "btc_anchor_connector not available",
+                    "foundup_id": self.foundup_id, "epoch": epoch}
 
 
-# Singleton management
 _ledger_registry: Dict[str, EpochLedger] = {}
+_registry_lock = RLock()
 
 
 def get_epoch_ledger(foundup_id: str) -> EpochLedger:
-    """Get or create ledger for a FoundUp.
-
-    Args:
-        foundup_id: FoundUp identifier
-
-    Returns:
-        EpochLedger instance
-    """
-    if foundup_id not in _ledger_registry:
-        _ledger_registry[foundup_id] = EpochLedger(foundup_id)
-    return _ledger_registry[foundup_id]
+    foundup_id = _identifier(foundup_id)
+    with _registry_lock:
+        if foundup_id not in _ledger_registry:
+            _ledger_registry[foundup_id] = EpochLedger(foundup_id)
+        return _ledger_registry[foundup_id]
 
 
 def reset_epoch_ledgers() -> None:
-    """Reset all ledgers (for testing)."""
-    global _ledger_registry
-    _ledger_registry = {}
+    with _registry_lock:
+        _ledger_registry.clear()
 
 
-__all__ = [
-    "EpochEntry",
-    "MerkleProof",
-    "EpochLedger",
-    "get_epoch_ledger",
-    "reset_epoch_ledgers",
-]
+__all__ = ["EpochEntry", "MerkleProof", "EpochLedger", "get_epoch_ledger", "reset_epoch_ledgers"]

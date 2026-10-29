@@ -7,6 +7,8 @@ import hashlib
 from dataclasses import replace
 from pathlib import Path
 
+import pytest
+
 from modules.ai_intelligence.ai_gateway.src.ai_gateway import AIGateway, ProviderConfig
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_configured_gateway_runner import (
     AIGatewayConfiguredModelCaller,
@@ -14,6 +16,7 @@ from modules.ai_intelligence.ai_gateway.src.model_autoresearch_configured_gatewa
     ConfiguredGatewayReasoningControlEvidence,
     ConfiguredGatewayRunnerPolicy,
     GatewayModelCallResult,
+    LMStudioConfiguredModelCaller,
     MappingPromptSource,
     build_configured_gateway_benchmark_runner,
 )
@@ -294,6 +297,104 @@ def test_disallowed_provider_fails_before_model_call():
         raise AssertionError("expected provider rejection")
 
     assert caller.calls == []
+
+
+def test_campaign_preflight_reserves_all_members_before_first_call():
+    prompt = "Audit the bounded RedDog runtime path."
+    task_one = _task(prompt)
+    task_two = replace(task_one, task_id="task-002")
+    caller = FakeConfiguredCaller()
+    policy = replace(_policy("openai/gpt-5.2"), max_total_calls=2)
+    runner = build_configured_gateway_benchmark_runner(
+        caller=caller,
+        prompt_source=MappingPromptSource(
+            {"task-001": prompt, "task-002": prompt}
+        ),
+        policy=policy,
+        prompt_guard=build_canonical_local_autoresearch_prompt_guard(),
+    )
+    prepare = getattr(runner, "prepare_campaign")
+
+    admission_digest = prepare(
+        tasks=(task_one, task_two), candidates=(_candidate("openai/gpt-5.2"),)
+    )
+    first = runner(task_one, _candidate("openai/gpt-5.2"))
+    second = runner(task_two, _candidate("openai/gpt-5.2"))
+
+    assert admission_digest.startswith("sha256:")
+    assert first.runner_receipt_id and second.runner_receipt_id
+    assert len(caller.calls) == 2
+
+
+def test_campaign_preflight_failure_makes_zero_provider_calls():
+    prompt = "Audit the bounded RedDog runtime path."
+    task_one = _task(prompt)
+    task_two = replace(task_one, task_id="task-missing")
+    caller = FakeConfiguredCaller()
+    runner = build_configured_gateway_benchmark_runner(
+        caller=caller,
+        prompt_source=MappingPromptSource({"task-001": prompt}),
+        policy=replace(_policy("openai/gpt-5.2"), max_total_calls=2),
+        prompt_guard=build_canonical_local_autoresearch_prompt_guard(),
+    )
+
+    try:
+        getattr(runner, "prepare_campaign")(
+            tasks=(task_one, task_two),
+            candidates=(_candidate("openai/gpt-5.2"),),
+        )
+    except ValueError as exc:
+        assert str(exc) == "configured_gateway_runner_prompt_missing"
+    else:
+        raise AssertionError("expected atomic preflight rejection")
+
+    assert caller.calls == []
+
+
+def test_lm_studio_caller_uses_exact_loaded_model_without_fallback():
+    class Backend:
+        def generate_response(self, prompt, max_tokens):
+            assert prompt == "held-out prompt"
+            assert max_tokens == 64
+            return "local bounded answer"
+
+    loaded: list[str] = []
+    caller = LMStudioConfiguredModelCaller(
+        lambda model: loaded.append(model) or Backend()
+    )
+
+    result = caller.call_model(
+        provider="lm_studio_local",
+        model="nvidia/nemotron-3.5-lightning",
+        prompt="held-out prompt",
+        task_type="model_autoresearch",
+        max_completion_tokens=64,
+        reasoning_effort="off",
+    )
+
+    assert loaded == ["nvidia/nemotron-3.5-lightning"]
+    assert result.provider == "lm_studio_local"
+    assert result.model == "nvidia/nemotron-3.5-lightning"
+
+
+def test_lm_studio_caller_rejects_unenforced_reasoning_effort_before_backend():
+    calls: list[str] = []
+    caller = LMStudioConfiguredModelCaller(
+        lambda model: calls.append(model) or object()
+    )
+    with pytest.raises(
+        ValueError,
+        match="lm_studio_reasoning_control_unsupported",
+    ):
+        caller.call_model(
+            provider="lm_studio_local",
+            model="nvidia/nemotron-3.5-lightning",
+            prompt="held-out prompt",
+            task_type="model_autoresearch",
+            max_completion_tokens=64,
+            reasoning_effort="high",
+        )
+    assert calls == []
 
 
 def test_candidate_id_or_topology_tamper_fails_before_model_call():

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-import sys
-import io
+from typing import Any
 
 
 """
@@ -21,14 +20,24 @@ WSP 3: Infrastructure Domain - System Automation
 Provides autonomous background task execution during idle periods.
 """
 
-from .src.idle_automation_dae import IdleAutomationDAE, run_idle_automation
-from .src.self_research_refresh import SelfResearchRefresher
-
 __all__ = [
     'IdleAutomationDAE',
     'run_idle_automation',
     'SelfResearchRefresher',
 ]
+
+
+def __getattr__(name: str) -> Any:
+    """Load public runtime exports without burdening contract imports."""
+    if name in {"IdleAutomationDAE", "run_idle_automation"}:
+        from .src import idle_automation_dae
+
+        return getattr(idle_automation_dae, name)
+    if name == "SelfResearchRefresher":
+        from .src.self_research_refresh import SelfResearchRefresher
+
+        return SelfResearchRefresher
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 __version__ = "1.0.0"
 __wsp_compliance__ = "WSP 3, 27, 35, 48, 60, 70"

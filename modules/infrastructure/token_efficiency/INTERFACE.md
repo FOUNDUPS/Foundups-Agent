@@ -103,6 +103,110 @@ Get or create the bypass classifier singleton.
 4. **No raw storage**: Only hashes and lengths, never raw content
 5. **M2M output**: All decisions in WSP-99 M2M format
 
+## Public API (P2: Compact Fidelity Gate)
+
+P2 fidelity clarification (2026-09-13): the existing
+`M2MFidelityGate.assert_fidelity(...)` result's `fail_conditions_match` compares
+the requested stop conditions with both the compiled object and the parsed
+compact packet. A lossy comma/bracket round-trip returns `passed=False`,
+`fail_conditions_match=False` and an explanatory mismatch in `errors`.
+That stop-rule repair left the compiler grammar and function signature unchanged. This is a field
+preservation check, not full prose equivalence, authenticated CTX.HOLO delivery
+or admission of the AI Overseer YAML-document candidate.
+
+The subsequent action/scope correction adds the optional `M2MPrompt.action`
+field (empty for legacy packets). New `M2MCompiler.compile(...)` output carries
+its extracted verb as compact `A:<action>` and YAML `MISSION.ACTION`.
+`parse_compact(...)` restores it and `decompile(...)` preserves it independently
+of mode. Legacy actionless packets keep their mode-only rendering. An older
+reader that ignores `A` cannot establish action fidelity.
+
+`M2MFidelityGate.assert_fidelity(...)` now compares the extracted action with
+both serialized-roundtrip fields and the decompiled verb. Missing or changed
+actions return `passed=False`, including loss of an explicit `IMPLEMENT`.
+`roundtrip_scope` reports the actual parsed scope; missing, shortened or
+retargeted scopes fail instead of being masked by the compiled object.
+The standalone `assert_m2m_fidelity(...)` raises `FidelityError` for those
+failures. Signatures and original positional dataclass arguments remain valid.
+These checks do not turn the compiler's heuristic extraction into a complete
+prose or objective-preservation oracle.
+
+The 2026-09-14 continuation also requires the original declared stop list in
+the decompiled instruction `Abort if any condition holds: <Python list repr>.`
+`fail_conditions_match` covers compiled, parsed and rendered stops; dropping
+or changing that instruction returns `passed=False` and a mismatch error.
+The public wrapper raises `FidelityError` as before. Legacy actionless packets
+render existing stops, while stop-free packets keep their previous output.
+No signature or compact-wire change is involved. The gate validates this
+specific rendering; it does not decide whether arbitrary surrounding prose
+contradicts it or establishes authority.
+
+### Legacy invariant emission guard — 2026-09-15
+
+`M2MPrompt.to_compact()` and `compile_m2m(...)` raise `ValueError` before output
+when `invariants` is not a built-in dictionary, a key is empty/non-string, a
+value is not a built-in string/bool/int/finite-float/None, or the flat grammar
+cannot preserve the field. Keys reject commas/colons/braces; values reject
+commas/braces. Both reject trim-boundary whitespace, ASCII controls and
+U+0085/U+2028/U+2029. Internal spaces and empty string values remain supported.
+Errors contain no input values. `compile()` preserves invalid falsey mappings
+until serialization so they cannot silently become an empty constraint set.
+
+Scalar parse results retain legacy strings (`True` becomes `"True"`, for example).
+Nested allowed paths, dependency lists and WSP15 objects cannot use this wire.
+Preserve the structured source and fail closed; do not weaken it to pass.
+This change does not harden `parse_compact`, YAML, other fields or full prose,
+and does not qualify schema/ROLE/ORIGIN/PRINCIPAL_REF/stable task IDs or authority.
+The fidelity gate's separate `HoloInvariants` object is not this wire dictionary.
+
+### Canonical envelope codec — 2026-09-15
+
+The existing `prompt/swarm/m2m_compiler.py` owns two additional pure functions:
+
+```python
+from prompt.swarm.m2m_compiler import encode_m2m_envelope, decode_m2m_envelope
+
+wire = encode_m2m_envelope(normalized_order)  # Caller supplies the complete order.
+restored_order = decode_m2m_envelope(wire)
+```
+
+`encode_m2m_envelope(envelope: dict[str, Any]) -> str` validates a plain JSON
+snapshot, then emits sorted-key compact UTF-8-compatible JSON. The decoder takes
+a built-in `str`, rejects duplicate keys at every depth, validates the same
+profile and returns a new dictionary. Neither mutates the input or uses providers,
+storage, the heuristic prose compiler or the legacy parser.
+
+Required fields follow current WSP99 section 0: `schema=0102_m2m_v1`, `ROLE`,
+`ORIGIN`, `L`, `S`, `M`, `T`, `A`, `R`, `I`, `O`, `F`. `PRINCIPAL_REF` is optional
+context; omission remains omission. Unknown fields reject. Roles/origins use the
+canonical enumerations; lanes are A/B/C/QA/SENTINEL/ORCH and modes exec/plan/qa.
+Legacy D/audit/review/verify/implement remain available only through legacy APIs.
+S/T/A and present PRINCIPAL_REF must be nonblank strings, preserved without
+trimming. R is a list of nonnegative built-in integers (not bool); I is a
+dictionary; O/F are string lists. These lists may be empty. The codec does not
+resolve WSP existence, paths, task identity uniqueness or action meaning.
+
+Nested I accepts exact built-in dict/list/string/bool/int/finite-float/None values
+and string keys. Delimiters, whitespace, Unicode and list order are preserved.
+Unsupported/custom types, cycles, invalid Unicode and non-finite numbers reject
+without coercion. All public validation errors are
+`ValueError("invalid canonical M2M envelope")`, without input values.
+
+Local defensive limits are **65,536 UTF-8 bytes**, **depth 16** (root at zero),
+and **4,096 nodes including dictionary keys**. They are codec-profile choices,
+not WSP-mandated quotas. Encoding bounds traversal and compact output; decoding
+bounds the entire input wire before parsing, including whitespace. Python's
+integer-conversion limits also apply. Round-trip fidelity is for accepted Python
+JSON values, including integer/float distinction and negative floating zero;
+original wire whitespace or number spellings are not preserved. Determinism is
+not RFC8785/signature canonicalization or cross-language numeric qualification.
+
+The existing compact fidelity gate is unchanged and is not a validator for this
+codec. Passing codec tests does not prove principal prose was normalized correctly,
+that any downstream consumer preserves the envelope, or that execution, independent
+verification, reward or retained-learning authority exists. Keep those gates closed
+until separately qualified; do not convert signed receipts into this format.
+
 ## Public API (P3: Telemetry Service)
 
 ### Classes

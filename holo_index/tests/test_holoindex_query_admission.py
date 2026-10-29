@@ -7,8 +7,12 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import holo_index.query_admission as query_admission
+import pytest
 from holo_index.freshness_receipt import freshness_receipt_path
-from holo_index.query_admission import evaluate_readonly_query_admission
+from holo_index.query_admission import (
+    evaluate_readonly_query_admission,
+    rehydrate_canonical_freshness_proof,
+)
 from modules.infrastructure.foundups_mcp_bridge.tests.test_holo_query_service import (
     _receipt,
 )
@@ -206,6 +210,64 @@ def test_exact_clean_generation_is_admitted(tmp_path: Path) -> None:
     assert result.error == ""
     assert result.reasons == ()
     assert result.freshness == "CURRENT"
+
+
+def test_rehydration_rejects_expected_head_mismatch_before_receipt_read(
+    tmp_path: Path,
+) -> None:
+    reads: list[Path] = []
+    result = rehydrate_canonical_freshness_proof(
+        repo_root=tmp_path / "repo",
+        ssd_path=tmp_path / "ssd",
+        expected_repo_head_sha=SHA,
+        repository_state_reader=_clean_repository("b" * 40),
+        receipt_loader=lambda path: reads.append(Path(path)),
+        maintenance_probe=_clear_maintenance,
+    )
+
+    assert result.allowed is False
+    assert result.error == "REPO_HEAD_MISMATCH"
+    assert reads == []
+
+
+def test_rehydration_rejects_malformed_expected_head_before_any_read(
+    tmp_path: Path,
+) -> None:
+    reads: list[Path] = []
+    result = rehydrate_canonical_freshness_proof(
+        repo_root=tmp_path / "repo",
+        ssd_path=tmp_path / "ssd",
+        expected_repo_head_sha="not-a-sha",
+        repository_state_reader=lambda _path: pytest.fail("must not read repo"),
+        receipt_loader=lambda path: reads.append(Path(path)),
+        maintenance_probe=lambda _path: pytest.fail("must not probe lock"),
+    )
+
+    assert result.allowed is False
+    assert result.error == "HOLOINDEX_EXPECTED_REPO_HEAD_INVALID"
+    assert reads == []
+
+
+def test_rehydration_returns_canonical_generation_binding(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+    ssd_path = tmp_path / "ssd"
+    _write_receipt(ssd_path, repo_root=repo_root)
+
+    result = rehydrate_canonical_freshness_proof(
+        repo_root=repo_root,
+        ssd_path=ssd_path,
+        expected_repo_head_sha=SHA,
+        repository_state_reader=_clean_repository(),
+        maintenance_probe=_clear_maintenance,
+    )
+
+    assert result.allowed is True
+    assert result.binding["repo_head_sha"] == SHA
+    assert result.binding["freshness_generation_id"].startswith("sha256:")
+    assert result.binding["freshness_receipt_digest"].startswith("sha256:")
 
 
 def test_explicit_noncanonical_receipt_is_rejected_before_any_read(

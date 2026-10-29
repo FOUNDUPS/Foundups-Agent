@@ -9,20 +9,7 @@ This module operates as the autonomous social communication extension following
 complete DAE architecture protocols per WSP Enterprise Domain Architecture.
 """
 
-from .src import (
-    XTwitterDAENode,
-    DAEIdentity,
-    DAEIdentityState,
-    AuthenticationLevel,
-    CommunicationMode,
-    SocialEngagementToken,
-    AutonomousPost,
-    CABRInteraction,
-    DAEAuthenticator,
-    CABREngine,
-    create_x_twitter_dae_node,
-    test_x_twitter_dae
-)
+from importlib import import_module
 
 __version__ = "1.0.0"
 __author__ = "0102 pArtifact"
@@ -51,4 +38,11 @@ __all__ = [
     'CABREngine',
     'create_x_twitter_dae_node',
     'test_x_twitter_dae'
-] 
+]
+
+
+def __getattr__(name):
+    """Load legacy DAE exports only when explicitly requested."""
+    if name in __all__:
+        return getattr(import_module(".src", __name__), name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

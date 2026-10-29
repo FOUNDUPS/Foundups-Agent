@@ -14,14 +14,11 @@ INVOCATION_SCHEMA, RECEIPT_SCHEMA = "model_provider_catalog_discovery_invocation
 CANDIDATE_SCHEMA, PROVIDER = "model_provider_catalog_candidate_snapshot.v1", "openrouter"
 ENDPOINT_ID, DEFAULT_FRESHNESS_MS = "openrouter_models_api_v1", 86_400_000
 MAX_RESPONSE_BYTES, MAX_RECORDS, MAX_PRICE = 8 * 1024 * 1024, 2048, Decimal("1000")
-_ID = re.compile(r"[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?/"
-                 r"[a-z0-9](?:[a-z0-9._-]{0,126}[a-z0-9])?(?::free)?\Z")
+_ID = re.compile(r"[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?/[a-z0-9](?:[a-z0-9._-]{0,126}[a-z0-9])?(?::free)?\Z")
 _TOKEN, _DIGEST = re.compile(r"[a-z0-9][a-z0-9._:-]{0,63}\Z"), re.compile(r"sha256:[0-9a-f]{64}\Z")
 _CANDIDATE_ID = re.compile(r"model_provider_catalog_candidate_snapshot:[0-9a-f]{64}\Z")
 _PRICE = re.compile(r"(?:0|[1-9][0-9]*)(?:\.[0-9]+)?\Z")
-_SECRET = re.compile(r"(?i)(?:bearer\s+\S+|(?:api[_-]?key|token|secret)\s*[:=]|"
-                     r"\bsk-[a-z0-9_-]{12,}\b|\bgh[opusr]_[a-z0-9_]{12,}\b|"
-                     r"\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.)")
+_SECRET = re.compile(r"(?i)(?:bearer\s+\S+|(?:api[_-]?key|token|secret)\s*[:=]|\bsk-[a-z0-9_-]{12,}\b|\bgh[opusr]_[a-z0-9_]{12,}\b|\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.)")
 _REASONS = frozenset("""completed precall_intent transport_pending invocation_invalid scheduled_invocation_not_due
 scheduled_invocation_expired output_path_invalid precall_write_failed transport_timeout transport_failed
 redirect_rejected redirect_history_rejected http_status_rejected content_type_rejected body_too_large json_invalid top_level_invalid
@@ -322,6 +319,10 @@ def _sanitize_record(raw: Mapping[str, Any]) -> dict[str, Any]:
     if not isinstance(pricing, Mapping) or not isinstance(architecture, Mapping):
         raise ValueError("record_invalid")
     result: dict[str, Any] = {"id": raw["id"]}
+    release = {key: raw[key] for key in ("canonical_slug", "created") if key in raw}
+    if ("canonical_slug" in release and not _valid_model_id(release["canonical_slug"])) or ("created" in release and (not _uint(release["created"]) or release["created"] > 253_402_300_799)):
+        raise ValueError("record_invalid")
+    result.update(release)
     if "context_length" in raw:
         value = raw["context_length"]
         if type(value) is not int or not 0 < value <= MAX_CONTEXT_LENGTH:

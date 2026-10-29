@@ -1,0 +1,308 @@
+"""Read-only selection of a clean same-HEAD HoloIndex authority worktree."""
+
+from __future__ import annotations
+
+import os
+import subprocess
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Callable, Mapping
+
+from holo_index.repository_state import (
+    RepositoryState,
+    read_repository_state,
+    repository_root_digest,
+)
+
+
+AUTHORITY_REPO_ROOT_ENV = "REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT"
+AUTHORITY_ROOT_INVALID = "HOLOINDEX_AUTHORITY_ROOT_INVALID"
+AUTHORITY_ROOT_UNRELATED = "HOLOINDEX_AUTHORITY_ROOT_UNRELATED"
+AUTHORITY_ROOT_DIRTY = "HOLOINDEX_AUTHORITY_ROOT_DIRTY"
+AUTHORITY_ROOT_HEAD_MISMATCH = "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH"
+WORKSPACE_STATE_UNAVAILABLE = "HOLOINDEX_WORKSPACE_STATE_UNAVAILABLE"
+
+
+@dataclass(frozen=True)
+class HoloIndexAuthoritySelection:
+    """Internal root selection plus secret-free receipt fields."""
+
+    accepted: bool
+    selected_root: Path
+    workspace_head_sha: str
+    authority_head_sha: str
+    authority_root_digest: str
+    workspace_overlay_present: bool
+    source: str
+    rejection_reasons: tuple[str, ...] = ()
+
+    @property
+    def error(self) -> str:
+        return self.rejection_reasons[0] if self.rejection_reasons else ""
+
+
+def _git_common_dir(repo_root: Path) -> Path | None:
+    argv = [
+        "git",
+        "-C",
+        str(repo_root),
+        "rev-parse",
+        "--path-format=absolute",
+        "--git-common-dir",
+    ]
+    try:
+        result = subprocess.run(
+            argv,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=5.0,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError, ValueError):
+        return None
+    value = str(result.stdout or "").strip()
+    if result.returncode != 0 or not value:
+        return None
+    path = Path(value)
+    return (path if path.is_absolute() else repo_root / path).resolve(strict=False)
+
+
+def _failure(
+    workspace: Path,
+    state: RepositoryState,
+    reason: str,
+    source: str,
+) -> HoloIndexAuthoritySelection:
+    return HoloIndexAuthoritySelection(
+        accepted=False,
+        selected_root=workspace,
+        workspace_head_sha=state.head_sha,
+        authority_head_sha="",
+        authority_root_digest="",
+        workspace_overlay_present=not state.proven_clean,
+        source=source,
+        rejection_reasons=(reason,),
+    )
+
+
+def _head_mismatch_failure(
+    workspace: Path,
+    workspace_state: RepositoryState,
+    authority: Path,
+    authority_state: RepositoryState,
+    source: str,
+) -> HoloIndexAuthoritySelection:
+    """Expose a verified stale-authority binding without accepting it."""
+
+    return HoloIndexAuthoritySelection(
+        accepted=False,
+        selected_root=workspace,
+        workspace_head_sha=workspace_state.head_sha,
+        authority_head_sha=authority_state.head_sha,
+        authority_root_digest=repository_root_digest(authority),
+        workspace_overlay_present=not workspace_state.proven_clean,
+        source=source,
+        rejection_reasons=(AUTHORITY_ROOT_HEAD_MISMATCH,),
+    )
+
+
+def _candidate(
+    workspace: Path,
+    environment: Mapping[str, str],
+) -> tuple[Path | None, str, str]:
+    configured = str(environment.get(AUTHORITY_REPO_ROOT_ENV, "") or "").strip()
+    if configured:
+        path = Path(configured)
+        if not path.is_absolute():
+            return None, "configured", AUTHORITY_ROOT_INVALID
+        return path.resolve(strict=False), "configured", ""
+    sibling = workspace.parent / f"{workspace.name}-holo-authority"
+    if sibling.exists():
+        return sibling.resolve(strict=False), "deterministic_sibling", ""
+    return None, "workspace", ""
+
+
+def _same_common_dir(
+    workspace: Path,
+    authority: Path,
+    reader: Callable[[Path], Path | None],
+) -> bool:
+    workspace_common = reader(workspace)
+    authority_common = reader(authority)
+    return bool(
+        workspace_common
+        and authority_common
+        and os.path.normcase(str(workspace_common))
+        == os.path.normcase(str(authority_common))
+    )
+
+
+def _workspace_selection(
+    workspace: Path,
+    state: RepositoryState,
+) -> HoloIndexAuthoritySelection:
+    return HoloIndexAuthoritySelection(
+        accepted=True,
+        selected_root=workspace,
+        workspace_head_sha=state.head_sha,
+        authority_head_sha=state.head_sha,
+        authority_root_digest=repository_root_digest(workspace),
+        workspace_overlay_present=not state.proven_clean,
+        source="workspace",
+    )
+
+
+def select_holoindex_workspace_authority(
+    workspace_root: Path | str,
+    *,
+    state_reader: Callable[[Path], RepositoryState] = read_repository_state,
+) -> HoloIndexAuthoritySelection:
+    """Select this workspace only after a fresh clean-state proof."""
+
+    workspace = Path(workspace_root).resolve(strict=False)
+    state = state_reader(workspace)
+    if state.head_sha == "unknown":
+        return _failure(
+            workspace, state, WORKSPACE_STATE_UNAVAILABLE, "workspace"
+        )
+    if not state.proven_clean:
+        return _failure(workspace, state, AUTHORITY_ROOT_DIRTY, "workspace")
+    return _workspace_selection(workspace, state)
+
+
+def resolve_holoindex_runtime_root(
+    workspace_root: Path | str,
+    *,
+    common_dir_reader: Callable[[Path], Path | None] = _git_common_dir,
+) -> Path:
+    """Return the same-repository primary worktree for vetted dependencies."""
+
+    workspace = Path(workspace_root).resolve(strict=False)
+    common_dir = common_dir_reader(workspace)
+    if common_dir is None:
+        return workspace
+    candidate = common_dir.parent.resolve(strict=False)
+    if (
+        not candidate.is_dir()
+        or not (candidate / ".git").exists()
+        or not _same_common_dir(workspace, candidate, common_dir_reader)
+    ):
+        return workspace
+    return candidate
+
+
+def _validate_authority_candidate(
+    workspace: Path,
+    workspace_state: RepositoryState,
+    authority: Path,
+    source: str,
+    state_reader: Callable[[Path], RepositoryState],
+    common_dir_reader: Callable[[Path], Path | None],
+) -> HoloIndexAuthoritySelection:
+    if authority == workspace or not authority.is_dir() or not (authority / ".git").exists():
+        return _failure(workspace, workspace_state, AUTHORITY_ROOT_INVALID, source)
+    if not _same_common_dir(workspace, authority, common_dir_reader):
+        return _failure(workspace, workspace_state, AUTHORITY_ROOT_UNRELATED, source)
+    authority_state = state_reader(authority)
+    if not authority_state.proven_clean:
+        return _failure(workspace, workspace_state, AUTHORITY_ROOT_DIRTY, source)
+    if authority_state.head_sha != workspace_state.head_sha:
+        return _head_mismatch_failure(
+            workspace,
+            workspace_state,
+            authority,
+            authority_state,
+            source,
+        )
+    return HoloIndexAuthoritySelection(
+        accepted=True,
+        selected_root=authority,
+        workspace_head_sha=workspace_state.head_sha,
+        authority_head_sha=authority_state.head_sha,
+        authority_root_digest=repository_root_digest(authority),
+        workspace_overlay_present=not workspace_state.proven_clean,
+        source=source,
+    )
+
+
+def resolve_holoindex_authority_root(
+    workspace_root: Path | str,
+    *,
+    environment: Mapping[str, str] | None = None,
+    state_reader: Callable[[Path], RepositoryState] = read_repository_state,
+    common_dir_reader: Callable[[Path], Path | None] = _git_common_dir,
+) -> HoloIndexAuthoritySelection:
+    """Select a clean same-HEAD authority root without creating or updating it."""
+
+    workspace = Path(workspace_root).resolve(strict=False)
+    workspace_state = state_reader(workspace)
+    if workspace_state.head_sha == "unknown":
+        return _failure(
+            workspace, workspace_state, WORKSPACE_STATE_UNAVAILABLE, "workspace"
+        )
+    authority, source, candidate_error = _candidate(
+        workspace, os.environ if environment is None else environment
+    )
+    if candidate_error:
+        return _failure(workspace, workspace_state, candidate_error, source)
+    if authority is None:
+        if not workspace_state.proven_clean:
+            return _failure(
+                workspace, workspace_state, AUTHORITY_ROOT_DIRTY, source
+            )
+        return _workspace_selection(workspace, workspace_state)
+    return _validate_authority_candidate(
+        workspace,
+        workspace_state,
+        authority,
+        source,
+        state_reader,
+        common_dir_reader,
+    )
+
+
+def authority_selection_matches_target(
+    selection: HoloIndexAuthoritySelection,
+    *,
+    target_head_sha: str,
+    authority_root_digest: str,
+    allow_stale: bool = False,
+    expected_stale_head_sha: str = "",
+) -> bool:
+    """Match a current authority or one exact repair-pending stale binding."""
+
+    common = bool(
+        selection.authority_root_digest == authority_root_digest
+        and selection.workspace_head_sha == target_head_sha
+    )
+    return common and bool(
+        (
+            selection.accepted
+            and selection.authority_head_sha == target_head_sha
+        )
+        or (
+            allow_stale
+            and not selection.accepted
+            and selection.error == AUTHORITY_ROOT_HEAD_MISMATCH
+            and bool(expected_stale_head_sha)
+            and selection.authority_head_sha == expected_stale_head_sha
+            and selection.authority_head_sha != target_head_sha
+        )
+    )
+
+
+__all__ = [
+    "AUTHORITY_REPO_ROOT_ENV",
+    "AUTHORITY_ROOT_DIRTY",
+    "AUTHORITY_ROOT_HEAD_MISMATCH",
+    "AUTHORITY_ROOT_INVALID",
+    "AUTHORITY_ROOT_UNRELATED",
+    "HoloIndexAuthoritySelection",
+    "WORKSPACE_STATE_UNAVAILABLE",
+    "authority_selection_matches_target",
+    "resolve_holoindex_authority_root",
+    "resolve_holoindex_runtime_root",
+    "select_holoindex_workspace_authority",
+]

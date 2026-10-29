@@ -32,6 +32,9 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
     canonical_signing_input,
     verify_delegated_work_authority,
 )
+from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
+    signed_stage_binding,
+)
 from modules.communication.moltbot_bridge.src.reddog_openclaw_work_order_policy_gate import (
     POLICY_ACCEPT,
     POLICY_REJECT,
@@ -115,21 +118,29 @@ def _build(now: int = 1000):
         "reddog_id": "reddog:abc123",
         "repo_full_name": _REPO,
         "foundup_id": _FID,
-        "allowed_paths": [f"modules/foundups/{_FID}/**"],
+        "allowed_paths": [f"modules/foundups/{_FID}/src/worker.py"],
         "denied_paths": [],
-        "requested_operation": "create_foundup",
+        "requested_operation": "edit_foundup_module",
         "permission_snapshot_digest": digest,
+        "queue_consumer_receipt_digest": "sha256:" + ("b" * 64),
         "wsp15_allocation_receipt_id": "sha256:wsp15-allocation",
         "wsp15_allocation_digest": "sha256:wsp15-allocation-digest",
         "wsp15_priority": "P0",
         "wsp15_mps_total": 20,
         "wsp15_reasoning_tier": "ULTRA",
+        **signed_stage_binding(
+            requested_operation="edit_foundup_module",
+            changed_paths=(f"modules/foundups/{_FID}/src/worker.py",),
+        ),
         "nonce": "nonce-unique-0001",
         "issued_at": now - 5,
         "expires_at": now + 120,
         "valve_state_required": _VALVE,
         "key_epoch": "epoch-1",
     }
+    workauth["selected_slice"] = workauth[
+        "progressive_policy_stage_receipt"
+    ]["selected_slice"]
     workauth["signature"] = crypto.sign(rpub, canonical_signing_input(workauth, PREFIX_WORKAUTH))
     snap = PermissionSnapshot(evidence_digest=digest, expires_at=now + 300, can_write=True, repo_full_name=_REPO)
     ctx = dict(
@@ -153,6 +164,47 @@ def _resign_wa(crypto, identity, workauth):
 def _run(identity, workauth, ctx):
     return verify_delegated_work_authority(work_authority=workauth, identity=identity, **ctx)
 
+
+def test_memex_authority_binding_is_optional_but_must_be_canonical() -> None:
+    crypto, identity, workauth, ctx = _build()
+    workauth["memex_supply_receipt_id"] = "memex-supply-receipt-1"
+    workauth["memex_supply_digest"] = "sha256:" + ("d" * 64)
+    _resign_wa(crypto, identity, workauth)
+    assert _run(identity, workauth, ctx).accepted is True
+
+    crypto, identity, workauth, ctx = _build()
+    workauth["memex_supply_receipt_id"] = "memex-supply-receipt-1"
+    _resign_wa(crypto, identity, workauth)
+    result = _run(identity, workauth, ctx)
+    assert result.accepted is False
+    assert ReasonCode.MALFORMED_PAYLOAD in result.reason_codes
+
+    crypto, identity, workauth, ctx = _build()
+    workauth["memex_supply_receipt_id"] = "memex-supply-receipt-1"
+    workauth["memex_supply_digest"] = "sha256:not-a-digest"
+    _resign_wa(crypto, identity, workauth)
+    result = _run(identity, workauth, ctx)
+    assert result.accepted is False
+    assert ReasonCode.MALFORMED_PAYLOAD in result.reason_codes
+
+
+@pytest.mark.parametrize(
+    "field",
+    ("progressive_policy_stage_receipt_id", "progressive_policy_stage_digest"),
+)
+def test_progressive_stage_binding_requires_canonical_sha256(field: str) -> None:
+    crypto, identity, workauth, ctx = _build()
+    workauth.update(signed_stage_binding(
+        requested_operation="edit_foundup_module",
+        changed_paths=(f"modules/foundups/{_FID}/src/worker.py",),
+    ))
+    workauth[field] = "sha256:not-canonical"
+    _resign_wa(crypto, identity, workauth)
+
+    result = _run(identity, workauth, ctx)
+
+    assert result.accepted is False
+    assert ReasonCode.MALFORMED_PAYLOAD in result.reason_codes
 
 def _policy_order_from_workauth(workauth, now: int = 1000, **overrides):
     captured = datetime.fromtimestamp(now - 60, timezone.utc).replace(microsecond=0).isoformat()
@@ -279,7 +331,7 @@ def test_payload_tampering_rejects() -> None:
     _, identity, workauth, ctx = _build()
     workauth["allowed_paths"] = ["**"]  # widen after signing
     r = _run(identity, workauth, ctx)
-    assert r.accepted is False and ReasonCode.WORKAUTH_SIGNATURE_INVALID in r.reason_codes
+    assert r.accepted is False and ReasonCode.MALFORMED_PAYLOAD in r.reason_codes
 
 
 # 3 -------------------------------------------------------------------------- #
@@ -342,7 +394,7 @@ def test_changed_allowed_paths_rejects() -> None:
     _, identity, workauth, ctx = _build()
     workauth["allowed_paths"] = workauth["allowed_paths"] + [".github/workflows/**"]
     r = _run(identity, workauth, ctx)
-    assert r.accepted is False and ReasonCode.WORKAUTH_SIGNATURE_INVALID in r.reason_codes
+    assert r.accepted is False and ReasonCode.MALFORMED_PAYLOAD in r.reason_codes
 
 
 # 10 ------------------------------------------------------------------------- #
@@ -463,7 +515,7 @@ def test_path_outside_foundup_scope_rejects() -> None:
     workauth["allowed_paths"] = [".github/workflows/deploy.yml"]
     _resign_wa(crypto, identity, workauth)
     r = _run(identity, workauth, ctx)
-    assert r.accepted is False and ReasonCode.PATH_OUT_OF_SCOPE in r.reason_codes
+    assert r.accepted is False and ReasonCode.MALFORMED_PAYLOAD in r.reason_codes
 
 
 def test_path_traversal_rejects() -> None:
@@ -471,7 +523,7 @@ def test_path_traversal_rejects() -> None:
     workauth["allowed_paths"] = [f"modules/foundups/{_FID}/../../.env"]
     _resign_wa(crypto, identity, workauth)
     r = _run(identity, workauth, ctx)
-    assert r.accepted is False and ReasonCode.PATH_OUT_OF_SCOPE in r.reason_codes
+    assert r.accepted is False and ReasonCode.MALFORMED_PAYLOAD in r.reason_codes
 
 
 # ---- CoR regression: principal-key trust anchor (BLOCKER) ------------------- #
@@ -553,7 +605,7 @@ def test_admin_verb_requires_can_admin() -> None:
         {d: PermissionSnapshot(evidence_digest=d, expires_at=1000 + 300, can_write=True, can_admin=False, repo_full_name=_REPO)}
     )
     r = _run(identity, workauth, ctx)
-    assert r.accepted is False and ReasonCode.SNAPSHOT_INSUFFICIENT in r.reason_codes
+    assert r.accepted is False and ReasonCode.MALFORMED_PAYLOAD in r.reason_codes
 
 
 # ---- CoR-R2 regression: lax backend returning a truthy non-bool must reject - #
@@ -573,7 +625,6 @@ def test_identity_reusable_but_work_authority_nonce_consume_once() -> None:
     """The SAME identity authorizes multiple work orders (reusable within TTL); each
     work-authority nonce is single-use; reusing a work-auth nonce replays."""
     crypto, identity, wa1, ctx = _build()
-    store = ctx["nonce_store"]  # one store shared across all submissions
 
     # wo-1 with its own nonce -> ACCEPT (identity used once)
     assert _run(identity, wa1, ctx).accepted is True

@@ -5,6 +5,27 @@ This log tracks all changes to the IDE FoundUps module following WSP 22 (Module 
 
 ---
 
+## PR 1346 dependency floor reconciliation (2026-10-29)
+
+- Preserve the original PR requirement `ws >=8.21.0` in the package manifest and lock root while retaining current main's resolved `ws 8.22.0`, integrity and every other dependency. This avoids replacing newer dependency work with the old PR lockfile.
+- Validation: package/lock identity comparison and `npm ci --ignore-scripts --dry-run --no-audit --no-fund` pass (236 packages planned). No package installation or TypeScript compile was performed; existing compile limitations above remain. Fresh PR and post-merge checks are separate gates.
+- WSP 10, 12, 22, 50, 97.
+
+## MSAL Node authorization-flow dependency fix (2026-10-26)
+
+- Pinned transitive `@azure/msal-node` to patched `7.1.1` through the VS Code extension package override; current `@vscode/vsce` and `@azure/identity` releases still select affected MSAL 6.x without the override.
+- Regenerated the extension lockfile and validated the resolved dependency tree and VSCE CLI startup without invoking an authentication flow. The full TypeScript compile still reaches the module's documented pre-existing WRE/interface errors; the dependency change adds no source or type surface.
+- Scope is the local development/publishing toolchain. No credential probing, provider mutation, extension publication, or production deployment is claimed.
+
+## Temporal Insight Rendering Security Fix (2026-10-10)
+
+- Replaced the broken nested template literal with DOM creation and `textContent`; insight labels and explanations cannot inject HTML into the extension webview.
+- Added a Node regression test with malicious HTML strings and replacement behavior: `node --test modules/development/ide_foundups/tests/test_temporal_insight_rendering.cjs`.
+- Refreshed extension dependencies, migrated deprecated `vsce` to `@vscode/vsce`, and retained CommonJS-compatible `uuid` 11.1.1. The registry audit reports zero dependency findings.
+- Validation: dependency installation and rendering regression pass. Full compilation proceeds past the repaired syntax but remains blocked by existing missing WRE/orchestrator methods, stale import, and VS Code option type errors; no extension deployment is claimed.
+
+---
+
 ## WRE Import Seam Fix (2026-05-02)
 
 ### Change Summary

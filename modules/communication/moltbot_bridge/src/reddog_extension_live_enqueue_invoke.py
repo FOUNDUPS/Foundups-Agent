@@ -11,6 +11,7 @@ or settle rewards.
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
+from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Union
 
 from modules.communication.moltbot_bridge.src.reddog_openclaw_live_enqueue import (
@@ -33,6 +34,9 @@ from modules.communication.moltbot_bridge.src.reddog_operator_loop_wardrobe_sele
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
     VALVE_OPEN_LIVE_ENQUEUE,
 )
+from modules.communication.moltbot_bridge.src.reddog_registered_foundup_target_verifier import (
+    verify_registered_foundup_target,
+)
 
 EXTENSION_LIVE_ENQUEUE_INVOKE_ACCEPT = "EXTENSION_LIVE_ENQUEUE_INVOKE_ACCEPT"
 EXTENSION_LIVE_ENQUEUE_INVOKE_REJECT = "EXTENSION_LIVE_ENQUEUE_INVOKE_REJECT"
@@ -49,6 +53,7 @@ class ExtensionLiveEnqueueInvokeReason:
     VALVE_NOT_LIVE_ENQUEUE = "REJECT_VALVE_NOT_OPEN_LIVE_ENQUEUE"
     LIVE_ENQUEUE_REJECTED = "REJECT_LIVE_ENQUEUE_SEAM_REJECTED"
     AUTHORITATIVE_ADMISSION_MISSING = "REJECT_AUTHORITATIVE_LIVE_ENQUEUE_ADMISSION_MISSING"
+    FOUNDUP_TARGET_INVALID = "REJECT_REGISTERED_FOUNDUP_TARGET_INVALID"
 
 
 @dataclass(frozen=True)
@@ -135,6 +140,8 @@ def invoke_reddog_extension_live_enqueue_explicit_valve(
     policy_gate_receipt: Mapping[str, Any],
     signed_receipt_chain_result: Mapping[str, Any],
     valve_decision: Mapping[str, Any],
+    registered_foundup_target_receipt: Optional[Mapping[str, Any]] = None,
+    repo_root: Optional[Path] = None,
     writer: Optional[LiveEnqueueWriter],
     seen_live_enqueue_keys: Optional[set] = None,
     admission_registry: Optional[InMemoryLiveEnqueueAdmissionRegistry] = None,
@@ -149,6 +156,13 @@ def invoke_reddog_extension_live_enqueue_explicit_valve(
     selection = _selection_mapping(selection_receipt)
     valve = _mapping(valve_decision)
     reasons = _validate_selection_receipt(selection, valve)
+    target_reasons = verify_registered_foundup_target(
+        repo_root or Path.cwd(),
+        registered_foundup_target_receipt,
+        selection_receipt=selection,
+    )
+    if target_reasons:
+        reasons.extend([ExtensionLiveEnqueueInvokeReason.FOUNDUP_TARGET_INVALID, *target_reasons])
     if reasons:
         return _reject(reasons, explicit_requested=True)
     if admission_registry is None:

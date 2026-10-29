@@ -1,30 +1,469 @@
 # RedDog Interface
 
+## Petition planning source closure — 2026-10-27
+
+The generated backend closure includes the effect-free petition planning leaf
+and rebinds the existing social adapter/controller. It now admits exactly1,472
+members and rejects1,473; the independent LF/CRLF manifest cap is329KiB.
+The new manifest is332,892 LF bytes /335,909 CRLF bytes, exceeding the previous
+328KiB CRLF ceiling by37 bytes. Individual2MiB and aggregate32MiB caps remain.
+This is a source/package contract, not host installation or campaign authority.
+The dated sections below describe their respective historical source revisions.
+
+## FoundUps authorization source closure — 2026-10-25
+
+The source backend manifest includes `agent_market/src/authorization.py` and
+rebinds the four existing FAM/simulator members changed by PR2188. Its exact
+member ceiling is 1,470; the existing boundary test rejects 1,471. The 328 KiB
+LF/CRLF manifest, 2 MiB individual and 32 MiB aggregate byte limits stay fixed.
+This source closure grants no installed-runtime, signer or effect authority.
+
+## PR1792 reusable brand grounding candidate — 2026-10-25
+
+An optional registry `brand_context_path` names public, tracked JSON validated
+against `modules/foundups/brand_context.schema.json`. The existing resolver
+uses the declared parent/child names and aliases; `public_discovery_alias`
+retains its separate discovery meaning. The parent registry identity and
+manifest still determine mutation scope. Brand context grants no authority.
+
+Declared invalid/private paths, linked components, multiply linked files,
+untracked/dirty context or schema, duplicate child IDs and aliases belonging
+to different identities reject. Two selected child references are ambiguous.
+No-context legacy receipts remain valid; new fallback fields must agree with
+the parent registry. The backend rechecks current content and selected child
+against `matched_reference`. Its UTF-8 receipt hashing matches the existing
+Node producer for this schema, including Japanese strings; this is not a
+general cross-language canonical-JSON specification. File checks are use-time
+validation, not an atomic filesystem capability against hostile concurrent edits.
+
+The reusable helper is included through the existing package closure owner.
+The local candidate has 66 runtime members and 70 packaged files, with the
+unchanged 1 MiB package bound. Protected registry/payload, website and skill
+activation from original PR1792 remain separate and unqualified.
+
+## PR841 backend closure boundary
+
+The exact runtime-file ceiling is 1,451, admitting only the newly imported
+`modules/communication/livechat/src/engagement_lifecycle.py` beyond the prior
+1,450-member closure. Existing manifest validation accepts 1,451 members and
+rejects 1,452. Manifest 324 KiB, per-file 2 MiB and total 32 MiB byte bounds,
+schema, digest checks, identity and admission authority are unchanged. This
+source-contract qualification grants no installed-host or runtime authorization.
+
+## Principal Activity Ledger candidate — PR1638
+
+`principal_activity_extension_adapter` owns local capture, context and status
+through the existing Principal Memex command-registration seam. Data remains
+under `globalStorageUri/principal-activity-ledger`; the key remains in VS Code
+SecretStorage. These local commands grant no external disclosure or execution
+authority. Installed-host operation is `IMPLEMENTED_NOT_VALIDATED`.
+
+- `ensureKey(secretStorage, scopedRoot)` now requires an existing absolute
+  storage root. An unscoped call rejects. All existing ledger files under that
+  root must authenticate with the stored key; missing, malformed or wrong keys
+  fail closed. Different roots sharing a secret slot remain unqualified.
+- `openLedger(context, principal)` supplies that scope. Same-root key operations
+  serialize locally and coordinate with cooperating processes. A busy or
+  abandoned lock rejects; there is no automatic lock stealing.
+- `PrincipalActivityLedger.append(event)` authenticates existing records before
+  extending the chain. A receipt requires the complete record write and flush
+  to succeed. An exception may leave bytes and does not authorize replay.
+- `events()` authenticates payloads. `verifyChain()` checks envelope consistency
+  only; neither proves that a valid tail was not removed.
+- `context({project, contact, limit})` identifies commitments associated with
+  matching history and applies their latest state from the entire principal
+  ledger, in append order. Filtering/windowing cannot resurrect a completion;
+  a later reopen replaces it. Recent events and open commitments each retain
+  at most `limit` entries, clamped to 1–200.
+- `contextPacket()` additionally bounds serialized output and reports when
+  entries were removed. Its `event_count` describes the pre-byte-cap recent
+  event selection, not the number left after byte truncation.
+- `open_commitment_count` counts all relevant, currently open IDs before caps;
+  `open_commitments_truncated` reports loss from either the item or byte cap.
+  The broader `truncated` flag also includes commitment truncation. An existing
+  empty/blank/partial ledger rejects; an I/O failure does not authorize reset.
+
+See [architecture and recovery boundaries](docs/PRINCIPAL_ACTIVITY_LEDGER_ARCHITECTURE.md)
+and [the integration receipt](docs/PRINCIPAL_ACTIVITY_LEDGER_INTEGRATION_RECEIPT.md).
+
+## Model routing and evaluation fallback
+
+The extension consumes receipt-bound AI Gateway runtime bindings when
+configured. It does not let Nemotron, Hermes, OpenClaw, LM Studio availability,
+or extension keyword heuristics mint model-selection authority. The shared
+verified topology resolver preserves exact role/provider/model bindings and
+fails closed when the consumer does not expose the required provider. Each
+`callFusion` provider egress obtains a fresh query receipt and performs an
+epoch-second `topology_valid_until` check before spawning the provider bridge;
+the worker captured when the webview opened is never sufficient call authority.
+
+Without a ready runtime binding, the explicit evaluation fallback is:
+
+- principal: `z-ai/glm-5.2`
+- critics: `deepseek/deepseek-v4-pro`, `qwen/qwen3.8-max`,
+  `moonshotai/kimi-k3`
+
+This roster is usable only when the operator explicitly sets
+`reddog.allowEvaluationFallback=true`; its default is false. The opt-in applies
+only to an unconfigured runtime. A configured binding that is rejected,
+expired, replayed, or provider-incompatible always blocks.
+An admitted evaluation roster remains no-effect: only a fresh
+`receipt_bound_runtime` egress can open bounded action planning. Evaluation
+output cannot enqueue OpenClaw work, dispatch, or enter production promotion.
+
+The local Nemotron proposer is shadow-only. It returns ordered model IDs;
+AI Gateway supplies providers/roles and admits only evaluation-eligible held-out
+benchmark candidates. No production routing or extension mutation follows from
+that proposal.
+
+## Governed resident Holo grounding
+
+The VSIX one-shot and canonical resident/OpenClaw read-only worker share the
+same generation-bound owner-query contract. The Python worker adapter retains
+its 60-second total wall and reserves three seconds for cleanup; the canonical
+CLI and asynchronous VSIX cold path are separately bounded at 300 seconds to
+cover the existing 270-second readiness canary. It exposes only allowed scoped
+hit metadata after exact CURRENT repository, authority, generation, replica,
+and receipt verification; Fusion receives no route or owner credential.
+
+Each success and health response now carries the owner-computed
+`retrieval_runtime_ranker_digest` for the exact twelve-module source closure that
+controls backend routing, ranking, Tier0 injection/dedup, path projection, and
+response ordering. Query clients and evaluation receipts require that value to
+equal the candidate's clean-authority digest. The same receipt now carries the
+child-computed `runtime_environment_digest`, binding executable content,
+ABI/platform, verified RedDog source bytes, distribution build records,
+replica/model artifacts, and actual allowlisted settings. Installed dependency
+payload bytes are not exact-closure verified, so the assurance flag is false
+and A-grade admission rejects.
+
+The A-grade facade always reruns the public corpus and enforces non-downgradable
+floors, but it has no non-test/VSIX caller and no deployed independent signing
+authority. Retrieval-quality RSI is unavailable and no promotion follows.
+
+Automatic exact-main maintenance, route activation, and AgentDB completion
+passed again through the real OpenClaw supervisor at exact main
+`66526ae5cdd0467ce264c1db4122ab82eadb7733` on 2026-08-27. Three fresh-process
+queries completed in about 34 seconds each and a pre-warmed query in 10.3
+seconds; all were CURRENT/no-gap/no-reindex, and full immutable revalidation of
+33 artifacts remained unchanged. Earlier post-restart diagnostics failed closed
+at 60/180 seconds; the latest base-bound governed query passed on attempt one
+inside the 300-second CLI wall. That proves base usability, not exact-current-
+main readiness or scale.
+Persistent authenticated owner activation is P0 scalability debt, and no
+outbound Hermes dispatch is enabled by this interface.
+
+## Test and promotion interface
+
+`package.json` exposes `test`, `test:contract`, and `test:release` without local
+dependencies. `tests/reddog_test_plan.js` is the single authenticated membership
+source for the bounded developer tiers and the four promotion groups.
+The exact release invocation is `npm run test:release`.
+`tests/run_reddog_test_tier.js` accepts only `fast` or `contract`, resolves exact
+regular files inside the test root, runs members sequentially with bounded
+output/time, and propagates the first failure.
+
+`tests/verify_extension_contract.js` remains the backward-compatible canonical
+promotion entry. Its parent process authenticates all 18 shards and requires
+the seven deferred `test_*` members (five governed-Git plus two bridge/package
+tails) to exactly equal the unique flattened release plan. Four children then
+run the shared-VM core, governed-Git hardening, Git
+environment/ref formats, and bridge-environment/WSP_62 groups concurrently.
+Concurrency is capped at four; each child is capped at 400 seconds and 2 MiB
+per output stream under the unchanged 420-second release ceiling. Results print
+in plan order and any exit, signal, timeout, or output overflow fails promotion.
+The canonical owner never reads an environment group selector. It launches the
+unadvertised `reddog_release_worker.js` with an exact group argv and a fresh
+128-bit nonce mirrored in an owner-overridden child environment. The supervisor
+starts one overall deadline from command entry, records child/release timeout
+state before termination, then attempts graceful and forced process-tree stops.
+If close cannot be confirmed, it destroys/unrefs child handles and emits a
+bounded failing receipt after fixed grace; a later zero exit cannot erase it.
+The first aligned promotion receipt was PASS in 295.928 seconds with `core` as
+the slowest group at 295.219 seconds. A repeat passed in 266.709 seconds;
+headroom is derived from the slower receipt.
+A hostile ambient-selector repair run passed all four groups in 279.723 seconds.
+Windows tree termination resolves `SystemRoot`/`SYSTEMROOT` to an absolute
+`System32\\taskkill.exe`, uses fixed PID arguments with `shell: false`, and
+waits for explicit process evidence. Synchronous/asynchronous launch failure,
+nonzero exit, or the 750-millisecond taskkill timeout returns failure to the
+controller for both graceful and forced attempts. Error handling remains
+idempotent after settlement; POSIX process-group signaling is unchanged.
+The loop-3 hostile-selector promotion passed in 274.537 seconds wall time;
+the owner receipt was 273.762 seconds with all four timeout fields false.
+
+`sanitizedGitEnv(source)` delegates to the fixed `buildGovernedGit(source)`
+profile. It returns a new object and never aliases or mutates `source`. The
+profile admits only case-normalized Windows process-launch/root/shell keys,
+required temp keys, and locale controls, then overwrites the exact governed Git
+variables. It does not copy PATH/Path/PATHEXT or wildcard-copy ambient `GIT_*`,
+credential, Python, Node, dynamic-loader, SSH-agent, home/profile,
+virtual-environment, or arbitrary caller fields.
+
+`governed_git_executable.js` is the single executable authority. It resolves
+lexical PATH/PATHEXT order before child execution, binds the canonical regular
+file's portable/native identity, size, and SHA-256, rejects link/reparse
+substitution, and permits ordinary installed hardlinks. Windows additionally
+requires Valid Authenticode from an independently bound fixed-SystemRoot
+PowerShell verifier; non-Windows records `not_applicable`. All readiness,
+configuration, projection, content, and repository-state commands invoke the
+same receipt-bound absolute executable with the closed environment and require
+successful binding revalidation before releasing output. The direct proof does
+not extend to Git DLLs or helper-program closure.
+Local configuration and ownership probes have an exact five-second child bound;
+this remains fail-closed while allowing the documented four-worker release
+closure to contend for CPU and disk without a false authority rejection.
+
+Readiness and projection receipts use `reddog_governed_git_readiness.v2` and
+`reddog_git_projection_receipt.v2`. Start Operations carries a
+`reddog_governed_git_repo_state.v2` receipt from the JavaScript authority into
+Python; the Python snapshot consumer validates its root, HEAD, dirty paths,
+worktree digest, readiness, digest-only executable receipt, and content digest
+rather than launching ambient Git. Body hashing is necessary but insufficient:
+the consumer also enforces exact object keys, types, bounds, digest formats,
+complete equal portable/native identities, link counts, and platform signature
+shape. Unknown or raw-path fields fail closed.
+
+`buildBridgePythonEnv(baseEnv, profile)` delegates to the closed environment
+profiles in `start_operations_environment.js`. Common isolated-profile state is limited
+to allowlisted Windows/POSIX process-discovery, temp/home, locale, certificate,
+and virtual-environment keys plus `PYTHONIOENCODING=utf-8`, `PYTHONUTF8=1`, and
+`PYTHONNOUSERSITE=1`. Named profiles admit only their observed configuration:
+`advisory_provider`, `authoritative_work_state`, `model_runtime_binding`,
+`holo_query`, `holoindex_owner`, and `resident_architect`; `default` adds none.
+Unknown or caller-constructed profiles fail to `default`. OpenRouter, Holo
+owner, and resident authority credentials never cross into another profile.
+`REDDOG_HOLOINDEX_QUERY_ROUTE_FILE` and the exclusive legacy
+`REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` are admitted by the closed
+`holoindex_owner` and `resident_architect` profiles, allowing their Python
+boundaries to prove the same explicit active replica without exposing it to
+unrelated bridge children. The separate Start Operations control environment
+also admits these exact non-empty strings for its promotion-time owner check;
+non-string, empty, secret, and arbitrary values are dropped. Python rejects
+both route candidates together, requires a digest-bound terminal journal for
+`CURRENT`, and exact-matches route-file authority and replica bindings to the
+active descriptor without consumer-side recovery or publication.
+Those two profiles and the bounded Start Operations control boundary admit
+`REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT` so an
+explicit clean committed-head authority checkout survives the JavaScript to
+Python boundary. The value remains only a candidate: Python independently
+proves its topology, clean state, and exact workspace HEAD before use.
+The resident worker does not treat profile propagation as proof. Its default
+generation-bound adapter invokes the same one-shot owner bridge in a bounded
+child process, validates exact CURRENT authority/replica/receipt coherence, and
+projects only allowed-path hits into a new scoped worker receipt. Raw owner
+evidence, private route state, and credentials do not enter Fusion. The path
+grounds canonical resident/OpenClaw audits but performs no live Hermes dispatch.
+`buildHoloQueryEnv(envLike, retrievalMode)` composes `holo_query`, which admits
+only `HOLOINDEX_SSD_PATH`, legacy `HOLO_SSD_PATH`, and explicit `HOLO_OFFLINE`,
+then forces `HOLOINDEX_QUERY_READONLY=1`. Lexical mode additionally synthesizes
+`HOLO_SKIP_MODEL=1`; semantic and unknown modes remove an ambient skip request.
+The local Holo helper removes the common `PYTHONNOUSERSITE` hardening flag to
+preserve the current configured/system interpreter's per-user NumPy visibility;
+it still excludes `PYTHONPATH`, `PYTHONHOME`, `PYTHONSTARTUP`, and credentials.
+This residual package-provenance risk remains until a sealed/configured Holo
+interpreter closure can support universal user-site isolation. The function
+returns a fresh object and never aliases or mutates `envLike`.
+
+R9 makes `registeredGitMetadataReceipt(root)` an authority receipt rather than
+a whole-repository hygiene receipt. Its existing frozen public shape remains
+`{ fingerprint, valid, worktree_config_state }`. The fingerprint covers the
+canonical direct/linked topology, linked gitfile/common/back-reference,
+authority HEAD/index/config.worktree, common config/shallow/info attributes and
+exclude controls, top-level objects/refs directory identity, and the exact
+current detached or `refs/heads/*` loose/packed resolution. Alternate stores,
+grafts, unsafe relevant controls, and unsupported ref storage fail closed.
+
+The common `info` and `objects/info` directories are required ordinary,
+canonical in-common directories for both direct repositories and linked
+worktrees. Missing, non-directory, symlink/junction/reparse escape, or identity
+substitution during their pre/realpath/post capture rejects the receipt; RedDog
+does not create either directory and still does not enumerate their entries.
+Supported `refs/heads/*` names use a bounded internal parser faithful to Git's
+ref-format exclusions: Unicode and `+` remain valid, while controls, space,
+DEL, `~^:?*[\\`, `..`, `@{`, empty components, dot-prefixed/dot-suffixed
+components, `.lock` suffixes, and leading/trailing slash fail closed. The
+parser never invokes Git and never broadens authority beyond branch refs. The
+receipt's OID check is intentionally structural: exactly 40 or 64 hexadecimal
+characters for detached HEAD and the current loose or packed ref. It does not
+reimplement Git's config grammar. Complete capped config bytes remain in the
+receipt fingerprint, while Git's own `HEAD^{commit}` resolution proves object-
+format and commit semantics before a bound named batch or projection is
+released. Packed current-ref classification recognizes exact-current
+whitespace tokens before accepting only the canonical one-space record;
+malformed current records cannot degrade into the valid unborn state.
+
+`noFollowPathEntry(path)` centralizes internal entry state as `absent`,
+`present`, or `error` from `lstat`. Only `ENOENT` maps to absent. Optional and
+forbidden controls, ordinary directories, `plainControlFile()`, direct
+`commondir`, current loose refs, and execution-root `.git` therefore reject
+dangling or unreadable present entries instead of treating them as missing.
+`registeredGitMetadataState(root)` shares the root `.git` observation with the
+first receipt so this correction does not add a fourth receipt or weaken the
+absolute-final-proof order. For supported branch refs, required canonical
+`refs/heads` plus each existing deeper parent is checked without directory
+enumeration; only a genuinely missing deeper parent preserves unborn handling.
+
+`gitOutputs()` still accepts at most 16 unique fixed operation names and keeps
+its existing array/error shapes. Each immutable command list runs twice with
+identical governed argv/environment; all bounded strings must match. A bound
+batch that does not request `HEAD_SHA` prepends that fixed operation as its
+semantic proof and removes the proof output before return. Only then is the
+narrow final receipt taken as the last protected read. A command error, output
+mismatch, or relevant receipt drift invalidates the whole batch. `HEAD_SHA`
+verifies `HEAD^{commit}`, so format mismatch and missing/corrupt required
+objects fail through Git even though unrelated object directories are not
+traversed. Snapshot callers use the same semantic proof while preserving true
+unborn handling, two enumerations, stable content captures, and a narrow final
+receipt. `governedGitReadiness()` covers structural/config readiness, not later
+command success, so READY may coexist with a fail-closed command result.
+
+Projection admission never uses a follow-target existence check. For each
+changed path, `projectionPathState()` uses the shared no-follow entry classifier
+and validates every existing parent component as a stable canonical ordinary
+directory, without enumeration. Exact `ENOENT` may represent a tracked
+deletion; dangling final/parent links, junctions, non-directory parents, lookup
+errors, or component substitution reject the complete snapshot. An absent
+untracked record remains invalid. Present files continue through
+`resolveSafeRepoFile()` and the canonical confined regular-file/single-link
+identity checks.
+
+Before `readOpenedBytes(handle, size, maxSize)` is called, the opened fd must be
+an ordinary single-link file with the exact pre-open identity and a safe integer
+size from zero through 2 MiB. The reader defensively repeats the explicit size
+cap before allocating exactly that size and issuing only remaining-length
+positional `readSync` requests. A zero or incomplete read, growth, truncation,
+fd/path identity change, pre-open replacement, or invalid size returns no
+projection. Zero bytes and exactly 2 MiB are valid; 2 MiB plus one is rejected.
+These checks do not increase the per-file or aggregate caps.
+
+Each present control is capped before and after open, allocated at exactly the
+opened size, and read through explicit remaining-length fd requests. A zero or
+incomplete read, growth, truncation, or candidate-path substitution rejects the
+receipt at the retained fd/path identity checks. Index bytes are digested as a
+Buffer and are not copied into a UTF-8 string. `packedRefOid()` deliberately
+parses only an exact current-ref entry (including duplicate/current-OID
+rejection); malformed unrelated packed lines are outside the narrow receipt's
+global-hygiene claim. A `HEAD_SHA` authority resolution that makes Git parse
+such malformed storage fails the complete named batch as a command failure.
+
+This is point-sampled consistency, not continuous filesystem atomicity. A
+fully restored ABA between samples is outside the receipt claim. Per-query
+global loose-object/all-ref special-file hygiene is also not claimed; that
+would require a separate maintenance audit. The FoundUp resolver's subsequent
+registry/schema byte reads are not transactionally enclosed by the Git quartet
+and remain an explicitly separate atomicity limitation.
+
+Historical release narratives and superseded acceptance boundaries are maintained in
+`ModLog.md`; this interface retains only current callable and authority contracts.
+
 ## Purpose
 
-`reddog` is a local Cursor/VS Code extension whose user-facing product name is RedDog. It opens the resident 0102 FoundUps architect thin client and retains the redaction-gated OpenRouter bridge through `scripts/advisory_model_once.py`.
+`reddog` is a local Cursor/VS Code thin-client extension for RedDog, the
+lightweight interaction, exchange, and attention surface backed by the
+principal-scoped 0102 FoundUps Digital Twin. It retains the redaction-gated
+OpenRouter bridge through `scripts/advisory_model_once.py`.
+
+### Continuous conversation adapter
+
+`conversation_plane_policy.js` exposes deterministic `classify()` plus bounded
+prompt, context, effort, and model selectors. Its decision carries independent
+`interaction_intent`, `reasoning_depth`, and `effect_ceiling` fields. The
+adapter can emit at most `PROPOSAL`; it cannot emit bounded execution authority.
+`CHAT` always receives an empty repository context packet. Default fast/critic
+chat uses the configured single-model path; an explicit/risk-derived panel may
+use Fusion without changing the `NONE` effect ceiling.
+Raw provider history and the opt-in last-work-packet summary are both withheld
+from foreground chat, even if the UI continuation checkbox is selected.
+
+This is a package-internal policy interface, not a network API. The Digital
+Twin backend now defines a strict zero-authority turn/status/cancel envelope,
+binds existing requests to verified current-generation session/AgentDB state,
+stores their content-free replay fence, and can persist one trusted empty-ID
+TURN scope after exact intent/grounding/FoundUp/E0 checks. The backend also
+durably binds that original empty-ID request to the resolved ID/revision 0
+through an explicit v2 journal record under the same signed-generation lease.
+The backend's scope-schema-v4 E0 state signs the exact source/resolved request
+commitment, and replay consumes its verified authority atomically.
+The extension does not call these aggregates, and the first TURN is not yet
+executed by a handler or immediate CAS. PFMall and phone clients therefore still
+require an authenticated resident adapter with durable event ordering; the
+browser `reddog:command` event is not that transport.
+
+### VS Code workspace and package capabilities
+
+`package.json` declares `untrustedWorkspaces.supported=false` and
+`virtualWorkspaces.supported=false`. RedDog requires trusted local filesystem,
+Git, Python subprocess, worker-thread, and materialized backend behavior; these
+capability flags are a fail-closed compatibility boundary, not a permission
+grant.
+
+The distributable surface is pinned to 69 files: 65 runtime files derived from
+the static relative-require closure plus the two dynamic workers and Python
+bootstrap, and four public metadata/assets (`LICENSE`, `README.md`, `package.json`,
+`icon.png`). The packaged license text must canonically match the repository
+authority. `tests/**`, `docs/**`, internal governance journals, caches,
+coverage, logs, environment files, credential-container suffixes, dependencies,
+editor files, prior VSIX files, and `.vscodeignore` do not cross the package
+boundary. The release group runs the deterministic installed-VSCE listing
+twice; the default fast tier performs static validation only.
+The listed regular-file closure is additionally capped at 1 MiB raw. Git
+attributes materialize all 68 text entries as LF on every host and keep the PNG
+binary. `reddog_package_surface_receipt.v2` emits file/byte/cap fields plus the
+governing effective EOL-policy digest, sorted member-content digest, LF mode,
+and text/binary counts. CR bytes or an effective attribute override fail before
+receipt emission. The observed raw
+total is not a final compressed-VSIX size claim; archive size is verified when
+the release artifact is actually built.
+
+`renderHtml()` receives `webview.cspSource` plus a fresh 128-bit nonce created
+for each panel. Its deny-by-default CSP admits the packaged icon, inline
+VS Code-theme CSS, and only the nonce-bearing inline script. The webview has no
+network or arbitrary script source. Inline CSS remains an explicit bounded
+compatibility exception pending the WSP_62 UI extraction.
+
+`governed_git_executable.js` is the sole production Git process authority.
+Its internal binding retains canonical absolute paths solely for invocation and
+revalidation. `toPublicExecutableReceipt()` removes both Git and verifier paths
+before any serialized boundary. Readiness v2 and projection-receipt v2 expose
+only canonical-path digests, SHA-256,
+size, start/final portable/native identities, and signature proof. Windows
+readiness requires Valid Authenticode from an identity/hash-bound fixed-
+SystemRoot PowerShell verifier; its public proof retains only verifier path/root
+digests, fixed-relative-path and containment proof, hash/size, and complete
+identities. Other platforms expose exactly `status: not_applicable`.
+Configuration and content calls use the same internal absolute binding with
+PATH/Path/PATHEXT removed and revalidate before output release. Start Operations
+consumes the JS-minted repository-state v2 receipt; Python does not resolve or
+execute Git. This proves the selected executable only, not Git DLL/helper
+closure or independent authentication of the unhashed receipt origin.
 
 It is the IDE-side thin-client surface for the resident RedDog backend and the OpenClaw/WRE/Hermes execution spine. The extension submits typed intent and displays receipts; it does not grant shell, repository write, merge, FoundUp registration, or CABR authority.
 
-RedDog is the resident FoundUps architect thin client and 012/0102 interface. Fusion is one internal reasoning mode, not the product identity.
+The VSIX is the IDE-side thin client. RedDog is the fast interaction/exchange
+surface; 0102 is the resident FoundUps Digital Twin and deep architect layer.
+Fusion is one internal reasoning mode, not the product identity.
 
-Version 0.4.13 answers direct authoritative-work questions from `REDDOG_AUTHORITATIVE_WORK_STATE_PATH`. It validates the external snapshot revision and freshness, governed queue/claim lineage, canonical WSP_15 receipt, and selected-slice consistency, then returns a digest-bound local status receipt. A missing or invalid state is `NOT_READY` and never falls through to HoloIndex or Fusion.
+For version-by-version provenance, generated closure pins, and migration history, see
+`ModLog.md`. Current behavior is specified by the contracts below.
 
-Version 0.4.12 requires the selected workspace to satisfy an extension-pinned `scripts/reddog_backend_manifest.json` before target extraction, HoloIndex lookup, model execution, permission probing, or work-order creation. `scripts/generate_reddog_backend_manifest.py` deterministically binds every executable entry point (including `holo_index.py`), its exact-case Git-tracked Python dependency closure, package initializers, package-relative dynamic imports, and declared dynamic file-load scopes; undeclared dynamic loading fails manifest generation. The extension validates the exact backend API, executable/bridge/runtime SHA-256 digests, repository markers, every intermediate path component, canonical parent containment, regular-file type, and non-symlink/junction boundary. Full lifecycle checks run in an extension-owned worker thread; synchronous repair/judgment bridges recheck immediately before process launch. Failure produces an allowlisted, content-free local block receipt; RedDog never repairs or re-indexes the backend during this check. This is a compatibility and bounded path-integrity gate, not an atomic filesystem lock against a hostile local administrator.
-
-Version 0.4.11 requires the editor host to provide `REDDOG_AUTHENTICATED_PRINCIPAL_ID` and `REDDOG_AUTHORIZED_FOUNDUP_IDS`. The extension binds the selected principal and FoundUp into `reddog_intent.v2`; the Python bridge independently resolves the same host scope and submits through `RedDogResidentArchitectClient`. Missing or mismatched scope fails before the backend cycle. Resident records use canonical genesis state, full-intent binding, revision CAS, terminal cancellation, monotonic retries, and recomputed internal-integrity telemetry. These controls do not replace signed execution authority.
-
-Version 0.4.10 streams orchestrator-owned Fusion stage metadata to the webview and emits digest-bound progress and OpenRouter call receipts in Copy MD. Receipts include roles, requested/served models, provider routing, generation IDs, retries, timing, token counts, and cost in OpenRouter credits. Missing or retry-ambiguous provider accounting is reported as incomplete and cost remains unknown rather than zero. Receipts are integrity-checked, bound to the extension-generated process run, secret-filtered, and observational only; they are not authentication or action authority.
+The extension-pinned backend manifest is validated before target extraction, HoloIndex lookup, model execution, permission probing, or work-order creation.
+Compatibility failure is local and fail-closed; it does not trigger repair,
+re-indexing, provider access, or work dispatch.
 
 ## RedDog and the Recursive 0102 DAE Ecosystem
 
-012 does not orchestrate every worker. 012 talks to RedDog. RedDog participates in the recursive 0102 DAE ecosystem. Autonomous WRE/DAE agents perform bounded system work under Hermes/OpenClaw/WRE governance.
+012 does not orchestrate every worker. 012 talks to RedDog, which exchanges
+bounded intent and context with the deeper 0102 layer. Autonomous WRE/DAE
+agents perform bounded system work under OpenClaw supervision and WRE authority;
+Hermes receives bounded leaf jobs.
 
 ### Architecture Stack
 
 ```text
 012 work focus
-  -> RedDog digital twin / architect interface
+  -> RedDog fast interaction / exchange surface
+  -> 0102 digital twin / architect layer
   -> recursive 0102 DAE ecosystem
 ```
 
@@ -32,14 +471,15 @@ Version 0.4.10 streams orchestrator-owned Fusion stage metadata to the webview a
 
 | Layer | Role |
 | --- | --- |
-| RedDog | Digital-twin architect/interface. 012's first contact point. |
-| Hermes | Scaffolding, lifecycle, scheduling, queues, receipts. Not policy authority. |
-| OpenClaw | Policy and intent gate. |
+| RedDog | Lightweight low-latency interaction, exchange, and attention surface; 012's first contact point. |
+| 0102 | Principal-scoped Digital Twin, architect, and deep cognition/orchestration layer. |
+| Hermes | Bounded delegated leaf-worker/scaffolding runtime. Not conversation, policy, repository, or promotion authority. |
+| OpenClaw | Channel gateway and policy/control supervisor for admitted work. |
 | HoloIndex | Memory and retrieval. |
 | Skillz/Rolodex | Capability catalog. |
 | Autonomous WRE/DAE agents | Code, docs, tests, ops, promotion, FoundUps launch. |
 | Sentinels | Critique, truth, drift, regression review. Review only, no execution. |
-| WRE | Repo and process authority. Verification and dispatch. |
+| WRE | Work decomposition, repo/process authority, verification, dispatch, and recursive learning. |
 | CABR/pAVS | Benefit validation, routing, reputation. |
 | 012 | Work focus, testing, sovereign authorization, override. |
 
@@ -52,8 +492,8 @@ Autonomous WRE/DAE agents are NOT 012 work. 012 provides work focus, testing, so
 | Capability | Status | Boundary |
 |---|---|---|
 | Advisory model review | YES | OpenRouter request after Fusion redaction gate passes |
-| Bounded repo context | YES | Extension auto-gathers WSP/HoloIndex/editor/git/Skillz context by WSP_15 tier and sends it through redaction gate |
-| HoloIndex recall | YES | Semantic evidence comes from the authenticated HoloIndex owner service and requires a current generation-bound query receipt. Legacy `--bundle-json` supplies bounded direct-read/context structure only; its unbound semantic hits are discarded. Explicit lexical opt-down remains diagnostic-only. |
+| Bounded repo context | YES | Extension auto-gathers WSP/HoloIndex/editor/git/Skillz context by reasoning tier and sends it through redaction gate |
+| HoloIndex recall | YES | One governed owner adapter supplies current generation-bound semantic evidence or a bounded lexical/direct-read bundle. The extension does not invoke raw `holo_index.py --bundle-json`/`--offline`; lexical mode remains diagnostic-only and semantic authority fails closed. |
 | Repository audit fallback | YES, READ-ONLY | Generation-bound semantic recall remains authoritative; structured Holo candidates must also survive secure direct read. Missing source or independent test/contract evidence triggers bounded deterministic discovery, never shell/model paths, writes, or execution authority. |
 | WSP_00/WSP_97/WSP_15 prompting | YES | System prompt requires role lock, truth labels, proposed fixes, and MPS priority |
 | Repo edits | NO | No write tool exposed to model |
@@ -78,7 +518,7 @@ External repositories are assessed through advisory WSP intake before they can b
 
 ## Governed Repo Work Order Contract
 
-RedDog is the 0102 architect interface - **not an authority owner**. RedDog receives **bounded delegated capability for one work order after fresh verification**; it does not "have authority."
+RedDog is the interaction interface to the 0102 architect layer - **not an authority owner**. A governed RedDog-mediated operation may receive **bounded delegated capability for one work order after fresh verification**; the surface itself does not "have authority."
 
 | Artifact | Location |
 |---|---|
@@ -201,12 +641,12 @@ Run Trace HoloIndex scorecard fields (v0.3.22+):
 | `work_focus_targets_derived` | At least one required target was DERIVED from free-form work-focus prose / M2M / Read-first shapes, not only the explicit header (v0.3.44+) | OBSERVED |
 | `work_focus_target_derivation_sources` | Which read-intent shapes contributed targets: subset of `{required_block, read_first, m2m_read, ctx_files, markdown_bullet, inline_path, backtick_path, symbol}` (v0.3.44+) | OBSERVED |
 | `work_focus_targets_dropped_low_confidence` | Flowing-prose tokens dropped from the required list because they had a slash but NO file extension (e.g. `breadcrumb/handoff`); EXCLUDED from `required_targets_total` / `_missing` so they cannot flip `target_recall_ok` (v0.3.45+; `[]` when none) | OBSERVED |
-| `direct_read_fallback_used` | Governed direct-read-by-path fetch ran (or offline lexical fallback used) | OBSERVED |
+| `direct_read_fallback_used` | The governed owner bundle contains accepted non-empty direct-read paths and bytes | OBSERVED |
 | `direct_read_paths` | Repo-relative target paths actually fetched by the Python bundle layer | OBSERVED |
 | `direct_read_rejected` | `{path, reason}` for denied/traversal/absolute/secret/symlink-escape hits (never read) | OBSERVED |
 | `direct_read_bytes` | Total bytes injected across all fetched targets (bounded by total budget) | OBSERVED |
 | `direct_read_truncated` | `{path, bytes}` for targets clipped by the per-file byte cap | OBSERVED |
-| `direct_read_fetch_attempted` | Enriched direct-read subprocess was invoked (v0.3.33+) | OBSERVED |
+| `direct_read_fetch_attempted` | The governed owner bundle supplied direct-read evidence, or bounded missing-target enrichment was requested (v0.3.33+) | OBSERVED |
 | `direct_read_fetch_error` | Classified fetch failure (`timeout`, `max_buffer`, `process_error`, `unknown`, or none) | OBSERVED |
 | `audit_context_requested` | Extension requested audit-mode redaction for governance direct-read context (v0.3.34+) | OBSERVED |
 | `audit_context_applied` | Bridge passed `audit_mode=True` into `evaluate_redaction_gate()` (v0.3.34+) | OBSERVED |
@@ -236,7 +676,15 @@ Run Trace Unicode normalization fields (v0.3.24+) and bridge UTF-8 invariant (v0
 | `unicode_normalization_sources` | Pipe-separated: `prompt`, `context`, `repair_prompt` | OBSERVED |
 | `unicode_normalization_form` | `NFC` when normalization ran; `none` when skipped | OBSERVED |
 
-Bridge child env (v0.3.25+): `PYTHONIOENCODING=utf-8`, `PYTHONUTF8=1`. Python bridge reads stdin via `sys.stdin.buffer` UTF-8 decode so valid Unicode (e.g. U+2014 em dash) is not mis-decoded on Windows before the redaction gate.
+Bridge child env (v0.4.101+): every route uses a closed profile and forces
+`PYTHONIOENCODING=utf-8` plus `PYTHONUTF8=1`. Common isolated profiles also set
+`PYTHONNOUSERSITE=1`; local `holo_query` deliberately removes it because the
+current configured/system interpreter requires per-user NumPy. That route still
+denies `PYTHONPATH`, `PYTHONHOME`, `PYTHONSTARTUP`, and credentials. Universal
+user-site isolation requires a sealed/configured Holo interpreter closure.
+Python
+bridge reads stdin via `sys.stdin.buffer` UTF-8 decode so valid Unicode (e.g.
+U+2014 em dash) is not mis-decoded on Windows before the redaction gate.
 
 `evaluateTargetRecall(taskText, bundleOutput)` and `inferRecallTargetPaths(taskText)` implement target-specific recall from bundle `task_retrieval.code_hits`. Path-aware detector (REDDOG_TARGET_RECALL_PATH_AWARE_PHASE1, slice 1/3): when the prompt carries an explicit "Required direct-read targets" list, `parseRequiredTargetPaths(taskText)` parses it into repo-relative paths/globs and `evaluateTargetRecall` compares each required path against content-bearing bundle locations, using `isSelfFileLocation()` so retrieving `extension.js` (RedDog itself) can never satisfy a required target. This closes the `content_included(any file) != required_targets_recalled` false negative: `index_gap_detected` is honestly `true` when required targets are absent. Prompts without a required list keep prior inferred-target behavior. This slice is detector-only: it does NOT read required files (slice 2) or change redaction (slice 3).
 
@@ -324,11 +772,11 @@ Model and context routing:
 - Fusion review-packet model fields are bridge-owned. Extension-supplied `bridge_meta` may add non-core telemetry but cannot replace the selected mode, lead, critic panel, truncation state, budgets, excerpts, quorum, or retry truth.
 - Principal/synthesis default: `z-ai/glm-5.2`.
 - Adversarial critic default: `deepseek/deepseek-v4-pro`.
-- Implementation critic default: `moonshotai/kimi-k2.7-code`.
-- Long-horizon reasoning critic default: `moonshotai/kimi-k3` with mandatory `max` reasoning, no temperature parameter, and a receipt-recorded 4096-token floor for every direct completion call. An explicit direct selection or receipt-backed signed promotion may place K3 in single, principal, or synthesis roles; this bridge does not itself promote a champion, change defaults, open an OpenClaw execution valve, or dispatch Hermes.
+- Implementation critic default: `qwen/qwen3.8-max`.
+- Long-horizon reasoning critic default: `moonshotai/kimi-k3` with mandatory `max` reasoning, no temperature parameter, and a receipt-recorded 4096-token floor for every direct completion call. Regular single and manual Fusion inputs accept only integer completion budgets from 1 through the endpoint-fixture maximum of 131072; missing values retain their existing 2048/1600 defaults and invalid values fail as `invalid_max_tokens` before provider dispatch. Valid larger budgets are preserved and receipts distinguish requested from effective values. An explicit direct selection or receipt-backed signed promotion may place K3 in single, principal, or synthesis roles; this bridge does not itself promote a champion, change defaults, open an OpenClaw execution valve, or dispatch Hermes.
 - REGULAR smoke/simple prompts auto-route to `openrouter_single` with the GLM principal and `wsp_holo` HoloIndex grounding (no Fusion panel, Skillz, or git).
 - Substantive audit/research/implementation prompts must produce a non-empty typed target universe. When no explicit path, external source, or semantic header exists, RedDog derives a generic semantic subject and requires content-bearing HoloIndex evidence for it; broad audits require two references across implementation/authority and verification/authority categories. Unparseable work fails before Fusion with `grounding_target_universe_empty`.
-- Context is not a 012-facing selector; it is resolved from WSP_15 tier.
+- Context is not a 012-facing selector; it is resolved from the reasoning tier. That heuristic is not a WSP_15 allocation.
 - Skillz/Wardrobe/Rolodex/OpenClaw/Hermes discovery is context only. RedDog may recommend a governed handoff, but this extension cannot execute it.
 - `openrouter_fusion_alias` remains implemented for future explicit use, but is not the RedDog default because critic traces are not exposed.
 - Repair pass: at most one; uses the same redaction-gated bridge; must not invent evidence.
@@ -380,13 +828,17 @@ Formal contract:
 
 ```text
 012 work focus (non-authoritative)
+  -> RedDog interaction surface
   -> 0102 constructWspTaskPrompt(workFocus, classification, contextQuality, workerType)
   -> redaction gate (prompt + bounded context separately)
   -> OpenRouter bridge
-  -> RedDog architect output
+  -> 0102 advisory output
+  -> RedDog presentation
 ```
 
-012 does not prompt RedDog directly. The bridge receives the assembled WSP task prompt, not raw work focus alone. Work focus is embedded inside the WSP prompt under an explicit non-authoritative label.
+012 speaks to RedDog directly. RedDog does not send raw work focus to the
+provider as sole authority: the deeper 0102 layer assembles the WSP task prompt
+for the bridge, and embeds work focus under an explicit non-authoritative label.
 
 ## WSP_97 Truth Table (v0.3.15)
 

@@ -506,8 +506,8 @@ class TestSerialization:
 class TestPolicyFlags:
     """Tests for PolicyFlags dataclass."""
 
-    def test_default_all_false(self):
-        """All flags default to False."""
+    def test_default_gates_false_and_dry_run_true(self):
+        """Authority flags default False while execution defaults to dry-run."""
         flags = PolicyFlags()
         assert flags.security_gate_checked is False
         assert flags.security_gate_passed is False
@@ -517,7 +517,7 @@ class TestPolicyFlags:
         assert flags.exfoliation_gate_passed is False
         assert flags.wsp_preflight_checked is False
         assert flags.wsp_preflight_passed is False
-        assert flags.dry_run_mode is False
+        assert flags.dry_run_mode is True
         # HXA24: Capability token fields
         assert flags.capability_token_checked is False
         assert flags.capability_token_present is False
@@ -710,10 +710,10 @@ class TestPolicyFlagsDeserializationSanitization:
         flags = PolicyFlags.from_dict({"dry_run_mode": False})
         assert flags.dry_run_mode is False
 
-    def test_dry_run_mode_defaults_false_when_missing(self):
-        """dry_run_mode defaults False when absent from inbound data."""
+    def test_dry_run_mode_defaults_true_when_missing(self):
+        """dry_run_mode defaults safe when absent from inbound data."""
         flags = PolicyFlags.from_dict({})
-        assert flags.dry_run_mode is False
+        assert flags.dry_run_mode is True
 
     def test_foundupjob_from_dict_sanitizes_malicious_payload(self):
         """FoundUpJob.from_dict routes through the same sanitization chokepoint."""
@@ -743,12 +743,12 @@ class TestPolicyFlagsDeserializationSanitization:
         for name in _SANITIZED_FLAG_NAMES:
             assert getattr(job.policy_flags, name) is False
 
-    def test_create_job_yields_all_false_gate_flags(self):
-        """create_job() yields all-False gate/token flags at birth (unchanged)."""
+    def test_create_job_yields_false_gates_and_dry_run(self):
+        """create_job() starts with no authority and safe dry-run execution."""
         job = create_job(tenant_id="t", requested_action="build_foundup")
         for name in _SANITIZED_FLAG_NAMES:
             assert getattr(job.policy_flags, name) is False
-        assert job.policy_flags.dry_run_mode is False
+        assert job.policy_flags.dry_run_mode is True
 
     def test_direct_constructor_still_allows_server_authored_true(self):
         """Direct PolicyFlags(...) constructor is UNCHANGED (server authority).

@@ -224,7 +224,19 @@ def _build_tab(driver, stream_text):
     icon = El(attributes={"aria-label": "spark"}, parent=driver)
     trigger = El(parent=driver, deep_children={ASK_ICON: icon})
     prompt = El(attributes={"aria-label": "Ask something"}, parent=driver)
-    stream = El(text=stream_text, parent=driver)
+    class SubmittedStream(El):
+        @property
+        def text(self):
+            # The new answer arrives only after input, as in the live UI.
+            if prompt.sent_keys:
+                return self._text
+            return GREETING if '"topics"' in self._text else self._text
+
+        @text.setter
+        def text(self, value):
+            self._text = value
+
+    stream = SubmittedStream(text=stream_text, parent=driver)
     return {
         TITLE_DEEP: title,
         ASK_TRIGGER: trigger,
@@ -339,8 +351,39 @@ def test_video_prompt_names_the_specific_video():
     assert "studio.youtube.com/video/abc123" in p
     assert "My Title" in p
     assert "JSON" in p
+    assert '"source_video_id":"abc123"' in p
     # Single line (no embedded newline -> no stray ENTER in the contenteditable).
     assert "\n" not in p
+
+
+@pytest.mark.asyncio
+async def test_answer_capture_ignores_previous_video_baseline(monkeypatch):
+    """A retained prior-video JSON must not stabilize as this video's answer."""
+    old = '{"source_video_id":"old","content_category":"educational","topics":["old"]}'
+    new = '{"source_video_id":"new","content_category":"educational","topics":["new"]}'
+
+    class Stream:
+        def __init__(self):
+            self.reads = 0
+
+        @property
+        def text(self):
+            self.reads += 1
+            return old if self.reads <= 5 else new
+
+    stream = Stream()
+    indexer = StudioAskIndexer(driver=object())
+    monkeypatch.setattr(indexer, "_first_element", lambda _selectors: stream)
+
+    async def no_delay(*_args, **_kwargs):
+        return None
+
+    monkeypatch.setattr(indexer, "_human_delay", no_delay)
+    answer = await indexer._scrape_ask_response(
+        baseline_answer=old,
+        total_deadline=mod.time.monotonic() + 1.0,
+    )
+    assert answer == new
 
 
 # ===========================================================================

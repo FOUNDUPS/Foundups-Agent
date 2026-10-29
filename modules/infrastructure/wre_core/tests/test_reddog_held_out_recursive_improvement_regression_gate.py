@@ -3,15 +3,23 @@
 from __future__ import annotations
 
 import ast
+import copy
 import json
 from pathlib import Path
+
+import pytest
 
 from modules.infrastructure.wre_core.src import (
     reddog_held_out_recursive_improvement_regression_gate as gate,
 )
 from modules.infrastructure.wre_core.src.reddog_verified_outcome_ratchet import (
+    InMemoryOutcomeRatchetStore,
     OUTCOME_RATCHET_RECORDED,
     OUTCOME_RATCHET_REJECT,
+    ratchet_verified_outcome,
+)
+from modules.infrastructure.wre_core.src.reddog_verified_draft_pr_publish import (
+    VERIFIED_DRAFT_PR_PUBLISH_ACCEPT,
 )
 from modules.infrastructure.wre_core.src.wre_autonomous_slice_verifier_runtime import (
     AUTONOMOUS_SLICE_VERIFIER_ACCEPT,
@@ -26,7 +34,7 @@ def _digest(ch: str) -> str:
 
 
 def valid_request() -> dict:
-    return {
+    request = {
         "work_order_id": "wo-held-out-1",
         "slice_name": "REDDOG_HELD_OUT_RECURSIVE_IMPROVEMENT_REGRESSION_GATE_PHASE1",
         "worker_id": "worker-0102",
@@ -57,6 +65,9 @@ def valid_request() -> dict:
                 "ratchet_id": "outcome_ratchet_1234",
                 "work_order_id": "wo-held-out-1",
                 "slice_name": "REDDOG_HELD_OUT_RECURSIVE_IMPROVEMENT_REGRESSION_GATE_PHASE1",
+                "verifier_receipt_id": "wre_slice_verify_1234",
+                "outcome_status": "accepted",
+                "pattern_memory_eligible": True,
                 "pattern_memory_write_performed": False,
             },
         },
@@ -79,6 +90,36 @@ def valid_request() -> dict:
             "holoindex_freshness_receipt_digest": _digest("4"),
         },
     }
+    request["ratchet_result"]["receipt"]["verification_digest"] = gate._digest(
+        request["verification_result"]
+    )
+    return request
+
+
+def record_gate_fixture(request, *, invalid_cost=False, failed_outcome=False):
+    """Exercise the real recorder with this gate's existing synthetic evidence."""
+    verifier_receipt = request["verification_result"]["receipt"]
+    recorded_request = {
+        "work_order_id": request["work_order_id"],
+        "slice_name": request["slice_name"],
+        "outcome_status": "failed" if failed_outcome else "accepted",
+        "request_receipt": {"request_id": request["improvement_job"]["job_id"]},
+        "execution_receipts": [{"receipt_id": "synthetic-test-execution"}],
+        "verification_result": copy.deepcopy(request["verification_result"]),
+        "publish_result": {
+            "accepted": True, "decision": VERIFIED_DRAFT_PR_PUBLISH_ACCEPT,
+            "receipt": {"receipt_id": "synthetic-publication",
+                        "work_order_id": request["work_order_id"],
+                        "slice_name": request["slice_name"],
+                        "verifier_receipt_id": verifier_receipt["receipt_id"]},
+        },
+        "cost_receipt": {"total_tokens": True if invalid_cost else 100, "estimated_cost_usd": 0.01},
+        "latency_receipt": {"wall_time_ms": 10, "queue_time_ms": 0},
+        "acceptance_receipt": {} if failed_outcome else {"accepted": True},
+        "failure_receipt": {"failed": True} if failed_outcome else None,
+        "holoindex_evidence": copy.deepcopy(request["holoindex_evidence"]),
+    }
+    return ratchet_verified_outcome(recorded_request, store=InMemoryOutcomeRatchetStore())
 
 
 def assert_reject(req: dict, code: str) -> gate.HeldOutRecursiveImprovementRegressionResult:
@@ -122,6 +163,7 @@ def test_carries_model_runtime_binding_from_verifier_and_ratchet_receipts() -> N
         "reddog_model_runtime_binding:test"
     )
     req["ratchet_result"]["receipt"]["model_runtime_binding_digest"] = _digest("5")
+    req["ratchet_result"]["receipt"]["verification_digest"] = gate._digest(req["verification_result"])
 
     result = gate.evaluate_held_out_recursive_improvement_regression_gate(req)
 
@@ -262,6 +304,83 @@ def test_receipt_is_deterministic_and_json_serializable() -> None:
     dumped = json.dumps(first.to_dict(), sort_keys=True)
     assert "held_out_recursive_gate_" in dumped
     assert "HELD_OUT_RECURSIVE_IMPROVEMENT_REGRESSION_GATE_ACCEPT" in dumped
+
+
+@pytest.mark.parametrize("key", ["test_count", "failure_count"])
+@pytest.mark.parametrize("value", [None, True, False, "0", "12", "bad", 0.5, -0.5, float("inf"), float("nan")],
+                         ids=["null", "true", "false", "zero-text", "count-text", "text", "fraction", "negative-fraction", "infinity", "nan"])
+def test_regression_counts_require_actual_nonnegative_integers(key, value):
+    req = valid_request()
+    req["held_out_regression"][key] = value
+    result = gate.evaluate_held_out_recursive_improvement_regression_gate(req)
+    assert result.accepted is False
+    assert result.pattern_memory_admission_allowed is False
+
+
+@pytest.mark.parametrize("section,key", [
+    ("verification_result", "work_order_id"), ("verification_result", "slice_name"),
+    ("ratchet_result", "work_order_id"), ("ratchet_result", "slice_name"),
+    ("ratchet_result", "verifier_receipt_id"), ("ratchet_result", "verification_digest"),
+])
+@pytest.mark.parametrize("replacement", [None, "foreign-evidence"])
+def test_retention_requires_the_same_work_and_verification(section, key, replacement):
+    req = valid_request()
+    if replacement is None:
+        req[section]["receipt"].pop(key)
+    else:
+        req[section]["receipt"][key] = replacement
+    assert_reject(req, gate.FAIL_RATCHET_RECEIPT if section == "ratchet_result" else gate.FAIL_VERIFICATION_RECEIPT)
+
+
+@pytest.mark.parametrize("key,replacement", [
+    ("outcome_status", "failed"), ("pattern_memory_eligible", False),
+    ("pattern_memory_eligible", None), ("pattern_memory_write_performed", None),
+    ("pattern_memory_write_performed", "false"),
+])
+def test_recorded_failure_or_ambiguous_memory_state_is_not_retention_evidence(key, replacement):
+    req = valid_request()
+    req["ratchet_result"]["receipt"][key] = replacement
+    assert_reject(req, gate.FAIL_RATCHET_RECEIPT)
+
+
+def test_verification_cannot_change_after_outcome_recording():
+    req = valid_request()
+    req["verification_result"]["receipt"]["head_sha"] = "b" * 40
+    req["held_out_regression"]["candidate_head_sha"] = "b" * 40
+    assert_reject(req, gate.FAIL_RATCHET_RECEIPT)
+
+
+def test_gate_identity_binds_full_regression_evidence():
+    req = valid_request()
+    first = gate.evaluate_held_out_recursive_improvement_regression_gate(req)
+    req["held_out_regression"]["test_count"] += 1
+    second = gate.evaluate_held_out_recursive_improvement_regression_gate(req)
+    assert first.accepted and second.accepted
+    assert first.receipt.gate_id != second.receipt.gate_id
+
+
+@pytest.mark.parametrize("section", ["verification_result", "ratchet_result"])
+def test_secret_metadata_does_not_reach_retention_receipts(section):
+    req = valid_request()
+    req[section]["receipt"]["work_order_id"] = "api_key = fixture-only"
+    req["work_order_id"] = "api_key = fixture-only"
+    result = gate.evaluate_held_out_recursive_improvement_regression_gate(req)
+    assert result.accepted is False
+    assert gate.FAIL_SECRET_IN_EVIDENCE in result.rejection_reasons
+    assert "fixture-only" not in json.dumps(result.to_dict())
+
+
+@pytest.mark.parametrize("invalid_cost,failed_outcome,expected", [
+    (False, False, True), (True, False, False), (False, True, False),
+])
+def test_real_recorder_result_drives_retention_decision(invalid_cost, failed_outcome, expected):
+    req = valid_request()
+    recorded = record_gate_fixture(req, invalid_cost=invalid_cost, failed_outcome=failed_outcome)
+    req["ratchet_result"] = recorded.to_dict()
+    result = gate.evaluate_held_out_recursive_improvement_regression_gate(req)
+    assert result.accepted is expected
+    assert result.pattern_memory_admission_allowed is expected
+    assert recorded.receipt.pattern_memory_write_performed is False
 
 
 def test_ast_boundary_no_execution_persistence_or_index_mutation() -> None:

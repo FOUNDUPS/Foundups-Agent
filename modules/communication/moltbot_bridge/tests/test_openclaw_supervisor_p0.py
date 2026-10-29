@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from pathlib import Path
 
 from modules.communication.moltbot_bridge.src.openclaw_supervisor import OpenClawSupervisor
@@ -9,6 +9,7 @@ from modules.infrastructure.database.src.db_manager import DatabaseManager
 def test_run_cycle_executes_and_completes_pending_autonomous_task(tmp_path, monkeypatch):
     db_path = tmp_path / "foundups.db"
     monkeypatch.setenv("FOUNDUPS_DB_PATH", str(db_path))
+    monkeypatch.setenv("OPENCLAW_AUTO_TASKS_ENABLED", "1")
     # Mock WRE to accept "test" skill and return success
     monkeypatch.setenv("WRE_MOCK_SKILLS", "test")
     DatabaseManager.reset_for_tests()

@@ -144,6 +144,33 @@ def test_dispatches_current_stage_handler_and_records_result() -> None:
     assert state["no_bridge_invoked"] is True
 
 
+def test_yielding_handler_is_recorded_before_control_is_released() -> None:
+    store = InMemoryResidentQueueChainResultsStore()
+    handler = _RecordingHandler(
+        {
+            **_authority_request_accept(),
+            "queue_chain_yield_required": True,
+        }
+    )
+
+    result = invoke_reddog_resident_queue_next_stage_dispatch(
+        explicit_resident_queue_stage_dispatch_requested=True,
+        work_state_snapshot=_snapshot(),
+        store=store,
+        handlers={"authority_request": handler},
+        now_iso=NOW,
+    )
+
+    assert result.accepted is True
+    assert result.deferred is True
+    assert result.record_result is not None
+    assert result.record_result.accepted is True
+    assert (
+        store.load()["stage_results"]["authority_request"]["status"]
+        == "QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT"
+    )
+
+
 def test_dispatch_uses_existing_chain_state_to_pick_next_stage() -> None:
     store = InMemoryResidentQueueChainResultsStore()
     seed = record_resident_queue_stage_result(

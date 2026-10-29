@@ -1,5 +1,9 @@
 # WRE Phase 3 - WSP Compliance Pre-Audit
 
+> **Historical pre-audit — superseded and non-authoritative.**
+> Blockers and readiness claims below apply only to the 2025 snapshot. Current
+> truth is defined by module documentation, verified receipts, and WSP 95 v2.1.
+
 **Date**: 2025-10-23
 **Auditor**: 0102
 **Purpose**: Assess Phase 3 (HoloDAE Integration) readiness and WSP requirements

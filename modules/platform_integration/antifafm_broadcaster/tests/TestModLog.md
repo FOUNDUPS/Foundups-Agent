@@ -8,7 +8,7 @@
 | `test_boot_layer_rotator.py` | NEW | 2026-03-22 | Boot layer schema rotation tests (16 tests) |
 | `test_gcc_shipping_tracker.py` | NEW | 2026-03-22 | GCC shipping tracker + screenshot mode (22 tests) |
 | `test_obs_controller_startup.py` | PASS | 2026-03-06 | OBS start verification (no false-positive stream started) |
-| `test_suno_stt_extractor.py` | PASS | 2026-03-05 | Suno STT lyrics extraction pipeline tests |
+| `test_suno_stt_extractor.py` | PASS | 2026-08-26 | 14 tests; SQLite handles, repository cwd, and database isolation verified |
 | `test_go_live_steps.py` | PASS | 2026-02-28 | Step-by-step Go Live debugging + DOM verification |
 | `test_discord_voice_broadcaster_integration.py` | PASS | 2026-04-09 | Discord voice lane boot/runtime wiring (+ invalid snowflake env case; 6 tests) |
 
@@ -207,23 +207,31 @@ pytest modules/platform_integration/antifafm_broadcaster/tests/test_obs_controll
 3. `TestSunoSTTTranscriber` - WSP 84 FasterWhisperSTT reuse verification
 4. `TestSunoSTTLyricsExtractor` - Full pipeline integration
 5. `TestCLIIntegration` - CLI --help, --stats commands
-6. `TestLaunchIntegration` - launch.py import, SKILLz JSON validation
+6. `TestLaunchIntegration` - launch.py import, direct-handler action JSON validation
 
 **Key Tests**:
 - `test_hash_normalization`: Verifies lyrics with different whitespace/case produce same hash
 - `test_deduplicator_detects_duplicate`: Verifies duplicate lyrics are detected across songs
 - `test_wsp84_reuse_import`: Verifies FasterWhisperSTT imported from voice_command_ingestion
-- `test_skill_json_valid`: Verifies suno_stt_extract.json SKILLz file is valid
+- `test_direct_handler_action_config_json_valid`: Verifies the launch-handler
+  action JSON without presenting it as executable WRE Skillz
 
 **WSP Compliance**:
 - WSP 5: Test coverage for new STT functionality
 - WSP 72: Module independence (no cross-module test dependencies)
 - WSP 84: Validates code reuse of FasterWhisperSTT
 
-**Run Tests**:
+**Run the isolated full contract**:
 ```bash
-pytest modules/platform_integration/antifafm_broadcaster/tests/test_suno_stt_extractor.py -v
+$env:ANTIFAFM_LYRICS_DB = 'O:\pytest_tmp\reddog_wre_truth\antifa\lyrics.db'
+pytest -q modules/platform_integration/antifafm_broadcaster/tests/test_suno_stt_extractor.py
 ```
+
+The extractor leaves pytest-owned stdout/stderr streams intact, explicitly
+closes every SQLite handle, derives subprocess cwd from the exact repository
+root, and accepts an isolated database through `ANTIFAFM_LYRICS_DB` or the
+constructor. Exact current result: `14 passed in 0.76s` with no live STT,
+network, browser, broadcast, or production database effect.
 
 ---
 
