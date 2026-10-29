@@ -403,6 +403,78 @@ receipt, test case, runtime member, cap, secret, signer or provider activation.
 Independent reconstruction accepted exactly40 bindings (39 manifest/one receipt);
 append preserves all2260 prior entries/order/keys. Fresh hosted scan still required.
 
+## Source-owned unsigned JSON framing allocation — before authoring
+
+WSP00/3/6/11/15/22/50/62/84/97; C2/I4/D3/Impact4=13/P1. Reuse the
+existing Algorand codec owner on a child branch of reviewed codec head24fb851d.
+Observed main remains5da1876; pending codec2206 and intent2202 publication/security
+gates still govern main. This allocation claims no new test result or admission.
+
+Need: bounded fifteen-field request/six-field response framing currently lives
+only in an external experiment. Move the pure format boundary into existing
+`modules/platform_integration/algorand/src/unsigned_asa_probe.py`, not a new module,
+DTO, launcher, controller or SQL layer. Public API:
+`format_unsigned_probe_request(request_json: bytes) -> bytes`.
+
+Admit exact builtin bytes of length1..4096 before parsing. Require one canonical
+ASCII JSON object with exactly the existing fifteen request fields. Reject duplicate
+and escaped-duplicate keys, missing/extra fields, nonfinite values, wrong structural
+kinds and nested values. Existing scalar annotations govern exact kinds before
+constructing the existing request DTO; the existing semantic validator remains
+responsible for realm, address, fee, round and numeric constraints. Sanitize JSON
+encoding/recursion/decoding errors to fixed field-name ValueError, without input echo.
+Canonical means sorted keys, compact separators, ensure_ascii=True, allow_nan=False,
+no whitespace or terminal newline; parsed equivalence alone does not qualify bytes.
+
+Reuse `build_unsigned_asa_probe` and the unchanged general
+`validate_unsigned_asa_probe` with the independently parsed expected request. Emit
+sidecars from the validated artifact, not unchecked builder metadata. Output exact
+canonical ASCII bytes<=16384 with schema=foundups-unsigned-probe-worker-result-v1,
+request_sha256, unsigned_hex, unsigned_sha256, transaction_id and
+source_binding_sha256. Require wire1..1024 and lowercase hex. The source binding
+is the existing domain plus all fifteen request fields; it is not producer/profile
+identity or proof of grants, trusted facts or wallet control. Output is ephemeral.
+
+Freeze24 new ordinary unittest methods plus the original28 unchanged ASTs/oracles:
+exact52 IDs. Commit fixed test/tooling prerequisites before desired RED against
+parent product. Retain actual absent-method failures separately from qualification
+status. Then review/commit the product and prepare a fresh profile for GREEN.
+V2 inventory/profile/release envelopes bind fixed52 count, literal IDs and their
+approved digest; no arbitrary selection, relaxed count or widened source/effect
+guard. Preserve original28 local/hosted profiles, receipts and failures unchanged.
+Up to three separately released malformed-profile/release controls may verify
+pre-import refusal; they are not extra unit methods or a production sandbox proof.
+
+Source ceiling260 lines/new functions<=35; test owner620/new methods<=35;
+qualifier310 with at most26 net lines and an inventory helper<=8. Guard/source
+admission ASTs stay unchanged. Workflow grows<=8 lines only for the v2 envelope;
+setup, dependencies, alias checks and guard stay fixed. This draft<=70 added lines
+fits plan85, all Markdown230 and root ModLog18 allocations. Only one new repository
+file is allocated: the compact protocol receipt<=24KiB. Runtime1471/caps unchanged.
+
+Reuse the exact existing materialized interpreter/base/fifteen-wheel environment
+read-only, with new source/profile phases and explicit parent release after review.
+No install or SDK environment change. Distinct hosted pip qualification must bind
+its own actual profile; local evidence is not relabeled as CI. No results are
+recorded before execution, and component counts are not summed with other suites.
+
+No FAM consumer, CLI/process transport, provider observation, fact/grant admission,
+durable artifact, reservation, signer, issuance, reward/payment, DEX or resident
+activation is introduced. Future host integration still needs current trusted
+facts, admitted producer provenance and existing-intent revalidation after I/O.
+Fresh strict scope and hosted/security checks remain publication gates; no parent
+merge, main/runtime readiness or broader native/OS isolation claim is allocated.
+
+### Local framing result — 2026-10-25
+
+Source242a819c4 passes52 exact methods in the existing materialized profile;
+original28 ASTs/oracles remain unchanged. Desired RED retained28PASS/20ERROR/4FAIL;
+64 retained AttributeErrors and79 unclassified overflow diagnostics are historical.
+GREEN has four expected denials, zero unexpected attempts/diagnostics,5263 stable
+files and286 loaded origins. Three pre-import refusals are separate controls.
+See receipts/FOUNDUPS_ALGORAND_FORMAT_PROTOCOL_20261025.json for literal IDs,
+source/profile/release/review bindings. Hosted/security/main gates remain separate.
+
 ## Unsigned integration checkpoint allocation — before authoring
 
 WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97. Source: main0909b941.

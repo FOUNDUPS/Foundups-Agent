@@ -39,6 +39,16 @@ Clarify account/signature/State-Proof boundaries without adding cryptography.
 Current patched-runtime, ledger/authority, exact-artifact replay and signer
 qualification remain separate. No chain operation or reward effect occurred.
 
+## 2026-10-25 — bounded canonical JSON framing locally qualified
+
+WSP11/15/22/50/62/84/97,13/P1. Added one bytes-only framing contract in the
+existing codec: exact15-field canonical request, existing build/general validation
+and six-field bounded immutable output. Full-request binding is data, not authority.
+Tests were authored first:24 new methods preserve all original28 ASTs and controls.
+Actual RED and52PASS GREEN/profile evidence is recorded in tests/TestModLog.md;
+hosted/security qualification remains separate. Original28 evidence is unchanged.
+No new FAM/SQL/launcher/facts/ledger/signer/chain/reward behavior is introduced.
+
 ## 2026-10-25 — local unsigned codec qualification passed
 
 Reconciled main e801 and committed source at `444c9f147b6a603be57f4bfb51453cd99b1827a9`.

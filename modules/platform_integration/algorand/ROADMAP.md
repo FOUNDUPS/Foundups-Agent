@@ -9,6 +9,16 @@ exact signature/fee policy, funded bounds and independent confirmation/recovery.
 Native Falcon accounts do not make every address, ASA or consensus automatically
 post-quantum secure. No new cryptographic implementation is planned here.
 
+## Canonical JSON framing layer
+
+- Locally qualified: one bounded bytes entrypoint in the existing codec.
+- Retain the original28 ASTs/oracles and add24 ordinary framing methods.
+- Record exact52 inventory and fresh versioned source/profile/results separately;
+  previous local/hosted28 results cannot qualify changed code automatically.
+- Main delivery still requires the pending parent and current hosted/security gates.
+- FAM consumption, producer admission, fee/round facts and durable artifact/reissue
+  ownership remain separate allocations; this layer creates no runtime caller.
+
 1. **Locally qualified layer:** strict scalar-to-unsigned-byte codec and test-first
    independent vectors; all 28 exact methods pass in the reviewed materialized
    profile. Source authoring and local qualification grant no network authority.

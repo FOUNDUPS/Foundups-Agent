@@ -161,7 +161,11 @@ jobs:
           repo = pathlib.Path(os.environ['GITHUB_WORKSPACE']).resolve()
           profile = task / 'profile.json'
           adapter = repo / 'modules/platform_integration/algorand/tests/qualify_sdk.py'
-          release = dict(status='RELEASED_FOR_CODEC_TESTS', profile_sha256=hashlib.sha256(profile.read_bytes()).hexdigest(), adapter_sha256=hashlib.sha256(adapter.read_bytes()).hexdigest(), head=os.environ['GITHUB_SHA'], phase=str(task / 'run'))
+          data = json.loads(profile.read_text(encoding='utf-8'))
+          inventory = dict(schema='asa-codec-tests-v2', count=52, ids_sha256='8dc3199b3e49348552bd871a9265842d11356986e2718241931c6aae2b5f03d7')
+          assert data['schema'] == 'asa-codec-profile-v2' and data['test_inventory'] == inventory
+          assert type(data['test_inventory']['count']) is int
+          release = dict(status='RELEASED_FOR_CODEC_TESTS_V2', profile_sha256=hashlib.sha256(profile.read_bytes()).hexdigest(), adapter_sha256=hashlib.sha256(adapter.read_bytes()).hexdigest(), head=os.environ['GITHUB_SHA'], phase=str(task / 'run'), test_inventory_sha256=inventory['ids_sha256'])
           (task / 'release.json').write_text(json.dumps(release, sort_keys=True, indent=2), encoding='utf-8')
           '@ | python -I -B -X utf8 -
           if ($LASTEXITCODE -ne 0) { throw 'Workflow profile release failed' }

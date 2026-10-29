@@ -9,6 +9,46 @@ format/guard acceptance and independent union review are required; old passing
 runs are not relabelled. The pinned3.12.10 profile is historical compatibility
 evidence, not current patched-runtime, signature or live-chain qualification.
 
+## 2026-10-25 — distinct hosted52-method qualification passed
+
+[Run40202250448](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/40202250448), job121195694357,
+passes52 exact IDs at PR head135bd6542/actual merge90767d6fa. Four expected denials,
+zero unexpected attempts/diagnostics,6193-file ci-pip profile and286 origins.
+Artifact12601834163 (expires2026-11-08) and profile/release/source/review hashes
+are retained in the portable format receipt. Local5263 is a distinct installation.
+Current metadata-only publication and its security rescan remain separately gated.
+
+## 2026-10-25 — canonical JSON framing locally qualified
+
+Test-first commit1fdd98bdb01423bc50203c2c23bed12b81a1659d preserved product161;
+product commit242a819c4ffae62501774ff6595964c3c828701f applied the exact reviewed204-line draft.
+Frozen tests remain512 lines: original28 unchanged plus24 framing methods.
+Desired RED ran once:28 PASS,20 ERROR,4 FAIL; unchanged subtest reporting explains
+four FAIL. All64 retained diagnostics are AttributeError at missing API callsites;
+79 overflow diagnostics remain unclassified. RED is deliberately not qualified.
+GREEN ran once: all52 exact IDs PASS, zero skips/errors/failures/diagnostics or
+overflow. Four expected denied controls and zero unexpected attempts held in both
+runs. Each has286 measured origins; GREEN's5263 frozen files rehash exactly.
+
+V2 fixes the52 IDs and descriptor digest, without widening source/effect guards.
+Three separately released preflight negatives reject old schema, changed same-count
+ID inventory and mismatched release binding before candidate import/phase creation.
+These controls are not extra unit methods. Old28 local/hosted evidence is unchanged.
+Source/test raw-vs-Git-LF, profiles, releases, reviews, outcomes and all52 literal IDs
+are in the [portable receipt](../../../../docs/architecture/receipts/FOUNDUPS_ALGORAND_FORMAT_PROTOCOL_20261025.json).
+External root: `C:/Users/user/AppData/Local/Temp/foundups-probe-json-20261025-c38yzrk4`.
+Two root static-script lookup mistakes and one predicted RED-classification mismatch
+are retained; no source, oracle, guard or expected inventory was weakened or rerun.
+Hosted pip/security qualification is pending for this candidate; local qualification
+adds no FAM caller, signer, current ledger fact, native/OS isolation or chain effect.
+
+## 2026-10-25 — canonical JSON framing acceptance allocated
+
+WSP11/15/22/50/62/84/97,13/P1. Appended24 normal methods before product;
+preserve all original28 ASTs/oracles and four denied controls. New total52 IDs
+covers bounded canonical JSON, exact scalar kinds, general-validator fault controls
+and declared request binding. No collection/execution yet; root owns RED/GREEN.
+
 ## 2026-10-25 — distinct hosted pip qualification passed
 
 [Run 40173561283](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/40173561283),
