@@ -11,6 +11,11 @@ Budget: <=10 workflow lines and <=16 log lines; no new dependency owner or gate
 exception. Run the unchanged security regression and fresh hosted codec profile.
 Reconcile main362b4c62a metadata, preserving all newer source/manifest/ledger
 entries and the prior exact public fixture review. Existing14/P1 priority remains.
+Local unchanged security suite passes52/53, including the bootstrap oracle.
+The unrelated GotJunk shell-stub case resolves Windows WSL bash and fails;
+the explicit Git-bin PATH retry reproduces it. Both failures are retained.
+No test waiver or assertion change: hosted Ubuntu must qualify all53 cases.
+Fresh hosted28-case codec qualification is still required after this repair.
 
 WSP15 allocation14/P1 in the existing delivery plan precedes integration.
 Preserve the exact codec,28 test methods, golden oracles, qualifier and lock.
