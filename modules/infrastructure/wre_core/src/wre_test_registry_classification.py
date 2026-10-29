@@ -69,6 +69,9 @@ def classify_test_file(repo_root: Path, relative_path: str) -> TestFileClassific
         reasons.add("archived_source")
     if tree is not None:
         _apply_effects(tree, reasons, capabilities)
+        mode_reason = _declared_test_mode(tree)
+        if mode_reason:
+            reasons.add(mode_reason)
     suite_class = _suite_class(path, tree, reasons)
     return TestFileClassification(
         suite_class=suite_class,
@@ -78,6 +81,21 @@ def classify_test_file(repo_root: Path, relative_path: str) -> TestFileClassific
         collectable=suite_class in {"unit", "integration"} and not reasons,
         description=description,
     )
+
+
+def _declared_test_mode(tree: ast.Module) -> str:
+    """Explicit incomplete/manual programs cannot become automated evidence."""
+    for node in tree.body:
+        targets = node.targets if isinstance(node, ast.Assign) else (
+            [node.target] if isinstance(node, ast.AnnAssign) else [])
+        if any(
+            isinstance(target, ast.Name) and target.id == "WRE_TEST_MODE"
+            for target in targets
+        ):
+            value = node.value.value if isinstance(node.value, ast.Constant) else None
+            return {"scaffold": "unimplemented_test_scaffold",
+                    "manual": "manual_test_program"}.get(value, "invalid_test_mode")
+    return ""
 
 
 def _apply_effects(
@@ -133,7 +151,7 @@ def shard_slug(owner: str, suite_class: str) -> str:
 def _suite_class(
     path: PurePosixPath, tree: ast.Module | None, reasons: set[str]
 ) -> str:
-    if "archived_source" in reasons:
+    if reasons & {"archived_source", "unimplemented_test_scaffold", "manual_test_program"}:
         return "manual"
     if reasons:
         return "operational"

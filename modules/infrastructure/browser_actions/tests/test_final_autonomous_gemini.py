@@ -1,184 +1,123 @@
-"""
-FINAL AUTONOMOUS GEMINI VISION TEST
-Launches own Chrome with FoundUps Gemini Vision integration
-Zero manual intervention required
-"""
-import sys
-import time
-from pathlib import Path
+"""Manual Chrome/Gemini YouTube heart probe; never automated test evidence.
 
-repo_root = Path(__file__).resolve().parent
-sys.path.insert(0, str(repo_root))
-
-from modules.infrastructure.foundups_selenium.src.browser_manager import get_browser_manager
-from selenium.webdriver.common.by import By
-import json
-
-print("\n" + "="*70)
-print(" AUTONOMOUS GEMINI VISION - YouTube Studio Heart Click")
-print(" 0102-Driven | Zero Manual Intervention")
-print("="*70 + "\n")
-
-# Step 1: Launch FoundUps browser with Gemini Vision
-print("[1] Launching FoundUps browser with Gemini Vision...")
-browser_manager = get_browser_manager()
-browser = browser_manager.get_browser(
-    browser_type='chrome',
-    profile_name='youtube_move2japan'
-)
-print("[OK] Browser launched with vision_analyzer embedded")
-
-# Step 2: Navigate to YouTube Studio
-url = "https://studio.youtube.com/channel/UC-LSSlOZwpGIRIYihaz8zCw/comments/inbox"
-print(f"\n[2] Navigating to YouTube Studio...")
-print(f"    URL: {url}")
-browser.get(url)
-time.sleep(8)  # Wait for page load
-print("[OK] Page loaded")
-
-# Step 3: Verify Gemini Vision available
-print("\n[3] Verifying Gemini Vision...")
-if not hasattr(browser, 'vision_analyzer') or not browser.vision_analyzer:
-    print("[ERROR] vision_analyzer not available!")
-    browser.quit()
-    sys.exit(1)
-print("[OK] Gemini Vision operational")
-
-# Step 4: Use Gemini Vision to find heart button
-print("\n[4] Gemini analyzing page for heart button...")
-
-prompt = """TASK: Find the CREATOR HEART button (NOT like button) on YouTube Studio.
-
-CRITICAL DISTINCTIONS:
-- LIKE button: Thumbs up icon - position 3 from left - IGNORE THIS
-- HEART button: Outlined heart icon - position 5 from left - TARGET THIS
-
-The heart is between thumbs down and three-dot menu in comment action bar.
-
-Return JSON:
-{
-  "found": true/false,
-  "confidence": "High/Medium/Low",
-  "element_description": "describe heart button only",
-  "selector": "CSS selector or XPath for HEART button"
-}
+Importing this module performs no browser, model, or platform action. Running
+the program explicitly retains the historical live heart-click behavior; that
+workflow has not been validated by the import-safety regression.
 """
 
-try:
+WRE_TEST_MODE = "manual"
+
+PROMPT = 'TASK: Find the CREATOR HEART button (NOT like button) on YouTube Studio.\n\nCRITICAL DISTINCTIONS:\n- LIKE button: Thumbs up icon - position 3 from left - IGNORE THIS\n- HEART button: Outlined heart icon - position 5 from left - TARGET THIS\n\nThe heart is between thumbs down and three-dot menu in comment action bar.\n\nReturn JSON:\n{\n  "found": true/false,\n  "confidence": "High/Medium/Low",\n  "element_description": "describe heart button only",\n  "selector": "CSS selector or XPath for HEART button"\n}\n'
+
+
+def _analyze_heart(browser):
     import io
+    import json
     from PIL import Image
 
+    print("[4] Gemini analyzing page for heart button...")
     screenshot = browser.get_screenshot_as_png()
     img = Image.open(io.BytesIO(screenshot))
-
-    response = browser.vision_analyzer.model.generate_content([prompt, img])
-    result = response.text
-    print(f"\n[GEMINI RESPONSE]:\n{result}\n")
-
-    # Parse JSON
+    result = browser.vision_analyzer.model.generate_content([PROMPT, img]).text
+    print(f"[GEMINI RESPONSE]:\n{result}")
     if "```json" in result:
-        json_str = result.split("```json")[1].split("```")[0].strip()
+        result = result.split("```json")[1].split("```")[0].strip()
     elif "```" in result:
-        json_str = result.split("```")[1].split("```")[0].strip()
-    else:
-        json_str = result
-
-    result_data = json.loads(json_str)
-
-    print(f"[5] Gemini Result:")
-    print(f"    Found: {result_data.get('found', False)}")
-    print(f"    Confidence: {result_data.get('confidence', 'Unknown')}")
-    print(f"    Description: {result_data.get('element_description', 'N/A')}")
-    print(f"    Selector: {result_data.get('selector', 'N/A')}")
-
+        result = result.split("```")[1].split("```")[0].strip()
+    result_data = json.loads(result)
+    print(f"[5] Gemini Result: {result_data}")
     if not result_data.get('found', False):
-        print("\n[ERROR] Gemini did not find heart button")
-        browser.quit()
-        sys.exit(1)
+        raise RuntimeError("Gemini did not find heart button")
+    return result_data
 
-except Exception as e:
-    print(f"[ERROR] Gemini analysis failed: {e}")
-    import traceback
-    traceback.print_exc()
-    browser.quit()
-    sys.exit(1)
 
-# Step 5: Locate and click element
-try:
-    print("\n[6] Locating element via Selenium...")
-    selector = result_data.get('selector', '')
+def _find_heart(browser, selector):
+    from selenium.webdriver.common.by import By
 
-# Try multiple strategies
-elements = []
-
-# Strategy 1: Try Gemini's full selector
-try:
-    if selector.startswith('//'):
-        elements = browser.find_elements(By.XPATH, selector)
-    elif selector:
-        elements = browser.find_elements(By.CSS_SELECTOR, selector)
-except Exception as e:
-    print(f"    [WARN] Gemini selector failed: {e}")
-
-# Strategy 2: If no elements, try simpler aria-label selector (more stable)
-if not elements and 'aria-label="Give appreciation"' in selector:
-    print("    [INFO] Trying simpler aria-label selector...")
+    elements = []
     try:
-        elements = browser.find_elements(By.CSS_SELECTOR, 'button[aria-label="Give appreciation"]')
-    except Exception as e:
-        print(f"    [WARN] Aria-label selector failed: {e}")
+        if selector.startswith('//'):
+            elements = browser.find_elements(By.XPATH, selector)
+        elif selector:
+            elements = browser.find_elements(By.CSS_SELECTOR, selector)
+    except Exception as exc:
+        print(f"[WARN] Gemini selector failed: {exc}")
+    if not elements and 'aria-label="Give appreciation"' in selector:
+        print("[INFO] Trying simpler aria-label selector...")
+        try:
+            elements = browser.find_elements(
+                By.CSS_SELECTOR, 'button[aria-label="Give appreciation"]')
+        except Exception as exc:
+            print(f"[WARN] Aria-label selector failed: {exc}")
+    if not elements:
+        print("[INFO] Trying yt-icon-button search...")
+        try:
+            for button in browser.find_elements(By.TAG_NAME, 'yt-icon-button'):
+                aria = (button.get_attribute('aria-label') or '').lower()
+                if 'appreciation' in aria or 'heart' in aria:
+                    elements = [button]
+                    break
+        except Exception as exc:
+            print(f"[WARN] Icon button search failed: {exc}")
+    if not elements:
+        raise RuntimeError(f"All selector strategies failed: {selector}")
+    return elements[0]
 
-# Strategy 3: Find all yt-icon-button elements and filter
-if not elements:
-    print("    [INFO] Trying yt-icon-button search...")
-    try:
-        all_buttons = browser.find_elements(By.TAG_NAME, 'yt-icon-button')
-        for btn in all_buttons:
-            aria = btn.get_attribute('aria-label') or ''
-            if 'appreciation' in aria.lower() or 'heart' in aria.lower():
-                elements = [btn]
-                break
-    except Exception as e:
-        print(f"    [WARN] Icon button search failed: {e}")
 
-if not elements:
-    print(f"[ERROR] All selector strategies failed - no elements found")
-    print(f"    Gemini selector: {selector}")
-    browser.quit()
-    sys.exit(1)
+def _click_heart(browser, element):
+    import time
 
-element = elements[0]
-print(f"[OK] Element located: <{element.tag_name}>")
-
-# Highlight (2sec RED border)
-browser.execute_script("""
-    arguments[0].style.border = '3px solid red';
-    arguments[0].style.backgroundColor = 'rgba(255,0,0,0.2)';
-""", element)
-print("\n[7] Element highlighted with RED border (2 seconds)")
-time.sleep(2)
-
-# Scroll and click
-browser.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
-time.sleep(1)
-element.click()
-
-print("\n" + "="*70)
-print("[SUCCESS] Autonomous heart button click executed!")
-print("="*70)
-print("\nCheck browser - heart should be RED (filled)")
-time.sleep(5)
-
-    print("\n[OK] Test complete - browser staying open for 30 seconds...")
+    print(f"[OK] Element located: <{element.tag_name}>")
+    browser.execute_script("""
+        arguments[0].style.border = '3px solid red';
+        arguments[0].style.backgroundColor = 'rgba(255,0,0,0.2)';
+    """, element)
+    print("[7] Element highlighted with RED border (2 seconds)")
+    time.sleep(2)
+    browser.execute_script(
+        "arguments[0].scrollIntoView({block: 'center'});", element)
+    time.sleep(1)
+    element.click()
+    print("[SUCCESS] Heart click executed; check browser for filled heart")
+    time.sleep(5)
+    print("[OK] Probe complete - browser staying open for 30 seconds...")
     time.sleep(30)
 
-except Exception as e:
-    print(f"[ERROR] Click failed: {e}")
-    import traceback
-    traceback.print_exc()
-    browser.quit()
-    sys.exit(1)
 
-print("\nClosing browser...")
-browser.quit()
-print("Done.")
+def main():
+    import sys
+    import time
+    import traceback
+    from pathlib import Path
+
+    repo_root = Path(__file__).resolve().parents[4]
+    sys.path.insert(0, str(repo_root))
+    from modules.infrastructure.foundups_selenium.src.browser_manager import get_browser_manager
+
+    print("MANUAL GEMINI VISION - YouTube Studio Heart Click")
+    browser = None
+    try:
+        print("[1] Launching FoundUps browser with Gemini Vision...")
+        browser = get_browser_manager().get_browser(
+            browser_type='chrome', profile_name='youtube_move2japan')
+        print("[2] Navigating to YouTube Studio...")
+        browser.get('https://studio.youtube.com/channel/UC-LSSlOZwpGIRIYihaz8zCw/comments/inbox')
+        time.sleep(8)
+        print("[3] Verifying Gemini Vision...")
+        if not getattr(browser, 'vision_analyzer', None):
+            raise RuntimeError("vision_analyzer not available")
+        result = _analyze_heart(browser)
+        _click_heart(browser, _find_heart(browser, result.get('selector', '')))
+        return 0
+    except Exception as exc:
+        print(f"[ERROR] Manual probe failed: {exc}")
+        traceback.print_exc()
+        return 1
+    finally:
+        if browser is not None:
+            print("Closing browser...")
+            browser.quit()
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

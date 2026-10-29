@@ -1076,6 +1076,19 @@ jobs:
         run: |
           python modules/infrastructure/wre_core/scripts/generate_test_registry.py --check
 
+      - name: Verify scaffold and test-source import safety
+        env:
+          PYTHONUTF8: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHON_DOTENV_DISABLED: '1'
+        run: >-
+          python -B -m pytest -q -c /dev/null --noconftest --import-mode=importlib
+          -o pythonpath=. -p no:cacheprovider
+          tests/test_wsp_compliance_guardian.py
+          tests/test_legacy_test_source_safety.py
+          modules/infrastructure/wre_core/tests/test_wre_test_registry.py
+
       - name: Run Mall GotJunk public listing acceptance
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'

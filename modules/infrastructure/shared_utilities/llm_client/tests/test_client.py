@@ -1,45 +1,27 @@
-# -*- coding: utf-8 -*-
-import io
+"""Test scaffold for client; SPECIFIED_NOT_IMPLEMENTED.
 
-
+No behavioral coverage exists yet. Production code is not imported during
+collection. Replace the placeholders with behavioral assertions before removing
+the scaffold marker and skip. SOURCE_MODULE is the intended future test subject.
 """
-# === UTF-8 ENFORCEMENT (WSP 90) ===
-# Prevent UnicodeEncodeError on Windows systems
-# Only apply when running as main script, not during import
-if __name__ == '__main__' and sys.platform.startswith('win'):
-    try:
-        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
-    except (OSError, ValueError):
-        # Ignore if stdout/stderr already wrapped or closed
-        pass
-# === END UTF-8 ENFORCEMENT ===
-
-Test suite for client
-WSP 5 compliant test coverage
-"""
-
 import pytest
-import sys
-from pathlib import Path
 
-# Add project root to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent.parent))
+WRE_TEST_MODE = "scaffold"
+SOURCE_MODULE = 'modules.infrastructure.shared_utilities.llm_client.src.client'
+pytestmark = pytest.mark.skip(reason="SPECIFIED_NOT_IMPLEMENTED: test scaffold")
 
-from O:.Foundups-Agent.modules.infrastructure.llm_client.src.client import *
 
 class TestClient:
-    """Test cases for client"""
-    
+    """Pending behavioral tests for client."""
+
     def test_initialization(self):
-        """Test basic initialization"""
-        # TODO: Implement test
-        assert True
-    
+        """TODO: verify initialization behavior."""
+        pytest.fail("Replace scaffold with behavioral assertions")
+
     def test_basic_functionality(self):
-        """Test core functionality"""
-        # TODO: Implement test
-        assert True
+        """TODO: verify core behavior."""
+        pytest.fail("Replace scaffold with behavioral assertions")
+
 
 if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+    raise SystemExit(pytest.main([__file__, "-v"]))

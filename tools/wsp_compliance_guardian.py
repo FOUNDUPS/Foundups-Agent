@@ -33,6 +33,7 @@ Core Responsibilities:
 - Self-heal and learn from violations (WSP 48)
 """
 
+import ast
 import os
 import sys
 import json
@@ -223,7 +224,7 @@ class WSPComplianceGuardian:
                     
                 # Expected test file
                 relative_path = src_file.relative_to(src_dir)
-                test_file = tests_dir / f"test_{relative_path}"
+                test_file = tests_dir / relative_path.parent / f"test_{relative_path.name}"
                 
                 if not test_file.exists():
                     violation = Violation(
@@ -234,6 +235,13 @@ class WSPComplianceGuardian:
                         remediation=f"Create test file: {test_file}"
                     )
                     report.add_violation(violation)
+                elif self._is_unimplemented_test(test_file):
+                    report.add_violation(Violation(
+                        standard=WSPStandard.WSP_5, level=ComplianceLevel.WARNING,
+                        file_path=str(test_file),
+                        description=f"Behavioral coverage unimplemented or source invalid: {test_file.name}",
+                        remediation="Implement behavioral assertions and validate the test source",
+                    ))
     
     def _validate_documentation(self, module_path: Path, report: ComplianceReport):
         """Validate WSP 22 documentation compliance"""
@@ -392,7 +400,8 @@ class WSPComplianceGuardian:
                 if 'No corresponding test file' in violation.description:
                     test_path = Path(violation.remediation.split(': ')[1])
                     self._create_test_skeleton(test_path, violation.file_path)
-                    return True
+                    logger.warning("Scaffold created; behavioral coverage remains missing")
+                    return False
                     
         except Exception as e:
             logger.error(f"Auto-fix failed: {e}")
@@ -520,44 +529,77 @@ This log tracks test execution results for the {module_name} module.
         file_path.write_text(template, encoding='utf-8')
         logger.info(f"[OK] Created {file_path} from template")
     
+    def _scaffold_paths(self, test_path: Path, source_path: str):
+        """Resolve in-project paths before creating any scaffold artifact."""
+        root = self.project_root.resolve()
+        source = Path(source_path)
+        target = Path(test_path)
+        source = (source if source.is_absolute() else root / source).resolve()
+        target = (target if target.is_absolute() else root / target).resolve()
+        relative = source.relative_to(root)
+        target.relative_to(root)
+        if not source.is_file() or source.suffix != '.py':
+            raise ValueError("Scaffold source must be an existing project Python file")
+        parts = relative.with_suffix('').parts
+        if any(not part.replace('_', '').isalnum() for part in parts):
+            raise ValueError("Scaffold source has an unsupported module path")
+        if target.suffix != '.py' or not target.name.startswith('test_'):
+            raise ValueError("Scaffold destination must be a project test_*.py file")
+        return target, '.'.join(parts), source.stem
+
     def _create_test_skeleton(self, test_path: Path, source_path: str):
-        """Create a test file skeleton for a source file"""
-        test_path.parent.mkdir(parents=True, exist_ok=True)
-        
-        source_name = Path(source_path).stem
-        test_content = f'''"""
-Test suite for {source_name}
-WSP 5 compliant test coverage
+        """Create an explicitly unimplemented scaffold, never coverage proof."""
+        target, source_module, source_name = self._scaffold_paths(test_path, source_path)
+        class_name = 'Test' + source_name.title().replace('_', '')
+        test_content = f'''"""Test scaffold for {source_name}; SPECIFIED_NOT_IMPLEMENTED.
+
+No behavioral coverage exists yet. Production code is not imported during
+collection. Replace the placeholders with behavioral assertions before removing
+the scaffold marker and skip. SOURCE_MODULE is the intended future test subject.
 """
-
 import pytest
-import sys
-from pathlib import Path
 
-# Add project root to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent.parent))
+WRE_TEST_MODE = "scaffold"
+SOURCE_MODULE = {source_module!r}
+pytestmark = pytest.mark.skip(reason="SPECIFIED_NOT_IMPLEMENTED: test scaffold")
 
-from {source_path.replace(".py", "").replace("/", ".").replace("\\", ".")} import *
 
-class Test{source_name.title().replace("_", "")}:
-    """Test cases for {source_name}"""
-    
+class {class_name}:
+    """Pending behavioral tests for {source_name}."""
+
     def test_initialization(self):
-        """Test basic initialization"""
-        # TODO: Implement test
-        assert True
-    
+        """TODO: verify initialization behavior."""
+        pytest.fail("Replace scaffold with behavioral assertions")
+
     def test_basic_functionality(self):
-        """Test core functionality"""
-        # TODO: Implement test
-        assert True
+        """TODO: verify core behavior."""
+        pytest.fail("Replace scaffold with behavioral assertions")
+
 
 if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+    raise SystemExit(pytest.main([__file__, "-v"]))
 '''
-        test_path.write_text(test_content, encoding='utf-8')
-        logger.info(f"[OK] Created test skeleton: {test_path}")
-    
+        ast.parse(test_content, filename=str(target))
+        target.parent.mkdir(parents=True, exist_ok=True)
+        with target.open('x', encoding='utf-8', newline='\n') as handle:
+            handle.write(test_content)
+        logger.info("Created unimplemented test scaffold: %s", target)
+
+    @staticmethod
+    def _is_unimplemented_test(test_path: Path) -> bool:
+        """Keep invalid or declared scaffold source visible as missing coverage."""
+        try:
+            tree = ast.parse(test_path.read_bytes(), filename=str(test_path))
+        except (OSError, SyntaxError, UnicodeError):
+            return True
+        return any(
+            isinstance(node, ast.Assign) and isinstance(node.value, ast.Constant)
+            and node.value.value == 'scaffold'
+            and any(isinstance(target, ast.Name) and target.id == 'WRE_TEST_MODE'
+                    for target in node.targets)
+            for node in tree.body
+        )
+
     def _update_modlog(self, module_path: Path, report: ComplianceReport, fixed_count: int):
         """Update ModLog.md with compliance actions"""
         modlog_path = module_path / 'ModLog.md'

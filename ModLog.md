@@ -15,6 +15,29 @@ blanket token-safety claim remains in section4.11. Direct source retrieval owns
 the evidence: lexical-only Holo returned UNKNOWN/gap with no semantic query;
 no reindex or CURRENT claim. Framework/knowledge mirror and NAV data-only
 validation are required before publication. This changes no economic policy.
+## 2026-10-29 — Test scaffold and legacy parser repair
+
+Repair the existing guardian's absolute-path imports, nested test filenames,
+unsafe overwrite and false coverage credit. Preserve 78 empty scaffolds as
+explicitly unimplemented (156 placeholders, zero behavioral coverage), repair
+the three remaining legacy test-source faults, and keep manual browser effects
+behind explicit invocation. The WRE classifier excludes scaffold/manual modes
+without masking existing effect reasons. No live platform action was executed.
+
+At base 362b4c62a665: 4220 module Python files, 81 parser faults -> zero; 51
+focused generator/import/registry tests and 30 runtime/consumer tests pass.
+Isolated scaffold execution gives 156 skips, zero passes/collection errors.
+Three Node compatibility suites pass. Exact-base Mode2: zero errors, 127
+retained warnings; static size debt remains 74 critical findings. Registry:
+1781 files, 260 quarantined; no existing collectable flag changes. Runtime
+manifest: unchanged 1472 members, one classifier digest and both consumer pins.
+The 38 changed-file scanner findings are prior-reviewed source hashes, verified
+and rebound exactly; hosted full-tree/history checks remain required.
+
+Truth: validated bounded generator/import/classification behavior; manual live
+probe behavior IMPLEMENTED_NOT_VALIDATED; scaffold coverage
+SPECIFIED_NOT_IMPLEMENTED. Main/PR closure is tracked in the active slice ledger.
+WSP5/6/22/34/50/62/84/97.
 
 ## 2026-10-29 — F4a enforcement, interface preservation and F3 cache repair
 

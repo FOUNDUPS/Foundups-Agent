@@ -1,5 +1,29 @@
 # Tools ModLog
 
+## 2026-10-29 — Repair the test scaffold generator
+
+The existing guardian converted absolute Windows paths into invalid dotted
+imports and treated two assert-True placeholders as coverage. It now resolves
+source and destination within the project, validates syntax before writing,
+uses exclusive creation to preserve authored files, and names nested tests
+`tests/<subdirectory>/test_<source>.py`. Scaffolds import no production subject,
+declare `WRE_TEST_MODE = "scaffold"`, skip explicitly, and fail if their skip is
+removed without implementing assertions. Creating one does not resolve WSP5.
+
+All 78 proven empty legacy scaffolds retain their paths and two intended test
+names; five moved source subjects are corrected as metadata. Of these, 52 have
+test_*.py filenames; 26 legacy nested names remain preserved rather than being
+silently turned into new execution. They represent 156 placeholders and zero
+behavioral coverage. WRE excludes explicit scaffold/manual modes.
+
+Validation: 19 new regression failures / four controls pass on baseline;
+51 focused generator, source-import and registry tests pass on the candidate.
+Isolated execution of all 78 repaired scaffold copies reports 156 skipped,
+zero passed and zero collection errors; no application packages are imported.
+The 4220-file module AST preview falls from 81 parser errors to zero. This
+does not prove full collection or module behavior. No live browser, model,
+platform action or all-repository pytest collection was run. WSP5/6/22/34/50/84/97.
+
 ## 2026-10-29 — Enforce historical missing-expiry completion
 
 FMAS consumes WSP62 section 5.1.3 only when both canonical mirrors at the

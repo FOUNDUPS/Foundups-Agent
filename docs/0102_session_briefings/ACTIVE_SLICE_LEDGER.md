@@ -2,25 +2,46 @@
 
 ## PR reconciliation — 2026-10-29
 
-**Latest acceptance:** policy #2258 is merged at
-`ade6bca85470159bef0e447353e9c0b91628a704`, following concurrent YouTube #2259.
-All 23 PR checks and all four resulting-main source workflows passed. A fresh
-governed query proves CURRENT/no-gap and matching source/workspace/authority,
-generation `9cba0a7721354209baef3460a20244e78b329a0603b5779fe85f997b1e112adb`.
-Owned maintenance runtimes stopped; port18800 was already absent on admission.
-Git commit-graph replacement and native verification also repaired the observed
-missing-cache warning without changing branches or source.
+**Latest owned merge:** #2260 at
+`362b4c62a665bd6c594904e39d974a7187a12649`. Final PR CI (all 15 jobs), CodeQL,
+OpenRouter and Moshpit passed. Resulting-main CodeQL, OpenRouter and Moshpit
+passed; main CI's dependency installation exceeded 25 minutes (versus 91
+seconds on the final PR), so that attempt was cancelled for one bounded retry.
+The retry is queued/running; it remains pending acceptance. Fresh owner query: CURRENT/no-gap, matching
+source/workspace/authority, generation
+`b8d75aea540ca0e311cc021c618b9d1d6723f1f7b88c4170d8e5d20c81834842`.
+Both owned maintenance runtimes stopped; port18880 is absent after cleanup.
 
-**Current owned slice:** `agent/wsp62-expiry-enforcement-20261029`, based on
-that exact main. Historical completion is now implemented in the existing audit
-owner; six dates are derived without renewal, two resolved exemptions removed,
-and the 3481-line interface preserved in five pages plus its heading directory.
-All 134 original headings and source text survive link rebasing. Local bounded
-CI selection: 103 pass / 28 subtests; module static audit: 81 remaining test
-syntax errors, down from 89; exact-base size audit: zero candidate errors.
-Four inherited expiry tests remain failing. Hosted/main acceptance is pending.
-Next action: exact-head checks, squash, resulting-main checks/Holo proof, then
-bounded F2 syntax/scaffold repair. Owner: this architect lane; review 2026-10-29.
+**Current prepared slice:** `agent/test-scaffold-repair-20261029`, reconciled
+with main `4c433502e66733ff83bb287ef910ef58dadb34dc` (#2206). Eight generator, three import-safety and 40 registry tests
+pass; 30 runtime/consumer tests and three Node compatibility suites pass.
+All 81 legacy test parser faults are repaired; 78 proven empty scaffolds retain
+156 explicitly skipped placeholders and zero behavioral coverage. Of these,
+52 have test_*.py filenames; the other 26 existing paths remain preserved.
+Registry: 1782 files / 260 quarantined, all 1780 current-main paths and prior
+collectable flags preserved. All 51 focused tests pass again on the combined
+tree; 18 incoming files are byte-identical and four shared records are combined.
+Exact-base Mode2: zero errors / 127 warnings. No live browser/model/platform
+actions or global collection were executed. No PR published yet.
+Next: complete the combined-tree exact-base audit and fresh Holo proof, then
+publish and complete exact-head/main checks. The prepared F2 commit is
+`b35d3901dd871ba373586f86219b9c4842cf1548`; its main integration is separate. Owner: architect lane; review 2026-10-29.
+
+**Concurrent ownership:** the active chat “Plan Foundups Blockchain Migration”
+owns #2202/#2210, #2211, #2261 and #2262; it merged #2206 with 24 green checks
+and is checking resulting main. Its review/runtime receipts are separate from
+this lane's evidence. The YouTube and Storytime lanes remain independently
+owned; no cross-chat message or takeover was performed.
+
+**Further source reviews:** #1677 retains useful JHR registry/promo work, but
+its #001 latest issue and old ticker owner conflict with current #003 and
+multilingual expiring-status behavior. #1774's unique essay also claims #003,
+already occupied by a different later issue. #1685's seven-file dated intake
+is useful historical documentation; 23 unique IDs, 11 language pairs and its
+printed arithmetic check out, while live Drive/formula/policy claims are not
+freshly verified. Preserve all three; reconcile rather than overwrite current
+publication/economic truth. Detailed local receipts are retained with the PR
+audit evidence. These reviews do not claim build/deployment/publication.
 
 **Earlier F1 acceptance:** #2257 is merged at
 `f304ba799f8fa835f0b5127efabe9e724315e3c8`: 25 PR checks and all six observed
@@ -30,9 +51,10 @@ The generated registry is current (1779 files / 260 quarantined); 28 registry
 tests and 85 affected safe-suite tests pass. These are bounded validations,
 not a claim that all module tests or live runtimes work.
 
-**Current queue snapshot:** 38 open PRs, comprising 37 retained original rows
-and concurrent Storytime #2256. YouTube #2254 merged separately at `887c09dd2`
-and was reconciled into F1. Earlier counts below are historical snapshots.
+**Queue snapshot (04:19 UTC):** 39 open PRs: 36 retained original rows
+plus Storytime #2256 and new blockchain #2261/#2262. Concurrent #2206 merged;
+#2211 has a new head and needs review of its current delta. Earlier counts
+below are historical snapshots, not current totals.
 
 **Earlier Holo proof:** exact main `f304ba799f` was CURRENT/no-gap, source,
 workspace and authority agree, generation
