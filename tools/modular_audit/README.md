@@ -46,9 +46,48 @@ replaces that gate nor changes its rules, scope or reviewed-finding records.
 
 ## Remaining audit work
 
-Mode 1 still discovers module structure through the filesystem and invokes
-external dependency/code scanners per module. The separate
-`WSPComplianceChecker` still needs its Git-scoped, read-only memory repair.
-Do not describe either path as a fully bounded read-only repository audit yet.
+Mode 1's structural entrypoint now requires the exact Git root. It uses stage-0
+tracked paths, never untracked directories, to identify blocks and document
+presence. Git output is limited to 4 MiB/100,000 records/30 seconds per read.
+Redirected, missing and special files are explicit incomplete inspection errors.
+Environment-named components are excluded before file metadata/content reads.
+Monitoring is a canonical WSP 3 domain; the documented `modules/wre_core` exception
+remains. No files are moved or repaired by this audit.
+Module evidence follows HoloIndex's existing rule: tracked files under direct
+`src/` or `tests/`, or a direct `README.md`/`INTERFACE.md`. Other containers remain
+explicit ownership warnings instead of acquiring fabricated module requirements.
+This distinguishes legacy scripts, intake/archive folders and telemetry data.
+
+`perform_security_scan(repo_root, domain_path="repository")` runs each applicable
+external scanner once with explicit process cwd; it never changes the caller's
+working directory. `run_pip_audit(root)` and `run_npm_audit(root)` require a root;
+`run_bandit(root, tracked_paths)` also requires the admitted inventory.
+
+- pip-audit covers the current interpreter's **installed environment**, when the
+  root requirements file is tracked. It does not resolve every module requirements
+  file. Known vulnerabilities without a severity are reported as unrated errors.
+- Bandit receives explicit tracked module Python targets, including tests, through
+  an owned temporary INI. It does not recurse or load an implicit `.bandit` file.
+  Inputs are limited to 2 MiB/file, 128 MiB total and 4 MiB of target names;
+  unsupported paths and missing coverage are errors. The INI is removed afterward.
+- npm audits the tracked root package/lock pair (8 MiB limit per manifest), includes
+  development/optional/peer dependencies, and disables workspace selection. It does
+  not audit every nested frontend lock. Node invokes the installed npm JS entrypoint
+  directly, including the adjacent Node/npm layout on Windows; unsupported layouts
+  report incomplete inspection. No install, update or `audit fix` command is used.
+
+Each external process has a 120-second deadline and 2 MiB stdout limit using the
+existing WRE process boundary. Exit 1 vulnerability JSON is retained; empty failed,
+malformed, duplicate-key and incomplete responses are errors. Findings contain
+fixed tool names/counts, never provider descriptions, source excerpts or stderr.
+Critical/high/unrated results are errors, medium results warnings, low/info results
+advisories. These limits are not process-tree/RSS isolation or a filesystem race
+guarantee. Auditors may contact advisory registries and use their own caches.
+
+Mode 2 and the optional WSP 62 size-check discovery retain their existing baseline
+and filesystem helpers; they are not covered by the new Mode 1 inventory claim.
+The separate WSPComplianceChecker's tracked read-only repair landed in #2265.
+Whole-repository security clearance, live auditor execution and deployment are
+not established by the offline acceptance suite.
 Use the focused test selection in [tests/README.md](tests/README.md); avoid
-global test collection and live Mode 1 execution during this repair.
+global test collection or live Mode 1 execution as an unreviewed test side effect.

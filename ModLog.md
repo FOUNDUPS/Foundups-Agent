@@ -1,3 +1,21 @@
+## 2026-10-29 — Run external audits once and report incomplete inspection
+
+F7b #2265 is merged as 77b824801 after all 25 current PR checks and all six
+resulting-main workflows passed. Fresh Holo evidence binds source/workspace/
+authority to that exact main, CURRENT/no-gap; owned maintenance runtimes stopped.
+Thirteen PRs have landed through this reconciliation lane.
+
+F7c replaces per-module external scans with one repository-scoped invocation
+per applicable tool. Tracked Mode 1 structure, explicit Bandit targets, bounded
+process output/deadlines and metadata-only result parsers prevent repeated scans
+and silent empty failure reports. Known pip vulnerabilities stay unrated errors;
+critical npm results and medium warnings are retained. No installs/fixes/moves
+or hosted secret-rule changes. Existing Mode 2/optional WSP62 discovery remains
+outside this new inventory scope. Six baseline regressions reproduced; 72 new
+cases and the final 245-test audit selection plus 28 subtests pass. Mode 2:
+0 errors/127 warnings/306 advisories. Hosted/main acceptance is still required.
+WSP 3/4/5/6/11/22/50/62/71/84/97.
+
 ## 2026-10-29 — Bound compliance scans and bind the audit checkout
 
 F7a #2264 is merged as 3ad0eddc8 after 24 logical PR checks; all five resulting-main
