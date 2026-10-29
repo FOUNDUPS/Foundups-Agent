@@ -232,6 +232,69 @@ class TestSecurityCriticalFilePaths:
 class TestConversationRuntimeFlags:
     """Test OpenClaw conversation backend and key-isolation flag parsing."""
 
+    def test_ollama_defaults_match_foundups_runtime(self):
+        with patch.dict(
+            os.environ,
+            {"OPENCLAW_CONVERSATION_BACKEND": "openclaw"},
+            clear=False,
+        ):
+            os.environ.pop("OPENCLAW_OLLAMA_MODEL", None)
+            os.environ.pop("OPENCLAW_OLLAMA_TIMEOUT_SEC", None)
+
+            dae = OpenClawDAE(repo_root=project_root)
+
+            assert dae._ollama_model == "qwen-overseer:latest"
+            assert dae._ollama_timeout_sec == 120.0
+
+    def test_ollama_fallback_uses_configured_cold_start_timeout(self):
+        fake_requests = MagicMock()
+        fake_response = MagicMock()
+        fake_response.ok = True
+        fake_response.json.return_value = {
+            "message": {"content": "runtime ready"},
+            "prompt_eval_count": 4,
+            "eval_count": 2,
+        }
+        fake_requests.post.return_value = fake_response
+
+        with patch.dict(
+            os.environ,
+            {
+                "OPENCLAW_CONVERSATION_BACKEND": "openclaw",
+                "OPENCLAW_NO_API_KEYS": "1",
+                "OPENCLAW_ALLOW_EXTERNAL_LLM": "0",
+                "OPENCLAW_AGENTIC_MODEL_SELECTION": "0",
+                "OPENCLAW_OLLAMA_MODEL": "qwen-overseer:latest",
+                "OPENCLAW_OLLAMA_TIMEOUT_SEC": "125",
+            },
+            clear=False,
+        ):
+            dae = OpenClawDAE(repo_root=project_root)
+            intent = OpenClawIntent(
+                raw_message="hello from the local runtime",
+                category=IntentCategory.CONVERSATION,
+                confidence=0.9,
+                sender="@UnDaoDu",
+                channel="local_repl",
+                session_key="sess_ollama_timeout",
+                is_authorized_commander=True,
+            )
+
+            with (
+                patch.object(
+                    type(dae),
+                    "overseer",
+                    new_callable=PropertyMock,
+                    return_value=None,
+                ),
+                patch.dict(sys.modules, {"requests": fake_requests}),
+            ):
+                response = dae._execute_conversation(intent)
+
+        assert response == "0102: runtime ready"
+        assert fake_requests.post.call_args.kwargs["timeout"] == 125.0
+        assert dae._last_conversation_engine == "ollama"
+
     def test_no_api_keys_false_strings_are_respected(self):
         with patch.dict(
             os.environ,

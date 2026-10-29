@@ -1,3 +1,18 @@
+## PC Ollama recovery metadata review — 2026-10-29
+
+The pinned Gitleaks 8.30.1 scan identifies 39 unchanged runtime source-hash rows,
+one unchanged test line and one unchanged module-log line. Every finding retains
+its exact text and five-line context and a prior whole-file/path/rule/line binding
+on main `cb2271228`. Rebind only these 41 entries to their new Git blobs, retaining
+all 2863 prior bindings (2904 total). All 1475 runtime hashes were rechecked from
+staged Git blobs; only the two recovered Ollama helper digests change.
+
+This is exact prior-content review, not an independent reviewer claim. The public
+example environment template changes only model/default-timeout settings; no
+private environment file is read by the scan. Scanner rules, scope, exclusions
+and fingerprint calculation remain unchanged. Full hosted tree/history scanning
+is a separate acceptance gate. Local receipt: `pc-ollama-metadata-review.json`.
+
 ## Preserved PC preflight recovery metadata — 2026-10-29
 
 Checksum-verified Gitleaks 8.30.1 reports39 unchanged source-hash rows in the

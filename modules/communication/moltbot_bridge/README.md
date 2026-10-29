@@ -1,3 +1,18 @@
+## Ollama fallback settings — 2026-10-29
+
+The local fallback defaults to `qwen-overseer:latest`, defined by the repository's
+`models/Modelfile.qwen-overseer`. That file refers to a host-specific GGUF path;
+the named model must already be created in Ollama. Set `OPENCLAW_OLLAMA_MODEL`
+to an installed model name, or explicitly blank it to disable this fallback.
+No model is downloaded, created or started by this change.
+
+`OPENCLAW_OLLAMA_TIMEOUT_SEC` defaults to 120 seconds and is clamped to 15–300.
+Blank, invalid or non-finite values use 120. The synchronous HTTP call receives
+this Requests connect/read timeout; it is not a total-turn deadline or immediate
+cancellation. Existing cancellation checks run before and after that call.
+See `docs/OLLAMA_SETUP.md` for setup. Offline contracts pass; live cold-start
+readiness and installed-runtime behavior require separate acceptance.
+
 ## Denied WSP preflight
 
 A failed WSP preflight returns an explicit security-block response. It stops

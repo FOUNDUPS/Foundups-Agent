@@ -1,3 +1,15 @@
+## 2026-10-29 — Preserve Ollama timeout recovery acceptance
+
+Retain the frozen 19-case helper oracle: unchanged source produces 15 failures
+and four passes; the two preserved PC helpers produce 19 passes. The portable
+copy changes only the default source root, retaining its assertions. Recover
+the two original constructor/conversation tests separately from an unrelated
+response-case assertion in the old PC file. Live models, daemon startup and
+provider calls remain outside this offline acceptance. WSP 6/22/50/97.
+
+The repository replay passes all 19 cases; both original DAE cases pass with
+central registration isolated and zero network/process attempts observed.
+
 ## 2026-10-29 — PC preflight denial recovery
 
 Frozen26-case oracle: unchanged main helper13 failed/13 passed; reconciled helper

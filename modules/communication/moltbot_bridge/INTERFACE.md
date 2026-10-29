@@ -1,3 +1,18 @@
+## Ollama fallback configuration contract — 2026-10-29
+
+`initialize_control_plane_state` assigns `_ollama_model` from
+`OPENCLAW_OLLAMA_MODEL` (default `qwen-overseer:latest`; explicit blank disables)
+and `_ollama_timeout_sec` from `OPENCLAW_OLLAMA_TIMEOUT_SEC` (default 120).
+Malformed/blank/non-finite timeouts fall back to 120; finite values clamp to
+15–300 seconds. `execute_conversation` passes that value to the existing
+synchronous local `/api/chat` request. Routing, payload, token accounting,
+external-provider policy and pre/post-request cancellation checks are unchanged.
+
+This is a Requests connect/read timeout, not a whole-response or turn deadline.
+A blocked call can delay cancellation. The default model must be installed;
+the repository Modelfile contains a machine-specific GGUF source. No automatic
+model creation, daemon startup, storage relocation or live readiness claim.
+
 ## Denied WSP preflight
 
 `OpenClawDAE.process()` delegates to `openclaw_process_loop.process_message()`.

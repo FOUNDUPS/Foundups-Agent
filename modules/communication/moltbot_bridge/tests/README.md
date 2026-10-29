@@ -1,3 +1,13 @@
+## Ollama fallback contract selection
+
+`test_openclaw_ollama_contract.py` freezes 19 offline cases for finite bounded
+timeouts, model overrides/blank-disable, request propagation, cancellation and
+local failure reporting. It imports real helpers without the production package
+initializer, uses synthetic collaborators and forbids live network/process work.
+Two preserved cases in `TestConversationRuntimeFlags` additionally exercise the
+DAE's constructor and conversation facade with mocked transport/overseer.
+These cases do not prove an installed model or live cold-start performance.
+
 ## Preflight denial boundary
 
 Run `test_openclaw_preflight_boundary.py` with bytecode and pytest plugins disabled,
