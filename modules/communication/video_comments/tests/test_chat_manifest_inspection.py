@@ -75,7 +75,8 @@ QUEUE = definitions('_inspection_queue', 'modules/communication/livechat/src/ope
 EXECUTOR = definitions('_inspection_executor', 'modules/communication/video_comments/skillz/tars_like_heart_reply/src/reply_executor.py')
 PROCESSOR = definitions('_inspection_processor', 'modules/communication/video_comments/skillz/tars_like_heart_reply/src/comment_processor.py')
 CHAT = definitions('_inspection_livechat', 'modules/communication/livechat/src/intelligent_livechat_reply.py')
-for name in ('is_general_reply_model', 'parse_reply_review', 'build_grounded_prompt'):
+for name in ('is_general_reply_model', 'parse_reply_review', 'build_grounded_prompt',
+             'parse_comment_assessment', 'reply_text_is_publishable'):
     setattr(GEN, name, getattr(CONTEXT, name))
 QUEUE.REPO_ROOT = ROOT
 QUEUE.MAX_JSON_BYTES = 4 * 1024 * 1024
@@ -158,29 +159,44 @@ class ReplyInspectionTests(unittest.TestCase):
         self.assertEqual(calls[0]['temperature'], 0)
 
     def test_click_success_without_readback_remains_unknown(self):
+        from modules.communication.video_comments.src.commenter_history_store import CommenterHistoryStore
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
         executor = object.__new__(EXECUTOR.BrowserReplyExecutor)
+        executor.history_store = CommenterHistoryStore(Path(directory.name) / 'history.db')
         executor.driver = SimpleNamespace(execute_script=lambda *a: None)
         executor._bind_reply_target = lambda *a: True
-        executor._posted_reply_count = lambda *a: 0
+        executor._reply_snapshot = lambda *a: dict(complete=True, ids=[], matching_ids=[])
         async def submit(*a, **k):
+            executor._submit_invoked = True
             return True
         executor._execute_reply_unverified = submit
         async def no_wait(*a):
             return None
         with patch.object(EXECUTOR.asyncio, 'sleep', no_wait):
-            self.assertFalse(asyncio.run(executor.execute_reply(1, 'draft', expected_comment={'text': 'c'})))
+            self.assertFalse(asyncio.run(executor.execute_reply(1, 'draft', expected_comment={
+                'text':'c', 'author_name':'Aki', 'comment_id':'original', 'video_id':'video',
+                '_target_channel_id':'receiving'})))
         self.assertEqual(executor.last_submission_status, 'unknown')
 
     def test_new_owner_readback_is_required(self):
+        from modules.communication.video_comments.src.commenter_history_store import CommenterHistoryStore
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
         executor = object.__new__(EXECUTOR.BrowserReplyExecutor)
+        executor.history_store = CommenterHistoryStore(Path(directory.name) / 'history.db')
         executor.driver = SimpleNamespace(execute_script=lambda *a: None)
         executor._bind_reply_target = lambda *a: True
-        counts = iter([0, 1])
-        executor._posted_reply_count = lambda *a: next(counts)
+        snapshots = iter([dict(complete=True, ids=[], matching_ids=[]),
+                          dict(complete=True, ids=['new'], matching_ids=['new'])])
+        executor._reply_snapshot = lambda *a: next(snapshots)
         async def submit(*a, **k):
+            executor._submit_invoked = True
             return True
         executor._execute_reply_unverified = submit
-        self.assertTrue(asyncio.run(executor.execute_reply(1, 'draft', expected_comment={'text': 'c'})))
+        self.assertTrue(asyncio.run(executor.execute_reply(1, 'draft', expected_comment={
+            'text':'c', 'author_name':'Aki', 'comment_id':'original', 'video_id':'video',
+            '_target_channel_id':'receiving'})))
         self.assertEqual(executor.last_submission_status, 'verified')
 
     def test_nested_submission_cannot_bypass_inspection(self):
@@ -232,13 +248,17 @@ class ReplyInspectionTests(unittest.TestCase):
         chat.classify_chatter = lambda *a: SimpleNamespace()
         chat.grok_available = True
         chat.system_prompt = 'Reply concisely'
-        chat.grok_client = SimpleNamespace(get_response=lambda **kwargs:
-            calls.append(kwargs) or 'The documentary details are on HornetHunter.com.')
+        def respond(**kwargs):
+            calls.append(kwargs)
+            return (json.dumps(GOOD) if len(calls) == 2 else
+                    'The documentary details are on HornetHunter.com.')
+        chat.grok_client = SimpleNamespace(get_response=respond)
         theme = {'message': 'New Hornet Hunter website', 'source_command_id': 'voice-1'}
         news_module = SimpleNamespace(get_news_context=lambda message: None)
         queue_module = SimpleNamespace(load_active_theme=lambda surface: theme)
         with patch.dict(sys.modules, {
             'modules.communication.livechat.src.operator_command_queue': queue_module,
+            'modules.communication.video_comments.src.reply_context': CONTEXT,
             'modules.communication.livechat.src.news_context_provider': news_module}), patch.object(CHAT.random, 'random', lambda: 1):
             reply = chat.generate_reply('Where can the film details be found?', 'Aki', 'viewer')
         self.assertIn('HornetHunter.com', reply)

@@ -77,6 +77,36 @@ def _finite_number(value: Any) -> bool:
         return False
 
 
+def enqueue_operator_command(command: dict, *, command_path=None, acknowledgement_path=None) -> str:
+    """Append one immutable command under the queue's existing ledger lock.
+
+    Producers own only the inbox. Acknowledgements and active state stay queue-owned.
+    """
+    inbox_path = _resolve_path(command_path or os.getenv(COMMAND_FILE_ENV, DEFAULT_COMMAND_FILE))
+    ledger_path = _resolve_path(acknowledgement_path or os.getenv(ACK_FILE_ENV, DEFAULT_ACK_FILE))
+    if inbox_path == ledger_path:
+        raise ValueError('manifest_paths_must_be_distinct')
+    if (not isinstance(command, dict) or not isinstance(command.get('id'), str)
+            or not 1 <= len(command['id']) <= 200
+            or command.get('action') not in {'status', 'set_context', 'clear_context', 'announce'}
+            or not isinstance(command.get('payload', {}), dict)):
+        raise ValueError('invalid_command')
+    identity = os.path.normcase(str(ledger_path))
+    with runtime_operation_lock(identity, timeout_seconds=5):
+        inbox = OperatorCommandQueue._read_json(inbox_path, {'version': 1, 'commands': []})
+        ledger = OperatorCommandQueue._read_json(ledger_path, {'version': 1, 'acknowledgements': []})
+        commands, rows = inbox.get('commands'), ledger.get('acknowledgements')
+        if not isinstance(commands, list) or not isinstance(rows, list) or len(commands) >= 100:
+            raise ValueError('invalid_or_full_manifest')
+        if any(not isinstance(row, dict) for row in commands + rows):
+            raise ValueError('invalid_manifest_entry')
+        if any(row.get('id') == command['id'] for row in commands + rows):
+            raise ValueError('command_id_already_exists')
+        inbox['commands'] = [*commands, command]
+        OperatorCommandQueue._atomic_write(inbox_path, inbox)
+    return command['id']
+
+
 class OperatorCommandQueue:
     """Serialize one ledger and claim before effects; never retry unknown work."""
 
@@ -269,7 +299,7 @@ class OperatorCommandQueue:
         if "livechat" in surfaces and gates["livechat_dry_run"]:
             return {"status": "simulated", "result": {"sender_accepted": False, "delivery_verified": False}}
         sender = getattr(getattr(self.dae, "livechat", None), "send_chat_message", None)
-        if "livechat" in surfaces and not callable(sender):
+        if action == 'announce' and not callable(sender):
             return {"status": "deferred", "reason": "livechat_unavailable"}
         result = {}
         if action == "set_context":

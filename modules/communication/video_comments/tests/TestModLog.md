@@ -1,5 +1,18 @@
 # video_comments TestModLog
 
+## 2026-10-29 — Windows completion of source repair
+
+Fresh Windows selection: original 53 reply-context plus 116 adjacent queue,
+lifecycle and control-plane cases pass. New semantic and submission-history
+selectors use real source definitions, real temporary SQLite files and synthetic
+browser/provider collaborators. The 15-case stdlib selection also passes.
+Independent fresh-context review reproduced original wrong-video/author binding
+and coder-model selection defects before their fixes. New positive controls
+exercise useful grounded draft approval, stable creator-reply readback and actual
+ChatSender payload handling; negative controls cover restart uncertainty,
+concurrent claims, stale theme at final submit/send, foreign origin and private
+instruction leaks. No public YouTube action or actual model judgment is claimed.
+
 ## 2026-10-29 — Private chat-manifest and reply-inspection candidate
 
 New explicit stdlib selector: `python -B -m unittest discover -s modules/communication/video_comments/tests -p test_chat_manifest_inspection.py -v`.

@@ -1271,7 +1271,10 @@ class CommentProcessor:
                 # Check if already signed (contains "0102" signature)
                 already_signed = "0102" in actual_reply_text
 
-                if already_signed:
+                if (comment_data.get('_generation_context') or {}).get('assessment'):
+                    # The assessed route reviews the writer's exact answer; no unrelated suffix.
+                    reply_text_to_post = actual_reply_text
+                elif already_signed:
                     # Reply already has signature from IntelligentReplyGenerator
                     reply_text_to_post = actual_reply_text
                     if self.action_debug:
@@ -1292,6 +1295,7 @@ class CommentProcessor:
                     reply_text_to_post = f"{tag} {reply_text_to_post}"
 
                 # Inspect the final text, including any suffixes, before submission.
+                comment_data['_target_channel_id'] = self.target_channel_id
                 review = await self._inspect_reply(comment_data, reply_text_to_post)
                 results['reply_review'] = review
                 if not review.get('approved'):
@@ -1299,13 +1303,24 @@ class CommentProcessor:
                     action_plan['reply']['reason'] = 'review_rejected'
                     return results
 
+                comment_data['_reply_review'] = dict(review)
+
                 logger.info(f"  [REPLY] Executing reply via execute_reply()...")
                 comment_data['_target_channel_id'] = self.target_channel_id
                 reply_ok = await self.reply_executor.execute_reply(
-                    comment_idx, reply_text_to_post, expected_comment=comment_data)
+                    comment_idx, reply_text_to_post, expected_comment=comment_data,
+                    pre_submit_guard=lambda: get_reply_generator().reply_theme_is_current(
+                        comment_data.get('_reply_theme')))
                 results['reply_submission_status'] = self.reply_executor.last_submission_status
                 if reply_ok:
                     reply_ok = await self._inspect_posted_reply(comment_idx, reply_text_to_post, results)
+                    attempt_id = getattr(self.reply_executor, 'last_attempt_id', None)
+                    history = getattr(self.reply_executor, 'history_store', None)
+                    if attempt_id and history:
+                        history.append_reply_evidence(attempt_id, {
+                            'post_inspection_passed': bool(reply_ok),
+                            'screenshot_path': results.get('reply_inspection_screenshot'),
+                            'screenshot_sha256': results.get('reply_inspection_sha256')})
 
                 results['reply'] = bool(reply_ok)
                 # Training Mode: Capture reply text for transcript (Task 3)
@@ -1405,6 +1420,7 @@ class CommentProcessor:
                 timeout=10.0,
             )
             comment_data['_reply_theme'] = getattr(generation, 'theme', None)
+            comment_data['_generation_context'] = getattr(generation, 'context', None)
             return generation.text, generation.source
         except asyncio.TimeoutError:
             logger.warning("[HARD-THINK] Layer 2 TIMEOUT (10s) - skipping this generation")
@@ -1421,9 +1437,12 @@ class CommentProcessor:
     async def _inspect_posted_reply(self, comment_idx, reply_text, results):
         try:
             snapshot = self.driver.get_screenshot_as_png()
-            path = self._snap_dir / f'{self.session_id}_c{comment_idx}_reply_posted.png'
+            from uuid import uuid4
+            path = self._snap_dir / f'{self.session_id}_c{comment_idx}_{uuid4().hex}_reply_posted.png'
             path.write_bytes(snapshot)
             results['reply_inspection_screenshot'] = str(path)
+            import hashlib
+            results['reply_inspection_sha256'] = hashlib.sha256(snapshot).hexdigest()
             if self.use_vision:
                 if not self.ui_tars_bridge:
                     return False
@@ -1454,7 +1473,8 @@ class CommentProcessor:
 
         generator = get_reply_generator()
         generate = generator.generate_reply_with_source if with_source else generator.generate_reply
-        receipt_args = {"cancel_event": cancel_event} if with_source else {}
+        receipt_args = {"cancel_event": cancel_event, "semantic_context": {
+            **comment_data, 'receiving_channel_id': self.target_channel_id}} if with_source else {}
         return generate(
             **receipt_args,
             author_name=comment_data.get('author_name', ''),

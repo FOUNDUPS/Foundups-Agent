@@ -11,10 +11,48 @@ def is_general_reply_model(model_id):
         return False
     name = model_id.lower().replace('_', '-').replace('/', '-')
     denied = ('tars', 'vision', '-vl', 'embedding', 'embed', 'tts', 'audio',
-              'speech', 'whisper', 'bark', 'kokoro', 'rerank', 'computer-use')
+              'speech', 'whisper', 'bark', 'kokoro', 'rerank', 'computer-use', 'coder', 'code-')
     families = ('qwen', 'gemma', 'llama', 'mistral', 'ministral', 'phi-',
                 'deepseek', 'glm-', 'gpt-oss')
     return not any(part in name for part in denied) and any(part in name for part in families)
+
+
+def reply_text_is_publishable(text):
+    """Deterministic format gate; meaning still requires language review."""
+    if not isinstance(text, str) or not text.strip() or len(text) > 1500:
+        return False
+    if any(ord(c) < 32 and c not in '\n\t' for c in text):
+        return False
+    return not any(token in text.lower() for token in (
+        '<|', '|>', '<think', '</think', '[inst]', '[/inst]', '```',
+        'private operator', 'system prompt', 'context_activated', 'manifest.json',
+    ))
+
+
+def parse_comment_assessment(raw, comment):
+    """Require an explicit meaning/strategy record grounded in the original text."""
+    try:
+        value = json.loads(raw)
+        if not isinstance(value, dict):
+            return None
+        choices = {'intent': {'question', 'request', 'opinion', 'appreciation', 'unclear'},
+                   'stance': {'support', 'oppose', 'unclear'},
+                   'strategy': {'answer', 'acknowledge', 'clarify'}}
+        if any(value.get(k) not in allowed for k, allowed in choices.items()):
+            return None
+        for key in ('meaning', 'question', 'uncertainty', 'evidence_quote'):
+            if not isinstance(value.get(key), str) or len(value[key]) > 1000:
+                return None
+        quote = value['evidence_quote'].strip()
+        if not value['meaning'].strip() or not quote or quote not in comment:
+            return None
+        if value['stance'] != 'unclear' and not quote:
+            return None
+        if value['intent'] == 'unclear' and value['strategy'] != 'clarify':
+            return None
+        return value
+    except (ValueError, TypeError):
+        return None
 
 
 def parse_reply_review(raw):

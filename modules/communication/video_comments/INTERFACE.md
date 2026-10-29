@@ -1,5 +1,35 @@
 # Video Comments - Public Interface
 
+## 2026-10-29 inspected posting contract
+
+The posting wrapper supplies `semantic_context` to `generate_reply_with_source`.
+This selects meaning assessment → grounded language draft → final language
+review before browser submission; legacy tier/template shortcuts do not select
+the answer. Content-neutral cooldown, repetition and recent-reply controls remain.
+`ReplyGenerationResult(text, source, theme=None, context=None)` retains the
+generation's supplied history, verified memory, assessment and private theme.
+Inspection receives that snapshot plus the original author/channel/video.
+Explicit and discovered LM Studio writers must match `resolve_general_model_path`
+as well as the conservative role filter. This is source routing, not a signed
+provider-admission receipt or measured model quality.
+
+`BrowserReplyExecutor.execute_reply(..., expected_comment=..., pre_submit_guard=...)`
+requires original full text, author, real `comment_id`, `video_id` and
+`_target_channel_id` on the exact Studio origin. It rechecks those identities and
+exact entered text in the single submit script. Settled existing reply IDs form
+the baseline; verification requires a new reply ID with exact text and the actual
+creator channel. Hidden/ambiguous replies and row disappearance are uncertain.
+Nested submission remains disabled until equivalent qualification exists.
+
+The existing `CommenterHistoryStore` adds `reply_target_key`, `begin_reply_attempt`,
+`finish_reply_attempt`, `get_reply_attempts` and `append_reply_evidence`.
+Claims are keyed by receiving channel/video/comment independently of draft text;
+unknown and verified reservations block later attempts across restarts. Only a
+proven pre-submit failure releases a claim. Verified delivery and its existing
+interaction-history row commit together. Unique screenshots, hashes, review and
+inspection results remain private evidence. `YT_COMMENT_HISTORY_DB` may select an
+absolute shared database across release checkouts; default module memory remains.
+
 **Module:** communication/video_comments
 **WSP Reference:** WSP 11 (Interface Documentation)
 **Status:** Production

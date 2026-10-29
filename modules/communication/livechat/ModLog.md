@@ -1,5 +1,16 @@
 # Livechat Module - ModLog
 
+## 2026-10-29 — Private activation and inspected livechat themes
+
+WSP00/10/11/22/50/84/97. The existing queue receives atomic producer appends under
+its ledger lock; acknowledgements/state remain queue-owned. Private set_context
+does not require a public sender, while existing automation/dry-run gates remain.
+Themed livechat drafts use bounded language review and preserve exact text/theme
+through the existing sender, which rechecks after delays immediately before API
+submission. Existing engagement/cooldown decisions precede generation, and review
+failure cannot fall back to template banter. Source and fixture verification do
+not prove real live delivery or model-role admission.
+
 ## 2026-10-29 — Private chat manifest and inspected replies (draft candidate)
 
 WSP 00/15/22/50/84/96/97. Extend existing queue, context reader, generator, Skillz processor and executor; no parallel scheduler or command inbox. `set_context` now activates private context without a public send; `announce` retains explicit publishing. Live-chat and stored-comment language routes consume theme context before generation. The signature hook no longer appends operator wording. Source command identity is carried into comment evidence, and an expired/replaced theme rejects an old draft.

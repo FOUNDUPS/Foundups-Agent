@@ -1,52 +1,112 @@
-# Chat manifest and reply inspection — source checkpoint
+# Private YouTube themes and inspected replies — Windows handoff
 
-Principal directive, 2026-10-29: “Update the chat manifest with …” is a spoken behavioral command through Red Dog to 0102. Preserve the command privately, let the agent read it, then prove changed reply behavior. Do not publish receipt notices or repeat the operator's text. Repair both theme use and comment-reply quality using existing Skillz.
+012 directive, 2026-10-29: finish PR2254, integrate verified source and prepare
+Windows for an observed test. GitHub changes do not automatically update an
+existing PC checkout or a running Python process.
 
 ## Source and retrieval boundary
 
-Base: FOUNDUPS/Foundups-Agent main `8b345ec206212b1e27868bdc4cacd06474b636a6`. Current GitHub source, AGENTS, WSP00/97, module interfaces, historical test inventories and the RedDog operations contract were retrieved. This environment has a source mirror, not the principal's Windows checkout. HoloIndex/native services and signed runtime model-role receipts were not available. Retrieval was lexical and direct-file; no semantic freshness or runtime authority is asserted. Historical docs claiming production do not override actual source or missing deployment proof.
+Original repair head: `5aa828e12905659d26784a77df564ea114eb68f9`, based on
+`8b345ec206212b1e27868bdc4cacd06474b636a6`. Windows refetch confirmed the open
+draft/head. The shared PC checkout `O:/Foundups-Agent` was on an unrelated feature
+branch at August commit `0c81418fe94a7786cfd55f01e138ddc5d510583d`, with existing
+modifications. Preserve it. Repair checkout:
+`C:/Users/user/.codex/worktrees/youtube-comment-repair-20261029/Foundups-Agent`.
 
-## Existing owners and voice routing
+WSP00 awakening/gate passed. Current AGENTS, WSP10/97, NAVIGATION and module
+README/INTERFACE/ROADMAP/ModLog/test contracts were retrieved before changes.
+Owner Holo query failed `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`: authority
+`5e938253...`, workspace `0c81418...`, `ok=false`, `freshness=UNKNOWN`,
+`index_gap_detected=true`. No reindex occurred; existing governed postmerge
+maintenance owns recovery.
 
-| Purpose | Owner |
+Retrieval evaluation: exact-commit direct inspection removed checkout staleness;
+module-first ordering reduced noise and duplicate reads. Historical production
+claims were not runtime proof. Video-comments memory README/requirements were
+missing; Tier-0 README/INTERFACE and explicit offline selectors existed. Existing
+owners were extended. Manual review was necessary for cross-module API/browser
+correctness; Qwen/Gemma roles cannot replace deterministic independent checks.
+
+## Owners and spoken commands
+
+| Purpose | Existing owner |
 |---|---|
-| Spoken instruction | Personal skill `operate-youtube-chat-manifest`; Red Dog interfaces with 012, 0102 retrieves/reasons before execution |
-| Trusted runtime inbox | `memory/012_manifest.json`, or `YT_012_MANIFEST_FILE` |
-| Private command receipt | `memory/012_manifest_acknowledgements.json`, or `YT_012_MANIFEST_ACK_FILE` |
-| Active theme | `memory/012_manifest_state.json`, or `YT_012_MANIFEST_STATE_FILE` |
-| Queue and lifecycle | `modules/communication/livechat/src/operator_command_queue.py`, `auto_moderator_dae.py` |
-| Stored-comment consumer | `modules/communication/video_comments/src/commenting_control_plane.py` |
-| Reply meaning and prompt | Existing `comment_content_analyzer.py`, `reply_context.py`, `intelligent_reply_generator.py` |
-| Review and browser posting | Existing `skillz/tars_like_heart_reply/src/comment_processor.py`, `reply_executor.py` |
+| Inbox | `memory/012_manifest.json`, override `YT_012_MANIFEST_FILE` |
+| Receipt | `memory/012_manifest_acknowledgements.json`, override `YT_012_MANIFEST_ACK_FILE` |
+| Theme | `memory/012_manifest_state.json`, override `YT_012_MANIFEST_STATE_FILE` |
+| Queue/producer/lifecycle | `livechat/src/operator_command_queue.py`, `auto_moderator_dae.py` |
+| Comment consumer | `video_comments/src/commenting_control_plane.py` |
+| Assessment/draft/review | `reply_context.py`, `intelligent_reply_generator.py` |
+| Browser identity/submission | existing `skillz/tars_like_heart_reply/src/` owners |
+| Durable history/evidence | `commenter_history_store.py`, override `YT_COMMENT_HISTORY_DB` |
 
-Do not write an example command into GitHub's tracked memory directory and call it a live update. Resolve the actual authorized runtime and its overrides, atomically append a unique command while preserving queued work, then read that command's receipt. A command ID with an unknown outcome must not be retried under a new ID. Public `announce` and private `set_context` are different actions.
+“Live stream …” selects livechat; “Commenting …” selects video comments; “Push …”
+selects both. “Update the chat manifest with …” is private and honors stated
+scope, otherwise both. Only explicit announcement intent selects `announce`.
+`set_context` does not publicly announce receipt or repeat operator wording.
 
-The default watcher polls every 60 seconds only while its DAE runs. The source change makes `set_context` silent even when livechat is selected. Existing gates, dry-run, TTL, lock, deferred availability and replay rules remain. Shared clear still does not clear the legacy commenting broadcast. Surface scope exists; channel-specific scope is not added by this patch and must not be inferred.
+Resolve paths from actual launch configuration. `enqueue_operator_command`
+appends one unique immutable ID under the existing ledger lock, preserving work.
+Producers never write acknowledgements/state. TTL, supersession, STOP/automation,
+selected-surface and dry-run gates remain. Private activation needs no sender.
+Shared clear does not clear legacy local promo state.
 
-## Candidate behavior
+## Implemented source behavior
 
-1. Activate theme privately and record `context_activated=true`, `public_message_sent=false` in the matching queue receipt.
-2. Carry the theme into the writing prompt with the original comment, video title and existing memory. Answer the actual comment first; use theme only when relevant. No raw theme suffix is added to published text.
-3. Use a general-language model for writing and a separate evaluation call for relevance, coherence, grounding and non-disclosure of private instructions. Missing/malformed/low judgments block posting. Ratings are model judgments, not calibrated probabilities.
-4. Keep model-role name filtering as a conservative safeguard, not a replacement for signed runtime/provider admission. UI-TARS remains a visual role. A separate call to the same model is not independent-provider verification.
-5. Bind and recheck the original Studio row, verify exact entered text, submit once, then require new creator-text DOM readback. Capture a post screenshot; when vision is enabled require its check too. A click alone remains unknown. Halt the current session on uncertainty. Nested reply submission remains blocked pending its own identity/readback qualification.
-6. Preserve theme command identity and review outcome in private telemetry; never claim theme adoption from mere command acceptance. Relevant observed wording plus the same command ID is stronger behavior evidence, but it is not proof of causal learning or retained RSI.
+- Posting assesses full original meaning, question, stance and uncertainty before
+  selecting a reply. Names alone establish no stance; negation, quotation and
+  sarcasm receive conservative evaluation. Content-neutral rate/history/repetition
+  checks remain before provider work.
+- The general-role owner selects the writer; GUI/audio/embedding/coder models,
+  including explicit LM Studio overrides, are rejected. UI-TARS remains visual.
+  Model-name checks are not signed runtime admission.
+- Generation retains supplied history, verified memory and assessment. Final
+  review sees that snapshot plus original author/channel/video/comment/theme.
+  Malformed review, gibberish, control tokens, unrelated answers and unsupported
+  facts reject. Per-call scores are judgments, not calibrated probabilities.
+- Themes enter generation and must still be current at submission. No wording is
+  appended afterward. Livechat preserves reviewed text/theme into ChatSender,
+  which rechecks after delays/conversion and retains existing cooldown gates.
+- Studio binds real comment/video/author/receiving-channel identity on the exact
+  Studio origin. The final script checks identity and exact editor text and
+  clicks once. Settled existing reply IDs form the baseline; verification needs
+  a new exact-text reply ID from the actual creator. Ambiguity/disappearance is
+  uncertain. Nested submission remains disabled pending equivalent qualification.
+- Existing SQLite history reserves before browser work, independently of draft
+  text. Unknown reservations survive restart and block retry; proven no-submit
+  failures alone release them. Verified delivery/history commit together.
+  Approved review/context, creator reply IDs and unique screenshot/hash/inspection
+  evidence stay private through the same owner.
 
-## Offline evidence
+## Verification and Windows preparation
 
-`PYTHONDONTWRITEBYTECODE=1 python -B -m unittest discover -s modules/communication/video_comments/tests -p test_chat_manifest_inspection.py -v`: **15 passed**. Actual source definitions execute with controlled model/browser collaborators; queue persistence uses temporary files and a stubbed lock. Parser checks pass for materialized Python files. No model service, native browser, Google account or public YouTube action was used.
+The original 53 context plus 116 adjacent queue/lifecycle/reader cases pass on
+Windows CPython3.12. The 15-case stdlib selector passes. New semantic and durable
+history selectors use actual source definitions, temporary real SQLite restart/
+concurrency and exact production JavaScript in synthetic DOMs. Positive controls
+exercise useful answers, creator readback and actual sender payloads. Providers/
+DOMs are fixtures; these are not live inference or delivery receipts.
 
-The existing 53-case context selector's fixtures were adapted for the new boundaries. It and the 116 adjacent cases were not rerun because pytest is unavailable here. The source mirror is incomplete; full startup, package import effects and Windows behavior remain unqualified.
+Independent fresh-context review read all original files, reproduced wrong-row
+and coder-model acceptance, and reviewed their repairs. Canonical registry,
+backend manifest, digest pins and security findings use existing generators/gates.
+Exact final SHA/checks belong to PR2254 and the runtime receipt; historical passing
+checks do not accept a new head.
 
-## Required closure before deployment or merge
+Initial discovery found no YouTube DAE, browser debug endpoint or model server.
+No manifest overrides existed. Old September worktree state was inactive.
+The existing general Qwen3.5-4B GGUF is installed on E:.
+Private runtime preparation is at `O:/Foundups-Agent-runtime/youtube/`, with
+absolute queue/receipt/state/history paths. The old history was backed up through
+SQLite read-only backup. No public action was taken. Model listing is not model
+loading or admission; source, role and live account/channel must be checked.
 
-- Independent exact-head review under the repository's existing signed work-order/model-role authority. Do not treat this document or the voice phrase as authority to bypass those gates.
-- Complete the semantic comment-assessment/routing qualification: intent, question, stance and uncertainty must be judged from the actual text, rather than identity alone. This patch removes a demonstrated false agreement but does not establish a calibrated commenter-rating system.
-- Run original/adjacent tests, add the new selection through the canonical WRE test-registry/CI owner, and verify hosted results. Preserve original assertions and exact-case inventory rules.
-- Regenerate `scripts/reddog_backend_manifest.json` with its existing generator in a complete checkout, inspect the dependency/hash delta, refresh both digest pins and run the owning extension/runtime checks. Do not hand-edit a partial runtime manifest or publish stale hashes.
-- Qualify Studio selectors against the authorized channel. The creator badge, row marker, exact text and unresponded-filter behavior need live receipts; disappearance is uncertainty, not delivery proof.
-- Persist unresolved post attempts across process restarts through the existing engagement-history owner before automatic recovery. Current halt prevents retries inside one session; it does not certify restart-safe exactly-once delivery.
-- Connect the existing authorized Work-to-native runtime route. No Windows host, model endpoint or running DAE was established in this session. Test a private theme, match receipt and active source ID, generate a bounded draft, then inspect an authorized actual reply. Do not create a public test comment solely to prove polling.
-- Validate current role capability and model-output quality. Model-name families are necessary filtering here, not a provider admission receipt or a measured quality guarantee.
-
-Keep the candidate draft-only until these gates have concrete receipts. Do not say the running agent changed behavior based on this checkpoint.
+For the observed test: pin the release checkout, general model service/role,
+account/channel, browser connection, private paths and gates. Poll a harmless
+status command, then inspect private activation and relevant generation. Verify
+the exact published creator reply under its original comment; Submit is not
+proof. Do not create public test comments merely to prove polling. Report
+separately: queued, received, activated, draft reviewed, delivery observed.
+Repository completion requires applicable checks on resulting main under
+WSP97 v1.10. Offline source validation claims no live model judgment, native RSI
+or measured transferable learning.
