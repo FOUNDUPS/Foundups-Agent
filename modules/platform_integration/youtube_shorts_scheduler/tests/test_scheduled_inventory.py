@@ -117,13 +117,14 @@ def test_native_and_url_receiving_account_must_agree(changes):
 
 
 @pytest.mark.parametrize("bad_row", [
-    row(schedule="Scheduled"), row(schedule="Unlisted Oct 30, 2026, 9:15 AM"),
-    row(schedule="Scheduled Feb 30, 2026, 9:15 AM"),
-    row(schedule="Scheduled Oct 30, 2026, 29:15 AM"),
-    row(schedule="Scheduled Oct 30, 2026, 9:15 AM; Oct 31, 2026"),
-    row(video_id=""), {"title": "A row without identity"},
+    {"schedule": "Scheduled"}, {"schedule": "Unlisted Oct 30, 2026, 9:15 AM"},
+    {"schedule": "Scheduled Feb 30, 2026, 9:15 AM"},
+    {"schedule": "Scheduled Oct 30, 2026, 29:15 AM"},
+    {"schedule": "Scheduled Oct 30, 2026, 9:15 AM; Oct 31, 2026"},
+    {"video_id": ""}, {"raw": {"title": "A row without identity"}},
 ])
 def test_parse_failures_retain_raw_observations_and_never_use_upload_date(bad_row):
+    bad_row = bad_row["raw"] if "raw" in bad_row else row(**bad_row)
     result = receipt(page([bad_row]))
     assert result["status"] == "partial" and result["total_scheduled"] is None
     assert result["rows_seen"] == 1 and result["rows_parsed"] == 0
@@ -223,11 +224,12 @@ def test_different_rows_after_no_progress_cannot_prove_pagination(previous):
 
 
 @pytest.mark.parametrize("later,issue", [
-    (page([row(SECOND)], channel_id="UCother", previous_page=True), "receiving_channel_unverified"),
-    (page([row(SECOND)], chip_texts=[], previous_page=True), "scheduled_filter_unverified"),
-    (RuntimeError("synthetic read failure"), "page_read_failed"),
+    ({"channel_id": "UCother", "previous_page": True}, "receiving_channel_unverified"),
+    ({"chip_texts": [], "previous_page": True}, "scheduled_filter_unverified"),
+    ({"read_error": True}, "page_read_failed"),
 ])
 def test_later_failure_keeps_earlier_bound_rows_without_absence_claim(later, issue):
+    later = RuntimeError("synthetic read failure") if later.get("read_error") else page([row(SECOND)], **later)
     result = receipt(page(next_page=True), later)
     assert result["status"] == "partial" and result["total_scheduled"] is None
     assert [video["video_id"] for video in result["videos"]] == [FIRST]

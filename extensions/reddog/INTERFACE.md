@@ -1,5 +1,14 @@
 # RedDog Interface
 
+## Native startup and qualified inventory closure - 2026-10-29
+
+The existing dependency-launcher startup owner and scheduled-inventory owner add
+exactly two required runtime files. The generated closure admits 1,474 members
+and rejects 1,475; both new members are asserted by the existing boundary test.
+The 329 KiB manifest, 2 MiB individual-file and 32 MiB aggregate caps are
+unchanged. This binds source/package bytes; installed services, browser selectors
+and live scheduling remain separate qualifications.
+
 ## Petition planning source closure — 2026-10-27
 
 The generated backend closure includes the effect-free petition planning leaf

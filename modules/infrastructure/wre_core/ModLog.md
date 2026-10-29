@@ -1,3 +1,14 @@
+## Startup and scheduled-inventory registry projection - 2026-10-29
+
+WSP 5/15/22/50/97. Regenerate the existing canonical registry after the two new
+test owners defer module-time fixture construction into test bodies. All case
+and assertion inventories remain intact; both programs now classify as unit and
+collectable without classifier changes or an execution allowlist. Projection:
+1,787 files, 260 quarantined; write/check pass. The focused CI adapter rechecks
+current source with this same AST owner and requires parity with the descriptor
+before either parent admission or child test execution. Quarantined programs
+remain visible and are rejected even if an obsolete JSON descriptor says unit.
+
 ## 2026-10-29 — Keep scaffolds and manual programs out of automated evidence
 
 The existing AST classifier recognizes explicit `WRE_TEST_MODE` assignments

@@ -239,6 +239,12 @@ function assertConfigurationMigrationPrecedence() {
 }
 
 function assertRuntimeFileCountBoundary() {
+  for (const member of [
+    'modules/infrastructure/dependency_launcher/src/lm_studio_startup.py',
+    'modules/platform_integration/youtube_shorts_scheduler/src/schedule_inventory.py'
+  ]) {
+    assert(manifest.required_runtime_files.includes(member));
+  }
   assert(manifest.required_runtime_files.includes(
     'modules/foundups/simulator/economics/_token_numeric.py'
   ));
@@ -258,13 +264,13 @@ function assertRuntimeFileCountBoundary() {
     candidate.required_runtime_files.push(member);
     candidate.required_runtime_sha256[member] = '0'.repeat(64);
   };
-  while (candidate.required_runtime_files.length < 1472) {
+  while (candidate.required_runtime_files.length < 1474) {
     addMember(candidate.required_runtime_files.length);
   }
-  assert.strictEqual(candidate.required_runtime_files.length, 1472);
+  assert.strictEqual(candidate.required_runtime_files.length, 1474);
   assert.deepStrictEqual(validator.validateManifest(candidate), []);
-  addMember(1472);
-  assert.strictEqual(candidate.required_runtime_files.length, 1473);
+  addMember(1474);
+  assert.strictEqual(candidate.required_runtime_files.length, 1475);
   assert.deepStrictEqual(validator.validateManifest(candidate), [
     'backend_runtime_file_contract_mismatch'
   ]);

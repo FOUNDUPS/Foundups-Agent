@@ -93,16 +93,20 @@ def test_missing_or_unloaded_model_is_not_ready_and_never_loaded(monkeypatch, ki
     assert startup.subprocess.run.call_count == 0
 
 
-@pytest.mark.parametrize("observed", [state(instances=2), state(key="qwen-coder-7b")])
+@pytest.mark.parametrize("observed", [(2, KEY), (1, "qwen-coder-7b")])
 def test_ambiguous_or_wrong_selected_model_is_not_ready(monkeypatch, observed):
-    monkeypatch.setattr(startup, "inspect_lm_studio_model", Mock(return_value=observed))
+    instances, key = observed
+    observed_state = state(instances=instances, key=key)
+    monkeypatch.setattr(startup, "inspect_lm_studio_model", Mock(return_value=observed_state))
     assert launch()[0] is False
     assert startup.subprocess.run.call_count == 0
 
 
-@pytest.mark.parametrize("error", [native.LMStudioAuthenticationError("private detail"), ValueError("private detail"), RuntimeError("private detail")])
+@pytest.mark.parametrize("error", [native.LMStudioAuthenticationError, ValueError, RuntimeError],
+                         ids=["error0", "error1", "error2"])
 def test_invalid_native_http_is_failure_without_spawn_or_private_error(monkeypatch, error):
-    monkeypatch.setattr(startup, "inspect_lm_studio_model", Mock(side_effect=error))
+    failure = error("private detail")
+    monkeypatch.setattr(startup, "inspect_lm_studio_model", Mock(side_effect=failure))
     ok, message = launch()
     assert not ok and "private detail" not in message
     assert startup.subprocess.run.call_count == 0
