@@ -1,5 +1,16 @@
 # ModLog: FoundUps Tokenization System
 
+## 2026-10-29 — Separate design documents from executable interfaces
+
+Add the missing INTERFACE with SPECIFIED_NOT_IMPLEMENTED status for this directory.
+The tracked inventory contains documents only; handoff code samples are not
+exported services or deployed contracts. Link the existing later CABR routing
+correction and identify earlier README/handoff mint-trigger wording as historical
+drift without creating a new economic policy or overriding the blockchain owner.
+No wallet, token, provider, deployment or runtime operation was performed. Validation
+is source/hash and relative-link review. WSP 11/22/49/50/84/97.
+
+
 ## 2026-02-17: CABR/UPS Semantics Canonicalization (Flow Routing, Not Mint Trigger)
 
 ### Changes
