@@ -1,5 +1,21 @@
 # WSP core test change log
 
+## 2026-10-29 — Shared domain and container-classification contracts
+
+Ten new cases in the existing checker test file bring that owner to 49 cases.
+The focused checker/FMAS selection plus three unchanged external acceptance
+regressions passes 83 cases. Those three regressions fail on exact main34b.
+The new cases cover both WSP 3 mirrors and preserve unresolved container debt
+without inventing module contracts. No application entrypoint, live model,
+external auditor or database was exercised. WSP 3/5/6/22/50/84/97.
+
+Integrated audit selection: 255 passed plus 28 subtests. Runtime/idle-consumer
+selection: 24 passed. Three Node compatibility suites passed, including exact
+1473-member acceptance/1474-member rejection. Exact-base Mode 2: 0 errors,
+127 warnings, 306 advisories. Registry check: current, 1787 files/260 quarantined.
+The structural inspection of main34b agrees on 158 roots and eight unqualified
+containers in both auditors, with unchanged Git status and no external scanners.
+
 ## 2026-10-29 — Read-only audit contracts
 
 Add 39 synthetic cases described in [README.md](README.md). Final frozen desired

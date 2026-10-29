@@ -17,6 +17,10 @@ from typing import Iterable, List, Optional
 from modules.infrastructure.wre_core.src.wre_git_bounded_io import (
     git_read_environment, run_bounded_stdout,
 )
+from modules.infrastructure.wsp_core.src.wsp_domain_policy import (
+    ARCHITECTURAL_EXCEPTIONS, CORE_DOMAINS, RESERVED_BLOCK_NAMES,
+    evidenced_module_roots, unqualified_module_containers,
+)
 
 
 class WSPViolationType(Enum):
@@ -43,12 +47,6 @@ class WSPViolation:
     fix_suggestion: Optional[str] = None
 
 
-CORE_DOMAINS = frozenset({
-    "ai_intelligence", "communication", "platform_integration", "infrastructure",
-    "foundups", "gamification", "blockchain", "development", "aggregation", "monitoring",
-})
-ARCHITECTURAL_EXCEPTIONS = frozenset({"wre_core"})  # WSP3 section 5.1
-RESERVED_BLOCK_NAMES = frozenset({"src", "tests", "docs", "memory", "skills", "skillz"})
 MAX_FILE_BYTES = 2 * 1024 * 1024
 MAX_TOTAL_BYTES = 128 * 1024 * 1024
 
@@ -145,15 +143,8 @@ class WSPComplianceChecker:
         return (entity_type, entity_name) in self.known_false_positives
 
     def _module_roots(self):
-        modules = set()
-        for relative in self._files:
-            parts = relative.split("/")
-            if len(parts) >= 3 and parts[0] == "modules" and parts[1] in ARCHITECTURAL_EXCEPTIONS:
-                modules.add("/".join(parts[:2]))
-            elif (len(parts) >= 4 and parts[0] == "modules"
-                  and parts[2] not in RESERVED_BLOCK_NAMES and not parts[2].startswith(".")):
-                modules.add("/".join(parts[:3]))
-        return sorted(m for m in modules if not self._is_known_false_positive("module", m.split("/")[-1]))
+        return [m for m in evidenced_module_roots(self._files)
+                if not self._is_known_false_positive("module", m.split("/")[-1])]
 
     async def scan(self) -> List[WSPViolation]:
         """Refresh tracked inventory and return hints plus explicit incomplete-scan rows."""
@@ -231,6 +222,10 @@ class WSPComplianceChecker:
         for path in sorted(misplaced):
             violations.append(_violation(WSPViolationType.ARCHITECTURE,
                 "Domain-level source/tests must belong to an owned block", [path], "high", 3))
+        for path in unqualified_module_containers(self._files):
+            violations.append(_violation(WSPViolationType.ARCHITECTURE,
+                "Tracked container lacks src/tests/root-contract evidence; review ownership",
+                [path], "medium", 3))
         return violations
 
     def _required_file(self, module, suffix, kind, severity, protocol):

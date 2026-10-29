@@ -91,24 +91,10 @@ else:
     from .external_audit import run_pip_audit, run_bandit, run_npm_audit
     from .tracked_audit import read_tracked_inventory, structural_findings
 
-# Define recognized Enterprise Domains (WSP 3)
-ENTERPRISE_DOMAINS = {
-    "ai_intelligence",
-    "communication", 
-    "platform_integration",
-    "infrastructure",
-    "monitoring",
-    "gamification",
-    "foundups",
-    "blockchain",
-    "development",
-    "aggregation"
-}
-
-# Define documented architectural exceptions (WSP 3, Section 1)
-ARCHITECTURAL_EXCEPTIONS = {
-    "wre_core"  # WRE Core Engine - WSP 46 documented exception
-}
+# Compatibility names share one immutable WSP 3 policy owner.
+from modules.infrastructure.wsp_core.src.wsp_domain_policy import (
+    CORE_DOMAINS as ENTERPRISE_DOMAINS, ARCHITECTURAL_EXCEPTIONS,
+)
 
 def is_module_directory(path):
     """

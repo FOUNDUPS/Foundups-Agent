@@ -1,5 +1,35 @@
 # WSP core change log
 
+## 2026-10-29 — Share WSP 3 policy and preserve unqualified ownership hints
+
+F6a centralizes immutable domain/exception/reserved-name constants and the pure
+module-evidence rule in this existing owner. FMAS and WSPComplianceChecker reuse
+it. Data-only containers no longer create false missing module contracts; they
+remain explicit architecture hints even under document suppressions. Git/source
+inspection, Holo committed-generation acquisition and physical layout are unchanged.
+
+Three frozen existing-consumer regressions fail on main34b and pass unchanged on
+the candidate. The checker now has ten additional cases, including both canonical
+WSP 3 mirrors, generator input, direct contract evidence, reserved names, exception
+compatibility and no-IO policy calls. Focused checker/FMAS/frozen selection: 83
+passed. The integrated audit selection passes 255 tests plus 28 subtests; runtime
+and idle-consumer selection passes 24 tests; three Node compatibility suites pass.
+Exact-base Mode 2 reports 0 errors/127 warnings/306 advisories. The unchanged test
+registry is current at 1787 owners/260 quarantined. A structural-only inspection
+of clean main34b confirms both auditors agree on 158 roots/eight unresolved
+containers, with unchanged Git status. The checker still reports the uninspected
+Hermes submodule explicitly; no whole-repository security coverage is claimed.
+
+The runtime closure adds only this pure helper (1473 total) and changes only the
+checker digest. Bind both manifest pins; admit exactly 1473 files and reject 1474,
+keeping 329 KiB/2 MiB/32 MiB byte caps. Review 39 exact source-hash metadata findings:
+38 previously reviewed unchanged digests and one newly reported unchanged digest,
+all recomputed against staged source. Preserve all 2705 prior review bindings;
+no security rule or source-path exclusion changes. Hosted/main acceptance remains
+required; these are source compatibility and local deterministic checks.
+Manual API and boundary verification was needed; no Qwen/Gemma or independent
+review is claimed. WSP 3/5/6/11/22/49/50/60/64/84/87/97.
+
 ## 2026-10-29 — Tracked, bounded, read-only compliance hints
 
 Replace recursive traversal and implicit PatternMemory construction with one

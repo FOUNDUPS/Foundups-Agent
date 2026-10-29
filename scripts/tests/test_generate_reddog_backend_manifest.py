@@ -86,6 +86,7 @@ def test_generated_closure_binds_executable_and_dynamic_load_sentinels(
         "holoindex_postmerge_claim_contract.py",
         "modules/infrastructure/idle_automation/src/holoindex_postmerge_coordinator.py",
         "modules/infrastructure/database/src/database.py",
+        "modules/infrastructure/wsp_core/src/wsp_domain_policy.py",
         "modules/infrastructure/dependency_launcher/src/wsl_agent_runtime.py",
     )
     assert set(required).issubset(runtime)
@@ -278,7 +279,7 @@ def test_checked_in_manifest_matches_independent_generation(
 
 def _assert_manifest_digest_pin(generated: dict[str, object]) -> None:
     digest = generator.canonical_manifest_digest(generated)
-    assert digest == "60fc85a9670dca2fba2cbfe745e7852d9b757c1364b80ae837ab664b6e36096f"
+    assert digest == "62d1c9a63620dad37d07d3100cd9dcfe8d33658d6dc0ac0ab19c2c0bc3c43946"
     constants = (
         REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js"
     ).read_text(encoding="utf-8")
