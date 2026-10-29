@@ -33,7 +33,7 @@ class TestFoundupDispatch:
 
     def test_dispatch_routes_to_fam_adapter(self):
         """Dispatch should call fam_adapter.handle_fam_intent."""
-        mock_intent = MagicMock()
+        mock_intent = MagicMock(metadata={}, payload=None)
         mock_intent.raw_message = "what is cabr"
         mock_intent.sender = "test_user"
         mock_dae = MagicMock()
@@ -153,7 +153,7 @@ class TestFoundupPlanSteps:
         mock_dae.IntentCategory = MockIntentCategory
         mock_dae.ExecutionPlan = MockPlan
 
-        mock_intent = MagicMock()
+        mock_intent = MagicMock(metadata={}, payload=None)
         mock_intent.category = MockIntentCategory.FOUNDUP
         mock_intent.target_domain = "fam_adapter"
         mock_intent.extracted_task = "test task"
@@ -203,7 +203,7 @@ class TestFoundupJobCreation:
             get_job_queue,
         )
 
-        mock_intent = MagicMock()
+        mock_intent = MagicMock(metadata={}, payload=None)
         mock_intent.raw_message = "start build gotjunk"
         mock_intent.sender = "test_user"
         mock_intent.session_key = "session_123"
@@ -233,7 +233,7 @@ class TestFoundupJobCreation:
             dispatch_foundup,
         )
 
-        mock_intent = MagicMock()
+        mock_intent = MagicMock(metadata={}, payload=None)
         mock_intent.raw_message = "hermes build social_twin"
         mock_intent.sender = "012"
         mock_intent.session_key = None
@@ -257,7 +257,7 @@ class TestFoundupJobCreation:
             get_job_queue,
         )
 
-        mock_intent = MagicMock()
+        mock_intent = MagicMock(metadata={}, payload=None)
         mock_intent.raw_message = "extract foundup move2japan"
         mock_intent.sender = "test_user"
         mock_intent.session_key = None
@@ -279,7 +279,7 @@ class TestFoundupJobCreation:
             get_job_queue,
         )
 
-        mock_intent = MagicMock()
+        mock_intent = MagicMock(metadata={}, payload=None)
         mock_intent.raw_message = "validate foundup kosei"
         mock_intent.sender = "test_user"
         mock_intent.session_key = None
@@ -301,7 +301,7 @@ class TestFoundupJobCreation:
             get_job_queue,
         )
 
-        mock_intent = MagicMock()
+        mock_intent = MagicMock(metadata={}, payload=None)
         mock_intent.raw_message = "start build gotjunk"
         mock_intent.sender = "test_user"
         mock_intent.session_key = None
@@ -330,7 +330,7 @@ class TestFoundupJobCreation:
             get_job_queue,
         )
 
-        mock_intent = MagicMock()
+        mock_intent = MagicMock(metadata={}, payload=None)
         mock_intent.raw_message = "openclaw build pqn_portal"
         mock_intent.sender = "test_user"
         mock_intent.session_key = None
@@ -467,7 +467,7 @@ class TestDryRunPolicyFlagAlignment:
             get_job_queue,
         )
 
-        mock_intent = MagicMock()
+        mock_intent = MagicMock(metadata={}, payload=None)
         mock_intent.raw_message = "build foundup gotjunk dry_run=true"
         mock_intent.sender = "test_user"
         mock_intent.session_key = "session_dry1"
@@ -492,7 +492,7 @@ class TestDryRunPolicyFlagAlignment:
             get_job_queue,
         )
 
-        mock_intent = MagicMock()
+        mock_intent = MagicMock(metadata={}, payload=None)
         mock_intent.raw_message = "hermes build kosei --dry-run"
         mock_intent.sender = "012"
         mock_intent.session_key = None
@@ -516,7 +516,7 @@ class TestDryRunPolicyFlagAlignment:
             get_job_queue,
         )
 
-        mock_intent = MagicMock()
+        mock_intent = MagicMock(metadata={}, payload=None)
         mock_intent.raw_message = "start build social_twin [dry-run]"
         mock_intent.sender = "test_user"
         mock_intent.session_key = None
@@ -538,7 +538,7 @@ class TestDryRunPolicyFlagAlignment:
             get_job_queue,
         )
 
-        mock_intent = MagicMock()
+        mock_intent = MagicMock(metadata={}, payload=None)
         mock_intent.raw_message = "build foundup gotjunk"
         mock_intent.sender = "test_user"
         mock_intent.session_key = None

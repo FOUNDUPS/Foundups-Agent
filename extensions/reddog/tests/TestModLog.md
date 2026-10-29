@@ -1,4 +1,460 @@
+## GitHub file-reader source binding — 2026-10-26
+
+Reuse the three existing Node contract/preflight/blocked-recovery owners:each
+exits0 at the new c1f97e86 pin. Existing eight Python generator cases also pass
+after source/manifest/pins are staged. Runtime1471 and1472 refusal stay fixed;
+no new cases, widened caps, native isolation or installed-runtime admission claim.
+
+## Numeric/current-main reconciliation qualification — 2026-10-25
+
+Fresh unchanged generator8 pass in77.50s with2 inherited inactive asyncio config
+warnings. Canonical write/check and existing Node contract/preflight/blocked-
+recovery commands each exit0. All1614 evidence snapshots remain stable in every
+phase, with zero instrumented Python/Node network or dotenv attempts. Runtime
+membership stays1471 and the explicit Node oracle still rejects1472. Manifest
+332650 LF/335665 CRLF bytes; source total19662966 and max154924 remain within
+existing328KiB/2MiB/32MiB limits. Exact commands/IDs/JUnit/maps remain in external
+`foundups-numeric-main-reconciliation-964348f28f734c79bc3b5ac4451f5934`.
+No unchanged simulator rerun or new behavioral coverage is claimed. Existing169
+simulator/FAM plus8 central hashes still match the qualified736 source. New
+metadata bindings, hosted gates and publication remain separate parent actions.
+
+## FoundUps selected numeric source closure — 2026-10-25
+
+Pre-edit WSP15 allocation16/P0 in the numeric plan permits exactly one required
+private arithmetic member. Runtime1470->1471; the existing explicit Node boundary
+now accepts1471 and rejects1472. The old boundary oracle first failed its
+1470 expected-count assertion on actual1471, before calling the validator.
+That RED is an oracle-count mismatch, not evidence of old-validator execution. All328KiB manifest,2MiB/source and32MiB total caps remain unchanged.
+Only token_economics.py's existing LF digest changes, plus _token_numeric.py.
+The alignment test owner is outside runtime membership: an initial parent
+measurement assertion wrongly expected its digest, before any pins changed.
+
+Canonical write/check, all8 existing generator cases and3 existing Node
+compatibility/preflight/blocked-recovery entrypoints pass. Existing Python pin
+and JS pin advance together. All1614 evidence hashes stay stable after deliberate
+write/cap edits; zero instrumented Python/Node network or dotenv attempts.
+No generator/source-discovery algorithm, runtime authority, dependency or API
+change. Evidence count1614 differs from actual1471 runtime members.
+
+Exact commands, IDs, timings and source maps are external under
+foundups-numeric-source-closure-f3jex_4s and in the numeric portable receipt.
+Known38 metadata findings are proposed, pending independent review:37 sources/
+contexts unchanged and1 known arithmetic-source SHA256 value changed. No blanket
+rule/path exemption, unknown finding approval, OS isolation, installed-runtime
+promotion, real chain effect or additional economic coverage follows.
+
+## FoundUps BTC/Mesa source closure — 2026-10-25
+
+The same8 generator cases and three existing Node entrypoints pass on the
+reconciled source, with only the existing canonical Python digest literal changed.
+Node commands: test_backend_compatibility_contract.js,
+test_backend_compatibility_preflight.js and test_holoindex_blocked_request_recovery.js
+under extensions/reddog/tests; each exits0. Runtime1470/+1 and all LF/CRLF, source,
+total-byte, hash and path checks remain. Canonical generator --write/--check pass.
+
+New canonical digest is c97e153f6184bcc7f4232ae2d5b17e1af708ec2a104ce4119f549af4839d26cd;
+whole LF manifest hash is6b7144a0d847c7cc96aa095765c464667f0d684a2741cfbc532a227f6a7d6808.
+These are different hash domains. No members or other manifest keys changed;
+only BTC/Mesa source digests advance. Generator8 passes in97.68s wrapper/96.64s
+pytest with two inherited config warnings. Node3 results are commands, not three
+invented case counts; these checks overlap prior source qualification.
+
+External source snapshots and exact commands/results live under
+foundups-btc-source-closure-6b08022181194325a9f2eea110484734 in host scratch.
+All runs record stable1613 evidence files and zero Python/Node network or dotenv
+attempts; runtime membership remains1470. Guards are not an OS sandbox. No
+installed/runtime/chain/authentication result follows. Known38 metadata contexts
+are proposed for independent review only, with no ledger write or scanner run;
+fresh hosted security/CI and main readback remain parent gates.
+
+## FoundUps epoch source closure — 2026-10-25
+
+Reuse the same8 generator cases and3 Node compatibility/preflight/recovery
+entrypoints without test-oracle changes except the canonical Python digest pin.
+All pass on the repaired epoch source (generator79.64s,2 inherited warnings).
+Independent staged review verifies1470 normalized source blobs, exact pins and
+unchanged328KiB/2MiB/1470/32MiB caps, including retained1471-member rejection.
+The generated delta is one source hash; no installed runtime is promoted.
+Fresh hosted CI/security and main convergence remain required.
+
+## FoundUps authorization closure — pre-verification inventory, 2026-10-25
+
+Reuse the eight existing Python generator cases and existing Node backend
+compatibility contract/preflight/recovery owners. The source change needs one
+additional runtime member, so the existing exact boundary accepts 1,470 and
+rejects 1,471; all LF/CRLF, byte, hash, path and staged-index assertions remain.
+Both digest pins must equal canonical generation, with source plus manifest and
+pins staged before the index test. No new test file or accepting fixture.
+This verifies source closure, not installed promotion or transaction authority.
+
+Fresh local results: all eight generator cases pass (80.23 s, two inherited
+inactive asyncio configuration warnings). The three existing Node entrypoints
+`test_backend_compatibility_contract.js`, `test_backend_compatibility_preflight.js`
+and `test_holoindex_blocked_request_recovery.js` exit0. Exact member/+1 and LF/CRLF
+size assertions remain effective. Python JUnit evidence is in external scratch
+`foundups-fx-manifest-f220070e36bf4ef69bb5c4184182eeb7/results.xml`.
+New-head hosted security/CI and independent source review remain required.
+
+After incorporating main `03035b4f5`, rerun all eight cases: eight pass in80.48s,
+two inherited warnings; the same three Node entrypoints exit0. Independent
+staged-source review verifies all1,470 normalized hashes and both pins without
+mismatch, while preserving main's verifier hash and exact ledger union. This
+combined result supersedes the preceding pre-merge fixture qualification.
+Fresh hosted gates remain required. See the FoundUps delivery plan for scope
+and external JUnit location.
+
+## 2026-10-23 — Kids story route dependency closure
+
+Regenerated the backend manifest for the admitted kids story dispatch adapter and changed route/skill registry digests. Runtime file bound is now exactly 1,468; byte bounds remain unchanged. Pin `0bd8eb97c46f9f35072685d3a543c46433b7e24b76ea5038a65c1cb24d59a507`. Production admission and provider execution remain unactivated.
+
+## PR2181 private lease extraction bindings — 2026-10-23
+
+WSP6/11/22/62/97. Regenerate the existing manifest after the private scope
+extraction: 1,467 members, no removals; canonical digest
+`92384847a635da3c7d0f5446f001519ead96eebf297159b9ea0b753657e73d57`.
+Pretty JSON measures 331,870 LF / 334,877 CRLF bytes; the prior 327 KiB cap
+misses CRLF by 29 bytes. Set only the measured whole-KiB ceiling to 328 KiB
+(995 bytes headroom), retain 2 MiB per-file / 32 MiB total, and test exact
+1,467-member acceptance / 1,468 rejection. Eight generator cases and all three
+Node contract/preflight/async commands pass. Independent staged-source/hash and
+reachability review plus its Node contract rerun pass. Fresh hosted gates remain.
+
+## Installed HIGH source integration — 2026-10-23
+
+Reconcile preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+Combined local qualification passed 400 cases with six platform skips; eight
+manifest cases and three Node compatibility commands also passed. These are
+separate scopes. Independent offline source/outcome review passes12 held-out
+cases; hosted Linux qualification and publication remain required. Earlier counts
+below apply to their dated sources.
+
+Reuse existing manifest, compatibility contract, preflight and asynchronous
+recovery checks after the combined source is frozen. Keep LF/CRLF, exact-byte/+1,
+member/+1, source-hash and staged-index assertions. The measured candidate requires 1,466/1,467 member and 327 KiB/+1 byte
+controls; all three existing Node commands and eight Python cases pass. Package/PAL and other incoming-main
+evidence remains preserved.
+
+The following entries preserve historical source, tests and publication states.
+Their then-current counts, pending gates and connectivity observations are dated
+evidence, not the status of the 2026-10-23 integration.
+
+## PR1638 integration replay — 2026-10-23
+
+Reuse the existing PAL inventory and tests without source/assertion changes.
+On verified portable Windows Node24.22.1, all five focused PAL/registration/
+adjacent-disclosure/package-manifest commands exit0; full fast tier18 members
+passes in19,568ms at integration checkpoint8a88810d7. The package-surface test
+passes69 files/975,019 bytes under unchanged caps and LF rules. Actual VSCE
+build maps71 entries:68 exact files, README's eight documented URL substitutions,
+and two packager metadata files. Archive284,535 bytes; exact hashes are in the
+existing integration receipt and external current-vsix-inspection.json.
+
+The first plain-clone fast attempt failed the canonical default-Python topology
+check; a source-pinned linked O: worktree then passed without changing tests or
+the qualified environment. Prior Node24.11.1/13-case independent results below
+remain historical, not additional new cases. Main4169b051's backend closure and
+PR1759 boundary tests are retained; hosted Ubuntu/Windows CI and installed-host
+qualification are separate pending gates. WSP00/5/6/22/50/97.
+
+## PR1638 PAL pre-test inventory — 2026-10-22
+
+Recorded before repair test authoring in the isolated PR1638 worktree. Source
+baseline: original `688eb097724ece28aca20e2e3477ca4c7aa9236c` merged onto
+`02d1c7c14c60487619287a9cb753ff3ddaa53c14`; this is local preparation, not native
+WRE execution or production activity/key access. WSP00/15/22/50/84/97 apply.
+
+| Existing test | Coverage and reuse decision |
+| --- | --- |
+| `test_principal_activity_ledger.js` | Temporary ledger, encrypted payload, principal path separation, context, and tampering. Original line19 does not parse. Repair and extend this file for wrong-key append, complete/short/failed writes, cooperating child-process contention, stale lock, and latest commitment status before filtering. |
+| `test_principal_activity_extension_adapter.js` | Fake SecretStorage, temporary storage, sequential key reuse, principal routing, bounded context. Extend with first-key concurrency, missing/wrong key beside existing data, root/key scope, rejected store/read, and truthful truncation. No real key store. |
+| `test_principal_activity_runtime_registration.js` | Static source/package command-registration assertions. Retain unchanged; no activated VS Code host proof. |
+| `test_principal_memex_disclosure_source.js` | Adjacent exact-shape/one-use SecretStorage and serialized consumption coverage. Reuse as a regression check; its process-local serialization is a pattern, not a cross-process lock. |
+| `test_package_manifest.js`, `test_package_surface.js`, `reddog_package_surface_contract.js`, `test_reddog_test_tiering.js` | Existing strict package/runtime membership and tier contracts remain owners. Root reproduced the original PR's missed 67/66 full-package counts after two runtime additions; root will repair these counts while retaining caps/EOL/allowlists and perform final combined-tree validation. |
+
+Read `tests/README.md`, this inventory, existing PAL tests, adjacent disclosure
+tests, and the source patterns before changes. Extend the two existing PAL test
+files; do not add a new test framework/store. The exact-head read-only baseline
+has a ledger syntax failure, passing adapter/static-registration tests, and
+separate synthetic failure receipts under external `refresh/1638-qualification`.
+Repair execution: both existing PAL files exit0 on Windows Node v24.11.1:
+`node tests/test_principal_activity_ledger.js` and
+`node tests/test_principal_activity_extension_adapter.js` (from the extension
+directory). The original contracts remain, including the repaired syntax line.
+Added fixtures cover eight concurrent first-key and append calls; independent
+child-process lock contention; scoped/missing/malformed/wrong keys across
+principals; empty/partial files; invalid JSON values; short/invalid/failed writes,
+flush/close failure; lock stat/close/replacement failure; and latest commitment
+state before scope/window limits. Context fixtures cover reopened/duplicate
+IDs, count/truncation metadata and final serialized-byte boundaries. The four
+source/test files are LF-only; diff-check passes. Evidence and source hashes:
+external `refresh/1638-qualification/repair-{ledger,adapter}-final.log` and
+`source-freeze.json`. Root owns package and combined-tree checks separately.
+
+No real SecretStorage, personal data, network, model, or installed extension was
+used. These are local fixture results, not installed-host qualification.
+Stale-lock recovery, power-loss guarantees, Windows ACLs, cross-root SecretStorage
+scope, hostile filesystem behavior and valid-tail rollback detection remain
+unqualified; failures can leave bytes or a lock for explicit inspection.
+
+Combined closure: the independent reviewer reran six scoped repository scripts
+and passed 13 separate adversarial probes with frozen source hashes. Root ran
+`node extensions/reddog/tests/run_reddog_test_tier.js fast` in the source-pinned
+O: checkout at `7615273f6`: 18 members PASS / 6,910 ms. The C: rejection remains
+recorded; the repository-location guard was not changed. Counts overlap.
+After current documentation count/link corrections, root's existing
+`node extensions/reddog/tests/test_package_surface.js` passes 69 files /
+975,019 raw bytes under the same one MiB limit. Actual local VSCE build yields
+71 archive entries / 284,536 bytes. Inspection verifies 68 exact source files,
+README's eight explicit URL-only rewrites and two generated metadata entries.
+The initial wrong-link-base archive is preserved; rebuilt qualification uses
+the existing README command's explicit monorepo content base. External evidence:
+`independent-source-review.json`, `fast-tier-result.json`,
+`package-surface-final.log`, `vsix-build-final.log`, `vsix-inspection.json`.
+Hosted CI/security, source publication, installation and native RSI remain
+separate unobserved gates. No source assertions were relaxed for closure.
+
+## PR1759 single-member admission boundary — 2026-10-22
+
+Reused `test_backend_compatibility_contract.js` after the O: fast tier reproduced
+the old 1,449-member rejection against the generated 1,450-member closure.
+Require the added queue path and preserve exact-max/max+1 acceptance/rejection;
+no byte, digest or path-validation bound changes. The initial C: attempt failed
+the tier's allowed-volume guard; source-pinned O: validation is required. Test
+results are recorded against the final PR head, not inferred from this change.
+
+## PR2150 policy manifest compatibility — 2026-10-21
+
+Reused `test_backend_compatibility_contract.js`,
+`test_backend_compatibility_preflight.js` and
+`test_holoindex_blocked_request_recovery.js`; all exit0. Independent-generation
+and staged-index binding checks pass within the six Python suites (101 pass,
+2 platform skips). Same1,449-member closure and unchanged caps/checks; only
+three member digests and existing pins change. Bridge TestModLog owns the full
+baseline/final receipt. No installed-runtime or Gmail behavior claim.
+
+## Live generation scope manifest boundary — 2026-10-20
+
+The initial binding run passed 35 tests and failed one: pretty generated JSON
+was 327,910 bytes against the unchanged 327,680-byte cap. Preserve that receipt.
+The reviewed capacity proposal pairs a 324 KiB consumer/Python bound with actual
+LF/CRLF acceptance, valid JSON padded to exactly 331,776 bytes, and unchanged
+maximum-plus-one rejection. Canonical digest, runtime count/hash/path guards,
+other byte limits and generator indent=2 remain unchanged. No source17 changes.
+Affected binding tests pass 36/0 skips in 80.266s; all three Node commands
+exit 0. No runtime suite rerun or admission
+claim follows from this resource-contract revision (WSP00/5/6/11/22/62/97).
+
+## Windows manifest byte compatibility — 2026-10-20
+
+Current 1,449-member manifest LF327430/CRLF330401 exposed a real Windows
+reader rejection at 320 KiB. Paired Node/Python accepted-input bound is
+now 324 KiB, a measured +4096-byte/1.25% contract change covering current
+and independently verified pending 1,451-member CRLF330885 (margin891).
+Pretty formatting, canonical digest/member bounds, other byte limits and
+source-line guards stay intact. This is post-read/pre-parse, not a memory
+allocation bound. Current binding tests36 pass; all three Node commands
+exit0 including actual LF/CRLF/exact-max/max+1 controls. Original failures
+and exact evidence remain in RSI dispatch. No native execution claim.
+WSP00/5/6/10/11/22/50/62/97.
+
+## 2026-10-15 — Initial enrollment backend binding
+
+Existing RedDog fast tier15members passed after regenerating the1426-member
+manifest and both consumer/generator pins. Initial generator checks exposed
+stale digest pins; those were updated to generated content rather than removing
+assertions. No member/cap/version relaxation or installed extension change.
+Evidence: `O:/RedDog-Builder-Artifacts/rsi-initial-manifest-20261015/reddog-fast.log`
+and `manifest-tests-final.xml`; hosted checks remain separately verified.
+
+## 2026-10-05 — WRE measured-zero fidelity binding (P15)
+
+The existing runtime manifest still covers1408 files; the reviewed PatternMemory
+repair changes its content digest to
+`3938f30d19cd46ecc909fc429fad9f2e967a1beb5709d7e75dc69965ff84d183`.
+Both existing consumer/generator pins are refreshed, with unchanged member and
+byte limits. Eight generator contracts pass (63.719s); the RedDog fast tier
+passes all15 members (10.000s parent), with stable named source pins. Hosted
+publication is verified: PR2062 and exact-main CI/CodeQL passed at `6efbc3ac1`.
+Hosted 340 WRE and 675 effect selections are recorded separately, not added to
+these integrity counts. P15 retained/control/recovery confirms the repaired
+consumer on unchanged saved rows; no model-learning or worker repair claim.
+See the canonical P15 RSI checkpoint. WSP5/22/50/97.
+
+## 2026-10-05 — WRE telemetry manifest boundary
+
+The existing compatibility boundary fixture now admits1408 members/rejects1409
+for the two declared audit-skill runtime additions. The generator test pins
+canonical digest `1cae5e88497899ef4021912002b85ad495cdb172196cc72a9dc9f46c58d59428`.
+No other assertions or byte limits changed. Exact consumer validation is
+recorded in the existing P14 RSI checkpoint; no installation/deployment implied.
+WSP5/6/22/50/95/97.
+
+## 2026-10-04 — Consent manifest consumer boundary
+
+`node extensions/reddog/tests/test_backend_compatibility_contract.js` reproduces
+the1406-versus1404 assertion failure on the original PR2060 head. Production
+MAX_RUNTIME_FILES and its exact boundary fixture now admit1406/reject1407;
+the strict digest, byte caps and all other assertions are unchanged.
+`node extensions/reddog/tests/run_reddog_test_tier.js fast` passes15 members
+locally (Node24.11.1,13.142s). Hosted Node22.23.3 failed on the historical head;
+replacement-head CI remains required. Package projection remains67 files and
+950438 bytes; refreshed content digest
+`0a928318bc551f96dcae974c72d36cccde28fb1f994c0d619057476929d3b8bd`.
+No packaging, installation or deployment is implied by the projection test.
+WSP5/6/22/50/97.
+
+## 2026-09-28 - Correspondence-state Skillz backend manifest reconciliation
+
+- RedDog fast tier initially failed the existing backend compatibility preflight after `skills_registry_v2.json` changed.
+- Reused the canonical generator contract: the runtime closure remains 1,401 files; only the registry runtime SHA changed. Refreshed `scripts/reddog_backend_manifest.json`, `extensions/reddog/backend_compatibility_constants.js`, and the existing generator-test digest pin together.
+- Expected manifest digest after repair: `663ec92531dda7c601bfdd269659b6984e72500b5f793f31b993dc5d4255dc60`. No compatibility assertion was weakened or removed.
+
 # Foundups(R)Agent TestModLog
+
+## 2026-09-24 - Research-display manifest validation
+
+- First PR1899 CI run35889528743 failed the unchanged backend compatibility contract: the dashboard source was a missed manifest dependency. The failure is retained in the canonical RSI backlog.
+- Regenerated the existing manifest and refreshed both digest pins to `3094aeb031a7f2917afe18f19a61e254fcfa6110528c286f2191ad00ad872618`. Exactly one member hash changed: `modules/infrastructure/wre_core/src/dashboard_alerts.py`. All1,401 members, API/version, caps and other hashes remain unchanged.
+- Local manifest check, eight existing generator tests and the unchanged Node backend contract pass. The67 display/wiring cases and their independent replay remain byte-bound and unchanged. Fresh exact-head CI is required; no installed extension/runtime or live RSI claim. WSP15/22/50/84/97.
+
+
+## 2026-09-20 - Hermes rejection-evidence package validation
+
+- One existing runtime member changed; the 1,400-member manifest and both digest pins now bind `3715e23b32f56b9b8756461854f5889335628763a16878de6923521cfa86afdd`. Membership, API/version, package caps and safeguard assertions stay unchanged.
+- Manifest check/eight generator tests pass with two pytest configuration warnings; existing fast tier passes 15 groups and deterministic packaging passes 67 files/950,440 bytes. Test registry remains 1,651 entries/269 quarantined; exact-head closure is recorded separately in the RSI backlog.
+- Bridge evidence is fake-only: qualified 10-failure red baseline, 108 focused passes and 114 connected passes after an external guard correction. Independent 117 repeats the 108 and adds nine controls; do not sum repeats. No installation, service, provider or real detached-child stop was tested. WSP 15/22/50/62/84/97.
+
+## 2026-09-20 - Prepared-context backend manifest binding
+
+- Updated five existing runtime member hashes; unchanged1,400-member manifest/API/version and extension behavior. Both digest pins now match `cbd1292a4857bf071ab2d8807114c7a03932f98f2e3dc1535bac4b09884469ef`.
+- Reproduced inherited generator-test pin mismatch before edits; retained it separately, then refreshed both pins together. Eight generator tests/check pass;15 fast groups and67-file/950,440-byte package pass.
+- No installed extension/provider/runtime updated. Source repair and exact publication evidence belong to the current RSI backlog. WSP15/22/50/84/97.
+
+
+## 2026-09-20 - Daemon counter manifest and package validation
+
+- Refreshed the existing daemon member digest and its JavaScript/Python manifest pins to 0f65af35cfd806cc1cdc22fc3f4654e5090a8d27dc47b605831af7cc2069b60c.
+- All 1,400 members, manifest API/version, package caps and safeguard assertions remain unchanged. No installed extension, provider or runtime is updated.
+- Generator 8 tests, existing RedDog 15 fast groups and deterministic 67-file/950,440-byte package pass. Source repair is owned by WRE Core; exact-head CI remains required. WSP15/22/50/84/97.
+
+## 2026-09-20 - WSL source and backend compatibility closure
+
+- PR1806 candidate2033939 failed the unchanged backend compatibility gate.
+  Independent diagnostics identify the changed WSL adapter as the sole stale
+  member. The original failure is retained in the canonical RSI backlog.
+- Regenerated the existing1,400-file manifest and refreshed its extension and
+  Python test digest pins to `11b2a45c0feca2b3c53372b0c07f22788091edf89fef91555142325f560a24f1`. The member set, API, version, caps and
+  all safeguard assertions are unchanged. No installed extension is updated.
+- Local generator8 tests, RedDog15 fast groups, exact backend contract and
+  package67 files/950,440 bytes pass; backend contract overlaps the fast tier.
+  Fresh exact-head CI is still required. WSP15/22/50/84/97; no runtime effects.
+
+## 2026-09-19 - Backend inventory after Skillz registry registration
+
+- `runBackendCompatibilityPreflight(repoRoot)` reproduced the exact fail-closed reason from issue #1784: `required_runtime_file_integrity_mismatch:modules/infrastructure/wre_core/skillz/skills_registry_v2.json`.
+- Regenerated the canonical 1,400-file inventory after the WRE Skillz registry changes, refreshed the manifest pin, and kept `test_backend_compatibility_contract.js` unchanged. The focused backend compatibility test and generator `--check` must pass before this repair can commit.
+
+## 2026-09-14 - 0.4.141 release identity reconciliation
+
+- Reproduced the exhaustive core failure against exact current main: the
+  package exposes `RedDog - FoundUps Interface` while the authenticated shard
+  still required the superseded architect display name.
+- Rebound the three stale package/README/ROADMAP assertions to the canonical
+  identity and extended the focused active-document negative set to reject the
+  surviving README wording that collapsed RedDog into 0102.
+- Reproduced `npm test` failing before its first tier member in a linked Windows
+  worktree because it assumed a worktree-local `.venv`. The runner now derives
+  the primary checkout through governed `--git-common-dir`, validates the
+  resulting O:/E: topology, and uses its validated venv defaults. The executable
+  is identity-bound and Git runs with the existing closed environment. Hostile
+  Git controls and foreign common-directory cases are executable regressions.
+- Removed the second undocumented prerequisite: Windows test temp now defaults
+  to `.tmp\\reddog-tests` inside the isolated task worktree, with cleanup of the
+  per-run pytest base and an explicit validated O:/E: override when needed.
+- Regenerated the authenticated contract as 18 shards / 6,942 lines / 492
+  assertions at
+  `sha256:e653fd5c3cbe0de8e6a235939d0531bb213748d6fa7c9a750f903c1aacc81f2e`.
+- Final local evidence: focused identity PASS; shard integrity PASS;
+  candidate WSP-62 PASS; backend manifest PASS at 1,400 files and
+  `sha256:68b038e9ec86967c8e9a426e2fe9fa5e798a717966852466167fe8434a935c02`;
+  fast tier 15/15 PASS in 5.394 seconds; conversation 32 Python tests and 15
+  JavaScript vectors PASS; contract 3/3 PASS; package PASS at 67 files / 950,440
+  raw bytes / `sha256:aeace93f0386c549ac6c70e6aae25ba6aaac10738ea76ee76585735668135773`.
+- Independent hostile review found the first common-directory resolver used
+  ambient Git authority. Added a governed executable/closed-environment path,
+  exact primary-versus-linked topology validation, and regressions for hostile
+  `GIT_DIR`, `GIT_WORK_TREE`, injected config and a valid-looking foreign O:/E:
+  repository. Focused tiering and candidate WSP-62 checks pass. The complete
+  four-group release gate passes in 229.074 seconds with no timeout (`core`
+  228.988 seconds, `governed_git` 143.794 seconds,
+  `git_formats_environment` 85.472 seconds, `bridge_wsp62` 7.174 seconds).
+  Hostile fixture stderr is expected evidence from passing groups. The two
+  Python warnings report unavailable pytest-asyncio configuration under the
+  deliberately sealed plugin environment; no test was skipped or failed.
+  WSP 15, 22, 50, 62, 97.
+
+## 2026-09-13 - Backend inventory versus current main
+
+- Remote roadmap CI failed `test_backend_compatibility_contract.js` because two already-merged phone/voice files differed from their stale inventory hashes. Local preflight reproduced exactly those two paths.
+- Regeneration changes only those hashes in the unchanged 1,400-file closure. The pinned canonical digest and existing generator-test expectation now match the generated inventory; no assertion or boundary was removed.
+- RedDog fast tier: all 15 groups pass with the documented Windows interpreter/dependency-root overrides and isolated temporary/database paths. The initial local attempt lacked a worktree-local dependency directory and stopped before its first test; using the supported existing dependency-root override resolves that setup issue.
+- Hostile backend-preflight runner and its imported checks pass. Generator selection: seven tests passed before staging; the eighth correctly rejected the old staged inventory, then passed after the regenerated inventory and digest pins were staged. No test implementation changed between those runs; two async-plugin configuration warnings were emitted.
+
+## 2026-09-05 - Identity / merged builder reconciliation (0.4.141 candidate)
+
+- Applied the RedDog/0102 identity contract above the already merged `0.4.140`
+  builder evidence; the corrected identity first lands in `0.4.141`.
+- Preserved executable negatives for missing, relative, wrong-volume, and
+  reparse-backed runtimes; suspended Job containment; closed environment;
+  bounded output; composition reproof; and authority nonclaims.
+- Reverified the merged package-surface expectations and exact order for the
+  repository-only `.gitignore` and `ARCHITECTURE.md` exclusions.
+- Focused identity, conversation, shard, Holo incident, tiering, and manifest
+  checks pass. Contract shards are 18 / 6,942 lines / 492 assertions at
+  `sha256:10b5118a5c9c...e32ad247`; the package is 67 files / 950,193 bytes at
+  `sha256:cb6e5d4bb38d...15b281b8`; the registry is current at 1,641 / 269.
+- Prior physical and full-release results remain exact-commit historical
+  evidence. Fresh 0.4.141 aggregate release and VSIX inspection are required.
+
+## 2026-08-30 - Held builder child evidence release (0.4.140)
+
+- Authentic RED collection preceded implementation. Focused falsifiers now
+  cover held launch, isolation flags, closed environment/path, bounded output,
+  canonical serialization, exact identity, surrounding composition stability,
+  protected-root aliasing, and explicit authority nonclaims.
+- Maintenance child behavior is replayed after shared-runner extraction; the
+  physical Windows integration launches the actual O:-materialized runtime.
+- Corrected the conversation test harness to honor `REDDOG_TEST_PYTHON` after
+  validation exposed an ambient non-O:/E: interpreter selection despite O:
+  temp roots. A later real failure proved that an O: interpreter could still
+  discover per-user packages elsewhere; the harness now uses `-B -s`, disables
+  user-site discovery, erases every case-insensitive ambient `PYTHON*` and
+  `PYTEST*` control before installing six exact values, and validates its O:/E:
+  dependency, repository, and temporary roots.
+- Replaced source-text-only confinement assertions with executable negative
+  tests for missing/relative/wrong-volume Python, false-green pytest controls,
+  E: admission, absent absolute files, and intermediate junction/reparse paths.
+  The full conversation tier remains 32 Python tests plus 15 shared JavaScript
+  vectors.
+- Hostile audit reproduced writable-runtime pollution. The 21-directory/181-pyc
+  and 6-directory/32-pyc generations are preserved in O: quarantine; exact
+  source rematerialization restored the same sealed identities. Final physical,
+  adjacent, conversation, and release runs leave both active/source trees at
+  zero pycache/pyc.
+- Backend is 1,398 files at `700d50f84e12...86e09ed`; contract is 18 shards /
+  6,942 lines / 492 assertions. Runner unit evidence is 22/22; focused physical
+  adjacency is 70/two capability skips in 108.06 seconds and includes the child;
+  registry is 1,640/269 and conversation is 32 Python plus 15 JS. Complete
+  bridge replay is 1,694/23 capability skips in 638.81 seconds after closing
+  recursion-limit-dependent health JSON depth admission.
+- Final release is four groups PASS in 214.279 seconds. Package surface is 67
+  files / 948,410 bytes. Exact package and inspected VSIX identities are
+  retained externally so packaged documentation is not a self-referential
+  content-digest claim.
+- Final source-runtime hygiene retained two additional four-pyc images in O:
+  quarantine, rematerialized 3,845/3,845 archive members byte-exact each time, and
+  hardened the canonical Holo query host with `-B` plus bytecode suppression.
 
 ## 2026-08-29 - Declared Windows/CPython ABI evidence release (0.4.139)
 

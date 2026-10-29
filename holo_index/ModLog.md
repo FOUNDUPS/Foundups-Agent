@@ -1,4 +1,69 @@
+## 2026-10-04 — Preserve native Markdown until EOS
+
+- Qualified native chat supplies an empty caller stop list; formatter EOS text
+  and token criteria remain. Raw route, profile/context checks and caps unchanged.
+- Independent fixed baseline: 59 pass/4 expected failures; candidate 63 pass.
+  Connected WRE suites: 176 pass; overlapping selections, three new cases.
+- One local model proposal was malformed and rejected; coordinator applied the
+  one-line repair. Earlier real output truncation cause remains unproven.
+- WSP00/5/11/15/22/48/50/84/97. Existing manifest/pins refreshed. Publication and
+  retained usefulness are separate; see canonical dispatch/backlog checkpoint.
+
+## 2026-10-01 — Explicit per-call local-model cleanup
+
+- Existing engine gains idempotent explicit close; existing WRE adapter owns
+  cleanup in finally and rejects proposals when cleanup fails. Direct reusable
+  engines retain their lifetime semantics. No new module/skill/backend.
+- Frozen62 cases: baseline40pass/22fail; repaired62pass, zero errors/skips.
+  Separate author/reviewer; no model, provider, database, admission or retention.
+- WSP00/5/6/11/15/22/48/50/62/84/97: bounded same-owner change, source bindings,
+  refreshed existing runtime manifest/pins, exact-head publication receipts.
+- Evidence `O:/Foundups-Agent-audits/20261001-rsi-engine-lifecycle/`; backlog
+  `local_engine_lifecycle_20261001`. Next: source-only admission prerequisites.
+
+## 2026-09-30 — Opt-in native-chat proposal caller
+
+- Extend existing master/adapter/Qwen route; copied trusted runtime/template
+  configuration, raw default, single rendering and actual-context token guard.
+- 35 portable cases passed; separate4 installed-source handler controls passed.
+  Zero native initialization/generation/provider calls. Original collection-only
+  runner failure retained; corrected runner passed with unchanged19-source scope.
+- Existing CI now selects the complete execution-truth file. No admission,
+  PatternMemory promotion, held-out gain or later retained-use claim.
+- Refreshed existing RedDog 1401-member manifest and both digest pins;
+  only3 member hashes changed. Generator8 tests and backend compatibility passed.
+- WSP00/5/6/11/15/22/48/50/84/97; next 13/P1: Preflight and separately qualify one bounded actual-model proposal call through the implemented trusted master helper.
+  Evidence `O:/Foundups-Agent-audits/20260930-rsi-native-caller-contract/`; source `ca7117b6a64bc66a4d4885d742cd06379ab582f1`.
+
 # HoloIndex Package ModLog
+
+## [2026-09-13] Current-source maintenance and public quality benchmark
+
+- Existing OpenClaw/WRE maintenance completed main `5326080d5` after PR #1710;
+  both owned runtimes stopped. No index operation was added to the query path.
+- Existing fixed public benchmark: six CURRENT/no-gap receipts, Recall@8/MRR
+  1.0, nDCG@8 0.9939998, p95 4031ms; deterministic verification accepted.
+  Corpus, ranker and 0.95 policy unchanged. Exact runtime closure remains false
+  in all receipts; no independent sealed evaluation or promotion performed.
+- Retained the full run in the existing dated RSI evidence artifact and linked
+  the source boundary from the roadmap/CLI atlas. This is R03/R05 evidence,
+  not completed RSI or a claim about subsequent main commits. WSP 22, 50, 87, 97.
+
+## [2026-09-13] R03 interpreter selection recovery
+
+- Diagnosed ambient Python/base mismatch excluding the existing vetted dependency path; the owned child reported missing NumPy. Reused the existing repository venv with the matched reference helper, without source or index mutation.
+- Normal default-budget query: CURRENT/no-gap, one owner attempt, reference `78b79c36`. A 60-second diagnostic query timed out; current-main source `89bdd7a5` still rejects the older authority with zero attempts. See CLI_REFERENCE.md for exact evidence boundaries and the reusable Windows recipe.
+- Existing runtime-selection tests: 2 passed / 16 deselected. Updated canonical instructions and R03 status; exact-current-main qualification and runtime/quality acceptance remain open. WSP 22, 50, 84, 87, 97.
+
+## [2026-09-13] R03 source selection and existing fallback documentation
+
+- Corrected bootstrap/canonical-agent retrieval instructions to bind the helper's actual source, distinguish primary checkout from current main, and reuse the existing local bundle when semantic retrieval is unavailable. Extended this module's atlas/interface rather than adding a service or module.
+- WSP 00 activation and strict tracker gate passed in the isolated checkout (`self=0102`, role architect, origin external principal); WSP 97 review reused owner/selector/repair contracts. The separate WSP 00 state-semantics PR #1636 remains unchanged.
+- Existing entry/root selection: 81 passed in 4.37s. Live primary entry: HEAD mismatch; matched reference: owner startup exit after two attempts; clean local bundle: success, UNKNOWN freshness, zero owner attempts. An initial unsupported `bundle_module_hint` request rejected before startup and was corrected to the existing `module_hint` field; it was not classified as an infrastructure outage.
+- Retrieval assessment: current module contracts were available through the local bundle; semantic availability and stale historical completion claims remained separate. Exact field/source checks filled missing context, and direct symbol reads avoided duplicate implementation. This documentation/contract comparison used deterministic tools; no Qwen/Gemma generation or measured learning is claimed.
+- R03 remains partial. No index/route/authority mutation, model generation, runtime source change, production memory write or new execution permission. WSP 00, 22, 50, 81, 87, 97.
+- The live local fallback also passed after documentation edits and correctly changed its evidence label to `workspace_overlay`. Targeted CLAUDE-to-AGENTS renderer parity passes. The broader projection check reports pre-existing `stale:.agents/skills/file_set`: tracked `japan_hyperscaler_report/SKILL.md` has no canonical counterpart in the generator's expected set. Skill sources/projections are unchanged from the base and belong to the concurrent lane; this is not reported as a global projection pass or repaired by deleting its skill.
+- Startup follow-up: `holo_query_owner_startup.await_owner_startup()` emits the observed label when the owned child exits, while `HoloQueryServiceSupervisor._spawn()` discards stdout/stderr. The cause is not established by that label. Reuse those owners for a bounded, secret-safe diagnostic before choosing repair; no new diagnostic module or speculative reindex was added.
 
 ## [2026-08-29] Pre-owner exact-main live acceptance
 

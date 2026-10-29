@@ -1,7 +1,7 @@
 {
   "schema_version": "reddog_extension_contract_shards.v1",
   "source_path": "extensions/reddog/tests/verify_extension_contract.js",
-  "source_sha256": "sha256:d68f91db0908f59159cf7d4f4e46180dcc70f2468d319b371563107d35b4cce6",
+  "source_sha256": "sha256:e653fd5c3cbe0de8e6a235939d0531bb213748d6fa7c9a750f903c1aacc81f2e",
   "source_line_count": 6942,
   "assertion_call_count": 492,
   "canonical_line_endings": "LF",
@@ -14,7 +14,7 @@
       "source_line_start": 1,
       "source_line_end": 400,
       "line_count": 400,
-      "sha256": "sha256:f217eb5b0357011727cdb1fcad12238ab79440f463b9c579205804356d76cbbb"
+      "sha256": "sha256:350f0bcedf6c83607003d436f963831b55e6c30bf48530378610f3f90c861af6"
     },
     {
       "order": 2,
@@ -22,7 +22,7 @@
       "source_line_start": 401,
       "source_line_end": 799,
       "line_count": 399,
-      "sha256": "sha256:71b8a706fd6955bab7598151ec2c7f18f08997f69b01ca28c9c8500fef4f49e3"
+      "sha256": "sha256:7a5b73aee78e4dea5acb094f66f38accf283dbaa1f3a4da926bba4f568ef2677"
     },
     {
       "order": 3,
@@ -38,7 +38,7 @@
       "source_line_start": 1169,
       "source_line_end": 1568,
       "line_count": 400,
-      "sha256": "sha256:1f96b222cd1ab22c2698618f09f120d8b6cb188277073ff7a5885653e0420e19"
+      "sha256": "sha256:ecd1472d7e764ac8a60bae9fd31a830ebf214fdc2dc5529d80e789f5b40b1e78"
     },
     {
       "order": 5,
@@ -78,7 +78,7 @@
       "source_line_start": 3155,
       "source_line_end": 3553,
       "line_count": 399,
-      "sha256": "sha256:9562a7e85dc8b75904f5cc98bbae6da60c1b69df2136f5700543f1eeb8aa402b"
+      "sha256": "sha256:ddebb5c9cd5a3d3b72190300f07e294fd29b2eba0e5f6022a54926cc707b0a3c"
     },
     {
       "order": 10,
@@ -110,7 +110,7 @@
       "source_line_start": 4728,
       "source_line_end": 5126,
       "line_count": 399,
-      "sha256": "sha256:f3575233c0ff55c21ad0d48ca96dc234138673e48d56d86fd4a430836e532159"
+      "sha256": "sha256:9fd56f15aabe326d4e6c5f9a6efcbd6f9560791b2b6fb919f0278eade6c28a1c"
     },
     {
       "order": 14,
@@ -142,7 +142,7 @@
       "source_line_start": 6327,
       "source_line_end": 6698,
       "line_count": 372,
-      "sha256": "sha256:e9f7e82200350c428127d50e57cf77b40bcb9fa81d6eb705189dbd916063fed3"
+      "sha256": "sha256:d910c5255341b7e41b82f4d8745da27cfad08d7d400267e37263c113048c1427"
     },
     {
       "order": 18,

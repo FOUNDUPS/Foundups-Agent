@@ -1,0 +1,122 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "execution_id": "HOLOINDEX_QUERY_RUNTIME_BUILDER_CHILD_PHASE2C3C",
+  "repository_context": {
+    "base_commit": "96d5db5685a015932205bd573b7ea1674b0897cd"
+  },
+  "execution_plane": "local_tools_and_wsp00_subagent_audit",
+  "outcome": "completed",
+  "wsp15_allocation": {
+    "receipt_id": "phase2c3c-held-builder-child-allocation",
+    "complexity": 4,
+    "importance": 5,
+    "deferability": 5,
+    "impact": 5,
+    "total": 19,
+    "priority": "P0"
+  },
+  "retrieval": {
+    "holo_generation": "sha256:92bac79b",
+    "freshness": "CURRENT",
+    "index_gap_detected": false,
+    "reindex_performed": false,
+    "retrieval_evaluation": "Committed runtime/process evidence ranked partially usefully, but the final exact-scope query was noisy and omitted the uncommitted Phase 2C3c overlay; direct staged-diff and complete local reads repaired ordering and missing-artifact gaps. Final governed receipt sha256:8e7c4f0bf2ac55ec2b224031d22a14e1a448743c03e26353936444d447d6f6d7 was CURRENT at the exact base with no gap and no reindex."
+  },
+  "micro_pass": [
+    "Authentic RED collection failed because the child modules did not exist.",
+    "The existing maintenance subprocess boundary was extracted into a shared bounded runner instead of duplicated.",
+    "An authentic direct-parent-exit RED proved descendant survival; Windows now starts suspended, assigns a private kill-on-close Job Object, and resumes only after successful assignment.",
+    "An order-dependent complete-macro RED proved health JSON depth depended on the ambient recursion limit; an explicit string-aware 128-level pre-parse gate closes it.",
+    "Independent final REDs proved false-green PYTHON/PYTEST controls, ambient cleanup-executable lookup, unchecked Job termination/close results, and reader-start escape; each now has an executable fail-closed boundary.",
+    "The child returns strict path-free evidence and cannot serialize the private authority capability.",
+    "The real O:-only integration launched the exact materialized interpreter and preserved the surrounding composition descriptor."
+  ],
+  "macro_pass": [
+    "Backend closure is 1398 runtime files at sha256:700d50f84e12d6deece513092ee6cab153defcc99c51f5a543aafdd1286e09ed.",
+    "Extension version and compatibility contract advance to 0.4.140; the deterministic package is 67 files and 948410 bytes at sha256:c1036d6fb9b27a906f04eeca480788fa9af52ab536505b9e58b6dbe43fbf0559.",
+    "Runner unit evidence is 22 passed; focused physical runner/maintenance/process-image/child evidence is 70 passed with 2 capability skips and includes the child; health boundary is 160 passed; complete bridge macro is 1694 passed with 23 capability skips; registry projection is current at 1640 with 269 quarantined.",
+    "The final four-group extension release passed in 214279 ms; VSIX 0.4.140 is 276270 bytes at sha256:13b629dd280120c87e206cec90243c7b2132ab81ac32d4b0537cefe71c8eaff6 with 69 safe entries, 67 exact source members, zero source-byte mismatches, and zero archive, sensitive-name, or credential-value-pattern findings.",
+    "Two final inspections preserved four-pyc source runtime images in O: forensic quarantine, including an unattributed 08:27:30 recurrence that predated the resumed exhaustive/release runs. Each archive-only rematerialization proved all 3845 qualified members byte-exact; the canonical Holo host command uses -B plus PYTHONDONTWRITEBYTECODE=1, and final source/active runtime hygiene is a release gate."
+  ],
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+      "WSP_framework/src/WSP_12_Dependency_Management.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "Governed Holo was CURRENT at exact base 96d5db5685a015932205bd573b7ea1674b0897cd with no index gap or reindex; independent receipt sha256:a5f747...99bb.",
+      "A later owner-startup failure was reproduced as an O: virtual-environment base mismatch, repaired locally without reindex, and re-proved CURRENT in one attempt by query receipt sha256:4c3531307c432dc673c8575edf6b4c7038552289f2ef4a4d9f621837ecdee326.",
+      "Final governed query receipt sha256:8e7c4f0bf2ac55ec2b224031d22a14e1a448743c03e26353936444d447d6f6d7 remained CURRENT at exact base 96d5db5685a015932205bd573b7ea1674b0897cd with overlay_present=true, no gap, no mutation, and no reindex.",
+      "Holo ranked the existing composition, process authority, held executable, and maintenance child; exact staged-diff and local reads supplied the uncommitted Phase 2C3c and version-specific evidence."
+    ],
+    "research": [
+      "Official Python release pages and the 3.12.10 Windows manifest prove 3.12.10 is the final 3.12 Windows binary while 3.12.14 is source-only security maintenance.",
+      "Existing process-image and maintenance modules supplied the held executable and bounded child mechanisms; no parallel authority system was created."
+    ],
+    "micro_pass": [
+      "Authentic RED collection preceded the child modules; runner unit evidence is 22 passed and focused physical runner/maintenance/process-image/child evidence is 70 passed with two capability skips.",
+      "Falsifiers cover direct-size bounds, canonical JSON, forged bindings, all protected-root categories, timeout/output failures, after-child mutation, live-overflow termination, and accidental evidence construction.",
+      "Changed production Python files are 357, 203, 25, 350, 194, and 185 lines with no function over 50 lines; the candidate JavaScript WSP_62 proof also passes."
+    ],
+    "macro_pass": [
+      "Focused physical adjacency passed 70 with 2 capability skips in 108.06 seconds and included the physical child.",
+      "Backend generator passed 8; health boundary passed 160; complete original-order bridge macro passed 1694 with 23 capability skips in 638.81 seconds; registry is current at 1640 and 269 quarantined.",
+      "Conversation passed 32 Python tests plus 15 JS vectors; final extension release passed all four groups in 214.279 seconds; package and VSIX identities match the macro_pass evidence above."
+    ],
+    "hard_think": [
+      "A serialized process observation cannot preserve the private in-process authority capability, so the public result is evidence-only and accidentally sealed.",
+      "A writable inert runtime can be polluted after proof; current exactness must be reverified and persistent write denial remains false."
+    ],
+    "dialectic_sweep": [
+      "A new launcher was rejected in favor of extracting the established bounded maintenance runner.",
+      "Ambient Python, inherited environment, synthetic physical proof, and a current-patch claim for 3.12.10 were rejected.",
+      "Independent NO-GO audit findings were reproduced: two polluted generations were quarantined, -B and O:/E: harness gates were tested, overflow/parser/evidence hardening was added, and WSP_62 doc growth was removed.",
+      "The second NO-GO audit forced bounded overflow completion, removal of Windows ambient-interpreter fallback, private evidence construction, and governed Holo startup repair; a live tier then forced user-site and Python-control isolation.",
+      "The final hostile review forced Job Object descendant containment, executable conversation confinement tests, honest documentation chronology, and recursion-limit-independent health JSON depth admission.",
+      "Final hygiene preserved two four-pyc source images in recoverable O: quarantine, including the unattributed 08:27:30 recurrence, rematerialized 3845/3845 members byte-exact each time, and corrected the canonical Holo host invocation so bytecode suppression begins at interpreter startup.",
+      "The independent final pass remained NO-GO until all ambient PYTHON/PYTEST controls were removed, external taskkill lookup was eliminated, Job termination/close failures surfaced, and reader startup entered the cleanup guard."
+    ],
+    "first_principles": [
+      "One exact held child plus surrounding complete reproof is the smallest useful execution observation layer.",
+      "Observation is not provenance, closure, determinism, write denial, activation, A-grade, or RSI authority."
+    ],
+    "execute": [
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_bounded_child_process.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_windows_job_object.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/holo_query_owner_health.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_child.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_child_contract.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_bounded_child_process.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_child.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_service_supervisor_health.py",
+      "extensions/reddog/tests/run_conversation_test_tier.js",
+      "scripts/reddog_backend_manifest.json",
+      "WSP_knowledge/WSP_Test_Registry.json",
+      "CLAUDE.md",
+      "AGENTS.md"
+    ]
+  },
+  "nonclaims": [
+    "No capability preservation, authenticated producer, pre-import/native/subprocess closure, deterministic effects, signature, or persistent write denial is proved.",
+    "No owner, route, maintenance, queue, activation, A-grade, or retrieval-RSI authority is added.",
+    "CPython 3.12.10 is not claimed to be the current security-patched 3.12 runtime."
+  ],
+  "wsps_applied": ["WSP_00", "WSP_6", "WSP_12", "WSP_15", "WSP_22", "WSP_50", "WSP_62", "WSP_84", "WSP_97"],
+  "compliance_evidence": [
+    "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_CHILD_ASSUMPTION_AUDIT_PHASE2C3C.md",
+    "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_CHILD_WSP15_RECEIPT_PHASE2C3C.json",
+    "modules/infrastructure/foundups_mcp_bridge/docs/clarity/REDDOG_BUILDER_PROCESS_CHILD_INTERFACE_PHASE2C3C.md",
+    "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/TestModLog.md",
+    "extensions/reddog/tests/TestModLog.md",
+    "scripts/reddog_backend_manifest.json",
+    "WSP_knowledge/WSP_Test_Registry.json"
+  ]
+}

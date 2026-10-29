@@ -1,5 +1,16 @@
 # AI Gateway TestModLog
 
+## [2026-10-07] - Strict model use-time clock
+
+WSP00/6/15/22/50/97,13/P1: existing verifier now requires an exact positive
+integer from its trusted clock. It no longer coerces strings/fractions or lets
+booleans masquerade as integers. Missing receipt keeps its earlier rejection.
+Baseline8fail: float/string incorrectly accepted; other six invalid types/ranges
+had inconsistent rejection. Connected security/artifact/panel/structural55passed
+in1.54s. No provider calls, runtime admission, new module or native RSI claim.
+Evidence: `outputs/rsi-permission-evidence-20261006/model-clock-connected.xml`.
+
+
 ## [2026-08-22] - Nemotron Lifecycle Receipt Binding
 
 - Added valid, missing, and tampered lifecycle-receipt coverage for the local

@@ -140,7 +140,7 @@ def rotation_harness(monkeypatch):
     monkeypatch.setattr(launch_mod, "_should_skip_channel", lambda *a, **k: False)
     monkeypatch.setattr(launch_mod, "_record_channel_result", lambda *a, **k: None)
     # Keep priority wiring a no-op (do not touch #854 ordering in these tests).
-    monkeypatch.setattr(launch_mod, "_prioritize_channels", lambda chans: chans)
+    monkeypatch.setattr(launch_mod, "_prioritize_channels", lambda chans, driver=None: chans)
 
     # Ensure a clean env baseline for the budget knob.
     monkeypatch.delenv("YT_SHORTS_PER_CHANNEL_PER_PASS", raising=False)

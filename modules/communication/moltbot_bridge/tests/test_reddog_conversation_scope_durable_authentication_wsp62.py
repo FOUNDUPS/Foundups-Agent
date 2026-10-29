@@ -9,6 +9,7 @@ import sys
 MODULE_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = Path(__file__).resolve().parents[4]
 SOURCE_FILES = {
+    "src/reddog_signer_system_service_owner_inputs.py",
     "src/reddog_authenticated_conversation_scope_state.py",
     "src/reddog_authority_profile_rehydration.py",
     "src/reddog_conversation_scope_advance.py",

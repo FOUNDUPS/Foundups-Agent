@@ -1,5 +1,89 @@
 # TestModLog
 
+## 2026-10-19 - Lexical containment and Windows Unicode regression controls
+
+Added14 lexical containment cases and6 Windows Unicode cases. Independent
+differential testing rejected the initial tuple-only implementation:6/12,717
+Windows mismatches (`\u0130` versus `i\u0307`); Linux had no mismatch. Preserve
+Windows `pathlib` comparison and use the tuple prefix only on POSIX. Revised
+candidate matches all12,717 cases on each platform. Windows focused command:
+`python -B -m pytest -q -rs --import-mode=importlib --basetemp O:/RedDog-Builder-Artifacts/rsi-containment-win-repair-20261019 modules/infrastructure/shared_utilities/tests/test_runtime_artifact_safety.py modules/infrastructure/shared_utilities/tests/test_runtime_artifact_windows_safety.py`
+passes49/skips1 (symlink creation unavailable), with2 existing config warnings
+under disabled plugin autoload. Earlier invalid nested basetemp caused23 setup
+errors; corrected output directory only. Independent Linux connected run found
+a symlink rejection-message mismatch, reproduced with the exact baseline
+predicate. Correct only the test name and exact expected existing link rejection;
+the no-follow guard and fixture remain unchanged. Linux rerun38pass/8Windows
+skips. Connected safety/POSIX-lock/installed-guard/isolation suites111pass/
+8Windows skips; installed process observations are synthetic test fixtures.
+The external broader harness first lacked an explicit root (collection error),
+then a main guard (spawn re-entered pytest); both failures are retained. Fix only
+the harness and preserve the production/test assertions. Commands, exact hashes
+and XML are in `next-startup/descriptor-path-publication-review/native-handshake-20261019/connected-linux-guarded-binding.json`.
+Manifest tests8pass; three Node entrypoints pass with expected negative bootstrap
+traces. Independent manifest review verifies1439 unchanged paths, one source
+digest change and both consumer pins. CI adds the connected Windows/Linux
+path suites to existing jobs; remote execution remains unverified here.
+
+The broader historical WSP62 exemption suite fails5/passes11 on both candidate
+and unchanged1e203 baseline because its September30 expiries are past. Retain
+those failures; no expiry or ceiling was changed. Current canonical WSP62§5.1.2
+classifies unchanged expiry debt as a remediation warning, while candidate
+growth remains governed by its exact base/ceiling. This owner shrinks704 to703
+physical lines. Do not report the historical suite as passing.
+
+
+## 2026-10-13 - Reproduce and repair minimal CI host dependency
+
+PR #2115 exposed three `openai.OpenAI` patch decorators that require the optional
+SDK to be installed before the offline tests can run. Reproduced with the import
+deliberately unavailable: three failures and five passes in the residency class.
+Use an explicit per-test module fixture, restored by pytest monkeypatch, while
+preserving SDK-construction assertions and native inventory checks. The same
+three CI-selected suites pass 61 tests with the SDK unavailable and 61 normally.
+No production dependency or runtime behavior changed. Independent source review
+found no blocking issue. Logs: `O:/RedDog-Builder-Artifacts/rsi-ci-closure-20261013/`.
+
+Follow-through run `38322453913` passed security but terminated with SIGILL while
+the fallback initialization test's mock imported the real llama_cpp library.
+Replace that import boundary with a per-test module double, restored by
+monkeypatch; retain initialization checks and strengthen constructor/instance
+assertions. Import-unavailable reproducer: 1 failed/2 passed. Connected three
+suites with both optional SDK imports unavailable: 61 passed in 1.50s. Saved
+logs: `llama-import-baseline.txt`, `both-sdk-absent-tests.txt`, and
+`updated-head-failure.txt` under the same evidence root. Remote rerun remains
+required; this is not hardware/native-model qualification.
+
+## 2026-10-12 - Fresh-main qualification of native reasoning omission
+
+Base `4095ad9ee6042f4e9b5668bf4f6bf50c493c5964`, branch
+`agent/rsi-native-reasoning-control-20261012`: documented seven-suite local
+LM Studio release gate plus backend manifest tests passed 132 cases, with one
+skip, in 71.77s. RedDog extension fast tier passed all 15 members in 10.502s.
+The manifest contains 1,426 files and only the adapter digest changed; both
+consumer pins match `f8ddc69d77d50e2e282ab4047d2b41f2dfd0c108996281030f3bb8a37a6f68a0`.
+Logs: `O:/RedDog-Builder-Artifacts/rsi-review-contract-20261012/exact-source-tests.txt`
+and `extension-tests.txt`. Independent source review found no blocking issue;
+remote CI and native author admission are not inferred from these local tests.
+
+## 2026-10-11 - Native optional reasoning control (historical checkpoint 144bcebfe)
+
+WSP00/6/11/22/97: old adapter rejected explicitNone (1fail/1pass reproducer).
+After repair:61pass,0skip in2.74s across local backend, exact model lifecycle
+and AI Gateway topology-proposer suites. Updated request capture asserts None
+omission versus unchangedoff, expected instance, authentication, byte bound,
+disabled storage and streaming. CI explicitly selects these suites.
+Independent review inspected source and saved results; remote CI unverified.
+Two real local Coder requests succeeded after the control repair, but their
+outputs remain rejected by the frozen content contract. Evidence at
+`O:/RedDog-Builder-Artifacts/rsi-local-audit-20261011/adapter-tests.*` and
+`qwen-coder-repair/`. No automatic promotion or autonomous repair is implied.
+
+Final integrity validation: 8 manifest tests passed in 66.22s and all 15 RedDog
+extension fast-tier members passed in 8.388s. The initial stale compatibility-pin
+failure is preserved; both pins now match the regenerated runtime manifest.
+Canonical test registry check passed without a registry change.
+
 ## 2026-08-28 - Windows Runtime Artifact Safety
 
 - Added focused coverage for executable-suffix mode projection, clean file and

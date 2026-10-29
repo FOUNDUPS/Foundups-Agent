@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from copy import deepcopy
 from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, List, Mapping, Optional, Protocol, Sequence
 
@@ -338,7 +339,9 @@ def invoke_reddog_wre_queue_authorized_pattern_memory_admission(
         return _reject(reasons, explicit_requested=True, receipt=receipt)
 
     try:
-        record_id = sink.store_verified_outcome(record)
+        record_id = sink.store_verified_outcome(deepcopy(record))
+        if not isinstance(record_id, str) or not record_id.strip():
+            raise ValueError("Memory sink returned no record acknowledgment")
     except Exception:
         receipt = _build_receipt(
             record=record,

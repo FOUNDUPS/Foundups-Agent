@@ -7,6 +7,63 @@
 
 ## Change Log
 
+### 2026-09-22: Qualify signed runtime-expectation projection
+
+- WSP00/15/22/50/62/84/97/99;13/P1. Extended existing INTERFACE/ROADMAP/test
+  documentation with exact mapping, use-time verification and capability
+  disposal requirements, plus a fixed synthetic acceptance matrix.
+- Current AI Gateway signed MODEL/PANEL evidence does not declare the general/
+  code compatibility slots or an installed inference-engine artifact. Named
+  existing policy/supply/inventory owners must resolve these before source work.
+- Existing49 security/supplier/receipt cases pass locally. This is owner-level
+  verification, not end-to-end projection or production cryptographic proof.
+  Source/tests/v1 receipts remain unchanged; no update, provider or service ran.
+  Independent review and exact publication state: canonical RSI backlog.
+
+### 2026-09-20: Default WSL availability checks to metadata-only
+
+- Added a separate default-off `FOUNDUPS_AGENT_WSL_COMMAND_PROBE_ENABLED` control
+  in the existing probe. Enable-only calls validate registration/base and return
+  `NOT_READY` without command execution; both controls opt into the existing
+  version path. Existing enable-only configurations intentionally change behavior.
+- Capture mode before resolver callbacks. Preserve disabled receipt bytes,
+  explicit-mode parsing/commands, trusted resolver exports, fail-soft callers and
+  existing structural guards; source remains238 lines. No new runtime authority.
+- Local43 focused and four connected checks pass; exact red/green, independent
+  review and remote state live in the canonical RSI backlog. Added the missing
+  WSP97-required TestModLog inventory; generated registry changes only this
+  suite's corrected description. No live WSL, update, provider or FoundUp effects.
+  WSP00/15/22/50/62/84/97/99; selected source12/P2.
+
+### 2026-09-20: Qualify the WSL advisory lifecycle boundary
+
+- WSP15 13/P1 contract qualification complete locally; source/test behavior is
+  unchanged. Corrected current README/INTERFACE/ROADMAP claims: enabled version
+  commands execute programs and may cold-start WSL/services; disabled remains
+  no-host-access. A running-state precheck cannot eliminate the later-exec race.
+- Existing 25 tests pass; seven external injected witnesses pass with zero real
+  WSL calls. Independent contract/caller reviews accept the separate 12/P2 next
+  repair: default-off command opt-in within the same owner, preserving Gateway
+  exports, fail-soft startup, receipt limits and structural guards.
+- The new control is not implemented. No runtime/update/provider activation,
+  main wiring, new module/skill or AmIBot work is included. Exact evidence and
+  fresh selection are in the canonical RSI backlog. WSP00/15/22/50/62/97/99.
+
+### 2026-09-13: Recognize installed OpenClaw numeric release suffix
+
+- RSI readiness inspection found the existing WSL advisory rejected installed
+  `OpenClaw 2026.7.1-2 (0790d9f)` while the existing Gateway command transport
+  successfully returned that version. Extended only the existing version regex
+  to accept numeric release suffixes; preserved full-match output filtering.
+- Extended existing positive and content-rejection tests: two new suffix cases
+  failed before the repair; 68 focused WSL/Gateway tests passed afterward.
+  A fresh version-only WSL probe reports both OpenClaw and Hermes available.
+- PASS remains unverified availability, not service health or model/dispatch
+  authority. No install, provider inference, service reconfiguration or new
+  module. WSP 22, 50, 84, 97; R07 readiness groundwork.
+
+---
+
 ### 2026-08-05: Runtime compatibility test clock consistency
 
 - Removed a calendar-bound fixture failure by composing publication evidence at

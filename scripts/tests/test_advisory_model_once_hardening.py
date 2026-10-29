@@ -87,8 +87,8 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         )
 
     def test_unknown_mode_rejects_before_query_or_network(self) -> None:
-        with mock.patch.object(bridge, "query_model_runtime_binding") as query, mock.patch(
-            "urllib.request.urlopen"
+        with mock.patch.object(bridge, "query_model_runtime_binding") as query, mock.patch.object(
+            bridge, "_openrouter_urlopen"
         ) as network:
             route, reason = bridge._verified_runtime_route(
                 {"mode": "unknown", "lead_model": "z-ai/glm-5.2"}
@@ -102,7 +102,7 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         blocked = SimpleNamespace(
             status="UNCONFIGURED", accepted=False, role_bindings=()
         )
-        with mock.patch("urllib.request.urlopen") as network:
+        with mock.patch.object(bridge, "_openrouter_urlopen") as network:
             _rc, out = self._invoke_main(
                 {
                     "mode": "openrouter_single",
@@ -126,7 +126,7 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         receipt.role_bindings = (
             {"role": "principal", "provider": "openai", "model_id": "z-ai/glm-5.2"},
         )
-        with mock.patch("urllib.request.urlopen") as network:
+        with mock.patch.object(bridge, "_openrouter_urlopen") as network:
             _rc, out = self._invoke_main(payload, runtime_receipt=receipt)
         self.assertFalse(out.get("ok"))
         self.assertEqual(out.get("reason"), "model_runtime_topology_provider_unsupported")
@@ -185,7 +185,7 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
                 raise item
             return io.BytesIO(item)
 
-        with mock.patch("urllib.request.urlopen", side_effect=fake_urlopen):
+        with mock.patch.object(bridge, "_openrouter_urlopen", side_effect=fake_urlopen):
             data, meta = bridge._post_openrouter("key", {"model": "x", "messages": []}, 30)
 
         self.assertEqual(len(calls), 2)
@@ -201,7 +201,7 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
             calls.append({"body": request.data.decode("utf-8")})
             raise HTTPError("https://x", 400, "bad", {}, io.BytesIO(b'{"error":{"message":"bad"}}'))
 
-        with mock.patch("urllib.request.urlopen", side_effect=fake_urlopen):
+        with mock.patch.object(bridge, "_openrouter_urlopen", side_effect=fake_urlopen):
             with self.assertRaises(HTTPError) as ctx:
                 bridge._post_openrouter("key", {"model": "x", "messages": []}, 30)
 
@@ -224,8 +224,8 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
                 raise item
             return io.BytesIO(item)
 
-        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch(
-            "urllib.request.urlopen", side_effect=fake_urlopen
+        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch.object(
+            bridge, "_openrouter_urlopen", side_effect=fake_urlopen
         ):
             _rc, out = self._invoke_main(
                 {
@@ -253,8 +253,8 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
             call_count["n"] += 1
             raise HTTPError("https://x", 400, "bad", {}, io.BytesIO(b'{"error":{"message":"bad"}}'))
 
-        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch(
-            "urllib.request.urlopen", side_effect=fake_urlopen
+        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch.object(
+            bridge, "_openrouter_urlopen", side_effect=fake_urlopen
         ):
             _rc, out = self._invoke_main(
                 {
@@ -826,7 +826,7 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
             item = responses.pop(0)
             return io.BytesIO(item)
 
-        with mock.patch("urllib.request.urlopen", side_effect=fake_urlopen):
+        with mock.patch.object(bridge, "_openrouter_urlopen", side_effect=fake_urlopen):
             _rc, out = self._invoke_main(
                 {
                     "mode": "openrouter_single",
@@ -872,7 +872,7 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         def fake_urlopen(request, timeout=0):  # noqa: ARG001
             return io.BytesIO(responses.pop(0))
 
-        with mock.patch("urllib.request.urlopen", side_effect=fake_urlopen):
+        with mock.patch.object(bridge, "_openrouter_urlopen", side_effect=fake_urlopen):
             _rc, out = self._invoke_main(
                 {
                     "mode": "openrouter_single",
@@ -902,7 +902,7 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         def fake_urlopen(request, timeout=0):  # noqa: ARG001
             return io.BytesIO(responses.pop(0))
 
-        with mock.patch("urllib.request.urlopen", side_effect=fake_urlopen):
+        with mock.patch.object(bridge, "_openrouter_urlopen", side_effect=fake_urlopen):
             _rc, out = self._invoke_main(
                 {
                     "mode": "openrouter_single",
@@ -938,8 +938,8 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         def fake_urlopen(request, timeout=0):  # noqa: ARG001
             return io.BytesIO(responses.pop(0))
 
-        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch(
-            "urllib.request.urlopen", side_effect=fake_urlopen
+        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch.object(
+            bridge, "_openrouter_urlopen", side_effect=fake_urlopen
         ):
             self._invoke_main(
                 {
@@ -970,8 +970,8 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         def fake_urlopen(request, timeout=0):  # noqa: ARG001
             return io.BytesIO(responses.pop(0))
 
-        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch(
-            "urllib.request.urlopen", side_effect=fake_urlopen
+        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch.object(
+            bridge, "_openrouter_urlopen", side_effect=fake_urlopen
         ):
             self._invoke_main(
                 {
@@ -995,8 +995,8 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         def fake_urlopen(request, timeout=0):  # noqa: ARG001
             return io.BytesIO(responses.pop(0))
 
-        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch(
-            "urllib.request.urlopen", side_effect=fake_urlopen
+        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch.object(
+            bridge, "_openrouter_urlopen", side_effect=fake_urlopen
         ):
             self._invoke_main(
                 {
@@ -1022,8 +1022,8 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         def fake_urlopen(request, timeout=0):  # noqa: ARG001
             return io.BytesIO(responses.pop(0))
 
-        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch(
-            "urllib.request.urlopen", side_effect=fake_urlopen
+        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch.object(
+            bridge, "_openrouter_urlopen", side_effect=fake_urlopen
         ):
             self._invoke_main(
                 {

@@ -143,21 +143,20 @@ def _finish_terminal(runner, headers, run_id, timeout, status, model, provider_i
 
 def _stop(runner, headers, run_id, timeout, reason):
     try:
-        stopped = runner.transport.request(
+        runner.transport.request(
             "POST", f"/v1/runs/{run_id}/stop", headers=headers, payload={},
             timeout_seconds=timeout,
         )
-        status = _status(runner.transport, headers, run_id, timeout)
+        _status(runner.transport, headers, run_id, timeout)
     except Exception:
-        status, stopped = None, None
-    confirmed = bool(stopped and stopped.status in {200, 202} and status)
-    confirmed = confirmed and status.get("status") == "cancelled"
-    return reject_hermes(reason, invoked=True, observed=confirmed, abort=confirmed)
+        pass
+    # Parent cancellation does not prove detached children stopped.
+    return reject_hermes(reason, invoked=True, observed=False, abort=False)
 
 
 def _terminal(status, run_id, model, provider_id, *, native_delegation):
     if status.get("status") != "completed" or _shows_forbidden_activity(status):
-        return reject_hermes("FAIL_HERMES_RUN_REJECTED", invoked=True)
+        return reject_hermes("FAIL_HERMES_RUN_REJECTED", invoked=True, observed=False)
     artifacts = _artifacts(str(status.get("output") or ""))
     if artifacts is None:
         return reject_hermes("FAIL_HERMES_ARTIFACT_OUTPUT", invoked=True)

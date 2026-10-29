@@ -1,5 +1,49 @@
 # Video Indexer Tests - ModLog
+
+## 2026-10-22 - Omitted language and real factory compatibility
+
+Added nine real-factory construction cases: omitted multilingual and `.en`
+defaults, explicit English/Japanese/auto-detection, and `.en` rejection of
+explicit `None`/Japanese or an invalid code. Temporary output directories isolate
+transcript storage; model initialization is patched to fail if invoked and asserted unused.
+Before the fix, the initial 13-case analyzer run reproduced two `.en` omission
+failures (11 passed). After the fix, all 14 analyzer language cases and seven existing
+voice language/offset cases pass: **21 passed, 0 failed**. Existing mocked
+Japanese/mixed/unknown conversion and local-file forwarding cases remain intact.
+This is local constructor/mock validation, not real ASR or native-worker evidence.
+WSP00/5/6/11/22/77/84/97.
+
+## 2026-09-21 - Audio language and timestamp regressions
+
+Five offline tests pass: batch language/output forwarding; Japanese, mixed
+and unknown evidence labels; preserved chunk offsets; local-file language
+forwarding. Uses fake extractor, model and metadata response; no live requests.
 **WSP Compliance**: WSP 34 (Test Documentation), WSP 22 (Change Log)
+
+## 2026-09-22 - Pre-merge full module run
+
+- `python -m pytest modules/ai_intelligence/video_indexer/tests -q --tb=short`
+  with isolated pytest, pytest-asyncio, dotenv, Selenium and requests dependencies:
+  **142 passed, 13 skipped**.
+- Added nested-cycle-failure and legacy Gemini exclusion coverage. Browser mock
+  responses now arrive after input; stale static response fixtures no longer
+  contradict the new guard. Registry routing tests use explicit content types.
+- Live authenticated browser indexing is not covered by this mock/unit result.
+
+## 2026-09-21 - VIDEO_INDEX_PORTFOLIO_INTEGRITY
+
+- Added a retained-response regression: an answer visible before submit is
+  ignored until a different response arrives.
+- Added per-video identity/provenance, duplicate-response digest, semantic
+  training-exclusion, and Gemini enrichment-merge tests.
+- Updated action-surface coverage for channel, portfolio, and bounded-daemon IDs;
+  portfolio grouping proves Chrome receives Move2Japan/UnDaoDu while Edge
+  receives FoundUps.
+- Fixed the four previously documented parse-only `_pattern_memory`
+  `AttributeError` paths by making the optional memory lookup defensive.
+- Local full pytest run was blocked because pytest is absent. Direct equivalent
+  integrity checks and `py_compile` passed; live Studio DOM remains an operator
+  proof requiring authenticated Chrome 9222 and Edge 9223 sessions.
 
 ## 2026-06-17 - STUDIO_ASK_GEMINI_READINESS_RETRY_PHASE1 (heartbeat + no-hang budget + content_category normalize/preserve) [updates #836] (Worker-Lane SSREADY-POLISH)
 

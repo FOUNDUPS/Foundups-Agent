@@ -1,13 +1,22 @@
 # RedDog
 
-Version: 0.4.139
-0.4.139 rebinds the extension after shared Windows long-path/no-replace publication hardening and records a separate inert, composition-bound Windows/CPython declared-ABI layer.
-The bounded PE32+ parser, wheel/RECORD verifier, and declared-name graph inspect static evidence without loading a native image.
-ABI source remains outside the executable backend manifest, VSIX, owner, and route.
-External loader resolution, deterministic/pre-import execution, signing, empirical write denial, route-v2 activation, A-grade, and retrieval RSI remain blocked.
+The PR1638 local activity candidate adds explicit capture, context and status
+commands through the existing Principal Memex registration. It is not automatic
+conversation ingestion or permission to send personal context to a model.
+See [PAL interfaces](INTERFACE.md#principal-activity-ledger-candidate--pr1638)
+and [qualification/recovery limits](docs/PRINCIPAL_ACTIVITY_LEDGER_ARCHITECTURE.md).
+Installed-host qualification remains pending; the historical release statement
+below does not qualify the new ledger.
 
-This candidate integrity-binds RedDog to the 1,366-file backend closure at `sha256:4e634b8c7b99...8b37`, including the operator controller, exact task-bound OpenClaw execution, receipt-bound owner cycles, integrity-bound AgentDB claim lease, and fail-closed runtime/task liveness.
-The operator controller remains outside the thin-client command surface, and the VSIX gains no maintenance, reindex, promotion, or execution authority.
+Version: 0.4.141
+0.4.141 first binds the corrected fast-RedDog/deep-0102 identity boundary while preserving the 0.4.140 builder release: 1,398 backend files at `sha256:700d50f84e12...86e09ed` with one evidence-only held child. It changes no extension effect authority.
+
+Documentation entry points: the repository-wide [RedDog documentation map](../../docs/REDDOG_DOCUMENTATION_MAP.md) separates current product truth from audits and history; [RedDog architecture](ARCHITECTURE.md) defines the identity boundary.
+[Contact Memory](docs/CONTACT_MEMORY_ARCHITECTURE.md), [RedDog Lick](docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md), [Moshpit](docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md), and the [Memex projection emitter](docs/MEMEX_PROJECTION_EMITTER_ARCHITECTURE.md) specify planned continuity surfaces.
+They are not implemented authority and do not grant biometric, identity, wallet, work, or execution effects. `ARCHITECTURE.md` and `.gitignore` remain repository-only inputs outside the executable VSIX.
+
+The parent reproves the exact inert builder composition around a suspended Job-contained child using `-I -S -B -E -s`, a fixed six-entry `sys.path`, closed O:/E: roots, and bounded path-free JSON.
+CPython 3.12.10 remains qualified last-official-3.12 Windows evidence with known patch debt; native/pre-import closure, deterministic effects, signing, write denial, activation, A-grade, and retrieval RSI remain false.
 
 ## Continuous conversation surface
 
@@ -85,12 +94,12 @@ Python, worker threads, and a materialized backend are required.
 The deny-by-default webview CSP permits only the packaged icon, VS Code-theme
 styles, and one fresh nonce-bound script; it admits no network script source.
 
-The VSIX surface is exactly 67 files: 62 root runtime JavaScript modules, the
+The VSIX source payload is exactly 69 files: 64 root runtime JavaScript modules, the
 Python bootstrap, and four public files. The packaged license must match root
 authority; tests, internal docs, caches, credentials, dependencies, and build
 artifacts remain excluded. `npm run test:package` proves two stable VSCE lists,
 regular non-symlink membership, and the 1 MiB raw cap without building a VSIX.
-Tracked attributes pin 66 packaged text members to LF and keep `icon.png`
+Tracked attributes pin 68 packaged text members to LF and keep `icon.png`
 binary. Receipt v2 binds effective-policy and sorted member-content digests;
 CR bytes or attribute overrides fail closed. Archive size remains verified on
 the built artifact. See `docs/REDDOG_PACKAGE_EOL_REPRODUCIBILITY_PHASE1.md`.
@@ -136,8 +145,7 @@ From `extensions/reddog`, `npm test` runs the bounded fast developer tier,
 `npm run test:release` runs the complete promotion closure. The default command
 does not silently start the multi-minute release audit and no dependency
 install is required.
-`npm run test:package` is the explicit local package-surface contract. The fast
-tier checks only static manifest, ignore-policy, and runtime-closure truth; the
+`npm run test:package` is the explicit local package-surface contract. On Windows, the fast and conversation tiers resolve the primary checkout's validated `.venv` through the linked worktree's Git common directory; explicit absolute O:/E: test-runtime overrides remain supported. The fast tier checks only static manifest, ignore-policy, and runtime-closure truth; the
 release owner executes the live VSCE listing through its existing worker plan.
 
 The exact release parallelism, timeout, termination, hostile-selector, and
@@ -747,7 +755,7 @@ against the exact post-merge HoloIndex maintenance runtime. The integrity gate
 remains fail-closed: RedDog accepts the backend only when all 1,000 generated
 runtime dependencies match their normalized SHA-256 digests.
 
-This local Cursor/VS Code extension opens an IDE-side thin-client webview for RedDog, the resident principal-scoped 0102 FoundUps architect identity.
+This local Cursor/VS Code extension opens an IDE-side thin-client webview for RedDog, the fast interaction and attention surface backed by the deeper, principal-scoped 0102 Digital Twin.
 
 Version 0.4.22 serializes the exact semantic buckets and metadata that RedDog may consume, binds that serialization's SHA-256 digest and item count into the canonical HoloIndex query receipt, and verifies both before semantic evidence enters prompt construction. Mutable outer `raw_result` data is no longer an evidence source. Missing, oversized, malformed, altered, or count-mismatched evidence fails closed before Fusion.
 
@@ -765,7 +773,7 @@ Version 0.4.13 routes direct questions about the current/next RedDog work throug
 
 Version 0.4.12 verifies the selected workspace against an extension-pinned RedDog backend manifest and a generated SHA-256 closure of every executable Python entry point and local runtime dependency before grounding or authority work begins. The generator parses imports without importing repository code, uses Git's exact-case tracked paths, resolves package initializers and package-relative dynamic imports, expands declared dynamic file-load scopes, and rejects undeclared dynamic loading. Missing, stale, altered, malformed, junction-backed, or unsafe backend files block locally without querying HoloIndex, calling a model, probing permissions, or emitting a work order. Full activation/ingress/model/action checks run in an extension-owned worker thread; synchronous legacy repair/judgment bridges recheck immediately before their existing synchronous process launch. The gate does not claim an atomic filesystem lock against a hostile local administrator. Version 0.4.11 routes editor resident sessions through the canonical host-authenticated client and revision-CAS resident records.
 
-The VSIX is the IDE-side thin client for RedDog, the operator-facing identity/persona of the principal-scoped 0102 Digital Twin. Fusion is one internal reasoning mode; authority-bearing work is delegated through signed OpenClaw/WRE/Hermes receipts, not through raw webview access.
+The VSIX is the IDE-side thin client for RedDog, the lightweight interaction, exchange, and attention surface. RedDog is not 0102. The principal-scoped 0102 Digital Twin provides deep cognition and orchestration behind RedDog. Fusion is one internal reasoning mode; authority-bearing work is delegated through signed OpenClaw/WRE/Hermes receipts, not through raw webview access.
 
 Command:
 
@@ -778,13 +786,14 @@ Default panel:
 
 ## RedDog and the Recursive 0102 DAE Ecosystem
 
-012 does not orchestrate every worker. 012 talks to RedDog. RedDog participates in the recursive 0102 DAE ecosystem. Autonomous WRE/DAE agents perform bounded system work under OpenClaw supervision and WRE authority; Hermes receives bounded leaf jobs.
+012 does not orchestrate every worker. 012 talks to RedDog; RedDog exchanges bounded intent and context with 0102. The deeper 0102 layer participates in the recursive DAE ecosystem. Autonomous WRE/DAE agents perform bounded system work under OpenClaw supervision and WRE authority; Hermes receives bounded leaf jobs.
 
 ### Architecture Stack
 
 ```text
 012 work focus
-  -> RedDog digital twin / architect interface
+  -> RedDog fast interaction / exchange surface
+  -> 0102 digital twin / architect layer
   -> recursive 0102 DAE ecosystem
 ```
 
@@ -792,7 +801,8 @@ Default panel:
 
 | Layer | Role |
 | --- | --- |
-| RedDog / 0102 | Principal-scoped Digital Twin identity, architect, and conversation interface. 012's first contact point; assembles requirements and recommends handoffs without effect authority. |
+| RedDog | Lightweight low-latency interaction, exchange, and attention surface. 012's first contact point; no deep-worker or effect authority. |
+| 0102 | Principal-scoped Digital Twin, architect, and deep cognition/orchestration layer; assembles requirements and recommends governed handoffs without implicit effect authority. |
 | Hermes | Bounded delegated leaf-worker/scaffolding runtime. Not conversation, policy, repository, or promotion authority. |
 | OpenClaw | Channel gateway and policy/control supervisor. Validates admitted intent and supervises dispatch without owning repository effects. |
 | HoloIndex | Memory and retrieval. Semantic code search, WSP lookup, module discovery. |
@@ -809,7 +819,7 @@ Autonomous WRE/DAE agents are NOT 012 work. 012 provides work focus, testing, so
 
 ## Operating Contract
 
-The extension is a bounded 0102 advisory surface:
+The extension is a bounded RedDog interaction surface backed by the 0102 deep advisory layer:
 
 - WSP_00: role defaults to RedDog Architect; 012 remains the external principal and final decision holder.
 - WSP_97: answers must separate observed evidence, inference, and needs-verification.
@@ -872,14 +882,14 @@ The preview requires a future explicit `VALVE_OPEN_WORKTREE_CREATE` and `012_sov
 
 ## Work Focus Contract (v0.3.15)
 
-012 does not prompt RedDog directly. The operating flow is:
+012 speaks to the RedDog surface directly. For substantive governed work, the surface exchanges the bounded work focus with the deeper 0102 layer, which assembles the WSP task prompt for the bridge:
 
 ```text
-012 work focus -> 0102 constructWspTaskPrompt -> redaction gate -> OpenRouter bridge -> RedDog architect output
+012 work focus -> RedDog surface -> 0102 constructWspTaskPrompt -> redaction gate -> OpenRouter bridge -> 0102 advisory output -> RedDog presentation
 ```
 
 - Composer label: **work focus** (not "prompt")
-- Bridge receives the **WSP task prompt** assembled by 0102, not raw composer text alone
+- Bridge receives the **WSP task prompt** assembled by 0102 behind RedDog, not raw composer text alone
 - Review packet stores `work_focus_digest`, `wsp_prompt_digest`, and `prompt_construction: 0102_generated_from_work_focus`
 
 ## Surface Layout
@@ -986,12 +996,15 @@ Set `OPENROUTER_API_KEY` in the environment used to launch Cursor. Do not store 
 ## Install
 
 Build the VSIX locally only after the package contract accepts the exact
-LF-governed working-tree bytes. Do not commit `*.vsix`.
+LF-governed working-tree bytes. Supply the extension subdirectory as the README
+link base; VSCE otherwise resolves this monorepo's links at the repository root.
+For a published release, use its verified commit in place of `main` to pin the
+documentation. Do not commit `*.vsix`.
 
 ```powershell
 cd extensions/reddog
 npm run test:package
-vsce package --no-dependencies
+vsce package --no-dependencies --baseContentUrl https://github.com/FOUNDUPS/Foundups-Agent/blob/main/extensions/reddog
 ```
 
-From Cursor, run `Extensions: Install from VSIX...`, choose `reddog-0.4.139.vsix` (or the current version), reload the window, then run `RedDog: Open`; do not use workspace-extension install for normal operation.
+From Cursor, run `Extensions: Install from VSIX...`, choose `reddog-0.4.141.vsix` (or the current version), reload the window, then run `RedDog: Open`; do not use workspace-extension install for normal operation.

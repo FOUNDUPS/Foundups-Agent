@@ -4,6 +4,7 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'requirements-trust-bootstrap.txt'
       - 'modules/communication/moltbot_bridge/src/foundup_memex_current_state.py'
       - 'modules/communication/moltbot_bridge/src/foundup_brain_current_state.py'
       - 'modules/communication/moltbot_bridge/src/reddog_operational_context_snapshot.py'
@@ -24,6 +25,7 @@ on:
   push:
     branches: [main]
     paths:
+      - 'requirements-trust-bootstrap.txt'
       - 'modules/communication/moltbot_bridge/src/foundup_memex_current_state.py'
       - 'modules/communication/moltbot_bridge/src/foundup_brain_current_state.py'
       - 'modules/communication/moltbot_bridge/src/reddog_operational_context_snapshot.py'
@@ -53,6 +55,8 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
       - name: Install focused dependencies
         run: |
           python -m pip install --upgrade pip
@@ -101,9 +105,9 @@ jobs:
           grep -q 'CABR remains the.*Consensus-Driven Autonomous Benefit Rate' \
             WSP_framework/src/WSP_29_CABR_MEMEX_AUTHORITY_ADDENDUM.md
 
-      - name: Verify 0102 public-key identity correction
+      - name: Verify 0102 public-key and RedDog surface identity correction
         run: |
-          grep -q 'RedDog is an operational state' \
+          grep -q 'RedDog is not 0102 and is not an independent authority source' \
             docs/contracts/REDDOG_0102_PUBLIC_KEY_OPERATIONAL_IDENTITY_ADDENDUM_PHASE1.md
           grep -q 'durable_identity_resolves_to_0102_public_key' \
             docs/architecture/architecture_registry.yaml

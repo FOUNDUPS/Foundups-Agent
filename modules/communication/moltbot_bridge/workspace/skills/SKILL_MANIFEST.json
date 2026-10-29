@@ -3,35 +3,43 @@
   "files": [
     {
       "path": "foundups-wsp/SKILL.md",
-      "sha256": "dafb28446b8c5d950264d393cca15c508585d69ce664db09a97307a77506ab58"
+      "sha256": "cb585f5d1ebe31d8cdbbd5f768e4b1f0e3199514827971c12e66190c8ddcdbb1"
     },
     {
       "path": "holo-search/SKILL.md",
-      "sha256": "7e7dbc9f56ac9bf89a3adc904b3818184e4df29fc3ac59605443ea33f0cb757b"
+      "sha256": "dd416339be7f42bb70d09b513b71c0cdb851189e094072ef8afbc437eba5777f"
     },
     {
       "path": "openclaw-automation/SKILL.md",
-      "sha256": "cefc209bd736d8876c98fc94500f5c264132eab6442fcc0121f1e836e2b8bf13"
+      "sha256": "eb9e11b9d8e9bc448e9656073ce1525c3eabc149a35d900e310310eaa555b0f9"
     },
     {
       "path": "openclaw-execute/SKILL.md",
-      "sha256": "cfb27fe2a0cdb101cdf5f2281758d148771f114dc2b5b9b9ad9d4e2ba58d3b2b"
+      "sha256": "49b22f6724ac0617a67f30b92c5f8b0b9fc0132c80ba0145ff6cd1b31740bf43"
     },
     {
       "path": "openclaw-grants/SKILL.md",
-      "sha256": "f1d85a4b297d914803e103801d212fce078e298bc546345fc62317226bbc57c7"
+      "sha256": "e977fff07b05644a804f361166c8c4f26c2f73f7af0472fd86d9153113336389"
     },
     {
       "path": "openclaw-monitor/SKILL.md",
-      "sha256": "a8054ea4e7145d6713ab1a2720c6dca359025fb14ceeaa798a2e906f775561a2"
+      "sha256": "16d7a1fd93d9b95cd302ac0eaf9f0c66b913c0b6d1ed4060acee8339a4a7744a"
     },
     {
       "path": "openclaw-schedule/SKILL.md",
-      "sha256": "bac625d8493417105693111af19ca3a2f3550bd8c250d53121daedf08a0d99f1"
+      "sha256": "52dc7a734e5bf8c851c6652f79926eadce38ab4c29470129832b21c585106760"
     },
     {
       "path": "pqn-research/SKILL.md",
-      "sha256": "c01ba2e4d56afaa117e3a0991014d67bae98ce40c98c42bca2b2edf1360fad57"
+      "sha256": "ee0088c29fa24179ecb7316a228ab57368cdcfabd74d625215d17abad0197fbf"
+    },
+    {
+      "path": "promote-antifafm/SKILL.md",
+      "sha256": "70b04edfe34030bc2b1c211b772cba8e7d1eb8e16159406b4fd3f984ab246e49"
+    },
+    {
+      "path": "launch-petition/SKILL.md",
+      "sha256": "4b8b67b30258866cce7b1a1c7dbf7f373441b90664fc9d2bb4b667f2dc85974d"
     }
   ]
 }

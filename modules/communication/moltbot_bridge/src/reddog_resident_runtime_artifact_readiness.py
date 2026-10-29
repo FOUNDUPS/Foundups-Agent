@@ -42,6 +42,7 @@ from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_au
 from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
     read_reddog_runtime_json_mapping,
 )
+from .reddog_signer_owner_e0_principal_records import SCHEMA_VERSION_V2, parse_principal_artifact
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply import (
     SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
 )
@@ -457,10 +458,24 @@ def _validate_resolver_schemas(
         reasons["permission_snapshots.json"].append("permission_store_schema_invalid")
     elif permissions.get("snapshot_count") != len(snapshots):
         reasons["permission_snapshots.json"].append("permission_store_count_invalid")
-    if principals.get("schema_version") != schema or not isinstance(records, Mapping):
+    if principals.get("schema_version") == SCHEMA_VERSION_V2:
+        _validate_v2_principals(principals, reasons)
+    elif principals.get("schema_version") != schema or not isinstance(records, Mapping):
         reasons["principal_authority_records.json"].append("principal_store_schema_invalid")
     elif principals.get("principal_count") != len(records):
         reasons["principal_authority_records.json"].append("principal_store_count_invalid")
+
+
+def _validate_v2_principals(
+    principals: Mapping[str, Any], reasons: dict[str, list[str]],
+) -> None:
+    """Check v2 shape only; readiness does not authenticate reviewer designation."""
+    try:
+        parse_principal_artifact(
+            json.dumps(principals, ensure_ascii=True, allow_nan=False).encode("ascii")
+        )
+    except (TypeError, ValueError, RecursionError):
+        reasons["principal_authority_records.json"].append("principal_store_schema_invalid")
 
 
 def _freshness_reasons(

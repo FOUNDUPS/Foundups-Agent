@@ -34,6 +34,7 @@ const EXPECTED_RUNTIME_FILES = Object.freeze([
   'daemon_diagnostic_analysis.js',
   'daemon_diagnostic_secret_filter.js',
   'extension.js',
+  'foundup_brand_context.js',
   'foundup_target_phrase.js',
   'foundup_work_grounding.js',
   'foundup_work_runtime_binding.js',
@@ -62,6 +63,8 @@ const EXPECTED_RUNTIME_FILES = Object.freeze([
   'operator_wardrobe_selection_proof.js',
   'orchestration_prompt_routes.js',
   'orchestration_prompt_trace.js',
+  'principal_activity_extension_adapter.js',
+  'principal_activity_ledger.js',
   'principal_memex_disclosure_source.js',
   'progressive_execution_stage.js',
   'repo_audit_grounding.js',
@@ -85,7 +88,8 @@ const EXPECTED_PACKAGE_FILES = Object.freeze([
   ...EXPECTED_RUNTIME_FILES, 'LICENSE', 'README.md', 'icon.png', 'package.json'
 ].sort());
 const EXPECTED_IGNORE_RULES = Object.freeze([
-  'tests/**', 'docs/**', '*.vsix', 'node_modules/**', '.vscode/**',
+  'tests/**', 'docs/**', '.gitignore', 'ARCHITECTURE.md', '*.vsix',
+  'node_modules/**', '.vscode/**',
   'ModLog.md', 'ROADMAP.md', 'INTERFACE.md', 'HOLOINDEX.md',
   'wsp_62_exemptions.yaml', '**/__pycache__/**', '**/.pytest_cache/**',
   '**/.cache/**', '**/coverage/**', '**/.coverage*', '**/.nyc_output/**',

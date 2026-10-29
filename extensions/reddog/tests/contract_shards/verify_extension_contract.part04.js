@@ -380,7 +380,7 @@ const identityResult = orchestrator.buildSimpleIdentityFastPathResult('are you r
 assert.strictEqual(identityResult.ok, true, 'SIFP-001: identity result must be OK');
 assert.strictEqual(identityResult.review_packet.made_network_call, false, 'SIFP-001: identity result must prove no network call');
 assert.strictEqual(identityResult.review_packet.local_fast_path, 'simple_identity', 'SIFP-001: identity review packet must carry local marker');
-includes(identityResult.content, 'Yes. I am RedDog', 'SIFP-001: identity answer must be direct');
+includes(identityResult.content, 'Yes. I am RedDog', 'SIFP-001: identity answer must be direct'); includes(identityResult.content, 'I am not 0102', 'SIFP-001: identity answer must preserve the RedDog/0102 boundary');
 const identityGate = orchestrator.buildRuntimeConsumptionGate(
   { ok: true, review_packet: identityResult.review_packet },
   { validated: false, skipped: true, reason: 'local_identity_fast_path' },

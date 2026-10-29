@@ -1,5 +1,88 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-10-19: MCP security dependency coordination
+
+MCP 1.30.0 is now declared consistently in requirements, the launcher's strict
+runtime contract, and the existing candidate-binding regression. Current docs
+reflect the quartet; historical qualification records below remain unchanged.
+Local Linux coverage is 28 passing cases plus a successful real runtime version
+probe. The 19 Windows-only cases and two owned HTTP cases still require the
+unchanged 49-case Windows CI gate. Installed environments require their existing
+governed upgrade and qualification procedure before activation; source acceptance
+does not establish deployment or native execution authority.
+
+## 2026-10-04: Paired MCP compatibility layer
+
+The existing launcher now pins FastMCP3.2.0/MCP1.28.1 with unchanged
+Pydantic2.12.3/Uvicorn0.38.0. Direct Windows base-interpreter launches initialize
+the selected venv's normal site hooks for both server and readiness children;
+this closes a reproduced missing-PyWin32 startup failure. Capability probes use
+explicit `-B`. Unexpected post-spawn exceptions reuse the existing termination
+owner, retaining the handle and lock when termination fails.
+
+Local evidence:47 nonlistener cases and two real owned loopback HTTP cases
+pass, with no errors/skips. The earlier live attempt failed cleanup and remains
+in the evidence. Frozen cleanup baseline:44pass/2fail; coordinator repair:46pass.
+The new Windows CI job requires all49, including real lifecycle checks, using
+its own128MiB VHD. Hosted verification/publication are pending at this checkpoint.
+
+One local Qwen proposal was rejected before application: invented helper,
+incorrect handle/lock identity and invalid fallback. The coordinator authored
+the production repairs; no worker repair success is claimed. One observed SDK
+completion:767 input/59 output tokens;52.062s parent; zero paid inference calls.
+The existing benchmark owner records that rejection; no automatic retry.
+
+This is ordinary supervised maintenance. Shared runtimes were not upgraded,
+native effect admission remains blocked, and sampled PID ownership checks do
+not establish an atomic endpoint lease or graceful ASGI shutdown. The fixture
+uses a private mock lock, so real singleton cleanup is outside this qualification.
+Evidence: `outputs/rsi-mcp-runtime-qualification-20261004` on the execution PC;
+canonical sequencing: root ROADMAP and `docs/roadmaps/rsi_swarm_backlog.json`.
+WSP00/15/22/50/84/97; no new module, skill or orchestrator.
+
+First hosted attempt:46pass/2livefail because its PowerShell ownership observer
+timed out at10s, while both owned processes cleaned up correctly. The revised
+fixture uses fixed System32 netstat numeric TCP/PID projection with unchanged
+ownership criteria and a15s startup observation window, capped10s per probe.
+One added projection negative test initially had a PID/port substitution typo;
+that failed run is retained. Corrected input and final47+2 local cases pass.
+The prior48 test-function ASTs and production source remain unchanged. Hosted
+replacement qualification remains pending; the first failure is not erased.
+
+## 2026-10-02: Optional Windows child Job memory limit
+
+The existing shared child runner and Job owner now accept opt-in aggregate
+committed-memory limits, preserving default callers, output bounds, deadlines,
+and cleanup. Invalid inputs fail before launch; configuration and assignment
+precede resume. Local evidence covers 62 distinct passing cases across separate
+selections: 48 deterministic, two Windows memory, four process/maintenance, and
+eight manifest checks. Publication and hosted CI remain pending.
+
+This is a resource-control prerequisite. Native-model file-read bounds and a
+separately reviewed disposable input remain unresolved before any native load.
+It supplies no working-set bound, complete sandbox, model support/capability,
+runtime admission, or measured RSI gain. (WSP 00/15/22/50/62/97)
+
+## 2026-08-30: Held builder child phase 2C3c
+
+**Implemented and physically falsified as inert evidence; not retained
+authority or activation.** The parent proves an exact Phase 2C3a binding,
+holds its interpreter across exactly one bounded child, replaces the child
+environment and `sys.path`, validates one canonical output record, and repeats
+the full composition proof. Protected runtime, canonical, repository, and temp
+roots must be disjoint. The child returns process observation evidence; the
+private `BuilderProcessAuthority` capability does not cross JSON.
+
+A qualified O:-materialized CPython 3.12.10 child passed the real integration.
+That is the final official CPython 3.12 Windows binary release, so it carries
+known patch debt and cannot prove current security patching. Next P0 work is an
+independently allocated current-runtime/profile migration plus provenance and
+pre-import/native-loader closure. Deterministic effects, signing, empirical
+write denial, route-v2 activation, A-grade, and retrieval RSI remain false.
+Hostile replay also demonstrated the write-denial gap by polluting two otherwise
+exact generations with bytecode; both are quarantined, the active generation is
+clean/rematerialized, and all release harnesses now suppress bytecode writes.
+
 ## 2026-08-30: Base-prefix consumer correction phase 2C3b
 
 **Implemented and falsified as a topology correction only; still not a child,
@@ -16,11 +99,10 @@ model distinct generation/payload roots. A shared real-materialization suite
 proves both topology validators accept the actual composition and candidate
 validation rejects the obsolete `<generation>/python.exe` topology.
 
-**Next independently allocated P0 transaction:** bind the Phase 2C3a result to
-the smallest one-shot held-executable child and reprove its actual-process
-authority. Pre-import, ABI/native/subprocess closure, deterministic effects,
-signing, write denial, activation, A-grade, and retrieval RSI remain later
-independent gates.
+**Historical next step:** Phase 2C3c now supplies the smallest held child and
+reproves process evidence. It does not preserve process authority. Pre-import,
+ABI/native/subprocess closure, deterministic effects, signing, write denial,
+activation, A-grade, and retrieval RSI remain independent gates.
 
 ## 2026-08-30: Inert builder-runtime composition phase 2C3a
 

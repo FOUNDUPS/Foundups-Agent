@@ -1,0 +1,30 @@
+# EDUIT test inventory
+
+Run `node --test modules/foundups/eduit/tests/*.test.mjs` from repository root.
+
+- `storytime.test.mjs`: world clock, rescue outcomes, scene continuity, cue/locale
+  invariants and typography independent of tremor physics.
+- `layout.test.mjs`: gesture adapter cancellation/destroy, root projection and
+  packaging CLI with fake media (not a real video review).
+- `pwa.test.mjs`: manifest, cache bounds and flag/pointer contracts.
+- `director_harness.html`: actual same-origin viewer controller acceptance. Copy
+  temporarily to the packaged site's root as `layout-qa.html`, open through the
+  managed preview, choose a viewport and run. Reload between runs. Uses synthetic
+  pointer events with explicitly stubbed pointer capture, not native touch proof.
+  Remove before publishing. Exercise real mouse hold/unlock separately.
+
+See TestModLog and ../docs/PRESCHOOL_VIEWER_REVIEW.md for results and limitations.
+
+Slow-rescue revision extends the same engine tests and viewer fixture with
+score/sleep/practice/reset and64px bound checks. The optional live rescue button
+uses real-time waits; cloud-browser suspension can exhaust them before the active
+game clock advances. Treat that as inconclusive, never substitute a green engine
+result for a completed browser round.
+
+- `viewport.test.mjs`: execute the actual viewer viewport owner with missing API,
+  normal-zoom offsets, rotation, foreground, and browser-zoom fixtures; assert
+  both owners pause when bounds change. These inputs are not device emulation.
+- `director_harness.html` phone matrix: both root/manifest entry at six dimensions,
+  useful landscape scene size, >=64px controls, safe-area arithmetic, hit tests,
+  one drawing rail and state preservation. First run the identical oracle against
+  the retained published baseline; record a red control before candidate acceptance.

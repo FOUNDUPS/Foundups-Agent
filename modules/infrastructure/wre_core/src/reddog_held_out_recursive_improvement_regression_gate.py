@@ -18,6 +18,8 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional
 
 from modules.infrastructure.wre_core.src.reddog_verified_outcome_ratchet import (
     OUTCOME_RATCHET_RECORDED,
+    _redact_receipt_labels,
+    _scope_matches,
 )
 from modules.infrastructure.wre_core.src.wre_autonomous_slice_verifier_runtime import (
     AUTONOMOUS_SLICE_VERIFIER_ACCEPT,
@@ -155,10 +157,7 @@ def _is_head_sha(value: Any) -> bool:
 
 
 def _int(value: Any) -> int:
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return 0
+    return value if type(value) is int and value >= 0 else 0
 
 
 def _contains_secret(value: Any) -> bool:
@@ -176,13 +175,21 @@ def _verification_accepted(verification_result: Mapping[str, Any]) -> bool:
     )
 
 
-def _ratchet_recorded_without_pattern_memory(ratchet_result: Mapping[str, Any]) -> bool:
+def _ratchet_recorded_without_pattern_memory(
+    ratchet_result: Mapping[str, Any], verification_result: Mapping[str, Any],
+    scope: Mapping[str, Any],
+) -> bool:
     receipt = _mapping(ratchet_result.get("receipt"))
     return (
         ratchet_result.get("accepted") is True
         and ratchet_result.get("decision") == OUTCOME_RATCHET_RECORDED
         and bool(str(receipt.get("ratchet_id") or ""))
-        and receipt.get("pattern_memory_write_performed") is not True
+        and receipt.get("outcome_status") == "accepted"
+        and receipt.get("pattern_memory_eligible") is True
+        and receipt.get("pattern_memory_write_performed") is False
+        and _scope_matches(receipt, scope)
+        and receipt.get("verifier_receipt_id") == _mapping(verification_result.get("receipt")).get("receipt_id")
+        and receipt.get("verification_digest") == _digest(verification_result)
     )
 
 
@@ -261,7 +268,11 @@ def _held_out_suite_ok(
     ):
         reasons.append(FAIL_AUTHOR_GENERATED_SUITE)
 
-    if suite.get("passed") is not True or _int(suite.get("failure_count")) != 0:
+    if (
+        suite.get("passed") is not True
+        or type(suite.get("failure_count")) is not int
+        or suite["failure_count"] != 0
+    ):
         reasons.append(FAIL_REGRESSION_FAILED)
 
     if (
@@ -327,9 +338,10 @@ def evaluate_held_out_recursive_improvement_regression_gate(
         reasons.append(FAIL_REQUIRED_FIELD)
     if not _job_is_pending_dry_run(improvement_job):
         reasons.append(FAIL_IMPROVEMENT_JOB_NOT_DRY_RUN_PENDING)
-    if not _verification_accepted(verification_result):
+    scope = {"work_order_id": work_order_id, "slice_name": slice_name}
+    if not _verification_accepted(verification_result) or not _scope_matches(verification_receipt, scope):
         reasons.append(FAIL_VERIFICATION_RECEIPT)
-    if not _ratchet_recorded_without_pattern_memory(ratchet_result):
+    if not _ratchet_recorded_without_pattern_memory(ratchet_result, verification_result, scope):
         reasons.append(FAIL_RATCHET_RECEIPT)
     if ratchet_receipt.get("pattern_memory_write_performed") is True:
         reasons.append(FAIL_PATTERN_MEMORY_ALREADY_WRITTEN)
@@ -347,19 +359,19 @@ def evaluate_held_out_recursive_improvement_regression_gate(
         reasons.append(FAIL_HOLOINDEX_EVIDENCE)
     if not runtime_binding_ok:
         reasons.append(FAIL_MODEL_RUNTIME_BINDING)
-    if _contains_secret(
-        {
-            "improvement_job": improvement_job,
-            "held_out_regression": held_out_suite,
-            "holoindex_evidence": holoindex_evidence,
-        }
-    ):
+    if _contains_secret(req):
         reasons.append(FAIL_SECRET_IN_EVIDENCE)
 
     deduped = _dedupe(reasons)
     accepted = not deduped
     pattern_allowed = accepted and pattern_requested
     seed = {
+        "identity_version": 2,
+        "evidence_digest": _digest({
+            "improvement_job": improvement_job, "verification_result": verification_result,
+            "ratchet_result": ratchet_result, "held_out_regression": held_out_suite,
+            "holoindex_evidence": holoindex_evidence,
+        }),
         "work_order_id": work_order_id,
         "slice_name": slice_name,
         "improvement_job_id": improvement_job_id,
@@ -401,6 +413,8 @@ def evaluate_held_out_recursive_improvement_regression_gate(
         pattern_memory_admission_allowed=pattern_allowed,
         rejection_reasons=deduped,
     )
+    if FAIL_SECRET_IN_EVIDENCE in deduped:
+        receipt = _redact_receipt_labels(receipt)
     return HeldOutRecursiveImprovementRegressionResult(
         decision=(
             HELD_OUT_RECURSIVE_IMPROVEMENT_REGRESSION_GATE_ACCEPT

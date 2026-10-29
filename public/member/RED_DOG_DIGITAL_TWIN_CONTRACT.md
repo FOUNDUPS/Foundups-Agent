@@ -1,24 +1,28 @@
 # Red Dog Digital Twin Contract
 
-**Version**: 1.1.0
+**Version**: 1.2.0
 **Status**: Active identity and surface contract; authenticated PFMall transport is specified, not implemented
-**Last updated**: 2026-08-28
+**Last updated**: 2026-09-05
 
 **Vision:** `docs/REDDOG_OUTCOME_VISION.md` defines the Red Dog north-star outcome. This contract defines current identity, authority, surface, and implementation truth; where the two differ, the difference is roadmap work rather than license to overstate current capability.
 
 ## 1. Canonical identity
 
-RedDog is the operator-facing name, product identity, persona, and conversation
-surface of 012's principal-scoped 0102 Digital Twin. RedDog does not contain a
-separate 0102 identity. RedDog services may host the runtime, and a
+RedDog is the lightweight, low-latency interaction, exchange, and attention
+surface through which 012 communicates with a principal-scoped 0102 Digital
+Twin. RedDog is not 0102. RedDog owns conversational immediacy and presentation;
+0102 owns deep cognition, retrieval, reasoning, and orchestration. They form
+one continuous relationship without becoming competing assistants or one
+identity. RedDog services may host the relationship's runtime, and a
 principal-scoped OpenClaw runtime may supervise admitted execution behind it.
-This preserves the original "personal OpenClaw agent" direction without
-claiming that the browser shell is the runtime or that one OpenClaw process
-owns the complete RedDog identity and policy.
+This preserves the original personal-agent direction without claiming that the
+browser shell is the runtime or that one OpenClaw process owns identity or
+policy.
 
 | Component | Canonical responsibility |
 |---|---|
-| RedDog / 0102 | Operator-facing Digital Twin product identity and the real-time reasoning/orchestration relationship, without sovereign or implicit effect authority. |
+| RedDog | Fast human-facing interaction, exchange, and attention surface; no deep-worker or effect authority. |
+| 0102 | Principal-scoped Digital Twin for deep cognition, reasoning, retrieval, and orchestration intent; no sovereign or implicit effect authority. |
 | RedDog services | Authenticated conversation, session, model, memory-adapter, transport, and receipt hosts. A service is not the complete RedDog identity. |
 | PFMall shell | Thin presentation client for RedDog. It may emit authenticated requests and display replies or receipts after the resident adapter exists. |
 | OpenClaw | Principal-scoped 0102 execution/runtime layer, channel gateway, and work supervisor behind RedDog. It does not independently widen RedDog policy or effect authority. |
@@ -56,7 +60,7 @@ PFMall / phone / VSIX thin clients
               |
               | authenticated request + session/event id
               v
-Resident RedDog / 0102 conversation services
+Resident RedDog surface + 0102 cognition services
               |
               | proposal-only boundary
               v
@@ -130,7 +134,7 @@ and acceptance gates.
 
 ## 7. Surface requirements
 
-- Mall and FoundUp entry reuse one RedDog identity and conversation session.
+- Mall and FoundUp entry reuse one RedDog surface and one principal-scoped conversation relationship.
 - Reconnects resume only from server-authoritative event order; the browser
   cannot invent or reorder acknowledged work.
 - Replies distinguish chat, research evidence, proposal, authorization state,
@@ -139,7 +143,8 @@ and acceptance gates.
   RedDog capability as unavailable; it never silently falls back to browser
   authority.
 - OpenClaw and Hermes implementation names may appear in audit details, while
-  the continuous product/persona presented to 012 remains RedDog/0102.
+  RedDog remains the continuous fast surface and 0102 remains the deep Digital
+  Twin behind it.
 
 ## 8. Phase gates
 

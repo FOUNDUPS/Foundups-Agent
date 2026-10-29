@@ -1,8 +1,39 @@
 # RedDog Roadmap
 
+## Current PAL reconciliation — PR1638
+
+WSP15: C4/I4/D3/Impact4 = 15/P1. The existing local activity-ledger proposal is
+integrated locally with main `4169b051` at source checkpoint `8a88810d7`.
+Fresh Node24.22.1 focused, fast-tier and package checks pass; independent review
+and hosted convergence remain pending. It is not a second memory store or an
+RSI completion claim. Scope: key initialization/recovery rejection, authenticated
+append, cooperating-process serialization, truthful write/context receipts,
+and the existing command/package closure. Canonical detail and measured results
+belong in [the existing integration receipt](docs/PRINCIPAL_ACTIVITY_LEDGER_INTEGRATION_RECEIPT.md).
+
+Local source/behavior review is complete: 13 independent adversarial probes,
+18 fast-tier members and the actual package/archive path pass within their
+documented scopes. Remaining publication gates: fresh remote main/owner,
+exact-head hosted checks and squash/readback. Before installed promotion:
+VS Code/profile SecretStorage and filesystem qualification. Cross-root key sharing, automatic
+stale-lock recovery, anti-rollback anchoring and multi-device sync are not proved
+by the local candidate. Existing blockchain/PF Mall and native RSI lanes retain
+their ownership. Historical version/release claims below keep their original
+scope.
+
 ## Status
 
-Phase: RedDog 0.4.139 resident architect thin-client surface.
+Phase: RedDog 0.4.141 held builder-child identity rebind candidate.
+
+0.4.141 first binds the corrected architecture: foreground RedDog is the
+lightweight interaction/exchange surface, while 0102 remains the deep Digital
+Twin, architect, and orchestration layer behind it. It preserves the 0.4.140
+one-shot held-executable builder child and its suspended, Job-contained,
+O:-runtime proof as bounded path-free evidence rather than the private builder
+capability. No extension, Git, owner, route, maintenance, activation, or
+execution authority is added. The prior 0.4.140 builder release evidence
+remains exact-commit history; fresh 0.4.141
+release, VSIX, and post-merge evidence remain mandatory promotion gates.
 
 0.4.139 retains exact-task post-merge execution, receipt-bound owner
 reacquisition, phase-aware liveness, repeatable supervisor release, and
@@ -95,6 +126,12 @@ Current implementation:
   presentation-only.
 - [ ] Durable personalized memory, voice, automatic async critic dispatch, and
   promotion-to-execution binding; each remains separately gated.
+- [x] RedDog Lick non-biometric PoC: explicit session consent, guest/display-name
+  claims, one-use continuity challenge, provisional encounter profile,
+  expiry/withdrawal, AutoPost capture linkage, and a non-authoritative
+  `LickReceipt`. Not deployed; possession proof, change detection, corrections,
+  and deletion-tombstone UI remain before any biometric evaluation. AutoPost
+  does not decide identity. See `docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md`.
 
 - Governed Holo resident binding (implemented / exact-main live acceptance passed): the VSIX one-shot and canonical
   resident/OpenClaw read-only worker now use the same verified replica resolver
@@ -356,17 +393,28 @@ Current implementation:
 
 ## Architecture Direction
 
-This extension is the IDE-side RedDog thin client. RedDog/0102 is the continuous principal-scoped identity; resident services host conversation/model state while OpenClaw supervises admitted work, WRE retains execution authority, and Hermes receives bounded leaf jobs.
+This extension is the IDE-side RedDog thin client. RedDog is the lightweight
+fast interaction/exchange surface; 0102 is the principal-scoped Digital Twin
+and deep cognition/orchestration layer behind it. Resident services host
+conversation/model state while OpenClaw supervises admitted work, WRE retains
+execution authority, and Hermes receives bounded leaf jobs.
 
-RedDog is the resident FoundUps architect identity and conversation product across thin-client surfaces. Fusion is one internal reasoning mode; authority-bearing work remains in the signed OpenClaw/WRE/Hermes worker path.
+RedDog is the continuous conversation and attention surface across thin
+clients. 0102 is the resident FoundUps architect and deep reasoning layer.
+Fusion is one internal reasoning mode; authority-bearing work remains in the
+signed OpenClaw/WRE/Hermes worker path.
 
 ### RedDog and the Recursive 0102 DAE Ecosystem
 
-012 does not orchestrate every worker. 012 talks to RedDog. RedDog participates in the recursive 0102 DAE ecosystem. Autonomous WRE/DAE agents perform bounded work under OpenClaw supervision and WRE authority; Hermes receives bounded leaf jobs.
+012 does not orchestrate every worker. 012 talks to RedDog; RedDog exchanges
+bounded intent and context with 0102. The deeper 0102 layer participates in the
+recursive DAE ecosystem. Autonomous WRE/DAE agents perform bounded work under
+OpenClaw supervision and WRE authority; Hermes receives bounded leaf jobs.
 
 ```text
 012 work focus
-  -> RedDog digital twin / architect interface
+  -> RedDog fast interaction / exchange surface
+  -> 0102 digital twin / architect layer
   -> recursive 0102 DAE ecosystem
   -> OpenClaw policy / control supervision
   -> WRE execution authority -> Hermes bounded leaf jobs

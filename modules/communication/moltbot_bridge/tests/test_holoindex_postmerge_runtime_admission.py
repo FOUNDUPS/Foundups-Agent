@@ -69,13 +69,14 @@ def test_missing_runtime_dependencies_reject_before_task_coordination(
         controller, "classify_verified_owner_result",
         lambda *_args, **_kwargs: "INVALID",
     )
-    head, task_id, authority_digest, terminal = controller._admit_or_coordinate(
+    head, task_id, authority_digest, incident_id, terminal = controller._admit_or_coordinate(
         root=tmp_path, query="runtime closure", git_runner=_git,
         query_runner=lambda *_args, **_kwargs: {"ok": False},
         select_authority=lambda root: SimpleNamespace(accepted=True),
         coordinator=coordinator, runtime_preflight=lambda: False,
     )
     assert head == HEAD and task_id == "" and authority_digest == ""
+    assert incident_id == ""
     assert terminal is not None
     assert terminal.rejection_reasons == ("runtime_dependencies_unavailable",)
     coordinator.assert_not_called()

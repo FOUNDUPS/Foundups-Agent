@@ -44,3 +44,12 @@ Chat Command → game_manager.py → chess/checkers_engine.py
 ## Dependencies
 
 - `python-chess` - Chess move validation and game logic
+
+## Reusable interaction review
+
+Use EDUIT's candidate [interactive experience review Skillz](../../foundups/eduit/skillz/interactive_experience_review/SKILLz.md)
+for audience, layout, timing, scoring and lifecycle audits of game/web interfaces.
+It retains failures and independent evidence through existing WRE boundaries;
+it is not a production worker or a proven cross-game improvement. Storytime's
+browser engine remains EDUIT-owned; this module's chat chess/checkers manager
+is not a replacement for it. Forward-test the candidate on the next real task.

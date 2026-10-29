@@ -1,5 +1,68 @@
 # foundups_mcp_bridge Tests
 
+## MCP runtime compatibility
+
+The `mcp-runtime-compatibility` Windows CI job selects the existing launcher,
+HTTP server and query-candidate-binding suites. It installs the module's exact
+quartet in a disposable venv, supplies private HOME/TEMP, and requires every
+selected case to pass without skips. The existing directory-alias helper can
+use a junction when Windows symlink privilege is unavailable; that tests the
+same rejected reparse boundary, not symlink privilege itself.
+
+For the two live cases, `FOUNDUPS_MCP_TEST_PYTHON` must identify the disposable
+candidate interpreter. The fixture substitutes only the shared instance-lock
+acquisition and interpreter selection. Real capability, server, authentication
+and MCP readiness checks still execute. An ephemeral loopback endpoint must
+be observed as owned by the captured child PID before requests. This is a
+sampled ownership check, not a race-free socket lease. The fixed System32
+`netstat.exe -ano -p tcp` observer projects only exact numeric loopback listener
+PIDs; raw endpoint tables are not persisted. Its15s observation window precedes
+the protocol canary, with each command capped at10s or remaining time. The finalizer observes
+lock release and reaps only captured children; emergency cleanup fails the test.
+No production singleton cleanup, public tunnel, OAuth flow, active-runtime
+upgrade, native WRE admission or generalized RSI gain follows from these tests.
+
+## Optional child Job memory contract (2026-10-02)
+
+The existing `test_reddog_bounded_child_process.py` retains its original 22
+cases. The new frozen selection has 29 deterministic cases for exact types,
+platform rejection before effects, aggregate flags/value, default call shape,
+forwarding, and failure cleanup/order. Candidate selection combines these with
+19 original no-child cases. Two separately selected Windows cases query the
+actual 128 MiB Job limit before requesting a 1 MiB successful allocation or a
+256 MiB rejected commit; they free any acquired allocation and use 10-second
+child deadlines. They do not empirically test cumulative descendant allocation.
+The physical fixture reuses the OS-observed process image rather than the venv
+redirector, whose nested Job confused the original configuration query.
+Local results: 48 deterministic + two memory + four legacy/maintenance process
+cases + eight manifest checks = 62 distinct passes across separate selections.
+The overflow tests require complete bounded capture, not zero exit after an
+intentional overflow kill. Failed attempts and that oracle correction remain
+in `TestModLog.md`; publication/hosted CI are pending. No model, provider,
+operational store, or production service is selected.
+
+## Held builder child evidence (2026-08-30 historical)
+
+- `test_reddog_bounded_child_process.py` preserves bounded output, timeout,
+  process-tree cleanup, and no-shell/no-unbounded-read behavior after extracting
+  the maintenance runner.
+- `test_reddog_holoindex_query_runtime_builder_child.py` falsifies forged
+  bindings, wrong process identity, ambiguous/noncanonical JSON, protected-root
+  aliasing, ambient environment/path inheritance, and authority inflation.
+- The opt-in Windows integration composes the reviewed packaging wheel with the
+  qualified O:-materialized CPython 3.12.10 base, launches that exact held
+  interpreter, and proves the descriptor unchanged afterward. It proves no
+  current-patch, pre-import/native/subprocess, write-denial, activation,
+  A-grade, or RSI claim.
+- Focused runner unit boundary is 22/22. The physical runner/maintenance/
+  process-image/child matrix is 70 passed / two capability skips in 108.06
+  seconds and includes the qualified physical Windows child.
+  Both the clean source and materialized runtime retain zero pycache directories
+  and pyc files afterward.
+- The complete bridge macro is 1,694 passed / 23 capability skips in 638.81
+  seconds. It includes an explicit health-JSON depth boundary that remains
+  fail-closed after the process recursion limit is raised.
+
 ## Base-prefix consumer correction
 
 - `test_reddog_holoindex_query_runtime_base_prefix_consumers.py` uses the
@@ -617,7 +680,10 @@ Exact opt-in evidence on this slice:
 - Fake HTTP RED was ready under duplicate-`ok` last-wins. Expanded RED/GREEN is
   **24 failed / 10 passed -> 34/34** across all 19 security-relevant key
   positions, nested duplicates, NaN/infinities, depth 64/2,000, primitives,
-  syntax, UTF-8, oversize/status failures, and one unique JSON control.
+  syntax, UTF-8, oversize/status failures, and one unique JSON control. The
+  2,000-level falsifier raises the process recursion limit first and still fails
+  closed at the explicit 128-level structural boundary; brackets inside JSON
+  strings do not consume depth.
 - Invalid representations never produce ready/terminal evidence. Each admitted
   transport performs the same request, read limit 65,537, and single close.
 - Combined R16-R22 is **200/200**; lifecycle is **302 passed / 1 host skip**;
@@ -792,9 +858,9 @@ the disposable process fixture.
   replica-root configuration, existing isolated-store proof, exact route build,
   and stable fail-closed error reduction.
 - `test_reddog_holoindex_maintenance_diagnostics.py`: bounded child-output
-  capture, strict stable-error propagation, cooperative descendant containment,
-  failed-`taskkill`/escaped-session limits, exact-PID test cleanup, and secret-free
-  failure behavior.
+  capture, strict stable-error propagation, Windows kill-on-close Job Object
+  containment with no external cleanup executable, POSIX escaped-session
+  limits, exact-PID test cleanup, and secret-free failure behavior.
 - `test_reddog_holoindex_acceptance_guards.py`: clean worktree authority,
   distinct clean related dependency runtime with verified local site-packages,
   disjoint/reparse-safe store, TOCTOU identity, canonical digest, and immutable

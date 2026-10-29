@@ -1,5 +1,9 @@
 # Video Indexer Module
 
+Japanese audio uses the existing `AudioAnalyzer(language="ja")`; automatic
+detection is the default for multilingual models; omitted language remains English
+for `.en` models. See [language evidence in the interface](INTERFACE.md#audioanalyzer).
+
 **WSP Compliance**: WSP 49 (Module Structure), WSP 3 (Domain Organization), WSP 72 (Independence)
 
 ## Purpose
@@ -8,11 +12,15 @@ Comprehensive video content indexing for 012's YouTube channels (FoundUps, UnDao
 
 Ask-Gemini browser indexing now persists JSON artifacts for continuity across pipelines.
 
-## Utility Routing (POC)
+## Utility Routing
 
 Index outputs are used to route downstream behavior:
-- 012 voice content → Digital Twin memory and response training
+- Gemini/Ask Studio summaries → searchable Digital Twin memory
+- YouTube/Whisper verbatim transcripts → response/weight-training datasets
 - music/video content → RavingANTIFA or faceless-video pipeline (module in development)
+
+Gemini summaries are explicitly marked `training_eligible: false`; they must
+not be treated as words 012 actually spoke.
 
 ## Architecture
 
@@ -88,6 +96,19 @@ HoloIndex ChromaDB (holo_index/chroma_store/)
 ```
 
 ## Quick Start
+
+Attach authenticated Chrome (port 9222) and Edge (port 9223) sessions, then run
+one resumable batch across the three primary channels:
+
+```bash
+python -m modules.ai_intelligence.video_indexer.cli --portfolio --batch-size 10
+python -m modules.ai_intelligence.video_indexer.cli --status
+```
+
+Each rerun skips valid existing manifests and advances to the next visible
+unindexed videos. Use `--reindex` only for an intentional rebuild.
+
+The Python orchestration API remains available:
 
 ```python
 from modules.ai_intelligence.video_indexer.src.video_indexer import VideoIndexer

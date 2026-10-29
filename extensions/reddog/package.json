@@ -1,8 +1,8 @@
 {
   "name": "reddog",
-  "displayName": "RedDog - FoundUps Architect",
-  "description": "Open the RedDog resident 0102 architect thin client for FoundUps.",
-  "version": "0.4.139",
+  "displayName": "RedDog - FoundUps Interface",
+  "description": "Open the lightweight RedDog interaction surface backed by governed 0102 cognition.",
+  "version": "0.4.141",
   "publisher": "foundups",
   "icon": "icon.png",
   "engines": {
@@ -25,7 +25,10 @@
     "onCommand:reddog.setConversationSessionCredential",
     "onCommand:reddog.clearConversationSessionCredential",
     "onCommand:reddog.setPrincipalMemexDisclosure",
-    "onCommand:reddog.clearPrincipalMemexDisclosure"
+    "onCommand:reddog.clearPrincipalMemexDisclosure",
+    "onCommand:reddog.capturePrincipalActivity",
+    "onCommand:reddog.showPrincipalActivityContext",
+    "onCommand:reddog.principalActivityStatus"
   ],
   "main": "./extension.js",
   "scripts": {
@@ -68,6 +71,21 @@
         "command": "reddog.clearPrincipalMemexDisclosure",
         "title": "Clear Principal Memex Disclosure",
         "category": "RedDog"
+      },
+      {
+        "command": "reddog.capturePrincipalActivity",
+        "title": "Capture Principal Activity (Local)",
+        "category": "RedDog"
+      },
+      {
+        "command": "reddog.showPrincipalActivityContext",
+        "title": "Show Principal Activity Context (Local)",
+        "category": "RedDog"
+      },
+      {
+        "command": "reddog.principalActivityStatus",
+        "title": "Principal Activity Status (Local)",
+        "category": "RedDog"
       }
     ],
     "menus": {
@@ -89,6 +107,15 @@
         },
         {
           "command": "reddog.clearPrincipalMemexDisclosure"
+        },
+        {
+          "command": "reddog.capturePrincipalActivity"
+        },
+        {
+          "command": "reddog.showPrincipalActivityContext"
+        },
+        {
+          "command": "reddog.principalActivityStatus"
         }
       ],
       "editor/title": [

@@ -1,4 +1,106 @@
+## PR1792 reusable brand core selection — 2026-10-25
+
+Run `node extensions/reddog/tests/test_foundup_work_grounding.js` and the existing
+package-manifest/surface scripts explicitly; the current Node fast tier does
+not discover this grounding suite. Grounding tests snapshot public registry
+entities into owned fixtures rather than treating a dirty checkout as clean.
+They retain existing generic/unknown-reference, scope and integrity assertions,
+then exercise synthetic child identity, Japanese aliases, dirty/missing evidence,
+private-path preread denial, junction/symlink and hard-link rejection.
+
+The existing Python target-verifier suite invokes the actual Node producer;
+provide Node on PATH or `REDDOG_TEST_NODE`. Missing Node is a failure, not a skip.
+Backend/schema selection currently contains 74 cases. Qualification receipts
+bind exact case identities, normal imports and effect guards. Package surface
+also checks the Git index and must be run after the owner stages the candidate.
+No protected brand activation or deployed-host result is implied.
+
+## Issuer composition closure count — 2026-10-16
+
+`node extensions/reddog/tests/test_backend_compatibility_contract.js` reproduced
+the generated1428-member manifest versus stale1426-member consumer cap. The
+updated boundary accepts1428 and rejects1429; digest, paths, hashes and byte
+limits remain enforced. CI now invokes this contract before existing preflight.
+Membership adds only the root request-role and extracted startup dependency owners.
+This verifies repository compatibility, not installed extension/runtime state.
+
+## Effect approval closure count — PR2090, 2026-10-07
+
+Backend runtime closure1419→1421 adds exactly `reddog_effect_consensus_proof.py`
+and `reddog_current_effect_signing_authority.py`, removes none. The existing
+compatibility cap and boundary regression now accept1421/reject1422, and require
+both named additions. Digest remainsbc84374ad861c79d9b51c79964722916a7f6b0e336a2356909fe486923e0259d;
+byte limits, allowlists and signatures are unchanged. No service/extension install.
+
+CI37507545251 passed signing677/3skip and startup248, then exposed the stale1419
+extension boundary. Local full fast tier15 members passed in9468ms after restoring
+required LF to changed JS files. Independent two-file review found no blocker;
+receipt `effect-signing-extension-count-review.json`, SHA256
+`d09b48a349f4016dd964ab0bae45440661c4e86dc2f4a0e9c74e3e60846b6bb4`.
+WSP00/6/15/22/50/84/97. New-head hosted checks pending; no native RSI claim.
+
 # RedDog Extension Tests
+
+## PR1638 local activity-ledger reconciliation
+
+Current scope and results: [integration receipt](../docs/PRINCIPAL_ACTIVITY_LEDGER_INTEGRATION_RECEIPT.md)
+and the PR1638 entry in `TestModLog.md`. Existing ledger/adapter suites now cover
+key concurrency/loss, authenticated append, partial I/O and cleanup, cooperating
+child-process locking, strict JSON, latest commitment status, and truthful
+bounded projections using temporary data and fake SecretStorage. Registration
+remains a static contract; real installed-host operation is unqualified.
+
+The fast tier has 18 members, including the three PAL tests. The package contract
+has 69 files (68 LF text, one binary) under its unchanged one MiB cap. Historical
+67-file release receipts below keep their original source scope. The focused
+Linux/Windows CI job is configured; hosted results require new-head execution.
+
+## 0.4.141 identity / merged builder reconciliation candidate
+
+- The fast-RedDog/deep-0102 identity boundary is applied above the already
+  merged `0.4.140` builder release and first lands in `0.4.141`.
+- Backend compatibility binds 1,398 files at `700d50f84e12...86e09ed`.
+  Focused runner and physical child tests cover suspended Job containment,
+  fixed O:/E: roots, bounded canonical JSON, and explicit authority nonclaims.
+- `.gitignore` and `ARCHITECTURE.md` retain their merged `.vscodeignore`
+  exclusions and exact package-surface regression order.
+- Focused identity, conversation, shard, Holo incident, tiering, and manifest
+  checks pass. The authenticated contract is 18 shards / 6,942 lines / 492
+  assertions at `sha256:10b5118a5c9c...e32ad247`; the canonical registry is
+  current at 1,641 tests / 269 quarantined.
+- The deterministic thin package is 67 files / 950,193 bytes at
+  `sha256:cb6e5d4bb38d...15b281b8`, below the one MiB cap.
+- Exact 0.4.140 full-release and VSIX results remain historical. This 0.4.141
+  candidate must produce its own aggregate release, package, archive, and
+  exact-main evidence before promotion.
+
+## 0.4.140 held builder child evidence release
+
+- Backend compatibility advances to the 1,398-file closure at
+  `700d50f84e12...86e09ed`. The child is backend evidence only; no extension
+  command or runtime caller is added.
+- Focused Python tests cover the shared bounded runner and strict child
+  evidence. The physical Windows gate launches the exact qualified O: runtime
+  and repeats complete composition verification around it.
+- The conversation tier honors `REDDOG_TEST_PYTHON`, suppresses user-site
+  discovery, erases every case-insensitive ambient `PYTHON*` and `PYTEST*`
+  control before setting its exact six-key test contract, and admits only validated
+  O:/E: interpreter, dependency, repository, and temporary roots.
+- Runner unit evidence is 22/22. Focused physical runner/maintenance/
+  process-image/child evidence is 70 passed / two capability skips in 108.06
+  seconds and includes the qualified physical Windows child.
+- Backend generator passes eight and the registry is current at 1,640 / 269.
+  Conversation passes 32 Python tests and 15 shared JS vectors. Complete bridge
+  replay is 1,694 passed / 23 capability skips in 638.81 seconds, including the
+  recursion-limit-independent 128-level health JSON gate. Final release is four
+  groups PASS in 214.279 seconds; the package is 67 files / 948,410 bytes. The
+  inspected VSIX identity and all exact digests are retained in the external
+  WSP_97 receipt rather than self-referenced inside the package.
+  Archive inspection requires zero duplicate, collision, encryption, symlink,
+  unsafe-path, sensitive-name, source-byte-mismatch, or credential-value-pattern
+  findings. No test grants
+  producer, pre-import/native/subprocess, write-denial, route, owner,
+  activation, A-grade, or retrieval-RSI authority.
 
 ## 0.4.139 declared Windows/CPython ABI evidence release
 
@@ -585,6 +687,15 @@ npm run test:conversation   # shared Python/JavaScript conversation vectors
 npm run test:contract       # plan and shard authentication
 npm run test:release        # exact exhaustive promotion closure
 ```
+
+On Windows, the conversation runner resolves the primary checkout through the
+current worktree's Git common directory, then validates and uses that checkout's
+`.venv\\Scripts\\python.exe` and `.venv\\Lib\\site-packages`. This keeps the
+canonical commands usable from linked task worktrees without creating a local
+venv or accepting ambient/user-site Python. `REDDOG_TEST_PYTHON` and
+`REDDOG_TEST_SITE_PACKAGES` remain explicit absolute O:/E: overrides. Temporary
+artifacts use the task worktree's ignored `.tmp\\reddog-tests` by default;
+`REDDOG_TEST_TEMP` may select another existing absolute O:/E: directory.
 
 The release command is the legacy `node tests/verify_extension_contract.js`
 entry. It authenticates the 18-shard aggregate and exactly seven committed-

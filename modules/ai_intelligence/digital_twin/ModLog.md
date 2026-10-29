@@ -2,6 +2,34 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## 2026-10-18 - Bounded AntifaFM station reply drafts
+
+- Added `CommentDrafter.for_station()` and `draft_station_reply()` using the
+  configured local Qwen runtime without human voice memory or legacy prompts.
+- Added strict system/user chat separation, JSON decision validation, caller
+  source bindings, a 2,400-character context cap, and a 280-character draft cap.
+  Eligible drafts answer listener-initiated station/music questions or feedback
+  and disclose 0102 as an AI agent for UnDaoDu. Political persuasion, abuse, and
+  unrelated intents are skipped; the policy requires review for missing facts.
+- Missing models, mock mode, and generation/validation failures return review
+  with no reply. The station path has no mock/template fallback or tools.
+  Results always include `no_publication_performed=True`; legacy
+  `no_execution_performed=True` denotes no external action, not no inference.
+- Preserved ordinary `draft()` and `LocalLLM.generate()` behavior. Guarded real
+  package import found no legacy constructors or external actions; no Digital
+  Twin package initialization change was needed.
+- Validation: 39 focused offline tests passed, including the existing three
+  drafter tests and exact 280/281-character boundary cases. Fixture-generated
+  JSON verifies contract handling, not actual local-model semantic quality.
+  No live model inference or publication was performed. See `tests/TestModLog.md`.
+
+## 2026-09-05 - RedDog surface / 0102 Digital Twin boundary correction
+
+- Corrected the active module contract: RedDog is the fast interaction and
+  attention surface; 0102 is the principal-scoped Digital Twin and deep
+  cognition/orchestration layer behind it. The Principal Memex and all effect
+  authority boundaries remain unchanged. (WSP 22/50/73/97)
+
 ## 2026-08-26 - Durable resident first-TURN resolution alignment
 
 - Aligned current Digital Twin truth with the implemented explicit v2 journal
