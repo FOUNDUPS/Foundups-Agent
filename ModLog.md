@@ -1,3 +1,21 @@
+## 2026-10-29 — Cryptographic claims correction allocation
+
+Before applying the separate WSP26 correction patch: WSP15 C1/I4/D4/Impact4=13/P1.
+Limit six existing paths: this log, NAVIGATION, both numbered WSP26 copies,
+the existing FX venue research document and WSP_framework/ModLog. Correct
+security facts and synchronize mirrors; preserve economic/vision choices.
+Cap110 added Markdown lines and one NAV value; no runtime logic, dependency,
+crypto implementation, financial policy, signature or provider effect.
+Require source/mirror/NAV/link/scope readback and fresh publication checks.
+Base:362b4c62a665bd6c594904e39d974a7187a12649; external proposal remains unexecuted.
+
+Applied the separately reviewed correction after allocation. Root rechecked
+current Algorand account/SDK and NIST final sources; no future-break forecast or
+blanket token-safety claim remains in section4.11. Direct source retrieval owns
+the evidence: lexical-only Holo returned UNKNOWN/gap with no semantic query;
+no reindex or CURRENT claim. Framework/knowledge mirror and NAV data-only
+validation are required before publication. This changes no economic policy.
+
 ## 2026-10-29 — F4a enforcement, interface preservation and F3 cache repair
 
 Policy #2258 merged at ade6bca85470159bef0e447353e9c0b91628a704, preserving
