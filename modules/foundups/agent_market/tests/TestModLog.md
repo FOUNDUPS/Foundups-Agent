@@ -1,5 +1,18 @@
 # TestModLog - tests
 
+## 2026-10-29 — Freeze exact quantity and pre-effect launch acceptance
+
+Allocation17/P0 precedes tests/product. Unchanged schema/orchestrator baseline:
+53 passed, no failures/errors/skips; source hashes stable in external chain-
+security quantity-regression/baseline. Reuse those two owners and all old oracles.
+Add eight model-field matrices for bool, ambiguous numeric/coercible values and
+a negative int subclass with deceptive comparisons; preserve exact built-in
+minimum/next-integer boundaries. Launch refusal must occur before any registry,
+token, repository or task adapter call, retaining the existing failed-result
+and local audit event. Freeze desired tests before changing product sources.
+Domain-schema coverage does not qualify separate compute dictionary/ORM ingress,
+asset units, funded caps, controller independence, signing or chain settlement.
+
 ## 2026-10-25 — P0B explicit authority and independent stored proof
 
 - Baseline: 292 connected FAM/lifecycle cases passed before test/product edits.
