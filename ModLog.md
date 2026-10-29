@@ -21,7 +21,8 @@ WSP 3/5/11/22/49/50/60/84/87/90/97; see the active slice ledger.
 
 PR2270's first secret scan flags one role-description sentence in the social
 utility contract. Checksum-verified Gitleaks reproduces the exact finding. Add
-one content-bound prose review and evidence note, preserving 2744 prior bindings
+one content-bound prose review and evidence note, preserving all 2822 bindings
+from main addd00534 after the concurrent YouTube merge and guarded rebase,
 and all scanner rules. This adds two security review paths to the documentation
 slice; fresh hosted tree/history acceptance remains required. WSP 71/97.
 

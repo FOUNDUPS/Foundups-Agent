@@ -8,8 +8,9 @@ source sentence; no independent reviewer is claimed.
 
 Add one path/full-blob/rule/line binding for content SHA256 `645e52ae93f6ec94574910f39f53f0be02ae414d4264f2c4091d0acaf68154e6`:
 `ca6719b3aa2e590fd96d7698c5b5f952252be0a4e7fbc4d25d661552c171e67b`. The same blob occurs in introduced commit
-`10da6d5d7f1c42fa153c1160849f03b312c71c0c`, so this exact review covers its tree and
-history finding. Preserve all 2744 previous bindings. Scanner rules,
+`26fb18732` after rebasing onto main `addd00534`; the reviewed blob is unchanged,
+so this exact review covers its tree and history finding. Preserve all 2822
+bindings from that main, including the concurrent YouTube review entries. Scanner rules,
 scope, exclusions and fingerprint algorithms stay unchanged. Fresh final tree/history
 checks remain required; this review is not repository-wide security clearance.
 
