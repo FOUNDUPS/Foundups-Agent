@@ -249,3 +249,46 @@ body.focused .story-header,body.focused .story-line,body.focused .panel-label{vi
 @media(prefers-reduced-motion:reduce){.gentle-hint{animation:none}.storybook-page h2{transition:none}}
 
 #picture{overflow:auto}#close-picture{display:block;margin:12px 0 0 auto;position:sticky;bottom:0;min-width:64px;min-height:64px}
+
+/* 2026-10-29 child-first responsive storybook: nearly full-screen on phones. */
+@media (max-width: 600px) and (orientation: portrait) {
+ #story-intro.storybook-ready {
+  width: calc(var(--app-width) - 12px);
+  max-width: none;
+  height: calc(var(--app-height) - 12px - var(--safe-top) - var(--safe-bottom));
+  max-height: none;
+  margin: auto;
+  padding: clamp(12px,3vw,24px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+ }
+ #story-intro.storybook-ready .storybook-page {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+ }
+ #story-intro.storybook-ready .intro-illustration {
+  height: clamp(112px,24vh,230px);
+  font-size: clamp(80px,18vw,140px);
+ }
+ #story-intro.storybook-ready h2 {
+  font-size: clamp(48px,11vw,94px);
+  min-height: 0;
+  line-height: 1.08;
+  text-align: center;
+ }
+ #story-intro.storybook-ready .storybook-navigation { flex: 0 0 auto; }
+ #story-intro.storybook-ready .intro-actions { flex: 0 0 auto; }
+ /* Fill upper spare space with a modest landscape strip, not an enormous dirt field. */
+ .unit.expanded .scene-context {
+  height: min(100px, max(0px, calc((var(--scene-height) - min(var(--scene-height), (var(--app-width) - var(--pad-left) - var(--pad-right)) * .5625)) / 2)));
+ }
+}
+/* Tablet keeps its established 16:9 framing and does not inherit phone-only sizing. */
+@media (min-width: 601px) {
+ #story-intro.storybook-ready {width: min(88vw, 840px);}
+ #story-intro.storybook-ready h2 {font-size: clamp(48px, 6.5vw, 88px);}
+}
