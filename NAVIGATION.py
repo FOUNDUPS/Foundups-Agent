@@ -539,7 +539,7 @@ DAE_ARCHITECTURE = {
     "unsigned Algorand TestNet ASA probe packet codec": "modules/platform_integration/algorand/README.md",
     "unsigned ASA declared facts wire transaction ID contract": "modules/platform_integration/algorand/INTERFACE.md",
     "unsigned ASA guarded SDK qualification unit shard": "modules/platform_integration/algorand/tests/README.md",
-    "algorand quantum resistant falcon": "WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md - Section 4.11: Falcon-1024 NIST signatures, 10K TPS, State Proofs",
+    "algorand quantum resistant falcon": "WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md - Section 4.11: Falcon State Proofs and native PQ accounts; migration and consensus limits",
     "foundup token exit reverse conversion": "WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md - Section 3.7: FoundUp token→UPS costly (2-5% fee + decay resumes)",
     "no portfolio cap UPS is the cap": "WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md - Section 4.9: No artificial limit, stake wherever you have UPS",
     "subscription revenue BTC flywheel": "WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md - Section 4.9: Subscription→BTC reserve→backs UPS→self-reinforcing",

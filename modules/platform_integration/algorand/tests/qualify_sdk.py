@@ -24,6 +24,7 @@ from email.parser import BytesParser
 PREFIX = "modules.platform_integration.algorand"
 TEST = PREFIX + ".tests.test_unsigned_asa_probe"
 ADAPTER = Path(__file__).resolve()
+TEST_INVENTORY_SHA256 = "8dc3199b3e49348552bd871a9265842d11356986e2718241931c6aae2b5f03d7"
 
 def need(ok, reason):
     if not ok:
@@ -34,6 +35,13 @@ def sha(path):
 
 def save(path, value):
     Path(path).write_text(json.dumps(value, sort_keys=True, indent=2) + "\n", encoding="utf-8", newline="\n")
+
+def test_inventory(identifiers):
+    need(type(identifiers) is list and len(identifiers) == 52 and all(type(i) is str for i in identifiers), "test_inventory")
+    need(identifiers == sorted(identifiers) and len(set(identifiers)) == 52, "test_inventory")
+    digest = hashlib.sha256(json.dumps(identifiers, separators=(",", ":"), ensure_ascii=True).encode("ascii")).hexdigest()
+    need(digest == TEST_INVENTORY_SHA256, "test_inventory")
+    return dict(schema="asa-codec-tests-v2", count=52, ids_sha256=digest)
 
 def plain(path):
     path = Path(path).absolute()
@@ -135,8 +143,8 @@ def prepare(args):
     for relative in [*sources.values(), str(lock.relative_to(repo))]: files[str(plain(repo / relative))] = sha(repo / relative)
     for relative in namespaces.values(): need((repo / relative).is_dir() and not (repo / relative / "__init__.py").exists(), "namespace_shape")
     parsed = ast.parse((repo / sources[TEST]).read_bytes()); ids = sorted(TEST + "." + c.name + "." + f.name for c in parsed.body if isinstance(c, ast.ClassDef) for f in c.body if isinstance(f, ast.FunctionDef) and f.name.startswith("test_"))
-    need(len(ids) == 28, "test_inventory")
-    save(output, dict(schema="asa-codec-profile-v1", head=args.head, installation_profile=args.installation_profile, identity=ident, repo=str(repo), site=str(site), sources=sources, namespaces=namespaces, files=files, venv_baseline=baseline, test_ids=ids, metadata=metadata, archives=archives, lock_sha256=sha(lock), adapter_sha256=sha(ADAPTER), startup_limit="Python startup precedes these hooks; fixed controlled venv required. Installer-added RECORD/INSTALLER/scripts are not wheel-payload equality; non-site launchers/config have a distinct measured baseline."))
+    inventory = test_inventory(ids)
+    save(output, dict(schema="asa-codec-profile-v2", test_inventory=inventory, head=args.head, installation_profile=args.installation_profile, identity=ident, repo=str(repo), site=str(site), sources=sources, namespaces=namespaces, files=files, venv_baseline=baseline, test_ids=ids, metadata=metadata, archives=archives, lock_sha256=sha(lock), adapter_sha256=sha(ADAPTER), startup_limit="Python startup precedes these hooks; fixed controlled venv required. Installer-added RECORD/INSTALLER/scripts are not wheel-payload equality; non-site launchers/config have a distinct measured baseline."))
 
 class SourceGate(importlib.abc.MetaPathFinder, importlib.abc.Loader):
     def __init__(self, data, deny):
@@ -217,8 +225,11 @@ def install_guard(data, phase):
 def run(args):
     data = json.loads(Path(args.profile).read_text(encoding="utf-8")); authorization = json.loads(Path(args.release).read_text(encoding="utf-8"))
     phase = Path(args.phase).resolve(); repo = Path(data["repo"])
-    need(authorization == dict(status="RELEASED_FOR_CODEC_TESTS", profile_sha256=sha(args.profile), adapter_sha256=sha(ADAPTER), head=data["head"], phase=str(phase)), "release_binding")
-    need(data["schema"] == "asa-codec-profile-v1" and data["adapter_sha256"] == sha(ADAPTER) and identity() == data["identity"], "profile_binding")
+    inventory = test_inventory(data["test_ids"])
+    need(type(data["test_inventory"]) is dict and type(data["test_inventory"].get("count")) is int
+         and data["test_inventory"] == inventory, "test_inventory_descriptor")
+    need(authorization == dict(status="RELEASED_FOR_CODEC_TESTS_V2", profile_sha256=sha(args.profile), adapter_sha256=sha(ADAPTER), head=data["head"], phase=str(phase), test_inventory_sha256=TEST_INVENTORY_SHA256), "release_binding")
+    need(data["schema"] == "asa-codec-profile-v2" and data["adapter_sha256"] == sha(ADAPTER) and identity() == data["identity"], "profile_binding")
     need(ADAPTER == (repo / data["sources"][PREFIX + ".tests.qualify_sdk"]).resolve(), "adapter_real_path")
     need(repo not in phase.parents and not phase.exists(), "new_external_phase")
     need(all(Path(p).is_file() and sha(p) == digest for p, digest in data["files"].items()), "frozen_file_drift")
@@ -231,7 +242,7 @@ def run(args):
     for name in ("TEMP", "TMP", "HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA"): os.environ[name] = str(phase)
     tempfile.tempdir = str(phase)
     guard = install_guard(data, phase); state = guard.foundups_guard
-    receipt = dict(status="FAILED", stage="test_import", profile_sha256=sha(args.profile), installation_profile=data["installation_profile"], attempts=state["attempts"], cases=[], diagnostics=[], diagnostic_overflow=0, limitation="Python hooks, not OS/native isolation; startup is separate from guarded execution.")
+    receipt = dict(status="FAILED", stage="test_import", test_inventory=inventory, profile_sha256=sha(args.profile), installation_profile=data["installation_profile"], attempts=state["attempts"], cases=[], diagnostics=[], diagnostic_overflow=0, limitation="Python hooks, not OS/native isolation; startup is separate from guarded execution.")
     try:
         suite = unittest.defaultTestLoader.loadTestsFromName(TEST)
         def ids(group): return [identifier for item in group for identifier in (ids(item) if isinstance(item, unittest.TestSuite) else [item.id()])]
