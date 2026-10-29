@@ -1,3 +1,20 @@
+## 2026-10-29 — F4a policy groundwork and F1 main acceptance
+
+F1 #2257 merged at `f304ba799f8fa835f0b5127efabe9e724315e3c8` after 25 passing
+PR checks; all six observed source workflows on that resulting main passed.
+Governed Holo maintenance completed and stopped both owned runtimes. A fresh
+task-checkout query returned CURRENT/no-gap, matching source/workspace/authority,
+one owner attempt and no query reindexing, generation
+`bf26960cc9b61fe8492c5b09051308d5d83d61a01de4b5ce040af08b0c5d4407`.
+The historical common-directory helper recipe still selects dirty primary
+checkout `0c81418fe` and correctly rejects; current CLAUDE task-helper guidance
+works. Primary work and the existing port18800 service remain untouched.
+
+F4a starts with WSP62 policy only: record a missing historical expiry as the
+already-past review-quarter boundary without renewal or ceiling changes.
+Framework/knowledge mirrors stay equal; enforcement and metadata are a later
+slice after this policy lands. SPECIFIED_NOT_IMPLEMENTED. WSP22/50/62/81/97.
+
 ## 2026-10-29 — F1 syntax/encoding and audit parser repair
 
 The first hosted test job stopped at a stale generated test registry after
