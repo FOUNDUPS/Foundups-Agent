@@ -49,8 +49,8 @@ retain dependency follow-up rather than call every workflow green. The final
 snapshot has 39 open PRs: 37 retained original rows plus concurrent #2254
 YouTube and #2256 Storytime. Those new lanes retain their owners.
 
-**Chosen follow-up:** F1 on `agent/python-audit-repair-20261029`, based on
-`68562f2c8`, repairs six production parser failures and 36 BOM-only headers,
+**Chosen follow-up:** F1 PR #2257 on `agent/python-audit-repair-20261029`, based on
+`68562f2c8` and reconciled with YouTube main `887c09dd2`, repairs six production parser failures and 36 BOM-only headers,
 plus the audit owner's Python encoding support and required integrity records.
 Local AST acceptance: 4216 files, zero production failures, 81 remaining test
 failures; no global collection or live service acceptance. Audit suite: 65 pass
