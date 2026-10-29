@@ -1,3 +1,14 @@
+## Shared WSP domain policy source binding — 2026-10-29
+
+WSP 3/5/6/22/50/84/97. The backend closure adds only
+`modules/infrastructure/wsp_core/src/wsp_domain_policy.py` and changes the
+existing checker source digest. Canonical digest: 62d1c9a6. Rebind the JS and
+generator-test pins; raise the exact member cap by one to 1473 and prove 1474
+is rejected. Manifest/per-file/total byte caps stay 329 KiB/2 MiB/32 MiB.
+The 24-test generator/idle-consumer selection and all three Node compatibility
+suites pass. No extension installation, runtime deployment or provider authority
+is claimed. Exact source-hash security metadata is reviewed separately from rules.
+
 ## GitHub file-reader source binding — 2026-10-26
 
 WSP6/15/22/50/97; metadata amendment13/P1 in the FoundUps delivery plan.

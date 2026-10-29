@@ -57,6 +57,10 @@ Module evidence follows HoloIndex's existing rule: tracked files under direct
 `src/` or `tests/`, or a direct `README.md`/`INTERFACE.md`. Other containers remain
 explicit ownership warnings instead of acquiring fabricated module requirements.
 This distinguishes legacy scripts, intake/archive folders and telemetry data.
+FMAS and WSPComplianceChecker now import the same pure policy from
+`modules/infrastructure/wsp_core/src/wsp_domain_policy.py`; previous constant
+names remain immutable compatibility aliases. This sharing does not change
+Mode 2's discovery behavior or HoloIndex's committed-generation authority.
 
 `perform_security_scan(repo_root, domain_path="repository")` runs each applicable
 external scanner once with explicit process cwd; it never changes the caller's

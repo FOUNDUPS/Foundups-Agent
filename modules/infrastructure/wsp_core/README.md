@@ -45,5 +45,13 @@ mathematical labels do not establish physical quantum behavior. Earlier docs
 advertised `WSPValidator` and `WSPEnforcer`, which this package does not implement.
 
 See [tests/README.md](tests/README.md) for bounded regression evidence and
-[ModLog.md](ModLog.md) for changes. Remaining work includes canonical domain
-constant sharing with FMAS and separate ownership of structural migrations.
+[ModLog.md](ModLog.md) for changes. `src/wsp_domain_policy.py` is the shared pure
+WSP 3 policy used by this checker and FMAS: immutable domains, the documented WRE
+exception, reserved container names, and module evidence classification.
+
+A tracked file under direct `src/` or `tests/`, or a direct README/INTERFACE,
+identifies a block. Other tracked containers remain architecture ownership hints;
+they do not acquire fabricated module-document requirements. Each scanner keeps
+its own inventory/metadata boundary. HoloIndex's committed-generation acquisition
+is unchanged. Physical migrations and substantive missing documents remain work
+for their actual owners; the policy performs no moves or automatic repairs.

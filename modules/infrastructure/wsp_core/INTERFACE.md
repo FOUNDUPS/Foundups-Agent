@@ -42,6 +42,21 @@ is neither read nor changed; callers own any prior authorized retrieval.
 
 ## Other existing owners
 
+`src/wsp_domain_policy.py` exports immutable `CORE_DOMAINS`,
+`ARCHITECTURAL_EXCEPTIONS`, and `RESERVED_BLOCK_NAMES`. The checker's previous
+constant names remain aliases; FMAS's `ENTERPRISE_DOMAINS` aliases `CORE_DOMAINS`.
+Callers cannot mutate the shared sets. Both WSP 3 Markdown mirrors are checked
+against the policy by tests, not parsed at runtime.
+
+`evidenced_module_roots(paths, exceptions=ARCHITECTURAL_EXCEPTIONS)` and
+`unqualified_module_containers(paths, exceptions=ARCHITECTURAL_EXCEPTIONS)` return
+sorted tuples of relative roots. Inputs are already-admitted repository-relative
+file paths. The functions do no filesystem/process/database IO and do not prove
+path validity, current generation or domain legitimacy. Unknown domains remain
+separate findings; custom exception selections preserve the FMAS adapter API.
+Unqualified-container architecture hints are not suppressed by module-document
+false-positive selections. Suppression of real modules retains its prior scope.
+
 `SemanticStateEngine` and its immutable `SemanticState` are defined in
 `src/semantic_state_engine.py`; they retain their existing WSP 44 transition
 contract and optional log behavior. The WSP 00 neural adapter remains separate.
