@@ -1,3 +1,20 @@
+## PR2260 unchanged historical prose binding — 2026-10-29
+
+Hosted job123246799489 at source f2cb5d9abbfd763e437494e88b3b3bfd15eba469
+reports one unreviewed tree finding, 170 exact prior reviews and zero findings
+in introduced history. The bridge ModLog's existing finding moved from line3865
+to3883 after the new 18-line entry. Immutable Git blobs prove the entire prior
+ModLog is an unchanged suffix, the finding line is unique in both versions,
+the hosted merge-tree blob matches the candidate, and the exact prior binding
+exists in main ade6bca8547's ledger. This is previously reviewed historical
+prose about key resolution, not a newly added credential. The reconciliation
+architect performed this source-bound review; no independent agent review is
+claimed.
+
+Append only that one exact file/rule/line binding and preserve all prior entries.
+No scanner rule, exclusion, scope or fingerprint algorithm changes. Fresh final
+tree/history checks remain required; this review is not a scanner execution.
+
 ## PR2257 encoding manifest metadata review — 2026-10-29
 
 Hosted job123214518117 at source `5ce02d043` reports 38 unreviewed

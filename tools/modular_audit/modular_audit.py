@@ -49,6 +49,7 @@ Mode 2: Baseline comparison
 
 import argparse
 import ast
+import calendar
 from datetime import date
 import json
 import logging
@@ -63,6 +64,12 @@ from typing import Dict, FrozenSet, Iterable, List, Optional, Tuple
 VERSION = "0.8.1"
 BASELINE_MISSING = object()
 ADVISORY_ARCHIVE_MAX_THRESHOLD = 1000
+EXPIRY_POLICY_SECTION = "#### 5.1.3. Historical Missing-Expiry Completion"
+EXPIRY_POLICY_DIGEST = "41c0730fe6e3e0f4f1afaf906b3f1ddb448e104574fe69cf819538c29b0e29da"
+EXPIRY_POLICY_PATHS = tuple(
+    f"{root}/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md"
+    for root in ("WSP_framework", "WSP_knowledge")
+)
 
 # Set up logging
 logging.basicConfig(
@@ -818,21 +825,93 @@ def _authorized_policy_transition(relative_key, entry, baseline_entry):
     )
 
 
+def _baseline_has_expiry_policy(baseline_root):
+    """Require matching canonical policy mirrors at the comparison base."""
+    if baseline_root is None:
+        return False
+    root = baseline_root.parent if baseline_root.name == "modules" else baseline_root
+    try:
+        mirrors = [(root / path).read_text(encoding="utf-8") for path in EXPIRY_POLICY_PATHS]
+        if mirrors[0] != mirrors[1] or mirrors[0].count(EXPIRY_POLICY_SECTION) != 1:
+            return False
+        section = mirrors[0].split(EXPIRY_POLICY_SECTION, 1)[1].split("### 5.2.", 1)[0]
+        return hashlib.sha256(section.strip().encode("utf-8")).hexdigest() == EXPIRY_POLICY_DIGEST
+    except (OSError, UnicodeError):
+        return False
+
+
+def _same_metadata(left, right):
+    """Compare parsed metadata without collapsing booleans, numbers or absence."""
+    if type(left) is not type(right):
+        return False
+    if isinstance(left, dict):
+        return len(left) == len(right) and all(
+            any(_same_metadata(key, other) and _same_metadata(value, other_value)
+                for other, other_value in right.items())
+            for key, value in left.items()
+        )
+    if isinstance(left, list):
+        return len(left) == len(right) and all(map(_same_metadata, left, right))
+    return left == right
+
+
+def _historical_expiry_completion(entry, baseline_entry, policy_present, today=None):
+    """Recognize only the independently specified, overdue metadata completion."""
+    if not policy_present or not isinstance(baseline_entry, dict):
+        return False
+    if baseline_entry.get("temporary") is not True or "expires_on" in baseline_entry:
+        return False
+    review = baseline_entry.get("review_date")
+    if not isinstance(review, str) or not re.fullmatch(r"[0-9]{4}-Q[1-4]", review):
+        return False
+    if not all(isinstance(baseline_entry.get(key), str) and baseline_entry[key].strip()
+               for key in ("reviewer", "remediation")):
+        return False
+    try:
+        year, month = int(review[:4]), int(review[-1]) * 3
+        boundary = date(year, month, calendar.monthrange(year, month)[1])
+    except ValueError:
+        return False
+    expiry = entry.get("expires_on")
+    unchanged = {key: value for key, value in entry.items() if key != "expires_on"}
+    return (
+        boundary < (today if today is not None else date.today())
+        and type(expiry) is str and expiry == boundary.isoformat()
+        and _same_metadata(unchanged, baseline_entry)
+    )
+
+
+def _exemption_policy_changed(relative_key, entry, baseline_entry, expiry_policy_present):
+    """Keep expiry completion separate from the existing archive-mode migration."""
+    expiry_changed = not _same_metadata(
+        entry.get("expires_on", BASELINE_MISSING),
+        baseline_entry.get("expires_on", BASELINE_MISSING),
+    )
+    if expiry_changed and not _historical_expiry_completion(
+        entry, baseline_entry, expiry_policy_present
+    ):
+        return True
+    fields = ("enforcement_mode", "permanent", "temporary")
+    policy_changed = any(
+        not _same_metadata(entry.get(field, BASELINE_MISSING),
+                           baseline_entry.get(field, BASELINE_MISSING))
+        for field in fields
+    )
+    return policy_changed and not _authorized_policy_transition(
+        relative_key, entry, baseline_entry
+    )
+
+
 def _audit_exemption_authority(
-    relative_key, entry, baseline_entry, baseline_count, file_path, baseline_file
+    relative_key, entry, baseline_entry, baseline_count, file_path, baseline_file,
+    expiry_policy_present=False,
 ):
     """Reject candidate-authored exemption authority and ceiling ratchets."""
     if baseline_entry is None:
         return []
     if baseline_entry is BASELINE_MISSING:
         return [f"WSP 62 ERROR: candidate-authored exemption {relative_key}"]
-    fields = ("enforcement_mode", "permanent", "temporary", "expires_on")
-    policy_changed = any(
-        entry.get(field) != baseline_entry.get(field) for field in fields
-    )
-    if policy_changed and not _authorized_policy_transition(
-        relative_key, entry, baseline_entry
-    ):
+    if _exemption_policy_changed(relative_key, entry, baseline_entry, expiry_policy_present):
         return [f"WSP 62 ERROR: exemption policy changed {relative_key}"]
     findings = []
     current_ceiling = entry.get("no_growth_ceiling", {}).get("file_lines")
@@ -938,7 +1017,7 @@ def _resolved_exemption_removal(
 
 def _audit_exempt_file(
     file_path, relative_key, display_path, exemption, baseline_entry,
-    line_count, baseline_count, baseline_file,
+    line_count, baseline_count, baseline_file, expiry_policy_present=False,
 ):
     """Evaluate one exempt file after its baseline policy is resolved."""
     findings = []
@@ -951,6 +1030,7 @@ def _audit_exempt_file(
     authority_findings = _audit_exemption_authority(
         relative_key, exemption, baseline_entry, baseline_count,
         file_path, baseline_file,
+        expiry_policy_present,
     )
     if authority_findings:
         findings.extend(f"{item} [{display_path}]" for item in authority_findings)
@@ -1164,7 +1244,8 @@ def _inherited_expiry_defect(entry, baseline_entry):
         return False
     return (
         baseline_entry.get("temporary") is True
-        and entry.get("expires_on") == baseline_entry.get("expires_on")
+        and _same_metadata(entry.get("expires_on", BASELINE_MISSING),
+                           baseline_entry.get("expires_on", BASELINE_MISSING))
     )
 
 
@@ -1268,7 +1349,7 @@ def _audit_unexempt_file(
 
 def _audit_sized_file(
     file_path, module_path, domain_path, modules_dir, rules, baseline_rules,
-    thresholds, baseline_root, rename_map,
+    thresholds, baseline_root, rename_map, expiry_policy_present=False,
 ):
     """Return findings for one supported file and its exemption contract."""
     if not file_path.is_file() or file_path.name.startswith('.'):
@@ -1301,7 +1382,7 @@ def _audit_sized_file(
         )
     return _audit_exempt_file(
         file_path, relative_key, display_path, exemption, baseline_entry,
-        line_count, baseline_count, baseline_file,
+        line_count, baseline_count, baseline_file, expiry_policy_present,
     )
 
 
@@ -1364,6 +1445,7 @@ def audit_file_sizes(
         return ["WSP 62: Modules directory does not exist"]
     findings = []
     thresholds = get_file_size_thresholds()
+    expiry_policy_present = _baseline_has_expiry_policy(baseline_root)
     try:
         inventory = (
             _git_tracked_module_paths(modules_dir)
@@ -1386,6 +1468,7 @@ def audit_file_sizes(
                 _audit_sized_file(
                     file_path, module_path, domain_path, modules_dir,
                     rules, baseline_rules, thresholds, baseline_root, rename_map,
+                    expiry_policy_present,
                 )
             )
     return findings
