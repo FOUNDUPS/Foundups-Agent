@@ -11,6 +11,28 @@ or OS confinement, whole-runtime closure, signer or network qualification.
 Product/test behavior is the original reviewed intent layer; main's BOM repairs
 are preserved. Fresh hosted/current-main qualification remains a separate gate.
 
+## 2026-10-25 — Existing-only revalidation measured results
+
+- Unchanged parent service:228 exact IDs,174 passes/54 call-phase AttributeError
+  failures for the absent API. The separate prepare-after-loss witness passed.
+- Exact reviewed source:focused228/228 then whole original19-owner FAM514/514;
+  no skips/exclusions, old459 IDs plus55 additions. Counts are nonadditive.
+- All247 selected sources stable;53 focused/74 final loaded sources prebound.
+  Zero guard attempts; default-store metadata unchanged, real central stopped.
+- Fresh clean environment and phase-owned HOME/cache; unchanged external runner.
+  Two PytestConfigWarning each run retained. No OS/native/ATTACH or live-chain proof.
+- Original422-line test prefix/26 functions/93 cases preserved; current owner148.
+  Existing receipt/companion append the new run records without changing old data.
+
+## 2026-10-25 — Existing-only revalidation acceptance allocated
+
+- WSP6/11/15/22/50/62/84/97; preallocated15/P1, same intent test owner.
+- Reuse ready/_prepare/_snapshot/_old/_intents and explicit treasury grants;
+  preserve original26 test-function ASTs and93 cases. Append revalidation
+  type/current-authority/history/existing-row/no-write controls, no new fixture plane.
+- Tests authored before production changes; no collection or execution yet.
+  Root owns desired RED, candidate qualification and final results below.
+
 ## 2026-10-25 — Local TestNet probe-intent qualification
 
 - Pre-runtime 16/P0 contract; separate docs/evidence packaging 14/P1. Qualified

@@ -420,3 +420,196 @@ def test_busy_writer_has_no_fallback_and_can_retry_after_release(ready):
         other.close()
     assert observed and _snapshot(ready[0]) == before
     assert _prepare(ready).state == "PREPARED"
+
+
+def _revalidate(ready, expected, *, policy=None, binding=None, actor="treasury_1", authorization=_TREASURY_AUTH):
+    adapter, _, _, _, configured, submitted = ready
+    return IntentService(adapter, configured if policy is None else policy).revalidate_existing(
+        expected, actor, submitted if binding is None else binding, authorization=authorization)
+
+
+@contextmanager
+def _revalidation_readonly(adapter, monkeypatch):
+    before = _snapshot(adapter)
+    monkeypatch.setattr(adapter, "_next_id", lambda prefix: pytest.fail("revalidation allocated an ID"))
+    def refuse_write(conn, cursor, statement, parameters, context, executemany):
+        if statement.lstrip().upper().startswith(("INSERT", "UPDATE", "DELETE", "REPLACE", "CREATE", "DROP", "ALTER")):
+            pytest.fail("revalidation attempted a database write")
+    event.listen(adapter.engine, "before_cursor_execute", refuse_write)
+    try:
+        yield
+    finally:
+        event.remove(adapter.engine, "before_cursor_execute", refuse_write)
+        assert _snapshot(adapter) == before
+
+
+@pytest.mark.parametrize("elapsed", [0, 1, 59], ids=["same-time", "later", "before-expiry"])
+def test_revalidation_exact_reopen_without_allocation_or_writes(ready, monkeypatch, elapsed):
+    expected, before = _prepare(ready), _snapshot(ready[0])
+    monkeypatch.setattr(SQLiteAdapter, "_now_utc", lambda self: datetime.fromtimestamp(NOW + elapsed, timezone.utc))
+    with _revalidation_readonly(ready[0], monkeypatch):
+        assert _revalidate(ready, expected) == expected
+    ready[0].close()
+    reopened = SQLiteAdapter(ready[0].db_path)
+    try:
+        with _revalidation_readonly(reopened, monkeypatch):
+            assert _revalidate((reopened, *ready[1:]), expected) == expected
+        assert _snapshot(reopened) == before
+        assert ready[1].trigger_payout(ready[2].task_id, "treasury_1", authorization=_TREASURY_AUTH) == ready[3]
+        assert _snapshot(reopened) == before
+    finally:
+        reopened.close()
+
+
+def test_revalidation_deleted_intent_is_not_recreated(ready, monkeypatch):
+    expected = _prepare(ready)
+    with ready[0].engine.begin() as conn:
+        conn.execute(text("DELETE FROM testnet_transfer_intents WHERE intent_id=:value"), {"value": expected.intent_id})
+    with _revalidation_readonly(ready[0], monkeypatch), pytest.raises(ValidationError):
+        _revalidate(ready, expected)
+    assert _intents(ready[0]) == []
+
+
+def test_prepare_retains_get_or_create_behavior_after_intent_loss(ready):
+    first, old = _prepare(ready), _old(ready[0])
+    with ready[0].engine.begin() as conn:
+        conn.execute(text("DELETE FROM testnet_transfer_intents WHERE intent_id=:value"), {"value": first.intent_id})
+    second = _prepare(ready)
+    assert second.intent_id != first.intent_id and second.identity_json == first.identity_json
+    assert second.identity_sha256 == first.identity_sha256 and len(_intents(ready[0])) == 1
+    assert _old(ready[0]) == old
+
+
+@pytest.mark.parametrize("field,value", [("intent_id", "different_intent"), ("payout_id", "missing"),
+    ("purpose", "OTHER_PURPOSE"), ("state", "CONFIRMED"), ("identity_json", "{}"),
+    ("identity_sha256", "0" * 64), ("created_at_epoch_s", NOW + 1), ("expires_at_epoch_s", NOW + 61)],
+    ids=["intent-id", "payout-id", "purpose", "state", "identity-json", "identity-hash", "created", "expiry"])
+def test_revalidation_binds_every_original_dto_field(ready, monkeypatch, field, value):
+    expected = replace(_prepare(ready), **{field: value})
+    with _revalidation_readonly(ready[0], monkeypatch), pytest.raises(AgentMarketError):
+        _revalidate(ready, expected)
+
+
+@pytest.mark.parametrize("kind", ["replaced-id", "replaced-created", "replaced-expiry", "json-and-hash"])
+def test_revalidation_rejects_replaced_or_rehashed_stored_intent(ready, monkeypatch, kind):
+    expected = _prepare(ready)
+    changes = {"intent_id": "replacement"} if kind == "replaced-id" else (
+        {"created_at_epoch_s": NOW - 1} if kind == "replaced-created" else {"expires_at_epoch_s": NOW + 61})
+    if kind == "json-and-hash":
+        changed = json.loads(expected.identity_json)
+        changed["binding"]["amount_atoms"] += 1
+        encoded = json.dumps(changed, sort_keys=True, separators=(",", ":"), allow_nan=False)
+        changes = dict(identity_json=encoded, identity_sha256=hashlib.sha256(encoded.encode()).hexdigest())
+    _change_row(ready[0], "testnet_transfer_intents", "intent_id", expected.intent_id, **changes)
+    with _revalidation_readonly(ready[0], monkeypatch), pytest.raises(ValidationError):
+        _revalidate(ready, expected)
+
+
+@pytest.mark.parametrize("context", [None, {}, CallerAuthorization("treasury_1", frozenset()),
+    CallerAuthorization("treasury_1", frozenset({("f_2", "treasury")})),
+    CallerAuthorization("treasury_1", frozenset({("f_1", "admin")})), _OTHER_TREASURY_AUTH],
+    ids=["absent", "payload", "no-grant", "wrong-foundup", "admin", "wrong-principal"])
+def test_revalidation_requires_current_scoped_authority(ready, monkeypatch, context):
+    expected = _prepare(ready)
+    with _revalidation_readonly(ready[0], monkeypatch), pytest.raises(PermissionDeniedError):
+        _revalidate(ready, expected, authorization=context)
+
+
+@pytest.mark.parametrize("change", ["policy-version", "quantity", "host-cap", "exact-expiry", "initiating-actor"])
+def test_revalidation_rechecks_policy_binding_clock_and_initiator(ready, monkeypatch, change):
+    expected, changes = _prepare(ready), {}
+    if change == "policy-version":
+        changes = dict(policy=replace(ready[4], policy_version=2), binding=replace(ready[5], policy_version=2))
+    elif change == "quantity":
+        changes = dict(binding=replace(ready[5], amount_atoms=8))
+    elif change == "host-cap":
+        changes = dict(policy=replace(ready[4], max_amount_atoms=1001))
+    elif change == "initiating-actor":
+        changes = dict(actor="other_actor", authorization=_OTHER_TREASURY_AUTH,
+                       policy=replace(ready[4], principal_id="other_actor"))
+    else:
+        monkeypatch.setattr(SQLiteAdapter, "_now_utc", lambda self: datetime.fromtimestamp(NOW + 60, timezone.utc))
+    with _revalidation_readonly(ready[0], monkeypatch), pytest.raises(AgentMarketError):
+        _revalidate(ready, expected, **changes)
+
+
+class _SnapshotComparisonTrap:
+    def __eq__(self, other):
+        raise AssertionError("snapshot rich comparison was invoked")
+
+
+class _SnapshotSubclass(PreparedTestnetIntent):
+    def __eq__(self, other):
+        raise AssertionError("snapshot subclass comparison was invoked")
+
+
+@pytest.mark.parametrize("kind", ["absent", "mapping", "subclass"])
+def test_revalidation_rejects_nonexact_snapshot_type(ready, monkeypatch, kind):
+    first = _prepare(ready)
+    expected = None if kind == "absent" else (asdict(first) if kind == "mapping" else _SnapshotSubclass(**asdict(first)))
+    with _revalidation_readonly(ready[0], monkeypatch), pytest.raises(ValidationError):
+        _revalidate(ready, expected)
+
+
+@pytest.mark.parametrize("field", ["intent_id", "payout_id", "purpose", "state", "identity_json",
+                                   "identity_sha256", "created_at_epoch_s", "expires_at_epoch_s"])
+def test_revalidation_checks_field_types_before_rich_equality(ready, monkeypatch, field):
+    expected = replace(_prepare(ready), **{field: _SnapshotComparisonTrap()})
+    with _revalidation_readonly(ready[0], monkeypatch), pytest.raises(ValidationError):
+        _revalidate(ready, expected)
+
+
+@pytest.mark.parametrize("field,value,created", [("created_at_epoch_s", True, 1),
+    ("created_at_epoch_s", 1.0, 1), ("expires_at_epoch_s", float(NOW + 60), NOW)],
+    ids=["created-bool-equals-one", "created-float-equals-one", "expiry-float-equals-int"])
+def test_revalidation_rejects_equal_nonbuiltin_integer_fields(ready, monkeypatch, field, value, created):
+    monkeypatch.setattr(SQLiteAdapter, "_now_utc", lambda self: datetime.fromtimestamp(created, timezone.utc))
+    expected = replace(_prepare(ready), **{field: value})
+    with _revalidation_readonly(ready[0], monkeypatch), pytest.raises(ValidationError):
+        _revalidate(ready, expected)
+
+
+@pytest.mark.parametrize("field", ["intent_id", "payout_id", "purpose", "state", "identity_json", "identity_sha256"])
+def test_revalidation_rejects_string_subclasses_in_snapshot(ready, monkeypatch, field):
+    class TextSubclass(str):
+        pass
+    first = _prepare(ready)
+    expected = replace(first, **{field: TextSubclass(getattr(first, field))})
+    with _revalidation_readonly(ready[0], monkeypatch), pytest.raises(ValidationError):
+        _revalidate(ready, expected)
+
+
+def test_revalidation_non_sqlite_refuses_before_session(ready, monkeypatch):
+    expected = _prepare(ready)
+    monkeypatch.setattr(ready[0].engine.dialect, "name", "postgresql")
+    monkeypatch.setattr(ready[0], "session", lambda: pytest.fail("unsupported revalidation opened a session"))
+    with _revalidation_readonly(ready[0], monkeypatch), pytest.raises(ValidationError):
+        _revalidate(ready, expected)
+
+
+@pytest.mark.parametrize("kind", ["unrecorded", "future-gap", "generated-column"])
+def test_revalidation_requires_current_qualified_schema(ready, monkeypatch, kind):
+    expected = _prepare(ready)
+    with ready[0].engine.begin() as conn:
+        if kind == "generated-column":
+            conn.execute(text("ALTER TABLE testnet_transfer_intents ADD COLUMN shadow INTEGER GENERATED ALWAYS AS(format_version) VIRTUAL"))
+        else:
+            conn.execute(text("DELETE FROM schema_migrations" + (" WHERE version>=3" if kind == "future-gap" else "")))
+            if kind == "future-gap":
+                conn.execute(text("INSERT INTO schema_migrations(version,description) VALUES(4,'unqualified')"))
+    with _revalidation_readonly(ready[0], monkeypatch), pytest.raises(ValidationError):
+        _revalidate(ready, expected)
+
+
+@pytest.mark.parametrize("kind", ["proof", "payout", "original-debit"])
+def test_revalidation_rechecks_actual_pending_lineage(ready, monkeypatch, kind):
+    expected = _prepare(ready)
+    if kind == "proof":
+        _change_row(ready[0], "proofs", "proof_id", ready[2].proof_id, artifact_hash="changed")
+    elif kind == "payout":
+        _change_row(ready[0], "payouts", "payout_id", ready[3].payout_id, amount=101)
+    else:
+        debit = next(row for row in _rows(ready[0], "compute_ledger_entries") if row["reason"] == "trigger_payout")
+        _change_row(ready[0], "compute_ledger_entries", "entry_id", debit["entry_id"], amount=2)
+    with _revalidation_readonly(ready[0], monkeypatch), pytest.raises(AgentMarketError):
+        _revalidate(ready, expected)

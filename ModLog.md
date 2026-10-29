@@ -268,6 +268,23 @@ Parent2206 and current hosted/security gates govern publication/main; local
 qualification grants no runtime/producer authority. Portable evidence:
 `docs/architecture/receipts/FOUNDUPS_ALGORAND_FORMAT_PROTOCOL_20261025.json`.
 
+## 2026-10-25 — Existing-only TestNet intent revalidation
+
+WSP00/6/11/15/22/50/62/84/97; preallocated15/P1, same service/test owners.
+Add require-existing full-DTO revalidation through shared current admission;
+missing records cannot allocate/recreate. Preserve prepare/schema3/runtime caps.
+Desired RED174pass/54missing-API failures; focused228 and all19FAM514 pass,
+retaining all459 old IDs plus55 new cases. Counts are nonadditive; zero guards.
+Preserve all old receipt/companion fields and document the four handoff decisions.
+This is a stacked local component pending parent/security gates, with no formatter,
+signer, chain, issuance, payment or production-site activation.
+
+Security follow-up14/P1: hosted job121179224336 found17 unchanged companion
+source-digest mappings with stale full-file bindings; zero history findings.
+Root and peer proved historical source bytes and every prior fingerprint.
+Retain2277 records, append only17 exact bindings (2294); no scanner relaxation.
+Fresh hosted scans required; parent GitGuardian remains separate.
+
 ## 2026-10-25 — FoundUps unsigned integration checkpoint
 
 WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97. Three documentation paths only.

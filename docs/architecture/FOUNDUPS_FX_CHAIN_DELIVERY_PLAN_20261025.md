@@ -475,6 +475,104 @@ files and286 loaded origins. Three pre-import refusals are separate controls.
 See receipts/FOUNDUPS_ALGORAND_FORMAT_PROTOCOL_20261025.json for literal IDs,
 source/profile/release/review bindings. Hosted/security/main gates remain separate.
 
+## Unsigned handoff contract and existing-intent revalidation allocation — 2026-10-25
+
+WSP15 C3/I4/D4/Impact4=15/P1; WSP00/6/11/22/50/62/84/97.
+This allocation precedes the new source/test work. It selects a local prerequisite,
+not a formatter, runtime admission or completed integration. Existing `prepare`
+is get-or-create; using it as a post-I/O check could recreate a deleted intent.
+
+Child branch `agent/foundups-testnet-intent-revalidation-20261025` starts at
+`cb794d47c613fda0009c14d219e905ff29ef1a24`, with PR base
+`agent/foundups-testnet-intents-20261025` (parent PR2202). Main is
+`5da187622d0076f6d53de79bf8e1bd1b93aa9bb5`; parent security gates remain pending.
+Do not mutate or merge the parent branch. Preserve the dated “next after security
+closure” publication plan below: separately allocated local prerequisite work is
+not a security waiver. Main publication requires parent delivery and current gates.
+
+**Decision 1 — consumer and current authority.** The planned explicit local API is
+`TestnetTransferIntentService.format_unsigned_probe`; it has no resident, HTTP,
+daemon or automatic caller. The trusted host resolves current principal, scoped
+grants and policy before initial preparation and again after formatter I/O.
+Reusing the same immutable context cannot detect revocation. The captured intent
+DTO is a comparison baseline, never authorization. Revalidate existing intent,
+policy, binding and expiry before launch and after response; discard stale results.
+No DB transaction spans formatter I/O. This slice does not implement that API.
+
+**Decision 2 — independently admitted facts.** A trusted host admits immutable
+exact `fee_microalgos`, `first_valid_round` and `last_valid_round`, with snapshot
+and fee-policy evidence, independently from the submitted binding. The existing
+Algorand module owns future TestNet observation; FAM's host owns policy admission.
+Derive `source_identity_sha256` from the revalidated stored identity. Recheck the
+current facts/policy after I/O. Missing or stale admission refuses launch: no
+submitted/default/golden-round fallback and no UTC-to-ledger-round inference.
+No authenticated fact source or observation implementation is admitted by this plan.
+
+**Decision 3 — producer, validation and provenance.** Select one actually admitted
+SDK-side source-pinned producer under `modules/platform_integration/algorand` as
+part of the trusted computing base. It calls existing `build_unsigned_asa_probe`
+and the sole general `validate_unsigned_asa_probe(raw, independent_expected)`
+before emission. This codec is on pending PR2206, not assumed present in this base.
+Host-owned admission/launch provenance is required; a returned source hash grants
+nothing. No admitted producer means refusal, with no mock/import/CLI fallback.
+Do not promote `tests/qualify_sdk.py`, its release or the temporary worker.
+Use existing bounded-process/held-image owners only under explicit application
+admission; no new generic process or policy framework is implied.
+Bind the existing `UnsignedASAProbeRequest` 15-field canonical request (<=4KiB).
+The <=16KiB untrusted result has exactly `schema`, `request_sha256`, `unsigned_hex`,
+`unsigned_sha256`, `transaction_id`, `source_binding_sha256`; exact builtin strings,
+no duplicate/extra fields or nonfinite content. Bind raw unsigned bytes (1..1024),
+wire/txID/request/source identities, and
+host-controlled 40s/512MiB child bounds. Those framing/hash checks are not a
+general wire validator: a self-consistent malicious admitted-TCB packet cannot
+be semantically rejected by host hashes. No producer/runtime admission exists yet.
+
+**Decision 4 — result effect.** Return only an ephemeral immutable unsigned format
+result after the post-I/O checks. No artifact DB row, cache, reservation, event,
+payout/task/compute mutation, signer or chain effect. Identical exact inputs may
+recompute deterministically; changed fee/round options are different ephemeral
+requests, not durably conflicting retries or reissues. No automatic renewal.
+A successful postcheck is point-in-time and conveys no lasting signer authority.
+
+**First coded layer — existing owner only.** Add the following prerequisite in
+`modules/foundups/agent_market/src/persistence/testnet_transfer_intents.py`:
+
+```python
+revalidate_existing(expected: PreparedTestnetIntent, actor_id: str,
+                    binding: SubmittedTestnetBinding, *,
+                    authorization=None) -> PreparedTestnetIntent
+```
+
+Share the current SQLite/schema/payout/proof/decision/initiation-actor, policy,
+binding, expiry and scoped `CallerAuthorization` admission inside one transaction.
+Require the exact captured DTO and builtin field types before rich equality or
+serialization. Require an already-existing original row and full DTO equality,
+including ID, canonical identity/hash, creation and expiry. Missing/deleted,
+replaced, tampered or duplicate history denies without allocation, insertion,
+recreation or repair. Keep `prepare` signature/get-or-create behavior, schema3,
+objects and exports unchanged. Success/refusal preserves logical DB/schema and
+accounting snapshots; task stays VERIFIED and payout INITIATED.
+
+Reuse the closest existing `test_testnet_transfer_intents.py` fixtures and pending
+payout helpers. Preserve all original26 test ASTs/93 case IDs. Freeze <=60 added
+cases and run desired RED against parent production before implementation;
+missing-method RED is distinct from a witness of unsafe naive `prepare` reuse.
+Cover reopen/no-write success; deletion without recreation; every captured field;
+current grants/policy/binding/expiry; self-consistent stored tamper/history damage;
+hostile field comparisons; and non-SQLite/schema refusal. Root alone runs the
+guarded focused/whole-FAM selections and owns publication; no result is claimed here.
+
+Budget: <=12 existing repository paths, no new files; source <=310 lines with
+functions <=40, existing test owner <=650 with functions <=35; plan <=100 added
+lines and all documentation <=220. No adapter/ORM/migration growth; retain1,471
+runtime members and all caps. Existing module memory/root log and distinctly
+appended receipt/companion evidence are root-owned; preserve every old record.
+No worker/controller/fact source, new binding/DTO module, artifact migration,
+reward conversion, signing, provider call or parent/security bypass in this slice.
+
+Measured prerequisite: RED174pass/54missing-API failures; focused228 and all19FAM514 pass.
+Original459 IDs retained plus55 new; counts nonadditive. See intent receipt `existing_only_revalidation`.
+
 ## Unsigned integration checkpoint allocation — before authoring
 
 WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97. Source: main0909b941.

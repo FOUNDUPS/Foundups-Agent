@@ -25,6 +25,13 @@ The [delivery plan](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_2
 records pre-execution WSP 15 priorities and evidence. Existing atomic SQLite
 verification and pending-payout repairs below remain in place.
 
+## Existing-intent revalidation allocation — 2026-10-25
+
+- [x] Locally qualified existing-only full-DTO revalidation; supplied policy/
+  authority rechecked, missing rows deny without recreation. Host resolves freshness.
+- [x] Kept schema 3 and prepare/get-or-create; qualified no-write/reopen
+  checks before a separately allocated formatter. Revalidation is point-in-time.
+
 ## Domain Alignment References
 - `modules/foundups/ROADMAP.md`
 - `modules/foundups/docs/OCCAM_LAYERED_EXECUTION_PLAN.md`

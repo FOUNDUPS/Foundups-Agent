@@ -152,5 +152,17 @@ conversion from `reward_amount`, UPS/F_i issuance, funded reward, vesting or
 tradability decision. See [the interface](INTERFACE.md#testnettransferintentservice-opt-in-local-api)
 and [qualification history](tests/TestModLog.md).
 
+### Existing-only revalidation contract
+
+For an already captured intent, use `revalidate_existing(prepared, actor_id,
+binding, authorization=current_context)` with the original exact
+`PreparedTestnetIntent`. Its full identity, ID and timestamps are the baseline,
+not authority. The host independently resolves current grants and host policy
+for each call; reusing an old context cannot reveal revocation.
+Missing, replaced or changed rows reject without allocation or repair. The API keeps
+`prepare` get-or-create behavior, schema 3 and pending
+accounting. This is a point-in-time check, not proof of continuous row presence
+or lasting permission. No formatter or automatic post-I/O caller is added.
+
 ## OpenClaw Execution Arm Alignment
 OpenClaw remains the execution ingress for intent routing. FAM provides explicit contracts that OpenClaw/WRE can call for launch and execution flows.
