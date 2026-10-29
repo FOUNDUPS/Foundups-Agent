@@ -1,5 +1,21 @@
 # ModLog - FoundUps Agent Market
 
+## 2026-10-29 — Existing-intent revalidation convergence allocation
+
+WSP11/15/22/50/77/84/97; existing contract15/P1, convergence14/P1.
+Reconcile existing PR2210/669bba8a onto parent e24024c57. Preserve its exact
+existing-only revalidation source and all original 55 added controls; no new
+test owner, schema, signer, transport, issuance or settlement. Pinned Git and
+existing module/interface/roadmap/test evidence resolve stale historical status.
+Independent source and exact prior metadata review precede merge acceptance.
+Run the existing focused/connected owners with credential-stripped, socket-denied,
+scratch-only SQLite controls. Historical whole-suite counts remain historical.
+Keep the current registry and manifest unless actual source membership requires
+owner-generated changes; do not force runtime admission. Budget: existing PR
+product/test delta only, <=24 module-log and <=12 test-log lines; additive main
+history and exact previously reviewed metadata union. Fresh hosted and resulting
+main checks are required. Revalidation is point-in-time, never chain confirmation.
+
 ## 2026-10-29 — Existing TestNet intent convergence allocation
 
 Before merging PR2202/cb794d47c onto delivered codec main4c433502e:
