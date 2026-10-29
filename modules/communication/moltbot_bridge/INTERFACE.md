@@ -1,3 +1,15 @@
+## Denied WSP preflight
+
+`OpenClawDAE.process()` delegates to `openclaw_process_loop.process_message()`.
+If `_wsp_preflight(intent)` returns false, emit `wsp_preflight` with result
+`blocked` and return `[SECURITY BLOCK] Execution prevented by WSP preflight: ...`.
+Preserve the original intent category/domain. Do not resolve permissions, build
+or execute a plan, invoke conversation fallback, or validate/store a result.
+This covers actual planner rejection of unauthorized COMMAND/SYSTEM and SCHEDULE
+without WRE. An authorized COMMAND without WRE retains its existing advisory
+path. Earlier continuity, classification, reporting and skill-safety work is not
+rolled back; this is not a claim of zero effects before preflight.
+
 **OpenClaw bridge interface directory.**
 
 The linked pages retain the complete contracts and their dated qualification

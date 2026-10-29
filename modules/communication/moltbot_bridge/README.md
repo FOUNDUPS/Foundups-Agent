@@ -1,3 +1,12 @@
+## Denied WSP preflight
+
+A failed WSP preflight returns an explicit security-block response. It stops
+before permission resolution, planning, conversation execution and result-memory
+updates; it does not turn the denied request into a conversation. Earlier
+continuity/classification reporting and skill checks still occur. Authorized
+advisory behavior, ZeroClaw profile selection and call-local skill verdicts keep
+their existing contracts. See [the interface](INTERFACE.md#denied-wsp-preflight).
+
 ## Installed HIGH source integration — 2026-10-23
 
 PR #2181 reconciles preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.

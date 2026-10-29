@@ -1,3 +1,14 @@
+## Preserved PC preflight recovery metadata — 2026-10-29
+
+Checksum-verified Gitleaks 8.30.1 reports39 unchanged source-hash rows in the
+regenerated runtime manifest and one unchanged, previously reviewed module-log
+line. Each retains its exact text/context and a prior path/blob/rule/line binding
+on main3a4de0b. Rebind these40 findings to the new Git blobs and preserve all2823
+prior entries. Direct staged-Git verification rehashes all1475 runtime members;
+only the preflight helper digest changes. The architect performed this review;
+no independent reviewer is claimed. Scanner rules/scope/algorithms are unchanged.
+Fresh hosted tree/history checks remain required; this is not security clearance.
+
 ## PR2270 exact documentation prose review — 2026-10-29
 
 Hosted job123361181139 and checksum-verified Gitleaks 8.30.1 both report one
