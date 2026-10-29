@@ -53,6 +53,15 @@ These are draft target semantics, not changes made by this intake.
 - registration assurance
 - voter-resilience/locality/alert capabilities
 
+### Planned Claim-Verification Capability
+- **Bullshit Meter / Political Claim Verification and Scoring Engine**: planned / not implemented.
+- Internal CV1: ten-speech asynchronous extraction, primary-source evidence graph, review dashboard, evaluation, and experimental 300-850 scoring only after its rubric/coverage gate.
+- CV2: methodology/funding audits; CV3: caption/video overlays; CV4: streaming ASR/live meter.
+- Public/member exposure remains subject to the existing surface/prototype gates.
+- PostgreSQL/pgvector and the requested six tables remain architecture proposals pending storage/retrieval reuse review.
+
+See [the feature design](../POLITICAL_CLAIM_VERIFICATION_AND_SCORING_ENGINE.md). No runtime capability field, module version, readiness flag, manifest, registry, catalog, or route is changed by this intake.
+
 ### Later Shared Governance
 - extract validated preference/mandate/voting-verification primitives for FoundUp SmartDAOs
 

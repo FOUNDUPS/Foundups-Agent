@@ -12,6 +12,14 @@ VOTE is an existing FoundUp mode that turns public election and political-financ
 6. **Parallel ballot** - later gated, non-binding preference ballot with cryptographic auditability; explicitly not an official election ballot unless a separate certification/legal gate is satisfied.
 7. **Registration assurance** - later gated, consented checks against official-source adapters with user-visible status and remediation prompts; no silent record changes or autonomous official submissions in the initial prototype.
 8. **SmartDAO governance reuse** - voting-verification, mandate, and support-signal primitives migrate into shared FoundUps governance infrastructure rather than remaining Vote-only logic.
+9. **Political claim verification / Bullshit Meter** - planned source-grounded speech verification, method/conflict audits, transparent experimental scoring, and later video/live evidence overlays.
+
+## Political Claim Verification and Scoring - Planned
+The **Bullshit Meter** extends the candidate evidence experience with four stages: **CV1** asynchronous transcript/claim verification and an internal CLI/review dashboard; **CV2** methodology/funding graph and historical consistency audits; **CV3** caption/video overlays; **CV4** streaming ASR and a live meter with explicit pending/unknown states.
+
+The pipeline retains exact source words, extracts atomic checkable claims, routes research to the relevant primary institution/document, audits methods and conflicts, and produces a clickable/exportable JSON evidence tree. Factual verdict, evidence confidence, context, funding conflicts, and intent remain separate. The proposed 300-850 scale is experimental until its equation, weights, coverage, and calibration pass review.
+
+The first evaluation is ten historical speeches across 2-5 public figures. PostgreSQL/pgvector and the six requested entity tables are candidate architecture choices subject to existing storage/retrieval reuse. No new repository or database is created by this intake. See the [canonical feature design](../POLITICAL_CLAIM_VERIFICATION_AND_SCORING_ENGINE.md) for the full pipeline, data model, source qualifications, UI, and acceptance criteria.
 
 ## Public PoC Flow
 1. User enters the public VOTE FoundUp landing surface.
@@ -48,3 +56,6 @@ VOTE does not begin by asking a voter to trust a recommendation. It begins by sh
 - Keep the cryptographic parallel ballot behind the prototype gate and connect it to existing governance/blockchain abstractions after audit.
 - Keep registration assurance jurisdiction-adapter based, consented, and compliance-gated.
 - Use Hermes/OpenClaw/AI Overseer/WRE/HoloIndex according to current codebase authority; do not hard-code alternate orchestration ownership.
+
+- Permit bounded internal CV1 evaluation alongside public PoC preparation; public claim-score and overlay activation remain subject to the existing prototype gate.
+- Reuse existing transcript/ASR, YouTube indexing, source retrieval, provenance, extension/media and WRE components after current-code discovery. Funding-confidence labels do not already implement general factual verification.

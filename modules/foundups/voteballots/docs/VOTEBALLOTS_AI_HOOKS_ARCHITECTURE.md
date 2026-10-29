@@ -8,6 +8,13 @@
 
 ---
 
+## 2026-10-30 Claim-Verification Planning Addendum
+The [Political Claim Verification and Scoring Engine](POLITICAL_CLAIM_VERIFICATION_AND_SCORING_ENGINE.md) extends this design with the proposed Bullshit Meter, its four rollout stages, exact-quote evidence graph, methodology/conflict audit, and score/evaluation qualifications. The [original supplied specification](intake/CLAIM_VERIFICATION_SOURCE_20261030.md) is preserved for provenance.
+
+For the new feature, the dated specification governs unknown/intent/score qualifications. The older AI hooks below remain design material; neither this addendum nor the existing mock-data funding implementation proves that speech extraction, general factual verification, live research, a database, overlays, or a public meter have been delivered.
+
+---
+
 ## Purpose
 
 AI-native political transparency application. User provides candidate name (speech or text), receives funding transparency report with evidence trail.

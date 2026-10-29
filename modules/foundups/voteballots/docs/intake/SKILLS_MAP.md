@@ -11,6 +11,12 @@
 | capture_to_research | Adapt shared AutoPost/capture primitives into a media/object -> Vote research intent contract | P1 |
 | election_compliance_preflight | Flag election-law, political-communication, privacy, fundraising, coordination, and jurisdiction-sensitive risks before release | P1 |
 | vote_candidate_record | Fetch and normalize voting history/public record/social evidence for later scorecard slices | P1 |
+| vote_claim_extraction | Preserve source words/context and extract schema-validated checkable claims from transcripts | P1 |
+| vote_primary_claim_research | Route factual claims to primary/specialist evidence with exact locators and source versions | P1 |
+| vote_claim_evaluation | Evaluate the ten-speech internal corpus, review verdicts, calibrate/abstain from scores, and preserve corrections | P1 |
+| vote_methodology_funding_audit | Audit sampling/statistics and documented conflicts without equating uncertainty or funding with falsehood | P2 |
+| vote_caption_evidence_overlay | Reuse existing extension/media components for timestamped asynchronous evidence tags | P2 |
+| vote_live_claim_meter | Integrate streaming ASR/cache/research with separate latency metrics and provisional/final states | P3 |
 | vote_discovery | Route user-controlled discovery of channels/content through pfMALL without political targeting | P1 |
 | vote_parallel_ballot | Non-binding cryptographic preference ballot experiment; preserve identity/choice separation and auditability | P2 |
 | registration_assurance | Consented official-source registration status monitoring and attention-state reporting | P2 |
@@ -45,6 +51,17 @@ Every skill or worker must receive explicit HoloIndex query parameters before ex
 - `registration assurance official source privacy consent`
 - `voter resilience polling friction map evidence ledger`
 
+### Claim-verification retrieval queries
+- `voteballots confidence scoring source references trail termination challenge correction`
+- `political claim fact verification primary source research provenance evidence graph`
+- `video_indexer youtube transcripts captions speech audio_provider ASR timestamp`
+- `HoloIndex PostgreSQL pgvector vector database source persistence migrations`
+- `FEC IRS Form 990 FARA OpenSecrets funding entity resolution`
+- `browser extension media video timeline caption overlay pfMALL`
+- `WRE evaluation golden dataset rubric version audit log correction`
+
+These are candidate skills and searches, not created/installed skills or confirmed available adapters. Verify exact paths and ownership before dispatch. CV1 evaluation and public activation have separate gates; see [claim-engine design](../POLITICAL_CLAIM_VERIFICATION_AND_SCORING_ENGINE.md).
+
 ## WRE Integration Points
 - WSP 109 intake produces the canonical packet.
 - WRE remains orchestration authority.
@@ -70,6 +87,10 @@ I:
   no_vibecoding: true
   no_hardcoded_module_ownership: true
   public_poc_first: true
+  internal_claim_evaluation_allowed: true
+  claim_engine_status: planned_not_implemented
+  claim_engine_spec: docs/POLITICAL_CLAIM_VERIFICATION_AND_SCORING_ENGINE.md
+  raw_feature_source_preserved: true
   prototype_gated: true
   political_truth_boundary: verified_inferred_unknown
   no_targeted_persuasion: true
@@ -78,6 +99,8 @@ O:
   - reuse_harvest_matrix
   - public_poc_build_plan
   - prototype_gate_plan
+  - claim_verification_reuse_and_evaluation_plan
+  - score_rubric_and_abstention_research_decisions
   - status_reconciliation_plan
 F:
   - holo_not_run
