@@ -1,5 +1,20 @@
 # Unsigned probe test owner
 
+## Canonical JSON framing inventory
+
+The locally qualified owner has52 ordinary methods: original28 plus24 framing methods.
+Subtests are assertions inside those methods, not additional standalone IDs.
+Preserve every old AST/oracle and the four original expected denial controls.
+New controls cover exact canonical input, type/size/duplicate/nonfinite refusal,
+both independent vectors, changed valid requests, and real general-validator
+fault injection. Validated sidecars and full-request hashes must match exactly.
+
+Use the newly reviewed fixed52 profile/inventory; do not widen an old release or
+run generic discovery outside admission. Actual RED/GREEN/hosted counts and hashes
+are in TestModLog; they overlap old28 evidence and confer no runtime authority.
+
+## Original codec layer — historical28-method qualification
+
 Owner: `test_unsigned_asa_probe.py`,28 ordinary stdlib unittest methods in
 `UnsignedASAProbeTests`; subtests are not additional standalone method IDs.
 Use the canonical unit shard and the separately reviewed SDK qualification

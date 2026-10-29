@@ -7,9 +7,11 @@ Synthetic public addresses have no asserted private-key or ledger identity.
 import base64
 import dataclasses
 import hashlib
+import json
 import socket
 import subprocess
 import unittest
+from unittest import mock
 
 import msgpack
 from algosdk import account
@@ -21,6 +23,7 @@ from modules.platform_integration.algorand.src.unsigned_asa_probe import (
     validate_unsigned_asa_probe,
 )
 from .qualify_sdk import assert_guarded, expected_denial
+from modules.platform_integration.algorand.src import unsigned_asa_probe as codec
 
 
 SENDER = "AEBAGBAFAYDQQCIKBMGA2DQPCAIREEYUCULBOGAZDINRYHI6D4QDTYK3BA"
@@ -66,6 +69,15 @@ class IntSubclass(int):
 
 class StrSubclass(str):
     pass
+
+
+def canonical_json(value):
+    return json.dumps(value, sort_keys=True, separators=(",", ":"),
+                      ensure_ascii=True, allow_nan=False).encode("ascii")
+
+
+def request_json(**changes):
+    return canonical_json(dataclasses.asdict(request(**changes)))
 
 
 class UnsignedASAProbeTests(unittest.TestCase):
@@ -263,3 +275,238 @@ class UnsignedASAProbeTests(unittest.TestCase):
     def test_account_negative_control_and_flat_fee_build(self):
         expected_denial("account_sign_client", account.generate_account)
         self.assertEqual(build_unsigned_asa_probe(request()).unsigned_bytes, GOLDEN)
+
+
+    def format_result(self, candidate=None):
+        candidate = request() if candidate is None else candidate
+        raw_request = canonical_json(dataclasses.asdict(candidate))
+        output = codec.format_unsigned_probe_request(raw_request)
+        self.assertIs(type(output), bytes)
+        self.assertLessEqual(len(output), 16384)
+        body = json.loads(output.decode("ascii"))
+        self.assertEqual(set(body), {"schema", "request_sha256", "unsigned_hex",
+                                   "unsigned_sha256", "transaction_id", "source_binding_sha256"})
+        self.assertTrue(all(type(value) is str for value in body.values()))
+        self.assertEqual(output, canonical_json(body))
+        self.assertEqual(body["schema"], "foundups-unsigned-probe-worker-result-v1")
+        self.assertEqual(body["request_sha256"], hashlib.sha256(raw_request).hexdigest())
+        self.assertRegex(body["unsigned_hex"], r"\A(?:[0-9a-f]{2})+\Z")
+        wire = bytes.fromhex(body["unsigned_hex"])
+        self.assertTrue(1 <= len(wire) <= 1024)
+        self.assertEqual(body["unsigned_sha256"], hashlib.sha256(wire).hexdigest())
+        self.assertRegex(body["transaction_id"], r"\A[A-Z2-7]{52}\Z")
+        self.assertEqual(body["transaction_id"], base64.b32encode(
+            hashlib.new("sha512_256", b"TX" + wire).digest()).decode().rstrip("="))
+        self.assertEqual(body["source_binding_sha256"], hashlib.sha256(
+            b"foundups:unsigned-asa-probe:request:v1\0" + raw_request).hexdigest())
+        return output, body
+
+    def reject_json(self, raw):
+        with self.assertRaises(ValueError):
+            codec.format_unsigned_probe_request(raw)
+
+    def test_format_golden_six_field_output(self):
+        _, body = self.format_result()
+        self.assertEqual(bytes.fromhex(body["unsigned_hex"]), GOLDEN)
+        self.assertEqual(body["transaction_id"], "N3GLERTNMD6GC443Q67RAVH7SCKB7EDEMY55W3T6QIPG7ZOAIMXQ")
+        self.assertEqual(body["source_binding_sha256"], "9a88e8909de608735f94c61724a278e869b816e6389dbb520d74fde20f994686")
+
+    def test_format_independent_boundary_six_field_output(self):
+        candidate = request(asset_id=1, asset_decimals=19, amount_atoms=2**63-1,
+                            fee_microalgos=1, first_valid_round=1, last_valid_round=1001)
+        _, body = self.format_result(candidate)
+        self.assertEqual(bytes.fromhex(body["unsigned_hex"]), BOUNDARY)
+        self.assertEqual(body["transaction_id"], "RVE2KBMHTH3H3GCJTH5JNXKMH6LW5OD4N77UGIVH7QSPBK3BXMTQ")
+        self.assertEqual(body["source_binding_sha256"], "5f2eec7d9759af3b5d71408e7130e78c07d502376db3531926ef31740f5cf3a9")
+
+    def test_format_changed_request_not_fixed_golden(self):
+        candidate = request(asset_id=4243, amount_atoms=18, fee_microalgos=1001,
+                            first_valid_round=1000001, last_valid_round=1000999)
+        _, body = self.format_result(candidate)
+        wire = bytes.fromhex(body["unsigned_hex"])
+        self.assertNotIn(wire, (GOLDEN, BOUNDARY))
+        self.assertEqual(validate_unsigned_asa_probe(wire, candidate),
+                         build_unsigned_asa_probe(candidate))
+
+    def test_format_declaration_binding_does_not_authorize_wire(self):
+        _, original = self.format_result()
+        for changes in (dict(expected_auth_address=RECEIVER), dict(asset_decimals=0),
+                        dict(source_identity_sha256="b" * 64), dict(fee_cap_microalgos=3000)):
+            with self.subTest(field=next(iter(changes))):
+                _, body = self.format_result(request(**changes))
+                self.assertEqual(body["unsigned_hex"], original["unsigned_hex"])
+                self.assertEqual(body["transaction_id"], original["transaction_id"])
+                self.assertNotEqual(body["request_sha256"], original["request_sha256"])
+                self.assertNotEqual(body["source_binding_sha256"], original["source_binding_sha256"])
+
+    def test_format_deterministic_immutable_bytes_and_exact_request_hash(self):
+        raw = request_json()
+        before = bytes(raw)
+        first, body = self.format_result()
+        second = codec.format_unsigned_probe_request(raw)
+        self.assertEqual(first, second)
+        self.assertIs(type(second), bytes)
+        self.assertEqual(raw, before)
+        self.assertEqual(body["request_sha256"], hashlib.sha256(raw).hexdigest())
+        self.assertNotEqual(body["request_sha256"], body["unsigned_sha256"])
+
+    def test_format_exact_bytes_input_type(self):
+        class Derived(bytes):
+            pass
+        class Coercible:
+            def __bytes__(self):
+                raise AssertionError("coercion")
+            def __len__(self):
+                raise AssertionError("length")
+        raw = request_json()
+        for candidate in (None, raw.decode(), bytearray(raw), memoryview(raw),
+                          Derived(raw), Coercible()):
+            with self.subTest(kind=type(candidate).__name__):
+                self.reject_json(candidate)
+
+    def test_format_input_size_checked_before_parse(self):
+        with mock.patch.object(codec.json, "loads", side_effect=AssertionError("parser_called")):
+            for raw in (b"", b"x" * 4097):
+                with self.subTest(length=len(raw)):
+                    self.reject_json(raw)
+        self.reject_json(b"x" * 4096)
+
+    def test_format_nonascii_bom_and_nul_input(self):
+        raw = request_json()
+        for candidate in (b"\xef\xbb\xbf" + raw, b"\xff\xfe" + raw.decode().encode("utf-16-le"),
+                          raw.replace(b"TEST_TRANSPORT_PROBE", "probe\u00e9".encode()),
+                          raw.replace(b"TEST_TRANSPORT_PROBE", b"probe\0")):
+            self.reject_json(candidate)
+
+    def test_format_malformed_truncated_and_trailing_input(self):
+        raw = request_json()
+        for candidate in (raw[:-1], b"{", raw + b"{}", raw + b"false", raw[:-1] + b",}",
+                          b'{"amount_atoms":' + b"[" * 1500 + b"]" * 1500 + b"}"):
+            self.reject_json(candidate)
+
+    def test_format_exact_top_level_object(self):
+        for value in (None, [], [dataclasses.asdict(request())], True, 17, "request"):
+            self.reject_json(canonical_json(value))
+
+    def test_format_duplicate_equal_conflicting_and_escaped_keys(self):
+        raw = request_json()
+        for tail in (b',"amount_atoms":17}', b',"amount_atoms":18}',
+                     b',"amount\\u005fatoms":17}', b',"unknown":1,"unknown":1}'):
+            self.reject_json(raw[:-1] + tail)
+
+    def test_format_exact_fifteen_fields(self):
+        values = dataclasses.asdict(request())
+        self.assertEqual(len(values), 15)
+        for field in values:
+            with self.subTest(missing=field):
+                self.reject_json(canonical_json({k: v for k, v in values.items() if k != field}))
+        for field in ("unknown", "authorization", "profile", "producer_grant_sha256"):
+            self.reject_json(canonical_json(values | {field: "untrusted"}))
+
+    def test_format_canonical_key_order_and_whitespace(self):
+        values = dataclasses.asdict(request())
+        raw = request_json()
+        reordered = dict(reversed(sorted(values.items())))
+        for candidate in (b" " + raw, raw + b" ", raw + b"\n",
+                          json.dumps(values, sort_keys=True).encode(),
+                          json.dumps(reordered, separators=(",", ":")).encode()):
+            self.reject_json(candidate)
+
+    def test_format_canonical_escapes_and_negative_zero(self):
+        raw = request_json()
+        for candidate in (raw.replace(b'"purpose"', b'"\\u0070urpose"', 1),
+                          raw.replace(SENDER.encode(), b"\\u0041" + SENDER[1:].encode(), 1),
+                          request_json(asset_decimals=0).replace(
+                              b'"asset_decimals":0', b'"asset_decimals":-0', 1)):
+            self.reject_json(candidate)
+
+    def test_format_bool_float_and_numeric_strings(self):
+        for field in ("asset_id", "amount_atoms", "fee_microalgos", "fee_cap_microalgos",
+                      "first_valid_round", "last_valid_round", "asset_decimals"):
+            for value in (True, False, 1.0, "1"):
+                with self.subTest(field=field, kind=type(value).__name__):
+                    values = dataclasses.asdict(request()) | {field: value}
+                    self.reject_json(canonical_json(values))
+
+    def test_format_null_nested_and_wrong_scalar_kinds(self):
+        values = dataclasses.asdict(request())
+        for field, original in values.items():
+            wrong = (None, [], {}) + ((1, True) if type(original) is str else ())
+            for value in wrong:
+                with self.subTest(field=field, kind=type(value).__name__):
+                    self.reject_json(canonical_json(values | {field: value}))
+
+    def test_format_nonfinite_literals_and_exponent_overflow(self):
+        raw = request_json()
+        for value in (b"NaN", b"Infinity", b"-Infinity", b"1e999"):
+            self.reject_json(raw.replace(b'"amount_atoms":17', b'"amount_atoms":' + value, 1))
+
+    def test_format_exact_integer_and_decimal_bounds(self):
+        for field in ("asset_id", "amount_atoms", "fee_microalgos", "fee_cap_microalgos",
+                      "first_valid_round", "last_valid_round"):
+            for value in (0, -1, 2**63, 10**100):
+                self.reject_json(request_json(**{field: value}))
+        for value in (-1, 20):
+            self.reject_json(request_json(asset_decimals=value))
+        self.format_result(request(asset_decimals=0))
+
+    def test_format_existing_realm_address_fee_round_rules(self):
+        for field, value in (("purpose", "PAYOUT"), ("network", "algorand-mainnet"),
+                             ("genesis_id", "mainnet-v1.0"), ("genesis_hash_hex", "0" * 64),
+                             ("sender_address", SENDER.lower()),
+                             ("recipient_address", SENDER[:-1] + "X"),
+                             ("expected_auth_address", AUTH.lower()),
+                             ("source_identity_sha256", "g" * 64),
+                             ("fee_microalgos", 2001), ("last_valid_round", 999999),
+                             ("last_valid_round", 1001001)):
+            with self.subTest(field=field):
+                self.reject_json(request_json(**{field: value}))
+
+    def test_format_wrong_expected_request_wire_rejected(self):
+        other = build_unsigned_asa_probe(request(amount_atoms=18))
+        with mock.patch.object(codec, "build_unsigned_asa_probe", return_value=other):
+            self.reject_json(request_json())
+
+    def test_format_malformed_and_unbounded_emitted_wire_rejected(self):
+        original = build_unsigned_asa_probe(request())
+        inner = msgpack.unpackb(GOLDEN, raw=False)
+        duplicate = b"\x8b" + GOLDEN[1:] + msgpack.packb("fee") + msgpack.packb(1000)
+        malformed = (b"", b"x" * 1025, bytearray(GOLDEN), GOLDEN + b"\0", duplicate,
+                     packet(unknown=b"x"), msgpack.packb({"sig": b"x" * 64, "txn": inner}, use_bin_type=True),
+                     msgpack.packb(dict(reversed(list(inner.items()))), use_bin_type=True))
+        for raw in malformed:
+            poisoned = dataclasses.replace(original, unsigned_bytes=raw)
+            with mock.patch.object(codec, "build_unsigned_asa_probe", return_value=poisoned):
+                self.reject_json(request_json())
+
+    def test_format_validated_artifact_sidecars_are_used(self):
+        original = build_unsigned_asa_probe(request())
+        poisoned = dataclasses.replace(original, transaction_id="unvalidated",
+                                       source_binding_sha256="f" * 64)
+        with mock.patch.object(codec, "build_unsigned_asa_probe", return_value=poisoned):
+            _, body = self.format_result()
+        self.assertEqual(body["transaction_id"], original.transaction_id)
+        self.assertEqual(body["source_binding_sha256"], original.source_binding_sha256)
+
+    def test_format_maximum_real_valid_output_bounds(self):
+        largest = 2**63 - 1
+        candidate = request(asset_id=largest, amount_atoms=largest, asset_decimals=19,
+                            fee_microalgos=largest, fee_cap_microalgos=largest,
+                            first_valid_round=largest, last_valid_round=largest)
+        output, body = self.format_result(candidate)
+        self.assertLessEqual(len(request_json(**dataclasses.asdict(candidate))), 4096)
+        self.assertLessEqual(len(bytes.fromhex(body["unsigned_hex"])), 1024)
+        self.assertLessEqual(len(output), 16384)
+
+    def test_format_errors_do_not_echo_input(self):
+        marker = "submitted-value-must-not-appear"
+        for raw in (canonical_json(dataclasses.asdict(request()) | {marker: marker}),
+                    request_json(source_identity_sha256=marker),
+                    b'{"' + marker.encode() + b'":'):
+            with self.assertRaises(ValueError) as caught:
+                codec.format_unsigned_probe_request(raw)
+            self.assertIn(str(caught.exception), ("request_json", "source_identity_sha256"))
+            self.assertNotIn(marker, str(caught.exception))
+            self.assertIsNone(caught.exception.__cause__)
+            if caught.exception.__context__ is not None:
+                self.assertTrue(caught.exception.__suppress_context__)

@@ -1,5 +1,16 @@
 # Algorand module change log
 
+## 2026-10-29 — JSON framing convergence allocation
+
+Before merging child6b679c988: preserve its exact204-line formatter,52 ordinary
+tests, v2 inventory/release guard and dependency lock. Parentfc1a8576b retains
+the reviewed trust bootstrap and all current main362b metadata. Reuse the single
+existing codec owner; no new behavior, test framework or signer. Budget: <=14
+log lines plus exact metadata union; retain all current ledger entries and only
+the child's already source-reviewed fixture binding. Require independent static
+union review and fresh hosted52/security gates, then parent/main convergence.
+Existing13/P1 priority applies. Historical results are not new-head qualification.
+
 ## 2026-10-29 — Current-main blockchain convergence
 
 Publication repair allocation, before mutation: head487531fd passed the28-case
@@ -27,6 +38,16 @@ as a verified false positive; the reconciled head still needs fresh gates.
 Clarify account/signature/State-Proof boundaries without adding cryptography.
 Current patched-runtime, ledger/authority, exact-artifact replay and signer
 qualification remain separate. No chain operation or reward effect occurred.
+
+## 2026-10-25 — bounded canonical JSON framing locally qualified
+
+WSP11/15/22/50/62/84/97,13/P1. Added one bytes-only framing contract in the
+existing codec: exact15-field canonical request, existing build/general validation
+and six-field bounded immutable output. Full-request binding is data, not authority.
+Tests were authored first:24 new methods preserve all original28 ASTs and controls.
+Actual RED and52PASS GREEN/profile evidence is recorded in tests/TestModLog.md;
+hosted/security qualification remains separate. Original28 evidence is unchanged.
+No new FAM/SQL/launcher/facts/ledger/signer/chain/reward behavior is introduced.
 
 ## 2026-10-25 — local unsigned codec qualification passed
 
