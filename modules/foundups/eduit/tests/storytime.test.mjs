@@ -51,7 +51,7 @@ test('educational typography cannot change tremor physics',()=>{
 });
 
 import {gameWorld,gameEvents} from '../../../../public/eduit/storytime/game-world.mjs';
-test('game cues have valid source foley and progressive world hazards',()=>{for(const e of gameEvents){assert.ok(e.sourceTime>=0&&e.sourceTime+e.sourceDuration<=15);assert.ok(e.start<e.end&&e.end<=DURATION);}const s={...initial(),elapsed:24};const early=gameWorld(s,s.actors),late=gameWorld({...s,elapsed:40},s.actors);assert.ok(late.warning>early.warning);assert.ok(scene(early).includes('falling-dirt'));assert.ok(scene(late).includes('new-cracks'));assert.equal(gameWorld({...s,outcome:'rescued'},s.actors).collapse,0);});
+test('game cues have valid source foley and progressive world hazards',()=>{for(const e of gameEvents){assert.ok(e.sourceTime>=0&&e.sourceTime+e.sourceDuration<=15);assert.ok(e.start<e.end&&e.end<=DURATION);}const s={...initial(),elapsed:24};const early=gameWorld(s,s.actors),late=gameWorld({...s,elapsed:40},s.actors);assert.ok(late.warning>early.warning);assert.ok(scene(early).includes('falling-dirt'));assert.ok(scene(late).includes('new-cracks'));assert.equal(gameWorld({...s,outcome:'rescued',victoryAt:20,elapsed:22},s.actors).collapse,1);});
 
 // Appearance is presentation only; these fixed render oracles come from main 8b345ec.
 import {createHash} from 'node:crypto';
@@ -109,4 +109,19 @@ test('preschool sniff label avoids the five actor envelopes and the rescue desti
   assert.equal(p.overlap,0);assert.ok(p.size>=72);assert.ok(p.box.left>=0&&p.box.right<=960);
   assert.ok(p.box.top>=0&&p.box.bottom<=540);
  }
+});
+
+
+test('successful rescue collapses the roof before the foot lifts, preserving survivors',()=>{
+ const state=initial();state.outcome='rescued';state.victoryAt=10;
+ state.actors=state.actors.map(a=>({...a,status:'safe'}));
+ const at=age=>{const s={...state,elapsed:state.victoryAt+age};const world=gameWorld(s,s.actors);return {world,svg:scene(world)};};
+ const before=at(0),contact=at(.5),after=at(2);
+ assert.equal(before.world.collapse,0);
+ assert.equal(contact.world.collapse,1);
+ assert.ok(contact.svg.includes('data-event="falling-roof"'));
+ assert.ok(!contact.svg.includes('M30 430 L30 260'));
+ assert.ok(after.svg.includes('data-event="footprint"'));
+ assert.equal((after.svg.match(/data-survivor=/g)||[]).length,5);
+ assert.ok(after.svg.includes('data-place="root-pocket"'));
 });
