@@ -1,5 +1,10 @@
 # LiveChat Module Test Suite
 
+The 2026-10-29 private-theme fallback and bounded MessageProcessor checks reuse
+`modules/communication/video_comments/tests/test_reply_semantic_assessment.py`
+(from this directory: `../../video_comments/tests/`). See that module's
+tests README and this TestModLog for the explicit offline selector and boundaries.
+
 ## Bounded confirmed-handoff acceptance (PR841)
 
 Run the two explicitly scoped files; do not collect historical live integrations:
@@ -165,4 +170,4 @@ python -m pytest modules/livechat/tests/ --cov=modules.livechat.src --cov-report
 - Viewer tracking tests added to test the `_update_viewer_count` method, including successful updates and handling of various error conditions 
 - Logging tests consolidated in test_livechat_logging.py, including comprehensive tests for the `_log_to_user_file` method with tests for success cases, file errors, directory creation errors, and JSON serialization errors 
 - Auto-moderation tests created in test_livechat_auto_moderation.py, covering the AutoModerator class functionality, integration with LiveChatListener, banned phrase detection, timeout logic, API error handling, and cooldown management
-- All specialized test files have been fully consolidated, with their functionality moved to the appropriate modular test files 
+- All specialized test files have been fully consolidated, with their functionality moved to the appropriate modular test files

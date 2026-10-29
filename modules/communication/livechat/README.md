@@ -1,5 +1,14 @@
 # LiveChat
 
+The private-theme route retains reviewed Grok replies and uses the existing local
+general-language assessment/writer/reviewer if Grok is unavailable or rejects a
+draft. The fallback requires LM Studio HTTP, keeps livechat scope and full native
+theme snapshots, and reviews the final `@mention` within 200 characters. Existing
+engagement/cooldown decisions precede the ten-second threaded wait; late results
+are discarded and busy shared generation/review locks reject immediately. See
+[the interface](INTERFACE.md) and [repair handoff](../video_comments/docs/CHAT_MANIFEST_REPAIR_20261029.md)
+for cancellation limits and remaining live qualification.
+
 ## Current bounded live handoff
 
 PR841 preserves independent Chrome/Edge comment loops during a confirmed API live

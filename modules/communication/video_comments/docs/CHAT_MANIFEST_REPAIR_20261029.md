@@ -4,6 +4,75 @@
 Windows for an observed test. GitHub changes do not automatically update an
 existing PC checkout or a running Python process.
 
+## Follow-up private livechat fallback — 2026-10-29
+
+The follow-up source starts at merged-main
+`887c09dd2d72162dce4747235bc2e1d0041cbf44` in the same isolated repair worktree,
+branch `fix/youtube-livechat-local-theme-route-20261029`. Preserve the older dirty
+PC checkout. PR2254's publication/main checks belong to its own receipt; those
+checks do not accept this follow-up's source or installed runtime.
+
+A separate private runtime probe observed HTTP403 from the existing Grok client.
+That cloud account/service condition remains outside this source repair. Retain
+the existing successful reviewed Grok path and, after unavailable/empty/failed/
+rejected themed output, reuse `get_reply_generator().generate_reply_with_source`
+plus `inspect_reply` through the approved general-language LM Studio HTTP route.
+No new provider, store, scheduler or paid retry is introduced. Actual local-model
+QA, source publication and live delivery are separate gates; fixture tests do not
+substitute for any of them.
+
+The explicit `reply_surface='livechat'` requires semantic context, reads only the
+livechat queue theme and excludes embedded Qwen/cloud/template re-entry. Stored
+comments keep their default reader, history/cooldown and provider behavior.
+Author ID, receiving channel and stream title are supplied to generation/review;
+the existing livechat generator cache is bound to channel and stream identity.
+Review sees the exact final `@mention` within 200 characters. The reviewed payload
+deep-copies the full native theme, retaining its scope/expiry/command metadata
+for the existing ChatSender post-delay guard. Theme expiry, replacement or native
+metadata drift blocks sending; no truncation follows approval.
+Both main generation and the direct local helper reject malformed native theme
+normalization before provider calls. The helper retains one qualified normalized
+theme for comparison with the generation receipt; `None` cannot serve as proof.
+
+Both existing eligible MessageProcessor call sites use
+`wait_for(to_thread(...), 10.0)` with a cancellation event. Existing engagement
+and cooldown checks precede them. Livechat rejects busy shared generator/reviewer
+locks immediately; comments keep serialized blocking access. Timeout discards
+late results and prevents later provider stages/local fallback, including after
+news/history/voice preparation. It cannot stop an already-active provider call;
+the ten-second await is not a process-kill or browser rollback guarantee. The
+caller retains themed mode across the await, so clearing context cannot enable
+an unreviewed string/template fallback.
+
+Current direct retrieval independently confirmed the owned branch and source.
+The source-bound Holo query returned `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`,
+`ok=false`, `freshness=UNKNOWN`, `index_gap_detected=true`; no reindex occurred.
+Authority HEAD was `68562f2c8ca4749e360e76758183319d54988879`; workspace HEAD was
+the merged-main base above. Retrieval evaluation: lexical WSP ordering was noisy,
+the module bundle found existing contracts, optional memory docs and the comments
+requirements file were absent, and direct exact-source reads removed staleness/
+duplication risk. Reuse the existing general-language model owner; deterministic
+API/cancellation checks and independent review govern this bounded repair rather
+than introducing another autonomous mutation or inference path.
+
+Local Windows offline verification: semantic **88** + unchanged submission history
+**16** = **104 passed**, 12 subtests passed, zero failures/errors/skips. Original
+context **53**, adjacent queue/lifecycle/control-plane **116** and separate stdlib
+inspection **15** pass independently. The combined157 run is context53 +
+the same104 and must not be added to them. The existing task TEMP evidence root
+retains `followup-repair-results.xml` for the 104-case CI inventory. Tests execute
+real source definitions with fixture providers/synthetic browser data and cover
+busy locks, comment serialization, heartbeat, late payload discard, no late local
+fallback and theme clearing; no public message, paid API or DAE startup occurred.
+Independent read-only review initially reproduced the 151-case selection, then
+found invalid native source/handle fields could normalize to `None` and still
+produce a reviewed reply. Six new controls reproduced this bypass in both entry
+points before repair and now pass without provider work. The earlier acceptance
+was withdrawn for this narrow fix. Renewed independent review accepts the fix and
+separately passes 157 cases with 12 subtests; that source acceptance awaits final
+commit identity. Real local-model QA and exact-head/main checks belong to their
+corresponding acceptance steps.
+
 ## Source and retrieval boundary
 
 Original repair head: `5aa828e12905659d26784a77df564ea114eb68f9`, based on
