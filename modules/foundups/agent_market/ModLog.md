@@ -1,5 +1,21 @@
 # ModLog - FoundUps Agent Market
 
+## 2026-10-29 — Final testnet safety integration allocation
+
+WSP11/15/22/50/77/84/97; convergence C2/I4/D4/Impact4=14/P1.
+Both constituent layers already have frozen tests and independent acceptance:
+quantity8e09a948 and revalidationd8c8f516, with delivered parent dedb0e032.
+Combine their exact product/oracle blobs in PR2261; no new behavior or test owner.
+Retain each PR's evidence. Close PR2210 as incorporated only after exact source
+preservation, fresh combined tests, independent review and resulting-main proof.
+Preserve all main history, the original registry and same manifest membership;
+union only the existing individually reviewed metadata approvals. Resolve shared
+documentation additively. Budget: constituent file union, <=24 module-log and
+<=12 test-log lines for allocation/results; no new implementation or thresholds.
+Run connected intent/quantity/FAM owners with the existing offline scratch runner,
+then exact-head hosted and resulting-main gates. This integration authorizes no
+issuer, signer, runtime activation, fund movement, broadcast or paid settlement.
+
 ## 2026-10-29 — Exact quantity admission before launch effects
 
 WSP00/6/11/15/22/50/77/84/97; allocated17/P0 before tests/product.
