@@ -1069,6 +1069,7 @@ jobs:
           -o pythonpath=. -p no:cacheprovider
           tools/modular_audit/tests/test_modular_audit.py
           tools/modular_audit/tests/test_fmas_mode2.py
+          tools/modular_audit/tests/test_secret_scan.py
           modules/infrastructure/wre_core/tests/test_fmas_health_triage.py
           modules/communication/moltbot_bridge/tests/test_reddog_wsp62_security_repair_exemptions.py::test_interface_contract_pages_need_no_size_exemption
 
