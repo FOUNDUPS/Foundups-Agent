@@ -2,6 +2,47 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## Exact quantity admission allocation — 2026-10-29, before tests/product
+
+WSP15 C3/I5/D5/Impact4=17/P0; WSP3/6/11/15/22/50/62/71/77/84/97.
+Pinned main f304ba799. Source audit finds eight domain-schema quantity predicates
+accept bool and int subclasses; deceptive comparisons can admit negative values.
+LaunchOrchestrator also coerces the planned reward with int(), and validates the
+initial task after registry/token/repository calls. Need: reject ambiguous monetary
+inputs before adapter effects, while preserving valid integer launch behavior.
+
+Reuse models.py, orchestrator.py and existing test_schemas.py/test_orchestrator.py.
+Require built-in int at the eight existing positive/nonnegative quantity guards.
+Construct the existing optional Task before any launch adapter call, retaining its
+ordinary validation/defaults and passing the raw reward without coercion. No new
+numeric framework, unit conversion, supply policy, schema or identity issuer.
+Keep the existing failure-result/audit-event contract; refusal must not create a
+FoundUp, deploy/configure a token, provision a repository or create a task.
+
+Freeze old IDs/oracles and desired bool/float/string/Decimal/Fraction/int-subclass
+and exact minimum-boundary controls before production edits. Reuse the two test
+owners, <=100 and <=55 added lines respectively. Preserve setup failures and
+actual RED; run both owners plus existing compute/permission/lifecycle/SQLite
+verification compatibility, exact prior-ID parity and independent effect review.
+Production budget: eight predicate replacements; move the existing Task block
+with <=8 net new lines, no new function and no broader launch redesign.
+
+The two production sources are already in the RedDog source manifest. Regenerate
+it with its existing static owner; require the same member set and only these
+two source hashes to change. This allocates source integrity, not installed-
+runtime activation. Restore no old manifest or old registry; preserve newer main.
+Any actual changed-whole-file scanner findings need exact source-bound review
+before their existing ledger can change; no anticipated or blanket exception.
+Structured memory budget: module README/INTERFACE/ROADMAP <=14 lines each,
+ModLog/tests TestModLog <=20 each, tests README <=12, this plan <=48/root log <=12.
+
+Scope limit: active compute adapters have separate coercing dictionary/ORM inputs;
+domain-schema hardening does not qualify those ingress paths. Controller-level
+verifier separation, funded aggregate caps, denomination/rounding, storage range,
+immutable intent/artifact/reissue state, signer and finality remain independent
+P0 gates. No provider, account/key generation, signing, broadcast or funds.
+Execution is deterministic local source/testing plus CI, not resident authority.
+
 ## Member host bootstrap allocation — 2026-10-26, before authoring
 
 WSP15 C3/I4/D4/Impact4=15/P1; WSP00/3/6/11/22/49/50/62/71/77/84/97/109.
