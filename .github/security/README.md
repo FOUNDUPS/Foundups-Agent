@@ -1,3 +1,21 @@
+## PR2254 YouTube reply manifest rebind — 2026-10-29
+
+The checksum-verified Gitleaks 8.30.1 full Git-LF tree scan at source
+`9b50dae1c3e57f224ebbe53a2840de42f218e5fa` reports 171 findings: 133 exact prior
+reviews and 38 renewed manifest bindings. Author and independent reviewer each
+verified all 171 finding-bearing files against immutable Git blobs, all 1,472
+runtime source digests, and the 38 unique unchanged metadata lines and prior
+exact approvals at `62eae2428ef2bc6c91540be36c2de3f2bd85146f`.
+
+Preserve all 2,495 prior entries and append only those 38 exact file/rule/line
+bindings. The final canonical backend digest is
+`4fd3be5f1b0c25cc4cadfd3c2785662ac3ceeb14cd918fbef49c4812955fccc5`.
+The intermediate source-commit history scan reports zero findings. Scanner rules,
+scope, exclusions and fingerprint behavior are unchanged. An initial Windows
+archive with CRLF conversion was discarded; the accepted scan explicitly forces
+Git LF output and verifies finding-bearing bytes against Git objects. Fresh
+final tree/history checks remain required; metadata review is not deployment.
+
 ## PR2215 Story Time manifest rebind — 2026-10-25
 
 Hosted job121251681796 reported39 manifest metadata findings. Author and

@@ -830,6 +830,19 @@ class MessageProcessor:
                         logger.info(f"🛡️ Intelligent throttle blocked MAGA response to {author_name}: {block_msg}")
                         return None
 
+                from modules.communication.livechat.src.operator_command_queue import load_active_theme
+                if load_active_theme('livechat'):
+                    if (processed_message.get('is_rate_limited') or not self.intelligent_reply
+                            or not _env_truthy('YT_COMMENT_REPLY_ENABLED', 'true')):
+                        return None
+                    response = self.intelligent_reply.generate_reply(
+                        message=message_text, username=author_name, user_id=author_id,
+                        role=role, is_member=processed_message.get('is_member', False))
+                    if response:
+                        self._update_maga_time(author_id)
+                        self.last_global_maga_time = current_time
+                    return response
+
                 # Reuse the MAGA response generated during classification to prevent duplicates
                 response = processed_message.get("maga_response")
                 if response:
@@ -874,6 +887,10 @@ class MessageProcessor:
                         logger.info(f"[GROK] Intelligent reply for {author_name}{member_tag}")
                         return response
                 
+                from modules.communication.livechat.src.operator_command_queue import load_active_theme
+                if load_active_theme('livechat'):
+                    return None  # Rejected themed drafts cannot fall back to uninspected banter.
+
                 # Fallback: Try banter engine
                 response = await self._generate_banter_response(message_text, author_name)
                 

@@ -1,8 +1,8 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1776,
-  "quarantined_tests": 273,
+  "total_tests": 1779,
+  "quarantined_tests": 275,
   "tests": [
     {
       "id": "test::WSP_agentic::tests::test_0102_awakening_with_pqn_verification",
@@ -13656,6 +13656,21 @@
       "description": "OOPS Page Account Switch Tests\n==============================\n\nTests for the direct OOPS page account switching flow.\n\nThis file also serves as UI-TARS training data documentation:\n- Expected DOM elements on OOPS page\n- Account picker structure after clicking \"Switch account\"\n- Success/failure verification criteria\n\nWSP Compliance:\n- WSP 5: Test Coverage\n- WSP 27: DAE Architecture (Action -> Verify)"
     },
     {
+      "id": "test::modules::communication::video_comments::tests::test_chat_manifest_inspection",
+      "path": "modules/communication/video_comments/tests/test_chat_manifest_inspection.py",
+      "owner": "modules/communication/video_comments",
+      "suite_class": "operational",
+      "shard_id": "modules-communication-video-comments-operational",
+      "capabilities": [],
+      "execution_type": "operational",
+      "collectable": false,
+      "timeout_s": 900,
+      "quarantine_reasons": [
+        "module_scope_local_function_invocation"
+      ],
+      "description": "Bounded stdlib regression selection; no package startup, model or browser.\n\nCompile complete production definitions with explicit collaborators. Queue files\nare real temporary files; its lock is stubbed here (existing queue tests own lock\nqualification). Provider and browser results are fixtures, not live receipts.\nRun: python -B -m unittest discover -s modules/communication/video_comments/tests\n     -p test_chat_manifest_inspection.py -v"
+    },
+    {
       "id": "test::modules::communication::video_comments::tests::test_classifier_pipeline",
       "path": "modules/communication/video_comments/tests/test_classifier_pipeline.py",
       "owner": "modules/communication/video_comments",
@@ -13781,11 +13796,41 @@
       "description": "Exact-source behavioral tests; package imports/constructors/live providers excluded.\n\nThe private loader compiles complete production definitions with denied optional\ncollaborators. No Selenium, profile store, model, network, or posting is started.\nDOM checks run the actual extraction JavaScript against synthetic rows in Node."
     },
     {
+      "id": "test::modules::communication::video_comments::tests::test_reply_semantic_assessment",
+      "path": "modules/communication/video_comments/tests/test_reply_semantic_assessment.py",
+      "owner": "modules/communication/video_comments",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline meaning/review contracts. Fixture judgments are not live model evidence."
+    },
+    {
+      "id": "test::modules::communication::video_comments::tests::test_reply_submission_history",
+      "path": "modules/communication/video_comments/tests/test_reply_submission_history.py",
+      "owner": "modules/communication/video_comments",
+      "suite_class": "operational",
+      "shard_id": "modules-communication-video-comments-operational",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "operational",
+      "collectable": false,
+      "timeout_s": 900,
+      "quarantine_reasons": [
+        "module_scope_local_function_invocation"
+      ],
+      "description": "Offline durable SQLite and exact-source browser-script contracts.\n\nNo Selenium package startup, credentials, model, browser or network is used.\nJavaScript runs in Node against an explicit synthetic DOM; it is not live proof."
+    },
+    {
       "id": "test::modules::communication::video_comments::tests::test_reply_to_comment",
       "path": "modules/communication/video_comments/tests/test_reply_to_comment.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit-part-01",
+      "shard_id": "modules-communication-video-comments-unit-part-02",
       "capabilities": [
         "import_path_mutation",
         "logging_configuration"

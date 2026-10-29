@@ -107,6 +107,45 @@ jobs:
           modules/communication/livechat/tests/test_operator_command_lifecycle.py
           modules/communication/video_comments/tests/test_commenting_control_plane.py
 
+      - name: Verify private themes and inspected replies with stdlib
+        shell: python
+        run: |
+          import sys
+          import unittest
+          from pathlib import Path
+          sys.path.insert(0, str(Path.cwd()))
+          suite = unittest.defaultTestLoader.discover(
+              'modules/communication/video_comments/tests',
+              pattern='test_chat_manifest_inspection.py')
+          result = unittest.TextTestRunner(verbosity=2).run(suite)
+          assert result.testsRun == 15 and not result.skipped, (result.testsRun, result.skipped)
+          sys.exit(0 if result.wasSuccessful() else 1)
+      - name: Verify durable reply attempts and semantic assessment
+        run: >-
+          python -B -m pytest --import-mode=importlib -o addopts=
+          -p pytest_asyncio.plugin -p no:cacheprovider -q --tb=short
+          modules/communication/video_comments/tests/test_reply_submission_history.py
+          modules/communication/video_comments/tests/test_reply_semantic_assessment.py
+          --junitxml=reply-repair-results.xml
+      - name: Require reply repair results without skips
+        shell: python
+        run: |
+          import hashlib
+          import xml.etree.ElementTree as ET
+          root = ET.parse('reply-repair-results.xml').getroot()
+          cases = list(root.iter('testcase'))
+          assert cases and not any(list(root.iter(tag)) for tag in ('failure', 'error', 'skipped'))
+          names = sorted(case.get('name') for case in cases)
+          digest = hashlib.sha256('\n'.join(names).encode()).hexdigest()
+          assert len(cases) == 41 and digest == '749231f87a938ee30520fc74e8c87548771193d7621625fd20d292ecdf47a242', (len(cases), digest)
+      - name: Preserve reply repair results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reply-repair-results-${{ matrix.os }}
+          path: reply-repair-results.xml
+          if-no-files-found: error
+
       - name: Verify isolated reply provenance and row context
         run: >-
           python -B -m pytest --import-mode=importlib -o addopts=

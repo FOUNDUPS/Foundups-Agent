@@ -173,8 +173,14 @@ def test_identical_duplicate_pending_is_processed_once_and_old_reason_is_removed
 def test_deferred_context_does_not_extend_ttl(tmp_path, monkeypatch, advance, expected):
     queue = make_queue(tmp_path, [command("set_context", ttl_seconds=60, message="Update")], chat=None)
     monkeypatch.setattr(module.time, "time", lambda: 100)
+    # A pending receipt from the older watcher retains its original deadline.
+    original = queue._dispatch
+    async def defer(command, row, recorded):
+        return {'status': 'deferred', 'reason': 'legacy_livechat_unavailable'}
+    queue._dispatch = defer
     assert poll(queue)["results"][0]["status"] == "deferred"
     assert json.loads(queue.state_path.read_text())["active_context"] is None
+    queue._dispatch = original
     monkeypatch.setattr(module.time, "time", lambda: 100 + advance)
     queue.dae.livechat = FakeLiveChat()
     assert poll(queue)["results"][0]["status"] == expected
@@ -192,7 +198,14 @@ def test_deferred_context_does_not_extend_ttl(tmp_path, monkeypatch, advance, ex
 ])
 def test_pending_context_cannot_resurrect_cleared_or_superseded_context(tmp_path, newer):
     queue = make_queue(tmp_path, [command("set_context"), newer], chat=None)
+    original = queue._dispatch
+    async def defer_old(command, row, recorded):
+        if command['id'] == 'voice-1':
+            return {'status': 'deferred', 'reason': 'legacy_livechat_unavailable'}
+        return await original(command, row, recorded)
+    queue._dispatch = defer_old
     assert poll(queue)["results"][0]["status"] == "deferred"
+    queue._dispatch = original
     before = json.loads(queue.state_path.read_text())["active_context"]
     queue.dae.livechat = FakeLiveChat()
     assert poll(queue)["results"][0]["status"] == "superseded"

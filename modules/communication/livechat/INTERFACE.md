@@ -48,6 +48,24 @@ This module exports:
 
 ## Operator command inbox (Phase 1)
 
+`set_context` activates private behavioral guidance and records
+`context_activated=true, public_message_sent=false`. Only `announce` sends the
+operator's message publicly. A private activation needs no public sender;
+existing STOP, automation, selected-surface and dry-run gates remain authoritative.
+`enqueue_operator_command(command, command_path=None, acknowledgement_path=None)`
+appends under the existing queue ledger lock, preserving queued work and rejecting
+reused IDs. Producers never write active state or acknowledgements.
+Spoken scope: “Live stream …” selects livechat; “Commenting …” selects comments;
+“Push …” selects both; “Update the chat manifest with …” is private and honors
+the stated scope (both when unstated). A public announcement requires explicit intent.
+
+Themed livechat uses the existing language client and bounded final review.
+`ReviewedLivechatReply` carries reviewed text and theme to `ChatSender`, which
+rechecks them after delay/conversion immediately before the API request. Existing
+engagement and cooldown gates still precede themed generation. A rejected theme
+reply cannot fall back to uninspected banter. Receipt, active context and observed
+wording are distinct outcomes; API acceptance alone is not delivery readback.
+
 `OperatorCommandQueue` polls the trusted-local `memory/012_manifest.json` once
 per minute. `AutoModeratorDAE.run()` owns and awaits its watcher on every exit.
 Allowlisted actions: `status`, gated `announce`, gated `set_context`, and local
