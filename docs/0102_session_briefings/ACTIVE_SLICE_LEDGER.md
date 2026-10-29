@@ -2,6 +2,40 @@
 
 ## PR reconciliation — 2026-10-29
 
+**Latest accepted slice:** #2267, head `2dbe57de2`, base `34b05f48d`, squash
+`4533f7321f8ee5c857ca7f9dc17801b716d429fe`. All 23 logical PR checks and four
+resulting-main workflows passed. Holo source/workspace/authority match that main,
+CURRENT/no-gap, generation
+`fc2d25bd3ac645e08975c2e65abe86283e40bb66f590208744704151d79d48c7`.
+Both owned maintenance runtimes stopped. Fifteen owned merges are closed.
+The original queue remains preserved; the last snapshot contains 36 other PRs.
+
+**Current slice:** `agent/security-cloudflare-undici-20261029`, base main4533.
+Update the eSingularity Cloudflare plugin/Wrangler/workers-types cohort so the
+upstream Miniflare pin resolves Undici 7.30.1. Four high and one medium alert
+identify this frontend path. Next/React/Vinext/Vite versions and page content are
+preserved; npm's optional WASM lock entries are reconciled with CI's npm version.
+Existing 85 Python and 26 Node cases plus catalog validation pass. Candidate lock
+audit reports zero known advisories. Clean install (scripts disabled), lint
+(zero errors/seven image warnings) and production build pass on Node 24.22.1 /
+npm 11.19.1. Hosted/main/Holo close-out remains required before a successor PR.
+
+**Critical dependency follow-up:** Chroma 1.5.5 has two critical alerts without
+listed patched versions. Readonly Holo snapshots avoid direct Chroma queries,
+but maintenance and legacy callers remain under exposure review. A synthetic,
+network/database/process-denied helper probe shows `embedding_function=None`
+still permits configured embedding construction. This is not full client/server
+mitigation evidence. Retain alerts and qualify real configuration-provenance
+controls before changing the qualified runtime. No exploit or production mutation.
+
+**Prepared follow-ons:** 24 source-reviewed contract documents for seven owners
+remain outside the checkout. Five of the eight unqualified containers contain
+code and need ownership review; do not label all eight data-only or hide them.
+Root artifact evidence preserves all bytes, including the malformed tracked
+Firestore file. F5/F6b/F8/F9 and reviewed decomposition remain on the work list.
+
+## Earlier F6a preparation (historical)
+
 **Latest accepted slice:** #2266, head `632c49293`, base `77b824801`, squash
 `34b05f48d74f55c09a542db44efb8ba271a8fe56`. All 24 logical PR checks and five
 resulting-main workflows passed. Holo source/workspace/authority all match that
