@@ -1,3 +1,12 @@
+## 2026-10-29 - Current-main bounded-audit integration
+
+Verified main `34b05f48` contributes two audit test owners, giving canonical
+registry 1,789 files / 260 quarantined and superseding the pre-merge 1,787 count.
+Accepted runtime membership (1,474), source digests, both pins and CI helper
+bytes are unchanged. Current-owner security and narrow canonical/index checks
+have separate private receipts; no live pip-audit/Bandit/npm execution or
+whole-repository security clearance follows from synthetic audit acceptance.
+
 ## 2026-10-29 - Native startup and scheduled inventory packaging
 
 Canonical registry generation/check gives 1,787 files, 260 quarantined, after
