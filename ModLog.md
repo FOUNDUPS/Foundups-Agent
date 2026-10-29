@@ -280,6 +280,23 @@ Parent2206 and current hosted/security gates govern publication/main; local
 qualification grants no runtime/producer authority. Portable evidence:
 `docs/architecture/receipts/FOUNDUPS_ALGORAND_FORMAT_PROTOCOL_20261025.json`.
 
+## 2026-10-25 — Existing-only TestNet intent revalidation
+
+WSP00/6/11/15/22/50/62/84/97; preallocated15/P1, same service/test owners.
+Add require-existing full-DTO revalidation through shared current admission;
+missing records cannot allocate/recreate. Preserve prepare/schema3/runtime caps.
+Desired RED174pass/54missing-API failures; focused228 and all19FAM514 pass,
+retaining all459 old IDs plus55 new cases. Counts are nonadditive; zero guards.
+Preserve all old receipt/companion fields and document the four handoff decisions.
+This is a stacked local component pending parent/security gates, with no formatter,
+signer, chain, issuance, payment or production-site activation.
+
+Security follow-up14/P1: hosted job121179224336 found17 unchanged companion
+source-digest mappings with stale full-file bindings; zero history findings.
+Root and peer proved historical source bytes and every prior fingerprint.
+Retain2277 records, append only17 exact bindings (2294); no scanner relaxation.
+Fresh hosted scans required; parent GitGuardian remains separate.
+
 ## 2026-10-25 — FoundUps unsigned integration checkpoint
 
 WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97. Three documentation paths only.
@@ -340,6 +357,34 @@ existing codec. Existing FAM intent/accounting owners and global CI/dependencies
 remain unchanged. No resident import, signer, ledger, provider, chain or paid state
 effect is allocated; next integration needs trusted ledger and artifact ownership.
 
+## 2026-10-25 — TestNet evidence portability and exact metadata review
+
+WSP15/22/50/97; preallocated 14/P1. Preserve the companion's committed Git LF
+bytes and all source/test evidence. The main receipt now explicitly separates
+portable Git LF integrity from its original Windows raw packaging hash. Parent
+and peer approve only 17 recorded source-SHA fingerprints, retaining all 2,181
+old ledger entries (2,198 total). Both reviews and historical limits remain in
+the intent plan. No scanner rule, source behavior or unknown finding changes;
+the separate GitGuardian main-receipt incident remains unresolved.
+Current reconciliation retains published main0909 (PR2208's38 successful checks,
+16-file and whole-tree source readback). Preserve both parent logs and exact
+2,277-entry prior-approval union; regenerate/check registry1,772/273. Main's
+f427 manifest,1,471 members and caps remain unchanged. No intent/source/oracle
+or authority extension; immutable review and fresh hosted gates remain required.
+
+## 2026-10-25 — Durable local TestNet probe preparation
+
+WSP00/6/11/15/22/50/62/97; runtime 16/P0, evidence/docs 14/P1. Add an explicit
+immutable TestNet probe-intent API, one shared ORM row and additive migration3.
+Current authority, complete pending lineage, exact integer units/identity/expiry
+and actual SQLite schema precede the single new row or exact content replay.
+Payout/task/event/compute state stays unchanged. Repaired focused 173, independent
+16 and qualified full FAM 459 pass with honest overlap and preserved failures.
+The full run binds 203 stable sources and confines 1,061 SQLite connections.
+Canonical test registry adds one unit owner: 1,771 files, 273 quarantined.
+The module plan retains generated-column, fixture, inventory and packaging
+corrections. No resident integration, signer, chain effect or paid reward exists;
+corrected portable evidence and dedicated hosted publication gates remain.
 ## 2026-10-25 — FoundUps delivery and research checkpoint
 
 WSP15 C2/I4/D4/Impact4=14/P1; WSP22/50/97. Reconcile existing delivery/research

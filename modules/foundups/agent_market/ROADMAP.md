@@ -20,10 +20,27 @@ Separate compute dictionary/ORM inputs are not qualified by this change.
 - [ ] Authenticated transport/domain issuer and current-grant resolution. The
   Python context itself supplies no signature, expiry or revocation mechanism.
 - [ ] Real testnet adapter, independently confirmed effects and settlement.
+- [x] Opt-in local `TEST_TRANSPORT_PROBE` intent preparation: immutable explicit
+  units/host policy, current authority, strict SQLite v3 schema and complete
+  content-bound replay. Final all-FAM 459 and independent 16 pass; see TestModLog.
+- [ ] Resident caller integration and any required generated source-closure
+  admission for the new explicit module API. No resident import/export is added.
+- [ ] Independently verify real TestNet genesis, asset properties, address
+  checksum/control, expected signer and restricted funding before unsigned
+  transaction preparation, broadcast/finality/recovery qualification.
+- [ ] Resolve reward denomination, issuance/vesting and WSP26 transfer policy
+  before connecting a probe to reward settlement. Existing payout stays pending.
 
 The [delivery plan](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md)
 records pre-execution WSP 15 priorities and evidence. Existing atomic SQLite
 verification and pending-payout repairs below remain in place.
+
+## Existing-intent revalidation allocation — 2026-10-25
+
+- [x] Locally qualified existing-only full-DTO revalidation; supplied policy/
+  authority rechecked, missing rows deny without recreation. Host resolves freshness.
+- [x] Kept schema 3 and prepare/get-or-create; qualified no-write/reopen
+  checks before a separately allocated formatter. Revalidation is point-in-time.
 
 ## Domain Alignment References
 - `modules/foundups/ROADMAP.md`

@@ -302,8 +302,8 @@ FAMDaemonHealth(
 ### Persistence Repository Layer (Prototype Tranche 2)
 
 **Shared persistence mappings:**
-- `src/persistence/orm_models.py` owns the single Base and13 row declarations. Existing `sqlite_adapter.Base` and row imports re-export identical objects; PostgreSQL retains that compatibility path.
-- Mapping definitions, metadata inventory, schema/migrations and adapter method behavior are unchanged. Legacy pickle globals resolve; newly emitted row pickles name `orm_models` and require that module when loading, including rollback. No repository FAM pickle consumer was found; this is not a durable serialization-format guarantee.
+- `src/persistence/orm_models.py` owns the single Base and 14 row declarations. The original 13 mappings and `sqlite_adapter.Base`/row re-export identities remain unchanged; the probe row is imported directly from `orm_models`.
+- Legacy pickle globals resolve; newly emitted row pickles name `orm_models` and require that module when loading, including rollback. No repository FAM pickle consumer was found; this is not a durable serialization-format guarantee. Migration3 adds only the probe-intent table; existing adapter methods are unchanged.
 
 **SQLiteAdapter:**
 - Primary persistence adapter for local/dev and deterministic test execution.
@@ -336,7 +336,7 @@ create_repository(config: RepositoryConfig | None = None) -> SQLiteAdapter
 - `list_applied_versions() -> list[int]`
 
 **Schema Versioning:**
-- `LATEST_SCHEMA_VERSION = 2`
+- `LATEST_SCHEMA_VERSION = 3`
 - Migrations tracked in `schema_migrations(version, description, applied_at)`
 - Migrations are idempotent and ordered.
 
@@ -354,6 +354,94 @@ create_repository(config: RepositoryConfig | None = None) -> SQLiteAdapter
 from modules.foundups.agent_market.src.fam_daemon import get_fam_daemon
 daemon = get_fam_daemon(auto_start=True)
 ```
+
+### TestnetTransferIntentService (opt-in local API)
+
+Explicit import owner: `src.persistence.testnet_transfer_intents`. Four frozen
+slot dataclasses define `HostTestnetPolicy`, `SubmittedTestnetBinding`,
+`PreparedTestnetIntent` and the service. No package export, resident runtime
+caller, HTTP route, automatic task hook or transport is installed by this layer.
+
+```python
+service = TestnetTransferIntentService(adapter, host_policy)
+prepared = service.prepare(
+    payout_id, actor_id, binding, authorization=current_treasury_context,
+)
+```
+
+The trusted host supplies policy independently of submitted fields. Its exact
+`principal_id`, `foundup_id` and `payout_recipient_id` bind the pending payout;
+`policy_id`/`policy_version` bind both records. Network must be
+`algorand-testnet`, genesis ID `testnet-v1.0`, with a lowercase 64-hex genesis
+hash. Both records bind asset ID/decimals, sender and expected authorization
+address. The selected recipient must belong to the host's immutable nonempty
+allowlist. Positive builtin integer `amount_atoms` and `fee_cap_microalgos` must
+not exceed the host's per-intent caps. These caps do not reserve or aggregate
+spending. No conversion from the payout's `reward_amount` occurs.
+
+Exact declaration types and builtin scalar fields are checked before
+serialization. Integers exclude booleans/coercions and are bounded by signed
+SQLite 64-bit capacity; asset decimals are 0–19. IDs/text are nonempty bounded
+strings without normalization. Submitted `format_version=1` and
+`purpose="TEST_TRANSPORT_PROBE"` are required. Policy and binding expiry must
+match exactly. The host UTC clock is sampled after acquiring the writer fence;
+preparation and replay reject at or after expiry. There is no renewal API.
+
+Each call, including a retry, requires current `CallerAuthorization` matching
+the actor and exact FoundUp/treasury grant. The actor must equal the original
+initiation actor. The host must authenticate the principal and resolve current
+grants independently; the Python context supplies no issuer proof, signature,
+revocation or credential-expiry service. Public address/genesis/asset strings
+remain expected identity, without checksum, node, signer or funding verification.
+
+Within the existing SQLite `BEGIN IMMEDIATE`/session commit owner, preparation
+qualifies migration history exactly `[1,2,3]` and the actual table: exact columns,
+TEXT/INTEGER affinities, nullability/primary key, no hidden/generated columns or
+intent triggers, and unconditional binary-collated uniqueness on
+`(payout_id,purpose)`. Missing/unqualified migration history, future versions and
+supplied unsupported schemas fail closed; no rebuild, backfill or repair is
+attempted. A constructor pin or disabled auto-migration does not by itself reject
+an already qualified v3 database; actual recorded history/schema decides.
+The existing `_payout_history` validates pending payout, independent stored
+proof/decision and complete initiation lineage in that same session.
+
+The new row stores full canonical host policy/submitted binding/payout scope
+and initiation event ID/payload digest, with a content SHA-256. Retry compares
+the complete expected content and stored mirrored fields, state and timestamps;
+digest equality alone is insufficient. An exact unexpired retry after reopen
+returns the original immutable scalar DTO, preserving creation time. Changed
+content rejects; rollback and competing adapters retain one durable winner.
+`NotFoundError` denotes an absent payout, `PermissionDeniedError` an authority
+denial, and `ValidationError` rejected binding/history/schema/time. Existing
+database/lock errors propagate with the existing session rollback semantics.
+
+Only this row is inserted. The old 13 mapped tables remain unchanged: payout
+`INITIATED`, task `VERIFIED`, no new correlated payout event or compute debit.
+No SDK, private key, unsigned transaction, signer, broadcast, confirmation,
+reservation or paid reward is implemented. This probe does not establish UPS/F_i
+issuance, vesting, reserve backing or transfer/trading policy; the WSP26 policy
+conflict remains unresolved. Local qualification and corrections are recorded in
+[TestModLog](tests/TestModLog.md) and the
+[allocated plan](../../../docs/architecture/FOUNDUPS_TESTNET_TRANSFER_INTENT_20261025.md).
+
+#### Existing-only revalidation contract
+
+```python
+revalidate_existing(expected: PreparedTestnetIntent, actor_id: str,
+    binding: SubmittedTestnetBinding, *, authorization=None) -> PreparedTestnetIntent
+```
+
+`expected` must be the exact captured DTO with exact builtin scalar types,
+checked before rich equality. All fields bind: ID, scope, canonical identity JSON,
+content hash, state, creation time and expiry. It supplies no authority.
+The host independently resolves current policy and caller grants before each
+call, including after later I/O; an old immutable context cannot detect revocation.
+Reuse the current schema-3, payout/proof/decision/history, binding, actor and expiry
+admission in one transaction. Require the row already exists and matches the full
+captured DTO; absence, replacement or tampering rejects without insert or repair.
+Success and denial preserve database/accounting state. `prepare` keeps its existing
+get-or-create contract. This check proves only current admitted state, not continuous
+presence or future signer authority; no formatter or resident consumer is added.
 
 ### DistributionService
 - `build_milestone_payload(task_id: str) -> dict[str, object]`
@@ -442,10 +530,13 @@ admission still require qualification before integration. Payout is separate.
 - `GET /compute/wallet/{actor_id}`
 
 ## Event Contract (Audit)
-Every mutation emits an event containing:
+Domain event mutations emit an event containing:
 - `event_id`, `event_type`, `timestamp`, `actor_id`
 - `foundup_id`, optional `task_id`, optional `proof_id`, optional `payout_id`
 - `payload` (small structured dict)
+
+Local TestNet probe preparation stores only its intent row and deliberately emits
+no payout event; it is not a domain payout transition.
 
 ## Permission Rules (PoC)
 - These role checks describe the in-memory PoC. Persistent pipeline compute access does not authenticate verifier/treasury roles; production role admission and settlement remain separate unresolved gates.

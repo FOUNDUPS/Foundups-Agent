@@ -96,6 +96,21 @@ all prior approvals. Scanner rules, scope, exclusions and fingerprint algorithm
 are unchanged. Fresh hosted tree/history checks are required on the published
 head; this metadata review does not establish runtime deployment or live cadence.
 
+## PR2210 intent revalidation metadata bindings — 2026-10-25
+
+Hosted job121179224336 reported17 tree findings in the appended companion and
+zero introduced-history findings. The matching historical field payload is unchanged.
+Root and peer recomputed the four referenced historical source files at
+`6fe7eba424c17f7813043dfb104cd845617cab38`, reproducing their Windows CRLF digests.
+All17 prior full-file/rule/line fingerprints occur once in the existing ledger;
+only the companion's full-file binding changed at `af3818a8b901cc73844946fefc536c05a4f3185f`.
+Root review: `de9bfb3623692bbe2854482cbf0ee30c2dcfbcdf93535e920646015e2cf4d7f1`.
+Peer review: `aa822b1890496c4d29d17da5bf05cbde3d6b574032874dee290966b24d060274`.
+Preserve all2277 approved records and append only17 exact bindings (2294 total).
+No scanner rule, scope, version, history coverage, failure handling or unknown
+finding changes. Retain the failed job; require fresh hosted scans afterward.
+Parent PR2202's separate GitGuardian gate still controls main delivery.
+
 ## PR2208 intake reference metadata and fixture bindings — 2026-10-25
 
 Actual job121124347560 reports40 unreviewed tree findings and zero in history:

@@ -20,6 +20,123 @@ reviewer did not rerun product. External isolated Python runner denies socket
 audit events, but does not establish native/OS confinement or full import closure.
 Manifest regenerated separately; only the two reviewed source hashes changed.
 
+## 2026-10-29 — Existing-only revalidation convergence
+
+Fresh four-owner focus:228 pass; ten-owner connected:406 pass, including228.
+No failures/errors/skips; per-run source hashes stable. Original child source,
+test and receipt blobs remain exact; no new case, oracle or test owner.
+Reused credential-stripped controller with denied Python socket events and
+scratch-only SQLite connections. Not full import/native/OS isolation or a chain
+observation. Historical514-case whole-FAM result was not rerun or relabeled.
+Fresh hosted and resulting-main acceptance remain distinct publication gates.
+
+## 2026-10-29 — Intent convergence against delivered codec main
+
+Existing four-owner focus passes173 cases (93 intent plus80 compatibility).
+Ten-owner connected run passes351; includes173, not an additive total.
+No failures/errors/skips; per-run source hashes are stable. Reused the external
+isolated Python runner with credential-stripped environment, denied socket events
+and SQLite connections limited to explicit scratch or memory. This is not native
+or OS confinement, whole-runtime closure, signer or network qualification.
+Product/test behavior is the original reviewed intent layer; main's BOM repairs
+are preserved. Fresh hosted/current-main qualification remains a separate gate.
+
+## 2026-10-25 — Existing-only revalidation measured results
+
+- Unchanged parent service:228 exact IDs,174 passes/54 call-phase AttributeError
+  failures for the absent API. The separate prepare-after-loss witness passed.
+- Exact reviewed source:focused228/228 then whole original19-owner FAM514/514;
+  no skips/exclusions, old459 IDs plus55 additions. Counts are nonadditive.
+- All247 selected sources stable;53 focused/74 final loaded sources prebound.
+  Zero guard attempts; default-store metadata unchanged, real central stopped.
+- Fresh clean environment and phase-owned HOME/cache; unchanged external runner.
+  Two PytestConfigWarning each run retained. No OS/native/ATTACH or live-chain proof.
+- Original422-line test prefix/26 functions/93 cases preserved; current owner148.
+  Existing receipt/companion append the new run records without changing old data.
+
+## 2026-10-25 — Existing-only revalidation acceptance allocated
+
+- WSP6/11/15/22/50/62/84/97; preallocated15/P1, same intent test owner.
+- Reuse ready/_prepare/_snapshot/_old/_intents and explicit treasury grants;
+  preserve original26 test-function ASTs and93 cases. Append revalidation
+  type/current-authority/history/existing-row/no-write controls, no new fixture plane.
+- Tests authored before production changes; no collection or execution yet.
+  Root owns desired RED, candidate qualification and final results below.
+
+## 2026-10-25 — Local TestNet probe-intent qualification
+
+- Pre-runtime 16/P0 contract; separate docs/evidence packaging 14/P1. Qualified
+  existing O: Python `-B -X utf8`, plugin/cache/bytecode/dotenv disabled,
+  socket/DNS/provider/model/process guards, explicit external SQLite/TEMP.
+  Unchanged pending/ORM/migration baseline: **80 passed**. Then the separately
+  authorized 74-line declaration-only API scaffold raised `NotImplementedError`;
+  it added no validation, schema or effects. RED is against that scaffold,
+  rather than a claim of entirely unchanged production declarations.
+- Original acceptance v1: **89 failed/80 passed**, 88 NotImplemented failures
+  and one expected migration-version assertion. V2: **90 failed/80 passed**,
+  adding genuine `schema_version=2`/`auto_migrate=False` constructor controls and
+  the explicit 13-table snapshot. V3 retained 90 failures/80 passes and strengthened
+  elapsed retry/reopen, full DTO comparison, schema uniqueness and durable race
+  winner assertions. All failures were call-phase; histories/IDs remain retained.
+- Initial runtime: **170 passed** (90 new+80 compatibility). Independent review:
+  **14 passed/1 failed**. An extra VIRTUAL generated column in a supplied altered
+  intent table was invisible to `table_info`, allowing preparation. A separate
+  fixture audit found the later-task case actually created a different FoundUp.
+  Independent construction of a genuinely valid later task in the original
+  FoundUp passed before the canonical fixture correction.
+- Parent allocated the repair first. V4 retains both later-task scopes using
+  existing task/proof/independent-decision APIs and adds extra/required-generated
+  column variants: **93 new cases**. On unchanged initial runtime the desired
+  regression produced **1 failure/172 passes**; the required-generated variant
+  already rejected. The same-FoundUp correction is after authoring evidence,
+  not retroactive proof of the original A04 fixture. Original90 assertions are
+  retained apart from that explicit correction/strengthening.
+- Narrow repair uses `table_xinfo` and requires every hidden flag 0. Repaired
+  focused **173 passed**, no skips/exclusions/errors. Independent repaired review
+  passes **16/16**: replay of the original 15 plus one new STORED-generated
+  required-column control; no material findings. Final source 233 lines/8 authored
+  functions/max 31; ORM +24/migration +23 lines; adapter unchanged. Original 13
+  mapping/alias/pickle ASTs remain unchanged. Test owner 422 lines/26 functions/max 30
+  fits the explicit425-line revised allocation.
+- A competing broad run completed **459 passes** while the sole qualification
+  worker was being coordinated. Its optional central-daemon import was forced
+  to ImportError 16 times, selecting the standalone branch. It is preserved only
+  as a diagnostic; it is not the agreed real-central qualification.
+- The agreed runner's first real-central run also had **459 assertion passes**,
+  but qualification failed: 20 loaded bridge Python files were absent from its
+  183-file prebinding. No source, assertion or runtime patch repaired that gap.
+  The inventory was expanded to 203, then an explicitly released fresh phase ran.
+- Final agreed result: **459/459 pass**, 19 owners, 24.86s, pytest exit 0 and
+  qualification exit 0; no skips, exclusions or guard attempts. All 203 prebound
+  sources and the six repaired-freeze files stayed stable. 1,061 audited SQLite
+  connections were allowed under unique external scratch. Real central daemon
+  was configured outside the checkout and stayed stopped; FAMDaemon constructor
+  and supplied paths were unchanged. Default-store size/mtime stats stayed
+  unchanged during the run. Only optional `fam_adapter._holo_retrieve` and
+  `_qwen_enrich` returned None; real parser/static help/assertions remained.
+  Two inherited inactive asyncio config warnings remain.
+- Actual whole-directory pytest arguments: `-q -p no:cacheprovider -o addopts=
+  --confcutdir <root>/modules/foundups --basetemp <phase>/pytest
+  <root>/modules/foundups/agent_market/tests`. The guarded external Python runner
+  invokes pytest with those arguments. Exact argv, node IDs and hashes are in
+  the portable receipt/companion prepared for publication; no new run is implied
+  by documentation packaging. The two agreed 459 runs use the same IDs; focused
+  173 is a subset. Independent probes overlap behaviors. None are added into a
+  larger unique-case count.
+- Raw evidence roots: `foundups-testnet-intent-plan-c3806aa510aa45d1b7d8d7b9c37125b8`
+  (baseline/RED/focused/freeze/diagnostic),
+  `foundups-testnet-intent-independent-{v1,v2}-20261025`, and
+  `foundups-testnet-allfam-prepared-09c1d91256b348318197b70bfaa36fcb`
+  (first rejected qualification and `all_fam_repaired_candidate_v2` final phase),
+  all in host temporary storage. Final raw receipt SHA-256:
+  `adf80cd88de5c17552a1851dee4ce691a189eef58f2e16ed8d71b5bdb0301b91`.
+- Guards constrain these known Python fixtures, not hostile native code or an
+  OS sandbox. SQLite journal writes are bounded indirectly by connection paths;
+  unchanged default stats are a run-local observation. No PostgreSQL, model
+  quality, production issuer, real signer/chain/provider/settlement, resident
+  caller or generated source-closure admission is qualified. Payout remains
+  `INITIATED`/task `VERIFIED`; only the local intent can be `PREPARED`.
+
 ## 2026-10-25 — P0B explicit authority and independent stored proof
 
 - Baseline: 292 connected FAM/lifecycle cases passed before test/product edits.
