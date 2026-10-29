@@ -1,5 +1,17 @@
 # DocDAE - Module Modification Log
 
+## 2026-10-29 — Document persistence and acceptance boundaries
+
+Add the missing INTERFACE for DocDAE and the shared cleanup planner. Constructor
+writes, dry-run training memory, metrics and breadcrumbs are now explicit; primary
+output suppression does not mean zero filesystem effects. Record the existing
+training helper's after-loop pattern reference and unverified success labeling
+as source-review findings, not repaired behavior. No cleanup entrypoint, model,
+MCP client, migration or live persistence was exercised. Source/hash and link
+checks validate the documentation only. Behavioral repair and runtime acceptance
+remain separate work. WSP 11/22/49/50/84/97.
+
+
 ## Purpose (WSP 22 Compliance)
 This ModLog tracks all changes to the `modules/infrastructure/doc_dae/` module.
 Each entry must include WSP protocol references and impact analysis.
