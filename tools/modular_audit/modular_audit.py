@@ -106,17 +106,11 @@ SECURITY_THRESHOLDS = {
     "LOW": "LOG"         # Track for future resolution
 }
 
-# Secret detection patterns (WSP 71)
-SECRET_PATTERNS = [
-    r'(?i)(password|passwd|pwd)\s*[=:]\s*["\']?[^"\'\s]{8,}',
-    r'(?i)(api[_-]?key|apikey)\s*[=:]\s*["\']?[^"\'\s]{16,}',
-    r'(?i)(secret|token)\s*[=:]\s*["\']?[^"\'\s]{16,}',
-    r'(?i)(access[_-]?key)\s*[=:]\s*["\']?[^"\'\s]{16,}',
-    r'(?i)(private[_-]?key)\s*[=:]\s*["\']?[^"\'\s]{32,}',
-    r'-----BEGIN\s+(?:RSA\s+)?PRIVATE\s+KEY-----',
-    r'(?i)mongodb://[^/\s]+:[^@\s]+@',
-    r'(?i)postgres://[^/\s]+:[^@\s]+@'
-]
+# Shared by the direct CLI and package import; no live scan runs at import.
+if __package__:
+    from .secret_scan import SECRET_PATTERNS, inspect_tracked_source
+else:
+    from secret_scan import SECRET_PATTERNS, inspect_tracked_source
 
 # Define recognized Enterprise Domains (WSP 3)
 ENTERPRISE_DOMAINS = {
@@ -495,49 +489,24 @@ def run_npm_audit() -> List[str]:
     return findings
 
 def scan_for_secrets(modules_dir: Path) -> List[str]:
-    """
-    Scan for accidentally committed secrets (WSP 71 compliance).
-    
-    Args:
-        modules_dir: Path to modules directory
-        
-    Returns:
-        List of secret detection findings
-    """
-    findings = []
-    
+    """Return metadata-only hints from tracked module source, failing closed."""
     try:
-        # Compile secret patterns
-        compiled_patterns = [re.compile(pattern) for pattern in SECRET_PATTERNS]
-        
-        # Scan all Python, JavaScript, and configuration files
-        file_patterns = ["*.py", "*.js", "*.ts", "*.json", "*.yaml", "*.yml", "*.env", "*.conf", "*.config"]
-        
-        for pattern in file_patterns:
-            for file_path in modules_dir.rglob(pattern):
-                # Skip certain directories
-                if any(skip in str(file_path) for skip in ['.git', '__pycache__', 'node_modules', '.venv']):
-                    continue
-                    
-                try:
-                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                        content = f.read()
-                        
-                    for line_num, line in enumerate(content.split('\n'), 1):
-                        for secret_pattern in compiled_patterns:
-                            if secret_pattern.search(line):
-                                relative_path = file_path.relative_to(modules_dir)
-                                findings.append(f"SECRET_DETECTED: Potential secret in {relative_path}:{line_num}")
-                                break  # Only report once per line
-                                
-                except Exception as e:
-                    # Skip files that can't be read
-                    continue
-                    
-    except Exception as e:
-        findings.append(f"SECRET_SCAN_ERROR: Secret scanning failed: {str(e)}")
-    
-    return findings
+        inventory = _git_tracked_module_paths(modules_dir)
+        if inventory is None:
+            raise ValueError("Git-tracked inventory unavailable")
+    except ValueError:
+        return ["SECRET_SCAN_ERROR: Git-tracked module inventory unavailable"]
+    return [_format_source_hint(item) for item in inspect_tracked_source(modules_dir, inventory)]
+
+
+def _format_source_hint(item):
+    """Format the inspector's location metadata; never accept source content."""
+    if item.category == "environment":
+        return f"SECRET_SCAN_SKIPPED: Environment file not read: {item.path}"
+    if item.category == "literal":
+        return f"SECRET_DETECTED: Potential literal secret in {item.path}:{item.line}"
+    return f"SECRET_SCAN_ERROR: Unable to inspect tracked source: {item.path}"
+
 
 def audit_all_modules(modules_root):
     """
@@ -1515,7 +1484,7 @@ def _finding_severity(finding):
     normalized = finding
     if normalized.startswith(error_prefixes):
         return "ERROR"
-    if normalized.startswith("WARNING:"):
+    if normalized.startswith(("WARNING:", "SECRET_SCAN_SKIPPED:", "SECRET_DETECTED:")):
         return "WARNING"
     return "ADVISORY"
 
@@ -1715,6 +1684,21 @@ def _log_findings(findings, severity_reader):
             logging.info(f"- {finding}")
 
 
+def _log_audit_completion(errors, warnings, advisories, has_changes=False):
+    """Keep non-error debt and baseline changes visible in the final status."""
+    if errors:
+        logging.error("Audit completed with errors.")
+        sys.exit(1)
+    elif warnings:
+        logging.warning("Audit completed with warnings.")
+    elif advisories:
+        logging.info("Audit completed with advisories.")
+    elif has_changes:
+        logging.info("Audit completed with baseline differences.")
+    else:
+        logging.info("Audit completed with no findings.")
+
+
 def _run_mode1(args, project_root):
     """Run structural audit mode without baseline attribution."""
     logging.info("Running FMAS Mode 1: Structure Audit")
@@ -1733,13 +1717,9 @@ def _run_mode1(args, project_root):
     logging.info(f"  Modules audited: {module_count}")
     logging.info(f"  Errors found: {errors}")
     logging.info(f"  Warnings found: {warnings}")
-    if errors:
-        logging.error("Audit completed with errors.")
-        sys.exit(1)
-    if warnings:
-        logging.warning("Audit completed with warnings.")
-    else:
-        logging.info("Audit completed with no findings.")
+    advisories = len(findings) - errors - warnings
+    logging.info(f"  Advisories found: {advisories}")
+    _log_audit_completion(errors, warnings, advisories)
 
 
 def _validated_mode2_baseline(args, project_root):
@@ -1788,10 +1768,10 @@ def _run_mode2(args, project_root):
         logging.info("\nDetailed Findings:")
         _log_findings(result_errors, _wsp62_severity)
         print()
-    if errors:
-        logging.error("Audit completed with errors.")
-        sys.exit(1)
-    logging.info("Audit completed with no findings.")
+    advisories = len(size_findings) - len(size_errors) - warnings
+    logging.info(f"  Advisories found: {advisories}")
+    has_changes = isinstance(audit_results, dict) and audit_results.get("has_changes", False)
+    _log_audit_completion(errors, warnings, advisories, has_changes)
 
 
 def main():

@@ -2,36 +2,95 @@
 
 ## PR reconciliation — 2026-10-29
 
-**Latest owned merge:** #2260 at
-`362b4c62a665bd6c594904e39d974a7187a12649`. Final PR CI (all 15 jobs), CodeQL,
-OpenRouter and Moshpit passed. Resulting-main CodeQL, OpenRouter and Moshpit
-passed; main CI's dependency installation exceeded 25 minutes (versus 91
-seconds on the final PR), so that attempt was cancelled for one bounded retry.
-The retry is queued/running; it remains pending acceptance. Fresh owner query: CURRENT/no-gap, matching
-source/workspace/authority, generation
-`b8d75aea540ca0e311cc021c618b9d1d6723f1f7b88c4170d8e5d20c81834842`.
-Both owned maintenance runtimes stopped; port18880 is absent after cleanup.
+**Latest accepted slice:** #2264, head `976842bb0`, base `01b87f0ea`, squash
+`3ad0eddc85c7e7a216a6a78182bcd2a1a32ef2d5`. All 24 latest logical PR checks and
+five workflows triggered on the resulting main passed. CodeQL's initial opaque
+helper alert was corrected with typed location metadata; no rule was suppressed.
+Fresh owner evidence matches source/workspace/authority at main3ad, CURRENT/no-gap,
+generation `9b6b555c59de1cccbc1e51b87fc6f92195f39c452c47b786c189db57966eca27`.
+The two owned maintenance runtimes stopped. F7a is closed; older pending text
+below is historical. Twelve owned PRs have now landed. Snapshot 06:04 UTC: 36 open.
 
-**Current prepared slice:** `agent/test-scaffold-repair-20261029`, reconciled
-with main `4c433502e66733ff83bb287ef910ef58dadb34dc` (#2206). Eight generator, three import-safety and 40 registry tests
-pass; 30 runtime/consumer tests and three Node compatibility suites pass.
-All 81 legacy test parser faults are repaired; 78 proven empty scaffolds retain
-156 explicitly skipped placeholders and zero behavioral coverage. Of these,
-52 have test_*.py filenames; the other 26 existing paths remain preserved.
-Registry: 1782 files / 260 quarantined, all 1780 current-main paths and prior
-collectable flags preserved. All 51 focused tests pass again on the combined
-tree; 18 incoming files are byte-identical and four shared records are combined.
-Exact-base Mode2: zero errors / 127 warnings. No live browser/model/platform
-actions or global collection were executed. No PR published yet.
-Next: complete the combined-tree exact-base audit and fresh Holo proof, then
-publish and complete exact-head/main checks. The prepared F2 commit is
-`b35d3901dd871ba373586f86219b9c4842cf1548`; its main integration is separate. Owner: architect lane; review 2026-10-29.
+**Current slice:** `agent/audit-readonly-compliance-20261029`, exact base main3ad.
+Replace WSPComplianceChecker traversal/database initialization with bounded Git
+inventory and explicit incomplete results; bind the GitHub audit adapter to the
+correct shared checkout root. Frozen desired baseline 31 failures/8 controls;
+candidate 39 passes. Actual read-only main3ad inspection: 14.11 seconds, unchanged
+Git status, one explicitly uninspected Hermes submodule. Refresh runtime hashes,
+registry and security evidence, then hosted/main checks before closing this slice.
+No unrelated successor PR is opened while owned acceptance remains unfinished.
 
-**Concurrent ownership:** the active chat “Plan Foundups Blockchain Migration”
-owns #2202/#2210, #2211, #2261 and #2262; it merged #2206 with 24 green checks
-and is checking resulting main. Its review/runtime receipts are separate from
-this lane's evidence. The YouTube and Storytime lanes remain independently
-owned; no cross-chat message or takeover was performed.
+Current validation: 173 audit tests plus 28 subtests, 24 runtime/consumer tests,
+62 registry tests and three Node suites passed. Mode 2: 0 errors/127 warnings/306
+advisories. Registry 1785/260 preserves all previous rows. Runtime membership 1472
+is unchanged; only the checker source hash changes. The 38 unchanged prior-reviewed
+source hashes are rebound to the new manifest bytes; all 2667 previous bindings
+remain. Fresh hosted checks and resulting-main/Holo acceptance remain required.
+
+**Additional retained work:** #1648's unique public-chat/accounting/membership
+work needs a split and current-main reconciliation; its old lock would downgrade
+Next/React. Offline client acceptance passed, but D1/ingress/deployment are not
+validated here. Its dated public knowledge packet was not fully live-fact-checked.
+#2234's coalition page is a candidate for isolated frontend validation; shared-host
+partner links need checking. #1998's monthly notice still calls 2026-10-13 the
+next meeting; repair stale copy/contracts before integration. All original work
+remains preserved. Current tracked placement evidence shows only economy and
+telemetry as noncanonical domain directories; other names in the supplied audit
+included local, untracked state. Do not migrate or delete such state blindly.
+
+**Latest owned acceptance:** #2263, squash
+`01b87f0ea569144c754d9f45ff8449b3f04d4dbe`, from accepted head
+`d007f045d71692d3520cb18763e67127cc04962f` and base `dedb0e032`.
+All 25 latest logical PR checks and six resulting-main workflows passed.
+The fresh owner query is CURRENT/no-gap with source/workspace/authority all
+matching that main SHA, generation
+`6e3eb8c4a81dcc41b0eb902c95a48b30679969b493c3bcb8af6b8433f43f01f2`.
+Both owned maintenance runtimes stopped. F4 #2260's bounded CI retry also
+succeeded; its prior pending paragraph below is historical, not an open gate.
+
+**F2 scope:** 81 legacy parser defects repaired. All 78 proven empty scaffolds
+remain explicitly non-evidentiary: 156 skipped placeholders and zero behavioral
+coverage. The generator validates contained paths/syntax and preserves authored
+files. The 51 focused tests and 30 runtime/consumer tests plus three Node suites
+passed. Final registry: 1783 files / 260 quarantined. Current-main integration
+preserved all 1782 prior rows and one incoming row. No global collection or live
+browser/model/platform operation was used as acceptance evidence.
+
+**Current owned slice:** `agent/audit-secret-scan-20261029`, based on exact main
+`01b87f0ea`. FMAS uses tracked module inventory, quoted literal hints, explicit
+incomplete-read errors, and metadata-only output; it never opens environment
+content. Warnings/advisories/baseline changes remain visible in final summaries.
+New acceptance on the base: 19 failed / 11 controls passed. Candidate CI selection:
+134 passed / 28 subtests passed; registry 1784 / 260, one added test path.
+The hosted security gate, reviewed findings and runtime manifest are unchanged.
+Owner: architect lane; review 2026-10-29. Next: exact-base audit, final source
+review, hosted checks, squash merge and resulting-main/Holo acceptance.
+
+**Next audit layers:** repair WSPComplianceChecker's filesystem scope and
+constructor database write; reconcile canonical domains; repair genuine missing
+module documentation; then classify root-file moves and remaining structural
+debt. Mode1 still invokes external scanners and is not a fully bounded scan.
+
+**Concurrent ownership:** “Plan Foundups Blockchain Migration” owns #2210/#2261
+and its separately merged #2202/#2206/#2211/#2262. YouTube retains runtime work.
+“Deploy Us Story Time PWA” is active with an explicit local-only instruction;
+#2221/#2256 are preserved for that owner. No cross-chat messages or takeover.
+
+**Queue snapshot (05:28 UTC):** 36 open PRs. Eleven PRs have been merged through
+this reconciliation lane; separate product-lane merges are not counted as ours.
+No original branch or unreviewed unique work was deleted. Earlier counts below
+are dated snapshots, not current totals.
+
+**Additional source reviews:** #1792 is only partly superseded by merged #2189;
+its protected brand activation remains unique. #2221 and #2256 have distinct
+path histories and retain the active Storytime owner. #2196 preserves Mall/About
+routing and cache lifecycle work, but needs current-main/#2113 reconciliation.
+Its 22 current-head checks, including GitGuardian, are successful; its historical
+incident hold is not evidence of a currently failing check. The dated receipt's
+17 source bindings and test-inventory digest match its own PR head, not today's
+main. #1648's transport/projection subsets have already landed separately; its
+public-chat/accounting/membership remainder is still under source review. These
+reviews do not establish current deployment or full semantic supersession.
 
 **Further source reviews:** #1677 retains useful JHR registry/promo work, but
 its #001 latest issue and old ticker owner conflict with current #003 and

@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1783,
+  "total_tests": 1785,
   "quarantined_tests": 260,
   "tests": [
     {
@@ -21041,6 +21041,22 @@
       "description": "Tests for WRE Master Orchestrator\n\nWSP Compliance: WSP 5 (Test Coverage), WSP 96 (WRE Skills), WSP 77 (Agent Coordination)"
     },
     {
+      "id": "test::modules::infrastructure::wsp_core::tests::test_wsp_compliance_checker",
+      "path": "modules/infrastructure/wsp_core/tests/test_wsp_compliance_checker.py",
+      "owner": "modules/infrastructure/wsp_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wsp-core-unit",
+      "capabilities": [
+        "import_path_mutation",
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline tracked-inventory and no-write contracts for WSPComplianceChecker."
+    },
+    {
       "id": "test::modules::infrastructure::wsp_framework_dae::tests::test_wsp_governance",
       "path": "modules/infrastructure/wsp_framework_dae/tests/test_wsp_governance.py",
       "owner": "modules/infrastructure/wsp_framework_dae",
@@ -24920,6 +24936,22 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": ""
+    },
+    {
+      "id": "test::tools::modular_audit::tests::test_secret_scan",
+      "path": "tools/modular_audit/tests/test_secret_scan.py",
+      "owner": "tools",
+      "suite_class": "unit",
+      "shard_id": "tools-unit",
+      "capabilities": [
+        "import_path_mutation",
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Synthetic-only acceptance tests for FMAS scan scope and honest summaries."
     },
     {
       "id": "test::tools::shared::tests::test_pagination",
