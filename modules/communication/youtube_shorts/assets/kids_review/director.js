@@ -3,22 +3,23 @@ import {bindPanelGestures} from '../storytime/panel-gestures.mjs';
 import {locales,normalizeLocale} from '../storytime/learning-events.mjs';
 const $=id=>document.getElementById(id),game=$('game'),ink=$('ink');
 const revision='slow-rescue-11',key='eduit.game-feedback.v2.'+revision;
+let storybook=null;
 let capture=null,strokes=[],drawing=null,entries=[],activePointer=null,childLocked=false;
 const pointers=new Set();let inkBlocked=false,history=[];
 function rememberInk(){history.push(structuredClone(strokes));if(history.length>50)history.shift();}
 try{const saved=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(saved))entries=saved.filter(e=>e?.capture&&typeof e.capture.svg==='string'&&e.capture.svg.length<100000&&Number.isFinite(e.capture.clock)&&e.capture.clock>=0&&e.capture.clock<=86400&&typeof e.note==='string'&&e.note.length<=4000&&Array.isArray(e.strokes)&&e.strokes.length<=200&&e.strokes.every(line=>Array.isArray(line)&&line.length<=3000&&line.every(p=>Array.isArray(p)&&p.length===2&&p.every(n=>Number.isFinite(n)&&n>=0&&n<=1)))).slice(-20);}catch{}
 const api=()=>game.contentWindow?.storytimeReview;
 function paint(){if(ink.hidden)return;const r=ink.getBoundingClientRect(),d=devicePixelRatio;ink.width=r.width*d;ink.height=r.height*d;const ctx=ink.getContext('2d');ctx.strokeStyle='#ef426f';ctx.lineWidth=3*d;ctx.lineCap='round';ctx.lineJoin='round';for(const line of strokes){ctx.beginPath();line.forEach(([x,y],i)=>i?ctx.lineTo(x*ink.width,y*ink.height):ctx.moveTo(x*ink.width,y*ink.height));ctx.stroke();}}
-function show(){$('game-panel').classList.add('marking');$('feedback-actions').hidden=false;game.hidden=true;$('frozen').hidden=false; // SVG originates exclusively in the local scene renderer.
+function show(){$('game-panel').dataset.appearance=capture?.appearance||'mamma';$('game-panel').classList.add('marking');$('feedback-actions').hidden=false;game.hidden=true;$('frozen').hidden=false; // SVG originates exclusively in the local scene renderer.
  const doc=new DOMParser().parseFromString(capture.svg,'image/svg+xml');
  // Reopened local feedback cannot introduce scripts, foreign objects or external references.
  const safeTags=new Set(['svg','defs','g','path','ellipse','circle','text','rect','use']);
  doc.querySelectorAll('*').forEach(n=>{if(n.namespaceURI!=='http://www.w3.org/2000/svg'||!safeTags.has(n.localName))n.remove();});
  doc.querySelectorAll('*').forEach(n=>[...n.attributes].forEach(a=>{if(/^on/i.test(a.name)||(/href/i.test(a.name)&&!/^#[a-zA-Z][\w-]*$/.test(a.value))||/url\(/i.test(a.value))n.removeAttribute(a.name);}));
  $('frozen').replaceChildren(document.importNode(doc.documentElement,true));ink.hidden=false;$('tools').hidden=false;paint();}
-function play(){$('game-panel').classList.remove('marking');$('feedback-actions').hidden=true;$('video').pause();ink.hidden=true;$('frozen').hidden=true;$('tools').hidden=true;game.hidden=false;drawing=null;activePointer=null;api()?.play();}
+function play(){$('game-panel').dataset.appearance=api()?.status().appearance||'mamma';$('game-panel').classList.remove('marking');$('feedback-actions').hidden=true;$('video').pause();ink.hidden=true;$('frozen').hidden=true;$('tools').hidden=true;game.hidden=false;drawing=null;activePointer=null;api()?.play();}
 $('play').onclick=()=>{if(['playing','celebrating'].includes(api()?.status().phase)&&!api()?.status().paused)api()?.pause();else play();};$('close').onclick=$('resume-game').onclick=play;
-$('feedback').onclick=()=>{if(childLocked)return;options.hidden=true;const current=api()?.freeze();if(!current)return;$('video').pause();if(!capture||capture.clock!==current.clock||capture.locale!==current.locale||JSON.stringify(capture.state)!==JSON.stringify(current.state)){if(capture)saveDraft();capture=current;strokes=[];history=[];$('note').value='';}show();};
+$('feedback').onclick=()=>{if(childLocked)return;options.hidden=true;const current=api()?.freeze();if(!current)return;$('video').pause();if(!capture||capture.clock!==current.clock||capture.locale!==current.locale||(capture.appearance||'mamma')!==(current.appearance||'mamma')||JSON.stringify(capture.state)!==JSON.stringify(current.state)){if(capture)saveDraft();capture=current;strokes=[];history=[];$('note').value='';}show();};
 const point=e=>{const r=ink.getBoundingClientRect();return [Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),Math.max(0,Math.min(1,(e.clientY-r.top)/r.height))];};
 ink.onpointerdown=e=>{pointers.add(e.pointerId);if(pointers.size>1){if(drawing){strokes.pop();history.pop();}drawing=null;activePointer=null;inkBlocked=true;paint();return;}if(inkBlocked||activePointer!==null)return;activePointer=e.pointerId;e.preventDefault();ink.setPointerCapture(e.pointerId);rememberInk();drawing=[point(e)];strokes.push(drawing);paint();};ink.onpointermove=e=>{if(drawing&&e.pointerId===activePointer){drawing.push(point(e));paint();}};ink.onpointerup=ink.onpointercancel=ink.onlostpointercapture=e=>{pointers.delete(e.pointerId);if(e.pointerId===activePointer){drawing=null;activePointer=null;}if(!pointers.size)inkBlocked=false;};
 $('undo').onclick=$('mark-undo').onclick=()=>{if(history.length)strokes=history.pop();paint();};$('clear').onclick=$('mark-clear').onclick=()=>{if(strokes.length){rememberInk();strokes=[];paint();}};
@@ -70,7 +71,7 @@ bindPanelGestures(gamePanel,{expand:()=>expand(gamePanel,true),collapse:()=>expa
 
 let language='en';try{language=normalizeLocale(localStorage.getItem('eduit.game-language'));}catch{}
 const languageBar=$('languages');
-function chooseLanguage(value){if(childLocked)return;video.pause();language=normalizeLocale(value);api()?.pause();api()?.setLocale(language);try{localStorage.setItem('eduit.game-language',language);}catch{}languageBar.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.locale===language)));}
+function chooseLanguage(value){if(childLocked)return;storybook?.pause('locale-change');video.pause();language=normalizeLocale(value);api()?.pause();api()?.setLocale(language);try{localStorage.setItem('eduit.game-language',language);}catch{}languageBar.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.locale===language)));}
 for(const [id,l] of Object.entries(locales)){const button=document.createElement('button');button.dataset.locale=id;button.lang=id;button.setAttribute('aria-label',l.label);const flag=document.createElement('img');flag.src=new URL('flags/'+({en:'gb',ja:'jp',pt:'pt',es:'es'}[id])+'.svg',import.meta.url).href;flag.alt='';flag.width=36;flag.height=24;button.title=l.label;button.append(flag);button.onclick=()=>chooseLanguage(id);languageBar.append(button);}
 game.addEventListener('load',()=>chooseLanguage(language));chooseLanguage(language);
 
@@ -116,8 +117,8 @@ storyInfo.addEventListener('close',()=>infoReturn?.focus());
 // One-time illustrated pre-video story. Does not auto-play media or collect child data.
 const introDialog=$('story-intro'),introSeenKey='eduit.storytime.intro-seen.v1';
 let introReturn=null,introClosing=false;
-function openStoryIntro(){if(childLocked||introDialog.open)return;video.pause();api()?.pause();introReturn=document.activeElement;introDialog.classList.remove('intro-collapsing');introDialog.showModal();$('intro-close').focus();}
-function finishStoryIntro(){if(introClosing||!introDialog.open)return;introClosing=true;try{localStorage.setItem(introSeenKey,'1');}catch{}const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;if(!reduced)introDialog.classList.add('intro-collapsing');const close=()=>{introDialog.close();introDialog.classList.remove('intro-collapsing');introClosing=false;$('video').focus({preventScroll:true});$('video-panel').scrollIntoView({block:'nearest',behavior:'instant'});};if(reduced)close();else {introDialog.addEventListener('animationend',close,{once:true});setTimeout(()=>{if(introClosing)close();},350);}}
+function openStoryIntro(){if(childLocked||introDialog.open)return;video.pause();api()?.pause();introReturn=document.activeElement;introDialog.classList.remove('intro-collapsing');introDialog.showModal();storybook?.open();$('intro-close').focus();}
+function finishStoryIntro(){if(introClosing||!introDialog.open)return;storybook?.pause('closing');introClosing=true;try{localStorage.setItem(introSeenKey,'1');}catch{}const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;if(!reduced)introDialog.classList.add('intro-collapsing');const close=()=>{introDialog.close();introDialog.classList.remove('intro-collapsing');introClosing=false;$('video').focus({preventScroll:true});$('video-panel').scrollIntoView({block:'nearest',behavior:'instant'});};if(reduced)close();else {introDialog.addEventListener('animationend',close,{once:true});setTimeout(()=>{if(introClosing)close();},350);}}
 $('intro-skip').addEventListener('click',finishStoryIntro);
 $('intro-close').addEventListener('click',finishStoryIntro);
 $('intro-replay').addEventListener('click',openStoryIntro);
@@ -128,7 +129,38 @@ if(!introSeen)queueMicrotask(openStoryIntro);
 
 
 // Narration is an English overlay over the retained film, not regenerated media.
-const narration=mountNarration(video,$('story-caption'));
+const narration=mountNarration(video,$('story-caption'),{statusHost:options});
 window.storytimeNarration=narration;
-const voiceOption=button('story-voice','English story voice','more',options,()=>{const enabled=voiceOption.getAttribute('aria-pressed')!=='true';voiceOption.setAttribute('aria-pressed',String(enabled));voiceOption.textContent=enabled?'English story voice: on':'English story voice: off';narration.setEnabled(enabled);});
+const voiceOption=button('story-voice','English story voice','more',options,()=>{const enabled=voiceOption.getAttribute('aria-pressed')!=='true';voiceOption.setAttribute('aria-pressed',String(enabled));voiceOption.textContent=enabled?'English story voice: on':'English story voice: off';storybook?.pause('voice-option');narration.setEnabled(enabled);});
 voiceOption.setAttribute('aria-pressed','true');voiceOption.textContent='English story voice: on';
+
+
+// Presentation-only choice; media and simulation remain owned by their existing adapters.
+const appearanceGroup=document.createElement('fieldset');appearanceGroup.id='game-appearance';
+const appearanceLegend=document.createElement('legend');appearanceLegend.textContent='Game appearance';
+const appearanceNote=document.createElement('p');appearanceNote.textContent='The video keeps its original MAMMA story';
+appearanceGroup.append(appearanceLegend,appearanceNote);options.insertBefore(appearanceGroup,optionsClose);
+let chosenAppearance='mamma';try{const saved=localStorage.getItem('eduit.game-appearance');if(saved==='mermaid')chosenAppearance=saved;}catch{}
+function chooseAppearance(value){
+ if(childLocked)return;
+ video.pause();api()?.pause();
+ const accepted=api()?.setAppearance?.(value);
+ if(accepted!==value){appearanceNote.textContent='This appearance is unavailable; your game is unchanged';const actual=api()?.status().appearance||'mamma';appearanceGroup.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.appearance===actual)));return;}
+ chosenAppearance=value;gamePanel.dataset.appearance=gamePanel.classList.contains('marking')?(capture?.appearance||'mamma'):value;
+ appearanceNote.textContent='Game appearance only · video unchanged';
+ appearanceGroup.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.appearance===value)));
+ try{localStorage.setItem('eduit.game-appearance',value);}catch{}
+}
+for(const [id,label] of [['mamma','MAMMA 🥚'],['mermaid','MAMMA Mermaid 🧜']]){
+ const b=document.createElement('button');b.type='button';b.dataset.appearance=id;b.textContent=label;
+ b.setAttribute('aria-pressed',String(id===chosenAppearance));b.onclick=()=>chooseAppearance(id);appearanceGroup.append(b);
+}
+game.addEventListener('load',()=>chooseAppearance(chosenAppearance));
+if(api())chooseAppearance(chosenAppearance);
+
+// Optional enhancement: older/offline clients keep a usable original dialog.
+import('./storybook.mjs').then(({mountStorybook})=>{
+ storybook=mountStorybook({dialog:introDialog,video,narration,beforePlay:()=>api()?.pause(),onFinish:finishStoryIntro});
+ window.storytimeStorybook=storybook;
+ if(introDialog.open)storybook.open();
+}).catch(()=>{const note=document.createElement('p');note.textContent='Story pages are unavailable. The game and original introduction still work.';introDialog.querySelector('.intro-actions').before(note);});

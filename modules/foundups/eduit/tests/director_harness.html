@@ -1,6 +1,6 @@
 <!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><title>Storytime interaction acceptance</title>
 <style>body{margin:0;font:14px system-ui;background:#ddd}nav{padding:8px}iframe{display:block;border:0}pre{white-space:pre-wrap;max-height:100px;overflow:auto}</style>
-<nav><button data-size="320,568">Small phone</button><button data-size="568,320">Small landscape</button><button data-size="390,844">Phone portrait</button><button data-size="844,390">Phone landscape</button><button data-size="768,1024">Tablet portrait</button><button data-size="1024,768">Tablet landscape</button><button id="rescue">Play rescue sequence</button><button id="run">Run acceptance</button><button id="phone-matrix">Run phone regression matrix</button></nav><pre id="results">Ready</pre><iframe id="app" src="/" width="390" height="844"></iframe>
+<nav><button data-size="320,568">Small phone</button><button data-size="568,320">Small landscape</button><button data-size="390,844">Phone portrait</button><button data-size="844,390">Phone landscape</button><button data-size="768,1024">Tablet portrait</button><button data-size="1024,768">Tablet landscape</button><button id="rescue">Play rescue sequence</button><button id="run">Run acceptance</button><button id="phone-matrix">Run phone regression matrix</button><button id="presentation">Run storybook/theme checks</button></nav><pre id="results">Ready</pre><iframe id="app" src="/" width="390" height="844"></iframe>
 <script type="module">
 const frame=document.querySelector('#app'),results=document.querySelector('#results');
 for(const b of document.querySelectorAll('[data-size]'))b.onclick=()=>{const [w,h]=b.dataset.size.split(',');frame.width=w;frame.height=h;};
@@ -79,6 +79,45 @@ document.querySelector('#phone-matrix').onclick=async()=>{
   if(size[0]===390){const bounds={left:20,top:80,width:350,height:600};for(const [n,v]of Object.entries(bounds))d.body.style.setProperty('--app-'+n,v+'px');$('video-options').click();const o=$('options').getBoundingClientRect();check('options follow offset visible viewport',o.left>=bounds.left&&o.top>=bounds.top&&o.right<=370.5&&o.bottom<=680.5,{entry});$('lock-child').click();const u=$('unlock').getBoundingClientRect();check('unlock follows offset visible viewport',u.left>=20&&u.top>=80&&u.right<=370.5&&u.bottom<=680.5,{entry});}
 
  }
+ results.textContent+='\nCOMPLETE';
+ }catch(e){results.textContent+='\nERROR '+e.message;}
+};
+
+// Additive presentation checks. Existing mechanics/layout oracles above stay intact.
+document.querySelector('#presentation').onclick=async()=>{
+ const checks=[],check=(name,ok)=>{checks.push({name,result:ok?'PASS':'FAIL'});results.textContent=JSON.stringify(checks,null,2);if(!ok)throw Error(name);};
+ try{
+ for(let n=0;n<100&&!frame.contentWindow?.storytimeStorybook;n++)await wait(100);
+ const d=frame.contentDocument,w=frame.contentWindow,$=id=>d.getElementById(id),api=$('game').contentWindow.storytimeReview;
+ check('optional storybook loaded',!!w.storytimeStorybook);
+ if(!$('story-intro').open)$('intro-replay').click();
+ check('opening does not autoplay',!w.storytimeStorybook.status().playing);
+ check('first page is short visible text',$('story-intro-title').textContent==='long long ago');
+ const modal=$('story-intro').getBoundingClientRect();check('book fits viewport',modal.left>=0&&modal.right<=w.innerWidth+.5&&modal.top>=0&&modal.bottom<=w.innerHeight+.5);
+ check('book type is preschool size',parseFloat(w.getComputedStyle($('story-intro-title')).fontSize)>=32);
+ check('book controls retain64px',[...$('story-intro').querySelectorAll('button')].filter(e=>e.getBoundingClientRect().width).every(e=>e.getBoundingClientRect().width>=64&&e.getBoundingClientRect().height>=64));
+ $('storybook-next').click();check('Next advances one page',w.storytimeStorybook.status().index===1);
+ $('storybook-previous').click();check('Previous returns one page',w.storytimeStorybook.status().index===0);
+ const page=d.querySelector('.storybook-page');
+ // Synthetic pointers test handlers, not native swiping or pinch delivery.
+ const pointer=(type,id,x,y)=>page.dispatchEvent(new w.PointerEvent(type,{pointerId:id,clientX:x,clientY:y,isPrimary:id===1,bubbles:true}));
+ pointer('pointerdown',1,180,120);pointer('pointerup',1,60,120);check('left swipe advances',w.storytimeStorybook.status().index===1);
+ pointer('pointerdown',1,60,120);pointer('pointerup',1,180,120);check('right swipe returns',w.storytimeStorybook.status().index===0);
+ pointer('pointerdown',1,120,180);pointer('pointerup',1,120,60);check('vertical gesture does not turn page',w.storytimeStorybook.status().index===0);
+ pointer('pointerdown',1,180,120);pointer('pointerdown',2,190,120);pointer('pointerup',1,60,120);pointer('pointerup',2,70,120);check('multiple pointers do not turn page',w.storytimeStorybook.status().index===0);
+ $('storybook-play').click();check('autoplay requires explicit action',w.storytimeStorybook.status().playing);
+ $('storybook-next').click();check('manual navigation stops autoplay',!w.storytimeStorybook.status().playing);
+ $('intro-close').click();await wait(400);check('close cancels book playback',!w.storytimeStorybook.status().playing);
+ $('full-game').click();const before=api.freeze();$('game-options').click();d.querySelector('#game-appearance button[data-appearance="mermaid"]').click();$('close-options').click();const after=api.freeze();
+ check('appearance does not mutate simulation',JSON.stringify(before.state)===JSON.stringify(after.state));
+ check('mermaid is actual different art',before.svg!==after.svg&&after.appearance==='mermaid');
+ check('appearance leaves explicit resume',api.status().paused);
+ $('feedback').click();const captured=$('frozen').innerHTML;$('game-options').click();d.querySelector('#game-appearance button[data-appearance="mamma"]').click();$('close-options').click();
+ check('old drawing retains captured appearance',$('frozen').innerHTML===captured);
+ check('one marking rail',w.getComputedStyle(d.querySelector('.game-controls')).display==='none'&&!$('feedback-actions').hidden);
+ check('theme picker reports selected state',d.querySelector('#game-appearance button[data-appearance="mamma"]').getAttribute('aria-pressed')==='true'&&d.querySelector('#game-appearance button[data-appearance="mermaid"]').getAttribute('aria-pressed')==='false');
+ const unchanged=api.freeze().state;check('unknown theme rejected',api.setAppearance('unknown')===null&&JSON.stringify(api.freeze().state)===JSON.stringify(unchanged));
+ check('normal audio status is grown-up detail',!!d.querySelector('#options #narration-status'));
  results.textContent+='\nCOMPLETE';
  }catch(e){results.textContent+='\nERROR '+e.message;}
 };

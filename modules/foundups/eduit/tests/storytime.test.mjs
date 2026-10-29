@@ -52,3 +52,61 @@ test('educational typography cannot change tremor physics',()=>{
 
 import {gameWorld,gameEvents} from '../../../../public/eduit/storytime/game-world.mjs';
 test('game cues have valid source foley and progressive world hazards',()=>{for(const e of gameEvents){assert.ok(e.sourceTime>=0&&e.sourceTime+e.sourceDuration<=15);assert.ok(e.start<e.end&&e.end<=DURATION);}const s={...initial(),elapsed:24};const early=gameWorld(s,s.actors),late=gameWorld({...s,elapsed:40},s.actors);assert.ok(late.warning>early.warning);assert.ok(scene(early).includes('falling-dirt'));assert.ok(scene(late).includes('new-cracks'));assert.equal(gameWorld({...s,outcome:'rescued'},s.actors).collapse,0);});
+
+// Appearance is presentation only; these fixed render oracles come from main 8b345ec.
+import {createHash} from 'node:crypto';
+import {appearances,appearanceFor} from '../../../../public/eduit/storytime/rig.mjs';
+import {learningWordLayout} from '../../../../public/eduit/storytime/scene.mjs';
+test('default appearance retains the original rendered art and invalid IDs fall back',()=>{
+ const golden={0:'5dbade47fbf60c95dd4dc0674d084500d08e3aa9633516154ef90d580178feb6',
+  '3.2':'5a7f43866bdc4495ba9ae91a19b4ff683e186d2a4a5a4152a4190609d3fd2ce4',
+  '10.8':'4e439f09eeee58e5d17066e923ce10847e5ab6dd529f0785ff09680c49824a22',
+  14:'8be4af1aac002f441c6c307dfd8dfdb058e01a8aa8f8bfa68f904be1008e33e7'};
+ for(const [t,hash]of Object.entries(golden)){
+  const world={...movie(Number(t)),showWords:false};
+  assert.equal(createHash('sha256').update(scene(world)).digest('hex'),hash);
+  for(const invalid of [null,{},'__proto__','constructor','missing','https://example.invalid/a.svg']){
+   assert.equal(appearanceFor(invalid).id,'mamma');assert.equal(scene({...world,appearance:invalid}),scene(world));
+  }
+ }
+ assert.ok(Object.isFrozen(appearances));assert.ok(Object.isFrozen(appearances.mermaid));
+});
+test('mermaid artwork changes every pose but never mutates simulated input or physical events',()=>{
+ for(const phase of ['sleeping','awake','moving','safe']){
+  const state=initial();state.actors=state.actors.map(a=>({...a,status:phase,awake:phase!=='sleeping'}));
+  const before=structuredClone(state),world={...gameWorld(state,state.actors),turn:1};
+  const original=scene(world),mermaid=scene({...world,appearance:'mermaid'});
+  assert.notEqual(mermaid,original);assert.ok(mermaid.includes('#164D68'));assert.deepEqual(state,before);
+  assert.equal((mermaid.match(/data-(?:actor|survivor)=/g)||[]).length,5);
+  assert.equal((original.match(/data-(?:actor|survivor)=/g)||[]).length,5);
+ }
+ for(const t of [0,2,9.9,10.8,14]){
+  const world=movie(t),before=structuredClone(world);
+  const a=scene({...world,appearance:'mamma'}),b=scene({...world,appearance:'mermaid'});
+  assert.deepEqual([...a.matchAll(/data-event="([^"]+)"/g)].map(m=>m[1]),[...b.matchAll(/data-event="([^"]+)"/g)].map(m=>m[1]));
+  assert.deepEqual(world,before);
+ }
+});
+test('rendering either appearance between inputs preserves identical rescue histories',()=>{
+ for(const practice of [false,true]){
+  const results=[];
+  for(const appearance of Object.keys(appearances)){
+   let s=advance(initial({practice}),'start');const history=[];
+   for(const id of ['baby-1','baby-2','baby-3','parent-1','parent-2']){
+    s=wake(s,id);s=advance(s,'root');
+    for(let i=0;i<50;i++){s=advance(s,'tick',.1);scene({...gameWorld(s,s.actors.map(a=>actorPose(a,s.elapsed))),appearance});}
+    history.push(structuredClone(s));
+   }
+   results.push(history);
+  }
+  assert.deepEqual(results[0],results[1]);assert.equal(results[0].at(-1).awards.length,5);
+ }
+});
+test('preschool sniff label avoids the five actor envelopes and the rescue destination',()=>{
+ for(const locale of Object.keys(locales)){
+  const s=initial();const a=s.actors[2];const cue={id:'test-sniff',kind:'sniff',actorId:a.id,size:58,x:a.x+180,y:a.y+28};
+  const label=localizeEvent(cue,locale).word,p=learningWordLayout(label,cue,s.actors);
+  assert.equal(p.overlap,0);assert.ok(p.size>=72);assert.ok(p.box.left>=0&&p.box.right<=960);
+  assert.ok(p.box.top>=0&&p.box.bottom<=540);
+ }
+});
