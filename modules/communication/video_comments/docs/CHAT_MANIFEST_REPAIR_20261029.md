@@ -87,6 +87,15 @@ concurrency and exact production JavaScript in synthetic DOMs. Positive controls
 exercise useful answers, creator readback and actual sender payloads. Providers/
 DOMs are fixtures; these are not live inference or delivery receipts.
 
+Additional private QA exercised the actual installed Qwen3.5-4B through the
+existing assessment/writer/reviewer route with synthetic comments and supplied
+facts. A useful documentary-website answer passed review. Unrelated promotion
+and unsupported claims were rejected. These examples are not calibrated quality
+or public delivery evidence. The short local requests disable reasoning output;
+the legacy system prompt's unrelated Japan/topic redirects are excluded from the
+assessed route. The final neutral prompt preserves the comment's subject and
+distinguishes missing context from a claim that a date/event does not exist.
+
 Independent fresh-context review read all original files, reproduced wrong-row
 and coder-model acceptance, and reviewed their repairs. Canonical registry,
 backend manifest, digest pins and security findings use existing generators/gates.

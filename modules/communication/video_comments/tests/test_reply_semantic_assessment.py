@@ -56,6 +56,9 @@ def test_posting_route_assesses_original_before_writing_and_reviews_supplied_fac
     assert result.text == 'The film details are at HornetHunter.com.'
     assert result.source == 'lm_studio' and review['approved']
     assert len(calls) == 3
+    assert all(call['reasoning_effort'] == 'none' for call in calls)
+    assert 'Write one concise YouTube reply' in calls[1]['messages'][0]['content']
+    assert 'behind Move2Japan' not in calls[1]['messages'][0]['content']
     first = calls[0]['messages']
     assert text in json.loads(first[1]['content'])['text']
     assert 'negation, quotation and sarcasm' in first[0]['content']
