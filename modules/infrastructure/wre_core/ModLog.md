@@ -1,3 +1,13 @@
+## 2026-10-29 — Reconcile risk-verification handoff with landed implementation
+
+Retain PR #2248's original execution packet and dispatch reference; resolve the
+roadmap overlap by preserving PR #2250's newer implementation/status table.
+The handoff now links that landed slice and names the remaining native outcome,
+promotion/rollback and measured-benefit gates. No runtime or authority changes.
+Validation: all relative Markdown file targets in the handoff and changed
+roadmap link resolve; diff whitespace check passed. Hosted checks remain a
+separate merge gate. WSP 10/22/48/50/84/97.
+
 ## 2026-10-28 — Preserve risk-based verification through execution and completion
 
 Reused the existing differential policy, scope resolver, evidence producer and

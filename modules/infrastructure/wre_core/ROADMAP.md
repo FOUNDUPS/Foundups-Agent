@@ -3,7 +3,8 @@
 Source baseline: `4afb9284d32e9af24f578fda91063114263d5a39`.
 This selection supersedes the older "Current selection" below for the
 risk-verification lane only. [PR2248](https://github.com/FOUNDUPS/Foundups-Agent/pull/2248)
-is the handoff; its planning document is not runtime admission.
+is the [preserved handoff](../../../docs/operations/WRE_RISK_BASED_VERIFICATION_HANDOFF_20261028.md);
+its planning document is not runtime admission.
 
 WSP15: C3/I4/D4/Impact4 = **15/P1**. Reconcile the existing policy-to-execution
 connection before optimizing broad CI scheduling. Reuse wins over a new router,

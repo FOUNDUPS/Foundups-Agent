@@ -1,3 +1,7 @@
+## Risk-based verification integration handoff — 2026-10-28
+
+See [WRE verification ownership, evidence boundaries and Prometheus M2M execution packet](WRE_RISK_BASED_VERIFICATION_HANDOFF_20261028.md). Existing test-impact projection and differential execution are separate from authenticated worker completion and RSI promotion. This cross-reference does not activate a new worker or claim end-to-end integration.
+
 ## Current owner input handoff — 2026-10-25
 
 [#2181 closure](https://github.com/FOUNDUPS/Foundups-Agent/pull/2181#issuecomment-6357450863)
