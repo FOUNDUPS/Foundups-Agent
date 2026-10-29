@@ -2,6 +2,21 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## Quantity publication reconciliation — 2026-10-29, before mutation
+
+Main advanced to ade6bca85 through unrelated livechat and WSP62 changes.
+Preserve those changes; merge main into the owned quantity branch. Relevant
+overlaps are root ModLog and separate entries in the backend manifest. Retain
+both histories and all current main manifest fields except the two allocated
+quantity source hashes. Independent review accepts those exact source/test bytes.
+Macro inspection also found the existing JS consumer's EXPECTED_MANIFEST_SHA256:
+the generator does not update it. Allocate one derived constant replacement,
+using the existing canonical sorted compact JSON digest, plus <=18 plan lines.
+Run existing generator/consumer checks without changing their assertions or
+manifest membership/caps. This binds source integrity only, not runtime activation.
+Retain all frozen amount results under their actual source; review current-main
+diff for overlap before claiming compatibility. Existing17/P0 priority remains.
+
 ## Exact quantity admission allocation — 2026-10-29, before tests/product
 
 WSP15 C3/I5/D5/Impact4=17/P0; WSP3/6/11/15/22/50/62/71/77/84/97.
