@@ -20,3 +20,11 @@ score/sleep/practice/reset and64px bound checks. The optional live rescue button
 uses real-time waits; cloud-browser suspension can exhaust them before the active
 game clock advances. Treat that as inconclusive, never substitute a green engine
 result for a completed browser round.
+
+- `viewport.test.mjs`: execute the actual viewer viewport owner with missing API,
+  normal-zoom offsets, rotation, foreground, and browser-zoom fixtures; assert
+  both owners pause when bounds change. These inputs are not device emulation.
+- `director_harness.html` phone matrix: both root/manifest entry at six dimensions,
+  useful landscape scene size, >=64px controls, safe-area arithmetic, hit tests,
+  one drawing rail and state preservation. First run the identical oracle against
+  the retained published baseline; record a red control before candidate acceptance.

@@ -7,11 +7,11 @@ export const CAST=[
  {id:'baby-2',x:235,y:378,scale:.42,duration:2.4,wakeTaps:2,destX:790,destY:378},
  {id:'baby-3',x:350,y:378,scale:.42,duration:2.2,wakeTaps:2,destX:860,destY:378}
 ];
-export function initial({practice=false}={}){return {phase:'ready',elapsed:0,practice,selected:null,score:0,awards:[],victoryAt:null,actors:CAST.map(a=>({...a,status:'sleeping',started:null,taps:0,tappedAt:null,awakeAt:null,wandered:false}))};}
+export function initial({practice=false,round=1}={}){const shift=(round-1)%3;return {phase:'ready',round,elapsed:0,practice,selected:null,score:0,awards:[],victoryAt:null,actors:CAST.map((a,i)=>({...a,x:a.x+([0,-12,12][(i+shift)%3]||0),status:'sleeping',started:null,taps:0,tappedAt:null,awakeAt:null,wandered:false}))};}
 export const rescuePoints=(elapsed,practice=false)=>10+(practice?0:Math.max(0,Math.floor(10*(1-elapsed/DEADLINE))));
 export const worldTime=s=>s.practice?Math.min(PRACTICE_HOLD,s.elapsed):s.elapsed;
 export function advance(state,event,dt=0){
- if(event==='start'||event==='retry')return {...initial({practice:state.practice}),phase:'playing'};
+ if(event==='start'||event==='retry')return {...initial({practice:state.practice,round:event==='retry'?(state.outcome==='rescued'?(state.round||1)%3+1:state.round||1):state.round||1}),phase:'playing'};
  if(!['playing','celebrating'].includes(state.phase))return state;
  const s={...state,actors:state.actors.map(a=>({...a})),awards:[...state.awards]};
  if(event==='tick'){
