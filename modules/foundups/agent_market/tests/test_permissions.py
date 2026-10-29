@@ -1,4 +1,4 @@
-﻿import pytest
+import pytest
 
 from copy import deepcopy
 from dataclasses import FrozenInstanceError, replace

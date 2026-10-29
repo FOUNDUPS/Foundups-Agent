@@ -1,3 +1,13 @@
+## 2026-10-29 — Regenerate registry after F1 encoding repair
+
+The first PR2257 hosted test gate detected a stale registry: removing BOMs
+makes 15 files statically parseable under the existing classifier. Canonical
+regeneration preserves all 1779 paths and changes only those 15 classifications;
+260 remain quarantined. No discovery/classification rule or test skip was added.
+The 28 registry tests and canonical --check pass; 85 affected dummy-STT,
+in-memory permission and schema tests pass. Twelve optional rESP import smoke
+files remain outside executed acceptance. WSP 22/50/84/97.
+
 ## 2026-10-29 — Reconcile the YouTube registry with current main
 
 Combined main `68562f2c8ca4749e360e76758183319d54988879` with the accepted

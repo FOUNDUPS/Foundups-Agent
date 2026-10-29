@@ -491,6 +491,35 @@ class TestBaselineComparison(unittest.TestCase):
 class TestWSP62Thresholds(unittest.TestCase):
     """Validate WSP 62 tiered thresholds for Python files."""
 
+    def test_function_inspection_accepts_valid_python_source_encodings(self):
+        sources = (
+            b"\xef\xbb\xbfdef work():\n    return 1\n",
+            b"# coding: latin-1\ndef work():\n    return 'caf\xe9'\n",
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "encoded.py"
+            for source in sources:
+                with self.subTest(source=source[:16]):
+                    compile(source, str(path), "exec")
+                    path.write_bytes(source)
+                    self.assertEqual(modular_audit._function_sizes(path), {"work": 2})
+
+    def test_function_inspection_rejects_invalid_source_after_encoding_detection(self):
+        sources = (
+            b"\xef\xbb\xbf# coding: latin-1\ndef work():\n    return 1\n",
+            b"\xef\xbb\xbfdef broken(\n",
+            b"value = \x00\n",
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "invalid.py"
+            for source in sources:
+                with self.subTest(source=source[:16]):
+                    with self.assertRaises(SyntaxError):
+                        compile(source, str(path), "exec")
+                    path.write_bytes(source)
+                    with self.assertRaises(SyntaxError):
+                        modular_audit._function_sizes(path)
+
     def test_python_function_default_ceiling_is_inclusive_at_50_lines(self):
         """Exactly 50 lines pass while a new 51-line function is debt."""
         with tempfile.TemporaryDirectory() as target_dir, tempfile.TemporaryDirectory() as base_dir:

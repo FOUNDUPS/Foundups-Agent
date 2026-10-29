@@ -1,4 +1,4 @@
-﻿"""Smoke test for src.biocognitive_monitoring_system."""
+"""Smoke test for src.biocognitive_monitoring_system."""
 
 import sys
 from pathlib import Path

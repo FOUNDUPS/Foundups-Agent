@@ -1,5 +1,15 @@
 # INTERFACE (WSP 11)
 
+## Legacy adapter workflow declaration
+
+`await GitHubAPIAdapter.trigger_workflow(workflow_id, ref, inputs=None, *,
+agent_id, session_id, cube_type)`
+
+The three identity arguments are required keywords; inputs may be omitted.
+The adapter retains its existing mock transport. Syntax and argument binding
+are verified; this interface does not establish live workflow dispatch.
+It is separate from the GitHubAPIClient observation interface below.
+
 ## Immutable regular-file observation
 
 `await GitHubAPIClient.get_file_observation(file_path: str, *,

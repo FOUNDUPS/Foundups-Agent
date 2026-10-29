@@ -1,3 +1,17 @@
+## PR2257 encoding manifest metadata review — 2026-10-29
+
+Hosted job123214518117 at source `5ce02d043` reports 38 unreviewed
+manifest metadata findings, 133 exact prior reviews and zero introduced-history
+findings. The reconciliation architect verified the hosted merge-tree manifest
+blob equals the candidate, all 1472 runtime source hashes from immutable Git
+blobs, and each flagged unique unchanged line against main `887c09dd2` and its
+prior exact approval. No independent agent review is claimed.
+
+Preserve all 2533 prior entries and append only those 38 exact file/rule/line
+bindings. The combined runtime list is unchanged; its eleven F1 source changes
+remove leading BOMs only. Scanner rules, scope, exclusions and fingerprint
+behavior are unchanged. Fresh final tree/history checks remain required.
+
 ## PR2254 YouTube reply manifest rebind — 2026-10-29
 
 The checksum-verified Gitleaks 8.30.1 full Git-LF tree scan at source

@@ -1,4 +1,4 @@
-﻿"""Persistent Task Pipeline Service for FoundUps Agent Market.
+"""Persistent Task Pipeline Service for FoundUps Agent Market.
 
 Implements TaskPipelineService interface with SQLite persistence.
 Manages complete task lifecycle: create → claim → submit → verify → payout.
