@@ -1,5 +1,15 @@
 # TestModLog - tests
 
+## 2026-10-29 — Existing-only revalidation convergence
+
+Fresh four-owner focus:228 pass; ten-owner connected:406 pass, including228.
+No failures/errors/skips; per-run source hashes stable. Original child source,
+test and receipt blobs remain exact; no new case, oracle or test owner.
+Reused credential-stripped controller with denied Python socket events and
+scratch-only SQLite connections. Not full import/native/OS isolation or a chain
+observation. Historical514-case whole-FAM result was not rerun or relabeled.
+Fresh hosted and resulting-main acceptance remain distinct publication gates.
+
 ## 2026-10-29 — Intent convergence against delivered codec main
 
 Existing four-owner focus passes173 cases (93 intent plus80 compatibility).

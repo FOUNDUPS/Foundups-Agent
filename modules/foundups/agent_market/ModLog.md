@@ -15,6 +15,10 @@ owner-generated changes; do not force runtime admission. Budget: existing PR
 product/test delta only, <=24 module-log and <=12 test-log lines; additive main
 history and exact previously reviewed metadata union. Fresh hosted and resulting
 main checks are required. Revalidation is point-in-time, never chain confirmation.
+Reconciled candidate preserves the original child source, tests and two receipt
+blobs. Fresh focused228 and connected406 cases pass with stable per-run source
+hashes; counts overlap. Registry and manifest retain the parent contents.
+Hosted exact-head and resulting-main qualification remain separate gates.
 
 ## 2026-10-29 — Existing TestNet intent convergence allocation
 
