@@ -15,6 +15,10 @@ documentation additively. Budget: constituent file union, <=24 module-log and
 Run connected intent/quantity/FAM owners with the existing offline scratch runner,
 then exact-head hosted and resulting-main gates. This integration authorizes no
 issuer, signer, runtime activation, fund movement, broadcast or paid settlement.
+Combined ten-owner run passes485 cases without failures/errors/skips and with
+stable source hashes. Constituent product/oracle blobs remain unchanged; this
+fresh integration run includes the prior406 connected revalidation cases and
+the79 quantity additions. Hosted/main and independent review remain separate.
 
 ## 2026-10-29 — Exact quantity admission before launch effects
 

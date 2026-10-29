@@ -1,5 +1,14 @@
 # TestModLog - tests
 
+## 2026-10-29 — Combined testnet safety integration
+
+Reused ten connected owners:485 passed, zero failures/errors/skips; sources
+stable. Includes all406 connected revalidation cases plus79 quantity additions;
+constituent counts overlap. Original assertions and source/test blobs retained.
+Same credential-stripped external runner, denied Python sockets and scratch-only
+SQLite; not OS isolation or live-chain proof. Existing registry/manifest owners
+and fresh hosted/current-main checks remain distinct integration gates.
+
 ## 2026-10-29 — Freeze exact quantity and pre-effect launch acceptance
 
 Allocation17/P0 precedes tests/product. Unchanged schema/orchestrator baseline:
