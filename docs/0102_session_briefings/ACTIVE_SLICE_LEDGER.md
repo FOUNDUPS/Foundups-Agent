@@ -1,5 +1,54 @@
 # Active Slice Ledger
 
+## PC recovery and module-contract close-out — 2026-10-29
+
+**Latest accepted slice:** #2270, head `b826ece02`, base `addd00534`, squash
+`3a4de0b54cb468580270f99d7b8abca4b89484c0`. All 23 PR checks and 21 main checks
+across four observed workflows passed. Fresh source/workspace/authority match
+that main, CURRENT/no-gap, generation
+`80834e88cd7b59cfdeea4c82d623b8b1dae5678975a745dc9488c5b9035dc850`.
+Both owned maintenance runtimes stopped. Seventeen owned merges are accepted.
+The separate YouTube #2269 Windows promotion remains preserved; its live-startup
+guard is not changed. Ignored frontend build artifacts remain after the prior
+automatic approval review block; owned worktrees are still needed.
+
+**Current slice:** `agent/pc-preflight-denial-20261029`, base main3a4de0b.
+Recover the preserved PC process-loop denial boundary, keeping main's newer
+call-local skill validation. Failed preflight returns before permission, planning,
+conversation execution and result-memory handling. Earlier continuity,
+classification and skill checks still run. Real planner cases cover unauthorized
+COMMAND/SYSTEM and SCHEDULE without WRE; authorized advisory behavior is retained.
+The frozen 26-case oracle is red on main (13 failures), green on the candidate.
+Connected offline validation passes 54 cases, then 12 existing permission cases;
+the source methods are real and unrelated daemon/containment/storage seams are
+synthetic. Eight manifest cases and three Node commands pass. No live application
+acceptance is claimed. Hosted checks and resulting-main/Holo acceptance remain.
+
+**PC reconciliation evidence:** 86 selected files independently match archive and
+current-PC hashes. The old 34-file overlay is stale: current main already has a
+newer native llmster owner and pitch v0.1.3. Preserve them. Original PC HEAD
+`0c81418fe` and main's `d35d34788` have different patch IDs; source comparison
+retains the substantive builder repair while reconciling newer upstream metadata.
+No claim of identical patches or full-PC atomic backup. All originals remain.
+Ollama timeout/model-default recovery has a separate frozen offline oracle
+(15 failures/4 passes on main, 19 passes on its preview); it is excluded here.
+Unique storage/YUMORI, call-safety, architecture and research artifacts remain
+preserved for current-contract review. No shared branch switch, reset or cleanup.
+
+**Retrieval evaluation:** the initial stale authority mismatch was retained.
+The local lexical bundle correctly marks its working-copy overlay UNKNOWN/gap;
+it is not semantic acceptance. It reports no missing required artifacts, but
+bounded document excerpts are truncated and optional memory/README is absent.
+Direct source and focused owner-document reads resolve those limits. Historical
+cross-lane logs are noisy; order current process/planner/skill contracts before
+older PC proposals, deduplicate already-merged pitch/startup work, and bind
+decisions to exact source hashes. The fresh clean-main owner query is now CURRENT.
+
+**Remaining work:** original PR queue and audit F5/F6b/F8/F9 follow-ons remain.
+Twenty-four dependency alerts remain in the last observed snapshot, including
+two critical Chroma alerts without listed patches. WSP 6/11/22/50/71/84/87/97.
+
+
 ## Module contracts — 2026-10-29
 
 **Latest accepted slice:** #2268, head `8ad8dc2ca`, base `4533f7321`, squash

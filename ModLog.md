@@ -1,3 +1,25 @@
+## 2026-10-29 — Recover denied-preflight handling from preserved PC work
+
+Module-contract PR #2270 merged as 3a4de0b54cb468580270f99d7b8abca4b89484c0.
+All 23 PR checks and 21 resulting-main checks across four observed workflows
+passed. Fresh Holo evidence binds source, workspace and authority to that main,
+CURRENT/no-gap; both owned maintenance runtimes stopped. Seventeen owned merges
+now have main/Holo acceptance.
+
+The supplied PC reconciliation bundle predates current main. Reverification
+matches all 86 selected preserved files to the archive and current PC. Main's
+newer llmster lifecycle and pitch v0.1.3 remain authoritative; the shared dirty
+checkout and all original work are retained. No blanket restoration is applied.
+
+Recover the small process-loop repair that returns a block on failed WSP
+preflight, retaining the original intent and newer skill-verdict contract.
+Frozen acceptance is 13 failures/13 passes on main and 26 passes on the candidate;
+the connected offline selection passes 54 cases plus 12 permission cases.
+Eight manifest tests and three Node commands pass. The 1475-member manifest
+changes only the repaired helper's digest; registry adds one test file.
+Live daemon/provider acceptance and hosted/main/Holo close-out remain required.
+Ollama timeout recovery is a separate prepared slice. WSP 6/11/22/50/71/84/87/97.
+
 ## 2026-10-29 — Add source-bound module contracts
 
 Frontend dependency repair #2268 merged as 21dc71b83bbea1b4c76c9f4c0f84979386480e44 after all 24

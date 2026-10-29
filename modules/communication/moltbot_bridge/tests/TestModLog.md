@@ -1,3 +1,16 @@
+## 2026-10-29 — PC preflight denial recovery
+
+Frozen26-case oracle: unchanged main helper13 failed/13 passed; reconciled helper
+26 passed, including actual planner COMMAND/SYSTEM authority and absent-WRE
+SCHEDULE cases. The initial Windows harness blocked asyncio's self-pipe; preserve
+that failed attempt separately. Creating the runner loop before socket denial
+repairs setup without changing acceptance assertions. Portable in-repo replay:
+26 passed. Connected run:54 passed (26 new+28 existing skill cases), then12 existing
+permission cases passed. Counts overlap and are not added to repeated runs.
+Synthetic seams: daemon registration/containment, permission storage for the skill
+selection, HTTP/provider/plan/memory collaborators. No live model or deployment.
+Exact-head hosted and resulting-main/Holo gates remain pending. WSP6/22/50/97.
+
 ## 2026-10-29 — Interface split and retained expiry debt
 
 Remove INTERFACE.md from the obsolete exact-size exemption expectation and

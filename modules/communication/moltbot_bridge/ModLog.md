@@ -1,3 +1,17 @@
+## 2026-10-29 — Recover explicit preflight denial from preserved PC work
+
+Reconcile only the denied-preflight branch from the preserved PC checkout onto
+main3a4de0b. Retain the newer call-local skill verdict and unchanged healthy paths.
+The older working copy and its verified backup remain untouched. Ollama timeout,
+llmster startup, pitch documents and unrelated PC work are excluded.
+Frozen helper/planner contracts: 13 failed/13 passed on unchanged source, then
+26 passed on the reconciled candidate. Connected legacy skill checks add28 passes;
+existing permission regressions add12. Registration/containment and unrelated
+permission storage are isolated in the connected harness; no live service ran.
+Manifest membership remains1475 with one source hash updated; existing pins and
+canonical test registry are regenerated/rebound. Hosted and resulting-main/Holo
+acceptance remain required. WSP 6/11/22/50/71/84/87/97.
+
 ## 2026-10-29 — Preserve interface contracts and repair exemption metadata
 
 Split the 3481-line interface into a directory and five active contract pages
