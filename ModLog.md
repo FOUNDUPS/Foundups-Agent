@@ -253,6 +253,51 @@ No runtime, cap, scanner, dependency, signing, issuance, payment or deployment
 change. The existing delivery plan/compact receipt retain unfinished work and
 the next separately allocated consumer/artifact layer.
 
+## 2026-10-25 — hosted interpreter alias accommodation allocation
+
+WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/97. The912c artifact observes only the
+official unused python3.exe file symlink. Preallocate a narrowly checked, recorded
+nonrecursive alias unlink inside the disposable hosted job, preserving target
+bytes and strict profile admission. No local runtime, SDK/guard/oracle/28-ID/lock
+change; retain both hosted pre-test failures and the distinct local28 pass.
+
+## 2026-10-25 — Algorand hosted metadata diagnostic allocation
+
+WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/97. PR2206/head124b's distinct CI
+environment refuses a linked base-runtime path before SDK tests. Preserve the
+failed prepare and skipped run; add a bounded stdlib link inventory in the same
+workflow/setup artifacts. Local28 passes remain dated and separate. No tested
+codec/helper/guard/oracle, source/effect grant or financial capability changes.
+Separate incident38965909 identifies the synthetic public AUTH fixture at test28;
+independent stdlib derivation verifies the reported field, with no private key.
+The remote finding remains unresolved; no detector suppression or gate waiver.
+
+## 2026-10-25 — unsigned Algorand codec local qualification
+
+All 28 frozen methods pass at committed444c9f147 after reconciling main e801;
+four expected denied controls, zero unexpected attempts/skips/errors/failures.
+Parent and independent profile review bind5,263 files and245 loaded origins;
+the original1,505-file materialized environment remains unchanged. Pre-execution
+static findings repaired the separately allocated284-line adapter; no codec/oracle
+change or behavioral RED claim. Manifest check1471/canonical0fb3 stays fixed.
+Record receipt hashes in module TestModLog. Distinct pip CI/security/review gates
+remain pending; no resident, ledger, signer, provider, chain or paid state effect.
+
+## 2026-10-25 — unsigned Algorand probe format allocation
+
+WSP15 C3/I4/D4/Impact4=15/P1; WSP3/6/12/22/49/50/62/84/97.
+Prepare one platform codec with frozen scalar declarations, canonical unsigned
+ASA bytes, actual SDK transaction ID and a separate request binding. Freeze28
+independent unittest methods before product authoring; flat fee avoids SDK account
+generation/signing in fee estimation. New module docs, module-only direct pins,
+exact15-wheel Windows3.12.10 qualification lock, bounded source/effect adapter and
+dedicated workflow are separately reviewed before execution. Current authoring
+is not a passing test, runtime admission or transaction submission result.
+Canonical Holo authority mismatch is preserved; direct source retrieval finds no
+existing codec. Existing FAM intent/accounting owners and global CI/dependencies
+remain unchanged. No resident import, signer, ledger, provider, chain or paid state
+effect is allocated; next integration needs trusted ledger and artifact ownership.
+
 ## 2026-10-25 — FoundUps delivery and research checkpoint
 
 WSP15 C2/I4/D4/Impact4=14/P1; WSP22/50/97. Reconcile existing delivery/research
@@ -62739,6 +62784,19 @@ shared backend, focused tests and CI; regenerate integrity bindings. Follow-up
 local schema-constrained reviews produced valid JSON but insufficient quotations,
 so no worker qualification, native admission or retained RSI gain is claimed.
 See shared_utilities ModLog and the RSI dispatch checkpoint for evidence.
+## 2026-10-25 — hosted Algorand result and exact fixture classification
+
+WSP15 C1/I4/D5/Impact4=14/P1; WSP22/50/97. Hosted run40173561283 passes the
+distinct pip profile's28 codec methods. Preserve prior failures and local bounds.
+Preallocate three existing security metadata owners to record only the exact
+line28 synthetic public-address fingerprint from job121109366122, after parent
+and independent review. Existing2220 entries, scanner/gate and frozen sources
+remain unchanged. GitGuardian disposition is separate; no merge waiver.
+Reconcile published intake main0909 with codec parents; preserve exact existing
+proof keys and2,261-entry approval union, main f427/pins and1,471/caps unchanged.
+Registry1,772/273 passes. No codec/helper/test/lock/workflow change; independent
+immutable review and fresh current-head hosted gates remain required.
+
 ## 2026-10-25 — intake reference preservation allocation
 
 WSP15 C2/I4/D3/Impact4=13/P1; WSP22/50/84/97. Preserve submitted references
