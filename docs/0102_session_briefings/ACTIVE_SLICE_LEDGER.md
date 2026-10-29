@@ -19,18 +19,18 @@ Python dependencies and the root npm lock are explicit limited scopes. Existing
 Mode 2/optional WSP62 discovery remains outside the new bounded inventory claim.
 Monitoring replaces the obsolete data_processing domain constant; no migrations.
 
-Six existing-entrypoint defects reproduce on the base. Seventy-one integrated cases
+Six existing-entrypoint defects reproduce on the base. Seventy-two integrated cases
 pass; old subprocess mocks were deliberately adapted to the bounded WRE runner,
 not called byte-identical red/green fixtures. Eight-owner audit selection:
-244 passed plus 28 subtests. Exact-base Mode 2: 0 errors/127 warnings/306 advisories.
+245 passed plus 28 subtests. Exact-base Mode 2: 0 errors/127 warnings/306 advisories.
 No live external scanner/network audit, installation, source repair, deployment,
 global collection or independent reviewer is claimed. Registry/runtime/source
 checks and hosted/main/Holo close-out must complete before a successor PR.
 Registry 1787/260 preserves all 1785 prior rows and adds two unit owners; 62
 registry/impact tests pass. Runtime manifest remains byte-identical (1472 members,
 canonical digest 60fc85a9670dca2fba2cbfe745e7852d9b757c1364b80ae837ab664b6e36096f).
-Actual structural-only main77b scan: 7224 admitted files, 166 blocks, 233 findings,
-three environment paths excluded, 4.34 seconds, unchanged Git status; no external
+Actual structural-only main77b scan: 7224 admitted files, 158 evidenced blocks and eight unresolved containers,
+three environment paths excluded, 4.69 seconds, unchanged Git status; no external
 scanner launched. Hosted/main/Holo acceptance remains required.
 
 **Additional retained work:** #1648's unique public-chat/accounting/membership

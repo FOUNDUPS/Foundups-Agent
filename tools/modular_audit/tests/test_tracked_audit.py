@@ -217,3 +217,17 @@ def test_empty_git_repository_is_not_a_clean_structural_audit(tmp_path):
     root = tracked_repo(tmp_path / 'repo', [])
     findings, count = audit.audit_all_modules(root)
     assert count == 0 and any(x.startswith('ERROR: No tracked module files') for x in findings)
+
+
+def test_data_container_is_not_a_module_but_code_test_and_document_scaffolds_are():
+    files = frozenset({'modules/telemetry/feedback/comment_engagement/session.json',
+        'modules/infrastructure/code/src/service.py', 'modules/infrastructure/check/tests/test_service.py',
+        'modules/infrastructure/documented/README.md', 'modules/infrastructure/contract/INTERFACE.md',
+        'modules/wre_core/README.md'})
+    roots = tracked.module_roots(files, audit.ARCHITECTURAL_EXCEPTIONS)
+    assert roots == ['modules/infrastructure/check', 'modules/infrastructure/code',
+                     'modules/infrastructure/contract', 'modules/infrastructure/documented', 'modules/wre_core']
+    findings, count = tracked.structural_findings(tracked.TrackedInventory(files, 0, 0),
+                                                audit.ENTERPRISE_DOMAINS, audit.ARCHITECTURAL_EXCEPTIONS)
+    assert count == 5 and any('Tracked container lacks' in x and 'telemetry/feedback' in x for x in findings)
+    assert not any("Module 'telemetry/feedback'" in x for x in findings)

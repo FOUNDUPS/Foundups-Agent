@@ -2,19 +2,22 @@
 
 ## Repository-scoped external audits — 2026-10-29
 
-`test_external_audit.py` and `test_tracked_audit.py` add 71 acceptance cases.
+`test_external_audit.py` and `test_tracked_audit.py` add 72 acceptance cases.
 All external scanner responses are synthetic/injected; one real isolated Python
 child verifies exit-1 JSON through the existing bounded process runner. Temporary
 Git repositories cover tracked-only discovery, untracked documentation, missing
 sources, environment components, stage conflicts, inventory truncation/duplicates,
 root mismatch, submodules, redirect rejection, source/manifest/output limits,
-explicit Bandit targets/cleanup and no process-global cwd change.
+explicit Bandit targets/cleanup and no process-global cwd change. A later
+regression against the first candidate reproduces data-only folders being counted
+as modules; it now follows existing Holo evidence rules and retains unresolved
+containers as ownership warnings.
 
 Six desired old-entrypoint cases fail against main77b. Integration intentionally
 changes the injected process boundary from subprocess.run to the existing bounded
 WRE runner and passes explicit roots; the expected outcomes are preserved, not
 claimed as a byte-identical red/green harness. The final eight-owner audit selection
-passes 244 tests plus 28 subtests. Exact-base Mode 2 remains at 0 errors, 127
+passes 245 tests plus 28 subtests. Exact-base Mode 2 remains at 0 errors, 127
 warnings and 306 advisories. No live pip-audit/Bandit/npm network audit, package
 installation, global collection or security-clearance claim is part of this proof.
 

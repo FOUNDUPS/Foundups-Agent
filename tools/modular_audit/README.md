@@ -53,6 +53,10 @@ Redirected, missing and special files are explicit incomplete inspection errors.
 Environment-named components are excluded before file metadata/content reads.
 Monitoring is a canonical WSP 3 domain; the documented `modules/wre_core` exception
 remains. No files are moved or repaired by this audit.
+Module evidence follows HoloIndex's existing rule: tracked files under direct
+`src/` or `tests/`, or a direct `README.md`/`INTERFACE.md`. Other containers remain
+explicit ownership warnings instead of acquiring fabricated module requirements.
+This distinguishes legacy scripts, intake/archive folders and telemetry data.
 
 `perform_security_scan(repo_root, domain_path="repository")` runs each applicable
 external scanner once with explicit process cwd; it never changes the caller's

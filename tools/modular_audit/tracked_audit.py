@@ -106,7 +106,9 @@ def module_roots(files, exceptions):
             continue
         if parts[1] in exceptions:
             roots.add('/'.join(parts[:2]))
-        elif len(parts) >= 4 and parts[2] not in RESERVED and not parts[2].startswith('.'):
+        elif (len(parts) >= 4 and parts[2] not in RESERVED and not parts[2].startswith('.')
+              and ((len(parts) >= 5 and parts[3] in {'src', 'tests'})
+                   or (len(parts) == 4 and parts[3] in {'README.md', 'INTERFACE.md'}))):
             roots.add('/'.join(parts[:3]))
     return sorted(roots)
 
@@ -128,6 +130,11 @@ def structural_findings(inventory, domains, exceptions):
                  and p.split('/')[1] not in exceptions and p.split('/')[2] in {'src', 'tests'}}
     findings.extend(f"WARNING: Domain-level source/tests need an owned block: '{p}'" for p in sorted(misplaced))
     roots = module_roots(files, exceptions)
+    containers = {'/'.join(p.split('/')[:3]) for p in files if p.startswith('modules/')
+                  and p.count('/') >= 3 and p.split('/')[1] not in exceptions
+                  and p.split('/')[2] not in RESERVED and not p.split('/')[2].startswith('.')}
+    findings.extend(f"WARNING: Tracked container lacks src/tests/root-contract evidence: '{p}'"
+                    for p in sorted(containers - set(roots)))
     for module in roots:
         name = module.removeprefix('modules/')
         owned = {p.removeprefix(module + '/') for p in files if p.startswith(module + '/')}
