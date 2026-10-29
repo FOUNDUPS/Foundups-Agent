@@ -1,5 +1,25 @@
 ﻿# Tests - FoundUps Agent Market
 
+## Local TestNet probe-intent acceptance (2026-10-25)
+
+`test_testnet_transfer_intents.py` has 93 collected controls in 26 functions for
+explicit host authority/identity/units/expiry, strict actual v3 schema, existing
+pending history, full-content retries/reopen, rollback and two-adapter races.
+Snapshots retain all 13 old mapped tables; the new table is checked separately.
+Public fixtures are synthetic; no key, SDK, network or chain transaction is used.
+Existing ORM tests explicitly union the one new mapper/table while retaining the
+original 13-entry alias/pickle inventory unchanged.
+
+Repaired focused 173 pass (93+80 existing compatibility cases), independently
+reviewed 16 held-outs pass, and final agreed whole FAM 459/459 pass across 19 test
+owners. These overlap and are not summed. Whole-run qualification prebinds 203
+source files, uses real central-daemon scratch configuration and leaves it
+stopped. Only optional help Holo/Qwen enrichment returns None. See
+[TestModLog](TestModLog.md) for original REDs, the generated-column failure and
+repair, fixture correction, rejected inventory run and separate diagnostic run.
+Local preparation acceptance proves no resident integration, signer, funding,
+chain effect or paid reward.
+
 ## Privileged operations (P0B)
 
 Existing permission and transaction tests supply host contexts explicitly; never
@@ -41,13 +61,15 @@ and [R24 acceptance](../../../../docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.
 
 ## Shared ORM compatibility (2026-09-23)
 
-Three controls in existing `test_sqlite_adapter.py` qualify all14 legacy/new
-class identities, one registry/exact13-table inventory, trusted legacy pickle
+The historical three controls in `test_sqlite_adapter.py` qualified all14 legacy/new
+class identities (Base plus13 rows), one registry/exact13-table inventory, trusted legacy pickle
 GLOBAL references, and a current transient row round trip. They run with125
 existing persistence/compute/lifecycle/schema/permission/CABR cases; all128 pass
 locally and independently with fixed IDs. The one expected baseline failure was
 the absent internal ORM owner. No existing test oracle changed.
-The new defining module changes newly emitted pickle paths; no PostgreSQL service
+The probe-intent layer now explicitly unions its additional mapper/table in the
+two inventory assertions; the original13 aliases/pickle loops remain unchanged.
+The defining module changes newly emitted pickle paths; no PostgreSQL service
 or production verification authority was exercised. See [TestModLog](TestModLog.md).
 
 ## Run
