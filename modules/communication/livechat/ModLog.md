@@ -1,5 +1,28 @@
 # Livechat Module - ModLog
 
+## 2026-10-29 — Bounded local fallback for private livechat themes
+
+WSP00/10/11/22/50/77/84/97. Retain reviewed Grok success and reuse the existing
+general-language generator after unavailable/empty/failed/rejected themed output.
+The explicit livechat surface permits LM Studio HTTP only; comments keep their
+default scoped/legacy reader and serialized provider behavior. Bind author,
+receiving channel and stream identity, including the existing generator cache.
+Review the exact final mention within 200 characters and carry a deep full native
+theme snapshot into the existing sender's post-delay guard.
+
+Both existing eligible caller sites use a ten-second threaded await and cancellation
+event. Busy livechat generation/review locks reject immediately. Expired/changed
+themes and late results fail closed; cancellation prevents subsequent stages but
+cannot kill an active provider call. Themed mode survives theme clearing during
+the await, preventing an unreviewed fallback. Deterministic selectors pass 104
+semantic/history cases (12 subtests), original context 53, adjacent queue/context
+116 and separate stdlib inspection 15. These are distinct fixture/source scopes,
+not public delivery or cloud-account repair. Independent review and actual local
+model QA remain separate acceptance evidence in the repair handoff. Subsequent
+review reproduced malformed native source/handle fields bypassing normalization;
+both entry points now reject them before providers, with six reproducing controls.
+The refreshed selection is 88 semantic + 16 history cases.
+
 ## 2026-10-29 — Private activation and inspected livechat themes
 
 WSP00/10/11/22/50/84/97. The existing queue receives atomic producer appends under

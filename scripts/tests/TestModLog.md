@@ -1,5 +1,32 @@
 # Script test inventory
 
+## 2026-10-29 — Bind the reviewed local private-theme route
+
+Source checkpoint `d350668253e922af14ccf38fe9233d8f320bd99e` is integrated with
+current main in `02d26d74a0dc3d6b0e79da9f3b65d45b22cb937b`. The existing repair
+CI selection now pins exactly 104 cases by name digest, with no skips; the
+original 53-case inventory and 15-case stdlib gate remain intact. Fresh local
+results: 104 passed plus 12 subtests, 53 context cases passed, 15 stdlib cases
+passed from the actual external-script runner, and 166 adjacent/registry cases
+passed. No production or test assertion changes are part of this packaging step.
+
+The existing canonical registry generator/check retains incoming main's exact
+1,779 files, 260 quarantined; byte-for-byte unchanged. No classification policy
+changed. The full
+backend generator retains 1,472 members at canonical digest
+`d90542671bc1be9d8297a5153540a0ad4b397214b9a9003c1ee985566f2be3a6`;
+both existing digest pins advance together. Real model qualification is separate
+private evidence; these offline counts do not prove public YouTube delivery.
+
+All eight existing manifest cases pass, including staged-index integrity. The
+three existing Node compatibility/preflight/blocked-recovery entrypoints and the
+unchanged 70-file / 979,415-byte package surface pass. All 75 security/credential
+cases pass with UTF-8 mode and the explicit Git Bash adapter for the existing
+Linux-shell fixture. The canonical Git-LF scan reports 171 findings, including
+38 renewed manifest metadata bindings independently re-reviewed against main
+`f304ba799f8fa835f0b5127efabe9e724315e3c8`. No scanner rules, scope or admission
+policy changed. Fresh hosted checks remain required after publication.
+
 ## 2026-10-29 — Restore repository imports in the hosted stdlib runner
 
 Hosted Ubuntu job `123206424059` ran the `shell: python` body as a temporary

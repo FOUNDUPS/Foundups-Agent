@@ -1,5 +1,25 @@
 # Video Comments - ModLog
 
+## 2026-10-29 — Scoped reuse for the private livechat fallback
+
+WSP00/10/11/22/50/77/84/97. Extend the existing generator/inspector with an
+explicit `reply_surface`, retaining stored comments as the default. Livechat uses
+only the queue's livechat context, requires semantic input and exact local HTTP
+source/review receipts, and cannot enter embedded Qwen/cloud/templates. Surface
+mismatch fails closed. Cancellation checks bracket provider stages and follow
+preparatory reads; busy livechat locks fail immediately while comments retain
+blocking serialization. The existing reply context helper normalizes prompt
+theme fields without replacing queue ownership or full native sender snapshots.
+
+The existing semantic selector now has 88 cases; paired with unchanged 16-case
+submission history it passes 104 cases and 12 subtests. Original context 53,
+adjacent queue/context 116 and separate inspection 15 also pass. Tests use actual
+source definitions with fixture providers and synthetic browser data; no paid
+calls, public messages or DAE startup. See the existing repair handoff for source,
+Holo freshness, timeout limits, model QA and publication boundaries. Independent
+review's malformed native-theme finding was reproduced by six controls before
+repair; both livechat entry points now reject normalization failure before inference.
+
 ## 2026-10-29 — Windows source repair and durable submission ownership
 
 WSP00/5/6/10/11/22/50/84/97. Preserve the dirty August PC checkout; repair the

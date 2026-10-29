@@ -12,6 +12,8 @@ quantity source hashes. Independent review accepts those exact source/test bytes
 Macro inspection also found the existing JS consumer's EXPECTED_MANIFEST_SHA256:
 the generator does not update it. Allocate one derived constant replacement,
 using the existing canonical sorted compact JSON digest, plus <=18 plan lines.
+The existing generator test's exact digest literal must bind that same derived
+artifact; replace only that literal, preserving all assertions and case IDs.
 Run existing generator/consumer checks without changing their assertions or
 manifest membership/caps. This binds source integrity only, not runtime activation.
 Retain all frozen amount results under their actual source; review current-main
