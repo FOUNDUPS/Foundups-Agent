@@ -1,5 +1,15 @@
 # AUTOPOST_REUSABLE_CAPTURE_ENGINE_AUDIT_PHASE1
 
+> **Historical capability snapshot — supersession note, 2026-10-23.** This
+> audit's video-only, mock-AI and memory-only findings describe its original
+> source baseline. AutoPost main `3c0fc19d40e225ed7f826541a33c38293f9fe664`
+> now has still-photo capture, local media persistence and real model invocation.
+> Use the [current shared item handoff](../../../modules/foundups/pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md)
+> and [AutoPost roadmap](https://github.com/FOUNDUPS/autopost/blob/main/ROADMAP.md)
+> for implementation planning. Multi-photo grouping, authenticated private Mall
+> attachment and physical-phone acceptance remain separate gaps. The original
+> audit below is retained as history, not rewritten as current evidence.
+
 **Slice**: AUTOPOST_REUSABLE_CAPTURE_ENGINE_AUDIT_PHASE1
 **Worker-Lane**: G (parallel to the Mall discovery audit on Lane A)
 **Type**: READ-ONLY discovery audit. DECISION-ONLY. No code/runtime change in any repo.

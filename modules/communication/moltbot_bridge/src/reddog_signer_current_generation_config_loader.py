@@ -46,6 +46,10 @@ def load_current_generation_signer_config_payload(
     )
     if config is None:
         raise ValueError("e0_selected_config_invalid")
+    if config.initial_handshake_only and (
+        type(selection.get("generation")) is not int or selection["generation"] != 1
+    ):
+        raise ValueError("e0_initial_handshake_generation_invalid")
     return payload, config
 
 

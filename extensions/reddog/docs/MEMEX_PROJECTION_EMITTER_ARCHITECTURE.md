@@ -24,7 +24,7 @@ policy/authz gate
 Memex Projection Emitter
         |
         +--> RedDog compact status
-        +--> Mosh Pit reverse chronology
+        +--> Moshpit reverse chronology
         +--> founder dashboard
         +--> PC/team view
         +--> stakeholder view
@@ -94,7 +94,7 @@ principal_id
 foundup_id
 projection_type
   - compact_status
-  - mosh_pit
+  - moshpit
   - accomplishments
   - open_loops
   - timeline
@@ -153,9 +153,9 @@ NEXT HIGHEST-LEVERAGE ACTION
 
 Full reverse chronology is expanded only when requested.
 
-## Mosh Pit Rendering
+## Moshpit Rendering
 
-The Mosh Pit is one projection type. It remains reverse chronological:
+The Moshpit is one projection type. It remains reverse chronological:
 
 ```text
 2026-09-05

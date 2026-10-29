@@ -1,4 +1,86 @@
+## 2026-10-23 — Resident RSI canary contract regression
+
+- Reused `test_contracts.py`; no parallel YUMORI test file or synthetic contact/mail database was created.
+- Added a contract for the existing `yumori_work_orchestrator` covering FoundUp-scoped Memex/Brain/Breadcrumb/provider continuity, resident-cycle decision flow, autonomous Gmail triage/audience validation, anti-spam recipient preflight, autonomous partner discovery, #1779 truth boundary and later unseen-cycle retained-improvement measurement.
+- The assertions deliberately do not claim a live Gmail/LinkedIn mutation, deployed OpenRouter client, resident runtime execution or retained RSI benefit. Those require provider/runtime receipts and later-use evidence.
+
+## 2026-10-21 — Moshpit event-time and paragraph policy contracts
+
+- Extended `test_yumori_moshpit_skill_is_wre_registered_and_projected` in the existing suite. Assertions bind ordering rules to their section: completion time, exclusion of body-only timestamps, unknown-time preservation and evidence for every historical move.
+- Write-procedure assertions retain standalone heading/activity paragraphs, one activity per paragraph, whole-current-day readback and protection against rewriting historical text for a chronology check. Existing private-log parity and projection assertions remain intact.
+- Validation: `python -B -m pytest -q -o addopts= -p no:cacheprovider modules/foundups/esingularity/tests/test_contracts.py` passed all 21 cases, with zero failures or skips. These are source-policy contracts, not live Google Docs ordering tests or runtime automation evidence. WSP 22/50/97.
+
+## 2026-10-21 — Private Moshpit native-write parity reconciliation
+
+- PR #2110 extends the existing `test_yumori_moshpit_skill_is_wre_registered_and_projected` contract with private-log native writes, exact errors, one pending delta and no parallel log.
+- Refreshed onto main a41a76053; the existing `test_contracts.py` suite passes 21 cases on exact PR head 5cadc75d4, with zero failures/skips. No new test file or runtime side effect.
+- Tests inspect canonical skill text and registry/projection contracts; they do not execute Google Docs or certify delivery. WSP 22/50/97.
+
+## 2026-10-02 — Directed Work versus AUTO origin regression
+
+- Extended existing contract tests: origin/schema classification never grants SEND;
+  explicit Work direction requires work-item/instruction binding; copied direction
+  cannot authorize AUTO; unknown origin and engineering holds remain blocked.
+- Canonical text regressions retain live Sent/state/preflight/readback requirements
+  and #1779's autonomous containment. No parallel tests or live Gmail effects.
+
+## 2026-09-30 — Work orchestration and capital-network contracts
+
+- Reused `test_contracts.py`; no parallel test file or investor fixture was created.
+- Registered the YUMORI Work orchestrator and thin agent projections.
+- Regression requires canonical WSP 15 ordering, bounded `YUMORI WORK HANDOFF`, reuse of the existing CONTACTS `Capital Targets` / `Capital People` surfaces, first-degree relationship labeling, mutual-connection discovery language, and the rule that visible Contact Info is not send authorization.
+- The test protects the no-mass-blast / correspondence-preflight boundary rather than encoding private contact data.
+
+## 2026-09-29 — Costed planning scenarios
+
+- Extended the existing model test file: cost totals/ranges, scenario-versus-evidence boundary, demand capacity/idle energy, debt repayment, cash conservation, renewal timing, Sukatto exclusion, and native projection preservation.
+- Focused 34 tests and all 70 module tests passed; 18 routing tests passed. Native FIN numerical parity and forced-full LibreOffice recalculation verified, including cost/demand/Sukatto-inclusion changes in a disposable fixture; see canonical economic document receipt.
+
+## 2026-09-29 — Three-site portfolio regression slice
+
+- Extended the existing test_yumori_economic_model.py; no new test file.
+- Tests preserve canonical identity/priority, unknown capacity, missing-data behavior, exact AWARDED boundaries, restricted sources, Sukatto exclusion, scenario-dependent self-funding, non-overlapping CapEx, cash conservation, investor arrears, peak liquidity, gated later phases, and distinct project/investor payback.
+- Existing legacy parity, 24-service catalog, demand sizing, heat cap and infrastructure-flow tests remain intact.
+- Focused run: 28 passed; new portfolio module coverage 93% including branches after final fail-closed guards. Module-suite and native formula/layout verification receipts follow in the execution receipt.
+
+## 2026-09-28 — Demand-led economics, site sizing, heat and JHR evidence contracts
+
+- Retrieved the existing test inventory, README, `test_contracts.py`, and YUMORI landing tests before finalizing the new economic-model regression.
+- Added the materially distinct `test_yumori_economic_model.py` for repository-owned project-finance and node-sizing math; reused existing public/site contract files for the site-registry, /future, and YUMORI copy changes.
+- Covers 24 unique service offers, no-demand fail-closed behavior, demand→revenue→GPU/IT/facility-kW translation, unpriced active-service failure, utility-capacity gating, legacy FIN parity, demand-capped heat recovery, and the official-source Japan infrastructure ledger boundary.
+- Updated the canonical WSP test registry to 1,660 tracked tests / 269 quarantined after adding the new file.
+- Fixed stale tests that encoded the superseded Hanyu 5/10/20 MW and fixed-1MW public language; the replacement assertions require demand-led sizing and unverified utility capacity rather than weakening the truth gate.
+
+## 2026-09-28 — Native Red Dog correspondence continuity dependency
+
+- Extended the existing `test_contracts.py` operational-skill contract to require the generic `reddog_correspondence_state` registry entry, YUMORI dependency, native-store boundary and thin operator projection.
+- YUMORI remains the domain adapter for proxy voice, CRM/routing and campaign semantics; provider transaction truth and send preflight remain separate.
+- No new YUMORI test file or private correspondence fixture was created.
+
+## 2026-09-28 — Pre-draft correspondence state capsule
+
+- Extended the existing `test_contracts.py` correspondence contract; no parallel test file or email-memory database was created.
+- Requires the YUMORI correspondence parent to reconstruct a compact state capsule before recipient-finalized draft creation/material update and again before send.
+- Freezes the provider-derived follow-up count, old-ask versus new-delta split, held-draft state, routing/sender-boundary state, next expected event and fail-closed third-follow-up guard.
+- Gmail remains transaction truth; CRM and Moshpits remain their existing projections/learning roles.
 # eSingularity TestModLog
+
+## 2026-09-29 — Investor finance path reconciliation
+
+- Extended the existing public-contract test for the labeled, access-controlled FIN path and base-case additional-capital boundary. The current workbook ID replaces an unused obsolete model ID; unconsumed fixed-MW metadata was removed. Existing language/routing tests cover the shared translation path.
+- Independently checked the three current Sensitivity Hanyu gap formulas against low/base/high CapEx and the Dashboard's legacy sizing separation in the native FIN workbook.
+
+## 2026-09-23 — Current council-position concatenation regression
+
+- Reused test_contracts.py; no parallel test file was created.
+- Added a bounded contract for the exact Japanese committee name, current September 25 request, explicit retirement of the former 60-day/fixed-hold request, separation of the budget vote from future YUMORI adoption, and the four public short routes (/vote-no, YUMORI.info, PPP.YUMORI.info, fin.YUMORI.info).
+- The same contract requires English and Portuguese translations for the new current-position copy, rejects the obsolete current-position phrases from the homepage/translator/vision surfaces, and preserves the historical /vote-no supersession note so sent correspondence is not rewritten.
+
+## 2026-09-21 — YUMORI.me English and Portuguese language switch
+
+- Reproduced the production defect: selecting English changed `html.lang`, the URL, and the multilingual ticker, while the restored YUMORI movement-page body remained Japanese because its source strings were absent from the shared language dictionary.
+- Extended `test_yumori_national_landing.py` in place; no parallel test file was created. The regression requires the existing query/local-storage language state, `pt-BR` document language, the canonical `JOIN YUMORI.me` label, and representative Japanese-source copy with both English and Portuguese translations.
+- Fresh results: 27 dependency-free landing/ticker/shared-contract functions passed, all 18 Node hostname-routing tests passed, and focused ESLint completed with zero errors plus two existing `<img>` warnings. Full `pytest` was unavailable. `tsc --noEmit` retained only the documented baseline manifest and duplicate-key errors; the bounded Vinext build was interrupted after remaining in client-reference analysis for two minutes.
 
 ## 2026-09-20 — YUMORI.me correspondence registration and voice contracts
 

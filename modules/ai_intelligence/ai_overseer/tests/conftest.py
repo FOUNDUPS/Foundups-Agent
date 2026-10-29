@@ -34,6 +34,7 @@ _ALLOWLIST = {
     "test_intake_auth_provider.py",
     "test_intake_transport.py",
     "test_intake_packet_builder.py",
+    "test_github_nomination_review.py",
 }
 
 _HEAVY_TARGETS = [

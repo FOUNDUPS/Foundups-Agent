@@ -21,6 +21,7 @@ import { CapturedItem, ItemStatus } from './types';
 import * as storage from './services/storage';
 // import * as ipfs from './services/ipfsService';
 import { initializeAuth } from './services/firebaseAuth';
+import { voteOnItem } from './services/firestoreSync';
 import { createCartReservation, syncReservationToFirestore, filterReservedItems, isReservationExpired, getExpiredCartItems } from './services/cartReservation';
 import { CartCountdown } from './components/CartCountdown';
 import { getCurrentUserId } from './services/firebaseAuth'; // ✅ AUTH: Get user UID for cross-device ownership
@@ -945,7 +946,8 @@ const App: React.FC = () => {
 
     // If item is reported, track moderation votes
     if (isReportedItem) {
-      const userId = 'current_user'; // TODO: Get actual user ID from auth
+      const userId = getCurrentUserId();
+      if (!userId) return;
       const isLibertyAlert = item.classification === 'ice' || item.classification === 'police';
 
       // Liberty Alert: Only trusted members can moderate
@@ -954,7 +956,13 @@ const App: React.FC = () => {
         // Skip moderation - continue to normal swipe flow below
       } else {
         // Regular users can moderate GotJunk OR trusted users moderating LA
-        const moderationVotes = item.moderationVotes || { keep: [], remove: [] };
+        let moderationVotes;
+        try {
+          moderationVotes = await voteOnItem(item.id, direction === 'left' ? 'remove' : 'keep');
+        } catch (error) {
+          console.warn('[Moderation] Vote was not accepted:', error);
+          return;
+        }
 
         if (direction === 'left') {
           // Swipe LEFT on reported item = Vote to REMOVE

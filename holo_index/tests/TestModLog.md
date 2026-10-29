@@ -1,3 +1,7 @@
+## 2026-09-29: Qwen package import controls
+
+Eight fixed stdlib unittest controls failed against the eager baseline and passed against the lazy candidate with identical fixture bytes. Fresh -I/-S/-B children validate real package/engine imports plus synthetic API dispatch; unknown attributes, deferred failures and real submodule fallback are covered. No model or service constructor ran. Local runner durations are receipt metadata, not a performance benchmark. Hosted/main validation is recorded separately in the RSI backlog publication receipt. WSP05/11/22/50/62/97.
+
 ﻿# HoloIndex Test Suite TESTModLog
 
 ## [2026-09-13] R03 existing source/entry contract selection

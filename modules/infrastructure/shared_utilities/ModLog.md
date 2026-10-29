@@ -1,6 +1,56 @@
 # WSP Module ModLog: Shared Utilities
 **WSP Compliance**: WSP 22 (Module ModLog and Roadmap Protocol)
 
+## 2026-10-19 - Preserve path semantics while removing POSIX containment exceptions
+
+WSP5/6/15/22/50/62/84/97. Existing runtime guard profiling identified repeated
+lexical containment exceptions. Reuse the same normalization; compare POSIX
+anchors and component prefixes directly, and retain Windows `pathlib`
+comparison through `is_relative_to`. Surrounding filesystem, link, descriptor,
+authority and expiry checks remain in place. No validation cache or new owner.
+
+Independent review rejected an initial raw-parts variant for six Windows
+Unicode mismatches. Revised production bytes match the original in12,717 cases
+on each Windows3.12.10/Linux3.12.3. Focused Windows tests49pass/1skip (symlink
+creation unavailable). Pure predicate timings do not establish guard latency,
+native admission or retained RSI gain. Connected Linux safety/lock/runtime-guard/
+isolation tests111pass/8Windows skips, manifest8pass and three Node entrypoints
+pass. Installed process observations in unit tests remain synthetic. Existing
+Windows/Linux CI jobs now run the related path tests. No native qualification
+or publication of this production candidate is claimed by those results.
+
+
+## 2026-10-13 - Close optional SDK assumption exposed by remote CI
+
+WSP6/22/50/97: remote CI failed three offline residency tests because their mock
+decorators imported an uninstalled optional SDK. Replace only the test boundary
+with an explicit restored module fixture; preserve all behavior assertions.
+Reproducer: 3 failed/5 passed. Connected suites: 61 passed with SDK absent and
+61 passed normally. No production code changes or dependency expansion.
+
+The next CI run exposed the same import-before-mock issue in the llama_cpp
+initialization test: loading the real native library terminated Python with an
+illegal instruction. Replace that test's import boundary with a restored module
+double and assert the returned instance and constructor arguments. An unavailable
+import reproduces 1 failure/2 passes; all 61 connected cases pass with both SDK
+imports unavailable. This validates offline adapter contracts, not native inference.
+
+## 2026-10-11 - Explicit native reasoning omission after local audit trial
+
+WSP00/6/11/15/22/50/84/97. The actual installed non-reasoning Qwen Coder route
+returnedHTTP400 when the adapter forced reasoning=off. Preserve the existing
+native API and add explicitNone omission; existing defaultoff, instance checks,
+request/response bounds and storage/streaming settings remain unchanged. None
+means server default; the caller checks model capability, with no automatic retry.
+
+Regression first failed1/passed1; connected backend/lifecycle/topology-proposer
+61pass. Independent source review accepted the repair and identified quotation
+errors in model output. Real post-repair coder calls completed with lifecycle
+load/unload confirmed; both outputs still fail the frozen review contract.
+See `docs/operations/RSI_SWARM_DISPATCH.md` for source-bound measurements.
+This is a coordinator-authored reusable repair prompted by real model trials,
+not autonomous code repair, native author admission or model promotion.
+
 ## 2026-08-28 - Windows confined identity and alternate-stream proof
 
 - Corrected confined identity comparison for Windows' suffix-projected execute

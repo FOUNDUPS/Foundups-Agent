@@ -136,3 +136,36 @@ def test_noncanonical_or_duplicate_key_input_rejects() -> None:
         ),
     )
     assert validate_authoritative_use_lease_request(duplicate, now_epoch=NOW) is None
+
+
+def _effect_domain_request(monkeypatch: pytest.MonkeyPatch, tier: str):
+    """Reuse request data without constructing a key, signer, store or lease."""
+    from modules.communication.moltbot_bridge.tests import (
+        test_reddog_external_signer_authoritative_use_lease as lease_fixtures,
+    )
+
+    monkeypatch.setattr(
+        lease_fixtures, "_public_key", lambda: "test:effect-domain-public-key"
+    )
+    return build_authoritative_use_lease_request(_payload(), authority_tier=tier)
+
+
+@pytest.mark.parametrize("tier", ["HIGH", "ULTRA"], ids=["HIGH", "ULTRA"])
+def test_effect_lease_request_preserves_distinct_consensus_domain(
+    monkeypatch: pytest.MonkeyPatch, tier: str
+) -> None:
+    from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_contract import (
+        canonical_elevated_signing_request_digest,
+    )
+
+    request = _effect_domain_request(monkeypatch, tier)
+    assert request.signer_role == "signer:authoritative-use-lease"
+    assert request.requested_operation == "issue_authoritative_use_lease"
+    assert request.authority_tier == tier
+    assert request.consensus_receipt_digest is None
+    assert validate_authoritative_use_lease_request(request, now_epoch=NOW) is not None
+
+    changed = replace(request, consensus_receipt_digest="sha256:" + "c" * 64)
+    assert validate_authoritative_use_lease_request(changed, now_epoch=NOW) is None
+    with pytest.raises(ValueError, match="^elevated_consensus_signing_input_noncanonical$"):
+        canonical_elevated_signing_request_digest(request)

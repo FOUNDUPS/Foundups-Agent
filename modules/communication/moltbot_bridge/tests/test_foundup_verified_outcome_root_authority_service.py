@@ -193,7 +193,7 @@ def _client_authority(
     )
     transport = build_root_authority_socket_exchange(
         repo_root=REPO_ROOT,
-        socket_path="C:/root-authority-test.sock",
+        socket_path=Path(REPO_ROOT.anchor) / "root-authority-test.sock",
     )
     return _create_service_backed_outcome_authority(
         descriptor,
@@ -924,7 +924,7 @@ def test_non_root_exchange_cannot_mint_authority(
     monkeypatch.setattr(client_module, "_require_protected_socket", lambda *_args: None)
     exchange = build_root_authority_socket_exchange(
         repo_root=REPO_ROOT,
-        socket_path="C:/non-root-authority-test.sock",
+        socket_path=Path(REPO_ROOT.anchor) / "non-root-authority-test.sock",
         expected_server_uid=1001,
     )
     with pytest.raises(ValueError, match="service_uid_invalid"):

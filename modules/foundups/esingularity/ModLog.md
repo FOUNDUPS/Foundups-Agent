@@ -1,4 +1,199 @@
+## 2026-10-23 — YUMORI resident RSI canary contract
+
+- Extended the existing registered `yumori_work_orchestrator` instead of creating another daemon/orchestrator. YUMORI is now the domain canary for the existing RedDog/OpenClaw/WRE resident loop under FoundUp scope `esingularity_001`.
+- Defined day-to-day continuity as evidence reconstruction across repository/Holo truth, authoritative work state, operational FoundUp Memex, Brain, Breadcrumbs, provider transaction truth, correspondence state, existing Contacts/Action Queue projections, YUMORI/0102 Moshpits and WRE PatternMemory/verified outcomes. No parallel memory database is introduced.
+- Added the autonomous project loop: recover -> observe deltas -> reconcile state -> identify the highest-leverage blocker -> compare actions -> WSP 15 select -> execute the highest admitted action -> independently verify -> write owned receipts/projections -> nominate learning.
+- Added Gmail autonomy requirements for provider-watermark deltas, complete-thread/Sent reconciliation, audience/route/sender/content validation, anti-spam/duplicate suppression, recipient preflight, provider readback and separate outcome tracking. `REDDOG_AUTO` external mutation remains truthfully gated on #1779 host deployment rather than bypassed.
+- Added autonomous partner discovery: derive the missing capability from the blocker, research direct precedent, cross against existing Contacts/Gmail/LinkedIn, verify roles and warm paths, rank fit, and prepare the smallest target-specific ask. Many names without a verified next action are not success.
+- Defined RSI success as later-cycle retained improvement with independent outcome evidence, not repetition, structural fidelity or non-empty model output. Metrics include blocker reduction, provider delta/replay behavior, wrong-audience prevention, partner progression, external-effect disposition, 012 intervention count, cost per useful verified outcome, and promoted/rejected learning candidates.
+
+## 2026-10-21 — Reconcile Moshpit event ordering policy PR #2007
+
+- Preserved the original event-owned timestamp, unknown-time placement, evidence-led historical repair and whole-day paragraph readback rules alongside PR #2110's private native-Docs safeguards.
+- Extended the existing Moshpit contract assertions; all 21 cases in `test_contracts.py` pass. Canonical agent projections still resolve the existing skill. Registry metadata is unchanged; its pre-existing 0.1.0 version versus canonical 0.1.2 is deferred from this policy slice.
+- This validates repository policy text, not live Docs mutation, automated ordering or end-to-end RSI. No correspondence, document or deployment effects. WSP 00/15/22/50/95/97; exact-head hosted checks and main readback remain publication gates.
+
+## 2026-10-21 — Close private Moshpit native-write policy PR #2110
+
+- Reconciled the existing private-log policy onto main a41a76053. Both canonical Google Docs require native content writes, exact error preservation, deduplication and readback; one pending learning delta must not replay a Gmail/CRM action.
+- Reused the existing `test_contracts.py` assertions. All 21 cases passed on refreshed PR head 5cadc75d4; this proves repository policy/registration contracts, not a live Docs write or deployed provider behavior.
+- Preserved private incident boundaries and existing action authority. No live document, correspondence or deployment effects. WSP 00/22/50/95/97; hosted checks and main readback remain publication gates.
+
+## 2026-10-13 — JHR website-first downstream newsletter contract (instruction-only)
+
+- 012 clarified: eSingularity.ai is the primary public publication for the Japan Hyperscaler Report. LinkedIn JHR is a **derived newsletter edition**, distributed after the exact site issue passes verified production deployment and live issue-anchor readback.
+- Updated the site workflow, JHR entrypoint and JHR README to require an explicit site release receipt before handing a source issue to the existing LinkedIn publishing skill. CSS, ticker, non-JHR site changes and NO_REPORT do not trigger social publication.
+- The upstream artifact identity and published permalink must survive the handoff; LinkedIn editorial copy cannot invent additional facts or preempt the site. No site content or website deployment changed in this slice; existing live articles retain their status. WSP00/97 evidence and exact-action approval remain required.
+
+## 2026-10-10 — Security audit remediation
+
+- Bound interest request bodies before JSON parsing, retained field/consent validation, rejected cross-origin requests, added transactional D1 client/global quotas and daily email deduplication. No existing submissions deleted.
+- Removed unpublished portraits and unused original group imagery from the static public root while preserving approved published profile images.
+- Corrected pre-existing PWA purpose typing and duplicate translation keys, retaining last-key-wins displayed copy, so type verification can run.
+- Added real SQLite admission tests and streamed request tests, including a midnight rotation regression found in independent review. Eight security tests, 18 domain-routing tests, and 82 existing module tests passed before integration. Deployment receipt is recorded separately; this entry alone is not proof of publication.
+- WSP00 documented torch-free bootstrap; source-bound lexical retrieval UNKNOWN freshness/index gap, direct file inspection at main b4f1a97 and Sites 90e539f. Manual review because no available verified production security overseer covers this repository. WSP22/50/77/97.
+
+## 2026-10-08 — Three-site scope and incremental recipient audit
+
+- Retain the three-site program while making the two schools the current feasibility focus; keep Sukatto conditional on public decisions, lawful procedures and independent feasibility. School investigation does not depend on Sukatto participation.
+- Separate the immediate request for municipal interest and a coordination contact from later governance, funding and property decisions. Reconcile the combined school consultation filing status without implying acceptance or eligibility approval.
+- Strengthen the recipient-document subskill: preserve the principal's current scope before compression, compare title/body/appendices and priority-change rules, and fix/read back one issue class at a time.
+- Validation: independent forward review passed four scope/cost/send-hold scenarios. Canonical Drive documents received sequential text readbacks and rendered-layout review; detailed source references remain technical annexes, not a required outbound package. No stakeholder email or attachment sent by this repair.
+
+## 2026-10-08 — Recipient document audit before correspondence release
+
+- Added a subordinate audience/document audit to the existing correspondence and City procedure owners: whole-package reading burden, purpose-first compression, first-use terminology, exact export/page/hash binding, all-page rendering and hidden-artifact checks.
+- Preserve official forms, required content, recipient supplement refusals, review-only instructions and existing send controls. A skill rule is not a mechanical sender-boundary fix.
+- Validation: independent forward review handled five synthetic cases (oversized package, refusal/review-only, official-form exception, missing glyphs, mutable document); clarified release-only progression and immediate revision recheck. Existing operational-skill contract passes.
+- Generalized the observed failure: internal technical evidence became required reading for a procedural recipient. Private correspondence and identifiers remain in Gmail/Drive logs, not Git.
+- Retrieval used the documented lexical module bundle (semantic freshness UNKNOWN); direct owner reads resolved the irrelevant protocol hits. Bootstrap used the documented torch-free gate fallback; detector witness absent. No stakeholder send or sender-boundary deployment in this change.
+
+## 2026-10-06 — Canonical LinkedIn page concatenated into eSingularity.ai
+
+- Elevated the current public FoundUp identity to **eSingularity.ai** in the FoundUp/module metadata.
+- Bound LinkedIn company page ID `2199715` to `esingularity_001` as the canonical social/publishing surface for AI Koban, JHR amplification, regional/sovereign AI infrastructure and partner development.
+- Reclassified `linkedin_esingularity` as a legacy pfMALL/source compatibility alias rather than a separate venture; no catalog deletion or runtime migration was performed in this change.
+- Preserved the WSP 97 publication boundary: live signed-in LinkedIn identity/page-name verification remains required before mutation, because cached public labels may lag.
+
+## 2026-10-05 — Preserve MLIT F-08 official-form evidence
+
+- Archived the untouched official application ZIP under docs/official with source URLs, SHA-256, inventory and structural/open verification.
+- Linked the record from Fukui City procedure, funding intelligence, module README and F-08; retained the Form 2-4 discrepancy and all applicant/send boundaries.
+- Verified ZIP/OOXML integrity, visible-sheet inventory, XML parsing and read-only Office-library loading; no submission acceptance or visual fidelity claim.
+- Documentation-only change. Bootstrap used the documented torch-free fallback (torch absent); detector witness absent. No City communication, application, funding award or Drive/FIN mutation.
+
+## 2026-10-02 — Separate 012-directed Work from Red Dog AUTO
+
+- Applied 012's explicit 19:09 JST operating correction: #1779 is not a blanket
+  block on specifically directed Work correspondence while Red Dog is developed.
+- Canonical correspondence/Work Skillz now bind execution origin and instruction
+  reference, retain every live Sent/recipient/capsule/readback gate, and keep AUTO
+  containment and message-specific engineering holds. Added a non-authorizing mode
+  classifier and regressions in the existing test owner. No mail/contact mutation.
+- Akida/Akita STT means Akira Hasegawa. #1779 remains open; no mechanical Work
+  connector isolation or Red Dog deployment is claimed. WSP00/50/95/97.
+
+## 2026-10-01 — Japan compute comparables and Japanese inquiry references
+
+- Added public-primary-source research covering five operating models, Japanese
+  workload examples, GPU tariff units/caps, Hokuriku electricity components and
+  experimental pPUE boundaries. Pricing and capacity retain source/date caveats.
+- Added eight official organization contact routes and seven Japanese, unsent
+  inquiry templates with placeholder signatures. Supplier/reference/support roles
+  remain separate from YUMORI customer or partner commitments.
+- Linked evidence through the existing economic-model owner and module README.
+  No model values, private correspondence, provider IDs or credentials are added.
+- Utility template is reference-only; existing held draft remains canonical after
+  private reconciliation. Highreso inclusion is research, not a new outreach step.
+- WSP00/22/50/97: documented torch-free gate fallback, detector witness absent;
+  local source-bound lexical retrieval retained UNKNOWN freshness. Documentation
+  and privacy/link checks only; no external correspondence, merge or deployment.
+
+## 2026-09-30 — YUMORI Work orchestration + capital-network expansion
+
+- Added `yumori_work_orchestrator` on current main as the YUMORI domain adapter from 012/Red Dog planning conversation to live-state-reconciled work items, canonical WSP 15 ordering, explicit 012 physical/decision actions, and bounded ChatGPT Work / RedDog handoff.
+- Added the governed capital-network workflow: classify real capital type, establish current public data-center/AI-infrastructure evidence, cross against verified first-degree LinkedIn/Gmail relationships, use Work/browser for mutual-connection and user-visible Contact Info inspection, reverify current roles, and require correspondence-state/recipient preflight before outreach.
+- The canonical capital database remains the existing CONTACTS workbook. The new workflow explicitly reuses `Capital Targets`, `Capital People`, `LinkedIn`, master Contacts and correspondence state instead of creating a second investor spreadsheet.
+- Capital precedents, mutual connections and visible contact data do not imply investor interest, support or authorization to send.
+- Added thin agent projections and WRE discovery metadata.
+
+## 2026-09-30 — Fukui GX policy integration and JHR correction
+
+- Re-verified the national GX Strategic Region taxonomy and corrected a stale April-only status: METI's 2026-09-11 first tranche formally recognizes Fukui Prefecture (Fukui City / Obama City) under **decarbonized-power utilization**, while Fukui is not in the separate **data-center cluster** class.
+- Added the 2026-09-02 Fukui governor / Energy Division policy signal that the Prefecture is accelerating large-data-center attraction and asked the national government to examine a dedicated-line supply model from nuclear generation, including whether regulation needs adjustment. This is policy exploration, not a supply commitment to a YUMORI site.
+- Integrated the policy connection into JHR #003 and corrected JHR #001's current-status callout without rewriting its April historical context.
+- Promoted F-03 and F-04 from shorthand rows into bounded funding-registry entries: the national GX Regional Co-Creation DC investment track is a future operator/SPV eligibility lane; Fukui's AI-data-center location subsidy requires ≥¥10B fixed investment and a building-constructed DC, so the current Hanyu phase does not qualify on its modeled scale.
+- Added concrete next actions for City Enterprise Location Promotion, Fukui Prefecture Growth Industry Location Division, the GX subsidy office, and the school prior-consultation agenda. No grant, utility capacity, City approval, operator participation, or fixed MW is promoted.
+
+## 2026-09-29 — Investor finance path reconciliation
+
+- Corrected current FIN case-specific Hanyu funding gaps and labeled the separate legacy sizing diagnostic. Reconciled 03/05/06 references, the public finance entry, and the repository calculation note.
+- The working workbook remains controlled and its MODEL ONLY estimates are not public investment returns. No grant, City approval or utility capacity was promoted.
+
+## 2026-09-29 — Three-site portfolio financial / PPP rebaseline
+
+- Retained Site 3 Hanyu / Site 2 Shimousaka / Site 1 Sukatto identities; made Priority 1/2/3 explicit. Sukatto is optional and cannot block an independently viable Hanyu launch.
+- Added a bounded portfolio engine alongside unchanged demand-led sizing and legacy parity: independent costs, awarded-only sources, three cash scenarios, deficit/arrears carry, investor-versus-reinvestment separation, gated allocation and distinct payback measures.
+- Rebased native 05's opening and decision architecture; surgically aligned 07, preserving six photos. Extended the original FIN's existing tabs without a second workbook or grant registry.
+- Current financial result: INSUFFICIENT EVIDENCE; 51 capital inputs and 55 annual cash inputs per scenario missing. All site/portfolio totals and financing gap remain TBD. No utility capacity or grant status was promoted.
+- Readback and PR/main receipts are recorded in docs/YUMORI_PORTFOLIO_REBASELINE_20260929.md. No City filing, external correspondence or website publication is claimed.
+
+## 2026-09-28 — Demand-led YUMORI economics becomes repository authority
+
+## 2026-09-28 — JHR #003 Japanese-only web issue prepared
+
+- Reconciled the canonical JHR skill, live archive history, Drive working manuscript and current website route before assigning the issue number. JHR #001 and #002 remain historical archive entries; the current AI rice-field / Champion / AI Koban manuscript becomes JHR #003.
+- Added the newest-first Japanese-only #003 web issue above #002 using the full Japanese Google Doc manuscript as editorial authority. Extracted and embedded the Doc's two actual images: the AI田んぼ concept graphic and the 2026-09-26 Hanyu-area transmission/substation field photograph. The concept image is labeled as conceptual; the field photograph is explicitly bounded to visible proximity, not utility capacity.
+- Preserved primary-source and field-observation boundaries for Fukui grid proximity, closed-school GPU reuse, Intelligent Internet Champion ownership, watt-bit coordination, and the three-site YUMORI architecture. No City approval, utility capacity, award, funding or fixed MW rollout is implied.
+- Updated the shared ticker and existing JHR/public contract tests to target #jhr-003. Updated the JHR skill language rule so an explicit 012 Japanese-only instruction overrides the legacy bilingual default while preserving older bilingual archive issues.
+- Synced the repository-side JHR #003 report record under jhr/reports to the same Japanese Google Doc article body and image assets. Website publication and LinkedIn publication remain separate gates; this slice publishes the web source first.
+
+
+- Replaced MW-first site assumptions with demand-led sizing: customer/service orders → revenue/resource demand → IT kW → facility kW → verified utility cap.
+- Added a 24-offer candidate Service Catalog and formula-driven Demand & Capacity / Node Sizing projection to the current FIN workbook.
+- Added repository `src/yumori_economic_model.py` as the calculation/sizing authority while preserving the legacy five-year FIN scenario only for audit continuity.
+- The model separately computes demand-backed capacity and a financial-floor equivalent. The financial floor is a viability warning, not permission to build.
+- Removed stale preset capacity assumptions from the current site tabs: Hanyu remains the conditional initial-priority grid-first candidate; Shimousaka is the second/future expansion site; Sukatto is the regional human-facing hub.
+- No deliverable kW/MW is claimed for any site until utility and carrier evidence exists.
+- The older integrated XLSX remains reference-only; the current native FIN workbook remains the working formula/interview projection.
+- Reconciled useful unique work from stale PR #1820 before superseding it: demand-capped heat-recovery math, the sourced Japan AI-infrastructure flow ledger, and bounded non-predictive dependency diagnostics are preserved in the new canonical model.
+
+## 2026-09-28 — YUMORI adopts native Red Dog correspondence state
+
+- Promoted the previously ephemeral Correspondence State Capsule onto the generic Red Dog correspondence-state persistence layer rather than creating an email Moshpit or YUMORI-specific database.
+- YUMORI now loads native scope state first, checks provider watermark/freshness, reconciles only changed provider delta when possible, then applies its existing Gmail/CRM/routing and proxy-voice rules.
+- Google Contacts/Email Log/Action Queue/Docs remain human-facing working projections; provider truth + native state are sufficient for machine continuity. Send authorization remains live recipient preflight.
+
+## 2026-09-28 — Correspondence continuity / duplicate-send guard
+
+- Added a mandatory ephemeral Correspondence State Capsule to the existing YUMORI.me correspondence parent rather than creating a parallel email Moshpit or contact database.
+- The capsule must be reconstructed before substantive recipient-finalized draft creation/material update and again immediately before send-capable actions.
+- It records provider-backed latest inbound/outbound state, outbound count since the last inbound, sent coverage, held drafts, unresolved asks versus genuinely new delta, routing/sender-boundary state, queue/follow-up gate, next expected event and next allowed action.
+- Provider-sent messages count for duplicate/follow-up suppression even when a separate send-integrity incident prevents promotion to VERIFIED_SENT.
+- Incomplete or contradictory evidence fails closed to HOLD / RECONCILE.
+## 2026-09-28 — Post-vote PPP/PFI truth-surface correction
+
+- Moved current YUMORI/eSingularity public copy from the completed September 25 VOTE NO campaign to a post-vote request for a formal PPP/PFI public-private comparison and project-formation route before irreversible demolition procurement or physical demolition.
+- Kept the FY2026 財産有効活用民間提案制度 as a separate asset-proposal lane; it is not the requested Sukatto procedure.
+- Reframed Document 05 as the PPP/PFI Public-Private Partnership Master rather than a generic/private-proposal application.
+- Preserved historical VOTE NO correspondence as historical public record instead of rewriting sent messages.
+- Added the official 8,099.56 m² property-sheet figure and the later 8,923.56 m² demolition-project scope as separate source-scoped figures. Gym/toilet/auxiliary-building inclusion is recorded only as a plausible explanation pending City confirmation.
+- Updated the public ticker, homepage, vision copy, translations, vote-no record page and JHR current-state wrappers accordingly.
+
 # Project eSingularity ModLog
+
+## 2026-09-29 — Post-vote movement entry and active contact correction
+
+- Audited GitHub main against Sites source version 53: the hosted source still carries the September 25 VOTE NO ticker and homepage, while main already holds the September 28 PPP/PFI correction. The live field-status branch's VOTE NO item expired September 25; the deployed compiled fallback is the stale part.
+- On YUMORI.me, added a concise current PPP/PFI comparison request and public-record link beneath the Japanese movement introduction, with English and Brazilian Portuguese derived from that text. Applied the existing guardian lockup and Japanese JHR name; kept the join form and WHY / WHAT / HOW sequence.
+- Changed only the active `/vote-no` council email subject to the present PPP/PFI comparison topic. The dated September 7 and 10 messages remain historical records.
+- Verified the movement language contracts, JHR public contracts, focused post-vote contract, and 18 routing checks; source publication status is recorded separately from these checks.
+- Squash-merged PR #1954 as `8d2687e917eb0ade554b2ddcc15efd2ee7f0dccd` after CI and Validate eSingularity passed. Reconciled the older Sites v53 source with current GitHub frontend, built successfully, and published Sites v54 from source `27ca3eb8dd2b258c6c12b8831dff770e8bc0c2b9`; deployment `appgdep_6abb049455008191a700d3f307efb92a` succeeded. Sites reports both custom domains active with SSL. Direct HTTP checks of `esingularity.ai` and `yumori.me` returned 403 in this execution environment, so fresh rendered custom-domain content is unverified; deployment success and source parity are distinct evidence.
+
+## 2026-09-23 — eSingularity.ai current council-position packet concatenation
+
+- Reconciled the public project homepage against the current five-page YUMORI council packet and the existing September 13 VOTE NO truth boundary. Added an explicitly attributed current-position block for **すかっとランド九頭竜 湯守（YUMORI.me）設立準備委員会**: the committee asks for a NO vote on the budget containing demolition preparation; the former 60-day delay/fixed hold is no longer the current request; and that vote is separate from adoption, financing, grants, guarantees, or contracting for the reuse proposal.
+- Added direct public routes to the current civic record, project/evidence alias, Proposal 05 (PPP.YUMORI.info), and the financial-model alias. Kept historical September 7/10 correspondence intact under /vote-no with its existing supersession note instead of rewriting sent history.
+- Replaced the first vision-slide pause framing with the current request and separate-decision boundary. Removed obsolete multilingual dictionary entries that described continuing demolition preparation, a formal-condition-change route, fixed-gap public support, or funding-transfer triggers; added complete Japanese-source English and Portuguese translations for the new current-position block and action.
+- Extended the existing test_contracts.py rather than creating a parallel test owner. The regression locks the official Japanese committee name, current/no-longer-current distinction, short URLs, multilingual copy, removal of stale current-position phrases, and preservation of historical supersession.
+- Scope is limited to eSingularity/YUMORI public truth surfaces and their tests/docs. No RSI, WRE, accounting PR, Gmail, Drive packet, DNS, or external message state was changed by this repository patch.
+
+## 2026-09-22 — YUMORI.me language repair merged, published, and verified
+
+- Squash-merged PR #1846 as `2cdda856cf53744b143da58c347ceaa2c171bcc1` after both `CI` and `Validate eSingularity` passed.
+- Published the reconciled latest frontend as Sites version 53 from source `26c102d49bb089a303947fb117b21847aae4277e`; deployment `appgdep_6ab15310f1588191a7c810441f300fed` succeeded at `https://esingularity-ai.undaodu.chatgpt.site` without overwriting the newer package, JHR, or asset-registry changes already on GitHub main.
+- Fresh cache-busted browser verification on `https://yumori.me/` exercised the visible selector in Japanese, English, and Portuguese. The rendered movement body, canonical JOIN action, localized selector label, and document language all changed correctly (`ja`, `en`, `pt-BR`). Japanese was restored as the selected state after verification.
+- Publication and live verification close the source-only status in the preceding repair entry. WSP 10/22/34/50/97; no DNS, forwarding, form, ticker payload, eSingularity homepage content, or unrelated worker lane changed.
+
+## 2026-09-21 — Repair YUMORI.me English and Portuguese switching
+
+- WSP 15 allocation receipt: complexity 2, importance 5, deferability 5, impact 4 = 16 / P0. The public selector visibly changed language state without translating the movement page, so this was a current production-path defect that could not be deferred.
+- WSP 00/50/97 evidence pass: the canonical awakening script could not import `torch`; the documented tracker fallback opened the gate with detector witness absent. Semantic HoloIndex retrieval was rejected by a missing generation binding; the clean-head lexical bundle was accepted only as degraded, unknown-freshness context and was cross-checked against the exact selector, page, tests, recent path history, and production DOM.
+- Root cause: the restored join-first YUMORI page postdated the shared translation dictionary. Its Japanese source strings were never registered, so English/Portuguese selection updated `html.lang`, `?lang=`, local storage, and the ticker but left nearly all movement copy in Japanese.
+- Kept the existing shared language engine and added complete movement-page English and Portuguese copy for visible headings, body text, actions, captions, and image alternatives. Preserved Japanese as the canonical source and corrected the participation label to the governed `JOIN YUMORI.me / 湯守になる` brand.
+- Reused `tests/test_yumori_national_landing.py` under the WSP 97 test-inventory gate and updated the module test memory. No eSingularity homepage, RSI surface, ticker payload, routing rule, form destination, or deployment configuration changed.
+- Fresh validation: 27 dependency-free test functions passed across the landing, ticker, and shared frontend contracts; all 18 Node hostname-routing tests passed; focused ESLint completed with zero errors and the two existing `<img>` optimization warnings. `tsc --noEmit` remains red only on the pre-existing manifest-purpose values and six duplicate translation keys present on `origin/main`. Vinext build made no progress beyond client-reference analysis during a bounded two-minute run and was interrupted; no build-success claim is made.
+- Publication status: source repair and separate PR only; no production deployment claimed by this entry.
 
 ## 2026-09-20 — YUMORI.me correspondence parent rebuilt on current main
 
@@ -250,3 +445,18 @@
 - Registered `esingularity_001` with the Foundups catalog using `/f/esingularity_001` and `idb_esingularity_001`.
 - Kept token status deferred and made no fundraising, investment, CABR, payout, or DAO activation claim.
 - Performed the migration on the isolated `feat/esingularity-foundup-migration` branch to avoid unrelated RedDog work.
+## 2026-09-29 — Three-site panel and bounded attendance history
+
+- Sites version 55 deployed successfully at 2026-09-29 09:51 JST. Direct custom-domain checks confirmed the Japanese three-site panel and bounded attendance copy on eSingularity.ai, language switching to English and pt-BR, the shared ticker, and the separate YUMORI.me movement homepage in all three languages. The first Sites checkout build stalled on a blocked Google Fonts fetch; rebuilding in the repository checkout and packaging the same synced source resolved publication.
+- A post-publication dialectic found that numeric card order could be mistaken for priority. The follow-up copy iteration puts Hanyu first, Shimousaka second and Sukatto as the separate regional hub, using role labels instead of site IDs. Stable registry IDs remain unchanged; selection remains evidence-gated.
+- Sites version 56 deployed successfully on 2026-09-29 JST from source commit `63695f6cde1734906ec5407dc3927408bd19f129`. Direct eSingularity.ai checks confirmed the corrected Japanese order and FY2005–FY2018 subtotal, then the corresponding English and Brazilian Portuguese strings. YUMORI.me still rendered its separate homepage, shared PPP/PFI ticker, and join links after this deployment.
+- Followed WSP 97 and the website-update skill; recorded the pre-edit audit and Prometheus M-to-M prompt in `frontend/audit/WSP97_THREE_SITES_ATTENDANCE_20260929.md`. Compared the project page, separate YUMORI homepage, shared ticker, Documents 03/05/07, candidate registry, Fukui City monitoring report and school-property call.
+- Added a compact project-only panel beneath the existing eSingularity hero: Sukatto as the human-facing PPP/PFI reuse proposal, former Hanyu as the conditional initial-priority school candidate, and former Shimousaka as the future expansion candidate. City school property call and Sukatto PPP/PFI route are distinguished; no capacity or approval is implied.
+- Added the FY2005–FY2018 calculated 1,957,341 extended uses next to the existing FY2018 statistic, with calculation and source. The three-million lifetime number remains explicitly estimated because FY1994–FY2004 annual records are missing; no FY2020 full-year extrapolation is used. Updated the public claim gate and Japanese, English and Brazilian Portuguese copy.
+- Validation: domain routing 18/18; selected pytest 29 passed, 2 unrelated tests fail because this checkout lacks `modules/infrastructure/wre_core/skillz/skills_registry_v2.json`; ESLint 0 errors/7 existing `img` warnings; vinext production build passed. Local browser preview was blocked by its client; live visual QA and publication receipt remain to be recorded after deployment.
+
+## 2026-09-29 — Costed CapEx and financial scenarios
+
+- Reused the canonical portfolio engine and existing FIN; added versioned planning allowances, demand-derived server sizing, independent site cost tables, and full electricity/debt/tax/renewal/investor cash drivers. Every project estimate is MODEL ONLY; verified market/specification comparators are explicitly scoped.
+- Low/base/high budgets are not quotes or guaranteed bounds. All grants and commitments remain unchanged; all site deployment gates remain HOLD. No heat value, demolition avoidance or reused-building value becomes project cash.
+- WSP 00/97 retrieval: clean main b517556; lexical Holo bundle only (semantic freshness UNKNOWN). Torch absent; sanctioned formula bootstrap fallback used, detector witness absent. Single owned local calculation/projection slice; WRE runtime orchestration not applicable. WSP 15 P0; WSP 22/50/84 reuse and evidence boundaries retained.

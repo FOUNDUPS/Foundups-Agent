@@ -7,6 +7,8 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterator, Mapping
+from .reddog_signer_owner_e0_current_scope import _CurrentOwnerUseScope, _scope_admission
+from .reddog_signer_owner_e0_current_scope import _lease_validated_owner_e0_current_scope
 
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
     Ed25519SignatureVerifier,
@@ -154,6 +156,7 @@ def _validated_selected_lease(
         checked,
         repo_root=repo_root,
         signer_runtime_root=Path(config.signer_runtime_root).resolve(),
+        initial_config=config,
     )
     _require_consensus_policy(checked)
     binding = revocation_authority_binding_from_policy(

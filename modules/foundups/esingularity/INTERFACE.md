@@ -26,7 +26,7 @@ The current eSingularity redesign brief calls for three to four primary content 
 | --- | --- |
 | `/` | eSingularity project/vision landing on eSingularity.ai |
 | `/yumori` | YUMORI movement, case for support, participation and evidence; also served internally at YUMORI.me `/` |
-| `/vote-no` | YUMORI.me civic-action record: current VOTE NO position, privacy-bounded council/mayor messages, and official contact routes |
+| `/vote-no` | YUMORI.me civic-action record: historical September 25 VOTE NO campaign, current post-vote PPP/PFI request, privacy-bounded council/mayor messages, and official contact routes |
 | `/future` | 福井の未来 / community-benefit explanation |
 | `/team` | Verified public team directory |
 | `/team/[slug]` | Individual public profile |
@@ -55,6 +55,23 @@ The current eSingularity redesign brief calls for three to four primary content 
 - Floor labels in Japanese are purpose-based: `下層階 · 温泉・地域スペース`, `3階 · 挑戦・育成スペース`, `最上階 · 実証・発展スペース`, and `別棟 · COG DC`.
 - The Japanese surface uses Japanese section labels for building value, visitor economy, council decision, AI rice-field explanation, community participation, meetings, and calls to action instead of decorative English headings.
 - `frontend/components/JapaneseSurfacePolisher.tsx` is the bounded compatibility layer for legacy hard-coded labels while route-by-route copy is migrated to a true structured locale source. It must preserve English and Portuguese equivalents when the language switcher changes `html.lang`.
+
+## YUMORI economic and node-sizing contract
+
+The repository calculation authority is `src/yumori_economic_model.py`; the current Drive FIN workbook is the formula-driven working projection and feasibility-interview surface.
+
+The current sizing chain is:
+
+`customer/service demand → annual revenue/resource demand → GPU/CPU/storage/network → IT kW → facility kW → utility-confirmed capacity`.
+
+- No current site has a confirmed deliverable kW/MW value.
+- Hanyu is the conditional initial-priority grid-first candidate, not a 5 MW commitment.
+- Shimousaka is the second/future expansion candidate; its larger site does not establish electrical capacity.
+- Sukatto remains the regional human-facing hub; its compute size is also demand-led.
+- The financial-floor facility-kW output is a viability metric under the current pricing/Opex/debt scenario, not a build target.
+- The legacy 1 MW / 384-GPU scenario remains only for audit parity.
+- Heat value is capped by recoverable, deliverable, actually demanded thermal energy.
+- The JHR infrastructure-flow ledger keeps undisclosed amounts null and does not convert relationships into YUMORI revenue or funding.
 
 ## FoundUps shell contract
 
@@ -110,3 +127,29 @@ The Sites project configuration remains at `frontend/.openai/hosting.json`. The 
 - COG DC capacity, heat recovery, demand, economics, 24-hour onsen operations, bath scale, 60-FoundUp occupancy, basement program and national reuse remain proposals pending validation.
 - Akira Hasegawa is not represented as committed to the project.
 - Public academic profiles are labeled as outreach candidates only; no membership or support is implied.
+
+## Three-site portfolio allocation interface
+
+`src/yumori_economic_model.py` exposes `SiteCost`, `GrantAllocation`,
+`SiteFinancialInputs`, `AnnualCashInputs`, `PortfolioInputs`, `PortfolioResult`,
+`default_portfolio_sites()` and `run_portfolio_model()`. The implementation resides
+in `src/yumori_portfolio_model.py` to keep legacy and demand-sizing logic bounded.
+
+`None` is missing, never zero. Independent costs retain evidence classes and
+sources. Grants require exact AWARDED status and award evidence; duplicate
+allocation IDs fail. Excluded-site funding cannot silently transfer to another
+site. Hanyu cash is computed without depending on Sukatto inclusion or gate status.
+Economic affordability and gated deployment are separate outputs. All 24 services
+and legacy five-year parity outputs remain unchanged.
+
+## Costed planning API
+
+`load_planning_assumptions()` reads the versioned planning data; `run_planning_scenario(name="base", data=None)` returns demand-derived design, independent cost lines, debt/cash driver schedules, later-site standalone cash and the canonical portfolio result. Evidence readiness remains separate from numeric scenario results. `yumori_fin_projection.build_projection()` emits bounded native FIN batches and performs no network mutation.
+
+## Community interest security contract — 2026-10-10
+
+POST `/api/interest` accepts JSON only, streams at most 8 KiB before parsing, rejects cross-origin browser requests, and preserves the existing consent/field validation and honeypot. Responses are noncacheable. Invalid JSON/fields return 400, oversized input 413, wrong content type 415, origin rejection 403, durable admission rejection 429 with Retry-After, and storage failure 503.
+
+D1 admits at most five submissions per ingress client in a rolling hour and 100 globally per hour, and one normalized email per 24 hours. The guarded insert and admission receipt run in one transaction. Current/previous daily client digests preserve the rolling window across UTC midnight; no raw IP is stored and stale admission metadata is pruned. These application limits bound stored submissions, not volumetric traffic or D1 request charges; edge-level abuse controls remain an operations concern. Missing Cloudflare ingress metadata shares a conservative quota; forwarded headers are not trusted. Existing interest records are preserved.
+
+Unpublished portraits and unused unblurred originals are staged outside `public/`. This stops new static serving but does not erase Git history or previously fetched copies. Approved 012/0102 profile imagery stays published.

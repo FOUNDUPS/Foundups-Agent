@@ -46,6 +46,9 @@ class ModelRuntimeBindingUseTimeVerifier:
         persisted = verified_runtime_binding_receipt(binding)
         if persisted is None:
             raise ValueError("model_runtime_binding_verification_receipt_missing")
+        now = self.trusted_now_epoch()
+        if type(now) is not int or now <= 0:
+            raise ValueError("model_runtime_binding_trusted_clock_invalid")
         verified = verify_model_runtime_binding_artifact(
             catalog_snapshot=self.catalog_snapshot,
             model_selection_receipt=selection,
@@ -56,7 +59,7 @@ class ModelRuntimeBindingUseTimeVerifier:
             trusted_keys_payload=self.trusted_keys_payload,
             key_resolver=self.key_resolver,
             signature_verifier=self.signature_verifier,
-            now=int(self.trusted_now_epoch()),
+            now=now,
             receipt_verified_at=persisted.verified_at,
         )
         if canonical_digest(verified.to_artifact()) != canonical_digest(binding):

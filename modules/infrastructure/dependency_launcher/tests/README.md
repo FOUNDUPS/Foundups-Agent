@@ -65,3 +65,31 @@ atomic prior-cache preservation, supply/output non-aliasing, and no install,
 command, or model-load path. A recomputed-hash forgery must remain overall
 `NOT_READY`; integrity-only source comparisons never claim authenticated
 `CURRENT`.
+
+## Signed expectation projection acceptance matrix
+
+Contract: [existing interface owner](../INTERFACE.md#signed-expectation-projection-contract--qualification-2026-09-22).
+This fixed matrix is an implementation gate. It is not a claim that a signed
+slot projector exists. Reuse `ai_gateway/tests/test_model_runtime_binding_security.py`
+and its serialized signed-evidence fixtures, current trusted-time/key inputs and
+actual verification/one-shot APIs. Their deterministic signature verifier is a
+test double, not a production cryptographic or signer-service qualification.
+Never replace the evidence chain with a Boolean `verified=True` mock.
+
+| ID | Synthetic condition | Required result | Current evidence / remaining work |
+|---|---|---|---|
+| C01 | Explicit exact slot mapping; same signed binding, role, model, provider, task and surface | Only the declared identity projects; overall v1 stays NOT_READY | Separate owner positive tests exist; cross-owner mapping/projector absent. |
+| C02 | Change role, model, provider, task or runtime surface independently | Reject each substitution before projection; zero promoted output | Existing binding/topology checks are reusable; five slot-projection cases remain to implement. |
+| C03 | Alter serialized selection, binding or signed evidence, including recomputed unkeyed hashes | Reject changed signed identity; no authority from self-hashes | Gateway tamper and supplier self-rehash tests exist; cross-owner cases pending. |
+| C04 | Expired evidence or revoked/rotated key epoch before verification | Reject with no projection | Existing trusted-time/revocation controls; exact rotation case needs qualification. |
+| C05 | Expiry/revocation/epoch change after capture, before projection | Revalidate at the qualified projection boundary or reject; no stale output | Gap: capability consumption alone does not recheck time/keys. |
+| C06 | Reuse a consumed capability, or offer another dispatcher's capability | Reject replay; advisory never consumes borrowed dispatch authority | Existing one-shot rejection; advisory-private/discard lifecycle pending. |
+| C07 | Missing/duplicate/partial promoted expectations or unsupported backend provenance | Reject exact-set supply; preserve previous valid cache | Existing supplier exact-set/cache tests; backend identity remains unsupported. |
+| C08 | Tampered/expired supply or envelope; model evidence substituted for binary provenance | Reject or remain NOT_READY; zero update effects | Existing receipt/supplier tests; authenticated software provenance absent. |
+| C09 | Success, mapping rejection or exception after private verification | Dispose every advisory-private capability; next dispatch verifies independently | New integration test required when an owner API is selected. |
+
+The 2026-09-22 qualification reran the existing security, supplier and receipt
+files together: **49 passed**, no skips, two disabled-plugin configuration
+warnings. These are owner-level checks, not 49 end-to-end RSI experiments.
+Do not count unimplemented rows above as passing. Exact source/test bindings,
+independent review and publication state are in the canonical RSI backlog.

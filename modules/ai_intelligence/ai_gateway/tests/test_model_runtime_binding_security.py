@@ -318,7 +318,9 @@ def test_runtime_capability_has_no_importable_issuer_or_seal() -> None:
     assert not hasattr(verifier, "_issue_verified_runtime_binding_capability")
 
 
-def test_use_time_verifier_rechecks_current_time_and_revocation() -> None:
+@pytest.mark.parametrize("invalid_now", [float(NOW)+0.75, str(NOW), True, None, float("nan"), float("inf"), -1, 0],
+    ids=["fractional", "string", "boolean", "missing", "nan", "infinity", "negative", "zero"])
+def test_use_time_verifier_rechecks_current_time_and_revocation(invalid_now) -> None:
     snapshot, selection, benchmark, promotion, _verified = _selection_chain()
     bundle = _serialized_evidence_bundle(snapshot, selection, benchmark, promotion)
     trusted = _trusted_keys_payload()
@@ -348,6 +350,9 @@ def test_use_time_verifier_rechecks_current_time_and_revocation() -> None:
     )
 
     assert capability is not None
+    invalid = ModelRuntimeBindingUseTimeVerifier(**inputs, trusted_now_epoch=lambda: invalid_now)
+    with pytest.raises(ValueError, match="model_runtime_binding_trusted_clock_invalid"):
+        invalid.verify(binding=persisted, selection=_artifact(selection.to_dict()))
     expired = ModelRuntimeBindingUseTimeVerifier(
         **inputs,
         trusted_now_epoch=lambda: NOW + 3_601,

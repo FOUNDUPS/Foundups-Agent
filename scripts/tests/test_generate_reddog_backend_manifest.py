@@ -193,6 +193,10 @@ def _assert_signer_and_memex_runtime_files(generated: dict) -> None:
     )
     assert all(path in required for path in expected)
     for filename in (
+        "reddog_grant_authority_service.py",
+        "reddog_grant_authority_high_service.py",
+        "reddog_grant_authority_runtime_dependencies.py",
+        "reddog_grant_authority_wsp71_permission_rehydration.py",
         "foundup_verified_outcome_root_authority_client.py",
         "foundup_verified_outcome_root_authority_protocol.py",
         "foundup_verified_outcome_root_authority_service.py",
@@ -257,7 +261,10 @@ def test_checked_in_manifest_matches_independent_generation(
     generated = generated_manifest
 
     assert checked_in == generated
-    assert generator.MANIFEST_PATH.stat().st_size <= 320 * 1024
+    assert generator.MANIFEST_PATH.stat().st_size <= 329 * 1024
+    lf_bytes = generator.MANIFEST_PATH.read_bytes().replace(b"\r\n", b"\n")
+    assert len(lf_bytes.replace(b"\n", b"\r\n")) <= 329 * 1024
+    assert "modules/platform_integration/social_media_orchestrator/src/petition_campaign.py" in generated["required_runtime_files"]
     _assert_registry_and_builder_runtime_files(generated)
     _assert_signer_and_memex_runtime_files(generated)
     result_module = (
@@ -271,7 +278,7 @@ def test_checked_in_manifest_matches_independent_generation(
 
 def _assert_manifest_digest_pin(generated: dict[str, object]) -> None:
     digest = generator.canonical_manifest_digest(generated)
-    assert digest == "bc3c14ffee1b71169283b8f2ba5cdea377d7d9aca3b8572b4d401610aa187367"
+    assert digest == "4edbc77efba5fc13fcb67ec70fde129cd54607b31e87b6a56915ccb26548e63e"
     constants = (
         REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js"
     ).read_text(encoding="utf-8")

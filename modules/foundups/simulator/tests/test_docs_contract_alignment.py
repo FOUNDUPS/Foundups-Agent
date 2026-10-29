@@ -46,7 +46,7 @@ def test_sse_streamable_events_match_interface_contract() -> None:
 
 
 def test_tokenomics_genesis_example_matches_btc_reserve_constant() -> None:
-    """Tokenomics example should match simulator genesis_ups_per_btc constant."""
+    """Tokenomics and architecture denominations must match the genesis constant."""
     root = _repo_root()
     reserve_text = (
         root / "modules/foundups/simulator/economics/btc_reserve.py"
@@ -64,6 +64,17 @@ def test_tokenomics_genesis_example_matches_btc_reserve_constant() -> None:
     doc_value = int(doc_match.group(1).replace(",", ""))
 
     assert doc_value == genesis_value
+
+    architecture_text = (
+        root / "docs/architecture/FOUNDUPS_BTC_RESERVE_TOKEN_ARCHITECTURE.md"
+    ).read_text(encoding="utf-8")
+    architecture_match = re.search(
+        r"Canonical constraint: 1 UPS = ([0-9,]+) satoshis? \(at genesis",
+        architecture_text,
+    )
+    assert architecture_match is not None, "Could not locate architecture genesis denomination"
+    architecture_sats = int(architecture_match.group(1).replace(",", ""))
+    assert architecture_sats * genesis_value == 100_000_000
 
 
 def test_source_of_truth_matrix_paths_exist() -> None:

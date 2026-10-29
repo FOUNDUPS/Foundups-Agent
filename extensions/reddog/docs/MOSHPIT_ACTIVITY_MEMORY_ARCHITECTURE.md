@@ -1,20 +1,22 @@
-# RedDog Mosh Pit Projection Architecture
+# RedDog Moshpit Projection Architecture
 
 Status: `PARTIALLY_SUPPORTED` / `UNIFIED_RENDERER_NOT_IMPLEMENTED`
 
+**Canonical term:** `Moshpit` (one word). **Canonical machine token:** `moshpit`. Split or underscored variants must not be introduced into active contracts.
+
 Existing Breadcrumb and Brain/Memex query components are reusable inputs. The
-unified Mosh Pit projection and reverse-chronological renderer are not wired.
+unified Moshpit projection and reverse-chronological renderer are not wired.
 
 ## Purpose
 
-The **Mosh Pit is not a new memory subsystem**. It is a governed, reverse-chronological project/FoundUp projection assembled from the memory architecture already present in FoundUps Agent:
+The **Moshpit is not a new memory subsystem**. It is a governed, reverse-chronological project/FoundUp projection assembled from the memory architecture already present in FoundUps Agent:
 
 - **Breadcrumbs** record the evidence-backed activity/discovery trail.
 - **Brain** is the durable consolidation component that interprets current state, active work, queued work, roadmap state, verified outcomes, and breadcrumb position.
 - **Memex** is the canonical broader FoundUp memory/current-state surface; Brain is one component inside it.
 - **RedDog** is the low-latency human-facing proxy/attention boundary that retrieves and presents the useful projection.
 - **0102** performs the deeper normalization, retrieval, reasoning, evidence reconciliation, and prioritization behind RedDog.
-- **Mosh Pit** is a view: what we did, what happened, what is complete, what remains open, and what should be resumed next.
+- **Moshpit** is a view: what we did, what happened, what is complete, what remains open, and what should be resumed next.
 
 The founding YUMORI workflow is the alpha pattern: 012 acts in the physical world while 0102 simultaneously performs research, documentation, architecture, coding, analysis, and artifact work. Both streams must be recoverable as **our** single operational history.
 
@@ -49,14 +51,14 @@ FoundUp Brain / Memex
   - verified outcomes
   - breadcrumb high-water mark / history position
         |
-        +--> Mosh Pit reverse chronology
+        +--> Moshpit reverse chronology
         +--> accomplishments / milestones
         +--> open loops / "go back to this"
         +--> stakeholder-safe status report
         +--> RedDog "what are we doing?" retrieval
 ```
 
-No duplicate Mosh Pit database should be created. The same underlying event/evidence graph should feed contact memory, Breadcrumbs, Brain/Memex, and Mosh Pit projections.
+No duplicate Moshpit database should be created. The same underlying event/evidence graph should feed contact memory, Breadcrumbs, Brain/Memex, and Moshpit projections.
 
 ## Breadcrumb Contract
 
@@ -93,9 +95,9 @@ For one FoundUp it should consolidate, without silently rewriting history:
 
 This is the layer that handles 012 moving rapidly between topics. A diversion does not need to be manually remembered by 012. Brain/Memex should retain the open loop so RedDog can later surface: "we still need to return to this."
 
-## Mosh Pit Projection
+## Moshpit Projection
 
-Mosh Pit is the human-readable activity/history projection over selected Breadcrumbs plus current-state interpretation from Brain/Memex.
+Moshpit is the human-readable activity/history projection over selected Breadcrumbs plus current-state interpretation from Brain/Memex.
 
 Its default YUMORI-style rendering is reverse chronological and grows upward:
 
@@ -155,7 +157,7 @@ RECENT ACCOMPLISHMENTS
 - reverse-chronological selected Breadcrumbs
 
 HISTORY
-- available on request as the full Mosh Pit projection
+- available on request as the full Moshpit projection
 ```
 
 ### Current implementation boundary
@@ -166,9 +168,9 @@ The repository already contains reusable runtime pieces for this retrieval path:
 - `query_unresolved_work()` retrieves unresolved/queued work;
 - FoundUp Brain/Memex assembly already consumes Breadcrumb state plus active/queued work and verified outcomes.
 
-This PR **does not claim that a unified Mosh Pit runtime renderer is already wired into RedDog**. It defines the canonical composition so the next runtime slice extends those existing query surfaces rather than creating a parallel memory/query stack.
+This PR **does not claim that a unified Moshpit runtime renderer is already wired into RedDog**. It defines the canonical composition so the next runtime slice extends those existing query surfaces rather than creating a parallel memory/query stack.
 
-## What Belongs in a Project Mosh Pit
+## What Belongs in a Project Moshpit
 
 The operational spine is:
 
@@ -182,7 +184,7 @@ The operational spine is:
 -> next/open action retained
 ```
 
-External events enter only when they caused, constrained, validated, or materially changed our work. The Mosh Pit is not a history of the City, NVIDIA, an investor, or another organization.
+External events enter only when they caused, constrained, validated, or materially changed our work. The Moshpit is not a history of the City, NVIDIA, an investor, or another organization.
 
 Examples:
 
@@ -229,22 +231,22 @@ The original transcript remains attached as provenance. The same rule applies to
 
 ## Contact Memory Integration
 
-Contact memory and Mosh Pit are different projections over overlapping event evidence:
+Contact memory and Moshpit are different projections over overlapping event evidence:
 
 - **Contact memory**: who is this person, what is our relationship, what happened between us, what commitments remain?
-- **Mosh Pit**: what did our operation do, what happened next, and how did the FoundUp advance?
+- **Moshpit**: what did our operation do, what happened next, and how did the FoundUp advance?
 
 A meeting should exist once as an event/breadcrumb and be projected into both contexts.
 
 ## Git / Engineering Integration
 
-Git history is high-value evidence for 0102 activity. Include technical work in a project Mosh Pit when it:
+Git history is high-value evidence for 0102 activity. Include technical work in a project Moshpit when it:
 
 1. directly builds that FoundUp/project;
 2. emerges directly from field use of that FoundUp/project; or
 3. materially improves the 012/0102 system being used to execute it.
 
-Do not turn the Mosh Pit into a complete repository changelog.
+Do not turn the Moshpit into a complete repository changelog.
 
 ## Daily Reconciliation
 
@@ -275,13 +277,13 @@ Redaction is a projection policy, not a mutation of canonical evidence.
 
 ## Google Doc Projection
 
-A living Google Doc is appropriate as a convenient stakeholder/human Mosh Pit view for YUMORI. It should be generated from approved Breadcrumb/Brain/Memex state and should not become the sole canonical memory store.
+A living Google Doc is appropriate as a convenient stakeholder/human Moshpit view for YUMORI. It should be generated from approved Breadcrumb/Brain/Memex state and should not become the sole canonical memory store.
 
 Target:
 
 ```text
 Breadcrumbs + Brain/Memex
--> Mosh Pit projection
+-> Moshpit projection
 -> disclosure filter
 -> prepend/sync living Google Doc
 ```
@@ -303,14 +305,14 @@ This machinery normally stays beneath the RedDog attention boundary. Surface it 
 
 ## Implementation Direction
 
-Do not build a separate Mosh Pit store. Extend existing surfaces in this order:
+Do not build a separate Moshpit store. Extend existing surfaces in this order:
 
 1. define a project/FoundUp-aware Breadcrumb event contract;
 2. ensure relevant 012/0102/PC events can enter that trail with provenance;
 3. ensure Brain/Memex can consolidate completion/open-loop state from those receipts;
 4. extend existing `query_past_work()` + `query_unresolved_work()` retrieval to emit a unified project activity projection;
 5. add Git/PR/artifact receipt matching;
-6. add the reverse-chronological Mosh Pit renderer;
+6. add the reverse-chronological Moshpit renderer;
 7. add optional governed Google Doc synchronization;
 8. keep RedDog output concise by default and expand full history only on request.
 

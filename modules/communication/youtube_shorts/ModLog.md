@@ -1,8 +1,18 @@
 # YouTube Shorts AI Generator - ModLog
 
+## 2026-10-25 — First Little Shrew animated episode
+
+Reused the shared SVG rig, canonical first segment and existing FFmpeg renderer to produce three five-second shots with original code-composed instrumental/foley and timed captions. Added an optional local command with exclusive outputs, source/asset provenance and explicit unreviewed status. 140 focused tests pass; independent actual-frame/technical review passed. Audio listening remains unverified. See YouTube Shorts docs/KIDS_LOCAL_PRODUCTION.md for measured artifact evidence and exact autonomy owner/gap map, including the mock wallet boundary. Updated the disabled research-scout state; no WRE/provider/spending/upload activation.
+
 **Module**: `youtube_shorts`
 **Domain**: `communication/`
 **WSP Compliance**: WSP 3, 22, 49, 80, 54
+
+## 2026-10-23 — Kids Episodes local production foundation
+
+WSP 97/109/95: registered hidden FoundUp intake; added local browser editor, exact 15-second renderer, draft/final formats, caption burn-in/SRT, local music/voice mix, bounded injected research/music adapters and prototype production/research instructions. Reuses YouTube ownership and preserves legacy publishing/auth behavior. Original/reference asset and rights review remain distinct.
+
+Evidence: new renderer, HTTP boundary and provider-fake tests plus actual FFmpeg/HTTP smoke. Live paid APIs, automatic transcription/alignment, hosted deployment, publishing and WRE admission are not validated. See docs/KIDS_EPISODES_RESEARCH.md for source retrieval, official provider research and limits.
 
 ## 2026-08-25 - AutoPost/Foundups Mall publisher boundary hardening
 
@@ -792,3 +802,89 @@ Components tested and working:
 3. ⏸️ Generate 15 test videos to verify cap works
 4. ⏸️ Set up automated posting schedule
 5. ⏸️ Create promotional video about the feature
+
+## 2026-10-23 — OpenRouter reference-conditioned storyboards
+
+Added an image adapter using the AI Gateway's existing provider configuration, explicit host admission, pinned FLUX.2 Klein 4B candidate, verified raster references, bounded image responses, exclusive attempt records and no retry/fallback. Added review-before-video callback composition for Kids Episodes. Kept dormant OpenRouter client, WRE and publishing unchanged. Official current API/model sources and repository-first retrieval evidence are in docs/OPENROUTER_STORYBOARDS.md. No paid generation or runtime activation is claimed.
+
+## 2026-10-26 — Us_Story_Time destination
+
+Registered the operator-selected Story Time channel in the existing publisher with FoundUps OAuth-set 10 reuse and an optional override and required channel-ID pinning. Added an unlisted, made-for-kids preschool review helper and documented headless/Kids ownership. No live account, upload or worker activation claimed. WSP 97 source/evidence notes are in Shorts KIDS_LOCAL_PRODUCTION.md.
+
+## 2026-10-26 — Little Shrew editorial revision 2
+
+012 requested removing the oversized sixth shrew. The rightmost of three equal-sized children now wakes after an early short tremor, wiggles and reaches the root by 5.5 seconds; parents and siblings stay asleep. Audio/captions retimed. Three five-second clips still total 15 seconds. Provenance labels this an editorial override of the original nine-beat source. Existing real render/audio tests passed; motion regression updated to inspect the smaller hero region and verifies five characters, equal child scales and sleeping family. No perceptual audio review or upload claimed for this revision.
+
+## 2026-10-25 — Editor-owned review surface
+
+WSP 97/3/49/84: verified the existing Shorts editor and EDUIT build before
+placing the review UI in Shorts assets and mounting it through EDUIT. Reuses
+the shared scene and generated video; no second renderer/server/PWA or WRE
+activation. Lexical owner retrieval: workspace overlay at 15c888ac0, freshness
+UNKNOWN, index gap true. Results identified the existing editor; optional
+roadmap/test README/memory artifacts absent. Exact files inspected directly.
+The bounded static tool is simpler than deploying the loopback render server
+as a public service; hosting remains a separate unverified gate.
+
+## 2026-10-26 — Collapse sound word and production review lesson
+
+Stomp-mode early cue now reads THUMP! with a shorter low-frequency impact;
+legacy non-stomp audio/captions are preserved. Updated production skill v0.2.1
+and story-direction reference with material continuity, anticipation/reaction,
+transition-frame review and sound-word pairing. EDUIT owns the shared scene.
+Next actual episode remains the transfer test; no autonomous learning claim.
+
+Latest creator clarification: the educational targets are THUMP → CRACK →
+SQUISH, replacing incidental stomp/crunch labels. Original crack bursts occur
+as fissures develop; compression tone/sweep and SQUISH coincide. Caption tests
+assert the three-word order and event windows. Production skill now requires
+a word → visible referent → actual sound trace rather than decorative captions.
+
+## 2026-10-26 — Ordered preview audits and milestone workflow
+
+Production skill v0.2.2 specifies physics/causality → continuity → education →
+art/readability on rendered outputs. Capture repeat sniff learning, event-local
+word anchors, staggered reactions, intermediate turning poses and English-only
+prototype versus planned reviewed locales. Series README records failures in
+current output against the new brief. Skill/docs iteration only; no new render,
+PR, publishing, paid generation or autonomous WRE/RSI activation. Bundle at the
+next milestone; focused preview checks need not wait for broad repository CI.
+
+## 2026-10-26 — Shared learning-event audio and spatial captions
+
+EDUIT supplies one event sheet to synthesized foley and scene rendering. Added
+optional Boolean captions_in_scene to existing renderer, retaining SRT while
+skipping duplicate burn-in. Legacy audio/caption behavior remains the default.
+Actual three-cycle video review and residual limits are in EDUIT ModLog.
+
+
+## 2026-10-26 — Storytime panel focus and launch audit
+Shorts-owned viewer now places expand/collapse on each panel. EDUIT mounts the
+same source at its standalone root, preventing a viewport-less redirect launch.
+See EDUIT HOME_SCREEN_LAYOUT_REPAIR.md for evidence and physical-device limits.
+
+
+Iteration skill v0.2.4 adds five evidence-scoped1–5 diagnostic criteria, autonomous
+adjacent-surface checks and repair/stop/retain rules. WSP15 remains defect priority,
+not visual quality. Current grades keep native iOS and transfer evidence separate.
+
+
+## 2026-10-26 — Storytime preschool viewer milestone
+
+Existing kids_review viewer gains child-sized controls, fullscreen annotation,
+stateful playback, direct video/game switch, snapshot sharing, repeat and touch
+lock. Shared EDUIT renderer enlarges sound words without changing motion/audio.
+See [preschool review](../../foundups/eduit/docs/PRESCHOOL_VIEWER_REVIEW.md)
+for evidence and limits.
+
+## 2026-10-27 — Slow-rescue viewer integration
+Existing director gains64px toolbar,60px fullscreen controls, Restart and untimed
+practice, longer feedback-clock bounds and slow-rescue-11 record namespace.
+EDUIT owns slower engine/cues/scoring; original15s media unchanged. See
+../../foundups/eduit/docs/SLOW_RESCUE_AND_AGENT_ROADMAP.md. No upload/auth changes.
+
+## 2026-10-28 — Storytime learning shell
+Existing kids_review viewer now owns compact Play/About/How, science-bounded copy,
+channel link and responsive control sizing. EDUIT retains roadmap/education scope;
+no new publisher or credential surface. Film and game engine unchanged. See EDUIT
+LEARNING_SHELL_REVIEW.md and EVOLUTION_PLAY_AND_SHARING_ROADMAP.md.

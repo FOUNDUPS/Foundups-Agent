@@ -233,7 +233,7 @@ def test_run_skill_scan_reports_missing_scanner(tmp_path: Path):
     """Scanner unavailable: available=False, passed=False (WSP 95 fail-closed)."""
     skills_dir = _wardrobe(tmp_path)
 
-    with patch("modules.communication.moltbot_bridge.src.skill_safety_guard.shutil.which", return_value=None):
+    with patch.object(guard, "_locate_scanner", return_value=None):
         result = run_skill_scan(skills_dir=skills_dir)
 
     assert result.available is False
@@ -525,6 +525,55 @@ def test_openclaw_dae_cached_verdict_never_skips_current_scan(cached, age, sever
     scan.assert_called_once()
     assert scan.call_args.kwargs["max_severity"] == severity
     assert dae._skill_scan_message == "current"
+
+
+def _offline_scanner_parent_environment(conflicting):
+    """Return only synthetic values; never inspect the real parent environment."""
+    launch = {name: "synthetic-" + name for name in (
+        "PATH", "PATHEXT", "SYSTEMROOT", "WINDIR", "COMSPEC",
+        "LANG", "LC_ALL", "NO_COLOR",
+    )}
+    parent = dict(launch, OPENAI_API_KEY="synthetic-not-a-credential",
+                  HTTP_PROXY="synthetic-proxy", PYTHONPATH="synthetic-module-path",
+                  LITELLM_API_BASE="synthetic-endpoint", UNSAFE_KNOB="synthetic")
+    parent.update(TMP="parent-temp", TEMP="parent-temp", PYTHONIOENCODING="ascii")
+    if conflicting:
+        parent.update(PYTHON_DOTENV_DISABLED="0", LITELLM_MODE="DEV",
+                      LITELLM_LOCAL_MODEL_COST_MAP="False", PYTHONDONTWRITEBYTECODE="0")
+    return parent, launch
+
+
+@pytest.mark.parametrize("conflicting", [False, True], ids=["missing", "conflicting"])
+def test_scanner_child_forces_offline_environment(scan_subject, monkeypatch, conflicting):
+    """Both scanner command forms receive enforced offline import controls."""
+    skills, reports, single = scan_subject
+    parent, launch = _offline_scanner_parent_environment(conflicting)
+    original_parent = dict(parent)
+    monkeypatch.setattr(guard.os, "environ", parent)
+    with patch.object(guard.subprocess, "run", side_effect=_scanner_process(
+        {}, single_skill=single,
+    )) as scanner:
+        result = run_skill_scan(skills, report_dir=reports)
+    scanner.assert_called_once()
+    command = scanner.call_args.args[0]
+    invocation = scanner.call_args.kwargs
+    private_report = Path(command[command.index("--output") + 1])
+    expected = dict(launch)
+    expected.update(TMP=str(private_report.parent), TEMP=str(private_report.parent),
+                    PYTHONIOENCODING="utf-8", PYTHON_DOTENV_DISABLED="1",
+                    LITELLM_MODE="PRODUCTION", LITELLM_LOCAL_MODEL_COST_MAP="True",
+                    PYTHONDONTWRITEBYTECODE="1")
+    assert invocation["env"] == expected
+    assert parent == original_parent
+    assert command[0:3] == ["skill-scanner", "scan" if single else "scan-all", str(skills)]
+    assert ("--skill-file" in command) is single
+    assert ("--recursive" in command) is not single
+    assert invocation["capture_output"] is True and invocation["text"] is True
+    assert invocation["timeout"] == 90
+    assert result.available is True and result.passed is True
+    assert result.manifest_passed is True and result.exit_code == 0
+    assert private_report.parent.parent == reports and not private_report.parent.exists()
+    assert Path(result.report_path).is_file()
 
 
 @pytest.mark.parametrize("change", ["edit", "add", "delete", "manifest"])

@@ -2368,20 +2368,17 @@ class OpenClawSupervisor:
 
         self._observe_holoindex_postmerge(obs)
 
-        # Poll DaemonSelfAuditLoop for real events (ported from Supervisor24x7)
-        # NOTE: scan_once() returns int (count of events), not an iterable
-        if self._self_audit_loop and hasattr(self._self_audit_loop, "scan_once"):
-            try:
-                event_count = self._self_audit_loop.scan_once()
-                if event_count and event_count > 0:
-                    obs["self_audit_event_count"] = event_count
-                    self.metrics.events_observed += event_count
-                    logger.info(
-                        "[SUPERVISOR] OBSERVE: %d self-audit events detected",
-                        event_count,
-                    )
-            except Exception as exc:
-                logger.warning("[SUPERVISOR] OBSERVE: scan_once() failed: %s", exc)
+        from modules.infrastructure.wre_core.src.daemon_self_audit_loop import observe_self_audit_status
+
+        status = observe_self_audit_status(self._self_audit_loop, enabled=self.self_audit_enabled)
+        obs["self_audit_status"] = status
+        event_count = status["event_count"]
+        if event_count is not None and event_count > 0:
+            obs["self_audit_event_count"] = event_count
+            self.metrics.events_observed += event_count
+            logger.info("[SUPERVISOR] OBSERVE: %d self-audit events detected", event_count)
+        if status["outcome"] == "failed":
+            logger.warning("[SUPERVISOR] OBSERVE: scan_once() failed: %s", "scan_failed")
 
         return obs
 

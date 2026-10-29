@@ -1,5 +1,16 @@
 # FoundUps Domain
 
+## Optional reusable brand context — PR1792 candidate, 2026-10-25
+
+`brand_context.schema.json` describes a parent brand and child names/aliases.
+A registry entity may declare `brand_context_path`; absence keeps the existing
+contract. `public_discovery_alias` remains independent. Context is public
+branding data with `BRANDING_ONLY_NO_EXECUTION_AUTHORITY`; it does not add a
+registered principal, token, routing or mutation scope. The existing grounding
+and backend verifier validate it at use time. Synthetic schema and actual
+producer/consumer tests qualify the reusable core only. Production payloads,
+registry activation, website and skill propagation remain original PR1792 work.
+
 ## Canonical Planning References
 
 For active execution, use these first:
@@ -8,6 +19,7 @@ For active execution, use these first:
 |----------|---------|
 | [FOUNDUPS_DOMAIN_CANONICAL_INDEX.md](docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md) | Domain truth: canonical vs planning vs pending-audit vs historical |
 | [ROADMAP.md](ROADMAP.md) | Domain-level layered roadmap |
+| [AutoPost item capture handoff](pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md) | Shop/GetK-style private photo grouping into the existing Mall; specified contracts and missing implementation gates |
 | [FOUNDUP_EXFOLIATION_PROTOCOL.md](docs/FOUNDUP_EXFOLIATION_PROTOCOL.md) | Core vs spin-out decision rule |
 | [PQN_SWARM_HUB_FOUNDUP_BRIEF.md](docs/PQN_SWARM_HUB_FOUNDUP_BRIEF.md) | Internal-first PQN swarm FoundUp brief |
 | [RedDog Lick connection handshake](../../extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md) | Cross-domain engagement contract; RedDog-owned, specified not implemented |
@@ -19,6 +31,7 @@ For active execution, use these first:
 | [agent_market/ROADMAP.md](agent_market/ROADMAP.md) | Execution ledger (active) |
 | [simulator/ROADMAP.md](simulator/ROADMAP.md) | Simulation and DEX (active) |
 | [social_twin/ROADMAP.md](social_twin/ROADMAP.md) | Human-in-the-loop (PoC lock) |
+| [pfmall/ROADMAP.md](pfmall/ROADMAP.md) | Shared discovery, private AutoPost item handoff and mobile creator integration |
 
 ---
 

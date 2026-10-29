@@ -1,5 +1,13 @@
 # Dependency launcher test inventory
 
+## 2026-09-22 — Signed expectation contract qualification
+
+Reused the existing supplier and receipt suites with AI Gateway's runtime-binding
+security suite:49 passed, zero skips, two disabled-plugin config warnings.
+No new test file or changed oracle. The [fixed matrix](README.md#signed-expectation-projection-acceptance-matrix)
+explicitly marks unimplemented cross-owner cases; passing existing owner tests
+does not close them. Independent replay/source bindings live in the RSI backlog.
+
 Canonical test memory under WSP22/50/84/97. Inventory inspected 2026-09-20;
 reuse these four existing test files before adding another owner. This file
 was missing and is added with the material WSL test expansion required by

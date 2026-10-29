@@ -11,6 +11,9 @@ Structure:
 - `test_foundup_launch_request.py` preserves ordered error-category expectations and the source AST guard; only the exact current command error maps to authority rejection, with an unknown near-message control.
 - `test_intake_packet_builder.py` proves actual commander-authorized metadata handoff, frozen
   job lineage, malformed/conflicting input rejection and preservation of dry-run queue behavior.
+- `test_github_nomination_review.py` owns the distinct GitHub event/form/CLI boundary:
+  fixed service context, nominator identity, OSP preservation/redaction, size limits,
+  generic rejection and exclusive artifacts. It does not authenticate replay metadata.
 - `test_mcp.py` MCP enum smoke checks.
 - `test_mixins_extended.py` extended coverage for mixin fallbacks.
 - `test_monitor_flow.py` witness loop coverage (gated).
@@ -37,6 +40,15 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest modules/ai_intelligence/ai_ove
 ```
 
 ## Opt-in Flags
+
+The nomination workflow selects this owner plus launch-request, intake-transport,
+intake-auth-provider and genesis-validator directly with normal package imports,
+`--noconftest --import-mode=importlib -p no:cacheprovider`, an external temp root and
+pytest9.0.3. Its682 local cases have no skips. The new owner is also allowlisted for
+ordinary module collection; no existing skip/gating rule is weakened.
+The committed workflow is the exact hosted command and retains Junit/dependency
+artifacts. Local replay and mocked data do not establish live issue provenance,
+project control or production admission. Original RED results remain historical.
 
 - `AI_OVERSEER_WITNESS_LOOP=1` enables witness loop scenarios.
 - `AI_OVERSEER_HEAVY_TESTS=1` re-enables otherwise skipped files. Set it when explicitly selecting

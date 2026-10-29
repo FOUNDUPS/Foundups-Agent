@@ -14,6 +14,9 @@ from modules.infrastructure.wre_core.src.skill_path_security import (
     has_link_or_reparse_component as _has_link_or_reparse_component,
     path_has_link_or_reparse,
 )
+from modules.infrastructure.wre_core.src.skill_execution_truth import (
+    normalize_registry_scope_projection,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +54,8 @@ def validate_runtime_skill_admission(
     }
     if actual != expected:
         return False, "registry and Skillz production metadata do not match"
+    if skill_name == "auto_test_registry_audit" and expected["intent_type"] != "TELEMETRY":
+        return False, "registry scope projection requires TELEMETRY intent"
     return True, "production Skillz metadata admitted"
 
 
@@ -92,6 +97,8 @@ def dispatch_registered_skill_executor(
 ) -> dict[str, Any]:
     """Execute only executor bytes bound to the scanner admission fingerprint."""
     try:
+        if skill_name == "auto_test_registry_audit" and not _projection_input_envelope(input_context):
+            return _error("invalid_projection_input", "registry projection input is malformed")
         source = _read_manifest_bound_executor(
             executor_path, admission_fingerprint=admission_fingerprint
         )
@@ -108,6 +115,8 @@ def dispatch_registered_skill_executor(
         task.setdefault("skill_name", skill_name)
         task.setdefault("agent", agent)
         result = execute_fn(task)
+        if skill_name == "auto_test_registry_audit":
+            return _projection_result(result, task["request"])
         if not isinstance(result, dict):
             return _error("invalid_executor_result", "registered skill executor returned a non-object result")
         if type(result.get("success")) is not bool:
@@ -127,6 +136,18 @@ def dispatch_registered_skill_executor(
             type(exc).__name__,
         )
         return _error("executor_exception", "registered skill executor failed")
+
+
+def _projection_input_envelope(value: Any) -> bool:
+    return (type(value) is dict and {"operation", "request"} <= set(value)
+            and not set(value) - {"operation", "request", "parent_continuity_context"})
+
+
+def _projection_result(value: Any, request: Any) -> dict:
+    normalized = normalize_registry_scope_projection(value, request=request)
+    if normalized is None:
+        return _error("invalid_projection_result", "registry projection result is malformed")
+    return {**normalized, "_executor_dispatch": True}
 
 
 def skill_bundle_fingerprint(skill_dir: Path) -> str:

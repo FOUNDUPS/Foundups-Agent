@@ -1,5 +1,14 @@
 # AI Gateway Module Interface Documentation
 
+## Model binding trusted time
+
+`ModelRuntimeBindingUseTimeVerifier.verify` samples `trusted_now_epoch` once.
+It must return an exact positive `int`; strings, floats (including NaN/infinity),
+booleans, None, zero and negative values raise
+`ValueError("model_runtime_binding_trusted_clock_invalid")` before lower evidence
+verification. Missing persisted receipt is still rejected first. Signature,
+revocation, expiry and one-shot capability requirements remain unchanged.
+
 ## Public API
 
 ### Classes
@@ -26,6 +35,12 @@ pair `openrouter` / `moonshotai/kimi-k3`. Its effective completion budget is
 above that endpoint-fixture limit fail before transport. Explicit input takes
 precedence over provider environment configuration. The wire request forces
 reasoning effort `max` and omits temperature. Non-K3 routes are unchanged.
+
+**OpenRouter transport containment:** `_call_openai(...)` disables redirects and
+rejects 3xx before reading JSON. Transport failures raise a fixed
+`openrouter_request_failed` message; timeout failures remain `requests.Timeout`.
+`ProviderConfig` representation omits its API key. This is a diagnostic boundary,
+not removal of exception context from memory. Other providers are unchanged.
 
 #### `GatewayResult`
 Data class containing AI call results.

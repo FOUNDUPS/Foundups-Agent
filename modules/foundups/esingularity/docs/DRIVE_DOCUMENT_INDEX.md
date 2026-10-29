@@ -1,12 +1,26 @@
 # YUMORI / eSingularity — Google Drive Document Index
 
-Last audited: 2026-09-13 JST
+Last audited: 2026-09-29 JST
 
 ## Authority rule
 
 The FoundUps repository is the canonical project map and current-status authority. Google Drive is the working evidence, drafting, outreach and analysis layer. When a Drive document conflicts with repository status or a primary government source, do not silently choose either version: re-verify the primary source, update the repository authority first, then reconcile Drive.
 
 This index exists so agents do not create another document merely because they cannot find an existing one.
+
+## Current-project namespace boundary
+
+The current Fukui program is the **YUMORI × eSingularity.ai × AI Koban** project family. It is distinct from historical eSingularity / Educational Singularity work dating to 2007–2010 and later legacy material.
+
+- Current-project retrieval must start from this index and the current project family, not from a broad Drive search for `eSingularity` alone.
+- Historical eSingularity documents are provenance / long-term memory unless a current canonical document explicitly promotes a historical claim into the active project.
+- A historical title, matching keyword, or later modification timestamp does **not** make a legacy document current authority.
+- Do not bulk-move, rename, delete, or rewrite historical eSingularity material merely to clean current retrieval. Preserve provenance and separate retrieval scope.
+- When historical material is intentionally used, label it `HISTORICAL_SOURCE` with its source/date and verify any claim that is being promoted into current work.
+
+The current mutable working-artifact container is named **CURRENT — YUMORI × eSingularity.ai × AI Koban — Working Documents**. Its semantic children are `WORK — Correspondence Drafts`, `EDITORIAL — Newsletters & Articles`, `PARTNERS — Partnership & Business Development`, and `ARCHIVE — Superseded Current-Project Drafts`. Discover them live by name; folder IDs are intentionally not encoded here.
+
+Numeric prefixes are reserved for the canonical current-project document spine. Operational containers must use semantic prefixes rather than `01`, `02`, etc.
 
 ## CORE — numbered project spine
 
@@ -18,8 +32,9 @@ These are durable project documents. Preserve their file IDs and update in place
 | 02 | **YUMORI Mayor Request Letter** | Mayor-facing formal request lane | `1Dx6HkdKSKISfxU7QgLvSZ6nFOc_T2MV0HCHVnoYioe4` |
 | 03 | **YUMORI City / Prefecture / Council Evidence — Demolition vs PPP/PFI Reuse** | Policy, evidence, economics and government-facing support material | `1yeO6-6_mTLW8QswosVKmCVCHSRgWiacq-7FL7-9clsE` |
 | 04 | **Who Is the Monk? — Kuzuryu Taicho, eSingularity & FoundUps** | Project-founder/background narrative; not a source for government facts | `1u_HMejJJOxU5y4DV2S-OSwaiQOk_QPffbUFna2CfSrE` |
-| 05 | **YUMORI PPP/PFI Private Proposal Master** | Canonical Drive PPP/PFI proposal mechanics and submission draft | `1QgnX9-2XE1wXtn2vg1d3zh3SmXDZyiEjKhSVJuSUOPc` |
+| 05 | **YUMORI / eSingularity 三拠点分散型AIインフラ・公共資産活用 PPP/PFI 官民連携案件形成マスター** | Three-site umbrella and asset-specific legal/VFM/finance/gates: school asset proposals and separate Sukatto PPP/PFI receiving route; no common application assumed | `1QgnX9-2XE1wXtn2vg1d3zh3SmXDZyiEjKhSVJuSUOPc` |
 | 06 | **YUMORI Project Prospectus — eSingularity Case for Support** | Integrated project prospectus / support case | `1-wxF_I39svQH8AGvF2sryIk6ReAz2ctHe0-5-HypypM` |
+| 07 | **YUMORI / eSingularity Three-Site Distributed AI Koban Node Portfolio** | Technical/site evidence and six field photographs. Priority 1 Hanyu (Site 3), Priority 2 Shimousaka (Site 2), Priority 3 optional Sukatto (Site 1) | `1BLGiTe3Z6kR7SZXjcuQ67OiQGBRHF9u6M0VdPDplkls` |
 
 ## OPERATIONS — preserve and find quickly
 
@@ -27,7 +42,7 @@ These are durable project documents. Preserve their file IDs and update in place
 | --- | --- | --- | --- |
 | `PICS` | **YUMORI Contact Photos & Business Cards** | Human-readable visual contact memory; photos/business cards | `10bLavCQg3FnjFQ3q_8JkyRw3Kmr4IatqUAGG8M3a-WI` |
 | `CONTACTS` | **YUMORI Master Contact Sheet** | Contact database and outreach tracking | `1BZl2F5B-bBQEGKsOhD0y7Wy1qPLnFJgyUUJEIR3QONo` |
-| `LOG` | **YUMORI Mosh Pit Activity Ledger** | Chronological activity ledger / transparency feed | `1Le5foHxTHWa8QMAfqTJ0PZFUULw3oNgJTgghlXaHEYM` |
+| `LOG` | **YUMORI Moshpit Activity Ledger** | Chronological activity ledger / transparency feed | `1Le5foHxTHWa8QMAfqTJ0PZFUULw3oNgJTgghlXaHEYM` |
 | `COMMITTEE` | **YUMORI Preparatory Committee Charter & Related Drafts** | Committee formation, rules and governance drafts | `15oRM09iAGQ09d7qRKmpO-bS-aoL1r7zFGfNu2EqjfS8` |
 | `PRESS` | **YUMORI Media Outreach & Press Kit** | Media-facing material and reporter context | `1Co7ruDw9BbihxsQ0DvgBVf-qTfrABfJXgscbTAcceXU` |
 | `PROCLAMATION` | **YUMORI Founding Declaration & Citizens' Statement** | Founding/civic declaration | `1VSzLUcf-L2gUYDSxwbcVBbS2Qj3JOwjPbtPB7KfbusA` |
@@ -37,10 +52,10 @@ These are durable project documents. Preserve their file IDs and update in place
 
 | Drive file | Role | Drive ID |
 | --- | --- | --- |
-| **FIN — YUMORI Phase 1 Financial Model & Grant Audit — 2026-09-12** | Current working grant register and functional financial audit | `1w00eZcfUMyaNu_wwQEf_GVNHpQamYScRdpB_QGecFJ0` |
+| **FIN — YUMORI Three-Site Portfolio, Demand-Led Financial Model & Grant Audit — 2026-09-29** | Current three-site capital allocation, independent cost ledgers, five-year Hanyu downside/base/upside cash waterfalls, self-funding test, grant audit, 24-service demand-led sizing and separate `Regional Impact` ledger. Existing 18 tabs retained. | `1w00eZcfUMyaNu_wwQEf_GVNHpQamYScRdpB_QGecFJ0` |
 | **FIN.YUMORI — Integrated Financial + Regional Impact Model.xlsx** | Legacy/integrated model retained as reference; do not let legacy assumptions override current audit | `11etQ_8zwMzEXemGriCpYw1IbTSy5rh-c` |
 
-Grant status itself is governed by [`GRANTS_AND_SUBSIDIES.md`](GRANTS_AND_SUBSIDIES.md). A statutory maximum or model placeholder is not project funding.
+Grant status itself is governed by [`GRANTS_AND_SUBSIDIES.md`](GRANTS_AND_SUBSIDIES.md). Candidate-site assumptions are governed by [`CANDIDATE_SITE_REGISTRY.md`](CANDIDATE_SITE_REGISTRY.md). Calculation and node-sizing logic is governed by [`YUMORI_ECONOMIC_MODEL.md`](YUMORI_ECONOMIC_MODEL.md) and `../src/yumori_economic_model.py`. The Drive FIN workbook is the working formula/interview projection, not the source of truth. A statutory maximum, legacy 1 MW scenario, financial-floor kW, or other model output is not project funding or permission to build.
 
 ## LEGAL / COUNCIL RECORDS
 
@@ -87,7 +102,9 @@ Drive titles should be English-first so 012 can identify them immediately, with 
 
 Preferred prefixes:
 
-`01–06`, `PICS`, `CONTACTS`, `LOG`, `COMMITTEE`, `FIN`, `PRESS`, `PROCLAMATION`, `LANDOWNERS`, `PETITION`, `LEGAL`, `LEGAL-EVIDENCE`, `RESEARCH`, `ARCHIVE`.
+`01–07`, `PICS`, `CONTACTS`, `LOG`, `COMMITTEE`, `FIN`, `PRESS`, `PROCLAMATION`, `LANDOWNERS`, `PETITION`, `LEGAL`, `LEGAL-EVIDENCE`, `RESEARCH`, `ARCHIVE`.
+
+Operational folders use semantic prefixes such as `WORK`, `EDITORIAL`, `PARTNERS`, and `ARCHIVE`; do not use numeric prefixes for operational containers.
 
 Avoid generic titles such as `draft`, `new doc`, `research-brief`, `working copy`, or Japanese-only titles at the top level.
 
@@ -95,10 +112,30 @@ Avoid generic titles such as `draft`, `new doc`, `research-brief`, `working copy
 
 Before making a new YUMORI Drive document:
 
-1. Read this index.
+1. Read this index and classify the request as CURRENT_PROJECT or HISTORICAL_SOURCE before searching.
 2. Search Drive by the relevant prefix/role.
 3. Check the repo authority for that domain.
 4. Update an existing authoritative file in place when possible.
 5. Create a new file only when it has a distinct durable role.
 6. If a new durable file is created, add its Drive ID and role here in the same work slice.
 7. Delete only when a live successor or exact duplicate is verified; otherwise rename/move to `ARCHIVE` rather than guessing.
+
+## Three-site rebaseline receipt — 2026-09-29
+
+05 and 07 were edited natively in place; 07 retains all six inline photographs.
+FIN uses the original spreadsheet ID and site-tab identities. Dashboard now shows
+portfolio outputs; its old summary is retained at rows 80–86 as legacy reference.
+`Regional Impact` keeps visitor spending, project revenue, payroll, private capital,
+and public-cost avoidance separate. None becomes cash available for construction.
+See [execution/verification receipt](YUMORI_PORTFOLIO_REBASELINE_20260929.md).
+
+### FIN costed-planning update — 2026-09-29
+
+Same canonical workbook ID and 18 tabs. Site cost tables now hold low/base/high MODEL ONLY allowances. Assumptions 68:122, Revenue 30:68 and Opex 30:124 drive all three 5Y Model waterfalls. This supersedes the empty-input numeric snapshot, not the INSUFFICIENT EVIDENCE investment-readiness boundary.
+
+Investor-path reconciliation: Document 03 keeps policy/economic evidence, 05
+keeps PPP financing gates, 07 keeps site evidence, and 06 explains the case for
+support. FIN alone calculates the current costed scenarios. eSingularity.ai
+points to the repository calculation note and labels its FIN link as
+access-controlled. The old 1 MW workbook is a historical comparison, not a
+second current financial source.

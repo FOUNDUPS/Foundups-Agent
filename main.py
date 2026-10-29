@@ -989,8 +989,7 @@ def _wre_dashboard_auto_enforce_enabled(*, interactive_menu: bool = False) -> bo
 
 def run_wre_dashboard_preflight(repo_root: Path, *, interactive_menu: bool = True) -> bool:
     """
-    Run WRE dashboard preflight at startup.
-
+    Run WRE dashboard preflight and advisory research display at startup.
     This mirrors DAE-level enforcement logic so `python main.py` has the same
     health gate semantics as individual DAE launchers.
 
@@ -1012,8 +1011,9 @@ def run_wre_dashboard_preflight(repo_root: Path, *, interactive_menu: bool = Tru
         from modules.infrastructure.wre_core.src.dashboard_alerts import (
             DashboardAlertMonitor,
             check_dashboard_health,
+            print_research_report_summary,
         )
-
+        print_research_report_summary()
         monitor = DashboardAlertMonitor()
         health = check_dashboard_health() or {}
         insufficient_data = bool(health.get("insufficient_data", False))
@@ -1195,7 +1195,7 @@ def run_git_main_merge_sentinel_preflight(repo_root: Path) -> bool:
     Env:
         GIT_MAIN_MERGE_SENTINEL=1           Enable sentinel (default OFF)
         GIT_MAIN_MERGE_SENTINEL_ENFORCED=0  If 1, block startup on failure
-        GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH=1  Delete merged branch (default ON)
+        GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH=1  Request cleanup (currently retained)
     """
     if os.getenv("GIT_MAIN_MERGE_SENTINEL", "0") != "1":
         logger.info("[GIT-MERGE-SENTINEL] Startup preflight disabled")

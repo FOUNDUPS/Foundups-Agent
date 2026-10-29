@@ -85,23 +85,58 @@ class UncomposedDurableSignerGrantRevocationOracle:
         """Run one non-grant action under the durable revocation fence."""
 
         with self._lock():
-            current_epoch = self._checked_now(at_epoch)
-            current = self._current(current_epoch)
-            if (
-                type(expires_at) is not int
-                or current_epoch >= expires_at
-                or key_epoch in current["revoked_key_epochs"]
-            ):
-                raise RuntimeError("signer_key_epoch_use_rejected")
-            result = action()
-            after_epoch = self._now()
-            after = self._current(after_epoch)
-            if (
-                after_epoch >= expires_at
-                or key_epoch in after["revoked_key_epochs"]
-            ):
-                raise RuntimeError("signer_key_epoch_use_rejected")
-            return result
+            return self._authorize_key_epoch_use_locked(
+                key_epoch=key_epoch, current_epoch=self._checked_now(at_epoch),
+                expires_at=expires_at, action=action,
+            )
+
+    def authorize_current_key_epoch_use(
+        self, *, key_epoch: str, expires_at: int, action: Callable[[], _T],
+    ) -> _T:
+        """Sample current time only after acquiring the durable revocation fence."""
+
+        with self._lock():
+            return self._authorize_key_epoch_use_locked(
+                key_epoch=key_epoch, current_epoch=self._now(),
+                expires_at=expires_at, action=action,
+            )
+
+    def _authorize_key_epoch_use_locked(
+        self, *, key_epoch: str, current_epoch: int, expires_at: int,
+        action: Callable[[], _T],
+    ) -> _T:
+        current = self._current(current_epoch)
+        use_epoch = self._require_current_key_epoch(
+            current, key_epoch=key_epoch, expires_at=expires_at,
+            not_before=current_epoch,
+        )
+        result = action()
+        after_epoch = self._now()
+        if after_epoch < use_epoch:
+            raise RuntimeError("signer_key_epoch_use_rejected")
+        after = self._current(after_epoch)
+        self._require_current_key_epoch(
+            after, key_epoch=key_epoch, expires_at=expires_at,
+            not_before=after_epoch,
+        )
+        return result
+
+    def _require_current_key_epoch(
+        self, snapshot: Mapping[str, Any], *, key_epoch: str,
+        expires_at: int, not_before: int,
+    ) -> int:
+        """Recheck time after snapshot I/O, before an effect or result escapes."""
+
+        now = self._now()
+        if (
+            now < not_before
+            or type(expires_at) is not int
+            or now >= expires_at
+            or not snapshot["issued_at"] <= now < snapshot["expires_at"]
+            or key_epoch in snapshot["revoked_key_epochs"]
+        ):
+            raise RuntimeError("signer_key_epoch_use_rejected")
+        return now
 
     def authorize_use(
         self, *, grant_id: str, key_epoch: str, at_epoch: int,

@@ -125,26 +125,26 @@ exemptions:
   - <<: *reddog_security_repair
     file: "src/reddog_signer_socket_service_runtime_wiring.py"
     reason: >-
-      Inherited signer composition host retained while conversation-scope
-      authentication reuses its canonical proposal-policy verification and
-      security-context bindings. No new oversized function is introduced.
-    threshold_override: 1151
-    function_threshold_override: 225
+      Inherited composition core moved behind the bounded admission entrypoint;
+      proposal-policy helpers reuse the existing policy owner. The core and
+      file shrink; the new wrapper and authority helpers stay below 50 lines.
+    threshold_override: 1145
+    function_threshold_override: 201
     functions:
       - "architect_proposal_security_context_digest"
-      - "run_reddog_signer_socket_service_runtime_wiring"
+      - "_run_signer_socket_service_runtime"
       - "validate_signer_socket_service_runtime_config"
       - "_build_backend"
-      - "_proposal_policy_authorization"
+      - "_proposal_nonce_store"
     remediation: "modules/communication/moltbot_bridge/ROADMAP.md#reddog-execution-valve-trust-boundary-decomposition"
     no_growth_ceiling:
-      file_lines: 1151
+      file_lines: 1145
       functions:
-        architect_proposal_security_context_digest: 120
-        run_reddog_signer_socket_service_runtime_wiring: 225
-        validate_signer_socket_service_runtime_config: 136
-        _build_backend: 132
-        _proposal_policy_authorization: 84
+        architect_proposal_security_context_digest: 117
+        _run_signer_socket_service_runtime: 201
+        validate_signer_socket_service_runtime_config: 134
+        _build_backend: 130
+        _proposal_nonce_store: 57
 
   - <<: *reddog_security_repair
     file: "src/reddog_resident_queue_slice_verifier_request_binding.py"

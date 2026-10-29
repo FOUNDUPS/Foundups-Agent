@@ -2,6 +2,13 @@
 
 **WSP Compliant Module** - YouTube Studio automation for Shorts scheduling.
 
+Remote use: [host requirements and command receipts](docs/REMOTE_SCHEDULING.md)
+and the [existing Work skill audit](docs/PRIOR_WORK_AUDIT_2026-09-22.md).
+Start with `youtube action scheduling channel=move2japan preflight=true` through
+the existing agent adapter. A one-shot command does not require `main.py`.
+
+Skill composition: [ordered workflow and evidence handoffs](skillz/README.md).
+
 ## Overview
 
 Automated scheduling system for YouTube Shorts across multiple channels:
@@ -13,12 +20,12 @@ Automated scheduling system for YouTube Shorts across multiple channels:
 
 - Selenium/UI-TARS DOM automation for YouTube Studio
 - Multi-channel scheduling with time slot management
-- Smart slot allocation (max 3 per day, ~6 hours apart)
-- Automatic title/description generation (FFCPLN format)
+- Channel-specific slot allocation; resolve limits through the shared scheduling policy
+- Evidence-gated title/description generation with metadata preservation fallback
 - Optional **Schedule → Index Weave**:
-  - Ensures `memory/video_index/{channel}/{video_id}.json` exists (Gemini Tier 1)
-  - Appends a compact `0102 DIGITAL TWIN INDEX v1` JSON block to the description (cloud memory)
-  - Updates local index JSON with `scheduling` + `description_sync` after successful schedule
+  - Reads existing `memory/video_index/{channel}/{video_id}.json` artifacts; this scheduler does not run Gemini or create missing index evidence.
+  - Metadata generation can reuse existing index context. Preserving metadata retains the current description.
+  - Records scheduling on existing index artifacts. Changed descriptions require independent saved-state readback before sync can be verified; preserving metadata preserves prior sync evidence.
 - **Index Utility Routing (POC)**:
   - If indexing identifies 012 voice → route to Digital Twin memory
   - If indexing identifies music/video → route to RavingANTIFA or faceless-video pipeline (module in development)

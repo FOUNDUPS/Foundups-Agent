@@ -1,6 +1,70 @@
 # FoundUps Domain - ModLog
 
+### 2026-10-25 — PR1792 reusable brand schema candidate
+
+Add the original optional brand-context schema and registry path field while
+preserving current public-discovery and portfolio contracts. Existing registry
+tests add synthetic context/authority-boundary and optional-field compatibility
+checks. Combined backend/schema selection: author repaired 74 pass, zero skips.
+No production registry, protected payload, website or skill bytes change.
+Original eSingularity/YUMORI activation assertions are retained as pending
+original-PR owner acceptance, not replaced by a claim of synthetic deployment.
+WSP00/15/22/50/97. Independent repaired-core review is accepted in
+`refresh/pr1792-independent-core-review-20261025.json`; final CI/package/
+generated and hosted qualification remain pending. No activation is implied.
+
 ## Chronological Change Log
+
+### 2026-10-23 - Private AutoPost item capture inside the shared Mall
+
+- Added the [shared item handoff](pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md) for
+  Shop clothing and GetK-style evidence. AutoPost stays the external camera and
+  original-media owner; item grouping and authenticated private attachment are
+  explicitly specified pending implementation. Public Shop remains undecided.
+- Updated the domain/module roadmaps, interfaces, canonical index, instance and
+  static-media contracts, registry evidence, navigation and bounded doc manifest.
+  Marked obsolete capture findings historical; preserved registry identities,
+  routes and unrelated Live/Lick/GetK work.
+- Repaired the existing member catalog request matcher and extended its current
+  VM harness. Detailed execution evidence lives in the member TestModLog and PR.
+  No new camera, identity/blob store, marketplace or private upload API was added.
+- WSP 22/50/83/84/97: exact-source reuse and independent review; runtime/bootstrap
+  and Holo limits remain recorded in the handoff. PRs own checks and main readback.
+
+### 2026-10-18 - AutoPost as the mobile Live product vehicle
+
+- Corrected the [mobile-studio contract](docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md)
+  after auditing canonical AutoPost source. AutoPost owns capture/Live mode;
+  shared creator control and pfMALL discovery keep their separate boundaries.
+- Updated the [M2M outcome](docs/mobile_studio/mobile_studio_outcome.v1.json),
+  pfMALL/member/domain roadmaps and owner references. The first media proof is
+  foreground WebRTC through an authenticated relay; native adoption is based
+  on measured requirements. OBS camera contribution and remote control differ.
+- Preserved the API evidence register and unrelated open PRs. Only existing
+  documentation changed; device, channel, streaming and deployed behavior remain
+  unverified. WSP 00/10/15/22/50/57/83/84/97; priority 14/P1. The owning PRs record
+  validation, squash-merge and main readback for each repository.
+
+---
+
+### 2026-10-17 - Play mobile creator studio documentation and roadmap
+
+- Extended the existing p.fMALL planning owner after inspecting main at
+  `407292aa754a88143796163581b67ca6679eac29`; no parallel application repository
+  or new FoundUp identity was created.
+- Added the [mobile studio contract](docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md),
+  [dated YouTube API evidence](docs/mobile_studio/PFMALL_CREATOR_LIVE_API_CONSTRAINTS.md)
+  and [M2M outcome](docs/mobile_studio/mobile_studio_outcome.v1.json). The bounded
+  collection has its own [manifest](docs/mobile_studio/doc_index.json) and
+  [execution receipt](docs/mobile_studio/wsp97_execution_receipt.json).
+- Updated p.fMALL README/INTERFACE/ROADMAP/ModLog, the domain roadmap and the
+  member roadmap's current-state pointer before implementation. Recorded current
+  reuse, API limits, eligibility, recovery, explicit unknowns and acceptance gates.
+- Documentation-only scope; current provider/channel/device verification and
+  creator-runtime admission remain absent. The PR owns validation and merge
+  evidence. WSP 00/10/15/22/50/57/83/84/97; planning score 14/P1.
+
+---
 
 ### 2026-09-15 - AmIBot declarative registry onboarding
 

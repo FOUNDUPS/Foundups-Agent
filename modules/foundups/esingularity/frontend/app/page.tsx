@@ -7,8 +7,8 @@ import FukuiComparisonMap from '../components/FukuiComparisonMap';
 
 const YUMORI_URL = 'https://yumori.me';
 
-function YumoriAction({ children }: { children: string }) {
-  return <a className="section-action" href={YUMORI_URL}><span>行動はYUMORI.me</span><strong>{children}</strong><b aria-hidden="true">↗</b></a>;
+function YumoriAction({ children, href = YUMORI_URL }: { children: string; href?: string }) {
+  return <a className="section-action" href={href}><span>行動はYUMORI.me</span><strong>{children}</strong><b aria-hidden="true">↗</b></a>;
 }
 
 export default function Home() {
@@ -51,9 +51,62 @@ export default function Home() {
               <a className="button button-ghost" href="/reports/jhr">JHR・最新レポート <span>→</span></a>
             </div>
             <a className="hero-jhr-news" href="/reports/jhr#latest"><span>JHR｜9月12日確認</span><strong>仙台200MW計画、9月11日に資金調達協議の基本合意を発表。</strong><small>ハイパースケーラー＝巨大なクラウド・AI計算基盤を運営する企業。全国の動きと福井への意味を読む →</small></a>
-            <a className="hero-vote-action" href="https://docs.google.com/forms/d/e/1FAIpQLScSKFyzCym8NCarvNIa5cT9c2Pe8C-cY2AbC4zLgsDOKspYKA/viewform"><strong>この構想を、解体で終わらせない。</strong><span>解体予算に反対を。VOTE NO</span><b>湯守に登録・準備委員会に参加 →</b></a>
+            <a className="hero-vote-action" href="https://docs.google.com/forms/d/e/1FAIpQLScSKFyzCym8NCarvNIa5cT9c2Pe8C-cY2AbC4zLgsDOKspYKA/viewform"><strong>この構想を、解体で終わらせない。</strong><span>採決後は、PPP/PFIで解体案と再利用案を比較する。</span><b>湯守に登録・準備委員会に参加 →</b></a>
           </div>
           <FukuiComparisonMap />
+        </section>
+
+        <section className="three-sites" aria-labelledby="three-sites-title">
+          <div className="three-sites-intro">
+            <p className="eyebrow"><span /> 福井の三地点構想 · 候補地</p>
+            <h2 id="three-sites-title">三地点でつくる、分散型AI交番の構想。</h2>
+            <p>旧羽生小学校を初期計算ノード候補、旧下宇坂小学校を将来拡張候補、旧すかっとランド九頭竜を温浴・交流・教育を担う地域拠点候補とする、一つの地域AI交番ネットワーク構想です。三地点を一つの提案として段階的に検討し、羽生の初期段階に三施設の同時整備は必要としません。順位は需要と電力・光回線・建物・権利・採算の確認で見直します。採用や整備は未決定です。</p>
+          </div>
+          <div className="three-sites-grid" role="list" aria-label="三地点の提案上の役割">
+            <article role="listitem"><span>初期優先候補</span><h3>旧羽生小学校</h3><p>近隣の送変電設備を現地で確認。利用できる電力容量や光回線は未確認で、正式な照会が必要です。</p></article>
+            <article role="listitem"><span>将来拡張候補</span><h3>旧下宇坂小学校</h3><p>広い敷地を生かす可能性を検討。需要と電力・通信・建物条件がそろうまで整備は前提としません。</p></article>
+            <article role="listitem"><span>地域拠点候補</span><h3>旧すかっとランド九頭竜</h3><p>九頭竜川沿いの天然温泉と市公表の敷地33,717.36㎡を生かし、交流・教育につなぐ再利用案。土地の権利や使える範囲を確認し、解体案とのPPP/PFI比較を市に求めています。</p></article>
+          </div>
+          <p className="three-sites-note">三地点は共通の構想として市に示し、資産ごとの手続を確認します。福井市の令和8年度民間提案募集の対象は二つの学校跡地です。旧すかっとランド九頭竜は別のPPP/PFI案件形成・比較評価経路を市に確認します。一括申請・一括契約は未確定です。 <a href="https://www.city.fukui.lg.jp/sisei/plan/reform/p073300.html" target="_blank" rel="noreferrer">市の募集資料 ↗</a> <a href="/reports/jhr">三地点の技術評価 ↗</a></p>
+        </section>
+
+        <section className="story section current-position" id="finance" aria-labelledby="finance-title">
+          <div className="section-index">資金計画 <span>/ 三拠点の段階整備</span></div>
+          <div className="story-heading">
+            <div><p className="eyebrow"><span /> 事業性の検証</p><h2 id="finance-title">まず羽生で、<br /><em>成立条件を確かめる。</em></h2></div>
+            <p>計算需要から初期設備を決め、電力・通信・工事費・運営費・返済・投資家への支払を検証します。余剰が残る場合だけ、羽生の増強、下宇坂、すかっとランドの段階整備へ配分できるかを試算します。</p>
+          </div>
+          <div className="evidence-boundary">
+            <strong>三拠点の費用・収益・自己資金化は、現在も計画上の試算です。</strong>
+            <p>各地点の工事費は見積未取得で、契約需要、受電容量、光回線、建物、権利、融資条件も未確認です。基本ケースでは後続整備に追加資本が必要です。すかっとランドの再利用は羽生の着手条件ではありません。</p>
+            <div className="scenario-links">
+              <a href="https://github.com/FOUNDUPS/Foundups-Agent/blob/main/modules/foundups/esingularity/docs/YUMORI_ECONOMIC_MODEL.md" target="_blank" rel="noreferrer">計算方法と前提を見る <b>↗</b></a>
+              <a href="https://fin.yumori.info" target="_blank" rel="noreferrer">関係者用FIN（閲覧権限が必要） <b>↗</b></a>
+            </div>
+          </div>
+        </section>
+
+        <section className="story section current-position" id="current-position" aria-labelledby="current-position-title">
+          <div className="section-index">現在の委員会要請 <span>/ 2026年9月28日更新</span></div>
+          <div className="story-heading">
+            <div>
+              <p className="eyebrow"><span /> すかっとランド九頭竜 湯守（YUMORI.me）設立準備委員会</p>
+              <h2 id="current-position-title">9月25日の採決後の<br /><em>現在の立場。</em></h2>
+            </div>
+            <p>9月25日の採決は終了しました。本委員会の現在の要請は、不可逆な解体調達・工事へ進む前に、福井市がPPP/PFIの官民連携ルートを指定し、解体案と再利用案を同じ証拠で比較検証することです。令和8年度の財産有効活用民間提案制度は別制度であり、旧すかっとランド九頭竜について本委員会が求める手続ではありません。</p>
+          </div>
+          <div className="evidence-boundary">
+            <strong>予算の可決と、解体工事の実施、YUMORI案の採否は別の判断です。</strong>
+            <p>本委員会は、YUMORI案の自動採用や随意契約を求めていません。PPP/PFIの正式な案件形成として、建物資料・現地調査へのアクセス、技術・財務・VFM、リスク分担、地権者・地域との協議を含む比較検証を求めています。</p>
+            <div className="scenario-links">
+              <a href="https://yumori.me/vote-no" target="_blank" rel="noreferrer">公開記録 <b>↗</b></a>
+              <a href="https://yumori.info" target="_blank" rel="noreferrer">プロジェクト概要 <b>↗</b></a>
+              <a href="https://docs.google.com/document/d/1yeO6-6_mTLW8QswosVKmCVCHSRgWiacq-7FL7-9clsE/edit" target="_blank" rel="noreferrer">政策・経済・再利用エビデンス（03） <b>↗</b></a>
+              <a href="https://ppp.yumori.info" target="_blank" rel="noreferrer">PPP/PFI提案資料（05） <b>↗</b></a>
+              <a href="#finance">資金計画の検証 <b>↓</b></a>
+            </div>
+          </div>
+          <p className="hub-caveat">この記載は設立準備委員会の見解であり、福井市の公式見解ではありません。</p>
         </section>
 
         <YumoriPresentation />
@@ -124,16 +177,21 @@ export default function Home() {
           <div className="story-heading"><div><p className="eyebrow"><span /> 公表資料から始める</p><h2 id="evidence-title">構想と事実を、<br /><em>混ぜない。</em></h2></div><p>1994年に開館した実在施設です。公開資料で確認できる事実、プロジェクトの仮説、まだ必要な検証を分けて表示します。</p></div>
           <div className="fact-rail" role="list" aria-label="施設の公表事実">
             <article role="listitem"><span>46.8億円</span><strong>建設時</strong><p>福井市の公表資料に記載された建設費。</p></article>
-            <article role="listitem"><span>8,099.56㎡</span><strong>延床面積</strong><p>福井市の財産資料に記載された既存建物の規模。</p></article>
+            <article role="listitem"><span>8,099.56㎡</span><strong>財産資料の延床面積</strong><p>福井市の財産資料の数値。2026年9月の解体準備事業資料は8,923.56㎡と記載しており、体育館等を含む範囲差の可能性がありますが、内訳は市へ確認中です。</p></article>
             <article role="listitem"><span>約15.8億円</span><strong>将来の解体見込み</strong><p>2026年6月の市議会質問資料に示された見込みで、確定契約額ではありません。</p></article>
             <article role="listitem"><span>129,649人</span><strong>2018年度利用</strong><p>入館者と宿泊者を合わせた、閉館前の利用実績。</p></article>
+          </div>
+          <div className="attendance-history">
+            <strong>開館以来の利用を、確認できる期間から見る。</strong>
+            <p>1994年開館。福井市の公表値を合算すると、2005〜2018年度の延べ利用は1,957,341人です（2006〜2010年度、2011〜2015年度は公表された年平均を各5倍）。「開館以来300万人超」は初期11年間の年度別記録が未確認のため推定であり、確定した累計としては扱いません。2020年度も通年営業の実績として外挿しません。</p>
+            <a href="https://www.city.fukui.lg.jp/fukusi/kfukusi/ikigai/p015196_d/fil/monitoring-30sukatto.pdf" target="_blank" rel="noreferrer">福井市の利用実績報告を見る ↗</a>
           </div>
           <div className="evidence-boundary">
             <strong>再利用の事業性、資金調達、工事費は検証中です。</strong>
             <p>監査を通過していない売上、利益、投資回収などの数値は、このサイトの根拠として公開しません。</p>
             <div className="scenario-links"><a href="https://www.city.fukui.lg.jp/sisei/plan/reform/p071776_d/fil/SUKATTO.pdf" target="_blank" rel="noreferrer">福井市 財産資料 <b>↗</b></a><a href="https://www.city.fukui.lg.jp/sisei/gikai/shitsumon/p004052_d/fil/0806a.pdf" target="_blank" rel="noreferrer">福井市議会 2026年6月質問資料 <b>↗</b></a></div>
           </div>
-          <YumoriAction>壊す前に、再利用案を比べる時間を求める</YumoriAction>
+          <YumoriAction href="https://yumori.me/vote-no">設立準備委員会の現在の要請と根拠を見る</YumoriAction>
         </section>
 
         <section className="proposal section" id="proposal" aria-labelledby="proposal-title">

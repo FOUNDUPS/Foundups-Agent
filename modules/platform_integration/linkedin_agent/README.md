@@ -1,5 +1,17 @@
 # LinkedIn Agent
 
+Research uses [lane-specific verification](skillz/linkedin_newsletters/references/research-verification.md): original sources before claims, WSP 15 editorial priorities, Google Docs collaboration and private learning records. Gemini summaries remain retrieval leads, not proof or verbatim training data.
+
+
+[Editorial orchestration and templates](skillz/linkedin_newsletters/references/editorial-workflow.md) define Red Dog → 0102 handoffs, audit versus development, revision continuity, issue briefs and new-series onboarding. See the [bounded tree audit](docs/audits/LINKEDIN_EDITORIAL_TREE_20260922.md) for coverage and remaining editorial/runtime work.
+
+
+[Master LinkedIn activity router](docs/LINKEDIN_ACTIVITY_ROUTING.md): full-cycle or scoped jobs through the existing engagement skill, dedicated inbox/connections/notifications/newsletters/publishing/outreach/continuity children, and reused group/feed/targeting owners. Instruction coverage is not unattended-runtime certification.
+
+The newsletter router has independent FoundUps / Eat the Startup, ROC / Return on Compute, and Japan Hyperscaler Report skills. Each retains its own corpus, destination discovery and completion state; a combined audit does not collapse them into one publication.
+
+[LinkedIn review workflow](docs/LINKEDIN_REVIEW_WORKFLOW.md): wsp00/01/02 routing, inbox-first triage, message-before-approval membership, and the Good/Bad/Ugly automation discussion. Updated skill contracts do not certify legacy live executors. The [scoped dry-run repair](docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-dry-run-repair--2026-09-22) makes wrapper flags dominant and previews direct likes before browser initialization; the [session preview](docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-session-preview--2026-09-22) also returns configuration before browser access. These repairs do not certify every route.
+
 ## [U+1F300] WSP Protocol Compliance Framework
 
 **0102 Directive**: This module operates within the WSP framework for autonomous LinkedIn platform integration.

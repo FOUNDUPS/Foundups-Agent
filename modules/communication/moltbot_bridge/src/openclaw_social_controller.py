@@ -83,15 +83,26 @@ async def execute_social(dae: Any, intent: "OpenClawIntent") -> str:
     )
 
 
+async def _try_petition_control(dae: Any, intent: "OpenClawIntent") -> Optional[str]:
+    """Adopt only the petition planner; preserve other campaign boundaries."""
+    from .social_campaign_adapter import handle_petition_campaign_intent
+
+    campaign_response = await handle_petition_campaign_intent(intent.raw_message, intent.sender)
+    if campaign_response:
+        dae._record_social_response("social_campaign", campaign_response)
+        dae._mark_conversation_engine("social_campaign_control", "deterministic_conversation_route")
+        return campaign_response
+    return None
+
+
 async def try_conversation_social_control(
     dae: Any, intent: "OpenClawIntent"
 ) -> Optional[str]:
-    """
-    Allow natural-language social controls from direct conversation channels.
+    """Route conversation controls through their existing bounded owners."""
+    campaign_response = await _try_petition_control(dae, intent)
+    if campaign_response:
+        return campaign_response
 
-    This keeps operator phrasing ergonomic while still routing through the same
-    deterministic social adapters.
-    """
     try:
         from .linkedin_loop_adapter import handle_linkedin_loop_intent
 

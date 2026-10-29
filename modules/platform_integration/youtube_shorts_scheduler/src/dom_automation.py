@@ -41,7 +41,6 @@ def _emit_oops_signal(signal_type: str, source_dae: str = "shorts_scheduler_dom"
 
 # Diagnostic screenshot directory
 DIAGNOSTIC_DIR = Path("modules/platform_integration/youtube_shorts_scheduler/memory/diagnostics")
-DIAGNOSTIC_DIR.mkdir(parents=True, exist_ok=True)
 
 
 class DOMSelectors:
@@ -338,14 +337,16 @@ class YouTubeStudioDOM:
     DOM interaction layer for YouTube Studio automation.
     """
 
-    def __init__(self, driver):
+    def __init__(self, driver, *, capture_diagnostics: bool = True):
         """
         Initialize with Selenium WebDriver.
 
         Args:
             driver: Selenium WebDriver instance (Chrome or Edge)
+            capture_diagnostics: Allow diagnostic file writes; disabled for preview.
         """
         self.driver = driver
+        self.capture_diagnostics = capture_diagnostics
         self.wait = WebDriverWait(driver, 10)
         self.selectors = DOMSelectors()
         # 012 digital twin (Occam): slow + deterministic + stable.
@@ -398,7 +399,10 @@ class YouTubeStudioDOM:
         Returns:
             Path to screenshot file, or None if capture failed
         """
+        if not self.capture_diagnostics:
+            return None
         try:
+            DIAGNOSTIC_DIR.mkdir(parents=True, exist_ok=True)
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"diag_{context}_{timestamp}.png"
             filepath = DIAGNOSTIC_DIR / filename

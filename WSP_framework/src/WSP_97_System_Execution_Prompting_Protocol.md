@@ -1,8 +1,8 @@
 # WSP 97: System Execution Prompting Protocol
 
 **Status**: ACTIVE
-**Version**: 1.9
-**Date**: 2026-08-26
+**Version**: 1.10
+**Date**: 2026-10-28
 **Author**: 0102 (System Execution Architect)
 
 ---
@@ -10,6 +10,21 @@
 ## System roadmap navigation
 
 After bootstrap, read [the root system roadmap](../../ROADMAP.md#authority-and-fast-start) for completion gates, current planning priorities and the selected work packet. Follow its module and evidence links on demand. The roadmap owns cross-system sequencing; it does not redefine this protocol, certify completion, grant authority or replace a current signed work order. Historical plans are listed in the roadmap archive register.
+
+## Mandatory Outcome Verification and Completion Gate (v1.10, 2026-10-28)
+
+**Universal invariant:** Execution success is not task completion. A worker MUST distinguish attempted execution, produced artifact, independently verified result, and (for WSP 48) demonstrated transferable improvement. A tool success, passing self-review, PR merge, document update, or memory entry alone is not acceptance.
+
+1. **Freeze acceptance before execution.** Identify the affected scope, authoritative owner, required checks, independent verifier, observable postcondition, and rollback or recovery path. A changed acceptance rule requires separate review; never relax tests merely to make a change pass.
+2. **Validate before mutation/promotion.** Run relevant deterministic tests and contract/security checks, inspect changed output, and obtain independent verification when required by the governing owner. No self-issued receipt may impersonate independent verification.
+3. **For repository changes:** create a traceable PR; run and inspect applicable checks on its exact head SHA; squash merge only within authorized repository policy; then obtain the resulting default-branch SHA and verify applicable CI/checks **on that SHA**. An empty status list, pending checks, unavailable CI, or a passing PR-head check alone means UNKNOWN, never PASS. Repository policy may block merging until checks pass; this protocol does not itself change branch protection.
+4. **For other work:** verify the actual task-specific postcondition (e.g. deployed endpoint and TLS, rendered/listened media, independently sourced research, or authorized worker outcome). A build or upload receipt does not prove live deployment or quality.
+5. **On failure or missing evidence:** mark the task BLOCKED/UNVERIFIED; inspect the failing evidence, repair in a bounded new change or revert under existing authority, rerun checks and verify the resulting state. Do not report completion while validation is pending. Preserve incident and correction evidence in the existing work record; route reusable lessons through existing WRE Pattern Memory only when admitted.
+6. **Close with a receipt:** record source/head SHA, PR and squash SHA when applicable, verifier and check identifiers/results, observed postcondition, exclusions, and remaining blockers. Report merge, main CI, live output, deployment, and WSP 48 RSI transfer as separate states. A validated one-off correction does not establish recursive self-improvement until reuse is independently measured.
+
+**Ownership:** WSP 97 defines the general completion gate; WSP 48 governs RSI qualification; WRE/admission components enforce execution authority; existing evidence/memory systems retain outcomes. HoloIndex, Brain and Memex are retrieval/continuity surfaces, not substitute authorities. This written rule does not claim automatic runtime enforcement or an always-on CI watcher.
+
+---
 
 ## What "Follow WSP 97" Means
 
@@ -202,7 +217,39 @@ Use this sequence unless a narrower protocol overrides it:
 8. Reduce to first principles / simplest valid move
 9. Execute inside the correct plane
 
-### 1.2A Test Inventory / Reuse Gate
+### 1.2A Main-Convergence / PR Closure Gate
+
+Repository work is not complete when a branch or pull request merely exists. For every mutation slice whose intended destination is `main`, WSP 97 requires a terminal convergence state.
+
+Canonical closure loop:
+
+```text
+bounded work
+  -> validate branch
+  -> specialized PR
+  -> inspect mergeability + checks + overlap
+  -> squash merge when qualified
+  -> read back main
+  -> reconcile/close superseded PRs
+  -> classify remaining dirty/open work
+```
+
+Required rules:
+
+1. **Specialized PRs:** keep one coherent concern per PR. Do not accumulate unrelated cleanup, product, WSP, dependency, or historical work merely to reduce PR count.
+2. **Merge is the default completion path:** when the authorized slice is validated, mergeable, has no required failing/pending gate, and does not conflict with newer authoritative work, squash-merge it rather than leaving completed work parked on a branch.
+3. **Verify main after merge:** read back the affected main-branch artifact(s) or resulting commit. A successful PR API response alone is not sufficient evidence that the intended contract survived convergence.
+4. **No blind stale merges:** an old/diverged PR must be compared with current main. Classify it as `SUPERSEDED`, `PARTIALLY_SUPERSEDED`, `NEEDS_REBASE`, `BLOCKED`, or `STILL_CURRENT` before mutation.
+5. **Preserve unique work:** never close/delete a stale PR solely because it is old or non-mergeable. If it contains unique valid delta, preserve that delta and route it through a fresh bounded reconciliation slice or explicit rebase/update.
+6. **Close superseded work:** if current main demonstrably contains the intended behavior and the old PR has no unique valid delta, close it with a reconciliation note rather than leaving repository entropy.
+7. **Dirty-tree safety:** "clean" never means discard unknown state. Classify dirty/untracked work by owner and intent before cleanup. Unknown or concurrent work is preserved and reported, not reset/stashed/deleted by assumption.
+8. **Open-PR hygiene:** before declaring a work cycle complete, inspect related open PRs for overlap. Completed work should not leave a second stale PR claiming the same outcome.
+9. **No false global-clean claim:** connector-visible PR/branch state does not prove a developer's local worktree is clean. Report local cleanliness only from direct worktree evidence.
+10. **Terminal receipt:** record one of `MERGED_VERIFIED_MAIN`, `SUPERSEDED_CLOSED`, `PRESERVED_NEEDS_REBASE`, `BLOCKED_REQUIRED_GATE`, or `ACTIVE_OWNED_WORK`. "PR created" is not a terminal receipt.
+
+This gate governs convergence, not authorization. It never bypasses review requirements, branch protection, CI, security, ownership, or a narrower WSP.
+
+### 1.2B Test Inventory / Reuse Gate
 
 When a task may create, modify, replace, or expand tests, WSP 97 MUST apply the WSP 22 TestModLog pattern before test authoring.
 

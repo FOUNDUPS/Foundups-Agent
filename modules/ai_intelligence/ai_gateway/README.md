@@ -19,6 +19,15 @@ pairs retain their existing request behavior.
 [VERIFIED] The contract is covered by offline mocked-transport tests; it does
 not grant model promotion, provider availability, or live-call authority.
 
+## OpenRouter transport boundary
+
+OpenRouter requests disable redirects and reject 3xx responses before parsing.
+Transport exceptions expose a fixed diagnostic while preserving timeout
+classification; provider credentials are excluded from `ProviderConfig` repr.
+Other provider transport behavior and the K3 request contract remain unchanged.
+This controls displayed transport diagnostics, not arbitrary successful model
+output or exception-object memory. Live calls still require existing admission.
+
 ## Model Intelligence Catalog
 
 `src/model_intelligence_catalog.py` provides the runtime evidence layer for

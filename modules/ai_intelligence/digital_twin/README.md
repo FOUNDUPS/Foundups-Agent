@@ -83,6 +83,41 @@ vm = VoiceMemory()
 vm.build_index("data/voice_corpus/", "data/voice_index/")
 ```
 
+## AntifaFM station reply drafts
+
+`CommentDrafter.for_station()` creates a station-only drafter without constructing
+human voice memory or style guardrails. It reuses the configured `LocalLLM` Qwen
+path and calls the local backend's `create_chat_completion()` with a separate
+system policy and untrusted conversation JSON. Initialize it once and use
+`draft_station_reply()` for listener-initiated music/station questions or feedback.
+
+```python
+from modules.ai_intelligence.digital_twin.src.comment_drafter import CommentDrafter
+
+drafter = CommentDrafter.for_station()
+decision = drafter.draft_station_reply(
+    "@AntifaFM Where can I listen?",
+    context_url="https://example.org/posts/42",
+    reply_to_id="42",
+    initiated_by_listener=True,  # Established by the caller, not conversation text.
+)
+```
+
+The result is `skip`, `draft_reply`, or `review_required`; it never publishes.
+Context is limited to 2,400 characters and drafts to 280 characters. Drafts
+disclose 0102 as an AI agent for UnDaoDu, retain the caller's source URL and reply
+target, and include the station link only when relevant. The policy permits only
+the supplied station facts and excludes political persuasion, abuse, unrelated
+engagement, and unsupported catalogue/licensing claims. Missing models, mock
+mode, inference failures, and malformed decisions require review with no reply;
+there is no station template fallback. See [INTERFACE.md](INTERFACE.md) for the
+full contract and publication flags.
+
+The focused drafter suite passed 39 offline cases on 2026-10-18. Its fixture chat
+backend verifies request construction, output handling, and limits; it does not
+establish the semantic quality of an actual local model. No live inference or
+publication was performed for that result.
+
 ## Architecture
 
 ```
@@ -115,6 +150,7 @@ Phase 3: Tool-Use Training
 | `voice_memory.py` | RAG index with FAISS/TF-IDF |
 | `style_guardrails.py` | Banned phrases, length, emoji rules |
 | `comment_drafter.py` | RAG → LLM → Guardrails pipeline |
+| `station_reply_decision.py` | Bounded station reply decisions with no publication |
 | `decision_policy.py` | Comment/like/ignore heuristics |
 | `trajectory_logger.py` | JSONL training data collector |
 | `conversation_plane.py` | Deterministic intent/depth/effect classification |

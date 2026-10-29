@@ -1,5 +1,16 @@
 # Idle Automation Test Module Log
 
+## 2026-10-07 — Self-audit report consumption
+
+Six frozen regressions failed before repair; final connected140passed in3.92s.
+Independent source review found history overflow (reproduced1fail/2pass), now
+isolated by the seventh regression. Covers real empty/bounded/partial/failed
+scanners, malformed historical shapes and nonfinite count. CI includes consumer
+and three producer suites. No test invokes a live worker or external API.
+Separate live report persistence retained scan coverage and historical signatures.
+Evidence: outputs/rsi-permission-evidence-20261006/internal-audit-status-*.xml.
+
+
 **Module**: `modules/infrastructure/idle_automation`
 **Framework**: pytest
 **Last Updated**: 2026-08-28

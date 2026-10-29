@@ -1,20 +1,95 @@
 # Member Area Interface
 
 **Module**: `public/member/`
-**Version**: 2.1.0
+**Version**: 2.2.0
 
 ## Public Interface
+
+### Public FX directory — 2026-10-25
+
+The homepage navigation links **FX** to `/f/`, whose existing index renderer
+provides **FX — FoundUps Exchange** project/token discovery. Its only catalog
+request remains `/f/public_catalog.json`; member runtime fields are excluded.
+
+The existing input performs case-insensitive substring matching over canonical
+ID, name, public summary and a nonempty string `token_symbol`. Both a bare ticker
+and its `$`-prefixed form match. Null, missing, blank and non-string symbols do
+not become ticker text or search terms. Readiness continues to filter
+`poc_landing_status`, independently of the query. Empty/cleared queries, no-match
+results, catalog errors and Return to Mall retain the existing owners.
+
+Tickers are declarations, not deployment or trading evidence. This slice adds
+no catalog records, router, claim verification, chain observation, price feed,
+wallet, order placement or participation authority. `/f/{id}` landing routes and
+protected app/deep-app handoff remain unchanged. Controlled VM tests exercise
+the actual input/change handlers; deployment and browser layout require separate
+verification.
 
 ### Entry URL
 ```text
 /member/
 ```
 
-### Auth Requirements
+### Ordinary Mall Auth Requirements
 - Clerk session required
 - invite validation required
 - username claim required before admitted users enter the Mall
 - redirects to `/?signin=required` if not authenticated
+
+### Registered Public Product Selection
+
+`/member/?foundup=move2japan` and `/member/index.html?foundup=move2japan` select
+public houses in this same page. Exactly one case-sensitive supported `foundup`
+value is required. Unknown or duplicate selections do not relax ordinary admission.
+The legacy `/move2japan/` page is only a fixed redirect; `/f/move2japan` uses the
+registry's exact public `poc_url`. `/f/move2japan/app` retains its existing gate.
+
+`Move2JapanSearch.prepareShell(window)` runs before shared controllers bind:
+it moves the one existing `#mallTileField` into the property layout and installs
+the product form inside the existing `#accountPlane`. It creates no second shell,
+account controller or tenant runtime. The actual page's product boot selects
+`mallStateRestore.selectProduct('move2japan')` before mounting the public catalog.
+Only an already-present Clerk user starts the read-only account initializer.
+
+The shared `window.redDog` gains:
+
+| API | Product contract |
+| --- | --- |
+| `registerDiscoveryAdapter({element, focusElement})` | Register the native product form in the existing plane |
+| `setDiscoveryAdmission(boolean)` | Strict admission state; revocation clears shared identity and member content |
+| `isDiscoveryAdmitted()` | Current product account admission, never payment entitlement |
+
+`product-discovery` retains the full controller plus accessible modal handling.
+The older reduced `public-discovery` mode remains available for existing callers;
+Move2Japan's canonical page uses `product-discovery`. Shared density/motion controls
+remain available to admitted accounts. Global video scope, category, query, layout
+and channel actions cannot change geographic results; the native property form
+owns its filters. Dispatcher `search_catalog` returns `incompatible_projection`
+when the shared field refuses the query, without emitting a state-change event.
+
+The property selection has precedence over responsive category rows, including
+empty results. `getLayoutMode()` reports `grouped`; ordinary rows/grid behavior
+is retained when leaving the product. Property detail identity is
+`(foundup_id, listing_id)` and remains separate from video channel identity.
+
+### Independent View State and Account Return
+
+`mallStateRestore` exposes `selectProduct`, `save`, `restore`, `bindAutoSave`,
+`rememberProductReturn` and `consumeProductReturn`.
+
+| View | Storage key / schema |
+| --- | --- |
+| Ordinary video Mall | `pfmall_mall_state_v1`; scope, projection, layout, vertical and category-row offsets |
+| Move2Japan | `pfmall_product_move2japan_state_v1`; `pfmall_product_state.v1`, geographic rows and stable listing anchors |
+| Account return | Session-only `pfmall_product_return_v1`; one use, 15 minutes, allowlisted filters and fixed member destination |
+
+Product restoration never applies video scope or layout. Deferred video scroll
+callbacks recheck the selected product. A loading product cannot overwrite its
+previous geographic state with an empty capture. The return is consumed only by
+the normal Mall initializer after Clerk/invite/username admission succeeds.
+Service-worker cache `pfmall-member-v5` normalizes member query navigations to one
+shell entry; public property JSON uses network-first validation and dated cached
+fallback. Auth, account, dynamic and cross-origin requests are not cached.
 
 ### Runtime Surface
 
@@ -503,3 +578,37 @@ The dispatcher tracks a local `sessionState` ( `overrideActive`, `overrideApplie
 ---
 
 *Last Updated: 2026-04-20*
+
+
+## Responsive browse and local query API — 2026-10-18
+
+- `mallTileField.setLayoutMode('rows'|'grid') -> boolean`: rows are default;
+  legacy density requests explicitly select grid. Both reuse the same tile/player API.
+- `getLayoutMode()`, `getRowOffsets()`, `restoreRowOffsets(offsets)` expose
+  presentation state; row keys are category strings, offsets nonnegative finite numbers.
+- `searchCatalog(query)` and `redDog.searchCatalog(query)` apply the same
+  `{type:'query', query}` field scope. Input is bounded to 300 characters.
+  AND-match search terms against lane/video metadata; `video(s)` requires a video
+  queue; small house/car/clothing aliases are explicit, not AI inference.
+  Leading `I'm/I am looking for`, `show me`, `find` and `browse` requests accept
+  bounded greeting/Red Dog/please prefixes. Clothes, clothing and apparel share
+  an alias set. Red and dog are retained as item words outside that request prefix.
+  Negation, price/budget and size terms are preserved as literal metadata terms;
+  no exclusion, numeric comparison or garment-size interpretation is performed.
+  Grouped product discovery still refuses this global operation and retains its
+  domain filter owner.
+- `pfmallControlDispatcher.dispatch('search_catalog', {query})` exposes that same
+  local presentation operation, returns `scope: local_catalog` plus observed state,
+  and emits `state_changed`. Existing origin checks are unchanged. It is not a
+  resident conversation transport or a grant of backend/worker authority.
+- State inspection includes `tile_field.layout_mode` where the field API exists.
+- Row movement preserves catalog-wide `data-index`; grouping never renumbers queues.
+- Scope/projection changes stop inline media and clear expanded index state before
+  filtering/reordering. Pinch gestures and canonical `/f/{foundup_id}` entry remain.
+
+Rows continue through the loaded catalog. Server pagination, virtualization,
+provider-confirmed live discovery, follow/payment persistence, consented preference
+mapping and authenticated speech/conversation are future slices, not implied by
+this presentation interface.
+
+Catalog queries discover matching channels. Opening a matching channel retains its full video queue; the query does not filter individual videos within that queue.

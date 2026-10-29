@@ -1,5 +1,36 @@
 # AI Gateway Module Change Log
 
+## [2026-10-23] - Shared OpenRouter transport containment
+
+WSP00/5/6/15/22/50/62/97, C3/I4/D4/Impact4=15/P1: reconcile the existing
+PR1648 proposal against current main. Exclude provider credentials from repr;
+disable OpenRouter redirects and replace transport diagnostics while preserving
+timeout classification. K3 request construction, campaign admission and other
+providers retain their current behavior. Bridge TestModLog owns the connected
+qualification evidence. No live calls, routing promotion or native RSI claim.
+
+
+## [2026-10-13] - Retain PR2111 historical qualification evidence
+
+WSP10/15/22/48/50/77/97/99: reconcile the unique October8 record from
+`cc32547b9677f2d2a5adf09bb924e52edbe9a4de` without restoring its stale selection.
+Saved audit0/1 accepted,3/4 facts correct,24.438s, owned load/unload, unknown token
+usage; injected panel probe and catalog368/99 remain separate evidence classes.
+No runtime or evaluator change. Root October13 selection stays current; the
+unexecuted experiment contract is archived in RSI_SWARM_DISPATCH. PR2111 closure
+requires verified integration; this entry does not claim merge or fresh CI.
+
+## [2026-10-07] - Strict model use-time clock
+
+WSP00/6/15/22/50/97,13/P1: existing verifier now requires an exact positive
+integer from its trusted clock. It no longer coerces strings/fractions or lets
+booleans masquerade as integers. Missing receipt keeps its earlier rejection.
+Baseline8fail: float/string incorrectly accepted; other six invalid types/ranges
+had inconsistent rejection. Connected security/artifact/panel/structural55passed
+in1.54s. No provider calls, runtime admission, new module or native RSI claim.
+Evidence: `outputs/rsi-permission-evidence-20261006/model-clock-connected.xml`.
+
+
 ## [2026-08-22] - Nemotron Exact Model Lifecycle Evidence
 
 - Replaced the assumed already-loaded proposer boundary with an explicit exact

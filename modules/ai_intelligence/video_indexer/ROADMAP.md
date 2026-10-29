@@ -1,7 +1,7 @@
 # Video Indexer Roadmap
 
 **WSP Compliance**: WSP 27 (DAE Architecture), WSP 77 (Agent Coordination)
-**Current Version**: V0.19.3 (2026-03-18)
+**Current Version**: V0.31.0 (2026-09-21)
 **Status**: PRODUCTION READY
 
 ---
@@ -32,7 +32,7 @@
 | 2 | Visual | COMPLETE | OpenCV + yt-dlp (2026-01-09) |
 | 3 | Multimodal | COMPLETE | Heuristic alignment (2026-01-09) |
 | 4 | Clips | COMPLETE | Virality scoring (2026-01-09) |
-| 5 | DAE Integration | PARTIAL | Menu hook, not full daemon |
+| 5 | DAE Integration | OPERATOR READY | Typed channel/portfolio/bounded-daemon actions; live browser proof pending |
 | 6 | Gemini AI | COMPLETE | Tier 1 indexing (2026-01-10) |
 | 7 | HoloIndex | COMPLETE | ChromaDB semantic search (2026-01-11) |
 | 8 | Quality Metrics | COMPLETE | Resolution/bitrate analysis (2026-01-11) |
@@ -124,12 +124,16 @@
 - [x] Ask-Gemini indexing persists JSON artifacts
 - [x] Progress telemetry for indexing runs (counts + deltas)
 - [x] STOP/REINDEX signals for daemon control
+- [x] Typed single/channel/portfolio/bounded-daemon action surface
+- [x] Resumable scanning advances past already-indexed batches
+- [x] Duplicate-response and source-video identity guards
+- [x] Gemini summaries excluded from verbatim training datasets
 - [ ] Utility routing signals (012 voice vs music/video → downstream pipelines)
 
 ### Gaps Remaining
-- [ ] Full background daemon (continuous operation)
+- [ ] Operator live-DOM proof across both authenticated browsers
 - [ ] Auto-index new uploads (channel monitoring)
-- [ ] Re-index on demand (admin command)
+- [x] Re-index on demand (`--reindex` / signal file)
 
 ---
 

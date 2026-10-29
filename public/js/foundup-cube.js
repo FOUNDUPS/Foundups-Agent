@@ -117,7 +117,7 @@ const FoundupCube = (function () {
     // ═══════════════════════════════════════════════════════════════════════
     const firestoreBridge = {
         db: null,
-        sessionId: crypto.randomUUID ? crypto.randomUUID() : 'session_' + Date.now(),
+        sessionId: crypto.randomUUID(),
         loopCount: 0,
         totalFiEarned: 0,
         eventsWritten: 0,

@@ -1,5 +1,25 @@
 # ModLog — elevenlabs_calls
 
+## 2026-10-05 — Red Dog two-phone conversation skill
+
+Added the canonical `.claude/skills/reddog-phone-conversation/SKILL.md` and its
+byte-identical Codex projection, with module and NAVIGATION discovery links.
+Creates a conversation packet from recipient, objective, position, evidence and
+delegated authority; supports Japanese live turns, English consultation, pause,
+resume and outcome notes. Contact data remains outside activity breadcrumbs.
+
+WSP 97 evidence: inspected the existing CLI/profile, roadmap, workspace skills,
+manifest rules, registry loader, Codex projection generator and RedDog's actual
+advisory discovery functions. Retrieval was connector lexical/direct file reads;
+no accepted Holo freshness receipt or live runtime execution is claimed. The
+simplest valid scope is an instruction skill; no new telephony service or executor.
+
+Validation: skill frontmatter validation passed; canonical/projection bytes are
+identical. A fresh-context text trial exercised Japanese introduction, English
+translation, a changed meeting proposal, deferred email commitment and an unrelated
+request for internal instructions. Trial preserved scope and meeting uncertainties.
+This is text behavior evidence, not proof of two-phone audio or a booked meeting.
+
 ## 2026-09-11 — PR closeout and discovery links
 
 Added direct links to all eight work orders in ROADMAP.md, domain-index links and
