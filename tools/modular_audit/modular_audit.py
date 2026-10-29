@@ -27,7 +27,7 @@ Foundups Modular Audit System (FMAS)
 This tool performs an audit of the module structure, test existence, and security vulnerability scanning.
 This helps ensure that all modules follow the established standards and security requirements.
 
-Mode 1: Structure check only
+Mode 1: Tracked structure and repository-scoped audits
 - Validates that each module has a src/ directory
 - Validates that each module has a tests/ directory
 - Checks for the presence of the module interface file
@@ -39,12 +39,12 @@ Mode 1: Structure check only
 - NOW SUPPORTS: WSP 4 security vulnerability scanning
 
 Mode 2: Baseline comparison
-- Performs all Mode 1 checks
+- Does not invoke Mode 1 external scanners
 - Additionally compares the module structure against a baseline
 - Reports added, modified, and removed modules and files
 - NOW SUPPORTS: Hierarchical domain structure comparison
 - NOW SUPPORTS: WSP 62 file size compliance checking
-- NOW SUPPORTS: Comprehensive security vulnerability baseline comparison
+- Preserves exact Git baseline attribution for WSP 62 enforcement
 """
 
 import argparse
@@ -61,7 +61,7 @@ import re
 from pathlib import Path
 from typing import Dict, FrozenSet, Iterable, List, Optional, Tuple
 
-VERSION = "0.8.1"
+VERSION = "0.8.2"
 BASELINE_MISSING = object()
 ADVISORY_ARCHIVE_MAX_THRESHOLD = 1000
 EXPIRY_POLICY_SECTION = "#### 5.1.3. Historical Missing-Expiry Completion"
@@ -80,37 +80,16 @@ logging.basicConfig(
 # Define critical modules that should prompt warnings if modified
 CRITICAL_MODULES = {"core", "security", "auth", "config"}
 
-# Security scanning configuration (WSP 4 Section 4.4.1)
-SECURITY_SCAN_TOOLS = {
-    "pip_audit": {
-        "command": ["pip-audit", "--desc", "--format=json"],
-        "description": "Python dependency vulnerability scanning",
-        "required": True
-    },
-    "bandit": {
-        "command": ["bandit", "-r", ".", "-f", "json"],
-        "description": "Python code security analysis",
-        "required": True
-    },
-    "npm_audit": {
-        "command": ["npm", "audit", "--json"],
-        "description": "Node.js dependency vulnerability scanning",
-        "required": False  # Only if package.json exists
-    }
-}
-
-# Security severity thresholds (WSP 4)
-SECURITY_THRESHOLDS = {
-    "HIGH": "FAIL",      # Block integration
-    "MEDIUM": "WARNING", # Require acknowledgment  
-    "LOW": "LOG"         # Track for future resolution
-}
-
-# Shared by the direct CLI and package import; no live scan runs at import.
-if __package__:
-    from .secret_scan import SECRET_PATTERNS, inspect_tracked_source
-else:
+# Direct CLI imports bind to this source checkout, never the caller's cwd.
+if not __package__:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
     from secret_scan import SECRET_PATTERNS, inspect_tracked_source
+    from external_audit import run_pip_audit, run_bandit, run_npm_audit
+    from tracked_audit import read_tracked_inventory, structural_findings
+else:
+    from .secret_scan import SECRET_PATTERNS, inspect_tracked_source
+    from .external_audit import run_pip_audit, run_bandit, run_npm_audit
+    from .tracked_audit import read_tracked_inventory, structural_findings
 
 # Define recognized Enterprise Domains (WSP 3)
 ENTERPRISE_DOMAINS = {
@@ -118,7 +97,7 @@ ENTERPRISE_DOMAINS = {
     "communication", 
     "platform_integration",
     "infrastructure",
-    "data_processing",
+    "monitoring",
     "gamification",
     "foundups",
     "blockchain",
@@ -320,173 +299,29 @@ def discover_source_files(root_path):
     
     return module_files, flat_files
 
-def perform_security_scan(module_path: Path, domain_path: str) -> List[str]:
-    """
-    Perform security vulnerability scanning for a module (WSP 4 Section 4.4.1).
-    
-    Args:
-        module_path: Path to the module directory
-        domain_path: Domain path for reporting
-        
-    Returns:
-        List of security findings
-    """
-    findings = []
-    
-    # Check if we're in the module directory for scanning
-    original_cwd = os.getcwd()
-    
+def perform_security_scan(repo_root, domain_path="repository", *, inventory=None):
+    """Run each applicable external scanner once with explicit repository cwd."""
     try:
-        os.chdir(module_path)
-        
-        # Python dependency vulnerability scanning (pip-audit)
-        if (module_path / "requirements.txt").exists():
-            pip_audit_findings = run_pip_audit()
-            findings.extend(_wrap_security_findings(domain_path, pip_audit_findings))
-        
-        # Python code security analysis (bandit)
-        if (module_path / "src").exists():
-            bandit_findings = run_bandit()
-            findings.extend(_wrap_security_findings(domain_path, bandit_findings))
-        
-        # Node.js dependency vulnerability scanning (npm audit)
-        if (module_path / "package.json").exists():
-            npm_audit_findings = run_npm_audit()
-            findings.extend(_wrap_security_findings(domain_path, npm_audit_findings))
-            
-    except Exception as e:
-        findings.append(f"SECURITY_SCAN_FAILED: {domain_path} - Security scan failed: {str(e)}")
-    finally:
-        os.chdir(original_cwd)
-    
-    return findings
-
-def run_pip_audit() -> List[str]:
-    """Run pip-audit for Python dependency vulnerability scanning."""
-    findings = []
-    
-    try:
-        result = subprocess.run(
-            ["pip-audit", "--desc", "--format=json"],
-            capture_output=True,
-            text=True,
-            timeout=120
-        )
-        
-        if result.returncode == 0:
-            # Parse JSON output
-            if result.stdout.strip():
-                try:
-                    audit_data = json.loads(result.stdout)
-                    vulnerabilities = audit_data.get("vulnerabilities", [])
-                    
-                    for vuln in vulnerabilities:
-                        package = vuln.get("package", "unknown")
-                        severity = vuln.get("severity", "unknown").upper()
-                        description = vuln.get("description", "No description")
-                        
-                        if severity in SECURITY_THRESHOLDS:
-                            threshold = SECURITY_THRESHOLDS[severity]
-                            findings.append(f"SECURITY_VULNERABILITY_{severity}: {package} - {description[:100]}...")
-                            
-                            if threshold == "FAIL":
-                                findings.append(f"SECURITY_AUDIT_FAIL: High-severity vulnerability in {package} blocks integration")
-                                
-                except json.JSONDecodeError:
-                    findings.append("SECURITY_SCAN_ERROR: Failed to parse pip-audit JSON output")
+        inventory = read_tracked_inventory(repo_root) if inventory is None else inventory
+    except (OSError, ValueError, RuntimeError, subprocess.SubprocessError):
+        return ["SECURITY_SCAN_ERROR: Git-tracked inventory unavailable or invalid"]
+    files, findings = inventory.files, []
+    if inventory.incomplete:
+        findings.append(f"SECURITY_SCAN_ERROR: Tracked input incomplete ({inventory.incomplete})")
+    if 'requirements.txt' in files:
+        findings.append("SECURITY_ADVISORY: pip-audit scope is the installed interpreter environment")
+        findings.extend(run_pip_audit(repo_root))
+    python_files = sorted(p for p in files if p.startswith('modules/') and p.endswith('.py'))
+    if python_files:
+        findings.extend(run_bandit(repo_root, python_files))
+    if 'package.json' in files:
+        if 'package-lock.json' not in files:
+            findings.append("SECURITY_SCAN_ERROR: npm root lockfile unavailable")
         else:
-            findings.append(f"SECURITY_SCAN_ERROR: pip-audit failed with code {result.returncode}")
-            
-    except subprocess.TimeoutExpired:
-        findings.append("SECURITY_SCAN_ERROR: pip-audit timed out")
-    except FileNotFoundError:
-        findings.append("SECURITY_SCAN_ERROR: pip-audit tool not found (install with 'pip install pip-audit')")
-    except Exception as e:
-        findings.append(f"SECURITY_SCAN_ERROR: pip-audit failed: {str(e)}")
-    
-    return findings
+            findings.append("SECURITY_ADVISORY: npm scope is the root package/lock pair; nested locks are not audited")
+            findings.extend(run_npm_audit(repo_root))
+    return _wrap_security_findings(domain_path, findings)
 
-def run_bandit() -> List[str]:
-    """Run bandit for Python code security analysis."""
-    findings = []
-    
-    try:
-        result = subprocess.run(
-            ["bandit", "-r", "src/", "-f", "json"],
-            capture_output=True,
-            text=True,
-            timeout=120
-        )
-        
-        # Bandit returns non-zero when issues are found, so check for JSON output
-        if result.stdout.strip():
-            try:
-                bandit_data = json.loads(result.stdout)
-                results = bandit_data.get("results", [])
-                
-                for issue in results:
-                    severity = issue.get("issue_severity", "unknown").upper()
-                    test_name = issue.get("test_name", "unknown")
-                    filename = issue.get("filename", "unknown")
-                    line_number = issue.get("line_number", 0)
-                    
-                    if severity in SECURITY_THRESHOLDS:
-                        threshold = SECURITY_THRESHOLDS[severity]
-                        findings.append(f"SECURITY_VULNERABILITY_{severity}: {test_name} in {filename}:{line_number}")
-                        
-                        if threshold == "FAIL":
-                            findings.append(f"SECURITY_AUDIT_FAIL: High-severity security issue in {filename}")
-                            
-            except json.JSONDecodeError:
-                findings.append("SECURITY_SCAN_ERROR: Failed to parse bandit JSON output")
-        
-    except subprocess.TimeoutExpired:
-        findings.append("SECURITY_SCAN_ERROR: bandit timed out")
-    except FileNotFoundError:
-        findings.append("SECURITY_SCAN_ERROR: bandit tool not found (install with 'pip install bandit')")
-    except Exception as e:
-        findings.append(f"SECURITY_SCAN_ERROR: bandit failed: {str(e)}")
-    
-    return findings
-
-def run_npm_audit() -> List[str]:
-    """Run npm audit for Node.js dependency vulnerability scanning."""
-    findings = []
-    
-    try:
-        result = subprocess.run(
-            ["npm", "audit", "--json"],
-            capture_output=True,
-            text=True,
-            timeout=120
-        )
-        
-        if result.stdout.strip():
-            try:
-                audit_data = json.loads(result.stdout)
-                vulnerabilities = audit_data.get("vulnerabilities", {})
-                
-                for package, vuln_info in vulnerabilities.items():
-                    severity = vuln_info.get("severity", "unknown").upper()
-                    
-                    if severity in SECURITY_THRESHOLDS:
-                        threshold = SECURITY_THRESHOLDS[severity]
-                        findings.append(f"SECURITY_VULNERABILITY_{severity}: npm package {package}")
-                        
-                        if threshold == "FAIL":
-                            findings.append(f"SECURITY_AUDIT_FAIL: High-severity vulnerability in npm package {package}")
-                            
-            except json.JSONDecodeError:
-                findings.append("SECURITY_SCAN_ERROR: Failed to parse npm audit JSON output")
-        
-    except subprocess.TimeoutExpired:
-        findings.append("SECURITY_SCAN_ERROR: npm audit timed out")
-    except FileNotFoundError:
-        findings.append("SECURITY_SCAN_ERROR: npm tool not found")
-    except Exception as e:
-        findings.append(f"SECURITY_SCAN_ERROR: npm audit failed: {str(e)}")
-    
-    return findings
 
 def scan_for_secrets(modules_dir: Path) -> List[str]:
     """Return metadata-only hints from tracked module source, failing closed."""
@@ -509,75 +344,19 @@ def _format_source_hint(item):
 
 
 def audit_all_modules(modules_root):
-    """
-    Audit all modules to ensure they follow the established structure.
-    Now supports Enterprise Domain architecture (WSP 3).
-    
-    Args:
-        modules_root: Path to the root directory containing the modules
-        
-    Returns:
-        tuple: (list of findings, count of modules audited)
-    """
-    if not modules_root.exists():
-        logging.error(f"Modules root {modules_root} does not exist")
-        return ["CRITICAL: Modules root directory does not exist"], 0
-    
-    modules_dir = modules_root if modules_root.name == "modules" else modules_root / "modules"
-    
-    if not modules_dir.exists():
-        logging.error(f"Modules directory {modules_dir} does not exist")
-        return ["CRITICAL: Modules directory does not exist"], 0
-    
-    findings = []
-    module_count = 0
-    
-    # Check for Enterprise Domain compliance
-    domain_findings = audit_enterprise_domains(modules_dir)
-    findings.extend(domain_findings)
-    
-    # Discover all modules recursively
-    modules = discover_modules_recursive(modules_dir)
-    
-    for module_path, module_name, domain_path in modules:
-        module_count += 1
-        
-        # Check for src directory
-        src_dir = module_path / "src"
-        if not src_dir.exists() or not src_dir.is_dir():
-            findings.append(f"ERROR: Module '{domain_path}' is missing the src/ directory")
-        
-        # Check for tests directory
-        tests_dir = module_path / "tests"
-        if not tests_dir.exists() or not tests_dir.is_dir():
-            findings.append(f"ERROR: Module '{domain_path}' is missing the tests/ directory")
-        else:
-            # Check for tests/README.md (WSP requirement)
-            test_readme = tests_dir / "README.md"
-            if not test_readme.exists():
-                findings.append(f"WARNING: Module '{domain_path}' is missing tests/README.md file")
-        
-        # Check for interface file (more flexible naming)
-        if src_dir.exists():
-            interface_files = list(src_dir.glob("*.py"))
-            if not interface_files:
-                findings.append(f"WARNING: Module '{domain_path}' has no Python files in src/ directory")
-        
-        # Check for module.json or requirements.txt (dependency manifest)
-        module_json = module_path / "module.json"
-        requirements_txt = module_path / "requirements.txt"
-        if not module_json.exists() and not requirements_txt.exists():
-            findings.append(f"WARNING: Module '{domain_path}' is missing dependency manifest (module.json or requirements.txt)")
-        
-        # WSP 4 Section 4.4.1: Security vulnerability scanning
-        security_findings = perform_security_scan(module_path, domain_path)
-        findings.extend(security_findings)
-    
-    # WSP 71: Scan for secrets across all modules
-    secret_findings = scan_for_secrets(modules_dir)
-    findings.extend(secret_findings)
-    
+    """Mode 1 requires a Git root and inspects tracked module structure only."""
+    root = Path(modules_root).absolute()
+    root = root.parent if root.name == 'modules' else root
+    try:
+        inventory = read_tracked_inventory(root)
+    except (OSError, ValueError, RuntimeError, subprocess.SubprocessError):
+        return ["ERROR: Git-tracked inventory unavailable or invalid"], 0
+    findings, module_count = structural_findings(inventory, ENTERPRISE_DOMAINS, ARCHITECTURAL_EXCEPTIONS)
+    findings.extend(perform_security_scan(root, inventory=inventory))
+    selected = frozenset(p for p in inventory.files if p.startswith('modules/'))
+    findings.extend(_format_source_hint(item) for item in inspect_tracked_source(root / 'modules', selected))
     return findings, module_count
+
 
 def audit_enterprise_domains(modules_dir):
     """
@@ -1484,7 +1263,7 @@ def _finding_severity(finding):
     normalized = finding
     if normalized.startswith(error_prefixes):
         return "ERROR"
-    if normalized.startswith(("WARNING:", "SECRET_SCAN_SKIPPED:", "SECRET_DETECTED:")):
+    if normalized.startswith(("WARNING:", "SECRET_SCAN_SKIPPED:", "SECRET_DETECTED:", "SECURITY_VULNERABILITY_MEDIUM:")):
         return "WARNING"
     return "ADVISORY"
 
