@@ -1,5 +1,29 @@
 # Video Comments - ModLog
 
+## 2026-10-29 — Windows source repair and durable submission ownership
+
+WSP00/5/6/10/11/22/50/84/97. Preserve the dirty August PC checkout; repair the
+existing PR in an isolated checkout at its verified head. Independent review
+identified wrong-row identity, collapsed-reply false readback, restart uncertainty,
+role-selection, theme-freshness and evidence-retention gaps. Existing owners now
+assess meaning before response strategy, retain supplied factual context for
+review, enforce the general-role selection, recheck the private theme at submit,
+and bind full original identity on the exact Studio origin. The history owner
+persists claims before browser action, exact review/context, new creator reply IDs
+and unique screenshot evidence; unknown outcomes block future attempts across
+restarts. Verified interaction history commits with the delivery receipt.
+Nested submission stays disabled. See the repair handoff for packaging and runtime
+evidence; local source/test success does not establish deployed or live behavior.
+
+## 2026-10-29 — Private chat manifest and inspected replies (draft candidate)
+
+WSP 00/15/22/50/84/96/97. Extend existing queue, context reader, generator, Skillz processor and executor; no parallel scheduler or command inbox. `set_context` now activates private context without a public send; `announce` retains explicit publishing. Live-chat and stored-comment language routes consume theme context before generation. The signature hook no longer appends operator wording. Source command identity is carried into comment evidence, and an expired/replaced theme rejects an old draft.
+
+General-language routes reject GUI/audio/embedding model names, including explicit UI-TARS selections. Keyword-only stance assertions become unknown. A separate language-review call evaluates the final candidate; failed/malformed review blocks posting. Top-level posting binds the original row and rechecks identity before submission, requires exact entered text and new creator-reply readback, captures a screenshot and optionally verifies through UI-TARS. Global submit fallbacks are removed. Uncertain outcomes halt the session; unqualified nested submission is blocked.
+
+15 bounded stdlib cases pass; materialized Python sources parse. This is a draft source checkpoint, not signed model-role admission, independent verifier approval, deployment, native RSI or live YouTube evidence. See `modules/communication/video_comments/docs/CHAT_MANIFEST_REPAIR_20261029.md` for exact remaining gates, including full-runtime manifest regeneration, durable uncertainty across restarts and live-selector qualification.
+
+
 **Module:** communication/video_comments
 **WSP Reference:** WSP 22 (ModLog Protocol)
 
@@ -3453,3 +3477,4 @@ YT_UI_SNAPSHOT_DIR="O:/tmp/ui_action_snapshots"
   - an alias resolved from environment: `move2japan`, `undaodu`, `ravingantifa`
 - Added env key for the new channel id:
   - `RAVINGANTIFA_CHANNEL_ID=UCVSmg5aOhP4tnQ9KFUg97qA`
+

@@ -44,6 +44,7 @@ class CommentingBroadcast:
     promo_message: str = ""  # optional free-form message, injected as context
     updated_at_unix: float = 0.0
     updated_by: str = "012"
+    source_command_id: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -112,7 +113,8 @@ def _load_shared_manifest_context() -> Optional[CommentingBroadcast]:
         message = context.get("message")
         if not isinstance(message, str) or not message.strip() or len(message) > MAX_MESSAGE_LENGTH:
             return None
-        return CommentingBroadcast(enabled=True, promo_message=message.strip(), updated_by="012_manifest")
+        return CommentingBroadcast(enabled=True, promo_message=message.strip(), updated_by="012_manifest",
+                                   source_command_id=context.get('source_command_id'))
     except (OSError, ValueError, TypeError, OverflowError):
         return None
 
@@ -158,4 +160,5 @@ def clear_promo(path: Path = DEFAULT_PATH) -> CommentingBroadcast:
     current.promo_message = ""
     save_broadcast(current, path)
     return current
+
 
