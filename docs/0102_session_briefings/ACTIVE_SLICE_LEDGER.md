@@ -1,5 +1,95 @@
 # Active Slice Ledger
 
+## PR reconciliation — 2026-10-29
+
+**Owner:** 0102 architect, PR reconciliation lane. This is a dated queue snapshot,
+not live GitHub state or permission to overwrite concurrent product lanes.
+The separate YouTube chat retains its runtime work. Verify current heads and
+checks before every mutation.
+
+**Scope of proof:** all 43 open PRs were inventoried, their complete changed-path
+sets compared with main `8b345ec206212b1e27868bdc4cacd06474b636a6`, and merge trees
+computed without changing the shared checkout. Thirteen were conflict-free and
+30 conflicted. No PR was wholly proven incorporated by ancestry, exact file
+identity or reverse-patch checks. These conservative checks do not rule out
+partial or semantic supersession. Blocked rows are triaged, not fully source-reviewed.
+No original branch or unique work was deleted.
+
+**Closed groundwork:** WSP 97 PR #2247 merged at `5e9382535`; all five observed
+main workflows passed. GitHub ruleset 8987382 now requires `lint`, `test (3.12)`,
+`security / secrets`, `holoindex_freshness`, and `wre-verification-contracts`,
+bound to the GitHub Actions integration. Existing PR/deletion/no-bypass rules
+were preserved. Up-to-date-with-base enforcement remains disabled; source
+reconciliation and resulting-main verification remain required by the architect.
+
+**HoloIndex:** initial retrieval failed with `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`:
+shared checkout `0c81418fe` and authority `a3f519660` differed. Current main already
+has the corrected task-helper/vetted-interpreter procedure in CLAUDE.md. The
+existing post-merge controller advanced the dedicated authority to `5e9382535`,
+refreshed through its maintenance owner and completed with both owned runtimes
+stopped. A fresh query returned `ok=true`, `freshness=CURRENT`, no gap, matching
+source/workspace/authority SHAs and one owner attempt without query reindexing.
+This proves that exact revision only; later main commits need their own refresh.
+Never move the shared dirty checkout or relax equality to disguise stale evidence.
+
+**Retrieval evaluation:** initial semantic ordering/duplication could not be
+assessed because no valid hits were returned. Staleness was high. Direct Git,
+NAVIGATION and owning README/INTERFACE/ROADMAP/log/test documents supplied the
+fallback. After repair, the WRE-scoped memory bundle and receipt were retrieved.
+Current and historical records remain explicitly separated. Cross-PR merge and
+CI evidence requires architect review; no Qwen/Gemma capability or independent
+agent run is claimed. Existing deterministic Git/CI/maintenance owners were reused.
+
+**Next action:** finish the refreshed ready PRs through exact-head and main checks,
+then work the rows below in dependency/risk order. Record a concrete repair or
+scope decision for retained work; an open PR is not a completed task.
+
+| PR | Observed head | Disposition / next gate |
+|---|---|---|
+| [#408](https://github.com/FOUNDUPS/Foundups-Agent/pull/408) | [2e788a053](https://github.com/FOUNDUPS/Foundups-Agent/commit/2e788a0539ac93f2edfefaa51128726fcb66745f) | Hold: ten added skips require replacement-coverage proof and current API tests; coordinate with the active YouTube lane. |
+| [#722](https://github.com/FOUNDUPS/Foundups-Agent/pull/722) | [2e9a66c8f](https://github.com/FOUNDUPS/Foundups-Agent/commit/2e9a66c8f86795fea2d75ac4c9e7b2c66ab88c61) | Refresh historical security proposal/template against current security owners and explicitly version its taxonomy before current CI. |
+| [#729](https://github.com/FOUNDUPS/Foundups-Agent/pull/729) | [1757a520c](https://github.com/FOUNDUPS/Foundups-Agent/commit/1757a520c779c3b6a83ed8a4282f2eae13beb10a) | Reconcile root instructions, generated AGENTS projection and dated stack claims; do not restore stale startup instructions. |
+| [#802](https://github.com/FOUNDUPS/Foundups-Agent/pull/802) | [de63ab95a](https://github.com/FOUNDUPS/Foundups-Agent/commit/de63ab95aab0ca11247cf2620cb4bc559bbce16c) | Reconcile registry and root ModLog; rerun GetK contracts, manifest and connected dry-run acceptance. |
+| [#1339](https://github.com/FOUNDUPS/Foundups-Agent/pull/1339) | [029d77a20](https://github.com/FOUNDUPS/Foundups-Agent/commit/029d77a20838879e5bbc90e46e445fff29cb9f69) | Rebuild the gaxios-only dependency change on the current lock; preserve newer security fixes and validate GotJunk build. |
+| [#1342](https://github.com/FOUNDUPS/Foundups-Agent/pull/1342) | [df0a9af87](https://github.com/FOUNDUPS/Foundups-Agent/commit/df0a9af87ed3aa086a218fe8f61ef392634042f8) | Review Vite major migration, plugin peers and current lock; require frontend build/regression evidence. |
+| [#1346](https://github.com/FOUNDUPS/Foundups-Agent/pull/1346) | [1c3775f69](https://github.com/FOUNDUPS/Foundups-Agent/commit/1c3775f69a744856dea5ddd125b78cac7fd7b116) | Refreshed: preserve ^8.21.0 minimum with locked 8.22.0 and all current resolved packages; dry-run passed; fresh CI pending. |
+| [#1605](https://github.com/FOUNDUPS/Foundups-Agent/pull/1605) | [467a7ce89](https://github.com/FOUNDUPS/Foundups-Agent/commit/467a7ce898a9b9e050390064dd9d5d212d76187b) | Reviewed architecture-only addition; refreshed on current main; fresh CI pending. No operational feasibility engine claimed. |
+| [#1618](https://github.com/FOUNDUPS/Foundups-Agent/pull/1618) | [afef5e917](https://github.com/FOUNDUPS/Foundups-Agent/commit/afef5e917dd1c327d34fd8952352d3469085f9b7) | Reconcile overlapping campaign/homepage changes; preserve current page behavior and revalidate bilingual UI/contracts. |
+| [#1636](https://github.com/FOUNDUPS/Foundups-Agent/pull/1636) | [318c68007](https://github.com/FOUNDUPS/Foundups-Agent/commit/318c68007c476fce727b25239d2f3f40d8effce6) | Retain draft: proposed state semantics conflict with current canonical WSP 00 identity language; settle canonical owner scope first. |
+| [#1642](https://github.com/FOUNDUPS/Foundups-Agent/pull/1642) | [3cfeac66a](https://github.com/FOUNDUPS/Foundups-Agent/commit/3cfeac66a9739ad4bf5a8e4587c5c80e574f9023) | Reconcile renamed Moshpit documentation and current memory owner; avoid a parallel protocol/authority. |
+| [#1646](https://github.com/FOUNDUPS/Foundups-Agent/pull/1646) | [56c49762c](https://github.com/FOUNDUPS/Foundups-Agent/commit/56c49762c9dae1323590943cc445f1a6a44c0f4e) | Retain draft; reconcile thesis with current YUMORI scope and current README/ModLog before acceptance. |
+| [#1648](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648) | [a77e284b8](https://github.com/FOUNDUPS/Foundups-Agent/commit/a77e284b8b72f1e731b97a987e1a48478755fda9) | Retain draft; 93-file public-chat/auth/accounting change overlaps current gateway/security work; split/reconcile and validate boundaries. |
+| [#1667](https://github.com/FOUNDUPS/Foundups-Agent/pull/1667) | [93efc4f39](https://github.com/FOUNDUPS/Foundups-Agent/commit/93efc4f39ae8112d7ee987b37c623df71cc973f6) | Current test failure and YouTube-owned work order; refresh against current evidence and coordinate with the active lane. |
+| [#1677](https://github.com/FOUNDUPS/Foundups-Agent/pull/1677) | [847568dde](https://github.com/FOUNDUPS/Foundups-Agent/commit/847568ddec7af170aaef73fdae86d4db2b3628b2) | Reconcile JHR routes/promotion and current campaign components; repair failing test selection and validate public rendering. |
+| [#1685](https://github.com/FOUNDUPS/Foundups-Agent/pull/1685) | [53df997d5](https://github.com/FOUNDUPS/Foundups-Agent/commit/53df997d516bf1c909ae09a27c0e709b8ea4b3e2) | Retain draft; review public/private boundary of packet materials, reconcile current docs and repair both failed workflows. |
+| [#1688](https://github.com/FOUNDUPS/Foundups-Agent/pull/1688) | [40d71249f](https://github.com/FOUNDUPS/Foundups-Agent/commit/40d71249fe913567ee6f5fa65536d89f2ecb46c3) | Retain draft; reconcile Japanese-first homepage scope with current public surfaces; build and bilingual visual acceptance required. |
+| [#1689](https://github.com/FOUNDUPS/Foundups-Agent/pull/1689) | [e7d88a8b6](https://github.com/FOUNDUPS/Foundups-Agent/commit/e7d88a8b6e7afa0e1a0ae09d27610bf5cfb0ed32) | Reconcile media-verification audit with current owner contracts; rerun failing tests and keep proposed/runtime states separate. |
+| [#1729](https://github.com/FOUNDUPS/Foundups-Agent/pull/1729) | [724f465bd](https://github.com/FOUNDUPS/Foundups-Agent/commit/724f465bd35ac1be5e9a91f41d0721da383c67d8) | Reconcile 21-file public-surface repair with later changes; diagnose validate failure and verify affected routes. |
+| [#1762](https://github.com/FOUNDUPS/Foundups-Agent/pull/1762) | [4a6df453f](https://github.com/FOUNDUPS/Foundups-Agent/commit/4a6df453f611fa62122a6cdb88a616b57fd7756c) | Retain draft; compare every proposed dependency/peer change with newer main resolutions before superseded or merge decision. |
+| [#1774](https://github.com/FOUNDUPS/Foundups-Agent/pull/1774) | [c914bc664](https://github.com/FOUNDUPS/Foundups-Agent/commit/c914bc6640d3322003ce89258b353f8950b66e0c) | Reconcile JHR issue and promotional surfaces; repair validate failure and review citations/rendering before publication claims. |
+| [#1792](https://github.com/FOUNDUPS/Foundups-Agent/pull/1792) | [09d0ad70f](https://github.com/FOUNDUPS/Foundups-Agent/commit/09d0ad70f6a91f9e9690ee796bf594cb50bb8631) | Reconcile brand-context source/registry with current RedDog; repair test and regeneration failures; rerun connected contracts. |
+| [#1822](https://github.com/FOUNDUPS/Foundups-Agent/pull/1822) | [663f0e175](https://github.com/FOUNDUPS/Foundups-Agent/commit/663f0e17566a4e613a6b419456239e02f156923d) | Retain draft; isolate Memory Horizon intake/PoC scope from the 37-file branch and reconcile registry/doc conflicts. |
+| [#1835](https://github.com/FOUNDUPS/Foundups-Agent/pull/1835) | [d0a532556](https://github.com/FOUNDUPS/Foundups-Agent/commit/d0a532556a5a3d22204eb6283ecb5ebac1068381) | Reviewed architecture overview with explicit unfinished-AGI/RSI boundary; refreshed on current main; fresh CI pending. |
+| [#1886](https://github.com/FOUNDUPS/Foundups-Agent/pull/1886) | [3aa71a078](https://github.com/FOUNDUPS/Foundups-Agent/commit/3aa71a0786b9202062e01beb84769c9ba0e7950e) | Review accounting schema acceptance versus posting authority; POSTED currently allows null account/payment identifiers. Spec is not a ledger gate. |
+| [#1906](https://github.com/FOUNDUPS/Foundups-Agent/pull/1906) | [d5eb2622a](https://github.com/FOUNDUPS/Foundups-Agent/commit/d5eb2622a14e2c551cedd188a702a5f73fa981b0) | Reconcile STT guard with current homepage; revalidate the intended text/projection contract without overwriting later content. |
+| [#1998](https://github.com/FOUNDUPS/Foundups-Agent/pull/1998) | [0457051b9](https://github.com/FOUNDUPS/Foundups-Agent/commit/0457051b92d2b494dbda50f0676bce851474ecff) | Do not merge stale meeting notice: October 13 is still hard-coded as upcoming. Reconcile current authorized schedule and dated test. |
+| [#2102](https://github.com/FOUNDUPS/Foundups-Agent/pull/2102) | [e9294fd00](https://github.com/FOUNDUPS/Foundups-Agent/commit/e9294fd00c4e728b1b489627d32c4db2fd557650) | Reconcile EDuIT Discovery intake/registry with current Storytime ownership; preserve unique history and rerun contracts. |
+| [#2113](https://github.com/FOUNDUPS/Foundups-Agent/pull/2113) | [e455fd019](https://github.com/FOUNDUPS/Foundups-Agent/commit/e455fd0190b0c35302a3a5776529a221c3123888) | Retain draft; reconcile investor brief and current ownership/demand/cost evidence before public claims. |
+| [#2178](https://github.com/FOUNDUPS/Foundups-Agent/pull/2178) | [f1fb9763b](https://github.com/FOUNDUPS/Foundups-Agent/commit/f1fb9763b1f4b602b7f93371cc5057d378610745) | Reconcile resident scheduling with current bridge owners; repair test failure; prove read-only effect ceiling. |
+| [#2196](https://github.com/FOUNDUPS/Foundups-Agent/pull/2196) | [44174fa68](https://github.com/FOUNDUPS/Foundups-Agent/commit/44174fa68ba2fe419d4e5ffdd42e0ba24e32452d) | Retain draft; reconcile homepage/Play Mall scope and investigate GitGuardian finding without waiving its gate. |
+| [#2202](https://github.com/FOUNDUPS/Foundups-Agent/pull/2202) | [cb794d47c](https://github.com/FOUNDUPS/Foundups-Agent/commit/cb794d47c613fda0009c14d219e905ff29ef1a24) | Reconcile security-finding registry/test inventory; investigate GitGuardian finding; qualify immutable TestNet intents before child 2210. |
+| [#2206](https://github.com/FOUNDUPS/Foundups-Agent/pull/2206) | [24fb851d1](https://github.com/FOUNDUPS/Foundups-Agent/commit/24fb851d1d1e1be4b1e1b51420483c5f0d8689a6) | Reconcile security-finding registry/test inventory; investigate GitGuardian finding; qualify unsigned codec before child 2211. |
+| [#2210](https://github.com/FOUNDUPS/Foundups-Agent/pull/2210) | [669bba8a3](https://github.com/FOUNDUPS/Foundups-Agent/commit/669bba8a3331f14056b5f6e0b8f6a7c284bf5b38) | Stacked on 2202. Parent must land first, then retarget/reconcile onto main and rerun exact-head acceptance. |
+| [#2211](https://github.com/FOUNDUPS/Foundups-Agent/pull/2211) | [6b679c988](https://github.com/FOUNDUPS/Foundups-Agent/commit/6b679c988915db85012d823681fdfa8f11598653) | Stacked on 2206. Parent must land first, then retarget/reconcile onto main and rerun exact-head acceptance. |
+| [#2221](https://github.com/FOUNDUPS/Foundups-Agent/pull/2221) | [63535378f](https://github.com/FOUNDUPS/Foundups-Agent/commit/63535378fd952eb3eb4a7e20f233e182c9d60c3e) | Retain draft; compare every intended PWA change with later merged 2224/2228/2229/2235/2253. Preserve unique residue before any closure. |
+| [#2226](https://github.com/FOUNDUPS/Foundups-Agent/pull/2226) | [f65243bce](https://github.com/FOUNDUPS/Foundups-Agent/commit/f65243bce27c1b340c934e0eb27daafb21635206) | Reconcile root/WRE ModLogs without altering qualified serving code; rerun current-head HTTP/serving checks before child 2227. |
+| [#2227](https://github.com/FOUNDUPS/Foundups-Agent/pull/2227) | [a7109ba09](https://github.com/FOUNDUPS/Foundups-Agent/commit/a7109ba09b355a25ab0d65c009816863eeb7c749) | Retain draft; stacked on 2226. Inspect replacement image qualification and exact saved-image vulnerability scan before deployment claims. |
+| [#2234](https://github.com/FOUNDUPS/Foundups-Agent/pull/2234) | [b9c109678](https://github.com/FOUNDUPS/Foundups-Agent/commit/b9c109678158882f7020fcc75cd87e299ac9e310) | Diagnose validate failure and verify partner route/build/bilingual UI; retain explicit non-binding inquiry and no-partner-commitment boundaries. |
+| [#2238](https://github.com/FOUNDUPS/Foundups-Agent/pull/2238) | [bf78e977b](https://github.com/FOUNDUPS/Foundups-Agent/commit/bf78e977b6a6609fa1b7ef0af1f3d177e5dac495) | Reconcile reviewed findings, compatibility constants and manifest tests; revalidate dry-run editorial package with current authorization owner. |
+| [#2247](https://github.com/FOUNDUPS/Foundups-Agent/pull/2247) | [91056ef5d](https://github.com/FOUNDUPS/Foundups-Agent/commit/91056ef5dcea561de25310b40de81bc70af9c85e) | MERGED 5e9382535630cd46727bd231b7b2cdd339175e7f; all five observed resulting-main workflows passed. |
+| [#2248](https://github.com/FOUNDUPS/Foundups-Agent/pull/2248) | [3c3e15abc](https://github.com/FOUNDUPS/Foundups-Agent/commit/3c3e15abc0f680cb34e00e4bb025237ebe80e104) | Reconcile roadmap conflict and dated proposal with merged 2250 implementation; retain genuinely pending integration gates. |
+| [#2251](https://github.com/FOUNDUPS/Foundups-Agent/pull/2251) | [7f425c52b](https://github.com/FOUNDUPS/Foundups-Agent/commit/7f425c52b472c7b6c79e0de7d41c9d55a93d5370) | Reviewed bounded source handoff; two build/privacy-contract tests passed; refreshed on main; fresh CI pending. Sites remains deployment owner. |
+
 > Dated ledger snapshot: entries below were last reconciled on 2026-04-21. They do not establish current lane ownership. Start at [the system roadmap](../../ROADMAP.md), then verify current commits, open changes and runtime claims before choosing a slice. Preserve these historical entries until each owner reconciles them.
 
 ## RSI handoff — 2026-09-13

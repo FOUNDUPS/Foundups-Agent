@@ -1,3 +1,31 @@
+## 2026-10-29 — PR reconciliation and completion ownership
+
+Inventoried all 43 open PRs against main `8b345ec20`: 13 conflict-free merge
+trees and 30 conflicting trees, with three explicitly stacked PRs. This is
+complete inventory/merge analysis, not blanket source-review acceptance.
+The [dated PR ledger](docs/0102_session_briefings/ACTIVE_SLICE_LEDGER.md#pr-reconciliation--2026-10-29)
+records each disposition and next gate while preserving the earlier history.
+
+PR #2247 landed as `5e9382535`; all five observed main workflows passed.
+GitHub ruleset 8987382 now requires five existing GitHub Actions checks:
+lint, test (3.12), security / secrets, holoindex_freshness and
+wre-verification-contracts. Readback matched the proposed change; prior PR,
+deletion and no-bypass rules were preserved. Branch currency remains an
+architect reconciliation responsibility; no mandatory merge queue was added.
+
+The existing governed HoloIndex transaction repaired the stale authority at
+that exact main SHA. A fresh process then returned CURRENT, no index gap,
+matching workspace/authority/source SHAs and one owner attempt without query
+reindexing. This dated proof is not freshness evidence for later commits.
+No source repair or relaxed authority check was needed. The old shared
+checkout and copied startup instructions are not current-main evidence.
+
+Extended the existing WSP 10 closure instructions with PR ownership, dated
+blocker/action records and proof before superseded closure; regenerated the
+Codex projection. No new scheduler, automatic merger or branch deletion.
+WSP 10/15/22/50/77/84/97; policy text, GitHub enforcement, per-PR validation
+and HoloIndex runtime proof remain separate evidence.
+
 ## 2026-10-28 — WRE verification preflight and connected CI
 
 Repaired policy downgrade and premature check execution through existing WRE
