@@ -1,3 +1,14 @@
+## 2026-10-29 — Reconciliation merge receipts and ordered audit follow-up
+
+Five inherited PRs now merged: #2247 `5e9382535`, #1605 `0eb44e2c7`,
+#1835 `f96c636c5`, #2251 `3ec357892`, #1346 `1bbe01214`. Each passed
+observed PR checks before merge; #2247 main checks passed, later main checks
+remain pending at this snapshot. #2248 now preserves its packet and links
+#2250 implementation with explicit remaining gates; fresh acceptance pending.
+The existing active-slice ledger retains all 43 original rows and now records
+012's ordered follow-up audit with its old-checkout evidence boundary.
+No branch deletion, test skip, runtime grant or deployment. WSP 10/22/50/97.
+
 ## 2026-10-29 — PR reconciliation and completion ownership
 
 Inventoried all 43 open PRs against main `8b345ec20`: 13 conflict-free merge

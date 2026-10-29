@@ -5,6 +5,12 @@ This log tracks all changes to the IDE FoundUps module following WSP 22 (Module 
 
 ---
 
+## PR 1346 dependency floor reconciliation (2026-10-29)
+
+- Preserve the original PR requirement `ws >=8.21.0` in the package manifest and lock root while retaining current main's resolved `ws 8.22.0`, integrity and every other dependency. This avoids replacing newer dependency work with the old PR lockfile.
+- Validation: package/lock identity comparison and `npm ci --ignore-scripts --dry-run --no-audit --no-fund` pass (236 packages planned). No package installation or TypeScript compile was performed; existing compile limitations above remain. Fresh PR and post-merge checks are separate gates.
+- WSP 10, 12, 22, 50, 97.
+
 ## MSAL Node authorization-flow dependency fix (2026-10-26)
 
 - Pinned transitive `@azure/msal-node` to patched `7.1.1` through the VS Code extension package override; current `@vscode/vsce` and `@azure/identity` releases still select affected MSAL 6.x without the override.
