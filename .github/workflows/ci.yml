@@ -112,6 +112,8 @@ jobs:
         run: |
           import sys
           import unittest
+          from pathlib import Path
+          sys.path.insert(0, str(Path.cwd()))
           suite = unittest.defaultTestLoader.discover(
               'modules/communication/video_comments/tests',
               pattern='test_chat_manifest_inspection.py')

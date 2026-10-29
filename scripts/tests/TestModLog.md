@@ -1,5 +1,17 @@
 # Script test inventory
 
+## 2026-10-29 — Restore repository imports in the hosted stdlib runner
+
+Hosted Ubuntu job `123206424059` ran the `shell: python` body as a temporary
+script, leaving the checkout outside `sys.path`: 13 cases passed and two actual
+history imports failed. Reproduced the same two failures locally with the exact
+workflow body saved outside the checkout and `PYTHONPATH` removed.
+
+The runner now inserts `Path.cwd()` before discovery. The same temporary-script
+reproduction passes all 15 cases, with the exact-count/no-skips assertion intact.
+Production, test assertions, registry, manifest, pins and security policy are
+unchanged. Fresh Windows/Linux hosted results remain a separate gate.
+
 ## 2026-10-29 — YouTube reply source and CI bindings
 
 The existing Windows/Linux YouTube job now runs the 15 stdlib inspection cases
