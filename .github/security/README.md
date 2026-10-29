@@ -1,3 +1,18 @@
+## PR2270 exact documentation prose review — 2026-10-29
+
+Hosted job123361181139 and checksum-verified Gitleaks 8.30.1 both report one
+`generic-api-key` finding at `modules/infrastructure/git_social_posting/INTERFACE.md`
+line22. The complete authored sentence describes account publishing responsibilities;
+it is not a credential assignment, value or example. The architect reviewed that
+source sentence; no independent reviewer is claimed.
+
+Add one path/full-blob/rule/line binding for content SHA256 `645e52ae93f6ec94574910f39f53f0be02ae414d4264f2c4091d0acaf68154e6`:
+`ca6719b3aa2e590fd96d7698c5b5f952252be0a4e7fbc4d25d661552c171e67b`. The same blob occurs in introduced commit
+`10da6d5d7f1c42fa153c1160849f03b312c71c0c`, so this exact review covers its tree and
+history finding. Preserve all 2744 previous bindings. Scanner rules,
+scope, exclusions and fingerprint algorithms stay unchanged. Fresh final tree/history
+checks remain required; this review is not repository-wide security clearance.
+
 ## Test-scaffold repair manifest metadata binding — 2026-10-29
 
 Checksum-verified Gitleaks 8.30.1 scanned the 100 changed staged Git files,

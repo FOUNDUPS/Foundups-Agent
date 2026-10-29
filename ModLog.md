@@ -19,6 +19,12 @@ directory is added. Source review is not runtime acceptance. Structural presence
 and hosted/main/Holo acceptance of this documentation remain separate checks.
 WSP 3/5/11/22/49/50/60/84/87/90/97; see the active slice ledger.
 
+PR2270's first secret scan flags one role-description sentence in the social
+utility contract. Checksum-verified Gitleaks reproduces the exact finding. Add
+one content-bound prose review and evidence note, preserving 2744 prior bindings
+and all scanner rules. This adds two security review paths to the documentation
+slice; fresh hosted tree/history acceptance remains required. WSP 71/97.
+
 ## 2026-10-29 — Close shared domain policy and qualify frontend dependency repair
 
 F6a #2267 is merged as 4533f7321f8ee5c857ca7f9dc17801b716d429fe after all

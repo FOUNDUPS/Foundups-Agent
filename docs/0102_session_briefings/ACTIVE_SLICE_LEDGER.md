@@ -21,7 +21,10 @@ unqualified containers contain code and receive substantive owner contracts;
 identity_shield intake, archived duplicates and telemetry feedback remain explicit
 ownership work. The staged inventory has 163 evidenced roots with no missing
 README/INTERFACE filenames; this is presence evidence, not a completeness score.
-All 55 changed paths are Markdown, and the three prior logs are byte-preserved.
+The documentation has 55 changed Markdown paths; three prior logs are byte-preserved.
+Hosted Gitleaks flagged one authored role-description sentence. The pinned local
+scanner reproduced it; one exact path/blob/rule/line review preserves all 2744
+prior bindings and scanner behavior. Security README/ledger add two review paths.
 No application entrypoint, model, provider, cleanup, publishing,
 payment or live memory operation was invoked for documentation qualification.
 Hosted checks and resulting-main/Holo close-out remain required.
