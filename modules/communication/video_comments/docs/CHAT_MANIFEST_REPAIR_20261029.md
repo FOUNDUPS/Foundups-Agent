@@ -95,6 +95,14 @@ or public delivery evidence. The short local requests disable reasoning output;
 the legacy system prompt's unrelated Japan/topic redirects are excluded from the
 assessed route. The final neutral prompt preserves the comment's subject and
 distinguishes missing context from a claim that a date/event does not exist.
+Actual QA also showed unstructured reviewers misspelling/omitting required keys.
+The local reviewer now uses the supported strict JSON-schema response shape;
+semantic decisions and thresholds are unchanged. A sole complete JSON code fence
+is accepted for evaluation envelopes, with prose/trailing output still rejected.
+Theme relevance is assessed before writing, and irrelevant themes are withheld
+from generation rather than relying on a promotional suffix or writer hint.
+Private local Gemma4-E2B QA uses the same route; model scores never replace
+independent inspection of the original comment, supplied facts and final reply.
 
 Independent fresh-context review read all original files, reproduced wrong-row
 and coder-model acceptance, and reviewed their repairs. Canonical registry,

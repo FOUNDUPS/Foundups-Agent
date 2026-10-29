@@ -26,13 +26,26 @@ def reply_text_is_publishable(text):
     return not any(token in text.lower() for token in (
         '<|', '|>', '<think', '</think', '[inst]', '[/inst]', '```',
         'private operator', 'system prompt', 'context_activated', 'manifest.json',
+        'my response was based', 'text provided in the comment',
     ))
+
+
+def _json_object_text(raw):
+    """Accept an entire JSON envelope, including a model's sole JSON code fence.
+
+    Never extract an object from prose or discard trailing output.
+    """
+    if isinstance(raw, str):
+        raw = raw.strip()
+        if raw.startswith('```json\n') and raw.endswith('\n```'):
+            return raw[8:-4]
+    return raw
 
 
 def parse_comment_assessment(raw, comment):
     """Require an explicit meaning/strategy record grounded in the original text."""
     try:
-        value = json.loads(raw)
+        value = json.loads(_json_object_text(raw))
         if not isinstance(value, dict):
             return None
         choices = {'intent': {'question', 'request', 'opinion', 'appreciation', 'unclear'},
@@ -46,6 +59,9 @@ def parse_comment_assessment(raw, comment):
         quote = value['evidence_quote'].strip()
         if not value['meaning'].strip() or not quote or quote not in comment:
             return None
+        if type(value.get('theme_relevant', False)) is not bool:
+            return None
+        value.setdefault('theme_relevant', False)
         if value['stance'] != 'unclear' and not quote:
             return None
         if value['intent'] == 'unclear' and value['strategy'] != 'clarify':
@@ -59,7 +75,7 @@ def parse_reply_review(raw):
     """Reject missing, malformed or low-scoring judgments; no fixed confidence."""
     rejected = {'approved': False, 'reason': 'review_unavailable_or_invalid'}
     try:
-        value = json.loads(raw)
+        value = json.loads(_json_object_text(raw))
         if not isinstance(value, dict):
             return rejected
         checks = ('addresses_comment', 'coherent', 'grounded', 'no_internal_instructions')

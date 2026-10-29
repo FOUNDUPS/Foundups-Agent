@@ -1,5 +1,19 @@
 # Script test inventory
 
+## 2026-10-29 — YouTube reply source and CI bindings
+
+The existing Windows/Linux YouTube job now runs the 15 stdlib inspection cases
+and a separate exact 41-case semantic/submission inventory, requiring no skips.
+The original 53-case reply-context inventory is unchanged. Local repair selection:
+41 passed plus 12 unittest subtests. Canonical registry generation/check reports
+1,778 files / 275 quarantined; 50 existing registry/differential cases pass.
+
+The existing security/credential selection passes all 75 cases with UTF-8 mode
+and an explicit Git Bash adapter for the Linux-shell workflow fixture on this
+Windows host. The plain native run's unavailable WSL-launcher failure is retained;
+no assertion or scanner rule was changed. Backend manifest and pin regeneration
+uses the existing full-checkout generator; final checks are recorded below.
+
 ## 2026-10-26 — GitHub client source binding
 
 Rebind only the existing client's normalized hash in the1471-member manifest;

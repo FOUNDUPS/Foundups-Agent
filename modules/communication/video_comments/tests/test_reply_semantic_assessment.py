@@ -21,7 +21,7 @@ GEN.select_channel_personality = CONTEXT.select_channel_personality
 def assessment(text, **changes):
     return dict(intent='question', meaning='Asks where the film is available',
                 question='Where can I watch it?', stance='unclear', uncertainty='No release information supplied',
-                evidence_quote=text, strategy='answer', **changes)
+                evidence_quote=text, strategy='answer', theme_relevant=False, **changes)
 
 
 @pytest.mark.parametrize('text', [
@@ -39,8 +39,11 @@ def test_posting_route_assesses_original_before_writing_and_reviews_supplied_fac
     generator._load_personalization_context = lambda **kwargs: 'Previously asked about the film.'
     generator._load_voice_memory_context = lambda *a, **kw: 'Film details are at HornetHunter.com.'
     calls = []
-    answers = iter([json.dumps(assessment(text)),
-                    'The film details are at HornetHunter.com.', json.dumps(helper.GOOD)])
+    assessment_json, review_json = json.dumps(assessment(text)), json.dumps(helper.GOOD)
+    if 'sarcasm' in text.lower():
+        assessment_json = '```json\n' + assessment_json + '\n```'
+        review_json = '```json\n' + review_json + '\n```'
+    answers = iter([assessment_json, 'The film details are at HornetHunter.com.', review_json])
     def post(url, **kwargs):
         calls.append(kwargs['json'])
         return SimpleNamespace(status_code=200, json=lambda: {'choices': [
@@ -59,6 +62,9 @@ def test_posting_route_assesses_original_before_writing_and_reviews_supplied_fac
     assert all(call['reasoning_effort'] == 'none' for call in calls)
     assert 'Write one concise YouTube reply' in calls[1]['messages'][0]['content']
     assert 'behind Move2Japan' not in calls[1]['messages'][0]['content']
+    schema = calls[2]['response_format']['json_schema']
+    assert schema['strict'] is True
+    assert set(schema['schema']['required']) == set(helper.GOOD)
     first = calls[0]['messages']
     assert text in json.loads(first[1]['content'])['text']
     assert 'negation, quotation and sarcasm' in first[0]['content']
@@ -75,6 +81,9 @@ def test_posting_route_assesses_original_before_writing_and_reviews_supplied_fac
     'uncertainty': '', 'evidence_quote': 'not actually in comment', 'strategy': 'answer'})])
 def test_unqualified_assessment_cannot_select_a_reply(raw):
     assert CONTEXT.parse_comment_assessment(raw, 'Where is the film?') is None
+    assert CONTEXT.parse_comment_assessment('prose ```json\n' + json.dumps(
+        assessment('Where is the film?')) + '\n```', 'Where is the film?') is None
+    assert not CONTEXT.parse_reply_review('```json\n' + json.dumps(helper.GOOD) + '\n``` trailing')['approved']
 
 
 @pytest.mark.parametrize('model', ['ui-tars-1.5-7b', 'qwen2-vl', 'qwen3-coder-30b',
@@ -100,6 +109,8 @@ def test_explicit_loaded_model_must_match_general_role_owner(monkeypatch, select
 def test_control_tokens_and_internal_instructions_never_reach_language_approval(draft):
     generator = object.__new__(GEN.IntelligentReplyGenerator)
     assert not generator.inspect_reply({'text': 'Question'}, draft)['approved']
+    assert not generator.inspect_reply({'text': 'Why assume that?'},
+        'My response was based on the text provided in the comment.')['approved']
 
 
 def test_private_context_activates_without_a_public_sender(tmp_path, monkeypatch):

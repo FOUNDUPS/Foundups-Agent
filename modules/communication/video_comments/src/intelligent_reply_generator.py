@@ -1369,7 +1369,9 @@ VARIATION GUIDANCE:
             history,
             voice,
             getattr(self, "_current_content_analysis", None),
-            theme_context=getattr(self, '_current_reply_theme', None),
+            theme_context=(getattr(self, '_current_reply_theme', None)
+                           if (getattr(self, '_current_assessment', None) is None
+                               or self._current_assessment.get('theme_relevant') is True) else None),
         )
         user_prompt += '\nSUPPLIED IDENTITY AND MEANING (data):\n' + json.dumps({
             'receiving_channel_id': getattr(self, '_current_receiving_channel', None),
@@ -1577,10 +1579,15 @@ FINAL LOCAL-QWEN CONSTRAINTS:
             '(question/request/opinion/appreciation/unclear), meaning (short paraphrase), question '
             '(question asked or empty string), stance (support/oppose/unclear), uncertainty '
             '(limitations or empty string), evidence_quote (exact original comment excerpt), '
-            'strategy (answer/acknowledge/clarify). Use clarify for unclear intent. No scores.'
+            'strategy (answer/acknowledge/clarify), and theme_relevant (boolean). '
+            'Set theme_relevant true only when the private theme directly helps answer THIS comment. '
+            'A documentary website does not answer a political interview question, quoted sarcasm '
+            'or a release-date question when no date is supplied. Otherwise set it false. '
+            'Use clarify for unclear intent. No scores.'
         )
         try:
-            raw, _ = self._language_judgment(system, data)
+            raw, _ = self._language_judgment(system, {
+                **data, 'private_theme': getattr(self, '_current_reply_theme', None)})
             return parse_comment_assessment(raw, data['text'])
         except Exception as exc:
             logger.warning('[COMMENT-ASSESS] Unavailable: %s', type(exc).__name__)
@@ -1637,6 +1644,8 @@ FINAL LOCAL-QWEN CONSTRAINTS:
             'uses only supplied factual context and reveals no private operator instructions. '
             'Check every factual claim. A date/link/event not supplied is unknown, not nonexistent '
             'or unannounced. Reject unsupported negative claims as well as invented positive facts. '
+            'Without an actual prior reply in the supplied context, reject claims about what a '
+            'previous response meant or whether it made an assumption. Acknowledge corrections directly. '
             'A theme is optional; do not demand promotion. If uncertain, reject. '
             'Return only one JSON object with boolean addresses_comment, coherent, grounded, '
             'no_internal_instructions and numeric relevance, coherence in [0,1]. '
@@ -1647,13 +1656,33 @@ FINAL LOCAL-QWEN CONSTRAINTS:
                 'receiving_channel_id': comment_data.get('_target_channel_id'),
                 'supplied_generation_context': comment_data.get('_generation_context'),
                 'theme': theme, 'candidate': reply_text}
+        assessment = (comment_data.get('_generation_context') or {}).get('assessment') or {}
+        if assessment and assessment.get('theme_relevant') is not True:
+            data['theme'] = None
+            data['private_theme_for_leak_detection_only'] = theme
+            system += (' The assessment found the private theme irrelevant. Do not treat the '
+                       'leak-detection-only theme as factual support for answering this comment.')
         prompt = json.dumps(data, ensure_ascii=False)
         with self._generation_lock:
             try:
                 if self.lm_studio_available and is_general_reply_model(self.lm_studio_model_id):
+                    # Grammar constrains shape only; all semantic judgments still need to pass.
+                    review_schema = {
+                        'type': 'object', 'additionalProperties': False,
+                        'properties': {
+                            **{key: {'type': 'boolean'} for key in (
+                                'addresses_comment', 'coherent', 'grounded', 'no_internal_instructions')},
+                            **{key: {'type': 'number', 'minimum': 0, 'maximum': 1}
+                               for key in ('relevance', 'coherence')},
+                        },
+                        'required': ['addresses_comment', 'coherent', 'grounded',
+                                     'no_internal_instructions', 'relevance', 'coherence'],
+                    }
                     response = requests.post(self.LM_STUDIO_URL, json={
                         'model': self.lm_studio_model_id, 'temperature': 0, 'max_tokens': 180,
                         'reasoning_effort': 'none',
+                        'response_format': {'type': 'json_schema', 'json_schema': {
+                            'name': 'reply_review', 'strict': True, 'schema': review_schema}},
                         'messages': [{'role': 'system', 'content': system},
                                      {'role': 'user', 'content': prompt}]}, timeout=3)
                     if response.status_code == 200:

@@ -1,3 +1,13 @@
+## 2026-10-29 — Register the YouTube reply repair tests
+
+Regenerated the canonical Git-tracked registry with its existing generator after
+the reply inspection, semantic assessment and durable submission tests were
+tracked. The registry is current at 1,778 files / 275 quarantined; no classifier,
+quarantine rule, collection or authority contract changed. The existing registry
+and differential-runtime selection passes 50 cases on Windows. The YouTube CI
+owner separately runs the bounded offline repair selections; registry presence
+does not establish live model or YouTube delivery. WSP 5/6/22/50/97.
+
 ## 2026-10-28 — Preserve risk-based verification through execution and completion
 
 Reused the existing differential policy, scope resolver, evidence producer and
