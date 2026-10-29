@@ -55,7 +55,8 @@ SQLite `trigger_payout` records payout, task linkage, configured compute charge 
 - `src/interfaces.py`: service contracts and adapter boundaries.
 - `src/in_memory.py`: PoC in-memory implementation.
 - `src/persistence/`: SQLite/Postgres adapters, migration manager, repository factory.
-- `src/persistence/orm_models.py`: single shared Base/13 ORM row mappings; legacy `sqlite_adapter` Base/row imports remain compatible. Domain dataclasses stay in `src/models.py`.
+- `src/persistence/orm_models.py`: single shared Base/14 ORM row mappings; all 13 legacy `sqlite_adapter` row imports remain compatible. Domain dataclasses stay in `src/models.py`.
+- `src/persistence/testnet_transfer_intents.py`: explicit opt-in local probe-intent API; no resident caller, signing or transport.
 - `src/persistence/verification.py`: internal atomic SQLite verification used by the existing task pipeline; one decision/debit/event, exact replay and fail-closed legacy history. This records a supplied decision without granting verifier authority.
 - `src/exceptions.py`: domain errors.
 - `tests/`: schema, lifecycle, and permission tests.
@@ -120,6 +121,36 @@ detect expiry or revocation of a previously constructed context.
 An authenticated transport and signed/domain issuer remain separate integration
 work. This Python context is a host boundary, not a portable credential or a
 repository claim. See [the interface](INTERFACE.md#taskpipelineservice).
+
+## Opt-in TestNet probe preparation
+
+`TestnetTransferIntentService` is available by explicit import from
+`src.persistence.testnet_transfer_intents`. A trusted host supplies immutable
+`HostTestnetPolicy` separately from `SubmittedTestnetBinding`, then calls
+`prepare(payout_id, actor_id, binding, authorization=treasury_context)`.
+There is no resident runtime caller or package export; resident integration and
+any required generated source-closure admission remain future work.
+
+Preparation requires SQLite with recorded migrations 1–3 and the qualified actual
+intent schema, an independently verified pending payout with intact initiation
+history, and the original initiation actor's current exact FoundUp/treasury grant.
+The host policy binds that principal and recipient to an exact Algorand TestNet
+genesis/asset/sender/expected-authorizer identity, recipient allowlist, explicit
+integer asset atoms, microalgo fee cap and expiry. Supplied strings do not prove
+wallet control, checksum validity, node identity, asset properties or funding.
+
+Only a `PREPARED` intent row is added. Full canonical content binds the policy,
+submitted identity and validated initiation event. Exact unexpired retries,
+including after reopen, return the same immutable result; changed content,
+expired policy, missing current authority or unsupported schema rejects. Schema
+validation includes hidden/generated columns and unconditional business-key
+uniqueness; supplied malformed databases are held without automatic repair.
+
+Payout remains `INITIATED`, task remains `VERIFIED`, and no payout event, compute
+charge, reservation or chain effect is added. This is a transport probe, with no
+conversion from `reward_amount`, UPS/F_i issuance, funded reward, vesting or
+tradability decision. See [the interface](INTERFACE.md#testnettransferintentservice-opt-in-local-api)
+and [qualification history](tests/TestModLog.md).
 
 ## OpenClaw Execution Arm Alignment
 OpenClaw remains the execution ingress for intent routing. FAM provides explicit contracts that OpenClaw/WRE can call for launch and execution flows.
