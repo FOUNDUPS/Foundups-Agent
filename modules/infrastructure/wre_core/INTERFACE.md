@@ -342,6 +342,10 @@ and exact `verification_digest`. Test counts must be positive integers and the
 failure count must be the integer zero; malformed values cannot imply a pass. Its v2 identity binds
 the full input evidence. Old minimal hand-written fixtures must supply the
 fields already produced by the real recorder; missing fields fail closed.
+Current receipts serialize `identity_version=2` and `evidence_digest`, the exact
+fields already used in their gate ID. Memex reconstructs that ID without changing
+it. Historical unversioned receipts preserve their exact serialized shape and
+legacy ID; partial, malformed, unsupported or downgraded identities reject.
 
 The existing bridge `invoke_reddog_wre_queue_authorized_pattern_memory_admission(...)`
 also isolates sink input and rejects empty/non-string acknowledgments through

@@ -1889,20 +1889,20 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.parent_consensus_join_20261020.installed_high_source_reconciliation_20261023.posix_spawn_followup",
-    "base_commit": "99dc200869d49ab911134a11768c0d9a05472cb2",
-    "selected_action": "Close PR2181 combined installed HIGH/live-lease integration after hosted regressions",
-    "status": "LOCAL_LINUX_REPAIR_REVIEW_PASSED_FRESH_HOSTED_GATES_REQUIRED",
+    "observation_path": "docs/operations/RSI_SWARM_DISPATCH.md#resident-assurance-connection--2026-10-30",
+    "base_commit": "7d6a292bcb28e5cbadd1dffdac1a795d3da7e31e",
+    "selected_action": "Close existing main-to-AgentDB assurance connection, then authenticate the resident native-worker caller",
+    "status": "LOCAL_CONTRACT_REPAIR_NATIVE_ADMISSION_UNPROVED",
     "wsp15": {
-      "complexity": 4,
-      "importance": 5,
-      "deferability": 5,
-      "impact": 5,
-      "total": 19,
-      "priority": "P0"
+      "complexity": 2,
+      "importance": 4,
+      "deferability": 4,
+      "impact": 4,
+      "total": 14,
+      "priority": "P1"
     },
     "dispatchable": false,
-    "next_action": "Pass fresh exact-head hosted gates, squash merge and verify exact-main source/checks; then establish the authentic current-generation owner/policy inputs through existing enrollment owners. No signing keys or grants are supplied by this planning record."
+    "next_action": "Verify source review, Linux composition and publication for this connection; then resume the19/P0 authenticated owner/peer-grant/parent-consensus/external-lease-issuer integration. PR2181 publication is already closed. No signing keys or grants are supplied by this planning record."
   },
   "current_observation": {
     "parent_consensus_join_20261020": {

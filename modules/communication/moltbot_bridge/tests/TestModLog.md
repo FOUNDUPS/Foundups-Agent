@@ -1,3 +1,52 @@
+## 2026-10-30 — Main assurance binding regression
+
+Follow-on hosted run40999255647 reached verification but failed Memex evidence
+publication. The actual verifier/ratchet/held-out producer reproduces a missing
+v2 receipt identity handoff (one failure/31 passes before repair). Strict
+versioned serialization and legacy-shape compatibility repair that handoff;
+constructor-type, malformed metadata, tamper and downgrade cases protect it.
+The next boundary is real G3 activation: the canonical sink has no acceptance
+transaction and refuses it. The socket composition now expects that refusal
+while preserving verified upstream stages, signed failure/cleanup receipts,
+builder attribution and durable assurance lineage. Synthetic builders and
+authority remain fixtures, not native-worker qualification.
+
+Final connected Windows receipt/consumer selection:221 passed, with two unrelated
+pytest asyncio-option warnings (plugin autoload disabled). WSL diagnostic:five
+startup/socket cases pass using native Linux cryptography and read-only pure
+pytest dependencies; unrelated menu imports are fail-on-use stubs. This is
+diagnostic evidence, not full environment qualification; hosted Linux must run
+the unmodified test environment. Independent source review retained builder
+attribution, no leaked outcome reservation and no fallback memory write.
+
+Hosted run40996640620 passed signing1481/three skipped and startup1003/one
+skipped, then exposed a fixture identity mismatch in the newly selected Linux
+socket composition (625 passed/one failed/one skipped). The queue's selected
+slice differed from its verifier plan/request. Memex correctly refused that
+admission. Bind both fixture inputs to the queue before authority materialization;
+retain canonical-chain and publisher checks. Portable startup plus Memex queue
+regressions pass21/one AF_UNIX skip; hosted full-chain acceptance remains separate.
+A WSL replay was unavailable because its Python lacks the main entrypoint's
+Chroma dependencies; no dependency or shared-runtime changes were made.
+
+Initial hosted run40995247034 reached an unchanged signing-expiry fixture failure
+before the resident chain:1476 passed/one failed/three skipped. Separate payload
+and authorization construction can straddle a clock tick. Production correctly
+uses the first expiry; the fixture used authorization expiry alone. A signed
+test authorization ending five seconds later deterministically reproduces the
+failure (one failed/five passed). The fixture now advances at the first expiry,
+covering earlier/equal/later authorization and before/after-sign principal I/O,
+without changing production lifetime checks or the no-returned-signature rule.
+
+Baseline main7d6a292b: portable startup regression2 fail/2 pass; AF_UNIX chain
+skips on this Windows interpreter. Missing store argument and dispatch reached
+despite unavailable storage reproduce independently of provider execution.
+Repaired source:4 pass/1 skip; connected admission, verifier, reservation,
+recovery and finalization suites62 pass/1 skip. Counts overlap. The chain removes
+test-injected assurance and checks durable completion lineage; its Linux result
+is separate. Synthetic authority/worker collaborators remain explicit, with no
+claim of native author execution, installed-service qualification or G1+G2.
+
 ## 2026-10-29 — Preserve Ollama timeout recovery acceptance
 
 Retain the frozen 19-case helper oracle: unchanged source produces 15 failures

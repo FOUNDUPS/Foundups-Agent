@@ -12,6 +12,16 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
+## Resident assurance connection — 2026-10-30
+
+Source audit at `7d6a292bcb28e5cbadd1dffdac1a795d3da7e31e` supports
+Challenge → Build → Verify → Accept → Improve through existing R06–R19 owners.
+The selected **14/P1 (C2/I4/D4/Impact4)** repair connects main's enabled resident
+startup to the existing AgentDB assurance store; its integration test previously
+supplied that missing dependency itself. The **19/P0** authenticated native
+worker umbrella remains open. See the [current connection and evidence limits](docs/operations/RSI_SWARM_DISPATCH.md#resident-assurance-connection--2026-10-30).
+Recovery, PC synchronization and unrelated PRs remain in their separate lanes.
+
 ## Current RSI input gate — 2026-10-25
 
 [#2181](https://github.com/FOUNDUPS/Foundups-Agent/pull/2181) source publication is complete:

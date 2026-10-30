@@ -1,3 +1,44 @@
+## PR2276 receipt-runtime metadata rebinding — 2026-10-30
+
+After the held-out producer/consumer repair, checksum-pinned Gitleaks8.30.1
+reports39 unchanged manifest source-hash rows and one unchanged module-log
+passage in the scoped staged export. Independent source review confirms all40
+five-line contexts and their prior full-blob/path/rule/line ledger bindings
+against ec2a66b82. All1477 runtime digests match staged Git bytes; only the two
+receipt implementations change, with no inventory or resource-limit change.
+
+Append exactly40 current fingerprints, preserving all2951 prior entries
+(2991 total). Compact sorted addition-set SHA256:
+`4ccc839d3a76bb3e97a0307742544d08dcc029671bdfbe913dc36131008e6022`.
+The earlier seven PR2276 bindings remain historical receipts. No scanner rule,
+scope or finding calculation changes. Scoped local scanning and independent
+metadata review do not replace hosted full-tree/introduced-history checks.
+
+## PR2276 unchanged backlog hash metadata — 2026-10-30
+
+Subsequent hosted job123871199595 reports one remaining ModLog prose finding.
+Independent review verifies the unique base line3941 and two-line context are
+unchanged at current line3951 after the ten-line prefix. Preserve the existing
+review and append only fingerprint
+`1541b6279e9a4bd990cb9d4d4ed27f1e1925322fe9e1ab3be0cb686d5cecf800`
+for file SHA256 `6fc6b6dd8664564f5e449cd4aca522cc4c01d4be0c218f6bf704e73fcf315040`.
+This is ordinary key-resolution documentation, not a credential. Seven exact
+bindings total are added by PR2276; no scanner rule or scope is weakened.
+
+Hosted job123866749916 flags six unchanged historical hash entries in the RSI
+backlog after its current-selection update. Independent review verifies every
+line and two-line surrounding context against main7d6a292b, and confirms every
+prior path/full-blob/rule/line fingerprint is already reviewed. Five values match
+the retained llama_tokenizer.py SHA256; the sixth is a historical Git blob SHA1
+for the named grant-provider source, not a credential or current-source claim.
+
+Append only six exact bindings for backlog Git-content SHA256
+`f0c8ca7fb3c0e3c07fe70dd0c07dfd8e3b7190090c63d2b4962242e77f87f813`.
+Their compact sorted-set SHA256 is
+`508b8abaa2e595dfaea47d20358c3c6049dd91672dc5812ad26e2f692d6d66ae`.
+Preserve all previous bindings and scanner rules/scope. Independent source review
+is not a scan; fresh hosted tree and introduced-history checks remain required.
+
 ## PR2238 current-source metadata review — 2026-10-29
 
 Checksum-verified Gitleaks 8.30.1 flags 39 unchanged runtime source-hash rows

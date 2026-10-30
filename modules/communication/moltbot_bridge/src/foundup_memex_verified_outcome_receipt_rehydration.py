@@ -43,7 +43,16 @@ def rehydrate_held_out_outcome_receipt(
 ) -> HeldOutRecursiveImprovementRegressionReceipt:
     """Return one exact held-out receipt bound to its verified source receipt."""
 
-    payload = _exact(value, _HELD_OUT_FIELDS, "held_out")
+    legacy_fields = _HELD_OUT_FIELDS - {"identity_version", "evidence_digest"}
+    if isinstance(value, Mapping) and set(value) == legacy_fields:
+        payload = _exact(value, legacy_fields, "held_out")
+    else:
+        payload = _exact(value, _HELD_OUT_FIELDS, "held_out")
+        if (type(payload["identity_version"]) is not int
+                or payload["identity_version"] != 2
+                or not isinstance(payload["evidence_digest"], str)
+                or not _DIGEST.fullmatch(payload["evidence_digest"])):
+            raise ValueError("verified_outcome_held_out_identity_invalid")
     receipt = HeldOutRecursiveImprovementRegressionReceipt(**payload)
     _validate_held_out(receipt, verifier)
     if receipt.gate_id != _held_out_gate_id(receipt):

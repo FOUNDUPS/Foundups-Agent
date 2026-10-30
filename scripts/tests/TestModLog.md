@@ -1,3 +1,17 @@
+## 2026-10-30: Held-out receipt runtime integrity binding
+
+Regenerate the existing 1477-source manifest after the held-out receipt producer
+and Memex rehydrator repair. Only those two runtime hashes change; dependency
+membership and resource limits remain fixed. Canonical digest:
+`1111afa6908658bff9384a4cc5f14f6805afc21f222df3a5cd646d8559e831e1`.
+Update the existing extension/test pins together. This is source packaging,
+not service deployment or native RSI evidence. WSP 5/11/22/48/97.
+
+Local validation: eight Python manifest tests passed; Node compatibility
+contract/preflight and their imported async/query contracts passed. Canonical
+registry check remains current at1792 files/260 quarantined. Hosted CI and
+exact-main readback are separate publication gates.
+
 ## 2026-10-29: Current reconciliation local validation
 
 Existing Python manifest suite: eight passed after the measured 330 KiB

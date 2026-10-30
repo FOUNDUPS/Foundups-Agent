@@ -63,6 +63,7 @@ The [complete contract](../../../../../docs/operations/RSI_SWARM_DISPATCH.md#ver
 | `AuthorityRuntimeVerifiedOutcomeStore.load_publication(record_id)` / `publish()` | Validated STAGED/ACTIVE retry evidence; three revision attempts preserve the signed envelope and unrelated state. Staging is invisible to consumable readers. |
 | `SignedVerifiedOutcomeEvidencePublisher.publish()` | Exact durable winner acknowledgment preserves original issuance/signature; no re-signing, renewal or activation. |
 | `ResidentQueueChainResultReceipt.recorded_at` | Canonical held-out event time supplies admission `verified_at`; bootstrap time cannot repair absent historical time. |
+| Held-out receipt rehydration | Current gate receipts retain `identity_version=2` and `evidence_digest` for exact ID reconstruction. Complete historical unversioned shapes retain their original serialization; partial/version/type/digest changes and downgraded IDs reject. This conveys consistency, not admission or activation authority. |
 | PatternMemory staging / authority-envelope consumption | `AuthorityRuntimeVerifiedOutcomeStore(store, *, accepted_outcome_source=None)` requires its configured source's `load_verified_outcome(record_id)` to return the exact accepted canonical record before/after new activation and at envelope reads. Unbound/missing/changed/unreadable sources reject; ACTIVE retries recheck memory. Activation reloads exact durable evidence after each commit attempt, recovers an identical ACTIVE winner/lost reply, and retries only revision conflicts up to three commits. Cancellation propagates; unreadable/substituted or uncommitted state cannot acknowledge success. Staging/publication retry remains separate. Current source binding, durable authority and opaque one-use capability remain required; the real sink rejects direct activation. |
 | Learning-candidate gate / reconstruction verifier | Bounded `STRUCTURAL_ONLY` evidence, not authenticated provenance, work authority or runtime admission. |
 
@@ -274,6 +275,13 @@ settle rewards.
 <a id="contract-082"></a>
 
 ### Independent assurance capacity admission
+
+Main's enabled resident serial preflight supplies the existing AgentDB store,
+using the same configured DatabaseManager backend as signed-worker dispatch.
+No new database or environment selector is introduced. Initialization errors
+record an unaccepted startup result before dispatch; enforced startup fails.
+Disabled startup and earlier rejected draft-runner modes do not open this store.
+This connection does not supply missing signer, consensus or lease authority.
 
 The resident queue inserts `assurance_capacity_admission` after isolated
 worktree creation and before `bounded_worker_pilot`.

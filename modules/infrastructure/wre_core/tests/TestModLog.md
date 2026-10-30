@@ -1,3 +1,12 @@
+## 2026-10-30 — Held-out identity producer/consumer regression
+
+The real verifier → ratchet → held-out gate → Memex rehydrator reproduces one
+failure/31 passes before repair. Version/digest serialization preserves the v2
+ID seed and historical signed shape; constructor metadata, tampering and downgrade
+controls remain explicit. The bridge queue-binding suite owns this connected
+regression; hosted CI also selects the gate and existing authenticity consumers.
+Synthetic input evidence does not establish native independent evaluation.
+
 ## 2026-10-29 — Explicit unimplemented/manual classification
 
 Twelve new registry cases cover literal/annotated modes, invalid declarations,
