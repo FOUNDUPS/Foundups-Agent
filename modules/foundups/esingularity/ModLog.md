@@ -1,3 +1,24 @@
+## 2026-10-30 — Reconcile organization-partner inquiry PR #2234
+
+- Preserve the original coalition/inquiry proposal while retaining both
+  homepages, the shared movement ticker and individual JOIN actions. Use the
+  existing language switcher for Japanese-first copy and complete selected
+  English/Portuguese equivalents; keep the Japanese email template explicit.
+- Add only the host-restricted `/partners` alias. Use `/yumori/partners` for the
+  movement CTA so navigation also works from the shared project host. The
+  inquiry remains a manually sent `mailto:` draft, not a form backend or an
+  automatic sender. Candidate-site and funding/approval conditions stay open.
+- Extend the existing routing suite for exact-path and negative-host behavior;
+  no new test file, localization system, credential, provider or deployment is
+  introduced. Fresh isolated validation on October 30 passes 85 module Python
+  tests, 32 routing tests and eight signup-security tests. The preserved October
+  29 lint/build/browser evidence is dated evidence, not a new run.
+- The current-main Holo owner query is CURRENT/no-gap at `cbef41fbae1b`; actual
+  candidate paths and owner contracts were checked directly. Metadata checks,
+  independent candidate audit, exact-head hosted checks and resulting-main
+  acceptance remain publication gates. Site publication and inquiry delivery
+  remain unverified. WSP 00/10/11/22/50/84/97; website workflow applied.
+
 ## 2026-10-29 — Update Cloudflare tooling for Undici security fixes
 
 - The frontend lock pinned Undici 7.29.1 through Miniflare. GitHub reports four
