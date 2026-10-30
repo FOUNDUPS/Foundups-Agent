@@ -2,6 +2,42 @@
 
 ---
 
+## 2026-10-30 — Political Claim Verification / Bullshit Meter Intake
+
+**Author**: 0102  
+**Slice**: `VOTE_POLITICAL_CLAIM_VERIFICATION_INTAKE_PHASE1`  
+**Scope**: documentation only; EXISTING_FOUNDUP_UPDATE  
+**References**: WSP 22, WSP 30, WSP 50, WSP 62, WSP 95, WSP 97, WSP 108, WSP 109  
+**Branch**: `docs/vote-claim-verification-20261030`
+
+### Source and purpose
+012 supplied a political claim-verification/scoring specification, then requested its addition to Vote's Outcome, Solution, Pain, roadmap and related documentation. The complete supplied text is retained as provenance; its proposed implementation instructions are not reported as executed.
+
+### Created
+- `docs/intake/CLAIM_VERIFICATION_SOURCE_20261030.md` — original feature specification and spoken-scope clarification.
+- `docs/POLITICAL_CLAIM_VERIFICATION_AND_SCORING_ENGINE.md` — integrated pipeline, evidence/score qualifications, proposed data model, four-stage roadmap, UI contracts, evaluation criteria, and primary methodology sources.
+
+### Updated
+- All eight canonical WSP 109 intake documents, including Outcome, Solution and Pain.
+- `README.md` and `ROADMAP.md` — linked the feature and preserved existing product phases.
+- `INTERFACE.md` — planned addendum without claiming runtime APIs. The historical 1,307-line AI hooks architecture file is unchanged to avoid growing existing documentation-size debt (WSP 62).
+- This module log; prior entries preserved.
+
+### Follow-up requirements verification
+- Explicit PoC -> Prototype -> MVP framing added inside Solution; unspecified MVP scope remains unspecified.
+- Pain now identifies implementation barriers; the manifest draft records observed tier/stage/token declaration/next-slice fields.
+- Actual genesis/diligence/pitch Skillz and WSP 95 were read and distinguished from candidate skills and runtime execution.
+- At 012's request, the shared FoundUps onboarding reference and domain README/ModLog record the repository-first rule for future work.
+
+### Decisions and validation scope
+- CV1 internal ten-speech evaluation may proceed alongside public PoC preparation; public/member release remains gated.
+- Preserve the supplied 300-850/index/overlay intent while separating verdict, confidence, context, conflicts and intent. Unknown evidence is unscored. Fixed polling thresholds, conflict weighting, recurrence penalties, and latency targets require qualification and validation.
+- Current GitHub documents/code were inspected with direct-path retrieval; semantic HoloIndex execution and the Windows checkout were not verified in this remote documentation pass.
+- Validation covers source preservation, changed-document links, unchanged historical entries, scope/status consistency, and the GitHub change set. No runtime test result is inferred from documentation checks.
+- The existing six-slice mock-data chain and historical May 25 `303 passed` record remain unchanged. No new engine, corpus run, score, database/migration, production code, runtime manifest/registry, route/catalog activation, live FEC integration, or deployment is claimed.
+
+---
+
 ## 2026-08-26 — WSP 109 Canonicalization + Public PoC Reopen
 
 **Author**: 0102  

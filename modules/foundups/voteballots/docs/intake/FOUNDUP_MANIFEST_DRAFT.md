@@ -10,6 +10,11 @@ WSP 109's current entity decision tree indicates VOTE should be re-evaluated as 
 |---|---|
 | foundup_id | `voteballots` |
 | module_path | `modules/foundups/voteballots` |
+| display_name | `Vote/Ballots` |
+| stage / lifecycle_stage | `incubating` |
+| tier | `F0_DAE` |
+| token_status | `EXISTS` in the registry; a declaration, not independently verified token/chain activity |
+| registry next_slice | `VOTE_POC_IMPLEMENTATION_PHASE1` (historical label; reconciliation pending) |
 | registry entity_type | `skeleton_candidate` |
 | registry implementation_status | `SPECIFIED` |
 | registry poc_status | `idea` |
@@ -32,7 +37,8 @@ These are draft target semantics, not changes made by this intake.
 | module_path | preserve current module path |
 | stage | PoC until public PoC launch gate passes; prototype only after prototype gate |
 | implementation_status | reflect internal implemented PoC without claiming public launch |
-| token_status | preserve current authoritative token state |
+| tier | preserve observed `F0_DAE`; no lifecycle promotion in this intake |
+| token_status | preserve registry declaration `EXISTS`; do not infer minting, active economics, CABR or payouts |
 | poc_status | reconcile internal implementation vs public-surface semantics explicitly |
 | public_surface_status | discoverable until public landing activation passes |
 | public_url_or_route | canonical WSP 104 route, not a new parallel route |
@@ -52,6 +58,15 @@ These are draft target semantics, not changes made by this intake.
 - non-binding cryptographic parallel ballot
 - registration assurance
 - voter-resilience/locality/alert capabilities
+
+### Planned Claim-Verification Capability
+- **Bullshit Meter / Political Claim Verification and Scoring Engine**: planned / not implemented.
+- Internal CV1: ten-speech asynchronous extraction, primary-source evidence graph, review dashboard, evaluation, and experimental 300-850 scoring only after its rubric/coverage gate.
+- CV2: methodology/funding audits; CV3: caption/video overlays; CV4: streaming ASR/live meter.
+- Public/member exposure remains subject to the existing surface/prototype gates.
+- PostgreSQL/pgvector and the requested six tables remain architecture proposals pending storage/retrieval reuse review.
+
+See [the feature design](../POLITICAL_CLAIM_VERIFICATION_AND_SCORING_ENGINE.md). No runtime capability field, module version, readiness flag, manifest, registry, catalog, or route is changed by this intake.
 
 ### Later Shared Governance
 - extract validated preference/mandate/voting-verification primitives for FoundUp SmartDAOs

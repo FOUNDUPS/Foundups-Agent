@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-10-30 Planned Claim-Verification Addendum
+The [Political Claim Verification and Scoring Engine](docs/POLITICAL_CLAIM_VERIFICATION_AND_SCORING_ENGINE.md) adds proposed transcript, atomic-claim, evidence-graph, methodological/funding-audit, versioned-assessment, and score-snapshot contracts. Exact API signatures are reserved for the build packet. These are **planned / not implemented** and must not be reported as exports from the current Python v0.6.0 funding pipeline.
+
+Verdict, WSP 97 evidence confidence, context, conflicts, review state, and intent are separate fields. Unknown/uncheckable/pending cases are unscored; every published assessment requires exact source locators and a correction history. The April API below remains design specification, not proof of delivered speech, search, graph, or challenge functionality.
+
+---
+
 ## Public API
 
 ### Primary Entry Point
