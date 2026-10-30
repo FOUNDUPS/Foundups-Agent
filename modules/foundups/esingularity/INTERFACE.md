@@ -26,10 +26,31 @@ The current eSingularity redesign brief calls for three to four primary content 
 | --- | --- |
 | `/` | eSingularity project/vision landing on eSingularity.ai |
 | `/yumori` | YUMORI movement, case for support, participation and evidence; also served internally at YUMORI.me `/` |
+| `/yumori/partners` | Organization partner inquiry page; also served internally at YUMORI.me/www `/partners` |
 | `/vote-no` | YUMORI.me civic-action record: historical September 25 VOTE NO campaign, current post-vote PPP/PFI request, privacy-bounded council/mayor messages, and official contact routes |
 | `/future` | 福井の未来 / community-benefit explanation |
 | `/team` | Verified public team directory |
 | `/team/[slug]` | Individual public profile |
+
+## Organization partner inquiry contract
+
+- The `/partners` alias is an exact-path, internal `beforeFiles` rewrite limited
+  to YUMORI.me and www.YUMORI.me. It does not capture eSingularity.ai,
+  YUMORI.info, preview hosts, descendant paths, APIs, reports or assets.
+- The movement-page CTA uses the explicit `/yumori/partners` filesystem route
+  so it also works when viewing that page on the shared project's host.
+- The inquiry page keeps canonical `https://yumori.me/partners` metadata and
+  links the project identity to absolute `https://esingularity.ai/`.
+- Its `mailto:` action supplies an editable Japanese subject/body. Sending is
+  manual. No server-side form, automatic email, submission storage, consent
+  processing or delivery receipt is implemented by this route.
+- The visitor is requesting a discussion, not consenting to a partnership,
+  financing or contract. The three candidate-site roles and unconfirmed
+  feasibility conditions remain explicit.
+- Japanese-first visible copy and selected English/Portuguese equivalents use
+  the existing language owner. The shared homepage ticker and individual JOIN
+  path remain intact. Live publication and actual inquiry delivery require
+  separate observations.
 
 ## YUMORI presentation contract
 
