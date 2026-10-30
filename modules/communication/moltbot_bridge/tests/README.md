@@ -9,6 +9,9 @@ digest through completion. Run alongside `test_reddog_resident_queue_assurance_c
 `test_signed_worker_assurance_{reservation,recovery,finalization}.py` suites.
 Use disabled bytecode/plugins, `--noconftest --import-mode=importlib` and an empty
 pytest config. A Windows AF_UNIX skip is not Linux or native-runtime acceptance.
+The fixture verifier plan and explicit request must name the queue's selected
+slice; `test_foundup_memex_verified_outcome_queue_binding.py` separately retains
+rejection coverage for mismatched, stale and noncanonical admission evidence.
 
 ## Ollama fallback contract selection
 

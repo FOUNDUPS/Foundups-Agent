@@ -234,7 +234,9 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
         }
     )
     profile_payload["bounded_worker_plan"] = _pilot_bounded_worker_plan()
+    selected_slice = state_payload["wre_queue_items"][0]["slice_id"]
     profile_payload["slice_verifier_plan"] = _slice_verifier_plan()
+    profile_payload["slice_verifier_plan"]["slice_name"] = selected_slice
     profile_payload, profile_source, profile_source_receipt_id = (
         supply_runtime_authority_source(
             repo_root=repo,
@@ -338,9 +340,11 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
         resident_queue_runtime_file_path(profile_env, repo, "REDDOG_SIGNER_SOCKET_PATH")
     )
     worktree = _pilot_worktree_path(repo, materialized_work_order)
+    verifier_request_payload = _slice_verifier_request()
+    verifier_request_payload["slice_name"] = selected_slice
     verifier_request = _write_json(
         runtime_root / "slice_verifier_request.json",
-        _slice_verifier_request(),
+        verifier_request_payload,
     )
     publish_request = _write_json(
         runtime_root / "draft_pr_publish_request.json",

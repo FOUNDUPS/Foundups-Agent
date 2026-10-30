@@ -1,5 +1,15 @@
 ## 2026-10-30 — Main assurance binding regression
 
+Hosted run40996640620 passed signing1481/three skipped and startup1003/one
+skipped, then exposed a fixture identity mismatch in the newly selected Linux
+socket composition (625 passed/one failed/one skipped). The queue's selected
+slice differed from its verifier plan/request. Memex correctly refused that
+admission. Bind both fixture inputs to the queue before authority materialization;
+retain canonical-chain and publisher checks. Portable startup plus Memex queue
+regressions pass21/one AF_UNIX skip; hosted full-chain acceptance remains separate.
+A WSL replay was unavailable because its Python lacks the main entrypoint's
+Chroma dependencies; no dependency or shared-runtime changes were made.
+
 Initial hosted run40995247034 reached an unchanged signing-expiry fixture failure
 before the resident chain:1476 passed/one failed/three skipped. Separate payload
 and authorization construction can straddle a clock tick. Production correctly
