@@ -23,6 +23,18 @@
 | voter_resilience | Reuse locality/map/alert/evidence patterns for voting-friction visibility and gated support workflows | P2 |
 | smartdao_governance_bridge | Extract validated generic signal/voting primitives from Vote into shared SmartDAO governance interfaces | P3 |
 
+## Current Repository Skill References - Verified 2026-10-30
+These instruction artifacts were read for applicability. No skill execution, admission, promotion, or WRE dispatch is claimed.
+
+| Existing instruction | Actual scope and application here |
+|---|---|
+| [foundup_genesis_intake](../../../../ai_intelligence/ai_overseer/skillz/foundup_genesis_intake/SKILLz.md) | Prototype for a **new** FoundUp genesis envelope; this EXISTING_FOUNDUP_UPDATE creates no new genesis or repository |
+| [strategic_diligence_gate](../../../../ai_intelligence/ai_overseer/skillz/strategic_diligence_gate/SKILLz.md) | Prototype architecture/resource decision instruction; relevant to later build decisions, not evidence of an admitted executor or executed review |
+| [foundup_pitch_package](../../../../platform_integration/social_media_orchestrator/skillz/foundup_pitch_package/SKILLz.md) | Prototype pitch/deck instruction; defines Outcome -> Solution -> Pain, PoC -> Prototype -> MVP within Solution, and implementation barriers within Pain; no pitch/deck is requested here |
+| [WSP 95](../../../../../WSP_framework/src/WSP_95_WRE_SKILLz_Wardrobe_Protocol.md) | Exact registry/frontmatter/bundle/scanner and effect-receipt admission governs actual runtime execution |
+
+`foundup_pain_solution_outcome_mapper` is a candidate in WSP 109; repository search did not locate a created skill with that name. Do not report a candidate as installed or executed. Historical wardrobe inventories are discovery leads; current files and registry are the authority.
+
 ## Mandatory Retrieval Discipline
 Every skill or worker must receive explicit HoloIndex query parameters before execution. `search codebase` is not sufficient.
 

@@ -79,3 +79,10 @@ Exact corpus and source access, shared storage/transcript/search/extension owner
 
 ### Retrieval assessment for this documentation slice
 Current module README, interface/architecture design, roadmap, eight intake files, implementation exports, shell/FEC code, and May closure evidence were read directly from GitHub. Exact module paths reduce generic governance-voting search noise; no existing `Bullshit Meter` code-search match or open Vote PR was found. Semantic HoloIndex execution and local Windows checkout state were not verified. The older interface and runtime manifest/registry labels remain separate from implementation truth; new features remain explicitly planned. Current-code semantic/reuse validation is still required before a build slice.
+
+### Repository-requirement verification and persistent instruction
+The follow-up verification read canonical WSP 109 in full, WSP 95 v2.1, WSP 108, the module onboarding protocol, the actual genesis/diligence/pitch Skillz, and WSP 30 stage definitions. The packet was tightened to make PoC -> Prototype -> MVP explicit within Solution and implementation barriers explicit within Pain. MVP remains unspecified rather than invented. Observed registry/manifest values now populate display name, stage, tier, token-status declaration and historical next-slice fields in the draft.
+
+The registry, Vote module, Mall catalog, video catalog and portfolio were inspected; Vote remains an existing module without an activated public app or a Vote entry in those three catalogs/projections. Direct GitHub retrieval was used. No callable HoloIndex runtime tool was available, and no HoloIndex query, WRE skill execution, bootstrap runtime, genesis validation, or launch validation is claimed. Candidate skills and prototype files do not establish production admission.
+
+012's instruction to repeat this repository-first check in future FoundUp work is recorded in the [shared onboarding reference](../../../docs/FOUNDUP_ONBOARDING_PROTOCOL_PHASE1.md), linked from the FoundUps domain README. It is persistent project guidance; no ChatGPT account-memory setting or runtime scheduler was changed.

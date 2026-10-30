@@ -10,6 +10,11 @@ WSP 109's current entity decision tree indicates VOTE should be re-evaluated as 
 |---|---|
 | foundup_id | `voteballots` |
 | module_path | `modules/foundups/voteballots` |
+| display_name | `Vote/Ballots` |
+| stage / lifecycle_stage | `incubating` |
+| tier | `F0_DAE` |
+| token_status | `EXISTS` in the registry; a declaration, not independently verified token/chain activity |
+| registry next_slice | `VOTE_POC_IMPLEMENTATION_PHASE1` (historical label; reconciliation pending) |
 | registry entity_type | `skeleton_candidate` |
 | registry implementation_status | `SPECIFIED` |
 | registry poc_status | `idea` |
@@ -32,7 +37,8 @@ These are draft target semantics, not changes made by this intake.
 | module_path | preserve current module path |
 | stage | PoC until public PoC launch gate passes; prototype only after prototype gate |
 | implementation_status | reflect internal implemented PoC without claiming public launch |
-| token_status | preserve current authoritative token state |
+| tier | preserve observed `F0_DAE`; no lifecycle promotion in this intake |
+| token_status | preserve registry declaration `EXISTS`; do not infer minting, active economics, CABR or payouts |
 | poc_status | reconcile internal implementation vs public-surface semantics explicitly |
 | public_surface_status | discoverable until public landing activation passes |
 | public_url_or_route | canonical WSP 104 route, not a new parallel route |

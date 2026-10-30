@@ -3,6 +3,17 @@
 ## Core Solution
 VOTE is an existing FoundUp mode that turns public election and political-finance information into a simple evidence-first civic interface. The public PoC is the open FoundUp landing/funnel surface: locate the user's election context, show the relevant candidate/race cards, expose funding/influence evidence, and allow a user to scan or capture political material so RedDog can resolve the subject and fetch its public history. Deeper capabilities remain gated through the existing pfMALL/member path and mature through staged prototype slices into discovery, resilience/alerts, non-binding cryptographic preference voting, registration assurance, and eventually reusable FoundUp SmartDAO governance primitives.
 
+## Solution Stages: PoC -> Prototype -> MVP
+This is the Solution portion of the repository's **Outcome -> Solution -> Pain** model. Stages sit inside Solution, rather than adding narrative pillars. The [current pitch-package instruction](../../../../platform_integration/social_media_orchestrator/skillz/foundup_pitch_package/SKILLz.md) documents this framing, and [WSP 30](../../../../../WSP_framework/src/WSP_30_Agentic_Module_Build_Orchestration.md) describes staged builds. Reading these references is not a claim that a skill or WRE job was executed.
+
+| Stage | Scope and gate | Observed status |
+|---|---|---|
+| PoC | Existing public candidate/race/funding trust surface; separately, bounded CV1 internal evaluation of ten historical speeches with claim/evidence receipts and abstention | Funding chain is internally implemented with mock data; public PoC and CV1 evaluation are not launched/completed |
+| Prototype | Refine and integrate candidate records and the staged claim engine: CV2 method/funding audit and CV3 caption overlays, with the existing prototype gate and correction/review requirements | Planned; discovery, parallel-ballot, registration and resilience slices retain their separate gates |
+| MVP | A supported real-participant release needs a defined audience, minimum scope, operating/review ownership and measurable release criteria | **Not yet specified or achieved.** This intake does not invent its scope or equate the later CV4 live-meter ambition with MVP readiness |
+
+The next bounded claim-engine action is the CV1 reuse/schema/evaluation packet. Public release remains separately gated.
+
 ## Key Capabilities
 1. **Public ballot intelligence** - locality/context resolution, candidate/race cards, funding and influence summaries, evidence provenance, trail-stop markers.
 2. **Capture-to-research** - reuse the ecosystem's capture/scan patterns so a user can photograph or capture a political object/ad and invoke the same evidence pipeline rather than creating a Vote-specific camera stack.

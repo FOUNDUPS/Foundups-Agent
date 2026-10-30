@@ -28,6 +28,18 @@ A listener needs to move from a specific political statement to the relevant pri
 
 The proposed Bullshit Meter also addresses the verifier's own failure modes: selective corpus choice, opaque scoring, repeated copies of one source, confident interpretation of uncertain transcripts, and confusion between an unsupported claim and a false claim. The product need is an inspectable evidence and correction path, not automatic certainty.
 
+## Obstacles to Implementing the Solution
+The adoption pain above remains. The Outcome -> Solution -> Pain framing also requires the barriers between the proposed solution and its outcome:
+
+- **Data and access**: live FEC integration is unfinished; transcripts, datasets and methodology documents need source-specific access, versions and licensing decisions.
+- **Verification quality**: transcript ambiguity, temporal/context mismatch, incomplete funding trails, correlated sources and uncalibrated scores must be handled before reliable public assessments.
+- **Reuse and integration**: storage, transcript/ASR, search, extension/media and review/correction owners require current-code discovery. Candidate skill names do not establish a working executor.
+- **Product readiness**: public Vote activation, manifest/registry label reconciliation and verification of the current pfMALL gate remain open dependencies.
+- **Evaluation and operation**: the ten-speech corpus, independent review, score coverage/calibration, corrections and separate ASR/research latency measurements have not been completed.
+- **MVP definition**: audience, minimum supported release, acceptance criteria and operating ownership remain unspecified.
+
+These are implementation constraints, not new user-research findings. See [Solution stages](SOLUTION.md) and [the feature evaluation plan](../POLITICAL_CLAIM_VERIFICATION_AND_SCORING_ENGINE.md).
+
 ## Pain Severity
 - Frequency: recurring during election cycles; continuous for political-media discovery and funding transparency
 - Impact: high when evidence, eligibility status, or access conditions are unclear

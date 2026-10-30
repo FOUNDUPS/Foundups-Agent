@@ -7,6 +7,7 @@
 **Author**: 0102  
 **Slice**: `VOTE_POLITICAL_CLAIM_VERIFICATION_INTAKE_PHASE1`  
 **Scope**: documentation only; EXISTING_FOUNDUP_UPDATE  
+**References**: WSP 22, WSP 30, WSP 50, WSP 62, WSP 95, WSP 97, WSP 108, WSP 109  
 **Branch**: `docs/vote-claim-verification-20261030`
 
 ### Source and purpose
@@ -19,8 +20,14 @@
 ### Updated
 - All eight canonical WSP 109 intake documents, including Outcome, Solution and Pain.
 - `README.md` and `ROADMAP.md` — linked the feature and preserved existing product phases.
-- `INTERFACE.md` and `docs/VOTEBALLOTS_AI_HOOKS_ARCHITECTURE.md` — explicitly planned addenda, without claiming runtime APIs.
+- `INTERFACE.md` — planned addendum without claiming runtime APIs. The historical 1,307-line AI hooks architecture file is unchanged to avoid growing existing documentation-size debt (WSP 62).
 - This module log; prior entries preserved.
+
+### Follow-up requirements verification
+- Explicit PoC -> Prototype -> MVP framing added inside Solution; unspecified MVP scope remains unspecified.
+- Pain now identifies implementation barriers; the manifest draft records observed tier/stage/token declaration/next-slice fields.
+- Actual genesis/diligence/pitch Skillz and WSP 95 were read and distinguished from candidate skills and runtime execution.
+- At 012's request, the shared FoundUps onboarding reference and domain README/ModLog record the repository-first rule for future work.
 
 ### Decisions and validation scope
 - CV1 internal ten-speech evaluation may proceed alongside public PoC preparation; public/member release remains gated.

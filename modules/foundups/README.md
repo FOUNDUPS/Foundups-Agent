@@ -19,6 +19,7 @@ For active execution, use these first:
 |----------|---------|
 | [FOUNDUPS_DOMAIN_CANONICAL_INDEX.md](docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md) | Domain truth: canonical vs planning vs pending-audit vs historical |
 | [ROADMAP.md](ROADMAP.md) | Domain-level layered roadmap |
+| [FoundUp intake/update retrieval rule](docs/FOUNDUP_ONBOARDING_PROTOCOL_PHASE1.md) | Standing 012 instruction: retrieve current repository requirements and applicable Skillz; preserve Outcome -> Solution -> Pain and PoC -> Prototype -> MVP |
 | [AutoPost item capture handoff](pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md) | Shop/GetK-style private photo grouping into the existing Mall; specified contracts and missing implementation gates |
 | [FOUNDUP_EXFOLIATION_PROTOCOL.md](docs/FOUNDUP_EXFOLIATION_PROTOCOL.md) | Core vs spin-out decision rule |
 | [PQN_SWARM_HUB_FOUNDUP_BRIEF.md](docs/PQN_SWARM_HUB_FOUNDUP_BRIEF.md) | Internal-first PQN swarm FoundUp brief |
