@@ -1,5 +1,14 @@
 ## 2026-10-30 — Main assurance binding regression
 
+Initial hosted run40995247034 reached an unchanged signing-expiry fixture failure
+before the resident chain:1476 passed/one failed/three skipped. Separate payload
+and authorization construction can straddle a clock tick. Production correctly
+uses the first expiry; the fixture used authorization expiry alone. A signed
+test authorization ending five seconds later deterministically reproduces the
+failure (one failed/five passed). The fixture now advances at the first expiry,
+covering earlier/equal/later authorization and before/after-sign principal I/O,
+without changing production lifetime checks or the no-returned-signature rule.
+
 Baseline main7d6a292b: portable startup regression2 fail/2 pass; AF_UNIX chain
 skips on this Windows interpreter. Missing store argument and dispatch reached
 despite unavailable storage reproduce independently of provider execution.

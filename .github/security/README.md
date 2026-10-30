@@ -1,3 +1,19 @@
+## PR2276 unchanged backlog hash metadata — 2026-10-30
+
+Hosted job123866749916 flags six unchanged historical hash entries in the RSI
+backlog after its current-selection update. Independent review verifies every
+line and two-line surrounding context against main7d6a292b, and confirms every
+prior path/full-blob/rule/line fingerprint is already reviewed. Five values match
+the retained llama_tokenizer.py SHA256; the sixth is a historical Git blob SHA1
+for the named grant-provider source, not a credential or current-source claim.
+
+Append only six exact bindings for backlog Git-content SHA256
+`f0c8ca7fb3c0e3c07fe70dd0c07dfd8e3b7190090c63d2b4962242e77f87f813`.
+Their compact sorted-set SHA256 is
+`508b8abaa2e595dfaea47d20358c3c6049dd91672dc5812ad26e2f692d6d66ae`.
+Preserve all previous bindings and scanner rules/scope. Independent source review
+is not a scan; fresh hosted tree and introduced-history checks remain required.
+
 ## PR2238 current-source metadata review — 2026-10-29
 
 Checksum-verified Gitleaks 8.30.1 flags 39 unchanged runtime source-hash rows
