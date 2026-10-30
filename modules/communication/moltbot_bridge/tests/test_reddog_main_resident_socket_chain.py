@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 import socket
+from types import SimpleNamespace
 
 import pytest
 
@@ -45,7 +46,6 @@ from modules.communication.moltbot_bridge.tests.test_reddog_main_openclaw_signed
     _FakeEnvCommitDraftPrRunner,
     _FakeExactShaEvidenceRunner,
     _FakeProfileWorktreeRunner,
-    _assurance_store,
     _draft_pr_publish_request,
     _patch_fusion_artifact_generator,
     _pilot_bounded_worker_plan,
@@ -64,6 +64,89 @@ from modules.communication.moltbot_bridge.tests.test_reddog_main_openclaw_signed
     runtime,
     threading,
 )
+
+
+def test_main_serial_preflight_supplies_existing_agentdb(tmp_path, monkeypatch):
+    import main
+    from modules.infrastructure.database.src.db_manager import DatabaseManager
+    from modules.communication.moltbot_bridge.src import (
+        reddog_main_resident_queue_serial_loop_bootstrap as serial_bootstrap,
+    )
+
+    calls = []
+
+    def bootstrap(**kwargs):
+        calls.append(kwargs)
+        return SimpleNamespace(
+            accepted=False, status="NOT_READY", steps_run=0, dispatched_stages=(),
+            next_action="", rejection_reasons=("test_authority_unavailable",),
+            queue_item_id=None, selected_slice=None,
+        )
+
+    monkeypatch.setattr(serial_bootstrap, "run_reddog_main_resident_queue_serial_loop_bootstrap", bootstrap)
+    DatabaseManager.reset_for_tests()
+    try:
+        with pytest.MonkeyPatch.context() as env:
+            env.setattr(os, "environ", {
+                "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP": "1",
+                "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_ENFORCED": "1",
+                "FOUNDUPS_DB_PATH": str(tmp_path / "foundups.db"),
+            })
+            assert main.run_reddog_resident_queue_serial_loop_preflight(tmp_path) is False
+            store = calls[0]["assurance_reservation_store"]
+            assert isinstance(store, AgentDB)
+            assert store.db is AgentDB().db
+            assert (tmp_path / "foundups.db").is_file()
+            assert main.run_reddog_resident_queue_serial_loop_preflight.last_result["accepted"] is False
+    finally:
+        DatabaseManager.reset_for_tests()
+
+
+@pytest.mark.parametrize("enabled,runner_mode,expected", [
+    ("0", "", True), ("1", "unsupported", False),
+])
+def test_main_serial_preflight_does_not_open_assurance_store_before_activation(
+    tmp_path, monkeypatch, enabled, runner_mode, expected,
+):
+    import main
+
+    def unexpected_store(*args, **kwargs):
+        pytest.fail("AgentDB must not open on disabled or rejected startup")
+
+    monkeypatch.setattr(AgentDB, "__init__", unexpected_store)
+    with pytest.MonkeyPatch.context() as env:
+        env.setattr(os, "environ", {
+            "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP": enabled,
+            "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_ENFORCED": "1",
+            "REDDOG_DRAFT_PR_RUNNER_MODE": runner_mode,
+        })
+        assert main.run_reddog_resident_queue_serial_loop_preflight(tmp_path) is expected
+
+
+def test_main_serial_preflight_store_failure_prevents_dispatch(tmp_path, monkeypatch):
+    import main
+    from sqlite3 import OperationalError
+    from modules.communication.moltbot_bridge.src import (
+        reddog_main_resident_queue_serial_loop_bootstrap as serial_bootstrap,
+    )
+
+    def unavailable_store(*args, **kwargs):
+        raise OperationalError("test database unavailable")
+
+    def unexpected_dispatch(**kwargs):
+        pytest.fail("Failed assurance storage must stop before dispatch")
+
+    monkeypatch.setattr(AgentDB, "__init__", unavailable_store)
+    monkeypatch.setattr(serial_bootstrap, "run_reddog_main_resident_queue_serial_loop_bootstrap", unexpected_dispatch)
+    with pytest.MonkeyPatch.context() as env:
+        env.setattr(os, "environ", {
+            "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP": "1",
+            "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_ENFORCED": "1",
+        })
+        assert main.run_reddog_resident_queue_serial_loop_preflight(tmp_path) is False
+    result = main.run_reddog_resident_queue_serial_loop_preflight.last_result
+    assert result["accepted"] is False
+    assert result["rejection_reasons"] == ("OperationalError",)
 
 
 @pytest.mark.skipif(not hasattr(socket, "AF_UNIX"), reason="AF_UNIX required")
@@ -97,11 +180,12 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
     real_serial_bootstrap = (
         serial_bootstrap.run_reddog_main_resident_queue_serial_loop_bootstrap
     )
-    assurance_store = _assurance_store()
+    startup_assurance_stores = []
 
     def _fixed_policy_time_bootstrap(**kwargs: object):
         kwargs["now_iso"] = BOOTSTRAP_NOW
-        kwargs["assurance_reservation_store"] = assurance_store
+        # Exercise the production caller's binding, not a test-only repair.
+        startup_assurance_stores.append(kwargs["assurance_reservation_store"])
         return real_serial_bootstrap(**kwargs)
 
     monkeypatch.setattr(
@@ -393,6 +477,15 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
 
     stored = json.loads(chain.read_text(encoding="utf-8"))
     assert_progressive_chain_state(stored)
+    assert startup_assurance_stores
+    reservation = stored["stage_results"]["assurance_capacity_admission"]["reservation"]
+    for store in startup_assurance_stores:
+        assert isinstance(store, AgentDB)
+        durable = store.get_independent_assurance_reservation(reservation["reservation_id"])
+        assert durable is not None
+        assert durable["status"] == "COMPLETED"
+        assert durable["reservation"]["reservation_id"] == reservation["reservation_id"]
+        assert durable["reservation"]["admission_reservation_digest"] == reservation["reservation_digest"]
     assert_progressive_effects(
         worktree_instances=_FakeProfileWorktreeRunner.instances,
         draft_runner_instances=_FakeEnvCommitDraftPrRunner.instances,

@@ -1,3 +1,33 @@
+## Resident assurance connection — 2026-10-30
+
+WSP97 source reconciliation at `7d6a292bcb28e5cbadd1dffdac1a795d3da7e31e`:
+Challenge/Build/Verify/Accept/Improve maps to existing R06/R14, R07–R08/R18,
+R09–R10/R19, R11–R13 and R15/R17/R23 owners. Do not create replacement queues,
+state machines, evaluation stores or roadmaps. Native G1+G2 precedes parallelism.
+
+The eligible **14/P1 (C2/I4/D4/Impact4)** slice connects main's resident startup
+to AgentDB's existing independent-assurance store. The signed OpenClaw binding
+already did this. The socket integration test injected the absent dependency,
+masking main's omission; it now requires the production binding and checks the
+durable reservation at completion. AgentDB initialization belongs only in enabled
+runtime composition; it is not a read-only readiness probe or new authority.
+
+Local Windows caller regression: baseline **2 failed / 2 passed / 1 skipped**;
+repair **4 passed / 1 skipped**. Connected admission, reservation, recovery and
+verifier-finalization suites: **62 passed / 1 skipped** (overlaps those four).
+The AF_UNIX composition requires Linux and is explicitly selected in hosted CI.
+Its signer, workers, model, authority and execution collaborators remain fixtures;
+passing it cannot establish native OpenClaw/Hermes operation or G1+G2 closure.
+
+After exact-source review and publication, next remains the **19/P0** native
+admission umbrella: authenticated peer-grant, parent-consensus and external
+lease-issuer caller composition plus current owner/work/model/budget inputs.
+Keep the existing selection/replay/generation refusals and post-valve issuance
+ordering. G3 activation/rollback, G4 later controlled benefit and G5 bounded
+continuation still require operational evidence. No paid model calls, new
+credentials, runtime grants, live deployments or compute-saving claim in this slice.
+The October25 scoped input observations below remain historical, not a new host scan.
+
 ## Risk-based verification integration handoff — 2026-10-28
 
 See [WRE verification ownership, evidence boundaries and Prometheus M2M execution packet](WRE_RISK_BASED_VERIFICATION_HANDOFF_20261028.md). Existing test-impact projection and differential execution are separate from authenticated worker completion and RSI promotion. This cross-reference does not activate a new worker or claim end-to-end integration.

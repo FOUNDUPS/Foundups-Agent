@@ -275,6 +275,13 @@ settle rewards.
 
 ### Independent assurance capacity admission
 
+Main's enabled resident serial preflight supplies the existing AgentDB store,
+using the same configured DatabaseManager backend as signed-worker dispatch.
+No new database or environment selector is introduced. Initialization errors
+record an unaccepted startup result before dispatch; enforced startup fails.
+Disabled startup and earlier rejected draft-runner modes do not open this store.
+This connection does not supply missing signer, consensus or lease authority.
+
 The resident queue inserts `assurance_capacity_admission` after isolated
 worktree creation and before `bounded_worker_pilot`.
 `ResidentQueueAssuranceCapacityAdmissionHandler` requires the AgentDB

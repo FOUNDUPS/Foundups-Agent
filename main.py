@@ -3597,6 +3597,11 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
 
         trusted_authority_clock = lambda: int(time.time())
         now_epoch = trusted_authority_clock() if authority_state_path else None
+        # Share the configured AgentDB with signed worker dispatch. Reserving
+        # independent verification capacity is mandatory before author work.
+        from modules.infrastructure.database.src.agent_db import AgentDB
+
+        assurance_reservation_store = AgentDB()
         result = run_reddog_main_resident_queue_serial_loop_bootstrap(
             repo_root=repo_root,
             runtime_allowed_root=resident_queue_runtime_root_path(os.environ, repo_root),
@@ -3690,6 +3695,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             draft_pr_runner=draft_pr_runner,
             pattern_memory_admission_sink=pattern_memory_admission_sink,
             worker_dispatch_writer=worker_dispatch_writer,
+            assurance_reservation_store=assurance_reservation_store,
             requested_queue_item_id=os.getenv("REDDOG_WRE_QUEUE_ITEM_ID", "") or None,
             now_epoch=now_epoch,
             trusted_now_epoch=trusted_authority_clock,

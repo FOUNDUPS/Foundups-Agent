@@ -1,3 +1,11 @@
+## Resident assurance startup — 2026-10-30
+
+Main now supplies the same existing AgentDB assurance owner as the signed-worker
+binding; the socket chain no longer supplies it from a test wrapper. Local
+contracts pass62 with one platform skip; Linux composition/publication must be
+verified separately. [Current RSI selection and remaining authority connections](../../../docs/operations/RSI_SWARM_DISPATCH.md#resident-assurance-connection--2026-10-30)
+govern next work. Installed HIGH history below does not establish native RSI.
+
 ## Installed HIGH source integration — 2026-10-23
 
 PR #2181 reconciles preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.

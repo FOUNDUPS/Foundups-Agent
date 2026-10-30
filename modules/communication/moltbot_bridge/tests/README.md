@@ -1,3 +1,15 @@
+## Resident assurance startup binding
+
+`test_reddog_main_resident_socket_chain.py` covers main's actual AgentDB binding,
+disabled/rejected startup, storage failure and a Linux AF_UNIX composition.
+The composition uses disposable storage and synthetic authority/worker fixtures;
+it must receive the production assurance dependency and retain its admission
+digest through completion. Run alongside `test_reddog_resident_queue_assurance_capacity_admission.py`,
+`test_reddog_resident_queue_slice_verifier_handler.py` and the database owner's
+`test_signed_worker_assurance_{reservation,recovery,finalization}.py` suites.
+Use disabled bytecode/plugins, `--noconftest --import-mode=importlib` and an empty
+pytest config. A Windows AF_UNIX skip is not Linux or native-runtime acceptance.
+
 ## Ollama fallback contract selection
 
 `test_openclaw_ollama_contract.py` freezes 19 offline cases for finite bounded

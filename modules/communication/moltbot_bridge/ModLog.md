@@ -1,3 +1,13 @@
+## 2026-10-30 — Connect resident startup assurance storage
+
+WSP 5/10/11/15/22/48/50/97. Main's enabled serial startup now supplies the
+existing AgentDB assurance store. No new scheduler, database, grants or provider
+route. Remove the test-only store injection that masked this omitted argument.
+Portable startup reproduces two failures before the repair, then four passes;
+connected assurance/verification/recovery contracts pass62 with one AF_UNIX skip.
+Hosted Linux selection now includes the socket chain. Native worker execution,
+protected authority inputs and retained RSI benefit remain separate gates.
+
 ## 2026-10-29: Reconcile existing editorial-package PR #2238
 
 WSP 11/22/50/71/84/97. Preserve the original compiler/strict content route while

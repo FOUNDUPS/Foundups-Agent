@@ -2591,6 +2591,7 @@ jobs:
             modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_execution_valve_handler.py \
             modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_stage_handler_registry.py \
             modules/communication/moltbot_bridge/tests/test_reddog_main_resident_queue_serial_loop_bootstrap.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_main_resident_socket_chain.py \
             modules/communication/moltbot_bridge/tests/test_reddog_openclaw_hermes_0102_worker_dispatch_runtime.py \
             modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_worker_dispatch_runtime_handler.py \
             modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_worktree_create_handler.py \

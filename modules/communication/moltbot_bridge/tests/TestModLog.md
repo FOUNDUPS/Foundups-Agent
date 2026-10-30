@@ -1,3 +1,14 @@
+## 2026-10-30 — Main assurance binding regression
+
+Baseline main7d6a292b: portable startup regression2 fail/2 pass; AF_UNIX chain
+skips on this Windows interpreter. Missing store argument and dispatch reached
+despite unavailable storage reproduce independently of provider execution.
+Repaired source:4 pass/1 skip; connected admission, verifier, reservation,
+recovery and finalization suites62 pass/1 skip. Counts overlap. The chain removes
+test-injected assurance and checks durable completion lineage; its Linux result
+is separate. Synthetic authority/worker collaborators remain explicit, with no
+claim of native author execution, installed-service qualification or G1+G2.
+
 ## 2026-10-29 — Preserve Ollama timeout recovery acceptance
 
 Retain the frozen 19-case helper oracle: unchanged source produces 15 failures
