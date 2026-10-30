@@ -26,7 +26,7 @@ The original design roadmap is stale.
 - locality/race/candidate roster UX
 - registry/manifest status reconciliation
 - Mall/portfolio promotion
-- prototype features
+- prototype features, including the newly specified political claim-verification / Bullshit Meter track
 - official or non-binding blockchain ballot execution
 
 ---
@@ -44,7 +44,7 @@ The original design roadmap is stale.
 - [ ] classify AutoPost/GotJunk/Liberty Alert/blockchain reuse surfaces
 
 ### Boundary
-Docs/audit first. Runtime registry/manifest promotion occurs only in its own tested slice.
+Docs/audit first. Runtime registry/manifest promotion occurs only in its own tested slice. Bounded internal CV1 claim-verification evaluation may be planned and executed alongside Phases 0/1 after its reuse/architecture gate; this does not activate a public scorecard or replace the public PoC.
 
 ---
 
@@ -107,6 +107,30 @@ A public user can reach Vote, identify the relevant election/candidate context o
 Every score axis must expose source evidence and confidence. No automatic endorsement/ranking.
 
 ---
+
+### Political Claim Verification Track - Bullshit Meter (2026-10-30)
+
+**Status**: planned / not implemented. Full requirements and original-source reconciliation: [feature design](docs/POLITICAL_CLAIM_VERIFICATION_AND_SCORING_ENGINE.md).
+
+| Track | Requested rollout phase | Planned deliverable |
+|---|---|---|
+| CV1 | Asynchronous Transcript Engine | Internal CLI/review dashboard; ten source-backed historical speeches across 2-5 figures; atomic claim extraction; primary-source retrieval; reviewed evidence JSON and experimental score or explicit abstention |
+| CV2 | Methodological & Funding Graph Integration | Sampling/statistical audits, method-aware uncertainty, sourced funding relationships, historical contradiction/recurrence, evaluated scoring policy |
+| CV3 | Browser Extension & Asynchronous Video Overlay | Caption-aligned evidence tags and clickable sources using existing extension/media components where suitable |
+| CV4 | Real-Time Debate & Broadcast Meter | Streaming ASR plus cache/research with independently measured latency, provisional/final states, and review/abstention |
+
+- [ ] CV1: reuse/schema decision, frozen ten-speech corpus, exact quote/offset preservation, claim/exclusion JSON and primary evidence graph.
+- [ ] CV1: independent reviewed labels and extraction/retrieval/verdict evaluation, including unknown and historical-context cases.
+- [ ] Scoring gate: explicit formula, deduplication, severity/recency policy, coverage, uncertainty, correction history, and calibration before publishing 300-850 scores or color bands.
+- [ ] CV2: audit methods and funding without treating financial association as falsehood or recurrence as proof of intent.
+- [ ] CV3: validate caption alignment, source freshness, permissions and correction propagation.
+- [ ] CV4: benchmark ASR, cache lookup, novel research, review and display separately; a sub-500-ms target is not an end-to-end verified-truth guarantee.
+- [ ] Public activation: satisfy public PoC/prototype gates and applicable V5/V6/V8 reopen criteria; V1/V2/V3/V7 apply if live FEC/public/runtime promotion is included.
+
+The public candidate/race/funding PoC remains Phase 1. CV1 is an internal evaluation track; the ten speeches and scores have not yet been produced. Unknown/uncheckable claims must remain unscored. PostgreSQL/pgvector is proposed, subject to current shared-storage/retrieval reuse. Existing phases below retain their scope and sequence.
+
+---
+
 
 ## Phase 3 - Prototype B: Discovery
 

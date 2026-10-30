@@ -1,3 +1,28 @@
+## 2026-10-29 — Reconcile the preserved YUMORI video-evidence proposal
+
+Existing editorial PR #2238 merged as c2d4c26f7a76168467b7ed4fc3a8b7518f55eff3,
+with an exact reviewed-tree match. All 41 observed PR checks and 22
+resulting-main checks across 5 observed workflows passed. Governed Holo
+maintenance and a fresh query bind source/workspace/authority to that main,
+CURRENT/no-gap; both owned runtimes stopped. Twenty-one owned merges now have
+main/Holo acceptance. The current inventory retains 35 open PRs, eleven drafts;
+all retained heads match the prior inventory. No unique work was bulk-closed.
+
+Next existing PR #1667 preserves its video-evidence proposal/history while
+correcting Moshpit terminology, the architecture link and obsolete unwired
+route descriptions. Current channel, portfolio and default-one-cycle daemon
+routes already exist. The YUMORI extractor/projected evidence is still
+SPECIFIED_NOT_IMPLEMENTED. Source wiring, an authenticated session and generated
+text do not establish execution/disclosure authority or observed events.
+
+All original campaign dates and three schema/flow blocks are preserved. Five
+existing owner paths and the canonical link resolve. Current module README and
+ModLog bodies remain; no executable source, test, runtime manifest or test
+registry change occurs. The three initial changed files have zero findings in
+the pinned scan; final root-record scanning and exact-head/main/Holo checks
+remain required. No browser, provider, extraction, publication or other chat's
+worktree is touched. WSP 11/22/50/60/84/87/97.
+
 ## 2026-10-29 — Reconcile existing editorial-package PR #2238
 
 Root preservation #2273 merged as 45aa97ba841d8100e1a68100bed4a64d69e40312.
