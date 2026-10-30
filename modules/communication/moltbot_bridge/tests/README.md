@@ -12,6 +12,11 @@ pytest config. A Windows AF_UNIX skip is not Linux or native-runtime acceptance.
 The fixture verifier plan and explicit request must name the queue's selected
 slice; `test_foundup_memex_verified_outcome_queue_binding.py` separately retains
 rejection coverage for mismatched, stale and noncanonical admission evidence.
+The socket composition now uses the real memory sink: verification completes,
+but its unimplemented acceptance transaction rejects activation before outcome
+signing or memory writes. A signed failure control receipt is not chain completion.
+The queue-binding suite also runs actual verifier/ratchet/held-out producers
+through receipt reconstruction, preserving v2 identity and legacy signed bytes.
 
 ## Ollama fallback contract selection
 

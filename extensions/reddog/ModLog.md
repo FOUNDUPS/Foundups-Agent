@@ -1,3 +1,12 @@
+## 2026-10-30: Held-out receipt runtime integrity binding
+
+Regenerate the existing 1477-source manifest after the held-out receipt producer
+and Memex rehydrator repair. Only those two runtime hashes change; dependency
+membership and resource limits remain fixed. Canonical digest:
+`1111afa6908658bff9384a4cc5f14f6805afc21f222df3a5cd646d8559e831e1`.
+Update the existing extension/test pins together. This is source packaging,
+not service deployment or native RSI evidence. WSP 5/11/22/48/97.
+
 ## 2026-10-29: Measured Windows manifest byte-bound amendment
 
 The actual two-helper closure is 334,056 LF bytes / 337,083 CRLF bytes, 187

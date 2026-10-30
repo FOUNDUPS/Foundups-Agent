@@ -1,3 +1,19 @@
+## PR2276 receipt-runtime metadata rebinding — 2026-10-30
+
+After the held-out producer/consumer repair, checksum-pinned Gitleaks8.30.1
+reports39 unchanged manifest source-hash rows and one unchanged module-log
+passage in the scoped staged export. Independent source review confirms all40
+five-line contexts and their prior full-blob/path/rule/line ledger bindings
+against ec2a66b82. All1477 runtime digests match staged Git bytes; only the two
+receipt implementations change, with no inventory or resource-limit change.
+
+Append exactly40 current fingerprints, preserving all2951 prior entries
+(2991 total). Compact sorted addition-set SHA256:
+`4ccc839d3a76bb3e97a0307742544d08dcc029671bdfbe913dc36131008e6022`.
+The earlier seven PR2276 bindings remain historical receipts. No scanner rule,
+scope or finding calculation changes. Scoped local scanning and independent
+metadata review do not replace hosted full-tree/introduced-history checks.
+
 ## PR2276 unchanged backlog hash metadata — 2026-10-30
 
 Subsequent hosted job123871199595 reports one remaining ModLog prose finding.

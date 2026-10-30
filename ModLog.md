@@ -7,6 +7,11 @@ The existing dispatch/backlog records the14/P1 slice and remaining19/P0 native
 authority gate. This is caller integration, not an admitted worker, deployment,
 measured compute saving or retained RSI improvement. Other recovery lanes untouched.
 
+The selected composition also reproduced a held-out receipt serialization gap.
+Repair the existing producer/consumer without changing identity seeds or legacy
+signed payloads. Exercise real memory-sink activation refusal after verification;
+the independent acceptance transaction remains an explicit R11-B/G3 dependency.
+
 ## 2026-10-29 — Reconcile the preserved YUMORI video-evidence proposal
 
 Existing editorial PR #2238 merged as c2d4c26f7a76168467b7ed4fc3a8b7518f55eff3,

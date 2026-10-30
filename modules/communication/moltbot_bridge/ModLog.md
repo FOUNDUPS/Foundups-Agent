@@ -1,4 +1,4 @@
-## 2026-10-30 — Connect resident startup assurance storage
+## 2026-10-30 — Connect resident assurance and held-out receipt consumption
 
 WSP 5/10/11/15/22/48/50/97. Main's enabled serial startup now supplies the
 existing AgentDB assurance store. No new scheduler, database, grants or provider
@@ -7,6 +7,14 @@ Portable startup reproduces two failures before the repair, then four passes;
 connected assurance/verification/recovery contracts pass62 with one AF_UNIX skip.
 Hosted Linux selection now includes the socket chain. Native worker execution,
 protected authority inputs and retained RSI benefit remain separate gates.
+
+That composition exposed a real producer/consumer defect: held-out gate IDs
+include v2 evidence fields that the receipt omitted. Preserve the seed, serialize
+the fields, and rehydrate strict v2 or exact legacy shapes. Reject partial,
+tampered and downgraded metadata. The real PatternMemory sink still refuses
+activation without its acceptance transaction; replace the obsolete fake-sink
+completion claim with verified upstream stages and explicit activation refusal.
+No G3 implementation or production authority is manufactured by these tests.
 
 ## 2026-10-29: Reconcile existing editorial-package PR #2238
 

@@ -2592,6 +2592,11 @@ jobs:
             modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_stage_handler_registry.py \
             modules/communication/moltbot_bridge/tests/test_reddog_main_resident_queue_serial_loop_bootstrap.py \
             modules/communication/moltbot_bridge/tests/test_reddog_main_resident_socket_chain.py \
+            modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_queue_binding.py \
+            modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_authenticity.py \
+            modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_adversarial.py \
+            modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_runtime_authority.py \
+            modules/infrastructure/wre_core/tests/test_reddog_held_out_recursive_improvement_regression_gate.py \
             modules/communication/moltbot_bridge/tests/test_reddog_openclaw_hermes_0102_worker_dispatch_runtime.py \
             modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_worker_dispatch_runtime_handler.py \
             modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_worktree_create_handler.py \

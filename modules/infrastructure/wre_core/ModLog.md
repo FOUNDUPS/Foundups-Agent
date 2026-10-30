@@ -1,3 +1,11 @@
+## Held-out receipt identity handoff — 2026-10-30
+
+The real held-out gate hashed v2 evidence fields but omitted them from its
+receipt, causing Memex reconstruction to reject accepted producer output.
+Serialize those fields without changing the existing ID seed; preserve exact
+historical wire shapes. Connected producer/consumer and malformed/downgrade
+controls cover the repair. No activation or native RSI is claimed. WSP11/22/48/97.
+
 ## Current-main bounded-audit registry integration - 2026-10-29
 
 Integrate verified main `34b05f48` without changing accepted YouTube production

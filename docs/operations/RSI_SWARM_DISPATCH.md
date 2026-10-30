@@ -19,6 +19,15 @@ The AF_UNIX composition requires Linux and is explicitly selected in hosted CI.
 Its signer, workers, model, authority and execution collaborators remain fixtures;
 passing it cannot establish native OpenClaw/Hermes operation or G1+G2 closure.
 
+Follow-on integration exposed a real receipt seam: the held-out producer hashed
+v2 identity/evidence fields but omitted them from serialization. Preserve its
+existing ID seed and the exact historical wire shape while carrying current
+fields through Memex reconstruction. The inherited socket fixture also falsely
+assumed G3 activation readiness. Its revised contract uses the real sink,
+requires completed verification/assurance and proves activation refusal with
+no outcome signing or retained-memory write. R11-B's accepted-memory transaction
+remains unimplemented; this checkpoint does not manufacture that capability.
+
 After exact-source review and publication, next remains the **19/P0** native
 admission umbrella: authenticated peer-grant, parent-consensus and external
 lease-issuer caller composition plus current owner/work/model/budget inputs.

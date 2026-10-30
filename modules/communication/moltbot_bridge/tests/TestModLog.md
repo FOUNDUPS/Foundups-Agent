@@ -1,5 +1,24 @@
 ## 2026-10-30 — Main assurance binding regression
 
+Follow-on hosted run40999255647 reached verification but failed Memex evidence
+publication. The actual verifier/ratchet/held-out producer reproduces a missing
+v2 receipt identity handoff (one failure/31 passes before repair). Strict
+versioned serialization and legacy-shape compatibility repair that handoff;
+constructor-type, malformed metadata, tamper and downgrade cases protect it.
+The next boundary is real G3 activation: the canonical sink has no acceptance
+transaction and refuses it. The socket composition now expects that refusal
+while preserving verified upstream stages, signed failure/cleanup receipts,
+builder attribution and durable assurance lineage. Synthetic builders and
+authority remain fixtures, not native-worker qualification.
+
+Final connected Windows receipt/consumer selection:221 passed, with two unrelated
+pytest asyncio-option warnings (plugin autoload disabled). WSL diagnostic:five
+startup/socket cases pass using native Linux cryptography and read-only pure
+pytest dependencies; unrelated menu imports are fail-on-use stubs. This is
+diagnostic evidence, not full environment qualification; hosted Linux must run
+the unmodified test environment. Independent source review retained builder
+attribution, no leaked outcome reservation and no fallback memory write.
+
 Hosted run40996640620 passed signing1481/three skipped and startup1003/one
 skipped, then exposed a fixture identity mismatch in the newly selected Linux
 socket composition (625 passed/one failed/one skipped). The queue's selected

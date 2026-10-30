@@ -10,7 +10,6 @@ import pytest
 
 from modules.communication.moltbot_bridge.tests.test_reddog_main_resident_queue_serial_loop_bootstrap import (
     NOW as BOOTSTRAP_NOW,
-    _FakePatternMemoryAdmissionSink,
     _StaticSocketPeerAttestor,
     _ed25519_signing_material_with_socket_backend,
     _slice_verifier_plan,
@@ -31,9 +30,7 @@ from modules.communication.moltbot_bridge.tests.reddog_elevated_consensus_downst
     downstream_test_consensus,
 )
 from modules.communication.moltbot_bridge.tests.reddog_progressive_chain_e2e_test_support import (
-    assert_progressive_chain_state,
     assert_progressive_control_receipt,
-    assert_progressive_effects,
     configure_control_receipt_signing_backend,
     configure_outcome_signing_backend,
     supply_runtime_authority_source,
@@ -150,7 +147,7 @@ def test_main_serial_preflight_store_failure_prevents_dispatch(tmp_path, monkeyp
 
 
 @pytest.mark.skipif(not hasattr(socket, "AF_UNIX"), reason="AF_UNIX required")
-def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queue_chain_without_work_orders(
+def test_main_resident_control_loop_verifies_then_refuses_unbound_memory_activation(
     tmp_path: Path,
     monkeypatch,
     capsys,
@@ -203,12 +200,6 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
     )
     _FakeProfileWorktreeRunner.instances.clear()
     _FakeEnvCommitDraftPrRunner.instances.clear()
-    pattern_memory_sink = _FakePatternMemoryAdmissionSink()
-    monkeypatch.setattr(
-        pattern_memory_sink_module,
-        "build_reddog_verified_pattern_memory_sink",
-        lambda **_: pattern_memory_sink,
-    )
     repo = _repo(tmp_path)
     runtime_root = tmp_path / "resident-runtime"
     runtime_root.mkdir(parents=True)
@@ -362,7 +353,7 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
             socket_path=socket_path,
             backend=signer_backend,
             peer_attestor=_StaticSocketPeerAttestor(),
-            max_requests=4,
+            max_requests=3,
             timeout_s=5,
             ready_callback=ready.set,
         )
@@ -377,6 +368,7 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
     )
     monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(runtime_root))
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_ENFORCED", "1")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_MAX_ROUNDS", "8")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_MAX_STEPS", "9")
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "2")
@@ -420,19 +412,23 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
                 work_state_path=state, authority_profile_path=profile
             ),
         ):
-            assert main.run_reddog_resident_queue_control_loop_preflight(repo) is True
+            assert main.run_reddog_resident_queue_control_loop_preflight(repo) is False
     finally:
         signer_thread.join(5)
     result = service_result["result"]
     assert result.accepted is True
     assert result.status == SIGNER_SOCKET_RESIDENT_SERVICE_SERVED
-    assert result.requests_handled == 4
-    assert len(outcome_authority.committed) == 1
+    # Identity, work authority and the failure control receipt are signed.
+    # The real sink refuses G3 before outcome publication/activation.
+    assert result.requests_handled == 3
+    assert not outcome_authority.committed
+    assert not outcome_authority.reserved
     assert not socket_path.exists()
     captured = capsys.readouterr().out
-    assert "[REDDOG-QUEUE-CONTROL] preflight=PASS" in captured
+    assert "[REDDOG-QUEUE-CONTROL] preflight=FAIL" in captured
     assert "[REDDOG-QUEUE-LOOP] preflight=PASS" in captured
-    assert "[REDDOG-OPENCLAW-CLAIM-LOOP] preflight=PASS" in captured
+    assert "SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_REJECT" in captured
+    assert "FAIL_VERIFIED_OUTCOME_EVIDENCE_PUBLICATION" in captured
     assert "claimed_count=7" in captured
     assert "receipts=signed_worker_task_execution_" in captured
     assert str(
@@ -440,7 +436,6 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
             "receipt_ids"
         ][0]
     ).startswith("signed_worker_task_execution_")
-    assert "control_receipt=reddog_resident_control_loop_" in captured
     control_receipt_path = Path(
         resident_queue_runtime_file_path(
             profile_env,
@@ -451,10 +446,13 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
     control_receipt = json.loads(
         control_receipt_path.read_text(encoding="utf-8").splitlines()[-1]
     )
+    assert control_receipt["receipt_id"].startswith("reddog_resident_control_loop_")
     assert_progressive_control_receipt(
         control_receipt,
         main.run_reddog_resident_queue_control_loop_preflight.last_result,
     )
+    assert main.run_reddog_resident_queue_control_loop_preflight.last_result["accepted"] is False
+    assert control_receipt["pattern_memory_admission_observed"] is False
     assert (
         main.run_reddog_resident_queue_control_loop_preflight.last_result[
             "control_lock_acquired"
@@ -480,21 +478,48 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
     assert calls
 
     stored = json.loads(chain.read_text(encoding="utf-8"))
-    assert_progressive_chain_state(stored)
+    stages = stored["stage_results"]
+    for stage in (
+        "worker_dispatch_runtime", "worktree_create", "bounded_worker_pilot",
+        "slice_verifier", "verified_draft_pr_publish", "verified_outcome_ratchet",
+        "model_feedback_admission", "held_out_regression_gate",
+    ):
+        assert stage in stages
+    generation = stages["bounded_worker_pilot"]["artifact_generation_result"]
+    assert generation["accepted"] is True
+    assert generation["receipt"]["model_receipt_id"] == "fusion-artifact-receipt-1"
+    assert stages["slice_verifier"]["verifier_result"]["accepted"] is True
+    assert stages["held_out_regression_gate"]["gate_result"]["accepted"] is True
+    assert "pattern_memory_admission" not in stages
+    assert stored["receipts"][-1]["next_action"] == "RUN_QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE"
     assert startup_assurance_stores
     reservation = stored["stage_results"]["assurance_capacity_admission"]["reservation"]
     for store in startup_assurance_stores:
         assert isinstance(store, AgentDB)
         durable = store.get_independent_assurance_reservation(reservation["reservation_id"])
         assert durable is not None
-        assert durable["status"] == "COMPLETED"
+        assert durable["status"] == "ACCEPT"
+        assert durable["accepted"] is False  # Terminal; no longer a usable reservation.
+        assert durable["reservation"]["terminal_status"] == "ACCEPT"
+        assert durable["reservation"]["completed_at"]
+        assert durable["reservation"]["terminal_receipt_id"] == stages["slice_verifier"]["verifier_result"]["receipt"]["receipt_id"]
         assert durable["reservation"]["reservation_id"] == reservation["reservation_id"]
         assert durable["reservation"]["admission_reservation_digest"] == reservation["reservation_digest"]
-    assert_progressive_effects(
-        worktree_instances=_FakeProfileWorktreeRunner.instances,
-        draft_runner_instances=_FakeEnvCommitDraftPrRunner.instances,
-        repo_root=repo,
-        artifact_path=PILOT_ARTIFACT,
-        outcome_store=outcome_store,
-        pattern_memory_records=pattern_memory_sink.records,
+    worktree_calls = [call for instance in _FakeProfileWorktreeRunner.instances
+                      for call in instance.calls if call[0] == "create_worktree"]
+    assert len(worktree_calls) == 1
+    assert (Path(worktree_calls[0][1]) / PILOT_ARTIFACT).read_text(encoding="utf-8").startswith("# Generated By Fusion")
+    assert not (repo / PILOT_ARTIFACT).exists()
+    draft_calls = [call[0] for instance in _FakeEnvCommitDraftPrRunner.instances
+                   for call in instance.calls if call[0] in {"push_branch", "create_draft_pr"}]
+    assert draft_calls == ["push_branch", "create_draft_pr"]  # Synthetic runner only.
+    assert outcome_store.exists()
+    sink = pattern_memory_sink_module.build_reddog_verified_pattern_memory_sink(
+        repo_root=repo, db_path=pattern_memory_db,
+    )
+    assert sink.activation_ready is False
+    assert not pattern_memory_db.exists()
+    assert not (repo / "runtime" / "pattern_memory.db").exists()
+    assert "foundup_memex_verified_outcome_authority" not in json.loads(
+        authority_state.read_text(encoding="utf-8"),
     )
