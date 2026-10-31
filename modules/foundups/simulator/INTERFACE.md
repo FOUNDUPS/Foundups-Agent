@@ -2,6 +2,11 @@
 
 ## CABR and breaker admission — 2026-10-31
 
+Economic promotion follows the [WSP26 change contract](../../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract).
+The [source matrix](contracts/source_of_truth_matrix.json) is an evidence map, not
+a runtime permission or settlement guarantee. Conflicting units and known failed
+security oracles block activation; documented mock behavior stays mock behavior.
+
 `route_cabr_ups_flow` raises ValueError unless PoB is an exact bool and all
 four numeric fields are finite built-in int/float. Signed finite clamps and
 valid formulas are unchanged. This pure calculation neither authenticates PoB

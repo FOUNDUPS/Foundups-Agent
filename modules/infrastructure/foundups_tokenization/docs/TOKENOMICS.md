@@ -3,8 +3,21 @@
 **Version**: 2.1.0
 **Date**: 2026-02-17
 **Status**: Architecture Complete, Simulator Operational
-**Canonical Spec**: [WSP 26: FoundUPS DAE Tokenization](../../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md)
-**Implementation**: [`modules/foundups/simulator/economics/`](../../../modules/foundups/simulator/economics/__init__.py)
+**Canonical Spec**: [WSP 26: FoundUPS DAE Tokenization](../../../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md)
+**Implementation**: [`modules/foundups/simulator/economics/`](../../../../modules/foundups/simulator/economics/__init__.py)
+
+## Current qualification status — 2026-10-31
+
+The 2026-02-17 header status is historical design status, not economic activation.
+Follow the [WSP 26 §1.2 simulator-first change contract](../../../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract).
+Only valid behavior with fresh source-bound tests and independent acceptance is
+the implementation reference; existing defects and disputed rules are excluded.
+Activity/mint wording, stage versus continuous release, units, pool denominators,
+fees and decay/burn variants below remain explicit conflicts, not new decisions.
+See the [dated conflict inventory](../../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#5-economic-conflicts-and-0102-decisions).
+Resolve/version changes in the simulator, independently accept them, update the
+affected governing mirrors, then prove chain parity before separate activation.
+No source publication or simulator result grants funding, signing or settlement.
 
 ## Executive Summary
 

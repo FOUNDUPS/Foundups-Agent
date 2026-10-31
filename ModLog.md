@@ -1,3 +1,14 @@
+## 2026-10-31 — Blockchain publication and simulator-first documentation
+
+012 authorizes source publication after the earlier local-only checkpoint.
+Merge60d899fd preserves blockchain17678 and main21ac/PR2278 recovery together.
+One WSP26 A/B/C/D change contract is linked by governing WSPs and exact mirrors,
+TOKENOMICS, BTC/FX research and module entry points. The source matrix marks
+conflicting UPS units explicitly; no runtime economics changed in this layer.
+Historical sealed receipts and six failed security oracles remain intact.
+Fresh publication qualification is recorded in the reconciliation addendum.
+WSP10/15/22/26/27/29/50/81/83/97/100. Deployment remains blocked.
+
 ## 2026-10-31 — PC-only blockchain reconciliation and security audit
 
 WSP15/22/26/27/29/48/81/97/100. Owned worktree at actual remote main4050 receives

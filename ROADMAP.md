@@ -12,6 +12,14 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
+## Blockchain simulator authority — 2026-10-31
+
+Blockchain planning follows the [WSP26 simulator-first contract](WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract)
+and [2026-10-31 reconciliation](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md).
+Publish reviewed source separately from deployment: unresolved economic conflicts,
+unfunded settlement and absent independent signing controls block activation.
+The existing simulator must validate any economic enhancement before chain parity.
+
 ## Resident assurance connection — 2026-10-30
 
 Source audit at `7d6a292bcb28e5cbadd1dffdac1a795d3da7e31e` supports

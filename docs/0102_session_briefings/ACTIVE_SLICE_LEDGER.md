@@ -1,3 +1,21 @@
+## Blockchain simulator-first publication — 2026-10-31
+
+Owner: 0102 blockchain lane. Branch agent/simulator-first-blockchain-parity-20261031.
+Preserved local checkpoint17678de1f17210eb9e5c2c7c75cc00fe57315980; merged current
+main21ac89287449d8ca54385a116053a33655d86e6b in60d899fd6f58d69c8924f39c2262a39fa453463a.
+PR2278 completed the PC recovery publication; its older candidate record below
+is historical. Current shared PC work and Mall2196 remain separate owners.
+
+Retained PR2261 head0a3f06c5938b12863f0a00783b7fa8e3adc48789 and PR2210
+headd8c8f516344c10f54a283c8421190b2b9b082685 are
+dependency sources, not merge authority. Their current old-head checks pass but
+both need convergence. Consolidate intended source, tests and receipt addenda;
+preserve current manifest/security policy. Next: fresh candidate qualification,
+independent review, publication checks, then exact merged-main verification.
+Close superseded PRs only after complete intended-change disposition is proven.
+See the [current reconciliation](../architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md).
+Source publication is authorized; funded execution and chain deployment remain blocked.
+
 ## PC local publication recovery candidate — 2026-10-31
 
 Owner: root reconciliation lane; worker: partners_worker; independent verifier:

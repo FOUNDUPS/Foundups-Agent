@@ -1,3 +1,12 @@
+## Simulator-first publication alignment — 2026-10-31
+
+Link the single WSP26 change contract and preserve historical source evidence.
+The source matrix now marks incompatible projection and genesis units as class D,
+CONFLICTING and activation BLOCKED. Extend the existing documentation test to
+check actual genesis/matrix consistency and governing mirrors; the frozen new
+assertion first fails on the old matrix. No economic constants or runtime change.
+WSP10/15/22/26/50/83/97; current qualification lives in the reconciliation report.
+
 ## Local CABR/breaker security and parity audit — 2026-10-31
 
 WSP15 14/P1; WSP22/26/27/29/48/50/81/84/97/100. Local-only scope at main4050.

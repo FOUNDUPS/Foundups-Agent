@@ -2,6 +2,17 @@
 
 Visual simulation of the autonomous FoundUp ecosystem.
 
+## Simulator-first economic change rule — 2026-10-31
+
+The [WSP26 contract](../../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract)
+requires versioned simulator validation before economic changes reach blockchain
+code. Current passing tests qualify their specific transitions, not every model
+assumption. The [source matrix](contracts/source_of_truth_matrix.json) records the
+one-satoshi projection versus1000-satoshi genesis conflict; activation is blocked.
+Use [INTERFACE](INTERFACE.md), [tests](tests/README.md), [ROADMAP](ROADMAP.md) and
+the [current audit](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md)
+together. Historical sealed receipts remain evidence of their original sources.
+
 ## Local security reconciliation — 2026-10-31
 
 CABR rejects non-boolean PoB decisions and nonfinite/coercible numbers; valid

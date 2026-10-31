@@ -9,6 +9,13 @@
 
 ### WSP 97 Source Verification Status
 
+**2026-10-31 simulator reconciliation:** the1000-satoshi genesis configuration
+below is tested, but fee/projection owners still use a one-satoshi accounting
+convention. Universal denomination, custody and redemption remain unresolved;
+neither figure establishes funded backing. Follow the [WSP26 change contract](../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract)
+and [current conflict/security record](FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md)
+before promoting a conversion or reserve design into blockchain behavior.
+
 | Claim | Source | Verification |
 |-------|--------|-------------|
 | BitClout/Al-Naji SEC charges (July 2024) | SEC Press Release #2024-91 | VERIFIED |

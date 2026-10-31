@@ -1,5 +1,39 @@
 # FoundUps blockchain reconciliation and security decision — 2026-10-31
 
+## Publication and simulator authority addendum — 2026-10-31
+
+012 subsequently authorized GitHub source publication and gated integration.
+The sealed audit below retains its original local-only scope and observations;
+its4050 base and old primary status are historical, not current synchronization
+claims. PC recovery is now in main21ac89287449d8ca54385a116053a33655d86e6b
+via PR2278. Checkpoint17678de1f17210eb9e5c2c7c75cc00fe57315980 preserves this
+blockchain work, merged with that main in60d899fd6f58d69c8924f39c2262a39fa453463a.
+Both independent ModLog additions and main's2993 reviewed security records survive.
+
+The [WSP26 simulator-first contract](../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract)
+governs economic changes: classify, verify the existing simulator, resolve and
+test the versioned decision there, review independently, align governing docs,
+then require blockchain transaction parity. Source publication is separate from
+economic activation. Deployment remains **BLOCKED** by the findings below.
+
+The existing source-of-truth matrix incorrectly described a universal one-sat
+unit. Its fee/projection convention and BTCReserve's tested1000-sat genesis
+configuration are now explicitly **CONFLICTING / class D / activation BLOCKED**.
+No balance conversion, peg, fee, supply or runtime policy changes in this addendum.
+The six failed adversarial assertions remain failures, and missing signer/rekey/
+bridge paths remain untested. Historical receipts retain their exact bytes.
+
+Fresh publication qualification: selected simulator/documentation420 pass,
+FAM485 pass, strict unsigned format52 pass, manifest consumer8 pass and three
+Node compatibility commands pass. Scopes are separate and not summed. Desired
+documentation RED was5 pass/1 failure before the matrix correction. All final
+selected runs have no unexpected denied effects or source mutation. The four
+strict SDK guard-denial controls are expected tests, not chain execution.
+See the [separate publication receipt](receipts/FOUNDUPS_BLOCKCHAIN_PUBLICATION_20261031.json)
+for exact result bindings and limits. Hosted PR/main gates remain required.
+
+## Historical sealed local audit
+
 **Deployment readiness: BLOCKED.** This is a local source reconciliation,
 architectural review and offline verification record. It does not authorize
 signing, funding, broadcasting, mainnet, deployment or GitHub changes.

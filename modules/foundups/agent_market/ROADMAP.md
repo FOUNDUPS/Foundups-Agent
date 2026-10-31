@@ -1,6 +1,12 @@
 ﻿# ROADMAP - FoundUps Agent Market
 ## Exact quantity admission — 2026-10-29
 
+**2026-10-31 promotion rule:** follow [WSP26](../../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract)
+and the [reconciliation report](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md).
+Integer admission and unsigned intent revalidation do not establish funded
+conservation. Resolve units, pending/aggregate caps, replay and independent
+authority through simulator validation before economic chain activation.
+
 Implemented eight constructor type guards and optional-task validation before
 launch adapter effects. Frozen acceptance reproduced 27 failures, then passed
 132 focused and 333 connected cases (overlapping scopes); independent review

@@ -51,6 +51,62 @@ Lifecycle linkage: Beneficial Action -> PoB Validation (WSP 29) -> CABR-Sized UP
 
 **Canonical distinction**: BTC backs UPS value; CABR does not back value. CABR controls flow rate (pipe size) of UPS routed from treasury after PoB validation.
 
+### 1.2 Simulator-first change contract
+
+For economic transitions and chain ports, the implementation reference is valid
+simulator behavior qualified by fresh tests and independent review on identified
+source, configuration and economic decision versions. Executable behavior or a
+passing test alone does not ratify disputed economics, authenticate inputs or
+prove funding. Known defects must not be promoted as reference behavior. The
+simulator can improve through the versioned process below; it is not frozen.
+
+Classify each bounded change before authoring:
+
+| Class | Meaning | Acceptance boundary |
+| --- | --- | --- |
+| A — transport | Faithful port or integration preserving accepted valid economics | Preserve the economic oracles; document representation, authority and execution differences. |
+| B — security | Refuse invalid or unauthorized behavior while preserving accepted valid economics | Freeze desired refusal/no-effect tests, retain valid-operation controls and obtain independent review. A guard does not authenticate its input facts. |
+| C — economic enhancement | Deliberate change to economic behavior | Authorize and version the decision, its before/after examples, affected invariants and migration/recovery consequences before changing the simulator. |
+| D — unresolved conflict | Contradictory evidence or missing policy/trust contract | Preserve the conflict; block dependent chain/economic activation until a decision and acceptance exist. Do not silently choose through prose or code. |
+
+A class C decision belongs in the existing scoped delivery plan or owning
+contract. Record the affected rule/source, decision version and authority, asset
+and amount units, rights/recipients, limits including pending exposure, fees and
+residual owners, before/after examples, acceptance cases and open dependencies.
+Missing financial policy remains explicit; these fields do not invent it.
+
+Apply one validated Occam layer at a time (WSP 27):
+
+1. Record the authorized, versioned economic decision and unresolved conflicts.
+2. Freeze desired tests before implementation; retain the prior baseline and
+   independently review each intentional oracle change rather than weakening
+   assertions to make a candidate pass.
+3. Make the bounded simulator change; test deterministic/adversarial sequences,
+   conservation, replay, pending limits and recovery as applicable. Obtain
+   independent acceptance of the identified source and observed outcomes.
+4. Update the affected governing WSPs, their exact WSP_knowledge mirrors and
+   related module/tokenomics contracts under WSP 81. Retain dated prior evidence.
+5. Independently test chain parity against the accepted simulator version: transitions,
+   integer asset units and approved rounding/residuals, fees/beneficiaries,
+   authority, aggregate/pending limits, retries, rollback, recovery and settlement.
+   A/B promotion also requires independent chain-level refusal/no-effect and
+   adversarial tests for invalid authority, artifacts and replay. If chain hooks
+   are absent, mark this gate blocked; local source publication may still proceed.
+6. Authorize activation separately under WSP 97 and the existing runtime policy.
+   Source publication, simulation parity, mock commitments and unsigned packets
+   grant no signer, issuer, funding, broadcast, listing or live-reward authority.
+
+A/B changes retain accepted valid economics and explicit refusal regressions.
+Class D blocks its dependent behavior without forbidding unrelated validated
+source publication. Product milestones, adoption and governance maturity are
+separate inputs; none independently grants mint or payout permission. CABR sizes
+existing Treasury flow after validated PoB; it does not independently mint UPS.
+
+The dated [reconciliation conflict inventory](../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#5-economic-conflicts-and-0102-decisions)
+is non-normative implementation evidence, not another economic authority. WSP 29
+retains PoB/CABR responsibilities; WSP 100 retains maturity/activation gates.
+This written contract does not claim automatic runtime enforcement or settlement.
+
 ## Universal Compute Account (UCA)
 
 Universal Compute Account (UCA) is the FoundUps evolution of Universal Capital Accounts. Traditional UCA gives people access to capital. FoundUps UCA gives people access to compute, agents, participation, and Return on Compute. In the AI age, compute replaces capital as the primary productive asset. UCA is therefore not a bank account and not a cash-transfer system. It is a productive compute account through which 012 humans direct 0102 agents, participate in FoundUps, earn UPS rewards, receive awards for agentic output, and share dividends from beneficial compute activity.

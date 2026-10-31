@@ -1,3 +1,11 @@
+## Publication documentation guardrails — 2026-10-31
+
+Existing documentation suite first produced5 passes/1 failure on the missing
+unit-conflict metadata. Added genesis-to-matrix consistency and exact economic
+protocol mirror checks; no historical oracle removed or weakened. The canonical
+registry retains all1792 main owners and adds the circuit-breaker owner. Fresh
+GREEN and connected counts are recorded in the current reconciliation addendum.
+
 ## Local adversarial qualification — 2026-10-31
 
 Fresh244 selected baseline passes. Desired RED79:12 pass/67 fail; candidate320

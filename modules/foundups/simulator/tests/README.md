@@ -2,6 +2,12 @@
 
 This directory contains regression tests for the FoundUps simulator module.
 
+`test_docs_contract_alignment.py` also checks the explicit blocked denomination
+conflict against the tested genesis value and compares governing WSP26/27/29/100
+mirrors. These are documentation guardrails, not funded settlement tests. Any
+resolution needs a reviewed simulator decision and new economic oracles before
+changing the conflict expectation; do not simply delete the gate.
+
 2026-10-31: `test_cabr_flow_router.py` adds exact-bool/finite scalar admission
 and seeded valid-formula/conservation properties; `test_circuit_breaker.py`
 covers competing severity, frozen-clock cooldown, queue hold and invalid inputs.

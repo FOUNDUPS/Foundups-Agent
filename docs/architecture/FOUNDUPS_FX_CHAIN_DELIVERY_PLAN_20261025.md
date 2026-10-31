@@ -2,6 +2,59 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## Simulator-first documentation and publication allocation — 2026-10-31
+
+012 now authorizes source publication and ordinary gated PR integration. This
+supersedes the earlier local-only publication boundary below, not its historical
+evidence or the prohibition on live signing, funds and chain deployment. PC
+recovery is already in main21ac89287449d8ca54385a116053a33655d86e6b via PR2278.
+Local checkpoint17678de1f17210eb9e5c2c7c75cc00fe57315980 preserves the33-path
+blockchain slice; merge60d899fd6f58d69c8924f39c2262a39fa453463a preserves both
+independent ModLog additions. No shared primary checkout changes are allocated.
+
+WSP15 C2/I4/D4/Impact4=14/P1. Simplest next layer: one normative simulator-first
+change contract in WSP26, with exact knowledge mirrors and small pointers from
+WSP27/29/100, TOKENOMICS and existing simulator/FAM/Algorand/BTC/FX entry points.
+Classify A transport, B security, C economic enhancement, D unresolved conflict.
+Allocate <=90 lines for the contract, <=20 per pointer/log/roadmap, <=80 for the
+existing source-of-truth matrix and <=100 for its existing documentation test.
+Mark the one-satoshi claim conflicting with the tested genesis1000-satoshi
+configuration; this does not choose a universal conversion or change economics.
+Retain all dated receipts verbatim and add a separate publication record with
+fresh tests, independent review and exact source identifiers. Regenerate only
+affected canonical test/doc indexes using their existing owners.
+
+Retrieval: task-overlay lexical Holo remains UNKNOWN with an index gap; a separate
+CURRENT result bound to main21ac does not qualify this overlay. Generic hits were
+noisy; direct verified module contracts, NAVIGATION and governing protocols take
+precedence. No new runtime, signer, scheduler, economic policy or model service.
+Manual decisions are required because Qwen/Gemma classification cannot prove
+conservation or settle conflicting units. Independent review and deterministic
+existing tests will verify the changes before source publication. The sealed
+six failed adversarial oracles and absent chain hooks remain activation blockers.
+
+### Retained PR2210/2261 intent — publication reconciliation
+
+The [original quantity and unsigned-handoff decisions](https://github.com/FOUNDUPS/Foundups-Agent/blob/0a3f06c5938b12863f0a00783b7fa8e3adc48789/docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md)
+remain immutable history. Their old publication sequence and1472-member manifest
+are superseded by current-main reconciliation, not their safety contracts.
+Eight exact-integer guards, pre-adapter Task validation and `revalidate_existing`
+are retained with original tests and receipt addenda. Separate compute dictionary/
+ORM ingress remains unqualified. No changed denomination or quantity coercion.
+
+Future `format_unsigned_probe` remains unimplemented: resolve current authority
+before/after I/O, revalidate only an existing intent, discard stale results and
+hold no DB transaction across I/O. Independently admit exact fee/ledger-round
+facts and their policy evidence; no fallback, default or wall-clock inference.
+Require an actually admitted source-pinned SDK producer, general wire validation
+against independently expected values and host-owned launch provenance. Preserve
+15-field request<=4KiB, exact six-field response<=16KiB, wire1..1024 and40s/512MiB
+host bounds. Returned hashes alone cannot validate malicious producer semantics.
+Return an ephemeral immutable unsigned result only: no storage, automatic renewal,
+reissue, reservation, payout or lasting signer authority. Durable settlement is a
+separate future layer. Old global logs and scanner notes stay in the pinned commit;
+current source-bound evidence and individually reviewed scan bindings replace them.
+
 ## Local reconciliation and adversarial allocation — 2026-10-31
 
 012 authorizes PC-only development, remote reads/fetch, and no GitHub mutation,
