@@ -170,6 +170,13 @@ Along the way: CABR (WSP 29) measures collective autonomous benefit. Participant
 
 ### 2.4 FoundUp Evolution Path (Occam's Layers, Not Big Bang)
 
+Economic changes and chain ports follow [WSP 26 §1.2](WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract):
+qualified simulator reference -> versioned decision/tests -> independent
+acceptance -> affected governing mirrors -> chain parity -> separate activation.
+The stage table below is lifecycle guidance, not mint authority. Its legacy MVP
+"Triggers UPS minting" wording remains a class D conflict with Treasury-flow
+semantics until an explicit economic decision resolves it.
+
 **CRITICAL ANTI-PATTERN: Building Everything At Once**
 
 0102 agents have a natural tendency to build complete systems - layering everything, connecting everything, solving everything in one pass. This wastes code compute time because:

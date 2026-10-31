@@ -1,0 +1,113 @@
+{
+  "schema": "foundups.blockchain.source-publication.v1",
+  "observed_utc": "2026-10-31T04:12:16.277750+00:00",
+  "authority": "012 subsequently authorized GitHub source publication and gated integration; no live signing, funding or chain deployment",
+  "main_base": "21ac89287449d8ca54385a116053a33655d86e6b",
+  "local_checkpoint": "17678de1f17210eb9e5c2c7c75cc00fe57315980",
+  "main_integration": "60d899fd6f58d69c8924f39c2262a39fa453463a",
+  "economic_change": "None in documentation layer; conflict recorded, no denomination conversion",
+  "tests": {
+    "docs_desired_red": {
+      "passed": 5,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "result_sha256": "4bbb890701020422e18a0f52949fa415e415a4b9e753b4c7301666748f6a2d3e"
+    },
+    "simulator_and_docs": {
+      "passed": 420,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "blocked_effects": 0,
+      "source_stable": true,
+      "result_sha256": "c6a76782f13becf840199787f1d0ed4f8879c7be898c032dd0f4f7cd9350ac13",
+      "owners": [
+        "modules/foundups/simulator/tests/test_cabr_flow_router.py",
+        "modules/foundups/simulator/tests/test_circuit_breaker.py",
+        "modules/foundups/simulator/tests/test_fi_orderbook_entry_guards.py",
+        "modules/foundups/simulator/tests/test_allocation_and_treasury_runtime.py",
+        "modules/foundups/simulator/tests/test_alignment_and_tokenomics.py",
+        "modules/foundups/simulator/tests/test_btc_reserve_semantics.py",
+        "modules/foundups/simulator/tests/test_epoch_ledger_settlement_commitment.py",
+        "modules/foundups/simulator/tests/test_market_stress.py",
+        "modules/foundups/simulator/tests/test_fam_lifecycle_flow.py",
+        "modules/foundups/simulator/tests/test_docs_contract_alignment.py"
+      ]
+    },
+    "FAM_selected": {
+      "passed": 485,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "blocked_effects": 0,
+      "source_stable": true,
+      "result_sha256": "0ce2c6932bc08a0cceb705aa59fd767dd75dc9f8692838ae480ca80c5724b3a7",
+      "source_context_correction": "Reused runner prose mentions an old uncommitted4050 import. Actual recorded head is60d899 and45 source hashes match the committed implementation; this wrapper corrects that stale annotation without altering the raw result."
+    },
+    "manifest_consumer": {
+      "passed": 8,
+      "failed": 0,
+      "result_sha256": "2052cd38935c958e3232b7efe2852cc849836b4db73b533a84faab68bc85b04c"
+    },
+    "node_compatibility": {
+      "commands_passed": 3,
+      "commands_failed": 0,
+      "result_sha256": "a5b845d9cfb29f834e4d6cbc3c1adcc9a362963a2f910579258c384d4229d42a"
+    },
+    "counts": "Separate selected scopes; not summed and not a whole-system or chain security certification",
+    "strict_unsigned_format": {
+      "passed": 52,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "qualification_sha256": "fe3491c271debc48814719801b713f1b39a30a8aeb340a77a7e0a8b8226f4e73",
+      "scope": "Existing preserved strict SDK profile; four expected guard denials, no live chain or resident admission"
+    },
+    "docs_after_independent_review": {
+      "passed": 6,
+      "failed": 0,
+      "result_sha256": "f03fdd541cefcf53e5fac5eb220062fa6ac6c5354235fe7f84934dd5eb5fab04",
+      "scope": "Repeat existing docs owner after explicit independent chain-test wording in WSP26 mirrors; overlaps earlier420"
+    }
+  },
+  "historical_evidence": {
+    "FOUNDUPS_BLOCKCHAIN_RECONCILIATION_20261031.json": "243673c09bada3e7d279093b09731696aba1467a164a94103ae8ff14fe41bd2c",
+    "FOUNDUPS_BLOCKCHAIN_RECONCILIATION_20261031.review.json": "bae936c7b1dca1749c0b3403b2f18241dd8de07a2d22cc8302218d881fce6d33"
+  },
+  "independent_reviews": {
+    "docs-matrix-independent-review.json": {
+      "sha256": "6c196e3d2d2ff24d8eca728668398fcef9dba44bf5266dee5d76f08ab86de528",
+      "scope": "Authorship and review scopes are explicit in the referenced record; staged equivalence and hosted checks remain separate"
+    },
+    "publication-governance-review.json": {
+      "sha256": "1ddc2bcf814a14602b264cefac509065d5b4ddfad33620d14470ee95bcfb6896",
+      "scope": "Authorship and review scopes are explicit in the referenced record; staged equivalence and hosted checks remain separate"
+    },
+    "wsp-simulator-first-doc-authoring-v2.json": {
+      "sha256": "89605b54413adf223176d807943595c925743234ce8f86dc9a2443b707e81a29",
+      "scope": "Authorship and review scopes are explicit in the referenced record; staged equivalence and hosted checks remain separate"
+    },
+    "fresh-qualification-result.json": {
+      "sha256": "fe3491c271debc48814719801b713f1b39a30a8aeb340a77a7e0a8b8226f4e73",
+      "scope": "Independent485/52 execution and source binding"
+    }
+  },
+  "registry": {
+    "total": 1793,
+    "quarantined": 260,
+    "added_owners": 1,
+    "existing_shard_changes": 1
+  },
+  "scanner_review": {
+    "prior_records_preserved": 2993,
+    "exact_public_metadata_bindings_added": 81,
+    "independent_review_sha256": "4c6baea091417edbc09a69eb2fb9d56134cca35b21aa0746be712516a40a8f9f",
+    "full_tree_history_status": "REQUIRED_AFTER_CANDIDATE_COMMIT"
+  },
+  "publication_status": "CANDIDATE_NOT_YET_PUSHED_OR_MERGED",
+  "deployment_readiness": "BLOCKED",
+  "blocked": "Units, aggregate supply/release, funded settlement, replay, independent authority, authenticated oracle/proof facts, pending limits and real chain parity; six historical adversarial failures remain failures",
+  "external_evidence_root": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-blockchain-publication-20261031",
+  "doc_index_scope": "Bounded merge of selected entries under existing schema; preserve all others. JSON receipts require explicit indexing because default DocDAE classifies JSON as operational data. No organizer/model execution."
+}

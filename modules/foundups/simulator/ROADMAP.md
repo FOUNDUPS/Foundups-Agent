@@ -1,5 +1,23 @@
 # ROADMAP - FoundUps Simulator
 
+## 2026-10-31 — Local security and parity audit
+
+Publication addendum: [WSP26](../../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract)
+now owns the simulator-first A/B/C/D contract. Source publication is authorized
+separately from activation; earlier local-only observations below are historical.
+Fresh selected simulator/docs qualification passes420. The units conflict is
+explicitly recorded, not resolved; all unchecked economic/security gates remain.
+
+- [x] Current remote/main reconciliation in an isolated PC worktree; no GitHub writes.
+- [x] CABR input and breaker severity/cooldown hardening; 414 connected tests and
+  6 independent held-outs pass. Historical results below remain dated evidence.
+- [x] Execute seven actual-owner adversarial probes: one pass, six security gaps.
+- [ ] Version UPS units, aggregate 21M supply, epoch funding, fees and pool denominators.
+- [ ] Durable pending/global reservations, idempotent distribution and funded FX.
+- [ ] Immutable policy, oracle authentication, self-trade controls and recovery.
+- [ ] Independent controller/signer and chain-level transaction parity.
+Deployment remains BLOCKED; see the 2026-10-31 architecture report.
+
 ## 2026-10-25 — Selected numeric admission
 
 - [x] Strict work/stake/unstake quantities, at-use fee validation and pure

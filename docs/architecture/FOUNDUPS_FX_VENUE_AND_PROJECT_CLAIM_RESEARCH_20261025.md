@@ -10,6 +10,14 @@ exchange service or resident worker.
 
 ## 1. Decision and evidence boundary
 
+**2026-10-31 precedence:** the venue candidates below remain research, subordinate
+to the [WSP26 simulator-first change contract](../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract).
+The existing internal F_i/UPS model is the reference for qualified transitions;
+external swaps, bridges and exits require an explicit reviewed policy decision
+and simulator validation before integration. Nomination, repository ownership
+or discovery listing does not confer token, treasury or trading authority. See
+the [current reconciliation and blockers](FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md).
+
 Build **FoundUps Exchange (FX)** as the project/asset discovery and trading
 interface over bounded, chain-native venue adapters. Reuse an existing protocol
 before considering a new AMM or order-book implementation. FX can have its own

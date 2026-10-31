@@ -1,5 +1,20 @@
 # Algorand module roadmap
 
+2026-10-31 current reconciliation supersedes historical publication-pending prose:
+
+Source publication is now authorized separately from deployment. The
+[WSP26 simulator-first contract](../../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract)
+governs any economic mapping into this adapter. Preserve unsigned format tests;
+require independent chain tests and simulator transition parity before admission.
+The dated local-only evidence below remains historical, not a publication block.
+
+PR2206 and PR2211 are merged into actual main4050. Unchanged format owner freshly
+passes52 exact cases through the existing strict offline qualifier and preserved
+SDK profile. This is not patched production-runtime admission or an integrated
+FAM signer/transport. Retain Algorand TestNet as the bounded candidate; qualify
+network/account/algorithm support and independent authority before any signing.
+No GitHub mutation or chain call occurred in this local-only mission.
+
 2026-10-29: reconcile the unique codec with current main and qualify its exact
 existing28-case format profile before parent/child PR convergence. Retain the
 old interpreter/profile identity; patched production-runtime admission remains

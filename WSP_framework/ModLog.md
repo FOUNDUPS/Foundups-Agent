@@ -1,3 +1,16 @@
+## 2026-10-31: Simulator-first economic change governance
+
+WSP81 class NOTIFICATION_REQUIRED: section addition and clarified cross-protocol
+acceptance under012's explicit simulator-first documentation/publication direction.
+012 notified in this session. Add WSP26 section1.2 and WSP27/29/100 pointers with
+exact knowledge mirrors; retain economics, active statuses, budgets and history.
+Base21ac89287449d8ca54385a116053a33655d86e6b; integrated source60d899fd6.
+Independent review required explicit chain-level adversarial/no-effect tests;
+the clarified gate remains blocked when chain hooks are absent. Fresh selected
+simulator/docs420 pass; final mirror/link checks and hosted gates remain separate.
+Recover through a focused Git revert, preserving prior evidence and local work.
+No archive duplicate, runtime policy, funding or deployment. WSP22/26/50/81/97.
+
 ## 2026-10-29: WSP85 current root ownership and preservation boundaries
 
 Clarify foundational root ownership instead of a historical ten-file ceiling,

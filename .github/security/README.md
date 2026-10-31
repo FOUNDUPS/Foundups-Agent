@@ -1,3 +1,15 @@
+## Blockchain source metadata review — 2026-10-31
+
+Pinned Gitleaks 8.30.1 reports81 exact findings in the reconciled changed files:
+39 generated runtime source digests,25 sealed reconciliation source mappings,
+and17 historical intention testcase source mappings. Independent reconstruction
+verifies each complete JSON pair against immutable Git blobs and its recorded
+LF/CRLF materialization; historical hashes are not relabeled as current source.
+Append only those81 file/blob/rule/line fingerprints, preserving all2993 existing
+records and all scanner rules/scope. Two findings use the Discord rule; their
+values also reconstruct as public source digests. No credential exception.
+Final committed-tree/introduced-history and hosted gates remain required.
+
 ## PC local recovery candidate metadata — 2026-10-31
 
 The checksum-pinned Gitleaks 8.30.1 changed-file scan reports two findings:

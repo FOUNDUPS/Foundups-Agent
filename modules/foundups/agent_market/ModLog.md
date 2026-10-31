@@ -1,5 +1,70 @@
 # ModLog - FoundUps Agent Market
 
+## 2026-10-31 — Local-only main/PR2261 reconciliation
+
+WSP15/22/26/29/50/97. Applied the reviewed14-path PR2261 delta to actual main4050
+in the owned PC worktree, preserving dirty primary and other worktrees. No remote
+write/merge/PR or live chain operation. Fresh independent ten-owner485/485 pass;
+all45 FAM source hashes stable,329 SQLite connections scratch-only. One initial
+hostname metadata denial was independently traced and narrowly allowed; retain
+the original qualification failure. Intent facade is not in the resident1477
+closure because no resident caller exists; future controller admission must
+qualify its actual closure and the FAM/SDK boundary. No funded payout claim.
+
+## 2026-10-29 — Final testnet safety integration allocation
+
+WSP11/15/22/50/77/84/97; convergence C2/I4/D4/Impact4=14/P1.
+Both constituent layers already have frozen tests and independent acceptance:
+quantity8e09a948 and revalidationd8c8f516, with delivered parent dedb0e032.
+Combine their exact product/oracle blobs in PR2261; no new behavior or test owner.
+Retain each PR's evidence. Close PR2210 as incorporated only after exact source
+preservation, fresh combined tests, independent review and resulting-main proof.
+Preserve all main history, the original registry and same manifest membership;
+union only the existing individually reviewed metadata approvals. Resolve shared
+documentation additively. Budget: constituent file union, <=24 module-log and
+<=12 test-log lines for allocation/results; no new implementation or thresholds.
+Run connected intent/quantity/FAM owners with the existing offline scratch runner,
+then exact-head hosted and resulting-main gates. This integration authorizes no
+issuer, signer, runtime activation, fund movement, broadcast or paid settlement.
+Combined ten-owner run passes485 cases without failures/errors/skips and with
+stable source hashes. Constituent product/oracle blobs remain unchanged; this
+fresh integration run includes the prior406 connected revalidation cases and
+the79 quantity additions. Hosted/main and independent review remain separate.
+
+## 2026-10-29 — Exact quantity admission before launch effects
+
+WSP00/6/11/15/22/50/77/84/97; allocated17/P0 before tests/product.
+Eight existing model quantity guards now require built-in int, excluding bool
+and deceptive subclasses. Reused the optional Task constructor before launch
+adapter calls and removed reward int coercion; failure audit behavior remains.
+Preserved all53 prior cases/oracles; frozen desired controls reproduced27 failures,
+then the same132 focused cases and333 connected cases passed (overlapping scopes).
+Independent review accepted source and evidence; static backend manifest retains
+the same members and changes only these two source hashes. No runtime activation.
+No signer, provider, broadcast or settlement. Compute dictionary/ORM ingress,
+controller-level independence, funded limits and immutable chain attempts remain
+unqualified. Hosted and resulting-main qualification are publication gates.
+
+## 2026-10-29 — Existing-intent revalidation convergence allocation
+
+WSP11/15/22/50/77/84/97; existing contract15/P1, convergence14/P1.
+Reconcile existing PR2210/669bba8a onto parent e24024c57. Preserve its exact
+existing-only revalidation source and all original 55 added controls; no new
+test owner, schema, signer, transport, issuance or settlement. Pinned Git and
+existing module/interface/roadmap/test evidence resolve stale historical status.
+Independent source and exact prior metadata review precede merge acceptance.
+Run the existing focused/connected owners with credential-stripped, socket-denied,
+scratch-only SQLite controls. Historical whole-suite counts remain historical.
+Keep the current registry and manifest unless actual source membership requires
+owner-generated changes; do not force runtime admission. Budget: existing PR
+product/test delta only, <=24 module-log and <=12 test-log lines; additive main
+history and exact previously reviewed metadata union. Fresh hosted and resulting
+main checks are required. Revalidation is point-in-time, never chain confirmation.
+Reconciled candidate preserves the original child source, tests and two receipt
+blobs. Fresh focused228 and connected406 cases pass with stable per-run source
+hashes; counts overlap. Registry and manifest retain the parent contents.
+Hosted exact-head and resulting-main qualification remain separate gates.
+
 ## 2026-10-29 — Existing TestNet intent convergence allocation
 
 Before merging PR2202/cb794d47c onto delivered codec main4c433502e:
@@ -23,6 +88,15 @@ qualify fresh hosted security/main and independent source/metadata preservation.
 No installed runtime activation, credentials, provider, signing or chain effects.
 Fresh focused173 and connected351 cases pass (overlapping scopes); sources stable.
 Current registry is1781/260; unchanged manifest confirms no runtime admission.
+
+## 2026-10-25 — Existing-only revalidation contract documentation
+
+- WSP11/15/22/50/62/84/97; existing-owner15/P1 allocation. Document the captured
+  exact DTO/full-identity baseline and current independently resolved host grants
+  and policy; missing or changed rows deny without allocation, repair or accounting.
+- Preserve prepare/get-or-create and schema3. Revalidation is point-in-time, with
+  no continuous-presence or future signer guarantee. No formatter is added.
+- Added the local API through shared admission; measured qualification is in TestModLog.
 
 ## 2026-10-25 — Opt-in local TestNet probe intents
 

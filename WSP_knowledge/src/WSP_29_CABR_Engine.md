@@ -21,6 +21,13 @@ CABR is the quality gate for metered build compute in FoundUps:
 
 Control variable for scaling is PoB yield (benefit per metered compute), not legacy CAGR semantics.
 
+Economic changes and chain ports follow the [WSP 26 §1.2 change contract](WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract).
+Fresh, independently accepted simulator behavior is the qualified reference;
+input flags or scores alone do not authenticate PoB, reserve or funding facts.
+The task-distribution shares in §3.3 do not by themselves establish parity with
+epoch/stakeholder pools or authorize funded settlement; unresolved denominators
+remain class D activation blockers.
+
 ### CABR = OBAI = The 0102 Network
 
 **CABR is not an external oracle.** CABR is the **Verification, Validation, and Valuation Engine** - and that engine IS the 0102 network itself (OBAI: Open Beneficial AI).

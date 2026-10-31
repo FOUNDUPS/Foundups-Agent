@@ -1,5 +1,14 @@
 # FoundUps Domain
 
+## Blockchain and simulator entry point — 2026-10-31
+
+Read the [simulator-first change contract](../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract),
+then the [source-backed reconciliation](../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md)
+and [delivery allocation](../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md).
+The simulator defines qualified economic behavior; unresolved units, issuance,
+funding, replay and authorization gaps block chain activation. Mall/FX discovery,
+pitch media and project claims do not bypass these gates or grant token rights.
+
 ## Optional reusable brand context — PR1792 candidate, 2026-10-25
 
 `brand_context.schema.json` describes a parent brand and child names/aliases.

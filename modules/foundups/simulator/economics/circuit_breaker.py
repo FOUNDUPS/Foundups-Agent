@@ -24,6 +24,8 @@ from enum import Enum
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime, timedelta
 
+from ._token_numeric import _require_numbers
+
 logger = logging.getLogger(__name__)
 
 
@@ -120,6 +122,8 @@ class CircuitBreaker:
         Returns:
             New breaker state
         """
+        _require_numbers(backing_ratio, current_btc_price,
+                         self.btc_price_24h_ago, self.daily_outflow)
         # Check BTC crash
         if self.btc_price_24h_ago > 0:
             btc_change = (current_btc_price - self.btc_price_24h_ago) / self.btc_price_24h_ago
@@ -129,16 +133,16 @@ class CircuitBreaker:
         # Check backing ratio (most important)
         if backing_ratio < self.config.backing_emergency:
             return self._transition_to(BreakerState.EMERGENCY, BreakerTrigger.BACKING_LOW)
-        elif backing_ratio < self.config.backing_restricted:
+        if backing_ratio < self.config.backing_restricted:
             return self._transition_to(BreakerState.RESTRICTED, BreakerTrigger.BACKING_LOW)
-        elif backing_ratio < self.config.backing_caution:
-            return self._transition_to(BreakerState.CAUTION, BreakerTrigger.BACKING_LOW)
 
-        # Check outflow
+        # Evaluate every restricted signal before any lower-severity caution.
         outflow_ratio = self.daily_outflow  # Already as ratio
         if outflow_ratio > self.config.outflow_restricted:
             return self._transition_to(BreakerState.RESTRICTED, BreakerTrigger.OUTFLOW_HIGH)
-        elif outflow_ratio > self.config.outflow_caution:
+        if backing_ratio < self.config.backing_caution:
+            return self._transition_to(BreakerState.CAUTION, BreakerTrigger.BACKING_LOW)
+        if outflow_ratio > self.config.outflow_caution:
             return self._transition_to(BreakerState.CAUTION, BreakerTrigger.OUTFLOW_HIGH)
 
         # Check if can recover to normal
@@ -151,6 +155,13 @@ class CircuitBreaker:
     def _transition_to(self, new_state: BreakerState, trigger: Optional[BreakerTrigger]) -> BreakerState:
         """Transition to a new state."""
         if new_state == self.state:
+            return self.state
+
+        # A milder current signal is not recovery authorization. Apply the
+        # existing cooldown/empty-queue rule to every severity downgrade.
+        severity = {BreakerState.NORMAL: 0, BreakerState.CAUTION: 1,
+                    BreakerState.RESTRICTED: 2, BreakerState.EMERGENCY: 3}
+        if severity[new_state] < severity[self.state] and not self._can_recover():
             return self.state
 
         old_state = self.state

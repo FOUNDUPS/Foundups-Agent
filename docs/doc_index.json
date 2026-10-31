@@ -4,7 +4,7 @@
   "documents": [
     {
       "doc_type": "other",
-      "hash_sha256": "ed22000c555d90bf46cc64c1e8b3c2667d936caf2c3c37a9b16ad9c773e495af",
+      "hash_sha256": "25e54c7fc668635bda1e9c95eb1d1c364331086020e19fe7d083534c8c59507a",
       "links": {
         "automation": [
           "doc_dae"
@@ -26,12 +26,19 @@
       },
       "module_hint": "docs_root",
       "path": "docs/0102_session_briefings/ACTIVE_SLICE_LEDGER.md",
-      "size_bytes": 18420,
+      "size_bytes": 72674,
       "status": "active",
       "wsp_refs": [
+        "WSP 00",
+        "WSP 10",
+        "WSP 11",
         "WSP 27",
+        "WSP 3",
+        "WSP 6",
         "WSP 62",
         "WSP 80",
+        "WSP 81",
+        "WSP 85",
         "WSP 97"
       ]
     },
@@ -2966,24 +2973,119 @@
       ]
     },
     {
+      "path": "docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md",
       "doc_type": "architecture",
-      "hash_sha256": "1b339bffc6e62361cb6f32a80fe19bfcce2adedb565b38404c476a0e57a8240f",
+      "module_hint": "modules/foundups/simulator",
+      "wsp_refs": [
+        "WSP 100",
+        "WSP 26",
+        "WSP 29"
+      ],
+      "hash_sha256": "e0eeb42e3e457e7b8c3123283a334c62bb30443bb0cd303a137f682cf6dc0020",
+      "size_bytes": 30988,
+      "status": "active",
       "links": {
+        "entry_points": [
+          "ModLog.md",
+          "ROADMAP.md",
+          "docs/0102_session_briefings/ACTIVE_SLICE_LEDGER.md",
+          "docs/architecture/FOUNDUPS_BTC_RESERVE_TOKEN_ARCHITECTURE.md",
+          "docs/architecture/FOUNDUPS_FX_VENUE_AND_PROJECT_CLAIM_RESEARCH_20261025.md",
+          "modules/foundups/README.md",
+          "modules/foundups/ROADMAP.md",
+          "modules/foundups/agent_market/ROADMAP.md",
+          "modules/foundups/simulator/README.md"
+        ],
         "automation": [
           "doc_dae"
-        ],
+        ]
+      }
+    },
+    {
+      "path": "docs/architecture/FOUNDUPS_BTC_RESERVE_TOKEN_ARCHITECTURE.md",
+      "doc_type": "architecture",
+      "module_hint": "modules/foundups/simulator",
+      "wsp_refs": [
+        "WSP 26",
+        "WSP 97"
+      ],
+      "hash_sha256": "88dfcca1b8998f469cd9dc041d76ff9cf1b4acd7d8734a1d0dfcf702b6b75d1e",
+      "size_bytes": 58808,
+      "status": "active",
+      "links": {
         "entry_points": [
           "docs/0102_session_briefings/ACTIVE_SLICE_LEDGER.md",
+          "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/architecture/FOUNDUPS_BLOCKCHAIN_TESTNET_ORCHESTRATION_PLAN.md",
+          "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/plans/research/2026-10-21-blockchain-architecture.md",
+          "docs/architecture/FOUNDUPS_FX_VENUE_AND_PROJECT_CLAIM_RESEARCH_20261025.md",
           "docs/audits/holoindex_search_quality/HIA_AGENTIC_RAG_DOCS_KNOWLEDGE_RECALL.md"
+        ],
+        "automation": [
+          "doc_dae"
         ]
-      },
-      "module_hint": "docs_root",
-      "path": "docs/architecture/FOUNDUPS_BTC_RESERVE_TOKEN_ARCHITECTURE.md",
-      "size_bytes": 58191,
-      "status": "active",
+      }
+    },
+    {
+      "path": "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md",
+      "doc_type": "architecture",
+      "module_hint": "modules/foundups/simulator",
       "wsp_refs": [
+        "WSP 00",
+        "WSP 109",
+        "WSP 15",
+        "WSP 22",
+        "WSP 26",
+        "WSP 27",
+        "WSP 3",
+        "WSP 31",
+        "WSP 50",
+        "WSP 6",
+        "WSP 62",
         "WSP 97"
-      ]
+      ],
+      "hash_sha256": "0c834786a559b6ed7b7bf007c02e849c20e06bafbe844516e81f4c2b6f25edb1",
+      "size_bytes": 87621,
+      "status": "active",
+      "links": {
+        "entry_points": [
+          "ModLog.md",
+          "docs/_archive/pc-reconciliation/2026-10-30/CURRENT_OWNER_HANDOFF.md",
+          "docs/_archive/pc-reconciliation/2026-10-30/historical-log-additions/modules/foundups/ModLog.md",
+          "docs/_archive/pc-reconciliation/2026-10-30/historical-log-additions/modules/foundups/agent/tests/TestModLog.md",
+          "docs/_archive/pc-reconciliation/2026-10-30/historical-log-additions/modules/platform_integration/social_media_orchestrator/ModLog.md",
+          "docs/_archive/pc-reconciliation/2026-10-30/planning-deltas/docs/foundups_vision.md.historical-patch.md",
+          "docs/_archive/pc-reconciliation/2026-10-30/planning-deltas/modules/foundups/ROADMAP.md.historical-patch.md",
+          "docs/_archive/pc-reconciliation/2026-10-30/planning-deltas/modules/foundups/agent_market/ROADMAP.md.historical-patch.md",
+          "docs/_archive/pc-reconciliation/2026-10-30/planning-deltas/modules/platform_integration/social_media_orchestrator/ROADMAP.md.historical-patch.md",
+          "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/architecture/FOUNDUPS_AUTONOMOUS_PITCH_DECK_AND_PROJECT_CLAIM_PLAN.md"
+        ],
+        "automation": [
+          "doc_dae"
+        ]
+      }
+    },
+    {
+      "path": "docs/architecture/FOUNDUPS_FX_VENUE_AND_PROJECT_CLAIM_RESEARCH_20261025.md",
+      "doc_type": "analysis",
+      "module_hint": "modules/foundups",
+      "wsp_refs": [
+        "WSP 00",
+        "WSP 15",
+        "WSP 26",
+        "WSP 97"
+      ],
+      "hash_sha256": "3deb3203deba8a85e7b7fe42e1f607944b48f35416e3ba885261ee850d1717c3",
+      "size_bytes": 37702,
+      "status": "active",
+      "links": {
+        "entry_points": [
+          "ModLog.md",
+          "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md"
+        ],
+        "automation": [
+          "doc_dae"
+        ]
+      }
     },
     {
       "doc_type": "other",
@@ -3256,6 +3358,95 @@
         "WSP 50",
         "WSP 97"
       ]
+    },
+    {
+      "path": "docs/architecture/receipts/FOUNDUPS_BLOCKCHAIN_PUBLICATION_20261031.json",
+      "doc_type": "other",
+      "module_hint": "modules/foundups/simulator",
+      "status": "active",
+      "links": {
+        "entry_points": [
+          "docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md"
+        ],
+        "automation": [
+          "doc_dae"
+        ]
+      },
+      "hash_sha256": "12a1d5e8774509d47c5e1894e0ae81e4925dce7f2fddca4c8c96d6d1ee266975",
+      "size_bytes": 5808,
+      "wsp_refs": [
+        "WSP 26"
+      ]
+    },
+    {
+      "path": "docs/architecture/receipts/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_20261031.json",
+      "doc_type": "other",
+      "module_hint": "modules/foundups/simulator",
+      "wsp_refs": [
+        "WSP 100",
+        "WSP 26",
+        "WSP 27",
+        "WSP 29"
+      ],
+      "hash_sha256": "243673c09bada3e7d279093b09731696aba1467a164a94103ae8ff14fe41bd2c",
+      "size_bytes": 461671,
+      "status": "active",
+      "links": {
+        "entry_points": [
+          "docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md"
+        ],
+        "automation": [
+          "doc_dae"
+        ]
+      }
+    },
+    {
+      "path": "docs/architecture/receipts/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_20261031.review.json",
+      "doc_type": "other",
+      "module_hint": "modules/foundups/simulator",
+      "wsp_refs": [],
+      "hash_sha256": "3d35094e33d6e9f968f35c30dd74974eeaa1c90fc6fb7eb88aa5176451e35693",
+      "size_bytes": 5783,
+      "status": "active",
+      "links": {
+        "entry_points": [],
+        "automation": [
+          "doc_dae"
+        ]
+      }
+    },
+    {
+      "path": "docs/architecture/receipts/FOUNDUPS_TESTNET_TRANSFER_INTENT_20261025.json",
+      "doc_type": "other",
+      "module_hint": "modules/foundups/agent_market",
+      "wsp_refs": [
+        "WSP 26",
+        "WSP 97"
+      ],
+      "hash_sha256": "3d130d40a6056f340549ece22a6cd946ba59bbaa24747a24ed877799e13c7237",
+      "size_bytes": 41816,
+      "status": "active",
+      "links": {
+        "entry_points": [],
+        "automation": [
+          "doc_dae"
+        ]
+      }
+    },
+    {
+      "path": "docs/architecture/receipts/FOUNDUPS_TESTNET_TRANSFER_INTENT_20261025.testcases.json",
+      "doc_type": "other",
+      "module_hint": "modules/foundups/agent_market",
+      "wsp_refs": [],
+      "hash_sha256": "307d27016de9434beffc953917a42306072e466dd7c268ae00f5fc896be858d7",
+      "size_bytes": 1781864,
+      "status": "active",
+      "links": {
+        "entry_points": [],
+        "automation": [
+          "doc_dae"
+        ]
+      }
     },
     {
       "doc_type": "other",
@@ -12101,5 +12292,5 @@
       ]
     }
   ],
-  "generated_at": "2026-08-30T10:41:43.472610Z"
+  "generated_at": "2026-10-31T04:14:26.033474Z"
 }

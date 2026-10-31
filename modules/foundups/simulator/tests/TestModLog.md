@@ -1,3 +1,23 @@
+## Publication documentation guardrails — 2026-10-31
+
+Existing documentation suite first produced5 passes/1 failure on the missing
+unit-conflict metadata. Added genesis-to-matrix consistency and exact economic
+protocol mirror checks; no historical oracle removed or weakened. The canonical
+registry retains all1792 main owners and adds the circuit-breaker owner. Fresh
+GREEN and connected counts are recorded in the current reconciliation addendum.
+
+## Local adversarial qualification — 2026-10-31
+
+Fresh244 selected baseline passes. Desired RED79:12 pass/67 fail; candidate320
+passes; connected414 passes after explicit real central-daemon scratch setup.
+Independent6 held-outs pass, original3 CABR ASTs preserved. Counts overlap.
+Seeded CABR properties:0/7/3102,256 decisions each; frozen clock for recovery.
+Separate seed310001 characterization:7 cases,1 pass/6 desired assertion failures,
+zero setup errors/skips/guard denials; sources unchanged. No xfail suppression.
+Retain initial pytest logging-guard failure, nonexistent-owner zero-test run and
+hostname/optional-SQLite diagnostic runs. Final configured run has no denied
+effects; Python instrumentation is not OS confinement or blockchain qualification.
+
 ## FoundUps selected numeric source closure — 2026-10-25
 
 Pre-edit WSP15 allocation16/P0 in the numeric plan permits exactly one required
