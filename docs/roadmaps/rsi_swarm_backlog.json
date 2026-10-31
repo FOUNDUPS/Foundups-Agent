@@ -1889,22 +1889,186 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "docs/operations/RSI_SWARM_DISPATCH.md#resident-assurance-connection--2026-10-30",
-    "base_commit": "7d6a292bcb28e5cbadd1dffdac1a795d3da7e31e",
-    "selected_action": "Close existing main-to-AgentDB assurance connection, then authenticate the resident native-worker caller",
-    "status": "LOCAL_CONTRACT_REPAIR_NATIVE_ADMISSION_UNPROVED",
+    "observation_path": "docs/operations/RSI_SWARM_DISPATCH.md#micro-verification-and-protected-native-composition--2026-11-01",
+    "base_commit": "43b3b66cce8a01f28fb08577a9db84f731e50455",
+    "selected_action": "Compose the existing protected native requester and lease consumer, then admit the R15 test-registry work procedure",
+    "status": "PROTECTED_COMPOSITION_AND_CURRENT_AUTHENTIC_INPUTS_REQUIRED",
     "wsp15": {
-      "complexity": 2,
-      "importance": 4,
-      "deferability": 4,
-      "impact": 4,
-      "total": 14,
-      "priority": "P1"
+      "complexity": 4,
+      "importance": 5,
+      "deferability": 5,
+      "impact": 5,
+      "total": 19,
+      "priority": "P0"
     },
     "dispatchable": false,
-    "next_action": "Verify source review, Linux composition and publication for this connection; then resume the19/P0 authenticated owner/peer-grant/parent-consensus/external-lease-issuer integration. PR2181 publication is already closed. No signing keys or grants are supplied by this planning record."
+    "next_action": "PR2276 is merged and exact-main verified. Do not construct integrity-secret-bearing replay stores in ordinary main or broaden initial LOW scope. Resolve authenticated protected request/transport and lease consumption through existing owners, establish current scoped work/model/verifier/budget inputs, and prove valid execution plus refusal and cleanup. The local Vote trial does not close native G1-G5."
   },
   "current_observation": {
+    "micro_verification_20261101": {
+      "source_base": "43b3b66cce8a01f28fb08577a9db84f731e50455",
+      "status": "LOCAL_WORKER_REJECTED_COORDINATOR_REPAIR_INDEPENDENTLY_REVIEWED",
+      "prior_selection": {
+        "observation_path": "docs/operations/RSI_SWARM_DISPATCH.md#resident-assurance-connection--2026-10-30",
+        "base_commit": "7d6a292bcb28e5cbadd1dffdac1a795d3da7e31e",
+        "selected_action": "Close existing main-to-AgentDB assurance connection, then authenticate the resident native-worker caller",
+        "status": "LOCAL_CONTRACT_REPAIR_NATIVE_ADMISSION_UNPROVED",
+        "wsp15": {
+          "complexity": 2,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 4,
+          "total": 14,
+          "priority": "P1"
+        },
+        "dispatchable": false,
+        "next_action": "Verify source review, Linux composition and publication for this connection; then resume the19/P0 authenticated owner/peer-grant/parent-consensus/external-lease-issuer integration. PR2181 publication is already closed. No signing keys or grants are supplied by this planning record."
+      },
+      "prior_publication": {
+        "pr": 2276,
+        "merge": "c9ac9059ed29073e885159747144071a3d310aff",
+        "tree": "52e12a57cff3ccaf971ca88492b9760f870683ab",
+        "main_ci_run": 41004992711,
+        "main_ci_and_codeql": "success"
+      },
+      "eligible_micro_wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 3,
+        "impact": 4,
+        "total": 13,
+        "priority": "P1"
+      },
+      "fixture": "modules/foundups/voteballots/tests/test_confidence_scoring_integration.py",
+      "worker": {
+        "source_head": "43b3b66cce8a01f28fb08577a9db84f731e50455",
+        "model": "qwen2.5-coder-7b-instruct-q4_k_m",
+        "model_sha256": "509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c",
+        "runtime": "llama-cpp-python0.3.20",
+        "adapter": "WRE local_skill_inference native_chat",
+        "elapsed_s": 73.75,
+        "usage": [
+          {
+            "prompt_tokens": 874,
+            "completion_tokens": 84,
+            "total_tokens": 958
+          }
+        ],
+        "usage_basis": "instrumented unchanged SDK response, not independent billing",
+        "paid_calls": 0,
+        "native_hermes_openclaw": false,
+        "os_sandboxed": false,
+        "proposal_only": true,
+        "result": {
+          "success": false,
+          "output": "",
+          "proposal": "```json\n{\n  \"old_string\": \"if source.confidence == ConfidenceLevel.VERIFIED_FACT:\\n                return ConfidenceLabel.VERIFIED_FACT, factors\",\n  \"new_string\": \"if source.confidence == ConfidenceLevel.VERIFIED_FACT:\\n                factors.append(\\\"downgraded_from_verified_due_to_missing_source\\\")\\n                return ConfidenceLabel.HIGH_CONFIDENCE_INFERENCE, factors\"\n}\n```",
+          "steps_completed": 0,
+          "failed_at_step": 1,
+          "error": "Local model output is an unverified proposal, not effect evidence",
+          "error_code": "unverified_model_proposal",
+          "_effect_evidence": false
+        }
+      },
+      "input_sha256": "f2600860e0f97e9d0bbdb580d6e8a7fc154622784085a4eb36ef0cb302586669",
+      "input_hash_encoding": "UTF8 with LF-normalized newlines",
+      "input_raw_sha256": "1c9fca39e6de5cbbfd979f3d5eaaad731ec0683402522d9cffe43df49a6173a4",
+      "evidence_kind": "unsigned_local_observation",
+      "frozen_test_sha256": "898327ec40945318140abdea6ad547609ec325d4c6de42733dc1b7353e43a3f6",
+      "final_test_sha256": "1f3a6cc94bf1100eacfc6a2a4a237738df45e2facbaebccb51d1d214ed8f22f5",
+      "baseline_raw_source_sha256": "abce30857ed5f11e818d350476a72ed0f65a7dc03eeab8c1beafffa0708b47a4",
+      "coordinator_source_sha256": "32b35d5804e0f2d42c511e0071b1db9dde293e2eecf00b4b86b91d29762d8b40",
+      "coordinator_source_lf_sha256": "f87a375dcc155229dfcde2fc5893b2d83f619cdc85ec4c5d259acd8a10c9eecf",
+      "final_test_lf_sha256": "59276bdc80d02bef09e7425cf8efab34864a56fefc928eddc5c06ee1701bf500",
+      "comparison": [
+        {
+          "variant": "baseline",
+          "exit_code": 1,
+          "tests": 20,
+          "failures": 4,
+          "errors": 0,
+          "skipped": 0,
+          "failed_cases": [
+            "test_non_direct_reference_cannot_preserve_verified_fact[news_report]",
+            "test_non_direct_reference_cannot_preserve_verified_fact[third_party_report]",
+            "test_non_direct_reference_cannot_preserve_verified_fact[]",
+            "test_verified_facts_consumer_excludes_non_direct_reference"
+          ],
+          "source_sha256": "1ddc132894fe919ab287018a2e039cc807aa8447aadfb413deda8ca778486e34"
+        },
+        {
+          "variant": "worker_candidate",
+          "exit_code": 1,
+          "tests": 20,
+          "failures": 7,
+          "errors": 0,
+          "skipped": 0,
+          "failed_cases": [
+            "test_non_direct_reference_cannot_preserve_verified_fact[news_report]",
+            "test_non_direct_reference_cannot_preserve_verified_fact[third_party_report]",
+            "test_non_direct_reference_cannot_preserve_verified_fact[]",
+            "test_verified_facts_consumer_excludes_non_direct_reference",
+            "test_approved_direct_reference_remains_verified_in_consumer[fec_filing]",
+            "test_approved_direct_reference_remains_verified_in_consumer[state_filing]",
+            "test_approved_direct_reference_remains_verified_in_consumer[court_record]"
+          ],
+          "source_sha256": "569384c2a5bb369db815c41ecea74c7b555eb5191c98c7e99ca019dead62de8b"
+        }
+      ],
+      "comparison_hash_note": "Disposable source copies are UTF8/LF; raw Windows checkout hashes differ. Original frozen test copies are byte-preserved.",
+      "coordinator_repair": "Only indirect funding-source VERIFIED_FACT branch changes to HIGH_CONFIDENCE_INFERENCE with explicit indirect-source factor; two docstrings corrected. Not attributed to worker.",
+      "independent_review": {
+        "source_review": "rejected wrong-branch model edit; accepted bounded coordinator repair",
+        "full_module": {
+          "passed": 322,
+          "failed": 0,
+          "skipped": 0,
+          "seconds": 1.77
+        },
+        "extra_synthetic_probes": {
+          "passed": 21
+        },
+        "strengthened_targeted": {
+          "passed": 20,
+          "seconds": 0.6
+        },
+        "overlap": "Do not add counts. Module includes two legacy stub/rubric suites; production consumer oracle separately executed.",
+        "independence_limit": "Separate Codex reviewers and test execution; tests withheld from model input but not OS-read-isolated."
+      },
+      "accepted_worker_results": {
+        "numerator": 0,
+        "denominator": 1
+      },
+      "defective_candidates_rejected": {
+        "numerator": 1,
+        "denominator": 1
+      },
+      "coordinator_interventions": {
+        "repair": 1,
+        "diagnostic_envelope_normalization": 1
+      },
+      "full_cost": null,
+      "cost_per_accepted_worker_result": null,
+      "cost_limit": "No paid worker provider calls; coordinator tokens/cost and local energy unknown. No comparative savings claim.",
+      "learning_candidate": "Anchor source edits to branch context and preserve positive controls; not retained as accepted RSI learning until independent later-use benefit.",
+      "aggregate_followup": {
+        "wsp15": {
+          "complexity": 2,
+          "importance": 3,
+          "deferability": 3,
+          "impact": 3,
+          "total": 11,
+          "priority": "P2"
+        },
+        "owner": "modules/foundups/voteballots/ROADMAP.md",
+        "state": "Pre-existing aggregate total_raised inherits upstream verified confidence with missing/indirect primary source; two independent synthetic counterexamples. Outside this bounded source-item repair."
+      },
+      "native_author_ticket": false,
+      "os_sandbox_qualified": false,
+      "activation_or_retention": false,
+      "g1_g5_closed": false,
+      "next": "Publish reviewed micro fixture/repair and reconcile protected native requester/consumer owners; preserve existing R15 target."
+    },
     "parent_consensus_join_20261020": {
       "source_base": "5862eea0ef49d950674a6509c3dd2a20771a6be2",
       "current_main": "824d0f71dade7dabc25afa1b778f8e3eb099a1e1",

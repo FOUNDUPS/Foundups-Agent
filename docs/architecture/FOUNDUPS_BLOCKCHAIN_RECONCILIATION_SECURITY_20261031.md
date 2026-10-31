@@ -10,6 +10,17 @@ The November 1 research baseline is `43b3b66cce8a01f28fb08577a9db84f731e50455`.
 Its intervening change concerns YUMORI documentation. Neither source publication
 nor a passing simulator authorizes chain activation.
 
+### Concurrent main reconciliation
+
+During final PR2281 checks, another session landed RSI/Vote PR2282 at
+`12adf3e4824645a21d93d10339ac4ccfa304e723`. The wallet implementation and its
+qualified tests do not overlap. Both root-log additions and the union of exact
+reviewed security records are preserved, along with all Vote/CI changes. The
+combined local policy/documentation/Vote selection passes 404 cases with no
+failures, errors, skips or guard denials. Previous 41 passing hosted checks belong
+to `6bc295c8f5242c808f30985334d4e5af7730d9fe`; combined-head hosted
+qualification and resulting-main checks are required separately.
+
 ### The economy being built
 
 The simulator already includes tokenomics. In

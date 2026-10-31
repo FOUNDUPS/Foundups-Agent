@@ -38,6 +38,13 @@ Current test files include:
 
 The canonical VOTE PoC closure snapshot records **303 passing tests** on 2026-05-25 for the implementation-complete six-slice chain. That historical result is evidence, not a claim that the suite was rerun for later docs-only work.
 
+
+November1 production-provenance repair:322 module tests passed, including the
+new independent20-case source/consumer oracle; exact frozen and strengthened
+versions are recorded in TestModLog. CI's existing WRE verification job runs this
+suite and uploads `vote-verification-results.xml`. Legacy rubric tests remain
+precedent, not evidence that every production claim satisfies direct-source rules.
+
 ---
 
 ## Suite Boundaries
