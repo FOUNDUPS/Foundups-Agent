@@ -1,5 +1,17 @@
 # ROADMAP - FoundUps Simulator
 
+## 2026-10-31 — Local security and parity audit
+
+- [x] Current remote/main reconciliation in an isolated PC worktree; no GitHub writes.
+- [x] CABR input and breaker severity/cooldown hardening; 414 connected tests and
+  6 independent held-outs pass. Historical results below remain dated evidence.
+- [x] Execute seven actual-owner adversarial probes: one pass, six security gaps.
+- [ ] Version UPS units, aggregate 21M supply, epoch funding, fees and pool denominators.
+- [ ] Durable pending/global reservations, idempotent distribution and funded FX.
+- [ ] Immutable policy, oracle authentication, self-trade controls and recovery.
+- [ ] Independent controller/signer and chain-level transaction parity.
+Deployment remains BLOCKED; see the 2026-10-31 architecture report.
+
 ## 2026-10-25 — Selected numeric admission
 
 - [x] Strict work/stake/unstake quantities, at-use fee validation and pure

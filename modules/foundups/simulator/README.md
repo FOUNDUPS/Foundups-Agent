@@ -2,6 +2,16 @@
 
 Visual simulation of the autonomous FoundUp ecosystem.
 
+## Local security reconciliation — 2026-10-31
+
+CABR rejects non-boolean PoB decisions and nonfinite/coercible numbers; valid
+finite clamps and release math remain. The breaker prioritizes the strongest
+active signal and retains its cooldown/queue hold across every downgrade.
+These simulator controls do not authenticate PoB, reserves or funded settlement.
+Fresh connected selection: 414 passed; independent held-outs: 6 passed.
+Seven separate attack probes yielded one pass and six desired-security failures.
+See the [reconciliation and threat report](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md).
+
 ## Work, stake and unstake numeric validation — 2026-10-25
 
 Selected economic operations now reject invalid quantities, mutable fees and

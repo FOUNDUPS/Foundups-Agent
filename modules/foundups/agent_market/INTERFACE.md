@@ -11,6 +11,16 @@ FoundUps Agent Market exposes stable contracts for launching tokenized FoundUps 
 
 ## Core Schemas
 
+Quantity validation requires `type(value) is int` for TokenTerms.max_supply,
+Task.reward_amount, Payout.amount, ComputePlan.monthly_credit_allocation,
+ComputeWallet.credit_balance/reserved_credits, ComputeLedgerEntry.amount and
+ComputeSession.credits_debited. Existing positive/nonnegative minima are unchanged;
+no upper bound or asset denomination is established by these constructors.
+LaunchOrchestrator preserves the raw initial reward and validates the planned Task
+before domain adapter calls. Invalid input returns a failed LaunchResult with no
+created artifacts; the existing launch.failed audit event remains. This is not
+whole-launch rollback or validation of separate compute dictionary/ORM ingress.
+
 ### Foundup
 ```python
 Foundup(
@@ -413,6 +423,25 @@ issuance, vesting, reserve backing or transfer/trading policy; the WSP26 policy
 conflict remains unresolved. Local qualification and corrections are recorded in
 [TestModLog](tests/TestModLog.md) and the
 [allocated plan](../../../docs/architecture/FOUNDUPS_TESTNET_TRANSFER_INTENT_20261025.md).
+
+#### Existing-only revalidation contract
+
+```python
+revalidate_existing(expected: PreparedTestnetIntent, actor_id: str,
+    binding: SubmittedTestnetBinding, *, authorization=None) -> PreparedTestnetIntent
+```
+
+`expected` must be the exact captured DTO with exact builtin scalar types,
+checked before rich equality. All fields bind: ID, scope, canonical identity JSON,
+content hash, state, creation time and expiry. It supplies no authority.
+The host independently resolves current policy and caller grants before each
+call, including after later I/O; an old immutable context cannot detect revocation.
+Reuse the current schema-3, payout/proof/decision/history, binding, actor and expiry
+admission in one transaction. Require the row already exists and matches the full
+captured DTO; absence, replacement or tampering rejects without insert or repair.
+Success and denial preserve database/accounting state. `prepare` keeps its existing
+get-or-create contract. This check proves only current admitted state, not continuous
+presence or future signer authority; no formatter or resident consumer is added.
 
 ### DistributionService
 - `build_milestone_payload(task_id: str) -> dict[str, object]`

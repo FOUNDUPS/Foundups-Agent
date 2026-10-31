@@ -1,5 +1,17 @@
 # INTERFACE - FoundUps Simulator
 
+## CABR and breaker admission — 2026-10-31
+
+`route_cabr_ups_flow` raises ValueError unless PoB is an exact bool and all
+four numeric fields are finite built-in int/float. Signed finite clamps and
+valid formulas are unchanged. This pure calculation neither authenticates PoB
+nor consumes Treasury funds. `CircuitBreaker.check_conditions` rejects invalid
+backing/price/outflow/reference values before transition, prioritizes the highest
+severity and applies existing cooldown/empty-queue recovery to all downgrades.
+Thresholds and multipliers are unchanged. Emergency plus queued exits stays
+held; authenticated recovery/cancellation, oracle freshness and global funded
+withdrawal enforcement are not implemented by this interface.
+
 ## Module Contract
 FoundUps Simulator provides real-time event streaming via Server-Sent Events (SSE) for the cube visualization frontend, bridging FAMDaemon observability data to the web UI.
 

@@ -1,3 +1,16 @@
+## Local CABR/breaker security and parity audit — 2026-10-31
+
+WSP15 14/P1; WSP22/26/27/29/48/50/81/84/97/100. Local-only scope at main4050.
+Added strict CABR input admission and breaker severity/cooldown guards within
+existing owners. Preserved valid arithmetic, clamps, thresholds and fee policy.
+Test-first 79 cases: 12 pass/67 fail before repair; connected repaired selection
+414 passes, independent6 passes. Original3 CABR test ASTs unchanged.
+Separate external7 attack probes: 1 pass/6 desired-security failures; none hidden.
+Documented pending funding, replay side effects, self-trade, policy alias, oracle
+and queue timing gaps. No chain signing, runtime activation or economic policy
+rewrite. Initial harness/setup failures and exact evidence remain in the portable
+reconciliation receipt; no production/PQ/compliance assurance follows.
+
 ## FoundUps selected numeric source closure — 2026-10-25
 
 Pre-edit WSP15 allocation16/P0 in the numeric plan permits exactly one required

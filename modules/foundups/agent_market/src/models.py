@@ -62,7 +62,7 @@ class TokenTerms:
         _require_non_empty(self.token_name, "token_name")
         _require_non_empty(self.token_symbol, "token_symbol")
         _require_non_empty(self.treasury_account, "treasury_account")
-        if not isinstance(self.max_supply, int) or self.max_supply <= 0:
+        if type(self.max_supply) is not int or self.max_supply <= 0:
             raise ValidationError("max_supply must be a positive integer")
 
 
@@ -106,7 +106,7 @@ class Task:
         _require_non_empty(self.creator_id, "creator_id")
         if not isinstance(self.acceptance_criteria, list) or not self.acceptance_criteria:
             raise ValidationError("acceptance_criteria must be a non-empty list")
-        if not isinstance(self.reward_amount, int) or self.reward_amount <= 0:
+        if type(self.reward_amount) is not int or self.reward_amount <= 0:
             raise ValidationError("reward_amount must be a positive integer")
 
 
@@ -160,7 +160,7 @@ class Payout:
         _require_non_empty(self.payout_id, "payout_id")
         _require_non_empty(self.task_id, "task_id")
         _require_non_empty(self.recipient_id, "recipient_id")
-        if not isinstance(self.amount, int) or self.amount <= 0:
+        if type(self.amount) is not int or self.amount <= 0:
             raise ValidationError("amount must be a positive integer")
 
 
@@ -220,7 +220,7 @@ class ComputePlan:
         _require_non_empty(self.actor_id, "actor_id")
         _require_non_empty(self.tier, "tier")
         _require_non_empty(self.status, "status")
-        if not isinstance(self.monthly_credit_allocation, int) or self.monthly_credit_allocation < 0:
+        if type(self.monthly_credit_allocation) is not int or self.monthly_credit_allocation < 0:
             raise ValidationError("monthly_credit_allocation must be non-negative integer")
 
 
@@ -235,9 +235,9 @@ class ComputeWallet:
     def __post_init__(self) -> None:
         _require_non_empty(self.wallet_id, "wallet_id")
         _require_non_empty(self.actor_id, "actor_id")
-        if not isinstance(self.credit_balance, int) or self.credit_balance < 0:
+        if type(self.credit_balance) is not int or self.credit_balance < 0:
             raise ValidationError("credit_balance must be non-negative integer")
-        if not isinstance(self.reserved_credits, int) or self.reserved_credits < 0:
+        if type(self.reserved_credits) is not int or self.reserved_credits < 0:
             raise ValidationError("reserved_credits must be non-negative integer")
 
 
@@ -259,7 +259,7 @@ class ComputeLedgerEntry:
         _require_non_empty(self.actor_id, "actor_id")
         _require_non_empty(self.entry_type, "entry_type")
         _require_non_empty(self.reason, "reason")
-        if not isinstance(self.amount, int) or self.amount <= 0:
+        if type(self.amount) is not int or self.amount <= 0:
             raise ValidationError("amount must be a positive integer")
 
 
@@ -279,5 +279,5 @@ class ComputeSession:
         _require_non_empty(self.foundup_id, "foundup_id")
         if not isinstance(self.workload, dict):
             raise ValidationError("workload must be a dict")
-        if not isinstance(self.credits_debited, int) or self.credits_debited < 0:
+        if type(self.credits_debited) is not int or self.credits_debited < 0:
             raise ValidationError("credits_debited must be non-negative integer")

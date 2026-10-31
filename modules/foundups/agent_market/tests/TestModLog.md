@@ -1,5 +1,54 @@
 # TestModLog - tests
 
+## 2026-10-31 — Fresh local reconciliation qualification
+
+Independent ten-owner485/485 pass with exact prior ID mapping, no skips/errors,
+45 stable FAM source hashes and329 scratch-only SQLite connections. Initial
+assertion-pass/qualification-fail and attribution runs retained: pyreadline3
+invoked local socket.gethostname. Final profile permits only that metadata event,
+denies other socket events and dotenv reads; zero unexpected denials. No mock
+result or old execution substitutes for this fresh run. SDK52 is a separate
+qualified format profile, not FAM-to-chain integration or live settlement.
+
+## 2026-10-29 — Combined testnet safety integration
+
+Reused ten connected owners:485 passed, zero failures/errors/skips; sources
+stable. Includes all406 connected revalidation cases plus79 quantity additions;
+constituent counts overlap. Original assertions and source/test blobs retained.
+Same credential-stripped external runner, denied Python sockets and scratch-only
+SQLite; not OS isolation or live-chain proof. Existing registry/manifest owners
+and fresh hosted/current-main checks remain distinct integration gates.
+
+## 2026-10-29 — Freeze exact quantity and pre-effect launch acceptance
+
+Allocation17/P0 precedes tests/product. Unchanged schema/orchestrator baseline:
+53 passed, no failures/errors/skips; source hashes stable in external chain-
+security quantity-regression/baseline. Reuse those two owners and all old oracles.
+Add eight model-field matrices for bool, ambiguous numeric/coercible values and
+a negative int subclass with deceptive comparisons; preserve exact built-in
+minimum/next-integer boundaries. Launch refusal must occur before any registry,
+token, repository or task adapter call, retaining the existing failed-result
+and local audit event. Freeze desired tests before changing product sources.
+Domain-schema coverage does not qualify separate compute dictionary/ORM ingress,
+asset units, funded caps, controller independence, signing or chain settlement.
+
+Frozen desired run:105 passed/27 failed; candidate: same132 IDs all passed.
+Connected eight-owner run:333 passed, no failures/errors/skips; includes132.
+All53 old case IDs/oracles preserved. Independent source/result review accepted;
+reviewer did not rerun product. External isolated Python runner denies socket
+audit events, but does not establish native/OS confinement or full import closure.
+Manifest regenerated separately; only the two reviewed source hashes changed.
+
+## 2026-10-29 — Existing-only revalidation convergence
+
+Fresh four-owner focus:228 pass; ten-owner connected:406 pass, including228.
+No failures/errors/skips; per-run source hashes stable. Original child source,
+test and receipt blobs remain exact; no new case, oracle or test owner.
+Reused credential-stripped controller with denied Python socket events and
+scratch-only SQLite connections. Not full import/native/OS isolation or a chain
+observation. Historical514-case whole-FAM result was not rerun or relabeled.
+Fresh hosted and resulting-main acceptance remain distinct publication gates.
+
 ## 2026-10-29 — Intent convergence against delivered codec main
 
 Existing four-owner focus passes173 cases (93 intent plus80 compatibility).
@@ -10,6 +59,28 @@ and SQLite connections limited to explicit scratch or memory. This is not native
 or OS confinement, whole-runtime closure, signer or network qualification.
 Product/test behavior is the original reviewed intent layer; main's BOM repairs
 are preserved. Fresh hosted/current-main qualification remains a separate gate.
+
+## 2026-10-25 — Existing-only revalidation measured results
+
+- Unchanged parent service:228 exact IDs,174 passes/54 call-phase AttributeError
+  failures for the absent API. The separate prepare-after-loss witness passed.
+- Exact reviewed source:focused228/228 then whole original19-owner FAM514/514;
+  no skips/exclusions, old459 IDs plus55 additions. Counts are nonadditive.
+- All247 selected sources stable;53 focused/74 final loaded sources prebound.
+  Zero guard attempts; default-store metadata unchanged, real central stopped.
+- Fresh clean environment and phase-owned HOME/cache; unchanged external runner.
+  Two PytestConfigWarning each run retained. No OS/native/ATTACH or live-chain proof.
+- Original422-line test prefix/26 functions/93 cases preserved; current owner148.
+  Existing receipt/companion append the new run records without changing old data.
+
+## 2026-10-25 — Existing-only revalidation acceptance allocated
+
+- WSP6/11/15/22/50/62/84/97; preallocated15/P1, same intent test owner.
+- Reuse ready/_prepare/_snapshot/_old/_intents and explicit treasury grants;
+  preserve original26 test-function ASTs and93 cases. Append revalidation
+  type/current-authority/history/existing-row/no-write controls, no new fixture plane.
+- Tests authored before production changes; no collection or execution yet.
+  Root owns desired RED, candidate qualification and final results below.
 
 ## 2026-10-25 — Local TestNet probe-intent qualification
 

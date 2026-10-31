@@ -1,4 +1,14 @@
 ﻿# ROADMAP - FoundUps Agent Market
+## Exact quantity admission — 2026-10-29
+
+Implemented eight constructor type guards and optional-task validation before
+launch adapter effects. Frozen acceptance reproduced 27 failures, then passed
+132 focused and 333 connected cases (overlapping scopes); independent review
+accepted source and test preservation. Hosted/main publication remains separate.
+Next P0 gates: authenticated controller independence, funded aggregate caps,
+asset units/range, durable attempt/reissue ownership, signing and confirmation.
+Separate compute dictionary/ORM inputs are not qualified by this change.
+
 ## Pre-chain safety delivery — 2026-10-25
 
 - [x] P0A: reject invalid/unavailable/disconnected requested or default token
@@ -24,6 +34,13 @@
 The [delivery plan](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md)
 records pre-execution WSP 15 priorities and evidence. Existing atomic SQLite
 verification and pending-payout repairs below remain in place.
+
+## Existing-intent revalidation allocation — 2026-10-25
+
+- [x] Locally qualified existing-only full-DTO revalidation; supplied policy/
+  authority rechecked, missing rows deny without recreation. Host resolves freshness.
+- [x] Kept schema 3 and prepare/get-or-create; qualified no-write/reopen
+  checks before a separately allocated formatter. Revalidation is point-in-time.
 
 ## Domain Alignment References
 - `modules/foundups/ROADMAP.md`

@@ -2,6 +2,15 @@
 
 This directory contains regression tests for the FoundUps simulator module.
 
+2026-10-31: `test_cabr_flow_router.py` adds exact-bool/finite scalar admission
+and seeded valid-formula/conservation properties; `test_circuit_breaker.py`
+covers competing severity, frozen-clock cooldown, queue hold and invalid inputs.
+The final connected9-owner run passes414 cases; independent6 held-outs pass.
+The seven separate external adversarial probes have six unresolved failures;
+they are recorded in the architecture receipt, not passing chain-security tests.
+Use credential-free scratch storage and real central-daemon scratch configuration;
+no live signer/provider is necessary or authorized for these tests.
+
 ## Work/stake/unstake numeric admission
 
 The existing `test_alignment_and_tokenomics.py` retains all6 original test ASTs

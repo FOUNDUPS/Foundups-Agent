@@ -634,5 +634,150 @@
     ],
     "companion_byte_domain": "committed_Git_LF_blob",
     "host_packaging_companion_bytes": 1822244
+  },
+  "existing_only_revalidation": {
+    "schema": "foundups-existing-intent-revalidation-layer-v1",
+    "historical_record_scope": "All prior top-level records, including original companion hashes and artifact_packaging byte counts, describe the unmodified blobs at parent cb794d47c613fda0009c14d219e905ff29ef1a24. This distinct appended layer binds the current companion via artifacts.companion.git_lf_sha256; original packaging hashes must not be compared to the appended bytes.",
+    "status": "QUALIFIED_LOCAL_COMPONENT_PENDING_STACKED_PUBLICATION",
+    "wsps": [
+      "00",
+      "6",
+      "11",
+      "15",
+      "22",
+      "50",
+      "62",
+      "84",
+      "97"
+    ],
+    "allocation": {
+      "sha256": "16d7554b922fa6ebb820b42fd16e9b47453b77d54415c2b6c952fd526b4913ad",
+      "score": 15,
+      "priority": "P1",
+      "paths": 12
+    },
+    "context": {
+      "branch": "agent/foundups-testnet-intent-revalidation-20261025",
+      "parent": "cb794d47c613fda0009c14d219e905ff29ef1a24",
+      "pr_base": "agent/foundups-testnet-intents-20261025",
+      "dependency_pr": 2202,
+      "main_observed": "5da187622d0076f6d53de79bf8e1bd1b93aa9bb5",
+      "publication": "Dedicated stacked PR; no parent merge/security waiver/main delivery claim"
+    },
+    "change": "Same service revalidate_existing exact captured DTO; shared current admission, require original row and complete DTO equality. Missing record fails before ID allocation or INSERT. prepare retains get-or-create behavior.",
+    "authority": "Expected DTO is data. Host must freshly resolve current principal/grants and policy; immutable Python CallerAuthorization/HostTestnetPolicy provide no issuer or live revocation service.",
+    "effect": "Point-in-time logical database/schema/accounting preservation. SQLite BEGIN IMMEDIATE is a writer fence, not a filesystem read-only connection or continuous-presence proof. No formatter/artifact/chain/payment effect.",
+    "source_snapshot": {
+      "modules/foundups/agent_market/src/persistence/testnet_transfer_intents.py": {
+        "measured_raw_sha256": "3ea3049b9709d6c504cac1b24aaf28fd1624a1631d699931f2fdbb335d035a4b",
+        "git_lf_sha256": "3ea3049b9709d6c504cac1b24aaf28fd1624a1631d699931f2fdbb335d035a4b"
+      },
+      "modules/foundups/agent_market/tests/test_testnet_transfer_intents.py": {
+        "measured_raw_sha256": "89049b3de24eb8c80f8047f8f28b4302c0a791794847600c1c53871d965d8988",
+        "git_lf_sha256": "2a86c259df7be51581cefa6f94e8e6d028f6d6ee1ba7c3ce3ee2da1f6ef19849"
+      }
+    },
+    "preservation": "Original 422-line test source is exact Git-LF prefix; original26 test functions/93 cases unchanged. All original459 whole-FAM IDs retained. Schema/ORM/adapter/exports/runtime registry/manifest/caps unchanged.",
+    "measurements": {
+      "desired_red": {
+        "passed": 174,
+        "failed": 54,
+        "new_missing_api_failures": 54,
+        "receipt_sha256": "3bf9a8c350df3bc77b6a52fc8aa4cf21c47e5b35e79babd1a5dd1781217298cc"
+      },
+      "focused_green": {
+        "receipt_sha256": "021cd434dada6c260660fe4d7cf074f318e0d830ac10b3f606847161530827e3",
+        "outer_sha256": "392f7f493be42aa75adfcdd96dbeec44e3a53e6a26cba136a81a6879007a9d5f",
+        "cases": 228,
+        "passed": 228,
+        "owners": 4,
+        "exact_unique_ids": true,
+        "preserved_original_ids": 173,
+        "added_ids": 55,
+        "sorted_compact_utf8_idset_sha256": "12d08ac7932afbb390ba4521fadffbf3239a3a746bd9c0fca4247768d780bff5",
+        "seconds": 18.45004177093506,
+        "sources": 247,
+        "loaded_prebound_repo_sources": 53,
+        "guards": {
+          "network": 0,
+          "process": 0,
+          "writes_denied": 0,
+          "dotenv_reads": 0,
+          "imports_denied": 0,
+          "sqlite_denied": 0
+        },
+        "warnings": {
+          "PytestConfigWarning": 2
+        },
+        "source_and_default_stats_stable": true,
+        "central_stopped": true
+      },
+      "final_all19_fam": {
+        "receipt_sha256": "9b220c75513b27026f0f1007f76c4001c3f61ce2bd06c6de0813bba4f25977f2",
+        "outer_sha256": "44bfae97c48173736678b2752487a1bb637ca206e9d6e1bf35b58e38dacc948b",
+        "cases": 514,
+        "passed": 514,
+        "owners": 19,
+        "exact_unique_ids": true,
+        "preserved_original_ids": 459,
+        "added_ids": 55,
+        "sorted_compact_utf8_idset_sha256": "95699c2a6a0a1a772424e2a44f98c886a1364de48973bfff658a1b956b2f38e1",
+        "seconds": 29.79212522506714,
+        "sources": 247,
+        "loaded_prebound_repo_sources": 74,
+        "guards": {
+          "network": 0,
+          "process": 0,
+          "writes_denied": 0,
+          "dotenv_reads": 0,
+          "imports_denied": 0,
+          "sqlite_denied": 0
+        },
+        "warnings": {
+          "PytestConfigWarning": 2
+        },
+        "source_and_default_stats_stable": true,
+        "central_stopped": true
+      },
+      "counts_nonadditive": true,
+      "new_cases": 55,
+      "test_owner_total": 148
+    },
+    "execution": {
+      "python": "Existing O: Python3.12.10, -I -B -X utf8",
+      "runner_raw_sha256": "88f401872684a8f0f852b9b1eb5725749208e167700926e397a1b2a8071a7de4",
+      "controller_raw_sha256": "3ff4ae0c32798e9f8290ff0792c98db0be384fe78fc3b92021ab6e4dba8d4c24",
+      "source_map": "247 selected current repository Python sources, unchanged before/after; 53 focused/74 final loaded repository sources all prebound.",
+      "environment": "Fresh explicit 3 Windows environment entries plus phase-owned HOME/USERPROFILE/cache/offline settings; no inherited credentials.",
+      "controls": "No network/process/dotenv/external-write/import/SQLite-path guard attempts; real central configured in scratch and stopped before/after. Only optional Holo/Qwen enrichment returns None.",
+      "warnings": "Two PytestConfigWarning in each run retained in private raw receipts.",
+      "pre_execution_repairs": "Initial controller ID-set result was observational and timeout evidence incomplete; both corrected before any release/run. Earlier unexecuted freeze versions retained."
+    },
+    "reviews": {
+      "independent_static_source": "7378788ff12fe57af601bc7fad75b262a6192ff323f397c5b966f0bf0b5b543d",
+      "independent_preparation": "7e72f2d534491c429ca0f91b9c07a932e30b8073f661800ce748bd12248939ab",
+      "independent_result": "fcad5d432ff8664c7b5da406edc6aa995ba37e3aeddeb5660cfef2a1ad8215d6",
+      "root_green_result": "114b9c69d4429b215e9fe5b859e47e05dce69bf9c9711a5b974d81ce3230df25",
+      "authorship": "Root source/controller/executor/evidence; simulator agent tests and procedural review with authorship disclosed; blockchain agent independently reviews source/results but authored prior plan/temporary worker."
+    },
+    "artifacts": {
+      "directory": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-unsigned-handoff-20261025-ffx2kqlf",
+      "full_receipts_and_runners": "External and unbundled; no public reproduction package claimed.",
+      "companion": {
+        "path": "docs/architecture/receipts/FOUNDUPS_TESTNET_TRANSFER_INTENT_20261025.testcases.json",
+        "append_bytes": 11522,
+        "old_raw_sha256": "40c6465ebb1d66551797c5e30e65acf8e9c25718c82b99a2c4d3ebdd3709b530",
+        "raw_sha256": "692a18f1bf74dcc7ede6e4d837aee461852c8a1539b12f8602c4a8f607249633",
+        "git_lf_sha256": "307d27016de9434beffc953917a42306072e466dd7c268ae00f5fc896be858d7",
+        "all_original_values_preserved": true
+      }
+    },
+    "limits": [
+      "Selected Python-source/process-guard qualification only; native/OS/ATTACH/concurrent-writer/external dependency closure unqualified.",
+      "No authority issuer, formatter/SDK/runtime, chain/funding/signing/payment or continuous row-presence qualification.",
+      "Full external receipts/runners not bundled; this is not a portable reproduction package.",
+      "Exact reconstruction of an identical deleted row is not historically detected. Fee/round options and unsigned artifacts are not persisted by this API.",
+      "Real formatter/producer/fact admission, current-grant issuer, chain signer/funding/confirmation/reconciliation, rewards/issuance, project admission, FX and production Mall remain unfinished."
+    ]
   }
 }

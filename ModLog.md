@@ -1,3 +1,14 @@
+## 2026-10-31 — PC-only blockchain reconciliation and security audit
+
+WSP15/22/26/27/29/48/81/97/100. Owned worktree at actual remote main4050 receives
+reviewed PR2261 changes and bounded CABR/breaker fixes; primary561-path dirty
+checkout and other worktrees preserved. No GitHub writes or live transactions.
+Fresh FAM485, simulator414, strict unsignedSDK52 and independent6 pass (distinct
+scopes); seven external attacks produce1 pass/6 unresolved failures. Economic
+unit/funding/supply conflicts, authority and recovery keep deployment BLOCKED.
+See docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md
+for source-backed incident research, threat model, decisions and remaining work.
+
 ## 2026-10-30 — RSI resident assurance connection
 
 WSP 5/10/15/22/48/50/97. Audit current7d6a292b and extend the existing main/AgentDB

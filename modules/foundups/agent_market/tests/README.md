@@ -1,6 +1,16 @@
 ﻿# Tests - FoundUps Agent Market
 
-## Local TestNet probe-intent acceptance (2026-10-25)
+## Existing-only intent revalidation (2026-10-25)
+
+The current intent owner has 148 cases: the original93 plus55 additions.
+Desired RED:174 pass/54 missing-API failures. Focused GREEN228 and the original
+19-owner FAM suite514 pass with exact old IDs retained; counts are nonadditive.
+No writes/allocation are allowed during successful or refused revalidation.
+Source-bound offline guards/default-store stats pass; two configuration warnings
+remain recorded. Native/OS/ATTACH, live authority and chain effects are unqualified.
+See TestModLog and the receipt's `existing_only_revalidation` record.
+
+## Original local TestNet probe-intent acceptance (2026-10-25)
 
 `test_testnet_transfer_intents.py` has 93 collected controls in 26 functions for
 explicit host authority/identity/units/expiry, strict actual v3 schema, existing
@@ -21,6 +31,13 @@ Local preparation acceptance proves no resident integration, signer, funding,
 chain effect or paid reward.
 
 ## Privileged operations (P0B)
+
+Exact quantity controls reuse test_schemas.py for eight fields, coercible types,
+booleans, deceptive integer subclasses and unchanged integer minimum boundaries.
+test_orchestrator.py rejects invalid initial rewards with zero calls to registry,
+token, repository and task adapters, preserving the failure audit event.
+The132-case focused inventory is included in the333-case connected run; do not
+add overlapping totals. TestModLog records RED and source-bound evidence limits.
 
 Existing permission and transaction tests supply host contexts explicitly; never
 add a fixture that grants authority from the actor or profile under test. Cover

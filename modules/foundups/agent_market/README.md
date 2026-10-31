@@ -1,7 +1,22 @@
 # FoundUps Agent Market (FAM)
 
+2026-10-31 local reconciliation: current main4050 plus the reviewed PR2261
+integer-admission/existing-intent revalidation delta is present in the owned PC
+worktree. Fresh ten-owner FAM qualification passes485 cases. No GitHub change,
+resident controller, signer or funded settlement follows. Older publication
+language below is historical; see the current blockchain reconciliation report.
+
 ## Purpose
 FoundUps Agent Market (FAM) is the outer layer for launching tokenized FoundUps and coordinating agent swarms through a task to proof to verification to payout pipeline.
+
+### Exact quantity admission — 2026-10-29
+
+Domain quantity constructors require built-in integers: booleans, numeric strings,
+floats and integer subclasses are invalid. Positive/nonnegative minima remain.
+Launch validates its optional initial task before registry, token or repository
+adapter calls; an invalid reward returns the existing failed launch/audit result.
+Separate compute dictionary/ORM ingress, asset units and funded caps remain
+unqualified. This admission boundary does not sign or settle a chain payment.
 
 ## CABR Canonical Intent
 
@@ -151,6 +166,18 @@ charge, reservation or chain effect is added. This is a transport probe, with no
 conversion from `reward_amount`, UPS/F_i issuance, funded reward, vesting or
 tradability decision. See [the interface](INTERFACE.md#testnettransferintentservice-opt-in-local-api)
 and [qualification history](tests/TestModLog.md).
+
+### Existing-only revalidation contract
+
+For an already captured intent, use `revalidate_existing(prepared, actor_id,
+binding, authorization=current_context)` with the original exact
+`PreparedTestnetIntent`. Its full identity, ID and timestamps are the baseline,
+not authority. The host independently resolves current grants and host policy
+for each call; reusing an old context cannot reveal revocation.
+Missing, replaced or changed rows reject without allocation or repair. The API keeps
+`prepare` get-or-create behavior, schema 3 and pending
+accounting. This is a point-in-time check, not proof of continuous row presence
+or lasting permission. No formatter or automatic post-I/O caller is added.
 
 ## OpenClaw Execution Arm Alignment
 OpenClaw remains the execution ingress for intent routing. FAM provides explicit contracts that OpenClaw/WRE can call for launch and execution flows.

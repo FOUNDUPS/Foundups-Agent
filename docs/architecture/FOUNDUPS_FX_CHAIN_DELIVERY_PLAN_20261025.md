@@ -2,6 +2,59 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## Local reconciliation and adversarial allocation — 2026-10-31
+
+012 authorizes PC-only development, remote reads/fetch, and no GitHub mutation,
+live signing, funding or deployment. Owned worktree: foundups-repo-observation;
+local branch agent/simulator-first-blockchain-parity-20261031 at remote main
+4050bdf880a2974511377a510a859f70101ea478. The remote branch is the same commit.
+Primary O:/Foundups-Agent remains on 0c81418fe94a7786cfd55f01e138ddc5d510583d
+with 561 initially changed/untracked paths. Preserve it and all other worktrees.
+
+Phase0 imports only the reviewed 14-path PR2261 delta from dedb0e032ae5db4ff50dca26c6aa3493f7042450
+to 0a3f06c5938b12863f0a00783b7fa8e3adc48789: exact integer admission and
+existing-only intent revalidation, with their existing tests/docs/receipt addenda.
+No old manifest, scanner ledger or unrelated logs replace current main. The old
+1c217680 controller-allocation branch is preserved; it contains no controller.
+Receipt: local-import-receipt.json in the external foundups-blockchain-20261031
+evidence directory. Fresh verification is required; historical passes do not count.
+
+WSP15 C2/I4/D4/Impact4=14/P1; WSP00/15/22/26/27/29/48/50/81/84/97/100.
+Next bounded security layer (class B, unchanged valid economics): reject forged
+truthy/non-boolean PoB flags and nonfinite/coercible numeric CABR inputs before
+arithmetic; preserve finite signed-input clamps, default release rate and valid
+operation order. Extend the existing CABR tests first (<=100 added lines), then
+its existing router (<=25 added lines). A boolean is not authenticated PoB.
+Inspect the existing circuit breaker for premature severity downgrade and
+condition priority. Allocate <=90 source-diff lines and one <=140-line test owner
+if no existing circuit-breaker tests exist. Keep thresholds, queue-rate policy,
+demurrage multipliers and economic fees unchanged. No runtime wiring claim.
+Freeze desired oracles, observe RED, repair, verify GREEN, then independent review.
+
+Unfixed FX pending/aggregate funding and self-trade paths are characterized using
+external probes of actual owners, not a parallel toy ledger. Preserve failed
+security oracles as evidence. No absent signer/bridge/governance path becomes a
+passing attack test. A01-A12 coverage will explicitly distinguish tested, partial
+and blocked paths. UPS denomination, funded epoch issuance, pool denominators and
+release conflicts are class D activation blockers, requiring versioned simulator
+decisions before chain promotion. Do not silently change their current economics.
+
+Manifest: regenerate the current 1477-member manifest with its existing generator
+after source edits; preserve its exact member set, newer main hashes and caps,
+updating only affected existing consumer pins. No runtime admission or installation.
+Documentation stays in existing module/log/roadmap owners plus one consolidated
+source-backed reconciliation/threat/parity report with portable test evidence.
+No protocol economics change is allocated, so mirrored WSP economics stay intact.
+
+Retrieval evaluation: task-bound lexical Holo returned ok=true, UNKNOWN freshness,
+index_gap_detected=true; this is not current semantic proof. Five hits included two
+useful simulator owners and three manuscript/template noise hits. Deduplicate
+code/code_hits; prioritize current source and NAVIGATION.py over stale prose.
+Module README/INTERFACE/ROADMAP/ModLog/test docs exist; memory/README and module
+requirements.txt are absent. No index repair. Manual source reconciliation and
+deterministic security tests are needed: Qwen/Gemma inference cannot establish
+funded conservation, signing independence, durable replay resistance or finality.
+
 ## Blockchain return and codec convergence allocation — 2026-10-29
 
 WSP15 C2/I4/D4/Impact4=14/P1; WSP3/6/11/15/22/50/62/71/77/84/97.

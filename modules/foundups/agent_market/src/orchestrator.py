@@ -108,6 +108,7 @@ class LaunchOrchestrator:
         """Execute full launch flow for a Foundup.
 
         Steps:
+        0. Validate the optional initial task before adapter effects
         1. Validate/create Foundup in registry
         2. Token deploy adapter call (if token_terms provided)
         3. Repo provision adapter call (if repo_name provided)
@@ -132,6 +133,21 @@ class LaunchOrchestrator:
         error: Optional[str] = None
 
         try:
+            task = None
+            if initial_task_params:
+                task = Task(
+                    task_id=initial_task_params.get("task_id", f"task_{uuid4().hex[:10]}"),
+                    foundup_id=foundup.foundup_id,
+                    title=str(initial_task_params.get("title", "Initial Task")),
+                    description=str(initial_task_params.get("description", "First task for the foundup")),
+                    acceptance_criteria=list(
+                        initial_task_params.get("acceptance_criteria", ["Complete the task"])
+                    ),
+                    reward_amount=initial_task_params.get("reward_amount", 100),
+                    creator_id=actor_id,
+                    status=TaskStatus.OPEN,
+                )
+
             # Step 1: Validate/create Foundup
             try:
                 existing = self.registry.get_foundup(foundup.foundup_id)
@@ -176,19 +192,7 @@ class LaunchOrchestrator:
                 )
 
             # Step 4: Initial task creation (if params provided)
-            if initial_task_params:
-                task = Task(
-                    task_id=initial_task_params.get("task_id", f"task_{uuid4().hex[:10]}"),
-                    foundup_id=foundup.foundup_id,
-                    title=str(initial_task_params.get("title", "Initial Task")),
-                    description=str(initial_task_params.get("description", "First task for the foundup")),
-                    acceptance_criteria=list(
-                        initial_task_params.get("acceptance_criteria", ["Complete the task"])
-                    ),
-                    reward_amount=int(initial_task_params.get("reward_amount", 100)),
-                    creator_id=actor_id,
-                    status=TaskStatus.OPEN,
-                )
+            if task is not None:
                 if self.task_pipeline:
                     initial_task = self.task_pipeline.create_task(task)
                     self._emit(
