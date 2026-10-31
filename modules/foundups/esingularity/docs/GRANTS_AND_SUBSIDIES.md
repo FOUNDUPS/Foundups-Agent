@@ -1,6 +1,6 @@
 # YUMORI.me / eSingularity — Grants, Subsidies, and PPP Support Registry
 
-Last verified: 2026-10-30 JST for F-12 exact deadline-time clarification; 2026-10-28 JST for F-13/F-14 coverage catch-up; 2026-10-26 targeted checks and other historical entries retain their own verification dates. These catch-up discoveries are not fresh official changes.
+Last verified: 2026-11-01 JST for F-13 expiry of the officially published October 31 application window (no new extension visible); 2026-10-30 JST for F-12 exact deadline-time clarification; 2026-10-28 JST for F-13/F-14 coverage catch-up; 2026-10-26 targeted checks and other historical entries retain their own verification dates. These catch-up discoveries are not fresh official changes.
 
 ## Purpose and truth boundary
 
@@ -267,9 +267,9 @@ Do not book any F-10 subsidy revenue, do not treat the published rates as expect
 ## F-13 — 令和8年度企業の太陽光・蓄電池設備導入促進事業補助金
 
 - Agency: 福井県 エネルギー環境部 エネルギー課.
-- **Round state:** OPEN as of the 2026-10-28 primary-source check; FY2026 call opened **2026-04-17**, ends **2026-10-31** unless the funding budget is exhausted earlier. Application by email; official page does not establish a cutoff hour.
+- **Round state: CLOSED BY PUBLISHED DEADLINE as of 2026-11-01 JST.** FY2026 application window ran **2026-04-17 through 2026-10-31**. The official prefectural page still states October 31 without a published extension; the budget may have exhausted earlier. Email submissions were specified; cutoff hour and administrator's final receipt status are not independently confirmed. This date passage is not a YUMORI application, rejection or award; FY2027 continuation/dates are unannounced.
 - **YUMORI project boundary: VERIFIED PROGRAM only; no project eligibility inquiry, eligibility, submission, selection or award evidenced.** This is a previously existing FY2026 program discovered in a coverage catch-up, **not a new October 28 call or changed deadline**.
-- Primary source, checked 2026-10-28: https://www.pref.fukui.lg.jp/doc/dengen/shin-energy/fukui-taiyokou.html
+- Primary source, rechecked 2026-11-01: https://www.pref.fukui.lg.jp/doc/dengen/shin-energy/fukui-taiyokou.html
 - Eligible applicants stated on the public page: a private enterprise with an established business establishment in Fukui Prefecture for at least one continuous year, or a qualifying lessor supplying such enterprise. Eligible installation form: self-consumption PV alone or PV **with** battery; battery-only funding is not established. At least 30% of generated electricity must be self-consumed, with 50% or more consumed in Fukui Prefecture. FIT/FIP, J-Credit registration and other subsidies for the same project are excluded.
 - Published equipment-unit grant amounts: PV with battery **¥50,000/kW, cap ¥5,000,000**; PV alone **¥30,000/kW, cap ¥3,000,000**. Commercial battery >20 kWh **¥63,000/kWh** (smaller battery **¥51,000/kWh**), battery cap **¥6,300,000** subject to actual cost/1/3 controls. A separate **¥20,000/kW, cap ¥2,000,000** addition is only for designated Reinan municipalities, **not Fukui City**. Each rate/cap is conditional, not a YUMORI forecast.
 - Candidate scope: solar generation and qualifying battery assets for a lawful future Fukui data-center/onsen operating site; **not** GPU purchase or unrestricted DC construction funding.
