@@ -152,11 +152,122 @@ class TestDirectFECSourceVerifiedFact:
         assert scored.is_successful
         # Without source reference, cannot be verified fact
         assert len(scored.scored_sources) == 1
-        # Should be downgraded due to missing source reference
-        assert scored.scored_sources[0].confidence_label != ConfidenceLabel.VERIFIED_FACT or (
-            "downgraded" in str(scored.scored_sources[0].scoring_factors).lower()
-            or scored.scored_sources[0].source_reference is not None
+        scored_source = scored.scored_sources[0]
+        assert scored_source.confidence_label != ConfidenceLabel.VERIFIED_FACT
+        assert scored_source.original_confidence == ConfidenceLevel.VERIFIED_FACT
+        assert scored_source.source_reference is None
+        assert "source_reference_absent" in scored_source.scoring_factors
+        assert any("downgraded" in factor for factor in scored_source.scoring_factors)
+        assert not [
+            claim for claim in get_verified_facts(scored)
+            if claim.claim_type == "funding_source"
+        ]
+
+
+def _score_synthetic_reference(source_type, confidence):
+    reference = FECSource(
+        source_type=source_type,
+        url="https://example.invalid/evidence/synthetic-1",
+        filing_id="SYNTHETIC-1",
+        accessed_at="2026-11-01T00:00:00Z",
+    )
+    source = FundingSourceSummary(
+        source_name="Synthetic Donor",
+        source_type="individual",
+        amount=1000.0,
+        percentage=10.0,
+        confidence=confidence,
+        source_reference=reference,
+    )
+    summary = FundingSummaryResult(
+        status=FundingSummaryStatus.SUCCESS,
+        candidate_id="SYNTHETIC-CANDIDATE",
+        candidate_name="Synthetic Candidate",
+        top_sources=[source],
+    )
+    return source, score_funding_summary_confidence(summary)
+
+
+class TestDirectSourceEligibilityRegression:
+    """Exercise production scoring and consumers with synthetic evidence only."""
+
+    @pytest.mark.parametrize("source_type", ["news_report", "third_party_report", ""])
+    def test_non_direct_reference_cannot_preserve_verified_fact(self, source_type):
+        source, scored = _score_synthetic_reference(
+            source_type, ConfidenceLevel.VERIFIED_FACT
         )
+
+        assert scored.is_successful
+        assert len(scored.scored_sources) == 1
+        result = scored.scored_sources[0]
+        assert result.confidence_label == ConfidenceLabel.HIGH_CONFIDENCE_INFERENCE
+        assert result.original_confidence == ConfidenceLevel.VERIFIED_FACT
+        assert result.source_reference is source.source_reference
+        assert source.confidence == ConfidenceLevel.VERIFIED_FACT
+        assert "source_reference_present" in result.scoring_factors
+        assert f"source_type:{source_type}" in result.scoring_factors
+        assert "downgraded_from_verified_due_to_indirect_source" in result.scoring_factors
+
+    def test_verified_facts_consumer_excludes_non_direct_reference(self):
+        _, scored = _score_synthetic_reference(
+            "news_report", ConfidenceLevel.VERIFIED_FACT
+        )
+
+        assert scored.is_successful
+        assert not [
+            claim for claim in get_verified_facts(scored)
+            if claim.claim_type == "funding_source"
+        ]
+
+    @pytest.mark.parametrize(
+        "source_type", ["fec_filing", "state_filing", "court_record", "news_report"]
+    )
+    @pytest.mark.parametrize(
+        "original, expected",
+        [
+            (ConfidenceLevel.HIGH_CONFIDENCE_INFERENCE, ConfidenceLabel.HIGH_CONFIDENCE_INFERENCE),
+            (ConfidenceLevel.LOW_CONFIDENCE_INFERENCE, ConfidenceLabel.LOW_CONFIDENCE_INFERENCE),
+            (ConfidenceLevel.UNKNOWN, ConfidenceLabel.UNKNOWN),
+        ],
+        ids=["high", "low", "unknown"],
+    )
+    def test_reference_never_upgrades_lower_or_unknown_confidence(
+        self, source_type, original, expected
+    ):
+        source, scored = _score_synthetic_reference(source_type, original)
+
+        assert scored.is_successful
+        result = scored.scored_sources[0]
+        assert result.confidence_label == expected
+        assert result.original_confidence == original
+        assert result.source_reference is source.source_reference
+        assert source.confidence == original
+        assert "source_reference_present" in result.scoring_factors
+        assert not [
+            claim for claim in get_verified_facts(scored)
+            if claim.claim_type == "funding_source"
+        ]
+
+    @pytest.mark.parametrize("source_type", ["fec_filing", "state_filing", "court_record"])
+    def test_approved_direct_reference_remains_verified_in_consumer(self, source_type):
+        source, scored = _score_synthetic_reference(
+            source_type, ConfidenceLevel.VERIFIED_FACT
+        )
+
+        assert scored.is_successful
+        result = scored.scored_sources[0]
+        assert result.confidence_label == ConfidenceLabel.VERIFIED_FACT
+        assert result.source_reference is source.source_reference
+        assert "source_reference_present" in result.scoring_factors
+        assert f"direct_source_type:{source_type}" in result.scoring_factors
+        claims = [
+            claim for claim in get_verified_facts(scored)
+            if claim.claim_type == "funding_source"
+        ]
+        assert len(claims) == 1
+        assert claims[0].source_reference is source.source_reference
+        assert claims[0].original_confidence == ConfidenceLevel.VERIFIED_FACT
+        assert claims[0].factors == result.scoring_factors
 
 
 # =============================================================================

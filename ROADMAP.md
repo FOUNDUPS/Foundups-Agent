@@ -12,6 +12,28 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
+
+## Micro verification and protected native composition — 2026-11-01
+
+Reconciled main `43b3b66cce8a01f28fb08577a9db84f731e50455`. The resident assurance
+connection below is published: [PR2276](https://github.com/FOUNDUPS/Foundups-Agent/pull/2276)
+merged at `c9ac9059ed29073e885159747144071a3d310aff`; its exact-main CI and CodeQL
+passed. Do not repeat that repair or mistake its controlled fixtures for G1.
+
+The **19/P0** native dependency is protected requester/lease-consumption
+composition plus authentic current inputs, not three ordinary constructor calls.
+The HIGH service already verifies proofs; ordinary main must not receive the
+integrity secrets required by replay stores. Preserve the initial LOW boundary.
+[Dispatch evidence and next acceptance gates](docs/operations/RSI_SWARM_DISPATCH.md#micro-verification-and-protected-native-composition--2026-11-01)
+own this correction, runtime inventory, fixture ranking and local/cloud decision.
+
+One eligible **13/P1** Vote micro qualification ran the existing local Qwen
+adapter against a real production defect. Independent frozen tests rejected its
+wrong-branch proposal (7 failures versus baseline 4); the separately attributed
+coordinator repair passed 322 module tests. No native author, OS confinement,
+promotion or learned later-use benefit is proved. R15's first admitted target
+remains the existing test-registry work procedure, not a replacement product build.
+
 ## Blockchain simulator authority — 2026-10-31
 
 Blockchain planning follows the [WSP26 simulator-first contract](WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract)

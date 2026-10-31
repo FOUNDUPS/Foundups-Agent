@@ -1,3 +1,16 @@
+## Current RSI selection — 2026-11-01
+
+Follow the [canonical dispatch checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#micro-verification-and-protected-native-composition--2026-11-01).
+PR2276's assurance/receipt connection is merged and exact-main checked; its older
+publication instruction is closed. Native19/P0 now has an explicit protected
+requester/lease-consumption gap, not a safe ordinary-main factory call. R15's
+existing test-registry procedure remains the first admitted improvement target.
+One local Vote proposal was independently rejected; the coordinator repaired the
+bounded defect. This qualifies a micro verification fixture, not native G1–G5.
+The October28 verification classification/CI observations below remain scoped
+historical evidence; their performance experiment remains queued, not the next
+native execution requirement. Preserve mandatory checks and current owners.
+
 ## Current verification integration — 2026-10-28
 
 Source baseline: `4afb9284d32e9af24f578fda91063114263d5a39`.
@@ -68,7 +81,7 @@ retained/control/recovery use of unchanged baseline SQLite rows selects positive
 → zero control → positive. The owned lane is retired with recovery preserved.
 This closes the measured consumer repair, not model learning or native admission.
 
-**Current selection:** follow the [canonical system checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#retain-the-direct-revocation-proof-regression--2026-10-05).
+**Historical October5 selection:** [preserved checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#retain-the-direct-revocation-proof-regression--2026-10-05); superseded by the current selection above.
 At724bb684 the bounded existing local adapter produced two rejected regression
 proposals (0/2 accepted). Retain the independently verified team-authored coverage
 repair, then qualify installed models on the fixed task. The earlier registered

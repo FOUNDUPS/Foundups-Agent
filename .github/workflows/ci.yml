@@ -43,12 +43,20 @@ jobs:
           modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_slice_verifier_request_binding.py
           modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_slice_verifier_handler.py
           modules/infrastructure/wre_core/tests/test_git_main_merge_sentinel.py
+      - name: Verify Vote micro-trial production oracle and downstream consumers
+        run: >-
+          python -B -m pytest -q --tb=short -c /dev/null --noconftest
+          --import-mode=importlib -o pythonpath=. -p no:cacheprovider
+          --junitxml=vote-verification-results.xml
+          modules/foundups/voteballots/tests
       - name: Preserve exact-revision verification results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: wre-verification-${{ github.sha }}
-          path: wre-verification-results.xml
+          path: |
+            wre-verification-results.xml
+            vote-verification-results.xml
           if-no-files-found: error
 
   principal-activity-ledger:

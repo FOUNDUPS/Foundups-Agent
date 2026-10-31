@@ -1,5 +1,21 @@
 # Vote/Ballots FoundUp — Module Log
 
+
+## 2026-11-01 — RSI micro qualification: indirect funding-source confidence
+
+WSP00/15/22/48/50/97; source baseline43b3b66. Production funding-source scoring
+must not inherit VERIFIED_FACT from an indirect reference. Reuse the existing
+scorer and integration suite; preserve lower/UNKNOWN values, direct-source
+controls, original input and reference identity. Add an explicit downgrade factor.
+Independent frozen tests reproduced4 failures/16 passes. One local Qwen proposal
+changed the wrong branch and produced7 failures/13 passes; it was rejected.
+The coordinator authored the actual repair; independent full module replay passed322.
+Strengthened oracle20 passed separately, with unchanged original frozen copies.
+CI now includes the module and retains its JUnit results alongside WRE checks.
+No worker promotion, live FEC access, public activation or native RSI is claimed.
+Exact trial and cost limits: [existing dispatch](../../../docs/operations/RSI_SWARM_DISPATCH.md#micro-verification-and-protected-native-composition--2026-11-01).
+The separate aggregate total_raised provenance defect is tracked in ROADMAP.
+
 ---
 
 ## 2026-10-30 — Political Claim Verification / Bullshit Meter Intake
