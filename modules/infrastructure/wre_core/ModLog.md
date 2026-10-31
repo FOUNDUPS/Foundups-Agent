@@ -1,3 +1,11 @@
+## Recover portable brain-source documentation — 2026-10-31
+
+Correct the continuity README to the existing extractor's `Path.home()` default.
+Link a sanitized September storage projection while retaining private junction
+details only in original custody. No extractor run, new brain ingestion, storage
+move or current host-junction verification occurred. Historical storage/test logs
+remain dated archive records; no pattern-memory admission is claimed. WSP 22/50/60/97.
+
 ## Held-out receipt identity handoff — 2026-10-30
 
 The real held-out gate hashed v2 evidence fields but omitted them from its

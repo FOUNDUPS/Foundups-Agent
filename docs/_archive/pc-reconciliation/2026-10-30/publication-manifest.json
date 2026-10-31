@@ -1,0 +1,1229 @@
+{
+  "schema": "foundups.pc-reconciliation.historical-package.v1",
+  "projection_created_at_utc": "2026-10-30T02:00:12.626831+00:00",
+  "timestamp_semantics": "Package derivation time only; original observation timestamps remain inside historical records.",
+  "comparison_reference": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+  "original_pc_base": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+  "records": [
+    {
+      "index": 5,
+      "source_path": "ModLog.md",
+      "original_disposition": "RETAIN_UNPUBLISHED_HISTORICAL_DELTA_SEPARATELY",
+      "proposed_disposition": "PUBLISH_SANITIZED_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Archive the September storage, economics and YUMORI log additions as historical claims. The extractor now uses Path.home(); September campaign completion and deployment statements do not qualify the current site or this PC. No old log entry is prepended to the active ModLog.",
+      "current_owners": [
+        "modules/infrastructure/wre_core/scripts/extract_brain_artifacts.py",
+        "modules/foundups/esingularity/README.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/historical-log-additions/ModLog.md",
+      "publication_sha256": "e3a947f4bced9d462460d8c79cbebf3a69877b0ee0581afe0b3d7ae7736cc3b4",
+      "source_full_file_sha256": "fdf716cebc34d911017dda1436c2a221e77605b64a4038375511f9be8f76ac43",
+      "preserved_record_sha256": "86027a2001189fceb3ec8f4f6e5588430d263f5e7ae3a765a3ddedc56ca3e801",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {
+        "absolute_host_path": 1
+      }
+    },
+    {
+      "index": 11,
+      "source_path": "docs/README.md",
+      "original_disposition": "RETAIN_LOCAL_PROPOSAL_DELTA_PENDING_OWNER_RECONCILIATION",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Keep the current documentation index. Preserve the six-line navigation/count/date change as a historical patch, and expose the three recovered plans through this archive. Regenerate the owned doc index only after accepted publication; do not restore the old document count or last-updated date.",
+      "current_owners": [
+        "modules/foundups/docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md",
+        "modules/infrastructure/doc_dae/src/doc_dae.py"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/planning-deltas/docs/README.md.historical-patch.md",
+      "publication_sha256": "0f333052bc5f36b932aec714cc7ec9eb0501e8f8e49fc78960631243d207faf1",
+      "source_full_file_sha256": "f0d7a2d93c0b4ce7e05993285dd7e1df3657e5596c4714784be774d33218b42c",
+      "preserved_record_sha256": "90b554232d7ca01b4480afaa9473e4a0c1b76c6c6376444f790699149865f80c",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 12,
+      "source_path": "docs/architecture/FOUNDUPS_AUTONOMOUS_PITCH_DECK_AND_PROJECT_CLAIM_PLAN.md",
+      "original_disposition": "RETAIN_LOCAL_ONLY_HISTORICAL_OR_PROPOSED_MATERIAL",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Archive this design, including its unique shared evidence brief, pitch/deck, durable media jobs, cost limits, repository claim and recovery requirements. Current Skillz is v0.1.3 and remains instruction-only. Carry durable media execution, private asset authorization, claim authority and separate publication grants to these owners; no executor or deployment is implied.",
+      "current_owners": [
+        "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md",
+        "modules/platform_integration/social_media_orchestrator/skillz/foundup_pitch_package/SKILLz.md",
+        "modules/foundups/docs/PFMALL_MEDIA_DELIVERY_CONTRACT.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/architecture/FOUNDUPS_AUTONOMOUS_PITCH_DECK_AND_PROJECT_CLAIM_PLAN.md",
+      "publication_sha256": "c7c7253205b118b12400e62aa752b05f5e158b05dc2aea7f599218a743b6a35e",
+      "source_full_file_sha256": "350ee3155bb696870e1e33023c868732d7c6176b5aa33598af6f6658bc678746",
+      "preserved_record_sha256": "350ee3155bb696870e1e33023c868732d7c6176b5aa33598af6f6658bc678746",
+      "link_resolution": [
+        {
+          "original_target": "../../WSP_framework/src/WSP_27_pArtifact_DAE_Architecture.md",
+          "resolved_target": "WSP_framework/src/WSP_27_pArtifact_DAE_Architecture.md"
+        },
+        {
+          "original_target": "../../WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md",
+          "resolved_target": "WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md"
+        },
+        {
+          "original_target": "../../WSP_framework/src/WSP_30_Agentic_Module_Build_Orchestration.md",
+          "resolved_target": "WSP_framework/src/WSP_30_Agentic_Module_Build_Orchestration.md"
+        },
+        {
+          "original_target": "../../modules/foundups/move2japan/docs/04_POC_PROTOTYPE_MVP.md",
+          "resolved_target": "modules/foundups/move2japan/docs/04_POC_PROTOTYPE_MVP.md"
+        },
+        {
+          "original_target": "../../modules/foundups/identity_shield/docs/intake/POC_SCOPE.md",
+          "resolved_target": "modules/foundups/identity_shield/docs/intake/POC_SCOPE.md"
+        },
+        {
+          "original_target": "../../modules/foundups/voteballots/docs/intake/PROTOTYPE_GATE.md",
+          "resolved_target": "modules/foundups/voteballots/docs/intake/PROTOTYPE_GATE.md"
+        },
+        {
+          "original_target": "../../.agents/skills/foundup-pitch-package/SKILL.md",
+          "resolved_target": ".agents/skills/foundup-pitch-package/SKILL.md"
+        },
+        {
+          "original_target": "../../modules/platform_integration/social_media_orchestrator/skillz/foundup_pitch_package/SKILLz.md",
+          "resolved_target": "modules/platform_integration/social_media_orchestrator/skillz/foundup_pitch_package/SKILLz.md"
+        },
+        {
+          "original_target": "../../WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md",
+          "resolved_target": "WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md"
+        },
+        {
+          "original_target": "../../modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_packet_builder.py",
+          "resolved_target": "modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_packet_builder.py"
+        },
+        {
+          "original_target": "../audits/architecture/FOUNDUP_CAMPAIGN_OPERATOR_SKILLZ_PLACEHOLDER_PHASE1.md",
+          "resolved_target": "docs/audits/architecture/FOUNDUP_CAMPAIGN_OPERATOR_SKILLZ_PLACEHOLDER_PHASE1.md"
+        },
+        {
+          "original_target": "../../modules/communication/youtube_shorts/src/veo3_generator.py",
+          "resolved_target": "modules/communication/youtube_shorts/src/veo3_generator.py"
+        },
+        {
+          "original_target": "../../modules/communication/youtube_shorts/src/shorts_orchestrator.py",
+          "resolved_target": "modules/communication/youtube_shorts/src/shorts_orchestrator.py"
+        },
+        {
+          "original_target": "../../modules/communication/headless_video_orchestrator/src/orchestrator.py",
+          "resolved_target": "modules/communication/headless_video_orchestrator/src/orchestrator.py"
+        },
+        {
+          "original_target": "../../public/f/public_catalog.json",
+          "resolved_target": "public/f/public_catalog.json"
+        },
+        {
+          "original_target": "../../modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md",
+          "resolved_target": "modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md"
+        }
+      ],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 13,
+      "source_path": "docs/architecture/FOUNDUPS_BLOCKCHAIN_TESTNET_ORCHESTRATION_PLAN.md",
+      "original_disposition": "RETAIN_LOCAL_ONLY_HISTORICAL_OR_PROPOSED_MATERIAL",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Archive the testnet plan as an earlier design, preserving its economic policy decisions and pilot acceptance sequence. Current main has stronger verifier binding, atomic payout initiation and immutable epoch retries, so the older defect list is not a current finding. Funding, signing, aggregate mint policy and durable epoch-budget qualification remain separate owner requirements.",
+      "current_owners": [
+        "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md",
+        "modules/foundups/agent_market/README.md",
+        "modules/foundups/simulator/economics/epoch_ledger.py",
+        "modules/foundups/simulator/economics/token_economics.py",
+        "modules/foundups/simulator/economics/cabr_flow_router.py"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/architecture/FOUNDUPS_BLOCKCHAIN_TESTNET_ORCHESTRATION_PLAN.md",
+      "publication_sha256": "dfff866f0f36a4063e9373b27066cd5c7ecbba7cfa60b0a444e39a63f4a297a5",
+      "source_full_file_sha256": "74e8c014929ef4886a0982fcd9c9772ebf3a7e173388d7682ef4a0c7cda13d58",
+      "preserved_record_sha256": "74e8c014929ef4886a0982fcd9c9772ebf3a7e173388d7682ef4a0c7cda13d58",
+      "link_resolution": [
+        {
+          "original_target": "../../modules/foundups/foundup_registry.json",
+          "resolved_target": "modules/foundups/foundup_registry.json"
+        },
+        {
+          "original_target": "../../modules/foundups/agent/src/build_plan_executor.py",
+          "resolved_target": "modules/foundups/agent/src/build_plan_executor.py"
+        },
+        {
+          "original_target": "../../modules/foundups/agent/src/build_plan_swarm_queue.py",
+          "resolved_target": "modules/foundups/agent/src/build_plan_swarm_queue.py"
+        },
+        {
+          "original_target": "../../modules/communication/moltbot_bridge/src/pavs_verification_seam.py",
+          "resolved_target": "modules/communication/moltbot_bridge/src/pavs_verification_seam.py"
+        },
+        {
+          "original_target": "../../modules/infrastructure/wre_core/src/reddog_verified_outcome_ratchet.py",
+          "resolved_target": "modules/infrastructure/wre_core/src/reddog_verified_outcome_ratchet.py"
+        },
+        {
+          "original_target": "../../modules/foundups/agent_market/src/token_factory.py",
+          "resolved_target": "modules/foundups/agent_market/src/token_factory.py"
+        },
+        {
+          "original_target": "FOUNDUPS_BTC_RESERVE_TOKEN_ARCHITECTURE.md",
+          "resolved_target": "docs/architecture/FOUNDUPS_BTC_RESERVE_TOKEN_ARCHITECTURE.md"
+        }
+      ],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 14,
+      "source_path": "docs/architecture/FOUNDUPS_DISCOVERY_AND_EXTERNAL_PROJECT_ONBOARDING_PLAN.md",
+      "original_disposition": "RETAIN_LOCAL_ONLY_HISTORICAL_OR_PROPOSED_MATERIAL",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Archive discovery/onboarding design and retain the unique discovery, voice-driven mall selection, no-rebuild project admission and proof requirements. Current intake host is bounded draft intake; it does not establish deployed claim authority, signer funding, video generation or permission to publish. Public media paths are not private storage.",
+      "current_owners": [
+        "modules/foundups/pfmall/ROADMAP.md",
+        "modules/foundups/pfmall/intake_host.py",
+        "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md",
+        "modules/foundups/docs/PFMALL_MEDIA_DELIVERY_CONTRACT.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/architecture/FOUNDUPS_DISCOVERY_AND_EXTERNAL_PROJECT_ONBOARDING_PLAN.md",
+      "publication_sha256": "17f044a6c63c2ba1b00530b0f5c2b1ceadb426a22233b973db372c091fca3c92",
+      "source_full_file_sha256": "20ff364d309240e3768d56d5b9e95fe2d1909a607923a0d995b996894f783960",
+      "preserved_record_sha256": "20ff364d309240e3768d56d5b9e95fe2d1909a607923a0d995b996894f783960",
+      "link_resolution": [
+        {
+          "original_target": "../../modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md",
+          "resolved_target": "modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md"
+        },
+        {
+          "original_target": "../../modules/foundups/docs/PFMALL_VIDEO_MALL_CATALOG_SCHEMA.md",
+          "resolved_target": "modules/foundups/docs/PFMALL_VIDEO_MALL_CATALOG_SCHEMA.md"
+        },
+        {
+          "original_target": "../../public/member/INTERFACE.md",
+          "resolved_target": "public/member/INTERFACE.md"
+        },
+        {
+          "original_target": "../../public/member/js/account-concierge.js",
+          "resolved_target": "public/member/js/account-concierge.js"
+        },
+        {
+          "original_target": "../../public/member/js/pfmall-control-dispatcher.js",
+          "resolved_target": "public/member/js/pfmall-control-dispatcher.js"
+        },
+        {
+          "original_target": "../../modules/foundups/pfmall/INTERFACE.md",
+          "resolved_target": "modules/foundups/pfmall/INTERFACE.md"
+        },
+        {
+          "original_target": "../../modules/foundups/simulator/economics/fi_rating.py",
+          "resolved_target": "modules/foundups/simulator/economics/fi_rating.py"
+        }
+      ],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 15,
+      "source_path": "docs/audits/architecture/CODEX_STORAGE_SELF_AUDIT_WSP97_20260905.md",
+      "original_disposition": "RETAIN_LOCAL_ONLY_HISTORICAL_OR_PROPOSED_MATERIAL",
+      "proposed_disposition": "PUBLISH_SANITIZED_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Publish only a sanitized historical storage audit projection. Preserve the raw host inventory privately. Keep the useful check-size, checkpoint, junction verification and recovery method; do not repeat relocation or regard September execution results as current machine observations.",
+      "current_owners": [
+        "modules/infrastructure/wre_core/scripts/extract_brain_artifacts.py"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/audits/architecture/CODEX_STORAGE_SELF_AUDIT_WSP97_20260905.md",
+      "publication_sha256": "aa6cf09a46184e382e7755a30da2e9b55b2c7d7fd38436ef5c3ede7582e62619",
+      "source_full_file_sha256": "b6ab5bd152eeccea7e9c2a0e9a02012d5f71d16b13e43cc8429b0f47e56dccf7",
+      "preserved_record_sha256": "b6ab5bd152eeccea7e9c2a0e9a02012d5f71d16b13e43cc8429b0f47e56dccf7",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {
+        "absolute_host_path": 4
+      }
+    },
+    {
+      "index": 16,
+      "source_path": "docs/audits/architecture/CODEX_STORAGE_SELF_AUDIT_WSP97_RECEIPT_20260905.json",
+      "original_disposition": "RETAIN_LOCAL_ONLY_HISTORICAL_OR_PROPOSED_MATERIAL",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Publish the original September receipt inside an explicitly historical envelope. Preserve its execution identifier, dates and claimed outcome as recorded. It is not a fresh receipt, a current junction check or authority to move storage.",
+      "current_owners": [
+        "modules/infrastructure/wre_core/scripts/extract_brain_artifacts.py"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/audits/architecture/CODEX_STORAGE_SELF_AUDIT_WSP97_RECEIPT_20260905.json",
+      "publication_sha256": "52f4f98a38a64d949fd046eb489d73d2f27226e999ea75acac2ef53b21966ae6",
+      "source_full_file_sha256": "0e0a58d30bdc2515b5dad464307d14c2fb4d266521069b0130448fb63dfb748e",
+      "preserved_record_sha256": "0e0a58d30bdc2515b5dad464307d14c2fb4d266521069b0130448fb63dfb748e",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 17,
+      "source_path": "docs/audits/architecture/C_DRIVE_STORAGE_RELOCATION_AUDIT_20260905.md",
+      "original_disposition": "RETAIN_LOCAL_ONLY_HISTORICAL_OR_PROPOSED_MATERIAL",
+      "proposed_disposition": "PUBLISH_SANITIZED_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Publish a sanitized historical relocation inventory and decision method; exact host/profile layout remains in private custody. Its sizes, processes and completed junction actions are September claims only. Any new relocation needs current observations and a separate recovery checkpoint.",
+      "current_owners": [
+        "modules/infrastructure/wre_core/scripts/extract_brain_artifacts.py"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/audits/architecture/C_DRIVE_STORAGE_RELOCATION_AUDIT_20260905.md",
+      "publication_sha256": "7f2a2e9cc512bd66394b69651d88a3678df296cc91becc1ca85af0d47c566d89",
+      "source_full_file_sha256": "3e73ed16af8f2d7246cbccc7252e838310d158c53d88d9a733fdf565f48d4c82",
+      "preserved_record_sha256": "3e73ed16af8f2d7246cbccc7252e838310d158c53d88d9a733fdf565f48d4c82",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {
+        "absolute_host_path": 15
+      }
+    },
+    {
+      "index": 18,
+      "source_path": "docs/audits/architecture/C_DRIVE_STORAGE_RELOCATION_WSP97_RECEIPT_20260905.json",
+      "original_disposition": "RETAIN_LOCAL_ONLY_HISTORICAL_OR_PROPOSED_MATERIAL",
+      "proposed_disposition": "PUBLISH_SANITIZED_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Publish a sanitized historical receipt envelope; retain raw host-path details privately. Preserve all original dates and outcomes without granting current storage acceptance or relocation authority.",
+      "current_owners": [
+        "modules/infrastructure/wre_core/scripts/extract_brain_artifacts.py"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/audits/architecture/C_DRIVE_STORAGE_RELOCATION_WSP97_RECEIPT_20260905.json",
+      "publication_sha256": "9766140d53178030144740ba4e66df8ad10767e9733dea58b636f850dd66613e",
+      "source_full_file_sha256": "6568ed7f17fc866cfab6dacde373326a9beaf6623bcab2441c2f25ebed375545",
+      "preserved_record_sha256": "6568ed7f17fc866cfab6dacde373326a9beaf6623bcab2441c2f25ebed375545",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {
+        "absolute_host_path": 1
+      }
+    },
+    {
+      "index": 19,
+      "source_path": "docs/audits/domain_ops/YUMORI_WSP97_CAMPAIGN_AUDIT_20260910.md",
+      "original_disposition": "RETAIN_LOCAL_ONLY_HISTORICAL_OR_PROPOSED_MATERIAL",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Archive the September campaign audit. Retain evidence-backed copy, explicit committee identity, form validation, distinct brand surfaces and measurement requirements. Current main records September voting as historical and uses a PPP/PFI project-formation route; do not restore expired urgency, obsolete vote copy or old readiness findings. Live form delivery and deployment require separate evidence.",
+      "current_owners": [
+        "modules/foundups/esingularity/README.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/audits/domain_ops/YUMORI_WSP97_CAMPAIGN_AUDIT_20260910.md",
+      "publication_sha256": "468cc997c1d74b341ef6035571506188dd9346a8dbaf1cfbe36cff7f03b2d35c",
+      "source_full_file_sha256": "a5b2ba78b2ad1bef2c06ede29043b0ceccfcc45d291e0f59d7a0ddfdb3b1e29c",
+      "preserved_record_sha256": "a5b2ba78b2ad1bef2c06ede29043b0ceccfcc45d291e0f59d7a0ddfdb3b1e29c",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 21,
+      "source_path": "docs/foundups_vision.md",
+      "original_disposition": "RETAIN_LOCAL_PROPOSAL_DELTA_PENDING_OWNER_RECONCILIATION",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Preserve the discovery and external-project vision additions as a historical patch. Carry browse/rate/reorganize discovery and existing-project onboarding to the current Mall and FX owners. Do not overlay the old last-updated date, old plan links or current vision wholesale.",
+      "current_owners": [
+        "modules/foundups/docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md",
+        "modules/foundups/pfmall/ROADMAP.md",
+        "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/planning-deltas/docs/foundups_vision.md.historical-patch.md",
+      "publication_sha256": "1d6fc7476270f99039b75f54f5be641a35417ec82d5366f0aabd73af9bbb6f24",
+      "source_full_file_sha256": "f4d62af6434fb167fbc9ae65fff0bf1c5a36821cc4da5b0b44d8e6fb0ac52f51",
+      "preserved_record_sha256": "788a0a99d712b8a5ac393c7bce672d17094852bbe883dfd969ea522cff8fd44e",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 22,
+      "source_path": "docs/plans/research/2026-10-21-blockchain-architecture.md",
+      "original_disposition": "RETAIN_LOCAL_ONLY_HISTORICAL_OR_PROPOSED_MATERIAL",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Archive the October blockchain research as a dated evidence record. Preserve authority, replay, recovery, policy and staged adapter requirements. Chain-product facts and external sources have not been re-fetched; current FX source contracts supersede older missing-interface claims, while real funding and signing remain separate.",
+      "current_owners": [
+        "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md",
+        "modules/foundups/agent_market/README.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/plans/research/2026-10-21-blockchain-architecture.md",
+      "publication_sha256": "83a6f3a48aaf06c4074bca434b3f8eafac4eb9f8bbaac33dc1c88c343f1d2f1f",
+      "source_full_file_sha256": "4957e17d28d104dbcc12e86c2017dfcf7c479ee7afe1d99ffa9f813b2ebe7599",
+      "preserved_record_sha256": "4957e17d28d104dbcc12e86c2017dfcf7c479ee7afe1d99ffa9f813b2ebe7599",
+      "link_resolution": [
+        {
+          "original_target": "../../architecture/FOUNDUPS_BTC_RESERVE_TOKEN_ARCHITECTURE.md",
+          "resolved_target": "docs/architecture/FOUNDUPS_BTC_RESERVE_TOKEN_ARCHITECTURE.md"
+        }
+      ],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 23,
+      "source_path": "docs/plans/research/2026-10-21-blockchain-read-manifest.json",
+      "original_disposition": "RETAIN_LOCAL_ONLY_HISTORICAL_OR_PROPOSED_MATERIAL",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Publish the historical read manifest in an envelope retaining its original repository_head, file hashes and scope. Its read coverage belongs to that old revision, not cbef or the mixed PC tree; no research completion claim is refreshed.",
+      "current_owners": [
+        "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/plans/research/2026-10-21-blockchain-read-manifest.json",
+      "publication_sha256": "368f3ae2a1ff2b3b1537fbf95e81b5cf32dc67c93f1fe617e2914dc58123ec2c",
+      "source_full_file_sha256": "d2560236715816a16489750cf07dd26baa9e11b3f7ab5e8d6c541e605c68f476",
+      "preserved_record_sha256": "d2560236715816a16489750cf07dd26baa9e11b3f7ab5e8d6c541e605c68f476",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 24,
+      "source_path": "docs/plans/research/2026-10-21-holoindex-retrieval-result.json",
+      "original_disposition": "RETAIN_LOCAL_ONLY_HISTORICAL_OR_PROPOSED_MATERIAL",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Publish the original failed HoloIndex receipt unchanged inside a historical envelope: ok=false, freshness=UNKNOWN, index_gap_detected=true and HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH remain failures. The new worker retrieval is a separate source-bound cbef observation, never a repair of this old receipt.",
+      "current_owners": [
+        "holo_index/CLI_REFERENCE.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/plans/research/2026-10-21-holoindex-retrieval-result.json",
+      "publication_sha256": "1ca433c672dc1e21c1df6cee3b5540aff06e6e67744ae9c320bf7a1cd1ca65f5",
+      "source_full_file_sha256": "19164657c292d5f99eb7597942f59a174ed7ace731f37a5bb985933dfc9ec31b",
+      "preserved_record_sha256": "19164657c292d5f99eb7597942f59a174ed7ace731f37a5bb985933dfc9ec31b",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 25,
+      "source_path": "docs/plans/research/2026-10-21-parent-wsp-coverage.json",
+      "original_disposition": "RETAIN_LOCAL_ONLY_HISTORICAL_OR_PROPOSED_MATERIAL",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Publish the historical parent WSP read coverage with original dates and paths. This establishes what the old review recorded, not present protocol compliance or current implementation coverage.",
+      "current_owners": [
+        "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/plans/research/2026-10-21-parent-wsp-coverage.json",
+      "publication_sha256": "5741f6a7db4d895121157d66f25fa7b73c50f1f6b04c701b969c26de82e7ad41",
+      "source_full_file_sha256": "47b78e7dd5388819baffd0ab2fe10d1c333f3d3c42908bc22095cf366d55f915",
+      "preserved_record_sha256": "47b78e7dd5388819baffd0ab2fe10d1c333f3d3c42908bc22095cf366d55f915",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 26,
+      "source_path": "docs/plans/research/2026-10-21-research-coverage.json",
+      "original_disposition": "RETAIN_LOCAL_ONLY_HISTORICAL_OR_PROPOSED_MATERIAL",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Publish the historical aggregate research coverage and original hash-validation claims inside an envelope. Do not convert old source hashes or numbered-WSP coverage into acceptance of the current release.",
+      "current_owners": [
+        "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/plans/research/2026-10-21-research-coverage.json",
+      "publication_sha256": "ac544ff8616cfd201f1d1fdbacb388bb94facce7fe5f16f00c3340b98a4745ae",
+      "source_full_file_sha256": "8b14a17c0fbea965ce2a660b61120bc5db96640295ec32d53c5cf5e67dbfb765",
+      "preserved_record_sha256": "8b14a17c0fbea965ce2a660b61120bc5db96640295ec32d53c5cf5e67dbfb765",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 27,
+      "source_path": "docs/plans/research/2026-10-21-simulator-economics.md",
+      "original_disposition": "RETAIN_LOCAL_ONLY_HISTORICAL_OR_PROPOSED_MATERIAL",
+      "proposed_disposition": "PUBLISH_SANITIZED_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Archive the economics research, omitting the one scanner-flagged sentence from the public projection without declaring it a credential. Current epoch source recomputes bound proof fields and rejects changed duplicate epochs, superseding two old probe findings. Aggregate staking supply policy and durable epoch-wide CABR budgeting remain explicit owner acceptance requirements; no fresh exploit or runtime test was executed.",
+      "current_owners": [
+        "modules/foundups/simulator/economics/epoch_ledger.py",
+        "modules/foundups/simulator/economics/token_economics.py",
+        "modules/foundups/simulator/economics/cabr_flow_router.py",
+        "modules/foundups/simulator/ROADMAP.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/plans/research/2026-10-21-simulator-economics.md",
+      "publication_sha256": "9df1af9c71ad156007bd30a9fae87d47424a3da664e55f5ac17f0a3d3dc7dee5",
+      "source_full_file_sha256": "56678a3abb9871d6d014e73373d0f35b4d8877d0c9ee2bab77aa9889ce511aaf",
+      "preserved_record_sha256": "56678a3abb9871d6d014e73373d0f35b4d8877d0c9ee2bab77aa9889ce511aaf",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {
+        "scanner_flagged_sentence_not_classified_as_secret": 1
+      }
+    },
+    {
+      "index": 28,
+      "source_path": "docs/plans/research/2026-10-21-simulator-wsp-coverage.json",
+      "original_disposition": "RETAIN_LOCAL_ONLY_HISTORICAL_OR_PROPOSED_MATERIAL",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Publish the original simulator WSP coverage in a historical envelope. Keep original head/date/hash scope; it does not validate current proof handling, supply caps or epoch budgeting.",
+      "current_owners": [
+        "modules/foundups/simulator/ROADMAP.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/plans/research/2026-10-21-simulator-wsp-coverage.json",
+      "publication_sha256": "39d6bf91c0d1a315791d995a2c286780313b504763fc478dafff306462f5e863",
+      "source_full_file_sha256": "aae4535d44dbb277977221882fe94c46ecd70c11ad230eb5914afbaeed1164b1",
+      "preserved_record_sha256": "aae4535d44dbb277977221882fe94c46ecd70c11ad230eb5914afbaeed1164b1",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 29,
+      "source_path": "docs/plans/research/2026-10-21-vision-catalog-coverage.json",
+      "original_disposition": "RETAIN_LOCAL_ONLY_HISTORICAL_OR_PROPOSED_MATERIAL",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Publish the original vision/catalog read coverage as dated evidence. Original inventory source hashes and workspace head are not a current catalog inventory or authority to include every record in public navigation.",
+      "current_owners": [
+        "modules/foundups/docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md",
+        "modules/foundups/pfmall/ROADMAP.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/plans/research/2026-10-21-vision-catalog-coverage.json",
+      "publication_sha256": "cc84ea5cc5ea100a166252abfd4a9b1cf541aedc8dfd85227a1e2ed8395c9655",
+      "source_full_file_sha256": "15dcd8eff98cb3cd3934ce06a6eedb929ec3fa868cc2f5747f3f8f85d5895dda",
+      "preserved_record_sha256": "15dcd8eff98cb3cd3934ce06a6eedb929ec3fa868cc2f5747f3f8f85d5895dda",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 30,
+      "source_path": "docs/plans/research/2026-10-21-vision-catalog.md",
+      "original_disposition": "RETAIN_LOCAL_ONLY_HISTORICAL_OR_PROPOSED_MATERIAL",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Archive the typed-registry versus Video Mall inventory distinction and original catalog analysis. Retain explicit population definitions and admission evidence requirements. Counts and economic assumptions are historical; current registry, public eligibility and FX policy need their own current qualification.",
+      "current_owners": [
+        "modules/foundups/docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md",
+        "modules/foundups/pfmall/ROADMAP.md",
+        "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/plans/research/2026-10-21-vision-catalog.md",
+      "publication_sha256": "d5a0f5401e27013dbbc31e282315733a23d610509d4fbb1efe83dbaf83b8cecf",
+      "source_full_file_sha256": "3b889fdc6835db5832164d3cce06f04f125d916f1f67395838b251eb57d9c490",
+      "preserved_record_sha256": "3b889fdc6835db5832164d3cce06f04f125d916f1f67395838b251eb57d9c490",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 31,
+      "source_path": "docs/plans/research/2026-10-22-blockchain-readiness-recheck.md",
+      "original_disposition": "RETAIN_LOCAL_ONLY_HISTORICAL_OR_PROPOSED_MATERIAL",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Archive the October readiness recheck, including its bounded validation scope and model-selection discussion. Current canonical FX delivery and v0.1.3 pitch skill supersede the older sequencing. No model provider, hosted video path or chain deployment is qualified by this record.",
+      "current_owners": [
+        "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md",
+        "modules/platform_integration/social_media_orchestrator/skillz/foundup_pitch_package/SKILLz.md",
+        "modules/foundups/agent_market/README.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/plans/research/2026-10-22-blockchain-readiness-recheck.md",
+      "publication_sha256": "ca09e859b316b2503a092521551177b27b7c14d1fb022916a16febd83e496110",
+      "source_full_file_sha256": "ae325f9b6181d64a286d389855835a56c4e7d789ec6e8dfb332a9c8c88a67b79",
+      "preserved_record_sha256": "ae325f9b6181d64a286d389855835a56c4e7d789ec6e8dfb332a9c8c88a67b79",
+      "link_resolution": [
+        {
+          "original_target": "../../../modules/foundups/agent_market/src/token_factory.py:233",
+          "status": "UNRESOLVED_HISTORICAL_REFERENCE_RENDERED_AS_TEXT"
+        },
+        {
+          "original_target": "../../../modules/foundups/agent_market/src/token_factory.py:138",
+          "status": "UNRESOLVED_HISTORICAL_REFERENCE_RENDERED_AS_TEXT"
+        },
+        {
+          "original_target": "../../../modules/foundups/agent_market/src/token_factory.py:212",
+          "status": "UNRESOLVED_HISTORICAL_REFERENCE_RENDERED_AS_TEXT"
+        },
+        {
+          "original_target": "../../../modules/foundups/agent_market/src/task_pipeline.py:239",
+          "status": "UNRESOLVED_HISTORICAL_REFERENCE_RENDERED_AS_TEXT"
+        },
+        {
+          "original_target": "../../../modules/foundups/agent_market/src/in_memory.py:429",
+          "status": "UNRESOLVED_HISTORICAL_REFERENCE_RENDERED_AS_TEXT"
+        },
+        {
+          "original_target": "../../../modules/foundups/agent_market/src/task_pipeline.py:295",
+          "status": "UNRESOLVED_HISTORICAL_REFERENCE_RENDERED_AS_TEXT"
+        },
+        {
+          "original_target": "../../../modules/foundups/agent_market/src/task_pipeline.py:327",
+          "status": "UNRESOLVED_HISTORICAL_REFERENCE_RENDERED_AS_TEXT"
+        },
+        {
+          "original_target": "../../../modules/foundups/agent_market/src/in_memory.py:468",
+          "status": "UNRESOLVED_HISTORICAL_REFERENCE_RENDERED_AS_TEXT"
+        },
+        {
+          "original_target": "../../../modules/foundups/agent_market/src/task_pipeline.py:331",
+          "status": "UNRESOLVED_HISTORICAL_REFERENCE_RENDERED_AS_TEXT"
+        },
+        {
+          "original_target": "../../../modules/foundups/agent_market/src/persistence/sqlite_adapter.py:358",
+          "status": "UNRESOLVED_HISTORICAL_REFERENCE_RENDERED_AS_TEXT"
+        },
+        {
+          "original_target": "../../../modules/foundups/simulator/economics/epoch_ledger.py:96",
+          "status": "UNRESOLVED_HISTORICAL_REFERENCE_RENDERED_AS_TEXT"
+        },
+        {
+          "original_target": "../../../modules/foundups/simulator/economics/epoch_ledger.py:148",
+          "status": "UNRESOLVED_HISTORICAL_REFERENCE_RENDERED_AS_TEXT"
+        },
+        {
+          "original_target": "../../../modules/foundups/simulator/economics/token_economics.py:826",
+          "status": "UNRESOLVED_HISTORICAL_REFERENCE_RENDERED_AS_TEXT"
+        },
+        {
+          "original_target": "../../../modules/foundups/simulator/economics/cabr_flow_router.py:48",
+          "status": "UNRESOLVED_HISTORICAL_REFERENCE_RENDERED_AS_TEXT"
+        },
+        {
+          "original_target": "../../../modules/foundups/simulator/economics/token_economics.py:1040",
+          "status": "UNRESOLVED_HISTORICAL_REFERENCE_RENDERED_AS_TEXT"
+        },
+        {
+          "original_target": "../../../modules/foundups/simulator/economics/btc_anchor_connector.py:313",
+          "status": "UNRESOLVED_HISTORICAL_REFERENCE_RENDERED_AS_TEXT"
+        },
+        {
+          "original_target": "../../../modules/foundups/simulator/economics/btc_anchor_connector.py:372",
+          "status": "UNRESOLVED_HISTORICAL_REFERENCE_RENDERED_AS_TEXT"
+        }
+      ],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 32,
+      "source_path": "docs/plans/research/2026-10-22-external-project-tokenization.md",
+      "original_disposition": "RETAIN_LOCAL_ONLY_HISTORICAL_OR_PROPOSED_MATERIAL",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Archive external-project/DAO2 research. Carry issuer authority, repository ownership, endorsement separation, replay, transfer and recovery requirements to current owners. External protocol claims are dated research; no live issuer or ownership proof is established.",
+      "current_owners": [
+        "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md",
+        "modules/foundups/pfmall/intake_host.py"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/plans/research/2026-10-22-external-project-tokenization.md",
+      "publication_sha256": "cc4d2b4907176bfef5137bfb339fde92e35aed8e6844b5f6d2e76c1d41a10f98",
+      "source_full_file_sha256": "2ede2a723ae5a7d14478ea304562de6a39b4a505351b4e7a0b5eaf3630ce9c32",
+      "preserved_record_sha256": "2ede2a723ae5a7d14478ea304562de6a39b4a505351b4e7a0b5eaf3630ce9c32",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 33,
+      "source_path": "docs/plans/research/2026-10-22-landing-page-audit.json",
+      "original_disposition": "RETAIN_LOCAL_ONLY_HISTORICAL_OR_PROPOSED_MATERIAL",
+      "proposed_disposition": "PUBLISH_SANITIZED_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Publish a sanitized historical landing audit envelope. Omit the unresolved external app identifier from the public projection while retaining the original privately. Preserve typed-registry, catalog-only and candidate populations separately; old HTTP and live-detail results remain October observations.",
+      "current_owners": [
+        "modules/foundups/docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md",
+        "modules/foundups/pfmall/ROADMAP.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/plans/research/2026-10-22-landing-page-audit.json",
+      "publication_sha256": "696ed5acf204656cd27d46efc44b53df2cab6b84ae5630977c70e903262f33d9",
+      "source_full_file_sha256": "53a0dea5c368f3db7260266bbcc3f6e6b1876d965150df3859b48925870bf826",
+      "preserved_record_sha256": "53a0dea5c368f3db7260266bbcc3f6e6b1876d965150df3859b48925870bf826",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {
+        "unverified_external_identifier": 1
+      }
+    },
+    {
+      "index": 34,
+      "source_path": "docs/plans/research/2026-10-22-landing-page-audit.md",
+      "original_disposition": "RETAIN_LOCAL_ONLY_HISTORICAL_OR_PROPOSED_MATERIAL",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Archive the landing coverage narrative with a historical warning. Preserve population distinctions, evidence-bounded token labels and navigation/publication acceptance requirements. Deployment drift and counts are not reasserted as current defects without new source and HTTP observations.",
+      "current_owners": [
+        "modules/foundups/docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md",
+        "modules/foundups/pfmall/ROADMAP.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/plans/research/2026-10-22-landing-page-audit.md",
+      "publication_sha256": "0527aff83854768c1573809d3ec562eb06ace6f087359f65aed1060e691c7726",
+      "source_full_file_sha256": "9a293bc726a7c5fe1c5d5210f5d7d1662c937b31d6bb30929ed586626e7a7e1d",
+      "preserved_record_sha256": "9a293bc726a7c5fe1c5d5210f5d7d1662c937b31d6bb30929ed586626e7a7e1d",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 35,
+      "source_path": "docs/plans/research/2026-10-22-project-intake-architecture.md",
+      "original_disposition": "RETAIN_LOCAL_ONLY_HISTORICAL_OR_PROPOSED_MATERIAL",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Archive intake design and carry ownership challenges, rename/transfer/fork handling, untrusted input and publication gates to current owners. Current intake_host provides isolated draft intake with explicit policy and public-key verification; that is not a deployed universal project claimant or authorization for external mutations.",
+      "current_owners": [
+        "modules/foundups/pfmall/intake_host.py",
+        "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/plans/research/2026-10-22-project-intake-architecture.md",
+      "publication_sha256": "0e4ee30371fa6a950550816295abab7a1514bb4f955a953b18f41b81eb29eafe",
+      "source_full_file_sha256": "aeac4fa1a78699cf32fe287a25c4ba3061a7c2ea9936c9510348bb008c92788d",
+      "preserved_record_sha256": "aeac4fa1a78699cf32fe287a25c4ba3061a7c2ea9936c9510348bb008c92788d",
+      "link_resolution": [
+        {
+          "original_target": "../../../WSP_framework/src/WSP_106_FoundUp_API_Gateway_Protocol.md#1-onboarding-api-foundups",
+          "resolved_target": "WSP_framework/src/WSP_106_FoundUp_API_Gateway_Protocol.md"
+        },
+        {
+          "original_target": "../../../WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md",
+          "resolved_target": "WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md"
+        },
+        {
+          "original_target": "../../../modules/ai_intelligence/ai_overseer/src/foundup_genesis/launch_request.py",
+          "resolved_target": "modules/ai_intelligence/ai_overseer/src/foundup_genesis/launch_request.py"
+        },
+        {
+          "original_target": "../../../modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_transport.py",
+          "resolved_target": "modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_transport.py"
+        },
+        {
+          "original_target": "../../../modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_auth_provider.py",
+          "resolved_target": "modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_auth_provider.py"
+        },
+        {
+          "original_target": "../../../modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_packet_builder.py",
+          "resolved_target": "modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_packet_builder.py"
+        },
+        {
+          "original_target": "../../../modules/foundups/foundup_registry.schema.json",
+          "resolved_target": "modules/foundups/foundup_registry.schema.json"
+        },
+        {
+          "original_target": "../../../modules/foundups/src/foundup_registry_loader.py",
+          "resolved_target": "modules/foundups/src/foundup_registry_loader.py"
+        },
+        {
+          "original_target": "../../../modules/foundups/agent_market/src/registry.py",
+          "resolved_target": "modules/foundups/agent_market/src/registry.py"
+        },
+        {
+          "original_target": "../../../modules/foundups/public_catalog_projector/src/projector.py",
+          "resolved_target": "modules/foundups/public_catalog_projector/src/projector.py"
+        },
+        {
+          "original_target": "../../../public/f/index.html",
+          "resolved_target": "public/f/index.html"
+        },
+        {
+          "original_target": "../../../modules/ai_intelligence/pfmall_discovery/INTERFACE.md",
+          "resolved_target": "modules/ai_intelligence/pfmall_discovery/INTERFACE.md"
+        },
+        {
+          "original_target": "../../../modules/platform_integration/github_integration/src/github_api_client.py",
+          "resolved_target": "modules/platform_integration/github_integration/src/github_api_client.py"
+        },
+        {
+          "original_target": "../../../modules/platform_integration/github_integration/src/reddog_github_permission_probe.py",
+          "resolved_target": "modules/platform_integration/github_integration/src/reddog_github_permission_probe.py"
+        },
+        {
+          "original_target": "../../../modules/foundups/agent_market/src/interfaces.py",
+          "resolved_target": "modules/foundups/agent_market/src/interfaces.py"
+        },
+        {
+          "original_target": "../../../modules/foundups/agent/src/source_authority.py",
+          "resolved_target": "modules/foundups/agent/src/source_authority.py"
+        },
+        {
+          "original_target": "../../architecture/FOUNDUP_SOURCE_AUTHORITY_CONTRACT.md",
+          "resolved_target": "docs/architecture/FOUNDUP_SOURCE_AUTHORITY_CONTRACT.md"
+        },
+        {
+          "original_target": "../../../modules/foundups/agent_market/src/token_factory.py",
+          "resolved_target": "modules/foundups/agent_market/src/token_factory.py"
+        },
+        {
+          "original_target": "../../audits/architecture/PLAYFOUNDUPS_MALL_PUBLIC_DISCOVERY_AUDIT_PHASE1.md",
+          "resolved_target": "docs/audits/architecture/PLAYFOUNDUPS_MALL_PUBLIC_DISCOVERY_AUDIT_PHASE1.md"
+        }
+      ],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 36,
+      "source_path": "docs/plans/research/2026-10-22-public-route-observations.json",
+      "original_disposition": "RETAIN_LOCAL_ONLY_HISTORICAL_OR_PROPOSED_MATERIAL",
+      "proposed_disposition": "PUBLISH_SANITIZED_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Publish a sanitized historical route-observation envelope. Preserve observation dates and statuses; remove local command-host details. This record does not assert today's endpoints, current deployment revision or successful form/comment delivery.",
+      "current_owners": [
+        "modules/foundups/pfmall/ROADMAP.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/plans/research/2026-10-22-public-route-observations.json",
+      "publication_sha256": "42ac45ef382313b221371935dc2dfb6a7e4b59334de66cecffb05a9568909042",
+      "source_full_file_sha256": "4d572e26ad816232c5c8ecfb8d57a6de82d4a0fe2e963fabbcffcb32c4d7f7e8",
+      "preserved_record_sha256": "4d572e26ad816232c5c8ecfb8d57a6de82d4a0fe2e963fabbcffcb32c4d7f7e8",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {
+        "absolute_host_path": 1
+      }
+    },
+    {
+      "index": 37,
+      "source_path": "docs/plans/research/2026-10-22-token-factory-fail-closed-receipt.json",
+      "original_disposition": "RETAIN_LOCAL_ONLY_HISTORICAL_OR_PROPOSED_MATERIAL",
+      "proposed_disposition": "PUBLISH_SANITIZED_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Publish a sanitized historical P0A receipt envelope with local stack and raw-receipt host locations removed. Token-factory fail-closed behavior is already on main, alongside newer caller authorization and atomic payout initiation. Preserve old test results, failed probes, network attribution and limitations as historical facts only; do not treat them as a fresh secret-free or offline test run.",
+      "current_owners": [
+        "modules/foundups/agent_market/src/token_factory.py",
+        "modules/foundups/agent_market/src/authorization.py",
+        "modules/foundups/agent_market/src/persistence/sqlite_adapter.py"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/plans/research/2026-10-22-token-factory-fail-closed-receipt.json",
+      "publication_sha256": "74b892ebd0878c03efbaeb749f72f3ec4c1cce3ea7ccbe1900b12ef55fe7aa67",
+      "source_full_file_sha256": "f70ab78c44fd3b3e14cdc942684ccdfa76cb593d9bc699fd0f473947b2cc644b",
+      "preserved_record_sha256": "f70ab78c44fd3b3e14cdc942684ccdfa76cb593d9bc699fd0f473947b2cc644b",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {
+        "absolute_host_path": 26
+      }
+    },
+    {
+      "index": 38,
+      "source_path": "docs/plans/research/2026-10-22-validation-receipt.json",
+      "original_disposition": "RETAIN_LOCAL_ONLY_HISTORICAL_OR_PROPOSED_MATERIAL",
+      "proposed_disposition": "PUBLISH_SANITIZED_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Publish a sanitized historical validation envelope. Preserve each original extension date, old result and scope while removing host fixture/output paths. Its pitch, media, blockchain and route claims are not current release acceptance; durable execution and private asset delivery remain separately owned.",
+      "current_owners": [
+        "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md",
+        "modules/platform_integration/social_media_orchestrator/skillz/foundup_pitch_package/SKILLz.md",
+        "modules/foundups/docs/PFMALL_MEDIA_DELIVERY_CONTRACT.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/plans/research/2026-10-22-validation-receipt.json",
+      "publication_sha256": "aaab2adf088076f724cab1b9e7106ecbaf53a4b80072bc07c0a1c4ecccfcd716",
+      "source_full_file_sha256": "a7386e9dc1d8204d866cfe7ae4e1e86c993d7bf24f8628ad97fe4780e1861e68",
+      "preserved_record_sha256": "a7386e9dc1d8204d866cfe7ae4e1e86c993d7bf24f8628ad97fe4780e1861e68",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {
+        "absolute_host_path": 5
+      }
+    },
+    {
+      "index": 40,
+      "source_path": "modules/communication/moltbot_bridge/ModLog.md",
+      "original_disposition": "RETAIN_UNPUBLISHED_HISTORICAL_DELTA_SEPARATELY",
+      "proposed_disposition": "PUBLISH_SANITIZED_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Archive the old call-safety and Ollama relocation log additions. Call-safety publication is a separate audited canonical .claude source plus generated .agents projection; no legacy references subtree is restored. Old local-live probe statements are not current Ollama or PC runtime acceptance.",
+      "current_owners": [
+        ".claude/skills/reddog-call-safety/SKILL.md",
+        "modules/communication/moltbot_bridge/tests/test_openclaw_ollama_contract.py"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/historical-log-additions/modules/communication/moltbot_bridge/ModLog.md",
+      "publication_sha256": "3483b4e0d546d3c0dc53437c669b7d8bb9f9ab641056a795dd4bdc6dbbff5dcf",
+      "source_full_file_sha256": "bb71912bb9b15cfe9372e30f80f3e83580c30f9d1b9fb03da90956cc40c8c021",
+      "preserved_record_sha256": "e4dbdebde7c64c065341adbc9d062df4116f3db9862fa1e691f9ddf00a8d0422",
+      "link_resolution": [
+        {
+          "original_target": "../../../.agents/skills/reddog-call-safety/SKILL.md",
+          "resolved_target": ".agents/skills/reddog-call-safety/SKILL.md"
+        }
+      ],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {
+        "absolute_host_path": 1
+      }
+    },
+    {
+      "index": 49,
+      "source_path": "modules/communication/moltbot_bridge/tests/TestModLog.md",
+      "original_disposition": "RETAIN_UNPUBLISHED_HISTORICAL_DELTA_SEPARATELY",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Archive the old 106-test and live-probe log additions without adding them to the active test log as fresh results. Current main already contains the Ollama default/timeout cases and bounded fake-I/O contract tests; only the independent one-line identity assertion candidate remains.",
+      "current_owners": [
+        "modules/communication/moltbot_bridge/tests/test_openclaw_ollama_contract.py"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/historical-log-additions/modules/communication/moltbot_bridge/tests/TestModLog.md",
+      "publication_sha256": "9f609e45ef71dd9d197e5d48674b242afd59c6206af48480f7e41b9389d41a7f",
+      "source_full_file_sha256": "07fa5f149931ca1a77144fd7d11fb5120d5d74ee47928e47602f299fe984c639",
+      "preserved_record_sha256": "827383553d517d17d66d1a98e54c168e73877e65cd564da187ae9137f6b8025c",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 58,
+      "source_path": "modules/foundups/ModLog.md",
+      "original_disposition": "RETAIN_UNPUBLISHED_HISTORICAL_DELTA_SEPARATELY",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Archive the October blockchain, discovery, pitch and P0A log additions. Preserve their dates and original outcomes; route continuing requirements to current FX/discovery/pitch owners. Older broad complete/passed claims are not reconciled release or runtime acceptance.",
+      "current_owners": [
+        "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md",
+        "modules/foundups/docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md",
+        "modules/platform_integration/social_media_orchestrator/skillz/foundup_pitch_package/SKILLz.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/historical-log-additions/modules/foundups/ModLog.md",
+      "publication_sha256": "90b313dbb5966a23f9b954b406e9ff07658d6c1e3e08a4a384500317fd1b2d8f",
+      "source_full_file_sha256": "ce0deef2646f3dcb9cfc74bd8699092fe8d17c570c6f0be0a0089fa292449fd6",
+      "preserved_record_sha256": "b467e9bc6e407db925f4fd43a2c146988ad0dc551fe9e0e8933d027b8f28da51",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 59,
+      "source_path": "modules/foundups/README.md",
+      "original_disposition": "RETAIN_LOCAL_PROPOSAL_DELTA_PENDING_OWNER_RECONCILIATION",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Preserve the three recovered-plan README links as a historical patch and route their content through this archive. Keep the current FoundUps README and canonical index; do not reintroduce absent-plan links into active navigation.",
+      "current_owners": [
+        "modules/foundups/docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md",
+        "modules/infrastructure/doc_dae/src/doc_dae.py"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/planning-deltas/modules/foundups/README.md.historical-patch.md",
+      "publication_sha256": "b03cec3b9970dcc6e05ca37e314b72c9d20b08016463de23770eba7155aa8c6a",
+      "source_full_file_sha256": "a9eaf99bb9b10345aaa612b55084c64d6ee665bc811c0bdf842ca6161b31d822",
+      "preserved_record_sha256": "afd1fb85de135781f3ddd7eee99db5bb168b75a3644a8b78cee102036743a6ee",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 60,
+      "source_path": "modules/foundups/ROADMAP.md",
+      "original_disposition": "RETAIN_LOCAL_PROPOSAL_DELTA_PENDING_OWNER_RECONCILIATION",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Archive the old discovery/pitch roadmap insertion. Retain browse/admission/voice evidence-brief and durable media requirements under current owners; do not downgrade newer delivery work or revive old placeholder claims.",
+      "current_owners": [
+        "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md",
+        "modules/foundups/pfmall/ROADMAP.md",
+        "modules/platform_integration/social_media_orchestrator/skillz/foundup_pitch_package/SKILLz.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/planning-deltas/modules/foundups/ROADMAP.md.historical-patch.md",
+      "publication_sha256": "d10a3cc6df6aa1ccac3427b04c578f69fe97fba94248d265b4aed6a46d71bd31",
+      "source_full_file_sha256": "6c5786b57035957a409406ee8d1550467e4a67c563214dc3d4ad830127289790",
+      "preserved_record_sha256": "21a17b0b32123be7aad7ae4a0c5f76d724620bce97cdd15ba922026c26ee9a3e",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 61,
+      "source_path": "modules/foundups/agent/tests/TestModLog.md",
+      "original_disposition": "RETAIN_UNPUBLISHED_HISTORICAL_DELTA_SEPARATELY",
+      "proposed_disposition": "PUBLISH_SANITIZED_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Archive the October build-plan test addition with its original 59-test result and scope, sanitizing the scratch-host command path. It is historical test evidence, not a fresh run on cbef or proof of executed FoundUp plans.",
+      "current_owners": [
+        "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/historical-log-additions/modules/foundups/agent/tests/TestModLog.md",
+      "publication_sha256": "3caee8741cd2dbade5acefd60fd7652283b8cd73d56e0768dd7b87f3cb5f6104",
+      "source_full_file_sha256": "57029dbd3bfc2830975cd07eb5a152d5dadc717498a747e18a68428cf5638526",
+      "preserved_record_sha256": "ad60da6b3421c49026a93c42784ca8f05bf0849cf72c6d38a610a4e3f3717c01",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {
+        "absolute_host_path": 1
+      }
+    },
+    {
+      "index": 63,
+      "source_path": "modules/foundups/agent_market/ModLog.md",
+      "original_disposition": "RETAIN_UNPUBLISHED_HISTORICAL_DELTA_SEPARATELY",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Archive the P0A implementation history. Current main includes the relevant token-factory owner and newer authorization/payout work; historical 190-test claims do not cover those newer changes or live settlement.",
+      "current_owners": [
+        "modules/foundups/agent_market/src/token_factory.py",
+        "modules/foundups/agent_market/src/authorization.py",
+        "modules/foundups/agent_market/src/persistence/sqlite_adapter.py"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/historical-log-additions/modules/foundups/agent_market/ModLog.md",
+      "publication_sha256": "adf2e75c2f04813d3bd3c8a5bae06373cf983f9fa28f1960124019f007fa7f76",
+      "source_full_file_sha256": "00052fad12e07f7923d9b125ac76578685bf7277b37707a4113a3696cd6225e6",
+      "preserved_record_sha256": "8508efc825dac1ecec5be3161e7e9e33192b4c5e2188c8f167431d5eb3265b3b",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 65,
+      "source_path": "modules/foundups/agent_market/ROADMAP.md",
+      "original_disposition": "RETAIN_LOCAL_PROPOSAL_DELTA_PENDING_OWNER_RECONCILIATION",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Archive the P0A roadmap patch. Keep current roadmap and authorization/payout ownership; do not restore old missing-authorization/non-atomic statements where current source has changed. Preserve signing, funding, issuer, confirmation and retry qualification as separate current delivery requirements.",
+      "current_owners": [
+        "modules/foundups/agent_market/README.md",
+        "modules/foundups/agent_market/src/authorization.py",
+        "modules/foundups/agent_market/src/persistence/sqlite_adapter.py",
+        "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/planning-deltas/modules/foundups/agent_market/ROADMAP.md.historical-patch.md",
+      "publication_sha256": "73ab3cf799b0e5dccc098c9f7f15915432025d145e7e692c1f74e0b2e74a1f97",
+      "source_full_file_sha256": "8349cd4461ac21519d98862397c0e643e0895a23c8d08411856b629733f358ab",
+      "preserved_record_sha256": "c9b011947ca1db3cade38447320b488050155d3f69c84cb0eef67bacffddf6a5",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 68,
+      "source_path": "modules/foundups/agent_market/tests/TestModLog.md",
+      "original_disposition": "RETAIN_UNPUBLISHED_HISTORICAL_DELTA_SEPARATELY",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Archive the P0A 190-test and 17-file inventory addition with its original date and scope. It is not a current module test count, current fixture inventory or post-merge result.",
+      "current_owners": [
+        "modules/foundups/agent_market/src/token_factory.py",
+        "modules/foundups/agent_market/README.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/historical-log-additions/modules/foundups/agent_market/tests/TestModLog.md",
+      "publication_sha256": "887bdbe4228f2d9c11aa9e44350f41710d26cee5f07987a6348bafee5310ac2c",
+      "source_full_file_sha256": "88611695dd1efedfa3aaa0ed473a32d618a596a80f29459cd01e7fbfadf18cd7",
+      "preserved_record_sha256": "98a9fa99b51781d45a2cb4aa11c97ce1b3d1c78314db9b3c452a2fbf1005c687",
+      "link_resolution": [
+        {
+          "original_target": "../../../../docs/plans/research/2026-10-22-token-factory-fail-closed-receipt.json",
+          "resolved_target": "docs/_archive/pc-reconciliation/2026-10-30/plans/docs/plans/research/2026-10-22-token-factory-fail-closed-receipt.json"
+        }
+      ],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 71,
+      "source_path": "modules/infrastructure/dependency_launcher/ModLog.md",
+      "original_disposition": "RETAIN_UNPUBLISHED_HISTORICAL_DELTA_SEPARATELY",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Archive the old llmster startup/autoload history rather than apply it to current launcher behavior. Current main protects native inventory readiness, exact model identity, node ownership and cold-GUI fallback policy. Unique legacy /api/v1/models/load helper deltas remain separately preserved for lifecycle-owner qualification, not silently dropped or enabled.",
+      "current_owners": [
+        "modules/infrastructure/dependency_launcher/README.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/historical-log-additions/modules/infrastructure/dependency_launcher/ModLog.md",
+      "publication_sha256": "c07c6133c7156d1aecffe741daa4e9d2e12ff9b53a34706d2d75c816b8a1b48b",
+      "source_full_file_sha256": "31951a02d208417f99e57528837fe65322da8725d1603cdb72efabccfef9b85d",
+      "preserved_record_sha256": "6f5e3883b3e556aa64a4ff9a7c7edab50bed0f69a54fa33f5236bf9acc61b80e",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 75,
+      "source_path": "modules/infrastructure/wre_core/ModLog.md",
+      "original_disposition": "RETAIN_UNPUBLISHED_HISTORICAL_DELTA_SEPARATELY",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Archive the September portable brain-directory implementation history. Current extractor already uses Path.home(); no new source overlay or fresh junction validation is implied.",
+      "current_owners": [
+        "modules/infrastructure/wre_core/scripts/extract_brain_artifacts.py"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/historical-log-additions/modules/infrastructure/wre_core/ModLog.md",
+      "publication_sha256": "97f990531bfbdb4442a13282c41fc7eb86ab79088812549a223e6d3077e04274",
+      "source_full_file_sha256": "51733a2406273ab7f3764e09c22a5fcb052f0f3cec7be7682d432a6dd1add095",
+      "preserved_record_sha256": "dd6c5414e9333607f1c1cb821678352fa7e742f715934f1782058d48a6a5c875",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 77,
+      "source_path": "modules/infrastructure/wre_core/tests/TestModLog.md",
+      "original_disposition": "RETAIN_UNPUBLISHED_HISTORICAL_DELTA_SEPARATELY",
+      "proposed_disposition": "PUBLISH_SANITIZED_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Archive the two September storage test observations, replacing the private host junction path only in the public copy. Do not refresh their date or assert that the current PC junction still satisfies them.",
+      "current_owners": [
+        "modules/infrastructure/wre_core/scripts/extract_brain_artifacts.py"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/historical-log-additions/modules/infrastructure/wre_core/tests/TestModLog.md",
+      "publication_sha256": "0a035a9d7456869082cee49ec5770530fc5eb2fc690f0a892b32799e1bd94fd9",
+      "source_full_file_sha256": "e9b1448e36d43d67ec81e4935163d06c00fa4d0b8c4d14e661c5727c0d2e7598",
+      "preserved_record_sha256": "ad1a1a72b1f31f531b76dceffb316e34960739449e042b687012e551ea7c80b3",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {
+        "absolute_host_path": 1
+      }
+    },
+    {
+      "index": 81,
+      "source_path": "modules/platform_integration/social_media_orchestrator/ModLog.md",
+      "original_disposition": "RETAIN_UNPUBLISHED_HISTORICAL_DELTA_SEPARATELY",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Archive the v0.1.0, v0.1.1 and v0.1.2 pitch history under its original dates. Current owner is v0.1.3 with separate campaign and FX boundaries. Do not downgrade the skill, infer media execution or claim private delivery from a static public path.",
+      "current_owners": [
+        "modules/platform_integration/social_media_orchestrator/skillz/foundup_pitch_package/SKILLz.md",
+        "modules/foundups/docs/PFMALL_MEDIA_DELIVERY_CONTRACT.md",
+        "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/historical-log-additions/modules/platform_integration/social_media_orchestrator/ModLog.md",
+      "publication_sha256": "2ef14dc9923bc890d1d07fd734dbcb04c17aa0f09816428020800dc035407ab8",
+      "source_full_file_sha256": "dd2b7da7bc68ae1f751edf02de08895861b5766c0d8512e69b5a88f92011c251",
+      "preserved_record_sha256": "09533e8e07af49e71e0815e3f3969f72c6e8d90c1daeff34e8073caf08825b2f",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    },
+    {
+      "index": 83,
+      "source_path": "modules/platform_integration/social_media_orchestrator/ROADMAP.md",
+      "original_disposition": "RETAIN_LOCAL_PROPOSAL_DELTA_PENDING_OWNER_RECONCILIATION",
+      "proposed_disposition": "PUBLISH_HISTORICAL_PROJECTION_KEEP_CANONICAL_MAIN",
+      "decision": "Archive the creative-package roadmap patch. Its planned durable generation, upload recovery, cost control and approved publication requirements remain useful; its claim that the campaign owner is a placeholder is superseded by current main. No old roadmap overlay is proposed.",
+      "current_owners": [
+        "modules/platform_integration/social_media_orchestrator/skillz/foundup_pitch_package/SKILLz.md",
+        "modules/foundups/docs/PFMALL_MEDIA_DELIVERY_CONTRACT.md",
+        "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md"
+      ],
+      "publication_path": "docs/_archive/pc-reconciliation/2026-10-30/planning-deltas/modules/platform_integration/social_media_orchestrator/ROADMAP.md.historical-patch.md",
+      "publication_sha256": "09392de7f053c35a98c4f4fdb18daebd0b6ef037c89f4bd8c17c00acec760ce3",
+      "source_full_file_sha256": "27dc3f7b28e8b857fc97f39ce591c302337ba5893755e68586019600c337601a",
+      "preserved_record_sha256": "931939f18b1a02af9dbd00888ea6ed1bd2f8e109b6e9c6d9a603571126ef0892",
+      "link_resolution": [],
+      "auditor_acceptance": "PENDING",
+      "runtime_and_commenting": "UNVERIFIED",
+      "omission_categories": {}
+    }
+  ],
+  "owner_source_bindings": {
+    "modules/infrastructure/wre_core/scripts/extract_brain_artifacts.py": {
+      "sha256": "0da8d2be4f38c23c83fdfeefb06d28cdcfe2f9b562a566ce29db838eda5fc9a1",
+      "revision": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+      "authority": "current-main source, not runtime observation"
+    },
+    "modules/foundups/esingularity/README.md": {
+      "sha256": "649ac419f493c5f84e2864d5b896ca119c959a9bd290b5ca1f2f42bd7353e4a7",
+      "revision": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+      "authority": "current-main source, not runtime observation"
+    },
+    "modules/foundups/docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md": {
+      "sha256": "71b25c8999fcf0702d99fd967693358130c3a6df509f05b6ab56b951dd0a8929",
+      "revision": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+      "authority": "current-main source, not runtime observation"
+    },
+    "modules/infrastructure/doc_dae/src/doc_dae.py": {
+      "sha256": "6f9e2744921bf3030ed36db534ec464e377eac121fe6231af40651cfcff8429b",
+      "revision": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+      "authority": "current-main source, not runtime observation"
+    },
+    "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md": {
+      "sha256": "861fd0f9688e3b7311acbca8698e4049e4a26cbe117e1131f39b8e5547d51a91",
+      "revision": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+      "authority": "current-main source, not runtime observation"
+    },
+    "modules/platform_integration/social_media_orchestrator/skillz/foundup_pitch_package/SKILLz.md": {
+      "sha256": "41da664b3986b118f85cdc05a0da3501b190bca054d558cd1ee6da94504cfdf0",
+      "revision": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+      "authority": "current-main source, not runtime observation"
+    },
+    "modules/foundups/docs/PFMALL_MEDIA_DELIVERY_CONTRACT.md": {
+      "sha256": "3a415e13b30e979c6320c8c9bf5d550e6630e23f345bda62d64eafc69ed45114",
+      "revision": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+      "authority": "current-main source, not runtime observation"
+    },
+    "modules/foundups/agent_market/README.md": {
+      "sha256": "a8829c0790194defc05c322bbfd160339a9e9c6d036e84d56d550cce11eed038",
+      "revision": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+      "authority": "current-main source, not runtime observation"
+    },
+    "modules/foundups/simulator/economics/epoch_ledger.py": {
+      "sha256": "3c5194fe581ba5b88dac2c8f3d3be98a4ac9e37c379e2f059bc63e107fbd87c9",
+      "revision": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+      "authority": "current-main source, not runtime observation"
+    },
+    "modules/foundups/simulator/economics/token_economics.py": {
+      "sha256": "06fe0e57e5d633bfc9ce64891e332d606f8b51e9a124813d7861d89b7260bab5",
+      "revision": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+      "authority": "current-main source, not runtime observation"
+    },
+    "modules/foundups/simulator/economics/cabr_flow_router.py": {
+      "sha256": "7e6d47fd73fffafddc21ccee02e09dfa3b962e2856edcc1f35fb354561f28ca3",
+      "revision": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+      "authority": "current-main source, not runtime observation"
+    },
+    "modules/foundups/pfmall/ROADMAP.md": {
+      "sha256": "89e75bd744188e25a0a5cc63e2182f4751d3f460c65041c15b38679562f0ece8",
+      "revision": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+      "authority": "current-main source, not runtime observation"
+    },
+    "modules/foundups/pfmall/intake_host.py": {
+      "sha256": "76c4d2682975bfc31bf969c530afc8455a2cdd5f16287fa176f80a32685bffb9",
+      "revision": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+      "authority": "current-main source, not runtime observation"
+    },
+    "holo_index/CLI_REFERENCE.md": {
+      "sha256": "44b594e811d165e702d3854f41964f0bd24717ea314c18d049562b7131f0ad33",
+      "revision": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+      "authority": "current-main source, not runtime observation"
+    },
+    "modules/foundups/simulator/ROADMAP.md": {
+      "sha256": "d32c1d334230922531cca649dd734f0371ca870b667069b9fedb72168d32d2c4",
+      "revision": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+      "authority": "current-main source, not runtime observation"
+    },
+    "modules/foundups/agent_market/src/token_factory.py": {
+      "sha256": "71ecb07c91a8f12f4077f6c83ba6e4008aaee04a7e312507827226b508a35a60",
+      "revision": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+      "authority": "current-main source, not runtime observation"
+    },
+    "modules/foundups/agent_market/src/authorization.py": {
+      "sha256": "4dc7e5d3561ee5ab5ad3d793851fbaeb391919b9a4a3ba199c3d8d8f1ced36b9",
+      "revision": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+      "authority": "current-main source, not runtime observation"
+    },
+    "modules/foundups/agent_market/src/persistence/sqlite_adapter.py": {
+      "sha256": "4a16be90334c17f9c325de6388505301715e25e21867312ef527ce04d71afec3",
+      "revision": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+      "authority": "current-main source, not runtime observation"
+    },
+    ".claude/skills/reddog-call-safety/SKILL.md": {
+      "sha256": "131c1b11f52658a884c860836f2f0119ddc1dd618564e792ebb4882dcaec791e",
+      "revision": null,
+      "authority": "separate unpublished v2 candidate; auditor pending"
+    },
+    "modules/communication/moltbot_bridge/tests/test_openclaw_ollama_contract.py": {
+      "sha256": "3e0ebe899718b2b3d6a53965d93789ffc4e3f3b79dfebb1047939c3374bcac34",
+      "revision": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+      "authority": "current-main source, not runtime observation"
+    },
+    "modules/infrastructure/dependency_launcher/README.md": {
+      "sha256": "7087a64fd56056500a64090bdf413b17e74f53cf622637d852d02935a5fe23f0",
+      "revision": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+      "authority": "current-main source, not runtime observation"
+    }
+  },
+  "publication_status": "PROPOSED_AUDITOR_PENDING",
+  "source_mutations": false,
+  "runtime_and_commenting": "UNVERIFIED"
+}
