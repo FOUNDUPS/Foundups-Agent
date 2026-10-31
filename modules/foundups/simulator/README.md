@@ -1,5 +1,15 @@
 # FoundUps Simulator
 
+## Agent-wallet policy isolation — 2026-11-01
+
+Allocation policies are validated and copied before funding effects. Caller-owned
+dicts/lists can no longer change an installed wallet policy; the public policy
+view is read-only. This class-B simulator repair preserves valid economics and
+trusted host replacement. It does not authenticate the host or provide a signing
+sandbox. The [current security sprint and roadmap](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#current-sprint-and-blockchain-roadmap--2026-11-01)
+track replay, funding, issuance and custody gates before any chain activation.
+
+
 Visual simulation of the autonomous FoundUp ecosystem.
 
 ## Simulator-first economic change rule — 2026-10-31

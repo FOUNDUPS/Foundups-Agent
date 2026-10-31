@@ -1,3 +1,13 @@
+## Security-first simulator sequence — 2026-11-01
+
+PR2279 delivered the retained quantity/revalidation source on main9925.
+Follow the [current sprint and roadmap](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#current-sprint-and-blockchain-roadmap--2026-11-01):
+A10/B01 policy isolation, then A07/B02 full epoch effects; units, mined/staked
+issuance, funded reservations and authentic independent grants remain gates.
+The unsigned consumer stays later15/P1; revalidate existing intent before/after
+I/O with admitted producer/facts. No implicit reissue, signing or PAID transition.
+Local simulator policy acceptance is not funded FAM settlement qualification.
+
 ﻿# ROADMAP - FoundUps Agent Market
 ## Exact quantity admission — 2026-10-29
 

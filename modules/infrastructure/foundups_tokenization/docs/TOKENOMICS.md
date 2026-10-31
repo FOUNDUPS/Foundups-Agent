@@ -19,6 +19,15 @@ Resolve/version changes in the simulator, independently accept them, update the
 affected governing mirrors, then prove chain parity before separate activation.
 No source publication or simulator result grants funding, signing or settlement.
 
+### Security-first status — 2026-11-01
+
+[The current roadmap](../../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#current-sprint-and-blockchain-roadmap--2026-11-01)
+starts with wallet-policy isolation and complete epoch-effect accounting.
+Adoption expands the released ceiling within the intended21M total; work-mint
+capacity subtracts already mined supply. The separate staked F_i counter does
+not prove a combined cap. Units, fees, denominators, funded backing and exits
+remain unresolved; no new asset, schedule, solvency or issuance rule is selected.
+
 ## Executive Summary
 
 FoundUps tokenomics implements a **bio-decay economic model** where:

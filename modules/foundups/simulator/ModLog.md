@@ -1,3 +1,13 @@
+## 2026-11-01 — Detached, validated agent-wallet policy
+
+WSP15 17/P0, class B; WSP22/26/48/50/84/97. Frozen 76-case desired policy
+suite reproduced 70 failures/6 passes before repair; 235 original regressions
+passed. Candidate now passes all311 without changing prior tests or economic
+formulas. Snapshot exact built-in policy values before allocation effects and
+expose a read-only public view; preserve trusted host replacement and empty-policy
+semantics. No new runtime owner or custody authority. Independently frozen tests
+and full source/publication verification are tracked in the current audit.
+
 ## Simulator-first publication alignment — 2026-10-31
 
 Link the single WSP26 change contract and preserve historical source evidence.

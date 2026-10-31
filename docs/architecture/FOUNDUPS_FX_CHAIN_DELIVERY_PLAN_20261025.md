@@ -2,6 +2,19 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## Agent-wallet policy security allocation — 2026-11-01
+
+Base `43b3b66cce8a01f28fb08577a9db84f731e50455`; WSP15 17/P0 (C3/I5/D5/Impact4),
+class B. The [current sprint and ordered roadmap](FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#current-sprint-and-blockchain-roadmap--2026-11-01)
+own the frozen acceptance, alternatives and subsequent accounting/custody gates.
+Allocate <=80 new source lines in existing token_economics and one <=180-line
+wallet-policy test owner; preserve valid economics and prior tests. Constructor,
+trusted replacement and allocation must detach/validate policy before effects.
+Current baseline235 passes; desired external RED76 has6 passes/70 failures.
+Independent13 held-outs are frozen before source edits. These are not chain tests.
+The WSP26 security corrections are notification-required clarification with exact
+mirrors. No token creation, key custody, runtime installation or live chain effect.
+
 ## Simulator-first documentation and publication allocation — 2026-10-31
 
 012 now authorizes source publication and ordinary gated PR integration. This

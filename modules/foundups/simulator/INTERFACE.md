@@ -1,5 +1,24 @@
 # INTERFACE - FoundUps Simulator
 
+## AgentExecutionWallet policy contract — 2026-11-01
+
+Constructor and trusted `policy_gates = value` replacement accept a plain dict
+with only `allowed_ops` and `max_per_task`. Operations must be a plain list/tuple
+of nonempty plain strings; the limit must be a nonnegative built-in int or finite
+float (not bool/subclasses/coercible objects). Integers retain their precision.
+Invalid policy raises ValueError before allocation balance changes. Installed
+policy is detached; reads return a mapping proxy with immutable operation tuples.
+`receive_allocation` and `human_allocates_to_agent` retain the previous policy for
+None or {}; a valid policy is installed only after successful funding. Direct
+host replacement with {} clears restrictions, preserving the existing API.
+
+This closes caller-container alias mutation, not arbitrary same-process access:
+raw object storage and trusted replacement remain host authority. Dataclass
+`asdict` serialization of the mapping-proxy view is not a qualified interface.
+No new issuer authentication, pending/global limits, precision conversion,
+concurrency isolation, signing, or funded blockchain settlement is supplied.
+
+
 ## CABR and breaker admission — 2026-10-31
 
 Economic promotion follows the [WSP26 change contract](../../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract).

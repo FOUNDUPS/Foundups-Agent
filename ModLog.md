@@ -1,3 +1,17 @@
+## 2026-11-01 — Security-first blockchain roadmap and custody clarification
+
+WSP15 A10/B01 class-B17/P0; following layer A07/B02 whole epoch effects.
+Document the source-bound19-entry typed catalog, simulator21M released ceiling
+versus mined/staked conflict, and independent custody/current-authority gates.
+WSP26§§4.2/4.3/4.5 clarify target custody without agent-held key assumptions,
+shared-seed guarantees or fee-as-security claims; exact knowledge mirror retained.
+WSP81 notification-required under012's explicit correction request; recover by
+focused Git revert from43b3. No fee, supply, maturity, tier or economic rule chosen.
+Root reports candidate 311 and independent 13 PASS as separate scopes; frozen RED
+and historical receipts remain. Final publication/current-main checks are pending.
+See the [current sprint, sources and ordered gates](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#current-sprint-and-blockchain-roadmap--2026-11-01).
+No production custody, funded reward, token issuance or live chain effect.
+
 ## 2026-10-31 — Blockchain publication and simulator-first documentation
 
 012 authorizes source publication after the earlier local-only checkpoint.
