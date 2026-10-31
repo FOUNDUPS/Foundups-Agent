@@ -1,0 +1,3905 @@
+{
+  "projection": {
+    "schema": "foundups.pc-reconciliation.historical-projection.v1",
+    "record_kind": "historical_projection_not_current_acceptance",
+    "source_path": "docs/plans/research/2026-10-22-landing-page-audit.json",
+    "original_pc_head": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+    "source_full_file_sha256": "53a0dea5c368f3db7260266bbcc3f6e6b1876d965150df3859b48925870bf826",
+    "preserved_record_sha256": "53a0dea5c368f3db7260266bbcc3f6e6b1876d965150df3859b48925870bf826",
+    "projection_created_at_utc": "2026-10-30T02:00:12.626831+00:00",
+    "projection_timestamp_is_not_an_observation": true,
+    "comparison_reference": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+    "disposition": "Publish a sanitized historical landing audit envelope. Omit the unresolved external app identifier from the public projection while retaining the original privately. Preserve typed-registry, catalog-only and candidate populations separately; old HTTP and live-detail results remain October observations.",
+    "current_owners": [
+      "modules/foundups/docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md",
+      "modules/foundups/pfmall/ROADMAP.md"
+    ],
+    "original_observation_timestamps": "Retained in historical content; no observation is rerun or redated.",
+    "publication_status": "Proposed, pending independent auditor acceptance; not published by this worker.",
+    "runtime_and_commenting": "UNVERIFIED"
+  },
+  "historical_record": {
+    "schema_version": "1.0.0",
+    "audit_date_jst": "2026-10-22",
+    "role": "reviewer",
+    "origin": "internal_handoff",
+    "scope": "Anonymous read-only local and public landing audit. No Git/PR/branch operations, site mutations, private auth, deployments or chain actions.",
+    "counts": {
+      "typed_registry_entities": 16,
+      "catalog_only_identities": 7,
+      "additional_unregistered_candidates": 2,
+      "source_public_projection_entries": 3,
+      "source_generic_product_entries_excluding_dedicated_holo_override": 2,
+      "source_dedicated_public_identity_surfaces": 2,
+      "source_dedicated_marketing_html": 1,
+      "source_dedicated_holo_stub_html": 1,
+      "deployed_legacy_catalog_rows": 13,
+      "local_member_catalog_rows": 14,
+      "deployed_canonical_typed_ids_matching_legacy_catalog": 4,
+      "deployed_alias_ids_for_typed_records": 2,
+      "observed_holo_stub": 1,
+      "functionally_validated_public_pocs": 0
+    },
+    "method": {
+      "anonymous_gets": true,
+      "no_authentication": true,
+      "no_redirects_followed": true,
+      "max_initial_body_bytes": 262144,
+      "max_catalog_body_bytes": 2097152,
+      "browser_dom_execution": false,
+      "app_flows_executed": false,
+      "web_tool": "Specific URLs attempted; inaccessible via web tool, then bounded urllib anonymous GET fallback.",
+      "holo_retrieval": "Owner authority HEAD mismatch preserved from parent; direct rg fallback; no reindex.",
+      "existing_projector_check": "0 errors, is_safe=true; registry16/projection3; no write mode"
+    },
+    "global_findings": [
+      {
+        "id": "DEPLOYMENT_SOURCE_DRIFT",
+        "priority": "P0",
+        "status": "OBSERVED",
+        "description": "Live public catalog URL returns HTML fallback; deployed generic /f template uses old member catalog; source uses scope-free projection."
+      },
+      {
+        "id": "PUBLIC_TOKEN_FALLBACK",
+        "priority": "P0",
+        "status": "SOURCE_STATIC",
+        "description": "Generic renderer invents $-prefixed token-like fallback for unset/deferred symbols."
+      },
+      {
+        "id": "SCOPE_COVERAGE",
+        "priority": "P1",
+        "status": "SOURCE_STATIC",
+        "description": "Only3 records in public projection; broader identity/venture publication requires typed classification policy, not blanket16-entity promotion."
+      },
+      {
+        "id": "POC_STAGE_COPY_DRIFT",
+        "priority": "P1",
+        "status": "SOURCE_STATIC",
+        "description": "GotJunk copy mismatch; VOTE internal implementation/public-launch split; Kosei undeployed marketing; Holo polished metadata versus stub and wrong PoC link."
+      }
+    ],
+    "registry_entities": [
+      {
+        "foundup_id": "gotjunk_001",
+        "display_name": "GotJunk",
+        "entity_type": "foundup",
+        "venture_counting_policy": "typed_product_identity_not_production_proof",
+        "purpose": "Rapid photo/video capture and peer-to-peer unwanted-item marketplace; current registry copy instead says junk-removal quotes/pickups.",
+        "registry_metadata": {
+          "stage": "proto",
+          "poc_status": "proto",
+          "implementation_status": "IMPLEMENTED",
+          "portfolio_status": "portfolio_candidate",
+          "poc_landing_status": "functional",
+          "portfolio_ready": false
+        },
+        "module_truth": "README PoC complete / Prototype current; AI organization explicitly future.",
+        "source_public_landing": {
+          "canonical_route": "/f/gotjunk_001",
+          "generic_projection_entry": true,
+          "generic_renderer": "public/f/index.html",
+          "status": "DATA_PRESENT_FOR_GENERIC_LANDING",
+          "dedicated_html": null,
+          "dedicated_role": null
+        },
+        "deployed_observation": {
+          "route_get": {
+            "url": "https://foundups.com/f/gotjunk_001",
+            "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+            "method": "GET",
+            "max_body_bytes": 262144,
+            "redirects_followed": false,
+            "authenticated": false,
+            "status": 200,
+            "content_type": "text/html; charset=utf-8",
+            "body_truncated": false,
+            "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+            "body_bytes": 38426,
+            "title": "FoundUps Mall | Entry",
+            "markers": {
+              "scope_free_projection": false,
+              "old_member_catalog": true,
+              "holo_stub": false,
+              "generic_foundups_home": false,
+              "back_to_mall": true,
+              "github_link": false,
+              "kosei_brand": false,
+              "gotjunk_brand": false,
+              "firebase_config": false
+            }
+          },
+          "canonical_id_in_deployed_legacy_catalog": true,
+          "catalog_alias": null,
+          "alias_in_deployed_catalog": false,
+          "classification": "OLD_TEMPLATE_AND_MATCHING_CATALOG_RECORD_JS_NOT_EXECUTED",
+          "browser_render_performed": false
+        },
+        "project_explanation": {
+          "status": "PUBLIC_SUMMARY_PARTIAL",
+          "notes": "Registry junk-removal quote/pickup story conflicts with actual capture/marketplace docs."
+        },
+        "stage_and_poc_evidence": {
+          "public_stage_visibility": "poc_landing_status_only_not_lifecycle_or_runtime_receipt",
+          "functional_poc_observed": false,
+          "notes": "README PoC complete / Prototype current; AI organization explicitly future."
+        },
+        "github_source": {
+          "registry_url": null,
+          "status": "NO_PUBLIC_SOURCE_LINK_IN_REGISTRY",
+          "recommended_policy": "Link approved public source or docs; do not invent new repositories or expose private source."
+        },
+        "app_or_entry": {
+          "registry_poc_url": "https://gotjunk-56566376153.us-west1.run.app/",
+          "registry_app_url": null,
+          "source_catalog_entry_url": null,
+          "live_direct_observation": {
+            "url": "https://gotjunk-56566376153.us-west1.run.app/",
+            "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+            "method": "GET",
+            "max_body_bytes": 262144,
+            "redirects_followed": false,
+            "authenticated": false,
+            "status": 200,
+            "content_type": "text/html",
+            "body_truncated": false,
+            "body_sha256": "ed2804179c10fb85153e1c1b88e7d7f856bd521f1e528d15231547d44958e8e6",
+            "body_bytes": 1565,
+            "title": "GotJUNK?",
+            "markers": {
+              "scope_free_projection": false,
+              "old_member_catalog": false,
+              "holo_stub": false,
+              "generic_foundups_home": false,
+              "back_to_mall": false,
+              "github_link": false,
+              "kosei_brand": false,
+              "gotjunk_brand": true,
+              "firebase_config": false
+            }
+          },
+          "status": "BOOTSTRAP_HTML_200_FUNCTIONAL_FLOW_UNTESTED"
+        },
+        "mall_backlink": {
+          "source_generic": "PRESENT_TO_MEMBER_MALL_/member/",
+          "dedicated_source": "NO_DEDICATED_HTML",
+          "deployed": "BACKLINK_IN_OLD_TEMPLATE_TO_/member/",
+          "note": "Existing target /member/ is the admitted Mall shell; no gate bypass was attempted."
+        },
+        "token_claims": {
+          "assignment_status": "EXISTS",
+          "assigned_symbol": "JUNK",
+          "on_chain_deployment_evidence": "NOT_ESTABLISHED",
+          "source_display_risk": "DOLLAR_SYMBOL_WITHOUT_PLANNED_OR_DEPLOYED_CONTEXT"
+        },
+        "evidence": [
+          {
+            "path": "modules/foundups/foundup_registry.json",
+            "line": 7,
+            "kind": "typed_metadata"
+          },
+          {
+            "path": "modules/foundups/gotjunk/README.md",
+            "line": 1,
+            "kind": "module_purpose_and_truth"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 901,
+            "kind": "source_public_data_owner"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 980,
+            "kind": "exact_identity_lookup"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1237,
+            "kind": "token_fallback"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1305,
+            "kind": "mall_return_link"
+          },
+          {
+            "path": "modules/foundups/gotjunk/README.md",
+            "line": 3,
+            "kind": "specific_truth_or_landing_gap"
+          },
+          {
+            "path": "modules/foundups/gotjunk/README.md",
+            "line": 29,
+            "kind": "specific_truth_or_landing_gap"
+          }
+        ],
+        "recommended_actions": [
+          "Correct registry/public narrative to capture/marketplace capabilities, not unproven junk-removal quote scheduling.",
+          "Add reviewed source/evidence links and a dated Prototype limitation statement.",
+          "Add a return-to-Mall link to the standalone app; verify the actual user journey before claiming functional PoC."
+        ]
+      },
+      {
+        "foundup_id": "kosei",
+        "display_name": "Kosei AI Systems",
+        "entity_type": "foundup",
+        "venture_counting_policy": "typed_product_identity_not_production_proof",
+        "purpose": "Content-automation business/service orchestration, audit funnel and client workspace; AutoPost is an external content-engine sibling.",
+        "registry_metadata": {
+          "stage": "incubating",
+          "poc_status": "poc",
+          "implementation_status": "IMPLEMENTED",
+          "portfolio_status": "portfolio_candidate",
+          "poc_landing_status": "functional",
+          "portfolio_ready": false
+        },
+        "module_truth": "README header Scaffold Phase0; older app embedding receipt says APP READY, marketing landing not deployed.",
+        "source_public_landing": {
+          "canonical_route": "/f/kosei",
+          "generic_projection_entry": true,
+          "generic_renderer": "public/f/index.html",
+          "status": "DATA_PRESENT_FOR_GENERIC_LANDING",
+          "dedicated_html": "public/kosei/index.html",
+          "dedicated_role": "undeployed_marketing_landing"
+        },
+        "deployed_observation": {
+          "route_get": {
+            "url": "https://foundups.com/f/kosei",
+            "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+            "method": "GET",
+            "max_body_bytes": 262144,
+            "redirects_followed": false,
+            "authenticated": false,
+            "status": 200,
+            "content_type": "text/html; charset=utf-8",
+            "body_truncated": false,
+            "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+            "body_bytes": 38426,
+            "title": "FoundUps Mall | Entry",
+            "markers": {
+              "scope_free_projection": false,
+              "old_member_catalog": true,
+              "holo_stub": false,
+              "generic_foundups_home": false,
+              "back_to_mall": true,
+              "github_link": false,
+              "kosei_brand": false,
+              "gotjunk_brand": false,
+              "firebase_config": false
+            }
+          },
+          "canonical_id_in_deployed_legacy_catalog": true,
+          "catalog_alias": null,
+          "alias_in_deployed_catalog": false,
+          "classification": "OLD_TEMPLATE_AND_MATCHING_CATALOG_RECORD_JS_NOT_EXECUTED",
+          "browser_render_performed": false
+        },
+        "project_explanation": {
+          "status": "PUBLIC_SUMMARY_PARTIAL",
+          "notes": null
+        },
+        "stage_and_poc_evidence": {
+          "public_stage_visibility": "poc_landing_status_only_not_lifecycle_or_runtime_receipt",
+          "functional_poc_observed": false,
+          "notes": "README header Scaffold Phase0; older app embedding receipt says APP READY, marketing landing not deployed."
+        },
+        "github_source": {
+          "registry_url": null,
+          "status": "NO_PUBLIC_SOURCE_LINK_IN_REGISTRY",
+          "recommended_policy": "Link approved public source or docs; do not invent new repositories or expose private source."
+        },
+        "app_or_entry": {
+          "registry_poc_url": "https://foundupscom.web.app/kosei/app/",
+          "registry_app_url": "https://foundupscom.web.app/kosei/app/",
+          "source_catalog_entry_url": "https://foundupscom.web.app/kosei/app/",
+          "live_direct_observation": {
+            "url": "https://foundupscom.web.app/kosei/app/",
+            "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+            "method": "GET",
+            "max_body_bytes": 262144,
+            "redirects_followed": false,
+            "authenticated": false,
+            "status": 200,
+            "content_type": "text/html; charset=utf-8",
+            "body_truncated": false,
+            "body_sha256": "779e0e443b4381e30cdf708846877eb177f2dd1bb05c4e961bb49b9a2192f687",
+            "body_bytes": 10549,
+            "title": "Kosei - Client Workspace",
+            "markers": {
+              "scope_free_projection": false,
+              "old_member_catalog": false,
+              "holo_stub": false,
+              "generic_foundups_home": false,
+              "back_to_mall": false,
+              "github_link": false,
+              "kosei_brand": false,
+              "gotjunk_brand": false,
+              "firebase_config": false
+            }
+          },
+          "status": "LOGIN_WORKSPACE_HTML_200_AUTH_FLOW_NOT_ENTERED"
+        },
+        "mall_backlink": {
+          "source_generic": "PRESENT_TO_MEMBER_MALL_/member/",
+          "dedicated_source": "NOT_FOUND_IN_AUDITED_HTML_AND_APP_SOURCE_SCAN",
+          "deployed": "BACKLINK_IN_OLD_TEMPLATE_TO_/member/",
+          "note": "Existing target /member/ is the admitted Mall shell; no gate bypass was attempted."
+        },
+        "token_claims": {
+          "assignment_status": "EXISTS",
+          "assigned_symbol": "KOSEI",
+          "on_chain_deployment_evidence": "NOT_ESTABLISHED",
+          "source_display_risk": "DOLLAR_SYMBOL_WITHOUT_PLANNED_OR_DEPLOYED_CONTEXT"
+        },
+        "evidence": [
+          {
+            "path": "modules/foundups/foundup_registry.json",
+            "line": 49,
+            "kind": "typed_metadata"
+          },
+          {
+            "path": "modules/foundups/kosei/README.md",
+            "line": 1,
+            "kind": "module_purpose_and_truth"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 901,
+            "kind": "source_public_data_owner"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 980,
+            "kind": "exact_identity_lookup"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1237,
+            "kind": "token_fallback"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1305,
+            "kind": "mall_return_link"
+          },
+          {
+            "path": "modules/foundups/kosei/README.md",
+            "line": 5,
+            "kind": "specific_truth_or_landing_gap"
+          },
+          {
+            "path": "modules/foundups/kosei/README.md",
+            "line": 84,
+            "kind": "specific_truth_or_landing_gap"
+          },
+          {
+            "path": "modules/foundups/kosei/README.md",
+            "line": 91,
+            "kind": "specific_truth_or_landing_gap"
+          },
+          {
+            "path": "public/kosei/index.html",
+            "line": 6,
+            "kind": "specific_truth_or_landing_gap"
+          }
+        ],
+        "recommended_actions": [
+          "Keep current client workspace separate from undeployed marketing landing; link both honestly.",
+          "Verify Kosei entry_url deployment parity; add source and dated PoC evidence.",
+          "Add Mall return path to dedicated marketing/workspace surfaces; avoid automated publishing claims beyond observed capabilities."
+        ]
+      },
+      {
+        "foundup_id": "voteballots",
+        "display_name": "Vote/Ballots",
+        "entity_type": "skeleton_candidate",
+        "venture_counting_policy": "do_not_count_as_independent_product_venture",
+        "purpose": "Evidence-first candidate/race and disclosed-funding transparency with provenance; internal PoC complete, public PoC unlaunched.",
+        "registry_metadata": {
+          "stage": "incubating",
+          "poc_status": "idea",
+          "implementation_status": "SPECIFIED",
+          "portfolio_status": "not_portfolio",
+          "poc_landing_status": "none",
+          "portfolio_ready": false
+        },
+        "module_truth": "README internal PoC chain complete; 6-slice/303-test historical closure, no public launch.",
+        "source_public_landing": {
+          "canonical_route": "/f/voteballots",
+          "generic_projection_entry": false,
+          "generic_renderer": "public/f/index.html",
+          "status": "NO_PUBLIC_PROJECTION_ENTRY",
+          "dedicated_html": null,
+          "dedicated_role": null
+        },
+        "deployed_observation": {
+          "route_get": {
+            "url": "https://foundups.com/f/voteballots",
+            "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+            "method": "GET",
+            "max_body_bytes": 262144,
+            "redirects_followed": false,
+            "authenticated": false,
+            "status": 200,
+            "content_type": "text/html; charset=utf-8",
+            "body_truncated": false,
+            "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+            "body_bytes": 38426,
+            "title": "FoundUps Mall | Entry",
+            "markers": {
+              "scope_free_projection": false,
+              "old_member_catalog": true,
+              "holo_stub": false,
+              "generic_foundups_home": false,
+              "back_to_mall": true,
+              "github_link": false,
+              "kosei_brand": false,
+              "gotjunk_brand": false,
+              "firebase_config": false
+            }
+          },
+          "canonical_id_in_deployed_legacy_catalog": false,
+          "catalog_alias": null,
+          "alias_in_deployed_catalog": false,
+          "classification": "OLD_TEMPLATE_ONLY_ID_ABSENT_FROM_DEPLOYED_CATALOG",
+          "browser_render_performed": false
+        },
+        "project_explanation": {
+          "status": "MODULE_DOCS_ONLY",
+          "notes": null
+        },
+        "stage_and_poc_evidence": {
+          "public_stage_visibility": "not_in_source_public_projection",
+          "functional_poc_observed": false,
+          "notes": "README internal PoC chain complete; 6-slice/303-test historical closure, no public launch."
+        },
+        "github_source": {
+          "registry_url": null,
+          "status": "NO_PUBLIC_SOURCE_LINK_IN_REGISTRY",
+          "recommended_policy": "Link approved public source or docs; do not invent new repositories or expose private source."
+        },
+        "app_or_entry": {
+          "registry_poc_url": null,
+          "registry_app_url": null,
+          "source_catalog_entry_url": null,
+          "live_direct_observation": null,
+          "status": "NO_DEPLOYED_APP_ENTRY_ESTABLISHED"
+        },
+        "mall_backlink": {
+          "source_generic": "NOT_APPLICABLE_MISSING_PUBLIC_LANDING",
+          "dedicated_source": "NO_DEDICATED_HTML",
+          "deployed": "ONLY_TEMPLATE_HAS_LINK_ID_NOT_RESOLVED",
+          "note": "Existing target /member/ is the admitted Mall shell; no gate bypass was attempted."
+        },
+        "token_claims": {
+          "assignment_status": "EXISTS",
+          "assigned_symbol": "VOTE",
+          "on_chain_deployment_evidence": "NOT_ESTABLISHED",
+          "source_display_risk": "NO_SOURCE_PUBLIC_TOKEN_DISPLAY_FOR_THIS_ID"
+        },
+        "evidence": [
+          {
+            "path": "modules/foundups/foundup_registry.json",
+            "line": 91,
+            "kind": "typed_metadata"
+          },
+          {
+            "path": "modules/foundups/voteballots/README.md",
+            "line": 1,
+            "kind": "module_purpose_and_truth"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 901,
+            "kind": "source_public_data_owner"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 980,
+            "kind": "exact_identity_lookup"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1237,
+            "kind": "token_fallback"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1305,
+            "kind": "mall_return_link"
+          },
+          {
+            "path": "modules/foundups/voteballots/README.md",
+            "line": 3,
+            "kind": "specific_truth_or_landing_gap"
+          },
+          {
+            "path": "modules/foundups/voteballots/README.md",
+            "line": 36,
+            "kind": "specific_truth_or_landing_gap"
+          },
+          {
+            "path": "modules/foundups/voteballots/README.md",
+            "line": 40,
+            "kind": "specific_truth_or_landing_gap"
+          }
+        ],
+        "recommended_actions": [
+          "Reconcile registry SPECIFIED label with internal implementation-complete/public-unlaunched status.",
+          "Publish an informational landing through the existing template only after scoped content review; retain no public launch/official ballot claim.",
+          "Link closure evidence and source; keep public PoC activation separate from this audit."
+        ]
+      },
+      {
+        "foundup_id": "trade",
+        "display_name": "Trade",
+        "entity_type": "skeleton_candidate",
+        "venture_counting_policy": "do_not_count_as_independent_product_venture",
+        "purpose": "Market-adapter trading intelligence and simulated proof metrics; no-money/dry-run mode, not deployed.",
+        "registry_metadata": {
+          "stage": "incubating",
+          "poc_status": "idea",
+          "implementation_status": "SPECIFIED",
+          "portfolio_status": "not_portfolio",
+          "poc_landing_status": "none",
+          "portfolio_ready": false
+        },
+        "module_truth": "README Incubating Phase0/internal prototype; no real trades or wallet signing.",
+        "source_public_landing": {
+          "canonical_route": "/f/trade",
+          "generic_projection_entry": false,
+          "generic_renderer": "public/f/index.html",
+          "status": "NO_PUBLIC_PROJECTION_ENTRY",
+          "dedicated_html": null,
+          "dedicated_role": null
+        },
+        "deployed_observation": {
+          "route_get": {
+            "url": "https://foundups.com/f/trade",
+            "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+            "method": "GET",
+            "max_body_bytes": 262144,
+            "redirects_followed": false,
+            "authenticated": false,
+            "status": 200,
+            "content_type": "text/html; charset=utf-8",
+            "body_truncated": false,
+            "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+            "body_bytes": 38426,
+            "title": "FoundUps Mall | Entry",
+            "markers": {
+              "scope_free_projection": false,
+              "old_member_catalog": true,
+              "holo_stub": false,
+              "generic_foundups_home": false,
+              "back_to_mall": true,
+              "github_link": false,
+              "kosei_brand": false,
+              "gotjunk_brand": false,
+              "firebase_config": false
+            }
+          },
+          "canonical_id_in_deployed_legacy_catalog": false,
+          "catalog_alias": null,
+          "alias_in_deployed_catalog": false,
+          "classification": "OLD_TEMPLATE_ONLY_ID_ABSENT_FROM_DEPLOYED_CATALOG",
+          "browser_render_performed": false
+        },
+        "project_explanation": {
+          "status": "MODULE_DOCS_ONLY",
+          "notes": null
+        },
+        "stage_and_poc_evidence": {
+          "public_stage_visibility": "not_in_source_public_projection",
+          "functional_poc_observed": false,
+          "notes": "README Incubating Phase0/internal prototype; no real trades or wallet signing."
+        },
+        "github_source": {
+          "registry_url": null,
+          "status": "NO_PUBLIC_SOURCE_LINK_IN_REGISTRY",
+          "recommended_policy": "Link approved public source or docs; do not invent new repositories or expose private source."
+        },
+        "app_or_entry": {
+          "registry_poc_url": null,
+          "registry_app_url": null,
+          "source_catalog_entry_url": null,
+          "live_direct_observation": null,
+          "status": "NO_DEPLOYED_APP_ENTRY_ESTABLISHED"
+        },
+        "mall_backlink": {
+          "source_generic": "NOT_APPLICABLE_MISSING_PUBLIC_LANDING",
+          "dedicated_source": "NO_DEDICATED_HTML",
+          "deployed": "ONLY_TEMPLATE_HAS_LINK_ID_NOT_RESOLVED",
+          "note": "Existing target /member/ is the admitted Mall shell; no gate bypass was attempted."
+        },
+        "token_claims": {
+          "assignment_status": "EXISTS",
+          "assigned_symbol": "TRADE",
+          "on_chain_deployment_evidence": "NOT_ESTABLISHED",
+          "source_display_risk": "NO_SOURCE_PUBLIC_TOKEN_DISPLAY_FOR_THIS_ID"
+        },
+        "evidence": [
+          {
+            "path": "modules/foundups/foundup_registry.json",
+            "line": 131,
+            "kind": "typed_metadata"
+          },
+          {
+            "path": "modules/foundups/trade/README.md",
+            "line": 1,
+            "kind": "module_purpose_and_truth"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 901,
+            "kind": "source_public_data_owner"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 980,
+            "kind": "exact_identity_lookup"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1237,
+            "kind": "token_fallback"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1305,
+            "kind": "mall_return_link"
+          },
+          {
+            "path": "modules/foundups/trade/README.md",
+            "line": 31,
+            "kind": "specific_truth_or_landing_gap"
+          },
+          {
+            "path": "modules/foundups/trade/README.md",
+            "line": 76,
+            "kind": "specific_truth_or_landing_gap"
+          }
+        ],
+        "recommended_actions": [
+          "Describe simulation/no-money limitations in a discoverable informational profile.",
+          "Add reviewed source contract links; no app/earnings/live-trading CTA until separately admitted."
+        ]
+      },
+      {
+        "foundup_id": "magadoom_001",
+        "display_name": "MAGADOOM",
+        "entity_type": "foundup",
+        "venture_counting_policy": "typed_product_identity_not_production_proof",
+        "purpose": "Platform-agnostic moderation gamification, timeout-derived XP and ranks; chat integration rather than a hosted web app.",
+        "registry_metadata": {
+          "stage": "incubating",
+          "poc_status": "poc",
+          "implementation_status": "IMPLEMENTED",
+          "portfolio_status": "not_portfolio",
+          "poc_landing_status": "none",
+          "portfolio_ready": false
+        },
+        "module_truth": "README calls game engine production ready; not a fresh hosted-product receipt.",
+        "source_public_landing": {
+          "canonical_route": "/f/magadoom_001",
+          "generic_projection_entry": false,
+          "generic_renderer": "public/f/index.html",
+          "status": "NO_PUBLIC_PROJECTION_ENTRY",
+          "dedicated_html": null,
+          "dedicated_role": null
+        },
+        "deployed_observation": {
+          "route_get": {
+            "url": "https://foundups.com/f/magadoom_001",
+            "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+            "method": "GET",
+            "max_body_bytes": 262144,
+            "redirects_followed": false,
+            "authenticated": false,
+            "status": 200,
+            "content_type": "text/html; charset=utf-8",
+            "body_truncated": false,
+            "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+            "body_bytes": 38426,
+            "title": "FoundUps Mall | Entry",
+            "markers": {
+              "scope_free_projection": false,
+              "old_member_catalog": true,
+              "holo_stub": false,
+              "generic_foundups_home": false,
+              "back_to_mall": true,
+              "github_link": false,
+              "kosei_brand": false,
+              "gotjunk_brand": false,
+              "firebase_config": false
+            }
+          },
+          "canonical_id_in_deployed_legacy_catalog": false,
+          "catalog_alias": null,
+          "alias_in_deployed_catalog": false,
+          "classification": "OLD_TEMPLATE_ONLY_ID_ABSENT_FROM_DEPLOYED_CATALOG",
+          "browser_render_performed": false
+        },
+        "project_explanation": {
+          "status": "MODULE_DOCS_ONLY",
+          "notes": null
+        },
+        "stage_and_poc_evidence": {
+          "public_stage_visibility": "not_in_source_public_projection",
+          "functional_poc_observed": false,
+          "notes": "README calls game engine production ready; not a fresh hosted-product receipt."
+        },
+        "github_source": {
+          "registry_url": null,
+          "status": "NO_PUBLIC_SOURCE_LINK_IN_REGISTRY",
+          "recommended_policy": "Link approved public source or docs; do not invent new repositories or expose private source."
+        },
+        "app_or_entry": {
+          "registry_poc_url": null,
+          "registry_app_url": null,
+          "source_catalog_entry_url": null,
+          "live_direct_observation": null,
+          "status": "NO_DEPLOYED_APP_ENTRY_ESTABLISHED"
+        },
+        "mall_backlink": {
+          "source_generic": "NOT_APPLICABLE_MISSING_PUBLIC_LANDING",
+          "dedicated_source": "NO_DEDICATED_HTML",
+          "deployed": "ONLY_TEMPLATE_HAS_LINK_ID_NOT_RESOLVED",
+          "note": "Existing target /member/ is the admitted Mall shell; no gate bypass was attempted."
+        },
+        "token_claims": {
+          "assignment_status": "EXISTS",
+          "assigned_symbol": "DOOM",
+          "on_chain_deployment_evidence": "NOT_ESTABLISHED",
+          "source_display_risk": "NO_SOURCE_PUBLIC_TOKEN_DISPLAY_FOR_THIS_ID"
+        },
+        "evidence": [
+          {
+            "path": "modules/foundups/foundup_registry.json",
+            "line": 171,
+            "kind": "typed_metadata"
+          },
+          {
+            "path": "modules/gamification/whack_a_magat/README.md",
+            "line": 1,
+            "kind": "module_purpose_and_truth"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 901,
+            "kind": "source_public_data_owner"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 980,
+            "kind": "exact_identity_lookup"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1237,
+            "kind": "token_fallback"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1305,
+            "kind": "mall_return_link"
+          }
+        ],
+        "recommended_actions": [
+          "Add informational engine/YouTube-integration profile and source evidence, rather than inventing a standalone app.",
+          "Show DOOM as assigned/planned metadata; XP is not proof of chain token issuance."
+        ]
+      },
+      {
+        "foundup_id": "antifafm_001",
+        "display_name": "antifaFM",
+        "entity_type": "foundup",
+        "venture_counting_policy": "typed_product_identity_not_production_proof",
+        "purpose": "Icecast-to-YouTube Live FFmpeg broadcaster; catalog uses antifafm alias.",
+        "registry_metadata": {
+          "stage": "proto",
+          "poc_status": "proto",
+          "implementation_status": "IMPLEMENTED",
+          "portfolio_status": "not_portfolio",
+          "poc_landing_status": "none",
+          "portfolio_ready": false
+        },
+        "module_truth": "README describes broadcaster with known unimplemented notification seam; no fresh broadcast-run receipt.",
+        "source_public_landing": {
+          "canonical_route": "/f/antifafm_001",
+          "generic_projection_entry": false,
+          "generic_renderer": "public/f/index.html",
+          "status": "NO_PUBLIC_PROJECTION_ENTRY",
+          "dedicated_html": null,
+          "dedicated_role": null
+        },
+        "deployed_observation": {
+          "route_get": {
+            "url": "https://foundups.com/f/antifafm_001",
+            "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+            "method": "GET",
+            "max_body_bytes": 262144,
+            "redirects_followed": false,
+            "authenticated": false,
+            "status": 200,
+            "content_type": "text/html; charset=utf-8",
+            "body_truncated": false,
+            "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+            "body_bytes": 38426,
+            "title": "FoundUps Mall | Entry",
+            "markers": {
+              "scope_free_projection": false,
+              "old_member_catalog": true,
+              "holo_stub": false,
+              "generic_foundups_home": false,
+              "back_to_mall": true,
+              "github_link": false,
+              "kosei_brand": false,
+              "gotjunk_brand": false,
+              "firebase_config": false
+            }
+          },
+          "canonical_id_in_deployed_legacy_catalog": false,
+          "catalog_alias": "antifafm",
+          "alias_in_deployed_catalog": true,
+          "classification": "CANONICAL_ID_MISSING_ALIAS_ONLY_OLD_TEMPLATE",
+          "browser_render_performed": false
+        },
+        "project_explanation": {
+          "status": "LEGACY_CATALOG_NARRATIVE_ONLY",
+          "notes": null
+        },
+        "stage_and_poc_evidence": {
+          "public_stage_visibility": "not_in_source_public_projection",
+          "functional_poc_observed": false,
+          "notes": "README describes broadcaster with known unimplemented notification seam; no fresh broadcast-run receipt."
+        },
+        "github_source": {
+          "registry_url": null,
+          "status": "NO_PUBLIC_SOURCE_LINK_IN_REGISTRY",
+          "recommended_policy": "Link approved public source or docs; do not invent new repositories or expose private source."
+        },
+        "app_or_entry": {
+          "registry_poc_url": null,
+          "registry_app_url": null,
+          "source_catalog_entry_url": null,
+          "live_direct_observation": null,
+          "status": "NO_DEPLOYED_APP_ENTRY_ESTABLISHED"
+        },
+        "mall_backlink": {
+          "source_generic": "NOT_APPLICABLE_MISSING_PUBLIC_LANDING",
+          "dedicated_source": "NO_DEDICATED_HTML",
+          "deployed": "BACKLINK_ON_ALIAS_TEMPLATE_ONLY",
+          "note": "Existing target /member/ is the admitted Mall shell; no gate bypass was attempted."
+        },
+        "token_claims": {
+          "assignment_status": "EXISTS",
+          "assigned_symbol": "ANTI",
+          "on_chain_deployment_evidence": "NOT_ESTABLISHED",
+          "source_display_risk": "NO_SOURCE_PUBLIC_TOKEN_DISPLAY_FOR_THIS_ID"
+        },
+        "evidence": [
+          {
+            "path": "modules/foundups/foundup_registry.json",
+            "line": 211,
+            "kind": "typed_metadata"
+          },
+          {
+            "path": "modules/platform_integration/antifafm_broadcaster/README.md",
+            "line": 1,
+            "kind": "module_purpose_and_truth"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 901,
+            "kind": "source_public_data_owner"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 980,
+            "kind": "exact_identity_lookup"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1237,
+            "kind": "token_fallback"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1305,
+            "kind": "mall_return_link"
+          }
+        ],
+        "recommended_actions": [
+          "Reconcile antifafm versus antifafm_001 canonical landing IDs.",
+          "Add broadcaster explanation, public listening/watch destination and reviewed source link.",
+          "Separate broadcast operation evidence from token status and web-app readiness."
+        ]
+      },
+      {
+        "foundup_id": "pfmall",
+        "display_name": "p.fMALL",
+        "entity_type": "platform_layer",
+        "venture_counting_policy": "do_not_count_as_independent_product_venture",
+        "purpose": "Discovery/interaction platform shell, presentation and read surfaces; not a separate product FoundUp.",
+        "registry_metadata": {
+          "stage": null,
+          "poc_status": "not_applicable",
+          "implementation_status": "IMPLEMENTED",
+          "portfolio_status": "not_portfolio",
+          "poc_landing_status": "none",
+          "portfolio_ready": false
+        },
+        "module_truth": "Implemented shell/read surfaces; authenticated resident RedDog conversation not implemented here.",
+        "source_public_landing": {
+          "canonical_route": "/f/pfmall",
+          "generic_projection_entry": false,
+          "generic_renderer": "public/f/index.html",
+          "status": "NO_PUBLIC_PROJECTION_ENTRY",
+          "dedicated_html": null,
+          "dedicated_role": null
+        },
+        "deployed_observation": {
+          "route_get": {
+            "url": "https://foundups.com/f/pfmall",
+            "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+            "method": "GET",
+            "max_body_bytes": 262144,
+            "redirects_followed": false,
+            "authenticated": false,
+            "status": 200,
+            "content_type": "text/html; charset=utf-8",
+            "body_truncated": false,
+            "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+            "body_bytes": 38426,
+            "title": "FoundUps Mall | Entry",
+            "markers": {
+              "scope_free_projection": false,
+              "old_member_catalog": true,
+              "holo_stub": false,
+              "generic_foundups_home": false,
+              "back_to_mall": true,
+              "github_link": false,
+              "kosei_brand": false,
+              "gotjunk_brand": false,
+              "firebase_config": false
+            }
+          },
+          "canonical_id_in_deployed_legacy_catalog": false,
+          "catalog_alias": null,
+          "alias_in_deployed_catalog": false,
+          "classification": "OLD_TEMPLATE_ONLY_ID_ABSENT_FROM_DEPLOYED_CATALOG",
+          "browser_render_performed": false
+        },
+        "project_explanation": {
+          "status": "MODULE_DOCS_ONLY",
+          "notes": null
+        },
+        "stage_and_poc_evidence": {
+          "public_stage_visibility": "not_in_source_public_projection",
+          "functional_poc_observed": false,
+          "notes": "Implemented shell/read surfaces; authenticated resident RedDog conversation not implemented here."
+        },
+        "github_source": {
+          "registry_url": null,
+          "status": "NO_PUBLIC_SOURCE_LINK_IN_REGISTRY",
+          "recommended_policy": "Link approved public source or docs; do not invent new repositories or expose private source."
+        },
+        "app_or_entry": {
+          "registry_poc_url": null,
+          "registry_app_url": null,
+          "source_catalog_entry_url": null,
+          "live_direct_observation": null,
+          "status": "NO_DEPLOYED_APP_ENTRY_ESTABLISHED"
+        },
+        "mall_backlink": {
+          "source_generic": "NOT_APPLICABLE_MISSING_PUBLIC_LANDING",
+          "dedicated_source": "NO_DEDICATED_HTML",
+          "deployed": "ONLY_TEMPLATE_HAS_LINK_ID_NOT_RESOLVED",
+          "note": "Existing target /member/ is the admitted Mall shell; no gate bypass was attempted."
+        },
+        "token_claims": {
+          "assignment_status": "NOT_APPLICABLE",
+          "assigned_symbol": null,
+          "on_chain_deployment_evidence": "NOT_ESTABLISHED",
+          "source_display_risk": "NO_SOURCE_PUBLIC_TOKEN_DISPLAY_FOR_THIS_ID"
+        },
+        "evidence": [
+          {
+            "path": "modules/foundups/foundup_registry.json",
+            "line": 251,
+            "kind": "typed_metadata"
+          },
+          {
+            "path": "modules/foundups/pfmall/README.md",
+            "line": 1,
+            "kind": "module_purpose_and_truth"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 901,
+            "kind": "source_public_data_owner"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 980,
+            "kind": "exact_identity_lookup"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1237,
+            "kind": "token_fallback"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1305,
+            "kind": "mall_return_link"
+          }
+        ],
+        "recommended_actions": [
+          "Use the existing Mall/platform explanation and public directory; label platform shell, not venture.",
+          "Preserve the existing member gate and distinguish static FAQ from resident RedDog."
+        ]
+      },
+      {
+        "foundup_id": "agent_market",
+        "display_name": "FAM - FoundUp Agent Market",
+        "entity_type": "infra_service",
+        "venture_counting_policy": "do_not_count_as_independent_product_venture",
+        "purpose": "Shared FoundUp launch/task/proof/verification/allocation ledger interfaces; production blockchain and UI out of PoC scope.",
+        "registry_metadata": {
+          "stage": null,
+          "poc_status": "not_applicable",
+          "implementation_status": "IMPLEMENTED",
+          "portfolio_status": "not_portfolio",
+          "poc_landing_status": "none",
+          "portfolio_ready": false
+        },
+        "module_truth": "PoC/persistence contracts; production chain writes, production DAO and UI out of scope.",
+        "source_public_landing": {
+          "canonical_route": "/f/agent_market",
+          "generic_projection_entry": false,
+          "generic_renderer": "public/f/index.html",
+          "status": "NO_PUBLIC_PROJECTION_ENTRY",
+          "dedicated_html": null,
+          "dedicated_role": null
+        },
+        "deployed_observation": {
+          "route_get": {
+            "url": "https://foundups.com/f/agent_market",
+            "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+            "method": "GET",
+            "max_body_bytes": 262144,
+            "redirects_followed": false,
+            "authenticated": false,
+            "status": 200,
+            "content_type": "text/html; charset=utf-8",
+            "body_truncated": false,
+            "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+            "body_bytes": 38426,
+            "title": "FoundUps Mall | Entry",
+            "markers": {
+              "scope_free_projection": false,
+              "old_member_catalog": true,
+              "holo_stub": false,
+              "generic_foundups_home": false,
+              "back_to_mall": true,
+              "github_link": false,
+              "kosei_brand": false,
+              "gotjunk_brand": false,
+              "firebase_config": false
+            }
+          },
+          "canonical_id_in_deployed_legacy_catalog": false,
+          "catalog_alias": null,
+          "alias_in_deployed_catalog": false,
+          "classification": "OLD_TEMPLATE_ONLY_ID_ABSENT_FROM_DEPLOYED_CATALOG",
+          "browser_render_performed": false
+        },
+        "project_explanation": {
+          "status": "MODULE_DOCS_ONLY",
+          "notes": null
+        },
+        "stage_and_poc_evidence": {
+          "public_stage_visibility": "not_in_source_public_projection",
+          "functional_poc_observed": false,
+          "notes": "PoC/persistence contracts; production chain writes, production DAO and UI out of scope."
+        },
+        "github_source": {
+          "registry_url": null,
+          "status": "NO_PUBLIC_SOURCE_LINK_IN_REGISTRY",
+          "recommended_policy": "Link approved public source or docs; do not invent new repositories or expose private source."
+        },
+        "app_or_entry": {
+          "registry_poc_url": null,
+          "registry_app_url": null,
+          "source_catalog_entry_url": null,
+          "live_direct_observation": null,
+          "status": "NO_DEPLOYED_APP_ENTRY_ESTABLISHED"
+        },
+        "mall_backlink": {
+          "source_generic": "NOT_APPLICABLE_MISSING_PUBLIC_LANDING",
+          "dedicated_source": "NO_DEDICATED_HTML",
+          "deployed": "ONLY_TEMPLATE_HAS_LINK_ID_NOT_RESOLVED",
+          "note": "Existing target /member/ is the admitted Mall shell; no gate bypass was attempted."
+        },
+        "token_claims": {
+          "assignment_status": "NOT_APPLICABLE",
+          "assigned_symbol": null,
+          "on_chain_deployment_evidence": "NOT_ESTABLISHED",
+          "source_display_risk": "NO_SOURCE_PUBLIC_TOKEN_DISPLAY_FOR_THIS_ID"
+        },
+        "evidence": [
+          {
+            "path": "modules/foundups/foundup_registry.json",
+            "line": 290,
+            "kind": "typed_metadata"
+          },
+          {
+            "path": "modules/foundups/agent_market/README.md",
+            "line": 1,
+            "kind": "module_purpose_and_truth"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 901,
+            "kind": "source_public_data_owner"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 980,
+            "kind": "exact_identity_lookup"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1237,
+            "kind": "token_fallback"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1305,
+            "kind": "mall_return_link"
+          }
+        ],
+        "recommended_actions": [
+          "Provide a curated infrastructure/about/docs profile if portfolio discovery requires it.",
+          "Avoid product token or payout-ready claims; expose contracts/evidence, not protected operational endpoints."
+        ]
+      },
+      {
+        "foundup_id": "move2japan",
+        "display_name": "Move2Japan",
+        "entity_type": "access_service",
+        "venture_counting_policy": "do_not_count_as_independent_product_venture",
+        "purpose": "Livechat intent/stakeholder funnel with planned guided relocation journey; registry access_service and product README disagree on classification.",
+        "registry_metadata": {
+          "stage": null,
+          "poc_status": "poc",
+          "implementation_status": "IMPLEMENTED",
+          "portfolio_status": "not_portfolio",
+          "poc_landing_status": "none",
+          "portfolio_ready": false
+        },
+        "module_truth": "Stakeholder web app scaffold/pending; livechat gateway is existing entry.",
+        "source_public_landing": {
+          "canonical_route": "/f/move2japan",
+          "generic_projection_entry": false,
+          "generic_renderer": "public/f/index.html",
+          "status": "NO_PUBLIC_PROJECTION_ENTRY",
+          "dedicated_html": null,
+          "dedicated_role": null
+        },
+        "deployed_observation": {
+          "route_get": {
+            "url": "https://foundups.com/f/move2japan",
+            "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+            "method": "GET",
+            "max_body_bytes": 262144,
+            "redirects_followed": false,
+            "authenticated": false,
+            "status": 200,
+            "content_type": "text/html; charset=utf-8",
+            "body_truncated": false,
+            "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+            "body_bytes": 38426,
+            "title": "FoundUps Mall | Entry",
+            "markers": {
+              "scope_free_projection": false,
+              "old_member_catalog": true,
+              "holo_stub": false,
+              "generic_foundups_home": false,
+              "back_to_mall": true,
+              "github_link": false,
+              "kosei_brand": false,
+              "gotjunk_brand": false,
+              "firebase_config": false
+            }
+          },
+          "canonical_id_in_deployed_legacy_catalog": true,
+          "catalog_alias": null,
+          "alias_in_deployed_catalog": false,
+          "classification": "OLD_TEMPLATE_AND_MATCHING_CATALOG_RECORD_JS_NOT_EXECUTED",
+          "browser_render_performed": false
+        },
+        "project_explanation": {
+          "status": "LEGACY_CATALOG_NARRATIVE_ONLY",
+          "notes": null
+        },
+        "stage_and_poc_evidence": {
+          "public_stage_visibility": "not_in_source_public_projection",
+          "functional_poc_observed": false,
+          "notes": "Stakeholder web app scaffold/pending; livechat gateway is existing entry."
+        },
+        "github_source": {
+          "registry_url": null,
+          "status": "NO_PUBLIC_SOURCE_LINK_IN_REGISTRY",
+          "recommended_policy": "Link approved public source or docs; do not invent new repositories or expose private source."
+        },
+        "app_or_entry": {
+          "registry_poc_url": null,
+          "registry_app_url": null,
+          "source_catalog_entry_url": null,
+          "live_direct_observation": null,
+          "status": "NO_DEPLOYED_APP_ENTRY_ESTABLISHED"
+        },
+        "mall_backlink": {
+          "source_generic": "NOT_APPLICABLE_MISSING_PUBLIC_LANDING",
+          "dedicated_source": "NO_DEDICATED_HTML",
+          "deployed": "BACKLINK_IN_OLD_TEMPLATE_TO_/member/",
+          "note": "Existing target /member/ is the admitted Mall shell; no gate bypass was attempted."
+        },
+        "token_claims": {
+          "assignment_status": "TOKEN_DEFERRED",
+          "assigned_symbol": null,
+          "on_chain_deployment_evidence": "NOT_ESTABLISHED",
+          "source_display_risk": "NO_SOURCE_PUBLIC_TOKEN_DISPLAY_FOR_THIS_ID"
+        },
+        "evidence": [
+          {
+            "path": "modules/foundups/foundup_registry.json",
+            "line": 329,
+            "kind": "typed_metadata"
+          },
+          {
+            "path": "modules/foundups/move2japan/README.md",
+            "line": 1,
+            "kind": "module_purpose_and_truth"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 901,
+            "kind": "source_public_data_owner"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 980,
+            "kind": "exact_identity_lookup"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1237,
+            "kind": "token_fallback"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1305,
+            "kind": "mall_return_link"
+          },
+          {
+            "path": "modules/foundups/move2japan/README.md",
+            "line": 159,
+            "kind": "specific_truth_or_landing_gap"
+          }
+        ],
+        "recommended_actions": [
+          "Resolve access_service versus FoundUp-product classification before public stage/token promotion.",
+          "Explain existing livechat BC0 entry and pending stakeholder PWA; verify proposed domains separately.",
+          "Add a public source/docs/watch link and Mall navigation without claiming the PWA works."
+        ]
+      },
+      {
+        "foundup_id": "simulator",
+        "display_name": "Economics Simulator",
+        "entity_type": "tool_simulator",
+        "venture_counting_policy": "do_not_count_as_independent_product_venture",
+        "purpose": "Shared deterministic ecosystem/economics simulation and visualization tool; scenario output is not operating economic performance.",
+        "registry_metadata": {
+          "stage": null,
+          "poc_status": "not_applicable",
+          "implementation_status": "IMPLEMENTED",
+          "portfolio_status": "not_portfolio",
+          "poc_landing_status": "none",
+          "portfolio_ready": false
+        },
+        "module_truth": "Tool/scenario engine; simulation is not live contribution-to-chain execution.",
+        "source_public_landing": {
+          "canonical_route": "/f/simulator",
+          "generic_projection_entry": false,
+          "generic_renderer": "public/f/index.html",
+          "status": "NO_PUBLIC_PROJECTION_ENTRY",
+          "dedicated_html": null,
+          "dedicated_role": null
+        },
+        "deployed_observation": {
+          "route_get": {
+            "url": "https://foundups.com/f/simulator",
+            "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+            "method": "GET",
+            "max_body_bytes": 262144,
+            "redirects_followed": false,
+            "authenticated": false,
+            "status": 200,
+            "content_type": "text/html; charset=utf-8",
+            "body_truncated": false,
+            "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+            "body_bytes": 38426,
+            "title": "FoundUps Mall | Entry",
+            "markers": {
+              "scope_free_projection": false,
+              "old_member_catalog": true,
+              "holo_stub": false,
+              "generic_foundups_home": false,
+              "back_to_mall": true,
+              "github_link": false,
+              "kosei_brand": false,
+              "gotjunk_brand": false,
+              "firebase_config": false
+            }
+          },
+          "canonical_id_in_deployed_legacy_catalog": false,
+          "catalog_alias": null,
+          "alias_in_deployed_catalog": false,
+          "classification": "OLD_TEMPLATE_ONLY_ID_ABSENT_FROM_DEPLOYED_CATALOG",
+          "browser_render_performed": false
+        },
+        "project_explanation": {
+          "status": "MODULE_DOCS_ONLY",
+          "notes": null
+        },
+        "stage_and_poc_evidence": {
+          "public_stage_visibility": "not_in_source_public_projection",
+          "functional_poc_observed": false,
+          "notes": "Tool/scenario engine; simulation is not live contribution-to-chain execution."
+        },
+        "github_source": {
+          "registry_url": null,
+          "status": "NO_PUBLIC_SOURCE_LINK_IN_REGISTRY",
+          "recommended_policy": "Link approved public source or docs; do not invent new repositories or expose private source."
+        },
+        "app_or_entry": {
+          "registry_poc_url": null,
+          "registry_app_url": null,
+          "source_catalog_entry_url": null,
+          "live_direct_observation": null,
+          "status": "NO_DEPLOYED_APP_ENTRY_ESTABLISHED"
+        },
+        "mall_backlink": {
+          "source_generic": "NOT_APPLICABLE_MISSING_PUBLIC_LANDING",
+          "dedicated_source": "NO_DEDICATED_HTML",
+          "deployed": "ONLY_TEMPLATE_HAS_LINK_ID_NOT_RESOLVED",
+          "note": "Existing target /member/ is the admitted Mall shell; no gate bypass was attempted."
+        },
+        "token_claims": {
+          "assignment_status": "NOT_APPLICABLE",
+          "assigned_symbol": null,
+          "on_chain_deployment_evidence": "NOT_ESTABLISHED",
+          "source_display_risk": "NO_SOURCE_PUBLIC_TOKEN_DISPLAY_FOR_THIS_ID"
+        },
+        "evidence": [
+          {
+            "path": "modules/foundups/foundup_registry.json",
+            "line": 369,
+            "kind": "typed_metadata"
+          },
+          {
+            "path": "modules/foundups/simulator/README.md",
+            "line": 1,
+            "kind": "module_purpose_and_truth"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 901,
+            "kind": "source_public_data_owner"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 980,
+            "kind": "exact_identity_lookup"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1237,
+            "kind": "token_fallback"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1305,
+            "kind": "mall_return_link"
+          }
+        ],
+        "recommended_actions": [
+          "Use an infrastructure/tool profile with reproducible scenario inputs and model limitations.",
+          "Link reviewed simulation documentation; never label scenario returns or token pools as production results."
+        ]
+      },
+      {
+        "foundup_id": "social_twin",
+        "display_name": "Social Twin",
+        "entity_type": "infra_service",
+        "venture_counting_policy": "do_not_count_as_independent_product_venture",
+        "purpose": "Human-approved social scan/draft/action workflow; README productization/PoC architecture conflicts with infra_service registry type.",
+        "registry_metadata": {
+          "stage": null,
+          "poc_status": "poc",
+          "implementation_status": "IMPLEMENTED",
+          "portfolio_status": "not_portfolio",
+          "poc_landing_status": "none",
+          "portfolio_ready": false
+        },
+        "module_truth": "PoC architecture lock; pfMALL app mount pending, human approval required.",
+        "source_public_landing": {
+          "canonical_route": "/f/social_twin",
+          "generic_projection_entry": false,
+          "generic_renderer": "public/f/index.html",
+          "status": "NO_PUBLIC_PROJECTION_ENTRY",
+          "dedicated_html": null,
+          "dedicated_role": null
+        },
+        "deployed_observation": {
+          "route_get": {
+            "url": "https://foundups.com/f/social_twin",
+            "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+            "method": "GET",
+            "max_body_bytes": 262144,
+            "redirects_followed": false,
+            "authenticated": false,
+            "status": 200,
+            "content_type": "text/html; charset=utf-8",
+            "body_truncated": false,
+            "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+            "body_bytes": 38426,
+            "title": "FoundUps Mall | Entry",
+            "markers": {
+              "scope_free_projection": false,
+              "old_member_catalog": true,
+              "holo_stub": false,
+              "generic_foundups_home": false,
+              "back_to_mall": true,
+              "github_link": false,
+              "kosei_brand": false,
+              "gotjunk_brand": false,
+              "firebase_config": false
+            }
+          },
+          "canonical_id_in_deployed_legacy_catalog": false,
+          "catalog_alias": null,
+          "alias_in_deployed_catalog": false,
+          "classification": "OLD_TEMPLATE_ONLY_ID_ABSENT_FROM_DEPLOYED_CATALOG",
+          "browser_render_performed": false
+        },
+        "project_explanation": {
+          "status": "MODULE_DOCS_ONLY",
+          "notes": null
+        },
+        "stage_and_poc_evidence": {
+          "public_stage_visibility": "not_in_source_public_projection",
+          "functional_poc_observed": false,
+          "notes": "PoC architecture lock; pfMALL app mount pending, human approval required."
+        },
+        "github_source": {
+          "registry_url": null,
+          "status": "NO_PUBLIC_SOURCE_LINK_IN_REGISTRY",
+          "recommended_policy": "Link approved public source or docs; do not invent new repositories or expose private source."
+        },
+        "app_or_entry": {
+          "registry_poc_url": null,
+          "registry_app_url": null,
+          "source_catalog_entry_url": null,
+          "live_direct_observation": null,
+          "status": "NO_DEPLOYED_APP_ENTRY_ESTABLISHED"
+        },
+        "mall_backlink": {
+          "source_generic": "NOT_APPLICABLE_MISSING_PUBLIC_LANDING",
+          "dedicated_source": "NO_DEDICATED_HTML",
+          "deployed": "ONLY_TEMPLATE_HAS_LINK_ID_NOT_RESOLVED",
+          "note": "Existing target /member/ is the admitted Mall shell; no gate bypass was attempted."
+        },
+        "token_claims": {
+          "assignment_status": "NOT_APPLICABLE",
+          "assigned_symbol": null,
+          "on_chain_deployment_evidence": "NOT_ESTABLISHED",
+          "source_display_risk": "NO_SOURCE_PUBLIC_TOKEN_DISPLAY_FOR_THIS_ID"
+        },
+        "evidence": [
+          {
+            "path": "modules/foundups/foundup_registry.json",
+            "line": 408,
+            "kind": "typed_metadata"
+          },
+          {
+            "path": "modules/foundups/social_twin/README.md",
+            "line": 1,
+            "kind": "module_purpose_and_truth"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 901,
+            "kind": "source_public_data_owner"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 980,
+            "kind": "exact_identity_lookup"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1237,
+            "kind": "token_fallback"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1305,
+            "kind": "mall_return_link"
+          },
+          {
+            "path": "modules/foundups/social_twin/README.md",
+            "line": 86,
+            "kind": "specific_truth_or_landing_gap"
+          },
+          {
+            "path": "modules/foundups/social_twin/README.md",
+            "line": 107,
+            "kind": "specific_truth_or_landing_gap"
+          }
+        ],
+        "recommended_actions": [
+          "Resolve registry infra_service versus productization README classification.",
+          "Describe human-approved PoC architecture and review-plane workflow; no SaaS/app-ready claim.",
+          "Link curated contracts/source, not messaging or browser execution controls."
+        ]
+      },
+      {
+        "foundup_id": "autopost",
+        "display_name": "AutoPost",
+        "entity_type": "external_foundup",
+        "venture_counting_policy": "typed_product_identity_not_production_proof",
+        "purpose": "External camera-to-post content creation engine; older audit describes functional capture with mock publishing connectors.",
+        "registry_metadata": {
+          "stage": "incubating",
+          "poc_status": "poc",
+          "implementation_status": "IMPLEMENTED",
+          "portfolio_status": "not_portfolio",
+          "poc_landing_status": "placeholder",
+          "portfolio_ready": false
+        },
+        "module_truth": "2026-05 audit: external/private repo, partly functional camera engine and mock connectors; live source visibility not freshly authenticated.",
+        "source_public_landing": {
+          "canonical_route": "/f/autopost",
+          "generic_projection_entry": false,
+          "generic_renderer": "public/f/index.html",
+          "status": "NO_PUBLIC_PROJECTION_ENTRY",
+          "dedicated_html": null,
+          "dedicated_role": null
+        },
+        "deployed_observation": {
+          "route_get": {
+            "url": "https://foundups.com/f/autopost",
+            "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+            "method": "GET",
+            "max_body_bytes": 262144,
+            "redirects_followed": false,
+            "authenticated": false,
+            "status": 200,
+            "content_type": "text/html; charset=utf-8",
+            "body_truncated": false,
+            "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+            "body_bytes": 38426,
+            "title": "FoundUps Mall | Entry",
+            "markers": {
+              "scope_free_projection": false,
+              "old_member_catalog": true,
+              "holo_stub": false,
+              "generic_foundups_home": false,
+              "back_to_mall": true,
+              "github_link": false,
+              "kosei_brand": false,
+              "gotjunk_brand": false,
+              "firebase_config": false
+            }
+          },
+          "canonical_id_in_deployed_legacy_catalog": true,
+          "catalog_alias": null,
+          "alias_in_deployed_catalog": false,
+          "classification": "OLD_TEMPLATE_AND_MATCHING_CATALOG_RECORD_JS_NOT_EXECUTED",
+          "browser_render_performed": false
+        },
+        "project_explanation": {
+          "status": "LEGACY_CATALOG_NARRATIVE_ONLY",
+          "notes": null
+        },
+        "stage_and_poc_evidence": {
+          "public_stage_visibility": "not_in_source_public_projection",
+          "functional_poc_observed": false,
+          "notes": "2026-05 audit: external/private repo, partly functional camera engine and mock connectors; live source visibility not freshly authenticated."
+        },
+        "github_source": {
+          "registry_url": "https://github.com/FOUNDUPS/autopost.git",
+          "status": "ANONYMOUS_GET_404_PRIVATE_MOVED_OR_UNAVAILABLE",
+          "recommended_policy": "Link approved public source or docs; do not invent new repositories or expose private source."
+        },
+        "app_or_entry": {
+          "registry_poc_url": "https://ai.studio/apps/[UNVERIFIED_EXTERNAL_IDENTIFIER_OMITTED]",
+          "registry_app_url": null,
+          "source_catalog_entry_url": null,
+          "live_direct_observation": null,
+          "status": "AI_STUDIO_AUTH_PATH_NOT_VISITED_DOMAIN_TIMEOUT"
+        },
+        "mall_backlink": {
+          "source_generic": "NOT_APPLICABLE_MISSING_PUBLIC_LANDING",
+          "dedicated_source": "NO_DEDICATED_HTML",
+          "deployed": "BACKLINK_IN_OLD_TEMPLATE_TO_/member/",
+          "note": "Existing target /member/ is the admitted Mall shell; no gate bypass was attempted."
+        },
+        "token_claims": {
+          "assignment_status": "TOKEN_DEFERRED",
+          "assigned_symbol": null,
+          "on_chain_deployment_evidence": "NOT_ESTABLISHED",
+          "source_display_risk": "NO_SOURCE_PUBLIC_TOKEN_DISPLAY_FOR_THIS_ID"
+        },
+        "evidence": [
+          {
+            "path": "modules/foundups/foundup_registry.json",
+            "line": 448,
+            "kind": "typed_metadata"
+          },
+          {
+            "path": "docs/audits/architecture/AUTOPOST_EXTERNAL_FOUNDUP_COMPLETION_AUDIT_PHASE1.md",
+            "line": 20,
+            "kind": "historical_external_source_audit"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 901,
+            "kind": "source_public_data_owner"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 980,
+            "kind": "exact_identity_lookup"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1237,
+            "kind": "token_fallback"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1305,
+            "kind": "mall_return_link"
+          }
+        ],
+        "recommended_actions": [
+          "Reconcile old AI Studio PoC URL, timed-out domain and anonymous GitHub404.",
+          "Expose a public explanation/docs page without asserting private source is publicly accessible.",
+          "Verify capture/publish distinction and mock connectors; add Mall return navigation only in authorized product work."
+        ]
+      },
+      {
+        "foundup_id": "pqn_portal",
+        "display_name": "PQN Portal",
+        "entity_type": "skeleton_candidate",
+        "venture_counting_policy": "do_not_count_as_independent_product_venture",
+        "purpose": "Local demo/gallery and scientific explainer portal scaffold; distinct from external Science Swarm Hub.",
+        "registry_metadata": {
+          "stage": "incubating",
+          "poc_status": "poc",
+          "implementation_status": "SPECIFIED",
+          "portfolio_status": "not_portfolio",
+          "poc_landing_status": "none",
+          "portfolio_ready": false
+        },
+        "module_truth": "Frontend files and API demo route exist, main class placeholder; not deployed/validated by this audit.",
+        "source_public_landing": {
+          "canonical_route": "/f/pqn_portal",
+          "generic_projection_entry": false,
+          "generic_renderer": "public/f/index.html",
+          "status": "NO_PUBLIC_PROJECTION_ENTRY",
+          "dedicated_html": null,
+          "dedicated_role": null
+        },
+        "deployed_observation": {
+          "route_get": {
+            "url": "https://foundups.com/f/pqn_portal",
+            "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+            "method": "GET",
+            "max_body_bytes": 262144,
+            "redirects_followed": false,
+            "authenticated": false,
+            "status": 200,
+            "content_type": "text/html; charset=utf-8",
+            "body_truncated": false,
+            "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+            "body_bytes": 38426,
+            "title": "FoundUps Mall | Entry",
+            "markers": {
+              "scope_free_projection": false,
+              "old_member_catalog": true,
+              "holo_stub": false,
+              "generic_foundups_home": false,
+              "back_to_mall": true,
+              "github_link": false,
+              "kosei_brand": false,
+              "gotjunk_brand": false,
+              "firebase_config": false
+            }
+          },
+          "canonical_id_in_deployed_legacy_catalog": false,
+          "catalog_alias": null,
+          "alias_in_deployed_catalog": false,
+          "classification": "OLD_TEMPLATE_ONLY_ID_ABSENT_FROM_DEPLOYED_CATALOG",
+          "browser_render_performed": false
+        },
+        "project_explanation": {
+          "status": "MODULE_DOCS_ONLY",
+          "notes": null
+        },
+        "stage_and_poc_evidence": {
+          "public_stage_visibility": "not_in_source_public_projection",
+          "functional_poc_observed": false,
+          "notes": "Frontend files and API demo route exist, main class placeholder; not deployed/validated by this audit."
+        },
+        "github_source": {
+          "registry_url": null,
+          "status": "NO_PUBLIC_SOURCE_LINK_IN_REGISTRY",
+          "recommended_policy": "Link approved public source or docs; do not invent new repositories or expose private source."
+        },
+        "app_or_entry": {
+          "registry_poc_url": null,
+          "registry_app_url": null,
+          "source_catalog_entry_url": null,
+          "live_direct_observation": null,
+          "status": "NO_DEPLOYED_APP_ENTRY_ESTABLISHED"
+        },
+        "mall_backlink": {
+          "source_generic": "NOT_APPLICABLE_MISSING_PUBLIC_LANDING",
+          "dedicated_source": "NO_DEDICATED_HTML",
+          "deployed": "ONLY_TEMPLATE_HAS_LINK_ID_NOT_RESOLVED",
+          "note": "Existing target /member/ is the admitted Mall shell; no gate bypass was attempted."
+        },
+        "token_claims": {
+          "assignment_status": "TOKEN_DEFERRED",
+          "assigned_symbol": null,
+          "on_chain_deployment_evidence": "NOT_ESTABLISHED",
+          "source_display_risk": "NO_SOURCE_PUBLIC_TOKEN_DISPLAY_FOR_THIS_ID"
+        },
+        "evidence": [
+          {
+            "path": "modules/foundups/foundup_registry.json",
+            "line": 488,
+            "kind": "typed_metadata"
+          },
+          {
+            "path": "modules/foundups/pqn_portal/README.md",
+            "line": 1,
+            "kind": "module_purpose_and_truth"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 901,
+            "kind": "source_public_data_owner"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 980,
+            "kind": "exact_identity_lookup"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1237,
+            "kind": "token_fallback"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1305,
+            "kind": "mall_return_link"
+          },
+          {
+            "path": "modules/foundups/pqn_portal/src/pqn_portal.py",
+            "line": 3,
+            "kind": "specific_truth_or_landing_gap"
+          },
+          {
+            "path": "modules/foundups/pqn_portal/frontend/index.html",
+            "line": 1,
+            "kind": "specific_truth_or_landing_gap"
+          }
+        ],
+        "recommended_actions": [
+          "Describe scaffold/local demo and unvalidated experimental claims; distinguish from Science Swarm Hub.",
+          "Do not infer a public deployment from frontend HTML or /runs/demo code.",
+          "Add reviewed source/theory/limitations links and route only after admission."
+        ]
+      },
+      {
+        "foundup_id": "science_swarm_hub",
+        "display_name": "Science Swarm Hub",
+        "entity_type": "external_foundup",
+        "venture_counting_policy": "typed_product_identity_not_production_proof",
+        "purpose": "External PQN research work registry, submissions, verification and contribution package; not a hosted PoC web application.",
+        "registry_metadata": {
+          "stage": "proto",
+          "poc_status": "proto",
+          "implementation_status": "IMPLEMENTED",
+          "portfolio_status": "not_portfolio",
+          "poc_landing_status": "none",
+          "portfolio_ready": false
+        },
+        "module_truth": "Monorepo README explicitly STUB after exfoliation; public repository GET succeeds.",
+        "source_public_landing": {
+          "canonical_route": "/f/science_swarm_hub",
+          "generic_projection_entry": false,
+          "generic_renderer": "public/f/index.html",
+          "status": "NO_PUBLIC_PROJECTION_ENTRY",
+          "dedicated_html": null,
+          "dedicated_role": null
+        },
+        "deployed_observation": {
+          "route_get": {
+            "url": "https://foundups.com/f/science_swarm_hub",
+            "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+            "method": "GET",
+            "max_body_bytes": 262144,
+            "redirects_followed": false,
+            "authenticated": false,
+            "status": 200,
+            "content_type": "text/html; charset=utf-8",
+            "body_truncated": false,
+            "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+            "body_bytes": 38426,
+            "title": "FoundUps Mall | Entry",
+            "markers": {
+              "scope_free_projection": false,
+              "old_member_catalog": true,
+              "holo_stub": false,
+              "generic_foundups_home": false,
+              "back_to_mall": true,
+              "github_link": false,
+              "kosei_brand": false,
+              "gotjunk_brand": false,
+              "firebase_config": false
+            }
+          },
+          "canonical_id_in_deployed_legacy_catalog": false,
+          "catalog_alias": "science_swarm",
+          "alias_in_deployed_catalog": true,
+          "classification": "CANONICAL_ID_MISSING_ALIAS_ONLY_OLD_TEMPLATE",
+          "browser_render_performed": false
+        },
+        "project_explanation": {
+          "status": "LEGACY_CATALOG_NARRATIVE_ONLY",
+          "notes": null
+        },
+        "stage_and_poc_evidence": {
+          "public_stage_visibility": "not_in_source_public_projection",
+          "functional_poc_observed": false,
+          "notes": "Monorepo README explicitly STUB after exfoliation; public repository GET succeeds."
+        },
+        "github_source": {
+          "registry_url": "https://github.com/FOUNDUPS/science-swarm-hub",
+          "status": "PUBLIC_REPOSITORY_GET_200",
+          "recommended_policy": "Link approved public source or docs; do not invent new repositories or expose private source."
+        },
+        "app_or_entry": {
+          "registry_poc_url": null,
+          "registry_app_url": null,
+          "source_catalog_entry_url": null,
+          "live_direct_observation": null,
+          "status": "PUBLIC_PACKAGE_REPO_NO_WEB_APP_PROVEN"
+        },
+        "mall_backlink": {
+          "source_generic": "NOT_APPLICABLE_MISSING_PUBLIC_LANDING",
+          "dedicated_source": "NO_DEDICATED_HTML",
+          "deployed": "BACKLINK_ON_ALIAS_TEMPLATE_ONLY",
+          "note": "Existing target /member/ is the admitted Mall shell; no gate bypass was attempted."
+        },
+        "token_claims": {
+          "assignment_status": "TOKEN_DEFERRED",
+          "assigned_symbol": null,
+          "on_chain_deployment_evidence": "NOT_ESTABLISHED",
+          "source_display_risk": "NO_SOURCE_PUBLIC_TOKEN_DISPLAY_FOR_THIS_ID"
+        },
+        "evidence": [
+          {
+            "path": "modules/foundups/foundup_registry.json",
+            "line": 528,
+            "kind": "typed_metadata"
+          },
+          {
+            "path": "modules/foundups/pqn_swarm_hub/README.md",
+            "line": 1,
+            "kind": "module_purpose_and_truth"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 901,
+            "kind": "source_public_data_owner"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 980,
+            "kind": "exact_identity_lookup"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1237,
+            "kind": "token_fallback"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1305,
+            "kind": "mall_return_link"
+          }
+        ],
+        "recommended_actions": [
+          "Reconcile science_swarm versus science_swarm_hub route IDs.",
+          "Use the verified public repository as the source/docs destination; explain package contribution workflow.",
+          "Provide Mall backlink/profile without claiming a hosted web demo or production contribution payouts."
+        ]
+      },
+      {
+        "foundup_id": "holoindex_prod_01",
+        "display_name": "HoloIndex",
+        "entity_type": "infra_service",
+        "venture_counting_policy": "do_not_count_as_independent_product_venture",
+        "purpose": "Public discovery/connective-trust surface only; protected internal HoloIndex retrieval, work ledger, memory and query authority remain excluded.",
+        "registry_metadata": {
+          "stage": "incubating",
+          "poc_status": "poc",
+          "implementation_status": "IMPLEMENTED",
+          "portfolio_status": "portfolio_candidate",
+          "poc_landing_status": "polished",
+          "portfolio_ready": false
+        },
+        "module_truth": "README discoverable_only, public trust surface distinct from internal infrastructure; deployed dedicated page explicitly Stub.",
+        "source_public_landing": {
+          "canonical_route": "/f/holoindex_prod_01",
+          "generic_projection_entry": true,
+          "generic_renderer": "public/f/index.html",
+          "status": "DEDICATED_STATIC_STUB_OVERRIDES_GENERIC",
+          "dedicated_html": "public/f/holoindex_prod_01/index.html",
+          "dedicated_role": "public_stub"
+        },
+        "deployed_observation": {
+          "route_get": {
+            "url": "https://foundups.com/f/holoindex_prod_01",
+            "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+            "method": "GET",
+            "max_body_bytes": 262144,
+            "redirects_followed": false,
+            "authenticated": false,
+            "status": 301,
+            "location": "/f/holoindex_prod_01/",
+            "error_type": "HTTPError"
+          },
+          "canonical_id_in_deployed_legacy_catalog": false,
+          "catalog_alias": null,
+          "alias_in_deployed_catalog": false,
+          "classification": "REDIRECT_TO_OBSERVED_DEDICATED_STUB",
+          "browser_render_performed": false
+        },
+        "project_explanation": {
+          "status": "STUB_TOO_SPARSE",
+          "notes": null
+        },
+        "stage_and_poc_evidence": {
+          "public_stage_visibility": "poc_landing_status_only_not_lifecycle_or_runtime_receipt",
+          "functional_poc_observed": false,
+          "notes": "README discoverable_only, public trust surface distinct from internal infrastructure; deployed dedicated page explicitly Stub."
+        },
+        "github_source": {
+          "registry_url": null,
+          "status": "NO_PUBLIC_SOURCE_LINK_IN_REGISTRY",
+          "recommended_policy": "Curated public trust evidence only; never internal HoloIndex query/index access."
+        },
+        "app_or_entry": {
+          "registry_poc_url": "https://foundups.com/holoindex",
+          "registry_app_url": null,
+          "source_catalog_entry_url": null,
+          "live_direct_observation": {
+            "url": "https://foundups.com/holoindex",
+            "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+            "method": "GET",
+            "max_body_bytes": 262144,
+            "redirects_followed": false,
+            "authenticated": false,
+            "status": 200,
+            "content_type": "text/html; charset=utf-8",
+            "body_truncated": false,
+            "body_sha256": "d78e5f63599ceea035232f9955b9cde25452b2652073e0e3fe635154224feeeb",
+            "body_bytes": 98748,
+            "title": "FoundUPS — Where Will You Aim Your Compute?",
+            "markers": {
+              "scope_free_projection": false,
+              "old_member_catalog": false,
+              "holo_stub": false,
+              "generic_foundups_home": false,
+              "back_to_mall": false,
+              "github_link": true,
+              "kosei_brand": false,
+              "gotjunk_brand": false,
+              "firebase_config": true
+            }
+          },
+          "status": "STALE_POC_URL_HOME_FALLBACK_DEDICATED_STUB"
+        },
+        "mall_backlink": {
+          "source_generic": "PRESENT_TO_MEMBER_MALL_/member/",
+          "dedicated_source": "NOT_FOUND_IN_AUDITED_HTML_AND_APP_SOURCE_SCAN",
+          "deployed": "ABSENT_FROM_DEDICATED_STUB",
+          "note": "Existing target /member/ is the admitted Mall shell; no gate bypass was attempted."
+        },
+        "token_claims": {
+          "assignment_status": "TOKEN_DEFERRED",
+          "assigned_symbol": null,
+          "on_chain_deployment_evidence": "NOT_ESTABLISHED",
+          "source_display_risk": "FABRICATED_DOLLAR_FALLBACK_DESPITE_DEFERRED_TOKEN"
+        },
+        "evidence": [
+          {
+            "path": "modules/foundups/foundup_registry.json",
+            "line": 568,
+            "kind": "typed_metadata"
+          },
+          {
+            "path": "modules/foundups/holoindex_prod_01/README.md",
+            "line": 1,
+            "kind": "module_purpose_and_truth"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 901,
+            "kind": "source_public_data_owner"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 980,
+            "kind": "exact_identity_lookup"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1237,
+            "kind": "token_fallback"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1305,
+            "kind": "mall_return_link"
+          },
+          {
+            "path": "public/f/holoindex_prod_01/index.html",
+            "line": 12,
+            "kind": "specific_truth_or_landing_gap"
+          },
+          {
+            "path": "public/f/holoindex_prod_01/js/connector.js",
+            "line": 1,
+            "kind": "specific_truth_or_landing_gap"
+          }
+        ],
+        "recommended_actions": [
+          "Retain explicit stub/dual-identity status; replace stale /holoindex link with verified canonical destination through approved data change.",
+          "Remove dollar-prefixed fallback token fabrication; token remains deferred.",
+          "Add public trust explanation, scoped public evidence and Mall backlink, without exposing internal index/query/backend authority."
+        ]
+      },
+      {
+        "foundup_id": "shield",
+        "display_name": "Shield",
+        "entity_type": "foundup",
+        "venture_counting_policy": "typed_product_identity_not_production_proof",
+        "purpose": "Specified consumer-defense document classification concept; current idea only, no OCR/upload/wallet/payment implementation.",
+        "registry_metadata": {
+          "stage": "incubating",
+          "poc_status": "idea",
+          "implementation_status": "SPECIFIED",
+          "portfolio_status": "not_portfolio",
+          "poc_landing_status": "none",
+          "portfolio_ready": false
+        },
+        "module_truth": "README SPECIFIED/not implemented; IDEA current, PoC next.",
+        "source_public_landing": {
+          "canonical_route": "/f/shield",
+          "generic_projection_entry": false,
+          "generic_renderer": "public/f/index.html",
+          "status": "NO_PUBLIC_PROJECTION_ENTRY",
+          "dedicated_html": null,
+          "dedicated_role": null
+        },
+        "deployed_observation": {
+          "route_get": {
+            "url": "https://foundups.com/f/shield",
+            "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+            "method": "GET",
+            "max_body_bytes": 262144,
+            "redirects_followed": false,
+            "authenticated": false,
+            "status": 200,
+            "content_type": "text/html; charset=utf-8",
+            "body_truncated": false,
+            "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+            "body_bytes": 38426,
+            "title": "FoundUps Mall | Entry",
+            "markers": {
+              "scope_free_projection": false,
+              "old_member_catalog": true,
+              "holo_stub": false,
+              "generic_foundups_home": false,
+              "back_to_mall": true,
+              "github_link": false,
+              "kosei_brand": false,
+              "gotjunk_brand": false,
+              "firebase_config": false
+            }
+          },
+          "canonical_id_in_deployed_legacy_catalog": false,
+          "catalog_alias": null,
+          "alias_in_deployed_catalog": false,
+          "classification": "OLD_TEMPLATE_ONLY_ID_ABSENT_FROM_DEPLOYED_CATALOG",
+          "browser_render_performed": false
+        },
+        "project_explanation": {
+          "status": "MODULE_DOCS_ONLY",
+          "notes": null
+        },
+        "stage_and_poc_evidence": {
+          "public_stage_visibility": "not_in_source_public_projection",
+          "functional_poc_observed": false,
+          "notes": "README SPECIFIED/not implemented; IDEA current, PoC next."
+        },
+        "github_source": {
+          "registry_url": null,
+          "status": "NO_PUBLIC_SOURCE_LINK_IN_REGISTRY",
+          "recommended_policy": "Link approved public source or docs; do not invent new repositories or expose private source."
+        },
+        "app_or_entry": {
+          "registry_poc_url": null,
+          "registry_app_url": null,
+          "source_catalog_entry_url": null,
+          "live_direct_observation": null,
+          "status": "NO_DEPLOYED_APP_ENTRY_ESTABLISHED"
+        },
+        "mall_backlink": {
+          "source_generic": "NOT_APPLICABLE_MISSING_PUBLIC_LANDING",
+          "dedicated_source": "NO_DEDICATED_HTML",
+          "deployed": "ONLY_TEMPLATE_HAS_LINK_ID_NOT_RESOLVED",
+          "note": "Existing target /member/ is the admitted Mall shell; no gate bypass was attempted."
+        },
+        "token_claims": {
+          "assignment_status": "TOKEN_DEFERRED",
+          "assigned_symbol": null,
+          "on_chain_deployment_evidence": "NOT_ESTABLISHED",
+          "source_display_risk": "NO_SOURCE_PUBLIC_TOKEN_DISPLAY_FOR_THIS_ID"
+        },
+        "evidence": [
+          {
+            "path": "modules/foundups/foundup_registry.json",
+            "line": 611,
+            "kind": "typed_metadata"
+          },
+          {
+            "path": "modules/foundups/shield/README.md",
+            "line": 1,
+            "kind": "module_purpose_and_truth"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 901,
+            "kind": "source_public_data_owner"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 980,
+            "kind": "exact_identity_lookup"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1237,
+            "kind": "token_fallback"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 1305,
+            "kind": "mall_return_link"
+          },
+          {
+            "path": "modules/foundups/shield/README.md",
+            "line": 6,
+            "kind": "specific_truth_or_landing_gap"
+          },
+          {
+            "path": "modules/foundups/shield/README.md",
+            "line": 43,
+            "kind": "specific_truth_or_landing_gap"
+          }
+        ],
+        "recommended_actions": [
+          "Publish idea/specification-only explanation if admitted; proposed domain is not deployment.",
+          "Keep Shield distinct from Identity Shield intake; no document upload, legal-advice, payment, wallet or token CTA.",
+          "Link reviewed specification/source evidence and Mall navigation only through scoped future work."
+        ]
+      }
+    ],
+    "catalog_only_identities": [
+      {
+        "foundup_id": "undaodu",
+        "display_name": "UnDaoDu",
+        "classification": "PERSONAL_CHANNEL",
+        "canonical_registry_entry": false,
+        "count_as_proven_venture": false,
+        "source_public_projection_entry": false,
+        "legacy_member_entry": "/member/foundup.html?id=undaodu",
+        "deployed_old_catalog_record": true,
+        "route_get": {
+          "url": "https://foundups.com/f/undaodu",
+          "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+          "method": "GET",
+          "max_body_bytes": 262144,
+          "redirects_followed": false,
+          "authenticated": false,
+          "status": 200,
+          "content_type": "text/html; charset=utf-8",
+          "body_truncated": false,
+          "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+          "body_bytes": 38426,
+          "title": "FoundUps Mall | Entry",
+          "markers": {
+            "scope_free_projection": false,
+            "old_member_catalog": true,
+            "holo_stub": false,
+            "generic_foundups_home": false,
+            "back_to_mall": true,
+            "github_link": false,
+            "kosei_brand": false,
+            "gotjunk_brand": false,
+            "firebase_config": false
+          }
+        },
+        "project_explanation": "012 personal channel covering music production, political commentary, and creative experiments. The longest-running content lane in the FoundUPS ecosystem.",
+        "truthful_stage": "active",
+        "poc_app_evidence": "CONTENT_LANE_ONLY_NO_WORKING_EDUCATION_RESEARCH_APP_ESTABLISHED",
+        "github_source_link": "NONE_IN_CATALOG_RECORD",
+        "app_url": null,
+        "mall_backlink": "OLD_GENERIC_TEMPLATE_HAS_/member/_RETURN_SOURCE_PUBLIC_PROJECTION_HAS_NO_RECORD",
+        "token_claims": "NO_TOKEN_SYMBOL_DO_NOT_FABRICATE",
+        "evidence": [
+          {
+            "path": "public/member/mall-video-catalog.json",
+            "kind": "source_identity_and_narrative",
+            "line": 5390
+          },
+          {
+            "path": "docs/audits/pfmall_foundup_identity/CANONICAL_FOUNDUP_INVENTORY.md",
+            "line": 35,
+            "kind": "historical_classification"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 980,
+            "kind": "source_exact_id_lookup"
+          },
+          {
+            "url": "https://foundups.com/member/mall-video-catalog.json",
+            "kind": "observed_deployed_metadata"
+          }
+        ],
+        "recommended_actions": [
+          "Keep identity/content-lane labeling; do not make a venture, wallet or token from this row.",
+          "Add public projected discovery metadata only through an approved classifier/projector policy; never fetch the member runtime catalog from the new public renderer.",
+          "Use existing Mall navigation; source/evidence and app links remain missing rather than invented."
+        ]
+      },
+      {
+        "foundup_id": "foundups_main",
+        "display_name": "FoundUps",
+        "classification": "UMBRELLA_BRAND",
+        "canonical_registry_entry": false,
+        "count_as_proven_venture": false,
+        "source_public_projection_entry": false,
+        "legacy_member_entry": "/member/foundup.html?id=foundups_main",
+        "deployed_old_catalog_record": true,
+        "route_get": {
+          "url": "https://foundups.com/f/foundups_main",
+          "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+          "method": "GET",
+          "max_body_bytes": 262144,
+          "redirects_followed": false,
+          "authenticated": false,
+          "status": 200,
+          "content_type": "text/html; charset=utf-8",
+          "body_truncated": false,
+          "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+          "body_bytes": 38426,
+          "title": "FoundUps Mall | Entry",
+          "markers": {
+            "scope_free_projection": false,
+            "old_member_catalog": true,
+            "holo_stub": false,
+            "generic_foundups_home": false,
+            "back_to_mall": true,
+            "github_link": false,
+            "kosei_brand": false,
+            "gotjunk_brand": false,
+            "firebase_config": false
+          }
+        },
+        "project_explanation": "Official FoundUPS YouTube presence. Product updates, ecosystem explainers, and development milestones.",
+        "truthful_stage": "active",
+        "poc_app_evidence": "CONTENT_LANE_ONLY_NO_WORKING_EDUCATION_RESEARCH_APP_ESTABLISHED",
+        "github_source_link": "NONE_IN_CATALOG_RECORD",
+        "app_url": null,
+        "mall_backlink": "OLD_GENERIC_TEMPLATE_HAS_/member/_RETURN_SOURCE_PUBLIC_PROJECTION_HAS_NO_RECORD",
+        "token_claims": "NO_TOKEN_SYMBOL_DO_NOT_FABRICATE",
+        "evidence": [
+          {
+            "path": "public/member/mall-video-catalog.json",
+            "kind": "source_identity_and_narrative",
+            "line": 10043
+          },
+          {
+            "path": "docs/audits/pfmall_foundup_identity/CANONICAL_FOUNDUP_INVENTORY.md",
+            "line": 35,
+            "kind": "historical_classification"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 980,
+            "kind": "source_exact_id_lookup"
+          },
+          {
+            "url": "https://foundups.com/member/mall-video-catalog.json",
+            "kind": "observed_deployed_metadata"
+          }
+        ],
+        "recommended_actions": [
+          "Keep identity/content-lane labeling; do not make a venture, wallet or token from this row.",
+          "Add public projected discovery metadata only through an approved classifier/projector policy; never fetch the member runtime catalog from the new public renderer.",
+          "Use existing Mall navigation; source/evidence and app links remain missing rather than invented."
+        ]
+      },
+      {
+        "foundup_id": "linkedin_012",
+        "display_name": "012 LinkedIn",
+        "classification": "PRINCIPAL_IDENTITY",
+        "canonical_registry_entry": false,
+        "count_as_proven_venture": false,
+        "source_public_projection_entry": false,
+        "legacy_member_entry": "/member/foundup.html?id=linkedin_012",
+        "deployed_old_catalog_record": true,
+        "route_get": {
+          "url": "https://foundups.com/f/linkedin_012",
+          "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+          "method": "GET",
+          "max_body_bytes": 262144,
+          "redirects_followed": false,
+          "authenticated": false,
+          "status": 200,
+          "content_type": "text/html; charset=utf-8",
+          "body_truncated": false,
+          "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+          "body_bytes": 38426,
+          "title": "FoundUps Mall | Entry",
+          "markers": {
+            "scope_free_projection": false,
+            "old_member_catalog": true,
+            "holo_stub": false,
+            "generic_foundups_home": false,
+            "back_to_mall": true,
+            "github_link": false,
+            "kosei_brand": false,
+            "gotjunk_brand": false,
+            "firebase_config": false
+          }
+        },
+        "project_explanation": "012 LinkedIn professional presence. No video content yet — lane reserved for future cross-platform content bridging.",
+        "truthful_stage": "staging",
+        "poc_app_evidence": "CONTENT_LANE_ONLY_NO_WORKING_EDUCATION_RESEARCH_APP_ESTABLISHED",
+        "github_source_link": "NONE_IN_CATALOG_RECORD",
+        "app_url": null,
+        "mall_backlink": "OLD_GENERIC_TEMPLATE_HAS_/member/_RETURN_SOURCE_PUBLIC_PROJECTION_HAS_NO_RECORD",
+        "token_claims": "NO_TOKEN_SYMBOL_DO_NOT_FABRICATE",
+        "evidence": [
+          {
+            "path": "public/member/mall-video-catalog.json",
+            "kind": "source_identity_and_narrative",
+            "line": 10831
+          },
+          {
+            "path": "docs/audits/pfmall_foundup_identity/CANONICAL_FOUNDUP_INVENTORY.md",
+            "line": 35,
+            "kind": "historical_classification"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 980,
+            "kind": "source_exact_id_lookup"
+          },
+          {
+            "url": "https://foundups.com/member/mall-video-catalog.json",
+            "kind": "observed_deployed_metadata"
+          }
+        ],
+        "recommended_actions": [
+          "Keep identity/content-lane labeling; do not make a venture, wallet or token from this row.",
+          "Add public projected discovery metadata only through an approved classifier/projector policy; never fetch the member runtime catalog from the new public renderer.",
+          "Use existing Mall navigation; source/evidence and app links remain missing rather than invented."
+        ]
+      },
+      {
+        "foundup_id": "linkedin_esingularity",
+        "display_name": "eSingularity",
+        "classification": "EDUCATION_CONTENT_CANDIDATE",
+        "canonical_registry_entry": false,
+        "count_as_proven_venture": false,
+        "source_public_projection_entry": false,
+        "legacy_member_entry": "/member/foundup.html?id=linkedin_esingularity",
+        "deployed_old_catalog_record": true,
+        "route_get": {
+          "url": "https://foundups.com/f/linkedin_esingularity",
+          "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+          "method": "GET",
+          "max_body_bytes": 262144,
+          "redirects_followed": false,
+          "authenticated": false,
+          "status": 200,
+          "content_type": "text/html; charset=utf-8",
+          "body_truncated": false,
+          "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+          "body_bytes": 38426,
+          "title": "FoundUps Mall | Entry",
+          "markers": {
+            "scope_free_projection": false,
+            "old_member_catalog": true,
+            "holo_stub": false,
+            "generic_foundups_home": false,
+            "back_to_mall": true,
+            "github_link": false,
+            "kosei_brand": false,
+            "gotjunk_brand": false,
+            "firebase_config": false
+          }
+        },
+        "project_explanation": "eSingularity LinkedIn page focused on AI education. No video content yet — lane reserved for future content.",
+        "truthful_stage": "staging",
+        "poc_app_evidence": "CONTENT_LANE_ONLY_NO_WORKING_EDUCATION_RESEARCH_APP_ESTABLISHED",
+        "github_source_link": "NONE_IN_CATALOG_RECORD",
+        "app_url": null,
+        "mall_backlink": "OLD_GENERIC_TEMPLATE_HAS_/member/_RETURN_SOURCE_PUBLIC_PROJECTION_HAS_NO_RECORD",
+        "token_claims": "NO_TOKEN_SYMBOL_DO_NOT_FABRICATE",
+        "evidence": [
+          {
+            "path": "public/member/mall-video-catalog.json",
+            "kind": "source_identity_and_narrative",
+            "line": 10870
+          },
+          {
+            "path": "docs/audits/pfmall_foundup_identity/CANONICAL_FOUNDUP_INVENTORY.md",
+            "line": 35,
+            "kind": "historical_classification"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 980,
+            "kind": "source_exact_id_lookup"
+          },
+          {
+            "url": "https://foundups.com/member/mall-video-catalog.json",
+            "kind": "observed_deployed_metadata"
+          }
+        ],
+        "recommended_actions": [
+          "Resolve EDUIT/eSingularity relationship and venture ownership before registry promotion; publish only honest candidate narrative.",
+          "Add public projected discovery metadata only through an approved classifier/projector policy; never fetch the member runtime catalog from the new public renderer.",
+          "Use existing Mall navigation; source/evidence and app links remain missing rather than invented."
+        ]
+      },
+      {
+        "foundup_id": "linkedin_tsingularity",
+        "display_name": "tSingularity",
+        "classification": "RESEARCH_CONTENT_CANDIDATE",
+        "canonical_registry_entry": false,
+        "count_as_proven_venture": false,
+        "source_public_projection_entry": false,
+        "legacy_member_entry": "/member/foundup.html?id=linkedin_tsingularity",
+        "deployed_old_catalog_record": true,
+        "route_get": {
+          "url": "https://foundups.com/f/linkedin_tsingularity",
+          "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+          "method": "GET",
+          "max_body_bytes": 262144,
+          "redirects_followed": false,
+          "authenticated": false,
+          "status": 200,
+          "content_type": "text/html; charset=utf-8",
+          "body_truncated": false,
+          "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+          "body_bytes": 38426,
+          "title": "FoundUps Mall | Entry",
+          "markers": {
+            "scope_free_projection": false,
+            "old_member_catalog": true,
+            "holo_stub": false,
+            "generic_foundups_home": false,
+            "back_to_mall": true,
+            "github_link": false,
+            "kosei_brand": false,
+            "gotjunk_brand": false,
+            "firebase_config": false
+          }
+        },
+        "project_explanation": "tSingularity LinkedIn page focused on technological singularity research. No video content yet — lane reserved.",
+        "truthful_stage": "staging",
+        "poc_app_evidence": "CONTENT_LANE_ONLY_NO_WORKING_EDUCATION_RESEARCH_APP_ESTABLISHED",
+        "github_source_link": "NONE_IN_CATALOG_RECORD",
+        "app_url": null,
+        "mall_backlink": "OLD_GENERIC_TEMPLATE_HAS_/member/_RETURN_SOURCE_PUBLIC_PROJECTION_HAS_NO_RECORD",
+        "token_claims": "NO_TOKEN_SYMBOL_DO_NOT_FABRICATE",
+        "evidence": [
+          {
+            "path": "public/member/mall-video-catalog.json",
+            "kind": "source_identity_and_narrative",
+            "line": 10909
+          },
+          {
+            "path": "docs/audits/pfmall_foundup_identity/CANONICAL_FOUNDUP_INVENTORY.md",
+            "line": 35,
+            "kind": "historical_classification"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 980,
+            "kind": "source_exact_id_lookup"
+          },
+          {
+            "url": "https://foundups.com/member/mall-video-catalog.json",
+            "kind": "observed_deployed_metadata"
+          }
+        ],
+        "recommended_actions": [
+          "Resolve EDUIT/eSingularity relationship and venture ownership before registry promotion; publish only honest candidate narrative.",
+          "Add public projected discovery metadata only through an approved classifier/projector policy; never fetch the member runtime catalog from the new public renderer.",
+          "Use existing Mall navigation; source/evidence and app links remain missing rather than invented."
+        ]
+      },
+      {
+        "foundup_id": "linkedin_foundups",
+        "display_name": "FoundUps LinkedIn",
+        "classification": "UMBRELLA_BRAND_MIRROR",
+        "canonical_registry_entry": false,
+        "count_as_proven_venture": false,
+        "source_public_projection_entry": false,
+        "legacy_member_entry": "/member/foundup.html?id=linkedin_foundups",
+        "deployed_old_catalog_record": true,
+        "route_get": {
+          "url": "https://foundups.com/f/linkedin_foundups",
+          "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+          "method": "GET",
+          "max_body_bytes": 262144,
+          "redirects_followed": false,
+          "authenticated": false,
+          "status": 200,
+          "content_type": "text/html; charset=utf-8",
+          "body_truncated": false,
+          "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+          "body_bytes": 38426,
+          "title": "FoundUps Mall | Entry",
+          "markers": {
+            "scope_free_projection": false,
+            "old_member_catalog": true,
+            "holo_stub": false,
+            "generic_foundups_home": false,
+            "back_to_mall": true,
+            "github_link": false,
+            "kosei_brand": false,
+            "gotjunk_brand": false,
+            "firebase_config": false
+          }
+        },
+        "project_explanation": "Official FoundUPS LinkedIn company page. No video content yet — lane reserved for corporate and ecosystem updates.",
+        "truthful_stage": "staging",
+        "poc_app_evidence": "CONTENT_LANE_ONLY_NO_WORKING_EDUCATION_RESEARCH_APP_ESTABLISHED",
+        "github_source_link": "NONE_IN_CATALOG_RECORD",
+        "app_url": null,
+        "mall_backlink": "OLD_GENERIC_TEMPLATE_HAS_/member/_RETURN_SOURCE_PUBLIC_PROJECTION_HAS_NO_RECORD",
+        "token_claims": "NO_TOKEN_SYMBOL_DO_NOT_FABRICATE",
+        "evidence": [
+          {
+            "path": "public/member/mall-video-catalog.json",
+            "kind": "source_identity_and_narrative",
+            "line": 10947
+          },
+          {
+            "path": "docs/audits/pfmall_foundup_identity/CANONICAL_FOUNDUP_INVENTORY.md",
+            "line": 35,
+            "kind": "historical_classification"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 980,
+            "kind": "source_exact_id_lookup"
+          },
+          {
+            "url": "https://foundups.com/member/mall-video-catalog.json",
+            "kind": "observed_deployed_metadata"
+          }
+        ],
+        "recommended_actions": [
+          "Keep identity/content-lane labeling; do not make a venture, wallet or token from this row.",
+          "Add public projected discovery metadata only through an approved classifier/projector policy; never fetch the member runtime catalog from the new public renderer.",
+          "Use existing Mall navigation; source/evidence and app links remain missing rather than invented."
+        ]
+      },
+      {
+        "foundup_id": "eduit",
+        "display_name": "EDUIT",
+        "classification": "EDUCATION_VENTURE_CANDIDATE_DERIVED_LANE",
+        "canonical_registry_entry": false,
+        "count_as_proven_venture": false,
+        "source_public_projection_entry": false,
+        "legacy_member_entry": "/member/foundup.html?id=eduit",
+        "deployed_old_catalog_record": true,
+        "route_get": {
+          "url": "https://foundups.com/f/eduit",
+          "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+          "method": "GET",
+          "max_body_bytes": 262144,
+          "redirects_followed": false,
+          "authenticated": false,
+          "status": 200,
+          "content_type": "text/html; charset=utf-8",
+          "body_truncated": false,
+          "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+          "body_bytes": 38426,
+          "title": "FoundUps Mall | Entry",
+          "markers": {
+            "scope_free_projection": false,
+            "old_member_catalog": true,
+            "holo_stub": false,
+            "generic_foundups_home": false,
+            "back_to_mall": true,
+            "github_link": false,
+            "kosei_brand": false,
+            "gotjunk_brand": false,
+            "firebase_config": false
+          }
+        },
+        "project_explanation": "EDUIT (eSingularity) — autonomous learning platform. Content derived from 012 UnDaoDu channel covering the eSingularity educational initiative.",
+        "truthful_stage": "staging",
+        "poc_app_evidence": "CONTENT_LANE_ONLY_NO_WORKING_EDUCATION_RESEARCH_APP_ESTABLISHED",
+        "github_source_link": "NONE_IN_CATALOG_RECORD",
+        "app_url": null,
+        "mall_backlink": "OLD_GENERIC_TEMPLATE_HAS_/member/_RETURN_SOURCE_PUBLIC_PROJECTION_HAS_NO_RECORD",
+        "token_claims": "NO_TOKEN_SYMBOL_DO_NOT_FABRICATE",
+        "evidence": [
+          {
+            "path": "public/member/mall-video-catalog.json",
+            "kind": "source_identity_and_narrative",
+            "line": 10985
+          },
+          {
+            "path": "docs/audits/pfmall_foundup_identity/CANONICAL_FOUNDUP_INVENTORY.md",
+            "line": 35,
+            "kind": "historical_classification"
+          },
+          {
+            "path": "public/f/index.html",
+            "line": 980,
+            "kind": "source_exact_id_lookup"
+          },
+          {
+            "url": "https://foundups.com/member/mall-video-catalog.json",
+            "kind": "observed_deployed_metadata"
+          }
+        ],
+        "recommended_actions": [
+          "Resolve EDUIT/eSingularity relationship and venture ownership before registry promotion; publish only honest candidate narrative.",
+          "Add public projected discovery metadata only through an approved classifier/projector policy; never fetch the member runtime catalog from the new public renderer.",
+          "Use existing Mall navigation; source/evidence and app links remain missing rather than invented."
+        ]
+      }
+    ],
+    "other_unregistered_candidates": [
+      {
+        "candidate_id": "identity_shield",
+        "classification": "DERIVATIVE_INTAKE_ONLY",
+        "canonical_registry_entry": false,
+        "source_public_landing": "NONE_IDENTIFIED",
+        "project_explanation": "Narrower identity-theft/privacy-defense concept in Shield family.",
+        "truthful_stage": "SPECIFIED_INTAKE_NO_RUNTIME",
+        "github_source": "NO_PUBLIC_PRODUCT_REPO_LINK",
+        "poc_app_url": null,
+        "mall_backlink": "NO_PUBLIC_PAGE",
+        "token_claims": "TOKEN_DEFERRED_NO_WALLET",
+        "evidence": [
+          {
+            "path": "modules/foundups/identity_shield/docs/intake/FOUNDUP_MANIFEST_DRAFT.md",
+            "line": 3,
+            "kind": "draft_not_registration"
+          }
+        ],
+        "recommended_actions": [
+          "Do not merge with shield or use its missing-parent historical note as current authority.",
+          "Only an idea/intake explanation can be proposed; no data upload or chain activation."
+        ]
+      },
+      {
+        "candidate_id": "geoze",
+        "classification": "UNREGISTERED_SKELETON_SOCIAL_IDENTITY_CANDIDATE",
+        "canonical_registry_entry": false,
+        "source_public_landing": "NONE_IDENTIFIED",
+        "project_explanation": "Geoze/GeozeAi/GEOZE COIN historical social surfaces; directory exists but no current registry or product manifest.",
+        "truthful_stage": "UNRESOLVED_CANDIDATE",
+        "github_source": "NO_VERIFIED_PRODUCT_SOURCE_LINK",
+        "poc_app_url": null,
+        "mall_backlink": "NO_PUBLIC_PAGE",
+        "token_claims": "DO_NOT_INFER_LIVE_COIN_FROM_HISTORICAL_NAME",
+        "evidence": [
+          {
+            "path": "docs/audits/pfmall_foundup_identity/CANONICAL_FOUNDUP_INVENTORY.md",
+            "line": 61,
+            "kind": "historical_candidate"
+          }
+        ],
+        "recommended_actions": [
+          "Resolve identities, ownership and intended product before public portfolio or token admission."
+        ]
+      }
+    ],
+    "source_hashes": [
+      {
+        "path": "modules/foundups/foundup_registry.json",
+        "sha256": "aae1f9074ae4fac5541b2e41e7b4be9a629d6398bc5971e5cab75147cc5787ea",
+        "bytes": 25723
+      },
+      {
+        "path": "public/member/mall-video-catalog.json",
+        "sha256": "1295357e3125b9e2527f3b8fa005761ca99890c2f187c96549aaaf7561301de1",
+        "bytes": 510862
+      },
+      {
+        "path": "public/f/public_catalog.json",
+        "sha256": "519dfb90e5367fc300bec08a2a05a39d1bee341ecafa9c8626f24387d629a8ff",
+        "bytes": 2219
+      },
+      {
+        "path": "public/f/index.html",
+        "sha256": "c93aa56a886c42371bcc69fa68533449c2655779dea8c1018b4f81a5c04d7fe5",
+        "bytes": 53933
+      },
+      {
+        "path": "public/f/holoindex_prod_01/index.html",
+        "sha256": "0543139cf453fbad3ab4738753cdaa503e6c2a9e79015c96c78c7a54604c4436",
+        "bytes": 875
+      },
+      {
+        "path": "public/f/holoindex_prod_01/js/connector.js",
+        "sha256": "5566ddf19461c1954caaac418469bfc14dcb637c8ceeaab782b4351f39a62520",
+        "bytes": 1108
+      },
+      {
+        "path": "public/kosei/index.html",
+        "sha256": "f47b6b12a56ac432f76dc07464cc8f864257680a4b491236b7d900f22dfbff0a",
+        "bytes": 13420
+      },
+      {
+        "path": "public/kosei/app/index.html",
+        "sha256": "89d8360eb67f95b0390a26cedfd9177238f7d366f32a6871905e2cc406adfd31",
+        "bytes": 10304
+      },
+      {
+        "path": "public/member/foundup.html",
+        "sha256": "2a26210878aa8d4d717f8a7422ca88c2847caee330516b5c27fa65effb76e63b",
+        "bytes": 31124
+      },
+      {
+        "path": "firebase.json",
+        "sha256": "fa0f559fbb5a3786673c3f814570a29bb3da832e8c516a5fced2bb83bc4fcaac",
+        "bytes": 2577
+      }
+    ],
+    "http_observations": [
+      {
+        "url": "https://foundups.com/f/gotjunk_001",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "body_bytes": 38426,
+        "title": "FoundUps Mall | Entry",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": true,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": true,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://foundups.com/f/kosei",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "body_bytes": 38426,
+        "title": "FoundUps Mall | Entry",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": true,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": true,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://foundups.com/f/voteballots",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "body_bytes": 38426,
+        "title": "FoundUps Mall | Entry",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": true,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": true,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://foundups.com/f/trade",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "body_bytes": 38426,
+        "title": "FoundUps Mall | Entry",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": true,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": true,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://foundups.com/f/magadoom_001",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "body_bytes": 38426,
+        "title": "FoundUps Mall | Entry",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": true,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": true,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://foundups.com/f/antifafm_001",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "body_bytes": 38426,
+        "title": "FoundUps Mall | Entry",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": true,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": true,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://foundups.com/f/pfmall",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "body_bytes": 38426,
+        "title": "FoundUps Mall | Entry",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": true,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": true,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://foundups.com/f/agent_market",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "body_bytes": 38426,
+        "title": "FoundUps Mall | Entry",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": true,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": true,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://foundups.com/f/move2japan",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "body_bytes": 38426,
+        "title": "FoundUps Mall | Entry",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": true,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": true,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://foundups.com/f/simulator",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "body_bytes": 38426,
+        "title": "FoundUps Mall | Entry",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": true,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": true,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://foundups.com/f/social_twin",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "body_bytes": 38426,
+        "title": "FoundUps Mall | Entry",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": true,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": true,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://foundups.com/f/autopost",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "body_bytes": 38426,
+        "title": "FoundUps Mall | Entry",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": true,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": true,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://foundups.com/f/pqn_portal",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "body_bytes": 38426,
+        "title": "FoundUps Mall | Entry",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": true,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": true,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://foundups.com/f/science_swarm_hub",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "body_bytes": 38426,
+        "title": "FoundUps Mall | Entry",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": true,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": true,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://foundups.com/f/holoindex_prod_01",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 301,
+        "location": "/f/holoindex_prod_01/",
+        "error_type": "HTTPError"
+      },
+      {
+        "url": "https://foundups.com/f/shield",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "body_bytes": 38426,
+        "title": "FoundUps Mall | Entry",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": true,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": true,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://foundups.com/f/undaodu",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "body_bytes": 38426,
+        "title": "FoundUps Mall | Entry",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": true,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": true,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://foundups.com/f/foundups_main",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "body_bytes": 38426,
+        "title": "FoundUps Mall | Entry",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": true,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": true,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://foundups.com/f/linkedin_012",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "body_bytes": 38426,
+        "title": "FoundUps Mall | Entry",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": true,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": true,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://foundups.com/f/linkedin_esingularity",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "body_bytes": 38426,
+        "title": "FoundUps Mall | Entry",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": true,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": true,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://foundups.com/f/linkedin_tsingularity",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "body_bytes": 38426,
+        "title": "FoundUps Mall | Entry",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": true,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": true,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://foundups.com/f/linkedin_foundups",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "body_bytes": 38426,
+        "title": "FoundUps Mall | Entry",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": true,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": true,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://foundups.com/f/eduit",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "body_bytes": 38426,
+        "title": "FoundUps Mall | Entry",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": true,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": true,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://foundups.com/f/",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "body_bytes": 38426,
+        "title": "FoundUps Mall | Entry",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": true,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": true,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://foundups.com/f/public_catalog.json",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "body_bytes": 38426,
+        "title": "FoundUps Mall | Entry",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": true,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": true,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://foundups.com/member/",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "a09fb4398bc20ee3b0f0c54e615b4fbc990501e30e012f8bdfa6184ed0808f05",
+        "body_bytes": 50610,
+        "title": "p.fMALL | FoundUPS",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": true,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": false,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": true
+        }
+      },
+      {
+        "url": "https://foundups.com/holoindex",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "d78e5f63599ceea035232f9955b9cde25452b2652073e0e3fe635154224feeeb",
+        "body_bytes": 98748,
+        "title": "FoundUPS — Where Will You Aim Your Compute?",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": false,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": false,
+          "github_link": true,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": true
+        }
+      },
+      {
+        "url": "https://foundups.com/f/holoindex_prod_01/",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "eacdb2cf9012b365f4ab22001edbb9a3491034ca2990100fdb09929d7a40fbac",
+        "body_bytes": 419,
+        "title": "HoloIndex",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": false,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": false,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://foundups.com/kosei/",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "d78e5f63599ceea035232f9955b9cde25452b2652073e0e3fe635154224feeeb",
+        "body_bytes": 98748,
+        "title": "FoundUPS — Where Will You Aim Your Compute?",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": false,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": false,
+          "github_link": true,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": true
+        }
+      },
+      {
+        "url": "https://foundupscom.web.app/kosei/app/",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": false,
+        "body_sha256": "779e0e443b4381e30cdf708846877eb177f2dd1bb05c4e961bb49b9a2192f687",
+        "body_bytes": 10549,
+        "title": "Kosei - Client Workspace",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": false,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": false,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://gotjunk-56566376153.us-west1.run.app/",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html",
+        "body_truncated": false,
+        "body_sha256": "ed2804179c10fb85153e1c1b88e7d7f856bd521f1e528d15231547d44958e8e6",
+        "body_bytes": 1565,
+        "title": "GotJUNK?",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": false,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": false,
+          "github_link": false,
+          "kosei_brand": false,
+          "gotjunk_brand": true,
+          "firebase_config": false
+        }
+      },
+      {
+        "url": "https://autopost.foundups.com",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": null,
+        "error_type": "URLError",
+        "error": "<urlopen error timed out>"
+      },
+      {
+        "url": "https://kosei.ai",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": null,
+        "error_type": "URLError",
+        "error": "<urlopen error timed out>"
+      },
+      {
+        "url": "https://github.com/FOUNDUPS/autopost",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 404,
+        "location": null,
+        "error_type": "HTTPError"
+      },
+      {
+        "url": "https://github.com/FOUNDUPS/science-swarm-hub",
+        "checked_at_utc": "2026-10-21T18:19:47.746168+00:00",
+        "method": "GET",
+        "max_body_bytes": 262144,
+        "redirects_followed": false,
+        "authenticated": false,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_truncated": true,
+        "body_sha256": "d3178b2546e17037a9838cc46b57a37fa99f8c796a42623fb87ca96a49020631",
+        "body_bytes": 262144,
+        "title": "GitHub - FOUNDUPS/science-swarm-hub: Science Swarm Hub FoundUp — PQN work registry, rESP submissions, verification, and contribution measurement (Python package: pqn_swarm_hub). · ",
+        "markers": {
+          "scope_free_projection": false,
+          "old_member_catalog": false,
+          "holo_stub": false,
+          "generic_foundups_home": false,
+          "back_to_mall": false,
+          "github_link": true,
+          "kosei_brand": false,
+          "gotjunk_brand": false,
+          "firebase_config": false
+        }
+      }
+    ],
+    "live_detail_observations": [
+      {
+        "url": "https://foundups.com/member/mall-video-catalog.json",
+        "checked_at_utc": "2026-10-21T18:20:46.283899+00:00",
+        "status": 200,
+        "content_type": "application/json",
+        "body_bytes": 499716,
+        "body_truncated": false,
+        "body_sha256": "1d9f63044e2f1a4d05abfbf31e52006840de61099eadf801f7b88977e6868e6a",
+        "entities": [
+          {
+            "foundup_id": "move2japan",
+            "title": "Move to Japan",
+            "source_type": "youtube_channel",
+            "entry_url": null,
+            "external_url": null,
+            "launch_readiness": "discoverable_only",
+            "lifecycle_stage": "active",
+            "description": "012 documents life in rural Japan — relocation, culture, and political activism through the FFCPLN movement. 573 videos spanning daily life, resistance music, and community building.",
+            "token_symbol": null
+          },
+          {
+            "foundup_id": "undaodu",
+            "title": "UnDaoDu",
+            "source_type": "youtube_channel",
+            "entry_url": null,
+            "external_url": null,
+            "launch_readiness": "discoverable_only",
+            "lifecycle_stage": "active",
+            "description": "012 personal channel covering music production, political commentary, and creative experiments. The longest-running content lane in the FoundUPS ecosystem.",
+            "token_symbol": null
+          },
+          {
+            "foundup_id": "foundups_main",
+            "title": "FoundUps",
+            "source_type": "youtube_channel",
+            "entry_url": null,
+            "external_url": null,
+            "launch_readiness": "discoverable_only",
+            "lifecycle_stage": "active",
+            "description": "Official FoundUPS YouTube presence. Product updates, ecosystem explainers, and development milestones.",
+            "token_symbol": null
+          },
+          {
+            "foundup_id": "antifafm",
+            "title": "antifaFM",
+            "source_type": "youtube_channel",
+            "entry_url": null,
+            "external_url": null,
+            "launch_readiness": "discoverable_only",
+            "lifecycle_stage": "proto",
+            "description": "24/7 headless radio broadcaster with visual layers. Bridges Icecast to YouTube Live via FFmpeg. The broadcast stack is real.",
+            "token_symbol": null
+          },
+          {
+            "foundup_id": "linkedin_012",
+            "title": "012 LinkedIn",
+            "source_type": "linkedin_profile",
+            "entry_url": null,
+            "external_url": null,
+            "launch_readiness": "discoverable_only",
+            "lifecycle_stage": "staging",
+            "description": "012 LinkedIn professional presence. No video content yet — lane reserved for future cross-platform content bridging.",
+            "token_symbol": null
+          },
+          {
+            "foundup_id": "linkedin_esingularity",
+            "title": "eSingularity",
+            "source_type": "linkedin_profile",
+            "entry_url": null,
+            "external_url": null,
+            "launch_readiness": "discoverable_only",
+            "lifecycle_stage": "staging",
+            "description": "eSingularity LinkedIn page focused on AI education. No video content yet — lane reserved for future content.",
+            "token_symbol": null
+          },
+          {
+            "foundup_id": "linkedin_tsingularity",
+            "title": "tSingularity",
+            "source_type": "linkedin_profile",
+            "entry_url": null,
+            "external_url": null,
+            "launch_readiness": "discoverable_only",
+            "lifecycle_stage": "staging",
+            "description": "tSingularity LinkedIn page focused on technological singularity research. No video content yet — lane reserved.",
+            "token_symbol": null
+          },
+          {
+            "foundup_id": "linkedin_foundups",
+            "title": "FoundUps LinkedIn",
+            "source_type": "linkedin_profile",
+            "entry_url": null,
+            "external_url": null,
+            "launch_readiness": "discoverable_only",
+            "lifecycle_stage": "staging",
+            "description": "Official FoundUPS LinkedIn company page. No video content yet — lane reserved for corporate and ecosystem updates.",
+            "token_symbol": null
+          },
+          {
+            "foundup_id": "eduit",
+            "title": "EDUIT",
+            "source_type": "derived",
+            "entry_url": null,
+            "external_url": null,
+            "launch_readiness": "discoverable_only",
+            "lifecycle_stage": "staging",
+            "description": "EDUIT (eSingularity) — autonomous learning platform. Content derived from 012 UnDaoDu channel covering the eSingularity educational initiative.",
+            "token_symbol": null
+          },
+          {
+            "foundup_id": "science_swarm",
+            "title": "Science Swarm Hub",
+            "source_type": "github_repo",
+            "entry_url": null,
+            "external_url": "https://github.com/FOUNDUPS/science-swarm-hub",
+            "launch_readiness": "discoverable_only",
+            "lifecycle_stage": "externalized",
+            "description": "Science Swarm Hub — multi-agent research coordination platform for PQN alignment and scientific inquiry.",
+            "token_symbol": null
+          },
+          {
+            "foundup_id": "autopost",
+            "title": "AutoPost",
+            "source_type": "external_app",
+            "entry_url": null,
+            "external_url": "https://autopost.foundups.com",
+            "launch_readiness": "discoverable_only",
+            "lifecycle_stage": "externalized",
+            "description": "AutoPost — AI-powered camera-to-post content engine. Externalized product FoundUp with own repo and domain.",
+            "token_symbol": null
+          },
+          {
+            "foundup_id": "kosei",
+            "title": "Kosei AI Systems",
+            "source_type": "internal_service",
+            "entry_url": null,
+            "external_url": "https://kosei.ai",
+            "launch_readiness": "discoverable_only",
+            "lifecycle_stage": "incubating",
+            "description": "Kosei AI Systems — AI content automation service for businesses. Internal service FoundUp with planned production domain.",
+            "token_symbol": "KOSEI"
+          },
+          {
+            "foundup_id": "gotjunk_001",
+            "title": "GotJunk",
+            "source_type": "internal_app",
+            "entry_url": null,
+            "external_url": null,
+            "launch_readiness": "conditional",
+            "lifecycle_stage": "proto",
+            "description": "Peer-to-peer marketplace for selling unwanted items. List it, price it, move it.",
+            "token_symbol": "JUNK"
+          }
+        ]
+      },
+      {
+        "url": "https://foundups.com/f/holoindex_prod_01/",
+        "checked_at_utc": "2026-10-21T18:20:46.580897+00:00",
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_bytes": 419,
+        "body_truncated": false,
+        "body_sha256": "eacdb2cf9012b365f4ab22001edbb9a3491034ca2990100fdb09929d7a40fbac",
+        "text_excerpt": "HoloIndex HoloIndex (Stub) Truthful Bridge Verification Search",
+        "links": [],
+        "fetch_refs": [],
+        "app_markers": {
+          "App Not Ready": false,
+          "Launch App": false,
+          "entry_url": false,
+          "firebase": false,
+          "stub": false,
+          "Stub": true,
+          "Back to Mall": false,
+          "Return to Mall": false
+        }
+      },
+      {
+        "url": "https://foundups.com/f/",
+        "checked_at_utc": "2026-10-21T18:20:46.606258+00:00",
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_bytes": 38426,
+        "body_truncated": false,
+        "body_sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "text_excerpt": "FoundUps Mall | Entry Back to Mall Loading FoundUp... Red Dog Your digital twin This FoundUp Loading... Briefing Suggested actions Readiness guide Ready - live frontend, direct shell handoff when tenant embedding is wired. Conditional - working frontend with known gaps. Will move to ready when conditions clear. Discoverable only - backend service visible in the Mall. No web frontend to load yet. Navigation Use Back to Mall to return and browse other FoundUps. This entry page is deep-linkable. You can share or bookmark this URL. Return to Mall",
+        "links": [
+          "/member/"
+        ],
+        "fetch_refs": [
+          "/member/mall-video-catalog.json"
+        ],
+        "app_markers": {
+          "App Not Ready": true,
+          "Launch App": true,
+          "entry_url": true,
+          "firebase": false,
+          "stub": false,
+          "Stub": false,
+          "Back to Mall": true,
+          "Return to Mall": true
+        }
+      },
+      {
+        "url": "https://foundupscom.web.app/kosei/app/",
+        "checked_at_utc": "2026-10-21T18:20:46.636632+00:00",
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body_bytes": 10549,
+        "body_truncated": false,
+        "body_sha256": "779e0e443b4381e30cdf708846877eb177f2dd1bb05c4e961bb49b9a2192f687",
+        "text_excerpt": "Kosei - Client Workspace Kosei Sign in to your workspace Sign in with Google or Sign in with Email No Workspace Found Your account doesn't have a Kosei workspace yet. If you've completed an audit, your workspace may still be in setup. Contact support to request an audit. Kosei Sign Out Dashboard Platforms Support -- TRIAL EN Trial Status -- Days Left -- Usage -- Platforms Onboarding -- Posting Preferences Reporting 0 Created 0 Published 0 Pending 0 Replies 0 Connected -- Trial Days Connected Platforms Loading platforms... Submit Feedback or Issue Subject Category General Bug Report Feature Request Content Issue Priority Low Medium High Urgent Description Submit Your Issues No issues submitted yet",
+        "links": [],
+        "fetch_refs": [],
+        "app_markers": {
+          "App Not Ready": false,
+          "Launch App": false,
+          "entry_url": false,
+          "firebase": true,
+          "stub": false,
+          "Stub": false,
+          "Back to Mall": false,
+          "Return to Mall": false
+        }
+      },
+      {
+        "url": "https://gotjunk-56566376153.us-west1.run.app/",
+        "checked_at_utc": "2026-10-21T18:20:46.662433+00:00",
+        "status": 200,
+        "content_type": "text/html",
+        "body_bytes": 1565,
+        "body_truncated": false,
+        "body_sha256": "ed2804179c10fb85153e1c1b88e7d7f856bd521f1e528d15231547d44958e8e6",
+        "text_excerpt": "GotJUNK?",
+        "links": [],
+        "fetch_refs": [],
+        "app_markers": {
+          "App Not Ready": false,
+          "Launch App": false,
+          "entry_url": false,
+          "firebase": false,
+          "stub": false,
+          "Stub": false,
+          "Back to Mall": false,
+          "Return to Mall": false
+        }
+      }
+    ],
+    "limitations": [
+      "HTTP200 or matching catalog metadata is not proof of browser-rendered landing or working PoC.",
+      "Timeouts are unavailable observations, not proof a service is permanently down.",
+      "Anonymous GitHub404 does not distinguish private, moved or missing repository.",
+      "Source metadata can be newer than deployment and can conflict with module docs; no state promotion made."
+    ]
+  }
+}

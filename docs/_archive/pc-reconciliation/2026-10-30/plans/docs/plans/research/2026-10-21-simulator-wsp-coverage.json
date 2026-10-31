@@ -1,0 +1,300 @@
+{
+  "projection": {
+    "schema": "foundups.pc-reconciliation.historical-projection.v1",
+    "record_kind": "historical_projection_not_current_acceptance",
+    "source_path": "docs/plans/research/2026-10-21-simulator-wsp-coverage.json",
+    "original_pc_head": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+    "source_full_file_sha256": "aae4535d44dbb277977221882fe94c46ecd70c11ad230eb5914afbaeed1164b1",
+    "preserved_record_sha256": "aae4535d44dbb277977221882fe94c46ecd70c11ad230eb5914afbaeed1164b1",
+    "projection_created_at_utc": "2026-10-30T02:00:12.626831+00:00",
+    "projection_timestamp_is_not_an_observation": true,
+    "comparison_reference": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+    "disposition": "Publish the original simulator WSP coverage in a historical envelope. Keep original head/date/hash scope; it does not validate current proof handling, supply caps or epoch budgeting.",
+    "current_owners": [
+      "modules/foundups/simulator/ROADMAP.md"
+    ],
+    "original_observation_timestamps": "Retained in historical content; no observation is rerun or redated.",
+    "publication_status": "Proposed, pending independent auditor acceptance; not published by this worker.",
+    "runtime_and_commenting": "UNVERIFIED"
+  },
+  "historical_record": {
+    "date": "2026-10-21",
+    "head": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+    "scope": "Canonical framework numbered protocols assigned simulator/economics lane; full source text consumed in bounded chunks. Includes WSP29 Memex addendum as architecture clarification. WSP87-96,102,105,108 delegated back to parent. No numbered canonical WSP>=110 found.",
+    "files": [
+      {
+        "path": "WSP_framework/src/WSP_100_DAE_SmartDAO_Escalation_Protocol.md",
+        "sha256": "22a93681f0a404da51063317474e3511bec08a32655d2d6a3e70166b43db373a",
+        "bytes": 46428,
+        "lines": 1060,
+        "words": 5354,
+        "read_mode": "full_text",
+        "read_ranges": [
+          1,
+          1060
+        ],
+        "reviewer": "simulator_economics"
+      },
+      {
+        "path": "WSP_framework/src/WSP_101_UPS_Utility_Classification_Protocol.md",
+        "sha256": "b2bf9a735ebf926e3aa567e7fa6ba288480669233c1b0fbbdd0719d67b904c7c",
+        "bytes": 12637,
+        "lines": 391,
+        "words": 1749,
+        "read_mode": "full_text",
+        "read_ranges": [
+          1,
+          391
+        ],
+        "reviewer": "simulator_economics"
+      },
+      {
+        "path": "WSP_framework/src/WSP_103_FoundUp_Federation_Protocol.md",
+        "sha256": "120468d4378b101b97c50668b3847908d3b7a6650916bc47c683df0d99a2e881",
+        "bytes": 18617,
+        "lines": 641,
+        "words": 1959,
+        "read_mode": "full_text",
+        "read_ranges": [
+          1,
+          641
+        ],
+        "reviewer": "simulator_economics"
+      },
+      {
+        "path": "WSP_framework/src/WSP_104_FoundUp_Route_Namespace_and_Tenant_Isolation_Protocol.md",
+        "sha256": "2606bb6fe81032a205f1652eb13c777d0d6aadaa9260e3933599d48f86b3ec00",
+        "bytes": 13757,
+        "lines": 447,
+        "words": 1886,
+        "read_mode": "full_text",
+        "read_ranges": [
+          1,
+          447
+        ],
+        "reviewer": "simulator_economics"
+      },
+      {
+        "path": "WSP_framework/src/WSP_106_FoundUp_API_Gateway_Protocol.md",
+        "sha256": "c8380eb89088f63ed4a037121d4852816c266382298d7012663b45dc874b4a80",
+        "bytes": 18542,
+        "lines": 740,
+        "words": 1748,
+        "read_mode": "full_text",
+        "read_ranges": [
+          1,
+          740
+        ],
+        "reviewer": "simulator_economics"
+      },
+      {
+        "path": "WSP_framework/src/WSP_107_Intelligent_Internet_Orchestration_Vision.md",
+        "sha256": "e276eae074271889f1bca5e156f75f94520154b1c4c55950eb9c3c45fe5ebe38",
+        "bytes": 6107,
+        "lines": 107,
+        "words": 864,
+        "read_mode": "full_text",
+        "read_ranges": [
+          1,
+          107
+        ],
+        "reviewer": "simulator_economics"
+      },
+      {
+        "path": "WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md",
+        "sha256": "21cc5eb038f443e464fcf70f109054760932da81c72bf5b15af14edbd673c0ec",
+        "bytes": 25708,
+        "lines": 911,
+        "words": 3531,
+        "read_mode": "full_text",
+        "read_ranges": [
+          1,
+          911
+        ],
+        "reviewer": "simulator_economics"
+      },
+      {
+        "path": "WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md",
+        "sha256": "0b9f6c95bd0d2dafd615a9f61f8f1c784417d710f2a42443fdefd73212f4d33c",
+        "bytes": 71482,
+        "lines": 1604,
+        "words": 9343,
+        "read_mode": "full_text",
+        "read_ranges": [
+          1,
+          1604
+        ],
+        "reviewer": "simulator_economics"
+      },
+      {
+        "path": "WSP_framework/src/WSP_27_pArtifact_DAE_Architecture.md",
+        "sha256": "575c0684b7d225c805453539c190e941309a35c2afdecfd7cc775da7576c7319",
+        "bytes": 56626,
+        "lines": 975,
+        "words": 7829,
+        "read_mode": "full_text",
+        "read_ranges": [
+          1,
+          975
+        ],
+        "reviewer": "simulator_economics"
+      },
+      {
+        "path": "WSP_framework/src/WSP_29_CABR_Engine.md",
+        "sha256": "476614a6c9e6920377efb62042eacc043444b83a9cf978fa8bfbb3f87f15f840",
+        "bytes": 20466,
+        "lines": 561,
+        "words": 2209,
+        "read_mode": "full_text",
+        "read_ranges": [
+          1,
+          561
+        ],
+        "reviewer": "simulator_economics"
+      },
+      {
+        "path": "WSP_framework/src/WSP_29_CABR_MEMEX_AUTHORITY_ADDENDUM.md",
+        "sha256": "6f1059661988c354e634edda1f8a5d63907a658547e2eaf4f09268b75f4a519b",
+        "bytes": 3736,
+        "lines": 106,
+        "words": 482,
+        "read_mode": "full_text",
+        "read_ranges": [
+          1,
+          106
+        ],
+        "reviewer": "simulator_economics"
+      },
+      {
+        "path": "WSP_framework/src/WSP_80_Cube_Level_DAE_Orchestration_Protocol.md",
+        "sha256": "9a570dabf00623120dacf58cb6e8309a9a36be09bb4c94eb687f26c3ef89146c",
+        "bytes": 11040,
+        "lines": 262,
+        "words": 1590,
+        "read_mode": "full_text",
+        "read_ranges": [
+          1,
+          262
+        ],
+        "reviewer": "simulator_economics"
+      },
+      {
+        "path": "WSP_framework/src/WSP_81_Framework_Backup_Governance_Protocol.md",
+        "sha256": "ead8c0d6a681fa4c5c073990bae7473ce6971bdd140075fc469928e5a1b3e584",
+        "bytes": 12573,
+        "lines": 326,
+        "words": 1469,
+        "read_mode": "full_text",
+        "read_ranges": [
+          1,
+          326
+        ],
+        "reviewer": "simulator_economics"
+      },
+      {
+        "path": "WSP_framework/src/WSP_82_Citation_Cross_Reference_Protocol.md",
+        "sha256": "2ec68c6477e8e553a8d50d81f023fed3942f3a8ea50a35524debd8040b10a956",
+        "bytes": 6971,
+        "lines": 197,
+        "words": 969,
+        "read_mode": "full_text",
+        "read_ranges": [
+          1,
+          197
+        ],
+        "reviewer": "simulator_economics"
+      },
+      {
+        "path": "WSP_framework/src/WSP_83_Documentation_Tree_Attachment_Protocol.md",
+        "sha256": "a18e4fbdbf0bd19167693183ac092fa78c527ad3ac5c45019f3514be89191fb3",
+        "bytes": 11651,
+        "lines": 343,
+        "words": 1450,
+        "read_mode": "full_text",
+        "read_ranges": [
+          1,
+          343
+        ],
+        "reviewer": "simulator_economics"
+      },
+      {
+        "path": "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+        "sha256": "b3e7a654dccda6275a720398315606c894a1b7e5a06c083a9257e6b0a6aeb345",
+        "bytes": 15702,
+        "lines": 468,
+        "words": 2058,
+        "read_mode": "full_text",
+        "read_ranges": [
+          1,
+          468
+        ],
+        "reviewer": "simulator_economics"
+      },
+      {
+        "path": "WSP_framework/src/WSP_85_Root_Directory_Protection.md",
+        "sha256": "45691e9a3030c56121899e81a427cd5c0ed4b945611d2eb5cc480cc396774b9c",
+        "bytes": 10264,
+        "lines": 281,
+        "words": 1186,
+        "read_mode": "full_text",
+        "read_ranges": [
+          1,
+          281
+        ],
+        "reviewer": "simulator_economics"
+      },
+      {
+        "path": "WSP_framework/src/WSP_86_0102_Modular_Navigation_Protocol.md",
+        "sha256": "05274f4aed1b68bff42512c1d1cf02505fb923d24cedf175d7a3733ec68a530d",
+        "bytes": 18170,
+        "lines": 468,
+        "words": 2110,
+        "read_mode": "full_text",
+        "read_ranges": [
+          1,
+          468
+        ],
+        "reviewer": "simulator_economics"
+      },
+      {
+        "path": "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md",
+        "sha256": "5dcb531b5eac2cbd77bce102b5ccee650f230a0576124a7c97cfdbf4c357b263",
+        "bytes": 33156,
+        "lines": 778,
+        "words": 4343,
+        "read_mode": "full_text",
+        "read_ranges": [
+          1,
+          778
+        ],
+        "reviewer": "simulator_economics"
+      },
+      {
+        "path": "WSP_framework/src/WSP_98_FoundUps_Mesh_Native_Architecture_Protocol.md",
+        "sha256": "2903f5cd6c18b18383d16ca37a62746d88e793df56c19d0fceb07af396615e18",
+        "bytes": 9576,
+        "lines": 223,
+        "words": 1286,
+        "read_mode": "full_text",
+        "read_ranges": [
+          1,
+          223
+        ],
+        "reviewer": "simulator_economics"
+      },
+      {
+        "path": "WSP_framework/src/WSP_99_M2M_Prompting.md",
+        "sha256": "0895cb9169470faa00d1d242e785850b6bece3fc92a6b7bad0c90a51d8a147d3",
+        "bytes": 11789,
+        "lines": 456,
+        "words": 1497,
+        "read_mode": "full_text",
+        "read_ranges": [
+          1,
+          456
+        ],
+        "reviewer": "simulator_economics"
+      }
+    ]
+  }
+}

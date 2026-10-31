@@ -1,3 +1,19 @@
+## Preserved PC guidance and assertion recovery — 2026-10-31
+
+Recover the call-safety education skill, generated Codex mirror, module research
+and 28 synthetic cases without implementing telephony or granting runtime effects.
+The existing DAE assertion now accepts the identity casing already accepted by
+production. Offline source-bound replay rejects the old assertion on lowercase
+and uppercase replies; the candidate accepts both and native fallback, while two
+invalid-output controls still fail. Model/provider, observation and persistence
+collaborators are synthetic or disabled; no live runtime is qualified.
+The first harness attempt stopped at an incorrect patch target and remains saved.
+
+The [dated recovery review](../../../docs/_archive/pc-reconciliation/2026-10-30/REVALIDATION_20261031.md)
+separates original evidence from current source review. Historical logs stay in
+the archive, not new success entries. Independent final-source review and exact
+head/main publication gates remain required. WSP 5/6/22/50/84/97.
+
 ## 2026-10-30 — Connect resident assurance and held-out receipt consumption
 
 WSP 5/10/11/15/22/48/50/97. Main's enabled serial startup now supplies the

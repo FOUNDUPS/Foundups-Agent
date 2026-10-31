@@ -1,3 +1,17 @@
+## PC local recovery candidate metadata — 2026-10-31
+
+The checksum-pinned Gitleaks 8.30.1 changed-file scan reports two findings:
+an unchanged synthetic security-test fixture and unchanged historical bridge
+ModLog prose. The worker compared each unique line and five-line context with
+main4050bdf880a2974511377a510a859f70101ea478 and its prior reviewed binding.
+Append only their two current file/path/rule/line fingerprints, preserving all
+2,991 prior entries (2,993 total). Independent exact-source review is pending;
+these proposed bindings do not claim that review has occurred.
+
+No scanner rules, exclusions, scope or fingerprint calculation changed. The
+local scan covers changed files only; fresh hosted full-tree/introduced-history
+checks remain separate required gates. No raw finding values are published.
+
 ## PR2276 receipt-runtime metadata rebinding — 2026-10-30
 
 After the held-out producer/consumer repair, checksum-pinned Gitleaks8.30.1
