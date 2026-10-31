@@ -1,3 +1,20 @@
+## PC recovery assertion qualification — 2026-10-31
+
+Source base 4050bdf880a2974511377a510a859f70101ea478. Existing test replay uses real
+DAE process/planner/conversation/identity/result code and synthetic isolated
+collaborators. Baseline: native fallback passes, lowercase and uppercase identity
+replies fail the casing assertion. Candidate: all three pass; two deliberately
+invalid-output controls are rejected. The Python audit-hook guard recorded no
+socket/DNS, subprocess, private-file or outside-fixture write attempts; it is not
+OS-level confinement. Eight Windows asyncio self-pipe fixtures precede that guard.
+The initial harness failed before the assertion because it named a nonexistent
+patch target; that attempt and its timestamp are retained. No live model, daemon,
+provider, telephony, memory admission or commenting result follows.
+
+Call-safety cases remain structural criteria only. Historical October log totals
+are preserved in the recovery archive and are not current test results. Final
+candidate/auditor and hosted head/main gates remain separate. WSP 5/6/22/50/97.
+
 ## 2026-10-30 — Main assurance binding regression
 
 Follow-on hosted run40999255647 reached verification but failed Memex evidence

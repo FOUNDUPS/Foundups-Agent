@@ -1,3 +1,18 @@
+## Preserved identity assertion and call-safety education
+
+`TestEndToEndProcess.test_conversation_returns_response` checks nonempty identity
+output. Its case-insensitive `digital twin` alternative follows the existing
+production `_ensure_conversation_identity` contract; it does not relax identity
+presence. Offline qualification uses synthetic model responses and the actual
+DAE process/normalization boundary, with unrelated runtime/storage owners isolated.
+Lowercase/uppercase identity replies expose the old casing mismatch; unrelated
+and empty output remain rejected by the assertion. Do not run this constructor
+selection against live credentials, model or daemon owners to reproduce it.
+
+The call-safety JSON under `docs/fixtures` contains 28 synthetic review criteria,
+not an executed classifier or audio benchmark. Structural/skill/link checks do
+not establish spoof resistance or permit calls. See the [dated source review](../../../../docs/_archive/pc-reconciliation/2026-10-30/REVALIDATION_20261031.md).
+
 ## Resident assurance startup binding
 
 `test_reddog_main_resident_socket_chain.py` covers main's actual AgentDB binding,

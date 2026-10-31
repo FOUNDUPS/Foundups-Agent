@@ -1,3 +1,12 @@
+## Recover pitch instruction interface navigation — 2026-10-31
+
+Restore the preserved interface entry using main's existing v0.1.3 pitch owner
+and canonical FX/media contracts. It remains a local instruction skill without
+a callable executor, WRE admission, resident trigger or publication grant.
+Earlier pitch plans/log additions are retained as dated archive projections;
+no old skill version or campaign-placeholder description replaces main.
+No campaign, provider, asset upload or social posting occurred. WSP 11/22/50/84/97.
+
 ## 2026-10-29: Reconcile existing editorial-package PR #2238
 
 WSP 11/22/50/71/84/97. Preserve the original compiler/strict content route while

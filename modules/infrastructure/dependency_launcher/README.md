@@ -95,7 +95,9 @@ Environment variables:
 | `FOUNDUPS_CHROME_PORT` | `9222` | Chrome debug port |
 | `CHROME_PROFILE_PATH` | `O:/Foundups-Agent/.../youtube_move2japan/chrome` | Chrome profile |
 | `LM_STUDIO_PATH` | auto-detected (supports `E:\LM_studio\LM Studio\LM Studio.exe`) | LM Studio executable |
-| `LM_STUDIO_PORT` | `1234` | LM Studio API port |
+| `LM_STUDIO_PORT` | `1234` | Native LM Studio / `llmster` API port |
+| `LMS_CLI_PATH` | auto-detected from PATH/per-user installation | Explicit override for the existing LM Studio CLI |
+| `LM_STUDIO_PREFER_LLMSTER` | `true` | Prefer bounded headless startup; false does not authorize a cold GUI launch |
 
 > For this environment (UI-TARS vision required), set:
 > ```

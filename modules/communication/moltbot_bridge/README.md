@@ -1413,3 +1413,12 @@ coerced or trimmed. Existing invalid-cache errors still propagate first.
 ### Correspondence authority status — 2026-10-06
 
 For #1779, the legacy V2 JavaScript sender boundary is a quarantined fail-closed compatibility surface. The canonical implementation is the service-owned Python `CorrespondenceSenderBoundary` in `src/reddog_correspondence_sender_boundary.py`. Repository tests qualify that contract only; external Gmail/Work capability isolation remains a deployment/host requirement and must not be inferred from source or a successful individual send.
+
+## Phone-call safety education
+
+[RedDog call safety](../../../.agents/skills/reddog-call-safety/SKILL.md) provides
+WSP 97 call/turn review, missed-call evidence handling, Japan telephony research,
+and offline attack/benign evaluation cases. This is an education package;
+phone integration and runtime enforcement are `SPECIFIED_NOT_IMPLEMENTED`.
+See its [research notes](docs/REDDOG_CALL_SAFETY_RESEARCH_20261013.md)
+before reusing the existing voice ingestion or synthetic chat routing.

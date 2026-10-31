@@ -1,3 +1,20 @@
+## Preserved PC source and historical evidence recovery — 2026-10-31
+
+Prepare one recovery lane from main4050bdf880a2974511377a510a859f70101ea478:
+the reviewed nine-file source proposal and 42 historical text projections with
+three archive support files. Rehash all54 inputs and the86 original saved files;
+keep historical dates and exact source classes. Remove the private junction path
+from public continuity text, add a separately dated review, and qualify the DAE
+casing assertion against its existing identity contract. No production behavior,
+current owner roadmap or historical test outcome is replaced.
+
+The existing reconciliation checkout has a new protected branch; its prior
+abd812 branch and ignored files remain. Original PC/release/Holo owners are
+separate. Final source audit, immutable commit/head readback, hosted checks,
+merge and main verification are pending. Runtime/commenting remain unverified.
+See [the recovery record](docs/_archive/pc-reconciliation/2026-10-30/REVALIDATION_20261031.md).
+WSP 00/5/6/10/11/22/50/60/84/97.
+
 ## 2026-10-30 — RSI resident assurance connection
 
 WSP 5/10/15/22/48/50/97. Audit current7d6a292b and extend the existing main/AgentDB

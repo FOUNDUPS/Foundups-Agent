@@ -1,3 +1,24 @@
+## PC local publication recovery candidate — 2026-10-31
+
+Owner: root reconciliation lane; worker: partners_worker; independent verifier:
+reconciliation_auditor. Branch `agent/pc-local-recovery-20261031`, observed base
+`4050bdf880a2974511377a510a859f70101ea478`. No candidate commit or PR exists yet.
+The prior `agent/yumori-partner-reconciliation-20261029` remains at
+`abd812a6cbd6955d011b38cc91c1f6b9bb86036d`; ignored build files are preserved.
+
+Prepare the nine-file current-source recovery and 45-file historical package,
+with a private-path redaction, separately dated source review, qualified identity
+assertion and owner records. Current checks and retained exclusions are in the
+[recovery review](../_archive/pc-reconciliation/2026-10-30/REVALIDATION_20261031.md).
+Next: final offline/static/security checks, independent exact-tree review, then
+parent-owned immutable commit/push/PR-head readback and normal head/main gates.
+No prior candidate approval substitutes for this new source review.
+
+Original O-drive synchronization, other open PRs, media/legacy helper ownership,
+credentials and live runtime/commenting verification remain separate. The
+historical ledger entries below retain their original scope and timestamps.
+WSP 10/22/50/97.
+
 # Active Slice Ledger
 
 ## Video proposal reconciliation and editorial close-out — 2026-10-29

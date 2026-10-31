@@ -1932,7 +1932,7 @@ class TestEndToEndProcess:
         ))
         assert isinstance(result, str)
         assert len(result) > 0
-        assert "0102" in result or "Digital Twin" in result
+        assert "0102" in result or "digital twin" in result.lower()
 
     def test_blocked_command_returns_security_block(self):
         """Non-commander COMMAND returns an explicit security block."""

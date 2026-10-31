@@ -1,3 +1,12 @@
+## Recover documented native startup configuration — 2026-10-31
+
+Complete the README configuration table for the existing `LMS_CLI_PATH` and
+`LM_STUDIO_PREFER_LLMSTER` settings. Source review confirms the current facade
+passes the preference to the bounded startup owner; false does not authorize a
+cold GUI launch. No implementation, model default, autoload or startup test is
+replaced. Old helper API-v1 deltas remain preserved for lifecycle-owner review.
+This is documentation recovery, not a fresh server/model observation. WSP 11/22/50/97.
+
 # Dependency Launcher Module - ModLog
 
 ## 2026-10-29 — Local bounded native server startup layer

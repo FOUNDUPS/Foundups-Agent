@@ -7,6 +7,15 @@
 
 ## Public API
 
+### Local pitch-package instruction entry (prototype)
+
+`skillz/foundup_pitch_package/SKILLz.md` produces a versioned brief, narration/storyboard
+and companion deck from existing Outcome/Solution/Pain evidence. The Codex entry is
+`.agents/skills/foundup-pitch-package/SKILL.md` at repository root. It has no callable
+executor, WRE registry admission, resident trigger or publication authority. Use the
+current Skillz and `docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md`
+for the media-admission and separately granted campaign boundaries.
+
 ### Source-backed editorial package
 
 ```python
