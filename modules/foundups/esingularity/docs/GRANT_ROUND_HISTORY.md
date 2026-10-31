@@ -49,7 +49,7 @@ Dates are ISO calendar dates. Times are JST. A dash means not established in thi
 | F-10-2026-R3 | METI/SII ZEB demonstration / subsidy | FY2026 / 3 | 2026-09-18 | — | 2026-10-09 17:00 | CLOSED | VERIFIED PROGRAM; building-owner eligibility unresolved | 2026-11-02 | S10 |
 | F-11-2025S-R4 | SII energy/non-fossil equipment / subsidy | FY2025 supplementary / 4 | 2026-10-05 | Tracked postal delivery; no hand delivery | 2026-10-30 17:00 received | CLOSED confirmed by SII 2026-10-30; fifth call unannounced | VERIFIED PROGRAM; no YUMORI eligibility/application established | 2026-10-27 | S11 |
 | F-12-2026-R3 | Low-carbon-material new-build ZEB / subsidy | FY2026 / 3, final FY2026 call per SERA | 2026-10-16 | Submission method to verify with SERA | 2026-12-15 17:00 JST received (MOE 10/16 release; verified 10/30) | OPEN | VERIFIED PROGRAM; new construction only, not existing-school/onsen retrofit | 2026-11-02 | S12 |
-| F-13-2026-R1 | Fukui enterprise self-consumption PV/battery / subsidy | FY2026 / annual call, prior existing | 2026-04-17 | Budget exhaustion may close early; email submission, no official clock established | 2026-10-31; hour unverified | PUBLISHED OPEN; current budget availability not independently evidenced | VERIFIED PROGRAM; no YUMORI project eligibility/application | 2026-10-28 | S14 |
+| F-13-2026-R1 | Fukui enterprise self-consumption PV/battery / subsidy | FY2026 / annual call, prior existing | 2026-04-17 | Budget exhaustion may close early; email submission, no official clock established | 2026-10-31; hour unverified | CLOSED BY PUBLISHED DEADLINE as of 2026-11-01; page unchanged; final intake status unconfirmed | VERIFIED PROGRAM; no YUMORI project eligibility/application | 2026-11-02 | S14 |
 | F-14-2025S-R4 | METI/SII whole-facility energy savings + EMS / subsidy | FY2025 supplementary / 4 | 2026-10-05 | Tracked mailing; hand delivery disallowed | 2026-10-30 17:00 JST physical receipt | CLOSED confirmed by SII 2026-10-30; fifth call unannounced | VERIFIED PROGRAM; no YUMORI applicant/baseline/use rights | 2026-10-28 | S15 |
 | P-01-2026-P1 | Fukui large-DC feasibility study / procurement, NOT subsidy | FY2026 / Phase 1 | 2026-10-14 (notice) | Bidder qualification 2026-10-23 17:00 | 2026-11-04 17:00; qualified bidders only | QUALIFIED BIDDERS ONLY | VERIFIED PROGRAM/PROCUREMENT; no YUMORI contract or selection | 2026-11-05 | S13 |
 
@@ -116,6 +116,10 @@ F-13's primary page still gives October 31 (email submission, possible earlier e
 
 The Ministry of the Environment's 2026-10-16 F-12 third-round announcement explicitly states **2026-12-15 17:00 JST 必着**. Corrected the previously unverified cutoff time without implying a deadline extension or newly announced program. Primary source: https://www.env.go.jp/press/press_05673.html . Submission method still requires the administrator's current instructions. No YUMORI eligibility, application, selection, award or financing admission changed.
 
+
+### 2026-11-01 — F-13 scheduled round closure
+
+Reopened Fukui Prefecture's F-13 primary notice (last updated 2026-04-17): the announced FY2026 application window ended 2026-10-31, and the page had not published an extension as of this check. Marked this historical call CLOSED BY PUBLISHED DEADLINE; actual receipt/budget-exhaustion close and any FY2027 successor are not independently established. Keep all published component rates/caps and eligibility questions for future review. The FY2026 date does not prove YUMORI did/did not submit, nor does it promote eligibility, selection or award. Next 2026-11-02 internal review is a research plan, not an official deadline or activated reminder.
 
 ### 2026-10-28 — coverage catch-up, not a new official trigger
 
