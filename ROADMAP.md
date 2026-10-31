@@ -42,6 +42,15 @@ Publish reviewed source separately from deployment: unresolved economic conflict
 unfunded settlement and absent independent signing controls block activation.
 The existing simulator must validate any economic enhancement before chain parity.
 
+### Current blockchain security sequence — 2026-11-01
+
+[The current sprint and ordered roadmap](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#current-sprint-and-blockchain-roadmap--2026-11-01)
+select A10/B01 wallet-policy isolation17/P0, then A07/B02 full epoch effects.
+Local candidate311 and independent13 pass in separate scopes; publication and
+resulting-main acceptance remain pending. Registry19 is scoped metadata without issuance evidence.
+Preserve simulator-first authority, disputed units/caps and independent funding/
+signer/recovery gates. No planning packet grants live TestNet or production use.
+
 ## Resident assurance connection — 2026-10-30
 
 Source audit at `7d6a292bcb28e5cbadd1dffdac1a795d3da7e31e` supports

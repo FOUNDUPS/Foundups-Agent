@@ -1,5 +1,224 @@
 # FoundUps blockchain reconciliation and security decision — 2026-10-31
 
+## Current sprint and blockchain roadmap — 2026-11-01
+
+This dated addendum supersedes planning/publication status below, not the sealed
+October 31 observations. PR2279 merged at `9925eb65e08b3602ad11ee32537bebf0d94bca32`;
+its 41 PR checks and 22 resulting-main checks passed. PR2210 and PR2261 were
+closed as incorporated/superseded, with their original history retained.
+The November 1 research baseline is `43b3b66cce8a01f28fb08577a9db84f731e50455`.
+Its intervening change concerns YUMORI documentation. Neither source publication
+nor a passing simulator authorizes chain activation.
+
+### Concurrent main reconciliation
+
+During final PR2281 checks, another session landed RSI/Vote PR2282 at
+`12adf3e4824645a21d93d10339ac4ccfa304e723`. The wallet implementation and its
+qualified tests do not overlap. Both root-log additions and the union of exact
+reviewed security records are preserved, along with all Vote/CI changes. The
+combined local policy/documentation/Vote selection passes 404 cases with no
+failures, errors, skips or guard denials. Previous 41 passing hosted checks belong
+to `6bc295c8f5242c808f30985334d4e5af7730d9fe`; combined-head hosted
+qualification and resulting-main checks are required separately.
+
+### The economy being built
+
+The simulator already includes tokenomics. In
+[`FoundUpTokenPool`](../../modules/foundups/simulator/economics/token_economics.py),
+the intended per-FoundUp total is 21 million F_i; adoption increases the released
+ceiling within that total. Remaining work-mint capacity is released ceiling minus
+already mined supply. The pool of available rewards can therefore grow without
+raising the total cap. It is useful-work allocation, not Bitcoin proof-of-work.
+
+This is only **VERIFIED_SIMULATED** behavior. The total-supply field is mutable,
+work inputs are not authenticated, and UPS-backed staked F_i outstanding is a
+separate counter without a demonstrated combined cap. Product milestones
+(PoC/Prototype/MVP), adoption scores, and governance tiers are distinct inputs;
+none is mint authority. Whether mined and staked F_i share the same issuance
+ceiling remains a class D conflict. No second asset or new release schedule is
+silently introduced to resolve it.
+
+Historical WSP26§4.4.1 no-breaker, implementation and 100%-reserve assertions
+are not accepted proof of funded solvency or security. Fees (including 11% mined
+and 5% staked paths versus 2–5% wording),1-sat versus 1000-sat units, distribution
+denominators and reserve/exit rights remain blocked conflicts; no rule is chosen.
+
+The current [FAM launch orchestrator](../../modules/foundups/agent_market/src/orchestrator.py)
+optionally creates a token through a factory. The implemented default is a
+clearly identified mock. Mock Treasury credit of the requested supply is not
+circulation, vested eligibility, a live ASA, or proof that every catalog project
+has its own token. Generic TokenTerms do not enforce a universal 21M policy.
+The simulator's configured verifier/treasury identities and auto-approved work
+are also not production collective consensus. CABR sizes validated Treasury flow;
+it never independently mints UPS.
+
+### Typed catalog snapshot, not a token inventory
+
+The [typed registry](../../modules/foundups/foundup_registry.json) contains 19
+entries at 43b3:7 foundups,5 skeleton candidates,3 infrastructure services,
+one platform layer, one simulator and 2 external foundups. Its five public
+projections are directory metadata; no 115-project source list was established
+by this bounded audit. The registry does not exhaust every project or nomination.
+
+| Typed ID / name | Registry type | Declared stage / PoC | Token metadata | Public projection |
+| --- | --- | --- | --- | --- |
+| `gotjunk_001` / GotJunk | `foundup` | proto / proto | `EXISTS` | yes |
+| `kosei` / Kosei AI Systems | `foundup` | incubating / poc | `EXISTS` | yes |
+| `voteballots` / Vote/Ballots | `skeleton_candidate` | incubating / idea | `EXISTS` | no |
+| `trade` / Trade | `skeleton_candidate` | incubating / idea | `EXISTS` | no |
+| `magadoom_001` / MAGADOOM | `foundup` | incubating / poc | `EXISTS` | no |
+| `antifafm_001` / antifaFM | `foundup` | proto / proto | `EXISTS` | no |
+| `pfmall` / p.fMALL | `platform_layer` | n/a / not_applicable | `NOT_APPLICABLE` | no |
+| `agent_market` / FAM - FoundUp Agent Market | `infra_service` | n/a / not_applicable | `NOT_APPLICABLE` | no |
+| `move2japan` / Move2Japan | `foundup` | incubating / poc | `TOKEN_DEFERRED` | yes |
+| `simulator` / Economics Simulator | `tool_simulator` | n/a / not_applicable | `NOT_APPLICABLE` | no |
+| `social_twin` / Social Twin | `infra_service` | n/a / poc | `NOT_APPLICABLE` | no |
+| `autopost` / AutoPost | `external_foundup` | incubating / poc | `TOKEN_DEFERRED` | no |
+| `pqn_portal` / PQN Portal | `skeleton_candidate` | incubating / poc | `TOKEN_DEFERRED` | no |
+| `science_swarm_hub` / Science Swarm Hub | `external_foundup` | proto / proto | `TOKEN_DEFERRED` | no |
+| `holoindex_prod_01` / HoloIndex | `infra_service` | incubating / poc | `TOKEN_DEFERRED` | yes |
+| `esingularity_001` / eSingularity | `foundup` | proto / proto | `TOKEN_DEFERRED` | yes |
+| `shield` / Shield | `foundup` | incubating / idea | `TOKEN_DEFERRED` | no |
+| `detect_ai` / AmIBot | `skeleton_candidate` | incubating / idea | `TOKEN_DEFERRED` | no |
+| `kids_episodes` / Kids Episodes | `skeleton_candidate` | incubating / idea | `TOKEN_DEFERRED` | no |
+
+`EXISTS` above is a registry declaration, not verified token issuance. No reviewed
+row records an authenticated chain/genesis/asset-ID and confirmed-issuance mapping.
+The 14 tracked manifests include 12 registry references; the 14 video entries also
+contain creators, brands and aliases. They are not14 extra admitted ventures.
+Repository/controller proof, issuer rights, live readiness and catalog promotion
+remain separate gates; no row, ticker or asset is created by this table.
+
+### First sprint: isolate agent spending policy
+
+**A10 / class B / WSP15 17/P0 (C3/I5/D5/Impact4).** At the pinned baseline, the wallet stores a
+caller-owned policy dictionary. A later edit to its nested allowed-operation
+list changes spending permission. Repair this existing owner before adding a
+signer: install a detached policy snapshot, expose a read-only view, validate
+policy before funding effects, and retain explicit trusted-host replacement.
+
+Frozen acceptance covers constructor/direct replacement, direct allocation and
+engine allocation; original/nested mutation; invalid policy with no debit or
+replacement; insufficient funding; valid host rebinding; exact integer limits;
+and existing empty/omitted-policy behavior. Valid fees and the existing numeric
+normalization oracle remain unchanged. The host replacement API remains trusted:
+this is not authenticated governance, a same-process sandbox, or a live wallet.
+Serialization through dataclasses.asdict is outside the qualified interface.
+
+The alternatives were an epoch cache, immediate token issuance, and a new wallet
+framework. An epoch cache alone would miss side effects and failure recovery;
+issuance lacks prerequisite authority/funding; a new framework duplicates existing
+owners. A10 is the smallest independent security layer. A07 follows with complete
+effect accounting rather than a ledger-only patch. Candidate acceptance supplied by the root records 311 passing cases (235 existing
+plus 76 wallet-policy cases), with zero failures, skips or recorded guard denials. The
+independent 13-case run also passes, with 173 source snapshots unchanged. These
+scopes are not summed; the 235 baseline and 76-case RED (6 pass/70 fail) remain.
+See the [wallet-policy receipt](receipts/FOUNDUPS_WALLET_POLICY_SECURITY_20261101.json);
+Connected simulator/documentation qualification passes 489 cases with no
+failures, errors, skips or guard denials. These overlap the focused selection.
+Eight manifest-generator tests and three Node consumer entrypoints also pass.
+Final publication and resulting-main verification remain pending.
+
+Trusted host policy replacement remains available, and omitted limits retain
+their existing unbounded semantics. This fixes hostile caller aliases, not
+malicious host replacement, authenticated policy governance, aggregate withdrawals
+or funded conservation. A07 remains the next complete-effect accounting layer.
+
+### Ordered work packets and acceptance gates
+
+These are planning assignments to 0102 roles under WSP97, not signed runtime
+orders or a claim that background workers have been activated. Each packet gets
+fresh source retrieval, frozen tests, a separate implementer/verifier, and a
+reviewable receipt before promotion. No wrapper or new scheduler is required.
+
+| Order / packet | Existing owner / assigned 0102 role | WSP / class / MPS | Exit evidence |
+| --- | --- | --- | --- |
+| B01 policy isolation | simulator token_economics / security worker; economics verifier | 26/50/97, B, 17/P0 | Caller aliases cannot expand permission; rejection has no funding effects; valid regressions and held-outs pass. |
+| B02 epoch effects once | pool_distribution + epoch_ledger + Mesa callers / accounting worker | 26/29/97, B, 18/P0 (4/5/5/4) | Exact retries return detached prior result; conflicting context rejects; participant/fund/drip/hurdle changes commit atomically; exception and concurrency tests preserve all counters. Process-local proof must be labeled until durable recovery exists. |
+| B03 monetary units and issuance decision | simulator source matrix + tokenomics / economic architect | 26/27/29/100, C/D, 19/P0 (4/5/5/5) | Versioned asset units, integer scale/rounding/residuals, mined/staked cap and release policy; seeded boundary/conservation tests; independent acceptance before governing mirrors and chain port. |
+| B04 catalog-to-asset identity | foundup_registry + manifests + FAM registry/intake / catalog worker | 26/58/109, A/B, 15/P1 (3/4/4/4) | Joined read-only coverage report; stable project IDs; nomination distinct from verified repository control and issuer grant; duplicate/repository-transfer/expired-claim controls. No ticker treated as chain evidence. |
+| B05 funded allocation and limits | FAM persistent payout/intent + existing simulator Treasury/FX / accounting worker | 26/29/97, B, 19/P0 (4/5/5/5) | Atomic funded reservations count pending/ambiguous operations across wallet, agent, controlling identity, FoundUp and system windows; unique proof consumption; crash/replay reconciliation; integer conservation. |
+| B06 approved release and consensus | FAM verifier + simulator work/maturity/release owners / issuance worker | 26/27/29/100, B/C, 19/P0 (4/5/5/5) | Authenticated independent work/maturity evidence; no self-verification or Sybil quorum; per-FoundUp cumulative issuance never exceeds the approved released/total bounds across all lanes. Depends on B03/B05. |
+| B07 intent-to-unsigned consumer | FAM current-intent API + Algorand codec / transport worker | 11/26/97, A/B, 15/P1 (3/4/4/4) | Current host authority before/after I/O; admitted producer; independent network/account/asset/fee/round facts; existing-only revalidation; no implicit reissue or signing. Preserve existing bounded JSON/wire contracts. |
+| B08 custody and constrained signer | existing platform integration boundary / security architect and independent chain verifier | 26/71/97, B, 20/P0 (5/5/5/5) | Separate custody/control domains; exact-effect decode; scoped one-use authorization; algorithm/domain/encoding vectors; deny rekey/close/delegation/unknown groups; durable attempts; independently observed finality. Provider qualification and external audit required. |
+| B09 freeze, monitoring and recovery | existing breaker/queue/FAM evidence owners / incident worker | 26/48/91/97, B, 19/P0 (4/5/5/5) | Coordinated small drains, oracle forgery, pending exposure and governance changes detected; authenticated freeze/recovery; ambiguous payment reconciliation; no queue release accelerated by repeated calls. |
+| B10 one-project TestNet pilot, then inventory rollout | FAM token factory + Algorand + catalog / integration worker | 26/97/100/109, A/B, 17/P0 (4/5/4/4) | Separately authorized bounded pilot only after B03-B09; actual network/genesis, asset ID, issuer/privileged authorities, supply/decimals, opt-ins and confirmed transaction evidence; exact retries do not create a second token. Expand only to eligible verified projects. |
+| B11 internal FX settlement | existing fi_orderbook + FAM settlement / exchange worker | 26/29/97, B/C, 19/P0 (4/5/5/5) | Funded two-sided reservations, exact settlement/fees, related-party/Sybil manipulation controls and cancellation/recovery. External DEX, bridge or wrapped assets require another simulator decision and security review. |
+
+B02, B03 and B04 can prepare independently; dependency order still gates effects.
+The original A01-A12 taxonomy remains the coverage map: B05/B09 cover A01/A02;
+B08 covers A03/A04/A09; B06 covers A05/A06; B02/B05/B08 cover A07; B11 covers A08;
+B01/B08/B09 cover A10; B05/B09 cover A11; B09 covers A12. A mock or missing hook
+cannot be marked a passed attack. B01 alone does not close A10 governance risks.
+
+### Custody research and decisions
+
+Retain Algorand as the existing TestNet transport candidate, with Bitcoin reserve
+custody a separate boundary. There is no connected FoundUps monetary signer to
+certify. RedDog's existing Ed25519 governance signing is a different authority;
+it must never be reused or described as the token wallet merely because an
+algorithm name matches. No model, repository text, RPC response, GitHub badge,
+or fee incentive grants spending or mint authority.
+
+Bitcoin HD derivation separates addresses, not compromise domains. Shared seeds,
+backups, signer hosts, administrator credentials or approval UIs can correlate
+thousands of wallets. Threshold signatures only help when independent parties
+independently validate the exact intended effect. Agent-facing tools should
+submit typed bounded intents; key material and arbitrary signing APIs stay out
+of the agent's environment. Normal reward capabilities deny privilege-changing
+transactions; recovery is a separate independently approved capability.
+
+The service shortlist is a qualification queue, not a selected production wallet:
+[AWS KMS](https://docs.aws.amazon.com/kms/latest/developerguide/symm-asymm-choose-key-spec.html)
+now documents Ed25519, with different RAW versus prehash modes. Exact Algorand
+domain/message interoperability and restricted IAM/control-plane access still
+need tests. [Google Cloud KMS](https://cloud.google.com/kms/docs/algorithms)
+lists PureEdDSA Ed25519 in software; that does not prove a qualifying HSM mode.
+Neither enumerated service algorithm list establishes support for Algorand's
+Falcon f1 scheme; ML-DSA is not a substitute. SDK support does not establish
+hardware custody, recovery support, or a safe FoundUps caller.
+
+[Algorand's post-quantum account guidance](https://dev.algorand.co/concepts/accounts/post-quantum/)
+distinguishes Falcon accounts, ordinary Ed25519 multisig, consensus and tooling.
+Keep algorithm/network/compiler/runtime versions and migration/recovery tests
+explicit. No claim of universal quantum protection or unhackability follows.
+The initial deployment gate also includes the existing dependency exposure and
+configuration review, including Chroma advisories; a source-only query or pinned
+package is not evidence that every local service is safely configured.
+
+The incident table below remains dated evidence. Binance's
+[October 31 update](https://www.binance.com/en-AU/support/announcement/detail/1fdf1f61559c401da0435895ffcccb62)
+reports 90% replenishment using company/insurance funds. Replenishment is not
+recovery of stolen assets or a final forensic finding. The October 29 compromise
+is corroborated by official disclosures; final mechanism and attribution remain
+provisional. Direct detail requests sometimes redirect to the announcement index;
+indexed official and locale-specific responses were retained with this limitation.
+TRM's EIP-7702/signing-infrastructure analysis stays an investigator assessment,
+not proof that FoundUps or Algorand uses that Ethereum delegation mechanism.
+
+No real token creation, keys, funded transactions, bridge, runtime installation,
+or blockchain deployment is authorized or performed by this research sprint.
+**Readiness remains BLOCKED** until the applicable gates above are independently
+qualified. Source publication and the ledger of remaining work remain separate.
+
+### Retrieval repair and qualification
+
+The initial owner query rejected a stale authority head. One governed existing
+post-merge maintenance task completed for 43b3; it stopped both runtimes it
+started. A separate source-bound query returned CURRENT with no index gap and
+matching authority/workspace/generation. This qualifies the clean 43b3 reference,
+not the edited candidate. Candidate work used explicit lexical bundles and direct
+source inspection; noise and incomplete generic hits were resolved by exact owner
+documents and source. No raw reindex or authority-reset workaround was used.
+
+### Sources and acceptance boundary
+
+The catalog and economic audits are source-bound to43b3; the portable receipt
+retains their hashes and independent attribution. Custody corrections also use
+[BIP32](https://bips.dev/32/), [NIST threshold guidance](https://csrc.nist.gov/projects/threshold-cryptography)
+and [Safe transaction verification](https://help.safe.global/articles/4369997924-how-to-verify-safewallet-transactions-on-a-hardware-wallet).
+These explain common-mode risk; they do not certify any FoundUps deployment.
+
 ## Publication and simulator authority addendum — 2026-10-31
 
 012 subsequently authorized GitHub source publication and gated integration.

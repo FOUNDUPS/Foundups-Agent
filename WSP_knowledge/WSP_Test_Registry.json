@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1793,
+  "total_tests": 1794,
   "quarantined_tests": 260,
   "tests": [
     {
@@ -16382,6 +16382,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for unified sustainability calculator.\n\nIncludes ROC-first validation suite (2026-03-28):\n- ROC boundary tests (negative, zero, positive)\n- Gate combination matrix (ROC \u00d7 ROI)\n- Invariant assertions\n- FAM/pAVS baseline pinning"
+    },
+    {
+      "id": "test::modules::foundups::simulator::tests::test_wallet_policy",
+      "path": "modules/foundups/simulator/tests/test_wallet_policy.py",
+      "owner": "modules/foundups/simulator",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-simulator-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Agent budget policies are detached host inputs, not mutable caller grants."
     },
     {
       "id": "test::modules::foundups::simulator::tests::test_weighted_stake_allocation",

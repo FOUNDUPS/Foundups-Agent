@@ -1,5 +1,15 @@
 # FoundUps Simulator Test Suite
 
+## Wallet policy security suite — 2026-11-01
+
+`test_wallet_policy.py` freezes constructor, host replacement, allocation, hostile
+object admission, nested alias isolation, public-view immutability, exact integer
+limits and legacy empty-policy behavior. Desired baseline: 76 cases, 6 passed/
+70 failed. Candidate with three original regression owners: 311 passed, no
+failures/errors/skips or instrumented forbidden effects. Independent held-outs
+are separate; counts overlap other runs and do not establish chain security.
+
+
 This directory contains regression tests for the FoundUps simulator module.
 
 `test_docs_contract_alignment.py` also checks the explicit blocked denomination

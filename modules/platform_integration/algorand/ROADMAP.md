@@ -1,3 +1,13 @@
+## Current security-first sequence — 2026-11-01
+
+Source codec/framing and existing-intent revalidation are delivered through
+main9925; dated pending-publication statements below remain historical.
+The [current roadmap](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#current-sprint-and-blockchain-roadmap--2026-11-01)
+prioritizes A10/B01 policy isolation and A07/B02 complete accounting. The bounded
+unsigned consumer remains15/P1 after its authority/facts gates; preserve52 tests.
+No wallet, signer, real asset, funding, current-ledger fact or live TestNet result
+is supplied by this source publication. Later chain parity remains mandatory.
+
 # Algorand module roadmap
 
 2026-10-31 current reconciliation supersedes historical publication-pending prose:
@@ -16,7 +26,7 @@ network/account/algorithm support and independent authority before any signing.
 No GitHub mutation or chain call occurred in this local-only mission.
 
 2026-10-29: reconcile the unique codec with current main and qualify its exact
-existing28-case format profile before parent/child PR convergence. Retain the
+existing 28-case format profile before parent/child PR convergence. Retain the
 old interpreter/profile identity; patched production-runtime admission remains
 unproved. Before signing, require controller-level verifier separation, immutable
 intent/artifact/attempt/reissue records, authenticated network/account/ASA facts,

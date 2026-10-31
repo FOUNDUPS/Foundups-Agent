@@ -1,3 +1,16 @@
+## 2026-11-01 — Wallet policy test-first qualification
+
+Frozen 76-case owner: 6 passed/70 failed on current base43b3. Existing three-owner
+baseline: 235 passed. Same frozen policy bytes plus originals on candidate:
+311 passed, 0 failures/errors/skips; sources unchanged and no effect-guard denial.
+Preserve initial wrong-filename run (exit4/0 tests) as setup failure, not a test.
+The reused credential-free runner imports real modules with scratch SQLite and
+central-daemon state. Its Python guards are not OS confinement. Independent
+13-case oracle was frozen before candidate edits and now passes independently.
+Connected simulator/docs selection: 489 passes; packaging: 8 Python cases and
+3 Node entrypoints pass. Counts overlap. See the current audit receipt for source
+hashes. No historical economic test was edited.
+
 ## Publication documentation guardrails — 2026-10-31
 
 Existing documentation suite first produced5 passes/1 failure on the missing

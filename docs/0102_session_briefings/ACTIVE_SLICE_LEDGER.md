@@ -1,3 +1,15 @@
+## Blockchain security-first simulator lane — 2026-11-01
+
+PR2279 is delivered at 9925eb65e08b3602ad11ee32537bebf0d94bca32 after 41 PR and 22
+resulting-main checks passed. PR2210/2261 are closed as incorporated/superseded;
+the older publication-pending entries below retain their dated history.
+Current base 43b3; A10/B01 wallet-policy isolation is the 17/P0 class-B sprint,
+followed by A07/B02 complete epoch-effect accounting. Current candidate 311 and
+independent 13 pass in separate scopes; hosted/final-main qualification is pending.
+The [current roadmap and scoped 19-entry catalog](../architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#current-sprint-and-blockchain-roadmap--2026-11-01)
+retain units, funded aggregate limits, authority, custody and recovery gates.
+No worker dispatch, token issuance, signing or live TestNet authority follows.
+
 ## Blockchain simulator-first publication — 2026-10-31
 
 Owner: 0102 blockchain lane. Branch agent/simulator-first-blockchain-parity-20261031.

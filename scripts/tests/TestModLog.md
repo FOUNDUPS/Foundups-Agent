@@ -1,3 +1,12 @@
+## 2026-11-01: Agent-wallet policy source binding
+
+Regenerate the unchanged 1477-member runtime closure after the wallet policy
+repair. Only token_economics.py's LF source digest changes; membership, resource
+caps, dependencies and authority stay fixed. Update the existing JS and Python
+canonical digest pins together. Existing consumer tests and publication gates
+are recorded in the wallet-policy security receipt; this is packaging evidence,
+not runtime installation or chain qualification. WSP11/22/48/97.
+
 ## 2026-10-30: Held-out receipt runtime integrity binding
 
 Regenerate the existing 1477-source manifest after the held-out receipt producer

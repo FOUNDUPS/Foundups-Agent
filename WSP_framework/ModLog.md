@@ -1,3 +1,16 @@
+## 2026-11-01: WSP26 custody targets and agent signing boundaries
+
+Under 012's explicit security-document correction request, clarify only WSP26
+sections 4.2/4.3/4.5; WSP81 class NOTIFICATION_REQUIRED, with notification in the
+review/publication handoff. Wallet segregation, MPC/HSM and agent orchestration
+are target designs, not implemented custody or automatic independence/security.
+Record shared-seed and shared-control-plane risk; agents propose bounded intent
+without assumed raw-key/shard custody. Retain fees, supply, maturity, tiers and
+economic policy, and reuse existing 1.2/4.11 acceptance gates. Exact numbered
+knowledge mirror and independent source/scope review are required before commit.
+Base43b3b66cce8a01f28fb08577a9db84f731e50455; recover by focused Git revert.
+No runtime, key, signer, custody, chain or economic activation. WSP22/26/81/97.
+
 ## 2026-10-31: Simulator-first economic change governance
 
 WSP81 class NOTIFICATION_REQUIRED: section addition and clarified cross-protocol

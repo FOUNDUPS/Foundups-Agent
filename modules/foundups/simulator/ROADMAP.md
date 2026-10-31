@@ -1,5 +1,22 @@
 # ROADMAP - FoundUps Simulator
 
+## 2026-11-01 — Wallet policy isolation and ordered blockchain gates
+
+- [x] Class-B 17/P0: freeze acceptance, reproduce mutable policy/invalid admission,
+  then detach and validate policy in the existing wallet/allocation owners.
+- [x] Focused selection: 311 passed (76 new policy cases and 235 existing cases).
+- [x] Independent 13 held-outs, connected 489 cases, 8 manifest cases and 3 Node
+  consumer entrypoints pass; runtime membership remains 1477.
+- [ ] Dedicated PR and resulting-main checks.
+- [ ] Next: replay-safe atomic epoch distribution including upstream balances.
+- [ ] Resolve units and mined/staked aggregate supply before funded integer
+  reservations, authenticated work/maturity releases and isolated chain signing.
+
+The [ordered owner/acceptance roadmap](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#current-sprint-and-blockchain-roadmap--2026-11-01)
+governs the remaining gates. Historical checklists below are dated evidence;
+A10 alias repair does not close governance authentication or deployment readiness.
+
+
 ## 2026-10-31 — Local security and parity audit
 
 Publication addendum: [WSP26](../../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract)
