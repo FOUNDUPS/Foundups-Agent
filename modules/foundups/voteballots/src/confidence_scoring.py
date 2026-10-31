@@ -2,7 +2,7 @@
 Confidence Scoring for VoteBallots FoundUp.
 
 Applies WSP 97 confidence labels to structured funding summaries, separating:
-- VERIFIED_FACT: Direct FEC filing or source reference present
+- VERIFIED_FACT: Already verified claim with an approved direct source reference
 - HIGH_CONFIDENCE_INFERENCE: Multiple corroborating official/public sources
 - LOW_CONFIDENCE_INFERENCE: Single weak/non-official source
 - UNKNOWN: Missing source or trail termination
@@ -61,7 +61,7 @@ class ConfidenceLabel(Enum):
     """
 
     VERIFIED_FACT = "verified_fact"
-    """Direct FEC filing or source reference with high credibility confirms the claim."""
+    """Already verified claim with a direct filing or court-record reference."""
 
     HIGH_CONFIDENCE_INFERENCE = "high_confidence_inference"
     """Multiple corroborating official/public sources support the claim."""
@@ -341,8 +341,8 @@ def _determine_source_confidence_label(
             factors.append(f"source_type:{source_type}")
             # Non-direct source type
             if source.confidence == ConfidenceLevel.VERIFIED_FACT:
-                # Verified in original, keep it
-                return ConfidenceLabel.VERIFIED_FACT, factors
+                factors.append("downgraded_from_verified_due_to_indirect_source")
+                return ConfidenceLabel.HIGH_CONFIDENCE_INFERENCE, factors
             elif source.confidence == ConfidenceLevel.HIGH_CONFIDENCE_INFERENCE:
                 return ConfidenceLabel.HIGH_CONFIDENCE_INFERENCE, factors
             else:

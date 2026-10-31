@@ -8,6 +8,21 @@
 
 ## Current State
 
+
+### 2026-11-01 bounded RSI fixture checkpoint
+
+The funding-source indirect-reference repair passes322 module tests and an
+independent review. One local worker proposal was rejected before production application;
+the coordinator authored the accepted source repair. See tests/TestModLog and
+canonical RSI dispatch. This does not open the public surface or complete RSI.
+
+**Remaining proven defect:** `_build_summary_claims` inherits `summary.confidence`
+for `total_raised` without checking primary-source eligibility. Independent
+synthetic probes reproduce a verified aggregate with an indirect or absent
+reference. WSP15 C2/I3/D3/Impact3=11/P2. Next: freeze aggregate direct/indirect/
+missing/lower-confidence controls and reuse source-provenance policy for this
+consumer. Do not represent source-item closure as all-claim verification.
+
 The original design roadmap is stale.
 
 ### Complete

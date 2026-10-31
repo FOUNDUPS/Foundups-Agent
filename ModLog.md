@@ -1,3 +1,16 @@
+## 2026-11-01 — RSI micro worker rejection and native-boundary reconciliation
+
+WSP00/15/22/48/50/97. Reuse WRE local inference, Vote production scorer and its
+existing independent integration oracle. One real local Qwen proposal failed
+semantic and envelope checks; disposable execution increased failures4→7.
+Coordinator repair passes322 module tests; independent review and extra probes
+preserve the distinction from worker success, OS isolation and retained RSI.
+Canonical root/WRE/backlog pointers close PR2276 publication and replace stale
+ordinary-main wiring advice with the protected requester/consumer dependency.
+Existing CI gains Vote production/consumer coverage without removing any gate.
+PC/runtime/cloud and fixture evidence live in RSI_SWARM_DISPATCH; no new platform,
+model installation, grant, external data call or production deployment.
+
 ## 2026-10-31 — Blockchain publication and simulator-first documentation
 
 012 authorizes source publication after the earlier local-only checkpoint.
