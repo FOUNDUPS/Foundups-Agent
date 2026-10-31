@@ -1,3 +1,16 @@
+## Wallet policy source binding review — 2026-11-01
+
+The pinned Gitleaks 8.30.1 changed-file scan at 8367d2f50 reports 39 exact
+manifest findings: 37 generic-api-key and 2 discord-api-token classifications.
+An independent verifier and root reconstruct every complete JSON path/hash pair
+from its immutable Git source using the unchanged LF normalization. Thirty-eight
+source values are unchanged; the qualified token_economics digest is updated.
+Append only the 39 current file/rule/line fingerprints, preserving all 3,074
+prior records (3,113 total). No credential exception, scanner rule, coverage or
+fingerprint algorithm changes. The full-tree/introduced-history and hosted gates
+remain required. Independent proof SHA256:
+`2c15eeae3d8de395ff6a883f08dd9dd0a7d62bc78433125e5e73c6fa8c38db97`.
+
 ## Blockchain source metadata review — 2026-10-31
 
 Pinned Gitleaks 8.30.1 reports81 exact findings in the reconciled changed files:
