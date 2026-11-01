@@ -3,10 +3,18 @@
 PR2279 is delivered at 9925eb65e08b3602ad11ee32537bebf0d94bca32 after 41 PR and 22
 resulting-main checks passed. PR2210/2261 are closed as incorporated/superseded;
 the older publication-pending entries below retain their dated history.
-Current base 43b3; A10/B01 wallet-policy isolation is the 17/P0 class-B sprint,
-followed by A07/B02 complete epoch-effect accounting. Current candidate 311 and
-independent 13 pass in separate scopes; hosted/final-main qualification is pending.
-The [current roadmap and scoped 19-entry catalog](../architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#current-sprint-and-blockchain-roadmap--2026-11-01)
+PR2281 delivered A10/B01 at `24cc4aa2971b05ff8b53f76d157145da4134ed5c` with 24 PR
+and 22 resulting-main checks passing. Primary PC fast-forward and preservation
+are verified. Current lane `agent/foundups-epoch-replay-20261101` starts there;
+owner/root architecture, worker/blockchain_architecture and independent
+verifier/simulator_economics own A07/B02 complete epoch effects, class-B 18/P0.
+Fresh baseline 154 passes including seeded 240-tick orchestration. Frozen desired
+replay acceptance first yields 2 passes/38 failures with no setup error/skip;
+corrected independent 57 and broader simulator 930 pass in overlapping scopes.
+Controlled fresh-process traces match baseline/candidate exactly; initial
+nondeterministic traces are retained. Package8 Python/3 Node pass. Next: security/hosted publication
+and exact-main/PC verification; no PR exists at this documentation checkpoint.
+The [current roadmap and scoped 19-entry catalog](../architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#replay-safe-epoch-settlement-and-ai-threat-update--2026-11-01)
 retain units, funded aggregate limits, authority, custody and recovery gates.
 No worker dispatch, token issuance, signing or live TestNet authority follows.
 

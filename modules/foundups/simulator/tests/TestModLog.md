@@ -1,3 +1,40 @@
+## 2026-11-01 — Epoch effect, concurrency and controlled-process acceptance
+
+Independent frozen40: baseline2 pass/38 fail, zero setup errors/skips/guard
+denials. Candidate40 and separate16 held-outs pass. Root found a private Mesa
+callback returning a distribution instead of its original None; a separate
+frozen control reproduced the failure, then the one-line repair passes.
+Final independent selection57 passes with174 source snapshots unchanged.
+
+Promote the original40 and callback control into existing staker/epoch/Layer-D
+owners (689/431/206 lines). Their192 cases pass. All old raw content prefixes and
+test ASTs remain; only new helper names are disambiguated, with inverse-renaming
+AST equivalence to the frozen acceptance. The16 held-outs remain independent.
+Counts overlap and must not be summed as independent attack coverage.
+
+The fresh154 baseline includes real240-tick non-AI orchestration. First harness
+attempt:151 pass/3 fail (two forbidden default SQLite paths, one inspection typo).
+Correct only default scratch-store selection and `_fam_bridge` inspection;
+retain failures and unchanged guards. Initial candidate/repeat smoke passes but
+economic traces differ, so no parity was accepted from them. Stdlib diagnostics
+prove `-I` ignores PYTHONHASHSEED. A separately frozen `-P -s`/closed-env profile
+with explicit hash seed710007 and one case per fresh process produces identical
+baseline/candidate/candidate traces, SHA672d12c9d8fb6286624ea892fb3a5d0315c475ee45f8c83c9a271ba4328f0ff1.
+No monetary values were normalized or discarded. Real implementation imports,
+scratch FAM/central-daemon storage and Python effect guards remain; this is not
+OS confinement, model-seed-only portability, funded settlement or chain testing.
+
+Broader actual simulator:930 pass, exact3 historical SSEHTTP deselections, zero
+failures/errors/skips/guard denials; all174 inventoried source hashes unchanged.
+No optional enrichment stubs or broad daemon-path rewrite. The controlled seed
+trace is one separately qualified scenario, not a blanket reproducibility claim.
+
+Packaging: canonical generator write/check,8 original Python/index cases and3
+Node consumer entrypoints pass. Actual old1477 validator rejects the generated
+1478 closure before pins/count change; new boundary accepts1478/rejects1479.
+This differs from an old fixture's preliminary count assertion. All earlier
+members, byte caps and registry1794 owners remain; only one private helper is new.
+
 ## 2026-11-01 — Wallet policy test-first qualification
 
 Frozen 76-case owner: 6 passed/70 failed on current base43b3. Existing three-owner

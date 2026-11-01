@@ -1,5 +1,48 @@
 # INTERFACE - FoundUps Simulator
 
+## Pool epoch effect contract — 2026-11-01
+
+`PoolDistributor(ledger=None)` keeps the no-argument constructor and existing
+`distribute_epoch(epoch, total_ups_rewards, foundup_id=None)` call. A supplied
+ledger must be an actual `EpochLedger`. Epochs are nonnegative built-in integers;
+amounts are finite nonnegative built-in int/float values, excluding bool and
+coercible/subclass objects. Context is None or a nonempty built-in string. An
+explicit context must match the bound ledger. None and an explicit matching
+context remain distinct request identities; None preserves legacy callers.
+
+One distributor owns one epoch sequence for its process lifetime. Numerically
+equivalent amounts such as 100 and 100.0 identify an exact retry; large integers
+are not rounded for identity. Exact retries, including after later epochs,
+return a fresh detached copy of the original result without recalculation or
+further balance effects. Altered amounts/contexts and unseen older epochs reject;
+new increasing epochs may have gaps. Changes to roster, configuration or earlier
+returned dictionaries do not change the saved decision.
+
+Before participating writes, the pool prepares participant balances/tiers,
+shared staker cumulative BTC and first-lock state, fund/drip totals, receipt
+copies and optional ledger evidence. Public register/activity/statistics calls
+serialize with distributions. Bound publication holds pool then ledger locks;
+a preexisting ledger entry without this pool's own receipt cannot prove payment.
+Ordinary preparation failures leave those participating effects unchanged. Valid
+percentages, activity shares, missing-tier residuals and arithmetic order remain.
+Shared `StakerPosition` references preserve original sequential hurdle crossing.
+
+Mesa binds its existing F0 ledger to the pool. A failed distribution tail retains
+its epoch and amount and resumes before another demurrage pass. The epoch counter
+and pending state finalize before observers. A validated coordinated receipt
+allows at most one local observer attempt per epoch, marked before I/O; ordinary
+observer/logging exceptions cannot report an economic abort. BaseException is
+not swallowed. Failed telemetry may be lost. Direct mock connector force behavior
+is unchanged; automatic model retries do not republish an observed epoch.
+
+This is **VERIFIED_SIMULATED (process-local)** scope only after the linked current
+acceptance. It does not make earlier demurrage, MetaGPT work resets, fee-runner
+downstream account credits or external delivery atomic. Restart recovery,
+cross-process writers, Treasury funding, exact chain units and real settlement
+remain absent. Process death, allocation failure and arbitrary unsynchronized
+mutation of public objects/configuration are outside this guarantee. See the
+[current evidence and AI threat map](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#replay-safe-epoch-settlement-and-ai-threat-update--2026-11-01).
+
 ## AgentExecutionWallet policy contract — 2026-11-01
 
 Constructor and trusted `policy_gates = value` replacement accept a plain dict

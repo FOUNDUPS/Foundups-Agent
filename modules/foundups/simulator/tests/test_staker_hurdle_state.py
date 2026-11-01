@@ -496,3 +496,194 @@ class TestDuConservationAccounting:
         assert expected_actual + expected_withheld == pytest.approx(
             pre_reduction, rel=1e-9
         )
+
+
+# A07/B02 frozen process-local replay/atomicity acceptance.
+from concurrent.futures import ThreadPoolExecutor
+from copy import deepcopy
+from decimal import Decimal
+from threading import Barrier, Event
+from modules.foundups.simulator.economics import epoch_ledger as lm
+from modules.foundups.simulator.economics import pool_distribution as pm
+from modules.foundups.simulator.economics.epoch_ledger import EpochLedger
+from modules.foundups.simulator.economics.pool_distribution import (
+    PoolDistributor, ParticipantType as PT, ActivityLevel as AL, StakerPosition)
+from modules.foundups.agent_market.src.fam_daemon import FAMDaemon
+from modules.foundups.simulator.config import SimulatorConfig
+from modules.foundups.simulator.mesa_model import FoundUpsModel
+
+
+def _a07_pool(ledger=None):
+    pool = PoolDistributor() if ledger is None else PoolDistributor(ledger=ledger)
+    p = pool.register_participant("alice", PT.DU, AL.DU,
+        staker_position=StakerPosition(original_stake_btc=0.001))
+    return pool, p
+
+def _a07_state(pool, ledger=None):
+    people = {k: (id(p), int(p.activity_level), p.ups_balance,
+        dict(p.foundup_tokens), None if p.staker_position is None else
+        (id(p.staker_position), dict(vars(p.staker_position))))
+        for k, p in pool.participants.items()}
+    evidence = None if ledger is None else (
+        [(e.to_dict(), dict(e.participant_rewards)) for e in ledger.entries],
+        dict(ledger.merkle_roots), dict(ledger.merkle_trees))
+    return deepcopy((pool.accumulated_fund, pool.total_drip_distributed,
+                     people, evidence))
+
+def _a07_receipt(r):
+    return {**vars(r), "participant_rewards": dict(r.participant_rewards)}
+
+def test_a01_exact_retry_has_no_effects():
+    pool, _ = _a07_pool()
+    first = pool.distribute_epoch(1, 100, "a")
+    before = _a07_state(pool)
+    again = pool.distribute_epoch(1, 100.0, "a")
+    assert _a07_state(pool) == before
+    assert _a07_receipt(again) == _a07_receipt(first) and again is not first
+
+def test_a02_late_retry_owns_first_receipt_and_configuration(monkeypatch):
+    pool, _ = _a07_pool()
+    result = pool.distribute_epoch(1, 100, "a")
+    expected = _a07_receipt(result)
+    pool.distribute_epoch(3, 50, "a")
+    pool.register_participant("new", PT.UN, AL.UN)
+    monkeypatch.setitem(pm.POOL_PERCENTAGES, "fund", 0.01)
+    try:
+        result.participant_rewards["alice"] = 999
+        result.total_rewards = 999
+    except (TypeError, AttributeError):
+        pass
+    before = _a07_state(pool)
+    retry = pool.distribute_epoch(1, 100, "a")
+    assert _a07_receipt(retry) == expected and _a07_state(pool) == before
+    assert retry is not result
+
+@pytest.mark.parametrize("total,context", [(101, "a"), (100, "b"), (100, None)])
+def test_a03_conflicts_leave_complete_state_unchanged(total, context):
+    pool, _ = _a07_pool()
+    pool.distribute_epoch(1, 100, "a")
+    before = _a07_state(pool)
+    with pytest.raises(ValueError):
+        pool.distribute_epoch(1, total, context)
+    assert _a07_state(pool) == before
+
+@pytest.mark.parametrize("label", ["bool", "negative", "nan", "inf", "string",
+    "decimal", "float_subclass", "hostile", "epoch_bool", "epoch_float", "epoch_negative",
+    "context_empty", "context_whitespace", "context_number"])
+def test_a04_invalid_request_rejects_before_effects(label):
+    class Hostile:
+        def __float__(self): raise AssertionError("coercion hook")
+        def __mul__(self, other): raise AssertionError("arithmetic hook")
+    class FloatSubclass(float): pass
+    values = {"bool": True, "negative": -1, "nan": float("nan"), "inf": float("inf"),
+        "string": "100", "decimal": Decimal("100"), "float_subclass": FloatSubclass(100),
+        "hostile": Hostile()}
+    epoch = {"epoch_bool": True, "epoch_float": 1.0, "epoch_negative": -1}.get(label, 1)
+    context = {"context_empty": "", "context_whitespace": " ", "context_number": 1}.get(label, "a")
+    pool, _ = _a07_pool()
+    before = _a07_state(pool)
+    with pytest.raises(ValueError):
+        pool.distribute_epoch(epoch, values.get(label, 100), context)
+    assert _a07_state(pool) == before
+
+def test_a05_unrecorded_old_epoch_rejects_but_gaps_allowed():
+    pool, _ = _a07_pool()
+    pool.distribute_epoch(3, 100)
+    before = _a07_state(pool)
+    with pytest.raises(ValueError): pool.distribute_epoch(2, 100)
+    assert _a07_state(pool) == before
+    assert pool.distribute_epoch(8, 100).epoch == 8
+
+def test_a06_zero_normalization_and_empty_roster_preserve_math():
+    pool = PoolDistributor()
+    pool.distribute_epoch(0, -0.0)
+    before = _a07_state(pool)
+    assert pool.distribute_epoch(0, 0).total_rewards == 0
+    assert _a07_state(pool) == before
+    r = pool.distribute_epoch(1, 100)
+    assert r.fund_pool == 4 and r.fund_accumulated == 4
+    assert r.participant_rewards == {} and r.drip_distributed == 0
+    before = _a07_state(pool)
+    pool.distribute_epoch(1, 100.0)
+    assert _a07_state(pool) == before
+
+def test_a07_late_participant_failure_is_atomic():
+    pool, _ = _a07_pool()
+    bad = pool.register_participant("late", PT.DU, AL.DU)
+    bad.ups_balance = "invalid"
+    before = _a07_state(pool)
+    with pytest.raises((TypeError, ValueError)):
+        pool.distribute_epoch(1, 100)
+    assert _a07_state(pool) == before
+
+@pytest.mark.parametrize("field", ["balance", "fund", "drip"])
+def test_a08_finite_request_cannot_publish_infinite_prospective_state(field):
+    pool, p = _a07_pool()
+    maximum = float.fromhex("0x1.fffffffffffffp+1023")
+    if field == "balance": p.ups_balance = maximum
+    elif field == "fund": pool.accumulated_fund = maximum
+    else: pool.total_drip_distributed = maximum
+    before = _a07_state(pool)
+    with pytest.raises(ValueError): pool.distribute_epoch(1, 1e308)
+    assert _a07_state(pool) == before
+
+def test_a12_concurrent_exact_requests_commit_once():
+    pool, _ = _a07_pool()
+    barrier = Barrier(4)
+    def call():
+        barrier.wait(timeout=3)
+        return pool.distribute_epoch(1, 100, "a")
+    with ThreadPoolExecutor(4) as executor: results = list(executor.map(lambda _: call(), range(4)))
+    assert pool.accumulated_fund == 4
+    assert pool.participants["alice"].ups_balance == pytest.approx(76.8)
+    assert all(_a07_receipt(x) == _a07_receipt(results[0]) for x in results)
+    assert len({id(x) for x in results}) == 4
+
+def test_a13_concurrent_conflicts_have_one_winner():
+    pool, _ = _a07_pool()
+    barrier = Barrier(2)
+    def call(total):
+        barrier.wait(timeout=3)
+        try: return (total, pool.distribute_epoch(1, total, "a"))
+        except ValueError: return (total, None)
+    with ThreadPoolExecutor(2) as executor: results = list(executor.map(call, (100, 200)))
+    winners = [(n, r) for n, r in results if r is not None]
+    assert len(winners) == 1
+    amount, receipt = winners[0]
+    assert pool.accumulated_fund == pytest.approx(amount * 0.04)
+    assert pool.participants["alice"].ups_balance == pytest.approx(amount * 0.768)
+
+def test_a15_hurdle_crossing_and_retry_keep_first_lock():
+    pool, p = _a07_pool()
+    position = p.staker_position
+    position.cumulative_distributions_btc = 0.00999
+    first = pool.distribute_epoch(1, 100)
+    assert first.du_actual_distributed == pytest.approx(3.2)
+    locked = position.hurdle_locked_at_btc
+    before = _a07_state(pool)
+    pool.distribute_epoch(1, 100)
+    assert _a07_state(pool) == before
+    second = pool.distribute_epoch(2, 100)
+    assert second.du_actual_distributed == pytest.approx(3.2 * 0.0526)
+    assert position.hurdle_locked_at_btc == locked
+
+def test_a16_shared_position_keeps_original_sequential_crossing_formula():
+    pool, p = _a07_pool()
+    position = p.staker_position
+    position.cumulative_distributions_btc = 0.00999
+    q = pool.register_participant("bob", PT.DU, AL.DU, staker_position=position)
+    receipt = pool.distribute_epoch(1, 100)
+    assert p.staker_position is q.staker_position is position
+    assert receipt.participant_rewards["alice"] == pytest.approx(38.4)
+    assert receipt.participant_rewards["bob"] == pytest.approx(36.88416)
+    assert position.hurdle_locked_at_btc == pytest.approx(0.010006)
+    assert position.cumulative_distributions_btc == pytest.approx(0.0100068416)
+
+def test_a17_missing_tiers_do_not_get_new_redistribution_policy():
+    pool, _ = _a07_pool()
+    receipt = pool.distribute_epoch(1, 100)
+    assert receipt.participant_rewards["alice"] == pytest.approx(76.8)
+    assert receipt.drip_distributed == pytest.approx(12.8)
+    assert receipt.fund_pool == pytest.approx(4)
+    assert receipt.du_actual_distributed == pytest.approx(3.2)
+    assert receipt.du_hurdle_withheld == 0
