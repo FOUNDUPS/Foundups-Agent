@@ -15,6 +15,12 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 ## Micro verification and protected native composition — 2026-11-01
 
+The [native Hermes qualification](docs/operations/RSI_SWARM_DISPATCH.md#native-hermes-api-qualification--2026-11-01)
+reproduces an upstream skill-discovery500 and tests a one-line candidate repair
+in three confined containers (34 assertions). No author/model call or installed
+promotion occurred. Complete full-gateway/provider qualification and protected
+admission before expanding Vote; the existing19/P0 and R15 gates remain selected.
+
 The [aggregate-to-display follow-up](docs/operations/RSI_SWARM_DISPATCH.md#vote-aggregate-to-display-trial--2026-11-01)
 extends the existing Vote fixture after the host repair. The local proposal was
 rejected; a separately attributed coordinator repair connects aggregate evidence

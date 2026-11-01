@@ -1,3 +1,15 @@
+## 2026-11-01 — Native Hermes handler qualification
+
+WSP00/15/22/48/50/97. The [existing dispatch record](../../../docs/operations/RSI_SWARM_DISPATCH.md#native-hermes-api-qualification--2026-11-01)
+records an actual upstream0.22.5 skill-discovery500, a coordinator-authored one-line
+candidate overlay, and baseline/empty/skill Docker cases with34 passing assertions.
+This closes a component diagnosis and candidate repair, not installed promotion,
+independent author acceptance or native RSI. Existing0.20.4 pin, authority, provider,
+skills and publication controls are unchanged. The temporary native listeners and
+containers closed; private repair evidence stays on O:. Independent source/evidence
+review approved the candidate and reran34 checks. Full gateway/model readiness,
+native outcome verification and protected requester/lease composition remain required.
+
 ## Preserved PC guidance and assertion recovery — 2026-10-31
 
 Recover the call-safety education skill, generated Codex mirror, module research
