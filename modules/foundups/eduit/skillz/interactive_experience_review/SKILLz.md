@@ -1,7 +1,7 @@
 ---
 name: interactive_experience_review
 description: Audit and iteratively repair audience-specific games and web interfaces, including EDUIT Storytime timing, touch controls, learning cues, scoring and feedback. Use before implementation and after inspecting each changed output.
-version: 0.2.1
+version: 0.3.0
 intent_type: AUDIT
 promotion_state: prototype
 ---
@@ -31,6 +31,42 @@ other games. Keep each product's runtime and evidence in its existing module.
    Treat unfamiliar requirements as proposals, not already working features.
 
 ## Inspect in this order
+
+### PWA app presentation gate
+
+When the product is a child-facing installed PWA, build and audit its actual app
+surface, not just its manifest or a desktop page shrunk onto a phone. Keep the
+primary activity and a small control rail prominent. Put secondary character,
+music and language choices behind a clearly named menu with large, labelled
+choices; reuse existing controls/state rather than a second settings system.
+For Storytime, require at least64 CSS pixels for menu, Done, language and choice
+targets in the actual rendered viewport. Check legible labels, spacing and center
+hit testing after scrolling each choice into view. Offscreen scrollable options
+are not clipped controls, but the exit must remain reachable above safe areas.
+Native dialog focus/Escape or an equivalent established modal pattern must work.
+Viewport-unit and orientation checks need an actual sized browsing viewport or
+iframe; resizing a DIV alone does not exercise the intended CSS viewport.
+
+Inspect top-level launch as well as direct app URLs. A viewport-less forwarding
+frame can shrink otherwise correct controls. Record that hosting defect and do
+not certify the custom domain from a passing iframe or direct-origin test.
+Check phone/tablet portrait/landscape and installed entry where available; keep
+unverified native iOS touch/audio separate from desktop browser measurements.
+
+Fullscreen animation needs one continuous spatial composition. A decorative
+upper strip is not a live extension: trace the entire moving leg from the real
+visible top through contact and lift, then the revealed opening into the same
+sky. Inspect intermediate frames and material seams. If SVG bounds extend, prove
+the same world-to-screen mapping for art, hit targets and overlays; preserve the
+canonical simulation and frozen-feedback coordinates. Do not stretch the actors
+or change physics to fill spare space. Replay/status must not cover the family.
+
+Freeze state before opening settings, changing a choice, closing, rotating and
+leaving fullscreen. Actors, awards, score, timer, round, practice and drawings
+must persist; these actions pause and never start music or resume play implicitly.
+An independent reviewer must exercise controls and inspect rendered geometry,
+not merely check CSS declarations. Retain failure/repair evidence as a candidate;
+only a later real task can demonstrate transfer of this procedure.
 
 | Pass | Required evidence |
 |---|---|

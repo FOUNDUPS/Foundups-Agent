@@ -1,5 +1,12 @@
 # EDUIT — Education Using Information Technology
 
+Current app-presentation build, **app-scene-17**: open the three-line **Storytime
+menu** beside player controls for large Characters, Music and Language choices.
+Fullscreen uses one continuous sky/game scene; the whole leg enters and leaves
+the top. Settings pause without restarting the round or starting music. The
+existing build/review skills now include these app-specific acceptance checks.
+
+
 Latest preview correction, **whole-story-16**: Auto play reads all five story
 plates before starting the video once. The25s demonstration now records the
 same game mechanics as the playable panel; the original Foley is kept separately.

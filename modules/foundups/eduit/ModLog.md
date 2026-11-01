@@ -1,5 +1,33 @@
 # EDUIT ModLog
 
+## 2026-11-01 — App-sized settings and one continuous fullscreen scene
+
+WSP00/15/22/50/84/97,15/P1(C3/I4/D4/Impact4). Latest012 photos require
+app presentation, not a shrinking document of settings. Existing #options is now
+a native Storytime menu: Characters/Music/Language panels, >=64px targets, sticky
+Done and grouped advanced controls. The existing mounted controls move once;
+opening/choosing/closing pauses without changing simulation or starting music.
+Independent browser failures exposed side-safe-area arithmetic and delayed focus
+return; both were repaired. A cross-origin domain wrapper gets an explicit
+Open full-size Storytime link to this same app, never automatic top navigation.
+
+Expanded game uses one SVG with symmetric sky/soil around the canonical world.
+The whole foot descends from the actual top, contacts at the unchanged base
+position and exits above the actual top on lift. Revealed openings join upper
+sky for both skins. World hit targets keep the same transformed subrectangle;
+freeze remains canonical960x540. Default scene golden hashes and mechanics are
+unchanged. Ending controls occupy empty space rather than covering the family.
+Existing25s engine film is freshly rerendered for current source bindings.
+
+The interactive review skill0.3.0 and Shorts build skill0.2.5 now require an app
+presentation gate: actual target/hit bounds, safe areas, focus, one continuous
+animation, canonical world/feedback mapping and independent output inspection.
+Candidate skill correction, not admitted promotion or next-tile RSI transfer.
+Retrieval used source-bound lexical owner bundle with UNKNOWN freshness/indexgap;
+core documents were verified directly and broad/historical results reranked.
+Native iOS touch/listening and actual custom-domain DNS repair remain separate.
+
+
 ## 2026-11-01 — Whole story before a same-engine demonstration
 
 WSP00/15/22/50/84/97, existing Shorts presentation and rendering owners.

@@ -1,5 +1,19 @@
 # EDUIT test history
 
+## 2026-11-01 — App menu, continuous canvas and independent photo audit
+
+Freeze app-menu >=64px/hit bounds, safe-area exit/focus, real-earned state
+preservation and no music autoplay; test both routes/six dimensions in normal and
+expanded mode. Independent matrix initially451passed/25failed: actual safe-area
+and focus defects, plus fixed-wall-time fixture failing to earn an award. Fix
+product arithmetic/focus and wait for actual clock/score/survivor without weakening
+oracles. Repaired matrix572/572passes. Scene tests retain originalgoldens and
+sample100descent/100lift positions; actual rendered contact/lift and both palettes
+are reviewed separately. Freeze/feedback stays canonical960x540. Output receipts
+under outputs/storytime-pwa-scene-independent-20261101 preserve failed controls.
+Synthetic viewports/offline replay are not physical iOS touch/listening proof.
+
+
 ## 2026-11-01 — Full-story and deterministic game-film regressions
 
 Freeze: Auto play from any plate reads0→4 once, no video during book, one final

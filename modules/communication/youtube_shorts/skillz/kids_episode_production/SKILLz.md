@@ -1,6 +1,7 @@
 ---
 name: kids_episode_production
-version: 0.2.4
+description: Build and independently review Kids Episodes media and Storytime viewer/PWA changes through existing production and interactive-review owners.
+version: 0.2.5
 intent_type: GENERATION
 promotion_state: prototype
 ---
@@ -26,6 +27,10 @@ explicitly rerendered. This link does not activate a worker or prove transfer.
 For Storytime screenshot, layout, PWA, gesture or whiteboard feedback, read
 [viewer iteration](references/viewer-iteration.md) and the current EDUIT module
 docs before changing code. Apply its locked-invariant and evidence checks.
+For child-facing PWA builds, apply the interactive review's **PWA app presentation
+gate** before implementation and after rendering: app-sized menu choices,
+continuous fullscreen scene geometry, mapped hit targets and preserved state.
+Installation metadata alone does not satisfy the app-presentation contract.
 
 ## Story-first production
 

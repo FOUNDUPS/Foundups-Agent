@@ -23,3 +23,14 @@ body.embedded .hotspot span{display:none}
 #ending>span{max-width:85%;text-align:center;font-size:clamp(24px,5vw,46px);line-height:1.12}
 #ending button{pointer-events:auto;align-self:flex-end;margin-right:clamp(12px,9%,90px)!important;min-width:clamp(76px,12vw,112px);min-height:clamp(76px,12vw,112px);font-size:clamp(38px,6vw,58px)}
 @media(max-width:500px){#ending{padding-bottom:21%;}#ending>span{font-size:clamp(22px,6vw,34px)}}
+
+/* One expanded SVG surrounds the unchanged simulation; interaction stays in its world rectangle. */
+body.embedded.scene-expanded .play-stage{height:100vh;aspect-ratio:auto}
+body.embedded.scene-expanded #scene,body.embedded.scene-expanded #scene svg{height:100%;width:100%}
+body.embedded.scene-expanded .rescue-targets{inset:auto;top:var(--world-top);left:var(--world-left);width:var(--world-width);height:var(--world-height)}
+body.embedded.scene-expanded #ending{inset:auto;top:var(--world-top);left:var(--world-left);width:var(--world-width);height:var(--world-height)}
+/* Ending controls occupy empty space, never the rescued family at the vine. */
+#ending{padding:8px;justify-content:space-between;gap:8px}
+#ending>span{font-size:clamp(22px,4vw,34px);line-height:1.12}
+#ending button{align-self:center;margin:0!important}
+@media(orientation:portrait){body.embedded.scene-expanded #ending button{position:fixed;right:16px;bottom:16px}}

@@ -1,5 +1,14 @@
 # EDUIT test inventory
 
+App presentation extends the same inventory with scene-presentation.test.mjs:
+canonical scale/world mapping, malformed presentation rejection, default-frame
+identity, full-height leg entry/exit and matching skin sky/opening. Independent
+app-menu/scene browser matrix verifies actual rendered hit bounds and real-earned
+state through native menu, choices, Done/Escape, fullscreen and injected safe
+areas. Cross-origin wrapper escape is a separate user-activated launch check.
+Retain raw failures/repairs; no physical-device claims from synthetic events.
+
+
 Run `node --test modules/foundups/eduit/tests/*.test.mjs` from repository root.
 
 Current sleeve selection adds `choice-wheel.test.mjs` and `music-picker.test.mjs`:

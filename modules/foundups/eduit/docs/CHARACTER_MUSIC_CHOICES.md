@@ -1,5 +1,26 @@
 # Storytime sleeve: character and music choices
 
+## Current app presentation — 2026-11-01
+
+012's phone photos supersede the original bottom-of-page settings arrangement.
+Use the existing Storytime-menu hamburger in either player rail. Characters,
+Music and Language each open a large panel in one native modal; Done is reachable
+above safe areas, Escape closes only that menu, and focus returns to its opener.
+Targets are >=64px in the actual viewport, not merely declared SVG units. Existing
+wheel instances, choices, licenses and state semantics remain the same. The menu
+pauses immediately; closing or selecting never resumes or starts music.
+
+Expanded gameplay is one continuous SVG: upper sky, original world and lower
+soil. The whole foot enters from the actual top and fully exits on lift; both
+skins' revealed opening joins the sky. Hit/overlay geometry remains mapped to the
+canonical world; frozen feedback stays960x540. Preserve actual awarded state and
+inspect rendered frames after layout changes. The existing interactive-review
+and Shorts production skills own this build/audit gate; no second UI framework,
+engine, scheduler or learning memory. Skill transfer still needs another real
+work item. eduit.org masked forwarding remains a separate hosting defect; its
+framed app offers an explicit same-app full-size launch link.
+
+
 2026-11-01. Latest012 direction authorizes Sites review publication and pushing
 verified work to the existing GitHub PR. This extends the presentation layer over
 PR2256, preserving its storybook and the earlier local dialog/timing repairs.

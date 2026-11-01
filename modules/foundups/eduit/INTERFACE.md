@@ -1,5 +1,26 @@
 # EDUIT interfaces
 
+## App menu and expanded scene — 2026-11-01
+
+`#game-options` / `#video-options` open the same native `#options` dialog. Existing
+wheel/language instances mount in #menu-character-panel/#menu-music-panel/
+#menu-language-panel; section buttons #menu-characters/#menu-music/#menu-language.
+`#close-options` Done and Escape return focus without resuming. Native dialog
+focus containment; >=64px menu/choice/language targets; advanced controls remain
+under #menu-advanced. No duplicate state, arbitrary media or new permissions.
+
+`storytimeReview.setPresentation({expanded:boolean})` changes only framing.
+`scenePresentation(width,height,expanded)` maps original960x540 coordinates into
+an extended sky/soil viewBox. Art, hit targets and score share that mapping;
+`freeze().svg` remains canonical960x540 for normalized feedback. Enter/exit,
+marking and resume explicitly synchronize presentation. Whole-leg movement and
+sky-open footprint use the same scene owner; no detached animated strip.
+
+An observed cross-origin masked wrapper gets #open-full-app, a user-activated
+_top link to the app's own current route. No automatic frame escape or open
+redirect. Passing direct-origin checks does not certify eduit.org forwarding.
+
+
 ## Whole-story playback and film revision — 2026-11-01
 
 `window.storytimeStorybook.play()` begins the whole story at plate0, or pauses

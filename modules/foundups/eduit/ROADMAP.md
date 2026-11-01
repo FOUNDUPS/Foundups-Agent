@@ -1,5 +1,15 @@
 # EDUIT execution roadmap
 
+## 2026-11-01 — PWA app-presentation correction
+
+012 photo audit supersedes the bottom document-flow settings layout: use one
+app-sized Storytime menu for character/music/language and one continuous expanded
+scene for the whole leg and sky opening. Preserve game/feedback coordinates and
+all earned state. Existing interactive review/build skills now enforce these
+checks. Keep WSP15 priority separate from visual-quality/learning-effectiveness
+judgments. Next real tile must prove skill transfer; this repair alone does not.
+
+
 ## 2026-11-01 — Full-story sequencing and engine-recorded film
 
 Latest012 correction: Auto play runs all five story plates before a single video
