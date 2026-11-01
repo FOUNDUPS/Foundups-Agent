@@ -1,5 +1,17 @@
 # EDUIT ModLog
 
+## 2026-11-01 — Preserve adjacent video layout during book repair
+
+Final diff review found the old book CSS block also contained a phone-portrait
+video decorative-strip height cap. Restore the identical100px cap in its own
+media rule, preserving adjacent video layout. Existing game-specific hidden
+strip rule remains authoritative; no physics, art or book geometry change.
+Preschool-20/cachev14 identifies this scope-preservation follow-up. Reviewed
+storybook module hash remains unchanged;63/63 Node checks rerun successfully.
+Independent actual390x844 browser review passes: video strip100px, game strip
+hidden, and collapsed first/final book geometry retained. Tiny Next-button
+comparison variance is its existing hint animation, not a reduced target.
+
 ## 2026-11-01 — Preschool book critique, repair and independent reinspection
 
 WSP00/15/22/50/84/97,14/P1(C2/I4/D4/Impact4): smallest layer is the existing

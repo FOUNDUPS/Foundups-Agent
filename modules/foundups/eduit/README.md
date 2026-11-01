@@ -1,6 +1,6 @@
 # EDUIT — Education Using Information Technology
 
-Current storybook presentation, **preschool-19**: nearly full-screen teaching
+Current storybook presentation, **preschool-20**: nearly full-screen teaching
 words, large Play story/Pause labels and64px actions. On short screens decoration
 gives way to words; final Video replaces redundant Skip beside Close. The same
 five-page narration/video sequence and game remain. Native Home Screen launch

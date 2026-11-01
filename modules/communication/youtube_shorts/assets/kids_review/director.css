@@ -282,6 +282,11 @@ html:has(#story-intro[open]){overflow:hidden}
  #story-intro.storybook-ready #storybook-progress{margin:4px 0}
  .storybook-navigation{padding:4px 0}
 }
+/* Preserve the existing video-only decorative strip independently of the book.
+   Expanded game presentation hides this element through its own scene owner. */
+@media(max-width:600px) and (orientation:portrait){
+ .unit.expanded .scene-context{height:min(100px,max(0px,calc((var(--scene-height) - min(var(--scene-height),(var(--app-width) - var(--pad-left) - var(--pad-right)) * .5625)) / 2)))}
+}
 
 /* Consistent thumb-side entry and exit; center the glyph rather than inheriting button padding. */
 .unit .expand-button,.unit.expanded .expand-button{

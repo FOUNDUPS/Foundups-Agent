@@ -2,7 +2,7 @@
 
 ## Preschool book presentation — 2026-11-01
 
-Preschool-19 retains stable dialog/button IDs and story scheduler. The native
+Preschool-20 retains stable dialog/button IDs and story scheduler. The native
 book fills available safe-area bounds. Primary labels are24px, teaching words
 at least48px on short landscape phones/52px portrait and96px tablet. Last page
 moves #storybook-watch into .intro-actions, hides redundant #intro-skip and keeps
