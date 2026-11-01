@@ -111,15 +111,74 @@ Studio Gemma occupied about3.46GB; do not evict shared models. Serial CPU infere
 plus deterministic tests is feasible (the trial above ran); concurrent model
 capacity is not benchmarked. Start with one author and separate verification.
 
-Installed inventory: Windows OpenClaw2026.5.2; WSL OpenClaw2026.7.1-2 and
-Hermes0.20.4. Upstream observations: [OpenClaw2026.10.9](https://github.com/openclaw/openclaw/releases/tag/v2026.10.9),
-[Hermes0.22.5](https://github.com/NousResearch/hermes-agent/releases/tag/v0.22.5).
-These newer versions require isolated qualification, not replacement of the
-source-pinned runtime. No upgrades, downloads, grants or paid calls in this trial.
-After012's restart, WSL kernel6.18.54.1 responds and LM Studio's API is reachable;
-Ollama0.40.13's app exists but server11434 refuses connections/startup times out.
-Docker's Linux-engine pipe is absent. An installed CLI or model catalog is not
-runtime/sandbox qualification. The successful local adapter did not use Ollama.
+The earlier micro trial used Windows OpenClaw2026.5.2, WSL OpenClaw2026.7.1-2
+and Hermes0.20.4. It did not upgrade them or use Ollama. Its unavailable Ollama
+server and Docker engine observations are superseded by the host repair below.
+
+#### Host repair and isolated upgrade qualification — 2026-11-01
+
+012 authorized local startup, repair and stable-version updates. This host
+maintenance does not supply native work-order, model, evaluator or promotion
+authority. Release observations are dated, not an automatic update policy.
+
+| Runtime | Observed result | Remaining boundary |
+| --- | --- | --- |
+| [Ollama0.40.13](https://github.com/ollama/ollama/releases/tag/v0.40.13) | Latest stable; normal app starts server11434; two bounded CPU inference checks returned `OK`, including after restart | Health checks, not worker-quality or RSI evidence |
+| [WSL3.0.3](https://github.com/microsoft/WSL/releases/tag/3.0.3) | Latest stable; kernel6.18.54.1; Ubuntu-24.04 reaches Docker Engine29.9.2 | WSL alone is not a worker sandbox |
+| [Docker Desktop4.97.0](https://docs.docker.com/desktop/release-notes/#4970) | Upgraded from4.76.0; official checksum and publisher signature checked; Linux engine responds from Windows and Ubuntu-24.04 | Existing sandbox image is the August21 build, not a newly qualified/latest image |
+| [llmster0.0.27-1](https://lmstudio.ai/install.ps1) | Upgraded from0.0.21-2 while no models/clients were active; API1234 responds; direct hidden launch avoids observed detached-launch console windows | Observe later startup; do not claim automatic recovery or model-quality qualification |
+| [OpenClaw2026.10.9](https://github.com/openclaw/openclaw/releases/tag/v2026.10.9) | Isolated CLI starts with checksum-verified Node24.22.2; sandbox command is available | Existing routed installation unchanged; matched Gateway/profile and actual governed adapter execution remain unqualified |
+| [Hermes0.22.5](https://github.com/NousResearch/hermes-agent/releases/tag/v0.22.5) | Isolated source `bf0203a794a07aac3ff764972ab9087baa4e4f4e`, PM-managed Python3.14.9; API version import and13 selected upstream API tests pass | FoundUps health gate still requires0.20.4 and rejects0.22.5; do not loosen the pin without adapter/confinement qualification |
+
+Ollama's profile-directory junction caused Windows untrusted-mount-point errors.
+Preserve the original junction as a recovery reference; use a normal profile
+configuration directory with byte-identical existing identity files. Model data
+and the existing external `OLLAMA_MODELS` setting remain in place. No replacement
+identity was generated. Its app, rather than a temporary `serve` process, now owns
+the server.
+
+Docker4.76 failed while initializing its stale inference socket. The verified
+update restored startup without a factory reset. Correct the existing WSL
+integration list to include the actual `Ubuntu-24.04` distribution; the prior
+`Ubuntu` entry did not make Docker available there. Account sign-in was confirmed
+separately and does not confer WRE execution authority.
+
+One disposable container per caller (Windows, then WSL) used the existing image
+`sha256:c42aca9d0efd20283ccd61e798d6ec557acf1c0238e017c5b39184a030d891c2`.
+Both checks verified UID65534, loopback-only networking, zero effective
+capabilities, `NoNewPrivs=1`, rejected writes under `/tmp`, and automatic removal.
+Launch limits were read-only root, no network, no host mounts,32 PIDs,128MiB and
+one CPU. The two pre-existing stopped containers remained. This is a host
+sandbox smoke test, not OpenClaw/Hermes dispatch, independent outcome acceptance
+or a general isolation/security certification.
+
+The old llmster updater stalled. Its owned process was stopped; the official,
+checksum/signature-verified bootstrap installed the candidate. Detached CLI
+startup then exposed Node/LM Link console windows. Stopping that owned daemon
+removed the windows; direct `Start-Process -WindowStyle Hidden` of the installed
+daemon (using its existing launch record) restored the API without the detached
+CLI wake-up. Do not close unrelated terminals or change global terminal settings.
+
+Hermes qualification first rejected an undeclared `api` extra and an incorrect
+test interpreter/missing optional dependencies. Preserve those failures. The
+corrected upstream PM environment used `web,messaging`, its separate test Python,
+and `scripts/run_tests.sh tests/gateway/test_api_server.py -k 'health or capabilities or auth or toolsets or skills' -q`
+with file retries disabled:13 passed,0 failed. No provider job or credentials
+were used. Candidate installs are retained under the host's
+`~/.local/share/foundups/runtime-candidates/20261101`; local maintenance logs and
+recovery state are in `C:/tmp/rsi-runtime-repair-20261101/`, outside Git.
+
+Independent read-only review at11:23 JST confirmed both Docker callers, current
+Ollama/LM Studio responses, the13-test log, and zero WindowsTerminal/OpenConsole
+processes after direct hidden launch. It did not replay the earlier repairs or
+authenticate their historical measurements. Source/evidence review is separate
+from independent acceptance of a worker-produced improvement.
+
+Next: qualify the existing provider adapters against these exact candidate
+versions and the intended sandbox image before changing routed deployments.
+Keep the protected installed runtime, signed admission and R15/G1-G4 gates intact.
+No paid model calls, independent retained improvement or native author success
+are established by this maintenance.
 
 [Grok Bot](https://x.ai/bot) documents persistent cloud computing and parallel bots,
 but its bots share a user's machine; this is not proof of one server per bot or
