@@ -38,6 +38,7 @@ from .economics.pool_distribution import (
     ParticipantType, ActivityLevel,
 )
 from .economics.epoch_ledger import EpochLedger
+from ._mesa_epoch import _EpochDistributionTail
 from .economics.btc_anchor_connector import AnchorMode, BTCAnchorConnector
 from .economics.fi_rating import FiRatingEngine, get_rating_engine
 from .economics.allocation_engine import AllocationEngine
@@ -138,7 +139,6 @@ class FoundUpsModel:
         self._demurrage = DemurrageEngine(
             config=DecayConfig(), btc_reserve=self._btc_reserve,
         )
-        self._pool_distributor = PoolDistributor()
         self._fi_distributors: Dict[str, FoundUpTokenDistributor] = {}
 
         # BTC-F_i ratio tracking (key metric from 012)
@@ -211,6 +211,8 @@ class FoundUpsModel:
         self._f0_seeded = False
         self._f0_source_foundup_id = "F_0"
         self._epoch_ledger = EpochLedger(foundup_id=self._f0_source_foundup_id)
+        self._pool_distributor = PoolDistributor(ledger=self._epoch_ledger)
+        self._epoch_tail = _EpochDistributionTail()
         self._anchor_connector: Optional[BTCAnchorConnector] = self._build_anchor_connector()
         self._f0_investor_ids: List[str] = [f"f0_investor_{idx:03d}" for idx in range(8)]
         self._mvp_offerings_resolved = 0
@@ -1039,6 +1041,8 @@ class FoundUpsModel:
         Decayed UPS is redistributed across network and pAVS treasury lanes.
         Active participants get decay relief via pool rewards.
         """
+        if self._epoch_tail.resume(self):
+            return
         daemon = self._fam_bridge.get_daemon()
         network_before = self._demurrage.total_to_network_pool
         pavs_before = self._demurrage.total_to_pavs_treasury
@@ -1104,62 +1108,17 @@ class FoundUpsModel:
             )
 
         # Distribute epoch rewards via pool structure
-        self._epoch_counter += 1
+        epoch = self._epoch_counter + 1
         state = self._state_store.get_state()
         epoch_rewards = float(state.total_stakes) * 0.01  # 1% of total stakes per epoch
         if epoch_rewards > 0 and self._pool_distributor.participants:
-            distribution = self._pool_distributor.distribute_epoch(
-                epoch=self._epoch_counter,
-                total_ups_rewards=epoch_rewards,
-            )
-            self._record_epoch_distribution(distribution)
+            self._epoch_tail.start(self, epoch, epoch_rewards)
+        else:
+            self._epoch_counter = epoch
 
     def _record_epoch_distribution(self, distribution: object) -> None:
         """Record epoch distribution to ledger and optionally publish Layer-D anchor."""
-        entry = self._epoch_ledger.record_from_distribution(distribution)
-        daemon = self._fam_bridge.get_daemon()
-        if daemon:
-            daemon.emit(
-                event_type="epoch_ledger_recorded",
-                payload={
-                    "epoch": entry.epoch_number,
-                    "entry_hash": entry.entry_hash,
-                    "participant_count": len(entry.participant_rewards),
-                    "total_distributed": round(float(entry.total_fi_distributed), 6),
-                },
-                actor_id="epoch_ledger",
-                foundup_id=self._f0_source_foundup_id,
-            )
-
-        if not self._anchor_connector:
-            return
-
-        every = max(1, int(self._config.layer_d_anchor_every_n_epochs))
-        if entry.epoch_number % every != 0:
-            return
-
-        commitment = self._epoch_ledger.prepare_settlement_commitment(entry.epoch_number)
-        if commitment is None:
-            return
-
-        result = self._anchor_connector.publish_commitment(
-            commitment,
-            force=bool(self._config.layer_d_anchor_force_republish),
-        )
-        if daemon:
-            daemon.emit(
-                event_type="settlement_anchor_published",
-                payload={
-                    "epoch": entry.epoch_number,
-                    "success": bool(result.get("success", False)),
-                    "status": result.get("status"),
-                    "tx_ref": result.get("tx_ref"),
-                    "idempotent_hit": bool(result.get("idempotent_hit", False)),
-                    "error": result.get("error"),
-                },
-                actor_id="btc_anchor_connector",
-                foundup_id=self._f0_source_foundup_id,
-            )
+        self._epoch_tail.observe(self, distribution)
 
     def _simulate_012_allocations(self) -> None:
         """Simulate 012 participants allocating UPS to FoundUps via 0102 digital twin.

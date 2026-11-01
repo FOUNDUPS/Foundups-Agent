@@ -1,6 +1,142 @@
 # FoundUps blockchain reconciliation and security decision — 2026-10-31
 
+## Replay-safe epoch settlement and AI threat update — 2026-11-01
+
+Current source baseline: `24cc4aa2971b05ff8b53f76d157145da4134ed5c`.
+[PR2281](https://github.com/FOUNDUPS/Foundups-Agent/pull/2281) delivered B01/A10
+wallet-policy isolation. All 24 final PR checks and 22 resulting-main checks
+passed; the primary PC checkout was fast-forwarded with its existing untracked
+work preserved. This supersedes the older active-sprint, baseline and
+publication-pending status below; sealed observations retain their source scope.
+Neither publication nor simulation qualifies a live monetary service.
+
+**Active layer: B02/A07, class B, WSP15 18/P0 (4/5/5/4).** The existing pool
+credits participants, updates staker hurdles, accumulates the fund and pays drip
+before Mesa asks the epoch ledger to deduplicate evidence. A ledger retry check
+alone therefore cannot prevent a second economic payment. Reuse these owners,
+prepare their complete effects before publication, and retain one detached
+receipt per distributor/epoch in the process lifetime. Existing valid pool
+formulas, numeric conventions and first-hurdle sequencing remain the reference.
+Shared staker positions must preserve the original participant iteration order.
+
+The independent baseline run passed 154 cases, including an actual non-AI
+240-tick Mesa run with seed 710007, three founders and eight user agents. It
+created FoundUps, submitted and verified work, paid tasks and produced a valid
+epoch chain. Its earlier harness failures remain recorded: two rejected default
+repository-database writes and one incorrect inspection attribute. The corrected
+test configuration only directs default FAM storage to separate scratch paths;
+real economic and authorization implementations remain in use. Python effect
+guards are not OS confinement. This baseline does not establish the repair.
+
+Independent acceptance froze 40 cases before implementation: 2 passed and 38
+failed on the baseline. All 40 then passed, together with 16 separate held-outs
+covering shared-ledger races, forged receipts, failed preparation and observers.
+Root review identified one callback return-value regression; its separate test
+first failed, then passed after a one-line correction. The corrected source
+passes all 57 independent cases with no failures, errors, skips or guard denials.
+These checks qualify selected **VERIFIED_SIMULATED** process-local effects,
+not the complete A07 durable or chain-level attack family.
+
+The initial seeded reruns passed their individual smoke assertions but produced
+different economic totals, including between two candidate runs. They are not
+parity evidence. Source inspection found process-randomized `hash()` in founder
+naming and rating potential, process-global random state and a shared rating
+engine. `SimulatorConfig.seed` alone therefore does not establish fresh-process
+reproducibility. Qualification must bind the full process configuration and
+initial state; no monetary difference may be removed as volatile metadata.
+
+The separately frozen controlled profile uses a fresh process, Python3.12.10,
+`-P -s`, an explicitly constructed credential-free environment and
+`PYTHONHASHSEED=710007`. The original audit guards and real scratch-state owners
+remain unchanged; Python's `-I` would ignore that hash-seed variable. One original
+24cc baseline and two corrected-candidate runs produced byte-identical recorded
+traces: SHA256 `672d12c9d8fb6286624ea892fb3a5d0315c475ee45f8c83c9a271ba4328f0ff1`.
+Each ran 240 ticks, created six FoundUps, paid 214 simulated tasks and recorded
+24 epochs. Recorded final stakes, F_i outstanding and fund values also match.
+This qualifies that exact profile and recorded trace; it does not fix model-wide
+global RNG/singleton ownership or prove seed-only portability. A model-owned RNG,
+stable identity hashing and independently isolated runs need a separate versioned
+simulation change before expanding economic acceptance.
+
+The promoted three-owner regression passes 192 cases, retaining every old test
+AST and matching the frozen new oracles after helper-name disambiguation. The
+broader simulator run passes 930 cases with the same three explicitly named SSE
+HTTP cases deselected, zero failures/errors/skips and zero effect-guard denials.
+These overlapping counts are not added. The [epoch security receipt](receipts/FOUNDUPS_EPOCH_REPLAY_SECURITY_20261101.json)
+binds sources, actual runs, rejected probes and remaining activation boundaries.
+Package, hosted and resulting-main evidence is separate from these local results.
+
+Canonical package generation adds only `_mesa_epoch.py`: all 1,477 earlier
+members remain, and the three edited runtime owners receive new hashes. The
+actual old validator refused the 1,478-member closure before the reviewed count
+update; the new boundary accepts 1,478 and rejects 1,479. Eight existing Python
+generator/index cases and three Node consumer entrypoints pass. The 330KiB
+manifest, 2MiB/source and 32MiB total caps are unchanged; LF/CRLF manifest sizes
+are 334,222/337,251 bytes. The canonical test registry remains 1,794 owners.
+Hosted source publication and resulting-main verification remain pending at
+this documentation checkpoint. Live economic deployment remains **BLOCKED**.
+
+### AI-exposed financial attack surfaces
+
+Primary sources were checked on 2026-11-01. AI can reduce the work required to
+discover and exploit a defect; that does not establish a break of cryptography.
+Anthropic's [December2025 SCONE study](https://www.anthropic.com/research/smart-contracts)
+and [May2026 update](https://www.anthropic.com/research/exploit-evals) demonstrate
+exploit generation in local blockchain simulations. Their simulated proceeds
+are not live theft, and their EVM results are not FoundUps or Algorand findings.
+
+Agents can also be redirected through information they are allowed to read.
+Invariant's [GitHub MCP demonstration](https://invariantlabs.ai/blog/mcp-github-vulnerability)
+and [tool-poisoning experiments](https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks)
+show repository and tool-metadata risks in controlled settings.
+[GitHub's VS Code assessment](https://github.blog/security/vulnerability-research/safeguarding-vs-code-against-prompt-injections/)
+documents addressed tool/file-action bypasses.
+[OpenAI's September2026 self-replication report](https://alignment.openai.com/misalignment-reports/self-replicating-prompt-injections-exist)
+observed no impact outside simulated tool calls. None is evidence of a FoundUps
+incident or confirmed blockchain theft.
+
+Repository content, dependencies, tool metadata/results, RPC facts, memory and
+model-written PoB explanations remain untrusted inputs. A claimed approval or
+urgent recovery instruction cannot grant spending authority. Host qualification
+requires pinned dependencies, bounded I/O and custody outside candidate code.
+FAM's `CallerAuthorization` is a trusted-host injection seam, not an issuer or
+a same-process sandbox; different agent IDs do not prove independent control.
+[MCP security guidance](https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/security_best_practices)
+requires audience separation and rejects token passthrough. This is a requirement
+for host integration, not evidence that FoundUps has completed it.
+
+Deterministic controls must constrain effects even if hostile text redirects an
+agent; [OpenAI's security guidance](https://openai.com/index/designing-agents-to-resist-prompt-injection/)
+supports this separation. The [Bybit/Safe investigation](https://www.sygnia.co/blog/sygnia-investigation-bybit-hack/)
+illustrates shared signing-presentation compromise, without establishing AI
+causation. Signers must independently decode the exact transaction, bind current
+scoped approval and deny unapproved authority changes. Post-quantum signatures
+cannot repair poisoned construction, accounting, authorization or recovery.
+
+| Existing attack / status at the baseline | Required next evidence in the existing roadmap |
+| --- | --- |
+| A01/A02: local policy exists; funded aggregate reservations do not | B05/B09: pending and ambiguous exposure across agent, controller, FoundUp and system windows; coordinated small calls stay within funded limits. |
+| A03/A04: unsigned Algorand field restrictions exist; monetary signer missing | B08: separate custody/control domains, independently decoded effects, one-use approvals, denied rekey/close/delegation and independently observed finality. |
+| A05/A06: local proof/task and type checks exist; independent facts and release authority missing | B03/B06: authentic work/maturity evidence, unique consumption and combined release/supply bounds; names and literal `True` are insufficient. |
+| A07: ledger evidence deduplicates after pool effects | B02: full local effect/retry/concurrency qualification; B05/B08: durable funded admission and chain-level no-effect/replay tests. |
+| A08: matching simulated; self-trade gap remains | B11: funded two-sided reservations, related-controller/Sybil controls, exact settlement/fees and cancellation. |
+| A09: external venue/bridge unqualified | Keep disabled; require separate asset, venue and bridge admission plus independent chain restrictions. |
+| A10: B01 detaches caller policy; trusted-host replacement remains | B08/B09: authenticated versioned policy and approvals outside candidate-controlled code; stale or self-granted authority rejected. |
+| A11: numeric checks do not authenticate reserve backing | B05/B09: authentic fresh backing and liabilities; fabricated plausible inputs cannot increase capacity. |
+| A12: breaker concepts exist; authenticated recovery and repeated queue processing unresolved | B09: clock-bound queue release, safe reconciliation and independent freeze/unfreeze authority. |
+
+These are linked threat requirements, not passed attack tests. The current
+distribution layer cannot establish restart recovery, cross-process exclusion,
+funded Treasury conservation or chain finality. Algorand's
+[sender/lease exclusion](https://dev.algorand.co/concepts/transactions/leases/)
+lasts only for its validity window; it is not lifetime business idempotency or
+authority to issue a replacement payment after a timeout. The dated Binance,
+bridge and quantum-risk evidence below retains its stated uncertainties.
+
 ## Current sprint and blockchain roadmap — 2026-11-01
+
+**Historical B01 checkpoint.** Current execution status is in the A07 addendum
+above. The ordered B01–B11 work packets below still own the remaining gates.
 
 This dated addendum supersedes planning/publication status below, not the sealed
 October 31 observations. PR2279 merged at `9925eb65e08b3602ad11ee32537bebf0d94bca32`;
@@ -134,7 +270,7 @@ reviewable receipt before promotion. No wrapper or new scheduler is required.
 | Order / packet | Existing owner / assigned 0102 role | WSP / class / MPS | Exit evidence |
 | --- | --- | --- | --- |
 | B01 policy isolation | simulator token_economics / security worker; economics verifier | 26/50/97, B, 17/P0 | Caller aliases cannot expand permission; rejection has no funding effects; valid regressions and held-outs pass. |
-| B02 epoch effects once | pool_distribution + epoch_ledger + Mesa callers / accounting worker | 26/29/97, B, 18/P0 (4/5/5/4) | Exact retries return detached prior result; conflicting context rejects; participant/fund/drip/hurdle changes commit atomically; exception and concurrency tests preserve all counters. Process-local proof must be labeled until durable recovery exists. |
+| B02 epoch effects once | pool_distribution + epoch_ledger + Mesa callers / accounting worker | 26/29/97, B, 18/P0 (4/5/5/4) | Exact retries return detached prior result; conflicting context rejects; prepare participant/fund/drip/hurdle and ledger effects before scoped publication. Ordinary preparation failures leave participating state unchanged; qualify concurrency separately. No process-death rollback or durable recovery claim. |
 | B03 monetary units and issuance decision | simulator source matrix + tokenomics / economic architect | 26/27/29/100, C/D, 19/P0 (4/5/5/5) | Versioned asset units, integer scale/rounding/residuals, mined/staked cap and release policy; seeded boundary/conservation tests; independent acceptance before governing mirrors and chain port. |
 | B04 catalog-to-asset identity | foundup_registry + manifests + FAM registry/intake / catalog worker | 26/58/109, A/B, 15/P1 (3/4/4/4) | Joined read-only coverage report; stable project IDs; nomination distinct from verified repository control and issuer grant; duplicate/repository-transfer/expired-claim controls. No ticker treated as chain evidence. |
 | B05 funded allocation and limits | FAM persistent payout/intent + existing simulator Treasury/FX / accounting worker | 26/29/97, B, 19/P0 (4/5/5/5) | Atomic funded reservations count pending/ambiguous operations across wallet, agent, controlling identity, FoundUp and system windows; unique proof consumption; crash/replay reconciliation; integer conservation. |
