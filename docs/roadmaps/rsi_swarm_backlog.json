@@ -2061,13 +2061,19 @@
           "priority": "P2"
         },
         "owner": "modules/foundups/voteballots/ROADMAP.md",
-        "state": "Pre-existing aggregate total_raised inherits upstream verified confidence with missing/indirect primary source; two independent synthetic counterexamples. Outside this bounded source-item repair."
+        "state": "Coordinator repair closes aggregate eligibility and its quick-answer/shell consumer; local worker no-op rejected. Original29 scorer and later47 consumer oracles are frozen separately; full398 pass. No native admission or learned retention.",
+        "evidence": "docs/operations/RSI_SWARM_DISPATCH.md#vote-aggregate-to-display-trial--2026-11-01",
+        "worker_attempts": 1,
+        "worker_accepted": 0,
+        "coordinator_repairs": 2,
+        "paid_worker_calls": 0,
+        "retained_learning_demonstrated": false
       },
       "native_author_ticket": false,
       "os_sandbox_qualified": false,
       "activation_or_retention": false,
       "g1_g5_closed": false,
-      "next": "Publish reviewed micro fixture/repair and reconcile protected native requester/consumer owners; preserve existing R15 target."
+      "next": "Source-item trial published in PR2282. Close aggregate/display publication separately; qualify candidate provider confinement and protected native requester/consumer owners. Preserve existing R15 target; do not retry unchanged failed local routes."
     },
     "parent_consensus_join_20261020": {
       "source_base": "5862eea0ef49d950674a6509c3dd2a20771a6be2",

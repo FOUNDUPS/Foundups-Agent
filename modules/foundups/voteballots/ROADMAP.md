@@ -16,12 +16,16 @@ independent review. One local worker proposal was rejected before production app
 the coordinator authored the accepted source repair. See tests/TestModLog and
 canonical RSI dispatch. This does not open the public surface or complete RSI.
 
-**Remaining proven defect:** `_build_summary_claims` inherits `summary.confidence`
-for `total_raised` without checking primary-source eligibility. Independent
-synthetic probes reproduce a verified aggregate with an indirect or absent
-reference. WSP15 C2/I3/D3/Impact3=11/P2. Next: freeze aggregate direct/indirect/
-missing/lower-confidence controls and reuse source-provenance policy for this
-consumer. Do not represent source-item closure as all-claim verification.
+**Aggregate follow-up (11/P2, C2/I3/D3/Impact3):** the next local Qwen proposal
+was an unchanged block in the wrong envelope and was rejected. The coordinator
+extended the existing provenance helper to aggregate totals. Independent review
+then exposed the connected quick-answer bug: it labeled totals using child-source
+overall confidence. The consumer now uses the unique total claim and caps answer/
+shell metadata; absent/ambiguous/invalid claims remain UNKNOWN. Frozen scorer and
+display oracles, fixture corrections and exact results are in tests/TestModLog.
+This closes a bounded internal defect, not public activation, native author
+admission or a demonstrated learning gain. Further model attempts require a
+newly qualified task/model route; repeating this failed configuration is not RSI.
 
 The original design roadmap is stale.
 

@@ -13,8 +13,23 @@ and references. For individual funding sources, upstream VERIFIED_FACT requires
 `fec_filing`, `state_filing` or `court_record`; other source types cap it at
 HIGH_CONFIDENCE_INFERENCE and add `downgraded_from_verified_due_to_indirect_source`.
 Lower/UNKNOWN values and approved direct sources are unchanged. A type label is
-not source authentication. Aggregate total_raised remains a separate known
-provenance gap (ROADMAP); this is not the planned general claim-verification API.
+not source authentication. Aggregate total_raised remained a separate known
+provenance gap at this checkpoint; see the correction below. This is not the
+planned general claim-verification API.
+
+## 2026-11-01 Aggregate Confidence and Display Correction
+
+Aggregate `total_raised` uses the same existing provenance policy as funding
+source items. Missing/indirect VERIFIED inputs cap at HIGH with the existing
+downgrade reasons; lower/UNKNOWN values and original references are preserved.
+The generic aggregate factor is `aggregate_from_summary`, not a claim that every
+input came from FEC records. Source-type eligibility does not authenticate evidence.
+
+The total line uses its unique `total_raised` claim's confidence, never a child
+source's confidence. A missing, ambiguous or invalid total label is UNKNOWN.
+Answer/shell confidence remains conservative: it cannot exceed either existing
+overall confidence or the displayed total claim. Other source labels, review,
+trail and line-count rules are unchanged. No public activation or live data access.
 
 ## 2026-10-30 Planned Claim-Verification Addendum
 The [Political Claim Verification and Scoring Engine](docs/POLITICAL_CLAIM_VERIFICATION_AND_SCORING_ENGINE.md) adds proposed transcript, atomic-claim, evidence-graph, methodological/funding-audit, versioned-assessment, and score-snapshot contracts. Exact API signatures are reserved for the build packet. These are **planned / not implemented** and must not be reported as exports from the current Python v0.6.0 funding pipeline.

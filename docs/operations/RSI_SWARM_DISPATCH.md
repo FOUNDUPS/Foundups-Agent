@@ -1,3 +1,50 @@
+## Vote aggregate-to-display trial — 2026-11-01
+
+Base `4c96d6b17429226248c3a82de5544262e773c41e`; owned lane
+`fix/rsi-vote-aggregate-trial-20261101`. Apply existing Vote follow-up11/P2
+(C2/I3/D3/Impact3); native19/P0 and R15 remain blocked by protected composition
+and authentic inputs. This eligible local proposal trial is not native dispatch.
+Holo's corrected voteballots bundle supplies current-workspace paths, but semantic
+freshness is UNKNOWN/index-gap true. Initial wrong module_hint returned unrelated
+hits; direct module docs and source resolved that retrieval error. No reindex.
+
+Independent tests were frozen before each repair. One existing WRE native-chat
+Qwen2.5-Coder7B Q4_K_M attempt used the previously qualified0.3.20 runtime/template,
+CPU4/context2048/output512,180s child deadline and no model tools. It returned the
+supplied block unchanged inside markdown fences: reject for both format and no
+repair. No model patch was materialized or normalized into acceptance. Runtime
+37.33s; SDK usage595 input/72 output tokens. One call, no retry, paid calls0;
+full coordinator/energy cost UNKNOWN. Different tasks and prompts prevent a
+comparative efficiency or learning claim against the prior source-item attempt.
+
+| Evidence scope | Before | After | Attribution |
+| --- | --- | --- | --- |
+| Frozen29 aggregate scorer cases |25 pass/4 fail|29 pass|Coordinator shared-policy repair|
+| Frozen47 answer/shell cases, added after review found the consumer gap |3 pass/44 fail|47 pass|Coordinator display/metadata repair|
+| Full module after two legacy fixture corrections |4 fixture failures/394 pass|398 pass|Independent final replay1.71s; overlapping scope|
+
+The existing source policy now handles both funding-source and aggregate inputs.
+It caps unsupported VERIFIED totals, preserves weaker labels/references and uses
+`aggregate_from_summary` instead of invented FEC provenance. Independent review
+caught the old display consumer reusing overall confidence after scorer tests had
+passed. Quick-answer now uses the unique typed total claim or UNKNOWN; answer and
+shell metadata cannot exceed that label or existing overall confidence. The two
+older positive-total fixtures now include explicit claims for their stated cases;
+the new acceptance assertions were not relaxed. Original frozen files/hashes and
+failed comparisons remain retained outside Git under the existing local micro
+evidence directory's `aggregate/` child. TestModLog records exact hash bindings.
+
+Worker acceptance0/1, rejected proposals1/1, native acceptances0. The independent
+reviewer ran tests and reviewed source; it did not independently instrument the
+model's reported usage. No OS-held-out isolation, native OpenClaw/Hermes execution,
+promotion, learned retention or G1–G5 completion. Private services/accounts and
+other product lanes were untouched. The documented local proposal route is useful
+for rejection evidence but has not earned autonomous repair qualification.
+
+Next system action remains exact-candidate provider/confinement qualification and
+protected admitted requester/consumer composition, followed by R15. Do not keep
+repeating this model configuration or expand FoundUp scope to avoid those gates.
+
 ## Micro verification and protected native composition — 2026-11-01
 
 **Source:** main `43b3b66cce8a01f28fb08577a9db84f731e50455`; dedicated

@@ -1,5 +1,19 @@
 # Vote/Ballots FoundUp — Module Log
 
+## 2026-11-01 — Aggregate-to-display provenance closure
+
+WSP00/15/22/48/50/97; base4c96d6b. Freeze independent scorer acceptance before
+one existing-WRE local Qwen proposal. Reject its unchanged fenced output; do not
+materialize it. The coordinator reuses the source policy for aggregate totals.
+Independent review finds a connected display defect despite passing scorer tests;
+freeze a separate consumer oracle before repairing quick-answer confidence and
+shell metadata. Missing/ambiguous/invalid total claims fail closed as UNKNOWN.
+Preserve valid direct sources, lower values, source identities and review/trail
+rules. Replace misleading aggregate_from_fec_records with aggregate_from_summary.
+Only two historical quick-answer fixtures need explicit claims for their stated
+scenarios; new acceptance assertions stay fixed. See tests/TestModLog for results.
+No native worker success, live data, public launch or measured retained gain.
+
 
 ## 2026-11-01 — RSI micro qualification: indirect funding-source confidence
 

@@ -308,12 +308,12 @@ def _confidence_level_to_label(level: ConfidenceLevel) -> ConfidenceLabel:
 
 
 def _determine_source_confidence_label(
-    source: FundingSourceSummary,
+    source: FundingSourceSummary | FundingSummaryResult,
 ) -> tuple[ConfidenceLabel, List[str]]:
-    """Determine confidence label for a funding source.
+    """Apply the same provenance policy to source items and aggregate summaries.
 
     Args:
-        source: Funding source summary.
+        source: Source item or summary supplying confidence and source_reference.
 
     Returns:
         Tuple of (confidence label, list of factors).
@@ -443,9 +443,9 @@ def _build_summary_claims(
 
     # Total raised claim
     if summary.total_raised > 0:
-        # Total raised confidence based on overall summary confidence
-        total_label = _confidence_level_to_label(summary.confidence)
-        total_factors = ["aggregate_from_fec_records"]
+        # Aggregate claims require the same source eligibility as source items.
+        total_label, total_factors = _determine_source_confidence_label(summary)
+        total_factors.insert(0, "aggregate_from_summary")
 
         if summary.source_reference is not None:
             total_factors.append("primary_source_reference_present")

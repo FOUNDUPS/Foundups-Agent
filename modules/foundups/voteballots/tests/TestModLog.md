@@ -2,6 +2,27 @@
 
 <!-- WSP 22: anti-vibecoding test inventory. NEWEST entries at TOP. -->
 
+## [2026-11-01] — Aggregate and displayed-confidence closure
+
+Independent aggregate oracle29: baseline25 passed/4 failed; coordinator repair29
+passed. Integration test SHA256 remains
+`527c92634c47605a630886b6d3e983e5e938c0104acad9bb843fd8b4f651115f`.
+One local worker proposed unchanged source in an invalid envelope and was rejected
+without materialization. The original full scorer-only replay351 passed, but four
+independent display probes exposed incorrect VERIFIED total wording/metadata.
+
+Separate consumer oracle47 was frozen before consumer repair: baseline3 passed/
+44 failed; repaired47 passed. Frozen quick-answer test SHA256
+`a970c19c05a840a0a98f46ed555a634e368c1798270a38338c1633c68ee84223`.
+All three formats and actual shell propagation are covered, including missing,
+duplicate and invalid-label claims, lower/UNKNOWN and approved direct controls.
+Two historical fixtures lacked their stated aggregate claims; add explicit claims
+without changing assertions. Final quick-answer test SHA256
+`96d7d8f30c2d4e3f0b0989c67cde17368116852ea70657b7554ddb792626576e`.
+Independent final replay: frozen29/47 and full398 pass (overlapping scopes),
+0.59s/0.30s/1.71s. No skips. Use the existing CI-equivalent command below.
+This is source/test review, not native independent acceptance or retained RSI.
+
 
 ## [2026-11-01] — Production source provenance micro oracle
 

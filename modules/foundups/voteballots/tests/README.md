@@ -23,6 +23,12 @@ This is an anti-vibecoding requirement: the test inventory exists so workers do 
 
 ## Current Active Test Surface
 
+November1 aggregate-to-display follow-up:398 module tests pass. The existing
+integration and quick-answer suites contain separately frozen29/47-case oracles;
+quick-answer cases exercise shell metadata/readiness too. TestModLog distinguishes
+the failed local proposal, coordinator repairs, original baselines and two legacy
+fixture corrections. Historical303/322 counts below retain their original scope.
+
 See `TestModLog.md` for the canonical file-by-file inventory and reuse guidance.
 
 Current test files include:

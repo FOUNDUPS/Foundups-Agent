@@ -1,3 +1,13 @@
+## 2026-11-01 — Vote aggregate-to-display RSI qualification
+
+WSP00/15/22/48/50/97. Reuse the existing Vote11/P2 follow-up and WRE local
+proposal adapter. One Qwen proposal repeats its input and is rejected. The
+coordinator's shared-policy repair passes a frozen aggregate oracle; independent
+review catches and closes a downstream total-label/answer-metadata seam through
+separately frozen quick-answer/shell cases. Retain all failed attempts and source
+bindings in the canonical dispatch/backlog; do not count coordinator work as
+native author success or claim improved learning without a controlled later use.
+
 ## 2026-11-01 — Restore RSI host runtimes and qualify upgrade candidates
 
 WSP00/22/50/97. Repair Ollama's redirected configuration without replacing its
