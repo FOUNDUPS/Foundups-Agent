@@ -1,5 +1,35 @@
 # FoundUps Simulator Test Suite
 
+## Native allocation admission controls — 2026-11-01
+
+Execution and independent scoped source review are accepted:
+The 171 frozen cases plus 25 independent held-outs passed: 196 cases. The 311
+original regressions passed with exact prior case IDs. Zero errors, skips or guard
+denials were recorded; 174 simulator/FAM Python source snapshots remained stable.
+Independent source/AST/budget review reports no material findings within the
+frozen native-state contract.
+Frozen controls cover wallet receive, human debit, engine routing and MetaGPT
+registration: hostile/non-finite/negative scalars, participating-state overflow,
+preparation failures with no participating writes, policy retention, valid
+arithmetic, lookup precedence and insufficient zero-wallet registration.
+Supported native state and trusted serialized hosting are the boundary; arbitrary
+receiver hooks, logging rollback, concurrency and durable funding are unqualified.
+
+The 311-pass baseline and separate desired 171-case RED (48 pass / 123 fail)
+remain historical evidence. The 171 frozen controls are promoted into existing
+`test_allocation_and_treasury_runtime.py` (336 lines); the original prefix/AST
+and frozen non-docstring AST are preserved. Promoted/broader execution results:
+The broad run passed 1,190 cases: the prior 1,019 plus 171 promoted controls.
+The promoted owner contributes 173 cases, derived from that broad result rather
+than another run. The same three SSE HTTP cases were deselected; zero failures,
+errors, skips or guard denials; 174 source snapshots remained stable. The 25
+external held-outs are outside 1,190, and these overlapping scopes are not added.
+Controlled fresh de baseline/candidate 240-tick raw traces match under the finite
+profile. Package eight Python/three Node and registry 1,800/260 pass with the
+same 1,481 members and unchanged caps. Security/publication/candidate-main/PC/Holo
+remain pending and separate. Do not sum scopes,
+replace old oracles, infer full A02/B05 or use passing tests as chain authority.
+
 ## Reserve quote observation — 2026-11-01
 
 Existing `test_btc_reserve_semantics.py` retains all seven original cases and adds

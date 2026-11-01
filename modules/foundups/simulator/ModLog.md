@@ -1,3 +1,29 @@
+## 2026-11-01 — Native allocation numeric preparation candidate
+
+WSP11/15/22/26/48/50/62/84/97; class B, 18/P0 (4/5/5/4). Reuse the existing wallet,
+human and engine allocation owners plus MetaGPT registration: strict built-in
+finite nonnegative admission and prospective arithmetic/policy preparation before
+participating state writes. Preserve legacy lookup/allocator precedence, valid
+arithmetic and valid insufficient zero-wallet registration.
+The 171 frozen cases plus 25 independent held-outs passed: 196 cases. The 311
+original regressions passed with exact prior case IDs. Zero errors, skips or guard
+denials were recorded; 174 simulator/FAM Python source snapshots remained stable.
+Independent source/AST/budget review reports no material findings within the
+frozen native-state contract.
+Fresh de baseline/candidate 240-tick raw traces match under the finite profile;
+broad execution passes 1,190 with the same three SSE HTTP deselections. Promoted
+173 is a derived subset; the 25 external held-outs are outside that run. Package
+eight Python/three Node and registry 1,800/260 pass with the same 1,481 members,
+two resident hashes changed and unchanged caps. Fresh security/publication and
+candidate-main/PC/Holo remain pending. Composite allocation
+omits the prior standalone wallet receipt INFO log, permitted before code;
+logging is not settlement evidence or rollback authority. This is supported
+native state under trusted serialized hosting, not arbitrary receiver/logging
+rollback, durable funding, full A02, unit resolution or signing authority.
+PR2288/d927 source publication and fresh de6917 source 21/21/PC checks are separate;
+Reserve-source C/O queries are CURRENT with no index gap, committed-head only; exact runtime
+closure remains false. Historical source/test/package evidence remains unchanged.
+
 ## 2026-11-01 — Bounded reserve quote observation
 
 Class A, WSP15 16/P0 (3/4/5/4); WSP11/22/26/50/62/84/97. Add only an opt-in

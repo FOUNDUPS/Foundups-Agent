@@ -1,3 +1,51 @@
+## 2026-11-01 — Allocation numeric preflight: RED and executed GREEN
+
+Root-verified original selection passes 311. Separately frozen four-entrypoint
+acceptance has 171 cases: 48 pass / 123 fail on the pre-edit source, not a candidate
+PASS. Preserve exact frozen oracles, old valid-call behavior and all failed
+attempts. No additional independent case count is claimed.
+
+- Independent reviewed candidate: The 171 frozen cases plus 25 independent held-outs passed: 196 cases. The 311
+  original regressions passed with exact prior case IDs. Zero errors, skips or guard
+  denials were recorded; 174 simulator/FAM Python source snapshots remained stable.
+  Independent source/AST/budget review reports no material findings within the
+  frozen native-state contract.
+- Promoted the 171 frozen controls into existing
+  `test_allocation_and_treasury_runtime.py` (336 lines): the original 3,068-byte
+  prefix/AST and frozen non-docstring AST are preserved. Promoted/broader results:
+  The broad run passed 1,190 cases: the prior 1,019 plus 171 promoted controls.
+  The promoted owner contributes 173 cases, derived from that broad result rather
+  than another run. The same three SSE HTTP cases were deselected; zero failures,
+  errors, skips or guard denials; 174 source snapshots remained stable. The 25
+  external held-outs are outside 1,190, and these overlapping scopes are not added.
+- Controlled trace and exact process/profile scope: Fresh de6917 baseline and candidate controlled 240-tick traces match raw bytes,
+  SHA256 `672d12c9d8fb6286624ea892fb3a5d0315c475ee45f8c83c9a271ba4328f0ff1`.
+  This finite process/profile observation is not seed-only or whole-model proof.
+- Canonical closure/pins/registry and unchanged caps: Canonical package qualification passed eight Python cases and three Node
+  entrypoints; registry 1,800/260 is unchanged. The same 1,481 ordered members remain,
+  with only the numeric-helper and token-economics runtime hashes changed; MetaGPT
+  is outside the closure. Canonical digest is
+  `7d35294b980d4f4e329edf003e7e96337e3a6413c288764e2f07d5a465c3980e`.
+  Manifest LF/CRLF sizes are 334,850/337,885 bytes under the unchanged 337,920 cap,
+  leaving 35 bytes; individual 2 MiB and total 32 MiB caps are unchanged. This
+  qualifies staged package bytes, not hosted checks, installed closure or activation.
+- Fresh security/publication/main/PC/Holo: Pending at this prepublication checkpoint: fresh immutable security gate, protected
+  PR, resulting-main checks and new-source PC/Holo qualification; later observations
+  belong in separately dated delivery evidence.
+
+The 196/311 scopes have zero errors/skips/guard denials and 174 stable source
+snapshots; the broad run passes 1,190 with the same three SSE HTTP deselections.
+Promoted 173 is its derived subset; the 25 external held-outs remain outside it.
+Package eight Python/three Node and registry 1,800/260 pass; security/publication
+and candidate-main/PC/Holo remain pending. Controlled
+trace is a repeated scenario, not an extra distinct regression case.
+Composite human/engine/MetaGPT allocation omits the previous standalone wallet
+receipt INFO log, as allowed before implementation. Logging is neither settlement
+evidence nor rollback authority. Admission/preparation covers native
+participating numeric/policy/MetaGPT registration state under a serialized host;
+postcommit logging, arbitrary receiver/property hooks, concurrency, durability,
+global units, full A02, funded conservation and live signing stay outside scope.
+
 ## 2026-11-01 — Reserve quote test-first and independent source review
 
 Historical fb58 baseline: seven original cases pass; unchanged originals plus 89

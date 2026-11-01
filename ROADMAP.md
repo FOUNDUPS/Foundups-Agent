@@ -50,6 +50,32 @@ The existing simulator must validate any economic enhancement before chain parit
 
 ### Current blockchain security sequence — 2026-11-01
 
+#### Current source checkpoint and next local allocation gate
+
+PR2288 merged d927; subsequent Vote PR2289 leaves the blockchain source and
+1,481-member runtime closure unchanged at de6917. Exact new-main source checks
+pass 21/21, and PC/control bindings pass separately. Reserve source delivery is
+complete after separate C/O CURRENT with no index gap queries; installed/native closure is
+still unverified and lexical bundle freshness remains UNKNOWN.
+Historical d927's failed dependency-maintenance job remains an open separate
+follow-up; no sealed quote or test receipt is relabeled.
+
+The **18/P0 class-B** candidate implements numeric admission and precommit
+preparation in the four existing wallet/human/engine/MetaGPT allocation entrypoints.
+The 171 frozen cases plus 25 independent held-outs passed: 196 cases. The 311
+original regressions passed with exact prior case IDs. Zero errors, skips or guard
+denials were recorded; 174 simulator/FAM Python source snapshots remained stable.
+Independent source/AST/budget review reports no material findings within the
+frozen native-state contract.
+Fresh controlled de baseline/candidate 240-tick traces match raw bytes under the
+finite profile. Broad execution passes 1,190, including the derived promoted
+173-case subset; 25 external held-outs are outside it. Package eight Python/three
+Node and registry 1,800/260 pass, same 1,481 members and unchanged caps. Fresh
+security/publication/candidate-main/PC/Holo remain pending; delivered-de acceptance
+does not qualify this candidate. Preserve accepted arithmetic
+and lookup/insufficient-funding behavior. B03 C/D, B05 funded accounting, custody
+and chain activation remain open; the older quote-pending notes are historical.
+
 Current [concurrent-main reconciliation](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#concurrent-main-quote-reconciliation--2026-11-01)
 preserves PR2287 YouTube work alongside the unchanged quote source. The b0b+b3e
 merge overlay passes 1,019 simulator cases, one controlled trace and package

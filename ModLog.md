@@ -25,6 +25,29 @@ partial compatibility checks, not native author execution or retained RSI.
 See [current runtime evidence and remaining gates](docs/operations/RSI_SWARM_DISPATCH.md#host-repair-and-isolated-upgrade-qualification--2026-11-01).
 Private account/configuration recovery state stays outside Git.
 
+## 2026-11-01 — Local allocation admission and preparation checkpoint
+
+WSP11/15/22/26/48/50/62/84/97; class B, 18/P0 (4/5/5/4). Candidate repair reuses
+four native allocation/MetaGPT entrypoints and existing numeric guards; prepare
+participating values/policy/registrations before mutation, retaining valid
+arithmetic and lookup/insufficient-funding behavior. Independent acceptance:
+The 171 frozen cases plus 25 independent held-outs passed: 196 cases. The 311
+original regressions passed with exact prior case IDs. Zero errors, skips or guard
+denials were recorded; 174 simulator/FAM Python source snapshots remained stable.
+Independent source/AST/budget review reports no material findings within the
+frozen native-state contract.
+Fresh de baseline/candidate 240-tick raw traces match under the finite profile.
+Broad execution passes 1,190; promoted 173 is its subset, not another run.
+Package eight Python/three Node and registry 1,800/260 pass with the same 1,481
+members and unchanged caps. Security/publication/candidate-main/PC/Holo remain pending.
+Composite allocation omits the earlier standalone wallet INFO receipt log, a
+pre-authorized granularity change; logs are not settlement evidence. No B05,
+full A02, arbitrary receiver/logging rollback, unit or chain-activation claim.
+PR2288 merged d927; current de6917 source checks 21/21 and separate PC bindings
+pass. Reserve source-delivery C/O readbacks are CURRENT with no index gap, committed-head
+only; exact runtime closure remains false. Preserve the historical maintenance failure,
+failed ENOSPC attempt/successful retry and both sealed quote receipts.
+
 ## 2026-11-01 — Reconcile quote delivery with concurrent YouTube main
 
 WSP10/22/26/50/84/97. Preserve owned b0b and upstream PR2287/main b3e together,

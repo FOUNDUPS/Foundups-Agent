@@ -1,3 +1,35 @@
+## Numeric allocation prerequisite and current source checkpoint — 2026-11-01
+
+PR2288 merged d927; unchanged blockchain source is now on main de6917 after
+PR2289. Fresh exact-de6917 source checks pass 21/21, including the five required
+app-15368 contexts. Independent PC/control readback passes 80 unique bindings and
+preserves the exact 16,767-path unrelated PC inventory. Separate C/O semantic
+queries are CURRENT with no index gap at de6917, committed-head only; lexical bundles remain
+UNKNOWN with an index gap and exact installed/native closure remains false. Reserve source
+delivery is complete.
+Retain dated d927's 21 source successes plus separate failed Dependabot maintenance
+job, original ENOSPC attempt and successful single retry; sealed quote evidence
+is unchanged.
+
+Allocation candidate: class B, 18/P0 (4/5/5/4), four existing native allocation/MetaGPT
+entrypoints, trusted serialized host. Strict scalar and prospective-state
+preparation precedes participating numeric/policy/registration writes. Root owns
+architecture/publication; implementation and independent verification remain
+separate. Frozen desired RED is 48 pass / 123 fail out of 171; the existing 311-pass
+baseline is a separate scope. The 171 frozen cases plus 25 independent held-outs passed: 196 cases. The 311
+original regressions passed with exact prior case IDs. Zero errors, skips or guard
+denials were recorded; 174 simulator/FAM Python source snapshots remained stable.
+Independent source/AST/budget review reports no material findings within the
+frozen native-state contract.
+Controlled fresh de baseline/candidate 240-tick raw traces match the retained
+672d12c9 identity under the finite process profile. Broad execution passes 1,190;
+the promoted 173-case subset is derived from it, with 25 external held-outs outside
+that scope. Package eight Python/three Node and registry 1,800/260 pass with the
+same 1,481 members and unchanged caps. Security/publication/current-candidate
+main/PC/Holo remain pending; delivered-de CI/Holo does not qualify this candidate.
+This is not B05 funding, full A02, arbitrary rollback or a B03 C/D decision.
+Older source-publication checkpoints below remain dated history.
+
 ## Quote concurrent-main reconciliation — 2026-11-01
 
 This dated prepublication qualification tested the uncommitted owned

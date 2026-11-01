@@ -22,7 +22,7 @@ from types import MappingProxyType
 from typing import Dict, List, Optional, Tuple
 
 from ._token_numeric import (
-    _AdoptionValues, _WorkValues, _adoption_values, _checked_add,
+    _AdoptionValues, _WorkValues, _adoption_values, _allocation_values, _checked_add,
     _discount_rate, _mint_values, _remaining_value, _require_numbers,
     _stake_values, _unstake_record_values, _unstake_values, _wallet_values,
 )
@@ -350,8 +350,8 @@ class AgentExecutionWallet:
     def receive_allocation(self, amount: float, policy: Optional[Dict] = None) -> None:
         """Human allocates UPS to agent for task execution."""
         prepared_policy = _wallet_policy_snapshot(policy) if policy is not None else None
-        self.ups_balance += amount
-        self.total_allocated += amount
+        balance, allocated = _checked_add(self.ups_balance, amount), _checked_add(self.total_allocated, amount)
+        self.ups_balance, self.total_allocated = balance, allocated
         if prepared_policy:
             self.policy_gates = prepared_policy
         logger.info(f"[Wallet:{self.agent_id}] Received {amount:.2f} UPS from {self.allocator_id}")
@@ -451,12 +451,11 @@ class HumanUPSAccount:
 
     def allocate_to_agent(self, amount: float, agent_wallet: AgentExecutionWallet) -> bool:
         """Human allocates UPS budget to agent."""
-        if amount > self.ups_balance:
+        values = _allocation_values(amount, self.ups_balance, agent_wallet.ups_balance, agent_wallet.total_allocated)
+        if values is None:
             logger.warning(f"[Human:{self.human_id}] Insufficient UPS for allocation")
             return False
-
-        self.ups_balance -= amount
-        agent_wallet.receive_allocation(amount)
+        self.ups_balance, agent_wallet.ups_balance, agent_wallet.total_allocated = values
         return True
 
     def convert_mined_fi_to_ups(
