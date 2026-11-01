@@ -12,6 +12,15 @@ This log tracks changes specific to the **rESP_o1o2** module in the **ai_intelli
 
 ## MODLOG ENTRIES
 
+### [2026-11-01] — Withhold xAI failure response bodies and exception messages
+
+The existing Grok connector is used by the explicit legacy comment fallback and
+ordinary livechat generator. Keep environment-derived authentication in its
+Authorization header; failure logs now contain only HTTP status or exception
+class. Two controlled connector cases verify synthetic key/message separation
+and no raw diagnostic echo within the 24-case commenting safety selection.
+No API call, new provider route or credential-file access was used.
+
 ### [2026-03-15] - Microsoft STT `0102 -> 0-1-0-2` Support Note
 **WSP Protocol**: WSP 22, WSP 50, WSP 84
 **Phase**: Evidence Intake / Support Materials

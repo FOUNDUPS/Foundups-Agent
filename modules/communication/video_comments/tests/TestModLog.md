@@ -1,5 +1,19 @@
 # video_comments TestModLog
 
+## 2026-11-01 — Frozen quality-stop and diagnostic controls
+
+New independent 24-case file preserves the original repair selectors. Qualified
+pre-fix source: 18 assertion failures, 6 passes, no errors/skips. Repaired owners:
+24 passes, no errors/skips or denied real effects. Existing semantic/context/
+history: 157 passes and 12 subtests; existing stdlib inspection: 15 passes.
+The fixed new case-name digest is
+`8c6a71ffff1aa89e9458726916745e9c3389f4955f8b38086b34066b417b8822`.
+The test-only worker authored/froze acceptance before production changes; root
+executed under an explicit credential-free child with network and dotenv denies.
+Raw diagnostics stay private. Positive useful-answer and actual no-STOP Submit
+controls guard against an implementation that merely blocks everything. No
+provider/model/daemon/browser/public test was performed.
+
 ## 2026-10-29 — Follow-up livechat fallback and bounded caller qualification
 
 Extend the existing `test_reply_semantic_assessment.py` source-bound selection;

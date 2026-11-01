@@ -342,11 +342,25 @@ class BrowserReplyExecutor:
             return {complete: true, ids: ids, matching_ids: matching};
         ''', selector, expected, reply_text)
 
+    @staticmethod
+    def _reply_actions_allowed() -> bool:
+        """Use the existing gates at entry and again at the actual Submit boundary."""
+        try:
+            from modules.communication.livechat.src.automation_gates import gate_snapshot
+            gates = gate_snapshot()
+            return (gates.get('stop_active') is False
+                    and all(gates.get(key) is True for key in (
+                        'yt_automation', 'comment_engagement', 'comment_reply')))
+        except Exception:
+            return False
+
     async def execute_reply(self, comment_idx: int, reply_text: str, *, expected_comment=None, pre_submit_guard=None) -> bool:
         """Bind the original row, submit once, and require new owner-text readback."""
         self.last_submission_status = 'not_attempted'
         self._submit_invoked = False
         self._pre_submit_guard = pre_submit_guard
+        if not self._reply_actions_allowed():
+            return False
         if not getattr(self, 'history_store', None):
             return False  # No volatile-only escape hatch around durable reservation.
         try:
@@ -747,6 +761,8 @@ class BrowserReplyExecutor:
         if entered_text is None or entered_text.replace('\r\n', '\n') != reply_text.replace('\r\n', '\n'):
             return False
         if self._pre_submit_guard is not None and self._pre_submit_guard() is not True:
+            return False
+        if not self._reply_actions_allowed():
             return False
         self._submit_invoked = True  # Persisted unknown already owns this target before the click.
         from modules.communication.video_comments.skillz.tars_like_heart_reply.src.comment_row_context import COMMENT_IDENTITY_SCRIPT

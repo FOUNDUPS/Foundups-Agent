@@ -1,3 +1,29 @@
+## Combined reply-quality and simulator runtime metadata — 2026-11-01
+
+Pinned Gitleaks 8.30.1 reports 39 new whole-manifest fingerprint renewals for
+the combined source at main 4ecd01ba plus the reply-quality repair. Independent
+review reconstructs each public path/hash pair from immutable Git blobs, its
+actual current source digest, its unique unchanged manifest row and the exact
+prior 4ecd01ba approval. These 37 generic-api-key and two discord-api-token
+classifications are source-integrity metadata. The new set is disjoint from the
+earlier reply-quality set. Preserve all 3,477 existing records, including both
+latest main and historical reply-quality approvals; append only these 39 new
+records (3,516 total). Every other ledger field and all historical sections stay.
+No scanner rule, exclusion, scope or fingerprint algorithm changes. Fresh final
+staged-tree and actual merge-commit history gates remain required.
+
+## YouTube reply-quality runtime metadata review — 2026-11-01
+
+Pinned Gitleaks 8.30.1 reports 39 exact whole-manifest fingerprint renewals
+after the reply-quality repair. Independent review reconstructs every complete
+public source path/hash pair from immutable Git blobs. Each finding line is
+uniquely unchanged, its referenced source digest is valid, and its prior exact
+fingerprint is approved in main 988b4d94. Append only these 39 records, preserving
+all 3,399 prior entries and every other ledger field (3,438 total).
+The runtime membership and all byte caps remain unchanged. No scanner rule,
+exclusion, scope or fingerprint algorithm changes. Fresh final staged-tree and
+introduced-history checks remain required; no raw matched values are published.
+
 ## Native Hermes qualification ModLog rebinding — 2026-11-01
 
 Pinned Gitleaks8.30.1 reports one previously reviewed historical-prose finding
