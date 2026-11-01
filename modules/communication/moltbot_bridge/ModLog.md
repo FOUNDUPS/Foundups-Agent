@@ -6,8 +6,9 @@ candidate overlay, and baseline/empty/skill Docker cases with34 passing assertio
 This closes a component diagnosis and candidate repair, not installed promotion,
 independent author acceptance or native RSI. Existing0.20.4 pin, authority, provider,
 skills and publication controls are unchanged. The temporary native listeners and
-containers closed; private repair evidence stays on O:. Full gateway/model readiness,
-independent patch review and protected requester/lease composition remain required.
+containers closed; private repair evidence stays on O:. Independent source/evidence
+review approved the candidate and reran34 checks. Full gateway/model readiness,
+native outcome verification and protected requester/lease composition remain required.
 
 ## Preserved PC guidance and assertion recovery — 2026-10-31
 

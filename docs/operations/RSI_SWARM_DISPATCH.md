@@ -34,6 +34,13 @@ container was automatically removed. No Docker socket or production credentials
 were mounted. **34 deterministic assertions passed, zero failed** across these
 three runs; this is not34 author jobs or an independent actor's outcome acceptance.
 
+Subsequent independent source/evidence review approved the exact one-line patch
+and documentation, rehashed the original/overlay, reran34 assertions and confirmed
+container absence. `independent-source-evidence-review.json` is in the same private
+evidence directory. This is source/evidence review, not native independent outcome
+verification. Failure cleanup between container creation and startup is unqualified;
+the checker imported the main checkout, whose confinement bytes matched this lane.
+
 Qualification failures are retained: the first host probe used an invalid aiohttp
 cleanup property; the corrected probe explicitly checked closed session/refused
 listener. The WSL `docker` name resolved to a legacy Windows executable and could
@@ -56,8 +63,8 @@ FoundUp, resident-root or work-state bindings. An OpenRouter key was present, bu
 numeric campaign reservation was established, so **zero paid calls** were made.
 These observations do not prove authority artifacts are absent elsewhere.
 
-**Next eligible action:** independently review the exact upstream candidate patch,
-then qualify the configured full gateway/model, API/tool/skill surface and existing
+**Next eligible action:** qualify the reviewed candidate with the configured full
+gateway/model, API/tool/skill surface and existing
 provider event/cleanup contract before promoting a version. In parallel sequencing,
 finish the protected requester/lease-consumption connection below and resolve genuine
 current work/model/verifier/budget inputs. Do not weaken the version pin, fabricate
