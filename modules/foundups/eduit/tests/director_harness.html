@@ -297,4 +297,95 @@ document.querySelector('#presentation').onclick=async()=>{
  }catch(e){results.textContent+='\nERROR '+e.message;}
 };
 
+// Presentation-only word policy: real paused media seeks are layout fixtures,
+// not accelerated simulation or acoustic/end-to-end playback evidence.
+const wordChecks=document.createElement('button');wordChecks.id='word-presentation';wordChecks.textContent='Run word placement regression';document.querySelector('nav').append(wordChecks);
+const fallbackWordChecks=document.createElement('button');fallbackWordChecks.id='word-fallback';fallbackWordChecks.textContent='Run missing-sidecar word fallback fixture';document.querySelector('nav').append(fallbackWordChecks);
+const effectiveOpacity=(el,w)=>{
+ let opacity=1;
+ for(let node=el;node&&node.nodeType===1;node=node.parentElement){const s=w.getComputedStyle(node);if(s.display==='none'||s.visibility==='hidden')return 0;opacity*=Number(s.opacity);}
+ return opacity;
+};
+const visuallyPresent=(el,w)=>{if(!el||effectiveOpacity(el,w)<=.05)return false;const r=el.getBoundingClientRect();return r.width>0&&r.height>0;};
+async function mediaLayoutSeek(video,time,w){
+ const ready=async(predicate,label)=>{const deadline=performance.now()+10000;while(!predicate()){if(video.error)throw Error('Movie failed during '+label);if(performance.now()>deadline)throw Error('Movie '+label+' timed out');await wait(25);}};
+ await ready(()=>video.readyState>=1&&video.duration>time,'metadata');video.pause();
+ if(video.seeking||Math.abs(video.currentTime-time)>.001)video.currentTime=time;
+ await ready(()=>!video.seeking&&video.readyState>=2&&Math.abs(video.currentTime-time)<.002,'layout seek');
+ await new Promise(resolve=>w.requestAnimationFrame(()=>w.requestAnimationFrame(resolve)));
+}
+function wordGeometry(d,w){
+ const panel=d.getElementById('video-panel'),svg=panel.querySelector('.movie-scene svg'),phrase=d.getElementById('story-phrase'),caption=d.getElementById('story-caption'),rail=panel.querySelector('.video-controls');
+ const rect=r=>({left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height});
+ const sceneGroups=[...panel.querySelectorAll('.movie-scene [data-learning]')].filter(el=>visuallyPresent(el,w));
+ const range=d.createRange();range.selectNodeContents(phrase);const word=range.getBoundingClientRect();
+ let canonicalBottom=null;
+ if(svg&&visuallyPresent(svg,w)){const r=svg.getBoundingClientRect(),box=svg.viewBox.baseVal,scale=Math.min(r.width/box.width,r.height/box.height);canonicalBottom=r.top+(r.height-box.height*scale)/2+(-box.y+540)*scale;}
+ return {mode:panel.dataset.wordPlacement,ready:panel.classList.contains('movie-responsive'),sceneGroups:sceneGroups.length,sceneWords:sceneGroups.map(g=>g.querySelector('text')?.textContent),separateVisible:visuallyPresent(phrase,w)&&!!phrase.textContent,separateWord:phrase.textContent,separateFont:parseFloat(w.getComputedStyle(phrase).fontSize),word:rect(word),caption:rect(caption.getBoundingClientRect()),canonicalBottom,controls:rect(rail.getBoundingClientRect()),surface:rect(panel.querySelector('.surface').getBoundingClientRect()),panelScrollTop:panel.scrollTop,panelScrollHeight:panel.scrollHeight,panelClientHeight:panel.clientHeight};
+}
+async function selectWordPlacement(d,w,mode){
+ const $=id=>d.getElementById(id);$('video-options').click();d.querySelector('#menu-advanced summary').click();
+ const button=d.querySelector('[data-word-placement-choice="'+mode+'"]');if(!button)throw Error('Missing word placement choice '+mode);button.click();
+ await new Promise(resolve=>w.requestAnimationFrame(()=>w.requestAnimationFrame(resolve)));
+}
+wordChecks.onclick=async()=>{
+ const rows=[],check=(name,ok,detail={})=>{rows.push({name,result:ok?'PASS':'FAIL',...detail});results.textContent=JSON.stringify(rows,null,2);if(!ok)throw Error(name);};
+ try{for(const entry of ['/', '/review/director.html'])for(const size of [[320,568],[390,844],[568,320],[844,390],[768,1024],[1280,900]]){
+  const loaded=new Promise(resolve=>frame.addEventListener('load',resolve,{once:true}));frame.width=size[0];frame.height=size[1];frame.src=entry;await loaded;
+  const d=frame.contentDocument,w=frame.contentWindow,$=id=>d.getElementById(id);
+  for(let n=0;n<120&&!(w.storytimeStorybook&&$('game')?.contentWindow.storytimeReview&&$('video-options'));n++)await wait(100);
+  check('word policy owners ready',!!w.storytimeStorybook&&!!$('video-options')&&!!$('game')?.contentWindow.storytimeReview,{entry,size});
+  if(!$('story-intro').open)$('intro-replay').click();
+  const storyButtons=[...$('story-intro').querySelectorAll('button')].filter(el=>visuallyPresent(el,w));
+  check('word policy leaves two-action story intact',storyButtons.length===2&&storyButtons.some(b=>b.id==='storybook-play')&&storyButtons.some(b=>b.id==='intro-close'),{entry,size});
+  $('intro-close').click();for(let n=0;n<60&&$('story-intro').open;n++)await wait(20);
+  $('full-video').click();for(let n=0;n<200&&!$('video-panel').classList.contains('movie-responsive');n++)await wait(50);
+  check('responsive expanded scene is ready',$('video-panel').classList.contains('movie-responsive'),{entry,size});
+  const video=$('video'),game=$('game').contentWindow.storytimeReview,clock=game.status().clock,score=game.status().score;
+  const timeline=await fetch(new URL('replay-timeline.json',video.src),{cache:'no-store'}).then(r=>r.json());
+  const thumps=timeline.events.filter(e=>e.kind==='thump'),samples=[timeline.events.find(e=>e.kind==='sniff'),...thumps,timeline.events.find(e=>e.kind==='squish')];
+  check('five recorded layout cue samples exist',samples.length===5&&samples.every(Boolean)&&thumps.length===3,{entry,size});
+  for(const mode of ['below','scene']){
+   const before=video.currentTime;await selectWordPlacement(d,w,mode);
+   check('choice pauses without changing movie or game',video.paused&&Math.abs(video.currentTime-before)<.002&&game.status().paused&&game.status().clock===clock&&game.status().score===score,{entry,size,mode});
+   check('placement selection is explicit and persisted',w.localStorage.getItem('eduit.movie-word-placement.v1')===mode&&d.querySelector('[data-word-placement-choice="'+mode+'"]').getAttribute('aria-pressed')==='true',{entry,size,mode});
+   const fonts=[];
+   for(const cue of samples){
+    const target=(cue.start+cue.end)/2;await mediaLayoutSeek(video,target,w);const geometry=wordGeometry(d,w),word=cue.kind.toUpperCase();
+    check('paused seek reached the real media cue',video.paused&&Math.abs(video.currentTime-target)<.002,{entry,size,mode,cue:cue.id,time:video.currentTime});
+    check('presentation does not scroll or clip the expanded panel',Math.abs(geometry.panelScrollTop)<.1&&geometry.panelScrollHeight<=geometry.panelClientHeight+1&&geometry.surface.top>=-.5,{entry,size,mode,cue:cue.id,geometry});
+    check('exactly one visual word channel',geometry.sceneGroups+(geometry.separateVisible?1:0)===1,{entry,size,mode,cue:cue.id,geometry});
+    if(mode==='below'){
+     check('outside placement removes only scene text',geometry.sceneGroups===0&&geometry.separateVisible&&geometry.separateWord===word,{entry,size,cue:cue.id});
+     const landscape=size[0]>size[1]&&size[1]<=500,center=geometry.word.top+geometry.word.height/2;
+     check('outside word is centered in the defined free region',landscape?Math.abs(center-(geometry.caption.top+geometry.caption.bottom)/2)<=4:Math.abs(center-(geometry.canonicalBottom+geometry.controls.top)/2)<=4,{entry,size,cue:cue.id,center,geometry});
+     check('outside word stays clear of picture and controls',landscape?geometry.word.left>=geometry.surface.right-1&&geometry.word.bottom<=geometry.controls.top:geometry.word.top>=geometry.canonicalBottom-1&&geometry.word.bottom<=geometry.controls.top-1,{entry,size,cue:cue.id,geometry});
+     check('outside word fits its available caption bounds',geometry.word.left>=geometry.caption.left-1&&geometry.word.right<=geometry.caption.right+1&&geometry.word.top>=geometry.caption.top-1&&geometry.word.bottom<=geometry.caption.bottom+1,{entry,size,cue:cue.id,geometry});
+     check('outside word preserves the current readability floor',geometry.separateFont>=(landscape?24:size[0]>=601?56:48),{entry,size,cue:cue.id,font:geometry.separateFont});
+     if(cue.kind==='thump')fonts.push(geometry.separateFont);
+    }else check('on-picture placement restores scene text and suppresses separate word',geometry.sceneGroups===1&&!geometry.separateVisible&&geometry.sceneWords[0].replace('!','')===word,{entry,size,cue:cue.id,geometry});
+   }
+   if(mode==='below')check('distance progression survives the new word region',fonts.length===3&&fonts[0]<fonts[1]&&fonts[1]<fonts[2],{entry,size,fonts});
+  }
+  await selectWordPlacement(d,w,'below');$('full-video').click();await mediaLayoutSeek(video,(samples[0].start+samples[0].end)/2,w);const native=wordGeometry(d,w);
+  check('unexpanded native movie suppresses separate word',!native.ready&&!native.separateVisible&&native.sceneGroups===0&&visuallyPresent(video,w),{entry,size,native});
+  check('all presentation work preserves game state',game.status().paused&&game.status().clock===clock&&game.status().score===score,{entry,size});
+ }
+ results.textContent+='\nCOMPLETE';
+ }catch(e){results.textContent+='\nERROR '+e.message;}
+};
+fallbackWordChecks.onclick=async()=>{
+ const rows=[],check=(name,ok,detail={})=>{rows.push({name,result:ok?'PASS':'FAIL',...detail});results.textContent=JSON.stringify(rows,null,2);if(!ok)throw Error(name);};
+ try{for(const entry of ['/', '/review/director.html']){
+  frame.width=390;frame.height=844;const loaded=new Promise(resolve=>frame.addEventListener('load',resolve,{once:true}));frame.src=entry;await loaded;
+  const d=frame.contentDocument,w=frame.contentWindow,$=id=>d.getElementById(id);
+  for(let n=0;n<120&&!(w.storytimeStorybook&&$('video-options'));n++)await wait(100);
+  if($('story-intro').open){$('intro-close').click();for(let n=0;n<60&&$('story-intro').open;n++)await wait(20);}
+  $('full-video').click();for(let n=0;n<200&&!$('movie-word-status').textContent.includes('unavailable');n++)await wait(50);
+  check('intentional missing-sidecar fixture fails closed',!$('video-panel').classList.contains('movie-responsive')&&$('movie-word-status').textContent.includes('unavailable'),{entry,status:$('movie-word-status').textContent});
+  for(const mode of ['below','scene']){await selectWordPlacement(d,w,mode);await mediaLayoutSeek($('video'),3.9,w);const geometry=wordGeometry(d,w);check('fallback keeps native picture and hides extra visual word',!geometry.ready&&geometry.sceneGroups===0&&!geometry.separateVisible&&visuallyPresent($('video'),w),{entry,mode,geometry});}
+ }
+ results.textContent+='\nCOMPLETE';
+ }catch(e){results.textContent+='\nERROR '+e.message;}
+};
 </script>

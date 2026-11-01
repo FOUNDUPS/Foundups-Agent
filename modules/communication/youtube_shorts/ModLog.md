@@ -1,5 +1,24 @@
 # YouTube Shorts AI Generator - ModLog
 
+## 2026-11-02 — Single-word presentation, retained scene option
+
+WSP00/15/22/50/84/97;15/P1. Lexical retrieval freshness UNKNOWN/index gap retained;
+direct owner/docs/tests resolve scope. Baseline24 showed two SNIFF channels and
+a separate word ~88px below its intended center.25 defaults to one outside word,
+centered between canonical picture bounds and controls. Original scene labels
+remain selectable in grown-up controls; invalid/missing presentation data retains
+native film labels and hides the extra HTML word. No film/engine/audio rerender.
+
+Independent frozen852/852 browser assertions cover both routes/six sizes/five
+cues/two placements; fallback6/6. Review found absolute grid-area positioning
+and final far-THUMP43px failures; reset inherited grid placement and apply a
+scoped48px/56px final floor while retaining far<near<contact. Short landscape
+keeps its established sidebar and compact floor. Real one-Play observation saw
+all five cards then natural25s movie completion, game clock/score0/paused.
+Old-origin execution retained43px despite current disk code; revision-key the
+critical UI graph and share one exact narration URL.86 Node tests pass.
+See ../../foundups/eduit/docs/SINGLE_WORD_PRESENTATION.md for evidence and limits.
+
 ## 2026-11-02 — Simple continuous story popup
 
 012 supersedes card navigation: two88px Play/Pause+X actions,64px glyphs, same

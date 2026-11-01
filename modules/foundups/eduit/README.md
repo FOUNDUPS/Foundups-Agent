@@ -1,5 +1,12 @@
 # EDUIT — Education Using Information Technology
 
+**single-word-25** defaults to one teaching word outside the expanded movie,
+centered between the picture and controls. Grown-up controls offer **Outside
+picture** / **On picture**; both reuse the existing renderer and movie clock.
+Compact/native fallback retains its baked film word and hides the extra caption.
+The film, sound cues, game and two-action storybook remain unchanged.
+See [word presentation](docs/SINGLE_WORD_PRESENTATION.md).
+
 **simple-story-24** has two big popup actions: ▶/Ⅱ and ×. One Play runs all five
 cards, then the movie; no arrows, Skip or manual swipe turns. Closing the modal
 cannot stop the handoff through scrollbar reflow. See

@@ -1,5 +1,21 @@
 # EDUIT interfaces
 
+## Single teaching-word profile — 2026-11-02
+
+`mountMoviePresentation` accepts `wordPlacement` (`below` or `scene`, default
+`below`), `captionAvailable` (boolean), and `onChange(status)`. It returns
+`setWordPlacement(value)`, `setCaptionAvailable(boolean)` and `status()` in
+addition to existing lifecycle methods. Invalid values fail closed. Status
+reports requested/effective placement, caption availability, expanded/ready/failed.
+No arbitrary style/script URLs or model dispatch is accepted. Setters redraw the
+retained movie frame without writing transport time or game state. Only a valid
+revision2 cue sheet enables the separate word; absent captions, failed renderer
+or compact/native playback retain the original picture word. The grown-up menu
+pauses playback and persists the allowlisted choice locally under
+`eduit.movie-word-placement.v1`; it does not resume automatically.
+Director and storybook share exactly one revision-keyed narration module URL.
+See [presentation contract](docs/SINGLE_WORD_PRESENTATION.md).
+
 ## Two-action story popup — 2026-11-02
 
 Only `#storybook-play` and `#intro-close` are child actions:88px minimum targets,

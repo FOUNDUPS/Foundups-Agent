@@ -2,6 +2,7 @@
 const ids=new Set(['parent-1','parent-2','baby-1','baby-2','baby-3']);
 const statuses=new Set(['sleeping','awake','wandering','moving','safe','lost']);
 const kinds=new Set(['thump','crack','crunch','squish','sniff']);
+export const movieWordPlacements=Object.freeze(['below','scene']);
 const number=(v,min,max)=>{if(typeof v!=='number'||!Number.isFinite(v)||v<min||v>max)throw Error('Invalid movie number');return v;};
 const text=v=>{if(typeof v!=='string'||!/^[-a-zA-Z0-9 !.]{1,120}$/.test(v))throw Error('Invalid movie text');return v;};
 const bool=v=>{if(typeof v!=='boolean')throw Error('Invalid movie flag');return v;};
@@ -55,16 +56,22 @@ export async function loadMovieFrames(video,{fetcher=fetch,importer=url=>import(
  if(typeof renderer.scene!=='function'||typeof renderer.scenePresentation!=='function')throw Error('Invalid movie renderer');
  return {...recording,renderer};
 }
-export function mountMoviePresentation({video,panel,surface,load=()=>loadMovieFrames(video),document:doc=globalThis.document,requestFrame=cb=>requestAnimationFrame(cb),cancelFrame=id=>cancelAnimationFrame(id),observe=cb=>new ResizeObserver(cb)}){
+export function mountMoviePresentation({video,panel,surface,wordPlacement='below',captionAvailable=true,onChange=()=>{},load=()=>loadMovieFrames(video),document:doc=globalThis.document,requestFrame=cb=>requestAnimationFrame(cb),cancelFrame=id=>cancelAnimationFrame(id),observe=cb=>new ResizeObserver(cb)}){
+ if(!movieWordPlacements.includes(wordPlacement))throw new TypeError('Unknown movie word placement');
+ if(typeof captionAvailable!=='boolean')throw new TypeError('Unknown movie caption availability');
+ const effectivePlacement=()=>wordPlacement==='below'&&captionAvailable?'below':'scene';
+ panel.dataset.wordPlacement=effectivePlacement();
  const layer=doc.createElement('div');layer.className='movie-scene';layer.setAttribute('aria-hidden','true');layer.hidden=true;surface.append(layer);
  let recording=null,pending=null,failed=false,disposed=false,callback=null,last='',enabled=false;
+ const status=()=>({wordPlacement,effectivePlacement:effectivePlacement(),captionAvailable,expanded:enabled&&!disposed,ready:!!recording&&!failed&&!disposed,failed});
+ const notify=()=>onChange(status());
  const visible=()=>enabled&&!doc.hidden&&!disposed&&!failed;
  function cancel(){if(callback){if(callback.video)video.cancelVideoFrameCallback(callback.id);else cancelFrame(callback.id);callback=null;}}
  function draw(time=video.currentTime){
   if(!visible()||!recording)return;
   const {width,height}=surface.getBoundingClientRect();if(!(width>0&&height>0))return;
-  const index=movieFrameIndex(time,recording),key=[index,width,height].join(':');
-  if(key!==last){const owner=recording.renderer;layer.innerHTML=owner.scene({...recording.frames[index],presentation:owner.scenePresentation(width,height,true)});last=key;}
+  const index=movieFrameIndex(time,recording),key=[index,width,height,effectivePlacement()].join(':');
+  if(key!==last){const owner=recording.renderer;layer.innerHTML=owner.scene({...recording.frames[index],showWords:effectivePlacement()==='scene',presentation:owner.scenePresentation(width,height,true)});last=key;}
   layer.hidden=false;panel.classList.add('movie-responsive');
  }
  function schedule(){
@@ -75,11 +82,13 @@ export function mountMoviePresentation({video,panel,surface,load=()=>loadMovieFr
  function refresh(){cancel();if(!visible()){layer.hidden=true;return;}draw();schedule();}
  function setExpanded(value){
   enabled=value===true;
-  if(!enabled){cancel();layer.hidden=true;panel.classList.remove('movie-responsive');return;}
-  if(!recording&&!pending&&!failed){pending=Promise.resolve().then(load).then(result=>{recording=result;refresh();}).catch(()=>{failed=true;layer.hidden=true;panel.classList.remove('movie-responsive');});}
-  refresh();
+  if(!enabled){cancel();layer.hidden=true;panel.classList.remove('movie-responsive');notify();return;}
+  if(!recording&&!pending&&!failed){pending=Promise.resolve().then(load).then(result=>{recording=result;refresh();notify();}).catch(()=>{failed=true;layer.hidden=true;panel.classList.remove('movie-responsive');notify();});}
+  refresh();notify();
  }
+ function setWordPlacement(value){if(disposed||!movieWordPlacements.includes(value))return false;wordPlacement=value;panel.dataset.wordPlacement=effectivePlacement();refresh();notify();return true;}
+ function setCaptionAvailable(value){if(disposed||typeof value!=='boolean')return false;captionAvailable=value;panel.dataset.wordPlacement=effectivePlacement();refresh();notify();return true;}
  const events=['play','pause','seeked','loadeddata','ended'];for(const event of events)video.addEventListener(event,refresh);
  doc.addEventListener('visibilitychange',refresh);const resize=observe(refresh);resize.observe(surface);
- return {setExpanded,ready:()=>pending||Promise.resolve(),dispose(){disposed=true;cancel();resize.disconnect();for(const event of events)video.removeEventListener(event,refresh);doc.removeEventListener('visibilitychange',refresh);layer.remove();panel.classList.remove('movie-responsive');}};
+ return {setExpanded,setWordPlacement,setCaptionAvailable,status,ready:()=>pending||Promise.resolve(),dispose(){disposed=true;cancel();resize.disconnect();for(const event of events)video.removeEventListener(event,refresh);doc.removeEventListener('visibilitychange',refresh);layer.remove();panel.classList.remove('movie-responsive');delete panel.dataset.wordPlacement;notify();}};
 }

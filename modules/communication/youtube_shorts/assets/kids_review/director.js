@@ -1,11 +1,12 @@
-import {mountNarration,replayNarrationCues} from './story-narration.mjs';
+import {mountNarration,replayNarrationCues} from './story-narration.mjs?rev=single-word-25';
 import {mountMusicPicker} from './music-picker.mjs';
 import {mountChoiceWheel} from './choice-wheel.mjs';
-import {mountMoviePresentation} from '../storytime/movie-presentation.mjs';
+import * as movieView from '../storytime/movie-presentation.mjs?rev=single-word-25';
 import {appearanceFor} from '../storytime/rig.mjs';
 import {bindPanelGestures} from '../storytime/panel-gestures.mjs';
 import {locales,normalizeLocale} from '../storytime/learning-events.mjs';
 const $=id=>document.getElementById(id),game=$('game'),ink=$('ink');
+const {mountMoviePresentation}=movieView,movieWordPlacements=movieView.movieWordPlacements||[];
 // A masked domain wrapper can omit the outer mobile viewport. Offer an explicit
 // user-controlled escape to this app's own origin; never navigate the top silently.
 let crossOriginFrame=false;try{crossOriginFrame=window.top!==window&&window.top.location.origin!==location.origin;}catch{crossOriginFrame=true;}
@@ -39,7 +40,9 @@ $('copy').onclick=async()=>{try{await navigator.clipboard.writeText(record());$(
 $('video').onplay=()=>api()?.freeze();new ResizeObserver(paint).observe(ink);list();
 
 const gamePanel=$('game-panel'),videoPanel=$('video-panel'),video=$('video');
-const moviePresentation=mountMoviePresentation({video,panel:videoPanel,surface:video.closest('.surface')});
+let movieWordPlacement='below';
+try{const saved=localStorage.getItem('eduit.movie-word-placement.v1');if(movieWordPlacements.includes(saved))movieWordPlacement=saved;}catch{}
+const moviePresentation=mountMoviePresentation({video,panel:videoPanel,surface:video.closest('.surface'),wordPlacement:movieWordPlacement,captionAvailable:false,onChange:updateMovieWordStatus});
 const expandIcon='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H3v6m12-6h6v6M3 15v6h6m12-6v6h-6"/></svg>';
 const collapseIcon='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h6V3m6 0v6h6M9 21v-6H3m12 6v-6h6"/></svg>';
 let lastViewport="";
@@ -117,6 +120,24 @@ for(const [id,label] of [['characters','Characters'],['music','Music'],['languag
  const entry=document.createElement('button');entry.id='menu-'+id;entry.type='button';entry.textContent=label;entry.setAttribute('aria-controls',panel.id);entry.setAttribute('aria-pressed',String(id==='characters'));entry.onclick=()=>showMenuSection(id);menuNav.append(entry);menuButtons.set(id,entry);
 }
 const advanced=document.createElement('details');advanced.id='menu-advanced';const advancedSummary=document.createElement('summary');advancedSummary.textContent='Grown-up controls';advanced.append(advancedSummary);options.append(advanced);
+function updateMovieWordStatus(state){
+ const host=$('movie-word-options');if(!host)return;
+ for(const choice of host.querySelectorAll('[data-word-placement-choice]'))choice.setAttribute('aria-pressed',String(choice.dataset.wordPlacementChoice===state.wordPlacement));
+ $('movie-word-status').textContent=!state.expanded?'Expand the video to compare placement.':state.failed?'Separate word unavailable. The movie shows its own words.':!state.ready?'Preparing the expanded view…':state.wordPlacement==='below'&&!state.captionAvailable?'Separate word unavailable. The picture shows its own word.':state.wordPlacement==='below'?'One word below the picture, or beside it on a wide screen.':'One word on the picture.';
+}
+// Older cached presenters keep their usable movie without a new named-export
+// dependency or controls for methods they do not implement.
+if(typeof moviePresentation.setWordPlacement==='function'&&typeof moviePresentation.status==='function'){
+const wordOptions=document.createElement('fieldset');wordOptions.id='movie-word-options';
+const wordLegend=document.createElement('legend');wordLegend.textContent='Teaching word placement';wordOptions.append(wordLegend);
+const wordNote=document.createElement('p');wordNote.textContent='Expanded video: one word outside the picture, or on it.';wordOptions.append(wordNote);
+for(const [value,label]of [['below','Outside picture'],['scene','On picture']]){
+ const choice=document.createElement('button');choice.type='button';choice.dataset.wordPlacementChoice=value;choice.textContent=label;
+ choice.onclick=()=>{pauseForMenu();if(!moviePresentation.setWordPlacement(value))return;try{localStorage.setItem('eduit.movie-word-placement.v1',value);}catch{}closeOptions();};wordOptions.append(choice);
+}
+const wordStatus=document.createElement('p');wordStatus.id='movie-word-status';wordStatus.setAttribute('role','status');wordOptions.append(wordStatus);advanced.append(wordOptions);
+updateMovieWordStatus(moviePresentation.status());
+}
 function pauseForMenu(){video.pause();api()?.pause();storybook?.pause('menu');window.storytimeMusic?.stop();}
 function showMenuSection(id){if(!menuPanels.has(id))return;pauseForMenu();for(const [key,panel]of menuPanels){panel.hidden=key!==id;menuButtons.get(key).setAttribute('aria-pressed',String(key===id));}options.scrollTop=0;}
 function closeOptions(){if(!options.open)return;pauseForMenu();options.close();if(optionsReturn?.isConnected)optionsReturn.focus({preventScroll:true});}
@@ -163,7 +184,7 @@ if(!introSeen)queueMicrotask(openStoryIntro);
 
 // Movie action cues come from this build's actual engine replay, never the old15s timeline.
 const narration=mountNarration(video,$('story-caption'),{statusHost:advanced,cues:[]});
-fetch(new URL('replay-timeline.json',video.src),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(t=>narration.setCues(replayNarrationCues(t))).catch(()=>{});
+fetch(new URL('replay-timeline.json',video.src),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(t=>{const cues=replayNarrationCues(t);narration.setCues(cues);moviePresentation.setCaptionAvailable?.(t?.revision==='same-engine-rescue-2'&&t.duration===25&&Array.isArray(t.events)&&cues.length===t.events.length&&cues.length>0);}).catch(()=>moviePresentation.setCaptionAvailable?.(false));
 window.storytimeNarration=narration;
 const voiceOption=button('story-voice','English story voice','more',advanced,()=>{const enabled=voiceOption.getAttribute('aria-pressed')!=='true';voiceOption.setAttribute('aria-pressed',String(enabled));voiceOption.textContent=enabled?'English story voice: on':'English story voice: off';storybook?.pause('voice-option');narration.setEnabled(enabled);});
 voiceOption.setAttribute('aria-pressed','true');voiceOption.textContent='English story voice: on';
@@ -205,7 +226,7 @@ window.storytimeMusic=mountMusicPicker({host:menuPanels.get('music'),video,game,
  isStoryOpen:()=>introDialog.open});
 
 // Optional enhancement: older/offline clients keep a usable original dialog.
-import('./storybook.mjs').then(({mountStorybook})=>{
+import('./storybook.mjs?rev=single-word-25').then(({mountStorybook})=>{
  storybook=mountStorybook({dialog:introDialog,video,narration,beforePlay:()=>api()?.pause(),onFinish:()=>{
   if(!introDialog.open||introClosing)return;
   const generation=introGeneration;

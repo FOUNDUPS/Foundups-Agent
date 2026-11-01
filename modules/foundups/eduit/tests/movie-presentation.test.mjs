@@ -16,17 +16,17 @@ test('external frame data cannot introduce executable SVG text, IDs or unbounded
   const copy=structuredClone(raw);mutate(copy);assert.throws(()=>validateMovieFrames(copy));
  }
 });
-function fixture({load=async()=>({...recording,renderer:{scene,scenePresentation}}),fallback=false}={}){
+function fixture({load=async()=>({...recording,renderer:{scene,scenePresentation}}),fallback=false,wordPlacement='below',captionAvailable=true,onChange=()=>{}}={}){
  const classes=new Set(),queue=new Map();let next=1,resizeCb,writes=0;
  const layer={hidden:true,setAttribute(){},remove(){},set innerHTML(v){this.svg=v;writes++;}};
  const doc=Object.assign(new EventTarget(),{hidden:false,createElement:()=>layer});
  const video=Object.assign(new EventTarget(),{currentTime:0,paused:true,ended:false,requestVideoFrameCallback:cb=>{const id=next++;queue.set(id,cb);return id;},cancelVideoFrameCallback:id=>queue.delete(id)});
  if(fallback){delete video.requestVideoFrameCallback;delete video.cancelVideoFrameCallback;}
- const panel={classList:{add:x=>classes.add(x),remove:x=>classes.delete(x)}};
+ const panel={dataset:{},classList:{add:x=>classes.add(x),remove:x=>classes.delete(x)}};
  let width=390,height=650;
  const surface={append(){},getBoundingClientRect:()=>({width,height})};
- const view=mountMoviePresentation({video,panel,surface,load,document:doc,requestFrame:cb=>{const id=next++;queue.set(id,cb);return id;},cancelFrame:id=>queue.delete(id),observe:cb=>{resizeCb=cb;return {observe(){},disconnect(){}};}});
- return {view,video,doc,layer,queue,classes,writes:()=>writes,event:name=>video.dispatchEvent(new Event(name)),resize:(w,h)=>{width=w;height=h;resizeCb();},present(time){const [id,cb]=queue.entries().next().value;queue.delete(id);video.currentTime=time;cb(0,{mediaTime:time});}};
+ const view=mountMoviePresentation({video,panel,surface,load,wordPlacement,captionAvailable,onChange,document:doc,requestFrame:cb=>{const id=next++;queue.set(id,cb);return id;},cancelFrame:id=>queue.delete(id),observe:cb=>{resizeCb=cb;return {observe(){},disconnect(){}};}});
+ return {view,video,doc,layer,panel,queue,classes,writes:()=>writes,event:name=>video.dispatchEvent(new Event(name)),resize:(w,h)=>{width=w;height=h;resizeCb();},present(time){const [id,cb]=queue.entries().next().value;queue.delete(id);video.currentTime=time;cb(0,{mediaTime:time});}};
 }
 test('video alone advances picture; pause, seek, resize, collapse and repeat preserve transport',async()=>{
  const f=fixture();assert.equal(f.queue.size,0);f.view.setExpanded(true);await f.view.ready();assert.equal(f.queue.size,0);assert.equal(f.layer.hidden,false);
@@ -43,6 +43,27 @@ test('video alone advances picture; pause, seek, resize, collapse and repeat pre
 });
 test('failed sidecar leaves native movie visible and never starts transport',async()=>{
  const f=fixture({load:async()=>{throw Error('digest mismatch');}});f.view.setExpanded(true);await f.view.ready();assert.equal(f.classes.size,0);assert.equal(f.layer.hidden,true);assert.equal(f.video.paused,true);assert.equal(f.queue.size,0);f.view.dispose();
+});
+test('one-word placement switches paused drawing without changing time, actors or recorded data',async()=>{
+ const before=structuredClone(recording.frames),f=fixture();f.view.setExpanded(true);await f.view.ready();
+ f.video.currentTime=.9;f.event('seeked');const outside=f.layer.svg;
+ assert.equal(f.view.status().wordPlacement,'below');assert.equal(f.panel.dataset.wordPlacement,'below');assert.ok(!outside.includes('data-learning='));
+ assert.equal(f.view.setWordPlacement('scene'),true);const inside=f.layer.svg;assert.ok(inside.includes('>SNIFF</text>'));assert.notEqual(inside,outside);
+ const actors=svg=>[...svg.matchAll(/<g data-(?:actor|survivor)="[^"]+" transform="[^"]+"/g)].map(m=>m[0]);assert.deepEqual(actors(inside),actors(outside));
+ assert.equal(f.video.currentTime,.9);assert.equal(f.video.paused,true);assert.equal(f.queue.size,0);assert.deepEqual(recording.frames,before);
+ for(const invalid of ['both','https://example.invalid/words.js',{},null]){assert.equal(f.view.setWordPlacement(invalid),false);assert.equal(f.layer.svg,inside);assert.equal(f.view.status().wordPlacement,'scene');}
+ f.view.setWordPlacement('below');assert.equal(f.layer.svg,outside);f.view.dispose();assert.equal(f.panel.dataset.wordPlacement,undefined);assert.equal(f.view.setWordPlacement('scene'),false);assert.equal(f.panel.dataset.wordPlacement,undefined);
+});
+test('invalid initial word profiles fail before loading or drawing, while failed media remains explicit',async()=>{
+ assert.throws(()=>fixture({wordPlacement:'both'}),TypeError);
+ const states=[],f=fixture({onChange:s=>states.push(s),load:async()=>{throw Error('missing sidecar');}});f.view.setExpanded(true);await f.view.ready();
+ assert.equal(f.view.status().failed,true);assert.equal(f.view.status().ready,false);assert.equal(f.classes.has('movie-responsive'),false);assert.equal(f.layer.hidden,true);assert.equal(f.video.paused,true);assert.ok(states.some(s=>s.failed));f.view.dispose();
+});
+test('unavailable separate captions retain picture labels until caption metadata is ready',async()=>{
+ const f=fixture({captionAvailable:false});f.view.setExpanded(true);await f.view.ready();f.video.currentTime=.9;f.event('seeked');
+ assert.equal(f.view.status().wordPlacement,'below');assert.equal(f.view.status().effectivePlacement,'scene');assert.ok(f.layer.svg.includes('>SNIFF</text>'));
+ assert.equal(f.view.setCaptionAvailable('yes'),false);assert.equal(f.view.setCaptionAvailable(true),true);assert.equal(f.view.status().effectivePlacement,'below');assert.ok(!f.layer.svg.includes('data-learning='));
+ assert.equal(f.video.currentTime,.9);assert.equal(f.video.paused,true);f.view.dispose();assert.equal(f.view.setCaptionAvailable(false),false);
 });
 test('rAF fallback samples retained media time and performs no work while collapsed',async()=>{
  const f=fixture({fallback:true});f.view.setExpanded(true);await f.view.ready();f.video.paused=false;f.event('play');assert.equal(f.queue.size,1);f.present(21);const picture=f.layer.svg;assert.equal(f.queue.size,1);f.present(21);assert.equal(f.layer.svg,picture);const count=f.writes();f.view.setExpanded(false);assert.equal(f.queue.size,0);f.event('play');assert.equal(f.writes(),count);assert.equal(f.queue.size,0);f.view.dispose();

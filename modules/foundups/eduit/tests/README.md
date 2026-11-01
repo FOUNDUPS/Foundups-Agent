@@ -1,5 +1,16 @@
 # EDUIT test inventory
 
+## 2026-11-02 — Single-word25 validation
+
+86 Node tests pass, including invalid profile/caption fallback, retained-time
+redraw, final font floor with strict distance progression, and shared revision
+module graph. Independent director harness:852/852 word-layout assertions,
+both routes × six sizes × five cues × two placements;6/6 native fallback.
+Real single Play observed indices0–4 then movie ended25s, game clock0/score0/paused.
+Actual geometry and screenshots retained in
+`O:/Foundups-Agent/outputs/storytime-word-layout-20261102/` including red baselines.
+Desktop observation does not certify native iOS sound/touch or child comprehension.
+
 Simple24 supersedes manual child navigation tests per012. Existing harness checks
 exactly two88px/glyph64 actions, all5pages/root+inner/six sizes, one Play through
 book and movie beyond3s, Pause/Resume, incidental taps/swipes and X/no late start.

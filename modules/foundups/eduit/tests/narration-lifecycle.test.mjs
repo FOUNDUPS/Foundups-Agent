@@ -84,11 +84,21 @@ test('action speech preserves complete Foley and survives the old short sniff en
  const thumps=cues.filter(c=>c.text==='THUMP');assert.ok(thumps[0].word_scale<thumps[1].word_scale&&thumps[1].word_scale<thumps[2].word_scale);
 }));
 test('actual caption fit retains distinct far, near and landing sizes within the same available box',()=>{
- const prior=globalThis.getComputedStyle;globalThis.getComputedStyle=()=>({paddingLeft:'0',paddingRight:'0',paddingTop:'0',paddingBottom:'0',rowGap:'0',getPropertyValue:n=>n==='--lesson-min-size'?'32':'96'});
+ const prior=globalThis.getComputedStyle;globalThis.getComputedStyle=()=>({paddingLeft:'0',paddingRight:'0',paddingTop:'0',paddingBottom:'0',rowGap:'0',getPropertyValue:n=>({'--lesson-min-size':'32','--lesson-max-size':'96'}[n]||'')});
  try{
   const phrase={textContent:'THUMP',dataset:{},style:{fontSize:'32px'},get scrollWidth(){return parseFloat(this.style.fontSize)*3;},get scrollHeight(){return parseFloat(this.style.fontSize);},getBoundingClientRect(){return {height:parseFloat(this.style.fontSize)};}};
   const caption={clientWidth:390,clientHeight:64,children:[phrase],dataset:{}};
   const sizes=replayNarrationCues(replay()).filter(c=>c.text==='THUMP').map(c=>{phrase.dataset.wordScale=String(c.word_scale);fitCaptionText(phrase,caption);return parseFloat(phrase.style.fontSize);});
   assert.ok(sizes[0]<sizes[1]&&sizes[1]<sizes[2]);assert.ok(sizes[0]>=24);assert.ok(sizes[2]<=65);
  }finally{if(prior===undefined)delete globalThis.getComputedStyle;else globalThis.getComputedStyle=prior;}
+});
+test('separate-word floor stays readable without flattening distant, near and landing THUMPs',()=>{
+ const prior=globalThis.getComputedStyle;
+ try{for(const [width,floor]of [[288,48],[744,56]]){
+  globalThis.getComputedStyle=()=>({paddingLeft:'0',paddingRight:'0',paddingTop:'0',paddingBottom:'0',rowGap:'0',getPropertyValue:n=>({'--lesson-min-size':String(floor),'--lesson-max-size':'96','--lesson-action-floor':String(floor)}[n]||'')});
+  const phrase={textContent:'THUMP',dataset:{},style:{fontSize:'48px'},get scrollWidth(){return parseFloat(this.style.fontSize)*3.9;},get scrollHeight(){return parseFloat(this.style.fontSize);},getBoundingClientRect(){return {height:parseFloat(this.style.fontSize)};}};
+  const caption={clientWidth:width,clientHeight:280,children:[phrase],dataset:{}};
+  const sizes=replayNarrationCues(replay()).filter(c=>c.text==='THUMP').map(c=>{phrase.dataset.wordScale=String(c.word_scale);fitCaptionText(phrase,caption);return parseFloat(phrase.style.fontSize);});
+  assert.ok(sizes[0]>=floor);assert.ok(sizes[0]<sizes[1]&&sizes[1]<sizes[2]);assert.ok(sizes[2]*3.9<=width+1);assert.equal(caption.dataset.textOverflow,'false');
+ }}finally{if(prior===undefined)delete globalThis.getComputedStyle;else globalThis.getComputedStyle=prior;}
 });

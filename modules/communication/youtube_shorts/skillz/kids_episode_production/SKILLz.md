@@ -1,7 +1,7 @@
 ---
 name: kids_episode_production
 description: Build and independently review Kids Episodes media and Storytime viewer/PWA changes through existing production and interactive-review owners.
-version: 0.2.9
+version: 0.2.10
 intent_type: GENERATION
 promotion_state: prototype
 ---
@@ -15,6 +15,15 @@ Use FOUNDUPS/Foundups-Agent as the implementation authority. Read AGENTS.md, WSP
 ## Story direction before production
 
 Read `references/story-direction.md` before scripting or revising an educational event. Apply its ordered physics, continuity, education and art/readability audits to each preview. Use the fast creative loop and milestone integration rules; record unverified listening separately.
+
+## Single-word visual profile
+
+Apply the interactive review's one-word/delivery gate. Preserve original scene
+labels behind the allowlisted profile; default to one centered outside word in
+expanded playback. Native MP4 fallback retains baked words. Do not rerender
+unchanged media or introduce another engine/model service for presentation.
+Check final scaled font sizes, exact shared narration import URL, warm-origin
+revision delivery, actual full-story playback and the published revision.
 
 ## Viewer and game repair
 

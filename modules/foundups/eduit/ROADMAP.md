@@ -1,5 +1,14 @@
 # EDUIT execution roadmap
 
+## 2026-11-02 — One word, one visual channel
+
+012 requests removing duplicate action words and centering the separate word.
+Default to Outside picture in expanded movie; preserve On picture behind the
+existing grown-up menu. Keep baked native fallback honest. Freeze geometry,
+readability, distance progression, single-channel rendering and unchanged clocks;
+independently inspect both routes, six sizes and actual complete playback before
+publication. This is a controlled presentation profile, not a new AI backend.
+
 ## 2026-11-02 — One Play, whole story, one clear exit
 
 012 supersedes manual child card navigation: two large pictograms, automatic

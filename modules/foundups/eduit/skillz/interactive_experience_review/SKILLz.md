@@ -1,7 +1,7 @@
 ---
 name: interactive_experience_review
 description: Audit and iteratively repair audience-specific games and web interfaces, including EDUIT Storytime timing, touch controls, learning cues, scoring and feedback. Use before implementation and after inspecting each changed output.
-version: 0.3.7
+version: 0.3.8
 intent_type: AUDIT
 promotion_state: prototype
 ---
@@ -20,6 +20,28 @@ This explicit contract supersedes older manual-card cases below.
 This is a reusable **candidate procedure**, first applied to EDUIT. It is not an
 installed continuous worker, production-admitted Skillz, or proof of transfer to
 other games. Keep each product's runtime and evidence in its existing module.
+
+## One teaching word and delivery review
+
+For Storytime25, freeze one effective visual channel. Outside picture is default
+in expanded movie; On picture remains a grown-up comparison. Check actual word
+bounds centered between canonical picture and controls (or short-landscape side
+region), both routes and all six sizes. Absolute grid children must reset inherited
+grid placement before using panel-relative top/bottom. Test final scaled action
+fonts, not only base font sizes:48px phone/56px tablet where the outside region
+supports them, strict far<near<contact. Preserve the existing short-landscape
+compact exception explicitly. Test unavailable captions/renderer/native playback:
+baked film words stay visible and extra HTML words disappear.
+
+Retain failed baselines; do not relax geometry/font oracles to turn red green.
+Profile changes must preserve retained media time and game state. Exercise menu
+choices with actual DOM presses. Observe one Play through every card and natural
+movie end separately from legitimate paused-media seeking used for layout cases.
+If current disk code differs from executed behavior, a fresh port is diagnosis,
+not an update solution. Revision-key affected UI imports, keep shared speech
+imports identical, and recheck the warm original origin without clearing caches.
+Record public-origin checks separately from local acceptance. Do not infer native
+acoustic/touch acceptance or autonomous RSI from desktop checks.
 
 ## Establish the contract
 

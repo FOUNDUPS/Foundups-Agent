@@ -36,7 +36,12 @@ export function fitCaptionText(phrase,caption){
  function fits(size){phrase.style.fontSize=size+'px';return phrase.scrollWidth<=width+1&&Math.max(phrase.scrollHeight,phrase.getBoundingClientRect().height)<=height+1;}
  if(!fits(low)){caption.dataset.textOverflow='true';return;}
  for(let i=0;i<8;i++){const mid=(low+high)/2;if(fits(mid))low=mid;else high=mid;}
- fits(Math.max(24,Math.floor(low*(Number(phrase.dataset.wordScale)||1))));caption.dataset.textOverflow='false';
+ const scale=Number(phrase.dataset.wordScale)||1;
+ const floor=Number(style.getPropertyValue('--lesson-action-floor'))||0;
+ // In the separate-word panel keep every word readable, then distribute the
+ // distance emphasis within the available range; a clamp alone flattens far/near.
+ const emphasis=Math.max(0,Math.min(1,(scale-.6)/.4));
+ fits(floor>0?Math.floor(floor+(low-floor)*emphasis):Math.max(24,Math.floor(low*scale)));caption.dataset.textOverflow='false';
 }
 export function replayNarrationCues(timeline){
  if(!['same-engine-rescue-1','same-engine-rescue-2'].includes(timeline?.revision)||!Number.isFinite(timeline.duration)||timeline.duration<=0||timeline.duration>120||!Array.isArray(timeline.events)||timeline.events.length>100)return [];
