@@ -1,5 +1,53 @@
 # INTERFACE - FoundUps Simulator
 
+## Opt-in simulator reserve quote observation — 2026-11-01
+
+`snapshot_simulator_quote(reserve: BTCReserve, *, context_id: str, tick: int)`
+returns a frozen, slotted `SimulatorQuoteSnapshot`. The receiver must be an exact
+BTCReserve. It reads only `total_btc`, `total_ups_circulating` and
+`genesis_ups_per_btc`; each must be an exact built-in int/float, finite and
+nonnegative, with genesis strictly positive. Bool, subclasses and coercible
+objects reject with ValueError without invoking their numeric hooks. Only immutable
+copies of the three source values are retained; no reserve reference is retained
+or source state changed. USD rate and inflow history are not read.
+
+| Field | Produced type and meaning |
+| --- | --- |
+| `format_version` | int, fixed `1` |
+| `interpretation` | str, fixed `decimal_view_v1` |
+| `source_kind` | str, fixed `simulator_state` |
+| `context_id` | Exact built-in str, 1–128 ASCII chars: first `[A-Za-z0-9]`, remainder `[A-Za-z0-9._:-]`; observation label |
+| `tick` | Exact built-in int in `0..2**63-1`; observation label |
+| `branch` | str, `genesis_notional` or `reserve_ratio` |
+| `reserve_btc` | Reduced immutable `(numerator, denominator)` built-in int tuple |
+| `circulating_ups` | Reduced immutable built-in int rational tuple |
+| `genesis_ups_per_btc` | Reduced immutable built-in int rational tuple |
+| `sats_per_ups` | Reduced immutable built-in int rational tuple |
+| `identity_sha256` | 64 lowercase hexadecimal chars; content/context identity |
+
+All denominators are positive. Ints remain exact; finite floats use their
+canonical decimal spelling before exact rational arithmetic. Zero circulation
+selects `genesis_notional`: `100000000 / genesis`, including positive BTC with
+zero UPS. Positive BTC and circulation select `reserve_ratio`:
+`100000000 * BTC / UPS`. Zero BTC with outstanding UPS raises ValueError only in
+this API; the differing legacy properties, all defaults and callers are preserved.
+This view does not recover historical precision or change global Decimal context.
+
+Work limits are 1100 input-int bits before conversion, 330 decimal digits per
+source-pair component, 668 per derived-quote component and 8192 payload bytes.
+These bound format work, not asset precision, supply or economic caps. Identity
+hashes ASCII `foundups.simulator.reserve-quote.v1`, one NUL byte, then sorted-key
+compact ASCII JSON of all fields except `identity_sha256`; tuples become arrays,
+with no newline or nonfinite tokens. Changed labels/content change identity;
+there is no replay-conflict or consumption store.
+
+A trusted host must serialize observation with source writes; concurrent
+multiscalar capture is not atomic. Public construction, immutability, labels and
+digest are data, not authentication, currentness, funded backing, issuance or
+settlement evidence. No consumer may infer authority from a self-supplied record
+or digest. This opt-in class A representation leaves the class D unit conflict
+and future class C economic decisions open, with no default or chain activation.
+
 ## Pool epoch effect contract — 2026-11-01
 
 `PoolDistributor(ledger=None)` keeps the no-argument constructor and existing

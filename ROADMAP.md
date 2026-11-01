@@ -44,21 +44,26 @@ The existing simulator must validate any economic enhancement before chain parit
 
 ### Current blockchain security sequence — 2026-11-01
 
-[The current sprint and ordered roadmap](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#replay-safe-epoch-settlement-and-ai-threat-update--2026-11-01)
-record B01 wallet-policy isolation delivered through PR2281 at
-`24cc4aa2971b05ff8b53f76d157145da4134ed5c` with 24 PR and 22 resulting-main checks
-passing. A07/B02 full epoch effects is the active class-B 18/P0 layer; its fresh
-154-case baseline includes an actual seeded 240-tick simulation. Independent
-frozen replay acceptance first produced 2 passes/38 failures before repair.
-Corrected source passes 57 independent cases and 930 broader simulator cases
-in overlapping scopes; controlled fresh-process economic traces match exactly.
-Package checks pass8 Python cases and3 Node entrypoints; protected publication
-remains pending. Seed-only reproducibility is not proved.
+[The current sprint and ordered roadmap](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#reserve-quote-observation-and-b02-delivery--2026-11-01)
+record B01 delivered through PR2281 at 24cc (24 PR/22 main checks) and B02 through
+PR2285 at `fb58cd530d7b6887ce6218af282cb6ee7382ded5` (23 PR/21 main checks).
+Primary-PC source/preservation and exact-source Holo qualification passed
+separately; lexical bundles are not semantic freshness proof. B02's 57 independent
+and 930 broader cases overlap; its controlled process trace is qualified, while
+seed-only reproducibility and durable/funded settlement remain unproved.
+
+The next existing-owner prerequisite is a **16/P0 class A reserve observation**:
+an opt-in 11-field rational view with host-serialized capture and non-authoritative
+content/context identity. Independent 113, promoted 96 and broader 1,019 cases pass
+in overlapping scopes. Fresh controlled reference/candidate traces match; that
+finite profile does not prove seed-only portability. Package checks pass eight
+Python cases and three Node entrypoints; protected publication remains pending.
+No default consumer or economic rule changes. B03's 19/P0 class
+C/D units/issuance decision stays open.
 The [AI threat update](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#ai-exposed-financial-attack-surfaces)
-maps repository/tool poisoning and automated exploitation to existing controls
-and missing gates. The 19-entry registry remains metadata without issuance evidence.
-Preserve simulator-first authority, disputed units/caps and independent funding/
-signer/recovery gates. No planning packet grants live TestNet or production use.
+retains authentic funding, independent signer and recovery gates. The scoped
+19-entry catalog is metadata without issuance evidence, not an exhaustive project
+inventory. No planning packet grants live TestNet or production authority.
 
 ## Resident assurance connection — 2026-10-30
 

@@ -1,8 +1,71 @@
 # FoundUps blockchain reconciliation and security decision — 2026-10-31
 
+## Reserve quote observation and B02 delivery — 2026-11-01
+
+[PR2285](https://github.com/FOUNDUPS/Foundups-Agent/pull/2285) delivered B02/A07
+at `fb58cd530d7b6887ce6218af282cb6ee7382ded5`: all 23 PR checks and 21
+resulting-main checks passed. Primary-PC source/preservation and exact-source
+Holo qualification passed separately. Its semantic receipt qualified committed
+fb58, CURRENT/no gap; its lexical bundle retained UNKNOWN/gaptrue. This closes
+the earlier B02 publication-pending state below, without changing sealed records
+or qualifying a newer source, installed runtime or live monetary service.
+
+The next bounded prerequisite is **class A representation, WSP15 16/P0
+(3/4/5/4)**, on the docs-only successor base
+`4c96d6b17429226248c3a82de5544262e773c41e`. Existing `btc_reserve.py` adds
+`snapshot_simulator_quote(reserve, *, context_id, tick)` and an immutable,
+11-field record. `decimal_view_v1` keeps integers exact and interprets finite
+floats through their canonical decimal spelling, then exact rational arithmetic.
+This opt-in view does not recover historical float precision or change any
+legacy calculation, default consumer, fee, supply or chain behavior.
+
+The [interface](../../modules/foundups/simulator/INTERFACE.md#opt-in-simulator-reserve-quote-observation--2026-11-01)
+defines fields, work limits, branches and the domain-separated content digest.
+Context, tick, digest and public record construction confer no authentication,
+currentness, unique consumption, funded backing or settlement authority. The host
+must serialize observation with source writes; concurrent multiscalar capture is
+not atomic. Zero circulation is explicitly notional. Zero BTC with outstanding
+UPS rejects only in this new API; both differing legacy views remain unchanged.
+
+Frozen historical acceptance produced 7 original passes and 89 desired failures
+before implementation. The independently reviewed source passes 113 cases:
+those 96 cases plus 17 additional held-outs, with unchanged source snapshots and
+zero effect-guard denials. Review found no material defect within the selected
+contract. The promoted existing owner passes 96 cases; the broader simulator
+passes 1,019 with the same three named SSE HTTP cases deselected. All GREEN selections
+have zero failures/errors/skips/guard denials and 174 unchanged simulator/FAM
+Python source snapshots, including tests; these are not the runtime closure.
+These scopes overlap. Python guards are not OS confinement. The [quote receipt](receipts/FOUNDUPS_RESERVE_QUOTE_OBSERVATION_20261101.json)
+records the actual source-bound evidence and open publication gates.
+
+Canonical packaging preserves all 1,478 runtime paths and changes only the reserve
+owner's hash. Eight Python generator/index cases, three Node entrypoints and the
+unchanged 1,794-owner/260-quarantine registry check pass. Manifest 330 KiB,
+individual-source 2 MiB and total-source 32 MiB caps are unchanged. These checks
+bind the tested source and staged package entries, not an installed runtime or
+a future commit. Protected publication, resulting-main and new-source PC/Holo
+qualification remain pending; chain activation remains blocked.
+
+A fresh controlled profile ran the clean fb58 reference, whose 174 simulator/FAM
+Python source hashes equal the docs-only 4c96 base, and two candidate processes. Complete trace
+bytes match SHA256 `672d12c9d8fb6286624ea892fb3a5d0315c475ee45f8c83c9a271ba4328f0ff1`:
+240 ticks, six FoundUps, 214 paid simulated tasks and 24 epochs. Python 3.12.10,
+`-P -s` and explicit `PYTHONHASHSEED=710007` bind this finite profile. No monetary
+fields were normalized. The actual reference ran fb58, not 4c96. This verifies no
+observed change to that default path; seed-only portability, all model states,
+economic correctness and live backing remain unproved. The new observer is unused
+by existing model/fee consumers. These are repeated scenario runs, not additional
+distinct regression cases.
+
+B03's **19/P0 class C/D unit and issuance decision remains unresolved**. This
+representation prerequisite does not ratify the one-satoshi/1000-satoshi conflict
+or authorize changed economics. Future class C transitions need their own
+versioned simulator decision and independent acceptance. Durable funded limits,
+authentic source facts, custody, chain parity and activation remain blocked.
+
 ## Replay-safe epoch settlement and AI threat update — 2026-11-01
 
-Current source baseline: `24cc4aa2971b05ff8b53f76d157145da4134ed5c`.
+**Historical B02 implementation checkpoint; delivered above.** Source baseline: `24cc4aa2971b05ff8b53f76d157145da4134ed5c`.
 [PR2281](https://github.com/FOUNDUPS/Foundups-Agent/pull/2281) delivered B01/A10
 wallet-policy isolation. All 24 final PR checks and 22 resulting-main checks
 passed; the primary PC checkout was fast-forwarded with its existing untracked
@@ -10,9 +73,9 @@ work preserved. This supersedes the older active-sprint, baseline and
 publication-pending status below; sealed observations retain their source scope.
 Neither publication nor simulation qualifies a live monetary service.
 
-**Active layer: B02/A07, class B, WSP15 18/P0 (4/5/5/4).** The existing pool
-credits participants, updates staker hurdles, accumulates the fund and pays drip
-before Mesa asks the epoch ledger to deduplicate evidence. A ledger retry check
+**B02/A07, class B, WSP15 18/P0 (4/5/5/4).** At the original 24cc baseline,
+the pool credited participants, updated staker hurdles, accumulated the fund
+and paid drip before Mesa asked the epoch ledger to deduplicate evidence. A ledger retry check
 alone therefore cannot prevent a second economic payment. Reuse these owners,
 prepare their complete effects before publication, and retain one detached
 receipt per distributor/epoch in the process lifetime. Existing valid pool
@@ -73,8 +136,8 @@ update; the new boundary accepts 1,478 and rejects 1,479. Eight existing Python
 generator/index cases and three Node consumer entrypoints pass. The 330KiB
 manifest, 2MiB/source and 32MiB total caps are unchanged; LF/CRLF manifest sizes
 are 334,222/337,251 bytes. The canonical test registry remains 1,794 owners.
-Hosted source publication and resulting-main verification remain pending at
-this documentation checkpoint. Live economic deployment remains **BLOCKED**.
+Publication was pending at this checkpoint; the dated delivery addendum above
+records its completion. Live economic deployment remains **BLOCKED**.
 
 ### AI-exposed financial attack surfaces
 
@@ -118,7 +181,7 @@ cannot repair poisoned construction, accounting, authorization or recovery.
 | A01/A02: local policy exists; funded aggregate reservations do not | B05/B09: pending and ambiguous exposure across agent, controller, FoundUp and system windows; coordinated small calls stay within funded limits. |
 | A03/A04: unsigned Algorand field restrictions exist; monetary signer missing | B08: separate custody/control domains, independently decoded effects, one-use approvals, denied rekey/close/delegation and independently observed finality. |
 | A05/A06: local proof/task and type checks exist; independent facts and release authority missing | B03/B06: authentic work/maturity evidence, unique consumption and combined release/supply bounds; names and literal `True` are insufficient. |
-| A07: ledger evidence deduplicates after pool effects | B02: full local effect/retry/concurrency qualification; B05/B08: durable funded admission and chain-level no-effect/replay tests. |
+| A07: delivered B02 qualifies process-local pool/ledger/Mesa retries; restart, funded and chain replay remain missing | B05/B08: durable funded admission and chain-level no-effect/replay tests; no whole outer-cycle guarantee. |
 | A08: matching simulated; self-trade gap remains | B11: funded two-sided reservations, related-controller/Sybil controls, exact settlement/fees and cancellation. |
 | A09: external venue/bridge unqualified | Keep disabled; require separate asset, venue and bridge admission plus independent chain restrictions. |
 | A10: B01 detaches caller policy; trusted-host replacement remains | B08/B09: authenticated versioned policy and approvals outside candidate-controlled code; stale or self-granted authority rejected. |

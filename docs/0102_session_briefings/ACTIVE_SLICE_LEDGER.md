@@ -1,3 +1,30 @@
+## Reserve quote prerequisite and B02 delivery — 2026-11-01
+
+PR2285 delivered B02/A07 at `fb58cd530d7b6887ce6218af282cb6ee7382ded5` with all
+23 PR and 21 resulting-main checks passing. Primary-PC source/preservation and
+exact-fb58 semantic Holo qualification passed separately; lexical bundles remain
+UNKNOWN/gaptrue. This closes the older B02 publication-pending checkpoint below.
+
+Current lane `agent/foundups-reserve-quote-20261101`, docs-only successor base
+`4c96d6b17429226248c3a82de5544262e773c41e`: root owns architecture/publication,
+blockchain_architecture owns the bounded reserve observer, simulator_economics
+independently verifies source and frozen oracles. Class A, 16/P0 (3/4/5/4),
+existing owner only; no default consumer, unit decision or changed economics.
+Frozen historical baseline: 7 original passes/89 desired failures. Reviewed source
+passes 113 independent cases including 17 held-outs. Promoted 96 and broader
+1,019 cases pass with the same three SSE HTTP deselections and no guard denials;
+counts overlap. Package checks pass eight Python cases and three Node entrypoints,
+retaining all 1,478 runtime paths and byte caps. Publication and new-source PC/Holo
+gates remain pending.
+Controlled fb58 reference (same simulator/FAM Python sources as 4c96) and two candidate
+traces match exactly under the explicit process/hash-seed profile, not seed alone.
+
+The [current contract and roadmap](../architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#reserve-quote-observation-and-b02-delivery--2026-11-01)
+keep observation context/digest non-authoritative and require host serialization.
+B03 class C/D units/issuance, funding, custody and chain activation remain open.
+
+**Historical B02 working checkpoint, superseded by delivery above:**
+
 ## Blockchain security-first simulator lane — 2026-11-01
 
 PR2279 is delivered at 9925eb65e08b3602ad11ee32537bebf0d94bca32 after 41 PR and 22
