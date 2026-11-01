@@ -1,3 +1,16 @@
+## Combined reserve quote runtime metadata review — 2026-11-01
+
+The pinned Gitleaks 8.30.1 committed-tree scan at bb1cd6315 reports 39 exact
+manifest findings (37 generic-api-key, two discord-api-token). Independent and
+architect reviews reconstruct every complete source path/hash pair from Git.
+Each line and five-line context matches the prior reviewed public metadata in
+main b3e0465c2. Reconciliation changes the containing manifest digest only.
+Append these 39 current whole-file/path/rule/line bindings, retaining the 3,236
+combined historical records (3,275 total). No scanner rule, exclusion, scope or
+fingerprint algorithm changes. Independent proof SHA256:
+`519b28a416c3e3fa57d7126659af7cdc13bf04232a187077f42ac67cdbc514f1`.
+Fresh committed-tree/introduced-history and hosted checks remain required.
+
 ## Reserve quote runtime metadata review — 2026-11-01
 
 The pinned Gitleaks 8.30.1 committed-tree scan at cc67f4634 reports 39 exact
