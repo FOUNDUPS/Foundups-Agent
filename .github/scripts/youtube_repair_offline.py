@@ -17,7 +17,7 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[2]
 SCHEDULER_TESTS = 'modules/platform_integration/youtube_shorts_scheduler/tests/'
 SUITES = {
-    'routing': (81, '498fde1a15a85f1b0528f24f8363a7ecb20122b8201f528229ffe6c45d9ed84d', (
+    'routing': (88, '05ac81da16c7f890eaf338321563e69b98bdc27cce6833a90c37feb4ad9f0e53', (
         'modules/ai_intelligence/ai_gateway/tests/test_youtube_model_routing.py',
         'modules/ai_intelligence/ai_gateway/tests/test_youtube_model_composition.py',
         'modules/communication/video_comments/tests/test_llm_integration.py',

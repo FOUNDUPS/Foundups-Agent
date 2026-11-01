@@ -22,6 +22,11 @@ commenting session; a restart is not a durable global quality suspension.
 
 With no YouTube binding configuration, the Gateway resolves the existing local
 `general` role. An explicit `LM_STUDIO_MODEL` must match that role. The existing
+`LM_STUDIO_NATIVE_MODEL_KEY` selects its exact native inventory identity when
+the server key differs from the display alias. It must pass the same language-role
+guard; signed dynamic routes retain their exact bound model and ignore this
+incumbent override. The actual native key is retained in the route receipt.
+The existing
 LM Studio backend verifies exact native residency/instance identity before and
 after inference. It does not start a server, load/download a model, evict another
 model, choose any arbitrary loaded model, or use a tiny triage/vision/coder model.

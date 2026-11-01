@@ -88,6 +88,13 @@ def _incumbent_model():
     selected = model.lower().replace('_', '-')
     if not _general_language_model(model) or not (selected == role_name or selected.endswith('/' + role_name)):
         raise ValueError('youtube_general_role_mismatch')
+    # The native inventory key can differ from the OpenAI-compatible display ID.
+    # Reuse the existing operator-selected General key; never apply it to signed routes.
+    native_key = os.getenv('LM_STUDIO_NATIVE_MODEL_KEY')
+    if native_key:
+        if not _general_language_model(native_key):
+            raise ValueError('youtube_native_general_role_mismatch')
+        return native_key
     return model
 
 

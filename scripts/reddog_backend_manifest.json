@@ -1735,7 +1735,7 @@
     "modules/ai_intelligence/ai_gateway/src/model_selection_artifact_supply.py": "b69763f524feae247052081b95b66d4eed7f8a9f6a6cb3ac3c911cc3f9a11a6e",
     "modules/ai_intelligence/ai_gateway/src/model_selection_artifact_supply_bootstrap.py": "eb17ef6ec6f98730beb04c3640c451688f6320acd7235bf25a08ec71e1811580",
     "modules/ai_intelligence/ai_gateway/src/model_signed_evidence.py": "8c344e89897d9a38cc2093f591ed9251786b8b254c6003d30024b1d38aef8fb6",
-    "modules/ai_intelligence/ai_gateway/src/youtube_model_routing.py": "11bb3a24e8e6987e5ae79088d60b7f069678d58a7521adcd755bd506e3c7646a",
+    "modules/ai_intelligence/ai_gateway/src/youtube_model_routing.py": "2843f533f04529b1dff6981418a11baa65508bea5805baf09aafeb8271240274",
     "modules/ai_intelligence/ai_gateway/tests/test_model_promotion_gate.py": "72e5e3ef28d2f8633ff2fb705922ccb523e86f1fc236e3a1eec8726383b8bcc5",
     "modules/ai_intelligence/ai_overseer/skillz/antifafm_dj/__init__.py": "beff2da8a7822733756796984671c731d8b7deb910721fcc55fdd7fa2f1f84a2",
     "modules/ai_intelligence/ai_overseer/skillz/antifafm_dj/executor.py": "1ed6ee9dd8a179d58a539189ff953ee5cf7353830d71f08e126082c2fae9e193",

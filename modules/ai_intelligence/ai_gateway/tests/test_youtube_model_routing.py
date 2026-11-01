@@ -169,12 +169,13 @@ def test_stage_override_and_surface_are_passed_to_existing_verifier(routing, mon
     assert all(item["environ"]["REDDOG_MODEL_RUNTIME_AVAILABLE_PROVIDERS"] == "lm_studio_local,openrouter" for item in seen)
 
 
-def _real_binding(routing, monkeypatch, *, surface="youtube_comments", family="youtube_reply"):
+def _real_binding(routing, monkeypatch, *, surface="youtube_comments", family="youtube_reply",
+                  provider="openrouter", model="qwen/qwen3:free"):
     from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
         model_runtime_binding_test_verifier, model_selection_and_runtime_binding_receipts)
     from modules.communication.moltbot_bridge.src import reddog_model_runtime_binding_query as query
     selection, binding = model_selection_and_runtime_binding_receipts(
-        runtime_surface=surface, task_family=family, provider="openrouter", model_id="qwen/qwen3:free")
+        runtime_surface=surface, task_family=family, provider=provider, model_id=model)
     runtime = routing.tmp / "runtime"
     runtime.mkdir()
     binding_path, selection_path = runtime / "binding.json", runtime / "selection.json"
@@ -355,3 +356,62 @@ def test_nonempty_rejected_writer_output_keeps_quality_fault_receipt(routing, mo
     assert len(calls) == 1
     assert result.success is False and result.reason == "invalid_reply_text"
     assert result.response == "" and marker not in caplog.text and marker not in repr(result)
+
+
+@pytest.mark.parametrize("stage", ["assess", "write", "review"])
+def test_prepared_general_profile_resolves_exact_native_key(routing, monkeypatch, stage):
+    from modules.infrastructure.shared_utilities import local_model_selection as selection
+    from modules.infrastructure.shared_utilities import local_llm_backends as backends
+    from modules.infrastructure.shared_utilities.lm_studio_native_transport import (
+        _model_state_from_inventory, LMStudioResidencyState)
+    filename, display, native = "google_gemma-4-E2B-it-Q4_K_M.gguf", "google-gemma-4-e2b-it", "gemma4-e2b"
+    roles, prepared, chats = [], [], []
+    monkeypatch.setattr(selection, "resolve_model_selection", lambda role:
+        roles.append(role) or SimpleNamespace(exists=True, path=Path(filename)))
+    monkeypatch.setenv("LM_STUDIO_MODEL", display)
+    monkeypatch.setenv("LM_STUDIO_NATIVE_MODEL_KEY", native)
+    inventory = {"models": [{"key": native, "type": "llm", "loaded_instances": [
+        {"id": "synthetic-general-instance", "config": {}}]}]}
+    assert _model_state_from_inventory(display, inventory).state is LMStudioResidencyState.NOT_INSTALLED
+    def backend(**kwargs):
+        prepared.append(kwargs["model_id"])
+        return SimpleNamespace(initialize=lambda:
+            _model_state_from_inventory(kwargs["model_id"], inventory).state is LMStudioResidencyState.RESIDENT,
+            create_chat_completion=lambda **request: chats.append(request) or {
+                "choices": [{"message": {"content": "The film details are at HornetHunter.com."}}]})
+    monkeypatch.setattr(backends, "LMStudioBackend", backend)
+    result = _call(routing, stage=stage)
+    assert result.success is True and result.provider == "lm_studio_local"
+    assert result.model == native and result.route_id == "configured_general_incumbent"
+    assert result.response == "The film details are at HornetHunter.com."
+    assert roles == ["general"] and prepared == [native] and len(chats) == 1
+    assert chats[0]["messages"][1]["content"] == "Where can I watch the film?"
+
+
+@pytest.mark.parametrize("native", ["UI-TARS-1.5-7B", "qwen-coder-7b", "gemma-3-270m-it"])
+def test_incumbent_native_override_cannot_admit_an_incompatible_model(routing, monkeypatch, native):
+    from modules.infrastructure.shared_utilities import local_model_selection as selection
+    monkeypatch.setattr(selection, "resolve_model_selection", lambda role:
+        SimpleNamespace(exists=True, path=Path("google_gemma-4-E2B-it-Q4_K_M.gguf")))
+    monkeypatch.setenv("LM_STUDIO_MODEL", "google-gemma-4-e2b-it")
+    monkeypatch.setenv("LM_STUDIO_NATIVE_MODEL_KEY", native)
+    calls = []
+    monkeypatch.setattr(routing.module, "_local_call", _forbid(calls))
+    monkeypatch.setattr(routing.module, "_openrouter_call", _forbid(calls))
+    result = _call(routing)
+    assert result.success is False and result.response == "" and calls == []
+
+
+def test_signed_local_binding_ignores_incumbent_native_override(routing, monkeypatch):
+    bound = "qwen3.5-4b"
+    verified = _real_binding(routing, monkeypatch, provider="lm_studio_local", model=bound)
+    monkeypatch.setenv("LM_STUDIO_MODEL", "google-gemma-4-e2b-it")
+    monkeypatch.setenv("LM_STUDIO_NATIVE_MODEL_KEY", "UI-TARS-1.5-7B")
+    fallbacks, calls = [], []
+    monkeypatch.setattr(routing.module, "_incumbent_model", _forbid(fallbacks))
+    monkeypatch.setattr(routing.module, "_local_call", lambda model, payload, *a, **kw:
+        calls.append(model) or "The film details are at HornetHunter.com.")
+    result = _call(routing)
+    assert result.success is True and result.provider == "lm_studio_local"
+    assert result.model == bound and calls == [bound] and verified and fallbacks == []
+    assert result.route_id != "configured_general_incumbent"

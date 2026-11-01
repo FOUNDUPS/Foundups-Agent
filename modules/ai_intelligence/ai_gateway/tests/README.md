@@ -1,5 +1,14 @@
 # AI Gateway Tests
 
+## Native incumbent identity controls — 2026-11-02
+
+Seven additional held-out cases in `test_youtube_model_routing.py` distinguish
+the prepared General display alias from its exact native inventory key across
+assessment, writer and review; reject visual/coder/270m native overrides; and
+keep a signed local binding independent of the incumbent override. This makes
+50 routing plus 20 composition cases. Authored before the bounded production
+fix; no execution or installed-model qualification is claimed at this freeze.
+
 ## YouTube consumer routing contract — 2026-11-01
 
 The independent selection is 43 cases in `test_youtube_model_routing.py` and

@@ -1,3 +1,29 @@
+## Incumbent native-model manifest metadata — 2026-11-02
+
+The fresh Git-LF scan of package tree a6c6e001, source freeze 8eb67124 and main
+base a4e18704 reports 39 new whole-manifest checksum bindings. Independent
+review reconstructs each unchanged public source path/hash row, its actual Git
+source digest and exact prior approval. Append only those 39 reviewed bindings,
+preserving all 3,598 earlier records and every other field (3,637 total).
+The existing 1,485-member closure and all size/count bounds are unchanged.
+No scanner rule, exclusion, scope or fingerprint algorithm changes.
+Independent review receipt SHA256:
+`7aa583ddc973fde9a45f2126f74161a19ba2ad41a84d92569968ee6934b595b2`.
+Fresh final-tree and actual committed-history gates remain required.
+
+## YouTube Gateway documentation integration — 2026-11-01
+
+The fresh Git-LF scan of merged tree 4d7a7e16 against main a4e18704 reports one
+new binding for unchanged bridge ModLog prose at line 4010, formerly the exact
+approved line 3999. Independent review reconstructs the current and prior Git
+blobs, the existing approval and every current finding. Append only that one
+opaque fingerprint, retaining all 3,597 prior records and all other ledger
+fields (3,598 total). No runtime source, scanner rule, exclusion, scan scope or
+fingerprint algorithm changes.
+Independent review receipt SHA256:
+`9ef2029a58128f4ef9df00a003ec40da8a962c80da8e609dff931838f5095ce4`.
+Fresh final-tree and actual committed-history gates remain required.
+
 ## Shared YouTube model Gateway metadata review — 2026-11-01
 
 Pinned Gitleaks 8.30.1 reports 41 new exact fingerprints at staged tree 8ab7e4e8
@@ -12,6 +38,16 @@ Independent review receipt SHA256:
 `ef60b3ccb4a49c911ec45110da417f6b95a618391b99317a5635da8d00b02539`.
 Fresh final staged-tree, actual committed-history and hosted checks remain
 separate required evidence.
+
+## Native OpenClaw qualification ModLog rebinding — 2026-11-01
+
+Hosted Gitleaks8.30.1 found the previously reviewed historical-prose binding
+at bridge ModLog3999, shifted from3987 in main d65a7257. Coordinator re-review
+and deterministic immutable-blob reconstruction prove the complete old suffix
+and eleven-line context unchanged and the exact base fingerprint already approved.
+Append only the new file/path/rule/line binding; retain every prior record and
+all scanner rules. This is not an independent actor review. Hosted tree/history
+checks must pass on the final revision. Private proof accompanies the native trial.
 
 ## Pool-credit refusal runtime metadata review — 2026-11-01
 

@@ -1,5 +1,35 @@
 # AI Gateway TestModLog
 
+## 2026-11-02 — Preserve the prepared General model's native identity
+
+The prepared PC uses a display alias distinct from its native inventory key.
+The shared local incumbent now honors existing `LM_STUDIO_NATIVE_MODEL_KEY`,
+validates it as a general-language model and records that exact selected key.
+Signed dynamic routes continue using their exact admitted identity and ignore
+this incumbent-only override. No model/server load, provider fallback or new
+configuration owner is added.
+
+Seven independently authored controls reproduced six assertion failures and
+82 passes before the fix, with zero errors/skips or denied effects. After the
+bounded fix the complete routing/legacy selector passes 88 cases: 70 independent
+routing/composition cases and 18 migrated legacy adapter cases. The useful
+positive uses the actual pure native inventory parser with a synthetic entry;
+it does not prove installed residency or live model quality. The existing CI
+selector now pins all 88 exact case names. WSP11/22/50/62/77/84/97.
+
+
+## 2026-11-02 — Held-out native General key controls
+
+WSP00/11/22/50/77/84/97. Added seven controls before the incumbent-key repair:
+the prepared Gemma display/path/native-key pair must produce an exact native
+model receipt for all three stages; incompatible visual/coder/270m overrides
+must reach no transport; and the real signed-test verifier/query local route
+must retain its bound model despite an unrelated incumbent native override.
+The positive uses the actual pure native-inventory parser with synthetic
+residency, and the existing signed helper gains optional provider/model inputs.
+Existing test bodies are unchanged. No tests, service, model or provider calls
+were executed by the independent author; execution belongs to the guarded owner.
+
 ## 2026-11-01 — Current guarded model-routing qualification
 
 Fresh credential-free Windows runs: 63 independently authored routing/composition
