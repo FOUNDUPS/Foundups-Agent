@@ -1,5 +1,22 @@
 # INTERFACE - FoundUps Simulator
 
+## Hourly queue readiness — 2026-11-01
+
+`CircuitBreaker.process_queue()` retains its no-argument call and FIFO count rule:
+`max(1, int(current_queue_length * queue_release_per_hour))`. The first eligible
+nonempty call releases immediately; later dequeues need at least 3,600 monotonic
+seconds. Native slices are prepared before the final clock observation and
+queue/timer publication. Long gaps earn one batch, with no catch-up credits.
+Empty, EMERGENCY and early calls leave queue/timer unchanged; drain/refill retains
+the timer. Existing datetime cooldown, requested-at, outflow and rate policy stay.
+The private timer is excluded from constructor, repr and equality; `asdict` gains
+additive bookkeeping. A postmutation logging failure leaves the dequeue/timer
+committed: no successful return, lost-result recovery or retry permission follows.
+This candidate supports ordinary native dataclass/list state under serialized
+calls within one live instance. Hostile hooks, concurrent/direct state mutation,
+copy/recreation, restart durability, funded payment and authenticated recovery
+are excluded. It does not close all A12 or change the B03 C/D unit conflict.
+
 ## Opt-in simulator reserve quote observation — 2026-11-01
 
 `snapshot_simulator_quote(reserve: BTCReserve, *, context_id: str, tick: int)`

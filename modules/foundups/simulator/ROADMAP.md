@@ -1,5 +1,20 @@
 # ROADMAP - FoundUps Simulator
 
+## 2026-11-01 — B09 hourly readiness candidate
+
+- [x] Freeze 19 desired cases; actual RED is 12 pass / 7 fail. The original
+  baseline passes 35; focused candidate passes the unchanged combined 54.
+- [x] Independent five/source acceptance and promoted/broad 1,209 pass; original
+  oracles and 174 source snapshots remain stable, with three SSE HTTP deselections.
+- [x] Canonical generation/check and eight Python/three Node consumers pass.
+- [ ] Security, protected PR/resulting-main and PC preservation.
+
+The 14/P1 class-B slice preserves hourly FIFO/count math, not funding, recovery,
+concurrency or full A12. [Guard delivery](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#allocation-delivery-and-stored-chroma-security-hold--2026-11-01)
+is complete at 424e6863; persistent maintenance remains held. Older pending
+checkpoints below retain their dated source scope. B03 C/D and B05 stay blocked.
+No fresh 240-tick trace ran; older traces did not exercise positive queue release.
+
 ## 2026-11-01 — Native allocation numeric prerequisite
 
 - [x] PR2288 source published at d927; unchanged blockchain/runtime source reaches

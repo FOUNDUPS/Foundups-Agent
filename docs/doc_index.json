@@ -4,7 +4,7 @@
   "documents": [
     {
       "doc_type": "other",
-      "hash_sha256": "e98ffaa4b92873f63b98dbdee3ec97d9fb538d653d0152707cd2c7cb5e102867",
+      "hash_sha256": "8290352825cec492e97bbe482c8ec8213b367730bf8aca9eadb319c86e07bb07",
       "links": {
         "automation": [
           "doc_dae"
@@ -26,7 +26,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/0102_session_briefings/ACTIVE_SLICE_LEDGER.md",
-      "size_bytes": 80116,
+      "size_bytes": 80410,
       "status": "active",
       "wsp_refs": [
         "WSP 00",
@@ -2983,8 +2983,8 @@
         "WSP 29",
         "WSP 97"
       ],
-      "hash_sha256": "e367bd46c79982ce5fb8bc7ed94910985eb9786dac313363ad890b11022d2bb5",
-      "size_bytes": 73615,
+      "hash_sha256": "195e33d86f5a5d902529bea00dc73334593125d8fb309390cfd8402104259426",
+      "size_bytes": 75764,
       "status": "active",
       "links": {
         "entry_points": [

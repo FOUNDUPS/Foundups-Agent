@@ -1,5 +1,18 @@
 # FoundUps Simulator
 
+## Hourly queue readiness candidate — 2026-11-01
+
+B09's 14/P1 class-B candidate enforces elapsed hourly readiness in the existing
+breaker; first release, FIFO and minimum-one batch math stay unchanged. Focused
+54 (35 original plus 19 desired), five independent cases and broader 1,209 pass;
+source review finds no material issue within the frozen scope. The 19 are a
+subset of the broad run; five held-outs are outside it. Do not sum these scopes.
+Package eight Python/three Node pass; security/publication remain pending.
+This is native serialized-instance readiness, not payment, restart recovery
+or authenticated unfreeze.
+See the [contract](INTERFACE.md#hourly-queue-readiness--2026-11-01) and
+[current threat map](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#hourly-queue-readiness-candidate--2026-11-01).
+
 ## Local security and opt-in reserve observations — 2026-11-01
 
 B02 source is delivered through PR2285; exact pool retries do not repeat local effects.

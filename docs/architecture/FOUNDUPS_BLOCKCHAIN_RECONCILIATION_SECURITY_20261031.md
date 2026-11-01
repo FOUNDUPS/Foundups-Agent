@@ -21,15 +21,42 @@ client-side exposure independent of server language; repository source review
 confirms local config/schema constructor paths. No local compromise, blockchain
 hack or AI participation is established.
 
-The class-B [existing-owner guard](../../holo_index/INTERFACE.md#stored-chroma-settings-admission--2026-11-01) has bounded local source/pure, safe
-scratch-native and package acceptance; [TestModLog](../../holo_index/tests/TestModLog.md#stored-settings-local-qualification--2026-11-01) owns outcomes, failures
-and explicit sparse-sentinel oracle corrections. It constrains these Holo callers,
-not every installed SDK consumer or upstream vulnerability. Pending at this local
-prepublication checkpoint: protected publication, new-source PC/Holo and explicit
-maintenance release. The controller remains held, global runtime closure unproved
-and upstream advisories open. The [existing AI threat map](#ai-exposed-financial-attack-surfaces)
-stays canonical; B03 fee research, class-D units, funded accounting, independent
-issuer/signer and chain activation remain unresolved or blocked.
+Dated delivery correction: [PR2291](https://github.com/FOUNDUPS/Foundups-Agent/pull/2291)
+merged at `424e6863b19c9353a296e0cc837e3f30eaa428fd`, exact reviewed tree,
+with 23 PR/21 main checks successful. Independent readback verifies 28 delivered
+C/O files, 17,551 preserved PC pathnames and 10,051 evidence-file copies; these
+are separate scopes, not a content audit of all unrelated PC paths. PC record:
+`outputs/blockchain-holo-admission-20261101-db203f83/EXECUTION_REPORT.md`, SHA256
+`cdcf19ff9721f80f8504dec6c0523571d2cb4e5d7147410553cf207106ac8246`.
+The [guard contract](../../holo_index/INTERFACE.md#stored-chroma-settings-admission--2026-11-01) and [test history](../../holo_index/tests/TestModLog.md#stored-settings-local-qualification--2026-11-01)
+retain failed native runs and explicit sparse/fixture corrections. These selected
+callers do not fix every SDK consumer or upstream advisory. Publication/PC pending
+notes below are historical; persistent maintenance remains HOLD, with exact
+runtime/current-store qualification unproved. No fresh semantic CURRENT claim follows.
+
+## Hourly queue readiness candidate — 2026-11-01
+
+The existing breaker owns this 14/P1 class-B B09 slice: first nonempty release,
+FIFO and minimum-one/count math stay; later dequeues require 3,600 monotonic seconds.
+Native slices precede final time observation and queue/timer publication. No catch-up,
+empty/emergency timer advance or drain/refill reset is allowed. Private timer state
+is excluded from constructor/repr/equality but appears additively in `asdict`.
+Actual baseline 35 passes; frozen desired RED is 12 pass/7 fail. Focused candidate
+passes the combined 54; independent five and source review accept the frozen
+scope. Code/method 324/28 lines fit 330/35. Promoted owner 240 lines preserves
+old prefix/oracles; broader 1,209 passes with the same three SSE HTTP deselections,
+zero failures/errors/skips/guards and 174 stable snapshots. New 19 are within that
+run, five held-outs outside it; do not add overlapping counts. No fresh 240-tick
+trace ran, and older traces did not exercise positive queue release.
+Package eight Python/three Node pass with 1,481 members, only the breaker hash
+changed, unchanged caps and 35 bytes CRLF headroom. Registry was not run locally;
+no instrumented zero-effects or native-runtime claim follows. Security/publication remain pending.
+Only native serialized-instance readiness is claimed. Logging can fail after a
+committed dequeue; successful return, lost-result recovery, concurrency, restart,
+funded payment and authenticated unfreeze are not supplied. Historical A12 failure
+below stays evidence; this partial candidate does not close full A12 or broad B09.
+B03 C/D units/thresholds/liabilities/issuance, B05 funding and separate custody
+remain unresolved or blocked; no TestNet/production activation follows.
 
 ## Allocation numeric preflight and delivered-source checkpoint — 2026-11-01
 
@@ -333,7 +360,7 @@ cannot repair poisoned construction, accounting, authorization or recovery.
 | A09: external venue/bridge unqualified | Keep disabled; require separate asset, venue and bridge admission plus independent chain restrictions. |
 | A10: B01 detaches caller policy; trusted-host replacement remains | B08/B09: authenticated versioned policy and approvals outside candidate-controlled code; stale or self-granted authority rejected. |
 | A11: numeric checks do not authenticate reserve backing | B05/B09: authentic fresh backing and liabilities; fabricated plausible inputs cannot increase capacity. |
-| A12: breaker concepts exist; authenticated recovery and repeated queue processing unresolved | B09: clock-bound queue release, safe reconciliation and independent freeze/unfreeze authority. |
+| A12: hourly readiness has focused 54, independent five/source, broader and package acceptance; security/delivery pending | B09: retain native-instance limits; authenticated recovery, safe reconciliation and independent freeze/unfreeze authority remain absent. |
 
 These are linked threat requirements, not passed attack tests. The current
 distribution layer cannot establish restart recovery, cross-process exclusion,
@@ -802,7 +829,7 @@ they are not substituted for this required scenario matrix.
 | A09 external swap/bridge bypass | BLOCKED: no real external venue/bridge path | No bridge enabled; chain restrictions must be proven before any external listing |
 | A10 governance manipulation | External policy alias probe; current source review | Trusted issuer, immutable versioned policy, timelock and independent governance controls absent |
 | A11 reserve oracle abuse | Invalid numeric breaker inputs fixed; external plausible false-credit probe | Numeric validity is not authentic/fresh BTC backing or proof of liabilities |
-| A12 emergency recovery | Cooldown/severity/empty-queue tests, external queue timing probe | Emergency with queued exits remains held; authenticated cancellation/reconciliation/unfreeze is absent |
+| A12 emergency recovery | Historical timing failure retained; hourly-readiness candidate passes focused 54, independent five, broader and package; security/delivery pending | Emergency with queued exits stays held; no funded/concurrent/restart or authenticated cancellation/reconciliation/unfreeze guarantee |
 
 Contract audit must additionally cover reentrancy/inner-call behavior, group/order
 manipulation, fee changes, stale prices, replay domains/nonces, duplicate settlement,

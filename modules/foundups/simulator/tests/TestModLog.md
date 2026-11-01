@@ -1,3 +1,16 @@
+## 2026-11-01 — B09 desired cadence and focused result
+
+Freeze 13 functions / 19 cases before implementation; baseline 35 passes,
+desired RED 12 pass / 7 fail, no errors/skips/guard denials. Focused candidate
+passes the same 54 identities with stable source snapshots and zero guard denials.
+Original seven test ASTs and the 90-line raw prefix are retained in the actual
+240-line promoted owner. Broader 1,209 passes with the same three SSE HTTP
+deselections, zero failures/errors/skips/guards and 174 stable source snapshots.
+Tests check ordered object identity, not count alone. Logging failure retains
+committed cadence without promising successful return. Independent five pass;
+source review finds no material issue. The new 19 are within 1,209, five held-outs
+outside it; counts overlap. Package eight Python/three Node pass; security/publication remain pending.
+
 ## 2026-11-01 — Allocation numeric preflight: RED and executed GREEN
 
 Root-verified original selection passes 311. Separately frozen four-entrypoint

@@ -1,5 +1,19 @@
 # FoundUps Simulator Test Suite
 
+## Hourly queue cadence acceptance — 2026-11-01
+
+The existing breaker owner retains seven original test ASTs / 35 cases. Nineteen
+frozen desired cases cover 3,599.999/3,600 boundaries, rollback, long gaps, FIFO
+identity conservation, minimum-one math, empty/refill, emergency holds, logging
+failure and constructor/equality compatibility. Patch stdlib `time.monotonic`;
+no private timer name or clock-read count is an oracle. Actual RED is 12 pass /
+7 fail; focused 54 and independent five pass, with source acceptance. The promoted
+240-line owner keeps its old raw prefix/oracles; broader 1,209 passes, same three
+SSE HTTP deselections, zero failures/errors/skips/guards and 174 stable snapshots.
+New 19 are within the broad run, five outside it; do not sum scopes. Package eight
+Python/three Node pass; security/publication remain pending. No fresh 240-tick trace
+ran; prior traces did not exercise positive queue releases or prove payment/recovery.
+
 ## Native allocation admission controls — 2026-11-01
 
 Execution and independent scoped source review are accepted:
