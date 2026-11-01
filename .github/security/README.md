@@ -1,3 +1,15 @@
+## Pool-credit refusal runtime metadata review — 2026-11-01
+
+Pinned Gitleaks 8.30.1 reports 39 whole-manifest fingerprint renewals at
+source commit 40d2bbfa. Root and independent review reconstruct every unchanged
+public source path/hash pair, eleven-line context and exact prior approval from
+main 1787ea8a. Append only these 37 generic-api-key and two discord-api-token
+metadata bindings, preserving all 3,516 existing records (3,555 total).
+No scanner rule, exclusion, scope or fingerprint algorithm changes.
+Independent proof SHA256:
+`7ef7c85a607f5031335870a24020bcb8051f08e831731c440a40289be1cf54ab`.
+Fresh final committed-tree/history and hosted checks remain required.
+
 ## Combined reply-quality and simulator runtime metadata — 2026-11-01
 
 Pinned Gitleaks 8.30.1 reports 39 new whole-manifest fingerprint renewals for
