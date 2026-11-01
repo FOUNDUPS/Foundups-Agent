@@ -1,3 +1,59 @@
+## 2026-11-01 — Complete local epoch effects and replay-safe Mesa tail
+
+WSP15 18/P0 class B; WSP22/26/29/48/50/62/84/97. Reuse PoolDistributor and
+EpochLedger with pure preparation, fixed pool-to-ledger lock order and detached
+per-epoch decisions. Exact retries do not credit balances/fund/drip/hurdles again;
+conflicts reject. Preserve existing formulas and shared-position sequencing.
+Extract only private Mesa tail/observer orchestration: Mesa shrinks2061→2020;
+helper89, pool968 and ledger358 fit their frozen ceilings. Keep pending request
+identity before another decay, finalize counters before one observer attempt.
+Ordinary postcommit observer/log failures cannot falsely report an economic abort.
+
+Fresh baseline154 passes. Frozen desired40 first2 pass/38 fail; final independent
+57 pass including16 held-outs and a separately reproduced/repaired None-return
+regression. Promoted41 controls extend three existing owners:192 pass, every
+prior test AST preserved. Initial seeded-process traces differ and remain smoke
+evidence; controlled fresh-process/hash-seed baseline and two candidates match
+byte-for-byte. Broader simulator930 passes with the same3 SSEHTTP deselections,
+zero failures/errors/skips/guard denials. Full evidence is in the current audit.
+Canonical runtime closure1477→1478 adds only the private helper;8 generator/index
+cases and3 Node entrypoints pass, old member identities retained and byte caps
+unchanged. The canonical test registry remains1794; no new test owner is needed.
+No durable recovery, whole outer-cycle transaction, funded budget, integer chain
+unit, signing or activation claim. No economic percentage or cap decision changed.
+
+## 2026-11-01 — Detached, validated agent-wallet policy
+
+WSP15 17/P0, class B; WSP22/26/48/50/84/97. Frozen 76-case desired policy
+suite reproduced 70 failures/6 passes before repair; 235 original regressions
+passed. Candidate now passes all311 without changing prior tests or economic
+formulas. Snapshot exact built-in policy values before allocation effects and
+expose a read-only public view; preserve trusted host replacement and empty-policy
+semantics. No new runtime owner or custody authority. Independently frozen tests
+and full source/publication verification are tracked in the current audit.
+
+## Simulator-first publication alignment — 2026-10-31
+
+Link the single WSP26 change contract and preserve historical source evidence.
+The source matrix now marks incompatible projection and genesis units as class D,
+CONFLICTING and activation BLOCKED. Extend the existing documentation test to
+check actual genesis/matrix consistency and governing mirrors; the frozen new
+assertion first fails on the old matrix. No economic constants or runtime change.
+WSP10/15/22/26/50/83/97; current qualification lives in the reconciliation report.
+
+## Local CABR/breaker security and parity audit — 2026-10-31
+
+WSP15 14/P1; WSP22/26/27/29/48/50/81/84/97/100. Local-only scope at main4050.
+Added strict CABR input admission and breaker severity/cooldown guards within
+existing owners. Preserved valid arithmetic, clamps, thresholds and fee policy.
+Test-first 79 cases: 12 pass/67 fail before repair; connected repaired selection
+414 passes, independent6 passes. Original3 CABR test ASTs unchanged.
+Separate external7 attack probes: 1 pass/6 desired-security failures; none hidden.
+Documented pending funding, replay side effects, self-trade, policy alias, oracle
+and queue timing gaps. No chain signing, runtime activation or economic policy
+rewrite. Initial harness/setup failures and exact evidence remain in the portable
+reconciliation receipt; no production/PQ/compliance assurance follows.
+
 ## FoundUps selected numeric source closure — 2026-10-25
 
 Pre-edit WSP15 allocation16/P0 in the numeric plan permits exactly one required

@@ -46,6 +46,7 @@ class ContentOrchestrator:
                 'hashtag_prefix': '#'
             }
         }
+
         
     def format_for_platform(self, content: str, platform: str, options: Dict[str, Any] = None) -> str:
         """
@@ -307,3 +308,10 @@ class ContentOrchestrator:
                 suggestions.append("LinkedIn posts benefit from relevant industry hashtags.")
                 
         return suggestions
+
+
+def prepare_campaign(brief: Dict[str, Any]) -> Dict[str, Any]:
+    """Prepare source-backed drafts/calendar; never schedule or publish."""
+    from .campaign_planner import prepare_content_campaign
+
+    return prepare_content_campaign(brief, ContentOrchestrator({}).platform_limits)

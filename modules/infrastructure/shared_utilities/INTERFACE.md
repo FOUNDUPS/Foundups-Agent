@@ -1,5 +1,15 @@
 # shared_utilities Interface Specification
 
+### `lm_studio_node_lock_identity(base_url: str) -> str`
+
+Additive export from `lm_studio_model_lifecycle.py` for existing explicit server
+startup. Returns the existing `lm-studio-node:<digest>` identity computed from
+the canonical `loopback:<port>` node identity with the same JSON/SHA256 protocol.
+Loopback aliases share the same lock. It does not acquire a lock or grant model,
+server, or dispatch authority. Existing managed transactions use this helper;
+lock scope digests, journals, normalization, leases and cleanup remain unchanged.
+
+
 **WSP 11 Compliance:** Complete
 **Last Updated:** 2026-10-11
 **Version:** 0.5.1

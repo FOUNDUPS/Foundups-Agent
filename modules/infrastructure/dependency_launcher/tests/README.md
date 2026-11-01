@@ -1,5 +1,34 @@
 # Dependency Launcher Tests
 
+## Native LM Studio server startup — local offline layer
+
+`test_llmster_startup_fallback.py` has49 parameter-expanded controls. It mocks
+all process, CLI and native service observations, verifies exact selected native
+residency separately from server reachability, checks failed/unknown/racing
+startup states and explicit bind, refuses cold GUI spawning without any
+Popen/server command, and preserves General/vision role boundaries. Existing
+GUI startup still reaches the explicit CLI loopback bind.
+The actual YouTube Phase-2 AST node executes in isolation; the full DAE/main.py
+is not imported or started. A competing-caller test uses a private fake lock;
+three controls bind the actual borrow-only transaction to the prior physical
+node-lock and journal-digest protocol. This does not prove exclusion against
+external GUI actions that do not share the lock.
+
+Local actual-source validation selected only this file plus existing
+`shared_utilities/tests/test_local_model_selection.py`,
+`test_lm_studio_dependency_boundary.py`, and `test_lm_studio_model_lifecycle.py`:
+94 passed, zero failures/skips. Plugin autoload/bytecode/cache and dotenv loading
+were disabled. A subprocess receives a fixed credential-free test environment,
+which is also cleared/replaced before source imports. Temporary storage stays
+off-repo; real subprocess/HTTP entrypoints are denied with constant messages,
+and lifecycle OS locks use a private test namespace. Assertions avoid serializing
+mock call arguments.49 earlier
+draft cases and21 earlier baseline cases overlap; do not add those totals.
+No live server start, model load/unload/download/inference, browser, scheduler or
+main.py qualification is claimed. Independent review remains separate.
+
+
+
 The suite covers browser dependency recovery and the read-only runtime
 compatibility advisory.
 

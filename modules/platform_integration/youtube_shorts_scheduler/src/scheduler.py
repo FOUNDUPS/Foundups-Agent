@@ -278,6 +278,8 @@ class YouTubeShortsScheduler:
         if type(max_videos) is not int or max_videos < 0:
             raise ValueError('max_videos must be a nonnegative integer')
         original_tracker = self.tracker
+        if not self.dry_run:
+            self.dom.begin_policy_cycle()
         if self.dry_run:
             self.tracker = copy.deepcopy(original_tracker)
             self.tracker.persist = False
@@ -426,12 +428,17 @@ class YouTubeShortsScheduler:
                     auto_heal = False
                 audit_report = auditor.run_audit(auto_heal=auto_heal)
                 results["audit"] = {
-                    "healthy": audit_report.get("healthy", False),
+                    "status": audit_report.get("status", "failed"),
+                    "healthy": audit_report.get("healthy"),
+                    "total_scheduled": audit_report.get("total_scheduled"),
+                    "observed_scheduled_count": audit_report.get("observed_scheduled_count", 0),
                     "false_positives": len(audit_report.get("false_positives", [])),
                     "time_collisions": len(audit_report.get("time_collisions", [])),
                     "healed": len(audit_report.get("healed", [])),
                 }
-                if not audit_report.get("healthy"):
+                if audit_report.get("status") != "complete":
+                    logger.warning("[SCHEDULER] Post-cycle audit incomplete; total and calendar health unknown")
+                elif audit_report.get("healthy") is False:
                     logger.warning(
                         f"[SCHEDULER] Post-cycle audit found issues: "
                         f"{len(audit_report.get('false_positives', []))} false positives, "
@@ -673,6 +680,14 @@ class YouTubeShortsScheduler:
 
                     video_id = video.get("video_id")
                     original_title = video.get("title", "")
+                    if not self.dry_run:
+                        from .video_policy import scheduling_policy, VideoPolicyBlocked
+                        try:
+                            scheduling_policy(self.channel_id, video_id,
+                                              getattr(self.dom, "_policy_cycle_attempts", 0))
+                        except VideoPolicyBlocked:
+                            results["skipped"].append({"video_id": video_id, "reason": "operator_policy_blocked"})
+                            return True
 
                     # RESUME CAPABILITY: Skip already-scheduled videos
                     if video_id and self.tracker.is_video_scheduled(video_id):
@@ -824,6 +839,8 @@ class YouTubeShortsScheduler:
                             continue
 
                         # Update metadata if requested
+                        self.dom.begin_policy_edit(self.channel_id, video_id, allow_metadata=update_metadata)
+                        self.dom._policy_timezone = self.channel_tz
                         if update_metadata:
                             metadata_updated = await self._update_video_metadata(
                                 video_id=video_id,
@@ -1031,27 +1048,18 @@ class YouTubeShortsScheduler:
             # Quick timeout for sync navigation - don't block main scheduling
             logger.info("[SCHEDULER] Syncing with YouTube schedule (experimental)...")
 
-            # Navigate to scheduled filter (with fallback for robustness)
-            if not self.dom.navigate_to_shorts_with_fallback(self.channel_id, "SCHEDULED"):
+            from .content_page_scheduler import ContentPageScheduler
+            from .schedule_inventory import qualified_inventory
+
+            if not ContentPageScheduler(self.driver, self.dom).navigate_to_scheduled(self.channel_key):
                 logger.debug("[SCHEDULER] SCHEDULED filter not available, using local tracker")
                 return
-            await asyncio.sleep(2)
-
-            # Get all scheduled videos (paginate if needed)
-            all_scheduled = []
-            while True:
-                scheduled = self.dom.get_scheduled_videos()
-                all_scheduled.extend(scheduled)
-
-                if self.dom.has_next_page():
-                    self.dom.click_next_page()
-                    await asyncio.sleep(1)
-                else:
-                    break
-
-            # Sync to tracker
-            self.tracker.sync_from_youtube(all_scheduled)
-            logger.info(f"[SCHEDULER] Synced {len(all_scheduled)} scheduled videos")
+            inventory = self.dom.read_scheduled_inventory(self.channel_id)
+            if not qualified_inventory(inventory, self.channel_id):
+                logger.warning("[SCHEDULER] Scheduled inventory incomplete; tracker sync refused")
+                return
+            if self.tracker.sync_from_youtube(inventory["videos"], inventory=inventory):
+                logger.info("[SCHEDULER] Synced %s qualified scheduled videos", inventory["total_scheduled"])
 
         except Exception as e:
             logger.debug(f"[SCHEDULER] Sync skipped: {e}")
@@ -1066,10 +1074,14 @@ class YouTubeShortsScheduler:
     ):
         """Apply matched analyzer evidence, otherwise preserve existing metadata."""
         try:
+            session = self.dom._policy_edit()
+            if session.video_id != video_id or session.channel_id != self.channel_id:
+                return False
+            original_title = session.original["title"]
             if os.getenv("YT_SCHEDULER_INDEX_WEAVE_ENABLED", "true").lower() not in ("1", "true", "yes"):
                 logger.info("[SCHEDULER] index_context=disabled for %s", video_id)
                 return True  # Metadata preservation, not template substitution.
-            original_description = self.dom.get_current_description()
+            original_description = session.original["description"]
             if not isinstance(original_description, str):
                 return False  # Cannot safely preserve an unread description.
             ctx = build_index_metadata_context(

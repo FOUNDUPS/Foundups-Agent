@@ -11,6 +11,7 @@ import asyncio
 import logging
 import os
 import random
+from uuid import uuid4
 from typing import Any, Dict, List
 
 # YTR1: Import for stale element recovery
@@ -40,7 +41,7 @@ class BrowserReplyExecutor:
     - Anti-detection: Human-like typing with typos
     """
     
-    def __init__(self, driver, human, selectors, delay_multiplier=1.0):
+    def __init__(self, driver, human, selectors, delay_multiplier=1.0, history_store=None):
         """
         Args:
             driver: Selenium WebDriver instance
@@ -52,6 +53,10 @@ class BrowserReplyExecutor:
         self.human = human
         self.selectors = selectors
         self.delay_multiplier = delay_multiplier
+        if history_store is None:
+            from modules.communication.video_comments.src.commenter_history_store import get_commenter_history_store
+            history_store = get_commenter_history_store()
+        self.history_store = history_store
         logger.info(f"[DAEMON][REPLY-EXECUTOR] Initialized with tempo multiplier: {delay_multiplier}x")
 
     async def process_nested_replies(
@@ -287,86 +292,109 @@ class BrowserReplyExecutor:
         return results
 
     async def execute_nested_reply(self, parent_thread_idx: int, reply_idx: int, reply_text: str) -> bool:
-        """Execute reply to a nested reply (relative positioning)."""
+        # Nested rows have no qualified identity/readback contract yet.
+        logger.warning('[REPLY-INSPECT] Nested submission blocked pending identity qualification')
+        return False
+    def _bind_reply_target(self, comment_idx, expected, marker, selector=None):
+        from modules.communication.video_comments.skillz.tars_like_heart_reply.src.comment_row_context import COMMENT_IDENTITY_SCRIPT
+        return self.driver.execute_script(COMMENT_IDENTITY_SCRIPT + r'''
+            const row = document.querySelectorAll(arguments[0])[arguments[1]];
+            const expected = arguments[2], marker = arguments[3];
+            if (!matchesCommentTarget(row, expected)) return false;
+            if (marker) row.setAttribute('data-0102-reply-target', marker);
+            return true;
+        ''', selector or self.selectors['comment_thread'], comment_idx - 1, expected, marker)
+
+    def _reply_snapshot(self, selector, expected, reply_text):
+        from modules.communication.video_comments.skillz.tars_like_heart_reply.src.comment_row_context import COMMENT_IDENTITY_SCRIPT
+        return self.driver.execute_script(COMMENT_IDENTITY_SCRIPT + r'''
+            const row = document.querySelector(arguments[0]);
+            if (!row || !row.isConnected) return null;
+            const expected = arguments[1], draft = arguments[2];
+            if (!matchesCommentTarget(row, expected)) return null;
+            const exact = value => (value || '').replace(/\r\n/g, '\n').trim();
+            const visible = el => !!(el && (el.getClientRects().length || el.offsetParent));
+            // Settled complete baseline: revealing an old collapsed reply cannot prove delivery.
+            for (const el of row.querySelectorAll('button, ytcp-button, [role="button"], [aria-expanded="false"], [role="progressbar"]')) {
+                const label = (el.getAttribute('aria-label') || el.textContent || '').trim();
+                if (visible(el) && (el.getAttribute('role') === 'progressbar' ||
+                    /(?:show|view|load|more|\d+)\s+(?:\d+\s+)?(?:more\s+)?repl(?:y|ies)/i.test(label) ||
+                    (el.getAttribute('aria-expanded') === 'false' && /repl/i.test(label)))) return {complete: false};
+            }
+            const replies = row.querySelector('ytcp-comment-replies, [class*="replies-renderer"]');
+            if (!replies) return {complete: true, ids: [], matching_ids: []};
+            const ids = [], matching = [];
+            for (const text of replies.querySelectorAll('[id="content-text"]')) {
+                const reply = text.closest('ytcp-comment, ytcp-comment-view, ytcp-comment-view-model');
+                if (!reply || !replies.contains(reply)) return {complete: false};
+                const id = commentIdentity(reply, true);
+                if (!id || ids.includes(id)) return {complete: false};
+                ids.push(id);
+                const author = reply.querySelector('ytcp-comment-author, #author-text');
+                const link = author && (author.matches('a[href]') ? author : author.querySelector('a[href]'));
+                const authorUrl = link && new URL(link.href, location.href);
+                const channel = authorUrl && authorUrl.protocol === 'https:' &&
+                    ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'studio.youtube.com'].includes(authorUrl.hostname) &&
+                    (authorUrl.pathname.match(/^\/channel\/([^/]+)/) || [])[1];
+                const owner = reply.querySelector('[class*="creator-badge"], [aria-label*="owner"], [aria-label*="Owner"]');
+                if (owner && channel === expected._target_channel_id && exact(text.textContent) === exact(draft)) matching.push(id);
+            }
+            return {complete: true, ids: ids, matching_ids: matching};
+        ''', selector, expected, reply_text)
+
+    async def execute_reply(self, comment_idx: int, reply_text: str, *, expected_comment=None, pre_submit_guard=None) -> bool:
+        """Bind the original row, submit once, and require new owner-text readback."""
+        self.last_submission_status = 'not_attempted'
+        self._submit_invoked = False
+        self._pre_submit_guard = pre_submit_guard
+        if not getattr(self, 'history_store', None):
+            return False  # No volatile-only escape hatch around durable reservation.
         try:
-            # Open reply box for nested reply
-            opened = self.driver.execute_script("""
-                const threadIdx = arguments[0];
-                const replyIdx = arguments[1];
-                const threads = document.querySelectorAll('ytcp-comment-thread');
-                const thread = threads[threadIdx];
-                if (!thread) return false;
-
-                const repliesContainer = thread.querySelector('ytcp-comment-replies');
-                if (!repliesContainer) return false;
-
-                const replyElements = repliesContainer.querySelectorAll(
-                    'ytcp-comment-replies[class*="expanded"]'
-                );
-                const reply = replyElements[replyIdx];
-                if (!reply) return false;
-
-                const replyBtn = reply.querySelector('[id*="reply-button"] button');
-                if (!replyBtn) return false;
-
-                replyBtn.click();
-                return true;
-            """, parent_thread_idx - 1, reply_idx)
-
-            if not opened:
-                return False
-
-            delay = (self.human.human_delay(1.5, 0.6) if self.human else 1.5) * self.delay_multiplier
-            await asyncio.sleep(delay)
-
-            # Type reply (same as parent comment logic)
-            typed = self.driver.execute_script("""
-                const threadIdx = arguments[0];
-                const replyIdx = arguments[1];
-                const text = arguments[2];
-                const threads = document.querySelectorAll('ytcp-comment-thread');
-                const thread = threads[threadIdx];
-                if (!thread) return false;
-
-                # Find the reply's textarea (it appears after clicking Reply button)
-                const textarea = thread.querySelector('textarea[id*="textarea"]');
-                if (!textarea) return false;
-
-                textarea.value = text;
-                textarea.dispatchEvent(new Event('input', {bubbles: true}));
-                return true;
-            """, parent_thread_idx - 1, reply_idx, reply_text)
-
-            if not typed:
-                return False
-
-            # 2026-02-04: Reduced pre-submit delay from 1.0s→0.5s
-            delay = (self.human.human_delay(0.5, 0.3) if self.human else 0.5) * self.delay_multiplier
-            await asyncio.sleep(delay)
-
-            # Submit reply
-            submitted = self.driver.execute_script("""
-                const threadIdx = arguments[0];
-                const threads = document.querySelectorAll('ytcp-comment-thread');
-                const thread = threads[threadIdx];
-                if (!thread) return false;
-
-                const submitBtn = thread.querySelector('[id*="submit-button"] button');
-                if (!submitBtn) return false;
-
-                submitBtn.click();
-                return true;
-            """, parent_thread_idx - 1)
-
-            return bool(submitted)
-
-        except Exception as e:
-            logger.warning(f"[NESTED] Reply execution failed: {e}")
+            self.history_store.reply_target_key(expected_comment)
+        except (ValueError, TypeError):
             return False
+        marker = uuid4().hex
+        selector = f'[data-0102-reply-target="{marker}"]'
+        if not self._bind_reply_target(comment_idx, expected_comment, marker):
+            return False
+        before = self._reply_snapshot(selector, expected_comment, reply_text)
+        if not before or not before.get('complete') or before.get('matching_ids'):
+            return False  # Already present or ambiguous; never post a duplicate.
+        attempt_id = self.history_store.begin_reply_attempt(expected_comment, reply_text)
+        if not attempt_id:
+            self.last_submission_status = 'unknown'
+            return False
+        self.last_attempt_id = attempt_id
+        self.last_submission_status = 'unknown'
+        try:
+            if not await self._execute_reply_unverified(1, reply_text, thread_selector=selector,
+                                                      expected_comment=expected_comment):
+                return False
+            for _ in range(10):
+                snapshot = self._reply_snapshot(selector, expected_comment, reply_text)
+                new_ids = set(snapshot.get('matching_ids', [])) - set(before['ids']) if snapshot else set()
+                if snapshot and snapshot.get('complete') and new_ids:
+                    self.history_store.finish_reply_attempt(attempt_id, 'verified', {
+                        'creator_reply_ids': sorted(new_ids), 'original_comment_id': expected_comment['comment_id']})
+                    self.last_submission_status = 'verified'
+                    return True
+                await asyncio.sleep(0.5)
+            return False
+        except Exception as exc:
+            logger.warning('[REPLY-INSPECT] Outcome uncertain: %s', type(exc).__name__)
+            return False
+        finally:
+            if not self._submit_invoked and self.last_submission_status != 'verified':
+                self.history_store.finish_reply_attempt(attempt_id, 'not_submitted', {'submit_invoked': False})
+                self.last_submission_status = 'not_submitted'
+            try:
+                self.driver.execute_script("const row=document.querySelector(arguments[0]); if(row) row.removeAttribute('data-0102-reply-target');", selector)
+            except Exception:
+                pass  # Preserve the observed outcome if the page disappeared.
 
-    async def execute_reply(self, comment_idx: int, reply_text: str) -> bool:
+    async def _execute_reply_unverified(self, comment_idx: int, reply_text: str, *, thread_selector=None, expected_comment=None) -> bool:
         """Execute reply flow: Open box -> Type -> Submit."""
-        thread_selector = self.selectors["comment_thread"]
+        thread_selector = thread_selector or self.selectors["comment_thread"]
         try:
             from modules.infrastructure.foundups_selenium.src.human_behavior import get_0102_behavior_interface
             behavior_profile = get_0102_behavior_interface(default="0102")
@@ -446,18 +474,6 @@ class BrowserReplyExecutor:
             try { 
                 replyBtn.scrollIntoView({behavior: 'smooth', block: 'center'});
                 
-                // FORCE CLICK: Dispatch events manually to bypass custom element quirks
-                const validEvents = ['mousedown', 'mouseup', 'click'];
-                validEvents.forEach(type => {
-                    const event = new MouseEvent(type, {
-                        bubbles: true,
-                        cancelable: true,
-                        view: window
-                    });
-                    replyBtn.dispatchEvent(event);
-                });
-                
-                // Standard click as backup
                 replyBtn.click();
             } catch (e) {
                 return {success: false, error: 'Click failed: ' + e.toString()};
@@ -703,7 +719,7 @@ class BrowserReplyExecutor:
             # VERIFY text was entered
             entered_text = self.driver.execute_script("return arguments[0].textContent", textarea)
 
-            if not entered_text or len(entered_text.strip()) < len(reply_text.strip()) * 0.5:
+            if not entered_text or entered_text.replace('\r\n', '\n') != reply_text.replace('\r\n', '\n'):
                 logger.error(f"[DAEMON][REPLY-EXEC] ❌ Verification FAILED! Expected {len(reply_text)} chars, got {len(entered_text) if entered_text else 0}")
                 logger.error(f"[DAEMON][REPLY-EXEC]   Expected: '{reply_text[:50]}...'")
                 logger.error(f"[DAEMON][REPLY-EXEC]   Got: '{entered_text[:50] if entered_text else ''}...'")
@@ -723,13 +739,29 @@ class BrowserReplyExecutor:
             await asyncio.sleep(0.4 * self.delay_multiplier)
 
         # Submit - HARDENED 2026-01-18: Multiple selector strategies + text-based fallback
+        if not self._bind_reply_target(1, expected_comment, None, selector=thread_selector):
+            return False  # A virtualized row may have changed while typing.
+        entered_text = self.driver.execute_script(
+            "const row=document.querySelector(arguments[0]); const el=row && row.querySelector('[contenteditable=\"true\"], textarea'); return el ? (el.value === undefined ? el.textContent : el.value) : null;",
+            thread_selector)
+        if entered_text is None or entered_text.replace('\r\n', '\n') != reply_text.replace('\r\n', '\n'):
+            return False
+        if self._pre_submit_guard is not None and self._pre_submit_guard() is not True:
+            return False
+        self._submit_invoked = True  # Persisted unknown already owns this target before the click.
+        from modules.communication.video_comments.skillz.tars_like_heart_reply.src.comment_row_context import COMMENT_IDENTITY_SCRIPT
         submit_result = self.driver.execute_script(
-            """
+            COMMENT_IDENTITY_SCRIPT + """
             const threadSelector = arguments[0];
             const threadIndex = arguments[1];
             const threads = document.querySelectorAll(threadSelector);
             const thread = threads[threadIndex];
             if (!thread) return {success: false, error: 'Thread not found'};
+            if (!matchesCommentTarget(thread, arguments[2])) return {success:false, error:'Target changed'};
+            const editor = thread.querySelector('[contenteditable="true"], textarea');
+            const entered = editor && (editor.value === undefined ? editor.textContent : editor.value);
+            if (entered == null || entered.replace(/\\r\\n/g, '\\n') !== arguments[3].replace(/\\r\\n/g, '\\n'))
+                return {success:false, error:'Entered text changed'};
 
             // Helper to find button by text content (case-insensitive)
             function findButtonByText(root, text) {
@@ -767,7 +799,6 @@ class BrowserReplyExecutor:
             // Strategy 1: Direct ID selectors (legacy working paths)
             submitBtn = thread.querySelector('#submit-button button');
             if (!submitBtn) submitBtn = thread.querySelector('ytcp-button#submit-button button');
-            if (!submitBtn) submitBtn = document.querySelector('ytcp-comment-creator #submit-button button');
 
             // Strategy 2: Look for Reply button in comment-creator section
             if (!submitBtn) {
@@ -790,36 +821,26 @@ class BrowserReplyExecutor:
                 submitBtn = findButtonByText(thread, 'Reply');
             }
 
-            // Strategy 6: Global search in comment creator (when thread scope fails)
-            if (!submitBtn) {
-                const globalCreator = document.querySelector('ytcp-comment-creator');
-                if (globalCreator) {
-                    submitBtn = globalCreator.querySelector('#submit-button button');
-                    if (!submitBtn) submitBtn = findButtonByText(globalCreator, 'Reply');
-                }
-            }
 
             if (submitBtn && !submitBtn.disabled) {
-                // FORCE CLICK: dispatch mouse events for custom element compatibility
-                try {
-                    submitBtn.scrollIntoView({behavior: 'instant', block: 'center'});
-                    ['mousedown', 'mouseup', 'click'].forEach(type => {
-                        submitBtn.dispatchEvent(new MouseEvent(type, {bubbles: true, cancelable: true, view: window}));
-                    });
-                } catch(e) {
-                    submitBtn.click();
-                }
+                submitBtn.scrollIntoView({behavior: 'instant', block: 'center'});
+                submitBtn.click();
                 return {success: true, strategy: 'found'};
             }
             return {success: false, error: 'Submit button not found/disabled', searched: ['#submit-button', 'text:Reply', 'shadow-dom']};
             """,
             thread_selector,
             comment_idx - 1,
+            expected_comment,
+            reply_text,
         )
 
         if not submit_result or not submit_result.get("success"):
+            if isinstance(submit_result, dict) and submit_result.get('error') in ('Thread not found', 'Submit button not found/disabled', 'Target changed', 'Entered text changed'):
+                self._submit_invoked = False  # Script proves no click was attempted.
             if submit_result and submit_result.get("error"):
                 logger.warning(f"[REPLY] DOM submit failed: {submit_result.get('error')}")
             return False
 
         return True
+

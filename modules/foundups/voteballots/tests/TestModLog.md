@@ -2,6 +2,30 @@
 
 <!-- WSP 22: anti-vibecoding test inventory. NEWEST entries at TOP. -->
 
+
+## [2026-11-01] — Production source provenance micro oracle
+
+Extended `test_confidence_scoring_integration.py`:19 added cases and one tightened
+missing-reference test. Three indirect types,12 lower/UNKNOWN controls, three
+approved direct types and verified-facts consumption. Synthetic references only.
+Frozen20: baseline16 passed/4 failed; local worker candidate13 passed/7 failed;
+coordinator repair20 passed. Frozen test SHA256:
+`898327ec40945318140abdea6ad547609ec325d4c6de42733dc1b7353e43a3f6`.
+Independent full replay322 passed in1.77s, plus21 separately executed synthetic
+probes (noncanonical types, repeated calls, mixed labels, input preservation).
+Do not add overlapping scopes or equate legacy stub tests with production proof.
+After that comparison, the indirect assertion was strengthened to exact HIGH and
+`downgraded_from_verified_due_to_indirect_source`, both specified before inference.
+Strengthened20 passed in0.60s; final test SHA256:
+`1f3a6cc94bf1100eacfc6a2a4a237738df45e2facbaebccb51d1d214ed8f22f5`.
+The independent reviewer reproduced two aggregate total_raised counterexamples;
+that distinct pre-existing gap remains open in the module roadmap.
+
+Reproduce the CI-equivalent module closure from root:
+`python -B -m pytest -q --tb=short -c /dev/null --noconftest --import-mode=importlib -o pythonpath=. -p no:cacheprovider modules/foundups/voteballots/tests`
+Use `NUL` on Windows; set `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1` and
+`PYTHONDONTWRITEBYTECODE=1`. No network, API key or model call is needed.
+
 ## [2026-08-26] — Canonical Test Inventory Reconciliation
 
 **Purpose**: Make the existing VOTE test surface visible before any worker creates or modifies tests.

@@ -8,7 +8,7 @@ const INZAI_IMAGE = 'https://www.re-port.net/picture_l/report/0000074457_09.png'
 
 export const metadata: Metadata = {
   title: 'YUMORI.me — 湯守になる。地域を守り、地域のAIをつくる',
-  description: 'YUMORI.meは、ハイパースケール時代に地域の建物・電力・知識・文化を守り、既存資産を地域向けCOG DCへ再生する市民運動です。目標1,000人。',
+  description: '福井の企業・大学・農業・地域とともに、独立性のある地域AI基盤の実現可能性を検討するYUMORI.me。企業のAI担当代表者・実装パートナーを募ります。',
   keywords: ['YUMORI.me','湯守','Japan Hyperscaler Report','JHR','COG DC','地域コンピュート','ハイパースケーラー','印西','福井','eSingularity'],
   alternates: { canonical: 'https://yumori.me/' },
   openGraph: { title: 'YUMORI.me — 湯守になる', description: '知る。守る。つくる。湯守になる。', type: 'website', url: 'https://yumori.me/' },
@@ -28,6 +28,22 @@ export default function YumoriPage() {
   return <main className="yumori-page" style={{ background:'#0b0d0c', color:'#f4f1e8', minHeight:'100vh', fontFamily:'system-ui,sans-serif' }}>
     <header className="yumori-header"><a href="https://yumori.me/">YUMORI.me / 湯守</a><div id="home-language-controls" /></header>
     <CampaignTicker movement />
+    <section aria-labelledby="coalition-title" style={{...panel, background:'#172119', color:'#f4f1e8'}}>
+      <p style={{letterSpacing:'.15em',fontWeight:850}}>福井 / AIパートナー連携 — 企業・団体の参加相談</p>
+      <h2 id="coalition-title" style={title}>福井のAI基盤を、<br/>福井の企業と地域でつくる。</h2>
+      <p style={body}>企業のAI責任者・担当代表者の皆さまへ。地域企業、大学、農業、教育機関が必要とする計算資源を、地域の電力・土地・暮らしと両立させるためのパートナー連携を準備しています。運営・技術・利用・資金・教育の観点から、一緒に実現条件を検討しませんか。</p>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,260px),1fr))',gap:14,maxWidth:900,margin:'24px 0'}}>
+        <div style={{padding:22,border:'1px solid #63866a',borderRadius:18,background:'#20342a'}}><strong>企業・大学・農業・地域</strong><p>AIの利用課題・必要なサービス・地域への効果</p></div>
+        <div style={{padding:22,border:'1px solid #63866a',borderRadius:18,background:'#20342a'}}><strong>YUMORI.me パートナー連携</strong><p>需要調査・計画・実施体制・資金条件の検討</p></div>
+        <div style={{padding:22,border:'1px solid #63866a',borderRadius:18,background:'#20342a'}}><strong>運営・技術パートナー</strong><p>設計・整備・運営の実施可能性を検証</p></div>
+      </div>
+      <p style={{fontSize:13,opacity:.82,maxWidth:850}}>構想・協議の段階です。参加企業、建物利用権、受電容量、顧客契約、資金、市の承認や事業成立は未確定です。福井市の旧羽生小学校を初期候補として調査し、旧下宇坂小学校は教育・拡張候補、旧すかっとランド九頭竜は別の条件付き検討対象です。</p>
+      <div style={{display:'flex',gap:14,flexWrap:'wrap',marginTop:26}}>
+        <a href="/yumori/partners" style={join}>企業・団体の参加を相談する →</a>
+        <a href={ESINGULARITY_URL} style={{...link,alignSelf:'center'}}>計画と技術構想を知る →</a>
+      </div>
+      <p style={{marginTop:18,fontSize:14}}>個人の湯守参加も継続しています。 <a href={FORM_URL} target="_blank" rel="noreferrer" style={{color:'inherit',fontWeight:800}}>JOIN YUMORI.me / 湯守になる →</a></p>
+    </section>
     <section className="yumori-hero" style={panel}>
       <p style={{ letterSpacing:'.18em', fontWeight:850 }}>YUMORI.me / 湯守</p>
       <h1 className="yumori-wordmark">YUMORI<span style={{opacity:.5}}>.me</span></h1>

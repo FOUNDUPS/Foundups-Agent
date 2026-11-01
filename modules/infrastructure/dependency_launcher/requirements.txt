@@ -1,2 +1,4 @@
-# Runtime implementation uses the Python standard library only.
+# Core implementation uses the Python standard library.
+# Optional process observer: psutil (supplied by the host when available).
+# Missing/failed observation blocks cold startup; no installation is performed.
 # Test dependency: pytest (managed by the repository development environment).

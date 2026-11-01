@@ -1,3 +1,30 @@
+## 2026-10-30 — Held-out identity producer/consumer regression
+
+The real verifier → ratchet → held-out gate → Memex rehydrator reproduces one
+failure/31 passes before repair. Version/digest serialization preserves the v2
+ID seed and historical signed shape; constructor metadata, tampering and downgrade
+controls remain explicit. The bridge queue-binding suite owns this connected
+regression; hosted CI also selects the gate and existing authenticity consumers.
+Synthetic input evidence does not establish native independent evaluation.
+
+## 2026-10-29 — Explicit unimplemented/manual classification
+
+Twelve new registry cases cover literal/annotated modes, invalid declarations,
+preserved external-effect reasons and ordinary unit compatibility. The full
+registry owner passes 40 cases; the combined generator/import/registry selection
+passes 51. The 23 added cases yield 19 failures / four passes on unchanged
+baseline. Only inert source fixtures are executed. WSP5/6/22/34/50/97.
+
+## 2026-10-29 — Regenerate registry after F1 encoding repair
+
+The first PR2257 hosted test gate detected a stale registry: removing BOMs
+makes 15 files statically parseable under the existing classifier. Canonical
+regeneration preserves all 1779 paths and changes only those 15 classifications;
+260 remain quarantined. No discovery/classification rule or test skip was added.
+The 28 registry tests and canonical --check pass; 85 affected dummy-STT,
+in-memory permission and schema tests pass. Twelve optional rESP import smoke
+files remain outside executed acceptance. WSP 22/50/84/97.
+
 ## 2026-10-28 — Risk-verification preflight and downgrade regressions
 
 Source baseline: `4afb9284d32e9af24f578fda91063114263d5a39`.

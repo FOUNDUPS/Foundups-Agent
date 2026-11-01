@@ -1,5 +1,35 @@
 # Dependency launcher test inventory
 
+## 2026-10-29 — Native startup offline qualification
+
+Actual owned-source validation passed94 cases, zero failures/skips:49 startup,
+21 existing model-selection/dependency-boundary, and24 lifecycle controls.
+The external runner imports actual worktree source with no draft overlays,
+uses a fixed minimal credential-free child environment, clears/replaces it
+before source imports, denies real process/HTTP/socket-create-connection effects
+with constant messages, checks mock counts without serializing kwargs, and isolates lifecycle
+journals and OS mutexes from the shared live-model namespace. Existing node-lock
+identity/journal protocol is checked directly with the actual borrowed transaction.
+This is local unit evidence, not independent acceptance, live daemon readiness,
+model inference, or full main.py execution. The earlier49 isolated draft cases
+overlap with this selection and are not added to it.
+
+Coverage: warm exact General readiness without CLI/discovery; server versus
+resident distinction; installed/missing/wrong/ambiguous models; malformed/auth
+HTTP; occupied port; missing/denied/incomplete/conflicting/racing processes;
+checked nonzero/timeouts; explicit bind; cold GUI refusal without spawn, while
+existing GUI via CLI remains usable; bounded API
+failure; busy competing callers; actual facade/ensure_dependencies forwarding;
+actual isolated YouTube Phase-2 AST execution; unchanged General default; and
+three prior-protocol/actual transaction lock+digest equivalence controls.
+The caller AST slice avoids importing/starting the full DAE and establishes only
+that selected phase's argument flow. Model loading/unloading/inference is denied.
+
+The unchanged21 model-selection/dependency-boundary cases also passed on clean
+01b87f0e before implementation. Those earlier results overlap with the94-case
+actual-source selection. Independent review remains a separate gate.
+
+
 ## 2026-09-22 — Signed expectation contract qualification
 
 Reused the existing supplier and receipt suites with AI Gateway's runtime-binding

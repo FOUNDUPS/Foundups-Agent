@@ -54,3 +54,35 @@ EXISTING_FOUNDUP_UPDATE
 
 ## Provenance Note
 Prepared from 012/0102 design discussion on 2026-08-26 and reconciled against the current Foundups-Agent repository, WSP 109 intake contract, Vote PoC closure evidence, FoundUp registry, pfMALL public-landing audit, AutoPost reusable-capture audit, GotJunk map architecture, and Liberty Alert integration evidence.
+
+---
+
+## 2026-10-30 Update - Political Claim Verification and Scoring Engine
+
+### Source and requested action
+Source type: pasted_prompt + spoken_012. The supplied **Bullshit Meter** specification extends Vote with political speech ingestion, atomic factual-claim extraction, primary-source research, statistical/methodological and funding/incentive audits, transparent 300-850 scoring, a clickable evidence graph, and later video/live overlays. The subsequent spoken instruction explicitly requested updating Vote's Outcome, Solution, Pain, roadmap, and related documents.
+
+The complete [original supplied specification](CLAIM_VERIFICATION_SOURCE_20261030.md) is retained. The [integrated feature design](../POLITICAL_CLAIM_VERIFICATION_AND_SCORING_ENGINE.md) is the canonical planning document for architecture, qualifications, data model, UI, rollout, and downstream evaluation.
+
+### Classification and scope
+- EXISTING_FOUNDUP_UPDATE under `modules/foundups/voteballots/`; no duplicate Vote repository.
+- Documentation/intake/roadmap update only. The new engine, database, ten-speech run, scores, overlays, and deployment are not implemented by this slice.
+- Preserve the existing public candidate/race/funding PoC and all later governance phases.
+- Permit CV1 internal evaluation alongside public PoC preparation; public/member activation retains its release gates.
+- CV1: asynchronous transcripts, ten speeches across 2-5 public figures, CLI/review dashboard and evidence JSON. CV2: methods/funding audits. CV3: caption/video overlays. CV4: streaming ASR/live meter.
+
+### Required qualifications
+Unknown/uncheckable evidence is unscored; verdict and confidence are separate. Financial association alone does not prove falsity, and recurrence does not prove intent. Polling thresholds are method-aware review signals. The 300-850 range, color bands, conflict multiplier, recurrence penalty, and sub-500-ms target remain proposals requiring the evaluation specified in the feature design.
+
+### Decisions carried into the build packet
+Exact corpus and source access, shared storage/transcript/search/extension owners, scoring equation/weights/coverage/calibration, model/runtime selection, and review/latency budgets remain unresolved implementation decisions. The proposed PostgreSQL/pgvector schema includes Politicians, Transcripts, Extracted_Claims, Primary_Sources, Funding_Entities, and Audit_Logs; no database or migration has been created.
+
+### Retrieval assessment for this documentation slice
+Current module README, interface/architecture design, roadmap, eight intake files, implementation exports, shell/FEC code, and May closure evidence were read directly from GitHub. Exact module paths reduce generic governance-voting search noise; no existing `Bullshit Meter` code-search match or open Vote PR was found. Semantic HoloIndex execution and local Windows checkout state were not verified. The older interface and runtime manifest/registry labels remain separate from implementation truth; new features remain explicitly planned. Current-code semantic/reuse validation is still required before a build slice.
+
+### Repository-requirement verification and persistent instruction
+The follow-up verification read canonical WSP 109 in full, WSP 95 v2.1, WSP 108, the module onboarding protocol, the actual genesis/diligence/pitch Skillz, and WSP 30 stage definitions. The packet was tightened to make PoC -> Prototype -> MVP explicit within Solution and implementation barriers explicit within Pain. MVP remains unspecified rather than invented. Observed registry/manifest values now populate display name, stage, tier, token-status declaration and historical next-slice fields in the draft.
+
+The registry, Vote module, Mall catalog, video catalog and portfolio were inspected; Vote remains an existing module without an activated public app or a Vote entry in those three catalogs/projections. Direct GitHub retrieval was used. No callable HoloIndex runtime tool was available, and no HoloIndex query, WRE skill execution, bootstrap runtime, genesis validation, or launch validation is claimed. Candidate skills and prototype files do not establish production admission.
+
+012's instruction to repeat this repository-first check in future FoundUp work is recorded in the [shared onboarding reference](../../../docs/FOUNDUP_ONBOARDING_PROTOCOL_PHASE1.md), linked from the FoundUps domain README. It is persistent project guidance; no ChatGPT account-memory setting or runtime scheduler was changed.

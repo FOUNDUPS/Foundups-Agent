@@ -26,6 +26,8 @@ ACHIEVEMENTS:
 # === NEED_TO: Problem -> Solution Mapping ===
 # Direct mapping of problems to existing code solutions
 NEED_TO = {
+    "Soro social media DAE gap audit": "modules/platform_integration/social_media_orchestrator/docs/audits/SORO_SOCIAL_DAE_AUDIT_20261027.md",
+    "source backed brand content calendar": "modules/platform_integration/social_media_orchestrator/src/content/content_orchestrator.py:prepare_campaign()",
     # AutoPost owns capture; shared Mall handoff is specified, not a live upload API.
     "Shop clothing capture": "modules/foundups/pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md",
     "AutoPost multiple item photos": "modules/foundups/pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md",
@@ -536,7 +538,10 @@ DAE_ARCHITECTURE = {
     "earned UPS vs allocated UPS": "WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md - Section 4.9: Labor (task completion) + Investment (subscription)",
     "engagement funnel CABR signals": "WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md - Section 4.10: Follow→Vote→Stake→Endorse→Advise→Team→Promote",
     "blockchain architecture 3 layer": "WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md - Section 4.11: Bitcoin(L0) + Algorand(L1) + Off-chain(L2)",
-    "algorand quantum resistant falcon": "WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md - Section 4.11: Falcon-1024 NIST signatures, 10K TPS, State Proofs",
+    "unsigned Algorand TestNet ASA probe packet codec": "modules/platform_integration/algorand/README.md",
+    "unsigned ASA declared facts wire transaction ID contract": "modules/platform_integration/algorand/INTERFACE.md",
+    "unsigned ASA guarded SDK qualification unit shard": "modules/platform_integration/algorand/tests/README.md",
+    "algorand quantum resistant falcon": "WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md - Section 4.11: Falcon State Proofs and native PQ accounts; migration and consensus limits",
     "foundup token exit reverse conversion": "WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md - Section 3.7: FoundUp token→UPS costly (2-5% fee + decay resumes)",
     "no portfolio cap UPS is the cap": "WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md - Section 4.9: No artificial limit, stake wherever you have UPS",
     "subscription revenue BTC flywheel": "WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md - Section 4.9: Subscription→BTC reserve→backs UPS→self-reinforcing",

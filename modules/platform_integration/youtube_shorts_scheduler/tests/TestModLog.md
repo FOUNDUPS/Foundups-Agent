@@ -1,3 +1,48 @@
+## 2026-11-01 — Final policy consumer qualification
+
+60 new focused controls passed, zero failures/errors/skips/captured streams:
+detail19, durable save/reload16, inline9, Shorts16. Actual queue claims persist
+across new navigation/queue instances. Useful metadata Save→clean same-tab fresh
+document→exact readback settles applied; no-op refresh stays unknown. Slot-write
+claims cannot be settled by metadata-only proof. Tests preserve foreign drafts,
+stop late pauses/STOP/caps before clicks and refuse unrelated popup targets.
+
+Adjacent185 passed (existing selected147 + metadata23 + publisher15), with
+original assertions retained. Shared fake DOM fixtures explicitly model cycle and
+authoritative detail APIs, strict spec_set remains, and only synthetic identity
+literals changed to valid native shapes. Browser/provider/model/auth effects were
+not exercised. Private source/XML/guard hashes are retained by the task owner;
+publication, resulting-main checks and installed runtime qualification are
+separate gates under WSP97.
+
+## 2026-10-29 — Scheduled-inventory and audit-consumer controls
+
+Added actual-source scheduled inventory and sink controls, plus explicit
+partial/failed post-audit receipts. Existing breadcrumb fixtures previously set
+`dry_run=True`, bypassing the very post-audit gate they asserted. They now keep
+scheduling/tracker collaborators fake and enable the actual audit consumer gate;
+all original negative/positive breadcrumb and auto-heal assertions remain.
+Final S1 bounded actual-source selection passed102:86 inventory/consumer,
+9 existing visibility,7 post-audit breadcrumb; zero failures/errors/skips.
+Review-driven controls cover numeric identity, malformed expected channel,
+later-page progress, forged complete repair receipts and useful qualified
+positive repair inputs. Both native channel locations and explicit Scheduled
+date-cell/tooltip contracts are handled; installed selectors remain unqualified.
+Final independent sink review found that an optional comparison parameter could
+let `None` reach reset before iteration failed. The actual reset sink now rejects
+non-lists first; None/tuple controls preserve in-memory dictionaries and disk
+bytes. Prior97/99-case XML is retained as superseded evidence, not added to102.
+Three adjacent-reader controls reject Title/search chips containing visibility
+words while preserving explicit Visibility and bare Has schedule labels.
+
+Guarded tests use a fixed minimal child environment; no inherited credentials,
+environment-bearing mock assertions, host registry writes or real effects.
+Initial guard-only attempts rejected pytest's null-device write and Windows
+asyncio's socketpair; allow only the null device and use a private no-I/O timer
+loop. The host standard-library interpreter lacked pytz under disabled user-site
+imports; reuse the existing repository `.venv` without installing dependencies.
+These setup failures are not runtime defects or passing test evidence.
+
 ## 2026-10-25 — Move2Japan per-channel cadence
 
 ## 2026-10-26 — Hosted metadata fixture correction

@@ -1,3 +1,17 @@
+## 2026-10-30 — Partner inquiry routing reconciliation
+
+- Reused `test_domain_routing.mjs`: 32 passing configuration cases cover the
+  exact root/partner rules, YUMORI.me/www host boundary, excluded hosts and
+  unaffected paths. Eight existing signup-security tests also pass.
+- Fresh isolated Python run: 85 module tests passed with two existing pytest
+  configuration warnings. Commands used Node 24.22.1 and the existing vetted
+  Python environment, with inherited provider credentials excluded and dotenv
+  loading disabled. No production service or message sender was invoked.
+- Preserved October 29 browser/lint/build results retain their original
+  observation time. Source hashes match that candidate, including its final
+  translation. Independent review, hosted exact-head checks, production
+  publication and actual inquiry delivery remain separate gates. WSP 5/6/22/97.
+
 ## 2026-10-23 — Resident RSI canary contract regression
 
 - Reused `test_contracts.py`; no parallel YUMORI test file or synthetic contact/mail database was created.

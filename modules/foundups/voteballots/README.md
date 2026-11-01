@@ -90,6 +90,21 @@ See `docs/intake/PROTOTYPE_GATE.md`.
 
 ---
 
+## Planned Feature - Political Claim Verification / Bullshit Meter
+The 2026-10-30 intake adds a staged claim-verification capability to the existing Vote FoundUp:
+
+1. **CV1**: asynchronous transcript analysis, ten-speech internal evaluation, CLI/review dashboard, and primary-source evidence trees.
+2. **CV2**: statistical/methodological and funding/incentive audits.
+3. **CV3**: caption/video evidence overlays through reusable extension/media components.
+4. **CV4**: streaming ASR and a live meter with explicit pending/unknown states.
+
+The requested 300-850 score and color bands are experimental proposals. Unknown evidence remains unscored; factual contradiction, uncertainty, funding conflict, and intent are separate. The feature is **planned / not implemented**. Internal evaluation may run alongside public PoC preparation, while public/member exposure retains its existing gates.
+
+- [Canonical feature specification](docs/POLITICAL_CLAIM_VERIFICATION_AND_SCORING_ENGINE.md)
+- [Original 012 specification](docs/intake/CLAIM_VERIFICATION_SOURCE_20261030.md)
+
+The current mock-data funding chain, live-data limitation, and public-not-launched status remain unchanged.
+
 ## Reuse-First Architecture
 
 Before new implementation, workers must retrieve through HoloIndex and validate against current code. Priority reuse targets:

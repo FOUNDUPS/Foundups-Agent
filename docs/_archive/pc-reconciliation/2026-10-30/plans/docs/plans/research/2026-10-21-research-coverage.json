@@ -1,0 +1,2599 @@
+{
+  "projection": {
+    "schema": "foundups.pc-reconciliation.historical-projection.v1",
+    "record_kind": "historical_projection_not_current_acceptance",
+    "source_path": "docs/plans/research/2026-10-21-research-coverage.json",
+    "original_pc_head": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+    "source_full_file_sha256": "8b14a17c0fbea965ce2a660b61120bc5db96640295ec32d53c5cf5e67dbfb765",
+    "preserved_record_sha256": "8b14a17c0fbea965ce2a660b61120bc5db96640295ec32d53c5cf5e67dbfb765",
+    "projection_created_at_utc": "2026-10-30T02:00:12.626831+00:00",
+    "projection_timestamp_is_not_an_observation": true,
+    "comparison_reference": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+    "disposition": "Publish the historical aggregate research coverage and original hash-validation claims inside an envelope. Do not convert old source hashes or numbered-WSP coverage into acceptance of the current release.",
+    "current_owners": [
+      "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md"
+    ],
+    "original_observation_timestamps": "Retained in historical content; no observation is rerun or redated.",
+    "publication_status": "Proposed, pending independent auditor acceptance; not published by this worker.",
+    "runtime_and_commenting": "UNVERIFIED"
+  },
+  "historical_record": {
+    "schema_version": "1.0",
+    "date": "2026-10-21",
+    "repository_head": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+    "scope": "Distributed research coverage. Full_text means source content was read in bounded model-visible chunks, including truncation repairs; sections_only is explicitly narrower. Source code tracing and focused tests also appear in the three reports and are not claimed as a full repository audit.",
+    "source_manifests": [
+      {
+        "path": "docs/plans/research/2026-10-21-parent-wsp-coverage.json",
+        "sha256": "47b78e7dd5388819baffd0ab2fe10d1c333f3d3c42908bc22095cf366d55f915",
+        "records": 14
+      },
+      {
+        "path": "docs/plans/research/2026-10-21-vision-catalog-coverage.json",
+        "sha256": "15dcd8eff98cb3cd3934ce06a6eedb929ec3fa868cc2f5747f3f8f85d5895dda",
+        "records": 97
+      },
+      {
+        "path": "docs/plans/research/2026-10-21-blockchain-read-manifest.json",
+        "sha256": "d2560236715816a16489750cf07dd26baa9e11b3f7ab5e8d6c541e605c68f476",
+        "records": 43
+      },
+      {
+        "path": "docs/plans/research/2026-10-21-simulator-wsp-coverage.json",
+        "sha256": "aae4535d44dbb277977221882fe94c46ecd70c11ad230eb5914afbaeed1164b1",
+        "records": 21
+      }
+    ],
+    "numbered_wsp_slots_full_text": 110,
+    "numbered_wsp_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107,
+      108,
+      109
+    ],
+    "canonical_numbered_wsp_files_full_text": 111,
+    "missing_numbered_wsp_ids": [],
+    "unique_source_paths": 173,
+    "full_text_paths": 152,
+    "sections_only_paths": 21,
+    "hash_validation": "all_manifest_entries_match_current_files",
+    "files": [
+      {
+        "path": "AGENTS.md",
+        "sha256": "e41a09fbb313cef62cb027f299e2a837cc0168bbbbd44bd67f80d6081b01849a",
+        "bytes": 31333,
+        "lines": 761,
+        "words": 3905,
+        "read_mode": "sections_only",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "sections_only"
+          }
+        ]
+      },
+      {
+        "path": "NAVIGATION.py",
+        "sha256": "a1dc264b3845cc74200c0d77430dabec524035dd0cfac319ba7f197ae83295e1",
+        "bytes": 57641,
+        "lines": 567,
+        "words": 3466,
+        "read_mode": "sections_only",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "sections_only"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/ANNEX_PROMETHEUS_RECURSION.md",
+        "sha256": "b85507f7bdb18c42c4502294562bdd54d1ac2d77c5e37b968619888976293f45",
+        "bytes": 1696,
+        "lines": 45,
+        "words": 235,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+        "sha256": "6e9edd709ca8709296a8f3ddd9c66a113b78d20019f40a25771a84bed817a2b3",
+        "bytes": 42746,
+        "lines": 692,
+        "words": 5643,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-parent-wsp-coverage.json",
+            "read_mode": "full_text"
+          },
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_100_DAE_SmartDAO_Escalation_Protocol.md",
+        "sha256": "22a93681f0a404da51063317474e3511bec08a32655d2d6a3e70166b43db373a",
+        "bytes": 46428,
+        "lines": 1060,
+        "words": 5354,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-simulator-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_101_UPS_Utility_Classification_Protocol.md",
+        "sha256": "b2bf9a735ebf926e3aa567e7fa6ba288480669233c1b0fbbdd0719d67b904c7c",
+        "bytes": 12637,
+        "lines": 391,
+        "words": 1749,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-simulator-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_102_FoundUps_Web_Design_Protocol.md",
+        "sha256": "c937eb079c7fd6a529fd3198d8811bc3218e1598e5218672ec0bfa636bcf9914",
+        "bytes": 6633,
+        "lines": 237,
+        "words": 962,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-parent-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_103_FoundUp_Federation_Protocol.md",
+        "sha256": "120468d4378b101b97c50668b3847908d3b7a6650916bc47c683df0d99a2e881",
+        "bytes": 18617,
+        "lines": 641,
+        "words": 1959,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-simulator-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_104_FoundUp_Route_Namespace_and_Tenant_Isolation_Protocol.md",
+        "sha256": "2606bb6fe81032a205f1652eb13c777d0d6aadaa9260e3933599d48f86b3ec00",
+        "bytes": 13757,
+        "lines": 447,
+        "words": 1886,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-simulator-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_105_CLI_Interface_Standard.md",
+        "sha256": "68aa7affd358605ebf17ecb35aec214e030e64ac19e6f82b3ec740d191032165",
+        "bytes": 7915,
+        "lines": 178,
+        "words": 929,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-parent-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_106_FoundUp_API_Gateway_Protocol.md",
+        "sha256": "c8380eb89088f63ed4a037121d4852816c266382298d7012663b45dc874b4a80",
+        "bytes": 18542,
+        "lines": 740,
+        "words": 1748,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-simulator-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_107_Intelligent_Internet_Orchestration_Vision.md",
+        "sha256": "e276eae074271889f1bca5e156f75f94520154b1c4c55950eb9c3c45fe5ebe38",
+        "bytes": 6107,
+        "lines": 107,
+        "words": 864,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-simulator-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_108_Documentation_Compliance_Guardian.md",
+        "sha256": "97010589b6795e47cec101c2075984a4ad9354c95eeebbc62c290fe24c98fd39",
+        "bytes": 6444,
+        "lines": 159,
+        "words": 798,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-parent-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md",
+        "sha256": "21cc5eb038f443e464fcf70f109054760932da81c72bf5b15af14edbd673c0ec",
+        "bytes": 25708,
+        "lines": 911,
+        "words": 3531,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-simulator-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_10_State_Save_Protocol.md",
+        "sha256": "eb67b2b4db3ca024d4b69cd52ae4a6ddd3f23c7d4ca52162c8234ced392aa3e9",
+        "bytes": 6331,
+        "lines": 137,
+        "words": 920,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_11_WRE_Standard_Command_Protocol.md",
+        "sha256": "24f31cc18e3b8b8e3abc635d26c1bccd5696e0b1724c213e0e5537bfee88a01d",
+        "bytes": 5090,
+        "lines": 123,
+        "words": 709,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_12_Dependency_Management.md",
+        "sha256": "7e8d01972d1ad266bbc9c1f7de4034a5be30597bdbce8ae1d5471a46e10677d3",
+        "bytes": 2080,
+        "lines": 29,
+        "words": 280,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_13_AGENTIC_SYSTEM.md",
+        "sha256": "378da163bf384cebd9929d830b1a82030ba3535aeaf3ba8c6a3a608ffa3c2323",
+        "bytes": 12567,
+        "lines": 287,
+        "words": 1593,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_14_Modular_Audit_Protocol.md",
+        "sha256": "c8837c7d729c629c940bbc2c989d49b6528651942ea74fbf482e020e22c53c5e",
+        "bytes": 472,
+        "lines": 11,
+        "words": 72,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+        "sha256": "706239210fa0404f0f72d3b3c0f06fa3c371262d7d498546d63810d14d09b8d9",
+        "bytes": 13345,
+        "lines": 207,
+        "words": 1762,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_16_Test_Audit_Coverage.md",
+        "sha256": "c702bc12cb0b31e1518e879f3ea069bd1e2fe53cba24ebea68cc4029d7b27021",
+        "bytes": 478,
+        "lines": 11,
+        "words": 74,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_17_Pattern_Registry_Protocol.md",
+        "sha256": "396da9e90f2bb7a5d3ebdd9514f9cce9c710d0f45ed75130506933fa88cb48fd",
+        "bytes": 6998,
+        "lines": 224,
+        "words": 908,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_18_ENFORCEMENT_v2.md",
+        "sha256": "2434ad11f5ecd435577a22189bfbf2be669a7af0b7649c84dae2dcc171c6f833",
+        "bytes": 6936,
+        "lines": 219,
+        "words": 999,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_19_Canonical_Symbols.md",
+        "sha256": "2f9192adb34b1933651b4a4230f8d981692ee1579f0238288c2b5d381437391c",
+        "bytes": 3757,
+        "lines": 65,
+        "words": 510,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_1_The_WSP_Framework.md",
+        "sha256": "15b3c05fa573527ab0f1886934edba928c76028d6db99ee3c29ab82f1f570072",
+        "bytes": 13091,
+        "lines": 228,
+        "words": 1637,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_20_Professional_and_Scientific_Language.md",
+        "sha256": "7679001ac39e897da74531fa16720dd5c0c347cf1ec09bd54a8b61ceabe13e63",
+        "bytes": 7341,
+        "lines": 138,
+        "words": 824,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_21_Enhanced_Prompt_Engineering_Protocol.md",
+        "sha256": "b18e095466d9224ebfce5b367cbb2cdeff7c1d536617749b6c96808fa07509b2",
+        "bytes": 21105,
+        "lines": 479,
+        "words": 2694,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_22_ModLog_Structure.md",
+        "sha256": "0c2d3d3f17a1f3b146d465d45d667b785a98c41ee2aeeb84df8dcec6437853f4",
+        "bytes": 4352,
+        "lines": 109,
+        "words": 557,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_23_rESP_Foundups_Integration_Vision.md",
+        "sha256": "3c00c8036add0659e27b7e8e454e5eeddec0b4768f84c9116f918fdaa6de3f36",
+        "bytes": 6918,
+        "lines": 158,
+        "words": 764,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_24_rESP_Pre-Artifact_Awakening_Test_Suite.md",
+        "sha256": "896917534dc2fb8563c4e0291c5df8b6084be61e046002fa1de29c42774c8e41",
+        "bytes": 4697,
+        "lines": 126,
+        "words": 504,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_25_Semantic_WSP_Score_System.md",
+        "sha256": "2a445ae0c8da4785bc404de63ccfb653e2bf9555972e737dfca0baa087042319",
+        "bytes": 6562,
+        "lines": 146,
+        "words": 697,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md",
+        "sha256": "0b9f6c95bd0d2dafd615a9f61f8f1c784417d710f2a42443fdefd73212f4d33c",
+        "bytes": 71482,
+        "lines": 1604,
+        "words": 9343,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-simulator-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_27_pArtifact_DAE_Architecture.md",
+        "sha256": "575c0684b7d225c805453539c190e941309a35c2afdecfd7cc775da7576c7319",
+        "bytes": 56626,
+        "lines": 975,
+        "words": 7829,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-simulator-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_28_Partifact_Cluster_DAE.md",
+        "sha256": "51a49253c92adcb02691418b33b950b965b547bdab241dce7377d90b8447f526",
+        "bytes": 8476,
+        "lines": 307,
+        "words": 844,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_29_CABR_Engine.md",
+        "sha256": "476614a6c9e6920377efb62042eacc043444b83a9cf978fa8bfbb3f87f15f840",
+        "bytes": 20466,
+        "lines": 561,
+        "words": 2209,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-simulator-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_29_CABR_MEMEX_AUTHORITY_ADDENDUM.md",
+        "sha256": "6f1059661988c354e634edda1f8a5d63907a658547e2eaf4f09268b75f4a519b",
+        "bytes": 3736,
+        "lines": 106,
+        "words": 482,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-simulator-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_2_Clean_State_Management.md",
+        "sha256": "0adc65025bec72039ad5f16ba4e2ed36c04ab5d24b15b07c9ec7165a8fc0427f",
+        "bytes": 5388,
+        "lines": 101,
+        "words": 778,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_30_Agentic_Module_Build_Orchestration.md",
+        "sha256": "d56bf01013aed620b1ce368f671024a3ba284770815873b5cdb5f80e323d00d2",
+        "bytes": 12425,
+        "lines": 234,
+        "words": 1485,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_31_WSP_Framework_Protection_Protocol.md",
+        "sha256": "92caa230903a2908c9c8dadeaadc026263727b6cc8d3b34e9d7aa0dbc5d87a38",
+        "bytes": 17132,
+        "lines": 238,
+        "words": 964,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_32_0102_Reading_Flow_Protocol.md",
+        "sha256": "1828bd7c81f797c62ab2e7c013608c8f7a82bd129c65ae9985bdf4c0e968af31",
+        "bytes": 10261,
+        "lines": 257,
+        "words": 1359,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_33_Autonomous_Module_Implementation_Workflow.md",
+        "sha256": "61cffd96f000eb69ad7b2db49b9fc0a7217c6c0f5d1772e740a1e94884c384e0",
+        "bytes": 10861,
+        "lines": 294,
+        "words": 1279,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_34_Git_Operations_Protocol.md",
+        "sha256": "8a09bce4921a574558e81b0c4885411b0c993789b7f36925407f1550689049c8",
+        "bytes": 9442,
+        "lines": 226,
+        "words": 1225,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_35_HoloIndex_Qwen_Advisor_Plan.md",
+        "sha256": "c939ae69ae45e099b8a0085d5c1f8438c817234bce2feefb7e4de7d1f543f07c",
+        "bytes": 6752,
+        "lines": 111,
+        "words": 827,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_36_Agentic_Core.md",
+        "sha256": "d9a9fd16ea43fa535b49dcc657534803fe7770696af36526681db7dc23e64d81",
+        "bytes": 17921,
+        "lines": 404,
+        "words": 1927,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_37_Roadmap_Scoring_System.md",
+        "sha256": "d1c473e7d695746b7ad440b537cf34feafb3b05412bdde4fb1879e0f7cbdcfda",
+        "bytes": 11351,
+        "lines": 199,
+        "words": 1511,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_38_Agentic_Activation_Protocol.md",
+        "sha256": "d57ce79ac9039b7b5a376330f1acf0f32216d0429a18234e28af69847684e52e",
+        "bytes": 14547,
+        "lines": 379,
+        "words": 1447,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_39_Agentic_Ignition_Protocol.md",
+        "sha256": "e840cb0a0a04e13a06bf8a325d0e073173f444a74754f4cf2b0d112f4d34154d",
+        "bytes": 12940,
+        "lines": 249,
+        "words": 1467,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_3_Enterprise_Domain_Organization.md",
+        "sha256": "e099bdcbbaae27b885bc741e3b6171d0bd2d522e0c5ab4b5a2304f22d0e8f61c",
+        "bytes": 6422,
+        "lines": 108,
+        "words": 810,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_40_Architectural_Coherence_Protocol.md",
+        "sha256": "e0a068f358cd26d179e49c47e2c5a6745b26a9b5828f5db2459bce562c50c2ad",
+        "bytes": 7758,
+        "lines": 144,
+        "words": 975,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_41_WRE_Simulation_Protocol.md",
+        "sha256": "3d2542cf559ed861ba3273da098ae8e1aa541a8dd93569400449dee6d2a6162a",
+        "bytes": 3997,
+        "lines": 53,
+        "words": 567,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_42_Universal_Platform_Protocol.md",
+        "sha256": "54f7373405ba3409a04f5420ca1b797fa6803117e4ae77cf3cc8d43554d15243",
+        "bytes": 3156,
+        "lines": 80,
+        "words": 401,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_43_Agentic_Emergence_Protocol.md",
+        "sha256": "7e9cee5d3f3ed62fb431fabe84a0759851a01cd9dbcadd912f6606dd67d73454",
+        "bytes": 4035,
+        "lines": 84,
+        "words": 483,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_44_Semantic_State_Engine_Protocol.md",
+        "sha256": "ef86ab3592de901e422aeb7da19a0f4ca63ac7e11499884c96d394558ca594df",
+        "bytes": 12509,
+        "lines": 291,
+        "words": 1180,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_45_Behavioral_Coherence_Protocol.md",
+        "sha256": "c6f6518f5e827a962f684e11a6c1a282108b523b08756bbeb178c9ffa78c8950",
+        "bytes": 4244,
+        "lines": 47,
+        "words": 605,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_46_Windsurf_Recursive_Engine_Protocol.md",
+        "sha256": "eede6846e18ff7f55a749628995d8d89178fd6fc40237abafe34a1464f2fb0e4",
+        "bytes": 22456,
+        "lines": 337,
+        "words": 2850,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_47_Module_Violation_Tracking_Protocol.md",
+        "sha256": "29bf496a2a087ef64328f74afbcc2621df6b12ca29e7942a39b072965ed697c4",
+        "bytes": 7422,
+        "lines": 160,
+        "words": 928,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_48_Recursive_Self_Improvement_Protocol.md",
+        "sha256": "d7a39e6d2bec460c3ccf53ca39fb7d3208916c17b76a5e8cfc9e8d782c9d100d",
+        "bytes": 28307,
+        "lines": 657,
+        "words": 3365,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_49_Module_Directory_Structure_Standardization_Protocol.md",
+        "sha256": "64d28cc86f924c215ed6c28a3c1619bba9ffc532b107dac80ff55348cb0edceb",
+        "bytes": 14462,
+        "lines": 299,
+        "words": 1598,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_4_FMAS_Validation_Protocol.md",
+        "sha256": "652a9812077973e71edade006c03e1cecea4242a30e06b53ce7cb808df200e1e",
+        "bytes": 9889,
+        "lines": 144,
+        "words": 1284,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+        "sha256": "3a7a915f3c416484ee593962e3210aac39d21467c3877c9917d081697c81993a",
+        "bytes": 36120,
+        "lines": 909,
+        "words": 4074,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_51_WRE_CHRONICLE.md",
+        "sha256": "fb4e42f7a7dcf3c0e6b69f0f3592cb53d9eef5ad07a8fd93b4d59817bc8069d4",
+        "bytes": 5875,
+        "lines": 129,
+        "words": 734,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_52_The_Agentic_Collaboration_Journal.md",
+        "sha256": "d7512fc3f32d17a11fbf6743371c849505a8c1f4d37f06419e6fea419e11ac4c",
+        "bytes": 2082,
+        "lines": 32,
+        "words": 282,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_53_Symbiotic_Environment_Integration_Protocol.md",
+        "sha256": "9eaf030722e081e8c146494c77a89c0167fc5ff94a10607ec4b04e372bcbcdb1",
+        "bytes": 8154,
+        "lines": 218,
+        "words": 805,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_54_WRE_Agent_Duties_Specification.md",
+        "sha256": "2a8b7d356d9c3277903e8aa1d8bcea78a14ece958803223f7ef6d302e1418df9",
+        "bytes": 11750,
+        "lines": 253,
+        "words": 1253,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_55_Module_Creation_Automation.md",
+        "sha256": "e7a5636811a2e777e30f351e3029148233ceb1f4271226ce5e7a505447945ce9",
+        "bytes": 3387,
+        "lines": 63,
+        "words": 408,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_56_Artifact_State_Coherence_Protocol.md",
+        "sha256": "bc0c2b19fa293ac420001871a0f623b69e12c479f5246ff8f3f4579688e51de2",
+        "bytes": 2473,
+        "lines": 37,
+        "words": 340,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_57_System_Wide_Naming_Coherence_Protocol.md",
+        "sha256": "430bca5a768f5aa231d8c0398af4cc6fb0ddbfc7a94c9286b048d60c1847d288",
+        "bytes": 16469,
+        "lines": 443,
+        "words": 2049,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_58_FoundUp_IP_Lifecycle_and_Tokenization_Protocol.md",
+        "sha256": "23961b29dcd451b5d92b9f008ee7365460f55ffe17f6062d20526f1591a0c24c",
+        "bytes": 5549,
+        "lines": 198,
+        "words": 775,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_59_Distributed_Development_Architecture.md",
+        "sha256": "ec965b0d2379f9a2a9c3743b2a6161d33836bffed9809f381dafa03fad93bffc",
+        "bytes": 7711,
+        "lines": 192,
+        "words": 881,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_5_Test_Coverage_Enforcement_Protocol.md",
+        "sha256": "5222b44206c7f44720085fc980398ea7ae60adb677a24de896b02b9c68be2827",
+        "bytes": 2313,
+        "lines": 31,
+        "words": 336,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_60_Module_Memory_Architecture.md",
+        "sha256": "361483b91bfc23500ff4cac9b07d903f540b67ba2bd312e62c9cf3a0f6e52e43",
+        "bytes": 20988,
+        "lines": 441,
+        "words": 2474,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_61_Theoretical_Physics_Foundation_Protocol.md",
+        "sha256": "552b4fb5772fc3fb8e0c8ff05e64e2bb66bf757098f95fa619f46680e36035f2",
+        "bytes": 9370,
+        "lines": 211,
+        "words": 1099,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+        "sha256": "4e0cf9f0c31515345b0e826d029df3a753ef0e1e1e0eeebd73eee15f5fdb6920",
+        "bytes": 19750,
+        "lines": 443,
+        "words": 2357,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_63_Component_Directory_Organization_Scaling_Protocol.md",
+        "sha256": "5a2332dbff94955d5c04fed303bdbdcff715eadfe598bb58d916999c94b043a5",
+        "bytes": 20919,
+        "lines": 539,
+        "words": 2137,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_64_Violation_Prevention_Protocol.md",
+        "sha256": "8800402496a7dde05dc7ec617996933b90961877e2a6a66ff2e9a8726226217a",
+        "bytes": 22317,
+        "lines": 549,
+        "words": 2529,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_65_Component_Consolidation_Protocol.md",
+        "sha256": "8817dd43b0bf7a42f0c65c2c64b622e1a58320c2dcedebbd9a0cde61e1aa0bd4",
+        "bytes": 17370,
+        "lines": 457,
+        "words": 1699,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_66_Proactive_Enterprise_Modularization_Protocol.md",
+        "sha256": "245310464999a0a145fd259857caf2eea67ec1176d4ce15472599fd316cc72da",
+        "bytes": 17886,
+        "lines": 423,
+        "words": 1886,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_67_Recursive_Anticipation_Protocol.md",
+        "sha256": "f21a96361b83339d711f029f53ac8276421bb1537d51860e0b0b2a450ed93361",
+        "bytes": 9479,
+        "lines": 212,
+        "words": 1126,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_68_Enterprise_Build_Scalability_Protocol.md",
+        "sha256": "3e7ac02aacaee8d70e9ec0d96e4445edfa2593f737cc47590aad28a6deb44dad",
+        "bytes": 11900,
+        "lines": 230,
+        "words": 1367,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_69_Zen_Coding_Prediction_Integration.md",
+        "sha256": "c29a12a690f93acc63d02ffa50fa8ebeb903eea7e23de8c43637828aec3f2dfb",
+        "bytes": 13475,
+        "lines": 255,
+        "words": 1530,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+        "sha256": "3232fc28ec727ae50ec01bc8e24cebe86a8a78cc62510c888a5c56e4921b7f2d",
+        "bytes": 15726,
+        "lines": 296,
+        "words": 1974,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_70_System_Status_Reporting_Protocol.md",
+        "sha256": "a2f672ac14cbba9a966ec372e424b95d5170e0b6932b944d43ea6949bbf22007",
+        "bytes": 9404,
+        "lines": 209,
+        "words": 1140,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_71_Secrets_Management_Protocol.md",
+        "sha256": "83727ee6b87435343ce78d587154ebf84ce0698bc8d4d632780d207d8f4c1897",
+        "bytes": 17631,
+        "lines": 425,
+        "words": 2176,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_72_Block_Independence_Interactive_Protocol.md",
+        "sha256": "7776d069d565da626a4de674d0e678ea7e6b3c7043dcfe75ad6e311fb7707983",
+        "bytes": 11669,
+        "lines": 260,
+        "words": 1245,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_73_012_Digital_Twin_Architecture.md",
+        "sha256": "adb4583f018939be0590bd94155729e19b2680d5533ce8478c8186244e23b47a",
+        "bytes": 11752,
+        "lines": 243,
+        "words": 1530,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_74_Agentic_Enhancement_Protocol.md",
+        "sha256": "d0d58366238bc6a608d55b9f0da31f9f1e0d5f2cab47b570d6c80e34007e7ac8",
+        "bytes": 12184,
+        "lines": 170,
+        "words": 1323,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_75_Token_Based_Development_Output_Protocol.md",
+        "sha256": "592c3f785b29d8341843d72fff23c5fcdfe7dd786d1ef718e8ceeb08371684d0",
+        "bytes": 6682,
+        "lines": 183,
+        "words": 897,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_76_Multi_Agent_Awakening_Protocol.md",
+        "sha256": "d8b38e6b2778e7210e9d2fac7464c1d7dfafbb32c388916af626173f96ec25b7",
+        "bytes": 18679,
+        "lines": 395,
+        "words": 1834,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_77_Agent_Coordination_Protocol.md",
+        "sha256": "65743b55e0d6b6b343332a4d97a2227ab97c0dbec9bfe44e3e03156a0a77e041",
+        "bytes": 10741,
+        "lines": 305,
+        "words": 1321,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_78_Database_Architecture_Scaling_Protocol.md",
+        "sha256": "91f90e2e93f02ef468d46c2068cd50b4925f51becacb02aadee5657ab7879ef9",
+        "bytes": 5049,
+        "lines": 128,
+        "words": 684,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_79_Module_SWOT_Analysis_Protocol.md",
+        "sha256": "0238b8b25f8d86d6d88a212533c159cfaf20bca10ead8fdd5d5abc22d8ebef8f",
+        "bytes": 4775,
+        "lines": 170,
+        "words": 701,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_7_Test-Validated_Commit_Protocol.md",
+        "sha256": "499a630661ac6f33ef1dc45dcd14083b2bfc1ade1cc8219cd137b68ccbf0ff83",
+        "bytes": 2060,
+        "lines": 26,
+        "words": 306,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_80_Cube_Level_DAE_Orchestration_Protocol.md",
+        "sha256": "9a570dabf00623120dacf58cb6e8309a9a36be09bb4c94eb687f26c3ef89146c",
+        "bytes": 11040,
+        "lines": 262,
+        "words": 1590,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-simulator-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_81_Framework_Backup_Governance_Protocol.md",
+        "sha256": "ead8c0d6a681fa4c5c073990bae7473ce6971bdd140075fc469928e5a1b3e584",
+        "bytes": 12573,
+        "lines": 326,
+        "words": 1469,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-simulator-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_82_Citation_Cross_Reference_Protocol.md",
+        "sha256": "2ec68c6477e8e553a8d50d81f023fed3942f3a8ea50a35524debd8040b10a956",
+        "bytes": 6971,
+        "lines": 197,
+        "words": 969,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-simulator-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_83_Documentation_Tree_Attachment_Protocol.md",
+        "sha256": "a18e4fbdbf0bd19167693183ac092fa78c527ad3ac5c45019f3514be89191fb3",
+        "bytes": 11651,
+        "lines": 343,
+        "words": 1450,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-simulator-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+        "sha256": "b3e7a654dccda6275a720398315606c894a1b7e5a06c083a9257e6b0a6aeb345",
+        "bytes": 15702,
+        "lines": 468,
+        "words": 2058,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-simulator-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_85_Root_Directory_Protection.md",
+        "sha256": "45691e9a3030c56121899e81a427cd5c0ed4b945611d2eb5cc480cc396774b9c",
+        "bytes": 10264,
+        "lines": 281,
+        "words": 1186,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-simulator-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_86_0102_Modular_Navigation_Protocol.md",
+        "sha256": "05274f4aed1b68bff42512c1d1cf02505fb923d24cedf175d7a3733ec68a530d",
+        "bytes": 18170,
+        "lines": 468,
+        "words": 2110,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-simulator-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_87_Code_Navigation_Protocol.md",
+        "sha256": "1a9ae5dadb830a0a40922825c4330f46dc6f8c2b6c8b8c6586084ab016186ae6",
+        "bytes": 19973,
+        "lines": 429,
+        "words": 2609,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-parent-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_88_Vibecoded_Module_Remediation.md",
+        "sha256": "2c59456fb3d3428cf97adedf3067de24d4c04c1040c51bd530de3fc730cc5586",
+        "bytes": 5478,
+        "lines": 88,
+        "words": 709,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-parent-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_89_Production_Deployment_Infrastructure_Protocol.md",
+        "sha256": "ccf1785f539fa19ff58d7f4a11f302688dda6fb5de7a2e7c0f6c70638b518cb6",
+        "bytes": 11145,
+        "lines": 379,
+        "words": 1310,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-parent-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_8_LLME_Semantic_Triplet_WSP_Rating_System.md",
+        "sha256": "c45b52d4d444f7d47c41ed2a6d42d6ecf1f3903d31137891ab166cf6b026c9d8",
+        "bytes": 3063,
+        "lines": 52,
+        "words": 451,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_90_UTF8_Encoding_Enforcement_Protocol.md",
+        "sha256": "37a2333e9ecc430ab67be7d5621447db635556c7e80e390526f9f8cece3067e0",
+        "bytes": 16696,
+        "lines": 573,
+        "words": 1989,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-parent-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_91_DAEMON_Observability_Protocol.md",
+        "sha256": "f0b660d434f273df5cd4cad2ea5cd1c0d6df35a5c09686cbf12e209a887e6f5e",
+        "bytes": 31259,
+        "lines": 945,
+        "words": 2860,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-parent-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_92_DAE_Cube_Mapping_and_Mermaid_Flow_Protocol.md",
+        "sha256": "da008a17da24daa4ff295084cb27e06bd2e6ea19b7d2cc6d74e40e0321ec73a9",
+        "bytes": 8490,
+        "lines": 241,
+        "words": 1071,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-parent-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_93_CodeIndex_Surgical_Intelligence_Protocol.md",
+        "sha256": "d82e62aa8a98dc0849f58fa768471958c04187ce78e3535e071307de79133a72",
+        "bytes": 33273,
+        "lines": 961,
+        "words": 3566,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-parent-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_94_Agent_Coordination_Protocol.md",
+        "sha256": "41a82502b7fc66df7e6d66fded7003db97b24e7b4bd97ad31ad93fc31383835e",
+        "bytes": 966,
+        "lines": 27,
+        "words": 137,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-parent-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_95_WRE_SKILLz_Wardrobe_Protocol.md",
+        "sha256": "25eb07bf42d8b4c72e5aa465d3725e2d70a7058ce077f946d635f983ca5d26c3",
+        "bytes": 14491,
+        "lines": 365,
+        "words": 1975,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-parent-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_96_MCP_Governance_and_Consensus_Protocol.md",
+        "sha256": "bdeeb2b421c79a79536b3d9f77fa000ab303b0c447f9d97389604bf4e5a2ca50",
+        "bytes": 22865,
+        "lines": 504,
+        "words": 2884,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-parent-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md",
+        "sha256": "5dcb531b5eac2cbd77bce102b5ccee650f230a0576124a7c97cfdbf4c357b263",
+        "bytes": 33156,
+        "lines": 778,
+        "words": 4343,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-simulator-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_98_FoundUps_Mesh_Native_Architecture_Protocol.md",
+        "sha256": "2903f5cd6c18b18383d16ca37a62746d88e793df56c19d0fceb07af396615e18",
+        "bytes": 9576,
+        "lines": 223,
+        "words": 1286,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-simulator-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_99_M2M_Prompting.md",
+        "sha256": "0895cb9169470faa00d1d242e785850b6bece3fc92a6b7bad0c90a51d8a147d3",
+        "bytes": 11789,
+        "lines": 456,
+        "words": 1497,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-simulator-wsp-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_9_Project_Configuration_Standard.md",
+        "sha256": "028d100b2494738415a7fdb69cc177d29515e51190d3d7121f1444ca0e8fc27b",
+        "bytes": 1966,
+        "lines": 49,
+        "words": 262,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_CORE.md",
+        "sha256": "65cf6681e004b364a9ddafed0a190fc9b719d8edc66b16df4b3344e8e9612c27",
+        "bytes": 33361,
+        "lines": 659,
+        "words": 4140,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_INIT.md",
+        "sha256": "8c923122239e08d30a4229f2793a785f15cec9f27d7fb371c1fdd3b1432ee744",
+        "bytes": 21874,
+        "lines": 537,
+        "words": 2629,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          },
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_MASTER_INDEX.md",
+        "sha256": "e8b39d4488bb083a2c3b58ecf883b2be70dd1f4cc922ae88c24fe8752c2f5e1e",
+        "bytes": 39072,
+        "lines": 295,
+        "words": 5826,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_framework/src/WSP_framework.md",
+        "sha256": "f091a78a03e3bb8db6f782db2219118664892bd0fc51c162ed15aada8d4f782d",
+        "bytes": 27530,
+        "lines": 501,
+        "words": 3162,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-blockchain-read-manifest.json",
+            "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+          }
+        ]
+      },
+      {
+        "path": "WSP_knowledge/docs/FoundUps_0102_Vision_Blueprint.md",
+        "sha256": "9802815cad62c032c827ce67c240938023cee943c9ef89a6d05d58f55249fea7",
+        "bytes": 42938,
+        "lines": 805,
+        "words": 4850,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_knowledge/docs/VISION_ALIGNMENT_CRITICAL_ANALYSIS_2025_09_16.md",
+        "sha256": "360a5ff31172a3dc3ff702897fa3797084721ace21b505005b254454356ea4c3",
+        "bytes": 12144,
+        "lines": 331,
+        "words": 1584,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_knowledge/docs/WRE_FoundUps_Vision.md",
+        "sha256": "2ea9df71a785dee0446c3b91abc31dd2643d7570846fdc72f72a6c1d9eba0154",
+        "bytes": 57246,
+        "lines": 861,
+        "words": 6495,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_knowledge/enterprise_vision/FoundUps_Vision_2025.md",
+        "sha256": "85e947ef925b83efc75e81bf3a7a2e6bdc7ab962ceb1676e88343e58b4d4bb3d",
+        "bytes": 20245,
+        "lines": 370,
+        "words": 2355,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_knowledge/red_dog_external_state/ACTIVE_RESEARCH_THREADS.md",
+        "sha256": "deb7c7a8b5c8993261b26a8547ed7515e8ab02d6ec8b6077136a20ff3dc381f2",
+        "bytes": 2801,
+        "lines": 65,
+        "words": 312,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_knowledge/red_dog_external_state/BOOTSTRAP.md",
+        "sha256": "f9fb599919a0e90a6c0242d219ed47503b5fc51bbe682a8d64b94f7601f80738",
+        "bytes": 1891,
+        "lines": 44,
+        "words": 243,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_knowledge/red_dog_external_state/CURRENT_CONTEXT.md",
+        "sha256": "d3a924a1acd249f4ac5f83afce6a3610c5aaf31e3e838e465900ed4b09d05551",
+        "bytes": 2177,
+        "lines": 49,
+        "words": 262,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_knowledge/red_dog_external_state/MEMORY_BOUNDARY.md",
+        "sha256": "0784b9d2421d1fb4369fd31b9be8c153b1f89c8af4469dd74a4278d035c7becb",
+        "bytes": 1911,
+        "lines": 50,
+        "words": 237,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "WSP_knowledge/red_dog_external_state/WORK_TO_WORK_LINEAGE.md",
+        "sha256": "194caeeadf96c9751680a6bc20ffbc7f40ddd370921972155ea5b173e04a8604",
+        "bytes": 1815,
+        "lines": 48,
+        "words": 224,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "docs/0102_session_briefings/ACTIVE_SLICE_LEDGER.md",
+        "sha256": "ced0d1a765dfbad68db50f9aa7c00fd13bee9f0e9c3adfe1f83c3fb081c57c89",
+        "bytes": 16519,
+        "lines": 215,
+        "words": 1958,
+        "read_mode": "sections_only",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "sections_only"
+          }
+        ]
+      },
+      {
+        "path": "docs/0102_session_briefings/FOUNDUPOPS_MANIFEST_DISCOVERY_AND_FAM_REGISTRY_PHASE1.md",
+        "sha256": "20e8a413e2d07d1297bdbfd5edf617532521b7bc5bcd24d7b617d14368c4b12c",
+        "bytes": 6787,
+        "lines": 204,
+        "words": 866,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "docs/0102_session_briefings/README.md",
+        "sha256": "cd00acc1cfd1728ea58f3e05f0f0644750d0d82021ef61779b27603c6c9a83ad",
+        "bytes": 1481,
+        "lines": 31,
+        "words": 152,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "docs/012_VISION_DEEP_THINK_ANALYSIS.md",
+        "sha256": "4c61411302f053d08aff4b0b04ad04592255936123cae7583da03a47cf04762e",
+        "bytes": 52089,
+        "lines": 1196,
+        "words": 5317,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "docs/OUTER_LAYER_VISION_EXTRACT.md",
+        "sha256": "d5c3a6797df3e922ce607b43f4961203e34d73e1022b7db0f0812723bb68f5c5",
+        "bytes": 2305,
+        "lines": 22,
+        "words": 239,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "docs/architecture/FOUNDUP_SOURCE_AUTHORITY_CONTRACT.md",
+        "sha256": "4bcc64f75fb68ac728ff2b5ddf6b6e0e3c1487e78cf0b1ad37868bb684b600af",
+        "bytes": 33503,
+        "lines": 531,
+        "words": 4454,
+        "read_mode": "sections_only",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "sections_only"
+          }
+        ]
+      },
+      {
+        "path": "docs/audits/architecture/FOUNDUPS_3V_ENGINE_VISION_CONCATENATION_AUDIT_PHASE1.md",
+        "sha256": "c9a019d8ad5c1e46f580691f16de53c5079538c71fcc545e4d5196b09d540d03",
+        "bytes": 18986,
+        "lines": 466,
+        "words": 2710,
+        "read_mode": "sections_only",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "sections_only"
+          }
+        ]
+      },
+      {
+        "path": "docs/audits/architecture/FOUNDUP_CANONICAL_INVENTORY_AND_STAGE_REGISTRY_AUDIT_PHASE1.md",
+        "sha256": "0e2596cab8db8c91be387decbfeec2805384f46921d9dd31ce1b831405708ce5",
+        "bytes": 14034,
+        "lines": 340,
+        "words": 1688,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "docs/audits/architecture/FOUNDUP_CANONICAL_REGISTRY_POPULATION_PHASE1.md",
+        "sha256": "7ee54579e3d057007e25bcc00a9a2ba2579fe0936f993cb57dab946213e126d8",
+        "bytes": 5892,
+        "lines": 160,
+        "words": 629,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "docs/audits/architecture/HOLOINDEX_PROD_01_REGISTRY_ENTRY_PHASE1.md",
+        "sha256": "f7dfd80b659ebfb4a06614a28b24b00da8ccef8994649c5812d03116bdaabd3f",
+        "bytes": 7136,
+        "lines": 203,
+        "words": 930,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "docs/audits/pfmall_foundup_identity/CANONICAL_FOUNDUP_INVENTORY.md",
+        "sha256": "0c0d112d1d9dfcfe7016d65bac48631d0e2e33cca8ae71244c676dbd5cb3f4b1",
+        "bytes": 6119,
+        "lines": 116,
+        "words": 853,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "docs/foundups_vision.md",
+        "sha256": "105607f17b8789b6206bca2f56bada36324a616145843602c5c4cd4c40b9c9ec",
+        "bytes": 23236,
+        "lines": 449,
+        "words": 3131,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/INTERFACE.md",
+        "sha256": "cd5898933bdf5a12defc876c14099e70492eac5e1bcbcd5247bc2d956224f3a5",
+        "bytes": 12164,
+        "lines": 425,
+        "words": 1203,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/ModLog.md",
+        "sha256": "32ebcee5e6aed312eb800b2bd083c1bfafa1b58043b0f52f818bc8bd22981221",
+        "bytes": 20384,
+        "lines": 455,
+        "words": 2187,
+        "read_mode": "sections_only",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "sections_only"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/README.md",
+        "sha256": "8858ed95e4f8f3d035e76481fb96df7893ef7d59f2f98a361adbcab00a30be48",
+        "bytes": 17388,
+        "lines": 347,
+        "words": 1878,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/ROADMAP.md",
+        "sha256": "d9ced875d0cc6c50d40071bf06914ace45bfe55e036c12f53c6ea63a50a2d5f6",
+        "bytes": 6591,
+        "lines": 163,
+        "words": 812,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/agent/src/source_authority.py",
+        "sha256": "5115c40d0e951adbcdfb5a0b995f1735911f4c799b881c6955bf3fceb550738f",
+        "bytes": 7352,
+        "lines": 173,
+        "words": 884,
+        "read_mode": "sections_only",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "sections_only"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md",
+        "sha256": "8600778425fc7151fd8ca44d436718e542b3898478f1c976761804a3d0369d98",
+        "bytes": 12071,
+        "lines": 331,
+        "words": 1441,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/docs/FOUNDUP_EXFOLIATION_PROTOCOL.md",
+        "sha256": "af096eda144f1473e735d406325cb3d0ace4ebc06bc7967dcd461d3026e94dbd",
+        "bytes": 5484,
+        "lines": 203,
+        "words": 800,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/docs/PFMALL_LAUNCH_CATALOG_TAXONOMY.md",
+        "sha256": "f9e84e11c6900cf8212d09639adb7a3bde5010ea83351e86cdf16f8b5064bfa6",
+        "bytes": 17843,
+        "lines": 312,
+        "words": 2304,
+        "read_mode": "sections_only",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "sections_only"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/foundup_registry.json",
+        "sha256": "aae1f9074ae4fac5541b2e41e7b4be9a629d6398bc5971e5cab75147cc5787ea",
+        "bytes": 25723,
+        "lines": 650,
+        "words": 1466,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/foundup_registry.schema.json",
+        "sha256": "1698cf577f9d92f9d9bcd4a6b9624d87f55483b521b4ee9b6941d99d9abc424a",
+        "bytes": 11047,
+        "lines": 375,
+        "words": 850,
+        "read_mode": "sections_only",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "sections_only"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/gotjunk/foundup_manifest.json",
+        "sha256": "8f79753448c5c1b0843984de0ae3be5a9112fba7e8d36372ae977ee56af342cc",
+        "bytes": 3474,
+        "lines": 105,
+        "words": 245,
+        "read_mode": "sections_only",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "sections_only"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/holoindex_prod_01/foundup_manifest.json",
+        "sha256": "9d6219e8199b77296f61e0b23b739ec74ccb3eb5926a20763ed456fdcc6f5602",
+        "bytes": 1013,
+        "lines": 30,
+        "words": 72,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/identity_shield/docs/intake/FOUNDUP_MANIFEST_DRAFT.md",
+        "sha256": "7a6ffeb2a9591b80f1f42076fc9500f444f0827167123ad1e7e6e8f45159d72e",
+        "bytes": 2326,
+        "lines": 47,
+        "words": 298,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/kosei/foundup_manifest.json",
+        "sha256": "8fd71f6672c012c02b72b77b034e7ef197752dfaf5aada8f7edcd1a78148ad65",
+        "bytes": 3452,
+        "lines": 110,
+        "words": 248,
+        "read_mode": "sections_only",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "sections_only"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/memory/README.md",
+        "sha256": "c35dbd2a29282d06fea24975e867fe9ccf4089c3cf53cfed0eec75fde56e6e83",
+        "bytes": 10038,
+        "lines": 296,
+        "words": 932,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/pfmall/api.py",
+        "sha256": "8cef4f38d40ff6190a4a9cf149f0a411975ab019d65bbc75babe8d0938c4c9f2",
+        "bytes": 4867,
+        "lines": 149,
+        "words": 460,
+        "read_mode": "sections_only",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "sections_only"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/pfmall/shell_core.py",
+        "sha256": "401700518796d6d3f99223cdbfe40a59dbbb264bf1ecb3082d52d3e89431cdb4",
+        "bytes": 25121,
+        "lines": 708,
+        "words": 2024,
+        "read_mode": "sections_only",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "sections_only"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/public_catalog_projector/INTERFACE.md",
+        "sha256": "f6b8af74b6a7aa1d418563d83850f9abd3c121b86082a3c5c5d83033cec2a7c6",
+        "bytes": 2273,
+        "lines": 45,
+        "words": 255,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/public_catalog_projector/ModLog.md",
+        "sha256": "82069dc9594cd70f768c7ca5b4f54f6b4cb5a12335be87abfe7d65ae7725a255",
+        "bytes": 2071,
+        "lines": 38,
+        "words": 234,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/public_catalog_projector/README.md",
+        "sha256": "1358ad0d13d068aae5e50ea5ef8e00c674298bdab16fc68263d7bb691bbeebfe",
+        "bytes": 2577,
+        "lines": 57,
+        "words": 307,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/public_catalog_projector/requirements.txt",
+        "sha256": "f74da12489e67a3b47ba675ea0a6bde240ffbb9d524362440c2700cb5e94eeea",
+        "bytes": 139,
+        "lines": 4,
+        "words": 19,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/requirements.txt",
+        "sha256": "13681f43e6119c406806406da4eac5080636d8780c38088b2c20a8fe13afdd3b",
+        "bytes": 3286,
+        "lines": 107,
+        "words": 361,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/shield/foundup_manifest.json",
+        "sha256": "a50182b824ad4828942ddadce9efde602ef3b0150d37af4ac8b17f865996ad34",
+        "bytes": 1351,
+        "lines": 35,
+        "words": 104,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/src/foundup_registry_loader.py",
+        "sha256": "310d1f1afbdf43081e8d4f0a11229f816fd010fdb9773ab2941c6e4b1c3c8820",
+        "bytes": 7309,
+        "lines": 219,
+        "words": 704,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/tests/README.md",
+        "sha256": "3ea7be35b2076b7f56a66f727694777882a5e3165c1daf42a444b0f1c5f24248",
+        "bytes": 2601,
+        "lines": 72,
+        "words": 306,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/tests/TestModLog.md",
+        "sha256": "d3c24efa4e935da954c8d45978f927b6fb42b9fab6e4a2476ade6a34a0771e69",
+        "bytes": 3801,
+        "lines": 86,
+        "words": 428,
+        "read_mode": "full_text",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "full_text"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/trade/foundup_manifest.json",
+        "sha256": "3d66cf40e84969d7190deea66b2f76554216476af477b641176808a83c953a4a",
+        "bytes": 3439,
+        "lines": 113,
+        "words": 244,
+        "read_mode": "sections_only",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "sections_only"
+          }
+        ]
+      },
+      {
+        "path": "modules/foundups/voteballots/foundup_manifest.json",
+        "sha256": "2cdccdbf8580f734bfe1595a754946399e8a4e85cb09500b3288409aa1b6541e",
+        "bytes": 3660,
+        "lines": 107,
+        "words": 263,
+        "read_mode": "sections_only",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "sections_only"
+          }
+        ]
+      },
+      {
+        "path": "modules/gamification/whack_a_magat/foundup_manifest.json",
+        "sha256": "4b9d0342d3a0a8c6bbf491f63dc5a41e7c3db30699bf40fbbff7f0b1f2da1140",
+        "bytes": 3405,
+        "lines": 105,
+        "words": 240,
+        "read_mode": "sections_only",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "sections_only"
+          }
+        ]
+      },
+      {
+        "path": "modules/platform_integration/antifafm_broadcaster/foundup_manifest.json",
+        "sha256": "da98c3debf9674131ff44a3730dba77c72690964d27f7d1304a6514fa38c1898",
+        "bytes": 3515,
+        "lines": 105,
+        "words": 243,
+        "read_mode": "sections_only",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "sections_only"
+          }
+        ]
+      },
+      {
+        "path": "public/f/portfolio_data.json",
+        "sha256": "46e282c66011dab146027aa840cd64bc8762b3fb21ff9f138c160924cc6ba099",
+        "bytes": 1928,
+        "lines": 50,
+        "words": 145,
+        "read_mode": "sections_only",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "sections_only"
+          }
+        ]
+      },
+      {
+        "path": "public/f/public_catalog.json",
+        "sha256": "519dfb90e5367fc300bec08a2a05a39d1bee341ecafa9c8626f24387d629a8ff",
+        "bytes": 2219,
+        "lines": 56,
+        "words": 155,
+        "read_mode": "sections_only",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "sections_only"
+          }
+        ]
+      },
+      {
+        "path": "public/member/mall-catalog.json",
+        "sha256": "94b6ee0015d9fdd8f3045570d4c45fd096dc34b910ae7eb412d7e965a4e4e260",
+        "bytes": 2691,
+        "lines": 65,
+        "words": 251,
+        "read_mode": "sections_only",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "sections_only"
+          }
+        ]
+      },
+      {
+        "path": "public/member/mall-video-catalog.json",
+        "sha256": "1295357e3125b9e2527f3b8fa005761ca99890c2f187c96549aaaf7561301de1",
+        "bytes": 510862,
+        "lines": 11404,
+        "words": 26988,
+        "read_mode": "sections_only",
+        "reviews": [
+          {
+            "manifest": "2026-10-21-vision-catalog-coverage.json",
+            "read_mode": "sections_only"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,5 +1,19 @@
 # FoundUps Domain - ModLog
 
+### 2026-10-30 — Persistent repository-first FoundUp intake rule
+
+**2026-10-31 blockchain alignment:** domain entry points now link WSP26's
+simulator-first change contract and current reconciliation. Discovery, repository
+claims, pitch creation and FX interfaces remain subordinate to validated economic
+and authority contracts. GitHub source publication is separate from deployment;
+no economic policy is silently selected. WSP22/26/50/83/97.
+
+- At 012's explicit request, recorded the future-work retrieval rule in `docs/FOUNDUP_ONBOARDING_PROTOCOL_PHASE1.md` and linked it from the domain README.
+- Retrieve current WSP 109 and applicable Skillz before new/existing FoundUp work; preserve Outcome -> Solution -> Pain, staged Solution and implementation barriers within Pain.
+- Distinguish current instructions/candidate skills from admitted or executed skills, and document unavailable HoloIndex/runtime checks honestly.
+- Vote's claim-verification packet now follows the clarified framing, keeps MVP scope unspecified, and records observed manifest/registry draft parameters.
+- Documentation only; no runtime, skill bundle, registry, public launch or ChatGPT account-memory mutation. References: WSP 22/30/50/62/95/97/108/109.
+
 ### 2026-10-25 — PR1792 reusable brand schema candidate
 
 Add the original optional brand-context schema and registry path field while

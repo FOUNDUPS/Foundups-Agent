@@ -1,4 +1,16 @@
 # WSP Module ModLog: Shared Utilities
+
+## 2026-10-29 — Export the existing LM Studio node-lock identity
+
+- Added `lm_studio_node_lock_identity` within the existing lifecycle owner;
+  transactions and explicit dependency startup reuse the same prior lock name.
+  No new lock/lease/service manager, journal format or model action was added.
+- Three alias controls compare the prior canonical-JSON hash protocol and the
+  actual borrow-only transaction lock/journal digest. These are included in the
+  dependency launcher's49 startup cases within94 actual-source offline checks,
+  not a separate additive total. No real server/model/process call was made.
+- Existing General/code role selection and defaults remain unchanged. WSP11/22/84/97.
+
 **WSP Compliance**: WSP 22 (Module ModLog and Roadmap Protocol)
 
 ## 2026-10-19 - Preserve path semantics while removing POSIX containment exceptions

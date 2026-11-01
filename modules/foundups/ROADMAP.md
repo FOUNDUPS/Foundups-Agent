@@ -1,6 +1,13 @@
 # FoundUps Domain Roadmap
 
 ## Purpose
+
+Blockchain work follows [WSP26's simulator-first contract](../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract)
+and the [current reconciliation gates](../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md).
+Publish reviewed source separately from economic activation. Test and review
+economic changes in the simulator, update governing docs/mirrors, then prove chain
+parity. Discovery, claims and FX venues remain downstream of these contracts.
+
 Keep FoundUps delivery coherent across sessions and agents by using an Occam-first
 layered plan from PoC to MVP.
 

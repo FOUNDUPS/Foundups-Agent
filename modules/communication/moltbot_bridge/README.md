@@ -1,3 +1,27 @@
+## Ollama fallback settings — 2026-10-29
+
+The local fallback defaults to `qwen-overseer:latest`, defined by the repository's
+`models/Modelfile.qwen-overseer`. That file refers to a host-specific GGUF path;
+the named model must already be created in Ollama. Set `OPENCLAW_OLLAMA_MODEL`
+to an installed model name, or explicitly blank it to disable this fallback.
+No model is downloaded, created or started by this change.
+
+`OPENCLAW_OLLAMA_TIMEOUT_SEC` defaults to 120 seconds and is clamped to 15–300.
+Blank, invalid or non-finite values use 120. The synchronous HTTP call receives
+this Requests connect/read timeout; it is not a total-turn deadline or immediate
+cancellation. Existing cancellation checks run before and after that call.
+See `docs/OLLAMA_SETUP.md` for setup. Offline contracts pass; live cold-start
+readiness and installed-runtime behavior require separate acceptance.
+
+## Denied WSP preflight
+
+A failed WSP preflight returns an explicit security-block response. It stops
+before permission resolution, planning, conversation execution and result-memory
+updates; it does not turn the denied request into a conversation. Earlier
+continuity/classification reporting and skill checks still occur. Authorized
+advisory behavior, ZeroClaw profile selection and call-local skill verdicts keep
+their existing contracts. See [the interface](INTERFACE.md#denied-wsp-preflight).
+
 ## Installed HIGH source integration — 2026-10-23
 
 PR #2181 reconciles preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
@@ -1389,3 +1413,12 @@ coerced or trimmed. Existing invalid-cache errors still propagate first.
 ### Correspondence authority status — 2026-10-06
 
 For #1779, the legacy V2 JavaScript sender boundary is a quarantined fail-closed compatibility surface. The canonical implementation is the service-owned Python `CorrespondenceSenderBoundary` in `src/reddog_correspondence_sender_boundary.py`. Repository tests qualify that contract only; external Gmail/Work capability isolation remains a deployment/host requirement and must not be inferred from source or a successful individual send.
+
+## Phone-call safety education
+
+[RedDog call safety](../../../.agents/skills/reddog-call-safety/SKILL.md) provides
+WSP 97 call/turn review, missed-call evidence handling, Japan telephony research,
+and offline attack/benign evaluation cases. This is an education package;
+phone integration and runtime enforcement are `SPECIFIED_NOT_IMPLEMENTED`.
+See its [research notes](docs/REDDOG_CALL_SAFETY_RESEARCH_20261013.md)
+before reusing the existing voice ingestion or synthetic chat routing.

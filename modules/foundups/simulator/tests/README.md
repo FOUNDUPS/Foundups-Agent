@@ -1,6 +1,47 @@
 # FoundUps Simulator Test Suite
 
+## Replay-safe epoch effects — 2026-11-01
+
+Existing `test_staker_hurdle_state.py`, `test_epoch_ledger_settlement_commitment.py`
+and `test_layer_d_anchor_runtime.py` retain prior oracles and add41 controls for
+complete effects, detached exact/late retries, conflicts, invalid requests,
+overflow, shared staker sequencing, failed preparation, concurrency, captured
+Mesa retry and observer failures. The three-owner run passes192; separate frozen
+acceptance plus held-outs passes57. These scopes overlap. See
+[TestModLog](TestModLog.md) for the genuine RED failures, source bindings,
+controlled-process trace parity and rejected initial nondeterministic traces.
+Do not infer reproducibility from config.seed alone or chain safety from mocks.
+The [interface](../INTERFACE.md#pool-epoch-effect-contract--2026-11-01) states the
+process-local boundary and remaining funded/durable accounting work.
+Broader simulator:930 pass with the same3 SSEHTTP deselections; package checks
+pass8 Python cases and3 Node entrypoints. These are separate, overlapping scopes.
+
+## Wallet policy security suite — 2026-11-01
+
+`test_wallet_policy.py` freezes constructor, host replacement, allocation, hostile
+object admission, nested alias isolation, public-view immutability, exact integer
+limits and legacy empty-policy behavior. Desired baseline: 76 cases, 6 passed/
+70 failed. Candidate with three original regression owners: 311 passed, no
+failures/errors/skips or instrumented forbidden effects. Independent held-outs
+are separate; counts overlap other runs and do not establish chain security.
+
+
 This directory contains regression tests for the FoundUps simulator module.
+
+`test_docs_contract_alignment.py` also checks the explicit blocked denomination
+conflict against the tested genesis value and compares governing WSP26/27/29/100
+mirrors. These are documentation guardrails, not funded settlement tests. Any
+resolution needs a reviewed simulator decision and new economic oracles before
+changing the conflict expectation; do not simply delete the gate.
+
+2026-10-31: `test_cabr_flow_router.py` adds exact-bool/finite scalar admission
+and seeded valid-formula/conservation properties; `test_circuit_breaker.py`
+covers competing severity, frozen-clock cooldown, queue hold and invalid inputs.
+The final connected9-owner run passes414 cases; independent6 held-outs pass.
+The seven separate external adversarial probes have six unresolved failures;
+they are recorded in the architecture receipt, not passing chain-security tests.
+Use credential-free scratch storage and real central-daemon scratch configuration;
+no live signer/provider is necessary or authorized for these tests.
 
 ## Work/stake/unstake numeric admission
 

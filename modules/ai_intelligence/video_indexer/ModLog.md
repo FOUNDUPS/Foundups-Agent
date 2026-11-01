@@ -1,5 +1,31 @@
 # Video Indexer Module - Modification Log
 
+## 2026-10-29 — Reconcile preserved YUMORI evidence work order (#1667)
+
+Preserve the original proposal/history, campaign dates and all three JSON/flow
+blocks. Use canonical Moshpit terminology and filename; correct the obsolete
+architecture path and unwired-action descriptions against current action_surface.
+Single-video, channel, registry/browser-grouped portfolio and default-one-cycle
+daemon routes already exist. Reuse current JSON persistence and its SQLite
+metadata catalog; no duplicate route or memory store is introduced.
+
+The YUMORI extractor/projection remains SPECIFIED_NOT_IMPLEMENTED. Current source
+wiring does not qualify live Studio operation or the still-unimplemented unified
+Moshpit renderer. Authenticated visibility is separate from disclosure authority;
+generated/source text is untrusted data, and OBSERVED requires source/timestamp
+support. The proposed live test is explicitly future acceptance, not a dispatch.
+
+Validation: source/text/hash review preserves all original campaign-date counts
+and schema/flow blocks; all five existing owner paths and the canonical relative
+architecture link resolve. The accepted current-main Holo bundle identified the
+actual action/test owners; unrelated shorts/public-member hits were reranked.
+Required artifacts exist; optional planning/memory/runbook artifacts are absent.
+Affected module/CLI/architecture trees are unchanged between retrieval main45aa
+and integration mainc2d4. No executable code, test assertions, runtime metadata,
+browser/provider action or installed-runtime claim. Hosted and resulting-main/
+Holo checks remain separate gates. WSP 11/22/50/60/84/87/97.
+
+
 ## 2026-10-22 - Retain omitted-language compatibility for English-only models
 
 A private omission sentinel distinguishes legacy callers from explicit `None`

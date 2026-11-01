@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import JSON, Boolean, DateTime, Enum, Index, Integer, String, Text
+from sqlalchemy import JSON, Boolean, CheckConstraint, DateTime, Enum, Index, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from ..models import PayoutStatus, TaskStatus
@@ -134,6 +134,30 @@ class PayoutRow(Base):
     status: Mapped[PayoutStatus] = mapped_column(Enum(PayoutStatus), default=PayoutStatus.INITIATED)
     reference: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
     paid_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class TestnetTransferIntentRow(Base):
+    """Prepared probe identity; no transport or payment state is represented."""
+
+    __tablename__ = "testnet_transfer_intents"
+    __table_args__ = (
+        UniqueConstraint("payout_id", "purpose", name="uq_testnet_payout_purpose"),
+        CheckConstraint("purpose='TEST_TRANSPORT_PROBE'"),
+        CheckConstraint("format_version=1"),
+        CheckConstraint("state='PREPARED'"),
+    )
+    intent_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    payout_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    purpose: Mapped[str] = mapped_column(String(64), nullable=False)
+    format_version: Mapped[int] = mapped_column(Integer, nullable=False)
+    state: Mapped[str] = mapped_column(String(64), nullable=False)
+    foundup_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    task_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    actor_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    identity_json: Mapped[str] = mapped_column(Text, nullable=False)
+    identity_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    created_at_epoch_s: Mapped[int] = mapped_column(Integer, nullable=False)
+    expires_at_epoch_s: Mapped[int] = mapped_column(Integer, nullable=False)
 
 
 class DistributionPostRow(Base):

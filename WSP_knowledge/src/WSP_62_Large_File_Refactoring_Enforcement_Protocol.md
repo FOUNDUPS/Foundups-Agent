@@ -300,6 +300,38 @@ exemptions:
   policy. A candidate cannot authorize a new mode by changing this protocol
   and consuming that mode in the same diff.
 
+#### 5.1.3. Historical Missing-Expiry Completion
+
+An incomplete temporary exemption may record its already-overdue review
+boundary without receiving a renewal. This is a bounded metadata repair,
+not approval of the underlying debt. All of these conditions are required:
+
+1. The exact comparison base already contains this policy and the exemption.
+   Policy must land separately before implementation or metadata consumes it;
+   a candidate-authored policy cannot authorize its own exception.
+2. The base entry has `temporary: true`, no `expires_on` key, a string
+   `review_date` exactly matching `YYYY-Q1` through `YYYY-Q4` with a valid
+   calendar year, and nonempty string `reviewer` and `remediation` fields.
+3. The only entry change is adding a string `expires_on` in `YYYY-MM-DD`
+   format, equal to the last calendar day of that existing review quarter.
+   That day must be strictly earlier than the evaluation date. Current or
+   future review quarters do not qualify.
+4. Every other field, including ownership, justification, enforcement mode,
+   file/function ceilings and threshold overrides, remains identical to the
+   exact base. Ordinary source-growth and exemption-authority checks still
+   run; the completion cannot excuse a limit increase or new debt.
+5. The completed entry remains `EXEMPTION_EXPIRED` remediation debt. The
+   recorded boundary is derived from the old review quarter, not evidence
+   that an explicit expiry had previously been approved or remediation done.
+
+Reject new exemptions, malformed or absent review/owner/remediation metadata,
+replacement or removal of any existing expiry (including null/invalid values),
+and any simultaneous entry change. This rule does not authorize renewal,
+conversion to a permanent exemption, or removal of still-applicable limits.
+Implementation must prove both canonical policy mirrors at the exact base;
+missing, divergent or candidate-only policy must fail closed. This section
+specifies acceptance conditions; executable enforcement needs separate proof.
+
 ### 5.2. Automatic Exemptions
 
 #### 5.2.1. File Pattern Exemptions

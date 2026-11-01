@@ -1,5 +1,34 @@
 # TestModLog
 
+## 2026-11-01 — Private video-policy owner contracts
+
+`test_video_policy.py` exercises actual queue/lock/atomic persistence using
+disposable files: synchronous private-only freshness, exact native receiving
+scope, sparse surface fields, replacement text, per-field expiry/supersession,
+clear/context isolation, corruption/busy/digest/uncertainty rejection, restart
+claims, private inspector phases and bounded scoped readback observations.
+Existing queue cases now explicitly distinguish private context activation from
+public effect gates, and cover absolute deadlines without extending deferred
+work. Fixed credential-free child environments omit inherited credentials before
+test mocks. No provider, browser, model, target runtime command or public action
+is exercised. The focused core selection passes179 cases (103 policy,62 queue,
+14 lifecycle), with zero failures/errors/skips. Raw/LF source bindings, canonical
+collectability and exact node inventory are recorded in the private task receipt.
+
+## 2026-10-29 — Shared-generator livechat fallback and async caller checks
+
+The existing video-comments semantic selector executes actual livechat generator,
+sender and MessageProcessor definitions with controlled collaborators. Its 88
+cases include exact final mention/theme snapshots, livechat-only context, busy
+generation/inspection, comments serialization, heartbeat, timeout/cancellation,
+late-result/no-late-fallback and both existing eligible caller paths. Paired with
+submission history, 104 cases and 12 subtests pass; the separate original context
+53, adjacent operator queue/lifecycle/reader 116 and stdlib inspection 15 pass.
+See `../../video_comments/tests/TestModLog.md` for inventory/effect boundaries.
+Malformed native source/handle fields are rejected before all providers in six
+controls that reproduced the bypass before repair. No DAE, public sender, paid
+API or real browser/model is started by these tests.
+
 ## 2026-10-23 - PR841 frozen local source acceptance
 
 The two documented source-bound files pass81 cases in8.24s on CPython3.12.2,

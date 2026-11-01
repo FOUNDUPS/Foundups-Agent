@@ -55,7 +55,6 @@ EXPECTED_MODULE_FILES = {
     "tests/test_reddog_signed_worker_dispatch_task_executor.py",
 }
 PROVIDER_EVIDENCE_EXACT_FILES = {
-    "INTERFACE.md",
     "src/reddog_backend_architect_determination_runtime.py",
     "src/reddog_fusion_progress_validation.py",
     "src/reddog_provider_call_evidence.py",
@@ -243,6 +242,17 @@ def test_provider_evidence_exemptions_match_exact_touched_file_sizes() -> None:
             assert item["no_growth_ceiling"].get("functions", {}) == (
                 _oversized_function_sizes(target)
             )
+
+
+def test_interface_contract_pages_need_no_size_exemption() -> None:
+    entries = yaml.safe_load(
+        (MODULE_ROOT / "wsp_62_exemptions.yaml").read_text(encoding="utf-8")
+    )["exemptions"]
+    assert "INTERFACE.md" not in {item["file"] for item in entries}
+    pages = sorted((MODULE_ROOT / "docs/interfaces").glob("*.md"))
+    assert len(pages) == 5
+    for path in [MODULE_ROOT / "INTERFACE.md", *pages]:
+        assert len(path.read_text(encoding="utf-8").splitlines()) < 1000
 
 
 def test_required_audit_logs_use_non_blocking_archival_policy() -> None:

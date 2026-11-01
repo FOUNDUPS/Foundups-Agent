@@ -18,6 +18,7 @@ import logging
 import math
 from dataclasses import dataclass, field
 from enum import Enum
+from types import MappingProxyType
 from typing import Dict, List, Optional, Tuple
 
 from ._token_numeric import (
@@ -292,6 +293,32 @@ SUBSCRIPTION_TIERS: Dict[SubscriptionTier, SubscriptionConfig] = {
 }
 
 
+def _wallet_policy_snapshot(policy: Dict) -> Dict:
+    """Validate plain policy data before effects; retain no caller-owned containers."""
+    if type(policy) is not dict:
+        raise ValueError("Wallet policy must be a plain dict")
+    if any(type(key) is not str for key in policy):
+        raise ValueError("Wallet policy keys must be plain strings")
+    if any(key not in ("allowed_ops", "max_per_task") for key in policy):
+        raise ValueError("Unknown wallet policy field")
+    snapshot = {}
+    if "allowed_ops" in policy:
+        operations = policy["allowed_ops"]
+        if type(operations) not in (list, tuple):
+            raise ValueError("allowed_ops must be a plain list or tuple")
+        if any(type(operation) is not str or not operation for operation in operations):
+            raise ValueError("allowed_ops entries must be nonempty plain strings")
+        snapshot["allowed_ops"] = tuple(operations)
+    if "max_per_task" in policy:
+        limit = policy["max_per_task"]
+        if type(limit) not in (int, float):
+            raise ValueError("max_per_task must be a plain number")
+        if limit < 0 or (type(limit) is float and not math.isfinite(limit)):
+            raise ValueError("max_per_task must be finite and nonnegative")
+        snapshot["max_per_task"] = limit
+    return snapshot
+
+
 @dataclass
 class AgentExecutionWallet:
     """Agent wallet for holding allocated UPS budgets.
@@ -307,12 +334,26 @@ class AgentExecutionWallet:
     total_spent: float = 0.0
     policy_gates: Dict = field(default_factory=dict)
 
+    def __setattr__(self, name, value):
+        if name == "policy_gates":
+            value = _wallet_policy_snapshot(value)
+        object.__setattr__(self, name, value)
+
+    def __getattribute__(self, name):
+        value = object.__getattribute__(self, name)
+        if name == "policy_gates":
+            # Keep detached plain state for existing numeric snapshot/deepcopy users.
+            # This public view is not a sandbox against arbitrary same-process code.
+            return MappingProxyType(value)
+        return value
+
     def receive_allocation(self, amount: float, policy: Optional[Dict] = None) -> None:
         """Human allocates UPS to agent for task execution."""
+        prepared_policy = _wallet_policy_snapshot(policy) if policy is not None else None
         self.ups_balance += amount
         self.total_allocated += amount
-        if policy:
-            self.policy_gates = policy
+        if prepared_policy:
+            self.policy_gates = prepared_policy
         logger.info(f"[Wallet:{self.agent_id}] Received {amount:.2f} UPS from {self.allocator_id}")
 
     def spend(self, amount: float, operation: str) -> Tuple[bool, float]:
@@ -1013,9 +1054,10 @@ class TokenEconomicsEngine:
             logger.warning(f"Human {human_id} is not the allocator for agent {agent_id}")
             return False
 
+        prepared_policy = _wallet_policy_snapshot(policy) if policy is not None else None
         success = account.allocate_to_agent(amount, wallet)
-        if success and policy:
-            wallet.policy_gates = policy
+        if success and prepared_policy:
+            wallet.policy_gates = prepared_policy
 
         return success
 

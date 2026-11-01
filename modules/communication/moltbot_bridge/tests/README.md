@@ -1,3 +1,59 @@
+## Preserved identity assertion and call-safety education
+
+`TestEndToEndProcess.test_conversation_returns_response` checks nonempty identity
+output. Its case-insensitive `digital twin` alternative follows the existing
+production `_ensure_conversation_identity` contract; it does not relax identity
+presence. Offline qualification uses synthetic model responses and the actual
+DAE process/normalization boundary, with unrelated runtime/storage owners isolated.
+Lowercase/uppercase identity replies expose the old casing mismatch; unrelated
+and empty output remain rejected by the assertion. Do not run this constructor
+selection against live credentials, model or daemon owners to reproduce it.
+
+The call-safety JSON under `docs/fixtures` contains 28 synthetic review criteria,
+not an executed classifier or audio benchmark. Structural/skill/link checks do
+not establish spoof resistance or permit calls. See the [dated source review](../../../../docs/_archive/pc-reconciliation/2026-10-30/REVALIDATION_20261031.md).
+
+## Resident assurance startup binding
+
+`test_reddog_main_resident_socket_chain.py` covers main's actual AgentDB binding,
+disabled/rejected startup, storage failure and a Linux AF_UNIX composition.
+The composition uses disposable storage and synthetic authority/worker fixtures;
+it must receive the production assurance dependency and retain its admission
+digest through completion. Run alongside `test_reddog_resident_queue_assurance_capacity_admission.py`,
+`test_reddog_resident_queue_slice_verifier_handler.py` and the database owner's
+`test_signed_worker_assurance_{reservation,recovery,finalization}.py` suites.
+Use disabled bytecode/plugins, `--noconftest --import-mode=importlib` and an empty
+pytest config. A Windows AF_UNIX skip is not Linux or native-runtime acceptance.
+The fixture verifier plan and explicit request must name the queue's selected
+slice; `test_foundup_memex_verified_outcome_queue_binding.py` separately retains
+rejection coverage for mismatched, stale and noncanonical admission evidence.
+The socket composition now uses the real memory sink: verification completes,
+but its unimplemented acceptance transaction rejects activation before outcome
+signing or memory writes. A signed failure control receipt is not chain completion.
+The queue-binding suite also runs actual verifier/ratchet/held-out producers
+through receipt reconstruction, preserving v2 identity and legacy signed bytes.
+
+## Ollama fallback contract selection
+
+`test_openclaw_ollama_contract.py` freezes 19 offline cases for finite bounded
+timeouts, model overrides/blank-disable, request propagation, cancellation and
+local failure reporting. It imports real helpers without the production package
+initializer, uses synthetic collaborators and forbids live network/process work.
+Two preserved cases in `TestConversationRuntimeFlags` additionally exercise the
+DAE's constructor and conversation facade with mocked transport/overseer.
+These cases do not prove an installed model or live cold-start performance.
+
+## Preflight denial boundary
+
+Run `test_openclaw_preflight_boundary.py` with bytecode and pytest plugins disabled,
+`--noconftest --import-mode=importlib -p no:cacheprovider` and an explicit empty
+pytest config. Its26 cases load actual process/planner helpers without the daemon
+package initializer; collaborators are synthetic. Windows event-loop setup occurs
+before application socket/process denial. No model/provider/service starts.
+Retain `test_skill_boundary_policy.py` and `test_openclaw_permission_fail_closed.py`
+for adjacent contracts. Their constructors need isolated daemon registration,
+containment and permission storage when run locally; they are not live acceptance.
+
 ## Installed HIGH source integration — 2026-10-23
 
 PR #2181 reconciles preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.

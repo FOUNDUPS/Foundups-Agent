@@ -986,6 +986,10 @@ class CommentEngagementDAE:
                 use_intelligent_reply=use_intelligent_reply
             )
             all_results.append(result)
+            if not result.get('reply') and result.get('reply_submission_status') in {'unknown', 'verified'}:
+                logger.warning('[REPLY-INSPECT] Halting session for outcome reconciliation; no automatic retry')
+                result['halted_for_reconciliation'] = True
+                break
 
             # FAM DAEmon: Publish comment engagement event (Training Mode observability)
             if FAM_DAEMON_AVAILABLE and not result.get('no_comment_exists'):
@@ -1376,3 +1380,4 @@ async def execute_skill(
         )
     finally:
         dae.close()
+

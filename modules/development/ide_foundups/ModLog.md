@@ -1,9 +1,22 @@
 # IDE FoundUps Module - Change Log
 
+## 2026-10-29 — Repair Python test-source parsing
+
+Use setattr for the mock VSCode enum member named `None`, preserving its 0
+value and Collapsed/Expanded values 1/2. The isolated import regression passes.
+Generated assert-True scaffolds are now explicitly unfinished; no extension,
+provider or IDE behavior is claimed validated. WSP5/22/34/50.
+
 ## WSP 22 Compliance: Traceable Narrative
 This log tracks all changes to the IDE FoundUps module following WSP 22 (Module ModLog and Roadmap Protocol).
 
 ---
+
+## PR 1346 dependency floor reconciliation (2026-10-29)
+
+- Preserve the original PR requirement `ws >=8.21.0` in the package manifest and lock root while retaining current main's resolved `ws 8.22.0`, integrity and every other dependency. This avoids replacing newer dependency work with the old PR lockfile.
+- Validation: package/lock identity comparison and `npm ci --ignore-scripts --dry-run --no-audit --no-fund` pass (236 packages planned). No package installation or TypeScript compile was performed; existing compile limitations above remain. Fresh PR and post-merge checks are separate gates.
+- WSP 10, 12, 22, 50, 97.
 
 ## MSAL Node authorization-flow dependency fix (2026-10-26)
 

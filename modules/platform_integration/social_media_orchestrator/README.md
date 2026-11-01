@@ -1,5 +1,13 @@
 # Social Media Orchestrator
 
+## Source-backed editorial packages — 2026-10-27
+
+`content_orchestrator.prepare_campaign(brief)` and the existing SOCIAL campaign
+route now prepare FoundUp-scoped, source-preserving X/LinkedIn drafts and dated
+calendar proposals. No publication or scheduler effects are performed. See the
+[contract/example](docs/CONTENT_CAMPAIGN.md) and
+[Soro comparison and remaining build sequence](docs/audits/SORO_SOCIAL_DAE_AUDIT_20261027.md).
+
 **Domain**: platform_integration  
 **Classification**: Social Media Orchestration Service  
 **WSP Compliance**: WSP 3, WSP 11, WSP 22, WSP 49

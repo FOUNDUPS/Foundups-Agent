@@ -1,5 +1,68 @@
 # ROADMAP - FoundUps Simulator
 
+## 2026-11-01 — Replay-safe epoch effects and controlled parity
+
+- [x] Class-B 18/P0: prepare pool balances, tiers, shared hurdle state, fund/drip,
+  receipts and optional ledger evidence before coordinated local publication.
+- [x] Capture failed Mesa distribution tails; finalize before observers; admit
+  exact detached retries and reject conflicts without repeating pool effects.
+- [x] Frozen 40-case RED: 2 pass/38 fail; corrected candidate 57 passes, including
+  16 independent held-outs and one independently reproduced return-value repair.
+- [x] Fresh 154-case baseline and real 240-tick simulation. Initial process
+  reruns exposed nondeterminism and remain smoke evidence, not parity.
+- [x] Controlled fresh-process/hash-seed profile: original baseline and two
+  candidate economic traces match exactly; no financial values filtered out.
+- [x] Broader simulator: 930 pass, same three SSE HTTP cases deselected; no
+  failures/errors/skips or guard denials. Counts overlap the focused selections.
+- [x] Canonical closure1478 adds only the private helper; unchanged byte caps,
+  8 Python generator/index cases and3 Node entrypoints pass. Registry1794 unchanged.
+- [ ] Protected PR and resulting-main checks, followed by primary-PC verification.
+- [ ] Own RNG/hash/singleton state per simulation; version and freeze repeatable
+  cross-process traces before expanding economic-model validation.
+- [ ] Durable funded reservations, source consumption and recovery across
+  processes/outer callers; independently confirmed chain settlement remains absent.
+
+The [current scope and AI threat map](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#replay-safe-epoch-settlement-and-ai-threat-update--2026-11-01)
+connect these controls to B03–B11. Whole demurrage/MetaGPT/fee-runner atomicity is
+not implied. Keep the tested economic rules while resolving units and issuance.
+
+## 2026-11-01 — Wallet policy isolation and ordered blockchain gates
+
+- [x] Class-B 17/P0: freeze acceptance, reproduce mutable policy/invalid admission,
+  then detach and validate policy in the existing wallet/allocation owners.
+- [x] Focused selection: 311 passed (76 new policy cases and 235 existing cases).
+- [x] Independent 13 held-outs, connected 489 cases, 8 manifest cases and 3 Node
+  consumer entrypoints pass; runtime membership remains 1477.
+- [x] PR2281 merged at24cc4aa2971b05ff8b53f76d157145da4134ed5c;24 PR and22
+  resulting-main checks passed. Primary PC synchronized without discarding work.
+- [x] Successor B02 local source and independent controls are qualified above;
+  broader publication and durable settlement remain separate gates.
+- [ ] Resolve units and mined/staked aggregate supply before funded integer
+  reservations, authenticated work/maturity releases and isolated chain signing.
+
+The [ordered owner/acceptance roadmap](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#current-sprint-and-blockchain-roadmap--2026-11-01)
+governs the remaining gates. Historical checklists below are dated evidence;
+A10 alias repair does not close governance authentication or deployment readiness.
+
+
+## 2026-10-31 — Local security and parity audit
+
+Publication addendum: [WSP26](../../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract)
+now owns the simulator-first A/B/C/D contract. Source publication is authorized
+separately from activation; earlier local-only observations below are historical.
+Fresh selected simulator/docs qualification passes420. The units conflict is
+explicitly recorded, not resolved; all unchecked economic/security gates remain.
+
+- [x] Current remote/main reconciliation in an isolated PC worktree; no GitHub writes.
+- [x] CABR input and breaker severity/cooldown hardening; 414 connected tests and
+  6 independent held-outs pass. Historical results below remain dated evidence.
+- [x] Execute seven actual-owner adversarial probes: one pass, six security gaps.
+- [ ] Version UPS units, aggregate 21M supply, epoch funding, fees and pool denominators.
+- [ ] Durable pending/global reservations, idempotent distribution and funded FX.
+- [ ] Immutable policy, oracle authentication, self-trade controls and recovery.
+- [ ] Independent controller/signer and chain-level transaction parity.
+Deployment remains BLOCKED; see the 2026-10-31 architecture report.
+
 ## 2026-10-25 — Selected numeric admission
 
 - [x] Strict work/stake/unstake quantities, at-use fee validation and pure

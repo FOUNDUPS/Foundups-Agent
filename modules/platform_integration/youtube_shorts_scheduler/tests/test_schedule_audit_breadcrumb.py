@@ -36,6 +36,10 @@ class TestScheduleAuditBreadcrumbEmission:
             scheduler.driver = MagicMock()
             scheduler.dom = MagicMock()
             scheduler.tracker = MagicMock()
+            # This consumer test must reach the live-cycle audit gate while all
+            # scheduling and tracker collaborators remain fake.
+            scheduler.dry_run = False
+            scheduler._run_visibility_pass = AsyncMock(return_value=False)
             return scheduler
 
     @pytest.mark.asyncio
@@ -51,6 +55,7 @@ class TestScheduleAuditBreadcrumbEmission:
 
         # Mock unhealthy audit report
         unhealthy_report = {
+            "status": "complete",
             "healthy": False,
             "false_positives": [{"video_id": "vid1"}, {"video_id": "vid2"}],
             "time_collisions": [{"slot": "Feb 1, 2026 @ 5:00 PM", "video_ids": ["a", "b"]}],
@@ -93,6 +98,7 @@ class TestScheduleAuditBreadcrumbEmission:
         telemetry_mock.store_breadcrumb = capture_breadcrumb
 
         unhealthy_report = {
+            "status": "complete",
             "healthy": False,
             "false_positives": [{"video_id": "vid1"}],
             "time_collisions": [{"slot": "Feb 1, 2026 @ 5:00 PM", "video_ids": ["a", "b"]}],
@@ -129,6 +135,22 @@ class TestScheduleAuditBreadcrumbEmission:
             assert captured_metadata["missing_from_tracker"] == 2
 
     @pytest.mark.asyncio
+    @pytest.mark.parametrize("status", ["failed", "partial"])
+    async def test_incomplete_audit_is_unknown_not_clean_or_absence_conflict(self, mock_scheduler, status):
+        telemetry = MagicMock()
+        report = {"status": status, "healthy": None, "total_scheduled": None,
+                  "observed_scheduled_count": 1, "false_positives": [], "time_collisions": [], "healed": []}
+        with patch.dict(os.environ, {"YT_SCHEDULER_POST_AUDIT": "true"}), \
+             patch("modules.platform_integration.youtube_shorts_scheduler.src.schedule_auditor.ScheduleAuditor") as factory, \
+             patch("modules.communication.livechat.src.breadcrumb_telemetry.get_breadcrumb_telemetry", return_value=telemetry):
+            factory.return_value.run_audit.return_value = report
+            result = await mock_scheduler.run_scheduling_cycle()
+        assert result["audit"]["status"] == status
+        assert result["audit"]["healthy"] is None and result["audit"]["total_scheduled"] is None
+        assert result["audit"]["observed_scheduled_count"] == 1
+        assert telemetry.store_breadcrumb.call_count == 0
+
+    @pytest.mark.asyncio
     async def test_no_breadcrumb_when_audit_healthy(self, mock_scheduler):
         """Test no breadcrumb emitted when audit is healthy."""
         captured_breadcrumbs = []
@@ -140,6 +162,7 @@ class TestScheduleAuditBreadcrumbEmission:
         telemetry_mock.store_breadcrumb = capture_breadcrumb
 
         healthy_report = {
+            "status": "complete",
             "healthy": True,
             "false_positives": [],
             "time_collisions": [],
@@ -210,12 +233,15 @@ class TestScheduleAuditAutoHeal:
             scheduler.driver = MagicMock()
             scheduler.dom = MagicMock()
             scheduler.tracker = MagicMock()
+            scheduler.dry_run = False
+            scheduler._run_visibility_pass = AsyncMock(return_value=False)
             return scheduler
 
     @pytest.mark.asyncio
     async def test_auto_heal_passed_to_auditor(self, mock_scheduler):
         """Test auto_heal flag from env is passed to auditor."""
         unhealthy_report = {
+            "status": "complete",
             "healthy": False,
             "false_positives": [{"video_id": "vid1"}],
             "time_collisions": [],

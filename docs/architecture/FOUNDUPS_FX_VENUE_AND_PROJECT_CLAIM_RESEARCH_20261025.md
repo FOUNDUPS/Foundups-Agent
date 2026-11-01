@@ -10,6 +10,14 @@ exchange service or resident worker.
 
 ## 1. Decision and evidence boundary
 
+**2026-10-31 precedence:** the venue candidates below remain research, subordinate
+to the [WSP26 simulator-first change contract](../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract).
+The existing internal F_i/UPS model is the reference for qualified transitions;
+external swaps, bridges and exits require an explicit reviewed policy decision
+and simulator validation before integration. Nomination, repository ownership
+or discovery listing does not confer token, treasury or trading authority. See
+the [current reconciliation and blockers](FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md).
+
 Build **FoundUps Exchange (FX)** as the project/asset discovery and trading
 interface over bounded, chain-native venue adapters. Reuse an existing protocol
 before considering a new AMM or order-book implementation. FX can have its own
@@ -66,6 +74,31 @@ managed checkout, and fresh main has newer persistence/verification repairs.
 Treat that earlier material as historical research. Do not port obsolete repairs
 or claim that every old defect remains without revalidation against the owning
 current source. This document adds no new test result or accounting clearance.
+
+## Cryptographic security boundary (2026-10-29)
+
+This dated clarification does not activate a signer, account migration or bridge.
+[Algorand reports native Falcon accounts live since August 2026](https://algorand.co/technology/post-quantum),
+in addition to State Proofs. Existing Ed25519 accounts do not automatically migrate.
+[Protocol authorization](https://specs.algorand.co/ledger/ledger-txn-authorization)
+separates ordinary signatures, Ed25519 multisig and native post-quantum signatures.
+[Account guidance](https://dev.algorand.co/concepts/accounts/post-quantum/) documents
+remaining consensus/VRF, tooling, rekey/recovery and fee boundaries. Review holder
+and ASA privileged authorities separately; asset issuance is not a security proof.
+
+[NIST IR8547 is final as of October27,2026](https://csrc.nist.gov/pubs/ir/8547/final).
+Its [final text](https://nvlpubs.nist.gov/nistpubs/ir/2026/NIST.IR.8547.pdf) still describes
+Falcon-derived standardization as developing. FIPS203 ML-KEM, FIPS204 ML-DSA and
+FIPS205 SLH-DSA are final; Falcon selection does not imply finalized FN-DSA or a
+validated implementation. Migration schedules are not forecasts of quantum breakage.
+Algorand's deterministic Falcon variant is not a claim of FN-DSA compliance.
+Custody implication: threshold/MPC signing or an HSM does not itself replace a
+quantum-vulnerable signature algorithm. Qualify custody and algorithm separately.
+The [Python2.12 release](https://github.com/algorand/py-algorand-sdk/releases/tag/v2.12.0)
+advertises post-quantum support; that does not qualify a FoundUps signer or prove
+an earlier pinned artifact exercised that path. Current docs are not network probes.
+A Bitcoin bridge, secure custody, issuer admission and funded settlement still need
+separate implementation and evidence. This clarification changes no economic policy.
 
 ## 3. Venue and license shortlist
 

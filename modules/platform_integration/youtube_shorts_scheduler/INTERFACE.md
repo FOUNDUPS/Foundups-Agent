@@ -1,5 +1,76 @@
 # YouTube Shorts Scheduler - Interface Documentation
 
+## Private operator directives (2026-11-01)
+
+Existing 012 queue `get_video_policy(channel_id, video_id, surface=...)` supplies
+sparse metadata/scheduling fields. No field means existing behavior; unavailable,
+busy, corrupt or blocked input refuses writes. Private context/sources are never
+copied into titles, descriptions or public feedback. A directive does not open
+the existing automation gate or establish account access.
+
+The actual detail Save and inline popup button owners recheck current policy,
+STOP/automation, receiving identity and cycle cap immediately before submission.
+`begin_policy_edit(channel_id, video_id, *, allow_metadata=True)` captures exact
+detail-page strings before our edits. Preserve restores that original only while
+current fields still equal our known draft; a foreign/manual change refuses Save.
+The CLI's preserve-metadata flag continues to prevent metadata edits. Exact
+replacement uses queue-validated single-video text with no promotional appendix.
+
+Durable queue save claims precede clicks. An uncertain receiving-video save is
+blocked across navigation/restart even if its draft or policy changes. Save bools
+remain click-workflow receipts. Metadata-only saves can settle `applied` after a
+same-window, clean/disabled-Save/no-prompt check, fresh-document reload witness,
+and exact native channel/video/title/description readback. This conditional tab
+check is not exclusive ownership or protection from all concurrent human work.
+Scheduling claims bind intended slot/timezone/visibility as well as metadata;
+they remain unknown because no complete account-timezone/slot readback owner is
+qualified here. No automatic undo or retry follows uncertain submission.
+
+Inline writes additionally require one visible popup explicitly associated with
+the exact connected row (containment or ARIA reference). An unassociated portal
+popup refuses before claim/click; row presence alone is insufficient. Installed
+selector/association qualification remains separate from controlled offline tests.
+
+## Qualified scheduled inventory
+
+`YouTubeStudioDOM.read_scheduled_inventory(channel_id, *, max_pages=100) -> dict`
+reads the current filtered list without account navigation or content changes.
+`status` is `complete`, `partial` or `failed`; `total_scheduled` is an integer
+only for a complete read, including a qualified empty result. Other fields are
+`channel_id`, `channel_verified`, `filter_verified`, `start_verified`,
+`pagination_complete`, `pages_read`, `rows_seen`, `rows_parsed`,
+`observed_scheduled_count`, `videos`, `unparsed_rows` and `issues`.
+Each qualified video includes exact `video_id`, displayed `date`/`time`, raw
+`visibility_text`, raw `date_text`/`date_label`, and `schedule_source` equal to
+`visibility_cell` or `schedule_labeled_date_cell`. A Date cell supplies a slot
+only when its own text/aria-label/title explicitly says Scheduled, with no
+Uploaded/Published contradiction. Unlabeled/upload dates never supply one. These are channel-local displayed wall
+times, not an assertion of timezone or a verified publication write.
+
+Native receiving ID (`ytcfg.get` or `yt.config_`, with conflicts refused) and exact Studio path must agree on every page. An actual
+single Scheduled/Has schedule chip, no extra search/filter, an observed first
+page and known final pagination state are required. Missing pagination controls,
+repeated pages/IDs, invalid slots, changed channel/filter, parse failures or the
+100-page bound retain partial observations and leave the total unknown.
+
+`ContentPageScheduler.audit_calendar` adds `status`, `inventory`,
+`observed_scheduled_count`, `observed_conflicts` and `observed_heavy_days`.
+Partial reads have no automatic `conflicts`/`heavy_days` repair input and cannot
+recommend a clean calendar. `ScheduleAuditor.run_audit` returns `healthy=None`
+when incomplete, with no absence-based comparisons or tracker auto-heal.
+`ScheduleTracker.sync_from_youtube(videos, *, inventory=None) -> bool` refuses
+to reset state without a complete matching receipt, returning false unchanged.
+`resolve_conflicts(..., *, inventory=None)` requires a complete receipt and every
+supplied member/slot bound to it. `thin_schedule` requires matching complete
+inventory, video list, channel config and tracker identity before any repair.
+These read receipts establish observed inputs, not live write/readback authority.
+
+Rotation binds canonical receiving IDs to scheduler/config/tracker/cache and
+verifies native ID, Studio path and known permission before any writer. Unknown
+or failed switches skip writers; fallback is deferred to its own canonical
+entry. Unbound/incomplete zero caches are ignored. This is an additive receipt
+and deliberate safety change for historical unqualified tracker-sync callers.
+
 ## Channel cadence
 
 Omitted daily cap now resolves per channel: Move2Japan is eight/day at

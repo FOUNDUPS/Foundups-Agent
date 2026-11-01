@@ -1,3 +1,46 @@
+## 2026-10-30 — Reconcile organization-partner inquiry PR #2234
+
+- Preserve the original coalition/inquiry proposal while retaining both
+  homepages, the shared movement ticker and individual JOIN actions. Use the
+  existing language switcher for Japanese-first copy and complete selected
+  English/Portuguese equivalents; keep the Japanese email template explicit.
+- Add only the host-restricted `/partners` alias. Use `/yumori/partners` for the
+  movement CTA so navigation also works from the shared project host. The
+  inquiry remains a manually sent `mailto:` draft, not a form backend or an
+  automatic sender. Candidate-site and funding/approval conditions stay open.
+- Extend the existing routing suite for exact-path and negative-host behavior;
+  no new test file, localization system, credential, provider or deployment is
+  introduced. Fresh isolated validation on October 30 passes 85 module Python
+  tests, 32 routing tests and eight signup-security tests. The preserved October
+  29 lint/build/browser evidence is dated evidence, not a new run.
+- The current-main Holo owner query is CURRENT/no-gap at `cbef41fbae1b`; actual
+  candidate paths and owner contracts were checked directly. Metadata checks,
+  independent candidate audit, exact-head hosted checks and resulting-main
+  acceptance remain publication gates. Site publication and inquiry delivery
+  remain unverified. WSP 00/10/11/22/50/84/97; website workflow applied.
+
+## 2026-10-29 — Update Cloudflare tooling for Undici security fixes
+
+- The frontend lock pinned Undici 7.29.1 through Miniflare. GitHub reports four
+  high and one medium advisory for this path, all with first patched 7.30.1.
+  Update the matched upstream cohort: Cloudflare Vite plugin 1.66.0, Wrangler
+  4.154.0 and workers-types 5.20261023.1; both parents select Miniflare
+  5.20261023.1-beta with Undici 7.30.1. No major-version override is introduced.
+- Preserve Next 16.4.3, React/React DOM 19.2.8, Vinext 1.1.0 and Vite 8.3.5.
+  npm 11.19.1 reconciles optional WASM dependencies omitted by the first local
+  npm 11.6.2 lock update; clean-install acceptance must use the reconciled lock.
+- Existing tests pass: 85 Python contracts on both base and candidate, 26 Node
+  routing/signup-security cases on CI's Node 24.22.1, and catalog validation.
+  Final frontend lock audit reports zero known advisories. Clean install (488
+  packages with lifecycle scripts disabled), lint (zero errors/seven existing
+  image warnings) and the production build pass on Node 24.22.1/npm 11.19.1.
+  Hosted exact-head/resulting-main acceptance remains pending at preparation time.
+- Holo retrieval is CURRENT/no-gap at main4533; generic security results were
+  reranked to the actual package, config, workflow and test owners. Manual lock
+  resolution is appropriate because executable package compatibility is required.
+  No new tests, page edits, publication, provider actions or Chroma fix are claimed.
+  WSP 5/6/10/22/50/71/84/87/97; website-maintenance skill applied to validation.
+
 ## 2026-10-23 — YUMORI resident RSI canary contract
 
 - Extended the existing registered `yumori_work_orchestrator` instead of creating another daemon/orchestrator. YUMORI is now the domain canary for the existing RedDog/OpenClaw/WRE resident loop under FoundUp scope `esingularity_001`.

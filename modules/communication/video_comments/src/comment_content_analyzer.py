@@ -469,94 +469,13 @@ Answers:"""
         content_analysis: ContentAnalysis,
         comment_text: str
     ) -> tuple:
-        """
-        Determine if commenter aligns with or opposes video stance.
-
-        FIX (2025-12-30): This is CRITICAL for proper engagement.
-        - Commenter who AGREES with video → Supportive reply, acknowledge their point
-        - Commenter who DISAGREES → May need different engagement strategy
-
-        Example:
-            Video: "GOP on Gaza - 'I think we should kill them all.' Sickening."
-            Comment: "He is as critical as Netanyahu and his criminal gangsters"
-            Analysis:
-              - Video criticizes genocide/GOP
-              - Comment criticizes Netanyahu
-              - Both are critical of those enabling violence
-              → ALIGNMENT: AGREES
-
-        Returns:
-            (aligns: bool, reason: str)
-        """
+        """Preserve unknown stance until language evaluation; names alone prove nothing."""
         if not video_context or not video_context.title:
             return (None, "no video context")
 
-        comment_lower = comment_text.lower()
-
-        # Check if commenter is criticizing same entities as video
-        commenter_critical_of = []
-
-        # Entity detection in comment
-        CRITICAL_ENTITIES = {
-            'netanyahu': 'Netanyahu',
-            'criminal': 'criminality',
-            'gangster': 'criminality',
-            'genocide': 'genocide',
-            'kill': 'violence',
-            'murder': 'violence',
-            'war crime': 'war crimes',
-            'gop': 'GOP',
-            'republican': 'Republicans',
-            'trump': 'Trump',
-            'maga': 'MAGA',
-        }
-
-        for keyword, entity in CRITICAL_ENTITIES.items():
-            if keyword in comment_lower:
-                commenter_critical_of.append(entity)
-
-        # Check alignment
-        # If video is anti-genocide and commenter criticizes genocide enablers → AGREES
-        if video_context.stance in ('anti_genocide', 'critical'):
-            # Commenter criticizes Netanyahu/war crimes/violence → AGREES with anti-genocide stance
-            if any(e in commenter_critical_of for e in ['Netanyahu', 'criminality', 'genocide', 'war crimes', 'violence']):
-                reason = f"both critical of {', '.join(commenter_critical_of)}"
-                logger.info(f"[ALIGNMENT] ✅ AGREES: {reason}")
-                return (True, reason)
-
-            # Commenter defends those being criticized → DISAGREES
-            # FIX (2025-12-30): Expanded patterns to catch dismissive sarcasm trolling
-            # Example: "If you keep throwing out ridiculous statements" → dismisses genocide reporting
-            DEFENSE_PATTERNS = [
-                # Direct defense
-                'nothing wrong', 'not that bad', 'innocent',
-                # Dismissing as false
-                'fake news', 'lies', 'propaganda', 'misinformation',
-                # Dismissing as exaggerated
-                'ridiculous', 'exaggerate', 'overreact', 'hysterical', 'drama',
-                'blown out of proportion', 'making things up', 'nonsense',
-                # Sarcasm used to dismiss (common troll tactic)
-                'sarcastic response', 'deserve sarcasm', 'throwing out',
-                # Deflection
-                'both sides', 'what about', 'whatabout',
-            ]
-            if any(p in comment_lower for p in DEFENSE_PATTERNS):
-                # Find which pattern matched for logging
-                matched = next((p for p in DEFENSE_PATTERNS if p in comment_lower), "unknown")
-                reason = f"defends those video criticizes (pattern: '{matched}')"
-                logger.info(f"[ALIGNMENT] ❌ DISAGREES: {reason}")
-                return (False, reason)
-
-        # If video criticizes GOP/MAGA
-        if 'GOP' in video_context.critical_of or 'MAGA' in video_context.critical_of:
-            if any(e in commenter_critical_of for e in ['GOP', 'Republicans', 'MAGA', 'Trump']):
-                reason = "both critical of GOP/MAGA"
-                logger.info(f"[ALIGNMENT] ✅ AGREES: {reason}")
-                return (True, reason)
-
-        # Can't determine alignment
-        logger.info(f"[ALIGNMENT] ❓ UNKNOWN: insufficient signals")
-        return (None, "insufficient signals")
+        # Entity presence is not stance. Quotation, negation and support all
+        # contain the same names. Preserve uncertainty for the language stage.
+        return (None, "stance requires semantic evaluation; entity names are insufficient")
 
     def analyze_with_video_context(
         self,
@@ -619,3 +538,4 @@ def get_content_analyzer() -> CommentContentAnalyzer:
     if _analyzer_instance is None:
         _analyzer_instance = CommentContentAnalyzer()
     return _analyzer_instance
+

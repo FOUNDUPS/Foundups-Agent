@@ -1,5 +1,16 @@
 # WSP Tools - ModLog
 
+## 2026-10-29 — Document actual bulk-tool interfaces
+
+Add the missing INTERFACE for the flagged wrapper-repair script, older hard-coded
+bulk remover and orchestration entrypoint. Record mode precedence, return/status
+limitations, write effects and the absence of replacement-code validation. The
+older tool is not presented as a dry-run alternative, and historical counts are
+not refreshed without a real inventory. This is documentation only: no bulk
+rewrite, campaign, model invocation or source test was executed. Source/hash and
+relative-link review provide the bounded evidence. WSP 11/22/49/50/84/90/97.
+
+
 ## 2026-02-26: WSP 90 Bulk Fix Script
 
 **Issue**: "lost sys.stderr" error during main.py startup

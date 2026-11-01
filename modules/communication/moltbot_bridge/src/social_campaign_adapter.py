@@ -8,6 +8,7 @@ Supported campaigns:
   research_x_to_ln_group
   antifafm
   petition (planning only)
+  content (source-backed editorial package only)
 
 Example:
   social campaign research_x_to_ln_group \
@@ -28,9 +29,10 @@ SUPPORTED_CAMPAIGNS = {
     "research_x_to_ln_group",
     "antifafm",
     "petition",
+    "content",
 }
 
-STRICT_CAMPAIGNS = {"antifafm", "petition"}
+STRICT_CAMPAIGNS = {"antifafm", "petition", "content"}
 PETITION_REQUEST = re.compile(
     r"^(?:(?:red\s*dog|0102)[,:]?\s+)?(?:(?:let['’]s|please|we want to|I want to)\s+)?"
     r"(?:launch|start)\s+(?:a|the|this)\s+petition\b", re.IGNORECASE,
@@ -102,6 +104,13 @@ def _parse_campaign_command(message: str) -> Optional[Tuple[str, Dict[str, str]]
 
 
 async def execute_social_campaign(campaign: str, params: Dict[str, str]) -> Dict[str, Any]:
+    if campaign == "content":
+        from modules.platform_integration.social_media_orchestrator.src.content.campaign_planner import (
+            execute_content_campaign,
+        )
+
+        return await execute_content_campaign(params)
+
     if campaign == "petition":
         from modules.platform_integration.social_media_orchestrator.src.petition_campaign import (
             execute_petition_campaign,

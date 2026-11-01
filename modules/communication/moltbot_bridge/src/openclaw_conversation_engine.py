@@ -219,7 +219,7 @@ def execute_conversation(dae: Any, intent: "OpenClawIntent") -> str:
                     "stream": False,
                     "options": {"num_predict": 80, "temperature": 0.7},
                 },
-                timeout=15,
+                timeout=dae._ollama_timeout_sec,
             )
             if dae._is_turn_cancelled("post_ollama"):
                 dae._mark_conversation_engine("cancelled", "post_ollama")

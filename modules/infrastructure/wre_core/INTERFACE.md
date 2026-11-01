@@ -342,6 +342,10 @@ and exact `verification_digest`. Test counts must be positive integers and the
 failure count must be the integer zero; malformed values cannot imply a pass. Its v2 identity binds
 the full input evidence. Old minimal hand-written fixtures must supply the
 fields already produced by the real recorder; missing fields fail closed.
+Current receipts serialize `identity_version=2` and `evidence_digest`, the exact
+fields already used in their gate ID. Memex reconstructs that ID without changing
+it. Historical unversioned receipts preserve their exact serialized shape and
+legacy ID; partial, malformed, unsupported or downgraded identities reject.
 
 The existing bridge `invoke_reddog_wre_queue_authorized_pattern_memory_admission(...)`
 also isolates sink input and rejects empty/non-string acknowledgments through
@@ -978,6 +982,14 @@ or runtime admission. The [roadmap](ROADMAP.md#consumer-dry-run-isolation-qualif
 records the baseline witness, repair and verification limits.
 
 ## Test differential and independent verification
+
+Test source may declare `WRE_TEST_MODE = "scaffold"` or `"manual"` (ordinary or
+annotated assignment). Both remain noncollectable in the canonical registry;
+scaffolds carry `unimplemented_test_scaffold`, manual programs carry
+`manual_test_program`. Other/nonliteral declarations carry `invalid_test_mode`.
+These declarations cannot hide external-effect reasons or grant execution.
+They do not authorize importing arbitrary test modules. Generated scaffolds
+are SPECIFIED_NOT_IMPLEMENTED and never count as behavioral coverage.
 
 `load_canonical_test_registry()`, `collect_registered_test_shards()`,
 `make_test_impact_plan()`, `make_test_run_snapshot()`, and

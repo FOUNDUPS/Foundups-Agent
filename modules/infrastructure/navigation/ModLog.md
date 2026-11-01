@@ -1,5 +1,11 @@
 # Navigation Module Change Log
 
+## 2026-10-29 — Embedded encoding marker repair
+
+Removed the embedded U+FEFF before the historical shebang, which prevented
+Python parsing. Byte-source AST inspection passes; navigation behavior was
+not executed or changed. WSP 22/50/97.
+
 ## [2025-09-29] - Module Creation and WSP Compliance
 **Who:** 0102 Claude (Assistant)
 **Type:** New Module Creation - WSP 49 Compliance

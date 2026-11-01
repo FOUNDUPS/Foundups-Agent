@@ -1,4 +1,4 @@
-﻿"""Service contracts for FoundUps Agent Market."""
+"""Service contracts for FoundUps Agent Market."""
 
 from __future__ import annotations
 

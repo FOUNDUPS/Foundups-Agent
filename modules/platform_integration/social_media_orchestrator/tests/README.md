@@ -1,3 +1,7 @@
+## Editorial package compiler — 2026-10-27
+
+The original PR added tests/test_content/test_content_orchestrator.py for the compiler. Current-main reconciliation retains the separately repaired legacy content_orchestrator.py scaffold and its explicit quarantine; these new cases do not qualify that older formatting surface. Run it alongside the existing connected campaign selection below. To measure only the two new compiler leaves, enable pytest_cov and pass --cov=modules.platform_integration.social_media_orchestrator.src.content.campaign_brief --cov=modules.platform_integration.social_media_orchestrator.src.content.campaign_planner --cov-fail-under=90. The original 2026-10-27 record reports 107 tests +131 subtests with 99.54% compiler coverage; that historical result is not current-main validation. These are offline source/contract checks, not voice quality, installed runtime, CMS or live delivery evidence.
+
 # Social Media Orchestrator Tests
 
 ## Petition intake and campaign routing — 2026-10-27

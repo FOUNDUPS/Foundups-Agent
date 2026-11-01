@@ -1,5 +1,16 @@
 # Video Comments - Autonomous YouTube Engagement Module
 
+The 2026-10-29 commenting repair uses an explicit meaning assessment before
+writing and a separate review of the final reply against the original comment
+and supplied facts. UI-TARS is restricted to visual inspection. Private themes
+enter the writing prompt; they are never appended as slogans or announcements.
+Stable Studio comment/video/channel identity and restart-safe SQLite attempt
+records guard submission. See [the repair and Windows handoff](docs/CHAT_MANIFEST_REPAIR_20261029.md).
+Offline qualification and live delivery are separate evidence states.
+The same generator also serves the private livechat fallback through an explicit
+surface: general-role LM Studio HTTP only, scoped themes and final reviewed
+`@mention` text. Stored-comment defaults, history and provider fallbacks remain.
+
 > PR1478 reconciliation (2026-10-23): 53 focused offline cases and 116 adjacent
 > command/context cases pass locally; publication checks remain separate.
 > Historical completion/live-test labels below are not current deployment,

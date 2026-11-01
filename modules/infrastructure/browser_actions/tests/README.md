@@ -16,6 +16,16 @@ below characterized the original gap; it is superseded by this acceptance scope.
 
 **WSP Reference:** WSP 34 (Test Documentation)
 
+## Manual Gemini probe import safety — 2026-10-29
+
+`test_final_autonomous_gemini.py` now parses and can be imported without browser
+or provider imports, output or sys.path changes. It remains an explicitly
+manual live-action program, excluded from WRE automated evidence. The bounded
+regression is `tests/test_legacy_test_source_safety.py` at repository root.
+Running the program itself can click a live YouTube heart; that behavior was
+not executed or validated by this repair. Whole-folder collection is still
+outside the bounded acceptance scope because other integration harnesses remain.
+
 ## Test Strategy
 
 Browser action testing uses:

@@ -1,6 +1,37 @@
 # FoundUps Simulator
 
+## Replay-safe pools and wallet policy — 2026-11-01
+
+Pool distributions prepare complete local effects and optional ledger evidence;
+exact epoch retries return detached prior results. Mesa retains failed tails
+before another decay and attempts observers once. [The contract](INTERFACE.md#pool-epoch-effect-contract--2026-11-01)
+limits this to the running process. Wallet policies remain detached/read-only,
+with trusted host replacement. [Current verification and AI threats](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#replay-safe-epoch-settlement-and-ai-threat-update--2026-11-01)
+retain durable recovery, funding, issuance and custody gates before activation.
+
+
 Visual simulation of the autonomous FoundUp ecosystem.
+
+## Simulator-first economic change rule — 2026-10-31
+
+The [WSP26 contract](../../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract)
+requires versioned simulator validation before economic changes reach blockchain
+code. Current passing tests qualify their specific transitions, not every model
+assumption. The [source matrix](contracts/source_of_truth_matrix.json) records the
+one-satoshi projection versus1000-satoshi genesis conflict; activation is blocked.
+Use [INTERFACE](INTERFACE.md), [tests](tests/README.md), [ROADMAP](ROADMAP.md) and
+the [current audit](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md)
+together. Historical sealed receipts remain evidence of their original sources.
+
+## Local security reconciliation — 2026-10-31
+
+CABR rejects non-boolean PoB decisions and nonfinite/coercible numbers; valid
+finite clamps and release math remain. The breaker prioritizes the strongest
+active signal and retains its cooldown/queue hold across every downgrade.
+These simulator controls do not authenticate PoB, reserves or funded settlement.
+Fresh connected selection: 414 passed; independent held-outs: 6 passed.
+Seven separate attack probes yielded one pass and six desired-security failures.
+See the [reconciliation and threat report](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md).
 
 ## Work, stake and unstake numeric validation — 2026-10-25
 

@@ -306,8 +306,10 @@ def is_edge_running() -> bool:
 
 
 def is_lm_studio_running() -> bool:
-    """Check if LM Studio API is running."""
-    return is_port_open(LM_STUDIO_PORT)
+    """Check native LM Studio HTTP reachability, without asserting residency."""
+    from .lm_studio_startup import is_server_reachable
+
+    return is_server_reachable(LM_STUDIO_PORT)
 
 
 def launch_chrome() -> Tuple[bool, str]:
@@ -423,68 +425,28 @@ def launch_edge() -> Tuple[bool, str]:
         return False, str(e)
 
 
-def launch_lm_studio(load_model: bool = True) -> Tuple[bool, str]:
+def launch_lm_studio(
+    load_model: bool = True, *, model_key: Optional[str] = None
+) -> Tuple[bool, str]:
+    """Start the server; verify selected residency without loading any model.
+
+    The legacy ``load_model`` flag requests default UI-TARS readiness when no
+    explicit key is supplied. False requests server-only readiness. Model
+    loading remains an explicit operator/lifecycle action, outside startup.
     """
-    Launch LM Studio and optionally load all AI models.
+    from .lm_studio_startup import launch_model_server, resolve_lms_cli_path
 
-    Models loaded (WSP 77 Agent Coordination):
-    - UI-TARS: Vision-based automation
-    - Gemma: Fast pattern matching (Phase 1)
-    - Qwen: Intelligent reasoning (Phase 2)
-
-    Args:
-        load_model: Whether to auto-load models via API after LM Studio starts
-
-    Returns:
-        Tuple of (success, message)
-    """
-    if is_lm_studio_running():
-        logger.info(f"[DEPS] LM Studio already running on port {LM_STUDIO_PORT}")
-        # Even if running, try to load all models if requested
-        if load_model:
-            load_all_models()
-        return True, "LM Studio already running"
-
-    lm_studio_path = resolve_lm_studio_path()
-    if not lm_studio_path:
-        logger.warning("[DEPS] LM Studio executable not found (set LM_STUDIO_PATH in .env)")
-        logger.warning("[DEPS] Please start LM Studio manually and load UI-TARS model")
-        return False, "LM Studio executable not found"
-
-    try:
-        logger.info(f"[DEPS] Launching LM Studio: {lm_studio_path}")
-
-        # Launch LM Studio as detached process
-        subprocess.Popen(
-            [lm_studio_path],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
-        )
-
-        # Wait for API to be ready (LM Studio takes longer to start)
-        logger.info("[DEPS] Waiting for LM Studio API (this may take 30-60 seconds)...")
-        for i in range(120):  # 2 minute timeout
-            time.sleep(1)
-            if is_lm_studio_running():
-                logger.info(f"[DEPS] [OK] LM Studio API ready on port {LM_STUDIO_PORT}")
-
-                # Auto-load all AI models (UI-TARS, Gemma, Qwen)
-                if load_model:
-                    time.sleep(2)  # Brief pause for API to fully initialize
-                    load_all_models()
-
-                return True, f"LM Studio started on port {LM_STUDIO_PORT}"
-            if i % 10 == 0 and i > 0:
-                logger.info(f"[DEPS] Still waiting for LM Studio... ({i}s)")
-
-        logger.warning("[DEPS] LM Studio launched but API not responding")
-        logger.warning("[DEPS] Please ensure models are loaded in LM Studio (UI-TARS, Gemma, Qwen)")
-        return False, "LM Studio launched but API not responding - load models manually"
-
-    except Exception as e:
-        logger.error(f"[DEPS] Failed to launch LM Studio: {e}")
-        return False, str(e)
+    required_key = model_key if model_key is not None else (
+        UI_TARS_MODEL_ID if load_model else None
+    )
+    prefer_headless = os.getenv("LM_STUDIO_PREFER_LLMSTER", "true").strip().lower()
+    return launch_model_server(
+        port=LM_STUDIO_PORT,
+        model_key=required_key,
+        lms_cli=resolve_lms_cli_path(),
+        gui_path=resolve_lm_studio_path(),
+        prefer_headless=prefer_headless in {"1", "true", "yes", "on"},
+    )
 
 
 def _load_ui_tars_model() -> bool:
@@ -679,12 +641,15 @@ def load_all_models() -> Dict[str, bool]:
     return results
 
 
-async def ensure_dependencies(require_lm_studio: bool = True) -> Dict[str, bool]:
+async def ensure_dependencies(
+    require_lm_studio: bool = True, *, model_key: Optional[str] = None
+) -> Dict[str, bool]:
     """
     Ensure all dependencies are running before DAE starts.
     
     Args:
-        require_lm_studio: Whether LM Studio is required (for UI-TARS vision)
+        require_lm_studio: Whether native server/selected-model readiness is required
+        model_key: Exact native key; defaults to UI-TARS for legacy vision callers
     
     Returns:
         Dict with status of each dependency
@@ -713,13 +678,13 @@ async def ensure_dependencies(require_lm_studio: bool = True) -> Dict[str, bool]
         if results['edge']:
             logger.info("[DEPS] Edge detected (auto-launch disabled)")
     
-    # 3. LM Studio for UI-TARS (optional but recommended)
+    # 3. Native LM Studio server and the caller-selected model (optional)
     if require_lm_studio:
-        lm_ok, lm_msg = launch_lm_studio()
+        lm_ok, lm_msg = launch_lm_studio(model_key=model_key)
         results['lm_studio'] = lm_ok
         if not lm_ok:
             logger.warning(f"[DEPS] [WARN] LM Studio: {lm_msg}")
-            logger.warning("[DEPS] Comment engagement will use DOM-only mode (no vision verification)")
+            logger.warning("[DEPS] Selected model is not ready; DOM actions remain available")
     else:
         results['lm_studio'] = is_lm_studio_running()
         if results['lm_studio']:
@@ -730,7 +695,7 @@ async def ensure_dependencies(require_lm_studio: bool = True) -> Dict[str, bool]
     logger.info("[DEPS] DEPENDENCY STATUS:")
     logger.info(f"  Chrome (port {CHROME_DEBUG_PORT}): {'READY' if results['chrome'] else 'NOT READY'}")
     logger.info(f"  Edge (port {EDGE_DEBUG_PORT}): {'READY' if results.get('edge') else 'NOT READY'}")
-    logger.info(f"  LM Studio (port {LM_STUDIO_PORT}): {'READY' if results.get('lm_studio') else 'NOT RUNNING'}")
+    logger.info(f"  LM Studio (port {LM_STUDIO_PORT}): {'READY' if results.get('lm_studio') else 'NOT READY'}")
     logger.info("="*60)
     
     return results

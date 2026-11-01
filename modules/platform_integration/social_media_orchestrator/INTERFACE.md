@@ -7,6 +7,37 @@
 
 ## Public API
 
+### Local pitch-package instruction entry (prototype)
+
+`skillz/foundup_pitch_package/SKILLz.md` produces a versioned brief, narration/storyboard
+and companion deck from existing Outcome/Solution/Pain evidence. The Codex entry is
+`.agents/skills/foundup-pitch-package/SKILL.md` at repository root. It has no callable
+executor, WRE registry admission, resident trigger or publication authority. Use the
+current Skillz and `docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md`
+for the media-admission and separately granted campaign boundaries.
+
+### Source-backed editorial package
+
+```python
+content_orchestrator.prepare_campaign(brief: dict) -> dict
+async def execute_content_campaign(params: dict[str, str]) -> dict
+```
+
+The existing SOCIAL adapter accepts `social campaign content action=prepare
+dry_run=true brief='<JSON>'`. Inline input is bounded to64KiB with unique JSON
+keys. `social_content_brief.v1` requires an explicit brand projection, audience,
+objective, CTA, source excerpts, topics and offset-aware calendar parameters.
+Returns `social_content_package.v1`: deterministic editorial priorities,
+deduplicated evidence, source-preserving drafts, proposed UTC slots, review
+requirements and measurement join keys. See [the full contract](docs/CONTENT_CAMPAIGN.md).
+
+All evidence remains supplied/unverified. Brand rules and locale are carried for
+review, not automatically applied. Package revision is not signed authority;
+no account is selected, no source/credential/config is fetched and no model,
+scheduler, storage, browser or publisher runs. Unknown/live parameters reject.
+Length checks are raw Unicode prechecks; provider validation remains pending.
+Overlength drafts return no publishable content, preserving source text/links.
+
 ### Petition intake plan
 
 ```python

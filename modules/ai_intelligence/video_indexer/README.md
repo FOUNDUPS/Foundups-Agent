@@ -1,5 +1,14 @@
 # Video Indexer Module
 
+## YUMORI campaign evidence proposal
+
+The preserved [Moshpit video-evidence work order](YOUTUBE_DAE_YUMORI_MOSHPIT_VIDEO_EVIDENCE_WORK_ORDER.md)
+reuses current action and persistence owners. YUMORI-specific extraction and
+candidate projection remain SPECIFIED_NOT_IMPLEMENTED; this document does not
+authorize browser access, backfill, disclosure or publication. Existing
+single-video/channel/portfolio/daemon routes do not prove that campaign outcome.
+
+
 Japanese audio uses the existing `AudioAnalyzer(language="ja")`; automatic
 detection is the default for multilingual models; omitted language remains English
 for `.en` models. See [language evidence in the interface](INTERFACE.md#audioanalyzer).

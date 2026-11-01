@@ -69,6 +69,8 @@ class ChatSender:
         Returns:
             True if message was sent successfully, False otherwise
         """
+        reviewed_text = getattr(message_text, 'reviewed_text', None)
+        theme_snapshot = getattr(message_text, 'theme_snapshot', None)
         if stop_active():
             run_id = os.getenv("YT_AUTOMATION_RUN_ID", "").strip()
             logger.warning(
@@ -168,6 +170,12 @@ class ChatSender:
                 logger.debug(
                     f"[EMOJI] After conversion: {message_text.encode('ascii', 'backslashreplace').decode('ascii')}"
                 )
+
+                # Recheck after every await/delay and before the network effect.
+                if reviewed_text is not None:
+                    from modules.communication.livechat.src.operator_command_queue import load_active_theme
+                    if str(message_text) != reviewed_text or load_active_theme('livechat') != theme_snapshot:
+                        return False
 
                 # Prepare message data
                 message_data = {

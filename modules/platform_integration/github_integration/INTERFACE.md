@@ -1,5 +1,24 @@
 # INTERFACE (WSP 11)
 
+## WSP audit root binding
+
+`WSPAutomationManager(project_root=None)` defaults to its own repository root.
+An explicit root is shared by the compliance checker and WRE integration.
+`scan_for_violations()` retains the checker's explicit incomplete-scan records;
+the checker does not mark documentation hints as authorized automatic fixes.
+Scanning does not invoke issue/PR publication methods. The root binding is covered
+by two offline constructor cases in the infrastructure WSP core test owner.
+
+## Legacy adapter workflow declaration
+
+`await GitHubAPIAdapter.trigger_workflow(workflow_id, ref, inputs=None, *,
+agent_id, session_id, cube_type)`
+
+The three identity arguments are required keywords; inputs may be omitted.
+The adapter retains its existing mock transport. Syntax and argument binding
+are verified; this interface does not establish live workflow dispatch.
+It is separate from the GitHubAPIClient observation interface below.
+
 ## Immutable regular-file observation
 
 `await GitHubAPIClient.get_file_observation(file_path: str, *,

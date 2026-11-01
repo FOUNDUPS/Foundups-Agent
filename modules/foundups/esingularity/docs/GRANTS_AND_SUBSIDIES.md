@@ -1,6 +1,6 @@
 # YUMORI.me / eSingularity — Grants, Subsidies, and PPP Support Registry
 
-Last verified: 2026-10-28 JST for F-13/F-14 coverage catch-up; 2026-10-26 targeted checks and other historical entries retain their own verification dates. These catch-up discoveries are not fresh official changes.
+Last verified: 2026-11-01 JST for F-13 expiry of the officially published October 31 application window (no new extension visible); 2026-10-30 JST for F-12 exact deadline-time clarification; 2026-10-28 JST for F-13/F-14 coverage catch-up; 2026-10-26 targeted checks and other historical entries retain their own verification dates. These catch-up discoveries are not fresh official changes.
 
 ## Purpose and truth boundary
 
@@ -200,6 +200,7 @@ Do not book any F-10 subsidy revenue, do not treat the published rates as expect
 - Official program page: https://www.meti.go.jp/policy/energy_environment/global_warming/gx_strategy_area/subsidy/subsidy.html
 - Official program office: https://gx-area-hojo.jp/
 - The office published a second-call pre-announcement on 2026-08-20. Treat exact second-call dates, rates and thresholds as controlled by the current second-call guide when released; do not copy first-call economics into FIN as expected funding.
+- **Material round-status news (2026-10-30):** the officially appointed GX office published its **FY2026 first-call selected-operator list for the データセンター設備投資型 track**. This is a published selection result for other program applicants, **not YUMORI project selection or awarded funding**. Selection-list publication has no effect on the still-unannounced second-call dates. Official news: https://gx-area-hojo.jp/archives/1668/2026/30/14/30/ ; official first-call evidence/list landing page: https://gx-area-hojo--dev1.sandbox.my.salesforce-sites.com/FirstRoundOfInformation (first call closed 2026-09-01 12:00 JST). The list attachment was not independently readable through the evidence fetch in this check; do not infer selected names/sites or a YUMORI status from it. First-call published DC subsidy tiers depend on power sourcing and company size (up to 50% and ¥25 billion per qualifying project); these are not updated second-call terms and not YUMORI funding.
 
 **YUMORI fit:** potentially relevant to a future Hanyu-led or other independently qualifying building-scale compute investment if an eligible operating company/SPV has lawful site rights, a qualifying decarbonized-power procurement structure, demand/offtake, finance, and a credible operating plan. The preparatory committee and current Form 1 filing are not themselves an eligible DC investment application.
 
@@ -242,7 +243,7 @@ Do not book any F-10 subsidy revenue, do not treat the published rates as expect
 ## F-11 — 令和7年度補正予算 省エネ・非化石転換補助金（設備単位型）第4次公募
 
 - Agency: 経済産業省 / 一般社団法人環境共創イニシアチブ (SII).
-- Status: **VERIFIED PROGRAM / FOURTH CALL OPEN; YUMORI ELIGIBILITY NOT ESTABLISHED**.
+- Status: **CLOSED — SII confirmed the fourth call ended 2026-10-30 at 17:00 JST; project boundary remains VERIFIED PROGRAM with YUMORI eligibility/application/award unestablished**. SII mentions a possible fifth-call schedule to be announced later; no fifth-call opening/deadline is established.
 - Open: 2026-10-05. Deadline: **2026-10-30 17:00 JST (physical receipt of application)**.
 - Official call: https://sii.or.jp/setsubi07r/overview4.html
 - Official guide: https://sii.or.jp/setsubi07r/uploads/r7h_st_01_kouboyouryou_4.pdf
@@ -254,7 +255,7 @@ Do not book any F-10 subsidy revenue, do not treat the published rates as expect
 
 - Agency: 環境省 / 一般社団法人静岡県環境資源協会 (SERA).
 - Status: **VERIFIED PROGRAM / THIRD CALL OPEN; YUMORI ELIGIBILITY NOT ESTABLISHED**.
-- Open: 2026-10-16. Deadline: **2026-12-15**; verify exact submission method and cutoff with current guide before any action.
+- Open: 2026-10-16. Deadline: **2026-12-15 17:00 JST (receipt required)**, explicitly stated in the Ministry of the Environment's 2026-10-16 primary release; verify the exact submission method with the administrator before action. Deadline-time evidence rechecked 2026-10-30 (not a new government amendment).
 - Round clarification, rechecked 2026-10-26: SERA identifies this as the **final FY2026 call**. This does not establish a FY2027 successor or opening date.
 - Official ministry release: https://www.env.go.jp/press/press_05673.html
 - Official administrator: https://siz-kankyou.com/2026co2/teitansokenzai3/
@@ -266,9 +267,9 @@ Do not book any F-10 subsidy revenue, do not treat the published rates as expect
 ## F-13 — 令和8年度企業の太陽光・蓄電池設備導入促進事業補助金
 
 - Agency: 福井県 エネルギー環境部 エネルギー課.
-- **Round state:** OPEN as of the 2026-10-28 primary-source check; FY2026 call opened **2026-04-17**, ends **2026-10-31** unless the funding budget is exhausted earlier. Application by email; official page does not establish a cutoff hour.
+- **Round state: CLOSED BY PUBLISHED DEADLINE as of 2026-11-01 JST.** FY2026 application window ran **2026-04-17 through 2026-10-31**. The official prefectural page still states October 31 without a published extension; the budget may have exhausted earlier. Email submissions were specified; cutoff hour and administrator's final receipt status are not independently confirmed. This date passage is not a YUMORI application, rejection or award; FY2027 continuation/dates are unannounced.
 - **YUMORI project boundary: VERIFIED PROGRAM only; no project eligibility inquiry, eligibility, submission, selection or award evidenced.** This is a previously existing FY2026 program discovered in a coverage catch-up, **not a new October 28 call or changed deadline**.
-- Primary source, checked 2026-10-28: https://www.pref.fukui.lg.jp/doc/dengen/shin-energy/fukui-taiyokou.html
+- Primary source, rechecked 2026-11-01: https://www.pref.fukui.lg.jp/doc/dengen/shin-energy/fukui-taiyokou.html
 - Eligible applicants stated on the public page: a private enterprise with an established business establishment in Fukui Prefecture for at least one continuous year, or a qualifying lessor supplying such enterprise. Eligible installation form: self-consumption PV alone or PV **with** battery; battery-only funding is not established. At least 30% of generated electricity must be self-consumed, with 50% or more consumed in Fukui Prefecture. FIT/FIP, J-Credit registration and other subsidies for the same project are excluded.
 - Published equipment-unit grant amounts: PV with battery **¥50,000/kW, cap ¥5,000,000**; PV alone **¥30,000/kW, cap ¥3,000,000**. Commercial battery >20 kWh **¥63,000/kWh** (smaller battery **¥51,000/kWh**), battery cap **¥6,300,000** subject to actual cost/1/3 controls. A separate **¥20,000/kW, cap ¥2,000,000** addition is only for designated Reinan municipalities, **not Fukui City**. Each rate/cap is conditional, not a YUMORI forecast.
 - Candidate scope: solar generation and qualifying battery assets for a lawful future Fukui data-center/onsen operating site; **not** GPU purchase or unrestricted DC construction funding.
@@ -277,7 +278,7 @@ Do not book any F-10 subsidy revenue, do not treat the published rates as expect
 ## F-14 — 令和7年度補正予算 省エネ・非化石転換補助金（工場・事業場型）第4次公募
 
 - Agency: 経済産業省 / 一般社団法人環境共創イニシアチブ (SII).
-- **Round state:** OPEN as of 2026-10-28; fourth call began **2026-10-05**, closes **2026-10-30 17:00 JST, physical receipt**. Required shipping must be traceable; hand delivery is disallowed. Published 2026-10-05, **not a newly opened call since the 2026-10-26 review**.
+- **Round state:** **CLOSED — SII explicitly confirmed on 2026-10-30 that fourth-call receipt ended at 17:00 JST** (opened 2026-10-05); shipping required traceability and hand delivery was disallowed. SII says fifth-call details will be published when decided, but has not established a fifth-call date. This is a round closure, **not** YUMORI application, rejection or award.
 - **YUMORI project boundary: VERIFIED PROGRAM only; applicant, facility and use-right eligibility, application and award not established.**
 - Official call, checked 2026-10-28: https://sii.or.jp/koujou07r/overview4.html
 - Official administrator's program/type explanation: https://www.syouenehojyokin.sii.or.jp/about-type/kojyo.html
@@ -293,6 +294,10 @@ Do not book any F-10 subsidy revenue, do not treat the published rates as expect
 - Published: 2026-10-14. Bidder eligibility submission closed **2026-10-23 17:00**; proposals due **2026-11-04 17:00** only for already-qualified bidders.
 - Official source: https://www.pref.fukui.lg.jp/doc/dengen/1014.html
 - Public research procurement ceiling **¥6,160,000 incl. tax** is NOT a grant cap or subsidy. Scope studies siting and infrastructure for very large data centers; no evidence any YUMORI site is selected or on the list. Possible complementary heat-reuse/decentralized-compute question is only a future inquiry hypothesis.
+
+### Watch reconciliation — 2026-10-31 JST
+
+SII first-party October 30 notices confirm F-11 (equipment track) and F-14 (whole-facility track) fourth calls **CLOSED** at 17:00 JST (physical receipt). Both mention a possible fifth call, with no official opening, deadline, category rates or caps yet established. The GX program administrator published FY2026 F-03 first-call DC-track selection results on October 30; this is **not** a YUMORI eligibility or award receipt, and the second-call status remains PREANNOUNCED. F-13's official Fukui deadline is October 31 with possible earlier budget exhaustion; its page has not evidenced an extension or current unexhausted budget, so do not infer a current application slot from the calendar. No public-asset list or City filing route was promoted. Primary sources: https://sii.or.jp/setsubi07r/overview4.html , https://sii.or.jp/koujou07r/overview4.html , https://gx-area-hojo.jp/ , https://www.pref.fukui.lg.jp/doc/dengen/shin-energy/fukui-taiyokou.html . Status remains VERIFIED PROGRAM except F-01's separately retained ELIGIBILITY INQUIRY; no financial admission.
 
 ## Other tracked programs
 

@@ -1,4 +1,4 @@
-﻿"""
+"""
 OpenAI Sora2 Video Generator
 
 Provides an alternative generator to Google Veo 3 for YouTube Shorts.

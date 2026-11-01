@@ -1,3 +1,73 @@
+## 2026-11-01 — Epoch effect, concurrency and controlled-process acceptance
+
+Independent frozen40: baseline2 pass/38 fail, zero setup errors/skips/guard
+denials. Candidate40 and separate16 held-outs pass. Root found a private Mesa
+callback returning a distribution instead of its original None; a separate
+frozen control reproduced the failure, then the one-line repair passes.
+Final independent selection57 passes with174 source snapshots unchanged.
+
+Promote the original40 and callback control into existing staker/epoch/Layer-D
+owners (689/431/206 lines). Their192 cases pass. All old raw content prefixes and
+test ASTs remain; only new helper names are disambiguated, with inverse-renaming
+AST equivalence to the frozen acceptance. The16 held-outs remain independent.
+Counts overlap and must not be summed as independent attack coverage.
+
+The fresh154 baseline includes real240-tick non-AI orchestration. First harness
+attempt:151 pass/3 fail (two forbidden default SQLite paths, one inspection typo).
+Correct only default scratch-store selection and `_fam_bridge` inspection;
+retain failures and unchanged guards. Initial candidate/repeat smoke passes but
+economic traces differ, so no parity was accepted from them. Stdlib diagnostics
+prove `-I` ignores PYTHONHASHSEED. A separately frozen `-P -s`/closed-env profile
+with explicit hash seed710007 and one case per fresh process produces identical
+baseline/candidate/candidate traces, SHA672d12c9d8fb6286624ea892fb3a5d0315c475ee45f8c83c9a271ba4328f0ff1.
+No monetary values were normalized or discarded. Real implementation imports,
+scratch FAM/central-daemon storage and Python effect guards remain; this is not
+OS confinement, model-seed-only portability, funded settlement or chain testing.
+
+Broader actual simulator:930 pass, exact3 historical SSEHTTP deselections, zero
+failures/errors/skips/guard denials; all174 inventoried source hashes unchanged.
+No optional enrichment stubs or broad daemon-path rewrite. The controlled seed
+trace is one separately qualified scenario, not a blanket reproducibility claim.
+
+Packaging: canonical generator write/check,8 original Python/index cases and3
+Node consumer entrypoints pass. Actual old1477 validator rejects the generated
+1478 closure before pins/count change; new boundary accepts1478/rejects1479.
+This differs from an old fixture's preliminary count assertion. All earlier
+members, byte caps and registry1794 owners remain; only one private helper is new.
+
+## 2026-11-01 — Wallet policy test-first qualification
+
+Frozen 76-case owner: 6 passed/70 failed on current base43b3. Existing three-owner
+baseline: 235 passed. Same frozen policy bytes plus originals on candidate:
+311 passed, 0 failures/errors/skips; sources unchanged and no effect-guard denial.
+Preserve initial wrong-filename run (exit4/0 tests) as setup failure, not a test.
+The reused credential-free runner imports real modules with scratch SQLite and
+central-daemon state. Its Python guards are not OS confinement. Independent
+13-case oracle was frozen before candidate edits and now passes independently.
+Connected simulator/docs selection: 489 passes; packaging: 8 Python cases and
+3 Node entrypoints pass. Counts overlap. See the current audit receipt for source
+hashes. No historical economic test was edited.
+
+## Publication documentation guardrails — 2026-10-31
+
+Existing documentation suite first produced5 passes/1 failure on the missing
+unit-conflict metadata. Added genesis-to-matrix consistency and exact economic
+protocol mirror checks; no historical oracle removed or weakened. The canonical
+registry retains all1792 main owners and adds the circuit-breaker owner. Fresh
+GREEN and connected counts are recorded in the current reconciliation addendum.
+
+## Local adversarial qualification — 2026-10-31
+
+Fresh244 selected baseline passes. Desired RED79:12 pass/67 fail; candidate320
+passes; connected414 passes after explicit real central-daemon scratch setup.
+Independent6 held-outs pass, original3 CABR ASTs preserved. Counts overlap.
+Seeded CABR properties:0/7/3102,256 decisions each; frozen clock for recovery.
+Separate seed310001 characterization:7 cases,1 pass/6 desired assertion failures,
+zero setup errors/skips/guard denials; sources unchanged. No xfail suppression.
+Retain initial pytest logging-guard failure, nonexistent-owner zero-test run and
+hostname/optional-SQLite diagnostic runs. Final configured run has no denied
+effects; Python instrumentation is not OS confinement or blockchain qualification.
+
 ## FoundUps selected numeric source closure — 2026-10-25
 
 Pre-edit WSP15 allocation16/P0 in the numeric plan permits exactly one required

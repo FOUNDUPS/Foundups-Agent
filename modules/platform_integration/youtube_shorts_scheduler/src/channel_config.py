@@ -1,4 +1,4 @@
-﻿"""
+"""
 Channel Configuration for YouTube Shorts Scheduler
 
 Multi-channel support driven by the shared YouTube channel registry.

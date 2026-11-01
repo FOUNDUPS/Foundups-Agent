@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.env
+.env.*
+*.tar
+frontend/.openai/
+frontend/dist/*
+!frontend/dist/assets/
+frontend/dist/assets/*
+!frontend/dist/assets/style.css
+!frontend/dist/assets/site.js

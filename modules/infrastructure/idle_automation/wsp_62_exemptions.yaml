@@ -14,6 +14,7 @@ exemptions:
     classes:
       - "SelfResearchRefresher"
     temporary: true
+    expires_on: "2026-09-30"
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
     remediation: "modules/infrastructure/idle_automation/ROADMAP.md#phase-2-enhancement-in-progress-u1f6a7"

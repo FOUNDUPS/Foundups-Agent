@@ -1,5 +1,13 @@
 # Browser Actions TestModLog
 
+## 2026-10-29 — Legacy manual probe import regression
+
+The old source fails parsing. The repaired source imports with runtime/provider
+imports denied, no output and no sys.path mutation. This control lives in
+`tests/test_legacy_test_source_safety.py` and loads the file without importing
+application parent packages. It proves bounded import safety, not heart-click
+behavior. The program remains manual and excluded by WRE. WSP22/34/50/97.
+
 ## 2026-09-24: Manager admission guard
 
 - WSP 00/15/22/34/50/62/84/97; C3/I3/D4/Impact3 = 13/P1. The existing action owner now requires no prior pending/connected target, the actual PENDING enum, a matching target and identity with the currently stored pending object before Connect. Rejections return `connection_request_not_admitted` without invitation UI or success credit. Existing policy denials, previews, navigation failures and manager bookkeeping are preserved.

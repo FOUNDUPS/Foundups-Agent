@@ -1,3 +1,46 @@
+## 2026-11-01 — Private operator directive consumers
+
+The fixed four-module consumer selection passed60 cases:19 detail/button,
+16 real queue claim/reload,9 inline popup and16 Shorts controls. Canonical test
+admission classified all four collectable without quarantine exceptions. Minimal
+explicit environment, private paths and denied browser/model/network/process
+effects were used; no captured JUnit streams or skipped cases.
+
+`test_video_policy_consumers.py` tests late preserve/pause/foreign edits at actual
+Save. `test_video_policy_save_readback.py` proves durable unknown retry refusal,
+fresh-document metadata readback and no verification from a no-op refresh or a
+metadata-only schedule read. `test_video_policy_inline.py` exercises actual popup
+submission with strict target association and no fallback after uncertain click.
+The fourth module is Shorts `test_operator_upload_policy.py`.
+
+Adjacent185 cases passed: existing selected-batch147, metadata evidence23 and
+publisher boundary15. Strict typed DOM fixtures gained the new explicit edit
+session contract; valid synthetic native IDs replaced invalid placeholders.
+All original assertions and selected-batch case counts remain.
+
+## 2026-10-29 — Qualified scheduled inventory, offline only
+
+`test_scheduled_inventory.py` exercises actual parser/collector and consumer
+definitions with synthetic DOM snapshots: useful multi-page slots and qualified
+empty; raw parse failures and upload-date rejection; native/URL account mismatch;
+extra/missing filters; unknown first/final pagination; repeated pages, limits,
+later drift and failed page transitions. Tracker/auditor/CPS/scheduler controls
+verify positive reads plus no clean/absence/auto-heal/reset on unknown. Existing
+visibility and post-audit breadcrumb tests remain adjacent regressions.
+The local selection passed102 cases, zero failures/errors/skips:86 inventory and
+consumer controls,9 existing visibility checks and7 breadcrumb controls. Useful
+positive repairs use fake writers; no schedule is changed. Explicitly Scheduled
+modern date cells/tooltips pass while generic/upload dates and contradictory
+slots fail. This does not qualify a live selector or a real saved schedule.
+
+The external local harness clears the child environment to a fixed credential-
+free allowlist before source imports, disables dotenv/bytecode/plugin autoload,
+denies process/HTTP/socket/SQLite effects and confines writes/registry/temporary
+storage outside Git. A timers/tasks-only test loop avoids Windows asyncio's
+otherwise real TCP wakeup socketpair. No browser, scheduler service, model or
+main.py is started. Synthetic inputs qualify logic, not installed DOM selectors
+or live scheduling. Manual browser suites below remain excluded.
+
 ## Offline selected-batch closure (2026-10-22)
 
 The CI job `youtube-selected-batch` runs explicit mocked scheduler/adapter and
@@ -123,4 +166,3 @@ When `YT_SCHEDULER_INDEX_WEAVE_ENABLED=true` (default), the production scheduler
 ## Last Updated
 
 - **V0.8.x** (2026-01-18): Production-aligned full cake; deterministic click cadence; page save hardened
-

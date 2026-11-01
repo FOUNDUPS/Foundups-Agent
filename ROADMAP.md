@@ -12,6 +12,64 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
+
+## Micro verification and protected native composition — 2026-11-01
+
+Reconciled main `43b3b66cce8a01f28fb08577a9db84f731e50455`. The resident assurance
+connection below is published: [PR2276](https://github.com/FOUNDUPS/Foundups-Agent/pull/2276)
+merged at `c9ac9059ed29073e885159747144071a3d310aff`; its exact-main CI and CodeQL
+passed. Do not repeat that repair or mistake its controlled fixtures for G1.
+
+The **19/P0** native dependency is protected requester/lease-consumption
+composition plus authentic current inputs, not three ordinary constructor calls.
+The HIGH service already verifies proofs; ordinary main must not receive the
+integrity secrets required by replay stores. Preserve the initial LOW boundary.
+[Dispatch evidence and next acceptance gates](docs/operations/RSI_SWARM_DISPATCH.md#micro-verification-and-protected-native-composition--2026-11-01)
+own this correction, runtime inventory, fixture ranking and local/cloud decision.
+
+One eligible **13/P1** Vote micro qualification ran the existing local Qwen
+adapter against a real production defect. Independent frozen tests rejected its
+wrong-branch proposal (7 failures versus baseline 4); the separately attributed
+coordinator repair passed 322 module tests. No native author, OS confinement,
+promotion or learned later-use benefit is proved. R15's first admitted target
+remains the existing test-registry work procedure, not a replacement product build.
+
+## Blockchain simulator authority — 2026-10-31
+
+Blockchain planning follows the [WSP26 simulator-first contract](WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract)
+and [2026-10-31 reconciliation](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md).
+Publish reviewed source separately from deployment: unresolved economic conflicts,
+unfunded settlement and absent independent signing controls block activation.
+The existing simulator must validate any economic enhancement before chain parity.
+
+### Current blockchain security sequence — 2026-11-01
+
+[The current sprint and ordered roadmap](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#replay-safe-epoch-settlement-and-ai-threat-update--2026-11-01)
+record B01 wallet-policy isolation delivered through PR2281 at
+`24cc4aa2971b05ff8b53f76d157145da4134ed5c` with 24 PR and 22 resulting-main checks
+passing. A07/B02 full epoch effects is the active class-B 18/P0 layer; its fresh
+154-case baseline includes an actual seeded 240-tick simulation. Independent
+frozen replay acceptance first produced 2 passes/38 failures before repair.
+Corrected source passes 57 independent cases and 930 broader simulator cases
+in overlapping scopes; controlled fresh-process economic traces match exactly.
+Package checks pass8 Python cases and3 Node entrypoints; protected publication
+remains pending. Seed-only reproducibility is not proved.
+The [AI threat update](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#ai-exposed-financial-attack-surfaces)
+maps repository/tool poisoning and automated exploitation to existing controls
+and missing gates. The 19-entry registry remains metadata without issuance evidence.
+Preserve simulator-first authority, disputed units/caps and independent funding/
+signer/recovery gates. No planning packet grants live TestNet or production use.
+
+## Resident assurance connection — 2026-10-30
+
+Source audit at `7d6a292bcb28e5cbadd1dffdac1a795d3da7e31e` supports
+Challenge → Build → Verify → Accept → Improve through existing R06–R19 owners.
+The selected **14/P1 (C2/I4/D4/Impact4)** repair connects main's enabled resident
+startup to the existing AgentDB assurance store; its integration test previously
+supplied that missing dependency itself. The **19/P0** authenticated native
+worker umbrella remains open. See the [current connection and evidence limits](docs/operations/RSI_SWARM_DISPATCH.md#resident-assurance-connection--2026-10-30).
+Recovery, PC synchronization and unrelated PRs remain in their separate lanes.
+
 ## Current RSI input gate — 2026-10-25
 
 [#2181](https://github.com/FOUNDUPS/Foundups-Agent/pull/2181) source publication is complete:

@@ -6,6 +6,23 @@
 
 ---
 
+## 2026-11-01 Implemented Funding-Source Confidence Correction
+
+The existing Python `score_funding_summary_confidence` preserves original labels
+and references. For individual funding sources, upstream VERIFIED_FACT requires
+`fec_filing`, `state_filing` or `court_record`; other source types cap it at
+HIGH_CONFIDENCE_INFERENCE and add `downgraded_from_verified_due_to_indirect_source`.
+Lower/UNKNOWN values and approved direct sources are unchanged. A type label is
+not source authentication. Aggregate total_raised remains a separate known
+provenance gap (ROADMAP); this is not the planned general claim-verification API.
+
+## 2026-10-30 Planned Claim-Verification Addendum
+The [Political Claim Verification and Scoring Engine](docs/POLITICAL_CLAIM_VERIFICATION_AND_SCORING_ENGINE.md) adds proposed transcript, atomic-claim, evidence-graph, methodological/funding-audit, versioned-assessment, and score-snapshot contracts. Exact API signatures are reserved for the build packet. These are **planned / not implemented** and must not be reported as exports from the current Python v0.6.0 funding pipeline.
+
+Verdict, WSP 97 evidence confidence, context, conflicts, review state, and intent are separate fields. Unknown/uncheckable/pending cases are unscored; every published assessment requires exact source locators and a correction history. The April API below remains design specification, not proof of delivered speech, search, graph, or challenge functionality.
+
+---
+
 ## Public API
 
 ### Primary Entry Point

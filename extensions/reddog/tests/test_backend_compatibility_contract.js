@@ -239,8 +239,18 @@ function assertConfigurationMigrationPrecedence() {
 }
 
 function assertRuntimeFileCountBoundary() {
+  for (const member of [
+    'modules/infrastructure/dependency_launcher/src/lm_studio_startup.py',
+    'modules/platform_integration/youtube_shorts_scheduler/src/schedule_inventory.py',
+    'modules/infrastructure/wsp_core/src/wsp_domain_policy.py'
+  ]) {
+    assert(manifest.required_runtime_files.includes(member));
+  }
   assert(manifest.required_runtime_files.includes(
     'modules/foundups/simulator/economics/_token_numeric.py'
+  ));
+  assert(manifest.required_runtime_files.includes(
+    'modules/foundups/simulator/_mesa_epoch.py'
   ));
   assert(manifest.required_runtime_files.includes(
     'modules/communication/livechat/src/engagement_lifecycle.py'
@@ -251,6 +261,13 @@ function assertRuntimeFileCountBoundary() {
   for (const name of ['reddog_effect_consensus_proof.py', 'reddog_current_effect_signing_authority.py', 'reddog_external_signer_authoritative_use_lease.py']) {
     assert(manifest.required_runtime_files.includes(`modules/communication/moltbot_bridge/src/${name}`));
   }
+  for (const member of [
+    'modules/communication/livechat/src/operator_video_policy_owner.py',
+    'modules/communication/livechat/src/video_policy.py',
+    'modules/platform_integration/youtube_shorts_scheduler/src/video_policy.py'
+  ]) {
+    assert(manifest.required_runtime_files.includes(member));
+  }
   const validator = require('../backend_compatibility_manifest');
   const candidate = JSON.parse(JSON.stringify(manifest));
   const addMember = (index) => {
@@ -258,13 +275,13 @@ function assertRuntimeFileCountBoundary() {
     candidate.required_runtime_files.push(member);
     candidate.required_runtime_sha256[member] = '0'.repeat(64);
   };
-  while (candidate.required_runtime_files.length < 1472) {
+  while (candidate.required_runtime_files.length < 1481) {
     addMember(candidate.required_runtime_files.length);
   }
-  assert.strictEqual(candidate.required_runtime_files.length, 1472);
+  assert.strictEqual(candidate.required_runtime_files.length, 1481);
   assert.deepStrictEqual(validator.validateManifest(candidate), []);
-  addMember(1472);
-  assert.strictEqual(candidate.required_runtime_files.length, 1473);
+  addMember(1481);
+  assert.strictEqual(candidate.required_runtime_files.length, 1482);
   assert.deepStrictEqual(validator.validateManifest(candidate), [
     'backend_runtime_file_contract_mismatch'
   ]);

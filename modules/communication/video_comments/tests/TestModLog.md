@@ -1,5 +1,55 @@
 # video_comments TestModLog
 
+## 2026-10-29 — Follow-up livechat fallback and bounded caller qualification
+
+Extend the existing `test_reply_semantic_assessment.py` source-bound selection;
+no new test family or weaker source assertions. It now contains 88 collected
+cases covering retained Grok success, four Grok failure modes, exact local HTTP
+receipts, shared-context isolation, full native snapshots, exact final 200-character
+mention review and expiry/supersession/native metadata changes. Added concurrency
+and cancellation controls exercise busy generation/review locks, preserved comment
+serialization, all three HTTP stage failures/cancellations, cancellation during
+news/history/voice preparation, actual caller heartbeat and ten-second timeout
+configuration, late payload discard, no late local fallback, both eligible caller
+identities, and theme clearing without unreviewed fallback. Six malformed native
+theme cases (source ID, handles container/item across main/direct local entry)
+reproduced successful invalid replies before repair and now block all providers.
+
+Final local selector: semantic 88 + unchanged submission history 16 = **104 passed,
+12 subtests passed**, zero failures/errors/skips, Windows CPython3.12. Original
+context selector remains separate at 53 passed; adjacent queue/lifecycle/reader
+116 and stdlib inspection 15 pass separately. Combined 157 is the same context +
+104 scope and must not be added to those counts. JUnit inventory is retained in the
+existing task TEMP evidence root as `followup-repair-results.xml`; exact-case CI
+digest/pins are owned by the publication step. Providers, model judgments and
+browser data are fixtures. A provider thread cannot be killed by await timeout;
+the tests prove result discard and prevention of later stages, not preemption.
+
+One initial caller test supplied a falsey generator and therefore skipped its
+intended branch. An explicit invocation assertion exposed that fixture gap; the
+truthy fixture now executes the real caller. No production assertion was relaxed.
+
+## 2026-10-29 — Windows completion of source repair
+
+Fresh Windows selection: original 53 reply-context plus 116 adjacent queue,
+lifecycle and control-plane cases pass. New semantic and submission-history
+selectors use real source definitions, real temporary SQLite files and synthetic
+browser/provider collaborators. The 15-case stdlib selection also passes.
+Independent fresh-context review reproduced original wrong-video/author binding
+and coder-model selection defects before their fixes. New positive controls
+exercise useful grounded draft approval, stable creator-reply readback and actual
+ChatSender payload handling; negative controls cover restart uncertainty,
+concurrent claims, stale theme at final submit/send, foreign origin and private
+instruction leaks. No public YouTube action or actual model judgment is claimed.
+
+## 2026-10-29 — Private chat-manifest and reply-inspection candidate
+
+New explicit stdlib selector: `python -B -m unittest discover -s modules/communication/video_comments/tests -p test_chat_manifest_inspection.py -v`.
+15 cases pass locally on CPython 3.12 with no third-party packages. Complete source definitions are compiled with controlled collaborators; temporary queue files are real. Providers, browser readback and the queue lock are fixtures. The actual no-post path is exercised for a rejected draft. Tests reproduce UI-TARS model rejection, uncertain stance, malformed/low-scoring reviews, private context activation, replay suppression, explicit announcements, theme prompt consumption and click-without-readback rejection. These are offline regressions, not observed model quality, Chrome selectors, durable crash safety, or live delivery.
+
+The original 53-case selector is retained; its fixtures are adapted for role validation and the new review/posting boundary, without claiming those fixtures test the inspector. Its full run and the 116 adjacent cases remain unrun here because pytest is unavailable. The broad registry and exact-case CI admission still require the owning runtime's qualification. No historical pass count is reused as a current result.
+
+
 ## 2026-10-23 — PR1478 source-bound offline reconciliation
 
 Base `0d3f715bb475c6451e8f23243f43f1adf057cb0f`; original PR head
@@ -129,3 +179,4 @@ correction are explicit; no index rebuild or model call was used.
 
 Applicable ownership: WSP 22 (test history), WSP 50 (source verification),
 WSP 84 (reuse), and WSP 97 section 1.2B (inventory before test authoring).
+

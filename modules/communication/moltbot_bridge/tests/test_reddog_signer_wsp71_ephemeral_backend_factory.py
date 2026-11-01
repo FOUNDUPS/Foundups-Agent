@@ -487,12 +487,26 @@ def test_proposal_factory_expiry_during_request_reserve_prevents_signature(tmp_p
 
 
 @pytest.mark.parametrize("phase", ["before-sign", "after-sign"])
-def test_proposal_key_expiry_in_principal_io_never_returns_signature(tmp_path, monkeypatch, phase):
+@pytest.mark.parametrize("authorization_expiry_delta", [-5, 0, 5])
+def test_proposal_key_expiry_in_principal_io_never_returns_signature(
+    tmp_path, monkeypatch, phase, authorization_expiry_delta,
+):
     from modules.communication.moltbot_bridge.src import reddog_signer_proposal_activation as module
+    from modules.communication.moltbot_bridge.tests import test_reddog_architect_proposal_signer_policy_runtime as proposal
+    original_authorization = proposal._policy_authorization
+    def authorization(policy, **kwargs):
+        return original_authorization(
+            policy, expires_at=policy.expected_payload.expires_at + authorization_expiry_delta,
+            **kwargs,
+        )
+    monkeypatch.setattr(proposal, "_policy_authorization", authorization)
     case = _proposal_factory_case(tmp_path)
     calls, signed = [], []
     def act(result):
-        expiry = case.config.proposal_policy_authorization.expires_at
+        # Exercise principal I/O at the first actual authority boundary, even
+        # when fixture creation crosses a clock tick between the two objects.
+        expiry = min(case.config.proposal_policy_authorization.expires_at,
+                     case.policy.expected_payload.expires_at)
         clock = [expiry - 1]
         monkeypatch.setattr(module, "time", SimpleNamespace(time=lambda: clock[0]))
         original = case.owner.resolver.resolve
@@ -510,6 +524,7 @@ def test_proposal_key_expiry_in_principal_io_never_returns_signature(tmp_path, m
             key.sign(b"synthetic-expiry-control")
     _call_proposal_component(case, act)
     assert len(signed) == (0 if phase == "before-sign" else 1)
+    assert len(calls) == (1 if phase == "before-sign" else 2)
 
 
 

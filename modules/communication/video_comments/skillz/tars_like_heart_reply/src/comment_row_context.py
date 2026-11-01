@@ -5,6 +5,72 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+COMMENT_IDENTITY_SCRIPT = r"""
+function commentIdentity(row, nested = false) {
+    if (!row) return null;
+    const original = row.querySelector('ytcp-comment-view-model, ytcp-comment-view, ytcp-comment') || row;
+    const candidates = new Set();
+    for (const node of [row, original]) {
+        for (const attr of ['data-comment-id', 'comment-id']) {
+            const id = typeof node.getAttribute === 'function' ? node.getAttribute(attr) : null;
+            if (id && /^[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)?$/.test(id)) candidates.add(id);
+        }
+    }
+    for (const link of original.querySelectorAll('a[href]')) {
+        if (link.closest && (link.closest('ytcp-video-thumbnail-with-info') || (!nested && link.closest('ytcp-comment-replies')))) continue;
+        try {
+            const url = new URL(link.href, 'https://studio.youtube.com');
+            if (!['studio.youtube.com', 'youtube.com', 'www.youtube.com', 'm.youtube.com'].includes(url.hostname)) continue;
+            const id = url.searchParams.get('lc') || url.searchParams.get('commentId');
+            if (id && /^[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)?$/.test(id)) candidates.add(id);
+        } catch (e) {}
+    }
+    return candidates.size === 1 ? candidates.values().next().value : null;
+}
+function rowVideoIdentity(row) {
+    const info = row.querySelector('ytcp-video-thumbnail-with-info');
+    if (!info) return null;
+    const ids = new Set();
+    for (const link of info.querySelectorAll('a[href]')) {
+        try {
+            const url = new URL(link.href, 'https://studio.youtube.com');
+            if (url.protocol !== 'https:' || url.username || url.password) continue;
+            let id = null;
+            if (url.hostname === 'studio.youtube.com') id = (url.pathname.match(/^\/video\/([A-Za-z0-9_-]+)(?:\/|$)/) || [])[1];
+            else if (['youtube.com', 'www.youtube.com', 'm.youtube.com'].includes(url.hostname)) {
+                if (url.pathname === '/watch') id = url.searchParams.get('v');
+                else id = (url.pathname.match(/^\/shorts\/([A-Za-z0-9_-]+)(?:\/|$)/) || [])[1];
+            }
+            if (id && /^[A-Za-z0-9_-]+$/.test(id)) ids.add(id);
+        } catch (e) {}
+    }
+    return ids.size === 1 ? ids.values().next().value : null;
+}
+function matchesCommentTarget(row, expected) {
+    if (location.origin !== 'https://studio.youtube.com') return false;
+    if (!row || !row.isConnected || !expected || !expected.text || !expected.author_name ||
+        !expected.comment_id || !expected.video_id || commentIdentity(row) !== expected.comment_id ||
+        rowVideoIdentity(row) !== expected.video_id) return false;
+    const norm = value => (value || '').replace(/\s+/g, ' ').trim();
+    const exact = value => (value || '').replace(/\r\n/g, '\n').trim();
+    const text = row.querySelector('yt-formatted-string#content-text, #content-text');
+    const author = row.querySelector('#author-text, ytcp-comment-author');
+    if (!text || !author || exact(text.textContent) !== exact(expected.text) ||
+        norm(author.textContent).replace(/^@/, '') !== norm(expected.author_handle || expected.author_name).replace(/^@/, '')) return false;
+    if (!expected._target_channel_id || !location.pathname.startsWith('/channel/' + expected._target_channel_id + '/')) return false;
+    if (expected.channel_id) {
+        const link = author.matches('a[href]') ? author : author.querySelector('a[href]');
+        if (!link) return false;
+        const url = new URL(link.href, location.href);
+        if (!['youtube.com', 'www.youtube.com', 'm.youtube.com', 'studio.youtube.com'].includes(url.hostname)) return false;
+        const id = (url.pathname.match(/^\/channel\/([^/]+)/) || [])[1];
+        if (id !== expected.channel_id) return false;
+    }
+    return true;
+}
+"""
+
+
 COMMENT_ROW_SCRIPT = r"""
                 function collectThreads(selector) {
                     const direct = document.querySelectorAll(selector);
@@ -48,7 +114,7 @@ COMMENT_ROW_SCRIPT = r"""
                 let channelId = null;
                 const authorEl = thread.querySelector('#author-text, yt-formatted-string.author-text, a#name, .author-name, a[href*="/channel/"], a[href^="/@"]');
                 if (authorEl) {
-                    const raw = authorEl.textContent.trim().replace(/\\s+/g, ' ');
+                    const raw = authorEl.textContent.trim().replace(/\s+/g, ' ');
                     authorHandle = raw;
                     authorName = raw.replace(/^@/, '');
 
@@ -179,7 +245,8 @@ COMMENT_ROW_SCRIPT = r"""
                 }
 
                 return {
-                    text: text.substring(0, 500),
+                    comment_id: commentIdentity(thread),
+                    text: text,
                     author_name: authorName,
                     author_handle: authorHandle,
                     channel_id: channelId,
@@ -218,7 +285,7 @@ def _log_row_context(data):
 def extract_comment_data(driver, comment_idx):
     """Read one row through the supplied driver; never infer another row's video."""
     try:
-        data = driver.execute_script(COMMENT_ROW_SCRIPT, comment_idx - 1)
+        data = driver.execute_script(COMMENT_IDENTITY_SCRIPT + COMMENT_ROW_SCRIPT, comment_idx - 1)
         if data:
             _log_row_context(data)
             return data
@@ -239,7 +306,7 @@ def create_comment_processor(dae, processor_class):
         driver=dae.driver, human=dae.human, stats=dae.stats,
         reply_executor=dae.reply_executor, selectors=dae.SELECTORS,
         vision_descriptions=dae.VISION_DESCRIPTIONS, use_vision=dae.use_vision,
-        use_dom=True, ui_tars_bridge=None, check_moderators=dae.check_moderators,
+        use_dom=True, ui_tars_bridge=getattr(dae, 'ui_tars_bridge', None), check_moderators=dae.check_moderators,
         mod_lookup=dae.mod_lookup, reply_debug_tags=dae.reply_debug_tags,
         video_title=dae.video_title, target_channel_id=dae.channel_id,
         session_id=dae.session_id,
@@ -259,9 +326,14 @@ def comment_event_payload(result, session_id, comment_idx, channel_id, timestamp
         'reply_text_posted': result.get('reply_text_posted', ''),
         'reply_source': result.get('reply_source', 'bot'),
         'llm_source': result.get('llm_source', 'unknown'),
+        'reply_review': result.get('reply_review'),
+        'reply_submission_status': result.get('reply_submission_status', 'not_attempted'),
+        'delivery_verified': result.get('delivery_verified', False),
+        'theme_source_command_id': result.get('theme_source_command_id'),
         'video_id': result.get('video_id'), 'video_title': result.get('video_title'),
         'channel_id': channel_id, 'timestamp': timestamp,
     }
     if parent_idx is not None:
         payload.update(is_nested=True, parent_comment_idx=parent_idx)
     return payload
+

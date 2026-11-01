@@ -830,6 +830,20 @@ class MessageProcessor:
                         logger.info(f"🛡️ Intelligent throttle blocked MAGA response to {author_name}: {block_msg}")
                         return None
 
+                from modules.communication.livechat.src.operator_command_queue import load_active_theme
+                theme_at_entry = load_active_theme('livechat')
+                if theme_at_entry:
+                    if (processed_message.get('is_rate_limited') or not self.intelligent_reply
+                            or not _env_truthy('YT_COMMENT_REPLY_ENABLED', 'true')):
+                        return None
+                    response = await self._await_intelligent_reply(theme_snapshot=theme_at_entry,
+                        message=message_text, username=author_name, user_id=author_id,
+                        role=role, is_member=processed_message.get('is_member', False))
+                    if response:
+                        self._update_maga_time(author_id)
+                        self.last_global_maga_time = current_time
+                    return response
+
                 # Reuse the MAGA response generated during classification to prevent duplicates
                 response = processed_message.get("maga_response")
                 if response:
@@ -860,9 +874,11 @@ class MessageProcessor:
                 # Try intelligent reply generator (Grok-powered with patterns)
                 # NOTE: _env_truthy is defined at module level (line 67) - do NOT import here
                 # Importing inside the function creates a local variable scoping issue
+                from modules.communication.livechat.src.operator_command_queue import load_active_theme
+                theme_at_entry = load_active_theme('livechat')
                 if self.intelligent_reply and _env_truthy("YT_COMMENT_REPLY_ENABLED", "true"):
                     is_member = processed_message.get("is_member", False)  # Blue badge
-                    response = self.intelligent_reply.generate_reply(
+                    response = await self._await_intelligent_reply(theme_snapshot=theme_at_entry,
                         message=message_text,
                         username=author_name,
                         user_id=author_id,
@@ -874,6 +890,10 @@ class MessageProcessor:
                         logger.info(f"[GROK] Intelligent reply for {author_name}{member_tag}")
                         return response
                 
+                from modules.communication.livechat.src.operator_command_queue import load_active_theme
+                if theme_at_entry or load_active_theme('livechat'):
+                    return None  # Rejected themed drafts cannot fall back to uninspected banter.
+
                 # Fallback: Try banter engine
                 response = await self._generate_banter_response(message_text, author_name)
                 
@@ -960,6 +980,31 @@ class MessageProcessor:
             logger.error(f"[FAIL] Error generating response for {author_name}: {e}")
             return None
     
+    async def _await_intelligent_reply(self, *, theme_snapshot=None, **kwargs):
+        """Keep polling responsive and invalidate queued/late work after the bounded wait."""
+        import asyncio
+        from copy import deepcopy
+        from threading import Event
+        from modules.communication.livechat.src.intelligent_livechat_reply import ReviewedLivechatReply
+        cancel = Event()
+        snapshot = deepcopy(theme_snapshot)
+        try:
+            response = await asyncio.wait_for(asyncio.to_thread(
+                self.intelligent_reply.generate_reply, **kwargs, cancel_event=cancel,
+                expected_theme_snapshot=snapshot), timeout=10.0)
+            if snapshot is not None and (not isinstance(response, ReviewedLivechatReply)
+                    or response.theme_snapshot != snapshot or response.reviewed_text != str(response)):
+                return None
+            return response
+        except asyncio.TimeoutError:
+            logger.warning('[LIVECHAT-REPLY] Generation timed out; late result discarded')
+            return None
+        except Exception as exc:
+            logger.warning('[LIVECHAT-REPLY] Generation failed: %s', type(exc).__name__)
+            return None
+        finally:
+            cancel.set()
+
     async def _generate_banter_response(self, message_text: str, author_name: str) -> Optional[str]:
         """Generate response using the banter engine."""
         if not self.banter_enabled or not self.banter_engine:

@@ -467,3 +467,7 @@ extensions/reddog/*.vsix
 
 # Private patent drafts and unpublished enabling material
 private/patents/
+
+# WSP 85: keep new temporary work and handoff prompts out of the root.
+/tmp_*
+/.prompt_*.md
