@@ -1,14 +1,14 @@
 # FoundUps Simulator
 
-## Replay-safe pools and wallet policy — 2026-11-01
+## Local security and opt-in reserve observations — 2026-11-01
 
-Pool distributions prepare complete local effects and optional ledger evidence;
-exact epoch retries return detached prior results. Mesa retains failed tails
-before another decay and attempts observers once. [The contract](INTERFACE.md#pool-epoch-effect-contract--2026-11-01)
-limits this to the running process. Wallet policies remain detached/read-only,
-with trusted host replacement. [Current verification and AI threats](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#replay-safe-epoch-settlement-and-ai-threat-update--2026-11-01)
-retain durable recovery, funding, issuance and custody gates before activation.
-
+B02 source is delivered through PR2285; exact pool retries do not repeat local effects.
+Mesa retains failed tails and attempts observers once. Wallet policies stay detached,
+read-only, with trusted host replacement. The opt-in 11-field reserve observation
+uses rational decimal views; legacy economics and default consumers stay unchanged.
+Host serialization is required; its digest proves no authority/currentness/backing.
+[Contracts](INTERFACE.md) retain restart/funding limits; [current evidence](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md)
+keeps unit decisions, issuance, custody and chain activation separate.
 
 Visual simulation of the autonomous FoundUp ecosystem.
 

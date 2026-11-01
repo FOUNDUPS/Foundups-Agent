@@ -1,3 +1,29 @@
+## Combined reserve quote runtime metadata review — 2026-11-01
+
+The pinned Gitleaks 8.30.1 committed-tree scan at bb1cd6315 reports 39 exact
+manifest findings (37 generic-api-key, two discord-api-token). Independent and
+architect reviews reconstruct every complete source path/hash pair from Git.
+Each line and five-line context matches the prior reviewed public metadata in
+main b3e0465c2. Reconciliation changes the containing manifest digest only.
+Append these 39 current whole-file/path/rule/line bindings, retaining the 3,236
+combined historical records (3,275 total). No scanner rule, exclusion, scope or
+fingerprint algorithm changes. Independent proof SHA256:
+`519b28a416c3e3fa57d7126659af7cdc13bf04232a187077f42ac67cdbc514f1`.
+Fresh committed-tree/introduced-history and hosted checks remain required.
+
+## Reserve quote runtime metadata review — 2026-11-01
+
+The pinned Gitleaks 8.30.1 committed-tree scan at cc67f4634 reports 39 exact
+manifest findings (37 generic-api-key, two discord-api-token). Independent and
+architect reviews reconstruct every complete path/hash pair from immutable Git
+sources. Each value, line and five-line context matches its prior reviewed
+public metadata. Only the containing manifest digest changes the fingerprints.
+Append those 39 exact whole-file/path/rule/line bindings and preserve all 3,158
+prior records (3,197 total). No scanner rule, exclusion, scope or fingerprint
+algorithm changed. Independent proof SHA256:
+`9c6d3282de782b8d018a5729f113dcf1571be6a291572da5ad47af7177201f86`.
+Fresh committed-tree/introduced-history and hosted checks remain required.
+
 ## Private video-policy runtime metadata review — 2026-11-01
 
 Pinned Gitleaks8.30.1 reports39 new whole-manifest bindings after the private

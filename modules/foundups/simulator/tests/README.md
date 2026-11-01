@@ -1,5 +1,21 @@
 # FoundUps Simulator Test Suite
 
+## Reserve quote observation — 2026-11-01
+
+Existing `test_btc_reserve_semantics.py` retains all seven original cases and adds
+the frozen 89-case observation acceptance: literal digest goldens, exact record
+types/detachment, rational extrema, hostile scalar/receiver rejection without
+hooks, context/tick grammar, zero-reserve branches and unchanged source/Decimal
+state. Historical baseline: 7 pass/89 desired failures. Independent candidate
+selection passes 113 including 17 separate held-outs. Promoted 96 and broader
+1,019 cases pass with 174 unchanged simulator/FAM Python source snapshots,
+including tests, the same three SSE HTTP
+deselections and zero failures/errors/skips/guard denials; counts overlap.
+Package eight Python cases/three Node entrypoints and unchanged registry check
+pass separately; these are not installed-runtime or chain acceptance.
+The [interface](../INTERFACE.md#opt-in-simulator-reserve-quote-observation--2026-11-01)
+requires serialized host reads and grants no authority or funded/chain proof.
+
 ## Replay-safe epoch effects — 2026-11-01
 
 Existing `test_staker_hurdle_state.py`, `test_epoch_ledger_settlement_commitment.py`

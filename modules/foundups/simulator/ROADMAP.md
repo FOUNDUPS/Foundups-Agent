@@ -1,5 +1,34 @@
 # ROADMAP - FoundUps Simulator
 
+## 2026-11-01 — Concurrent-main quote delivery
+
+The [reconciliation receipt](../../../docs/architecture/receipts/FOUNDUPS_RESERVE_QUOTE_RECONCILIATION_20261101.json)
+records b0b+b3e overlay regression 1,019, one controlled trace, package eight
+Python/three Node checks and registry 1,800/260 passing. The original quote and
+1,478-member proof stay sealed; inherited closure is now 1,481 with three YouTube
+owners and unchanged byte caps. CRLF headroom is 35 bytes. Publication, fresh
+security/main/PC/Holo and all economic activation gates remain separate.
+
+## 2026-11-01 — Opt-in reserve quote representation
+
+- [x] Class A, 16/P0: immutable 11-field observations in the existing reserve
+  owner; no default consumer, legacy economics or global unit decision changes.
+- [x] Frozen baseline: 7 original passes/89 desired failures. Independent review:
+  113 passes including 17 additional held-outs; source unchanged during execution.
+- [x] Promoted 96 and broader 1,019 cases pass with 174 unchanged simulator/FAM
+  Python source snapshots (including tests),
+  the same three SSE HTTP deselections and zero failures/errors/skips/guard denials.
+- [x] Fresh controlled fb58 reference (same simulator/FAM Python sources as 4c96) and
+  two candidate traces match exactly; explicit hash-seed/process profile only.
+- [x] Package eight Python cases/three Node entrypoints and registry check pass;
+  all 1,478 paths and byte caps preserved. Seed-only portability remains unproved.
+- [ ] Protected publication, resulting-main and new-source PC/Holo qualification.
+- [ ] B03 class C/D units/issuance decision, authentic facts, durable funded
+  accounting, independent custody and chain-level acceptance remain separate.
+
+The [quote interface](INTERFACE.md#opt-in-simulator-reserve-quote-observation--2026-11-01)
+requires host-serialized reads. Context/digest are not authority or backing.
+
 ## 2026-11-01 — Replay-safe epoch effects and controlled parity
 
 - [x] Class-B 18/P0: prepare pool balances, tiers, shared hurdle state, fund/drip,
@@ -16,7 +45,9 @@
   failures/errors/skips or guard denials. Counts overlap the focused selections.
 - [x] Canonical closure1478 adds only the private helper; unchanged byte caps,
   8 Python generator/index cases and3 Node entrypoints pass. Registry1794 unchanged.
-- [ ] Protected PR and resulting-main checks, followed by primary-PC verification.
+- [x] PR2285 delivered B02 at `fb58cd530d7b6887ce6218af282cb6ee7382ded5`:
+  23 PR/21 main checks, separate PC source/preservation and exact-source Holo
+  semantic qualification passed. Lexical freshness remains separately UNKNOWN.
 - [ ] Own RNG/hash/singleton state per simulation; version and freeze repeatable
   cross-process traces before expanding economic-model validation.
 - [ ] Durable funded reservations, source consumption and recovery across
