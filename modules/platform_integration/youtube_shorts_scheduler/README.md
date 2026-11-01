@@ -1,5 +1,13 @@
 # YouTube Shorts Scheduler
 
+Private 012 metadata/scheduling directives now reach the existing detail Save,
+manual enhancement and inline scheduling owners. Preserve keeps exact detail-page
+originals while permitting scheduling; late directives are rechecked at the actual
+button. Foreign drafts, unknown identity, STOP, pause, cap or unavailable policy
+refuse the effect. Unknown saves receive durable retry blockers. Only qualified
+metadata reload/readback can report applied; scheduling remains unverified until
+the complete persisted slot/timezone is independently established. See INTERFACE.
+
 ## Local scheduler qualification — 2026-10-29
 
 Calendar audits and optional tracker sync now use `YouTubeStudioDOM.read_scheduled_inventory`.

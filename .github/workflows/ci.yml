@@ -113,6 +113,8 @@ jobs:
           python -B -m pytest --import-mode=importlib -p pytest_asyncio.plugin -q --tb=short
           modules/communication/livechat/tests/test_operator_command_queue.py
           modules/communication/livechat/tests/test_operator_command_lifecycle.py
+          modules/communication/livechat/tests/test_video_policy.py
+          modules/communication/livechat/tests/test_operator_manifest_cli.py
           modules/communication/video_comments/tests/test_commenting_control_plane.py
 
       - name: Verify private themes and inspected replies with stdlib
@@ -218,6 +220,8 @@ jobs:
         run: python -I -B .github/scripts/youtube_repair_offline.py --suite inventory
       - name: Verify 35 rotation controls in a separate minimal child
         run: python -I -B .github/scripts/youtube_repair_offline.py --suite rotation
+      - name: Verify 55 scoped directive and actual save/upload boundary controls
+        run: python -I -B .github/scripts/youtube_repair_offline.py --suite directives
       - name: Preserve sanitized offline repair inventories
         if: always()
         uses: actions/upload-artifact@v4
@@ -230,6 +234,8 @@ jobs:
             ${{ runner.temp }}/youtube-repair-inventory/results.xml
             ${{ runner.temp }}/youtube-repair-rotation/summary.json
             ${{ runner.temp }}/youtube-repair-rotation/results.xml
+            ${{ runner.temp }}/youtube-repair-directives/summary.json
+            ${{ runner.temp }}/youtube-repair-directives/results.xml
           if-no-files-found: error
       - name: Verify stream checker global and local quota boundaries
         run: python -B modules/platform_integration/stream_resolver/tests/test_no_quota_stream_checker.py -v

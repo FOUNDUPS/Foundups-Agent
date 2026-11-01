@@ -8,7 +8,7 @@ Run: python -B -m unittest discover -s modules/communication/video_comments/test
 """
 import ast
 import asyncio
-from contextlib import nullcontext
+from contextlib import contextmanager, nullcontext
 import dataclasses
 from datetime import datetime, timezone
 from enum import Enum
@@ -20,12 +20,15 @@ import math
 import os
 from pathlib import Path
 import random
+import re
 import sys
 import tempfile
 import threading
 import time
 from types import ModuleType, SimpleNamespace
 import typing
+import unicodedata
+from urllib.parse import urlsplit
 import unittest
 from unittest.mock import patch
 from uuid import uuid4
@@ -45,6 +48,11 @@ def definitions(name, path):
                 ast.literal_eval(node.value)
             except (ValueError, TypeError):
                 value = node.value
+                if (path.endswith('/video_policy.py') and isinstance(node, ast.Assign)
+                        and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)
+                        and node.targets[0].id in {'CHANNEL', 'VIDEO', 'FIELDS'}):
+                    body.append(node)
+                    continue
                 if not (isinstance(value, ast.Call) and isinstance(value.func, ast.Name)
                         and value.func.id == 'frozenset' and len(value.args) == 1):
                     continue
@@ -59,6 +67,7 @@ def definitions(name, path):
         RLock=threading.RLock, Event=threading.Event, threading=threading,
         os=os, Path=Path, time=time, json=json, math=math, random=random,
         hashlib=hashlib, datetime=datetime, timezone=timezone, uuid4=uuid4,
+        contextmanager=contextmanager, re=re, unicodedata=unicodedata, urlsplit=urlsplit,
         logger=logging.getLogger(name), runtime_operation_lock=lambda *a, **k: nullcontext(),
     )
     for node in ast.walk(tree):
@@ -71,7 +80,11 @@ def definitions(name, path):
 CONTEXT = definitions('_inspection_context', 'modules/communication/video_comments/src/reply_context.py')
 GEN = definitions('_inspection_generator', 'modules/communication/video_comments/src/intelligent_reply_generator.py')
 ANALYSIS = definitions('_inspection_analysis', 'modules/communication/video_comments/src/comment_content_analyzer.py')
+POLICY = definitions('_inspection_video_policy', 'modules/communication/livechat/src/video_policy.py')
+POLICY_OWNER = definitions('_inspection_policy_owner', 'modules/communication/livechat/src/operator_video_policy_owner.py')
+POLICY_OWNER.video_policy = POLICY
 QUEUE = definitions('_inspection_queue', 'modules/communication/livechat/src/operator_command_queue.py')
+QUEUE.video_policy, QUEUE.policy_owner = POLICY, POLICY_OWNER
 EXECUTOR = definitions('_inspection_executor', 'modules/communication/video_comments/skillz/tars_like_heart_reply/src/reply_executor.py')
 PROCESSOR = definitions('_inspection_processor', 'modules/communication/video_comments/skillz/tars_like_heart_reply/src/comment_processor.py')
 CHAT = definitions('_inspection_livechat', 'modules/communication/livechat/src/intelligent_livechat_reply.py')

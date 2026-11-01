@@ -1,5 +1,11 @@
 # LiveChat
 
+Private operator video directives now share the existing manifest queue. Scoped
+metadata/scheduling/Shorts policies refresh synchronously before writer guards;
+unknown outcomes remain durable and blocked. Private context activation stays
+independent of public send gates. See [the current policy API](docs/VIDEO_POLICY_INTERFACE.md)
+for offline qualification, exact expiry and persisted-readback boundaries.
+
 The private-theme route retains reviewed Grok replies and uses the existing local
 general-language assessment/writer/reviewer if Grok is unavailable or rejects a
 draft. The fallback requires LM Studio HTTP, keeps livechat scope and full native

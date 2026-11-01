@@ -1,4 +1,4 @@
-"""Three fixed YouTube repair selections in separate credential-free children.
+"""Fixed YouTube repair selections in separate credential-free children.
 
 The guards reuse the qualified startup, inventory and rotation mechanisms.
 This adapter accepts no caller-supplied tests, commands or application roots.
@@ -28,6 +28,11 @@ SUITES = {
         SCHEDULER_TESTS + 'test_schedule_audit_breadcrumb.py')),
     'rotation': (35, '664830788a43165c40b0166e2f7736d63cc06e1f73346db9b1d1f2cb1a0bc07d', (
         SCHEDULER_TESTS + 'test_schedule_rotation_fairness.py',)),
+    'directives': (55, 'f8c2343dc8c28aa57169092bb5771c4d20af4263588f3169dd2bdb3779c36091', (
+        SCHEDULER_TESTS + 'test_video_policy_consumers.py',
+        SCHEDULER_TESTS + 'test_video_policy_save_readback.py',
+        SCHEDULER_TESTS + 'test_video_policy_inline.py',
+        'modules/communication/youtube_shorts/tests/test_operator_upload_policy.py')),
 }
 
 
@@ -95,7 +100,7 @@ class EffectGuard:
             self.in_socketpair = False
 
     def private_pair_event(self, event, args):
-        if (event in {'socket.bind', 'socket.connect'} and self.suite in {'startup', 'rotation'}
+        if (event in {'socket.bind', 'socket.connect'} and self.suite in {'startup', 'rotation', 'directives'}
                 and self.in_socketpair):
             frame = sys._getframe(1)
             while frame and frame.f_code is not self.original_pair.__code__:
@@ -137,7 +142,7 @@ def install_effects(stack, guard):
     import socket
     from unittest.mock import patch
     socket.has_ipv6 = False  # Avoid urllib3's import-time IPv6 bind probe.
-    if guard.suite in {'startup', 'rotation'}:
+    if guard.suite in {'startup', 'rotation', 'directives'}:
         socket.socketpair = guard.pair
     sys.addaudithook(guard.audit)
     for target in ('subprocess.Popen', 'subprocess.run', 'os.system', 'socket.create_connection',

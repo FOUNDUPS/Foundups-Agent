@@ -1,5 +1,24 @@
 # YouTube Shorts AI Generator - ModLog
 
+## 2026-11-01 — Scoped directive checks through the uploader boundary
+
+WSP11/22/50/84/97. Kept existing generator/provider, hardened authentication,
+uploader and Shorts memory owners. DAE reads private pause/topics/interval and
+uses interruptible waits plus durable recent upload-attempt time. Frozen topic
+intent crosses DAE, orchestrator and final uploader check; changes/expiry stop
+stale artifacts before the API. Uploader claims actual retained stream bytes
+before submission and keeps uncertain same-artifact retries blocked across
+restart/new metadata. Different bytes after cadence remain a new operation;
+there is no topic ledger or promise of cross-restart generation deduplication.
+
+Replaced the new flow's LIVE claim with accepted/pending-readback feedback. No
+policy research context is broadcast. Added offline whole-production-definition
+controls with fake media/service/generation collaborators and actual private
+queue claims. No Google/model SDK is required for the new test selection. The
+existing publisher fixture now uses valid synthetic native identity literals;
+all original assertions remain. Live provider/browser/publication remains outside
+this local qualification.
+
 ## 2026-10-25 — First Little Shrew animated episode
 
 Reused the shared SVG rig, canonical first segment and existing FFmpeg renderer to produce three five-second shots with original code-composed instrumental/foley and timed captions. Added an optional local command with exclusive outputs, source/asset provenance and explicit unreviewed status. 140 focused tests pass; independent actual-frame/technical review passed. Audio listening remains unverified. See YouTube Shorts docs/KIDS_LOCAL_PRODUCTION.md for measured artifact evidence and exact autonomy owner/gap map, including the mock wallet boundary. Updated the disabled research-scout state; no WRE/provider/spending/upload activation.

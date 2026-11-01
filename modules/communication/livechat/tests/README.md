@@ -1,5 +1,13 @@
 # LiveChat Module Test Suite
 
+The 2026-11-01 queue-owner selector is `test_video_policy.py` plus existing
+`test_operator_command_queue.py` and `test_operator_command_lifecycle.py`.
+Use a fixed credential-free child environment with private temp/profile paths;
+disable dotenv and plugin autoload before imports. It exercises disposable queue
+files and fake public effects, with no actual runtime command, browser or model.
+See [the policy contract](../docs/VIDEO_POLICY_INTERFACE.md) for exact scope and
+readback/uncertainty limits. Full runtime behavior remains a separate live gate.
+
 The 2026-10-29 private-theme fallback and bounded MessageProcessor checks reuse
 `modules/communication/video_comments/tests/test_reply_semantic_assessment.py`
 (from this directory: `../../video_comments/tests/`). See that module's
