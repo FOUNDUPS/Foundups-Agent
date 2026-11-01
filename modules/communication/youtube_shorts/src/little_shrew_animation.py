@@ -77,10 +77,12 @@ class ShrewScene:
         return Image.open(io.BytesIO(png)).convert("RGB")
 
 
-def render_shot(scene, beat_index, output):
+def render_shot(scene, beat_index, output, *, duration_seconds=15):
     """Encode 150 distinct-time frames; exclusive publication, bounded subprocess."""
-    if type(beat_index) is not int or beat_index not in range(3):
-        raise ValueError("Only beats 0, 1 and 2 are implemented")
+    if type(duration_seconds) is not int or not 5 <= duration_seconds <= 60 or duration_seconds % 5:
+        raise ValueError("duration must be 5-60 seconds in five-second shots")
+    if type(beat_index) is not int or beat_index not in range(duration_seconds // 5):
+        raise ValueError("Beat outside the declared duration")
     output = Path(output)
     if output.exists():
         raise FileExistsError(output)
@@ -98,13 +100,15 @@ def render_shot(scene, beat_index, output):
         os.link(temp / "shot.mp4", output)
 
 
-def compose_audio(output, *, stomp=False, events=None):
+def compose_audio(output, *, stomp=False, events=None, duration_seconds=15):
     """Original 120 BPM flute-like score plus quiet synthesized snore/sniff/rumble.
 
     No sampled recordings, voices or borrowed melody. Returns actual cue windows.
     """
     rate = 48000
-    audio = np.zeros(rate * 15, dtype=np.float64)
+    if type(duration_seconds) is not int or not 15 <= duration_seconds <= 60:
+        raise ValueError("audio duration must be 15-60 whole seconds")
+    audio = np.zeros(rate * duration_seconds, dtype=np.float64)
     rng = np.random.default_rng(120)
 
     def tone(start, length, frequency, gain):

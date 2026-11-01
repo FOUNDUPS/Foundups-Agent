@@ -1,5 +1,81 @@
 # EDUIT interfaces
 
+## Word/picture activation and pictograms — 2026-11-01
+
+The existing `.storybook-page` click starts all five pages from0 when paused.
+Taps during playback do not interrupt it; the native primary button remains the
+keyboard/screen-reader equivalent. Deliberate swipe/arrows pause for manual
+preview; a cancelled pointer, drag or multitouch cannot become a start click.
+An explicit primary Pause/Play resumes the retained page, repeating its phrase;
+manual navigation and close/open clear that resume intent. Surface activation
+always requests the whole story. Background/visibility changes still pause.
+
+Stable button IDs retain accessible names; visible controls are ▶/Ⅱ, arrows,
+⏭, × and 🎬. The gentle start hint points to ▶ rather than Next. Teaching words
+remain large lesson content. The existing single video handoff remains; a denied
+browser play exposes its existing explicit fallback. UI-TARS verify-only model
+location, real CUA press and observed all-page/video outcome are separate proof.
+
+## Preschool book presentation — 2026-11-01
+
+Preschool-20 retains stable dialog/button IDs and story scheduler. The native
+book fills available safe-area bounds. Primary labels are24px, teaching words
+at least48px on short landscape phones/52px portrait and96px tablet. Last page
+moves #storybook-watch into .intro-actions, hides redundant #intro-skip and keeps
+#intro-close; accessible Play video name remains while visible text is ▶ Video.
+Play story always restarts the full book; no autoplay/video/game clock changes.
+Unavailable voice gets a separate landscape grid row, never over the words.
+Manifest id/start_url/scope stay stable; no device-zoom guesses or frame busting.
+
+## App menu and expanded scene — 2026-11-01
+
+`#game-options` / `#video-options` open the same native `#options` dialog. Existing
+wheel/language instances mount in #menu-character-panel/#menu-music-panel/
+#menu-language-panel; section buttons #menu-characters/#menu-music/#menu-language.
+`#close-options` Done and Escape return focus without resuming. Native dialog
+focus containment; >=64px menu/choice/language targets; advanced controls remain
+under #menu-advanced. No duplicate state, arbitrary media or new permissions.
+
+`storytimeReview.setPresentation({expanded:boolean})` changes only framing.
+`scenePresentation(width,height,expanded)` maps original960x540 coordinates into
+an extended sky/soil viewBox. Art, hit targets and score share that mapping;
+`freeze().svg` remains canonical960x540 for normalized feedback. Enter/exit,
+marking and resume explicitly synchronize presentation. Whole-leg movement and
+sky-open footprint use the same scene owner; no detached animated strip.
+
+An observed cross-origin masked wrapper gets #open-full-app, a user-activated
+_top link to the app's own current route. No automatic frame escape or open
+redirect. Passing direct-origin checks does not certify eduit.org forwarding.
+
+
+## Whole-story playback and film revision — 2026-11-01
+
+`window.storytimeStorybook.play()` begins the whole story at plate0, or pauses
+active playback. Opening alone never speaks. Skip/Close cancel without starting
+video; completed playback closes once and starts the movie at0, with explicit
+Play fallback on browser denial. Each new page visit's first video Play enters
+the book unless explicitly dismissed. No child session records are transmitted.
+`replay-timeline.json` revision same-engine-rescue-1 provides bounded event times
+for movie action captions/voice; invalid/unavailable metadata leaves these off.
+`storytime_replay.mjs` is offline input recording, not another game engine. Film
+states use engine.advance/actorPose/gameWorld/scene. Runtime Foley references the
+fixed15s game-foley.wav, not the replacement25s movie. Video remains original MAMMA
+appearance, independent of cosmetic choices in the game. Re-render after source
+changes; retain source/asset digests. Native device audio is a separate gate.
+
+
+## Character/music sleeve — 2026-11-01
+
+Existing `setAppearance` remains the only game-art mutation seam. Shorts-owned
+`choice-wheel.mjs::mountChoiceWheel` handles allowlisted cosmetic choices;
+`music-picker.mjs::mountMusicPicker` controls separate local background audio.
+`window.storytimeMusic.status()` exposes selected/armed/pending/playing/message
+for local review, not an analytics or dispatch API. Music Off defaults, explicit
+Play only, quiet loop, no arbitrary source/child traces. Cue trace repair samples
+live media time and labels callbacks versus acoustic evidence; original authored
+offsets and English fallback remain. See choices contract and existing timing
+review; full learning engine/worker admission are not implied.
+
 > **Canonical 2026-10-28 handoff:** [Storytime conversation audit and Prometheus M2M handoff](docs/STORYTIME_RSI_CONVERSATION_AUDIT_AND_HANDOFF.md) is the current decision register. It supersedes conflicting historical statements below about video+game-only tiles, Earn Stars buttons, forced three-round quizzes, and autonomous runtime status. Existing site work is owned by a separate session; this PR documentation change must not overwrite that session's UI work.
 ## EDUIT vision / Storytime Evolution map — 2026-10-28
 

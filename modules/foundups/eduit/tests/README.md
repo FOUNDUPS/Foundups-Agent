@@ -1,6 +1,36 @@
 # EDUIT test inventory
 
+Use **Run full-story interaction regression** in the existing director_harness
+for the title-start and actual elapsed-time all-page/movie handoff on both routes,
+plus Pause/resume, later-page start, incidental tap and synthetic pointer
+cancel/multitouch/swipe cases. It uses the real silent-play UI option, not a
+forced clock. Separate CUA real presses and UI-TARS model-guided input receipts
+live under outputs/storytime-playback-20261101; do not call synthetic dispatch
+native touch or count static model inference as a completed playthrough.
+
+Preschool book acceptance extends the existing director_harness storybook button:
+all five pages at six sizes on both routes, rendered font/target floors, no
+scroll/clipping and direct hit tests. Independent rendered/silent/voice-failure
+receipts are retained separately; see TestModLog. Actual Home Screen launch is
+not certified by an inner iframe or direct-origin viewport measurement.
+
+App presentation extends the same inventory with scene-presentation.test.mjs:
+canonical scale/world mapping, malformed presentation rejection, default-frame
+identity, full-height leg entry/exit and matching skin sky/opening. Independent
+app-menu/scene browser matrix verifies actual rendered hit bounds and real-earned
+state through native menu, choices, Done/Escape, fullscreen and injected safe
+areas. Cross-origin wrapper escape is a separate user-activated launch check.
+Retain raw failures/repairs; no physical-device claims from synthetic events.
+
+
 Run `node --test modules/foundups/eduit/tests/*.test.mjs` from repository root.
+
+Current sleeve selection adds `choice-wheel.test.mjs` and `music-picker.test.mjs`:
+keyboard/drag/programmatic-centering/rejection/teardown, explicit audio start,
+Off, pause, source allowlist, late promise and playback denial. Current full53/53
+passes; prior baseline Windows/scene failures were repaired against unchanged
+acceptance. The existing director harness adds “Run character wheel checks”.
+Credits/audio rights and physical listening are separate from synthetic tests.
 
 - `storytime.test.mjs`: world clock, rescue outcomes, scene continuity, cue/locale
   invariants and typography independent of tremor physics.
@@ -28,3 +58,12 @@ result for a completed browser round.
   useful landscape scene size, >=64px controls, safe-area arithmetic, hit tests,
   one drawing rail and state preservation. First run the identical oracle against
   the retained published baseline; record a red control before candidate acceptance.
+
+- `director_harness.html` **Run storybook visibility regression**: both root and
+  inner director at390x844,844x390 and1280x900. Uses the actual Story/Skip/Close
+  and explicit storybook Play controls, checks native-modal opening and bounds,
+  no closed-dialog layout or narration, reopening, and resizing while closed.
+  Run the unchanged oracle against original CSS before testing a repair. After
+  replacing local CSS, reload with fresh assets and verify the loaded stylesheet;
+  a cached original rule is not evidence about the candidate. This is browser
+  layout/handler evidence, not physical mobile touch or acoustic acceptance.

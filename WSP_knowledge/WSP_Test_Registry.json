@@ -18988,7 +18988,9 @@
       "owner": "modules/infrastructure/foundups_vision",
       "suite_class": "unit",
       "shard_id": "modules-infrastructure-foundups-vision-unit",
-      "capabilities": [],
+      "capabilities": [
+        "network"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,

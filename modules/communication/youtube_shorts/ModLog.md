@@ -1,5 +1,50 @@
 # YouTube Shorts AI Generator - ModLog
 
+## 2026-11-01 — Word-tap full story and pictorial controls
+
+Existing book owner now treats teaching words/picture as a full-story start and
+ignores incidental taps during playback. Preserve manual preview, explicit pause
+and lifecycle cancellation; guard synthetic click after swipe/cancel/multitouch.
+Child controls use ▶/Ⅱ, arrows, ⏭, × and 🎬 with accessible names, hinting the
+complete-story route. EDUIT owns actual elapsed-time and independent UI-TARS/CUA
+review evidence; media and shared scene remain unchanged. Production candidate
+0.2.7 routes to review0.3.3 task-completion gate; no autonomous worker activation.
+
+## 2026-11-01 — Preschool book presentation and production review gate
+
+EDUIT photo feedback requires prominent teaching words and large familiar actions
+on every page. Existing director CSS/storybook owner fills available bounds;
+last-page Video replaces redundant Skip, Close stays reachable and unavailable
+voice has a separate landscape row. Independent visual review exposed and repaired
+two short-landscape defects;60 rendered states pass without relaxing thresholds.
+Game engine, media and narration order unchanged. Production candidate0.2.6 routes
+to updated interactive review0.3.2 and the existing authorized GoDaddy/Gmail
+deployment procedure; no new RSI worker or learning-effectiveness claim.
+
+## 2026-11-01 — Same-engine demonstration render support
+
+WSP50/84/97: EDUIT now exports legal deterministic game inputs through its
+existing engine/world/scene. Existing Shorts shot, audio and assembly functions
+accept an explicit bounded duration while preserving strict15s defaults and
+legacy assembly validation. No new renderer/provider, mechanics or artwork.
+The fixed original15s Foley remains a distinct asset so game sourceTime offsets
+cannot drift when the demonstration movie changes. Actual media, listening and
+mobile acceptance remain separate from source checks.
+
+## 2026-11-01 — Reusable sleeve choices for Storytime review
+
+Existing director now mounts a shared accessible horizontal choice wheel for
+MAMMA/original Mermaid and optional licensed music. Local rigs supply thumbnails;
+existing setAppearance owns state-safe art changes. Music Off defaults; explicit
+Play, quiet same-origin tracks, bounded cancellation/error handling and accessible
+credits. Independent held-out drag/retry defects repaired with retained controls.
+No new renderer, game engine, auth, child record or media generator. Narration
+trace timing provenance and earlier closed-dialog repair retained. EDUIT-owned
+baseline geometry/UTF8 repairs restore original golden frames; full53/53 and
+independent31 checks pass. Existing builder freshly rerendered matched media.
+Latest012 authorizes Sites preview and GitHub push; exact source/CI/live receipts
+remain separate from listening, native mobile and RSI transfer.
+
 ## 2026-11-01 — Scoped directive checks through the uploader boundary
 
 WSP11/22/50/84/97. Kept existing generator/provider, hardened authentication,
@@ -907,3 +952,18 @@ Existing kids_review viewer now owns compact Play/About/How, science-bounded cop
 channel link and responsive control sizing. EDUIT retains roadmap/education scope;
 no new publisher or credential surface. Film and game engine unchanged. See EDUIT
 LEARNING_SHELL_REVIEW.md and EVOLUTION_PLAY_AND_SHARING_ROADMAP.md.
+
+## 2026-10-29 — Local-only closed storybook visibility repair
+
+The portrait-phone `.storybook-ready` layout rule now requires `[open]`.
+Previously its `display:flex` overrode the browser's closed-dialog hiding,
+leaving a closed storybook inline below the viewer. Open layout, controls,
+safe-area rules, narration and game/media owners are unchanged.
+
+The existing EDUIT browser harness gains an open/close/Skip/resize regression.
+Original CSS fails with `open=false`, `display:flex` and one client rectangle;
+the same oracle passes92 checks with the repair across root/director entries
+and390x844,844x390,1280x900. Closest Node layout/viewport checks:5 passed,
+2 existing Windows file-URL path failures. Harness syntax and diff checks pass.
+See EDUIT `docs/PHONE_FULLSCREEN_REPAIR.md`. No native-device/audio acceptance,
+Git commit/push, merge or publication is claimed. WSP22/50/84/97.

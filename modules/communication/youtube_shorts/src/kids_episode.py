@@ -51,16 +51,19 @@ def _text(value, field, limit=300):
     return value.strip()
 
 
-def validate_episode(spec: dict) -> dict:
+def validate_episode(spec: dict, *, duration_seconds=DURATION) -> dict:
     """Return a normalized copy or raise ValueError; perform no IO."""
     if not isinstance(spec, dict):
         raise ValueError("episode must be an object")
+    duration_seconds = _number(duration_seconds, "allowed duration")
+    if not 1 <= duration_seconds <= 60 or duration_seconds * 30 != round(duration_seconds * 30):
+        raise ValueError("allowed duration must be 1-60 seconds aligned to 30fps")
     result = copy.deepcopy(spec)
     if type(result.get("schema_version")) is not int or result["schema_version"] != 1:
         raise ValueError("schema_version must be 1")
     for field in ("title", "learning_objective", "activity", "age_band", "language"):
         result[field] = _text(result.get(field), field)
-    if _number(result.get("duration_seconds"), "duration_seconds") != DURATION:
+    if _number(result.get("duration_seconds"), "duration_seconds") != duration_seconds:
         raise ValueError("episode duration must be exactly 15 seconds")
     if not isinstance(result.get("preset"), str) or result["preset"] not in PRESETS:
         raise ValueError("preset must be draft or final")
@@ -81,11 +84,11 @@ def validate_episode(spec: dict) -> dict:
         clip["path"] = _text(clip.get("path"), "clip.path", 4096)
         clip["start"] = _number(clip.get("start", 0), "clip.start")
         clip["duration"] = _number(clip.get("duration"), "clip.duration")
-        if clip["start"] < 0 or not 0 < clip["duration"] <= DURATION:
+        if clip["start"] < 0 or not 0 < clip["duration"] <= duration_seconds:
             raise ValueError("clip start must be nonnegative and duration within 15 seconds")
     if transition == "fade_black" and any(c["duration"] < fade_seconds * 2 for c in clips):
         raise ValueError("clips must be at least twice the fade duration")
-    if not math.isclose(sum(c["duration"] for c in clips), DURATION, abs_tol=1e-6):
+    if not math.isclose(sum(c["duration"] for c in clips), duration_seconds, abs_tol=1e-6):
         raise ValueError("clip durations must total 15 seconds")
     for kind in ("music", "voice"):
         if kind == "voice" and kind not in result:
@@ -109,7 +112,7 @@ def validate_episode(spec: dict) -> dict:
         cue["text"] = _text(cue.get("text"), "caption.text", 140)
         if any(c in cue["text"] for c in "\\{}<>"):
             raise ValueError("captions must be plain text, without subtitle markup")
-        if not previous_end <= cue["start"] < cue["end"] <= DURATION:
+        if not previous_end <= cue["start"] < cue["end"] <= duration_seconds:
             raise ValueError("captions must be ordered, non-overlapping, and within 15 seconds")
         if round(cue["end"] * 1000) <= round(cue["start"] * 1000):
             raise ValueError("caption must last at least one millisecond")
@@ -179,13 +182,14 @@ def _asset(path, base_dir, kind):
     return resolved, _stream_duration(streams[0])
 
 
-def render_episode(spec: dict, output_path, *, base_dir=".") -> dict:
+def render_episode(spec: dict, output_path, *, base_dir=".", duration_seconds=DURATION) -> dict:
     """Render MP4 and adjacent SRT; reject existing outputs and short assets.
 
     Does not attest educational review, music rights, or publishing approval.
     Source clip audio is intentionally discarded. Requires FFmpeg with libass.
     """
-    episode = validate_episode(spec)
+    episode = validate_episode(spec, duration_seconds=duration_seconds)
+    duration_seconds = episode["duration_seconds"]
     output = Path(output_path).resolve()
     sidecar = output.with_suffix(".srt")
     if output.suffix.lower() != ".mp4":
@@ -202,7 +206,7 @@ def render_episode(spec: dict, output_path, *, base_dir=".") -> dict:
             raise ValueError("clip trim exceeds source duration")
         inputs.append(path)
     music, duration = _asset(episode["music"]["path"], base_dir, "audio")
-    if duration < DURATION - 0.04:
+    if duration < duration_seconds - 0.04:
         raise ValueError("music must cover the 15-second episode")
     inputs.append(music)
     if "voice" in episode:
@@ -237,19 +241,19 @@ def render_episode(spec: dict, output_path, *, base_dir=".") -> dict:
                            "PrimaryColour=&H0000FFFF,OutlineColour=&H00181818,BorderStyle=1,Outline=2,"
                            "Shadow=0,Alignment=2,MarginV=25'[video]")
         music_volume = "0.20" if "voice" in episode else "0.80"
-        filters.append(f"[{count}:a:0]asetpts=PTS-STARTPTS,atrim=duration=15,volume={music_volume}[music]")
+        filters.append(f"[{count}:a:0]asetpts=PTS-STARTPTS,atrim=duration={duration_seconds},volume={music_volume}[music]")
         if "voice" in episode:
-            filters.append(f"[{count+1}:a:0]asetpts=PTS-STARTPTS,atrim=duration=15,apad=whole_dur=15[voice]")
+            filters.append(f"[{count+1}:a:0]asetpts=PTS-STARTPTS,atrim=duration={duration_seconds},apad=whole_dur={duration_seconds}[voice]")
             filters.append("[music][voice]amix=inputs=2:duration=first:normalize=0,alimiter=limit=0.95:level=0[audio]")
         else:
             filters.append("[music]alimiter=limit=0.95:level=0[audio]")
         args += ["-filter_complex", ";".join(filters), "-map", "[video]", "-map", "[audio]",
-                 "-t", "15", "-c:v", "libx264", "-threads", "2", "-preset", speed, "-crf", crf,
+                 "-t", str(duration_seconds), "-c:v", "libx264", "-threads", "2", "-preset", speed, "-crf", crf,
                  "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-ac", "2", "-movflags", "+faststart", "render.mp4"]
         _run(args, cwd=temp)
         measured = _probe(temp / "render.mp4")
         measured_duration = float(measured["format"]["duration"])
-        if abs(measured_duration - DURATION) > 0.10:
+        if abs(measured_duration - duration_seconds) > 0.10:
             raise RuntimeError("render duration failed verification")
         video_streams = [s for s in measured.get("streams", []) if s.get("codec_type") == "video"]
         if (len(video_streams) != 1 or
@@ -259,8 +263,8 @@ def render_episode(spec: dict, output_path, *, base_dir=".") -> dict:
         # Container duration can be supplied by audio alone. Independently
         # require the encoded video timeline and its fixed-rate frame count.
         video = video_streams[0]
-        if (abs(_stream_duration(video) - DURATION) > 1 / 30 or
-                video.get("nb_frames") != "450" or
+        if (abs(_stream_duration(video) - duration_seconds) > 1 / 30 or
+                video.get("nb_frames") != str(round(duration_seconds * 30)) or
                 Fraction(video.get("avg_frame_rate", "0")) != 30):
             raise RuntimeError("render video coverage failed verification")
         # Same-volume hard links publish complete files without replacing an

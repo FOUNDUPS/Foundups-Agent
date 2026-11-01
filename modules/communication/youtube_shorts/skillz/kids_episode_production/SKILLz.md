@@ -1,6 +1,7 @@
 ---
 name: kids_episode_production
-version: 0.2.4
+description: Build and independently review Kids Episodes media and Storytime viewer/PWA changes through existing production and interactive-review owners.
+version: 0.2.7
 intent_type: GENERATION
 promotion_state: prototype
 ---
@@ -26,6 +27,24 @@ explicitly rerendered. This link does not activate a worker or prove transfer.
 For Storytime screenshot, layout, PWA, gesture or whiteboard feedback, read
 [viewer iteration](references/viewer-iteration.md) and the current EDUIT module
 docs before changing code. Apply its locked-invariant and evidence checks.
+For child-facing PWA builds, apply the interactive review's **PWA app presentation
+gate** before implementation and after rendering: app-sized menu choices,
+continuous fullscreen scene geometry, mapped hit targets and preserved state.
+Installation metadata alone does not satisfy the app-presentation contract.
+Apply **Task completion before component PASS** from that same review skill:
+press the child's intended words/picture and primary pictogram, observe the whole
+story and video handoff, and independently recheck after repair. UI-TARS inference
+must be followed by an actual authorized press and an observed result; retain
+model/coordinate failures separately. Child-facing navigation must not depend on
+reading. This candidate does not activate an autonomous production/test worker.
+For authorized Storytime DNS/hosting work, use EDUIT's existing
+[deployment runbook](../../../../foundups/eduit/DEPLOYMENT.md), including its
+GoDaddy/Gmail verification procedure. This is a scoped deployment step, not
+permission to collect unrelated sign-in codes or change account security.
+Apply its preschool visual acceptance to every affected page after each repair:
+inspect words, symbols and action labels at phone size, independently critique,
+repair and reinspect the published revision. A passing menu or code suite cannot
+certify the storybook or an installed shortcut behind a forwarding frame.
 
 ## Story-first production
 

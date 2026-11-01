@@ -1,5 +1,96 @@
 # EDUIT test history
 
+## 2026-11-01 — Child-intended action, all-page playback and UI-TARS
+
+Freeze visible words/picture press→all five pages without Next→one actual video
+play; test the child action rather than only model.play(). Baseline20 primary
+Play already passed, but actual title tap stayed idle and ordinary surface tap
+stopped a running story. Extend existing director_harness with elapsed-time
+both-route regression, unchanged game clock, explicit Pause/resume, later-page
+restart and synthetic pointerup/leave/click, cancel/multitouch/swipe guards.
+Independent real CUA and UI-TARS-guided word press own behavioral evidence;
+static inference and accepted coordinates are not a completed test.
+
+The first phone handoff snapshot appeared paused0; subsequent full direct event
+capture proves one video_play/video_playing and advancing time. Keep the original
+inconclusive observation; no unproved viewport-cause fix. Existing Node63/63 and
+vision-owner49 isolated profile/snapshot tests pass. Preserve exact failures,
+source/screenshot hashes and platform limits in the output receipts. Actual iOS
+touch/listening and comprehension stay unverified.
+The new symbol oracle exposed the existing harness's missing charset: its inline
+glyph literals decoded as Windows1252 while the product correctly used UTF8.
+Retain the red assertion; declare UTF8 on the same harness and rerun the unchanged
+symbol/name/font/target criterion. Do not replace glyph checks with source text.
+
+## 2026-11-01 — Preschool book visual acceptance
+
+Extend existing director_harness storybook visibility regression to every page,
+both root/manifest routes and320x568,390x844,568x320,844x390,768x1024,1280x900.
+Freeze48px phone/56px tablet words,24px labels,64px targets, no clipping/scrolling
+or overlap and direct center hits. Independent actual-browser60 page states
+pass after retaining/repairing two failed short-landscape candidates. Separate
+synthetic voice-unavailable568 and actual-settings voice-off320 cases. Node63/63
+pass; outer eduit.org Home Screen launch remains separately unverified.
+Evidence outputs/storytime-preschool-20261101/INDEPENDENT_FINAL_REVIEW.json.
+The expanded existing harness also completed964/964 checks across both routes
+and all six declared dimensions, including reopen/close/resize/play cancellation.
+
+## 2026-11-01 — Hidden wheel reveal acceptance
+
+Published17 live review caught selectedMermaid outside the hidden-mounted rail.
+Retained broken wheel fails the strict visible-card oracle; observer repair now
+passes72/72 actual-browser reveal checks without scrollIntoView or forcedrail
+scroll. Check persistedMermaid and explicitly selectedWholesome on sectionchange,
+reopen andfullscreen atbothroutes/3sizes. Four independent component held-outs
+and fullNode63/63pass. Positive-width-only ResizeObserver preserves drag/selection,
+emitsnointeraction, disconnects onteardown. Media unchanged; app-scene-18/cachev12.
+
+
+## 2026-11-01 — App menu, continuous canvas and independent photo audit
+
+Freeze app-menu >=64px/hit bounds, safe-area exit/focus, real-earned state
+preservation and no music autoplay; test both routes/six dimensions in normal and
+expanded mode. Independent matrix initially451passed/25failed: actual safe-area
+and focus defects, plus fixed-wall-time fixture failing to earn an award. Fix
+product arithmetic/focus and wait for actual clock/score/survivor without weakening
+oracles. Repaired matrix572/572passes. Scene tests retain originalgoldens and
+sample100descent/100lift positions; actual rendered contact/lift and both palettes
+are reviewed separately. Freeze/feedback stays canonical960x540. Output receipts
+under outputs/storytime-pwa-scene-independent-20261101 preserve failed controls.
+Synthetic viewports/offline replay are not physical iOS touch/listening proof.
+
+
+## 2026-11-01 — Full-story and deterministic game-film regressions
+
+Freeze: Auto play from any plate reads0→4 once, no video during book, one final
+start from0, no start after Skip/Close, blocked-play fallback remains discoverable,
+centered bounds/control reach in portrait/landscape, five legal rescues and exact
+engine-state/world equivalence. Immediate first speech is gesture-bound; callbacks
+are not acoustic evidence. Replay cue spans must match actual source frames.
+Independent browser fixture/failures/held-outs reside under outputs/
+storytime-storybook-independent-20261101. First offscreen fixture was repaired
+without relaxing geometry; blocked fallback label race was separately repaired.
+Actual phone listening and native touch remain unverified. No child-data tests.
+
+
+## 2026-11-01 — Sleeve choices and baseline restoration
+
+Current full Node selection53/53 passes. Independent31 additional held-outs
+pass across wheel/music/explicit retry controls/SW and original-art restoration.
+Native Windows cp932/UTF8mode0 run also passes53/53: portability repaired in
+actual URL conversion and explicitUTF8 projection, not hidden by host settings.
+Four fixed original SVG hashes and seven additional original frames match the
+existing8b345ec source without editing golden assertions. Engine/rig unchanged.
+Earlier five failures below are historical, retained as negative controls.
+
+Independent red controls caught held-drag release, ordinary rescue retry after
+audio denial, and overlay Replay omission. Current fixed byte hashes and review:
+primary outputs/storytime-wheels-20261101/verifier-final-source-review.json.
+Character browser harness covers nonzero earned rescue award, unchanged state,
+keyboard/scroll choice and fullscreen return; native device/touch/listening are
+separate. Local HTML media playback observed both tracks; acoustic quality is
+not inferred. See choices contract and final browser/publication receipts.
+
 ## 2026-10-26 — Collapse continuity
 
 Existing inventory: `storytime.test.mjs` covers ordered inputs, wrong target,
@@ -91,3 +182,22 @@ oracle rejects v12's60px exit, then passes296 root/inner viewport checks on the
 candidate. Retained35-check suite passes at390x844 including rotation with frozen
 frame/marks. Readiness race retained as fixture failure, bounded wait added.
 Native iOS touch/Home Screen and physical audio remain unverified.
+
+## 2026-10-29 — Closed storybook portrait regression, local only
+
+New dedicated group in the existing director harness fails the retained original
+CSS at the first portrait Skip: `open=false`, computed `display:flex`, one client
+rectangle. With the `[open]` selector correction, the unchanged group passes
+92/92 checks across both entry routes and three sizes, including open modal,
+explicit Play/Close cancellation, reopen/Skip and four closed resize transitions.
+
+First candidate run loaded cached original CSS and was rejected. A local
+cache-bypassing reload plus CSSOM inspection confirmed the corrected rule before
+the passing run; no persistent browser-cache setting changed. Full raw before/
+after logs and per-check JSON are retained in the local synchronization outputs.
+
+Independent closest Node run:5 passed,2 unchanged Windows file-URL path failures;
+existing full-suite scene/order/hash failures were not relabeled fixed. Harness
+module syntax and git diff checks pass. No new Python test or registry entry.
+Native iOS/audio/PWA upgrade acceptance remains unverified; no commit, push,
+merge, Sites publication or deployment occurred for this correction.

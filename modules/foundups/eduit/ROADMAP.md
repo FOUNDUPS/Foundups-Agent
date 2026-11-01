@@ -1,5 +1,63 @@
 # EDUIT execution roadmap
 
+## 2026-11-01 — Test the child's intended start action
+
+012's behavioral correction supersedes a book-size-only acceptance: pressing
+the words/picture or ▶ starts the entire popup, without repeated Next. Keep
+child controls pictorial, visible lesson words and accessible names. Independent
+baseline found the old primary Play already ran all pages; the missing word tap
+and touch-to-pause handler were the coverage gap. Repair the existing handlers
+and review sequence; bind a UI-TARS model proposal to actual CUA input and observe
+the whole result. Retain current model/coordinate and native-device limitations;
+this bounded test is not admission of an autonomous RSI worker.
+
+## 2026-11-01 — Preschool readability before broader RSI claims
+
+Latest012 installed screenshot fails whole-app readability despite prior menu
+checks. Prioritize actual ages3–6 book output: every page, largest phrase, controls,
+silent/unavailable voice, short landscape and outer launch. Fix/reinspect/
+independently verify before publication; retain the failed candidate. Skills now
+route this bounded loop without activating another RSI worker. Existing GoDaddy
+masked forwarding and pending Sites domain validation own the launch defect;
+fresh Gmail verification is explicitly authorized. No native-device acceptance
+or comprehension improvement is inferred from desktop viewport checks.
+
+## 2026-11-01 — PWA app-presentation correction
+
+012 photo audit supersedes the bottom document-flow settings layout: use one
+app-sized Storytime menu for character/music/language and one continuous expanded
+scene for the whole leg and sky opening. Preserve game/feedback coordinates and
+all earned state. Existing interactive review/build skills now enforce these
+checks. Keep WSP15 priority separate from visual-quality/learning-effectiveness
+judgments. Next real tile must prove skill transfer; this repair alone does not.
+
+
+## 2026-11-01 — Full-story sequencing and engine-recorded film
+
+Latest012 correction: Auto play runs all five story plates before a single video
+handoff. Center the actual dialog/text, keep video paused while reading, avoid
+repeating the opening over the film. The replacement25s film uses unchanged live
+game mechanics via deterministic replay; old15s Foley is preserved independently.
+The next learning audit still measures actual foot/contact/word/audio alignment;
+sharing game mechanics is not proof of correct pedagogical timing or RSI transfer.
+Custom-domain masked forwarding is a separate mobile-hosting defect.
+
+
+## 2026-11-01 — Reviewable sleeve choices, then measured learning cues
+
+15/P1(C3/I4/D4/Impact4): visible character/music wheels over the existing engine,
+independent local verification and authorized Sites review preview. See
+[choices contract](docs/CHARACTER_MUSIC_CHOICES.md). First two approved skins and
+two licensed tracks; retain no-autoplay, pause/state, accessibility and provenance.
+Then resume one recorded THUMP timing proof. Full adaptive content, recognition,
+admitted workers and next-tile RSI transfer remain separate. Latest012 direction
+permits verified pushes to the existing PR; merge/main acceptance stays separate.
+
+## Phone storybook and narration correction — 2026-10-29
+
+The existing PR #2256 now includes a follow-up phone-first correction: the first-visit storybook fills nearly the available portrait viewport, uses large short text and a taller picture, retains left/right swipe and Previous/Next, and explicit autoplay reads pages before handing off to the MP4. Browser playback restrictions can block automatic video sound, in which case the existing large Play control receives focus. Skip/Close do not auto-start video. The iPad retains its separate responsive layout. The upper fullscreen context on phones is bounded to avoid an oversized dirt strip; game physics, score, artwork scale and hit geometry remain unchanged. This is source implementation, not verified physical-device acceptance or a published Sites version. English browser TTS remains device-voice dependent; native iPad audible testing, all-locale audio and prerecorded production voices are separate acceptance gaps.
+
+
 > **Canonical 2026-10-28 handoff:** [Storytime conversation audit and Prometheus M2M handoff](docs/STORYTIME_RSI_CONVERSATION_AUDIT_AND_HANDOFF.md) is the current decision register. It supersedes conflicting historical statements below about video+game-only tiles, Earn Stars buttons, forced three-round quizzes, and autonomous runtime status. Existing site work is owned by a separate session; this PR documentation change must not overwrite that session's UI work.
 ## EDUIT vision / Storytime Evolution map — 2026-10-28
 

@@ -1,7 +1,7 @@
 ---
 name: interactive_experience_review
 description: Audit and iteratively repair audience-specific games and web interfaces, including EDUIT Storytime timing, touch controls, learning cues, scoring and feedback. Use before implementation and after inspecting each changed output.
-version: 0.2.1
+version: 0.3.3
 intent_type: AUDIT
 promotion_state: prototype
 ---
@@ -32,6 +32,76 @@ other games. Keep each product's runtime and evidence in its existing module.
 
 ## Inspect in this order
 
+### PWA app presentation gate
+
+**Preschool visual acceptance (ages 3–6):** after each bounded repair, stop
+authoring and inspect the rendered experience: "Can this child see the teaching
+word, recognize what to do, and reach it?" Passing code tests or one corrected
+menu does not answer that question. Inspect every affected story page and state,
+including the longest phrase, paused playback and unavailable voice. Keep
+familiar symbols and optional narration; do not require independent reading.
+For the current Storytime book, freeze at least48 CSSpx teaching text on phones,
+56px on tablets and64px targets. Child actions use familiar pictograms: at least
+48px for primary Play/Pause and36px for secondary glyphs, with accessible names
+retained for screen readers. Do not require reading button labels to start or
+continue the story. These are this
+product's review thresholds, not scientific evidence about learning. Reflow or
+remove decorative art before reducing the words. Check actual text glyph bounds,
+wrapping, contrast, hit testing and control reach without scrolling the oracle
+into success. A large empty dialog with small words fails.
+
+Inspect the screenshot at its intended phone display size, then independently
+review all five pages at320×568,390×844,844×390 and768×1024, plus the short landscape
+568×320 case. Repeat the same acceptance after repair and on the actual published
+revision. Keep failed baselines and critique, repair, reinspection and independent
+verdict in the existing correction ledger. A screenshot report from012 is a
+regression signal even when earlier aggregate checks were green; repair the
+review procedure as well as the product. Update this candidate only within its
+existing WRE/RSI boundary below; do not certify autonomous improvement from prose.
+
+An installed shortcut can still contain a masked-forwarding frame. Record the
+actual outer launch URL/origin and visible scaling; inner CSS pixels alone cannot
+certify physical readability. Do not compensate by guessing device zoom or
+silently frame-busting. Keep stable manifest identity; provide an explicit own-
+origin launch and explain any remaining domain/install repair. Certify native
+Home Screen launch only after observing that route on the device.
+
+When the product is a child-facing installed PWA, build and audit its actual app
+surface, not just its manifest or a desktop page shrunk onto a phone. Keep the
+primary activity and a small control rail prominent. Put secondary character,
+music and language choices behind a clearly named menu with large, labelled
+choices; reuse existing controls/state rather than a second settings system.
+For Storytime, require at least64 CSS pixels for menu, Done, language and choice
+targets in the actual rendered viewport. Check legible labels, spacing and center
+hit testing after scrolling each choice into view. Offscreen scrollable options
+are not clipped controls, but the exit must remain reachable above safe areas.
+Native dialog focus/Escape or an equivalent established modal pattern must work.
+Open previously hidden choice panels with their retained selection fully visible
+and centered; a layout reveal must not silently select or start anything.
+Viewport-unit and orientation checks need an actual sized browsing viewport or
+iframe; resizing a DIV alone does not exercise the intended CSS viewport.
+
+Inspect top-level launch as well as direct app URLs. A viewport-less forwarding
+frame can shrink otherwise correct controls. Record that hosting defect and do
+not certify the custom domain from a passing iframe or direct-origin test.
+Check phone/tablet portrait/landscape and installed entry where available; keep
+unverified native iOS touch/audio separate from desktop browser measurements.
+
+Fullscreen animation needs one continuous spatial composition. A decorative
+upper strip is not a live extension: trace the entire moving leg from the real
+visible top through contact and lift, then the revealed opening into the same
+sky. Inspect intermediate frames and material seams. If SVG bounds extend, prove
+the same world-to-screen mapping for art, hit targets and overlays; preserve the
+canonical simulation and frozen-feedback coordinates. Do not stretch the actors
+or change physics to fill spare space. Replay/status must not cover the family.
+
+Freeze state before opening settings, changing a choice, closing, rotating and
+leaving fullscreen. Actors, awards, score, timer, round, practice and drawings
+must persist; these actions pause and never start music or resume play implicitly.
+An independent reviewer must exercise controls and inspect rendered geometry,
+not merely check CSS declarations. Retain failure/repair evidence as a candidate;
+only a later real task can demonstrate transfer of this procedure.
+
 | Pass | Required evidence |
 |---|---|
 | Causality and timing | A cue precedes the required action; travel and consequences are visible. All intended successes are achievable with the declared pace. Inspect anticipation, transition and ending, not only endpoints. |
@@ -48,6 +118,41 @@ retry/drowsing must not silently revoke an earned rescue. Test slow deliberate
 input as well as the fastest successful route.
 
 ## Repair, rate and retain
+
+### Task completion before component PASS
+
+Freeze the intended child's **visible action and whole outcome** before coding.
+For Storytime, independently press the words/picture as well as ▶. A model's
+`play()` test cannot certify the missing click handler; button bounds cannot
+certify a completed story. One start must show all five pages without repeated
+Next, keep the game clock paused, and then start the film once or expose an
+explicit browser-denial fallback. Observe actual film time advancing; closed
+dialog plus a paused film at0 is a failure or pending state, not a handoff PASS.
+Inspect the real resize/scroll/visibility events through modal close as well.
+
+Test manual later-page→start, incidental taps during listening, explicit
+Pause→resume, Skip/Close cancellation and pointerup→leave→click order. A swipe,
+cancelled gesture or multitouch must not accidentally start a story. Keep the
+primary affordance dominant; do not animate Next as the suggested first action
+when the intended route is one complete story. Retain teaching words as lesson
+content while controls use symbols. Actual-child comprehension stays unverified
+until observed; neither a model's icon selection nor typography proves it.
+
+When012 requests UI-TARS, retrieve the existing vision bridge and its model
+contract. Bind fresh screenshot hash, real viewport, device-pixel ratio, exact
+model, resize transform and coordinate profile. Strictly decode one allowlisted
+action, reject unknown scales/out-of-bounds/multiple or executable output, then
+perform the proposed press through the authorized UI tool and inspect its
+postcondition over time. A static inference, valid coordinates or a successful
+click is not an end-to-end playthrough. Keep raw proposal, actual action and
+independent result separate. No installs, unattended actuator or WRE promotion
+is implied by this bounded verification. Retain a parser/model blocker honestly.
+
+Use the same frozen failing case after repair, then held-out input sequences and
+the published revision. Record the previous test's coverage gap and repair that
+existing test/skill. This is the RSI candidate loop: intent→observe→act→verify→
+critique→repair→independent recheck; preserve failure evidence and next-task
+transfer limits in the existing owner, not a second memory or test scheduler.
 
 - Run the closest existing tests, then inspect the actual affected preview.
   Extend existing test files for new edge cases. Do not use source assertions
@@ -73,6 +178,14 @@ input as well as the fastest successful route.
   main and live result separately. Never activate WRE or publish media implicitly.
 
 ## Existing RSI boundary
+
+Before timing or caption-bound measurements, wait for media metadata, the actual
+requested currentTime and decoded-frame readiness, then allow layout frames.
+Duration/buffered bytes alone do not establish seeking. A local static server
+returning200 for byte-range requests can expose seekable[0,0] and silently clamp
+the requested time to0. Verify206/Content-Range and use the existing installed
+range-capable preview runtime; do not relax bounds or certify the wrong frame.
+Keep this2026-11-01 correction as a candidate until a later real tile proves reuse.
 
 Use [WRE](../../../../infrastructure/wre_core/README.md) and
 [WSP 95](../../../../../WSP_framework/src/WSP_95_WRE_SKILLz_Wardrobe_Protocol.md)

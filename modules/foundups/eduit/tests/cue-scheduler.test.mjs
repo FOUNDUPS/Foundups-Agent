@@ -9,3 +9,79 @@ test('seek backwards and repeat rearm cue without overlapping old voice',()=>{co
 test('trace distinguishes intended media timestamp from browser callback time',()=>{const f=fixture();f.clock(1000);f.s.update(220,{running:true});f.clock(1400);f.calls[0].cb.start();const start=f.traces.find(r=>r.type==='speech_started');assert.equal(start.intended_ms,220);assert.equal(start.observed_ms,1400);assert.equal(start.media_ms,220);});
 test('THUMP visible word follows original 9600ms effect; speech leaves transient clear',()=>{const c=storyCues.find(x=>x.id==='thump');assert.equal(c.start_ms,9680);assert.equal(c.speech_ms,10400);assert.ok(c.fade_ms<c.end_ms);});
 test('pause after completed speech permits explicit same-cue replay; cues do not repeat every frame',()=>{const f=fixture();f.s.update(220,{running:true});f.calls[0].cb.end();f.s.update(600,{running:true});assert.equal(f.calls.length,1);f.s.stop();f.s.update(800,{running:true});assert.equal(f.calls.length,2);});
+
+import {StorybookPlayback,storyPages,storyObjects} from '../../../../public/eduit/storytime/cue-scheduler.mjs';
+function bookFixture(){let time=0;const spoken=[],views=[],traces=[];let cancels=0;
+ const book=new StorybookPlayback({speak:(text,cb)=>spoken.push({text,cb}),cancel:()=>cancels++,view:(page,state)=>views.push({page,state}),trace:e=>traces.push(e),now:()=>time});
+ return {book,spoken,views,traces,step:t=>{time=t;book.tick(t);},set:t=>{time=t;},cancels:()=>cancels};
+}
+test('storybook shares concept text while retaining independent movie/page clocks and spoken emoji-free forms',()=>{
+ assert.equal(storyPages[0].text,storyObjects['long-ago'].text);
+ assert.equal(storyPages[1].text,storyCues[1].text);
+ assert.equal(storyPages[1].speech_offset_ms,0);assert.equal(storyCues[1].speech_ms,3620);
+ assert.equal(storyPages[2].text,'a family of MAMMA 🥚s');assert.equal(storyPages[2].spoken_text,'a family of MAMMAs');
+ assert.ok(storyPages.every(p=>!/[🥚]/u.test(p.spoken_text??p.text)));
+});
+test('storybook never speaks or advances until Play and waits for actual speech completion plus hold',()=>{
+ const f=bookFixture();f.step(5000);assert.equal(f.spoken.length,0);assert.equal(f.book.index,0);
+ f.set(0);f.book.play();assert.equal(f.spoken.length,1);f.step(220);assert.equal(f.spoken.length,1);
+ f.spoken[0].cb.start();f.step(6000);assert.equal(f.book.index,0);
+ f.spoken[0].cb.end();f.step(7199);assert.equal(f.book.index,0);f.step(7550);assert.equal(f.book.index,1);
+});
+test('navigation and pause invalidate previous-page callbacks without auto-advancing',()=>{
+ const f=bookFixture();f.book.play();f.step(220);const stale=f.spoken[0].cb;
+ f.book.select(2);stale.start();stale.end();f.step(10000);
+ assert.equal(f.book.index,2);assert.equal(f.book.playing,false);assert.equal(f.book.completedAt,null);
+ f.book.play();f.step(10220);assert.equal(f.spoken.at(-1).text,'a family of MAMMAs');
+ const old=f.spoken.at(-1).cb;f.book.pause('hidden');old.end();f.step(20000);assert.equal(f.book.playing,false);assert.equal(f.book.index,2);
+});
+test('silent and unavailable narration use bounded holds; hung speech is not retried',()=>{
+ const silent=bookFixture();silent.book.play({audible:false});silent.step(4200);assert.equal(silent.book.index,0);silent.step(4550);
+ assert.equal(silent.book.index,1);assert.equal(silent.spoken.length,0);
+ const failed=bookFixture();failed.book.play();failed.step(220);failed.spoken[0].cb.error();failed.step(4550);assert.equal(failed.book.index,1);
+ const hung=bookFixture();hung.book.play();hung.step(220);hung.step(12000);assert.equal(hung.book.unavailable,true);
+ hung.step(12500);hung.step(13000);assert.equal(hung.spoken.length,1);hung.step(13550);assert.equal(hung.book.index,1);
+});
+test('final story page stops; invalid selection and malformed clock cannot change progress',()=>{
+ const f=bookFixture();f.book.select(storyPages.length-1);f.book.play({audible:false});f.step(4550);
+ assert.equal(f.book.finished,true);assert.equal(f.book.playing,false);assert.equal(f.book.index,4);
+ assert.equal(f.book.select(100),false);assert.equal(f.book.select(NaN),false);
+ f.book.tick(Infinity);f.book.tick(-1);assert.equal(f.book.index,4);
+ assert.throws(()=>new StorybookPlayback({pages:[],speak(){},cancel(){}}),TypeError);
+});
+
+test('whole-story playback from every plate narrates all five once before completion',()=>{
+ for(let selected=0;selected<storyPages.length;selected++){
+  const f=bookFixture();f.book.select(selected);f.book.play({fromStart:true});
+  assert.equal(f.book.index,0);assert.equal(f.spoken.length,1,'first utterance is synchronous with Play');
+  let at=0;
+  for(let page=0;page<storyPages.length;page++){
+   assert.equal(f.book.index,page);assert.equal(f.book.finished,false);
+   f.spoken.at(-1).cb.start();f.spoken.at(-1).cb.end();
+   at+=3350;f.step(at);if(page<storyPages.length-1)f.step(++at);
+  }
+  assert.equal(f.book.finished,true);assert.equal(f.book.playing,false);
+  assert.deepEqual(f.spoken.map(s=>s.text),storyPages.map(p=>p.spoken_text??p.text));
+ }
+});
+
+test('caption trace follows completed view callback and does not claim painted pixels',()=>{
+ const order=[];
+ const s=new CueScheduler({speak:()=>{},cancel:()=>{},view:()=>order.push('view'),trace:r=>{if(r.type==='word_visible'){order.push('trace');assert.equal(r.visibility_source,'view_callback');}}});
+ s.update(0);assert.deepEqual(order,['view','trace']);
+});
+test('delayed speech callback samples live media time independently of frame ticks',()=>{
+ let media=220,observed=1000,callback;const traces=[];
+ const s=new CueScheduler({speak:(_text,cb)=>callback=cb,cancel:()=>{},view:()=>{},trace:r=>traces.push(r),mediaNow:()=>media,now:()=>observed});
+ s.update(220,{running:true});media=610;observed=1390;callback.start();
+ const start=traces.find(r=>r.type==='speech_started');
+ assert.equal(start.intended_ms,220);assert.equal(start.media_ms,610);assert.equal(start.observed_ms,1390);
+ assert.equal(start.media_clock,'sampled');assert.equal(start.onset_source,'speech_callback');
+});
+test('missing or invalid live media clock is explicitly last-update evidence',()=>{
+ for(const mediaNow of [undefined,()=>NaN,()=>Infinity,()=>-1]){
+  const traces=[];const s=new CueScheduler({speak:()=>{},cancel:()=>{},view:()=>{},trace:r=>traces.push(r),mediaNow});
+  s.update(400,{running:true});const r=traces.find(x=>x.type==='speech_requested');
+  assert.equal(r.media_ms,400);assert.equal(r.media_clock,'last_update');
+ }
+});

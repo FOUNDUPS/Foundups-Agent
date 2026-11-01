@@ -97,3 +97,35 @@ PR checks, squash merge, exact-main checks, Site deploy and live root/inner smok
 checks separately. Baseline rollback is Site version12.
 
 Official viewport semantics: https://developer.mozilla.org/en-US/docs/Web/API/VisualViewport
+
+## 2026-10-29 local correction: closed portrait storybook
+
+At PR2256 head3651c518, closing the native storybook dialog retained its
+`storybook-ready` class. The portrait-phone rule assigned `display:flex` even
+without the `open` attribute, overriding native closed-dialog hiding and leaving
+the book inline below the language controls. The desktop view remained hidden.
+
+The existing Shorts director CSS now qualifies that one portrait layout selector
+with `[open]`. Open-book typography, geometry, safe areas, controls, narration,
+game clocks and media remain with their existing owners. The correction is local
+and uncommitted; it has not been published or pushed to either repository.
+
+The dedicated **Run storybook visibility regression** group in the existing
+`director_harness.html` supplies the frozen acceptance oracle. Original CSS fails
+after actual Skip with `open=false`, `display:flex`, one client rectangle. The
+same oracle passes92 checks with the repair: root and inner director at390x844,
+844x390 and1280x900; actual Story/Close/Skip controls; modal bounds; explicit
+book-play cancellation; reopen; and portrait/landscape/desktop resizing while
+closed. Synthetic iframe dimensions are not a physical iPhone/iPad test.
+
+An initial candidate attempt reused the original browser-cached stylesheet. It
+was retained as a failed attempt. A fresh local reload and CSSOM inspection
+confirmed `[open]` was loaded before accepting the passing run. No persistent
+cache override or service-worker lifecycle change was introduced. Local raw
+evidence is `closed-storybook-browser-before.log`, `...-after.log` and
+`closed-storybook-browser-results.json` under the synchronization outputs.
+
+Independent verification: patch review passes; closest Node checks5 pass and
+2 existing Windows `file:` pathname failures remain; harness syntax and diff
+checks pass. The earlier3 scene/order/art-hash failures, physical audio, native
+touch and installed-PWA update gates remain open. WSP22/50/84/97.

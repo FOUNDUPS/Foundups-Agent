@@ -1,5 +1,38 @@
 # EDUIT — Education Using Information Technology
 
+Current storybook interaction, **tap-story-21**: tap the teaching words/picture
+or ▶ to run the complete story without repeated Next presses. Incidental taps
+while listening leave it running; explicit Ⅱ pauses and ▶ resumes that page.
+The child controls are pictograms with screen-reader names. Manual arrows remain
+available; starting after manual navigation runs the complete story from page1.
+
+Retained preschool presentation: nearly full-screen teaching
+words and64px actions. On short screens decoration
+gives way to words; final Video replaces redundant Skip beside Close. The same
+five-page narration/video sequence and game remain. Native Home Screen launch
+through eduit.org still requires separate domain verification; use the direct
+Sites origin for an unframed review. See [deployment procedure](DEPLOYMENT.md).
+
+Retained app-presentation build, **app-scene-18**: open the three-line **Storytime
+menu** beside player controls for large Characters, Music and Language choices.
+Fullscreen uses one continuous sky/game scene; the whole leg enters and leaves
+the top. Settings pause without restarting the round or starting music. The
+existing build/review skills now include these app-specific acceptance checks.
+
+
+Latest preview correction, **whole-story-16**: Auto play reads all five story
+plates before starting the video once. The25s demonstration now records the
+same game mechanics as the playable panel; the original Foley is kept separately.
+Use the direct Sites URL for phone review: eduit.org currently embeds it in a
+viewport-less forwarding frame, which is a separate hosting defect.
+
+
+Latest local sleeve work: [character/music choices](docs/CHARACTER_MUSIC_CHOICES.md)
+adds visible swipeable choices over the existing game. Two original appearances,
+two attributed CC BY music tracks and Off; no automatic sound or engine changes.
+Latest012 direction authorizes Sites review publication and verified GitHub
+pushes. This preview is separate from full learning/RSI acceptance.
+
 > **Canonical 2026-10-28 handoff:** [Storytime conversation audit and Prometheus M2M handoff](docs/STORYTIME_RSI_CONVERSATION_AUDIT_AND_HANDOFF.md) is the current decision register. It supersedes conflicting historical statements below about video+game-only tiles, Earn Stars buttons, forced three-round quizzes, and autonomous runtime status. Existing site work is owned by a separate session; this PR documentation change must not overwrite that session's UI work.
 ## EDUIT vision / Storytime Evolution map — 2026-10-28
 

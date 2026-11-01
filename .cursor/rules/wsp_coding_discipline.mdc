@@ -11,3 +11,16 @@ alwaysApply: true
 - Simplicity First: choose the simplest working solution; minimize dependencies/abstractions.
 - Avoid backwards compatibility unless ROADMAP/INTERFACE explicitly requires it; remove legacy code.
 - Keep ALL docs current in same change (README, INTERFACE, ROADMAP, ModLog, tests/README).
+
+## Mandatory regression-preserving repair contract (WSP 84 / WSP 97 / RSI)
+
+Before modifying code, read this rule, applicable WSPs, the module's INTERFACE/README/ROADMAP, and the existing test inventory. Search for the established implementation and its consumers. Record the exact failing behavior, baseline version, dependent invariants, and a reproducible negative test **before** patching.
+
+- **Enhance in place.** Prefer the smallest change to the owning component. Do not rewrite or replace working modules, fork parallel versions, remove features, or alter unrelated behavior without explicit approved scope and migration evidence.
+- **Freeze the acceptance oracle.** Test the reported defect **and** previously working behavior (micro and macro dependency checks). The independent Test Agent discovers appropriate checks based on the actual diff, risks and dependencies; WSP 97 does not prescribe a fixed test list.
+- **Compare outputs.** Inspect actual rendered, audible, interactive, or API behavior as appropriate, including boundary conditions and target devices. A source assertion or successful commit is not a rendered result.
+- **No silent degradation.** Preserve timing, data, controls, scoring, accessibility, integration, and deployment behavior unless the change explicitly authorizes otherwise. If a repair causes a new regression, stop promotion and fix/revert rather than weaken tests.
+- **Retain the lesson.** Record symptom → root cause → minimal correction → failing-before/passing-after evidence → independent verdict in the existing ModLog/test history and appropriate Skillz. Only claim RSI transfer after verified reuse on a subsequent real task.
+- **Close the loop.** Follow WSP 97 exact-head checks, authorized squash merge, exact-main checks, deployed postcondition and rollback receipt. Pending or unavailable checks remain UNKNOWN.
+
+This is a universal coding discipline. Product-specific test selection and execution remain the Test Agent's responsibility.
