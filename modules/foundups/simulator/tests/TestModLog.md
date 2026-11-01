@@ -1,3 +1,21 @@
+## 2026-11-01 — Pool credit acceptance and actual focused result
+
+Fresh original staker/ledger/Layer-D selection passes 192. Frozen external v2 has 40
+cases: desired RED 14 pass/26 fail, no errors/skips; unchanged candidate focused 232
+passes. The 40 are within 232, not another aggregate. Old assertions remain required.
+Before execution, v1 setup issues (explicit zero network receipt and immutable
+MappingProxyType snapshotting) were corrected in v2; v1 was not executed.
+Promoted staker-hurdle owner 834 lines/145 appended fits <= 850/160. Independent review
+confirms original prefix/all test ASTs; no new test owner or registry entry.
+Selected refusal snapshots include pool/optional-ledger state; accepted retries
+retain the original receipt. Receipt/local/hurdle absorption and partial rounding stay excluded.
+Controlled baseline/candidate 240-tick raw traces match at hash seed 710007;
+6 FoundUps/24 epochs/214 simulated paid tasks. Broad 1,276 includes 232; five held-outs/package pass.
+Security/PR/main/PC remain pending. No fresh full-model or funded-recovery proof.
+Node is credential-stripped only; no general effect-guard claim is made.
+The 12 prior arithmetic observations and all failed/fixture evidence remain sealed.
+B03 PR2296 delivery is separate: 23 PR/21 main checks, 29 PC bindings/187 evidence files.
+
 ## 2026-11-01 — B11-S1 RED, fixture history and current local results
 
 Original 182 pass; unchanged desired 27 yields 14 pass/13 fail, then focused 209

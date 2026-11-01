@@ -1,5 +1,13 @@
 # FoundUps Simulator
 
+## Native pool credit refusal candidate — 2026-11-01
+
+Class B, 17/P0 candidate: four additions refuse completely absorbed positive credits.
+Original 192 and frozen 40 yield focused 232 passes; desired RED is 14 pass/26 fail.
+Partial rounding, receipts/hurdles/underflow and funding are excluded; see [contract](INTERFACE.md#native-pool-credit-refusal--2026-11-01).
+B03 PR2296/main 1787 delivered: 23 PR/21 main checks, 29 PC bindings/187 evidence files.
+Broad 1,276/parity, five held-outs and package eight Python/three Node pass; security/publication pending.
+
 ## Same-ID trade-prevention candidate — 2026-11-01
 
 B11-S1 is a 16/P1 class-B matching control: cancel an incoming self-crossing

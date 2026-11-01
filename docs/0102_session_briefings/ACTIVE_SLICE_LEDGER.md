@@ -1,3 +1,21 @@
+## B03 delivered; native pool-credit candidate — 2026-11-01
+
+B03 PR2296/main 1787 source delivery closed: 23 PR/21 main checks, 29 C/O bindings
+and 187 evidence files independently preserved. Existing perimeter remains
+SPECIFIED_NOT_IMPLEMENTED; arithmetic NOT_SELECTED/source-transfer code HOLD.
+Current class B, 17/P0 candidate guards only four native pool additions. A positive
+credit with result <= prior book refuses before participating pool/ledger publication.
+Root implements; independent verification remains separate. Original 192 pass;
+frozen 40 RED 14 pass/26 fail; focused 232 pass. Scopes overlap, not an aggregate.
+Controlled 240-tick baseline/candidate numeric trace parity: 6 FoundUps/24 epochs/214 simulated paid tasks.
+Independent source/IDs/ASTs, broad 1,276/five held-outs/package eight Python/three Node pass;
+security/PR/main/PC pending. Node has no general effect-guard qualification.
+Partial rounding, receipt/hurdle accumulators, zero-producing underflow and funding
+stay excluded; earlier outer decay is not rolled back. Global units/precision D,
+B05 funding, custody, upstream dependency and Holo/chain holds remain unchanged.
+See the [current checkpoint](../architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#b03-delivered-four-site-credit-refusal-candidate--2026-11-01).
+Earlier B03 delivery-pending and B11 candidate notes are dated history, not current blockers.
+
 ## B11 delivered; next B03-P1 decision — 2026-11-01
 
 PR2294/main `4ecd01ba464f5269006afb03d6500e42a212288b`: 23 PR/21 main

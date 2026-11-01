@@ -1,5 +1,15 @@
 # ROADMAP - FoundUps Simulator
 
+## 2026-11-01 — Four native pool credits, candidate only
+
+- [x] B03 PR2296 delivered at 1787: 23 PR/21 main checks, 29 PC bindings/187 evidence files.
+- [x] Original 192; frozen 40 RED 14 pass/26 fail; focused 232 pass. These scopes overlap.
+- [x] Independent source/AST/native controls, broad 1,276 and controlled trace parity pass.
+- [x] Independent five and package eight Python/three Node pass.
+Security/PR/main/PC pending; the [contract](INTERFACE.md#native-pool-credit-refusal--2026-11-01) retains exclusions.
+B03 arithmetic NOT_SELECTED/source-transfer code HOLD, B05 funding and Holo/chain holds stay.
+Parity is selected numeric-trace/config/process evidence, not whole-state or funding proof.
+
 ## 2026-11-01 — B03-P1 perimeter decision, implementation held
 
 The [accepted perimeter](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p1-perimeter-v1)

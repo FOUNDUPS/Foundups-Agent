@@ -71,12 +71,16 @@ and 375 evidence files copied/verified. This is not an untracked-content audit.
 B11-S1 delivered through PR2294 at `4ecd01ba464f5269006afb03d6500e42a212288b`:
 23 PR/21 main checks, 22 PC bindings and 501 frozen evidence files independently
 verified. This partial same-ID control does not establish funded settlement/full B11.
-Next: accepted [B03-P1 perimeter v1](docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p1-perimeter-v1),
-SPECIFIED_NOT_IMPLEMENTED. Synthetic pAVS source, full nominal admission, actual
-posted debit and retained omissions are selected; arithmetic NOT_SELECTED/code HOLD.
-Useful numerical acceptance and a separate code allocation precede implementation.
-Global denomination/precision D, funded B05, B08 custody and full B11 remain open;
-no Holo maintenance, live-chain or deployment authority follows.
+B03-P1 delivered through PR2296 at `1787ea8a1122bc55ee7f07082ee7499de6bfd226`:
+23 PR/21 main checks, 29 PC bindings/187 evidence files independently verified.
+The [perimeter](docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p1-perimeter-v1)
+remains SPECIFIED_NOT_IMPLEMENTED, arithmetic NOT_SELECTED/source-transfer code HOLD.
+Next candidate: 17/P0 class B four-site pool credit refusal, focused 232 pass
+(192 original + 40 desired; RED 14 pass/26 fail); broad 1,276/controlled trace parity pass.
+Independent source/IDs/ASTs, five held-outs and package eight Python/three Node pass.
+Security/publication pending; no whole-state, funded or native-effect confinement claim.
+Partial rounding/hurdle/receipt/underflow and funding are excluded; B05/B08/full B11
+and global D, persistent Holo, live-chain and deployment holds remain.
 
 #### Historical allocation source checkpoint — prepublication, 2026-11-01
 
