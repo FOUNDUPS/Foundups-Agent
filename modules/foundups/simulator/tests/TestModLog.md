@@ -1,3 +1,15 @@
+## 2026-11-01 — B11-S1 RED, fixture history and current local results
+
+Original 182 pass; unchanged desired 27 yields 14 pass/13 fail, then focused 209
+pass. Independent first run five pass/one fixture-routing failure is preserved;
+approved setup-only correction with unchanged assertions passes six. Supplemental
+post-candidate real-Mesa two passes, not pre-candidate independent acceptance.
+Broad 1,236 passes, same three SSE HTTP deselections, zero failures/errors/skips/
+guard denials and 174 stable snapshots, independently confirmed. New 27
+are its derived subset; independent six and supplemental two remain external.
+Package eight Python/three Node pass; security/publication remain pending.
+B09 delivery is separately closed; the local registry check was not run.
+
 ## 2026-11-01 — B09 desired cadence and focused result
 
 Freeze 13 functions / 19 cases before implementation; baseline 35 passes,

@@ -1,5 +1,22 @@
 # INTERFACE - FoundUps Simulator
 
+## Same-ID trade-prevention candidate — 2026-11-01
+
+For ordinary native orders/string IDs under serialized hosting, a best crossing
+same-ID maker causes cancellation of the incoming remainder, fixed reason
+`self_trade_prevention`, one incoming-side rejection-count increment and no heap
+reinsertion. Maker state and preceding external fills remain; no skipping to
+worse prices. Price-only ordering, seller price and accepted fee math stay.
+Rejection counters now include this cancellation even after a filled prefix;
+placement/cancellation records are allowed effects, not a wholly no-effect refusal.
+Direct same-ID `_execute_trade` raises ValueError before all counters/fills/history.
+CANCELLED with no trades returns FAILED/zero amounts. With an external prefix,
+DEX_BUY reports actual trade notional/F_i/fee sums and historical order ID;
+message says cancelled remainder, never pending. Ordinary live partial behavior
+stays. Mesa refunds only unused `remaining_allocation`, not wallet cash.
+No funded debit, fee-payer policy, ownership/alias/Sybil proof, whole-market
+rollback, concurrency/restart or complete A08/B11 protection is supplied.
+
 ## Hourly queue readiness — 2026-11-01
 
 `CircuitBreaker.process_queue()` retains its no-argument call and FIFO count rule:
@@ -12,7 +29,7 @@ the timer. Existing datetime cooldown, requested-at, outflow and rate policy sta
 The private timer is excluded from constructor, repr and equality; `asdict` gains
 additive bookkeeping. A postmutation logging failure leaves the dequeue/timer
 committed: no successful return, lost-result recovery or retry permission follows.
-This candidate supports ordinary native dataclass/list state under serialized
+The delivered queue implementation supports ordinary native dataclass/list state under serialized
 calls within one live instance. Hostile hooks, concurrent/direct state mutation,
 copy/recreation, restart durability, funded payment and authenticated recovery
 are excluded. It does not close all A12 or change the B03 C/D unit conflict.

@@ -1,5 +1,14 @@
 # ROADMAP - FoundUps Simulator
 
+## 2026-11-01 — B11-S1 connected matching control
+
+- [x] Original 182 and focused 209 pass; desired 27 first produced 14 pass/13 fail.
+- [x] Corrected independent six and post-candidate real-Mesa two pass; original
+  independent five pass/one fixture failure is retained with setup-only correction.
+- [x] Independent confirmation of broader 1,236.
+- [x] Actual CLI check, eight Python/three Node package consumers; same 1,481/caps.
+- [ ] Security, protected PR/main and PC readback; B03/B05/B08/full B11 stay blocked.
+
 ## 2026-11-01 — B09 hourly readiness candidate
 
 - [x] Freeze 19 desired cases; actual RED is 12 pass / 7 fail. The original
@@ -7,7 +16,7 @@
 - [x] Independent five/source acceptance and promoted/broad 1,209 pass; original
   oracles and 174 source snapshots remain stable, with three SSE HTTP deselections.
 - [x] Canonical generation/check and eight Python/three Node consumers pass.
-- [ ] Security, protected PR/resulting-main and PC preservation.
+- [x] B09 delivered at 430f9ef9: 23 PR/21 main checks and separate PC/evidence preservation.
 
 The 14/P1 class-B slice preserves hourly FIFO/count math, not funding, recovery,
 concurrency or full A12. [Guard delivery](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#allocation-delivery-and-stored-chroma-security-hold--2026-11-01)
