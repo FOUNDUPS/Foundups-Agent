@@ -1,13 +1,13 @@
 # FoundUps Simulator
 
-## Agent-wallet policy isolation — 2026-11-01
+## Replay-safe pools and wallet policy — 2026-11-01
 
-Allocation policies are validated and copied before funding effects. Caller-owned
-dicts/lists can no longer change an installed wallet policy; the public policy
-view is read-only. This class-B simulator repair preserves valid economics and
-trusted host replacement. It does not authenticate the host or provide a signing
-sandbox. The [current security sprint and roadmap](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#current-sprint-and-blockchain-roadmap--2026-11-01)
-track replay, funding, issuance and custody gates before any chain activation.
+Pool distributions prepare complete local effects and optional ledger evidence;
+exact epoch retries return detached prior results. Mesa retains failed tails
+before another decay and attempts observers once. [The contract](INTERFACE.md#pool-epoch-effect-contract--2026-11-01)
+limits this to the running process. Wallet policies remain detached/read-only,
+with trusted host replacement. [Current verification and AI threats](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#replay-safe-epoch-settlement-and-ai-threat-update--2026-11-01)
+retain durable recovery, funding, issuance and custody gates before activation.
 
 
 Visual simulation of the autonomous FoundUp ecosystem.

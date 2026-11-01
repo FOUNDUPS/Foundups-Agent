@@ -44,10 +44,19 @@ The existing simulator must validate any economic enhancement before chain parit
 
 ### Current blockchain security sequence — 2026-11-01
 
-[The current sprint and ordered roadmap](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#current-sprint-and-blockchain-roadmap--2026-11-01)
-select A10/B01 wallet-policy isolation17/P0, then A07/B02 full epoch effects.
-Local candidate311 and independent13 pass in separate scopes; publication and
-resulting-main acceptance remain pending. Registry19 is scoped metadata without issuance evidence.
+[The current sprint and ordered roadmap](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#replay-safe-epoch-settlement-and-ai-threat-update--2026-11-01)
+record B01 wallet-policy isolation delivered through PR2281 at
+`24cc4aa2971b05ff8b53f76d157145da4134ed5c` with 24 PR and 22 resulting-main checks
+passing. A07/B02 full epoch effects is the active class-B 18/P0 layer; its fresh
+154-case baseline includes an actual seeded 240-tick simulation. Independent
+frozen replay acceptance first produced 2 passes/38 failures before repair.
+Corrected source passes 57 independent cases and 930 broader simulator cases
+in overlapping scopes; controlled fresh-process economic traces match exactly.
+Package checks pass8 Python cases and3 Node entrypoints; protected publication
+remains pending. Seed-only reproducibility is not proved.
+The [AI threat update](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#ai-exposed-financial-attack-surfaces)
+maps repository/tool poisoning and automated exploitation to existing controls
+and missing gates. The 19-entry registry remains metadata without issuance evidence.
 Preserve simulator-first authority, disputed units/caps and independent funding/
 signer/recovery gates. No planning packet grants live TestNet or production use.
 

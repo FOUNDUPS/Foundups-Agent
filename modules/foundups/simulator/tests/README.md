@@ -1,5 +1,21 @@
 # FoundUps Simulator Test Suite
 
+## Replay-safe epoch effects — 2026-11-01
+
+Existing `test_staker_hurdle_state.py`, `test_epoch_ledger_settlement_commitment.py`
+and `test_layer_d_anchor_runtime.py` retain prior oracles and add41 controls for
+complete effects, detached exact/late retries, conflicts, invalid requests,
+overflow, shared staker sequencing, failed preparation, concurrency, captured
+Mesa retry and observer failures. The three-owner run passes192; separate frozen
+acceptance plus held-outs passes57. These scopes overlap. See
+[TestModLog](TestModLog.md) for the genuine RED failures, source bindings,
+controlled-process trace parity and rejected initial nondeterministic traces.
+Do not infer reproducibility from config.seed alone or chain safety from mocks.
+The [interface](../INTERFACE.md#pool-epoch-effect-contract--2026-11-01) states the
+process-local boundary and remaining funded/durable accounting work.
+Broader simulator:930 pass with the same3 SSEHTTP deselections; package checks
+pass8 Python cases and3 Node entrypoints. These are separate, overlapping scopes.
+
 ## Wallet policy security suite — 2026-11-01
 
 `test_wallet_policy.py` freezes constructor, host replacement, allocation, hostile

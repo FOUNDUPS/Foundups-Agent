@@ -1,0 +1,705 @@
+{
+  "schema": "foundups.epoch-replay.security-qualification.v1",
+  "recorded_at_utc": "2026-11-01T01:59:37.081485+00:00",
+  "base": "24cc4aa2971b05ff8b53f76d157145da4134ed5c",
+  "branch": "agent/foundups-epoch-replay-20261101",
+  "authority": "012 authorizes reviewed source development and ordinary protected publication. No live signing, assets, funded transfers, token issuance, chain deployment or security-policy bypass.",
+  "classification": "B: selected simulator security improvement; valid qualified economic formulas unchanged",
+  "status": "VERIFIED_SIMULATED",
+  "scope": "Process-local pool/ledger effects and captured Mesa distribution tail; no complete A07 durable or chain guarantee",
+  "precode_allocation": {
+    "schema": "foundups.blockchain.sprint-allocation.v1",
+    "date": "2026-11-01",
+    "self": "0102",
+    "role": "architect",
+    "origin": "external_principal",
+    "base": "24cc4aa2971b05ff8b53f76d157145da4134ed5c",
+    "branch": "agent/foundups-epoch-replay-20261101",
+    "scope": "A07/B02 process-local atomic pool and epoch-ledger effects, captured Mesa distribution tail; fresh simulation verification and source-backed AI security threat integration",
+    "classification": "B security preserving qualified valid economics; C/D monetary decisions excluded",
+    "mps": {
+      "complexity": 4,
+      "importance": 5,
+      "deferability": 5,
+      "impact": 4,
+      "total": 18,
+      "priority": "P0"
+    },
+    "source_budget": {
+      "existing_pool_max_lines": 1000,
+      "existing_ledger_max_lines": 500,
+      "existing_mesa_base_and_ceiling": 2061,
+      "required_private_extraction": "modules/foundups/simulator/_mesa_epoch.py",
+      "private_max_lines": 180,
+      "private_functions_target_max_lines": 50,
+      "reason": "Mesa is over the inherited Python hard limit. Move its existing epoch observer/tail orchestration into a private helper; reduce Mesa, no generic framework or self-waived exemption.",
+      "test_existing_owners": [
+        "test_staker_hurdle_state.py",
+        "test_epoch_ledger_settlement_commitment.py",
+        "test_layer_d_anchor_runtime.py"
+      ],
+      "test_owner_max_lines": 800,
+      "new_test_owner": false,
+      "readme_no_growth_ceiling": 1043
+    },
+    "derived_packaging": {
+      "runtime_members_before": 1477,
+      "runtime_members_after_max": 1478,
+      "only_new_member": "modules/foundups/simulator/_mesa_epoch.py",
+      "manifest_cap_bytes": 337920,
+      "per_source_cap_bytes": 2097152,
+      "total_cap_bytes": 33554432,
+      "rule": "Preflight and run canonical generator; preserve all original members; new count boundary must accept1478 and reject1479. Record original boundary RED separately; no broad cap increase.",
+      "test_registry_owner_count": 1794
+    },
+    "interface": {
+      "pool_constructor": "PoolDistributor(ledger: Optional[EpochLedger] = None)",
+      "distribution": "Existing epoch,total_ups_rewards,foundup_id=None parameters unchanged",
+      "ledger": "Public record methods unchanged; private lock-held prepare/publish for coordinated effects",
+      "mesa": "Existing cycle/methods delegate only private distribution tail; pending identity retained on precommit failure and resumed before repeating demurrage; counter/pending finalized before observers."
+    },
+    "acceptance": [
+      "All prior valid percentages, fees, hurdle crossing/lock semantics, activity shares, fund/drip ordering, float conventions and participant identities retained.",
+      "Validate exact built-in epoch/amount/context before effects; finite prospective quantities; bind optional actual ledger context; never coerce arbitrary numeric hooks.",
+      "One epoch key per pool instance with normalized amount/context. Exact and late retries return detached original decisions despite roster/config or returned-value changes; conflicting and unrecorded older epochs reject before effects.",
+      "Prepare all balances, tiers, cumulative hurdle amounts, lock flags/value, fund/drip totals, result, ledger hashes/tree/index before any participating mutation. No callback/logging/I-O during partial economic publication.",
+      "One coherent pool->ledger lock ordering. Supported registration/activity/stats and same/conflicting concurrent requests serialize; different pool instances sharing a ledger cannot both credit one epoch.",
+      "Prepopulated ledger evidence without this pool's committed receipt does not establish a funded or completed distribution.",
+      "At the Mesa tail, retain failed request identity; resume it before another decay; commit counter/pending before telemetry/anchor observers. Observer failure cannot re-credit; no exactly-once external delivery claim.",
+      "Fresh seeded positive-work simulation and baseline, frozen desired RED, unchanged old tests, GREEN plus independent held-outs; deterministic economic trace comparisons with explicitly identified volatile metadata."
+    ],
+    "alternatives": [
+      {
+        "option": "Ledger-only cache",
+        "disposition": "Rejected: existing evidence dedup happens after economic mutations."
+      },
+      {
+        "option": "Full durable economic database or generic transaction framework",
+        "disposition": "Deferred to B05/durable B02 scope after source and funding decisions; duplicates existing owners and changes far more state."
+      },
+      {
+        "option": "Grow inherited 2061-line Mesa module or compress unrelated code",
+        "disposition": "Rejected; one bounded private extraction removes existing orchestration from Mesa."
+      },
+      {
+        "option": "Issue tokens immediately or select new economics",
+        "disposition": "Blocked by explicit units/aggregate supply/funding/custody requirements."
+      }
+    ],
+    "retrieval": {
+      "semantic": "CURRENT; ok true; gap false",
+      "source": "24cc4aa2971b05ff8b53f76d157145da4134ed5c",
+      "generation": "sha256:0e7fa618ef1b437d13447d2b1d48d81aa34f6cb08736b7f5bd72b29c7eea12f8",
+      "noise": "3 relevant epoch/Mesa/test hits; unrelated AI gateway replay and Trade document excluded.",
+      "ordering": "Direct must-include pool owner, module README/INTERFACE/ROADMAP/ModLog/tests README/TestModLog before implementation.",
+      "missing": "Simulator memory/README.md and requirements.txt absent; requirements-sse is a different optional web dependency surface.",
+      "staleness": "Source-qualified baseline; later overlay needs lexical/direct inspection. Historical briefings and counts not current acceptance.",
+      "duplication": "Reuse closest test owners; no duplicate transaction service."
+    },
+    "verification": {
+      "independent_verifier": "0102/simulator_economics",
+      "worker": "0102/blockchain_architecture",
+      "researcher": "0102/vision_catalog",
+      "root": "0102 architectural acceptance and packaging/publication",
+      "release": "HOLD until fresh baseline, desired RED and independently frozen tests are recorded; this allocation is not a passing result"
+    },
+    "workflow": {
+      "wre_plane": "Local source implementation/independent offline tests and read-only research; no monetary runtime activation or new scheduler.",
+      "manual_reason": "Complete effect boundaries, lock order and economic preservation require source-level architectural review and adversarial tests; no Qwen/Gemma execution or measured RSI improvement claimed.",
+      "recovery": "Preserve source/base and reviewable diff; ordinary precommit error leaves selected state unchanged; process restart durability remains absent."
+    },
+    "exclusions": [
+      "Live assets/signing/chain deployment",
+      "B03 units, 21M mined/staked aggregate policy and funding changes",
+      "Whole demurrage/MetaGPT/fee-runner atomicity beyond explicitly captured tail",
+      "Host/process sandbox or immunity from arbitrary code writes",
+      "Unrelated worktrees and PC untracked changes"
+    ]
+  },
+  "sources": [
+    {
+      "path": "modules/foundups/simulator/economics/pool_distribution.py",
+      "lines": 968,
+      "cap": 1000,
+      "raw_sha256": "733a1f3c23e4a125b2d8d6919c5b83f98486b6b199d2500ebd1311771ecbe08b",
+      "git_lf_sha256": "733a1f3c23e4a125b2d8d6919c5b83f98486b6b199d2500ebd1311771ecbe08b"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/epoch_ledger.py",
+      "lines": 358,
+      "cap": 500,
+      "raw_sha256": "d4eabe17652690e339768fa6ad24fa9640c0333dca8190286b9a667d1573d799",
+      "git_lf_sha256": "44dad69a8b4476ad1a43a06e66fd6570c747c253995ae69e95ec01c2df490b7d"
+    },
+    {
+      "path": "modules/foundups/simulator/mesa_model.py",
+      "lines": 2020,
+      "cap": 2061,
+      "raw_sha256": "6f2fda0c80c78546c7249a0a3f0e78e3769b7cac414d5fce27e290145aa65ee6",
+      "git_lf_sha256": "dc0e8ccacb360c11a819b7518dc261ce32d1ceb1ad9a1840339806e7e380dcde"
+    },
+    {
+      "path": "modules/foundups/simulator/_mesa_epoch.py",
+      "lines": 89,
+      "cap": 180,
+      "raw_sha256": "28464a7039aecf21e2d09aa2d124dafdad8717ddaf8961987f3b9ae2bbd05b3c",
+      "git_lf_sha256": "28464a7039aecf21e2d09aa2d124dafdad8717ddaf8961987f3b9ae2bbd05b3c"
+    }
+  ],
+  "tests": {
+    "reviewer-baseline": {
+      "artifact": {
+        "artifact": "reviewer-baseline/result.json",
+        "sha256": "b16802b7f75cffbecf337ef27c48603edcc6630ef3e305cbda7c2c31c5ddc778",
+        "bytes": 82319
+      },
+      "exit": 1,
+      "outcomes": {
+        "passed": 151,
+        "failure": 3
+      },
+      "case_ids_sha256": "171ede356a9a1f3a383b25cb9b500dc159f580ba8cddad559c395c433166646b",
+      "source_count": 173,
+      "source_unchanged": true,
+      "guard_denials": 2
+    },
+    "reviewer-baseline-v2": {
+      "artifact": {
+        "artifact": "reviewer-baseline-v2/result.json",
+        "sha256": "dc90da69af9781f4c8a6f17c5210d5e0077b2add6b4422e29aec9afb468a8576",
+        "bytes": 78829
+      },
+      "exit": 0,
+      "outcomes": {
+        "passed": 154
+      },
+      "case_ids_sha256": "171ede356a9a1f3a383b25cb9b500dc159f580ba8cddad559c395c433166646b",
+      "source_count": 173,
+      "source_unchanged": true,
+      "guard_denials": 0
+    },
+    "independent-desired-red": {
+      "artifact": {
+        "artifact": "independent-desired-red/result.json",
+        "sha256": "277f7495cdaf2e03de70b83c5695239a428fd4d9cacd39bb9cd9f73370521465",
+        "bytes": 54465
+      },
+      "exit": 1,
+      "outcomes": {
+        "failure": 38,
+        "passed": 2
+      },
+      "case_ids_sha256": "6254ab7ea70a6c0ac14b5411379959d75c211c588e428a37336687dc714e199c",
+      "source_count": 173,
+      "source_unchanged": true,
+      "guard_denials": 0
+    },
+    "independent-candidate-green": {
+      "artifact": {
+        "artifact": "independent-candidate-green/result.json",
+        "sha256": "8e8d185773b62e1d896ad069ab643f89424903242a9d5d3449b954df70fff9b3",
+        "bytes": 56853
+      },
+      "exit": 0,
+      "outcomes": {
+        "passed": 56
+      },
+      "case_ids_sha256": "273f8fcebf5dd0b4018f4936691f43baf8f53e267c81a89e74c8a2c78fd61a8e",
+      "source_count": 174,
+      "source_unchanged": true,
+      "guard_denials": 0
+    },
+    "callback-return-desired-red": {
+      "artifact": {
+        "artifact": "callback-return-desired-red/result.json",
+        "sha256": "0d089a142b78048a3557396b4b32e90250639e2fc839aa6715d620599af89966",
+        "bytes": 50004
+      },
+      "exit": 1,
+      "outcomes": {
+        "failure": 1
+      },
+      "case_ids_sha256": "2b355f89788efe4613e66b1d5814b4e4be4c4173e04d20c393e8eab232be21d1",
+      "source_count": 174,
+      "source_unchanged": true,
+      "guard_denials": 0
+    },
+    "independent-repaired-green": {
+      "artifact": {
+        "artifact": "independent-repaired-green/result.json",
+        "sha256": "0458bd74bdd4c5a43de03e89d0b0fcf814bd4babf4553e9982b824e7968cfe09",
+        "bytes": 57082
+      },
+      "exit": 0,
+      "outcomes": {
+        "passed": 57
+      },
+      "case_ids_sha256": "1e7233c8356fb692cc91e023acdd4e7a3da43c7b37c9ff6bc323c96dda77a268",
+      "source_count": 174,
+      "source_unchanged": true,
+      "guard_denials": 0
+    },
+    "candidate-baseline-parity": {
+      "artifact": {
+        "artifact": "candidate-baseline-parity/result.json",
+        "sha256": "a7f28d8b9f42091baafdc2c06520a4bd73bc06643b9246ffe15eec58c4091c65",
+        "bytes": 79090
+      },
+      "exit": 0,
+      "outcomes": {
+        "passed": 154
+      },
+      "case_ids_sha256": "171ede356a9a1f3a383b25cb9b500dc159f580ba8cddad559c395c433166646b",
+      "source_count": 174,
+      "source_unchanged": true,
+      "guard_denials": 0
+    },
+    "candidate-seeded-repeat": {
+      "artifact": {
+        "artifact": "candidate-seeded-repeat/result.json",
+        "sha256": "d18bb6e3845fec431bbcd5dce2236c105f9424af52af009c03d80da53ad4c220",
+        "bytes": 49960
+      },
+      "exit": 0,
+      "outcomes": {
+        "passed": 1
+      },
+      "case_ids_sha256": "a2aad693a34e0c74c29a528c28ad11fdb7c1510add95a6370d6d51e78c255083",
+      "source_count": 174,
+      "source_unchanged": true,
+      "guard_denials": 0
+    },
+    "controlled-seed-baseline": {
+      "artifact": {
+        "artifact": "controlled-seed-baseline/result.json",
+        "sha256": "59255c5675387256c932a591389cf38ae4d36eac3bf6fcee0423129ce6d51439",
+        "bytes": 50132
+      },
+      "exit": 0,
+      "outcomes": {
+        "passed": 1
+      },
+      "case_ids_sha256": "a2aad693a34e0c74c29a528c28ad11fdb7c1510add95a6370d6d51e78c255083",
+      "source_count": 173,
+      "source_unchanged": true,
+      "guard_denials": 0
+    },
+    "controlled-seed-candidate-1": {
+      "artifact": {
+        "artifact": "controlled-seed-candidate-1/result.json",
+        "sha256": "cb348b52ccf544da9d18218d4d3dd67e79f404a3ff1fdf6dbba21ae5d89705ed",
+        "bytes": 50447
+      },
+      "exit": 0,
+      "outcomes": {
+        "passed": 1
+      },
+      "case_ids_sha256": "a2aad693a34e0c74c29a528c28ad11fdb7c1510add95a6370d6d51e78c255083",
+      "source_count": 174,
+      "source_unchanged": true,
+      "guard_denials": 0
+    },
+    "controlled-seed-candidate-2": {
+      "artifact": {
+        "artifact": "controlled-seed-candidate-2/result.json",
+        "sha256": "b96848352a9fffbdb5ae912fda241957754a192ce3101d3c3ab6724a5e052fa9",
+        "bytes": 50447
+      },
+      "exit": 0,
+      "outcomes": {
+        "passed": 1
+      },
+      "case_ids_sha256": "a2aad693a34e0c74c29a528c28ad11fdb7c1510add95a6370d6d51e78c255083",
+      "source_count": 174,
+      "source_unchanged": true,
+      "guard_denials": 0
+    },
+    "promoted-replay-regressions": {
+      "artifact": {
+        "artifact": "promoted-replay-regressions/result.json",
+        "sha256": "4fc91c1b3c5bdc6abca37727a69bd2e3aaa00e92deae55f31e11a9e28680f4db",
+        "bytes": 85853
+      },
+      "exit": 0,
+      "outcomes": {
+        "passed": 192
+      },
+      "case_ids_sha256": "9803957a3390b54cf37fdd1b52b51043d1c079b0916dbc2f350d6eec9119a64f",
+      "source_count": 174,
+      "source_unchanged": true,
+      "guard_denials": 0
+    },
+    "broader-simulator-regression": {
+      "artifact": {
+        "artifact": "broader-simulator-regression/result.json",
+        "sha256": "9b0f544ce3efb18390376f5ba1b2da7a4c464b1623eb0e653ff3aa774568cda6",
+        "bytes": 228480
+      },
+      "exit": 0,
+      "outcomes": {
+        "passed": 930
+      },
+      "case_ids_sha256": "0ab3f609308da469b4e4ed32c19a3a02c24a68175e1650d46f6db52449c88df6",
+      "source_count": 174,
+      "source_unchanged": true,
+      "guard_denials": 0
+    }
+  },
+  "test_promotion": {
+    "owners": [
+      {
+        "path": "modules/foundups/simulator/tests/test_staker_hurdle_state.py",
+        "old_raw_sha256": "9db41c4ebd58b175690a4028b514213e4a0a5eb63d803cdb35aed13abb88f7f2",
+        "raw_sha256": "840716b6e35cedc9630e95c1dfeb1ec14115507602f0d565850733d703351fa2",
+        "git_lf_sha256": "9b3ad8f6dd00e9e91912a6e3c2e34d7c7b423c5183a601e3f1f04449f781626b",
+        "lines": 689,
+        "added_test_methods": [
+          "test_a01_exact_retry_has_no_effects",
+          "test_a02_late_retry_owns_first_receipt_and_configuration",
+          "test_a03_conflicts_leave_complete_state_unchanged",
+          "test_a04_invalid_request_rejects_before_effects",
+          "test_a05_unrecorded_old_epoch_rejects_but_gaps_allowed",
+          "test_a06_zero_normalization_and_empty_roster_preserve_math",
+          "test_a07_late_participant_failure_is_atomic",
+          "test_a08_finite_request_cannot_publish_infinite_prospective_state",
+          "test_a12_concurrent_exact_requests_commit_once",
+          "test_a13_concurrent_conflicts_have_one_winner",
+          "test_a15_hurdle_crossing_and_retry_keep_first_lock",
+          "test_a16_shared_position_keeps_original_sequential_crossing_formula",
+          "test_a17_missing_tiers_do_not_get_new_redistribution_policy"
+        ],
+        "old_top_level_asts_preserved": true,
+        "new_test_ast_inverse_rename_equal": true,
+        "old_bytes_exact_prefix": true
+      },
+      {
+        "path": "modules/foundups/simulator/tests/test_epoch_ledger_settlement_commitment.py",
+        "old_raw_sha256": "d89bcf1503bd9e77a3f0e263c60ad6280ad2cb70f94d76ffcf3ee84c086a2751",
+        "raw_sha256": "8c42091249a46e40f54d9916ccb6bb08fa60583cf7b2cafd644f1b91dabc3f6c",
+        "git_lf_sha256": "d874e82703b0bbf6c102f3fa742310748e37da1e95cc657b3ba9fd16fee22936",
+        "lines": 431,
+        "added_test_methods": [
+          "test_a09_bound_ledger_tree_failure_has_no_economic_or_evidence_commit",
+          "test_a10_external_ledger_entry_does_not_prove_pool_credit",
+          "test_a11_bound_context_mismatch_rejects_before_effects",
+          "test_a14_owner_api_serializes_against_prepared_ledger_commit",
+          "test_a21_large_integer_request_identity_is_not_rounded"
+        ],
+        "old_top_level_asts_preserved": true,
+        "new_test_ast_inverse_rename_equal": true,
+        "old_bytes_exact_prefix": true
+      },
+      {
+        "path": "modules/foundups/simulator/tests/test_layer_d_anchor_runtime.py",
+        "old_raw_sha256": "950fcc0ddaa74d8ee63f632ba7f5e06db60505145a970fc1da10cb5864e24f30",
+        "raw_sha256": "1e877e5c13c6cc74aee7ba51d73dd9b7ee31db898d32643a240f4395553e1ac8",
+        "git_lf_sha256": "1d287d77dd864c94c8a3505aed2c1c60324bebd98698a06c97f717148e091205",
+        "lines": 206,
+        "added_test_methods": [
+          "test_a18_mesa_failed_tail_retries_same_identity_without_repeating_decay",
+          "test_a19_mesa_postcommit_observer_failure_is_one_attempt_not_abort",
+          "test_a20_mesa_known_finalized_retry_does_not_republish_anchor",
+          "test_existing_epoch_record_callback_returns_none"
+        ],
+        "old_top_level_asts_preserved": true,
+        "new_test_ast_inverse_rename_equal": true,
+        "old_bytes_exact_prefix": true
+      }
+    ],
+    "owner_count_unchanged": 1794,
+    "new_methods": 22,
+    "new_cases": 41,
+    "independent_heldout_cases": 16,
+    "counts_overlap": true
+  },
+  "broader_omissions": [
+    "modules/foundups/simulator/tests/test_sse_server.py::test_sim_events_endpoint_denies_without_invite_key",
+    "modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_denies_when_protected",
+    "modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_allows_with_valid_invite"
+  ],
+  "controlled_trace": {
+    "profile": "Python3.12.10; fresh process; -P -s; closed environment with PYTHONHASHSEED710007; unchanged Python audit guards and real scratch FAM/central-daemon configuration",
+    "model_seed": 710007,
+    "ticks": 240,
+    "founders": 3,
+    "user_agents": 8,
+    "baseline_runs": 1,
+    "candidate_runs": 2,
+    "recorded_trace_sha256": "672d12c9d8fb6286624ea892fb3a5d0315c475ee45f8c83c9a271ba4328f0ff1",
+    "exact_bytes_equal": true,
+    "monetary_normalization": false,
+    "final": {
+      "total_foundups": 6,
+      "total_stakes": 49862,
+      "epochs_completed": 24,
+      "fi_outstanding": 6548.0,
+      "fund_pool_ups": 235.20799999999997
+    },
+    "scope": "Only the recorded finite scenario and complete stated process profile; not config.seed-only reproducibility or every economic state"
+  },
+  "retained_diagnostics": [
+    "First baseline:151 passed/3 failed; two default SQLite writes denied and one probe attribute error. Corrected test storage selection/inspection only; original guards remain.",
+    "Desired40:2 passed/38 failed before implementation; valid shared-position and missing-tier arithmetic controls already passed.",
+    "ROOT-01 callback return compatibility:1 failed on first candidate, then passed after removing only delegate return; original40/16 unchanged.",
+    "Three initial successful seeded smoke runs had materially different economic traces. They do not prove parity; no monetary differences were filtered away.",
+    "Stdlib diagnostics prove -I ignores PYTHONHASHSEED. Separate approved -P -s closed-environment profile preserves safe path, no user site and the original effect guard.",
+    "Actual old1477 validator refused generated1478 closure; desired acceptance assertion failed. This is distinct from the old fixture failing its preliminary count assertion."
+  ],
+  "ai_research": {
+    "source_head": "24cc4aa2971b05ff8b53f76d157145da4134ed5c",
+    "primary_sources": [
+      {
+        "id": "S01",
+        "title": "AI agents find smart contract exploits",
+        "url": "https://www.anthropic.com/research/smart-contracts",
+        "published": "2025-12-01",
+        "sections_read": "Introduction; SCONE methodology; web lines52\u201377",
+        "evidence_limit": "Simulator-only capability demonstration; no live assets affected.",
+        "accessed": "2026-11-01",
+        "access_mode": "direct_primary_body"
+      },
+      {
+        "id": "S02",
+        "title": "Measuring LLMs\u2019 ability to develop exploits",
+        "url": "https://www.anthropic.com/research/exploit-evals",
+        "published": "2026-05-22",
+        "sections_read": "SCONE section; web lines98\u2013108",
+        "evidence_limit": "12 post-cutoff cases, local simulation, Best@8; not independently reproduced here.",
+        "accessed": "2026-11-01",
+        "access_mode": "direct_primary_body"
+      },
+      {
+        "id": "S03",
+        "title": "Designing AI agents to resist prompt injection",
+        "url": "https://openai.com/index/designing-agents-to-resist-prompt-injection/",
+        "published": "2026-03-11",
+        "sections_read": "Source/sink and deterministic consequence limits; web lines35\u201374",
+        "evidence_limit": "Vendor security guidance, not FoundUps enforcement evidence.",
+        "accessed": "2026-11-01",
+        "access_mode": "direct_primary_body"
+      },
+      {
+        "id": "S04",
+        "title": "Self-replicating prompt injections exist",
+        "url": "https://alignment.openai.com/misalignment-reports/self-replicating-prompt-injections-exist",
+        "published": "2026-09-25",
+        "sections_read": "Summary and replication mechanisms; web lines16\u201329,104\u2013109",
+        "evidence_limit": "No observed impact outside simulated tool calls; not a production worm incident.",
+        "accessed": "2026-11-01",
+        "access_mode": "direct_primary_body"
+      },
+      {
+        "id": "S05",
+        "title": "Safeguarding VS Code against prompt injections",
+        "url": "https://github.blog/security/vulnerability-research/safeguarding-vs-code-against-prompt-injections/",
+        "published": "2025-08-25; updated2026-07-06",
+        "sections_read": "Security assessment and file edits; web lines429\u2013444,590\u2013633",
+        "evidence_limit": "Demonstrated and addressed bypasses; not a claim current FoundUps dependency is vulnerable.",
+        "accessed": "2026-11-01",
+        "access_mode": "direct_primary_body"
+      },
+      {
+        "id": "S06",
+        "title": "Security Best Practices, MCP2026-07-28",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/security_best_practices",
+        "published": null,
+        "sections_read": "Confused deputy and token passthrough; web lines97\u2013218",
+        "evidence_limit": "Versioned public specification guidance; publication date not established.",
+        "accessed": "2026-11-01",
+        "access_mode": "direct_primary_body"
+      },
+      {
+        "id": "S07",
+        "title": "GitHub MCP Exploited: Accessing private repositories via MCP",
+        "url": "https://invariantlabs.ai/blog/mcp-github-vulnerability",
+        "published": "2025-05-26",
+        "sections_read": "Demo setup/attack and trusted-tool boundary; web lines26\u201369",
+        "evidence_limit": "Controlled researcher demonstration; not a confirmed FoundUps incident.",
+        "accessed": "2026-11-01",
+        "access_mode": "direct_primary_body"
+      },
+      {
+        "id": "S08",
+        "title": "Bybit \u2013 What We Know So Far",
+        "url": "https://www.sygnia.co/blog/sygnia-investigation-bybit-hack/",
+        "published": "2025-03-16",
+        "sections_read": "Timeline and transaction execution; web lines134\u2013150,188\u2013196",
+        "evidence_limit": "Incident-response investigation; no AI causation established; no chain decoding reproduced here.",
+        "accessed": "2026-11-01",
+        "access_mode": "direct_primary_body"
+      },
+      {
+        "id": "S09",
+        "title": "Leases",
+        "url": "https://dev.algorand.co/concepts/transactions/leases/",
+        "published": null,
+        "sections_read": "How leases work and pitfalls; web lines422\u2013431,493\u2013500",
+        "evidence_limit": "Sender/lease exclusion is window-bound; documentation is not current network/FoundUps behavior proof.",
+        "accessed": "2026-11-01",
+        "access_mode": "direct_primary_body"
+      },
+      {
+        "id": "S10",
+        "title": "MCP Security Notification: Tool Poisoning Attacks",
+        "url": "https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks",
+        "published": "2025-04-01",
+        "sections_read": "Tool metadata, rug pulls and cross-server shadowing; web lines23\u201336,76\u201386",
+        "evidence_limit": "Controlled experiments; no payload was copied into the proposal or executed.",
+        "accessed": "2026-11-01",
+        "access_mode": "direct_primary_body"
+      }
+    ],
+    "scope": "Primary disclosures and controlled research mapped to existing A01-A12 requirements; no AI-caused theft attribution or live exploit execution"
+  },
+  "evidence": [
+    {
+      "artifact": "sprint-allocation-before-code.json",
+      "sha256": "33605b31eca057efe977f16f82070ccbf29644234a246b67b77b4676054db6ca",
+      "bytes": 6982
+    },
+    {
+      "artifact": "root-acceptance-addendum-before-go.json",
+      "sha256": "f8d21faaede82afc870d5d723c86208f26db7969dc008737f154d3682001b007",
+      "bytes": 2075
+    },
+    {
+      "artifact": "root-implementation-go.json",
+      "sha256": "d19bf9338081d1a7534ca68ae8f7593920927798fbcef50455123c4ffb46409f",
+      "bytes": 1129
+    },
+    {
+      "artifact": "independent-acceptance-freeze-v2.json",
+      "sha256": "4a35299a8fd9c116b74e942af1f388c4afbf6ad07b07e8774176b03c8eda7792",
+      "bytes": 2857
+    },
+    {
+      "artifact": "heldouts-freeze-v2.json",
+      "sha256": "afb76221bc1fad1ebaf4e2e64819e3a4510d6d329e01003452a611f20da941c8",
+      "bytes": 1927
+    },
+    {
+      "artifact": "callback-return-compatibility-freeze.json",
+      "sha256": "a54253a5ec6b6dc379cbc43a2a1fef6aabd0729c7f79eb9ef0e0e8e9a2d39a3a",
+      "bytes": 697
+    },
+    {
+      "artifact": "worker-candidate-freeze.json",
+      "sha256": "127a2d57b70d2a225bfcb3a30f6cbee1abb75ebea7e4eaa53c45343ae65b7c08",
+      "bytes": 3678
+    },
+    {
+      "artifact": "worker-candidate-freeze-v2.json",
+      "sha256": "847a5c74cbb2f84a1ef9b372a474ca98f5c6e16f57531a65fd97e7c55edb5355",
+      "bytes": 3552
+    },
+    {
+      "artifact": "root-source-review-v1.json",
+      "sha256": "c4c6574233dcb7a1ae64875ecfd819de65f431e9344afee35f7d4daf19f4ed5f",
+      "bytes": 2248
+    },
+    {
+      "artifact": "root-test-promotion-audit.json",
+      "sha256": "8dd131493499e87395e1dbd9766b4c397fca05e4d9151ed930825089fd682e84",
+      "bytes": 1040
+    },
+    {
+      "artifact": "root-seed-parity-diagnostic-v1.json",
+      "sha256": "5b72f4b08893c5a8c7c6adea663ebd6d98565c41c5f8835f8434840df2f3e271",
+      "bytes": 2499
+    },
+    {
+      "artifact": "stdlib-hash-flags-diagnostic/receipt.json",
+      "sha256": "c2c8cce59a2f5255d7f101a10bfd4616a2941347a849e8b8e68ea1807ea6cd30",
+      "bytes": 4653
+    },
+    {
+      "artifact": "controlled-seed-profile-freeze.json",
+      "sha256": "48bab4ab03e3d88c4f96975c61fc555c48c324d0304bec608a071e3f8f5558b1",
+      "bytes": 50232
+    },
+    {
+      "artifact": "controlled-seed-parity-result.json",
+      "sha256": "6e811dcdb5eeeac9bb560f8b99a238846fceeb984745da753d2918703b72e0a6",
+      "bytes": 3971
+    },
+    {
+      "artifact": "test-promotion-proof.json",
+      "sha256": "aba69a8862c0fda19bf5df8fff8b9830a70f06354e18d9a0824b7af3ec377f3a",
+      "bytes": 3746
+    },
+    {
+      "artifact": "broader-simulator-review.json",
+      "sha256": "0df369a32497ae41d38ef324270765e4586310cabdae2ed441e6d68ec921710d",
+      "bytes": 1871
+    },
+    {
+      "artifact": "independent-acceptance-final.json",
+      "sha256": "5f8f1465bc710f49c37d83b43bc1d894acb88dc003f700935283ff7b03966d06",
+      "bytes": 12411
+    },
+    {
+      "artifact": "ai-financial-risk-evidence.json",
+      "sha256": "7a069fb4a83a12b0f770fad19496c28e65ffef0acaa97f206ff49c4fd1519f83",
+      "bytes": 31709
+    },
+    {
+      "artifact": "documentation-addendum-review.json",
+      "sha256": "97f76ae85a6f41e5ddd3f301ba47ca437e235fb26fdd014502fd9c264006b0f0",
+      "bytes": 5760
+    },
+    {
+      "artifact": "canonical-packaging/generation-and-old-validator-red.json",
+      "sha256": "47b8be405cea60c684fbbf2c4b0ef3664d6c38fbb734f32b07c32e0dd53ed60c",
+      "bytes": 6735
+    },
+    {
+      "artifact": "canonical-packaging/packaging-result.json",
+      "sha256": "ca81bdb90223be17c2316a5f2e2b8251a139d5cf61ff84841ff4edae00467ab9",
+      "bytes": 16423
+    },
+    {
+      "artifact": "public-evidence-peer-review.json",
+      "sha256": "310cff705adb9b4723954a3fafc108383f3401f3c9a8a4956cb4f58a0c5bf52e",
+      "bytes": 4676
+    }
+  ],
+  "packaging": {
+    "status": "VERIFIED_LOCAL_SOURCE_PACKAGE",
+    "original_members": 1477,
+    "members": 1478,
+    "only_new_member": "modules/foundups/simulator/_mesa_epoch.py",
+    "canonical_digest": "aa427f95b54afa093d42f75931a2928a4963245a9fad4103ae3d9b9a735b36a4",
+    "lf_bytes": 334222,
+    "crlf_bytes": 337251,
+    "python_cases_passed": 8,
+    "python_source_snapshots_unchanged": 1485,
+    "node_entrypoints_passed": 3,
+    "test_registry_check": "current1794/quarantined260; no write",
+    "result": {
+      "artifact": "canonical-packaging/packaging-result.json",
+      "sha256": "ca81bdb90223be17c2316a5f2e2b8251a139d5cf61ff84841ff4edae00467ab9",
+      "bytes": 16423
+    },
+    "caps": {
+      "manifest_bytes": 337920,
+      "source_bytes": 2097152,
+      "total_bytes": 33554432
+    }
+  },
+  "publication": "PENDING: local source acceptance is distinct from protected PR, resulting-main and primary-PC reconciliation",
+  "deployment_readiness": "BLOCKED",
+  "remaining": [
+    "Model-owned RNG, stable identity hashing and independent singleton state with versioned reproducibility oracles",
+    "Versioned monetary units, rounding/residuals and combined mined/staked supply/release policy before funded chain economics",
+    "Durable funded reservations, aggregate pending/ambiguous limits, unique proof consumption and crash reconciliation",
+    "Authenticated work/maturity/reserve/policy facts and independent controlling identities",
+    "Independent constrained custody/signing, exact-effect authorization, denied privilege changes and independently confirmed settlement",
+    "Freeze/recovery, funded FX and related-controller/Sybil controls; external venues remain unqualified"
+  ],
+  "limits": [
+    "No allocation/process-death rollback or arbitrary same-process mutation protection",
+    "No atomicity for earlier demurrage, MetaGPT resets, downstream fee-account credits or external observer delivery",
+    "One local observer attempt may lose telemetry; BaseException is not swallowed; explicit mock force API unchanged",
+    "No real asset issuance, monetary transfer, provider qualification, external audit or legal-compliance certification"
+  ]
+}

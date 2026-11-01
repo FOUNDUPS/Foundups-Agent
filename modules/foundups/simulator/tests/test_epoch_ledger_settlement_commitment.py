@@ -325,3 +325,107 @@ def test_verify_chain_rejects_private_list_index_divergence(recompute_entry_hash
     assert ledger._by_epoch[1] is original
     assert original.entry_hash == original.compute_hash()
     assert ledger.verify_chain() is False
+
+
+# A07/B02 frozen process-local replay/atomicity acceptance.
+from concurrent.futures import ThreadPoolExecutor
+from copy import deepcopy
+from decimal import Decimal
+from threading import Barrier, Event
+from modules.foundups.simulator.economics import epoch_ledger as lm
+from modules.foundups.simulator.economics import pool_distribution as pm
+from modules.foundups.simulator.economics.epoch_ledger import EpochLedger
+from modules.foundups.simulator.economics.pool_distribution import (
+    PoolDistributor, ParticipantType as PT, ActivityLevel as AL, StakerPosition)
+from modules.foundups.agent_market.src.fam_daemon import FAMDaemon
+from modules.foundups.simulator.config import SimulatorConfig
+from modules.foundups.simulator.mesa_model import FoundUpsModel
+
+
+def _a07_pool(ledger=None):
+    pool = PoolDistributor() if ledger is None else PoolDistributor(ledger=ledger)
+    p = pool.register_participant("alice", PT.DU, AL.DU,
+        staker_position=StakerPosition(original_stake_btc=0.001))
+    return pool, p
+
+def _a07_state(pool, ledger=None):
+    people = {k: (id(p), int(p.activity_level), p.ups_balance,
+        dict(p.foundup_tokens), None if p.staker_position is None else
+        (id(p.staker_position), dict(vars(p.staker_position))))
+        for k, p in pool.participants.items()}
+    evidence = None if ledger is None else (
+        [(e.to_dict(), dict(e.participant_rewards)) for e in ledger.entries],
+        dict(ledger.merkle_roots), dict(ledger.merkle_trees))
+    return deepcopy((pool.accumulated_fund, pool.total_drip_distributed,
+                     people, evidence))
+
+def test_a09_bound_ledger_tree_failure_has_no_economic_or_evidence_commit(monkeypatch):
+    ledger = EpochLedger("a")
+    pool, _ = _a07_pool(ledger)
+    before = _a07_state(pool, ledger)
+    with monkeypatch.context() as m:
+        m.setattr(lm, "_build_tree", lambda *a: (_ for _ in ()).throw(RuntimeError("tree")))
+        with pytest.raises(RuntimeError): pool.distribute_epoch(1, 100, "a")
+    assert _a07_state(pool, ledger) == before
+    result = pool.distribute_epoch(1, 100, "a")
+    assert ledger.verify_chain() and len(ledger.entries) == 1
+    assert dict(ledger.entries[0].participant_rewards) == result.participant_rewards
+    before = _a07_state(pool, ledger)
+    pool.distribute_epoch(1, 100.0, "a")
+    assert _a07_state(pool, ledger) == before
+
+def test_a10_external_ledger_entry_does_not_prove_pool_credit():
+    ledger = EpochLedger("a")
+    ledger.record_epoch(1, 100, {"fund": 4}, {"alice": 76.8})
+    pool, _ = _a07_pool(ledger)
+    before = _a07_state(pool, ledger)
+    with pytest.raises(ValueError): pool.distribute_epoch(1, 100, "a")
+    assert _a07_state(pool, ledger) == before
+
+def test_a11_bound_context_mismatch_rejects_before_effects():
+    ledger = EpochLedger("a")
+    pool, _ = _a07_pool(ledger)
+    before = _a07_state(pool, ledger)
+    with pytest.raises(ValueError): pool.distribute_epoch(1, 100, "b")
+    assert _a07_state(pool, ledger) == before
+
+@pytest.mark.parametrize("operation", ["register", "activity"])
+def test_a14_owner_api_serializes_against_prepared_ledger_commit(monkeypatch, operation):
+    ledger = EpochLedger("a")
+    pool, _ = _a07_pool(ledger)
+    entered, release, attempted, completed = Event(), Event(), Event(), Event()
+    original = lm._build_tree
+    def pause(*args):
+        entered.set()
+        assert release.wait(3)
+        return original(*args)
+    monkeypatch.setattr(lm, "_build_tree", pause)
+    def alter():
+        attempted.set()
+        if operation == "register": pool.register_participant("new", PT.UN, AL.UN)
+        else: pool.update_activity("alice", AL.UN)
+        completed.set()
+    with ThreadPoolExecutor(2) as executor:
+        first = executor.submit(pool.distribute_epoch, 1, 100, "a")
+        try:
+            assert entered.wait(3)
+            change = executor.submit(alter)
+            assert attempted.wait(3)
+            assert not completed.wait(0.1)
+        finally: release.set()
+        receipt = first.result(timeout=3)
+        change.result(timeout=3)
+    assert receipt.participant_rewards["alice"] == pytest.approx(76.8)
+    assert "new" not in receipt.participant_rewards and ledger.verify_chain()
+
+@pytest.mark.parametrize("bound", [False, True])
+def test_a21_large_integer_request_identity_is_not_rounded(bound):
+    ledger = EpochLedger("a") if bound else None
+    pool, _ = _a07_pool(ledger)
+    total = 2 ** 53
+    receipt = pool.distribute_epoch(1, total, "a")
+    assert type(receipt.total_rewards) is int and receipt.total_rewards == total
+    before = _a07_state(pool, ledger)
+    with pytest.raises(ValueError):
+        pool.distribute_epoch(1, total + 1, "a")
+    assert _a07_state(pool, ledger) == before

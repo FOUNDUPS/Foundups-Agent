@@ -250,6 +250,9 @@ function assertRuntimeFileCountBoundary() {
     'modules/foundups/simulator/economics/_token_numeric.py'
   ));
   assert(manifest.required_runtime_files.includes(
+    'modules/foundups/simulator/_mesa_epoch.py'
+  ));
+  assert(manifest.required_runtime_files.includes(
     'modules/communication/livechat/src/engagement_lifecycle.py'
   ));
   assert(manifest.required_runtime_files.includes(
@@ -265,13 +268,13 @@ function assertRuntimeFileCountBoundary() {
     candidate.required_runtime_files.push(member);
     candidate.required_runtime_sha256[member] = '0'.repeat(64);
   };
-  while (candidate.required_runtime_files.length < 1477) {
+  while (candidate.required_runtime_files.length < 1478) {
     addMember(candidate.required_runtime_files.length);
   }
-  assert.strictEqual(candidate.required_runtime_files.length, 1477);
-  assert.deepStrictEqual(validator.validateManifest(candidate), []);
-  addMember(1477);
   assert.strictEqual(candidate.required_runtime_files.length, 1478);
+  assert.deepStrictEqual(validator.validateManifest(candidate), []);
+  addMember(1478);
+  assert.strictEqual(candidate.required_runtime_files.length, 1479);
   assert.deepStrictEqual(validator.validateManifest(candidate), [
     'backend_runtime_file_contract_mismatch'
   ]);

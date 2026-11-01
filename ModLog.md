@@ -15,6 +15,22 @@ partial compatibility checks, not native author execution or retained RSI.
 See [current runtime evidence and remaining gates](docs/operations/RSI_SWARM_DISPATCH.md#host-repair-and-isolated-upgrade-qualification--2026-11-01).
 Private account/configuration recovery state stays outside Git.
 
+## 2026-11-01 — Replay-safe epoch effects and AI threat integration
+
+WSP15 18/P0 class B; WSP22/26/29/48/50/62/84/97. B01/PR2281 is delivered at24cc
+with24 PR and22 main checks passing. Extend existing pool/ledger/Mesa owners to
+prepare complete local effects, reject conflicting retries and return detached
+prior decisions. Keep valid economic formulas, shared-staker order and callback
+compatibility. One private helper reduces the inherited Mesa module.
+Frozen replay RED2/38 becomes40 pass; final independent57 and promoted192 pass
+in overlapping scopes. Controlled fresh-process economic traces match baseline
+and candidate; initial nondeterministic traces remain retained failures of parity.
+Primary AI exploitation/prompt-injection research is mapped to existing A01–A12
+owners and missing funded/custody/recovery gates in the architecture report.
+Broader simulator930 and package8 Python/3 Node pass; runtime closure adds one
+private helper under unchanged byte caps. No live signer, token issuance, funds
+or chain deployment. Protected publication remains a separate recorded gate.
+
 ## 2026-11-01 — Security-first blockchain roadmap and custody clarification
 
 WSP15 A10/B01 class-B17/P0; following layer A07/B02 whole epoch effects.
