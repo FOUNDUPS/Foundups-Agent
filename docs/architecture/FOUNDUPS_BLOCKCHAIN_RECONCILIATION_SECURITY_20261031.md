@@ -1,5 +1,20 @@
 # FoundUps blockchain reconciliation and security decision — 2026-10-31
 
+## B11 delivered; B03-P1 perimeter decision — 2026-11-01
+
+[PR2294](https://github.com/FOUNDUPS/Foundups-Agent/pull/2294) delivered at
+`4ecd01ba464f5269006afb03d6500e42a212288b`: 23 PR/21 main checks pass;
+22 PC file bindings and 501 frozen evidence files are independently verified.
+The external delivery report SHA256 is
+`47a5c2d23c88bf5c1ab27bc08d7b20094e786ccb746e13e7d210417192247774`.
+Earlier B11 candidate/security/publication-pending prose remains historical;
+this delivered slice is not full A08/B11, funding, custody or Holo release.
+[B03-P1 perimeter v1](FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p1-perimeter-v1)
+selects synthetic pAVS source/full-budget admission, actual-posted debit and
+source retention of omitted shares. Status is SPECIFIED_NOT_IMPLEMENTED;
+arithmetic NOT_SELECTED/code HOLD. Future health-ratio effects and epoch-tail-only
+refusal bounds are explicit. Global units/precision, funded B05 and signing stay blocked.
+
 ## Allocation delivery and stored Chroma security hold — 2026-11-01
 
 [PR2290](https://github.com/FOUNDUPS/Foundups-Agent/pull/2290) delivered allocation

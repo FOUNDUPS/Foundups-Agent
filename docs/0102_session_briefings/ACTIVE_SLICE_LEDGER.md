@@ -1,3 +1,15 @@
+## B11 delivered; next B03-P1 decision — 2026-11-01
+
+PR2294/main `4ecd01ba464f5269006afb03d6500e42a212288b`: 23 PR/21 main
+checks pass; 22 PC bindings and 501 evidence files are independently verified.
+Root 0102 adopts the [B03-P1 perimeter](../architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p1-perimeter-v1)
+under 012 delegation: synthetic source, full-budget refusal, posted debit and
+retained omissions. SPECIFIED_NOT_IMPLEMENTED; arithmetic NOT_SELECTED/code HOLD.
+Independent numerical acceptance and code allocation are future gates, not runs.
+Global D units/precision, B05 funding, custody and persistent Holo remain blocked.
+Earlier B11 pending checkpoints are historical; sealed failures/receipts stay intact.
+The [dated source/status](../architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#b11-delivered-b03-p1-perimeter-decision--2026-11-01) separates delivery from activation.
+
 ## B09 delivered; B11-S1 local candidate — 2026-11-01
 
 B09 main 430f9ef9 has 23 PR/21 main checks and 17 verified C/O blobs. Its

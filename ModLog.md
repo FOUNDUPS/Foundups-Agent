@@ -1,3 +1,13 @@
+## 2026-11-01 — B03-P1 perimeter accepted; arithmetic and code held
+
+WSP15/22/26/29/97; 19/P0 decision prerequisite under root 0102/012 delegation.
+The [existing delivery plan](docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p1-perimeter-v1)
+selects synthetic pAVS source/full nominal admission, posted debit and retained
+omissions. SPECIFIED_NOT_IMPLEMENTED; arithmetic NOT_SELECTED/code HOLD, no funding.
+Epoch-tail-only refusal and future 10%/50% health-ratio effects stay explicit.
+B11 PR2294 closes at 4ecd01ba: 23 PR/21 main checks, 22 PC bindings and 501
+independently preserved evidence files. Old failures/history and global D stay intact.
+
 ## 2026-11-01 — B09 delivered; B11-S1 matching candidate
 
 B09 closes at 430f9ef9 with 23 PR/21 main checks, 17 C/O blobs and 27,258

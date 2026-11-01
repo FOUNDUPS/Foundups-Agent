@@ -31,7 +31,8 @@
         "modules/infrastructure/foundups_tokenization/docs/TOKENOMICS.md",
         "WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md",
         "docs/architecture/FOUNDUPS_BTC_RESERVE_TOKEN_ARCHITECTURE.md",
-        "docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md"
+        "docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md",
+        "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md"
       ]
     },
     {

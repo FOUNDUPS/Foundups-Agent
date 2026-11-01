@@ -68,12 +68,15 @@ qualification and explicit maintenance release remain open. The controller is he
 B09 delivered at `430f9ef90ad126b76f3d90e03d1086d2e2237267`: 23 PR/21 main
 checks, 17 C/O source bindings, 27,258 immediate untracked pathnames preserved,
 and 375 evidence files copied/verified. This is not an untracked-content audit.
-Current 16/P1 class-B [B11-S1 candidate](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#same-id-matching-control-candidate--2026-11-01)
-links same-ID cancellation to truthful allocation results. Focused 209, corrected
-independent six, supplemental Mesa two and broad 1,236 pass; broad independently
-confirmed. Package eight Python/three Node pass; security/publication pending. Scopes overlap;
-no new full trace, funding, custody, authenticated recovery or chain authority.
-B03 C/D and the broader B05/B08/B11 gates remain open; persistent Holo stays held.
+B11-S1 delivered through PR2294 at `4ecd01ba464f5269006afb03d6500e42a212288b`:
+23 PR/21 main checks, 22 PC bindings and 501 frozen evidence files independently
+verified. This partial same-ID control does not establish funded settlement/full B11.
+Next: accepted [B03-P1 perimeter v1](docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p1-perimeter-v1),
+SPECIFIED_NOT_IMPLEMENTED. Synthetic pAVS source, full nominal admission, actual
+posted debit and retained omissions are selected; arithmetic NOT_SELECTED/code HOLD.
+Useful numerical acceptance and a separate code allocation precede implementation.
+Global denomination/precision D, funded B05, B08 custody and full B11 remain open;
+no Holo maintenance, live-chain or deployment authority follows.
 
 #### Historical allocation source checkpoint — prepublication, 2026-11-01
 
