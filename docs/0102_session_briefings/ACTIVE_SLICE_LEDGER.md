@@ -1,16 +1,17 @@
-## Guard delivered; B09 hourly readiness candidate — 2026-11-01
+## B09 delivered; B11-S1 local candidate — 2026-11-01
 
-PR2291 is delivered at 424e6863: 23 PR/21 main checks, 28 C/O file bindings,
-17,551 preserved pathnames and 10,051 copied evidence files independently verified.
-The [checkpoint](../architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#allocation-delivery-and-stored-chroma-security-hold--2026-11-01)
-corrects older pending-publication prose; it does not release persistent Holo
-maintenance or qualify the complete runtime/current store. Upstream alerts stay open.
-Current 14/P1 class-B [B09 candidate](../architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#hourly-queue-readiness-candidate--2026-11-01): root owns source/publication, blockchain_architecture
-owns frozen desired tests/documentation; simulator_economics independently reviews.
-Baseline 35, focused 54, independent five and promoted/broad 1,209 pass; source
-review accepts the frozen scope. New 19 are within the broad run, five outside it;
-do not sum scopes. Desired RED is 12 pass/7 fail. Package eight Python/three Node pass;
-security/publication remain pending. B03 C/D, funding, custody, recovery and chain activation stay blocked.
+B09 main 430f9ef9 has 23 PR/21 main checks and 17 verified C/O blobs. Its
+27,258 immediate pathname inventory and 375 files/22,602,445-byte evidence copy
+are independently verified, not unrelated-content or interval-continuity proof.
+Current 16/P1 B11-S1 uses two existing owners; root implements/publishes,
+simulator_economics independently verifies, blockchain_architecture drafts docs
+and supplemental post-candidate real-Mesa cases. Focused 209, corrected six,
+supplemental two and broad 1,236 pass, independently confirmed. Package eight
+Python/three Node pass; security/publication pending. Initial five pass/one fixture failure
+is retained. B03 C/D, funded B05, separate custody and full B11/A08 stay open;
+Holo maintenance remains held. [Current contract/status](../architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#same-id-matching-control-candidate--2026-11-01).
+Additional Chroma UUID/RBAC advisories include metadata version 1.5.5; no patched version is listed.
+Raw-settings admission does not establish tenant isolation; runtime exposure UNVERIFIED, Holo HOLD continues.
 
 ## Numeric allocation prerequisite and current source checkpoint — 2026-11-01
 

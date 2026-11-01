@@ -1,5 +1,18 @@
 # FoundUps Simulator Test Suite
 
+## B11-S1 matching and actual allocation integration — 2026-11-01
+
+Original 182 passes; frozen 27 RED is 14 pass/13 fail; focused 209 passes.
+Independent first run five pass/one failed because zero released supply selected
+DIRECT_STAKE. Approved positive-exhausted setup, unchanged assertions, passes six.
+Supplemental post-candidate real-Mesa two verifies budget 100/96, executed 0/4,
+pending zero and wallet UPS unchanged at 100. It is not a pre-candidate held-out.
+Broad 1,236 passes with three SSE HTTP deselections, zero failures/errors/skips/
+guard denials and 174 stable source snapshots, independently confirmed.
+The new 27 are within broad; six plus two are outside. No summation, new full trace,
+OS/native confinement or funding claim. Package eight Python/three Node pass;
+security/publication stay pending. Local registry was not run.
+
 ## Hourly queue cadence acceptance — 2026-11-01
 
 The existing breaker owner retains seven original test ASTs / 35 cases. Nineteen
@@ -11,7 +24,7 @@ no private timer name or clock-read count is an oracle. Actual RED is 12 pass /
 240-line owner keeps its old raw prefix/oracles; broader 1,209 passes, same three
 SSE HTTP deselections, zero failures/errors/skips/guards and 174 stable snapshots.
 New 19 are within the broad run, five outside it; do not sum scopes. Package eight
-Python/three Node pass; security/publication remain pending. No fresh 240-tick trace
+Python/three Node pass; B09 delivery is complete at 430f9ef9. No fresh 240-tick trace
 ran; prior traces did not exercise positive queue releases or prove payment/recovery.
 
 ## Native allocation admission controls — 2026-11-01

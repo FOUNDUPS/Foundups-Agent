@@ -1,13 +1,23 @@
 # FoundUps Simulator
 
+## Same-ID trade-prevention candidate — 2026-11-01
+
+B11-S1 is a 16/P1 class-B matching control: cancel an incoming self-crossing
+remainder, preserve earlier external fills/maker state and correct allocation
+labels. Focused 209, corrected independent six and supplemental Mesa two pass;
+broader 1,236 passes with independent confirmation. Scopes overlap.
+Package eight Python/three Node pass; security/publication remain pending.
+This is not funding, Sybil defense
+or full A08/B11; see the [contract](INTERFACE.md#same-id-trade-prevention-candidate--2026-11-01).
+
 ## Hourly queue readiness candidate — 2026-11-01
 
-B09's 14/P1 class-B candidate enforces elapsed hourly readiness in the existing
+B09's 14/P1 class-B implementation enforces elapsed hourly readiness in the existing
 breaker; first release, FIFO and minimum-one batch math stay unchanged. Focused
 54 (35 original plus 19 desired), five independent cases and broader 1,209 pass;
 source review finds no material issue within the frozen scope. The 19 are a
 subset of the broad run; five held-outs are outside it. Do not sum these scopes.
-Package eight Python/three Node pass; security/publication remain pending.
+Package eight Python/three Node pass; B09 delivered at 430f9ef9, 23 PR/21 main checks.
 This is native serialized-instance readiness, not payment, restart recovery
 or authenticated unfreeze.
 See the [contract](INTERFACE.md#hourly-queue-readiness--2026-11-01) and

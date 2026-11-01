@@ -65,13 +65,15 @@ The [dated checkpoint](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECU
 supersedes publication-pending prose; upstream alerts, exact runtime/current-store
 qualification and explicit maintenance release remain open. The controller is held.
 
-The next 14/P1 class-B [B09 candidate](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#hourly-queue-readiness-candidate--2026-11-01)
-enforces the existing hourly queue cadence, preserving first/FIFO/minimum-one math.
-Baseline 35, focused 54, independent five and promoted/broad 1,209 pass; source
-review accepts the frozen scope. The 19 are within the broad run; held-outs are
-outside it. Desired RED is 12 pass/7 fail. Package eight Python/three Node pass;
-security/publication remain pending. No fresh 240-tick trace is claimed. B03 C/D, funding,
-custody, authenticated recovery and chain activation are not resolved.
+B09 delivered at `430f9ef90ad126b76f3d90e03d1086d2e2237267`: 23 PR/21 main
+checks, 17 C/O source bindings, 27,258 immediate untracked pathnames preserved,
+and 375 evidence files copied/verified. This is not an untracked-content audit.
+Current 16/P1 class-B [B11-S1 candidate](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#same-id-matching-control-candidate--2026-11-01)
+links same-ID cancellation to truthful allocation results. Focused 209, corrected
+independent six, supplemental Mesa two and broad 1,236 pass; broad independently
+confirmed. Package eight Python/three Node pass; security/publication pending. Scopes overlap;
+no new full trace, funding, custody, authenticated recovery or chain authority.
+B03 C/D and the broader B05/B08/B11 gates remain open; persistent Holo stays held.
 
 #### Historical allocation source checkpoint — prepublication, 2026-11-01
 

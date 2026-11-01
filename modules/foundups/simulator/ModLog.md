@@ -1,3 +1,16 @@
+## 2026-11-01 — B11-S1 matching and allocation candidate
+
+WSP15 16/P1 class B; WSP11/22/26/48/62/97. Cancel only same-ID taker remainder,
+count its rejection once, preserve maker/external prefix and use truthful matched
+allocation labels. Focused 209, corrected independent six and supplemental Mesa
+two pass; broad 1,236 passes with independent confirmation. First independent
+five pass/one failure routed to DIRECT_STAKE; setup-only correction retains assertions.
+Files 590/523 fit 620/540; buy-allocation method grows 74→85 lines above 50,
+FiOrderBook 398→412 and AllocationEngine 385→396 above 200: explicit inherited
+debt, not broad compliance. Package eight Python/three Node pass; security/delivery
+remain pending. B09 is
+delivered at 430f9ef9; older candidate-pending entries below remain dated history.
+
 ## 2026-11-01 — Hourly queue cadence candidate
 
 WSP15 14/P1 class B; WSP11/22/26/48/62/97. Existing breaker candidate is 324
