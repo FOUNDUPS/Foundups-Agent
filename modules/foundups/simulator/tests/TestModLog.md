@@ -1,3 +1,34 @@
+## 2026-11-01 — Reserve quote test-first and independent source review
+
+Historical fb58 baseline: seven original cases pass; unchanged originals plus 89
+desired cases produce 7 pass/89 fail because the opt-in API is absent, with zero
+errors/skips/guard denials. All 174 simulator/FAM Python source blobs, including
+tests, remain unchanged on docs-only base 4c96; no new-base rerun is claimed.
+Source review and actual candidate selection pass 113 cases: 89 desired, seven
+originals and 17 additional held-outs, zero denials, 174 Python sources unchanged. Review
+finds no material defect within the selected contract. The fixed goldens bind
+literal domain-separated identities; source/derived bounds have distinct coverage.
+No unreachable public boundary probe is claimed. The entire 397-line legacy class
+and seven original test ASTs remain; promotion appends the exact frozen oracles
+to the existing owner (285 lines under 300). Promoted 96 and broader 1,019 pass,
+with 174 unchanged simulator/FAM Python source snapshots and zero errors/skips/
+guard denials. The broad
+selection retains exactly the three historical SSE HTTP deselections named in
+the receipt; no additional case is excluded.
+Fresh controlled reference fb58 (174 Python source hashes equal docs-only 4c96) and two
+candidate traces match completely: SHA256 `672d12c9d8fb6286624ea892fb3a5d0315c475ee45f8c83c9a271ba4328f0ff1`.
+All three use fresh Python 3.12.10 `-P -s` processes and explicit hash seed 710007:
+240 ticks, six FoundUps, 214 paid tasks, 24 epochs, zero guard denials. No monetary
+field is normalized. Actual reference fb58 is not a 4c96 run; one finite default
+path does not prove seed-only or whole-model reproducibility or qualify new economics.
+Canonical package eight Python cases/three Node entrypoints pass with tested
+staged bindings and all 1,478 runtime paths preserved; registry remains 1,794/260.
+Byte caps and count-boundary oracles are unchanged. Publication is separate.
+The 17 held-outs remain external; counts overlap, not independent additive coverage.
+Closed-env Python guards and real scratch state are not OS/native confinement.
+No authenticated source, currentness, funded backing, live chain or deployment
+qualification follows. Context/digest/frozen public construction are data only.
+
 ## 2026-11-01 — Epoch effect, concurrency and controlled-process acceptance
 
 Independent frozen40: baseline2 pass/38 fail, zero setup errors/skips/guard

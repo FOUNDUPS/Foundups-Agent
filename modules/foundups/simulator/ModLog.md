@@ -1,3 +1,25 @@
+## 2026-11-01 — Bounded reserve quote observation
+
+Class A, WSP15 16/P0 (3/4/5/4); WSP11/22/26/50/62/84/97. Add only an opt-in
+module-level observer and frozen slotted record in btc_reserve.py: 597 lines under
+620; record 13, function 29 and three helpers 11/6/6 fit the allocated limits. The
+397-line BTCReserve class and all original module nodes remain unchanged.
+Exact integer/decimal rational data and domain-bound content identity introduce
+no consumer, global unit, fee, supply, funding, provider or chain effect. Reject
+zero reserve with outstanding UPS only in this API; preserve both legacy views.
+Trusted-host serialization is required; the snapshot/digest is not authority,
+currentness, backed value or unique consumption. No historical precision recovery.
+Frozen baseline 7 pass/89 fail; independently reviewed source passes 113 cases,
+with zero guard denials and 174 unchanged simulator/FAM Python source snapshots,
+including tests. Promoted 96 and
+broader 1,019 pass, same three SSE HTTP deselections, no errors/skips/guard denials;
+counts overlap. Controlled fb58 reference and two candidate traces match exactly
+under the fixed process/hash-seed profile; no seed-only portability claim.
+Package eight Python cases/three Node entrypoints pass; the same 1,478 paths,
+byte caps and 1,794-owner registry remain. Publication is pending.
+B02 delivered through PR2285, 23 PR/21 main checks plus
+separate PC/Holo qualification; no live activation or governing unit decision.
+
 ## 2026-11-01 — Complete local epoch effects and replay-safe Mesa tail
 
 WSP15 18/P0 class B; WSP22/26/29/48/50/62/84/97. Reuse PoolDistributor and
