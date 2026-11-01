@@ -1,3 +1,27 @@
+## 2026-11-01 — Complete local epoch effects and replay-safe Mesa tail
+
+WSP15 18/P0 class B; WSP22/26/29/48/50/62/84/97. Reuse PoolDistributor and
+EpochLedger with pure preparation, fixed pool-to-ledger lock order and detached
+per-epoch decisions. Exact retries do not credit balances/fund/drip/hurdles again;
+conflicts reject. Preserve existing formulas and shared-position sequencing.
+Extract only private Mesa tail/observer orchestration: Mesa shrinks2061→2020;
+helper89, pool968 and ledger358 fit their frozen ceilings. Keep pending request
+identity before another decay, finalize counters before one observer attempt.
+Ordinary postcommit observer/log failures cannot falsely report an economic abort.
+
+Fresh baseline154 passes. Frozen desired40 first2 pass/38 fail; final independent
+57 pass including16 held-outs and a separately reproduced/repaired None-return
+regression. Promoted41 controls extend three existing owners:192 pass, every
+prior test AST preserved. Initial seeded-process traces differ and remain smoke
+evidence; controlled fresh-process/hash-seed baseline and two candidates match
+byte-for-byte. Broader simulator930 passes with the same3 SSEHTTP deselections,
+zero failures/errors/skips/guard denials. Full evidence is in the current audit.
+Canonical runtime closure1477→1478 adds only the private helper;8 generator/index
+cases and3 Node entrypoints pass, old member identities retained and byte caps
+unchanged. The canonical test registry remains1794; no new test owner is needed.
+No durable recovery, whole outer-cycle transaction, funded budget, integer chain
+unit, signing or activation claim. No economic percentage or cap decision changed.
+
 ## 2026-11-01 — Detached, validated agent-wallet policy
 
 WSP15 17/P0, class B; WSP22/26/48/50/84/97. Frozen 76-case desired policy

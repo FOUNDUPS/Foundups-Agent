@@ -155,6 +155,14 @@ class MerkleProof:
             return False
 
 
+@dataclass(frozen=True)
+class _EpochPublication:
+    entries: List[EpochEntry]
+    by_epoch: Dict[int, EpochEntry]
+    trees: Dict[int, Tree]
+    roots: Dict[int, str]
+
+
 class EpochLedger:
     """Process-local finalized epoch evidence; this is not durable settlement state."""
 
@@ -188,26 +196,40 @@ class EpochLedger:
     def record_epoch(self, epoch: int, total: float, pool_allocations: Dict[str, float],
                      participant_rewards: Dict[str, float]) -> EpochEntry:
         """Finalize once, accepting only exact normalized retries of an existing epoch."""
+        with self._lock:
+            entry, publication = self._prepare_epoch(epoch, total, pool_allocations, participant_rewards)
+            if publication is not None:
+                self._publish_epoch(publication)
+            return entry
+
+    def _prepare_epoch(self, epoch, total, pool_allocations, participant_rewards):
+        """Build all publication containers while the caller holds this ledger's lock."""
         epoch, total = _epoch(epoch), _number(total)
         pools, rewards = _amounts(pool_allocations), _amounts(participant_rewards)
-        with self._lock:
-            existing = self._by_epoch.get(epoch)
-            if existing is not None:
-                if (existing.total_fi_distributed == total and existing.pool_allocations == pools
-                        and existing.participant_rewards == rewards):
-                    return existing
-                raise ValueError("epoch finalization conflicts with existing content")
-            if self._entries and epoch <= self._entries[-1].epoch_number:
-                raise ValueError("new epoch must increase; gaps are allowed")
-            entry = EpochEntry(epoch, datetime.now(timezone.utc).isoformat(), total, pools, rewards,
-                               prev_hash=self._entries[-1].entry_hash if self._entries else "genesis",
-                               foundup_id=self.foundup_id)
-            tree = _build_tree(self.foundup_id, epoch, rewards)
-            entry = replace(entry, entry_hash=entry.compute_hash())
-            self._entries.append(entry)
-            self._by_epoch[epoch] = entry
-            self._trees[epoch], self._roots[epoch] = tree, tree[-1][0]
-            return entry
+        existing = self._by_epoch.get(epoch)
+        if existing is not None:
+            if (existing.total_fi_distributed == total and existing.pool_allocations == pools
+                    and existing.participant_rewards == rewards):
+                return existing, None
+            raise ValueError("epoch finalization conflicts with existing content")
+        if self._entries and epoch <= self._entries[-1].epoch_number:
+            raise ValueError("new epoch must increase; gaps are allowed")
+        entry = EpochEntry(epoch, datetime.now(timezone.utc).isoformat(), total, pools, rewards,
+                           prev_hash=self._entries[-1].entry_hash if self._entries else "genesis",
+                           foundup_id=self.foundup_id)
+        tree = _build_tree(self.foundup_id, epoch, rewards)
+        entry = replace(entry, entry_hash=entry.compute_hash())
+        publication = _EpochPublication(
+            [*self._entries, entry], {**self._by_epoch, epoch: entry},
+            {**self._trees, epoch: tree}, {**self._roots, epoch: tree[-1][0]})
+        return entry, publication
+
+    def _publish_epoch(self, publication):
+        """Publish prepared references without callbacks, arithmetic or allocation."""
+        self._entries = publication.entries
+        self._by_epoch = publication.by_epoch
+        self._trees = publication.trees
+        self._roots = publication.roots
 
     def record_from_distribution(self, distribution) -> EpochEntry:
         return self.record_epoch(distribution.epoch, distribution.total_rewards,

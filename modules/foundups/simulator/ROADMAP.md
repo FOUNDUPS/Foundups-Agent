@@ -1,5 +1,31 @@
 # ROADMAP - FoundUps Simulator
 
+## 2026-11-01 — Replay-safe epoch effects and controlled parity
+
+- [x] Class-B 18/P0: prepare pool balances, tiers, shared hurdle state, fund/drip,
+  receipts and optional ledger evidence before coordinated local publication.
+- [x] Capture failed Mesa distribution tails; finalize before observers; admit
+  exact detached retries and reject conflicts without repeating pool effects.
+- [x] Frozen 40-case RED: 2 pass/38 fail; corrected candidate 57 passes, including
+  16 independent held-outs and one independently reproduced return-value repair.
+- [x] Fresh 154-case baseline and real 240-tick simulation. Initial process
+  reruns exposed nondeterminism and remain smoke evidence, not parity.
+- [x] Controlled fresh-process/hash-seed profile: original baseline and two
+  candidate economic traces match exactly; no financial values filtered out.
+- [x] Broader simulator: 930 pass, same three SSE HTTP cases deselected; no
+  failures/errors/skips or guard denials. Counts overlap the focused selections.
+- [x] Canonical closure1478 adds only the private helper; unchanged byte caps,
+  8 Python generator/index cases and3 Node entrypoints pass. Registry1794 unchanged.
+- [ ] Protected PR and resulting-main checks, followed by primary-PC verification.
+- [ ] Own RNG/hash/singleton state per simulation; version and freeze repeatable
+  cross-process traces before expanding economic-model validation.
+- [ ] Durable funded reservations, source consumption and recovery across
+  processes/outer callers; independently confirmed chain settlement remains absent.
+
+The [current scope and AI threat map](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#replay-safe-epoch-settlement-and-ai-threat-update--2026-11-01)
+connect these controls to B03–B11. Whole demurrage/MetaGPT/fee-runner atomicity is
+not implied. Keep the tested economic rules while resolving units and issuance.
+
 ## 2026-11-01 — Wallet policy isolation and ordered blockchain gates
 
 - [x] Class-B 17/P0: freeze acceptance, reproduce mutable policy/invalid admission,
@@ -7,8 +33,10 @@
 - [x] Focused selection: 311 passed (76 new policy cases and 235 existing cases).
 - [x] Independent 13 held-outs, connected 489 cases, 8 manifest cases and 3 Node
   consumer entrypoints pass; runtime membership remains 1477.
-- [ ] Dedicated PR and resulting-main checks.
-- [ ] Next: replay-safe atomic epoch distribution including upstream balances.
+- [x] PR2281 merged at24cc4aa2971b05ff8b53f76d157145da4134ed5c;24 PR and22
+  resulting-main checks passed. Primary PC synchronized without discarding work.
+- [x] Successor B02 local source and independent controls are qualified above;
+  broader publication and durable settlement remain separate gates.
 - [ ] Resolve units and mined/staked aggregate supply before funded integer
   reservations, authenticated work/maturity releases and isolated chain signing.
 
