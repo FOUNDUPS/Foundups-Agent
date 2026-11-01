@@ -1,5 +1,16 @@
 # EDUIT test history
 
+## 2026-11-01 — Hidden wheel reveal acceptance
+
+Published17 live review caught selectedMermaid outside the hidden-mounted rail.
+Retained broken wheel fails the strict visible-card oracle; observer repair now
+passes72/72 actual-browser reveal checks without scrollIntoView or forcedrail
+scroll. Check persistedMermaid and explicitly selectedWholesome on sectionchange,
+reopen andfullscreen atbothroutes/3sizes. Four independent component held-outs
+and fullNode63/63pass. Positive-width-only ResizeObserver preserves drag/selection,
+emitsnointeraction, disconnects onteardown. Media unchanged; app-scene-18/cachev12.
+
+
 ## 2026-11-01 — App menu, continuous canvas and independent photo audit
 
 Freeze app-menu >=64px/hit bounds, safe-area exit/focus, real-earned state

@@ -1,6 +1,6 @@
 # EDUIT — Education Using Information Technology
 
-Current app-presentation build, **app-scene-17**: open the three-line **Storytime
+Current app-presentation build, **app-scene-18**: open the three-line **Storytime
 menu** beside player controls for large Characters, Music and Language choices.
 Fullscreen uses one continuous sky/game scene; the whole leg enters and leaves
 the top. Settings pause without restarting the round or starting music. The

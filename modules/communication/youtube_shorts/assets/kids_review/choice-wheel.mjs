@@ -65,5 +65,11 @@ export function mountChoiceWheel({host,id,label,choices,selected,onSelect=()=>tr
  listen(rail,'scroll',()=>{view.clearTimeout(timer);timer=view.setTimeout(settle,150);});listen(rail,'scrollend',settle);
  select(items.some(c=>c.id===selected)?selected:items[0].id,{scroll:false});
  if(view.requestAnimationFrame)view.requestAnimationFrame(()=>{if(!disposed)center(items.findIndex(item=>item.id===current),{initial:true});});
+ // Menus mount while hidden. Reveal/resize must show the retained selection,
+ // without interpreting layout as a new choice or interrupting a finger drag.
+ if(typeof view.ResizeObserver==='function'){
+  const observer=new view.ResizeObserver(()=>{if(!disposed&&!pointerDown&&rail.clientWidth>0)center(items.findIndex(item=>item.id===current),{initial:true});});
+  observer.observe(rail);cleanups.push(()=>observer.disconnect());
+ }
  return {element,buttons,select,selected:()=>current,destroy(){disposed=true;view.clearTimeout(timer);cleanups.splice(0).forEach(remove=>remove());element.remove();}};
 }

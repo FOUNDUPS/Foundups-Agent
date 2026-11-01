@@ -2,9 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {mountChoiceWheel} from '../../../communication/youtube_shorts/assets/kids_review/choice-wheel.mjs';
 
-function fixture({reject=false,reduced=false,selected='mamma'}={}){
- const calls=[],timers=new Map(),frames=[];let timer=0,interactions=0;
+function fixture({reject=false,reduced=false,selected='mamma',resize=false}={}){
+ const calls=[],timers=new Map(),frames=[],observers=[];let timer=0,interactions=0;
  const view=Object.assign(new EventTarget(),{matchMedia:()=>({matches:reduced}),requestAnimationFrame:fn=>frames.push(fn),setTimeout:fn=>{timers.set(++timer,fn);return timer;},clearTimeout:id=>timers.delete(id)});
+ if(resize)view.ResizeObserver=class{constructor(callback){this.callback=callback;observers.push(this);}observe(target){this.target=target;}disconnect(){this.disconnected=true;}};
  const doc={defaultView:view,createElement:()=>new Element()};
  class Element extends EventTarget{
   constructor(){super();this.ownerDocument=doc;this.children=[];this.dataset={};this.attributes=new Map();this.clientWidth=160;this.scrollLeft=0;this.textContent='';}
@@ -18,7 +19,7 @@ function fixture({reject=false,reduced=false,selected='mamma'}={}){
  }
  const host=new Element(),wheel=mountChoiceWheel({host,id:'test-wheel',label:'Characters',selected,
   choices:[{id:'mamma',label:'MAMMA'},{id:'mermaid',label:'Mermaid'}],onSelect:id=>{calls.push(id);return !reject;},onInteract:()=>interactions++});
- return {wheel,host,calls,doc,view,timers,frames,interactions:()=>interactions};
+ return {wheel,host,calls,doc,view,timers,frames,observers,interactions:()=>interactions};
 }
 test('choice is explicit, rejects unknown IDs, and preserves one accessible selected card',()=>{
  const f=fixture();assert.equal(f.calls.length,0);assert.equal(f.wheel.selected(),'mamma');
@@ -84,4 +85,15 @@ test('a drag that stops before finger release still commits once after release',
  f.view.dispatchEvent(new Event('pointerup'));flush();
  assert.equal(f.wheel.selected(),'mermaid');assert.deepEqual(f.calls,['mermaid']);
  rail.dispatchEvent(new Event('scrollend'));assert.deepEqual(f.calls,['mermaid']);
+});
+
+test('hidden menu reveal centers retained choice without selection or interaction effects',()=>{
+ const f=fixture({selected:'mermaid',resize:true}),rail=f.wheel.buttons[0].parentElement,observer=f.observers[0];
+ rail.clientWidth=0;rail.getBoundingClientRect=()=>({left:0,width:rail.clientWidth});
+ f.frames.splice(0).forEach(fn=>fn());observer.callback();assert.equal(rail.scrolled,undefined);
+ rail.clientWidth=160;f.wheel.buttons[1].getBoundingClientRect=()=>({left:200,width:112});observer.callback();
+ assert.equal(rail.scrolled.left,176);assert.equal(rail.scrolled.behavior,'auto');
+ assert.equal(f.wheel.selected(),'mermaid');assert.deepEqual(f.calls,[]);assert.equal(f.interactions(),0);
+ const before=rail.scrolled;rail.dispatchEvent(new Event('pointerdown'));observer.callback();assert.equal(rail.scrolled,before);
+ f.wheel.destroy();assert.equal(observer.disconnected,true);observer.callback();assert.equal(rail.scrolled,before);
 });

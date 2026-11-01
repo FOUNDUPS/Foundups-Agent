@@ -1,5 +1,17 @@
 # EDUIT ModLog
 
+## 2026-11-01 — Hidden-menu selection reveal follow-up
+
+Live app17 review caught a retained Mermaid selection partly outside the rail:
+initial centering ran while its native dialog was hidden. Existing wheel owner
+now re-centers the same selection instantly on positive-width reveal/resize,
+skips active pointer drags, emits no selection/interaction and disconnects on
+teardown. Keep zero-size callbacks inert. Component regression plus independent
+actual-browser selected-card visibility checks own acceptance. App-scene-18 and
+UIcachev12 identify the repair; media/source bindings remain unchanged. Interactive
+review candidate0.3.1 adds this hidden-surface criterion; no automatic promotion.
+
+
 ## 2026-11-01 — App-sized settings and one continuous fullscreen scene
 
 WSP00/15/22/50/84/97,15/P1(C3/I4/D4/Impact4). Latest012 photos require

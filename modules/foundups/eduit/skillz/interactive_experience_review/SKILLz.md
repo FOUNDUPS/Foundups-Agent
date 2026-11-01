@@ -1,7 +1,7 @@
 ---
 name: interactive_experience_review
 description: Audit and iteratively repair audience-specific games and web interfaces, including EDUIT Storytime timing, touch controls, learning cues, scoring and feedback. Use before implementation and after inspecting each changed output.
-version: 0.3.0
+version: 0.3.1
 intent_type: AUDIT
 promotion_state: prototype
 ---
@@ -44,6 +44,8 @@ targets in the actual rendered viewport. Check legible labels, spacing and cente
 hit testing after scrolling each choice into view. Offscreen scrollable options
 are not clipped controls, but the exit must remain reachable above safe areas.
 Native dialog focus/Escape or an equivalent established modal pattern must work.
+Open previously hidden choice panels with their retained selection fully visible
+and centered; a layout reveal must not silently select or start anything.
 Viewport-unit and orientation checks need an actual sized browsing viewport or
 iframe; resizing a DIV alone does not exercise the intended CSS viewport.
 
