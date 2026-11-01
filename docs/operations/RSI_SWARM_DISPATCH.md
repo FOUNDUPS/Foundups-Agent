@@ -1,3 +1,68 @@
+## Native Hermes API qualification — 2026-11-01
+
+Source baseline `430f9ef90ad126b76f3d90e03d1086d2e2237267`. WSP00/15/48/50/97.
+This **15/P1 (C3/I4/D4/Impact4)** provider-qualification prerequisite advances
+the existing native19/P0 dependency. Vote remains the micro fixture; R15 remains
+the first admitted improvement target. StoryTime and other active lanes are separate.
+
+The installed candidate matches upstream Hermes0.22.5 release
+`bf0203a794a07aac3ff764972ab9087baa4e4f4e`. Real authenticated HTTP calls to its
+existing handlers exposed a defect hidden by the earlier mocked API tests:
+`GET /v1/skills` returns500 because `APIServerAdapter._handle_skills` passes
+`include_editorial=True` to `find_all_skills`, which accepts only `skip_disabled`.
+The release source and current upstream source independently contain that mismatch;
+there is no verified upstream fix in this checkpoint. The official release remains
+[v0.22.5](https://github.com/NousResearch/hermes-agent/releases/tag/v0.22.5).
+
+A coordinator-authored **candidate overlay**, not an installed runtime promotion,
+removes only that unsupported keyword. It preserves the real discovery function,
+sorting, disabled-skill filtering, authentication and error handling. With an empty
+temporary home it returns200 and an empty list; with one harmless skill fixture it
+returns200 and that actual skill. It does not replace failed discovery with `[]`.
+The original candidate checkout remains clean and unchanged. The one-line patch,
+source hashes, native responses and replay commands are retained privately under
+`O:/AgentData/RSI/scratch/hermes-api-qualification/20261101-1806/`.
+
+Three disposable containers executed the baseline, repaired-empty and repaired-skill
+cases using the existing pinned `openclaw-sandbox:bookworm-slim` image. Actual
+Hermes handlers and discovery ran, but no full gateway, model, delegated worker or
+author ticket ran. Kernel/process observations: UID1000, zero effective capabilities,
+NoNewPrivs1, loopback-only interface. Docker enforced read-only root/input mounts,
+no external network,64 PIDs,768MiB,two CPUs; only the owned result directory was
+host-writable, with96MiB temporary home storage. Each HTTP listener closed and each
+container was automatically removed. No Docker socket or production credentials
+were mounted. **34 deterministic assertions passed, zero failed** across these
+three runs; this is not34 author jobs or an independent actor's outcome acceptance.
+
+Qualification failures are retained: the first host probe used an invalid aiohttp
+cleanup property; the corrected probe explicitly checked closed session/refused
+listener. The WSL `docker` name resolved to a legacy Windows executable and could
+not bind Linux source paths. Explicit `/usr/bin/docker -H unix:///var/run/docker.sock`
+fixed this invocation without changing shared contexts or symlinks. UID65534 could
+not traverse the candidate's private Python directories; the non-root owning UID1000
+ran with the same read-only mounts/capability/network limits. No host permissions
+were broadened. These harness corrections do not qualify general host recovery.
+
+Existing FoundUps gates remain unchanged: admitted API version0.20.4; the candidate
+reports0.22.5 and degraded health for unconfigured model/gateway. Real responses
+remain rejected with `FAIL_HERMES_RUNTIME_IDENTITY`. The existing tool-surface gate
+accepts the empty delegation-only profile and rejects the visible skill fixture.
+Browser control was disabled in the test profile; its advertised expanded API still
+needs full qualification. HTTP200 is not service health or execution authority.
+
+No matching native system service/running container was observed in the inspected
+Ubuntu24.04 service scope. This process had no authenticated-principal, authorized-
+FoundUp, resident-root or work-state bindings. An OpenRouter key was present, but no
+numeric campaign reservation was established, so **zero paid calls** were made.
+These observations do not prove authority artifacts are absent elsewhere.
+
+**Next eligible action:** independently review the exact upstream candidate patch,
+then qualify the configured full gateway/model, API/tool/skill surface and existing
+provider event/cleanup contract before promoting a version. In parallel sequencing,
+finish the protected requester/lease-consumption connection below and resolve genuine
+current work/model/verifier/budget inputs. Do not weaken the version pin, fabricate
+authority, or count this component repair as G1/G2, activation, retention or RSI.
+
 ## Vote aggregate-to-display trial — 2026-11-01
 
 Base `4c96d6b17429226248c3a82de5544262e773c41e`; owned lane
