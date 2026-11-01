@@ -1,3 +1,13 @@
+## Native Hermes qualification ModLog rebinding — 2026-11-01
+
+Pinned Gitleaks8.30.1 reports one previously reviewed historical-prose finding
+in the changed bridge ModLog, line3975 in main430f9ef to3987 in5a1e47f0c.
+Architect and independent review reconstruct the unchanged whole-file suffix,
+identical eleven-line context and the immutable base's exact approved fingerprint.
+Append only its new full-file/path/rule/line binding, retaining all prior records.
+No scanner, rule, exclusion, credential or historical prose changes. Fresh
+committed-tree/history and hosted checks remain required.
+
 ## Allocation preflight runtime metadata review — 2026-11-01
 
 Pinned Gitleaks 8.30.1 at source commit 844a8057b reports 39 committed-tree
