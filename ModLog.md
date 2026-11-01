@@ -1,3 +1,16 @@
+## 2026-11-01 — B09 queue cadence candidate and guard delivery reconciliation
+
+WSP15 14/P1 class B; WSP22/26/48/62/97. Existing breaker candidate adds elapsed
+hourly readiness, preserving FIFO/count/minimum-one and first release. Baseline
+35, focused 54, independent five and promoted/broad 1,209 pass; no scope summation.
+Frozen RED is 12 pass/7 fail; source review accepts 324/28-line scope. Same three
+SSE HTTP deselections, zero failures/errors/skips/guards and 174 stable snapshots.
+Package eight Python/three Node pass; security/publication pending, no fresh trace or live authority.
+PR2291 is delivered at 424e6863 with 23 PR/21 main checks, 28 C/O file bindings,
+17,551 preserved pathnames and 10,051 independently verified evidence files.
+This dated correction supersedes old guard-publication pending prose; controller
+maintenance remains held. See the [current report](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md).
+
 ## 2026-11-01 — Vote aggregate-to-display RSI qualification
 
 WSP00/15/22/48/50/97. Reuse the existing Vote11/P2 follow-up and WRE local

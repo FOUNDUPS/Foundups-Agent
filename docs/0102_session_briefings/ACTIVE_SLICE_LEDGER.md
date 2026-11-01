@@ -1,12 +1,16 @@
-## Stored-settings local acceptance; delivery gates open — 2026-11-01
+## Guard delivered; B09 hourly readiness candidate — 2026-11-01
 
-Allocation PR2290 delivery is complete; the [checkpoint](../architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#allocation-delivery-and-stored-chroma-security-hold--2026-11-01) supersedes
-older publication assertions without rewriting sealed evidence. Existing Holo
-owners have scoped local source/pure, literal scratch-native and package
-acceptance under the [API](../../holo_index/INTERFACE.md#stored-chroma-settings-admission--2026-11-01), with failures and explicit corrections retained
-in [TestModLog](../../holo_index/tests/TestModLog.md#stored-settings-local-qualification--2026-11-01). Root owns releases; implementation and verification
-remain separate. Protected publication/new-source PC/Holo and explicit controller
-release remain pending; upstream advisories remain open and deployment remains blocked.
+PR2291 is delivered at 424e6863: 23 PR/21 main checks, 28 C/O file bindings,
+17,551 preserved pathnames and 10,051 copied evidence files independently verified.
+The [checkpoint](../architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#allocation-delivery-and-stored-chroma-security-hold--2026-11-01)
+corrects older pending-publication prose; it does not release persistent Holo
+maintenance or qualify the complete runtime/current store. Upstream alerts stay open.
+Current 14/P1 class-B [B09 candidate](../architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#hourly-queue-readiness-candidate--2026-11-01): root owns source/publication, blockchain_architecture
+owns frozen desired tests/documentation; simulator_economics independently reviews.
+Baseline 35, focused 54, independent five and promoted/broad 1,209 pass; source
+review accepts the frozen scope. New 19 are within the broad run, five outside it;
+do not sum scopes. Desired RED is 12 pass/7 fail. Package eight Python/three Node pass;
+security/publication remain pending. B03 C/D, funding, custody, recovery and chain activation stay blocked.
 
 ## Numeric allocation prerequisite and current source checkpoint — 2026-11-01
 

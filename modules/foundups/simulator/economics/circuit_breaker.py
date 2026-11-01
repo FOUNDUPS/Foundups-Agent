@@ -19,6 +19,7 @@ This prevents Terra-style death spirals where panic → exits → more panic.
 from __future__ import annotations
 
 import logging
+import time
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Dict, List, Optional, Tuple
@@ -107,6 +108,9 @@ class CircuitBreaker:
     # Statistics
     times_triggered: int = 0
     total_queued_exits: int = 0
+
+    # Local cadence only; never serialized authority or a funded reservation.
+    _last_queue_release: Optional[float] = field(default=None, init=False, repr=False, compare=False)
 
     def check_conditions(
         self,
@@ -244,7 +248,9 @@ class CircuitBreaker:
         return queued
 
     def process_queue(self) -> List[QueuedExit]:
-        """Process queued exits (call hourly).
+        """Release at most one FIFO batch per elapsed hour in this instance.
+
+        Trusted serialized host calls only; no catch-up or durable settlement.
 
         Returns:
             List of exits ready to process
@@ -252,10 +258,17 @@ class CircuitBreaker:
         if not self.exit_queue or self.exits_blocked():
             return []
 
+        now = time.monotonic()
+        if self._last_queue_release is not None and now - self._last_queue_release < 3600:
+            return []
+
         # Process 10% of queue per hour
         num_to_process = max(1, int(len(self.exit_queue) * self.config.queue_release_per_hour))
         ready = self.exit_queue[:num_to_process]
-        self.exit_queue = self.exit_queue[num_to_process:]
+        remaining = self.exit_queue[num_to_process:]
+        committed_at = time.monotonic()
+        self.exit_queue = remaining
+        self._last_queue_release = committed_at
 
         logger.info(
             f"[CircuitBreaker] Processing {len(ready)} queued exits "

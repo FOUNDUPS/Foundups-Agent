@@ -2463,7 +2463,7 @@
     "modules/foundups/simulator/economics/btc_reserve.py": "9c3ff563c03a650c1e0b3baad79eaed7babb953d0e865361f736db7d1e24d594",
     "modules/foundups/simulator/economics/cabr_flow_router.py": "bf2a05f13f348f288f0f862d94ff1e4b9f6d07c05d7976cb035744b8cc6e2367",
     "modules/foundups/simulator/economics/channel_partner_pool.py": "d425714afbf82ce108f898ab534b768d71519c29c7d78ab514f06a971298523e",
-    "modules/foundups/simulator/economics/circuit_breaker.py": "1ce17c042de0c479eac7c6f9a45961e67db3f7dc366e15f9058465f1838ccf0e",
+    "modules/foundups/simulator/economics/circuit_breaker.py": "40f7b942e0608757e7029a3e365e21f9dceffcecde92d52d04b86a4b586e5f4e",
     "modules/foundups/simulator/economics/compute_graph.py": "211e57d4cdac399efa2e9bcb5f2f192e7da57b37161f5a514201dca90d39b0bf",
     "modules/foundups/simulator/economics/demurrage.py": "496d54d5c48eaba025c68bcb38ade0621d9dcbee92c09d2cc217cc7ca82d10f0",
     "modules/foundups/simulator/economics/dilution_scenario.py": "43de1e90f7d31514a166da8daf36a2ed776e8f3501b299f500d5588af6d2578f",

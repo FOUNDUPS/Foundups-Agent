@@ -1,3 +1,19 @@
+## 2026-11-01 — Hourly queue cadence candidate
+
+WSP15 14/P1 class B; WSP11/22/26/48/62/97. Existing breaker candidate is 324
+lines: monotonic observation after native slice preparation, one first batch,
+then at least 3,600 seconds; no catch-up or drain/refill reset. Preserve FIFO,
+minimum-one/rate math, datetime cooldown and original oracles. Actual baseline
+35 passes; desired RED 12 pass/7 fail; focused 54 and independent five pass.
+Promoted/broad 1,209 passes retain the same three SSE HTTP deselections, no
+failures/errors/skips/guards and 174 stable snapshots. New 19 are within that
+run; five held-outs are outside it. Source review reports no material finding;
+324 source/28 method lines fit 330/35; inherited class size already exceeds 200,
+and remains explicit debt, not broad compliance. Package eight Python/three Node
+pass; security/publication remain pending.
+Private `asdict` state is additive; postmutation log failure is not rollback or
+successful-return proof. No funded/concurrent/restart/authenticated recovery claim.
+
 ## 2026-11-01 — Native allocation numeric preparation candidate
 
 WSP11/15/22/26/48/50/62/84/97; class B, 18/P0 (4/5/5/4). Reuse the existing wallet,

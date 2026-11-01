@@ -52,13 +52,20 @@ The existing simulator must validate any economic enhancement before chain parit
 
 #### Current retrieval-security checkpoint — 2026-11-01
 
-Allocation source delivery is complete at 5d9f9134; the [dated checkpoint](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#allocation-delivery-and-stored-chroma-security-hold--2026-11-01)
-keeps protected checks, PC preservation and durable evidence distinct.
-The existing-owner [stored-settings API](holo_index/INTERFACE.md#stored-chroma-settings-admission--2026-11-01) now has bounded local source/test,
-literal scratch-native and package acceptance, recorded in [TestModLog](holo_index/tests/TestModLog.md#stored-settings-local-qualification--2026-11-01).
-Pending at this local checkpoint: protected publication, new-source PC/Holo and
-explicit maintenance release. The controller and chain activation remain held;
-B03 fee research and class-D source-unit conflicts remain unresolved.
+PR2291 delivered the [stored-settings guard](holo_index/INTERFACE.md#stored-chroma-settings-admission--2026-11-01)
+at `424e6863b19c9353a296e0cc837e3f30eaa428fd`: 23 PR/21 main checks pass,
+with 28 C/O file bindings and separate pathname/evidence preservation verified.
+The [dated checkpoint](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#allocation-delivery-and-stored-chroma-security-hold--2026-11-01)
+supersedes publication-pending prose; upstream alerts, exact runtime/current-store
+qualification and explicit maintenance release remain open. The controller is held.
+
+The next 14/P1 class-B [B09 candidate](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#hourly-queue-readiness-candidate--2026-11-01)
+enforces the existing hourly queue cadence, preserving first/FIFO/minimum-one math.
+Baseline 35, focused 54, independent five and promoted/broad 1,209 pass; source
+review accepts the frozen scope. The 19 are within the broad run; held-outs are
+outside it. Desired RED is 12 pass/7 fail. Package eight Python/three Node pass;
+security/publication remain pending. No fresh 240-tick trace is claimed. B03 C/D, funding,
+custody, authenticated recovery and chain activation are not resolved.
 
 #### Historical allocation source checkpoint — prepublication, 2026-11-01
 
