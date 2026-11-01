@@ -2479,7 +2479,7 @@
     "modules/foundups/simulator/economics/market_stress.py": "35ce4f8695e3ea96b65aa7407aa129ad0f9e463efccd1f1aff317469940ddc56",
     "modules/foundups/simulator/economics/participation_sentinel.py": "7a649c949b44dd10ed7a25de752701818ec303bc4570b2c3630c243eba13e54f",
     "modules/foundups/simulator/economics/pavs_audit.py": "f1129f3e8709df84a942264803049f2cdedb25c269929fb9f40fb8b9f7e96fe3",
-    "modules/foundups/simulator/economics/pool_distribution.py": "733a1f3c23e4a125b2d8d6919c5b83f98486b6b199d2500ebd1311771ecbe08b",
+    "modules/foundups/simulator/economics/pool_distribution.py": "689a481a7d2d97a7fa438f7ac13bd674beba7ee656190c6ed94f3c1211c5f894",
     "modules/foundups/simulator/economics/rage_quit.py": "22e44732659288c9ea897a49408f55e134fbc04deaca6f29e422812e2775c814",
     "modules/foundups/simulator/economics/smartdao_spawning.py": "ef036d1f85d423b49b7f841e573f3e0f845a7a9ce2b1da43c88bb2b31a65675a",
     "modules/foundups/simulator/economics/staker_viability.py": "dc56ef66f6d416388a3fafd89039858d8f1ee6751cb95c3a197ab221ef47e877",

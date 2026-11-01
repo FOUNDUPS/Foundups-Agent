@@ -1,3 +1,15 @@
+## 2026-11-01 — Native positive pool-credit candidate
+
+WSP15/22/26/48/50/62/97; class B, 17/P0. One private six-line helper replaces four
+additions before publication, rejecting positive increments with result <= prior.
+Native arithmetic/order and exact retries stay. Source 976 <= 990/helper 6 <= 10;
+PoolDistributor 260-line class debt is inherited and unchanged, not broad compliance.
+Original 192; frozen 40 RED 14 pass/26 fail; focused 232 pass. IDs/ASTs independently accepted.
+Broad 1,276/parity, five held-outs and package eight Python/three Node pass; security/publication pending.
+Partial rounding, receipt/hurdle accumulators and underflow are excluded; no funding.
+B03 PR2296/main 1787: 23 PR/21 main checks, 29 PC bindings/187 files preserved.
+Arithmetic NOT_SELECTED/source-transfer code HOLD; sealed diagnostics/history stay intact.
+
 ## 2026-11-01 — B11-S1 matching and allocation candidate
 
 WSP15 16/P1 class B; WSP11/22/26/48/62/97. Cancel only same-ID taker remainder,

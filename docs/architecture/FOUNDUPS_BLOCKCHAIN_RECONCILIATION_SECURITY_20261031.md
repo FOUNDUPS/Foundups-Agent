@@ -1,5 +1,28 @@
 # FoundUps blockchain reconciliation and security decision — 2026-10-31
 
+## B03 delivered; four-site credit refusal candidate — 2026-11-01
+
+[PR2296](https://github.com/FOUNDUPS/Foundups-Agent/pull/2296) delivered B03-P1 at
+`1787ea8a1122bc55ee7f07082ee7499de6bfd226`: 23 PR/21 main checks pass,
+29 C/O delivered bindings and 187 frozen evidence files are independently verified.
+External report: `outputs/blockchain-accounting-contract-20261101/EXECUTION_REPORT.md`.
+Its perimeter is SPECIFIED_NOT_IMPLEMENTED, arithmetic NOT_SELECTED/source-transfer
+code HOLD. Earlier B03 delivery-pending checkpoints remain historical.
+The new 17/P0 class B candidate adds a private six-line helper to the existing pool:
+stakeholder/network balance, accumulated fund and lifetime drip additions only.
+A positive increment whose native result <= prior book refuses in private plans;
+selected pool/ledger effects stay uncommitted, while earlier outer decay does not roll back.
+Partial rounding/over-credit, receipt/local/hurdle accumulators, multiplication/division
+underflow to zero, standalone staker methods and zero-increment conversion stay excluded.
+Original 192 pass; desired 40 RED 14 pass/26 fail; focused 232 pass, overlapping scopes.
+Controlled 240-tick baseline/candidate raw trace parity: 6 FoundUps/24 epochs/214 simulated paid tasks.
+Independent source/IDs/ASTs, five held-outs, broad 1,276 and package eight Python/three Node pass.
+Security/publication pending. Package raw source maps: 1,490 Python/10 Node stable;
+Node is credential-stripped, not a general effect-guard qualification.
+Source 976/helper 6 fit 990/10; inherited 260-line class debt stays. No exact conservation,
+funded debit/reservation, restart recovery, unit/fee policy or chain activation follows.
+The hash seed 710007/config/process profile scopes parity; no whole-state, controller or security clearance.
+
 ## B11 delivered; B03-P1 perimeter decision — 2026-11-01
 
 [PR2294](https://github.com/FOUNDUPS/Foundups-Agent/pull/2294) delivered at

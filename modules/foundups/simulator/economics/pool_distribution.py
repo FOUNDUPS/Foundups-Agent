@@ -577,6 +577,14 @@ def _finite(value):
     return value
 
 
+def _credit(balance, amount):
+    """Refuse completely absorbed credits; this is not exact-money accounting."""
+    result = _finite(_finite(balance) + _finite(amount))
+    if amount > 0 and result <= balance:
+        raise ValueError("positive pool credit is below balance precision")
+    return result
+
+
 def _distribution_copy(result):
     return replace(result, participant_rewards=dict(result.participant_rewards))
 
@@ -747,11 +755,11 @@ class PoolDistributor:
         amounts = [_finite(total * _finite(POOL_PERCENTAGES[name])) for name in
                    ("stakeholder_un", "stakeholder_dao", "stakeholder_du", "network", "fund")]
         result.un_pool, result.dao_pool, result.du_pool, result.network_pool, result.fund_pool = amounts
-        result.fund_accumulated = _finite(_finite(self.accumulated_fund) + result.fund_pool)
+        result.fund_accumulated = _credit(self.accumulated_fund, result.fund_pool)
         people, positions = self._participant_plans()
         self._distribute_stakeholder_pools(result, people)
         self._distribute_network_drip(result, people)
-        drip = _finite(_finite(self.total_drip_distributed) + result.drip_distributed)
+        drip = _credit(self.total_drip_distributed, result.drip_distributed)
         _validate_distribution(result)
         return result, people, positions, drip
 
@@ -780,7 +788,7 @@ class PoolDistributor:
                         result.du_actual_distributed += share
                     total_reward += share
             if total_reward > 0:
-                plan.balance = _finite(plan.balance + total_reward)
+                plan.balance = _credit(plan.balance, total_reward)
                 pid = plan.participant.participant_id
                 result.participant_rewards[pid] = result.participant_rewards.get(pid, 0.0) + total_reward
                 if du_reward > 0 and plan.position is not None:
@@ -800,7 +808,7 @@ class PoolDistributor:
             level_share = result.network_pool * _finite(ACTIVITY_SHARES[activity])
             per_participant = level_share / len(participants)
             for plan in participants:
-                plan.balance = _finite(plan.balance + per_participant)
+                plan.balance = _credit(plan.balance, per_participant)
                 pid = plan.participant.participant_id
                 result.participant_rewards[pid] = result.participant_rewards.get(pid, 0.0) + per_participant
                 result.drip_distributed += per_participant

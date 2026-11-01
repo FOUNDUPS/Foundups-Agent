@@ -1,3 +1,13 @@
+## 2026-11-01 — Four-site native pool-credit refusal candidate
+
+WSP15/22/26/48/50/62/97; class B, 17/P0. Existing pool preparation refuses positive
+credits that leave the selected participant/fund/drip book unchanged. Exactly four
+additions; no fees, denomination, precision policy or funded source is selected.
+Fresh 192 original plus 40 desired gives 232 focused passes; RED 14 pass/26 fail.
+Broad 1,276/parity, five held-outs and package eight Python/three Node pass; security/publication pending.
+B03 PR2296/main 1787 is closed: 23 PR/21 main checks, 29 PC bindings/187 copied files.
+Arithmetic NOT_SELECTED/source-transfer code HOLD; partial rounding and chain/Holo holds remain.
+
 ## 2026-11-01 — B03-P1 perimeter accepted; arithmetic and code held
 
 WSP15/22/26/29/97; 19/P0 decision prerequisite under root 0102/012 delegation.

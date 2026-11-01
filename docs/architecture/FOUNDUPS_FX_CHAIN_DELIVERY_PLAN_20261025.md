@@ -1,5 +1,28 @@
 # FoundUps FX and blockchain delivery — 2026-10-25
 
+## Four-site native pool credit refusal candidate — 2026-11-01
+
+Base `1787ea8a1122bc55ee7f07082ee7499de6bfd226`; WSP15 class B, 17/P0(3/5/5/4).
+B03-P1 is delivered through PR2296: 23 PR/21 main checks, 29 PC bindings/187 evidence files.
+This separate security allocation does not implement the source-transfer decision below.
+Exactly four pool additions use a private six-line native checked credit: stakeholder
+and network participant balances, accumulated fund and lifetime drip counter.
+Positive increment/result <= prior refuses before pool/optional-ledger publication;
+accepted exact/late retries keep their original decision before any recalculation.
+Earlier Mesa decay/counters/events remain outside rollback. Native operation order,
+valid zero/fractional controls, percentages and shared-position first crossing stay.
+Partial rounding, receipt/local/hurdle accumulators, zero-producing underflow,
+standalone staker methods and zero-increment conversion are excluded. No exact accounting.
+Fresh original 192; frozen 40 desired RED 14 pass/26 fail; focused 232 pass. These overlap.
+Controlled 240-tick baseline/candidate raw trace parity: 6 FoundUps/24 epochs/214 simulated paid tasks.
+Independent five and package eight Python/three Node pass; source maps unchanged.
+Security/publication pending; no general Node effect-guard claim is made.
+Budgets: pool <= 990/helper <= 10; candidate 976/6, inherited class260 unchanged.
+Existing staker-hurdle tests may append <= 160/total <= 850 under the pre-code addendum;
+old assertions stay; no new owner/registry. Current 1,481 runtime members/caps must remain.
+B03 arithmetic NOT_SELECTED/source-transfer code HOLD; B05 funding, custody and chain
+activation stay blocked. No new economic policy, WSP mirror or runtime grant is selected.
+
 Status: active layered delivery; no testnet or production readiness claim.
 
 ## B03-P1 perimeter v1

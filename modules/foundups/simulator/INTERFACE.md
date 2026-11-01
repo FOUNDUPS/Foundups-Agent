@@ -1,5 +1,21 @@
 # INTERFACE - FoundUps Simulator
 
+## Native pool credit refusal — 2026-11-01
+
+The class B candidate guards exactly four PoolDistributor additions: stakeholder
+and network participant balances, accumulated fund and lifetime drip counter.
+For finite nonnegative built-in operands, compute the existing native addition;
+if its increment is positive but result <= prior book, raise ValueError while
+plans remain private. Pool/optional-ledger publication follows all preparation.
+Failed new epochs retain participating balances, tiers, shared positions, receipts
+and markers; accepted exact/late retries keep their saved decision before recalculation.
+Earlier Mesa decay/counters are not rolled back; this is not historical repair.
+Existing order/types/zero/fractional arithmetic remain. Partial rounding/over-credit,
+receipt/local/hurdle accumulator absorption, standalone StakerPosition, underflow
+to zero and zero-increment conversion are excluded. No exact conservation, source
+debit, funded entitlement, restart recovery, unit/precision selection or chain grant.
+B03 source transfer remains SPECIFIED_NOT_IMPLEMENTED, arithmetic NOT_SELECTED/code HOLD.
+
 ## Same-ID trade-prevention candidate — 2026-11-01
 
 For ordinary native orders/string IDs under serialized hosting, a best crossing

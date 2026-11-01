@@ -1,5 +1,13 @@
 # FoundUps Simulator Test Suite
 
+## Four-site pool credit refusal candidate — 2026-11-01
+
+Fresh original 192 passes; frozen external 40 RED is 14 pass/26 fail; focused 232 pass.
+Cases cover each selected lost credit, refusal snapshots, native controls and retries.
+The 12 sealed diagnostics still describe old arithmetic risks, not mitigation tests.
+Controlled baseline/candidate 240-tick traces match: 6 FoundUps/24 epochs/214 simulated paid tasks.
+Broad 1,276 includes 232; five held-outs/package eight Python/three Node pass, not whole-state/funding/native confinement.
+
 ## B11-S1 matching and actual allocation integration — 2026-11-01
 
 Original 182 passes; frozen 27 RED is 14 pass/13 fail; focused 209 passes.

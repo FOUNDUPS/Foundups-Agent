@@ -687,3 +687,148 @@ def test_a17_missing_tiers_do_not_get_new_redistribution_policy():
     assert receipt.fund_pool == pytest.approx(4)
     assert receipt.du_actual_distributed == pytest.approx(3.2)
     assert receipt.du_hurdle_withheld == 0
+
+
+import json
+
+_SLOTS = ("stakeholder", "participant_drip", "fund", "lifetime_drip")
+_PRIORS = (9007199254740993, 9007199254740992.0)
+
+
+def _credit_set(pool, person, slot, value):
+    if slot in ("stakeholder", "participant_drip"):
+        person.ups_balance = value
+    else:
+        field = "accumulated_fund" if slot == "fund" else "total_drip_distributed"
+        setattr(pool, field, value)
+
+
+def _credit_pool(slot, prior, bound):
+    ledger = EpochLedger("a") if bound else None
+    pool = PoolDistributor(ledger=ledger)
+    person = pool.register_participant("alice", PT.UN,
+        AL.DU if slot == "participant_drip" else AL.UN)
+    _credit_set(pool, person, slot, prior)
+    return pool, person, ledger, 4 if slot == "participant_drip" else 1
+
+
+def _credit_snapshot(pool, ledger):
+    cache = {epoch: (amount, context, _a07_receipt(receipt), None if entry is None else
+        (id(entry), entry.to_dict(), dict(entry.participant_rewards)))
+        for epoch, (amount, context, receipt, entry) in pool._epochs.items()}
+    return _a07_state(pool, ledger), deepcopy(cache)
+
+
+def _credit_emit(pool, receipt, tmp_path):
+    people = {pid: {**vars(person), "staker_position": None if person.staker_position is None else
+        {k: v for k, v in vars(person.staker_position).items() if k != "stake_timestamp"}}
+        for pid, person in pool.participants.items()}
+    data = {"receipt": _a07_receipt(receipt), "participants": people,
+        "fund": pool.accumulated_fund, "drip": pool.total_drip_distributed,
+        "epochs": {epoch: {"amount": value[0], "context": value[1],
+            "receipt": _a07_receipt(value[2])} for epoch, value in pool._epochs.items()},
+        "ledger": [] if pool._ledger is None else [{"epoch": e.epoch_number,
+            "total": e.total_fi_distributed, "pools": dict(e.pool_allocations),
+            "rewards": dict(e.participant_rewards)} for e in pool._ledger.entries]}
+    (tmp_path / "native-control.json").write_text(json.dumps(data, sort_keys=True,
+        separators=(",", ":"), allow_nan=False) + "\n", encoding="utf-8")
+
+
+@pytest.mark.parametrize("slot,prior,bound", [
+    (slot, prior, bound) for slot in _SLOTS for prior in _PRIORS for bound in (False, True)],
+    ids=[f"{slot}-{kind}-{mode}" for slot in _SLOTS
+         for kind in ("large_int", "large_float") for mode in ("standalone", "ledger")])
+def test_positive_credit_absorption_refuses_before_all_publication(slot, prior, bound):
+    pool, person, ledger, total = _credit_pool(slot, prior, bound)
+    if slot == "participant_drip":
+        stakeholder_after = prior + 1.92
+        assert stakeholder_after > prior
+        assert stakeholder_after + 0.512 == stakeholder_after
+    before = _credit_snapshot(pool, ledger)
+    with pytest.raises(ValueError):
+        pool.distribute_epoch(1, total, "a")
+    assert _credit_snapshot(pool, ledger) == before
+
+
+@pytest.mark.parametrize("bound", [False, True], ids=["standalone", "ledger"])
+def test_late_absorption_preserves_earlier_participant_hurdle_and_existing_epoch(bound):
+    ledger = EpochLedger("a") if bound else None
+    pool, first = _a07_pool(ledger)
+    pool.distribute_epoch(1, 100, "a")
+    late = pool.register_participant("late", PT.UN, AL.UN)
+    late.ups_balance = 9007199254740992.0
+    before = _credit_snapshot(pool, ledger)
+    with pytest.raises(ValueError):
+        pool.distribute_epoch(2, 1, "a")
+    assert _credit_snapshot(pool, ledger) == before
+
+
+@pytest.mark.parametrize("slot,bound", [(slot, b) for slot in _SLOTS for b in (False, True)],
+    ids=[f"{slot}-{mode}" for slot in _SLOTS for mode in ("standalone", "ledger")])
+def test_refused_epoch_can_commit_after_repair_then_replay_without_revalidating_books(slot, bound):
+    pool, person, ledger, total = _credit_pool(slot, 9007199254740992.0, bound)
+    before = _credit_snapshot(pool, ledger)
+    with pytest.raises(ValueError):
+        pool.distribute_epoch(1, total, "a")
+    assert _credit_snapshot(pool, ledger) == before
+    _credit_set(pool, person, slot, 0)
+    first = pool.distribute_epoch(1, total, "a")
+    assert first.participant_rewards["alice"] > 0 and first.fund_pool > 0
+    assert ledger is None or len(ledger.entries) == 1
+    _credit_set(pool, person, slot, 9007199254740992.0)
+    committed = _credit_snapshot(pool, ledger)
+    again = pool.distribute_epoch(1, total, "a")
+    assert _a07_receipt(again) == _a07_receipt(first) and again is not first
+    assert _credit_snapshot(pool, ledger) == committed
+
+
+@pytest.mark.parametrize("prior,bound", [(n, b) for n in (9007199254740992, 9007199254740992.0)
+    for b in (False, True)], ids=[f"{kind}-{mode}" for kind in ("int", "float")
+    for mode in ("standalone", "ledger")])
+def test_zero_increments_are_admitted_with_large_books(prior, bound, tmp_path):
+    pool, person, ledger, _ = _credit_pool("stakeholder", prior, bound)
+    pool.accumulated_fund = pool.total_drip_distributed = prior
+    result = pool.distribute_epoch(1, 0, "a")
+    assert person.ups_balance == pool.accumulated_fund == pool.total_drip_distributed == prior
+    assert result.participant_rewards == {"alice": 0.0}
+    assert result.fund_pool == result.drip_distributed == 0
+    _credit_emit(pool, result, tmp_path)
+
+
+@pytest.mark.parametrize("label,total,opening,expected,bound", [
+    (label, total, opening, expected, bound)
+    for label, total, opening, expected in (("full9_fraction", 0.1, 1.25, None),
+        ("single_fraction", 1, 0.1, 0.1304), ("single_seeded", 10000, 0.1, 304.1),
+        ("single_large", 10000, 9007199254740992.0, 9007199254741296))
+    for bound in (False, True)], ids=[f"{label}-{mode}" for label in
+    ("full9_fraction", "single_fraction", "single_seeded", "single_large")
+    for mode in ("standalone", "ledger")])
+def test_useful_fractional_and_representable_large_credits_remain_admitted(label, total, opening, expected, bound, tmp_path):
+    ledger = EpochLedger("a") if bound else None
+    pool = PoolDistributor(ledger=ledger)
+    cohort = [(pt, al) for pt in PT for al in AL] if label == "full9_fraction" else [(PT.UN, AL.UN)]
+    for i, (pt, al) in enumerate(cohort):
+        pool.register_participant("p" + str(i), pt, al).ups_balance = opening
+    result = pool.distribute_epoch(1, total, "a")
+    assert all(p.ups_balance > opening for p in pool.participants.values())
+    assert all(v > 0 for v in result.participant_rewards.values())
+    if expected is not None:
+        actual = pool.participants["p0"].ups_balance
+        assert actual == expected if label == "single_large" else actual == pytest.approx(expected)
+    _credit_emit(pool, result, tmp_path)
+
+
+@pytest.mark.parametrize("bound", [False, True], ids=["standalone", "ledger"])
+def test_shared_hurdle_first_crossing_order_retains_original_rewards(bound, tmp_path):
+    ledger = EpochLedger("a") if bound else None
+    pool, alice = _a07_pool(ledger)
+    position = alice.staker_position
+    position.cumulative_distributions_btc = 0.00999
+    bob = pool.register_participant("bob", PT.DU, AL.DU, staker_position=position)
+    result = pool.distribute_epoch(1, 100, "a")
+    assert alice.staker_position is bob.staker_position is position
+    assert result.participant_rewards["alice"] == pytest.approx(38.4)
+    assert result.participant_rewards["bob"] == pytest.approx(36.88416)
+    assert position.hurdle_locked_at_btc == pytest.approx(0.010006)
+    assert position.cumulative_distributions_btc == pytest.approx(0.0100068416)
+    _credit_emit(pool, result, tmp_path)
