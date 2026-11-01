@@ -1,3 +1,20 @@
+## 2026-11-01 — Restore RSI host runtimes and qualify upgrade candidates
+
+WSP00/22/50/97. Repair Ollama's redirected configuration without replacing its
+identity/models; verify normal-app startup and bounded local inference. Update
+Docker4.76 to4.97, preserve existing containers/images, and restore the actual
+Ubuntu-24.04 integration. Windows and WSL disposable sandbox checks pass.
+Update idle llmster to0.0.27-1; investigate detached-launch console windows and
+verify the direct hidden startup separately from API readiness.
+
+Stage OpenClaw2026.10.9/Node24.22.2 and Hermes0.22.5/Python3.14.9 in an isolated
+candidate root. Hermes13 selected upstream API tests pass; the existing FoundUps
+0.20.4 health pin correctly rejects the candidate. No routed/protected runtime,
+authority grant or promotion gate is replaced. These are host maintenance and
+partial compatibility checks, not native author execution or retained RSI.
+See [current runtime evidence and remaining gates](docs/operations/RSI_SWARM_DISPATCH.md#host-repair-and-isolated-upgrade-qualification--2026-11-01).
+Private account/configuration recovery state stays outside Git.
+
 ## 2026-11-01 — Security-first blockchain roadmap and custody clarification
 
 WSP15 A10/B01 class-B17/P0; following layer A07/B02 whole epoch effects.
