@@ -23,6 +23,7 @@ import json
 import os
 import random
 import requests
+from modules.ai_intelligence.ai_gateway.src.ai_gateway import AIGateway
 import sqlite3
 from pathlib import Path
 from typing import Dict, Any, Optional, List, Tuple
@@ -296,17 +297,6 @@ except Exception as e:
     CLASSIFIER_AVAILABLE = False
     logger.debug(f"[REPLY-GEN] CommenterClassifier not available: {e}")
 
-# QwenInferenceEngine: Local LLM fallback (2025-12-30: Agentic responder)
-# Uses llama-cpp-python for local inference when Grok/LM Studio unavailable
-try:
-    from holo_index.qwen_advisor.llm_engine import QwenInferenceEngine
-    QWEN_ENGINE_AVAILABLE = True
-    logger.info("[REPLY-GEN] QwenInferenceEngine loaded (local llama.cpp fallback)")
-except Exception as e:
-    QwenInferenceEngine = None
-    QWEN_ENGINE_AVAILABLE = False
-    logger.debug(f"[REPLY-GEN] QwenInferenceEngine not available: {e}")
-
 # CommentContentAnalyzer: Gemma-based content extraction (2025-12-30)
 # Extracts MEANING from comments for contextual replies (not templates)
 try:
@@ -375,7 +365,7 @@ class IntelligentReplyGenerator:
     Generates context-aware replies based on commenter profile and comment content.
     
     Integration (WSP 3 - Reuse existing modules):
-    - LLMConnector for contextual AI responses (rESP_o1o2)
+    - AIGateway for task-scoped assessment, writing and final language review
     - GrokGreetingGenerator for MAGA detection (communication/livechat)
     - BanterEngine for fallback responses (ai_intelligence/banter_engine)
     
@@ -623,32 +613,10 @@ VARIATION GUIDANCE:
     LM_STUDIO_URL = os.getenv("LM_STUDIO_URL", "http://127.0.0.1:1234/v1/chat/completions")
 
     def __init__(self):
-        """Initialize the intelligent reply generator with Grok (primary) or LM Studio (fallback)."""
+        """Initialize reply behavior; the shared Gateway owns all model calls."""
         self._initialize_reply_state()
+        self._model_gateway = AIGateway()
 
-        # Grok is a legacy, explicit opt-in fallback. The autonomous default is
-        # the local Qwen route. RedDog already performs governed OpenRouter calls
-        # without per-call 012 involvement, but its public production surfaces
-        # are not yet typed for short-form YouTube reply generation.
-        if _env_truthy("YT_ENABLE_GROK_REPLIES"):
-            try:
-                from modules.ai_intelligence.rESP_o1o2.src.llm_connector import LLMConnector
-                if os.getenv("GROK_API_KEY") or os.getenv("XAI_API_KEY"):
-                    self.grok_connector = LLMConnector(
-                        model="grok-3-fast",
-                        max_tokens=60,
-                        temperature=0.85,
-                        timeout=3,
-                    )
-                    logger.info("[REPLY-GEN] Legacy Grok fallback enabled (3s timeout)")
-                else:
-                    logger.warning("[REPLY-GEN] Grok fallback enabled but no API key is configured")
-            except Exception as e:
-                logger.warning('[REPLY-GEN] Grok init failed: %s', type(e).__name__)
-
-        # Primary local service route (normally serving the general Qwen model).
-        self._check_lm_studio()
-        
         # Load BanterEngine as ultimate fallback
         # ENV SWITCH: Set DISABLE_BANTER_ENGINE=true to disable template fallbacks
         self.banter_engine = None
@@ -670,27 +638,7 @@ VARIATION GUIDANCE:
             except Exception as e:
                 logger.warning(f"[REPLY-GEN] GrokGreetingGenerator init failed: {e}")
 
-        # QWEN AGENTIC RESPONDER: embedded local fallback for the LM Studio route.
-        # ENV SWITCH: Set DISABLE_QWEN_ENGINE=true to skip local Qwen inference
-        self.qwen_engine = None
-        if _env_truthy("DISABLE_QWEN_ENGINE"):
-            logger.info("[REPLY-GEN] QwenEngine DISABLED via DISABLE_QWEN_ENGINE=true")
-        elif QWEN_ENGINE_AVAILABLE and QwenInferenceEngine:
-            try:
-                # Comment replies are a general-language task, not a coding task.
-                qwen_model_path = resolve_general_model_path()
-                if qwen_model_path.exists() and is_general_reply_model(qwen_model_path.name):
-                    self.qwen_engine = QwenInferenceEngine(
-                        model_path=qwen_model_path,
-                        max_tokens=150,  # Short replies
-                        temperature=0.8,  # Creative but focused
-                        context_length=2048,
-                    )
-                    logger.info(f"[REPLY-GEN] QwenInferenceEngine ready: {qwen_model_path.name}")
-                else:
-                    logger.warning(f"[REPLY-GEN] Qwen model not found: {qwen_model_path}")
-            except Exception as e:
-                logger.warning(f"[REPLY-GEN] QwenInferenceEngine init failed: {e}")
+        self.qwen_engine = None  # Legacy attribute; inference is Gateway-owned.
 
         # Phase 3O-3R Sprint 5: Initialize skill-based reply router
         self.skill_0 = None  # MAGA mockery
@@ -719,20 +667,18 @@ VARIATION GUIDANCE:
                 logger.warning(f"[REPLY-GEN] CommentContentAnalyzer init failed: {e}")
 
         # LLM SOURCE TRACKING (2026-02-21): Track which LLM generated each reply for training data
-        self._last_llm_source = None  # 'grok', 'lm_studio', 'qwen', 'template', 'skill_0', 'skill_1', 'skill_2'
+        self._last_llm_source = None  # Exact shared provider or legacy non-posting strategy.
 
         # LLM CHAIN STATUS SUMMARY (diagnostic)
         logger.info("[REPLY-GEN] ═══ LLM CHAIN STATUS ═══")
-        logger.info(f"[REPLY-GEN]   Grok: {'✅ READY' if self.grok_connector else '❌ NOT AVAILABLE'}")
-        logger.info(f"[REPLY-GEN]   LM Studio: {'✅ READY' if (self.lm_studio_available and self.lm_studio_model_id) else '❌ NOT AVAILABLE'}")
-        logger.info(f"[REPLY-GEN]   Qwen Engine: {'✅ READY' if self.qwen_engine else '❌ NOT AVAILABLE'}")
+        logger.info("[REPLY-GEN] Language routing: shared AI Gateway")
+        logger.info("[REPLY-GEN] Model residency/admission is resolved by the Gateway at use time")
         logger.info(f"[REPLY-GEN]   Content Analyzer: {'✅ READY' if self.content_analyzer else '❌ NOT AVAILABLE'}")
         logger.info(f"[REPLY-GEN]   BanterEngine: {'✅ READY' if self.banter_engine else '❌ NOT AVAILABLE'}")
         logger.info("[REPLY-GEN] ═════════════════════════")
 
     def _initialize_reply_state(self):
         self._generation_lock = RLock()
-        self.grok_connector = None
         self.lm_studio_available = False
         self.lm_studio_model_id = os.getenv("LM_STUDIO_MODEL") or None
         self.banter_engine = None
@@ -1130,7 +1076,7 @@ VARIATION GUIDANCE:
         return None
     
     def _check_lm_studio(self):
-        """Check if LM Studio is running (fallback when Grok unavailable)."""
+        """Legacy read-only diagnostic; not inference or runtime routing authority."""
         try:
             response = requests.get(
                 os.getenv("LM_STUDIO_MODELS_URL", "http://127.0.0.1:1234/v1/models"),
@@ -1339,13 +1285,7 @@ VARIATION GUIDANCE:
         video_title: Optional[str] = None,
     ) -> Optional[str]:
         """
-        Generate a grounded reply through the local general-language model route.
-
-        Priority:
-        1. LM Studio local model service (normally general Qwen)
-        2. Embedded general Qwen through llama.cpp
-        3. Legacy Grok only when ``YT_ENABLE_GROK_REPLIES=true``
-        4. Template engine (reported as non-contextual so the posting gate can skip it)
+        Generate a grounded reply through the shared task-scoped AI Gateway.
 
         Args:
             comment_text: The comment to reply to
@@ -1397,163 +1337,36 @@ VARIATION GUIDANCE:
                 'Output only the reply, at most two short sentences.'
             )
 
-        if self._reply_work_cancelled():
+        result = self._call_language_model(system_prompt, user_prompt, 'write', max_tokens=150)
+        if not result.success or self._reply_work_cancelled():
+            if getattr(result, 'reason', None) == 'invalid_reply_text':
+                self._current_reply_rejection_reason = 'invalid_reply_text'
             return None
-        try:
-            # LLM FALLBACK CHAIN LOGGING (diagnostic)
-            logger.info(f"[LLM-CHAIN] ═══ STARTING LLM FALLBACK CHAIN ═══")
-            logger.info(f"[LLM-CHAIN]   Comment: {comment_text[:60]}...")
-            logger.info(f"[LLM-CHAIN]   Author: @{author_name}")
-            logger.info(f"[LLM-CHAIN]   Tier: {tier}")
-
-            # 1. Try the local model service (normally the general Qwen model).
-            logger.info(f"[LLM-CHAIN] [1/4] Trying LM Studio (lm_studio_available={self.lm_studio_available}, model={self.lm_studio_model_id})")
-            if self.lm_studio_available and is_general_reply_model(self.lm_studio_model_id):
-                # Construct messages for LM Studio
-                messages = [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
-                ]
-
-                payload = {
-                    "model": self.lm_studio_model_id,
-                    "messages": messages,
-                    "temperature": 0.4 if getattr(self, '_current_assessment', None) else 0.9,
-                    "reasoning_effort": "none",
-                    "max_tokens": 150
-                }
-
-                try:
-                    # 2026-02-04: Reduced from 15s→8s (speed optimization)
-                    response = requests.post(
-                        self.LM_STUDIO_URL,
-                        json=payload,
-                        headers={"Content-Type": "application/json"},
-                        timeout=3
-                    )
-                    if self._reply_work_cancelled():
-                        return None
-
-                    if response.status_code == 200:
-                        json_resp = response.json()
-                        if "choices" in json_resp and json_resp["choices"]:
-                            content = json_resp["choices"][0]["message"]["content"]
-
-                            if not reply_text_is_publishable(content):
-                                if isinstance(content, str) and content.strip():
-                                    self._current_reply_rejection_reason = 'invalid_reply_text'
-                                logger.error('[LLM-CHAIN] Invalid local writer output; text withheld')
-                                return None  # A quality fault is not provider unavailability.
-                            else:
-                                self._last_llm_source = 'lm_studio'  # Track for training data
-                                logger.info('[LLM-CHAIN] LM Studio draft produced (%d characters)', len(content))
-                                return content
-                        else:
-                            logger.warning(f"[LLM-CHAIN] ❌ LM Studio returned empty choices")
-                    else:
-                        logger.warning('[LLM-CHAIN] LM Studio HTTP %s; body withheld', response.status_code)
-                except Exception as e:
-                    logger.warning('[LLM-CHAIN] LM Studio exception: %s', type(e).__name__)
-            else:
-                logger.warning(f"[LLM-CHAIN] ⏭️ LM Studio NOT AVAILABLE")
-
-            # Livechat is served by the bounded local HTTP owner, never embedded inference.
-            if getattr(self, '_current_reply_surface', 'comments') == 'livechat' or self._reply_work_cancelled():
-                return None
-
-            # 2. Try embedded Qwen (local llama.cpp).
-            logger.info(f"[LLM-CHAIN] [2/4] Trying QwenInferenceEngine (local llama.cpp)")
-            if self.qwen_engine:
-                try:
-                    # Reuse the same grounded prompt assembled for every provider.
-                    qwen_prompt = f"""{user_prompt}
-
-FINAL LOCAL-QWEN CONSTRAINTS:
-- Maximum 25 words
-- One or two short sentences
-- Output only the reply"""
-                    qwen_response = self.qwen_engine.generate_response(
-                        prompt=qwen_prompt,
-                        system_prompt=system_prompt,
-                        max_tokens=80,
-                        stop=["###"],
-                    )
-                    if qwen_response and not qwen_response.startswith("Error:"):
-                        if not reply_text_is_publishable(qwen_response):
-                            self._current_reply_rejection_reason = 'invalid_reply_text'
-                            logger.error('[LLM-CHAIN] Invalid embedded writer output; text withheld')
-                            return None
-                        # Clean up the response
-                        qwen_response = self._clean_reply(qwen_response, author_name)
-
-                        # QWEN LENGTH GATE (2026-02-21): Reject if too long or has explanatory text
-                        if reply_text_is_publishable(qwen_response):
-                            word_count = len(qwen_response.split())
-                            # Gate: Max 25 words (allow some buffer over 15 word prompt)
-                            if word_count > 25:
-                                logger.warning(f"[LLM-CHAIN] ❌ Qwen response too long ({word_count} words), rejecting")
-                                qwen_response = None
-                            # Gate: Reject if still has explanatory patterns
-                            elif any(p in qwen_response.lower() for p in ['this response', 'this reply', 'note:', 'the key point']):
-                                logger.warning(f"[LLM-CHAIN] ❌ Qwen response has explanatory text, rejecting")
-                                qwen_response = None
-
-                        if qwen_response and qwen_response.strip():
-                            self._last_llm_source = 'qwen'  # Track for training data
-                            logger.info('[LLM-CHAIN] Embedded draft produced (%d characters)', len(qwen_response))
-                            return qwen_response
-                        else:
-                            self._current_reply_rejection_reason = 'invalid_reply_text'
-                            logger.warning(f"[LLM-CHAIN] ❌ Qwen response rejected by length/pattern gate")
-                            return None
-                    else:
-                        logger.warning('[LLM-CHAIN] Embedded writer returned no usable draft; text withheld')
-                except Exception as e:
-                    logger.warning('[LLM-CHAIN] Embedded writer exception: %s', type(e).__name__)
-            else:
-                logger.warning(f"[LLM-CHAIN] ⏭️ QwenInferenceEngine NOT AVAILABLE")
-
-            # Livechat's local fallback never re-enters a rejected cloud route or templates.
-            if getattr(self, '_current_reply_surface', 'comments') == 'livechat':
-                return None
-
-            # 3. Optional legacy Grok fallback. Disabled unless explicitly opted in.
-            if self.grok_connector and _env_truthy("YT_ENABLE_GROK_REPLIES"):
-                logger.info("[LLM-CHAIN] [3/4] Trying legacy Grok fallback")
-                try:
-                    reply = self.grok_connector.get_response(
-                        prompt=user_prompt,
-                        system_prompt=system_prompt,
-                    )
-                    if reply:
-                        if not reply_text_is_publishable(reply):
-                            self._current_reply_rejection_reason = 'invalid_reply_text'
-                            return None
-                        reply = self._clean_reply(reply, author_name)
-                        self._last_llm_source = "grok"
-                        logger.info('[LLM-CHAIN] Legacy cloud draft produced (%d characters)', len(reply))
-                        return reply
-                    logger.warning("[LLM-CHAIN] ❌ Grok returned None/empty")
-                except Exception as grok_err:
-                    logger.warning('[LLM-CHAIN] Legacy cloud exception: %s', type(grok_err).__name__)
-
-            # 4. Fallback to BanterEngine (if available) - templates only.
-            logger.info(f"[LLM-CHAIN] [4/4] Falling back to BanterEngine (TEMPLATE-BASED)")
-            if self.banter_engine:
-                 # Map tier to BanterEngine style if possible, or just generic
-                 logger.warning("[LLM-CHAIN] ⚠️ Using BanterEngine TEMPLATES (NOT contextual!)")
-                 state_info, banter_reply = self.banter_engine.process_input_enhanced(comment_text)
-                 if not banter_reply or banter_reply == "...silence...":
-                     banter_reply = self.banter_engine.get_random_banter_enhanced("default")
-                 self._last_llm_source = 'template'  # Track for training data
-                 logger.info(f"[LLM-CHAIN] BanterEngine reply: {banter_reply[:80] if banter_reply else 'None'}...")
-                 return banter_reply
-
+        if not reply_text_is_publishable(result.response):
+            self._current_reply_rejection_reason = 'invalid_reply_text'
             return None
+        reply = self._clean_reply(result.response, author_name)
+        self._last_llm_source = 'lm_studio' if result.provider == 'lm_studio_local' else result.provider
+        self._current_generation_context['model_route'] = {
+            'provider': result.provider, 'model': result.model, 'route_id': result.route_id}
+        return reply
 
-        except Exception as e:
-            logger.error('[REPLY-GEN] Contextual generation failed: %s', type(e).__name__)
-            return None
+    def _call_language_model(self, system, prompt, stage, *, max_tokens=400, response_format=None, surface=None, cancel_event=None):
+        """One shared routing boundary; no local/cloud fallback in the consumer."""
+        # The async caller closes a completed generation token in finally.
+        # Final review has its own lifetime and must not inherit that closed token.
+        event = cancel_event if stage == 'review' else (cancel_event or getattr(self, '_current_cancel_event', None))
+        if event is not None and event.is_set():
+            from modules.ai_intelligence.ai_gateway.src.youtube_model_routing import YouTubeModelResult
+            return YouTubeModelResult(reason='cancelled')
+        gateway = getattr(self, '_model_gateway', None)
+        if gateway is None:
+            gateway = self._model_gateway = AIGateway()
+        return gateway.call_youtube_task(
+            system_prompt=system, prompt=prompt, stage=stage,
+            surface=surface or getattr(self, '_current_reply_surface', 'comments'),
+            max_tokens=max_tokens, response_format=response_format,
+            cancel_event=event)
 
     def generate_reply_with_source(self, *args, cancel_event=None, reply_surface='comments', **kwargs) -> ReplyGenerationResult:
         """Generate one immutable receipt; cancelled queued work never calls a provider.
@@ -1584,26 +1397,11 @@ FINAL LOCAL-QWEN CONSTRAINTS:
                 self._generation_lock.release()
 
     def _language_judgment(self, system, data, max_tokens=400):
-        """Use the existing general-language route for bounded structured evaluation."""
-        if self._reply_work_cancelled():
-            return None, 'cancelled'
-        prompt = json.dumps(data, ensure_ascii=False)
-        if self.lm_studio_available and is_general_reply_model(self.lm_studio_model_id):
-            response = requests.post(self.LM_STUDIO_URL, json={
-                'model': self.lm_studio_model_id, 'temperature': 0, 'max_tokens': max_tokens,
-                'reasoning_effort': 'none',
-                'messages': [{'role': 'system', 'content': system},
-                             {'role': 'user', 'content': prompt}]}, timeout=3)
-            if response.status_code == 200:
-                if self._reply_work_cancelled():
-                    return None, 'cancelled'
-                return response.json()['choices'][0]['message']['content'], 'lm_studio'
-        if getattr(self, '_current_reply_surface', 'comments') == 'livechat' or self._reply_work_cancelled():
-            return None, 'unknown'
-        if self.qwen_engine:
-            return self.qwen_engine.generate_response(
-                prompt=prompt, system_prompt=system, max_tokens=max_tokens, stop=['###']), 'qwen'
-        return None, 'unknown'
+        """Assessment uses the same shared policy as writing and final review."""
+        result = self._call_language_model(system, json.dumps(data, ensure_ascii=False),
+                                           'assess', max_tokens=max_tokens)
+        source = 'lm_studio' if result.provider == 'lm_studio_local' else result.provider
+        return (result.response, source) if result.success else (None, result.reason or 'unknown')
 
     def _reply_work_cancelled(self):
         event = getattr(self, '_current_cancel_event', None)
@@ -1737,41 +1535,31 @@ FINAL LOCAL-QWEN CONSTRAINTS:
                 self._generation_lock.release()
 
     def _inspect_reply_locked(self, system, prompt, reply_surface, cancel_event):
-            try:
-                if cancel_event is not None and cancel_event.is_set():
-                    return {'approved': False, 'reason': 'cancelled'}
-                if self.lm_studio_available and is_general_reply_model(self.lm_studio_model_id):
-                    # Grammar constrains shape only; all semantic judgments still need to pass.
-                    review_schema = {
-                        'type': 'object', 'additionalProperties': False,
-                        'properties': {
-                            **{key: {'type': 'boolean'} for key in (
-                                'addresses_comment', 'coherent', 'grounded', 'no_internal_instructions')},
-                            **{key: {'type': 'number', 'minimum': 0, 'maximum': 1}
-                               for key in ('relevance', 'coherence')},
-                        },
-                        'required': ['addresses_comment', 'coherent', 'grounded',
-                                     'no_internal_instructions', 'relevance', 'coherence'],
-                    }
-                    response = requests.post(self.LM_STUDIO_URL, json={
-                        'model': self.lm_studio_model_id, 'temperature': 0, 'max_tokens': 180,
-                        'reasoning_effort': 'none',
-                        'response_format': {'type': 'json_schema', 'json_schema': {
-                            'name': 'reply_review', 'strict': True, 'schema': review_schema}},
-                        'messages': [{'role': 'system', 'content': system},
-                                     {'role': 'user', 'content': prompt}]}, timeout=3)
-                    if response.status_code == 200:
-                        if cancel_event is not None and cancel_event.is_set():
-                            return {'approved': False, 'reason': 'cancelled'}
-                        raw = response.json()['choices'][0]['message']['content']
-                        return {**parse_reply_review(raw), 'review_provider': 'lm_studio'}
-                if reply_surface != 'livechat' and self.qwen_engine:
-                    raw = self.qwen_engine.generate_response(
-                        prompt=prompt, system_prompt=system, max_tokens=180, stop=['###'])
-                    return {**parse_reply_review(raw), 'review_provider': 'qwen'}
-            except Exception as exc:
-                logger.warning('[REPLY-INSPECT] Failed: %s', type(exc).__name__)
-            return {'approved': False, 'reason': 'review_unavailable'}
+        if cancel_event is not None and cancel_event.is_set():
+            return {'approved': False, 'reason': 'cancelled'}
+        review_schema = {
+            'type': 'object', 'additionalProperties': False,
+            'properties': {
+                **{key: {'type': 'boolean'} for key in (
+                    'addresses_comment', 'coherent', 'grounded', 'no_internal_instructions')},
+                **{key: {'type': 'number', 'minimum': 0, 'maximum': 1}
+                   for key in ('relevance', 'coherence')},
+            },
+            'required': ['addresses_comment', 'coherent', 'grounded',
+                         'no_internal_instructions', 'relevance', 'coherence'],
+        }
+        result = self._call_language_model(system, prompt, 'review', max_tokens=180,
+            surface=reply_surface, cancel_event=cancel_event,
+            response_format={'type': 'json_schema', 'json_schema': {
+                'name': 'reply_review', 'strict': True, 'schema': review_schema}})
+        if cancel_event is not None and cancel_event.is_set():
+            return {'approved': False, 'reason': 'cancelled'}
+        if not result.success:
+            return {'approved': False, 'reason': (
+                'review_unavailable_or_invalid' if result.reason == 'invalid_reply_text' else 'review_unavailable')}
+        return {**parse_reply_review(result.response),
+                'review_provider': 'lm_studio' if result.provider == 'lm_studio_local' else result.provider,
+                'review_model': result.model, 'review_route_id': result.route_id}
 
     def _record_skill_source(self, prefix, result, llm_reply, source):
         """Credit a provider only when the skill retained its actual draft."""
@@ -2146,7 +1934,7 @@ FINAL LOCAL-QWEN CONSTRAINTS:
         # LAYER 8: Agentic Username Analysis (Fallthrough Check)
         # If score is still low/inconclusive, ask the LLM: "Is this name racist/bad?"
         # Only check if we have an LLM available and score is not already decisive
-        if score < 0.7 and (self.grok_connector or self.lm_studio_available):
+        if score < 0.7:
             try:
                 agentic_score = self._analyze_username_agentically(author_name)
                 if agentic_score > 0.0:
@@ -2178,33 +1966,8 @@ FINAL LOCAL-QWEN CONSTRAINTS:
             "Output ONLY the number."
         )
         
-        response = None
-        
-        # Priority 1: Grok
-        if self.grok_connector:
-            try:
-                response = self.grok_connector.get_response(user_prompt, system_prompt)
-            except Exception:
-                pass
-        
-        # Priority 2: LM Studio
-        if not response and self.lm_studio_available:
-            try:
-                # Reuse existing LM Studio logic (simplified)
-                payload = {
-                     "model": self.lm_studio_model_id,
-                     "messages": [
-                         {"role": "system", "content": system_prompt},
-                         {"role": "user", "content": user_prompt}
-                     ],
-                     "temperature": 0.1, # Deterministic
-                     "max_tokens": 10
-                }
-                res = requests.post(self.LM_STUDIO_URL, json=payload, timeout=5)
-                if res.status_code == 200:
-                    response = res.json()["choices"][0]["message"]["content"]
-            except Exception:
-                pass
+        result = self._call_language_model(system_prompt, user_prompt, 'assess', max_tokens=10)
+        response = result.response if result.success else None
 
         if response:
             # YTR1: Reject TTS tokens - they contain digits that confuse the regex

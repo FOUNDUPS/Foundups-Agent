@@ -264,7 +264,13 @@ function assertRuntimeFileCountBoundary() {
   for (const member of [
     'modules/communication/livechat/src/operator_video_policy_owner.py',
     'modules/communication/livechat/src/video_policy.py',
-    'modules/platform_integration/youtube_shorts_scheduler/src/video_policy.py'
+    'modules/platform_integration/youtube_shorts_scheduler/src/video_policy.py',
+    'modules/ai_intelligence/ai_gateway/src/model_autoresearch_canonical_prompt_guard.py',
+    'modules/ai_intelligence/ai_gateway/src/model_autoresearch_configured_gateway_atomic_create.py',
+    'modules/ai_intelligence/ai_gateway/src/model_autoresearch_configured_gateway_durability.py',
+    'modules/ai_intelligence/ai_gateway/src/model_autoresearch_configured_gateway_evidence.py',
+    'modules/ai_intelligence/ai_gateway/src/model_autoresearch_configured_gateway_posix_recovery.py',
+    'modules/ai_intelligence/ai_gateway/src/youtube_model_routing.py'
   ]) {
     assert(manifest.required_runtime_files.includes(member));
   }
@@ -275,13 +281,13 @@ function assertRuntimeFileCountBoundary() {
     candidate.required_runtime_files.push(member);
     candidate.required_runtime_sha256[member] = '0'.repeat(64);
   };
-  while (candidate.required_runtime_files.length < 1481) {
+  while (candidate.required_runtime_files.length < 1485) {
     addMember(candidate.required_runtime_files.length);
   }
-  assert.strictEqual(candidate.required_runtime_files.length, 1481);
+  assert.strictEqual(candidate.required_runtime_files.length, 1485);
   assert.deepStrictEqual(validator.validateManifest(candidate), []);
-  addMember(1481);
-  assert.strictEqual(candidate.required_runtime_files.length, 1482);
+  addMember(1485);
+  assert.strictEqual(candidate.required_runtime_files.length, 1486);
   assert.deepStrictEqual(validator.validateManifest(candidate), [
     'backend_runtime_file_contract_mismatch'
   ]);

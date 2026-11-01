@@ -1,5 +1,21 @@
 # AI Gateway Module Change Log
 
+## 2026-11-01 — Shared YouTube model orchestration
+
+WSP00/10/11/22/50/62/77/84/97. Replace consumer-owned provider chains with
+`AIGateway.call_youtube_task` for assessment, writer and exact final review.
+Reuse local general-role/native residency, signed selection/runtime binding,
+Fusion approval-only redaction and existing provider transport. Keep NVIDIA
+Nemotron's topology proposer evaluation-only; discovery does not promote models.
+Configured invalid routing never silently falls back. OpenRouter uses exact
+approved non-xAI text models with zero-price/no-data-collection restrictions.
+Remove direct xAI clients, preserve reviewed live-chat text even without themes,
+rebind command adapters on channel changes, and separate review cancellation
+from the async caller's already-completed generation token. Preserve all posting
+and manifest/history owners. Lazy bridge exports avoid webhook/env startup when
+importing routing/security utilities. See video_comments/LLM_INTEGRATION.md.
+Qualification is offline; no daemon/model/public action or credential read.
+
 ## [2026-10-23] - Shared OpenRouter transport containment
 
 WSP00/5/6/15/22/50/62/97, C3/I4/D4/Impact4=15/P1: reconcile the existing

@@ -121,7 +121,7 @@ class CommentProcessor:
         "unknown": "❓",
     }
 
-    CONTEXTUAL_PROVIDERS = frozenset({"lm_studio", "qwen", "grok"})
+    CONTEXTUAL_PROVIDERS = frozenset({"lm_studio", "openrouter"})
     CONTEXTUAL_SKILLS = frozenset({"skill_1", "skill_1_sub", "skill_2", "skill_3"})
     CONTEXTUAL_STRATEGIES = frozenset({
         "skill_0:grok_greeting", "skill_0:contextual_mockery",
@@ -1465,12 +1465,16 @@ class CommentProcessor:
             return False
 
     async def _inspect_reply(self, comment_data, reply_text):
+        review_cancel = Event()
         try:
             return await asyncio.wait_for(asyncio.to_thread(
-                get_reply_generator().inspect_reply, dict(comment_data), reply_text), timeout=5)
+                get_reply_generator().inspect_reply, dict(comment_data), reply_text,
+                cancel_event=review_cancel), timeout=5)
         except Exception as exc:
             logger.warning('[REPLY-INSPECT] No approval: %s', type(exc).__name__)
             return {'approved': False, 'reason': 'review_unavailable'}
+        finally:
+            review_cancel.set()
 
     def _generate_intelligent_reply(self, comment_data: Dict[str, Any], *, with_source=False, cancel_event=None):
         """

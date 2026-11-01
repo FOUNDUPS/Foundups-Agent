@@ -1,5 +1,16 @@
 # WSP Module ModLog: Shared Utilities
 
+## 2026-11-01 — Shared YouTube language-role and bounded dispatch
+
+Expose the existing general-language model role guard for Gateway consumers,
+excluding visual/coder/audio/triage/xAI routes. LMStudioBackend accepts optional
+`max_retries` and `pre_dispatch_check`; absent values preserve generic behavior.
+YouTube sets zero SDK retries and checks cancellation/deadline after the native
+instance probe and immediately before dispatch. Support its explicit reasoning-off
+control. Scoped diagnostics now report exception classes rather than raw messages.
+Exact residency checks, loopback policy and model lifecycle owners are preserved.
+WSP11/22/50/62/77/84/97; no model/server/public action during qualification.
+
 ## 2026-10-29 — Export the existing LM Studio node-lock identity
 
 - Added `lm_studio_node_lock_identity` within the existing lifecycle owner;

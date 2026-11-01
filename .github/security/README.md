@@ -1,3 +1,18 @@
+## Shared YouTube model Gateway metadata review — 2026-11-01
+
+Pinned Gitleaks 8.30.1 reports 41 new exact fingerprints at staged tree 8ab7e4e8
+against main d65a7257. Independent review reconstructs 39 unchanged generated
+public source-SHA rows, a freshly qualified workflow checksum map at line 44
+(nine actual Git source pairs; no inherited approval), and unchanged bridge
+ModLog prose at line 3998, formerly 3987. Removing inserted lines 3–13 reproduces
+the complete prior ModLog bytes. Append only these 41 reviewed metadata bindings,
+preserving all 3,555 prior entries and every other ledger field (3,596 total).
+No scanner rule, exclusion, scope or fingerprint algorithm changes.
+Independent review receipt SHA256:
+`ef60b3ccb4a49c911ec45110da417f6b95a618391b99317a5635da8d00b02539`.
+Fresh final staged-tree, actual committed-history and hosted checks remain
+separate required evidence.
+
 ## Pool-credit refusal runtime metadata review — 2026-11-01
 
 Pinned Gitleaks 8.30.1 reports 39 whole-manifest fingerprint renewals at

@@ -119,6 +119,17 @@ class AIGateway:
 
         logger.info(f"[AI-GATEWAY] Initialized with {len([p for p in self.providers.values() if p.api_key])} active providers")
 
+    def call_youtube_task(self, *, system_prompt: str, prompt: str, stage: str,
+                          surface: str = 'comments', max_tokens: int = 400,
+                          response_format: Optional[dict] = None, cancel_event=None):
+        """Use the shared, task-scoped YouTube route; never generic fallback."""
+        from .youtube_model_routing import call_youtube_task
+        return call_youtube_task(
+            self, system_prompt=system_prompt, prompt=prompt, stage=stage,
+            surface=surface, max_tokens=max_tokens,
+            response_format=response_format, cancel_event=cancel_event,
+        )
+
     def _get_env_int(self, name: str, default: int) -> int:
         """Read an int from env with a safe fallback."""
         value = os.getenv(name)

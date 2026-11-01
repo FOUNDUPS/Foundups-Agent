@@ -1,5 +1,13 @@
 # LiveChat
 
+## Shared YouTube model route (2026-11-01)
+
+Assessment, writer and exact final review now call the shared AI Gateway.
+Direct xAI and embedded local-provider fallback are retired for these consumers.
+Ordinary and themed live chat share this reviewed path. NVIDIA's shadow proposer
+remains evaluation-only; exact signed bindings govern dynamic production models.
+See [routing/configuration and evidence limits](../video_comments/LLM_INTEGRATION.md).
+
 Private operator video directives now share the existing manifest queue. Scoped
 metadata/scheduling/Shorts policies refresh synchronously before writer guards;
 unknown outcomes remain durable and blocked. Private context activation stays

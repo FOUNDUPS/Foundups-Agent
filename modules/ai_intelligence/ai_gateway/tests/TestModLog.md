@@ -1,5 +1,50 @@
 # AI Gateway TestModLog
 
+## 2026-11-01 — Current guarded model-routing qualification
+
+Fresh credential-free Windows runs: 63 independently authored routing/composition
+cases; 18 migrated legacy adapter cases (81 combined fixed selector); 165 retained
+and extended comment-context/semantic/history cases plus 12 subtests; 24 existing
+quality-stop controls; 15 stdlib cases; 231 adjacent Gateway/catalog/selection/
+binding/redaction/local-role cases; and the existing isolated 94-case startup
+selection. These overlap and are not additive totals. No failures/errors/skips or
+denied real effects in those selections. Raw output stays private.
+
+Legacy tests explicitly replace the retired direct-provider/forced-slogan and
+template contracts with captured identity, no synchronous model call, Gateway
+delegation, mandatory exact final review and useful approved-answer controls.
+No tests were quarantined or skipped to obtain this result. Production provider
+qualification, signed promotion, daemon startup and public delivery remain
+separate/unverified. Packaging/security and hosted checks have their own receipts.
+
+## [2026-11-01] — Independent YouTube routing acceptance controls
+
+WSP00/11/22/50/77/84/97. Added the distinct YouTube consumer test surface after
+inventorying existing configured-caller, K3 and signed runtime-binding suites.
+Tests are authored independently of production edits and handed to the root for
+guarded execution; no passing result is claimed at author freeze. Useful local
+and governed-cloud controls prevent a deny-everything implementation from
+qualifying. Existing generic provider/K3 tests retain their original contracts.
+No service, model, credential file, network call or public effect is authorized.
+The original 42-case author freeze is retained separately. Five held-out cases
+add the real generation-await cleanup/review boundary, explicit canceled review,
+receiving-channel refresh and refusal to assign requester privileges to a target.
+An additional output-guard receipt control preserves the existing typed
+quality-stop distinction when the Gateway rejects an actual nonempty writer draft.
+Four identity controls require explicit unambiguous string IDs rather than
+display-name keys or malformed memory values. Positive fixtures retain actual IDs.
+After review found inline command inference, the existing owner contract was
+changed to a private descriptor consumed by the bounded async caller. The three
+adapter/persona assertions now verify descriptor identity and zero synchronous
+model calls; the original 42 routing controls remain intact. Seven additional
+controls cover the actual bounded async positive, heartbeat/timeout cancellation,
+four stale receiving-context cases and the command builder's private descriptor.
+The 59 cases are mechanically split into 43 routing and 16 composition cases;
+all function ASTs remain identical across that split. Both files classify as
+unit/collectable and remain within 500-line modules and 50-line functions.
+Four additional backend controls check generic versus YouTube retry construction
+and the positive/canceled native-probe-to-SDK boundary: final selection 43 + 20 = 63.
+
 ## [2026-10-07] - Strict model use-time clock
 
 WSP00/6/15/22/50/97,13/P1: existing verifier now requires an exact positive

@@ -1,5 +1,13 @@
 # Video Comments - Autonomous YouTube Engagement Module
 
+## Shared YouTube model route (2026-11-01)
+
+Assessment, writer and exact final review now call the shared AI Gateway.
+Direct xAI and embedded local-provider fallback are retired for these consumers.
+Ordinary and themed live chat share this reviewed path. NVIDIA's shadow proposer
+remains evaluation-only; exact signed bindings govern dynamic production models.
+See [routing/configuration and evidence limits](../video_comments/LLM_INTEGRATION.md).
+
 The 2026-11-01 quality-stop repair carries invalid nonempty writer output in
 the existing immutable reply receipt. Rejected final language reviews and invalid
 writer text stop the current engagement session before another comment, nested

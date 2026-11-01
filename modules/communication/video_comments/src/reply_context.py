@@ -21,14 +21,8 @@ def normalize_reply_theme(theme):
 
 def is_general_reply_model(model_id):
     """Conservative role allowlist; a loaded GUI/audio model is not a writer."""
-    if not isinstance(model_id, str) or not model_id.strip():
-        return False
-    name = model_id.lower().replace('_', '-').replace('/', '-')
-    denied = ('tars', 'vision', '-vl', 'embedding', 'embed', 'tts', 'audio',
-              'speech', 'whisper', 'bark', 'kokoro', 'rerank', 'computer-use', 'coder', 'code-')
-    families = ('qwen', 'gemma', 'llama', 'mistral', 'ministral', 'phi-',
-                'deepseek', 'glm-', 'gpt-oss')
-    return not any(part in name for part in denied) and any(part in name for part in families)
+    from modules.infrastructure.shared_utilities.local_model_selection import is_general_language_model
+    return is_general_language_model(model_id)
 
 
 def reply_text_is_publishable(text):

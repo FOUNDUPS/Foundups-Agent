@@ -1,198 +1,119 @@
-# LLM Integration for YouTube Comments
+# YouTube language routing
 
-## Current Studio route (2026-11-01)
+## Shared route (2026-11-01)
 
-The inspected Studio posting path is `CommentProcessor` →
-`IntelligentReplyGenerator`, not the older `LLMCommentGenerator` example below.
-It reads the full comment and bound author/channel/video context, assesses its
-meaning, drafts an answer, and separately reviews the exact final text against
-the original and supplied facts. UI-TARS checks the browser visually; it does
-not write replies or judge their language meaning.
+Studio comments and ordinary/themed live chat use the existing semantic
+`IntelligentReplyGenerator` → `AIGateway.call_youtube_task` boundary. The Gateway
+owns model/provider dispatch for `assess`, `write`, and `review`. No YouTube
+consumer constructs an xAI client, uses the generic social/Grok fallback chain,
+or silently revives embedded Qwen inference after a rejected/unavailable route.
+The retired `YT_ENABLE_GROK_REPLIES` switch has no effect.
 
-The language route tries the configured general-role LM Studio service, then
-embedded general Qwen for stored comments. Legacy xAI Grok drafting requires
-`YT_ENABLE_GROK_REPLIES=true`; it is not an OpenRouter call. Assessment and review
-remain local. The private livechat fallback uses local HTTP only, whereas the
-separate ordinary livechat generator can use its existing xAI client. Do not
-infer the active provider from old class names, a model listing, or this document.
+The model assesses the complete original text and author/receiving-channel/video
+context, then writes an answer, then separately evaluates the exact final reply.
+Live chat reviews the complete final `@mention` string (at most 200 characters),
+including when there is no theme. The reviewed text reaches the sender without
+truncation or extra slogans. UI-TARS remains visual-only. Existing STOP switches,
+identity binding, theme freshness, delivery evidence and unknown-attempt history
+remain the publication owners. A rejected writer or final review halts the current
+commenting session; a restart is not a durable global quality suspension.
 
-The prepared Windows profile currently selects local Gemma 4 E2B through LM
-Studio, disables embedded Qwen and legacy Grok comment replies, and keeps
-publication disabled. The daemon is stopped; configured routing is not evidence
-of a successful inference or live reply.
+## Local incumbent and dynamic orchestration
 
-Runtime credentials come from environment variables loaded by the existing
-startup environment owner. They belong in local ignored configuration or the
-process environment, never in the manifest, prompts, screenshots shared publicly,
-or test output. Authentication headers are separate from model message payloads.
-Offline tests use a fixed credential-free environment and synthetic markers;
-they must not import `main.py` or read actual environment files.
+With no YouTube binding configuration, the Gateway resolves the existing local
+`general` role. An explicit `LM_STUDIO_MODEL` must match that role. The existing
+LM Studio backend verifies exact native residency/instance identity before and
+after inference. It does not start a server, load/download a model, evict another
+model, choose any arbitrary loaded model, or use a tiny triage/vision/coder model.
+Both reasoning-off controls are passed through the shared backend.
 
-The remaining sections describe the historical API-based dialogue implementation.
-Their default-provider and completion labels do not certify the Studio route.
+Dynamic replacement consumes the existing signed production model selection and
+runtime-binding owners. It re-verifies signatures, trusted time, task, surface,
+provider and expiry on each stage; there is no cached authority across calls.
+Only a single `principal` is supported, with task family `youtube_reply` and
+runtime surface `youtube_comments` or `youtube_livechat`. Panels and bindings
+for another task/channel surface cannot become an implicit writer.
 
-## Current Status: FIXED [OK]
+The existing NVIDIA Nemotron owner is
+`ai_gateway/src/model_topology_proposal_lm_studio.py`. It proposes evaluation-only
+topologies. Its output feeds the existing held-out benchmark and signed promotion
+path; it is not production model-selection or posting authority. This integration
+does not weaken that boundary or silently load Nemotron during a reply.
 
-### The Problem
-The original system was **NOT using any LLM** for comment responses. It was just:
-- Pattern matching
-- Random template selection  
-- Hardcoded responses
+## Configuration through the existing environment owner
 
-### The Solution
-Created `llm_comment_generator.py` that integrates:
+These variables contain paths, never credentials or inline model replies:
 
-## Supported LLMs
+| Variable | Meaning |
+| --- | --- |
+| `YT_MODEL_ROUTING_ROOT` | Absolute outside-repository artifact root |
+| `YT_MODEL_RUNTIME_BINDING_RECEIPT_PATH` | Signed/verified runtime binding artifact |
+| `YT_MODEL_SELECTION_RECEIPT_PATH` | Corresponding production selection |
+| `YT_MODEL_CATALOG_SNAPSHOT_PATH` | Canonical catalog evidence |
+| `YT_MODEL_BENCHMARK_EVIDENCE_RECEIPTS_PATH` | Held-out benchmark evidence |
+| `YT_MODEL_PROMOTION_EVIDENCE_RECEIPTS_PATH` | Promotion evidence |
+| `YT_MODEL_PRODUCTION_EVIDENCE_BUNDLE_PATH` | Authenticated evidence bundle |
+| `YT_MODEL_RUNTIME_BINDING_POLICY_PATH` | Exact task/surface admission policy |
+| `YT_MODEL_EVIDENCE_TRUSTED_KEYS_PATH` | Existing verifier's public trust configuration |
 
-### 1. Grok (Default)
-```python
-llm_generator = LLMCommentGenerator(provider="grok")
-```
-- Set environment variable: `GROK_API_KEY` or `XAI_API_KEY`
-- Model: `grok-3-latest`
-- Best for: Witty, consciousness-aware responses
+Stage overrides are `YT_MODEL_<COMMENTS|LIVECHAT>_<ASSESS|WRITE|REVIEW>_BINDING_PATH`
+and the matching `_SELECTION_PATH`; otherwise the common paths apply. Any partial
+or invalid effective configuration fails closed with no local/paid/xAI fallback.
+Use the existing artifact suppliers and verifier bootstrap; hand-written JSON,
+an ENV model name, or a private manifest command cannot mint production authority.
 
-### 2. Claude
-```python
-llm_generator = LLMCommentGenerator(provider="claude")
-```
-- Set environment variable: `ANTHROPIC_API_KEY` or `CLAUDE_API_KEY`
-- Model: `claude-3-sonnet-20240229`
-- Best for: Thoughtful, nuanced dialogue
+Authentication is read separately from `OPENROUTER_API_KEY` or `LM_API_TOKEN`.
+No consumer loads `.env` itself, exposes credentials in command status, or puts
+them in message payloads. The existing startup environment owner may load local
+ignored files. ENV files are not encrypted storage.
 
-### 3. GPT
-```python
-llm_generator = LLMCommentGenerator(provider="gpt")
-```
-- Set environment variable: `OPENAI_API_KEY`
-- Model: `gpt-4`
-- Best for: General conversation
+## OpenRouter free models
 
-## How It Works
+The same verified route supports exact OpenRouter text-model IDs. It rejects
+xAI/Grok and unpinned `openrouter/auto` or `openrouter/free` aliases. Request
+policy caps prompt/completion prices at zero, denies provider data collection,
+disables provider fallback and HTTP redirects, and checks the returned model ID.
+No eligible endpoint/rate limit returns unavailable, never a paid fallback.
+Kimi K3 is rejected before HTTP because its existing 4096-token minimum conflicts
+with this consumer's 2048-token ceiling; the Gateway's K3 contract is preserved.
 
-### Comment Flow with LLM
-```
-1. User posts comment on Move2Japan video
-2. RealtimeCommentDialogue detects it (5-15 seconds)
-3. LLMCommentGenerator creates intelligent response:
-   - Builds context (video, channel, conversation history)
-   - Sends to LLM with tailored prompt
-   - Gets natural language response
-4. Response posted via YouTube API
-5. Conversation continues with context
-```
+The existing Fusion approval-only guard scans the complete system/user/schema
+payload and output. It blocks rather than silently changing text. Raw provider
+bodies, exception messages, rejected drafts and credential values are not logged.
+Nonempty rejected output retains `invalid_reply_text` provenance for the existing
+quality-stop owner. Format/security guards do not establish factual accuracy.
 
-### Example LLM Prompts
+The existing credential-free catalog discovery tool completed a public GET on
+2026-11-01: 355 accepted candidate records, 97 rejected records, including 17
+zero prompt/completion price entries. Examples were
+`google/gemma-4-26b-a4b-it:free`, `google/gemma-4-31b-it:free`, and
+`nvidia/nemotron-3.5-lightning:free`. Listing, pricing, schema support and availability
+can change; these examples are not installed models or approved champions.
+The bounded private discovery receipt is retained with the task evidence.
 
-#### For Questions:
-```
-A YouTube user named John asked a question on Move2Japan:
-"Why did you choose Japan over other countries?"
+Use `scripts/openrouter_model_catalog_snapshot_once.py` for explicit catalog
+refresh, then the existing catalog bridge, benchmark, signed promotion and runtime
+binding suppliers. No production free model was admitted or called during this
+repair; the current credential-rotation/startup guards remain in force.
 
-Video context: Moving to Japan - My Story
-Previous conversation: [if any]
+Official contracts: [free models](https://openrouter.ai/collections/free-models),
+[provider policies](https://github.com/OpenRouterTeam/docs/blob/main/guides/routing/provider-selection.mdx),
+[privacy](https://github.com/OpenRouterTeam/docs/blob/main/guides/privacy/provider-logging.mdx).
 
-Generate a helpful, informative response that:
-1. Directly answers their question
-2. Is friendly and conversational
-3. Encourages further dialogue
-4. Stays under 400 characters
+## Legacy consumers and evidence limits
 
-Response: [LLM generates here]
-```
+The historical `LLMCommentGenerator` now delegates to the same semantic owner,
+requires captured original identity/context, and returns no template on failure.
+Its inactive nested-dialogue caller cannot mutate the reviewed text afterward.
+This does not qualify nested/API publishing; that path still lacks the Studio
+submission owner's safeguards and is not enabled by this work.
 
-#### For Consciousness Triggers:
-```
-A YouTube user named Sarah posted a consciousness-aware comment:
-"[U+270A][U+270B][U+1F590] This video really opened my eyes!"
+Live-chat consciousness commands reuse the channel-bound reviewed generator.
+After persona/channel changes their adapter is rebound; requester privileges do
+not become the target author's role. Display names/string memories are not author
+channel IDs. Missing or ambiguous captured identity yields no language reply.
 
-Generate an engaging, consciousness-themed response that:
-1. Acknowledges their awakened state
-2. References the [U+270A][U+270B][U+1F590] progression
-3. Is friendly and encouraging
-4. Stays under 400 characters
-
-Response: [LLM generates here]
-```
-
-## Fallback System
-
-If LLM is unavailable (no API key, quota exceeded, etc.):
-1. Falls back to `AgenticChatEngine` 
-2. Uses template-based responses
-3. Still maintains conversation context
-4. Logs warning but continues operating
-
-## Setup Instructions
-
-### 1. Set API Key
-```bash
-# For Grok (recommended)
-export GROK_API_KEY="your-grok-api-key"
-
-# For Claude
-export ANTHROPIC_API_KEY="your-claude-api-key"
-
-# For GPT
-export OPENAI_API_KEY="your-openai-api-key"
-```
-
-### 2. Run the System
-```bash
-PYTHONIOENCODING=utf-8 python modules/communication/video_comments/tests/test_poc_dialogue.py
-```
-
-### 3. Monitor Logs
-```
-[BOT] Using LLM for intelligent comment responses  # Success
-[U+26A0]️ No LLM available, using template responses   # Fallback mode
-```
-
-## Benefits of LLM Integration
-
-### Before (Template-based):
-- Generic responses: "Thanks for your comment!"
-- No real understanding
-- Repetitive patterns
-- Can't handle complex questions
-
-### After (LLM-powered):
-- Natural, contextual responses
-- Understands questions and intent
-- Maintains conversation flow
-- Personality and engagement
-
-## Cost Considerations
-
-### API Usage:
-- Grok: ~$0.001 per comment response
-- Claude: ~$0.002 per comment response  
-- GPT-4: ~$0.003 per comment response
-
-### Optimization:
-- Cache common responses
-- Limit response length (400 chars)
-- Use context pruning
-- Batch similar questions
-
-## Testing
-
-```bash
-# Test with specific video
-python test_poc_dialogue.py --video VIDEO_ID
-
-# Test LLM connection
-python test_llm_integration.py
-
-# Monitor real-time
-python test_poc_dialogue.py
-```
-
-## Conclusion
-
-The system now has **proper LLM integration** for intelligent YouTube comment responses. It can:
-- [OK] Generate natural language responses
-- [OK] Understand context and questions
-- [OK] Maintain conversation threads
-- [OK] Fall back gracefully if LLM unavailable
-- [OK] Support multiple LLM providers
+Tests use explicit credential-free children, mocked providers and private temp
+files with real network/credential-file access denied. Passing fixtures proves
+routing and mechanics, not actual model semantic quality, YouTube selectors,
+live delivery, daemon startup, or production promotion evidence.

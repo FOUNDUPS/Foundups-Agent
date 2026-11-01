@@ -161,28 +161,10 @@ class MessageProcessor:
         self.emoji_limiter = EmojiResponseLimiter() if EmojiResponseLimiter else None
         self.agentic_improvement = AgenticSelfImprovement() if AgenticSelfImprovement else None
         
-        # Initialize Grok and consciousness handlers FIRST
-        # Try to get LLMConnector for Grok, otherwise use simple fact checker
-        try:
-            from modules.ai_intelligence.rESP_o1o2.src.llm_connector import LLMConnector
-            # Check for Grok/xAI API key
-            if os.environ.get("GROK_API_KEY") or os.environ.get("XAI_API_KEY"):
-                # Use Grok 3 - latest flagship model with enhanced consciousness capabilities
-                llm_connector = LLMConnector(model="grok-3")  
-                self.grok = GrokIntegration(llm_connector)
-                logger.info("[OK] Grok 3 LLM integration initialized - 0102 consciousness online!")
-            else:
-                logger.warning("No Grok API key found, using SimpleFactChecker fallback")
-                from modules.communication.livechat.src.simple_fact_checker import SimpleFactChecker
-                self.simple_fact_checker = SimpleFactChecker(self.memory_dir)
-                self.grok = None
-        except Exception as e:
-            logger.warning(f"Could not initialize Grok LLM: {e}, using SimpleFactChecker")
-            # Fallback to simple fact checker
-            from modules.communication.livechat.src.simple_fact_checker import SimpleFactChecker
-            self.simple_fact_checker = SimpleFactChecker(self.memory_dir)
-            self.grok = None
-            
+        # Legacy consciousness adapter delegates to the bound, reviewed consumer.
+        # It never constructs a provider client or accepts provider credentials.
+        self.grok = GrokIntegration(self.intelligent_reply)
+
         self.sentiment_engine = AgenticSentiment0102()
         self.consciousness = ConsciousnessHandler(self.sentiment_engine, self.grok)
 
@@ -240,6 +222,8 @@ class MessageProcessor:
             bot_channel_id=bot_channel_id,
             stream_title=stream_title,
         )
+        if getattr(self, 'grok', None) is not None:
+            self.grok.reply_generator = self.intelligent_reply
 
     def process_message(self, message: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -671,6 +655,9 @@ class MessageProcessor:
                     response = self.consciousness.process_consciousness_command(
                         message_text, author_id, author_name, role
                     )
+                    from modules.communication.livechat.src.llm_integration import ModelReplyRequest
+                    if isinstance(response, ModelReplyRequest):
+                        return await self._resolve_model_command(response)
                     if response:
                         logger.info(f"✊✋🖐 Consciousness command response for {author_name}")
                         # Mark this as a consciousness response
@@ -738,6 +725,9 @@ class MessageProcessor:
                     logger.warning(f"[AI][GAME] QUIZ DETECTED IN MESSAGE_PROCESSOR! Sending to handle_whack_command")
                 is_member = processed_message.get("is_member", False)
                 response = self._handle_whack_command(message_text, author_name, author_id, role, is_member)
+                from modules.communication.livechat.src.llm_integration import ModelReplyRequest
+                if isinstance(response, ModelReplyRequest):
+                    return await self._resolve_model_command(response)
                 if response:
                     # Handle list responses (e.g., /help returns multiple messages)
                     if isinstance(response, list):
@@ -980,6 +970,25 @@ class MessageProcessor:
             logger.error(f"[FAIL] Error generating response for {author_name}: {e}")
             return None
     
+    async def _resolve_model_command(self, request):
+        """Keep command inference inside the existing bounded thread/cancel owner."""
+        from modules.communication.livechat.src.llm_integration import ModelReplyRequest
+        from modules.communication.livechat.src.operator_command_queue import load_active_theme
+        if not isinstance(request, ModelReplyRequest):
+            return request
+        def current():
+            generator = self.intelligent_reply
+            return (getattr(self, 'channel_id', None) == request.receiving_channel_id
+                    and getattr(self, 'stream_title', None) == request.stream_title
+                    and getattr(generator, 'channel_id', None) == request.receiving_channel_id
+                    and getattr(generator, 'stream_title', None) == request.stream_title)
+        if not current():
+            return None
+        response = await self._await_intelligent_reply(
+            theme_snapshot=load_active_theme('livechat'), message=request.message,
+            username=request.username, user_id=request.user_id, role=request.role)
+        return response if current() else None
+
     async def _await_intelligent_reply(self, *, theme_snapshot=None, **kwargs):
         """Keep polling responsive and invalidate queued/late work after the bounded wait."""
         import asyncio
@@ -992,7 +1001,7 @@ class MessageProcessor:
             response = await asyncio.wait_for(asyncio.to_thread(
                 self.intelligent_reply.generate_reply, **kwargs, cancel_event=cancel,
                 expected_theme_snapshot=snapshot), timeout=10.0)
-            if snapshot is not None and (not isinstance(response, ReviewedLivechatReply)
+            if (not isinstance(response, ReviewedLivechatReply)
                     or response.theme_snapshot != snapshot or response.reviewed_text != str(response)):
                 return None
             return response
@@ -1343,7 +1352,7 @@ class MessageProcessor:
                 else:
                     logger.info(f"[SEARCH] [FULL FC] Analyzing ALL comments from @{target}")
 
-                return self.grok.fact_check(target, role, emoji_seq)
+                return await self._resolve_model_command(self.grok.fact_check(target, role, emoji_seq))
             elif hasattr(self, 'simple_fact_checker'):
                 return self.simple_fact_checker.fact_check(target, requester, role, emoji_seq)
             else:
@@ -1398,6 +1407,7 @@ class MessageProcessor:
                         all_messages[username].append({
                             'username': username,
                             'message': message_text,
+                            'channel_id': (msg.get('author_id') or msg.get('user_id') or msg.get('channel_id')) if isinstance(msg, dict) else None,
                             'timestamp': ''  # String format doesn't include timestamp
                         })
 
@@ -1416,6 +1426,7 @@ class MessageProcessor:
                             all_messages[username].append({
                                 'username': username,
                                 'message': message_text,
+                                'channel_id': (msg.get('author_id') or msg.get('user_id') or msg.get('channel_id')) if isinstance(msg, dict) else None,
                                 'timestamp': ''
                             })
 
@@ -1522,7 +1533,8 @@ class MessageProcessor:
             "last_global_maga_response": self.last_global_maga_time,
             "trigger_emojis": self.trigger_emojis,
             "memory_dir": self.memory_dir,
-            "grok_enabled": self.grok is not None,
+            "grok_enabled": False,  # Legacy status key; no direct xAI client.
+            "model_router_enabled": self.grok is not None,
             "consciousness_enabled": self.consciousness is not None,
             "pqn_enabled": self.pqn_orchestrator is not None
         }
