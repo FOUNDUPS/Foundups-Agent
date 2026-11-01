@@ -1,5 +1,13 @@
 # ROADMAP - FoundUps Simulator
 
+## 2026-11-01 — B03-P1 perimeter decision, implementation held
+
+The [accepted perimeter](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p1-perimeter-v1)
+is SPECIFIED_NOT_IMPLEMENTED: synthetic source/full-budget admission, posted debit,
+retained omissions. Arithmetic NOT_SELECTED/code HOLD; future numerical acceptance
+must precede code. Global unit/precision D, B05 funding and chain gates stay blocked.
+No new runtime, quote consumer or economic test is delivered by this decision.
+
 ## 2026-11-01 — B11-S1 connected matching control
 
 - [x] Original 182 and focused 209 pass; desired 27 first produced 14 pass/13 fail.
@@ -7,7 +15,7 @@
   independent five pass/one fixture failure is retained with setup-only correction.
 - [x] Independent confirmation of broader 1,236.
 - [x] Actual CLI check, eight Python/three Node package consumers; same 1,481/caps.
-- [ ] Security, protected PR/main and PC readback; B03/B05/B08/full B11 stay blocked.
+- [x] B11-S1 PR2294: 23 PR/21 main checks, 22 PC bindings/501 evidence files; broader gates stay blocked.
 
 ## 2026-11-01 — B09 hourly readiness candidate
 

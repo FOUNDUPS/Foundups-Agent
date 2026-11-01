@@ -2,6 +2,91 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## B03-P1 perimeter v1
+
+**2026-11-01: accepted perimeter decision; SPECIFIED_NOT_IMPLEMENTED.**
+Root 0102 selects these source/book choices under 012 architecture delegation,
+against main `4ecd01ba464f5269006afb03d6500e42a212288b`; no enforcement is claimed.
+Arithmetic is NOT_SELECTED and code is HOLD pending its separate versioned decision
+and independently frozen useful integer/fractional acceptance. Global denomination
+and UPS precision remain D/CONFLICTING/BLOCKED; no runtime or chain activation.
+
+### Selected perimeter and remaining decisions
+
+1. Specify prospective opt-in `sim_native_epoch_transfer_v1`; preserve legacy
+   defaults, standalone pool callers and sealed receipts. No new API/metadata owner.
+   Connect the actual Mesa demurrage/pool tail, not reward transport probes.
+2. The selected source is this model's native `pavs_treasury_balance`, with explicit
+   synthetic opening/redistribution provenance. A finite number is not external BTC,
+   authenticated backing, custody or solvency. Use current source stock after prior
+   serialized CABR consumption; subtract accepted pending/ambiguous obligations; mirrors add none.
+3. Retain the request `R = native(total_stakes * 0.01)` and existing pool shares,
+   activity/order, shared-position hurdle and first-crossing arithmetic. Require
+   full nominal `R <= available` before publication. Insufficiency refuses the whole
+   epoch; do not clip rewards, reweight recipients, borrow or mint the shortfall.
+4. Selected destinations are actual participant `ups_balance` gains and the
+   distributor's `accumulated_fund` gain. Their receipts are evidence, not more assets.
+   Drip/epoch/demurrage totals and pool allocations are counters, not extra cash.
+   Human/agent and phantom books outside this path are not summed into its source.
+5. Under later selected arithmetic, require `source_before - source_after = C`,
+   where `C = sum(actual participant gains) + actual fund gain`, with `0 <= C <= R`.
+   Each actual gain must equal its authorized planned credit, not merely a nominal
+   sum. Unallocated/empty-tier/hurdle-withheld `R-C` stays at the source: no new
+   recipient, burn, residual account or second fund/network credit is selected.
+6. Arithmetic/quantization is NOT_SELECTED. Exact native-state-delta refusal may
+   reject useful fractional epochs; a sum check misses credits swallowed by a large
+   balance. Freeze useful integer/fractional/large-balance cases before code. If native
+   representation fails that bar, select atom scale/rounding/residual rights explicitly
+   as C; neither eight-decimal Fi nor a satoshi price chooses UPS precision.
+7. No fee or UPS/BTC conversion is selected. The pool's historical 1,000-sat hurdle
+   convention remains explicit debt, not redemption authority. Quote/SmartDAO/surplus/
+   spawn/seed units and fee carry require separate C/D decisions. The existing quote's
+   `decimal_view_v1` rational fields and `genesis_notional`/`reserve_ratio` branches
+   identify captured simulator values; context/tick/hash prove no backing or freshness.
+8. Prepare source, participants/tiers/hurdles/fund/drip, receipt copies and ledger
+   before callback-free publication under trusted host serialization. Bind mode,
+   source/model context, epoch and request; exact retry must not debit twice.
+   Preexisting ledger evidence is not source consumption; observers remain post-commit.
+   No-effect preparation refusal covers ONLY this epoch tail: earlier Mesa decay,
+   counters and events are not rolled back. Demurrage wallets copied from
+   `_token_economy` do not establish a globally canonical wallet or supply perimeter.
+9. Failed pre-commit tails are unaccepted requests, not funded promises. Retry
+   keeps identity, revalidates source and does not repeat the prior decay pass.
+   This version admits no asynchronous/external effects. Accepted pending amounts
+   must reserve once by operation identity; ambiguity remains unavailable until
+   reconciliation, never automatically refunded or reissued. No current reservation
+   book proves zero exposure; unknown imported source/mode/pending state refuses.
+10. New runs only. No opening funds/migration follows from equal numbers or hashes.
+    Source debits can cross the existing 10%/50% treasury-health boundaries and
+    change later redistribution: this is an explicit C effect despite unchanged
+    formulas. No end-to-end decay conservation, durable recovery or funded claim.
+
+### Required acceptance to freeze before implementation
+
+- Preserve old ASTs/oracles/default traces, no-arg construction and standalone
+  MetaGPT/fee-simulation behavior; label their non-funded scopes separately.
+- Sufficient/equal/insufficient nominal budget; actual source loss equals all
+  posted gains once. Empty tiers/withheld shares stay at source without new recipients.
+- Useful integer and fractional cohorts, small credits into large balances,
+  nonrepresentable results/nonfinite/coercible state/overflow; no participating writes
+  on refusal. Select arithmetic outcomes explicitly; these are not executed cases.
+- Tree/hash/preparation failure and exact/conflicting/late retries preserve the
+  epoch-tail boundary. CABR/epoch order consumes one source, never duplicated capacity.
+- Pending/ambiguous obligations reduce availability; copied/cumulative books and
+  ledger hashes cannot create funds. Unknown recovery state cannot release or reissue.
+- Actual Mesa retry avoids repeated decay; post-commit observer failure does not
+  undo/repeat funding. Test both sides of 10%/50% health and subsequent redistribution.
+- Retain D/CONFLICTING/BLOCKED and separate legacy q=1, reserve genesis q=1,000/
+  dynamic observations. No quote consumption, fee selection or chain parity is implied.
+
+Existing owners: `mesa_model.py:1038-1121`, `_mesa_epoch.py:18-48`,
+`economics/pool_distribution.py:669-806`, `economics/epoch_ledger.py:197-238`,
+`economics/demurrage.py:416-438,491-497,598-619`; no new production module/framework.
+Reuse epoch-ledger, staker-hurdle and layer-D runtime test owners after new allocation.
+Freeze source/publication API and WSP62 budgets separately; this is the 19/P0 B03
+decision prerequisite, not completion of B03/B05. Decision -> acceptance -> code
+qualification -> separate activation; no new test, source or runtime behavior here.
+
 ## Agent-wallet policy security allocation — 2026-11-01
 
 Base `43b3b66cce8a01f28fb08577a9db84f731e50455`; WSP15 17/P0 (C3/I5/D5/Impact4),
