@@ -1,3 +1,12 @@
+## 2026-11-01 — Bind reviewed UI-TARS runtime bytes
+
+Regenerate the existing1481-member backend manifest after the UI-TARS leaf repair
+and refresh its existing compatibility/test digest pins. Canonical b18b3987...
+is independently predicted from the single normalized-leaf delta. Membership,
+API/schema, limits, bridge hashes and semantic assertions remain unchanged.
+This is repository binding maintenance, not an installed extension/backend update.
+All8 generator/index cases and3 existing Node compatibility/preflight/recovery owners pass.
+
 ## 2026-11-01 — Bind private YouTube operator directives
 
 Regenerate the existing backend closure and both digest pins for the queue's

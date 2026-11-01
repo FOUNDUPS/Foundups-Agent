@@ -2694,7 +2694,7 @@
     "modules/infrastructure/foundups_vision/src/chrome_preflight_check.py": "9eb1d6b2957fdddf0c153c48fef747887ef7e701657fc8d89efeb6b71dd67c9b",
     "modules/infrastructure/foundups_vision/src/gemini_vision_bridge.py": "fa920b77f0ac3095221e873242cde17fe8125525adcbb73b79a97e5a38f16249",
     "modules/infrastructure/foundups_vision/src/studio_account_switcher.py": "ca0ab7a8e440bb65b72595cba53d3d92d1533decc3cd82e0ef765581b739d3aa",
-    "modules/infrastructure/foundups_vision/src/ui_tars_bridge.py": "72fef468318c7bb3fbe73342f97ea42e5bab82532389e8fc873c208f3b56b19b",
+    "modules/infrastructure/foundups_vision/src/ui_tars_bridge.py": "585d807ed6afec579775d549df5fa437a459f7456462ea04e266da1193a1b14d",
     "modules/infrastructure/foundups_vision/src/vision_executor.py": "0de0c4576ddf79225dfd20c68ce32005fec1c4d16a60e665077f732ce9189a3d",
     "modules/infrastructure/foundups_vision/src/vision_training_collector.py": "6c0f55336e874b9b602330a906abfd463bdcaed7ee8ec3ff5dd40c27f3efbd85",
     "modules/infrastructure/github_orchestrator/__init__.py": "e5bd37f8163c4c1c61207a0461eb7b71b18ee561a703b7b0fa9c599e30773841",

@@ -1,3 +1,11 @@
+## 2026-11-01 — UI-TARS leaf manifest consistency
+
+Keep1481 members and all existing caps/semantic contracts. Refresh the existing
+backend compatibility digest after canonical regeneration of the reviewed UI-TARS
+source hash. Run generator/index cases after staging and existing Node backend
+compatibility, preflight and blocked-recovery contracts. No installed activation.
+Local result:8/8 generator/index cases and all3 existing Node owners pass.
+
 ## 2026-10-30: Held-out receipt runtime integrity binding
 
 Regenerate the existing 1477-source manifest after the held-out receipt producer

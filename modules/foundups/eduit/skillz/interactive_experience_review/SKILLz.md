@@ -1,7 +1,7 @@
 ---
 name: interactive_experience_review
 description: Audit and iteratively repair audience-specific games and web interfaces, including EDUIT Storytime timing, touch controls, learning cues, scoring and feedback. Use before implementation and after inspecting each changed output.
-version: 0.3.3
+version: 0.3.4
 intent_type: AUDIT
 promotion_state: prototype
 ---
@@ -147,6 +147,15 @@ postcondition over time. A static inference, valid coordinates or a successful
 click is not an end-to-end playthrough. Keep raw proposal, actual action and
 independent result separate. No installs, unattended actuator or WRE promotion
 is implied by this bounded verification. Retain a parser/model blocker honestly.
+
+Keep artifact integrity inspection separate from player actions. Do not use
+`downloadMedia` on hidden stylesheet/script links to obtain code hashes: a failed
+lookup can still open the browser's native Save As dialog. Prefer the canonical
+source/archive binding or a supported read-only resource export; record an
+unsupported live byte hash as unverified. After an unexpected download/export
+timeout, stop keyboard/coordinate tests until any owned native dialog is
+identified and cancelled. Never let the next Enter press confirm a save, choose
+an unrelated directory, or change browser download settings to hide the problem.
 
 Use the same frozen failing case after repair, then held-out input sequences and
 the published revision. Record the previous test's coverage gap and repair that

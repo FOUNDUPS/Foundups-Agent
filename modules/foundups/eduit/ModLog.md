@@ -1,5 +1,24 @@
 # EDUIT ModLog
 
+## 2026-11-01 — Verification side effect and runtime binding follow-up
+
+Live21's independent asset check incorrectly used downloadMedia on a hidden CSS
+link.012 reported native Save As for director.css. Stop that route and all further
+keyboard tests; no file exists at the shown training_data/youtube/director.css
+path, and no save was confirmed. Both native inventories expose only minimized
+unrelated Chrome parents, not a uniquely targetable owned dialog; do not restore
+or send blanket Escape. Ask012 for closed-state before remaining keyboard tests.
+Review candidate0.3.4 now separates artifact inspection from the player lane,
+retains unsupported live byte-hash limits and requires resolving unexpected
+owned native dialogs. Existing live word→five pages→movie evidence predates this
+side effect and remains separately bound; no changed PWA payload is implied.
+
+CIc5 then caught the transitive UI-TARS source hash in the RedDog runtime manifest.
+Use the existing generator and documented digest-pin maintenance; preserve
+membership, caps and semantic tests. No backend/extension activation is allowed.
+Independent one-leaf binding review passes; all8 generator/index cases and3
+existing Node compatibility/preflight/recovery owners pass locally after staging.
+
 ## 2026-11-01 — One child action plays the complete book
 
 WSP00/15/22/50/84/97,15/P1(C3/I4/D4/Impact4). Retrieval retained UNKNOWN Holo

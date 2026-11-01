@@ -1,3 +1,12 @@
+## 2026-11-01 — UI-TARS leaf binding refresh
+
+CI caught stale backend bytes after the reviewed UI-TARS repair. Regenerate with
+the existing owner; only that LF-normalized leaf hash changes,1481 members fixed.
+Refresh both existing digest literals to b18b39879bebac8f05cade43e884280ba656016b0f3389580b0412aa6525ee26.
+Stage manifest/source/pins before all8 generator/index cases. No semantic oracle,
+member list, byte cap, generator or installed-runtime authority change.
+All8 generator/index cases and3 existing Node compatibility/preflight/recovery owners pass.
+
 ## 2026-11-01 — Private operator directives backend closure
 
 The canonical registry generator reports1800 tracked tests,260 quarantined,
