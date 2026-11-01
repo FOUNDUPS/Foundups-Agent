@@ -1,5 +1,14 @@
 # YouTube Shorts AI Generator
 
+The existing private 012 queue now controls scoped Shorts pause, topics and
+interval. Generation binds the selected topic/policy through the final upload
+handoff; a changed directive retains the artifact privately. Uploader identity
+comes from its existing authenticated channel owner. Durable claims prevent
+uncertain same-byte uploads from being retried and preserve recent-attempt
+cadence across DAE restart. A returned URL means upload accepted, with independent
+saved-state verification pending. No live generation/upload was used to qualify
+this change. See INTERFACE for scope and restart limits.
+
 **Domain**: `communication/`
 **Status**: POC (Proof of Concept)
 **WSP Compliance**: WSP 3, 49, 80, 54

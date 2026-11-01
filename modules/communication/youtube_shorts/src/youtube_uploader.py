@@ -8,6 +8,7 @@ No caller-facing API returns an OAuth credential or token path.
 from __future__ import annotations
 
 import logging
+import hashlib
 import mimetypes
 import os
 from dataclasses import dataclass
@@ -21,6 +22,14 @@ logger = logging.getLogger(__name__)
 
 class YouTubeUploadError(Exception):
     """YouTube publishing failed without returning a verified video identity."""
+
+
+class YouTubeUploadPolicyBlocked(YouTubeUploadError):
+    """No upload started; a fresh private directive or public gate refused it."""
+
+
+class YouTubeUploadOutcomeUnknown(YouTubeUploadError):
+    """An upload started; retain its durable claim and never automatically retry."""
 
 
 @dataclass(frozen=True)
@@ -203,6 +212,8 @@ class YouTubeShortsUploader:
         playlist_id: Optional[str] = None,
         made_for_kids: bool = False,
         contains_synthetic_media: bool = False,
+        policy_surface: Optional[str] = None,
+        policy_fingerprint: Optional[str] = None,
     ) -> YouTubePublishResult:
         """Upload one verified media file and optionally attach it to a playlist."""
         path = Path(video_path)
@@ -235,7 +246,14 @@ class YouTubeShortsUploader:
             resumable=True,
             chunksize=8 * 1024 * 1024,
         )
+        policy, artifact = None, None
+        if policy_surface == "shorts":
+            policy, artifact = self._claim_shorts_upload(media, policy_fingerprint)
+        elif policy_surface is not None:
+            raise YouTubeUploadPolicyBlocked("Unsupported upload policy surface")
+        started = False
         try:
+            started = True
             request = self.youtube.videos().insert(
                 part="snippet,status",
                 body=body,
@@ -254,6 +272,9 @@ class YouTubeShortsUploader:
             video_id = str(response.get("id", "")).strip()
             if not video_id:
                 raise YouTubeUploadError("YouTube upload completed without a video ID")
+
+            if policy is not None:
+                self._observe_upload_accepted(policy, artifact, video_id)
 
             playlist_item_id = None
             if playlist_id:
@@ -277,11 +298,65 @@ class YouTubeShortsUploader:
                 playlist_id=playlist_id,
                 playlist_item_id=playlist_item_id,
             )
-        except YouTubeUploadError:
-            raise
         except Exception as exc:
-            logger.error("[UPLOAD-ERROR] Upload failed: %s", exc)
-            raise YouTubeUploadError(f"Upload failed: {exc}") from exc
+            logger.error("[UPLOAD-ERROR] Upload outcome unknown (%s)", type(exc).__name__)
+            if started:
+                raise YouTubeUploadOutcomeUnknown("Upload started; independent readback required") from exc
+            raise
+
+    def get_shorts_policy(self):
+        """Read only the authenticated uploader's actual receiving-channel scope."""
+        from modules.communication.livechat.src.operator_command_queue import get_video_policy
+        from modules.communication.livechat.src.automation_gates import gate_snapshot
+        channel_id = self.channel_info.get("id") if isinstance(self.channel_info, dict) else None
+        gates = gate_snapshot()
+        if not isinstance(channel_id, str) or not channel_id or gates.get("stop_active") or gates.get("yt_automation") is not True:
+            raise YouTubeUploadPolicyBlocked("Receiving identity or public gate unavailable")
+        try:
+            policy = get_video_policy(channel_id, surface="shorts")
+        except Exception as exc:
+            raise YouTubeUploadPolicyBlocked("Private upload policy unavailable") from exc
+        if (not isinstance(policy, dict) or policy.get("available") is not True
+                or policy.get("blocked") or policy.get("shorts_enabled") is False):
+            raise YouTubeUploadPolicyBlocked("Shorts upload paused or policy unavailable")
+        return policy
+
+    def _claim_shorts_upload(self, media, expected_fingerprint=None):
+        from modules.communication.livechat.src.operator_command_queue import claim_video_policy_upload
+        # Hash the descriptor retained by MediaFileUpload, never a later path
+        # lookup which may name different bytes after an atomic replacement.
+        source = media.stream()
+        before = os.fstat(source.fileno())
+        position = source.tell()
+        digest = hashlib.sha256()
+        try:
+            source.seek(0)
+            for chunk in iter(lambda: source.read(1024 * 1024), b""):
+                digest.update(chunk)
+        finally:
+            source.seek(position)
+        after = os.fstat(source.fileno())
+        if (before.st_size, before.st_mtime_ns) != (after.st_size, after.st_mtime_ns):
+            raise YouTubeUploadPolicyBlocked("Upload artifact changed during hashing")
+        policy = self.get_shorts_policy()  # final gate after generation/media preparation
+        if expected_fingerprint is not None and policy["fingerprint"] != expected_fingerprint:
+            raise YouTubeUploadPolicyBlocked("Generation directive changed before upload")
+        artifact = digest.hexdigest()
+        result = claim_video_policy_upload(self.channel_info["id"], artifact,
+            command_ids=policy["matched_command_ids"], fingerprint=policy["fingerprint"])
+        if not isinstance(result, dict) or result.get("claimed") is not True:
+            raise YouTubeUploadPolicyBlocked("Upload already claimed or private claim unavailable")
+        final = os.fstat(source.fileno())
+        if (after.st_size, after.st_mtime_ns) != (final.st_size, final.st_mtime_ns):
+            raise YouTubeUploadPolicyBlocked("Claimed upload stream changed; retain unknown claim")
+        return policy, artifact
+
+    def _observe_upload_accepted(self, policy, artifact, video_id):
+        from modules.communication.livechat.src.operator_command_queue import record_video_policy_observation
+        record_video_policy_observation(policy["matched_command_ids"], surface="shorts",
+            channel_id=self.channel_info["id"], video_id=video_id, outcome="unknown",
+            detail={"artifact_sha256": artifact, "policy_fingerprint": policy["fingerprint"],
+                    "reason": "upload_accepted_independent_readback_required"})
 
     def publish_foundups_media(
         self,
@@ -322,6 +397,7 @@ class YouTubeShortsUploader:
         description: str,
         tags: Optional[list[str]] = None,
         privacy: str = "public",
+        *, policy_fingerprint: Optional[str] = None,
     ) -> str:
         """Backward-compatible Shorts helper returning only the Shorts URL."""
         if "#shorts" not in description.lower():
@@ -332,6 +408,8 @@ class YouTubeShortsUploader:
             description,
             tags=tags,
             privacy=privacy,
+            policy_surface="shorts",
+            policy_fingerprint=policy_fingerprint,
         )
         return result.shorts_url
 

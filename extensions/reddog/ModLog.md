@@ -1,3 +1,13 @@
+## 2026-11-01 — Bind private YouTube operator directives
+
+Regenerate the existing backend closure and both digest pins for the queue's
+private policy owner/validator and scheduler policy helper. Exact runtime
+membership is1481; the contract rejects1482. The existing330KiB manifest,
+2MiB per-source and32MiB total limits remain unchanged (LF334850 bytes,
+CRLF337885 bytes). Existing Node compatibility, preflight, blocked-recovery and
+package-manifest checks pass, alongside all8 manifest/index cases. This packages
+the qualified local source; it does not establish live YouTube delivery.
+
 ## 2026-10-30: Held-out receipt runtime integrity binding
 
 Regenerate the existing 1477-source manifest after the held-out receipt producer

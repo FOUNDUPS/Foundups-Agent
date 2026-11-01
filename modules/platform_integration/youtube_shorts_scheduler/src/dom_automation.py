@@ -336,6 +336,9 @@ class YouTubeStudioDOM:
     """
     DOM interaction layer for YouTube Studio automation.
     """
+    _policy_timezone = None
+    _policy_cycle_attempts = 0
+    _video_policy_edit = None
 
     def __init__(self, driver, *, capture_diagnostics: bool = True):
         """
@@ -2611,6 +2614,7 @@ class YouTubeStudioDOM:
 
     def navigate_to_video(self, video_id: str):
         """Navigate to video edit page."""
+        self._video_policy_edit = None
         url = f"https://studio.youtube.com/video/{video_id}/edit"
         logger.info(f"[DOM] Navigating to video: {video_id}")
         self.driver.get(url)
@@ -2656,7 +2660,114 @@ class YouTubeStudioDOM:
         )
         logger.debug(f"[DOM] {field_name} set via JS ({len(text)} chars)")
 
+    def begin_policy_edit(self, channel_id=None, video_id=None, *, allow_metadata=True):
+        """Capture authoritative detail fields before this owner changes them."""
+        from .video_policy import EditSession, DETAIL_SNAPSHOT_SCRIPT
+        session = EditSession.capture(self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT),
+                                      channel_id, video_id)
+        session.allow_metadata = allow_metadata
+        try:
+            session.window_handle = self.driver.current_window_handle
+        except Exception:
+            session.window_handle = None
+        self._video_policy_edit = session
+        return session
+
+    def begin_policy_cycle(self):
+        self._policy_cycle_attempts = 0
+        self._video_policy_edit = None
+
+    def _policy_edit(self):
+        session = getattr(self, "_video_policy_edit", None)
+        return session if session is not None else self.begin_policy_edit(
+            getattr(self, "_last_shorts_channel_id", None))
+
+    def _write_policy_fields(self, desired):
+        from .video_policy import DETAIL_SNAPSHOT_SCRIPT, VideoPolicyBlocked
+        session = self._policy_edit()
+        for name, value in desired.items():
+            session.check(self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT))
+            if value != session.staged[name]:
+                getattr(self, "_edit_" + name + "_unchecked")(value)
+                snapshot = self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT)
+                expected = dict(session.staged, **{name: value})
+                if any(snapshot.get(key) != text for key, text in expected.items()):
+                    raise VideoPolicyBlocked("draft_write_not_verified")
+                session.staged[name] = value
+
+    def _stage_policy_field(self, name, value):
+        from .video_policy import DETAIL_SNAPSHOT_SCRIPT
+        session = self._policy_edit()
+        proposed = dict(session.proposed, **{name: value})
+        desired = session.desired(self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT), proposed)
+        self._write_policy_fields(desired)
+
     def edit_title(self, new_title: str):
+        self._stage_policy_field("title", new_title)
+
+    def edit_description(self, new_description: str):
+        self._stage_policy_field("description", new_description)
+
+    def _guard_policy_save(self):
+        from .video_policy import DETAIL_SNAPSHOT_SCRIPT, scheduling_policy, VideoPolicyBlocked
+        session = self._policy_edit()
+        desired = session.desired(self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT))
+        self._write_policy_fields(desired)
+        snapshot = self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT)
+        if session.desired(snapshot) != desired:
+            raise VideoPolicyBlocked("policy_changed_during_restore")
+        if getattr(self, "_policy_scheduling", False):
+            session.policies["scheduling"] = scheduling_policy(
+                session.channel_id, session.video_id, getattr(self, "_policy_cycle_attempts", 0))
+        return session
+
+    def _submit_policy_save(self, callback):
+        from .video_policy import VideoPolicyBlocked, require_public_gate, claim_save
+        session = self._guard_policy_save()
+        require_public_gate()
+        claim_save(session)
+        session.submitted()
+        if getattr(self, "_policy_scheduling", False):
+            self._policy_cycle_attempts = getattr(self, "_policy_cycle_attempts", 0) + 1
+        try:
+            return callback()
+        except Exception as exc:
+            raise VideoPolicyBlocked("submission_started_outcome_unknown") from exc
+
+    def _readback_policy_save(self):
+        """Conditional same-tab clean reload; never discard a foreign draft/prompt."""
+        from .video_policy import DETAIL_SNAPSHOT_SCRIPT, detail_identity, verify_metadata_save
+        session = self._policy_edit()
+        try:
+            before = self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT)
+            detail_identity(before, session.channel_id, session.video_id)
+            if (not session.window_handle or self.driver.current_window_handle != session.window_handle
+                    or before.get("save_disabled") is not True or before.get("prompt_open") is not False
+                    or any(before.get(key) != value for key, value in session.staged.items())):
+                return False
+            old_document = self.driver.find_element(By.TAG_NAME, "html")
+            self.driver.refresh()
+            WebDriverWait(self.driver, 8).until(EC.staleness_of(old_document))
+            after = WebDriverWait(self.driver, 8).until(
+                lambda d: self._policy_reloaded_snapshot(session))
+            if (self.driver.current_window_handle != session.window_handle
+                    or after.get("save_disabled") is not True or after.get("prompt_open") is not False):
+                return False
+            return verify_metadata_save(session, after)
+        except Exception:
+            logger.warning("[DOM] Save readback unavailable; durable outcome remains unknown")
+            return False
+
+    def _policy_reloaded_snapshot(self, session):
+        from .video_policy import DETAIL_SNAPSHOT_SCRIPT
+        snapshot = self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT)
+        if (not isinstance(snapshot, dict) or snapshot.get("channel_id") != session.channel_id
+                or any(snapshot.get(key) != value for key, value in session.staged.items())
+                or snapshot.get("save_disabled") is not True or snapshot.get("prompt_open") is not False):
+            return False
+        return snapshot
+
+    def _edit_title_unchecked(self, new_title: str):
         """Edit video title."""
         import time
         title_input = self.wait_for_element(
@@ -2682,7 +2793,7 @@ class YouTubeStudioDOM:
             logger.debug(f"[DOM] Title send_keys failed ({type(e).__name__}), using JS fallback")
             self._set_text_via_js(title_input, new_title, "Title")
 
-    def edit_description(self, new_description: str):
+    def _edit_description_unchecked(self, new_description: str):
         """Edit video description."""
         import time
         desc_input = self.wait_for_element(
@@ -2740,17 +2851,21 @@ class YouTubeStudioDOM:
                     self.driver.execute_script("arguments[0].scrollIntoView({block:'center'});", el)
                 except Exception:
                     pass
-                self.safe_click(el)
+                self._submit_policy_save(el.click)
                 time.sleep(2.0)
+                self._readback_policy_save()
                 return
             except Exception as exc:
+                from .video_policy import VideoPolicyBlocked
+                if isinstance(exc, VideoPolicyBlocked):
+                    raise
                 last_err = exc
                 continue
 
         # JS fallback: Studio sometimes renders Save as a custom element without stable ids,
         # or behind wrappers that Selenium "clickable" heuristics miss.
         try:
-            clicked = self.driver.execute_script(
+            clicked = self._submit_policy_save(lambda: self.driver.execute_script(
                 """
                 function isVisible(el) {
                   if (!el) return false;
@@ -2764,12 +2879,9 @@ class YouTubeStudioDOM:
                 function clickBest(el) {
                   if (!el) return false;
                   // Prefer inner <button> when present.
-                  try {
-                    const inner = el.querySelector && el.querySelector('button');
-                    if (inner && isVisible(inner)) { inner.click(); return true; }
-                  } catch (e) {}
-                  try { el.click(); return true; } catch (e) {}
-                  return false;
+                  const inner = el.querySelector && el.querySelector('button');
+                  const target = inner && isVisible(inner) ? inner : el;
+                  target.click(); return true;
                 }
 
                 const root = document;
@@ -2785,11 +2897,15 @@ class YouTubeStudioDOM:
 
                 return { clicked: false, found: saveLike.slice(0, 8).map(x => ({id:x.id, text:x.t})) };
                 """
-            )
+            ))
             if isinstance(clicked, dict) and clicked.get("clicked"):
                 time.sleep(2.0)
+                self._readback_policy_save()
                 return
         except Exception as exc:
+            from .video_policy import VideoPolicyBlocked
+            if isinstance(exc, VideoPolicyBlocked):
+                raise
             last_err = exc
 
         raise TimeoutException(f"Save button not found/clickable: {last_err}")
@@ -2912,38 +3028,26 @@ class YouTubeStudioDOM:
             return False
 
     def reschedule_open_set_save(self, date_str: str, time_str: str, video_id: Optional[str] = None) -> bool:
-        """Full reschedule flow for one already-scheduled video (reuses the picker).
-
-        open_scheduled_edit_popup -> set_schedule_date -> set_schedule_time ->
-        click_done -> click_save. Mirrors ``schedule_video`` but enters via the list
-        "Scheduled" label instead of the edit-page visibility dialog, and SKIPS
-        select_schedule_option (the popup is already in scheduled state).
-
-        Returns True only when every step succeeds.
-        """
-        import time as _t
-
-        if not self.open_scheduled_edit_popup(video_id=video_id):
-            return False
-        steps = [
-            ("set_schedule_date", lambda: self.set_schedule_date(date_str)),
-            ("set_schedule_time", lambda: self.set_schedule_time(time_str)),
-            ("click_done", lambda: self.click_done()),
-            ("click_save", lambda: self.click_save()),
-        ]
-        for name, fn in steps:
-            try:
-                fn()
-            except Exception as exc:
-                logger.error(f"[RESCHED] reschedule failed at {name}: {type(exc).__name__}: {exc}")
-                try:
-                    ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()
-                    _t.sleep(0.4)
-                except Exception:
-                    pass
+        """Use the same guarded inline owner; no second page-level Save retry."""
+        from .content_page_scheduler import ContentPageScheduler
+        from .video_policy import inline_identity, VideoPolicyBlocked
+        try:
+            inline_identity(self.driver, video_id=video_id)
+            row = self.driver.execute_script("""
+                const wanted = '/video/' + arguments[0] + '/edit';
+                const rows = Array.from(document.querySelectorAll('ytcp-video-row')).filter(row =>
+                    Array.from(row.querySelectorAll('a[href*="/video/"]')).some(a =>
+                        new URL(a.href, location.href).pathname === wanted));
+                return rows.length === 1 ? rows[0] : null;
+            """, video_id)
+            if row is None:
                 return False
-        logger.info(f"[RESCHED] Rescheduled {video_id or '(first scheduled)'} -> {date_str} {time_str}")
-        return True
+            return ContentPageScheduler(self.driver, self).reschedule_row_inline(
+                row, date_str, time_str, video_id=video_id)
+        except VideoPolicyBlocked:
+            logger.warning("[RESCHED] Fresh policy or target binding refused inline save")
+            return False
+
 
     # =========================================
     # PAGE 3: SCHEDULING DIALOG METHODS
@@ -3436,6 +3540,22 @@ class YouTubeStudioDOM:
         raise TimeoutException("Done/Save button not found/clickable")
 
     def schedule_video(self, date_str: str, time_str: str) -> bool:
+        from .video_policy import scheduling_policy, VideoPolicyBlocked
+        self._policy_scheduling = True
+        try:
+            session = self._policy_edit()
+            session.requested_schedule = {"date": date_str, "time": time_str,
+                "timezone": getattr(self, "_policy_timezone", None), "visibility": "scheduled"}
+            scheduling_policy(session.channel_id, session.video_id,
+                              getattr(self, "_policy_cycle_attempts", 0))
+            return self._schedule_video_workflow(date_str, time_str)
+        except VideoPolicyBlocked:
+            logger.warning("[DOM] Scheduling refused by fresh directive guard")
+            return False
+        finally:
+            self._policy_scheduling = False
+
+    def _schedule_video_workflow(self, date_str: str, time_str: str) -> bool:
         """
         Full scheduling workflow for current video.
 

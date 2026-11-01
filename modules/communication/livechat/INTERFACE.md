@@ -50,11 +50,14 @@ This module exports:
 
 `set_context` activates private behavioral guidance and records
 `context_activated=true, public_message_sent=false`. Only `announce` sends the
-operator's message publicly. A private activation needs no public sender;
-existing STOP, automation, selected-surface and dry-run gates remain authoritative.
+operator's message publicly. Private activation needs no public sender and is
+independent of STOP/send/announcement/dry-run gates. Those gates remain
+authoritative at actual public writers.
 `enqueue_operator_command(command, command_path=None, acknowledgement_path=None)`
 appends under the existing queue ledger lock, preserving queued work and rejecting
 reused IDs. Producers never write active state or acknowledgements.
+Private video metadata/scheduling/Shorts policy uses that same inbox, lock,
+acknowledgement ledger and state owner; see [the bounded policy contract](docs/VIDEO_POLICY_INTERFACE.md).
 Spoken scope: “Live stream …” selects livechat; “Commenting …” selects comments;
 “Push …” selects both; “Update the chat manifest with …” is private and honors
 the stated scope (both when unstated). A public announcement requires explicit intent.
@@ -86,8 +89,9 @@ acceptance alone is not delivery readback.
 
 `OperatorCommandQueue` polls the trusted-local `memory/012_manifest.json` once
 per minute. `AutoModeratorDAE.run()` owns and awaits its watcher on every exit.
-Allowlisted actions: `status`, gated `announce`, gated `set_context`, and local
-`clear_context`. No arbitrary prompt, shell, browser or code execution exists.
+Allowlisted actions: `status`, gated `announce`, private `set_context` /
+`clear_context`, and private `set_video_policy` / `clear_video_policy`.
+No arbitrary prompt, shell, browser or code execution exists.
 
 `YT_012_MANIFEST_FILE`, `YT_012_MANIFEST_ACK_FILE` and
 `YT_012_MANIFEST_STATE_FILE` override the three distinct paths. Relative paths
@@ -102,14 +106,17 @@ operator reconciliation; they are never automatically retried. Legacy terminal
 receipts remain terminal. This is duplicate-attempt prevention, not exactly-once
 delivery, authentication, or power-loss durability on every filesystem.
 
-Only `deferred` work may retry, using its persisted first-observation time.
-TTL defaults to 3,600 seconds; integer values 60–86,400 are accepted. Deferred
-context waits for every requested surface before activation; newer context/clear
-commands supersede older pending context. `clear_context` clears the shared
+Only public `deferred` work may retry, using its persisted first-observation time.
+Private video-policy reservations never retry an unknown/deferred outcome.
+TTL defaults to 3,600 seconds; integer values 60–86,400 are accepted. Optional
+finite `expires_at_unix` can shorten that deadline. Private context activates
+without send gates; newer context/clear commands supersede older legacy pending
+context. `clear_context` clears the shared
 context, not legacy module-local broadcast configuration. Live-chat messages
 are limited to 200 characters; comment-only context allows 500. Existing STOP,
-automation, announcement, send and comment-engagement gates remain authoritative.
-Live-chat dry-run is `simulated` without activating shared context or calling a sender.
+automation, announcement, send and comment-engagement gates remain authoritative
+at public writers. Live-chat announcement dry-run is `simulated` without calling
+a sender; it does not disable private context activation.
 
 Accepted sender results report `sender_accepted=true, delivery_verified=false`
 and amber health. Local status/context acknowledgements can be green. Receipts
