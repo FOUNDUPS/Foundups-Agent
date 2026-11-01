@@ -201,3 +201,14 @@ existing full-suite scene/order/hash failures were not relabeled fixed. Harness
 module syntax and git diff checks pass. No new Python test or registry entry.
 Native iOS/audio/PWA upgrade acceptance remains unverified; no commit, push,
 merge, Sites publication or deployment occurred for this correction.
+# 2026-11-01 — Expanded movie continuity
+
+Candidate22 adds7 meaningful movie-presentation tests: all750 canonical frames,
+unsafe data, media clock/lifecycle, failure fallback, rAF cancellation, full
+loader good/bad hash paths and origin/binding refusal. Initial packaging suite
+failed because its fake render intentionally supplied no provenance; its fake
+subprocess now explicitly captures/asserts presentation export, while production
+still refuses missing provenance. Full Node suite70/70 after that fixture repair.
+Existing renderer/engine/film/foley bytes unchanged. Five static stages are saved
+in outputs/storytime-video-leg-20261101. Actual browser/native review remains held
+pending closure of the previously reported Save As; no browser PASS inferred.

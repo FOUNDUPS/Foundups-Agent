@@ -1,5 +1,22 @@
 # EDUIT interfaces
 
+## Responsive movie picture — 2026-11-01
+
+`mountMoviePresentation({video,panel,surface})` returns `setExpanded(boolean)`,
+`ready()` and `dispose()`. Only expanded video gets recorded scene frames;
+requestVideoFrameCallback supplies presented media time, with currentTime/rAF
+fallback. Pause, seek, resize, repeat and foreground render the retained media
+position. No play(), time assignment, game input or independent clock is used.
+Collapsed/disposed/hidden views cancel frame work. Failure keeps native MP4.
+`export_movie_presentation.mjs <asset-dir>` verifies existing film provenance,
+all source hashes and actual MP4 bytes, derives750 frames through the existing
+replay owner and proves canonical SVG equality before writing bounded sidecars.
+The loader validates shape/cast/text/numbers and frame/movie/fetched-source
+hashes. Fetched source hashes do not prove the identity of already executed
+modules after an arbitrary mixed-version update; current renderer sources are
+unchanged. Future renderer revisions need independently reviewed generation
+binding. Manifest identity and installation scope remain unchanged.
+
 ## Word/picture activation and pictograms — 2026-11-01
 
 The existing `.storybook-page` click starts all five pages from0 when paused.

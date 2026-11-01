@@ -1,6 +1,7 @@
 import {mountNarration,replayNarrationCues} from './story-narration.mjs';
 import {mountMusicPicker} from './music-picker.mjs';
 import {mountChoiceWheel} from './choice-wheel.mjs';
+import {mountMoviePresentation} from '../storytime/movie-presentation.mjs';
 import {appearanceFor} from '../storytime/rig.mjs';
 import {bindPanelGestures} from '../storytime/panel-gestures.mjs';
 import {locales,normalizeLocale} from '../storytime/learning-events.mjs';
@@ -38,6 +39,7 @@ $('copy').onclick=async()=>{try{await navigator.clipboard.writeText(record());$(
 $('video').onplay=()=>api()?.freeze();new ResizeObserver(paint).observe(ink);list();
 
 const gamePanel=$('game-panel'),videoPanel=$('video-panel'),video=$('video');
+const moviePresentation=mountMoviePresentation({video,panel:videoPanel,surface:video.closest('.surface')});
 const expandIcon='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H3v6m12-6h6v6M3 15v6h6m12-6v6h-6"/></svg>';
 const collapseIcon='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h6V3m6 0v6h6M9 21v-6H3m12 6v-6h6"/></svg>';
 let lastViewport="";
@@ -67,6 +69,7 @@ function expand(el,on){
  for(const sibling of document.querySelector('main').children){if(on&&sibling!==el&&sibling.id!=='languages')sibling.setAttribute('inert','');else sibling.removeAttribute('inert');}
  if(on)el.querySelector('.expand-button').focus({preventScroll:true});else if(focusReturn?.isConnected){focusReturn.focus({preventScroll:true});focusReturn=null;}
  viewport();api()?.setPresentation?.({expanded:gamePanel.classList.contains('expanded')&&!gamePanel.classList.contains('marking')});
+ moviePresentation.setExpanded(videoPanel.classList.contains('expanded'));
 }
 $('full-game').onclick=()=>expand(gamePanel,!gamePanel.classList.contains('expanded'));
 $('full-video').onclick=()=>expand(videoPanel,!videoPanel.classList.contains('expanded'));

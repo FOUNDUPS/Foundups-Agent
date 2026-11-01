@@ -1,5 +1,15 @@
 # EDUIT execution roadmap
 
+## 2026-11-01 — Whole leg in expanded movie, not only gameplay
+
+012's screenshot exposes separate coverage: the game's expanded SVG passed,
+but the movie retained a static sky strip. Extend the existing film replay into
+one responsive scene using real media time, retaining the MP4/audio/game.
+Freeze continuous entry/contact/lift, all750 canonical frames, pause/seek/resize,
+invalid-data fallback and cancellation before implementation. Candidate22 needs
+actual browser frame progression and012's native PWA review; static images and
+mock transport checks alone do not certify mobile playback or performance.
+
 ## 2026-11-01 — Test the child's intended start action
 
 012's behavioral correction supersedes a book-size-only acceptance: pressing

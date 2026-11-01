@@ -1,7 +1,7 @@
 ---
 name: interactive_experience_review
 description: Audit and iteratively repair audience-specific games and web interfaces, including EDUIT Storytime timing, touch controls, learning cues, scoring and feedback. Use before implementation and after inspecting each changed output.
-version: 0.3.4
+version: 0.3.5
 intent_type: AUDIT
 promotion_state: prototype
 ---
@@ -90,7 +90,14 @@ unverified native iOS touch/audio separate from desktop browser measurements.
 Fullscreen animation needs one continuous spatial composition. A decorative
 upper strip is not a live extension: trace the entire moving leg from the real
 visible top through contact and lift, then the revealed opening into the same
-sky. Inspect intermediate frames and material seams. If SVG bounds extend, prove
+sky. Inspect intermediate frames and material seams. Inspect
+video and gameplay separately: a passing expanded game does not certify a movie
+with a static upper strip. A responsive recorded scene must use the actual media
+clock and the same recorded world/renderer; verify every canonical frame and
+media/source binding, plus real Play/Pause/seek/replay/resize and failure fallback.
+Static stills/mocked callbacks do not establish actual browser frame progression
+or native performance. Inspect the complete entry/contact/lift at phone size.
+If SVG bounds extend, prove
 the same world-to-screen mapping for art, hit targets and overlays; preserve the
 canonical simulation and frozen-feedback coordinates. Do not stretch the actors
 or change physics to fill spare space. Replay/status must not cover the family.

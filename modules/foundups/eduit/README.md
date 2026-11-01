@@ -1,5 +1,12 @@
 # EDUIT — Education Using Information Technology
 
+**connected-leg-22** adds a continuous expanded movie picture: the entire foot
+enters the upper sky, reaches the original contact and exits through the top.
+The existing movie is still the sole sound/playback clock. Its recorded engine
+frames go through the same scene renderer as the game; no second game runs.
+Missing or mismatched presentation data retains the native movie. See
+[movie presentation](docs/MOVIE_PRESENTATION.md) for binding and review limits.
+
 Current storybook interaction, **tap-story-21**: tap the teaching words/picture
 or ▶ to run the complete story without repeated Next presses. Incidental taps
 while listening leave it running; explicit Ⅱ pauses and ▶ resumes that page.

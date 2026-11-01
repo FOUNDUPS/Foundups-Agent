@@ -341,3 +341,10 @@ html:has(#options[open]){overflow:hidden}
 #game-panel.expanded .scene-context{display:none}
 #game-panel.expanded:not(.marking) .surface{height:100%;aspect-ratio:auto}
 #game-panel.expanded.marking .surface{height:auto;aspect-ratio:16/9}
+/* The video remains the sole audio/transport clock. Its exact recorded scene
+   fills the expanded surface; hide the separate decorative strip only when ready. */
+#video-panel.expanded.movie-responsive .surface{width:100%;height:100%;aspect-ratio:auto}
+#video-panel.expanded.movie-responsive .scene-context{display:none}
+#video-panel.expanded.movie-responsive video{visibility:hidden}
+.movie-scene{pointer-events:none;background:var(--world-earth,#69472f)}
+.movie-scene[hidden]{display:none!important}

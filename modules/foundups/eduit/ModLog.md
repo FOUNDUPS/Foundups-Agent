@@ -1,5 +1,32 @@
 # EDUIT ModLog
 
+## 2026-11-01 — Connect the fullscreen movie leg to the visible top
+
+WSP00/15/22/50/84/97; bounded presentation repair. Holo lexical bundle has UNKNOWN
+freshness/index gap, noisy unrelated video hits; direct existing module/scene/
+replay/skill reads resolve ownership. Optional memory/requirements artifacts are
+absent; no authority reindex or new dependencies. Exact replay and media binding
+need deterministic source review, so0102 implements with independent architecture
+and code/output review rather than delegate unverified timing to model inference.
+
+012 screenshot preschool-20 identifies video, not the already-expanded game:
+video still used a separate static strip above a16:9 native film. Candidate22
+uses unchanged scene/replay owners,750 recorded worlds and actual media time.
+Expanded picture has one whole descending/lifting leg; native video remains
+sole transport/audio clock. No game/feedback/score/learning state change.
+Generate bounded sidecars only after all10 original film source hashes and
+actual movie hash match; normalized world projection equals every original SVG.
+Runtime rejects invalid cast/text/numbers, wrong frame/movie/fetched-source
+hashes and retains usable native movie. Worker bumps to v16, caches only new UI
+module; large replay/movie are not precached. Build CLI fake-media fixture mocks
+the new presentation-export subprocess explicitly, retaining its production
+fail-closed provenance gate. Initial full suite exposed that fixture gap.
+
+Real browser/native animation review is held while the reported Save As closure
+is unknown. Static five-stage rendering and transport mocks are distinct from
+that evidence. Current scene/rig/learning sources are unchanged; fetched-source
+hash verification is not a general proof of already-executed module identity.
+
 ## 2026-11-01 — Verification side effect and runtime binding follow-up
 
 Live21's independent asset check incorrectly used downloadMedia on a hidden CSS

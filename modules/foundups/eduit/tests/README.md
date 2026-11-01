@@ -1,5 +1,11 @@
 # EDUIT test inventory
 
+`movie-presentation.test.mjs` checks all750 canonical scene frames against the
+existing recorder, bounded safe data, good/bad asset hashes, media-only clock,
+pause/seek/resize/reopen/foreground, rAF fallback and callback teardown. These
+are transport/scene unit tests, not proof of actual browser rVFC progression or
+native iOS performance. See ../docs/MOVIE_PRESENTATION.md and TestModLog.
+
 Use **Run full-story interaction regression** in the existing director_harness
 for the title-start and actual elapsed-time all-page/movie handoff on both routes,
 plus Pause/resume, later-page start, incidental tap and synthetic pointer
