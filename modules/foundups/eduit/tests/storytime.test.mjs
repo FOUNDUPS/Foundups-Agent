@@ -59,7 +59,7 @@ test('distant, near and contact thumps grow in rendered size and Foley gain, wit
  assert.ok(volumes[0]<volumes[1]&&volumes[1]<volumes[2]);
  for(const kind of ['sniff','crack','squish'])assert.equal(foleyVolume({kind}),.8);
  const world=gameWorld({...initial(),outcome:'rescued',victoryAt:0,elapsed:1.6},initial().actors);
- assert.equal(world.cue.kind,'squish');assert.equal(world.impact,1);assert.equal(world.lift,0);assert.ok(scene(world).includes('>SQUISH</text>'));
+ assert.equal(world.cue,null);assert.equal(world.impact,1);assert.equal(world.lift,0);assert.ok(!scene(world).includes('>SQUISH</text>'));
 });
 test('game cues have valid source foley and progressive world hazards',()=>{for(const e of gameEvents){assert.ok(e.sourceTime>=0&&e.sourceTime+e.sourceDuration<=15);assert.ok(e.start<e.end&&e.end<=DURATION);}const s={...initial(),elapsed:24};const early=gameWorld(s,s.actors),late=gameWorld({...s,elapsed:40},s.actors);assert.ok(late.warning>early.warning);assert.ok(scene(early).includes('falling-dirt'));assert.ok(scene(late).includes('new-cracks'));assert.equal(gameWorld({...s,outcome:'rescued',victoryAt:20,elapsed:22},s.actors).collapse,1);});
 
@@ -134,4 +134,20 @@ test('successful rescue collapses the roof before the foot lifts, preserving sur
  assert.ok(after.svg.includes('data-event="footprint"'));
  assert.equal((after.svg.match(/data-survivor=/g)||[]).length,5);
  assert.ok(after.svg.includes('data-place="root-pocket"'));
+});
+
+
+test('SQUISH requires a caught mammal, never safe rescue or practice',()=>{
+ const start=advance(initial(),'start');
+ const noInput=tick(start,550);assert.ok(noInput.actors.every(a=>a.status==='lost'));
+ assert.equal(gameWorld(noInput,noInput.actors).cue?.kind,'squish');
+ const partial=structuredClone(noInput);partial.actors[0].status='safe';
+ assert.equal(gameWorld(partial,partial.actors).cue?.kind,'squish');
+ const safe=structuredClone(noInput);safe.actors.forEach(a=>a.status='safe');
+ assert.notEqual(gameWorld(safe,safe.actors).cue?.kind,'squish');
+ let rescued=advance(initial({practice:true}),'start');
+ for(const actor of rescued.actors){rescued=wake(rescued,actor.id);rescued=advance(rescued,'root');rescued=tick(rescued,Math.ceil(actor.duration*10)+1);}
+ assert.equal(rescued.outcome,'rescued');
+ for(let n=0;n<36;n++){const w=gameWorld(rescued,rescued.actors);assert.notEqual(w.cue?.kind,'squish');assert.ok(!scene(w).includes('>SQUISH</text>'));rescued=advance(rescued,'tick',.1);}
+ const practice=tick(advance(initial({practice:true}),'start'),550);assert.notEqual(gameWorld(practice,practice.actors).cue?.kind,'squish');
 });

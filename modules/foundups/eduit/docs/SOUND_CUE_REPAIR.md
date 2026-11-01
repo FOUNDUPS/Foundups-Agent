@@ -1,5 +1,22 @@
 # Sound-cues-23
 
+## Superseding correction — safe-sounds-26 / replay3
+
+012 clarified SQUISH is an animal outcome, not soil compression. The23
+successful ending described below was semantically wrong. Replay3 retains the
+same legal rescue inputs and25s foot motion, but no SQUISH word/audio/caption
+because all five mammals survive. Timed gameplay retains SQUISH only54–56s
+with at least one engine actor marked lost. Practice has no loss cue. Historical
+23 hashes and presence tests below remain a receipt, not current acceptance.
+
+Replay3 MP4 SHA:
+`ac386b8750474ee40d73eeb36e7125abb8c2afe89c0b56de2cc15b5ec3d11d0f`.
+750 canonical frames match the current producer;54 old victory cue frames lose
+SQUISH and all other frame values/actions/final state remain identical.
+Original15s loss Foley SHA remains
+`5eb91326c6a6890223208467bd1e364146268a34d34b2b957ca15d81e2f4a3a8`.
+
+
 012 confirms the connected fullscreen leg works, then identifies clipped SNIFF,
 unprogressive THUMP and missing SQUISH. The actual successful replay contained
 five0.4s sniff cues, identicalTHUMP gains and no SQUISH. Tests of the historical

@@ -1,5 +1,23 @@
 # EDUIT ModLog
 
+## 2026-11-02 — Outcome-bound SQUISH, successful replay3
+
+WSP00/15/22/50/84/97;15/P1. Holo lexical freshness UNKNOWN/index gap retained;
+search was noisy and direct engine/world/replay/audio owners resolved scope.
+012 clarifies that SQUISH means a caught mammal, not empty soil compression.
+The prior victory-squish was incorrect. Rescued branch now keeps its THUMP then
+no SQUISH; normal54–56s cue requires an engine `lost` actor. Defensive all-safe,
+practice and successful demo are silent for SQUISH. No engine timing/scoring,
+rescue input, physics or original loss Foley primitive changes.
+
+Use existing renderer/FFmpeg/Sharp pipeline for replay3's25s MP4, event-derived
+audio, captions,750frame sidecar and matching provenance. Current UI/game import
+revision keys and worker20 carry the change to warm clients.87 Node tests pass. Independent engine/controller checks cover8527 frames across
+loss/mixed/rescued/practice cases; only54 false cue frames differ from25, with
+identical actions/final state. Rebuilt MP4 SHA is
+`ac386b8750474ee40d73eeb36e7125abb8c2afe89c0b56de2cc15b5ec3d11d0f`;
+original loss Foley remains byte-identical. Publication receipts record media review.
+
 ## 2026-11-02 — Single-word presentation, retained scene option
 
 WSP00/15/22/50/84/97;15/P1. Lexical retrieval freshness UNKNOWN/index gap retained;

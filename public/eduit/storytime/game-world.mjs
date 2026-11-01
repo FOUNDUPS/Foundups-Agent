@@ -18,11 +18,11 @@ export function gameWorld(state,poses){
  const victoryAge=won?Math.max(0,state.elapsed-state.victoryAt):0;
  if(won){
   const impact=clamp(victoryAge/.45),lift=clamp((victoryAge-2.3)/.85);
-  const cue=victoryAge>=.35&&victoryAge<1.45?{id:'victory-thump',kind:'thump',word:'THUMP!',start:state.victoryAt+.35,end:state.victoryAt+1.45,x:450,y:230,size:112,shakeSize:85,gain:.17,sourceTime:9.6,sourceDuration:.65}:
-   victoryAge>=1.45&&victoryAge<3.25?{id:'victory-squish',kind:'squish',word:'SQUISH',start:state.victoryAt+1.45,end:state.victoryAt+3.25,x:430,y:330,size:76,gain:.12,sourceTime:10.65,sourceDuration:1}:null;
+  const cue=victoryAge>=.35&&victoryAge<1.45?{id:'victory-thump',kind:'thump',word:'THUMP!',start:state.victoryAt+.35,end:state.victoryAt+1.45,x:450,y:230,size:112,shakeSize:85,gain:.17,sourceTime:9.6,sourceDuration:.65}:null;
   return {t,cue,actors:poses,warning:1,reaction:1,collapse:impact,impact,lift,turn:1,shake:cue?.kind==='thump',rootSway:cue?.kind==='thump'?3:0,progressiveCracks:true,dust:false};
  }
- let cue=gameEvents.find(e=>t>=e.start&&t<e.end);
+ // Only the engine's caught/lost outcome permits the mammal SQUISH cue.
+ let cue=gameEvents.find(e=>t>=e.start&&t<e.end&&(e.kind!=='squish'||state.actors.some(a=>a.status==='lost')));
  const sniffActor=poses.find(a=>['awake','wandering'].includes(a.status));
  if(!cue&&sniffActor){const offset=state.elapsed-sniffActor.awakeAt,index=Math.floor(offset/1.8);if(offset%1.8<.8)cue={id:`sniff-${sniffActor.id}-${sniffActor.awakeAt}-${index}`,kind:'sniff',start:t-offset%1.8,end:t-offset%1.8+.8,size:58,actorId:sniffActor.id,sourceTime:3.1,sourceDuration:.55,x:sniffActor.x>650?sniffActor.x-130:sniffActor.x+180,y:sniffActor.scale<.6?sniffActor.y+28:sniffActor.y-20};}
  if(cue)cue={...cue,word:cue.kind.toUpperCase()};

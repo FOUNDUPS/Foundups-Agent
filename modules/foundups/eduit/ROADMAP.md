@@ -1,5 +1,13 @@
 # EDUIT execution roadmap
 
+## 2026-11-02 — Meaning before cue presence
+
+012 corrects SQUISH semantics: only a mammal caught in the collapse permits it.
+Do not label soil compression as animal squish. Remove false victory cue, gate
+loss cue on engine actor status, rebuild successful movie/audio/frame binding,
+and independently inspect safe/mixed/no-input/practice outcomes. Preserve
+progressive THUMP, complete SNIFF, foot continuity and one-word presentation.
+
 ## 2026-11-02 — One word, one visual channel
 
 012 requests removing duplicate action words and centering the separate word.

@@ -1,7 +1,7 @@
 ---
 name: kids_episode_production
 description: Build and independently review Kids Episodes media and Storytime viewer/PWA changes through existing production and interactive-review owners.
-version: 0.2.10
+version: 0.2.11
 intent_type: GENERATION
 promotion_state: prototype
 ---
@@ -15,6 +15,14 @@ Use FOUNDUPS/Foundups-Agent as the implementation authority. Read AGENTS.md, WSP
 ## Story direction before production
 
 Read `references/story-direction.md` before scripting or revising an educational event. Apply its ordered physics, continuity, education and art/readability audits to each preview. Use the fast creative loop and milestone integration rules; record unverified listening separately.
+
+## Outcome-bound educational cues
+
+Apply interactive review's outcome-semantics gate: SQUISH means a mammal was
+caught, never empty soil compression or an all-safe celebration. Test both the
+presence and absence branches through the actual engine replay and regenerate
+all baked media together. Do not force a vocabulary word into a successful
+ending simply because an older checklist asked for its presence.
 
 ## Single-word visual profile
 

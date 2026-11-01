@@ -2,7 +2,7 @@ import {bindPanelGestures} from './panel-gestures.mjs';
 import {initial,advance,actorPose,DEADLINE} from './engine.mjs';
 import {scene,scenePresentation} from './scene.mjs';
 import * as artwork from './rig.mjs';
-import {gameWorld,foleyVolume} from './game-world.mjs';
+import {gameWorld,foleyVolume} from './game-world.mjs?rev=safe-sounds-26';
 import {locales,normalizeLocale,localizeEvent} from './learning-events.mjs';
 let locale='en',appearance='mamma';
 const $=id=>document.getElementById(id),stage=$('scene');

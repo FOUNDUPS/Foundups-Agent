@@ -11,7 +11,7 @@ const actionOwner=source.split(/\r?\n/).find(line=>line.startsWith('function act
 const reviewOwner=source.slice(source.indexOf('window.storytimeReview='),source.indexOf('// Reuse the Mall gesture owner'));
 assert.ok(audioOwner.startsWith('function resetCueAudio()')&&actionOwner&&reviewOwner.startsWith('window.storytimeReview='),'controller owner extraction must remain explicit');
 const sniff={id:'sniff-test',kind:'sniff',sourceTime:3.1,sourceDuration:.55};
-const squish={id:'victory-squish',kind:'squish',sourceTime:10.65,sourceDuration:1};
+const squish={id:'game-squish',kind:'squish',sourceTime:10.65,sourceDuration:1};
 function fixture(){
  const pending=[],plays=[];
  const soundtrack={currentTime:0,volume:.8,paused:true,pause(){this.paused=true;},play(){this.paused=false;plays.push({time:this.currentTime,volume:this.volume});return new Promise(resolve=>pending.push(resolve));}};

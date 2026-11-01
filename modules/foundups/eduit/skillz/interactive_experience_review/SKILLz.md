@@ -1,7 +1,7 @@
 ---
 name: interactive_experience_review
 description: Audit and iteratively repair audience-specific games and web interfaces, including EDUIT Storytime timing, touch controls, learning cues, scoring and feedback. Use before implementation and after inspecting each changed output.
-version: 0.3.8
+version: 0.3.9
 intent_type: AUDIT
 promotion_state: prototype
 ---
@@ -20,6 +20,18 @@ This explicit contract supersedes older manual-card cases below.
 This is a reusable **candidate procedure**, first applied to EDUIT. It is not an
 installed continuous worker, production-admitted Skillz, or proof of transfer to
 other games. Keep each product's runtime and evidence in its existing module.
+
+## Outcome semantics before sound coverage
+
+For Storytime, SQUISH requires at least one engine actor caught/lost in the
+collapse. All-safe rescue and practice must have zero SQUISH word, speech and
+Foley. Test loss and mixed outcomes positively, all-safe and practice negatively;
+no-input cue remains bounded54–56s. Presence of every vocabulary word in every
+ending is not an acceptance goal. Trace the triggering event and its referent,
+not just a sound's existence. Regenerate movie/audio/timeline/binding when a
+wrong cue is baked in; hiding HTML does not repair exported media. Verify actual
+successful replay frames and decoded soundtrack, and retain loss source assets
+for legitimate branches. Preserve art/motion and unchanged engine inputs.
 
 ## One teaching word and delivery review
 

@@ -343,8 +343,9 @@ wordChecks.onclick=async()=>{
   check('responsive expanded scene is ready',$('video-panel').classList.contains('movie-responsive'),{entry,size});
   const video=$('video'),game=$('game').contentWindow.storytimeReview,clock=game.status().clock,score=game.status().score;
   const timeline=await fetch(new URL('replay-timeline.json',video.src),{cache:'no-store'}).then(r=>r.json());
-  const thumps=timeline.events.filter(e=>e.kind==='thump'),samples=[timeline.events.find(e=>e.kind==='sniff'),...thumps,timeline.events.find(e=>e.kind==='squish')];
-  check('five recorded layout cue samples exist',samples.length===5&&samples.every(Boolean)&&thumps.length===3,{entry,size});
+  const thumps=timeline.events.filter(e=>e.kind==='thump'),squish=timeline.events.find(e=>e.kind==='squish'),samples=[timeline.events.find(e=>e.kind==='sniff'),...thumps,...(squish?[squish]:[])];
+  check('recorded layout cue samples exist',samples.every(Boolean)&&thumps.length===3,{entry,size});
+  check('rescued revision3 has no caught-mammal cue',timeline.revision!=='same-engine-rescue-3'||!squish,{entry,size,revision:timeline.revision});
   for(const mode of ['below','scene']){
    const before=video.currentTime;await selectWordPlacement(d,w,mode);
    check('choice pauses without changing movie or game',video.paused&&Math.abs(video.currentTime-before)<.002&&game.status().paused&&game.status().clock===clock&&game.status().score===score,{entry,size,mode});

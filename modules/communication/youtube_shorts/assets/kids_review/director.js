@@ -1,7 +1,7 @@
-import {mountNarration,replayNarrationCues} from './story-narration.mjs?rev=single-word-25';
+import {mountNarration,replayNarrationCues} from './story-narration.mjs?rev=safe-sounds-26';
 import {mountMusicPicker} from './music-picker.mjs';
 import {mountChoiceWheel} from './choice-wheel.mjs';
-import * as movieView from '../storytime/movie-presentation.mjs?rev=single-word-25';
+import * as movieView from '../storytime/movie-presentation.mjs?rev=safe-sounds-26';
 import {appearanceFor} from '../storytime/rig.mjs';
 import {bindPanelGestures} from '../storytime/panel-gestures.mjs';
 import {locales,normalizeLocale} from '../storytime/learning-events.mjs';
@@ -184,7 +184,7 @@ if(!introSeen)queueMicrotask(openStoryIntro);
 
 // Movie action cues come from this build's actual engine replay, never the old15s timeline.
 const narration=mountNarration(video,$('story-caption'),{statusHost:advanced,cues:[]});
-fetch(new URL('replay-timeline.json',video.src),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(t=>{const cues=replayNarrationCues(t);narration.setCues(cues);moviePresentation.setCaptionAvailable?.(t?.revision==='same-engine-rescue-2'&&t.duration===25&&Array.isArray(t.events)&&cues.length===t.events.length&&cues.length>0);}).catch(()=>moviePresentation.setCaptionAvailable?.(false));
+fetch(new URL('replay-timeline.json',video.src),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(t=>{const cues=replayNarrationCues(t);narration.setCues(cues);moviePresentation.setCaptionAvailable?.(t?.revision==='same-engine-rescue-3'&&t.duration===25&&Array.isArray(t.events)&&cues.length===t.events.length&&cues.length>0);}).catch(()=>moviePresentation.setCaptionAvailable?.(false));
 window.storytimeNarration=narration;
 const voiceOption=button('story-voice','English story voice','more',advanced,()=>{const enabled=voiceOption.getAttribute('aria-pressed')!=='true';voiceOption.setAttribute('aria-pressed',String(enabled));voiceOption.textContent=enabled?'English story voice: on':'English story voice: off';storybook?.pause('voice-option');narration.setEnabled(enabled);});
 voiceOption.setAttribute('aria-pressed','true');voiceOption.textContent='English story voice: on';
@@ -226,7 +226,7 @@ window.storytimeMusic=mountMusicPicker({host:menuPanels.get('music'),video,game,
  isStoryOpen:()=>introDialog.open});
 
 // Optional enhancement: older/offline clients keep a usable original dialog.
-import('./storybook.mjs?rev=single-word-25').then(({mountStorybook})=>{
+import('./storybook.mjs?rev=safe-sounds-26').then(({mountStorybook})=>{
  storybook=mountStorybook({dialog:introDialog,video,narration,beforePlay:()=>api()?.pause(),onFinish:()=>{
   if(!introDialog.open||introClosing)return;
   const generation=introGeneration;

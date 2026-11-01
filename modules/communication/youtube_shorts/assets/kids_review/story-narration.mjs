@@ -44,7 +44,7 @@ export function fitCaptionText(phrase,caption){
  fits(floor>0?Math.floor(floor+(low-floor)*emphasis):Math.max(24,Math.floor(low*scale)));caption.dataset.textOverflow='false';
 }
 export function replayNarrationCues(timeline){
- if(!['same-engine-rescue-1','same-engine-rescue-2'].includes(timeline?.revision)||!Number.isFinite(timeline.duration)||timeline.duration<=0||timeline.duration>120||!Array.isArray(timeline.events)||timeline.events.length>100)return [];
+ if(!['same-engine-rescue-1','same-engine-rescue-2','same-engine-rescue-3'].includes(timeline?.revision)||!Number.isFinite(timeline.duration)||timeline.duration<=0||timeline.duration>120||!Array.isArray(timeline.events)||timeline.events.length>100)return [];
  const words={thump:'THUMP',sniff:'SNIFF',crack:'CRACK',crunch:'CRUNCH',squish:'SQUISH'};
  const events=timeline.events.filter(e=>e&&typeof e==='object'&&typeof e.id==='string'&&/^[a-z0-9.-]{1,80}$/.test(e.id)&&Object.hasOwn(words,e.kind)&&Number.isFinite(e.start)&&Number.isFinite(e.end)&&e.start>=0&&e.end-e.start>=.001&&e.end<=timeline.duration).sort((a,b)=>a.start-b.start);
  return events.map((e,i)=>{

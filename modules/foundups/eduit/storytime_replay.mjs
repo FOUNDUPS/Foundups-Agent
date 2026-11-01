@@ -1,7 +1,7 @@
 // Offline demonstration inputs. The live engine owns every state transition.
 import {initial,advance,actorPose} from '../../../public/eduit/storytime/engine.mjs';
 import {gameWorld} from '../../../public/eduit/storytime/game-world.mjs';
-export const replayRevision='same-engine-rescue-2',fps=30;
+export const replayRevision='same-engine-rescue-3',fps=30;
 export function replay(){
  const states=[],actions=[];let state=initial(),frame=0;
  const capture=()=>states.push(structuredClone(state));

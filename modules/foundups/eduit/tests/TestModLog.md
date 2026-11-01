@@ -1,5 +1,15 @@
 # EDUIT test history
 
+## 2026-11-02 — SQUISH needs an actual loss
+
+Replay3 is an all-safe demonstration and must have zero SQUISH events/frames;
+retain five full SNIFFs and three progressive THUMPs. Game-world regression
+covers no-input loss, mixed safe/lost, all-safe/outcome-unset, successful practice
+and no-loss practice. Loss cue remains bounded54–56s. Older cancellation test
+uses a loss cue fixture, not a fake victory cue.87 Node tests pass initially;
+independent media/controller/browser proof is recorded separately in
+`O:/Foundups-Agent/outputs/storytime-safe-sounds-20261102/`.
+
 ## 2026-11-02 — Single-word25 validation
 
 86 Node tests pass, including invalid profile/caption fallback, retained-time

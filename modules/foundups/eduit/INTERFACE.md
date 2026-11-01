@@ -1,5 +1,17 @@
 # EDUIT interfaces
 
+## Outcome-bound SQUISH — 2026-11-02
+
+The existing engine actor status is authority. `gameWorld` emits the54–56s
+`game-squish` only if at least one `state.actors` entry is `lost`. The rescued
+branch has only its original THUMP, then no action cue during compressed hold.
+No all-safe state, including defensive all-safe/outcome-unset state, may squish.
+Practice never loses actors and cannot generate that cue. The successful replay
+revision is `same-engine-rescue-3`; accepted by narration/presentation loaders.
+Old revisions remain readable for compatibility but are not the current film.
+The original15s Foley source still contains the loss segment; the controller
+plays it only when the outcome-bound world supplies the loss cue.
+
 ## Single teaching-word profile — 2026-11-02
 
 `mountMoviePresentation` accepts `wordPlacement` (`below` or `scene`, default

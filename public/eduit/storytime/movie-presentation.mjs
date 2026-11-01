@@ -7,7 +7,7 @@ const number=(v,min,max)=>{if(typeof v!=='number'||!Number.isFinite(v)||v<min||v
 const text=v=>{if(typeof v!=='string'||!/^[-a-zA-Z0-9 !.]{1,120}$/.test(v))throw Error('Invalid movie text');return v;};
 const bool=v=>{if(typeof v!=='boolean')throw Error('Invalid movie flag');return v;};
 export function validateMovieFrames(data){
- if(data?.schema!=='eduit.movie_frames.v1'||!['same-engine-rescue-1','same-engine-rescue-2'].includes(data.revision)||data.fps!==30||data.duration!==25||!Array.isArray(data.frames)||data.frames.length!==750)throw Error('Unsupported movie frames');
+ if(data?.schema!=='eduit.movie_frames.v1'||!['same-engine-rescue-1','same-engine-rescue-2','same-engine-rescue-3'].includes(data.revision)||data.fps!==30||data.duration!==25||!Array.isArray(data.frames)||data.frames.length!==750)throw Error('Unsupported movie frames');
  const frames=data.frames.map(w=>{
   const out={t:number(w.t,0,120)};
   for(const key of ['warning','reaction','collapse','impact','lift','turn'])out[key]=number(w[key],0,1);
@@ -41,7 +41,7 @@ export async function loadMovieFrames(video,{fetcher=fetch,importer=url=>import(
   const bytes=await response.arrayBuffer();if(bytes.byteLength>max)throw Error('Movie data too large');return bytes;
  };
  const binding=JSON.parse(new TextDecoder().decode(await get(new URL('movie-presentation.json',base),4096)));
- if(binding?.schema!=='eduit.movie_presentation.v1'||!['same-engine-rescue-1','same-engine-rescue-2'].includes(binding.revision)||binding.fps!==30||binding.duration!==25||binding.frameCount!==750)throw Error('Unsupported movie binding');
+ if(binding?.schema!=='eduit.movie_presentation.v1'||!['same-engine-rescue-1','same-engine-rescue-2','same-engine-rescue-3'].includes(binding.revision)||binding.fps!==30||binding.duration!==25||binding.frameCount!==750)throw Error('Unsupported movie binding');
  const names=['scene.mjs','rig.mjs','learning-events.mjs'],sources=Object.fromEntries(names.map(n=>[n,binding.sources?.[n]]));
  if(Object.keys(binding.sources||{}).length!==3||!names.every(n=>typeof sources[n]==='string'&&/^[0-9a-f]{64}$/.test(sources[n]))||binding.rendererGeneration!==await digest(new TextEncoder().encode(JSON.stringify(sources))))throw Error('Movie renderer generation mismatch');
  const rendererBase=new URL('presentations/'+binding.rendererGeneration+'/',import.meta.url);

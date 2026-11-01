@@ -1,5 +1,11 @@
 # EDUIT — Education Using Information Technology
 
+**safe-sounds-26** corrects the sound meaning: SQUISH is reserved for a mammal
+caught in the timed collapse. An all-safe rescue, including practice, has no
+SQUISH word, narration or Foley. The successful demo film is rebuilt as
+`same-engine-rescue-3`; its foot still lands and lifts. This supersedes23's
+incorrect use of SQUISH for an empty compressed burrow.
+
 **single-word-25** defaults to one teaching word outside the expanded movie,
 centered between the picture and controls. Grown-up controls offer **Outside
 picture** / **On picture**; both reuse the existing renderer and movie clock.
