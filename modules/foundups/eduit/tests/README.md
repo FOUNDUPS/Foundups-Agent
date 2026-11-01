@@ -1,5 +1,11 @@
 # EDUIT test inventory
 
+Preschool book acceptance extends the existing director_harness storybook button:
+all five pages at six sizes on both routes, rendered font/target floors, no
+scroll/clipping and direct hit tests. Independent rendered/silent/voice-failure
+receipts are retained separately; see TestModLog. Actual Home Screen launch is
+not certified by an inner iframe or direct-origin viewport measurement.
+
 App presentation extends the same inventory with scene-presentation.test.mjs:
 canonical scale/world mapping, malformed presentation rejection, default-frame
 identity, full-height leg entry/exit and matching skin sky/opening. Independent

@@ -1,5 +1,16 @@
 # YouTube Shorts AI Generator - ModLog
 
+## 2026-11-01 — Preschool book presentation and production review gate
+
+EDUIT photo feedback requires prominent teaching words and large familiar actions
+on every page. Existing director CSS/storybook owner fills available bounds;
+last-page Video replaces redundant Skip, Close stays reachable and unavailable
+voice has a separate landscape row. Independent visual review exposed and repaired
+two short-landscape defects;60 rendered states pass without relaxing thresholds.
+Game engine, media and narration order unchanged. Production candidate0.2.6 routes
+to updated interactive review0.3.2 and the existing authorized GoDaddy/Gmail
+deployment procedure; no new RSI worker or learning-effectiveness claim.
+
 ## 2026-11-01 — Same-engine demonstration render support
 
 WSP50/84/97: EDUIT now exports legal deterministic game inputs through its

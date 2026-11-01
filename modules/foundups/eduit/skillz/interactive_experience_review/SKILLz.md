@@ -1,7 +1,7 @@
 ---
 name: interactive_experience_review
 description: Audit and iteratively repair audience-specific games and web interfaces, including EDUIT Storytime timing, touch controls, learning cues, scoring and feedback. Use before implementation and after inspecting each changed output.
-version: 0.3.1
+version: 0.3.2
 intent_type: AUDIT
 promotion_state: prototype
 ---
@@ -33,6 +33,35 @@ other games. Keep each product's runtime and evidence in its existing module.
 ## Inspect in this order
 
 ### PWA app presentation gate
+
+**Preschool visual acceptance (ages 3–6):** after each bounded repair, stop
+authoring and inspect the rendered experience: "Can this child see the teaching
+word, recognize what to do, and reach it?" Passing code tests or one corrected
+menu does not answer that question. Inspect every affected story page and state,
+including the longest phrase, paused playback and unavailable voice. Keep
+familiar symbols and optional narration; do not require independent reading.
+For the current Storytime book, freeze at least48 CSSpx teaching text on phones,
+56px on tablets, 24px primary action labels and64px targets. These are this
+product's review thresholds, not scientific evidence about learning. Reflow or
+remove decorative art before reducing the words. Check actual text glyph bounds,
+wrapping, contrast, hit testing and control reach without scrolling the oracle
+into success. A large empty dialog with small words fails.
+
+Inspect the screenshot at its intended phone display size, then independently
+review all five pages at320×568,390×844,844×390 and768×1024, plus the short landscape
+568×320 case. Repeat the same acceptance after repair and on the actual published
+revision. Keep failed baselines and critique, repair, reinspection and independent
+verdict in the existing correction ledger. A screenshot report from012 is a
+regression signal even when earlier aggregate checks were green; repair the
+review procedure as well as the product. Update this candidate only within its
+existing WRE/RSI boundary below; do not certify autonomous improvement from prose.
+
+An installed shortcut can still contain a masked-forwarding frame. Record the
+actual outer launch URL/origin and visible scaling; inner CSS pixels alone cannot
+certify physical readability. Do not compensate by guessing device zoom or
+silently frame-busting. Keep stable manifest identity; provide an explicit own-
+origin launch and explain any remaining domain/install repair. Certify native
+Home Screen launch only after observing that route on the device.
 
 When the product is a child-facing installed PWA, build and audit its actual app
 surface, not just its manifest or a desktop page shrunk onto a phone. Keep the

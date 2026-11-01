@@ -1,5 +1,16 @@
 # EDUIT interfaces
 
+## Preschool book presentation — 2026-11-01
+
+Preschool-19 retains stable dialog/button IDs and story scheduler. The native
+book fills available safe-area bounds. Primary labels are24px, teaching words
+at least48px on short landscape phones/52px portrait and96px tablet. Last page
+moves #storybook-watch into .intro-actions, hides redundant #intro-skip and keeps
+#intro-close; accessible Play video name remains while visible text is ▶ Video.
+Play story always restarts the full book; no autoplay/video/game clock changes.
+Unavailable voice gets a separate landscape grid row, never over the words.
+Manifest id/start_url/scope stay stable; no device-zoom guesses or frame busting.
+
 ## App menu and expanded scene — 2026-11-01
 
 `#game-options` / `#video-options` open the same native `#options` dialog. Existing

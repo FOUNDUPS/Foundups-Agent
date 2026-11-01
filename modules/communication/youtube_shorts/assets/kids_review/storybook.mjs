@@ -21,11 +21,13 @@ export function mountStorybook({dialog,video,narration,beforePlay=()=>{},onFinis
  const nav=document.createElement('nav');nav.className='storybook-navigation';nav.setAttribute('aria-label','Story pages');
  function control(id,text,label){const b=document.createElement('button');b.id=id;b.type='button';b.textContent=text;b.setAttribute('aria-label',label);nav.append(b);return b;}
  const previous=control('storybook-previous','←','Previous story page');
- const autoplay=control('storybook-play','▶ Auto play','Play the story automatically');
+ const autoplay=control('storybook-play','▶ Play story','Play the story automatically');
  const next=control('storybook-next','→','Next story page');
  actions.before(progress,notice,nav);
- const handoff=document.createElement('button');handoff.id='storybook-watch';handoff.type='button';handoff.textContent='Play video';handoff.hidden=true;
- actions.before(handoff);
+ const handoff=document.createElement('button');handoff.id='storybook-watch';handoff.type='button';handoff.textContent='▶ Video';handoff.setAttribute('aria-label','Play video');handoff.hidden=true;
+ // The last page replaces the redundant Skip action with the explicit video
+ // handoff. Keep Close reachable without adding a fourth row on short phones.
+ actions.insertBefore(handoff,actions.lastElementChild);
  let frame=0,lastPage=null,interacted=false,model=null,audioSnapshot=null;
  const trace=[];const debug=new URLSearchParams(location.search).has('timing');
  const voice=createSpeechChannel({volume:()=>video.volume,notice:ok=>{notice.hidden=ok;notice.textContent=ok?'':'Voice unavailable · use the arrows or read along';}});
@@ -42,11 +44,12 @@ export function mountStorybook({dialog,video,narration,beforePlay=()=>{},onFinis
   surface.setAttribute('aria-live',state.playing?'off':'polite');surface.classList.toggle('page-fading',state.fading);
   progress.textContent=`${state.index+1} / ${state.total}`;
   previous.disabled=state.index===0;next.disabled=state.index===state.total-1;
-  autoplay.textContent=state.playing?'Ⅱ Pause':'▶ Auto play';
+  autoplay.textContent=state.playing?'Ⅱ Pause':'▶ Play story';
   autoplay.setAttribute('aria-label',state.playing?'Pause the story':'Play the story automatically');
   autoplay.setAttribute('aria-pressed',String(state.playing));
   next.classList.toggle('gentle-hint',!interacted&&!state.playing&&!next.disabled);
   handoff.hidden=state.index!==state.total-1;
+  $('intro-skip').hidden=!handoff.hidden;
   if(state.unavailable){notice.hidden=false;notice.textContent='Voice unavailable · use the arrows or read along';}
   else if(state.silent){notice.hidden=false;notice.textContent='Sound is off · read along';}
  }

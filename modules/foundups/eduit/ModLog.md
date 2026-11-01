@@ -1,5 +1,32 @@
 # EDUIT ModLog
 
+## 2026-11-01 — Preschool book critique, repair and independent reinspection
+
+WSP00/15/22/50/84/97,15/P1(C2/I4/D4/Impact4): smallest layer is the existing
+book presentation, not a new game/RSI engine. Holo lexical bundle found the
+EDUIT owner but has UNKNOWN freshness/index gap; direct current docs,
+test inventory and source establish this lane. Optional absent SPEC/PRD are not
+new work; narrative search noise was reranked to the book/CSS/runbook.
+
+012's Home Screen photo disproves the earlier whole-PWA readability inference.
+Existing Shorts book now uses near-full-screen words and24px familiar primary
+actions. First independent568x320 last-page result clipped Close; second showed
+an88px wrapped video action and overlapping voice notice. Keep failed screenshots,
+replace redundant final Skip with compact ▶ Video beside Close, isolate notice
+in its own landscape grid row, and reinspect without reducing48px words/64px
+targets or changing the oracle. Independent60 page states pass across both
+routes/five dimensions plus silent and synthetic-unavailable cases. Node63/63
+passes. Original simulation, video bytes and speech sequencing are retained.
+
+Review candidate0.3.2 and production0.2.6 now require child-view critique of each
+affected page after every repair and published revision; extend the existing
+viewer harness. These are prototype procedures, not runtime RSI promotion or
+proof of child comprehension. Existing deployment runbook gains012-authorized,
+fresh GoDaddy/Google Voice Gmail-code workflow without retaining numbers/secrets.
+DNS changes and native Home Screen verification remain separate evidence gates.
+Raw failures, final independent receipt and rollback snapshot are retained under
+outputs/storytime-preschool-20261101; no child interaction data collected.
+
 ## 2026-11-01 — Hidden-menu selection reveal follow-up
 
 Live app17 review caught a retained Mermaid selection partly outside the rail:

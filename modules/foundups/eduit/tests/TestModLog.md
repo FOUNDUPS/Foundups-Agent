@@ -1,5 +1,16 @@
 # EDUIT test history
 
+## 2026-11-01 — Preschool book visual acceptance
+
+Extend existing director_harness storybook visibility regression to every page,
+both root/manifest routes and320x568,390x844,568x320,844x390,768x1024,1280x900.
+Freeze48px phone/56px tablet words,24px labels,64px targets, no clipping/scrolling
+or overlap and direct center hits. Independent actual-browser60 page states
+pass after retaining/repairing two failed short-landscape candidates. Separate
+synthetic voice-unavailable568 and actual-settings voice-off320 cases. Node63/63
+pass; outer eduit.org Home Screen launch remains separately unverified.
+Evidence outputs/storytime-preschool-20261101/INDEPENDENT_FINAL_REVIEW.json.
+
 ## 2026-11-01 — Hidden wheel reveal acceptance
 
 Published17 live review caught selectedMermaid outside the hidden-mounted rail.

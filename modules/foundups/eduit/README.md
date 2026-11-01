@@ -1,6 +1,13 @@
 # EDUIT — Education Using Information Technology
 
-Current app-presentation build, **app-scene-18**: open the three-line **Storytime
+Current storybook presentation, **preschool-19**: nearly full-screen teaching
+words, large Play story/Pause labels and64px actions. On short screens decoration
+gives way to words; final Video replaces redundant Skip beside Close. The same
+five-page narration/video sequence and game remain. Native Home Screen launch
+through eduit.org still requires separate domain verification; use the direct
+Sites origin for an unframed review. See [deployment procedure](DEPLOYMENT.md).
+
+Retained app-presentation build, **app-scene-18**: open the three-line **Storytime
 menu** beside player controls for large Characters, Music and Language choices.
 Fullscreen uses one continuous sky/game scene; the whole leg enters and leaves
 the top. Settings pause without restarting the round or starting music. The

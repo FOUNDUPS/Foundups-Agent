@@ -1,5 +1,16 @@
 # EDUIT execution roadmap
 
+## 2026-11-01 — Preschool readability before broader RSI claims
+
+Latest012 installed screenshot fails whole-app readability despite prior menu
+checks. Prioritize actual ages3–6 book output: every page, largest phrase, controls,
+silent/unavailable voice, short landscape and outer launch. Fix/reinspect/
+independently verify before publication; retain the failed candidate. Skills now
+route this bounded loop without activating another RSI worker. Existing GoDaddy
+masked forwarding and pending Sites domain validation own the launch defect;
+fresh Gmail verification is explicitly authorized. No native-device acceptance
+or comprehension improvement is inferred from desktop viewport checks.
+
 ## 2026-11-01 — PWA app-presentation correction
 
 012 photo audit supersedes the bottom document-flow settings layout: use one

@@ -1,7 +1,7 @@
 ---
 name: kids_episode_production
 description: Build and independently review Kids Episodes media and Storytime viewer/PWA changes through existing production and interactive-review owners.
-version: 0.2.5
+version: 0.2.6
 intent_type: GENERATION
 promotion_state: prototype
 ---
@@ -31,6 +31,14 @@ For child-facing PWA builds, apply the interactive review's **PWA app presentati
 gate** before implementation and after rendering: app-sized menu choices,
 continuous fullscreen scene geometry, mapped hit targets and preserved state.
 Installation metadata alone does not satisfy the app-presentation contract.
+For authorized Storytime DNS/hosting work, use EDUIT's existing
+[deployment runbook](../../../../foundups/eduit/DEPLOYMENT.md), including its
+GoDaddy/Gmail verification procedure. This is a scoped deployment step, not
+permission to collect unrelated sign-in codes or change account security.
+Apply its preschool visual acceptance to every affected page after each repair:
+inspect words, symbols and action labels at phone size, independently critique,
+repair and reinspect the published revision. A passing menu or code suite cannot
+certify the storybook or an installed shortcut behind a forwarding frame.
 
 ## Story-first production
 
