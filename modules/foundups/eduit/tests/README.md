@@ -1,5 +1,13 @@
 # EDUIT test inventory
 
+Sound23 adds `game-audio-lifecycle.test.mjs`: execute actual controller audio/
+action/review functions in a VM with fake media; verify full source completion,
+silent priming, retry/reset/practice/resume and late promises. Replay tests now
+require all five sniffs, progressive gains and SQUISH; narration tests require
+no action duck, a surviving old sniff endpoint and distinct fitted caption sizes.
+80Node tests pass. Real decoded movie samples and independent source/generation
+checks are separate; no acoustic or native-touch proof is inferred from mocks.
+
 `movie-presentation.test.mjs` checks all750 canonical scene frames against the
 existing recorder, bounded safe data, good/bad asset hashes, media-only clock,
 pause/seek/resize/reopen/foreground, rAF fallback and callback teardown. These

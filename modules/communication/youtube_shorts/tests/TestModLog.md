@@ -1,5 +1,14 @@
 # YouTube Shorts TestModLog
 
+## 2026-11-01 — Storytime sound/voice lifecycle
+
+EDUIT Node80/80 includes no action-Foley duck, surviving the old sniff endpoint,
+caption size progression and actual controller resets. Independent decoded MP4
+samples verify5sniff primitives, increasingTHUMP RMS andSQUISH. Python Cairo
+media suite not run: this host lacks CairoSVG; the actual final producer instead
+completed with installed Sharp/Pillow/NumPy and existing FFmpeg. No installation
+or acoustic/native listening PASS is implied. See EDUIT TestModLog and receipts.
+
 ## 2026-11-01 — Private directive upload consumers
 
 `test_operator_upload_policy.py` exercises actual uploader definitions with an

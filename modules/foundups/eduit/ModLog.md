@@ -1,5 +1,20 @@
 # EDUIT ModLog
 
+## 2026-11-01 — Complete SNIFF, progressive THUMP, restored SQUISH
+
+WSP00/15/22/50/84/97;15/P1. Holo lexical freshness UNKNOWN/index gap retained;
+direct owner reads resolve noisy search. Independent baseline found0.4s sniffs
+cutting voice/ducking Foley80%, flatTHUMP gain/font size and missing rescued
+SQUISH. Existing replay/game-world/scene/narration/audio owners repaired; engine
+scores and rescue inputs untouched. Independent actual-controller execution
+caught a new retry sound leak; reset now clears old offset and primes silently.
+Generation-addressed renderer avoids stale instance reuse when scene changes.
+Optional installed Sharp rasterizes the same SVG through existing producer;
+no dependencies installed or new pipeline. Final build
+build/storytime-sound-23-verified passes source/asset/sample checks; earlier
+build/storytime-sound-23 is STALE after shake correction and must not publish.
+80Node tests pass. See [contract/evidence/limits](docs/SOUND_CUE_REPAIR.md).
+
 ## 2026-11-01 — Connect the fullscreen movie leg to the visible top
 
 WSP00/15/22/50/84/97; bounded presentation repair. Holo lexical bundle has UNKNOWN

@@ -1,9 +1,10 @@
 // Shared scene, independently paced game cues. Source offsets reference original foley.
 import {worldTime,DEADLINE} from './engine.mjs';
 const clamp=x=>Math.max(0,Math.min(1,x));
+export const foleyVolume=cue=>cue?.kind==='thump'?.8*clamp((cue.gain??.17)/.17):.8;
 export const gameEvents=[
- {id:'game-far',start:1,end:3,kind:'thump',x:170,y:65,size:48,shakeSize:20,sourceTime:.6,sourceDuration:.75},
- {id:'game-near',start:12,end:14,kind:'thump',x:420,y:65,size:60,shakeSize:30,sourceTime:2,sourceDuration:.8},
+ {id:'game-far',start:1.4,end:3,kind:'thump',x:170,y:65,size:48,shakeSize:20,gain:.07,sourceTime:.6,sourceDuration:.75},
+ {id:'game-near',start:12,end:14,kind:'thump',x:420,y:65,size:60,shakeSize:30,gain:.11,sourceTime:2,sourceDuration:.8},
  {id:'game-crack-1',start:23,end:25,kind:'crack',x:240,y:180,size:62,sourceTime:7.6,sourceDuration:.65},
  {id:'game-overhead',start:32,end:34,kind:'thump',x:540,y:65,size:78,shakeSize:42,sourceTime:6.7,sourceDuration:.75},
  {id:'game-crack-2',start:38,end:40,kind:'crack',x:540,y:180,size:66,sourceTime:8.45,sourceDuration:.65},
@@ -16,9 +17,10 @@ export function gameWorld(state,poses){
  const t=worldTime(state),won=state.outcome==='rescued';
  const victoryAge=won?Math.max(0,state.elapsed-state.victoryAt):0;
  if(won){
-  const impact=clamp(victoryAge/.45),lift=clamp((victoryAge-1.1)/.85);
-  const cue=victoryAge>=.35&&victoryAge<1.15?{id:'victory-thump',kind:'thump',word:'THUMP!',start:state.victoryAt+.35,end:state.victoryAt+1.15,x:450,y:230,size:112,shakeSize:85,sourceTime:9.6,sourceDuration:.65}:null;
-  return {t,cue,actors:poses,warning:1,reaction:1,collapse:impact,impact,lift,turn:1,shake:!!cue,rootSway:cue?3:0,progressiveCracks:true,dust:false};
+  const impact=clamp(victoryAge/.45),lift=clamp((victoryAge-2.3)/.85);
+  const cue=victoryAge>=.35&&victoryAge<1.45?{id:'victory-thump',kind:'thump',word:'THUMP!',start:state.victoryAt+.35,end:state.victoryAt+1.45,x:450,y:230,size:112,shakeSize:85,gain:.17,sourceTime:9.6,sourceDuration:.65}:
+   victoryAge>=1.45&&victoryAge<3.25?{id:'victory-squish',kind:'squish',word:'SQUISH',start:state.victoryAt+1.45,end:state.victoryAt+3.25,x:430,y:330,size:76,gain:.12,sourceTime:10.65,sourceDuration:1}:null;
+  return {t,cue,actors:poses,warning:1,reaction:1,collapse:impact,impact,lift,turn:1,shake:cue?.kind==='thump',rootSway:cue?.kind==='thump'?3:0,progressiveCracks:true,dust:false};
  }
  let cue=gameEvents.find(e=>t>=e.start&&t<e.end);
  const sniffActor=poses.find(a=>['awake','wandering'].includes(a.status));

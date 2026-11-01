@@ -1,7 +1,7 @@
 ---
 name: kids_episode_production
 description: Build and independently review Kids Episodes media and Storytime viewer/PWA changes through existing production and interactive-review owners.
-version: 0.2.7
+version: 0.2.8
 intent_type: GENERATION
 promotion_state: prototype
 ---
@@ -32,6 +32,9 @@ gate** before implementation and after rendering: app-sized menu choices,
 continuous fullscreen scene geometry, mapped hit targets and preserved state.
 Installation metadata alone does not satisfy the app-presentation contract.
 Apply **Task completion before component PASS** from that same review skill:
+For sound repairs also use its actual-replay sound-object gate: decode and check
+all chosen cues, inspect fitted sizes, exercise cancellation/reset, and listen
+independently when possible. Sample presence is not acoustic acceptance.
 press the child's intended words/picture and primary pictogram, observe the whole
 story and video handoff, and independently recheck after repair. UI-TARS inference
 must be followed by an actual authorized press and an observed result; retain

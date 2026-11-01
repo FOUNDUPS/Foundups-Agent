@@ -10,7 +10,6 @@ from pathlib import Path
 import subprocess
 import tempfile
 import io
-import cairosvg
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -21,18 +20,23 @@ def load(name):
     spec.loader.exec_module(module)
     return module
 
-def render(output):
+def render(output, *, rasterizer='cairo'):
+    if rasterizer not in ('cairo', 'sharp'):
+        raise ValueError('Unknown SVG rasterizer')
     output = Path(output).resolve()
     output.mkdir(parents=True, exist_ok=False)
     author, editor = load('little_shrew_animation'), load('kids_episode')
     with tempfile.TemporaryDirectory(prefix='eduit-svg-') as temp:
         frames = Path(temp) / 'frames'
-        subprocess.run(['node', str(Path(__file__).with_name('export_story_frames.mjs')), str(frames)],check=True,timeout=60)
+        subprocess.run(['node', str(Path(__file__).with_name('export_story_frames.mjs')), str(frames)] + (['--png'] if rasterizer=='sharp' else []),check=True,timeout=180)
         events=json.loads((frames/'events.json').read_text())
         timeline=json.loads((frames/'timeline.json').read_text())
         duration=timeline['duration']
         class Scene:
             def frame(self, seconds):
+                if rasterizer=='sharp':
+                    return Image.open(frames / f'{round(seconds * 30):03d}.png').convert('RGB')
+                import cairosvg
                 svg = (frames / f'{round(seconds * 30):03d}.svg').read_bytes()
                 return Image.open(io.BytesIO(cairosvg.svg2png(bytestring=svg))).convert('RGB')
         for i in range(duration//5):
@@ -59,4 +63,4 @@ def render(output):
             'asset_hashes':{p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in output.iterdir() if p.is_file()}}
     (output/'provenance.json').write_text(json.dumps(record,indent=2)+'\n')
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('--output-dir',required=True);render(parser.parse_args().output_dir)
+    parser=argparse.ArgumentParser();parser.add_argument('--output-dir',required=True);parser.add_argument('--rasterizer',choices=['cairo','sharp'],default='cairo');args=parser.parse_args();render(args.output_dir,rasterizer=args.rasterizer)

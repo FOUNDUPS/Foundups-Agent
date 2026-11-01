@@ -2,7 +2,7 @@ import {bindPanelGestures} from './panel-gestures.mjs';
 import {initial,advance,actorPose,DEADLINE} from './engine.mjs';
 import {scene,scenePresentation} from './scene.mjs';
 import * as artwork from './rig.mjs';
-import {gameWorld} from './game-world.mjs';
+import {gameWorld,foleyVolume} from './game-world.mjs';
 import {locales,normalizeLocale,localizeEvent} from './learning-events.mjs';
 let locale='en',appearance='mamma';
 const $=id=>document.getElementById(id),stage=$('scene');
@@ -14,7 +14,8 @@ let state=initial(),last=0,paused=false,hitKey="";
 let expandedPresentation=false;
 // Fixed original Foley offsets do not follow the demonstration film's timeline.
 const soundtrack=new Audio("assets/game-foley.wav");soundtrack.preload="auto";soundtrack.volume=.8;
-let lastCue=null,audioEnabled=false,ctx=null,playedVictory=false;
+let lastCue=null,audioEnabled=false,ctx=null,playedVictory=false,activeAudioCue=null;
+function resetCueAudio(){soundtrack.pause();soundtrack.currentTime=0;lastCue=null;activeAudioCue=null;}
 function synthImpact(){
  try{ctx ||= new (window.AudioContext||window.webkitAudioContext)();ctx.resume();const now=ctx.currentTime;
  const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type='sine';osc.frequency.setValueAtTime(85,now);osc.frequency.exponentialRampToValueAtTime(34,now+.65);
@@ -26,15 +27,16 @@ function syncAudio(){if(paused||state.phase!=='playing')soundtrack.pause();}
 function cueAudio(cue){
  if(!audioEnabled||paused||!['playing','celebrating'].includes(state.phase)){soundtrack.pause();return;}
  if(cue?.id==='victory-thump'&&!playedVictory){playedVictory=true;synthImpact();}
- if(cue?.kind==='thump')soundtrack.volume=.8*Math.min(1,.25+Math.min(state.elapsed/48,1)*.65);
- if(cue?.id!==lastCue){soundtrack.pause();lastCue=cue?.id||null;if(cue){soundtrack.currentTime=cue.sourceTime;soundtrack.play().catch(()=>{});}}
- if(cue&&soundtrack.currentTime>=cue.sourceTime+cue.sourceDuration)soundtrack.pause();
+ soundtrack.volume=foleyVolume(cue||activeAudioCue);
+ if(cue&&cue.id!==lastCue){soundtrack.pause();lastCue=cue.id;activeAudioCue=cue;soundtrack.currentTime=cue.sourceTime;soundtrack.play().catch(()=>{});}
+ if(!cue)lastCue=null;
+ if(activeAudioCue&&soundtrack.currentTime>=activeAudioCue.sourceTime+activeAudioCue.sourceDuration){soundtrack.pause();activeAudioCue=null;}
 }
-function enableAudio(){audioEnabled=true;soundtrack.play().then(()=>{if(!lastCue||paused||state.phase!=='playing')soundtrack.pause();}).catch(()=>{});}
+function enableAudio(){audioEnabled=true;soundtrack.volume=0;soundtrack.play().then(()=>{if(!lastCue||paused||!['playing','celebrating'].includes(state.phase))soundtrack.pause();soundtrack.volume=activeAudioCue?foleyVolume(activeAudioCue):0;}).catch(()=>{});}
 const embedded=new URLSearchParams(location.search).get('embed')==='1';if(embedded)document.body.classList.add('embedded');
 const hits=document.createElement('div');hits.className='rescue-targets';stage.after(hits);
 for(const id of ['wake','root'])$(id).remove();
-function act(e){if(panelGestures?.isPinching())return;if(e==='start'||e==='retry'){paused=false;lastCue=null;playedVictory=false;enableAudio();}else if(paused)return;state=advance(state,e);if(e==='start'||e==='retry')syncAudio();draw();}
+function act(e){if(panelGestures?.isPinching())return;if(e==='start'||e==='retry'){paused=false;resetCueAudio();playedVictory=false;enableAudio();}else if(paused)return;state=advance(state,e);if(e==='start'||e==='retry')syncAudio();draw();}
 $('start').onclick=()=>act('start');$('retry').onclick=()=>act('retry');$('pause').onclick=()=>{paused=!paused;syncAudio();};
 function draw(){
  const t=state.elapsed,poses=state.actors.map(a=>actorPose(a,t));
@@ -88,7 +90,7 @@ window.storytimeReview={setPresentation({expanded=false}={}){
  if(typeof value!=='string'||!available||!Object.hasOwn(available,value))return null;
  paused=true;soundtrack.pause();appearance=value;
  document.body.style.background=available[value].earth;draw();return appearance;
- },status(){return {paused,phase:state.phase,clock:state.elapsed,score:state.score,practice:state.practice,appearance};},reset(){playedVictory=false;lastCue=null;state=advance(state,'retry');paused=true;soundtrack.pause();draw();},setPractice(value){playedVictory=false;state=initial({practice:!!value});lastCue=null;paused=true;soundtrack.pause();draw();},setLocale(value){locale=normalizeLocale(value);document.documentElement.lang=locale;draw();return locale;},freeze(){paused=true;soundtrack.pause();return {svg:canonicalFrame(),phase:state.phase,elapsed:state.elapsed,clock:state.elapsed,state:structuredClone(state),locale,appearance};},play(){paused=false;lastCue=null;enableAudio();if(['ready','over'].includes(state.phase))act('start');syncAudio();},pause(){paused=true;soundtrack.pause();}};
+ },status(){return {paused,phase:state.phase,clock:state.elapsed,score:state.score,practice:state.practice,appearance};},reset(){playedVictory=false;resetCueAudio();state=advance(state,'retry');paused=true;soundtrack.pause();draw();},setPractice(value){playedVictory=false;state=initial({practice:!!value});resetCueAudio();paused=true;soundtrack.pause();draw();},setLocale(value){locale=normalizeLocale(value);document.documentElement.lang=locale;draw();return locale;},freeze(){paused=true;soundtrack.pause();return {svg:canonicalFrame(),phase:state.phase,elapsed:state.elapsed,clock:state.elapsed,state:structuredClone(state),locale,appearance};},play(){paused=false;resetCueAudio();enableAudio();if(['ready','over'].includes(state.phase))act('start');syncAudio();},pause(){paused=true;soundtrack.pause();}};
 // Reuse the Mall gesture owner inside the iframe; only same-origin parent can react.
 panelGestures=bindPanelGestures(stage.parentElement,{expand:()=>parent.postMessage({type:'storytime.fullscreen',expanded:true},location.origin),collapse:()=>parent.postMessage({type:'storytime.fullscreen',expanded:false},location.origin)});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){paused=true;soundtrack.pause();}});

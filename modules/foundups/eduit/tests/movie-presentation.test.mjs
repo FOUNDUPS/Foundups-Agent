@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {replay,replayWorld} from '../storytime_replay.mjs';
-import {scene} from '../../../../public/eduit/storytime/scene.mjs';
+import {scene,scenePresentation} from '../../../../public/eduit/storytime/scene.mjs';
 import {validateMovieFrames,movieFrameIndex,mountMoviePresentation,loadMovieFrames} from '../../../../public/eduit/storytime/movie-presentation.mjs';
 const replayData=replay(),raw={schema:'eduit.movie_frames.v1',revision:replayData.revision,fps:30,duration:25,frames:replayData.states.map(replayWorld)};
 const recording=validateMovieFrames(raw);
@@ -16,7 +16,7 @@ test('external frame data cannot introduce executable SVG text, IDs or unbounded
   const copy=structuredClone(raw);mutate(copy);assert.throws(()=>validateMovieFrames(copy));
  }
 });
-function fixture({load=async()=>recording,fallback=false}={}){
+function fixture({load=async()=>({...recording,renderer:{scene,scenePresentation}}),fallback=false}={}){
  const classes=new Set(),queue=new Map();let next=1,resizeCb,writes=0;
  const layer={hidden:true,setAttribute(){},remove(){},set innerHTML(v){this.svg=v;writes++;}};
  const doc=Object.assign(new EventTarget(),{hidden:false,createElement:()=>layer});
@@ -52,14 +52,20 @@ test('loader accepts bound assets and rejects mismatched frames, movie and rende
  const encode=v=>Buffer.from(typeof v==='string'?v:JSON.stringify(v));
  const sha=v=>createHash('sha256').update(v).digest('hex');
  const frameBytes=encode(raw),movieBytes=encode('unchanged movie'),sourceBytes=encode('renderer');
- const binding={schema:'eduit.movie_presentation.v1',revision:'same-engine-rescue-1',fps:30,duration:25,frameCount:750,framesSha256:sha(frameBytes),videoSha256:sha(movieBytes),sources:Object.fromEntries(['scene.mjs','rig.mjs','learning-events.mjs'].map(n=>[n,sha(sourceBytes)]))};
+ const binding={schema:'eduit.movie_presentation.v1',revision:replayData.revision,fps:30,duration:25,frameCount:750,framesSha256:sha(frameBytes),videoSha256:sha(movieBytes),sources:Object.fromEntries(['scene.mjs','rig.mjs','learning-events.mjs'].map(n=>[n,sha(sourceBytes)]))};
+ binding.rendererGeneration=sha(encode(binding.sources));
  try{
   for(const bad of [null,'frames','movie','renderer']){
    const copy=structuredClone(binding);if(bad==='frames')copy.framesSha256='0'.repeat(64);if(bad==='movie')copy.videoSha256='0'.repeat(64);if(bad==='renderer')copy.sources['rig.mjs']='0'.repeat(64);
    const fetcher=async url=>{const name=new URL(url).pathname.split('/').at(-1);const data=name==='movie-presentation.json'?encode(copy):name==='movie-frames.json'?frameBytes:name==='little-shrew.mp4'?movieBytes:sourceBytes;return {ok:true,redirected:false,headers:new Headers({'content-length':String(data.length)}),arrayBuffer:async()=>data.buffer.slice(data.byteOffset,data.byteOffset+data.length)};};
-   const promise=loadMovieFrames({src:'https://storytime.example/storytime/assets/little-shrew.mp4'},{fetcher});if(bad)await assert.rejects(promise);else assert.equal((await promise).frames.length,750);
+   let imports=0;const importer=async url=>{imports++;assert.ok(url.pathname.endsWith('/presentations/'+binding.rendererGeneration+'/scene.mjs'));return {scene,scenePresentation:()=>({top:0,bottom:0})};};
+   const promise=loadMovieFrames({src:'https://storytime.example/storytime/assets/little-shrew.mp4'},{fetcher,importer});if(bad){await assert.rejects(promise);assert.equal(imports,0);}else {assert.equal((await promise).frames.length,750);assert.equal(imports,1);}
   }
  }finally{globalThis.location=previous;}
+});
+test('mount uses the verified generation renderer rather than the static fallback',async()=>{
+ let renders=0;const f=fixture({load:async()=>({...recording,renderer:{scene:()=>{renders++;return '<svg data-generation="verified"/>';},scenePresentation:()=>({top:1,bottom:1})}})});
+ f.view.setExpanded(true);await f.view.ready();assert.equal(renders,1);assert.equal(f.layer.svg,'<svg data-generation="verified"/>');f.view.dispose();
 });
 test('unexpected origin or invalid binding fails before requesting frame/video payloads',async()=>{
  const previous=globalThis.location;globalThis.location=new URL('https://storytime.example/');

@@ -1,5 +1,5 @@
 // Presentation data comes from the existing film recorder, never a second game.
-import {readFile,writeFile} from 'node:fs/promises';
+import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -14,8 +14,11 @@ const provenance=JSON.parse(await readFile(resolve(assets,'provenance.json'),'ut
 const requiredSources=[...['scene.mjs','rig.mjs','engine.mjs','game-world.mjs','learning-events.mjs'].map(n=>'public/eduit/storytime/'+n),...['render_story_preview.py','export_story_frames.mjs','storytime_replay.mjs'].map(n=>'modules/foundups/eduit/'+n),...['little_shrew_animation.py','kids_episode.py'].map(n=>'modules/communication/youtube_shorts/src/'+n)].sort();
 const sourceEntries=Object.entries(provenance.source_hashes||{}).map(([p,h])=>[p.replaceAll('\\','/'),h]);
 if(provenance.schema!=='eduit.story_preview.v1'||provenance.method!=='deterministic_game_engine_replay'||JSON.stringify(sourceEntries.map(([p])=>p).sort())!==JSON.stringify(requiredSources))throw Error('Incomplete film provenance');
+const verifiedSources=new Map();
 for(const [path,expected]of sourceEntries){
- if(hash(await readFile(resolve(root,path.replaceAll('\\','/'))))!==expected)throw Error('Film source differs: '+path);
+ const bytes=await readFile(resolve(root,path));
+ if(hash(bytes)!==expected)throw Error('Film source differs: '+path);
+ verifiedSources.set(path,bytes);
 }
 const video=await readFile(resolve(assets,'little-shrew.mp4'));
 if(hash(video)!==provenance.asset_hashes['little-shrew.mp4'])throw Error('Film bytes differ');
@@ -28,8 +31,11 @@ const validated=validateMovieFrames(data);
 for(let i=0;i<frames.length;i++)if(scene(frames[i])!==scene(validated.frames[i]))throw Error('Frame projection differs: '+i);
 const bytes=Buffer.from(JSON.stringify(data));
 const sources={};
-for(const name of ['scene.mjs','rig.mjs','learning-events.mjs'])sources[name]=hash(await readFile(resolve(root,'public/eduit/storytime',name)));
-const binding={schema:'eduit.movie_presentation.v1',revision:recording.revision,fps:recording.fps,duration:recording.duration,frameCount:frames.length,framesSha256:hash(bytes),videoSha256:hash(video),sources};
+for(const name of ['scene.mjs','rig.mjs','learning-events.mjs'])sources[name]=hash(verifiedSources.get('public/eduit/storytime/'+name));
+const rendererGeneration=hash(Buffer.from(JSON.stringify(sources)));
+const rendererDir=resolve(assets,'../presentations',rendererGeneration);await mkdir(rendererDir,{recursive:true});
+for(const name of Object.keys(sources))await writeFile(resolve(rendererDir,name),verifiedSources.get('public/eduit/storytime/'+name));
+const binding={schema:'eduit.movie_presentation.v1',revision:recording.revision,fps:recording.fps,duration:recording.duration,frameCount:frames.length,framesSha256:hash(bytes),videoSha256:hash(video),rendererGeneration,sources};
 await writeFile(resolve(assets,'movie-frames.json'),bytes);
 await writeFile(resolve(assets,'movie-presentation.json'),JSON.stringify(binding,null,2)+'\n');
 console.log(JSON.stringify({frames:frames.length,bytes:bytes.length,canonicalFramesEqual:true,...binding}));

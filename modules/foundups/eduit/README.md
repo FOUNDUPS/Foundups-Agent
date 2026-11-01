@@ -1,5 +1,10 @@
 # EDUIT — Education Using Information Technology
 
+**sound-cues-23** rebuilds the25s movie with five longer SNIFF demonstrations,
+progressively larger/louder THUMPs and the missing SQUISH after landing. Action
+voice keeps Foley audible; audio resets cannot leak a prior-round sound.
+See [sound cue repair](docs/SOUND_CUE_REPAIR.md) for timing, evidence and limits.
+
 **connected-leg-22** adds a continuous expanded movie picture: the entire foot
 enters the upper sky, reaches the original contact and exits through the top.
 The existing movie is still the sole sound/playback clock. Its recorded engine

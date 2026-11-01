@@ -13,7 +13,8 @@ export function scenePresentation(width,height,expanded=false){
 export const wordPresentation=Object.freeze({minSize:72,maxSize:112,scale:1.15,padding:12});
 export function learningWordLayout(label,cue,actors=[]){
  const units=[...label].reduce((sum,ch)=>sum+(/[\u3000-\u9fff]/u.test(ch)?1:.75),0);
- const size=Math.min(wordPresentation.maxSize,Math.max(wordPresentation.minSize,(cue?.size||58)*wordPresentation.scale),936/Math.max(units,1));
+ const thump=cue?.kind==='thump';
+ const size=Math.min(thump?144:wordPresentation.maxSize,Math.max(wordPresentation.minSize,(cue?.size||58)*(thump?1.5:wordPresentation.scale)),936/Math.max(units,1));
  const halfWidth=Math.max(70,units*size/2),padding=wordPresentation.padding;
  const obstacle=actors.filter(a=>a.status!=='lost').map(a=>({left:a.x+8*a.scale-padding,right:a.x+184*a.scale+padding,top:a.y+24*a.scale-padding,bottom:a.y+124*a.scale+padding}));
  // Keep the rescue destination and score clear, too.

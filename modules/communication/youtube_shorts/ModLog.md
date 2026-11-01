@@ -1,5 +1,16 @@
 # YouTube Shorts AI Generator - ModLog
 
+## 2026-11-01 — Storytime action voice preserves Foley
+
+Existing narration owner extends action display/speech windows from the actual
+engine replay, avoids ducking its teaching sound, and preserves progressive
+THUMP sizes after caption fitting. Pause/seek/mute/hide cancellation unchanged.
+Existing local animation owner imports optional Cairo only for its Cairo frame;
+EDUIT's existing SVG producer can use installed Sharp before the same FFmpeg
+author/editor. No new editor, pipeline or provider. Fresh25s film and provenance
+independently checked; decoded AAC contains5sniffs/progressiveTHUMPs/SQUISH,
+while native listening remains unverified. See EDUIT docs/SOUND_CUE_REPAIR.md.
+
 ## 2026-11-01 — Word-tap full story and pictorial controls
 
 Existing book owner now treats teaching words/picture as a full-story start and

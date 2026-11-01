@@ -34,3 +34,10 @@ test('repeated film exports preserve full state/action/event identity and actual
  }
  assert.equal(scene(replayWorld(a.states.at(-1))).match(/data-survivor=/g).length,5);
 });
+test('film retains five longer sniff demonstrations, progressive impacts and the missing squish',()=>{
+ const film=replay(),sniffs=film.events.filter(e=>e.kind==='sniff'),thumps=film.events.filter(e=>e.kind==='thump');
+ assert.equal(sniffs.length,5);for(const cue of sniffs)assert.ok(cue.end-cue.start>=.69);
+ assert.equal(thumps.length,3);assert.ok(thumps[0].gain<thumps[1].gain&&thumps[1].gain<thumps[2].gain);
+ const squish=film.events.find(e=>e.kind==='squish');assert.ok(squish);assert.ok(squish.end-squish.start>=1.79);
+ assert.equal(film.duration,25);assert.equal(film.revision,'same-engine-rescue-2');
+});

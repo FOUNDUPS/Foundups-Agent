@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {replay} from '../storytime_replay.mjs';
 const source=await readFile(new URL('../../../communication/youtube_shorts/assets/kids_review/story-narration.mjs',import.meta.url),'utf8');
 const engine=new URL('../../../../public/eduit/storytime/cue-scheduler.mjs',import.meta.url).href;
-const {mountNarration,replayNarrationCues}=await import('data:text/javascript;base64,'+Buffer.from(source.replace('../storytime/cue-scheduler.mjs',engine)).toString('base64'));
+const {mountNarration,replayNarrationCues,fitCaptionText}=await import('data:text/javascript;base64,'+Buffer.from(source.replace('../storytime/cue-scheduler.mjs',engine)).toString('base64'));
 
 test('movie action cues use actual replay time and reject unknown or malformed timelines',()=>{
  const timeline={revision:'same-engine-rescue-1',duration:25,events:[{id:'victory-thump',kind:'thump',start:21.3666667,end:22.1666667}]};
@@ -20,7 +20,7 @@ test('movie action cues use actual replay time and reject unknown or malformed t
 test('media buffering and seeking cancel voice; caller volume change survives restoration',()=>{
  const prior=Object.fromEntries(['window','document','location','SpeechSynthesisUtterance','requestAnimationFrame','cancelAnimationFrame'].map(k=>[k,globalThis[k]]));
  let frame,spoken=[],cancels=0;
- const element=()=>({classList:{toggle(){}},setAttribute(){},replaceChildren(){},append(){}});
+ const element=()=>({dataset:{},classList:{toggle(){}},setAttribute(){},replaceChildren(){},append(){}});
  globalThis.document=Object.assign(new EventTarget(),{hidden:false,createElement:element});
  globalThis.location={search:'?timing'};
  globalThis.SpeechSynthesisUtterance=class{constructor(text){this.text=text;}};
@@ -42,7 +42,7 @@ test('media buffering and seeking cancel voice; caller volume change survives re
 function narrationFixture(search,run){
  const keys=['window','document','location','SpeechSynthesisUtterance','requestAnimationFrame','cancelAnimationFrame'];
  const prior=Object.fromEntries(keys.map(k=>[k,globalThis[k]]));let frame;const spoken=[];
- const element=()=>({textContent:'',children:[],classList:{toggle(){}},setAttribute(){},replaceChildren(...nodes){this.children=nodes;},append(node){this.children.push(node);}});
+ const element=()=>({dataset:{},textContent:'',children:[],classList:{toggle(){}},setAttribute(){},replaceChildren(...nodes){this.children=nodes;},append(node){this.children.push(node);}});
  globalThis.document=Object.assign(new EventTarget(),{hidden:false,createElement:element});globalThis.location={search};
  globalThis.SpeechSynthesisUtterance=class{constructor(text){this.text=text;}};
  globalThis.window=Object.assign(new EventTarget(),{SpeechSynthesisUtterance,speechSynthesis:{getVoices:()=>[],speak:u=>spoken.push(u),cancel(){}}});
@@ -75,3 +75,20 @@ test('completed story suppresses repeated movie introduction while retaining act
  video.currentTime=10.5;video.dispatchEvent(new Event('play'));assert.equal(api.status().voice,'requested');
  api.setStoryRead(false);video.currentTime=.3;video.dispatchEvent(new Event('play'));assert.equal(api.status().voice,'requested');
 }));
+test('action speech preserves complete Foley and survives the old short sniff endpoint',()=>narrationFixture('',({api,video,caption,spoken,tick})=>{
+ const film=replay(),event=film.events.find(e=>e.kind==='sniff'),cues=replayNarrationCues(film),cue=cues.find(c=>c.id===event.id);
+ assert.ok(cue.end_ms-cue.speech_ms>=800);api.setCues(cues);video.paused=false;video.currentTime=(cue.speech_ms+1)/1000;video.dispatchEvent(new Event('play'));
+ assert.equal(spoken.length,1);assert.equal(spoken[0].text,'SNIFF');spoken[0].onstart();assert.equal(video.volume,1,'action voice must not duck instructional Foley');
+ video.currentTime=event.end+.05;tick();assert.equal(api.status().voice,'speaking');assert.equal(typeof spoken[0].onend,'function');assert.equal(caption.children[1].textContent,'SNIFF');
+ video.paused=true;video.dispatchEvent(new Event('pause'));assert.equal(spoken[0].onend,null);assert.equal(video.volume,1);
+ const thumps=cues.filter(c=>c.text==='THUMP');assert.ok(thumps[0].word_scale<thumps[1].word_scale&&thumps[1].word_scale<thumps[2].word_scale);
+}));
+test('actual caption fit retains distinct far, near and landing sizes within the same available box',()=>{
+ const prior=globalThis.getComputedStyle;globalThis.getComputedStyle=()=>({paddingLeft:'0',paddingRight:'0',paddingTop:'0',paddingBottom:'0',rowGap:'0',getPropertyValue:n=>n==='--lesson-min-size'?'32':'96'});
+ try{
+  const phrase={textContent:'THUMP',dataset:{},style:{fontSize:'32px'},get scrollWidth(){return parseFloat(this.style.fontSize)*3;},get scrollHeight(){return parseFloat(this.style.fontSize);},getBoundingClientRect(){return {height:parseFloat(this.style.fontSize)};}};
+  const caption={clientWidth:390,clientHeight:64,children:[phrase],dataset:{}};
+  const sizes=replayNarrationCues(replay()).filter(c=>c.text==='THUMP').map(c=>{phrase.dataset.wordScale=String(c.word_scale);fitCaptionText(phrase,caption);return parseFloat(phrase.style.fontSize);});
+  assert.ok(sizes[0]<sizes[1]&&sizes[1]<sizes[2]);assert.ok(sizes[0]>=24);assert.ok(sizes[2]<=65);
+ }finally{if(prior===undefined)delete globalThis.getComputedStyle;else globalThis.getComputedStyle=prior;}
+});

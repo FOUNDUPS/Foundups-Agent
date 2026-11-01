@@ -1,5 +1,19 @@
 # EDUIT test history
 
+## 2026-11-01 — Successful-replay sound objects, not legacy scene-only proof
+
+80Node tests pass, including5 independently authored actual-controller VM cases.
+Baseline: five0.4s sniffs, uniformTHUMP gain/size and absent rescuedSQUISH. New
+tests retain all five0.7s sniffs, actual caption fit, progressive gains, all750
+legal engine frames, restored SQUISH and no action duck/cancellation at the old
+endpoint. Reviewer reproduced retry leakage in the first repair; reset/offset/
+silent-unlock correction passes the same holdout. Initial fixture failures from
+missing DOM dataset and literal floating-point boundary were corrected without
+weakening product requirements. Full replay retains its original25s oracle.
+Final source/assets/generation and decoded actual AAC independently pass;
+waveform presence/RMS is not listening. Native audio/TTS still needs012 review.
+See ../docs/SOUND_CUE_REPAIR.md and outputs/storytime-sound-20261101.
+
 ## 2026-11-01 — Child-intended action, all-page playback and UI-TARS
 
 Freeze visible words/picture press→all five pages without Next→one actual video

@@ -1,7 +1,7 @@
 ---
 name: interactive_experience_review
 description: Audit and iteratively repair audience-specific games and web interfaces, including EDUIT Storytime timing, touch controls, learning cues, scoring and feedback. Use before implementation and after inspecting each changed output.
-version: 0.3.5
+version: 0.3.6
 intent_type: AUDIT
 promotion_state: prototype
 ---
@@ -117,6 +117,19 @@ only a later real task can demonstrate transfer of this procedure.
 | UI and accessibility | Measure rendered CSS bounds, not SVG/source sizes. Inspect phone/tablet portrait/landscape, installed entry where available, minimum supported viewport, focus, keyboard and mouse. Check tap overlap, safe areas, short landscape rails and glyph coverage. |
 | Incentives and privacy | Award once for the intended completed action, never repeated input. Bound speed bonuses; preserve an untimed path. Keep learning success distinct from score. Do not infer aptitude or send child play records into agent memory. |
 | Integration | Exercise actual root/inner launch, cache update, allowed messaging, share/cancel, child lock and teardown. Reuse existing Mall/Shorts owners; do not treat a local boolean as entitlement or account security. |
+
+For sound-object corrections, inventory the **actual successful replay** and its
+decoded media, not only legacy scene samples. Require each chosen SNIFF/THUMP/
+SQUISH's visible cause, written word, complete effect and spoken-word opportunity.
+Measure actual rendered/fitted word-size progression; authored sizes alone can
+be flattened by a minimum. Protect the effect transient from generic voice duck,
+retain word time for speech and test explicit cancellation separately. Check
+per-cue gain restoration, visual-cue expiry versus source completion, retry/reset/
+practice/resume and late unlock promises with independent actual-owner execution.
+Rerender after cue/source changes and bind source/media/renderer generations;
+never repin stale media. Decode/audio-sample tests prove content, not listening,
+phone audibility or browser voice onset. Keep those device gates explicit. This
+candidate extends the existing RSI procedure; it does not promote a worker.
 
 Use a deterministic first learning round when randomness would conceal the rule.
 If variation is introduced, bind it to a reproducible seed and prove every

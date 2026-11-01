@@ -13,7 +13,6 @@ import tempfile
 import wave
 import xml.etree.ElementTree as ET
 
-import cairosvg
 import numpy as np
 from PIL import Image
 
@@ -73,6 +72,7 @@ class ShrewScene:
                 + "".join(pebbles + bodies) + '</g></svg>')
 
     def frame(self, seconds):
+        import cairosvg
         png = cairosvg.svg2png(bytestring=self.svg(seconds).encode())
         return Image.open(io.BytesIO(png)).convert("RGB")
 

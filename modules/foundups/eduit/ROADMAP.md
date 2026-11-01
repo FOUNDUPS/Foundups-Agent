@@ -1,5 +1,14 @@
 # EDUIT execution roadmap
 
+## 2026-11-01 — Hear/see the actual successful replay's sound objects
+
+012 confirms22leg, then reports clipped SNIFF, flat THUMPs and missing SQUISH.
+Candidate23 repairs existing cue/audio owners and rebuilds matched media. Test
+the actual successful replay, including all five sniffs and the rescued branch,
+not only legacy scene samples. Independent decoder, static-frame and controller
+checks precede preview; phone listening/TTS latency remain acceptance steps.
+See [sound cue repair](docs/SOUND_CUE_REPAIR.md); no autonomous RSI claim.
+
 ## 2026-11-01 — Whole leg in expanded movie, not only gameplay
 
 012's screenshot exposes separate coverage: the game's expanded SVG passed,

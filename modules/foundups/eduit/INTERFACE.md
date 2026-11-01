@@ -1,5 +1,14 @@
 # EDUIT interfaces
 
+## Sound cues / renderer generation — 2026-11-01
+
+Revision2 stays25s/750frames with new authored demo holds and a rerendered MP4.
+Action captions reserve time without overlapping the next cue; voice no longer
+ducks Foley. `foleyVolume(cue)` restores each event's intended level and reset
+clears retained sound/offset. Generation-addressed renderer copies and derived
+same-origin imports replace the old fetched-source-only binding. Draw has no
+static renderer fallback. [Exact contract and limits](docs/SOUND_CUE_REPAIR.md).
+
 ## Responsive movie picture — 2026-11-01
 
 `mountMoviePresentation({video,panel,surface})` returns `setExpanded(boolean)`,
