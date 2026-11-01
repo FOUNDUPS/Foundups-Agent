@@ -323,11 +323,11 @@ class LLMConnector:
                     logging.warning("Empty response from Grok API")
                     return None
             else:
-                logging.error(f"Grok API error: {response.status_code} - {response.text}")
+                logging.error('Grok API HTTP %s; response body withheld', response.status_code)
                 return None
                 
         except Exception as e:
-            logging.error(f"Grok API error: {e}")
+            logging.error('Grok API error: %s', type(e).__name__)
             return None
     
     def _get_google_response(self, prompt: str, max_tokens: int, temperature: float, system_prompt: Optional[str] = None) -> Optional[str]:

@@ -59,6 +59,7 @@ class ReplyGenerationResult:
     source: str
     theme: Optional[Dict[str, Any]] = None
     context: Optional[Dict[str, Any]] = None
+    rejection_reason: Optional[str] = None
 
 
 def _serialized_reply_generation(method):
@@ -643,7 +644,7 @@ VARIATION GUIDANCE:
                 else:
                     logger.warning("[REPLY-GEN] Grok fallback enabled but no API key is configured")
             except Exception as e:
-                logger.warning(f"[REPLY-GEN] Grok init failed: {e}")
+                logger.warning('[REPLY-GEN] Grok init failed: %s', type(e).__name__)
 
         # Primary local service route (normally serving the general Qwen model).
         self._check_lm_studio()
@@ -1184,7 +1185,7 @@ VARIATION GUIDANCE:
             else:
                 logger.warning("[REPLY-GEN] LM Studio responded but no models")
         except Exception as e:
-            logger.warning(f"[REPLY-GEN] LM Studio not available: {e}")
+            logger.warning('[REPLY-GEN] LM Studio not available: %s', type(e).__name__)
 
     def _load_personalization_context(
         self,
@@ -1438,23 +1439,21 @@ VARIATION GUIDANCE:
                         if "choices" in json_resp and json_resp["choices"]:
                             content = json_resp["choices"][0]["message"]["content"]
 
-                            # YTR1: Reject TTS/audio control tokens - wrong model type loaded
-                            tts_token_patterns = ("<|s_", "<|audio", "<|speech", "<|tts")
                             if not reply_text_is_publishable(content):
-                                logger.error(f"[LLM-CHAIN] ❌ TTS TOKENS DETECTED - wrong model '{self.lm_studio_model_id}'")
-                                logger.error(f"[LLM-CHAIN] Output: {content[:100]}...")
-                                logger.error(f"[LLM-CHAIN] Load a TEXT model (qwen, gemma) or set LM_STUDIO_MODEL")
-                                # Fall through to next LLM - do NOT return this as success
+                                if isinstance(content, str) and content.strip():
+                                    self._current_reply_rejection_reason = 'invalid_reply_text'
+                                logger.error('[LLM-CHAIN] Invalid local writer output; text withheld')
+                                return None  # A quality fault is not provider unavailability.
                             else:
                                 self._last_llm_source = 'lm_studio'  # Track for training data
-                                logger.info(f"[LLM-CHAIN] ✅ LM STUDIO SUCCESS: {content[:80]}...")
+                                logger.info('[LLM-CHAIN] LM Studio draft produced (%d characters)', len(content))
                                 return content
                         else:
                             logger.warning(f"[LLM-CHAIN] ❌ LM Studio returned empty choices")
                     else:
-                        logger.warning(f"[LLM-CHAIN] ❌ LM Studio HTTP {response.status_code}: {response.text[:100]}")
+                        logger.warning('[LLM-CHAIN] LM Studio HTTP %s; body withheld', response.status_code)
                 except Exception as e:
-                    logger.warning(f"[LLM-CHAIN] ❌ LM Studio exception: {e}")
+                    logger.warning('[LLM-CHAIN] LM Studio exception: %s', type(e).__name__)
             else:
                 logger.warning(f"[LLM-CHAIN] ⏭️ LM Studio NOT AVAILABLE")
 
@@ -1480,6 +1479,10 @@ FINAL LOCAL-QWEN CONSTRAINTS:
                         stop=["###"],
                     )
                     if qwen_response and not qwen_response.startswith("Error:"):
+                        if not reply_text_is_publishable(qwen_response):
+                            self._current_reply_rejection_reason = 'invalid_reply_text'
+                            logger.error('[LLM-CHAIN] Invalid embedded writer output; text withheld')
+                            return None
                         # Clean up the response
                         qwen_response = self._clean_reply(qwen_response, author_name)
 
@@ -1497,14 +1500,16 @@ FINAL LOCAL-QWEN CONSTRAINTS:
 
                         if qwen_response and qwen_response.strip():
                             self._last_llm_source = 'qwen'  # Track for training data
-                            logger.info(f"[LLM-CHAIN] ✅ QWEN ENGINE SUCCESS: {qwen_response[:80]}...")
+                            logger.info('[LLM-CHAIN] Embedded draft produced (%d characters)', len(qwen_response))
                             return qwen_response
                         else:
+                            self._current_reply_rejection_reason = 'invalid_reply_text'
                             logger.warning(f"[LLM-CHAIN] ❌ Qwen response rejected by length/pattern gate")
+                            return None
                     else:
-                        logger.warning(f"[LLM-CHAIN] ❌ Qwen returned error: {qwen_response[:100] if qwen_response else 'None'}")
+                        logger.warning('[LLM-CHAIN] Embedded writer returned no usable draft; text withheld')
                 except Exception as e:
-                    logger.warning(f"[LLM-CHAIN] ❌ Qwen exception: {e}")
+                    logger.warning('[LLM-CHAIN] Embedded writer exception: %s', type(e).__name__)
             else:
                 logger.warning(f"[LLM-CHAIN] ⏭️ QwenInferenceEngine NOT AVAILABLE")
 
@@ -1521,13 +1526,16 @@ FINAL LOCAL-QWEN CONSTRAINTS:
                         system_prompt=system_prompt,
                     )
                     if reply:
+                        if not reply_text_is_publishable(reply):
+                            self._current_reply_rejection_reason = 'invalid_reply_text'
+                            return None
                         reply = self._clean_reply(reply, author_name)
                         self._last_llm_source = "grok"
-                        logger.info(f"[LLM-CHAIN] ✅ GROK SUCCESS: {reply[:80]}...")
+                        logger.info('[LLM-CHAIN] Legacy cloud draft produced (%d characters)', len(reply))
                         return reply
                     logger.warning("[LLM-CHAIN] ❌ Grok returned None/empty")
                 except Exception as grok_err:
-                    logger.warning(f"[LLM-CHAIN] ❌ Grok exception: {grok_err}")
+                    logger.warning('[LLM-CHAIN] Legacy cloud exception: %s', type(grok_err).__name__)
 
             # 4. Fallback to BanterEngine (if available) - templates only.
             logger.info(f"[LLM-CHAIN] [4/4] Falling back to BanterEngine (TEMPLATE-BASED)")
@@ -1544,7 +1552,7 @@ FINAL LOCAL-QWEN CONSTRAINTS:
             return None
 
         except Exception as e:
-            logger.error(f"[REPLY-GEN] Contextual reply generation failed: {e}")
+            logger.error('[REPLY-GEN] Contextual generation failed: %s', type(e).__name__)
             return None
 
     def generate_reply_with_source(self, *args, cancel_event=None, reply_surface='comments', **kwargs) -> ReplyGenerationResult:
@@ -1569,7 +1577,8 @@ FINAL LOCAL-QWEN CONSTRAINTS:
                 theme = getattr(self, '_current_reply_theme', None)
                 context = getattr(self, '_current_generation_context', None)
                 return ReplyGenerationResult(text, self.get_last_llm_source(), dict(theme) if theme else None,
-                                             dict(context) if context else None)
+                                             dict(context) if context else None,
+                                             getattr(self, '_current_reply_rejection_reason', None))
         finally:
             if livechat_claimed:
                 self._generation_lock.release()
@@ -2252,6 +2261,7 @@ FINAL LOCAL-QWEN CONSTRAINTS:
         # A source receipt is per comment. Never let a successful provider from
         # the previous inbox row make a later template look contextual.
         self._last_llm_source = "unknown"
+        self._current_reply_rejection_reason = None
         self._current_generation_context = None
         self._current_assessment = None
         self._current_reply_theme = None

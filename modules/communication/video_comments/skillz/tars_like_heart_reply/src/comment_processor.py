@@ -1216,6 +1216,11 @@ class CommentProcessor:
                 logger.info("[HARD-THINK] Layer 2: Invoking Intelligent Reply Generator...")
                 
                 actual_reply_text, reply_source = await self._await_reply_generation(comment_data)
+                if comment_data.get('_reply_rejection_reason') == 'invalid_reply_text':
+                    results.update(halted_for_reply_quality=True, quality_halt_reason='invalid_reply_text')
+                    results['errors'].append('invalid_reply_text')
+                    action_plan['reply']['reason'] = 'invalid_reply_text'
+                    return results
                 allow_generic = os.getenv("YT_ALLOW_GENERIC_REPLY_FALLBACK", "false").strip().lower() in {"1", "true", "yes", "on"}
                 if actual_reply_text and not allow_generic and not self.is_contextual_reply_source(reply_source):
                     logger.warning("[CONTEXT-GATE] Skipping non-contextual reply from source=%s", reply_source)
@@ -1298,9 +1303,12 @@ class CommentProcessor:
                 comment_data['_target_channel_id'] = self.target_channel_id
                 review = await self._inspect_reply(comment_data, reply_text_to_post)
                 results['reply_review'] = review
-                if not review.get('approved'):
-                    results['errors'].append(review.get('reason', 'review_rejected'))
+                if review.get('approved') is not True:
+                    reason = review.get('reason', 'review_rejected')
+                    results['errors'].append(reason)
                     action_plan['reply']['reason'] = 'review_rejected'
+                    if reason in {'review_rejected', 'review_unavailable_or_invalid'}:
+                        results.update(halted_for_reply_quality=True, quality_halt_reason=reason)
                     return results
 
                 comment_data['_reply_review'] = dict(review)
@@ -1421,12 +1429,13 @@ class CommentProcessor:
             )
             comment_data['_reply_theme'] = getattr(generation, 'theme', None)
             comment_data['_generation_context'] = getattr(generation, 'context', None)
+            comment_data['_reply_rejection_reason'] = getattr(generation, 'rejection_reason', None)
             return generation.text, generation.source
         except asyncio.TimeoutError:
             logger.warning("[HARD-THINK] Layer 2 TIMEOUT (10s) - skipping this generation")
             return None, "unknown"
         except Exception as exc:
-            logger.error("[HARD-THINK] Layer 2 ERROR: %s", exc)
+            logger.error("[HARD-THINK] Layer 2 ERROR: %s", type(exc).__name__)
             return None, "unknown"
         finally:
             generation_cancel.set()

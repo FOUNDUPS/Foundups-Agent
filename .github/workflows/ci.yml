@@ -137,6 +137,15 @@ jobs:
           modules/communication/video_comments/tests/test_reply_submission_history.py
           modules/communication/video_comments/tests/test_reply_semantic_assessment.py
           --junitxml=reply-repair-results.xml
+      - name: Verify isolated reply quality stop and credential boundaries
+        run: python -B .github/scripts/youtube_repair_offline.py --suite quality
+      - name: Preserve sanitized quality-stop results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: youtube-quality-stop-${{ matrix.os }}
+          path: ${{ runner.temp }}/youtube-repair-quality/results.xml
+          if-no-files-found: error
       - name: Require reply repair results without skips
         shell: python
         run: |

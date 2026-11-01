@@ -1,5 +1,15 @@
 # Video Comments - Autonomous YouTube Engagement Module
 
+The 2026-11-01 quality-stop repair carries invalid nonempty writer output in
+the existing immutable reply receipt. Rejected final language reviews and invalid
+writer text stop the current engagement session before another comment, nested
+reply, refresh or engagement event. Intentional skips and unavailable providers
+are not mislabeled as bad output. This is a session halt, not a persistent
+cross-worker suspension; review the cause before restarting. The existing STOP,
+automation, comment-engagement and reply switches are checked again immediately
+before Submit. Provider failure diagnostics withhold raw bodies and exception
+messages. See [current routing and credential boundaries](LLM_INTEGRATION.md).
+
 The 2026-10-29 commenting repair uses an explicit meaning assessment before
 writing and a separate review of the final reply against the original comment
 and supplied facts. UI-TARS is restricted to visual inspection. Private themes

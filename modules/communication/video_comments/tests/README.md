@@ -1,5 +1,25 @@
 # video_comments Tests
 
+## 2026-11-01 quality-stop selection
+
+`test_reply_quality_safety.py` has 24 bounded cases through complete production
+definitions and explicit fixture collaborators. It covers current-session halt
+on rejected/invalid output, non-quality skip distinctions, receipt reset, useful
+approved answers, actual typing-to-Submit late STOP, all four early switches,
+synthetic environment key/message separation and provider diagnostic non-echo.
+18 cases failed before repair; all 24 pass afterward, without skips. One initial
+typing fixture returned no entered text; it was corrected before the qualified
+pre-fix replay so the no-STOP positive reaches Submit and late STOP exposes the
+actual missing guard.
+
+The existing closed `.github/scripts/youtube_repair_offline.py --suite quality`
+owns the fixed 24-case inventory. It clears inherited environment, denies real
+network, environment-file access and application effects, permits only the
+existing private CPython event-loop socket pair, and uploads sanitized XML only.
+Run it in a fresh private `RUNNER_TEMP` outside Git using the qualified Python.
+The existing 157 + 12-subtest and 15-stdlib selections remain separate unchanged
+regressions. No fixture judgment proves the active model's semantic accuracy.
+
 ## 2026-10-29 repair selectors
 
 The follow-up private-livechat fallback selection is 88 semantic + 16 submission

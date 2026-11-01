@@ -1,5 +1,27 @@
 # Video Comments - ModLog
 
+## 2026-11-01 — Stop rejected-output sessions and recheck Submit gates
+
+WSP00/10/11/22/50/77/84/97. Source review found final review blocked individual
+drafts but left the loop regenerating the same unreplied comment; the last click
+checked theme freshness without fresh STOP/reply switches. Extend existing
+receipts, processor, loop and executor rather than adding a controller. Preserve
+quality-fault provenance under the generation lock, halt the current session on
+actual invalid writer output or rejected/malformed final review, and expose that
+halt truthfully in the existing summary. Intentional skips/transport failures are
+distinct; global restart suspension is not added. Check all existing reply action
+switches at entry and immediately before Submit. Remove raw writer failure
+bodies, exception messages and invalid-draft previews from diagnostics.
+
+Independent frozen controls reproduced 18 failures/6 passes before repair,
+then all 24 passed. Existing 157 cases plus 12 subtests and separate 15 stdlib
+cases pass with credentials absent and no real network/environment-file effects.
+The 24 controls include useful-answer and no-STOP positive paths, late STOP,
+receipt reset, unchanged environmental secret/message separation and synthetic
+diagnostic non-echo. Hosted fixed selections use the existing isolated runner and
+sanitized artifacts. These fixture results are not real model-quality, current
+YouTube selector or public-delivery qualification.
+
 ## 2026-10-29 — Scoped reuse for the private livechat fallback
 
 WSP00/10/11/22/50/77/84/97. Extend the existing generator/inspector with an
