@@ -10,6 +10,8 @@ supplemental two and broad 1,236 pass, independently confirmed. Package eight
 Python/three Node pass; security/publication pending. Initial five pass/one fixture failure
 is retained. B03 C/D, funded B05, separate custody and full B11/A08 stay open;
 Holo maintenance remains held. [Current contract/status](../architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#same-id-matching-control-candidate--2026-11-01).
+Additional Chroma UUID/RBAC advisories include metadata version 1.5.5; no patched version is listed.
+Raw-settings admission does not establish tenant isolation; runtime exposure UNVERIFIED, Holo HOLD continues.
 
 ## Numeric allocation prerequisite and current source checkpoint — 2026-11-01
 

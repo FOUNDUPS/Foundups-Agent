@@ -9,6 +9,9 @@ original five-pass/one-fixture-failure run. Package eight Python/three Node pass
 security/publication are pending;
 no source publication, funded settlement or complete A08/B11 protection follows.
 
+Nov 1 dependency inventory: 44 open alerts (2 critical/10 high/24 moderate/8 low).
+Additional Chroma server-authorization gaps are not fixed by settings admission; exposure UNVERIFIED, Holo HOLD.
+
 ## 2026-11-01 — B09 queue cadence candidate and guard delivery reconciliation
 
 WSP15 14/P1 class B; WSP22/26/48/62/97. Existing breaker candidate adds elapsed

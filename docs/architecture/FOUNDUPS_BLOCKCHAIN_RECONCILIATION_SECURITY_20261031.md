@@ -34,6 +34,14 @@ callers do not fix every SDK consumer or upstream advisory. Publication/PC pendi
 notes below are historical; persistent maintenance remains HOLD, with exact
 runtime/current-store qualification unproved. No fresh semantic CURRENT claim follows.
 
+### Additional Chroma authorization advisories — 2026-11-01
+
+Nov 1 review of June 12 disclosures: [CVE-2026-45830](https://github.com/advisories/GHSA-2wm9-hf6c-p5cr) (>=0.4.17 through 1.5.9)
+and [CVE-2026-45831](https://github.com/advisories/GHSA-xph7-9rjv-w5fr) (>=0.5.0 through 1.5.9); no patched version listed.
+Declared and installed-metadata Chroma 1.5.5 falls in both ranges. UUID tenant filtering
+and SimpleRBAC resource checks are server-authorization gaps; the raw-settings guard is not a fix.
+Live/embedded exposure and AI causation remain UNVERIFIED; controller/store/runtime HOLD continues.
+
 ## Hourly queue readiness candidate — 2026-11-01
 
 The existing breaker owns this 14/P1 class-B B09 slice: first nonempty release,
