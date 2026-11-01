@@ -15,6 +15,15 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 ## Micro verification and protected native composition — 2026-11-01
 
+The [native OpenClaw trial](docs/operations/RSI_SWARM_DISPATCH.md#native-openclaw-vote-qualification--2026-11-01)
+now establishes actual isolated local/OpenRouter model execution. Five author jobs
+produced no accepted candidate; a separate advisory review was also inadequate.
+The paid candidate passed25 frozen checks but failed an added exact-type check
+required by the original specification; its repair was byte-identical. Three
+paid calls reported $0.00384265. No production change or runtime promotion; the
+protected admission19/P0 and R15 gates remain open. This supersedes any inference
+that resident model execution itself is still untested, not the earlier receipts.
+
 The [native Hermes qualification](docs/operations/RSI_SWARM_DISPATCH.md#native-hermes-api-qualification--2026-11-01)
 reproduces an upstream skill-discovery500 and tests a one-line candidate repair
 in three confined containers (34 assertions). No author/model call or installed

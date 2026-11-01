@@ -1,3 +1,15 @@
+## 2026-11-01 — Native OpenClaw Vote trial: execution observed, acceptance rejected
+
+WSP00/15/22/48/50/97/99. The [existing dispatch record](../../../docs/operations/RSI_SWARM_DISPATCH.md#native-openclaw-vote-qualification--2026-11-01)
+records real isolated OpenClaw2026.10.9 jobs, local Qwen and OpenRouter usage,
+frozen verification, a missed exact-int edge case, identical repair rejection and
+an inadequate advisory reviewer. Five author jobs/zero accepted improvements;
+three paid invocations reported $0.00384265. Record tool-discovery and session-
+retry controls, the successful one-request probes and failed exact-URL probe.
+Correct display-escaping diagnoses through actual decoding. Production runtime,
+source, skills, authority and version pins remain unchanged; no RSI gate closes.
+Private replay evidence is preserved on O:; no Codex subagent authored the work.
+
 ## 2026-11-01 — Native Hermes handler qualification
 
 WSP00/15/22/48/50/97. The [existing dispatch record](../../../docs/operations/RSI_SWARM_DISPATCH.md#native-hermes-api-qualification--2026-11-01)
