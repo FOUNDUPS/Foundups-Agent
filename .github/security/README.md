@@ -1,3 +1,13 @@
+## Vote aggregate trial backlog metadata review — 2026-11-01
+
+Pinned Gitleaks8.30.1 finds six existing generic-api-key metadata rows in the
+changed RSI backlog. Independent exact-index/base review verifies every flagged
+line and five lines on either side unchanged from main4c96d6b; whole-file interval
+mapping proves the six-line shift despite repeated historical contexts. Every
+old path/full-file-hash/rule/line fingerprint is already reviewed in that immutable
+base. Add only the six new exact fingerprints; preserve all rules and prior rows.
+Fresh committed-tree/history and hosted checks remain required.
+
 ## Epoch replay runtime metadata review — 2026-11-01
 
 The pinned Gitleaks 8.30.1 committed-tree scan at 0844cd743 reports 39 exact

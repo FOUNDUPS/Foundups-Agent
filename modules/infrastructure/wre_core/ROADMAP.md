@@ -5,8 +5,11 @@ PR2276's assurance/receipt connection is merged and exact-main checked; its olde
 publication instruction is closed. Native19/P0 now has an explicit protected
 requester/lease-consumption gap, not a safe ordinary-main factory call. R15's
 existing test-registry procedure remains the first admitted improvement target.
-One local Vote proposal was independently rejected; the coordinator repaired the
-bounded defect. This qualifies a micro verification fixture, not native G1–G5.
+The source-item and subsequent aggregate/display Vote proposals were independently
+rejected; coordinator repairs closed the bounded defects. The latter passes398
+module cases and demonstrates why consumers need independent verification after
+scorer tests pass. These qualify micro verification fixtures, not native G1–G5.
+See [the aggregate trial](../../../docs/operations/RSI_SWARM_DISPATCH.md#vote-aggregate-to-display-trial--2026-11-01).
 The October28 verification classification/CI observations below remain scoped
 historical evidence; their performance experiment remains queued, not the next
 native execution requirement. Preserve mandatory checks and current owners.

@@ -26,6 +26,8 @@ Builds on:
 
 from __future__ import annotations
 
+from dataclasses import asdict
+
 import pytest
 
 from modules.foundups.voteballots.src.fec_adapter import (
@@ -268,6 +270,88 @@ class TestDirectSourceEligibilityRegression:
         assert claims[0].source_reference is source.source_reference
         assert claims[0].original_confidence == ConfidenceLevel.VERIFIED_FACT
         assert claims[0].factors == result.scoring_factors
+
+
+# =============================================================================
+# Aggregate provenance regression
+# =============================================================================
+
+
+class TestAggregateTotalProvenanceRegression:
+    """Freeze aggregate eligibility independently of the item-source scorer."""
+
+    @pytest.mark.parametrize(
+        "source_type",
+        [None, "news_report", "third_party_report", "", "fec_filing", "state_filing", "court_record"],
+        ids=["missing", "news", "third-party", "empty-type", "fec", "state", "court"],
+    )
+    @pytest.mark.parametrize(
+        "original",
+        list(ConfidenceLevel),
+        ids=lambda level: level.value,
+    )
+    def test_total_requires_its_own_eligible_reference(self, source_type, original):
+        reference = None if source_type is None else FECSource(
+            source_type=source_type,
+            url="https://example.invalid/evidence/aggregate-1",
+            filing_id="SYNTHETIC-AGGREGATE-1",
+            accessed_at="2026-11-01T00:00:00Z",
+        )
+        # A verified individual item cannot certify the different aggregate claim.
+        item_reference = FECSource(source_type="fec_filing", filing_id="SYNTHETIC-ITEM-1")
+        item = FundingSourceSummary(
+            source_name="Synthetic Donor", source_type="individual", amount=100.0,
+            percentage=1.0, confidence=ConfidenceLevel.VERIFIED_FACT,
+            source_reference=item_reference,
+        )
+        summary = FundingSummaryResult(
+            status=FundingSummaryStatus.SUCCESS, candidate_id="SYNTHETIC-AGGREGATE",
+            candidate_name="Synthetic Candidate", total_raised=12345.67,
+            total_contributions=17, top_sources=[item], confidence=original,
+            source_reference=reference,
+            trail_termination_markers=[TrailTerminationMarker.DIRECT_FEC_RECORDS_ONLY],
+        )
+        before = asdict(summary)
+        eligible = source_type in {"fec_filing", "state_filing", "court_record"}
+        expected = ConfidenceLabel(original.value)
+        if original == ConfidenceLevel.VERIFIED_FACT and not eligible:
+            expected = ConfidenceLabel.HIGH_CONFIDENCE_INFERENCE
+
+        scored = score_funding_summary_confidence(summary)
+        repeated = score_funding_summary_confidence(summary)
+        assert scored.is_successful and repeated.is_successful
+        assert asdict(scored) == asdict(repeated)
+        assert asdict(summary) == before
+        assert scored.source_reference is reference
+        assert scored.total_raised == 12345.67 and scored.total_contributions == 17
+        assert scored.trail_termination_markers == summary.trail_termination_markers
+        totals = [claim for claim in scored.summary_claims if claim.claim_type == "total_raised"]
+        assert len(totals) == 1
+        total = totals[0]
+        assert total.confidence_label == expected
+        assert total.original_confidence == original
+        assert total.source_reference is reference
+        assert total.claim_text == "Candidate raised $12,345.67"
+        if original == ConfidenceLevel.VERIFIED_FACT and not eligible:
+            reason = "missing" if reference is None else "indirect"
+            assert f"downgraded_from_verified_due_to_{reason}_source" in total.factors
+        verified_totals = [claim for claim in get_verified_facts(scored) if claim.claim_type == "total_raised"]
+        assert verified_totals == ([total] if expected == ConfidenceLabel.VERIFIED_FACT else [])
+        unknown_totals = [claim for claim in get_unknown_claims(scored) if claim.claim_type == "total_raised"]
+        assert unknown_totals == ([total] if expected == ConfidenceLabel.UNKNOWN else [])
+        assert scored.scored_sources[0].confidence_label == ConfidenceLabel.VERIFIED_FACT
+        assert scored.scored_sources[0].source_reference is item_reference
+
+    def test_zero_total_does_not_create_an_aggregate_claim(self):
+        summary = FundingSummaryResult(
+            status=FundingSummaryStatus.SUCCESS, total_raised=0.0,
+            confidence=ConfidenceLevel.VERIFIED_FACT,
+            source_reference=FECSource(source_type="fec_filing"),
+        )
+        scored = score_funding_summary_confidence(summary)
+        assert scored.is_successful
+        assert not [claim for claim in scored.summary_claims if claim.claim_type == "total_raised"]
+        assert not [claim for claim in get_verified_facts(scored) if claim.claim_type == "total_raised"]
 
 
 # =============================================================================

@@ -15,6 +15,12 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 ## Micro verification and protected native composition — 2026-11-01
 
+The [aggregate-to-display follow-up](docs/operations/RSI_SWARM_DISPATCH.md#vote-aggregate-to-display-trial--2026-11-01)
+extends the existing Vote fixture after the host repair. The local proposal was
+rejected; a separately attributed coordinator repair connects aggregate evidence
+to the displayed confidence. Keep R15 and protected native admission as the next
+system gates; more supervised product repairs do not close G1–G5.
+
 Reconciled main `43b3b66cce8a01f28fb08577a9db84f731e50455`. The resident assurance
 connection below is published: [PR2276](https://github.com/FOUNDUPS/Foundups-Agent/pull/2276)
 merged at `c9ac9059ed29073e885159747144071a3d310aff`; its exact-main CI and CodeQL
