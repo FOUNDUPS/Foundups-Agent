@@ -23,7 +23,7 @@ document.querySelector('#run').onclick=async()=>{
  const d=frame.contentDocument,w=frame.contentWindow,$=id=>d.getElementById(id),api=$('game').contentWindow.storytimeReview,checks=[];
  function check(name,ok){checks.push({name,result:ok?'PASS':'FAIL'});results.textContent=JSON.stringify(checks,null,2);if(!ok)throw Error(name);}
  try{
- if($('story-intro').open){$('intro-skip').click();await wait(400);}
+ if($('story-intro').open){$('intro-close').click();await wait(400);}
  $('play').click();await wait(200);$('about-open').click();check('About pauses live game',api.status().paused&&$('story-info').open&&!$('about-content').hidden);const infoClock=api.status().clock;await wait(150);check('information does not consume game time',api.status().clock===infoClock);$('info-close').click();check('About returns without resetting',api.status().clock===infoClock);$('how-open').click();check('How shows manual instructions',!$('how-content').hidden&&$('about-content').hidden);$('info-close').click();
  $('full-game').click();await wait(250);check('game fills selected viewport',$('game-panel').getBoundingClientRect().width===Number(frame.width));
  $('play').click();await wait(450);check('stateful pause label',$('play').getAttribute('aria-label')==='Pause game');$('play').click();const clock=api.status().clock;await wait(150);check('pause holds clock',api.status().clock===clock);check('primary target scales for viewport', $('play').getBoundingClientRect().width + .1 >= (Math.min(w.innerWidth,w.innerHeight)<=450?(w.innerWidth<=360||w.innerHeight<=450?64:72):76.8));check('primary touch target is at least64px', $('play').getBoundingClientRect().width>=64&&$('play').getBoundingClientRect().height>=64);check('control rail stays in viewport', $('play').getBoundingClientRect().bottom<=w.innerHeight&&$('game-options').getBoundingClientRect().right<=w.innerWidth);
@@ -78,7 +78,7 @@ document.querySelector('#phone-matrix').onclick=async()=>{
   const d=frame.contentDocument,w=frame.contentWindow,$=id=>d.getElementById(id);
   for(let n=0;n<100&&!($('video-play')&&$('game').contentWindow.storytimeReview);n++)await wait(100);
   const api=$('game').contentWindow.storytimeReview;if(!api)throw Error('Game failed to load');
-  if($('story-intro').open){$('intro-skip').click();await wait(400);}
+  if($('story-intro').open){$('intro-close').click();await wait(400);}
   const visible=e=>!!e&&e.getBoundingClientRect().width>0&&e.getBoundingClientRect().height>0&&w.getComputedStyle(e).visibility!=='hidden';
   const overlap=(a,b)=>Math.min(a.right,b.right)-Math.max(a.left,b.left)>1&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>1;
   function inspect(panel,mode,safe=[0,0,0,0]){
@@ -125,41 +125,50 @@ document.querySelector('#storybook-dialog').onclick=async()=>{
   check('storybook and game are ready',!!w.storytimeStorybook&&!!$('game')?.contentWindow.storytimeReview,{entry,size});
   const intro=$('story-intro'),book=w.storytimeStorybook;
   const closed=label=>check(label,!intro.open&&w.getComputedStyle(intro).display==='none'&&intro.getClientRects().length===0,{entry,size,open:intro.open,display:w.getComputedStyle(intro).display,rects:intro.getClientRects().length});
-  async function closeWith(id){
-   $(id).click();
-   for(let n=0;n<100&&intro.open;n++)await wait(20);
+  async function closeBook(){
+   $('intro-close').click();for(let n=0;n<100&&intro.open;n++)await wait(20);
   }
-  // Respect the application's first-visit state; never assign open or inject CSS.
-  if(!intro.open)$('intro-replay').click();
-  await closeWith('intro-skip');closed('Skip removes the closed book from layout');
-  $('intro-replay').click();
+  // Use the existing grown-up voice option, never assign a clock or add a page selector.
+  if(intro.open)await closeBook();
+  $('game-options').click();d.querySelector('#menu-advanced summary').click();
+  if($('story-voice').getAttribute('aria-pressed')==='true')$('story-voice').click();
+  $('close-options').click();$('intro-replay').click();
   const bounds=intro.getBoundingClientRect();
   check('Story opens a visible native modal',intro.open&&intro.matches(':modal')&&bounds.width>0&&bounds.height>0,{entry,size});
   check('open book fits viewport',bounds.left>=-.5&&bounds.top>=-.5&&bounds.right<=w.innerWidth+.5&&bounds.bottom<=w.innerHeight+.5,{entry,size});
   check('opening does not autoplay media or narration',$('video').paused&&!book.status().playing&&$('game').contentWindow.storytimeReview.status().paused,{entry,size});
   if(w.matchMedia('(max-width:600px) and (orientation:portrait)').matches)check('open phone book keeps its flex layout',w.getComputedStyle(intro).display==='flex',{entry,size});
-  const exit=$('intro-close').getBoundingClientRect();
-  check('Close retains a reachable64px target',exit.width>=64&&exit.height>=64&&exit.left>=0&&exit.top>=0&&exit.right<=w.innerWidth+.5&&exit.bottom<=w.innerHeight+.5,{entry,size});
-  // Freeze every teaching page, not just the first page or the settings menu.
+  const seen=[];
+  // Let the actual scheduler reach each page, pause with the actual primary
+  // control for layout inspection, then resume. No forced clock/model select API.
   for(let page=0;page<5;page++){
+   if(page>0){
+    const deadline=performance.now()+8000;
+    while(intro.open&&book.status().index<page&&performance.now()<deadline)await wait(50);
+    check('automatic playback reaches the next teaching page',intro.open&&book.status().index===page&&book.status().playing,{entry,size,page});
+    $('storybook-play').click();
+   }
+   seen.push(book.status().index);
+   check('inspection pause retains the selected page',!book.status().playing&&book.status().index===page,{entry,size,page});
    const title=$('story-intro-title'),r=title.getBoundingClientRect(),font=parseFloat(w.getComputedStyle(title).fontSize);
    check('preschool teaching words keep their font floor',font>=(size[0]>=601&&size[1]>500?56:48),{entry,size,page,font});
    check('all teaching words fit without scrolling',r.left>=bounds.left&&r.right<=bounds.right&&r.top>=bounds.top&&r.bottom<=bounds.bottom&&intro.scrollHeight<=intro.clientHeight+1,{entry,size,page});
-   for(const b of intro.querySelectorAll('button')){
-    const box=b.getBoundingClientRect();if(!box.width||!box.height)continue;
-    check('storybook pictograms and targets remain large',box.width>=64&&box.height>=64&&parseFloat(w.getComputedStyle(b).fontSize)>=(b.id==='storybook-play'?48:36),{entry,size,page,id:b.id});
-    check('child actions use pictograms with accessible names',['←','→','▶','Ⅱ','⏭','×','🎬'].includes(b.textContent.trim())&&!!b.getAttribute('aria-label'),{entry,size,page,id:b.id});
-    check('storybook actions fit and remain directly hittable',box.left>=bounds.left&&box.right<=bounds.right&&box.top>=bounds.top&&box.bottom<=bounds.bottom&&(b.disabled||b.contains(d.elementFromPoint(box.x+box.width/2,box.y+box.height/2))),{entry,size,page,id:b.id});
+   const buttons=[...intro.querySelectorAll('button')].filter(b=>{const r=b.getBoundingClientRect();return r.width>0&&r.height>0;});
+   check('exactly Play or Pause plus X are visible',buttons.length===2&&buttons.some(b=>b.id==='storybook-play')&&buttons.some(b=>b.id==='intro-close'),{entry,size,page,ids:buttons.map(b=>b.id)});
+   for(const b of buttons){
+    const box=b.getBoundingClientRect();
+    check('both story actions have88px targets and64px glyphs',box.width>=88&&box.height>=88&&parseFloat(w.getComputedStyle(b).fontSize)>=64,{entry,size,page,id:b.id});
+    check('child actions use only Play Pause and X pictograms',['▶','Ⅱ','×'].includes(b.textContent.trim())&&!!b.getAttribute('aria-label'),{entry,size,page,id:b.id});
+    check('storybook actions fit and remain directly hittable',box.left>=bounds.left&&box.right<=bounds.right&&box.top>=bounds.top&&box.bottom<=bounds.bottom&&b.contains(d.elementFromPoint(box.x+box.width/2,box.y+box.height/2)),{entry,size,page,id:b.id});
    }
    check('inspecting a page does not autoplay video',$('video').paused,{entry,size,page});
-   if(page<4)$('storybook-next').click();
+   $('storybook-play').click();check('primary control starts or resumes automatic playback',book.status().playing&&book.status().index===page,{entry,size,page});
   }
-  // A real Play action makes the cancellation check independent of initial idle.
-  $('storybook-play').click();check('book playback starts explicitly',book.status().playing,{entry,size});
-  await closeWith('intro-close');closed('Close removes the closed book from layout');
-  check('Close stops book playback',!book.status().playing,{entry,size});
-  $('intro-replay').click();check('closed book can reopen',intro.open&&intro.matches(':modal'),{entry,size});
-  await closeWith('intro-skip');closed('reopened book closes with Skip');
+  check('every page inspected through automatic progression',JSON.stringify(seen)==='[0,1,2,3,4]',{entry,size,seen});
+  await closeBook();closed('X removes the closed book from layout');
+  check('X stops book playback without starting movie',!book.status().playing&&$('video').paused,{entry,size});
+  $('intro-replay').click();check('closed book can reopen at the first page',intro.open&&intro.matches(':modal')&&book.status().index===0,{entry,size});
+  await closeBook();closed('reopened book closes with X');
   for(const resized of [[390,844],[844,390],[1280,900],[390,844]]){
    frame.width=resized[0];frame.height=resized[1];
    await new Promise(resolve=>w.requestAnimationFrame(()=>w.requestAnimationFrame(resolve)));
@@ -182,28 +191,32 @@ behaviorChecks.onclick=async()=>{
   const book=w.storytimeStorybook,video=$('video'),game=$('game').contentWindow.storytimeReview;
   check('behavior owners ready',!!book&&!!game,{entry});
   if($('story-intro').open){$('intro-close').click();for(let n=0;n<30&&$('story-intro').open;n++)await wait(20);}
-  $('game-options').click();d.querySelector('#menu-advanced summary').click();$('story-voice').click();$('close-options').click();$('intro-replay').click();
+  $('game-options').click();d.querySelector('#menu-advanced summary').click();if($('story-voice').getAttribute('aria-pressed')==='true')$('story-voice').click();$('close-options').click();$('intro-replay').click();
   const page=d.querySelector('.storybook-page'),clock=game.status().clock;
   const point=(type,id=1,x=100)=>page.dispatchEvent(new w.PointerEvent(type,{pointerId:id,isPrimary:id===1,clientX:x,clientY:150,bubbles:true}));
-  point('pointerdown');point('pointerup');point('pointerleave');$('story-intro-title').click();
-  check('touch-up then leave still permits the title start',book.status().playing&&book.status().index===0,{entry});
-  const seen=[0],deadline=performance.now()+32000;let sampledPlayingTap=false,sampledPause=false;
+  const buttons=[...$('story-intro').querySelectorAll('button')].filter(b=>b.getBoundingClientRect().width>0);
+  check('two visible child actions',buttons.length===2,{entry,ids:buttons.map(b=>b.id)});
+  $('storybook-play').click();check('one big Play begins the complete book',book.status().playing&&book.status().index===0,{entry});
+  const seen=[0],deadline=performance.now()+35000;let sampledPlayingTap=false,sampledPause=false;
   while($('story-intro').open&&performance.now()<deadline){
    const state=book.status();if(seen.at(-1)!==state.index)seen.push(state.index);
    check('movie stays paused during book',video.paused,{entry,page:state.index});
-   if(state.index===1&&!sampledPlayingTap){sampledPlayingTap=true;point('pointerdown');point('pointerup');$('story-intro-title').click();check('ordinary page tap does not interrupt playback',book.status().playing&&book.status().index===1,{entry});}
-   if(state.index===2&&!sampledPause){sampledPause=true;$('storybook-play').click();check('explicit pause retains its page',!book.status().playing&&book.status().index===2,{entry});$('storybook-play').click();check('explicit resume continues the retained page',book.status().playing&&book.status().index===2,{entry});}
+   if(state.index===1&&!sampledPlayingTap){sampledPlayingTap=true;point('pointerdown');point('pointerup');$('story-intro-title').click();check('ordinary page tap does not interrupt playback',book.status().playing&&book.status().index===1,{entry});point('pointerdown',1,200);point('pointerup',1,100);page.click();check('swipe cannot turn a page or pause automatic playback',book.status().playing&&book.status().index===1,{entry});}
+   if(state.index===2&&!sampledPause){sampledPause=true;$('storybook-play').click();check('explicit Pause retains its page',!book.status().playing&&book.status().index===2,{entry});$('storybook-play').click();check('explicit resume continues the retained page',book.status().playing&&book.status().index===2,{entry});}
    await wait(100);
   }
-  check('one title action runs every page without Next',JSON.stringify(seen)==='[0,1,2,3,4]'&&!$('story-intro').open,{entry,seen});
-  for(let n=0;n<50&&video.paused&&!$('video-play').getAttribute('aria-label').includes('Story finished');n++)await wait(100);
-  check('handoff starts film or exposes browser-denial fallback',!video.paused||$('video-play').getAttribute('aria-label')==='Story finished. Play video',{entry,paused:video.paused});video.pause();
+  check('one Play runs every page without Next',JSON.stringify(seen)==='[0,1,2,3,4]'&&!$('story-intro').open,{entry,seen});
+  const filmDeadline=performance.now()+6000;
+  while(video.currentTime<3&&performance.now()<filmDeadline&&!$('video-play').getAttribute('aria-label').includes('Story finished'))await wait(100);
+  const fallback=$('video-play').getAttribute('aria-label')==='Story finished. Play video';
+  check('handoff keeps movie running beyond3s or exposes explicit policy fallback',(!video.paused&&video.currentTime>=3)||fallback,{entry,paused:video.paused,time:video.currentTime,fallback});video.pause();
   check('watching did not consume game time',game.status().paused&&game.status().clock===clock,{entry});
-  $('intro-replay').click();$('storybook-next').click();$('storybook-next').click();$('storybook-play').click();check('manual later page then Play starts the full book',book.status().playing&&book.status().index===0,{entry});
+  $('intro-replay').click();point('pointerdown');point('pointerup');point('pointerleave');$('story-intro-title').click();check('touch-up then leave still permits title start',book.status().playing&&book.status().index===0,{entry});
   $('storybook-play').click();point('pointerdown');point('pointercancel');page.click();check('cancelled gesture cannot start playback',!book.status().playing,{entry});
   point('pointerdown',1);point('pointerdown',2);point('pointerup',1);point('pointerup',2);page.click();check('multitouch is not a story-start tap',!book.status().playing,{entry});
-  point('pointerdown',1,200);point('pointerup',1,100);page.click();check('swipe remains manual and cannot become a start click',!book.status().playing&&book.status().index===1,{entry});
-  $('intro-close').click();await wait(400);check('Close cancels playback without starting movie',!book.status().playing&&video.paused,{entry});
+  point('pointerdown',1,200);point('pointerup',1,100);page.click();check('idle swipe cannot navigate or become a start click',!book.status().playing&&book.status().index===0,{entry});
+  $('storybook-play').click();$('intro-close').click();for(let n=0;n<30&&$('story-intro').open;n++)await wait(20);
+  await wait(25000);check('X cancels beyond a full silent-book duration with no late movie',!$('story-intro').open&&!book.status().playing&&video.paused,{entry});
  }
  results.textContent+='\nCOMPLETE';
  }catch(e){results.textContent+='\nERROR '+e.message;}
@@ -216,7 +229,7 @@ characterChecks.onclick=async()=>{
  try{
   for(let n=0;n<100&&!(frame.contentDocument?.getElementById('character-wheel')&&frame.contentDocument?.getElementById('game')?.contentWindow.storytimeReview);n++)await wait(100);
   const d=frame.contentDocument,w=frame.contentWindow,$=id=>d.getElementById(id),g=$('game').contentDocument,api=$('game').contentWindow.storytimeReview;
-  if($('story-intro').open){$('intro-skip').click();await wait(400);}
+  if($('story-intro').open){$('intro-close').click();await wait(400);}
   const expanded=d.querySelector('.unit.expanded');if(expanded)expanded.querySelector('.expand-button').click();
   const wheel=$('character-wheel'),cards=[...wheel.querySelectorAll('button[data-appearance]')],rail=wheel.querySelector('.choice-rail');
   check('character choice is in visible normal flow',$('customization').getBoundingClientRect().height>0&&wheel.getBoundingClientRect().width>0&&!$('options').contains(wheel));
@@ -259,17 +272,16 @@ document.querySelector('#presentation').onclick=async()=>{
  const modal=$('story-intro').getBoundingClientRect();check('book fits viewport',modal.left>=0&&modal.right<=w.innerWidth+.5&&modal.top>=0&&modal.bottom<=w.innerHeight+.5);
  check('book type is preschool size',parseFloat(w.getComputedStyle($('story-intro-title')).fontSize)>=32);
  check('book controls retain64px',[...$('story-intro').querySelectorAll('button')].filter(e=>e.getBoundingClientRect().width).every(e=>e.getBoundingClientRect().width>=64&&e.getBoundingClientRect().height>=64));
- $('storybook-next').click();check('Next advances one page',w.storytimeStorybook.status().index===1);
- $('storybook-previous').click();check('Previous returns one page',w.storytimeStorybook.status().index===0);
+ check('manual page controls are absent',!$('storybook-next')&&!$('storybook-previous')&&!$('storybook-watch'));
  const page=d.querySelector('.storybook-page');
  // Synthetic pointers test handlers, not native swiping or pinch delivery.
  const pointer=(type,id,x,y)=>page.dispatchEvent(new w.PointerEvent(type,{pointerId:id,clientX:x,clientY:y,isPrimary:id===1,bubbles:true}));
- pointer('pointerdown',1,180,120);pointer('pointerup',1,60,120);check('left swipe advances',w.storytimeStorybook.status().index===1);
- pointer('pointerdown',1,60,120);pointer('pointerup',1,180,120);check('right swipe returns',w.storytimeStorybook.status().index===0);
+ pointer('pointerdown',1,180,120);pointer('pointerup',1,60,120);check('left swipe does not navigate',w.storytimeStorybook.status().index===0);
+ pointer('pointerdown',1,60,120);pointer('pointerup',1,180,120);check('right swipe does not navigate',w.storytimeStorybook.status().index===0);
  pointer('pointerdown',1,120,180);pointer('pointerup',1,120,60);check('vertical gesture does not turn page',w.storytimeStorybook.status().index===0);
  pointer('pointerdown',1,180,120);pointer('pointerdown',2,190,120);pointer('pointerup',1,60,120);pointer('pointerup',2,70,120);check('multiple pointers do not turn page',w.storytimeStorybook.status().index===0);
  $('storybook-play').click();check('autoplay requires explicit action',w.storytimeStorybook.status().playing);
- $('storybook-next').click();check('manual navigation stops autoplay',!w.storytimeStorybook.status().playing);
+ pointer('pointerdown',1,180,120);pointer('pointerup',1,60,120);check('swiping preserves automatic playback',w.storytimeStorybook.status().playing&&w.storytimeStorybook.status().index===0);
  $('intro-close').click();await wait(400);check('close cancels book playback',!w.storytimeStorybook.status().playing);
  $('full-game').click();const before=api.freeze();$('full-game').click();d.querySelector('#game-appearance button[data-appearance="mermaid"]').click();$('full-game').click();const after=api.freeze();
  check('appearance does not mutate simulation',JSON.stringify(before.state)===JSON.stringify(after.state));

@@ -1,5 +1,23 @@
 # EDUIT ModLog
 
+## 2026-11-02 — Two story actions and a settled movie handoff
+
+WSP00/15/22/50/84/97;15/P1. Holo lexical UNKNOWN freshness/index gap retained;
+direct owner/docs/tests/skill reads resolve scope.012's2/5 screenshot cannot
+establish its pause cause. Independent23 baseline measured five controls, one
+Play running all five cards, then a movie stopping at.899s. Measured client widths
+390→375 and visual390.39999→375.200012, unchanged390×844 layout/offsets, match
+the viewport pause rule. Narrow measured scrollbar exception fixes the handoff;
+existing offset/rotation oracles stay. Exact case added to viewport unit.
+
+Only bigPlay/Pause and bigX remain; no arrows/Skip/Watch/manual swipe or key turns.
+Open focuses Play. Same scheduler, words, game,23movie/SFX and renderer generation.
+Independent actual candidate observed1→2→3→4→5 then movie beyond3.69s, with two
+88px targets/glyph64. Existing harness covers real elapsed all-page/root/inner
+six-size layout and handoff. Checks use owned browser DOM locators; native keys,
+coordinates/downloads remain held while old Save As closure is unknown. See
+[contract/evidence](docs/SIMPLE_STORY_PLAYBACK.md).
+
 ## 2026-11-01 — Complete SNIFF, progressive THUMP, restored SQUISH
 
 WSP00/15/22/50/84/97;15/P1. Holo lexical freshness UNKNOWN/index gap retained;

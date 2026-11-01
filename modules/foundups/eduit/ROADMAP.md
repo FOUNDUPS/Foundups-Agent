@@ -1,5 +1,13 @@
 # EDUIT execution roadmap
 
+## 2026-11-02 — One Play, whole story, one clear exit
+
+012 supersedes manual child card navigation: two large pictograms, automatic
+five-page story, then a movie that continues after close. Baseline23 did play
+all pages, but its film stopped at.899s during measured scrollbar restoration.
+Test movie advancement beyond3s after modal settlement. Reuse existing storybook,
+viewport owner and harness; preserve23media and learning rules.
+
 ## 2026-11-01 — Hear/see the actual successful replay's sound objects
 
 012 confirms22leg, then reports clipped SNIFF, flat THUMPs and missing SQUISH.

@@ -1,5 +1,11 @@
 # EDUIT test inventory
 
+Simple24 supersedes manual child navigation tests per012. Existing harness checks
+exactly two88px/glyph64 actions, all5pages/root+inner/six sizes, one Play through
+book and movie beyond3s, Pause/Resume, incidental taps/swipes and X/no late start.
+Viewport unit freezes observed scrollbar reflow and retains offset/rotation
+oracles. Actual elapsed browser checks remain distinct from model/unit proof.
+
 Sound23 adds `game-audio-lifecycle.test.mjs`: execute actual controller audio/
 action/review functions in a VM with fake media; verify full source completion,
 silent priming, retry/reset/practice/resume and late promises. Replay tests now

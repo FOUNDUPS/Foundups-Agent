@@ -1,5 +1,10 @@
 # EDUIT — Education Using Information Technology
 
+**simple-story-24** has two big popup actions: ▶/Ⅱ and ×. One Play runs all five
+cards, then the movie; no arrows, Skip or manual swipe turns. Closing the modal
+cannot stop the handoff through scrollbar reflow. See
+[simple story contract](docs/SIMPLE_STORY_PLAYBACK.md).
+
 **sound-cues-23** rebuilds the25s movie with five longer SNIFF demonstrations,
 progressively larger/louder THUMPs and the missing SQUISH after landing. Action
 voice keeps Foley audible; audio resets cannot leak a prior-round sound.
@@ -12,7 +17,7 @@ frames go through the same scene renderer as the game; no second game runs.
 Missing or mismatched presentation data retains the native movie. See
 [movie presentation](docs/MOVIE_PRESENTATION.md) for binding and review limits.
 
-Current storybook interaction, **tap-story-21**: tap the teaching words/picture
+Historical storybook interaction, **tap-story-21** (controls superseded by24): tap the teaching words/picture
 or ▶ to run the complete story without repeated Next presses. Incidental taps
 while listening leave it running; explicit Ⅱ pauses and ▶ resumes that page.
 The child controls are pictograms with screen-reader names. Manual arrows remain

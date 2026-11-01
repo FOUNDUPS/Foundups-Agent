@@ -1,5 +1,18 @@
 # EDUIT test history
 
+## 2026-11-02 — One Play through the whole story and settled movie
+
+81Node tests pass, retaining all80 prior cases plus the exact observed scrollbar
+transition; true offsets/rotation still pause. Independent published23 baseline
+had5controls and automatic5/5, but movie paused.899s after close. Candidate24's
+actual primary press observed all5pages and movie advancing past3.69s. Existing
+harness visibility matrix completed928rawassertions,0fail: root+inner×6sizes×5
+automatic pages (60page presentations), paused via actual controls for geometry.
+Two88px targets/glyph64, teaching48/56px, no overflow and direct hit tests pass.
+Raw count is not928unique cases; synthetic harness clicks are not native touch.
+Behavior/cancellation and live publication evidence are retained separately in
+outputs/storytime-simple-20261102. No native iOS speech/listening claim.
+
 ## 2026-11-01 — Successful-replay sound objects, not legacy scene-only proof
 
 80Node tests pass, including5 independently authored actual-controller VM cases.

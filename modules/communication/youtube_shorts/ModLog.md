@@ -1,5 +1,15 @@
 # YouTube Shorts AI Generator - ModLog
 
+## 2026-11-02 — Simple continuous story popup
+
+012 supersedes card navigation: two88px Play/Pause+X actions,64px glyphs, same
+five-page scheduler and automatic video handoff. Remove child arrows/Skip/Watch
+and swipe/key turns; focus primary on open. A measured scrollbar restoration
+after modal close no longer pauses the just-started movie; real geometry changes
+keep prior behavior. Existing EDUIT harness/viewport owners provide regressions.
+Preserve23film/audio/scene bytes; no new editor or renderer. See EDUIT
+docs/SIMPLE_STORY_PLAYBACK.md for baseline/independent evidence and limits.
+
 ## 2026-11-01 — Storytime action voice preserves Foley
 
 Existing narration owner extends action display/speech windows from the actual

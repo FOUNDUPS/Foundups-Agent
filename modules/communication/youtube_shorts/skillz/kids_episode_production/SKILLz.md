@@ -1,7 +1,7 @@
 ---
 name: kids_episode_production
 description: Build and independently review Kids Episodes media and Storytime viewer/PWA changes through existing production and interactive-review owners.
-version: 0.2.8
+version: 0.2.9
 intent_type: GENERATION
 promotion_state: prototype
 ---
@@ -17,6 +17,10 @@ Use FOUNDUPS/Foundups-Agent as the implementation authority. Read AGENTS.md, WSP
 Read `references/story-direction.md` before scripting or revising an educational event. Apply its ordered physics, continuity, education and art/readability audits to each preview. Use the fast creative loop and milestone integration rules; record unverified listening separately.
 
 ## Viewer and game repair
+
+Current Storytime book: one Play runs all five cards, with only a large primary
+Play/Pause and large X. Apply the review skill's two-action/settled-handoff gate;
+do not reintroduce manual child card navigation from historical examples.
 
 Also apply the candidate [interactive experience review](../../../../foundups/eduit/skillz/interactive_experience_review/SKILLz.md)
 for audience, timing, points and interface changes. Game duration is independent

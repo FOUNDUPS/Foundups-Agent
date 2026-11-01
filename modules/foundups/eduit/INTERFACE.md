@@ -1,5 +1,18 @@
 # EDUIT interfaces
 
+## Two-action story popup — 2026-11-02
+
+Only `#storybook-play` and `#intro-close` are child actions:88px minimum targets,
+64px glyphs and accessible Play/Pause/Resume/Close names. One Play runs every
+page; Pause retains it, Resume repeats its phrase. Surface taps can start the
+whole book; swipes/arrows no longer navigate or interrupt. Previous/Next/Watch
+nodes are retired. `#intro-skip` stays hidden for unenhanced fallback compatibility.
+Open focuses Play; X/Escape cancel without movie start. Existing play/pause/status
+API and single completion handoff/browser-denial fallback stay intact.
+Viewport updates still pause gameplay; video excludes only measured scrollbar
+reflow with unchanged layout/height/offsets and matching changed client widths.
+Unknown geometry, offsets and rotation keep prior pause rules.
+
 ## Sound cues / renderer generation — 2026-11-01
 
 Revision2 stays25s/750frames with new authored demo holds and a rerendered MP4.

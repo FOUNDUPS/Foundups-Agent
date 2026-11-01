@@ -43,6 +43,7 @@ const moviePresentation=mountMoviePresentation({video,panel:videoPanel,surface:v
 const expandIcon='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H3v6m12-6h6v6M3 15v6h6m12-6v6h-6"/></svg>';
 const collapseIcon='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h6V3m6 0v6h6M9 21v-6H3m12 6v-6h6"/></svg>';
 let lastViewport="";
+let lastViewportGeometry=null;
 function viewport(){
  const v=window.visualViewport,useVisual=v?.scale===1&&v.width>0&&v.height>0;
  // Follow the visible viewport at normal zoom; preserve ordinary browser zoom.
@@ -50,8 +51,17 @@ function viewport(){
  const left=useVisual&&Number.isFinite(v.offsetLeft)?v.offsetLeft:0;
  const top=useVisual&&Number.isFinite(v.offsetTop)?v.offsetTop:0;
  const size=[width,height,left,top].join('x');
- if(lastViewport&&size!==lastViewport){video.pause();api()?.pause();}
+ const geometry={width,height,left,top,clientWidth:document.documentElement.clientWidth,layoutWidth:window.innerWidth,layoutHeight:window.innerHeight};
+ const old=lastViewportGeometry;
+ // Closing the modal restores the document scrollbar. Its measured client-width
+ // change is layout reflow, not a request to stop the film just handed off.
+ const scrollbarReflow=old&&width!==old.width&&height===old.height&&left===old.left&&top===old.top&&
+  geometry.layoutWidth===old.layoutWidth&&geometry.layoutHeight===old.layoutHeight&&
+  geometry.clientWidth>0&&old.clientWidth>0&&geometry.clientWidth!==old.clientWidth&&
+  Math.abs(width-geometry.clientWidth)<1&&Math.abs(old.width-old.clientWidth)<1;
+ if(lastViewport&&size!==lastViewport){if(!scrollbarReflow)video.pause();api()?.pause();}
  lastViewport=size;
+ lastViewportGeometry=geometry;
  for(const [name,value] of Object.entries({width,height,left,top}))document.documentElement.style.setProperty('--app-'+name,value+'px');
 }
 window.addEventListener('resize',viewport);window.addEventListener('orientationchange',viewport);
@@ -140,7 +150,7 @@ storyInfo.addEventListener('close',()=>infoReturn?.focus());
 // One-time illustrated pre-video story. Does not auto-play media or collect child data.
 const introDialog=$('story-intro'),introSeenKey='eduit.storytime.intro-seen.v1';
 let introReturn=null,introClosing=false,introGeneration=0;
-function openStoryIntro(){if(childLocked||introDialog.open)return;introGeneration++;video.pause();api()?.pause();introReturn=document.activeElement;introDialog.classList.remove('intro-collapsing');introDialog.showModal();storybook?.open();$('intro-close').focus();}
+function openStoryIntro(){if(childLocked||introDialog.open)return;introGeneration++;video.pause();api()?.pause();introReturn=document.activeElement;introDialog.classList.remove('intro-collapsing');introDialog.showModal();storybook?.open();($('storybook-play')||$('intro-close')).focus();}
 function finishStoryIntro(){if(introClosing||!introDialog.open)return;storyReadyForVideo=true;storybook?.pause('closing');introClosing=true;try{localStorage.setItem(introSeenKey,'1');}catch{}const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;if(!reduced)introDialog.classList.add('intro-collapsing');const close=()=>{introDialog.close();introDialog.classList.remove('intro-collapsing');introClosing=false;$('video').focus({preventScroll:true});$('video-panel').scrollIntoView({block:'nearest',behavior:'instant'});};if(reduced)close();else {introDialog.addEventListener('animationend',close,{once:true});setTimeout(()=>{if(introClosing)close();},350);}}
 $('intro-skip').addEventListener('click',finishStoryIntro);
 $('intro-close').addEventListener('click',finishStoryIntro);

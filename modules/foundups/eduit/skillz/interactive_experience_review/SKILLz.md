@@ -1,12 +1,21 @@
 ---
 name: interactive_experience_review
 description: Audit and iteratively repair audience-specific games and web interfaces, including EDUIT Storytime timing, touch controls, learning cues, scoring and feedback. Use before implementation and after inspecting each changed output.
-version: 0.3.6
+version: 0.3.7
 intent_type: AUDIT
 promotion_state: prototype
 ---
 
 # Review an interactive experience
+
+Current Storytime book contract (012,2026-11-02): exactly two88px child actions
+with64px glyphs, Play/Pause and X. No manual arrows/Skip/Watch/swipe turns. One
+start must run all five cards. Inspect movie time beyond3s after modal/scrollbar
+settlement, not just one playing frame. Preserve offset/rotation pause oracles
+when repairing a measured client/visual-width reflow. Owned-tab DOM button tests
+can continue while native keyboard/coordinate/download actions are held for an
+unresolved Save As; never send a global Enter or repeat hidden asset downloads.
+This explicit contract supersedes older manual-card cases below.
 
 This is a reusable **candidate procedure**, first applied to EDUIT. It is not an
 installed continuous worker, production-admitted Skillz, or proof of transfer to
