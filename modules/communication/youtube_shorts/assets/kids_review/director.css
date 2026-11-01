@@ -218,6 +218,23 @@ body.focused .story-header,body.focused .story-line,body.focused .panel-label{vi
 #game-appearance legend{font-size:16px;font-weight:800}
 #game-appearance p{font-size:13px;line-height:1.4;margin:6px 0}
 #game-appearance button[aria-pressed="true"]{outline:3px solid #1b7076;outline-offset:-3px;background:#d5edda}
+#customization{padding:16px 12px 24px;color:#123e43;background:#fffaf1;min-width:0}
+#customization h2{font-size:24px;margin:0 0 12px}
+#customization fieldset{min-width:0;margin:0 0 16px;padding:12px;border:2px solid #d7e6d8;border-radius:18px}
+#game-music summary{min-height:48px;display:flex;align-items:center;cursor:pointer;font-weight:700}
+#game-music details p{font-size:14px;line-height:1.6;overflow-wrap:anywhere}
+body.focused #customization{display:none}
+.choice-wheel{min-width:0;max-width:100%}.choice-label{font-size:18px;font-weight:800;margin:8px 0}
+.choice-controls{display:grid;grid-template-columns:48px minmax(0,1fr) 48px;align-items:center;gap:6px}
+.choice-controls>button{width:48px;min-width:48px;height:48px;padding:0;font-size:28px}
+.choice-controls>button:disabled{opacity:.4;cursor:default}
+.choice-rail{--choice-width:clamp(112px,35vw,168px);display:flex;gap:12px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scroll-padding-inline:calc(50% - var(--choice-width)/2);padding:10px max(0px,calc(50% - var(--choice-width)/2));min-width:0;touch-action:pan-x pan-y pinch-zoom}
+.choice-card{flex:0 0 var(--choice-width);min-width:48px;min-height:112px;max-width:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:8px;scroll-snap-align:center;border:3px solid transparent;background:#edf2e6;color:#123e43;font-size:16px;line-height:1.2}
+.choice-card svg{width:100%;height:80px;flex:none}.choice-picture{font-size:40px;line-height:1.2}
+.choice-card[aria-pressed="true"]{border-color:#1b7076;background:#d5edda;box-shadow:0 3px 0 #1b707633}
+.choice-wheel button:focus-visible{outline:4px solid #165d65;outline-offset:2px}
+.choice-status{min-height:24px;font-size:15px;margin:8px 0 0}
+@media(prefers-reduced-motion:reduce){.choice-rail{scroll-behavior:auto}.choice-card{transition:none}}
 @media(max-width:430px){.unit:not(.expanded) #feedback-actions{display:grid;grid-template-columns:repeat(2,var(--control-size));justify-content:center}}
 /* One page at a time. Large teaching text takes priority over decorative art. */
 #story-intro.storybook-ready{width:min(calc(100% - 24px),640px);max-height:calc(var(--app-height) - 24px - var(--safe-top) - var(--safe-bottom));padding:16px}
@@ -252,7 +269,7 @@ body.focused .story-header,body.focused .story-line,body.focused .panel-label{vi
 
 /* 2026-10-29 child-first responsive storybook: nearly full-screen on phones. */
 @media (max-width: 600px) and (orientation: portrait) {
- #story-intro.storybook-ready {
+ #story-intro.storybook-ready[open] {
   width: calc(var(--app-width) - 12px);
   max-width: none;
   height: calc(var(--app-height) - 12px - var(--safe-top) - var(--safe-bottom));

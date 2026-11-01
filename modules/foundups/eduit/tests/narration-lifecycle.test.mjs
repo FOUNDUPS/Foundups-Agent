@@ -25,3 +25,32 @@ test('media buffering and seeking cancel voice; caller volume change survives re
  assert.ok(cancels>=2);assert.ok(api.status().trace.some(r=>r.reason==='buffering'));
  }finally{for(const [k,v]of Object.entries(prior))if(v===undefined)delete globalThis[k];else globalThis[k]=v;}
 });
+
+function narrationFixture(search,run){
+ const keys=['window','document','location','SpeechSynthesisUtterance','requestAnimationFrame','cancelAnimationFrame'];
+ const prior=Object.fromEntries(keys.map(k=>[k,globalThis[k]]));let frame;const spoken=[];
+ const element=()=>({textContent:'',children:[],classList:{toggle(){}},setAttribute(){},replaceChildren(...nodes){this.children=nodes;},append(node){this.children.push(node);}});
+ globalThis.document=Object.assign(new EventTarget(),{hidden:false,createElement:element});globalThis.location={search};
+ globalThis.SpeechSynthesisUtterance=class{constructor(text){this.text=text;}};
+ globalThis.window=Object.assign(new EventTarget(),{SpeechSynthesisUtterance,speechSynthesis:{getVoices:()=>[],speak:u=>spoken.push(u),cancel(){}}});
+ globalThis.requestAnimationFrame=fn=>(frame=fn,1);globalThis.cancelAnimationFrame=()=>{};
+ try{const video=Object.assign(new EventTarget(),{currentTime:0,paused:true,ended:false,muted:false,volume:1}),caption=element();
+  const api=mountNarration(video,caption);run({api,video,caption,spoken,tick:()=>frame()});
+ }finally{for(const [k,v]of Object.entries(prior))if(v===undefined)delete globalThis[k];else globalThis[k]=v;}
+}
+test('adapter binds live callback time and caption correspondence to explicit cue evidence',()=>narrationFixture('?timing',({api,video,caption,spoken})=>{
+ video.paused=false;video.currentTime=.3;video.dispatchEvent(new Event('play'));
+ assert.equal(caption.children[1].textContent,spoken[0].text);
+ video.currentTime=.7;spoken[0].onstart();
+ const status=api.status(),r=status.trace.find(x=>x.type==='speech_started');
+ assert.equal(r.media_ms,700);assert.equal(r.media_clock,'sampled');assert.equal(r.onset_source,'speech_callback');
+ assert.equal(r.cue_revision,'english-narration-1');assert.equal(r.locale,'en-GB');
+ assert.equal(status.timing.acoustic_onset,'unverified');assert.equal(status.timing.caption_onset_source,'view_callback');
+}));
+test('debug evidence is bounded and opt-in, while status returns detached trace rows',()=>{
+ for(const search of ['', '?timing'])narrationFixture(search,({api,video})=>{
+  video.paused=false;for(let i=0;i<400;i++){video.currentTime=i%2?.3:4;video.dispatchEvent(new Event('play'));}
+  const rows=api.status().trace;assert.equal(rows.length,search?300:0);
+  if(search){rows[0].cue_id='tampered';assert.notEqual(api.status().trace[0].cue_id,'tampered');}
+ });
+});

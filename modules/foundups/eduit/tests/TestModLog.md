@@ -1,5 +1,23 @@
 # EDUIT test history
 
+## 2026-11-01 — Sleeve choices and baseline restoration
+
+Current full Node selection53/53 passes. Independent31 additional held-outs
+pass across wheel/music/explicit retry controls/SW and original-art restoration.
+Native Windows cp932/UTF8mode0 run also passes53/53: portability repaired in
+actual URL conversion and explicitUTF8 projection, not hidden by host settings.
+Four fixed original SVG hashes and seven additional original frames match the
+existing8b345ec source without editing golden assertions. Engine/rig unchanged.
+Earlier five failures below are historical, retained as negative controls.
+
+Independent red controls caught held-drag release, ordinary rescue retry after
+audio denial, and overlay Replay omission. Current fixed byte hashes and review:
+primary outputs/storytime-wheels-20261101/verifier-final-source-review.json.
+Character browser harness covers nonzero earned rescue award, unchanged state,
+keyboard/scroll choice and fullscreen return; native device/touch/listening are
+separate. Local HTML media playback observed both tracks; acoustic quality is
+not inferred. See choices contract and final browser/publication receipts.
+
 ## 2026-10-26 — Collapse continuity
 
 Existing inventory: `storytime.test.mjs` covers ordered inputs, wrong target,
@@ -91,3 +109,22 @@ oracle rejects v12's60px exit, then passes296 root/inner viewport checks on the
 candidate. Retained35-check suite passes at390x844 including rotation with frozen
 frame/marks. Readiness race retained as fixture failure, bounded wait added.
 Native iOS touch/Home Screen and physical audio remain unverified.
+
+## 2026-10-29 — Closed storybook portrait regression, local only
+
+New dedicated group in the existing director harness fails the retained original
+CSS at the first portrait Skip: `open=false`, computed `display:flex`, one client
+rectangle. With the `[open]` selector correction, the unchanged group passes
+92/92 checks across both entry routes and three sizes, including open modal,
+explicit Play/Close cancellation, reopen/Skip and four closed resize transitions.
+
+First candidate run loaded cached original CSS and was rejected. A local
+cache-bypassing reload plus CSSOM inspection confirmed the corrected rule before
+the passing run; no persistent browser-cache setting changed. Full raw before/
+after logs and per-check JSON are retained in the local synchronization outputs.
+
+Independent closest Node run:5 passed,2 unchanged Windows file-URL path failures;
+existing full-suite scene/order/hash failures were not relabeled fixed. Harness
+module syntax and git diff checks pass. No new Python test or registry entry.
+Native iOS/audio/PWA upgrade acceptance remains unverified; no commit, push,
+merge, Sites publication or deployment occurred for this correction.

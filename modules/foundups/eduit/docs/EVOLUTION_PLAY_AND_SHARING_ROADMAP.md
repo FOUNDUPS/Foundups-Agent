@@ -9,6 +9,14 @@ mechanics remain the mechanical reference until separately reviewed changes.
 
 ## Stages and current priority
 
+Latest012 direction (2026-11-01): add swipeable character and background-music
+choices to the existing sleeve, preserving the deterministic engine. First
+preview uses approved MAMMA/original Mermaid art and licensed existing music,
+not another renderer or generated soundtrack. See
+[character/music contract](CHARACTER_MUSIC_CHOICES.md). Sites preview is now
+authorized, along with verified pushes to the existing GitHub PR. Continue the learning-cue
+roadmap after scoped independent review and012's actual preview feedback.
+
 | Stage | Deliverable | Exit evidence |
 |---|---|---|
 | Mechanical proof of concept | Video above game, clear Watch/Play/About/How navigation, short story line, touch/mouse/fullscreen controls and visible rescue score | Existing game remains playable; responsive bounds and state continuity inspected; no false AI/upload claim |

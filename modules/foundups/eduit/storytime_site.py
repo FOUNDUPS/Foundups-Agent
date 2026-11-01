@@ -3,7 +3,7 @@ from pathlib import Path
 
 def mount_storytime_root(output):
     output=Path(output)
-    source=(output/'review/director.html').read_text()
+    source=(output/'review/director.html').read_text(encoding='utf-8')
     source=source.replace('href="director.css"','href="review/director.css"').replace('src="director.js"','src="review/director.js"')
     source=source.replace('href="../','href="').replace('src="../','src="')
-    (output/'index.html').write_text(source)
+    (output/'index.html').write_text(source, encoding='utf-8')

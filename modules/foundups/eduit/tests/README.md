@@ -2,6 +2,13 @@
 
 Run `node --test modules/foundups/eduit/tests/*.test.mjs` from repository root.
 
+Current sleeve selection adds `choice-wheel.test.mjs` and `music-picker.test.mjs`:
+keyboard/drag/programmatic-centering/rejection/teardown, explicit audio start,
+Off, pause, source allowlist, late promise and playback denial. Current full53/53
+passes; prior baseline Windows/scene failures were repaired against unchanged
+acceptance. The existing director harness adds “Run character wheel checks”.
+Credits/audio rights and physical listening are separate from synthetic tests.
+
 - `storytime.test.mjs`: world clock, rescue outcomes, scene continuity, cue/locale
   invariants and typography independent of tremor physics.
 - `layout.test.mjs`: gesture adapter cancellation/destroy, root projection and
@@ -28,3 +35,12 @@ result for a completed browser round.
   useful landscape scene size, >=64px controls, safe-area arithmetic, hit tests,
   one drawing rail and state preservation. First run the identical oracle against
   the retained published baseline; record a red control before candidate acceptance.
+
+- `director_harness.html` **Run storybook visibility regression**: both root and
+  inner director at390x844,844x390 and1280x900. Uses the actual Story/Skip/Close
+  and explicit storybook Play controls, checks native-modal opening and bounds,
+  no closed-dialog layout or narration, reopening, and resizing while closed.
+  Run the unchanged oracle against original CSS before testing a repair. After
+  replacing local CSS, reload with fresh assets and verify the loaded stylesheet;
+  a cached original rule is not evidence about the candidate. This is browser
+  layout/handler evidence, not physical mobile touch or acoustic acceptance.

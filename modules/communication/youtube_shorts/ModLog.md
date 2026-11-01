@@ -1,5 +1,19 @@
 # YouTube Shorts AI Generator - ModLog
 
+## 2026-11-01 — Reusable sleeve choices for Storytime review
+
+Existing director now mounts a shared accessible horizontal choice wheel for
+MAMMA/original Mermaid and optional licensed music. Local rigs supply thumbnails;
+existing setAppearance owns state-safe art changes. Music Off defaults; explicit
+Play, quiet same-origin tracks, bounded cancellation/error handling and accessible
+credits. Independent held-out drag/retry defects repaired with retained controls.
+No new renderer, game engine, auth, child record or media generator. Narration
+trace timing provenance and earlier closed-dialog repair retained. EDUIT-owned
+baseline geometry/UTF8 repairs restore original golden frames; full53/53 and
+independent31 checks pass. Existing builder freshly rerendered matched media.
+Latest012 authorizes Sites preview and GitHub push; exact source/CI/live receipts
+remain separate from listening, native mobile and RSI transfer.
+
 ## 2026-10-25 — First Little Shrew animated episode
 
 Reused the shared SVG rig, canonical first segment and existing FFmpeg renderer to produce three five-second shots with original code-composed instrumental/foley and timed captions. Added an optional local command with exclusive outputs, source/asset provenance and explicit unreviewed status. 140 focused tests pass; independent actual-frame/technical review passed. Audio listening remains unverified. See YouTube Shorts docs/KIDS_LOCAL_PRODUCTION.md for measured artifact evidence and exact autonomy owner/gap map, including the mock wallet boundary. Updated the disabled research-scout state; no WRE/provider/spending/upload activation.
@@ -888,3 +902,18 @@ Existing kids_review viewer now owns compact Play/About/How, science-bounded cop
 channel link and responsive control sizing. EDUIT retains roadmap/education scope;
 no new publisher or credential surface. Film and game engine unchanged. See EDUIT
 LEARNING_SHELL_REVIEW.md and EVOLUTION_PLAY_AND_SHARING_ROADMAP.md.
+
+## 2026-10-29 — Local-only closed storybook visibility repair
+
+The portrait-phone `.storybook-ready` layout rule now requires `[open]`.
+Previously its `display:flex` overrode the browser's closed-dialog hiding,
+leaving a closed storybook inline below the viewer. Open layout, controls,
+safe-area rules, narration and game/media owners are unchanged.
+
+The existing EDUIT browser harness gains an open/close/Skip/resize regression.
+Original CSS fails with `open=false`, `display:flex` and one client rectangle;
+the same oracle passes92 checks with the repair across root/director entries
+and390x844,844x390,1280x900. Closest Node layout/viewport checks:5 passed,
+2 existing Windows file-URL path failures. Harness syntax and diff checks pass.
+See EDUIT `docs/PHONE_FULLSCREEN_REPAIR.md`. No native-device/audio acceptance,
+Git commit/push, merge or publication is claimed. WSP22/50/84/97.

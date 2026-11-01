@@ -1,5 +1,11 @@
 # EDUIT — Education Using Information Technology
 
+Latest local sleeve work: [character/music choices](docs/CHARACTER_MUSIC_CHOICES.md)
+adds visible swipeable choices over the existing game. Two original appearances,
+two attributed CC BY music tracks and Off; no automatic sound or engine changes.
+Latest012 direction authorizes Sites review publication and verified GitHub
+pushes. This preview is separate from full learning/RSI acceptance.
+
 > **Canonical 2026-10-28 handoff:** [Storytime conversation audit and Prometheus M2M handoff](docs/STORYTIME_RSI_CONVERSATION_AUDIT_AND_HANDOFF.md) is the current decision register. It supersedes conflicting historical statements below about video+game-only tiles, Earn Stars buttons, forced three-round quizzes, and autonomous runtime status. Existing site work is owned by a separate session; this PR documentation change must not overwrite that session's UI work.
 ## EDUIT vision / Storytime Evolution map — 2026-10-28
 

@@ -1,5 +1,15 @@
 # EDUIT execution roadmap
 
+## 2026-11-01 — Reviewable sleeve choices, then measured learning cues
+
+15/P1(C3/I4/D4/Impact4): visible character/music wheels over the existing engine,
+independent local verification and authorized Sites review preview. See
+[choices contract](docs/CHARACTER_MUSIC_CHOICES.md). First two approved skins and
+two licensed tracks; retain no-autoplay, pause/state, accessibility and provenance.
+Then resume one recorded THUMP timing proof. Full adaptive content, recognition,
+admitted workers and next-tile RSI transfer remain separate. Latest012 direction
+permits verified pushes to the existing PR; merge/main acceptance stays separate.
+
 ## Phone storybook and narration correction — 2026-10-29
 
 The existing PR #2256 now includes a follow-up phone-first correction: the first-visit storybook fills nearly the available portrait viewport, uses large short text and a taller picture, retains left/right swipe and Previous/Next, and explicit autoplay reads pages before handing off to the MP4. Browser playback restrictions can block automatic video sound, in which case the existing large Play control receives focus. Skip/Close do not auto-start video. The iPad retains its separate responsive layout. The upper fullscreen context on phones is bounded to avoid an oversized dirt strip; game physics, score, artwork scale and hit geometry remain unchanged. This is source implementation, not verified physical-device acceptance or a published Sites version. English browser TTS remains device-voice dependent; native iPad audible testing, all-locale audio and prerecorded production voices are separate acceptance gaps.

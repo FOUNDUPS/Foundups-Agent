@@ -1,5 +1,17 @@
 # EDUIT interfaces
 
+## Character/music sleeve — 2026-11-01
+
+Existing `setAppearance` remains the only game-art mutation seam. Shorts-owned
+`choice-wheel.mjs::mountChoiceWheel` handles allowlisted cosmetic choices;
+`music-picker.mjs::mountMusicPicker` controls separate local background audio.
+`window.storytimeMusic.status()` exposes selected/armed/pending/playing/message
+for local review, not an analytics or dispatch API. Music Off defaults, explicit
+Play only, quiet loop, no arbitrary source/child traces. Cue trace repair samples
+live media time and labels callbacks versus acoustic evidence; original authored
+offsets and English fallback remain. See choices contract and existing timing
+review; full learning engine/worker admission are not implied.
+
 > **Canonical 2026-10-28 handoff:** [Storytime conversation audit and Prometheus M2M handoff](docs/STORYTIME_RSI_CONVERSATION_AUDIT_AND_HANDOFF.md) is the current decision register. It supersedes conflicting historical statements below about video+game-only tiles, Earn Stars buttons, forced three-round quizzes, and autonomous runtime status. Existing site work is owned by a separate session; this PR documentation change must not overwrite that session's UI work.
 ## EDUIT vision / Storytime Evolution map — 2026-10-28
 

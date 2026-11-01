@@ -1,4 +1,4 @@
-import {CueScheduler} from '../storytime/cue-scheduler.mjs';
+import {CueScheduler,cueRevision} from '../storytime/cue-scheduler.mjs';
 let activeSpeechChannel=null;
 export function createSpeechChannel({notice=()=>{},volume=()=>.85}={}){
  const synth=window.speechSynthesis;let utterance=null;
@@ -52,8 +52,8 @@ export function mountNarration(video,caption,{statusHost=caption}={}){
  function duck(on){if(on&&volume===null){volume=video.volume;changingVolume=true;duckedVolume=volume*.2;video.volume=duckedVolume;changingVolume=false;}
   else if(!on&&volume!==null){const restore=volume;volume=null;duckedVolume=null;changingVolume=true;video.volume=restore;changingVolume=false;}}
  const cancel=()=>channel.cancel();
- const scheduler=new CueScheduler({cancel,duck,
-  trace:r=>{if(debug){records.push(r);if(records.length>300)records.shift();}},
+ const scheduler=new CueScheduler({cancel,duck,mediaNow:()=>video.currentTime*1000,
+  trace:r=>{if(debug){records.push({cue_revision:cueRevision,locale:'en-GB',...r});if(records.length>300)records.shift();}},
   view:(cue,fading)=>{const text=cue?.text||'';if(text!==lastText){lastText=text;phrase.textContent=text;picture.textContent=cue?.picture||'';queueFit();}caption.classList.toggle('caption-fading',fading);},
   speak:(text,callbacks)=>channel.speak(text,callbacks)});
  const update=()=>scheduler.update(video.currentTime*1000,{running:!video.paused&&!video.ended&&!document.hidden&&!buffering&&!seeking,audible:voiceOn&&!video.muted&&video.volume>0});
@@ -70,5 +70,6 @@ export function mountNarration(video,caption,{statusHost=caption}={}){
  window.addEventListener('pagehide',()=>{cancelAnimationFrame(raf);cancelAnimationFrame(fitFrame);scheduler.stop('pagehide');});
  update();
  return {stop:reason=>scheduler.stop(reason),setEnabled(value){voiceOn=!!value;scheduler.stop('voice-option');update();},
-  status:()=>({voice:scheduler.voice,enabled:voiceOn,englishOnly:true,trace:debug?records.slice():[],traceEnabled:debug})};
+  status:()=>({voice:scheduler.voice,enabled:voiceOn,englishOnly:true,trace:debug?records.map(r=>({...r})):[],traceEnabled:debug,
+   timing:{cue_revision:cueRevision,locale:'en-GB',caption_onset_source:'view_callback',speech_onset_source:'speech_callback',acoustic_onset:'unverified'}})};
 }

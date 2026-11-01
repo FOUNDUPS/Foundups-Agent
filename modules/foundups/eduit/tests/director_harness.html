@@ -1,6 +1,6 @@
 <!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><title>Storytime interaction acceptance</title>
 <style>body{margin:0;font:14px system-ui;background:#ddd}nav{padding:8px}iframe{display:block;border:0}pre{white-space:pre-wrap;max-height:100px;overflow:auto}</style>
-<nav><button data-size="320,568">Small phone</button><button data-size="568,320">Small landscape</button><button data-size="390,844">Phone portrait</button><button data-size="844,390">Phone landscape</button><button data-size="768,1024">Tablet portrait</button><button data-size="1024,768">Tablet landscape</button><button id="rescue">Play rescue sequence</button><button id="run">Run acceptance</button><button id="phone-matrix">Run phone regression matrix</button><button id="presentation">Run storybook/theme checks</button></nav><pre id="results">Ready</pre><iframe id="app" src="/" width="390" height="844"></iframe>
+<nav><button data-size="320,568">Small phone</button><button data-size="568,320">Small landscape</button><button data-size="390,844">Phone portrait</button><button data-size="844,390">Phone landscape</button><button data-size="768,1024">Tablet portrait</button><button data-size="1024,768">Tablet landscape</button><button id="rescue">Play rescue sequence</button><button id="run">Run acceptance</button><button id="phone-matrix">Run phone regression matrix</button><button id="storybook-dialog">Run storybook visibility regression</button><button id="presentation">Run storybook/theme checks</button></nav><pre id="results">Ready</pre><iframe id="app" src="/" width="390" height="844"></iframe>
 <script type="module">
 const frame=document.querySelector('#app'),results=document.querySelector('#results');
 for(const b of document.querySelectorAll('[data-size]'))b.onclick=()=>{const [w,h]=b.dataset.size.split(',');frame.width=w;frame.height=h;};
@@ -48,6 +48,31 @@ const sizes=[[320,568],[390,844],[568,320],[844,390],[768,1024],[1024,768]];
 document.querySelector('#phone-matrix').onclick=async()=>{
  const rows=[];results.textContent='Running';
  const check=(name,ok,detail={})=>{rows.push({name,result:ok?'PASS':'FAIL',...detail});results.textContent=JSON.stringify(rows,null,2);if(!ok)throw Error(name);};
+ async function seekForLayout(video,time,w){
+  async function ready(predicate,phase){
+   const deadline=performance.now()+8000;
+   while(!predicate()){
+    if(video.error)throw Error('Video error during '+phase+': '+video.error.code);
+    if(performance.now()>=deadline)throw Error('Video '+phase+' timed out at '+video.currentTime+'s (requested '+time+'s, readyState '+video.readyState+', seeking '+video.seeking+')');
+    await wait(25);
+   }
+  }
+  await ready(()=>video.readyState>=1&&Number.isFinite(video.duration)&&video.duration>time,'metadata readiness');
+  video.pause();
+  let targetSeeked=!video.seeking&&Math.abs(video.currentTime-time)<.05;
+  const sought=()=>{if(!video.seeking&&Math.abs(video.currentTime-time)<.05)targetSeeked=true;};
+  video.addEventListener('seeked',sought);
+  try{
+   if(!targetSeeked)video.currentTime=time;
+   await ready(()=>targetSeeked&&!video.seeking&&video.readyState>=2&&Math.abs(video.currentTime-time)<.05,'target seek readiness');
+   await new Promise((resolve,reject)=>{
+    let frameId,remaining=2;
+    const timeout=w.setTimeout(()=>{w.cancelAnimationFrame(frameId);reject(Error('Layout frames timed out after seek to '+time+'s'));},3000);
+    const next=()=>{if(--remaining===0){w.clearTimeout(timeout);resolve();}else frameId=w.requestAnimationFrame(next);};
+    frameId=w.requestAnimationFrame(next);
+   });
+  }finally{video.removeEventListener('seeked',sought);}
+ }
  try{for(const entry of ['/', '/review/director.html'])for(const size of sizes){
   const loaded=new Promise(resolve=>frame.addEventListener('load',resolve,{once:true}));frame.width=size[0];frame.height=size[1];frame.src=entry;await loaded;
   const d=frame.contentDocument,w=frame.contentWindow,$=id=>d.getElementById(id);
@@ -73,13 +98,98 @@ document.querySelector('#phone-matrix').onclick=async()=>{
   const safe=size[0]>size[1]?[0,32,16,32]:[24,0,20,0];
   ['top','right','bottom','left'].forEach((n,i)=>d.documentElement.style.setProperty('--safe-'+n,safe[i]+'px'));inspect($('game-panel'),'drawing-safe',safe);
   $('resume-game').click();api.pause();$('to-video').click();inspect($('video-panel'),'video',safe);
-  if(size[0]>size[1]&&size[1]<=500){for(const time of [3.8,7,10]){const sought=new Promise(resolve=>$('video').addEventListener('seeked',resolve,{once:true}));$('video').currentTime=time;await sought;const caption=$('story-caption');check('actual phrase and picture fit sidebar',caption.scrollHeight<=caption.clientHeight+1&&caption.scrollWidth<=caption.clientWidth+1,{entry,size,time,text:caption.textContent});}}
+  if(size[0]>size[1]&&size[1]<=500){for(const time of [3.8,7,10]){
+   const video=$('video');await seekForLayout(video,time,w);
+   check('video reached requested frame',!video.seeking&&video.readyState>=2&&Math.abs(video.currentTime-time)<.05,{entry,size,time,actualTime:video.currentTime,readyState:video.readyState});
+   const caption=$('story-caption');check('actual phrase and picture fit sidebar',caption.scrollHeight<=caption.clientHeight+1&&caption.scrollWidth<=caption.clientWidth+1,{entry,size,time,actualTime:video.currentTime,text:caption.textContent});
+  }}
   ['top','right','bottom','left'].forEach(n=>d.documentElement.style.removeProperty('--safe-'+n));
   check('page remains within width',d.documentElement.scrollWidth<=size[0],{entry,size});
   if(size[0]===390){const bounds={left:20,top:80,width:350,height:600};for(const [n,v]of Object.entries(bounds))d.body.style.setProperty('--app-'+n,v+'px');$('video-options').click();const o=$('options').getBoundingClientRect();check('options follow offset visible viewport',o.left>=bounds.left&&o.top>=bounds.top&&o.right<=370.5&&o.bottom<=680.5,{entry});$('lock-child').click();const u=$('unlock').getBoundingClientRect();check('unlock follows offset visible viewport',u.left>=20&&u.top>=80&&u.right<=370.5&&u.bottom<=680.5,{entry});}
 
  }
  results.textContent+='\nCOMPLETE';
+ }catch(e){results.textContent+='\nERROR '+e.message;}
+};
+
+// Native dialog visibility: closed state must survive phone presentation styles.
+// Run unchanged against the retained broken CSS before checking the repair.
+document.querySelector('#storybook-dialog').onclick=async()=>{
+ const rows=[];
+ const check=(name,ok,detail={})=>{rows.push({name,result:ok?'PASS':'FAIL',...detail});results.textContent=JSON.stringify(rows,null,2);if(!ok)throw Error(name);};
+ try{for(const entry of ['/', '/review/director.html'])for(const size of [[390,844],[844,390],[1280,900]]){
+  const loaded=new Promise(resolve=>frame.addEventListener('load',resolve,{once:true}));
+  frame.width=size[0];frame.height=size[1];frame.src=entry;await loaded;
+  const d=frame.contentDocument,w=frame.contentWindow,$=id=>d.getElementById(id);
+  for(let n=0;n<100&&!(w.storytimeStorybook&&$('game')?.contentWindow.storytimeReview);n++)await wait(100);
+  check('storybook and game are ready',!!w.storytimeStorybook&&!!$('game')?.contentWindow.storytimeReview,{entry,size});
+  const intro=$('story-intro'),book=w.storytimeStorybook;
+  const closed=label=>check(label,!intro.open&&w.getComputedStyle(intro).display==='none'&&intro.getClientRects().length===0,{entry,size,open:intro.open,display:w.getComputedStyle(intro).display,rects:intro.getClientRects().length});
+  async function closeWith(id){
+   $(id).click();
+   for(let n=0;n<100&&intro.open;n++)await wait(20);
+  }
+  // Respect the application's first-visit state; never assign open or inject CSS.
+  if(!intro.open)$('intro-replay').click();
+  await closeWith('intro-skip');closed('Skip removes the closed book from layout');
+  $('intro-replay').click();
+  const bounds=intro.getBoundingClientRect();
+  check('Story opens a visible native modal',intro.open&&intro.matches(':modal')&&bounds.width>0&&bounds.height>0,{entry,size});
+  check('open book fits viewport',bounds.left>=-.5&&bounds.top>=-.5&&bounds.right<=w.innerWidth+.5&&bounds.bottom<=w.innerHeight+.5,{entry,size});
+  check('opening does not autoplay media or narration',$('video').paused&&!book.status().playing&&$('game').contentWindow.storytimeReview.status().paused,{entry,size});
+  if(w.matchMedia('(max-width:600px) and (orientation:portrait)').matches)check('open phone book keeps its flex layout',w.getComputedStyle(intro).display==='flex',{entry,size});
+  const exit=$('intro-close').getBoundingClientRect();
+  check('Close retains a reachable64px target',exit.width>=64&&exit.height>=64&&exit.left>=0&&exit.top>=0&&exit.right<=w.innerWidth+.5&&exit.bottom<=w.innerHeight+.5,{entry,size});
+  // A real Play action makes the cancellation check independent of initial idle.
+  $('storybook-play').click();check('book playback starts explicitly',book.status().playing,{entry,size});
+  await closeWith('intro-close');closed('Close removes the closed book from layout');
+  check('Close stops book playback',!book.status().playing,{entry,size});
+  $('intro-replay').click();check('closed book can reopen',intro.open&&intro.matches(':modal'),{entry,size});
+  await closeWith('intro-skip');closed('reopened book closes with Skip');
+  for(const resized of [[390,844],[844,390],[1280,900],[390,844]]){
+   frame.width=resized[0];frame.height=resized[1];
+   await new Promise(resolve=>w.requestAnimationFrame(()=>w.requestAnimationFrame(resolve)));
+   closed('closed book stays hidden after resize to'+resized.join('x'));
+  }
+ }
+ results.textContent+='\nCOMPLETE';
+ }catch(e){results.textContent+='\nERROR '+e.message;}
+};
+
+// Character choices exercise the real paused game and native scroll container.
+const characterChecks=document.createElement('button');characterChecks.id='characters';characterChecks.textContent='Run character wheel checks';document.querySelector('nav').append(characterChecks);
+characterChecks.onclick=async()=>{
+ const rows=[],check=(name,ok)=>{rows.push({name,result:ok?'PASS':'FAIL'});results.textContent=JSON.stringify(rows,null,2);if(!ok)throw Error(name);};
+ try{
+  for(let n=0;n<100&&!(frame.contentDocument?.getElementById('character-wheel')&&frame.contentDocument?.getElementById('game')?.contentWindow.storytimeReview);n++)await wait(100);
+  const d=frame.contentDocument,w=frame.contentWindow,$=id=>d.getElementById(id),g=$('game').contentDocument,api=$('game').contentWindow.storytimeReview;
+  if($('story-intro').open){$('intro-skip').click();await wait(400);}
+  const expanded=d.querySelector('.unit.expanded');if(expanded)expanded.querySelector('.expand-button').click();
+  const wheel=$('character-wheel'),cards=[...wheel.querySelectorAll('button[data-appearance]')],rail=wheel.querySelector('.choice-rail');
+  check('character choice is in visible normal flow',$('customization').getBoundingClientRect().height>0&&wheel.getBoundingClientRect().width>0&&!$('options').contains(wheel));
+  check('wheel targets are at least48px',[...wheel.querySelectorAll('button')].every(button=>{const r=button.getBoundingClientRect();return r.width>=48&&r.height>=48;}));
+  check('wheel stays within page width',d.documentElement.scrollWidth<=w.innerWidth&&rail.scrollWidth>rail.clientWidth);
+  check('two approved choices have actual local artwork',cards.length===2&&cards.every(card=>card.querySelector('svg use')));
+  cards.find(card=>card.dataset.appearance==='mamma').click();
+  $('play').click();
+  const wake=g.querySelector('[aria-label="Wake baby-1"]');check('fixture can wake first character',!!wake);wake.click();
+  g.querySelector('[aria-label="Move selected shrew to root"]').click();
+  for(let n=0;n<120&&api.status().score===0;n++)await wait(50);
+  check('fixture earned a real rescue award',api.status().score>0);
+  rail.dispatchEvent(new w.PointerEvent('pointerdown',{pointerId:1,bubbles:true}));
+  const before=api.freeze();await wait(180);check('wheel interaction pauses without consuming time',api.status().paused&&api.status().clock===before.clock);
+  cards.find(card=>card.dataset.appearance==='mermaid').click();const after=api.freeze();
+  check('choice preserves actors score awards and timer',JSON.stringify(before.state)===JSON.stringify(after.state));
+  check('Mermaid changes only approved appearance',after.appearance==='mermaid'&&after.svg!==before.svg&&$('video').paused);
+  check('selection announces one active choice',cards.filter(card=>card.getAttribute('aria-pressed')==='true').length===1&&wheel.querySelector('[role="status"]').textContent.includes('Mermaid'));
+  cards[1].dispatchEvent(new w.KeyboardEvent('keydown',{key:'Home',bubbles:true,cancelable:true}));
+  check('keyboard returns to MAMMA and retains focus',api.status().appearance==='mamma'&&d.activeElement===cards[0]);
+  rail.dispatchEvent(new w.PointerEvent('pointerdown',{pointerId:2,bubbles:true}));w.dispatchEvent(new w.PointerEvent('pointerup',{pointerId:2}));rail.scrollTo({left:rail.scrollWidth,behavior:'instant'});
+  for(let n=0;n<50&&api.status().appearance!=='mermaid';n++)await wait(30);
+  check('native scrolling settles on Mermaid',api.status().appearance==='mermaid'&&api.status().paused);
+  $('full-game').click();check('fullscreen hides the normal-flow wheel',w.getComputedStyle($('customization')).display==='none');
+  $('full-game').click();check('return restores wheel without restarting game',wheel.getBoundingClientRect().height>0&&api.status().paused&&api.status().clock===before.clock);
+  results.textContent+='\nCOMPLETE — scroll/handler evidence, not physical finger delivery.';
  }catch(e){results.textContent+='\nERROR '+e.message;}
 };
 
@@ -108,11 +218,11 @@ document.querySelector('#presentation').onclick=async()=>{
  $('storybook-play').click();check('autoplay requires explicit action',w.storytimeStorybook.status().playing);
  $('storybook-next').click();check('manual navigation stops autoplay',!w.storytimeStorybook.status().playing);
  $('intro-close').click();await wait(400);check('close cancels book playback',!w.storytimeStorybook.status().playing);
- $('full-game').click();const before=api.freeze();$('game-options').click();d.querySelector('#game-appearance button[data-appearance="mermaid"]').click();$('close-options').click();const after=api.freeze();
+ $('full-game').click();const before=api.freeze();$('full-game').click();d.querySelector('#game-appearance button[data-appearance="mermaid"]').click();$('full-game').click();const after=api.freeze();
  check('appearance does not mutate simulation',JSON.stringify(before.state)===JSON.stringify(after.state));
  check('mermaid is actual different art',before.svg!==after.svg&&after.appearance==='mermaid');
  check('appearance leaves explicit resume',api.status().paused);
- $('feedback').click();const captured=$('frozen').innerHTML;$('game-options').click();d.querySelector('#game-appearance button[data-appearance="mamma"]').click();$('close-options').click();
+ $('feedback').click();const captured=$('frozen').innerHTML;$('full-game').click();d.querySelector('#game-appearance button[data-appearance="mamma"]').click();$('full-game').click();
  check('old drawing retains captured appearance',$('frozen').innerHTML===captured);
  check('one marking rail',w.getComputedStyle(d.querySelector('.game-controls')).display==='none'&&!$('feedback-actions').hidden);
  check('theme picker reports selected state',d.querySelector('#game-appearance button[data-appearance="mamma"]').getAttribute('aria-pressed')==='true'&&d.querySelector('#game-appearance button[data-appearance="mermaid"]').getAttribute('aria-pressed')==='false');

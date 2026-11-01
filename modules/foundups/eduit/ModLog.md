@@ -1,5 +1,32 @@
 # EDUIT ModLog
 
+## 2026-11-01 — Character/music wheels and verified branch repairs
+
+Latest012 direction authorizes Sites preview and verified GitHub pushes.
+WSP00/15/22/50/84/97:15/P1(C3/I4/D4/Impact4), existing engine/sleeve owners.
+Visible swipeable MAMMA/original Mermaid choices, actual local rig previews,
+keyboard/arrows and optional Off/Carefree/Wholesome music. Tracks by Kevin
+MacLeod, CC BY4.0, source/credits/change notices retained; no generated music.
+Music is quiet and explicit-Play only, pauses for story/video/hidden state.
+
+Independent review caught held-drag settlement, blocked-play retry from rescue
+taps and missing overlay Replay support; bounded fixes retain their red evidence.
+Programmatic centering preserves the selected choice. Cue traces now sample
+live media time, follow view completion and return detached bounded snapshots;
+callbacks do not certify acoustic onset. Prior closed-dialog repair is retained.
+
+Five baseline failures traced and repaired without changing golden assertions:
+native file-URL paths, explicitUTF8 root projection, pocket/actor/roof layering,
+original H740 safety boundary and original MAMMA footprint palette. Mermaid
+palette retained. Engine/rig unchanged. Full Node53/53 and independent31 held-outs
+pass, including native cp932 with UTF8mode0 and original source/frame comparison.
+Fresh canonical media rerendered after the layer repair. Browser and publication
+receipts remain separate. UI-TARS model loaded and returned real-pixel inference,
+but existing bridge rejected its coordinate format; no autonomous player PASS.
+See docs/CHARACTER_MUSIC_CHOICES.md; primary outputs/storytime-rsi-20261101 and
+outputs/storytime-wheels-20261101 retain exact review/failure evidence. No child
+records, model promotion, native worker admission or retained RSI claim.
+
 ## 2026-10-28 — Storytime RSI continuity architecture (documentation-only)
 
 - Cross-linked README, INTERFACE and ROADMAP to `docs/STORYTIME_RSI_SYSTEM_ARCHITECTURE.md`.
@@ -304,3 +331,17 @@ normal-zoom visualViewport offsets/scroll and foreground refresh; changed bounds
 pause both owners. Existing manifest/gesture/game/media/feedback identity retained.
 See docs/PHONE_FULLSCREEN_REPAIR.md for red baseline, browser/Node evidence and
 native-device limits. Remaining issue2252 findings are not relabeled repaired.
+
+## 2026-10-29 — Local GitHub comparison and closed-book regression
+
+Compared PR2256 head3651c518 with its fetched remote: the Storytime source
+matches. New main commits through01b87f0e do not alter the scoped Storytime
+owners. The original dirty PC checkout and old PR2221 lane remain preserved;
+only the unoccupied local main reference was fast-forwarded.
+
+The Shorts-owned portrait storybook rule now applies only while its dialog is
+open. Added a dedicated real-browser oracle to the existing director harness;
+retained the original closed-but-visible failure and92 passing candidate checks.
+See docs/PHONE_FULLSCREEN_REPAIR.md for evidence, cache-refresh qualification
+and platform limits. No game, scene, renderer, movie or PWA lifecycle change.
+These are uncommitted local repairs; no GitHub/Sites push or deployment.

@@ -1,4 +1,7 @@
 import {mountNarration} from './story-narration.mjs';
+import {mountMusicPicker} from './music-picker.mjs';
+import {mountChoiceWheel} from './choice-wheel.mjs';
+import {appearanceFor} from '../storytime/rig.mjs';
 import {bindPanelGestures} from '../storytime/panel-gestures.mjs';
 import {locales,normalizeLocale} from '../storytime/learning-events.mjs';
 const $=id=>document.getElementById(id),game=$('game'),ink=$('ink');
@@ -136,27 +139,39 @@ voiceOption.setAttribute('aria-pressed','true');voiceOption.textContent='English
 
 
 // Presentation-only choice; media and simulation remain owned by their existing adapters.
+const customization=document.createElement('section');customization.id='customization';customization.setAttribute('aria-label','Make it yours');
+const customizationTitle=document.createElement('h2');customizationTitle.textContent='Make it yours';customization.append(customizationTitle);$('languages').after(customization);
 const appearanceGroup=document.createElement('fieldset');appearanceGroup.id='game-appearance';
 const appearanceLegend=document.createElement('legend');appearanceLegend.textContent='Game appearance';
 const appearanceNote=document.createElement('p');appearanceNote.textContent='The video keeps its original MAMMA story';
-appearanceGroup.append(appearanceLegend,appearanceNote);options.insertBefore(appearanceGroup,optionsClose);
+appearanceGroup.append(appearanceLegend,appearanceNote);customization.append(appearanceGroup);
 let chosenAppearance='mamma';try{const saved=localStorage.getItem('eduit.game-appearance');if(saved==='mermaid')chosenAppearance=saved;}catch{}
 function chooseAppearance(value){
- if(childLocked)return;
  video.pause();api()?.pause();
  const accepted=api()?.setAppearance?.(value);
- if(accepted!==value){appearanceNote.textContent='This appearance is unavailable; your game is unchanged';const actual=api()?.status().appearance||'mamma';appearanceGroup.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.appearance===actual)));return;}
+ if(accepted!==value){appearanceNote.textContent='This appearance is unavailable; your game is unchanged';return false;}
  chosenAppearance=value;gamePanel.dataset.appearance=gamePanel.classList.contains('marking')?(capture?.appearance||'mamma'):value;
  appearanceNote.textContent='Game appearance only · video unchanged';
- appearanceGroup.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.appearance===value)));
+ appearanceWheel.select(value,{scroll:false});
  try{localStorage.setItem('eduit.game-appearance',value);}catch{}
+ return true;
 }
-for(const [id,label] of [['mamma','MAMMA 🥚'],['mermaid','MAMMA Mermaid 🧜']]){
- const b=document.createElement('button');b.type='button';b.dataset.appearance=id;b.textContent=label;
- b.setAttribute('aria-pressed',String(id===chosenAppearance));b.onclick=()=>chooseAppearance(id);appearanceGroup.append(b);
-}
+const appearanceWheel=mountChoiceWheel({host:appearanceGroup,id:'character-wheel',label:'Characters',selected:chosenAppearance,
+ choices:[{id:'mamma',label:'MAMMA'},{id:'mermaid',label:'MAMMA Mermaid'}],onSelect:chooseAppearance,
+ onInteract:()=>{video.pause();api()?.pause();storybook?.pause('character-choice');narration.stop('character-choice');},
+ renderChoice:(item,button)=>{
+  button.dataset.appearance=item.id;
+  // Reuse approved local rigs with scoped IDs; no fetched or executable artwork.
+  const prefix='choice-'+item.id+'-',rig=appearanceFor(item.id).rig.replace(/\bid="([^"]+)"/g,(_,name)=>'id="'+prefix+name+'"').replace(/href="#([^"]+)"/g,(_,name)=>'href="#'+prefix+name+'"');
+  const preview=document.createElementNS('http://www.w3.org/2000/svg','svg');preview.setAttribute('viewBox','0 0 190 130');preview.setAttribute('aria-hidden','true');
+  preview.innerHTML=rig+'<use href="#'+prefix+'happy"/>';button.append(preview);
+ }});
 game.addEventListener('load',()=>chooseAppearance(chosenAppearance));
 if(api())chooseAppearance(chosenAppearance);
+
+window.storytimeMusic=mountMusicPicker({host:customization,video,game,
+ pauseSession:()=>{video.pause();api()?.pause();storybook?.pause('music-choice');narration.stop('music-choice');},
+ isStoryOpen:()=>introDialog.open});
 
 // Optional enhancement: older/offline clients keep a usable original dialog.
 import('./storybook.mjs').then(({mountStorybook})=>{

@@ -1,4 +1,5 @@
 // Media-clock cue coordination. Browser voice callbacks are not hardware onset proof.
+export const cueRevision='english-narration-1';
 export const storyObjects=Object.freeze({
  'long-ago':Object.freeze({text:'long long ago',picture:'🌿'}),
  dinosaurs:Object.freeze({text:'there were dinosaurs',picture:'🦕'}),
@@ -16,11 +17,16 @@ export const storyCues=Object.freeze([
  {id:'safe',start_ms:12300,end_ms:15000,speech_ms:12520,fade_ms:14600,text:storyObjects['safe'].text}
 ]);
 export class CueScheduler {
- constructor({cues=storyCues,speak,cancel,view,duck=()=>{},trace=()=>{},now=()=>performance.now()}){
-  Object.assign(this,{cues,speak,cancel,view,duck,trace,now});
+ constructor({cues=storyCues,speak,cancel,view,duck=()=>{},trace=()=>{},now=()=>performance.now(),mediaNow}){
+  Object.assign(this,{cues,speak,cancel,view,duck,trace,now,mediaNow});
   this.current=null;this.epoch=0;this.voice='idle';this.lastMs=0;this.running=false;
  }
- emit(type,extra={}){this.trace({type,cue_id:this.current?.id||null,media_ms:this.lastMs,observed_ms:this.now(),...extra});}
+ emit(type,extra={}){
+  let sampled;try{sampled=this.mediaNow?.();}catch{}
+  const live=Number.isFinite(sampled)&&sampled>=0;
+  this.trace({type,cue_id:this.current?.id||null,media_ms:live?sampled:this.lastMs,
+   media_clock:live?'sampled':'last_update',observed_ms:this.now(),...extra});
+ }
  stop(reason='pause'){
   this.epoch++;this.cancel();this.duck(false);this.voice='idle';this.running=false;
   this.emit('cancelled',{reason});
@@ -31,18 +37,20 @@ export class CueScheduler {
   if(ms<this.lastMs)this.reset('rewind');
   this.lastMs=ms;
   const cue=this.cues.find(c=>ms>=c.start_ms&&ms<c.end_ms)||null;
-  if(cue!==this.current){this.stop('cue-change');this.current=cue;if(cue)this.emit('word_visible',{intended_ms:cue.start_ms});}
+  const changed=cue!==this.current;
+  if(changed){this.stop('cue-change');this.current=cue;}
   if((!running||!audible)&&this.running)this.stop(!running?'pause':'muted');
   this.running=running&&audible;
   const speaking=['requested','speaking'].includes(this.voice);
   this.view(cue,!!cue&&ms>=cue.fade_ms&&!speaking);
+  if(changed&&cue)this.emit('word_visible',{intended_ms:cue.start_ms,visibility_source:'view_callback'});
   if(!cue||!this.running||this.voice!=='idle'||ms<cue.speech_ms||ms>=cue.fade_ms)return;
   const epoch=++this.epoch;this.voice='requested';
   this.emit('speech_requested',{intended_ms:cue.speech_ms});
   const valid=()=>this.epoch===epoch;
   const finish=(type)=>{if(!valid())return;this.voice='done';this.duck(false);this.emit(type);};
   try{this.speak(cue.spoken_text??cue.text,{
-   start:()=>{if(!valid())return;this.voice='speaking';this.duck(true);this.emit('speech_started',{intended_ms:cue.speech_ms});},
+   start:()=>{if(!valid())return;this.voice='speaking';this.duck(true);this.emit('speech_started',{intended_ms:cue.speech_ms,onset_source:'speech_callback'});},
    end:()=>finish('speech_ended'),error:()=>finish('speech_unavailable')
   });}catch{finish('speech_unavailable');}
  }

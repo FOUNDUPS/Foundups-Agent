@@ -49,3 +49,24 @@ test('final story page stops; invalid selection and malformed clock cannot chang
  f.book.tick(Infinity);f.book.tick(-1);assert.equal(f.book.index,4);
  assert.throws(()=>new StorybookPlayback({pages:[],speak(){},cancel(){}}),TypeError);
 });
+
+test('caption trace follows completed view callback and does not claim painted pixels',()=>{
+ const order=[];
+ const s=new CueScheduler({speak:()=>{},cancel:()=>{},view:()=>order.push('view'),trace:r=>{if(r.type==='word_visible'){order.push('trace');assert.equal(r.visibility_source,'view_callback');}}});
+ s.update(0);assert.deepEqual(order,['view','trace']);
+});
+test('delayed speech callback samples live media time independently of frame ticks',()=>{
+ let media=220,observed=1000,callback;const traces=[];
+ const s=new CueScheduler({speak:(_text,cb)=>callback=cb,cancel:()=>{},view:()=>{},trace:r=>traces.push(r),mediaNow:()=>media,now:()=>observed});
+ s.update(220,{running:true});media=610;observed=1390;callback.start();
+ const start=traces.find(r=>r.type==='speech_started');
+ assert.equal(start.intended_ms,220);assert.equal(start.media_ms,610);assert.equal(start.observed_ms,1390);
+ assert.equal(start.media_clock,'sampled');assert.equal(start.onset_source,'speech_callback');
+});
+test('missing or invalid live media clock is explicitly last-update evidence',()=>{
+ for(const mediaNow of [undefined,()=>NaN,()=>Infinity,()=>-1]){
+  const traces=[];const s=new CueScheduler({speak:()=>{},cancel:()=>{},view:()=>{},trace:r=>traces.push(r),mediaNow});
+  s.update(400,{running:true});const r=traces.find(x=>x.type==='speech_requested');
+  assert.equal(r.media_ms,400);assert.equal(r.media_clock,'last_update');
+ }
+});

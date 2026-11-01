@@ -74,6 +74,14 @@ input as well as the fastest successful route.
 
 ## Existing RSI boundary
 
+Before timing or caption-bound measurements, wait for media metadata, the actual
+requested currentTime and decoded-frame readiness, then allow layout frames.
+Duration/buffered bytes alone do not establish seeking. A local static server
+returning200 for byte-range requests can expose seekable[0,0] and silently clamp
+the requested time to0. Verify206/Content-Range and use the existing installed
+range-capable preview runtime; do not relax bounds or certify the wrong frame.
+Keep this2026-11-01 correction as a candidate until a later real tile proves reuse.
+
 Use [WRE](../../../../infrastructure/wre_core/README.md) and
 [WSP 95](../../../../../WSP_framework/src/WSP_95_WRE_SKILLz_Wardrobe_Protocol.md)
 for future authenticated outcomes, candidate storage, independent evaluation and
