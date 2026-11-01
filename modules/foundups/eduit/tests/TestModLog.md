@@ -1,5 +1,18 @@
 # EDUIT test history
 
+## 2026-11-01 — Full-story and deterministic game-film regressions
+
+Freeze: Auto play from any plate reads0→4 once, no video during book, one final
+start from0, no start after Skip/Close, blocked-play fallback remains discoverable,
+centered bounds/control reach in portrait/landscape, five legal rescues and exact
+engine-state/world equivalence. Immediate first speech is gesture-bound; callbacks
+are not acoustic evidence. Replay cue spans must match actual source frames.
+Independent browser fixture/failures/held-outs reside under outputs/
+storytime-storybook-independent-20261101. First offscreen fixture was repaired
+without relaxing geometry; blocked fallback label race was separately repaired.
+Actual phone listening and native touch remain unverified. No child-data tests.
+
+
 ## 2026-11-01 — Sleeve choices and baseline restoration
 
 Current full Node selection53/53 passes. Independent31 additional held-outs

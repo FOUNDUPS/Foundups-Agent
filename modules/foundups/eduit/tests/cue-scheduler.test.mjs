@@ -18,13 +18,13 @@ function bookFixture(){let time=0;const spoken=[],views=[],traces=[];let cancels
 test('storybook shares concept text while retaining independent movie/page clocks and spoken emoji-free forms',()=>{
  assert.equal(storyPages[0].text,storyObjects['long-ago'].text);
  assert.equal(storyPages[1].text,storyCues[1].text);
- assert.equal(storyPages[1].speech_offset_ms,220);assert.equal(storyCues[1].speech_ms,3620);
+ assert.equal(storyPages[1].speech_offset_ms,0);assert.equal(storyCues[1].speech_ms,3620);
  assert.equal(storyPages[2].text,'a family of MAMMA 🥚s');assert.equal(storyPages[2].spoken_text,'a family of MAMMAs');
  assert.ok(storyPages.every(p=>!/[🥚]/u.test(p.spoken_text??p.text)));
 });
 test('storybook never speaks or advances until Play and waits for actual speech completion plus hold',()=>{
  const f=bookFixture();f.step(5000);assert.equal(f.spoken.length,0);assert.equal(f.book.index,0);
- f.set(0);f.book.play();f.step(219);assert.equal(f.spoken.length,0);f.step(220);assert.equal(f.spoken.length,1);
+ f.set(0);f.book.play();assert.equal(f.spoken.length,1);f.step(220);assert.equal(f.spoken.length,1);
  f.spoken[0].cb.start();f.step(6000);assert.equal(f.book.index,0);
  f.spoken[0].cb.end();f.step(7199);assert.equal(f.book.index,0);f.step(7550);assert.equal(f.book.index,1);
 });
@@ -48,6 +48,21 @@ test('final story page stops; invalid selection and malformed clock cannot chang
  assert.equal(f.book.select(100),false);assert.equal(f.book.select(NaN),false);
  f.book.tick(Infinity);f.book.tick(-1);assert.equal(f.book.index,4);
  assert.throws(()=>new StorybookPlayback({pages:[],speak(){},cancel(){}}),TypeError);
+});
+
+test('whole-story playback from every plate narrates all five once before completion',()=>{
+ for(let selected=0;selected<storyPages.length;selected++){
+  const f=bookFixture();f.book.select(selected);f.book.play({fromStart:true});
+  assert.equal(f.book.index,0);assert.equal(f.spoken.length,1,'first utterance is synchronous with Play');
+  let at=0;
+  for(let page=0;page<storyPages.length;page++){
+   assert.equal(f.book.index,page);assert.equal(f.book.finished,false);
+   f.spoken.at(-1).cb.start();f.spoken.at(-1).cb.end();
+   at+=3350;f.step(at);if(page<storyPages.length-1)f.step(++at);
+  }
+  assert.equal(f.book.finished,true);assert.equal(f.book.playing,false);
+  assert.deepEqual(f.spoken.map(s=>s.text),storyPages.map(p=>p.spoken_text??p.text));
+ }
 });
 
 test('caption trace follows completed view callback and does not claim painted pixels',()=>{

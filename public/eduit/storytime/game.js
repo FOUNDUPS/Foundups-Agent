@@ -11,7 +11,8 @@ const roundLabel=document.createElement('span');roundLabel.id='round-count';roun
 $('retry').style.cssText='margin-left:auto;min-height:56px;min-width:64px;order:99';
 const pulseStyle=document.createElement('style');pulseStyle.textContent='@keyframes eduitReplayPulse{50%{transform:scale(1.065);box-shadow:0 0 0 7px #f8d76b55}}#retry:not([hidden]){animation:eduitReplayPulse 1.5s ease-in-out infinite}@media(prefers-reduced-motion:reduce){#retry{animation:none!important}}';document.head.append(pulseStyle);
 let state=initial(),last=0,paused=false,hitKey="";
-const soundtrack=new Audio("assets/little-shrew.mp4");soundtrack.preload="auto";
+// Fixed original Foley offsets do not follow the demonstration film's timeline.
+const soundtrack=new Audio("assets/game-foley.wav");soundtrack.preload="auto";soundtrack.volume=.8;
 let lastCue=null,audioEnabled=false,ctx=null,playedVictory=false;
 function synthImpact(){
  try{ctx ||= new (window.AudioContext||window.webkitAudioContext)();ctx.resume();const now=ctx.currentTime;
@@ -24,7 +25,7 @@ function syncAudio(){if(paused||state.phase!=='playing')soundtrack.pause();}
 function cueAudio(cue){
  if(!audioEnabled||paused||!['playing','celebrating'].includes(state.phase)){soundtrack.pause();return;}
  if(cue?.id==='victory-thump'&&!playedVictory){playedVictory=true;synthImpact();}
- if(cue?.kind==='thump')soundtrack.volume=Math.min(1,.25+Math.min(state.elapsed/48,1)*.65);
+ if(cue?.kind==='thump')soundtrack.volume=.8*Math.min(1,.25+Math.min(state.elapsed/48,1)*.65);
  if(cue?.id!==lastCue){soundtrack.pause();lastCue=cue?.id||null;if(cue){soundtrack.currentTime=cue.sourceTime;soundtrack.play().catch(()=>{});}}
  if(cue&&soundtrack.currentTime>=cue.sourceTime+cue.sourceDuration)soundtrack.pause();
 }

@@ -1,4 +1,4 @@
-import {mountNarration} from './story-narration.mjs';
+import {mountNarration,replayNarrationCues} from './story-narration.mjs';
 import {mountMusicPicker} from './music-picker.mjs';
 import {mountChoiceWheel} from './choice-wheel.mjs';
 import {appearanceFor} from '../storytime/rig.mjs';
@@ -6,7 +6,7 @@ import {bindPanelGestures} from '../storytime/panel-gestures.mjs';
 import {locales,normalizeLocale} from '../storytime/learning-events.mjs';
 const $=id=>document.getElementById(id),game=$('game'),ink=$('ink');
 const revision='slow-rescue-11',key='eduit.game-feedback.v2.'+revision;
-let storybook=null;
+let storybook=null,storyReadyForVideo=false,videoNeedsGesture=false;
 let capture=null,strokes=[],drawing=null,entries=[],activePointer=null,childLocked=false;
 const pointers=new Set();let inkBlocked=false,history=[];
 function rememberInk(){history.push(structuredClone(strokes));if(history.length>50)history.shift();}
@@ -87,7 +87,7 @@ function button(id,label,kind,host,action){const b=document.createElement('butto
 for(const [id,kind] of [['play','play'],['feedback','pencil'],['mark-undo','undo'],['mark-clear','clear'],['share-image','share'],['resume-game','play']])$(id).innerHTML=icon(kind);
 $('feedback').classList.add('adult-control');
 const videoRail=document.createElement('nav');videoRail.className='video-controls';videoRail.setAttribute('aria-label','Video controls');videoPanel.append(videoRail);
-button('video-play','Play video','play',videoRail,()=>{api()?.pause();if(video.paused)video.play().catch(()=>{});else video.pause();});
+button('video-play','Play video','play',videoRail,()=>{api()?.pause();if(video.paused){if(!storyReadyForVideo){openStoryIntro();storybook?.play();return;}video.play().then(()=>videoNeedsGesture=false).catch(()=>videoNeedsGesture=true);}else video.pause();});
 function switchTo(panel){video.pause();api()?.pause();expand(panel,true);}
 button('to-game','Play the game','game',videoRail,()=>switchTo(gamePanel));
 button('to-video','Watch the video','film',document.querySelector('.game-controls'),()=>switchTo(videoPanel));
@@ -105,7 +105,7 @@ let hold=null;const cancelHold=()=>{clearTimeout(hold);hold=null;};
 function beginHold(e){if(e.type==='keydown'&&![' ','Enter'].includes(e.key))return;if(hold)return;e.preventDefault();hold=setTimeout(()=>{cancelHold();if(confirm('Unlock grown-up controls?'))lock(false);},1200);}
 unlock.onpointerdown=beginHold;unlock.onkeydown=beginHold;unlock.onpointerup=unlock.onpointercancel=unlock.onpointerleave=unlock.onkeyup=unlock.onblur=cancelHold;
 window.addEventListener('keydown',e=>{if(e.key==='Escape'){options.hidden=true;}});
-let lastPlay='';setInterval(()=>{const state=api()?.status(),running=['playing','celebrating'].includes(state?.phase)&&!state.paused;const label=running?'Pause game':state?.phase==='over'?'Replay game':'Play game';if(label!==lastPlay){$('play').innerHTML=icon(running?'pause':'play');$('play').setAttribute('aria-label',label);lastPlay=label;}$('video-play').innerHTML=icon(video.paused?'play':'pause');$('video-play').setAttribute('aria-label',video.paused?'Play video':'Pause video');},200);
+let lastPlay='';setInterval(()=>{const state=api()?.status(),running=['playing','celebrating'].includes(state?.phase)&&!state.paused;const label=running?'Pause game':state?.phase==='over'?'Replay game':'Play game';if(label!==lastPlay){$('play').innerHTML=icon(running?'pause':'play');$('play').setAttribute('aria-label',label);lastPlay=label;}$('video-play').innerHTML=icon(video.paused?'play':'pause');$('video-play').setAttribute('aria-label',video.paused?(videoNeedsGesture?'Story finished. Play video':'Play video'):'Pause video');},200);
 document.addEventListener('visibilitychange',()=>{if(document.hidden){video.pause();api()?.pause();}});
 const picture=document.createElement('dialog');picture.id='picture';picture.setAttribute('aria-label','Your marked picture');document.body.append(picture);
 let pictureURL=null;
@@ -119,20 +119,21 @@ storyInfo.addEventListener('close',()=>infoReturn?.focus());
 
 // One-time illustrated pre-video story. Does not auto-play media or collect child data.
 const introDialog=$('story-intro'),introSeenKey='eduit.storytime.intro-seen.v1';
-let introReturn=null,introClosing=false;
-function openStoryIntro(){if(childLocked||introDialog.open)return;video.pause();api()?.pause();introReturn=document.activeElement;introDialog.classList.remove('intro-collapsing');introDialog.showModal();storybook?.open();$('intro-close').focus();}
-function finishStoryIntro(){if(introClosing||!introDialog.open)return;storybook?.pause('closing');introClosing=true;try{localStorage.setItem(introSeenKey,'1');}catch{}const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;if(!reduced)introDialog.classList.add('intro-collapsing');const close=()=>{introDialog.close();introDialog.classList.remove('intro-collapsing');introClosing=false;$('video').focus({preventScroll:true});$('video-panel').scrollIntoView({block:'nearest',behavior:'instant'});};if(reduced)close();else {introDialog.addEventListener('animationend',close,{once:true});setTimeout(()=>{if(introClosing)close();},350);}}
+let introReturn=null,introClosing=false,introGeneration=0;
+function openStoryIntro(){if(childLocked||introDialog.open)return;introGeneration++;video.pause();api()?.pause();introReturn=document.activeElement;introDialog.classList.remove('intro-collapsing');introDialog.showModal();storybook?.open();$('intro-close').focus();}
+function finishStoryIntro(){if(introClosing||!introDialog.open)return;storyReadyForVideo=true;storybook?.pause('closing');introClosing=true;try{localStorage.setItem(introSeenKey,'1');}catch{}const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;if(!reduced)introDialog.classList.add('intro-collapsing');const close=()=>{introDialog.close();introDialog.classList.remove('intro-collapsing');introClosing=false;$('video').focus({preventScroll:true});$('video-panel').scrollIntoView({block:'nearest',behavior:'instant'});};if(reduced)close();else {introDialog.addEventListener('animationend',close,{once:true});setTimeout(()=>{if(introClosing)close();},350);}}
 $('intro-skip').addEventListener('click',finishStoryIntro);
 $('intro-close').addEventListener('click',finishStoryIntro);
 $('intro-replay').addEventListener('click',openStoryIntro);
 introDialog.addEventListener('cancel',event=>{event.preventDefault();finishStoryIntro();});
-introDialog.addEventListener('close',()=>{if(!introClosing)introReturn?.focus();});
+introDialog.addEventListener('close',()=>{if(!introClosing&&!introDialog.open)introReturn?.focus();});
 let introSeen=false;try{introSeen=localStorage.getItem(introSeenKey)==='1';}catch{}
 if(!introSeen)queueMicrotask(openStoryIntro);
 
 
-// Narration is an English overlay over the retained film, not regenerated media.
-const narration=mountNarration(video,$('story-caption'),{statusHost:options});
+// Movie action cues come from this build's actual engine replay, never the old15s timeline.
+const narration=mountNarration(video,$('story-caption'),{statusHost:options,cues:[]});
+fetch(new URL('replay-timeline.json',video.src),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(t=>narration.setCues(replayNarrationCues(t))).catch(()=>{});
 window.storytimeNarration=narration;
 const voiceOption=button('story-voice','English story voice','more',options,()=>{const enabled=voiceOption.getAttribute('aria-pressed')!=='true';voiceOption.setAttribute('aria-pressed',String(enabled));voiceOption.textContent=enabled?'English story voice: on':'English story voice: off';storybook?.pause('voice-option');narration.setEnabled(enabled);});
 voiceOption.setAttribute('aria-pressed','true');voiceOption.textContent='English story voice: on';
@@ -175,7 +176,16 @@ window.storytimeMusic=mountMusicPicker({host:customization,video,game,
 
 // Optional enhancement: older/offline clients keep a usable original dialog.
 import('./storybook.mjs').then(({mountStorybook})=>{
- storybook=mountStorybook({dialog:introDialog,video,narration,beforePlay:()=>api()?.pause(),onFinish:()=>{finishStoryIntro();setTimeout(()=>{if(!introDialog.open)video.play().catch(()=>{const playButton=$('video-play');playButton?.focus({preventScroll:true});});},380);}});
+ storybook=mountStorybook({dialog:introDialog,video,narration,beforePlay:()=>api()?.pause(),onFinish:()=>{
+  if(!introDialog.open||introClosing)return;
+  const generation=introGeneration;
+  storyReadyForVideo=true;narration.setStoryRead(true);video.pause();video.currentTime=0;
+  // Complete synchronously: no delayed play can escape Skip/Close or a reopened story.
+  introDialog.close();introDialog.classList.remove('intro-collapsing');
+  try{localStorage.setItem(introSeenKey,'1');}catch{}
+  $('video-panel').scrollIntoView({block:'center',behavior:'instant'});
+  video.play().then(()=>{if(generation===introGeneration)videoNeedsGesture=false;}).catch(()=>{if(generation!==introGeneration||introDialog.open)return;videoNeedsGesture=true;const playButton=$('video-play');playButton?.focus({preventScroll:true});playButton?.setAttribute('aria-label','Story finished. Play video');});
+ }});
  window.storytimeStorybook=storybook;
  if(introDialog.open)storybook.open();
 }).catch(()=>{const note=document.createElement('p');note.textContent='Story pages are unavailable. The game and original introduction still work.';introDialog.querySelector('.intro-actions').before(note);});

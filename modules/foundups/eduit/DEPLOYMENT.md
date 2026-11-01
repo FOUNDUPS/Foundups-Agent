@@ -1,5 +1,17 @@
 # EDUIT / Us Story Time agent deployment runbook
 
+## Current Storytime preview correction — 2026-11-01
+
+whole-story-16 replaces the earlier15s demonstration with a25s deterministic
+playthrough of the existing engine, preserving separate fixed game Foley.
+The existing public Sites project remains the review owner. Build canonical
+static output, bind media/source hashes, publish that exact archive and verify
+visible revision. No merge authorization is implied. eduit.org currently uses
+masked forwarding with a viewport-less frameset; direct Sites mobile checks do
+not verify that custom-domain wrapper or repair DNS. A real custom-domain mapping
+requires fresh provider ownership/connection verification and sanitized rollback.
+
+
 2026-10-26 JST. Operator explicitly requested landing/game and domain correction.
 Source owner: FOUNDUPS/Foundups-Agent; existing Firebase hosting architecture.
 Do not create an unrelated hosted Sites project or a second FoundUp identity.

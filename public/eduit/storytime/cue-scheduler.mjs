@@ -61,7 +61,7 @@ export class CueScheduler {
 export const storyPages=Object.freeze(['long-ago','dinosaurs','family','sleeping','thump'].map(id=>Object.freeze({
  ...storyObjects[id],id,concept_id:id==='thump'?'sound.thump':`story.${id}`,
  ...(id==='thump'?{text:'then something went THUMP',spoken_text:'then something went thump'}:{}),
- speech_offset_ms:220,min_visible_ms:3000,hold_ms:1200,fade_ms:350,silent_hold_ms:4200
+ speech_offset_ms:0,min_visible_ms:3000,hold_ms:1200,fade_ms:350,silent_hold_ms:4200
 })));
 export class StorybookPlayback {
  constructor({pages=storyPages,speak,cancel,view=()=>{},trace=()=>{},now=()=>performance.now(),speechTimeoutMs=12000}){
@@ -89,9 +89,11 @@ export class StorybookPlayback {
   if(!Number.isInteger(index)||index<0||index>=this.pages.length)return false;
   this.pause('navigation');this.index=index;this.load();return true;
  }
- play({audible=true}={}){
-  this.pause('explicit-play');this.silent=!audible;this.load();
+ play({audible=true,fromStart=false}={}){
+  this.pause('explicit-play');if(fromStart)this.index=0;this.silent=!audible;this.load();
   this.origin=this.now();this.playing=true;this.render();
+  // First utterance stays inside the explicit browser gesture, including Safari.
+  this.tick(this.origin);
  }
  pause(reason='pause'){this.playing=false;this.scheduler.stop(reason);this.render();}
  tick(at=this.now()){

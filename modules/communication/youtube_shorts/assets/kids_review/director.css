@@ -237,7 +237,10 @@ body.focused #customization{display:none}
 @media(prefers-reduced-motion:reduce){.choice-rail{scroll-behavior:auto}.choice-card{transition:none}}
 @media(max-width:430px){.unit:not(.expanded) #feedback-actions{display:grid;grid-template-columns:repeat(2,var(--control-size));justify-content:center}}
 /* One page at a time. Large teaching text takes priority over decorative art. */
-#story-intro.storybook-ready{width:min(calc(100% - 24px),640px);max-height:calc(var(--app-height) - 24px - var(--safe-top) - var(--safe-bottom));padding:16px}
+html:has(#story-intro[open]){overflow:hidden}
+#story-intro.storybook-ready{width:min(calc(100% - 24px),840px);max-height:min(calc(100dvh - 24px),calc(var(--app-height) - 24px - var(--safe-top) - var(--safe-bottom)));padding:16px;margin:auto;text-align:center}
+#story-intro.storybook-ready[open]{display:flex;flex-direction:column;min-height:min(720px,calc(100dvh - 24px),calc(var(--app-height) - 24px - var(--safe-top) - var(--safe-bottom)))}
+#story-intro.storybook-ready .storybook-page{flex:1 1 auto;display:flex;flex-direction:column;justify-content:center;min-height:0}
 .storybook-page{touch-action:pan-y pinch-zoom;user-select:none;outline-offset:4px}
 #story-intro.storybook-ready .intro-illustration{min-height:0;height:96px;font-size:60px;border-radius:18px;display:grid;place-items:center;margin:0 0 12px}
 .storybook-ready .intro-illustration svg{height:100%;max-width:100%;width:100%}
@@ -257,7 +260,7 @@ body.focused #customization{display:none}
 .gentle-hint{animation:storybook-hint 1.4s ease-in-out 2}
 @media(orientation:landscape) and (max-height:500px){
  #story-intro.storybook-ready{padding:8px 12px}
- .storybook-page{display:grid;grid-template-columns:70px minmax(0,1fr);gap:12px;align-items:center}
+ #story-intro.storybook-ready .storybook-page{display:grid;grid-template-columns:70px minmax(0,1fr);gap:12px;align-items:center}
  #story-intro.storybook-ready .intro-illustration{height:64px;font-size:48px;margin:0}
  #story-intro.storybook-ready h2{font-size:clamp(32px,6vw,44px);min-height:0;margin:4px 0}
  #story-intro.storybook-ready #storybook-progress{margin:4px 0}
@@ -272,7 +275,7 @@ body.focused #customization{display:none}
  #story-intro.storybook-ready[open] {
   width: calc(var(--app-width) - 12px);
   max-width: none;
-  height: calc(var(--app-height) - 12px - var(--safe-top) - var(--safe-bottom));
+  height: min(calc(100dvh - 12px),calc(var(--app-height) - 12px - var(--safe-top) - var(--safe-bottom)));
   max-height: none;
   margin: auto;
   padding: clamp(12px,3vw,24px);

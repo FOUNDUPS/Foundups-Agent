@@ -1,5 +1,12 @@
 # EDUIT — Education Using Information Technology
 
+Latest preview correction, **whole-story-16**: Auto play reads all five story
+plates before starting the video once. The25s demonstration now records the
+same game mechanics as the playable panel; the original Foley is kept separately.
+Use the direct Sites URL for phone review: eduit.org currently embeds it in a
+viewport-less forwarding frame, which is a separate hosting defect.
+
+
 Latest local sleeve work: [character/music choices](docs/CHARACTER_MUSIC_CHOICES.md)
 adds visible swipeable choices over the existing game. Two original appearances,
 two attributed CC BY music tracks and Off; no automatic sound or engine changes.

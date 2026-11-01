@@ -1,4 +1,4 @@
-import {CueScheduler,cueRevision} from '../storytime/cue-scheduler.mjs';
+import {CueScheduler,cueRevision,storyCues} from '../storytime/cue-scheduler.mjs';
 let activeSpeechChannel=null;
 export function createSpeechChannel({notice=()=>{},volume=()=>.85}={}){
  const synth=window.speechSynthesis;let utterance=null;
@@ -38,7 +38,15 @@ export function fitCaptionText(phrase,caption){
  for(let i=0;i<8;i++){const mid=(low+high)/2;if(fits(mid))low=mid;else high=mid;}
  fits(Math.floor(low));caption.dataset.textOverflow='false';
 }
-export function mountNarration(video,caption,{statusHost=caption}={}){
+export function replayNarrationCues(timeline){
+ if(timeline?.revision!=='same-engine-rescue-1'||!Number.isFinite(timeline.duration)||timeline.duration<=0||timeline.duration>120||!Array.isArray(timeline.events)||timeline.events.length>100)return [];
+ const words={thump:'THUMP',sniff:'SNIFF',crack:'CRACK',crunch:'CRUNCH',squish:'SQUISH'};
+ return timeline.events.filter(e=>e&&typeof e==='object'&&typeof e.id==='string'&&/^[a-z0-9.-]{1,80}$/.test(e.id)&&Object.hasOwn(words,e.kind)&&Number.isFinite(e.start)&&Number.isFinite(e.end)&&e.start>=0&&e.end-e.start>=.001&&e.end<=timeline.duration).map(e=>({
+  id:e.id,text:words[e.kind],template:'action',start_ms:e.start*1000,end_ms:e.end*1000,
+  speech_ms:(e.start+Math.min(.25,(e.end-e.start)/3))*1000,fade_ms:(e.end-Math.min(.05,(e.end-e.start)/6))*1000
+ }));
+}
+export function mountNarration(video,caption,{statusHost=caption,cues=storyCues}={}){
  const debug=new URLSearchParams(location.search).has('timing');
  const records=[];let fitFrame=0,lastText=null,volume=null,changingVolume=false,voiceOn=true,raf=0,buffering=false,seeking=false,duckedVolume=null;
  const phrase=document.createElement('span'),picture=document.createElement('span');
@@ -52,7 +60,8 @@ export function mountNarration(video,caption,{statusHost=caption}={}){
  function duck(on){if(on&&volume===null){volume=video.volume;changingVolume=true;duckedVolume=volume*.2;video.volume=duckedVolume;changingVolume=false;}
   else if(!on&&volume!==null){const restore=volume;volume=null;duckedVolume=null;changingVolume=true;video.volume=restore;changingVolume=false;}}
  const cancel=()=>channel.cancel();
- const scheduler=new CueScheduler({cancel,duck,mediaNow:()=>video.currentTime*1000,
+ let activeCues=cues,storyRead=false;
+ const scheduler=new CueScheduler({cues,cancel,duck,mediaNow:()=>video.currentTime*1000,
   trace:r=>{if(debug){records.push({cue_revision:cueRevision,locale:'en-GB',...r});if(records.length>300)records.shift();}},
   view:(cue,fading)=>{const text=cue?.text||'';if(text!==lastText){lastText=text;phrase.textContent=text;picture.textContent=cue?.picture||'';queueFit();}caption.classList.toggle('caption-fading',fading);},
   speak:(text,callbacks)=>channel.speak(text,callbacks)});
@@ -69,7 +78,7 @@ export function mountNarration(video,caption,{statusHost=caption}={}){
  document.addEventListener('visibilitychange',()=>{if(document.hidden)scheduler.stop('hidden');});
  window.addEventListener('pagehide',()=>{cancelAnimationFrame(raf);cancelAnimationFrame(fitFrame);scheduler.stop('pagehide');});
  update();
- return {stop:reason=>scheduler.stop(reason),setEnabled(value){voiceOn=!!value;scheduler.stop('voice-option');update();},
+ return {stop:reason=>scheduler.stop(reason),setCues(value){activeCues=value;scheduler.reset('film-revision');scheduler.cues=storyRead?activeCues.filter(c=>c.template==='action'):activeCues;update();},setStoryRead(value){storyRead=!!value;scheduler.reset('story-read');scheduler.cues=storyRead?activeCues.filter(c=>c.template==='action'):activeCues;update();},setEnabled(value){voiceOn=!!value;scheduler.stop('voice-option');update();},
   status:()=>({voice:scheduler.voice,enabled:voiceOn,englishOnly:true,trace:debug?records.map(r=>({...r})):[],traceEnabled:debug,
    timing:{cue_revision:cueRevision,locale:'en-GB',caption_onset_source:'view_callback',speech_onset_source:'speech_callback',acoustic_onset:'unverified'}})};
 }

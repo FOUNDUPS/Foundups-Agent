@@ -24,7 +24,7 @@ export function mountStorybook({dialog,video,narration,beforePlay=()=>{},onFinis
  const autoplay=control('storybook-play','▶ Auto play','Play the story automatically');
  const next=control('storybook-next','→','Next story page');
  actions.before(progress,notice,nav);
- const handoff=document.createElement('button');handoff.id='storybook-watch';handoff.type='button';handoff.textContent='Watch the story';handoff.hidden=true;
+ const handoff=document.createElement('button');handoff.id='storybook-watch';handoff.type='button';handoff.textContent='Play video';handoff.hidden=true;
  actions.before(handoff);
  let frame=0,lastPage=null,interacted=false,model=null,audioSnapshot=null;
  const trace=[];const debug=new URLSearchParams(location.search).has('timing');
@@ -59,13 +59,13 @@ export function mountStorybook({dialog,video,narration,beforePlay=()=>{},onFinis
   if(model.playing){pause('explicit-pause');return;}
   beforePlay();video.pause();narration.stop('storybook');notice.hidden=true;
   audioSnapshot={volume:video.volume,muted:video.muted};
-  model.play({audible:!video.muted&&video.volume>0&&narration.status().enabled!==false});
+  model.play({fromStart:true,audible:!video.muted&&video.volume>0&&narration.status().enabled!==false});
   cancelAnimationFrame(frame);frame=requestAnimationFrame(loop);
  }
  listen(previous,'click',()=>navigate(-1));listen(next,'click',()=>navigate(1));listen(autoplay,'click',play);
  listen(handoff,'click',()=>{pause('watch-handoff');onFinish();});
- listen(dialog,'close',()=>pause('closed'));listen(dialog,'cancel',()=>pause('cancelled'));
- listen(dialog,'focusin',e=>{if(model.playing&&e.target!==autoplay)pause('focus');});
+ listen(dialog,'close',()=>{if(!dialog.open)pause('closed');});listen(dialog,'cancel',()=>pause('cancelled'));
+ listen(video,'play',()=>{if(dialog.open)video.pause();});
  listen(dialog,'keydown',e=>{
   if(e.altKey||e.ctrlKey||e.metaKey||!['ArrowLeft','ArrowRight'].includes(e.key))return;
   e.preventDefault();navigate(e.key==='ArrowLeft'?-1:1);
@@ -91,6 +91,7 @@ export function mountStorybook({dialog,video,narration,beforePlay=()=>{},onFinis
  return {
   open(){interacted=false;lastPage=null;notice.hidden=true;pause('opened');model.select(0);},
   pause,
+  play,
   status:()=>({index:model.index,playing:model.playing,finished:model.finished,englishOnly:true,trace:debug?trace.slice():[]}),
   destroy(){pause('destroy');cleanup.splice(0).forEach(remove=>remove());voice.cancel();}
  };

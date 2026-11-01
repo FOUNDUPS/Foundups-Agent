@@ -1,5 +1,27 @@
 # EDUIT ModLog
 
+## 2026-11-01 — Whole story before a same-engine demonstration
+
+WSP00/15/22/50/84/97, existing Shorts presentation and rendering owners.
+Auto play now explicitly restarts all five plates; first speech is requested
+inside Play, not a delayed frame. Centered dialog/text retain64px controls,
+bounded portrait/landscape sizing and native closed-dialog hiding. Video stays
+paused while the book is open. Completion closes synchronously and starts video
+once from0; Skip/Close never starts it. A blocked browser keeps an explicit Play
+fallback. Ordinary video Play routes through the book once per page visit unless
+012 explicitly dismissed it. Action cues read the packaged replay timeline;
+old film intro narration is not repeated or silently substituted on missing data.
+
+The25s film is an offline deterministic playthrough of unchanged engine advance,
+actorPose, gameWorld and scene: five legal rescues and the existing victory reveal.
+Original15s game Foley is separated into game-foley.wav to preserve source offsets.
+No new engine, scene redesign, child records or admitted RSI activation.
+The first render predating an event-end correction was rejected; the final build
+has exact source/asset bindings. Domain eduit.org was observed returning a masked
+frameset with no viewport meta; app publication alone does not repair that wrapper.
+Physical iOS speech/audio and child-learning efficacy remain unverified.
+
+
 ## 2026-11-01 — Character/music wheels and verified branch repairs
 
 Latest012 direction authorizes Sites preview and verified GitHub pushes.

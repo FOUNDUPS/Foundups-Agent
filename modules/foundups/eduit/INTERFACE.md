@@ -1,5 +1,21 @@
 # EDUIT interfaces
 
+## Whole-story playback and film revision — 2026-11-01
+
+`window.storytimeStorybook.play()` begins the whole story at plate0, or pauses
+active playback. Opening alone never speaks. Skip/Close cancel without starting
+video; completed playback closes once and starts the movie at0, with explicit
+Play fallback on browser denial. Each new page visit's first video Play enters
+the book unless explicitly dismissed. No child session records are transmitted.
+`replay-timeline.json` revision same-engine-rescue-1 provides bounded event times
+for movie action captions/voice; invalid/unavailable metadata leaves these off.
+`storytime_replay.mjs` is offline input recording, not another game engine. Film
+states use engine.advance/actorPose/gameWorld/scene. Runtime Foley references the
+fixed15s game-foley.wav, not the replacement25s movie. Video remains original MAMMA
+appearance, independent of cosmetic choices in the game. Re-render after source
+changes; retain source/asset digests. Native device audio is a separate gate.
+
+
 ## Character/music sleeve — 2026-11-01
 
 Existing `setAppearance` remains the only game-art mutation seam. Shorts-owned

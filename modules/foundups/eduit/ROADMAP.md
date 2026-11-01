@@ -1,5 +1,16 @@
 # EDUIT execution roadmap
 
+## 2026-11-01 — Full-story sequencing and engine-recorded film
+
+Latest012 correction: Auto play runs all five story plates before a single video
+handoff. Center the actual dialog/text, keep video paused while reading, avoid
+repeating the opening over the film. The replacement25s film uses unchanged live
+game mechanics via deterministic replay; old15s Foley is preserved independently.
+The next learning audit still measures actual foot/contact/word/audio alignment;
+sharing game mechanics is not proof of correct pedagogical timing or RSI transfer.
+Custom-domain masked forwarding is a separate mobile-hosting defect.
+
+
 ## 2026-11-01 — Reviewable sleeve choices, then measured learning cues
 
 15/P1(C3/I4/D4/Impact4): visible character/music wheels over the existing engine,

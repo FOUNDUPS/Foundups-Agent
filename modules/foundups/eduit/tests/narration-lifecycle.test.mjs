@@ -1,9 +1,22 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import {replay} from '../storytime_replay.mjs';
 const source=await readFile(new URL('../../../communication/youtube_shorts/assets/kids_review/story-narration.mjs',import.meta.url),'utf8');
 const engine=new URL('../../../../public/eduit/storytime/cue-scheduler.mjs',import.meta.url).href;
-const {mountNarration}=await import('data:text/javascript;base64,'+Buffer.from(source.replace('../storytime/cue-scheduler.mjs',engine)).toString('base64'));
+const {mountNarration,replayNarrationCues}=await import('data:text/javascript;base64,'+Buffer.from(source.replace('../storytime/cue-scheduler.mjs',engine)).toString('base64'));
+
+test('movie action cues use actual replay time and reject unknown or malformed timelines',()=>{
+ const timeline={revision:'same-engine-rescue-1',duration:25,events:[{id:'victory-thump',kind:'thump',start:21.3666667,end:22.1666667}]};
+ const [cue]=replayNarrationCues(timeline);assert.equal(cue.start_ms,timeline.events[0].start*1000);
+ assert.equal(cue.text,'THUMP');assert.ok(cue.speech_ms>cue.start_ms&&cue.speech_ms<cue.fade_ms);
+ for(const value of [null,{}, {...timeline,revision:'old'}, {...timeline,duration:Infinity}])assert.deepEqual(replayNarrationCues(value),[]);
+ assert.deepEqual(replayNarrationCues({...timeline,events:[{kind:'remote-script',start:0,end:1},{kind:'thump',start:-1,end:2}]}),[]);
+ assert.deepEqual(replayNarrationCues({...timeline,events:[null,{id:{},kind:'thump',start:1,end:2}]}),[]);
+ const [short]=replayNarrationCues({...timeline,events:[{id:'short',kind:'thump',start:1,end:1.002}]});
+ assert.ok(short.start_ms<short.speech_ms&&short.speech_ms<short.fade_ms&&short.fade_ms<short.end_ms);
+ const actual=replay();assert.equal(replayNarrationCues(actual).length,actual.events.length);
+});
 test('media buffering and seeking cancel voice; caller volume change survives restoration',()=>{
  const prior=Object.fromEntries(['window','document','location','SpeechSynthesisUtterance','requestAnimationFrame','cancelAnimationFrame'].map(k=>[k,globalThis[k]]));
  let frame,spoken=[],cancels=0;
@@ -54,3 +67,11 @@ test('debug evidence is bounded and opt-in, while status returns detached trace 
   if(search){rows[0].cue_id='tampered';assert.notEqual(api.status().trace[0].cue_id,'tampered');}
  });
 });
+
+test('completed story suppresses repeated movie introduction while retaining action teaching',()=>narrationFixture('',({api,video})=>{
+ api.setStoryRead(true);video.paused=false;video.currentTime=.3;video.dispatchEvent(new Event('play'));
+ assert.equal(api.status().voice,'idle');
+ video.currentTime=4;video.dispatchEvent(new Event('play'));assert.equal(api.status().voice,'idle');
+ video.currentTime=10.5;video.dispatchEvent(new Event('play'));assert.equal(api.status().voice,'requested');
+ api.setStoryRead(false);video.currentTime=.3;video.dispatchEvent(new Event('play'));assert.equal(api.status().voice,'requested');
+}));

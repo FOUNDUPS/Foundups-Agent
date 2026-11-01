@@ -1,5 +1,15 @@
 # YouTube Shorts AI Generator - ModLog
 
+## 2026-11-01 — Same-engine demonstration render support
+
+WSP50/84/97: EDUIT now exports legal deterministic game inputs through its
+existing engine/world/scene. Existing Shorts shot, audio and assembly functions
+accept an explicit bounded duration while preserving strict15s defaults and
+legacy assembly validation. No new renderer/provider, mechanics or artwork.
+The fixed original15s Foley remains a distinct asset so game sourceTime offsets
+cannot drift when the demonstration movie changes. Actual media, listening and
+mobile acceptance remain separate from source checks.
+
 ## 2026-11-01 — Reusable sleeve choices for Storytime review
 
 Existing director now mounts a shared accessible horizontal choice wheel for
