@@ -1,3 +1,18 @@
+## Quote concurrent-main reconciliation — 2026-11-01
+
+This dated prepublication qualification tested the uncommitted owned
+b0b112572f75c1e12b69305b6753b1a2f346f2ae plus upstream PR2287/main
+b3e0465c237bd53bfa473195720c2c5e55a1882a merge overlay.
+Quote source/tests and its sealed receipt remain exact; YouTube source and both
+inherited metadata sets are preserved. Earlier 4c96/1,478-member results below
+retain their dated scope. Actual combined regression passes 1,019 with the same
+three SSE HTTP deselections and zero guard denials; one fresh controlled trace
+matches the retained reference without rerunning it. Package eight Python/three
+Node checks and registry 1,800/260 pass with inherited 1,481 runtime paths.
+Byte caps and guards remain; CRLF headroom is 35 bytes. The [current receipt](../architecture/receipts/FOUNDUPS_RESERVE_QUOTE_RECONCILIATION_20261101.json)
+records the line-ending preflight and exact parent scope. Publication, fresh
+security/current-main/PC/Holo checks and chain activation remain separate gates.
+
 ## Reserve quote prerequisite and B02 delivery — 2026-11-01
 
 PR2285 delivered B02/A07 at `fb58cd530d7b6887ce6218af282cb6ee7382ded5` with all

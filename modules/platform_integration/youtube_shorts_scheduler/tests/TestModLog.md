@@ -1,3 +1,20 @@
+## 2026-11-01 — Final policy consumer qualification
+
+60 new focused controls passed, zero failures/errors/skips/captured streams:
+detail19, durable save/reload16, inline9, Shorts16. Actual queue claims persist
+across new navigation/queue instances. Useful metadata Save→clean same-tab fresh
+document→exact readback settles applied; no-op refresh stays unknown. Slot-write
+claims cannot be settled by metadata-only proof. Tests preserve foreign drafts,
+stop late pauses/STOP/caps before clicks and refuse unrelated popup targets.
+
+Adjacent185 passed (existing selected147 + metadata23 + publisher15), with
+original assertions retained. Shared fake DOM fixtures explicitly model cycle and
+authoritative detail APIs, strict spec_set remains, and only synthetic identity
+literals changed to valid native shapes. Browser/provider/model/auth effects were
+not exercised. Private source/XML/guard hashes are retained by the task owner;
+publication, resulting-main checks and installed runtime qualification are
+separate gates under WSP97.
+
 ## 2026-10-29 — Scheduled-inventory and audit-consumer controls
 
 Added actual-source scheduled inventory and sink controls, plus explicit

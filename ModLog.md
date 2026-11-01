@@ -15,6 +15,18 @@ partial compatibility checks, not native author execution or retained RSI.
 See [current runtime evidence and remaining gates](docs/operations/RSI_SWARM_DISPATCH.md#host-repair-and-isolated-upgrade-qualification--2026-11-01).
 Private account/configuration recovery state stays outside Git.
 
+## 2026-11-01 — Reconcile quote delivery with concurrent YouTube main
+
+WSP10/22/26/50/84/97. Preserve owned b0b and upstream PR2287/main b3e together,
+including both inherited metadata sets and all upstream nonshared source paths.
+Quote source/test blobs and the original sealed receipt stay exact; historical
+4c96/1,478-member qualification is not relabeled as combined execution.
+Actual merge-overlay simulator 1,019 and one controlled trace pass; package
+eight Python/three Node checks and registry 1,800/260 pass. Runtime closure is
+inherited 1,481; unchanged caps leave 35 CRLF manifest bytes. Retain the initial
+raw-byte stop and exact LF/index materialization review, with guards unchanged.
+Fresh security, publication/main/PC/Holo and activation gates remain separate.
+
 ## 2026-11-01 — Opt-in reserve observation and B02 delivery closure
 
 WSP11/15/22/26/50/62/84/97; class A, 16/P0 (3/4/5/4). Reuse the reserve owner

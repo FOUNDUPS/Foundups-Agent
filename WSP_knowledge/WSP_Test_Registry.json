@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1794,
+  "total_tests": 1800,
   "quarantined_tests": 260,
   "tests": [
     {
@@ -6524,6 +6524,19 @@
       "description": "Offline contracts using real queue/locks, disposable files and fake senders."
     },
     {
+      "id": "test::modules::communication::livechat::tests::test_operator_manifest_cli",
+      "path": "modules/communication/livechat/tests/test_operator_manifest_cli.py",
+      "owner": "modules/communication/livechat",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-livechat-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Credential-free local producer contracts; no daemon or public effects."
+    },
+    {
       "id": "test::modules::communication::livechat::tests::test_orchestrator",
       "path": "modules/communication/livechat/tests/test_orchestrator.py",
       "owner": "modules/communication/livechat",
@@ -6737,7 +6750,7 @@
       "path": "modules/communication/livechat/tests/test_surgical_migration_live.py",
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
-      "shard_id": "modules-communication-livechat-unit-part-02",
+      "shard_id": "modules-communication-livechat-unit-part-03",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -6761,6 +6774,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Test for UnifiedMessageRouter - WSP 5/6 Testing Compliance\nTests the enhanced message routing architecture without breaking existing functionality."
+    },
+    {
+      "id": "test::modules::communication::livechat::tests::test_video_policy",
+      "path": "modules/communication/livechat/tests/test_video_policy.py",
+      "owner": "modules/communication/livechat",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-livechat-unit-part-03",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline private queue contracts; native IDs and disposable queue files only."
     },
     {
       "id": "test::modules::communication::livechat::tests::test_youtube_dae",
@@ -13693,7 +13719,9 @@
       "owner": "modules/communication/video_comments",
       "suite_class": "operational",
       "shard_id": "modules-communication-video-comments-operational",
-      "capabilities": [],
+      "capabilities": [
+        "network"
+      ],
       "execution_type": "operational",
       "collectable": false,
       "timeout_s": 900,
@@ -14077,6 +14105,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Offline transport and pipeline tests; no live model-quality claim."
+    },
+    {
+      "id": "test::modules::communication::youtube_shorts::tests::test_operator_upload_policy",
+      "path": "modules/communication/youtube_shorts/tests/test_operator_upload_policy.py",
+      "owner": "modules/communication/youtube_shorts",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-youtube-shorts-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline uploader/DAE definitions with fake media, service and generators."
     },
     {
       "id": "test::modules::communication::youtube_shorts::tests::test_promo_generation",
@@ -23707,7 +23748,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_audio_label_observe_log.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23720,7 +23761,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_full_chain.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23733,7 +23774,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_index_metadata_decoupling.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23746,7 +23787,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_launch_import.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [
         "process"
       ],
@@ -23761,7 +23802,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_layer0_entry.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation"
@@ -23777,7 +23818,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_layer1_filter.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [
         "browser",
         "logging_configuration"
@@ -23793,7 +23834,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_layer2_edit.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [
         "browser",
         "logging_configuration",
@@ -23810,7 +23851,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_layer3_schedule.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [
         "browser",
         "logging_configuration",
@@ -23827,7 +23868,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_layer4_schedule_audit.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [
         "browser",
         "logging_configuration"
@@ -23843,7 +23884,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_live_schedule_signal_priority.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23856,7 +23897,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_long_form_scheduling_enable.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23869,7 +23910,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_long_form_tz_peak_window.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23882,7 +23923,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_metadata_evidence.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23895,7 +23936,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_oops_recovery.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [
         "browser",
         "logging_configuration"
@@ -23911,7 +23952,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_peak_window.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23924,7 +23965,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_remote_cli.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [
         "process"
       ],
@@ -23939,7 +23980,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_reschedule_applier.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23952,7 +23993,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_reschedule_planner.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23965,7 +24006,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_schedule_audit_breadcrumb.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -23980,7 +24021,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_schedule_include_private.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23993,7 +24034,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_schedule_rotation_fairness.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -24006,7 +24047,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_scheduled_inventory.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -24019,7 +24060,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_scheduler.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -24032,7 +24073,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_shorts_live_schedule_signal.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -24045,7 +24086,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_shorts_priority_wiring.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -24058,7 +24099,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_shorts_skillz_domain_registration.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -24071,7 +24112,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_unified_shorts_videos_priority.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -24080,11 +24121,52 @@
       "description": "Unit tests for YOUTUBE_ROTATION_UNIFIED_SHORTS_VIDEOS_SIGNAL_PHASE1.\n\nSlice: YOUTUBE_ROTATION_UNIFIED_SHORTS_VIDEOS_SIGNAL_PHASE1\n\nWhat is wired\n-------------\n1. read_live_schedule_signal (shorts_live_schedule_signal/executor.py) now accepts\n   content_type (\"short\" | \"upload\"). Validates at entry; invalid -> fail closed.\n   DOM scan logic (HAS_SCHEDULE filter + row scrape) is REUSED unchanged (WSP 84).\n\n2. build_live_count_fn (what_should_i_schedule/executor.py) now accepts\n   content_type. Thr"
     },
     {
+      "id": "test::modules::platform_integration::youtube_shorts_scheduler::tests::test_video_policy_consumers",
+      "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_video_policy_consumers.py",
+      "owner": "modules/platform_integration/youtube_shorts_scheduler",
+      "suite_class": "unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline actual-save-owner controls; no browser, providers or credentials."
+    },
+    {
+      "id": "test::modules::platform_integration::youtube_shorts_scheduler::tests::test_video_policy_inline",
+      "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_video_policy_inline.py",
+      "owner": "modules/platform_integration/youtube_shorts_scheduler",
+      "suite_class": "unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline inline button scope/gate checks with actual CPS methods."
+    },
+    {
+      "id": "test::modules::platform_integration::youtube_shorts_scheduler::tests::test_video_policy_save_readback",
+      "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_video_policy_save_readback.py",
+      "owner": "modules/platform_integration/youtube_shorts_scheduler",
+      "suite_class": "unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
+      "capabilities": [
+        "browser"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Real private queue claims and guarded reload with synthetic DOM only."
+    },
+    {
       "id": "test::modules::platform_integration::youtube_shorts_scheduler::tests::test_visibility_filter_complete",
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_visibility_filter_complete.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [
         "browser"
       ],
@@ -24099,7 +24181,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_visibility_filter_enforcement.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -24112,7 +24194,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_visibility_natural_click.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-02",
       "capabilities": [
         "browser"
       ],
@@ -24127,7 +24209,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_what_should_i_schedule.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,

@@ -748,21 +748,17 @@ def run_shorts_scheduler(
         print(f"[OK] Editing video: {video_id}")
         time.sleep(2)
         
-        # Extract current content
-        current_title = dom.get_current_title()
-        current_desc = dom.get_current_description()
-        
-        print(f"\n[CURRENT TITLE] {current_title[:60]}..." if current_title else "[WARN] No title found")
-        
-        # Enhance using SKILLz
-        print("\n[SKILLZ] Enhancing with FFCPLN music titles...")
+        # Capture exact detail-page originals, never the stale list-row title.
+        dom.begin_policy_cycle()
+        session = dom.begin_policy_edit(channel_id, video_id)
+        current_title = session.original["title"]
+        current_desc = session.original["description"]
         skill = FFCPLNTitleEnhanceSkill()
         result = skill.execute(SkillContext(
-            original_title=current_title or "",
-            original_description=current_desc or "",
-            video_duration=60
+            original_title=current_title, original_description=current_desc,
+            video_duration=60, video_id=video_id,
         ))
-        
+
         safe_title_for_console = _ascii_safe(_strip_console_only_emojis(result.enhanced_title))
         print(f"[NEW TITLE] {safe_title_for_console}")
         print(f"[CONFIDENCE] {result.confidence}")
@@ -774,19 +770,9 @@ def run_shorts_scheduler(
         # Apply enhanced content via JavaScript
         print("\n[APPLYING] Setting new title and description...")
         
-        dom.driver.execute_script(f"""
-            const titleField = document.querySelector('ytcp-social-suggestions-textbox#title-textarea #textbox');
-            if (titleField) {{
-                titleField.innerText = "{result.enhanced_title.replace('"', '\\"')}";
-                titleField.dispatchEvent(new Event('input', {{ bubbles: true }}));
-            }}
-            const descField = document.querySelector('ytcp-social-suggestions-textbox#description-textarea #textbox');
-            if (descField) {{
-                descField.innerText = `{result.enhanced_description.replace('`', '\\`')}`;
-                descField.dispatchEvent(new Event('input', {{ bubbles: true }}));
-            }}
-        """)
-        
+        dom.edit_title(result.enhanced_title)
+        dom.edit_description(result.enhanced_description)
+
         time.sleep(1)
 
         if mode == "schedule":
@@ -827,23 +813,9 @@ def run_shorts_scheduler(
         else:
             # Enhance-only: click Save once
             print("[SAVING] Clicking Save button...")
-            save_result = dom.driver.execute_script("""
-                const saveBtn = document.querySelector('#save-button button, ytcp-button#save-button');
-                if (saveBtn && !saveBtn.disabled) {
-                    saveBtn.click();
-                    return {success: true};
-                }
-                return {success: false};
-            """)
-            
-            if save_result.get('success'):
-                print("[OK] Save clicked! Waiting for confirmation...")
-                time.sleep(3)
-                print(f"\n[SUCCESS] Video {video_id} enhanced and saved!")
-                print(f"   NEW TITLE: {safe_title_for_console}")
-            else:
-                print("[WARN] Save button not found or disabled")
-        
+            dom.click_save()
+            print("[UNVERIFIED] Save submitted; independent same-video readback required")
+
     except Exception as e:
         print(f"\n[ERROR] Shorts scheduler failed: {e}")
         logger.error(f"Shorts scheduler error: {e}", exc_info=True)

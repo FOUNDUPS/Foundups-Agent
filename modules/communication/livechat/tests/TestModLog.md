@@ -1,5 +1,20 @@
 # TestModLog
 
+## 2026-11-01 — Private video-policy owner contracts
+
+`test_video_policy.py` exercises actual queue/lock/atomic persistence using
+disposable files: synchronous private-only freshness, exact native receiving
+scope, sparse surface fields, replacement text, per-field expiry/supersession,
+clear/context isolation, corruption/busy/digest/uncertainty rejection, restart
+claims, private inspector phases and bounded scoped readback observations.
+Existing queue cases now explicitly distinguish private context activation from
+public effect gates, and cover absolute deadlines without extending deferred
+work. Fixed credential-free child environments omit inherited credentials before
+test mocks. No provider, browser, model, target runtime command or public action
+is exercised. The focused core selection passes179 cases (103 policy,62 queue,
+14 lifecycle), with zero failures/errors/skips. Raw/LF source bindings, canonical
+collectability and exact node inventory are recorded in the private task receipt.
+
 ## 2026-10-29 — Shared-generator livechat fallback and async caller checks
 
 The existing video-comments semantic selector executes actual livechat generator,

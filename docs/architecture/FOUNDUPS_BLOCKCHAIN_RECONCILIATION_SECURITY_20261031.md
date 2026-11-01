@@ -1,5 +1,39 @@
 # FoundUps blockchain reconciliation and security decision — 2026-10-31
 
+## Concurrent-main quote reconciliation — 2026-11-01
+
+This dated prepublication qualification tested the uncommitted merge overlay of owned
+`b0b112572f75c1e12b69305b6753b1a2f346f2ae` and upstream PR2287 main
+`b3e0465c237bd53bfa473195720c2c5e55a1882a`. It preserves the upstream YouTube
+work, both inherited metadata sets and the exact quote source/test blobs.
+No blockchain economic source changes are introduced by reconciliation.
+The original 4c96-based qualification and 1,478-member package below remain
+dated pre-integration evidence. Its sealed quote receipt is unchanged; the
+[separate reconciliation receipt](receipts/FOUNDUPS_RESERVE_QUOTE_RECONCILIATION_20261101.json)
+binds the new scope without relabeling prior runs.
+
+Actual combined-overlay regression passes 1,019 cases with the same three SSE
+HTTP deselections, zero failures/errors/skips/guard denials and 174 unchanged
+simulator/FAM Python source snapshots, including tests. One fresh controlled
+candidate trace matches the retained fb58 reference byte-for-byte; the reference
+was not rerun. This is one repeated finite process/hash-seed scenario, not a new
+distinct regression case, seed-only portability or a future-commit/main result.
+
+The inherited runtime closure has 1,481 paths, including three YouTube owners;
+only the reserve hash differs from upstream. Fresh canonical check, eight Python
+cases, three Node entrypoints and the 1,800-owner/260-quarantine registry check
+pass. The original raw-byte preflight stopped on CRLF versus staged LF bytes;
+canonical generation materialized LF; root verified exact normalized/index
+equality and retained the failure. Normal checks then passed with unchanged
+guards and no extra generator write.
+Manifest LF/CRLF sizes are 334,850/337,885 bytes under the unchanged 337,920 cap:
+only 35 bytes of Windows headroom remain. Individual 2 MiB and total 32 MiB source
+caps remain. New owners or source growth need separate resource admission.
+
+Protected publication, fresh security qualification, resulting-main and actual
+PC/Holo readback remain separate gates. No global unit decision, quote consumer,
+authenticated reserve, custody, funding, token issuance or chain activation follows.
+
 ## Reserve quote observation and B02 delivery — 2026-11-01
 
 [PR2285](https://github.com/FOUNDUPS/Foundups-Agent/pull/2285) delivered B02/A07

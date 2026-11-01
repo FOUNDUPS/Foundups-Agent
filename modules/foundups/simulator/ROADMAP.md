@@ -1,5 +1,14 @@
 # ROADMAP - FoundUps Simulator
 
+## 2026-11-01 — Concurrent-main quote delivery
+
+The [reconciliation receipt](../../../docs/architecture/receipts/FOUNDUPS_RESERVE_QUOTE_RECONCILIATION_20261101.json)
+records b0b+b3e overlay regression 1,019, one controlled trace, package eight
+Python/three Node checks and registry 1,800/260 passing. The original quote and
+1,478-member proof stay sealed; inherited closure is now 1,481 with three YouTube
+owners and unchanged byte caps. CRLF headroom is 35 bytes. Publication, fresh
+security/main/PC/Holo and all economic activation gates remain separate.
+
 ## 2026-11-01 — Opt-in reserve quote representation
 
 - [x] Class A, 16/P0: immutable 11-field observations in the existing reserve

@@ -44,6 +44,14 @@ The existing simulator must validate any economic enhancement before chain parit
 
 ### Current blockchain security sequence — 2026-11-01
 
+Current [concurrent-main reconciliation](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#concurrent-main-quote-reconciliation--2026-11-01)
+preserves PR2287 YouTube work alongside the unchanged quote source. The b0b+b3e
+merge overlay passes 1,019 simulator cases, one controlled trace and package
+eight Python/three Node checks with 1,481 runtime paths and registry 1,800/260.
+Earlier 4c96/1,478 evidence is sealed, not relabeled. Byte caps remain unchanged;
+35 bytes of CRLF manifest headroom require separate future resource admission.
+Publication, fresh security, resulting-main and PC/Holo gates remain separate.
+
 [The current sprint and ordered roadmap](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#reserve-quote-observation-and-b02-delivery--2026-11-01)
 record B01 delivered through PR2281 at 24cc (24 PR/22 main checks) and B02 through
 PR2285 at `fb58cd530d7b6887ce6218af282cb6ee7382ded5` (23 PR/21 main checks).
