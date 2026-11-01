@@ -986,6 +986,9 @@ class CommentEngagementDAE:
                 use_intelligent_reply=use_intelligent_reply
             )
             all_results.append(result)
+            if result.get('halted_for_reply_quality') is True:
+                logger.error('[REPLY-QUALITY] Halting this session after rejected output; review before restarting')
+                break  # Do not regenerate, refresh, enter nested replies or publish an engagement event.
             if not result.get('reply') and result.get('reply_submission_status') in {'unknown', 'verified'}:
                 logger.warning('[REPLY-INSPECT] Halting session for outcome reconciliation; no automatic retry')
                 result['halted_for_reconciliation'] = True
@@ -1197,7 +1200,8 @@ class CommentEngagementDAE:
             if await self.comment_processor._vision_exists(self.VISION_DESCRIPTIONS["has_comment"], min_confidence=0.4, timeout=60):
                 remaining_comments = 1
                 logger.info(f"[DAEMON][PHASE-4]   Vision detected remaining comments")
-        all_processed = (remaining_comments == 0)
+        quality_halt = next((row for row in all_results if row.get('halted_for_reply_quality') is True), None)
+        all_processed = remaining_comments == 0 and quality_halt is None
 
         if all_processed:
             logger.info(f"[DAEMON][PHASE-4] ✅ ALL COMMENTS PROCESSED - Inbox is 100% clear!")
@@ -1213,6 +1217,8 @@ class CommentEngagementDAE:
             'total_processed': total_processed,
             'stats': self.stats,
             'results': all_results,
+            'halted_for_reply_quality': quality_halt is not None,
+            'quality_halt_reason': quality_halt.get('quality_halt_reason') if quality_halt else None,
         }
         
         telemetry_file = TELEMETRY_DIR / f"session_{self.session_id}.json"

@@ -1,5 +1,36 @@
 # LLM Integration for YouTube Comments
 
+## Current Studio route (2026-11-01)
+
+The inspected Studio posting path is `CommentProcessor` →
+`IntelligentReplyGenerator`, not the older `LLMCommentGenerator` example below.
+It reads the full comment and bound author/channel/video context, assesses its
+meaning, drafts an answer, and separately reviews the exact final text against
+the original and supplied facts. UI-TARS checks the browser visually; it does
+not write replies or judge their language meaning.
+
+The language route tries the configured general-role LM Studio service, then
+embedded general Qwen for stored comments. Legacy xAI Grok drafting requires
+`YT_ENABLE_GROK_REPLIES=true`; it is not an OpenRouter call. Assessment and review
+remain local. The private livechat fallback uses local HTTP only, whereas the
+separate ordinary livechat generator can use its existing xAI client. Do not
+infer the active provider from old class names, a model listing, or this document.
+
+The prepared Windows profile currently selects local Gemma 4 E2B through LM
+Studio, disables embedded Qwen and legacy Grok comment replies, and keeps
+publication disabled. The daemon is stopped; configured routing is not evidence
+of a successful inference or live reply.
+
+Runtime credentials come from environment variables loaded by the existing
+startup environment owner. They belong in local ignored configuration or the
+process environment, never in the manifest, prompts, screenshots shared publicly,
+or test output. Authentication headers are separate from model message payloads.
+Offline tests use a fixed credential-free environment and synthetic markers;
+they must not import `main.py` or read actual environment files.
+
+The remaining sections describe the historical API-based dialogue implementation.
+Their default-provider and completion labels do not certify the Studio route.
+
 ## Current Status: FIXED [OK]
 
 ### The Problem

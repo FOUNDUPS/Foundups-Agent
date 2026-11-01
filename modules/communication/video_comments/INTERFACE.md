@@ -1,5 +1,27 @@
 # Video Comments - Public Interface
 
+## Quality-stop contract (2026-11-01)
+
+`ReplyGenerationResult` adds optional `rejection_reason=None`, preserving existing
+positional callers. `invalid_reply_text` denotes an actual nonempty rejected
+writer draft, not a missing provider or intentional skip. It resets under the
+existing per-generation lock and travels with that generation's receipt.
+`CommentProcessor` returns `halted_for_reply_quality=True` and a bounded
+`quality_halt_reason` for that code, `review_rejected`, or
+`review_unavailable_or_invalid`. No executor call follows. The DAE stops its
+current loop before events, nested work and refresh, and returns the same fields
+in its summary. It does not claim the inbox is clear after a quality halt.
+
+This does not persist a global suspension across orchestrator rotation/restart.
+The existing durable unknown-delivery reservations remain independent and are
+never released by a quality result. UI-TARS remains a visual observer; final
+meaning review is a separate general-language call, not calibrated correctness.
+
+`BrowserReplyExecutor` rechecks the existing gate snapshot before binding or
+claiming an attempt and again after typing/theme checks immediately before the
+single Submit script. STOP or disabled automation/engagement/reply blocks it.
+Unsubmitted claims retain the existing proven-no-submit release behavior.
+
 ## Account-switch access contract (2026-10-29)
 
 `TarsAccountSwapper.swap_to(target, *, navigate_to_comments=True)` certifies
