@@ -223,23 +223,55 @@ def test_invalid_context_has_no_effect(tmp_path, payload):
 
 
 @pytest.mark.parametrize("gate", ["YT_AUTOMATION_ENABLED", "YT_LIVECHAT_SEND_ENABLED", "YT_LIVECHAT_ANNOUNCEMENTS_ENABLED", "YT_COMMENT_ENGAGEMENT_ENABLED", "STOP"])
-def test_closed_gate_prevents_context_and_send(tmp_path, monkeypatch, gate):
+def test_closed_public_gate_allows_private_context_without_send(tmp_path, monkeypatch, gate):
     queue = make_queue(tmp_path, [command("set_context")])
     if gate == "STOP":
         (tmp_path / "STOP").touch()
     else:
         monkeypatch.setenv(gate, "false")
-    assert poll(queue)["results"][0]["status"] == "blocked"
-    assert json.loads(queue.state_path.read_text())["active_context"] is None
+    assert poll(queue)["results"][0]["status"] == "accepted"
+    assert json.loads(queue.state_path.read_text())["active_context"]['message'] == 'Hello'
     assert queue.dae.livechat.messages == []
 
 
-def test_dry_run_is_simulated_without_context_or_sender_effect(tmp_path, monkeypatch):
+def test_public_dry_run_does_not_disable_private_context(tmp_path, monkeypatch):
     queue = make_queue(tmp_path, [command("set_context")])
     monkeypatch.setenv("YT_LIVECHAT_DRY_RUN", "true")
-    assert poll(queue)["results"][0]["status"] == "simulated"
+    assert poll(queue)["results"][0]["status"] == "accepted"
     assert queue.dae.livechat.messages == []
-    assert json.loads(queue.state_path.read_text())["active_context"] is None
+    assert json.loads(queue.state_path.read_text())["active_context"]['message'] == 'Hello'
+
+
+@pytest.mark.parametrize('action', ['set_context', 'announce'])
+@pytest.mark.parametrize('deadline,expected', [(99, 'expired'), (130, 'accepted'), (99999, 'accepted')])
+def test_explicit_deadline_bounds_private_context_and_public_announcement(tmp_path, monkeypatch, action, deadline, expected):
+    monkeypatch.setattr(module.time, 'time', lambda: 100)
+    queue = make_queue(tmp_path, [command(action, message='Hello', ttl_seconds=60, expires_at_unix=deadline)])
+    assert poll(queue)['results'][0]['status'] == expected
+    if action == 'set_context' and expected == 'accepted':
+        assert json.loads(queue.state_path.read_text())['active_context']['expires_at_unix'] == min(160, deadline)
+    if expected == 'expired':
+        assert queue.dae.livechat.messages == []
+
+
+@pytest.mark.parametrize('deadline', [True, None, '130', float('inf'), -1])
+def test_invalid_explicit_context_deadline_is_rejected(tmp_path, deadline):
+    queue = make_queue(tmp_path, [command('set_context', message='Hello', expires_at_unix=deadline)])
+    if isinstance(deadline, float):
+        with pytest.raises(ValueError):
+            poll(queue)
+        return
+    assert poll(queue)['results'][0]['status'] == 'rejected'
+
+
+def test_deferred_announcement_does_not_extend_explicit_deadline(tmp_path, monkeypatch):
+    monkeypatch.setattr(module.time, 'time', lambda: 100)
+    queue = make_queue(tmp_path, [command('announce', message='Hello', ttl_seconds=60, expires_at_unix=130)], chat=None)
+    assert poll(queue)['results'][0]['status'] == 'deferred'
+    monkeypatch.setattr(module.time, 'time', lambda: 131)
+    queue.dae.livechat = FakeLiveChat()
+    assert poll(queue)['results'][0]['status'] == 'expired'
+    assert queue.dae.livechat.messages == []
 
 
 def test_comments_only_context_retains_500_character_contract(tmp_path):
@@ -362,12 +394,33 @@ print(json.dumps(asyncio.run(q.poll_once())))
 '''
 
 
+def process_environment(tmp_path):
+    """Fresh fixed child values; never copy the runner's environment."""
+    profile = tmp_path / 'profile'
+    profile.mkdir(exist_ok=True)
+    return {'SYSTEMROOT': r'C:\Windows', 'WINDIR': r'C:\Windows', 'SYSTEMDRIVE': 'C:',
+            'COMSPEC': r'C:\Windows\System32\cmd.exe',
+            'PATH': r'C:\Windows\System32;C:\Windows' if os.name == 'nt' else '/usr/bin:/bin',
+            'USERPROFILE': str(profile), 'HOME': str(profile), 'TEMP': str(tmp_path), 'TMP': str(tmp_path),
+            'PYTHONPATH': str(Path(__file__).resolve().parents[4]), 'PYTHONDONTWRITEBYTECODE': '1',
+            'PYTHONNOUSERSITE': '1', 'PYTHON_DOTENV_DISABLED': '1', 'PYTHONUTF8': '1', 'PYTHONIOENCODING': 'utf-8',
+            'YT_AUTOMATION_STOP_FILE': str(tmp_path / 'STOP'), 'YT_AUTOMATION_ENABLED': 'true',
+            'YT_LIVECHAT_SEND_ENABLED': 'true', 'YT_LIVECHAT_ANNOUNCEMENTS_ENABLED': 'true',
+            'YT_COMMENT_ENGAGEMENT_ENABLED': 'true', 'YT_LIVECHAT_DRY_RUN': 'false'}
+
+
+def test_process_child_environment_excludes_unapproved_runner_keys(tmp_path, monkeypatch):
+    monkeypatch.setenv('FAKE_PRIVATE_CREDENTIAL', 'offline-sentinel')
+    keys = set(process_environment(tmp_path))
+    assert 'FAKE_PRIVATE_CREDENTIAL' not in keys
+
+
 @pytest.mark.parametrize("mode", ["wait", "crash"])
 def test_real_process_lock_and_crash_restart(tmp_path, mode):
     make_queue(tmp_path)
     script = tmp_path / "worker.py"
     script.write_text(_PROCESS)
-    env = dict(os.environ, PYTHONPATH=str(Path(__file__).resolve().parents[4]), PYTHONDONTWRITEBYTECODE="1")
+    env = process_environment(tmp_path)
     args = [sys.executable, "-B", str(script), str(tmp_path)]
     first = subprocess.Popen([*args, mode], env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     try:
@@ -376,13 +429,13 @@ def test_real_process_lock_and_crash_restart(tmp_path, mode):
             if first.poll() is not None:
                 break
             time.sleep(0.02)
-        assert (tmp_path / "entered").exists(), first.communicate(timeout=2)
+        assert (tmp_path / "entered").exists(), 'private child did not reach fake sender'
         if mode == "wait":
             busy = subprocess.run([*args, "normal"], env=env, capture_output=True, text=True, timeout=15, check=True)
             assert json.loads(busy.stdout)["status"] == "busy"
             (tmp_path / "release").touch()
         output, error = first.communicate(timeout=15)
-        assert first.returncode == (17 if mode == "crash" else 0), error
+        assert first.returncode == (17 if mode == "crash" else 0), 'private child exited unexpectedly'
         later = subprocess.run([*args, "normal"], env=env, capture_output=True, text=True, timeout=15, check=True)
         assert json.loads(later.stdout)["processed"] == 0
         assert (tmp_path / "effects").read_text() == "attempt\n"

@@ -278,6 +278,8 @@ class YouTubeShortsScheduler:
         if type(max_videos) is not int or max_videos < 0:
             raise ValueError('max_videos must be a nonnegative integer')
         original_tracker = self.tracker
+        if not self.dry_run:
+            self.dom.begin_policy_cycle()
         if self.dry_run:
             self.tracker = copy.deepcopy(original_tracker)
             self.tracker.persist = False
@@ -678,6 +680,14 @@ class YouTubeShortsScheduler:
 
                     video_id = video.get("video_id")
                     original_title = video.get("title", "")
+                    if not self.dry_run:
+                        from .video_policy import scheduling_policy, VideoPolicyBlocked
+                        try:
+                            scheduling_policy(self.channel_id, video_id,
+                                              getattr(self.dom, "_policy_cycle_attempts", 0))
+                        except VideoPolicyBlocked:
+                            results["skipped"].append({"video_id": video_id, "reason": "operator_policy_blocked"})
+                            return True
 
                     # RESUME CAPABILITY: Skip already-scheduled videos
                     if video_id and self.tracker.is_video_scheduled(video_id):
@@ -829,6 +839,8 @@ class YouTubeShortsScheduler:
                             continue
 
                         # Update metadata if requested
+                        self.dom.begin_policy_edit(self.channel_id, video_id, allow_metadata=update_metadata)
+                        self.dom._policy_timezone = self.channel_tz
                         if update_metadata:
                             metadata_updated = await self._update_video_metadata(
                                 video_id=video_id,
@@ -1062,10 +1074,14 @@ class YouTubeShortsScheduler:
     ):
         """Apply matched analyzer evidence, otherwise preserve existing metadata."""
         try:
+            session = self.dom._policy_edit()
+            if session.video_id != video_id or session.channel_id != self.channel_id:
+                return False
+            original_title = session.original["title"]
             if os.getenv("YT_SCHEDULER_INDEX_WEAVE_ENABLED", "true").lower() not in ("1", "true", "yes"):
                 logger.info("[SCHEDULER] index_context=disabled for %s", video_id)
                 return True  # Metadata preservation, not template substitution.
-            original_description = self.dom.get_current_description()
+            original_description = session.original["description"]
             if not isinstance(original_description, str):
                 return False  # Cannot safely preserve an unread description.
             ctx = build_index_metadata_context(

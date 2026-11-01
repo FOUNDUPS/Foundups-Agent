@@ -1,3 +1,23 @@
+## 2026-11-01 — Private operator directive consumers
+
+The fixed four-module consumer selection passed60 cases:19 detail/button,
+16 real queue claim/reload,9 inline popup and16 Shorts controls. Canonical test
+admission classified all four collectable without quarantine exceptions. Minimal
+explicit environment, private paths and denied browser/model/network/process
+effects were used; no captured JUnit streams or skipped cases.
+
+`test_video_policy_consumers.py` tests late preserve/pause/foreign edits at actual
+Save. `test_video_policy_save_readback.py` proves durable unknown retry refusal,
+fresh-document metadata readback and no verification from a no-op refresh or a
+metadata-only schedule read. `test_video_policy_inline.py` exercises actual popup
+submission with strict target association and no fallback after uncertain click.
+The fourth module is Shorts `test_operator_upload_policy.py`.
+
+Adjacent185 cases passed: existing selected-batch147, metadata evidence23 and
+publisher boundary15. Strict typed DOM fixtures gained the new explicit edit
+session contract; valid synthetic native IDs replaced invalid placeholders.
+All original assertions and selected-batch case counts remain.
+
 ## 2026-10-29 — Qualified scheduled inventory, offline only
 
 `test_scheduled_inventory.py` exercises actual parser/collector and consumer

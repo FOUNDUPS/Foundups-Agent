@@ -1,5 +1,22 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-11-01 — Fresh private directives at existing Save owners
+
+WSP11/22/50/62/84/97. Reused the existing 012 queue, automation gate and DOM/CPS
+owners. Added a stateless consumer helper and per-edit original/proposed/staged
+snapshots. Scheduler/manual enhancement now use authoritative detail originals;
+actual Save rechecks and restores preserve only for our known draft. Native
+channel/video binding, public gates and per-cycle cap guard the final buttons.
+Legacy inline reschedule delegates the same guarded CPS owner; unassociated
+popup targets fail closed. No private research context enters public metadata.
+
+Queue-owned claims block uncertain same-video retry across cycles/restarts.
+Metadata-only applied feedback requires clean same-tab fresh-document reload and
+exact readback; scheduling claims cannot settle from metadata-only proof.
+Existing caller gates and preserve-metadata remain authoritative. Tests use fake
+DOM/providers and private queue paths; no browser/model/service/public action was
+performed. Live selector/readback qualification is separate.
+
 ## 2026-10-29 — Qualified calendar reads and canonical receiving-account rotation
 
 WSP11/22/50/62/84/97. Existing DOM/CPS/auditor/tracker owners now share one

@@ -1,5 +1,36 @@
 # YouTube Shorts Scheduler - Interface Documentation
 
+## Private operator directives (2026-11-01)
+
+Existing 012 queue `get_video_policy(channel_id, video_id, surface=...)` supplies
+sparse metadata/scheduling fields. No field means existing behavior; unavailable,
+busy, corrupt or blocked input refuses writes. Private context/sources are never
+copied into titles, descriptions or public feedback. A directive does not open
+the existing automation gate or establish account access.
+
+The actual detail Save and inline popup button owners recheck current policy,
+STOP/automation, receiving identity and cycle cap immediately before submission.
+`begin_policy_edit(channel_id, video_id, *, allow_metadata=True)` captures exact
+detail-page strings before our edits. Preserve restores that original only while
+current fields still equal our known draft; a foreign/manual change refuses Save.
+The CLI's preserve-metadata flag continues to prevent metadata edits. Exact
+replacement uses queue-validated single-video text with no promotional appendix.
+
+Durable queue save claims precede clicks. An uncertain receiving-video save is
+blocked across navigation/restart even if its draft or policy changes. Save bools
+remain click-workflow receipts. Metadata-only saves can settle `applied` after a
+same-window, clean/disabled-Save/no-prompt check, fresh-document reload witness,
+and exact native channel/video/title/description readback. This conditional tab
+check is not exclusive ownership or protection from all concurrent human work.
+Scheduling claims bind intended slot/timezone/visibility as well as metadata;
+they remain unknown because no complete account-timezone/slot readback owner is
+qualified here. No automatic undo or retry follows uncertain submission.
+
+Inline writes additionally require one visible popup explicitly associated with
+the exact connected row (containment or ARIA reference). An unassociated portal
+popup refuses before claim/click; row presence alone is insufficient. Installed
+selector/association qualification remains separate from controlled offline tests.
+
 ## Qualified scheduled inventory
 
 `YouTubeStudioDOM.read_scheduled_inventory(channel_id, *, max_pages=100) -> dict`

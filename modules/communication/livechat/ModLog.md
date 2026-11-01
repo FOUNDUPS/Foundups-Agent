@@ -1,5 +1,18 @@
 # Livechat Module - ModLog
 
+## 2026-11-01 — Queue-owned private video directives
+
+Extend the existing operator inbox with bounded `set_video_policy` and
+`clear_video_policy`; preserve context/legacy receipts and share the existing
+lock, pre-effect uncertainty claim and atomic writes. Synchronous private-only
+intake gives metadata/scheduling/Shorts writers fresh scoped fields before their
+effect guard; corrupt/busy/unknown state blocks explicitly. Per-field scope
+supersession, absolute bounded deadlines, digest-bound snapshots, private
+observations and durable upload reservations remain queue-owned. Private context
+activation is independent of public send/dry-run gates; public writers retain
+their gates. See `docs/VIDEO_POLICY_INTERFACE.md`. WSP11/22/50/62/84/97.
+This is offline file/API qualification, with no public/model/browser actions.
+
 ## 2026-10-29 — Select General readiness for language/DOM startup
 
 - Existing Phase-2 dependency call passes exact `LM_STUDIO_NATIVE_MODEL_KEY`,

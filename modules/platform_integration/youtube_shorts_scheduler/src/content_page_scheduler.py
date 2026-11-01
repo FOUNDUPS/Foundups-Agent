@@ -249,6 +249,7 @@ class ContentPageScheduler:
         if not config:
             logger.error(f"[CPS] Unknown channel: {channel_key}")
             return False
+        self._policy_channel_id = config["id"]
 
         # Navigate to base Studio URL (NO filter params — they cause blank screen)
         base_url = f"https://studio.youtube.com/channel/{config['id']}/videos/{content_type}"
@@ -506,6 +507,14 @@ class ContentPageScheduler:
         Returns:
             True if popup opened
         """
+        from .video_policy import inline_identity, scheduling_policy
+        channel_id, video_id = inline_identity(self.driver, row_element,
+            channel_id=getattr(self, "_policy_channel_id", None),
+            video_id=getattr(self, "_policy_expected_video", None))
+        scheduling_policy(channel_id, video_id, getattr(self.dom, "_policy_cycle_attempts", 0))
+        self._policy_row = row_element
+        self._policy_video_id = video_id
+        self._policy_submission_started = False
         try:
             time_module.sleep(self._pre_click_delay)
 
@@ -643,6 +652,10 @@ class ContentPageScheduler:
         Returns:
             True if button clicked
         """
+        from .video_policy import submit_inline, VideoPolicyBlocked
+        def submit(callback):
+            return submit_inline(self, getattr(self, "_policy_row", None),
+                                 getattr(self, "_policy_video_id", None), callback)
         try:
             pre_save_delay = float(os.getenv("YT_CPS_PRE_SAVE_DELAY", "1.0"))
             time_module.sleep(pre_save_delay)
@@ -654,7 +667,7 @@ class ContentPageScheduler:
                         (By.CSS_SELECTOR, self.sel.POPUP_SAVE_BUTTON_CSS)
                     )
                 )
-                self.dom.safe_click(btn)
+                submit(btn.click)
                 time_module.sleep(1.0)
                 logger.debug("[CPS] Popup schedule button clicked (CSS)")
                 return True
@@ -668,7 +681,7 @@ class ContentPageScheduler:
                         (By.XPATH, self.sel.POPUP_SAVE_BUTTON_XPATH)
                     )
                 )
-                self.dom.safe_click(btn)
+                submit(btn.click)
                 time_module.sleep(1.0)
                 logger.debug("[CPS] Popup schedule button clicked (XPath)")
                 return True
@@ -682,10 +695,12 @@ class ContentPageScheduler:
                     "//ytcp-video-visibility-edit-popup"
                     "//button[.//span[contains(text(),'Schedule') or contains(text(),'Save')]]"
                 )
-                self.driver.execute_script("arguments[0].click();", btn)
+                submit(lambda: self.driver.execute_script("arguments[0].click();", btn))
                 time_module.sleep(1.0)
                 logger.debug("[CPS] Popup schedule button clicked (JS fallback)")
                 return True
+            except VideoPolicyBlocked:
+                raise
             except Exception:
                 pass
 
@@ -693,6 +708,8 @@ class ContentPageScheduler:
             return False
 
         except Exception as e:
+            if isinstance(e, VideoPolicyBlocked):
+                raise
             logger.error(f"[CPS] Popup schedule click failed: {e}")
             return False
 
@@ -705,7 +722,7 @@ class ContentPageScheduler:
         except Exception:
             pass
 
-    def reschedule_row_inline(self, row_element, new_date: str, new_time: str) -> bool:
+    def reschedule_row_inline(self, row_element, new_date: str, new_time: str, *, video_id=None) -> bool:
         """
         Reschedule an already-scheduled video via the inline popup (no edit page nav).
 
@@ -728,6 +745,9 @@ class ContentPageScheduler:
         Returns:
             True if rescheduled successfully
         """
+        self._policy_expected_video = video_id
+        self._policy_requested_schedule = {"date": new_date, "time": new_time,
+            "timezone": getattr(self, "_policy_timezone", None), "visibility": "scheduled"}
         try:
             # Step 1: Open the popup
             if not self._click_visibility_edit_on_row(row_element):
@@ -809,6 +829,9 @@ class ContentPageScheduler:
             True if all steps succeeded
         """
         workflow_start = time_module.time()
+        self._policy_expected_video = video_id
+        self._policy_requested_schedule = {"date": date_str, "time": time_str,
+            "timezone": getattr(self, "_policy_timezone", None), "visibility": "scheduled"}
         logger.info(f"[CPS] Scheduling {video_id} → {date_str} @ {time_str}")
 
         steps = [
@@ -885,6 +908,9 @@ class ContentPageScheduler:
             "scheduled": [],
             "errors": [],
         }
+        self.dom.begin_policy_cycle()
+        self._policy_channel_id = tracker.channel_id
+        self._policy_timezone = channel_tz
 
         rows = self.get_video_rows_with_data()
         unlisted_rows = [r for r in rows if r["visibility"].lower() in ("unlisted", "private")]
@@ -1157,6 +1183,7 @@ class ContentPageScheduler:
                 try:
                     self.dom.navigate_to_video(video_id)
                     time_module.sleep(2)
+                    self.dom.begin_policy_edit(tracker.channel_id, video_id, allow_metadata=False)
                     success = self.dom.schedule_video(new_date, new_time)
 
                     if success:
@@ -1293,13 +1320,15 @@ class ContentPageScheduler:
 
                 if row_element:
                     # Use inline popup rescheduling (fast, stays on content page)
-                    success = self.reschedule_row_inline(row_element, new_date, new_time)
+                    self._policy_channel_id = tracker.channel_id
+                    success = self.reschedule_row_inline(row_element, new_date, new_time, video_id=video_id)
                 else:
                     # Fallback: navigate to edit page
                     logger.debug(f"[CPS-THIN] Row not found for {video_id}, using edit page")
                     try:
                         self.dom.navigate_to_video(video_id)
                         time_module.sleep(2)
+                        self.dom.begin_policy_edit(tracker.channel_id, video_id, allow_metadata=False)
                         success = self.dom.schedule_video(new_date, new_time)
                     except Exception as e:
                         logger.error(f"[CPS-THIN] Edit page reschedule failed: {e}")
