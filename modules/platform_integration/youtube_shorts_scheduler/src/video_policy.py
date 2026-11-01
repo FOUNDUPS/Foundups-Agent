@@ -148,12 +148,23 @@ def claim_save(session):
 def verify_metadata_save(session, snapshot):
     """Metadata facts alone must never settle an attempted schedule change."""
     from modules.communication.livechat.src.operator_command_queue import verify_video_policy_save
-    if session.requested_schedule is not None:
-        return False
     detail_identity(snapshot, session.channel_id, session.video_id)
     fields = {key: snapshot[key] for key in session.staged}
     if fields != session.staged:
         return False
+    if session.requested_schedule is not None:
+        metadata = session.policies["metadata"]
+        fresh = read_policy(session.channel_id, session.video_id, surface="metadata")
+        if fresh["fingerprint"] != metadata["fingerprint"]:
+            observe(metadata, surface="metadata", channel_id=session.channel_id,
+                    video_id=session.video_id, outcome="unknown",
+                    detail={"reason": "metadata_policy_changed_after_submission"})
+            return False
+        observe(metadata, surface="metadata", channel_id=session.channel_id,
+                video_id=session.video_id, outcome="applied",
+                detail={"persisted_readback": True, "policy_fingerprint": metadata["fingerprint"],
+                        "readback_sha256": save_digest(session.channel_id, session.video_id, fields)})
+        return False  # metadata fact only: the whole scheduling claim stays unknown
     result = verify_video_policy_save(session.channel_id, session.video_id,
         draft_sha256=session.draft_sha256,
         readback_sha256=save_digest(session.channel_id, session.video_id, fields),

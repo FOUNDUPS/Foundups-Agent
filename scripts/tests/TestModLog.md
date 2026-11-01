@@ -1,3 +1,13 @@
+## 2026-11-01 — Private operator directives backend closure
+
+The canonical registry generator reports1800 tracked tests,260 quarantined,
+without relaxing admission. All8 backend manifest/index cases and4 existing
+Node package/compatibility checks pass in explicit credential-free children.
+Both digest pins bind the exact1481-member closure and all three new leaves;
+the next1482-member candidate is rejected. Every existing byte cap is retained.
+Final staged-tree source-digest/security metadata is reviewed separately through
+the unchanged security owner; no live provider, browser or YouTube claim follows.
+
 ## 2026-11-01: Agent-wallet policy source binding
 
 Regenerate the unchanged 1477-member runtime closure after the wallet policy

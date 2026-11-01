@@ -1,7 +1,7 @@
 ## 2026-11-01 — Private operator directive consumers
 
-The fixed four-module consumer selection passed55 cases:19 detail/button,
-11 real queue claim/reload,9 inline popup and16 Shorts controls. Canonical test
+The fixed four-module consumer selection passed60 cases:19 detail/button,
+16 real queue claim/reload,9 inline popup and16 Shorts controls. Canonical test
 admission classified all four collectable without quarantine exceptions. Minimal
 explicit environment, private paths and denied browser/model/network/process
 effects were used; no captured JUnit streams or skipped cases.

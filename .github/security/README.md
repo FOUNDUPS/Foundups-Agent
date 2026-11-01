@@ -1,3 +1,15 @@
+## Private video-policy runtime metadata review — 2026-11-01
+
+Pinned Gitleaks8.30.1 reports39 new whole-manifest bindings after the private
+YouTube operator policy closure reaches1481 sources. Independent review
+reconstructs every complete path/hash pair from immutable Git blobs; all39
+lines are unchanged, uniquely located and reconstruct prior exact approvals in
+the3158-entry incoming-main ledger. Append only those39 fingerprints, retaining
+the entire prior prefix and every other ledger field (3197 total).
+No scanner rule, exclusion, scope or fingerprint algorithm changes. Fresh final
+staged-tree and introduced-history checks remain required; no live credentials
+or raw matched values are published.
+
 ## Epoch replay runtime metadata review — 2026-11-01
 
 The pinned Gitleaks 8.30.1 committed-tree scan at 0844cd743 reports 39 exact

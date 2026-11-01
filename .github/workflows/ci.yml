@@ -220,7 +220,7 @@ jobs:
         run: python -I -B .github/scripts/youtube_repair_offline.py --suite inventory
       - name: Verify 35 rotation controls in a separate minimal child
         run: python -I -B .github/scripts/youtube_repair_offline.py --suite rotation
-      - name: Verify 55 scoped directive and actual save/upload boundary controls
+      - name: Verify 60 scoped directive and actual save/upload boundary controls
         run: python -I -B .github/scripts/youtube_repair_offline.py --suite directives
       - name: Preserve sanitized offline repair inventories
         if: always()

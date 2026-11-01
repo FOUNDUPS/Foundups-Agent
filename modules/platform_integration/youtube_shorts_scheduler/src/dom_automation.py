@@ -2745,8 +2745,6 @@ class YouTubeStudioDOM:
                     or before.get("save_disabled") is not True or before.get("prompt_open") is not False
                     or any(before.get(key) != value for key, value in session.staged.items())):
                 return False
-            if session.requested_schedule is not None:
-                return False  # no qualified account-timezone/slot readback owner yet
             old_document = self.driver.find_element(By.TAG_NAME, "html")
             self.driver.refresh()
             WebDriverWait(self.driver, 8).until(EC.staleness_of(old_document))

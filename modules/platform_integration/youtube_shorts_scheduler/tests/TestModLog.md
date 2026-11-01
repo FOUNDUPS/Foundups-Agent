@@ -1,7 +1,7 @@
 ## 2026-11-01 — Final policy consumer qualification
 
-55 new focused controls passed, zero failures/errors/skips/captured streams:
-detail19, durable save/reload11, inline9, Shorts16. Actual queue claims persist
+60 new focused controls passed, zero failures/errors/skips/captured streams:
+detail19, durable save/reload16, inline9, Shorts16. Actual queue claims persist
 across new navigation/queue instances. Useful metadata Save→clean same-tab fresh
 document→exact readback settles applied; no-op refresh stays unknown. Slot-write
 claims cannot be settled by metadata-only proof. Tests preserve foreign drafts,

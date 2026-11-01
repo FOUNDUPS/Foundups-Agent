@@ -9,7 +9,7 @@ pause/STOP/unknown refusal, generation fingerprint races, retained descriptor
 hashing, durable unknown-asset retry refusal and restart cadence are covered.
 Provider/model/auth/browser/service effects remain denied. The legacy publisher
 test retains its assertions with valid synthetic channel/video identity literals.
-Its16 controls passed as part of the55-case fixed consumer selection. The15
+Its16 controls passed as part of the60-case fixed consumer selection. The15
 existing publisher-boundary cases also passed alongside the selected-batch147
 and metadata-evidence23. No skipped cases or captured JUnit streams.
 

@@ -90,13 +90,97 @@ def test_unowned_or_unclean_current_page_never_refreshes_or_applies(owned_editor
     assert owner._read_json(owner.state_path, {})["video_effect_claims"][-1]["outcome"] == "unknown"
 
 
-def test_metadata_readback_cannot_settle_schedule_operation(owned_editor):
+def test_metadata_readback_cannot_settle_schedule_operation(owned_editor, monkeypatch):
     dom, state, calls, owner = owned_editor
+    def forbidden_verify(*_args, **_kwargs):
+        raise AssertionError("metadata readback must not settle scheduling claim")
+    monkeypatch.setattr(queue, "verify_video_policy_save", forbidden_verify)
     dom._policy_scheduling = True
     dom._policy_edit().requested_schedule = {"date": "Nov 2, 2026", "time": "1:00 PM", "timezone": "Asia/Tokyo", "visibility": "scheduled"}
     dom.click_save()
-    assert calls["refreshes"] == 0
+    assert calls["refreshes"] == 1
     assert owner._read_json(owner.state_path, {})["video_effect_claims"][-1]["outcome"] == "unknown"
+
+
+def schedule_with_fake_picker(dom, during_time=None):
+    dom.open_visibility_dialog = lambda: None
+    dom.select_schedule_option = lambda: None
+    dom.set_schedule_date = lambda _date: None
+    dom.set_schedule_time = lambda _time: during_time() if during_time else None
+    dom.click_done = lambda: None
+    dom._policy_timezone = "Asia/Tokyo"
+    return dom.schedule_video("Nov 2, 2026", "1:00 PM")
+
+
+def enqueue_title_policy(owner, mode):
+    fields = {"channel_ids": [CHANNEL], "video_ids": [VIDEO], "title_mode": mode}
+    if mode == "replace": fields["title_text"] = "Exact approved replacement"
+    queue.enqueue_operator_command({"id": "metadata-" + mode, "action": "set_video_policy", "payload": fields},
+        command_path=owner.command_path, acknowledgement_path=owner.acknowledgement_path)
+
+
+@pytest.mark.parametrize("mode", ["preserve", "replace"])
+def test_schedule_metadata_fact_applied_after_fresh_reload_without_releasing_save_claim(owned_editor, monkeypatch, mode):
+    dom, state, calls, owner = owned_editor
+    dom.edit_title("Earlier automatic title draft")
+    def forbidden_verify(*_args, **_kwargs):
+        raise AssertionError("metadata fact must not settle scheduling claim")
+    monkeypatch.setattr(queue, "verify_video_policy_save", forbidden_verify)
+    assert schedule_with_fake_picker(dom, lambda: enqueue_title_policy(owner, mode)) is True
+    expected = " Exact original \n" if mode == "preserve" else "Exact approved replacement"
+    assert state["title"] == expected and calls == {"clicks": 1, "refreshes": 1}
+    saved = owner._read_json(owner.state_path, {})
+    claim = saved["video_effect_claims"][-1]
+    assert claim["outcome"] == "unknown" and "scheduling" in claim["fingerprints"]
+    applied = [row for row in saved["video_policy_observations"] if row["outcome"] == "applied"]
+    assert len(applied) == 1 and applied[0]["surface"] == "metadata"
+    assert applied[0]["channel_id"] == CHANNEL and applied[0]["video_id"] == VIDEO
+    detail = applied[0]["detail"]
+    assert detail == {"persisted_readback": True, "policy_fingerprint": claim["fingerprints"]["metadata"],
+                      "readback_sha256": policy.save_digest(CHANNEL, VIDEO, {"title": expected, "description": state["description"]})}
+    dom.begin_policy_cycle()
+    dom.begin_policy_edit(CHANNEL, VIDEO)
+    with pytest.raises(policy.VideoPolicyBlocked, match="already_claimed"):
+        dom._submit_policy_save(lambda: calls.update(clicks=2))
+    assert calls["clicks"] == 1
+
+
+@pytest.mark.parametrize("problem", ["wrong_identity", "noop_refresh"])
+def test_schedule_metadata_fact_requires_exact_fresh_document(owned_editor, monkeypatch, problem):
+    dom, state, calls, owner = owned_editor
+    class OneCheckWait:
+        def __init__(self, driver, _timeout): self.driver = driver
+        def until(self, condition):
+            result = condition(self.driver)
+            if not result: raise TimeoutException("synthetic bounded wait")
+            return result
+    monkeypatch.setattr("modules.platform_integration.youtube_shorts_scheduler.src.dom_automation.WebDriverWait", OneCheckWait)
+    original_refresh = dom.driver.refresh
+    def refresh():
+        if problem == "wrong_identity":
+            original_refresh()
+            state["channel_id"] = "UC" + "b" * 22
+        else: calls["refreshes"] += 1
+    dom.driver.refresh = refresh
+    assert schedule_with_fake_picker(dom, lambda: enqueue_title_policy(owner, "preserve")) is True
+    saved = owner._read_json(owner.state_path, {})
+    assert calls == {"clicks": 1, "refreshes": 1}
+    assert saved["video_effect_claims"][-1]["outcome"] == "unknown"
+    assert not any(row["outcome"] == "applied" for row in saved["video_policy_observations"])
+
+
+def test_schedule_metadata_policy_cleared_after_submit_remains_unknown(owned_editor):
+    dom, state, calls, owner = owned_editor
+    original_refresh = dom.driver.refresh
+    def refresh():
+        original_refresh()
+        queue.enqueue_operator_command({"id": "clear", "action": "clear_video_policy", "payload": {"channel_ids": [CHANNEL], "video_ids": [VIDEO]}},
+            command_path=owner.command_path, acknowledgement_path=owner.acknowledgement_path)
+    dom.driver.refresh = refresh
+    assert schedule_with_fake_picker(dom, lambda: enqueue_title_policy(owner, "preserve")) is True
+    saved = owner._read_json(owner.state_path, {})
+    assert saved["video_effect_claims"][-1]["outcome"] == "unknown"
+    assert not any(row["outcome"] == "applied" for row in saved["video_policy_observations"])
 
 
 def test_unknown_save_blocks_after_new_navigation_cycle_and_queue_instance(owned_editor, monkeypatch):

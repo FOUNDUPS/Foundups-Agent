@@ -28,7 +28,7 @@ SUITES = {
         SCHEDULER_TESTS + 'test_schedule_audit_breadcrumb.py')),
     'rotation': (35, '664830788a43165c40b0166e2f7736d63cc06e1f73346db9b1d1f2cb1a0bc07d', (
         SCHEDULER_TESTS + 'test_schedule_rotation_fairness.py',)),
-    'directives': (55, 'f8c2343dc8c28aa57169092bb5771c4d20af4263588f3169dd2bdb3779c36091', (
+    'directives': (60, 'fa7f4c3167786becbe723a5eabf42c2cc7ff7ecff3eba0699595f1654094d8d8', (
         SCHEDULER_TESTS + 'test_video_policy_consumers.py',
         SCHEDULER_TESTS + 'test_video_policy_save_readback.py',
         SCHEDULER_TESTS + 'test_video_policy_inline.py',
