@@ -1,3 +1,13 @@
+## Native OpenClaw qualification ModLog rebinding — 2026-11-01
+
+Hosted Gitleaks8.30.1 found the previously reviewed historical-prose binding
+at bridge ModLog3999, shifted from3987 in main d65a7257. Coordinator re-review
+and deterministic immutable-blob reconstruction prove the complete old suffix
+and eleven-line context unchanged and the exact base fingerprint already approved.
+Append only the new file/path/rule/line binding; retain every prior record and
+all scanner rules. This is not an independent actor review. Hosted tree/history
+checks must pass on the final revision. Private proof accompanies the native trial.
+
 ## Pool-credit refusal runtime metadata review — 2026-11-01
 
 Pinned Gitleaks 8.30.1 reports 39 whole-manifest fingerprint renewals at
