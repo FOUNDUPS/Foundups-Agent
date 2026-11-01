@@ -30,6 +30,8 @@ if TYPE_CHECKING:
     from .fi_orderbook import OrderBookManager, Order, Trade
     from .fi_rating import FiRatingEngine
 
+from .fi_orderbook import OrderStatus
+
 logger = logging.getLogger(__name__)
 
 
@@ -437,6 +439,17 @@ class AllocationEngine:
             price=price,
             quantity=quantity,
         )
+
+        if order.status == OrderStatus.CANCELLED:
+            return AllocationResult(
+                foundup_id=foundup_id,
+                ups_allocated=sum(t.ups_total for t in trades),
+                fi_received=sum(t.quantity for t in trades),
+                path=AllocationPath.DEX_BUY if trades else AllocationPath.FAILED,
+                order_id=order.order_id,
+                fee_paid=sum(t.fee_ups for t in trades),
+                message=f"Order cancelled: {order.rejection_reason}; {order.remaining:.2f} F_i unfilled",
+            )
 
         if trades:
             # Immediate fill (partial or full)

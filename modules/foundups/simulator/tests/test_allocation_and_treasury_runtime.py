@@ -334,3 +334,58 @@ def test_allocation_does_not_newly_validate_or_change_nonparticipating_fields(en
     parts[1].total_spent = None
     assert _call(entry, parts, 1) is (None if entry == "wallet" else True)
     assert parts[0].total_allocated == -1 and parts[1].total_spent is None
+
+
+from copy import deepcopy
+from types import SimpleNamespace
+from modules.foundups.simulator.economics.fi_orderbook import EntryProtectionConfig, OrderBookManager, OrderStatus
+from modules.foundups.simulator.economics.allocation_engine import AllocationEngine, AllocationPath
+
+
+def _b11_allocator():
+    manager = OrderBookManager(entry_protection_config=EntryProtectionConfig(enabled=False))
+    pool = SimpleNamespace(remaining_mintable=0, available_supply=100)
+    engine = AllocationEngine(SimpleNamespace(foundup_pools={"f": pool}), manager)
+    return engine, manager.get_or_create_book("f")
+
+
+@pytest.mark.parametrize("partial", [False, True])
+def test_b11_actual_allocator_reports_only_completed_notional_when_cancelled(partial):
+    engine, book = _b11_allocator()
+    if partial:
+        external, _ = book.place_sell_order("external", 5, 2)
+    maker, _ = book.place_sell_order("same", 5, 10)
+    # Two equal-price ordinary asks: this fixture root is external, not a FIFO promise.
+    assert book.sell_orders[0] is (external if partial else maker)
+    maker_before = deepcopy(vars(maker))
+    batch = engine.allocate_fixed("same", 25, {"f": 1.0})
+    result, = batch.results
+    order = book.all_orders[result.order_id]
+    assert order.status is OrderStatus.CANCELLED and order.rejection_reason == "self_trade_prevention"
+    assert result.path is (AllocationPath.DEX_BUY if partial else AllocationPath.FAILED)
+    assert (result.ups_allocated, result.fi_received, result.fee_paid) == pytest.approx((10, 2, .2) if partial else (0, 0, 0))
+    assert "cancel" in result.message.lower() and "pending" not in result.message.lower()
+    assert batch.pending_orders == [] and batch.success_count == int(partial)
+    assert (batch.total_fi_received, batch.total_fees) == pytest.approx((2, .2) if partial else (0, 0))
+    assert (engine.total_allocated_ups, engine.total_fi_acquired) == pytest.approx((10, 2) if partial else (0, 0))
+    assert engine.allocation_count == 1 and vars(maker) == maker_before
+    assert book.buy_orders == [] and book.sell_orders == [maker]
+
+
+@pytest.mark.parametrize("partial", [False, True])
+def test_b11_actual_allocator_live_open_and_partial_paths_stay_compatible(partial):
+    engine, book = _b11_allocator()
+    if partial:
+        book.place_sell_order("external", 5, 2)
+    batch = engine.allocate_fixed("same", 25, {"f": 1.0})
+    result, = batch.results
+    assert result.path is (AllocationPath.DEX_BUY if partial else AllocationPath.DEX_PENDING)
+    assert result.ups_allocated == 25 and result.fi_received == (2 if partial else 0)
+    assert result.fee_paid == pytest.approx(.2 if partial else 0)
+    order = book.all_orders[result.order_id]
+    assert order.status is (OrderStatus.PARTIAL if partial else OrderStatus.OPEN)
+    assert order.rejection_reason is None and book.buy_orders == [order]
+    assert batch.pending_orders == ([] if partial else [result])
+    assert engine.total_allocated_ups == 25 and engine.allocation_count == 1
+    if partial:
+        assert "pending" in result.message.lower()

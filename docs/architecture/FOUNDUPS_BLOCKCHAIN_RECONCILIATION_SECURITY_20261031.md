@@ -34,6 +34,14 @@ callers do not fix every SDK consumer or upstream advisory. Publication/PC pendi
 notes below are historical; persistent maintenance remains HOLD, with exact
 runtime/current-store qualification unproved. No fresh semantic CURRENT claim follows.
 
+### Additional Chroma authorization advisories — 2026-11-01
+
+Nov 1 review of June 12 disclosures: [CVE-2026-45830](https://github.com/advisories/GHSA-2wm9-hf6c-p5cr) (>=0.4.17 through 1.5.9)
+and [CVE-2026-45831](https://github.com/advisories/GHSA-xph7-9rjv-w5fr) (>=0.5.0 through 1.5.9); no patched version listed.
+Declared and installed-metadata Chroma 1.5.5 falls in both ranges. UUID tenant filtering
+and SimpleRBAC resource checks are server-authorization gaps; the raw-settings guard is not a fix.
+Live/embedded exposure and AI causation remain UNVERIFIED; controller/store/runtime HOLD continues.
+
 ## Hourly queue readiness candidate — 2026-11-01
 
 The existing breaker owns this 14/P1 class-B B09 slice: first nonempty release,
@@ -50,13 +58,41 @@ run, five held-outs outside it; do not add overlapping counts. No fresh 240-tick
 trace ran, and older traces did not exercise positive queue release.
 Package eight Python/three Node pass with 1,481 members, only the breaker hash
 changed, unchanged caps and 35 bytes CRLF headroom. Registry was not run locally;
-no instrumented zero-effects or native-runtime claim follows. Security/publication remain pending.
+no instrumented zero-effects or native-runtime claim follows. Dated delivery correction:
+PR2292 merged normally at `430f9ef90ad126b76f3d90e03d1086d2e2237267`, 23 PR/21
+main checks; 17 C/O blobs and 27,258 immediate untracked pathnames are preserved.
+Independent frozen evidence copy: 375 files/22,602,445 bytes. PC delivery report
+`outputs/blockchain-queue-cadence-20261101-ca490f54/EXECUTION_REPORT.md`, SHA256
+`2f7078ebf2c3d895c8aafb1364d36853ad7da90cc8e965447f323266b86d10b5`.
+Older B09 pending prose is historical; no unrelated-content or Holo-release claim.
 Only native serialized-instance readiness is claimed. Logging can fail after a
 committed dequeue; successful return, lost-result recovery, concurrency, restart,
 funded payment and authenticated unfreeze are not supplied. Historical A12 failure
-below stays evidence; this partial candidate does not close full A12 or broad B09.
+below stays evidence; this delivered slice does not close full A12 or broad B09.
 B03 C/D units/thresholds/liabilities/issuance, B05 funding and separate custody
 remain unresolved or blocked; no TestNet/production activation follows.
+
+## Same-ID matching control candidate — 2026-11-01
+
+B11-S1, 16/P1 class B: cancel a same-ID best-crossing taker remainder, one
+incoming rejection increment, no reinsertion; preserve maker and valid external
+prefix. Price-only priority/seller-price/fee math stay. Direct private execution
+rejects same-ID before counters/fills/history. IDs are native host labels, not
+authenticated ownership or cross-controller/Sybil evidence. CANCELLED zero-fill
+is FAILED/zero; partial cancellation is DEX_BUY with actual notional/F_i/fee sums,
+historical order ID and no pending claim. Mesa refunds unused allocation budget,
+not wallet cash. Files 590/523 fit 620/540; method 74→85 and classes 398→412 /
+385→396 retain explicit inherited size debt. Focused 209, corrected six and
+post-candidate Mesa two pass. First independent five pass/one wrong-route fixture
+failure is retained; only setup was corrected, with original assertions unchanged.
+Broad 1,236 passes, same three SSE HTTP deselections/174 stable snapshots,
+independently confirmed. Actual CLI check and eight Python/three Node consumers
+pass; 1,481 members/order/caps stay, only the two source digests change. Canonical
+`7275b086ddfdd6286668fa2ea16d9233fdd43cf16074e492c8bef2d960c547b9`;
+35 bytes CRLF headroom remain. Registry NOT_RUN; package hooks do not establish
+instrumented zero-effects or native confinement. Security/publication remain pending.
+New 27 are in broad; six/two are outside. No summed total, new 240-tick trace,
+funded conservation, whole-market rollback or complete A08/B11 claim follows.
 
 ## Allocation numeric preflight and delivered-source checkpoint — 2026-11-01
 
@@ -356,11 +392,11 @@ cannot repair poisoned construction, accounting, authorization or recovery.
 | A03/A04: unsigned Algorand field restrictions exist; monetary signer missing | B08: separate custody/control domains, independently decoded effects, one-use approvals, denied rekey/close/delegation and independently observed finality. |
 | A05/A06: local proof/task and type checks exist; independent facts and release authority missing | B03/B06: authentic work/maturity evidence, unique consumption and combined release/supply bounds; names and literal `True` are insufficient. |
 | A07: delivered B02 qualifies process-local pool/ledger/Mesa retries; restart, funded and chain replay remain missing | B05/B08: durable funded admission and chain-level no-effect/replay tests; no whole outer-cycle guarantee. |
-| A08: matching simulated; self-trade gap remains | B11: funded two-sided reservations, related-controller/Sybil controls, exact settlement/fees and cancellation. |
+| A08: same-ID cancellation candidate locally tested; delivery pending | B11: funded two-sided reservations, related-controller/Sybil controls, exact settlement/fees and recovery remain open. |
 | A09: external venue/bridge unqualified | Keep disabled; require separate asset, venue and bridge admission plus independent chain restrictions. |
 | A10: B01 detaches caller policy; trusted-host replacement remains | B08/B09: authenticated versioned policy and approvals outside candidate-controlled code; stale or self-granted authority rejected. |
 | A11: numeric checks do not authenticate reserve backing | B05/B09: authentic fresh backing and liabilities; fabricated plausible inputs cannot increase capacity. |
-| A12: hourly readiness has focused 54, independent five/source, broader and package acceptance; security/delivery pending | B09: retain native-instance limits; authenticated recovery, safe reconciliation and independent freeze/unfreeze authority remain absent. |
+| A12: hourly readiness delivered at 430f9ef9 with scoped checks/readback | B09: retain native-instance limits; authenticated recovery, safe reconciliation and independent freeze/unfreeze authority remain absent. |
 
 These are linked threat requirements, not passed attack tests. The current
 distribution layer cannot establish restart recovery, cross-process exclusion,
@@ -516,7 +552,7 @@ reviewable receipt before promotion. No wrapper or new scheduler is required.
 | B08 custody and constrained signer | existing platform integration boundary / security architect and independent chain verifier | 26/71/97, B, 20/P0 (5/5/5/5) | Separate custody/control domains; exact-effect decode; scoped one-use authorization; algorithm/domain/encoding vectors; deny rekey/close/delegation/unknown groups; durable attempts; independently observed finality. Provider qualification and external audit required. |
 | B09 freeze, monitoring and recovery | existing breaker/queue/FAM evidence owners / incident worker | 26/48/91/97, B, 19/P0 (4/5/5/5) | Coordinated small drains, oracle forgery, pending exposure and governance changes detected; authenticated freeze/recovery; ambiguous payment reconciliation; no queue release accelerated by repeated calls. |
 | B10 one-project TestNet pilot, then inventory rollout | FAM token factory + Algorand + catalog / integration worker | 26/97/100/109, A/B, 17/P0 (4/5/4/4) | Separately authorized bounded pilot only after B03-B09; actual network/genesis, asset ID, issuer/privileged authorities, supply/decimals, opt-ins and confirmed transaction evidence; exact retries do not create a second token. Expand only to eligible verified projects. |
-| B11 internal FX settlement | existing fi_orderbook + FAM settlement / exchange worker | 26/29/97, B/C, 19/P0 (4/5/5/5) | Funded two-sided reservations, exact settlement/fees, related-party/Sybil manipulation controls and cancellation/recovery. External DEX, bridge or wrapped assets require another simulator decision and security review. |
+| B11 internal FX settlement | existing fi_orderbook + FAM settlement / exchange worker | 26/29/97, B/C, 19/P0 (4/5/5/5) | Partial 16/P1 same-ID cancellation candidate; funded two-sided reservations, exact settlement/fees, related-controller/Sybil and recovery remain open. External DEX/bridge/wrapped assets need another simulator decision/security review. |
 
 B02, B03 and B04 can prepare independently; dependency order still gates effects.
 The original A01-A12 taxonomy remains the coverage map: B05/B09 cover A01/A02;
@@ -568,6 +604,19 @@ provisional. Direct detail requests sometimes redirect to the announcement index
 indexed official and locale-specific responses were retained with this limitation.
 TRM's EIP-7702/signing-infrastructure analysis stays an investigator assessment,
 not proof that FoundUps or Algorand uses that Ethereum delegation mechanism.
+
+### Dated Binance follow-up — 2026-11-01
+
+[Update 4](https://www.binance.com/en/support/announcement/detail/73911fb819b240f88b88256bdd318eda)
+(page timestamp Nov 1, 04:08) said it was preparing phased withdrawals for
+06:00–09:00 UTC and reported 95% replenishment. These are company assertions,
+not observed service availability, recovered stolen assets or independent custody
+proof; its post-incident report remained future. [Update 3](https://www.binance.com/en/support/announcement/detail/1fdf1f61559c401da0435895ffcccb62)
+reported an Oct 31 00:00 UTC snapshot and estimated full ZK proof by Nov 3;
+no completed proof or confirmed exploit mechanism is established here. Both
+primary bodies were read; Update 4 required the official link from Update 3 after
+direct-open initially failed. Earlier dates/figures and retrieval limits remain
+historical snapshots; no chain activity or signing/AI attribution was verified.
 
 No real token creation, keys, funded transactions, bridge, runtime installation,
 or blockchain deployment is authorized or performed by this research sprint.
@@ -829,7 +878,7 @@ they are not substituted for this required scenario matrix.
 | A09 external swap/bridge bypass | BLOCKED: no real external venue/bridge path | No bridge enabled; chain restrictions must be proven before any external listing |
 | A10 governance manipulation | External policy alias probe; current source review | Trusted issuer, immutable versioned policy, timelock and independent governance controls absent |
 | A11 reserve oracle abuse | Invalid numeric breaker inputs fixed; external plausible false-credit probe | Numeric validity is not authentic/fresh BTC backing or proof of liabilities |
-| A12 emergency recovery | Historical timing failure retained; hourly-readiness candidate passes focused 54, independent five, broader and package; security/delivery pending | Emergency with queued exits stays held; no funded/concurrent/restart or authenticated cancellation/reconciliation/unfreeze guarantee |
+| A12 emergency recovery | Historical timing failure retained; delivered hourly readiness has focused 54, independent five, broader/package and 23 PR/21 main checks | Emergency with queued exits stays held; no funded/concurrent/restart or authenticated cancellation/reconciliation/unfreeze guarantee |
 
 Contract audit must additionally cover reentrancy/inner-call behavior, group/order
 manipulation, fee changes, stale prices, replay domains/nonces, duplicate settlement,
