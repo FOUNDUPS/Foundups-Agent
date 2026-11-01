@@ -11,6 +11,14 @@
 
 ### 2026-11-01 bounded RSI fixture checkpoint
 
+**Native cycle-validation follow-up:** the [OpenClaw qualification](../../../docs/operations/RSI_SWARM_DISPATCH.md#native-openclaw-vote-qualification--2026-11-01)
+ran three local and two paid author jobs against the existing request validator.
+The paid candidate passes25 frozen cases but accepts integer subclasses, contrary
+to the original exact-int requirement; the bounded repair returned identical bytes.
+No candidate was applied. The current validator still mishandles falsy/non-integer
+cycle hints. Preserve this concrete defect and supplementary counterexample for
+the next qualified route; a model-reported success or25/25 alone is insufficient.
+
 The funding-source indirect-reference repair passes322 module tests and an
 independent review. One local worker proposal was rejected before production application;
 the coordinator authored the accepted source repair. See tests/TestModLog and

@@ -1,3 +1,110 @@
+## Native OpenClaw Vote qualification — 2026-11-01
+
+Source `d65a7257f10ab25d604cb965a69f89cf25da01ad`; WSP00/15/48/50/97/99.
+Continue the existing provider-qualification prerequisite **15/P1
+(C3/I4/D4/Impact4)** under protected native19/P0. This is supervised resident
+runtime qualification, not signed WRE author admission. R15 remains the first
+admitted improvement target. No new scheduler, router or memory owner was added.
+
+**Observed execution:** isolated OpenClaw2026.10.9/Node24.22.2 executed three
+local `qwen3.5-4b` author jobs through LM Studio and two OpenRouter
+`qwen/qwen3-coder` author jobs plus one separate-context advisory review.
+These are actual native CLI/model runs, not Codex subagents or simulated workers.
+Installed gateway2026.7.1-2 and its production profile remain unchanged; the
+candidate runtime is not promoted. The historical Hermes checkpoint below had
+zero model calls; this later checkpoint must not rewrite that history.
+
+The task was the existing Vote `_validate_request` cycle-year check: allow None
+or an exact integer1900–2100, reject bool/other types without conversion, preserve
+query/state/office behavior and existing error text. The Git-blob (LF) source SHA256 was
+`27fd06b5c5143cf125bb1c30d54a9906c108bfc4832542d173ff54053ddfd79f`.
+The author received only the bounded function/specification. The existing WSP99
+encoder/decoder and artifact-map validator were reused. No repository write or
+hidden-test mount was available to the author.
+
+| Invocation | Observed result | Reported input/output tokens |
+| --- | --- | --- |
+| Local1 | Non-JSON output; seven assistant turns and six attempted tool calls | 25,136 / 2,794 |
+| Local2 | Tool discovery disabled; one turn, still invalid output format | 2,319 / 1,296 |
+| Local3 | Canonical M2M; JSON/Python parse, frozen AST scope gate rejects; two turns including an output-limit retry | 4,719 / 2,444 |
+| OpenRouter author | One turn; original25 checks pass, supplemental exact-type check fails | 2,229 / 339 |
+| OpenRouter repair | One turn; identical candidate bytes, same rejection | 2,638 / 339 |
+| OpenRouter reviewer | One turn; advisory rejection without a concrete counterexample, misses the exact-type defect; review not accepted | 2,512 / 162 |
+
+The frozen25-case checker SHA256 is
+`0ced70b3e9a08f82c033ff9d216ddc756fd0959c21241ca84917fc05be496c38`.
+Baseline16 pass/9 fail; paid candidate25 pass/0 fail. Source review then exposed
+an omitted case: an `int` subclass with value2024 is accepted despite the original
+exact-int requirement. A separate no-network process reproduced that failure.
+The original25 cases were not altered or relabeled as sufficient. Both decoded paid author
+UTF-8 payloads (LF) have SHA256
+`29a4f5829b33b4674d01455a7ffd9124b5c082eb3493a03bb26efc241d4e98a0`.
+**Zero of five author jobs produced an accepted improvement.** The paid repair
+was not silently corrected by the coordinator. Vote production source is unchanged.
+
+The author container used the pinned existing image
+`sha256:c42aca9d0efd20283ccd61e798d6ec557acf1c0238e017c5b39184a030d891c2`,
+UID1000, read-only root/input/runtime mounts, dropped capabilities, NoNewPrivs,
+96 PIDs,2GiB,two CPUs and temporary writable storage. It had bridge networking:
+this is filesystem/process confinement, **not OS-enforced egress isolation**.
+The paid container received only the selected provider key by environment name;
+inspection receipts omit Config.Env. No repository, Docker socket or verification
+suite was mounted. Separate deterministic verification ran with network disabled,
+read-only candidate/checker mounts,32 PIDs,256MiB,one CPU and a15-second limit.
+This is separate execution feedback, not independently controlled signing or
+promotion authority. The model reviewer was the same family and had no authority.
+
+**Budget and request accounting:**012 superseded local-only with permission to
+spend; the coordinator imposed $0.10 total and three paid invocations. The complete
+reservation was $0.076152 using16,384 context/1,800 output and provider price caps.
+The configured OpenRouter route allowed only Venice, disabled fallback and
+required parameters/data-collection denial. Native output reported provider-billed
+costs $0.00128865 + $0.00143180 + $0.00112220 = **$0.00384265**. This is provider
+usage reported by OpenClaw, not an independently reconciled invoice. Paid outputs
+report one assistant turn each; no retry appeared. Catalog/endpoint discovery was
+unauthenticated read-only. Local electricity/hardware and coordinator compute cost
+were not measured. Accepted-result cost is undefined with zero accepted artifacts;
+there is no demonstrated savings claim or model promotion.
+
+**Reusable findings, not retained RSI:** tool denial alone left discovery overhead
+in the first candidate run; disabling toolSearch/codeMode removed that observed
+loop in the next invocation. OpenClaw provider retries live in session
+`.openclaw/settings.json`, under `retry.provider.maxRetries`, not openclaw.json.
+With maxRetries0, actual native CLI probes against a fake provider made exactly
+one HTTP request for both503 and output-limit responses. The latter still exited0,
+so CLI success is not artifact acceptance. The generic test URL did not forward
+OpenRouter provider controls. Exact-URL interception failed at the DNS guard;
+production request fields were source/doc-reviewed, not packet-capture verified.
+No guard was weakened. See [retry settings](https://docs.openclaw.ai/concepts/retry)
+and [provider routing](https://openrouter.ai/docs/guides/routing/provider-selection).
+
+**Audit corrections:** initial manifest call_limit1 described a native invocation,
+not an enforced model-request cap; it did not prevent seven local turns. Apparent
+backslash escaping in displayed output initially caused an incorrect syntax
+assessment. Actual JSON decoding/AST parsing corrected it before a repair call:
+local3 fails the AST scope gate; paid source fails exact-type behavior. Raw outputs
+and the corrected checkpoint are preserved. Never inspect serialized display text
+as a substitute for executing the existing artifact decoder and verifier.
+A receipt check also caught Windows CRLF materialization: compare decoded payloads
+and pinned Git blobs for the hashes above; do not equate host-file byte hashes.
+The second local staging file has CRLF; both returned source payloads are identical.
+
+Private replay inputs, rejected artifacts, frozen and supplemental checkers,
+container states, config hashes and accounting remain under
+`O:/AgentData/RSI/scratch/openclaw-vote-native-20261101/` (`checkpoint.json`).
+No application code, provider route, skill, version pin or runtime authority was
+promoted. No autonomous next-task selection, retained benefit, G1/G2 or RSI is
+claimed. Separate native source review proved inadequate for acceptance; the
+coordinator and deterministic counterexample prevented a false positive.
+
+**Next eligible action:** preserve the exact-int counterexample in the next
+qualification suite; reject this task/model/prompt combination until a materially
+different qualified route or instruction treatment succeeds. Do not repeat the
+unchanged repair or expand to a FoundUp build. Continue the existing protected
+requester/lease-consumption composition and authenticate the current task, model,
+verifier and budget inputs. Runtime execution now has evidence; accepted worker
+improvement and the protected production admission chain remain distinct gaps.
+
 ## Native Hermes API qualification — 2026-11-01
 
 Source baseline `430f9ef90ad126b76f3d90e03d1086d2e2237267`. WSP00/15/48/50/97.
