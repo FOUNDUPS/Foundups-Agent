@@ -37,6 +37,17 @@ after submission. Reconciliation still shows42 DNS records and masked forwarding
 no apex cutover performed. Keep this provider completion blocker distinct from
 successful direct-origin publication and unverified native Home Screen launch.
 
+Follow-up reconciliation supersedes the preliminary authentication summary:
+the second challenge rejected a stale code from Gmail's grouped preview. Fresh
+resend + exact notification/container binding returned the normal challenge to
+authenticated DNS. The queued save still reopens GoDaddy's zero-height embedded
+verification frame and is not committed. Runbook now freezes message identity,
+not the first code in a conversation. Live19 independent first/final phone and
+landscape checks pass and match reviewed CSS/book hashes; manifest bytes and
+launch route match the saved payload. One batched-navigation screenshot captured
+the earlier page; preserve it, separate navigation/observation/capture and verify
+the replacement pixels as THUMP5/5. No native-install or child-effectiveness claim.
+
 ## 2026-11-01 — Hidden-menu selection reveal follow-up
 
 Live app17 review caught a retained Mermaid selection partly outside the rail:
