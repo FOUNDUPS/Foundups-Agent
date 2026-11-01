@@ -10,6 +10,8 @@ pass after retaining/repairing two failed short-landscape candidates. Separate
 synthetic voice-unavailable568 and actual-settings voice-off320 cases. Node63/63
 pass; outer eduit.org Home Screen launch remains separately unverified.
 Evidence outputs/storytime-preschool-20261101/INDEPENDENT_FINAL_REVIEW.json.
+The expanded existing harness also completed964/964 checks across both routes
+and all six declared dimensions, including reopen/close/resize/play cancellation.
 
 ## 2026-11-01 — Hidden wheel reveal acceptance
 

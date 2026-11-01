@@ -43,6 +43,14 @@ the forwarding-owned apex A records are15.197.225.128 and3.33.251.168. Provider
 requested apex targets and public verification TXT values must be refreshed from
 Sites before cutover. Preserve MX/SPF/DKIM/DMARC and unrelated subdomains. The
 current prepared two-TXT save is not yet a successful DNS change.
+Observed follow-up: fresh Google Voice Gmail notifications arrived and matching
+codes were submitted to two normal GoDaddy challenges. Both remained loading
+after submission. Original iframe reports zero height. Re-read still shows42
+records, with no successful verification TXT save or apex cutover established.
+Do not continue deleting forwarding or adding routing records on that evidence.
+Retain the sanitized before-state/rollback in the current output receipt; next
+action is restoring normal completion of GoDaddy's verification flow, then
+reconciling actual records before another bounded attempt.
 
 ## Current Storytime preview correction — 2026-11-01
 

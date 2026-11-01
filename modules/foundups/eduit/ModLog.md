@@ -2,7 +2,7 @@
 
 ## 2026-11-01 — Preschool book critique, repair and independent reinspection
 
-WSP00/15/22/50/84/97,15/P1(C2/I4/D4/Impact4): smallest layer is the existing
+WSP00/15/22/50/84/97,14/P1(C2/I4/D4/Impact4): smallest layer is the existing
 book presentation, not a new game/RSI engine. Holo lexical bundle found the
 EDUIT owner but has UNKNOWN freshness/index gap; direct current docs,
 test inventory and source establish this lane. Optional absent SPEC/PRD are not
@@ -26,6 +26,16 @@ fresh GoDaddy/Google Voice Gmail-code workflow without retaining numbers/secrets
 DNS changes and native Home Screen verification remain separate evidence gates.
 Raw failures, final independent receipt and rollback snapshot are retained under
 outputs/storytime-preschool-20261101; no child interaction data collected.
+
+Published Sites19 (`preschool-19`) from repository0d1b9c1ff and Sites source
+f63db104d34ea4771b0da4c8325b46c3b2a46239, keeping verified25s media unchanged.
+The expanded existing browser harness completed964 checks with no failures.
+GoDaddy's original verification iframe has zero height; opening the normal
+challenge permits delivery of fresh Google Voice Gmail notifications. Two
+matching fresh codes were submitted privately, but verification remains loading
+after submission. Reconciliation still shows42 DNS records and masked forwarding;
+no apex cutover performed. Keep this provider completion blocker distinct from
+successful direct-origin publication and unverified native Home Screen launch.
 
 ## 2026-11-01 — Hidden-menu selection reveal follow-up
 
