@@ -204,7 +204,10 @@ def test_actual_bad_writer_format_has_receipt_reason_without_raw_output_log_and_
 def test_bad_qwen_format_never_falls_through_as_success(owners):
     item = generator(owners)
     item.lm_studio_available = False
-    item.qwen_engine = SimpleNamespace(generate_response=lambda **_: "<|audio|>SYNTHETIC_QWEN_BAD_FORMAT")
+    item.qwen_engine = SimpleNamespace(generate_response=lambda **_: pytest.fail('Retired direct route reached'))
+    item._model_gateway = SimpleNamespace(call_youtube_task=lambda **_: SimpleNamespace(
+        success=True, response='<|audio|>SYNTHETIC_QWEN_BAD_FORMAT', provider='lm_studio_local',
+        model='qwen3.5-4b', route_id='fixture-shared-route'))
     item._clean_reply = lambda text, _author: text
     assert item._generate_contextual_reply("Where is the film?", "Aki") is None
     assert getattr(item, "_current_reply_rejection_reason", None) == "invalid_reply_text"

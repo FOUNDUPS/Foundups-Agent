@@ -96,6 +96,34 @@ QUEUE.MAX_JSON_BYTES = 4 * 1024 * 1024
 QUEUE._ACTIVE_LEDGERS = set()
 QUEUE._ACTIVE_GUARD = threading.Lock()
 QUEUE._TERMINAL = {'accepted', 'blocked', 'rejected', 'unknown', 'simulated', 'expired', 'superseded', 'failed'}
+def fixture_gateway_class(module):
+    """Explicit Gateway collaborator for consumer-only source-bound tests.
+
+    These cases inspect semantic payloads, not real routing/transport authority;
+    ai_gateway/tests/test_youtube_model_routing.py owns the shared boundary.
+    """
+    class FixtureGateway:
+        def call_youtube_task(self, **kwargs):
+            payload = {'model': 'qwen3.5-4b', 'temperature': 0 if kwargs['stage'] != 'write' else 0.4,
+                'reasoning_effort': 'none', 'max_tokens': kwargs['max_tokens'],
+                'messages': [{'role': 'system', 'content': kwargs['system_prompt']},
+                             {'role': 'user', 'content': kwargs['prompt']}]}
+            if kwargs.get('response_format') is not None:
+                payload['response_format'] = kwargs['response_format']
+            try:
+                response = module.requests.post('http://offline.invalid/shared-model', json=payload, timeout=3)
+                if response.status_code != 200:
+                    raise ValueError('fixture_provider_unavailable')
+                text = response.json()['choices'][0]['message']['content']
+                return SimpleNamespace(success=True, response=text, provider='lm_studio_local',
+                    model='qwen3.5-4b', route_id='fixture-shared-route', reason=None)
+            except Exception:
+                return SimpleNamespace(success=False, response='', provider='none', model='',
+                    route_id=None, reason='route_unavailable')
+    return FixtureGateway
+
+
+GEN.AIGateway = fixture_gateway_class(GEN)
 GOOD = dict(addresses_comment=True, coherent=True, grounded=True,
             no_internal_instructions=True, relevance=0.95, coherence=0.95)
 
@@ -230,7 +258,7 @@ class ReplyInspectionTests(unittest.TestCase):
         processor.delay_multiplier = 0
         processor.stats = {'replies': 0}
         async def generate(*a):
-            return 'gibberish 0102', 'qwen'
+            return 'gibberish 0102', 'lm_studio'
         async def reject(*a):
             return {'approved': False, 'reason': 'review_rejected'}
         processor._await_reply_generation = generate
@@ -259,26 +287,37 @@ class ReplyInspectionTests(unittest.TestCase):
         calls = []
         chat = object.__new__(CHAT.IntelligentLivechatReply)
         chat.classify_chatter = lambda *a: SimpleNamespace()
-        chat.grok_available = True
+        chat.channel_id, chat.stream_title = 'creator', 'Hornet documentary'
         chat.system_prompt = 'Reply concisely'
         def respond(**kwargs):
             calls.append(kwargs)
-            return (json.dumps(GOOD) if len(calls) == 2 else
-                    'The documentary details are on HornetHunter.com.')
-        chat.grok_client = SimpleNamespace(get_response=respond)
+            outputs = [json.dumps({'intent': 'question', 'meaning': 'Asks where to find film details',
+                'question': 'Where are the details?', 'stance': 'unclear', 'uncertainty': '',
+                'evidence_quote': 'Where can the film details be found?', 'strategy': 'answer',
+                'theme_relevant': True}), 'The documentary details are on HornetHunter.com.', json.dumps(GOOD)]
+            return SimpleNamespace(success=True, response=outputs[len(calls) - 1], provider='lm_studio_local',
+                model='gemma4-e2b', route_id='fixture-shared-route', reason=None)
+        generator = object.__new__(GEN.IntelligentReplyGenerator)
+        generator._generation_lock = threading.RLock()
+        generator._model_gateway = SimpleNamespace(call_youtube_task=respond)
+        generator._load_personalization_context = lambda **kwargs: ''
+        generator._load_voice_memory_context = lambda *args, **kwargs: 'Film details are on HornetHunter.com.'
+        GEN.normalize_reply_theme, GEN.select_channel_personality = CONTEXT.normalize_reply_theme, CONTEXT.select_channel_personality
         theme = {'message': 'New Hornet Hunter website', 'source_command_id': 'voice-1'}
         news_module = SimpleNamespace(get_news_context=lambda message: None)
         queue_module = SimpleNamespace(load_active_theme=lambda surface: theme)
         with patch.dict(sys.modules, {
             'modules.communication.livechat.src.operator_command_queue': queue_module,
             'modules.communication.video_comments.src.reply_context': CONTEXT,
+            'modules.communication.video_comments.src.intelligent_reply_generator': SimpleNamespace(get_reply_generator=lambda: generator),
             'modules.communication.livechat.src.news_context_provider': news_module}), patch.object(CHAT.random, 'random', lambda: 1):
             reply = chat.generate_reply('Where can the film details be found?', 'Aki', 'viewer')
         self.assertIn('HornetHunter.com', reply)
         self.assertNotIn('activated', reply)
-        self.assertIn('Where can the film details be found?', calls[0]['prompt'])
-        self.assertIn('New Hornet Hunter website', calls[0]['prompt'])
-        self.assertIn('Do not copy it verbatim', calls[0]['prompt'])
+        self.assertEqual(len(calls), 3)
+        self.assertIn('Where can the film details be found?', calls[1]['prompt'])
+        self.assertIn('New Hornet Hunter website', calls[1]['prompt'])
+        self.assertIn('Answer the actual comment first', calls[1]['prompt'])
 
     def test_context_activation_is_private_and_replay_is_inert(self):
         with tempfile.TemporaryDirectory() as folder:

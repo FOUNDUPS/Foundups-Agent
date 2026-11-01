@@ -1,5 +1,80 @@
 # AI Gateway TestModLog
 
+## 2026-11-02 — Preserve the prepared General model's native identity
+
+The prepared PC uses a display alias distinct from its native inventory key.
+The shared local incumbent now honors existing `LM_STUDIO_NATIVE_MODEL_KEY`,
+validates it as a general-language model and records that exact selected key.
+Signed dynamic routes continue using their exact admitted identity and ignore
+this incumbent-only override. No model/server load, provider fallback or new
+configuration owner is added.
+
+Seven independently authored controls reproduced six assertion failures and
+82 passes before the fix, with zero errors/skips or denied effects. After the
+bounded fix the complete routing/legacy selector passes 88 cases: 70 independent
+routing/composition cases and 18 migrated legacy adapter cases. The useful
+positive uses the actual pure native inventory parser with a synthetic entry;
+it does not prove installed residency or live model quality. The existing CI
+selector now pins all 88 exact case names. WSP11/22/50/62/77/84/97.
+
+
+## 2026-11-02 — Held-out native General key controls
+
+WSP00/11/22/50/77/84/97. Added seven controls before the incumbent-key repair:
+the prepared Gemma display/path/native-key pair must produce an exact native
+model receipt for all three stages; incompatible visual/coder/270m overrides
+must reach no transport; and the real signed-test verifier/query local route
+must retain its bound model despite an unrelated incumbent native override.
+The positive uses the actual pure native-inventory parser with synthetic
+residency, and the existing signed helper gains optional provider/model inputs.
+Existing test bodies are unchanged. No tests, service, model or provider calls
+were executed by the independent author; execution belongs to the guarded owner.
+
+## 2026-11-01 — Current guarded model-routing qualification
+
+Fresh credential-free Windows runs: 63 independently authored routing/composition
+cases; 18 migrated legacy adapter cases (81 combined fixed selector); 165 retained
+and extended comment-context/semantic/history cases plus 12 subtests; 24 existing
+quality-stop controls; 15 stdlib cases; 231 adjacent Gateway/catalog/selection/
+binding/redaction/local-role cases; and the existing isolated 94-case startup
+selection. These overlap and are not additive totals. No failures/errors/skips or
+denied real effects in those selections. Raw output stays private.
+
+Legacy tests explicitly replace the retired direct-provider/forced-slogan and
+template contracts with captured identity, no synchronous model call, Gateway
+delegation, mandatory exact final review and useful approved-answer controls.
+No tests were quarantined or skipped to obtain this result. Production provider
+qualification, signed promotion, daemon startup and public delivery remain
+separate/unverified. Packaging/security and hosted checks have their own receipts.
+
+## [2026-11-01] — Independent YouTube routing acceptance controls
+
+WSP00/11/22/50/77/84/97. Added the distinct YouTube consumer test surface after
+inventorying existing configured-caller, K3 and signed runtime-binding suites.
+Tests are authored independently of production edits and handed to the root for
+guarded execution; no passing result is claimed at author freeze. Useful local
+and governed-cloud controls prevent a deny-everything implementation from
+qualifying. Existing generic provider/K3 tests retain their original contracts.
+No service, model, credential file, network call or public effect is authorized.
+The original 42-case author freeze is retained separately. Five held-out cases
+add the real generation-await cleanup/review boundary, explicit canceled review,
+receiving-channel refresh and refusal to assign requester privileges to a target.
+An additional output-guard receipt control preserves the existing typed
+quality-stop distinction when the Gateway rejects an actual nonempty writer draft.
+Four identity controls require explicit unambiguous string IDs rather than
+display-name keys or malformed memory values. Positive fixtures retain actual IDs.
+After review found inline command inference, the existing owner contract was
+changed to a private descriptor consumed by the bounded async caller. The three
+adapter/persona assertions now verify descriptor identity and zero synchronous
+model calls; the original 42 routing controls remain intact. Seven additional
+controls cover the actual bounded async positive, heartbeat/timeout cancellation,
+four stale receiving-context cases and the command builder's private descriptor.
+The 59 cases are mechanically split into 43 routing and 16 composition cases;
+all function ASTs remain identical across that split. Both files classify as
+unit/collectable and remain within 500-line modules and 50-line functions.
+Four additional backend controls check generic versus YouTube retry construction
+and the positive/canceled native-probe-to-SDK boundary: final selection 43 + 20 = 63.
+
 ## [2026-10-07] - Strict model use-time clock
 
 WSP00/6/15/22/50/97,13/P1: existing verifier now requires an exact positive

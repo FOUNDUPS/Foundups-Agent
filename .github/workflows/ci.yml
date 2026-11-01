@@ -107,7 +107,7 @@ jobs:
       - name: Bootstrap checksum-verified Python trust
         run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
       - name: Install bounded offline runner
-        run: python -m pip install pytest==9.0.3 pytest-asyncio==1.3.0
+        run: python -m pip install pytest==9.0.3 pytest-asyncio==1.3.0 requests==2.33.0 urllib3==2.8.0
       - name: Verify claims, process recovery, lifecycle and context consumption
         run: >-
           python -B -m pytest --import-mode=importlib -p pytest_asyncio.plugin -q --tb=short
@@ -146,6 +146,15 @@ jobs:
           name: youtube-quality-stop-${{ matrix.os }}
           path: ${{ runner.temp }}/youtube-repair-quality/results.xml
           if-no-files-found: error
+      - name: Verify shared YouTube model routing in an isolated child
+        run: python -I -B .github/scripts/youtube_repair_offline.py --suite routing
+      - name: Preserve sanitized model-routing results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: youtube-model-routing-${{ matrix.os }}
+          path: ${{ runner.temp }}/youtube-repair-routing/results.xml
+          if-no-files-found: error
       - name: Require reply repair results without skips
         shell: python
         run: |
@@ -156,7 +165,7 @@ jobs:
           assert cases and not any(list(root.iter(tag)) for tag in ('failure', 'error', 'skipped'))
           names = sorted(case.get('name') for case in cases)
           digest = hashlib.sha256('\n'.join(names).encode()).hexdigest()
-          assert len(cases) == 104 and digest == '831e155cd5a850cf0bae533878269c6ab6382fbd3884f608d73cd62a806d1aa8', (len(cases), digest)
+          assert len(cases) == 112 and digest == '4dfdd7547ebdcad26e344244b4785e824c5913346a18b68ecec0a60e7cf1679c', (len(cases), digest)
       - name: Preserve reply repair results
         if: always()
         uses: actions/upload-artifact@v4
@@ -181,7 +190,7 @@ jobs:
           assert cases and not any(list(root.iter(tag)) for tag in ('failure', 'error', 'skipped'))
           names = sorted(case.get('name') for case in cases)
           digest = hashlib.sha256('\n'.join(names).encode()).hexdigest()
-          assert digest == '909f31dfc4a764e43cf1ae618ee2e03fcd4a14a02ddb803ff6c85ef5cfd77c6f', (len(cases), digest)
+          assert len(cases) == 53 and digest == '55dc3804e638d5d30eba883a46b808de86883f61268e4a90d152f030491eddc5', (len(cases), digest)
       - name: Preserve reply context results
         if: always()
         uses: actions/upload-artifact@v4

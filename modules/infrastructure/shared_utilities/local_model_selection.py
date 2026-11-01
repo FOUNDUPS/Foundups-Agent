@@ -126,6 +126,19 @@ class ModelSelection:
     source: str
 
 
+def is_general_language_model(model_id):
+    """Conservative language-role guard shared by routing and public replies."""
+    if not isinstance(model_id, str) or not model_id.strip():
+        return False
+    name = model_id.lower().replace('_', '-').replace('/', '-')
+    denied = ('tars', 'vision', '-vl', 'embedding', 'embed', 'tts', 'audio',
+              'speech', 'whisper', 'bark', 'kokoro', 'rerank', 'computer-use', 'coder', 'code-',
+              'grok', 'x-ai', 'xai', '270m')
+    families = ('qwen', 'gemma', 'llama', 'mistral', 'ministral', 'phi-',
+                'deepseek', 'glm-', 'gpt-oss', 'nemotron', 'kimi')
+    return not any(part in name for part in denied) and any(part in name for part in families)
+
+
 def _get_env_path(name: str) -> Optional[Path]:
     value = os.getenv(name)
     if value is None:

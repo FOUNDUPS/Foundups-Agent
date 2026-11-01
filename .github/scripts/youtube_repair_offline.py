@@ -17,6 +17,12 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[2]
 SCHEDULER_TESTS = 'modules/platform_integration/youtube_shorts_scheduler/tests/'
 SUITES = {
+    'routing': (88, '05ac81da16c7f890eaf338321563e69b98bdc27cce6833a90c37feb4ad9f0e53', (
+        'modules/ai_intelligence/ai_gateway/tests/test_youtube_model_routing.py',
+        'modules/ai_intelligence/ai_gateway/tests/test_youtube_model_composition.py',
+        'modules/communication/video_comments/tests/test_llm_integration.py',
+        'modules/communication/livechat/tests/test_antima_factcheck.py',
+        'modules/communication/livechat/tests/test_antima_savage.py')),
     'quality': (24, '8c6a71ffff1aa89e9458726916745e9c3389f4955f8b38086b34066b417b8822', (
         'modules/communication/video_comments/tests/test_reply_quality_safety.py',)),
     'startup': (94, '5c8d4b290535cea0ce898c5fb377920058f84ce5926a4fdf96e993aab7d76965', (
@@ -102,7 +108,7 @@ class EffectGuard:
             self.in_socketpair = False
 
     def private_pair_event(self, event, args):
-        if (event in {'socket.bind', 'socket.connect'} and self.suite in {'startup', 'rotation', 'directives', 'quality'}
+        if (event in {'socket.bind', 'socket.connect'} and self.suite in {'startup', 'rotation', 'directives', 'quality', 'routing'}
                 and self.in_socketpair):
             frame = sys._getframe(1)
             while frame and frame.f_code is not self.original_pair.__code__:
@@ -144,7 +150,7 @@ def install_effects(stack, guard):
     import socket
     from unittest.mock import patch
     socket.has_ipv6 = False  # Avoid urllib3's import-time IPv6 bind probe.
-    if guard.suite in {'startup', 'rotation', 'directives', 'quality'}:
+    if guard.suite in {'startup', 'rotation', 'directives', 'quality', 'routing'}:
         socket.socketpair = guard.pair
     sys.addaudithook(guard.audit)
     for target in ('subprocess.Popen', 'subprocess.run', 'os.system', 'socket.create_connection',

@@ -1,5 +1,17 @@
 # AI Gateway Module Interface Documentation
 
+## YouTube task consumer
+
+`AIGateway.call_youtube_task(system_prompt=..., prompt=..., stage='assess'|'write'|'review',
+surface='comments'|'livechat', max_tokens=400, response_format=None, cancel_event=None)`
+returns an immutable `YouTubeModelResult`: `response` (excluded from repr),
+`provider`, `model`, `success`, `route_id`, and bounded `reason`. The configured
+local general role is the incumbent; dynamic single-model replacement requires
+an exact current signed binding for `youtube_reply` and `youtube_comments` or
+`youtube_livechat`. No generic provider fallback. See
+`modules/communication/video_comments/LLM_INTEGRATION.md` for configuration,
+free-model/privacy controls and qualification limits.
+
 ## Model binding trusted time
 
 `ModelRuntimeBindingUseTimeVerifier.verify` samples `trusted_now_epoch` once.

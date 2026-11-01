@@ -12,6 +12,17 @@ Private replay evidence is preserved on O:; no Codex subagent authored the work.
 
 ## 2026-11-01 — Native Hermes handler qualification
 
+## 2026-11-01 — Reuse model binding verification without webhook startup
+
+Bridge package exports resolve lazily: importing pure model-binding/redaction
+utilities no longer constructs OpenClaw/webhook objects or loads their environment.
+Explicit exported app/DAE imports preserve the existing optional behavior.
+`query_model_runtime_binding` accepts a code-owned expected surface, defaulting
+to its unchanged RedDog architect surface. YouTube supplies its distinct surface;
+all signature, trust, TTL, role, provider, path and evidence checks remain owned
+by the existing verifier. No new trust/promotion source or model call is added.
+WSP11/22/50/62/77/84/97. Offline regression evidence is recorded by the caller.
+
 WSP00/15/22/48/50/97. The [existing dispatch record](../../../docs/operations/RSI_SWARM_DISPATCH.md#native-hermes-api-qualification--2026-11-01)
 records an actual upstream0.22.5 skill-discovery500, a coordinator-authored one-line
 candidate overlay, and baseline/empty/skill Docker cases with34 passing assertions.

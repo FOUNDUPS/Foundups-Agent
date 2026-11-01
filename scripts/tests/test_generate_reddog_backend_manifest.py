@@ -262,9 +262,9 @@ def test_checked_in_manifest_matches_independent_generation(
     generated = generated_manifest
 
     assert checked_in == generated
-    assert generator.MANIFEST_PATH.stat().st_size <= 330 * 1024
+    assert generator.MANIFEST_PATH.stat().st_size <= 332 * 1024
     lf_bytes = generator.MANIFEST_PATH.read_bytes().replace(b"\r\n", b"\n")
-    assert len(lf_bytes.replace(b"\n", b"\r\n")) <= 330 * 1024
+    assert len(lf_bytes.replace(b"\n", b"\r\n")) <= 332 * 1024
     assert "modules/platform_integration/social_media_orchestrator/src/petition_campaign.py" in generated["required_runtime_files"]
     _assert_registry_and_builder_runtime_files(generated)
     _assert_signer_and_memex_runtime_files(generated)
@@ -282,10 +282,16 @@ def _assert_manifest_digest_pin(generated: dict[str, object]) -> None:
         'modules/communication/livechat/src/operator_video_policy_owner.py',
         'modules/communication/livechat/src/video_policy.py',
         'modules/platform_integration/youtube_shorts_scheduler/src/video_policy.py',
+        'modules/ai_intelligence/ai_gateway/src/model_autoresearch_canonical_prompt_guard.py',
+        'modules/ai_intelligence/ai_gateway/src/model_autoresearch_configured_gateway_atomic_create.py',
+        'modules/ai_intelligence/ai_gateway/src/model_autoresearch_configured_gateway_durability.py',
+        'modules/ai_intelligence/ai_gateway/src/model_autoresearch_configured_gateway_evidence.py',
+        'modules/ai_intelligence/ai_gateway/src/model_autoresearch_configured_gateway_posix_recovery.py',
+        'modules/ai_intelligence/ai_gateway/src/youtube_model_routing.py',
     ):
         assert member in generated["required_runtime_files"]
     digest = generator.canonical_manifest_digest(generated)
-    assert digest == "fecfc86fe19e4687662db197463f1d8d0a9a999b62ebf4f3e711c26ad0d05c39"
+    assert digest == "cfd5136b9a090c37f0b57dd8109a1f0b68f7cbf6ddcc866ea6180f02440ca454"
     constants = (
         REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js"
     ).read_text(encoding="utf-8")

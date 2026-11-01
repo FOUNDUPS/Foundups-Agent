@@ -1,5 +1,21 @@
 # LiveChat Module Interface
 
+## Shared YouTube model route (2026-11-01)
+
+Assessment, writer and exact final review now call the shared AI Gateway.
+Direct xAI and embedded local-provider fallback are retired for these consumers.
+Ordinary and themed live chat share this reviewed path. NVIDIA's shadow proposer
+remains evaluation-only; exact signed bindings govern dynamic production models.
+See [routing/configuration and evidence limits](../video_comments/LLM_INTEGRATION.md).
+
+Language-producing command adapters return a frozen private `ModelReplyRequest`
+containing the original message, author identity/role and receiving-channel/stream
+snapshot; construction performs no model call. The existing async
+`MessageProcessor._resolve_model_command` consumes it through
+`_await_intelligent_reply` with its bounded thread, cancellation token and exact
+reviewed-payload checks. It rejects a changed receiving context before or after
+the call. Raw request text is excluded from the descriptor representation.
+
 ## Confirmed live-session handoff (PR841)
 
 `AutoModeratorDAE.terminate_comment_engagement(for_live_handoff=False)` keeps

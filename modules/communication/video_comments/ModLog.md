@@ -1,5 +1,21 @@
 # Video Comments - ModLog
 
+## 2026-11-01 — Shared YouTube model orchestration
+
+WSP00/10/11/22/50/62/77/84/97. Replace consumer-owned provider chains with
+`AIGateway.call_youtube_task` for assessment, writer and exact final review.
+Reuse local general-role/native residency, signed selection/runtime binding,
+Fusion approval-only redaction and existing provider transport. Keep NVIDIA
+Nemotron's topology proposer evaluation-only; discovery does not promote models.
+Configured invalid routing never silently falls back. OpenRouter uses exact
+approved non-xAI text models with zero-price/no-data-collection restrictions.
+Remove direct xAI clients, preserve reviewed live-chat text even without themes,
+rebind command adapters on channel changes, and separate review cancellation
+from the async caller's already-completed generation token. Preserve all posting
+and manifest/history owners. Lazy bridge exports avoid webhook/env startup when
+importing routing/security utilities. See video_comments/LLM_INTEGRATION.md.
+Qualification is offline; no daemon/model/public action or credential read.
+
 ## 2026-11-01 — Stop rejected-output sessions and recheck Submit gates
 
 WSP00/10/11/22/50/77/84/97. Source review found final review blocked individual

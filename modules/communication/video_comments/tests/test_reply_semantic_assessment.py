@@ -142,12 +142,9 @@ def test_private_context_activates_without_a_public_sender(tmp_path, monkeypatch
 
 
 def test_livechat_rejects_a_private_instruction_leak(monkeypatch):
-    chat = object.__new__(CHAT.IntelligentLivechatReply)
-    chat.grok_available, chat.system_prompt = True, 'Reply concisely'
-    replies = iter(['Private operator theme activated', json.dumps(helper.GOOD)])
-    chat.grok_client = SimpleNamespace(get_response=lambda **kwargs: next(replies))
-    assert chat._generate_grok_response('Where is the film?', 'Aki', 'viewer',
-        theme={'message': 'Film theme', 'source_command_id': 'private-1'}) is None
+    chat, _, _, _, calls, _ = local_livechat_fixture(monkeypatch, draft='Private operator theme activated')
+    assert chat.generate_reply('Where can I watch the film?', 'Aki', 'viewer') is None
+    assert len(calls) == 2  # Assessment and invalid writer; never approve or publish.
 
 
 def test_semantic_route_retains_history_cooldown_without_calling_a_provider():
@@ -232,6 +229,59 @@ def local_livechat_fixture(monkeypatch, draft='Film details are at HornetHunter.
     return chat, generator, native, current, calls, post
 
 
+@pytest.mark.parametrize('provider', ['lm_studio_local', 'openrouter'])
+@pytest.mark.parametrize('theme_active', [False, True])
+def test_all_livechat_language_replies_use_shared_assessment_and_exact_final_review(monkeypatch, provider, theme_active):
+    chat, generator, native, current, calls, _ = local_livechat_fixture(monkeypatch)
+    if not theme_active:
+        current[0] = None
+    base = GEN.AIGateway()
+    stages = []
+    def shared(**kwargs):
+        stages.append((kwargs['stage'], kwargs['surface']))
+        result = base.call_youtube_task(**kwargs)
+        result.provider = provider
+        return result
+    generator._model_gateway = SimpleNamespace(call_youtube_task=shared)
+    result = chat.generate_reply('Where can I watch the film?', 'Aki', 'viewer')
+    assert isinstance(result, CHAT.ReviewedLivechatReply)
+    assert result == result.reviewed_text == '@Aki Film details are at HornetHunter.com.'
+    assert result.theme_snapshot == (native if theme_active else None)
+    assert stages == [('assess', 'livechat'), ('write', 'livechat'), ('review', 'livechat')]
+    assert json.loads(calls[2]['messages'][1]['content'])['candidate'] == str(result)
+
+
+@pytest.mark.parametrize('payload', ['plain', 'wrong_theme', 'changed_text'])
+def test_ordinary_async_caller_also_requires_exact_reviewed_payload(monkeypatch, payload):
+    value = ('A plain string' if payload == 'plain' else CHAT.ReviewedLivechatReply('Reviewed',
+             {'source_command_id': 'unexpected'} if payload == 'wrong_theme' else None))
+    if payload == 'changed_text':
+        value.reviewed_text = 'Different'
+    processor = livechat_processor_fixture(monkeypatch, SimpleNamespace(generate_reply=lambda **kw: value))
+    assert asyncio.run(processor._await_intelligent_reply(theme_snapshot=None, message='Question?')) is None
+
+
+def test_comment_review_timeout_closes_its_independent_token_before_late_dispatch(monkeypatch):
+    entered, cancelled = threading.Event(), []
+    def inspect(*args, cancel_event=None):
+        cancelled.append(cancel_event)
+        entered.set()
+        assert cancel_event.wait(2), 'Review lifetime did not close after timeout'
+        return {'approved': False, 'reason': 'cancelled'}
+    monkeypatch.setattr(helper.PROCESSOR, 'get_reply_generator', lambda: SimpleNamespace(inspect_reply=inspect), raising=False)
+    processor = object.__new__(helper.PROCESSOR.CommentProcessor)
+    real_wait_for = asyncio.wait_for
+    async def bounded(awaitable, *, timeout):
+        assert timeout == 5
+        task = asyncio.create_task(awaitable)
+        assert await asyncio.to_thread(entered.wait, 1)
+        return await real_wait_for(task, timeout=0.03)
+    monkeypatch.setattr(helper.PROCESSOR.asyncio, 'wait_for', bounded)
+    review = asyncio.run(processor._inspect_reply({'text': 'Film question'}, 'Useful draft'))
+    assert review == {'approved': False, 'reason': 'review_unavailable'}
+    assert len(cancelled) == 1 and cancelled[0].is_set()
+
+
 @pytest.mark.parametrize('grok_failure', ['unavailable', 'empty', 'exception', 'review_rejected'])
 def test_themed_livechat_uses_actual_local_assessment_writer_review_after_grok_failure(monkeypatch, grok_failure):
     chat, generator, native, current, calls, _ = local_livechat_fixture(monkeypatch)
@@ -264,14 +314,12 @@ def test_themed_livechat_uses_actual_local_assessment_writer_review_after_grok_f
 
 def test_successful_reviewed_grok_reply_does_not_call_local_fallback(monkeypatch):
     chat, _, native, _, calls, _ = local_livechat_fixture(monkeypatch)
-    chat.grok_available = True
-    values = iter(['Film details are on the website.', json.dumps(helper.GOOD)])
-    chat.grok_client = SimpleNamespace(get_response=lambda **kw:next(values))
-    monkeypatch.setattr(CHAT.random, 'random', lambda:1)
+    chat.grok_available = True  # Stale legacy configuration must have no authority.
+    chat.grok_client = SimpleNamespace(get_response=lambda **kw:pytest.fail('Retired xAI route called'))
     result = chat.generate_reply('Where can I watch the film?', 'Aki', 'actual-viewer-id')
     assert isinstance(result, CHAT.ReviewedLivechatReply)
-    assert result == '@Aki Film details are on the website.' and result.theme_snapshot == native
-    assert calls == []
+    assert result == '@Aki Film details are at HornetHunter.com.' and result.theme_snapshot == native
+    assert len(calls) == 3
 
 
 @pytest.mark.parametrize('characters,accepted', [(195, True), (196, False)])
@@ -332,7 +380,7 @@ def test_invalid_surface_never_reaches_generation_or_review_provider(surface):
 
 def test_livechat_local_failure_never_invokes_paid_or_template_fallback(monkeypatch):
     chat, generator, _, _, _, _ = local_livechat_fixture(monkeypatch)
-    generator.lm_studio_available = False
+    generator._model_gateway = SimpleNamespace(call_youtube_task=lambda **kw:SimpleNamespace(success=False, response='', provider='none', reason='route_unavailable'))
     generator._assess_comment = lambda data:assessment(data['text'])
     generator.grok_connector = SimpleNamespace(get_response=lambda **kw:pytest.fail('Local fallback called cloud'))
     generator.banter_engine = SimpleNamespace(process_input_enhanced=lambda *a:pytest.fail('Local fallback used template'))
@@ -388,7 +436,7 @@ def test_malformed_native_theme_blocks_all_provider_work(monkeypatch, invalid, e
     if entrypoint == 'generate':
         result = chat.generate_reply('Where can I watch the film?', 'Aki', 'viewer')
     else:
-        result = chat._generate_local_theme_response('Where can I watch the film?', 'Aki', 'viewer', 'USER', False, native)
+        result = chat._generate_model_response('Where can I watch the film?', 'Aki', 'viewer', 'USER', False, native)
     assert result is None
     assert calls == [] and cloud_calls == []
 
@@ -516,10 +564,13 @@ def test_cancellation_during_preparation_prevents_new_provider_dispatch(monkeypa
         cancelled.set()
         return ''
     if preparation == 'news':
-        chat.grok_available = True
-        chat.grok_client = SimpleNamespace(get_response=lambda **kw:pytest.fail('Cancelled work started Grok'))
-        monkeypatch.setitem(sys.modules, 'modules.communication.livechat.src.news_context_provider',
-                            SimpleNamespace(get_news_context=prepare))
+        # The old independent news/provider path is gone. Exercise cancellation
+        # during private context preparation before the first shared-model call.
+        original = generator._load_reply_theme_for_surface
+        def context(surface):
+            cancelled.set()
+            return original(surface)
+        generator._load_reply_theme_for_surface = context
     else:
         setattr(generator, '_load_personalization_context' if preparation == 'history' else
                 '_load_voice_memory_context', prepare)
@@ -545,17 +596,17 @@ def livechat_processor_fixture(monkeypatch, reply):
 
 @pytest.mark.parametrize('blocked_call', [1, 2])
 def test_actual_async_caller_keeps_heartbeat_and_discards_timed_out_grok_without_local_fallback(monkeypatch, blocked_call):
-    chat, _, native, _, calls, _ = local_livechat_fixture(monkeypatch)
+    chat, generator, native, _, calls, _ = local_livechat_fixture(monkeypatch)
     entered, release, finished = threading.Event(), threading.Event(), threading.Event()
     cloud_calls, captured, ticks = [], [], []
-    chat.grok_available = True
-    def grok(**kwargs):
+    original_post = GEN.requests.post
+    def shared_post(*args, **kwargs):
         cloud_calls.append(kwargs)
         if len(cloud_calls) == blocked_call:
             entered.set()
             assert release.wait(3)
-        return 'Film details are on the website.' if len(cloud_calls) == 1 else json.dumps(helper.GOOD)
-    chat.grok_client = SimpleNamespace(get_response=grok)
+        return original_post(*args, **kwargs)
+    monkeypatch.setattr(GEN, 'requests', SimpleNamespace(post=shared_post), raising=False)
     original_generate = chat.generate_reply
     def generate(**kwargs):
         captured.append(kwargs['cancel_event'])
@@ -583,7 +634,7 @@ def test_actual_async_caller_keeps_heartbeat_and_discards_timed_out_grok_without
         while not finished.is_set():
             await asyncio.sleep(0.001)
     asyncio.run(run())
-    assert len(cloud_calls) == blocked_call and calls == []
+    assert len(cloud_calls) == len(calls) == blocked_call
 
 
 @pytest.mark.parametrize('payload', ['plain', 'wrong_theme', 'changed_text'])

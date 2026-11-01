@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1801,
+  "total_tests": 1803,
   "quarantined_tests": 260,
   "tests": [
     {
@@ -3018,6 +3018,32 @@
       "description": "Authenticated durable provenance contracts for topology proposer calls."
     },
     {
+      "id": "test::modules::ai_intelligence::ai_gateway::tests::test_youtube_model_composition",
+      "path": "modules/ai_intelligence/ai_gateway/tests/test_youtube_model_composition.py",
+      "owner": "modules/ai_intelligence/ai_gateway",
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline YouTube consumer composition through complete production definitions.\n\nThe sibling routing module owns the synthetic credential-free fixture. This\nselection adds no model/network/browser effects and requires the guarded child."
+    },
+    {
+      "id": "test::modules::ai_intelligence::ai_gateway::tests::test_youtube_model_routing",
+      "path": "modules/ai_intelligence/ai_gateway/tests/test_youtube_model_routing.py",
+      "owner": "modules/ai_intelligence/ai_gateway",
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Independent offline controls for the exact YouTube Gateway consumer.\n\nImports and all collaborators are constructed inside fixtures. Execute only in\nthe owner's credential-free, network/effect-guarded child. No installed service,\nproduction credential, model load, or public action is part of this contract."
+    },
+    {
       "id": "test::modules::ai_intelligence::ai_overseer::src::test_gate_manual",
       "path": "modules/ai_intelligence/ai_overseer/src/test_gate_manual.py",
       "owner": "modules/ai_intelligence/ai_overseer",
@@ -5788,14 +5814,12 @@
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
       "shard_id": "modules-communication-livechat-unit-part-01",
-      "capabilities": [
-        "import_path_mutation"
-      ],
+      "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
-      "description": "Test AntiMa Fallacy Detection System\nTests the enhanced Grok fact-check with logical fallacy detection"
+      "description": "Legacy fact-check adapter now queues shared reviewed language work."
     },
     {
       "id": "test::modules::communication::livechat::tests::test_antima_savage",
@@ -5803,14 +5827,12 @@
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
       "shard_id": "modules-communication-livechat-unit-part-01",
-      "capabilities": [
-        "import_path_mutation"
-      ],
+      "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
-      "description": "Test Savage AntiMa Trolling Responses\nTests that responses are cutting and brutal against MAGA trolls"
+      "description": "Political names do not grant unreviewed provider replies or forced slogans."
     },
     {
       "id": "test::modules::communication::livechat::tests::test_automatic_throttling",
@@ -13780,15 +13802,12 @@
       "owner": "modules/communication/video_comments",
       "suite_class": "integration",
       "shard_id": "modules-communication-video-comments-integration",
-      "capabilities": [
-        "import_path_mutation",
-        "logging_configuration"
-      ],
+      "capabilities": [],
       "execution_type": "integration",
       "collectable": true,
       "timeout_s": 600,
       "quarantine_reasons": [],
-      "description": "WSP-Compliant Test Suite for LLM Comment Integration\nFollowing WSP FMAS (Fail, Mock, Assert, Success) testing protocol"
+      "description": "Legacy public generation API now delegates to the shared reviewed owner.\n\nRetires direct-provider/forced-template expectations. No service constructors,\ncredentials, network, browser or public effects belong in this selection."
     },
     {
       "id": "test::modules::communication::video_comments::tests::test_move2japan_access",

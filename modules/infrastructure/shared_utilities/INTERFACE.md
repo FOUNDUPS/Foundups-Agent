@@ -1,5 +1,19 @@
 # shared_utilities Interface Specification
 
+### Shared language-role and LM Studio dispatch controls
+
+`local_model_selection.is_general_language_model(model_id)` is the common
+conservative role guard used by YouTube and AI Gateway; it rejects visual,
+coder, audio, embedding, tiny triage and xAI model identifiers.
+
+`LMStudioBackend(..., max_retries=None, pre_dispatch_check=None)` preserves the
+SDK default when retry count is absent; explicit values are integers in [0,2].
+The optional trusted callback runs after the exact native-instance precheck and
+before completion/chat/native dispatch. YouTube passes zero retries plus its
+deadline/cancel guard. It cannot preempt an already in-flight request. Optional
+chat `reasoning_effort='none'` is validated and forwarded without altering other
+callers. No server/model startup, fallback or credential-file loading is added.
+
 ### `lm_studio_node_lock_identity(base_url: str) -> str`
 
 Additive export from `lm_studio_model_lifecycle.py` for existing explicit server

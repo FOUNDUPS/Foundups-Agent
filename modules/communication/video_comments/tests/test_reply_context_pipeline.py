@@ -135,6 +135,16 @@ def _bare_generator():
     generator._load_voice_memory_context = (
         lambda comment_text, video_title=None: "Verified channel position: build cooperatively"
     )
+    # The model collaborator now sits behind the Gateway boundary. No production
+    # local/provider fallback is emulated by this consumer fixture.
+    def call_youtube_task(**kwargs):
+        if generator.qwen_engine is None:
+            return SimpleNamespace(success=False, response='', provider='none', reason='route_unavailable')
+        text = generator.qwen_engine.generate_response(prompt=kwargs['prompt'],
+            system_prompt=kwargs['system_prompt'], max_tokens=kwargs['max_tokens'], stop=['###'])
+        return SimpleNamespace(success=True, response=text, provider='lm_studio_local',
+            model='qwen3.5-4b', route_id='fixture-shared-route', reason=None)
+    generator._model_gateway = SimpleNamespace(call_youtube_task=call_youtube_task)
     return generator
 
 
@@ -157,7 +167,7 @@ def test_local_qwen_receives_comment_video_guidance_and_memory():
     assert "Prior topic: mutual aid" in prompt
     assert "Verified channel position: build cooperatively" in prompt
     assert generator.qwen_engine.call["stop"] == ["###"]
-    assert generator.get_last_llm_source() == "qwen"
+    assert generator.get_last_llm_source() == "lm_studio"
 
 
 def test_voice_memory_query_includes_video_title():
@@ -266,7 +276,7 @@ def test_dom_extraction_retains_per_row_video_context():
 
 
 def test_context_gate_rejects_generic_and_stale_sources():
-    assert CommentProcessor.is_contextual_reply_source("skill_1:qwen")
+    assert CommentProcessor.is_contextual_reply_source("skill_1:lm_studio")
     assert CommentProcessor.is_contextual_reply_source("lm_studio")
     assert not CommentProcessor.is_contextual_reply_source("skill_1:template_regular")
     assert not CommentProcessor.is_contextual_reply_source("skill_2:personalized_stats")
@@ -345,7 +355,7 @@ def test_processor_cannot_borrow_later_provider_source(monkeypatch):
 
 
 def test_processor_receipt_stays_bound_after_post_await(monkeypatch):
-    generator = _fake_generation(monkeypatch, "Grounded 0102", "qwen")
+    generator = _fake_generation(monkeypatch, "Grounded 0102", "lm_studio")
     processor, posted = _offline_processor(monkeypatch)
     async def execute(index, text, **kwargs):
         posted.append((index, text))
@@ -354,11 +364,11 @@ def test_processor_receipt_stays_bound_after_post_await(monkeypatch):
     processor.reply_executor.execute_reply = execute
     result = asyncio.run(processor.engage_comment(1, do_like=False, do_heart=False))
     assert posted == [(1, "Grounded 0102")]
-    assert result["llm_source"] == "qwen"
+    assert result["llm_source"] == "lm_studio"
 
 
-@pytest.mark.parametrize("source", ["qwen", "grok", "lm_studio", "skill_1:qwen",
-    "skill_1_sub:lm_studio", "skill_2:grok", "skill_3:qwen",
+@pytest.mark.parametrize("source", ["openrouter", "skill_1:openrouter", "lm_studio", "skill_1:lm_studio",
+    "skill_1_sub:lm_studio", "skill_2:openrouter", "skill_3:lm_studio",
     "skill_0:contextual_mockery", "skill_0:grok_greeting", "gemma_emoji:heuristic_love"])
 def test_context_gate_accepts_exact_supported_strategies(source):
     assert CommentProcessor.is_contextual_reply_source(source)
@@ -422,7 +432,7 @@ def test_successful_provider_draft_retained_by_skill(monkeypatch):
     generator = _full_generator(monkeypatch)
     result = generator.generate_reply_with_source("A specific video comment", "Fixture")
     assert result.text == "That lyric lands because the video connects solidarity with action. 0102"
-    assert result.source == "skill_1:qwen"
+    assert result.source == "skill_1:lm_studio"
     with pytest.raises(dataclasses.FrozenInstanceError):
         result.source = "template"
 
@@ -446,7 +456,7 @@ def test_old_comment_skill_receipt_requires_actual_draft(monkeypatch, retains_dr
     result = generator.generate_reply_with_source("A specific video comment", "Fixture", published_time="1 year ago")
     assert generator.qwen_engine.call is not None
     assert CommentProcessor.is_contextual_reply_source(result.source) is retains_draft
-    assert result.source == ("skill_3:qwen" if retains_draft else "skill_3:unknown")
+    assert result.source == ("skill_3:lm_studio" if retains_draft else "skill_3:unknown")
 
 
 def test_timeout_discards_active_result_and_cancels_queued_provider(monkeypatch):
@@ -579,10 +589,10 @@ def test_dae_factory_preserves_injected_dependencies_and_channel():
 @pytest.mark.parametrize("parent", [None, 7])
 def test_event_payload_retains_receipt_without_inventing_video(parent):
     result = {"comment_text":"row", "reply_text_posted":"Bound answer", "reply":True,
-              "llm_source":"skill_1:qwen", "video_id":None, "video_title":None}
+              "llm_source":"skill_1:lm_studio", "video_id":None, "video_title":None}
     payload = row_module.comment_event_payload(result, "fixture", "7.1", "channel", "fixed-time", parent)
     assert payload["video_id"] is payload["video_title"] is None
-    assert payload["llm_source"] == "skill_1:qwen"
+    assert payload["llm_source"] == "skill_1:lm_studio"
     assert payload["reply_text_posted"] == "Bound answer"
     assert payload["comment_idx"] == "7.1"
     assert payload.get("is_nested", False) is (parent is not None)
@@ -593,21 +603,20 @@ def test_event_payload_retains_receipt_without_inventing_video(parent):
 @pytest.mark.parametrize("service_ok", [True, False])
 def test_local_service_has_full_prompt_and_bounded_qwen_fallback(monkeypatch, service_ok):
     generator = _bare_generator()
-    generator.lm_studio_available = True
-    generator.lm_studio_model_id = "qwen3-fixture"
-    calls = []
-    def post(url, **kwargs):
-        calls.append((url, kwargs))
-        return SimpleNamespace(status_code=200 if service_ok else 503,
-            json=lambda: {"choices":[{"message":{"content":"A grounded service answer"}}]})
-    monkeypatch.setattr(generator_module.requests, "post", post)
-    result = generator._generate_contextual_reply("specific comment", "Fixture", video_title="Row title")
-    assert calls[0][1]["timeout"] == 3
-    prompt = calls[0][1]["json"]["messages"][1]["content"]
-    assert "specific comment" in prompt and "Row title" in prompt and "Prior topic: mutual aid" in prompt
-    assert generator.get_last_llm_source() == ("lm_studio" if service_ok else "qwen")
-    assert result
-    assert (generator.qwen_engine.call is None) is service_ok
+    captured = []
+    def shared(**kwargs):
+        captured.append(kwargs)
+        return SimpleNamespace(success=service_ok, response='A grounded service answer',
+            provider='lm_studio_local', model='qwen3.5-4b', route_id='fixture-shared-route')
+    generator._model_gateway = SimpleNamespace(call_youtube_task=shared)
+    result = generator._generate_contextual_reply('specific comment', 'Fixture', video_title='Row title')
+    assert len(captured) == 1 and captured[0]['stage'] == 'write'
+    assert captured[0]['max_tokens'] == 150 and captured[0]['surface'] == 'comments'
+    prompt = captured[0]['prompt']
+    assert 'specific comment' in prompt and 'Row title' in prompt and 'Prior topic: mutual aid' in prompt
+    assert (result is not None) is service_ok
+    assert generator.get_last_llm_source() == ('lm_studio' if service_ok else 'unknown')
+    assert generator.qwen_engine.call is None  # Never revive the retired embedded fallback.
 
 
 def test_grok_is_not_called_without_explicit_opt_in():

@@ -1,5 +1,34 @@
 # video_comments TestModLog
 
+## 2026-11-01 — Current guarded model-routing qualification
+
+Fresh credential-free Windows runs: 63 independently authored routing/composition
+cases; 18 migrated legacy adapter cases (81 combined fixed selector); 165 retained
+and extended comment-context/semantic/history cases plus 12 subtests; 24 existing
+quality-stop controls; 15 stdlib cases; 231 adjacent Gateway/catalog/selection/
+binding/redaction/local-role cases; and the existing isolated 94-case startup
+selection. These overlap and are not additive totals. No failures/errors/skips or
+denied real effects in those selections. Raw output stays private.
+
+Legacy tests explicitly replace the retired direct-provider/forced-slogan and
+template contracts with captured identity, no synchronous model call, Gateway
+delegation, mandatory exact final review and useful approved-answer controls.
+No tests were quarantined or skipped to obtain this result. Production provider
+qualification, signed promotion, daemon startup and public delivery remain
+separate/unverified. Packaging/security and hosted checks have their own receipts.
+
+## 2026-11-01 — Migrate consumer fixtures to shared routing
+
+Existing semantic/context/quality/stdlib selectors retain positive useful replies,
+exact final mentions, cancellation, locks, theme freshness, provider provenance
+and no-post checks. Their explicit model collaborator now represents the Gateway,
+not a direct consumer-owned HTTP/Qwen/xAI client. Historical case names mentioning
+Qwen/Grok are retained for selector continuity; retired-route attributes must not
+gain call authority. A local service failure now expects no embedded fallback.
+Shared routing/security acceptance is independently authored in the AI Gateway
+YouTube consumer suite. Fresh final execution evidence is retained separately;
+no real model, browser or public delivery is claimed.
+
 ## 2026-11-01 — Frozen quality-stop and diagnostic controls
 
 New independent 24-case file preserves the original repair selectors. Qualified
