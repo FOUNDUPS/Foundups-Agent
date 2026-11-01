@@ -1,3 +1,13 @@
+## Stored-settings local acceptance; delivery gates open — 2026-11-01
+
+Allocation PR2290 delivery is complete; the [checkpoint](../architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#allocation-delivery-and-stored-chroma-security-hold--2026-11-01) supersedes
+older publication assertions without rewriting sealed evidence. Existing Holo
+owners have scoped local source/pure, literal scratch-native and package
+acceptance under the [API](../../holo_index/INTERFACE.md#stored-chroma-settings-admission--2026-11-01), with failures and explicit corrections retained
+in [TestModLog](../../holo_index/tests/TestModLog.md#stored-settings-local-qualification--2026-11-01). Root owns releases; implementation and verification
+remain separate. Protected publication/new-source PC/Holo and explicit controller
+release remain pending; upstream advisories remain open and deployment remains blocked.
+
 ## Numeric allocation prerequisite and current source checkpoint — 2026-11-01
 
 PR2288 merged d927; unchanged blockchain source is now on main de6917 after

@@ -50,7 +50,20 @@ The existing simulator must validate any economic enhancement before chain parit
 
 ### Current blockchain security sequence — 2026-11-01
 
-#### Current source checkpoint and next local allocation gate
+#### Current retrieval-security checkpoint — 2026-11-01
+
+Allocation source delivery is complete at 5d9f9134; the [dated checkpoint](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#allocation-delivery-and-stored-chroma-security-hold--2026-11-01)
+keeps protected checks, PC preservation and durable evidence distinct.
+The existing-owner [stored-settings API](holo_index/INTERFACE.md#stored-chroma-settings-admission--2026-11-01) now has bounded local source/test,
+literal scratch-native and package acceptance, recorded in [TestModLog](holo_index/tests/TestModLog.md#stored-settings-local-qualification--2026-11-01).
+Pending at this local checkpoint: protected publication, new-source PC/Holo and
+explicit maintenance release. The controller and chain activation remain held;
+B03 fee research and class-D source-unit conflicts remain unresolved.
+
+#### Historical allocation source checkpoint — prepublication, 2026-11-01
+
+The following source-publication assertions record an older prepublication
+checkpoint superseded above; economic and activation gates remain open.
 
 PR2288 merged d927; subsequent Vote PR2289 leaves the blockchain source and
 1,481-member runtime closure unchanged at de6917. Exact new-main source checks

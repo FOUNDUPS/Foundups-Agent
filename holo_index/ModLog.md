@@ -1,3 +1,11 @@
+## 2026-11-01 — Bounded stored-settings guard qualified locally
+
+WSP11/15/22/48/50/62/84/97; class B, 18/P0. Existing owners enforce the scoped
+[raw settings contract](INTERFACE.md#stored-chroma-settings-admission--2026-11-01), including the pinned inert sparse sentinel.
+[TestModLog](tests/TestModLog.md#stored-settings-local-qualification--2026-11-01) retains failed native/fixture attempts and explicit oracle
+corrections beside final local evidence. Publication/new-source PC/Holo and
+controller release remain pending; no upstream advisory or global-runtime clearance.
+
 ## 2026-10-04 — Preserve native Markdown until EOS
 
 - Qualified native chat supplies an empty caller stop list; formatter EOS text

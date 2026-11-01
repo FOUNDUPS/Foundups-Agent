@@ -1,3 +1,58 @@
+## Stored-settings local qualification — 2026-11-01
+
+Original/adapted baselines retain the same 71 ordered passes, eight native cases
+excluded; four fixture adaptations add eight net lines with old ASTs retained.
+Frozen 82-case RED: one pass/81 failures (70 missing API, seven missing refusal,
+one early page and three getter tripwires), not 81 exploits. Initial v2 passes
+96 (82 plus 14 external held-outs); promoted 153 is the exact 71-plus-82 union.
+Those outcomes remain historical, not unchanged-current policy evidence.
+
+First native attempt: five passes/two failures plus a separate
+`native_module_origin_invalid` harness refusal, exit 3. Pinned SDK/source and
+scratch-only metadata proof establish sparse exact `{"type":"unknown"}` as inert
+absent EF. Root explicitly supersedes two sparse-denial directions and promotes
+five negative variants; direct/dense unknown and extra EF keys still reject.
+Amendment RED: nine pass/four fail out of 13. First corrected 185 attempt: 180
+pass/five fail from two bridge fixture methods treating that sentinel as malicious.
+Only those fixture values change to unknown plus an extra False field; assertions
+and production remain. Namespace handling uses a finite source-bound policy,
+not a generic origin-less-module bypass. Failed attempts are preserved, not waived.
+
+Final corrected pure result: 185 pass = promoted 158 (71 originals/current 87)
+plus external 13 and 14, zero failures/errors/skips/guards and 574 stable source
+snapshots. Original IDs/ASTs remain; the two semantic corrections/five new cases
+are explicit. Adjacent 29 passes separately with source applicability verified;
+it is bounded fake/snapshot evidence, not maintenance. Retained reviews:
+`independent-final-corrected-review.json` and `independent-adjacent-pure-review.json`.
+Hosted qualification remains pending for the existing-job selection of the same
+five owners/eight native exclusions; promotion alone is not hosted coverage.
+
+Native v2: seven safe literal scratch cases pass, zero failures/errors/skips/guards;
+577 source and 234 installed pins stay stable. One namespace is actually loaded
+among 76 origins, with exact paths/pinned children verified by
+`independent-native-v2-review.json` and `native-compatibility-2/execution-review.json`.
+The subprocess-tail and external-junction tests remain unrun/unqualified:
+`test_checkpoint_plus_tail_survives_real_subprocess_probe` and
+`test_vectors_junction_to_external_store_is_rejected`. No active-store/controller,
+model/network payload or complete installed/native closure is proved.
+
+The native admission run observed installed python-dotenv 1.2.1 while root
+`requirements.txt` pins 1.2.2. This installed/declaration drift requires later
+runtime reconciliation and is not cleared by these tests. Package import was
+allowed; `.env`/`.env.*` file reads remained denied.
+
+Final amended package: eight Python cases/three Node entrypoints pass; the earlier
+registry check remains 1,800/260 with unchanged bytes. Canonical digest
+`5bb4c1ae542d823100c791a0717c1c01c45bd46cb5ace47a9713630b8075428d` retains all
+1,481 members/order and unchanged caps, four runtime hashes changed versus base.
+Manifest LF/CRLF sizes: 334,850/337,885 under 337,920, leaving 35 bytes. Earlier
+b221248c package remains historical. `independent-package-v2-review.json` binds
+actual final commands/digests. Node used a credential-stripped package runner
+without the pure/native audit preload; no zero-instrumented-Node-effects or
+counted-attempt claim is made. Families overlap and are not summed.
+Pending locally: protected publication, new-source PC/Holo and explicit controller
+release. Upstream advisories remain open.
+
 ## 2026-09-29: Qwen package import controls
 
 Eight fixed stdlib unittest controls failed against the eager baseline and passed against the lazy candidate with identical fixture bytes. Fresh -I/-S/-B children validate real package/engine imports plus synthetic API dispatch; unknown attributes, deferred failures and real submodule fallback are covered. No model or service constructor ran. Local runner durations are receipt metadata, not a performance benchmark. Hosted/main validation is recorded separately in the RSI backlog publication receipt. WSP05/11/22/50/62/97.

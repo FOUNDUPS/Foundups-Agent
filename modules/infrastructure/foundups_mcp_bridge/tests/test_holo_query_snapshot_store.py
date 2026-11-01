@@ -36,6 +36,8 @@ class _Collection:
 
     def __init__(self, metadata: dict[str, str]) -> None:
         self.metadata = metadata
+        self._model = SimpleNamespace(configuration_json={"hnsw": {"space": "l2"}},
+                                      serialized_schema=None)
         self._values = {
             "ids": ["row_1", "row_2"],
             "documents": ["first", "second"],
@@ -289,3 +291,64 @@ def test_snapshot_set_total_size_fails_before_publication(
     with pytest.raises(QuerySnapshotStoreError, match="TOTAL_SIZE_BOUND"):
         publish_query_snapshot_set(holo, receipt, ssd_path=ssd)
     assert not (ssd / "vectors" / "query_snapshots").exists()
+
+
+from dataclasses import replace
+from holo_index.isolated_collection_snapshot_probe import open_persisted_collection_view
+from holo_index.tests.test_vector_segment_durability import ERROR, _Raw, _config, _with_ef
+from modules.infrastructure.foundups_mcp_bridge.src import holo_query_snapshot_store as store
+fixtures = SimpleNamespace(_fixture=_fixture, _tree_hashes=_tree_hashes, _Collection=_Collection)
+
+@pytest.mark.parametrize("cleanup_failure", [None, "stop", "clear", "both"])
+def test_persisted_unsafe_open_attempts_owned_cleanup_without_losing_primary_refusal(tmp_path, cleanup_failure):
+    calls = []
+    bad = _with_ef("key-sparse", {"type": "unknown", "extra": False})
+    class Client:
+        def get_collection(self, *args, **kwargs): return bad
+        def stop(self):
+            calls.append("stop")
+            if cleanup_failure in ("stop", "both"): raise RuntimeError("cleanup sentinel")
+        @staticmethod
+        def clear_system_cache():
+            calls.append("clear")
+            if cleanup_failure in ("clear", "both"): raise RuntimeError("cleanup sentinel")
+    client = Client(); client._system = SimpleNamespace(stop=client.stop)
+    with pytest.raises(ValueError, match=ERROR):
+        open_persisted_collection_view(tmp_path, client_factory=lambda path: client)
+    assert calls == ["stop", "clear"] and bad.reads == []
+
+def test_unsafe_last_export_collection_refuses_before_any_page_and_preserves_prior_generation(tmp_path, monkeypatch):
+    ssd, holo, receipt = fixtures._fixture(tmp_path)
+    prior = store.publish_query_snapshot_set(holo, receipt, ssd_path=ssd)
+    before, paged = fixtures._tree_hashes(prior), []
+    names = sorted(BASELINE_QUERY_COLLECTIONS)
+    last = getattr(holo, COLLECTION_ATTRS[names[-1]])
+    last._model = _with_ef("default-sparse", {"type": "unknown", "extra": False})._model
+    def forbidden_page(**kwargs):
+        paged.append(True)
+        raise AssertionError("page read before all-settings admission")
+    for name in names: monkeypatch.setattr(getattr(holo, COLLECTION_ATTRS[name]), "get", forbidden_page)
+    with pytest.raises(ValueError, match=ERROR):
+        store.publish_query_snapshot_set(holo, replace(receipt, generation_id="sha256:" + "c" * 64), ssd_path=ssd)
+    assert paged == [] and fixtures._tree_hashes(prior) == before
+    assert len(list(prior.parent.iterdir())) == 1
+
+@pytest.mark.parametrize("metric", ["l2", "cosine", "ip"])
+def test_export_uses_preflight_metric_capture_without_executable_getters(metric, tmp_path, monkeypatch):
+    ssd, holo, receipt = fixtures._fixture(tmp_path)
+    collections = [getattr(holo, COLLECTION_ATTRS[n]) for n in sorted(BASELINE_QUERY_COLLECTIONS)]
+    for collection in collections: collection._model.configuration_json = _config(metric)
+    def forbidden(self): raise AssertionError("executable settings getter")
+    monkeypatch.setattr(fixtures._Collection, "configuration", property(forbidden))
+    monkeypatch.setattr(fixtures._Collection, "schema", property(forbidden), raising=False)
+    first_get, original_encode, metrics = collections[0].get, store.encode_collection_snapshot, []
+    def mutate_on_page(**kwargs):
+        for collection in collections: collection._model.configuration_json = _config("ip" if metric != "ip" else "l2")
+        return first_get(**kwargs)
+    def observed_encode(**kwargs):
+        metrics.append(kwargs["metric"])
+        return original_encode(**kwargs)
+    monkeypatch.setattr(collections[0], "get", mutate_on_page)
+    monkeypatch.setattr(store, "encode_collection_snapshot", observed_encode)
+    store.publish_query_snapshot_set(holo, receipt, ssd_path=ssd)
+    assert metrics == [metric] * len(BASELINE_QUERY_COLLECTIONS)
