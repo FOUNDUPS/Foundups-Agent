@@ -39,6 +39,12 @@ FoundUps Vision provides 0102's "eyes" for complex browser automation tasks that
 
 ## UI-TARS Integration
 
+The current verified local1.5-7B model requires the explicit
+`ui_tars_1_5_qwen25vl` coordinate profile; see INTERFACE. The legacy tagged1000
+grid remains default for existing callers. A read-only `verify` proposal must
+pass fresh-frame target checks before CUA input and full behavioral observation.
+Successful local inference alone does not certify an autonomous player.
+
 **Model Location:** `E:/HoloIndex/models/ui-tars-1.5`
 
 UI-TARS Desktop provides:

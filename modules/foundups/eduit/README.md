@@ -1,7 +1,13 @@
 # EDUIT — Education Using Information Technology
 
-Current storybook presentation, **preschool-20**: nearly full-screen teaching
-words, large Play story/Pause labels and64px actions. On short screens decoration
+Current storybook interaction, **tap-story-21**: tap the teaching words/picture
+or ▶ to run the complete story without repeated Next presses. Incidental taps
+while listening leave it running; explicit Ⅱ pauses and ▶ resumes that page.
+The child controls are pictograms with screen-reader names. Manual arrows remain
+available; starting after manual navigation runs the complete story from page1.
+
+Retained preschool presentation: nearly full-screen teaching
+words and64px actions. On short screens decoration
 gives way to words; final Video replaces redundant Skip beside Close. The same
 five-page narration/video sequence and game remain. Native Home Screen launch
 through eduit.org still requires separate domain verification; use the direct

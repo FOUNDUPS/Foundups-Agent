@@ -1,5 +1,13 @@
 # EDUIT test inventory
 
+Use **Run full-story interaction regression** in the existing director_harness
+for the title-start and actual elapsed-time all-page/movie handoff on both routes,
+plus Pause/resume, later-page start, incidental tap and synthetic pointer
+cancel/multitouch/swipe cases. It uses the real silent-play UI option, not a
+forced clock. Separate CUA real presses and UI-TARS model-guided input receipts
+live under outputs/storytime-playback-20261101; do not call synthetic dispatch
+native touch or count static model inference as a completed playthrough.
+
 Preschool book acceptance extends the existing director_harness storybook button:
 all five pages at six sizes on both routes, rendered font/target floors, no
 scroll/clipping and direct hit tests. Independent rendered/silent/voice-failure

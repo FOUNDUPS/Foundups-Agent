@@ -1,5 +1,27 @@
 # EDUIT test history
 
+## 2026-11-01 — Child-intended action, all-page playback and UI-TARS
+
+Freeze visible words/picture press→all five pages without Next→one actual video
+play; test the child action rather than only model.play(). Baseline20 primary
+Play already passed, but actual title tap stayed idle and ordinary surface tap
+stopped a running story. Extend existing director_harness with elapsed-time
+both-route regression, unchanged game clock, explicit Pause/resume, later-page
+restart and synthetic pointerup/leave/click, cancel/multitouch/swipe guards.
+Independent real CUA and UI-TARS-guided word press own behavioral evidence;
+static inference and accepted coordinates are not a completed test.
+
+The first phone handoff snapshot appeared paused0; subsequent full direct event
+capture proves one video_play/video_playing and advancing time. Keep the original
+inconclusive observation; no unproved viewport-cause fix. Existing Node63/63 and
+vision-owner49 isolated profile/snapshot tests pass. Preserve exact failures,
+source/screenshot hashes and platform limits in the output receipts. Actual iOS
+touch/listening and comprehension stay unverified.
+The new symbol oracle exposed the existing harness's missing charset: its inline
+glyph literals decoded as Windows1252 while the product correctly used UTF8.
+Retain the red assertion; declare UTF8 on the same harness and rerun the unchanged
+symbol/name/font/target criterion. Do not replace glyph checks with source text.
+
 ## 2026-11-01 — Preschool book visual acceptance
 
 Extend existing director_harness storybook visibility regression to every page,

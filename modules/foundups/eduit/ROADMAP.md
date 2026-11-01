@@ -1,5 +1,16 @@
 # EDUIT execution roadmap
 
+## 2026-11-01 — Test the child's intended start action
+
+012's behavioral correction supersedes a book-size-only acceptance: pressing
+the words/picture or ▶ starts the entire popup, without repeated Next. Keep
+child controls pictorial, visible lesson words and accessible names. Independent
+baseline found the old primary Play already ran all pages; the missing word tap
+and touch-to-pause handler were the coverage gap. Repair the existing handlers
+and review sequence; bind a UI-TARS model proposal to actual CUA input and observe
+the whole result. Retain current model/coordinate and native-device limitations;
+this bounded test is not admission of an autonomous RSI worker.
+
 ## 2026-11-01 — Preschool readability before broader RSI claims
 
 Latest012 installed screenshot fails whole-app readability despite prior menu

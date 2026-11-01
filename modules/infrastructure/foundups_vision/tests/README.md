@@ -14,9 +14,13 @@ Vision-based testing requires:
 | File | Purpose |
 |------|---------|
 | `test_ui_tars_bridge.py` | UITarsBridge unit tests |
-| `test_vision_executor.py` | VisionExecutor workflow tests |
-| `test_action_patterns.py` | Pattern learning tests |
+| `test_account_switcher.py` | Account-switch training/export tests |
 | `test_account_switch.py` | Studio account switching smoke test (manual/integration) |
+
+`pytest modules/infrastructure/foundups_vision/tests/test_ui_tars_bridge.py -q -k TestUITarsCoordinates`
+isolates offline pure decoder/grid and mocked snapshot-only verify contracts.
+Other historical bridge/executor cases may contact local services; do not call
+them isolated unit tests or proof of model grounding. See TestModLog for inventory.
 
 ## Running Tests
 

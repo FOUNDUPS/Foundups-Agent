@@ -1,7 +1,7 @@
 ---
 name: interactive_experience_review
 description: Audit and iteratively repair audience-specific games and web interfaces, including EDUIT Storytime timing, touch controls, learning cues, scoring and feedback. Use before implementation and after inspecting each changed output.
-version: 0.3.2
+version: 0.3.3
 intent_type: AUDIT
 promotion_state: prototype
 ---
@@ -41,7 +41,10 @@ menu does not answer that question. Inspect every affected story page and state,
 including the longest phrase, paused playback and unavailable voice. Keep
 familiar symbols and optional narration; do not require independent reading.
 For the current Storytime book, freeze at least48 CSSpx teaching text on phones,
-56px on tablets, 24px primary action labels and64px targets. These are this
+56px on tablets and64px targets. Child actions use familiar pictograms: at least
+48px for primary Play/Pause and36px for secondary glyphs, with accessible names
+retained for screen readers. Do not require reading button labels to start or
+continue the story. These are this
 product's review thresholds, not scientific evidence about learning. Reflow or
 remove decorative art before reducing the words. Check actual text glyph bounds,
 wrapping, contrast, hit testing and control reach without scrolling the oracle
@@ -115,6 +118,41 @@ retry/drowsing must not silently revoke an earned rescue. Test slow deliberate
 input as well as the fastest successful route.
 
 ## Repair, rate and retain
+
+### Task completion before component PASS
+
+Freeze the intended child's **visible action and whole outcome** before coding.
+For Storytime, independently press the words/picture as well as ▶. A model's
+`play()` test cannot certify the missing click handler; button bounds cannot
+certify a completed story. One start must show all five pages without repeated
+Next, keep the game clock paused, and then start the film once or expose an
+explicit browser-denial fallback. Observe actual film time advancing; closed
+dialog plus a paused film at0 is a failure or pending state, not a handoff PASS.
+Inspect the real resize/scroll/visibility events through modal close as well.
+
+Test manual later-page→start, incidental taps during listening, explicit
+Pause→resume, Skip/Close cancellation and pointerup→leave→click order. A swipe,
+cancelled gesture or multitouch must not accidentally start a story. Keep the
+primary affordance dominant; do not animate Next as the suggested first action
+when the intended route is one complete story. Retain teaching words as lesson
+content while controls use symbols. Actual-child comprehension stays unverified
+until observed; neither a model's icon selection nor typography proves it.
+
+When012 requests UI-TARS, retrieve the existing vision bridge and its model
+contract. Bind fresh screenshot hash, real viewport, device-pixel ratio, exact
+model, resize transform and coordinate profile. Strictly decode one allowlisted
+action, reject unknown scales/out-of-bounds/multiple or executable output, then
+perform the proposed press through the authorized UI tool and inspect its
+postcondition over time. A static inference, valid coordinates or a successful
+click is not an end-to-end playthrough. Keep raw proposal, actual action and
+independent result separate. No installs, unattended actuator or WRE promotion
+is implied by this bounded verification. Retain a parser/model blocker honestly.
+
+Use the same frozen failing case after repair, then held-out input sequences and
+the published revision. Record the previous test's coverage gap and repair that
+existing test/skill. This is the RSI candidate loop: intent→observe→act→verify→
+critique→repair→independent recheck; preserve failure evidence and next-task
+transfer limits in the existing owner, not a second memory or test scheduler.
 
 - Run the closest existing tests, then inspect the actual affected preview.
   Extend existing test files for new edge cases. Do not use source assertions

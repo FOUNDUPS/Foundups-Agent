@@ -1,4 +1,4 @@
-<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><title>Storytime interaction acceptance</title>
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Storytime interaction acceptance</title>
 <style>body{margin:0;font:14px system-ui;background:#ddd}nav{padding:8px}iframe{display:block;border:0}pre{white-space:pre-wrap;max-height:100px;overflow:auto}</style>
 <nav><button data-size="320,568">Small phone</button><button data-size="568,320">Small landscape</button><button data-size="390,844">Phone portrait</button><button data-size="844,390">Phone landscape</button><button data-size="768,1024">Tablet portrait</button><button data-size="1024,768">Tablet landscape</button><button id="rescue">Play rescue sequence</button><button id="run">Run acceptance</button><button id="phone-matrix">Run phone regression matrix</button><button id="storybook-dialog">Run storybook visibility regression</button><button id="presentation">Run storybook/theme checks</button></nav><pre id="results">Ready</pre><iframe id="app" src="/" width="390" height="844"></iframe>
 <script type="module">
@@ -147,7 +147,8 @@ document.querySelector('#storybook-dialog').onclick=async()=>{
    check('all teaching words fit without scrolling',r.left>=bounds.left&&r.right<=bounds.right&&r.top>=bounds.top&&r.bottom<=bounds.bottom&&intro.scrollHeight<=intro.clientHeight+1,{entry,size,page});
    for(const b of intro.querySelectorAll('button')){
     const box=b.getBoundingClientRect();if(!box.width||!box.height)continue;
-    check('storybook primary labels and targets remain large',box.width>=64&&box.height>=64&&parseFloat(w.getComputedStyle(b).fontSize)>=24,{entry,size,page,id:b.id});
+    check('storybook pictograms and targets remain large',box.width>=64&&box.height>=64&&parseFloat(w.getComputedStyle(b).fontSize)>=(b.id==='storybook-play'?48:36),{entry,size,page,id:b.id});
+    check('child actions use pictograms with accessible names',['←','→','▶','Ⅱ','⏭','×','🎬'].includes(b.textContent.trim())&&!!b.getAttribute('aria-label'),{entry,size,page,id:b.id});
     check('storybook actions fit and remain directly hittable',box.left>=bounds.left&&box.right<=bounds.right&&box.top>=bounds.top&&box.bottom<=bounds.bottom&&(b.disabled||b.contains(d.elementFromPoint(box.x+box.width/2,box.y+box.height/2))),{entry,size,page,id:b.id});
    }
    check('inspecting a page does not autoplay video',$('video').paused,{entry,size,page});
@@ -164,6 +165,45 @@ document.querySelector('#storybook-dialog').onclick=async()=>{
    await new Promise(resolve=>w.requestAnimationFrame(()=>w.requestAnimationFrame(resolve)));
    closed('closed book stays hidden after resize to'+resized.join('x'));
   }
+ }
+ results.textContent+='\nCOMPLETE';
+ }catch(e){results.textContent+='\nERROR '+e.message;}
+};
+
+// Actual elapsed-time DOM integration; pointer dispatch here is synthetic, not
+// native mobile input. CUA/UI-TARS real presses are retained as separate evidence.
+const behaviorChecks=document.createElement('button');behaviorChecks.id='storybook-behavior';behaviorChecks.textContent='Run full-story interaction regression';document.querySelector('nav').append(behaviorChecks);
+behaviorChecks.onclick=async()=>{
+ const rows=[],check=(name,ok,detail={})=>{rows.push({name,result:ok?'PASS':'FAIL',...detail});results.textContent=JSON.stringify(rows,null,2);if(!ok)throw Error(name);};
+ try{for(const entry of ['/', '/review/director.html']){
+  frame.width=390;frame.height=844;const loaded=new Promise(resolve=>frame.addEventListener('load',resolve,{once:true}));frame.src=entry+'?timing=1';await loaded;
+  const d=frame.contentDocument,w=frame.contentWindow,$=id=>d.getElementById(id);
+  for(let n=0;n<100&&!(w.storytimeStorybook&&$('game')?.contentWindow.storytimeReview);n++)await wait(100);
+  const book=w.storytimeStorybook,video=$('video'),game=$('game').contentWindow.storytimeReview;
+  check('behavior owners ready',!!book&&!!game,{entry});
+  if($('story-intro').open){$('intro-close').click();for(let n=0;n<30&&$('story-intro').open;n++)await wait(20);}
+  $('game-options').click();d.querySelector('#menu-advanced summary').click();$('story-voice').click();$('close-options').click();$('intro-replay').click();
+  const page=d.querySelector('.storybook-page'),clock=game.status().clock;
+  const point=(type,id=1,x=100)=>page.dispatchEvent(new w.PointerEvent(type,{pointerId:id,isPrimary:id===1,clientX:x,clientY:150,bubbles:true}));
+  point('pointerdown');point('pointerup');point('pointerleave');$('story-intro-title').click();
+  check('touch-up then leave still permits the title start',book.status().playing&&book.status().index===0,{entry});
+  const seen=[0],deadline=performance.now()+32000;let sampledPlayingTap=false,sampledPause=false;
+  while($('story-intro').open&&performance.now()<deadline){
+   const state=book.status();if(seen.at(-1)!==state.index)seen.push(state.index);
+   check('movie stays paused during book',video.paused,{entry,page:state.index});
+   if(state.index===1&&!sampledPlayingTap){sampledPlayingTap=true;point('pointerdown');point('pointerup');$('story-intro-title').click();check('ordinary page tap does not interrupt playback',book.status().playing&&book.status().index===1,{entry});}
+   if(state.index===2&&!sampledPause){sampledPause=true;$('storybook-play').click();check('explicit pause retains its page',!book.status().playing&&book.status().index===2,{entry});$('storybook-play').click();check('explicit resume continues the retained page',book.status().playing&&book.status().index===2,{entry});}
+   await wait(100);
+  }
+  check('one title action runs every page without Next',JSON.stringify(seen)==='[0,1,2,3,4]'&&!$('story-intro').open,{entry,seen});
+  for(let n=0;n<50&&video.paused&&!$('video-play').getAttribute('aria-label').includes('Story finished');n++)await wait(100);
+  check('handoff starts film or exposes browser-denial fallback',!video.paused||$('video-play').getAttribute('aria-label')==='Story finished. Play video',{entry,paused:video.paused});video.pause();
+  check('watching did not consume game time',game.status().paused&&game.status().clock===clock,{entry});
+  $('intro-replay').click();$('storybook-next').click();$('storybook-next').click();$('storybook-play').click();check('manual later page then Play starts the full book',book.status().playing&&book.status().index===0,{entry});
+  $('storybook-play').click();point('pointerdown');point('pointercancel');page.click();check('cancelled gesture cannot start playback',!book.status().playing,{entry});
+  point('pointerdown',1);point('pointerdown',2);point('pointerup',1);point('pointerup',2);page.click();check('multitouch is not a story-start tap',!book.status().playing,{entry});
+  point('pointerdown',1,200);point('pointerup',1,100);page.click();check('swipe remains manual and cannot become a start click',!book.status().playing&&book.status().index===1,{entry});
+  $('intro-close').click();await wait(400);check('Close cancels playback without starting movie',!book.status().playing&&video.paused,{entry});
  }
  results.textContent+='\nCOMPLETE';
  }catch(e){results.textContent+='\nERROR '+e.message;}

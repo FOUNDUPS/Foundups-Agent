@@ -1,5 +1,5 @@
 // Optional storybook presentation. Same concepts/speech scheduler as the film overlay;
-// its page clock is deliberately independent of the retained 15-second MP4.
+// its page clock is deliberately independent of the film's media clock.
 import {StorybookPlayback} from '../storytime/cue-scheduler.mjs';
 import {rig} from '../storytime/rig.mjs';
 import {createSpeechChannel} from './story-narration.mjs';
@@ -21,14 +21,16 @@ export function mountStorybook({dialog,video,narration,beforePlay=()=>{},onFinis
  const nav=document.createElement('nav');nav.className='storybook-navigation';nav.setAttribute('aria-label','Story pages');
  function control(id,text,label){const b=document.createElement('button');b.id=id;b.type='button';b.textContent=text;b.setAttribute('aria-label',label);nav.append(b);return b;}
  const previous=control('storybook-previous','←','Previous story page');
- const autoplay=control('storybook-play','▶ Play story','Play the story automatically');
+ const autoplay=control('storybook-play','▶','Play the story automatically');
  const next=control('storybook-next','→','Next story page');
  actions.before(progress,notice,nav);
- const handoff=document.createElement('button');handoff.id='storybook-watch';handoff.type='button';handoff.textContent='▶ Video';handoff.setAttribute('aria-label','Play video');handoff.hidden=true;
+ const handoff=document.createElement('button');handoff.id='storybook-watch';handoff.type='button';handoff.textContent='🎬';handoff.setAttribute('aria-label','Play video');handoff.hidden=true;
  // The last page replaces the redundant Skip action with the explicit video
  // handoff. Keep Close reachable without adding a fourth row on short phones.
  actions.insertBefore(handoff,actions.lastElementChild);
- let frame=0,lastPage=null,interacted=false,model=null,audioSnapshot=null;
+ $('intro-skip').textContent='⏭';$('intro-skip').setAttribute('aria-label','Skip introduction');
+ $('intro-close').textContent='×';
+ let frame=0,lastPage=null,interacted=false,model=null,audioSnapshot=null,resumePaused=false;
  const trace=[];const debug=new URLSearchParams(location.search).has('timing');
  const voice=createSpeechChannel({volume:()=>video.volume,notice:ok=>{notice.hidden=ok;notice.textContent=ok?'':'Voice unavailable · use the arrows or read along';}});
  function family(sleeping){
@@ -44,28 +46,37 @@ export function mountStorybook({dialog,video,narration,beforePlay=()=>{},onFinis
   surface.setAttribute('aria-live',state.playing?'off':'polite');surface.classList.toggle('page-fading',state.fading);
   progress.textContent=`${state.index+1} / ${state.total}`;
   previous.disabled=state.index===0;next.disabled=state.index===state.total-1;
-  autoplay.textContent=state.playing?'Ⅱ Pause':'▶ Play story';
+  autoplay.textContent=state.playing?'Ⅱ':'▶';
   autoplay.setAttribute('aria-label',state.playing?'Pause the story':'Play the story automatically');
   autoplay.setAttribute('aria-pressed',String(state.playing));
-  next.classList.toggle('gentle-hint',!interacted&&!state.playing&&!next.disabled);
+  autoplay.classList.toggle('gentle-hint',!interacted&&!state.playing);
   handoff.hidden=state.index!==state.total-1;
   $('intro-skip').hidden=!handoff.hidden;
   if(state.unavailable){notice.hidden=false;notice.textContent='Voice unavailable · use the arrows or read along';}
   else if(state.silent){notice.hidden=false;notice.textContent='Sound is off · read along';}
  }
  model=new StorybookPlayback({speak:voice.speak,cancel:voice.cancel,view,trace:r=>{if(debug){trace.push(r);if(trace.length>300)trace.shift();}}});
- function pause(reason='interaction'){cancelAnimationFrame(frame);frame=0;model.pause(reason);}
+ function pause(reason='interaction'){
+  const terminal=['navigation','closed','cancelled','opened','closing','watch-handoff','story-complete'].includes(reason);
+  if(terminal)resumePaused=false;else if(model.playing)resumePaused=true;
+  cancelAnimationFrame(frame);frame=0;model.pause(reason);
+ }
  function navigate(delta){interacted=true;pause('navigation');model.select(model.index+delta);}
  function loop(now){if(!dialog.open||document.hidden){pause('not-visible');return;}model.tick(now);if(model.finished){pause('story-complete');onFinish();return;}if(model.playing)frame=requestAnimationFrame(loop);}
- function play(){
+ function play({restart=false}={}){
   interacted=true;
   if(model.playing){pause('explicit-pause');return;}
   beforePlay();video.pause();narration.stop('storybook');notice.hidden=true;
   audioSnapshot={volume:video.volume,muted:video.muted};
-  model.play({fromStart:true,audible:!video.muted&&video.volume>0&&narration.status().enabled!==false});
+  const fromStart=restart||!resumePaused;resumePaused=false;
+  model.play({fromStart,audible:!video.muted&&video.volume>0&&narration.status().enabled!==false});
   cancelAnimationFrame(frame);frame=requestAnimationFrame(loop);
  }
- listen(previous,'click',()=>navigate(-1));listen(next,'click',()=>navigate(1));listen(autoplay,'click',play);
+ listen(previous,'click',()=>navigate(-1));listen(next,'click',()=>navigate(1));listen(autoplay,'click',()=>play());
+ // The words/picture are also an explicit start gesture. Incidental taps while
+ // listening keep the story running; only Pause or deliberate navigation stops it.
+ let suppressPageClick=false;
+ listen(surface,'click',()=>{if(suppressPageClick){suppressPageClick=false;return;}if(!model.playing)play({restart:true});});
  listen(handoff,'click',()=>{pause('watch-handoff');onFinish();});
  listen(dialog,'close',()=>{if(!dialog.open)pause('closed');});listen(dialog,'cancel',()=>pause('cancelled'));
  listen(video,'play',()=>{if(dialog.open)video.pause();});
@@ -75,18 +86,20 @@ export function mountStorybook({dialog,video,narration,beforePlay=()=>{},onFinis
  });
  const pointers=new Map();let origin=null,multiple=false;
  listen(surface,'pointerdown',e=>{
-  pause('touch');pointers.set(e.pointerId,true);
+  if(!pointers.size)suppressPageClick=false;
+  pointers.set(e.pointerId,true);
   if(pointers.size>1){multiple=true;origin=null;return;}
   if(e.isPrimary!==false)origin={id:e.pointerId,x:e.clientX,y:e.clientY};
  });
  listen(surface,'pointerup',e=>{
   const point=origin;const wasMultiple=multiple;pointers.delete(e.pointerId);
   if(!pointers.size){origin=null;multiple=false;}
-  if(wasMultiple||!point||point.id!==e.pointerId)return;
+  if(wasMultiple||!point||point.id!==e.pointerId){suppressPageClick=true;return;}
   const dx=e.clientX-point.x,dy=e.clientY-point.y;
+  if(Math.abs(dx)>10||Math.abs(dy)>10)suppressPageClick=true;
   if(Math.abs(dx)>=40&&Math.abs(dx)>Math.abs(dy)*1.5)navigate(dx<0?1:-1);
  });
- const abortPointer=e=>{pointers.delete(e.pointerId);origin=null;if(!pointers.size)multiple=false;};
+ const abortPointer=e=>{const active=pointers.has(e.pointerId);pointers.delete(e.pointerId);if(active){origin=null;suppressPageClick=true;}if(!pointers.size)multiple=false;};
  listen(surface,'pointercancel',abortPointer);listen(surface,'pointerleave',abortPointer);
  listen(document,'visibilitychange',()=>{if(document.hidden)pause('hidden');});
  listen(window,'pagehide',()=>pause('pagehide'));

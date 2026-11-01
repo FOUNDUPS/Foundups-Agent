@@ -1,5 +1,15 @@
 # YouTube Shorts AI Generator - ModLog
 
+## 2026-11-01 — Word-tap full story and pictorial controls
+
+Existing book owner now treats teaching words/picture as a full-story start and
+ignores incidental taps during playback. Preserve manual preview, explicit pause
+and lifecycle cancellation; guard synthetic click after swipe/cancel/multitouch.
+Child controls use ▶/Ⅱ, arrows, ⏭, × and 🎬 with accessible names, hinting the
+complete-story route. EDUIT owns actual elapsed-time and independent UI-TARS/CUA
+review evidence; media and shared scene remain unchanged. Production candidate
+0.2.7 routes to review0.3.3 task-completion gate; no autonomous worker activation.
+
 ## 2026-11-01 — Preschool book presentation and production review gate
 
 EDUIT photo feedback requires prominent teaching words and large familiar actions

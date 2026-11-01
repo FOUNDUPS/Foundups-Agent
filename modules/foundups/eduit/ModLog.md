@@ -1,5 +1,47 @@
 # EDUIT ModLog
 
+## 2026-11-01 — One child action plays the complete book
+
+WSP00/15/22/50/84/97,15/P1(C3/I4/D4/Impact4). Retrieval retained UNKNOWN Holo
+freshness/index gap; direct module/test/skill owners established the actual
+interaction.012's correction exposed a task-coverage gap: old primary Play ran
+all five pages, but words/picture had no start handler and pointerdown paused
+playback. Prior font/target and scheduler checks did not test that intended press.
+
+Existing surface click now starts the whole story from0; incidental taps keep
+it running. Only explicit Pause or deliberate navigation stops it. Pause/Play
+resumes the retained page; manual navigation/title restart means all five.
+Guard drag, pointercancel, multitouch and pointerleave after pointerup. Visible
+buttons use familiar glyphs with retained accessible names; hint ▶, not Next.
+No game physics, media, story text, learning clock or new renderer/backend.
+
+Independent UI-TARS1.5 model proposal bound a fresh390x844 CSS viewport
+(390x843 captured PNG pixels, recorded separately) to CSS
+(196,403); actual CUA coordinate press on the words completed5/5 and reached a
+running movie. Separate direct event observer captured all five states, one
+video_play/playing and unchanged game time. A first paused0 handoff snapshot is
+retained as inconclusive; repeated direct runs do not establish its suspected
+viewport cause, so no speculative viewport change was made. Existing elapsed-
+time harness now covers both routes and synthetic gesture edge cases.
+
+Reuse the existing vision bridge: opt-in exact1.5 resized-pixel coordinate
+profile, strict decoding, consistent DPR mapping and explicit failed-action
+results. Root independently reviewed and reran49 isolated owner tests; no Python
+browser actuator used. The model loaded solely for this test was unloaded; the
+preexisting LMStudio server stays running. Node63/63 pass. No paid/model-download
+or new test backend required. Skills review0.3.3/production0.2.7 retain a bounded
+task→action→observed outcome→critique→repair→independent recheck procedure.
+No WRE admission, actual-child comprehension or native iOS acceptance claimed.
+An independent parser review rejected unknown/inconsistent CSS geometry and a
+silent frame-offset fallback. Repair before acceptance: the new1.5 pilot requires
+verified top-level context and finite consistent PNG/CSS geometry, allowing
+recorded pixel rounding; legacy behavior is preserved. Five external held-out
+categories pass with zero provider/input effects for rejected cases. Missing
+geometry cannot produce a false successful action. Retain these red controls
+and the separate final source/test binding rather than hiding the failed probe.
+Evidence: outputs/storytime-playback-20261101, including red baselines and model
+proposal vs actual input vs outcome. tap-story-21/cachev15 identifies the repair.
+
 ## 2026-11-01 — Preserve adjacent video layout during book repair
 
 Final diff review found the old book CSS block also contained a phone-portrait

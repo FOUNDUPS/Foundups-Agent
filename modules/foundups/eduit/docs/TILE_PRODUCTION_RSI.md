@@ -73,6 +73,17 @@ must be authenticated by existing owners; different strings alone prove nothing.
 
 ## Frozen acceptance oracle: eduit.tile_acceptance.v1
 
+2026-11-01 behavioral correction: a visual/size PASS and scheduler unit tests
+missed the actual child's word/picture tap. Extend existing `touch_mouse_keyboard`,
+`causality` and `video_game_pair` evidence through the skill's **Task completion
+before component PASS**. Freeze one intended press→all pages→one video handoff,
+not a test path that calls the internal play method. Keep observed action,
+elapsed-time progression and final film playback separate. When UI-TARS is
+requested, bind exact model/screenshot/coordinate mapping, execute its bounded
+proposal and independently judge the outcome. Keep symbol-only child controls,
+screen-reader names and actual-child comprehension limits distinct. No new
+executor, learning database or automatic skill promotion is introduced.
+
 2026-11-01 correction:012's Home Screen screenshot disproved the prior broad
 app-readability conclusion despite passing menu checks. Extend the existing
 `phone_tablet_controls` and `sound_word_action` observations through the review

@@ -1,5 +1,21 @@
 # EDUIT interfaces
 
+## Word/picture activation and pictograms — 2026-11-01
+
+The existing `.storybook-page` click starts all five pages from0 when paused.
+Taps during playback do not interrupt it; the native primary button remains the
+keyboard/screen-reader equivalent. Deliberate swipe/arrows pause for manual
+preview; a cancelled pointer, drag or multitouch cannot become a start click.
+An explicit primary Pause/Play resumes the retained page, repeating its phrase;
+manual navigation and close/open clear that resume intent. Surface activation
+always requests the whole story. Background/visibility changes still pause.
+
+Stable button IDs retain accessible names; visible controls are ▶/Ⅱ, arrows,
+⏭, × and 🎬. The gentle start hint points to ▶ rather than Next. Teaching words
+remain large lesson content. The existing single video handoff remains; a denied
+browser play exposes its existing explicit fallback. UI-TARS verify-only model
+location, real CUA press and observed all-page/video outcome are separate proof.
+
 ## Preschool book presentation — 2026-11-01
 
 Preschool-20 retains stable dialog/button IDs and story scheduler. The native

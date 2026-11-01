@@ -11,6 +11,39 @@
 
 Main bridge to UI-TARS Desktop for vision-based automation.
 
+### Explicit coordinate profiles — 2026-11-01
+
+`execute_action(..., context={"coordinate_profile": "legacy_1000"})` remains the
+default tagged1000-grid contract. Coordinates are bounded, not guessed from
+whether a number exceeds1000. Unknown/multiple/malformed or executable actions
+fail closed before any input action.
+
+The opt-in `ui_tars_1_5_qwen25vl` profile requires the verified API model identifier
+`ui-tars-1.5-7b`. Its plain `click(start_box='(x,y)')` coordinates are absolute pixels
+over the explicitly submitted factor28 image grid, following ByteDance's
+[model guide](https://github.com/bytedance/UI-TARS/blob/main/README_coordinates.md).
+The bridge pre-resizes its image to that grid, then maps through observed CSS
+geometry. The new profile is a top-level-only pilot: the viewport query must
+prove `topLevel: true`, finite positive width/height, and screenshot scales
+consistent within one physical rounding pixel per axis. Unknown/nested contexts
+fail before inference or input; it never guesses or queries legacy frame offsets.
+Existing legacy iframe/fallback behavior remains unchanged. Result metadata includes `coordinate_profile`,
+`model_image_size`, `coordinate_grid_size`, `original_screenshot_size`,
+`coordinates`, `observed_viewport` and `viewport_css`. The submitted image size and coordinate grid
+are separate for the legacy normalized profile; diagnostics label both explicitly.
+Do not apply the profile to another model merely because its filename says7B.
+
+`verify`/`find` return a proposed location without clicking. A model response or
+parse success is not a button/playback test: independently check the fresh frame,
+execute authorized input through the approved controller, then observe the full
+result. Unknown model provenance or geometry blocks actuation. The static
+Storytime probe is development evidence, not autonomous gameplay or WRE admission.
+Results now expose `proposal_only` and `action_executed`. Click/type/scroll only
+report success when the existing browser actuator returns `{ok: true}` exactly;
+sentinel denial, missing element or missing acknowledgement report failure/error
+and emit `action_failed`. This confirms dispatch only, not the application's
+eventual outcome; observe playback/navigation/state independently afterward.
+
 ```python
 class UITarsBridge:
     """Bridge to UI-TARS Desktop for vision-based browser automation."""
