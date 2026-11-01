@@ -1,5 +1,36 @@
 # FoundUps blockchain reconciliation and security decision — 2026-10-31
 
+## Allocation delivery and stored Chroma security hold — 2026-11-01
+
+[PR2290](https://github.com/FOUNDUPS/Foundups-Agent/pull/2290) delivered allocation
+source at `5d9f91346b75f4ae330aa64dbf737e766106d6da`, candidate-identical tree
+`7fdbb0fcda2fa25b6fe5edca3631ce09afd2663b`: 40 PR/21 main checks and 20 C/O blob
+bindings pass. Exactly 17,227 untracked pathnames were preserved at reconciliation,
+without content hashes or a whole-interval claim; all 502 frozen evidence files
+were independently C/O hash-verified. Delivery report SHA256:
+`0b73f3618f876af9e7061cbd2f4943f76b582ffe8f9105aafc9e856214fba86d`.
+The [allocation receipt](receipts/FOUNDUPS_ALLOCATION_PREFLIGHT_20261101.json) retains
+its sealed prepublication scope; later delivery does not rewrite it.
+
+The dependency snapshot records 44 open alerts, including critical ChromaDB
+[UPDATE_COLLECTION](https://github.com/advisories/GHSA-36p7-vc44-83pf) and
+[pre-auth collection](https://github.com/advisories/GHSA-f4j7-r4q5-qw2c) advisories.
+Both include pinned/metadata-observed 1.5.5 and list no patched version at review.
+[Issue 6717](https://github.com/chroma-core/chroma/issues/6717) separately reports
+client-side exposure independent of server language; repository source review
+confirms local config/schema constructor paths. No local compromise, blockchain
+hack or AI participation is established.
+
+The class-B [existing-owner guard](../../holo_index/INTERFACE.md#stored-chroma-settings-admission--2026-11-01) has bounded local source/pure, safe
+scratch-native and package acceptance; [TestModLog](../../holo_index/tests/TestModLog.md#stored-settings-local-qualification--2026-11-01) owns outcomes, failures
+and explicit sparse-sentinel oracle corrections. It constrains these Holo callers,
+not every installed SDK consumer or upstream vulnerability. Pending at this local
+prepublication checkpoint: protected publication, new-source PC/Holo and explicit
+maintenance release. The controller remains held, global runtime closure unproved
+and upstream advisories open. The [existing AI threat map](#ai-exposed-financial-attack-surfaces)
+stays canonical; B03 fee research, class-D units, funded accounting, independent
+issuer/signer and chain activation remain unresolved or blocked.
+
 ## Allocation numeric preflight and delivered-source checkpoint — 2026-11-01
 
 PR2288 merged at `d9279817b45d9339d62bccfb0fa6965a305c688d`. Concurrent

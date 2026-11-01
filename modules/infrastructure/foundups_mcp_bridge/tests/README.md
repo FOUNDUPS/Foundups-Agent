@@ -1,5 +1,13 @@
 # foundups_mcp_bridge Tests
 
+## Stored-settings snapshot controls — 2026-11-01
+
+The existing snapshot owner tests inert getters, complete baseline preflight,
+no early pages and preserved publication under the [Holo API](../../../../holo_index/INTERFACE.md#stored-chroma-settings-admission--2026-11-01).
+[TestModLog](../../../../holo_index/tests/TestModLog.md#stored-settings-local-qualification--2026-11-01) owns exact phases, corrections and unqualified native cases.
+Local/scratch-native and package passes do not certify an active store, complete
+dependency closure or permission to run maintenance.
+
 ## MCP runtime compatibility
 
 The `mcp-runtime-compatibility` Windows CI job selects the existing launcher,

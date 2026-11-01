@@ -1,5 +1,12 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-11-01 — Snapshot admission qualified within local scope
+
+WSP11/15/22/48/50/62/84/97. Existing snapshot publication uses the shared
+[Holo API](../../../holo_index/INTERFACE.md#stored-chroma-settings-admission--2026-11-01) and captured metrics before paging. [TestModLog](../../../holo_index/tests/TestModLog.md#stored-settings-local-qualification--2026-11-01) retains
+failed attempts, explicit corrections and final local/safe-scratch evidence.
+Protected publication/new-source PC/Holo and controller release remain pending.
+
 ## 2026-10-26: Coordinated FastMCP 3.4.11 security candidate
 
 Update the HTTP launcher's exact dependency contract, requirement, and query

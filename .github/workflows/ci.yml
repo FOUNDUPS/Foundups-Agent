@@ -1175,6 +1175,34 @@ jobs:
       - name: Run Qwen package import contracts
         run: python -I -S -B holo_index/tests/test_qwen_package_import.py -v
 
+      - name: Verify stored Holo settings admission without native stores
+        env:
+          PYTHONUTF8: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHON_DOTENV_DISABLED: '1'
+          HOLO_SKIP_MODEL: '1'
+          HOLO_OFFLINE: '1'
+          HOLO_DISABLE_PIP_INSTALL: '1'
+          HF_HUB_OFFLINE: '1'
+          TRANSFORMERS_OFFLINE: '1'
+        run: >-
+          python -B -m pytest -q --tb=short -c /dev/null --noconftest
+          --import-mode=importlib -o pythonpath=. -p no:cacheprovider
+          --deselect=holo_index/tests/test_vector_segment_durability.py::test_legacy_subthreshold_generation_is_not_durable
+          --deselect=holo_index/tests/test_vector_segment_durability.py::test_live_collection_policy_requires_complete_schema
+          --deselect=holo_index/tests/test_vector_segment_durability.py::test_durable_generation_survives_four_cleared_client_opens
+          --deselect=holo_index/tests/test_vector_segment_durability.py::test_checkpoint_plus_tail_survives_real_subprocess_probe
+          --deselect=holo_index/tests/test_vector_segment_durability.py::test_missing_persisted_metadata_rejects_named_collection
+          --deselect=holo_index/tests/test_vector_segment_durability.py::test_changed_persistence_policy_rejects_named_collection
+          --deselect=holo_index/tests/test_vector_segment_durability.py::test_vectors_junction_to_external_store_is_rejected
+          --deselect=modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_snapshot_store.py::test_real_chroma_export_is_queryable_without_chroma_reopen
+          holo_index/tests/test_vector_segment_durability.py
+          holo_index/tests/test_complete_source_indexing.py
+          modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_snapshot_store.py
+          holo_index/tests/test_isolated_collection_snapshot_probe.py
+          holo_index/tests/test_holoindex_storage_contract.py
+
       - name: Run social scheduler execution evidence
         env:
           PYTHONDONTWRITEBYTECODE: '1'

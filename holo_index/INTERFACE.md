@@ -1,3 +1,51 @@
+## Stored Chroma settings admission — 2026-11-01
+
+API: `validate_collection_raw_settings(collection) -> str` in
+`holo_index.vector_segment_durability`, raising
+`UnsafeCollectionSettingsError(ValueError)` with fixed message
+`HOLOINDEX_UNSAFE_COLLECTION_SETTINGS`. The [test history](tests/TestModLog.md#stored-settings-local-qualification--2026-11-01) binds corrected
+local and literal scratch-native acceptance; this is not upstream SDK remediation,
+global runtime closure or persistent-maintenance authority.
+
+The helper captures supported native-model `configuration_json` and
+`serialized_schema` as inert data, without `.configuration`, `.schema`, EF registry
+lookup, `is_legacy` or model construction, returning l2/cosine/ip. Direct EF accepts
+absence/None or exact `{"type":"legacy"}`. Whole schema None is inert empty;
+present nested schema EF None rejects. Exact legacy specs are accepted in schema.
+Exact `{"type":"known","name":"default","config":{}}` is accepted only in direct
+configuration/dense-schema slots under pinned 1.5.5; the guard constructs nothing,
+while the SDK may later construct that inert default. Sparse slots additionally
+accept only exact `{"type":"unknown"}`, the pinned absent-EF sentinel decoded to
+None before builders. Direct/dense unknown, known sparse constructors, extra EF
+keys/kwargs and trust_remote_code (even false) reject. Bounded non-EF JSON padding
+and harmless column names remain allowed.
+
+Both roots require exact builtin JSON types/keys, finite floats and acyclic
+containers. Limits: depth 16 inclusive with roots at zero; 4,096 occurrence nodes
+including keys; 256,000 string code points; 2,048-bit integer magnitude before
+serialization. Shared acyclic aliases count per occurrence. Combined compact
+ensure_ascii/allow_nan=False JSON size is at most 256,000 bytes, without a separator
+between roots. Preflight bounds intermediate encoded representation below 6 MiB,
+not peak RSS; serialization still precedes the final byte check. Every SDK-consumed
+dense/sparse slot in defaults and all named keys is checked, including disabled/
+non-embedding keys, without substring-based name denial.
+
+Core maintenance ensure/create/reset, persisted-proof open and export admit supported handles
+before downstream use. Unsafe refusal is distinct from missing/durability storage
+and cannot trigger reset. Persisted-open refusal attempts owned-client cleanup;
+outer core startup cleanup/error precedence and readonly AST remain unchanged,
+without arbitrary native-failure guarantees. Export admits every fixed baseline
+collection before any page, then uses captured metrics; refusal publishes no
+generation and preserves published artifacts. Owned staging may still occur;
+immutable query snapshots remain separate. Reopened/exported handles revalidate
+under trusted serialized hosting, without global use-time locking, concurrent
+native writers, arbitrary monkeypatch or whole-store rollback promises.
+
+Local/scratch-native acceptance authorizes no current-store inspection/reset,
+package mutation, arbitrary EF invocation, provider or controller. Protected
+publication, new-source PC/Holo, runtime qualification and an explicit governed
+release remain pending; upstream advisories and chain activation remain open or blocked.
+
 ## Explicit local-model ownership — 2026-10-01
 
 `QwenInferenceEngine.close() -> None` detaches its model and clears initialized

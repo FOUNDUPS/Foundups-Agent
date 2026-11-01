@@ -1,5 +1,13 @@
 # FoundUps MCP Bridge Interface
 
+## Stored-settings gate for snapshot publication — 2026-11-01
+
+The [Holo API](../../../holo_index/INTERFACE.md#stored-chroma-settings-admission--2026-11-01) governs raw-model admission and captured metrics before any
+baseline page read. Refusal publishes no generation and preserves published
+artifacts, while owned staging may occur. [Test history](../../../holo_index/tests/TestModLog.md#stored-settings-local-qualification--2026-11-01) binds local scope
+and remaining gates; route grants, immutable replicas, global runtime closure
+and explicit controller release remain separate.
+
 ## Public API
 
 ### Holo owner runtime identity

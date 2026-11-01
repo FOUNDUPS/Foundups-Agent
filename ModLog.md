@@ -25,6 +25,15 @@ partial compatibility checks, not native author execution or retained RSI.
 See [current runtime evidence and remaining gates](docs/operations/RSI_SWARM_DISPATCH.md#host-repair-and-isolated-upgrade-qualification--2026-11-01).
 Private account/configuration recovery state stays outside Git.
 
+## 2026-11-01 — Local stored-settings guard with explicit delivery hold
+
+WSP11/15/22/48/50/62/84/97; class B, 18/P0. Existing Holo owners qualify raw settings
+before callback-capable SDK use/publication under the [API](holo_index/INTERFACE.md#stored-chroma-settings-admission--2026-11-01).
+[Test history](holo_index/tests/TestModLog.md#stored-settings-local-qualification--2026-11-01) retains initial native failure and explicit narrow oracle/
+fixture corrections; the [checkpoint](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#allocation-delivery-and-stored-chroma-security-hold--2026-11-01) separates delivered allocation
+source. Protected publication/new-source PC/Holo and controller release remain
+pending; no upstream advisory or deployment clearance is claimed.
+
 ## 2026-11-01 — Local allocation admission and preparation checkpoint
 
 WSP11/15/22/26/48/50/62/84/97; class B, 18/P0 (4/5/5/4). Candidate repair reuses

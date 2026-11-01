@@ -1,3 +1,12 @@
+## Stored-settings local guard; maintenance hold — 2026-11-01
+
+Existing Holo owners validate persisted raw settings before callback-capable SDK
+use under the [API contract](INTERFACE.md#stored-chroma-settings-admission--2026-11-01). [Test history](tests/TestModLog.md#stored-settings-local-qualification--2026-11-01) records scoped local and
+literal scratch-native acceptance, failed attempts and explicit corrections.
+The [checkpoint](../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#allocation-delivery-and-stored-chroma-security-hold--2026-11-01) separates this application guard from open upstream
+advisories, complete runtime closure and new-source delivery. No persistent
+controller, dependency upgrade or new CURRENT result is released here.
+
 ## Qualified native-chat proposal option
 
 The existing WRE-to-Qwen caller now has an explicit, default-off native-chat
