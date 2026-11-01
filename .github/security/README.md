@@ -1,3 +1,16 @@
+## Epoch replay runtime metadata review — 2026-11-01
+
+The pinned Gitleaks 8.30.1 committed-tree scan at 0844cd743 reports 39 exact
+manifest findings (37 generic-api-key, two discord-api-token). Independent and
+architect reviews reconstruct all 39 complete path/hash pairs from immutable
+Git sources. Every value and five-line context matches previously reviewed
+public metadata; inserting the private epoch helper shifted their locations.
+Append only those 39 current whole-file/path/rule/line fingerprints, preserving
+all 3,119 prior records (3,158 total). No scanner rules, exclusions, scope or
+fingerprint algorithm changed. Independent proof SHA256:
+`138fd14709bea8e7ae53baa338795edb73cad0327c918c90e4b9a57e3274b929`.
+Fresh committed-tree/introduced-history and hosted checks remain required.
+
 ## Wallet policy source binding review — 2026-11-01
 
 The pinned Gitleaks 8.30.1 changed-file scan at 8367d2f50 reports 39 exact
