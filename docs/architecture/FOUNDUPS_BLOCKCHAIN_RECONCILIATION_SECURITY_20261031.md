@@ -1,5 +1,87 @@
 # FoundUps blockchain reconciliation and security decision — 2026-10-31
 
+## Allocation numeric preflight and delivered-source checkpoint — 2026-11-01
+
+PR2288 merged at `d9279817b45d9339d62bccfb0fa6965a305c688d`. Concurrent
+PR2289 advanced main to `de6917e59c68cc2036622741455737366242bde7` without
+changing the 174 simulator/FAM Python source snapshots, nine Holo contracts or
+1,481 runtime members. Fresh de6917 qualification passes 21 source checks,
+including all five required app-15368 contexts; primary/control source readback
+passes separately, with unrelated PC files preserved. Separate control and actual
+primary semantic queries are CURRENT with no index gap at de6917: committed-head evidence
+only; lexical bundles remain UNKNOWN with an index gap and exact installed/native runtime
+closure remains false. Reserve source delivery is complete. Historical d927 has
+21 source successes and a separate failed
+Dependabot frontend-maintenance job; retain that failure and the original ENOSPC
+attempt/successful single retry. Earlier sealed quote receipts remain unchanged.
+
+The allocation candidate implements **class B, WSP15 18/P0 (4/5/5/4)** in existing owners:
+`AgentExecutionWallet.receive_allocation`, `HumanUPSAccount.allocate_to_agent`,
+`TokenEconomicsEngine.human_allocates_to_agent` and `SwarmFoundUp.register_agent`.
+Unsupported/non-finite/negative operands and prospective overflow are rejected
+before participating numeric, installed-policy or MetaGPT registration changes.
+Composite source is mandatory: None is invalid source state, not an absence or
+unfunded-credit sentinel. Standalone wallet credit remains separate bookkeeping.
+Numeric scalar hooks do not execute. Accepted built-in int/float arithmetic,
+legacy lookup/allocator precedence and valid insufficient funding behavior,
+including MetaGPT zero-wallet registration, are preserved.
+
+Composite human/engine/MetaGPT allocation omits the previous standalone wallet
+receipt INFO log, as allowed before implementation. Logging is neither settlement
+evidence nor rollback authority.
+
+This is native-state admission and precommit preparation under a trusted
+serialized host. It does not supply arbitrary receiver/property-hook rollback,
+postcommit logging rollback, concurrency isolation, durable reservations, B05
+funded conservation, a global UPS unit or full A02 authority protection. B03 class
+C/D and the signer/activation gates remain open. It adds no runtime owner or
+resource-cap authority.
+
+Frozen pre-edit evidence remains separate: existing baseline 311 passes; desired
+171 cases have 48 passes/123 failures. The delivered de6917 source/PC/Holo
+checkpoint does not qualify this allocation candidate.
+
+- Independent candidate acceptance: The 171 frozen cases plus 25 independent held-outs passed: 196 cases. The 311
+  original regressions passed with exact prior case IDs. Zero errors, skips or guard
+  denials were recorded; 174 simulator/FAM Python source snapshots remained stable.
+  Independent source/AST/budget review reports no material findings within the
+  frozen native-state contract.
+  Source ceilings are met: numeric helper 176/185 lines, token economics
+  1,392/1,393 and MetaGPT 639/643; unrelated source ASTs are preserved.
+- The 171 frozen controls are promoted into existing
+  `test_allocation_and_treasury_runtime.py` (336 lines), preserving the original
+  prefix/AST and frozen non-docstring AST. Its actual 173-case subset is verified
+  within the broad run below.
+- Promoted/broader regressions: The broad run passed 1,190 cases: the prior 1,019 plus 171 promoted controls.
+  The promoted owner contributes 173 cases, derived from that broad result rather
+  than another run. The same three SSE HTTP cases were deselected; zero failures,
+  errors, skips or guard denials; 174 source snapshots remained stable. The 25
+  external held-outs are outside 1,190, and these overlapping scopes are not added.
+- Controlled finite-profile parity: Fresh de6917 baseline and candidate controlled 240-tick traces match raw bytes,
+  SHA256 `672d12c9d8fb6286624ea892fb3a5d0315c475ee45f8c83c9a271ba4328f0ff1`.
+  This finite process/profile observation is not seed-only or whole-model proof.
+- Canonical packaging: Canonical package qualification passed eight Python cases and three Node
+  entrypoints; registry 1,800/260 is unchanged. The same 1,481 ordered members remain,
+  with only the numeric-helper and token-economics runtime hashes changed; MetaGPT
+  is outside the closure. Canonical digest is
+  `7d35294b980d4f4e329edf003e7e96337e3a6413c288764e2f07d5a465c3980e`.
+  Manifest LF/CRLF sizes are 334,850/337,885 bytes under the unchanged 337,920 cap,
+  leaving 35 bytes; individual 2 MiB and total 32 MiB caps are unchanged. This
+  qualifies staged package bytes, not hosted checks, installed closure or activation.
+  No runtime member, accepted-count or byte-cap increase was introduced.
+- Fresh security/publication/main/PC/Holo: Pending at this prepublication checkpoint: fresh immutable security gate, protected
+  PR, resulting-main checks and new-source PC/Holo qualification; later observations
+  belong in separately dated delivery evidence.
+
+The [allocation preflight receipt](receipts/FOUNDUPS_ALLOCATION_PREFLIGHT_20261101.json)
+binds source, corrected precode ceilings, test/trace/package evidence and portable
+held-out reproduction sources. The old verifier ceiling typo remains preserved
+in its original report and corrected by a separate addendum; no budget increased.
+
+This dated reserve source-delivery checkpoint closes its corresponding older
+pending notes below. Candidate publication/main/PC/Holo and all economic
+activation gates remain separate.
+
 ## Concurrent-main quote reconciliation — 2026-11-01
 
 This dated prepublication qualification tested the uncommitted merge overlay of owned

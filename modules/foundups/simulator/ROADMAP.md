@@ -1,5 +1,35 @@
 # ROADMAP - FoundUps Simulator
 
+## 2026-11-01 — Native allocation numeric prerequisite
+
+- [x] PR2288 source published at d927; unchanged blockchain/runtime source reaches
+  de6917 through Vote PR2289. Fresh 21/21 source checks and separate PC/control
+  readback pass; old quote and reconciliation receipts stay sealed.
+- [x] Governed exact-de6917 C/O semantic queries CURRENT with no index gap; exact runtime
+  closure remains false and lexical bundle freshness UNKNOWN. Historical d927
+  dependency maintenance failure stays separate from accepted source checks.
+- [x] Class-B18/P0 candidate: native allocation numeric/policy/result preparation before
+  participating balances/counters and MetaGPT registrations change; four existing
+  entrypoints, valid arithmetic and legacy lookup/insufficient behavior retained.
+- [x] Executed candidate: The 171 frozen cases plus 25 independent held-outs passed: 196 cases. The 311
+  original regressions passed with exact prior case IDs. Zero errors, skips or guard
+  denials were recorded; 174 simulator/FAM Python source snapshots remained stable.
+  Independent source/AST/budget review reports no material findings within the
+  frozen native-state contract.
+- [x] Controlled fresh de baseline/candidate 240-tick raw traces match under the
+  finite process profile; this is not seed-only or whole-model proof.
+- [x] Final independent source/AST/budget review reports no material findings
+  within the frozen native-state contract; all allocated source ceilings hold.
+- [x] Broad execution passes 1,190 with the same three SSE HTTP deselections and
+  zero failures/errors/skips/guard denials; promoted 173 is a derived subset.
+- [x] Package eight Python/three Node and registry 1,800/260 pass; same 1,481
+  members, only two resident hashes changed, unchanged caps and 35 CRLF bytes free.
+- [ ] Fresh security, publication and candidate-main/PC/Holo qualification.
+  Delivered-de checks do not qualify this allocation candidate.
+
+This local preparation layer does not close B03 C/D, B05 funding, full A02,
+arbitrary receiver/logging rollback, durable recovery or chain activation.
+
 ## 2026-11-01 — Concurrent-main quote delivery
 
 The [reconciliation receipt](../../../docs/architecture/receipts/FOUNDUPS_RESERVE_QUOTE_RECONCILIATION_20261101.json)

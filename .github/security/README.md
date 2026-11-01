@@ -1,3 +1,16 @@
+## Allocation preflight runtime metadata review — 2026-11-01
+
+Pinned Gitleaks 8.30.1 at source commit 844a8057b reports 39 committed-tree
+manifest findings and two introduced-history observations of the same bindings.
+Architect and independent reviews reconstruct every complete source path/hash
+pair from immutable Git: 37 source values are unchanged, and the two qualified
+numeric-helper/token-economics source digests change. All 39 prior member/rule/line
+bindings are independently matched against main de6917. Append only 39 exact
+whole-file/path/rule/line fingerprints, preserving all 3,281 prior records
+(3,320 total). No scanner rule, exclusion, scope or fingerprint algorithm changes.
+Independent proof SHA256: `0f91d0a657aae7c74a8a92c313751ce5860692e0acd302f66efc13fc50999c0e`.
+Fresh committed-tree/introduced-history and hosted checks remain required.
+
 ## Vote aggregate trial backlog metadata review — 2026-11-01
 
 Pinned Gitleaks8.30.1 finds six existing generic-api-key metadata rows in the

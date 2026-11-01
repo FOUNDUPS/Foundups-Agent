@@ -91,6 +91,36 @@ remain absent. Process death, allocation failure and arbitrary unsynchronized
 mutation of public objects/configuration are outside this guarantee. See the
 [current evidence and AI threat map](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#replay-safe-epoch-settlement-and-ai-threat-update--2026-11-01).
 
+## Native allocation admission contract — 2026-11-01
+
+Execution and independent scoped source review are accepted:
+The 171 frozen cases plus 25 independent held-outs passed: 196 cases. The 311
+original regressions passed with exact prior case IDs. Zero errors, skips or guard
+denials were recorded; 174 simulator/FAM Python source snapshots remained stable.
+Independent source/AST/budget review reports no material findings within the
+frozen native-state contract.
+The implemented scoped contract covers `AgentExecutionWallet.receive_allocation`,
+`HumanUPSAccount.allocate_to_agent`, `TokenEconomicsEngine.human_allocates_to_agent`
+and `SwarmFoundUp.register_agent` with supported native account/wallet state under
+a trusted serialized host. Exact built-in int/float operands/results must be
+finite and nonnegative under the existing arithmetic; bool, numeric subclasses
+and coercible objects are rejected without executing numeric hooks. Relevant
+existing balances/counters, prospective results and policy are prepared before
+participating numeric/policy/MetaGPT registration changes. Composite source is
+mandatory: None is invalid source state and never an absence/unfunded-credit
+sentinel. Standalone wallet receipt uses separate checked additions.
+
+Composite human/engine/MetaGPT allocation omits the previous standalone wallet
+receipt INFO log, as allowed before implementation. Logging is neither settlement
+evidence nor rollback authority.
+
+Keep legacy missing/wrong-allocator and unknown-owner precedence. A valid request
+above funds still leaves core balances unchanged; MetaGPT retains zero-wallet
+registration for valid insufficient funds. Existing empty-policy behavior stays
+as specified below. This is no arbitrary override/property-hook rollback,
+postcommit logging rollback, concurrency/durability guarantee, global precision
+choice, funded conservation, signing authority or full A02 protection.
+
 ## AgentExecutionWallet policy contract — 2026-11-01
 
 Constructor and trusted `policy_gates = value` replacement accept a plain dict

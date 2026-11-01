@@ -5,7 +5,7 @@ transient calculations, not settlement or economic authority.
 """
 
 import math
-from typing import NamedTuple
+from typing import NamedTuple, Optional
 
 
 class _WalletValues(NamedTuple):
@@ -13,6 +13,12 @@ class _WalletValues(NamedTuple):
     balance: float
     spent: float
     fee: float
+
+
+class _AllocationValues(NamedTuple):
+    source_balance: float
+    wallet_balance: float
+    wallet_allocated: float
 
 
 class _AdoptionValues(NamedTuple):
@@ -65,6 +71,20 @@ def _checked_add(*values) -> float:
     result = sum(values)
     _require_numbers(result)
     return result
+
+
+def _allocation_values(
+    amount: float, source: float, balance: float, allocated: float,
+) -> Optional[_AllocationValues]:
+    """Prepare all participating values for a human-to-wallet transfer."""
+    _require_numbers(amount, source, balance, allocated)
+    if amount > source:
+        return None
+    remaining = source - amount
+    _require_numbers(remaining)
+    return _AllocationValues(
+        remaining, _checked_add(balance, amount), _checked_add(allocated, amount),
+    )
 
 
 def _fee_values(amount: float, rate: float) -> tuple[float, float]:
