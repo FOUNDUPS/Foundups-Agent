@@ -56,22 +56,23 @@ export async function loadMovieFrames(video,{fetcher=fetch,importer=url=>import(
  if(typeof renderer.scene!=='function'||typeof renderer.scenePresentation!=='function')throw Error('Invalid movie renderer');
  return {...recording,renderer};
 }
-export function mountMoviePresentation({video,panel,surface,wordPlacement='below',captionAvailable=true,onChange=()=>{},load=()=>loadMovieFrames(video),document:doc=globalThis.document,requestFrame=cb=>requestAnimationFrame(cb),cancelFrame=id=>cancelAnimationFrame(id),observe=cb=>new ResizeObserver(cb)}){
+export function mountMoviePresentation({video,panel,surface,wordPlacement='below',captionAvailable=true,inline=false,onChange=()=>{},load=()=>loadMovieFrames(video),document:doc=globalThis.document,requestFrame=cb=>requestAnimationFrame(cb),cancelFrame=id=>cancelAnimationFrame(id),observe=cb=>new ResizeObserver(cb)}){
  if(!movieWordPlacements.includes(wordPlacement))throw new TypeError('Unknown movie word placement');
  if(typeof captionAvailable!=='boolean')throw new TypeError('Unknown movie caption availability');
+ if(typeof inline!=='boolean')throw new TypeError('Unknown inline movie presentation');
  const effectivePlacement=()=>wordPlacement==='below'&&captionAvailable?'below':'scene';
  panel.dataset.wordPlacement=effectivePlacement();
  const layer=doc.createElement('div');layer.className='movie-scene';layer.setAttribute('aria-hidden','true');layer.hidden=true;surface.append(layer);
  let recording=null,pending=null,failed=false,disposed=false,callback=null,last='',enabled=false;
- const status=()=>({wordPlacement,effectivePlacement:effectivePlacement(),captionAvailable,expanded:enabled&&!disposed,ready:!!recording&&!failed&&!disposed,failed});
+ const status=()=>({wordPlacement,effectivePlacement:effectivePlacement(),captionAvailable,expanded:enabled&&!disposed,inline,ready:!!recording&&!failed&&!disposed,failed});
  const notify=()=>onChange(status());
- const visible=()=>enabled&&!doc.hidden&&!disposed&&!failed;
+ const visible=()=>(enabled||inline)&&!doc.hidden&&!disposed&&!failed;
  function cancel(){if(callback){if(callback.video)video.cancelVideoFrameCallback(callback.id);else cancelFrame(callback.id);callback=null;}}
  function draw(time=video.currentTime){
   if(!visible()||!recording)return;
   const {width,height}=surface.getBoundingClientRect();if(!(width>0&&height>0))return;
-  const index=movieFrameIndex(time,recording),key=[index,width,height,effectivePlacement()].join(':');
-  if(key!==last){const owner=recording.renderer;layer.innerHTML=owner.scene({...recording.frames[index],showWords:effectivePlacement()==='scene',presentation:owner.scenePresentation(width,height,true)});last=key;}
+  const index=movieFrameIndex(time,recording),key=[index,width,height,enabled,effectivePlacement()].join(':');
+  if(key!==last){const owner=recording.renderer;layer.innerHTML=owner.scene({...recording.frames[index],showWords:effectivePlacement()==='scene',presentation:owner.scenePresentation(width,height,enabled)});last=key;}
   layer.hidden=false;panel.classList.add('movie-responsive');
  }
  function schedule(){
@@ -82,7 +83,7 @@ export function mountMoviePresentation({video,panel,surface,wordPlacement='below
  function refresh(){cancel();if(!visible()){layer.hidden=true;return;}draw();schedule();}
  function setExpanded(value){
   enabled=value===true;
-  if(!enabled){cancel();layer.hidden=true;panel.classList.remove('movie-responsive');notify();return;}
+  if(!enabled&&!inline){cancel();layer.hidden=true;panel.classList.remove('movie-responsive');notify();return;}
   if(!recording&&!pending&&!failed){pending=Promise.resolve().then(load).then(result=>{recording=result;refresh();notify();}).catch(()=>{failed=true;layer.hidden=true;panel.classList.remove('movie-responsive');notify();});}
   refresh();notify();
  }

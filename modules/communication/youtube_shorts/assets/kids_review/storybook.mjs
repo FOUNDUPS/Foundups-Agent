@@ -2,7 +2,7 @@
 // its page clock is deliberately independent of the film's media clock.
 import {StorybookPlayback} from '../storytime/cue-scheduler.mjs';
 import {rig} from '../storytime/rig.mjs';
-import {createSpeechChannel} from './story-narration.mjs?rev=safe-sounds-26';
+import {createSpeechChannel} from './story-narration.mjs?rev=word-space-27';
 
 export function mountStorybook({dialog,video,narration,beforePlay=()=>{},onFinish=()=>{}}){
  const $=id=>dialog.querySelector('#'+id),cleanup=[];

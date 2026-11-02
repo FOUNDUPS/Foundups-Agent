@@ -1,5 +1,36 @@
 # Single teaching-word presentation — single-word-25
 
+## Current direction — word-space-27
+
+The same outside-word layout now applies to the small page player and fullscreen.
+The verified recorded scene shows no learning word when Outside picture is
+selected. The separate word occupies brown space beneath the picture, centered
+horizontally and vertically within the reserved region. On a short landscape
+fullscreen the established side region preserves scene size and leg continuity.
+On picture restores the original scene label and hides the separate word in both
+sizes. Nothing is deleted from the original renderer. Native failure still uses
+the baked film word, because an overlay cannot remove lettering from an MP4.
+
+Compact presentation is an explicit inline:true option on the existing presenter;
+other callers retain earlier lifecycle semantics. Same MP4 audio/transport clock,
+recorded actors and original renderer generation. Compact uses canonical540-world
+height; fullscreen uses its established extended scene. Switching size or profile
+never seeks/resets/resumes the movie or runs gameplay. The grown-up menu pauses.
+
+The caption binary fitter now has room to grow up to240px, constrained by actual
+measured width/height. Compact caption height scales128–216px with viewport width;
+fullscreen uses the available lower brown region. Final phone/tablet floors stay
+48/56px and distant<near<landing THUMPs remain ordered. Short landscape retains
+its bounded prior exception. No assumption that a three-year-old can read is
+introduced; recognizable Play/Pause/X and narration remain. These are product
+review thresholds, not evidence of child comprehension.
+
+Current proof is separate under
+`O:/Foundups-Agent/outputs/storytime-word-space-20261102/`; historical25 cases
+below remain receipts. In particular, the old claim that compact is always native
+is superseded for opted-in ready presentation. No26media/audio/outcome rule changes.
+
+
 Default expanded playback shows one word outside the picture. The caption is
 centered between the canonical picture lower boundary and the controls, with
 8px clearance. Short landscape uses the established right-hand region. A grown-up

@@ -1,5 +1,14 @@
 # EDUIT execution roadmap
 
+## 2026-11-02 — Use the brown word space at either player size
+
+012 requests a clean animation and separate centered words in brown space,
+with adaptive half/fullscreen lettering and progressively growing THUMP. Extend
+the existing verified movie presentation to compact playback; preserve both
+placement choices, current clocks/media and native fallback. Review rendered
+compact/fullscreen at six sizes, both modes, expansion/collapse and actual
+playback before publication. No new renderer, movie export or learning engine.
+
 ## 2026-11-02 — Meaning before cue presence
 
 012 corrects SQUISH semantics: only a mammal caught in the collapse permits it.

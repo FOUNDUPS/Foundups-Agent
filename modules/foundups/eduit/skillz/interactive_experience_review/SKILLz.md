@@ -1,7 +1,7 @@
 ---
 name: interactive_experience_review
 description: Audit and iteratively repair audience-specific games and web interfaces, including EDUIT Storytime timing, touch controls, learning cues, scoring and feedback. Use before implementation and after inspecting each changed output.
-version: 0.3.9
+version: 0.3.10
 intent_type: AUDIT
 promotion_state: prototype
 ---
@@ -35,14 +35,17 @@ for legitimate branches. Preserve art/motion and unchanged engine inputs.
 
 ## One teaching word and delivery review
 
-For Storytime25, freeze one effective visual channel. Outside picture is default
+For Storytime27, freeze one effective visual channel in compact and fullscreen. Outside picture is default
 in expanded movie; On picture remains a grown-up comparison. Check actual word
 bounds centered between canonical picture and controls (or short-landscape side
 region), both routes and all six sizes. Absolute grid children must reset inherited
 grid placement before using panel-relative top/bottom. Test final scaled action
 fonts, not only base font sizes:48px phone/56px tablet where the outside region
 supports them, strict far<near<contact. Preserve the existing short-landscape
-compact exception explicitly. Test unavailable captions/renderer/native playback:
+compact exception explicitly. Fit to actual region bounds with adaptive maximum240px; inspect whether larger
+full-screen space is actually used instead of retaining a fixed small cap. Verify
+canonical compact geometry and retained time on expand/back. Test unavailable
+captions/renderer/native playback:
 baked film words stay visible and extra HTML words disappear.
 
 Retain failed baselines; do not relax geometry/font oracles to turn red green.

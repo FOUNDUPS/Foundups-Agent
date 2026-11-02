@@ -1,7 +1,7 @@
-import {mountNarration,replayNarrationCues} from './story-narration.mjs?rev=safe-sounds-26';
+import {mountNarration,replayNarrationCues} from './story-narration.mjs?rev=word-space-27';
 import {mountMusicPicker} from './music-picker.mjs';
 import {mountChoiceWheel} from './choice-wheel.mjs';
-import * as movieView from '../storytime/movie-presentation.mjs?rev=safe-sounds-26';
+import * as movieView from '../storytime/movie-presentation.mjs?rev=word-space-27';
 import {appearanceFor} from '../storytime/rig.mjs';
 import {bindPanelGestures} from '../storytime/panel-gestures.mjs';
 import {locales,normalizeLocale} from '../storytime/learning-events.mjs';
@@ -42,7 +42,7 @@ $('video').onplay=()=>api()?.freeze();new ResizeObserver(paint).observe(ink);lis
 const gamePanel=$('game-panel'),videoPanel=$('video-panel'),video=$('video');
 let movieWordPlacement='below';
 try{const saved=localStorage.getItem('eduit.movie-word-placement.v1');if(movieWordPlacements.includes(saved))movieWordPlacement=saved;}catch{}
-const moviePresentation=mountMoviePresentation({video,panel:videoPanel,surface:video.closest('.surface'),wordPlacement:movieWordPlacement,captionAvailable:false,onChange:updateMovieWordStatus});
+const moviePresentation=mountMoviePresentation({video,panel:videoPanel,surface:video.closest('.surface'),wordPlacement:movieWordPlacement,captionAvailable:false,inline:true,onChange:updateMovieWordStatus});
 const expandIcon='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H3v6m12-6h6v6M3 15v6h6m12-6v6h-6"/></svg>';
 const collapseIcon='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h6V3m6 0v6h6M9 21v-6H3m12 6v-6h6"/></svg>';
 let lastViewport="";
@@ -123,14 +123,14 @@ const advanced=document.createElement('details');advanced.id='menu-advanced';con
 function updateMovieWordStatus(state){
  const host=$('movie-word-options');if(!host)return;
  for(const choice of host.querySelectorAll('[data-word-placement-choice]'))choice.setAttribute('aria-pressed',String(choice.dataset.wordPlacementChoice===state.wordPlacement));
- $('movie-word-status').textContent=!state.expanded?'Expand the video to compare placement.':state.failed?'Separate word unavailable. The movie shows its own words.':!state.ready?'Preparing the expanded view…':state.wordPlacement==='below'&&!state.captionAvailable?'Separate word unavailable. The picture shows its own word.':state.wordPlacement==='below'?'One word below the picture, or beside it on a wide screen.':'One word on the picture.';
+ $('movie-word-status').textContent=state.failed?'Separate word unavailable. The movie shows its own words.':!state.ready?'Preparing the picture…':state.wordPlacement==='below'&&!state.captionAvailable?'Separate word unavailable. The picture shows its own word.':state.wordPlacement==='below'?'One word below the picture, or beside it on a wide screen.':'One word on the picture.';
 }
 // Older cached presenters keep their usable movie without a new named-export
 // dependency or controls for methods they do not implement.
 if(typeof moviePresentation.setWordPlacement==='function'&&typeof moviePresentation.status==='function'){
 const wordOptions=document.createElement('fieldset');wordOptions.id='movie-word-options';
 const wordLegend=document.createElement('legend');wordLegend.textContent='Teaching word placement';wordOptions.append(wordLegend);
-const wordNote=document.createElement('p');wordNote.textContent='Expanded video: one word outside the picture, or on it.';wordOptions.append(wordNote);
+const wordNote=document.createElement('p');wordNote.textContent='One word outside the picture, or on it. Both player sizes use this choice.';wordOptions.append(wordNote);
 for(const [value,label]of [['below','Outside picture'],['scene','On picture']]){
  const choice=document.createElement('button');choice.type='button';choice.dataset.wordPlacementChoice=value;choice.textContent=label;
  choice.onclick=()=>{pauseForMenu();if(!moviePresentation.setWordPlacement(value))return;try{localStorage.setItem('eduit.movie-word-placement.v1',value);}catch{}closeOptions();};wordOptions.append(choice);
@@ -226,7 +226,7 @@ window.storytimeMusic=mountMusicPicker({host:menuPanels.get('music'),video,game,
  isStoryOpen:()=>introDialog.open});
 
 // Optional enhancement: older/offline clients keep a usable original dialog.
-import('./storybook.mjs?rev=safe-sounds-26').then(({mountStorybook})=>{
+import('./storybook.mjs?rev=word-space-27').then(({mountStorybook})=>{
  storybook=mountStorybook({dialog:introDialog,video,narration,beforePlay:()=>api()?.pause(),onFinish:()=>{
   if(!introDialog.open||introClosing)return;
   const generation=introGeneration;

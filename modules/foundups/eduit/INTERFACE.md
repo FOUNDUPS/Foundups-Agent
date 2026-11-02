@@ -1,5 +1,24 @@
 # EDUIT interfaces
 
+## Clean compact and fullscreen picture — word-space-27
+
+`mountMoviePresentation` adds boolean `inline` (default false); director opts in
+with true. With opt-in, `setExpanded(false)` loads and displays the same verified
+recording in the compact surface. Expanded status stays false, and the renderer
+receives `scenePresentation(width,height,false)` for canonical compact geometry.
+Expansion/collapse redraws retained media time with the correct geometry; no
+second clock, player or game is created. Existing callers without inline retain
+the previous collapse/teardown behavior. Invalid inline values throw TypeError.
+Status includes the inline flag. Native MP4 is hidden only after verified scene
+readiness and remains the fallback on load/hash/renderer failure. Below/scene
+placement applies to both sizes; native fallback retains its baked word.
+
+The outside caption fits actual width/height with a240px maximum,48px phone and
+56px tablet final floor, while preserving far<near<contact. Short-landscape
+fullscreen retains its existing compact sidebar bounds. Menu changes still pause
+and never autoresume. The same revision-keyed narration singleton serves book
+and movie. [Layout contract](docs/SINGLE_WORD_PRESENTATION.md).
+
 ## Outcome-bound SQUISH — 2026-11-02
 
 The existing engine actor status is authority. `gameWorld` emits the54–56s

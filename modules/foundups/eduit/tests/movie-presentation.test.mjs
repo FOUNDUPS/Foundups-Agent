@@ -16,7 +16,7 @@ test('external frame data cannot introduce executable SVG text, IDs or unbounded
   const copy=structuredClone(raw);mutate(copy);assert.throws(()=>validateMovieFrames(copy));
  }
 });
-function fixture({load=async()=>({...recording,renderer:{scene,scenePresentation}}),fallback=false,wordPlacement='below',captionAvailable=true,onChange=()=>{}}={}){
+function fixture({load=async()=>({...recording,renderer:{scene,scenePresentation}}),fallback=false,wordPlacement='below',captionAvailable=true,inline=false,onChange=()=>{}}={}){
  const classes=new Set(),queue=new Map();let next=1,resizeCb,writes=0;
  const layer={hidden:true,setAttribute(){},remove(){},set innerHTML(v){this.svg=v;writes++;}};
  const doc=Object.assign(new EventTarget(),{hidden:false,createElement:()=>layer});
@@ -25,7 +25,7 @@ function fixture({load=async()=>({...recording,renderer:{scene,scenePresentation
  const panel={dataset:{},classList:{add:x=>classes.add(x),remove:x=>classes.delete(x)}};
  let width=390,height=650;
  const surface={append(){},getBoundingClientRect:()=>({width,height})};
- const view=mountMoviePresentation({video,panel,surface,load,wordPlacement,captionAvailable,onChange,document:doc,requestFrame:cb=>{const id=next++;queue.set(id,cb);return id;},cancelFrame:id=>queue.delete(id),observe:cb=>{resizeCb=cb;return {observe(){},disconnect(){}};}});
+ const view=mountMoviePresentation({video,panel,surface,load,wordPlacement,captionAvailable,inline,onChange,document:doc,requestFrame:cb=>{const id=next++;queue.set(id,cb);return id;},cancelFrame:id=>queue.delete(id),observe:cb=>{resizeCb=cb;return {observe(){},disconnect(){}};}});
  return {view,video,doc,layer,panel,queue,classes,writes:()=>writes,event:name=>video.dispatchEvent(new Event(name)),resize:(w,h)=>{width=w;height=h;resizeCb();},present(time){const [id,cb]=queue.entries().next().value;queue.delete(id);video.currentTime=time;cb(0,{mediaTime:time});}};
 }
 test('video alone advances picture; pause, seek, resize, collapse and repeat preserve transport',async()=>{
@@ -95,4 +95,25 @@ test('unexpected origin or invalid binding fails before requesting frame/video p
   await assert.rejects(loadMovieFrames({src:'https://other.example/storytime/assets/little-shrew.mp4'},{fetcher}));assert.equal(calls,0);
   await assert.rejects(loadMovieFrames({src:'https://storytime.example/storytime/assets/little-shrew.mp4'},{fetcher}));assert.equal(calls,1);
  }finally{globalThis.location=previous;}
+});
+
+
+test('inline opt-in retains one clean picture through compact/fullscreen without transport writes',async()=>{
+ const f=fixture({inline:true});f.resize(390,219.375);f.view.setExpanded(false);await f.view.ready();
+ assert.equal(f.view.status().inline,true);assert.equal(f.view.status().expanded,false);assert.equal(f.classes.has('movie-responsive'),true);
+ f.video.currentTime=2.5;f.event('seeked');assert.ok(!f.layer.svg.includes('data-learning='));
+ const compact=f.layer.svg;assert.ok(compact.includes('viewBox="0 0 960 540"'));
+ f.resize(390,650);f.view.setExpanded(true);assert.notEqual(f.layer.svg,compact);assert.equal(f.video.currentTime,2.5);assert.equal(f.video.paused,true);
+ f.view.setExpanded(false);assert.ok(f.layer.svg.includes('viewBox="0 0 960 540"'));assert.equal(f.layer.hidden,false);
+ f.view.setWordPlacement('scene');assert.ok(f.layer.svg.includes('>THUMP</text>'));
+ f.video.paused=false;f.event('play');assert.equal(f.queue.size,1);f.present(4);assert.equal(f.video.currentTime,4);
+ f.doc.hidden=true;f.doc.dispatchEvent(new Event('visibilitychange'));assert.equal(f.queue.size,0);assert.equal(f.layer.hidden,true);
+ f.doc.hidden=false;f.doc.dispatchEvent(new Event('visibilitychange'));assert.equal(f.layer.hidden,false);assert.equal(f.queue.size,1);
+ f.view.dispose();assert.equal(f.queue.size,0);assert.equal(f.classes.has('movie-responsive'),false);
+});
+
+test('inline failure leaves native fallback and unknown inline option is rejected',async()=>{
+ assert.throws(()=>fixture({inline:'true'}),TypeError);
+ const f=fixture({inline:true,load:async()=>{throw Error('missing data');}});f.view.setExpanded(false);await f.view.ready();
+ assert.equal(f.view.status().failed,true);assert.equal(f.layer.hidden,true);assert.equal(f.classes.has('movie-responsive'),false);assert.equal(f.video.paused,true);assert.equal(f.queue.size,0);f.view.dispose();
 });

@@ -1,5 +1,16 @@
 # EDUIT test history
 
+## 2026-11-02 — Compact/fullscreen word-space27
+
+89 Node tests initially pass. Presenter tests preserve default collapse semantics
+and add inline opt-in canonical geometry, same retained time through expand/back,
+both word modes, hidden cancellation, dispose and failed-data native fallback.
+Browser acceptance must now cover both compact and fullscreen at six sizes,
+root/inner and both modes, actual glyph bounds/fit/final floors and strict THUMP
+growth. Replace the older mandatory compact-native oracle only for opted-in
+ready presentation; failed native fallback remains mandatory. Preserve26media
+hashes and actual one-Play/all5/movie-end/game-paused regression.
+
 ## 2026-11-02 — SQUISH needs an actual loss
 
 Replay3 is an all-safe demonstration and must have zero SQUISH events/frames;

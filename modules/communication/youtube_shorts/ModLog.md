@@ -1,5 +1,23 @@
 # YouTube Shorts AI Generator - ModLog
 
+## 2026-11-02 — Clean picture and adaptive words in both player sizes
+
+WSP00/15/22/50/84/97;15/P1. Governed lexical retrieval retains UNKNOWN freshness
+and index gap; noisy older review hits were resolved against direct presenter,
+CSS, narration, docs and tests. The gap was compact/native-only playback: outside
+words previously applied only fullscreen. Existing presenter now accepts opt-in
+inline:true; director loads its verified recorded frames in either size. Same
+movie transport, canonical compact geometry and expanded leg/scene owner.
+
+Outside picture defaults to one separate word centered in the brown region;
+On picture remains selectable for comparison. Actual caption bounds determine
+fitting up to240px;48/56px floors and strict THUMP growth remain. Existing short
+landscape sidebar stays bounded. Native/hash failure preserves baked film labels
+and hides extra words. No26media, engine, sound or SQUISH-semantics change.
+89 Node tests initially pass, including inline lifecycle, no transport writes,
+hidden/dispose cancellation and native fallback. Independent browser/public
+acceptance is recorded separately under outputs/storytime-word-space-20261102.
+
 ## 2026-11-02 — Outcome-bound SQUISH, successful replay3
 
 WSP00/15/22/50/84/97;15/P1. Holo lexical freshness UNKNOWN/index gap retained;

@@ -1,5 +1,12 @@
 # EDUIT — Education Using Information Technology
 
+**word-space-27** uses a clean picture plus a separate teaching-word area in
+both the smaller page player and fullscreen. The word centers in the brown area
+below the picture; short landscape keeps the existing side region. Its font fits
+the actual space and distant/near/landing THUMPs grow progressively. Grown-up
+controls retain **Outside picture** / **On picture** for both sizes. The26 film,
+soundtrack and outcome-bound SQUISH rule remain unchanged.
+
 **safe-sounds-26** corrects the sound meaning: SQUISH is reserved for a mammal
 caught in the timed collapse. An all-safe rescue, including practice, has no
 SQUISH word, narration or Foley. The successful demo film is rebuilt as
