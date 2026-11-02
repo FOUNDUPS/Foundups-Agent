@@ -1,3 +1,16 @@
+## Restricted native epoch transfer manifest metadata — 2026-11-02
+
+The unchanged full-tree/history gate at 4515fdcf against e94ea1c6 reports 39
+new exact bindings for unchanged public source hashes in the generated manifest.
+Independent review reconstructs each source hash and prior exact approval;
+37 surrounding contexts match, and two differ only in verified allocated source
+hash neighbors. Append only those 39 bindings, preserving all 3,637 earlier
+records (3,676 total). Runtime membership and size/count bounds stay unchanged.
+No scanner rule, exclusion, scan scope or fingerprint algorithm changes.
+Independent review receipt SHA256:
+`4ed399052667e4ec84b917abb240ffdad5bc8f934cc9ed20b4446ad3608b651a`.
+Fresh final-tree and actual committed-history gates remain required.
+
 ## Incumbent native-model manifest metadata — 2026-11-02
 
 The fresh Git-LF scan of package tree a6c6e001, source freeze 8eb67124 and main

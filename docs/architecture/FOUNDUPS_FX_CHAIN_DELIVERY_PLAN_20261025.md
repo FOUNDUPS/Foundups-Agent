@@ -1,5 +1,70 @@
 # FoundUps FX and blockchain delivery — 2026-10-25
 
+## B03-P3 exact native transfer v1
+
+**2026-11-02 — class C, 19/P0 (4/5/5/5); simulator-qualified restricted-domain version.**
+Root 0102 selects this decision under 012 delegation, against main
+`e94ea1c653bf70ad5b9e4f28ee731b390b495dcd`, and implements the candidate.
+`simulator_economics` froze 45 desired cases; `vision_catalog` supplied 11 held-outs.
+The review-driven exact-type repairs and all earlier failures remain separate evidence.
+This supersedes P1's arithmetic NOT_SELECTED/code HOLD only for the opt-in native
+UPS source/pool perimeter. Default `legacy_unfunded`, standalone callers and sealed
+history stay. Global units/precision D and full B03/B05, custody and chain gates remain.
+
+### Selected source, arithmetic and commit
+
+1. `sim_native_epoch_transfer_v1` binds the real model DemurrageEngine/EpochLedger
+   once before bootstrap: empty ledger, zero source, no wallets. Later opening and
+   redistribution credits are synthetic; imported state/mode upgrades/source swaps refuse.
+2. A fresh synchronous-only run explicitly starts with known-empty liabilities;
+   unknown or present obligations HOLD. Missing books/copies/notifications/hashes do
+   not prove zero. No asynchronous accepted source operation or shared reservation book.
+3. Read actual S after prior serialized CABR; require full nominal R<=S, not only C.
+   Preserve native reward request, multiplication/division, pool/tier/order/hurdle formulas.
+4. Compare exact binary ratios transiently; store only finite nonnegative built-in
+   int/float. The 1,024-bit integer work limit is not an asset-supply cap. No epsilon,
+   Decimal(str(...)) reinterpretation, atom scale, quantization or Fraction debit/storage.
+5. Each actual participant gain and saved receipt equals its native component-credit
+   sum; fund gain equals fund_pool. Native checked C exactly represents all actual
+   participant/fund gains, 0<=C<=R. Native S-C must lose exactly C; no rational rescue.
+6. Check intermediate/receipt/drip/hurdle additions too; counters are not extra cash.
+   R-C stays source-owned, with no fee, burn or new residual owner. Native formula
+   rounding/underflow and the historical 1,000-sat hurdle convention remain model debt.
+7. Prepare source, pool/positions/counters, receipts and ledger before callback-free
+   publication. Exact/late retries return the saved decision before new book reads;
+   conflicting context/ledger-only evidence refuses. Failed tails revalidate source
+   without repeating decay. Postcommit observers remain at-most-one local attempts.
+8. Refusal covers only the epoch tail, not earlier decay/CABR/events. Source debit
+   can change subsequent 10%/50% health routing, an explicit class-C consequence.
+   Trusted serialization excludes uncoordinated writers, arbitrary memory mutation,
+   crashes and restart/cross-worker recovery; source/ledger proof is process-local.
+9. Numerical UPS transfers only: no F_i mint/release/21M policy change. Historical
+   EpochEntry.total_fi_distributed naming does not relabel the asset or prove funding.
+   A misaligned book can stall a whole epoch; no skip, epsilon or silent repair is granted.
+
+### Accepted examples and scoped evidence
+
+Full-nine zero-destination R=S=3,750 posts C=3,750 (3,600 participants +150 fund),
+source 0; legacy leaves source unchanged. Fractional 468.75 and smaller dyadic controls
+also pass. Misaligned decimals/large-book deltas/non-native C refuse before posting;
+S=2**60 losing 3,712 for C=3,750 rejects. R=0.1 receives no rational-remainder rescue.
+Fresh baseline 276 pass; frozen 45 RED: 1 legacy pass/44 missing-API failures. Initial
+321 focused/11 held-outs pass. Three review-driven cases exposed metaclass-equality
+hooks in _native_value/_number; identity-only repair preserves valid built-in economics.
+Final focused 337 pass = 276 prior +48 promoted +11 held-outs +2 external repeats;
+broad 1,324 includes the promoted 48, with three deliberate SSE HTTP deselections.
+Zero errors/skips/recorded guard denials; 174 phase source maps stable. Do not sum scopes.
+Controlled 240-tick final legacy trace is byte-identical to fresh e94 baseline:
+6 FoundUps/24 epochs/214 simulated paid tasks. Raw SHA `672d12c9...`; functional
+payload SHA `4cac5ac2...` is a different domain. This is selected numeric/config/process
+parity, not whole-state, native/OS confinement or chain proof. Old ASTs/oracles remain.
+Package canonical check/eight Python/three Node entrypoints pass; 1,485 members/caps stay.
+Node is credential-stripped only; six doc contracts pass. Security/PR/main/PC remain PENDING.
+PR2297/main d65 delivered the prior four-credit guard; old pending notes stay historical.
+Next decision: canonical UPS denomination/scale, rounding/residual rights and migration
+before general durable funded settlement. Retain source authenticity, pending/reservation,
+PoB/identity, F_i policy, signer and pilot gates; this local mode closes no A01–A12 family.
+
 ## Four-site native pool credit refusal candidate — 2026-11-01
 
 Base `1787ea8a1122bc55ee7f07082ee7499de6bfd226`; WSP15 class B, 17/P0(3/5/5/4).

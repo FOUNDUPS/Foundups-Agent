@@ -1,5 +1,20 @@
 # FoundUps blockchain reconciliation and security decision — 2026-10-31
 
+## Restricted native transfer and retained threats — 2026-11-02
+
+The [19/P0 class-C mode](FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p3-exact-native-transfer-v1)
+is simulator-qualified for exact admitted UPS source/book deltas; default legacy stays.
+A01/A02/A07 gain local accounting coupling, not authenticated sources/PoB, aggregate
+reservations, durable recovery or family completion. Misaligned books can stall epochs;
+no silent skip/repair. Global units, F_i policy, custody, Holo and chain holds remain.
+[Balancer's Nov18 2025 postmortem](https://medium.com/balancer-protocol/nov-3-exploit-post-mortem-51dcbeb6b020)
+attributes its Nov3 affected-pool incident to exact-out rounding plus rates/low liquidity.
+Use composed deltas/adversarial sequences as a lesson; no AI causation is established.
+[OpenZeppelin](https://docs.openzeppelin.com/contracts/5.x/erc4626) shows integer shares
+can still lose value through rounding/rate manipulation; atomization needs explicit rights.
+[OWASP](https://cheatsheetseries.owasp.org/cheatsheets/AI_Agent_Security_Cheat_Sheet.html)
+requires exact-operation/one-use authorization outside agent context. P3 adds no signer.
+
 ## B03 delivered; four-site credit refusal candidate — 2026-11-01
 
 [PR2296](https://github.com/FOUNDUPS/Foundups-Agent/pull/2296) delivered B03-P1 at

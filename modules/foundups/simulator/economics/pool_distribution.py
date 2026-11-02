@@ -78,6 +78,7 @@ from dataclasses import dataclass, field, replace
 from contextlib import nullcontext
 from threading import RLock
 
+from .._mesa_epoch import _EpochFunding
 from .epoch_ledger import EpochLedger, _epoch, _number, _identifier
 from enum import IntEnum
 from typing import Dict, List, Optional, Tuple
@@ -610,15 +611,26 @@ def _validate_distribution(result):
 class PoolDistributor:
     """Process-local pool effects with optional coordinated epoch evidence."""
 
-    def __init__(self, ledger: Optional[EpochLedger] = None):
+    def __init__(self, ledger: Optional[EpochLedger] = None, *, funding=None):
         if ledger is not None and type(ledger) is not EpochLedger:
             raise ValueError("expected an epoch ledger")
+        if funding is not None and type(funding) is not _EpochFunding:
+            raise ValueError("expected new-run simulation funding")
         self.participants: Dict[str, Participant] = {}
         self.accumulated_fund: float = 0.0
         self.total_drip_distributed: float = 0.0
         self._ledger = ledger
         self._lock = RLock()
         self._epochs = {}
+        self._funding = funding
+        if funding is not None:
+            funding.bind(self)
+
+    def _add(self, left, right):
+        return left + right if self._funding is None else self._funding.add(left, right)
+
+    def _credit(self, balance, amount):
+        return _credit(balance, amount) if self._funding is None else self._add(balance, amount)
 
     def register_participant(
         self,
@@ -695,6 +707,7 @@ class PoolDistributor:
                     raise ValueError("ledger evidence does not establish pool credit")
             try:
                 result, people, positions, drip = self._prepare_distribution(epoch, total_ups_rewards)
+                transfer = self._funding.prepare(self, result, people) if self._funding else None
             except (OverflowError, ZeroDivisionError) as exc:
                 raise ValueError("epoch arithmetic is out of range") from exc
             snapshot, returned = _distribution_copy(result), _distribution_copy(result)
@@ -706,18 +719,23 @@ class PoolDistributor:
             epochs = {**self._epochs, epoch: (identity, foundup_id, snapshot, entry)}
             if publication is not None:
                 self._ledger._publish_epoch(publication)
-            for plan in people:
-                plan.participant.activity_level = plan.activity
-                plan.participant.ups_balance = plan.balance
-            for plan in positions.values():
-                plan.position.cumulative_distributions_btc = plan.cumulative
-                plan.position.post_hurdle_locked = plan.locked
-                plan.position.hurdle_locked_at_btc = plan.locked_at
-            self.accumulated_fund = result.fund_accumulated
-            self.total_drip_distributed = drip
+            self._publish_distribution(result, people, positions, drip)
+            if transfer is not None:
+                self._funding.publish(transfer)
             self._epochs = epochs
         self._log_distribution(result, positions)
         return returned
+
+    def _publish_distribution(self, result, people, positions, drip):
+        for plan in people:
+            plan.participant.activity_level = plan.activity
+            plan.participant.ups_balance = plan.balance
+        for plan in positions.values():
+            plan.position.cumulative_distributions_btc = plan.cumulative
+            plan.position.post_hurdle_locked = plan.locked
+            plan.position.hurdle_locked_at_btc = plan.locked_at
+        self.accumulated_fund = result.fund_accumulated
+        self.total_drip_distributed = drip
 
     def _position_plan(self, position):
         if type(position) is not StakerPosition or type(position.post_hurdle_locked) is not bool:
@@ -755,11 +773,11 @@ class PoolDistributor:
         amounts = [_finite(total * _finite(POOL_PERCENTAGES[name])) for name in
                    ("stakeholder_un", "stakeholder_dao", "stakeholder_du", "network", "fund")]
         result.un_pool, result.dao_pool, result.du_pool, result.network_pool, result.fund_pool = amounts
-        result.fund_accumulated = _credit(self.accumulated_fund, result.fund_pool)
+        result.fund_accumulated = self._credit(self.accumulated_fund, result.fund_pool)
         people, positions = self._participant_plans()
         self._distribute_stakeholder_pools(result, people)
         self._distribute_network_drip(result, people)
-        drip = _credit(self.total_drip_distributed, result.drip_distributed)
+        drip = self._credit(self.total_drip_distributed, result.drip_distributed)
         _validate_distribution(result)
         return result, people, positions, drip
 
@@ -784,16 +802,16 @@ class PoolDistributor:
                             unreduced = share
                             share = unreduced * _finite(rate)
                             du_reward = share
-                            result.du_hurdle_withheld += unreduced - share
-                        result.du_actual_distributed += share
-                    total_reward += share
+                            result.du_hurdle_withheld = self._add(result.du_hurdle_withheld, unreduced - share)
+                        result.du_actual_distributed = self._add(result.du_actual_distributed, share)
+                    total_reward = self._add(total_reward, share)
             if total_reward > 0:
-                plan.balance = _credit(plan.balance, total_reward)
+                plan.balance = self._credit(plan.balance, total_reward)
                 pid = plan.participant.participant_id
-                result.participant_rewards[pid] = result.participant_rewards.get(pid, 0.0) + total_reward
+                result.participant_rewards[pid] = self._add(result.participant_rewards.get(pid, 0.0), total_reward)
                 if du_reward > 0 and plan.position is not None:
                     position = plan.position
-                    position.cumulative = _finite(position.cumulative + du_reward * _finite(UPS_TO_BTC_RATE))
+                    position.cumulative = _finite(self._add(position.cumulative, du_reward * _finite(UPS_TO_BTC_RATE)))
                     if not position.locked and position.target > 0 and position.cumulative >= position.target:
                         position.locked = True
                         position.locked_at = position.cumulative
@@ -808,10 +826,10 @@ class PoolDistributor:
             level_share = result.network_pool * _finite(ACTIVITY_SHARES[activity])
             per_participant = level_share / len(participants)
             for plan in participants:
-                plan.balance = _credit(plan.balance, per_participant)
+                plan.balance = self._credit(plan.balance, per_participant)
                 pid = plan.participant.participant_id
-                result.participant_rewards[pid] = result.participant_rewards.get(pid, 0.0) + per_participant
-                result.drip_distributed += per_participant
+                result.participant_rewards[pid] = self._add(result.participant_rewards.get(pid, 0.0), per_participant)
+                result.drip_distributed = self._add(result.drip_distributed, per_participant)
 
     def _validated_entry(self, result):
         _validate_distribution(result)

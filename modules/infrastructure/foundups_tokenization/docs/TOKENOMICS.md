@@ -28,6 +28,14 @@ capacity subtracts already mined supply. The separate staked F_i counter does
 not prove a combined cap. Units, fees, denominators, funded backing and exits
 remain unresolved; no new asset, schedule, solvency or issuance rule is selected.
 
+### Restricted native UPS simulator version — 2026-11-02
+
+[The source-bound B03-P3 decision](../../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p3-exact-native-transfer-v1)
+qualifies opt-in exact native source/recipient/fund transfers or full-epoch refusal.
+Default legacy and F_i mint/release/21M policy stay. A synthetic source losing actual
+posted gains proves no external backing, UPS atom scale, custody or chain settlement.
+Global unit/precision D and full B03/B05 remain open; no implicit migration.
+
 ## Executive Summary
 
 FoundUps tokenomics implements a **bio-decay economic model** where:

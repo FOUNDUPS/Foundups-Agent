@@ -65,6 +65,15 @@ The existing simulator must validate any economic enhancement before chain parit
 
 ### Current blockchain security sequence — 2026-11-01
 
+#### Restricted native UPS transfer qualified locally — 2026-11-02
+
+The [19/P0 class-C version](docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p3-exact-native-transfer-v1)
+qualifies one synthetic source/pool tail: focused 337/broad 1,324 plus legacy trace parity,
+with overlapping scopes; default legacy stays. Central record separates delivery gates.
+Next: select canonical UPS units/scale, rounding/residual rights and migration before
+B05 general durable funded settlement. F_i policy, signer/pilot, Holo and chain holds stay.
+Earlier PR2297/main d65 guard-pending notes are historical, not current implementation state.
+
 #### Current retrieval-security checkpoint — 2026-11-01
 
 PR2291 delivered the [stored-settings guard](holo_index/INTERFACE.md#stored-chroma-settings-admission--2026-11-01)

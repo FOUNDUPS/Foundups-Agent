@@ -1,3 +1,13 @@
+## 2026-11-02 — Restricted native UPS transfer qualification
+
+WSP15/22/26/48/62/81/97; class C, 19/P0 under 012 architecture delegation.
+[The existing decision](docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p3-exact-native-transfer-v1)
+selects exact admitted source transfer with legacy defaults unchanged. Root implements;
+independent tests/source review qualify focused 337/broad 1,324 and legacy trace parity.
+Exact-type findings/repairs stay visible. See central record for separate delivery gates.
+Next: canonical denomination/rounding/rights before general durable funded settlement.
+No global unit/F_i policy, external backing, custody or chain activation follows.
+
 ## 2026-11-01 — Four-site native pool-credit refusal candidate
 
 WSP15/22/26/48/50/62/97; class B, 17/P0. Existing pool preparation refuses positive

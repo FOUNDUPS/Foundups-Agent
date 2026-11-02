@@ -107,6 +107,16 @@ is non-normative implementation evidence, not another economic authority. WSP 29
 retains PoB/CABR responsibilities; WSP 100 retains maturity/activation gates.
 This written contract does not claim automatic runtime enforcement or settlement.
 
+### Restricted native UPS simulator version — 2026-11-02
+
+The [B03-P3 class-C decision](../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p3-exact-native-transfer-v1)
+qualifies `sim_native_epoch_transfer_v1` only for an admitted fresh serialized
+simulator source/pool tail; default legacy stays unfunded. Exact native component,
+receipt/book/source equality restricts amounts; formula rounding remains model debt.
+This selects no UPS atoms/global precision, F_i mint/release/21M, external backing,
+custody or durable/chain settlement authority. Global unit conflicts remain D;
+independent source qualification and separate activation gates still apply.
+
 ## Universal Compute Account (UCA)
 
 Universal Compute Account (UCA) is the FoundUps evolution of Universal Capital Accounts. Traditional UCA gives people access to capital. FoundUps UCA gives people access to compute, agents, participation, and Return on Compute. In the AI age, compute replaces capital as the primary productive asset. UCA is therefore not a bank account and not a cash-transfer system. It is a productive compute account through which 012 humans direct 0102 agents, participate in FoundUps, earn UPS rewards, receive awards for agentic output, and share dividends from beneficial compute activity.

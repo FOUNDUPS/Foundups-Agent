@@ -1,3 +1,13 @@
+## 2026-11-02 — Native-transfer RED, repairs and final qualification
+
+simulator_economics froze 45: initial RED 1 pass/44 missing-API failures; v1 focused
+321 and vision_catalog's independent 11 pass. Metaclass equality exposed a no-hook
+claim gap; one helper then two upstream request/balance cases failed before identity repairs.
+Keep failed runs and initial reviews; the first pass missed the prior _number seam.
+Final focused 337 includes 276 prior/48 promoted/11 held-outs/two external repeats;
+broad 1,324 includes promoted cases. Zero errors/skips/recorded denials; 174 maps stable.
+Final controlled legacy trace matches baseline bytes; no whole-state or live-chain claim.
+
 ## 2026-11-01 — Pool credit acceptance and actual focused result
 
 Fresh original staker/ledger/Layer-D selection passes 192. Frozen external v2 has 40

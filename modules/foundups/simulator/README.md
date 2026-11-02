@@ -1,5 +1,14 @@
 # FoundUps Simulator
 
+## Restricted native UPS transfer — 2026-11-02
+
+The [versioned simulator-qualified mode](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p3-exact-native-transfer-v1)
+admits exact native source/recipient/fund changes or refuses the whole epoch.
+Default legacy remains unfunded; one bound synthetic source is not external backing.
+See the central record for actual overlapping test scopes and separate delivery gates.
+PR2297/main d65 delivered the earlier guard. Next: ratify units/rounding/residual rights
+before general settlement; full B03/B05, custody, Holo and chain holds remain.
+
 ## Native pool credit refusal candidate — 2026-11-01
 
 Class B, 17/P0 candidate: four additions refuse completely absorbed positive credits.

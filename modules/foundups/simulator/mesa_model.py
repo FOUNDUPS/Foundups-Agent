@@ -38,7 +38,7 @@ from .economics.pool_distribution import (
     ParticipantType, ActivityLevel,
 )
 from .economics.epoch_ledger import EpochLedger
-from ._mesa_epoch import _EpochDistributionTail
+from ._mesa_epoch import _EpochDistributionTail, _build_epoch_pool
 from .economics.btc_anchor_connector import AnchorMode, BTCAnchorConnector
 from .economics.fi_rating import FiRatingEngine, get_rating_engine
 from .economics.allocation_engine import AllocationEngine
@@ -211,14 +211,14 @@ class FoundUpsModel:
         self._f0_seeded = False
         self._f0_source_foundup_id = "F_0"
         self._epoch_ledger = EpochLedger(foundup_id=self._f0_source_foundup_id)
-        self._pool_distributor = PoolDistributor(ledger=self._epoch_ledger)
+        self._pool_distributor = _build_epoch_pool(
+            self._config.epoch_funding_mode, self._demurrage, self._epoch_ledger)
         self._epoch_tail = _EpochDistributionTail()
         self._anchor_connector: Optional[BTCAnchorConnector] = self._build_anchor_connector()
         self._f0_investor_ids: List[str] = [f"f0_investor_{idx:03d}" for idx in range(8)]
         self._mvp_offerings_resolved = 0
         self._total_dex_trades = 0
         self._total_dex_volume_ups = 0.0
-
         # Agents
         self._agents: Dict[str, BaseSimAgent] = {}
         self._agent_order: List[str] = []
