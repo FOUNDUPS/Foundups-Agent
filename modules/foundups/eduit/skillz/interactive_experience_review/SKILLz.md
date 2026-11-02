@@ -42,7 +42,10 @@ region), both routes and all six sizes. Absolute grid children must reset inheri
 grid placement before using panel-relative top/bottom. Test final scaled action
 fonts, not only base font sizes:48px phone/56px tablet where the outside region
 supports them, strict far<near<contact. Preserve the existing short-landscape
-compact exception explicitly. Fit to actual region bounds with adaptive maximum240px; inspect whether larger
+compact exception explicitly. Freeze phone/tablet case identities before review;
+a wide landscape phone is still a phone. Do not infer its tablet font floor from
+viewport width alone. Retain classification mistakes as harness failures and
+correct the test without weakening the product readability contract. Fit to actual region bounds with adaptive maximum240px; inspect whether larger
 full-screen space is actually used instead of retaining a fixed small cap. Verify
 canonical compact geometry and retained time on expand/back. Test unavailable
 captions/renderer/native playback:

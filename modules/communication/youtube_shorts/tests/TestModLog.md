@@ -1,5 +1,12 @@
 # YouTube Shorts TestModLog
 
+27 audit correction: compact844×390 was incorrectly assigned a56px tablet floor
+by the width-only harness. The frozen case is a landscape phone with48px floor.
+Corrected only device classification, retained red evidence, and reran unchanged
+geometry/fit/growth oracles. No product CSS adjustment was needed for this result.
+The review skill now requires freezing device identity across orientation.
+
+
 ## 2026-11-02 — Compact/fullscreen word-space27
 
 89 Node tests initially pass. Presenter tests preserve default collapse semantics
