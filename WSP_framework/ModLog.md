@@ -1,3 +1,12 @@
+## 2026-11-02 — WSP26 restricted simulator-native transfer clarification
+
+Under 012 continuation, add the narrow §1.2 B03-P3 simulator-qualified version pointer;
+WSP81 NOTIFICATION_REQUIRED, notification recorded in the review/publication handoff.
+Framework/knowledge bytes match by proposal; independent validation follows application.
+No fee/supply/F_i/UPS atom, custody or chain authority changes; all prior text remains.
+0102 handles monetary scope manually; no Qwen/model invocation or pattern-store write.
+Recover by focused Git revert; WSP22/26/81/97 and independent review remain required.
+
 ## 2026-11-01: WSP26 custody targets and agent signing boundaries
 
 Under 012's explicit security-document correction request, clarify only WSP26

@@ -59,6 +59,23 @@
         "modules/foundups/simulator/ModLog.md",
         "modules/foundups/simulator/INTERFACE.md"
       ]
+    },
+    {
+      "id": "sim_native_epoch_transfer_v1",
+      "statement": "Opt-in restricted native UPS source/pool transfers require exact component, receipt, destination and source equality with full nominal admission. Default legacy is separate; no F_i or global unit policy follows.",
+      "status": "VERIFIED_SIMULATED",
+      "decision_class": "C",
+      "chain_activation": "BLOCKED",
+      "code_refs": [
+        "modules/foundups/simulator/_mesa_epoch.py",
+        "modules/foundups/simulator/economics/pool_distribution.py",
+        "modules/foundups/simulator/economics/epoch_ledger.py",
+        "modules/foundups/simulator/mesa_model.py"
+      ],
+      "doc_refs": [
+        "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md",
+        "modules/foundups/simulator/INTERFACE.md"
+      ]
     }
   ],
   "event_contracts": {

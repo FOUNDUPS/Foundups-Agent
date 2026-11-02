@@ -1,3 +1,12 @@
+## 2026-11-02 — Restricted native UPS transfer qualification
+
+WSP15/22/26/48/62/81/97; class C, 19/P0. Root implements the [versioned mode](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p3-exact-native-transfer-v1);
+independent desired/held-out/source review stays attributed. Final focused 337 and
+broad 1,324 pass with legacy trace parity; scopes overlap, not an aggregate.
+Exact-type review failures and identity repairs remain evidence. Pool 994/class 277,
+helper 172 and no-growth Mesa 2,020 fit allocation; inherited size debt remains.
+This is restricted synthetic-source transfer, not general accounting/funding or F_i policy.
+
 ## 2026-11-01 — Native positive pool-credit candidate
 
 WSP15/22/26/48/50/62/97; class B, 17/P0. One private six-line helper replaces four

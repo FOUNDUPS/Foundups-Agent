@@ -1,5 +1,13 @@
 # ROADMAP - FoundUps Simulator
 
+## 2026-11-02 — Restricted native UPS transfer qualified locally
+
+The [19/P0 class-C mode](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p3-exact-native-transfer-v1)
+has final focused 337/broad 1,324 passes and controlled legacy trace parity;
+these scopes overlap. Delivery gates remain separate in the central record.
+Next: version canonical UPS units/scale, rounding/residual rights and migration
+before general durable funded settlement. B05, signer/pilot and Holo/chain holds stay.
+
 ## 2026-11-01 — Four native pool credits, candidate only
 
 - [x] B03 PR2296 delivered at 1787: 23 PR/21 main checks, 29 PC bindings/187 evidence files.

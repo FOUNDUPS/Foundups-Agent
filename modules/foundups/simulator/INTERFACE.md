@@ -1,5 +1,16 @@
 # INTERFACE - FoundUps Simulator
 
+## Restricted native UPS epoch transfers — 2026-11-02
+
+`SimulatorConfig.epoch_funding_mode` defaults to `legacy_unfunded`; opt-in
+`sim_native_epoch_transfer_v1` is simulator-qualified. Unknown modes refuse.
+PoolDistributor keeps legacy construction and adds keyword-only `funding=None`,
+bound once to the actual fresh source/ledger by the private factory.
+The [decision](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p3-exact-native-transfer-v1)
+owns full R<=S, component/receipt/book equality, native C and exact source loss;
+unknown/present liabilities HOLD. Misaligned books may stall the whole epoch.
+No F_i/21M, global unit, external funding, restart or chain authority follows.
+
 ## Native pool credit refusal — 2026-11-01
 
 The class B candidate guards exactly four PoolDistributor additions: stakeholder

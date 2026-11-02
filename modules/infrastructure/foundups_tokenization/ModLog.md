@@ -1,5 +1,12 @@
 # ModLog: FoundUps Tokenization System
 
+## 2026-11-02 — Restricted native UPS accounting qualification
+
+TOKENOMICS links the source-bound B03-P3 simulator version, not an issued asset/service.
+Exact native transfers do not select UPS atoms or F_i mint/release/21M policy.
+Global denomination D and backing/custody/chain holds remain; prior history unchanged.
+WSP22/26/81/97; exact WSP26 mirror required; separate delivery gates remain explicit.
+
 ## 2026-10-29 — Separate design documents from executable interfaces
 
 **2026-10-31 governance alignment:** TOKENOMICS points to the WSP26 simulator-first

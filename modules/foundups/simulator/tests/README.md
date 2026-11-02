@@ -1,5 +1,15 @@
 # FoundUps Simulator Test Suite
 
+## Restricted native UPS transfer acceptance — 2026-11-02
+
+simulator_economics froze 45 desired cases; vision_catalog supplied 11 held-outs.
+Three review-driven exact-type regressions were separately frozen and promoted.
+Final focused 337 executions = 276 prior +48 promoted +11 held-outs +2 external repeats;
+broad 1,324 includes the 48, with three deliberate SSE HTTP deselections. Do not sum.
+174 source maps stay stable; old ASTs/oracles remain. Controlled legacy trace matches
+fresh baseline bytes. [Scope and delivery record](../../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p3-exact-native-transfer-v1)
+keeps synthetic funds, refusal/liveness limits and runtime/chain exclusions explicit.
+
 ## Four-site pool credit refusal candidate — 2026-11-01
 
 Fresh original 192 passes; frozen external 40 RED is 14 pass/26 fail; focused 232 pass.

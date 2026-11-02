@@ -1,3 +1,12 @@
+## Restricted native UPS transfer locally qualified — 2026-11-02
+
+PR2297/main d65 delivered the earlier four-credit guard. The [19/P0 class-C mode](../architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p3-exact-native-transfer-v1)
+now qualifies exact admitted synthetic-source/recipient/fund changes, preserving defaults.
+Root implements; desired 45/held-outs 11 and review-driven repairs are separately attributed.
+Final focused 337/broad 1,324 and legacy trace parity overlap; central record owns delivery gates.
+Next: ratify canonical units/scale, rounding/residual rights and migration before general
+funded settlement. Full B03/B05, identity/PoB/custody, Holo and chain holds remain.
+
 ## B03 delivered; native pool-credit candidate — 2026-11-01
 
 B03 PR2296/main 1787 source delivery closed: 23 PR/21 main checks, 29 C/O bindings
