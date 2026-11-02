@@ -389,9 +389,12 @@ fallbackWordChecks.onclick=async()=>{
   const d=frame.contentDocument,w=frame.contentWindow,$=id=>d.getElementById(id);
   for(let n=0;n<120&&!(w.storytimeStorybook&&$('video-options'));n++)await wait(100);
   if($('story-intro').open){$('intro-close').click();for(let n=0;n<60&&$('story-intro').open;n++)await wait(20);}
-  $('full-video').click();for(let n=0;n<200&&!$('movie-word-status').textContent.includes('unavailable');n++)await wait(50);
+  for(let n=0;n<200&&!$('movie-word-status').textContent.includes('unavailable');n++)await wait(50);
   check('intentional missing-sidecar fixture fails closed',!$('video-panel').classList.contains('movie-responsive')&&$('movie-word-status').textContent.includes('unavailable'),{entry,status:$('movie-word-status').textContent});
-  for(const mode of ['below','scene']){await selectWordPlacement(d,w,mode);await mediaLayoutSeek($('video'),3.9,w);const geometry=wordGeometry(d,w);check('fallback keeps native picture and hides extra visual word',!geometry.ready&&geometry.sceneGroups===0&&!geometry.separateVisible&&visuallyPresent($('video'),w),{entry,mode,geometry});}
+  for(const presentation of ['compact','expanded']){
+   if($('video-panel').classList.contains('expanded')!==(presentation==='expanded'))$('full-video').click();
+   for(const mode of ['below','scene']){await selectWordPlacement(d,w,mode);await mediaLayoutSeek($('video'),3.9,w);const geometry=wordGeometry(d,w);check('fallback keeps native picture and hides extra visual word',!geometry.ready&&geometry.sceneGroups===0&&!geometry.separateVisible&&visuallyPresent($('video'),w),{entry,presentation,mode,geometry});}
+  }
  }
  results.textContent+='\nCOMPLETE';
  }catch(e){results.textContent+='\nERROR '+e.message;}
