@@ -51,7 +51,7 @@ Dates are ISO calendar dates. Times are JST. A dash means not established in thi
 | F-12-2026-R3 | Low-carbon-material new-build ZEB / subsidy | FY2026 / 3, final FY2026 call per SERA | 2026-10-16 | Submission method to verify with SERA | 2026-12-15 17:00 JST received (MOE 10/16 release; verified 10/30) | OPEN | VERIFIED PROGRAM; new construction only, not existing-school/onsen retrofit | 2026-11-02 | S12 |
 | F-13-2026-R1 | Fukui enterprise self-consumption PV/battery / subsidy | FY2026 / annual call, prior existing | 2026-04-17 | Budget exhaustion may close early; email submission, no official clock established | 2026-10-31; hour unverified | CLOSED BY PUBLISHED DEADLINE as of 2026-11-01; page unchanged; final intake status unconfirmed | VERIFIED PROGRAM; no YUMORI project eligibility/application | 2026-11-02 | S14 |
 | F-14-2025S-R4 | METI/SII whole-facility energy savings + EMS / subsidy | FY2025 supplementary / 4 | 2026-10-05 | Tracked mailing; hand delivery disallowed | 2026-10-30 17:00 JST physical receipt | CLOSED confirmed by SII 2026-10-30; fifth call unannounced | VERIFIED PROGRAM; no YUMORI applicant/baseline/use rights | 2026-10-28 | S15 |
-| P-01-2026-P1 | Fukui large-DC feasibility study / procurement, NOT subsidy | FY2026 / Phase 1 | 2026-10-14 (notice) | Bidder qualification 2026-10-23 17:00 | 2026-11-04 17:00; qualified bidders only | QUALIFIED BIDDERS ONLY | VERIFIED PROGRAM/PROCUREMENT; no YUMORI contract or selection | 2026-11-05 | S13 |
+| P-01-2026-P1 | Fukui large-DC feasibility study / procurement, NOT subsidy | FY2026 / Phase 1 | 2026-10-14 (notice) | Bidder qualification 2026-10-23 17:00 | 2026-11-04 17:00; qualified bidders only | CLOSED BY PUBLISHED DEADLINE 2026-11-04 17:00; result not established | VERIFIED PROGRAM/PROCUREMENT; no YUMORI contract or selection | 2026-11-05 | S13 |
 
 The separate F-10 ZEB diagnosis/planning track remains recorded in the canonical registry as closed 2026-10-16 17:00. Its exact opening and separate source must be reverified before adding a fully verified calendar row. Do not confuse it with ZEB construction rounds.
 
@@ -71,6 +71,7 @@ No FY2027 call date or continuation is asserted by this queue.
 | F-11 equipment / F-12 new-build ZEB | 2027-02-01 | Retain current autumn rounds; no annual recurrence assumed | Decide actual equipment versus new-building scope, ownership, eligible products/materials, savings and procurement constraints. Keep watching for supplementary calls before next year. |
 | F-03 GX / F-04 Fukui location | 2026-11-02 | GX second call pre-announced; location incentive requires consultation | Recheck current terms, independently justified investment scale, power/source-region contribution, container exclusion and municipal ceiling. |
 | F-09 public assets | 2026-10-27 | FY2026 consultation 11/30, proposal 12/15 | Reconcile actual consultation receipt and delivery capacity now. Any future-year property list/forms require a fresh City check; Sukatto is a separate PPP/PFI route. |
+| F-15 MOE/SII building retrofit | 2026-11-05; next-cycle 2027-02-01 | Existing FY2026 call opened 06/04; published November 30 date has conflicting hours | Resolve MOE 17:00 vs SII 23:59 with binding SII guide/office. Verify building owner/lease, public-body applicant, closed-site baseline, BPI and building energy reductions, and duplicate subsidies before any application. |
 | P-01 procurement intelligence | 2026-11-05 | Qualification closed 10/23; qualified-bidder proposals 11/04 | Check official procurement outcome/policy implications; never treat the study budget as a subsidy or assume annual recurrence. |
 
 ## Official sources
@@ -91,9 +92,11 @@ No FY2027 call date or continuation is asserted by this queue.
 - S14: https://www.pref.fukui.lg.jp/doc/dengen/shin-energy/fukui-taiyokou.html (published 2026-04-17)
 - S15: https://sii.or.jp/koujou07r/overview4.html and https://www.syouenehojyokin.sii.or.jp/about-type/kojyo.html (published 2026-10-05)
 
+- S16: https://www.env.go.jp/press/press_04846.html (MOE, 2026-06-04; says 17:00 JST) and https://bl-renos.jp/r8/about/ (SII, says 23:59 JST) — unresolved binding cutoff.
+
 ## Maintenance / regression checks
 
-- Preserve all 19 initial round/support records, the two 2026-10-28 catch-up records and F-03 first-round outcome record added 2026-10-31 (22 total) when adding a new year.
+- Preserve all 19 initial round/support records, the two 2026-10-28 catch-up records, F-03 first-round outcome record added 2026-10-31 and F-15 2026-11-05 retrospective coverage record (23 total) when adding a new year.
 - Unique round key; dates either exact official dates or explicitly unknown; fiscal year separate from calendar year.
 - CLOSED and current project-boundary fields can coexist; F-01's inquiry is retained.
 - F-09 and P-01 are non-grant lanes. Do not add their nominal values to a subsidy total.
@@ -103,6 +106,13 @@ No FY2027 call date or continuation is asserted by this queue.
 - Synchronize the existing FIN `Grants & Subsidies` summary and `Grant Calendar` after registry changes; verify formulas and preserve the AWARDED-only financial gate.
 
 ## Change log
+
+### 2026-11-05 — P-01 published deadline elapsed; F-15 coverage gap closed
+
+Primary Fukui Prefecture P-01 notice still lists 2026-10-23 17:00 JST qualification and 2026-11-04 17:00 JST proposal-receipt deadlines. As of November 5, proposal intake is **CLOSED BY PUBLISHED DEADLINE**, with no new amended notice or outcome verified. This is a policy/procurement record, **not a grant**. Do not infer a YUMORI bid, selected consulting firm, site, contract or award.
+
+Added F-15 MOE/SII 2026-06-04 commercial-building retrofit call as historical catch-up, NOT a newly opened program or changed deadline. The official MOE June notice says November 30 17:00 JST while SII's current program page says November 30 23:59 JST; preserve both and block any final cutoff claim until official clarification. Published 1/2–1/3 rates, ¥1B cap, and potential retrofit scope do not establish YUMORI site/applicant eligibility. No future-year date or subsidy revenue admitted.
+
 
 ### 2026-10-31 — national round closures and GX DC first-call selection results
 
