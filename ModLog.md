@@ -63393,3 +63393,12 @@ issue submission, control/admission, registry, token or market activation. Publi
 and verify the default-branch form before separately changing overlapping Mall UI.
 Implemented the55-line form; YAML/schema/required-field/order checks and independent
 source review pass. No issue submitted. Hosted publication gates remain pending.
+
+## 2026-11-05 — Preserve hosted CPU test capacity
+
+PR2302's general test job exhausted its hosted disk while installing CUDA wheels,
+before acceptance tests ran. The CPU-only hosted job now preinstalls PyTorch from
+the official CPU index, verifies that build after the unchanged requirements,
+and avoids restoring/retaining the former GPU pip cache. Runtime requirements
+and all acceptance commands remain unchanged. Hosted validation is pending.
+WSP10/22/50/97. No package installation or model change on the Windows PC.
