@@ -1,6 +1,6 @@
 # YUMORI.me / eSingularity — Grants, Subsidies, and PPP Support Registry
 
-Last verified: 2026-11-01 JST for F-13 expiry of the officially published October 31 application window (no new extension visible); 2026-10-30 JST for F-12 exact deadline-time clarification; 2026-10-28 JST for F-13/F-14 coverage catch-up; 2026-10-26 targeted checks and other historical entries retain their own verification dates. These catch-up discoveries are not fresh official changes.
+Last verified: 2026-11-05 JST for P-01 deadline passage and F-15 dated coverage correction; 2026-11-01 JST for F-13 expiry of the officially published October 31 application window (no new extension visible); 2026-10-30 JST for F-12 exact deadline-time clarification; 2026-10-28 JST for F-13/F-14 coverage catch-up; 2026-10-26 targeted checks and other historical entries retain their own verification dates. These catch-up discoveries are not fresh official changes.
 
 ## Purpose and truth boundary
 
@@ -287,13 +287,32 @@ Do not book any F-10 subsidy revenue, do not treat the published rates as expect
 - **Unresolved:** eligible applicant/site owner and licensed operator; baseline energy consumption at a currently closed public property; threshold energy savings/investment payback, installed equipment boundaries, design/construction start constraints, availability of a valid City property-rights route and no overlapping cost claims with F-07A, F-07B and F-11. A 2026 deadline cannot overcome current property or applicant uncertainty.
 - Retain the call for future-cycle comparison without asserting another supplementary round in 2027.
 
+## F-15 — 令和８年度 業務用建築物の脱炭素改修加速化事業（脱炭素ビルリノベ2026）
+
+- Agency: 環境省 / 執行団体 一般社団法人環境共創イニシアチブ (SII).
+- **Round state: OPEN as of 2026-11-05, subject to prior budget exhaustion.** This is a **2026-06-04 originally announced** opportunity discovered in coverage reconciliation on 2026-11-04, **not a newly opened November call**.
+- **Official deadline clock conflict — DO NOT ASSERT A FINAL HOUR:** MOE's 2026-06-04 announcement says **2026-11-30 17:00 JST 必着**, whereas the current SII administrator call page says **2026-11-30 23:59 JST**. Resolve with current binding guide and SII in writing before planning or submitting; use earlier clock as a protective internal planning gate only, not as a resolved official rule. Both pages agree on the November 30 date.
+- Primary sources, checked 2026-11-05: https://www.env.go.jp/press/press_04846.html and https://bl-renos.jp/r8/about/
+- Support: eligible existing nonresidential building-envelope/energy retrofit; published conditional **1/2–1/3** of eligible equipment, construction and design costs; maximum **¥1,000,000,000** and minimum **¥2,000,000** per project, per administrator page and controlling guide. These are **not YUMORI funding**.
+- Potential components: building insulation, high-efficiency HVAC and commercial hot-water, controls/BEMS, possibly qualifying external high-efficiency heat sources under the specific program rule. This does not establish that a closed public onsen, a reused former school, server heat-pump package, or compute hardware qualifies.
+- Administrator's published main performance conditions include BPI ≤1.0 and use-dependent primary-energy reductions (roughly 30% for hotels/restaurants and 40% for offices/schools), BEMS and approved modelling; formal project-specific tests depend on the guide.
+- **YUMORI project boundary: VERIFIED PROGRAM only.** No qualifying applicant, ownership or use rights, operating/baseline conditions, proposal, selection or award established. Check City ownership versus eligible operator, public/private applicant criteria, buildings/application units, baseline methodology for closed properties, procurement only after award, stacking with F-07/F-10/F-11/F-14, and actual need for the retrofit.
+- Calendar handling: retain original FY2026 call permanently; mark 2027 successor **UNANNOUNCED / NOT VERIFIED**. The November 5 entry is historical coverage correction, not a new government clarification.
+
 ## P-01 — 福井県 大型データセンター誘致可能性調査業務（フェーズ１） (procurement; NOT subsidy)
 
 - Agency: 福井県エネルギー環境部エネルギー課.
-- Status: **VERIFIED PROCUREMENT NOTICE / NO YUMORI CONTRACT OR AWARD**.
-- Published: 2026-10-14. Bidder eligibility submission closed **2026-10-23 17:00**; proposals due **2026-11-04 17:00** only for already-qualified bidders.
+- Round state: **CLOSED BY PUBLISHED DEADLINE as of 2026-11-05 JST**. The original Prefecture notice has not announced an extension or award, and final receipt/selection has not been independently established. **NOT A GRANT**.
+- YUMORI boundary: **NO QUALIFIED BID, CONTRACT, SITE SELECTION OR AWARD EVIDENCED**.
+- Published: 2026-10-14. Bidder eligibility submission deadline **2026-10-23 17:00**; proposal receipt deadline **2026-11-04 17:00** for already-qualified bidders only.
 - Official source: https://www.pref.fukui.lg.jp/doc/dengen/1014.html
 - Public research procurement ceiling **¥6,160,000 incl. tax** is NOT a grant cap or subsidy. Scope studies siting and infrastructure for very large data centers; no evidence any YUMORI site is selected or on the list. Possible complementary heat-reuse/decentralized-compute question is only a future inquiry hypothesis.
+
+### Watch reconciliation — 2026-11-05 JST
+
+The published 2026-11-04 17:00 JST deadline for Fukui Prefecture's P-01 large-data-center feasibility consultancy passed. Its October 14 primary notice remained unchanged at review; mark **CLOSED BY PUBLISHED DEADLINE**, not award, rejected bid or confirmed final procurement outcome. It is **not a subsidy**, and has no YUMORI finance implication. Primary source: https://www.pref.fukui.lg.jp/doc/dengen/1014.html
+
+Record the already announced June 4 MOE/SII commercial-building retrofit call as F-15 for forward-cycle coverage. Its November 30 **time conflict (MOE 17:00 vs SII 23:59)** is unresolved and must be reported as conflicting official sources, not silently resolved. It is not a new opening or published change on November 5. No project-status promotion or committed funding.
 
 ### Watch reconciliation — 2026-10-31 JST
 
