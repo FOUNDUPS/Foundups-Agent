@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1803,
+  "total_tests": 1805,
   "quarantined_tests": 260,
   "tests": [
     {
@@ -3411,6 +3411,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": ""
+    },
+    {
+      "id": "test::modules::ai_intelligence::ai_overseer::tests::test_preflight_model_boundary",
+      "path": "modules/ai_intelligence/ai_overseer/tests/test_preflight_model_boundary.py",
+      "owner": "modules/ai_intelligence/ai_overseer",
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-ai-overseer-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Exercise real startup/constructor bodies with all runtime effects replaced.\n\nAST loading follows the existing preflight test boundary: importing main itself\nloads environment files and CLI services unrelated to these deterministic gates."
     },
     {
       "id": "test::modules::ai_intelligence::ai_overseer::tests::test_preflight_resolution",
@@ -19596,6 +19609,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for centralized local model routing."
+    },
+    {
+      "id": "test::modules::infrastructure::shared_utilities::tests::test_local_model_startup_selection",
+      "path": "modules/infrastructure/shared_utilities/tests/test_local_model_startup_selection.py",
+      "owner": "modules/infrastructure/shared_utilities",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-shared-utilities-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline role selection and exact native initialization; no model/service use."
     },
     {
       "id": "test::modules::infrastructure::shared_utilities::tests::test_mode_detection",

@@ -1,5 +1,12 @@
 # AI Overseer Tests
 
+`test_preflight_model_boundary.py` executes the actual constructor and main
+factory bodies with runtime collaborators replaced. It verifies model-free
+preflight, preserved rejection, default operational initialization and logging
+restoration without importing main's environment-loading entry point.
+The WSP sentinel tests include current/future allocation positives and malformed,
+duplicate, occupied, skipped and missing-row controls.
+
 This directory hosts unit and integration tests for the AI Overseer module.
 
 Structure:

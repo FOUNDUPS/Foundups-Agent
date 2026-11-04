@@ -299,100 +299,61 @@ class TestLMStudioNativeResidency:
                 )
 
 
+@pytest.fixture
+def native_role_backend(monkeypatch):
+    """Exact native/SDK collaborators; never an obsolete reachability preprobe."""
+    import sys
+    from types import ModuleType
+    from modules.infrastructure.shared_utilities import local_llm_backends as owner
+    from modules.infrastructure.shared_utilities.lm_studio_native_transport import (
+        LMStudioModelState, LMStudioLoadedInstance, LMStudioResidencyState,
+    )
+    state = {"resident": True}
+    def inspect_native(key, **_kwargs):
+        status = LMStudioResidencyState.RESIDENT if state["resident"] else LMStudioResidencyState.SERVER_UNREACHABLE
+        instances = (LMStudioLoadedInstance("test-instance", {}),) if state["resident"] else ()
+        return LMStudioModelState(key, status, instances)
+    sdk = ModuleType("openai")
+    sdk.OpenAI = MagicMock()
+    monkeypatch.setitem(sys.modules, "openai", sdk)
+    monkeypatch.setattr(owner, "inspect_lm_studio_model", inspect_native)
+    return state
+
+
 class TestResolverBackendSelection:
-    """Test resolver selects correct backend based on availability."""
+    """Existing preference/fallback assertions against the actual initializer."""
 
-    def test_resolve_qwen_prefers_lm_studio_when_available(self):
-        """When LM Studio is available with qwen model, use LMStudioBackend."""
-        from modules.infrastructure.shared_utilities.local_llm_resolver import (
-            resolve_qwen_backend,
-        )
+    def test_resolve_qwen_prefers_lm_studio_when_available(self, native_role_backend):
+        from modules.infrastructure.shared_utilities.local_llm_resolver import resolve_qwen_backend
+        backend = resolve_qwen_backend()
+        assert backend is not None
+        assert backend.backend_name == "lm_studio"
 
-        with patch(
-            "modules.infrastructure.shared_utilities.local_llm_resolver.is_lm_studio_available"
-        ) as mock_available:
-            mock_available.return_value = True
+    def test_resolve_qwen_falls_back_to_llama_cpp_when_lm_studio_unavailable(self, native_role_backend, tmp_path):
+        from modules.infrastructure.shared_utilities.local_llm_resolver import resolve_qwen_backend
+        native_role_backend["resident"] = False
+        path = tmp_path / "qwen.gguf"
+        path.write_bytes(b"offline-placeholder")
+        with patch("modules.infrastructure.shared_utilities.local_llm_backends.LlamaCppBackend.initialize", return_value=True):
+            backend = resolve_qwen_backend(model_path=path, n_ctx=2048)
+        assert backend is not None
+        assert backend.backend_name == "llama_cpp"
 
-            with patch(
-                "modules.infrastructure.shared_utilities.local_llm_backends.LMStudioBackend.initialize"
-            ) as mock_init:
-                mock_init.return_value = True
+    def test_resolve_gemma_prefers_lm_studio_when_available(self, native_role_backend):
+        from modules.infrastructure.shared_utilities.local_llm_resolver import resolve_gemma_backend
+        backend = resolve_gemma_backend()
+        assert backend is not None
+        assert backend.backend_name == "lm_studio"
 
-                backend = resolve_qwen_backend(
-                    model_path=Path("E:/models/qwen.gguf"), n_ctx=2048
-                )
-
-                assert backend is not None
-                assert backend.backend_name == "lm_studio"
-
-    def test_resolve_qwen_falls_back_to_llama_cpp_when_lm_studio_unavailable(self):
-        """When LM Studio is unavailable, fall back to LlamaCppBackend."""
-        from modules.infrastructure.shared_utilities.local_llm_resolver import (
-            resolve_qwen_backend,
-        )
-
-        with patch(
-            "modules.infrastructure.shared_utilities.local_llm_resolver.is_lm_studio_available"
-        ) as mock_available:
-            mock_available.return_value = False
-
-            with patch(
-                "modules.infrastructure.shared_utilities.local_llm_backends.LlamaCppBackend.initialize"
-            ) as mock_init:
-                mock_init.return_value = True
-
-                backend = resolve_qwen_backend(
-                    model_path=Path("E:/models/qwen.gguf"), n_ctx=2048
-                )
-
-                assert backend is not None
-                assert backend.backend_name == "llama_cpp"
-
-    def test_resolve_gemma_prefers_lm_studio_when_available(self):
-        """When LM Studio is available with gemma model, use LMStudioBackend."""
-        from modules.infrastructure.shared_utilities.local_llm_resolver import (
-            resolve_gemma_backend,
-        )
-
-        with patch(
-            "modules.infrastructure.shared_utilities.local_llm_resolver.is_lm_studio_available"
-        ) as mock_available:
-            mock_available.return_value = True
-
-            with patch(
-                "modules.infrastructure.shared_utilities.local_llm_backends.LMStudioBackend.initialize"
-            ) as mock_init:
-                mock_init.return_value = True
-
-                backend = resolve_gemma_backend(
-                    model_path=Path("E:/models/gemma.gguf"), n_ctx=1024
-                )
-
-                assert backend is not None
-                assert backend.backend_name == "lm_studio"
-
-    def test_resolve_gemma_falls_back_to_llama_cpp_when_lm_studio_unavailable(self):
-        """When LM Studio is unavailable, fall back to LlamaCppBackend."""
-        from modules.infrastructure.shared_utilities.local_llm_resolver import (
-            resolve_gemma_backend,
-        )
-
-        with patch(
-            "modules.infrastructure.shared_utilities.local_llm_resolver.is_lm_studio_available"
-        ) as mock_available:
-            mock_available.return_value = False
-
-            with patch(
-                "modules.infrastructure.shared_utilities.local_llm_backends.LlamaCppBackend.initialize"
-            ) as mock_init:
-                mock_init.return_value = True
-
-                backend = resolve_gemma_backend(
-                    model_path=Path("E:/models/gemma.gguf"), n_ctx=1024
-                )
-
-                assert backend is not None
-                assert backend.backend_name == "llama_cpp"
+    def test_resolve_gemma_falls_back_to_llama_cpp_when_lm_studio_unavailable(self, native_role_backend, tmp_path):
+        from modules.infrastructure.shared_utilities.local_llm_resolver import resolve_gemma_backend
+        native_role_backend["resident"] = False
+        path = tmp_path / "gemma.gguf"
+        path.write_bytes(b"offline-placeholder")
+        with patch("modules.infrastructure.shared_utilities.local_llm_backends.LlamaCppBackend.initialize", return_value=True):
+            backend = resolve_gemma_backend(model_path=path, n_ctx=1024)
+        assert backend is not None
+        assert backend.backend_name == "llama_cpp"
 
 
 class TestSingletonCacheReuse:

@@ -1,3 +1,15 @@
+## 2026-11-05 — Windows startup preflight and shared model roles
+
+Main uses deterministic AI Overseer preflights without eagerly acquiring models.
+Unavailable AI proposal capabilities are checked before constructing their model
+owner. Code and triage resolve through the existing shared role-selection owner;
+exact native residency failures remain distinct from an unreachable server.
+Windows OpenClaw workspace skills retain committed LF bytes for raw-hash checks.
+The WSP allocation sentinel derives its next number from current allocations.
+Focused validation and independent review are recorded in the module test logs.
+Live daemon/model quality and missing runtime authority remain unverified.
+WSP00/10/11/22/50/77/97. No secrets, authority receipts or security bypass added.
+
 ## 2026-11-02 — Restricted native UPS transfer qualification
 
 WSP15/22/26/48/62/81/97; class C, 19/P0 under 012 architecture delegation.

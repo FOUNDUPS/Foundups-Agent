@@ -1,5 +1,26 @@
 # WSP Module ModLog: Shared Utilities
 
+## 2026-11-05 — Role-owned native keys and truthful initialization status
+
+WSP11/22/50/62/84/97. Extended the existing role selector with scoped code/triage
+native keys, preserving declared defaults and refusing basename guesses for
+custom paths. One shared resolver handles both legacy entry points. Singleton
+factories resolve current file/native settings once and make one backend attempt;
+they no longer perform pathless-then-config retries or import-time advisor-path
+selection. Existing cache/force-reinit and explicit GGUF fallback remain.
+
+LMStudioBackend retains its actual native initialization state for diagnostics.
+Reachable nonresident, SDK failure and authentication are distinguished from an
+unreachable server. Native inference/authentication/instance/retry controls,
+General selection and signed Gateway paths are unchanged. No service/model
+launch, native load/unload, download or arbitrary resident selection was added.
+The new24 offline controls recorded21 RED failures then24 GREEN. The combined75
+selection (including the24) passed with native/SDK/file collaborators and zero denied effects,
+processes, SQLite or dotenv calls. No real model/service was exercised.
+Final existing startup owner adapter passed176 with final source bytes, preserving
+the original94 names/digest and adding scoped role/preflight/sentinel controls.
+Canonical admission, full conftests and unchanged effect guards were active.
+
 ## 2026-11-01 — Shared YouTube language-role and bounded dispatch
 
 Expose the existing general-language model role guard for Gateway consumers,

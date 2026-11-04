@@ -194,6 +194,7 @@ class LMStudioBackend(LocalLLMBackend):
         self.pre_dispatch_check = pre_dispatch_check
         self._client = None
         self._initialized = False
+        self.last_initialization_status = "not_initialized"
 
     @property
     def backend_name(self) -> str:
@@ -209,6 +210,7 @@ class LMStudioBackend(LocalLLMBackend):
         if self._initialized:
             return True
 
+        self.last_initialization_status = "initialization_failed"
         try:
             state = inspect_lm_studio_model(
                 self.model_id,
@@ -216,6 +218,7 @@ class LMStudioBackend(LocalLLMBackend):
                 api_token=self.api_token,
                 timeout=min(self.request_timeout, 10.0),
             )
+            self.last_initialization_status = state.state.value
             if state.state is not LMStudioResidencyState.RESIDENT:
                 logger.warning(
                     "[LM-STUDIO] Exact model '%s' is not resident (%s)",
@@ -226,6 +229,7 @@ class LMStudioBackend(LocalLLMBackend):
             instance_ids = tuple(item.instance_id for item in state.loaded_instances)
             expected = self.expected_instance_id
             if len(instance_ids) != 1 or (expected is not None and instance_ids[0] != expected):
+                self.last_initialization_status = "resident_ambiguous_or_changed"
                 logger.warning("[LM-STUDIO] Exact model residency is ambiguous or changed")
                 return False
             self.expected_instance_id = instance_ids[0]
@@ -244,11 +248,14 @@ class LMStudioBackend(LocalLLMBackend):
             return True
 
         except ImportError:
+            self.last_initialization_status = "sdk_unavailable"
             logger.warning("[LM-STUDIO] openai package not installed")
             return False
         except LMStudioAuthenticationError:
+            self.last_initialization_status = "authentication_required"
             raise
         except Exception as e:
+            self.last_initialization_status = "initialization_failed"
             logger.debug("[LM-STUDIO] Not available: %s", type(e).__name__)
             return False
 
