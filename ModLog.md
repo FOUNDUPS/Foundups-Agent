@@ -63396,8 +63396,8 @@ source review pass. No issue submitted. Hosted publication gates remain pending.
 
 ## 2026-11-05 — Preserve hosted CPU test capacity
 
-PR2302's general test job exhausted its hosted disk while installing CUDA wheels,
-before acceptance tests ran. The CPU-only hosted job now preinstalls PyTorch from
+PR2302's general and red-team jobs exhausted hosted disk installing CUDA wheels,
+before acceptance tests ran. Both CPU-only jobs now preinstall PyTorch from
 the official CPU index, verifies that build after the unchanged requirements,
 and avoids restoring/retaining the former GPU pip cache. Runtime requirements
 and all acceptance commands remain unchanged. Hosted validation is pending.
