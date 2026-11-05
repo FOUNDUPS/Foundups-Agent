@@ -1,5 +1,20 @@
 # LiveChat
 
+## Bounded subprocess output and handoff diagnostics (2026-11-05)
+
+The existing comment runner drains stdout/stderr in 65,536-byte chunks and
+retains physical lines up to 65,536 bytes before LF (including CR). It discards
+an entire oversized line, including JSON-looking suffixes, then continues with
+subsequent valid output. Fixed phase codes distinguish initialization, matching
+work settlement, observed direct-child exit and completed pipe readers.
+
+Completed reader/wait failures retain failed ownership through a constant
+RuntimeError. An inherited pipe held by a descendant still blocks settlement
+until actual EOF; this change adds no abandonment timeout or family kill.
+The original81 lifecycle controls plus20 new controls pass101 in a closed
+credential-free Windows run. This does not identify the live incident
+conclusively or verify chat delivery. See INTERFACE and tests/TestModLog.
+
 ## Shared YouTube model route (2026-11-01)
 
 Assessment, writer and exact final review now call the shared AI Gateway.

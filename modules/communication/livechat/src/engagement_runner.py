@@ -42,6 +42,39 @@ from modules.communication.livechat.src.engagement_lifecycle import (
 logger = logging.getLogger(__name__)
 
 
+# Payload bytes before LF (CR, when present, counts toward this existing limit).
+_MAX_SUBPROCESS_LINE_BYTES = 65536
+
+
+async def _bounded_stream_lines(stream):
+    """Drain fixed chunks and discard an entire oversized physical line."""
+    pending = bytearray()
+    dropping = False
+    while chunk := await stream.read(65536):
+        start = 0
+        while start < len(chunk):
+            newline = chunk.find(b'\n', start)
+            end = len(chunk) if newline < 0 else newline
+            if not dropping:
+                piece = chunk[start:end]
+                if len(pending) + len(piece) > _MAX_SUBPROCESS_LINE_BYTES:
+                    pending.clear()
+                    dropping = True
+                    logger.warning('[SUBPROCESS-STREAM] reason=oversized_line_discarded')
+                else:
+                    pending.extend(piece)
+            if newline < 0:
+                break
+            if not dropping:
+                yield bytes(pending)
+            pending.clear()
+            dropping = False
+            start = newline + 1
+        await asyncio.sleep(0)
+    if pending and not dropping:
+        yield bytes(pending)
+
+
 def _env_truthy(name: str, default: str = "false") -> bool:
     return os.getenv(name, default).strip().lower() in ("1", "true", "yes", "y", "on")
 
@@ -303,10 +336,7 @@ class SubprocessRunner(EngagementRunner):
 
         async def _drain_stream(stream, sink, prefix):
             skip_backtrace = 0  # Counter for skipping hex backtrace lines
-            while True:
-                line = await stream.readline()
-                if not line:
-                    break
+            async for line in _bounded_stream_lines(stream):
                 text = line.decode('utf-8', errors='ignore').rstrip()
                 if text:
                     sink.append(text)

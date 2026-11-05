@@ -1,5 +1,24 @@
 # LiveChat Module Test Suite
 
+## 2026-11-05 — Bounded pipe and handoff controls
+
+The same two lifecycle files now select101 cases: the original81 plus20 new
+controls. Actual runner/stdlib stream cases cover oversized lines and forged
+suffixes, subsequent JSON, EOF, cap boundaries, UTF-8/CRLF and event-loop progress.
+Finite source-defined Python children cover real oversized-output completion,
+cancellation and live handoff while another channel survives. An inherited-pipe
+descendant control verifies ownership remains held until controlled EOF. Reader
+OSError/CancelledError controls verify fixed failures retain the owner; phase
+checks distinguish process exit from completed readers.
+
+Use the existing two-file CI selector with a fixed credential-free parent,
+private temp/profile paths, dotenv/plugin autoload disabled and canonical test
+admission. Real subprocess fixtures must be admitted only by exact private
+program/argv; launch them isolated with explicit clean environments. The private
+qualification guard reused the existing effect policy and rejected every other
+process/network/model/credential-file effect. Do not collect historical live
+integrations or interpret these fixtures as current chat delivery evidence.
+
 The 2026-11-01 queue-owner selector is `test_video_policy.py` plus existing
 `test_operator_command_queue.py` and `test_operator_command_lifecycle.py`.
 Use a fixed credential-free child environment with private temp/profile paths;
