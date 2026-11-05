@@ -1,5 +1,27 @@
 # video_comments TestModLog
 
+## 2026-11-05 — Use neutral grounding data in the memory fixture
+
+PR2306 CodeQL flagged domain-substring checks in the synthetic memory fixture.
+Replace that website-shaped datum with one ordinary factual sentence, retaining
+the cold omission/warm supplied-grounding predicates, assertions and case names.
+No URL sanitizer, suppression, runtime behavior or effect boundary is changed.
+The unchanged closed quality adapter passes all 60 cases with the original case
+inventory and zero issues; hosted CodeQL alert closure remains a separate gate.
+
+## 2026-11-05 — Optional memory stays within the caller lifetime
+
+New source-bound readiness controls: original RED22 17 failures/5 passes;
+strengthened RED23 18 failures/5 passes; GREEN23 + unchanged quality37 = 60
+passes, zero errors/skips/denied effects. All prior red artifacts are retained.
+Cold controls explicitly spy/deny both the index constructor and embedding
+loader, beyond the Chroma probe. Warm review snapshots retain supplied memory.
+Event barriers drive history cancellation without a fragile 50ms positive-path
+deadline. Fake model judgments test stage/data flow, not semantic accuracy.
+The existing context fixture migration retains its prior query/title assertions
+and adds exact ready-only/token bindings. Default legacy cold initialization,
+no-new-keyword private calls and zero-vector behavior remain covered separately.
+
 ## 2026-11-05 — Inbox completion requires positive evidence
 
 New `test_inbox_completion_evidence.py`: 13 cases. Initial qualified RED: 7

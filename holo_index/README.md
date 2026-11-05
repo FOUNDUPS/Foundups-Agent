@@ -1,3 +1,14 @@
+## Optional ready-only video search — 2026-11-05
+
+Existing `VideoContentIndex.search()` accepts keyword-only
+`allow_cold_init=True, cancel_event=None`. A bounded optional consumer can set
+the flag false to require an already-loaded embedding model before any count
+or search. It never falls back to a zero embedding or starts a cold model in
+that mode. Cancellation gates subsequent count/encode/query/result phases;
+an active native operation is not forcibly interrupted. Legacy defaults and
+explicit indexing owners are unchanged. This adds no warmup, cache, model
+selection or generation-freshness authority.
+
 ## Stored-settings local guard; maintenance hold — 2026-11-01
 
 Existing Holo owners validate persisted raw settings before callback-capable SDK

@@ -35,14 +35,16 @@ def source_module(name, path):
     return module
 
 
-HISTORY = source_module('_submission_history', 'modules/communication/video_comments/src/commenter_history_store.py')
-ROW = source_module('_submission_row', 'modules/communication/video_comments/skillz/tars_like_heart_reply/src/comment_row_context.py')
-tree = ast.parse(EXECUTOR_PATH.read_text(encoding='utf-8'))
-definitions = ast.Module(body=[node for node in tree.body if isinstance(node, ast.ClassDef)], type_ignores=[])
-namespace = dict(asyncio=asyncio, os=os, random=random, uuid4=uuid4, Any=object, Dict=dict, List=list,
-                 logger=logging.getLogger(__name__), HUMAN_BEHAVIOR_AVAILABLE=False)
-exec(compile(definitions, str(EXECUTOR_PATH), 'exec'), namespace)
-Executor = namespace['BrowserReplyExecutor']
+def _source_owners():
+    global HISTORY, ROW, tree, Executor
+    HISTORY = source_module('_submission_history', 'modules/communication/video_comments/src/commenter_history_store.py')
+    ROW = source_module('_submission_row', 'modules/communication/video_comments/skillz/tars_like_heart_reply/src/comment_row_context.py')
+    tree = ast.parse(EXECUTOR_PATH.read_text(encoding='utf-8'))
+    definitions = ast.Module(body=[node for node in tree.body if isinstance(node, ast.ClassDef)], type_ignores=[])
+    namespace = dict(asyncio=asyncio, os=os, random=random, uuid4=uuid4, Any=object, Dict=dict, List=list,
+                     logger=logging.getLogger(__name__), HUMAN_BEHAVIOR_AVAILABLE=False)
+    exec(compile(definitions, str(EXECUTOR_PATH), 'exec'), namespace)
+    Executor = namespace['BrowserReplyExecutor']
 CONTEXT = dict(_target_channel_id='RECEIVING', video_id='VIDEO', comment_id='UgxOriginal',
                text='Where is the film?', author_name='Aki', author_handle='@Aki', channel_id='AUTHOR')
 
@@ -87,6 +89,10 @@ let input = ''; process.stdin.on('data', x => input += x); process.stdin.on('end
 
 
 class SubmissionHistoryTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        _source_owners()
+
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)

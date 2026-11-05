@@ -1,3 +1,21 @@
+## 2026-11-05 — Reply memory readiness and cancellation
+
+YouTube replies reuse ready in-process voice/video memory without starting cold
+Chroma or embedding-model initialization inside the reply deadline. Existing
+memory owners retain their legacy initialization defaults; cancellation stops
+subsequent enrichment stages and discards late context. Active native work is
+cooperative, not forcibly interrupted. No new warm-up service is introduced.
+
+The 60 focused and 165 adjacent cases pass under their existing effect guards.
+Two older test modules defer initialization until fixture setup, preserving
+their assertions and actual JavaScript fixtures for canonical test admission.
+Independent controls cover cold-to-warm reuse and late cancellation. Shared
+model routing, deadlines, quality judgment, comment identity and delivery gates
+are unchanged. A separate synthetic local-model run completed all three stages;
+its whole-probe qualification remains false after blocking an import-time IPv6
+capability check, and it does not prove published reply quality or delivery.
+WSP00/10/11/22/50/77/97. Live browser identity remains a separate verification.
+
 ## 2026-11-05 — Menu logging and scheduling readiness follow-up
 
 Main-menu input temporarily filters background console logging while retaining

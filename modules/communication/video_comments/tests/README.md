@@ -1,5 +1,19 @@
 # video_comments Tests
 
+## 2026-11-05 optional memory readiness
+
+`test_reply_memory_readiness.py` contains 23 bounded actual-definition controls.
+Cold and warm positives reach assess/write/review; cold fixtures ask a useful
+clarification and warm fixtures use only supplied grounding. Constructor/model
+loader spies, cache-sentinel checks, cancellation between retrieval stages,
+legacy defaults and refusal of a cold compatibility retry cover the new boundary.
+Initial RED22 had 17 failures/5 passes; stricter RED23 had 18 failures/5 passes.
+All 23 pass with the existing quality37 (60 combined), with no errors/skips or
+denied effects under the unchanged repository EffectGuard and minimal child.
+The strict VoiceMemory double in `test_reply_context_pipeline.py` now asserts
+the ready-only flag and token as well as the original query/title fields.
+Real models, Chroma stores, corpora, subprocess probes and browsers are excluded.
+
 ## 2026-11-05 inbox completion evidence
 
 `test_inbox_completion_evidence.py` adds 13 actual-definition controls for

@@ -1,3 +1,16 @@
+## Reply-memory readiness metadata review — 2026-11-05
+
+The unchanged full-tree scanner at staged tree 386f0846 against main 78e16b4d
+reports 39 new exact bindings for unchanged generated public source path/SHA
+rows (37 generic-api-key and two discord-api-token matches). Independent review
+reconstructs the current immutable source digests, unique unchanged rows and
+exact prior approvals. Append only those 39, preserving all 3,795 earlier
+entries and every other ledger field (3,834 total). The 1,485-member closure,
+332 KiB manifest, 2 MiB member and 32 MiB total limits, scanner rules/scope and
+fingerprint algorithm remain unchanged. Independent review receipt SHA256:
+`8f14cef15e59dc88e9ee900a05cfb8c25151fa48d9a8fb1119624e391512ab76`.
+Fresh final-tree and actual committed-history gates remain separate requirements.
+
 ## Runtime prompt, inbox and scheduler metadata review — 2026-11-05
 
 The unchanged full-tree scanner at staged tree 3fc87236 against main d5ed0749

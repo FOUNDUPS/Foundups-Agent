@@ -1,5 +1,18 @@
 # Video Comments - Autonomous YouTube Engagement Module
 
+## Optional reply memory (2026-11-05)
+
+The bounded reply path requests ready-only video memory. A cold worker omits
+optional video-RAG and still assesses, writes and separately reviews the original
+comment with its captured identity, supplied video/theme context and available
+history. Missing memory is no permission to invent personal facts or links.
+An existing video index and embedding model in the same process may supply
+grounding. This path does not warm them or promise eventual readiness.
+Cancellation prevents subsequent enrichment stages and discards late output;
+an in-flight native encode or database call cannot be forcibly interrupted.
+Shared routing, request budgets, final quality review and submission identity
+guards are unchanged. A missing stable video ID can still prevent submission.
+
 ## Inbox completion evidence (2026-11-05)
 
 Zero visible threads, a load timeout or a failed empty-state read does not prove

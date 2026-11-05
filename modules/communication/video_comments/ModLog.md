@@ -1,5 +1,25 @@
 # Video Comments - ModLog
 
+## 2026-11-05 — Ready-only optional reply memory
+
+WSP00/11/22/50/77/84/97. Reuse VoiceMemory/VideoContentIndex with additive
+ready-only and cooperative cancellation options; the bounded reply path cannot
+start cold Chroma probes, index creation or embedding-model loading. A cold
+first comment still reaches assessment, writing and independent final review
+without optional memory. Existing warm grounding is retained. History and
+retrieval stage boundaries honor the generation token; no cold legacy retry is
+allowed when a collaborator lacks the new keyword contract.
+
+The RAG path predates the manifest work; this is not evidence that JSON/private
+commands introduced the live silence. Existing 10/5-second caller budgets,
+shared/signed model routing, quality and stable submission identity remain.
+No warmup owner/cache, automatic eventual readiness or hard native-call
+cancellation is added. A fresh process can continue without optional video-RAG.
+Test-first RED23: 18 failures, 5 passes; GREEN23 plus existing quality37: 60 passes,
+zero errors/skips/denied effects. Synthetic collaborators prove control flow,
+not actual model quality, current DOM identity or live delivery. Preparation
+source base is `2a8ed786`; default-branch integration is a separate parent gate.
+
 ## 2026-11-05 — Preserve unverified inbox completion
 
 WSP00/11/22/50/97. The worker previously converted a wait timeout and zero DOM

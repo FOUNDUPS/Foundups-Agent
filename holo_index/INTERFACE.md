@@ -1,3 +1,20 @@
+## Ready-only optional video search — 2026-11-05
+
+```python
+VideoContentIndex.search(query, k=5, channel=None, *,
+                         allow_cold_init=True, cancel_event=None)
+```
+
+Default calls retain legacy embedding initialization and the existing channel
+filter/result format. With cold initialization forbidden, an absent embedding
+model returns no matches before collection access; a model lost during count
+also cannot trigger lazy loading. `_get_embedding()` uses the existing object
+at use time and returns no embedding in that mode rather than a zero vector.
+An event is checked before and between count, encoding, query and returned
+matches. This is cooperative cancellation; active native work may finish later.
+The caller retains lifecycle/authority obligations. Existing index construction,
+maintenance, stored-settings and source-freshness contracts are unchanged.
+
 ## Stored Chroma settings admission — 2026-11-01
 
 API: `validate_collection_raw_settings(collection) -> str` in
