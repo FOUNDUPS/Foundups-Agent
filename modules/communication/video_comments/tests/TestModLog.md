@@ -1,5 +1,18 @@
 # video_comments TestModLog
 
+## 2026-11-05 — Keep quality STOP state inside each fixture
+
+Hosted CI runs the stdlib 15 before the direct reply 112. The rejected-draft
+fixture reached the real quality latch and left its default STOP for the next
+step, correctly blocking three history tests before durable reservation. A
+two-process replay sharing one private STOP reproduced the exact three hosted
+failures (109 passed); the preceding stdlib 15 passed. Both fixture owners now
+use restoring private STOP/gate state. The rejected-draft control additionally
+asserts the actual persisted incident reason, scope and receipt identity.
+The identical bounded runner in a fresh directory passes 15 then 112 with the
+original case inventories, zero errors/skips or denied effects. No production
+gate, STOP state, delivery assertion or effect allowance changed.
+
 ## 2026-11-05 — Visual evidence does not rewrite delivery
 
 Added 9 actual-definition controls for typed optional visual observations.

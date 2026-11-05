@@ -109,6 +109,12 @@ class SubmissionHistoryTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)
+        self.enterContext(patch.dict(os.environ, {
+            'YT_AUTOMATION_STOP_FILE': str(Path(self.directory.name) / 'STOP'),
+            'YT_AUTOMATION_ENABLED': 'true',
+            'YT_COMMENT_ENGAGEMENT_ENABLED': 'true',
+            'YT_COMMENT_REPLY_ENABLED': 'true',
+        }))
         self.path = Path(self.directory.name) / 'history.db'
         self.store = HISTORY.CommenterHistoryStore(self.path)
 
