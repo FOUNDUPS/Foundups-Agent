@@ -1,3 +1,12 @@
+## Ready-only optional video memory — 2026-11-05
+
+Cross-owner source-bound RED23: 18 failures/5 passes; GREEN23 + unchanged
+quality37: 60 passes, zero errors/skips/denied effects. Existing default search
+behavior remains covered alongside cold-model refusal and cancellation stages.
+Fake collections/embeddings exercise complete production definitions. No real
+storage/model/probe or full Holo suite was run; raw-settings and maintenance
+qualification remain separate owner evidence.
+
 ## Stored-settings local qualification — 2026-11-01
 
 Original/adapted baselines retain the same 71 ordered passes, eight native cases

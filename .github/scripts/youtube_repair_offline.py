@@ -23,9 +23,10 @@ SUITES = {
         'modules/communication/video_comments/tests/test_llm_integration.py',
         'modules/communication/livechat/tests/test_antima_factcheck.py',
         'modules/communication/livechat/tests/test_antima_savage.py')),
-    'quality': (37, '40c036ef579b91a24aecf2f724930a128fff0215323e3c92fe843e9d6064251b', (
+    'quality': (60, '07119367388aebad0b26ff82025186215ac7ca174c1ef7e602b4655976c572ad', (
         'modules/communication/video_comments/tests/test_reply_quality_safety.py',
-        'modules/communication/video_comments/tests/test_inbox_completion_evidence.py')),
+        'modules/communication/video_comments/tests/test_inbox_completion_evidence.py',
+        'modules/communication/video_comments/tests/test_reply_memory_readiness.py')),
     'startup': (185, 'f0bb505c605a5e9d7ca810589a2033ed842248350578196f46c326772776c2dc', (
         'modules/infrastructure/dependency_launcher/tests/test_llmster_startup_fallback.py',
         'modules/infrastructure/shared_utilities/tests/test_local_model_selection.py',

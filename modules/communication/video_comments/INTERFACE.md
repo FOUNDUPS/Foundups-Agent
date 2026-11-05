@@ -1,5 +1,15 @@
 # Video Comments - Public Interface
 
+## Optional memory lifetime (2026-11-05)
+
+`IntelligentReplyGenerator` passes the current generation cancellation event and
+`allow_cold_init=False` to the existing `VoiceMemory.query()` owner. It checks
+cancellation before/after personalization and voice grounding. An unavailable or
+unsupported ready-only collaborator supplies no optional memory; it is never
+retried through a cold legacy query. The caller's 10-second generation and
+separate 5-second review budgets are unchanged. This is cooperative stage gating,
+not hard cancellation of an active native operation or automatic warmup.
+
 ## Shared YouTube model route (2026-11-01)
 
 Assessment, writer and exact final review now call the shared AI Gateway.

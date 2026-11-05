@@ -1,5 +1,17 @@
 # Digital Twin Tests
 
+## Ready-only reply retrieval
+
+The bounded cross-owner selection is
+`modules/communication/video_comments/tests/test_reply_memory_readiness.py`.
+Its 23 controls compile complete VoiceMemory/VideoContentIndex/reply definitions
+with synthetic collections, embeddings and Gateway judgments. Constructor and
+model-loader spies guard cold omission; warm results, cache preservation,
+cooperative cancellation and unchanged legacy defaults are positive controls.
+Run only through the existing credential-free EffectGuard owner. The four
+legacy `test_voice_memory.py` build/corpus tests can initialize ML dependencies
+and are not automatically offline-safe or part of this selection.
+
 ## Test Strategy (WSP 34)
 - Keep unit tests deterministic; avoid external model/network dependencies.
 - Use mock LLM paths or local fixtures for repeatable outputs.

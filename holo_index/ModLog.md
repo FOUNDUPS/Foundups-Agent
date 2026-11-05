@@ -1,3 +1,14 @@
+## 2026-11-05 — Reuse ready video embeddings for bounded optional replies
+
+WSP11/22/50/84/97. Add default-compatible ready-only/cancellation keywords to
+the existing video search/embedding methods. Ready-only calls skip an unloaded
+model before collection access and do not revive the legacy zero-vector path.
+Cancellation prevents later stages/results; active native calls retain their
+ordinary ownership. No initialization/health/indexing/warming owner changed.
+The video_comments focused cross-owner tests provide 23 new cases, passing with
+the existing quality37 (60 combined) under the unchanged effect guard. Actual
+Holo storage/model use and generation freshness are not qualified by fixtures.
+
 ## 2026-11-01 — Bounded stored-settings guard qualified locally
 
 WSP11/15/22/48/50/62/84/97; class B, 18/P0. Existing owners enforce the scoped

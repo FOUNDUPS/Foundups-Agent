@@ -74,26 +74,30 @@ def _load_definitions(name, relative):
     return module
 
 
-context_module = _load_definitions(
-    "_reply_context_prompt", "modules/communication/video_comments/src/reply_context.py")
-row_module = _load_definitions(
-    "_reply_context_row", "modules/communication/video_comments/skillz/tars_like_heart_reply/src/comment_row_context.py")
-generator_module = _load_definitions(
-    "_reply_context_generator", "modules/communication/video_comments/src/intelligent_reply_generator.py")
-processor_module = _load_definitions(
-    "_reply_context_processor", "modules/communication/video_comments/skillz/tars_like_heart_reply/src/comment_processor.py")
-generator_module.build_grounded_prompt = context_module.build_grounded_prompt
-generator_module.select_channel_personality = context_module.select_channel_personality
-generator_module.is_general_reply_model = context_module.is_general_reply_model
-generator_module.parse_reply_review = context_module.parse_reply_review
-generator_module.parse_comment_assessment = context_module.parse_comment_assessment
-generator_module.reply_text_is_publishable = context_module.reply_text_is_publishable
-processor_module.extract_row_comment_data = row_module.extract_comment_data
-IntelligentReplyGenerator = generator_module.IntelligentReplyGenerator
-CommentProcessor = processor_module.CommentProcessor
-processor_module.INTELLIGENT_REPLIES_AVAILABLE = True
-processor_module.get_reply_generator = _deny_dependency
-processor_module.CommenterType = generator_module.CommenterType
+@pytest.fixture(scope="module", autouse=True)
+def _source_owners():
+    global context_module, row_module, generator_module, processor_module
+    global IntelligentReplyGenerator, CommentProcessor
+    context_module = _load_definitions(
+        "_reply_context_prompt", "modules/communication/video_comments/src/reply_context.py")
+    row_module = _load_definitions(
+        "_reply_context_row", "modules/communication/video_comments/skillz/tars_like_heart_reply/src/comment_row_context.py")
+    generator_module = _load_definitions(
+        "_reply_context_generator", "modules/communication/video_comments/src/intelligent_reply_generator.py")
+    processor_module = _load_definitions(
+        "_reply_context_processor", "modules/communication/video_comments/skillz/tars_like_heart_reply/src/comment_processor.py")
+    generator_module.build_grounded_prompt = context_module.build_grounded_prompt
+    generator_module.select_channel_personality = context_module.select_channel_personality
+    generator_module.is_general_reply_model = context_module.is_general_reply_model
+    generator_module.parse_reply_review = context_module.parse_reply_review
+    generator_module.parse_comment_assessment = context_module.parse_comment_assessment
+    generator_module.reply_text_is_publishable = context_module.reply_text_is_publishable
+    processor_module.extract_row_comment_data = row_module.extract_comment_data
+    IntelligentReplyGenerator = generator_module.IntelligentReplyGenerator
+    CommentProcessor = processor_module.CommentProcessor
+    processor_module.INTELLIGENT_REPLIES_AVAILABLE = True
+    processor_module.get_reply_generator = _deny_dependency
+    processor_module.CommenterType = generator_module.CommenterType
 
 
 @pytest.fixture(autouse=True)
@@ -174,8 +178,9 @@ def test_voice_memory_query_includes_video_title():
     captured = {}
 
     class _VoiceMemory:
-        def query(self, text, k):
-            captured.update(text=text, k=k)
+        def query(self, text, k, *, allow_cold_init, cancel_event):
+            captured.update(text=text, k=k, allow_cold_init=allow_cold_init,
+                            cancel_event=cancel_event)
             return [{"score": 0.9, "text": "grounded fact", "source_type": "video"}]
 
     generator = object.__new__(IntelligentReplyGenerator)
@@ -190,6 +195,8 @@ def test_voice_memory_query_includes_video_title():
     assert captured == {
         "text": "A specific video\nWhat did you mean by this?",
         "k": 3,
+        "allow_cold_init": False,
+        "cancel_event": None,
     }
     assert "grounded fact" in context
 

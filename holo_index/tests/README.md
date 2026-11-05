@@ -1,3 +1,15 @@
+## Ready-only video retrieval — 2026-11-05
+
+The focused source-bound controls live in
+`modules/communication/video_comments/tests/test_reply_memory_readiness.py`.
+Synthetic model/collection collaborators test unloaded-model refusal before
+count, model-readiness races, cancellation between count/encode/query/results
+and legacy default channel/embedding behavior. Together with VoiceMemory and
+the reply caller they retain useful cold and warm generation controls.
+No actual Chroma storage, embedding model, indexing or maintenance is invoked.
+Existing health/metadata tests need their own qualified private paths and
+collaborators; a dummy Chroma client alone does not prevent constructor writes.
+
 ## Stored-settings qualification — 2026-11-01
 
 Existing durability/core/storage/probe and bridge snapshot owners cover the

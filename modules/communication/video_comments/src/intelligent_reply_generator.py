@@ -1217,6 +1217,8 @@ VARIATION GUIDANCE:
 
     def _get_voice_memory(self):
         """Lazy-initialize VoiceMemory (Digital Twin RAG) on first use."""
+        if self._reply_work_cancelled():
+            return None
         if self._voice_memory is None:
             try:
                 from modules.ai_intelligence.digital_twin.src.voice_memory import VoiceMemory
@@ -1236,21 +1238,23 @@ VARIATION GUIDANCE:
         Query VoiceMemory for grounding context relevant to the comment.
 
         Returns formatted context string, or empty string if unavailable/no results.
-        Never blocks reply generation — all failures return empty string.
+        Skip cold optional video memory; failures/cancellation return no context.
+        Already-running native work is cooperative, not forcibly interruptible.
         """
-        if not self._voice_memory_enabled:
+        if not self._voice_memory_enabled or self._reply_work_cancelled():
             return ""
 
         vm = self._get_voice_memory()
-        if not vm:
+        if not vm or self._reply_work_cancelled():
             return ""
 
         try:
             query_text = comment_text
             if video_title:
                 query_text = f'{video_title}\n{comment_text}'
-            results = vm.query(query_text, k=3)
-            if not results:
+            results = vm.query(query_text, k=3, allow_cold_init=False,
+                               cancel_event=getattr(self, '_current_cancel_event', None))
+            if not results or self._reply_work_cancelled():
                 return ""
 
             # Filter low-relevance noise
@@ -1298,8 +1302,14 @@ VARIATION GUIDANCE:
         Returns:
             Contextual reply or None if all LLMs unavailable
         """
+        if self._reply_work_cancelled():
+            return None
         history = self._load_personalization_context(author_name=author_name, author_channel_id=author_channel_id)
+        if self._reply_work_cancelled():
+            return None
         voice = self._load_voice_memory_context(comment_text, video_title=video_title)
+        if self._reply_work_cancelled():
+            return None
         self._current_generation_context = {
             'comment': comment_text, 'author': author_name, 'author_channel_id': author_channel_id,
             'video_title': video_title, 'history': history, 'verified_memory': voice,
