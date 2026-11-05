@@ -1,3 +1,16 @@
+## WRE readiness manifest metadata review — 2026-11-06
+
+The full-tree scanner at de3d85e5 reports 39 new whole-file bindings after
+regenerating the backend manifest (37 generic-api-key, two discord-api-token).
+Independent review verifies each public source-path/SHA row against committed
+source, its unchanged context and exact prior approval. Append only these 39
+fingerprints, preserving all 3,951 ordered prior records (3,990 total) and other
+ledger fields. Scanner rules, fingerprint formula, tree/history coverage and
+resource bounds are unchanged. Independent review receipt SHA256:
+`bdc6f56e513b827f328327a4df3fbaa83b52a0ac0872d27749ae443e900ba2f4`.
+Fresh final-tree and introduced-history checks remain required; this metadata
+classification does not establish model operation or protected worker admission.
+
 ## Browser attachment recovery metadata review — 2026-11-05
 
 The unchanged full-tree scanner at staged tree 5b8a3795 against main 76cb579b
