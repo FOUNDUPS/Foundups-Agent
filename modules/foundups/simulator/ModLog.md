@@ -1,3 +1,15 @@
+## 2026-11-05 — Micro-UPS preview qualification and continuity
+
+WSP15/22/26/50/62/81/97; root-selected class C, 19/P0. The [P4 preview](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p4-prospective-micro-ups-allocation-v1)
+is VERIFIED_SIMULATED: 360 focused/1,404 broad and independent 15 pass, retaining
+RED/integration failures and old assertions. Controlled legacy trace bytes match.
+Actual numeric/pool sizes 208/1,071, pool class 296, plan class 29/new method 18;
+promoted owner 693 <=700. Preallocated growth preserves inherited size debt, not
+broad compliance; split legacy models before posting expansion. Source/package/
+delivery gates are recorded separately. P3 PR2300/main 95516e81 remains delivered.
+Legacy `_require_numbers` tuple-membership is a separate static follow-up; P4's
+identity-only atom ingress does not use it. No exploit execution or global hardening claim.
+
 ## 2026-11-02 — Restricted native UPS transfer qualification
 
 WSP15/22/26/48/62/81/97; class C, 19/P0. Root implements the [versioned mode](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p3-exact-native-transfer-v1);

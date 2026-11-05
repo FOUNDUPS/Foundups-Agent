@@ -1,3 +1,18 @@
+## Prospective micro-UPS manifest metadata review — 2026-11-05
+
+The unchanged full-tree/introduced-history gate at 06625b9e against main 0cd8910b
+reported 40 occurrences sharing 39 exact bindings. Independent source review
+reconstructed 38 unchanged public source hashes and the changed _token_numeric
+source hash from exact committed bytes; the latter appears in both tree and
+history with the same whole-file/rule/line identity. Its former value was not
+used as approval of the new value. Append only these 39 reviewed bindings,
+preserving all 3,834 ordered prior records (3,873 total). Gate, rules, history
+coverage, fingerprint formula, package membership and caps remain unchanged.
+Independent finding-review SHA256:
+`102939cbf92a02f94dcdb32891c22b43eac57e6ec11ac583b547aa363d682c61`.
+Fresh final-tree/history and hosted checks are still required. This classification
+proves public generated metadata only, not custody or deployment readiness.
+
 ## Reply-memory readiness metadata review — 2026-11-05
 
 The unchanged full-tree scanner at staged tree 386f0846 against main 78e16b4d

@@ -1,5 +1,16 @@
 # FoundUps Simulator Test Suite
 
+## Prospective micro-UPS acceptance — 2026-11-05
+
+P4 is VERIFIED_SIMULATED within the [selected preview contract](../../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p4-prospective-micro-ups-allocation-v1).
+Fresh baseline 280; frozen 80 after the display-ID repair fail on missing API;
+candidate focused 360 passes. Final broad 1,404 passes with three SSE HTTP deselections,
+zero failures/errors/skips/recorded denials and 174 stable phase Python sources.
+The 80 are inside broad; independent 15 and the native maximal-plan JSON/BigInt check
+are separate. Controlled 240-tick legacy trace bytes match baseline; do not sum scopes.
+Final old prefix/functions and frozen assertions are preserved in the 693-line owner.
+TestModLog retains the Windows-ID error and lost-import failure; no funded/chain proof.
+
 ## Restricted native UPS transfer acceptance — 2026-11-02
 
 simulator_economics froze 45 desired cases; vision_catalog supplied 11 held-outs.

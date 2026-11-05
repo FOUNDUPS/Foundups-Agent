@@ -1,3 +1,19 @@
+## 2026-11-05 — P4 RED, import repair and verified preview
+
+P4 is VERIFIED_SIMULATED. Fresh 280 baseline passes; frozen v1 RED has 79 missing-API
+failures/one Windows setup error from an oversized parameter ID. The 100,000-character
+input stayed; an ID-only fix yields v2 RED 80 missing-API failures, then focused 360 pass.
+Promotion first lost the root draft's hashlib import: broad 1,403 pass/one NameError.
+Restoring the import, without oracle changes, yields final broad 1,404 pass with three
+SSE HTTP deselections, zero failures/errors/skips/recorded denials and 174 stable sources.
+Final old raw prefix/functions and frozen 80 remain; test owner 693 <=700.
+Lesson: verify whole-module import closure as well as function-body AST preservation.
+Independent 15/native JS max-plan JSON/BigInt pass separately; the 80 are within broad.
+Controlled 240-tick legacy trace matches bytes; scopes overlap, not aggregate counts.
+Legacy `_require_numbers` type-membership needs a separate static follow-up; the new
+atom guard does not call it, and this note claims no exploit execution.
+The [central decision](../../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p4-prospective-micro-ups-allocation-v1) owns source/delivery gates; P3 failure/history remains below.
+
 ## 2026-11-02 — Native-transfer RED, repairs and final qualification
 
 simulator_economics froze 45: initial RED 1 pass/44 missing-API failures; v1 focused

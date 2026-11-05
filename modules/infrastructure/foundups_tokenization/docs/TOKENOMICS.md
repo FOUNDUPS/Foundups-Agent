@@ -2,13 +2,15 @@
 
 **Version**: 2.1.0
 **Date**: 2026-02-17
-**Status**: Architecture Complete, Simulator Operational
+**Status**: Simulator implemented; blockchain activation blocked by open economic and security gates
 **Canonical Spec**: [WSP 26: FoundUPS DAE Tokenization](../../../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md)
 **Implementation**: [`modules/foundups/simulator/economics/`](../../../../modules/foundups/simulator/economics/__init__.py)
 
 ## Current qualification status — 2026-10-31
 
-The 2026-02-17 header status is historical design status, not economic activation.
+The version/date identify the 2026-02-17 model baseline. Its former Architecture
+Complete/Simulator Operational label was design status; the current header states
+the open activation gates rather than claiming economic completion.
 Follow the [WSP 26 §1.2 simulator-first change contract](../../../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract).
 Only valid behavior with fresh source-bound tests and independent acceptance is
 the implementation reference; existing defects and disputed rules are excluded.
@@ -27,6 +29,16 @@ Adoption expands the released ceiling within the intended21M total; work-mint
 capacity subtracts already mined supply. The separate staked F_i counter does
 not prove a combined cap. Units, fees, denominators, funded backing and exits
 remain unresolved; no new asset, schedule, solvency or issuance rule is selected.
+
+### Prospective micro-UPS quantity policy — 2026-11-05
+
+The [B03-P4 preview](../../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p4-prospective-micro-ups-allocation-v1)
+is VERIFIED_SIMULATED: `ups_micro_v1` uses 1,000,000 integer atoms per UPS for
+actual-roster allocation planning. Terminal-lane floors retain R-C without carry.
+Six decimals select quantity/range, not UPS/BTC valuation or redemption; F_i's
+eight-decimal/21M policy remains separate. Native books/v2, staker conversion,
+fees, source backing and durable settlement are not migrated by this preview.
+P3 source delivery closed at PR2300/main 95516e81; P4's delivery gates stay separate.
 
 ### Restricted native UPS simulator version — 2026-11-02
 

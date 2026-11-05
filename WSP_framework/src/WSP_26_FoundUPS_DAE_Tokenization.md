@@ -107,6 +107,15 @@ is non-normative implementation evidence, not another economic authority. WSP 29
 retains PoB/CABR responsibilities; WSP 100 retains maturity/activation gates.
 This written contract does not claim automatic runtime enforcement or settlement.
 
+### Prospective micro-UPS allocation policy — 2026-11-05
+
+The [B03-P4 class-C preview](../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p4-prospective-micro-ups-allocation-v1)
+is VERIFIED_SIMULATED for six-decimal `ups_micro_v1` actual-roster planning.
+Terminal-lane floors retain source-owned residue without carry; native stakers refuse.
+This selects no BTC price/redemption, F_i precision/supply or native-book/v2 migration.
+Global valuation, funded settlement, custody and chain parity remain separate gates.
+P3 source delivery is complete; preview hashes/JSON grant no economic or runtime authority.
+
 ### Restricted native UPS simulator version — 2026-11-02
 
 The [B03-P3 class-C decision](../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p3-exact-native-transfer-v1)

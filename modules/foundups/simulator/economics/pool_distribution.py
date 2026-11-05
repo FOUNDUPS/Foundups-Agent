@@ -74,12 +74,15 @@ Token Naming (STANDARDIZED):
 from __future__ import annotations
 
 import logging
+import re
 from dataclasses import dataclass, field, replace
 from contextlib import nullcontext
 from threading import RLock
 
 from .._mesa_epoch import _EpochFunding
-from .epoch_ledger import EpochLedger, _epoch, _number, _identifier
+from .epoch_ledger import EpochLedger, _epoch, _number, _identifier, _digest
+from ._token_numeric import _ups_atoms, _ups_atom_lanes
+from ._token_numeric import parse_ups_atoms as parse_ups_atoms
 from enum import IntEnum
 from typing import Dict, List, Optional, Tuple
 
@@ -608,6 +611,61 @@ def _validate_distribution(result):
             _finite(value)
 
 
+def _atom_identifier(value):
+    if (type(value) is not str or len(value) > 128
+            or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}", value) is None):
+        raise ValueError("atom plan identifiers require bounded ASCII strings")
+    return value
+
+
+def _atom_roster(participants):
+    if type(participants) is not dict or len(participants) > 10_000:
+        raise ValueError("atom planning requires a bounded built-in roster")
+    rows = []
+    for key, person in participants.items():
+        pid = _atom_identifier(key)
+        if (type(person) is not Participant or _atom_identifier(person.participant_id) != pid
+                or type(person.participant_type) is not ParticipantType
+                or type(person.activity_level) is not ActivityLevel):
+            raise ValueError("invalid atom plan participant or classification")
+        if person.staker_position is not None:
+            raise ValueError("native staker positions require an explicit atom migration")
+        rows.append((pid, person.participant_type.value, person.activity_level.value))
+    return tuple(sorted(rows))
+
+
+@dataclass(frozen=True, slots=True)
+class UPSAtomPlan:
+    """Detached prospective allocation data, never a funded receipt or authority."""
+
+    epoch: int
+    foundup_id: str
+    total_reward_atoms: int
+    roster: tuple
+    participant_rewards_atoms: tuple
+    fund_atoms: int
+    source_retained_atoms: int
+
+    def _payload(self):
+        return {"format_version": "foundups.ups-atom-plan.v1", "asset": "UPS",
+                "decimals": 6, "unit_policy": "ups_micro_v1",
+                "epoch": str(self.epoch), "foundup_id": self.foundup_id,
+                "total_reward_atoms": str(self.total_reward_atoms),
+                "roster": [list(row) for row in self.roster],
+                "participant_rewards_atoms": [[pid, str(n)] for pid, n in self.participant_rewards_atoms],
+                "fund_atoms": str(self.fund_atoms),
+                "source_retained_atoms": str(self.source_retained_atoms)}
+
+    @property
+    def identity_sha256(self):
+        return _digest(self._payload())
+
+    def to_dict(self):
+        """Fresh JSON view; decimal strings preserve money beyond JS safe integers."""
+        payload = self._payload()
+        return {**payload, "identity_sha256": _digest(payload)}
+
+
 class PoolDistributor:
     """Process-local pool effects with optional coordinated epoch evidence."""
 
@@ -631,6 +689,25 @@ class PoolDistributor:
 
     def _credit(self, balance, amount):
         return _credit(balance, amount) if self._funding is None else self._add(balance, amount)
+
+    def plan_atom_epoch(self, epoch, total_reward_atoms, *, foundup_id):
+        """Preview ups_micro_v1 on the real roster without admitting or posting funds."""
+        epoch, total = _ups_atoms(epoch), _ups_atoms(total_reward_atoms)
+        context = _atom_identifier(foundup_id)
+        with self._lock, self._ledger._lock if self._ledger else nullcontext():
+            if self._ledger is not None and _atom_identifier(self._ledger.foundup_id) != context:
+                raise ValueError("atom plan context does not match the bound ledger")
+            roster = _atom_roster(self.participants)
+            counts = [[0] * 3 for _ in range(4)]
+            for _, participant_type, activity in roster:
+                for pool in range(participant_type + 1):
+                    counts[pool][activity] += 1
+                counts[3][activity] += 1
+            rewards = tuple((pid, sum(_ups_atom_lanes(total, counts, pt, activity)))
+                            for pid, pt, activity in roster)
+            fund = total * 4 // 100
+            retained = _ups_atoms(total - fund - sum(amount for _, amount in rewards))
+            return UPSAtomPlan(epoch, context, total, roster, rewards, fund, retained)
 
     def register_participant(
         self,

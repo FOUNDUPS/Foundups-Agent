@@ -1,5 +1,16 @@
 # ROADMAP - FoundUps Simulator
 
+## 2026-11-05 — P3 delivered; micro-UPS preview verified
+
+P3 [PR2300](https://github.com/FOUNDUPS/Foundups-Agent/pull/2300)/main 95516e81
+closed with 23 PR/21 main checks and scoped PC/preservation verification.
+The [P4 class-C preview](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p4-prospective-micro-ups-allocation-v1)
+is VERIFIED_SIMULATED: 360 focused/1,404 broad and 15 independent passes, with
+byte-identical controlled legacy trace. These scopes overlap; delivery is separate.
+Next: staker hurdle/tier and atom source/book/receipt migration, then shared pending
+reservations/durable settlement. Split legacy pool models before broader posting;
+BTC conversion, F_i policy, identity/PoB, custody, dependency/Holo and chain gates stay.
+
 ## 2026-11-02 — Restricted native UPS transfer qualified locally
 
 The [19/P0 class-C mode](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p3-exact-native-transfer-v1)
