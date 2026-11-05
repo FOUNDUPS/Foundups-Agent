@@ -1,3 +1,19 @@
+## Readiness evidence and cold-start distinction — 2026-11-06
+
+Replace global-count qualification and fabricated zero rates with per-metric
+coverage, nullable missing measurements and explicit database-lifetime scope.
+Retain actual zeros and sampled critical alerts alongside unrelated unknowns.
+Dashboard inspection opens existing storage read-only and reports missing
+storage without creating it. Share policy across startup, both Connect WRE
+owners and DAE actions; preserve cold-start admission without calling it READY.
+Noninteractive root startup now uses the existing strict DAE action default.
+
+WSP15 ordering: readiness/menu C3/I4/D5/Impact4=16/P0; protected native composition
+retains its existing 19/P0 dependency gates before R15 (14/P1). No worker grant,
+model probe, live training or RSI transfer is inferred. Independent review
+rejected an initial UNKNOWN-blocking proposal because it would deadlock cold
+start; the reviewed preservation rule supersedes that proposal. WSP5/11/15/22/48/50/97.
+
 ## Recover portable brain-source documentation — 2026-10-31
 
 Correct the continuity README to the existing extractor's `Path.home()` default.

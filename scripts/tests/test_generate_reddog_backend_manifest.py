@@ -291,7 +291,7 @@ def _assert_manifest_digest_pin(generated: dict[str, object]) -> None:
     ):
         assert member in generated["required_runtime_files"]
     digest = generator.canonical_manifest_digest(generated)
-    assert digest == "0a59eef34028e5442f1afff4d368ae2afb5b510d14b38b290cac56ce2f7bbfda"
+    assert digest == "c0c7c2f1315119070bf8289fc72ccfb888030153da7097b3bb74f2ac3c303dac"
     constants = (
         REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js"
     ).read_text(encoding="utf-8")

@@ -1,3 +1,12 @@
+## Readiness evidence — 2026-11-06
+
+`test_dashboard_evidence.py` exercises real temporary SQLite storage and actual
+source-extracted startup/Connect WRE/headless functions. Pair it with
+`test_dashboard_snapshot_export.py`, `test_dae_preflight_security_behavior.py`,
+`test_pattern_memory.py`, the CLI Connect WRE tests and training-menu admission
+tests. No main startup, native models or live storage are needed. UNKNOWN
+coverage and admission permission are tested as distinct states.
+
 ## Risk-verification integration — 2026-10-28
 
 The additive CI job `wre-verification-contracts` runs the exact nine-file

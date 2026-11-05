@@ -1,3 +1,39 @@
+## Readiness evidence and admission — 2026-11-06
+
+`PatternMemory(db_path=None, *, read_only=False)` retains writable defaults.
+Read-only callers open an existing SQLite database without schema migration or
+false-positive seeding. Dashboard-owned readers close their connections;
+injected memory retains its caller-owned lifecycle. Missing default storage is
+reported as `storage_state=not_created`, without creating directories or files.
+
+`get_telemetry_dashboard()` returns `None` for unmeasured rates and averages,
+preserving measured zero. `metric_evidence` carries each threshold's sample count
+and recorded times; `telemetry_scope=database_lifetime` prevents an inference of
+current-run qualification. Retrieval excludes unscored rows from its denominator
+and reports observation dates and distinct skill count. Counter times are last
+updates, not sample-window dates. Variation completion time is not recorded.
+
+`check_dashboard_health()` evaluates one snapshot and adds `status` and
+`unknown_metrics`. `healthy` requires known evidence and no alerts. A missing or
+undersampled metric cannot suppress a different metric's sampled critical.
+`WRE_DASHBOARD_UNKNOWN_MODE=0` permits evaluation of smaller measured samples;
+it never manufactures evidence for a missing denominator.
+
+`dae_preflight.dashboard_readiness(health, *, in_watch, interactive_menu=False)`
+is shared by both Connect WRE owners and startup/action checks. UNKNOWN retains
+the existing cold-start admission policy after security, but is not PASS/READY.
+Checker errors are UNKNOWN and refused under enforcement. Known criticals block
+when enforcement applies. Explicit environment overrides remain authoritative.
+Interactive menu startup defaults advisory; actions default AUTO enforcement.
+This intentionally aligns noninteractive root startup with DAE action defaults,
+even without `OPENCLAW_24X7`. Security checks and their strict-runtime defaults
+are unchanged. Diagnostics do not grant protected worker admission or prove RSI.
+Headless startup additionally requires an enabled check with READY or legitimate
+coverage-only UNKNOWN. Disabled checks, DEGRADED warnings (including mixed
+unknown/warning), and malformed/failed checker results are not admitted. The
+disabled and mixed-warning cases intentionally tighten the older root command's
+inconsistent behavior; ordinary DAE cold-start admission remains separate.
+
 ## Risk-verification preflight contract — 2026-10-28
 
 `wre_test_differential_runtime.validate_test_impact_policy_binding(request)`

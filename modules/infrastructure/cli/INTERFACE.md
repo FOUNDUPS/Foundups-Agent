@@ -4,6 +4,11 @@
 
 ### main_menu.py
 - `run_main_menu()` - Entry point for interactive CLI
+- `_run_connect_wre()` - Reports CHECKED/PARTIAL and shared readiness state.
+  UNKNOWN evidence and checker errors never become READY; returning true means
+  READY/DEGRADED with a successful preflight, not a protected worker connection.
+  Root `main.run_connect_wre()` uses the same policy; its separate
+  `admission_allowed` field preserves the headless cold-start boundary.
 
 ### utilities.py
 - `console_input(prompt: str = "") -> str` - Main-menu input with temporary

@@ -2,6 +2,14 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## 2026-11-06 — Connect WRE readiness truth
+
+Use shared readiness policy; UNKNOWN coverage no longer claims READY or a
+connected worker. Checker errors and malformed minimum-sample configuration
+remain diagnostic UNKNOWN. The root command and headless consumer are covered
+alongside the menu path, including mixed unknown and measured critical evidence.
+No terminal rendering cause or live training success is inferred. WSP11/15/22/97.
+
 ## 2026-11-05 — Preserve interactive menu prompts
 
 Background services were logging over `Select option:` after main startup.

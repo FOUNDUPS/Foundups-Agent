@@ -13,7 +13,13 @@ attempts to initialize PatternMemory even for scan/summary. `utf8_fix` invokes
 the remediation coordinator with auto-approval; `batch` invokes the idle DAE's
 pattern-training operation. They are not read-only audit commands.
 
-The menu can read the configured training corpus, store/recall patterns and run
+Opening the menu now loads no corpus, pattern memory or model. `D` displays
+read-only WRE evidence and the explicitly selected research report. Every
+implemented action runs the existing security/WRE preflight before importing
+or initializing its dependencies. A refusal is visible and leaves the menu
+available. Diagnostics do not prove model availability or authorize training.
+
+Admitted menu actions can read the configured training corpus, store/recall patterns and run
 model-routing work. Its Gemma policy and Qwen summary drills are explicitly
 unimplemented menu options. Option 9 clears stored patterns and resets their
 checkpoint after its typed confirmation. Do not use that operation to verify

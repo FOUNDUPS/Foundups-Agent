@@ -1,9 +1,12 @@
 # Training adapter interfaces
 
 [scripts/launch.py](scripts/launch.py) exposes run_training_system(), an
-interactive menu that reads the configured corpus and uses pattern memory,
-training and routing owners. The module imports PatternMemory; importing this
-adapter is not a guarantee that all transitive imports are side-effect-free.
+interactive menu with lazy corpus, pattern-memory and model dependencies.
+Opening/back navigation, placeholder drills and `D` diagnostics perform no
+training action. Choices 1/2/5/6/7/8/9 require the shared preflight first;
+refusal displays BLOCKED and returns to menu selection. Choice 9 additionally
+retains its typed confirmation before memory construction/reset. The `D` view
+does not run the security scanner or grant action admission.
 
 [scripts/training_commands.py](scripts/training_commands.py) exposes
 execute_training_command(command: str, targets: Optional[str], json_output: bool)

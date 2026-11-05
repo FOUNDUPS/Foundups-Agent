@@ -1,3 +1,17 @@
+## 2026-11-06: WRE readiness packaging bindings
+
+The first hosted run rejected stale WRE source hashes in two independent
+manifest/index cases. The existing generator refreshes three hashes and both
+digest pins; the 1485-file closure and all caps remain unchanged.
+
+All eight existing Python manifest tests pass (96.46s), including staged-index
+blob consistency. Network/model imports were prohibited; disabled pytest plugin
+autoload produced two expected unknown asyncio-option warnings. Existing Node
+package-manifest, package-surface, compatibility-contract and preflight commands
+pass, including their imported async/query contracts. Independent source review
+recomputed the canonical digest and source hashes; it did not execute tests.
+Hosted checks must qualify the new commit separately. WSP 5/11/22/50/97.
+
 ## 2026-10-30: Held-out receipt runtime integrity binding
 
 Regenerate the existing 1477-source manifest after the held-out receipt producer

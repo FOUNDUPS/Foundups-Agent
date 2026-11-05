@@ -167,19 +167,38 @@ class DashboardAlertMonitor:
 
         # Minimum sample threshold
         self.min_samples = int(os.getenv("WRE_DASHBOARD_MIN_SAMPLES", str(MIN_SAMPLES_DEFAULT)))
+        if self.min_samples < 1:
+            raise ValueError("WRE_DASHBOARD_MIN_SAMPLES must be positive")
         self.unknown_mode = os.getenv("WRE_DASHBOARD_UNKNOWN_MODE", "1") != "0"
 
     def _get_memory(self):
         """Lazy-load pattern memory."""
         if self.pattern_memory is None:
             from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory
-            self.pattern_memory = PatternMemory()
+            if not PatternMemory.default_db_path().exists():
+                raise FileNotFoundError("Pattern memory has not been created")
+            self.pattern_memory = PatternMemory(read_only=True)
         return self.pattern_memory
 
     def get_dashboard(self) -> Dict:
         """Get current dashboard metrics."""
-        memory = self._get_memory()
-        return memory.get_telemetry_dashboard()
+        owned = self.pattern_memory is None
+        try:
+            memory = self._get_memory()
+        except FileNotFoundError:
+            return {"total_executions": 0, "telemetry_scope": "database_lifetime",
+                    "storage_state": "not_created", "metric_evidence": {}}
+        try:
+            dashboard = memory.get_telemetry_dashboard()
+            count = dashboard.get("codeact_executions", 0)
+            dashboard["codeact_gate_trigger_rate"] = (
+                dashboard.get("codeact_gate_triggers", 0) / count if count > 0 else None
+            )
+            return dashboard
+        finally:
+            if owned:
+                memory.close()
+                self.pattern_memory = None
 
     def get_total_executions(self, dashboard: Optional[Dict] = None) -> int:
         """Get total skill executions from dashboard."""
@@ -188,8 +207,22 @@ class DashboardAlertMonitor:
         return int(dashboard.get("total_executions", 0))
 
     def has_sufficient_data(self, dashboard: Optional[Dict] = None) -> bool:
-        """Check if we have enough data to evaluate thresholds."""
-        return self.get_total_executions(dashboard) >= self.min_samples
+        """Every threshold needs its own measured denominator, never a global count."""
+        if dashboard is None:
+            dashboard = self.get_dashboard()
+        return not self.unknown_metrics(dashboard)
+
+    def unknown_metrics(self, dashboard: Dict, *, require_minimum: bool = True) -> List[str]:
+        evidence = dashboard.get("metric_evidence", {})
+        missing = []
+        for metric in dict.fromkeys(t.metric for t in self.thresholds):
+            value = dashboard.get(metric)
+            samples = evidence.get(metric, {}).get("samples")
+            minimum = self.min_samples if require_minimum and self.unknown_mode else 1
+            if (type(samples) is not int or samples < max(1, minimum)
+                    or type(value) not in (int, float) or not math.isfinite(value)):
+                missing.append(metric)
+        return missing
 
     def check_threshold(self, metric: str, value: float, threshold: AlertThreshold) -> Optional[Alert]:
         """Check if metric breaches threshold."""
@@ -211,7 +244,7 @@ class DashboardAlertMonitor:
             )
         return None
 
-    def check_all(self, skip_if_insufficient: bool = True) -> List[Alert]:
+    def check_all(self, skip_if_insufficient: bool = True, *, dashboard: Optional[Dict] = None) -> List[Alert]:
         """
         Check all metrics against thresholds.
 
@@ -223,28 +256,13 @@ class DashboardAlertMonitor:
             List of triggered alerts (empty if healthy or insufficient data)
         """
         alerts = []
-        dashboard = self.get_dashboard()
-
-        # Check for insufficient data - don't alert on zero-data startup
-        if skip_if_insufficient and self.unknown_mode:
-            if not self.has_sufficient_data(dashboard):
-                logger.debug(
-                    f"[WRE-DASHBOARD] Insufficient data: "
-                    f"{self.get_total_executions(dashboard)}/{self.min_samples} samples"
-                )
-                return []  # No alerts when data is insufficient
-
-        # Add computed metrics
-        codeact_total = dashboard.get("codeact_executions", 0)
-        codeact_triggers = dashboard.get("codeact_gate_triggers", 0)
-        if codeact_total > 0:
-            dashboard["codeact_gate_trigger_rate"] = codeact_triggers / codeact_total
-        else:
-            dashboard["codeact_gate_trigger_rate"] = 0.0
+        if dashboard is None:
+            dashboard = self.get_dashboard()
+        unknown = self.unknown_metrics(dashboard, require_minimum=skip_if_insufficient)
 
         # Check each threshold
         for threshold in self.thresholds:
-            if threshold.metric in dashboard:
+            if threshold.metric not in unknown:
                 value = dashboard[threshold.metric]
                 alert = self.check_threshold(threshold.metric, value, threshold)
                 if alert:
@@ -299,7 +317,9 @@ class DashboardAlertMonitor:
         Returns:
             True if all healthy, False if any alerts
         """
-        alerts = self.check_all()
+        dashboard = self.get_dashboard()
+        unknown = self.unknown_metrics(dashboard)
+        alerts = self.check_all(dashboard=dashboard)
 
         if verbose:
             print("=" * 60)
@@ -308,10 +328,13 @@ class DashboardAlertMonitor:
             print(f"Watch period: {self.watch_period_start.date()} to {self.watch_period_end.date()}")
             print(f"In watch period: {self.is_in_watch_period()}")
             print("=" * 60)
-            print(self.format_alerts(alerts))
+            if unknown:
+                print("[UNKNOWN] Insufficient per-metric evidence: " + ", ".join(unknown))
+            if alerts or not unknown:
+                print(self.format_alerts(alerts))
             print("=" * 60)
 
-        return len(alerts) == 0
+        return not alerts and not unknown
 
 
 def check_dashboard_health() -> Dict:
@@ -332,13 +355,16 @@ def check_dashboard_health() -> Dict:
     monitor = DashboardAlertMonitor()
     dashboard = monitor.get_dashboard()
     total_executions = monitor.get_total_executions(dashboard)
-    insufficient_data = not monitor.has_sufficient_data(dashboard)
+    unknown = monitor.unknown_metrics(dashboard)
+    insufficient_data = bool(unknown)
 
     # check_all will return empty list if insufficient data
-    alerts = monitor.check_all()
+    alerts = monitor.check_all(dashboard=dashboard)
 
     return {
-        "healthy": len(alerts) == 0,
+        "healthy": not alerts and not unknown,
+        "status": "FAIL" if alerts else ("UNKNOWN" if unknown else "PASS"),
+        "unknown_metrics": unknown,
         "alerts": [
             {
                 "metric": a.metric,
@@ -355,6 +381,28 @@ def check_dashboard_health() -> Dict:
         "min_samples": monitor.min_samples,
         "timestamp": datetime.now().isoformat()
     }
+
+
+def print_dashboard_evidence(health: Dict) -> None:
+    """Display counts and recorded age without exposing paths, queries or payloads."""
+    dashboard = health.get("dashboard", {})
+    print("[WRE-EVIDENCE] scope=database_lifetime; historical aggregates, not current-run proof")
+    unknown = set(health.get("unknown_metrics", []))
+    for metric, evidence in dashboard.get("metric_evidence", {}).items():
+        value = dashboard.get(metric)
+        measured = (f"{value:.3f}" if type(value) in (int, float) and math.isfinite(value) else "unknown")
+        label = f"UNKNOWN (measured={measured})" if metric in unknown or value is None else measured
+        print(f"  {metric}={label} samples={evidence.get('samples', 0)}")
+        # Date-only output keeps untrusted storage text out of terminal control sequences.
+        dates = [str(evidence.get(key) or "") for key in ("recorded_from", "recorded_to")]
+        dates = [value[:10] if re.fullmatch(r"\d{4}-\d{2}-\d{2}.*", value) else "unknown" for value in dates]
+        basis = evidence.get("time_basis")
+        if basis == "counter_last_updated":
+            print(f"    last_counter_updates={dates[0]}..{dates[1]} (not a sample window)")
+        elif basis == "retrieval_timestamp":
+            print(f"    recorded_samples={dates[0]}..{dates[1]} (not current-run proof)")
+        else:
+            print("    measurement_time=unknown")
 
 
 def _local_research_report_path(value):
