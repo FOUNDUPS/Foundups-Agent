@@ -1,5 +1,14 @@
 # video_comments TestModLog
 
+## 2026-11-05 — Use neutral grounding data in the memory fixture
+
+PR2306 CodeQL flagged domain-substring checks in the synthetic memory fixture.
+Replace that website-shaped datum with one ordinary factual sentence, retaining
+the cold omission/warm supplied-grounding predicates, assertions and case names.
+No URL sanitizer, suppression, runtime behavior or effect boundary is changed.
+The unchanged closed quality adapter passes all 60 cases with the original case
+inventory and zero issues; hosted CodeQL alert closure remains a separate gate.
+
 ## 2026-11-05 — Optional memory stays within the caller lifetime
 
 New source-bound readiness controls: original RED22 17 failures/5 passes;

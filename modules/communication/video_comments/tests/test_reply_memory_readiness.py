@@ -11,6 +11,9 @@ from types import SimpleNamespace
 import pytest
 
 
+GROUNDING_FACT = 'Watch the film through the festival streaming library.'
+
+
 class Embedding:
     def __init__(self, calls, after=None):
         self.calls, self.after = calls, after
@@ -36,7 +39,7 @@ class Collection:
         self.calls.append(('query', kwargs.get('where')))
         if self.after_query:
             self.after_query()
-        return {'documents': [['The film details are at HornetHunter.com.']],
+        return {'documents': [[GROUNDING_FACT]],
                 'metadatas': [[{'video_id': 'fixture-film', 'title': 'Fixture film',
                                'channel': 'fixture', 'start_time': '0:10', 'end_time': '0:20'}]],
                 'distances': [[0.1]]}
@@ -78,10 +81,10 @@ def generator(owners):
         text = 'Where can I watch the film?'
         assessment = dict(intent='question', meaning='Asks where to watch the film', question=text,
             stance='unclear', uncertainty='', evidence_quote=text, strategy='answer', theme_relevant=False)
-        grounded = 'HornetHunter.com' in kwargs['prompt']
+        grounded = GROUNDING_FACT in kwargs['prompt']
         answer = json.dumps(assessment) if kwargs['stage'] == 'assess' else (
             json.dumps(owners.helper.GOOD) if kwargs['stage'] == 'review'
-            else ('The film details are at HornetHunter.com.' if grounded
+            else (GROUNDING_FACT if grounded
                   else 'Which film do you mean?'))
         return SimpleNamespace(success=True, response=answer, provider='lm_studio_local',
                                model='qwen3.5-4b', route_id='synthetic-shared-route', reason=None)
@@ -127,7 +130,7 @@ def test_cold_first_comment_still_generates_and_reviews_without_cold_enrichment(
     assert attempted == [] and owners.voice._video_index is None
     assert 'never invent' in calls[1]['system_prompt'].lower()
     assert 'Where can I watch the film?' in calls[1]['prompt']
-    assert 'HornetHunter.com' not in calls[1]['prompt']
+    assert GROUNDING_FACT not in calls[1]['prompt']
     reviewed = json.loads(calls[2]['prompt'])
     assert reviewed['comment'] == 'Where can I watch the film?'
     assert reviewed['candidate'] == text
@@ -142,11 +145,11 @@ def test_warm_ready_video_memory_is_supplied_to_the_reviewed_writer(owners):
     assert text and source == 'lm_studio' and review['approved'] is True
     assert [call['stage'] for call in calls] == ['assess', 'write', 'review']
     assert reads == ['count', 'encode', ('query', None)]
-    assert 'HornetHunter.com' in calls[1]['prompt']
+    assert GROUNDING_FACT in calls[1]['prompt']
     assert 'Where can I watch the film?' in calls[1]['prompt']
     reviewed = json.loads(calls[2]['prompt'])
     assert reviewed['comment'] == 'Where can I watch the film?' and reviewed['candidate'] == text
-    assert 'HornetHunter.com' in reviewed['supplied_generation_context']['verified_memory']
+    assert GROUNDING_FACT in reviewed['supplied_generation_context']['verified_memory']
 
 
 @pytest.mark.parametrize('cached', [None, False])
