@@ -1,3 +1,11 @@
+## Supervisor model-free startup
+
+`test_supervisor_model_startup.py` executes actual startup/plan methods with
+synthetic collaborators. It checks no eager model acquisition, retained memory
+and monitor initialization, and unchanged triage plans with actual fallback
+analysis for idle, self-audit, maintenance and signed-task claims. No daemon or
+provider runs; these are five offline cases, not live operational acceptance.
+
 ## Preserved identity assertion and call-safety education
 
 `TestEndToEndProcess.test_conversation_returns_response` checks nonempty identity

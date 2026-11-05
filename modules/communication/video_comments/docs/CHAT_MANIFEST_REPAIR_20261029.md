@@ -4,6 +4,37 @@
 Windows for an observed test. GitHub changes do not automatically update an
 existing PC checkout or a running Python process.
 
+## Runtime regression audit — 2026-11-05
+
+At main `d5ed0749756114816c7bd3a2ca5e996738011d96`, comparison of the
+manifest repair history found no new queue await before live polling. The watcher
+is a separate task; the earlier engagement-settlement barrier predates these
+repairs. This does not prove that arbitrary filesystem or subprocess stalls are
+impossible, or establish the live silence's complete cause. Current offline
+replay passed 101 lifecycle, 24 quality and 248 queue/policy/CLI/reader cases;
+the latter used the historical narrower request-denial guard, not the full
+lifecycle/quality effect guard. Private execution receipts retain those limits.
+
+The restarted Windows process had no manifest path overrides. Its default
+`memory/012_manifest.json` inbox was absent and its state had no active theme or
+video policy. A separate preparation directory contained a queued status request
+but was not selected by the process. Future instructions must resolve the running
+owner's paths before enqueueing; preparation receipts alone are not activation
+evidence. No queues, overrides or live context were changed by this audit.
+
+The 2026-11-05 menu/scheduler follow-up does not change manifest queue semantics,
+generation routing or reply submit guards. Public delivery and observed
+behavior require separate runtime evidence after installing the final source.
+
+Later runtime evidence distinguished two further conditions: at 11:20 JST the
+selected video's API response had no active live-chat ID, and comment-worker
+subprocess cleanup later completed all four phases; scheduling reached Save but
+ten earlier scheduling claims
+remained `unknown`. The policy integration intentionally preserves uncertain
+saves even when no directive matched, so it does affect ordinary retry behavior.
+A claim is not proof of a successful click or saved schedule. Never erase these
+records or retry automatically; obtain matching saved-state evidence first.
+
 ## Follow-up private livechat fallback — 2026-10-29
 
 The follow-up source starts at merged-main

@@ -4,10 +4,12 @@ from types import SimpleNamespace
 import time
 
 import pytest
+from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
+from selenium.webdriver.common.by import By
 
 from modules.communication.livechat.src import operator_command_queue as queue
 from modules.platform_integration.youtube_shorts_scheduler.src import video_policy as policy
-from modules.platform_integration.youtube_shorts_scheduler.src.dom_automation import YouTubeStudioDOM
+from modules.platform_integration.youtube_shorts_scheduler.src.dom_automation import DOMSelectors, YouTubeStudioDOM
 
 CHANNEL = "UC" + "a" * 22
 VIDEO = "a" * 11
@@ -171,3 +173,40 @@ def test_cycle_attempt_count_is_not_reset_by_policy_reads(editor):
     with pytest.raises(policy.VideoPolicyBlocked, match="cycle_cap"):
         dom._submit_policy_save(lambda: clicks.append(True))
     assert len(clicks) == 1 and dom._policy_cycle_attempts == 1
+
+
+@pytest.mark.parametrize("surface", ["native_schedule", "hidden_schedule", "stale_schedule", "legacy_schedule", "named_dialog", "absent"])
+def test_visibility_entry_recognizes_existing_native_schedule_control(monkeypatch, surface):
+    """Readiness only: the existing native radio is not an audience decision."""
+    monkeypatch.setattr(time, "sleep", lambda *_: None)
+    class OneCheckWait:
+        def __init__(self, driver, _timeout): self.driver = driver
+        def until(self, condition):
+            result = condition(self.driver)
+            if not result: raise TimeoutException("synthetic dialog not ready")
+            return result
+    monkeypatch.setattr("modules.platform_integration.youtube_shorts_scheduler.src.dom_automation.WebDriverWait", OneCheckWait)
+    dom = object.__new__(YouTubeStudioDOM)
+    dom.selectors = DOMSelectors()
+    calls = {"clicks": 0, "native_reads": 0}
+    def displayed():
+        if surface == "stale_schedule": raise StaleElementReferenceException()
+        return surface == "native_schedule"
+    def find_elements(by, selector):
+        assert by == By.XPATH and selector == dom.selectors.SCHEDULE_RADIO_XPATH
+        calls["native_reads"] += 1
+        return [] if surface == "absent" else [SimpleNamespace(is_displayed=displayed)]
+    dom.driver = SimpleNamespace(find_elements=find_elements,
+        execute_script=lambda *_: surface == "legacy_schedule")
+    dom.wait_for_clickable = lambda *_a, **_k: object()
+    def named_dialog(*_a, **_k):
+        if surface != "named_dialog": raise TimeoutException("synthetic unlabeled dialog")
+        return object()
+    dom.wait_for_element = named_dialog
+    dom.safe_click = lambda *_: calls.update(clicks=calls["clicks"] + 1)
+    if surface in {"native_schedule", "legacy_schedule", "named_dialog"}:
+        dom.open_visibility_dialog()
+    else:
+        with pytest.raises(TimeoutException): dom.open_visibility_dialog()
+    assert calls["clicks"] == 1
+    if surface == "native_schedule": assert calls["native_reads"] > 0

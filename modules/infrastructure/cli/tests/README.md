@@ -12,6 +12,11 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest modules/infrastructure/cli/tests/ -v
 
 ## Test Files
 
+- `test_console_prompt.py` — actual prompt/filter definitions with a synthetic
+  input and real background logging thread, private file sink, foreground output,
+  prior-filter retention and answer/EOF/interrupt cleanup; checks main-menu wiring.
+  No interactive terminal or full application startup is exercised.
+
 - `test_openclaw_voice_cue_parsing.py` — cue/alias behavior, shared speech import,
   Japanese language forwarding and current/legacy Cohere decoding. External model
   inference is replaced; no microphone or model download is required.

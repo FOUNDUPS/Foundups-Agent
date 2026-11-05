@@ -23,9 +23,10 @@ SUITES = {
         'modules/communication/video_comments/tests/test_llm_integration.py',
         'modules/communication/livechat/tests/test_antima_factcheck.py',
         'modules/communication/livechat/tests/test_antima_savage.py')),
-    'quality': (24, '8c6a71ffff1aa89e9458726916745e9c3389f4955f8b38086b34066b417b8822', (
-        'modules/communication/video_comments/tests/test_reply_quality_safety.py',)),
-    'startup': (176, '1f5acb4d955b61823f632d1067a6ec6592c96d3617e63fd83a833f9179965a22', (
+    'quality': (37, '40c036ef579b91a24aecf2f724930a128fff0215323e3c92fe843e9d6064251b', (
+        'modules/communication/video_comments/tests/test_reply_quality_safety.py',
+        'modules/communication/video_comments/tests/test_inbox_completion_evidence.py')),
+    'startup': (185, 'f0bb505c605a5e9d7ca810589a2033ed842248350578196f46c326772776c2dc', (
         'modules/infrastructure/dependency_launcher/tests/test_llmster_startup_fallback.py',
         'modules/infrastructure/shared_utilities/tests/test_local_model_selection.py',
         'modules/infrastructure/shared_utilities/tests/test_lm_studio_dependency_boundary.py',
@@ -33,14 +34,16 @@ SUITES = {
         'modules/infrastructure/shared_utilities/tests/test_local_model_startup_selection.py',
         'modules/infrastructure/shared_utilities/tests/test_local_llm_backends.py',
         'modules/ai_intelligence/ai_overseer/tests/test_preflight_model_boundary.py',
-        'modules/ai_intelligence/ai_overseer/tests/test_wsp_framework_sentinel.py')),
+        'modules/ai_intelligence/ai_overseer/tests/test_wsp_framework_sentinel.py',
+        'modules/infrastructure/cli/tests/test_console_prompt.py',
+        'modules/communication/moltbot_bridge/tests/test_supervisor_model_startup.py')),
     'inventory': (102, 'dc14189b4474df1d2f62cb18858206d861078fabad24de6451d242aeb098ef49', (
         SCHEDULER_TESTS + 'test_scheduled_inventory.py',
         SCHEDULER_TESTS + 'test_visibility_filter_enforcement.py',
         SCHEDULER_TESTS + 'test_schedule_audit_breadcrumb.py')),
     'rotation': (35, '664830788a43165c40b0166e2f7736d63cc06e1f73346db9b1d1f2cb1a0bc07d', (
         SCHEDULER_TESTS + 'test_schedule_rotation_fairness.py',)),
-    'directives': (60, 'fa7f4c3167786becbe723a5eabf42c2cc7ff7ecff3eba0699595f1654094d8d8', (
+    'directives': (66, '989aea728b2f018befd98e062516ff950e082fddcb337584c10a4a0af9e084f6', (
         SCHEDULER_TESTS + 'test_video_policy_consumers.py',
         SCHEDULER_TESTS + 'test_video_policy_save_readback.py',
         SCHEDULER_TESTS + 'test_video_policy_inline.py',

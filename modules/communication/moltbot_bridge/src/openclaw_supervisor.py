@@ -2259,7 +2259,12 @@ class OpenClawSupervisor:
             from modules.ai_intelligence.ai_overseer.src.ai_overseer import (
                 AIIntelligenceOverseer,
             )
-            self._ai_overseer = AIIntelligenceOverseer(repo_root=self.repo_root)
+            # Supervisor plans use advisory classification only. Native model
+            # acquisition here races the interactive console on Windows and is
+            # not required by the supervisor's existing triage/dispatch owners.
+            self._ai_overseer = AIIntelligenceOverseer(
+                repo_root=self.repo_root, initialize_models=False
+            )
             logger.info("[SUPERVISOR] AI Overseer loaded")
         except ImportError as e:
             logger.debug("[SUPERVISOR] AI Overseer unavailable: %s", e)
@@ -2652,7 +2657,8 @@ class OpenClawSupervisor:
         if triage["action"] == "claim_signed_worker_tasks_until_idle":
             plan["max_claims"] = triage.get("max_claims", 1)
 
-        # WSP 77: AI Overseer fast classification (Gemma 50-100ms)
+        # WSP 77: advisory analysis; lightweight startup uses the existing
+        # deterministic fallback. Triage, not this metadata, owns the action.
         if self._ai_overseer is not None:
             try:
                 mission_desc = f"{triage['action']}: {triage.get('reason', 'supervisor cycle')}"

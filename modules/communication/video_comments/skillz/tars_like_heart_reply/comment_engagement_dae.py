@@ -740,6 +740,32 @@ class CommentEngagementDAE:
 
         logger.info(f"[DAE-NAV] Page ready for engagement")
 
+    def _has_empty_inbox_indicator(self) -> bool:
+        """Read existing positive empty-view evidence; zero threads is insufficient."""
+        try:
+            return bool(self.driver.execute_script(r"""
+                const bodyText = (document.body.innerText || '').replace(/\s+/g, ' ').trim();
+                // This is also shown for filtered/search results, not global emptiness.
+                if (bodyText.includes('No comments found. Try searching for something else or removing filters.')) {
+                    return false;
+                }
+                const emptySelectors = [
+                    'ytcp-comments-empty-state',
+                    '.empty-state-content',
+                    '[data-empty-state]',
+                    '.ytcp-comment-surface-empty'
+                ];
+                for (const sel of emptySelectors) {
+                    if (document.querySelector(sel)) return true;
+                }
+                return bodyText.includes('No comments to respond to') ||
+                    bodyText.includes('All caught up') ||
+                    bodyText.includes('No new comments');
+            """))
+        except Exception:
+            logger.debug('[DAE-WAIT] Empty state unavailable; inbox status unverified')
+            return False
+
     async def _wait_for_comments_loaded(self, timeout: float = 15.0) -> int:
         """
         Wait for YouTube Studio inbox to fully load comments.
@@ -747,8 +773,8 @@ class CommentEngagementDAE:
         YouTube Studio uses lazy loading - comments are loaded via JavaScript
         after initial page render. This method waits for either:
         1. `ytcp-comment-thread` elements to appear (comments exist)
-        2. A "no comments" indicator (inbox is truly empty)
-        3. Timeout (fallback to DOM query)
+        2. An existing positive empty-view indicator
+        3. Timeout (return the count without claiming an empty inbox)
 
         FIX (2025-12-30): Resolves 0-comment false positives after account switch.
         The DOM query was returning 0 because JavaScript hadn't finished loading yet.
@@ -772,39 +798,10 @@ class CommentEngagementDAE:
                 logger.info(f"[DAE-WAIT] ✅ Found {count} comment(s) after {elapsed:.1f}s")
                 return count
 
-            # Check for "no comments" indicator (inbox truly empty)
-            # YouTube Studio shows specific text when inbox is empty
-            try:
-                no_comments_indicator = self.driver.execute_script("""
-                    // Check for empty state indicators
-                    const emptySelectors = [
-                        'ytcp-comments-empty-state',
-                        '.empty-state-content',
-                        '[data-empty-state]',
-                        '.ytcp-comment-surface-empty'
-                    ];
-                    for (const sel of emptySelectors) {
-                        if (document.querySelector(sel)) return true;
-                    }
-
-                    // Check for text indicators
-                    const bodyText = document.body.innerText || '';
-                    if (bodyText.includes('No comments to respond to') ||
-                        bodyText.includes('All caught up') ||
-                        bodyText.includes('No new comments')) {
-                        return true;
-                    }
-
-                    return false;
-                """)
-
-                if no_comments_indicator:
-                    elapsed = time.time() - start_time
-                    logger.info(f"[DAE-WAIT] ✅ Empty inbox confirmed after {elapsed:.1f}s (no comments indicator found)")
-                    return 0
-
-            except Exception as e:
-                logger.debug(f"[DAE-WAIT] Empty state check failed: {e}")
+            if self._has_empty_inbox_indicator():
+                elapsed = time.time() - start_time
+                logger.info(f"[DAE-WAIT] Empty inbox view confirmed after {elapsed:.1f}s")
+                return 0
 
             # Wait before next poll
             await asyncio.sleep(poll_interval)
@@ -936,16 +933,19 @@ class CommentEngagementDAE:
             logger.debug(f"[DAEMON][PHASE--1]   DOM count: {comment_count} (Occam: {has_comment})")
 
             if not has_comment:
-                logger.info(f"[DAEMON][PHASE--1] ⚪ NO COMMENTS FOUND - Inbox is clear!")
-                logger.info("[DAE] No comments found")
+                empty_confirmed = self._has_empty_inbox_indicator()
+                if empty_confirmed:
+                    logger.info('[DAEMON][PHASE--1] Empty inbox view confirmed')
+                else:
+                    logger.info('[DAEMON][PHASE--1] No DOM threads; inbox status unverified')
 
                 # BREADCRUMB: Store for WRE/AI Overseer analysis
-                if self.livechat_sender:
+                if self.livechat_sender and empty_confirmed:
                     self.livechat_sender.store_breadcrumb(
                         source_dae='comment_engagement',
                         phase='PHASE--1',
                         event_type='no_comments_detected',
-                        message='Inbox cleared via Occam detection (pre-loop)',
+                        message='Inbox view cleared; positive empty-state indicator (pre-loop)',
                         metadata={
                             'comment_count': 0,
                             'detection_method': 'DOM',
@@ -955,9 +955,9 @@ class CommentEngagementDAE:
                     )
 
                 # ANTI-SPAM: Notify livechat that inbox is clear (prevents infinite refresh loops)
-                if self.livechat_sender and total_processed > 0:
+                if self.livechat_sender and total_processed > 0 and empty_confirmed:
                     try:
-                        message = f"✊✋🖐️ Comment inbox cleared! Processed {total_processed} comment{'s' if total_processed != 1 else ''} this session."
+                        message = f"✊✋🖐️ Current comment inbox view cleared! Processed {total_processed} comment{'s' if total_processed != 1 else ''} this session."
                         await self.livechat_sender.send_chat_message(
                             message_text=message,
                             response_type='general',
@@ -1017,8 +1017,8 @@ class CommentEngagementDAE:
 
             # OCCAM'S RAZOR: Check if no comment exists (first principles detection)
             if result.get('no_comment_exists'):
-                logger.info(f"[DAEMON][PHASE-2] ✅ NO MORE COMMENTS - DOM detection (Occam's Razor)")
-                logger.info(f"[DAE] Inbox cleared - no DOM thread at index 1")
+                logger.info('[DAEMON][PHASE-2] No DOM thread at requested index; final evidence required')
+                logger.info('[DAE] No DOM thread at index 1; inbox status unverified')
 
                 # BREADCRUMB: Store for WRE/AI Overseer analysis
                 if self.livechat_sender:
@@ -1026,7 +1026,7 @@ class CommentEngagementDAE:
                         source_dae='comment_engagement',
                         phase='PHASE-2',
                         event_type='no_comments_detected',
-                        message='Inbox cleared via Occam detection (in-loop)',
+                        message='No DOM thread at index 1; inbox status unverified',
                         metadata={
                             'comment_count': 0,
                             'detection_method': 'DOM',
@@ -1035,7 +1035,7 @@ class CommentEngagementDAE:
                         }
                     )
 
-                break  # Exit loop immediately - no vision check needed!
+                break  # Final completion check still requires positive empty evidence.
 
             total_processed += 1
 
@@ -1201,11 +1201,13 @@ class CommentEngagementDAE:
                 remaining_comments = 1
                 logger.info(f"[DAEMON][PHASE-4]   Vision detected remaining comments")
         quality_halt = next((row for row in all_results if row.get('halted_for_reply_quality') is True), None)
-        all_processed = remaining_comments == 0 and quality_halt is None
+        empty_confirmed = remaining_comments == 0 and self._has_empty_inbox_indicator()
+        all_processed = empty_confirmed and quality_halt is None
 
         if all_processed:
-            logger.info(f"[DAEMON][PHASE-4] ✅ ALL COMMENTS PROCESSED - Inbox is 100% clear!")
-            logger.info("[DAE] ALL COMMENTS PROCESSED - Community tab is clear!")
+            logger.info('[DAEMON][PHASE-4] ALL COMMENTS PROCESSED - empty inbox view confirmed')
+        elif remaining_comments == 0:
+            logger.info('[DAEMON][PHASE-4] Completion unverified; zero DOM threads alone is insufficient')
         else:
             logger.info(f"[DAEMON][PHASE-4] ⚪ Partial completion - {remaining_comments} comments remaining")
         

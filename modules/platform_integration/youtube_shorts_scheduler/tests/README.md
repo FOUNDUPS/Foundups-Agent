@@ -1,3 +1,13 @@
+## 2026-11-05 — Native visibility readiness regression
+
+The same four-file private-directive consumer selection now passes66 controls
+(retained60 plus six readiness cases). Actual `open_visibility_dialog` uses a
+synthetic driver: the existing visible native schedule radio and prior named/
+legacy paths pass; hidden, stale or absent native controls alone remain unready. The regression
+first failed only the native-radio case on the previous source. The existing
+qualified replay uses fixed credential-free children, private paths and effect
+denials; no real browser, Audience decision or schedule is exercised.
+
 ## 2026-11-01 — Private operator directive consumers
 
 The fixed four-module consumer selection passed60 cases:19 detail/button,

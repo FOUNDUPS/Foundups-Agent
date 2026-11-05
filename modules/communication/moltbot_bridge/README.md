@@ -1,3 +1,11 @@
+## Supervisor startup advisory analysis — 2026-11-05
+
+The resident supervisor initializes the existing Overseer without acquiring
+models. Its plan includes the existing deterministic fallback analysis, labelled
+`fallback`, with complexity 3 and coordination true. This metadata is advisory;
+triage selects the action and existing execution gates remain authoritative.
+Actual language generation retains its established model router and policies.
+
 ## Ollama fallback settings — 2026-10-29
 
 The local fallback defaults to `qwen-overseer:latest`, defined by the repository's

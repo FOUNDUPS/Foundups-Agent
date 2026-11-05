@@ -1,3 +1,19 @@
+## 2026-11-05 — Menu logging and scheduling readiness follow-up
+
+Main-menu input temporarily filters background console logging while retaining
+file evidence. The supervisor reuses model-free Overseer startup with explicit
+fallback advisory metadata. The Shorts dialog opener recognizes the visible
+native schedule control already supported by its next step. Existing policy,
+save/readback, model-routing and security owners remain authoritative. Component
+tests reproduce the prompt/startup and recognizer gaps; they do not establish
+the incident's entire cause or live YouTube behavior. WSP00/10/22/50/77/97.
+
+The existing comment worker now requires positive empty-view evidence before
+reporting completion; zero threads after timeout/error or a filtered empty view
+remain unverified. The quality/completion selection passes 37 cases, including
+confirmed empty and genuinely processed positives. Existing coordinator and
+delivery guards are unchanged. See module test logs for isolated execution scope.
+
 ## 2026-11-05 — Windows startup preflight and shared model roles
 
 Main uses deterministic AI Overseer preflights without eagerly acquiring models.

@@ -1,5 +1,22 @@
 # video_comments Tests
 
+## 2026-11-05 inbox completion evidence
+
+`test_inbox_completion_evidence.py` adds 13 actual-definition controls for
+timeout, empty-state read failure, ambiguous filtered-empty text with a generic
+empty node, transient evidence, missing-thread races, clear-feedback suppression,
+remaining threads, confirmed empty views and useful processed-comment positives.
+The DOM and clock are synthetic; telemetry uses a private test directory.
+Seven assertion failures reproduced the initial defect before repair, with four
+useful controls already passing. Independent actual-JavaScript review found
+newline/repeated-space bypasses in the exact-text veto; two additional controls
+failed before whitespace normalization. All 13 then passed with the unchanged 24
+quality-stop cases under the existing offline owner's unchanged EffectGuard
+and explicit credential-free environment, with zero errors/skips/denials.
+The Python DOM answers remain fixtures; the independent actual-JavaScript probe
+has its own evidence and must not be inferred from these Python case results.
+This does not qualify live global inbox emptiness or add DOM selectors.
+
 ## 2026-11-01 quality-stop selection
 
 `test_reply_quality_safety.py` has 24 bounded cases through complete production

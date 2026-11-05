@@ -16,7 +16,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException, StaleElementReferenceException
 
 logger = logging.getLogger(__name__)
 
@@ -3105,13 +3105,23 @@ class YouTubeStudioDOM:
             pass
 
         # Fallback: if dialog selector changes, wait for schedule/date/time inputs to exist
-        WebDriverWait(self.driver, 8).until(lambda d: d.execute_script("""
+        WebDriverWait(self.driver, 8).until(self._visibility_controls_ready)
+
+    def _visibility_controls_ready(self, driver):
+        """Recognize the same visible native radio used by the next schedule step."""
+        for control in driver.find_elements(By.XPATH, self.selectors.SCHEDULE_RADIO_XPATH):
+            try:
+                if control.is_displayed():
+                    return True
+            except StaleElementReferenceException:
+                continue  # Re-rendered controls are not evidence of readiness.
+        return driver.execute_script("""
             const hasSchedule =
               !!document.querySelector('tp-yt-paper-radio-button[name=\"SCHEDULE\"], tp-yt-paper-radio-button[name=\"SCHEDULED\"], tp-yt-paper-radio-button[name=\"SCHEDULE\"]');
             const hasDate = !!document.querySelector('input[aria-label*=\"Date\"]');
             const hasTime = !!document.querySelector('input[aria-label*=\"Time\"], input[aria-label*=\"time\"]');
             return hasSchedule || (hasDate && hasTime);
-        """))
+        """)
 
     def select_schedule_option(self):
         """Select the 'Schedule' radio button in visibility dialog."""

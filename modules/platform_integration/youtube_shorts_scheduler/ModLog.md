@@ -1,5 +1,20 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-11-05 — Reuse the native schedule control for dialog readiness
+
+WSP11/22/50/62/84/97. The post-click readiness fallback omitted the existing
+`SCHEDULE_RADIO_XPATH` (`PUBLISH_FROM_PRIVATE`) that the next scheduling step
+already uses. Reuse that exact selector and require a displayed, non-stale
+control, retaining the named-dialog and legacy readiness paths. Button lookup,
+clicks, timeout bounds and all private-policy/Save/readback guards are unchanged.
+
+Six synthetic controls first reproduced the missing native variant (one failed,
+65 passed); the same four-file consumer selection then passed66 with no errors,
+skips or denied effects. No browser/model/provider/public action occurred.
+This proves a recognizer mismatch, not the cause of the attached live failures:
+an unanswered Audience requirement or overlay must not be automatically answered
+or dismissed. Installed UI readiness and saved schedules remain separate gates.
+
 ## 2026-11-01 — Fresh private directives at existing Save owners
 
 WSP11/22/50/62/84/97. Reused the existing 012 queue, automation gate and DOM/CPS

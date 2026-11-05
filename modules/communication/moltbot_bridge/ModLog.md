@@ -1,3 +1,14 @@
+## 2026-11-05 — Lightweight supervisor advisory analysis
+
+The background supervisor was acquiring a second native model owner while main
+displayed its menu. Reuse AIIntelligenceOverseer(initialize_models=False), already
+used by startup preflights. Its advisory plan metadata now reports the existing
+fallback (complexity 3, coordination true, no patterns/team); triage still owns
+actions, tasks and budgets. No provider selection or model binding is changed.
+One constructor control fails before/passes after; four real fallback/plan parity
+controls pass. This removes an unnecessary native-load trigger, not all possible
+concurrent native console writes. WSP00/22/50/77/97; offline validation only.
+
 ## 2026-11-05 — Preserve manifest-bound workspace skill bytes on Windows
 
 Narrow Git LF attributes cover the existing workspace SKILL.md files and manifest.

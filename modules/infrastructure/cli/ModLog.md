@@ -2,6 +2,16 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## 2026-11-05 — Preserve interactive menu prompts
+
+Background services were logging over `Select option:` after main startup.
+The existing utility owner now filters background records only at existing
+console handlers during main-menu input, retaining file evidence and foreground
+records. Prior filters survive normal input, EOF and interruption. No global
+input/stdout replacement or daemon shutdown. Four isolated behavioral/wiring
+cases pass; raw/native writes and other menu-module prompts remain out of scope.
+WSP00/11/22/50/97. See tests/TestModLog.md for execution limits.
+
 ## V0.3.16 — Japanese STT reuse for phone prototype (2026-09-10)
 
 **WSP Protocol:** 05, 06, 22, 97

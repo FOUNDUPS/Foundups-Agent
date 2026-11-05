@@ -6,6 +6,10 @@
 - `run_main_menu()` - Entry point for interactive CLI
 
 ### utilities.py
+- `console_input(prompt: str = "") -> str` - Main-menu input with temporary
+  calling-thread filters on existing stdout/stderr logging handlers. File sinks
+  and preexisting filters are preserved; EOF/KeyboardInterrupt propagate after
+  cleanup. This is a logging boundary, not capture of native or arbitrary output.
 - `env_truthy(name: str, default: str = "false") -> bool`
 - `env_flag(name: str, default_on: bool = True) -> bool`
 - `maybe_clear_screen() -> None`

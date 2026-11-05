@@ -19,6 +19,7 @@ from typing import Optional, Dict, Any
 import psutil
 
 from modules.infrastructure.cli.src.utilities import (
+    console_input as input,
     env_truthy,
     env_flag,
     maybe_clear_screen,
