@@ -145,7 +145,7 @@ class EffectGuard:
         try:
             self.node_calls += 1
             kwargs.pop('env', None)  # Discard the literal fixture's platform hint.
-            return self.original_run(command, **kwargs, cwd=self.out, env=env, shell=False)
+            return self.original_run(command, **kwargs, cwd=str(self.out), env=env, shell=False)
         finally:
             self.node_call = None
 

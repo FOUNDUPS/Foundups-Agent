@@ -1,5 +1,17 @@
 # video_comments TestModLog
 
+## 2026-11-05 — Normalize the offline Node working directory
+
+The hosted Windows Studio selection passed 137 cases, while Linux rejected
+130 Node-dependent cases: the adapter dispatched a Path but bound its exact
+process audit to a string. CPython normalizes that value on Windows only.
+The dispatch now passes the same string on both platforms; audit checks and
+effect permissions are unchanged. Independent actual-source POSIX execution
+stopped at an inert audit sentinel before any spawn and reproduced then
+resolved the mismatch. Fresh Windows validation passes the unchanged 137
+cases with zero issues/denials, plus all 17 prior effect controls and a new
+exact-string dispatch assertion. Hosted Linux validation remains required.
+
 ## 2026-11-05 — Keep quality STOP state inside each fixture
 
 Hosted CI runs the stdlib 15 before the direct reply 112. The rejected-draft
