@@ -1,3 +1,27 @@
+## Preserve browser sessions during attachment — 2026-11-05
+
+- Monitoring observed the old repeated-readiness-failure branch execute an
+  image-wide Chrome termination. This predates the modern Studio row repair.
+  The observed log does not establish which HTTP failure caused the branch.
+- Separate valid no-page inventories from unknown CDP state in the existing
+  owner, invoke the tab-recovery helper at most once, and remove all four Chrome/Edge image-wide
+  kill/relaunch paths. Retain public signatures and read-only boolean readiness;
+  startup remains separate. Generic driver failures preserve sessions too.
+- Extended the existing test owner with actual fake HTTP-to-retry composition:
+  22 failures/13 passes before source repair, then35 passes. Original11 cases
+  retain their assertions; eight readiness mocks now target the private probe.
+  The focused+adjacent startup selection passes84 cases. Independent injected
+  HTTP witnesses pass60 cases plus28 exception-race cases. These are separate
+  overlapping checks, not a combined end-to-end count. Runtime promotion remains
+  separate. A lost PUT response followed by the existing GET fallback cannot
+  prove a single physical tab; only helper-invocation count is bounded here.
+- Retrieval: task-source lexical bundle binds main76cb579b, freshness UNKNOWN
+  with index gap retained. README/INTERFACE/ROADMAP/test memory/NAVIGATION read;
+  no module memory/README exists. Broad historical docs were noisy, so prioritize
+  exact retry and HTTP owners. No duplicate lifecycle system or new dependency.
+  Manual source repair is appropriate for this HTTP/Selenium composition defect;
+  live local model capacity remains with the running DAE. WSP00/10/11/22/50/84/97.
+
 ## Recover documented native startup configuration — 2026-10-31
 
 Complete the README configuration table for the existing `LMS_CLI_PATH` and

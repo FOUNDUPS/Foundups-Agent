@@ -1,5 +1,16 @@
 # Dependency Launcher Module
 
+## Browser attachment recovery — 2026-11-05
+
+Chrome and Edge attachment preserve existing browser processes and sessions.
+A valid empty or worker-only DevTools inventory gets one recovery-tab attempt;
+unreachable/malformed HTTP and failed Selenium attachment return a bounded
+failure. The legacy `relaunch_on_fail` argument remains accepted but no longer
+kills or relaunches browsers. Initial startup still uses the existing launcher.
+The existing helper may try PUT then GET, so a lost response does not establish
+how many tabs were created. These guarantees are tested with injected HTTP/Selenium boundaries; live browser
+recovery after this change has not yet been verified.
+
 ## Bounded native server startup — local qualification, 2026-10-29
 
 Explicit DAE startup prefers the existing `lms` CLI/headless daemon. It reuses

@@ -1,3 +1,17 @@
+## Browser attachment recovery metadata review — 2026-11-05
+
+The unchanged full-tree scanner at staged tree 5b8a3795 against main 76cb579b
+reports 39 new whole-file bindings for unchanged public source path/SHA rows
+(37 generic-api-key and two discord-api-token matches). Independent review
+reconstructs all 216 finding fingerprints and each new row's source digest and
+prior exact approval. Append only these 39, preserving all 3,912 prior entries
+and every other ledger field (3,951 total). The 1,485-member closure and existing
+332 KiB/2 MiB/32 MiB bounds, scanner rules/scope and fingerprint algorithm remain
+unchanged. Independent review receipt SHA256:
+`571a13705a8eb148ea3a33c19982e8e9c91a93d03a69bc86feec74a96723a78c`.
+Fresh final-tree and actual committed-history gates remain required. This is
+public generated metadata classification, not live browser qualification.
+
 ## Native Studio reply metadata review — 2026-11-05
 
 The unchanged full-tree scanner at staged tree 7d8782cf against main 0b3da300

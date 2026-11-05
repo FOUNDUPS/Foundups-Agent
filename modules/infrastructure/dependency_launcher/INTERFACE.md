@@ -91,17 +91,28 @@ full main.py startup or scheduler qualification is claimed.
 
 Attach Selenium to the debug-port Chrome with retries and DevTools verification.
 
-**Non-destructive recovery (Phase 1):** if DevTools is UP but exposes no
-discoverable page target (Selenium "unable to discover open pages"), this opens a
-normal tab via `open_devtools_page()` and retries the attach. It does NOT taskkill
-the operator's prepared Chrome on this path; if a tab cannot be opened it logs a
-clear actionable error and returns `None`. The genuinely-DevTools-DOWN path still
-relaunches (follow-up: BROWSER_ATTACH_RECOVERY_DEVTOOLS_DOWN_PHASE2).
+**Non-destructive recovery:** valid DevTools version/page responses distinguish
+readiness, a live browser with no normal page, and unavailable/unknown state.
+An empty or worker-only inventory gets one recovery-tab attempt through the existing
+`open_devtools_page()` owner. Recheck readiness before attachment. The existing
+Selenium discover-pages race shares that helper-invocation limit. The helper's
+existing PUT/GET fallback means a lost response cannot prove a single tab was
+created. Failed tab creation,
+malformed/unreachable HTTP and generic attachment errors never kill or relaunch
+a browser; bounded retries return `None` with a diagnostic. Startup remains with
+`launch_chrome()` / `ensure_dependencies()`. `relaunch_on_fail` remains accepted
+for compatibility; neither value authorizes browser termination or relaunch.
 
 ### `connect_edge_with_retry(max_retries=3, retry_delay=2.0, relaunch_on_fail=True) -> Optional[WebDriver]`
 
 Same as `connect_chrome_with_retry` for Edge (port 9223), including the
-non-destructive no-page recovery (no `msedge.exe` taskkill on the no-page path).
+non-destructive recovery and compatibility-only `relaunch_on_fail` flag.
+
+### `is_devtools_responding(port, timeout=2.0) -> bool`
+
+Read-only page-readiness probe. Returns `True` only for typed version JSON and
+a valid target list containing a normal page. `False` is not proof the browser
+process is dead; the private probe retains the no-page versus unknown distinction.
 
 ### `open_devtools_page(port: int, url: str = "about:blank", timeout: float = 3.0) -> bool`
 

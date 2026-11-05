@@ -2578,7 +2578,7 @@
     "modules/infrastructure/database/src/sqlite_audit.py": "54e7d09023dd2309c96d8e8738247aadc672329d2a43dca00f7f7528f93bb060",
     "modules/infrastructure/dependency_launcher/__init__.py": "b6dcbc0762b5d1b0eeb535362e447d4401d1ba754e34ca28fb3f7e168504591c",
     "modules/infrastructure/dependency_launcher/src/__init__.py": "c83a079db6a7d9a2aa0a2fa491019d3bea5309cf6ccf78545146974f08fcc230",
-    "modules/infrastructure/dependency_launcher/src/dae_dependencies.py": "91ae9e9be82a840822a2b372b56d1edf32303e38e1dd767818b5e10b7fcb6560",
+    "modules/infrastructure/dependency_launcher/src/dae_dependencies.py": "92f1d3443578619d82f4200f710fc131f6c8f34f3444a42839dc874072e9cb1b",
     "modules/infrastructure/dependency_launcher/src/lm_studio_startup.py": "35f1bdd8282b97c9e4f5b55bb8f1f37db2034b18010638dc53a85a67f7c64ac6",
     "modules/infrastructure/dependency_launcher/src/runtime_compatibility_evidence_supplier.py": "1e15a1029db535d749c56d2bba6df15a6a0ea2b01eec4494fe959f76c7f57063",
     "modules/infrastructure/dependency_launcher/src/runtime_compatibility_preflight.py": "bbed37f5cf8e2515673bef008891604dc7fdd1ca72e09eaa72083510929fe940",
