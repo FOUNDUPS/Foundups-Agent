@@ -71,7 +71,7 @@ class ChatSender:
         """
         reviewed_text = getattr(message_text, 'reviewed_text', None)
         theme_snapshot = getattr(message_text, 'theme_snapshot', None)
-        if stop_active():
+        if stop_active('livechat'):
             run_id = os.getenv("YT_AUTOMATION_RUN_ID", "").strip()
             logger.warning(
                 f"[AUTOMATION-AUDIT] run_id={run_id or 'unset'} livechat_send=disabled (stop_file={stop_file_path()})"
@@ -177,6 +177,8 @@ class ChatSender:
                     if str(message_text) != reviewed_text or load_active_theme('livechat') != theme_snapshot:
                         return False
 
+                if stop_active('livechat'):
+                    return False
                 # Prepare message data
                 message_data = {
                     "snippet": {

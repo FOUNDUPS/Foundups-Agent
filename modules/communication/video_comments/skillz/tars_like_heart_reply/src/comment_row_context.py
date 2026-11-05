@@ -6,9 +6,139 @@ logger = logging.getLogger(__name__)
 
 
 COMMENT_IDENTITY_SCRIPT = r"""
+function rowOriginalComment(row) {
+    if (!row) return null;
+    const selector = 'ytcp-comment-view-model, ytcp-comment-view, ytcp-comment';
+    if (row.matches && row.matches(selector)) return row;
+    for (const node of row.querySelectorAll(selector)) {
+        if (node.closest && !node.closest('ytcp-comment-replies') &&
+            node.closest('ytcp-comment-thread') === row) return node;
+    }
+    return row;
+}
+function rowOwnsNode(row, original, node, threadLevel = false) {
+    if (!row || !original || !node || !node.closest || !row.contains(node) ||
+        node.closest('ytcp-comment-replies') || node.closest('ytcp-comment-thread') !== row) return false;
+    const owner = node.closest('ytcp-comment-view-model, ytcp-comment-view, ytcp-comment');
+    if (original === row) return !owner;
+    if (original.contains(node)) return owner === original;
+    return threadLevel && !owner;
+}
+function trustedRowUrl(raw, hosts, protocols = ['https:']) {
+    if (typeof raw !== 'string' || !raw.trim()) return null;
+    try {
+        const url = new URL(raw, 'https://studio.youtube.com');
+        return protocols.includes(url.protocol) && hosts.includes(url.hostname) &&
+            !url.username && !url.password && !url.port ? url : null;
+    } catch (e) { return null; }
+}
+function rowVideoLink(link) {
+    const url = trustedRowUrl(link.getAttribute('href') || link.href,
+        ['studio.youtube.com', 'youtube.com', 'www.youtube.com', 'm.youtube.com']);
+    if (!url) return null;
+    let id = null;
+    if (url.hostname === 'studio.youtube.com')
+        id = (url.pathname.match(/^\/video\/([A-Za-z0-9_-]+)(?:\/|$)/) || [])[1];
+    else if (url.pathname === '/watch') id = url.searchParams.get('v');
+    else id = (url.pathname.match(/^\/shorts\/([A-Za-z0-9_-]+)(?:\/|$)/) || [])[1];
+    return id && /^[A-Za-z0-9_-]+$/.test(id) ? {id, url: url.href} : null;
+}
+function rowThumbnailId(image) {
+    const raw = image.getAttribute('src');
+    if (!raw || !raw.startsWith('https://')) return null;
+    const url = trustedRowUrl(raw, ['i.ytimg.com']);
+    return url && !url.search && !url.hash &&
+        (url.pathname.match(/^\/vi\/([A-Za-z0-9_-]{11})\/default\.jpg$/) || [])[1] || null;
+}
+function rowVideoMetadata(row) {
+    const original = rowOriginalComment(row), ids = new Set(), urls = new Map(), titles = new Set();
+    let legacyTitle = null;
+    for (const info of row.querySelectorAll('ytcp-video-thumbnail-with-info, ytcp-comment-video-thumbnail#video-thumbnail')) {
+        const modern = info.matches('ytcp-comment-video-thumbnail#video-thumbnail');
+        if (!rowOwnsNode(row, original, info, !modern)) continue;
+        const local = new Set();
+        for (const link of info.querySelectorAll('a[href]')) {
+            if (!rowOwnsNode(row, original, link, !modern)) continue;
+            const identity = rowVideoLink(link);
+            if (identity) {
+                local.add(identity.id); ids.add(identity.id);
+                if (!urls.has(identity.id)) urls.set(identity.id, identity.url);
+            }
+        }
+        if (modern) for (const image of info.querySelectorAll('ytcp-img-with-fallback#video-thumbnail img#img-with-fallback')) {
+            if (!rowOwnsNode(row, original, image)) continue;
+            const id = rowThumbnailId(image);
+            if (id) { local.add(id); ids.add(id); }
+        }
+        const title = info.querySelector(modern ? '#video-title' : '#video-title, [data-video-title], [title]');
+        const text = title && rowOwnsNode(row, original, title, !modern) &&
+            (title.getAttribute('title') || title.getAttribute('data-video-title') || title.textContent || '')
+            .trim().replace(/\s+/g, ' ').substring(0, 300);
+        if (text && local.size === 1) titles.add(text);
+        if (text && !modern && local.size === 0) legacyTitle = text;
+    }
+    if (ids.size > 1) return {video_id: null, video_title: null, video_url: null};
+    const id = ids.size === 1 ? ids.values().next().value : null;
+    return {video_id: id, video_title: titles.size === 1 ? titles.values().next().value :
+        (ids.size === 0 ? legacyTitle : null), video_url: id && urls.get(id) || null};
+}
+function rowVideoIdentity(row) { return rowVideoMetadata(row).video_id; }
+function rowAuthorIdentity(row) {
+    const original = rowOriginalComment(row);
+    let identity = null;
+    for (const author of original.querySelectorAll('#author-text, yt-formatted-string.author-text, a#name, .author-name, ytcp-comment-author')) {
+        if (!rowOwnsNode(row, original, author)) continue;
+        const handle = (author.textContent || '').trim().replace(/\s+/g, ' ');
+        if (!handle) continue;
+        const link = author.matches('a[href]') ? author : author.querySelector('a[href]');
+        if (link && !rowOwnsNode(row, original, link)) return null;
+        const url = link && trustedRowUrl(link.getAttribute('href') || link.href,
+            ['studio.youtube.com', 'youtube.com', 'www.youtube.com', 'm.youtube.com'], ['https:', 'http:']);
+        if (link && !url) return null;
+        if (author.matches('a#name') && !url) return null;
+        if (url && !/^\/(?:channel\/[A-Za-z0-9_-]+|@[^/]+)\/?$/.test(url.pathname)) return null;
+        const candidate = {author_name: handle.replace(/^@/, ''), author_handle: handle,
+            channel_id: url && (url.pathname.match(/^\/channel\/([^/]+)(?:\/|$)/) || [])[1] || null,
+            author_url: url ? url.origin + url.pathname : null};
+        if (identity && (candidate.author_name !== identity.author_name ||
+            candidate.channel_id !== identity.channel_id || candidate.author_url !== identity.author_url)) return null;
+        identity = candidate;
+    }
+    return identity;
+}
+function rowContentElement(row) {
+    const original = rowOriginalComment(row);
+    for (const selector of ['yt-formatted-string#content-text, #content-text', '#content, .comment-text, ytcp-comment-renderer'])
+        for (const node of original.querySelectorAll(selector))
+            if (rowOwnsNode(row, original, node)) return node;
+    return null;
+}
+
+function normalizedHandle(value) {
+    if (typeof value !== 'string') return null;
+    const handle = value.trim().toLowerCase();
+    return /^@[^\/?#\s@]+$/.test(handle) ? handle : null;
+}
+function nativeReceivingMatches(expected) {
+    if (!expected || !/^UC[A-Za-z0-9_-]{22}$/.test(expected._target_channel_id || '') ||
+        !normalizedHandle(expected._target_channel_handle)) return false;
+    try {
+        const values = [
+            window.ytcfg && typeof window.ytcfg.get === 'function' ? window.ytcfg.get('CHANNEL_ID') : null,
+            window.yt && window.yt.config_ ? window.yt.config_.CHANNEL_ID : null
+        ].filter(value => value !== undefined && value !== null);
+        return values.length > 0 && values.every(value => typeof value === 'string' && value === expected._target_channel_id);
+    } catch (e) { return false; }
+}
+function rowRequiresNativeProof(row) {
+    const original = rowOriginalComment(row);
+    return Array.from(original.querySelectorAll('ytcp-comment-video-thumbnail#video-thumbnail, a#name'))
+        .some(node => rowOwnsNode(row, original, node));
+}
+
 function commentIdentity(row, nested = false) {
     if (!row) return null;
-    const original = row.querySelector('ytcp-comment-view-model, ytcp-comment-view, ytcp-comment') || row;
+    const original = rowOriginalComment(row);
     const candidates = new Set();
     for (const node of [row, original]) {
         for (const attr of ['data-comment-id', 'comment-id']) {
@@ -17,7 +147,7 @@ function commentIdentity(row, nested = false) {
         }
     }
     for (const link of original.querySelectorAll('a[href]')) {
-        if (link.closest && (link.closest('ytcp-video-thumbnail-with-info') || (!nested && link.closest('ytcp-comment-replies')))) continue;
+        if (link.closest && (link.closest('ytcp-video-thumbnail-with-info, ytcp-comment-video-thumbnail') || (!nested && !rowOwnsNode(row, original, link)))) continue;
         try {
             const url = new URL(link.href, 'https://studio.youtube.com');
             if (!['studio.youtube.com', 'youtube.com', 'www.youtube.com', 'm.youtube.com'].includes(url.hostname)) continue;
@@ -27,25 +157,6 @@ function commentIdentity(row, nested = false) {
     }
     return candidates.size === 1 ? candidates.values().next().value : null;
 }
-function rowVideoIdentity(row) {
-    const info = row.querySelector('ytcp-video-thumbnail-with-info');
-    if (!info) return null;
-    const ids = new Set();
-    for (const link of info.querySelectorAll('a[href]')) {
-        try {
-            const url = new URL(link.href, 'https://studio.youtube.com');
-            if (url.protocol !== 'https:' || url.username || url.password) continue;
-            let id = null;
-            if (url.hostname === 'studio.youtube.com') id = (url.pathname.match(/^\/video\/([A-Za-z0-9_-]+)(?:\/|$)/) || [])[1];
-            else if (['youtube.com', 'www.youtube.com', 'm.youtube.com'].includes(url.hostname)) {
-                if (url.pathname === '/watch') id = url.searchParams.get('v');
-                else id = (url.pathname.match(/^\/shorts\/([A-Za-z0-9_-]+)(?:\/|$)/) || [])[1];
-            }
-            if (id && /^[A-Za-z0-9_-]+$/.test(id)) ids.add(id);
-        } catch (e) {}
-    }
-    return ids.size === 1 ? ids.values().next().value : null;
-}
 function matchesCommentTarget(row, expected) {
     if (location.origin !== 'https://studio.youtube.com') return false;
     if (!row || !row.isConnected || !expected || !expected.text || !expected.author_name ||
@@ -53,19 +164,13 @@ function matchesCommentTarget(row, expected) {
         rowVideoIdentity(row) !== expected.video_id) return false;
     const norm = value => (value || '').replace(/\s+/g, ' ').trim();
     const exact = value => (value || '').replace(/\r\n/g, '\n').trim();
-    const text = row.querySelector('yt-formatted-string#content-text, #content-text');
-    const author = row.querySelector('#author-text, ytcp-comment-author');
+    const text = rowContentElement(row), author = rowAuthorIdentity(row);
     if (!text || !author || exact(text.textContent) !== exact(expected.text) ||
-        norm(author.textContent).replace(/^@/, '') !== norm(expected.author_handle || expected.author_name).replace(/^@/, '')) return false;
+        norm(author.author_handle).replace(/^@/, '') !== norm(expected.author_handle || expected.author_name).replace(/^@/, '')) return false;
     if (!expected._target_channel_id || !location.pathname.startsWith('/channel/' + expected._target_channel_id + '/')) return false;
-    if (expected.channel_id) {
-        const link = author.matches('a[href]') ? author : author.querySelector('a[href]');
-        if (!link) return false;
-        const url = new URL(link.href, location.href);
-        if (!['youtube.com', 'www.youtube.com', 'm.youtube.com', 'studio.youtube.com'].includes(url.hostname)) return false;
-        const id = (url.pathname.match(/^\/channel\/([^/]+)/) || [])[1];
-        if (id !== expected.channel_id) return false;
-    }
+    if (expected.channel_id && author.channel_id !== expected.channel_id) return false;
+    if (expected.author_url && author.author_url !== expected.author_url) return false;
+    if (rowRequiresNativeProof(row) && !nativeReceivingMatches(expected)) return false;
     return true;
 }
 """
@@ -96,38 +201,13 @@ COMMENT_ROW_SCRIPT = r"""
                 const thread = threads[arguments[0]];
                 if (!thread) return null;
 
-                // Extract comment text from yt-formatted-string#content-text
-                // This is the actual comment content element
-                let text = '';
-                const contentText = thread.querySelector('yt-formatted-string#content-text');
-                if (contentText) {
-                    text = contentText.textContent.trim();
-                } else {
-                    // Fallback selectors
-                    const contentEl = thread.querySelector('#content, .comment-text, ytcp-comment-renderer');
-                    text = contentEl ? contentEl.textContent.trim() : '';
-                }
-
-                // Extract author handle/name and channel ID
-                let authorName = 'Unknown';
-                let authorHandle = 'Unknown';
-                let channelId = null;
-                const authorEl = thread.querySelector('#author-text, yt-formatted-string.author-text, a#name, .author-name, a[href*="/channel/"], a[href^="/@"]');
-                if (authorEl) {
-                    const raw = authorEl.textContent.trim().replace(/\s+/g, ' ');
-                    authorHandle = raw;
-                    authorName = raw.replace(/^@/, '');
-
-                    // Extract channel ID from href (if available)
-                    const authorLink = thread.querySelector('a[href*="/channel/"]');
-                    if (authorLink) {
-                        const href = authorLink.href;
-                        const match = href.match(/\/channel\/([^\/\?]+)/);
-                        if (match) {
-                            channelId = match[1];
-                        }
-                    }
-                }
+                // Use the same owned original-comment identity at extraction and Submit.
+                const contentText = rowContentElement(thread);
+                const text = contentText ? contentText.textContent.trim() : '';
+                const author = rowAuthorIdentity(thread);
+                const authorName = author ? author.author_name : 'Unknown';
+                const authorHandle = author ? author.author_handle : 'Unknown';
+                const channelId = author ? author.channel_id : null;
 
                 // Check for mod badge (moderator indicator)
                 const modBadge = thread.querySelector('.mod-badge, [aria-label*="Moderator"], .moderator-badge');
@@ -204,45 +284,8 @@ COMMENT_ROW_SCRIPT = r"""
                     }
                 }
 
-                // Extract the exact video context for this inbox row. Studio inbox
-                // can mix comments from many videos, so a DAE-wide title is unsafe.
-                let videoTitle = null;
-                let videoId = null;
-                let videoUrl = null;
-                // Only metadata owned by this row may supply video context.
-                // Comment/reply links and unrelated hosts are never video metadata.
-                const videoInfo = thread.querySelector('ytcp-video-thumbnail-with-info');
-                if (videoInfo) {
-                    const title = videoInfo.querySelector('#video-title, [data-video-title], [title]');
-                    if (title) {
-                        const candidate = (title.getAttribute('title') ||
-                            title.getAttribute('data-video-title') || title.textContent || '')
-                            .trim().replace(/\s+/g, ' ');
-                        if (candidate) videoTitle = candidate.substring(0, 300);
-                    }
-                    const candidates = new Map();
-                    for (const link of videoInfo.querySelectorAll('a[href]')) {
-                        try {
-                            const url = new URL(link.href || link.getAttribute('href'), 'https://studio.youtube.com');
-                            if (url.protocol !== 'https:' || url.username || url.password) continue;
-                            let id = null;
-                            if (url.hostname === 'studio.youtube.com') {
-                                id = (url.pathname.match(/^\/video\/([A-Za-z0-9_-]+)(?:\/|$)/) || [])[1];
-                            } else if (['youtube.com', 'www.youtube.com', 'm.youtube.com'].includes(url.hostname)) {
-                                if (url.pathname === '/watch') id = url.searchParams.get('v');
-                                else id = (url.pathname.match(/^\/shorts\/([A-Za-z0-9_-]+)(?:\/|$)/) || [])[1];
-                            }
-                            if (!id || !/^[A-Za-z0-9_-]+$/.test(id)) continue;
-                            if (!candidates.has(id)) candidates.set(id, url.href);
-                        } catch (e) { /* Missing/invalid metadata remains absent. */ }
-                    }
-                    if (candidates.size === 1) {
-                        [videoId, videoUrl] = candidates.entries().next().value;
-                    } else if (candidates.size > 1) {
-                        // A title cannot be bound to either conflicting video.
-                        videoTitle = null;
-                    }
-                }
+                // Modern thumbnail identity and legacy anchors share one scoped owner.
+                const video = rowVideoMetadata(thread);
 
                 return {
                     comment_id: commentIdentity(thread),
@@ -250,12 +293,13 @@ COMMENT_ROW_SCRIPT = r"""
                     author_name: authorName,
                     author_handle: authorHandle,
                     channel_id: channelId,
+                    author_url: author ? author.author_url : null,
                     is_mod: isMod,
                     is_subscriber: isSubscriber,
                     published_time: publishedTime,
-                    video_title: videoTitle,
-                    video_id: videoId,
-                    video_url: videoUrl
+                    video_title: video.video_title,
+                    video_id: video.video_id,
+                    video_url: video.video_url
                 };
             """
 

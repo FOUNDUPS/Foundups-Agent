@@ -1,5 +1,53 @@
 # Video Comments - ModLog
 
+## 2026-11-05 — Separate delivery from optional visual observation
+
+The processor previously treated the generic UI-TARS locator confidence as a
+post-inspection pass and could overwrite a verified reply with a screenshot or
+vision failure. Preserve exact DOM/history delivery and record typed,
+non-authoritative visual observations instead. Explicitly record the bridge's
+unbound recapture and keep screenshots private. Evidence append failure cannot
+make an already verified reply appear retryable; unknown outcomes stay unknown.
+No new visual model, semantic validator, provider or posting route is added.
+
+Qualified test-first RED: 9 cases, 8 assertion failures and 1 pass. GREEN: the
+new 9 plus unchanged quality/memory 60 all pass, with zero errors, skips or
+denied effects. Independent review accepted this source layer. Initial registry
+admission refusals ran no tests and are not RED evidence. These synthetic
+controls do not establish live delivery or actual model quality.
+WSP 11/22/50/77/84/97.
+
+## 2026-11-05 — Modern Studio row identity and disabled-zero baseline
+
+The existing row owner now shares scoped legacy/modern video and original-author
+helpers across extraction, bind and final Submit. It accepts the observed modern
+thumbnail shape without fabricating a watch URL, freezes the selected author's
+URL when available and prevents nested/foreign UC-ID borrowing. Conflicting
+metadata remains absent. The reply owner recognizes only the fully qualified
+owned disabled-zero widget as inert; other incomplete or existing-reply evidence
+still blocks submission. Later native Elements inspection established the exact
+toolbar ancestry and expanded `COLLAPSE` state, including a label of one with
+four loaded reply rows. The final route validates that owned inventory without
+using label cardinality. Modern creator badges are bound to once-frozen canonical
+registry context, fresh native UC/URL proof and exact new parent/reply IDs/text.
+Multiple supported inventories refuse readback. Native textarea operations now
+use current `value`; stale/micro-edit continuation proves the draft prefix and
+rewinds the index after a confirmed edit. Legacy readback, durable history,
+shared model routing, quality gates and final exact-text checks are preserved.
+
+Test-first actual-source Node controls reproduced 35 assertion failures among
+69 cases before repair. Two review controls then reproduced inner-native-comment
+borrowing and class-based-reply/zero-widget contradictions. The 71 checkpoint
+and its adjacent 165 are retained as historical evidence. Creator RED117 had 35
+failures; the two-container heldout then failed once among 118 cases. Native-input
+RED16 had eight native failures and eight contenteditable passes; loop RED19
+reproduced two continuation failures. Final 118 Studio + 19 editor controls pass
+with zero errors, skips or denied effects. Native observations ground selectors;
+synthetic tests do not prove a newly published reply or live model quality.
+WSP 50/84/97: existing owners and exact fixture admission, no second browser,
+store or posting route. The composed final adjacent 165 also pass with zero
+issues/denials; CI and live output remain separate gates.
+
 ## 2026-11-05 — Ready-only optional reply memory
 
 WSP00/11/22/50/77/84/97. Reuse VoiceMemory/VideoContentIndex with additive

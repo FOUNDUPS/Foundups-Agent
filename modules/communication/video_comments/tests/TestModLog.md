@@ -1,5 +1,87 @@
 # video_comments TestModLog
 
+## 2026-11-05 — Normalize the offline Node working directory
+
+The hosted Windows Studio selection passed 137 cases, while Linux rejected
+130 Node-dependent cases: the adapter dispatched a Path but bound its exact
+process audit to a string. CPython normalizes that value on Windows only.
+The dispatch now passes the same string on both platforms; audit checks and
+effect permissions are unchanged. Independent actual-source POSIX execution
+stopped at an inert audit sentinel before any spawn and reproduced then
+resolved the mismatch. Fresh Windows validation passes the unchanged 137
+cases with zero issues/denials, plus all 17 prior effect controls and a new
+exact-string dispatch assertion. Hosted Linux validation remains required.
+
+## 2026-11-05 — Keep quality STOP state inside each fixture
+
+Hosted CI runs the stdlib 15 before the direct reply 112. The rejected-draft
+fixture reached the real quality latch and left its default STOP for the next
+step, correctly blocking three history tests before durable reservation. A
+two-process replay sharing one private STOP reproduced the exact three hosted
+failures (109 passed); the preceding stdlib 15 passed. Both fixture owners now
+use restoring private STOP/gate state. The rejected-draft control additionally
+asserts the actual persisted incident reason, scope and receipt identity.
+The identical bounded runner in a fresh directory passes 15 then 112 with the
+original case inventories, zero errors/skips or denied effects. No production
+gate, STOP state, delivery assertion or effect allowance changed.
+
+## 2026-11-05 — Visual evidence does not rewrite delivery
+
+Added 9 actual-definition controls for typed optional visual observations.
+Qualified RED: 8 assertion failures, 1 pass. GREEN: 69 combined cases, retaining
+the prior quality/memory 60 case inventory, with zero failures/errors/skips or
+denied effects. Initial canonical-registry admission refusals produced no test
+execution and remain separate from RED. Independent source review confirmed
+only the processor's observation and delivery-result handling changed in this
+layer. No screenshots or inspection content are committed; live model and
+published-reply verification remain separate gates.
+
+## 2026-11-05 — Modern Studio identity qualification
+
+Initial 71 actual-source JavaScript cases in `test_studio_row_identity.py` used
+one bounded fixed Node fixture. The unchanged-base RED run had 35 assertion
+failures, 34 passes and no errors/skips/denied effects. An initial repair run
+exposed exact-content selector priority versus a generic content wrapper; that
+run is retained. After preserving exact comment-text priority, all initial 69
+passed. Two review-held controls reproduced inner native-comment borrowing and
+class-based-reply/zero-widget contradiction (RED71: 2 failures, 69 passes).
+Historical GREEN71 and the unchanged 112 reply + 53 context case inventories pass
+under the independently admitted exact-program guards with zero issues/denials.
+The controls bind extraction through one final synthetic Submit and preserve
+strict creator-ID readback, historical-match and unknown-history boundaries.
+
+Only the two existing legacy DOM constants gain native ancestry/query support;
+whole-module AST reversal proves all other definitions/assertions unchanged.
+No new literal runs under a generic subprocess allowance. Current browser DOM
+observation is separate evidence; no public comment or creator-schema delivery
+was attempted by these tests.
+
+The retained adjacent assertion caught first-versus-last URL selection for
+repeated same-video anchors; preserving the original first URL repaired it
+without altering the assertion. One precollection attempt hit Windows WMI's
+`readline`/platform fallback to an unadmitted subprocess; the guard correctly
+denied it. That attempt is retained and excluded from test counts. One fresh
+identical-guard retry produced the qualified RED71; no guard exception was added.
+
+Native toolbar/expanded-control/creator observations then replaced the earlier
+synthetic direct-parent assumption. The original 71 assertions/parameters remain;
+117 creator/receiving/toolbar cases first produced 35 assertion failures, then
+passed. Review's second-container omission control failed once among 118 before
+the conservative multiple-container refusal. Final Studio118 passes.
+
+The separate fixed `EDITOR_DOM` ran actual clear/append/read/micro-edit scripts:
+RED16 was eight native textarea failures/eight contenteditable passes; property
+repair passed all 16. Three appended actual-definition loop controls produced
+two failures (lost micro-edited character and continued foreign recovered text).
+Prefix verification and index rewind repair them. Final editor19 passes, giving
+137 combined, zero failures/errors/skips/denied effects. Original editor16 AST
+and literal are retained; no new process/provider authority was added. The
+composed final adjacent 165 also pass, preserving the original 112/53 case-name
+digests and assertions. Its initial four fixture-contract failures are retained:
+two sender doubles needed the now-explicit `livechat` STOP scope (two stronger
+scope assertions added), and a typing double needed the exact new value/text
+getter. No runtime gate, old assertion or case name was weakened.
+
 ## 2026-11-05 — Use neutral grounding data in the memory fixture
 
 PR2306 CodeQL flagged domain-substring checks in the synthetic memory fixture.

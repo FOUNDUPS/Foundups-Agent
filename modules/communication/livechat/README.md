@@ -1,5 +1,27 @@
 # LiveChat
 
+## Scoped comment-quality halt (2026-11-05)
+
+Recognized rejected reply text latches a comments-only incident in the existing
+`memory/STOP_YT_AUTOMATION` file. The existing gates refuse further comment
+generation, reactions, submission, retries and channel advancement. A typed halt
+is not inbox clearance or rotation completion. Explicit live-chat and scheduling
+surfaces retain their other permission checks; every manual, empty, unknown,
+malformed or unreadable STOP remains global.
+
+The default and relative override paths resolve from the checkout root. An
+absolute `YT_AUTOMATION_STOP_FILE` override stays absolute. No private comment,
+draft or prompt is stored in this incident. Private manifest intake stays available
+and cannot reset it. See [the interface](INTERFACE.md) for the closed record,
+dedicated child exit code and explicit recovery boundary.
+
+Recovery first settles the old comment owners, then uses the existing STOP
+owner's exact matching compare-and-clear API and starts fresh comment owners.
+Removing the file does not reset an already halted parent, and clearing a quality
+incident never releases uncertain delivery reservations. There is no automatic
+expiry or generic resume action. This qualifies cooperating writers and offline
+synthetic collaborators; it does not prove a live reply was delivered.
+
 ## Bounded subprocess output and handoff diagnostics (2026-11-05)
 
 The existing comment runner drains stdout/stderr in 65,536-byte chunks and

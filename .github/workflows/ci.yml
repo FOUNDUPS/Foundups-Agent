@@ -148,6 +148,19 @@ jobs:
           if-no-files-found: error
       - name: Verify shared YouTube model routing in an isolated child
         run: python -I -B .github/scripts/youtube_repair_offline.py --suite routing
+      - name: Verify native Studio identity, creator readback and exact editor input
+        run: python -I -B .github/scripts/youtube_repair_offline.py --suite studio
+      - name: Verify durable comments-only quality halt and parent propagation
+        run: python -I -B .github/scripts/youtube_repair_offline.py --suite quality_stop
+      - name: Preserve sanitized Studio and scoped quality halt results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: youtube-studio-quality-halt-${{ matrix.os }}
+          path: |
+            ${{ runner.temp }}/youtube-repair-studio/results.xml
+            ${{ runner.temp }}/youtube-repair-quality_stop/results.xml
+          if-no-files-found: error
       - name: Preserve sanitized model-routing results
         if: always()
         uses: actions/upload-artifact@v4

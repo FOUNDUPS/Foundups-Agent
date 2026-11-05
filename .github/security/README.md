@@ -1,3 +1,16 @@
+## Native Studio reply metadata review — 2026-11-05
+
+The unchanged full-tree scanner at staged tree 7d8782cf against main 0b3da300
+reports 39 new exact bindings for generated public source path/SHA rows
+(37 generic-api-key and two discord-api-token matches). Independent review
+reconstructs the immutable source digests, unchanged rows and exact prior
+approvals. Append only those 39, preserving all 3,873 earlier entries and every
+other ledger field (3,912 total). The 1,485-member closure, 332 KiB manifest,
+2 MiB member and 32 MiB total limits, scanner rules/scope and fingerprint
+algorithm remain unchanged. Independent review receipt SHA256:
+`46cd2d819907f4c5de30ee608ab7f519ac1570c2f6b3308a0a1a83aa061e6863`.
+Fresh final-tree and actual committed-history gates remain separate requirements.
+
 ## Prospective micro-UPS manifest metadata review — 2026-11-05
 
 The unchanged full-tree/introduced-history gate at 06625b9e against main 0cd8910b

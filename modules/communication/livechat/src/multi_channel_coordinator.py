@@ -262,6 +262,27 @@ class MultiChannelCoordinator:
     def _record_oops(self, account_name: str) -> None:
         self._oops_backoff[account_name] = time.time()
 
+    def _comments_halt(self, channel_id=None, result=None):
+        """Latch this owner's halt; recovery settles it and creates a fresh owner."""
+        from modules.communication.livechat.src.automation_gates import comment_stop_result, comments_exit_code, QUALITY_REASONS
+        halted = getattr(self, '_comments_halt_receipt', None) or comment_stop_result()
+        if comments_exit_code(result):
+            reason = result.get('quality_halt_reason')
+            incident_id = result.get('quality_stop_incident_id')
+            halted = {'halted_for_reply_quality': result.get('halted_for_reply_quality') is True,
+                      'halted_for_comments_stop': result.get('halted_for_comments_stop') is True,
+                      'quality_stop_persisted': result.get('quality_stop_persisted') is True,
+                      'quality_halt_reason': reason if isinstance(reason, str) and reason in QUALITY_REASONS else 'comments_halted_child',
+                      'quality_stop_incident_id': incident_id if isinstance(incident_id, str) and len(incident_id) == 32
+                          and all(char in '0123456789abcdef' for char in incident_id) else None}
+        if not halted:
+            return False
+        halted.update(state='halted', all_processed=False)
+        self._comments_halt_receipt = halted
+        if channel_id:
+            self.update_engagement_status(channel_id, {**halted, 'updated_at': time.time()})
+        return True
+
     async def run_multi_channel_engagement(
         self,
         runner,
@@ -285,6 +306,8 @@ class MultiChannelCoordinator:
         Returns:
             Total comments processed across all channels
         """
+        if self._comments_halt():
+            return 0
         strict_inbox = _env_truthy("YT_INBOX_STRICT", "true")
         edge_parallel = _env_truthy("YT_EDGE_PARALLEL", "true")
         edge_first = _env_truthy("YT_EDGE_FIRST", "true")
@@ -349,6 +372,9 @@ class MultiChannelCoordinator:
                 logger.warning(f"[ROTATE] Edge task failed: {e}")
 
         logger.info("=" * 70)
+        if self._comments_halt():
+            logger.warning('[ROTATE] Comment engagement halted; no completion or chained work')
+            return total_processed
         logger.info("[ROTATE] MULTI-CHANNEL ENGAGEMENT COMPLETE")
         logger.info(f"[ROTATE] Total comments processed: {total_processed}")
         logger.info(f"[ROTATE] Channels: Chrome ({len(chrome_accounts)}) + Edge ({len(edge_accounts)})")
@@ -411,6 +437,8 @@ class MultiChannelCoordinator:
         Returns:
             Total comments processed for this browser
         """
+        if self._comments_halt():
+            return 0
         strict_inbox = _env_truthy("YT_INBOX_STRICT", "true")
         chrome_accounts, edge_accounts = _get_ordered_accounts_by_browser()
 
@@ -458,6 +486,8 @@ class MultiChannelCoordinator:
         
         Updated 2026-01-09: Now supports multiple Edge accounts.
         """
+        if self._comments_halt():
+            return 0
         total_processed = 0
         edge_driver = None
         edge_port = int(os.getenv("FOUNDUPS_EDGE_PORT", "9223"))
@@ -509,6 +539,8 @@ class MultiChannelCoordinator:
 
         # Process each Edge account
         for idx, (account_name, channel_id) in enumerate(edge_accounts, 1):
+            if self._comments_halt(channel_id):
+                break
             if self._should_skip_oops(account_name):
                 logger.warning(f"[ROTATE] [Edge] Skipping {account_name}: OOPS cooldown active")
                 continue
@@ -606,6 +638,8 @@ class MultiChannelCoordinator:
                 if result and result.get("deferred"):
                     continue
                 result = result or {}
+                if self._comments_halt(channel_id, result):
+                    break
                 stats = result.get("stats", {})
                 processed = stats.get("comments_processed", 0)
                 total_processed += processed
@@ -644,6 +678,8 @@ class MultiChannelCoordinator:
                     edge_driver, runner, channel_id, account_name,
                     max_comments, 9223, processed, strict_inbox, error_text, session_recovered
                 )
+                if self._comments_halt(channel_id):
+                    break
                 total_processed += processed - stats.get("comments_processed", 0)  # Add retry delta
 
                 # FIX 2026-02-06: Check if comments STILL exist after verify/retry
@@ -667,6 +703,8 @@ class MultiChannelCoordinator:
                             if retry_result and retry_result.get("deferred"):
                                 continue
                             retry_result = retry_result or {}
+                            if self._comments_halt(channel_id, retry_result):
+                                break
                             retry_stats = retry_result.get('stats', {})
                             retry_processed = retry_stats.get('comments_processed', 0)
                             total_processed += retry_processed
@@ -806,6 +844,8 @@ class MultiChannelCoordinator:
 
         Uses TarsAccountSwapper for account switching within same Google account.
         """
+        if self._comments_halt():
+            return 0
         total_processed = 0
         total_shorts_scheduled = 0  # Track shorts for LinkedIn rotation trigger
         chrome_driver = None
@@ -887,6 +927,8 @@ class MultiChannelCoordinator:
 
         # Process each Chrome account
         for idx, (account_name, channel_id) in enumerate(chrome_accounts, 1):
+            if self._comments_halt(channel_id):
+                break
             if self._should_skip_oops(account_name):
                 logger.warning(f"[ROTATE] [Chrome] Skipping {account_name}: OOPS cooldown active")
                 continue
@@ -999,6 +1041,8 @@ class MultiChannelCoordinator:
                 if result and result.get("deferred"):
                     continue
                 result = result or {}
+                if self._comments_halt(channel_id, result):
+                    break
                 stats = result.get('stats', {})
                 processed = stats.get('comments_processed', 0)
                 total_processed += processed
@@ -1042,6 +1086,8 @@ class MultiChannelCoordinator:
                     chrome_driver, runner, channel_id, account_name,
                     max_comments, 9222, processed, strict_inbox, error_text, session_recovered
                 )
+                if self._comments_halt(channel_id):
+                    break
                 total_processed += processed - stats.get('comments_processed', 0)  # Add retry delta
 
                 # FIX 2026-02-06: Check if comments STILL exist after verify/retry
@@ -1067,6 +1113,8 @@ class MultiChannelCoordinator:
                                 if retry_result and retry_result.get("deferred"):
                                     continue
                                 retry_result = retry_result or {}
+                                if self._comments_halt(channel_id, retry_result):
+                                    break
                                 retry_stats = retry_result.get('stats', {})
                                 retry_processed = retry_stats.get('comments_processed', 0)
                                 total_processed += retry_processed
@@ -1279,6 +1327,8 @@ class MultiChannelCoordinator:
         Returns reordered list: FoundUps first, then channels with work, then rest.
         FIX 2026-03-21: Don't waste time on channels with no work.
         """
+        if self._comments_halt():
+            return []
         from modules.infrastructure.dependency_launcher.src.dae_dependencies import STUDIO_FILTER
 
         # (name, id, comment_count, needs_shorts, is_foundups)
@@ -1298,6 +1348,8 @@ class MultiChannelCoordinator:
             logger.warning(f"[AUDIT] Shorts coverage check failed: {e}")
 
         for account_name, channel_id in self._comment_accounts(edge_accounts):
+            if self._comments_halt(channel_id):
+                break
             is_foundups = account_name.lower() == "foundups"
             comment_count = 0
             needs_shorts = shorts_coverage_map.get(channel_id, True)  # Default: needs work
@@ -1366,6 +1418,8 @@ class MultiChannelCoordinator:
         Returns reordered list: FoundUps first, then channels with work, then rest.
         FIX 2026-03-21: Chrome handles indexing in addition to comments/shorts.
         """
+        if self._comments_halt():
+            return []
         from modules.infrastructure.dependency_launcher.src.dae_dependencies import STUDIO_FILTER
 
         # (name, id, comment_count, needs_shorts, needs_indexing, is_foundups)
@@ -1400,6 +1454,8 @@ class MultiChannelCoordinator:
                 logger.debug(f"[AUDIT] [Chrome] Indexing check skipped: {e}")
 
         for account_name, channel_id in self._comment_accounts(chrome_accounts):
+            if self._comments_halt(channel_id):
+                break
             is_foundups = account_name.lower() == "foundups"
             comment_count = 0
             needs_shorts = shorts_coverage_map.get(channel_id, True)
@@ -1475,11 +1531,15 @@ class MultiChannelCoordinator:
         """
         Verify inbox is clear and retry engagement if needed.
         """
+        if self._comments_halt():
+            return processed
         verify_retries = int(os.getenv("YT_INBOX_VERIFY_RETRIES", "1"))
         verify_timeout = float(os.getenv("YT_INBOX_VERIFY_TIMEOUT", "15"))
         verify_result = None
 
         for attempt in range(1, verify_retries + 1):
+            if self._comments_halt(channel_id):
+                return processed
             if self._is_live_channel(channel_id):
                 return processed
             verify_result = await self.verify_studio_inbox_clear(

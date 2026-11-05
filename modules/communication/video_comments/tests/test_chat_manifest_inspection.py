@@ -269,8 +269,22 @@ class ReplyInspectionTests(unittest.TestCase):
             return True
         processor.reply_executor = SimpleNamespace(execute_reply=post)
         PROCESSOR.INTELLIGENT_REPLIES_AVAILABLE = True
-        with patch.dict(os.environ, {'YT_ALLOW_GENERIC_REPLY_FALLBACK': 'false'}):
-            result = asyncio.run(processor.engage_comment(1, do_like=False, do_heart=False))
+        with tempfile.TemporaryDirectory() as folder:
+            stop = Path(folder) / 'STOP'
+            with patch.dict(os.environ, {
+                'YT_AUTOMATION_STOP_FILE': str(stop),
+                'YT_AUTOMATION_ENABLED': 'true',
+                'YT_COMMENT_ENGAGEMENT_ENABLED': 'true',
+                'YT_COMMENT_REPLY_ENABLED': 'true',
+                'YT_ALLOW_GENERIC_REPLY_FALLBACK': 'false',
+            }):
+                result = asyncio.run(processor.engage_comment(1, do_like=False, do_heart=False))
+                self.assertTrue(result['halted_for_reply_quality'])
+                self.assertTrue(result['quality_stop_persisted'])
+                incident = json.loads(stop.read_text(encoding='utf-8'))
+                self.assertEqual(incident['reason'], 'review_rejected')
+                self.assertEqual(incident['scope'], 'comments')
+                self.assertEqual(incident['incident_id'], result['quality_stop_incident_id'])
         self.assertFalse(result['reply'])
         self.assertEqual(posted, [])
         self.assertIn('review_rejected', result['errors'])

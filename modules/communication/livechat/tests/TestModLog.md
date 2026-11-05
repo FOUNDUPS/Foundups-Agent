@@ -1,5 +1,33 @@
 # TestModLog
 
+## 2026-11-05 — Scoped persistent quality halt and truthful parent outcome
+
+Test-first private owner controls: original44 RED43 assertion failures/1 useful
+positive, then44 GREEN. Parent integration reached65 GREEN after a qualified
+two-assertion RED; the dedicated child exit78 wins over missing/conflicting JSON
+and preserves a halt when exclusive STOP creation fails. Two heldouts reproduce
+settled-stop/missing-Edge inbox waiting (RED2/65positive), followed by the narrow
+post-settlement guard. A duplicate-key heldout reproduces global-to-scoped
+misclassification (RED1/67positive), followed by strict duplicate-key rejection.
+
+Final selection:68 passed, zero failures/errors/skips/denied effects, five private
+SQLite connections and zero Node/Python fixture processes. The exact runner keeps
+replacement environments, provider/network/credential-file/outside-private-write
+denials and scoped private unlink. Typed halt never marks inbox/rotation complete;
+manual/newer/unknown STOP and uncertain delivery reservations survive clear.
+The cooperating-writer guarantee is deliberately narrower than arbitrary manual
+replacement. Existing101 controls pass with their unchanged names/assertions and
+21 exact admitted fixture launches after loading the actual new helper and using
+private STOP paths. No cancellation/settlement ownership assertion was removed.
+
+Earlier parent-fixture attempts are retained but excluded from source-proof RED:
+one passed positional arguments to a keyword-only API; a second omitted inert
+fake coordinator fields. An earlier101 composition retained six failures because
+its source-bound DAE loader omitted the new actual helper; fixture composition
+was repaired without stubbing it or changing assertions. All epochs and raw
+diagnostics remain private under youtube-studio-identity-20261105/quality-stop.
+This is offline source qualification, not evidence of a live model/browser action.
+
 ## 2026-11-05 — Pipe framing, retained ownership and fixed phase evidence
 
 Test-first actual-source framing selection:13 cases,6 RED assertion failures/

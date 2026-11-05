@@ -1,5 +1,37 @@
 # Video Comments - Autonomous YouTube Engagement Module
 
+## Delivery and optional visual observation (2026-11-05)
+
+Exact new creator-reply readback and durable history own delivery verification.
+The optional UI-TARS screenshot/locator pass records a private observation; its
+coordinates or confidence do not approve the reply's meaning or prove posting.
+A screenshot or vision failure cannot turn a verified post into a retry. An
+unknown posting outcome stays unknown. The shared language review still runs
+before submission.
+
+## Studio row identity (2026-11-05)
+
+The existing row owner recognizes both legacy video anchors and the observed
+modern original-comment thumbnail. Modern thumbnail identity requires the exact
+HTTPS `i.ytimg.com/vi/<11-character-ID>/default.jpg` shape; it supplies no invented
+watch URL. Extraction, binding and final Submit share the same owned original
+author, comment and video checks. Nested/foreign evidence and conflicting video
+IDs cannot repair a missing identity.
+
+The observed disabled “0 replies” control is owned through the exact action
+toolbar. Its expanded `COLLAPSE` state can be non-blocking only with a settled,
+visible native reply inventory; the displayed count is never inventory proof.
+Multiple reply containers, loading, more/collapsed and contradictory evidence
+remain unqualified. Modern creator readback requires native receiving-channel
+proof, the frozen canonical registry handle, owned creator-badge/name anchors,
+exact parent/reply IDs and exact text. A handle never becomes a UC identifier.
+
+Native textarea entry uses its current `value`; contenteditable entry retains
+`textContent`. Recovery continues only our exact draft prefix, and a confirmed
+micro-edit rewinds the typing position. The final exact-text guard is unchanged.
+The 137 source-bound controls use synthetic DOMs/collaborators. Live publication
+and readback remain separate gates; durable unknown reservations are retained.
+
 ## Optional reply memory (2026-11-05)
 
 The bounded reply path requests ready-only video memory. A cold worker omits

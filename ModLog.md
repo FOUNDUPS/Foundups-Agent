@@ -1,3 +1,20 @@
+## 2026-11-05 — Native Studio reply evidence and scoped quality halt
+
+The existing comment owner recognizes observed Studio row/video metadata,
+native reply textarea values and owned creator badges. Exact original identity,
+receiving-channel identity, entered text and a new published creator-reply ID
+remain required. Ambiguous reply inventories stay uncertain and are not retried.
+Optional UI-TARS locator observations no longer claim semantic or delivery proof
+or erase delivery already verified by the existing DOM/history owner.
+
+The existing STOP owner persists recognized comment-quality incidents with
+comments-only scope, while manual or unreadable STOP evidence remains global.
+The worker, coordinator and daemon retain typed halts instead of retrying them
+or reporting comment completion. Explicit reviewed recovery preserves unknown
+delivery reservations. Module test logs distinguish synthetic qualification,
+private browser observations and pending live behavior; no live publication or
+scheduling result is inferred from these changes. WSP00/10/11/22/50/77/97.
+
 ## 2026-11-05 — P3 continuity and verified micro-UPS preview
 
 P3 PR2300/main 95516e81 closed with 23 PR/21 main checks, PC/runtime readback and

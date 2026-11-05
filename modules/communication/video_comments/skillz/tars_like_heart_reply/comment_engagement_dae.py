@@ -846,6 +846,19 @@ class CommentEngagementDAE:
         # Fallback to simple response
         return "Thanks for the comment!"
     
+    def _comments_halt_summary(self, halted, results, processed):
+        """A typed halt never enters the completion/vision/retry path."""
+        self.stats['all_processed'] = False
+        summary = {**halted, 'state': 'halted', 'session_id': self.session_id,
+                   'channel_id': self.channel_id, 'total_processed': processed,
+                   'stats': self.stats, 'results': results}
+        try:
+            with (TELEMETRY_DIR / f'session_{self.session_id}.json').open('w') as stream:
+                json.dump(summary, stream, indent=2, default=str)
+        except OSError:
+            logger.warning('[REPLY-QUALITY] Halted; private session receipt unavailable')
+        return summary
+
     async def engage_all_comments(
         self,
         max_comments: int = 10,
@@ -883,6 +896,10 @@ class CommentEngagementDAE:
         - Agentic: Execute Like + Heart + Reply (based on switches)
         - Refresh: Remove processed comment
         """
+        from modules.communication.livechat.src.automation_gates import comment_stop_result
+        halted = comment_stop_result()
+        if halted:
+            return self._comments_halt_summary(halted, [], 0)
         # IMPORTANT: max_comments=0 means UNLIMITED processing
         unlimited_mode = (max_comments == 0)
         effective_max = max_comments if max_comments > 0 else 999999
@@ -907,6 +924,9 @@ class CommentEngagementDAE:
         bot_replied_threads = set()  # Training Mode: Track threads where bot posted replies
 
         while total_processed < effective_max:
+            halted = comment_stop_result()
+            if halted:
+                return self._comments_halt_summary(halted, all_results, total_processed)
             logger.debug(f"[DAEMON][CARDIOVASCULAR] 💗 Loop iteration {total_processed + 1}/{effective_max}")
             # Orphan detection: Check if parent YouTube DAE is still running
             if self.parent_pid and PSUTIL_AVAILABLE:
@@ -986,9 +1006,9 @@ class CommentEngagementDAE:
                 use_intelligent_reply=use_intelligent_reply
             )
             all_results.append(result)
-            if result.get('halted_for_reply_quality') is True:
+            if result.get('halted_for_reply_quality') is True or result.get('halted_for_comments_stop') is True:
                 logger.error('[REPLY-QUALITY] Halting this session after rejected output; review before restarting')
-                break  # Do not regenerate, refresh, enter nested replies or publish an engagement event.
+                return self._comments_halt_summary(result, all_results, total_processed)
             if not result.get('reply') and result.get('reply_submission_status') in {'unknown', 'verified'}:
                 logger.warning('[REPLY-INSPECT] Halting session for outcome reconciliation; no automatic retry')
                 result['halted_for_reconciliation'] = True
@@ -1367,6 +1387,10 @@ async def execute_skill(
     Returns:
         Engagement session summary with commenter classifications
     """
+    from modules.communication.livechat.src.automation_gates import comment_stop_result
+    halted = comment_stop_result()
+    if halted:
+        return halted
     dae = CommentEngagementDAE(
         channel_id=channel_id,
         video_id=video_id,
