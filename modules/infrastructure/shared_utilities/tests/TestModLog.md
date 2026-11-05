@@ -1,5 +1,24 @@
 # TestModLog
 
+## 2026-11-05 — Exact role/native startup resolution
+
+Added24 test-first actual-callable controls, canonical unit/collectable without
+quarantine exceptions. Recorded21 RED assertion failures/3 baseline positives,
+then24 GREEN with the same frozen test. A combined75 selection (including those24)
+passed after migrating obsolete
+resolver preprobe fixtures to actual native inventory and fake SDK collaborators;
+all original preference/fallback/nonlaunch assertions and test names remain.
+The guard used a fixed explicit environment/private paths and reported zero
+network/process/model/SQLite/dotenv effects. These are controlled local results,
+not installed model readiness, live inference or authority to start/load services.
+Final existing startup adapter passed176/zero failures/errors/skips and bound
+current production/test bytes. The original94 case names/digest remain exact;
+24 new role controls,30 backend cases,13 preflight controls and15 sentinel cases
+complete the selection. The first full attempt exposed an owner-conftest foreign
+item skip; its owner scoped that hook with five test-first controls. A later
+private output path exceeded Windows limits; shortening only private RUNNER_TEMP
+resolved it. Both attempts remain recorded; no guard or assertion was weakened.
+
 ## 2026-10-19 - Lexical containment and Windows Unicode regression controls
 
 Added14 lexical containment cases and6 Windows Unicode cases. Independent

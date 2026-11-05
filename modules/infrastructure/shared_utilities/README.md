@@ -1,5 +1,14 @@
 # shared_utilities
 
+Legacy code/triage backend selection now uses the existing role owner for both
+the file and an explicit native key. Custom file names are never guessed into
+native IDs. The declared defaults remain configurable through scoped role keys;
+General and signed Gateway routes stay separate. Singleton factories make one
+resolution attempt, and exact native initialization retains a content-free status
+so installed-but-not-resident is not mislabeled as an unreachable server. Existing
+explicit file fallback remains operational behavior; preflight must not call
+model-initializing factories. See INTERFACE for the complete boundary.
+
 **Domain:** infrastructure (ai_intelligence | communication | platform_integration | infrastructure | monitoring | development | foundups | gamification | blockchain)
 **Status:** Prototype (POC | Prototype | MVP | Production)
 **WSP Compliance:** Compliant (Compliant | In Progress | Non-Compliant)

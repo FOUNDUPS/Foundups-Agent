@@ -1,3 +1,15 @@
+## 2026-11-05 — Windows startup preflight and shared model roles
+
+Main uses deterministic AI Overseer preflights without eagerly acquiring models.
+Unavailable AI proposal capabilities are checked before constructing their model
+owner. Code and triage resolve through the existing shared role-selection owner;
+exact native residency failures remain distinct from an unreachable server.
+Windows OpenClaw workspace skills retain committed LF bytes for raw-hash checks.
+The WSP allocation sentinel derives its next number from current allocations.
+Focused validation and independent review are recorded in the module test logs.
+Live daemon/model quality and missing runtime authority remain unverified.
+WSP00/10/11/22/50/77/97. No secrets, authority receipts or security bypass added.
+
 ## 2026-11-02 — Restricted native UPS transfer qualification
 
 WSP15/22/26/48/62/81/97; class C, 19/P0 under 012 architecture delegation.
@@ -63381,3 +63393,12 @@ issue submission, control/admission, registry, token or market activation. Publi
 and verify the default-branch form before separately changing overlapping Mall UI.
 Implemented the55-line form; YAML/schema/required-field/order checks and independent
 source review pass. No issue submitted. Hosted publication gates remain pending.
+
+## 2026-11-05 — Preserve hosted CPU test capacity
+
+PR2302's general and red-team jobs exhausted hosted disk installing CUDA wheels,
+before acceptance tests ran. Both CPU-only jobs now preinstall PyTorch from
+the official CPU index, verifies that build after the unchanged requirements,
+and avoids restoring/retaining the former GPU pip cache. Runtime requirements
+and all acceptance commands remain unchanged. Hosted validation is pending.
+WSP10/22/50/97. No package installation or model change on the Windows PC.

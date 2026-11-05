@@ -25,11 +25,15 @@ SUITES = {
         'modules/communication/livechat/tests/test_antima_savage.py')),
     'quality': (24, '8c6a71ffff1aa89e9458726916745e9c3389f4955f8b38086b34066b417b8822', (
         'modules/communication/video_comments/tests/test_reply_quality_safety.py',)),
-    'startup': (94, '5c8d4b290535cea0ce898c5fb377920058f84ce5926a4fdf96e993aab7d76965', (
+    'startup': (176, '1f5acb4d955b61823f632d1067a6ec6592c96d3617e63fd83a833f9179965a22', (
         'modules/infrastructure/dependency_launcher/tests/test_llmster_startup_fallback.py',
         'modules/infrastructure/shared_utilities/tests/test_local_model_selection.py',
         'modules/infrastructure/shared_utilities/tests/test_lm_studio_dependency_boundary.py',
-        'modules/infrastructure/shared_utilities/tests/test_lm_studio_model_lifecycle.py')),
+        'modules/infrastructure/shared_utilities/tests/test_lm_studio_model_lifecycle.py',
+        'modules/infrastructure/shared_utilities/tests/test_local_model_startup_selection.py',
+        'modules/infrastructure/shared_utilities/tests/test_local_llm_backends.py',
+        'modules/ai_intelligence/ai_overseer/tests/test_preflight_model_boundary.py',
+        'modules/ai_intelligence/ai_overseer/tests/test_wsp_framework_sentinel.py')),
     'inventory': (102, 'dc14189b4474df1d2f62cb18858206d861078fabad24de6451d242aeb098ef49', (
         SCHEDULER_TESTS + 'test_scheduled_inventory.py',
         SCHEDULER_TESTS + 'test_visibility_filter_enforcement.py',

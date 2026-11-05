@@ -232,7 +232,7 @@ jobs:
             modules/communication/voice_command_ingestion/tests/test_transcript_language.py \
             modules/communication/voice_command_ingestion/tests/test_voice_command_ingestion.py \
             modules/ai_intelligence/video_indexer/tests/test_audio_transcript_language.py
-      - name: Verify 94 offline native startup controls in a minimal child
+      - name: Verify 176 offline native startup controls in a minimal child
         run: python -I -B .github/scripts/youtube_repair_offline.py --suite startup
       - name: Verify 102 qualified inventory controls in a separate minimal child
         run: python -I -B .github/scripts/youtube_repair_offline.py --suite inventory
@@ -1081,6 +1081,8 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    env:
+      PIP_NO_CACHE_DIR: '1'
     strategy:
       matrix:
         python-version: ['3.12']
@@ -1095,19 +1097,15 @@ jobs:
 
       - name: Bootstrap checksum-verified Python trust
         run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
-      - name: Cache pip dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install pytest pytest-cov
+          # This hosted runner has no GPU. Avoid restoring/downloading CUDA
+          # wheels that exhaust its disk before any acceptance tests can run.
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
           pip install -r requirements.txt
+          python -c "import torch; assert torch.version.cuda is None, 'CPU CI requires CPU PyTorch'"
 
       - name: Verify audit expiry and exact-base authority contracts
         env:
@@ -2779,6 +2777,8 @@ jobs:
     name: redteam observation (report-only)
     runs-on: ubuntu-latest
     continue-on-error: true   # report-only — must not block PRs in PHASE1
+    env:
+      PIP_NO_CACHE_DIR: '1'
     steps:
       - uses: actions/checkout@v4
 
@@ -2789,14 +2789,6 @@ jobs:
 
       - name: Bootstrap checksum-verified Python trust
         run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
-      - name: Cache pip dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -2804,7 +2796,9 @@ jobs:
           # Red-team suite is stdlib + pytest only (no new deps installed
           # by this slice). Project requirements pulled in for parity with
           # the `test` job in case fixtures share runtime imports.
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
           pip install -r requirements.txt
+          python -c "import torch; assert torch.version.cuda is None, 'Hosted test job requires CPU-only Torch'"
 
       - name: Run red-team suite (report-only)
         # The suite must complete with zero skipped tests. We capture the

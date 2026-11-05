@@ -1,3 +1,11 @@
+## 2026-11-05 — Preserve manifest-bound workspace skill bytes on Windows
+
+Narrow Git LF attributes cover the existing workspace SKILL.md files and manifest.
+A fresh Git checkout with core.autocrlf=true verifies all ten original file hashes
+with the unchanged strict verifier. Existing manifest hashes and guard source are
+unchanged. This verifies file integrity, not a signature or live daemon behavior.
+WSP22/50/97. Existing checkout materialization requires independent byte checks.
+
 ## 2026-11-01 — Native OpenClaw Vote trial: execution observed, acceptance rejected
 
 WSP00/15/22/48/50/97/99. The [existing dispatch record](../../../docs/operations/RSI_SWARM_DISPATCH.md#native-openclaw-vote-qualification--2026-11-01)

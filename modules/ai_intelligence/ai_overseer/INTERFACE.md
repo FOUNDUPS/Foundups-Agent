@@ -1,5 +1,17 @@
 # AI Intelligence Overseer - Public API
 
+## Deterministic startup checks
+
+`AIIntelligenceOverseer(repo_root, initialize_models=False)` retains security and
+WSP sentinels while leaving the refactoring inference orchestrator and semantic
+AutoGate uninitialized. `main._create_ai_overseer_for_preflight` uses this mode:
+startup inspection needs no local-model residency or file loading. The default
+operational constructor preserves existing model initialization. This option
+does not bypass sentinel failures, authorize inference or produce model bindings.
+
+The WSP index sentinel requires one well-formed next-number declaration equal
+to the highest file or indexed allocation plus one; indexed reservations count.
+
 **Version**: 0.1.0
 **Status**: POC
 **WSP Compliance**: WSP 11 (Public API Documentation)

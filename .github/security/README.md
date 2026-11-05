@@ -1,3 +1,16 @@
+## Windows startup role/preflight metadata review — 2026-11-05
+
+The unchanged full-tree scanner reports 40 new exact metadata bindings at
+c20bfebf against main 95516e81. Independent review reconstructs 39 unchanged
+public manifest source-path/hash pairs and one unchanged bridge ModLog line,
+including current Git source bytes and prior exact approvals. The complete old
+ModLog remains after its eight-line prefix. Append only the reviewed 40 entries,
+preserving all 3,676 earlier records and other fields (3,716 total). Runtime
+membership/caps and scanner rules, scope and fingerprint algorithm are unchanged.
+Independent review receipt SHA256:
+`43161dda215d54d1577639bb388b384a89a1de29f9d191dd33fc4bb1753fdde6`.
+Final-tree and actual committed-history gates remain separate required evidence.
+
 ## Restricted native epoch transfer manifest metadata — 2026-11-02
 
 The unchanged full-tree/history gate at 4515fdcf against e94ea1c6 reports 39

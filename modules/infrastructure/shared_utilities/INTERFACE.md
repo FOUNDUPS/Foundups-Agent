@@ -1,5 +1,37 @@
 # shared_utilities Interface Specification
 
+### Code/triage native key selection and backend initialization (2026-11-05)
+
+`local_model_selection.resolve_role_native_key('code' | 'triage') -> str | None`
+owns the exact native identity for the legacy Qwen/Gemma consumers. Explicit
+`LOCAL_MODEL_CODE_NATIVE_KEY` / `LOCAL_MODEL_TRIAGE_NATIVE_KEY` wins. Without
+role PATH/DIR/HOLO alias overrides, the existing declared native defaults remain
+`qwen-coder-7b` and `gemma-270m`. A custom role path without its scoped native key
+returns None: a file basename is not an installed-key mapping. Relocating only
+`LOCAL_MODEL_ROOT` retains the declared default. Blank/malformed explicit keys
+raise `ValueError`. General's `LM_STUDIO_NATIVE_MODEL_KEY`, General default and
+signed AI Gateway routes are independent and unchanged.
+
+`resolve_qwen_backend` / `resolve_gemma_backend` retain their public arguments,
+with additive keyword `native_model_key`: omission uses the role owner; None
+skips native lookup; a string selects that exact key. One actual backend
+initialization replaces the generic reachability preprobe. Its
+`last_initialization_status` is content-free: native state values, or
+`not_initialized`, `resident_ambiguous_or_changed`, `sdk_unavailable`,
+`authentication_required`, `initialization_failed`. Nonresident/SDK failure is
+never reported as server unreachable. Authentication still propagates through
+the resolver; inference, instance checks and retries retain their contracts.
+Direct `resolve_qwen_backend(model_path=custom)` remains native-role-first with
+that explicit file as fallback; use `native_model_key=None` for file-only intent.
+
+Singleton factories capture role file/native key once and make one resolver
+attempt. They retain existing cache and explicit `force_reinit` behavior; settings
+changes do not hot-swap a cached engine. An existing explicit GGUF fallback can
+still initialize llama.cpp during an operational factory/resolver call. Missing
+files are not sent to that loader. Startup/preflight callers must inspect status
+without invoking these operational factories. No native load/unload, server
+start/stop, download or arbitrary resident substitution is introduced.
+
 ### Shared language-role and LM Studio dispatch controls
 
 `local_model_selection.is_general_language_model(model_id)` is the common

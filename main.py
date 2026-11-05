@@ -524,12 +524,12 @@ def search_with_holoindex(query: str):
 
 
 def _create_ai_overseer_for_preflight(repo_root: Path) -> Any:
-    """Create AI Overseer with quieter logs during startup preflight."""
+    """Create deterministic preflight monitors without loading inference models."""
     _prev_level = logging.root.level
     try:
         logging.root.setLevel(logging.WARNING)
         from modules.ai_intelligence.ai_overseer.src.ai_overseer import AIIntelligenceOverseer
-        return AIIntelligenceOverseer(repo_root)
+        return AIIntelligenceOverseer(repo_root, initialize_models=False)
     finally:
         logging.root.setLevel(_prev_level)
 

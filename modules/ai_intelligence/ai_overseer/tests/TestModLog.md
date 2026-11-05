@@ -97,3 +97,31 @@ Earlier setup attempts are preserved: 0 collected from overbroad hostname/null-s
 denials; then 593 call passes/5 desired failures plus 3 fixture errors from Win32
 extended-path spelling. The final runner corrects only the physical phase comparison
 and uses an owned pytest log. This is ordinary local pytest, not SDK/OS admission.
+## 2026-11-05: Startup model boundary and independent index controls
+
+Four constructor/factory cases and eight independently authored index cases
+extend the retained seven sentinel cases. The old fixture's declaration changes
+from 99 to 98 to agree with its highest allocated row 97; its original seven
+test bodies remain unchanged. First qualified baseline: 8 failures/11 passes;
+final local selection: 19 passed, no skips/errors/denied effects. One earlier
+harness attempt failed before collection because its private temp directory was
+not prepared; it is not test evidence. Models, credentials, processes and real
+network calls are outside this test boundary. WSP50/97.
+
+The proposal capability is checked before constructing the model orchestrator.
+Four additional controls reproduced three failures before repair; the combined
+selection passes 23 cases, with no skips, errors or denied effects. Exception
+diagnostics retain only the exception class. An absent proposal capability
+remains unavailable without starting models for an unsupported operation.
+
+Adjacent dispatch/sentinel selection: 36 passed without skips or denied effects.
+The private harness confines import-time registry/log writes and supplies the
+already-mocked DAE constructor module, avoiding unrelated gamification storage.
+Earlier broad runs hit these confinement boundaries and subprocess-only tests;
+those failed runs remain evidence, not passing qualification. No guard was relaxed.
+
+Full-suite integration exposed the Overseer collection hook applying its heavy
+test skip to unrelated modules. Five controls preserve inside-owner allow/deny,
+nested heavy tests and explicit opt-in while refusing outside-owner skips.
+RED: one failure in 13; GREEN: 28 combined boundary/index cases, zero effects.
+The hook now scopes its existing policy to its own test directory. WSP97.
