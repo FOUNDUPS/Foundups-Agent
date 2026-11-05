@@ -1,5 +1,29 @@
 # Video Comments - ModLog
 
+## 2026-11-05 — Preserve unverified inbox completion
+
+WSP00/11/22/50/97. The worker previously converted a wait timeout and zero DOM
+threads into `all_processed=True` and clear feedback, while the existing
+coordinator correctly returned UNKNOWN. Reuse the existing empty-state check
+with no new selectors, explicitly exclude the observed filtered/search-empty
+message, and require fresh positive evidence for final completion. Keep integer
+count and summary interfaces; missing-thread processing races no longer assert
+an inbox was cleared. Positive empty and processed-comment paths remain useful.
+No coordinator, navigation, browser, model or runtime authority changed.
+
+The initial eleven test-first actual-definition controls produced 7 assertion
+failures and 4 passes before repair. Independent actual-JavaScript review then
+found two whitespace bypasses; its original 10-case result (8 passes, 2 failures)
+is retained. Normalize rendered whitespace before the text checks. Two added
+source-bound controls failed before that correction; all 13 now pass with the
+unchanged 24 quality-stop cases (37 combined, no failures/errors/skips or denied
+effects). The Python DOM collaborator is not an actual JavaScript engine.
+The existing closed
+offline owner supplied the unchanged EffectGuard and credential-free child.
+These are synthetic DOM observations; current installed selectors and the live
+inbox remain unverified. Holo lexical retrieval returned UNKNOWN/index gap;
+direct owner/contract reads supplied the source evidence.
+
 ## 2026-11-01 — Shared YouTube model orchestration
 
 WSP00/10/11/22/50/62/77/84/97. Replace consumer-owned provider chains with

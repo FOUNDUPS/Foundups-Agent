@@ -1,5 +1,10 @@
 # YouTube Shorts Scheduler
 
+The detail-page visibility readiness check also recognizes the existing visible
+`PUBLISH_FROM_PRIVATE` schedule control used by its next step. Hidden or stale
+native controls do not establish readiness. This bounded 2026-11-05 correction does not
+choose an Audience answer or establish the cause of a particular live timeout.
+
 Private 012 metadata/scheduling directives now reach the existing detail Save,
 manual enhancement and inline scheduling owners. Preserve keeps exact detail-page
 originals while permitting scheduling; late directives are rechecked at the actual

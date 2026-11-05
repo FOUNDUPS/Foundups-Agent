@@ -1,3 +1,12 @@
+## 2026-11-05 — Visible native schedule readiness
+
+Added six cases to `test_video_policy_consumers.py` without changing the existing
+assertions. One native `PUBLISH_FROM_PRIVATE` readiness case failed before the
+source correction (65 other cases passed). The final four-file consumer replay
+passed66, with zero failures/errors/skips/denied effects. Named-dialog and legacy
+positives remain; hidden/stale/absent native controls remain unready. No audience
+answer, public Save or live selector qualification is inferred from these tests.
+
 ## 2026-11-01 — Final policy consumer qualification
 
 60 new focused controls passed, zero failures/errors/skips/captured streams:

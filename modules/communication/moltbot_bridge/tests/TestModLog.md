@@ -1,3 +1,13 @@
+## 2026-11-05 — Supervisor startup and plan preservation
+
+New startup control reproduced eager acquisition before repair. With model-free
+Overseer initialization, that control and four real fallback/plan parity cases
+pass. Action, task, restart budget, self-audit and maintenance metadata and claim
+limit remain identical; only advisory ai_analysis is added. Combined CLI/bridge
+selection: nine pass, zero errors/skips/denied effects with credential-cleared
+startup EffectGuard. Native models/services and live console behavior were not
+executed. WSP5/6/22/50/77/97.
+
 ## PC recovery assertion qualification — 2026-10-31
 
 Source base 4050bdf880a2974511377a510a859f70101ea478. Existing test replay uses real

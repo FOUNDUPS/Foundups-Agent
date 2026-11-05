@@ -1,5 +1,15 @@
 # cli TestModLog
 
+## 2026-11-05 — Prompt logging boundary
+
+Four new cases failed before the utility existed and pass after wiring the real
+definitions into synthetic input. Background console records are suppressed only
+while waiting; a real private FileHandler retains them, foreground records remain,
+and prior filters survive answer/EOF/KeyboardInterrupt. Combined with supervisor
+startup/plan controls: nine pass, zero errors/skips/denied effects under the
+existing startup EffectGuard and cleared credentials. Offline component evidence;
+no claim of a full Windows terminal session or native-output capture. WSP5/6/22/97.
+
 ## 2026-09-10 — Japanese speech adapter and import boundary
 
 Read README, TestModLog and the existing cue-parsing test before authoring.

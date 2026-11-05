@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1805,
+  "total_tests": 1808,
   "quarantined_tests": 260,
   "tests": [
     {
@@ -13219,6 +13219,19 @@
       "description": "Tests for social campaign adapter command parsing and routing."
     },
     {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_supervisor_model_startup",
+      "path": "modules/communication/moltbot_bridge/tests/test_supervisor_model_startup.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-14",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Execute the real supervisor startup method without services or model effects."
+    },
+    {
       "id": "test::modules::communication::moltbot_bridge::tests::test_webhook_receiver_auth",
       "path": "modules/communication/moltbot_bridge/tests/test_webhook_receiver_auth.py",
       "owner": "modules/communication/moltbot_bridge",
@@ -13794,6 +13807,19 @@
       "description": "Local broadcast/context reader contracts; every state file is temporary."
     },
     {
+      "id": "test::modules::communication::video_comments::tests::test_inbox_completion_evidence",
+      "path": "modules/communication/video_comments/tests/test_inbox_completion_evidence.py",
+      "owner": "modules/communication/video_comments",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline completion evidence through the complete engagement owner definition."
+    },
+    {
       "id": "test::modules::communication::video_comments::tests::test_like_single_comment",
       "path": "modules/communication/video_comments/tests/test_like_single_comment.py",
       "owner": "modules/communication/video_comments",
@@ -13892,7 +13918,7 @@
       "path": "modules/communication/video_comments/tests/test_reply_quality_safety.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit-part-01",
+      "shard_id": "modules-communication-video-comments-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -17267,6 +17293,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Regression tests for Connect WRE CLI status command."
+    },
+    {
+      "id": "test::modules::infrastructure::cli::tests::test_console_prompt",
+      "path": "modules/infrastructure/cli/tests/test_console_prompt.py",
+      "owner": "modules/infrastructure/cli",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-cli-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Real prompt utility, synthetic input and private logging sinks only."
     },
     {
       "id": "test::modules::infrastructure::cli::tests::test_follow_wsp_menu",
@@ -24184,7 +24223,9 @@
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
       "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
-      "capabilities": [],
+      "capabilities": [
+        "browser"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,

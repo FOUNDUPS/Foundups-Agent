@@ -1,3 +1,16 @@
+## Runtime prompt, inbox and scheduler metadata review — 2026-11-05
+
+The unchanged full-tree scanner at staged tree 3fc87236 against main d5ed0749
+reports 40 new exact metadata bindings: 39 unchanged generated public source
+path/SHA rows and one unchanged bridge ModLog row shifted from 4018 to 4029.
+Independent review reconstructs the source hashes, prior exact approvals and
+complete old ModLog bytes after its eleven-line prefix. Append only these 40,
+preserving all 3,755 earlier entries and other fields (3,795 total). The existing
+1,485-member closure, package limits, scanner rules/scope and fingerprint
+algorithm are unchanged. Independent review receipt SHA256:
+`378d833e51c820d995b6305a61fb1e3fb64099e563e2af8d5482d29a710fad84`.
+Fresh final-tree and actual committed-history gates remain separate requirements.
+
 ## Live-chat handoff manifest metadata review — 2026-11-05
 
 The unchanged full-tree scanner reports 39 new exact metadata bindings at

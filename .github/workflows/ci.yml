@@ -232,13 +232,13 @@ jobs:
             modules/communication/voice_command_ingestion/tests/test_transcript_language.py \
             modules/communication/voice_command_ingestion/tests/test_voice_command_ingestion.py \
             modules/ai_intelligence/video_indexer/tests/test_audio_transcript_language.py
-      - name: Verify 176 offline native startup controls in a minimal child
+      - name: Verify 185 offline native startup controls in a minimal child
         run: python -I -B .github/scripts/youtube_repair_offline.py --suite startup
       - name: Verify 102 qualified inventory controls in a separate minimal child
         run: python -I -B .github/scripts/youtube_repair_offline.py --suite inventory
       - name: Verify 35 rotation controls in a separate minimal child
         run: python -I -B .github/scripts/youtube_repair_offline.py --suite rotation
-      - name: Verify 60 scoped directive and actual save/upload boundary controls
+      - name: Verify 66 scoped directive and actual save/upload boundary controls
         run: python -I -B .github/scripts/youtube_repair_offline.py --suite directives
       - name: Preserve sanitized offline repair inventories
         if: always()

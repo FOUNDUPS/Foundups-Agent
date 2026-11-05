@@ -1,5 +1,20 @@
 # video_comments TestModLog
 
+## 2026-11-05 — Inbox completion requires positive evidence
+
+New `test_inbox_completion_evidence.py`: 13 cases. Initial qualified RED: 7
+failures, 4 passes, zero errors/skips. Independent actual-JavaScript review found
+two whitespace bypasses (8/10 passing); two added Python controls failed before
+normalization. Final GREEN 13 plus unchanged quality-stop 24 = 37 passes, zero
+failures/errors/skips or denied effects. Complete production definitions,
+fake DOM/clock and private telemetry test useful confirmed-empty and processed
+positives as well as timeout/error/filtered-empty/race negatives. The filtered
+DOM collaborator models the existing generic node plus explicit message veto;
+no real browser or current-selector verification was performed. The existing
+EffectGuard/run_child mechanisms are unchanged and canonical admission passed.
+Private receipts retain exact source bytes and expanded case names; publication
+and live verification are separate parent-owned gates.
+
 ## 2026-11-01 — Current guarded model-routing qualification
 
 Fresh credential-free Windows runs: 63 independently authored routing/composition

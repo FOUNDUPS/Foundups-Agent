@@ -1,5 +1,18 @@
 # Video Comments - Autonomous YouTube Engagement Module
 
+## Inbox completion evidence (2026-11-05)
+
+Zero visible threads, a load timeout or a failed empty-state read does not prove
+completion. The worker sets `stats.all_processed` only when its existing
+empty-state indicators are positively observed again at the final check.
+The filtered/search message "No comments found. Try searching for something else
+or removing filters." is explicitly unqualified, including when a generic
+empty-state element is present. Clear feedback is withheld without positive
+evidence. Rendered whitespace is normalized before the text checks so line
+breaks or repeated spaces cannot bypass that veto. This describes the current
+inbox view; the coordinator retains its
+separate verification and no global or live inbox qualification is claimed.
+
 ## Shared YouTube model route (2026-11-01)
 
 Assessment, writer and exact final review now call the shared AI Gateway.

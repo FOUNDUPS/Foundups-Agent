@@ -266,7 +266,15 @@ result = await dae.engage_comment(
 ```
 
 #### engage_all_comments(max_comments, ...) → Dict
-Engage with all visible comments.
+Engage with all visible comments. The existing `stats.all_processed` boolean is
+`True` only with zero remaining DOM threads, current positive empty-state
+evidence and no quality halt. A zero count, timeout, failed empty-state read or
+filtered/search-empty message leaves it `False` (completion unverified).
+Text evidence normalizes whitespace before the filtered-message veto.
+This qualifies the observed inbox view, not an unfiltered global inbox.
+`_wait_for_comments_loaded()` retains its integer count return; callers must
+not interpret zero alone as completion. Clear breadcrumbs and completion
+notifications also require a positive empty-state observation.
 ```python
 result = await dae.engage_all_comments(
     max_comments=10,
