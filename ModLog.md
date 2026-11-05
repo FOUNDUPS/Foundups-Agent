@@ -1,3 +1,14 @@
+## 2026-11-06 — WRE readiness evidence and training-menu boundaries
+
+The 16/P0 readiness repair distinguishes per-metric missing evidence from actual
+zero, keeps sampled criticals visible, and reports historical scope. Both
+Connect WRE owners and startup/action checks share policy. The training menu
+renders before dependency initialization and retains preflight for each action.
+Read-only diagnostics are separate from action admission and production RSI.
+See WRE/CLI/training module logs and the 207-pass offline test receipt scope.
+Native protected composition and R15 remain separately gated; no model training,
+live daemon restart or public delivery is established here. WSP11/15/22/48/50/97.
+
 ## 2026-11-05 — Native Studio reply evidence and scoped quality halt
 
 The existing comment owner recognizes observed Studio row/video metadata,

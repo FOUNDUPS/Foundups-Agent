@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1813,
+  "total_tests": 1815,
   "quarantined_tests": 258,
   "tests": [
     {
@@ -4433,6 +4433,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for AI Intelligence Core module.\n\nWSP Compliance: WSP 5 (Testing Standards), WSP 6 (Test Validation)"
+    },
+    {
+      "id": "test::modules::ai_intelligence::training_system::tests::test_training_menu_admission",
+      "path": "modules/ai_intelligence/training_system/tests/test_training_menu_admission.py",
+      "owner": "modules/ai_intelligence/training_system",
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-training-system-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Opening or refusing the menu must not load corpus, models or pattern memory."
     },
     {
       "id": "test::modules::ai_intelligence::training_system::tests::test_utf8_import_boundary",
@@ -17357,7 +17370,7 @@
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
-      "description": "Regression tests for Connect WRE CLI status command."
+      "description": "Exercise the actual readiness command without unrelated CLI startup effects."
     },
     {
       "id": "test::modules::infrastructure::cli::tests::test_console_prompt",
@@ -20099,6 +20112,19 @@
       "description": "Finite self-audit scan status contracts with inert effects and explicit clocks."
     },
     {
+      "id": "test::modules::infrastructure::wre_core::tests::test_dashboard_evidence",
+      "path": "modules/infrastructure/wre_core/tests/test_dashboard_evidence.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Readiness distinguishes missing evidence, measured failure and admission."
+    },
+    {
       "id": "test::modules::infrastructure::wre_core::tests::test_dashboard_snapshot_export",
       "path": "modules/infrastructure/wre_core/tests/test_dashboard_snapshot_export.py",
       "owner": "modules/infrastructure/wre_core",
@@ -20352,7 +20378,7 @@
       "path": "modules/infrastructure/wre_core/tests/test_hermes_delegate_import_path.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-01",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-02",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -20848,7 +20874,7 @@
       "path": "modules/infrastructure/wre_core/tests/test_security_pattern_memory.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-02",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -21307,7 +21333,7 @@
       "path": "modules/infrastructure/wre_core/wre_master_orchestrator/tests/test_wre_master_orchestrator.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-04",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,

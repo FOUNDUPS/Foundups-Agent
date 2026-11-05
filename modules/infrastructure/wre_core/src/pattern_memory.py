@@ -77,7 +77,11 @@ class PatternMemory(PatternABEvidenceMixin):
     3. Converge to >90% fidelity over 4 weeks
     """
 
-    def __init__(self, db_path: Optional[Path] = None):
+    @staticmethod
+    def default_db_path() -> Path:
+        return Path(__file__).parent.parent / "data" / "pattern_memory.db"
+
+    def __init__(self, db_path: Optional[Path] = None, *, read_only: bool = False):
         """
         Own a connection for one work item on the creating thread.
 
@@ -86,23 +90,27 @@ class PatternMemory(PatternABEvidenceMixin):
 
         Args:
             db_path: Path to SQLite database file
+            read_only: Inspect existing storage without schema creation or seeding.
         """
         if db_path is None:
-            self.db_path = Path(__file__).parent.parent / "data" / "pattern_memory.db"
+            self.db_path = self.default_db_path()
         else:
             self.db_path = Path(db_path)
 
-        # Ensure data directory exists
-        self.db_path.parent.mkdir(parents=True, exist_ok=True)
-
-        self.conn = sqlite3.connect(str(self.db_path))
+        if read_only:
+            self.conn = sqlite3.connect(self.db_path.resolve().as_uri() + "?mode=ro", uri=True)
+            self.conn.execute("PRAGMA query_only=ON")
+        else:
+            self.db_path.parent.mkdir(parents=True, exist_ok=True)
+            self.conn = sqlite3.connect(str(self.db_path))
         self.conn.row_factory = sqlite3.Row  # Access columns by name
         self.false_positive_columns: set = set()
 
-        self._initialize_schema()
-        self._seed_false_positive_memory()
+        if not read_only:
+            self._initialize_schema()
+            self._seed_false_positive_memory()
 
-        logger.info(f"[PATTERN-MEMORY] Initialized - db={self.db_path}")
+            logger.info(f"[PATTERN-MEMORY] Initialized - db={self.db_path}")
 
     def _initialize_schema(self) -> None:
         """
@@ -830,7 +838,21 @@ class PatternMemory(PatternABEvidenceMixin):
         cursor = self.conn.cursor()
 
         cursor.execute("SELECT * FROM telemetry_counters")
-        counters = {row['counter_name']: row['counter_value'] for row in cursor.fetchall()}
+        counter_rows = cursor.fetchall()
+        counters = {row['counter_name']: row['counter_value'] for row in counter_rows}
+        counter_times = {row['counter_name']: row['last_updated'] for row in counter_rows}
+
+        def ratio(numerator, denominator):
+            return numerator / denominator if denominator > 0 else None
+
+        def rounded(value, digits=3):
+            return round(value, digits) if value is not None else None
+
+        def evidence(samples, *counter_names):
+            times = [counter_times[name] for name in counter_names if counter_times.get(name)]
+            return {"samples": samples, "recorded_from": min(times) if times else None,
+                    "recorded_to": max(times) if times else None,
+                    "time_basis": "counter_last_updated" if counter_names else "not_recorded"}
 
         cursor.execute("""
             SELECT
@@ -842,7 +864,7 @@ class PatternMemory(PatternABEvidenceMixin):
         row = cursor.fetchone()
         total_tested = row['total'] or 0
         promoted = row['promoted'] or 0
-        win_rate = promoted / max(total_tested, 1)
+        win_rate = ratio(promoted, total_tested)
 
         cursor.execute("""
             SELECT AVG(after_fidelity - before_fidelity) as avg_delta
@@ -852,20 +874,25 @@ class PatternMemory(PatternABEvidenceMixin):
               AND after_fidelity IS NOT NULL
         """)
         row = cursor.fetchone()
-        avg_delta = row['avg_delta'] or 0
+        avg_delta = row['avg_delta']
 
         # Sprint 2: Retrieval metrics
         cursor.execute("""
             SELECT
                 COUNT(*) as total_retrievals,
+                COUNT(relevance_score) as scored_retrievals,
                 AVG(relevance_score) as avg_relevance,
-                SUM(CASE WHEN relevance_score >= 0.5 THEN 1 ELSE 0 END) as high_relevance_count
+                SUM(CASE WHEN relevance_score >= 0.5 THEN 1 ELSE 0 END) as high_relevance_count,
+                MIN(CASE WHEN relevance_score IS NOT NULL THEN timestamp END) as first_scored,
+                MAX(CASE WHEN relevance_score IS NOT NULL THEN timestamp END) as last_scored,
+                COUNT(DISTINCT CASE WHEN relevance_score IS NOT NULL THEN skill_name END) as skill_count
             FROM retrieval_quality
         """)
         ret_row = cursor.fetchone()
         retrieval_total = ret_row['total_retrievals'] or 0
         high_relevance = ret_row['high_relevance_count'] or 0
-        retrieval_coverage = high_relevance / max(retrieval_total, 1)
+        retrieval_scored = ret_row['scored_retrievals'] or 0
+        retrieval_coverage = ratio(high_relevance, retrieval_scored)
 
         # Sprint 2: Graph metrics
         cursor.execute("SELECT COUNT(*) as edge_count FROM skill_edges")
@@ -881,35 +908,45 @@ class PatternMemory(PatternABEvidenceMixin):
         tot_selections = counters.get("tot_selections", 0)
         tot_high_confidence = counters.get("tot_high_confidence", 0)
         tot_branch_count = counters.get("tot_branch_count", 0)
-        tot_confidence_rate = tot_high_confidence / max(tot_selections, 1)
-        tot_avg_branches = tot_branch_count / max(tot_selections, 1)
+        tot_confidence_rate = ratio(tot_high_confidence, tot_selections)
+        tot_avg_branches = ratio(tot_branch_count, tot_selections)
 
         codeact_success = counters.get("codeact_exec_success", 0)
         codeact_fail = counters.get("codeact_exec_fail", 0)
         codeact_total = codeact_success + codeact_fail
-        codeact_success_rate = codeact_success / max(codeact_total, 1)
+        codeact_success_rate = ratio(codeact_success, codeact_total)
         codeact_gate_triggers = counters.get("codeact_gate_triggers", 0)
 
         return {
+            "telemetry_scope": "database_lifetime",
+            "metric_evidence": {
+                "tot_confidence_rate": evidence(tot_selections, "tot_selections"),
+                "codeact_success_rate": evidence(codeact_total, "codeact_exec_success", "codeact_exec_fail"),
+                "codeact_gate_trigger_rate": evidence(codeact_total, "codeact_exec_success", "codeact_exec_fail"),
+                "variation_win_rate": evidence(total_tested),
+                "retrieval_coverage": {"samples": retrieval_scored,
+                    "recorded_from": ret_row['first_scored'], "recorded_to": ret_row['last_scored'],
+                    "time_basis": "retrieval_timestamp", "skill_count": ret_row['skill_count']},
+            },
             # Sprint 1
             "retry_count": counters.get("react_retry_count", 0),
             "total_executions": counters.get("total_executions", 0),
-            "variation_win_rate": round(win_rate, 3),
-            "avg_fidelity_delta": round(avg_delta, 3),
+            "variation_win_rate": rounded(win_rate),
+            "avg_fidelity_delta": rounded(avg_delta),
             "variations_tested": total_tested,
             "variations_promoted": promoted,
             # Sprint 2
-            "retrieval_coverage": round(retrieval_coverage, 3),
-            "avg_retrieval_relevance": round(ret_row['avg_relevance'] or 0, 3),
+            "retrieval_coverage": rounded(retrieval_coverage),
+            "avg_retrieval_relevance": rounded(ret_row['avg_relevance']),
             "total_retrievals": retrieval_total,
             "skill_edges": edge_count,
             "connected_skills": connected_skills,
             # Sprint 3
             "tot_selections": tot_selections,
-            "tot_confidence_rate": round(tot_confidence_rate, 3),
-            "tot_avg_branches": round(tot_avg_branches, 1),
+            "tot_confidence_rate": rounded(tot_confidence_rate),
+            "tot_avg_branches": rounded(tot_avg_branches, 1),
             "codeact_executions": codeact_total,
-            "codeact_success_rate": round(codeact_success_rate, 3),
+            "codeact_success_rate": rounded(codeact_success_rate),
             "codeact_gate_triggers": codeact_gate_triggers
         }
 

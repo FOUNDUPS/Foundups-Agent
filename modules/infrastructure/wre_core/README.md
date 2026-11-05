@@ -1,5 +1,11 @@
 ## Risk-based verification connection — 2026-10-28
 
+Readiness uses each metric's measured sample count. Missing measurements are
+UNKNOWN; database-lifetime aggregates are not current-run or model health proof.
+Sampled critical failures remain enforced even when other metrics are unknown.
+Cold-start UNKNOWN retains existing admission after security checks, without
+claiming PASS or READY. See the [readiness interface](INTERFACE.md#readiness-evidence-and-admission--2026-11-06).
+
 The existing verification path now preflights a complete policy/check plan
 before running commands and prevents declared differential evidence from being
 silently dropped at final acceptance. The [interface](INTERFACE.md#risk-verification-preflight-contract--2026-10-28)

@@ -1,3 +1,19 @@
+## 2026-11-06 — Readiness evidence and menu admission
+
+Initial baseline: 13 failures and eight import errors across the first 21
+regressions; the import errors deliberately remove model-memory support in the
+fixture and are not evidence of a missing installed dependency. Corrected a
+fixture's counter method name before retaining the baseline result.
+
+Focused candidate and adjacent storage/security/report-reader selection: 207
+passed offline. Coverage includes per-metric counts, absent versus measured
+zero, historical scope, mixed unknown/critical, read-only storage, cold-start
+admission, both Connect WRE paths, headless handoff and menu refusal/diagnostics.
+The host denied network, subprocess execution and native model-stack imports.
+No live database mutation, model load, daemon startup or training was validated.
+Hosted CI selects these regressions; repository delivery and runtime installation
+require separate receipts. WSP5/6/11/15/22/50/97.
+
 ## 2026-10-30 — Held-out identity producer/consumer regression
 
 The real verifier → ratchet → held-out gate → Memex rehydrator reproduces one
