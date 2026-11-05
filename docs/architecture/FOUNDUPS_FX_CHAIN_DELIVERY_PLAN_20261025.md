@@ -85,7 +85,22 @@ atom transition. Python runs used credential-stripped scratch/effect guards,
 not native OS confinement; the Node readback was credential-stripped only.
 Actual source sizes: numeric208/pool1071, pool class296, plan class29/new method18;
 promoted test693. Old production function ASTs and existing test bodies remain.
-Package/check/PR/main/PC delivery is recorded separately after observed completion.
+Reconciliation preserves concurrent main `0cd8910b2901831452688edefe6ed01a11cedfba`
+and both ModLog histories; economic code/test Git blobs equal the tested candidate.
+The combined 1,485-member manifest has canonical SHA256
+`db4c093a07bff87443eacab090109e89d81cfe9556e9b8756eb9e5aabc59f5a4`.
+Canonical generation/check, eight Python package tests (including the committed
+index) and three JavaScript entrypoints pass. The first combined Python run passed
+its assertions but failed raw-byte stability after a late generator changed only
+manifest CRLF to LF; retain that failure. The serial final rerun passes with every
+source hash stable. Generation must finish before byte-bound acceptance begins.
+Independent reconciliation could not reconstruct the earlier promoted test file's
+raw-byte hash from its committed LF/CRLF forms; preserve that provenance gap.
+A fresh combined-source run therefore re-executed the same 1,404 cases: all pass,
+with three SSE deselections, no errors/skips/guard denials and 174 stable source
+hashes. It supplies current byte-bound evidence without relabeling the older run.
+Exact source/security/PR/main/PC delivery remains separately verified; these local
+results grant no signing, deployment or economic activation authority.
 
 ### Owners, retrieval and next boundary
 
