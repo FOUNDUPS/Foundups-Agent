@@ -1,3 +1,16 @@
+## Live-chat handoff manifest metadata review — 2026-11-05
+
+The unchanged full-tree scanner reports 39 new exact metadata bindings at
+357e1411 against main f03e10e7. Independent review reconstructs all 216 findings
+from Git bytes; the 39 renewals are unchanged public manifest source-path/hash
+rows with prior exact approval and verified current source hashes. Only the
+engagement lifecycle and runner runtime hashes changed; all 1,485 members and
+package limits remain unchanged. Append only these 39 entries, preserving all
+3,716 prior records and every other field (3,755 total). Scanner rules, scope
+and fingerprint algorithm are unchanged. Independent review receipt SHA256:
+`27f606146c2d8325be15e6bf7462bf2fd2f2f0517cef7d882f221f6fbd9e6a20`.
+Final-tree and actual committed-history gates remain separate required evidence.
+
 ## Windows startup role/preflight metadata review — 2026-11-05
 
 The unchanged full-tree scanner reports 40 new exact metadata bindings at

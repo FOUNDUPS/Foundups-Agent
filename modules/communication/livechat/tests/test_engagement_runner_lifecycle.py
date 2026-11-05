@@ -187,6 +187,10 @@ def _stubborn_process():
     drained = []
 
     class Pipe:
+        async def read(self, size):
+            assert size == 65536
+            return await self.readline()
+
         async def readline(self):
             await exited.wait()
             drained.append(self)
@@ -743,3 +747,262 @@ def test_rotation_cleanup_failure_retains_owner_and_rejects_redispatch(
         finally:
             await _release_failed_cleanup_test(state, heartbeat, rotation, handoff)
     asyncio.run(scenario())
+
+
+# Bounded framing controls exercise the actual runner and stdlib StreamReader.
+def _framing_payload(case):
+    import json
+    good = json.dumps({'stats': {'comments_processed': 7}, 'label': '日本語'}, ensure_ascii=False).encode()
+    def padded(size, count):
+        prefix = json.dumps({'stats': {'comments_processed': count}, 'padding': ''}).encode()
+        return prefix[:-2] + b'x' * (size - len(prefix)) + prefix[-2:]
+    split = good.index('日本語'.encode()) + 1
+    cases = {
+        'normal_eof': [good], 'crlf_multiline': [b'noise\r\n' + good + b'\r\n'],
+        'split_utf8': [good[:split], good[split:split+1], good[split+1:] + b'\n'],
+        'boundary_65536': [padded(65536, 7) + b'\n'],
+        'oversized_then_same_chunk': [padded(65537, 999) + b'\n' + good + b'\n'],
+        'oversized_forged_suffix': [b'x' * 65537 + b'{"stats":{"comments_processed":999}}\n' + good + b'\n'],
+        'oversized_then_later_chunk': [b'x' * 131072 + b'\n', good + b'\n'],
+        'oversized_eof': [padded(65537, 999)],
+        'empty_lines': [b'\n\r\n' + good + b'\n'],
+        'multiple_json': [good + b'\n{"stats":{"comments_processed":999}}\n'],
+    }
+    return cases[case]
+
+
+async def _run_memory_streams(module, tmp_path, monkeypatch, chunks):
+    stdout, stderr = asyncio.StreamReader(), asyncio.StreamReader()
+    stderr.feed_eof()
+    async def feed():
+        for chunk in chunks:
+            stdout.feed_data(chunk)
+            await asyncio.sleep(0)
+        stdout.feed_eof()
+    producer = asyncio.create_task(feed())
+    class Process:
+        pid = 123
+        returncode = 0
+        async def wait(self):
+            await producer
+            return self.returncode
+    process = Process(); process.stdout, process.stderr = stdout, stderr
+    async def spawn(*args, **kwargs):
+        return process
+    monkeypatch.setattr(asyncio, 'create_subprocess_exec', spawn)
+    runner = _offline_subprocess_runner(module, tmp_path, finish=True)
+    return await runner.run_engagement('offline-channel')
+
+
+@pytest.mark.parametrize('case', [
+    'normal_eof', 'crlf_multiline', 'split_utf8', 'boundary_65536',
+    'oversized_then_same_chunk', 'oversized_forged_suffix',
+    'oversized_then_later_chunk', 'oversized_eof', 'empty_lines', 'multiple_json',
+])
+def test_runner_frames_bounded_physical_lines(runner_source, tmp_path, monkeypatch, case):
+    result = asyncio.run(_run_memory_streams(runner_source, tmp_path, monkeypatch, _framing_payload(case)))
+    expected = 0 if case == 'oversized_eof' else 7
+    assert result['stats']['comments_processed'] == expected
+    if case == 'split_utf8':
+        assert result['label'] == '日本語'
+
+
+def test_immediate_chunk_stream_keeps_event_loop_responsive(runner_source, tmp_path, monkeypatch):
+    async def scenario():
+        ticks = [0]; observed = []; stop = asyncio.Event()
+        class Stream:
+            def __init__(self, chunks): self.chunks = list(chunks)
+            async def read(self, size):
+                assert size == 65536
+                observed.append(ticks[0])
+                return self.chunks.pop(0) if self.chunks else b''
+            async def readline(self):
+                observed.append(ticks[0])
+                return self.chunks.pop(0) if self.chunks else b''
+        class Process:
+            pid = 123; returncode = 0
+            stdout = Stream([b'noise\n'] * 256 + [b'{"stats":{"comments_processed":7}}\n'])
+            stderr = Stream([])
+            async def wait(self): return 0
+        async def spawn(*args, **kwargs): return Process()
+        async def pulse():
+            while not stop.is_set():
+                ticks[0] += 1
+                await asyncio.sleep(0)
+        monkeypatch.setattr(asyncio, 'create_subprocess_exec', spawn)
+        heartbeat = asyncio.create_task(pulse())
+        try:
+            runner = _offline_subprocess_runner(runner_source, tmp_path, finish=True)
+            result = await runner.run_engagement('offline-channel')
+            assert result['stats']['comments_processed'] == 7
+            assert max(observed) > min(observed)
+        finally:
+            stop.set(); await heartbeat
+    asyncio.run(scenario())
+
+
+@pytest.mark.parametrize('failure', ['oserror', 'cancelled'])
+def test_finished_reader_failure_is_not_reported_as_settlement(runner_source, caplog, failure):
+    async def scenario():
+        class Process:
+            returncode = 0
+            async def wait(self): return 0
+        spawn = asyncio.get_running_loop().create_future(); spawn.set_result(Process())
+        async def reader():
+            if failure == 'cancelled': raise asyncio.CancelledError()
+            raise OSError('private-reader-diagnostic-marker')
+        drain = asyncio.create_task(reader())
+        await asyncio.sleep(0)
+        with pytest.raises(RuntimeError, match='subprocess_cleanup_reader_or_wait_failed'):
+            await runner_source._finish_subprocess(spawn, [drain], None)
+        assert 'private-reader-diagnostic-marker' not in caplog.text
+    asyncio.run(scenario())
+
+
+_PIPE_FIXTURE_PROGRAM = """import json, pathlib, subprocess, sys, time
+root = pathlib.Path(__file__).parent
+mode = sys.argv[sys.argv.index('--channel') + 1]
+(root / 'started').write_text('ready')
+if mode == 'inherited':
+    subprocess.Popen([sys.executable, '-I', '-S', '-B', str(root / 'pipe_descendant.py')], stdin=subprocess.DEVNULL, stdout=sys.stdout, stderr=sys.stderr)
+elif mode in ('actual', 'complete', 'flood'):
+    sys.stdout.buffer.write(b'x' * (2 * 1024 * 1024) + b'\\n')
+    sys.stdout.buffer.flush()
+    print(json.dumps({'stats': {'comments_processed': 7}}), flush=True)
+    (root / 'emitted').write_text('done')
+else:
+    print('READY', flush=True)
+deadline = time.monotonic() + 8
+while mode != 'complete' and not (root / 'release').exists() and time.monotonic() < deadline:
+    time.sleep(.02)
+"""
+_PIPE_DESCENDANT_PROGRAM = """import pathlib, time
+root = pathlib.Path(__file__).parent
+(root / 'inherited_ready').write_text('ready')
+deadline = time.monotonic() + 8
+while not (root / 'release').exists() and time.monotonic() < deadline:
+    time.sleep(.02)
+"""
+
+
+def _pipe_fixture_runner(module, tmp_path):
+    script = tmp_path / 'pipe_child.py'
+    script.write_text(_PIPE_FIXTURE_PROGRAM, encoding='utf-8')
+    (tmp_path / 'pipe_descendant.py').write_text(_PIPE_DESCENDANT_PROGRAM, encoding='utf-8')
+    runner = module.SubprocessRunner(tmp_path); runner.engagement_script = script
+    return runner
+
+
+def _capture_pipe_fixture(monkeypatch):
+    original_spawn, original_task = asyncio.create_subprocess_exec, asyncio.create_task
+    state = SimpleNamespace(processes={}, readers={}, tasks=[])
+    def task(coro, *args, **kwargs):
+        value = original_task(coro, *args, **kwargs); state.tasks.append(value)
+        if getattr(coro, '__qualname__', '').endswith('._drain_stream'):
+            state.readers[value] = coro.cr_frame.f_locals['stream']
+        return value
+    async def spawn(*args, **kwargs):
+        channel = args[args.index('--channel') + 1]
+        kwargs['env'] = {key: os.environ[key] for key in ('SYSTEMROOT','WINDIR','TEMP','TMP') if key in os.environ}
+        kwargs['env'].update(PYTHONUTF8='1', PYTHONDONTWRITEBYTECODE='1', PYTHON_DOTENV_DISABLED='1')
+        process = await original_spawn(args[0], '-I', '-S', '-B', *args[1:], **kwargs)
+        state.processes[channel] = process
+        return process
+    monkeypatch.setattr(asyncio, 'create_task', task)
+    monkeypatch.setattr(asyncio, 'create_subprocess_exec', spawn)
+    return state
+
+
+async def _fixture_ready(condition, timeout=3):
+    deadline = asyncio.get_running_loop().time() + timeout
+    while not condition() and asyncio.get_running_loop().time() < deadline:
+        await asyncio.sleep(.02)
+    return bool(condition())
+
+
+def _fixture_reader_failed(state):
+    return any(task.done() and not task.cancelled() and isinstance(task.exception(), ValueError)
+               for task in state.readers)
+
+
+async def _settle_pipe_fixture(state, tmp_path, operations):
+    # This recovery is restricted to synthetic children/readers created above.
+    (tmp_path / 'release').write_text('release', encoding='utf-8')
+    for operation in operations:
+        if not operation.done(): operation.cancel()
+    for process in state.processes.values():
+        if process.returncode is None: process.kill()
+    await asyncio.sleep(.05)
+    for task, stream in state.readers.items():
+        if task.done() and not task.cancelled() and isinstance(task.exception(), ValueError):
+            while await asyncio.wait_for(stream.read(65536), 3): pass
+    await asyncio.wait_for(asyncio.gather(*operations, return_exceptions=True), 5)
+    for process in state.processes.values():
+        await asyncio.wait_for(process.wait(), 3)
+
+
+@pytest.mark.parametrize('finish', [True, False])
+def test_real_oversized_child_output_settles(runner_source, tmp_path, monkeypatch, finish):
+    async def scenario():
+        runner = _pipe_fixture_runner(runner_source, tmp_path)
+        state = _capture_pipe_fixture(monkeypatch)
+        mode = 'complete' if finish else 'flood'
+        operation = asyncio.create_task(runner.run_engagement(mode))
+        try:
+            assert await _fixture_ready(lambda: mode in state.processes and (tmp_path/'started').exists())
+            assert await _fixture_ready(lambda: (tmp_path/'emitted').exists() or _fixture_reader_failed(state))
+            if not finish: operation.cancel()
+            done, _ = await asyncio.wait({operation}, timeout=3)
+            assert done, 'oversized output retained a blocked reader/wait cleanup'
+            if finish:
+                assert operation.result()['stats']['comments_processed'] == 7
+            else:
+                assert operation.cancelled()
+            process = state.processes[mode]
+            assert process.returncode is not None
+            assert process.stdout.at_eof() and process.stderr.at_eof()
+        finally:
+            await _settle_pipe_fixture(state, tmp_path, [operation])
+    asyncio.run(scenario())
+
+
+def test_inherited_pipe_keeps_ownership_until_controlled_descendant_exit(runner_source, tmp_path, monkeypatch):
+    async def scenario():
+        runner = _pipe_fixture_runner(runner_source, tmp_path)
+        state = _capture_pipe_fixture(monkeypatch)
+        operation = asyncio.create_task(runner.run_engagement('inherited'))
+        try:
+            assert await _fixture_ready(lambda: 'inherited' in state.processes and (tmp_path/'inherited_ready').exists())
+            operation.cancel(); process = state.processes['inherited']
+            assert await _fixture_ready(lambda: process.returncode is not None)
+            await asyncio.sleep(.15)
+            assert not operation.done()
+            assert await asyncio.wait_for(process.wait(), .2) == process.returncode
+            assert any(not task.done() for task in state.readers)
+            (tmp_path/'release').write_text('release', encoding='utf-8')
+            done, _ = await asyncio.wait({operation}, timeout=5)
+            assert done and operation.cancelled()
+            assert process.stdout.at_eof() and process.stderr.at_eof()
+        finally:
+            await _settle_pipe_fixture(state, tmp_path, [operation])
+    asyncio.run(scenario())
+
+
+@pytest.mark.asyncio
+async def test_cleanup_diagnostics_separate_process_exit_from_reader_settlement(runner_source, caplog):
+    release = asyncio.Event()
+    async def reader(): await release.wait()
+    async def wait(): return 0
+    process = SimpleNamespace(returncode=0, wait=wait)
+    spawn = asyncio.get_running_loop().create_future(); spawn.set_result(process)
+    drain = asyncio.create_task(reader())
+    with caplog.at_level(logging.INFO):
+        cleanup = asyncio.create_task(runner_source._finish_subprocess(spawn, [drain], None))
+        try:
+            assert await _fixture_ready(lambda: 'phase=process_exit_observed' in caplog.text)
+            assert not cleanup.done()
+            assert 'phase=readers_settled' not in caplog.text
+            release.set(); await cleanup
+            assert 'phase=readers_settled' in caplog.text
+        finally:
+            release.set(); await cleanup

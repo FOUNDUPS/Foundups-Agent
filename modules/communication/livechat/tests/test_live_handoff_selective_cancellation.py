@@ -704,3 +704,71 @@ async def test_failed_rotation_instance_cannot_be_replaced_or_forgotten(dae_owne
                                    run_polling_loop=poll, stop_listening=lambda: None)
     await dae._run_confirmed_live_chat()
     assert not polled
+
+
+@pytest.mark.asyncio
+async def test_oversized_output_settles_before_live_poll_and_other_channel_survives(
+    dae_owner, runner_source, process_cases, tmp_path, monkeypatch
+):
+    dae, coordinator, _ = dae_owner
+    runner = process_cases._pipe_fixture_runner(runner_source, tmp_path)
+    state = process_cases._capture_pipe_fixture(monkeypatch)
+    matching = asyncio.create_task(coordinator._run_owned_engagement(runner, channel_id='actual', video_id=None, max_comments=1))
+    other = asyncio.create_task(coordinator._run_owned_engagement(runner, channel_id='other', video_id=None, max_comments=1))
+    polled = []
+    async def initialize(): return True
+    async def poll():
+        assert state.processes['actual'].returncode is not None
+        assert state.processes['actual'].stdout.at_eof()
+        assert state.processes['other'].returncode is None
+        assert not other.done()
+        polled.append(True)
+    dae.livechat = SimpleNamespace(initialize=initialize, channel_id='actual', live_chat_id='chat', youtube=True,
+                                   run_polling_loop=poll, stop_listening=lambda: None)
+    handoff = None
+    try:
+        assert await process_cases._fixture_ready(lambda: len(state.processes)==2)
+        assert await process_cases._fixture_ready(lambda: (tmp_path/'emitted').exists() or process_cases._fixture_reader_failed(state))
+        handoff = asyncio.create_task(dae._run_confirmed_live_chat())
+        done, _ = await asyncio.wait({handoff}, timeout=3)
+        assert done, 'live polling stayed blocked after an oversized output line'
+        await handoff
+        assert polled == [True]
+        assert (await matching)['deferred'] == 'live_channel'
+        assert not other.done()
+    finally:
+        await process_cases._settle_pipe_fixture(state, tmp_path, [matching, other, *([handoff] if handoff else [])])
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('failure', ['oserror', 'cancelled'])
+async def test_reader_cleanup_failure_retains_owner_and_prevents_live_poll(dae_owner, runner_source, failure):
+    dae, coordinator, _ = dae_owner
+    started = asyncio.Event(); polled = []
+    async def reader():
+        if failure == 'cancelled': raise asyncio.CancelledError()
+        raise OSError('private-reader-diagnostic-marker')
+    class Process:
+        returncode = 0
+        async def wait(self): return 0
+    async def run(**kwargs):
+        started.set()
+        try: await asyncio.Event().wait()
+        finally:
+            spawn = asyncio.get_running_loop().create_future(); spawn.set_result(Process())
+            drain = asyncio.create_task(reader()); await asyncio.sleep(0)
+            await runner_source._finish_subprocess(spawn, [drain], None)
+    runner = SimpleNamespace(run_engagement=run, supports_settled_cancellation=True)
+    operation = asyncio.create_task(coordinator._run_owned_engagement(runner, channel_id='actual', video_id=None, max_comments=1))
+    await asyncio.wait_for(started.wait(), 3)
+    async def initialize(): return True
+    async def poll(): polled.append(True)
+    dae.livechat = SimpleNamespace(initialize=initialize, channel_id='actual', live_chat_id='chat', youtube=True,
+                                   run_polling_loop=poll, stop_listening=lambda: None)
+    await dae._run_confirmed_live_chat()
+    with pytest.raises(RuntimeError, match='subprocess_cleanup_reader_or_wait_failed'): await operation
+    assert len(coordinator._active_engagements) == 1 and not polled
+    await dae._run_confirmed_live_chat()
+    assert len(coordinator._active_engagements) == 1 and not polled
+    with pytest.raises(RuntimeError, match='unresolved cleanup'):
+        await coordinator._run_owned_engagement(runner, channel_id='actual', video_id=None, max_comments=1)

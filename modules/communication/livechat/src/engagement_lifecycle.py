@@ -31,12 +31,14 @@ async def _await_owned_completion(task: asyncio.Task) -> bool:
 
 async def _finish_subprocess(spawn_task, drains, wait_task) -> None:
     """Recover a racing spawn, then reap the child and finish every pipe reader."""
+    logger.info("[SUBPROCESS-CLEANUP] phase=await_spawn")
     try:
         process = await spawn_task
     except Exception:
         return  # Spawn failed; the original await owns that exception.
     if not drains:
         drains.append(asyncio.create_task(process.communicate()))
+    logger.info("[SUBPROCESS-CLEANUP] phase=await_exit")
     if process.returncode is None:
         try:
             process.terminate()
@@ -52,7 +54,11 @@ async def _finish_subprocess(spawn_task, drains, wait_task) -> None:
     await process.wait()
     if wait_task is not None:
         drains.append(wait_task)
-    await asyncio.gather(*drains, return_exceptions=True)
+    logger.info("[SUBPROCESS-CLEANUP] phase=process_exit_observed")
+    outcomes = await asyncio.gather(*drains, return_exceptions=True)
+    if any(isinstance(outcome, BaseException) for outcome in outcomes):
+        raise RuntimeError("subprocess_cleanup_reader_or_wait_failed") from None
+    logger.info("[SUBPROCESS-CLEANUP] phase=readers_settled")
 
 
 async def await_thread_worker(worker, timeout):
@@ -156,6 +162,7 @@ async def run_confirmed_live_chat(self):
         raise RuntimeError("A live handoff/session is already owned")
     self._live_handoff_running = True
     try:
+        logger.info("[LIVECHAT-HANDOFF] phase=initialize")
         if not self.livechat or not await self.livechat.initialize():
             logger.warning("[LOCK] Live chat unavailable; keeping comment engagement active")
             return
@@ -171,7 +178,9 @@ async def run_confirmed_live_chat(self):
         self._confirmed_live_channel_id = channel_id
         heartbeat_task = None
         try:
+            logger.info("[LIVECHAT-HANDOFF] phase=settling")
             await self.terminate_comment_engagement(for_live_handoff=True)
+            logger.info("[LIVECHAT-HANDOFF] phase=polling")
             self._live_stream_pending = False
             self._live_chat_active = True
             if self.telemetry:

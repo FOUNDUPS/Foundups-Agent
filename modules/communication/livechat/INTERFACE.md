@@ -1,5 +1,28 @@
 # LiveChat Module Interface
 
+## Subprocess framing and cleanup evidence (2026-11-05)
+
+`SubprocessRunner` reads stdout/stderr in fixed65,536-byte chunks. Physical
+lines may contain at most65,536 bytes before LF; CR counts toward that cap.
+Oversized lines are discarded through their delimiter or EOF, so their suffix
+cannot become a separate JSON result. Subsequent valid lines and normal EOF
+remain parseable; byte framing preserves UTF-8 split across chunks. Existing
+first-JSON-result parsing and total retained-line-list policy are unchanged.
+
+`_finish_subprocess` still awaits the owned direct child and every pipe reader.
+A completed reader or queued-wait BaseException, including CancelledError,
+becomes `RuntimeError("subprocess_cleanup_reader_or_wait_failed")` with no raw
+cause. The existing coordinator retains that failed owner and refuses later
+dispatch. Normal targeted caller cancellation and `_await_owned_completion`
+keep their prior behavior. No unknown child is abandoned or family killed.
+
+Content-free INFO phases are `LIVECHAT-HANDOFF` initialize/settling/polling and
+`SUBPROCESS-CLEANUP` await_spawn/await_exit/process_exit_observed/readers_settled.
+Direct-child exit is explicitly distinct from complete reader settlement. A
+descendant retaining inherited pipe handles may still hold the await indefinitely;
+phase evidence does not grant permission to drop that ownership. These codes
+contain no chat text, identity, provider payload or credential.
+
 ## Shared YouTube model route (2026-11-01)
 
 Assessment, writer and exact final review now call the shared AI Gateway.

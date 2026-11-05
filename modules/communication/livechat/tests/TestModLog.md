@@ -1,5 +1,33 @@
 # TestModLog
 
+## 2026-11-05 — Pipe framing, retained ownership and fixed phase evidence
+
+Test-first actual-source framing selection:13 cases,6 RED assertion failures/
+7 baseline positives, zero errors/skips/denied effects; the same13 pass after
+repair. A separate three-scenario controlled Windows probe preserved the direct
+child/old-wait/reader dependency and settled all its fixtures; it is mechanism
+evidence, not a separate production test total or proof of the live cause.
+
+Final closed two-file selection:101 passed (original81 plus20), zero failures/
+errors/skips/denied effects. It admits21 exact parent fixture launches plus the
+finite inherited-pipe descendant, with isolated explicit clean child environments.
+New controls preserve useful valid JSON and later lines, reject oversized forged
+suffixes/EOF, retain normal EOF/UTF-8/CRLF/cap behavior, exercise heartbeat progress,
+real cancellation/handoff, inherited EOF waiting, fixed reader failure propagation
+and failed-owner retention. Process-exit phases cannot claim reader settlement.
+All original test assertions/names remain; the old fake EOF reader additively
+implements read alongside readline.
+
+Two earlier full attempts are retained as UNQUALIFIED harness runs: strict
+process admission rejected pytest's transient current-node environment metadata
+and existing rotation fixture programs, causing outer deadlines. The final guard
+forces only validated source-defined fixtures through isolated clean environments
+and private CWD, admits the two existing rotation programs explicitly, and keeps
+all other effect denials. No test or production safeguard was relaxed.
+Private evidence: livechat-pipe-handoff-20261105/green-final-full; source/test
+hashes remained stable during execution. No active daemon, browser, model,
+provider call or public delivery was exercised.
+
 ## 2026-11-01 — Current guarded model-routing qualification
 
 Fresh credential-free Windows runs: 63 independently authored routing/composition

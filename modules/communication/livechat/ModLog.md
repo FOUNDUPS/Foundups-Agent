@@ -1,5 +1,28 @@
 # Livechat Module - ModLog
 
+## 2026-11-05 — Bounded pipe framing and honest handoff phases
+
+WSP00/11/22/50/62/77/84/97. A controlled Windows source-runner probe reproduced
+two mechanisms: inherited descendant pipe handles, and an oversized readline
+failure that left the old process waiter/cleanup pending after direct-child
+exit. They do not establish the cause of the current live incident.
+
+Reuse the rotation owner's fixed-chunk read pattern within the existing engagement
+runner, with bounded physical-line framing and whole-oversized-line rejection.
+Preserve later valid JSON, split UTF-8, normal EOF and scheduling fairness.
+Surface completed reader/wait failures as a constant non-cancellation error,
+retaining failed ownership; preserve the generic ownership await. Fixed phase
+codes distinguish setup, settlement, child exit and reader completion.
+Inherited pipe ownership still waits for actual EOF; no family kill, watchdog,
+posting change, model route or additional lifecycle manager was introduced.
+
+The existing81 controls plus20 new controls pass101 with fixed minimal parent/
+child environments, exact local fixture-program admission and zero denied
+effects. All controlled children settle; no active daemon/browser/model/provider
+or public action was exercised. See tests/TestModLog for qualified RED and
+retained harness failures. Source/test receipts bind base181 and exact bytes;
+merge, installed runtime diagnosis and live delivery remain separate gates.
+
 ## 2026-11-01 — Shared YouTube model orchestration
 
 WSP00/10/11/22/50/62/77/84/97. Replace consumer-owned provider chains with
