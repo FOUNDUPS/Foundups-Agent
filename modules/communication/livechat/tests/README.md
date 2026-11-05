@@ -1,5 +1,23 @@
 # LiveChat Module Test Suite
 
+## 2026-11-05 — Scoped quality STOP controls
+
+`test_comment_quality_stop.py` selects68 cases against actual owner definitions
+and disposable private STOP/manifest/history files. It covers closed and duplicate
+JSON fields, unsafe/unreadable/manual global STOP, explicit scopes, checkout-rooted
+paths, exclusive cooperating-writer races, a fresh module owner, write failure,
+exact clear refusal and unchanged uncertain delivery claims. Useful processor,
+chat-send and rotation positives remain alongside typed halt, exit78, no-retry,
+no-next-channel and settled-comment-task/live-handoff controls.
+
+Use the fixed credential-free guarded selection: no subprocess fixture is
+admitted for this new group; only the existing private SQLite owner is allowed.
+Older processor and lifecycle fixtures redirect STOP to per-test private paths
+and load the actual new helper definitions. They neither stub away the latch nor
+clear a real runtime STOP. The existing101 lifecycle selection retains its exact
+finite Python-fixture admission and every old assertion. None of these controls
+proves live delivery or OS compare-and-swap against arbitrary manual file writes.
+
 ## 2026-11-05 — Bounded pipe and handoff controls
 
 The same two lifecycle files now select101 cases: the original81 plus20 new

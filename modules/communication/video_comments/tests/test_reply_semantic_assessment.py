@@ -165,7 +165,10 @@ def test_actual_sender_preserves_reviewed_payload_and_rechecks_after_delay(monke
     import sys
     sender_module = helper.definitions('_semantic_sender',
         'modules/communication/livechat/src/chat_sender.py')
-    sender_module.stop_active = lambda: False
+    def stop_check(scope):
+        assert scope == 'livechat'
+        return False
+    sender_module.stop_active = stop_check
     sender_module._env_truthy = lambda name, default='false': name in {
         'YT_AUTOMATION_ENABLED', 'YT_LIVECHAT_SEND_ENABLED'}
     sender_module._convert_unicode_tags_to_emoji = lambda value: value
@@ -477,7 +480,10 @@ def test_livechat_fallback_retains_private_native_snapshot_through_sender_delay(
     chat, _, native, current, _, _ = local_livechat_fixture(monkeypatch)
     result = chat.generate_reply('Where can I watch the film?', 'Aki', 'viewer')
     sender_module = helper.definitions('_local_theme_sender', 'modules/communication/livechat/src/chat_sender.py')
-    sender_module.stop_active = lambda:False
+    def stop_check(scope):
+        assert scope == 'livechat'
+        return False
+    sender_module.stop_active = stop_check
     sender_module._env_truthy = lambda name, default='false':name in {'YT_AUTOMATION_ENABLED','YT_LIVECHAT_SEND_ENABLED'}
     sender_module._convert_unicode_tags_to_emoji = lambda value:value
     inserted = []

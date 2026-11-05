@@ -1,5 +1,45 @@
 # video_comments Tests
 
+## 2026-11-05 visual observation truth
+
+`test_reply_visual_evidence.py` uses complete production definitions and private
+synthetic collaborators. Nine cases cover useful DOM-only delivery, unavailable
+or misleading vision, screenshot/hash binding, optional evidence-append failure,
+and refusal to promote unknown posting. Qualified RED was 8 failures/1 pass;
+GREEN with the unchanged quality/memory 60 is 69 passing, zero errors/skips or
+denied effects. The existing closed effect guard is unchanged. This validates
+result handling, not a real vision model or YouTube delivery.
+
+## 2026-11-05 modern Studio identity
+
+`test_studio_row_identity.py` has 118 cases through complete current extraction,
+bind, snapshot and final Submit JavaScript, plus actual executor registry-context
+controls. One fixed `STUDIO_DOM` models the observed original tree, toolbar,
+zero/expanded controls and native creator badge. A useful zero-to-new-creator
+readback follows exactly one synthetic Submit. URL, ownership, conflict,
+multiple-inventory, native account-change and incomplete-state controls refuse.
+The expanded label-one/four-loaded-row positive explicitly rejects count inference.
+
+The private guard separately admits that exact Node program and binary, permits
+no Python fixture workers or SQLite for this selection, clears credentials and
+denies network/source writes. Initial RED69 had 35 failures/34 passes; review
+RED71 reproduced exactly two additional ownership/baseline findings. Later
+creator RED117 and the one-failure RED118 are retained separately. The historical
+71 fixture used direct host ancestry; later native toolbar evidence corrected
+that assumption in the current fixture/source. All original 71 test assertions
+and parameter cases remain present.
+
+`test_reply_editor_input.py` adds 19 cases: the unchanged fixed `EDITOR_DOM`
+separates dirty textarea `value` from default text while retaining contenteditable
+positives, and three actual Python typing-loop controls force a micro-edit or
+stale recovery. RED16 had eight native failures; RED19 exposed micro-edit rewind
+and foreign-text continuation. Final 118 + 19 pass with zero issues/denials.
+These are source/fixture checks, not live browser/model/publication evidence.
+The old 112 reply + 53 context names/assertions remain unchanged and also pass
+on the composed final source. Two sender doubles now assert the explicit
+`livechat` STOP scope, and the typing double recognizes the exact current
+value/text getter. These are fixture contract updates, with no gate relaxation.
+
 ## 2026-11-05 optional memory readiness
 
 `test_reply_memory_readiness.py` contains 23 bounded actual-definition controls.

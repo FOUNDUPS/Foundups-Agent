@@ -1,5 +1,68 @@
 # Video Comments - Public Interface
 
+## Visual evidence truth boundary (2026-11-05)
+
+`CommentProcessor.engage_comment` preserves the executor's `delivery_verified`
+result independently of `_inspect_posted_reply`. The latter returns
+`visual_observation` with `authoritative=False`, `text_verified=False`, and one
+of `not_requested`, `screenshot_unavailable`, `unavailable`, or
+`locator_returned`. A locator confidence is not a semantic or delivery verdict.
+The current bridge recaptures its own image, so `model_image_binding` is
+`unbound_recapture`; the saved screenshot/hash is not asserted to be the actual
+model input. Evidence append failure is `reply_evidence_status=append_unavailable`
+and does not revoke verified delivery. No observation can promote an uncertain
+submission. Existing language review, exact DOM readback and history claims
+remain authoritative for their separate responsibilities.
+
+## Owned Studio identity and empty baseline (2026-11-05)
+
+`comment_row_context.py` shares its original-comment metadata/author helpers
+between extraction and `matchesCommentTarget`. Both legacy
+`ytcp-video-thumbnail-with-info` links and the observed original-owned
+`ytcp-comment-video-thumbnail#video-thumbnail` are supported. Only an absolute
+HTTPS `i.ytimg.com/vi/<11-safe-character-ID>/default.jpg` image can supply modern
+thumbnail identity. Thumbnail-only context has `video_url=None`; multiple distinct
+qualified IDs leave identity and title absent.
+
+The additive `author_url` is the selected owned author anchor's trusted origin
+and pathname, rechecked when present in the captured target. Observed HTTP
+YouTube handle links are identity metadata only and are never fetched. Trusted
+host/protocol, credentials and port checks apply; an author UC ID can come only
+from that selected anchor's `/channel/` path. A handle never implies a UC ID.
+Nested/foreign authors or content cannot fill the original row's missing fields.
+
+`BrowserReplyExecutor.execute_reply` copies the supplied target, discards a caller
+`_target_channel_handle` and resolves the existing registry once by receiving UC
+ID. The returned entry must have that exact ID and a valid handle. Modern row
+binding, baseline and final Submit require this frozen context plus at least one
+matching native `CHANNEL_ID`; any present contradiction or malformed value fails.
+The exact Studio origin/channel path is also required. Legacy identity/readback
+behavior is retained; missing mapping never grants the modern route.
+
+`_reply_snapshot` qualifies the observed action-buttons > `div#toolbar` >
+show-replies host/native-button chain. Empty zero requires both disabled signals,
+both `aria-disabled=true`, `EXPAND`, exact zero text and no reply evidence.
+Expanded non-veto requires `thread[show-replies]`, `COLLAPSE`, enabled/aria-false
+controls and a settled visible native inventory. The label is not an inventory
+count: one displayed reply can accompany four loaded rows. Multiple supported
+reply containers, missing/duplicate IDs, hidden rows, loading, more or conflicting
+controls refuse a complete baseline.
+
+Modern readback requires a direct native `ytcp-comment-replies#replies` sibling,
+an owned expanded `[is-reply]` row with its raw parent-plus-suffix ID, and owned
+metadata containing the hidden name anchor and native `[is-creator]` badge.
+Their trusted YouTube handle links must agree with the frozen registry handle;
+the badge text must agree too. This is receiving-UC-to-known-handle context,
+never handle-to-UC inference. Only a new exact-text creator ID can settle the
+existing durable attempt. Historical matching IDs, nested submissions and unknown
+delivery reservations retain their existing refusal behavior.
+
+Native textarea clear/append/read/micro-edit operations use `value`; ordinary
+contenteditable operations use `textContent`. Stale recovery and micro-edit
+continuation require the actual input to be an exact prefix of the approved
+draft. A confirmed micro-edit updates the typing index. The final exact-text and
+pre-submit gates remain unchanged.
+
 ## Optional memory lifetime (2026-11-05)
 
 `IntelligentReplyGenerator` passes the current generation cancellation event and

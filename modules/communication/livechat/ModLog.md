@@ -1,5 +1,31 @@
 # Livechat Module - ModLog
 
+## 2026-11-05 — Persistent scoped comment-quality halt
+
+WSP00/11/22/50/62/77/84/97. Extend the existing STOP owner with one closed,
+content-free comments-quality incident. Unknown/manual/malformed/read-failed
+STOP remains global; legacy no-argument checks still see any STOP. Anchor
+relative/default paths to the checkout, preserve absolute overrides, exclusively
+create under the existing runtime lock, reject duplicate JSON keys and expose
+only an explicit exact matching compare-and-clear. Keep unknown delivery claims.
+
+Recognized invalid/rejected/unreviewed reply output now halts the direct processor,
+DAE, child runners, coordinator retry/channel paths and comments supervisor.
+Reserved exit78 carries the halt even without saved STOP or usable child JSON.
+Existing parent instances retain the typed halt and preserve unfinished
+checkpoints; completion telemetry distinguishes halted work. After an active
+comment task settles, a halted inbox wait can yield to the existing live handoff
+without calling the inbox clear. Live-chat sending uses its explicit scope;
+private context/status intake cannot reset the incident.
+
+Recovery settles old comment owners, clears only the exact recognized current
+incident through the owner API, then starts fresh comment owners. No automatic
+TTL, context reset, provider route or new persistent store was added. Qualified
+private-file/synthetic controls pass68 with zero failures/errors/skips/denied
+effects. Existing101 lifecycle/handoff controls also pass, retaining all original
+assertions and exact child-program admission; see tests/TestModLog for boundaries.
+No live browser, model/provider, daemon or public reply was exercised.
+
 ## 2026-11-05 — Bounded pipe framing and honest handoff phases
 
 WSP00/11/22/50/62/77/84/97. A controlled Windows source-runner probe reproduced

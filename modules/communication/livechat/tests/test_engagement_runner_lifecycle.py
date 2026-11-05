@@ -42,8 +42,12 @@ def _load_runner_source(monkeypatch):
     module._lifecycle = load_lifecycle(monkeypatch)
     for name in ("_await_owned_completion", "_finish_subprocess", "await_thread_worker"):
         module.__dict__[name] = getattr(module._lifecycle, name)
-    module.stop_active = lambda: False
-    module.stop_file_path = lambda: "unused-offline-stop"
+    from modules.communication.livechat.src.automation_gates import stop_active, stop_file_path
+    import tempfile
+    from uuid import uuid4
+    monkeypatch.setenv('YT_AUTOMATION_STOP_FILE', str(Path(tempfile.gettempdir()) / ('lifecycle-STOP-' + uuid4().hex)))
+    module.stop_active = stop_active
+    module.stop_file_path = stop_file_path
     monkeypatch.setitem(sys.modules, module.__name__, module)
     exec(compile(tree, str(source), "exec"), module.__dict__)
     for key, value in {

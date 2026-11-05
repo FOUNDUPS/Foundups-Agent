@@ -1053,6 +1053,9 @@ class AutoModeratorDAE:
             if self._comment_engagement_task and not self._comment_engagement_task.done():
                 await asyncio.sleep(5)
             else:
+                if self._comments_halted():
+                    logger.warning('[LOCK] Comments halted; settled comment task yields to live handoff without inbox-clear evidence')
+                    return
                 channel_id = self._comment_engagement_active_channel
                 status = self._comment_engagement_status.get(channel_id or "", {})
 
@@ -1097,6 +1100,22 @@ class AutoModeratorDAE:
                 logger.warning("[LOCK] Inbox-clear wait timed out; proceeding to live chat")
                 return
 
+    def _comments_halted(self, result=None):
+        """Retain this DAE's typed halt until settlement and a fresh owner."""
+        from modules.communication.livechat.src.automation_gates import comment_stop_result, comments_exit_code, QUALITY_REASONS
+        receipt = getattr(self, '_comments_halt_receipt', None) or comment_stop_result()
+        if comments_exit_code(result) and not receipt:
+            reason = result.get('quality_halt_reason')
+            receipt = {'state': 'halted', 'all_processed': False,
+                'halted_for_comments_stop': True,
+                'halted_for_reply_quality': result.get('halted_for_reply_quality') is True,
+                'quality_stop_persisted': result.get('quality_stop_persisted') is True,
+                'quality_halt_reason': reason if isinstance(reason, str) and reason in QUALITY_REASONS else 'comments_halted_child',
+                'stats': {'all_processed': False}}
+        if receipt:
+            self._comments_halt_receipt = receipt
+        return receipt
+
     async def _run_comment_engagement(
         self,
         runner,
@@ -1115,6 +1134,10 @@ class AutoModeratorDAE:
 
         This method is launched as an async task and does not block main DAE.
         """
+        halted = self._comments_halted()
+        if halted:
+            self._comment_engagement_status[channel_id] = dict(halted, updated_at=time.time())
+            return
         logger.info(f"[DAEMON][CARDIOVASCULAR] 🎬 _run_comment_engagement STARTED")
         logger.info(f"[DAEMON][CARDIOVASCULAR]   Channel: {channel_id}")
         logger.info(f"[DAEMON][CARDIOVASCULAR]   Video ID: {video_id}")
@@ -1133,6 +1156,10 @@ class AutoModeratorDAE:
             if result and result.get("deferred"):
                 return
             result = result or {}
+            halted = self._comments_halted(result)
+            if halted:
+                self._comment_engagement_status[channel_id] = dict(halted, updated_at=time.time())
+                return
             stats = result.get('stats', {})
             error = result.get('error')
 
@@ -1452,7 +1479,9 @@ class AutoModeratorDAE:
                 use_rotation_supervisor = _env_truthy("YT_USE_ROTATION_SUPERVISOR", "false")
 
                 # 2026-03-10: DAEmon switch - skip comment engagement if disabled
-                if not comments_enabled:
+                if self._comments_halted():
+                    logger.warning(f"[{tag}-LOOP] PHASE 1 HALTED: comments require explicit recovery")
+                elif not comments_enabled:
                     logger.info(f"[{tag}-LOOP] PHASE 1 SKIPPED: comments disabled via YT_COMMENTS_ENABLED=false")
                 elif use_rotation_supervisor:
                     # NEW: Task-based rotation with heartbeat stall detection
@@ -1467,6 +1496,8 @@ class AutoModeratorDAE:
                         result = await run_owned_rotation(
                             self, supervisor, browser_name, max_comments, RotationOperation.COMMENTS)
                         comments_processed = result.total_comments
+                        if result.halted:
+                            self._comments_halted({'halted_for_comments_stop': True})
 
                         # Emit stall detection breadcrumb for AI Overseer
                         if result.failed_channels:
@@ -1503,6 +1534,8 @@ class AutoModeratorDAE:
                                 ),
                                 timeout=phase1_timeout,
                             )
+                            if self.multi_channel_coordinator._comments_halt():
+                                self._comments_halted(self.multi_channel_coordinator._comments_halt_receipt)
                         except asyncio.TimeoutError:
                             logger.error(f"[{tag}-LOOP] PHASE 1 TIMEOUT after {phase1_timeout}s — skipping to next phase")
                     finally:
@@ -1510,17 +1543,19 @@ class AutoModeratorDAE:
                             browser_lock.release()
                             logger.debug(f"[{tag}-LOOP] PHASE 1: Browser lock RELEASED")
                 phase1_elapsed = time.time() - phase1_start
-                logger.info(f"[{tag}-LOOP] PHASE 1: COMMENT ENGAGEMENT complete ({phase1_elapsed:.1f}s, {comments_processed} comments)")
-
-                # ACTIVITY ROUTING: Signal comment completion for this browser
-                try:
-                    activity_router = get_activity_router()
-                    activity_router.signal_activity_complete(
-                        ActivityType.COMMENT_ENGAGEMENT,
-                        metadata={"cycle": cycle_count, "browser": browser_name, "comments": comments_processed}
-                    )
-                except Exception as e:
-                    logger.debug(f"[{tag}-LOOP] [ACTIVITY-ROUTER] Signal failed: {e}")
+                if self._comments_halted():
+                    logger.warning(f"[{tag}-LOOP] PHASE 1: COMMENT ENGAGEMENT halted ({phase1_elapsed:.1f}s)")
+                else:
+                    logger.info(f"[{tag}-LOOP] PHASE 1: COMMENT ENGAGEMENT complete ({phase1_elapsed:.1f}s, {comments_processed} comments)")
+                    # ACTIVITY ROUTING: Only settled non-halted comment work completes.
+                    try:
+                        activity_router = get_activity_router()
+                        activity_router.signal_activity_complete(
+                            ActivityType.COMMENT_ENGAGEMENT,
+                            metadata={"cycle": cycle_count, "browser": browser_name, "comments": comments_processed}
+                        )
+                    except Exception as e:
+                        logger.debug(f"[{tag}-LOOP] [ACTIVITY-ROUTER] Signal failed: {e}")
 
                 # ============================================
                 # PHASE 2: VIDEO INDEXING (per-browser, optional)

@@ -6,10 +6,12 @@ This adapter accepts no caller-supplied tests, commands or application roots.
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
@@ -23,10 +25,16 @@ SUITES = {
         'modules/communication/video_comments/tests/test_llm_integration.py',
         'modules/communication/livechat/tests/test_antima_factcheck.py',
         'modules/communication/livechat/tests/test_antima_savage.py')),
-    'quality': (60, '07119367388aebad0b26ff82025186215ac7ca174c1ef7e602b4655976c572ad', (
+    'quality': (69, '5c1486a10845dd2dd4b44b72304a2eb1a4f2afdbb8d849ccdeccce64e3b15469', (
         'modules/communication/video_comments/tests/test_reply_quality_safety.py',
         'modules/communication/video_comments/tests/test_inbox_completion_evidence.py',
-        'modules/communication/video_comments/tests/test_reply_memory_readiness.py')),
+        'modules/communication/video_comments/tests/test_reply_memory_readiness.py',
+        'modules/communication/video_comments/tests/test_reply_visual_evidence.py')),
+    'quality_stop': (68, '2a5ac5f9e9a8bd249f78ddf959a99e319a613df2b6a346749d49304f34f18b73', (
+        'modules/communication/livechat/tests/test_comment_quality_stop.py',)),
+    'studio': (137, '012d0519ef03b757222bb16b021f3e297fd9b82908d251fdbce9391024f498d4', (
+        'modules/communication/video_comments/tests/test_studio_row_identity.py',
+        'modules/communication/video_comments/tests/test_reply_editor_input.py')),
     'startup': (185, 'f0bb505c605a5e9d7ca810589a2033ed842248350578196f46c326772776c2dc', (
         'modules/infrastructure/dependency_launcher/tests/test_llmster_startup_fallback.py',
         'modules/infrastructure/shared_utilities/tests/test_local_model_selection.py',
@@ -49,6 +57,14 @@ SUITES = {
         SCHEDULER_TESTS + 'test_video_policy_save_readback.py',
         SCHEDULER_TESTS + 'test_video_policy_inline.py',
         'modules/communication/youtube_shorts/tests/test_operator_upload_policy.py')),
+}
+
+# Reviewed literals only; no caller-provided JavaScript or runtime browser.
+NODE_FIXTURES = {
+    'modules/communication/video_comments/tests/test_studio_row_identity.py':
+        ('STUDIO_DOM', 'c93324766519e5b7d15a60990df6c816ba12cee04fcad5b6e0436147f1350e5c'),
+    'modules/communication/video_comments/tests/test_reply_editor_input.py':
+        ('EDITOR_DOM', '2d949aaebc6b2258c1711e4d9fe9ba7950356ddcb6f6ab13a55035420ac4b1cf'),
 }
 
 
@@ -89,9 +105,74 @@ def admitted(suite):
 class EffectGuard:
     def __init__(self, out, suite):
         import socket
+        import sqlite3
         self.out, self.suite = out, suite
         self.denied, self.in_socketpair = 0, False
         self.original_pair = socket.socketpair
+        self.original_run, self.original_popen = subprocess.run, subprocess.Popen
+        self.original_connect = sqlite3.connect
+        self.node, self.node_hash, self.node_programs = None, None, set()
+        self.node_call, self.sqlite_call = None, None
+        self.node_calls, self.sqlite_calls = 0, 0
+        if suite == 'studio':
+            bound = json.loads((out / 'owner.json').read_text(encoding='utf-8'))['node']
+            self.node, self.node_hash = Path(bound['path']).resolve(), bound['sha256']
+            if hashlib.sha256(self.node.read_bytes()).hexdigest() != self.node_hash:
+                self.deny()
+            for relative, (name, expected) in NODE_FIXTURES.items():
+                tree = ast.parse((ROOT / relative).read_text(encoding='utf-8'))
+                programs = [ast.literal_eval(item.value) for item in tree.body
+                    if isinstance(item, ast.Assign) and len(item.targets) == 1
+                    and isinstance(item.targets[0], ast.Name) and item.targets[0].id == name]
+                if len(programs) != 1 or hashlib.sha256(programs[0].encode()).hexdigest() != expected:
+                    self.deny()
+                self.node_programs.add(programs[0])
+
+    def node_run(self, args, *positional, **kwargs):
+        if (self.suite != 'studio' or positional or not isinstance(args, (list, tuple))
+                or len(args) != 3 or args[1] != '-e' or args[2] not in self.node_programs
+                or Path(args[0]).resolve() != self.node
+                or set(kwargs) not in ({'input', 'capture_output', 'text', 'timeout', 'check'},
+                                      {'input', 'capture_output', 'text', 'timeout', 'check', 'env'})
+                or ('env' in kwargs and kwargs['env'] != {'SystemRoot': r'C:\Windows', 'WINDIR': r'C:\Windows'})
+                or kwargs['capture_output'] is not True or kwargs['text'] is not True
+                or kwargs['timeout'] != 5 or kwargs['check'] is not True
+                or not isinstance(kwargs['input'], str) or self.node_call is not None
+                or hashlib.sha256(self.node.read_bytes()).hexdigest() != self.node_hash):
+            self.deny()
+        command, env = [str(self.node), '-e', args[2]], minimal_environment(self.out)
+        self.node_call = (command, str(self.out), env)
+        try:
+            self.node_calls += 1
+            kwargs.pop('env', None)  # Discard the literal fixture's platform hint.
+            return self.original_run(command, **kwargs, cwd=self.out, env=env, shell=False)
+        finally:
+            self.node_call = None
+
+    def node_popen(self, args, *positional, **kwargs):
+        if self.node_call is None or positional:
+            self.deny()
+        command, cwd, env = self.node_call
+        if (list(args) != command or str(kwargs.get('cwd')) != cwd or kwargs.get('env') != env
+                or kwargs.get('shell') is not False or kwargs.get('text') is not True
+                or any(kwargs.get(key) != subprocess.PIPE for key in ('stdin', 'stdout', 'stderr'))
+                or set(kwargs) != {'stdin', 'stdout', 'stderr', 'text', 'cwd', 'env', 'shell'}):
+            self.deny()
+        return self.original_popen(args, **kwargs)
+
+    def private_sqlite(self, database, *args, **kwargs):
+        if (self.suite != 'quality_stop' or args or kwargs.get('uri')
+                or not isinstance(database, (str, os.PathLike))
+                or str(database).startswith(('file:', ':')) or not self.allowed(database)
+                or Path(database).resolve() == Path(os.devnull).resolve()
+                or self.sqlite_call is not None):
+            self.deny()
+        self.sqlite_call = str(Path(database).resolve())
+        try:
+            self.sqlite_calls += 1
+            return self.original_connect(database, **kwargs)
+        finally:
+            self.sqlite_call = None
 
     def deny(self, *_args, **_kwargs):
         self.denied += 1
@@ -116,7 +197,7 @@ class EffectGuard:
             self.in_socketpair = False
 
     def private_pair_event(self, event, args):
-        if (event in {'socket.bind', 'socket.connect'} and self.suite in {'startup', 'rotation', 'directives', 'quality', 'routing'}
+        if (event in {'socket.bind', 'socket.connect'} and self.suite in {'startup', 'rotation', 'directives', 'quality', 'routing', 'quality_stop', 'studio'}
                 and self.in_socketpair):
             frame = sys._getframe(1)
             while frame and frame.f_code is not self.original_pair.__code__:
@@ -127,6 +208,15 @@ class EffectGuard:
 
     def audit(self, event, args):
         if self.private_pair_event(event, args):
+            return
+        if event == 'subprocess.Popen' and self.suite == 'studio' and self.node_call is not None:
+            command, cwd, env = self.node_call
+            expected = ((None, subprocess.list2cmdline(command), cwd, env) if os.name == 'nt'
+                        else (command[0], command, cwd, env))
+            if args == expected:
+                return
+        if (event == 'sqlite3.connect' and self.suite == 'quality_stop' and self.sqlite_call is not None
+                and str(Path(args[0]).resolve()) == self.sqlite_call and self.allowed(args[0])):
             return
         if event in {'subprocess.Popen', 'os.system', 'os.exec', 'os.spawn', 'socket.bind',
                      'socket.connect', 'socket.connect_ex', 'socket.sendto', 'sqlite3.connect',
@@ -158,10 +248,14 @@ def install_effects(stack, guard):
     import socket
     from unittest.mock import patch
     socket.has_ipv6 = False  # Avoid urllib3's import-time IPv6 bind probe.
-    if guard.suite in {'startup', 'rotation', 'directives', 'quality', 'routing'}:
+    if guard.suite in {'startup', 'rotation', 'directives', 'quality', 'routing', 'quality_stop', 'studio'}:
         socket.socketpair = guard.pair
     sys.addaudithook(guard.audit)
-    for target in ('subprocess.Popen', 'subprocess.run', 'os.system', 'socket.create_connection',
+    stack.enter_context(patch('subprocess.run', new=guard.node_run if guard.suite == 'studio' else guard.deny))
+    stack.enter_context(patch('subprocess.Popen', new=guard.node_popen if guard.suite == 'studio' else guard.deny))
+    if guard.suite == 'quality_stop':
+        stack.enter_context(patch('sqlite3.connect', new=guard.private_sqlite))
+    for target in ('os.system', 'socket.create_connection',
                    'urllib.request.OpenerDirector.open', 'urllib.request.urlopen'):
         stack.enter_context(patch(target, new=guard.deny))
     if hasattr(os, 'startfile'):
@@ -240,6 +334,10 @@ def run_child(suite, out):
     os.chdir(out); sys.path.insert(0, str(ROOT)); sys.dont_write_bytecode = True
     tempfile.tempdir = str(out / 'tmp')
     guard = EffectGuard(out, suite)
+    if suite == 'studio':
+        os.environ['NODE_BINARY'] = str(guard.node)
+    if suite in {'quality', 'quality_stop'}:
+        os.environ['YT_AUTOMATION_STOP_FILE'] = str(out / 'STOP')
     with ExitStack() as stack:
         install_effects(stack, guard)
         if not admitted(suite):
@@ -258,6 +356,8 @@ def run_child(suite, out):
             *[str(ROOT / path) for path in SUITES[suite][2]]])
         if guard.denied:
             raise RuntimeError('Offline effect attempt; qualification failed; arguments suppressed')
+        (out / 'effects.json').write_text(json.dumps(dict(denied=guard.denied,
+            node_calls=guard.node_calls, private_sqlite_calls=guard.sqlite_calls)), encoding='utf-8')
         return code
 
 
@@ -273,6 +373,12 @@ def fresh_output(suite):
     nonce = secrets.token_hex(32)
     marker = dict(kind='youtube_repair_offline_child.v1', suite=suite, repository=str(ROOT),
                   nonce_sha256=hashlib.sha256(nonce.encode()).hexdigest())
+    if suite == 'studio':
+        binary = shutil.which('node')
+        if not binary:
+            raise RuntimeError('The fixed Node fixture runtime is unavailable')
+        binary = Path(binary).resolve()
+        marker['node'] = dict(path=str(binary), sha256=hashlib.sha256(binary.read_bytes()).hexdigest())
     (out / 'owner.json').write_text(json.dumps(marker), encoding='utf-8')
     return out, nonce
 
@@ -288,6 +394,12 @@ def validate_child(suite, value, nonce):
         raise RuntimeError('Child output ownership mismatch') from None
     expected = dict(kind='youtube_repair_offline_child.v1', suite=suite, repository=str(ROOT),
                     nonce_sha256=hashlib.sha256(nonce.encode()).hexdigest())
+    if suite == 'studio':
+        bound = marker.get('node', {})
+        if (set(bound) != {'path', 'sha256'} or not Path(bound['path']).is_absolute()
+                or hashlib.sha256(Path(bound['path']).read_bytes()).hexdigest() != bound['sha256']):
+            raise RuntimeError('Node fixture runtime binding mismatch')
+        expected['node'] = bound
     if marker != expected:
         raise RuntimeError('Child output ownership mismatch')
     return out
@@ -299,7 +411,7 @@ def launch(suite):
     if not admitted(suite):
         raise RuntimeError('Selection includes a quarantined or unregistered program')
     with (out / 'child-output.private').open('xb') as stream:
-        result = subprocess.run([sys.executable, '-I', '-B', str(Path(__file__).resolve()),
+        result = subprocess.run([sys.executable, '-I', '-X', 'utf8', '-B', str(Path(__file__).resolve()),
             '--suite', suite, '--child', str(out), '--child-token', nonce], cwd=out, env=minimal_environment(out),
             stdout=stream, stderr=stream, timeout=180, check=False)
     count, expected, _ = SUITES[suite]

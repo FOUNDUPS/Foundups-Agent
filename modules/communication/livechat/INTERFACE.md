@@ -1,5 +1,44 @@
 # LiveChat Module Interface
 
+## Existing STOP owner: comments-quality scope (2026-11-05)
+
+`automation_gates.stop_active()` retains its any-STOP behavior. Explicit
+`stop_active('comments')` also sees every STOP; explicit `global`, `livechat`,
+`scheduling`, `shorts` and `indexing` scopes permit only the recognized comments
+incident exception. Invalid scopes fail closed. `gate_snapshot.stop_active` is
+the global/manual decision; `comments_stop_active` and `comment_stop_status`
+report the separate comment decision. Comment engagement/reply flags are masked
+off while comments are stopped; other environment permissions are not enabled.
+
+`latch_comment_quality_stop(reason)` accepts only `invalid_reply_text`,
+`review_rejected` or `review_unavailable_or_invalid`. It exclusively creates the
+existing STOP path under the existing runtime-operation lock, never overwriting
+manual, newer or uncertain evidence. Its closed record has exactly `version=1`,
+`kind='comment_reply_quality'`, `scope='comments'`, a 32-character lowercase-hex
+`incident_id`, the recognized `reason`, and a finite positive
+`recorded_at_unix` below `1e12`. Reads are bounded to 4 KiB; nonregular,
+linked/reparse, malformed, changed or unreadable files fail closed globally.
+`read_comment_quality_stop()` returns only a validated record, otherwise `None`;
+use the gate snapshot to distinguish absence from a global/unknown STOP.
+
+`clear_comment_quality_stop(expected_record)` requires the complete exact current
+recognized record under the same owner lock and rechecks file identity/content.
+It never clears manual/newer/unknown STOP or any delivery claim. This is a
+cooperating-writer guarantee, not OS compare-and-swap against arbitrary manual
+replacement. Successful clear describes the file gate only: first settle the
+halted comment owners, then clear the matching incident and start fresh owners.
+Existing DAE/coordinator parent receipts remain halted, including when exclusive
+creation failed. No context command, expiry, restart loop or generic reset clears
+them automatically.
+
+`comment_stop_result()` supplies content-free typed halt evidence. The comments
+CLI uses reserved exit `78` for that result, including failed persistence; both
+subprocess readers and comments rotation honor it even without usable stdout.
+Other rotation task types keep their existing exit semantics. Halts preserve
+unfinished checkpoints and never publish comment/rotation completion evidence.
+An active owned comment task must settle before a comments-halted inbox wait can
+yield to live chat; that yield does not claim the inbox was cleared.
+
 ## Subprocess framing and cleanup evidence (2026-11-05)
 
 `SubprocessRunner` reads stdout/stderr in fixed65,536-byte chunks. Physical

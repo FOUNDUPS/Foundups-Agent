@@ -89,6 +89,11 @@ def _get_run_id() -> str:
     return run_id
 
 
+def _comments_halt_result():
+    from modules.communication.livechat.src.automation_gates import comment_stop_result
+    return comment_stop_result()
+
+
 @dataclass(frozen=True)
 class _CommentEngagementSwitches:
     enabled: bool
@@ -229,19 +234,19 @@ class SubprocessRunner(EngagementRunner):
     ) -> Dict[str, Any]:
         """Execute via subprocess (wraps existing community_monitor logic)."""
 
+        halted = _comments_halt_result()
+        if halted:
+            return halted
         switches = _get_comment_engagement_switches()
         run_id = _get_run_id()
-        if stop_active():
+        if stop_active('comments'):
             logger.warning(
                 "[AUTOMATION-AUDIT] run_id=%s comment_engagement=disabled (stop_file=%s) mode=subprocess",
                 run_id,
                 stop_file_path(),
             )
-            return {
-                "skipped": True,
-                "reason": "automation_stopped",
-                "stats": {"comments_processed": 0, "likes": 0, "hearts": 0, "replies": 0, "errors": 0},
-            }
+            return _comments_halt_result() or {'state': 'halted', 'halted_for_comments_stop': True,
+                                              'stats': {'comments_processed': 0, 'all_processed': False}}
         if not switches.enabled:
             logger.warning(f"[AUTOMATION-AUDIT] run_id={run_id} comment_engagement=disabled mode=subprocess")
             return {
@@ -418,7 +423,26 @@ class SubprocessRunner(EngagementRunner):
                 except Exception:
                     continue
 
+        from modules.communication.livechat.src.automation_gates import COMMENTS_HALTED_EXIT_CODE, comments_exit_code
+        if process is not None and process.returncode == COMMENTS_HALTED_EXIT_CODE:
+            halted = _comments_halt_result() or {
+                'state': 'halted', 'halted_for_comments_stop': True,
+                'quality_stop_persisted': False, 'error': 'comments_halted_child',
+                'stats': {'comments_processed': 0, 'all_processed': False}}
+            counts = json_output.get('stats') if isinstance(json_output, dict) else None
+            if isinstance(counts, dict):
+                halted['stats'] = {key: value for key, value in counts.items()
+                    if key in {'comments_processed', 'likes', 'hearts', 'replies', 'errors'}
+                    and type(value) is int and 0 <= value <= 1_000_000_000}
+                halted['stats']['all_processed'] = False
+            return halted
         if json_output:
+            if comments_exit_code(json_output):
+                json_output['state'] = 'halted'
+                if not isinstance(json_output.get('stats'), dict):
+                    json_output['stats'] = {}
+                json_output.setdefault('stats', {})['all_processed'] = False
+                return json_output
             stats = json_output.get('stats', {})
             logger.info(f"[DAEMON][CARDIOVASCULAR] 📊 ENGAGEMENT RESULTS:")
             logger.info(f"[DAEMON][CARDIOVASCULAR]   Comments processed: {stats.get('comments_processed', 0)}")
@@ -474,6 +498,9 @@ class ThreadRunner(EngagementRunner):
     ) -> Dict[str, Any]:
         """Execute in dedicated thread (prevent event loop blocking)."""
 
+        halted = _comments_halt_result()
+        if halted:
+            return halted
         switches = _get_comment_engagement_switches()
         run_id = _get_run_id()
         if not switches.enabled:
@@ -506,6 +533,9 @@ class ThreadRunner(EngagementRunner):
         Synchronous execution in dedicated thread.
         Selenium blocking happens HERE, not in main event loop.
         """
+        halted = _comments_halt_result()
+        if halted:
+            return halted
         try:
             # Import here to avoid loading in main thread
             import modules.communication.video_comments.skillz.tars_like_heart_reply.comment_engagement_dae as dae_module
@@ -611,6 +641,9 @@ class InProcessRunner(EngagementRunner):
 
         logger.warning("[INPROC] ⚠️ WARNING: Running in main event loop (will block livechat!)")
 
+        halted = _comments_halt_result()
+        if halted:
+            return halted
         switches = _get_comment_engagement_switches()
         run_id = _get_run_id()
         if not switches.enabled:

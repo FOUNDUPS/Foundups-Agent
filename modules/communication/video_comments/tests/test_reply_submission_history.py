@@ -54,31 +54,44 @@ const vm = require('node:vm');
 let input = ''; process.stdin.on('data', x => input += x); process.stdin.on('end', () => {
  const f = JSON.parse(input), v = Object.assign({id:'UgxOriginal', video:'VIDEO', text:'Where is the film?',
    author:'@Aki', authorChannel:'AUTHOR', target:'RECEIVING', replies:[]}, f.row || {});
- function author(name, channel, host='www.youtube.com') { const link={href:'https://'+host+'/channel/'+channel,
-   matches:()=>true, querySelector:()=>null};
-   return {textContent:name, matches:()=>false, querySelector:()=>link}; }
- function reply(r) { const e={getAttribute:k=>k==='data-comment-id'?r.id:null,
+ let row;
+ const owned = new Set();
+ function own(node) { owned.add(node); node.closest=selector=>selector==='ytcp-comment-thread'?row:null; return node; }
+ function author(name, channel, host='www.youtube.com') { const href='https://'+host+'/channel/'+channel;
+   const link=own({href,getAttribute:k=>k==='href'?href:null,matches:()=>true,querySelector:()=>null});
+   return own({textContent:name,matches:()=>false,querySelector:()=>link}); }
+ function reply(r) { const e={matches:()=>true,getAttribute:k=>k==='data-comment-id'?r.id:null,
    querySelector:s=>s.includes('ytcp-comment-author')?author('Creator',r.channel,r.host):
      s.includes('creator-badge')?(r.owner?{}:null):null,
    querySelectorAll:()=>[]};
-   const text={textContent:r.text, closest:()=>e}; return {e,text}; }
+   const text={textContent:r.text,closest:()=>e}; return {e,text}; }
  const replyRows=v.replies.map(reply);
- const replies={querySelectorAll:()=>replyRows.map(x=>x.text), contains:e=>replyRows.some(x=>x.e===e)};
- const info={querySelectorAll:()=>[{href:'https://studio.youtube.com/video/'+v.video+'/comments'}]};
- const control={textContent:'View 2 replies', getAttribute:k=>k==='aria-expanded'?'false':null,
-   getClientRects:()=>[{}], offsetParent:true};
+ const replies={querySelectorAll:()=>replyRows.map(x=>x.text),contains:e=>replyRows.some(x=>x.e===e)};
+ const href='https://studio.youtube.com/video/'+v.video+'/comments';
+ const videoLink=own({href,getAttribute:k=>k==='href'?href:null});
+ const info=own({matches:()=>false,querySelector:()=>null,querySelectorAll:()=>[videoLink]});
+ const content=own({textContent:v.text}), originalAuthor=author(v.author,v.authorChannel);
+ const control={textContent:'View 2 replies',getAttribute:k=>k==='aria-expanded'?'false':null,
+   getClientRects:()=>[{}],offsetParent:true};
  let clicks=0;
- const button={disabled:false, scrollIntoView:()=>{}, click:()=>clicks++};
- const row={isConnected:v.connected!==false, getAttribute:k=>k==='data-comment-id'?v.id:null,
-   setAttribute:()=>{}, querySelector:s=>s.includes('ytcp-comment-view')?null:
+ const button={disabled:false,scrollIntoView:()=>{},click:()=>clicks++};
+ row={isConnected:v.connected!==false,matches:()=>false,contains:node=>owned.has(node),
+   getAttribute:k=>k==='data-comment-id'?v.id:null,setAttribute:()=>{},
+   querySelector:s=>s.includes('ytcp-comment-view')?null:
      s.includes('ytcp-video-thumbnail-with-info')?info:
      s.includes('contenteditable')?{textContent:v.entered===undefined?'Draft':v.entered}:
      s.includes('submit-button')?button:
-     s.includes('content-text')?{textContent:v.text}:
-     s.includes('author')?author(v.author,v.authorChannel):
+     s.includes('content-text')?content:
+     s.includes('author')?originalAuthor:
      s.includes('replies')?(v.replies.length?replies:null):null,
-   querySelectorAll:s=>s==='a[href]'?[]:v.collapsed?[control]:[]};
- const document={querySelector:()=>v.disappeared?null:row, querySelectorAll:()=>[row]};
+   querySelectorAll:s=>{
+     if(s.startsWith('ytcp-video-thumbnail-with-info')) return [info];
+     if(s.startsWith('#author-text')) return [originalAuthor];
+     if(s.startsWith('yt-formatted-string#content-text')) return [content];
+     if(s.startsWith('button,')) return v.collapsed?[control]:[];
+     return [];
+   }};
+ const document={querySelector:()=>v.disappeared?null:row,querySelectorAll:()=>[row]};
  const program='(function(){'+f.script+'\n}).apply(null,'+JSON.stringify(f.args)+')';
  const result=vm.runInNewContext(program,{document,location:{origin:v.origin || 'https://studio.youtube.com',pathname:'/channel/'+v.target+'/comments',
    href:'https://studio.youtube.com/channel/'+v.target+'/comments'},URL},{timeout:1000});
@@ -285,7 +298,7 @@ class SubmissionHistoryTests(unittest.TestCase):
                 editor.textContent = ''
             elif 'const chunk = arguments[1]' in source:
                 editor.textContent += args[1]
-            elif source == 'return arguments[0].textContent' or source.startswith('const row=document.querySelector'):
+            elif source == 'const el = arguments[0]; return el.value === undefined ? el.textContent : el.value;' or source.startswith('const row=document.querySelector'):
                 return editor.textContent
             elif 'Submit button not found/disabled' in source:
                 submitted.append(True)

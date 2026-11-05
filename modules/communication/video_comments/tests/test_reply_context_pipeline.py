@@ -515,27 +515,45 @@ let input = '';
 process.stdin.on('data', data => input += data);
 process.stdin.on('end', () => {
   const fixture = JSON.parse(input);
-  const element = (text, href) => ({textContent:text || '', href,
-    getAttribute:name => name === 'href' ? href : name === 'title' ? text : null});
   const rows = fixture.rows.map(row => {
-    const title = element(row.title);
-    const links = (row.links || []).map(href => element('', href));
-    const info = row.metadata === false ? null : {
-      querySelector: () => row.title ? title : null,
-      querySelectorAll: () => links
+    let result, info;
+    const owned = new Set();
+    const element = (text, href, inMetadata=false) => {
+      const node = {textContent:text || '', href,
+        getAttribute:name => name === 'href' ? href : name === 'title' ? text : null,
+        matches:()=>false, querySelector:()=>null,
+        closest:selector => selector === 'ytcp-comment-thread' ? result :
+          inMetadata && selector.includes('video-thumbnail') ? info : null};
+      owned.add(node); return node;
     };
-    return {textContent:'fixture 1 day ago',
-      querySelector: selector => {
+    const title = element(row.title);
+    const links = (row.links || []).map(href => element('', href, true));
+    const content = element(row.comment), author = element('Fixture');
+    info = row.metadata === false ? null : {
+      matches:()=>false,
+      closest:selector=>selector === 'ytcp-comment-thread' ? result : null,
+      querySelector:()=>row.title ? title : null,
+      querySelectorAll:()=>links
+    };
+    if(info) owned.add(info);
+    result = {textContent:'fixture 1 day ago', matches:()=>false,
+      contains:node=>owned.has(node),
+      querySelector:selector => {
         if (selector === 'ytcp-video-thumbnail-with-info') return info;
         if (selector.includes('video-title')) return row.title ? title : null;
-        if (selector === 'yt-formatted-string#content-text') return element(row.comment);
-        if (selector.startsWith('#author-text')) return element('Fixture');
+        if (selector === 'yt-formatted-string#content-text') return content;
+        if (selector.startsWith('#author-text')) return author;
         return null;
       },
-      querySelectorAll: selector => selector === 'a[href]'
-        ? [element('', row.foreign), ...links] : []};
+      querySelectorAll:selector => {
+        if(selector.startsWith('ytcp-video-thumbnail-with-info')) return info ? [info] : [];
+        if(selector.startsWith('#author-text')) return [author];
+        if(selector.startsWith('yt-formatted-string#content-text')) return [content];
+        return selector === 'a[href]' ? [element('', row.foreign), ...links] : [];
+      }};
+    return result;
   });
-  const document = {querySelectorAll: selector => selector === 'ytcp-comment-thread' ? rows : []};
+  const document = {querySelectorAll:selector => selector === 'ytcp-comment-thread' ? rows : []};
   const program = '(function(){' + fixture.script + '\n}).call(null,' + fixture.index + ')';
   const result = vm.runInNewContext(program, {document, URL, console:{log(){}}}, {timeout:1000});
   process.stdout.write(JSON.stringify(result));

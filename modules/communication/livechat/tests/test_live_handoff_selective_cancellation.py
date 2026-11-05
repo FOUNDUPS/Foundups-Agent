@@ -73,7 +73,8 @@ async def _reap_test_process(process):
 
 
 @pytest.fixture
-def owners(monkeypatch, process_cases):
+def owners(monkeypatch, process_cases, tmp_path):
+    monkeypatch.setenv('YT_AUTOMATION_STOP_FILE', str(tmp_path / 'STOP'))
     def denied(*args, **kwargs):
         raise AssertionError("Network/provider effects forbidden in handoff tests")
     monkeypatch.setattr(socket, "getaddrinfo", denied)
@@ -200,6 +201,7 @@ def dae_owner(owners):
     cls = source_class("auto_moderator_dae.py", "AutoModeratorDAE", namespace, {
         "_get_confirmed_live_channel", "_run_confirmed_live_chat", "terminate_comment_engagement",
         "_comment_engagement_loop", "_ensure_multi_channel_coordinator", "_browser_engagement_loop", "_run_comment_engagement",
+        "_comments_halted",
     })
     source_function("auto_moderator_dae.py", "_env_truthy", namespace)
     dae = cls()

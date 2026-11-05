@@ -120,6 +120,15 @@ async def settle_owned_engagements(self, channel_id):
 async def run_owned_engagement(self, runner, *, channel_id, video_id,
                                 max_comments, browser_port=9222):
     """Own the real runner through cancellation, including thread completion."""
+    from modules.communication.livechat.src.automation_gates import comment_stop_result
+    def halt_result():
+        owner_gate = getattr(self, '_comments_halt', None)
+        if callable(owner_gate) and owner_gate():
+            return dict(self._comments_halt_receipt)
+        return comment_stop_result()
+    halted = halt_result()
+    if halted:
+        return halted
     deferred = {"deferred": "live_channel", "stats": {"comments_processed": 0}}
     for owned, (cid, port, owner) in tuple(self._active_engagements.items()):
         if cid == channel_id and owned.done() and not owned.cancelled() and owned.exception():
@@ -128,6 +137,9 @@ async def run_owned_engagement(self, runner, *, channel_id, video_id,
         return deferred
 
     async def invoke():
+        halted = halt_result()
+        if halted:
+            return halted
         # A confirmation can arrive between task creation and first execution.
         if self._is_live_channel(channel_id):
             return deferred
@@ -250,6 +262,10 @@ async def run_owned_rotation(self, supervisor, browser_name, max_comments, opera
 
 async def dispatch_comment_engagement(self, runner, channel_id, video_id,
                                       max_comments, mode, groups):
+    halt_gate = getattr(self, '_comments_halted', None)
+    halted = halt_gate() if callable(halt_gate) else None
+    if halted:
+        return dict(halted)
     await self._ensure_multi_channel_coordinator(runner, mode)
     if self.multi_channel_coordinator._is_live_channel(channel_id):
         return {"deferred": "live_channel"}
@@ -270,6 +286,11 @@ def comment_accounts(self, accounts):
 
 async def retry_verified_channel(self, driver, runner, channel_id,
                                   account_name, max_comments, browser_port):
+    from modules.communication.livechat.src.automation_gates import comment_stop_result
+    halted = comment_stop_result()
+    if halted:
+        self.update_engagement_status(channel_id, halted)
+        return 0
     self.set_active_channel(channel_id)
     self.log_studio_context(channel_id, f"{account_name} comment_engagement_retry", driver)
 
@@ -283,6 +304,13 @@ async def retry_verified_channel(self, driver, runner, channel_id,
     if retry_result and retry_result.get("deferred"):
         return None
     retry_result = retry_result or {}
+    if retry_result.get('halted_for_reply_quality') or retry_result.get('halted_for_comments_stop'):
+        if callable(getattr(self, '_comments_halt', None)):
+            self._comments_halt(channel_id, retry_result)
+        else:
+            self.update_engagement_status(channel_id, {'state': 'halted', 'all_processed': False,
+                'halted_for_reply_quality': retry_result.get('halted_for_reply_quality') is True})
+        return 0
     retry_stats = retry_result.get('stats', {})
     retry_processed = retry_stats.get('comments_processed', 0)
 

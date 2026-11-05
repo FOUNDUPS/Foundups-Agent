@@ -16,7 +16,8 @@ import pytest
 
 
 @pytest.fixture
-def owners(monkeypatch):
+def owners(monkeypatch, tmp_path):
+    monkeypatch.setenv('YT_AUTOMATION_STOP_FILE', str(tmp_path / 'STOP'))
     path = Path(__file__).with_name("test_chat_manifest_inspection.py")
     spec = importlib.util.spec_from_file_location("_quality_definition_helpers", path)
     helper = importlib.util.module_from_spec(spec)
@@ -24,6 +25,10 @@ def owners(monkeypatch):
     helper.GEN.normalize_reply_theme = helper.CONTEXT.normalize_reply_theme
     helper.GEN.select_channel_personality = helper.CONTEXT.select_channel_personality
     helper.PROCESSOR.INTELLIGENT_REPLIES_AVAILABLE = True
+    gates_spec = importlib.util.spec_from_file_location('_quality_actual_gates',
+        helper.ROOT / 'modules/communication/livechat/src/automation_gates.py')
+    helper.GATES = importlib.util.module_from_spec(gates_spec)
+    gates_spec.loader.exec_module(helper.GATES)
     for name, value in {"YT_ALLOW_GENERIC_REPLY_FALLBACK": "false", "YT_ENABLE_GROK_REPLIES": "false",
                         "YT_AUTOMATION_ENABLED": "true", "YT_COMMENT_ENGAGEMENT_ENABLED": "true",
                         "YT_COMMENT_REPLY_ENABLED": "true", "YT_FACTCHECK_ENABLED": "false"}.items():
@@ -255,7 +260,7 @@ def test_optin_xai_connector_keeps_key_only_in_auth_header_and_no_raw_error_log(
 @pytest.mark.parametrize("gate", ["stop", "automation", "engagement", "reply"])
 def test_actual_executor_early_gate_prevents_binding_claim_and_execution(owners, tmp_path, monkeypatch, gate):
     module = owners.EXECUTOR
-    gates = owners.definitions("_quality_gates", "modules/communication/livechat/src/automation_gates.py")
+    gates = owners.GATES
     module.gate_snapshot = gates.gate_snapshot
     monkeypatch.setitem(sys.modules, "modules.communication.livechat.src.automation_gates", gates)
     stop = tmp_path / "STOP"
@@ -280,7 +285,7 @@ def test_actual_executor_early_gate_prevents_binding_claim_and_execution(owners,
 @pytest.mark.parametrize("late_stop", [False, True])
 def test_actual_typing_to_submit_path_rechecks_late_stop_before_click(owners, tmp_path, monkeypatch, late_stop):
     module = owners.EXECUTOR
-    gates = owners.definitions("_quality_late_gates", "modules/communication/livechat/src/automation_gates.py")
+    gates = owners.GATES
     module.gate_snapshot = gates.gate_snapshot
     monkeypatch.setitem(sys.modules, "modules.communication.livechat.src.automation_gates", gates)
     row = owners.definitions("_quality_row", "modules/communication/video_comments/skillz/tars_like_heart_reply/src/comment_row_context.py")
@@ -299,7 +304,9 @@ def test_actual_typing_to_submit_path_rechecks_late_stop_before_click(owners, tm
         if "replyBtn.click()" in code: return {"success": True}
         if "return textarea;" in code: return textarea
         if "el.textContent += chunk" in code: entered.append(args[1]); return None
-        if code == "return arguments[0].textContent": return "".join(entered)
+        if (code == "return arguments[0].textContent"
+                or "const el = arguments[0]; return el.value === undefined" in code):
+            return "".join(entered)
         if "return el ?" in code:
             if late_stop: stop.write_text("stop", encoding="utf-8")
             return "".join(entered)
@@ -312,6 +319,7 @@ def test_actual_typing_to_submit_path_rechecks_late_stop_before_click(owners, tm
     item._pre_submit_guard = lambda: True
     item._submit_invoked = False
     monkeypatch.setattr(module.asyncio, "sleep", settled)
+    monkeypatch.setattr(module.random, "random", lambda: 1.0)
     result = asyncio.run(item._execute_reply_unverified(1, "Useful answer", expected_comment={"comment_id": "c1"}))
     assert "".join(entered) == "Useful answer"
     assert result is (not late_stop)
