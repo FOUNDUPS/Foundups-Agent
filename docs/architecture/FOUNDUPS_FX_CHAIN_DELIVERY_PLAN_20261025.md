@@ -102,6 +102,19 @@ hashes. It supplies current byte-bound evidence without relabeling the older run
 Exact source/security/PR/main/PC delivery remains separately verified; these local
 results grant no signing, deployment or economic activation authority.
 
+Source delivery is owned by [PR2307](https://github.com/FOUNDUPS/Foundups-Agent/pull/2307)
+on `agent/foundups-ups-unit-policy-20261105`. Its live head/checks/merge record, then
+the resulting main checks and local PC readback, are delivery evidence; the preview's
+VERIFIED_SIMULATED status does not depend on treating publication as chain readiness.
+Raw local receipts are retained under `outputs/blockchain-ups-policy-20261105/`.
+The first final-scan wrapper failed when concurrent Node scratch cleanup removed an
+inventoried path. Retain the failure; stop temporary-file writers and rerun the
+unchanged strict wrapper serially. Never relax path containment to clear a race.
+The final Node rerun passes all three entrypoints with stable current raw bytes.
+GitHub's 2026-11-05 push notice still reports 44 dependency alerts (2 critical,
+10 high, 24 moderate, 8 low); this is a notice, not fresh advisory-level triage or
+runtime clearance. Existing dependency and custody holds remain.
+
 ### Owners, retrieval and next boundary
 
 Reuse `_token_numeric.py` for bounded scalar arithmetic and PoolDistributor for
