@@ -6,6 +6,9 @@ Connect WRE owners and startup/action checks share policy. The training menu
 renders before dependency initialization and retains preflight for each action.
 Read-only diagnostics are separate from action admission and production RSI.
 See WRE/CLI/training module logs and the 207-pass offline test receipt scope.
+The first hosted run exposed stale backend packaging hashes for the changed
+owners. Regenerate the existing manifest and its extension/test digest pins;
+retain the independent closure and staged-index checks without weakening them.
 Native protected composition and R15 remain separately gated; no model training,
 live daemon restart or public delivery is established here. WSP11/15/22/48/50/97.
 

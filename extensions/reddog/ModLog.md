@@ -1,3 +1,11 @@
+## 2026-11-06 — Bind WRE readiness source changes
+
+Regenerate the existing backend manifest after the readiness and training-menu
+repair. Refresh both digest pins together; runtime membership remains 1485 and
+resource limits are unchanged. The first hosted run correctly rejected stale
+hashes. This update binds source packaging, not native worker admission or live
+training. WSP 5/11/22/50/97.
+
 ## 2026-11-01 — Bind private YouTube operator directives
 
 Regenerate the existing backend closure and both digest pins for the queue's
