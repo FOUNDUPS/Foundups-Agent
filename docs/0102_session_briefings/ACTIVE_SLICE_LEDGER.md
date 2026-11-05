@@ -1,3 +1,15 @@
+## P3 delivered; P4 preview verified — 2026-11-05
+
+P3 PR2300/main `95516e81ee6c1cf3ccec588492929662cc671c62` closed with 23 PR/21 main
+checks, 80 PC/control bindings, 1,485 runtime digests and independent preservation.
+The [P4 class-C preview](../architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p4-prospective-micro-ups-allocation-v1)
+is VERIFIED_SIMULATED at policy base 78e16b4d: focused 360/broad 1,404, independent
+15/native JS and controlled legacy trace pass; scopes overlap and delivery is separate.
+Root owns code/tests/package/index. Initial ID/import failures and corrections remain.
+Next: staker/import and atom source/book/receipt migration, then shared reservations/
+recovery. Source backing, identity/PoB, custody, dependency/Holo and chain holds stay.
+[Canonical continuity](../architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#p3-delivery-and-p4-continuity--2026-11-05) supersedes dated pending notes without rewriting their history.
+
 ## Restricted native UPS transfer locally qualified — 2026-11-02
 
 PR2297/main d65 delivered the earlier four-credit guard. The [19/P0 class-C mode](../architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p3-exact-native-transfer-v1)

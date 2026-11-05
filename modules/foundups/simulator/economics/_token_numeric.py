@@ -5,6 +5,8 @@ transient calculations, not settlement or economic authority.
 """
 
 import math
+import re
+from fractions import Fraction
 from typing import NamedTuple, Optional
 
 
@@ -173,4 +175,34 @@ def _unstake_record_values(
 ) -> tuple[float, float]:
     _require_numbers(position, amount, received)
     return max(0.0, position - amount), _checked_add(balance, received)
+
+
+def _ups_atoms(value: int) -> int:
+    """ups_micro_v1 operation bound, not an asset supply or custody assertion."""
+    if type(value) is not int or not 0 <= value <= 2**63 - 1:
+        raise ValueError("micro-UPS values require bounded built-in integers")
+    return value
+
+
+def parse_ups_atoms(text: str) -> int:
+    """Convert explicit decimal UPS intent to micro-UPS exactly; never round."""
+    if (type(text) is not str or len(text) > 20
+            or re.fullmatch(r"(?:0|[1-9][0-9]{0,12})(?:\.[0-9]{1,6})?", text) is None):
+        raise ValueError("expected unsigned ASCII UPS decimal with at most six places")
+    whole, _, fraction = text.partition(".")
+    return _ups_atoms(int(whole) * 1_000_000 + int(fraction.ljust(6, "0")))
+
+
+def _ups_atom_lanes(total, counts, participant_type, activity):
+    """Exact arithmetic over validated roster counts; floor each credit lane once.
+
+    Fixed integer ratios belong to ups_micro_v1, independent of legacy tuning.
+    Fractions are transient entitlements, never stored balances or debit operands.
+    """
+    tier = (4, 16, 80)[activity]
+    stakeholder = sum((Fraction(total * (60, 16, 4)[pool] * tier,
+                                10_000 * counts[pool][activity])
+                       for pool in range(participant_type + 1)), Fraction(0))
+    network = total * 16 * tier // (10_000 * counts[3][activity])
+    return stakeholder.numerator // stakeholder.denominator, network
 

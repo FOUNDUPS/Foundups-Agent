@@ -1,3 +1,14 @@
+## 2026-11-05 — P3 continuity and verified micro-UPS preview
+
+P3 PR2300/main 95516e81 closed with 23 PR/21 main checks, PC/runtime readback and
+1,102-payload preservation; its owners matched the P4 policy baseline 78e16b4d.
+Root's [P4 class-C preview](docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p4-prospective-micro-ups-allocation-v1)
+is VERIFIED_SIMULATED: focused 360/broad 1,404, independent 15 and native JS readback
+pass; controlled legacy trace bytes match. Retain initial RED/Windows-ID and import
+repair history; counts overlap. Results belong in these canonical docs, not a new report.
+No native-book/source/v2 migration or F_i/funding/custody/chain activation follows.
+WSP15/22/26/50/62/81/97; source/package/protected-delivery gates remain separate.
+
 ## 2026-11-05 — Reply memory readiness and cancellation
 
 YouTube replies reuse ready in-process voice/video memory without starting cold

@@ -1,3 +1,13 @@
+## 2026-11-05 — WSP26 micro-UPS preview qualification
+
+WSP81 NOTIFICATION_REQUIRED under 012's continuing architecture/docs request.
+The §1.2 [P4 pointer](../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p4-prospective-micro-ups-allocation-v1)
+and exact knowledge mirror now mark the bounded preview VERIFIED_SIMULATED after
+source-bound numerical/security acceptance. No F_i supply, BTC price, native-book/v2
+migration, custody or chain activation is selected. Failed ID/import runs stay evidence.
+0102 handles policy manually; no Qwen/model/pattern-store execution is claimed.
+WSP22/26/50/81/97; preserve prior text and recover through a focused Git revert.
+
 ## 2026-11-02 — WSP26 restricted simulator-native transfer clarification
 
 Under 012 continuation, add the narrow §1.2 B03-P3 simulator-qualified version pointer;

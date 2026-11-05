@@ -1,5 +1,117 @@
 # FoundUps FX and blockchain delivery — 2026-10-25
 
+## B03-P4 prospective micro-UPS allocation v1
+
+**2026-11-05 — class C, 19/P0 (4/5/5/5); decision frozen before implementation.**
+0102 selects this bounded simulator layer under 012's continuing architecture
+delegation, against main `78e16b4dd0de0dde66f37466d7df696485113a79`.
+The preceding P3 was delivered by [PR2300](https://github.com/FOUNDUPS/Foundups-Agent/pull/2300)
+at `95516e81ee6c1cf3ccec588492929662cc671c62`: 23 PR / 21 resulting-main checks,
+independent PC/runtime readback and evidence preservation passed. Its older
+delivery-PENDING sentence below is superseded; its economic limitations remain.
+P4 is now **VERIFIED_SIMULATED** within the prospective allocation scope below.
+Independent numerical and security reviews found no material product mismatch.
+
+### Selected policy and acceptance
+
+- `ups_micro_v1`: one UPS = 1,000,000 integer atoms, specifically for this
+  prospective allocation policy. Six decimals give 100 times the UPS range of
+  eight within the bounded `0..2**63-1` amount envelope; this is an operation/work
+  limit, not an issuance cap, BTC price or redemption promise. F_i's eight-decimal
+  proposal is a different asset. Existing float books and epoch.v2 are not migrated.
+- Public `parse_ups_atoms(text)` accepts only a built-in canonical ASCII decimal
+  string, no sign/exponent/whitespace/leading whole-number zeroes, at most six
+  fractional digits and at most 20 characters. It converts exactly or refuses;
+  it never rounds, coerces a float, or changes the global Decimal context.
+  Fractional trailing zeroes (`1.0`, `0.000000`) are accepted; `.1` and `1.` refuse.
+- `PoolDistributor.plan_atom_epoch(epoch, total_reward_atoms, *, foundup_id)`
+  snapshots its actual roster under the existing lock and produces an immutable
+  `UPSAtomPlan`. Amount and epoch are built-in integers in `0..2**63-1`;
+  identifiers match `[A-Za-z0-9][A-Za-z0-9._:-]{0,127}`. A bound ledger must match
+  the context. Maximum roster is 10,000 exact Participant objects with matching
+  IDs and exact enum classifications. Any non-None staker position refuses:
+  native BTC hurdle/tier migration and shared first-crossing remain unresolved.
+  Require an exact dict and bound its size before copying/sorting; check exact
+  types before equality/regex/arithmetic. Position refusal uses identity, not
+  truthiness. Capture detached immutable scalar rows, retaining zero rewards.
+- Fixed exact pool ratios are 60/16/4/16/4 percent and activity ratios 4/16/80
+  percent. Sum exact eligible stakeholder-pool entitlements per participant,
+  then floor ONCE for that stakeholder credit; floor network credit separately,
+  and floor the fund once. No intermediate pool/tier floor. This matches the two
+  existing participant credit lanes. Earlier per-pool-floor consideration was
+  rejected: single DU/DU R=7 yields 4 atoms here, versus 3 per-pool or 5 combined.
+  Versioned integer ratios/cumulative access do not read mutable legacy percentage,
+  activity/access tables, participant callbacks, balances or derived staker tiers.
+- `C = sum(participant atoms) + fund atoms <= R`; all `R-C` remains source-owned
+  in the prospective policy. No carry, new beneficiary, burn, largest-remainder
+  allocation or split-invariance promise. Splitting epochs/identities can change
+  retained dust; classifications and Sybil/PoB admission are not authenticated here.
+- Full-nine roster at 0.1 UPS: R=100000, C=99996, fund=4000, residue=4 atoms;
+  at 0.3 UPS residue=0. One-atom full-nine posts zero in the plan and retains one.
+  Single UN/DU R=13 yields stakeholder6 + network1, not an intermediate-floor5+1.
+- Plan identity binds `foundups.ups-atom-plan.v1`, UPS/scale6/`ups_micro_v1`,
+  epoch/context, sorted roster/classifications, nominal, credits, fund and residue.
+  Serialized amounts and epoch are decimal strings to avoid JavaScript precision
+  loss. Detached JSON and content hashes are neither authorization nor receipts.
+  Identical snapshots repeat deterministically; a changed zero-reward roster
+  still changes identity. No cache, ledger, source, reservation or balance writes.
+- Retain old defaults/oracles and fresh baseline. Freeze malformed-type/no-hook,
+  bounds/overflow, fractional/tiny/divisor-three, deterministic seeded conservation,
+  context/roster identity, native staker refusal and no-effect tests before code.
+  Independent tests/review precede source publication; chain parity stays blocked.
+
+### Executed P4 acceptance — 2026-11-05
+
+Fresh focused baseline: 280 passed. Frozen 80-case acceptance first produced
+79 missing-API failures and one Windows pytest parameter-ID setup error. The
+100,000-character invalid input was retained; only its display ID was shortened.
+The unchanged-source rerun produced 80 missing-API failures. Candidate focused
+selection then passed 360 (280 prior +80 new), with no errors/skips/guard denials.
+Promotion into the existing epoch-ledger test file initially lost its hashlib
+import: broad 1,403 passed/one NameError. Restoring that import, with unchanged
+assertions, gives **1,404 passed**, three deliberate SSE HTTP deselections and
+zero failures/errors/skips/guard denials. Independent readback confirms equal
+case IDs and 174 stable simulator/FAM Python files. Frozen tests, failed runs and
+the integration repair remain evidence; function AST equality alone missed imports.
+The 80 cases include 72 seeded roster trials against an independently authored
+rational oracle, maximal amounts/roster, exact decimal grammar and no-effect checks.
+
+Independent security held-outs: **15 passed**. A native JavaScript JSON.parse /
+BigInt check consumed an actual maximal-amount plan without precision loss.
+Controlled real Mesa baseline/candidate 240-tick traces are byte-identical:
+SHA256 `672d12c9d8fb6286624ea892fb3a5d0315c475ee45f8c83c9a271ba4328f0ff1`.
+These overlapping scopes are not summed; the legacy trace does not claim a funded
+atom transition. Python runs used credential-stripped scratch/effect guards,
+not native OS confinement; the Node readback was credential-stripped only.
+Actual source sizes: numeric208/pool1071, pool class296, plan class29/new method18;
+promoted test693. Old production function ASTs and existing test bodies remain.
+Package/check/PR/main/PC delivery is recorded separately after observed completion.
+
+### Owners, retrieval and next boundary
+
+Reuse `_token_numeric.py` for bounded scalar arithmetic and PoolDistributor for
+roster/plan semantics; no new money service or runtime module. Pre-code budgets:
+numeric <=280 lines; pool <=1100, PoolDistributor <=325, new functions <=50 and
+plan class <=80; append <=260 lines to the existing epoch-ledger test owner
+(total <=700), preserving old assertions. Pool growth enters WSP62's critical
+window: split its legacy participant/staker models before broader posting work,
+not as an unreviewed part of this arithmetic slice. Package membership/caps stay.
+0102 owns monetary-policy conflict resolution; Qwen/Gemma runtime/model execution
+and pattern writes are not claimed. WRE runtime activation is not part of this
+local source/test workflow. Independent 0102 reviewers own numerical and security checks.
+Governed lexical retrieval at this exact main was ok with workspace-head evidence,
+freshness UNKNOWN/index-gap true; semantic/native Holo HOLD stays. Keyword noise
+included unrelated web-design WSPs and missing tests; direct owner/NAVIGATION reads
+supplied the required pool/ledger tests. Optional memory/README and module
+requirements.txt are absent; no dependency installation is inferred or performed.
+
+Next: version staker hurdle/tier import and exact atom source/book/receipt migration,
+then shared pending reservations and durable funded settlement. A preview is not
+a funded debit. UPS/BTC conversion conflicts, F_i issuance/caps, PoB/identity,
+custody, native dependency qualification and chain activation remain separate gates.
+Results and continuity belong here and in existing module/WSP/TestModLog records;
+012 does not need a separate execution report.
+
 ## B03-P3 exact native transfer v1
 
 **2026-11-02 — class C, 19/P0 (4/5/5/5); simulator-qualified restricted-domain version.**

@@ -1,5 +1,33 @@
 # FoundUps blockchain reconciliation and security decision — 2026-10-31
 
+## P3 delivery and P4 continuity — 2026-11-05
+
+[PR2300](https://github.com/FOUNDUPS/Foundups-Agent/pull/2300) delivered tested head
+`0d9a543d9d40bb6e990e98c803cf438df4aa5ea4` by normal protected squash to main
+`95516e81ee6c1cf3ccec588492929662cc671c62`; tested/merged trees match, 23 PR and
+21 resulting-main checks passed without bypass. On Nov2, independent readback verified
+80 affected paths and all 1,485 runtime digests in both PC/control; the primary branch
+was preserved by fast-forward. Unrelated untracked proof was five coarse directory
+status lines only, not a pathname/content inventory. Separately, 1,102 payload files
+(59,488,159 bytes) plus their manifest were independently preserved byte-for-byte.
+These terminal facts supersede P3 delivery-PENDING prose, not its economic limitations.
+At the Nov5 policy baseline 78e16b4d, six P3 source/test owners matched delivered source.
+
+The [P4 preview](FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p4-prospective-micro-ups-allocation-v1) is now
+VERIFIED_SIMULATED: focused 360/broad 1,404 and independent 15/native JS pass;
+controlled legacy trace bytes match. This is planning, not source posting or custody.
+Terminal-lane floors can increase retained dust when requests/identities split;
+no split invariance, Sybil control or authentic entitlement follows from a plan hash.
+Native stakers refuse until BTC conversion, F_i tier and shared-hurdle migration
+are selected; atom source/book/receipt migration precedes durable funded recovery.
+The older `_require_numbers` tuple-membership pattern is a separate static follow-up;
+P4 uses identity-only atom ingress. No exploit was executed or broad host safety proven.
+The Nov2 snapshot had 44 alerts (2 critical/10 high/24 medium/8 low), not a fresh Nov5
+clearance. Chroma controller/store/native and other dependency holds remain; lexical
+freshness is UNKNOWN/index-gap true. Global BTC/F_i, PoB/identity, custody and chain
+gates stay. Protected P4 delivery is recorded separately after observed completion.
+Continuity/results stay in these canonical docs and existing logs; no new execution report.
+
 ## Restricted native transfer and retained threats — 2026-11-02
 
 The [19/P0 class-C mode](FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p3-exact-native-transfer-v1)

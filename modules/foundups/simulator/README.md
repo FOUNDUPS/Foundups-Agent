@@ -1,5 +1,16 @@
 # FoundUps Simulator
 
+## Prospective micro-UPS allocation — 2026-11-05
+
+The [B03-P4 preview](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p4-prospective-micro-ups-allocation-v1)
+is VERIFIED_SIMULATED: exact six-decimal UPS atoms and an immutable actual-roster
+allocation plan. Focused 360/broad 1,404 and independent 15 pass; scopes overlap.
+Native balances/source/v2 receipts stay separate; this is no funded posting or BTC price.
+P3 [PR2300](https://github.com/FOUNDUPS/Foundups-Agent/pull/2300)/main 95516e81
+closed with 23 PR/21 main checks and independent PC/preservation verification.
+[Canonical continuity](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#p3-delivery-and-p4-continuity--2026-11-05)
+records the proof and remaining migration, dependency/Holo, custody and chain gates.
+
 ## Restricted native UPS transfer — 2026-11-02
 
 The [versioned simulator-qualified mode](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p3-exact-native-transfer-v1)

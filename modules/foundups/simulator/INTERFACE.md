@@ -1,5 +1,21 @@
 # INTERFACE - FoundUps Simulator
 
+## Prospective micro-UPS interface — 2026-11-05
+
+**VERIFIED_SIMULATED bounded preview.** The [P4 contract](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p4-prospective-micro-ups-allocation-v1)
+implements `ups_micro_v1`: 1 UPS = 1,000,000 atoms; built-in amount/epoch integers
+are bounded by `0..2**63-1`. `parse_ups_atoms(text)` accepts the frozen ASCII decimal
+grammar exactly, at most six fractional digits/20 characters; trailing zeroes are
+allowed, while `.1`, `1.`, signs, whitespace, exponents and coercible objects refuse.
+`PoolDistributor.plan_atom_epoch(epoch, total_reward_atoms, *, foundup_id)` captures
+its real locked roster and returns immutable `UPSAtomPlan`. No source/balance,
+ledger/cache or reservation write; native staker positions refuse. Stakeholder
+entitlements sum exactly then floor once; network floors separately and fund once.
+Factory plans export detached JSON with decimal-string amounts/epoch. Context,
+roster and version identify data, never authority. `source_retained_atoms` is R-C
+in the plan, not an observed Treasury balance; no carry or new beneficiary.
+Defaults/P3/v2 receipts stay; current source qualification is scoped in the central record.
+
 ## Restricted native UPS epoch transfers — 2026-11-02
 
 `SimulatorConfig.epoch_funding_mode` defaults to `legacy_unfunded`; opt-in

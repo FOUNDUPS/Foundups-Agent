@@ -76,6 +76,22 @@
         "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md",
         "modules/foundups/simulator/INTERFACE.md"
       ]
+    },
+    {
+      "id": "ups_micro_v1_prospective_allocation",
+      "statement": "Prospective UPS quantity policy uses 1000000 atoms per UPS, bounded exact integers and terminal stakeholder/network/fund floors. R-C stays source-owned without carry. The actual-roster plan posts no source, balance, reservation or epoch.v2 state; native staker positions refuse.",
+      "status": "VERIFIED_SIMULATED",
+      "decision_class": "C",
+      "chain_activation": "BLOCKED",
+      "code_refs": [
+        "modules/foundups/simulator/economics/_token_numeric.py",
+        "modules/foundups/simulator/economics/pool_distribution.py"
+      ],
+      "doc_refs": [
+        "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md",
+        "modules/foundups/simulator/INTERFACE.md",
+        "WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md"
+      ]
     }
   ],
   "event_contracts": {
