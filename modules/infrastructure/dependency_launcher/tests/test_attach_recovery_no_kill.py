@@ -17,6 +17,7 @@ Whether PUT/GET /json/new actually opens a discoverable tab on real Chrome 149 i
 MOCK-validated only here; 012 live-validates (see ModLog "HONEST LIVE GAP").
 """
 
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -83,7 +84,7 @@ def test_chrome_no_kill_on_discover_pages():
     chrome_ctor = mock.Mock(side_effect=_DiscoverPagesError())
 
     with mock.patch.object(deps, "subprocess") as sp, \
-         mock.patch.object(deps, "is_devtools_responding", return_value=True), \
+         mock.patch.object(deps, "_devtools_page_state", return_value="ready"), \
          mock.patch.object(deps, "open_devtools_page", return_value=True) as open_tab, \
          mock.patch.object(deps, "launch_chrome") as launch, \
          mock.patch.object(deps, "time"), \
@@ -111,7 +112,7 @@ def test_chrome_recover_then_attach():
     chrome_ctor = mock.Mock(side_effect=[_DiscoverPagesError(), _FakeDriver()])
 
     with mock.patch.object(deps, "subprocess") as sp, \
-         mock.patch.object(deps, "is_devtools_responding", return_value=True), \
+         mock.patch.object(deps, "_devtools_page_state", return_value="ready"), \
          mock.patch.object(deps, "open_devtools_page", return_value=True) as open_tab, \
          mock.patch.object(deps, "launch_chrome") as launch, \
          mock.patch.object(deps, "time"), \
@@ -133,7 +134,7 @@ def test_chrome_fail_clear_no_kill_when_open_fails():
     chrome_ctor = mock.Mock(side_effect=_DiscoverPagesError())
 
     with mock.patch.object(deps, "subprocess") as sp, \
-         mock.patch.object(deps, "is_devtools_responding", return_value=True), \
+         mock.patch.object(deps, "_devtools_page_state", return_value="ready"), \
          mock.patch.object(deps, "open_devtools_page", return_value=False) as open_tab, \
          mock.patch.object(deps, "launch_chrome") as launch, \
          mock.patch.object(deps, "time"), \
@@ -154,7 +155,7 @@ def test_chrome_success_attach_preserved():
     chrome_ctor = mock.Mock(return_value=_FakeDriver())
 
     with mock.patch.object(deps, "subprocess") as sp, \
-         mock.patch.object(deps, "is_devtools_responding", return_value=True), \
+         mock.patch.object(deps, "_devtools_page_state", return_value="ready"), \
          mock.patch.object(deps, "open_devtools_page", return_value=True) as open_tab, \
          mock.patch.object(deps, "launch_chrome") as launch, \
          mock.patch.object(deps, "time"), \
@@ -180,7 +181,7 @@ def test_edge_no_kill_on_discover_pages():
     edge_ctor = mock.Mock(side_effect=_DiscoverPagesError())
 
     with mock.patch.object(deps, "subprocess") as sp, \
-         mock.patch.object(deps, "is_devtools_responding", return_value=True), \
+         mock.patch.object(deps, "_devtools_page_state", return_value="ready"), \
          mock.patch.object(deps, "open_devtools_page", return_value=True) as open_tab, \
          mock.patch.object(deps, "launch_edge") as launch, \
          mock.patch.object(deps, "time"), \
@@ -201,7 +202,7 @@ def test_edge_recover_then_attach():
     edge_ctor = mock.Mock(side_effect=[_DiscoverPagesError(), _FakeDriver()])
 
     with mock.patch.object(deps, "subprocess") as sp, \
-         mock.patch.object(deps, "is_devtools_responding", return_value=True), \
+         mock.patch.object(deps, "_devtools_page_state", return_value="ready"), \
          mock.patch.object(deps, "open_devtools_page", return_value=True) as open_tab, \
          mock.patch.object(deps, "launch_edge") as launch, \
          mock.patch.object(deps, "time"), \
@@ -223,7 +224,7 @@ def test_edge_fail_clear_no_kill_when_open_fails():
     edge_ctor = mock.Mock(side_effect=_DiscoverPagesError())
 
     with mock.patch.object(deps, "subprocess") as sp, \
-         mock.patch.object(deps, "is_devtools_responding", return_value=True), \
+         mock.patch.object(deps, "_devtools_page_state", return_value="ready"), \
          mock.patch.object(deps, "open_devtools_page", return_value=False) as open_tab, \
          mock.patch.object(deps, "launch_edge") as launch, \
          mock.patch.object(deps, "time"), \
@@ -244,7 +245,7 @@ def test_edge_success_attach_preserved():
     edge_ctor = mock.Mock(return_value=_FakeDriver())
 
     with mock.patch.object(deps, "subprocess") as sp, \
-         mock.patch.object(deps, "is_devtools_responding", return_value=True), \
+         mock.patch.object(deps, "_devtools_page_state", return_value="ready"), \
          mock.patch.object(deps, "open_devtools_page", return_value=True) as open_tab, \
          mock.patch.object(deps, "launch_edge") as launch, \
          mock.patch.object(deps, "time"), \
@@ -312,3 +313,92 @@ def test_open_devtools_page_failure_returns_false_never_raises():
     with mock.patch("urllib.request.urlopen", side_effect=OSError("blocked")):
         ok = deps.open_devtools_page(9222)
     assert ok is False
+
+
+@pytest.mark.parametrize("browser", ["chrome", "edge"])
+@pytest.mark.parametrize("scenario", [
+    "ready", "empty_then_ready", "empty_persistent", "open_failed",
+    "unavailable", "malformed_version", "invalid_version", "malformed_pages",
+    "invalid_pages", "invalid_target", "worker_only", "webdriver_failure",
+])
+def test_http_probe_composes_with_attach_without_relaunch(browser, scenario):
+    """Exercise actual HTTP classification and retry together, with no host effects.
+
+    Phase 1 mocked readiness True, hiding the destructive preflight branch.
+    This boundary double supplies bytes to the real probe and open-page owner.
+    """
+    opened = False
+    requests = []
+    page = {"id": "page-1", "type": "page", "url": "about:blank"}
+
+    class Response:
+        def __init__(self, body):
+            self.body = body
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def read(self):
+            return self.body
+
+    def http(req, **kwargs):
+        nonlocal opened
+        requests.append((req.full_url, req.get_method()))
+        if scenario == "unavailable":
+            raise OSError("synthetic unavailable")
+        if req.full_url.endswith("/json/version"):
+            if scenario == "malformed_version":
+                return Response(b'not-json Browser')
+            if scenario == "invalid_version":
+                return Response(b'{"Browser": false}')
+            return Response(b'{"Browser": "Synthetic/1.0"}')
+        if "/json/new?" in req.full_url:
+            if scenario == "open_failed":
+                raise OSError("synthetic open failure")
+            opened = True
+            return Response(b'{"id": "new-page"}')
+        assert req.full_url.endswith("/json")
+        if scenario == "malformed_pages":
+            return Response(b'not-json')
+        if scenario == "invalid_pages":
+            return Response(b'{}')
+        if scenario == "invalid_target":
+            return Response(b'[{"type": "page", "id": null}]')
+        if scenario == "worker_only" and not opened:
+            return Response(b'[{"type": "service_worker", "id": "worker"}]')
+        if scenario in ("empty_persistent", "open_failed") or (
+            scenario == "empty_then_ready" and not opened
+        ):
+            return Response(b'[]')
+        return Response(json.dumps([page]).encode())
+
+    ctor = mock.Mock(return_value=_FakeDriver())
+    if scenario == "webdriver_failure":
+        ctor.side_effect = RuntimeError("synthetic attach failure")
+    connect = getattr(deps, f"connect_{browser}_with_retry")
+    with mock.patch("urllib.request.urlopen", side_effect=http), \
+         mock.patch("selenium.webdriver." + browser.title(), ctor), \
+         mock.patch.object(deps, "launch_" + browser) as launch, \
+         mock.patch.object(deps, "subprocess") as process, \
+         mock.patch.object(deps, "time"):
+        result = connect(max_retries=3, retry_delay=0)
+
+    # Stronger than inspecting taskkill strings: no process operation/relaunch.
+    assert process.mock_calls == []
+    launch.assert_not_called()
+    if scenario in ("ready", "empty_then_ready", "worker_only"):
+        assert isinstance(result, _FakeDriver)
+        assert ctor.call_count == 1
+    else:
+        assert result is None
+        assert ctor.call_count == (3 if scenario == "webdriver_failure" else 0)
+    new_requests = [method for url, method in requests if "/json/new?" in url]
+    if scenario in ("empty_then_ready", "empty_persistent", "worker_only"):
+        assert new_requests == ["PUT"]  # One recovery tab per attachment call.
+    elif scenario == "open_failed":
+        assert new_requests == ["PUT", "GET"]
+    else:
+        assert new_requests == []

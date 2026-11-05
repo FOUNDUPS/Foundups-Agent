@@ -187,15 +187,12 @@ def is_port_open(port: int, host: str = "127.0.0.1", timeout: float = 1.0) -> bo
         return False
 
 
-def is_devtools_responding(port: int, timeout: float = 2.0) -> bool:
-    """Check if Chrome/Edge DevTools protocol is actually responding.
+def _devtools_page_state(port: int, timeout: float = 2.0) -> str:
+    """Distinguish a live browser without pages from unknown/unavailable CDP.
 
-    Just checking port open isn't enough - the browser might be hung or
-    another process might be using the port. This makes HTTP requests
-    to both /json/version AND /json (page list) to verify Selenium can connect.
-
-    The "unable to discover open pages" error happens when /json/version works
-    but /json fails - so we must check both.
+    An HTTP/parse/attach failure is never evidence of process ownership or
+    permission to terminate a browser. Only a valid page inventory can justify
+    opening a recovery tab.
     """
     try:
         import urllib.request
@@ -205,10 +202,13 @@ def is_devtools_responding(port: int, timeout: float = 2.0) -> bool:
         version_url = f"http://127.0.0.1:{port}/json/version"
         req = urllib.request.Request(version_url)
         with urllib.request.urlopen(req, timeout=timeout) as response:
-            data = response.read().decode('utf-8')
-            if 'Browser' not in data and 'webSocketDebuggerUrl' not in data:
+            data = json_module.loads(response.read().decode('utf-8'))
+            if not isinstance(data, dict) or not any(
+                isinstance(data.get(key), str) and data[key].strip()
+                for key in ('Browser', 'webSocketDebuggerUrl')
+            ):
                 logger.debug(f"[DEPS] DevTools version check failed - not Chrome/Edge")
-                return False
+                return "unavailable"
 
         # Step 2: Check /json (page list) - this is what Selenium uses
         pages_url = f"http://127.0.0.1:{port}/json"
@@ -216,19 +216,27 @@ def is_devtools_responding(port: int, timeout: float = 2.0) -> bool:
         with urllib.request.urlopen(req, timeout=timeout) as response:
             pages_data = response.read().decode('utf-8')
             pages = json_module.loads(pages_data)
-            if not isinstance(pages, list):
+            if not isinstance(pages, list) or any(
+                not isinstance(page, dict)
+                or not isinstance(page.get('type'), str) or not page['type'].strip()
+                or not isinstance(page.get('id'), str) or not page['id'].strip()
+                for page in pages
+            ):
                 logger.debug(f"[DEPS] DevTools pages check failed - invalid response")
-                return False
-            # Must have at least one page for Selenium to connect
-            if len(pages) == 0:
-                logger.debug(f"[DEPS] DevTools has 0 pages - browser may be starting")
-                return False
-            logger.debug(f"[DEPS] DevTools OK: {len(pages)} page(s) available")
-            return True
+                return "unavailable"
+            if not any(page['type'] == 'page' for page in pages):
+                logger.debug("[DEPS] DevTools live but no normal page target")
+                return "no_page"
+            return "ready"
 
     except Exception as e:
         logger.debug(f"[DEPS] DevTools check failed on port {port}: {e}")
-        return False
+        return "unavailable"
+
+
+def is_devtools_responding(port: int, timeout: float = 2.0) -> bool:
+    """Report discoverable-page readiness, without any recovery side effects."""
+    return _devtools_page_state(port, timeout) == "ready"
 
 
 def open_devtools_page(port: int, url: str = "about:blank", timeout: float = 3.0) -> bool:
@@ -716,72 +724,37 @@ def connect_chrome_with_retry(
     retry_delay: float = 2.0,
     relaunch_on_fail: bool = True,
 ) -> Optional[any]:
-    """
-    Connect to Chrome with retry logic and DevTools verification.
+    """Attach to Chrome with bounded, non-destructive recovery.
 
-    Handles timing races and stale browser states.
+    A live browser without a page gets one recovery-tab helper attempt. Failed or
+    malformed CDP observations and generic Selenium errors preserve all browser
+    processes and return None after bounded retries. Startup remains owned by
+    launch_chrome / ensure_dependencies.
 
-    NON-DESTRUCTIVE recovery (Phase 1): when DevTools is UP but exposes no
-    discoverable page target (Selenium raises "unable to discover open pages"),
-    we DO NOT taskkill the operator's prepared Chrome. Instead we open a normal
-    tab via the DevTools HTTP endpoint (open_devtools_page) and retry the attach.
-    If a tab cannot be opened, we log a clear actionable error and return None -
-    NEVER killing the session. (See BROWSER_ATTACH_RECOVERY_NO_KILL_PHASE1.)
-
-    NOTE (BROWSER_ATTACH_RECOVERY_DEVTOOLS_DOWN_PHASE2): the genuinely-DevTools-
-    DOWN path (is_devtools_responding False twice) still taskkills+relaunches as
-    a follow-up; that is out of scope for Phase 1 (no-page recovery).
-
-    Args:
-        max_retries: Maximum connection attempts
-        retry_delay: Seconds between retries
-        relaunch_on_fail: If True, attempt to relaunch Chrome on persistent failure
-            (DevTools-DOWN path only; the no-page path never relaunches/kills)
-
-    Returns:
-        Selenium WebDriver or None if connection failed
+    relaunch_on_fail is retained for call compatibility; neither value grants
+    authority to terminate or relaunch a shared browser.
     """
     from selenium import webdriver
     from selenium.webdriver.chrome.options import Options
 
     port = CHROME_DEBUG_PORT
-    devtools_failures = 0
+    recovery_tab_attempted = False
 
     for attempt in range(1, max_retries + 1):
-        # Step 1: Verify DevTools is responding (checks /json/version AND /json)
-        if not is_devtools_responding(port):
-            devtools_failures += 1
-            logger.warning(f"[DEPS] Chrome DevTools not responding (attempt {attempt}/{max_retries})")
-
-            # If DevTools failed twice, Chrome is likely DOWN (port not even
-            # answering /json/version) - kill it. This is the DevTools-DOWN path,
-            # distinct from the no-page path below. NOTE: still destructive;
-            # tracked as BROWSER_ATTACH_RECOVERY_DEVTOOLS_DOWN_PHASE2.
-            if devtools_failures >= 2 and relaunch_on_fail:
-                logger.warning("[DEPS] DevTools DOWN twice (not just no-page) - "
-                               "killing stale Chrome [PHASE2: make non-destructive]...")
-                try:
-                    subprocess.run(["taskkill", "/F", "/IM", "chrome.exe"],
-                                   capture_output=True, timeout=10)
-                    time.sleep(2)
-                except Exception:
-                    pass
-                logger.info("[DEPS] Relaunching Chrome...")
-                launch_chrome()
-                time.sleep(5)
-                devtools_failures = 0  # Reset counter after relaunch
-                continue
-
+        state = _devtools_page_state(port)
+        if state == "no_page" and not recovery_tab_attempted:
+            recovery_tab_attempted = True
+            if not open_devtools_page(port):
+                logger.error("[DEPS] Chrome is live but cannot open a recovery tab; "
+                             "open a normal tab manually. Browser preserved.")
+                return None
+            state = _devtools_page_state(port)
+        if state != "ready":
+            logger.warning(f"[DEPS] Chrome page readiness={state} "
+                           f"(attempt {attempt}/{max_retries}); browser preserved")
             if attempt < max_retries:
                 time.sleep(retry_delay)
-                continue
-            elif relaunch_on_fail:
-                logger.info("[DEPS] Attempting Chrome relaunch...")
-                launch_chrome()
-                time.sleep(3)
-                if not is_devtools_responding(port):
-                    logger.error("[DEPS] Chrome relaunch failed - DevTools not responding")
-                    return None
+            continue
 
         # Step 2: Attempt Selenium connection
         try:
@@ -803,6 +776,11 @@ def connect_chrome_with_retry(
             # DevTools HTTP endpoint, then retry the attach. NEVER taskkill the
             # operator's prepared Chrome here (NO_KILL contract, Phase 1).
             if "unable to discover open pages" in error_str:
+                if recovery_tab_attempted:
+                    logger.error("[DEPS] Chrome has no discoverable page after recovery; "
+                                 "open a normal tab manually. Browser preserved.")
+                    return None
+                recovery_tab_attempted = True
                 logger.info("[DEPS] Chrome up but no discoverable page - "
                             "opening a tab via DevTools (NO taskkill)...")
                 if open_devtools_page(port):
@@ -811,7 +789,11 @@ def connect_chrome_with_retry(
                         logger.info("[DEPS] DevTools page now discoverable - retrying attach")
                     else:
                         logger.warning("[DEPS] Opened a tab but page list still not ready - "
-                                       "retrying attach anyway")
+                                       "browser preserved")
+                        if attempt < max_retries:
+                            time.sleep(retry_delay)
+                            continue
+                        return None
                     if attempt < max_retries:
                         time.sleep(retry_delay)
                         continue
@@ -836,27 +818,9 @@ def connect_chrome_with_retry(
 
             if attempt < max_retries:
                 time.sleep(retry_delay)
-            elif relaunch_on_fail and attempt == max_retries:
-                logger.info("[DEPS] Final attempt - relaunching Chrome...")
-                try:
-                    subprocess.run(["taskkill", "/F", "/IM", "chrome.exe"],
-                                   capture_output=True, timeout=10)
-                    time.sleep(2)
-                except Exception:
-                    pass
-                launch_chrome()
-                time.sleep(5)
-
-                # One more try after relaunch
-                try:
-                    opts = Options()
-                    opts.add_experimental_option("debuggerAddress", f"127.0.0.1:{port}")
-                    driver = webdriver.Chrome(options=opts)
-                    _ = driver.current_url
-                    logger.info("[DEPS] Chrome connected after relaunch")
-                    return driver
-                except Exception as e2:
-                    logger.error(f"[DEPS] Chrome connection failed after relaunch: {e2}")
+            else:
+                logger.error("[DEPS] Chrome attach failed; browser preserved. "
+                             "Check the debug browser and driver before retrying.")
 
     return None
 
@@ -866,71 +830,37 @@ def connect_edge_with_retry(
     retry_delay: float = 2.0,
     relaunch_on_fail: bool = True,
 ) -> Optional[any]:
-    """
-    Connect to Edge with retry logic and DevTools verification.
+    """Attach to Edge with bounded, non-destructive recovery.
 
-    Handles timing races and stale browser states.
+    A live browser without a page gets one recovery-tab helper attempt. Failed or
+    malformed CDP observations and generic Selenium errors preserve all browser
+    processes and return None after bounded retries. Startup remains owned by
+    launch_edge / ensure_dependencies.
 
-    NON-DESTRUCTIVE recovery (Phase 1): when DevTools is UP but exposes no
-    discoverable page target ("unable to discover open pages"), we DO NOT
-    taskkill the operator's prepared Edge. Instead we open a normal tab via the
-    DevTools HTTP endpoint (open_devtools_page) and retry the attach; if a tab
-    cannot be opened we log a clear actionable error and return None - NEVER
-    killing the session. (See BROWSER_ATTACH_RECOVERY_NO_KILL_PHASE1.)
-
-    NOTE (BROWSER_ATTACH_RECOVERY_DEVTOOLS_DOWN_PHASE2): the genuinely-DevTools-
-    DOWN path still taskkills+relaunches as a follow-up (out of scope for Phase 1).
-
-    Args:
-        max_retries: Maximum connection attempts
-        retry_delay: Seconds between retries
-        relaunch_on_fail: If True, attempt to relaunch Edge on persistent failure
-            (DevTools-DOWN path only; the no-page path never relaunches/kills)
-
-    Returns:
-        Selenium WebDriver or None if connection failed
+    relaunch_on_fail is retained for call compatibility; neither value grants
+    authority to terminate or relaunch a shared browser.
     """
     from selenium import webdriver
     from selenium.webdriver.edge.options import Options as EdgeOptions
 
     port = EDGE_DEBUG_PORT
-    devtools_failures = 0
+    recovery_tab_attempted = False
 
     for attempt in range(1, max_retries + 1):
-        # Step 1: Verify DevTools is responding (checks /json/version AND /json)
-        if not is_devtools_responding(port):
-            devtools_failures += 1
-            logger.warning(f"[DEPS] Edge DevTools not responding (attempt {attempt}/{max_retries})")
-
-            # If DevTools failed twice, Edge is likely DOWN (port not even
-            # answering /json/version) - kill it. Distinct from the no-page path
-            # below. NOTE: still destructive; tracked as
-            # BROWSER_ATTACH_RECOVERY_DEVTOOLS_DOWN_PHASE2.
-            if devtools_failures >= 2 and relaunch_on_fail:
-                logger.warning("[DEPS] DevTools DOWN twice (not just no-page) - "
-                               "killing stale Edge [PHASE2: make non-destructive]...")
-                try:
-                    subprocess.run(["taskkill", "/F", "/IM", "msedge.exe"],
-                                   capture_output=True, timeout=10)
-                    time.sleep(2)
-                except Exception:
-                    pass
-                logger.info("[DEPS] Relaunching Edge...")
-                launch_edge()
-                time.sleep(5)
-                devtools_failures = 0  # Reset counter after relaunch
-                continue
-
+        state = _devtools_page_state(port)
+        if state == "no_page" and not recovery_tab_attempted:
+            recovery_tab_attempted = True
+            if not open_devtools_page(port):
+                logger.error("[DEPS] Edge is live but cannot open a recovery tab; "
+                             "open a normal tab manually. Browser preserved.")
+                return None
+            state = _devtools_page_state(port)
+        if state != "ready":
+            logger.warning(f"[DEPS] Edge page readiness={state} "
+                           f"(attempt {attempt}/{max_retries}); browser preserved")
             if attempt < max_retries:
                 time.sleep(retry_delay)
-                continue
-            elif relaunch_on_fail:
-                logger.info("[DEPS] Attempting Edge relaunch...")
-                launch_edge()
-                time.sleep(3)
-                if not is_devtools_responding(port):
-                    logger.error("[DEPS] Edge relaunch failed - DevTools not responding")
-                    return None
+            continue
 
         # Step 2: Attempt Selenium connection
         try:
@@ -952,6 +882,11 @@ def connect_edge_with_retry(
             # DevTools HTTP endpoint, then retry the attach. NEVER taskkill the
             # operator's prepared Edge here (NO_KILL contract, Phase 1).
             if "unable to discover open pages" in error_str:
+                if recovery_tab_attempted:
+                    logger.error("[DEPS] Edge has no discoverable page after recovery; "
+                                 "open a normal tab manually. Browser preserved.")
+                    return None
+                recovery_tab_attempted = True
                 logger.info("[DEPS] Edge up but no discoverable page - "
                             "opening a tab via DevTools (NO taskkill)...")
                 if open_devtools_page(port):
@@ -959,7 +894,11 @@ def connect_edge_with_retry(
                         logger.info("[DEPS] DevTools page now discoverable - retrying attach")
                     else:
                         logger.warning("[DEPS] Opened a tab but page list still not ready - "
-                                       "retrying attach anyway")
+                                       "browser preserved")
+                        if attempt < max_retries:
+                            time.sleep(retry_delay)
+                            continue
+                        return None
                     if attempt < max_retries:
                         time.sleep(retry_delay)
                         continue
@@ -983,27 +922,9 @@ def connect_edge_with_retry(
 
             if attempt < max_retries:
                 time.sleep(retry_delay)
-            elif relaunch_on_fail and attempt == max_retries:
-                logger.info("[DEPS] Final attempt - relaunching Edge...")
-                try:
-                    subprocess.run(["taskkill", "/F", "/IM", "msedge.exe"],
-                                   capture_output=True, timeout=10)
-                    time.sleep(2)
-                except Exception:
-                    pass
-                launch_edge()
-                time.sleep(5)
-
-                # One more try after relaunch
-                try:
-                    opts = EdgeOptions()
-                    opts.add_experimental_option("debuggerAddress", f"127.0.0.1:{port}")
-                    driver = webdriver.Edge(options=opts)
-                    _ = driver.current_url
-                    logger.info("[DEPS] Edge connected after relaunch")
-                    return driver
-                except Exception as e2:
-                    logger.error(f"[DEPS] Edge connection failed after relaunch: {e2}")
+            else:
+                logger.error("[DEPS] Edge attach failed; browser preserved. "
+                             "Check the debug browser and driver before retrying.")
 
     return None
 

@@ -1,5 +1,20 @@
 # Dependency launcher test inventory
 
+## 2026-11-05 — Browser attachment HTTP composition
+
+Existing `test_attach_recovery_no_kill.py` now exercises the real version/page
+probe and retry owner together against synthetic HTTP/Selenium boundaries.
+New24 parameter-expanded cases exposed22 failures on the old source; original11
+plus the two normal-attach controls passed. Repaired source passes35 cases.
+Coverage includes useful empty/worker-only recovery, helper-invocation bound, failed open,
+malformed/unavailable observations and generic driver failure for both browsers.
+No real browser, network, model or daemon was invoked by these tests. Existing
+assertions remain; prior readiness-only doubles target the new private probe.
+The focused35 and adjacent49 startup checks pass84 cases. Independent60 HTTP
+and28 exception-race witnesses also pass; those scopes overlap and must not be
+summed as end-to-end coverage. These are local mocked checks; live recovery
+remains unverified. WSP00/11/22/50/97.
+
 ## 2026-10-29 — Native startup offline qualification
 
 Actual owned-source validation passed94 cases, zero failures/skips:49 startup,
