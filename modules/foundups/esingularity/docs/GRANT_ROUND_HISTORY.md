@@ -48,9 +48,11 @@ Dates are ISO calendar dates. Times are JST. A dash means not established in thi
 | F-10-2026-R2 | METI/SII ZEB demonstration / subsidy | FY2026 / 2 | 2026-07-24 13:00 | — | 2026-08-17 17:00 | CLOSED | VERIFIED PROGRAM; building-owner eligibility unresolved | 2026-11-02 | S10 |
 | F-10-2026-R3 | METI/SII ZEB demonstration / subsidy | FY2026 / 3 | 2026-09-18 | — | 2026-10-09 17:00 | CLOSED | VERIFIED PROGRAM; building-owner eligibility unresolved | 2026-11-02 | S10 |
 | F-11-2025S-R4 | SII energy/non-fossil equipment / subsidy | FY2025 supplementary / 4 | 2026-10-05 | Tracked postal delivery; no hand delivery | 2026-10-30 17:00 received | CLOSED confirmed by SII 2026-10-30; fifth call unannounced | VERIFIED PROGRAM; no YUMORI eligibility/application established | 2026-10-27 | S11 |
+| F-11-2025S-R5 | SII equipment/non-fossil conversion / subsidy | FY2025 supplementary / fifth and final | 2026-11-06 | Multi-year ONLY; eligible applicant/equipment, prior-award contract ban | 2026-12-25 17:00 JST physical receipt, tracked post | OPEN; fifth/final for this supplement, no sixth planned | VERIFIED PROGRAM only; no YUMORI applicant/site eligibility/application | 2026-11-07 | S11b |
 | F-12-2026-R3 | Low-carbon-material new-build ZEB / subsidy | FY2026 / 3, final FY2026 call per SERA | 2026-10-16 | Submission method to verify with SERA | 2026-12-15 17:00 JST received (MOE 10/16 release; verified 10/30) | OPEN | VERIFIED PROGRAM; new construction only, not existing-school/onsen retrofit | 2026-11-02 | S12 |
 | F-13-2026-R1 | Fukui enterprise self-consumption PV/battery / subsidy | FY2026 / annual call, prior existing | 2026-04-17 | Budget exhaustion may close early; email submission, no official clock established | 2026-10-31; hour unverified | CLOSED BY PUBLISHED DEADLINE as of 2026-11-01; page unchanged; final intake status unconfirmed | VERIFIED PROGRAM; no YUMORI project eligibility/application | 2026-11-02 | S14 |
 | F-14-2025S-R4 | METI/SII whole-facility energy savings + EMS / subsidy | FY2025 supplementary / 4 | 2026-10-05 | Tracked mailing; hand delivery disallowed | 2026-10-30 17:00 JST physical receipt | CLOSED confirmed by SII 2026-10-30; fifth call unannounced | VERIFIED PROGRAM; no YUMORI applicant/baseline/use rights | 2026-10-28 | S15 |
+| F-14-2025S-R5 | SII facility-wide savings/EMS / subsidy | FY2025 supplementary / fifth and final | 2026-11-06 | Multi-year ONLY; facility PLUS equipment savings, applicant/project tests | 2026-12-25 17:00 JST physical receipt, tracked post | OPEN; fifth/final for this supplement, no sixth planned | VERIFIED PROGRAM only; closed-building baseline/ownership unresolved | 2026-11-07 | S15b |
 | F-15-2026-R1 | MOE/SII commercial-building decarbonization retrofit (脱炭素ビルリノベ2026) / subsidy | FY2026 / original June call, catch-up record | 2026-06-04 | — | 2026-11-30, TIME CONFLICT: MOE 17:00 / SII 23:59 JST; SII clarification required | OPEN subject to budget exhaustion; no new Nov5 opening | VERIFIED PROGRAM; closed property/applicant/owner/baseline and eligible building unresolved | 2026-11-05 (internal review) | S16 |
 | P-01-2026-P1 | Fukui large-DC feasibility study / procurement, NOT subsidy | FY2026 / Phase 1 | 2026-10-14 (notice) | Bidder qualification 2026-10-23 17:00 | 2026-11-04 17:00; qualified bidders only | CLOSED BY PUBLISHED DEADLINE 2026-11-04 17:00; result not established | VERIFIED PROGRAM/PROCUREMENT; no YUMORI contract or selection | 2026-11-05 | S13 |
 
@@ -68,8 +70,8 @@ No FY2027 call date or continuation is asserted by this queue.
 | F-07A/F-07B SHIFT and F-10 ZEB | 2027-02-01 | ZEB's first FY2026 call opened in May; late SHIFT/ZEB rounds were September-October | Establish usable operating baseline, lawful building/equipment owner and separate eligible-cost packages; check current guide and applicant credentials. |
 | F-06 SME DX | 2027-02-01 | FY2026 deadline extended from June 10 to June 30; no second call | Identify actual tenant/local-SME applicant and eligible DX project; no campus-funding assumption. |
 | F-13 Fukui enterprise solar/battery | 2027-02-01 | FY2026 opened 04/17 and currently publishes 10/31 close | Determine actual Fukui enterprise/eligible lessor, lawful site/title, solar self-consumption, storage scope and no duplicate subsidized costs. Recheck if FY2027 exists before using historic terms. |
-| F-14 facility-wide efficiency/EMS | 2027-02-01 | FY2025 supplementary fourth call opened 10/05/2026, closes 10/30 | Investigate valid active-facility baseline, applicant/owner and sizeable system-wide savings; no presumed supplementary renewal. |
-| F-11 equipment / F-12 new-build ZEB | 2027-02-01 | Retain current autumn rounds; no annual recurrence assumed | Decide actual equipment versus new-building scope, ownership, eligible products/materials, savings and procurement constraints. Keep watching for supplementary calls before next year. |
+| F-14 facility-wide efficiency/EMS | 2026-11-07 | Fifth/final opened 11/06, closes 12/25 at 17:00 JST; multi-year only | Screen facility-level and equipment-level savings, eligible 4-party collaboration/EMS rules, applicant and property baseline before any application. |
+| F-11 equipment / F-12 new-build ZEB | 2026-11-07 | F-11 fifth/final opened 11/06, closes 12/25 17:00 JST (multi-year only); F-12 distinct Dec15 call | Resolve applicant, multi-year project and listed equipment/GX/EMS eligibility; F-12 requires new-build materials and ownership. No supplemental renewal assumed. |
 | F-03 GX / F-04 Fukui location | 2026-11-02 | GX second call pre-announced; location incentive requires consultation | Recheck current terms, independently justified investment scale, power/source-region contribution, container exclusion and municipal ceiling. |
 | F-09 public assets | 2026-10-27 | FY2026 consultation 11/30, proposal 12/15 | Reconcile actual consultation receipt and delivery capacity now. Any future-year property list/forms require a fresh City check; Sukatto is a separate PPP/PFI route. |
 | F-15 MOE/SII building retrofit | 2026-11-05; next-cycle 2027-02-01 | Existing FY2026 call opened 06/04; published November 30 date has conflicting hours | Resolve MOE 17:00 vs SII 23:59 with binding SII guide/office. Verify building owner/lease, public-body applicant, closed-site baseline, BPI and building energy reductions, and duplicate subsidies before any application. |
@@ -88,16 +90,18 @@ No FY2027 call date or continuation is asserted by this queue.
 - S09: https://www.city.fukui.lg.jp/sisei/plan/reform/p073300.html
 - S10: https://sii.or.jp/zeb08/jissho_public.html
 - S11: https://sii.or.jp/setsubi07r/overview4.html
+- S11b: https://sii.or.jp/setsubi07r/overview5.html ; https://sii.or.jp/setsubi07r/uploads/r7h_st_01_kouboyouryou_5.pdf
 - S12: https://www.env.go.jp/press/press_05673.html and https://siz-kankyou.com/2026co2/teitansokenzai3/
 - S13: https://www.pref.fukui.lg.jp/doc/dengen/1014.html
 - S14: https://www.pref.fukui.lg.jp/doc/dengen/shin-energy/fukui-taiyokou.html (published 2026-04-17)
-- S15: https://sii.or.jp/koujou07r/overview4.html and https://www.syouenehojyokin.sii.or.jp/about-type/kojyo.html (published 2026-10-05)
+- S15: https://sii.or.jp/koujou07r/overview4.html
+- S15b: https://sii.or.jp/koujou07r/overview5.html ; https://sii.or.jp/koujou07r/uploads/r7h_kj_01_kouboyouryou_5.pdf and https://www.syouenehojyokin.sii.or.jp/about-type/kojyo.html (published 2026-10-05)
 
 - S16: https://www.env.go.jp/press/press_04846.html (MOE, 2026-06-04; says 17:00 JST) and https://bl-renos.jp/r8/about/ (SII, says 23:59 JST) — unresolved binding cutoff.
 
 ## Maintenance / regression checks
 
-- Preserve all 19 initial round/support records, the two 2026-10-28 catch-up records, F-03 first-round outcome record added 2026-10-31 and F-15 2026-11-05 retrospective coverage record (23 total) when adding a new year.
+- Preserve all 19 initial records, two 2026-10-28 catch-ups, F-03 first-round result, F-15 historical coverage, and two 2026-11-06 fifth-round openings (25 total) when adding a new year.
 - Unique round key; dates either exact official dates or explicitly unknown; fiscal year separate from calendar year.
 - CLOSED and current project-boundary fields can coexist; F-01's inquiry is retained.
 - F-09 and P-01 are non-grant lanes. Do not add their nominal values to a subsidy total.
@@ -107,6 +111,11 @@ No FY2027 call date or continuation is asserted by this queue.
 - Synchronize the existing FIN `Grants & Subsidies` summary and `Grant Calendar` after registry changes; verify formulas and preserve the AWARDED-only financial gate.
 
 ## Change log
+
+### 2026-11-07 — material SII fifth-call openings, multi-year-only
+On 2026-11-06 SII opened FY2025-supplementary **F-11 (equipment unit)** and **F-14 (facility-wide/EMS)** fifth rounds. Both close **2026-12-25 17:00 JST 必着**, requiring traceable postal receipt and no hand delivery. Both fifth-call guides explicitly exclude single-year projects, call this the last round and anticipate no sixth. The F-11 guide adds manufacturer-strengthening GX equipment and expands certain EMS coverage; the F-14 guide adds equipment-level efficiency conditions and the four-or-more-enterprise supply-chain track, and expands EMS to eligible new sites/lines. Historical fourth-call records remain closed; fifth-call rows are new IDs and do **not** imply YUMORI eligibility/submission/award or funds. Full rate/cap thresholds and precise applicant rights must be screened against the current guides. Primary sources S11b/S15b.
+
+
 
 ### 2026-11-05 — P-01 published deadline elapsed; F-15 coverage gap closed
 
