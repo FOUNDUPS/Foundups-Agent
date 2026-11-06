@@ -242,6 +242,16 @@ Do not book any F-10 subsidy revenue, do not treat the published rates as expect
 
 ## F-11 — 令和7年度補正予算 省エネ・非化石転換補助金（設備単位型）第4次公募
 
+### F-11 fifth call — NEW OFFICIAL ROUND (2026-11-06)
+- **Agency:** 経済産業省 / 一般社団法人環境共創イニシアチブ（SII）.
+- **Round status: OPEN.** Official start **2026-11-06**; **2026-12-25 17:00 JST 必着**. Send application by trackable post; hand delivery is not allowed. SII anticipates decisions in late February 2027.
+- **Material eligibility/round clarification:** **fifth call accepts MULTI-YEAR projects only; single-year applications are excluded.** SII says this is the last call for the FY2025 supplementary program and no sixth round is planned. This is not an announced FY2027 successor.
+- **Published conditional rates/caps:** ordinary (III) designated equipment up to **1/3, ¥100M per project**; new GX manufacturer-strengthening (III) track up to **1/3, ¥300M per project**; other GX top-performance, electrification/fuel-conversion and EMS tracks have distinct applicant/technology dependent rules. These are ceilings only, not projected YUMORI cash.
+- **New fifth-call tracks/terms:** the guide adds the GX manufacturer-strengthening equipment route and expands (IV) EMS to certain new sites/lines; verify every eligible-product list, GX condition and multi-year implementation rule against the *fifth-call guide*, not the prior fourth-call PDF.
+- **YUMORI project status: VERIFIED PROGRAM only.** Candidate equipment: specific eligible heat pumps, hot-water/HVAC, transformers, efficiency/EMS associated with a lawful Hanyu operator or separately qualifying onsen use. Whole GPU/modular-DC construction is not thereby eligible. **Unresolved:** actual multi-year project readiness, applicant/operator and site rights, equipment owner, closed-site operating/baseline proof, savings, award-before-contract procurement and no duplicate costs. Existing F-11 fourth round remains CLOSED (historical record below).
+- **Official fifth-call primary sources (verified 2026-11-07):** https://sii.or.jp/setsubi07r/overview5.html ; https://sii.or.jp/setsubi07r/uploads/r7h_st_01_kouboyouryou_5.pdf
+
+
 - Agency: 経済産業省 / 一般社団法人環境共創イニシアチブ (SII).
 - Status: **CLOSED — SII confirmed the fourth call ended 2026-10-30 at 17:00 JST; project boundary remains VERIFIED PROGRAM with YUMORI eligibility/application/award unestablished**. SII mentions a possible fifth-call schedule to be announced later; no fifth-call opening/deadline is established.
 - Open: 2026-10-05. Deadline: **2026-10-30 17:00 JST (physical receipt of application)**.
@@ -277,6 +287,16 @@ Do not book any F-10 subsidy revenue, do not treat the published rates as expect
 
 ## F-14 — 令和7年度補正予算 省エネ・非化石転換補助金（工場・事業場型）第4次公募
 
+### F-14 fifth call — NEW OFFICIAL ROUND (2026-11-06)
+- **Agency:** 経済産業省 / 一般社団法人環境共創イニシアチブ（SII）.
+- **Round status: OPEN.** Official start **2026-11-06**; **2026-12-25 17:00 JST 必着**. Trackable postal receipt required; no hand delivery. Indicative selection/award timing is late February 2027.
+- **Material eligibility/round clarification:** **MULTI-YEAR projects only; single-year applications excluded.** This is the final announced FY2025-supplementary round; SII plans no sixth call.
+- **Published conditional rates/caps:** (I) advanced track up to **2/3 for SMEs** or **1/2 for large enterprises/other**, with a published **¥3B total project ceiling (¥1.5B annually)**, or **¥4B total (¥2B annually)** in a qualifying non-fossil conversion track. Other (I) general/SME and (IV) EMS categories have lower, distinct rates/caps; **(IV) EMS up to ¥100M per project** subject to the current guide. No cap is forecast funding.
+- **New fifth-call clarifications:** (I) now adds an equipment-level savings test in addition to facility-level tests, introduces an eligible four-or-more-firm supply-chain collaboration track; (IV) EMS expands to certain new establishments or production lines. Track-specific conditions and payback tests apply.
+- **YUMORI project status: VERIFIED PROGRAM only.** Potentially relevant to a qualified facility-wide thermal/heat-reuse/efficiency/EMS project with a real eligible operator and multi-year execution plan, not general DC/GPU capital. **Unresolved:** active baseline for a closed property, ownership/site lease, applicant class, quantified savings/payback, energy-monitoring design, eligible equipment and segregated costs, pre-award contracting rules. Historical fourth call remains CLOSED.
+- **Official fifth-call primary sources (verified 2026-11-07):** https://sii.or.jp/koujou07r/overview5.html ; https://sii.or.jp/koujou07r/uploads/r7h_kj_01_kouboyouryou_5.pdf
+
+
 - Agency: 経済産業省 / 一般社団法人環境共創イニシアチブ (SII).
 - **Round state:** **CLOSED — SII explicitly confirmed on 2026-10-30 that fourth-call receipt ended at 17:00 JST** (opened 2026-10-05); shipping required traceability and hand delivery was disallowed. SII says fifth-call details will be published when decided, but has not established a fifth-call date. This is a round closure, **not** YUMORI application, rejection or award.
 - **YUMORI project boundary: VERIFIED PROGRAM only; applicant, facility and use-right eligibility, application and award not established.**
@@ -307,6 +327,9 @@ Do not book any F-10 subsidy revenue, do not treat the published rates as expect
 - Published: 2026-10-14. Bidder eligibility submission deadline **2026-10-23 17:00**; proposal receipt deadline **2026-11-04 17:00** for already-qualified bidders only.
 - Official source: https://www.pref.fukui.lg.jp/doc/dengen/1014.html
 - Public research procurement ceiling **¥6,160,000 incl. tax** is NOT a grant cap or subsidy. Scope studies siting and infrastructure for very large data centers; no evidence any YUMORI site is selected or on the list. Possible complementary heat-reuse/decentralized-compute question is only a future inquiry hypothesis.
+
+### Watch reconciliation — 2026-11-07 JST
+SII officially opened F-11 and F-14 *fifth* rounds on 2026-11-06; both close 2026-12-25 at 17:00 JST physical receipt and accept **multi-year only** projects. SII identifies the fifth as the final FY2025-supplementary round. Existing fourth-round rows remain CLOSED. Recheck and separately preserve new fifth-call equipment/GX/EMS eligibility conditions; no YUMORI project status or committed amount changes. Official sources: https://sii.or.jp/setsubi07r/overview5.html and https://sii.or.jp/koujou07r/overview5.html .
 
 ### Watch reconciliation — 2026-11-05 JST
 
