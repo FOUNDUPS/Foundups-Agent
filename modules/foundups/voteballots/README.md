@@ -22,6 +22,30 @@ VOTE then expands behind the existing pfMALL/member gate into deeper candidate r
 
 The original README/manifest/registry labels predate the implemented PoC chain and are partially stale.
 
+### 2026-11-07: Oversight workstream and public front door
+
+Oversight Blueprint is a Vote workstream under the existing `voteballots`
+FoundUp, classified as an `EXISTING_FOUNDUP_UPDATE`. It does not introduce a
+second tenant, token, registry entity or agent authority. WSP 109 permits a
+future derivative FoundUp, but independent governance/runtime needs have not
+been established for this workstream.
+
+- [Preserved Oversight source and release procedure](oversight/README.md):
+  all 155 public Site files, documents, data and instruction bundles are
+  preserved with exact file identities from Sites source `c66d22af`.
+- [Vote landing source](web/README.md): an informational PWA front door, separate
+  from the unlaunched candidate/evidence application described below.
+- Oversight's existing `https://oversight.mtrout.com/`,
+  `https://maga.mtrout.com/` and original Sites address remain available.
+- Intended additive domains are `vote.foundups.com` for the landing and
+  `oversight.vote.foundups.com` for the existing Oversight project. A configured
+  hostname is reported live only after public DNS, TLS and page verification.
+
+The canonical shell routes remain `/f/voteballots` and `/f/voteballots/app`,
+with `idb_voteballots` unchanged. Separate-origin public PWAs do not share Mall
+authentication, storage or service-worker scope. Imported instruction files
+are authored content; they are not admitted or running OpenClaw/WRE skills.
+
 ### Implemented Internal PoC Chain
 
 Six implementation slices are merged:
@@ -38,7 +62,8 @@ Canonical closure evidence: `docs/audits/architecture/VOTE_POC_CHAIN_OBSERVATION
 ### Not Yet Publicly Activated
 
 - `entry_url` remains empty
-- public Vote app is not launched
+- public Vote candidate/evidence app is not launched; an informational landing
+  does not satisfy that application launch gate
 - current shell integration is a local payload contract only
 - Vote is present in the canonical FoundUp registry but is not currently listed in `public/member/mall-catalog.json` or `public/f/portfolio_data.json`
 - registry/manifest implementation labels require a dedicated reconciliation slice before promotion

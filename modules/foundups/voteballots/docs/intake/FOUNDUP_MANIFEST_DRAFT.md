@@ -3,6 +3,16 @@
 ## Classification
 This is an EXISTING_FOUNDUP_UPDATE, not a new FoundUp intake.
 
+### 2026-11-07 source and presentation extension
+
+Oversight Blueprint is a workstream of this same FoundUp. Its complete public
+source is preserved in `oversight/site/`; `web/` provides an informational
+landing rather than a live candidate-data app. Existing tenant identity, routes,
+data namespace, runtime readiness, token declarations and member gates remain
+unchanged. See [the snapshot owner](../../oversight/README.md) for source and
+deployment provenance. The current-truth table below is the earlier intake
+snapshot; a static front door does not constitute the proposed app promotion.
+
 WSP 109's current entity decision tree indicates VOTE should be re-evaluated as `entity_type: foundup` because it is consumer-facing, has an existing VOTE token symbol/economics declaration, and has source/test implementation in the monorepo. Current registry classification `skeleton_candidate` predates the merged six-slice PoC implementation and must not be changed without a dedicated reconciliation/test slice.
 
 ## Current Truth

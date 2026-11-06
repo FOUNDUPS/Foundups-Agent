@@ -8,6 +8,26 @@
 
 ## Current State
 
+### 2026-11-07 source reconciliation and public presentation
+
+- GitHub Vote work through PRs #2275, #2282, #2289 and #2298 is already merged
+  and preserved on the PC; the integration base is main `152d52dd`.
+- Oversight Blueprint is a Vote workstream, not a newly registered derivative.
+  Its complete published source is preserved under `oversight/site/`, with
+  exact inventory and release provenance in `oversight/source-snapshot.json`.
+- `web/` supplies the informational Vote landing. Its availability does not
+  activate live FEC access, candidate tools, claim scores or an official ballot.
+- Keep both existing Oversight aliases. Add `vote.foundups.com` and
+  `oversight.vote.foundups.com` only through verified hosting/DNS/TLS setup.
+- A later shared installed PWA must explicitly integrate under the existing
+  `/f/voteballots/app` namespace. Separate origins alone do not implement it.
+- Preserved instruction bundles and source history are inputs for the existing
+  governed skill/runtime owners. They do not establish OpenClaw promotion, an
+  autonomous RSI loop or measured retained learning.
+
+This presentation/source slice leaves the runtime registry, manifest readiness,
+public candidate-data wiring and protected execution gates unchanged.
+
 
 ### 2026-11-01 bounded RSI fixture checkpoint
 

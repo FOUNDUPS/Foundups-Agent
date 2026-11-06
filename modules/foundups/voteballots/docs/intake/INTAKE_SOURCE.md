@@ -1,5 +1,25 @@
 # Vote/Ballots - Intake Source
 
+## 2026-11-07 existing FoundUp update: Oversight preservation and front door
+
+012 requested that the existing Oversight Blueprint site become a Vote
+workstream, that its complete work be preserved, and that the PC be reconciled
+with any GitHub work produced in Work. Live GitHub searches found the relevant
+Vote PRs already merged and present locally; no separate Oversight GitHub
+source or open PR was found in the connected account's accessible repositories.
+The PC was fast-forwarded to main `152d52dd` without discarding local files.
+
+The separate Sites source at `c66d22af` is preserved under `oversight/site/`.
+The [snapshot and release owner](../../oversight/README.md) records exact source
+and publication identities. `web/` owns the informational Vote front door.
+Requested additive domains are `vote.foundups.com` and
+`oversight.vote.foundups.com`; existing Oversight aliases are retained.
+
+Classification remains `EXISTING_FOUNDUP_UPDATE` with one `voteballots` tenant.
+This source/presentation work does not activate the candidate-data application,
+ballots, model workers or an autonomous RSI loop. Earlier intake snapshots below
+retain their historical dates and are not publication-status authority.
+
 ## Source Type
 external_0102_discussion
 

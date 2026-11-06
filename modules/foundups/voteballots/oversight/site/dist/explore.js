@@ -1,0 +1,29 @@
+'use strict';
+(() => {
+ const intro=(eyebrow,title,body)=>`<section class="page-heading"><p class="eyebrow">${eyebrow}</p><h1>${title}</h1><p class="page-intro">${body}</p></section>`;
+ const pages={
+  topics:()=>intro('QUESTIONS, NOT VERDICTS','What should Congress examine?','Choose a question. See the source, the responsible committees and the next public research task. A topic is not proof of wrongdoing.')+'<p class="document-status-note">Start with public records. Names in a file, contacts and financial connections do not establish guilt. No confidential submissions are accepted here.</p><div id="topic-cards" class="explore-cards" aria-live="polite">Loading source-linked questions…</div><section><h2>Research task board</h2><p>Prepared work orders for independent researchers. Read-only planning: no live claims, assigned workers or autonomous publication.</p><div id="research-board" class="explore-cards"></div><a href="14-worker-review-and-quality.html">How workers and reviewers operate →</a></section>',
+  assurance:()=>intro('REVIEW THE REVIEW','What has actually been checked?','Drafts exist. Selected claims received focused AI source checks. Qualified human legal review is still pending.')+'<div class="document-status-note"><strong>No blanket “legally vetted” badge.</strong> Collaborating agents reviewed selected content independently of its author context. They are part of one AI system, not independent law firms or institutional signatories.</div><details><summary>What each review label means</summary><p>Draft created: the file exists. Focused AI audit: selected propositions and named files were checked against sources. Human legal review: a separate qualified reviewer must record scope and decision. Official adoption: only the responsible institution can do that.</p></details><div id="review-summary" aria-live="polite">Loading review scope…</div><p><a href="14-worker-review-and-quality.html">Repeatable worker and review procedure →</a></p><p><a href="docs/audits/member-experience-audit-2026-11-07.md">Read the audit and unresolved gates →</a></p><div id="review-documents" class="explore-cards"></div>'
+ };
+ const resources={topics:'topics.json',queue:'investigations/research-queue.json',reviews:'data/document-reviews.json'};
+ const requests=Object.fromEntries(Object.entries(resources).map(([key,url])=>[key,fetch(url).then(r=>{if(!r.ok)throw Error('index unavailable');return r.json();})]));
+ Object.values(requests).forEach(p=>p.catch(()=>{}));
+ function el(tag,text,cls){const x=document.createElement(tag);if(text)x.textContent=text;if(cls)x.className=cls;return x;}
+ function anchor(text,url){const a=el('a',text);a.href=url;return a;}
+ function sourceUrl(url){try{const u=new URL(url);return u.protocol==='https:'&&!u.username&&!u.password&&['www.govinfo.gov','www.archives.gov'].includes(u.hostname)&&(!u.port||u.port==='443');}catch{return false;}}
+ function documentUrl(path){if(typeof path!=='string'||path.includes('..')||!(/^(docs|templates)\/[a-z0-9-]+\.md$/).test(path))return null;return path.startsWith('docs/')?path.slice(5).replace(/\.md$/,'.html'):path.replace(/\.md$/,'.html');}
+ async function hydrate(id,tab){if(!Object.hasOwn(pages,id))return;
+  try {const topics=id==='topics'?await requests.topics:null,queue=id==='topics'?await requests.queue:null,reviews=id==='assurance'?await requests.reviews:null;
+   if(id==='topics'){
+    const box=document.getElementById('topic-cards'),board=document.getElementById('research-board');if(!box||!board)return;box.replaceChildren();board.replaceChildren();
+    for(const t of topics){const card=el('details',null,'explore-card');card.id='topic-'+t.id;card.append(el('summary',t.title),el('p',t.question),el('span',t.status,'badge'),el('p',t.nodes));const link=documentUrl(t.document);if(link)card.append(anchor('Read the researched method →',link));if(!t.sources.length)card.append(el('p','Primary sources and limitations are in the linked protocol.'));for(const s of t.sources){if(sourceUrl(s.url)){const p=el('p');p.append(anchor(s.title,s.url));card.append(p);}}card.append(el('p','Next task: '+t.ticket_id+' · Proposed · Independent review required.'));if(t.id==='epstein')card.append(el('p','2025 Act: enacted. H.R. 9694 / S. 5005: introduced versions verified July 15, 2026; later action history not fully verified. The proposal concerns DOJ and state AGs/DAs, not the State Department. Protect survivors and minors; do not mirror raw sensitive files.'));box.append(card);}
+    for(const t of queue.tickets){const card=el('details',null,'explore-card');card.append(el('summary',t.ticket_id+' · '+t.title),el('p',t.question),el('p','Status: proposed. Worker: unassigned. Reviewer: unassigned. Publication: disabled.'));const ul=el('ul');for(const a of t.acceptance)ul.append(el('li',a));card.append(ul);board.append(card);}
+    if(tab){const target=document.getElementById('topic-'+tab);if(target)target.open=true;}
+   }else{
+    const summary=document.getElementById('review-summary'),box=document.getElementById('review-documents');if(!box||!summary)return;summary.replaceChildren(el('h2','Checks completed; limits visible'),el('p',reviews.summary));box.replaceChildren();
+    for(const d of reviews.documents){const row=el('details',null,'explore-card');row.append(el('summary',d.title),el('p',d.scope),el('p','Human legal review: pending.'),el('p','Source fingerprint: '+d.sha256));const link=documentUrl(d.path);if(link)row.append(anchor('Read this draft →',link));else if(['MASTER_BLUEPRINT.md','ROADMAP.md'].includes(d.path))row.append(anchor('Read this draft →',d.path.replace('.md','.html')));box.append(row);}
+   }
+  }catch{const box=document.getElementById(id==='topics'?'topic-cards':'review-summary');if(box)box.textContent='The live index is unavailable. Reconnect or open the linked written research and review procedure.';}
+ }
+ window.oversightExplore={pages,hydrate};
+})();
