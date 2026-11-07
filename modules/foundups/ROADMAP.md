@@ -18,6 +18,10 @@ implementation sources of truth:
 - `modules/foundups/agent/ROADMAP.md`
 - [p.fMALL roadmap](pfmall/ROADMAP.md) — discovery/presentation and the proposed
   shared mobile creator live-studio integration sequence.
+- [Vote roadmap](voteballots/ROADMAP.md) and
+  [launch checklist](voteballots/docs/RELEASE_ACCOUNTING.md#launch-pad) — public
+  Vote, Oversight and Coalition pages, with the candidate/evidence app gated
+  separately.
 - [AutoPost roadmap](https://github.com/FOUNDUPS/autopost/blob/main/ROADMAP.md#phase-4b--autopost-live-mode-planned)
   — external camera/publishing product and proposed Live mode.
 - `modules/foundups/docs/FOUNDUPS_PAVS_IRONCLAW_AGENT_BUILDER_DIGITAL_TWIN_ROADMAP.md`

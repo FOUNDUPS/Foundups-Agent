@@ -107,17 +107,15 @@ email, government IDs, passwords, credentials, political affiliation or location
 The service worker caches reviewed public shell files only. The download is
 private to the visitor's device; it is not a server receipt or membership badge.
 
-## Release gates and remaining scope
+## Release evidence and remaining scope
 
-- Run meaningful independent adversarial draft tests, JavaScript syntax checks,
-  public-page/link/manifest checks and the unchanged Oversight preservation guard.
-- Review the complete diff and preserve all existing public assets and domains.
-- Reconcile/push the existing Sites mirror, package that exact source, save and
-  publish through the existing project, then verify actual HTTPS page/assets.
-- Record browser layout/interaction results and any verification limit separately
-  from a successful source check or deployment receipt.
-- Merge through normal GitHub checks, verify resulting main, synchronize the PC
-  without overwriting unrelated work and remove the owned disposable worktree.
+PR #2317 merged and passed all four main workflows. The PC matched the merged
+commit, and the disposable worktree was removed. Independent validation passed
+114 draft cases, 398 Vote Python tests and the Oversight preservation check.
+The existing Sites project published version 2. All 11 Vote files matched on
+three public hosts, and the live browser confirmed draft preview and reset.
+The public clean path is verified online. See the
+[release accounting](RELEASE_ACCOUNTING.md) for DNS, TLS and offline scope.
 
 An authenticated intake receiver, provider OAuth, official-status review,
 membership grants, moderated briefing CMS, consensus votes and live enrollment

@@ -20,7 +20,11 @@ VOTE then expands behind the existing pfMALL/member gate into deeper candidate r
 
 ## Current Truth State
 
-The original README/manifest/registry labels predate the implemented PoC chain and are partially stale.
+The public Vote landing, Oversight Blueprint and Coalition pages are live. The
+candidate/evidence app is an internal PoC. The original registry and manifest
+labels predate the implemented chain. See the
+[release accounting and Launch Pad](docs/RELEASE_ACCOUNTING.md) for evidence,
+launch gates and the next product decisions.
 
 ### 2026-11-07: Oversight workstream and public front door
 
@@ -45,6 +49,7 @@ The preferred public address map is:
 | Address | Role |
 |---|---|
 | <https://vote.mtrout.com/> | Vote's informational public landing |
+| <https://vote.mtrout.com/coalition> | Coalition charter and local application draft |
 | <https://oversight.mtrout.com/> | Oversight Blueprint, a workstream within Vote |
 | <https://maga.mtrout.com/> | Retained alias for the same Oversight workstream |
 

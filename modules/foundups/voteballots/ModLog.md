@@ -1,5 +1,16 @@
 # Vote/Ballots FoundUp — Module Log
 
+## 2026-11-07 — Release accounting and Launch Pad
+
+Reconciled source, Sites, domain and browser evidence for Vote, Oversight and
+Coalition. Recorded each shipped capability and outstanding gate in the
+[release accounting](docs/RELEASE_ACCOUNTING.md), and distinguished the live
+informational landing from the candidate/evidence launch in the roadmap.
+Fresh DNS checks covered the three mtrout.com names, and HTTPS/page checks
+covered all seven public addresses. Recorded
+the Coalition clean-route offline gap and the stale registry labels as
+follow-up work. Scope is documentation. WSP 10, 22, 50 and 97.
+
 ## 2026-11-07 — Independent Coalition tab and private draft export
 
 012 requested a Coalition tab on the current Vote site and an architecture

@@ -1,6 +1,7 @@
 # Vote/Ballots FoundUp - Roadmap
 
-**Status**: Internal PoC chain complete; public PoC reopen pending  
+**Status**: Public Vote, Oversight and Coalition pages live. Candidate/evidence PoC remains internal.
+
 **Current module version**: 0.6.0  
 **Truth authority**: WSP 97 + `VOTE_POC_CHAIN_OBSERVATION_SNAPSHOT_PHASE1.md`
 
@@ -8,37 +9,23 @@
 
 ## Current State
 
-### 2026-11-07 Coalition public-tab layer
+### 2026-11-07 release accounting
 
-The existing Vote public PWA adds a Coalition page and local application-draft
-preparation/export. It does not enroll members, verify provider ownership or
-grant authority. No named creator's participation is assumed. The
-[source audit](docs/COALITION_TAB_AUDIT.md) records identity/consent, OAuth,
-cross-principal upsert, schema and counter findings in the proposed full-stack
-system. Live intake, provider OAuth, official review, moderated CMS and consensus
-storage remain separate undelivered capabilities. Location/affiliation political
-targeting and campaign routing are outside this public layer.
+Vote Sites v2 publishes the [Vote landing](https://vote.mtrout.com/) and the
+[Coalition tab](https://vote.mtrout.com/coalition). Oversight Sites v5 publishes
+the [Oversight Blueprint](https://oversight.mtrout.com/) and retains
+[`maga.mtrout.com`](https://maga.mtrout.com/) as an alias. Coalition prepares
+local drafts. Verified enrollment and editorial tools are future capabilities.
+The [release accounting and Launch Pad](docs/RELEASE_ACCOUNTING.md) record
+GitHub/PC reconciliation, DNS, HTTPS, browser checks and each capability's gates.
 
-### 2026-11-07 source reconciliation and public presentation
-
-- GitHub Vote work through PRs #2275, #2282, #2289 and #2298 is already merged
-  and preserved on the PC; the integration base is main `152d52dd`.
-- Oversight Blueprint is a Vote workstream, not a newly registered derivative.
-  Its complete published source is preserved under `oversight/site/`, with
-  exact inventory and release provenance in `oversight/source-snapshot.json`.
-- `web/` supplies the informational Vote landing. Its availability does not
-  activate live FEC access, candidate tools, claim scores or an official ballot.
-- Preferred verified addresses are `vote.mtrout.com`, `oversight.mtrout.com`
-  and the retained `maga.mtrout.com` Oversight alias. Existing FoundUps aliases
-  and generated Sites addresses remain retained; see the current README map.
-- A later shared installed PWA must explicitly integrate under the existing
-  `/f/voteballots/app` namespace. Separate origins alone do not implement it.
-- Preserved instruction bundles and source history are inputs for the existing
-  governed skill/runtime owners. They do not establish OpenClaw promotion, an
-  autonomous RSI loop or measured retained learning.
-
-This presentation/source slice leaves the runtime registry, manifest readiness,
-public candidate-data wiring and protected execution gates unchanged.
+For the candidate/evidence track, close the existing cycle-validation defect and
+reconcile registry labels in Phase 0. Use Phase 1 to prove one public evidence
+journey with authoritative sources, freshness and explicit data gaps. Oversight
+reader review and Coalition intake are parallel product decisions with separate
+acceptance gates. The published sites and preserved instruction bundles are
+presentation and authored content. Tenant activation and runtime qualification
+each have their own gates.
 
 
 ### 2026-11-01 bounded RSI fixture checkpoint
@@ -112,7 +99,8 @@ Docs/audit first. Runtime registry/manifest promotion occurs only in its own tes
 **Goal**: make the public FoundUp landing immediately useful without requiring member access.
 
 ### Primary User Experience
-- [ ] activate canonical public Vote landing under WSP 102/104
+- [x] publish the informational Vote front door and workstream links
+- [ ] activate the public candidate/evidence entry and tenant app under WSP 102/104
 - [ ] locality/context resolver with permission + manual fallback
 - [ ] relevant race/candidate roster
 - [ ] candidate cards with minimal funding/influence evidence

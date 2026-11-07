@@ -27,6 +27,10 @@ The owning publisher reported successful native Sites publication of version 5:
 - Original Sites address: <https://oversight-hub-pwa.undaodu.chatgpt.site/>
 
 The parent Vote informational landing uses <https://vote.mtrout.com/>.
+See the [Vote release accounting and Launch Pad](../docs/RELEASE_ACCOUNTING.md)
+for the current public availability and outstanding reader/review gates. The
+roadmap inside the preserved snapshot describes the earlier owner-private
+release stage and retains its value as a dated planning record.
 These three `mtrout.com` addresses passed public DNS, strict TLS and HTTP 200
 checks with their correct Vote/Oversight pages on both public endpoints on
 7 November 2026 at 00:45 UTC. The previously configured `vote.foundups.com`

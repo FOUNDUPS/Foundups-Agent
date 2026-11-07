@@ -12,6 +12,9 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
+The [Vote release accounting and Launch Pad](modules/foundups/voteballots/docs/RELEASE_ACCOUNTING.md)
+track the public Vote, Oversight and Coalition release and the remaining
+candidate/evidence and runtime gates.
 
 ## Micro verification and protected native composition — 2026-11-01
 
