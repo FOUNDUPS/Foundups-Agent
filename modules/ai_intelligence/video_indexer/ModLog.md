@@ -1,5 +1,19 @@
 # Video Indexer Module - Modification Log
 
+## 2026-11-07 — Remove unattended API enrichment; preserve shared-router boundary
+
+WSP00/22/50/77/97. Independently read the key-presence-triggered direct Gemini
+enrichment in the Studio indexing cycle at baseline `fa7d487f3`. Remove that
+paid pass while preserving browser Studio Ask output and the compatible empty
+`gemini_analysis` field. The scoped offline selection passes 32; the new
+key-presence control fails on old source (one failure, one pass). Merge and
+deployment remain pending. The broader shared-router migration
+audit remains SPECIFIED_NOT_IMPLEMENTED. Current YouTube gateway surfaces and
+stages do not include video analysis. Link the existing scheduler repair list
+instead of creating another tracker. No model, provider or browser execution.
+
+See [test scope and evidence limits](tests/TestModLog.md#2026-11-07--no-unattended-paid-enrichment-after-studio-indexing).
+
 ## 2026-10-29 — Reconcile preserved YUMORI evidence work order (#1667)
 
 Preserve the original proposal/history, campaign dates and all three JSON/flow

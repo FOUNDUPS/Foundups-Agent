@@ -1,5 +1,16 @@
 # Livechat Module - ModLog
 
+## 2026-11-07 — Reconcile installed repair and remaining operational proof
+
+WSP00/22/50/77/97. Record the owning repair handoff: PR2314 merged and installed
+at `fa7d487f3`; the 02:32:34 UTC observation found no main/worker process.
+Fresh-process activation and live semantic qualification remain pending. Link the existing scheduler
+roadmap for manual takeover, YUMORI metadata and shared-router follow-ons.
+Record LM Link disable acknowledgement and 36 passive no-connector samples over
+36 seconds separately from model HTTP availability. Documentation only; no
+source window fix or live reply claim, and no unknown delivery/scheduling
+reservation is released.
+
 ## 2026-11-07 — Route emoji questions to reviewed contextual replies
 
 012's live test exposed a hard-coded "consciousness evolution" answer in the

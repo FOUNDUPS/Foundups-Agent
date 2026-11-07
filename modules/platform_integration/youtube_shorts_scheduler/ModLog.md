@@ -1,5 +1,16 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-11-07 — Record manual takeover and YUMORI metadata requirements
+
+WSP00/22/50/77/97. Source review at `fa7d487f3` found that detail/CPS workflow
+failures can dismiss dialogs and continue rows; launch audit/origin restoration
+and outer cycles lack a propagated manual-yield state. Existing unknown-save
+claims and the no-CPS-retry-after-started-cycle guard remain authoritative.
+Record the required 60-second same-action recheck, no-navigation takeover and
+evidence-identified Foundups YUMORI song metadata in the existing roadmap.
+Both changes are SPECIFIED_NOT_IMPLEMENTED at this checkpoint. No source,
+browser, tracker, unknown-save record or test result changed in this docs slice.
+
 ## 2026-11-05 — Reuse the native schedule control for dialog readiness
 
 WSP11/22/50/62/84/97. The post-click readiness fallback omitted the existing

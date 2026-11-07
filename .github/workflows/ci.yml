@@ -262,6 +262,30 @@ jobs:
             modules/communication/voice_command_ingestion/tests/test_transcript_language.py \
             modules/communication/voice_command_ingestion/tests/test_voice_command_ingestion.py \
             modules/ai_intelligence/video_indexer/tests/test_audio_transcript_language.py
+      - name: Verify Studio indexing does not start paid API enrichment
+        run: >-
+          python -B -m pytest --import-mode=importlib -o addopts=
+          -p pytest_asyncio.plugin -p no:cacheprovider -q --tb=short
+          modules/ai_intelligence/video_indexer/tests/test_shorts_indexing_pass.py
+          modules/ai_intelligence/video_indexer/tests/test_action_surface.py
+          modules/ai_intelligence/video_indexer/tests/test_indexer_scheduler_order.py
+          --junitxml=studio-indexing-boundary-results.xml
+      - name: Require Studio indexing acceptance without skips
+        shell: python
+        run: |
+          import xml.etree.ElementTree as ET
+          root = ET.parse('studio-indexing-boundary-results.xml').getroot()
+          cases = list(root.iter('testcase'))
+          assert len(cases) == 32
+          assert not any(list(root.iter(tag)) for tag in ('failure', 'error', 'skipped'))
+          assert any(case.get('name') == 'test_cycle_runs_passes_per_content_types[True]' for case in cases)
+      - name: Preserve Studio indexing boundary results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: studio-indexing-boundary-results
+          path: studio-indexing-boundary-results.xml
+          if-no-files-found: error
       - name: Verify 185 offline native startup controls in a minimal child
         run: python -I -B .github/scripts/youtube_repair_offline.py --suite startup
       - name: Verify 102 qualified inventory controls in a separate minimal child

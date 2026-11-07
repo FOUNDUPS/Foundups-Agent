@@ -1,3 +1,16 @@
+## 2026-11-07 — YouTube repair boundaries and unattended enrichment removal
+
+Reconcile the [YouTube DAE checkpoint](modules/communication/livechat/README.md#youtube-dae-repair-checkpoint--2026-11-07)
+and [ordered work list](modules/platform_integration/youtube_shorts_scheduler/ROADMAP.md#repair-work-list--2026-11-07):
+PR2314 is installed, while fresh-process semantic qualification, manual takeover,
+YUMORI song metadata and wider shared-router migration remain separate gates.
+Remove only the Studio cycle's key-presence-triggered paid Gemini enrichment;
+retain browser Ask results and the empty compatibility field. The scoped offline
+selection passes 32; this new removal is not yet merged or deployed. Record LM
+Link supported disable and bounded passive confirmation in the dependency
+launcher log as configuration remediation, not a source window fix. No unknown
+comment/schedule reservation is cleared. WSP00/22/50/77/97.
+
 ## 2026-11-06 — WRE readiness evidence and training-menu boundaries
 
 The 16/P0 readiness repair distinguishes per-metric missing evidence from actual
