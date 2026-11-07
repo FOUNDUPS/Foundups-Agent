@@ -51,6 +51,11 @@ jobs:
           modules/foundups/voteballots/tests
       - name: Verify preserved Oversight public-source inventory
         run: python -B modules/foundups/voteballots/oversight/scripts/verify_snapshot.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.22.1'
+      - name: Verify Coalition application draft boundaries
+        run: node --test modules/foundups/voteballots/tests/test_coalition_draft.mjs
       - name: Preserve exact-revision verification results
         if: always()
         uses: actions/upload-artifact@v4

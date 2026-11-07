@@ -2,6 +2,22 @@
 
 <!-- WSP 22: anti-vibecoding test inventory. NEWEST entries at TOP. -->
 
+## [2026-11-07] — Independent local Coalition draft contract
+
+New Node `test_coalition_draft.mjs` covers a distinct browser-export boundary;
+the existing Python funding/shell tests do not exercise it. The verifier froze
+107 cases before reading implementation. Exact 11,914-byte prefix SHA256:
+`8459db930f24ef51ed2e596c8f12d652ecbf215e7834a486cacb93288c9678b8`.
+Initial 93 pass / 14 fail: export included out-of-contract `joined`/`reviewed`
+fields. Separate probes reproduced deceptive raw authority and encoded-control
+URLs. Seven appended cases preserve the original prefix and include a valid
+default-port control. The final test SHA256 is
+`4fc02770e67f29305e15e90c7b4f958e585c1a774154ff197fc2cd0b91c8631f`.
+Final 114 pass, no skips. Cases cover fixed unverified/unsubmitted status,
+strict consent, bounds, literal JSON text and URL confusion without a network
+call or authority grant. CI runs the Node suite in `wre-verification-contracts`.
+The unchanged Python Vote suite separately passes 398 tests.
+
 ## [2026-11-01] — Aggregate and displayed-confidence closure
 
 Independent aggregate oracle29: baseline25 passed/4 failed; coordinator repair29

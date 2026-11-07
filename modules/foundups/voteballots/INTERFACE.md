@@ -8,6 +8,14 @@
 
 ## 2026-11-07 Public Presentation and Oversight Source Contract
 
+`web/coalition.html` adds an independent Coalition information and voluntary
+application-draft page. `web/coalition-draft.mjs` exposes the pure
+`createCoalitionDraft(input, createdAtISO)` validation/export contract. Successful
+output remains `DRAFT_NOT_SUBMITTED` and `UNVERIFIED`; it is not an account,
+enrollment receipt, ownership proof or role grant. The browser prepares and
+downloads the draft without transmitting it or persisting form data. See the
+[audit and exact release boundary](docs/COALITION_TAB_AUDIT.md).
+
 `web/` owns Vote's static informational landing/PWA. It publishes no candidate
 lookup, scores, ballot submissions or authenticated backend API. Existing
 Python funding and shell-payload interfaces remain unchanged.

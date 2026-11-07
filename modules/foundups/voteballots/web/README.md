@@ -8,7 +8,8 @@ application, an official ballot, confidential intake or a running agent service.
 ## Source and deployment
 
 The buildless public files are `index.html`, `style.css`, `app.js`, `sw.js`,
-`manifest.webmanifest` and the three files under `icons/`. This README is
+`manifest.webmanifest`, `coalition.html`, `coalition.js`, `coalition-draft.mjs`
+and the three files under `icons/`. This README is
 operator documentation and is excluded from the deployed static directory.
 
 - Sites project: `appgprj_6aee6646e6ac81918ac2624d5d1db413`
@@ -38,6 +39,18 @@ explicitly changes it. Record actual deployment and alias results separately.
 
 ## PWA and product boundary
 
+The **Coalition** navigation opens `coalition.html`. Its voluntary form validates,
+previews and downloads a private application draft on the visitor's device.
+It sends nothing, uses no persistent browser storage, and grants no membership,
+verified badge or permission. It does not collect email, IDs or location. No
+named creator is seeded as a member. See [the audit](../docs/COALITION_TAB_AUDIT.md)
+for the supplied full-stack proposal's identity/schema findings and the separate
+backend admission requirements. Existing operator OAuth is not visitor OAuth.
+
+The same official House and Senate directory links and Capitol Switchboard
+phone link are available to every visitor. The site does not pick a target,
+collect a ZIP code or record whether a call was placed.
+
 All assets are local, the content policy is self-only, and the install control
 appears only when the browser offers installation. The service worker registers
 relative to this directory and caches only exact, same-origin public shell
@@ -57,3 +70,6 @@ Run `node --check` on `app.js` and `sw.js`; validate the manifest, local assets,
 anchors, HTTPS links and service-worker eligibility. Check desktop and phone
 layout when browser control is available. A source check or successful deploy
 does not itself establish browser-rendering QA or custom-domain activation.
+
+Run `node --test modules/foundups/voteballots/tests/test_coalition_draft.mjs`
+from the repository root for the independent draft-contract security cases.
