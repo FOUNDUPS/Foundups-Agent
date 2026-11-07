@@ -1,3 +1,16 @@
+## 2026-11-07 — Quiet stakeholder conversation through shared routing
+
+WSP00/15/22/50/60/73/77/84/97. Replace unsolicited ordinary reply fallthrough with
+fresh candidate selection, bounded attempt budgets and explicit semantic abstention.
+Capture batches before generation and remove badge priority for ordinary discussion;
+retain recognized command priority/permissions and explicit emoji limiter denial.
+Read current-session native-ID context from the complete existing SQLite owner.
+Remove timer trolling/invites and startup greeting generation. Bind conversation
+send destination across delays without changing reviewed text, STOP or unknown writes.
+Add canonical conversation stewardship skill and generated Codex projection; native
+WRE execution is not established. Current default daemon path only; alternate router
+mode and cross-restart capture remain follow-ons. See tests/TestModLog for evidence.
+
 # Livechat Module - ModLog
 
 ## 2026-11-07 — Reconcile installed repair and remaining operational proof

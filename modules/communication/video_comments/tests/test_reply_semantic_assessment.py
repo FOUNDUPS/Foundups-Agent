@@ -197,7 +197,7 @@ def test_actual_sender_preserves_reviewed_payload_and_rechecks_after_delay(monke
         assert inserted[0]['body']['snippet']['textMessageDetails']['messageText'] == str(draft)
 
 
-def local_livechat_fixture(monkeypatch, draft='Film details are at HornetHunter.com.'):
+def local_livechat_fixture(monkeypatch, draft='Film details are at HornetHunter.com.', reply_decision=None):
     """Actual generation/review definitions, temporary collaborators, no package startup or providers."""
     native = {'message':'Film details are at HornetHunter.com.', 'surfaces':['livechat'],
               'source_command_id':'live-theme-1', 'expires_at_unix':4102444800,
@@ -216,7 +216,8 @@ def local_livechat_fixture(monkeypatch, draft='Film details are at HornetHunter.
     generator._semantic_reply_history = lambda *a: pytest.fail('Livechat used comment cooldown')
     generator._load_personalization_context = lambda **kw: ''
     generator._load_voice_memory_context = lambda *a, **kw: ''
-    values = iter([json.dumps(assessment('Where can I watch the film?', theme_relevant=True)),
+    assessment_extra = {} if reply_decision is None else {'should_reply': reply_decision}
+    values = iter([json.dumps(assessment('Where can I watch the film?', theme_relevant=True, **assessment_extra)),
                    draft, json.dumps(helper.GOOD)])
     def post(url, **kwargs):
         calls.append(kwargs['json'])
@@ -230,6 +231,25 @@ def local_livechat_fixture(monkeypatch, draft='Film details are at HornetHunter.
     chat.classify_chatter = lambda *a: SimpleNamespace()
     chat._check_pattern_response = chat._generate_banter_response = lambda *a: pytest.fail('Theme failure used template')
     return chat, generator, native, current, calls, post
+
+
+@pytest.mark.parametrize('decision', [False, True])
+def test_conversation_context_reaches_assessment_writer_and_exact_review(monkeypatch, decision):
+    chat, generator, _, _, calls, _ = local_livechat_fixture(monkeypatch, reply_decision=decision)
+    context = {'session_id': 'current', 'participant_id': 'viewer', 'directed_request': False,
+               'recent_messages': [{'participant_id': 'other', 'text': 'The site has film details.'}],
+               'participant_messages': [{'participant_id': 'viewer', 'text': 'I meant the full film.'}]}
+    generator._load_personalization_context = lambda **kw: pytest.fail('Unscoped history lookup')
+    result = chat.generate_reply('Where can I watch the film?', 'Aki', 'viewer', conversation_context=context)
+    assert json.loads(calls[0]['messages'][1]['content'])['conversation'] == context
+    if not decision:
+        assert result is None and len(calls) == 1
+        return
+    assert isinstance(result, CHAT.ReviewedLivechatReply)
+    assert 'I meant the full film.' in calls[1]['messages'][1]['content']
+    review = json.loads(calls[2]['messages'][1]['content'])
+    assert review['candidate'] == str(result)
+    assert json.loads(review['supplied_generation_context']['history']) == context
 
 
 @pytest.mark.parametrize('provider', ['lm_studio_local', 'openrouter'])
@@ -591,6 +611,11 @@ def livechat_processor_fixture(monkeypatch, reply):
     module._sanitize_username = lambda value:value
     processor = object.__new__(module.MessageProcessor)
     processor.intelligent_reply = reply
+    processor.channel_id = reply.channel_id = 'receiving-channel'
+    processor.stream_title = reply.stream_title = 'Film discussion stream'
+    processor.persona_config = {}
+    processor.memory_manager = SimpleNamespace(current_session='current', get_conversation_context=lambda author: {
+        'session_id': 'current', 'participant_id': author, 'recent_messages': [], 'participant_messages': []})
     processor.self_improvement = SimpleNamespace(observe_command=lambda *a:None)
     processor.intelligent_throttle = None
     processor.announced_joins = {'viewer'}
@@ -673,7 +698,7 @@ def test_actual_trigger_caller_retains_themed_mode_after_theme_clear(monkeypatch
         return None
     processor._await_intelligent_reply = reject
     message = {'text':'Where can I watch the film?', 'author_name':'Aki', 'author_id':'viewer',
-               'is_moderator':True, 'has_trigger':True}
+               'is_moderator':True, 'has_trigger':True, 'published_at':datetime.now(timezone.utc).isoformat()}
     assert asyncio.run(processor.generate_response(message)) is None
     assert len(entries) == 1
 
@@ -721,13 +746,15 @@ def test_actual_callers_preserve_identity_and_accept_reviewed_payload_after_exis
     processor._is_maga_rate_limited = lambda author:False
     processor._update_maga_time = lambda author:updates.append(author)
     message = {'text':'Where can I watch the film?', 'author_name':'Aki', 'author_id':'viewer',
-               'is_moderator':True, 'is_member':True, 'has_trigger':path == 'trigger', 'has_maga':path == 'maga'}
+               'is_moderator':True, 'is_member':True, 'has_trigger':path == 'trigger', 'has_maga':path == 'maga',
+               'published_at':datetime.now(timezone.utc).isoformat()}
     assert asyncio.run(processor.generate_response(message)) is value
     assert len(captured) == 1
     assert captured[0]['user_id'] == 'viewer' and captured[0]['username'] == 'Aki'
     assert captured[0]['role'] == 'MOD' and captured[0]['is_member'] is True
     assert captured[0]['expected_theme_snapshot'] == native and captured[0]['cancel_event'].is_set()
-    assert updates == (['viewer'] if path == 'maga' else [])
+    assert updates == []  # Political classification is no longer an engagement reason.
+    assert len(processor._conversation_attempts) == 1
 
 
 def test_default_comment_generation_still_waits_for_existing_serialization_lock(monkeypatch):

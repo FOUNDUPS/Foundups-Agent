@@ -116,6 +116,7 @@ jobs:
           -p no:cacheprovider -q --tb=short
           modules/communication/livechat/tests/test_capture_before_processing.py
           modules/communication/livechat/tests/test_emoji_question_routing.py
+          modules/communication/livechat/tests/test_conversation_stewardship.py
           modules/communication/video_comments/tests/test_driver_handle_inheritance.py
           --junitxml=chat-capture-results.xml
       - name: Preserve chat capture results
@@ -195,7 +196,7 @@ jobs:
           assert cases and not any(list(root.iter(tag)) for tag in ('failure', 'error', 'skipped'))
           names = sorted(case.get('name') for case in cases)
           digest = hashlib.sha256('\n'.join(names).encode()).hexdigest()
-          assert len(cases) == 112 and digest == '4dfdd7547ebdcad26e344244b4785e824c5913346a18b68ecec0a60e7cf1679c', (len(cases), digest)
+          assert len(cases) == 114 and digest == '3bd2a5759ee9d533ba0b8e12d3ca7f43d4fca35683c5453ca60f4f0afaa6cc9a', (len(cases), digest)
       - name: Preserve reply repair results
         if: always()
         uses: actions/upload-artifact@v4

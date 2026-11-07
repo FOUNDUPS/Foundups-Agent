@@ -7,6 +7,8 @@ import os
 from pathlib import Path
 import re
 import sys
+import time
+from datetime import datetime, timezone
 from types import ModuleType, SimpleNamespace
 from unittest.mock import AsyncMock, Mock
 
@@ -23,10 +25,10 @@ def processor(monkeypatch):
     cls = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "MessageProcessor")
     cls.bases = []
     cls.body = [n for n in cls.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
-                and n.name in {"generate_response", "_resolve_model_command", "_check_whack_command"}]
+                and n.name in {"generate_response", "_conversation_response", "_resolve_model_command", "_check_whack_command"}]
     env = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "_env_truthy")
     future = ast.ImportFrom(module="__future__", names=[ast.alias(name="annotations")], level=0)
-    ns = {"logger": logging.getLogger(__name__), "os": os, "re": re,
+    ns = {"logger": logging.getLogger(__name__), "os": os, "re": re, "time": time,
           "_sanitize_username": lambda name: name}
     exec(compile(ast.fix_missing_locations(ast.Module(body=[future, env, cls], type_ignores=[])), str(path), "exec"), ns)
     name = "modules.communication.livechat.src.llm_integration"
@@ -51,6 +53,8 @@ def processor(monkeypatch):
     obj.channel_id = "receiving-channel"
     obj.stream_title = "Offline stream"
     obj.intelligent_reply = SimpleNamespace(channel_id=obj.channel_id, stream_title=obj.stream_title)
+    obj.memory_manager = SimpleNamespace(current_session='current', get_conversation_context=Mock(return_value={
+        'session_id': 'current', 'participant_id': 'captured-author', 'recent_messages': [], 'participant_messages': []}))
     obj._await_intelligent_reply = AsyncMock(return_value=reply)
     obj.self_improvement = SimpleNamespace(observe_command=Mock())
     obj.persona_config = {}
@@ -69,6 +73,7 @@ def processor(monkeypatch):
 
 def message(text, role="MOD", **flags):
     return {"text": text, "author_name": "Viewer", "author_id": "captured-author",
+            "published_at": datetime.now(timezone.utc).isoformat(),
             "is_moderator": role == "MOD", "is_owner": role == "OWNER",
             "has_consciousness": True, **flags}
 
@@ -86,10 +91,12 @@ def test_emoji_question_uses_exact_question_context_and_reviewed_reply(processor
     result = asyncio.run(obj.generate_response(data))
     assert result is reply, "canned text or rewritten reviewed text is not an answer"
     obj._await_intelligent_reply.assert_awaited_once_with(
-        theme_snapshot=theme, message=text, username="Viewer", user_id="captured-author", role=role)
+        theme_snapshot=theme, message=text, username="Viewer", user_id="captured-author", role=role,
+        is_member=False,
+        conversation_context={**obj.memory_manager.get_conversation_context.return_value, 'directed_request': True})
     obj.agentic_engine.generate_agentic_response.assert_not_called()
-    obj._update_trigger_time.assert_called_once_with("captured-author")
-    assert data["response_type"] == "consciousness"
+    assert len(obj._conversation_attempts) == 1
+    assert data["response_type"] == "conversation"
 
 
 @pytest.mark.parametrize("failure", ["unavailable", "disabled", "missing_generator", "rate_limited", "diversity", "changed_context"])
@@ -120,11 +127,11 @@ def test_emoji_question_never_falls_back_to_canned_success(processor, monkeypatc
 
 
 @pytest.mark.parametrize("text", ["✊✋🖐", "✊✋🖐️", "✊🏽✋🏽🖐🏽"])
-def test_bare_emoji_keeps_existing_non_question_behavior(processor, text):
+def test_bare_emoji_is_observation_only(processor, text):
     obj, _, _ = processor
     obj.agentic_engine.generate_agentic_response.return_value = "@Viewer Emoji acknowledgment"
-    assert asyncio.run(obj.generate_response(message(text))) == "@Viewer Emoji acknowledgment"
-    obj.agentic_engine.generate_agentic_response.assert_called_once_with("Viewer", text, "MOD")
+    assert asyncio.run(obj.generate_response(message(text))) is None
+    obj.agentic_engine.generate_agentic_response.assert_not_called()
     obj._await_intelligent_reply.assert_not_called()
 
 
@@ -137,11 +144,11 @@ def test_quiz_answer_precedes_question_generation(processor, text):
     obj._await_intelligent_reply.assert_not_called()
 
 
-def test_ordinary_viewer_permission_gate_is_unchanged(processor):
-    obj, _, _ = processor
-    assert asyncio.run(obj.generate_response(message("✊✋🖐 Explain this site", "USER"))) is None
+def test_stakeholder_question_is_eligible_without_badge(processor):
+    obj, reply, _ = processor
+    assert asyncio.run(obj.generate_response(message("✊✋🖐 Explain this site", "USER"))) is reply
     obj.agentic_engine.generate_agentic_response.assert_not_called()
-    obj._await_intelligent_reply.assert_not_called()
+    assert obj._await_intelligent_reply.await_args.kwargs['role'] == 'USER'
 
 
 def test_explicit_everyone_mode_preserves_actual_viewer_role(processor, monkeypatch):

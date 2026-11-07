@@ -546,7 +546,8 @@ class LiveChatCore:
 
             # Capture received text before filters, commands or model failures
             # can return early. Response eligibility must not decide history.
-            self._log_to_user_file(message)
+            if message_id not in getattr(self, '_batch_captured_ids', set()):
+                self._log_to_user_file(message)
             if message.get("_capture_only") is True:
                 return
             
@@ -673,7 +674,13 @@ class LiveChatCore:
                 return
             
             # Generate response if needed
+            sender = getattr(self, 'chat_sender', None)
+            conversation_destination = (getattr(sender, 'live_chat_id', None), getattr(sender, 'bot_channel_id', None))
             response = await self.message_processor.generate_response(processed)
+            if response and processed.get('response_type') == 'conversation':
+                if not conversation_destination[0] or not hasattr(response, 'reviewed_text'):
+                    return
+                response.destination_snapshot = conversation_destination
             
             if response:
                 # Handle list responses (e.g., /help sends multiple messages)
@@ -787,48 +794,37 @@ class LiveChatCore:
             logger.error(f"Error logging message: {e}")
     
     async def process_message_batch(self, messages: List[Dict[str, Any]]) -> None:
+        """Capture the received batch first, then preserve conversation order.
+
+        Authorized platform commands retain priority; ordinary conversation has
+        no badge queue. Polling remains serialized with bounded generation.
         """
-        Process a batch of messages with OWNER priority queue.
-
-        OWNER commands are ALWAYS processed FIRST, regardless of arrival order.
-        This ensures channel owners can control the bot immediately.
-
-        Priority Order:
-        1. OWNER messages (isChatOwner=True)
-        2. MOD messages (isChatModerator=True)
-        3. Regular user messages
-
-        Args:
-            messages: List of messages to process
-        """
-        # Split messages by role priority
-        owner_messages = []
-        mod_messages = []
-        user_messages = []
-
-        for message in messages:
-            author_details = message.get("authorDetails", {})
-            is_owner = author_details.get("isChatOwner", False)
-            is_mod = author_details.get("isChatModerator", False)
-
-            if is_owner:
-                owner_messages.append(message)
-            elif is_mod:
-                mod_messages.append(message)
-            else:
-                user_messages.append(message)
-
-        # Process in priority order: OWNER -> MOD -> USER
-        priority_queue = owner_messages + mod_messages + user_messages
-
-        if owner_messages:
-            logger.info(f"👑 Processing {len(owner_messages)} OWNER message(s) FIRST (bypassing queue of {len(messages) - len(owner_messages)} others)")
-
-        for message in priority_queue:
-            await self.process_message(message)
+        self._batch_captured_ids = set()
+        try:
+            for message in messages:
+                identity = message.get('id', '')
+                if (message.get('type') not in ('ban_event', 'timeout_event')
+                        and identity not in self.processed_message_ids
+                        and identity not in self._batch_captured_ids):
+                    self._log_to_user_file(message)
+                    self._batch_captured_ids.add(identity)
+            def command_priority(message):
+                author = message.get('authorDetails') or {}
+                text = message.get('snippet', {}).get('displayMessage', '').lstrip()
+                processor = getattr(self, 'message_processor', None)
+                recognized = any(callable(check := getattr(processor, name, None)) and check(text)
+                    for name in ('_check_whack_command', '_check_shorts_command', '_check_m2j_command', '_check_pqn_command'))
+                return (message.get('_capture_only') is not True and text.startswith(('/', '!'))
+                        and recognized and (author.get('isChatOwner') or author.get('isChatModerator')))
+            ordered = [msg for msg in messages if command_priority(msg)]
+            ordered += [msg for msg in messages if not command_priority(msg)]
+            for message in ordered:
+                await self.process_message(message)
+        finally:
+            self._batch_captured_ids.clear()
     
     async def run_polling_loop(self) -> None:
-        """Run the main polling loop with health monitoring and proactive trolling."""
+        """Run the polling loop with health monitoring and quiet conversation selection."""
         poll_interval_ms = 5000
         
         # Check quota status at start
@@ -837,7 +833,6 @@ class LiveChatCore:
             logger.warning(f"[DATA] QUOTA STATUS: {status['status']} - {status['units_used']}/{10000} units used ({status['percentage_used']:.1%})")
             logger.info(f"[IDEA] Recommendation: {status['recommendation']}")
         last_health_check = time.time()
-        last_troll = time.time()
         last_stream_check = time.time()  # Track last stream validation
         last_activity = time.time()  # Track last meaningful chat activity
         health_check_interval = 60  # Check health every minute
@@ -845,10 +840,6 @@ class LiveChatCore:
         inactivity_timeout = 180  # Consider stream inactive after 3 minutes of no messages
         consecutive_poll_errors = 0  # Track consecutive polling errors
         consecutive_empty_polls = 0  # Track polls with no messages
-        invite_distribution_done = False  # Track if we've done auto-distribution this session
-        # Dynamic troll interval based on chat activity
-        base_troll_interval = 600  # Base: 10 minutes for quiet chat
-        troll_interval = base_troll_interval
         
         while self.is_running:
             try:
@@ -861,55 +852,8 @@ class LiveChatCore:
                             logger.info(f"[IDEA] Health recommendation: {recommendation}")
                     last_health_check = time.time()
                 
-                # Periodic MAGA trolling - ONLY if chat is active
-                # Count recent messages to determine chat activity
-                recent_msg_count = len([ts for ts in getattr(self, 'message_timestamps', []) 
-                                       if time.time() - ts < 300])  # Messages in last 5 min
-                
-                # Adjust troll interval based on activity
-                if recent_msg_count == 0:
-                    # Dead chat: no proactive messages
-                    troll_interval = float('inf')  # Never troll in dead chat
-                elif recent_msg_count < 5:
-                    # Very quiet: rare trolling
-                    troll_interval = 1200  # 20 minutes
-                elif recent_msg_count < 20:
-                    # Moderate activity: occasional trolling
-                    troll_interval = 600  # 10 minutes
-                else:
-                    # Active chat: more frequent engagement
-                    troll_interval = 300  # 5 minutes
-                
-                if time.time() - last_troll > troll_interval and troll_interval != float('inf'):
-                    if hasattr(self.message_processor, 'agentic_engine'):
-                        troll_msg = self.message_processor.agentic_engine.generate_proactive_troll()
-                        await self.send_chat_message(troll_msg)
-                        logger.info(f"[TARGET] Sent proactive troll (activity: {recent_msg_count} msgs): {troll_msg[:50]}...")
-                        # Record success pattern for WRE
-                        if record_success:
-                            record_success('proactive_troll', {'activity': recent_msg_count, 'msg': troll_msg[:50]}, tokens_used=50)
-                    last_troll = time.time()
-
-                # Auto-distribute TOP 10 invites (once per session, after 30 min)
-                if not invite_distribution_done and hasattr(self.message_processor, 'stream_start_time'):
-                    stream_duration = time.time() - self.message_processor.stream_start_time
-                    if stream_duration > 1800:  # 30 minutes
-                        logger.info(f"[INVITE-AUTO] 🎟️ Stream running {stream_duration/60:.1f} min - checking TOP 10 invites...")
-                        try:
-                            from modules.gamification.whack_a_magat.src.invite_distributor import auto_distribute_top10_invites
-                            new_invites = auto_distribute_top10_invites()
-                            if new_invites:
-                                logger.info(f"[INVITE-AUTO] 📤 Sending {len(new_invites)} invite messages to chat...")
-                                for inv in new_invites:
-                                    await self.send_chat_message(inv['message'])
-                                    await asyncio.sleep(2)  # Delay between messages
-                                logger.info(f"[INVITE-AUTO] ✅ Distributed {len(new_invites)} TOP 10 invites")
-                            else:
-                                logger.info(f"[INVITE-AUTO] ⏭️ All TOP 10 whackers already have invites (no new distribution)")
-                            invite_distribution_done = True
-                        except Exception as e:
-                            logger.error(f"[INVITE-AUTO] ❌ Error: {e}")
-                            invite_distribution_done = True  # Don't retry on error
+                # Observation cadence is not a reason to speak. Conversation
+                # replies are selected from received messages by MessageProcessor.
 
                 # Periodic stream health check - detect if stream ended
                 if time.time() - last_stream_check > stream_check_interval:

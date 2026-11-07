@@ -21,7 +21,7 @@ def _core_methods():
     cls = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "LiveChatCore")
     cls.bases = []
     cls.body = [n for n in cls.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
-                and n.name in {"process_message", "_log_to_user_file"}]
+                and n.name in {"process_message", "process_message_batch", "_log_to_user_file"}]
     module = ast.Module(body=[ast.ImportFrom(module="__future__", names=[ast.alias(name="annotations")], level=0), cls], type_ignores=[])
     ns = {"__file__": str(path), "logger": logging.getLogger(__name__), "time": time}
     exec(compile(ast.fix_missing_locations(module), str(path), "exec"), ns)
@@ -41,6 +41,31 @@ def memory(tmp_path, monkeypatch):
     manager = module.ChatMemoryManager(str(tmp_path / "memory"))
     manager.start_session("offline-capture")
     return manager
+
+
+def test_full_batch_captured_once_before_first_reply_including_initial_history(memory):
+    core = _core_methods()()
+    core.memory_manager, core.processed_message_ids = memory, set()
+    core.message_timestamps, core.recent_command_cache = [], {}
+    core.mod_stats, core.wre_monitor = SimpleNamespace(record_message=lambda: None), None
+    core.router_mode = False
+    seen = []
+    def rows():
+        with sqlite3.connect(memory.db_path) as db:
+            return db.execute('SELECT message_text FROM chat_messages ORDER BY id').fetchall()
+    async def generate(data):
+        assert rows() == [('first?',), ('!unknown question?',), ('old text',)]
+        seen.append(data['text'])
+    core.message_processor = SimpleNamespace(
+        process_message=lambda msg: {'text': msg['snippet']['displayMessage']}, generate_response=generate)
+    def item(identity, text, **extra):
+        return {'id': identity, 'snippet': {'displayMessage': text},
+                'authorDetails': {'displayName': 'Same', 'channelId': identity, 'isChatModerator': identity == 'second'}, **extra}
+    first = item('first', 'first?')
+    batch = [first, item('second', '!unknown question?'), first, item('old', 'old text', _capture_only=True)]
+    asyncio.run(core.process_message_batch(batch))
+    assert seen == ['first?', '!unknown question?']
+    assert len(rows()) == 3 and core._batch_captured_ids == set()
 
 
 @pytest.mark.parametrize("role", ["USER", "MOD", "OWNER"])

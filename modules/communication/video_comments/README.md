@@ -1,3 +1,10 @@
+## Shared livechat conversation assessment — 2026-11-07
+
+Livechat can supply bounded current-session room/participant context to the existing
+semantic route. It must explicitly choose a useful reply before writing; the writer
+and final review retain that context. This does not change stored-comment eligibility
+or delivery receipts. See the [livechat contract](../livechat/INTERFACE.md).
+
 # Video Comments - Autonomous YouTube Engagement Module
 
 ## Delivery and optional visual observation (2026-11-05)

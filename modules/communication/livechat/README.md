@@ -1,3 +1,32 @@
+## Quiet conversation stewardship — 2026-11-07
+
+The default DAE receive path observes every supplied text message before response
+selection. The whole received batch is captured before generation; ordinary
+candidates retain arrival order. Questions, direct requests and problem reports
+may reach the existing shared assessment/writer/reviewer. The model must explicitly
+choose `should_reply=true`; rejection, missing evidence, stale input or changed
+context stays quiet, without canned fallback. Bare emojis and political keywords
+are not engagement reasons. Timer trolling, automatic invite broadcasts and startup
+greetings are removed. Explicit operator announcements keep their existing owner.
+
+All participants are stakeholders. Generic platform moderator/owner flags remain
+compatibility metadata and command permissions; a managing moderator is a delegate
+when that assignment is independently established. Current ingestion cannot distinguish
+managing from standard moderators. Badges do not prioritize ordinary conversation.
+
+Initial budget: three attempts per ten minutes, at least two minutes apart globally,
+one per participant per ten minutes. Failure/abstention consumes a slot. Only fresh
+input (at most 120 seconds old) is eligible. Scoped context uses up to 20 current-session
+messages and five native-ID participant messages, 500 characters each, from the existing
+ChatMemoryManager database. No display-name identity join or cross-session profiling.
+The destination is rechecked after sender waits; existing STOP and reviewed-text/theme
+checks remain. Model availability and verified live delivery are separate requirements.
+
+Use the [conversation stewardship skill](../../../.claude/skills/youtube-conversation-stewardship/SKILL.md)
+for observation, diagnosis and a bounded repair handoff. Its host-agent instructions do
+not register an autonomous WRE executor or authorize production promotion. WSP 15
+prioritizes approved repairs, not participant worth. See INTERFACE for scope limits.
+
 # LiveChat
 
 ## YouTube DAE repair checkpoint — 2026-11-07

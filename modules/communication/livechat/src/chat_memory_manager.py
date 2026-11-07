@@ -252,6 +252,30 @@ class ChatMemoryManager:
         except Exception as e:
             logger.error(f"[FAIL] Error storing message from {author_name}: {e}")
     
+    def get_conversation_context(self, author_id: str) -> Optional[Dict[str, Any]]:
+        """Bounded current-session context from the complete native-ID store.
+
+        No display-name fallback, cross-session profiling, or database creation.
+        Failure is distinct from an empty history so callers can remain quiet.
+        """
+        if not self.current_session or not isinstance(author_id, str) or not author_id:
+            return None
+        try:
+            with sqlite3.connect(self.db_path.resolve().as_uri() + '?mode=ro', uri=True, timeout=1) as db:
+                def rows(extra, params, limit):
+                    values = db.execute(
+                        'SELECT user_id, message_text, role FROM chat_messages '
+                        'WHERE session_id = ? ' + extra + ' ORDER BY id DESC LIMIT ?',
+                        (self.current_session, *params, limit)).fetchall()
+                    return [{'participant_id': identity, 'text': text[:500], 'platform_role': role}
+                            for identity, text, role in reversed(values)]
+                return {'session_id': self.current_session, 'participant_id': author_id,
+                        'recent_messages': rows('', (), 20),
+                        'participant_messages': rows('AND user_id = ?', (author_id,), 5)}
+        except (sqlite3.Error, OSError, TypeError):
+            logger.warning('[CONVERSATION] Scoped history read unavailable')
+            return None
+
     def get_history(self, author_name: str, limit: int = 10) -> List[str]:
         """
         Get user's message history from buffer + disk.
