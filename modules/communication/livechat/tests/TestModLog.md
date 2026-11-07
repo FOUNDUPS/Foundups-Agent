@@ -6,6 +6,14 @@ format and canonical Codex projection checks pass; registry is 1,819/258 quarant
 
 ## 2026-11-07 — Quiet conversation source qualification
 
+The existing exact reply-repair selection passes 114 cases and 12 subtests locally,
+with zero failures/errors/skips. Removing only the two new conversation-context
+parameter cases reproduces the previous 112-case inventory digest exactly. CI's
+count and digest pins are updated to this explicit expansion; no test is removed
+and no failure/skip assertion is relaxed. Initial private runner failures concerned
+Node discovery and Windows subprocess audit formatting, corrected for only the
+existing inert DOM fixture; they are not product regression evidence.
+
 Initial offline selection reproduced nine failures with ten useful positives after
 correcting the private Windows harness to admit only stdlib asyncio socket-pair setup.
 The first harness refusal is not a product RED result. Expanded selection passes 197
