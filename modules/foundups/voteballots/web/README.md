@@ -7,6 +7,11 @@ application, an official ballot, confidential intake or a running agent service.
 
 ## Source and deployment
 
+The public evidence and contact slices add two static pages plus their local
+styles, scripts and official directory snapshot. Deployment includes the
+reviewed HTML, CSS, JS, JSON, manifest and icons. Operator scripts and tests
+stay in the module.
+
 The buildless public files are `index.html`, `style.css`, `app.js`, `sw.js`,
 `manifest.webmanifest`, `coalition.html`, `coalition.js`, `coalition-draft.mjs`
 and the three files under `icons/`. This README is
@@ -58,8 +63,10 @@ All assets are local, the content policy is self-only, and the install control
 appears only when the browser offers installation. The service worker registers
 relative to this directory and caches only exact, same-origin public shell
 paths. It does not cache API requests, external links, query variants or writes.
-The current allowlist names `/coalition.html`. Offline navigation to the clean
-path remains an open device acceptance item.
+The v3 worker precaches the canonical `/coalition`, `/evidence` and
+`/contact` routes. Legacy HTML navigation has the corresponding canonical
+offline fallback. Installation validates response status, type and exact URL
+before filling the cache. Real-device acceptance is a separate check.
 
 Vote retains `/f/voteballots`, `/f/voteballots/app` and `idb_voteballots` in the
 FoundUps shell. A separately hosted landing and Oversight Site do not implement

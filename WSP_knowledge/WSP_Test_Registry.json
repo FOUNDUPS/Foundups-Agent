@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1819,
+  "total_tests": 1821,
   "quarantined_tests": 258,
   "tests": [
     {
@@ -16963,6 +16963,36 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Funding Summary unit tests.\n\nTests for VOTE_POC_FUNDING_SUMMARY_PHASE1.\n\nTest Boundaries:\n- NO_LIVE_API_REQUIRED_FOR_TESTS\n- NO_API_KEY_REQUIRED_FOR_TESTS\n- NO_NETWORK_CALLS_IN_TESTS\n- TRAIL_TERMINATION_MARKER_REQUIRED\n- SOURCE_REFERENCES_PRESERVED\n- NO_QUICK_ANSWER_GENERATION\n- NO_PERSUASION_LANGUAGE\n- NO_DARK_MONEY_AS_VERIFIED_FACT\n- NO_CANDIDATE_RECOMMENDATION\n\nUses mock FEC adapter from VOTE_POC_FEC_ADAPTER_PHASE1 (PR #707).\nUses entity resolution from VOTE_POC_ENTITY_RESOLUTION_PHASE1 (PR #"
+    },
+    {
+      "id": "test::modules::foundups::voteballots::tests::test_oversight_public_release",
+      "path": "modules/foundups/voteballots/tests/test_oversight_public_release.py",
+      "owner": "modules/foundups/voteballots",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-voteballots-unit",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Exercise the public release projection against the preserved site."
+    },
+    {
+      "id": "test::modules::foundups::voteballots::tests::test_public_evidence",
+      "path": "modules/foundups/voteballots/tests/test_public_evidence.py",
+      "owner": "modules/foundups/voteballots",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-voteballots-unit",
+      "capabilities": [
+        "network"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Check the static Vote evidence page without using the mock FEC adapter.\n\nRun pytest for the offline contract. To also verify every displayed amount\nagainst the original electronic filings, run from the repository root:\n\npython -B -m modules.foundups.voteballots.tests.test_public_evidence"
     },
     {
       "id": "test::modules::foundups::voteballots::tests::test_quick_answer",

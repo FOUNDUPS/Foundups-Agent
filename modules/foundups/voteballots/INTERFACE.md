@@ -8,6 +8,26 @@
 
 ## 2026-11-07 Public Presentation and Oversight Source Contract
 
+The Vote Site exposes `/evidence` and `/contact`; the corresponding source
+pages are `evidence.html` and `contact.html`. Evidence records bind the filer,
+candidate, recipient, filing, transaction, election designation, amount and
+source hash. Verified means the displayed item matches a specific filing.
+Unknown covers incomplete totals and unverified or absent coverage. The page
+has no live query endpoint or aggregate calculation.
+
+The contact page consumes the same-origin `contact-roster.json`, schema 1,
+and filters public Washington offices by manually selected state and chamber.
+The page maintains a maximum of 1, 3 or 5 manually chosen contacts in memory.
+Only an explicit visitor action opens a `tel:` link. Advance and remove
+operate on the displayed list.
+
+Oversight publishes `/accountability.json` (schema 1) and `/llms.txt`.
+Its public-release builder stages a reviewed overlay over the pinned
+155-file snapshot. Existing professional fragment routes remain supported.
+The manifest distinguishes public records, editorial assessment, proposed
+institutional mechanisms and published guide materials. It grants no tool or
+execution authority.
+
 `web/coalition.html` adds an independent Coalition information and voluntary
 application-draft page. `web/coalition-draft.mjs` exposes the pure
 `createCoalitionDraft(input, createdAtISO)` validation/export contract. Successful

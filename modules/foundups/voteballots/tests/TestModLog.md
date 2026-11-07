@@ -2,6 +2,18 @@
 
 <!-- WSP 22: anti-vibecoding test inventory. NEWEST entries at TOP. -->
 
+## [2026-11-07] — Accountability release and public interaction boundaries
+
+The cycle hint regression reproduced six failures across thirteen focused
+cases before repair. A separate call-spy probe went from 7/15 to 15/15.
+`test_oversight_public_release.py` verifies the overlay contract without
+changing the historical archive. `test_public_evidence.py` validates exact
+source locators offline and supports an explicit primary-filing replay.
+Node tests cover directory validation, manual queue behavior, canonical
+offline fallback and denial of redirected or mislabeled install responses.
+Independent browser, primary-source and exact-release checks are recorded in
+the [release accounting](../docs/RELEASE_ACCOUNTING.md#accountability-integration).
+
 ## [2026-11-07] — Independent local Coalition draft contract
 
 New Node `test_coalition_draft.mjs` covers a distinct browser-export boundary;

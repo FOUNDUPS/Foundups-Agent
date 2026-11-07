@@ -6,6 +6,13 @@ FoundUp identity, token, governance authority or agent runtime.
 
 ## Source and publication
 
+The current public overlay is owned by `public/` and assembled by
+`scripts/build_public_release.py` into a new staging directory. The builder
+verifies the pinned archive, then replaces only root/web `index.html` and
+`sw.js` and adds the four mirrored public assets. The original snapshot
+below remains the immutable reference. Existing chapter, data and
+professional document bytes are preserved in the staged release.
+
 `site/` preserves **all 155 tracked public source files** from the clean Oversight
 Sites checkout at `c66d22afc5795874f4020661dcadfdd69d3ad129`. The import includes the
 complete `dist/` tree, its `web/` copies, documents, research and review data,
@@ -13,9 +20,9 @@ instruction bundles, icons, and public `.openai/hosting.json` configuration.
 Its first recorded source commit was
 `a7bf6ab3f3685a0a905b04f5bc81fe4e4bab6081`.
 
-The Vote module's `site/` directory is the canonical editable owner going forward.
-The existing Sites repository remains the deployment mirror and retains the full
-original Git history. The import does not replace or rewrite that history.
+The import designated `site/` as the Vote-owned source. It is now the pinned
+historical base for the public overlay. The existing Sites repository remains
+the deployment mirror and retains the full original Git history.
 
 The owning publisher reported successful native Sites publication of version 5:
 
@@ -101,7 +108,9 @@ It prints only file/count/hash diagnostics, never file contents or credentials.
 
 For a subsequent change:
 
-1. Edit the canonical Vote-owned source in `site/`. Preserve every route,
+1. For the public front door, edit `public/` and run
+   `python -B modules/foundups/voteballots/oversight/scripts/build_public_release.py --output NEW_DIRECTORY`.
+   Preserve the historical `site/` snapshot. Preserve every route,
    document/data/instruction asset, access boundary and root/`web/` mirror pair.
 2. Run syntax, content, responsive and interaction checks appropriate to the
    change. Advance the public-shell cache version when shell assets change.
@@ -114,11 +123,11 @@ For a subsequent change:
    and the public audience; do not create a replacement project.
 5. Save and deploy that pushed mirror commit through native Sites tools. Wait
    for the successful publication receipt before recording a new deployed state.
-6. Then update the canonical inventory and source/release provenance to the
-   actual mirror commit and deployment, and run snapshot verification with
-   `--source-checkout` against that clean checkout. Keep historical snapshots
-   and publication receipts in Git history; never relabel a failed check as a
-   successful release. The current `c66d22af...` pin remains the import's history.
+6. Record the actual staged inventory, mirror commit and deployment separately
+   from the original pin. The `--source-checkout` option requires a clean
+   checkout of the historical `c66d22af...` source. After the deployment mirror
+   advances, use the verifier without that option or a separate checkout at
+   the original commit.
 7. Verify DNS, valid HTTPS and actual page content separately. Maintain the
    aliases and original-source history unless an explicitly reviewed migration
    replaces them.

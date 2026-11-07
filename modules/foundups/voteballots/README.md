@@ -20,6 +20,19 @@ VOTE then expands behind the existing pfMALL/member gate into deeper candidate r
 
 ## Current Truth State
 
+### Accountability integration and bounded public PoC
+
+The Oversight source adds a plain-language accountability overview, direct
+House and Senate materials, and agent-readable project and source indexes.
+Vote's new funding evidence page presents reviewed excerpts from original
+FEC filings and links separate official roll calls. Contact Congress builds a
+visitor-selected list from a dated House/Senate directory snapshot. The
+[release accounting](docs/RELEASE_ACCOUNTING.md#accountability-integration)
+tracks source, verification and publication separately.
+
+The broader public candidate lookup and live FEC pipeline remain gated. The
+existing `voteballots` manifest and Mall route still own that future admission.
+
 The public Vote landing, Oversight Blueprint and Coalition pages are live. The
 candidate/evidence app is an internal PoC. The original registry and manifest
 labels predate the implemented chain. See the

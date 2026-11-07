@@ -1,0 +1,123 @@
+#accountability-overview {
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+#accountability-overview h1,
+#accountability-overview h2,
+#accountability-overview h3 {
+  font-family: Georgia, serif;
+  line-height: 1.13;
+  margin: 0 0 .6em;
+}
+
+#accountability-overview h1 {
+  font-size: clamp(2.25rem, 4.7vw, 3.85rem);
+  max-width: 17ch;
+}
+
+#accountability-overview h2 {
+  font-size: clamp(1.6rem, 3vw, 2.3rem);
+}
+
+#accountability-overview h3 {
+  font-size: 1.35rem;
+}
+
+.accountability-hero {
+  background: #102a3a;
+  border-top: 4px solid #caa76b;
+  color: #fffaf1;
+  padding: clamp(1.3rem, 4vw, 3.4rem);
+}
+
+.accountability-kicker {
+  font-size: .76rem;
+  font-weight: 700;
+  letter-spacing: .13em;
+}
+
+.accountability-hero .accountability-kicker,
+.accountability-hero .accountability-link {
+  color: #f2d8a7;
+}
+
+.accountability-lead {
+  font-size: clamp(1rem, 1.5vw, 1.3rem);
+  max-width: 58ch;
+}
+
+.accountability-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .9rem 1.5rem;
+  margin: 1.4rem 0;
+}
+
+.accountability-actions .primary-button {
+  background: #f2d8a7;
+  color: #102a3a;
+}
+
+.accountability-note {
+  max-width: 61ch;
+  color: #dbe4e5;
+}
+
+#accountability-overview > section {
+  margin: clamp(1.8rem, 4vw, 3.7rem) 0;
+}
+
+.accountability-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: 1rem;
+  padding: 0;
+  counter-reset: accountability-step;
+}
+
+.accountability-steps li {
+  border-top: 2px solid #a17c40;
+  background: #fffaf0;
+  list-style: none;
+  padding: 1.1rem;
+}
+
+.accountability-steps li::before {
+  counter-increment: accountability-step;
+  content: counter(accountability-step, decimal-leading-zero);
+  display: block;
+  margin-bottom: .7rem;
+  color: #745320;
+  font-weight: 700;
+}
+
+.accountability-panel {
+  max-width: 80ch;
+}
+
+.accountability-links {
+  padding-left: 1.3rem;
+  columns: 2 14rem;
+}
+
+.accountability-links li {
+  break-inside: avoid;
+  margin-bottom: .4rem;
+}
+
+#accountability-overview a:not(.primary-button) {
+  text-decoration: underline;
+  text-underline-offset: .2em;
+}
+
+#accountability-overview a:focus-visible {
+  outline: 3px solid #ad781f;
+  outline-offset: 4px;
+}
+
+#accountability-overview[hidden],
+#view[hidden] {
+  display: none !important;
+}
