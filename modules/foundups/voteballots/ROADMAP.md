@@ -13,7 +13,12 @@
 
 The current source provides a human and agent-readable legislative roadmap with
 decision owners, templates, congressional outputs and a separate optional state
-referral. Oversight offers a native-dialer senator lookup with manual state
+referral. The connected maps make those gates navigable. The authority map has
+five featured 119th Congress committees and selected subcommittees. The
+investigation map has three fictional walkthroughs. State routing has worked
+New York and Washington examples and a general verification path for other
+jurisdictions. Refresh the authority records when a new Congress adopts its
+rules. Oversight offers a native-dialer senator lookup with manual state
 selection and an optional local suggestion. Vote provides two source-backed
 officeholder cards and a separate congressional contact list. The next staff
 qualification is a walkthrough from scope memo to recorded disposition using

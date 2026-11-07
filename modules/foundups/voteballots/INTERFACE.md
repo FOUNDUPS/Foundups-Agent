@@ -28,6 +28,13 @@ The manifest distinguishes public records, editorial assessment, proposed
 institutional mechanisms and published guide materials. It grants no tool or
 execution authority.
 
+`/explore` opens the public maps. A node fragment names a screen, and an
+`edge-<source>--<target>` fragment names the authority or evidence check between
+screens. The browser supports native history and a canonical parent breadcrumb.
+`/map-data.json` (schema 1) publishes the same nodes, choice pairs, source links
+and optional fictional connection evidence. `/web/explore` has a separate PWA
+scope with the same navigation. The map is a read-only reference.
+
 Oversight exposes `/legislative-roadmap` and `/contact`, with `.html` aliases and
 equivalent routes under `/web/`. The roadmap is a static staff reference. The
 contact page reuses the existing official directory snapshot and validated

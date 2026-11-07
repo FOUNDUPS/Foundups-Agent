@@ -14,6 +14,21 @@ bytes and paths remain preserved in the repository. Exploratory records,
 workspace branding and internal execution materials are archival only.
 The root and `/web/` retain their existing install scopes.
 
+The diagram on the landing opens `/explore`. The authority and investigation
+maps share the five-stage roadmap, evidence review, templates and decision
+gates. Boxes and connectors have separate fragment links, with a parent path,
+Back one level and Full map on each screen. The map works with static HTML and
+CSS. JavaScript moves focus on navigation. `/map-data.json` exposes the same
+reviewed records and trust boundary.
+
+The four `public/map-*.json` source files supply nodes and connecting gates.
+Each node has a title, summary, parent, and optional fact, link and choice
+pairs. The builder checks parent paths, choice reachability and public link
+schemes. Fictional money links include clearly marked sample exhibits and
+counterevidence. Review changes in the staged HTML and machine index together.
+The public explorer handles only reviewed educational material. Confidential
+records and actual authority decisions belong in approved office systems.
+
 The staff roadmap at `/legislative-roadmap` documents how to scope an inquiry,
 approve evidence collection, review findings and take legislative action if
 DOJ does not act. It links to the existing model documents. The state referral

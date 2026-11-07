@@ -24,7 +24,9 @@ VOTE then expands behind the existing pfMALL/member gate into deeper candidate r
 
 The Oversight source provides a legislative roadmap with named decision owners,
 model documents and separate paths for congressional action and optional state
-referrals. Its senator lookup offers public office numbers and optional local
+referrals. Its public diagram opens connected authority and investigation maps
+with committee rules, decision gates, and fictional walkthroughs. Its senator
+lookup offers public office numbers and optional local
 state suggestions. The staff reference includes agent-readable source indexes.
 Vote's new funding evidence page presents reviewed excerpts from original
 FEC filings and links separate official roll calls. Contact Congress builds a

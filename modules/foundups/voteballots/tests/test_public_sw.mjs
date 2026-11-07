@@ -75,12 +75,12 @@ test('canonical and prior HTML navigation use the same cached document offline',
   assert.equal(sw.event('fetch', '/contact', 'POST'), undefined);
 });
 
-test('Oversight serves the scoped roadmap, manual contact and preserved fragments offline', async () => {
+test('Oversight serves the scoped maps, roadmap and manual contact offline', async () => {
   const file = new URL('../oversight/public/sw.js', import.meta.url);
   const scope = origin + '/web/';
   let fetchHandler;
   const cached = new Response('Preserved professional shell');
-  const offline = new Map(['', 'legislative-roadmap', 'contact', 'contact-roster.json', 'states-location.mjs']
+  const offline = new Map(['', 'legislative-roadmap', 'contact', 'contact-roster.json', 'states-location.mjs', 'explore', 'map-data.json']
     .map((path) => [scope + path, cached]));
   vm.runInNewContext(readFileSync(file, 'utf8'), {
     URL, Response,
@@ -90,7 +90,7 @@ test('Oversight serves the scoped roadmap, manual contact and preserved fragment
     },
     caches: {
       open: async (name) => {
-        assert.equal(name, 'oversight-public-shell-v0.9.0:/web/');
+        assert.equal(name, 'oversight-public-shell-v0.10.0:/web/');
         return {match: async (key) => offline.get(key)};
       },
     },
@@ -104,7 +104,8 @@ test('Oversight serves the scoped roadmap, manual contact and preserved fragment
   assert.equal(await navigate('/web/#senate'), cached);
   assert.equal(await navigate('/web/index.html#house'), cached);
   for (const path of ['legislative-roadmap', 'legislative-roadmap.html#decide-referral',
-    'contact', 'contact.html', 'contact-roster.json', 'states-location.mjs']) {
+    'contact', 'contact.html', 'contact-roster.json', 'states-location.mjs', 'explore#authority',
+    'explore.html#edge-house--review', 'map-data.json']) {
     assert.equal(await navigate('/web/' + path), cached);
   }
   assert.equal(navigate('/contact'), undefined);

@@ -5,7 +5,9 @@
 The standalone Vote Site presents selected, dated and verified filing items
 for two officeholders, separately sourced chamber roles and votes, and
 explicit unknowns for unverified independent spending and full-cycle totals.
-The standalone Oversight Site presents the legislative roadmap and a separate
+The standalone Oversight Site presents the legislative roadmap through
+connected authority and investigation maps, with public records, model
+documents and clearly labeled fictional examples. It has a separate
 senator directory with manual state selection, optional on-device suggestions
 and native dial links. Vote's Contact Congress page uses public office directory
 snapshots, manual state/chamber filtering and a visitor-managed phone list.

@@ -2,6 +2,15 @@
 
 ## Standalone Oversight staff site
 
+The [interactive maps](https://maga.mtrout.com/explore) put decision screens
+behind the landing diagram. The authority branch covers five featured
+committees and selected subcommittees with individually sourced rules. The
+investigation branch provides three fictional walkthroughs with a supported
+payment trace, contrary evidence and an explicit point where the trail ends.
+Separate coordination, witness and January 6 branches link the legal gates
+and historical sources. The maps share the five-stage roadmap and publish a
+[machine-readable graph](https://maga.mtrout.com/map-data.json).
+
 The landing leads with Pain, Solution and Outcome. It dates and sources DOJ
 leadership and prior representation, marks the impartiality concern as the
 project's assessment, and separates the state-law referral from federal criminal
@@ -14,8 +23,8 @@ hub-and-spoke workflow, a sourced January 6 precedent, separate state
 authority and an attorney general transition snapshot that distinguishes
 provisional results from the serving office.
 
-The current source promotes the [legislative roadmap](https://maga.mtrout.com/legislative-roadmap)
-to the main staff action. It gives each stage an owner, decision record and
+The [legislative roadmap](https://maga.mtrout.com/legislative-roadmap)
+provides the process underneath the maps. It gives each stage an owner, decision record and
 supporting template. Congressional oversight and legislative outputs can proceed
 without DOJ. A separate referral needs an independently established state-law
 basis, a verified receiving office and authorized disclosure. The
