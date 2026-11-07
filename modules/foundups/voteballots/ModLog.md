@@ -1,5 +1,27 @@
 # Vote/Ballots FoundUp — Module Log
 
+## 2026-11-07 — Preferred Vote and Oversight public addresses
+
+012 clarified the preferred map: `vote.mtrout.com` is the existing Vote public
+landing; `oversight.mtrout.com` is its Oversight Blueprint workstream;
+`maga.mtrout.com` remains an alias of that same workstream. The existing
+FoundUps aliases and generated Sites addresses are retained, not promoted
+or removed. Vote keeps one `voteballots` identity.
+
+The owning publisher added `vote.mtrout.com` to the existing Vote Sites
+project and recorded all three requested DNS additions at effective TTL 3600,
+with all 35 prior `mtrout.com` records unchanged (38 records afterward).
+Google/Cloudflare DNS and active hosting/SSL were recorded separately from
+publication. Independent 00:45 UTC checks confirmed the expected CNAME and
+strict certificate/hostname validation with HTTP 200 and the correct Vote or
+Oversight title on both public endpoints for all three `mtrout.com` addresses.
+
+Only the Vote README, landing README, Oversight README and this log change.
+The 155 preserved source files, snapshot manifest, runtime, public assets and
+deployment configuration are unchanged. Validation: documentation diff and
+whitespace checks plus the existing source-preservation verifier; no new
+tests or API/calling changes. WSP10/22/50/71/97.
+
 ## 2026-11-07 — GitHub/PC reconciliation, Oversight preservation and Vote front door
 
 012 requested that Oversight become a Vote workstream, that all existing work
