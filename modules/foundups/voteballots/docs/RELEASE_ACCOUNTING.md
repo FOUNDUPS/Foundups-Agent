@@ -1,5 +1,52 @@
 # Vote release accounting and launch checklist
 
+## Accountability integration
+
+The new source extends the two existing public Sites under one
+`voteballots` FoundUp. The dates and deployment IDs in the previous release
+section below are the v2 Vote and v5 Oversight baseline.
+
+| Surface | Delivered in source | Acceptance boundary |
+|---|---|---|
+| [Oversight](https://maga.mtrout.com/) | Static overview, direct professional documents, original interactive routes, `/accountability.json` and `/llms.txt` | Preserved archive remains 155 files and 13 exact mirror pairs. Staged public release changes only root/web entry and worker files and adds four mirrored assets. Congress, agencies and state authorities retain their independent powers and obligations. |
+| [Vote evidence](https://vote.mtrout.com/evidence) | Five selected Schedule B records in four raw FEC filings, matched to their exact transaction identifiers and official candidate/committee IDs. Separate chamber roles, procedures and roll calls. | Direct contributions and forwarded individual earmarks are shown separately. UDP coverage and cycle totals remain unknown. No live lookup, estimate, ownership allegation or causal inference enters the public page. |
+| [Contact Congress](https://vote.mtrout.com/contact) | Dated official directory snapshot of 539 House and Senate offices. Visitor selects a state/chamber and up to 1, 3 or 5 offices. Each dialer action and next step is manual. | Committee and leadership discovery links out to official directories. Geolocation is deferred pending a vetted local lookup. Notes and selection stay in memory. |
+
+### Three review cycles
+
+1. **Architecture and evidence.** The previous Oversight root had no raw
+   overview or agent index. The first candidate's House, Senate and library
+   links required JavaScript. Direct documents now work without it. The
+   separate verifier rechecked the archive against its original checkout.
+   In the existing resolver, invalid cycle input either reached the adapter
+   or raised. The guard now accepts omission or an exact integer in range.
+   The independent entry-point probe moved from 7/15 to 15/15.
+2. **Public experience and integration.** Independent readers matched all
+   five filing records and the 539 phone entries to primary sources. Vote's
+   initial worker could cache a redirected response during installation. The
+   repair checks exact URLs, status and media type before writing. The
+   verifier exercised legacy and clean offline routes and a manually
+   controlled contact queue. Browser preview checked navigation without dialing.
+3. **System release audit.** The previous Oversight worker matched paths
+   outside its `/web/` scope and could return another cache's response. The
+   replacement uses exact scoped URLs and one cache per registration path.
+   The current chamber planning label and the HTTPS LinkedIn link clarify
+   the original header and apex redirect. The release requires exact
+   GitHub and Sites source plus public readback. These review cycles do not
+   establish retained autonomous improvement under WSP 48.
+
+### Remaining gates toward 2028
+
+The live FEC factory remains disabled and the alternate TypeScript fetch is
+a stub. Before expanding public lookup, qualify the live input, missing and
+stale records, amendments, refunds, duplicates and source receipts. Full
+candidate totals, state/race resolution and a Mall tenant launch remain
+separate work. Oversight still needs professional review and a reader
+correction pilot. Validate actual installed-device update and offline behavior
+in addition to worker and browser tests.
+
+## Previous public release
+
 **As of 7 November 2026.** Vote has a live public front door, a live Oversight
 Blueprint workstream, and a live Coalition information page. The candidate and
 funding application remains an internal proof of concept. Oversight and Coalition

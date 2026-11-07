@@ -1,5 +1,17 @@
 # Vote/Ballots FoundUp — Module Log
 
+## 2026-11-07 — Accountability landing, funding evidence and contact PoC
+
+Preserve the single Vote identity and stage a separate overlay on the
+155-file Oversight archive. Add directly readable institutional context,
+professional document links, and a source manifest. Publish selected filing
+excerpts through the existing Vote Site and add manual public office
+selection. Cycle review repaired no-JavaScript links, invalid election cycle
+inputs, unvalidated Vote precache redirects and Oversight scope escape.
+See [release accounting](docs/RELEASE_ACCOUNTING.md#accountability-integration)
+for facts, coverage limits and remaining activation gates. WSP 00, 22, 48,
+50, 97, 102, 104 and 109.
+
 ## 2026-11-07 — Release accounting and Launch Pad
 
 Reconciled source, Sites, domain and browser evidence for Vote, Oversight and

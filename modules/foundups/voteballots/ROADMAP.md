@@ -9,6 +9,17 @@
 
 ## Current State
 
+### Accountability integration and 2028 sequence
+
+The current source provides a human and agent-readable Oversight landing,
+two source-backed Vote officeholder cards and a local congressional contact
+list. See the [acceptance record](docs/RELEASE_ACCOUNTING.md#accountability-integration).
+For 2028, expand the fixed funding excerpt set only after defining coverage,
+amendment/refund handling and freshness rules. Then qualify live retrieval,
+one public race-to-evidence journey and the existing tenant mount. Preserve
+independent review and the existing correction and abstention gates before
+any claim scores or ballot experiments.
+
 ### 2026-11-07 release accounting
 
 Vote Sites v2 publishes the [Vote landing](https://vote.mtrout.com/) and the

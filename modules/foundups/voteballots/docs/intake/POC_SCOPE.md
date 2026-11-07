@@ -1,5 +1,18 @@
 # Vote/Ballots - POC Scope
 
+## Bounded public Sites slice
+
+The standalone Vote Site presents selected, dated and verified filing items
+for two officeholders, separately sourced chamber roles and votes, and
+explicit unknowns for unverified independent spending and full-cycle totals.
+The Oversight Site describes the proposed institutional process and links
+directly to Vote. Contact Congress uses public office directory snapshots,
+manual state/chamber filtering and a visitor-managed phone list.
+
+This slice uses exact real source records and leaves the general live-data,
+locality-to-race, shared Mall tenant, capture and RedDog gates below open.
+See [release accounting](../RELEASE_ACCOUNTING.md#accountability-integration).
+
 ## Minimum Viable Public POC
 A public visitor opens the canonical Vote FoundUp landing surface and immediately sees an evidence-first view of the relevant election context: local/area races where resolvable, candidate cards, and a minimal funding/influence summary for each candidate. The visitor can open a card for the source trail or invoke RedDog/capture input to research a political object or candidate. No invite is required for this public truth layer.
 

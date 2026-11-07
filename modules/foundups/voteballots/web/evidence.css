@@ -1,0 +1,137 @@
+.evidence-wrap {
+  width: min(100% - 44px, 1120px);
+  margin-inline: auto;
+}
+
+.evidence-intro {
+  padding-block: clamp(44px, 8vw, 104px);
+  background: var(--navy);
+  color: var(--white);
+}
+
+.evidence-intro .eyebrow,
+.evidence-intro h1 em {
+  color: var(--gold);
+}
+
+.evidence-intro p:not(.eyebrow) {
+  max-width: 62ch;
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.evidence-intro .evidence-cutoff {
+  color: #c6d7dc;
+}
+
+.evidence-section {
+  padding-block: clamp(42px, 6vw, 76px);
+}
+
+.evidence-section h2 {
+  font-size: clamp(33px, 5vw, 53px);
+}
+
+.evidence-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 24px;
+}
+
+.officeholder {
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--gold);
+  padding: clamp(18px, 3vw, 28px);
+  background: var(--white);
+  overflow-wrap: anywhere;
+}
+
+.evidence-section h3 {
+  font: 400 2rem/1.15 Georgia, serif;
+  margin: 0 0 14px;
+}
+
+.evidence-section h4 {
+  font-size: 1rem;
+  margin: 24px 0 10px;
+}
+
+.evidence-section p,
+.evidence-definitions {
+  line-height: 1.7;
+}
+
+.evidence-section a {
+  color: #164759;
+  text-decoration: underline;
+  text-underline-offset: .17em;
+}
+
+.funding-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.funding-item {
+  border-top: 1px solid var(--line);
+  padding: 14px 0 4px;
+}
+
+.funding-item p {
+  font-size: .89rem;
+  margin: 0 0 7px;
+}
+
+.funding-item .funding-item-title {
+  color: var(--ink);
+  font-size: .98rem;
+  font-weight: 650;
+}
+
+.evidence-badge {
+  display: inline-block;
+  margin-inline-end: 3px;
+  padding: 1px 7px;
+  background: #dcece4;
+  color: #204c3e;
+  font-size: .74rem;
+}
+
+.evidence-definitions {
+  max-width: 76ch;
+  margin: 0 0 28px;
+}
+
+.evidence-definitions dt {
+  margin-top: 16px;
+  font-weight: 700;
+}
+
+.evidence-definitions dd {
+  margin: 3px 0 0;
+}
+
+@media (max-width: 760px) {
+  .evidence-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media print {
+  .evidence-intro {
+    background: white;
+    color: black;
+  }
+
+  .evidence-intro .eyebrow,
+  .evidence-intro h1 em,
+  .evidence-intro .evidence-cutoff {
+    color: black;
+  }
+
+  .evidence-grid {
+    display: block;
+  }
+}
