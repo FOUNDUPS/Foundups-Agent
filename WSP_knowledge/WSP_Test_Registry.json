@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1818,
+  "total_tests": 1819,
   "quarantined_tests": 258,
   "tests": [
     {
@@ -6033,6 +6033,19 @@
       "description": "Test the enhanced consciousness response system"
     },
     {
+      "id": "test::modules::communication::livechat::tests::test_conversation_stewardship",
+      "path": "modules/communication/livechat/tests/test_conversation_stewardship.py",
+      "owner": "modules/communication/livechat",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-livechat-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline controls for quiet conversation selection and identity-scoped history."
+    },
+    {
       "id": "test::modules::communication::livechat::tests::test_cycle_watchdog",
       "path": "modules/communication/livechat/tests/test_cycle_watchdog.py",
       "owner": "modules/communication/livechat",
@@ -6269,7 +6282,7 @@
       "path": "modules/communication/livechat/tests/test_livechat.py",
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
-      "shard_id": "modules-communication-livechat-unit-part-01",
+      "shard_id": "modules-communication-livechat-unit-part-02",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -6776,7 +6789,7 @@
       "path": "modules/communication/livechat/tests/test_single_instance.py",
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
-      "shard_id": "modules-communication-livechat-unit-part-02",
+      "shard_id": "modules-communication-livechat-unit-part-03",
       "capabilities": [
         "import_path_mutation",
         "logging_configuration"

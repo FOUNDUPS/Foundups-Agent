@@ -1,3 +1,35 @@
+## Conversation contract — 2026-11-07
+
+`ChatMemoryManager.get_conversation_context(author_id)` returns a bounded current-session
+snapshot (`session_id`, `participant_id`, `recent_messages`, `participant_messages`) or
+`None` on unavailable/invalid identity/store. The query opens the existing database
+read-only; rows contain native participant ID, text and original platform role. The
+SQLite schema is unchanged. Persistence failures and cross-restart ingestion deduplication
+remain existing limitations; a read result does not prove an entire stream was captured.
+
+`MessageProcessor._conversation_response` owns candidate selection and attempt budgets.
+Ordinary speech bypasses the legacy badge-only gate, while recognized commands, quizzes
+and code commands keep existing handlers and permissions. Explicit emoji-limit denial
+is retained. The channel, title, generator and memory session must remain bound across
+generation. `conversation_context` is passed through the existing livechat generator;
+its shared assessment additionally requires literal boolean `should_reply=true`.
+The writer and final review see the same quoted context, not unscoped personalization.
+No provider client or model-choice option is added. The existing ten-second cancellation
+and final reviewed-carrier checks remain.
+
+Core attaches the captured `(live_chat_id, bot_channel_id)` as `destination_snapshot`
+to conversation replies before passing the unchanged reviewed text to ChatSender.
+Conversation sends require that snapshot and recheck it immediately before API insertion,
+after every delay. Unknown send outcomes are not automatically retried. Attempts and
+cooldowns are process-local, not durable delivery receipts or cross-restart quotas.
+
+Scope: default AutoModeratorDAE/MessageProcessor entry. Alternate `router_mode` currently
+loses native fields and is not qualified for this policy. Polling still serially awaits
+bounded processing; batch capture is not an independent background poller. Explicit
+moderation/game commands and operator announcements remain separate output classes.
+Native WRE skill execution/admission and autonomous source promotion are not implemented
+by the reusable host skill. Live behavior requires a fresh daemon and independent receipt.
+
 # LiveChat Module Interface
 
 ## Emoji question routing (2026-11-07)

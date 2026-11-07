@@ -1,3 +1,12 @@
+## Conversation stewardship owner — 2026-11-07
+
+The running YouTube conversation owner is `modules/communication/livechat`, not this
+scaffold. Its [README](../livechat/README.md) and
+[reusable skill](../../../.claude/skills/youtube-conversation-stewardship/SKILL.md)
+describe quiet observation, scoped participant context, shared AI routing and bounded
+repair handoff. Native WRE offload and independently verified live behavior remain
+separate qualification gates.
+
 # youtube_dae
 
 ## Operational entrypoint — 2026-11-07

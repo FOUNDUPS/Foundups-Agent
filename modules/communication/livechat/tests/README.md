@@ -1,3 +1,15 @@
+## Conversation stewardship controls — 2026-11-07
+
+`test_conversation_stewardship.py` exercises actual owner definitions with synthetic
+model/sender collaborators and a disposable SQLite database. It covers role parity,
+quiet reactions, eligible requests/reports, freshness/rate/history rejection, budgets,
+channel/title/session changes, existing command routing, native identity/session history,
+explicit semantic abstention, batch order and destination changes during sender waits.
+The capture suite additionally proves whole-batch persistence before generation and
+once-only capture with duplicate IDs and initial history. The semantic assessment suite
+proves context reaches assessment, writing and exact final review through the existing
+router. Fixture judgments are not live model-quality or delivery proof.
+
 # LiveChat Module Test Suite
 
 ## 2026-11-07 — Emoji questions use the existing reviewed reply owner

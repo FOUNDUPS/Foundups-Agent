@@ -326,7 +326,7 @@ RULES:
 - NO @mentions
 """
     
-    def _generate_model_response(self, message, username, user_id, role, is_member, theme, cancel_event=None):
+    def _generate_model_response(self, message, username, user_id, role, is_member, theme, cancel_event=None, conversation_context=None):
         """Reuse shared assessment/writer/reviewer for all live-chat language replies."""
         from modules.communication.livechat.src.operator_command_queue import load_active_theme
         from modules.communication.video_comments.src.reply_context import normalize_reply_theme, reply_text_is_publishable
@@ -337,6 +337,8 @@ RULES:
             return None
         data = {'text': message, 'author_name': username, 'channel_id': user_id,
                 'receiving_channel_id': target, 'video_title': getattr(self, 'stream_title', None)}
+        if conversation_context is not None:
+            data['conversation'] = conversation_context
         try:
             from modules.communication.video_comments.src.intelligent_reply_generator import get_reply_generator
             generator = get_reply_generator()
@@ -391,6 +393,7 @@ RULES:
         is_member: bool = False,
         cancel_event=None,
         expected_theme_snapshot=None,
+        conversation_context=None,
     ) -> Optional[str]:
         """
         Generate an intelligent reply for a live chat message.
@@ -423,7 +426,8 @@ RULES:
         if theme is not None and normalize_reply_theme(theme) is None:
             return None
         return self._generate_model_response(message, clean_username, user_id, role,
-                                             is_member, theme, cancel_event=cancel_event)
+                                             is_member, theme, cancel_event=cancel_event,
+                                             conversation_context=conversation_context)
 
 
 # Global instance

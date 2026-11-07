@@ -116,6 +116,7 @@ jobs:
           -p no:cacheprovider -q --tb=short
           modules/communication/livechat/tests/test_capture_before_processing.py
           modules/communication/livechat/tests/test_emoji_question_routing.py
+          modules/communication/livechat/tests/test_conversation_stewardship.py
           modules/communication/video_comments/tests/test_driver_handle_inheritance.py
           --junitxml=chat-capture-results.xml
       - name: Preserve chat capture results

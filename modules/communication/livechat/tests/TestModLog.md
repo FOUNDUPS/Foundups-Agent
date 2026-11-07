@@ -1,3 +1,21 @@
+Packaging verification: eight backend-manifest cases pass; runtime membership stays
+1,485 with seven source bindings updated. Twelve scoped security-gate cases pass.
+Independent review verifies exactly 39 unchanged public checksum fingerprints,
+appended without scanner/rule changes; fresh CI scanning is still required. Skill
+format and canonical Codex projection checks pass; registry is 1,819/258 quarantined.
+
+## 2026-11-07 — Quiet conversation source qualification
+
+Initial offline selection reproduced nine failures with ten useful positives after
+correcting the private Windows harness to admit only stdlib asyncio socket-pair setup.
+The first harness refusal is not a product RED result. Expanded selection passes 197
+cases, including existing emoji, capture and semantic-routing checks. New cases cover
+stakeholder parity, abstention, attempt budgets, scoped history, retained commands,
+changed context, whole-batch capture and final sender destination changes. No real
+model, browser, public send or runtime daemon was started. Independent review found
+command exclusions, emoji-denial propagation and destination/order gaps; these have
+regression coverage in the revised source. Hosted exact-head checks remain separate.
+
 # TestModLog
 
 ## 2026-11-07 — Reject canned success for emoji questions

@@ -1,3 +1,13 @@
+## 2026-11-07 — Shared livechat usefulness assessment
+
+The existing semantic assessment/writer/reviewer accepts bounded conversation context
+from the livechat owner. Live conversation assessment requires explicit `should_reply`
+true; absent/false/malformed decisions stop before writing. The same current-session
+context replaces unscoped personalization for this route and is retained in final
+review evidence. Stored-comment assessment contracts remain unchanged. Tests cover
+both abstention and assess/write/review propagation with inert model results. This is
+source/contract qualification, not live semantic acceptance. WSP00/22/50/60/77/97.
+
 # Video Comments - ModLog
 
 ## 2026-11-07 — Isolate browser-driver handles from comment workers

@@ -71,6 +71,9 @@ class ChatSender:
         """
         reviewed_text = getattr(message_text, 'reviewed_text', None)
         theme_snapshot = getattr(message_text, 'theme_snapshot', None)
+        destination_snapshot = getattr(message_text, 'destination_snapshot', None)
+        if response_type == 'conversation' and (reviewed_text is None or destination_snapshot is None):
+            return False
         if stop_active('livechat'):
             run_id = os.getenv("YT_AUTOMATION_RUN_ID", "").strip()
             logger.warning(
@@ -172,6 +175,9 @@ class ChatSender:
                 )
 
                 # Recheck after every await/delay and before the network effect.
+                if destination_snapshot is not None and destination_snapshot != (self.live_chat_id, self.bot_channel_id):
+                    logger.info('[CONVERSATION] Send suppressed: destination changed')
+                    return False
                 if reviewed_text is not None:
                     from modules.communication.livechat.src.operator_command_queue import load_active_theme
                     if str(message_text) != reviewed_text or load_active_theme('livechat') != theme_snapshot:
