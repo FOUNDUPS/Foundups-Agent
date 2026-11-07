@@ -32,8 +32,10 @@ section below are the v2 Vote and v5 Oversight baseline.
    replacement uses exact scoped URLs and one cache per registration path.
    The current chamber planning label and the HTTPS LinkedIn link clarify
    the original header and apex redirect. The release requires exact
-   GitHub and Sites source plus public readback. These review cycles do not
-   establish retained autonomous improvement under WSP 48.
+   GitHub and Sites source plus public readback. Initial hosted CI caught
+   two new tests missing from the generated registry. The canonical
+   generator added both as collectable Vote unit tests. These review cycles
+   do not establish retained autonomous improvement under WSP 48.
 
 ### Remaining gates toward 2028
 
