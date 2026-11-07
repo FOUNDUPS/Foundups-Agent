@@ -1,3 +1,11 @@
+## Vote public release and next gates — 2026-11-07
+
+Vote v2 and Oversight v5 are live. PRs #2312, #2313 and #2317 are merged.
+The [Vote release accounting and Launch Pad](../../modules/foundups/voteballots/docs/RELEASE_ACCOUNTING.md)
+record the PC, publication, DNS, HTTPS and browser evidence. The candidate
+evidence app remains internal. Next gates are in the
+[Vote roadmap](../../modules/foundups/voteballots/ROADMAP.md).
+
 ## P3 delivered; P4 preview verified — 2026-11-05
 
 P3 PR2300/main `95516e81ee6c1cf3ccec588492929662cc671c62` closed with 23 PR/21 main

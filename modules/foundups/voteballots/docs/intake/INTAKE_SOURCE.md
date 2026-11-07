@@ -14,6 +14,8 @@ The [snapshot and release owner](../../oversight/README.md) records exact source
 and publication identities. `web/` owns the informational Vote front door.
 Requested additive domains are `vote.foundups.com` and
 `oversight.vote.foundups.com`; existing Oversight aliases are retained.
+The later preferred-address decision and shipped Coalition tab are recorded in
+the [release accounting and Launch Pad](../RELEASE_ACCOUNTING.md).
 
 Classification remains `EXISTING_FOUNDUP_UPDATE` with one `voteballots` tenant.
 This source/presentation work does not activate the candidate-data application,

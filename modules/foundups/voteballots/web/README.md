@@ -15,6 +15,8 @@ operator documentation and is excluded from the deployed static directory.
 - Sites project: `appgprj_6aee6646e6ac81918ac2624d5d1db413`
 - Generated address: `https://vote.undaodu.chatgpt.site/`
 - Preferred public landing: <https://vote.mtrout.com/>.
+- Public Coalition page: <https://vote.mtrout.com/coalition>.
+- Release evidence and outstanding gates: [Vote release accounting](../docs/RELEASE_ACCOUNTING.md).
 - Oversight source/release owner: [the preserved workstream](../oversight/README.md).
 - Preferred Oversight workstream: <https://oversight.mtrout.com/>.
 - Retained Oversight alias: <https://maga.mtrout.com/>.
@@ -39,7 +41,8 @@ explicitly changes it. Record actual deployment and alias results separately.
 
 ## PWA and product boundary
 
-The **Coalition** navigation opens `coalition.html`. Its voluntary form validates,
+The **Coalition** navigation uses the `coalition.html` source page. Sites
+redirects that address to the public clean path `/coalition`. Its voluntary form validates,
 previews and downloads a private application draft on the visitor's device.
 It sends nothing, uses no persistent browser storage, and grants no membership,
 verified badge or permission. It does not collect email, IDs or location. No
@@ -55,6 +58,8 @@ All assets are local, the content policy is self-only, and the install control
 appears only when the browser offers installation. The service worker registers
 relative to this directory and caches only exact, same-origin public shell
 paths. It does not cache API requests, external links, query variants or writes.
+The current allowlist names `/coalition.html`. Offline navigation to the clean
+path remains an open device acceptance item.
 
 Vote retains `/f/voteballots`, `/f/voteballots/app` and `idb_voteballots` in the
 FoundUps shell. A separately hosted landing and Oversight Site do not implement
