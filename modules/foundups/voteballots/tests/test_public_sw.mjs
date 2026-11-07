@@ -88,7 +88,7 @@ test('Oversight serves the scoped document with preserved professional fragments
     },
     caches: {
       open: async (name) => {
-        assert.equal(name, 'oversight-public-shell-v0.6.0:/web/');
+        assert.equal(name, 'oversight-public-shell-v0.7.0:/web/');
         return {match: async (key) => key === scope ? cached : undefined};
       },
     },
@@ -103,6 +103,8 @@ test('Oversight serves the scoped document with preserved professional fragments
   assert.equal(await navigate('/web/index.html#house'), cached);
   assert.equal(navigate('/web/?q=1#states'), undefined);
   assert.equal(navigate('/abc/style.css#x'), undefined);
+  assert.equal(navigate('/web/app.js'), undefined);
+  assert.equal(navigate('/web/openclaw.json'), undefined);
 });
 
 test('failed precache rejects redirects and misleading MIME without writing', async () => {
