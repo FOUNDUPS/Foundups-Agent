@@ -90,7 +90,7 @@ test('Oversight serves the scoped roadmap, manual contact and preserved fragment
     },
     caches: {
       open: async (name) => {
-        assert.equal(name, 'oversight-public-shell-v0.8.0:/web/');
+        assert.equal(name, 'oversight-public-shell-v0.9.0:/web/');
         return {match: async (key) => offline.get(key)};
       },
     },

@@ -2,6 +2,11 @@
 
 ## Standalone Oversight staff site
 
+The landing leads with Pain, Solution and Outcome. It dates and sources DOJ
+leadership and prior representation, marks the impartiality concern as the
+project's assessment, and separates the state-law referral from federal criminal
+contempt. Recheck the dated leadership context whenever DOJ leadership changes.
+
 The Oversight publication now focuses on congressional accountability.
 The phone disclosure opens upward with labeled touch targets and readable
 type. Desktop retains the section sidebar. The landing presents the

@@ -34,6 +34,7 @@ def test_public_release_excludes_archive_operations_and_keeps_staff_routes(tmp_p
     assert 'href="/accountability.json"' in index
     assert 'href="/11-house-first-pwa.html"' in index and 'href="#senate"' in index
     assert 'href="legislative-roadmap"' in index and 'href="contact"' in index
+    assert index.index('id="pain"') < index.index('id="solution"') < index.index('id="outcome"') < index.index('id="hub"')
     assert "contact.js" not in index
     assert '<details class="thumb-nav">' in index and "hub-map" in index
     assert len({row["jurisdiction"] for row in json.loads((output / "dist/state-ag-transitions.json").read_text("utf-8"))["rows"]}) == 15
@@ -73,6 +74,9 @@ def test_public_release_excludes_archive_operations_and_keeps_staff_routes(tmp_p
     assert data["entry_points"]["legislative_roadmap"] == "/legislative-roadmap"
     assert data["entry_points"]["senator_directory"] == "/contact"
     assert data["entry_points"]["transition_data"] == "/state-ag-transitions.json"
+    assert 'In our view' in index and 'Todd Blanche' in data["doj_leadership_context"]["verified_fact"]
+    for key in ("attorney_general_biography", "prior_defense_court_filing", "federal_criminal_contempt"):
+        assert data["source_records"][key] in index
 
 
 class Links(HTMLParser):

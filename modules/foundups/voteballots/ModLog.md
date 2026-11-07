@@ -1,5 +1,12 @@
 # Vote/Ballots FoundUp — Module Log
 
+## 2026-11-07 — Oversight landing and DOJ bottleneck
+
+Lead with Pain, Solution and Outcome. Source and date the attorney general's
+prior representation, identify the impartiality concern as an assessment and
+explain the independent state-law pathway and federal contempt boundary.
+Synchronize the public indexes and advance the PWA shell cache. WSP 22, 50, 97.
+
 ## 2026-11-07 — Legislative roadmap and senator contact
 
 Put a chamber-neutral roadmap first on Oversight. Document owners, decision

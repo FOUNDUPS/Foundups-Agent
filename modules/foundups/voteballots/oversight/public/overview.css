@@ -63,6 +63,12 @@ p { margin: 0 0 1em; }
 }
 .kicker { color: var(--muted); font-size: .78rem; font-weight: 750; letter-spacing: .12em; }
 .accountability-hero .kicker { color: var(--gold); }
+.hero-brief { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; list-style: none; margin: 1.4rem 0; padding: 0; }
+.hero-brief li { background: var(--navy-light); border-top: 2px solid var(--gold); padding: .9rem; }
+.hero-brief h2 { color: var(--gold); font-size: 1.4rem; }
+.hero-brief p, .hero-sources { margin: 0; }
+.hero-sources, .hero-sources a { color: var(--cream); }
+@media (max-width: 1050px) { .hero-brief { grid-template-columns: minmax(0, 1fr); } }
 .lead { font-size: clamp(1.05rem, 1.8vw, 1.3rem); max-width: 63ch; }
 .actions { display: flex; flex-wrap: wrap; gap: .75rem; margin: 1rem 0; }
 .button { display: inline-flex; align-items: center; min-height: 48px; padding: .55rem .9rem; border: 1px solid transparent; border-radius: .25rem; text-decoration: none; font-weight: 700; }
@@ -119,6 +125,10 @@ figcaption { color: var(--muted); margin-top: .85rem; }
   .staff-layout { display: block; }
   .staff-layout main { padding: .75rem .75rem calc(6.5rem + env(safe-area-inset-bottom)); }
   .accountability-hero { padding: 1.25rem; }
+  .accountability-hero h1 { font-size: 2.05rem; }
+  .hero-brief { gap: .5rem; margin: 1rem 0; }
+  .hero-brief li { padding: .65rem .75rem; }
+  .hero-brief h2 { margin-bottom: .3em; }
   .button { width: 100%; justify-content: center; text-align: center; }
   .hub-node { padding: .6rem .35rem; }
   .thumb-nav {
@@ -169,6 +179,6 @@ figcaption { color: var(--muted); margin-top: .85rem; }
 @media print {
   .staff-sidebar, .thumb-nav, #install, .skip { display: none !important; }
   .staff-layout { display: block; }
-  .masthead, .accountability-hero, .hub-center { background: white; color: black; }
-  .masthead a, .secondary { color: black; }
+  .masthead, .accountability-hero, .hero-brief li, .hub-center { background: white; color: black; }
+  .masthead a, .secondary, .hero-brief h2, .hero-sources, .hero-sources a { color: black; }
 }

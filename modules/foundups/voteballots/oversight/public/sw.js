@@ -2,7 +2,7 @@
 
 const scope = new URL(self.registration.scope);
 const scopeSuffix = ':' + scope.pathname;
-const CACHE = 'oversight-public-shell-v0.8.0' + scopeSuffix;
+const CACHE = 'oversight-public-shell-v0.9.0' + scopeSuffix;
 const resolve = (path) => new URL(path, scope).href;
 const aliases = new Map([
   [resolve('index.html'), scope.href],
