@@ -49,6 +49,8 @@ jobs:
           --import-mode=importlib -o pythonpath=. -p no:cacheprovider
           --junitxml=vote-verification-results.xml
           modules/foundups/voteballots/tests
+      - name: Verify preserved Oversight public-source inventory
+        run: python -B modules/foundups/voteballots/oversight/scripts/verify_snapshot.py
       - name: Preserve exact-revision verification results
         if: always()
         uses: actions/upload-artifact@v4

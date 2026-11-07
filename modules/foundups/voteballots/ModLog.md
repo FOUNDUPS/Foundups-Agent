@@ -1,5 +1,39 @@
 # Vote/Ballots FoundUp — Module Log
 
+## 2026-11-07 — GitHub/PC reconciliation, Oversight preservation and Vote front door
+
+012 requested that Oversight become a Vote workstream, that all existing work
+be preserved, and that Work/GitHub changes be reconciled on the PC. Live GitHub
+metadata, branch/tree searches and ancestry checks found the related Vote PRs
+#2275/#2282/#2289/#2298 already merged and present locally. No separate Oversight
+repository, PR or indexed source was found among the connected account's 20
+accessible repositories. The PC fast-forwarded from e4ffddcb to main152d52dd
+with no unique local commits and unchanged pre-existing untracked status.
+
+Preserve all 155 public Oversight Site files under `oversight/site/`, including
+documents, data, authored instruction tree and both root/web copies. The exact
+source inventory, blob/working-file identities and Sites v5 publication are
+recorded in `oversight/source-snapshot.json`. Independent byte/provenance review
+confirmed all files and 13 mirror pairs. Scoped ignore/attribute rules preserve
+public bytes without admitting future credential files. No secret data or Git
+metadata is imported.
+
+`web/` adds the informational Vote landing/PWA. It links the published Oversight
+guide and honestly distinguishes internal funding work and planned claim
+verification from available features. This is an EXISTING_FOUNDUP_UPDATE under
+one `voteballots` identity. Canonical shell routes, data namespace, registry,
+manifest readiness and runtime admission remain unchanged. Separate-origin
+sites are not reported as an integrated Mall PWA or running autonomous RSI.
+
+Validation: existing Vote and related registry/projector/route selection yielded
+721 passed and three unrelated namespace-manifest failures; the exact three
+failures also reproduce on clean main152d52dd (EDUIT namespace, kids_episodes and
+Shield missing fields). The initial mixed legacy pytest import collision was
+resolved with importlib collection; no test was skipped or weakened. Static
+source, manifest, link, service-worker and preservation checks supplement those
+existing tests. Required hosted checks and final publication/readback remain
+separate release gates. WSP00/10/22/50/71/97/102/104/109.
+
 ## 2026-11-01 — Aggregate-to-display provenance closure
 
 WSP00/15/22/48/50/97; base4c96d6b. Freeze independent scorer acceptance before

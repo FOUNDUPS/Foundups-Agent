@@ -6,6 +6,22 @@
 
 ---
 
+## 2026-11-07 Public Presentation and Oversight Source Contract
+
+`web/` owns Vote's static informational landing/PWA. It publishes no candidate
+lookup, scores, ballot submissions or authenticated backend API. Existing
+Python funding and shell-payload interfaces remain unchanged.
+
+`oversight/site/` preserves the complete reviewed Oversight Sites source;
+`oversight/source-snapshot.json` binds its paths, sizes, hashes and publication
+identities. `oversight/scripts/verify_snapshot.py` validates the inventory and
+can compare it with the retained Sites checkout. See [the release owner](oversight/README.md).
+
+Oversight belongs to the existing `voteballots` FoundUp. No nested runtime
+identity, tenant namespace, token or cross-origin session is created. Public
+hostnames are presentation aliases, not authority or confidential-data grants.
+The existing `/f/voteballots/app` mount and manifest readiness gates remain.
+
 ## 2026-11-01 Implemented Funding-Source Confidence Correction
 
 The existing Python `score_funding_summary_confidence` preserves original labels

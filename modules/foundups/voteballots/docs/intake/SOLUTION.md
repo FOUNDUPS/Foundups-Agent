@@ -4,6 +4,18 @@
 VOTE is an existing FoundUp mode that turns public election and political-finance information into a simple evidence-first civic interface. The public PoC is the open FoundUp landing/funnel surface: locate the user's election context, show the relevant candidate/race cards, expose funding/influence evidence, and allow a user to scan or capture political material so RedDog can resolve the subject and fetch its public history. Deeper capabilities remain gated through the existing pfMALL/member path and mature through staged prototype slices into discovery, resilience/alerts, non-binding cryptographic preference voting, registration assurance, and eventually reusable FoundUp SmartDAO governance primitives.
 
 ## Solution Stages: PoC -> Prototype -> MVP
+
+### 2026-11-07 existing-workstream extension
+
+Oversight Blueprint is the public research/playbook workstream within Vote's
+existing Solution. Its reviewed documents, data and authored instruction tree
+are preserved in [the Vote-owned source package](../../oversight/README.md).
+Vote's informational landing links visitors to that available workstream while
+separately labeling internal funding evidence and planned claim verification.
+It does not replace the candidate/race PoC or collapse PoC, Prototype and MVP
+into a website launch. No additional FoundUp identity or runtime authority is
+created; a later derivative requires its own evidenced governance boundary.
+
 This is the Solution portion of the repository's **Outcome -> Solution -> Pain** model. Stages sit inside Solution, rather than adding narrative pillars. The [current pitch-package instruction](../../../../platform_integration/social_media_orchestrator/skillz/foundup_pitch_package/SKILLz.md) documents this framing, and [WSP 30](../../../../../WSP_framework/src/WSP_30_Agentic_Module_Build_Orchestration.md) describes staged builds. Reading these references is not a claim that a skill or WRE job was executed.
 
 | Stage | Scope and gate | Observed status |
