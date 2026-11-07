@@ -1,5 +1,23 @@
 # YouTube Shorts Scheduler
 
+## Pending operator-control repair — 2026-11-07
+
+**SPECIFIED_NOT_IMPLEMENTED:** when 012 takes over a scheduling edit, wait at
+least 60 seconds before rechecking the same action. Preserve the page and draft:
+no Escape, refresh, next Short/channel, fallback writer, calendar audit or origin
+restore during takeover. An unknown Save permits observation, never a timed
+writer retry. Existing draft/identity guards and durable unknown claims remain
+required; they do not yet propagate a browser-scoped yield through every caller.
+
+**SPECIFIED_NOT_IMPLEMENTED:** for evidence-identified Foundups YUMORI songs,
+prepare accurate title/description metadata before scheduling, including
+`#YUMORIme` and `https://music.YUMORI.me/`. Use the actual song/index evidence;
+do not apply campaign text to unrelated or unidentified videos, invent content,
+overwrite manual drafts, or bypass existing policy and saved-state checks.
+
+The [repair work list](ROADMAP.md#repair-work-list--2026-11-07) owns sequencing,
+source gaps and acceptance. These requirements do not qualify live scheduling.
+
 The detail-page visibility readiness check also recognizes the existing visible
 `PUBLISH_FROM_PRIVATE` schedule control used by its next step. Hidden or stale
 native controls do not establish readiness. This bounded 2026-11-05 correction does not

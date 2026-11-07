@@ -1,5 +1,52 @@
 # YouTube Shorts Scheduler - ROADMAP
 
+## Repair work list — 2026-11-07
+
+This dated list supersedes older readiness shorthand below for the current
+repair. It records dependencies, not runtime admission. The [YouTube DAE
+checkpoint](../../communication/livechat/README.md#youtube-dae-repair-checkpoint--2026-11-07)
+separates installed PR2314 source from pending restart and semantic live proof.
+
+1. **Manual takeover — SPECIFIED_NOT_IMPLEMENTED.** Wait at least 60 seconds
+   before a passive recheck of the same action/page. While yielded, preserve the
+   draft and prohibit Escape, refresh, other videos/channels, fallback writers,
+   audits and origin restoration. After a started or unknown Save, never retry
+   the writer. Extend the existing DOM/CPS/scheduler/launch owners and propagate
+   yield to continuous and DAE callers; keep takeover separate from STOP.
+   Source gaps at `fa7d487f3`: workflow catches dismiss dialogs; batch loops
+   continue; audit/restore ignore takeover; outer owners may start another phase.
+   Current detail snapshots watch title/description, while inline snapshots
+   bind popup/row identity; manual date/time changes need explicit coverage.
+   Existing empty-channel cooldown is not human inactivity detection. Acceptance
+   must cover the 60-second boundary, continued manual edits, no navigation or
+   retry after unknown submission, prompt preservation and STOP/cancellation.
+2. **Foundups YUMORI song metadata — SPECIFIED_NOT_IMPLEMENTED.** Use existing
+   per-video evidence to identify the song and prepare accurate metadata before
+   scheduling, including `#YUMORIme` and `https://music.YUMORI.me/`. Preserve
+   manual drafts and existing policy, identity and saved-state gates. Missing
+   evidence cannot become invented song details or blanket campaign tagging.
+3. **Studio indexing cost boundary — offline validated; merge/deployment pending.**
+   At this baseline, `video_indexer/src/studio_ask_indexer.py:2871` starts a
+   separate direct Gemini API enrichment pass when new indexes and a configured
+   key exist. The candidate removes only that unattended paid pass, retaining
+   browser Studio Ask results and the compatible empty `gemini_analysis` field.
+   The [scoped offline selection](../../ai_intelligence/video_indexer/tests/TestModLog.md#2026-11-07--no-unattended-paid-enrichment-after-studio-indexing)
+   passes 32; the key-presence regression fails on old source. This is not a
+   video-capable router implementation or installed-runtime proof.
+4. **Shared AI router migration audit — SPECIFIED_NOT_IMPLEMENTED.** 012 requires
+   AI calls to use the existing shared router. Inventory direct provider calls
+   before migration and preserve capability, cost and authority controls. The
+   current [YouTube gateway owner](../../ai_intelligence/ai_gateway/src/youtube_model_routing.py)
+   supports only `comments`/`livechat` and `assess`/`write`/`review`; it does not
+   establish video analysis capability. See the [indexer boundary](../../ai_intelligence/video_indexer/README.md#studio-indexing-cost-and-routing-boundary--2026-11-07).
+5. **Operational qualification — pending.** Pass scoped offline acceptance and
+   required repository checks before installing each change. Then separately
+   observe an authorized fresh daemon, same-page takeover behavior and correct
+   persisted/delivered results. Preserve all uncertain comment/schedule records.
+   LM Link disable was acknowledged; 36 passive samples over 36 seconds found
+   no connector while the GUI remained present. This bounded observation is not
+   model availability proof or qualification across a later restart.
+
 ## Current reconciliation — 2026-10-22
 
 PR1860: qualify the existing selected-batch route and connected offline CI,

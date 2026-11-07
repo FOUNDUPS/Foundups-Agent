@@ -1,5 +1,28 @@
 # LiveChat
 
+## YouTube DAE repair checkpoint — 2026-11-07
+
+The repair handoff records PR2314 merged and installed at `fa7d487f3`: received
+text capture, Windows driver pipe isolation and contextual emoji-question
+routing are present in source. Live semantic qualification of the installed
+reply route remains pending. The 2026-11-07 02:32:34 UTC process observation found
+no `main.py` or worker, excluding inspection commands; an intended restart is not
+restart evidence. Menu recovery, model residency and
+a Submit click do not establish a correct delivered reply.
+
+Continue from the [ordered repair work list](../../platform_integration/youtube_shorts_scheduler/ROADMAP.md#repair-work-list--2026-11-07).
+Manual scheduler takeover, evidence-based Foundups YUMORI song metadata and the
+remaining shared AI router migration are separate unfinished work. Unknown
+comment and scheduling outcomes remain reserved; do not retry or clear them.
+
+The same handoff records LM Link connector startup/timeouts without peers,
+first under `llmster` and then LM Studio GUI. The supported `lms link disable`
+operation exited successfully and returned `forceDisabled=true`. All 36 passive
+samples over 36 seconds found no connector while the GUI remained present.
+This is bounded configuration verification, not a source window fix or proof
+that LM Studio model HTTP is unavailable or all model-memory dependencies are
+broken.
+
 ## Emoji questions (2026-11-07)
 
 An authorized hand-emoji trigger containing text routes the complete message
@@ -9,8 +32,8 @@ the sender. Missing/disabled models, expiry, cancellation, quality rejection
 and rate/diversity limits produce no canned answer. Bare emoji acknowledgments,
 explicit code commands and slash-command precedence retain their existing paths.
 Only an entire emoji-plus-1–4 message is a quiz answer; a quiz with no result
-does not fall through to general generation. This source change needs activation
-in a new daemon process before it affects an already-running chat session.
+does not fall through to general generation. PR2314 is installed at the checkpoint
+above; activation in a fresh daemon and live semantic delivery remain unverified.
 
 ## Scoped comment-quality halt (2026-11-05)
 

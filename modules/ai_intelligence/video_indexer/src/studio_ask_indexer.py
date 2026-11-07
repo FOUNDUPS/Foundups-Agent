@@ -2864,64 +2864,15 @@ async def run_video_indexing_cycle(
     logger.info(f"[VIDEO-INDEX] Cycle complete: {total_indexed} videos indexed")
     logger.info(f"[VIDEO-INDEX] Skip count: {total_skipped}")
 
-    # 2026-02-05: GEMINI ANALYSIS PASS — analyze newly indexed videos via Gemini 2.5 Flash.
-    # Extracts topics, segments, transcript → generates hashtag suggestions.
-    # Gated: only runs if Gemini API key is configured and videos were indexed.
-    gemini_results = {}
-    if total_indexed > 0 and os.getenv("GEMINI_API_KEY"):
-        try:
-            from modules.ai_intelligence.video_indexer.src.gemini_video_analyzer import (
-                GeminiVideoAnalyzer,
-                save_analysis_result,
-                suggest_hashtags,
-            )
-            analyzer = GeminiVideoAnalyzer()
-            logger.info(f"[VIDEO-INDEX] Running Gemini analysis on {total_indexed} newly indexed videos...")
-
-            for channel_id, ch_result in results.items():
-                channel_entry = get_channel_by_id(channel_id) or {}
-                channel_key = str(channel_entry.get("key") or channel_id)
-                video_ids = ch_result.get("videos", [])
-                for vid in video_ids[:max_videos_per_channel]:
-                    try:
-                        analysis = analyzer.analyze_video(vid)
-                        if analysis.success:
-                            # Preserve the channel's canonical Studio manifest;
-                            # attach API enrichment instead of overwriting it.
-                            save_analysis_result(
-                                analysis,
-                                output_dir=str(INDEX_ROOT),
-                                channel=channel_key,
-                                index_to_holoindex=True,
-                                merge_existing=True,
-                            )
-
-                            # Generate hashtag suggestions
-                            tags = suggest_hashtags(analysis)
-                            logger.info(f"[VIDEO-INDEX] {vid}: {len(analysis.segments)} segments, "
-                                        f"{len(analysis.topics)} topics, {len(tags)} hashtags suggested")
-                            gemini_results[vid] = {
-                                "topics": analysis.topics,
-                                "hashtags": tags,
-                                "segments": len(analysis.segments),
-                                "success": True,
-                            }
-                        else:
-                            logger.warning(f"[VIDEO-INDEX] Gemini analysis failed for {vid}: {analysis.error}")
-                            gemini_results[vid] = {"success": False, "error": analysis.error}
-                    except Exception as gemini_err:
-                        logger.warning(f"[VIDEO-INDEX] Gemini error for {vid}: {gemini_err}")
-                        gemini_results[vid] = {"success": False, "error": str(gemini_err)}
-        except ImportError as ie:
-            logger.info(f"[VIDEO-INDEX] Gemini analyzer not available: {ie}")
-        except Exception as e:
-            logger.warning(f"[VIDEO-INDEX] Gemini analysis pass failed: {e}")
+    # Provider credentials are not permission for a second, paid analysis pass.
+    # Preserve Studio Ask evidence; video-capable shared routing is a separate
+    # qualification task. Keep the legacy result key empty for callers.
 
     return {
         "total_indexed": total_indexed,
         "total_skipped": total_skipped,
         "channels": results,
-        "gemini_analysis": gemini_results,
+        "gemini_analysis": {},
         "index_counts_before": counts_before,
         "index_counts_after": counts_after,
         "index_counts_delta": indexed_delta,

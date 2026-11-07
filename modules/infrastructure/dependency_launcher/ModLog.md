@@ -1,3 +1,16 @@
+## 2026-11-07 — LM Link configuration remediation and passive observation
+
+The runtime repair handoff observed the connector starting under `llmster`, then
+LM Studio GUI, with startup/timeouts and no peers. The supported
+`lms link disable` command exited 0 and acknowledged `forceDisabled=true`. All 36 passive
+samples over 36 seconds then found no connector; the GUI remained present in
+every sample. This is configuration-only remediation, not a dependency-launcher
+source window fix. It does not prove model HTTP availability, model residency,
+future restart behavior or indefinite connector absence. No credentials, private
+configuration paths or host identifiers are recorded here. See the [YouTube DAE
+checkpoint](../../communication/livechat/README.md#youtube-dae-repair-checkpoint--2026-11-07).
+WSP00/22/50/77/97.
+
 ## Preserve browser sessions during attachment — 2026-11-05
 
 - Monitoring observed the old repeated-readiness-failure branch execute an
