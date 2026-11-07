@@ -22,8 +22,17 @@ The owning publisher reported successful native Sites publication of version 5:
 - Project: `appgprj_6aed5317a2e4819193b1fdfe340a1cea`
 - Deployment: `appgdep_6aee654bd6308191a3f0bca480e9aad3`
 - Published source: `c66d22afc5795874f4020661dcadfdd69d3ad129`
-- Existing aliases: <https://oversight.mtrout.com/> and <https://maga.mtrout.com/>
+- Preferred workstream address: <https://oversight.mtrout.com/>
+- Retained alias for the same workstream: <https://maga.mtrout.com/>
 - Original Sites address: <https://oversight-hub-pwa.undaodu.chatgpt.site/>
+
+The parent Vote informational landing uses <https://vote.mtrout.com/>.
+These three `mtrout.com` addresses passed public DNS, strict TLS and HTTP 200
+checks with their correct Vote/Oversight pages on both public endpoints on
+7 November 2026 at 00:45 UTC. The previously configured `vote.foundups.com`
+and `oversight.vote.foundups.com` aliases remain retained; they are not the
+preferred public map. No existing alias or original Site is removed or
+redirected by this documentation correction.
 
 Per-file source/export mappings, Git blob identities, byte counts and SHA-256
 digests are in [source-snapshot.json](source-snapshot.json). The imported bytes

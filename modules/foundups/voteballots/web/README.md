@@ -13,11 +13,17 @@ operator documentation and is excluded from the deployed static directory.
 
 - Sites project: `appgprj_6aee6646e6ac81918ac2624d5d1db413`
 - Generated address: `https://vote.undaodu.chatgpt.site/`
-- Requested alias: `vote.foundups.com`; activation requires separate public
-  DNS, certificate and correct-page verification.
+- Preferred public landing: <https://vote.mtrout.com/>.
 - Oversight source/release owner: [the preserved workstream](../oversight/README.md).
-- Existing working Oversight address: `https://oversight.mtrout.com/`.
-- Requested additive workstream alias: `oversight.vote.foundups.com`.
+- Preferred Oversight workstream: <https://oversight.mtrout.com/>.
+- Retained Oversight alias: <https://maga.mtrout.com/>.
+
+All three preferred/retained `mtrout.com` addresses passed public DNS, strict
+TLS and correct-page HTTP 200 checks on both public endpoints on 7 November
+2026 at 00:45 UTC. The previously configured `vote.foundups.com` and
+`oversight.vote.foundups.com` aliases remain retained, not promoted to the
+preferred public map. Keep the generated Site addresses and existing aliases;
+an address preference is not authorization to delete or redirect them.
 
 The Site's source repository is a deployment mirror. Preserve its existing
 project identity and reconcile its current branch before replacing public files

@@ -35,11 +35,22 @@ been established for this workstream.
   preserved with exact file identities from Sites source `c66d22af`.
 - [Vote landing source](web/README.md): an informational PWA front door, separate
   from the unlaunched candidate/evidence application described below.
-- Oversight's existing `https://oversight.mtrout.com/`,
-  `https://maga.mtrout.com/` and original Sites address remain available.
-- Intended additive domains are `vote.foundups.com` for the landing and
-  `oversight.vote.foundups.com` for the existing Oversight project. A configured
-  hostname is reported live only after public DNS, TLS and page verification.
+
+The preferred public address map is:
+
+| Address | Role |
+|---|---|
+| <https://vote.mtrout.com/> | Vote's informational public landing |
+| <https://oversight.mtrout.com/> | Oversight Blueprint, a workstream within Vote |
+| <https://maga.mtrout.com/> | Retained alias for the same Oversight workstream |
+
+Public DNS and strict hostname/certificate checks returned the correct page
+with HTTP 200 for all three addresses on both public endpoints on 7 November
+2026 at 00:45 UTC. The original Sites addresses remain available. Previously
+configured `vote.foundups.com` and `oversight.vote.foundups.com` aliases are
+retained, but are not the preferred public map; this correction removes none
+of those aliases. A configured hostname is reported live only after public
+DNS, TLS and correct-page verification.
 
 The canonical shell routes remain `/f/voteballots` and `/f/voteballots/app`,
 with `idb_voteballots` unchanged. Separate-origin public PWAs do not share Mall
