@@ -77,12 +77,12 @@ p { margin: 0 0 1em; }
 .hub-node span { font-size: .75rem; letter-spacing: .08em; font-weight: 750; }
 .hub-node strong { display: block; font-size: 1.12rem; }
 .hub-node small { font-size: 1rem; }
-.hub-center, .hub-destination, .hub-connector { grid-column: 1 / -1; }
+.hub-center, .hub-connector { grid-column: 1 / -1; }
 .hub-center { background: var(--navy-light); color: white; }
 .hub-destination { background: #f4ead3; border-color: #c9b580; }
 .hub-connector { width: 100%; height: 1.55rem; fill: none; stroke: #52717e; stroke-width: 2; }
 .hub-connector path { vector-effect: non-scaling-stroke; }
-.hub-connector.dashed { stroke-dasharray: 3 4; }
+.hub-connector .dashed { stroke-dasharray: 3 4; }
 figcaption { color: var(--muted); margin-top: .85rem; }
 .workflow { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: .65rem; padding-left: 1.4rem; }
 .workflow li { padding: .8rem; background: var(--cream); }
@@ -106,6 +106,11 @@ figcaption { color: var(--muted); margin-top: .85rem; }
 .legal-document th, .legal-document td { border: 1px solid var(--line); padding: .55rem; vertical-align: top; }
 .legal-document th { background: #e3ecea; text-align: left; }
 .legal-document a { overflow-wrap: anywhere; }
+.roadmap { max-width: 76ch; }
+.roadmap .lead { margin-bottom: 1.5rem; }
+.roadmap .roadmap-jump { background: var(--cream); border-left: 4px solid #b28b50; padding: 1rem 1.2rem; }
+.roadmap .roadmap-jump ol { margin-bottom: 0; }
+.roadmap section { scroll-margin-top: 1rem; }
 
 @media (max-width: 760px) {
   .masthead { min-height: 60px; gap: .5rem; }

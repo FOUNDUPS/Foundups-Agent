@@ -14,6 +14,16 @@ bytes and paths remain preserved in the repository. Exploratory records,
 workspace branding and internal execution materials are archival only.
 The root and `/web/` retain their existing install scopes.
 
+The staff roadmap at `/legislative-roadmap` documents how to scope an inquiry,
+approve evidence collection, review findings and take legislative action if
+DOJ does not act. It links to the existing model documents. The state referral
+branch requires its own jurisdiction and disclosure decision. `/contact`
+reuses the official congressional roster and provides state selection, optional
+on-device state suggestion, native senator dial links and a private voicemail
+draft. The cached roadmap and manual lookup work offline after initial loading.
+Current deployment and verification are tracked in the release accounting and
+its linked PR, separate from the historical import below.
+
 `site/` preserves **all 155 tracked public source files** from the clean Oversight
 Sites checkout at `c66d22afc5795874f4020661dcadfdd69d3ad129`. The import includes the
 complete `dist/` tree, its `web/` copies, documents, research and review data,
@@ -25,7 +35,8 @@ The import designated `site/` as the Vote-owned source. It is now the pinned
 historical base for the public overlay. The existing Sites repository remains
 the deployment mirror and retains the full original Git history.
 
-The owning publisher reported successful native Sites publication of version 5:
+The owning publisher reported the following native Sites publication for the
+historical version 5 import:
 
 - Project: `appgprj_6aed5317a2e4819193b1fdfe340a1cea`
 - Deployment: `appgdep_6aee654bd6308191a3f0bca480e9aad3`

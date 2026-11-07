@@ -17,12 +17,23 @@ from verify_snapshot import safe_relative, verify
 WORKSTREAM = Path(__file__).resolve().parents[1]
 PUBLIC = WORKSTREAM / "public"
 ARCHIVE = WORKSTREAM / "site"
-PUBLIC_ASSETS = ("overview.css", "overview.js", "sw.js", "accountability.json", "llms.txt", "state-ag-transitions.json")
+DIRECTORY = WORKSTREAM.parent / "web"
+PUBLIC_ASSETS = (
+    "overview.css", "overview.js", "sw.js", "accountability.json", "llms.txt",
+    "state-ag-transitions.json", "contact.css", "contact.js", "states-boundaries.json", "states-location.mjs",
+)
+DIRECTORY_ASSETS = ("contact-queue.mjs", "contact-roster.json")
 APP_ASSETS = ("manifest.webmanifest", "icons/icon.svg", "icons/icon-192.png", "icons/icon-512.png")
+PAGES = {
+    "legislative-roadmap": "Legislative roadmap",
+    "contact": "Find and call your senators",
+    "state-ag-transitions": "Attorney general transitions",
+}
 SECTIONS = (
-    ("home", "Accountability"), ("hub", "Hub and spokes"), ("house", "House readiness"),
+    ("home", "Accountability"), ("legislative-roadmap", PAGES["legislative-roadmap"]),
+    ("contact", "Call your senators"), ("hub", "Hub and spokes"), ("house", "House readiness"),
     ("senate", "Senate authority"), ("states", "State handoff"),
-    ("ag-transitions", "Attorney general transitions"), ("january-6", "January 6 record"),
+    ("state-ag-transitions", PAGES["state-ag-transitions"]), ("january-6", "January 6 record"),
     ("library", "Staff library"),
 )
 DOCUMENTS = {
@@ -79,14 +90,20 @@ def links(items: dict[str, str]) -> str:
     return "".join(f'<li><a href="/{path}">{escape(title)}</a></li>' for path, title in items.items())
 
 
-def render(title: str, content: str, *, home: bool = False, asset_base: str = "./") -> bytes:
+def render(title: str, content: str, *, home: bool = False, asset_base: str = "./", contact: bool = False) -> bytes:
     nav = []
     for id_, label in SECTIONS:
-        href = asset_base + "state-ag-transitions.html" if id_ == "ag-transitions" else ("" if home else asset_base) + "#" + id_
+        href = asset_base + id_ if id_ in PAGES else ("" if home else asset_base) + "#" + id_
         nav.append(f'<a href="{href}" data-section="{id_}">{escape(label)}</a>')
+    page_assets = (
+        f'<link rel="stylesheet" href="{asset_base}contact.css">\n'
+        f'  <script type="module" src="{asset_base}contact.js"></script>'
+        if contact else ""
+    )
     page = source("index.html")
     for key, value in {
         "TITLE": escape(title), "NAV_LINKS": "\n".join(nav), "CONTENT": content, "ASSET_BASE": asset_base,
+        "PAGE_ASSETS": page_assets,
     }.items():
         page = page.replace("{{" + key + "}}", value)
     return page.encode("utf-8")
@@ -125,7 +142,7 @@ def render_transitions() -> bytes:
         )
     label = f"{checked.day} {checked:%B %Y}"
     return render("Attorney general transitions", f"""
-<section class="staff-section" id="ag-transitions" data-page-section="ag-transitions">
+<section class="staff-section" id="ag-transitions" data-page-section="state-ag-transitions">
   <p class="kicker">STATE AND TERRITORIAL OFFICES</p>
   <h1>2026 attorney general transitions</h1>
   <p class="lead">Snapshot checked <time datetime="{checked}">{label}</time>. {escape(data["scope"])}</p>
@@ -139,7 +156,7 @@ def render_transitions() -> bytes:
 def render_staff_document(path: str, title: str) -> bytes:
     house_materials = {key: value for key, value in DOCUMENTS.items() if key.startswith("templates/") and "briefing" not in key}
     summaries = {
-        "00-executive-summary.html": "<p>Use the overview to document a lead, identify committee authority, review the evidence, and decide what may be published or referred.</p><p><a href='/#hub'>Open the workflow and diagram</a></p>",
+        "00-executive-summary.html": "<p>Use the roadmap to document a lead, identify committee authority, review the evidence, and decide what action the committee may take independently of DOJ. Consider a separate referral when state law supports one.</p><p><a href='/legislative-roadmap'>Open the legislative roadmap</a></p>",
         "11-house-first-pwa.html": "<p>Confirm the committee’s jurisdiction and legislative purpose. Assign responsible counsel, specify how evidence will be held and reviewed, and determine which requests may be issued. Each model below requires approval by an authorized office.</p><ul>" + links(house_materials) + "</ul>",
         "14-worker-review-and-quality.html": "<ol><li>Record the original source, date and exact locator.</li><li>Separate the documented item from interpretation and unresolved gaps.</li><li>Check amendments, contradictory records and alternative explanations.</li><li>Have a second reviewer confirm the evidence and counsel approve any disclosure.</li><li>Preserve the review and correction history.</li></ol><p><a href='/templates/evidentiary-report.html'>Open the evidence report template</a></p>",
         "templates/house-office-briefing.html": "<p>Identify the legislative question, the committee with jurisdiction, the evidence needed and the approval path. Counsel should confirm disclosure restrictions and any authority needed before a referral.</p><p><a href='/11-house-first-pwa.html'>Open the House readiness package</a></p>",
@@ -199,9 +216,12 @@ def stage_release(output: Path) -> dict:
     overview = source("overview.html").replace("{{LIBRARY_LINKS}}", links(DOCUMENTS))
     shared = {
         **{name: source(name).encode("utf-8") for name in PUBLIC_ASSETS},
+        **{name: (DIRECTORY / name).read_bytes() for name in DIRECTORY_ASSETS},
         **{name: (ARCHIVE / "dist" / name).read_bytes() for name in APP_ASSETS},
         "index.html": render("Congressional accountability", overview, home=True),
         "state-ag-transitions.html": render_transitions(),
+        "legislative-roadmap.html": render(PAGES["legislative-roadmap"], source("legislative-roadmap.html")),
+        "contact.html": render(PAGES["contact"], source("contact.html"), contact=True),
     }
     files = {".openai/hosting.json": (ARCHIVE / ".openai/hosting.json").read_bytes()}
     for prefix in ("dist/", "dist/web/"):

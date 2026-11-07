@@ -2,6 +2,14 @@
 
 <!-- WSP 22: anti-vibecoding test inventory. NEWEST entries at TOP. -->
 
+## [2026-11-07] — Oversight legislative roadmap and contact
+
+Expanded existing release and worker tests for the two new routes, exact shared
+directory assets, mirrored and legacy paths, and scoped offline manual lookup.
+Contact tests cover Census boundary suggestion limits alongside roster and
+telephone validation. Browser holdout exercises state confirmation, fallback
+and desktop and phone layouts without dialing.
+
 ## [2026-11-07] — Standalone Oversight publication
 
 Reused the existing release and worker tests to check the reviewed inventory,
