@@ -21,6 +21,14 @@ Its XML check requires exactly 32 cases, no failures/errors/skips and the
 key-present regression; the existing artifact action retains the result. The
 CI-style command also passes 32 locally; hosted execution remains separate.
 
+The first PR head passed the hosted 32-case selection and exposed two stale
+backend-manifest bindings in general CI. The existing generator changes only
+this source hash, preserving all 1,485 runtime members; both canonical digest
+pins are refreshed without changing their assertions. Independent source review
+accepted the supplement. After generation and staging finished, all eight
+`scripts/tests/test_generate_reddog_backend_manifest.py` cases passed locally.
+An earlier overlapping generation/test run is not acceptance evidence.
+
 ## 2026-10-22 - Omitted language and real factory compatibility
 
 Added nine real-factory construction cases: omitted multilingual and `.en`

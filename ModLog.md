@@ -11,6 +11,13 @@ Link supported disable and bounded passive confirmation in the dependency
 launcher log as configuration remediation, not a source window fix. No unknown
 comment/schedule reservation is cleared. WSP00/22/50/77/97.
 
+Packaging follow-up: the first PR run detected the stale backend source binding.
+Regenerate it with the existing owner: all 1,485 runtime members and authority
+fields remain unchanged; only the edited indexer's hash and two digest pins
+change. Independent review accepted that exact scope; all eight packaging
+contracts pass after regeneration and staging. Repository checks remain a
+separate exact-head gate.
+
 ## 2026-11-06 — WRE readiness evidence and training-menu boundaries
 
 The 16/P0 readiness repair distinguishes per-metric missing evidence from actual
