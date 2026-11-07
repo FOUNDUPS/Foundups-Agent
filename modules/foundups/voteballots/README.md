@@ -35,6 +35,10 @@ been established for this workstream.
   preserved with exact file identities from Sites source `c66d22af`.
 - [Vote landing source](web/README.md): an informational PWA front door, separate
   from the unlaunched candidate/evidence application described below.
+- [Coalition tab audit](docs/COALITION_TAB_AUDIT.md): independent public principles
+  and a private, downloadable application draft. No creator participation,
+  enrollment, account ownership or official status is implied or verified by
+  preparing a draft. OAuth, intake and membership permissions are not live.
 
 The preferred public address map is:
 

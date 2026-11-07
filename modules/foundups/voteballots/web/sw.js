@@ -1,8 +1,8 @@
 'use strict';
 
 // Only this public guide's exact same-origin shell paths are eligible for caching.
-const CACHE = 'vote-public-guide-v1';
-const SHELL = ['./', './index.html', './style.css', './app.js', './manifest.webmanifest', './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png'];
+const CACHE = 'vote-public-guide-v2';
+const SHELL = ['./', './index.html', './coalition.html', './style.css', './app.js', './coalition.js', './coalition-draft.mjs', './manifest.webmanifest', './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png'];
 const SHELL_URLS = new Set(SHELL.map((path) => new URL(path, self.registration.scope).href));
 
 self.addEventListener('install', (event) => {

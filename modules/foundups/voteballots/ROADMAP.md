@@ -8,6 +8,17 @@
 
 ## Current State
 
+### 2026-11-07 Coalition public-tab layer
+
+The existing Vote public PWA adds a Coalition page and local application-draft
+preparation/export. It does not enroll members, verify provider ownership or
+grant authority. No named creator's participation is assumed. The
+[source audit](docs/COALITION_TAB_AUDIT.md) records identity/consent, OAuth,
+cross-principal upsert, schema and counter findings in the proposed full-stack
+system. Live intake, provider OAuth, official review, moderated CMS and consensus
+storage remain separate undelivered capabilities. Location/affiliation political
+targeting and campaign routing are outside this public layer.
+
 ### 2026-11-07 source reconciliation and public presentation
 
 - GitHub Vote work through PRs #2275, #2282, #2289 and #2298 is already merged
@@ -17,8 +28,9 @@
   exact inventory and release provenance in `oversight/source-snapshot.json`.
 - `web/` supplies the informational Vote landing. Its availability does not
   activate live FEC access, candidate tools, claim scores or an official ballot.
-- Keep both existing Oversight aliases. Add `vote.foundups.com` and
-  `oversight.vote.foundups.com` only through verified hosting/DNS/TLS setup.
+- Preferred verified addresses are `vote.mtrout.com`, `oversight.mtrout.com`
+  and the retained `maga.mtrout.com` Oversight alias. Existing FoundUps aliases
+  and generated Sites addresses remain retained; see the current README map.
 - A later shared installed PWA must explicitly integrate under the existing
   `/f/voteballots/app` namespace. Separate origins alone do not implement it.
 - Preserved instruction bundles and source history are inputs for the existing
@@ -68,7 +80,7 @@ The original design roadmap is stale.
 - 303 Vote tests recorded passing in the canonical closure snapshot
 
 ### Not Complete
-- public Vote landing/app activation
+- public candidate/evidence application activation
 - live public data wiring beyond current safe/mock boundaries
 - locality/race/candidate roster UX
 - registry/manifest status reconciliation

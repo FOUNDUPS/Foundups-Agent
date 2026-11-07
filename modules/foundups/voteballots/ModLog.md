@@ -1,5 +1,34 @@
 # Vote/Ballots FoundUp — Module Log
 
+## 2026-11-07 — Independent Coalition tab and private draft export
+
+012 requested a Coalition tab on the current Vote site and an architecture
+audit of a proposed distributed organizing platform. Extend the existing
+static Vote PWA, project and branding. The public page contains a charter,
+participation pathways and a voluntary application draft preview/download.
+No draft is submitted, no membership or identity is verified, and no named
+creator's endorsement is assumed. Public House/Senate directories and the
+Capitol Switchboard are the same for every visitor; no location/affiliation
+targeting, campaign scripts, call logging or automatic dialing is included.
+
+The [audit](docs/COALITION_TAB_AUDIT.md) records the identity/role separation,
+cross-principal upsert, OAuth, incomplete schema and counter defects. It also
+records the existing signup-handler identity-binding risk. These findings do
+not activate a database, OAuth, CMS or calling/payment/voice backend.
+
+Preserve all prior public assets and routes; add three public files and advance
+the exact public-shell cache to v2. The form is local and text-only, with no
+draft network requests or persistent browser storage. The validation contract
+rejects unsafe or misleading profile URLs and fixed-schema authority spoofing.
+No domain, audience, registry, Mall namespace or Oversight source change.
+
+Validation: independent 107-case frozen draft oracle exposed 14 failures from
+redundant authority-like fields; retained its exact prefix and added seven URL
+regression/default-port cases. Final 114 pass, no skips. Existing Vote Python
+398 pass; source/syntax checks and exact 155-file/13-mirror Oversight preservation
+pass. Actual browser, hosted deployment and GitHub evidence remain separate
+from source validation. WSP 00/10/22/50/71/97.
+
 ## 2026-11-07 — Preferred Vote and Oversight public addresses
 
 012 clarified the preferred map: `vote.mtrout.com` is the existing Vote public
