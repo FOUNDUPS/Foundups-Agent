@@ -11,9 +11,14 @@
 
 ### Accountability integration and 2028 sequence
 
-The current source provides a human and agent-readable Oversight landing,
-two source-backed Vote officeholder cards and a local congressional contact
-list. See the [acceptance record](docs/RELEASE_ACCOUNTING.md#accountability-integration).
+The current source provides a human and agent-readable legislative roadmap with
+decision owners, templates, congressional outputs and a separate optional state
+referral. Oversight offers a native-dialer senator lookup with manual state
+selection and an optional local suggestion. Vote provides two source-backed
+officeholder cards and a separate congressional contact list. The next staff
+qualification is a walkthrough from scope memo to recorded disposition using
+fictional material. Recheck directory coverage at the congressional transition
+and retain the official lookup fallback. See the [acceptance record](docs/RELEASE_ACCOUNTING.md#standalone-oversight-staff-site).
 For 2028, expand the fixed funding excerpt set only after defining coverage,
 amendment/refund handling and freshness rules. Then qualify live retrieval,
 one public race-to-evidence journey and the existing tenant mount. Preserve
@@ -23,7 +28,7 @@ any claim scores or ballot experiments.
 ### 2026-11-07 release accounting
 
 Vote Sites v2 publishes the [Vote landing](https://vote.mtrout.com/) and the
-[Coalition tab](https://vote.mtrout.com/coalition). Oversight Sites v5 publishes
+[Coalition tab](https://vote.mtrout.com/coalition). The existing Oversight Site publishes
 the [Oversight Blueprint](https://oversight.mtrout.com/) and retains
 [`maga.mtrout.com`](https://maga.mtrout.com/) as an alias. Coalition prepares
 local drafts. Verified enrollment and editorial tools are future capabilities.

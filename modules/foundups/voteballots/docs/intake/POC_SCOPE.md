@@ -5,9 +5,10 @@
 The standalone Vote Site presents selected, dated and verified filing items
 for two officeholders, separately sourced chamber roles and votes, and
 explicit unknowns for unverified independent spending and full-cycle totals.
-The Oversight Site describes the proposed institutional process and links
-directly to Vote. Contact Congress uses public office directory snapshots,
-manual state/chamber filtering and a visitor-managed phone list.
+The standalone Oversight Site presents the legislative roadmap and a separate
+senator directory with manual state selection, optional on-device suggestions
+and native dial links. Vote's Contact Congress page uses public office directory
+snapshots, manual state/chamber filtering and a visitor-managed phone list.
 
 This slice uses exact real source records and leaves the general live-data,
 locality-to-race, shared Mall tenant, capture and RedDog gates below open.

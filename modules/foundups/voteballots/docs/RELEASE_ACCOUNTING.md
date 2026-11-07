@@ -9,6 +9,17 @@ hub-and-spoke workflow, a sourced January 6 precedent, separate state
 authority and an attorney general transition snapshot that distinguishes
 provisional results from the serving office.
 
+The current source promotes the [legislative roadmap](https://maga.mtrout.com/legislative-roadmap)
+to the main staff action. It gives each stage an owner, decision record and
+supporting template. Congressional oversight and legislative outputs can proceed
+without DOJ. A separate referral needs an independently established state-law
+basis, a verified receiving office and authorized disclosure. The
+[senator directory](https://maga.mtrout.com/contact) provides manual state selection,
+an optional device-local state suggestion, direct office dial links and private
+voicemail preparation. The PWA caches the roadmap and manual directory. Precise
+location and notes are never sent to the site. See the merged pull request for
+the exact production version and independent browser verification.
+
 The public build uses an explicit staff-material allowlist. It excludes
 exploratory research, product branding and internal control files. The
 155-file source archive and 13 mirror pairs remain the historical record.
@@ -22,9 +33,9 @@ section below are the v2 Vote and v5 Oversight baseline.
 
 | Surface | Delivered in source | Acceptance boundary |
 |---|---|---|
-| [Oversight](https://maga.mtrout.com/) | Static overview, direct professional documents, original interactive routes, `/accountability.json` and `/llms.txt` | Preserved archive remains 155 files and 13 exact mirror pairs. Staged public release changes only root/web entry and worker files and adds four mirrored assets. Congress, agencies and state authorities retain their independent powers and obligations. |
+| [Oversight](https://maga.mtrout.com/) | Staff overview, legislative roadmap, senator lookup, professional documents, `/accountability.json` and `/llms.txt` | Preserved archive remains 155 files and 13 exact mirror pairs. Publication uses an explicit public allowlist. Congress, agencies and state authorities retain their independent powers and obligations. |
 | [Vote evidence](https://vote.mtrout.com/evidence) | Five selected Schedule B records in four raw FEC filings, matched to their exact transaction identifiers and official candidate/committee IDs. Separate chamber roles, procedures and roll calls. | Direct contributions and forwarded individual earmarks are shown separately. UDP coverage and cycle totals remain unknown. No live lookup, estimate, ownership allegation or causal inference enters the public page. |
-| [Contact Congress](https://vote.mtrout.com/contact) | Dated official directory snapshot of 539 House and Senate offices. Visitor selects a state/chamber and up to 1, 3 or 5 offices. Each dialer action and next step is manual. | Committee and leadership discovery links out to official directories. Geolocation is deferred pending a vetted local lookup. Notes and selection stay in memory. |
+| [Contact Congress](https://vote.mtrout.com/contact) | Dated official directory snapshot of 539 House and Senate offices. Visitor selects a state/chamber and up to 1, 3 or 5 offices. Each dialer action and next step is manual. | Committee and leadership discovery links out to official directories. This Vote page uses manual selection. Notes and selection stay in memory. |
 
 ### Three review cycles
 

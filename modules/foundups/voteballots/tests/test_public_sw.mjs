@@ -75,11 +75,13 @@ test('canonical and prior HTML navigation use the same cached document offline',
   assert.equal(sw.event('fetch', '/contact', 'POST'), undefined);
 });
 
-test('Oversight serves the scoped document with preserved professional fragments', async () => {
+test('Oversight serves the scoped roadmap, manual contact and preserved fragments offline', async () => {
   const file = new URL('../oversight/public/sw.js', import.meta.url);
   const scope = origin + '/web/';
   let fetchHandler;
   const cached = new Response('Preserved professional shell');
+  const offline = new Map(['', 'legislative-roadmap', 'contact', 'contact-roster.json', 'states-location.mjs']
+    .map((path) => [scope + path, cached]));
   vm.runInNewContext(readFileSync(file, 'utf8'), {
     URL, Response,
     self: {
@@ -88,8 +90,8 @@ test('Oversight serves the scoped document with preserved professional fragments
     },
     caches: {
       open: async (name) => {
-        assert.equal(name, 'oversight-public-shell-v0.7.0:/web/');
-        return {match: async (key) => key === scope ? cached : undefined};
+        assert.equal(name, 'oversight-public-shell-v0.8.0:/web/');
+        return {match: async (key) => offline.get(key)};
       },
     },
     fetch: async () => { throw new TypeError('offline'); },
@@ -101,6 +103,12 @@ test('Oversight serves the scoped document with preserved professional fragments
   }
   assert.equal(await navigate('/web/#senate'), cached);
   assert.equal(await navigate('/web/index.html#house'), cached);
+  for (const path of ['legislative-roadmap', 'legislative-roadmap.html#decide-referral',
+    'contact', 'contact.html', 'contact-roster.json', 'states-location.mjs']) {
+    assert.equal(await navigate('/web/' + path), cached);
+  }
+  assert.equal(navigate('/contact'), undefined);
+  assert.equal(navigate('/web/states-boundaries.json'), undefined);
   assert.equal(navigate('/web/?q=1#states'), undefined);
   assert.equal(navigate('/abc/style.css#x'), undefined);
   assert.equal(navigate('/web/app.js'), undefined);

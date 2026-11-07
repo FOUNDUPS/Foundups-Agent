@@ -28,6 +28,15 @@ The manifest distinguishes public records, editorial assessment, proposed
 institutional mechanisms and published guide materials. It grants no tool or
 execution authority.
 
+Oversight exposes `/legislative-roadmap` and `/contact`, with `.html` aliases and
+equivalent routes under `/web/`. The roadmap is a static staff reference. The
+contact page reuses the existing official directory snapshot and validated
+telephone formatter. Visitors select a state or opt into a browser-local state
+suggestion and confirm it before office numbers appear. Coordinates and optional
+voicemail notes stay in page memory. The cached PWA supports manual state lookup
+and roadmap reading offline after installation. The contact action is a native
+`tel:` link to a listed office.
+
 `web/coalition.html` adds an independent Coalition information and voluntary
 application-draft page. `web/coalition-draft.mjs` exposes the pure
 `createCoalitionDraft(input, createdAtISO)` validation/export contract. Successful

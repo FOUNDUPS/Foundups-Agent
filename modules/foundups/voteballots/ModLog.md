@@ -1,5 +1,14 @@
 # Vote/Ballots FoundUp — Module Log
 
+## 2026-11-07 — Legislative roadmap and senator contact
+
+Put a chamber-neutral roadmap first on Oversight. Document owners, decision
+records, approval and disclosure gates, legislative actions independent of DOJ,
+and the separate optional state referral. Add native senator dial links from the
+existing official directory, a browser-local optional state suggestion, and a
+private voicemail draft. Keep the roadmap and manual contact lookup in the PWA
+shell and preserve the 155-file archive. WSP 22, 50, 97, 102.
+
 ## 2026-11-07 — Standalone Oversight staff site and phone navigation
 
 Projected a reviewed public allowlist from the preserved Oversight archive.
