@@ -1,5 +1,14 @@
 # Vote/Ballots FoundUp — Module Log
 
+## 2026-11-07 — Standalone Oversight staff site and phone navigation
+
+Projected a reviewed public allowlist from the preserved Oversight archive.
+Removed product references and unreviewed work materials from the public
+build. Added a staff-first hub diagram, sourced January 6 example, dated
+attorney general transition directory, and one upward-opening phone
+disclosure. Kept desktop navigation and the professional document URLs.
+The original 155 files and 13 mirror pairs remain pinned. WSP 22, 50, 97.
+
 ## 2026-11-07 — Accountability landing, funding evidence and contact PoC
 
 Preserve the single Vote identity and stage a separate overlay on the

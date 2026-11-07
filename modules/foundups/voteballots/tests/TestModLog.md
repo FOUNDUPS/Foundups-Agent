@@ -2,6 +2,12 @@
 
 <!-- WSP 22: anti-vibecoding test inventory. NEWEST entries at TOP. -->
 
+## [2026-11-07] — Standalone Oversight publication
+
+Reused the existing release and worker tests to check the reviewed inventory,
+retired resource exclusion, local link resolution, transitions, and scoped
+offline navigation. The untouched archive remains verified before staging.
+
 ## [2026-11-07] — Accountability release and public interaction boundaries
 
 The cycle hint regression reproduced six failures across thirteen focused

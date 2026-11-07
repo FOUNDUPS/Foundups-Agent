@@ -1,5 +1,19 @@
 # Vote release accounting and launch checklist
 
+## Standalone Oversight staff site
+
+The Oversight publication now focuses on congressional accountability.
+The phone disclosure opens upward with labeled touch targets and readable
+type. Desktop retains the section sidebar. The landing presents the
+hub-and-spoke workflow, a sourced January 6 precedent, separate state
+authority and an attorney general transition snapshot that distinguishes
+provisional results from the serving office.
+
+The public build uses an explicit staff-material allowlist. It excludes
+exploratory research, product branding and internal control files. The
+155-file source archive and 13 mirror pairs remain the historical record.
+The Vote evidence and contact releases continue on their existing Site.
+
 ## Accountability integration
 
 The new source extends the two existing public Sites under one

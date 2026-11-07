@@ -6,12 +6,13 @@ FoundUp identity, token, governance authority or agent runtime.
 
 ## Source and publication
 
-The current public overlay is owned by `public/` and assembled by
-`scripts/build_public_release.py` into a new staging directory. The builder
-verifies the pinned archive, then replaces only root/web `index.html` and
-`sw.js` and adds the four mirrored public assets. The original snapshot
-below remains the immutable reference. Existing chapter, data and
-professional document bytes are preserved in the staged release.
+The current standalone accountability site is owned by `public/` and
+assembled by `scripts/build_public_release.py` into a new staging directory.
+The builder verifies the immutable archive, then publishes an explicit list
+of reviewed staff documents, source indexes and app assets. Original archive
+bytes and paths remain preserved in the repository. Exploratory records,
+workspace branding and internal execution materials are archival only.
+The root and `/web/` retain their existing install scopes.
 
 `site/` preserves **all 155 tracked public source files** from the clean Oversight
 Sites checkout at `c66d22afc5795874f4020661dcadfdd69d3ad129`. The import includes the
@@ -108,16 +109,18 @@ It prints only file/count/hash diagnostics, never file contents or credentials.
 
 For a subsequent change:
 
-1. For the public front door, edit `public/` and run
+1. Edit `public/` or the reviewed document projection and run
    `python -B modules/foundups/voteballots/oversight/scripts/build_public_release.py --output NEW_DIRECTORY`.
-   Preserve the historical `site/` snapshot. Preserve every route,
-   document/data/instruction asset, access boundary and root/`web/` mirror pair.
+   Preserve the historical `site/` snapshot and existing public professional
+   URLs. Review the whole allowlist, including root/`web/` entry paths.
 2. Run syntax, content, responsive and interaction checks appropriate to the
    change. Advance the public-shell cache version when shell assets change.
 3. Open the **same** Sites project with the Sites skill's supported source
    helper. Inspect and reconcile any remote changes with the canonical Vote
    source **before copying into the mirror**; preserve unique work on both sides.
 4. Synchronize only the reviewed public files into that reconciled checkout.
+   Remove retired public paths from the mirror after comparing the exact stage
+   inventory. A hidden link alone leaves its target publicly retrievable.
    Never copy `.git`, credentials or local state. Use the supported helper to
    validate, commit, push and package the exact mirror. Preserve `project_id`
    and the public audience; do not create a replacement project.
