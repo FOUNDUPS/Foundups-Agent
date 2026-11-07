@@ -1,5 +1,17 @@
 # LiveChat
 
+## Emoji questions (2026-11-07)
+
+An authorized hand-emoji trigger containing text routes the complete message
+through the existing channel-bound, assessed and reviewed reply pipeline. It
+uses the current private live-chat context and preserves the reviewed text to
+the sender. Missing/disabled models, expiry, cancellation, quality rejection
+and rate/diversity limits produce no canned answer. Bare emoji acknowledgments,
+explicit code commands and slash-command precedence retain their existing paths.
+Only an entire emoji-plus-1–4 message is a quiz answer; a quiz with no result
+does not fall through to general generation. This source change needs activation
+in a new daemon process before it affects an already-running chat session.
+
 ## Scoped comment-quality halt (2026-11-05)
 
 Recognized rejected reply text latches a comments-only incident in the existing
@@ -61,6 +73,18 @@ are discarded and busy shared generation/review locks reject immediately. See
 for cancellation limits and remaining live qualification.
 
 ## Current bounded live handoff
+
+Received text is captured through the existing ChatMemoryManager before reply
+filtering, command throttling or model generation. The immediate record is SQLite
+`chat_logs.db` in that manager's selected memory directory, carrying the session,
+author ID, display name, text, observed time and USER/MOD/OWNER role. Full and
+moderator-only text transcripts are exported by `end_session`; a per-stream JSON
+file is not the live capture authority. Inspect the selected runtime paths and
+new rows, not an old heartbeat or a send acknowledgement. In-memory message-ID
+deduplication is unchanged; this does not guarantee replay recovery or exactly-once
+capture across database failures or process restarts.
+The available initial API text batch is also captured, without triggering replies
+or old commands. Earlier text outside that provider batch is not reconstructed.
 
 PR841 preserves independent Chrome/Edge comment loops during a confirmed API live
 session while awaiting the matching channel's owned work before polling. The default

@@ -1,5 +1,31 @@
 # Livechat Module - ModLog
 
+## 2026-11-07 — Route emoji questions to reviewed contextual replies
+
+012's live test exposed a hard-coded "consciousness evolution" answer in the
+legacy agentic branch. Emoji-plus-question handling now reuses the existing
+ModelReplyRequest, receiving-context verification and bounded reviewed generator
+before legacy acknowledgments. The exact question and reviewed carrier survive;
+unavailable/rejected generation cannot become a canned success. Existing role,
+rate/diversity, slash-command and bare-emoji behavior is preserved. Whole-message
+quiz matching avoids consuming questions or falling through after an empty quiz.
+WSP 00/5/22/50/77/84/97. This is source work; live semantic delivery is unverified.
+
+## 2026-11-07 — Capture received text before reply processing
+
+WSP00/11/22/50/77/84/97. The trailing capture call skipped filtered messages,
+commands and processing/generation failures. Move it after message-ID deduplication
+and before downstream decisions, preserving the current store and moderator roles.
+Do not change ban/timeout handling, posting guards or cleanup ownership.
+The companion comment-worker change explicitly closes unrelated inherited handles
+when Selenium starts a Chrome/Edge service. A controlled Windows reproduction
+showed default inheritance withholding EOF after worker exit, and close_fds=True
+allowing EOF while the fixture service remained alive. This is mechanism evidence;
+source tests and live runtime recovery are reported separately.
+The initial API batch also used to discard every historical text item. Retain
+available text with a capture-only marker; core stores it before returning,
+without replaying commands, donation responses or ordinary reply triggers.
+
 ## 2026-11-05 — Persistent scoped comment-quality halt
 
 WSP00/11/22/50/62/77/84/97. Extend the existing STOP owner with one closed,

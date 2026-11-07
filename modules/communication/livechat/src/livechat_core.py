@@ -543,6 +543,12 @@ class LiveChatCore:
             author_id = author_details.get("channelId", "")
             is_moderator = author_details.get("isChatModerator", False)
             is_owner = author_details.get("isChatOwner", False)
+
+            # Capture received text before filters, commands or model failures
+            # can return early. Response eligibility must not decide history.
+            self._log_to_user_file(message)
+            if message.get("_capture_only") is True:
+                return
             
             # Log the message
             logger.debug(f"[{author_name}]: {display_message}")
@@ -701,9 +707,6 @@ class LiveChatCore:
                 if display_message.startswith('/'):
                     logger.warning(f"⚠️ NO RESPONSE for command: '{display_message}' from {author_name}")
                     logger.warning(f"⚠️ Processed flags: has_whack={processed.get('has_whack_command')}, has_trigger={processed.get('has_trigger')}")
-            
-            # Log to user file
-            self._log_to_user_file(message)
             
         except Exception as e:
             logger.error(f"Error processing message: {e}")

@@ -1,5 +1,13 @@
 # video_comments Tests
 
+## 2026-11-07 driver handle isolation
+
+`test_driver_handle_inheritance.py` compiles the actual connection method and
+uses real Chrome/Edge Options and Service objects with inert WebDriver/Popen
+boundaries. Both cases verify the existing debugger address and propagation of
+`close_fds=True` through Selenium's actual service launch. No browser is started.
+These two cases and the livechat capture tests run in the Windows/Ubuntu CI matrix.
+
 ## 2026-11-05 visual observation truth
 
 `test_reply_visual_evidence.py` uses complete production definitions and private

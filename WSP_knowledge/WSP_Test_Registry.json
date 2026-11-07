@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1815,
+  "total_tests": 1818,
   "quarantined_tests": 258,
   "tests": [
     {
@@ -5919,6 +5919,19 @@
       "description": "Tests for PHASE 2 (VIDEO INDEXING) gating in AutoModeratorDAE._browser_engagement_loop.\n\nSlice: EDGE_LOOP_INDEXING_PHASE1\nWSP refs: WSP 5 (coverage), WSP 6 (audit), WSP 84 (reuse run_video_indexing_cycle).\n\nContext\n-------\nThe per-browser engagement loop runs:\n    PHASE 1 (comments) -> PHASE 2 (video indexing) -> PHASE 3 (scheduling) -> PHASE 4 (LinkedIn)\n\nBefore this slice, PHASE 2 was gated Chrome-only:\n\n    if browser_name == \"chrome\" and os.getenv(\"YT_VIDEO_INDEXING_ENABLED\", ...):\n\nSo the E"
     },
     {
+      "id": "test::modules::communication::livechat::tests::test_capture_before_processing",
+      "path": "modules/communication/livechat/tests/test_capture_before_processing.py",
+      "owner": "modules/communication/livechat",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-livechat-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline receive-path regression tests; no browser, provider or model imports."
+    },
+    {
       "id": "test::modules::communication::livechat::tests::test_channel_operations",
       "path": "modules/communication/livechat/tests/test_channel_operations.py",
       "owner": "modules/communication/livechat",
@@ -6063,6 +6076,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Test runner for all YouTube ecosystem components"
+    },
+    {
+      "id": "test::modules::communication::livechat::tests::test_emoji_question_routing",
+      "path": "modules/communication/livechat/tests/test_emoji_question_routing.py",
+      "owner": "modules/communication/livechat",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-livechat-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline actual-method controls for emoji questions and reviewed reply identity."
     },
     {
       "id": "test::modules::communication::livechat::tests::test_emoji_responses",
@@ -6258,7 +6284,7 @@
       "path": "modules/communication/livechat/tests/test_livechat_auth_handling.py",
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
-      "shard_id": "modules-communication-livechat-unit-part-01",
+      "shard_id": "modules-communication-livechat-unit-part-02",
       "capabilities": [
         "network"
       ],
@@ -6273,7 +6299,7 @@
       "path": "modules/communication/livechat/tests/test_livechat_emoji_triggers.py",
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
-      "shard_id": "modules-communication-livechat-unit-part-01",
+      "shard_id": "modules-communication-livechat-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -6766,7 +6792,7 @@
       "path": "modules/communication/livechat/tests/test_slash_commands.py",
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
-      "shard_id": "modules-communication-livechat-unit-part-02",
+      "shard_id": "modules-communication-livechat-unit-part-03",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -6781,7 +6807,7 @@
       "path": "modules/communication/livechat/tests/test_social_media_posting.py",
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
-      "shard_id": "modules-communication-livechat-unit-part-02",
+      "shard_id": "modules-communication-livechat-unit-part-03",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -13833,6 +13859,21 @@
       "description": "Local broadcast/context reader contracts; every state file is temporary."
     },
     {
+      "id": "test::modules::communication::video_comments::tests::test_driver_handle_inheritance",
+      "path": "modules/communication/video_comments/tests/test_driver_handle_inheritance.py",
+      "owner": "modules/communication/video_comments",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
+      "capabilities": [
+        "browser"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Exercise both actual connect branches without starting a browser or model."
+    },
+    {
       "id": "test::modules::communication::video_comments::tests::test_inbox_completion_evidence",
       "path": "modules/communication/video_comments/tests/test_inbox_completion_evidence.py",
       "owner": "modules/communication/video_comments",
@@ -13911,7 +13952,7 @@
       "path": "modules/communication/video_comments/tests/test_post_comment.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit-part-01",
+      "shard_id": "modules-communication-video-comments-unit-part-02",
       "capabilities": [
         "import_path_mutation",
         "logging_configuration"

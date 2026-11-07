@@ -1,5 +1,32 @@
 # LiveChat Module Test Suite
 
+## 2026-11-07 — Emoji questions use the existing reviewed reply owner
+
+`test_emoji_question_routing.py` compiles the actual processor methods and uses
+the real ModelReplyRequest/reviewed-string definitions. Its 27 cases cover full
+question/context/author preservation, exact returned carrier identity, emoji
+positions/selectors/skin tones, permission and rate gates, unavailable/changed
+context, bare emoji, whole-message quizzes, slash priority and explicit code
+commands. Model execution is inert. The existing guarded routing and semantic
+assessment selections separately test bounded inference and provenance rejection.
+
+## 2026-11-07 — Capture before response processing
+
+`test_capture_before_processing.py` runs actual core/poller method definitions
+with the existing ChatMemoryManager and a disposable SQLite database. It covers
+USER/MOD/OWNER roles, filters, commands, duplicate message IDs, distinct IDs with
+repeated commands, router handling, processor/model failures and capture-only
+initial history. Initial text, Super Chat and membership text are saved without
+replaying their actions; ban/timeout routing remains unchanged. No provider,
+browser or model is invoked. This proves received-message capture, not complete
+stream backfill or durable exactly-once ingestion across failures/restarts.
+
+Positive processing and schema-command controls ensure capture does not suppress
+current actions. Historical and subsequent live moderation events have separate
+poller assertions. The two new capture/driver files select 37 cases. Together
+with the unchanged 101 lifecycle cases, the Windows selection passes 138 cases. CI runs
+the new selection on Windows and Ubuntu with pinned Selenium dependencies.
+
 ## 2026-11-05 — Scoped quality STOP controls
 
 `test_comment_quality_stop.py` selects68 cases against actual owner definitions

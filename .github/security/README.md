@@ -1,3 +1,19 @@
+## Live-chat capture and emoji-question metadata review — 2026-11-07
+
+PR2314 head `86183e654` regenerated four runtime source digests. Full-tree
+security job128260245645 reports 39 new whole-file bindings for unchanged
+public source-path/SHA rows (37 generic-api-key and two discord-api-token).
+Independent review verifies every referenced committed source digest, unchanged
+row/context and prior exact approval against base `746ff5b76`; the CI merge
+manifest is identical. Append only those 39 fingerprints, preserving all 3,990
+ordered records and other ledger fields (4,029 total). No scanner rule, gate,
+path exclusion, fingerprint formula, manifest membership or size bound changes.
+Independent review receipt SHA256:
+`a83f4cde63648cc0adf96fc9d31c79231f1fd550a5af86dada2a18d2d7d2aa3a`.
+Twelve existing security-boundary tests pass. Fresh final-tree/history and
+hosted checks remain required; this metadata review is not live-chat delivery
+or model-quality evidence. WSP 5, 22, 50, 71 and 97 apply.
+
 ## WRE readiness manifest metadata review — 2026-11-06
 
 The full-tree scanner at de3d85e5 reports 39 new whole-file bindings after

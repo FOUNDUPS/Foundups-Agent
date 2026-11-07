@@ -1,5 +1,33 @@
 # LiveChat Module Interface
 
+## Emoji question routing (2026-11-07)
+
+`MessageProcessor.generate_response` routes permitted hand-emoji-plus-text
+messages through `model_reply_request` and `_resolve_model_command`, preserving
+the original text, captured author ID/role, receiving channel and stream title.
+The existing bounded `_await_intelligent_reply` validates the exact reviewed
+payload and theme; its returned carrier is not reformatted or prefixed here.
+Question failure returns `None` without entering the legacy template path.
+Existing rate/diversity and sender throttles remain in force. Exact whole-message
+quiz answers (including variation selectors/skin modifiers) return their handler
+result directly; bare emoji and explicit code-command handling stay separate.
+
+## Capture before response selection (2026-11-07)
+
+`LiveChatCore.process_message` calls the existing `_log_to_user_file` once for a
+new received text-message ID, before schema handling, routing, filtering, command
+throttling and reply generation. It retains author identity and USER/MOD/OWNER
+role through ChatMemoryManager's immediate SQLite storage. Duplicate IDs retain
+their previous in-memory suppression. Ban/timeout events keep their separate path.
+No database schema or public posting policy changes. Existing storage-error and
+cross-restart deduplication limitations remain; capture is not reply delivery.
+
+The poller's available first batch retains text-bearing provider items with the
+internal boolean `_capture_only=True`. Core captures these and returns before
+schema actions, command processing and replies. Historical moderation events keep
+their existing skip policy. This only preserves history supplied by the API;
+it does not recover an entire missed stream or replay old commands/donations.
+
 ## Existing STOP owner: comments-quality scope (2026-11-05)
 
 `automation_gates.stop_active()` retains its any-STOP behavior. Explicit

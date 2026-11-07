@@ -1,5 +1,44 @@
 # TestModLog
 
+## 2026-11-07 — Reject canned success for emoji questions
+
+012 reported a live canned answer rather than an answer to the question. The
+actual-method routing selection reproduced it: RED15 failures/5 useful positives,
+then20 passed. Independent review added whole-message quiz and no-fallthrough
+heldouts: RED3 failures/24 positives. The final27 preserve the existing role,
+command, context and reviewed-carrier boundaries. These tests stub the bounded
+model call; separate existing semantic and guarded-routing suites cover that
+owner. No local test receipt establishes live semantic delivery.
+
+Final expanded Windows selection:277 pytest tests and12 subtests passed, with
+26 existing datetime.utcnow warnings and no failures/errors/skips. The corrected
+slash fixture additionally passes all27 emoji cases using the actual command
+detector. The unchanged guarded routing selection passes88 cases/zero issues.
+Backend manifest generation changes only the four modified runtime owner hashes;
+the exact JS/test digest pins are refreshed and all8 independent packaging tests
+pass. Earlier Node-bound fixture failures came from the sealed runner's missing
+Node path; the existing executable was explicitly supplied without relaxing the
+routing guard. Registry:1818 entries/258 quarantined.
+
+## 2026-11-07 — Preserve received chat before response decisions
+
+Actual-method/SQLite coverage verifies role and session persistence before
+filters, command throttles, router consumption and processor/model exceptions.
+Duplicate IDs are not recaptured within the current core instance. Different IDs
+with the same command remain separate messages. Available initial API text is
+captured without invoking response/command processing; event routing is retained.
+
+Initial capture/driver RED: 17 assertion failures. After repair and expanding
+heldouts, the initial-history layer produced six expected failures with 23 useful
+positives. Independent review required positive processing/send call assertions,
+historical/current schema commands and first-poll/live moderation controls.
+Final source selection: 138 passed, zero failures/errors/skips, with
+26 existing datetime.utcnow deprecation warnings (37 new capture/driver cases
+plus 101 unchanged lifecycle cases). A separate finite Windows Selenium process
+experiment reproduced inherited handles delaying EOF and verified close_fds
+releases it; it is mechanism evidence, not additional suite cases. No browser,
+model or public-post test was part of this offline selection.
+
 ## 2026-11-05 — Scoped persistent quality halt and truthful parent outcome
 
 Test-first private owner controls: original44 RED43 assertion failures/1 useful
