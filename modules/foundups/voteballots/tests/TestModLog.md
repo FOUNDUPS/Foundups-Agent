@@ -2,6 +2,12 @@
 
 <!-- WSP 22: anti-vibecoding test inventory. NEWEST entries at TOP. -->
 
+## [2026-11-07] — Oversight landing and DOJ bottleneck
+
+The release test checks the three landing sections in order and links the
+verified leadership and referral sources to the machine-readable index. The
+worker regression follows the new shell version for offline navigation.
+
 ## [2026-11-07] — Oversight legislative roadmap and contact
 
 Expanded existing release and worker tests for the two new routes, exact shared
