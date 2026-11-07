@@ -3,9 +3,9 @@
 import json
 from html.parser import HTMLParser
 from pathlib import Path
+from posixpath import dirname, join, normpath
 import subprocess
 import sys
-from urllib.parse import urljoin, urlsplit
 
 
 OVERSIGHT = Path(__file__).resolve().parents[1] / "oversight"
@@ -47,10 +47,12 @@ def test_public_release_excludes_archive_operations_and_keeps_staff_routes(tmp_p
             assert '<th scope="col">' in content
         page = "/" + html.relative_to(dist).as_posix()
         for target in parser.targets:
-            resolved = urlsplit(urljoin("https://oversight.test" + page, target))
-            if resolved.hostname == "oversight.test":
-                local = dist / resolved.path.lstrip("/")
-                assert local.is_file() or (local / "index.html").is_file(), (page, target)
+            if target.startswith(("https://", "http://", "mailto:")):
+                continue
+            path = target.split("#", 1)[0].split("?", 1)[0]
+            resolved = normpath(join(dirname(page), path)) if path else page
+            local = dist / resolved.lstrip("/")
+            assert local.is_file() or (local / "index.html").is_file(), (page, target)
 
     data = json.loads((output / "dist/accountability.json").read_text("utf-8"))
     assert "foundup_id" not in data
