@@ -1,0 +1,297 @@
+{
+  "investigation": {
+    "title": "Investigation map",
+    "summary": "Start with a question about a decision, transaction, or gap in oversight. Follow the records to the people with documented roles and test what the evidence supports.",
+    "parent": "overview",
+    "facts": [
+      ["What we know", "Every claim needs its own source and status. A record can verify a payment, a date, or that someone made a statement."],
+      ["Who can act", "Public researchers can examine public records. Any official request, compulsory process, or release needs its own authorized decision-maker."]
+    ],
+    "links": [["Five-stage roadmap", "/legislative-roadmap"]],
+    "choices": [
+      ["investigation-question", "Frame a bounded legislative question before collecting records."],
+      ["review", "Open shared evidence and legal review when the record is ready to assess."],
+      ["clemency-example", "Use a fictional payment to test the difference between a transaction, a claim of access, and an exchange."],
+      ["trading-example", "Use a fictional trade to test the link between a decision and an order."],
+      ["contracting-example", "Use a fictional procurement file to test whether an intermediary performed the work it billed for."]
+    ]
+  },
+  "investigation-question": {
+    "title": "Define the question",
+    "summary": "Name the action or gap that warrants review, the dates, and the legislative decision the inquiry could inform.",
+    "parent": "investigation",
+    "facts": [
+      ["Start here", "What reporting rule, selection procedure, or conflict safeguard might have failed? Identify the best lawful alternative explanation."],
+      ["Who can act", "Committee counsel checks jurisdiction, scope, and legislative purpose before formal inquiry or compulsory collection."]
+    ],
+    "links": [["Roadmap: scope the inquiry", "/legislative-roadmap#scope-inquiry"], ["Scope memo", "/templates/appendix-b-legislative-purpose.html"]],
+    "choices": [
+      ["investigation-records", "The question defines which records can answer it and keeps collection within scope."],
+      ["authority", "Check the committee's authority and approval rules before making an official request."]
+    ]
+  },
+  "investigation-records": {
+    "title": "Find and preserve records",
+    "summary": "Record the issuer, date, exact location, original format, and any limits on use. Preserve provenance and distinguish a statement in a record from the event it describes.",
+    "parent": "investigation-question",
+    "facts": [
+      ["What is missing", "Identify the smallest record request that would close a material gap. Check whether a public source or voluntary response is sufficient."],
+      ["Who can act", "The designated custodian holds records under the office's rules. Counsel and the authorized committee decision-maker review any compulsory request or sharing."]
+    ],
+    "links": [["Scoped evidence request", "/templates/appendix-c-subpoena-and-wave-one.html"], ["Privilege and litigation guide", "/05-litigation-and-privilege.html"]],
+    "choices": [["follow-money", "Trace a transaction only when a record identifies an actual event, amount, date, or counterparty."]]
+  },
+  "follow-money": {
+    "title": "Follow the money",
+    "summary": "Trace the source, intermediary, account or entity, recipient, and any subsequent transfer. Treat every connection as a separate claim.",
+    "parent": "investigation-records",
+    "facts": [
+      ["Per connection", "Show the supporting record, date, amount, parties, contrary evidence, and VERIFIED, INFERRED, or UNKNOWN status."],
+      ["Stop point", "If the next transfer lacks support, mark the link Not established. Matching amounts, nearby dates, or a shared bank can suggest a check but cannot fill a gap."]
+    ],
+    "links": [["Financial evidence methods", "/03-financial-forensics.html"]],
+    "choices": [
+      ["investigation-custodian", "Ask what the bank can document, which records are held, and what authority any further request needs."],
+      ["investigation-entities", "Resolve legal names, ownership, and control before attributing a benefit."],
+      ["clemency-source", "Inspect a fictional transfer one link at a time, starting at its documented source."],
+      ["decisions", "Bring supported links, contrary records, and documented gaps to the authorized decision-makers."]
+    ]
+  },
+  "investigation-custodian": {
+    "title": "Bank as record custodian",
+    "summary": "A bank may hold account-opening, payment, and settlement records. Treat it as a record custodian unless separate evidence establishes another role.",
+    "parent": "follow-money",
+    "facts": [
+      ["Already held", "Inventory the lawfully available payment confirmation and any approved statement excerpt. Mark missing dates, fields, or custody events."],
+      ["What is missing", "A posting record may confirm the destination account. The purpose of the payment may require separate agreements, invoices, or testimony."],
+      ["Who may ask", "Counsel checks the authorized committee's powers, financial privacy, and scope before any request. The public map grants no access to bank data."]
+    ],
+    "links": [["Financial records guide", "/03-financial-forensics.html"], ["Scoped evidence request", "/templates/appendix-c-subpoena-and-wave-one.html"]],
+    "choices": [["authority", "The governing rules and applicable privacy restrictions determine the authorized records route."]]
+  },
+  "investigation-entities": {
+    "title": "Resolve entities and accounts",
+    "summary": "Match an entity through its legal name, jurisdiction, dates, and reliable records. Identify separately who holds an account, controls an entity, or receives an economic benefit.",
+    "parent": "follow-money",
+    "facts": [["Competing explanation", "Similar names, shared addresses, and routine registered-agent services can connect unrelated entities in a search result. Verify each link before relying on it."]],
+    "choices": [["investigation-roles", "A person enters the map when a document or corroborated account establishes a relevant role."]]
+  },
+  "investigation-roles": {
+    "title": "Identify documented roles",
+    "summary": "Label people by their role in the records, such as custodian, intermediary, recipient, witness, or decision-maker.",
+    "parent": "investigation-entities",
+    "facts": [["What is missing", "Distinguish a signature from authority to decide, an account posting from economic benefit, and a witness account from corroborated fact."]],
+    "choices": [
+      ["test-evidence", "Compare each proposed finding with the supporting record, adverse evidence, and credible alternatives."],
+      ["witnesses", "Counsel evaluates the authority and safeguards for any witness approach."]
+    ]
+  },
+  "test-evidence": {
+    "title": "Test the evidence",
+    "summary": "Review the strongest contrary records and lawful explanations with a second reviewer. Narrow the finding to what the sources support.",
+    "parent": "review",
+    "facts": [
+      ["VERIFIED", "The identified original record supports the stated fact at a specific location."],
+      ["INFERRED", "The records support a stated interpretation, with the reasoning and alternatives visible."],
+      ["UNKNOWN", "The record cannot establish the claim. Name the gap or the evidence that could resolve it."]
+    ],
+    "links": [["Roadmap: build and challenge the record", "/legislative-roadmap#build-record"], ["Evidence review checklist", "/14-worker-review-and-quality.html"], ["Evidence report template", "/templates/evidentiary-report.html"]],
+    "choices": [
+      ["review", "Record how the review resolved each contradiction and which questions remain open."],
+      ["decisions", "Present the independent review and counsel's handling decisions before seeking approval for action."]
+    ]
+  },
+  "review": {
+    "title": "Evidence and legal review",
+    "summary": "Bring source-backed findings to independent review and counsel. Separate collection, access, and release decisions for each record.",
+    "parent": "investigation",
+    "facts": [
+      ["Handling", "Record the custodian, allowed users, handling restriction, independent source, and release status. Keep restricted originals in the authorized office's secure system."],
+      ["Sharing", "A shared map can show why an item is withheld. Counsel and the authorized office decide what may be released, to whom, and for what use."]
+    ],
+    "links": [["Shared hub charter", "/templates/central-hub-charter.html"], ["Evidence report", "/templates/evidentiary-report.html"]],
+    "choices": [
+      ["follow-money", "The reviewed record determines which payments can be traced and which connections remain unestablished."],
+      ["test-evidence", "Independent review checks provenance, contrary evidence, and what each source can establish."],
+      ["witnesses", "Separate voluntary contact, statutory immunity, and clemency before choosing a lawful witness mechanism."],
+      ["coordination", "Early coordination can establish authorized contacts. Any referral still needs state-law jurisdiction and a separate disclosure decision."],
+      ["decisions", "The approved evidentiary record is the basis for separate legislative and state-referral decisions."],
+      ["authority", "Verify which institution owns the decision and which approvals apply."]
+    ]
+  },
+  "clemency-example": {
+    "title": "Did a fee buy clemency access?",
+    "summary": "An applicant's business paid a consultant before a favorable clemency decision. What did the consultant deliver, and is there evidence of access or an exchange?",
+    "parent": "investigation",
+    "fictional": true,
+    "facts": [["Question", "Compare the payment, the consultant's representations, the official timeline, and the services delivered before judging their relationship."]],
+    "choices": [
+      ["clemency-source", "Start with the original payment record and follow each documented link separately."],
+      ["clemency-access", "Review the consultant's documented representation as a separate question from the money trail."]
+    ]
+  },
+  "clemency-source": {
+    "title": "Source: applicant's business",
+    "summary": "The business's authorized statement excerpt shows a USD 12,000 debit on April 10, 2026.",
+    "parent": "clemency-example",
+    "fictional": true,
+    "facts": [
+      ["VERIFIED · Original record", "Fictional bank statement A-01, April 10, line 8. The debit matches a USD 12,000 transfer confirmation."],
+      ["Counterevidence", "The confirmation references a consulting invoice. The payment alone establishes neither the actual service nor its purpose."]
+    ],
+    "choices": [["clemency-intermediary", "April 10, 2026 · USD 12,000 · VERIFIED. Fictional transfer confirmation A-02 names the consultant as payee. Invoice A-03 describes records preparation, which remains to be tested."]],
+    "connection_evidence": {"clemency-intermediary": [
+      ["Fictional record A-02 · Posted transfer", "April 10, 2026. Sender: applicant. Payee: consulting firm. USD 12,000. Payment reference C-0410. Status: posted."],
+      ["Counterevidence and limit", "Invoice A-03 describes records preparation. The transfer record cannot identify the purpose of the payment or establish access to a decision-maker."]
+    ]}
+  },
+  "clemency-intermediary": {
+    "title": "Intermediary: consulting firm",
+    "summary": "The consultant's receipt names the firm's operating account. Its invoice describes a records review and application preparation.",
+    "parent": "clemency-source",
+    "fictional": true,
+    "facts": [
+      ["VERIFIED · Original record", "Fictional invoice A-03, April 8, item 1, and receipt A-04, April 10, line 2. These establish what was billed and acknowledged."],
+      ["Counterevidence", "A later sales message describes possible access. The billing documents and the sales claim have different evidentiary uses."]
+    ],
+    "choices": [["clemency-account", "April 10, 2026 · USD 12,000 · VERIFIED. The fictional authorized deposit excerpt A-05 matches the receipt by payment reference. The deposit alone does not establish anyone's purpose."]],
+    "connection_evidence": {"clemency-account": [
+      ["Fictional record A-05 · Bank excerpt", "April 10, 2026. Account holder: consulting firm. Credit USD 12,000. Reference C-0410. Credit line 5."],
+      ["Counterevidence and limit", "The consulting firm's receipt matches the payment reference. Other credits appear in the same account. Later payments need their own evidence."]
+    ]}
+  },
+  "clemency-account": {
+    "title": "Account: firm operating funds",
+    "summary": "An authorized bank excerpt shows the deposit into the firm's operating account. Other receipts in the same account complicate attribution of later payments.",
+    "parent": "clemency-intermediary",
+    "fictional": true,
+    "facts": [
+      ["VERIFIED · Original record", "Fictional bank excerpt A-05, April 10, credit line 5. The account holder name matches the consulting firm's receipt."],
+      ["UNKNOWN · Gap", "The common account balance cannot identify which incoming funds paid a later invoice."]
+    ],
+    "choices": [["clemency-recipient", "April 14, 2026 · USD 3,500 · VERIFIED outgoing payment from the firm's account in A-06. Attribution of that payment to the applicant's deposit is UNKNOWN because funds were pooled."]],
+    "connection_evidence": {"clemency-recipient": [
+      ["Fictional record A-06 · Wire excerpt", "April 14, 2026. Sender: consulting firm operating account. Payee: records specialist. USD 3,500. Reference: specialist invoice A-07."],
+      ["Counterevidence and limit", "The dated delivery receipt corroborates the specialist's work. Account balances do not establish which incoming funds paid this invoice."]
+    ]}
+  },
+  "clemency-recipient": {
+    "title": "Recipient: records specialist",
+    "summary": "A USD 3,500 payment went to a specialist that supplied records research. This establishes the account recipient and supports an ordinary-services explanation.",
+    "parent": "clemency-account",
+    "fictional": true,
+    "facts": [
+      ["VERIFIED · Original record", "Fictional wire A-06, April 14, and provider invoice A-07, April 13, identify the payee and USD 3,500 amount."],
+      ["Counterevidence", "A dated delivery receipt and completed work product corroborate the services. The file contains no subsequent transfer record from the specialist."]
+    ],
+    "choices": [["clemency-transfer-gap", "Subsequent transfer · UNKNOWN date, amount, and recipient. The available records end at the specialist. No transfer to a decision-maker is established."]],
+    "connection_evidence": {"clemency-transfer-gap": [
+      ["Last supported record", "Fictional record A-06 establishes only the consulting firm's payment to the specialist on April 14, 2026."],
+      ["Not established", "There is no supporting record for a subsequent transfer. Its date, amount and recipient remain unknown."]
+    ]}
+  },
+  "clemency-transfer-gap": {
+    "title": "Subsequent transfer: not established",
+    "summary": "The available records end at the specialist. There is no supported connection from the specialist to an official or decision-maker.",
+    "parent": "clemency-recipient",
+    "fictional": true,
+    "facts": [["UNKNOWN · Stop here", "No authenticated transfer, date, amount, or recipient is available for a further step. The ledger stops here unless lawfully obtained new records establish a link."]],
+    "choices": [["clemency-access", "A separate authenticated message can be tested as a claim of influence. It supplies no missing transaction record."]]
+  },
+  "clemency-access": {
+    "title": "Test the claim of access",
+    "summary": "The consultant wrote that they could get the applicant's file in front of a decision-maker. The message verifies the statement and leaves actual access unknown.",
+    "parent": "clemency-example",
+    "fictional": true,
+    "facts": [
+      ["VERIFIED · Original record", "Fictional email A-08, April 15, body paragraph 2, contains the representation."],
+      ["Counterevidence", "Routine submission instructions in A-09 offer a lawful route for the file. No meeting log or corroborated witness places the consultant with the decision-maker."]
+    ],
+    "choices": [["clemency-decision", "Compare the recorded decision date to the separate payment and access records. The timing alone cannot establish a causal link."]]
+  },
+  "clemency-decision": {
+    "title": "A decision follows",
+    "summary": "A fictional public decision register records approval on May 18, 2026. The sequence warrants checking the review process and any communications.",
+    "parent": "clemency-access",
+    "fictional": true,
+    "facts": [
+      ["VERIFIED · Original record", "Fictional decision register A-10, May 18, entry 14. It records the outcome and date."],
+      ["Counterevidence", "A March 28 receipt shows the application was in the ordinary review queue before the consulting payment. The reason for the decision is UNKNOWN."]
+    ],
+    "choices": [["clemency-test", "Test communications, agreements, services performed, and routine review before describing any exchange."]]
+  },
+  "clemency-test": {
+    "title": "Challenge the exchange theory",
+    "summary": "Compare the consultant's agreement and work product with submission logs and authorized communications. Seek contrary evidence and independent corroboration.",
+    "parent": "clemency-decision",
+    "fictional": true,
+    "facts": [["INFERRED · Ordinary services", "The agreement, records delivery and separate invoice support a legitimate services explanation. Actual access, an exchange, and a transfer to any official remain UNKNOWN."]],
+    "choices": [["clemency-finding", "The second reviewer and counsel separate documented payments from unsupported claims and decide whether any release or next step is authorized."]]
+  },
+  "clemency-finding": {
+    "title": "Finding: a narrower record",
+    "summary": "The record establishes payment and completed services. It is insufficient to establish purchased access, an exchange, or a transfer to an official.",
+    "parent": "clemency-test",
+    "fictional": true,
+    "facts": [
+      ["Congressional option", "Consider a disclosure-policy review if the verified records expose a systemic gap."],
+      ["State referral", "No applicable state-law basis or competent recipient is established on these facts. Record a hold decision."]
+    ],
+    "choices": [["review", "Preserve the narrower finding and the unresolved claims for independent review and correction."]]
+  },
+  "trading-example": {
+    "title": "Did a nonpublic decision inform a trade?",
+    "summary": "A fund bought shares before an agency announcement. Who knew what and when, and when was the order decided?",
+    "parent": "investigation",
+    "fictional": true,
+    "choices": [["trading-records", "Reconcile order entry and execution times with disclosure times and the information actually available to the trader."]]
+  },
+  "trading-records": {
+    "title": "Compare order and disclosure records",
+    "summary": "Fictional confirmation B-01 shows a USD 48,000 buy at 10:13 UTC on June 9, 2026. Agency bulletin B-02 was public at 14:00 UTC that day.",
+    "parent": "trading-example",
+    "fictional": true,
+    "facts": [
+      ["VERIFIED", "The trade and publication timestamps are in separate original records."],
+      ["Counterevidence", "Fictional broker instruction B-03 was logged June 3. Its conditions match an automated execution triggered by a publicly available price."]
+    ],
+    "choices": [["trading-finding", "Check whether the existing order could have been changed and whether any reliable record connects the trader to nonpublic information."]]
+  },
+  "trading-finding": {
+    "title": "Finding: ordinary execution is supported",
+    "summary": "An independently timestamped broker audit supports execution under a pre-existing instruction. The record supplies no evidence that the trader received or acted on nonpublic information.",
+    "parent": "trading-records",
+    "fictional": true,
+    "facts": [["Disposition", "The evidence supports a lawful explanation. Close the lead on this record and retain the audit trail for correction if new evidence appears."]],
+    "choices": [["review", "Record the competing explanation and why it fits the independently verified records."]]
+  },
+  "contracting-example": {
+    "title": "What did a contract intermediary deliver?",
+    "summary": "An agency paid a contractor that used an intermediary. Can the agency verify services, prices, and the award decision?",
+    "parent": "investigation",
+    "fictional": true,
+    "choices": [["contracting-records", "Compare the award file, invoice, delivery, and agency acceptance before judging the arrangement."]]
+  },
+  "contracting-records": {
+    "title": "Compare award, invoice, and delivery",
+    "summary": "Fictional award C-01 allows subcontracting. Agency payment C-02 shows USD 80,000 on July 17, 2026. Deliverables and invoices support most of the payment.",
+    "parent": "contracting-example",
+    "fictional": true,
+    "facts": [
+      ["VERIFIED", "Payment C-02, entry 4, and acceptance record C-03 identify the award and dates. A USD 8,000 milestone line lacks a dated approval in the supplied file."],
+      ["Counterevidence", "A system-migration log identifies a plausible missing-record explanation. Other dated work products support performance under the contract."]
+    ],
+    "choices": [["contracting-finding", "Check the original approval record and payment terms. Keep any finding within the documented exception if the missing item cannot be recovered."]]
+  },
+  "contracting-finding": {
+    "title": "Finding: a documentation gap",
+    "summary": "The file does not verify milestone approval before payment. Subcontracting itself was permitted. The missing record cannot establish fraud, an improper award, or who caused the gap.",
+    "parent": "contracting-records",
+    "fictional": true,
+    "facts": [
+      ["Next decision", "An authorized committee may ask about record retention or consider reporting changes. Track any correction when the original file is found."],
+      ["State referral", "The evidence establishes no separate state-law basis on the current record."]
+    ],
+    "choices": [["congressional-action", "A supported records-control gap can inform authorized legislative follow-up without any referral."]]
+  }
+}

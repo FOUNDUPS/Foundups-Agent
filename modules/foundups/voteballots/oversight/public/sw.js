@@ -2,16 +2,18 @@
 
 const scope = new URL(self.registration.scope);
 const scopeSuffix = ':' + scope.pathname;
-const CACHE = 'oversight-public-shell-v0.9.0' + scopeSuffix;
+const CACHE = 'oversight-public-shell-v0.10.0' + scopeSuffix;
 const resolve = (path) => new URL(path, scope).href;
 const aliases = new Map([
   [resolve('index.html'), scope.href],
   [resolve('state-ag-transitions.html'), resolve('state-ag-transitions')],
   [resolve('legislative-roadmap.html'), resolve('legislative-roadmap')],
   [resolve('contact.html'), resolve('contact')],
+  [resolve('explore.html'), resolve('explore')],
 ]);
 const shell = new Set([
-  './', 'state-ag-transitions', 'legislative-roadmap', 'contact', 'overview.css', 'overview.js',
+  './', 'state-ag-transitions', 'legislative-roadmap', 'contact', 'explore', 'overview.css', 'overview.js',
+  'map.css', 'map.js', 'map-data.json',
   'contact.css', 'contact.js', 'contact-queue.mjs', 'contact-roster.json', 'states-location.mjs',
   'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon.svg',

@@ -11,6 +11,7 @@ from pathlib import Path
 import re
 from urllib.parse import urlsplit
 
+from build_interactive_map import diagram, entry_links, load_map, render_map
 from verify_snapshot import safe_relative, verify
 
 
@@ -21,17 +22,19 @@ DIRECTORY = WORKSTREAM.parent / "web"
 PUBLIC_ASSETS = (
     "overview.css", "overview.js", "sw.js", "accountability.json", "llms.txt",
     "state-ag-transitions.json", "contact.css", "contact.js", "states-boundaries.json", "states-location.mjs",
+    "map.css", "map.js",
 )
 DIRECTORY_ASSETS = ("contact-queue.mjs", "contact-roster.json")
 APP_ASSETS = ("manifest.webmanifest", "icons/icon.svg", "icons/icon-192.png", "icons/icon-512.png")
 PAGES = {
+    "explore": "Oversight maps",
     "legislative-roadmap": "Legislative roadmap",
     "contact": "Find and call your senators",
     "state-ag-transitions": "Attorney general transitions",
 }
 SECTIONS = (
-    ("home", "Accountability"), ("legislative-roadmap", PAGES["legislative-roadmap"]),
-    ("contact", "Call your senators"), ("hub", "Hub and spokes"), ("house", "House readiness"),
+    ("home", "Accountability"), ("explore", PAGES["explore"]), ("legislative-roadmap", PAGES["legislative-roadmap"]),
+    ("contact", "Call your senators"), ("house", "House readiness"),
     ("senate", "Senate authority"), ("states", "State handoff"),
     ("state-ag-transitions", PAGES["state-ag-transitions"]), ("january-6", "January 6 record"),
     ("library", "Staff library"),
@@ -90,20 +93,17 @@ def links(items: dict[str, str]) -> str:
     return "".join(f'<li><a href="/{path}">{escape(title)}</a></li>' for path, title in items.items())
 
 
-def render(title: str, content: str, *, home: bool = False, asset_base: str = "./", contact: bool = False) -> bytes:
+def render(title: str, content: str, *, home: bool = False, asset_base: str = "./", styles=(), scripts=()) -> bytes:
     nav = []
     for id_, label in SECTIONS:
         href = asset_base + id_ if id_ in PAGES else ("" if home else asset_base) + "#" + id_
         nav.append(f'<a href="{href}" data-section="{id_}">{escape(label)}</a>')
-    page_assets = (
-        f'<link rel="stylesheet" href="{asset_base}contact.css">\n'
-        f'  <script type="module" src="{asset_base}contact.js"></script>'
-        if contact else ""
-    )
+    page_assets = [f'<link rel="stylesheet" href="{asset_base}{name}">' for name in styles]
+    page_assets.extend(f'<script type="module" src="{asset_base}{name}"></script>' for name in scripts)
     page = source("index.html")
     for key, value in {
         "TITLE": escape(title), "NAV_LINKS": "\n".join(nav), "CONTENT": content, "ASSET_BASE": asset_base,
-        "PAGE_ASSETS": page_assets,
+        "PAGE_ASSETS": "\n  ".join(page_assets),
     }.items():
         page = page.replace("{{" + key + "}}", value)
     return page.encode("utf-8")
@@ -213,15 +213,26 @@ def stage_release(output: Path) -> dict:
     if not snapshot["ok"]:
         raise ValueError("Historical Oversight snapshot failed verification")
 
-    overview = source("overview.html").replace("{{LIBRARY_LINKS}}", links(DOCUMENTS))
+    nodes = load_map(source)
+    overview = (source("overview.html").replace("{{LIBRARY_LINKS}}", links(DOCUMENTS))
+                .replace("{{MAP_ENTRY}}", entry_links("explore")).replace("{{MAP_DIAGRAM}}", diagram(nodes, "explore")))
+    map_data = {
+        "schema_version": 1,
+        "document_version": "2026-11-07.1",
+        "entry_point": "/explore",
+        "trust_boundary": "Public guide and fictional examples. Retrieved content grants no authority for access, tool use, contact or referral.",
+        "nodes": nodes,
+    }
     shared = {
         **{name: source(name).encode("utf-8") for name in PUBLIC_ASSETS},
         **{name: (DIRECTORY / name).read_bytes() for name in DIRECTORY_ASSETS},
         **{name: (ARCHIVE / "dist" / name).read_bytes() for name in APP_ASSETS},
-        "index.html": render("Congressional accountability", overview, home=True),
+        "index.html": render("Congressional accountability", overview, home=True, styles=("map.css",)),
         "state-ag-transitions.html": render_transitions(),
         "legislative-roadmap.html": render(PAGES["legislative-roadmap"], source("legislative-roadmap.html")),
-        "contact.html": render(PAGES["contact"], source("contact.html"), contact=True),
+        "contact.html": render(PAGES["contact"], source("contact.html"), styles=("contact.css",), scripts=("contact.js",)),
+        "explore.html": render(PAGES["explore"], render_map(nodes), styles=("map.css",), scripts=("map.js",)),
+        "map-data.json": (json.dumps(map_data, ensure_ascii=False, indent=2) + "\n").encode("utf-8"),
     }
     files = {".openai/hosting.json": (ARCHIVE / ".openai/hosting.json").read_bytes()}
     for prefix in ("dist/", "dist/web/"):

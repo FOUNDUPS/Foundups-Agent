@@ -22,11 +22,12 @@ def test_public_release_excludes_archive_operations_and_keeps_staff_routes(tmp_p
     receipt = json.loads(result.stdout)
     snapshot = json.loads((OVERSIGHT / "source-snapshot.json").read_text("utf-8"))
     assert receipt["baseline_files"] == len(snapshot["files"]) == 155
-    assert receipt["files"] == 59
+    assert receipt["files"] == 67
     for name in ("index.html", "sw.js", "overview.css", "overview.js", "accountability.json",
                  "llms.txt", "state-ag-transitions.html", "state-ag-transitions.json", "manifest.webmanifest",
                  "legislative-roadmap.html", "contact.html", "contact.css", "contact.js",
-                 "contact-queue.mjs", "contact-roster.json", "states-boundaries.json", "states-location.mjs"):
+                 "contact-queue.mjs", "contact-roster.json", "states-boundaries.json", "states-location.mjs",
+                 "explore.html", "map-data.json", "map.css", "map.js"):
         assert (output / "dist" / name).read_bytes() == (output / "dist/web" / name).read_bytes()
 
     index = (output / "dist/index.html").read_text("utf-8")
@@ -36,7 +37,8 @@ def test_public_release_excludes_archive_operations_and_keeps_staff_routes(tmp_p
     assert 'href="legislative-roadmap"' in index and 'href="contact"' in index
     assert index.index('id="pain"') < index.index('id="solution"') < index.index('id="outcome"') < index.index('id="hub"')
     assert "contact.js" not in index
-    assert '<details class="thumb-nav">' in index and "hub-map" in index
+    assert '<details class="thumb-nav">' in index and "map-diagram" in index
+    assert 'href="explore#authority"' in index and 'href="explore#investigation"' in index
     assert len({row["jurisdiction"] for row in json.loads((output / "dist/state-ag-transitions.json").read_text("utf-8"))["rows"]}) == 15
 
     dist = output / "dist"
@@ -47,6 +49,17 @@ def test_public_release_excludes_archive_operations_and_keeps_staff_routes(tmp_p
     roadmap = (dist / "legislative-roadmap.html").read_text("utf-8")
     assert 'data-page-section="legislative-roadmap"' in roadmap
     assert all(f'id="{id_}"' in roadmap for id_ in ("scope-inquiry", "act-on-findings", "decide-referral"))
+    explorer = (dist / "explore.html").read_text("utf-8")
+    parsed_map = Links()
+    parsed_map.feed(explorer)
+    nodes = json.loads((dist / "map-data.json").read_text("utf-8"))["nodes"]
+    edge_screens = {f"edge-{key}--{target}" for key, node in nodes.items() for target, _ in node.get("choices", [])}
+    assert parsed_map.screens == set(nodes) | edge_screens
+    assert parsed_map.screens <= {url[1:] for url in parsed_map.targets if url.startswith("#")}
+    assert {"congressional-action", "coordination"} == {key for key, _ in nodes["decisions"]["choices"]}
+    assert all(nodes[key]["fictional"] is True for key in ("clemency-example", "trading-example", "contracting-example", "clemency-transfer-gap"))
+    assert "Fictional record A-02 · Posted transfer" in explorer
+    assert nodes["clemency-recipient"]["connection_evidence"]["clemency-transfer-gap"][-1][0] == "Not established"
     for path in ("openclaw.json", "search.json", "MASTER_BLUEPRINT.html",
                  "skills", "api/openapi.yaml", "web/app.js", "research", "documents.json"):
         assert not (dist / path).exists()
@@ -72,6 +85,7 @@ def test_public_release_excludes_archive_operations_and_keeps_staff_routes(tmp_p
     data = json.loads((output / "dist/accountability.json").read_text("utf-8"))
     assert "foundup_id" not in data
     assert data["entry_points"]["legislative_roadmap"] == "/legislative-roadmap"
+    assert data["entry_points"]["map_records"] == "/map-data.json"
     assert data["entry_points"]["senator_directory"] == "/contact"
     assert data["entry_points"]["transition_data"] == "/state-ag-transitions.json"
     assert 'In our view' in index and 'Todd Blanche' in data["doj_leadership_context"]["verified_fact"]
@@ -83,6 +97,10 @@ class Links(HTMLParser):
     def __init__(self):
         super().__init__()
         self.targets = []
+        self.screens = set()
 
     def handle_starttag(self, tag, attrs):
         self.targets.extend(value for key, value in attrs if key in ("href", "src", "data-worker") and value)
+        if tag == "section" and (attributes := dict(attrs)).get("class") == "map-screen":
+            assert attributes["id"] not in self.screens
+            self.screens.add(attributes["id"])

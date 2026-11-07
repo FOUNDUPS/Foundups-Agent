@@ -2,6 +2,13 @@
 
 <!-- WSP 22: anti-vibecoding test inventory. NEWEST entries at TOP. -->
 
+## [2026-11-07] — Interactive oversight maps
+
+The release projection checks mirrored map routes, graph node and connector
+screens, reachability, the separate outcome choices and the fictional money
+trace. The worker regression covers offline fragment navigation and scoped
+machine records. Independent browser checks cover phone and desktop drill-down.
+
 ## [2026-11-07] — Oversight landing and DOJ bottleneck
 
 The release test checks the three landing sections in order and links the

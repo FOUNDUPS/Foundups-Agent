@@ -78,21 +78,6 @@ p { margin: 0 0 1em; }
 .staff-section { padding: clamp(1.8rem, 5vw, 3.5rem) 0; border-bottom: 1px solid var(--line); scroll-margin-top: .75rem; }
 .staff-section > p { max-width: 76ch; }
 .hub-figure { margin: 1.25rem 0; padding: clamp(.75rem, 2.5vw, 1.6rem); border: 1px solid var(--line); background: var(--cream); max-width: 830px; }
-.hub-map { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: .65rem; }
-.hub-node { display: grid; align-content: center; text-align: center; padding: .75rem; background: #e7efef; border: 1px solid #b9cdd1; border-radius: .45rem; min-width: 0; }
-.hub-node span { font-size: .75rem; letter-spacing: .08em; font-weight: 750; }
-.hub-node strong { display: block; font-size: 1.12rem; }
-.hub-node small { font-size: 1rem; }
-.hub-center, .hub-connector { grid-column: 1 / -1; }
-.hub-center { background: var(--navy-light); color: white; }
-.hub-destination { background: #f4ead3; border-color: #c9b580; }
-.hub-connector { width: 100%; height: 1.55rem; fill: none; stroke: #52717e; stroke-width: 2; }
-.hub-connector path { vector-effect: non-scaling-stroke; }
-.hub-connector .dashed { stroke-dasharray: 3 4; }
-figcaption { color: var(--muted); margin-top: .85rem; }
-.workflow { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: .65rem; padding-left: 1.4rem; }
-.workflow li { padding: .8rem; background: var(--cream); }
-.workflow li p { margin-bottom: 0; }
 .library-list { display: grid; gap: .5rem 1.5rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); padding-left: 1.15rem; }
 .case-study { border-left: 4px solid #b28b50; padding-left: 1rem; }
 .staff-footer { padding: 1.45rem 0; color: var(--muted); }
@@ -130,7 +115,6 @@ figcaption { color: var(--muted); margin-top: .85rem; }
   .hero-brief li { padding: .65rem .75rem; }
   .hero-brief h2 { margin-bottom: .3em; }
   .button { width: 100%; justify-content: center; text-align: center; }
-  .hub-node { padding: .6rem .35rem; }
   .thumb-nav {
     display: block;
     position: fixed;
@@ -179,6 +163,6 @@ figcaption { color: var(--muted); margin-top: .85rem; }
 @media print {
   .staff-sidebar, .thumb-nav, #install, .skip { display: none !important; }
   .staff-layout { display: block; }
-  .masthead, .accountability-hero, .hero-brief li, .hub-center { background: white; color: black; }
+  .masthead, .accountability-hero, .hero-brief li { background: white; color: black; }
   .masthead a, .secondary, .hero-brief h2, .hero-sources, .hero-sources a { color: black; }
 }

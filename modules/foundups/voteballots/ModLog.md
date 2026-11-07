@@ -1,5 +1,13 @@
 # Vote/Ballots FoundUp — Module Log
 
+## 2026-11-07 — Interactive oversight maps
+
+Make the public hub diagram a navigation surface. Add committee authorities,
+question-led fictional investigations, per-connector evidence and approvals,
+independent state and legislative tracks, witness restrictions and sourced
+January 6 lessons. Keep the five-stage roadmap, source archive and senator
+lookup. Publish matching map records and scope offline access. WSP 22, 50, 97, 102.
+
 ## 2026-11-07 — Oversight landing and DOJ bottleneck
 
 Lead with Pain, Solution and Outcome. Source and date the attorney general's

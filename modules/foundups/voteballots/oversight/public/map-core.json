@@ -1,0 +1,40 @@
+{
+  "overview": {
+    "title": "Oversight",
+    "summary": "Explore who has authority, or start with a question and walk through an investigation. Open a connector to see the decision that permits the next step.",
+    "parent": null,
+    "choices": [
+      ["authority", "Start with a legislative purpose and identify the chamber, committee and official with authority."],
+      ["investigation", "Start with an answerable question. Establish what the records support before assigning a role to anyone."],
+      ["lessons", "Use historical records to identify specific failure points and test proposed safeguards."]
+    ],
+    "links": [["Five-stage legislative roadmap", "/legislative-roadmap"]]
+  },
+  "decisions": {
+    "title": "Authorized decisions",
+    "summary": "The evidence can support a legislative response, a separately authorized state referral, both, or neither.",
+    "parent": "authority",
+    "facts": [
+      ["What is ready?", "A reviewer has checked what the evidence establishes, what is disputed and what remains unknown. Counsel checks each proposed use and disclosure."],
+      ["Who decides?", "The official or body with authority under the applicable chamber and committee rules approves congressional action. A receiving state office exercises its own authority."],
+      ["When to stop", "Record the evidence gap, jurisdiction problem or disclosure restriction. Narrow the finding, keep investigating within authority, or close the matter as appropriate."]
+    ],
+    "links": [["Act on findings", "/legislative-roadmap#act-on-findings"], ["Decide whether to refer", "/legislative-roadmap#decide-referral"]],
+    "choices": [
+      ["congressional-action", "The authorized committee approves an action within its jurisdiction using findings the record can support."],
+      ["coordination", "Proceed on a separate state-law basis after verifying the recipient, screening each item and obtaining disclosure approval. State review is optional."]
+    ]
+  },
+  "congressional-action": {
+    "title": "Congressional action",
+    "summary": "Congress can act on a supported legislative finding without waiting for federal prosecution or a state referral.",
+    "parent": "decisions",
+    "facts": [
+      ["Options", "Consider an authorized hearing, report, audit request, legislative proposal or appropriations follow-up. Use the applicable chamber and committee process."],
+      ["Public findings", "Clear the facts, scope and permitted disclosures before release. Label unresolved questions and preserve contrary evidence and corrections."],
+      ["Follow-up", "Name the owner and review date. Track the legislative response separately from a referral, an investigation, any charges and a disposition."]
+    ],
+    "links": [["GAO reports and congressional requests", "https://www.gao.gov/about/what-gao-does/reports-testimonies"], ["Evidence report template", "/templates/evidentiary-report.html"], ["Weekly staff review", "/legislative-roadmap#track-follow-up"]],
+    "choices": [["review", "Reopen evidence review if new records, contradictions or corrections change what the finding supports."]]
+  }
+}
