@@ -1,5 +1,17 @@
 # LiveChat Module Interface
 
+## Emoji question routing (2026-11-07)
+
+`MessageProcessor.generate_response` routes permitted hand-emoji-plus-text
+messages through `model_reply_request` and `_resolve_model_command`, preserving
+the original text, captured author ID/role, receiving channel and stream title.
+The existing bounded `_await_intelligent_reply` validates the exact reviewed
+payload and theme; its returned carrier is not reformatted or prefixed here.
+Question failure returns `None` without entering the legacy template path.
+Existing rate/diversity and sender throttles remain in force. Exact whole-message
+quiz answers (including variation selectors/skin modifiers) return their handler
+result directly; bare emoji and explicit code-command handling stay separate.
+
 ## Capture before response selection (2026-11-07)
 
 `LiveChatCore.process_message` calls the existing `_log_to_user_file` once for a

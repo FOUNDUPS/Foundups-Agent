@@ -1,5 +1,17 @@
 # LiveChat
 
+## Emoji questions (2026-11-07)
+
+An authorized hand-emoji trigger containing text routes the complete message
+through the existing channel-bound, assessed and reviewed reply pipeline. It
+uses the current private live-chat context and preserves the reviewed text to
+the sender. Missing/disabled models, expiry, cancellation, quality rejection
+and rate/diversity limits produce no canned answer. Bare emoji acknowledgments,
+explicit code commands and slash-command precedence retain their existing paths.
+Only an entire emoji-plus-1–4 message is a quiz answer; a quiz with no result
+does not fall through to general generation. This source change needs activation
+in a new daemon process before it affects an already-running chat session.
+
 ## Scoped comment-quality halt (2026-11-05)
 
 Recognized rejected reply text latches a comments-only incident in the existing

@@ -1,5 +1,25 @@
 # TestModLog
 
+## 2026-11-07 — Reject canned success for emoji questions
+
+012 reported a live canned answer rather than an answer to the question. The
+actual-method routing selection reproduced it: RED15 failures/5 useful positives,
+then20 passed. Independent review added whole-message quiz and no-fallthrough
+heldouts: RED3 failures/24 positives. The final27 preserve the existing role,
+command, context and reviewed-carrier boundaries. These tests stub the bounded
+model call; separate existing semantic and guarded-routing suites cover that
+owner. No local test receipt establishes live semantic delivery.
+
+Final expanded Windows selection:277 pytest tests and12 subtests passed, with
+26 existing datetime.utcnow warnings and no failures/errors/skips. The corrected
+slash fixture additionally passes all27 emoji cases using the actual command
+detector. The unchanged guarded routing selection passes88 cases/zero issues.
+Backend manifest generation changes only the four modified runtime owner hashes;
+the exact JS/test digest pins are refreshed and all8 independent packaging tests
+pass. Earlier Node-bound fixture failures came from the sealed runner's missing
+Node path; the existing executable was explicitly supplied without relaxing the
+routing guard. Registry:1818 entries/258 quarantined.
+
 ## 2026-11-07 — Preserve received chat before response decisions
 
 Actual-method/SQLite coverage verifies role and session persistence before

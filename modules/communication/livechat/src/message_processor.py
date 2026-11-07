@@ -612,15 +612,44 @@ class MessageProcessor:
 
                 if can_use_consciousness:
                     # QUIZ ANSWER: Check if ✊✋🖐 is followed by a number (1-4)
-                    quiz_answer_match = re.search(r'✊✋🖐\s*([1-4])', message_text)
+                    quiz_answer_match = re.fullmatch(
+                        r'\s*✊[\ufe0f\U0001F3FB-\U0001F3FF]*'
+                        r'✋[\ufe0f\U0001F3FB-\U0001F3FF]*'
+                        r'🖐[\ufe0f\U0001F3FB-\U0001F3FF]*\s*([1-4])\s*', message_text)
                     if quiz_answer_match:
                         answer_num = quiz_answer_match.group(1)
                         logger.info(f"[BOOKS] Quiz answer: ✊✋🖐{answer_num} from {author_name}")
                         quiz_response = self.command_handler.handle_whack_command(
                             f"/quiz {answer_num}", author_name, author_id, role
                         )
-                        if quiz_response:
-                            return quiz_response
+                        return quiz_response
+
+                    # Emoji + substantive text is a request, not a successful
+                    # canned acknowledgment. Preserve the whole question and
+                    # the reviewed reply object through the existing call owner.
+                    request_text = re.sub(
+                        r'[✊👊✋🖐][\ufe0f\U0001F3FB-\U0001F3FF]*', '', message_text
+                    ).strip()
+                    is_code_command = re.match(r'^(holoindex|search code|find code)\b', request_text, re.I)
+                    if request_text and not is_code_command:
+                        if (processed_message.get('is_rate_limited')
+                                or not _env_truthy('YT_COMMENT_REPLY_ENABLED', 'true')):
+                            return None
+                        from modules.communication.livechat.src.llm_integration import model_reply_request
+                        request = model_reply_request(
+                            self.intelligent_reply, message_text, author_name, author_id, role)
+                        if request is None:
+                            return None
+                        self._update_trigger_time(author_id)
+                        response = await self._resolve_model_command(request)
+                        if response is None:
+                            return None  # No unreviewed/canned fallback for a question.
+                        if self.intelligent_throttle:
+                            allowed, _ = self.intelligent_throttle.check_message_diversity(response, 'consciousness')
+                            if not allowed:
+                                return None
+                        processed_message['response_type'] = 'consciousness'
+                        return response
 
                     logger.info("[BOT][AI] [QWEN-DAE-DECISION] EXECUTE consciousness_response (confidence: 0.85)")
                     # Generate agentic response based on chat history

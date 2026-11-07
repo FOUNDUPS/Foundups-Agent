@@ -1,5 +1,15 @@
 # LiveChat Module Test Suite
 
+## 2026-11-07 — Emoji questions use the existing reviewed reply owner
+
+`test_emoji_question_routing.py` compiles the actual processor methods and uses
+the real ModelReplyRequest/reviewed-string definitions. Its 27 cases cover full
+question/context/author preservation, exact returned carrier identity, emoji
+positions/selectors/skin tones, permission and rate gates, unavailable/changed
+context, bare emoji, whole-message quizzes, slash priority and explicit code
+commands. Model execution is inert. The existing guarded routing and semantic
+assessment selections separately test bounded inference and provenance rejection.
+
 ## 2026-11-07 — Capture before response processing
 
 `test_capture_before_processing.py` runs actual core/poller method definitions
