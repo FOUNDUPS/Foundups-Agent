@@ -660,14 +660,20 @@ class CommentEngagementDAE:
         try:
             if use_edge:
                 from selenium.webdriver.edge.options import Options as EdgeOptions
+                from selenium.webdriver.edge.service import Service as EdgeService
                 edge_options = EdgeOptions()
                 edge_options.add_experimental_option("debuggerAddress", f"127.0.0.1:{CHROME_PORT}")
-                self.driver = webdriver.Edge(options=edge_options)
+                # Windows Service defaults can keep the worker's inherited pipes
+                # open after cancellation, preventing the live-chat handoff.
+                self.driver = webdriver.Edge(
+                    options=edge_options, service=EdgeService(popen_kw={"close_fds": True}))
             else:
                 from selenium.webdriver.chrome.options import Options
+                from selenium.webdriver.chrome.service import Service as ChromeService
                 chrome_options = Options()
                 chrome_options.add_experimental_option("debuggerAddress", f"127.0.0.1:{CHROME_PORT}")
-                self.driver = webdriver.Chrome(options=chrome_options)
+                self.driver = webdriver.Chrome(
+                    options=chrome_options, service=ChromeService(popen_kw={"close_fds": True}))
 
             logger.info(f"[DAE-CONNECT] {browser_name} entangled: {self.driver.current_url[:60]}...")
 

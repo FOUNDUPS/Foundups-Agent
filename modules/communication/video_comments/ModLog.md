@@ -1,5 +1,15 @@
 # Video Comments - ModLog
 
+## 2026-11-07 — Isolate browser-driver handles from comment workers
+
+WSP00/22/50/77/84/97. Supply fresh Chrome/Edge Services with close_fds=True.
+Selenium's Windows default can inherit unrelated worker pipe handles even when
+driver stdout/stderr use DEVNULL. A surviving driver can therefore withhold EOF
+and block the existing handoff after the direct worker exits. Keep debugger-port
+attachment, cancellation, pipe draining, uncertain outcomes and STOP ownership.
+The fix prevents handle inheritance; it does not claim automatic orphan-driver
+reaping or browser-side rollback. No provider/model route changes.
+
 ## 2026-11-05 — Separate delivery from optional visual observation
 
 The processor previously treated the generic UI-TARS locator confidence as a

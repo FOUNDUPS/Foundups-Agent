@@ -1,5 +1,15 @@
 # video_comments TestModLog
 
+## 2026-11-07 — Close inherited worker handles in driver children
+
+Chrome and Edge connection controls verify real Selenium Service configuration,
+the unchanged debugger-address attachment and actual Popen close_fds propagation.
+Both pass in the final 138-case Windows selection (37 new capture/driver cases
+and 101 unchanged lifecycle cases). A separate finite Windows fixture confirmed
+that the previous Selenium default retains worker pipes after the worker exits;
+explicit close_fds permits EOF while the fixture driver is still alive. This
+does not validate automatic orphan reaping or live browser delivery.
+
 ## 2026-11-05 — Normalize the offline Node working directory
 
 The hosted Windows Studio selection passed 137 cases, while Linux rejected

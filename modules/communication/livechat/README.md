@@ -62,6 +62,18 @@ for cancellation limits and remaining live qualification.
 
 ## Current bounded live handoff
 
+Received text is captured through the existing ChatMemoryManager before reply
+filtering, command throttling or model generation. The immediate record is SQLite
+`chat_logs.db` in that manager's selected memory directory, carrying the session,
+author ID, display name, text, observed time and USER/MOD/OWNER role. Full and
+moderator-only text transcripts are exported by `end_session`; a per-stream JSON
+file is not the live capture authority. Inspect the selected runtime paths and
+new rows, not an old heartbeat or a send acknowledgement. In-memory message-ID
+deduplication is unchanged; this does not guarantee replay recovery or exactly-once
+capture across database failures or process restarts.
+The available initial API text batch is also captured, without triggering replies
+or old commands. Earlier text outside that provider batch is not reconstructed.
+
 PR841 preserves independent Chrome/Edge comment loops during a confirmed API live
 session while awaiting the matching channel's owned work before polling. The default
 termination call still shuts down the full supervisor. The session reservation

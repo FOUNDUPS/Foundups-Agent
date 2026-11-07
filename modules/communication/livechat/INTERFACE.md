@@ -1,5 +1,21 @@
 # LiveChat Module Interface
 
+## Capture before response selection (2026-11-07)
+
+`LiveChatCore.process_message` calls the existing `_log_to_user_file` once for a
+new received text-message ID, before schema handling, routing, filtering, command
+throttling and reply generation. It retains author identity and USER/MOD/OWNER
+role through ChatMemoryManager's immediate SQLite storage. Duplicate IDs retain
+their previous in-memory suppression. Ban/timeout events keep their separate path.
+No database schema or public posting policy changes. Existing storage-error and
+cross-restart deduplication limitations remain; capture is not reply delivery.
+
+The poller's available first batch retains text-bearing provider items with the
+internal boolean `_capture_only=True`. Core captures these and returns before
+schema actions, command processing and replies. Historical moderation events keep
+their existing skip policy. This only preserves history supplied by the API;
+it does not recover an entire missed stream or replay old commands/donations.
+
 ## Existing STOP owner: comments-quality scope (2026-11-05)
 
 `automation_gates.stop_active()` retains its any-STOP behavior. Explicit
