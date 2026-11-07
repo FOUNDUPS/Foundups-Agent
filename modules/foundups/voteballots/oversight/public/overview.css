@@ -125,6 +125,10 @@ figcaption { color: var(--muted); margin-top: .85rem; }
   .staff-layout { display: block; }
   .staff-layout main { padding: .75rem .75rem calc(6.5rem + env(safe-area-inset-bottom)); }
   .accountability-hero { padding: 1.25rem; }
+  .accountability-hero h1 { font-size: 2.05rem; }
+  .hero-brief { gap: .5rem; margin: 1rem 0; }
+  .hero-brief li { padding: .65rem .75rem; }
+  .hero-brief h2 { margin-bottom: .3em; }
   .button { width: 100%; justify-content: center; text-align: center; }
   .hub-node { padding: .6rem .35rem; }
   .thumb-nav {
