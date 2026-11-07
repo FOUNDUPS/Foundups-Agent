@@ -30,6 +30,9 @@ section below are the v2 Vote and v5 Oversight baseline.
 3. **System release audit.** The previous Oversight worker matched paths
    outside its `/web/` scope and could return another cache's response. The
    replacement uses exact scoped URLs and one cache per registration path.
+   A browser replay exposed offline legacy navigation with a fragment. The
+   worker now strips the fragment from its cache lookup while the original
+   House and Senate routes remain in the browser address.
    The current chamber planning label and the HTTPS LinkedIn link clarify
    the original header and apex redirect. The release requires exact
    GitHub and Sites source plus public readback. Initial hosted CI caught

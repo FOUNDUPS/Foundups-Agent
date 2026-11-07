@@ -68,10 +68,41 @@ test('canonical and prior HTML navigation use the same cached document offline',
     assert.equal(await sw.event('fetch', path + '.html'), sw.contents.get(origin + path));
   }
   assert.equal(await sw.event('fetch', '/index.html'), sw.contents.get(origin + '/'));
+  assert.equal(await sw.event('fetch', '/contact.html#main'), sw.contents.get(origin + '/contact'));
   for (const path of ['/contact?track=1', '/api', 'https://another.test/contact']) {
     assert.equal(sw.event('fetch', path), undefined);
   }
   assert.equal(sw.event('fetch', '/contact', 'POST'), undefined);
+});
+
+test('Oversight serves the scoped document with preserved professional fragments', async () => {
+  const file = new URL('../oversight/public/sw.js', import.meta.url);
+  const scope = origin + '/web/';
+  let fetchHandler;
+  const cached = new Response('Preserved professional shell');
+  vm.runInNewContext(readFileSync(file, 'utf8'), {
+    URL, Response,
+    self: {
+      registration: {scope},
+      addEventListener: (name, callback) => { if (name === 'fetch') fetchHandler = callback; },
+    },
+    caches: {
+      open: async (name) => {
+        assert.equal(name, 'oversight-public-shell-v0.6.0:/web/');
+        return {match: async (key) => key === scope ? cached : undefined};
+      },
+    },
+    fetch: async () => { throw new TypeError('offline'); },
+  });
+  function navigate(path) {
+    let result;
+    fetchHandler({request: {url: origin + path, method: 'GET'}, respondWith: (value) => { result = value; }});
+    return result;
+  }
+  assert.equal(await navigate('/web/#senate'), cached);
+  assert.equal(await navigate('/web/index.html#house'), cached);
+  assert.equal(navigate('/web/?q=1#states'), undefined);
+  assert.equal(navigate('/abc/style.css#x'), undefined);
 });
 
 test('failed precache rejects redirects and misleading MIME without writing', async () => {

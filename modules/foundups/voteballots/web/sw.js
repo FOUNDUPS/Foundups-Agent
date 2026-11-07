@@ -52,6 +52,7 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
+  url.hash = '';
   const cacheKey = PAGE_ALIASES.get(url.href) || url.href;
   if (event.request.method !== 'GET' || url.origin !== self.location.origin || url.search || !SHELL_URLS.has(cacheKey)) return;
   event.respondWith(fetch(event.request).then(async (response) => {

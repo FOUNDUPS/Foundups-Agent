@@ -24,7 +24,10 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const {url, method} = event.request;
-  const cacheKey = url === indexAlias ? scope.href : url;
+  // Navigation requests can carry a fragment used by the preserved router.
+  const resource = new URL(url);
+  resource.hash = '';
+  const cacheKey = resource.href === indexAlias ? scope.href : resource.href;
   if (method !== 'GET' || !shell.has(cacheKey)) return;
   event.respondWith(fetch(event.request).catch(async () => {
     const cache = await caches.open(CACHE);
