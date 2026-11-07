@@ -18,6 +18,14 @@ change. Independent review accepted that exact scope; all eight packaging
 contracts pass after regeneration and staging. Repository checks remain a
 separate exact-head gate.
 
+Security metadata follow-up: independently reverified 39 unchanged public source
+hash rows against the prior committed manifest and exact reviewed fingerprints.
+Append only their new whole-file-bound fingerprints (4,029 to 4,068 entries);
+scanner, rules and workflow remain unchanged. The 12 scoped fingerprint/error
+boundary cases pass locally. The broader Windows run has one unrelated GotJunk
+shell test failure because its bare `bash` selects unavailable WSL; the Linux
+security regression step passed before the manifest metadata findings.
+
 ## 2026-11-06 — WRE readiness evidence and training-menu boundaries
 
 The 16/P0 readiness repair distinguishes per-metric missing evidence from actual
