@@ -8,8 +8,11 @@ remaining gates. The four-entry landing is specified. The deployed root still
 opens with Pain, Solution and Outcome, with the interactive maps beneath it.
 The current hero offers the maps and senator directory as its two primary
 actions. The model rules and staffing plan are available deeper in the staff
-library. The planned entry sequence makes those destinations visible earlier
-while keeping the supporting materials available.
+library. In a live 390 × 844 CSS-pixel view, the two 48-pixel action buttons
+started at vertical positions 918 and 978. The 52-pixel section menu was
+visible, with no horizontal overflow. At 1366 × 900, the sidebar was visible
+and both actions started at 736. The planned entry sequence moves the
+destinations into the first phone screen while preserving the staff brief.
 
 | Surface | Observed result | Status |
 |---|---|---|
@@ -17,7 +20,7 @@ while keeping the supporting materials available.
 | `oversight.voice.foundups.com` and `oversight.voice.mtrout.com` | Google and Cloudflare public resolvers returned NXDOMAIN. Neither name appears in the Oversight Sites custom-domain list. | Proposed alias and alternate spelling, respectively. |
 | `vote.mtrout.com`, `vote.foundups.com` and `vote.undaodu.chatgpt.site` | Strict HTTPS returned the Vote informational landing. The two custom hosts returned matching landing HTML after removing the identified Cloudflare insertion. The original host also returned `/coalition`, `/evidence` and `/contact`. | One live Vote v3 Site. [Release PR #2319](https://github.com/FOUNDUPS/Foundups-Agent/pull/2319) |
 | `voice.houseoutis.com` | Both public resolvers returned NXDOMAIN. | Intended Voice outbound destination. Live link blocked on destination verification. |
-| Play FoundUps | `foundups.com/member/` returned the Mall shell. `foundups.com/f/voteballots` and its `/app` path returned the same generic entry shell as `/f/`. Source checks found the registry record, an empty manifest `entry_url`, discoverable-only readiness and no Vote entry in the admitted projections. | The Vote tenant remains gated. A shell HTTP 200 is not product activation. |
+| Play FoundUps | `foundups.com/member/` returned the Mall shell. `foundups.com/f/voteballots` and its `/app` path returned the same generic entry shell as `/f/`. Source checks found the registry record, an empty manifest `entry_url` and discoverable-only readiness. Vote was absent from the live public catalog, portfolio and member catalog projections. | Tenant activation requires an admitted entry and verified runtime. |
 
 Both active Sites deployments returned `succeeded` and matched the clean PC
 deployment mirror commits:
@@ -35,6 +38,8 @@ route and interior contracts. WSP 00 strict passed. The semantic HoloIndex
 query returned an authority HEAD mismatch and unknown freshness. A lexical
 query bound to `020a89c16` returned workspace context with unknown freshness.
 Exact paths and direct source reads supplied the documentation evidence.
+The earlier local Vote concatenation branch had no unique diff against the
+audited main. The related Oversight release PRs were already merged.
 
 **Pass 2 — landing and route readiness.** Strict HTTPS returned the model
 House rules, House readiness package, staffing plan, hub charter, committee
@@ -49,8 +54,10 @@ for the deployed map. A four-entry candidate has yet to be implemented.
 rule text first. A Senate reader retains distinct rules and approval paths.
 A first-time public reader gets a clear Voice destination and its current
 availability gate. A mobile reader's planned entry order and navigation
-requirements are explicit. The future candidate still requires independent
-browser and accessibility review. This slice changes documentation only.
+requirements are explicit. `git diff --check`, the ordered entry and hostname
+checks, and 18 new local Markdown references passed. The future candidate
+still requires independent browser and accessibility review. This slice
+changes documentation only.
 
 ## Standalone Oversight staff site
 
@@ -155,7 +162,7 @@ belong to the same `voteballots` FoundUp.
 | Vote | A responsive static landing with the Oversight entry, product readiness labels, a PWA manifest and a scoped service worker. The canonical editable source is `web/`. | [Vote](https://vote.mtrout.com/), [source and release procedure](../web/README.md), [PR #2312](https://github.com/FOUNDUPS/Foundups-Agent/pull/2312) |
 | Oversight Blueprint | The refreshed public guide has a clearer House-first entry, a responsive layout, and access to the document library, research material, templates and authored instruction bundles. The Vote workstream preserves all 155 public files and 13 root/web mirror pairs. The original Sites repository retains its history. | [Oversight](https://oversight.mtrout.com/), [source and release record](../oversight/README.md), [snapshot inventory](../oversight/source-snapshot.json) |
 | Coalition | An independent public charter, creator/official/community contribution paths, a private draft preview and JSON download, and general congressional contact resources. The draft stays on the visitor's device. Participation and endorsement remain unconfirmed. | [Coalition](https://vote.mtrout.com/coalition), [source and identity audit](COALITION_TAB_AUDIT.md), [PR #2317](https://github.com/FOUNDUPS/Foundups-Agent/pull/2317) |
-| Internal Vote PoC | Six merged parts cover the FEC adapter, candidate resolution, funding summaries, confidence scoring, quick answers and local shell payloads. Source provenance and aggregate-to-display confidence repairs are included. The current Python suite passed 398 tests. The earlier 303-test count is the six-slice closure baseline. | [Historical closure](../../../../docs/audits/architecture/VOTE_POC_CHAIN_OBSERVATION_SNAPSHOT_PHASE1.md), [current test history](../tests/TestModLog.md) |
+| Internal Vote PoC | Six merged parts cover the FEC adapter, candidate resolution, funding summaries, confidence scoring, quick answers and local shell payloads. Source provenance and aggregate-to-display confidence repairs are included. The prior release recorded 398 Python tests and the earlier six-slice closure recorded 303. | [Historical closure](../../../../docs/audits/architecture/VOTE_POC_CHAIN_OBSERVATION_SNAPSHOT_PHASE1.md), [test history](../tests/TestModLog.md) |
 
 ### Historical publication and operational evidence
 
