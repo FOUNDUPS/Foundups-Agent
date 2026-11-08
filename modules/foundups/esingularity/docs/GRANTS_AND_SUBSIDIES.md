@@ -1,6 +1,6 @@
 # YUMORI.me / eSingularity — Grants, Subsidies, and PPP Support Registry
 
-Last verified: 2026-11-08 JST for F-16 official 2026-11-06 budget-limit warning / historic two-track coverage; 2026-11-05 JST for P-01 deadline passage and F-15 dated coverage correction; 2026-11-01 JST for F-13 expiry of the officially published October 31 application window (no new extension visible); 2026-10-30 JST for F-12 exact deadline-time clarification; 2026-10-28 JST for F-13/F-14 coverage catch-up; 2026-10-26 targeted checks and other historical entries retain their own verification dates. These catch-up discoveries are not fresh official changes.
+Last verified: 2026-11-09 JST for F-08 official 2026-11-06 third-round allocation result; 2026-11-08 JST for F-16 official 2026-11-06 budget-limit warning / historic two-track coverage; 2026-11-05 JST for P-01 deadline passage and F-15 dated coverage correction; 2026-11-01 JST for F-13 expiry of the officially published October 31 application window (no new extension visible); 2026-10-30 JST for F-12 exact deadline-time clarification; 2026-10-28 JST for F-13/F-14 coverage catch-up; 2026-10-26 targeted checks and other historical entries retain their own verification dates. These catch-up discoveries are not fresh official changes.
 
 ## Purpose and truth boundary
 
@@ -119,18 +119,19 @@ Potential YUMORI.me uses: heat recovery, heat exchangers, heat pumps, hot-water/
 ## F-08 — 令和8年度 官民連携基盤整備推進調査費 第3回案件募集
 
 - Agency: 国土交通省 国土政策局 地方政策課 調整室
-- Status: **CLOSED — FY2026 third call ended 2026-10-08; local-government applicant only; future-round consultation remains available**
+- Status: **CLOSED — FY2026 third call ended 2026-10-08; MLIT published its third-round sole selected municipal study on 2026-11-06 (Kitsuki City, Oita), not a Fukui City/YUMORI award; future-year consultation remains available**
 - Application window: 2026-09-17 through 2026-10-08
 - Subsidy rate: up to 1/2 of eligible study costs
 - Applicant: prefectures, special wards, municipalities and specified inter-municipal bodies
 - Primary source: https://www.mlit.go.jp/report/press/kokudoseisaku09_hh_000191.html
 - Program page: https://www.mlit.go.jp/kokudoseisaku/kanminrenkei.html
+- 2026-11-06 official allocation result: https://www.mlit.go.jp/report/press/kokudoseisaku09_hh_000195.html ; award list: https://www.mlit.go.jp/report/press/content/002029338.pdf
 
 This is not YUMORI.me construction CAPEX. It supports local-government study of public infrastructure developed in coordination with private investment. Potential study content can include demand/feasibility work, project-scheme examination, public/private responsibility allocation and other work needed to move a PPP concept toward implementation.
 
 **YUMORI.me relevance:** YUMORI.me cannot apply directly. Fukui City would need to determine whether a Sukatto reuse/COGDC proposal, or associated public infrastructure such as power, roads, water, communications or other qualifying infrastructure, fits the program. The current action is to show the published national program and future-round consultation route to Fukui City and request a written determination or referral to the responsible department. Do not claim eligibility until MLIT/Fukui City confirms the scope.
 
-**Retained FY2026 windows, rechecked 2026-10-26:** first call 2026-02-10 to 2026-03-06; second 2026-06-11 to 2026-06-30; third 2026-09-17 to 2026-10-08. The official program page accepts future-year consultations. These historical windows do not establish FY2027 dates or a YUMORI/City application. See the retained-round calendar before planning the next cycle.
+**Retained FY2026 windows, rechecked 2026-11-09:** first call 2026-02-10 to 2026-03-06; second 2026-06-11 to 2026-06-30; third 2026-09-17 to 2026-10-08. On **2026-11-06**, MLIT published the third-round allocation: **one** selected local-government study, for Kitsuki Station area improvement in **Kitsuki City, Oita Prefecture**, planned total study cost **¥18.4 million**, national allocation **¥9.2 million** (1/2). Fukui City/YUMORI is **not** in that published recipient list. This does **not** establish whether Fukui City submitted an application, nor determine YUMORI eligibility. These figures are a recipient-specific allocation, **not** an F-08 general cap or available YUMORI funding. The official program page accepts future-year consultations; FY2027 call dates and continuation have not been verified. See retained-round calendar before planning the next cycle.
 
 ### F-08 form verification — 2026-10-05 JST
 
