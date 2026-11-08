@@ -12,26 +12,22 @@ styles, scripts and official directory snapshot. Deployment includes the
 reviewed HTML, CSS, JS, JSON, manifest and icons. Operator scripts and tests
 stay in the module.
 
-The buildless public files are `index.html`, `style.css`, `app.js`, `sw.js`,
-`manifest.webmanifest`, `coalition.html`, `coalition.js`, `coalition-draft.mjs`
-and the three files under `icons/`. This README is
-operator documentation and is excluded from the deployed static directory.
+The buildless public files include `index.html`, `style.css`, `app.js`,
+`sw.js`, `manifest.webmanifest`, the three icons, and the `/coalition`,
+`/evidence` and `/contact` HTML pages with their local assets. The contact page
+uses the reviewed `contact-roster.json` and `contact-queue.mjs`. This README
+is operator documentation outside the deployed static directory.
 
 - Sites project: `appgprj_6aee6646e6ac81918ac2624d5d1db413`
 - Generated address: `https://vote.undaodu.chatgpt.site/`
 - Preferred public landing: <https://vote.mtrout.com/>.
+- Verified alternate Vote address: <https://vote.foundups.com/>.
 - Public Coalition page: <https://vote.mtrout.com/coalition>.
-- Release evidence and outstanding gates: [Vote release accounting](../docs/RELEASE_ACCOUNTING.md).
-- Oversight source/release owner: [the preserved workstream](../oversight/README.md).
-- Preferred Oversight workstream: <https://oversight.mtrout.com/>.
-- Retained Oversight alias: <https://maga.mtrout.com/>.
+- Release evidence and outstanding gates: [current release audit](../docs/RELEASE_ACCOUNTING.md#2026-11-09-documentation-audit).
 
-All three preferred/retained `mtrout.com` addresses passed public DNS, strict
-TLS and correct-page HTTP 200 checks on both public endpoints on 7 November
-2026 at 00:45 UTC. The previously configured `vote.foundups.com` and
-`oversight.vote.foundups.com` aliases remain retained, not promoted to the
-preferred public map. Keep the generated Site addresses and existing aliases;
-an address preference is not authorization to delete or redirect them.
+The [Oversight landing contract](../oversight/README.md#phase-one-landing-contract)
+owns the MAGA/Oversight addresses and planned Voice link. Vote's current front
+door and the planned Voice stakeholder experience have separate roles.
 
 The Site's source repository is a deployment mirror. Preserve its existing
 project identity and reconcile its current branch before replacing public files

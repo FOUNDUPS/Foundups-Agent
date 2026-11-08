@@ -1,5 +1,14 @@
 # Vote/Ballots FoundUp — Module Log
 
+## 2026-11-09 — MAGA/Oversight Phase One documentation reconciliation
+
+Consolidated the address, source ownership and four-entry landing contract in
+`oversight/README.md`. Recorded active Sites projects and current HTTPS results,
+the Voice naming conflict and DNS blockers, the Mall activation boundary and
+the reusable House Rules, Team and Execution destinations. Updated the module
+interfaces, roadmap and release ledger. The documentation slice preserved all
+website source and the pinned archive. WSP 22, 50, 84, 97.
+
 ## 2026-11-07 — Interactive oversight maps
 
 Make the public hub diagram a navigation surface. Add committee authorities,

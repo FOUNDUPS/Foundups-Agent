@@ -4,6 +4,91 @@ Oversight is a civic research, preparation and review workstream of the existing
 `voteballots` FoundUp. This is an `EXISTING_FOUNDUP_UPDATE`: it creates no separate
 FoundUp identity, token, governance authority or agent runtime.
 
+## Phase One landing contract
+
+This section owns the current MAGA/Oversight and Vote/Voice handoff. Read the
+[release accounting](../docs/RELEASE_ACCOUNTING.md#2026-11-09-documentation-audit)
+for dated observations and the [Vote roadmap](../ROADMAP.md#magaoversight-phase-one)
+for sequencing. 012 scoped the 2026-11-09 slice to documentation.
+
+### One application and its addresses
+
+MAGA and Oversight are two names for the same public congressional accountability
+application. Its preferred address is [oversight.mtrout.com](https://oversight.mtrout.com/).
+[maga.mtrout.com](https://maga.mtrout.com/),
+[oversight.vote.foundups.com](https://oversight.vote.foundups.com/) and the
+[original Sites address](https://oversight-hub-pwa.undaodu.chatgpt.site/) serve the
+same release directly. The proposed `oversight.voice.foundups.com` should reach
+that same application after DNS, TLS, routing and deep-link verification. The
+operator also mentioned `oversight.voice.mtrout.com` as a possible spelling.
+Both Voice-branded Oversight names returned NXDOMAIN in this audit. Any future
+alias or redirect uses the existing Sites project or an approved forwarding
+mechanism and preserves every working alias, the original Sites address, path,
+query and fragment behavior. Each browser origin has its own PWA state.
+
+**Vote** is the existing informational civic Site. `vote.mtrout.com`,
+`vote.foundups.com` and its original Sites address serve that separate public
+surface under the same FoundUp identity. **Voice** is the planned public
+stakeholder participation surface. 012's spoken direction names
+`https://voice.houseoutis.com/` as the landing's outbound destination. The
+copied prompt instead calls the first entry Vote and names `vote.foundups.com`.
+For the handoff, use the more specific spoken direction and keep Vote available
+in its existing role. Reopen the decision with 012 before substituting Vote for
+Voice. The Voice destination returned NXDOMAIN, so a live Voice link is gated
+on verifying that destination. The proposed `#SchumerOut` campaign copy is a
+separate editorial decision. The entry label in this contract is **Voice**.
+
+### Four-entry landing
+
+The first screen gives a short purpose statement and four prominent entries in
+the order below. The future change edits the existing `public/overview.html`
+and shared presentation assets where needed. Use a single responsive landing,
+with large labeled touch targets on phones and conventional keyboard-accessible
+navigation on desktop. Place detailed materials behind these entries or below
+the first screen. Keep the existing staff and public links discoverable.
+
+| Order | Entry | Destination | Purpose |
+|---|---|---|---|
+| 01 | **Voice** | `https://voice.houseoutis.com/` | One outbound link after destination verification. The stakeholder PWA, messages to Congress, and participation flows are a later slice. |
+| 02 | **House Rules** | [`/templates/appendix-a-house-rules`](https://oversight.mtrout.com/templates/appendix-a-house-rules) | Explain the current House authority and the proposed 120th Congress rule changes. Keep Senate procedure and federal statutes separately sourced. The [House readiness package](https://oversight.mtrout.com/11-house-first-pwa) remains the supporting entry. |
+| 03 | **Team** | [`/templates/staffing-and-recruitment-plan`](https://oversight.mtrout.com/templates/staffing-and-recruitment-plan) | Connect staffing, counsel, investigators, forensic specialists and recruitment to the [hub charter](https://oversight.mtrout.com/templates/central-hub-charter) and [committee operating plan](https://oversight.mtrout.com/templates/committee-node-operating-plan). |
+| 04 | **Execution** | [`/explore`](https://oversight.mtrout.com/explore) | Enter the existing maps for investigations, records requests and subpoenas, depositions, hearings, evidence review, congressional action and separately authorized state referrals. Keep the [five-stage roadmap](https://oversight.mtrout.com/legislative-roadmap) as the process underneath. |
+
+The House Rules and Team entries explain how the **proposed** hub would reduce
+duplicated work. Reuse the model charter and committee operating agreement to
+show a shared intake and deconfliction process, a designated lead and liaison,
+an evidence inventory, and approved custody, access and disclosure rules.
+Staff should be able to tell which office owns each decision and when review is
+required. Proposed House rule text requires adoption, and a House rule cannot
+assign Senate powers, override statutory limits, or grant state enforcement
+authority. Each chamber and receiving state office retains its own legal
+authority. Sensitive evidence and official decisions belong in approved office
+systems. [119th House rules resolution](https://www.govinfo.gov/content/pkg/BILLS-119hres5eh/html/BILLS-119hres5eh.htm) ·
+[Senate rules](https://www.rules.senate.gov/rules-of-the-senate)
+
+### Play FoundUps and release gates
+
+The [external route contract](../../docs/PFMALL_EXTERNAL_FOUNDUP_ROUTE_CONTRACT.md#11-canonical-route-truth-summary-post-pr-655)
+owns the separation between Play FoundUps shell discovery and the product's
+experience. Oversight is a workstream of `voteballots`. Vote's public Sites
+front door is external to the Mall shell. `/f/voteballots` and
+`/f/voteballots/app` are the canonical route contract. An empty `entry_url`,
+discoverable-only manifest and absent admitted catalog entry leave the tenant
+launch gated. Public civic participation and the Mall's authenticated
+stakeholder interior use separate authority and access checks.
+
+For a future authorized landing implementation, retain the 155-file archive,
+13 historical mirror pairs, the public allowlist, all existing routes and deep
+links, the root and `/web/` worker scopes, the senator directory, both maps,
+research and templates, metadata, and `/accountability.json`, `/llms.txt` and
+`/map-data.json`. Recheck destination content and TLS, keyboard and touch
+navigation, both PWA scopes, and phone and desktop layouts. Review the result
+from public, House and Senate perspectives, with a separate verifier before
+publication. Follow the existing release procedure below. Keep credentials and
+confidential records out of both the reviewed stage and the publication log.
+The landing, DNS or redirect changes and the Voice runtime each require their
+own authorized slice and live readback.
+
 ## Source and publication
 
 The current standalone accountability site is owned by `public/` and
@@ -56,21 +141,9 @@ historical version 5 import:
 - Project: `appgprj_6aed5317a2e4819193b1fdfe340a1cea`
 - Deployment: `appgdep_6aee654bd6308191a3f0bca480e9aad3`
 - Published source: `c66d22afc5795874f4020661dcadfdd69d3ad129`
-- Preferred workstream address: <https://oversight.mtrout.com/>
-- Retained alias for the same workstream: <https://maga.mtrout.com/>
-- Original Sites address: <https://oversight-hub-pwa.undaodu.chatgpt.site/>
 
-The parent Vote informational landing uses <https://vote.mtrout.com/>.
-See the [Vote release accounting and Launch Pad](../docs/RELEASE_ACCOUNTING.md)
-for the current public availability and outstanding reader/review gates. The
-roadmap inside the preserved snapshot describes the earlier owner-private
-release stage and retains its value as a dated planning record.
-These three `mtrout.com` addresses passed public DNS, strict TLS and HTTP 200
-checks with their correct Vote/Oversight pages on both public endpoints on
-7 November 2026 at 00:45 UTC. The previously configured `vote.foundups.com`
-and `oversight.vote.foundups.com` aliases remain retained; they are not the
-preferred public map. No existing alias or original Site is removed or
-redirected by this documentation correction.
+The roadmap inside the preserved snapshot describes the earlier owner-private
+release stage and remains a dated planning record.
 
 Per-file source/export mappings, Git blob identities, byte counts and SHA-256
 digests are in [source-snapshot.json](source-snapshot.json). The imported bytes
@@ -100,9 +173,8 @@ service worker or installed PWA. This import does not claim a shell runtime
 integration. A future in-scope mount must preserve the existing Vote namespace
 and bound any worker/cache to its approved app subtree.
 
-Retain both current aliases and the original Site. An additional Vote-branded
-hostname may point at the same published project after its own hosting/DNS/TLS
-verification; do not remove an existing alias merely because another is added.
+Use the [address contract above](#one-application-and-its-addresses) for any
+later domain work.
 
 ## Instruction bundles and truth boundaries
 
