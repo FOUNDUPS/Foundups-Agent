@@ -9,6 +9,17 @@
 
 ## Current State
 
+### MAGA/Oversight Phase One
+
+The [landing contract](oversight/README.md#phase-one-landing-contract) owns
+the four-entry design and the single-site address model. The 2026-11-09 slice
+reconciles documentation against the deployed Sites and Mall contracts. The
+next authorized implementation can simplify the existing landing after
+reviewing this handoff. A working Voice destination is a separate release gate.
+Voice stakeholder participation, Mall cards, calling workflows and expanded
+funding-disclosure UI are later work. The current staff review, routes and
+source-preservation requirements remain part of the landing acceptance criteria.
+
 ### Accountability integration and 2028 sequence
 
 The current source provides a human and agent-readable legislative roadmap with
@@ -30,18 +41,18 @@ one public race-to-evidence journey and the existing tenant mount. Preserve
 independent review and the existing correction and abstention gates before
 any claim scores or ballot experiments.
 
-### 2026-11-07 release accounting
+### Current publication and Vote application gates
 
-Vote Sites v2 publishes the [Vote landing](https://vote.mtrout.com/) and the
-[Coalition tab](https://vote.mtrout.com/coalition). The existing Oversight Site publishes
-the [Oversight Blueprint](https://oversight.mtrout.com/) and retains
-[`maga.mtrout.com`](https://maga.mtrout.com/) as an alias. Coalition prepares
-local drafts. Verified enrollment and editorial tools are future capabilities.
+The [dated release audit](docs/RELEASE_ACCOUNTING.md#2026-11-09-documentation-audit)
+records Vote Sites v3 and Oversight Sites v10. Coalition prepares local drafts.
+Verified enrollment and editorial tools are future capabilities.
 The [release accounting and Launch Pad](docs/RELEASE_ACCOUNTING.md) record
 GitHub/PC reconciliation, DNS, HTTPS, browser checks and each capability's gates.
 
-For the candidate/evidence track, close the existing cycle-validation defect and
-reconcile registry labels in Phase 0. Use Phase 1 to prove one public evidence
+For the candidate/evidence track, reconcile registry labels in Phase 0. The
+cycle-validation defect noted in the November 1 checkpoint was fixed in
+[PR #2319](https://github.com/FOUNDUPS/Foundups-Agent/pull/2319). Use the Vote
+product's Phase 1 to prove one public evidence
 journey with authoritative sources, freshness and explicit data gaps. Oversight
 reader review and Coalition intake are parallel product decisions with separate
 acceptance gates. The published sites and preserved instruction bundles are
@@ -55,9 +66,9 @@ each have their own gates.
 ran three local and two paid author jobs against the existing request validator.
 The paid candidate passes25 frozen cases but accepts integer subclasses, contrary
 to the original exact-int requirement; the bounded repair returned identical bytes.
-No candidate was applied. The current validator still mishandles falsy/non-integer
-cycle hints. Preserve this concrete defect and supplementary counterexample for
-the next qualified route; a model-reported success or25/25 alone is insufficient.
+No candidate was applied at that checkpoint. The validator then mishandled
+falsy and non-integer cycle hints. PR #2319 later shipped the exact-input guard.
+Retain the counterexample as a regression case for any future worker trial.
 
 The funding-source indirect-reference repair passes322 module tests and an
 independent review. One local worker proposal was rejected before production application;

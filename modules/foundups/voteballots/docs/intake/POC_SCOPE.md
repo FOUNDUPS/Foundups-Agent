@@ -1,5 +1,10 @@
 # Vote/Ballots - POC Scope
 
+The [MAGA/Oversight Phase One landing](../../oversight/README.md#phase-one-landing-contract)
+is a separate presentation slice. The planned Voice outbound link leaves
+the new stakeholder experience to a later slice. The Vote evidence journey
+below remains this intake's product PoC scope.
+
 ## Bounded public Sites slice
 
 The standalone Vote Site presents selected, dated and verified filing items

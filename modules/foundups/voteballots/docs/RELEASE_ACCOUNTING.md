@@ -1,5 +1,57 @@
 # Vote release accounting and launch checklist
 
+## 2026-11-09 documentation audit
+
+The [Oversight landing contract](../oversight/README.md#phase-one-landing-contract)
+is the architectural handoff. This audit records observed publication and
+remaining gates. The four-entry landing is specified. The deployed root still
+opens with Pain, Solution and Outcome, with the interactive maps beneath it.
+The current hero offers the maps and senator directory as its two primary
+actions. The model rules and staffing plan are available deeper in the staff
+library. The planned entry sequence makes those destinations visible earlier
+while keeping the supporting materials available.
+
+| Surface | Observed result | Status |
+|---|---|---|
+| `oversight.mtrout.com`, `maga.mtrout.com`, `oversight.vote.foundups.com` and `oversight-hub-pwa.undaodu.chatgpt.site` | All four returned HTTP 200 with strict TLS, zero redirects and identical landing HTML after removing the identified Cloudflare insertion. Sites lists all three custom names active with SSL active. | One live Oversight v10 Site. [Release PR #2323](https://github.com/FOUNDUPS/Foundups-Agent/pull/2323) |
+| `oversight.voice.foundups.com` and `oversight.voice.mtrout.com` | Google and Cloudflare public resolvers returned NXDOMAIN. Neither name appears in the Oversight Sites custom-domain list. | Proposed alias and alternate spelling, respectively. |
+| `vote.mtrout.com`, `vote.foundups.com` and `vote.undaodu.chatgpt.site` | Strict HTTPS returned the Vote informational landing. The two custom hosts returned matching landing HTML after removing the identified Cloudflare insertion. The original host also returned `/coalition`, `/evidence` and `/contact`. | One live Vote v3 Site. [Release PR #2319](https://github.com/FOUNDUPS/Foundups-Agent/pull/2319) |
+| `voice.houseoutis.com` | Both public resolvers returned NXDOMAIN. | Intended Voice outbound destination. Live link blocked on destination verification. |
+| Play FoundUps | `foundups.com/member/` returned the Mall shell. `foundups.com/f/voteballots` and its `/app` path returned the same generic entry shell as `/f/`. Source checks found the registry record, an empty manifest `entry_url`, discoverable-only readiness and no Vote entry in the admitted projections. | The Vote tenant remains gated. A shell HTTP 200 is not product activation. |
+
+Both active Sites deployments returned `succeeded` and matched the clean PC
+deployment mirror commits:
+
+| Site | Project | Version and deployment | Mirror commit |
+|---|---|---|---|
+| Oversight | `appgprj_6aed5317a2e4819193b1fdfe340a1cea` | v10 · `appgdep_6aef1d36c44c81919941e5be20508e9a` | `4ea7134c22fe147ecc6a4c8ed7f36c95b72d1a1c` |
+| Vote | `appgprj_6aee6646e6ac81918ac2624d5d1db413` | v3 · `appgdep_6aeed7c291648191a1d377c554bb04ba` | `0038b0f3d08b687a7c237e09fe2d5d5447e6b317` |
+
+**Pass 1 — architecture and evidence.** Audited GitHub main `020a89c16`,
+which adds unrelated work after the Oversight release source `92aa9951c`.
+The Vote, Oversight and Mall paths inspected were identical between those
+commits. Read the existing module, shell, routing, navigation, state, external
+route and interior contracts. WSP 00 strict passed. The semantic HoloIndex
+query returned an authority HEAD mismatch and unknown freshness. A lexical
+query bound to `020a89c16` returned workspace context with unknown freshness.
+Exact paths and direct source reads supplied the documentation evidence.
+
+**Pass 2 — landing and route readiness.** Strict HTTPS returned the model
+House rules, House readiness package, staffing plan, hub charter, committee
+operating plan, maps, roadmap, senator directory and source indexes. Sites
+redirects the legacy template `.html` paths to their clean paths on the same
+host. The snapshot verifier returned 155 files, 13 mirror pairs and inventory
+SHA-256 `d75a8544dc1352c9e5dca2510835ea092a6824cc6adc2bfc95cff0c638e59e86`.
+The prior v10 PR holds the implementation, test and mobile/offline evidence
+for the deployed map. A four-entry candidate has yet to be implemented.
+
+**Pass 3 — documentation challenge.** A House reader reaches the proposed
+rule text first. A Senate reader retains distinct rules and approval paths.
+A first-time public reader gets a clear Voice destination and its current
+availability gate. A mobile reader's planned entry order and navigation
+requirements are explicit. The future candidate still requires independent
+browser and accessibility review. This slice changes documentation only.
+
 ## Standalone Oversight staff site
 
 The [interactive maps](https://maga.mtrout.com/explore) put decision screens
@@ -96,7 +148,7 @@ Blueprint workstream, and a live Coalition information page. The candidate and
 funding application remains an internal proof of concept. Oversight and Coalition
 belong to the same `voteballots` FoundUp.
 
-## Built and verified
+### Historical features and evidence
 
 | Surface | What shipped | Evidence |
 |---|---|---|
@@ -105,7 +157,7 @@ belong to the same `voteballots` FoundUp.
 | Coalition | An independent public charter, creator/official/community contribution paths, a private draft preview and JSON download, and general congressional contact resources. The draft stays on the visitor's device. Participation and endorsement remain unconfirmed. | [Coalition](https://vote.mtrout.com/coalition), [source and identity audit](COALITION_TAB_AUDIT.md), [PR #2317](https://github.com/FOUNDUPS/Foundups-Agent/pull/2317) |
 | Internal Vote PoC | Six merged parts cover the FEC adapter, candidate resolution, funding summaries, confidence scoring, quick answers and local shell payloads. Source provenance and aggregate-to-display confidence repairs are included. The current Python suite passed 398 tests. The earlier 303-test count is the six-slice closure baseline. | [Historical closure](../../../../docs/audits/architecture/VOTE_POC_CHAIN_OBSERVATION_SNAPSHOT_PHASE1.md), [current test history](../tests/TestModLog.md) |
 
-## Publication and operational evidence
+### Historical publication and operational evidence
 
 - **GitHub and PC.** The related Vote PRs #2275, #2282, #2289 and #2298 were
   already merged before the preservation work. PR #2312 merged the Oversight
@@ -134,9 +186,10 @@ belong to the same `voteballots` FoundUp.
   Oversight at desktop and 400 CSS pixels, and opened the House package.
   The Coalition release passed 114 independent draft cases. Live in-app browser
   QA at 475 CSS pixels confirmed the draft preview, download button state and
-  reset. The clean route `/coalition` is verified online. The current worker's
-  exact shell allowlist names `/coalition.html`; clean-route offline behavior
-  still needs a fix and an installed-device check. [Test history](../tests/TestModLog.md)
+  reset. The clean route `/coalition` is verified online. The version 2 worker
+  used a legacy-only cache key. Version 3 added clean-route
+  offline coverage. Installed-device acceptance remains a separate gate.
+  [Test history](../tests/TestModLog.md)
 
 | Project | Preferred address | Retained addresses |
 |---|---|---|
@@ -153,8 +206,9 @@ browser storage and worker scope. The shared Vote tenant route is
 
 | Capability | State | What remains before launch or expansion |
 |---|---|---|
-| Public Vote, Oversight and Coalition pages | Live | Resolve Coalition clean-route offline coverage if offline use is a product requirement. Exercise install, update and cache migration on a real phone. |
-| Candidate and funding evidence app | Internal PoC | Reconcile the registry's older `SPECIFIED` / `idea` labels with the runnable PoC in a tested slice. Manifest entry remains empty and discoverable-only. Repair exact election-cycle validation and review live-adapter admission, source freshness, coverage gaps and outage behavior. Prove one neutral race/candidate evidence journey under the existing tenant with traceable sources and explicit unknowns. Then verify routing, isolation and eligibility for catalog promotion. |
+| Public Vote, Oversight and Coalition pages | Live | Exercise install, update and cache migration on a real phone. |
+| MAGA/Oversight four-entry landing | Documented | Reuse the existing Site and routes. Verify Voice availability and complete authorized implementation and independent review before publication. [Landing contract](../oversight/README.md#phase-one-landing-contract) |
+| Candidate and funding evidence app | Internal PoC | Reconcile the registry's older `SPECIFIED` / `idea` labels with the runnable PoC in a tested slice. Manifest entry remains empty and discoverable-only. Review live-adapter admission, source freshness, coverage gaps and outage behavior. Prove one neutral race/candidate evidence journey under the existing tenant with traceable sources and explicit unknowns. Then verify routing, isolation and eligibility for catalog promotion. |
 | Oversight reader and review workflow | Public guide | Validate one real reader journey and one source-backed correction through accountable human review. The pinned published roadmap and instruction bundles record the original design. Treat them as historical source alongside this release record. |
 | Coalition membership and editorial work | Public draft only | Choose who receives and reviews applications, what is retained, and how consent can be withdrawn. Prove an authenticated, rate-limited private intake first. Verify provider account control separately from eligibility, membership consent and role grants. Official review, revocation, moderated publishing and durable revisions/votes are future layers. [Audit](COALITION_TAB_AUDIT.md) |
 | Calling, credits and AI voice | Design | The live page offers a visitor-initiated switchboard link. A separate human-controlled calling product would need an authenticated queue, retry-safe call state and provider callbacks, consent and transcript retention decisions, and an auditable credits ledger before any live voice or payment pilot. If the OpenAI voice design is resumed, the choice between existing access and a separate Vote key is open. Location/affiliation-based campaign routing is outside the launch scope. |
@@ -163,9 +217,8 @@ browser storage and worker scope. The shared Vote tenant route is
 
 ## Decision for the next build
 
-If the priority is the Vote product, choose one public evidence journey as the
-next milestone. It uses the six components already built and makes the jump from
-an informational site to a working evidence product measurable. If the priority
-is operating a coalition, first choose an accountable intake reviewer and agree
-on data retention and the first moderation workflow. That is a separate
-milestone. An Oversight reader and correction pilot can inform either path.
+The next MAGA/Oversight slice follows the
+[four-entry landing contract](../oversight/README.md#four-entry-landing) after
+the documentation handoff. The Vote product's first public evidence journey
+and Coalition intake remain separate milestones with their own acceptance
+gates.

@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-11-09 Phase One landing handoff
+
+The [Oversight landing contract](oversight/README.md#phase-one-landing-contract)
+owns the ordered Voice, House Rules, Team and Execution entries and the address
+roles. The proposed interface changes the existing public landing presentation
+only. Existing staff routes, fragments, indexes, contact tools, origin boundaries
+and cache scopes are part of the preservation contract. The Voice entry is an
+outbound link gated on destination verification. It carries no session,
+stakeholder entitlement, message or case data. Current published behavior and
+the proposed entry list have separate status in the
+[release audit](docs/RELEASE_ACCOUNTING.md#2026-11-09-documentation-audit).
+
 ## 2026-11-07 Public Presentation and Oversight Source Contract
 
 The Vote Site exposes `/evidence` and `/contact`; the corresponding source

@@ -1,6 +1,7 @@
 # Vote/Ballots FoundUp
 
-**Status**: Internal PoC implementation complete; public PoC not launched  
+**Status**: Public informational Sites live. Candidate and funding application remains an internal PoC.
+
 **Module Version**: 0.6.0 (`src/__init__.py`)  
 **FoundUp ID**: `voteballots`  
 **Token Symbol**: `VOTE`  
@@ -26,9 +27,9 @@ The Oversight source provides a legislative roadmap with named decision owners,
 model documents and separate paths for congressional action and optional state
 referrals. Its public diagram opens connected authority and investigation maps
 with committee rules, decision gates, and fictional walkthroughs. Its senator
-lookup offers public office numbers and optional local
-state suggestions. The staff reference includes agent-readable source indexes.
-Vote's new funding evidence page presents reviewed excerpts from original
+lookup offers public office numbers and optional local state suggestions.
+The staff reference includes agent-readable source indexes.
+Vote's funding evidence page presents reviewed excerpts from original
 FEC filings and links separate official roll calls. Contact Congress builds a
 visitor-selected list from a dated House/Senate directory snapshot. The
 [release accounting](docs/RELEASE_ACCOUNTING.md#accountability-integration)
@@ -61,22 +62,12 @@ been established for this workstream.
   enrollment, account ownership or official status is implied or verified by
   preparing a draft. OAuth, intake and membership permissions are not live.
 
-The preferred public address map is:
-
-| Address | Role |
-|---|---|
-| <https://vote.mtrout.com/> | Vote's informational public landing |
-| <https://vote.mtrout.com/coalition> | Coalition charter and local application draft |
-| <https://oversight.mtrout.com/> | Oversight Blueprint, a workstream within Vote |
-| <https://maga.mtrout.com/> | Retained alias for the same Oversight workstream |
-
-Public DNS and strict hostname/certificate checks returned the correct page
-with HTTP 200 for all three addresses on both public endpoints on 7 November
-2026 at 00:45 UTC. The original Sites addresses remain available. Previously
-configured `vote.foundups.com` and `oversight.vote.foundups.com` aliases are
-retained, but are not the preferred public map; this correction removes none
-of those aliases. A configured hostname is reported live only after public
-DNS, TLS and correct-page verification.
+The [Phase One landing contract](oversight/README.md#phase-one-landing-contract)
+owns the public address model, the four-entry handoff and the Vote/Voice
+distinction. MAGA and Oversight are one Site. Vote remains its separately hosted
+informational civic surface. The proposed Voice destination is a later
+stakeholder surface and has its own availability gate. See the
+[dated live audit](docs/RELEASE_ACCOUNTING.md#2026-11-09-documentation-audit).
 
 The canonical shell routes remain `/f/voteballots` and `/f/voteballots/app`,
 with `idb_voteballots` unchanged. Separate-origin public PWAs do not share Mall

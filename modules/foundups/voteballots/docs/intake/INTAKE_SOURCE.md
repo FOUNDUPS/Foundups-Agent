@@ -15,7 +15,9 @@ and publication identities. `web/` owns the informational Vote front door.
 Requested additive domains are `vote.foundups.com` and
 `oversight.vote.foundups.com`; existing Oversight aliases are retained.
 The later preferred-address decision and shipped Coalition tab are recorded in
-the [release accounting and Launch Pad](../RELEASE_ACCOUNTING.md).
+the [release accounting and Launch Pad](../RELEASE_ACCOUNTING.md). The
+[Phase One landing contract](../../oversight/README.md#phase-one-landing-contract)
+owns the current MAGA/Oversight aliases and the Voice handoff.
 
 Classification remains `EXISTING_FOUNDUP_UPDATE` with one `voteballots` tenant.
 This source/presentation work does not activate the candidate-data application,
