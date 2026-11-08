@@ -55,7 +55,7 @@ rule text first. A Senate reader retains distinct rules and approval paths.
 A first-time public reader gets a clear Voice destination and its current
 availability gate. A mobile reader's planned entry order and navigation
 requirements are explicit. `git diff --check`, the ordered entry and hostname
-checks, and 18 new local Markdown references passed. The future candidate
+checks, and 19 local Markdown references on changed lines passed. The future candidate
 still requires independent browser and accessibility review. This slice
 changes documentation only.
 
