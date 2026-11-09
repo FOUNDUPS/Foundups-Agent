@@ -6,9 +6,58 @@ on:
   pull_request:
     # Stacked PRs need their own checks even when their base is a feature branch.
     # Retargeting a PR must also produce fresh evidence for its new base.
+    # Draft PRs already run on open and synchronize.
     types: [opened, synchronize, reopened, edited, ready_for_review]
 
 jobs:
+  merge-scope-pilot:
+    name: Merge scope pilot (shadow)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    env:
+      PR_BASE: ${{ github.event.pull_request.base.sha }}
+      PR_HEAD: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Test validators and select validation scope
+        id: scope
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s .github/scripts/tests -p 'test_ci_merge_*.py'
+          python3 -B .github/scripts/ci_merge_scope.py \
+            --base "$PR_BASE" --head "$PR_HEAD" --merge "$GITHUB_SHA" \
+            > "$RUNNER_TEMP/merge-scope.json"
+          lane=$(python3 -c 'import json, sys; print(json.load(open(sys.argv[1]))["lane"])' "$RUNNER_TEMP/merge-scope.json")
+          echo "lane=$lane" >> "$GITHUB_OUTPUT"
+          printf 'Shadow lane: %s\nBase: %s\nHead: %s\nTest merge: %s\n' \
+            "$lane" "$PR_BASE" "$PR_HEAD" "$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+      - name: Check policy mirrors, catalog and agent projection
+        if: steps.scope.outputs.lane == 'policy'
+        run: |
+          python3 -B .github/scripts/ci_merge_policy.py "$PR_BASE" "$RUNNER_TEMP/merge-scope.json"
+          python3 -B scripts/generate_codex_tooling_projection.py --check
+      - name: Check documentation formatting and repository links
+        if: steps.scope.outputs.lane == 'docs' || steps.scope.outputs.lane == 'policy'
+        run: |
+          set -euo pipefail
+          git diff --check "$PR_BASE" "$GITHUB_SHA"
+          archive="$RUNNER_TEMP/lychee.tar.gz"
+          curl --fail --silent --show-error --location --retry 2 \
+            https://github.com/lycheeverse/lychee/releases/download/lychee-v0.24.2/lychee-x86_64-unknown-linux-gnu.tar.gz \
+            --output "$archive"
+          echo "1f4e0ef7f6554a6ed33dd7ac144fb2e1bbed98598e7af973042fc5cd43951c9a  $archive" | sha256sum --check --strict
+          tar --no-same-owner -xzf "$archive" -C "$RUNNER_TEMP" --strip-components=1 lychee-x86_64-unknown-linux-gnu/lychee
+          python3 -c 'import json, sys; print(*json.load(open(sys.argv[1]))["paths"], sep="\n")' \
+            "$RUNNER_TEMP/merge-scope.json" > "$RUNNER_TEMP/merge-docs.txt"
+          "$RUNNER_TEMP/lychee" --offline --no-progress --include-fragments \
+            --root-dir "$GITHUB_WORKSPACE" --files-from "$RUNNER_TEMP/merge-docs.txt"
+
   wre-verification-contracts:
     runs-on: ubuntu-latest
     timeout-minutes: 5

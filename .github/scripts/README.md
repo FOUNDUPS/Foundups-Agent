@@ -15,6 +15,32 @@ and buildx available. Missing Docker, a file-specific ignore override, build
 failure, timeout, leaked fixture, or missing source is a failure, never a skip.
 The dedicated workflow executes it without application dependencies or credentials.
 
+## Merge scope pilot
+
+CI validates drafts on open and synchronization, and still runs on
+reopen, edit and ready-for-review. A future reduction in metadata-triggered
+work must preserve fresh results when the base moves or a PR is retargeted.
+
+The shadow job binds the GitHub test-merge commit to both event parents and
+compares its complete diff with the reviewed head diff. The initial ordinary
+prose allowlist is limited to direct Markdown children of
+`docs/ci-pilot/examples/`. Numbered WSPs, their master index and recognized
+agent instructions use the policy lane. Unknown paths and mixed runtime
+changes select full validation. Missing Git evidence fails the shadow job.
+
+The job checks whitespace and repository links and anchors, using the pinned
+Lychee release in offline mode. Policy changes also check changed WSP mirrors,
+numbering and the Codex projection. CI continues to run the full existing suite,
+including the tracked-tree and introduced-history secret scan. The shadow
+job adds no new required status.
+
+Compare the shadow duration with the five required checks on the same PR head,
+base and test-merge SHA. Candidate fast-path time is the last of the shadow,
+secret-scan and HoloIndex checks to finish. Before cutover, qualify the policy
+checks on a real WSP revision, test bad links and unsafe diffs, and verify
+draft-to-ready and retarget behavior in GitHub. A required gate also needs
+independent review protection for changes to its workflow and validators.
+
 ## Change record — 2026-10-21
 
 ### Application image build budget — 2026-10-26
