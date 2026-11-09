@@ -19,6 +19,14 @@ VOTE then expands behind the existing pfMALL/member gate into deeper candidate r
 
 ---
 
+## Relationship to Voice and Oversight
+
+**Vote is the existing umbrella civic FoundUp** (`voteballots`). **Voice is a proposed, separately identified but interoperable civic-participation FoundUp**, not yet an implemented or admitted tenant. The proposed relationship is a consented, capability-scoped handoff through Play FoundUps shared contracts, not a merged application or cloned backend.
+
+**Oversight is currently a strategy and documentation/reference workstream** organized under Vote, not a FoundUp. It can inform both Vote's research and Voice's future civic-action experiences without creating a separate Oversight identity. Whether a later internal Voice feature should serve Oversight is **undecided and out of scope**; do not invent a Voice sub-product, route or runtime on that assumption.
+
+See [Oversight source classification](oversight/README.md). WSP 97 verifies actual repository state and WSP 109 governs any later independent FoundUp decision. No registry, manifest, token, tenant, route or public deployment change follows from this clarification.
+
 ## Current Truth State
 
 ### Accountability integration and bounded public PoC
