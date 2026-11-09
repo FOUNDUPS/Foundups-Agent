@@ -117,7 +117,7 @@ def diagram(nodes, prefix=""):
                     raise ValueError(f"Missing diagram connection {origin} to {target}")
                 classes = "map-wire conditional" if target == "coordination" else "map-wire"
                 description = f"{label}: {nodes[origin]['title']} to {nodes[target]['title']}"
-                items.append(f'<a class="{classes}" href="{prefix}#{edge_id(origin, target)}" aria-label="{escape(description)}">{escape(label)}</a>')
+                items.append(f'<a class="{classes}" href="{prefix}#{target}" aria-label="Open {escape(nodes[target]["title"])}: {escape(label)}">{escape(label)}</a>')
             else:
                 label = "Independent state action" if item == "coordination" else nodes[item]["title"]
                 items.append(f'<a class="map-box map-box-{item}" href="{prefix}#{item}">{escape(label)}</a>')
