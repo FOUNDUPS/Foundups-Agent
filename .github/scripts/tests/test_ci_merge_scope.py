@@ -25,6 +25,8 @@ class MergeScopeTest(unittest.TestCase):
         self.git("init", "-q", "-b", "base")
         self.git("config", "user.name", "CI classifier test")
         self.git("config", "user.email", "ci-classifier@example.invalid")
+        # Test the committed mode, independently of the filesystem mode.
+        self.git("config", "core.filemode", "false")
         self.write(_PROSE, "# Initial prose\n")
         self.write("runtime.py", "pass\n")
         self.git("add", ".")
