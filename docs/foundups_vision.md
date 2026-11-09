@@ -75,6 +75,16 @@ ChatGPT-like cross-surface history, the authenticated p.fMALL/phone RedDog
 adapter, universal FoundUp stake/interior surfaces, and mesh-native operation
 remain unimplemented gates.
 
+## Play FoundUps / Play FoundUps Mall — product foundation
+
+**Play FoundUps Mall (p.fMALL)** is the shared PWA discovery/store and interaction shell. **Play FoundUps** is the act of entering and interacting with a FoundUp, not the store's name. A **FoundUp** is a distinct outcome/venture with a manifest, identity, presentation skin and bounded capabilities; it is not necessarily a separate application stack.
+
+The intended architecture reuses one governed shell/runtime and shared service contracts for touch, swipe, pinch/zoom, navigation, identity, AI/RedDog, memory, WRE/RSI and optional blockchain functionality. A FoundUp's manifest declares its entry route, namespace, capabilities and agent routes. Different skins and task-specific AI context must not create independent privileged backends or grant authority merely by declaration. A thin browser client remains untrusted. Runtime composition and universal cross-FoundUp services are **TARGET**, not proven deployed for all FoundUps.
+
+**Vote** covers electoral discovery and representation; **Voice** covers ongoing civic participation and accountability. They are distinct FoundUps that can hand off consented, scoped context through versioned contracts. Do not confuse a Vote public site with a shared-origin Mall install or assume Voice is deployed.
+
+Canonical implementation references: [master architecture](../modules/foundups/docs/FOUNDUPS_MASTER_ARCHITECTURE.md), [Mall platform](../modules/foundups/pfmall/README.md), [manifest schema](../modules/foundups/docs/PFMALL_FOUNDUP_MANIFEST_SCHEMA.md). Bootstrap navigation belongs in WSP_00; evidence, drift reconciliation and verification remain WSP_97 responsibilities.
+
 ## Session Briefings
 
 For session-start execution context, read:
