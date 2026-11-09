@@ -124,6 +124,18 @@ Candidate-card PoC minimum:
 
 See `docs/intake/POC_SCOPE.md`.
 
+### 2026-11-10 selected collection and Voice relationship
+
+The [Vote/Voice integration contract](docs/VOTE_VOICE_INTEGRATION.md) records
+012's card-first Democratic-Senate collection and Prima's audit of Tertia's
+issue/evidence/action proposal. It narrows the first build without deleting
+the broader roadmap or existing public content. Reuse the Play FoundUps Mall
+scaffold; Vote composes external evidence rather than creating another political
+database. Proposed Voice owns issue discovery and voluntary participation.
+Their shared switchboard is a deferred capability, not a deployed third FoundUp.
+The contract separates contribution/spending types, unknown data, pepper opinions,
+source rights and user-approved effects. No new runtime or tenant is activated.
+
 ---
 
 ## Prototype Direction

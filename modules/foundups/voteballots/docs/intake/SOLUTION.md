@@ -1,5 +1,27 @@
 # Vote/Ballots - Solution Definition
 
+## 2026-11-10 selected Vote/Voice direction
+
+Read the [audited integration contract](../VOTE_VOICE_INTEGRATION.md) before
+using the broader stages below as a build order. 012 selected a card-first
+Democratic-Senate collection using existing Play FoundUps interactions, external
+funding sources and a wiki-style details reader. Location-based expansion,
+other offices and broader electoral tools are later work, not prerequisites.
+
+Vote is the politician/evidence discovery view. Proposed Voice is a separate
+issue-discovery and civic-participation FoundUp connected through consented,
+scoped references. A shared action adapter may support both; Tertia's Twilio
+switchboard is deferred research, not an implemented service or zero-wait promise.
+Oversight remains strategy/reference documentation, not an additional FoundUp.
+
+No replacement political database, shell, orchestrator, public page, tenant or
+telephony service is created by this clarification. External records remain
+attributed; operational cache/provenance and private opinions have separate
+owners. Community peppers are not verified funding or a representative poll.
+The contract audits proposed sources, money categories, permissions, unknowns
+and release gates. [Issue #2330](https://github.com/FOUNDUPS/Foundups-Agent/issues/2330)
+retains the proposed Voice intake; this documentation does not admit it.
+
 ## Core Solution
 VOTE is an existing FoundUp mode that turns public election and political-finance information into a simple evidence-first civic interface. The public PoC is the open FoundUp landing/funnel surface: locate the user's election context, show the relevant candidate/race cards, expose funding/influence evidence, and allow a user to scan or capture political material so RedDog can resolve the subject and fetch its public history. Deeper capabilities remain gated through the existing pfMALL/member path and mature through staged prototype slices into discovery, resilience/alerts, non-binding cryptographic preference voting, registration assurance, and eventually reusable FoundUp SmartDAO governance primitives.
 

@@ -310,6 +310,27 @@ Before each slice:
 
 ---
 
+## 2026-11-10 Vote/Voice selected sequence
+
+The [integration contract](docs/VOTE_VOICE_INTEGRATION.md) is the current
+product-discovery clarification from 012 and audited Tertia input. The general
+phases above remain a wider roadmap, not authorization to build all layers now.
+
+- [ ] Vote: qualify the existing Mall grid/player/gesture/rating interfaces and
+  a sourced Democratic-Senate card collection; preserve the existing public
+  writing and routes. Resolve pepper semantics before collecting opinions.
+- [ ] Data: prove one external-source-to-card-to-wiki journey with IDs, period,
+  provenance, contribution/spending separation and zero/unknown states. No
+  replacement political warehouse or unqualified bulk ingestion.
+- [ ] Voice: complete separate FoundUp intake/reuse qualification under existing
+  issue #2330; prove voluntary issue -> evidence -> official-contact navigation.
+- [ ] Shared action: reuse manual/native dialing first. Assisted hold/IVR/bridge
+  capability is a separate consent, provider, legal, abuse, privacy and technical
+  qualification decision; do not promise zero wait or deploy automated outreach.
+
+No runtime, manifest, registry, WSP, source-provider account or deployment change
+is made by recording this sequence. Merge execution remains in the Work lane.
+
 ## Canonical Intake Packet
 
 See `docs/intake/`:
