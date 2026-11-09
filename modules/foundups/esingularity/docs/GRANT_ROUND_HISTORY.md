@@ -42,7 +42,7 @@ Dates are ISO calendar dates. Times are JST. A dash means not established in thi
 | F-07B-2026-SEP | SHIFT DX CO2 reduction / subsidy | FY2026 / September additional call | 2026-09-11 | — | 2026-10-15 12:00 | CLOSED | VERIFIED PROGRAM; operating baseline and distinct costs unresolved | 2026-11-02 | S07 |
 | F-08-2026-R1 | MLIT PPP infrastructure study / public-body subsidy | FY2026 / 1 | 2026-02-10 | City/public-body decision to apply | 2026-03-06; time unverified | CLOSED | VERIFIED PROGRAM; no project submission inferred | 2026-11-02 | S08 |
 | F-08-2026-R2 | MLIT PPP infrastructure study / public-body subsidy | FY2026 / 2 | 2026-06-11 | City/public-body decision to apply | 2026-06-30; time unverified | CLOSED | VERIFIED PROGRAM; no project submission inferred | 2026-11-02 | S08 |
-| F-08-2026-R3 | MLIT PPP infrastructure study / public-body subsidy | FY2026 / 3 | 2026-09-17 | City/public-body decision to apply | 2026-10-08; time unverified | CLOSED | VERIFIED PROGRAM; future-year consultations available | 2026-11-02 | S08 |
+| F-08-2026-R3 | MLIT PPP infrastructure study / public-body subsidy | FY2026 / 3 | 2026-09-17 | City/public-body decision to apply | 2026-10-08; time unverified | CLOSED; 2026-11-06 MLIT third-round allocation published, one Kitsuki City (Oita) study, no Fukui City listed | VERIFIED PROGRAM only; no YUMORI eligibility/application/selection/award established; future-year consultations available | 2026-11-09 | S08, S08b |
 | F-09-2026-ASSETS | Fukui City asset proposals / NOT subsidy | FY2026 / listed schools | 2026-09-15 | Mandatory consultation/site-survey requests by 2026-11-30 | 2026-12-15; time unverified | OPEN | VERIFIED PROGRAM; Hanyu/Shimousaka listed, Sukatto not listed | 2026-10-27 | S09 |
 | F-10-2026-R1 | METI/SII ZEB demonstration / subsidy | FY2026 / 1 | 2026-05-12 10:00 | — | 2026-06-11 17:00 | CLOSED | VERIFIED PROGRAM; building-owner eligibility unresolved | 2026-11-02 | S10 |
 | F-10-2026-R2 | METI/SII ZEB demonstration / subsidy | FY2026 / 2 | 2026-07-24 13:00 | — | 2026-08-17 17:00 | CLOSED | VERIFIED PROGRAM; building-owner eligibility unresolved | 2026-11-02 | S10 |
@@ -90,6 +90,7 @@ No FY2027 call date or continuation is asserted by this queue.
 - S06: https://www.pref.fukui.lg.jp/doc/sinsan/dxkasoku.html
 - S07: https://www.env.go.jp/press/press_05521.html
 - S08: https://www.mlit.go.jp/kokudoseisaku/kanminrenkei.html
+- S08b: https://www.mlit.go.jp/report/press/kokudoseisaku09_hh_000195.html ; official 2026-11-06 third-round recipient list https://www.mlit.go.jp/report/press/content/002029338.pdf
 - S09: https://www.city.fukui.lg.jp/sisei/plan/reform/p073300.html
 - S10: https://sii.or.jp/zeb08/jissho_public.html
 - S11: https://sii.or.jp/setsubi07r/overview4.html
@@ -117,6 +118,9 @@ No FY2027 call date or continuation is asserted by this queue.
 - Synchronize the existing FIN `Grants & Subsidies` summary and `Grant Calendar` after registry changes; verify formulas and preserve the AWARDED-only financial gate.
 
 ## Change log
+
+### 2026-11-09 — F-08 FY2026 third-round allocation result confirmed (official publication Nov 6)
+MLIT announced on 2026-11-06 that the FY2026 third round of 官民連携基盤整備推進調査費 supported **one** local-government study: Kitsuki City, Oita (Kitsuki Station area). Planned study cost ¥18.4 million, national study allocation ¥9.2 million (1/2). Neither Fukui City nor YUMORI appears in this sole published selected-project list; this is **not** proof of a Fukui City non-application, and the selected third-party award is neither YUMORI eligibility nor project subsidy revenue. Round remains CLOSED after its 2026-10-08 deadline; next FY2027 opening/deadline not announced. City-led applicant/public-infrastructure-scope questions remain open. Official sources S08b; no 28th round created because this is the same third round.
 
 ### 2026-11-08 — Fukui F-16 budget-availability clarification; older tracks backfilled
 Fukui Prefecture's regular SME energy-efficiency equipment subsidy official page was updated 2026-11-06 and now warns it is near its allocated budget ceiling; applications during the nominal 2026-11-30 window may not receive grants. This is **not an official closure, extension or confirmed actual budget exhaustion**. Added previously omitted FY2026 normal (05/29 opening) and energy-price-shock (08/07 opening) tracks as historical coverage catch-up, not newly opened programs. Record first-come status, distinct conditional 1/2 rates and ¥6M/¥10M caps, equipment-purchase-only rules, regular-track business-premise ownership constraint, operating equipment/CO2 evidence and special-track historic energy-price test. The normal-track source update date supports a recent clarification but not an exact change timestamp. No YUMORI eligibility, application, selection, award or subsidy finance is promoted. Sources S17/S18.
