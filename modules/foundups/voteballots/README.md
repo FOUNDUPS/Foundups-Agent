@@ -19,6 +19,14 @@ VOTE then expands behind the existing pfMALL/member gate into deeper candidate r
 
 ---
 
+## Relationship to Voice and Oversight
+
+**Vote is the existing umbrella civic FoundUp** (`voteballots`). **Voice is a proposed, separately identified but interoperable civic-participation FoundUp**, not yet an implemented or admitted tenant. The proposed relationship is a consented, capability-scoped handoff through Play FoundUps shared contracts, not a merged application or cloned backend.
+
+**Oversight is currently a strategy and documentation/reference workstream** organized under Vote, not a FoundUp. It can inform both Vote's research and Voice's future civic-action experiences without creating a separate Oversight identity. Whether a later internal Voice feature should serve Oversight is **undecided and out of scope**; do not invent a Voice sub-product, route or runtime on that assumption.
+
+See [Oversight source classification](oversight/README.md). WSP 97 verifies actual repository state and WSP 109 governs any later independent FoundUp decision. No registry, manifest, token, tenant, route or public deployment change follows from this clarification.
+
 ## Current Truth State
 
 ### Accountability integration and bounded public PoC
@@ -43,6 +51,11 @@ candidate/evidence app is an internal PoC. The original registry and manifest
 labels predate the implemented chain. See the
 [release accounting and Launch Pad](docs/RELEASE_ACCOUNTING.md) for evidence,
 launch gates and the next product decisions.
+
+### Oversight classification clarification (2026-11-09)
+
+Oversight is a **strategy and documentation/reference workstream**, not an independent FoundUp. Its current ownership under `voteballots` is organizational and does not make the Oversight strategy a separate FoundUp. A future interactive Oversight FoundUp is a hypothesis requiring WSP 97 evidence and WSP 109 entity classification before manifest, registry, route, token, or runtime changes. Preserve the existing strategy site; do not treat documentation presentation as proof of an implemented FoundUp.
+
 
 ### 2026-11-07: Oversight workstream and public front door
 
