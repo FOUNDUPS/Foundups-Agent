@@ -44,6 +44,11 @@ labels predate the implemented chain. See the
 [release accounting and Launch Pad](docs/RELEASE_ACCOUNTING.md) for evidence,
 launch gates and the next product decisions.
 
+### Oversight classification clarification (2026-11-09)
+
+Oversight is a **strategy and documentation/reference workstream**, not an independent FoundUp. Its current ownership under `voteballots` is organizational and does not make the Oversight strategy a separate FoundUp. A future interactive Oversight FoundUp is a hypothesis requiring WSP 97 evidence and WSP 109 entity classification before manifest, registry, route, token, or runtime changes. Preserve the existing strategy site; do not treat documentation presentation as proof of an implemented FoundUp.
+
+
 ### 2026-11-07: Oversight workstream and public front door
 
 Oversight Blueprint is a Vote workstream under the existing `voteballots`
