@@ -137,7 +137,7 @@ def choice_cards(nodes, key, targets, labels=None):
     rows = []
     for target in targets:
         label = escape(labels[target] if labels else nodes[target]["title"])
-        rows.append(f'<li><a class="map-wire" href="#{edge_id(key, target)}" aria-label="Why this connection? {label}">Why this connection?</a><a class="map-box" href="#{target}">{label}</a></li>')
+        rows.append(f'<li><a class="map-box" href="#{target}">{label}</a><a class="map-wire" href="#{edge_id(key, target)}" aria-label="Review requirements before {label}">Requirements</a></li>')
     return f'<ul class="map-choices">{"".join(rows)}</ul>'
 
 
