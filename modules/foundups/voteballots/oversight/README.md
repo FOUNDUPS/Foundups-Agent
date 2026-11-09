@@ -9,6 +9,12 @@ Oversight is a civic research, preparation and review workstream of the existing
 `voteballots` FoundUp. This is an `EXISTING_FOUNDUP_UPDATE`: it creates no separate
 FoundUp identity, token, governance authority or agent runtime.
 
+## Relationship to Vote and proposed Voice
+
+Vote (`voteballots`) is the existing civic FoundUp and organizational umbrella for this Oversight **strategy/documentation** workstream. Voice is a **proposed separate FoundUp** for civic participation, designed to interoperate with Vote through governed Play FoundUps contracts. Oversight may provide reference material to either, but is not thereby a FoundUp, an internal Voice application, or a live cross-FoundUp integration.
+
+A dedicated internal Voice/Oversight experience is an **unresolved possibility**, not an approved feature or architecture. Do not add a manifest, tenant, domain, route, agent authority or implementation on that basis. Preserve the existing documentation and reference-site behavior. This classification supersedes any implication in older landing plans that a Voice destination is already live.
+
 ## Phase One landing contract
 
 This section owns the current MAGA/Oversight and Vote/Voice handoff. Read the
