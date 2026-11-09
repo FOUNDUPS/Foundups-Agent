@@ -4,6 +4,12 @@ Oversight is a civic research, preparation and review workstream of the existing
 `voteballots` FoundUp. This is an `EXISTING_FOUNDUP_UPDATE`: it creates no separate
 FoundUp identity, token, governance authority or agent runtime.
 
+## 2026-11-09 landing implementation candidate (unreleased)
+
+A review branch changes `public/overview.html` to lead with **Vote, House Rules, Team, Execution**, followed by native expandable **Obstacle, Process, Result** sections. Vote links to `https://vote.foundups.com/`; no Voice runtime or new Mall admission is implied. The map renderer makes the destination card the primary action and labels the intermediate legal/evidence gate as optional **Requirements**, preserving all node and gate screens. The source continues to distinguish House/Senate authority, federal pardons, independent state jurisdiction and disclosure approvals.
+
+**Release gate:** This is a source candidate, not a verified live deployment. Reconcile the older Phase One Voice/Voice-houseoutis wording below with 012's latest Vote-first instruction before publication; check builder allowlist and exact published output, tests, mobile/desktop and accessibility, current DOJ leadership sources, service-worker cache version, and all preserved deep links. Do not infer deployment from a GitHub commit or merge.
+
 ## Phase One landing contract
 
 This section owns the current MAGA/Oversight and Vote/Voice handoff. Read the
