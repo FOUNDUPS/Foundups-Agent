@@ -10,7 +10,7 @@
 
 ## Product naming and authority boundary
 
-**Play FoundUps Mall (p.fMALL)** is the PWA store and shared shell; **Play FoundUps** is the activity of interacting with FoundUps. A manifest identifies a FoundUp's skin/entry point, routes, capabilities and isolated namespace for composition; it does **not** create a separate platform backend, authorize an agent, or prove deployment. Reuse shared gesture, navigation, AI and governance interfaces. Vote and proposed Voice are separate FoundUps; any cross-FoundUp context transfer requires explicit consent and scoped contracts. Current signature and universal runtime limitations below still apply.
+**Play FoundUps Mall (p.fMALL)** is the PWA store and shared shell; **Play FoundUps** is the activity of interacting with FoundUps. A manifest identifies a FoundUp's skin/entry point, routes, capabilities and isolated namespace for composition; it does **not** create a separate platform backend, authorize an agent, or prove deployment. Reuse shared gesture, navigation, AI and governance interfaces. Any cross-FoundUp context transfer requires explicit consent and scoped contracts. Current signature and universal runtime limitations below still apply.
 
 ## 1. Purpose
 
