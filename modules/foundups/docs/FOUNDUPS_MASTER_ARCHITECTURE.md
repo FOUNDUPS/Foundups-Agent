@@ -27,7 +27,7 @@ separately authenticated authority boundaries; they are not browser features.
 
 The target is a reusable shell and governed services with per-FoundUp skins, task-specific AI context, entry routes, capabilities and isolated namespaces. Reuse gestures (touch/swipe/pinch/zoom), navigation, accessibility and shared platform adapters; backend agent, memory, RSI/WRE and optional blockchain services remain permissioned and server-side. Manifest capability declarations are requests/contracts, not proof of authorization. Existing separate PWAs and sites may remain independent deployments while the unified runtime is built; never claim universal composition is implemented.
 
-Vote (electoral discovery) and Voice (ongoing civic participation) are distinct FoundUps with an explicit, consented context handoff. Voice is a proposed FoundUp, not an observed release. Refer to [manifest schema](PFMALL_FOUNDUP_MANIFEST_SCHEMA.md) and [Mall runtime](../pfmall/README.md).
+FoundUps may connect through explicit, consented, versioned context and capability contracts while preserving separate identity and authorization. Refer to [manifest schema](PFMALL_FOUNDUP_MANIFEST_SCHEMA.md) and [Mall runtime](../pfmall/README.md).
 
 ## 2. Five-layer funnel
 
