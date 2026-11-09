@@ -2,6 +2,26 @@
 
 <!-- WSP 22: anti-vibecoding test inventory. NEWEST entries at TOP. -->
 
+## [2026-11-09] — Direct Oversight navigation and landing release gate
+
+Extended the existing `test_oversight_public_release.py` rather than creating
+another suite. Seventeen focused cases cover direct node/choice links, decorative
+connectors, one dotted state branch, preserved legacy fragments and exhibits,
+HTML escaping, graph validation, and the exact landing-only Vote-link exception.
+The existing full release test retains archive, mirror, route, source and
+fictional-evidence assertions while adopting the approved direct navigation.
+Subprocess stderr is now reported on failure; failed builds are not suppressed.
+The existing worker test tracks candidate cache `v0.11.0` and retains its legacy
+fragment/offline scope checks.
+
+Local focused comparison: prior source 16 failed/1 passed; repaired source
+17 passed. One full-archive integration case was deselected locally, not claimed
+as a pass. Hosted `wre-verification-contracts` succeeded for source `bc95cb3fec`
+in CI run 42557479077, including the full Vote suite, archive verifier and Node
+checks; later source heads require fresh checks. The [audit record](../oversight/docs/DIRECT_NAVIGATION_AUDIT_20261109.md)
+binds evidence and remaining gates. Four viewport component checks are not a
+full staged-site, Safari, independent-review or publication claim.
+
 ## [2026-11-07] — Interactive oversight maps
 
 The release projection checks mirrored map routes, graph node and connector
