@@ -1,8 +1,6 @@
 # Oversight Blueprint — a Vote workstream
 
-Oversight is a civic research, preparation and review workstream of the existing
-`voteballots` FoundUp. This is an `EXISTING_FOUNDUP_UPDATE`: it creates no separate
-FoundUp identity, token, governance authority or agent runtime.
+Oversight is a **documented congressional oversight strategy and reference blueprint**, not a standalone FoundUp, civic-action app, investigative authority, or operating agent. Its public websites publish proposed procedures, model documents, maps, and research for people to review and adapt. Hosting these documents as an interactive PWA does not turn the strategy into an executing system. The source is maintained within the existing `voteballots` workstream for organizational purposes only; it creates no separate FoundUp identity, token, governance authority or agent runtime.
 
 ## Phase One landing contract
 
