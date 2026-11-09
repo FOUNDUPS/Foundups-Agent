@@ -1,5 +1,10 @@
 # Oversight Blueprint — a Vote workstream
 
+> **Classification (2026-11-09):** Oversight is presently a **strategy, documentation and reference implementation workstream**, not an independent FoundUp. Its public domains are documentation/interactive reference surfaces, not evidence of a separate tenant, manifest, token, wallet or autonomous runtime. The existing Vote ownership is a source/workstream classification, not a claim that the Oversight strategy itself is a FoundUp.
+>
+> **Future option, not an approved build:** an interactive Oversight FoundUp could model the strategy as mobile-first, reusable Play FoundUps experiences rather than copying the heavy document site. Before creating a new manifest or tenant, WSP 97 must inspect the current strategy, routes and shared shell; WSP 109 must decide whether this is a genuine independent FoundUp or an extension of existing Vote/Voice capabilities. Preserve existing documentation, deep links, and provenance. No deployment or runtime promotion is implied.
+
+
 Oversight is a civic research, preparation and review workstream of the existing
 `voteballots` FoundUp. This is an `EXISTING_FOUNDUP_UPDATE`: it creates no separate
 FoundUp identity, token, governance authority or agent runtime.
