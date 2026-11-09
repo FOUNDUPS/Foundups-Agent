@@ -21,6 +21,10 @@ VOTE then expands behind the existing pfMALL/member gate into deeper candidate r
 
 ## Current Truth State
 
+### Oversight classification: strategy and documentation, not an application authority
+
+Oversight is a published congressional oversight **strategy/blueprint and documentation reference**, organized under Vote for source stewardship. Its diagrams, templates and interactive navigation explain proposed processes; they do not conduct investigations, authorize subpoenas, operate an agent, or constitute a separate FoundUp. The Vote and proposed Voice product runtimes are distinct from this reference material. See [Oversight source](oversight/README.md).
+
 ### Accountability integration and bounded public PoC
 
 The Oversight source provides a legislative roadmap with named decision owners,
