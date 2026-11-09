@@ -5,9 +5,7 @@
 > **Future option, not an approved build:** an interactive Oversight FoundUp could model the strategy as mobile-first, reusable Play FoundUps experiences rather than copying the heavy document site. Before creating a new manifest or tenant, WSP 97 must inspect the current strategy, routes and shared shell; WSP 109 must decide whether this is a genuine independent FoundUp or an extension of existing Vote/Voice capabilities. Preserve existing documentation, deep links, and provenance. No deployment or runtime promotion is implied.
 
 
-Oversight is a civic research, preparation and review workstream of the existing
-`voteballots` FoundUp. This is an `EXISTING_FOUNDUP_UPDATE`: it creates no separate
-FoundUp identity, token, governance authority or agent runtime.
+Oversight is a **documented congressional oversight strategy and reference blueprint**, not a standalone FoundUp, civic-action app, investigative authority, or operating agent. Its public websites publish proposed procedures, model documents, maps, and research for people to review and adapt; they do not conduct investigations or authorize subpoenas. Hosting these documents as an interactive PWA does not turn the strategy into an executing system. The source is maintained within the existing `voteballots` workstream for organizational purposes only. This remains an `EXISTING_FOUNDUP_UPDATE`: it creates no separate FoundUp identity, token, governance authority or agent runtime. Vote and the proposed Voice product runtimes remain distinct from this reference material.
 
 ## Relationship to Vote and proposed Voice
 
