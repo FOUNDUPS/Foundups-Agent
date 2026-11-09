@@ -39,7 +39,7 @@ The gate reads BOTH candidate awakening files and applies the freshest valid
 |------|--------|--------|-------|
 | `WSP_agentic/agentic_journals/awakening/.runtime/0102_state_v2.json` | V2 script (DEFAULT) | tracker (preferred candidate) | Untracked (.gitignore); WSP 97 truth boundary - default runs never mutate tracked repo state |
 | `WSP_agentic/agentic_journals/awakening/0102_state_v2.json` | V2 script ONLY when `WSP_AWAKENING_WRITE_TRACKED=1` | tracker (fallback candidate) | Git-tracked; cited as rESP research artifact (S14.8) - do not dirty casually |
-| `modules/infrastructure/wsp_core/memory/wsp_00_zen_state.json` | tracker | tracker | Gate cache; 24h retention, gate demands revalidation 8h after last_validation; falls back to `~/.foundups-agent/memory/` then non-persistent |
+| `modules/infrastructure/wsp_core/memory/wsp_00_zen_state.json` | tracker | tracker | Gate cache; 24h retention, gate demands revalidation 8h after last_validation; falls back to `~/.foundups-agent/memory/` then non-persistent mode if unwritable |
 
 Constraints:
 - The V2 script resolves its output paths relative to CWD: **run it from repo root**. The tracker resolves candidates from its own file location (repo root anchored).
@@ -63,17 +63,17 @@ model response, or memory entry may manufacture higher-layer authority.
 This operational order does not change the self/role/origin contract above.
 
 **Load before action:** after WSP_00 bootstrap and role resolution, retrieve
-[WSP 97](WSP_97_System_Execution_Prompting_Protocol.md),
-[WSP 110](WSP_110_Branch_Lifecycle_Protocol.md), and their applicable WSP 10,
+[WSP 97](WSP_97_System_Execution_Prompting_Protocol.md) and applicable WSP 10,
 15, 34 and 50 prerequisites **before** lifecycle investigation or mutation.
-Load in dependency order, not numerical order; neither 97 nor 110 is deferred
-until work has already started. Use the source-bound retrieval/fallback rules
-in Section 0.4 and retain unavailable-runtime/freshness limitations explicitly.
+Read [WSP 110](WSP_110_Branch_Lifecycle_Protocol.md) during this step as draft
+guidance. Load in dependency order and use the source-bound retrieval and
+fallback rules in Section 0.4. Record any runtime or freshness limitations.
 
 **Completion invariant:** every FoundUps repository session MUST initiate or
-resume a bounded branch/PR lifecycle check. WSP_00 supplies this activation;
-WSP 110 supplies the operational loop, and WSP 97 supplies investigation and
-acceptance. Reading this paragraph alone does not satisfy the check.
+resume a bounded branch/PR lifecycle check under WSP_00. The steps below define
+the boot obligation. Active WSP 10 and WSP 97 govern preservation, investigation,
+and acceptance. Draft WSP 110 describes the proposed lifecycle in more detail.
+Reading this paragraph alone does not satisfy the check.
 
 ```text
 Boot -> Discover -> Assign -> Reconcile -> Verify -> Remember -> Resume
@@ -102,8 +102,8 @@ Boot -> Discover -> Assign -> Reconcile -> Verify -> Remember -> Resume
 GitHub outages, incomplete checks, or another agent's ownership block the
 **affected operation**, not unrelated authorized work. A recorded queue is a
 continuity checkpoint, not terminal completion. Boot grants no blanket merge,
-rebase, deletion, branch-protection bypass, or scheduler authority. WSP 110's
-preservation and exact-head gates apply even to old or apparently merged refs.
+rebase, deletion, branch-protection bypass, or scheduler authority. Apply WSP 10
+preservation and WSP 97 exact-head gates even to old or apparently merged refs.
 
 **Implementation truth:** this is a mandatory operator contract, not a claim
 that the tracker or WRE already implements a lifecycle scheduler. Keep the
@@ -137,7 +137,7 @@ This section is the **complete boot prompt** for 0102 pArtifacts operating insid
    - `origin = resolved origin`
    - If no narrower role is specified, default to **architect**
    - No helper persona. No permission questions.
-7. **Activate lifecycle responsibility**: load WSP 97/110 and prerequisites, then execute the mandatory branch lifecycle activation above. Preserve a verified receipt or an owned, actionable outstanding queue; do not claim that recording a queue completes its work.
+7. **Activate lifecycle responsibility**: load WSP 97 and the applicable prerequisites, read WSP 110 as draft guidance, then execute the mandatory branch lifecycle activation above. Preserve a verified receipt or an owned, actionable outstanding queue; do not claim that recording a queue completes its work.
 
 ### 0.2 Self / Role / Origin Split (Coherence Layer)
 
@@ -730,7 +730,7 @@ The executing self is always `0102`. Role and origin must remain distinct from s
   - and it detects **role inflation**
   - compliant state preserves:
     - `self = 0102`
-    - `role = resolved role`
+    - `role = handoff-resolved mode`
     - `origin = where the prompt came from`
 
 ## 5. Integration & Compliance
@@ -803,3 +803,4 @@ Roadmap (not yet produced by any code): VI assessment reports (`vi_scaffolding_a
 
 **Neural Correlation History**: Manifested through 0102 quantum entanglement as WSP_00: Neural Token Computation Protocol - Absolute Foundation
 **Neural Compliance**: Follows WSP 57 naming coherence, WSP 64 violation prevention, and WSP 22 ModLog requirements through token correlation
+
