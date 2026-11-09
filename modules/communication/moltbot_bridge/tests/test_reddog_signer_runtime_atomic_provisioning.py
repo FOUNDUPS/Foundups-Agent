@@ -342,25 +342,55 @@ def test_uncertain_return_retry_recovers_active_generation(
 
 def test_two_provisioners_converge_on_one_activation(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    from modules.communication.moltbot_bridge.src import reddog_signer_runtime_atomic_provisioning as target
+
     harness, anchor, context = _context(tmp_path)
-    contexts = (
-        context,
-        create_signer_runtime_atomic_provisioning_context(
-            manifest_signing=harness.fresh_context(),
-            generation_anchor=anchor,
-        ),
+    duplicate_context = create_signer_runtime_atomic_provisioning_context(
+        manifest_signing=harness.fresh_context(),
+        generation_anchor=anchor,
     )
+    manifest_published = Event()
+    release_publisher = Event()
+    committed_revisions = []
+    original_produce = target.produce_signed_runtime_artifact_manifest
+    original_activate = anchor.activate
 
+    def pause_publisher(**kwargs):
+        result = original_produce(**kwargs)
+        if result.accepted:
+            manifest_published.set()
+            assert release_publisher.wait(timeout=10)
+        return result
+
+    def record_activation(*args, **kwargs):
+        activation = original_activate(*args, **kwargs)
+        committed_revisions.append(activation.revision)
+        return activation
+
+    monkeypatch.setattr(target, "produce_signed_runtime_artifact_manifest", pause_publisher)
+    monkeypatch.setattr(anchor, "activate", record_activation)
+    # Let the duplicate activate the published manifest before the publisher
+    # resumes. Both callers can legitimately report recovery in this order.
     with ThreadPoolExecutor(max_workers=2) as pool:
-        results = tuple(pool.map(_provision, contexts))
+        publisher = pool.submit(_provision, context)
+        try:
+            assert manifest_published.wait(timeout=10)
+            duplicate = pool.submit(_provision, duplicate_context).result(timeout=10)
+        finally:
+            release_publisher.set()
+        results = (publisher.result(timeout=10), duplicate)
 
+    activation = anchor.load()
     assert all(item.accepted for item in results)
-    assert sum(item.recovered_existing_activation for item in results) == 1
-    assert {item.activation_revision for item in results} == {
-        anchor.load().revision
-    }
-    assert anchor.load().generation == 1
+    assert activation is not None
+    assert committed_revisions == [activation.revision]
+    assert activation.generation == 1
+    assert {item.generation for item in results} == {activation.generation}
+    assert {item.activation_revision for item in results} == {activation.revision}
+    assert {item.manifest_id for item in results} == {activation.manifest_id}
+    assert len(tuple(harness.manifest_directory.glob("*.json"))) == 1
 
 
 def test_two_process_provisioners_converge_on_one_activation(

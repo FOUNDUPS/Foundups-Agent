@@ -4,6 +4,14 @@ Independent review verifies exactly 39 unchanged public checksum fingerprints,
 appended without scanner/rule changes; fresh CI scanning is still required. Skill
 format and canonical Codex projection checks pass; registry is 1,819/258 quarantined.
 
+## 2026-11-10 — CI merge latency pilot
+
+Add exact-diff shadow classification and scoped Markdown and WSP checks
+alongside the existing required suite. Keep draft, edit and retarget
+coverage while measuring same-revision duplicate runs and the cost of the
+proposed fast path. See [CI merge scope pilot](.github/scripts/README.md#merge-scope-pilot).
+WSP 10, 22, 34, 50 and 97.
+
 ## 2026-11-07 — YouTube conversation stewardship
 
 Add the canonical conversation stewardship skill and first quiet conversation layer:
