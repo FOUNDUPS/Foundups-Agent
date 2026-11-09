@@ -33,7 +33,7 @@ Dates are ISO calendar dates. Times are JST. A dash means not established in thi
 | F-01-2025S-R3 | Regional DC decarbonization / subsidy | FY2025 supplementary / 3 | 2026-09-01 | — | 2026-10-09 12:00 | CLOSED | ELIGIBILITY INQUIRY; existing 2026-09-13 record, no eligibility promotion | 2026-11-02 | S01 |
 | F-02-2026-R2 | Zero-emission regional DC / subsidy | FY2026 / 2 | 2026-09-17 | Inquiry deadline 2026-10-07 17:00, retained from registry | 2026-10-16 12:00 | CLOSED | VERIFIED PROGRAM | 2026-11-02 | S02 |
 | F-03-2026-R1 | GX regional co-creation DC investment / subsidy | FY2026 / 1 | 2026-07-17 | — | 2026-09-01 12:00 | CLOSED; official DC-track selection list published 2026-10-30 | VERIFIED PROGRAM; no YUMORI project status promotion | 2026-11-02 | S03 |
-| F-03-2026-R2 | GX regional co-creation / subsidy | FY2026 / second-call pre-announcement | 2026-08-20 (pre-announcement, not opening) | — | — | PREANNOUNCED; current formal dates require recheck | VERIFIED PROGRAM | 2026-11-02 | S03 |
+| F-03-2026-R2 | GX regional co-creation DC investment / subsidy | FY2026 / 2 (pre-announced 2026-08-20) | 2026-11-09 (formal opening) | J-Grants/G-Biz ID Prime then program portal; valid applicant/power/site/investment unknown | 2026-12-14 12:00 JST (electronic application) | OPEN; official administrator published second-call guides 2026-11-09 | VERIFIED PROGRAM only; no YUMORI applicant eligibility, application, selection or award | 2026-11-10 | S03 |
 | F-04-ROLLING | Fukui AI-DC location incentive / subsidy | Current policy / consultation | — | Prior consultation; exact requirements to recheck | — | VERIFY CURRENT TERMS | VERIFIED PROGRAM; present Phase 1 below recorded threshold | 2026-11-02 | S04 |
 | F-05-2026-ANNUAL | Cabinet Office PPP/PFI / advisory support | FY2026 / annual menus 1-3 | 2026-01-08 | — | 2026-02-28 12:00 | CLOSED | VERIFIED PROGRAM; public-body support, not YUMORI CapEx | 2026-11-02 | S05 |
 | F-05-ONGOING | Cabinet Office expert/one-stop / advisory support | Ongoing support, separate from annual call | — | Public-body route and support menu to confirm | — | ROLLING SUPPORT | VERIFIED PROGRAM | 2026-11-02 | S05 |
@@ -84,7 +84,7 @@ No FY2027 call date or continuation is asserted by this queue.
 
 - S01: https://www.env.go.jp/press/press_05495.html
 - S02: https://www.env.go.jp/press/press_05570.html and https://rcespa.jp/r08-datacenter/r08-datacenter-no2
-- S03: https://gx-area-hojo.jp/ (2026-10-30 first-call DC-selection-list publication; 2026-08-20 second-call pre-announcement, formal second-call terms not promoted); first-call results landing: https://gx-area-hojo--dev1.sandbox.my.salesforce-sites.com/FirstRoundOfInformation
+- S03: https://gx-area-hojo.jp/archives/1701/2026/25/09/09/ (2026-11-09 second-call opening); https://r8.gx-area-hojo.jp/ (2026-12-14 12:00 JST deadline; DC-track rate/cap patterns); https://gx-area-hojo.jp/ (2026-10-30 first-call result; 2026-08-20 advance notice historical)
 - S04: https://kigyoritti.pref.fukui.lg.jp/preferential/archives/1 (legacy verification 2026-09-30; queued for live recheck)
 - S05: https://www8.cao.go.jp/pfi/shien/r8/r8_index.html
 - S06: https://www.pref.fukui.lg.jp/doc/sinsan/dxkasoku.html
@@ -118,6 +118,11 @@ No FY2027 call date or continuation is asserted by this queue.
 - Synchronize the existing FIN `Grants & Subsidies` summary and `Grant Calendar` after registry changes; verify formulas and preserve the AWARDED-only financial gate.
 
 ## Change log
+
+### 2026-11-10 — F-03 second round opens (official release 2026-11-09)
+The METI-appointed GX地域共創補助金 administrator opened its FY2026 second call, including データセンター設備投資型, on 2026-11-09. The active official program portal lists **2026-12-14 12:00 JST** as the application deadline and conditional DC rates/ceilings across three eligible power/location patterns (up to 1/2 or 1/3 for large companies, max ¥25B for patterns 1/2 or ¥10B for pattern 3). This is the same fiscal-year second round previously PREANNOUNCED on 2026-08-20; its immutable round key remains F-03-2026-R2 and the first-round record remains closed. Need verify eligible applicant, lawful site rights, minimum investment, site/power linkage, regional contribution, ownership, staged execution, cost overlap and official applicant-guide details. No YUMORI eligibility, application, selection, award or finance admitted. Official: https://gx-area-hojo.jp/archives/1701/2026/25/09/09/ and https://r8.gx-area-hojo.jp/ .
+
+
 
 ### 2026-11-09 — F-08 FY2026 third-round allocation result confirmed (official publication Nov 6)
 MLIT announced on 2026-11-06 that the FY2026 third round of 官民連携基盤整備推進調査費 supported **one** local-government study: Kitsuki City, Oita (Kitsuki Station area). Planned study cost ¥18.4 million, national study allocation ¥9.2 million (1/2). Neither Fukui City nor YUMORI appears in this sole published selected-project list; this is **not** proof of a Fukui City non-application, and the selected third-party award is neither YUMORI eligibility nor project subsidy revenue. Round remains CLOSED after its 2026-10-08 deadline; next FY2027 opening/deadline not announced. City-led applicant/public-infrastructure-scope questions remain open. Official sources S08b; no 28th round created because this is the same third round.
