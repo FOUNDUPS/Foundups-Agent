@@ -1,0 +1,101 @@
+{
+  "hpc": {
+    "lane": {
+      "foundup_id": "hpc",
+      "title": "Hasan Piker Coalition",
+      "creator": "012",
+      "creator_id": "012",
+      "creator_display": "UnDaoDu (012)",
+      "entity": "Hasan Piker Coalition",
+      "source_type": "derived",
+      "source_id": "UC-LSSlOZwpGIRIYihaz8zCw",
+      "source_handle": "@MOVE2JAPAN",
+      "parent_channels": [
+        "move2japan"
+      ],
+      "derivation_method": "manual_curation",
+      "category": "media",
+      "tags": [
+        "012-lane",
+        "political-media",
+        "schumerout"
+      ],
+      "topic_family": "media",
+      "geo": "Global",
+      "status": "active",
+      "display_order": 101,
+      "related_lanes": [
+        "move2japan"
+      ],
+      "tagline": "Independent political commentary and satire",
+      "description": "A curated political-media FoundUp starting with the SchumerOUT collection of Move2Japan Shorts.",
+      "tier": "F0_DAE",
+      "lifecycle_stage": "incubating",
+      "launch_readiness": "discoverable_only",
+      "poster_url": "https://i.ytimg.com/vi/BXCzUOh9Y8M/oar2.jpg",
+      "video_count": 5,
+      "videos": [
+        {
+          "video_id": "BXCzUOh9Y8M",
+          "title": "Chuck Schumer Out — call senators NOW",
+          "thumbnail_url": "https://i.ytimg.com/vi/BXCzUOh9Y8M/oar2.jpg",
+          "embed_url": "https://www.youtube.com/embed/BXCzUOh9Y8M",
+          "source_url": "https://www.youtube.com/shorts/BXCzUOh9Y8M",
+          "timestamp": "2026-11-08T11:00:22Z",
+          "duration_seconds": 24,
+          "editorial_label": "Opinion",
+          "source_label": "Move2Japan"
+        },
+        {
+          "video_id": "fp2BkIS2FNI",
+          "title": "Here’s a reason why Schumer should be replaced! Chuck #SchumerOUT",
+          "thumbnail_url": "https://i.ytimg.com/vi/fp2BkIS2FNI/oar2.jpg",
+          "embed_url": "https://www.youtube.com/embed/fp2BkIS2FNI",
+          "source_url": "https://www.youtube.com/shorts/fp2BkIS2FNI",
+          "timestamp": "2026-11-07T20:00:02Z",
+          "duration_seconds": 36,
+          "editorial_label": "Opinion",
+          "source_label": "Move2Japan"
+        },
+        {
+          "video_id": "DDAfdpJeUP0",
+          "title": "CHUCK #SchumerOUT call the senate U.S. Capitol Switchboard * Phone: (202) 224-3121",
+          "thumbnail_url": "https://i.ytimg.com/vi/DDAfdpJeUP0/oar2.jpg",
+          "embed_url": "https://www.youtube.com/embed/DDAfdpJeUP0",
+          "source_url": "https://www.youtube.com/shorts/DDAfdpJeUP0",
+          "timestamp": "2026-11-07T19:23:30Z",
+          "duration_seconds": 60,
+          "editorial_label": "Opinion",
+          "source_label": "Move2Japan"
+        },
+        {
+          "video_id": "Pdz1Q5tHmJQ",
+          "title": "BREAKING: “Chuck #SchumerOUT 💙🌊”#HasanPikerCoalition",
+          "thumbnail_url": "https://i.ytimg.com/vi/Pdz1Q5tHmJQ/oar2.jpg",
+          "embed_url": "https://www.youtube.com/embed/Pdz1Q5tHmJQ",
+          "source_url": "https://www.youtube.com/shorts/Pdz1Q5tHmJQ",
+          "timestamp": "2026-11-07T17:14:22Z",
+          "duration_seconds": 50,
+          "editorial_label": "Satire",
+          "source_label": "Move2Japan"
+        },
+        {
+          "video_id": "urXOSlVgPdk",
+          "title": "“I WANT DO!! Every minute of the day, I WANT DO!” Chuck #SchumerOUT NOW",
+          "thumbnail_url": "https://i.ytimg.com/vi/urXOSlVgPdk/oar2.jpg",
+          "embed_url": "https://www.youtube.com/embed/urXOSlVgPdk",
+          "source_url": "https://www.youtube.com/shorts/urXOSlVgPdk",
+          "timestamp": "2026-11-07T14:00:24Z",
+          "duration_seconds": 56,
+          "editorial_label": "Opinion",
+          "source_label": "Move2Japan"
+        }
+      ]
+    },
+    "identity": "Independent satirical FoundUp",
+    "topic": "SchumerOUT",
+    "credit": "Move2Japan",
+    "voice_resource_url": "https://vote.mtrout.com/contact",
+    "disclosure": "This is an independent satirical FoundUp. It is not affiliated with, endorsed by, or operated by Hasan Piker or any other person depicted or discussed. Videos and images belong to their respective creators and rights holders. Commentary and satire do not imply endorsement."
+  }
+}

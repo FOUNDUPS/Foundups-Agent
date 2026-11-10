@@ -70,6 +70,7 @@
   var currentDensity = '3x5';
   var densityManuallySet = false; // Whether user has manually overridden density
   var expandedFoundUp = null; // Index of expanded FoundUp, or null
+  var fixedVideoField = false; // Public projection starts and stays inside one lane.
   var browseScrollTop = 0;
   var expandSourceIndex = null; // Original tile index for collapse animation
   var expandSourceVisual = null; // { bgImage, bgColor } for collapse continuity
@@ -664,6 +665,11 @@
     mallCatalog = fullCatalog.slice();
     originalOrder = mallCatalog.slice();  // Preserve original order
     currentFieldScope = null;  // Reset scope on init
+    fixedVideoField = options?.fixedVideoField === true && mallCatalog.length === 1;
+    if (fixedVideoField) {
+      expandedFoundUp = 0;
+      layoutMode = 'grid';
+    }
     tileField = document.getElementById('mallTileField');
 
     if (!tileField) {
@@ -685,7 +691,8 @@
     configureGroups(options);
 
     // Create collapse hint
-    createCollapseHint();
+    if (fixedVideoField) setMotionMode('glide');
+    else createCollapseHint();
 
     // Auto-select density based on viewport (respects manual override)
     autoSelectDensity();
@@ -712,6 +719,7 @@
 
   /** Replace a public result set. This is presentation, not an access-control gate. */
   function updateCatalog(catalog, options) {
+    if (fixedVideoField) return false;
     if (!tileField) {
       initialize(catalog, options);
       return;
@@ -1267,14 +1275,14 @@
 
       // Enter FoundUp button (bottom-left, visible during preview) — video tiles only
       // Uses stable foundup_id for WSP 104 canonical routing
-      var enterFoundupBtn = hasVideos ? '<button class="mall-tile-enter" aria-label="Enter FoundUp" title="Enter FoundUp"><svg viewBox="0 0 24 24"><path d="M15 3h6v6M14 10l6.1-6.1M9 21H3v-6M10 14l-6.1 6.1"/></svg></button>' : '';
+      var enterFoundupBtn = hasVideos && !fixedVideoField ? '<button class="mall-tile-enter" aria-label="Enter FoundUp" title="Enter FoundUp"><svg viewBox="0 0 24 24"><path d="M15 3h6v6M14 10l6.1-6.1M9 21H3v-6M10 14l-6.1 6.1"/></svg></button>' : '';
 
       // Inline preview container (YouTube iframe or HTML5 video goes here) — video tiles only
       var previewContainer = hasVideos ? '<div class="mall-tile-preview"><div class="mall-tile-preview-stage"></div></div>' : '';
 
       // Speaker button for mute/unmute (top-left, video-backed only)
       var speakerSvg = '<svg viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
-      var audioBtn = hasVideos ? '<button class="mall-tile-audio" aria-label="Start muted preview" title="Start muted preview">' + speakerSvg + '</button>' : '';
+      var audioBtn = hasVideos && !fixedVideoField ? '<button class="mall-tile-audio" aria-label="Start muted preview" title="Start muted preview">' + speakerSvg + '</button>' : '';
 
       // Non-video source type action badge
       var sourceTypeActions = {
@@ -1290,7 +1298,7 @@
 
       return '<article class="' + tileClass + '" data-index="' + index + '" data-foundup-id="' + escapeAttr(item.foundup_id || item.id || '') + '" data-tile-type="' + tileType + '" tabindex="0" aria-label="' + escapeAttr(item.name || item.title || '') + '" style="' + posterStyle + '">' +
         previewContainer +
-        '<span class="mall-tile-badge ' + badgeClass + '">' + escapeHtml(readiness.replace('_', ' ')) + '</span>' +
+        (fixedVideoField ? '' : '<span class="mall-tile-badge ' + badgeClass + '">' + escapeHtml(readiness.replace('_', ' ')) + '</span>') +
         queueBadge +
         sourceActionBadge +
         playIndicator +
@@ -1449,6 +1457,10 @@
         window.gestureZone(tile, {
           onPinchOut: function() {
             var index = Number(tile.dataset.index || 0);
+            if (fixedVideoField) {
+              openFullscreenFromTile(index);
+              return;
+            }
             if (isPropertyListing(mallCatalog[index])) {
               togglePlay(index);
               return;
@@ -1525,7 +1537,7 @@
     if (escapeBound) return;
     escapeBound = true;
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && expandedFoundUp !== null) {
+      if (e.key === 'Escape' && expandedFoundUp !== null && !fixedVideoField) {
         e.stopPropagation();
         collapseFoundUp();
       } else if (e.key === 'Escape' && playingIndex !== null) {
@@ -1542,6 +1554,10 @@
    * @param {number} index - Tile index
    */
   function togglePlay(index) {
+    if (fixedVideoField) {
+      openFullscreenFromTile(index);
+      return;
+    }
     var tiles = tileField.querySelectorAll('.mall-tile');
     var targetTile = getTileElement(index);
 
@@ -1611,7 +1627,8 @@
       var parentItem = mallCatalog[expandedFoundUp];
       if (!parentItem || !parentItem.videos || !parentItem.videos.length) return;
       var foundupId = parentItem.foundup_id || parentItem.id || '';
-      window.mallVideoPlayer.open(foundupId, parentItem.videos, index);
+      var scopedOptions = fixedVideoField ? { returnTile: getTileElement(index) } : undefined;
+      window.mallVideoPlayer.open(foundupId, parentItem.videos, index, scopedOptions);
     } else {
       // Mall mode: tiles are FoundUps — open queue at first video
       var item = mallCatalog[index];
@@ -1682,11 +1699,11 @@
    * @param {number} index - FoundUp index in catalog
    */
   function expandFoundUp(index) {
+    if (fixedVideoField || expandedFoundUp === index) return;
     if (isPropertyListing(mallCatalog[index])) {
       togglePlay(index);
       return;
     }
-    if (expandedFoundUp === index) return; // Already expanded
     stopInlinePreview();
 
     var item = mallCatalog[index];
@@ -1766,7 +1783,7 @@
    * Collapse expanded video field back to Mall
    */
   function collapseFoundUp() {
-    if (expandedFoundUp === null) return;
+    if (expandedFoundUp === null || fixedVideoField) return;
     stopInlinePreview();
 
     // Hide collapse hint first
@@ -2157,6 +2174,7 @@
    * @param {string} foundupId - Stable FoundUp identity
    */
   function navigateToFoundUp(foundupId) {
+    if (fixedVideoField) return;
     if (!foundupId) return;
     // Stop any active preview before navigation
     stopInlinePreview();
@@ -2266,6 +2284,7 @@
    * @param {string} projection - Projection name: default, alpha, readiness, category
    */
   function setProjection(projection) {
+    if (fixedVideoField) return;
     resetMediaScope();
     if (!['default', 'alpha', 'readiness', 'category'].includes(projection)) {
       projection = 'default';
@@ -2406,6 +2425,7 @@
    * @param {Object} options - { type: 'personal'|'creator'|'category'|'tag', query?: string }
    */
   function setFieldScope(options) {
+    if (fixedVideoField) return false;
     if (!options || !options.type) {
       clearFieldScope();
       return;
@@ -2469,6 +2489,7 @@
    * Clear field scope (show all lanes)
    */
   function clearFieldScope() {
+    if (fixedVideoField) return;
     if (currentFieldScope === null) return;
     resetMediaScope();
     currentFieldScope = null;

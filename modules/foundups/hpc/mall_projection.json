@@ -1,0 +1,45 @@
+{
+  "foundup_id": "hpc",
+  "source_foundup_id": "move2japan",
+  "identity": "Independent satirical FoundUp",
+  "topic": "SchumerOUT",
+  "voice_resource_url": "https://vote.mtrout.com/contact",
+  "disclosure": "This is an independent satirical FoundUp. It is not affiliated with, endorsed by, or operated by Hasan Piker or any other person depicted or discussed. Videos and images belong to their respective creators and rights holders. Commentary and satire do not imply endorsement.",
+  "videos": [
+    {
+      "video_id": "BXCzUOh9Y8M",
+      "title": "Chuck Schumer Out — call senators NOW",
+      "timestamp": "2026-11-08T11:00:22Z",
+      "duration_seconds": 24,
+      "editorial_label": "Opinion"
+    },
+    {
+      "video_id": "fp2BkIS2FNI",
+      "title": "Here’s a reason why Schumer should be replaced! Chuck #SchumerOUT",
+      "timestamp": "2026-11-07T20:00:02Z",
+      "duration_seconds": 36,
+      "editorial_label": "Opinion"
+    },
+    {
+      "video_id": "DDAfdpJeUP0",
+      "title": "CHUCK #SchumerOUT call the senate U.S. Capitol Switchboard * Phone: (202) 224-3121",
+      "timestamp": "2026-11-07T19:23:30Z",
+      "duration_seconds": 60,
+      "editorial_label": "Opinion"
+    },
+    {
+      "video_id": "Pdz1Q5tHmJQ",
+      "title": "BREAKING: “Chuck #SchumerOUT 💙🌊”#HasanPikerCoalition",
+      "timestamp": "2026-11-07T17:14:22Z",
+      "duration_seconds": 50,
+      "editorial_label": "Satire"
+    },
+    {
+      "video_id": "urXOSlVgPdk",
+      "title": "“I WANT DO!! Every minute of the day, I WANT DO!” Chuck #SchumerOUT NOW",
+      "timestamp": "2026-11-07T14:00:24Z",
+      "duration_seconds": 56,
+      "editorial_label": "Opinion"
+    }
+  ]
+}

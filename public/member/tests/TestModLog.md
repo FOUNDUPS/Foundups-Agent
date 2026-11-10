@@ -1,3 +1,11 @@
+## 2026-11-11 · HPC scoped video and state
+
+The shared product-state and service-worker VM covers exact hostname/query
+selection, tab-local scroll data, catalog separation and declared asset versions.
+The registry and catalog suites verify the Vote parent reference and reproducible
+public projection. Mobile Chromium preview checks the grid, disclosure, shared
+player, official YouTube embed, Vote handoff and sign-in boundary.
+
 ## 2026-10-25 | FX1 public directory and actual filter events
 
 Independent closeout: the same 300 cases passed again in 6.63s, with two inherited

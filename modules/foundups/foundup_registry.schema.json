@@ -182,6 +182,11 @@
         "entity_type": {
           "$ref": "#/$defs/EntityType"
         },
+        "parent_foundup_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{2,49}$",
+          "description": "Optional canonical parent FoundUp ID for discovery and product lineage. Grants no ownership or authorization."
+        },
         "module_path": {
           "type": ["string", "null"],
           "description": "Path relative to repo root, or null for external"

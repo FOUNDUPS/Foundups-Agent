@@ -1,3 +1,19 @@
+## HPC public Mall shell metadata review — 2026-11-11
+
+PR #2349's pinned Gitleaks run
+[`129930709412`](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/42845204382/job/129930709412)
+reported two current-tree `generic-api-key` candidates at
+`public/index.html:79` and `public/member/index.html:28`. The complete
+Clerk SDK elements at `359c91d29` are byte-identical to base `b7e7e1ac1`,
+where the matches on lines 75 and 25 have exact prior approvals. Clerk
+documents the frontend identifiers as publishable.
+[Clerk key documentation](https://clerk.com/docs/guides/secure/rotate-api-keys)
+
+The new whole-file digests and locations require two exact bindings. The
+ledger retains all 4,419 prior entries and appends only these two.
+The blocking scanner still covers the tracked tree and introduced history
+with the same rules and fingerprint algorithm.
+
 ## Stream inventory diagnostics metadata review — 2026-11-10
 
 The backend manifest refreshes three scheduler source checksums and retains

@@ -12,4 +12,4 @@ def test_mall_product_state_and_service_worker_runtime():
     script = Path(__file__).with_name("mall_product_state_vm.mjs")
     result = subprocess.run(["node", str(script)], capture_output=True, text=True, timeout=30)
     assert result.returncode == 0, result.stdout + result.stderr
-    assert "Mall product state and service worker runtime: 17 passed." in result.stdout
+    assert "Mall product state and service worker runtime: 20 passed." in result.stdout

@@ -135,6 +135,13 @@ called by catalog reads or Holo queries.
 
 ## Browser/member interface
 
+The public HPC video projection enters the same browser shell at
+`/member/?foundup=hpc`. The generated public video catalog contains the
+reviewed derived lane. The member video catalog contains its discovery card
+and uses the same registry identity. The browser route selects presentation,
+while the WSP 104 app handoff and server checks own membership and capabilities.
+See [HPC's interface](../hpc/INTERFACE.md).
+
 The static homepage's FX anchor targets the existing `/f/` public directory.
 Its project/ticker search consumes only the scope-free public projection; no
 Python/HTTP API or router is added. See
