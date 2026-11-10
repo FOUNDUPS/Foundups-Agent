@@ -156,3 +156,25 @@ This review used direct GitHub source/issue/PR retrieval and public primary/prov
 Open authoring decisions before implementation: actual shared pepper scale/control, roster and senators-elect release rules, provider availability/licensing, source refresh/cache policy, and a qualified shared action owner. Unknowns stay visible rather than becoming invented requirements or ready-made integrations.
 
 Related open work at review: #2331 owns foundational Play FoundUps terminology; #2333 owns the Vote/Oversight classification reconciliation; #2328 owns Oversight navigation; #2335 owns WSP lifecycle changes. Do not modify or merge those lanes through this intake. The new product clarification should be reconciled with their accepted outcomes without overwriting them. Work retains merge execution; this authoring slice creates no blanket merge or branch-cleanup authority.
+
+## 10. PolyVoice extension — 2026-11-10
+
+The [PolyVoice module specification](POLYVOICE_MODULE.md) adds 012's proposed
+representative-facing transparency workflow to Voice, without replacing Voice's
+citizen issue/action role or Vote's selected card-first PoC. Voice owns consent,
+local meeting review and disclosure policy; Vote consumes only an approved,
+source-qualified public JSON projection. AutoPost supplies candidate reusable
+capture/media/perception components, not automatic meeting publication.
+
+The specification records outcome, solution, pain, source-draft corrections,
+PoC/prototype gates, explicit retrieval queries, existing test-reuse targets,
+comparables and open legal/device questions. Private session data and local
+media references stay separate from the public disclosure. Model provenance
+is not device attestation; office disclosure is not independent proof; unknown
+coverage and non-adoption are not guilt. No microphone, social posting, new
+tenant, runtime schema, leaderboard or deployment is activated by this extension.
+
+The extension audit read main at `dc1ef39df8a3d4150f54a6c1608a624216c767db`,
+which already contains the #2333 Oversight-classification clarification. This
+updates the review context above without altering its historical account or
+merging other lanes. Issue #2330 remains the Voice implementation intake.
