@@ -58,7 +58,7 @@ SUITES = {
         SCHEDULER_TESTS + 'test_video_policy_save_readback.py',
         SCHEDULER_TESTS + 'test_video_policy_inline.py',
         'modules/communication/youtube_shorts/tests/test_operator_upload_policy.py')),
-    'calendar': (233, '34a1025bcfdc347dcf132ef4a8ae877cc25420add05e32c9ed8176db53136309', (
+    'calendar': (283, '6f023a55efaa1140f8efee0c5f4e0cdfdb4c5142859be4fb022d691be91c2dd8', (
         'modules/communication/livechat/tests/test_operator_stream_schedule.py',
         'modules/communication/livechat/tests/test_operator_recorded_stream_schedule.py',
         SCHEDULER_TESTS + 'test_stream_schedule_calendar.py',

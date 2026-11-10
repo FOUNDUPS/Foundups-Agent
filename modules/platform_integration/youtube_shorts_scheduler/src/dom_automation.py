@@ -2611,12 +2611,44 @@ class YouTubeStudioDOM:
         except NoSuchElementException:
             return False
 
-    def click_next_page(self):
-        """Navigate to next page of results."""
-        btn = self.wait_for_clickable(self.selectors.NEXT_PAGE_BTN)
-        self.safe_click(btn)
-        import time
-        time.sleep(1)  # Wait for page load
+    def click_next_page(self, *, expected_page=None):
+        """Use the inventory's observed native control; wait for changed rows.
+
+        Studio can render #navigate-after inside an open shadow root rather
+        than the legacy labelled light-DOM button. One click only: a failure
+        must not advance a second time and silently omit a calendar page.
+        """
+        from .schedule_inventory import SCHEDULED_PAGE_SCRIPT
+        before = self.driver.execute_script(SCHEDULED_PAGE_SCRIPT, True)
+        if expected_page is not None and (not isinstance(expected_page, dict)
+                or not isinstance(before, dict) or any(before.get(key) != expected_page.get(key)
+                    for key in ('channel_id', 'url', 'chip_texts', 'search_text', 'rows'))):
+            raise RuntimeError('pagination_scope_changed')
+
+        def row_ids(snapshot):
+            rows = snapshot.get('rows') if isinstance(snapshot, dict) else None
+            if not isinstance(rows, list) or not rows or len(rows) > 1000:
+                return None
+            ids = [row.get('video_id') if isinstance(row, dict) else None for row in rows]
+            return tuple(ids) if all(isinstance(vid, str) and vid for vid in ids) else None
+
+        original = row_ids(before)
+        if (original is None or before.get('loading') is not False
+                or before.get('next_page') is not True or before.get('next_control') is None):
+            raise RuntimeError('pagination_control_unverified')
+        before['next_control'].click()
+
+        def advanced(_driver):
+            after = self.driver.execute_script(SCHEDULED_PAGE_SCRIPT)
+            if not isinstance(after, dict):
+                return False
+            if any(after.get(key) != before.get(key) for key in ('channel_id', 'chip_texts', 'search_text')):
+                raise RuntimeError('pagination_scope_changed')
+            current = row_ids(after)
+            return (after.get('loading') is False and after.get('previous_page') is True
+                    and current is not None and current != original)
+
+        WebDriverWait(self.driver, 10).until(advanced)
 
     # =========================================
     # PAGE 2: VIDEO EDIT METHODS

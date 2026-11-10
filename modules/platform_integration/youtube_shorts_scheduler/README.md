@@ -2,6 +2,13 @@
 
 ## First test after a stream ends
 
+For an already accepted, pending request, add `--inspect-request` to the native
+CLI command below to diagnose Unlisted inventory through the same browser owner.
+It reads only that request and returns content-free page checks and match counts.
+It does not consume inbox commands, claim a batch, reserve slots or save content.
+Expired or terminal requests are not inspectable through this execution entry.
+Inspection retains the runtime lease, source/access checks and verification handoff.
+
 An explicit private `recorded_source` and `first_test_only: true` request can
 name an ended stream without inventing a live session. The native Agent CLI
 accepts `--request-id <id> --browser chrome|edge` after the producer enqueues it.

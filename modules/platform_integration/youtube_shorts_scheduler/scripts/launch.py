@@ -914,13 +914,19 @@ async def _has_schedule_target_access(swapper, channel_key: str, expected_channe
         return False
 
 
-def _run_stream_schedule_requests(driver, requests, *, dry_run=False, stop_event=None, queue=None):
+def _run_stream_schedule_requests(driver, requests, *, dry_run=False, stop_event=None, queue=None,
+                                  inspect_only=False):
     """Consume frozen manifest work through this already-owned browser only.
 
     No ordinary rotation, extra-tab cleanup, audit navigation or origin restore
     follows this branch. Discovery is read-only; the queue lock covers only the
     immutable claim, never browser work or a scheduler Save.
     """
+    if inspect_only and (not isinstance(requests, list) or len(requests) != 1
+            or not isinstance(requests[0], dict) or requests[0].get('source_kind') != 'recorded'
+            or requests[0].get('first_test_only') is not True):
+        return {'stream_schedule_requests': [{'status': 'blocked', 'reason': 'single_recorded_first_test_required'}],
+                'saved_state_verified': False, 'operator_handoff_required': False, 'inspection_only': True}
     import asyncio
     from modules.communication.livechat.src.operator_command_queue import OperatorCommandQueue
     from modules.communication.livechat.src.automation_gates import stop_active, _env_truthy
@@ -955,21 +961,33 @@ def _run_stream_schedule_requests(driver, requests, *, dry_run=False, stop_event
             access = verify_schedule_target_access(driver, request['channel_id'],
                                                     request['parent_video_id'], **access_options)
             if access.get('verified') is not True:
-                outcomes.append({'status': 'pending', 'reason': 'same_target_access_unverified'})
+                outcomes.append({'status': 'pending', 'reason': 'same_target_access_unverified',
+                                 'access_reason': access.get('reason') if access.get('reason') in {
+                                     'invalid_schedule_target', 'studio_permission_denied',
+                                     'studio_permission_unobserved', 'studio_parent_title_changed',
+                                     'studio_parent_access_unverified'} else 'studio_parent_access_unverified'})
                 continue
-            scheduler = YouTubeShortsScheduler(config['key'], dry_run=False)
+            scheduler = YouTubeShortsScheduler(config['key'], dry_run=inspect_only)
             if (scheduler.channel_id != request['channel_id']
                     or scheduler.config['id'] != request['channel_id']
                     or scheduler.tracker.channel_id != request['channel_id']):
                 raise ValueError('stream_schedule_channel_mismatch')
             scheduler.driver = driver
             scheduler.request_driver = driver
-            scheduler.dom = YouTubeStudioDOM(driver)
+            scheduler.dom = YouTubeStudioDOM(driver, capture_diagnostics=not inspect_only)
             scheduler.stream_schedule_request = request
             scheduler.stop_event = stop_event
             batch = scheduler.discover_stream_title_batch(request['stream_title'])
+            if inspect_only:
+                outcomes.append({'status': 'inspected', 'reason': batch.get('reason'),
+                                 'inventory_complete': batch.get('complete') is True,
+                                 'matching_count': len(batch.get('video_ids', [])),
+                                 'diagnostics': batch.get('diagnostics', {})})
+                break  # Inspection never claims a batch, reserves a slot or saves.
             if batch.get('complete') is not True:
-                outcomes.append({'status': 'pending', 'reason': 'stream_title_inventory_incomplete'})
+                outcomes.append({'status': 'pending', 'reason': 'stream_title_inventory_incomplete',
+                                 'inventory_reason': batch.get('reason'),
+                                 'diagnostics': batch.get('diagnostics', {})})
                 continue
             claimed = queue.claim_stream_schedule_request(request, batch['video_ids'])
             handoff_required = True
@@ -997,6 +1015,9 @@ def _run_stream_schedule_requests(driver, requests, *, dry_run=False, stop_event
             break  # Preserve the claimed request's final editor for operator review.
         except VerificationHandoff:
             handoff_required = True
+            if inspect_only:
+                outcomes.append({'status': 'blocked', 'reason': 'verification_handoff'})
+                break
             # Never try another request/browser after manual or authentication takeover.
             if claimed is None:
                 try:
@@ -1021,7 +1042,7 @@ def _run_stream_schedule_requests(driver, requests, *, dry_run=False, stop_event
                              'reason': 'execution_outcome_unknown' if claimed else 'request_unavailable'})
             break
     return {'stream_schedule_requests': outcomes, 'saved_state_verified': False,
-            'operator_handoff_required': handoff_required}
+            'operator_handoff_required': handoff_required, 'inspection_only': inspect_only}
 
 
 def run_multi_channel_scheduler(
@@ -1031,6 +1052,7 @@ def run_multi_channel_scheduler(
     dry_run: bool = False,
     stop_event: "threading.Event | None" = None,
     stream_schedule_requests: Optional[List[dict]] = None,
+    stream_schedule_inspect_only: bool = False,
 ) -> dict:
     """
     Run scheduler across multiple channels in a single browser session.
@@ -1048,6 +1070,12 @@ def run_multi_channel_scheduler(
     Returns:
         Dict with results per channel
     """
+    if stream_schedule_inspect_only and (not isinstance(stream_schedule_requests, list)
+            or len(stream_schedule_requests) != 1 or not isinstance(stream_schedule_requests[0], dict)
+            or stream_schedule_requests[0].get('source_kind') != 'recorded'
+            or stream_schedule_requests[0].get('first_test_only') is not True):
+        return {'error': 'inspection_requires_frozen_request', 'inspection_only': True,
+                'saved_state_verified': False}
     import os
     import asyncio
     from selenium import webdriver
@@ -1138,7 +1166,8 @@ def run_multi_channel_scheduler(
 
     if stream_schedule_requests is not None:
         return _run_stream_schedule_requests(driver, stream_schedule_requests,
-                                             dry_run=dry_run, stop_event=stop_event)
+                                             dry_run=dry_run, stop_event=stop_event,
+                                             inspect_only=stream_schedule_inspect_only)
 
     # FIX: Close extra tabs if session restore opened multiple (2026-01-18)
     # HARDENED 2026-03-18: Handle Chrome 146 timeout issues gracefully

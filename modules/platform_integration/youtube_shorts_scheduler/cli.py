@@ -34,11 +34,12 @@ logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
 
 
-def run_operator_request(command_id, browser):
+def run_operator_request(command_id, browser, *, inspect_only=False):
     """Run one private first-test request through the native scheduling owner.
 
     This entry owns the same host lease as the full DAE. It consumes only the
     named scheduling command, never announcements or another pending request.
+    Inspection reads an already accepted pending request without consuming inbox work.
     """
     from modules.communication.livechat.src.automation_gates import (
         youtube_runtime_owner, stop_active, _env_truthy,
@@ -49,7 +50,11 @@ def run_operator_request(command_id, browser):
 
     with youtube_runtime_owner():
         queue = OperatorCommandQueue(None)
-        request = asyncio.run(queue.refresh_stream_schedule_request(command_id, recorded_only=True))
+        if inspect_only:
+            request = next((item for item in queue.get_pending_stream_schedule_requests()
+                            if item['id'] == command_id), None)
+        else:
+            request = asyncio.run(queue.refresh_stream_schedule_request(command_id, recorded_only=True))
         if request is None:
             return {'success': False, 'status': 'request_not_pending',
                     'receipt': queue.inspect_command(command_id)}
@@ -63,13 +68,18 @@ def run_operator_request(command_id, browser):
         if (stop_active('scheduling') or not _env_truthy('YT_AUTOMATION_ENABLED', 'true')
                 or not _env_truthy('YT_SHORTS_SCHEDULING_ENABLED', 'true')):
             return {'success': False, 'status': 'stream_schedule_gate_closed'}
+        options = {'stream_schedule_inspect_only': True} if inspect_only else {}
         result = run_multi_channel_scheduler(
             browser=browser, mode='schedule', max_per_channel=1,
-            stream_schedule_requests=[request],
+            stream_schedule_requests=[request], **options,
         )
-        return {'success': False, 'status': 'operator_review_required',
+        outcomes = result.get('stream_schedule_requests') if isinstance(result, dict) else None
+        inspected = (isinstance(outcomes, list) and len(outcomes) == 1
+                     and isinstance(outcomes[0], dict) and outcomes[0].get('status') == 'inspected')
+        status = ('request_inspected' if inspected else 'inspection_blocked') if inspect_only else 'operator_review_required'
+        return {'success': False, 'status': status,
                 'receipt': queue.inspect_command(command_id), 'execution': result,
-                'scheduling_verified': False}
+                'scheduling_verified': False, **({'inspection_only': True} if inspect_only else {})}
 
 
 def scheduling_preflight(channel, browser=None):
@@ -162,6 +172,8 @@ Examples:
                         help='Channel key: move2japan, undaodu, foundups')
     parser.add_argument('--request-id', type=str,
                         help='Consume only this recorded-stream first-test manifest command')
+    parser.add_argument('--inspect-request', action='store_true',
+                        help='Inspect an already accepted pending --request-id without claiming or scheduling')
     parser.add_argument('--max-videos', '-m', type=int, default=0,
                         help='Optional processing limit; default 0 schedules the whole batch')
     parser.add_argument('--video-ids', type=str,
@@ -185,6 +197,8 @@ Examples:
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
 
+    if args.inspect_request and args.request_id is None:
+        parser.error('--inspect-request requires --request-id and --browser')
     if args.request_id is not None:
         if (not args.browser or args.channel or args.video_ids is not None or args.max_videos
                 or args.list_channels or args.dry_run or args.preflight or args.preserve_metadata):
@@ -195,7 +209,8 @@ Examples:
         from dotenv import load_dotenv
         load_dotenv(Path(__file__).resolve().parents[3] / '.env', override=False)
         try:
-            result = run_operator_request(args.request_id, args.browser)
+            options = {'inspect_only': True} if args.inspect_request else {}
+            result = run_operator_request(args.request_id, args.browser, **options)
         except (OSError, ValueError, TimeoutError, RuntimeError) as exc:
             result = {'success': False, 'status': 'request_execution_blocked',
                       'reason': type(exc).__name__, 'scheduling_verified': False}

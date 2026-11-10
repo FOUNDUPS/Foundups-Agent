@@ -1,3 +1,15 @@
+## 2026-11-10 — Native request inventory inspection
+
+The sealed calendar suite retains all 233 previous cases and adds 50 controls.
+Real disposable queue bytes stay unchanged during inspection, including unseen,
+expired, access-blocked, verification-handoff and widened-scope requests. The
+actual launcher exits before claim/finish or scheduling. Diagnostics keep only
+bounded counts, flags and reason codes; tests reject titles/IDs/URLs in that data.
+The inventory suite retains its 102 cases. Pagination tests bind the qualified
+page witness, require a single observed-control click and changed rows, and refuse
+scope drift before clicking. No real browser, account, model, network or provider
+action occurs in these tests.
+
 ## 2026-11-10 — Frozen stream browser access
 
 `test_remote_cli.py` exercises `verify_schedule_target_access` with synthetic
