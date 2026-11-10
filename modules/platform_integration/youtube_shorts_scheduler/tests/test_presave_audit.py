@@ -13,6 +13,56 @@ CHANNEL = "UC" + "x" * 22
 VIDEO = "x" * 11
 
 
+@pytest.fixture(autouse=True)
+def isolated_audience_environment(monkeypatch):
+    monkeypatch.delenv("YT_MADE_FOR_KIDS_CHANNEL_IDS", raising=False)
+    monkeypatch.delenv("YT_NOT_MADE_FOR_KIDS_CHANNEL_IDS", raising=False)
+
+
+@pytest.mark.parametrize("target", [True, False])
+def test_environment_audience_uses_native_identity_without_enabling_channel(monkeypatch, target):
+    monkeypatch.setattr(channel_config, "CHANNELS", {})
+    setting = "YT_MADE_FOR_KIDS_CHANNEL_IDS" if target else "YT_NOT_MADE_FOR_KIDS_CHANNEL_IDS"
+    monkeypatch.setenv(setting, CHANNEL)
+    assert policy.audience_target(CHANNEL) is target
+    assert channel_config.CHANNELS == {}
+    with pytest.raises(policy.PreSaveAuditBlocked, match="unconfigured"):
+        policy.audience_target("UC" + "y" * 22)
+
+
+@pytest.mark.parametrize("problem", ["handle", "duplicate", "overlap", "trailing_comma", "conflict", "registry_string", "duplicate_registry"])
+def test_invalid_audience_configuration_cannot_select_or_claim(draft, monkeypatch, problem):
+    dom, state, calls = draft
+    if problem == "handle": monkeypatch.setenv("YT_MADE_FOR_KIDS_CHANNEL_IDS", "@Kids")
+    if problem == "duplicate": monkeypatch.setenv("YT_MADE_FOR_KIDS_CHANNEL_IDS", CHANNEL + "," + CHANNEL)
+    if problem == "overlap":
+        monkeypatch.setenv("YT_MADE_FOR_KIDS_CHANNEL_IDS", CHANNEL)
+        monkeypatch.setenv("YT_NOT_MADE_FOR_KIDS_CHANNEL_IDS", CHANNEL)
+    if problem == "trailing_comma": monkeypatch.setenv("YT_NOT_MADE_FOR_KIDS_CHANNEL_IDS", CHANNEL + ",")
+    if problem == "conflict": monkeypatch.setenv("YT_MADE_FOR_KIDS_CHANNEL_IDS", CHANNEL)
+    if problem == "registry_string": monkeypatch.setitem(channel_config.CHANNELS["audit"], "made_for_kids", "false")
+    if problem == "duplicate_registry": monkeypatch.setitem(channel_config.CHANNELS, "duplicate", {"id": CHANNEL, "made_for_kids": False})
+    with pytest.raises(policy.PreSaveAuditBlocked, match="invalid_or_conflicting"):
+        dom.prepare_schedule_audit()
+    assert calls["audience"] == calls["claim"] == calls["save"] == 0
+
+
+@pytest.mark.parametrize("audience", [True, False, None, "false"])
+def test_registry_round_trip_preserves_audience_without_name_defaults(tmp_path, monkeypatch, audience):
+    from modules.infrastructure.shared_utilities import youtube_channel_registry as registry
+    monkeypatch.setattr(registry, "_REGISTRY_PATH", tmp_path / "channels.json")
+    monkeypatch.setattr(registry, "_default_channels", lambda: [])
+    registry.save_registry({"channels": [{"key": "antifafm", "id": CHANNEL, "shorts": {"made_for_kids": audience}}]})
+    monkeypatch.setattr(channel_config, "get_channels", registry.get_channels)
+    channels = channel_config._build_channel_config()
+    assert channels["antifafm"]["made_for_kids"] == audience
+    monkeypatch.setattr(channel_config, "CHANNELS", channels)
+    if type(audience) is bool:
+        assert policy.audience_target(CHANNEL) is audience
+    else:
+        with pytest.raises(policy.PreSaveAuditBlocked): policy.audience_target(CHANNEL)
+
+
 @pytest.fixture
 def draft(monkeypatch):
     monkeypatch.setitem(channel_config.CHANNELS, "audit", {"id": CHANNEL, "made_for_kids": False})

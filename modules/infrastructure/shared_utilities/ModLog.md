@@ -1,5 +1,14 @@
 # WSP Module ModLog: Shared Utilities
 
+## 2026-11-10 — Preserve explicit YouTube audience policy
+
+Registry normalization now retains `shorts.made_for_kids` through save/load.
+Absent values remain None and malformed values remain distinguishable so the
+scheduling owner can refuse them; no truthiness conversion or channel default.
+The scheduler's offline audit controls cover true/false/absent/string round trips.
+No channel IDs, operational roles or existing registry files changed in source.
+WSP11/22/50/84/97; live qualification remains separate.
+
 ## 2026-11-05 — Role-owned native keys and truthful initialization status
 
 WSP11/22/50/62/84/97. Extended the existing role selector with scoped code/triage

@@ -1,5 +1,19 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-11-10 — Audit before scheduling; explicit audience configuration
+
+Extend existing detail Save guards with title/description completeness, observed
+audience and future date/time/timezone checks. Missing metadata consumes only
+matched eligible existing analysis; absent evidence blocks. Content-row scheduling
+enters the detail owner; unauditable inline writes refuse before claims/clicks.
+Keep manual-field protection, private directives and uncertain-save records.
+
+012's configuration correction removes channel-name audience defaults. Exact-ID
+Yes/No lists come from the runtime environment; explicit registry booleans survive
+normalization. Malformed, duplicate, conflicting or absent policy cannot select
+an audience or save. No configured ID enables a new channel's operational roles.
+Offline controls and installed/live qualification are separate. WSP11/22/50/84/97.
+
 ## 2026-11-10 — Guard direct launch attachments during verification
 
 Install the shared Selenium verification handoff on both launch attachment

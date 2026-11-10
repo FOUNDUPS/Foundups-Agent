@@ -1,3 +1,13 @@
+## 2026-11-10 — Pre-save audit and audience configuration
+
+The existing protected directives runner selects114 cases, including48 new
+pre-save audit/configuration controls. Synthetic drafts exercise actual preparation
+and Save owners: metadata completeness, eligible analysis reuse, observed audience,
+late changes, exact identity, invalid/DST slots and detail-owner handoff. Thirteen
+configuration cases cover native-ID Yes/No without enabling channels, invalid or
+conflicting configuration with zero writes, and registry audience round trips.
+All66 prior directive/upload controls remain. No browser/model/public action occurs.
+
 ## 2026-11-05 — Native visibility readiness regression
 
 The same four-file private-directive consumer selection now passes66 controls

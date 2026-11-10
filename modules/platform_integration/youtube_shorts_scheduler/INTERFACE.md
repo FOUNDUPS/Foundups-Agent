@@ -11,9 +11,13 @@ never private text. The audience value is included in the durable schedule diges
 The radio check requires exactly one enabled, visible native Yes and No control.
 
 `CHANNELS[*].made_for_kids` accepts a literal boolean from the registry's
-`shorts.made_for_kids`. The four existing non-kids keys default to False; every
-other key is unconfigured unless explicitly assigned. No display-name or duration
-inference establishes the kids-channel exception.
+`shorts.made_for_kids`, preserved by registry normalization/save/load.
+`configured_audience(channel_id)` additionally reads the current environment's
+`YT_MADE_FOR_KIDS_CHANNEL_IDS` and `YT_NOT_MADE_FOR_KIDS_CHANNEL_IDS` lists.
+Entries must be exact native IDs, unique within and across lists. A conflicting
+registry answer or duplicate registry identity refuses; missing policy is unknown.
+There is no channel-name default or duration inference. The helper never loads
+dotenv itself, adds a channel or enables its roles; startup owns environment loading.
 
 `schedule_video_from_row` now verifies the row identity and uses the detail owner;
 `schedule_all_visible` ends its list snapshot after one attempted detail candidate.

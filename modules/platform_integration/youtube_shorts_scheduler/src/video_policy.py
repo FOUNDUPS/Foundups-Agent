@@ -46,11 +46,14 @@ def metadata_audit_issues(title, description):
 
 def audience_target(channel_id):
     """Resolve only the exact configured channel; unknown/kids channels never default to No."""
-    from .channel_config import CHANNELS
-    matches = [config for config in CHANNELS.values() if config.get("id") == channel_id]
-    if len(matches) != 1 or type(matches[0].get("made_for_kids")) is not bool:
+    from .channel_config import configured_audience
+    try:
+        target = configured_audience(channel_id)
+    except ValueError:
+        raise PreSaveAuditBlocked("audience_policy_invalid_or_conflicting") from None
+    if type(target) is not bool:
         raise PreSaveAuditBlocked("audience_policy_unconfigured")
-    return matches[0]["made_for_kids"]
+    return target
 
 
 def audit_schedule(session, snapshot):

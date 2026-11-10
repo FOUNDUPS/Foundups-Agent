@@ -24,9 +24,13 @@ Before scheduling and again at Done/page Save, check:
 - A human-facing description within 5,000 characters. A provenance trailer
   alone or drafting preamble is insufficient.
 - The native Audience controls are unambiguous and the expected radio is
-  actually selected. 012's four configured non-kids channels default to No.
-  Us Story Time requires its separately configured native identity and explicit
-  `shorts.made_for_kids: true`; unknown channels have no default answer.
+  actually selected. Use the explicit native IDs in the runtime environment's
+  `YT_MADE_FOR_KIDS_CHANNEL_IDS` / `YT_NOT_MADE_FOR_KIDS_CHANNEL_IDS`, or the
+  registry's literal `shorts.made_for_kids` boolean. Us Story Time's native ID
+  belongs in the Yes configuration; 012's non-kids channel IDs belong in No.
+  No IDs or channel-name defaults belong in scheduling logic. Missing, malformed,
+  duplicate or conflicting policy blocks. Configuration alone does not enable
+  scheduling, comments or indexing on a new channel.
 - A future, valid date/time with an explicit configured timezone. Ambiguous
   or nonexistent DST times block. This validates intent, not Studio's persisted
   timezone/slot, calendar completeness or the absence of restrictions.

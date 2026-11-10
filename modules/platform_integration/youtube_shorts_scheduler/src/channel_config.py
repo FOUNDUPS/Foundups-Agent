@@ -19,6 +19,8 @@ The `available_ports` shows all browsers that can access the channel.
 from typing import Dict, Any, Optional, List
 from urllib.parse import quote
 import json
+import os
+import re
 import socket
 
 from modules.infrastructure.shared_utilities.youtube_channel_registry import get_channels
@@ -55,16 +57,40 @@ def _build_channel_config() -> Dict[str, Dict[str, Any]]:
             "account_section": browser.get("account_section", 0),
             "description_template": shorts.get("description_template", "ffcpln"),
             "content_types": ch.get("content_types") or ["short"],
-            # 012 direction (2026-11-10): these four channels are not for kids.
-            # A separately configured kids channel must explicitly opt into True.
-            "made_for_kids": shorts.get("made_for_kids", False if key in
-                {"move2japan", "undaodu", "foundups", "antifafm"} else None),
+            "made_for_kids": shorts.get("made_for_kids"),
         }
     return channels
 
 
 # Channel configurations (registry-driven)
 CHANNELS: Dict[str, Dict[str, Any]] = _build_channel_config()
+
+
+def configured_audience(channel_id: str) -> Optional[bool]:
+    """Resolve explicit native-ID policy; this does not enable a channel's roles."""
+    environment = {}
+    for setting, target in (("YT_MADE_FOR_KIDS_CHANNEL_IDS", True),
+                            ("YT_NOT_MADE_FOR_KIDS_CHANNEL_IDS", False)):
+        raw = os.environ.get(setting, "").strip()
+        if not raw:
+            continue
+        for value in raw.split(","):
+            value = value.strip()
+            if not re.fullmatch(r"UC[A-Za-z0-9_-]{22}", value) or value in environment:
+                raise ValueError("audience_environment_invalid_or_duplicate")
+            environment[value] = target
+    matches = [config for config in CHANNELS.values() if config.get("id") == channel_id]
+    if len(matches) > 1:
+        raise ValueError("audience_registry_ambiguous")
+    registered = matches[0].get("made_for_kids") if matches else None
+    if registered is not None and type(registered) is not bool:
+        raise ValueError("audience_registry_invalid")
+    if channel_id in environment:
+        target = environment[channel_id]
+        if registered is not None and registered is not target:
+            raise ValueError("audience_configuration_conflict")
+        return target
+    return registered
 
 
 def is_port_available(port: int) -> bool:

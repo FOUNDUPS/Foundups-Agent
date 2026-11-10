@@ -1,3 +1,13 @@
+## 2026-11-10 — Scheduling draft audit
+
+The focused four-file selection passed98. Protected directives replay executed114
+cases with zero test issues; its fixed case manifest was updated from101 after
+adding13 configuration cases, preserving all earlier names. Invalid audience
+configuration cannot select/claim/save; environment policy enables no channel
+roles. Registry true/false/absent/malformed answers survive save/load unchanged.
+Source controls do not establish native selector or saved-state live qualification.
+WSP11/22/50/84/97.
+
 ## 2026-11-05 — Visible native schedule readiness
 
 Added six cases to `test_video_policy_consumers.py` without changing the existing
