@@ -11,6 +11,7 @@ import { runInNewContext } from 'node:vm';
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const stateSource = readFileSync(join(root, 'js/mall-state-restore.js'), 'utf8');
 const swSource = readFileSync(join(root, 'member-sw.js'), 'utf8');
+const videoProjectionSource = readFileSync(join(root, 'js/mall-video-projection.js'), 'utf8');
 const VIDEO_KEY = 'pfmall_mall_state_v1';
 const PRODUCT_KEY = 'pfmall_product_move2japan_state_v1';
 const RETURN_KEY = 'pfmall_product_return_v1';
@@ -69,6 +70,46 @@ function stateRuntime(href = ORIGIN + '/member/?foundup=move2japan') {
     fire: (kind, event) => { for (const fn of events[kind] || []) fn(event); }
   };
 }
+
+await check('scoped video route is exact and the dedicated host wins over query selection', () => {
+  const window = {};
+  runInNewContext(videoProjectionSource, { window, URLSearchParams });
+  const route = window.mallVideoProjection;
+  for (const path of ['/member/?foundup=hpc', '/member/index.html?foundup=hpc&account=1']) {
+    assert.equal(route.resolve(new URL(path, ORIGIN)), 'hpc');
+  }
+  for (const path of ['/member/?foundup=hpc&foundup=move2japan', '/member/?foundup=__proto__', '/f/hpc/app?foundup=hpc']) {
+    assert.equal(route.resolve(new URL(path, ORIGIN)), null);
+  }
+  assert.equal(route.resolve(new URL('https://hpc.foundups.com/member/?foundup=move2japan')), 'hpc');
+  assert.equal(route.hostScope(new URL('https://hpc.foundups.com/')), 'hpc');
+  assert.equal(route.hostScope(new URL('https://hpc.foundups.com.example.org/')), null);
+  assert.equal(route.discoveryPath('hpc', ORIGIN + '/member/?foundup=hpc'), '/member/?foundup=hpc');
+  assert.equal(route.discoveryPath('hpc', 'https://example.org/member/?foundup=hpc'), null);
+  assert.equal(route.discoveryPath('move2japan', ORIGIN + '/member/?foundup=hpc'), null);
+});
+
+await check('fixed video projection restores only tab-local position', () => {
+  const h = stateRuntime(ORIGIN + '/member/?foundup=hpc');
+  h.local.set(VIDEO_KEY, 'preserve-video');
+  h.local.set(PRODUCT_KEY, 'preserve-product');
+  const key = 'pfmall_video_scope_hpc_v1';
+  assert.equal(h.api.selectVideoScope('hpc'), true);
+  assert.equal(h.api.selectProduct('move2japan'), false);
+  h.api.save();
+  assert.deepEqual(JSON.parse(h.session.get(key)), { scrollTop: 40, scrollLeft: 0 });
+  assert.equal(h.local.has(key), false);
+  assert.equal(h.local.get(VIDEO_KEY), 'preserve-video');
+  assert.equal(h.local.get(PRODUCT_KEY), 'preserve-product');
+  h.wrapper.scrollTop = 5;
+  assert.equal(h.api.restore(), true);
+  h.flushFrames();
+  assert.equal(h.wrapper.scrollTop, 40);
+  assert.deepEqual(h.calls, []);
+  h.session.set(key, JSON.stringify({ scrollTop: 40, scrollLeft: 0, fieldScope: {} }));
+  assert.equal(h.api.restore(), false);
+  assert.equal(h.session.has(key), false);
+});
 
 await check('video namespace retains category layout and rows while product state stays separate', () => {
   const h = stateRuntime();
@@ -317,22 +358,22 @@ function swRuntime() {
 await check('install precaches only explicit shell and product assets', async () => {
   const h = swRuntime();
   await h.event('install');
-  for (const path of ['/member/js/mall-tile-field.js', '/move2japan/property-search.js', '/move2japan/move2japan.css']) {
+  for (const path of ['/member/js/mall-tile-field.js?v=6', '/member/js/mall-video-projection.js', '/move2japan/property-search.js', '/move2japan/move2japan.css']) {
     assert.equal(h.precached.includes(path), true);
   }
   assert.equal(h.precached.includes('/move2japan/properties.json'), false);
   assert.equal(h.precached.every(path => path.startsWith('/')), true);
-  assert.equal(h.stores.has('pfmall-member-v5'), true);
+  assert.equal(h.stores.has('pfmall-member-v6'), true);
 });
 
 await check('activation retires only obsolete caches owned by this Mall', async () => {
   const h = swRuntime();
-  for (const name of ['pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4', 'pfmall-member-v5', 'pfmall-properties-v1', 'pfmall-posters-v1', 'gotjunk-offline-v1', 'other-app-cache']) {
+  for (const name of ['pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4', 'pfmall-member-v5', 'pfmall-member-v6', 'pfmall-properties-v1', 'pfmall-posters-v1', 'gotjunk-offline-v1', 'other-app-cache']) {
     await h.caches.open(name);
   }
   await h.event('activate');
-  assert.deepEqual(h.deleted.sort(), ['pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4']);
-  assert.equal(h.stores.has('pfmall-member-v5'), true);
+  assert.deepEqual(h.deleted.sort(), ['pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4', 'pfmall-member-v5']);
+  assert.equal(h.stores.has('pfmall-member-v6'), true);
   assert.equal(h.stores.has('gotjunk-offline-v1'), true);
   assert.equal(h.stores.has('other-app-cache'), true);
 });
@@ -368,8 +409,11 @@ await check('product navigation shares one static member shell without query cac
   assert.equal(online.response.status, 200);
   assert.equal(h.calls.at(-1).request, '/member/');
   assert.equal(h.calls.at(-1).options.credentials, 'omit');
-  const cache = await h.caches.open('pfmall-member-v5');
-  assert.equal((await cache.keys()).some(key => key.url.includes('?')), false);
+  const cache = await h.caches.open('pfmall-member-v6');
+  assert.equal((await cache.keys()).some(key => {
+    const url = new URL(key.url);
+    return url.pathname === '/member/' && !!url.search;
+  }), false);
   h.setNetwork(async () => { throw new Error('offline'); });
   const offline = await h.request('/member/?foundup=move2japan&q=clerk.accounts.dev', { mode: 'navigate' });
   assert.equal(offline.intercepted, true, 'a filter value is not an authentication path');
@@ -394,16 +438,32 @@ await check('private routes, query assets, foreign origins and non-GET remain un
 
 await check('declared static assets keep cache-first behavior and video fallback stays explicit', async () => {
   const h = swRuntime();
-  const first = await h.request('/member/js/mall-tile-field.js');
+  const first = await h.request('/member/js/mall-tile-field.js?v=6');
   const body = await first.response.text();
   assert.equal(h.calls.length, 1);
   h.setNetwork(async () => { throw new Error('offline'); });
-  const cached = await h.request('/member/js/mall-tile-field.js');
+  const cached = await h.request('/member/js/mall-tile-field.js?v=6');
   assert.equal(await cached.response.text(), body);
   assert.equal(h.calls.length, 1);
   const video = await h.request('/member/mall-video-catalog.json');
   assert.equal(await video.response.text(), '[]');
   assert.equal(video.response.headers.get('X-Offline-Fallback'), '1');
+});
+
+await check('scoped catalog has a separate cache key and no fallback to the member catalog', async () => {
+  const h = swRuntime();
+  const scoped = '/member/mall-public-video-catalog.json';
+  const raw = '{"hpc":{"lane":{"foundup_id":"hpc"}}}';
+  h.setNetwork(async () => new Response(raw, { headers: { 'Content-Type': 'application/json' } }));
+  assert.equal(await (await h.request(scoped)).response.text(), raw);
+  assert.equal(h.calls.at(-1).options.credentials, 'omit');
+  h.setNetwork(async () => { throw new Error('offline'); });
+  assert.equal(await (await h.request(scoped)).response.text(), raw);
+  assert.equal(await (await h.request('/member/mall-video-catalog.json')).response.text(), '[]');
+  const uncached = swRuntime();
+  uncached.setNetwork(async () => { throw new Error('offline'); });
+  assert.equal((await uncached.request(scoped)).response.status, 503);
+  assert.equal((await h.request('/member/js/mall-tile-field.js?v=unrecognized')).intercepted, false);
 });
 
 console.log('Mall product state and service worker runtime: ' + checks + ' passed.');

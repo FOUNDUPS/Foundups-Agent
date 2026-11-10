@@ -23,6 +23,33 @@ def catalog() -> list[dict]:
     return json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
 
 
+def test_hpc_catalog_rebuild_is_isolated_and_idempotent(catalog):
+    from scripts.refresh_mall_catalog import project_public_video_lanes
+
+    rebuilt, scoped = project_public_video_lanes(catalog)
+    assert rebuilt == catalog
+    assert scoped == json.loads(
+        CATALOG_PATH.with_name("mall-public-video-catalog.json").read_text(encoding="utf-8")
+    )
+    assert list(scoped) == ["hpc"]
+    projection = scoped["hpc"]
+    lane = projection["lane"]
+    discovery = next(item for item in catalog if item["foundup_id"] == "hpc")
+    assert discovery["videos"] == []
+    assert discovery["public_poc_url"] == "https://foundups.com/member/?foundup=hpc"
+    assert lane["parent_channels"] == ["move2japan"]
+    assert lane["source_id"] == "UC-LSSlOZwpGIRIYihaz8zCw"
+    assert projection["voice_resource_url"] == "https://vote.mtrout.com/contact"
+    assert lane["video_count"] == len(lane["videos"]) == 5
+    for video in lane["videos"]:
+        video_id = video["video_id"]
+        assert video["embed_url"] == f"https://www.youtube.com/embed/{video_id}"
+        assert video["source_url"] == f"https://www.youtube.com/shorts/{video_id}"
+        assert video["source_label"] == "Move2Japan"
+        assert video["editorial_label"] in {"Opinion", "Commentary", "Satire"}
+        assert "jeffries" not in video["title"].lower()
+
+
 class TestCatalogStructure:
     """Test overall catalog structure."""
 

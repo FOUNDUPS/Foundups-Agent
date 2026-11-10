@@ -147,8 +147,11 @@
     var primaryCtaHtml = '';
     var secondaryLinkHtml = '';
     var ctaDef = SOURCE_TYPE_CTA[item.source_type];
+    var publicProjection = window.mallVideoProjection?.discoveryPath(item.foundup_id, item.public_poc_url);
 
-    if (isNonVideo && ctaDef && item[ctaDef.urlField]) {
+    if (publicProjection) {
+      primaryCtaHtml = '<a href="' + esc(publicProjection) + '" class="fv-primary-cta">Browse Shorts</a>';
+    } else if (isNonVideo && ctaDef && item[ctaDef.urlField]) {
       // Non-video: primary CTA is the source action (View Repo, Open App, Open Service)
       primaryCtaHtml =
         '<a href="' + esc(item[ctaDef.urlField]) + '" target="_blank" rel="noopener noreferrer" class="fv-primary-cta">' +

@@ -310,6 +310,22 @@ Before each slice:
 
 ---
 
+## Voice handoff and qualification gates
+
+[Voice intake issue #2330](https://github.com/FOUNDUPS/Foundups-Agent/issues/2330) owns the proposed separate FoundUp. The [Vote/Voice integration candidate](https://github.com/FOUNDUPS/Foundups-Agent/pull/2337) is a separate specification under review.
+
+| Evidence state | Capability |
+| --- | --- |
+| Implemented and tested | Vote's [Contact Congress](https://vote.mtrout.com/contact) uses a dated official House and Senate contact snapshot, state/territory and chamber selection, a private in-page list, official source links and explicit native dialer entry. Vote's Node fixtures cover roster validation and queue handling. HPC uses that destination and restores its Mall scroll on browser Back. |
+| Implemented outside Voice, civic integration unverified | OpenClaw CLI microphone capture and speech recognition, the communication voice engine, and the separate ElevenLabs/Twilio single-call adapter with offline tests. Their existing receipts cover those components. Civic handset playback, call control and provider behavior require dedicated evidence. |
+| Specified | Voice issue discovery, scoped Vote evidence handoff, native dialing first, and explicit consent for optional speech or provider assistance. |
+| Missing | A registered Voice tenant and typed entry/return contract, civic speech UI, verified provider call initiation/termination and recovery, recording consent and retention, and abuse and privacy controls for production use. |
+
+- Qualify Voice intake, jurisdiction coverage and an official-source refresh path. Preserve office and role evidence when an office cannot be verified.
+- Prove issue → evidence → manual contact in the shared Mall. Establish a versioned handoff with explicit consent, minimal data and a bounded return route.
+- Test optional speech recognition independently for microphone consent, denied permission, local failure, and recovery. Preserve review and correction before any external action.
+- Before provider calling, verify initiation and hang-up under human control, interruption, retries, failure recovery, and explicit privacy and recording consent. Recording defaults off. Qualify provider rules, abuse limits and retention separately.
+
 ## Canonical Intake Packet
 
 See `docs/intake/`:

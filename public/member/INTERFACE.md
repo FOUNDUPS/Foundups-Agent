@@ -5,6 +5,20 @@
 
 ## Public Interface
 
+### Public video projection
+
+`/member/?foundup=hpc` or the exact HPC hostname selects a fixed guest
+video field from `mall-public-video-catalog.json`. The grid uses
+`mallTileField.initialize([lane], { fixedVideoField: true })` and the
+shared player. The scoped player returns keyboard focus to the selected
+tile when closed.
+
+`mallStateRestore.selectVideoScope(id)` selects tab-local scroll storage.
+The Vote contact handoff saves only the wrapper position. Browser Back
+uses the same scope key. Member and geographic product state keep their
+existing keys. The dedicated hostname sets presentation and the canonical
+`/f/{id}/app` handoff preserves member admission.
+
 ### Public FX directory — 2026-10-25
 
 The homepage navigation links **FX** to `/f/`, whose existing index renderer

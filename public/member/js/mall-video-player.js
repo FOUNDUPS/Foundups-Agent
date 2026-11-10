@@ -47,9 +47,11 @@
   var railTimer = null;
   var chromeTimer = null;
   var initialPinchDistance = 0;
+  var pinchTarget = null;
 
   // ─── localStorage Keys ───
   var SAVED_KEY = 'pfmall_saved_videos';
+  var returnTile = null;
   var HISTORY_KEY = 'pfmall_watch_history';
   var HISTORY_MAX = 50; // Max history entries
   /** Local-only resume: omit sub-threshold & “finished” positions (HTML5 video only; embeds cannot read time). */
@@ -152,7 +154,10 @@
       '    <button class="video-player-btn" data-action="back" aria-label="Back">',
       '      <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>',
       '    </button>',
-      '    <span class="video-player-title"></span>',
+      '    <div class="video-player-caption">',
+      '      <span class="video-player-title"></span>',
+      '      <a class="video-player-source" target="_blank" rel="noopener noreferrer" hidden></a>',
+      '    </div>',
       '  </div>',
       '  <div class="video-player-top-bar-right">',
       '    <button class="video-player-btn video-player-enter-btn" data-action="enter" aria-label="Enter FoundUp">',
@@ -214,6 +219,13 @@
     }
     pendingResumeSeconds = normalizeResumeSeconds(rs, 0);
 
+    returnTile = resumeOpts?.returnTile || null;
+    container.classList.toggle('scoped-player', !!returnTile);
+    if (returnTile) {
+      container.setAttribute('aria-modal', 'true');
+      document.getElementById('memberArea').inert = true;
+    }
+
     currentFoundUpId = foundupId;
     currentQueue = queue;
     currentIndex = Math.max(0, Math.min(startIndex || 0, queue.length - 1));
@@ -226,6 +238,7 @@
     renderRail();
     attachGestures();
     resetChromeTimer();
+    if (returnTile) topBar.querySelector('[data-action="back"]').focus();
 
     // Update save button state
     updateSaveButtonState(isVideoSaved(currentFoundUpId, currentQueue[currentIndex]));
@@ -256,12 +269,28 @@
 
     // Cleanup
     if (gestureRef) { gestureRef.destroy(); gestureRef = null; }
+    if (pinchTarget) {
+      pinchTarget.removeEventListener('touchstart', handlePinchStart);
+      pinchTarget.removeEventListener('touchmove', handlePinchMove);
+      pinchTarget = null;
+    }
+    initialPinchDistance = 0;
     clearTimeout(railTimer);
     clearTimeout(chromeTimer);
 
     currentQueue = [];
     currentFoundUpId = null;
     currentIndex = -1;
+
+    if (returnTile) {
+      document.getElementById('memberArea').inert = false;
+      var tile = returnTile.isConnected ? returnTile : document.querySelector(
+        '#mallTileField .mall-tile[data-index="' + Number(returnTile.dataset.index) + '"]'
+      );
+      tile?.focus({ preventScroll: true });
+      container.removeAttribute('aria-modal');
+      returnTile = null;
+    }
 
     window.dispatchEvent(new CustomEvent('videoPlayerClose'));
   }
@@ -306,6 +335,15 @@
   // ─── Render Video ───
   function renderVideo(video) {
     if (!video) return;
+    var sourceLink = topBar.querySelector('.video-player-source');
+    var originalUrl = returnTile ? scopedSourceUrl(video) : '';
+    sourceLink.hidden = !originalUrl;
+    if (originalUrl) {
+      sourceLink.href = originalUrl;
+      sourceLink.textContent = [video.source_label, video.editorial_label, video.timestamp?.slice(0, 10)]
+        .filter(Boolean).join(' · ');
+      sourceLink.setAttribute('aria-label', 'Original Short on YouTube · ' + sourceLink.textContent);
+    }
 
     destroyYTPlayer();
     titleEl.textContent = video.title || '';
@@ -324,6 +362,7 @@
       stage.appendChild(holderDiv);
 
       function createYTPlayer() {
+        if (!isOpen || !holderDiv.isConnected) return;
         destroyYTPlayer();
         ytPlayer = new window.YT.Player(holderDiv.id, {
           videoId: ytId,
@@ -481,8 +520,9 @@
     });
 
     // Pinch detection (for pinch-in return)
-    stage.addEventListener('touchstart', handlePinchStart, { passive: true });
-    stage.addEventListener('touchmove', handlePinchMove, { passive: false });
+    pinchTarget = returnTile ? container : stage;
+    pinchTarget.addEventListener('touchstart', handlePinchStart, { passive: true });
+    pinchTarget.addEventListener('touchmove', handlePinchMove, { passive: false });
   }
 
   function handlePinchStart(e) {
@@ -524,7 +564,7 @@
         break;
       case 'enter':
         // Enter FoundUp: navigate to canonical /f/{foundup_id} route (WSP 104)
-        if (currentFoundUpId) {
+        if (currentFoundUpId && !returnTile) {
           close();
           window.location.href = '/f/' + encodeURIComponent(currentFoundUpId);
         }
@@ -644,11 +684,17 @@
     return video.embed_url || video.embedUrl || video.source_url || video.sourceUrl || '';
   }
 
+  function scopedSourceUrl(video) {
+    var id = video.video_id;
+    var url = 'https://www.youtube.com/shorts/' + id;
+    return /^[A-Za-z0-9_-]{11}$/.test(id) && video.source_url === url ? url : '';
+  }
+
   function shareVideo() {
     if (!currentFoundUpId || currentIndex < 0) return;
 
     var video = currentQueue[currentIndex];
-    var url = getShareUrl(video);
+    var url = returnTile ? scopedSourceUrl(video) : getShareUrl(video);
 
     if (!url) {
       showHint('No share link');

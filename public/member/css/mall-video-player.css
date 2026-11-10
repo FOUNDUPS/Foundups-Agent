@@ -131,6 +131,46 @@
   margin: 0 0.75rem;
 }
 
+.video-player-caption .video-player-title {
+  display: block;
+}
+
+.scoped-player .video-player-top-bar-left,
+.scoped-player .video-player-caption {
+  min-width: 0;
+}
+
+.scoped-player .video-player-top-bar-left .video-player-btn {
+  flex-shrink: 0;
+}
+
+.scoped-player .video-player-source:not([hidden]) {
+  display: block;
+  margin: 0.25rem 0.75rem 0;
+  color: #ffdd99;
+  font-size: 0.72rem;
+}
+
+.video-player-fullscreen.scoped-player .video-player-top-bar {
+  position: relative;
+  flex-shrink: 0;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.video-player-fullscreen.scoped-player {
+  overflow-y: auto;
+}
+
+.scoped-player .video-player-stage {
+  min-height: 200px;
+}
+
+.scoped-player [data-action="enter"],
+.scoped-player [data-action="more"] {
+  display: none;
+}
+
 /* ─── Video Stage ─── */
 .video-player-stage {
   flex: 1;
@@ -287,6 +327,30 @@
 
 .video-player-gesture-hint.show {
   opacity: 1;
+}
+
+.video-player-fullscreen.scoped-player .video-player-queue-rail {
+  position: relative;
+  flex-shrink: 0;
+  transform: none;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.scoped-player .video-player-edge-trigger {
+  display: none;
+}
+
+.scoped-player .video-player-queue-item {
+  width: 132px;
+}
+
+.scoped-player .video-player-gesture-hint {
+  position: static;
+  transform: none;
+  padding: 0;
+  min-height: 1.25rem;
+  text-align: center;
 }
 
 /* ─── Expand Control (On Tiles) ─── */

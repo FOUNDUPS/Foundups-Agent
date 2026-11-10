@@ -1,5 +1,14 @@
 # Member Area Module Change Log
 
+## 2026-11-11 · HPC public video projection
+
+Use the existing grid and immersive player for the SchumerOUT collection.
+The exact dedicated hostname or explicit public query selects the field.
+The scoped route uses a tab-local scroll key for Vote contact return.
+Member entry, geographic product state and the global catalog retain their
+own routes and state. Service worker v6 distinguishes the public catalog
+cache key and declares the changed versioned assets.
+
 ## 2026-10-25 — FX1 public directory discovery
 
 Expose the existing `/f/` public directory through a normal homepage FX link.

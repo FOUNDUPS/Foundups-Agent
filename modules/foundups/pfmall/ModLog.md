@@ -1,3 +1,10 @@
+## 2026-11-11 · Public scoped video discovery
+
+HPC joins the canonical FoundUp registry and public discovery projector under
+WSP 97, 104 and 109. The Mall refresh owner generates a global discovery card
+and a public-only video catalog from the reviewed Move2Japan source records.
+The same member-shell field and player render the fixed public lane.
+
 ## 2026-10-26 — Isolated proposal host bootstrap candidate
 
 WSP00/3/6/11/15/22/49/50/62/71/77/84/97/109;15/P1 allocationf8fa5b25c.
