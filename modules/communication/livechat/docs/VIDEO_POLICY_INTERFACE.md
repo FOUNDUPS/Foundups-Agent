@@ -47,13 +47,50 @@ retain first-observation TTL. `set_context` and `announce` honor the same deadli
 
 ## Frozen stream scheduling requests
 
-`schedule_stream_shorts` accepts only `ttl_seconds` and `expires_at_unix` with
-the same bounds. The existing watcher freezes the confirmed running LiveChatCore
+`schedule_stream_shorts` accepts `ttl_seconds` and `expires_at_unix` with
+the same bounds. Without an explicit recorded source, the existing watcher freezes the confirmed running LiveChatCore
 channel, video, exact stream title, chat and memory session at acceptance. No
 speculative DAE video or later stream supplies missing fields. The title rule is
 operator authorization to select every matching UNLISTED Short on that channel;
 it is not independent evidence of a native parent-child relationship. A later
 stream ending or changing does not retarget the frozen request.
+
+For an ended stream, the same action accepts the paired fields
+`recorded_source={channel_id, parent_video_id, stream_title}` and
+`first_test_only=true`. All three source fields are required and native IDs are
+validated; alternate keys or a missing/false test flag are rejected. This is an
+explicit operator target, not proof that the parent is accessible or has the
+claimed title. The browser owner must freshly verify both before discovery.
+The immutable record adds `source_kind=recorded` and `first_test_only=true`, with
+empty chat/session IDs rather than an invented live session. Legacy live records
+retain their exact shape and digest. Both forms share the same channel/parent
+reservation, so another command or mode cannot retry an uncertain source.
+
+`await queue.refresh_stream_schedule_request(command_id, recorded_only=False)` validates the existing
+inbox, ledger and state under the current manifest lock, and consumes only that
+exact scheduling action using the existing claim/finish owner. It never polls or
+dispatches unrelated announcements, policies or context commands. It returns a
+copied unexpired pending request, or `None` for missing, other-action or terminal
+work; corrupt/conflicting state and unknown intake raise. No acknowledged command
+is dispatched again. Browser work must begin after this method releases the lock.
+The native recorded-only consumer passes `recorded_only=True`: legacy live and
+non-first-test commands are neither claimed nor returned, including already
+accepted live work. General daemon callers retain live intake by default.
+
+In recorded first-test mode the complete matching batch is frozen, but only its
+first ID may be submitted, with metadata preserved. Remaining IDs are withheld,
+not a new pending batch. The queue permits at most that first submitted ID in its
+result, preserves the full selection through restart and keeps the request
+terminal unknown after an uncertain attempt. A later continuation requires a
+separately qualified existing-owner transition after exact saved-schedule proof;
+replay, a new command or a successful click cannot authorize it. This queue layer
+does not implement that readback or continuation.
+The parent video itself is excluded from every selected batch, for both live and
+recorded sources, before claim and whenever persisted selections are validated.
+Recorded-only inspection reports `first_test_only`, `withheld_count` (all selected
+IDs after the first) and `submission_recorded_count`. These are admission/attempt
+counts, not verified schedules; `delivery_verified` remains false and private
+source title/channel/video fields are not exposed by inspection.
 
 `operator_stream_schedule_owner.py` uses the existing queue state, acknowledgements,
 receipts and lock. There is no separate inbox, worker or publisher. The dispatch

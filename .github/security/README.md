@@ -1,3 +1,15 @@
+## Ended-stream first-test metadata review — 2026-11-10
+
+The backend manifest refreshes seven source hashes and retains all 1,487
+runtime members. A pinned manifest scan and independent review at tree
+`0d65d756` verified 39 unchanged public source-path/SHA rows against base
+`750131610`. Each row matches the source at both revisions and has an exact
+prior approval. The new manifest digest requires 39 renewed exact bindings,
+preserving all 4,302 earlier entries and other fields (4,341 total). Scanner
+rules, exclusions, fingerprint formula, and scan coverage stay the same.
+Exact proposal SHA256: `ecdc5a19056d2b099801a4c60372bb1f6509101c786a623a7b7f23ccba813510`.
+Fresh full-tree and introduced-history checks remain required.
+
 ## Frozen stream Shorts schedule metadata review — 2026-11-10
 
 PR 2345 head `0199b14ba` adds one runtime member and updates twelve existing

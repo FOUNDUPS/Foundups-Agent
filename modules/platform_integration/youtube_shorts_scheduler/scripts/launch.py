@@ -950,7 +950,10 @@ def _run_stream_schedule_requests(driver, requests, *, dry_run=False, stop_event
                 outcomes.append({'status': 'blocked', 'reason': 'receiving_channel_not_registered'})
                 continue
             driver.get(f"https://studio.youtube.com/video/{request['parent_video_id']}/edit")
-            access = verify_schedule_target_access(driver, request['channel_id'], request['parent_video_id'])
+            access_options = ({'expected_title': request['stream_title']}
+                              if request.get('source_kind') == 'recorded' else {})
+            access = verify_schedule_target_access(driver, request['channel_id'],
+                                                    request['parent_video_id'], **access_options)
             if access.get('verified') is not True:
                 outcomes.append({'status': 'pending', 'reason': 'same_target_access_unverified'})
                 continue
@@ -975,7 +978,14 @@ def _run_stream_schedule_requests(driver, requests, *, dry_run=False, stop_event
                 queue.finish_stream_schedule_request(request['id'], reason='no_matching_shorts', no_submission=True)
                 outcomes.append({'status': 'blocked', 'reason': 'no_matching_shorts'})
                 break
-            result = asyncio.run(scheduler.run_scheduling_cycle(video_ids=claimed['video_ids'], max_videos=0))
+            # Freeze the complete discovery, but the recorded-stream qualification
+            # phase permits only its first member. A failed first member cannot
+            # fall through to a different Short. Remainder stays held in the queue.
+            first_test = claimed.get('first_test_only') is True
+            options = ({'video_ids': claimed['video_ids'][:1], 'max_videos': 1,
+                        'update_metadata': False} if first_test else
+                       {'video_ids': claimed['video_ids'], 'max_videos': 0})
+            result = asyncio.run(scheduler.run_scheduling_cycle(**options))
             submitted = result.get('submitted_ids') if isinstance(result, dict) else None
             no_submission = (isinstance(result, dict) and result.get('status') == 'blocked'
                              and submitted == [])

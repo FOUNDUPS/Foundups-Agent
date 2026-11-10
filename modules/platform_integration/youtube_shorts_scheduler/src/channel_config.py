@@ -38,7 +38,8 @@ if (!norm.trim() || !document.querySelector('ytcp-app')) return {permission: 'un
 """
 
 
-def verify_schedule_target_access(driver, channel_id: str, parent_video_id: str) -> Dict[str, Any]:
+def verify_schedule_target_access(driver, channel_id: str, parent_video_id: str,
+                                  *, expected_title: Optional[str] = None) -> Dict[str, Any]:
     """Observe the frozen parent editor on the caller's already locked driver."""
     from modules.infrastructure.foundups_selenium.src.youtube_verification import VerificationHandoff
     from .video_policy import DETAIL_SNAPSHOT_SCRIPT, detail_identity
@@ -57,6 +58,10 @@ def verify_schedule_target_access(driver, channel_id: str, parent_video_id: str)
         if permission != "observed":
             return {"verified": False, "reason": "studio_permission_unobserved"}
         detail_identity(snapshot, channel_id, parent_video_id)
+        if expected_title is not None and (
+                not isinstance(expected_title, str) or not expected_title
+                or snapshot.get('title') != expected_title):
+            return {"verified": False, "reason": "studio_parent_title_changed"}
     except VerificationHandoff:
         raise
     except Exception:

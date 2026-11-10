@@ -1,3 +1,23 @@
+## 2026-11-10 — Explicit recorded source and exact-request intake
+
+Extend the existing stream action with paired closed recorded-source/first-test
+fields; retain legacy live records and their digests. Add exact-ID scheduling
+refresh through the current lock/claim/receipt owner without consuming unrelated
+announcements or policies. Full selections remain frozen, with only the first
+submission permitted in recorded test mode; no replay or continuation transition
+is added. Recorded-only intake leaves legacy live requests untouched before claim;
+both source forms exclude their parent from selections. Thirty-five sealed offline
+queue cases pass with no effects or model
+imports. Native CLI/browser integration and live saved-state proof are separate
+gates. WSP15/22/50/77/84/97. See tests/TestModLog.md.
+
+The DAE and native first-test entry share a fixed host runtime lease. The DAE
+retains it through watcher and engagement shutdown; both ordinary and requested
+scheduler threads settle before browser ownership is released. Twenty lifecycle
+and two existing request-settlement cases pass under the offline guard. Older
+processes and pre-DAE startup do not participate, so live process inventory remains
+required before native qualification.
+
 ## 2026-11-10 — Freeze bounded stream scheduling in the existing manifest
 
 Add closed `schedule_stream_shorts` intake, immutable confirmed stream/session
@@ -5059,4 +5079,3 @@ are preserved verbatim in [the legacy archive](_archive/completed/ModLog_legacy_
 - `modules/communication/livechat/tests/test_party_command.py`
 
 **Status**: [OK] `!party` now routes correctly and runs safely without blocking the poll loop.
-

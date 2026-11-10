@@ -1,5 +1,24 @@
 # YouTube Shorts Scheduler - Interface Documentation
 
+## Recorded-stream first-test entry (2026-11-10)
+
+`cli --request-id <id> --browser chrome|edge` resolves one existing private
+manifest command through `refresh_stream_schedule_request`. It loads only its
+own checkout's `.env` without overriding inherited values. Other CLI execution
+modes cannot be combined. A host runtime lease excludes cooperating full DAE
+runs; older processes and pre-DAE setup still require runtime observation.
+
+`verify_schedule_target_access(..., expected_title=...)` additionally compares
+the actual parent editor title for recorded-source requests. Browser preference
+does not establish channel access. Full Unlisted Shorts selection is frozen,
+but `first_test_only` passes only its first ID, `max_videos=1` and
+`update_metadata=False`. The effect guard rejects a different member or a session
+that permits metadata updates. Required metadata/Audience/calendar gates remain.
+
+The CLI reports inspection and execution separately, exits 2 without independently
+verified scheduling, and never retries a terminal request. The remaining frozen
+IDs are withheld; no continuation or saved-slot verifier is introduced here.
+
 ## Frozen stream Shorts request (2026-11-10)
 
 The existing private manifest action `schedule_stream_shorts` freezes the confirmed

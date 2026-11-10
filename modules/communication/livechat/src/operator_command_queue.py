@@ -203,6 +203,9 @@ class OperatorCommandQueue:
     def get_pending_stream_schedule_requests(self):
         return stream_owner.pending(self)
 
+    async def refresh_stream_schedule_request(self, command_id, *, recorded_only=False):
+        return stream_owner.refresh(self, command_id, recorded_only=recorded_only)
+
     def claim_stream_schedule_request(self, request, video_ids):
         return stream_owner.claim(self, request, video_ids)
 

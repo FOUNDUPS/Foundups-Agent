@@ -1,5 +1,23 @@
 # YouTube Shorts Scheduler
 
+## First test after a stream ends
+
+An explicit private `recorded_source` and `first_test_only: true` request can
+name an ended stream without inventing a live session. The native Agent CLI
+accepts `--request-id <id> --browser chrome|edge` after the producer enqueues it.
+It consumes only that named command and uses the same host runtime lease as the
+DAE. Do not run it beside older processes that do not participate in this lease.
+
+The agent verifies the native parent channel, video and exact observed title,
+then reads Shorts filtered to Unlisted. It freezes every exact-title match but
+permits only the first ID through the existing calendar and Save owner, with
+title/description preserved. Incomplete metadata blocks this test instead of
+being rewritten. No alternate Short is attempted when the first is blocked.
+All remaining IDs stay held. Save attempts remain unknown; an independent
+saved-slot proof and a separately qualified continuation are required before
+title variation or the rest of the batch. This is native scheduler execution,
+not proof of a registered WRE skill invocation.
+
 ## Schedule Shorts from the current stream
 
 The private `schedule_stream_shorts` command uses the confirmed live session at

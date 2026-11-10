@@ -20,6 +20,18 @@ CHANNEL, VIDEO, OTHER = 'UC' + 'a' * 22, 'a' * 11, 'b' * 11
 TITLE = 'Synthetic source stream'
 
 
+@pytest.mark.parametrize('observed,expected,verified', [
+    (TITLE, TITLE, True), (TITLE + ' changed', TITLE, False),
+    (TITLE, '', False), (TITLE, 12, False)])
+def test_recorded_parent_title_is_observed_not_assumed(observed, expected, verified):
+    from modules.platform_integration.youtube_shorts_scheduler.src.channel_config import verify_schedule_target_access
+    driver = SimpleNamespace(execute_script=lambda script: {
+        'channel_id': CHANNEL, 'url': f'https://studio.youtube.com/video/{VIDEO}/edit',
+        'title': observed, 'description': 'Synthetic description', 'permission': 'observed'})
+    result = verify_schedule_target_access(driver, CHANNEL, VIDEO, expected_title=expected)
+    assert result['verified'] is verified
+
+
 def page(rows=None, **changes):
     return dict(channel_id=CHANNEL, url=f'https://studio.youtube.com/channel/{CHANNEL}/videos/short',
                 chip_texts=['Visibility: Unlisted'], search_text='', loading=False,
@@ -105,6 +117,29 @@ def test_frozen_request_guard_stops_changed_scope(problem):
     if problem == 'title': session.original['title'] += ' changed'
     if problem == 'child': session.video_id = OTHER
     with pytest.raises(policy.PreSaveAuditBlocked): owner._guard_stream_request(session)
+
+
+@pytest.mark.parametrize('video,metadata,allowed', [(VIDEO, False, True),
+    (OTHER, False, False), (VIDEO, True, False), (VIDEO, None, False)])
+def test_first_test_guard_confines_effect_to_first_id_with_preserved_metadata(video, metadata, allowed):
+    owner = bound_scheduler()
+    owner.stream_schedule_request.update(first_test_only=True, video_ids=[VIDEO, OTHER])
+    session = SimpleNamespace(channel_id=CHANNEL, video_id=video,
+                              original={'title': TITLE}, allow_metadata=metadata)
+    if allowed:
+        owner._guard_stream_request(session)
+    else:
+        with pytest.raises(policy.PreSaveAuditBlocked):
+            owner._guard_stream_request(session)
+
+
+def test_parent_is_never_a_clip_target_even_if_selection_contains_it():
+    owner = bound_scheduler()
+    owner.stream_schedule_request.update(first_test_only=True, parent_video_id=VIDEO)
+    session = SimpleNamespace(channel_id=CHANNEL, video_id=VIDEO,
+                              original={'title': TITLE}, allow_metadata=False)
+    with pytest.raises(policy.PreSaveAuditBlocked, match='child_changed'):
+        owner._guard_stream_request(session)
 
 
 def test_request_never_reconnects_or_widens_private_flag(monkeypatch):

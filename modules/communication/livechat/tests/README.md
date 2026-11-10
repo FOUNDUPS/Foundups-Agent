@@ -1,3 +1,15 @@
+## Recorded-source intake — 2026-11-10
+
+`test_operator_recorded_stream_schedule.py` has 35 sealed offline cases using
+actual queue owners and disposable manifests. They cover explicit ended-source
+validation, no invented live IDs, exact-action-only intake, untouched announcements,
+legacy record/digest compatibility, shared live/recorded deduplication, immutable
+first-only submission, withheld remainder, expiry, corrupted bindings and unknown
+intake replay refusal. No browser, daemon, provider or model is executed. These
+tests do not establish native parent access or saved-schedule readback.
+Recorded-only refresh preserves unseen/accepted legacy live requests byte-for-byte;
+both live and recorded claim/reload paths reject the parent as a selected Short.
+
 ## Frozen stream scheduling — 2026-11-10
 
 `test_operator_stream_schedule.py` uses real queue validation/locks with disposable

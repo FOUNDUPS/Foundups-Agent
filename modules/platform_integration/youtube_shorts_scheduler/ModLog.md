@@ -1,5 +1,20 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-11-10 — Native first-test dispatch for an ended stream
+
+Extend the existing Agent CLI with exact-request consumption and the shared DAE
+runtime lease. Recorded parent identity and observed title must match before
+complete Unlisted Shorts discovery. Preserve the full frozen selection but permit
+only its first member with unchanged title/description. Recheck this bound at the
+existing scheduling effect guard; no fallback member, ordinary rotation or title
+variation follows. Missing metadata blocks the first test. Save/readback and
+remaining-batch continuation remain unqualified. WSP10/11/22/50/77/84/97.
+
+Validation: the sealed calendar selection passes 215 cases, with all 154 previous
+names retained and zero denied effects. First-test guards reject parent targets,
+later batch members, changed titles, metadata rewriting and competing runtime
+ownership. Live scheduling remains unqualified until independent saved-slot proof.
+
 ## 2026-11-10 — Frozen stream title batch through the existing DAE
 
 Extend the private command queue and owned scheduler path with exact-title
