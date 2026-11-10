@@ -8,6 +8,8 @@ Based on live DOM inspection of YouTube Studio pages.
 import asyncio
 import logging
 import os
+import re
+from modules.infrastructure.foundups_selenium.src.youtube_verification import VerificationHandoff
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, List, Dict, Any, Tuple
@@ -803,21 +805,29 @@ class YouTubeStudioDOM:
                         "arguments[0].scrollIntoView({block:'center', inline:'center'});",
                         element,
                     )
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     pass
                 time.sleep(self._pre_click_delay)
                 element.click()
                 time.sleep(self._post_click_delay)
+        except VerificationHandoff:
+            raise
         except Exception:
             # Fallback order: ActionChains (often works on custom elements) -> JS click
             try:
                 time.sleep(self._pre_click_delay)
                 ActionChains(self.driver).move_to_element(element).click().perform()
                 time.sleep(self._post_click_delay)
+            except VerificationHandoff:
+                raise
             except Exception:
                 try:
                     self.driver.execute_script("arguments[0].click();", element)
                     time.sleep(self._post_click_delay)
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     raise
 
@@ -2776,17 +2786,50 @@ class YouTubeStudioDOM:
         return session
 
     def _submit_policy_save(self, callback):
-        from .video_policy import VideoPolicyBlocked, require_public_gate, claim_save
+        from .video_policy import VideoPolicyBlocked, PreSaveAuditBlocked, require_public_gate, claim_save
         session = self._guard_policy_save()
+        if (getattr(self, '_policy_scheduling', False) and getattr(self, '_policy_calendar_required', False)
+                and getattr(self, '_schedule_timezone_verified', False) is not True):
+            raise PreSaveAuditBlocked('presave_audit:studio_timezone_unverified')
+        if (getattr(self, '_policy_scheduling', False) and getattr(self, '_policy_calendar_required', False)
+                and getattr(self, '_schedule_picker_verified', None) != session.requested_schedule):
+            raise PreSaveAuditBlocked('presave_audit:studio_schedule_unverified')
         require_public_gate()
+        if getattr(self, '_policy_scheduling', False) and getattr(self, '_policy_calendar_required', False):
+            reserve = getattr(self, '_policy_before_schedule_submit', None)
+            if not callable(reserve):
+                raise PreSaveAuditBlocked('presave_audit:calendar_reservation_owner_missing')
+            reserve(session)
         claim_save(session)
         session.submitted()
         if getattr(self, "_policy_scheduling", False):
             self._policy_cycle_attempts = getattr(self, "_policy_cycle_attempts", 0) + 1
         try:
+            started = getattr(self, '_policy_on_schedule_submitting', None)
+            if getattr(self, '_policy_scheduling', False) and callable(started):
+                started(session)
             return callback()
+        except VerificationHandoff:
+            raise
         except Exception as exc:
             raise VideoPolicyBlocked("submission_started_outcome_unknown") from exc
+
+    def schedule_editor_clean_after_submit(self):
+        """Read-only handoff condition; a clean draft is not saved-schedule proof."""
+        from .video_policy import DETAIL_SNAPSHOT_SCRIPT, detail_identity
+        session = self._policy_edit()
+        try:
+            snapshot = self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT)
+            detail_identity(snapshot, session.channel_id, session.video_id)
+            return (session.submitting is True and bool(session.window_handle)
+                    and self.driver.current_window_handle == session.window_handle
+                    and snapshot.get('save_disabled') is True
+                    and snapshot.get('prompt_open') is False
+                    and all(snapshot.get(k) == v for k, v in session.staged.items()))
+        except VerificationHandoff:
+            raise
+        except Exception:
+            return False
 
     def _readback_policy_save(self):
         """Conditional same-tab clean reload; never discard a foreign draft/prompt."""
@@ -2808,6 +2851,8 @@ class YouTubeStudioDOM:
                     or after.get("save_disabled") is not True or after.get("prompt_open") is not False):
                 return False
             return verify_metadata_save(session, after)
+        except VerificationHandoff:
+            raise
         except Exception:
             logger.warning("[DOM] Save readback unavailable; durable outcome remains unknown")
             return False
@@ -2842,6 +2887,8 @@ class YouTubeStudioDOM:
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).perform()
             time.sleep(self.human_delay(0.25, 0.15))
             title_input.send_keys(new_title)
+        except VerificationHandoff:
+            raise
         except Exception as e:
             # ChromeDriver may fail on non-BMP characters (emoji). Fallback to JS assignment.
             logger.debug(f"[DOM] Title send_keys failed ({type(e).__name__}), using JS fallback")
@@ -2867,6 +2914,8 @@ class YouTubeStudioDOM:
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).perform()
             time.sleep(self.human_delay(0.25, 0.15))
             desc_input.send_keys(new_description)
+        except VerificationHandoff:
+            raise
         except Exception as e:
             # ChromeDriver may fail on non-BMP characters (emoji). Fallback to JS assignment.
             logger.debug(f"[DOM] Description send_keys failed ({type(e).__name__}), using JS fallback")
@@ -2885,6 +2934,8 @@ class YouTubeStudioDOM:
             WebDriverWait(self.driver, 6).until(
                 lambda d: not d.find_elements(By.CSS_SELECTOR, "tp-yt-paper-dialog#dialog")
             )
+        except VerificationHandoff:
+            raise
         except Exception:
             pass
 
@@ -2903,12 +2954,16 @@ class YouTubeStudioDOM:
                 el = self.wait_for_clickable(sel, by, timeout=5)
                 try:
                     self.driver.execute_script("arguments[0].scrollIntoView({block:'center'});", el)
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     pass
                 self._submit_policy_save(el.click)
                 time.sleep(2.0)
                 self._readback_policy_save()
                 return
+            except VerificationHandoff:
+                raise
             except Exception as exc:
                 from .video_policy import VideoPolicyBlocked
                 if isinstance(exc, VideoPolicyBlocked):
@@ -2956,6 +3011,8 @@ class YouTubeStudioDOM:
                 time.sleep(2.0)
                 self._readback_policy_save()
                 return
+        except VerificationHandoff:
+            raise
         except Exception as exc:
             from .video_policy import VideoPolicyBlocked
             if isinstance(exc, VideoPolicyBlocked):
@@ -3120,6 +3177,8 @@ class YouTubeStudioDOM:
         # 1) Strict XPath for the known aria-label (button)
         try:
             vis_btn = self.wait_for_clickable(self.selectors.VISIBILITY_BTN_XPATH, By.XPATH, timeout=6)
+        except VerificationHandoff:
+            raise
         except Exception:
             vis_btn = None
 
@@ -3131,6 +3190,8 @@ class YouTubeStudioDOM:
                     By.CSS_SELECTOR,
                     timeout=6,
                 )
+            except VerificationHandoff:
+                raise
             except Exception:
                 vis_btn = None
 
@@ -3142,6 +3203,8 @@ class YouTubeStudioDOM:
                     By.XPATH,
                     timeout=6,
                 )
+            except VerificationHandoff:
+                raise
             except Exception:
                 vis_btn = None
 
@@ -3155,6 +3218,8 @@ class YouTubeStudioDOM:
         try:
             self.wait_for_element(self.selectors.VISIBILITY_DIALOG_XPATH, By.XPATH, timeout=8)
             return
+        except VerificationHandoff:
+            raise
         except Exception:
             pass
 
@@ -3200,6 +3265,8 @@ class YouTubeStudioDOM:
                 self.safe_click(schedule_radio)
                 time.sleep(0.3)
                 break
+            except VerificationHandoff:
+                raise
             except Exception:
                 continue
 
@@ -3233,6 +3300,8 @@ class YouTubeStudioDOM:
                             "return arguments[0].getAttribute('aria-expanded');",
                             toggler,
                         )
+                    except VerificationHandoff:
+                        raise
                     except Exception:
                         state = None
 
@@ -3243,6 +3312,8 @@ class YouTubeStudioDOM:
                         self.safe_click(toggler)
                         time.sleep(0.5)
                         expanded = True
+        except VerificationHandoff:
+            raise
         except Exception:
             expanded = False
 
@@ -3253,6 +3324,8 @@ class YouTubeStudioDOM:
                 if expand_btn and expand_btn.is_displayed():
                     self.safe_click(expand_btn)
                     time.sleep(0.5)
+            except VerificationHandoff:
+                raise
             except Exception:
                 pass
 
@@ -3296,17 +3369,25 @@ class YouTubeStudioDOM:
             """
             try:
                 el.send_keys(Keys.ENTER)
+            except VerificationHandoff:
+                raise
             except Exception:
                 try:
                     ActionChains(self.driver).send_keys(Keys.ENTER).perform()
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     pass
             time.sleep(pre_type_delay)
             try:
                 el.send_keys(Keys.TAB)
+            except VerificationHandoff:
+                raise
             except Exception:
                 try:
                     ActionChains(self.driver).send_keys(Keys.TAB).perform()
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     pass
             time.sleep(pre_type_delay)
@@ -3321,6 +3402,8 @@ class YouTubeStudioDOM:
                     """,
                     el,
                 )
+            except VerificationHandoff:
+                raise
             except Exception:
                 pass
             time.sleep(pre_type_delay)
@@ -3330,6 +3413,8 @@ class YouTubeStudioDOM:
         try:
             # Try an actual Date input first (when already expanded)
             date_input = self.wait_for_element(self.selectors.DATE_INPUT_XPATH, By.XPATH, timeout=3)
+        except VerificationHandoff:
+            raise
         except Exception:
             date_input = None
 
@@ -3348,6 +3433,8 @@ class YouTubeStudioDOM:
                 # Occam: deterministic click with slow delays.
                 self.safe_click(date_trigger)
                 time.sleep(pre_type_delay)
+            except VerificationHandoff:
+                raise
             except Exception:
                 # Fallback: click the visible date text inside the schedule container to activate the picker/input.
                 self.driver.execute_script("""
@@ -3382,6 +3469,8 @@ class YouTubeStudioDOM:
                         val = (picker_input.get_attribute("value") or "").strip()
                         if val and val.lower() == date_str.strip().lower():
                             return
+                    except VerificationHandoff:
+                        raise
                     except Exception:
                         pass
 
@@ -3390,12 +3479,16 @@ class YouTubeStudioDOM:
                         time.sleep(pre_type_delay)
                         continue
                     return
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     picker_input = None
 
             # Alternate variant: aria-labeled Date input exists after clicking trigger
             try:
                 date_input = self.wait_for_element(self.selectors.DATE_INPUT_XPATH, By.XPATH, timeout=3)
+            except VerificationHandoff:
+                raise
             except Exception:
                 date_input = None
 
@@ -3418,6 +3511,8 @@ class YouTubeStudioDOM:
             slow_type(date_input, date_str)
             time.sleep(0.15)
             commit_input(date_input)
+        except VerificationHandoff:
+            raise
         except Exception as exc:
             raise TimeoutException(f"Date input not found/usable: {exc}")
 
@@ -3445,17 +3540,25 @@ class YouTubeStudioDOM:
             """
             try:
                 el.send_keys(Keys.ENTER)
+            except VerificationHandoff:
+                raise
             except Exception:
                 try:
                     ActionChains(self.driver).send_keys(Keys.ENTER).perform()
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     pass
             time.sleep(pre_type_delay)
             try:
                 el.send_keys(Keys.TAB)
+            except VerificationHandoff:
+                raise
             except Exception:
                 try:
                     ActionChains(self.driver).send_keys(Keys.TAB).perform()
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     pass
             time.sleep(pre_type_delay)
@@ -3470,6 +3573,8 @@ class YouTubeStudioDOM:
                     """,
                     el,
                 )
+            except VerificationHandoff:
+                raise
             except Exception:
                 pass
             time.sleep(pre_type_delay)
@@ -3484,6 +3589,8 @@ class YouTubeStudioDOM:
                 By.CSS_SELECTOR,
                 timeout=3,
             )
+        except VerificationHandoff:
+            raise
         except Exception:
             time_input = None
 
@@ -3493,6 +3600,8 @@ class YouTubeStudioDOM:
                 try:
                     time_input = self.wait_for_element(xp, By.XPATH, timeout=2)
                     break
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     time_input = None
 
@@ -3510,6 +3619,8 @@ class YouTubeStudioDOM:
                     }
                     return null;
                 """))
+            except VerificationHandoff:
+                raise
             except Exception:
                 time_input = None
 
@@ -3527,6 +3638,27 @@ class YouTubeStudioDOM:
         """Click Done button to confirm scheduling."""
         import time
         from .video_policy import PreSaveAuditBlocked
+
+        if getattr(self, '_policy_calendar_required', False):
+            # An unqualified dialog Save could itself publish. Only the explicit
+            # native Done staging control may precede the guarded Save boundary.
+            self._guard_policy_save()
+            self.verify_schedule_timezone()
+            self.verify_schedule_picker()
+            done = self.driver.execute_script("""
+                const visible = e => !!(e && (e.offsetWidth || e.offsetHeight || e.getClientRects().length));
+                const pickers = Array.from(document.querySelectorAll('ytcp-visibility-scheduler')).filter(visible);
+                if (pickers.length !== 1) return null;
+                const scope = pickers[0].closest('tp-yt-paper-dialog');
+                if (!scope) return null;
+                const buttons = Array.from(scope.querySelectorAll('ytcp-button#done-button button, button#done-button'))
+                    .filter(e => visible(e) && !e.disabled && (e.innerText || e.textContent || '').trim() === 'Done');
+                return buttons.length === 1 ? buttons[0] : null;
+            """)
+            if done is None:
+                raise PreSaveAuditBlocked('presave_audit:explicit_done_control_required')
+            self.safe_click(done)
+            return
 
         # YouTube Studio variants:
         # - native <button> with inner <span>Done</span>
@@ -3558,6 +3690,8 @@ class YouTubeStudioDOM:
                     )
                     if is_timezone:
                         continue
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     pass
 
@@ -3566,12 +3700,16 @@ class YouTubeStudioDOM:
                     if (el.tag_name or "").lower() == "ytcp-button":
                         inner = el.find_element(By.CSS_SELECTOR, "button")
                         el = inner
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     pass
 
                 try:
                     # Ensure it's in view (some Studio dialogs require scroll)
                     self.driver.execute_script("arguments[0].scrollIntoView({block:'center'});", el)
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     pass
                 if getattr(self, "_policy_scheduling", False):
@@ -3580,6 +3718,8 @@ class YouTubeStudioDOM:
                 time.sleep(1)
                 return
             except PreSaveAuditBlocked:
+                raise
+            except VerificationHandoff:
                 raise
             except Exception:
                 continue
@@ -3607,6 +3747,8 @@ class YouTubeStudioDOM:
                 return
         except PreSaveAuditBlocked:
             raise
+        except VerificationHandoff:
+            raise
         except Exception:
             pass
 
@@ -3615,6 +3757,8 @@ class YouTubeStudioDOM:
     def schedule_video(self, date_str: str, time_str: str) -> bool:
         from .video_policy import scheduling_policy, VideoPolicyBlocked, PreSaveAuditBlocked
         self._policy_scheduling = True
+        self._schedule_timezone_verified = False
+        self._schedule_picker_verified = None
         try:
             session = self._policy_edit()
             session.requested_schedule = {"date": date_str, "time": time_str,
@@ -3633,6 +3777,84 @@ class YouTubeStudioDOM:
             return False
         finally:
             self._policy_scheduling = False
+
+    def verify_schedule_timezone(self):
+        """Observe the existing timezone control; never change it to match config.
+
+        Only explicit IANA identity or these unambiguous Studio labels qualify.
+        Offset-only/localized/absent controls remain unknown, requiring owner review.
+        """
+        if not getattr(self, '_policy_calendar_required', False):
+            return
+        from .video_policy import PreSaveAuditBlocked
+        expected = getattr(self, '_policy_timezone', None)
+        aliases = {'Asia/Tokyo': {'Tokyo', 'Japan Standard Time'},
+                   'America/New_York': {'New York', 'Eastern Time (US & Canada)'}}
+        try:
+            values = self.driver.execute_script("""
+                const pickers = Array.from(document.querySelectorAll('ytcp-visibility-scheduler'))
+                    .filter(e => e.offsetWidth || e.offsetHeight || e.getClientRects().length);
+                if (pickers.length !== 1) return [];
+                const controls = Array.from(pickers[0].querySelectorAll('#timezone-select-button'))
+                    .filter(e => e.offsetWidth || e.offsetHeight || e.getClientRects().length);
+                return controls.map(e => (e.innerText || e.textContent || '').trim());
+            """)
+            if not isinstance(values, list) or len(values) != 1 or not isinstance(values[0], str):
+                raise ValueError('timezone_control_unverified')
+            label = values[0].strip()
+            # A numeric UTC offset alone is not a timezone or DST rule.
+            offset = re.match(r'^\(?(?:GMT|UTC)([+-])(\d{1,2}):?(\d{2})\)?\s*', label)
+            if offset:
+                minutes = (int(offset[2]) * 60 + int(offset[3])) * (1 if offset[1] == '+' else -1)
+                legal = {'Asia/Tokyo': {540}, 'America/New_York': {-240, -300}}
+                if int(offset[3]) >= 60 or minutes not in legal.get(expected, set()):
+                    raise ValueError('timezone_offset_contradiction')
+                label = label[offset.end():].strip()
+            if not expected or label not in {expected, *aliases.get(expected, set())}:
+                raise ValueError('timezone_identity_mismatch')
+            self._schedule_timezone_verified = True
+        except VerificationHandoff:
+            raise
+        except Exception as exc:
+            self._schedule_timezone_verified = False
+            raise PreSaveAuditBlocked('presave_audit:studio_timezone_unverified') from exc
+
+    def verify_schedule_picker(self):
+        """Observe committed picker values after typing, before any Done/Save."""
+        if not getattr(self, '_policy_calendar_required', False):
+            return
+        from .video_policy import PreSaveAuditBlocked
+        self._schedule_picker_verified = None
+        wanted = self._policy_edit().requested_schedule
+        try:
+            observed = self.driver.execute_script("""
+                const visible = e => !!(e && (e.offsetWidth || e.offsetHeight || e.getClientRects().length));
+                const pickers = Array.from(document.querySelectorAll('ytcp-visibility-scheduler')).filter(visible);
+                if (pickers.length !== 1) return null;
+                const picker = pickers[0];
+                const scope = picker.closest('ytcp-video-visibility-select, tp-yt-paper-dialog');
+                if (!scope) return null;
+                const radios = Array.from(scope.querySelectorAll('tp-yt-paper-radio-button[name="PUBLISH_FROM_PRIVATE"]')).filter(visible);
+                const dates = Array.from(picker.querySelectorAll('#datepicker-trigger div.left-container')).filter(visible);
+                const times = Array.from(picker.querySelectorAll('#time-of-day-container input')).filter(visible);
+                const invalid = Array.from(scope.querySelectorAll('[aria-invalid="true"], [invalid]')).some(visible);
+                if (radios.length !== 1 || dates.length !== 1 || times.length !== 1) return null;
+                return {selected: radios[0].checked === true || radios[0].getAttribute('aria-checked') === 'true',
+                        date: (dates[0].innerText || dates[0].textContent || '').trim(),
+                        time: (times[0].value || '').trim(), invalid};
+            """)
+            if (not isinstance(observed, dict) or observed.get('selected') is not True
+                    or observed.get('invalid') is not False or not isinstance(wanted, dict)):
+                raise ValueError('picker_unverified')
+            # Compare normalized wall values, never infer them from keystrokes.
+            for key, pattern in (('date', '%b %d, %Y'), ('time', '%I:%M %p')):
+                if datetime.strptime(observed[key], pattern) != datetime.strptime(wanted[key], pattern):
+                    raise ValueError('picker_value_mismatch')
+            self._schedule_picker_verified = dict(wanted)
+        except VerificationHandoff:
+            raise
+        except Exception as exc:
+            raise PreSaveAuditBlocked('presave_audit:studio_schedule_unverified') from exc
 
     def _schedule_video_workflow(self, date_str: str, time_str: str) -> bool:
         """
@@ -3654,6 +3876,8 @@ class YouTubeStudioDOM:
             ("select_schedule_option", lambda: self.select_schedule_option()),
             ("set_schedule_date", lambda: self.set_schedule_date(date_str)),
             ("set_schedule_time", lambda: self.set_schedule_time(time_str)),
+            ("verify_schedule_timezone", lambda: self.verify_schedule_timezone()),
+            ("verify_schedule_picker", lambda: self.verify_schedule_picker()),
             ("click_done", lambda: self.click_done()),
             ("click_save", lambda: self.click_save()),
         ]
@@ -3666,11 +3890,13 @@ class YouTubeStudioDOM:
                 elapsed = time_module.time() - step_start
                 step_times.append((step_name, elapsed))
                 logger.debug(f"[DOM] Step '{step_name}' completed in {elapsed:.1f}s")
+            except VerificationHandoff:
+                raise
             except Exception as e:
                 elapsed = time_module.time() - step_start
                 logger.error(f"[DOM] Scheduling failed at {step_name} ({elapsed:.1f}s): {type(e).__name__}: {e}")
                 from .video_policy import PreSaveAuditBlocked
-                if isinstance(e, PreSaveAuditBlocked):
+                if isinstance(e, PreSaveAuditBlocked) or getattr(self, '_policy_calendar_required', False):
                     raise  # Retain the current draft for the owner; no Escape.
                 # Best-effort cleanup: close dialog so the next loop isn't blocked.
                 try:

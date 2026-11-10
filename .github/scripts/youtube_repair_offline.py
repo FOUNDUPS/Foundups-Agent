@@ -58,6 +58,10 @@ SUITES = {
         SCHEDULER_TESTS + 'test_video_policy_save_readback.py',
         SCHEDULER_TESTS + 'test_video_policy_inline.py',
         'modules/communication/youtube_shorts/tests/test_operator_upload_policy.py')),
+    'calendar': (154, 'f54b0a7d33867ae0df88d013007ca0555c28ad6d4275592596ab6a5931bfab68', (
+        'modules/communication/livechat/tests/test_operator_stream_schedule.py',
+        SCHEDULER_TESTS + 'test_stream_schedule_calendar.py',
+        SCHEDULER_TESTS + 'test_calendar_reservations.py')),
 }
 
 # Reviewed literals only; no caller-provided JavaScript or runtime browser.
@@ -198,7 +202,7 @@ class EffectGuard:
             self.in_socketpair = False
 
     def private_pair_event(self, event, args):
-        if (event in {'socket.bind', 'socket.connect'} and self.suite in {'startup', 'rotation', 'directives', 'quality', 'routing', 'quality_stop', 'studio'}
+        if (event in {'socket.bind', 'socket.connect'} and self.suite in {'startup', 'rotation', 'directives', 'quality', 'routing', 'quality_stop', 'studio', 'calendar'}
                 and self.in_socketpair):
             frame = sys._getframe(1)
             while frame and frame.f_code is not self.original_pair.__code__:
@@ -249,7 +253,7 @@ def install_effects(stack, guard):
     import socket
     from unittest.mock import patch
     socket.has_ipv6 = False  # Avoid urllib3's import-time IPv6 bind probe.
-    if guard.suite in {'startup', 'rotation', 'directives', 'quality', 'routing', 'quality_stop', 'studio'}:
+    if guard.suite in {'startup', 'rotation', 'directives', 'quality', 'routing', 'quality_stop', 'studio', 'calendar'}:
         socket.socketpair = guard.pair
     sys.addaudithook(guard.audit)
     stack.enter_context(patch('subprocess.run', new=guard.node_run if guard.suite == 'studio' else guard.deny))
@@ -337,7 +341,7 @@ def run_child(suite, out):
     guard = EffectGuard(out, suite)
     if suite == 'studio':
         os.environ['NODE_BINARY'] = str(guard.node)
-    if suite in {'quality', 'quality_stop'}:
+    if suite in {'quality', 'quality_stop', 'calendar'}:
         os.environ['YT_AUTOMATION_STOP_FILE'] = str(out / 'STOP')
     with ExitStack() as stack:
         install_effects(stack, guard)
@@ -347,7 +351,7 @@ def run_child(suite, out):
             prepare_startup(stack)
         elif suite == 'inventory':
             prepare_inventory(stack, out, guard)
-        elif suite in {'rotation', 'directives'}:
+        elif suite in {'rotation', 'directives', 'calendar'}:
             prepare_rotation(out)
         import pytest
         code = pytest.main(['-c', str(ROOT / 'pytest.ini'), '--import-mode=importlib',

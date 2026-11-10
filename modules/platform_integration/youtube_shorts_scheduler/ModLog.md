@@ -1,5 +1,36 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-11-10 — Frozen stream title batch through the existing DAE
+
+Extend the private command queue and owned scheduler path with exact-title
+Unlisted Shorts discovery on the frozen confirmed stream channel. Require complete
+calendar inventory even for selected batches, bind the supplied access-verified
+browser without reconnect, and recheck expiry, cancellation, configured gates and
+detail identity/title before editing. Audit committed picker values and observed
+timezone before reserving a slot and entering the existing Save claim/callback.
+Reservations and submission attempts are separate; neither populates verified
+scheduled results. Preserve verification handoffs through fallback catchers.
+The legacy single-channel live shortcut refuses instead of bypassing this owner.
+
+The request branch yields its DAE browser after claimed work; the supervisor
+retains the held state. Ordinary general manual-takeover, full saved-state
+reconciliation, native WRE invocation and live Studio qualification remain separate.
+No channel identifiers or private instructions are added to source. WSP11/22/50/77/84/97.
+
+## 2026-11-10 — Exact calendar slots and durable unknown reservations
+
+Keep exact occupied slots from complete channel inventory and allocate against
+the combined observed and pending calendar. Preserve ET-to-channel date rollover,
+minimum spacing across midnight and the channel-local daily cap. Ambiguous
+observed times block the calendar. Allocation skips unrepresentable DST slots.
+
+Live reservations require persisted state and a fresh qualified calendar bound
+to the account timezone; Save separately observes the native picker. Duplicate or malformed state fails closed. A same-task nested
+operation reuses the channel lock, and another task or process must acquire it
+independently. Atomic saves retain unknown reservations across reloads and empty
+or failed inventory. State is scoped to the installed checkout's tracker folder.
+Qualified offline controls cover 34 calendar and persistence cases. WSP22/50/84/97.
+
 ## 2026-11-10 — Audit before scheduling; explicit audience configuration
 
 Extend existing detail Save guards with title/description completeness, observed

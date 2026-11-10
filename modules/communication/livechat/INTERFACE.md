@@ -1,3 +1,11 @@
+## Frozen stream scheduling — 2026-11-10
+
+The existing private manifest adds `schedule_stream_shorts`: freeze a confirmed
+live source, then let the existing browser owner select all exact-title UNLISTED
+Shorts on the receiving channel. Acceptance is pending work, not completion.
+See [the request and claim contract](docs/VIDEO_POLICY_INTERFACE.md#frozen-stream-scheduling-requests)
+for expiry, ownership, unknown Save preservation and offline-only qualification.
+
 ## Conversation contract — 2026-11-07
 
 `ChatMemoryManager.get_conversation_context(author_id)` returns a bounded current-session

@@ -1,5 +1,35 @@
 # YouTube Shorts Scheduler
 
+## Schedule Shorts from the current stream
+
+The private `schedule_stream_shorts` command uses the confirmed live session at
+acceptance. It freezes that channel and stream title, finds all Unlisted Shorts
+with that exact title, and claims that fixed batch. This follows 012's title
+selection rule; it does not infer native clip lineage from a matching title.
+No Short links are required. A stopped daemon or missing confirmed session cannot
+accept the command. A later stream or title change cannot redirect it.
+
+The existing browser owner must demonstrate access to the exact source stream.
+Before allocating, it reads the channel's complete scheduled calendar and keeps
+existing bookings. It uses empty future slots, configured cadence and timezone,
+plus durable reservations for uncertain earlier saves. The detail editor audits
+metadata, Audience and Studio's displayed date/time/timezone before Save. Missing
+or contradictory evidence blocks the batch. It does not enable disabled gates.
+
+Reservations, actual Save attempts and independently verified saved schedules are
+separate outcomes. Unknown saves remain protected. After executing a request or
+yielding for verification, that browser's DAE loop stays held for operator review;
+the supervisor does not silently restart it. The other browser and live chat have
+their own owners. Source/offline validation does not establish live Studio access,
+calendar timezone semantics, saved delivery or native WRE skill invocation.
+
+Use one installed checkout's canonical tracker directory for live scheduling.
+Preview may use disposable/custom storage; live allocation refuses it. The legacy
+single-channel `run_shorts_scheduler` live scheduling branch now refuses before
+attachment; use the existing primary scheduling owner/private request path.
+See [the request contract](../../communication/livechat/docs/VIDEO_POLICY_INTERFACE.md)
+and [scheduler interface](INTERFACE.md).
+
 ## Scheduling pre-save audit — 2026-11-10
 
 The [audit skill](skillz/youtube-presave-audit/SKILL.md) binds title, description,
@@ -13,8 +43,8 @@ malformed, duplicate or conflicting policy holds scheduling. These settings do
 not enable any channel's scheduler, comments or indexing roles. Manual draft
 changes and private preserve policies remain protected.
 
-Content-list scheduling enters the audited detail editor for one candidate per
-row snapshot. Legacy inline Save refuses because it cannot inspect the complete
+Content-list scheduling hands its exact visible Unlisted snapshot to the audited
+detail/calendar owner. Legacy inline Save refuses because it cannot inspect the complete
 draft. Offline validation does not qualify installed selectors, permission to
 access UnDaoDu, UI-TARS diagnosis, browser-wide takeover or persisted schedules.
 Existing uncertain save claims are retained.

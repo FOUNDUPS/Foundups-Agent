@@ -1,3 +1,14 @@
+## 2026-11-10 — Frozen stream browser access
+
+`test_remote_cli.py` exercises `verify_schedule_target_access` with synthetic
+Studio observations. A verified receipt requires the exact native channel,
+parent video edit URL, detail fields and observed permission. Oops, missing
+observations and mismatched identities block that candidate. A verification
+handoff propagates to the browser owner. The helper observes the supplied
+driver after the caller navigates under its browser lock. Port preferences
+only order candidates. The fixture covers source behavior and leaves live
+Studio qualification separate.
+
 ## 2026-11-10 — Pre-save audit and audience configuration
 
 The existing protected directives runner selects114 cases, including48 new

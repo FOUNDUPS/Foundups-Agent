@@ -1,3 +1,18 @@
+## 2026-11-10 — Stream-specific Shorts scheduling through existing owners
+
+Add the private `schedule_stream_shorts` action: freeze the confirmed stream,
+discover exact-title Unlisted Shorts on its channel, and execute the fixed batch
+through an access-verified browser. Require a complete calendar, occupied-slot
+allocation, durable uncertainty reservations and committed picker/audience/draft
+audits. Preserve request-specific browser handoff through supervision; isolate
+Chrome/Edge CDP routes and close the legacy live shortcut around the owner.
+
+The new sealed154-case suite passes, with existing inventory102, directives114
+and rotation35 inventories retained. Offline acceptance does not establish live
+Studio timezone semantics, saved schedules or native WRE invocation. Private
+channel configuration, evidence and unknown records remain outside this change.
+WSP10/11/22/50/77/84/97.
+
 ## 2026-11-10 — YouTube human verification handoff source slice
 
 Add a per-browser minimum30-second verification hold through existing Selenium

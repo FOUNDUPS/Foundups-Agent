@@ -1,3 +1,15 @@
+## 2026-11-10 — Freeze bounded stream scheduling in the existing manifest
+
+Add closed `schedule_stream_shorts` intake, immutable confirmed stream/session
+binding, source deduplication and terminal selection claims in the current queue
+state. Existing Phase3/browser ownership performs access/discovery and scheduling
+outside the manifest lock; request runs cannot fall into ordinary backlog rotation.
+Retain browser ownership through timeout/cancellation settlement. Add a read-only
+unknown scheduling-claim getter for calendar reconciliation. The exact-title rule
+is operator selection, not lineage proof. Forty-nine sealed offline fixtures pass;
+no runtime execution, source installation or verified scheduling delivery claimed.
+WSP15/22/50/77/84/97. See docs/VIDEO_POLICY_INTERFACE.md and tests/TestModLog.md.
+
 ## 2026-11-10 — Cooperate with human browser verification
 
 Install the shared Selenium verification gate on the DAE reconnect drivers,

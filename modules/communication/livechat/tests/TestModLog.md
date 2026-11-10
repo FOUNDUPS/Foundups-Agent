@@ -1,3 +1,21 @@
+## 2026-11-10 — Frozen stream request contracts
+
+Final focused selection: 49 passed, zero failures/errors/skips under the existing
+checked-in offline effect guard, with model imports denied and no real browser,
+network or child process effects. Real disposable manifest claims and synthetic
+launcher/DAE execution establish no browser work under the manifest lock, no
+retargeting/retry, and retained browser ownership until worker settlement.
+Held-browser results survive supervisor health checks; no automatic restart or
+later social/comment phase can consume that held browser. Legacy live scheduling
+refuses before attachment, and both launcher attachments use the CDP guard.
+The source getter reads exact unknown scheduling claims without consuming commands.
+The earlier seven-file expansion passed 301 cases, excluding only three existing
+subprocess cases from this process-denying private runner. Hosted coverage retains
+those cases. Initial failures were obsolete preview/live tracker fixtures; corrected
+fixtures use a synthetic qualified inventory with real disposable persistence and
+keep every selected-ID, visibility, metadata and unknown-outcome assertion.
+Live scheduling/readback and hosted checks are separate gates. WSP22/50/77/97.
+
 Packaging verification: eight backend-manifest cases pass; runtime membership stays
 1,485 with seven source bindings updated. Twelve scoped security-gate cases pass.
 Independent review verifies exactly 39 unchanged public checksum fingerprints,

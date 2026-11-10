@@ -13,8 +13,8 @@ Bind the native receiving channel and exact video ID before reading or editing.
 Read the existing scheduled inventory before allocating a slot. An incomplete
 calendar read means unknown coverage, not an empty calendar. A list row does not
 expose enough information to audit the full description and Audience: new
-content-page scheduling now enters the detail owner and ends that row snapshot
-after one candidate. The old inline Save refuses without a detail audit.
+content-page scheduling hands its exact Unlisted row snapshot to the existing
+detail/calendar owner. The old inline Save refuses without a detail audit.
 
 Before scheduling and again at Done/page Save, check:
 
@@ -31,9 +31,12 @@ Before scheduling and again at Done/page Save, check:
   No IDs or channel-name defaults belong in scheduling logic. Missing, malformed,
   duplicate or conflicting policy blocks. Configuration alone does not enable
   scheduling, comments or indexing on a new channel.
-- A future, valid date/time with an explicit configured timezone. Ambiguous
-  or nonexistent DST times block. This validates intent, not Studio's persisted
-  timezone/slot, calendar completeness or the absence of restrictions.
+- A future, valid date/time with an explicit configured timezone. Observe the
+  selected native Schedule control and committed date/time in the same visible
+  picker, plus the matching timezone identity, before Done/Save. A numeric offset
+  alone is insufficient. Ambiguous observed DST times block. The complete calendar
+  and durable unknown reservations govern allocation; no Save boolean proves the
+  slot persisted. Live list timezone semantics still require qualification.
 - Fresh private directives, STOP/public automation gate, unchanged known draft,
   exact receiving identity and durable duplicate/unknown-save protection.
 
