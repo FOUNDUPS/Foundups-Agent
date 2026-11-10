@@ -2,6 +2,7 @@
 import ast
 import asyncio
 import copy
+from contextlib import contextmanager
 import io
 import json
 import logging
@@ -226,12 +227,18 @@ def launcher(monkeypatch):
                 calls.append('discovery')
             return {'complete': settings.complete, 'video_ids': settings.ids}
 
-        async def run_scheduling_cycle(self, video_ids, max_videos):
+        async def run_scheduling_cycle(self, video_ids, max_videos, **options):
             with queue_ref[0]._locked():
                 calls.append(('schedule', list(video_ids), max_videos))
             assert self.request_driver is self.driver
             assert self.stream_schedule_request['execution_status'] == 'unknown'
             assert queue_ref[0].get_pending_stream_schedule_requests() == []
+            if self.stream_schedule_request.get('first_test_only') is True:
+                assert options == {'update_metadata': False}
+                assert video_ids == self.stream_schedule_request['video_ids'][:1]
+                assert max_videos == 1
+            else:
+                assert options == {}
             if settings.exception:
                 raise settings.exception
             return settings.result
@@ -242,8 +249,11 @@ def launcher(monkeypatch):
         monkeypatch.setitem(sys.modules, name, module)
 
     from modules.infrastructure.foundups_selenium.src.youtube_verification import VerificationHandoff
-    def access(driver, channel, parent):
+    def access(driver, channel, parent, **options):
         assert (channel, parent) == (CHANNEL, PARENT)
+        if options:
+            assert options == {'expected_title': TITLE}
+            calls.append('verify_title')
         calls.append('verify')
         if settings.exception == 'handoff':
             raise VerificationHandoff('fixture takeover')
@@ -300,6 +310,136 @@ def test_launcher_rejects_forged_snapshot_before_navigation(tmp_path, launcher):
     request['parent_video_id'] = OTHER
     run(result, [request])
     assert calls == []
+
+
+@pytest.mark.parametrize('blocked', [False, True])
+def test_recorded_launcher_freezes_full_batch_but_never_attempts_second(tmp_path, launcher, blocked):
+    run, settings, calls = launcher
+    settings.ids = [SHORT, OTHER]
+    if blocked:
+        settings.result = {'status': 'blocked', 'submitted_ids': []}
+    result = queue(tmp_path, [command(recorded_source={
+        'channel_id': CHANNEL, 'parent_video_id': PARENT, 'stream_title': TITLE},
+        first_test_only=True)])
+    result.dae = None
+    request = accept(result)
+    run(result, [request])
+    assert 'verify_title' in calls
+    assert [c for c in calls if isinstance(c, tuple)] == [('schedule', [SHORT], 1)]
+    frozen = json.loads(result.state_path.read_text())[owner.STATE_KEY][0]
+    assert frozen['video_ids'] == [SHORT, OTHER]
+    assert frozen['execution_status'] == ('blocked' if blocked else 'unknown')
+    assert result.get_pending_stream_schedule_requests() == []
+
+
+@pytest.fixture
+def native_request_cli(tmp_path, monkeypatch):
+    from modules.platform_integration.youtube_shorts_scheduler import cli
+    from modules.communication.livechat.src import automation_gates, operator_command_queue
+    from modules.infrastructure.shared_utilities import youtube_channel_registry
+    result = queue(tmp_path, [command(recorded_source={
+        'channel_id': CHANNEL, 'parent_video_id': PARENT, 'stream_title': TITLE},
+        first_test_only=True), {'id': 'unrelated', 'action': 'announce',
+                               'payload': {'message': 'Synthetic unrelated message'}}])
+    result.dae = None
+    calls = []
+    settings = SimpleNamespace(busy=False, registered=True, role=True, ports=[9222])
+
+    @contextmanager
+    def lease():
+        if settings.busy:
+            raise TimeoutError('owner_busy')
+        calls.append('lease')
+        try:
+            yield
+        finally:
+            calls.append('released')
+
+    def launch(**kwargs):
+        assert calls == ['lease']
+        assert kwargs['browser'] == 'chrome' and kwargs['max_per_channel'] == 1
+        assert kwargs['mode'] == 'schedule'
+        requests = kwargs['stream_schedule_requests']
+        assert len(requests) == 1 and requests[0]['id'] == 'request-1'
+        frozen = result.claim_stream_schedule_request(requests[0], [SHORT, OTHER])
+        result.finish_stream_schedule_request(frozen['id'], reason='schedule_readback_unqualified',
+                                             submitted_ids=[SHORT])
+        calls.append('native_owner')
+        return {'operator_handoff_required': True, 'saved_state_verified': False}
+
+    module_name = 'modules.platform_integration.youtube_shorts_scheduler.scripts.launch'
+    native = ModuleType(module_name)
+    native.run_multi_channel_scheduler = launch
+    native.BROWSER_PORTS = {'chrome': 9222, 'edge': 9223}
+    monkeypatch.setitem(sys.modules, module_name, native)
+    monkeypatch.setattr(automation_gates, 'youtube_runtime_owner', lease)
+    monkeypatch.setattr(operator_command_queue, 'OperatorCommandQueue', lambda dae: result)
+    monkeypatch.setattr(youtube_channel_registry, 'get_channel_by_id', lambda channel: (
+        {'roles': {'shorts': settings.role}, 'browser': {'available_ports': settings.ports}}
+        if settings.registered and channel == CHANNEL else None))
+    return cli, result, calls, settings
+
+
+def test_native_cli_uses_named_request_and_keeps_submit_unverified(native_request_cli):
+    cli, result, calls, _ = native_request_cli
+    out = cli.run_operator_request('request-1', 'chrome')
+    assert calls == ['lease', 'native_owner', 'released']
+    assert out['success'] is False and out['scheduling_verified'] is False
+    assert out['receipt']['selection_count'] == 2
+    assert out['receipt']['withheld_count'] == 1
+    assert out['receipt']['submission_recorded_count'] == 1
+    assert result.inspect_command('unrelated')['received'] is False
+    # The same source's unknown result is not reissued as a new request.
+    calls.clear()
+    again = cli.run_operator_request('request-1', 'chrome')
+    assert again['status'] == 'request_not_pending'
+    assert calls == ['lease', 'released']
+
+
+@pytest.mark.parametrize('case', ['busy', 'missing', 'role', 'port', 'stop', 'disabled'])
+def test_native_cli_blocks_before_browser_owner(native_request_cli, monkeypatch, case):
+    cli, result, calls, settings = native_request_cli
+    if case == 'busy': settings.busy = True
+    if case == 'missing': settings.registered = False
+    if case == 'role': settings.role = False
+    if case == 'port': settings.ports = [9223]
+    if case == 'stop':
+        import os
+        Path(os.environ['YT_AUTOMATION_STOP_FILE']).write_text('operator hold')
+    if case == 'disabled': monkeypatch.setenv('YT_SHORTS_SCHEDULING_ENABLED', 'false')
+    if case == 'busy':
+        with pytest.raises(TimeoutError): cli.run_operator_request('request-1', 'chrome')
+        assert result.inspect_command('request-1')['received'] is False
+    else:
+        assert cli.run_operator_request('request-1', 'chrome')['success'] is False
+    assert 'native_owner' not in calls
+    assert result.inspect_command('unrelated')['received'] is False
+
+
+def test_native_cli_argument_mode_loads_only_checkout_env_and_reports_unverified(monkeypatch, capsys):
+    from modules.platform_integration.youtube_shorts_scheduler import cli
+    import dotenv
+    calls = []
+    monkeypatch.setattr(dotenv, 'load_dotenv', lambda path, override: calls.append((path, override)))
+    monkeypatch.setattr(cli, 'run_operator_request', lambda identity, browser:
+                        {'scheduling_verified': False, 'success': False})
+    assert cli.main(['--request-id', 'synthetic', '--browser', 'chrome']) == 2
+    assert calls == [(ROOT / '.env', False)]
+    assert json.loads(capsys.readouterr().out)['scheduling_verified'] is False
+
+
+@pytest.mark.parametrize('extra', [[], ['--channel', 'fixture'], ['--dry-run'],
+    ['--preflight'], ['--preserve-metadata'], ['--max-videos', '2'], ['--video-ids', SHORT]])
+def test_native_cli_does_not_allow_other_execution_modes(monkeypatch, extra):
+    from modules.platform_integration.youtube_shorts_scheduler import cli
+    invoked = []
+    monkeypatch.setattr(cli, 'run_operator_request', lambda *args: invoked.append(args))
+    arguments = ['--request-id', 'synthetic']
+    if extra:
+        arguments += ['--browser', 'chrome', *extra]
+    with pytest.raises(SystemExit) as caught:
+        cli.main(arguments)
+    assert caught.value.code == 2 and invoked == []
 
 
 @pytest.mark.asyncio

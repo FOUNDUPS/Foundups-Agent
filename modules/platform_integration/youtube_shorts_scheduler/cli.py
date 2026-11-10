@@ -34,6 +34,44 @@ logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
 
 
+def run_operator_request(command_id, browser):
+    """Run one private first-test request through the native scheduling owner.
+
+    This entry owns the same host lease as the full DAE. It consumes only the
+    named scheduling command, never announcements or another pending request.
+    """
+    from modules.communication.livechat.src.automation_gates import (
+        youtube_runtime_owner, stop_active, _env_truthy,
+    )
+    from modules.communication.livechat.src.operator_command_queue import OperatorCommandQueue
+    from modules.infrastructure.shared_utilities.youtube_channel_registry import get_channel_by_id
+    from .scripts.launch import run_multi_channel_scheduler, BROWSER_PORTS
+
+    with youtube_runtime_owner():
+        queue = OperatorCommandQueue(None)
+        request = asyncio.run(queue.refresh_stream_schedule_request(command_id, recorded_only=True))
+        if request is None:
+            return {'success': False, 'status': 'request_not_pending',
+                    'receipt': queue.inspect_command(command_id)}
+        if request.get('source_kind') != 'recorded' or request.get('first_test_only') is not True:
+            return {'success': False, 'status': 'recorded_first_test_required'}
+        config = get_channel_by_id(request['channel_id'])
+        candidates = (config or {}).get('browser', {}).get('available_ports', [])
+        if (not config or config.get('roles', {}).get('shorts') is not True
+                or BROWSER_PORTS.get(browser) not in candidates):
+            return {'success': False, 'status': 'browser_candidate_not_configured'}
+        if (stop_active('scheduling') or not _env_truthy('YT_AUTOMATION_ENABLED', 'true')
+                or not _env_truthy('YT_SHORTS_SCHEDULING_ENABLED', 'true')):
+            return {'success': False, 'status': 'stream_schedule_gate_closed'}
+        result = run_multi_channel_scheduler(
+            browser=browser, mode='schedule', max_per_channel=1,
+            stream_schedule_requests=[request],
+        )
+        return {'success': False, 'status': 'operator_review_required',
+                'receipt': queue.inspect_command(command_id), 'execution': result,
+                'scheduling_verified': False}
+
+
 def scheduling_preflight(channel, browser=None):
     """Probe existing local transport only; never launch or authenticate a browser."""
     from .src.channel_config import get_channel_config
@@ -122,6 +160,8 @@ Examples:
 
     parser.add_argument('--channel', '-c', type=str,
                         help='Channel key: move2japan, undaodu, foundups')
+    parser.add_argument('--request-id', type=str,
+                        help='Consume only this recorded-stream first-test manifest command')
     parser.add_argument('--max-videos', '-m', type=int, default=0,
                         help='Optional processing limit; default 0 schedules the whole batch')
     parser.add_argument('--video-ids', type=str,
@@ -144,6 +184,23 @@ Examples:
 
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
+
+    if args.request_id is not None:
+        if (not args.browser or args.channel or args.video_ids is not None or args.max_videos
+                or args.list_channels or args.dry_run or args.preflight or args.preserve_metadata):
+            parser.error('--request-id requires --browser and cannot combine with other modes')
+        # Only this native entry loads its own checkout configuration; a command
+        # cannot supply an environment path or override the host's STOP controls.
+        from pathlib import Path
+        from dotenv import load_dotenv
+        load_dotenv(Path(__file__).resolve().parents[3] / '.env', override=False)
+        try:
+            result = run_operator_request(args.request_id, args.browser)
+        except (OSError, ValueError, TimeoutError, RuntimeError) as exc:
+            result = {'success': False, 'status': 'request_execution_blocked',
+                      'reason': type(exc).__name__, 'scheduling_verified': False}
+        print(json.dumps(result, ensure_ascii=True))
+        return 0 if result.get('scheduling_verified') is True else 2
 
     # List channels mode
     if args.list_channels:

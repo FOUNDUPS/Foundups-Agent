@@ -20,6 +20,7 @@ MAX_REQUESTS = 500
 MAX_SELECTION = 1000
 _FROZEN = {'id', 'command_digest', 'channel_id', 'parent_video_id', 'stream_title',
            'session_id', 'live_chat_id', 'accepted_at_unix', 'expires_at_unix', 'source_key'}
+_RECORDED = {'source_kind', 'first_test_only'}
 
 
 def _digest(value):
@@ -28,8 +29,17 @@ def _digest(value):
 
 
 def validate_payload(payload):
-    if not isinstance(payload, dict) or set(payload) - {'ttl_seconds', 'expires_at_unix'}:
+    if not isinstance(payload, dict) or set(payload) - {
+            'ttl_seconds', 'expires_at_unix', 'recorded_source', 'first_test_only'}:
         raise ValueError('invalid_stream_schedule_payload')
+    if 'recorded_source' in payload or 'first_test_only' in payload:
+        source = payload.get('recorded_source')
+        if (payload.get('first_test_only') is not True or not isinstance(source, dict)
+                or set(source) != {'channel_id', 'parent_video_id', 'stream_title'}):
+            raise ValueError('invalid_recorded_stream_source')
+        video_policy.ids([source['channel_id']], video_policy.CHANNEL, 1)
+        video_policy.ids([source['parent_video_id']], video_policy.VIDEO, 1)
+        video_policy.text(source['stream_title'], 100)
     ttl = payload.get('ttl_seconds', 3600)
     deadline = payload.get('expires_at_unix')
     if type(ttl) is not int or not 60 <= ttl <= 86400:
@@ -56,13 +66,19 @@ def validate_state(state, rows):
         raise ValueError('invalid_stream_schedule_state')
     seen, sources = set(), set()
     for request in requests:
-        if not isinstance(request, dict) or set(request) != _FROZEN | {
-                'request_digest', 'execution_status', 'video_ids', 'result'}:
+        if not isinstance(request, dict):
             raise ValueError('invalid_stream_schedule_record')
+        recorded = bool(set(request) & _RECORDED)
+        frozen_fields = _FROZEN | _RECORDED if recorded else _FROZEN
+        if set(request) != frozen_fields | {'request_digest', 'execution_status', 'video_ids', 'result'}:
+            raise ValueError('invalid_stream_schedule_record')
+        if recorded and (request['source_kind'] != 'recorded' or request['first_test_only'] is not True
+                         or request['session_id'] != '' or request['live_chat_id'] != ''):
+            raise ValueError('invalid_recorded_stream_binding')
         video_policy.ids([request['channel_id']], video_policy.CHANNEL, 1)
         video_policy.ids([request['parent_video_id']], video_policy.VIDEO, 1)
         for key, limit in (('id', 200), ('stream_title', 100), ('session_id', 300), ('live_chat_id', 300)):
-            video_policy.text(request[key], limit)
+            video_policy.text(request[key], limit, empty=recorded and key in {'session_id', 'live_chat_id'})
         for key in ('accepted_at_unix', 'expires_at_unix'):
             if type(request[key]) not in (int, float) or not 0 < request[key] < 1e12:
                 raise ValueError('invalid_stream_schedule_time')
@@ -70,7 +86,7 @@ def validate_state(state, rows):
             raise ValueError('invalid_stream_schedule_time')
         video_policy.validate_artifact(request['command_digest'])
         if (request['source_key'] != _digest([request['channel_id'], request['parent_video_id']])
-                or request['request_digest'] != _digest({k: request[k] for k in _FROZEN})):
+                or request['request_digest'] != _digest({k: request[k] for k in frozen_fields})):
             raise ValueError('stream_schedule_binding_changed')
         if request['id'] in seen or request['source_key'] in sources:
             raise ValueError('duplicate_stream_schedule_source')
@@ -78,13 +94,17 @@ def validate_state(state, rows):
         if request['execution_status'] not in {'pending', 'unknown', 'blocked'}:
             raise ValueError('invalid_stream_schedule_status')
         selected = _selection(request['video_ids'])
+        if request['parent_video_id'] in selected:
+            raise ValueError('stream_parent_not_a_short_target')
         if request['execution_status'] == 'pending' and selected:
             raise ValueError('unclaimed_stream_schedule_selection')
         result = request['result']
         if not isinstance(result, dict) or set(result) - {'reason', 'submitted_ids'}:
             raise ValueError('invalid_stream_schedule_result')
         video_policy.text(result.get('reason', ''), 100, empty=True)
-        if not set(_selection(result.get('submitted_ids', []))) <= set(selected):
+        submitted = _selection(result.get('submitted_ids', []))
+        if (not set(submitted) <= set(selected)
+                or (recorded and submitted and submitted != selected[:1])):
             raise ValueError('stream_schedule_result_out_of_scope')
         row = rows.get(request['id'])
         if (not row or row.get('action') != ACTION or row.get('command_digest') != request['command_digest']
@@ -108,23 +128,32 @@ def dispatch(self, command, row):
     expiry = min(row['first_seen_unix'] + ttl, deadline if deadline is not None else float('inf'))
     if expiry <= now:
         return {'status': 'expired', 'reason': 'stream_schedule_expired'}
-    live = getattr(self.dae, 'livechat', None)
-    if live is None or getattr(live, 'is_running', False) is not True:
-        return {'status': 'blocked', 'reason': 'confirmed_live_session_unavailable'}
-    # Only confirmed live owner fields; speculative DAE current_video_id is not used.
+    source = command.get('payload', {}).get('recorded_source')
+    if source is None:
+        live = getattr(self.dae, 'livechat', None)
+        if live is None or getattr(live, 'is_running', False) is not True:
+            return {'status': 'blocked', 'reason': 'confirmed_live_session_unavailable'}
+        # Only confirmed live owner fields; speculative DAE current_video_id is not used.
+        source = {'channel_id': getattr(live, 'channel_id', None),
+            'parent_video_id': getattr(live, 'video_id', None),
+            'stream_title': getattr(live, 'stream_title', None),
+            'session_id': getattr(getattr(live, 'memory_manager', None), 'current_session', None),
+            'live_chat_id': getattr(live, 'live_chat_id', None)}
+    else:
+        # Explicit operator target, still requiring native browser proof before writes.
+        # An ended stream has no accepted live session; never fabricate one.
+        source = {**source, 'session_id': '', 'live_chat_id': '',
+                  'source_kind': 'recorded', 'first_test_only': True}
     frozen = {'id': command['id'], 'command_digest': row['command_digest'],
-        'channel_id': getattr(live, 'channel_id', None),
-        'parent_video_id': getattr(live, 'video_id', None),
-        'stream_title': getattr(live, 'stream_title', None),
-        'session_id': getattr(getattr(live, 'memory_manager', None), 'current_session', None),
-        'live_chat_id': getattr(live, 'live_chat_id', None),
+        **source,
         'accepted_at_unix': now, 'expires_at_unix': expiry}
     frozen['source_key'] = _digest([frozen['channel_id'], frozen['parent_video_id']])
     try:
         video_policy.ids([frozen['channel_id']], video_policy.CHANNEL, 1)
         video_policy.ids([frozen['parent_video_id']], video_policy.VIDEO, 1)
         for key, limit in (('stream_title', 100), ('session_id', 300), ('live_chat_id', 300)):
-            video_policy.text(frozen[key], limit)
+            video_policy.text(frozen[key], limit,
+                              empty=frozen.get('source_kind') == 'recorded' and key != 'stream_title')
     except (ValueError, TypeError):
         return {'status': 'blocked', 'reason': 'confirmed_live_context_incomplete'}
     _, _, rows, _, state = owner._load_queue(self)
@@ -140,6 +169,38 @@ def dispatch(self, command, row):
     self._atomic_write(self.state_path, state)
     return {'status': 'accepted', 'result': {'request_digest': request['request_digest'],
         'execution_status': 'pending', 'expires_at_unix': expiry, 'delivery_verified': False}}
+
+
+def refresh(self, command_id, *, recorded_only=False):
+    """Consume one scheduling command only; never dispatch unrelated inbox work."""
+    from . import operator_video_policy_owner as owner
+    video_policy.text(command_id, 200)
+    with self._locked():
+        commands, ledger, rows, digests, state = owner._load_queue(self)
+        command = next((item for item in commands if item['id'] == command_id), None)
+        if command is None or command.get('action') != ACTION:
+            return None
+        if recorded_only:
+            payload = command.get('payload')
+            if (not isinstance(payload, dict) or 'recorded_source' not in payload
+                    or payload.get('first_test_only') is not True):
+                return None
+            validate_payload(payload)
+        if any(r.get('action') == ACTION and r['status'] == 'unknown' for r in rows.values()):
+            raise ValueError('stream_schedule_outcome_unknown')
+        if command_id not in rows:
+            row = owner._claim(self, command, digests[command_id], ledger, rows)
+            try:
+                result = dispatch(self, command, row)
+            except Exception as exc:
+                result = {'status': 'unknown', 'reason': type(exc).__name__}
+            owner._finish(self, row, result, ledger)
+        _, _, rows, _, state = owner._load_queue(self)
+        if any(r.get('action') == ACTION and r['status'] == 'unknown' for r in rows.values()):
+            raise ValueError('stream_schedule_outcome_unknown')
+        return deepcopy(next((request for request in validate_state(state, rows)
+            if request['id'] == command_id and request['execution_status'] == 'pending'
+            and request['expires_at_unix'] > time.time()), None))
 
 
 def pending(self):
@@ -160,6 +221,8 @@ def claim(self, request, video_ids):
         current = next((r for r in validate_state(state, rows) if r['id'] == request.get('id')), None)
         if current is None or current != request or rows[current['id']]['status'] != 'accepted':
             raise ValueError('stream_schedule_request_changed')
+        if current['parent_video_id'] in selected:
+            raise ValueError('stream_parent_not_a_short_target')
         if current['execution_status'] != 'pending':
             raise ValueError('stream_schedule_already_claimed')
         if current['expires_at_unix'] <= time.time():
@@ -184,7 +247,9 @@ def finish(self, command_id, *, reason, submitted_ids=(), no_submission=False):
         if (current is None or current['execution_status'] != 'unknown'
                 or current['result'].get('reason') != 'claimed_before_scheduling'):
             raise ValueError('stream_schedule_not_claimed')
-        if not set(submitted) <= set(current['video_ids']) or (no_submission and submitted):
+        if (not set(submitted) <= set(current['video_ids']) or (no_submission and submitted)
+                or (current.get('first_test_only') is True and submitted
+                    and submitted != current['video_ids'][:1])):
             raise ValueError('stream_schedule_result_out_of_scope')
         current.update(execution_status='blocked' if no_submission is True else 'unknown',
                        result={'reason': reason, 'submitted_ids': submitted})
@@ -198,7 +263,12 @@ def inspect(state, command_id):
     request = next((r for r in state.get(STATE_KEY, []) if r['id'] == command_id), None)
     if request is None:
         return {}
-    return {'execution_status': request['execution_status'],
+    result = {'execution_status': request['execution_status'],
             'request_digest': request['request_digest'], 'expires_at_unix': request['expires_at_unix'],
             'selection_count': len(request['video_ids']), 'execution_reason': request['result'].get('reason'),
             'delivery_verified': False}
+    if request.get('first_test_only') is True:
+        # Withheld means not admitted in this slice, never completed or verified.
+        result.update(first_test_only=True, withheld_count=max(len(request['video_ids']) - 1, 0),
+                      submission_recorded_count=len(request['result'].get('submitted_ids', [])))
+    return result

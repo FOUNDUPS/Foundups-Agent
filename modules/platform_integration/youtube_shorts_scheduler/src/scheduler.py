@@ -314,9 +314,15 @@ class YouTubeShortsScheduler:
                 or getattr(self, 'request_driver', None) is not self.driver
                 or not self.dom or self.dom.driver is not self.driver):
             raise PreSaveAuditBlocked('stream_schedule_scope_expired_or_changed')
+        allowed_ids = request.get('video_ids', [])
+        if request.get('first_test_only') is True:
+            allowed_ids = allowed_ids[:1]
+            if session is not None and session.allow_metadata is not False:
+                raise PreSaveAuditBlocked('stream_first_test_requires_metadata_preservation')
         if session is not None and (session.channel_id != self.channel_id
                 or session.original.get('title') != request['stream_title']
-                or session.video_id not in request.get('video_ids', [])):
+                or session.video_id == request.get('parent_video_id')
+                or session.video_id not in allowed_ids):
             raise PreSaveAuditBlocked('stream_schedule_child_changed')
 
     # =========================================

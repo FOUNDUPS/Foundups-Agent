@@ -5,6 +5,14 @@ live source, then let the existing browser owner select all exact-title UNLISTED
 Shorts on the receiving channel. Acceptance is pending work, not completion.
 See [the request and claim contract](docs/VIDEO_POLICY_INTERFACE.md#frozen-stream-scheduling-requests)
 for expiry, ownership, unknown Save preservation and offline-only qualification.
+The paired `recorded_source` / `first_test_only=true` payload explicitly names an
+ended parent without fabricating a live session. The async
+`refresh_stream_schedule_request(command_id, recorded_only=False)` consumes only that scheduling ID
+and returns a copied pending request or `None`; state-integrity failures raise.
+The full batch remains reserved while only its first ID may be reported submitted.
+Saved-schedule proof and later continuation remain separate qualifications.
+The native recorded-only mode sets `recorded_only=True` before intake, leaving
+legacy live requests untouched. Neither source mode can select its parent as a Short.
 
 ## Conversation contract — 2026-11-07
 

@@ -21,7 +21,9 @@ import math
 import re
 import stat
 import time
+from contextlib import contextmanager
 from pathlib import Path
+from threading import Lock
 from typing import Dict
 from uuid import uuid4
 
@@ -32,6 +34,20 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 COMMENTS_HALTED_EXIT_CODE = 78
 QUALITY_REASONS = frozenset({'invalid_reply_text', 'review_rejected', 'review_unavailable_or_invalid'})
 _INCIDENT_KEYS = {'version', 'kind', 'scope', 'incident_id', 'reason', 'recorded_at_unix'}
+_YOUTUBE_RUNTIME_LOCK = Lock()
+
+
+@contextmanager
+def youtube_runtime_owner():
+    """Exclude cooperating DAE and bounded request owners across checkouts."""
+    # A Windows mutex reenters on the same thread, including across asyncio tasks.
+    if not _YOUTUBE_RUNTIME_LOCK.acquire(blocking=False):
+        raise TimeoutError('youtube_runtime_owner_busy')
+    try:
+        with runtime_operation_lock('foundups-youtube-runtime-owner', timeout_seconds=0.01):
+            yield
+    finally:
+        _YOUTUBE_RUNTIME_LOCK.release()
 
 
 def _env_truthy(name: str, default: str = "false") -> bool:

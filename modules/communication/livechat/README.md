@@ -9,6 +9,13 @@ review; unknown results never retry automatically. See the
 for controls and the distinction between title selection and native lineage proof.
 Current qualification is offline; no live scheduling result is claimed.
 
+An ended stream can instead be explicitly bound with `recorded_source` and
+`first_test_only=true`. The native consumer refreshes only the named scheduling
+command; unrelated queued announcements stay untouched. The complete title-matching
+batch is frozen while only its first Short is admitted for a metadata-preserving
+test. The rest remain withheld pending separately qualified saved-state evidence;
+neither a new command nor restart retries the source. See the same request contract.
+
 ## Quiet conversation stewardship — 2026-11-07
 
 The default DAE receive path observes every supplied text message before response

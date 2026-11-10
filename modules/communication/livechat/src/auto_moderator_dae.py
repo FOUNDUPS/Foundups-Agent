@@ -1649,24 +1649,18 @@ class AutoModeratorDAE:
                                 ))
                                 results = await asyncio.wait_for(asyncio.shield(request_worker), timeout=phase3_timeout)
                             else:
-                                results = await asyncio.wait_for(
-                                    asyncio.to_thread(
-                                        run_multi_channel_scheduler,
-                                        browser=browser_name,
-                                        mode="schedule",
-                                        max_per_channel=max_shorts,
-                                        stop_event=scheduler_stop_event,
-                                    ),
-                                    timeout=phase3_timeout,
-                                )
+                                request_worker = asyncio.create_task(asyncio.to_thread(
+                                    run_multi_channel_scheduler, browser=browser_name,
+                                    mode="schedule", max_per_channel=max_shorts,
+                                    stop_event=scheduler_stop_event,
+                                ))
+                                results = await asyncio.wait_for(asyncio.shield(request_worker), timeout=phase3_timeout)
                         except asyncio.TimeoutError:
                             logger.error(f"[{tag}-LOOP] PHASE 3 TIMEOUT after {phase3_timeout}s")
-                            # Signal the leaked thread to stop driving the browser
+                            # Signal the owned thread and wait for it to settle below.
                             if scheduler_stop_event:
                                 scheduler_stop_event.set()
                                 logger.warning(f"[{tag}-LOOP] PHASE 3: Stop signal SENT to scheduler thread")
-                            if request_worker is None:
-                                await asyncio.sleep(5)
                             results = None
                         except asyncio.CancelledError:
                             if request_worker is not None:
@@ -1681,7 +1675,7 @@ class AutoModeratorDAE:
                                 # lock even through repeated cancellation.
                                 if await _await_owned_completion(request_worker):
                                     raise asyncio.CancelledError()
-                                if not request_worker.cancelled():
+                                if stream_requests and not request_worker.cancelled():
                                     if request_worker.exception() is not None:
                                         results = {'operator_handoff_required': True}
                                     elif results is None:
@@ -1878,33 +1872,41 @@ class AutoModeratorDAE:
             mode=mode
         )
     async def run(self):
-        """Own one operator watcher for the complete DAE run lifetime."""
+        """Hold host runtime ownership through the DAE and its owned shutdown."""
+        from .automation_gates import youtube_runtime_owner
+
         if getattr(self, "_operator_manifest_run_active", False):
             raise RuntimeError("AutoModeratorDAE.run is already active")
         self._operator_manifest_run_active = True
         watcher = None
         try:
-            # Independent of optional AI-overseer monitoring, but owned by run.
-            from .operator_command_queue import OperatorCommandQueue
-            self.operator_manifest_queue = OperatorCommandQueue(self)
-            watcher = asyncio.create_task(self.operator_manifest_queue.watch_forever())
-            self.operator_manifest_task = watcher
-            logger.info("[012-MANIFEST] Independent operator-manifest watcher started")
-            return await self._run_dae()
+            with youtube_runtime_owner():
+                try:
+                    # Independent of optional AI-overseer monitoring, but owned by run.
+                    from .operator_command_queue import OperatorCommandQueue
+                    self.operator_manifest_queue = OperatorCommandQueue(self)
+                    watcher = asyncio.create_task(self.operator_manifest_queue.watch_forever())
+                    self.operator_manifest_task = watcher
+                    logger.info("[012-MANIFEST] Independent operator-manifest watcher started")
+                    return await self._run_dae()
+                finally:
+                    tasks = ((watcher, "[012-MANIFEST] Operator watcher failed"),
+                             (getattr(self, '_comment_engagement_task', None), "[COMMUNITY] Owned engagement failed"))
+                    for task, _ in tasks:
+                        if task is not None and not task.done():
+                            task.cancel()
+                    cancelled = False
+                    for task, message in tasks:
+                        if task is None:
+                            continue
+                        cancelled = await _await_owned_completion(task) or cancelled
+                        if not task.cancelled() and task.exception() is not None:
+                            logger.error(message, exc_info=task.exception())
+                    if cancelled:
+                        raise asyncio.CancelledError()
         finally:
-            try:
-                if watcher is not None:
-                    watcher.cancel()
-                    try:
-                        await watcher
-                    except asyncio.CancelledError:
-                        pass
-                    except Exception:
-                        # Retrieve watcher failures without masking the DAE's exit.
-                        logger.exception("[012-MANIFEST] Operator watcher failed")
-            finally:
-                self.operator_manifest_task = None
-                self._operator_manifest_run_active = False
+            self.operator_manifest_task = None
+            self._operator_manifest_run_active = False
 
     async def _run_dae(self):
         """Existing startup, comment-only, and stream-monitoring lifecycle."""
