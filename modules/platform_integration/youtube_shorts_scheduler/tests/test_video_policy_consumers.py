@@ -18,7 +18,9 @@ VIDEO = "a" * 11
 @pytest.fixture
 def editor(monkeypatch):
     monkeypatch.setattr(time, "sleep", lambda *_: None)
-    state = {"channel_id": CHANNEL, "url": f"https://studio.youtube.com/video/{VIDEO}/edit",
+    from modules.platform_integration.youtube_shorts_scheduler.src import channel_config
+    monkeypatch.setitem(channel_config.CHANNELS, "audit_fixture", {"id": CHANNEL, "made_for_kids": False})
+    state = {"made_for_kids": False, "audience_ready": True, "channel_id": CHANNEL, "url": f"https://studio.youtube.com/video/{VIDEO}/edit",
              "title": " Original title \n", "description": " Original body \n"}
     active, observations, clicks = {}, [], []
 
@@ -38,6 +40,8 @@ def editor(monkeypatch):
     dom._edit_description_unchecked = lambda value: state.update(description=value)
     dom.begin_policy_cycle()
     dom.begin_policy_edit(CHANNEL, VIDEO)
+    dom._policy_edit().requested_schedule = {"date": "Nov 2, 2099", "time": "1:00 PM", "timezone": "Asia/Tokyo", "visibility": "scheduled"}
+    dom._policy_timezone = "Asia/Tokyo"
     return dom, state, active, observations, clicks
 
 
@@ -90,7 +94,7 @@ def test_pause_arriving_during_set_time_blocks_actual_save_owner(editor):
     dom.set_schedule_time = lambda time: active.update(scheduling={"scheduling_enabled": False})
     dom.click_done = lambda: None
     dom.wait_for_clickable = lambda *_a, **_k: SimpleNamespace(click=lambda: clicks.append(True))
-    assert dom.schedule_video("Nov 2, 2026", "1:00 PM") is False
+    assert dom.schedule_video("Nov 2, 2099", "1:00 PM") is False
     assert not clicks
 
 

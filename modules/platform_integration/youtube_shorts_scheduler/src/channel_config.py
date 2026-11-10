@@ -55,6 +55,10 @@ def _build_channel_config() -> Dict[str, Dict[str, Any]]:
             "account_section": browser.get("account_section", 0),
             "description_template": shorts.get("description_template", "ffcpln"),
             "content_types": ch.get("content_types") or ["short"],
+            # 012 direction (2026-11-10): these four channels are not for kids.
+            # A separately configured kids channel must explicitly opt into True.
+            "made_for_kids": shorts.get("made_for_kids", False if key in
+                {"move2japan", "undaodu", "foundups", "antifafm"} else None),
         }
     return channels
 

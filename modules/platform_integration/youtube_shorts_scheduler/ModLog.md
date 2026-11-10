@@ -2968,3 +2968,14 @@ skips it with `cadence_live_unqualified` until independent timezone and occupied
 receipts exist. Allocation/planning rejects unknown Studio timezone or any slot
 whose local date differs from its ET date (including Asia/Tokyo). This prevents
 clock-only conversion from silently publishing on the wrong calendar date.
+# 2026-11-10 — Scheduling pre-save completeness audit
+
+012 observed missing Audience answers, date-only music titles and empty bodies.
+Extended existing detail/save and index owners: repair incomplete metadata only
+from matched existing evidence, verify configured audience, and refuse incomplete
+or changed drafts and invalid schedule intent before Save. Content-page entry
+uses detail inspection; unqualified inline Save is held. Added the module-local
+audit skill and private AntifaFM candidate review without publishing or model calls.
+Offline tests cover actual guard/selection owners and durable unknown behavior;
+live installation, browser selectors, UI-TARS audience diagnosis and independent
+schedule readback remain separate qualification. WSP 10/22/50/84/95/97.

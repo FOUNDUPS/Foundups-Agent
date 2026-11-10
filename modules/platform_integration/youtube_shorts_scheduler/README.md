@@ -1,5 +1,20 @@
 # YouTube Shorts Scheduler
 
+## Scheduling pre-save audit — 2026-11-10
+
+The [audit skill](skillz/youtube-presave-audit/SKILL.md) binds title, description,
+Audience and schedule intent to the existing detail Save guard. Missing/date-only
+metadata can be repaired from matched existing index evidence; otherwise Save is
+blocked. The four configured non-kids channels select and verify No. A kids
+channel needs an explicit native-ID configuration; unknown channels never default
+to No. Manual draft changes and private preserve policies remain protected.
+
+Content-list scheduling enters the audited detail editor for one candidate per
+row snapshot. Legacy inline Save refuses because it cannot inspect the complete
+draft. Offline validation does not qualify installed selectors, permission to
+access UnDaoDu, UI-TARS diagnosis, browser-wide takeover or persisted schedules.
+Existing uncertain save claims are retained.
+
 ## Pending operator-control repair — 2026-11-07
 
 **SPECIFIED_NOT_IMPLEMENTED:** when 012 takes over a scheduling edit, wait at

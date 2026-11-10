@@ -809,66 +809,33 @@ class ContentPageScheduler:
         time_str: str,
         video_id: str = "unknown",
     ) -> bool:
+        """Use the existing detail owner so title, description and Audience are observable.
+
+        This is the initial route, never a fallback after a popup submission.
+        The old inline button remains fail-closed without a complete detail audit.
         """
-        Schedule a single video from its content page row.
-
-        Full flow:
-        1. Click visibility edit triangle on the row
-        2. Expand schedule section in popup
-        3. Set date
-        4. Set time
-        5. Click "Schedule" button in popup
-
-        Args:
-            row_element: Selenium WebElement for the ytcp-video-row
-            date_str: Date like "Feb 5, 2026"
-            time_str: Time like "5:15 PM"
-            video_id: For logging purposes
-
-        Returns:
-            True if all steps succeeded
-        """
-        workflow_start = time_module.time()
-        self._policy_expected_video = video_id
-        self._policy_requested_schedule = {"date": date_str, "time": time_str,
-            "timezone": getattr(self, "_policy_timezone", None), "visibility": "scheduled"}
-        logger.info(f"[CPS] Scheduling {video_id} → {date_str} @ {time_str}")
-
-        steps = [
-            ("click_visibility_edit", lambda: self._click_visibility_edit_on_row(row_element)),
-            ("expand_schedule", lambda: self._expand_schedule_in_popup()),
-            ("set_date", lambda: self._set_date_in_popup(date_str)),
-            ("set_time", lambda: self._set_time_in_popup(time_str)),
-            ("click_schedule", lambda: self._click_popup_schedule_button()),
-        ]
-
-        step_times = []
-        for step_name, fn in steps:
-            step_start = time_module.time()
+        from .video_policy import inline_identity, VideoPolicyBlocked
+        try:
+            if getattr(self, "_policy_submission_started", False):
+                raise VideoPolicyBlocked("inline_submission_outcome_unknown")
+            channel_id, current = inline_identity(
+                self.driver, row_element, channel_id=getattr(self, "_policy_channel_id", None),
+                video_id=video_id)
+            # A pending inline draft must be resolved by its owner, not discarded.
+            if self.driver.find_elements(By.CSS_SELECTOR, "ytcp-video-visibility-edit-popup[opened]"):
+                raise VideoPolicyBlocked("inline_draft_open")
+            self.dom.navigate_to_video(current)
+            session = self.dom.begin_policy_edit(channel_id, current)
+            if self.dom.read_edit_page_visibility() not in ("unlisted", "private"):
+                raise VideoPolicyBlocked("detail_visibility_not_schedulable")
+            self.dom._policy_timezone = getattr(self, "_policy_timezone", None)
             try:
-                result = fn()
-                elapsed = time_module.time() - step_start
-                step_times.append((step_name, elapsed))
-
-                if result is False:
-                    logger.error(f"[CPS] Step '{step_name}' returned False for {video_id}")
-                    self._dismiss_popup()
-                    return False
-
-                logger.debug(f"[CPS] Step '{step_name}' OK ({elapsed:.1f}s)")
-            except Exception as e:
-                elapsed = time_module.time() - step_start
-                logger.error(
-                    f"[CPS] Step '{step_name}' failed for {video_id}: "
-                    f"{type(e).__name__}: {e} ({elapsed:.1f}s)"
-                )
-                self._dismiss_popup()
-                return False
-
-        total_time = time_module.time() - workflow_start
-        timing = ", ".join(f"{n}:{t:.1f}s" for n, t in step_times)
-        logger.info(f"[CPS] Scheduled {video_id} → {date_str} {time_str} in {total_time:.1f}s [{timing}]")
-        return True
+                return self.dom.schedule_video(date_str, time_str)
+            finally:
+                self._policy_submission_started = getattr(session, "submitting", False) is True
+        except VideoPolicyBlocked as exc:
+            logger.warning("[CPS] Detail scheduling refused: %s", exc)
+            return False
 
     async def schedule_all_visible(
         self,
@@ -980,18 +947,10 @@ class ContentPageScheduler:
                 results["total_errors"] += 1
                 results["errors"].append({"video_id": video_id, "reason": str(e)})
 
-            # Human delay between videos
-            delay = self.dom.human_delay(2.0, 1.0)
-            await asyncio.sleep(delay)
+            # The audited detail route leaves the content list. End this row
+            # snapshot after one candidate; the next cycle must reacquire it.
+            break
 
-            # Refresh page after each successful schedule (row disappears)
-            if results["total_scheduled"] > 0 and results["total_scheduled"] % 3 == 0:
-                self.refresh_page()
-                # Re-fetch rows after refresh (stale elements)
-                rows = self.get_video_rows_with_data()
-                unlisted_rows = [r for r in rows if r["visibility"].lower() in ("unlisted", "private")]
-                # Adjust index (rows changed after refresh)
-                break  # Re-enter loop from schedule_all_visible caller if needed
 
         return results
 

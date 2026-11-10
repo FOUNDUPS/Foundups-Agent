@@ -176,3 +176,10 @@ When `YT_SCHEDULER_INDEX_WEAVE_ENABLED=true` (default), the production scheduler
 ## Last Updated
 
 - **V0.8.x** (2026-01-18): Production-aligned full cake; deterministic click cadence; page save hardened
+# Scheduling pre-save audit controls
+
+`test_presave_audit.py` exercises incomplete metadata, exact channel audience,
+unknown/changed controls, late draft changes, valid/invalid schedule intent,
+matched evidence repair and the content-row handoff to the detail owner. No live
+browser, GPU, model, upload or scheduling operation runs. Existing private-policy
+and durable readback controls remain applicable with fully specified draft fixtures.

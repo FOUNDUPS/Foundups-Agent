@@ -379,3 +379,11 @@ YouTube, no credentials. ASCII-only.
   base (this slice touches only `scheduler.py` and `index_weave.py`).
 
 ---
+# 2026-11-10 — Pre-save audit regression controls
+
+Added actual-owner tests for metadata completeness, audience selection/readback,
+kids/unknown-channel policy, late draft/identity changes, missing analysis and
+detail scheduling handoff. Updated old inline positive expectation: a popup with
+no description or audience now refuses before claim/click. Existing durable
+unknown-save tests use future explicit slots and observed Audience fixtures.
+These are offline controls, not live audience or scheduling qualification.

@@ -1,5 +1,26 @@
 # YouTube Shorts Scheduler - Interface Documentation
 
+## Pre-save completeness audit (2026-11-10)
+
+`prepare_schedule_audit()` consumes matched existing index evidence for incomplete
+metadata when metadata changes are permitted, then selects the exact configured
+Audience answer and reads it back. `audit_schedule(session, snapshot)` rechecks
+metadata completeness, audience, draft identity, future date/time and explicit
+timezone at the scheduling save owner. `PreSaveAuditBlocked` carries reason codes,
+never private text. The audience value is included in the durable schedule digest.
+The radio check requires exactly one enabled, visible native Yes and No control.
+
+`CHANNELS[*].made_for_kids` accepts a literal boolean from the registry's
+`shorts.made_for_kids`. The four existing non-kids keys default to False; every
+other key is unconfigured unless explicitly assigned. No display-name or duration
+inference establishes the kids-channel exception.
+
+`schedule_video_from_row` now verifies the row identity and uses the detail owner;
+`schedule_all_visible` ends its list snapshot after one attempted detail candidate.
+Legacy inline submission is refused before a durable claim or click. A full
+description/audience audit cannot be inferred from a popup or stale cached receipt.
+Valid intent does not prove live inventory completeness or persisted timezone/slot.
+
 ## Private operator directives (2026-11-01)
 
 Existing 012 queue `get_video_policy(channel_id, video_id, surface=...)` supplies

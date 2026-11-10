@@ -6,11 +6,80 @@ stay fresh at each effect; original/staged edit values live only with the DOM.
 from dataclasses import dataclass, field
 import hashlib
 import json
+import re
 from urllib.parse import urlsplit
 
 
 class VideoPolicyBlocked(RuntimeError):
     """The next write cannot be qualified; no retry of a started write."""
+
+
+class PreSaveAuditBlocked(VideoPolicyBlocked):
+    """Incomplete draft: retain the page for diagnosis, without Save or Escape."""
+
+
+def metadata_audit_issues(title, description):
+    """Conservative completeness checks, not a content classifier or quality score."""
+    issues = []
+    title = title.strip() if isinstance(title, str) else ""
+    title_subject = re.sub(r"(?:^|\s)#[^\s]+", "", title).strip()
+    description = description.strip() if isinstance(description, str) else ""
+    months = (r"jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|"
+              r"jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?")
+    dated = (re.fullmatch(r"[\d\s./:,年月日_-]+", title_subject) or
+             re.fullmatch(rf"(?:\d{{1,2}}\s+)?(?:{months})(?:[\s,.-]+\d{{1,4}})*", title_subject, re.I))
+    generic = re.fullmatch(r"(?:highlight[s]? overview|untitled|no title|video|short[s]?)(?:[\s#_-]*\d+)?", title_subject, re.I)
+    if not title_subject or dated or generic:
+        issues.append("title_missing_or_placeholder")
+    elif len(title) > 100:
+        issues.append("title_too_long")
+    # An index trailer alone is provenance, not a human-facing description.
+    body = description.split("M2M_CONTEXT", 1)[0].strip()
+    if not body or re.fullmatch(r"(?:n/a|tbd|description|none)", body, re.I):
+        issues.append("description_missing")
+    elif len(description) > 5000:
+        issues.append("description_too_long")
+    elif re.match(r"(?:here(?:'s| is)|below is)\s+(?:a\s+)?(?:copy.ready|bilingual|youtube description)", body, re.I):
+        issues.append("description_contains_drafting_preamble")
+    return issues
+
+
+def audience_target(channel_id):
+    """Resolve only the exact configured channel; unknown/kids channels never default to No."""
+    from .channel_config import CHANNELS
+    matches = [config for config in CHANNELS.values() if config.get("id") == channel_id]
+    if len(matches) != 1 or type(matches[0].get("made_for_kids")) is not bool:
+        raise PreSaveAuditBlocked("audience_policy_unconfigured")
+    return matches[0]["made_for_kids"]
+
+
+def audit_schedule(session, snapshot):
+    """Recheck the same current draft and audience at the actual scheduling Save."""
+    from datetime import datetime, timezone
+    import pytz
+    from .schedule_inventory import _date_value, _time_value
+    session.check(snapshot)
+    issues = metadata_audit_issues(snapshot.get("title"), snapshot.get("description"))
+    if issues:
+        raise PreSaveAuditBlocked("presave_audit:" + ",".join(issues))
+    target = audience_target(session.channel_id)
+    if (snapshot.get("audience_ready") is not True or
+            snapshot.get("made_for_kids") is not target or session.audience is not target):
+        raise PreSaveAuditBlocked("presave_audit:audience_unverified_or_changed")
+    schedule = session.requested_schedule or {}
+    try:
+        date = _date_value(schedule.get("date", ""))
+        time = _time_value(schedule.get("time", ""))
+        zone = pytz.timezone(schedule["timezone"])
+        if not date or not time or schedule.get("visibility") != "scheduled":
+            raise ValueError("invalid slot")
+        local = zone.localize(datetime.strptime(f"{date} {time}", "%b %d, %Y %I:%M %p"), is_dst=None)
+        # Refuse ambiguous/nonexistent DST wall times rather than guess an offset.
+        if local <= datetime.now(timezone.utc):
+            raise ValueError("unsafe slot")
+    except (KeyError, ValueError, TypeError, AttributeError, pytz.InvalidTimeError):
+        raise PreSaveAuditBlocked("presave_audit:schedule_invalid_or_timezone_unknown") from None
+    schedule["made_for_kids"] = target  # Included in the existing durable claim digest.
 
 
 def require_public_gate():
@@ -82,12 +151,14 @@ class EditSession:
     window_handle: str | None = None
     requested_schedule: dict | None = None
     draft_sha256: str | None = None
+    audience: bool | None = None
 
     @classmethod
     def capture(cls, snapshot, channel_id=None, video_id=None):
         native, current = detail_identity(snapshot, channel_id, video_id)
         values = {name: snapshot[name] for name in ("title", "description")}
-        return cls(native, current, values, dict(values), dict(values))
+        return cls(native, current, values, dict(values), dict(values),
+                   audience=snapshot.get("made_for_kids"))
 
     def check(self, snapshot):
         detail_identity(snapshot, self.channel_id, self.video_id)
@@ -186,8 +257,16 @@ function text(selector) {
 const saveButtons = Array.from(document.querySelectorAll('ytcp-button#save-button, button#save-button')).filter(el => el.getClientRects().length);
 const saveDisabled = saveButtons.length > 0 && saveButtons.every(el => el.disabled || el.hasAttribute('disabled') || el.getAttribute('aria-disabled') === 'true');
 const promptOpen = Array.from(document.querySelectorAll('tp-yt-paper-dialog, [role="dialog"]')).some(el => el.getClientRects().length);
+const audience = ['VIDEO_MADE_FOR_KIDS_MFK', 'VIDEO_MADE_FOR_KIDS_NOT_MFK'].map(name =>
+ Array.from(document.querySelectorAll('tp-yt-paper-radio-button[name="' + name + '"]')).filter(el => el.isConnected && el.getClientRects().length));
+const selected = el => el.checked === true || el.getAttribute('aria-checked') === 'true';
+const audienceReady = audience.every(group => group.length === 1 && !group[0].disabled &&
+ !group[0].hasAttribute('disabled') && group[0].getAttribute('aria-disabled') !== 'true');
+const audienceKnown = audienceReady && selected(audience[0][0]) !== selected(audience[1][0]);
 return {channel_id: ids.length === 1 ? ids[0] : null, url: window.location.href,
  save_disabled: saveDisabled, prompt_open: promptOpen,
+ made_for_kids: audienceKnown ? selected(audience[0][0]) : null,
+ audience_ready: audienceReady,
  title: text('ytcp-social-suggestions-textbox#title-textarea #textbox'),
  description: text('ytcp-social-suggestions-textbox#description-textarea #textbox')};
 """
@@ -236,30 +315,12 @@ def submit_inline(owner, row, video_id, callback):
         raise VideoPolicyBlocked("inline_target_unknown")
     channel_id, current = inline_identity(owner.driver, row,
         channel_id=getattr(owner, "_policy_channel_id", None), video_id=video_id, require_popup=True)
-    policy = scheduling_policy(channel_id, current, getattr(owner.dom, "_policy_cycle_attempts", 0))
+    scheduling_policy(channel_id, current, getattr(owner.dom, "_policy_cycle_attempts", 0))
     require_public_gate()
-    from modules.communication.livechat.src.operator_command_queue import claim_video_policy_save
-    metadata = read_policy(channel_id, current, surface="metadata")
+    read_policy(channel_id, current, surface="metadata")
     schedule = getattr(owner, "_policy_requested_schedule", None)
     if not isinstance(schedule, dict):
         raise VideoPolicyBlocked("inline_intent_unknown")
-    digest = save_digest(channel_id, current, {}, schedule)
-    claim = claim_video_policy_save(channel_id, current,
-        command_ids=sorted(set(metadata["matched_command_ids"] + policy["matched_command_ids"])),
-        metadata_fingerprint=metadata["fingerprint"], scheduling_fingerprint=policy["fingerprint"],
-        draft_sha256=digest)
-    if not isinstance(claim, dict) or claim.get("claimed") is not True:
-        raise VideoPolicyBlocked("inline_save_already_claimed_or_unavailable")
-    submitted = getattr(owner, "_policy_submitted_videos", set())
-    if (channel_id, current) in submitted:
-        raise VideoPolicyBlocked("inline_submission_outcome_unknown")
-    submitted.add((channel_id, current))
-    owner._policy_submitted_videos = submitted
-    owner._policy_submission_started = True
-    owner.dom._policy_cycle_attempts = getattr(owner.dom, "_policy_cycle_attempts", 0) + 1
-    observe(policy, surface="scheduling", channel_id=channel_id, video_id=current,
-            outcome="unknown", detail={"reason": "submission_started_readback_required"})
-    try:
-        return callback()
-    except Exception as exc:
-        raise VideoPolicyBlocked("inline_submission_started_outcome_unknown") from exc
+    # The list popup exposes neither the full description nor Audience. A row,
+    # cached audit or title alone cannot qualify a complete, fresh detail draft.
+    raise PreSaveAuditBlocked("presave_audit:detail_editor_required")
