@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1825,
+  "total_tests": 1828,
   "quarantined_tests": 258,
   "tests": [
     {
@@ -6668,6 +6668,21 @@
       "description": "Credential-free local producer contracts; no daemon or public effects."
     },
     {
+      "id": "test::modules::communication::livechat::tests::test_operator_stream_schedule",
+      "path": "modules/communication/livechat/tests/test_operator_stream_schedule.py",
+      "owner": "modules/communication/livechat",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-livechat-unit-part-02",
+      "capabilities": [
+        "network"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Disposable manifest contracts and actual launcher/DAE AST, with no services."
+    },
+    {
       "id": "test::modules::communication::livechat::tests::test_orchestrator",
       "path": "modules/communication/livechat/tests/test_orchestrator.py",
       "owner": "modules/communication/livechat",
@@ -6805,7 +6820,7 @@
       "path": "modules/communication/livechat/tests/test_session_logging.py",
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
-      "shard_id": "modules-communication-livechat-unit-part-02",
+      "shard_id": "modules-communication-livechat-unit-part-03",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -24077,6 +24092,19 @@
       "description": "Scheduler OBSERVE-MODE audio_label log tests.\n\nSlice: SHORTS_MUSIC_LABEL_OBSERVE_PHASE1   Worker-Lane: MUSIC-OBSERVE\n\nWSP refs: WSP 5 (coverage), WSP 6 (audit), WSP 84 (reuse load_index_json).\n\nCONTRACT under test (OBSERVE-ONLY -- never gates scheduling):\n  - When the index artifact carries an acoustic audio_label sibling,\n    _observe_audio_label_log emits a [MUSIC-OBSERVE] log with the label +\n    content_category. (NON-VACUOUS: asserts the actual log content.)\n  - When NO audio_label is prese"
     },
     {
+      "id": "test::modules::platform_integration::youtube_shorts_scheduler::tests::test_calendar_reservations",
+      "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_calendar_reservations.py",
+      "owner": "modules/platform_integration/youtube_shorts_scheduler",
+      "suite_class": "unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Exact calendar and durable reservation controls with synthetic local state."
+    },
+    {
       "id": "test::modules::platform_integration::youtube_shorts_scheduler::tests::test_full_chain",
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_full_chain.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
@@ -24441,6 +24469,19 @@
       "description": "Auto-fire registration tests for the shorts scheduling SKILLz.\n\nSlice: SHORTS_SKILLZ_AUTONOMOUS_REGISTRATION_PHASE1\n\nWhat these pin (mock-only, no daemon, no browser, no live models)\n----------------------------------------------------------------\nThe WRE skill-trigger discovers + fires skills whose SKILLz.md frontmatter carries\n`domain: youtube` (SkillTriggerMixin domain-discovery, skill_trigger.py:91-115; the\nmatch is `skill.metadata.get(\"domain\") == self._trigger_domain`). So a scheduling\nSKI"
     },
     {
+      "id": "test::modules::platform_integration::youtube_shorts_scheduler::tests::test_stream_schedule_calendar",
+      "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_stream_schedule_calendar.py",
+      "owner": "modules/platform_integration/youtube_shorts_scheduler",
+      "suite_class": "unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Frozen stream selection and mandatory calendar boundaries with synthetic DOMs."
+    },
+    {
       "id": "test::modules::platform_integration::youtube_shorts_scheduler::tests::test_unified_shorts_videos_priority",
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_unified_shorts_videos_priority.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
@@ -24486,7 +24527,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_video_policy_save_readback.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-02",
       "capabilities": [
         "browser"
       ],
@@ -24501,7 +24542,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_visibility_filter_complete.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-02",
       "capabilities": [
         "browser"
       ],

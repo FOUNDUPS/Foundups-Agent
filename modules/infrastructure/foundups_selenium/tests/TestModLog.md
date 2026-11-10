@@ -1,5 +1,17 @@
 ## TestModLog - FoundUps Selenium
 
+### 2026-11-10 — Match attachment doubles to the CDP owner
+
+The actual Chrome/Edge attachment fixture now supplies a Selenium-style command
+executor map. Assertions retain driver identity and human-only handoff, and also
+verify connection-specific `goog`/`ms` routing without mutating the shared map.
+No production guard or test assertion was relaxed. The source-bound offline
+selection passes **73 cases**, with zero failures/errors/skips or denied effects;
+one existing synthetic-session `datetime.utcnow` deprecation warning remains.
+The three isolated Python/Node process witnesses are deliberately deselected in
+the process-denying local runner and remain in the full **76-case hosted suite**.
+This repairs the CI test interface; it is not live browser qualification. WSP11/22/50/97.
+
 ### 2026-11-10 — Verification handoff inventory and offline checks
 
 Final import-boundary correction: **85 passed, zero skips**, with one inherited

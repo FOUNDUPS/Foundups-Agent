@@ -279,6 +279,7 @@ def test_checked_in_manifest_matches_independent_generation(
 
 def _assert_manifest_digest_pin(generated: dict[str, object]) -> None:
     for member in (
+        'modules/communication/livechat/src/operator_stream_schedule_owner.py',
         'modules/communication/livechat/src/operator_video_policy_owner.py',
         'modules/communication/livechat/src/video_policy.py',
         'modules/platform_integration/youtube_shorts_scheduler/src/video_policy.py',
@@ -291,7 +292,7 @@ def _assert_manifest_digest_pin(generated: dict[str, object]) -> None:
     ):
         assert member in generated["required_runtime_files"]
     digest = generator.canonical_manifest_digest(generated)
-    assert digest == "79fb18f8e927f632a94b1e23b5268da58112e7757e787e2fdd9d571b0815d784"
+    assert digest == "202bda43a6a7c8c9ab7d9aa00a1454782cc056ca766d9f5917285f421e3a496d"
     constants = (
         REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js"
     ).read_text(encoding="utf-8")

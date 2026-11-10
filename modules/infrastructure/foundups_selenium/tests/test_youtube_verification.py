@@ -191,11 +191,17 @@ def test_actual_attach_owner_returns_guarded_driver(setup_gate, monkeypatch, bro
     clock, effects, original, make = setup_gate
     gate = make(lambda *_: (clock() < 101, "a"*64))
     monkeypatch.setattr(v, "VerificationGate", lambda *a, **k: gate)
-    driver = SimpleNamespace(execute=original, current_url="https://studio.youtube.com/")
+    shared_commands = {"executeCdpCommand": ("POST", "/session/$sessionId/other/cdp/execute")}
+    driver = SimpleNamespace(execute=original, current_url="https://studio.youtube.com/",
+                             command_executor=SimpleNamespace(_commands=shared_commands))
     monkeypatch.setattr(deps, "_devtools_page_state", lambda *_: "ready")
     monkeypatch.setattr(webdriver, browser.title(), lambda **_: driver)
     attached = getattr(deps, "connect_" + browser + "_with_retry")(max_retries=1)
     assert attached is driver
+    assert attached.command_executor._commands is not shared_commands
+    assert attached.command_executor._commands["executeCdpCommand"] == (
+        "POST", f"/session/$sessionId/{'ms' if browser == 'edge' else 'goog'}/cdp/execute")
+    assert shared_commands["executeCdpCommand"] == ("POST", "/session/$sessionId/other/cdp/execute")
     with pytest.raises(v.VerificationHandoff, match="cleared"):
         attached.execute("clickElement", {"id": "save"})
     assert clock() == 130 and not effects

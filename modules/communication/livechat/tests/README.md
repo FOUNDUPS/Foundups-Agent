@@ -1,3 +1,16 @@
+## Frozen stream scheduling — 2026-11-10
+
+`test_operator_stream_schedule.py` uses real queue validation/locks with disposable
+files, actual launcher and DAE method AST, and synthetic browser/scheduler owners.
+It covers confirmed source freezing, closed scope, expiry, source deduplication,
+uncertain/corrupt state, immutable selection, STOP, no retry, title discovery,
+manual handoff, lock-free Save delegation and ownership through repeated cancellation.
+Actual supervisor cases retain the yielded browser across health checks while the
+peer keeps running or restarts normally. Launcher cases verify connection-specific
+CDP routing and early refusal of the legacy live scheduling bypass.
+No browser, provider, model or daemon runs; these are source contracts, not live
+selection or scheduling-readback proof.
+
 ## Conversation stewardship controls — 2026-11-07
 
 `test_conversation_stewardship.py` exercises actual owner definitions with synthetic

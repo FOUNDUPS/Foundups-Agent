@@ -119,6 +119,16 @@ def get_video_policy(self, channel_id, video_id=None, *, surface='metadata'):
     except (OSError, ValueError, TypeError, TimeoutError, OverflowError) as exc:
         return _unavailable(exc)
 
+def get_unresolved_scheduling_claims(self, channel_id):
+    """Fail closed on unreadable state; never refresh policies or dispatch work."""
+    from copy import deepcopy
+    video_policy.ids([channel_id], video_policy.CHANNEL, 1)
+    with self._locked():
+        _, _, _, _, state = _load_queue(self)
+        return deepcopy([claim for claim in state.get('video_effect_claims', [])
+            if claim['kind'] == 'save' and claim['channel_id'] == channel_id
+            and claim['outcome'] == 'unknown' and 'scheduling' in claim['fingerprints']])
+
 def inspect_command(self, command_id):
     """Read-only private status; does not consume or dispatch queued commands."""
     video_policy.text(command_id, 200)
@@ -136,7 +146,13 @@ def inspect_command(self, command_id):
         active = active and row is not None and (row['status'] == 'accepted')
         observations = [o for o in state.get('video_policy_observations', []) if command_id in o['policy_ids']]
         expiry, reason = _inspection_duration(command_id, row, rows, commands, active)
-        return {'id': command_id, 'queued': exists, 'received': row is not None, 'active': active, 'status': row['status'] if row else 'queued' if exists else 'not_found', 'expires_at_unix': expiry, 'expired': expiry is not None and expiry <= time.time(), 'inactive_reason': reason, 'outcomes': [{k: o[k] for k in ('surface', 'channel_id', 'video_id', 'outcome', 'recorded_at')} for o in observations[-20:]]}
+        from . import operator_stream_schedule_owner as stream_owner
+        execution = stream_owner.inspect(state, command_id)
+        if execution:
+            active = execution['execution_status'] == 'pending' and execution['expires_at_unix'] > time.time()
+            reason = None if active else ('expired' if execution['expires_at_unix'] <= time.time()
+                                          else execution['execution_status'])
+        return {'id': command_id, 'queued': exists, 'received': row is not None, 'active': active, 'status': row['status'] if row else 'queued' if exists else 'not_found', 'expires_at_unix': expiry, 'expired': expiry is not None and expiry <= time.time(), 'inactive_reason': reason, 'outcomes': [{k: o[k] for k in ('surface', 'channel_id', 'video_id', 'outcome', 'recorded_at')} for o in observations[-20:]], **execution}
 
 def _inspection_duration(command_id, row, rows, commands, active):
     result = row.get('result') if row else None
@@ -287,7 +303,7 @@ def _telemetry(row):
     if result.get('action') == 'set_context' and isinstance(result.get('result'), dict):
         result['result'] = {key: result['result'][key] for key in
                             ('context_activated', 'public_message_sent', 'expires_at_unix') if key in result['result']}
-    elif result.get('action') in video_policy.ACTIONS | {'status'}:
+    elif result.get('action') in video_policy.ACTIONS | {'status', 'schedule_stream_shorts'}:
         result.pop('result', None)
     return result
 
@@ -366,4 +382,6 @@ def _load_queue(self):
         if command['id'] in rows and rows[command['id']].get('command_digest', digest) != digest:
             raise ValueError('command_id_payload_changed')
         digests[command['id']] = digest
+    from . import operator_stream_schedule_owner as stream_owner
+    stream_owner.validate_state(state, rows)
     return (commands, ledger, rows, digests, state)

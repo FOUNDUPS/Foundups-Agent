@@ -7,6 +7,7 @@ explicitly schedule-labeled date cell supplies one. Failed reads do not claim ze
 from __future__ import annotations
 
 import re
+from modules.infrastructure.foundups_selenium.src.youtube_verification import VerificationHandoff
 from datetime import datetime
 from urllib.parse import urlsplit
 
@@ -164,6 +165,11 @@ def parse_scheduled_row(row: dict) -> dict | None:
     if (any(_date_value(text) != date for text in _DATE.findall(visibility))
             or any(_time_value(text) != time for text in _TIME.findall(visibility))):
         return None
+    # A displayed timezone suffix must not be discarded then reinterpreted in
+    # the configured account zone. Unsupported explicit zones need observation.
+    if any(re.search(r'\b(?:UTC|GMT|PST|PDT|EST|EDT|CST|CDT|MST|MDT|JST|KST|IST|CET|CEST)\b|\b[A-Za-z_]+/[A-Za-z_]+\b', text, re.I)
+           for text, _ in candidates):
+        return None
     return {"video_id": row["video_id"], "title": str(row.get("title", ""))[:256],
             "date": date, "time": time, "date_text": date_text, "date_label": date_label,
             "visibility_text": visibility, "schedule_source": source}
@@ -172,6 +178,8 @@ def parse_scheduled_row(row: dict) -> dict | None:
 def _qualified_page(dom, channel_id: str, page_number: int, result: dict) -> dict | None:
     try:
         page = dom.driver.execute_script(SCHEDULED_PAGE_SCRIPT)
+    except VerificationHandoff:
+        raise
     except Exception:
         result["issues"].append("page_read_failed")
         return None
@@ -255,6 +263,8 @@ def collect_scheduled_inventory(dom, channel_id: str, *, max_pages: int = MAX_PA
             break
         try:
             dom.click_next_page()
+        except VerificationHandoff:
+            raise
         except Exception:
             result["issues"].append("pagination_failed")
             break
@@ -292,3 +302,57 @@ def qualified_inventory(inventory: object, channel_id: str, videos: list | None 
             and type(inventory.get("rows_parsed")) is int and inventory["rows_parsed"] == len(rows)
             and type(inventory.get("total_scheduled")) is int and inventory["total_scheduled"] == len(rows)
             and (videos is None or videos == rows))
+
+
+def collect_unlisted_title_inventory(dom, channel_id: str, title: str, *, max_pages: int = MAX_PAGES) -> dict:
+    """Complete exact-title selection under 012's rule, not lineage inference.
+
+    Reuse the same native/list/filter/pagination snapshot as calendar reads.
+    A partial scan never returns an executable subset or an older backlog.
+    """
+    from modules.infrastructure.foundups_selenium.src.youtube_verification import VerificationHandoff
+    result = {'complete': False, 'video_ids': [], 'reason': 'inventory_unverified',
+              'selection_basis': 'operator_title_rule', 'channel_id': channel_id}
+    if (not isinstance(title, str) or not title.strip() or len(title) > 100
+            or type(max_pages) is not int or not 1 <= max_pages <= MAX_PAGES):
+        result['reason'] = 'invalid_title_selection'
+        return result
+    seen, selected = set(), []
+    for page_number in range(1, max_pages + 1):
+        try:
+            page = dom.driver.execute_script(SCHEDULED_PAGE_SCRIPT)
+            if (not isinstance(page, dict) or not _channel_matches(page, channel_id)
+                    or urlsplit(page['url']).path != f'/channel/{channel_id}/videos/short'
+                    or page.get('loading') is not False or page.get('search_text')
+                    or page.get('previous_page') is not (page_number != 1)):
+                return result
+            chips = page.get('chip_texts')
+            if (not isinstance(chips, list) or len(chips) != 1
+                    or ' '.join(str(chips[0]).casefold().split()) not in
+                    {'unlisted', 'visibility: unlisted', 'visibility unlisted'}):
+                return result
+            rows = page.get('rows')
+            if (not isinstance(rows, list) or len(rows) > 1000
+                    or (not rows and page.get('empty') is not True)):
+                return result
+            for row in rows:
+                if (not isinstance(row, dict) or not isinstance(row.get('video_id'), str)
+                        or not _VIDEO_ID.fullmatch(row['video_id']) or row['video_id'] in seen
+                        or not isinstance(row.get('title'), str)
+                        or str(row.get('schedule_text', '')).strip().casefold() != 'unlisted'):
+                    return result
+                seen.add(row['video_id'])
+                if row['title'] == title:
+                    selected.append(row['video_id'])
+            if page.get('next_page') is False:
+                return {**result, 'complete': True, 'video_ids': selected,
+                        'reason': 'matched' if selected else 'no_matching_shorts'}
+            if page.get('next_page') is not True or not rows:
+                return result
+            dom.click_next_page()
+        except VerificationHandoff:
+            raise
+        except Exception:
+            return result
+    result['reason'] = 'pagination_limit'
+    return result

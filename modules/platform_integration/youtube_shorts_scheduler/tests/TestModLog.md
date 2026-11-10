@@ -1,3 +1,24 @@
+## 2026-11-10 — Selected CI metadata fixtures
+
+Four existing scheduling positives now use a complete synthetic Studio calendar,
+private canonical tracker and manifest paths, and a strict DOM double that exposes
+the scheduling instance fields. They retain the original metadata assertions and
+verify that the Save double reaches durable reservation and clears the cycle guard.
+All 14 metadata-decoupling cases passed under the existing offline effect guard
+with zero failures, errors, skips or effect denials. WSP22/50/97.
+
+## 2026-11-10 — Stream batch and calendar boundaries
+
+The sealed calendar suite passed154:49 queue/DAE/launcher,71 selection/picker/Save
+boundaries,34 exact-slot/persistence cases. Zero failures, errors, skips, effect
+denials or model imports. The existing inventory102, directives114 and rotation35
+case inventories remain unchanged and passed after fixture migration. Attachment35
+and access11 controls passed; peak-window13 passed. Fixtures never publish.
+New cases cover exact-title selection, incomplete inventory, scope/driver changes,
+reserved versus attempted Save, contradictory timezone observations, committed
+picker mismatches, ambiguous Done/Save controls and supervisor handoff retention.
+Source and UI semantics remain separately qualified. WSP11/22/50/77/84/97.
+
 ## 2026-11-10 — Scheduling draft audit
 
 The focused four-file selection passed98. Protected directives replay executed114

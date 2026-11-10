@@ -1,3 +1,12 @@
+## 2026-11-10 — Isolate attached Chromium command routes
+
+Copy the Selenium connection command map and pin each Chrome/Edge attachment's
+CDP endpoint before installing the shared verification guard. Existing recovery
+and direct scheduler attachments reuse this owner. The 35 attachment controls and
+11 target-access fixtures passed offline; installed/live browser behavior remains
+separately qualified. No browser launch, kill, account switch or model probe was
+performed by validation. WSP11/22/50/84/97.
+
 ## 2026-11-10 — Install human verification guard on attached drivers
 
 Both Chrome/Edge normal and existing recovery attachment paths now install the
