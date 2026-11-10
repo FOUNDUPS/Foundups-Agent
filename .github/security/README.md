@@ -1,3 +1,17 @@
+## Frozen stream Shorts schedule metadata review — 2026-11-10
+
+PR 2345 head `0199b14ba` adds one runtime member and updates twelve existing
+source hashes. Hosted job 129745091959 reported 39 new manifest findings and
+zero introduced-history findings. A fresh pinned manifest scan and independent
+review verified 37 generic API key and two Discord token pattern matches as
+unchanged public source-path/SHA rows. Each row matches the Git source at both
+`769a21cf6` and `0199b14ba`, has an exact prior approval, and needs a new
+fingerprint for the regenerated manifest's whole-file digest and line binding.
+Append only the 39 approved fingerprints, preserving all 4,263 prior entries
+and other fields (4,302 total). Scanner rules, exclusions, fingerprint formula
+and scan coverage stay the same. Fresh full-tree and final-history checks are
+required. Private independent review receipt SHA256: `09dd0fb4a3a6b01b6e068785ee2471236656d4fa830c003594561bf75b4179b9`.
+
 ## Scheduling audit metadata review — 2026-11-10
 
 The pre-save audit changes four runtime source bindings, keeping all 1,486

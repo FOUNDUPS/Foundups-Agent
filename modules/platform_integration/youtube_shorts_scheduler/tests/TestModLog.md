@@ -1,3 +1,12 @@
+## 2026-11-10 — Selected CI metadata fixtures
+
+Four existing scheduling positives now use a complete synthetic Studio calendar,
+private canonical tracker and manifest paths, and a strict DOM double that exposes
+the scheduling instance fields. They retain the original metadata assertions and
+verify that the Save double reaches durable reservation and clears the cycle guard.
+All 14 metadata-decoupling cases passed under the existing offline effect guard
+with zero failures, errors, skips or effect denials. WSP22/50/97.
+
 ## 2026-11-10 — Stream batch and calendar boundaries
 
 The sealed calendar suite passed154:49 queue/DAE/launcher,71 selection/picker/Save
