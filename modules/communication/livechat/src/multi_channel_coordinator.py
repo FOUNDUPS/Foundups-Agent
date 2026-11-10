@@ -798,6 +798,8 @@ class MultiChannelCoordinator:
                                 edge_opts = EdgeOptions()
                                 edge_opts.add_experimental_option("debuggerAddress", f"127.0.0.1:{edge_port}")
                                 edge_driver = await asyncio.to_thread(webdriver.Edge, options=edge_opts)
+                                from modules.infrastructure.foundups_selenium.src.youtube_verification import install_youtube_verification_guard
+                                install_youtube_verification_guard(edge_driver, edge_port)
                                 edge_swapper = TarsAccountSwapper(edge_driver)
                                 logger.info(f"[ROTATE] [Edge] ✅ Browser relaunched successfully")
 

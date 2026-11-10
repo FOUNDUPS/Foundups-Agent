@@ -416,6 +416,8 @@ class AutoModeratorDAE:
                 opts = Options()
                 opts.add_experimental_option("debuggerAddress", f"127.0.0.1:{chrome_port}")
                 driver = await asyncio.to_thread(webdriver.Chrome, options=opts)
+                from modules.infrastructure.foundups_selenium.src.youtube_verification import install_youtube_verification_guard
+                install_youtube_verification_guard(driver, chrome_port)
 
                 # Verify connection works
                 try:
@@ -463,6 +465,8 @@ class AutoModeratorDAE:
                 edge_opts = EdgeOptions()
                 edge_opts.add_experimental_option("debuggerAddress", f"127.0.0.1:{edge_port}")
                 driver = await asyncio.to_thread(webdriver.Edge, options=edge_opts)
+                from modules.infrastructure.foundups_selenium.src.youtube_verification import install_youtube_verification_guard
+                install_youtube_verification_guard(driver, edge_port)
 
                 # Verify connection works
                 try:

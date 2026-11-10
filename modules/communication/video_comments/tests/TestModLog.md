@@ -1,5 +1,13 @@
 # video_comments TestModLog
 
+## 2026-11-10 — Preserve handle isolation with verification guard
+
+Extend the existing fake driver's interface without changing its Service or
+close_fds assertions. Both actual connect branches also assert the configured
+port on the installed verification gate; any browser command during attach
+fails. Included in the83-pass offline handoff/attachment/shadow selection.
+WSP11/22/50/97; no real browser or child-driver launch.
+
 ## 2026-11-07 — Close inherited worker handles in driver children
 
 Chrome and Edge connection controls verify real Selenium Service configuration,

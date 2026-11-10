@@ -1,5 +1,15 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-11-10 — Guard direct launch attachments during verification
+
+Install the shared Selenium verification handoff on both launch attachment
+paths before extra-tab cleanup or navigation. Detected challenges yield for
+at least30 seconds and until clear; no verification completion or pending-effect
+replay. Existing unknown-save claims are untouched. This is a narrow verification
+slice, not completion of the separate60-second manual draft/date-time takeover
+requirement below. Source installation and live qualification remain separate.
+WSP11/22/50/84/97.
+
 ## 2026-11-07 — Record manual takeover and YUMORI metadata requirements
 
 WSP00/22/50/77/97. Source review at `fa7d487f3` found that detail/CPS workflow

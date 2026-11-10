@@ -17,7 +17,8 @@ def test_comment_driver_does_not_inherit_worker_pipe_handles(monkeypatch, browse
 
     def attach(**kwargs):
         calls.append(kwargs)
-        return SimpleNamespace(current_url="about:blank")
+        return SimpleNamespace(current_url="about:blank", execute=lambda *args:
+                               pytest.fail("attach must not issue a browser effect"))
 
     monkeypatch.setattr(webdriver, browser, attach)
     path = Path(__file__).resolve().parents[1] / "skillz/tars_like_heart_reply/comment_engagement_dae.py"
@@ -31,6 +32,7 @@ def test_comment_driver_does_not_inherit_worker_pipe_handles(monkeypatch, browse
     exec(compile(ast.fix_missing_locations(ast.Module(body=[connect], type_ignores=[])), str(path), "exec"), ns)
     dae = SimpleNamespace(use_vision=False, use_dom=True, human=None, SELECTORS={})
     assert asyncio.run(ns["connect"](dae)) is True
+    assert dae.driver._youtube_verification_guard.port == port
     assert len(calls) == 1
     service = calls[0].get("service")
     assert service is not None, "Windows default Service inherits unrelated worker handles"

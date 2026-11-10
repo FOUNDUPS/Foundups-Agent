@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1823,
+  "total_tests": 1824,
   "quarantined_tests": 258,
   "tests": [
     {
@@ -19227,6 +19227,22 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "YTR3 - Undetected Browser Anti-Detection Test Harness\n\nTests UndetectedBrowserManager with mocked undetected_chromedriver.\nNo live browser, no Chrome process, deterministic.\n\nWSP 97: Mocks external systems (undetected_chromedriver), tests production code."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_selenium::tests::test_youtube_verification",
+      "path": "modules/infrastructure/foundups_selenium/tests/test_youtube_verification.py",
+      "owner": "modules/infrastructure/foundups_selenium",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-selenium-unit",
+      "capabilities": [
+        "browser",
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline verification handoff acceptance: fake clocks/drivers, no browser/model."
     },
     {
       "id": "test::modules::infrastructure::foundups_vision::tests::test_account_switch",

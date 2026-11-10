@@ -736,6 +736,7 @@ def connect_chrome_with_retry(
     """
     from selenium import webdriver
     from selenium.webdriver.chrome.options import Options
+    from modules.infrastructure.foundups_selenium.src.youtube_verification import install_youtube_verification_guard
 
     port = CHROME_DEBUG_PORT
     recovery_tab_attempted = False
@@ -760,7 +761,7 @@ def connect_chrome_with_retry(
         try:
             opts = Options()
             opts.add_experimental_option("debuggerAddress", f"127.0.0.1:{port}")
-            driver = webdriver.Chrome(options=opts)
+            driver = install_youtube_verification_guard(webdriver.Chrome(options=opts), port)
 
             # Step 3: Verify connection is alive
             _ = driver.current_url
@@ -801,7 +802,7 @@ def connect_chrome_with_retry(
                     try:
                         opts = Options()
                         opts.add_experimental_option("debuggerAddress", f"127.0.0.1:{port}")
-                        driver = webdriver.Chrome(options=opts)
+                        driver = install_youtube_verification_guard(webdriver.Chrome(options=opts), port)
                         _ = driver.current_url
                         logger.info("[DEPS] Chrome connected after opening a recovery tab")
                         return driver
@@ -842,6 +843,7 @@ def connect_edge_with_retry(
     """
     from selenium import webdriver
     from selenium.webdriver.edge.options import Options as EdgeOptions
+    from modules.infrastructure.foundups_selenium.src.youtube_verification import install_youtube_verification_guard
 
     port = EDGE_DEBUG_PORT
     recovery_tab_attempted = False
@@ -866,7 +868,7 @@ def connect_edge_with_retry(
         try:
             opts = EdgeOptions()
             opts.add_experimental_option("debuggerAddress", f"127.0.0.1:{port}")
-            driver = webdriver.Edge(options=opts)
+            driver = install_youtube_verification_guard(webdriver.Edge(options=opts), port)
 
             # Step 3: Verify connection is alive
             _ = driver.current_url
@@ -905,7 +907,7 @@ def connect_edge_with_retry(
                     try:
                         opts = EdgeOptions()
                         opts.add_experimental_option("debuggerAddress", f"127.0.0.1:{port}")
-                        driver = webdriver.Edge(options=opts)
+                        driver = install_youtube_verification_guard(webdriver.Edge(options=opts), port)
                         _ = driver.current_url
                         logger.info("[DEPS] Edge connected after opening a recovery tab")
                         return driver
