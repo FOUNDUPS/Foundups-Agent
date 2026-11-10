@@ -491,18 +491,6 @@ class TestProductionRegistryValidation:
         ids = [e["foundup_id"] for e in production_registry["entities"]]
         assert len(ids) == len(set(ids)), "Duplicate foundup_id found"
 
-    def test_parent_foundup_references_are_registered_and_acyclic(self, production_registry):
-        entities = {entry["foundup_id"]: entry for entry in production_registry["entities"]}
-        assert entities["hpc"]["parent_foundup_id"] == "voteballots"
-        for foundup_id, entry in entities.items():
-            visited = {foundup_id}
-            parent_id = entry.get("parent_foundup_id")
-            while parent_id:
-                assert parent_id in entities, f"{foundup_id}: unknown parent {parent_id}"
-                assert parent_id not in visited, f"{foundup_id}: parent cycle at {parent_id}"
-                visited.add(parent_id)
-                parent_id = entities[parent_id].get("parent_foundup_id")
-
     def test_production_has_manifest_foundups(self, production_registry):
         """Production registry includes manifest-bearing FoundUps."""
         ids = {e["foundup_id"] for e in production_registry["entities"]}

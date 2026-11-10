@@ -50,6 +50,21 @@ def test_hpc_catalog_rebuild_is_isolated_and_idempotent(catalog):
         assert "jeffries" not in video["title"].lower()
 
 
+def test_hpc_registry_parent_is_registered_and_acyclic():
+    path = CATALOG_PATH.parents[2] / "modules" / "foundups" / "foundup_registry.json"
+    registry = json.loads(path.read_text(encoding="utf-8"))
+    entities = {entry["foundup_id"]: entry for entry in registry["entities"]}
+    assert entities["hpc"]["parent_foundup_id"] == "voteballots"
+    for foundup_id, entry in entities.items():
+        visited = {foundup_id}
+        parent_id = entry.get("parent_foundup_id")
+        while parent_id:
+            assert parent_id in entities, f"{foundup_id}: unknown parent {parent_id}"
+            assert parent_id not in visited, f"{foundup_id}: parent cycle at {parent_id}"
+            visited.add(parent_id)
+            parent_id = entities[parent_id].get("parent_foundup_id")
+
+
 class TestCatalogStructure:
     """Test overall catalog structure."""
 
