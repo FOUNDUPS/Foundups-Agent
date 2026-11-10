@@ -4,6 +4,16 @@ Independent review verifies exactly 39 unchanged public checksum fingerprints,
 appended without scanner/rule changes; fresh CI scanning is still required. Skill
 format and canonical Codex projection checks pass; registry is 1,819/258 quarantined.
 
+## 2026-11-10 — Branch-scoped audit Markdown checks
+
+Wire the verified audit Markdown route into the existing required Python
+check behind a repository Actions variable. Match the tested commit to the
+fetched base and recheck the live base after Markdown validation. Full Python,
+secret scanning and policy coverage continue for other paths. Qualify the
+branch-scoped switch before protected main activation.
+[CI audit fast path](.github/scripts/README.md#audit-markdown-fast-path).
+WSP 10, 22, 34, 50 and 97.
+
 ## 2026-11-10 — CI merge latency pilot
 
 Add exact-diff shadow classification and scoped Markdown and WSP checks

@@ -7,7 +7,11 @@ import subprocess
 
 
 _SHA = re.compile(r"[0-9a-f]{40}")
-_PROSE = re.compile(r"docs/ci-pilot/examples/[a-z0-9]+(?:[-_][a-z0-9]+)*\.md")
+_PROSE = re.compile(
+    r"docs/(?:ci-pilot/examples|audits/prose)/"
+    r"(?!(?:agents|claude|gemini|skillz?)\.md$)[a-z0-9]+(?:[-_][a-z0-9]+)*\.md"
+    r"|docs/audits/agent_git_workflow_impact_audit\.md"
+)
 _POLICY = re.compile(
     r"(?:AGENTS|CLAUDE|GEMINI)\.md"
     r"|WSP_(?:framework|knowledge)/src/WSP_(?:[0-9]+_[A-Za-z0-9_.-]+|MASTER_INDEX)\.md"
