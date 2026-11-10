@@ -847,7 +847,6 @@ from modules.foundups.voteballots.src import (
 
 - `FECError` / `FECErrorType` — Structured error handling
 - `ConfidenceLevel` — WSP 97 confidence enum
-- `FECSource` — API query provenance
 - `CandidateRecord`, `CommitteeRecord`, `ContributionRecord` — FEC data structures
 - `FundingSummary` — Aggregated funding data
 - `*SearchResult` / `*SummaryResult` — Result wrappers
