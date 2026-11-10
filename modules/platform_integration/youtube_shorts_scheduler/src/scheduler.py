@@ -20,7 +20,7 @@ from urllib.parse import urlsplit
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.edge.options import Options as EdgeOptions
-from selenium.common.exceptions import WebDriverException
+from selenium.common.exceptions import WebDriverException, TimeoutException
 
 from .channel_config import get_channel_config, CHANNELS
 from .dom_automation import YouTubeStudioDOM
@@ -329,14 +329,23 @@ class YouTubeShortsScheduler:
     # SCHEDULING WORKFLOW
     # =========================================
 
+    def _navigate_stream_unlisted(self):
+        """Use the existing filtered URL on the frozen request's browser only."""
+        self._guard_stream_request()
+        try:
+            self.dom.navigate_to_shorts(self.channel_id, visibility='UNLISTED')
+        except VerificationHandoff:
+            raise
+        except TimeoutException:
+            # The existing helper waits for a row. A truly empty list has none;
+            # let the strict inventory reader evaluate its explicit empty state.
+            logger.info('[SCHEDULER] Row wait elapsed; inventory still requires qualified readback')
+        self._guard_stream_request()
+
     def discover_stream_title_batch(self, title):
         """Read all exact-title Unlisted Shorts; caller owns browser/stream binding."""
         from .schedule_inventory import collect_unlisted_title_inventory
-        from .content_page_scheduler import ContentPageScheduler
-        self._guard_stream_request()
-        if ContentPageScheduler(self.driver, self.dom).navigate_to_content(
-                self.channel_key, visibility='UNLISTED') is not True:
-            return {'complete': False, 'video_ids': [], 'reason': 'unlisted_navigation_unverified'}
+        self._navigate_stream_unlisted()
         return collect_unlisted_title_inventory(self.dom, self.channel_id, title)
 
     async def run_scheduling_cycle(
@@ -701,33 +710,43 @@ class YouTubeShortsScheduler:
         # Step 1: Navigate to the target-visibility Shorts (with fallback).
         logger.info(f"[SCHEDULER] Navigating to {target} Shorts for {self.channel_name}")
         self._guard_stream_request()
-        if not self.dom.navigate_to_shorts_with_fallback(self.channel_id, target):
-            logger.error(f"[SCHEDULER] Failed to navigate to {target} Shorts")
-            results["errors"].append({"error": f"Navigation to {target} Shorts failed"})
-            return True
-        filter_state = self.dom.read_visibility_filter_state()
-        logger.info(
-            f"[SCHEDULER] List filter state: detected={filter_state.get('detected')} "
-            f"chips={filter_state.get('chip_texts')}"
-        )
-        if filter_state.get("detected") == "SCHEDULED":
-            logger.error(
-                f"[SCHEDULER] Aborting {target} pass — Shorts list is on "
-                f"Scheduled/Has schedule, not {target}"
-            )
-            results["errors"].append({"error": "Wrong visibility filter: SCHEDULED"})
-            return True
-        await asyncio.sleep(2)  # Wait for page load
-
-        # Step 1.5: Set page size to 50 for larger batches (2026-01-28)
-        self.dom.set_page_size(50)
-        await asyncio.sleep(1)
-
         selected_rows = None
-        if video_ids is not None:
-            selected_rows = await self._collect_selected_rows(target, video_ids, results)
-            if selected_rows is None:
+        request = getattr(self, 'stream_schedule_request', None)
+        if request is not None:
+            if target != 'UNLISTED':
+                from .video_policy import PreSaveAuditBlocked
+                raise PreSaveAuditBlocked('stream_schedule_visibility_changed')
+            fresh = self.discover_stream_title_batch(request['stream_title'])
+            if (fresh.get('complete') is not True or not video_ids
+                    or not set(video_ids) <= set(fresh['video_ids'])
+                    or not set(video_ids) <= set(request['video_ids'])):
+                results['errors'].append({'error': 'Frozen selection not completely observed'})
                 return True
+            # Fresh discovery may include newer matching clips. Only the frozen
+            # selected IDs enter this pass; exact detail identity is checked later.
+            selected_rows = [{'video_id': vid, 'title': request['stream_title']} for vid in video_ids]
+        else:
+            if not self.dom.navigate_to_shorts_with_fallback(self.channel_id, target):
+                logger.error(f"[SCHEDULER] Failed to navigate to {target} Shorts")
+                results["errors"].append({"error": f"Navigation to {target} Shorts failed"})
+                return True
+            filter_state = self.dom.read_visibility_filter_state()
+            logger.info(
+                f"[SCHEDULER] List filter state: detected={filter_state.get('detected')} "
+                f"chips={filter_state.get('chip_texts')}"
+            )
+            if filter_state.get("detected") == "SCHEDULED":
+                logger.error(f"[SCHEDULER] Aborting {target} pass — list is Scheduled")
+                results["errors"].append({"error": "Wrong visibility filter: SCHEDULED"})
+                return True
+            await asyncio.sleep(2)
+            self.dom.set_page_size(50)
+            await asyncio.sleep(1)
+
+            if video_ids is not None:
+                selected_rows = await self._collect_selected_rows(target, video_ids, results)
+                if selected_rows is None:
+                    return True
 
         # Step 2-4: CONTINUOUS PROCESSING LOOP (2026-01-28: Added for true "until complete")
         # Process batches of videos until none remain under this filter.

@@ -272,3 +272,11 @@ L5.5: REFRESH (F5) ← CRITICAL before loop
 
 - **`YT_SCHEDULER_PRE_SAVE_DELAY_SEC`**: default `1.0`
   - Delay between dialog Done/Save and page-level Save click (stabilizes Studio animation timing).
+
+## Frozen-request list navigation
+
+The native stream request opens Shorts with the Unlisted URL filter through the
+existing DOM owner. It then qualifies the actual applied chip, receiving channel,
+rows and complete pagination before selecting exact-title matches. A URL or row
+wait alone is insufficient. Frozen selected navigation uses the same route without
+model fallback; ordinary channel rotation retains its existing behavior.
