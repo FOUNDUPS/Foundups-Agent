@@ -12,6 +12,13 @@ not a claim of a separate agent review. Private reconstruction receipt SHA256:
 `a84a8547472ea9c95bd5b901e7fd026601e2375e014d44ba8aa75de3490b270f`.
 Fresh final-tree and introduced-history CI remain required.
 
+The subsequent import-boundary correction changes only BrowserManager's source
+binding. Reconstruct the same39 unchanged metadata rows from exact staged Git
+bytes and the c082a0318 approvals; append39 bindings for the new whole-file digest
+while preserving the4146 prior entries (4185 total). Source reconstruction receipt
+SHA256: `3b95f929419d9f5d2963fad82e12a973875c530710d20a2f2e8b39e4a201786b`.
+No scanner/gate changes; fresh CI must verify the committed candidate.
+
 ## Live-chat capture and emoji-question metadata review — 2026-11-07
 
 PR2314 head `86183e654` regenerated four runtime source digests. Full-tree

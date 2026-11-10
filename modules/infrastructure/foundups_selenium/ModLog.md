@@ -2,6 +2,12 @@
 
 ## 2026-11-10 — Human-only verification hold
 
+Hosted Windows exposed a pre-existing package import side effect: BrowserManager
+created its O-drive session folder while importing the guard. Move that mkdir
+to the existing `_save_session` owner, preserving its configured destination and
+save behavior. A fresh-process no-mkdir import test and synthetic save/load test
+cover both sides. No browser session is created by guard installation.
+
 Add a shared per-debug-port effect gate at the existing YouTube attachment
 owners. Official auth targets and visible Studio verification dialogs yield
 for at least 30 seconds and until clear; interrupted effects are cancelled for

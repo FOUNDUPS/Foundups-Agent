@@ -2,6 +2,14 @@
 
 ### 2026-11-10 — Verification handoff inventory and offline checks
 
+Final import-boundary correction: **85 passed, zero skips**, with one inherited
+`datetime.utcnow` deprecation warning from synthetic session persistence.
+Hosted Windows had exposed two import failures on hosts without an O drive;
+the existing BrowserManager now creates the session directory only when saving.
+A fresh subprocess forbids mkdir during guard import, and a synthetic save/load
+retains persistence behavior. Hosted acceptance is required on this corrected
+source; the earlier83-pass result did not cover this absent-drive boundary.
+
 - `test_youtube_verification.py`: fake-clock 30-second minimum, longer visible
   challenge, STOP/unknown/corrupt control preservation, same-target release,
   waiting worker cancellation, per-port isolation, original uncertain transport

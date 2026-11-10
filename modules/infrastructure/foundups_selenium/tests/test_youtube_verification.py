@@ -325,3 +325,32 @@ with runtime_operation_lock(sys.argv[2], timeout_seconds=5):
         process.communicate(b"x", timeout=5)
     gate.execute(lambda *args: calls.append(args), "clickElement")
     assert len(calls) == 1
+
+
+def test_importing_guard_does_not_create_a_session_directory(tmp_path):
+    script = """
+import sys
+from pathlib import Path
+sys.path.insert(0, sys.argv[1])
+def denied(*args, **kwargs):
+    raise AssertionError('import must not create a runtime directory')
+Path.mkdir = denied
+from modules.infrastructure.foundups_selenium.src import youtube_verification
+assert youtube_verification.MINIMUM_HOLD_SECONDS == 30
+"""
+    result = subprocess.run([sys.executable, "-I", "-B", "-c", script, str(v._REPO)],
+                            cwd=tmp_path, capture_output=True, text=True, timeout=15,
+                            creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
+    assert result.returncode == 0, result.stderr
+
+
+def test_session_owner_creates_directory_only_when_saving(tmp_path, monkeypatch):
+    import logging
+    from modules.infrastructure.foundups_selenium.src import browser_manager as owner
+    root = tmp_path / "sessions"
+    monkeypatch.setattr(owner, "BROWSER_SESSION_DIR", root)
+    manager = object.__new__(owner.BrowserManager)
+    manager.logger = logging.getLogger(__name__)
+    assert manager._load_session("synthetic") is None and not root.exists()
+    manager._save_session("synthetic", 64379, "synthetic-profile")
+    assert manager._load_session("synthetic")["port"] == 64379
