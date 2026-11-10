@@ -1,3 +1,15 @@
+## Unlisted stream Shorts navigation metadata review — 2026-11-10
+
+The backend manifest refreshes the scheduler source checksum and retains all
+1,487 runtime members. A pinned manifest scan and independent review at tree
+`5263a3e3` verified 39 unchanged public source-path/SHA rows against base
+`e51f42f32`. Every row matches the source at both revisions and has an exact
+prior approval. The new whole-manifest digest requires 39 renewed exact
+bindings, preserving all 4,341 earlier entries and other fields (4,380 total).
+Scanner rules, exclusions, fingerprint formula, and scan coverage stay the
+same. Exact proposal SHA256: `b665f6474bc25aa503f6a23643eacbd4f8f3e847d61cec6942e7646d8dca1fe2`.
+Fresh full-tree and introduced-history checks remain required.
+
 ## Ended-stream first-test metadata review — 2026-11-10
 
 The backend manifest refreshes seven source hashes and retains all 1,487

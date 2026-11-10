@@ -1,5 +1,20 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-11-10 — Native Unlisted navigation after first live observation
+
+The native recorded-stream request reached its verified parent/channel, then the
+legacy ContentPageScheduler Unlisted sidebar selector timed out before selection
+or Save. Reuse the existing filtered Shorts URL helper for frozen-request discovery
+and selected navigation. A row timeout still permits strict explicit-empty
+readback; URL parameters alone never qualify the inventory. Preserve native
+channel, applied-chip, title and complete-pagination checks, late STOP checks and
+verification handoff. The frozen selected path no longer enters the model fallback.
+No unknown record or request reservation is cleared. WSP10/22/50/77/84/97.
+
+Sealed calendar qualification: 233 passed, retaining all 215 prior cases and
+adding 18 URL/readback/handoff/selection controls, with zero denied effects.
+Independent source review accepted; repaired native behavior awaits execution.
+
 ## 2026-11-10 — Native first-test dispatch for an ended stream
 
 Extend the existing Agent CLI with exact-request consumption and the shared DAE

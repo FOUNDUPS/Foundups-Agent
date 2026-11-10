@@ -24487,7 +24487,10 @@
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
       "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
-      "capabilities": [],
+      "capabilities": [
+        "browser",
+        "network"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,

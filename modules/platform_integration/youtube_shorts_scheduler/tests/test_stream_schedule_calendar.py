@@ -5,14 +5,17 @@ import threading
 import time
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock
+from urllib.parse import parse_qs, urlsplit
+import json
 
 import pytest
+from selenium.common.exceptions import TimeoutException
 
 from modules.infrastructure.foundups_selenium.src.youtube_verification import VerificationHandoff
 from modules.platform_integration.youtube_shorts_scheduler.src import schedule_inventory as inv
 from modules.platform_integration.youtube_shorts_scheduler.src import schedule_tracker as tracker_owner
 from modules.platform_integration.youtube_shorts_scheduler.src import video_policy as policy
-from modules.platform_integration.youtube_shorts_scheduler.src.dom_automation import YouTubeStudioDOM
+from modules.platform_integration.youtube_shorts_scheduler.src.dom_automation import YouTubeStudioDOM, DOMSelectors
 from modules.platform_integration.youtube_shorts_scheduler.src.scheduler import YouTubeShortsScheduler, scheduling_channel_lock
 from modules.platform_integration.youtube_shorts_scheduler.src.content_page_scheduler import ContentPageScheduler
 
@@ -103,6 +106,108 @@ def bound_scheduler():
     owner.stream_schedule_request = {'channel_id': CHANNEL, 'parent_video_id': OTHER,
         'stream_title': TITLE, 'expires_at_unix': time.time() + 1000, 'video_ids': [VIDEO]}
     return owner
+
+
+def navigation_scheduler(monkeypatch, observed):
+    owner = bound_scheduler()
+    owner.channel_name = 'Synthetic channel'
+    driver = SimpleNamespace(get=Mock(), execute_script=Mock(return_value=observed))
+    dom = object.__new__(YouTubeStudioDOM)
+    dom.selectors = DOMSelectors()
+    dom.driver, dom.wait_for_element = driver, Mock(return_value=object())
+    owner.driver = owner.request_driver = driver
+    owner.dom = dom
+    monkeypatch.setattr(ContentPageScheduler, 'navigate_to_content',
+                        Mock(side_effect=AssertionError('obsolete sidebar route')))
+    return owner
+
+
+@pytest.mark.parametrize('empty', [False, True])
+def test_stream_discovery_uses_unlisted_shorts_url_and_qualified_readback(monkeypatch, empty):
+    observed = page()
+    if empty:
+        observed.update(rows=[], empty=True)
+    owner = navigation_scheduler(monkeypatch, observed)
+    if empty:
+        owner.dom.wait_for_element.side_effect = TimeoutException('no row')
+    result = owner.discover_stream_title_batch(TITLE)
+    assert result['complete'] and result['video_ids'] == ([] if empty else [VIDEO])
+    url = urlsplit(owner.driver.get.call_args.args[0])
+    assert url.netloc == 'studio.youtube.com' and url.path == f'/channel/{CHANNEL}/videos/short'
+    assert json.loads(parse_qs(url.query)['filter'][0]) == [{'name': 'VISIBILITY', 'value': ['UNLISTED']}]
+    owner.driver.get.assert_called_once()
+
+
+@pytest.mark.parametrize('changes', [
+    {'chip_texts': []}, {'chip_texts': ['Has schedule']}, {'channel_id': 'UC'+'b'*22},
+    {'url': f'https://studio.youtube.com/video/{OTHER}/edit'}, {'loading': True}, {'next_page': None}])
+def test_stream_url_does_not_bless_unqualified_page(monkeypatch, changes):
+    observed = page(); observed.update(changes)
+    owner = navigation_scheduler(monkeypatch, observed)
+    result = owner.discover_stream_title_batch(TITLE)
+    assert not result['complete'] and result['video_ids'] == []
+
+
+@pytest.mark.parametrize('stage', ['get', 'wait'])
+def test_stream_url_preserves_verification_handoff_before_collection(monkeypatch, stage):
+    owner = navigation_scheduler(monkeypatch, page())
+    effect = owner.driver.get if stage == 'get' else owner.dom.wait_for_element
+    effect.side_effect = VerificationHandoff('verification_required')
+    with pytest.raises(VerificationHandoff):
+        owner.discover_stream_title_batch(TITLE)
+    owner.driver.execute_script.assert_not_called()
+
+
+def test_stream_navigation_rechecks_stop_before_collection(monkeypatch):
+    owner = navigation_scheduler(monkeypatch, page())
+    owner.driver.get.side_effect = lambda _: owner.stop_event.set()
+    with pytest.raises(policy.PreSaveAuditBlocked, match='stopped'):
+        owner.discover_stream_title_batch(TITLE)
+    owner.driver.execute_script.assert_not_called()
+
+
+def test_selected_stream_navigation_never_uses_model_fallback(monkeypatch):
+    owner = navigation_scheduler(monkeypatch, page([row(), row('c'*11)]))
+    owner.dry_run = True
+    owner.tracker = SimpleNamespace(reservations={VIDEO: {}})
+    owner.dom.navigate_to_shorts_with_fallback = Mock(side_effect=AssertionError('model fallback'))
+    owner.dom.read_visibility_filter_state = Mock(side_effect=AssertionError('legacy proof'))
+    owner.dom.set_page_size = Mock(side_effect=AssertionError('legacy page sizing'))
+    owner._collect_selected_rows = AsyncMock(side_effect=AssertionError('legacy scrape'))
+    monkeypatch.setattr(asyncio, 'sleep', AsyncMock())
+    result = {'errors': [], 'skipped': []}
+    assert asyncio.run(owner._run_visibility_pass('UNLISTED', 1, False, result, [VIDEO])) is False
+    assert result['skipped'] == [{'video_id': VIDEO, 'reason': 'schedule_outcome_unknown'}]
+    owner.driver.get.assert_called_once()
+    owner.dom.navigate_to_shorts_with_fallback.assert_not_called()
+
+
+def test_selected_stream_navigation_refuses_other_visibility(monkeypatch):
+    owner = navigation_scheduler(monkeypatch, page())
+    with pytest.raises(policy.PreSaveAuditBlocked, match='visibility_changed'):
+        asyncio.run(owner._run_visibility_pass('PRIVATE', 1, False, {'errors': []}, [VIDEO]))
+    owner.driver.get.assert_not_called()
+
+
+@pytest.mark.parametrize('problem', ['missing_chip', 'missing_selected', 'changed_title', 'outside_frozen'])
+def test_selected_stream_reentry_requires_complete_frozen_identity(monkeypatch, problem):
+    observed = page()
+    if problem == 'missing_chip': observed['chip_texts'] = []
+    if problem == 'missing_selected': observed['rows'] = [row('c'*11)]
+    if problem == 'changed_title': observed['rows'] = [row(VIDEO, TITLE + ' changed')]
+    if problem == 'outside_frozen': observed['rows'] = [row('c'*11)]
+    owner = navigation_scheduler(monkeypatch, observed)
+    selected = ['c'*11] if problem == 'outside_frozen' else [VIDEO]
+    result = {'errors': []}
+    assert asyncio.run(owner._run_visibility_pass('UNLISTED', 1, False, result, selected)) is True
+    assert result['errors'] == [{'error': 'Frozen selection not completely observed'}]
+
+
+def test_selected_stream_reentry_preserves_readback_verification_handoff(monkeypatch):
+    owner = navigation_scheduler(monkeypatch, page())
+    owner.driver.execute_script.side_effect = VerificationHandoff('verification_required')
+    with pytest.raises(VerificationHandoff):
+        asyncio.run(owner._run_visibility_pass('UNLISTED', 1, False, {'errors': []}, [VIDEO]))
 
 
 @pytest.mark.parametrize('problem', ['expiry', 'channel', 'driver', 'dom_driver', 'stop', 'title', 'child'])

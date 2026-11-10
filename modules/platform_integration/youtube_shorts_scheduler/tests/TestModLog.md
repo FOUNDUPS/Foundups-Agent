@@ -418,3 +418,14 @@ detail scheduling handoff. Updated old inline positive expectation: a popup with
 no description or audience now refuses before claim/click. Existing durable
 unknown-save tests use future explicit slots and observed Audience fixtures.
 These are offline controls, not live audience or scheduling qualification.
+
+## 2026-11-10 — Frozen-request Unlisted URL and strict re-entry
+
+The sealed calendar selection passes 233 cases, all 215 previous names retained,
+with zero failures/errors/skips or denied effects. Eighteen additions exercise the
+actual URL builder plus strict inventory, explicit-empty reads after row timeout,
+wrong/missing filters, channel/title/pagination changes, late STOP, verification
+handoff, and selection limited to previously frozen IDs. Frozen re-entry never
+calls the legacy page-size/filter/scrape/model fallback helpers. The native run
+that motivated this repair stopped at the old filter before selection or Save;
+this offline result does not establish a repaired live schedule. WSP22/50/77/97.
