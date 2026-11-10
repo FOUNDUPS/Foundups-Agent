@@ -56,7 +56,8 @@ class Pages:
             raise value
         return copy.deepcopy(value)
 
-    def click_next_page(self):
+    def click_next_page(self, *, expected_page=None):
+        assert expected_page == self.pages[self.index]
         self.index += 1
 
 
@@ -87,6 +88,73 @@ def test_second_page_failure_discards_first_page_selection():
     source = page(); source['next_page'] = True
     result = inv.collect_unlisted_title_inventory(Pages(source, RuntimeError('unavailable')), CHANNEL, TITLE)
     assert result['complete'] is False and result['video_ids'] == []
+
+
+def test_pagination_timeout_reports_stage_without_exposing_exception_text():
+    source = page(); source['next_page'] = True
+    dom = Pages(source)
+    dom.click_next_page = Mock(side_effect=TimeoutException(TITLE))
+    result = inv.collect_unlisted_title_inventory(dom, CHANNEL, TITLE)
+    assert result['reason'] == 'pagination_failed' and result['video_ids'] == []
+    assert result['diagnostics']['failure_type'] == 'TimeoutException'
+    assert TITLE not in json.dumps(result['diagnostics'])
+
+
+@pytest.mark.parametrize('case', ['advance', 'disabled', 'missing', 'unchanged', 'scope_changed', 'handoff',
+    'drift_channel', 'drift_rows', 'drift_filter', 'drift_route'])
+def test_native_pagination_clicks_observed_control_once_and_requires_changed_rows(monkeypatch, case):
+    from modules.platform_integration.youtube_shorts_scheduler.src import dom_automation
+    control = Mock()
+    before = page(); before.update(next_page=True, next_control=control)
+    witness = dict(before)
+    if case == 'drift_channel': before['channel_id'] = 'UC' + 'b' * 22
+    if case == 'drift_rows': before['rows'] = [row(OTHER)]
+    if case == 'drift_filter': before['chip_texts'] = ['Has schedule']
+    if case == 'drift_route': before['url'] = before['url'].replace('/short', '/upload')
+    after = page([row(OTHER)]); after.update(previous_page=True)
+    if case == 'disabled': before['next_page'] = False
+    if case == 'missing': before['next_control'] = None
+    if case == 'unchanged': after['rows'] = before['rows']
+    if case == 'scope_changed': after['channel_id'] = 'UC' + 'b' * 22
+    if case == 'handoff': control.click.side_effect = VerificationHandoff('verification_required')
+    dom = object.__new__(YouTubeStudioDOM)
+    dom.driver = SimpleNamespace(execute_script=Mock(side_effect=[before, after]))
+    dom.wait_for_clickable = Mock(side_effect=AssertionError('legacy selector'))
+    dom.safe_click = Mock(side_effect=AssertionError('retrying fallback'))
+    class Wait:
+        def __init__(self, *_args): pass
+        def until(self, predicate):
+            if not predicate(dom.driver): raise TimeoutException('rows unchanged')
+    monkeypatch.setattr(dom_automation, 'WebDriverWait', Wait)
+    if case == 'advance':
+        dom.click_next_page(expected_page=witness)
+    else:
+        expected = VerificationHandoff if case == 'handoff' else TimeoutException if case == 'unchanged' else RuntimeError
+        with pytest.raises(expected): dom.click_next_page(expected_page=witness)
+    assert control.click.call_count == (0 if case in {'disabled', 'missing'} or case.startswith('drift_') else 1)
+    dom.safe_click.assert_not_called()
+    dom.wait_for_clickable.assert_not_called()
+
+
+@pytest.mark.parametrize('changes,reason', [
+    ({'channel_id': None}, 'receiving_channel_unverified'),
+    ({'url': f'https://studio.youtube.com/channel/{CHANNEL}/videos/upload'}, 'shorts_route_unverified'),
+    ({'loading': True}, 'page_loading'),
+    ({'search_text': TITLE}, 'unexpected_search_filter'),
+    ({'previous_page': None}, 'pagination_position_unverified'),
+    ({'chip_texts': []}, 'unlisted_filter_unverified'),
+    ({'rows': []}, 'page_rows_unqualified'),
+    ({'rows': [{'video_id': VIDEO, 'title': TITLE, 'schedule_text': 'Private'}]}, 'unlisted_row_unqualified'),
+    ({'next_page': None}, 'pagination_unverified'),
+])
+def test_inventory_diagnosis_is_specific_and_content_free(changes, reason):
+    observed = page(); observed.update(changes)
+    result = inv.collect_unlisted_title_inventory(Pages(observed), CHANNEL, TITLE)
+    assert not result['complete'] and result['video_ids'] == []
+    assert result['reason'] == reason
+    diagnostic_text = json.dumps(result['diagnostics'])
+    assert all(value not in diagnostic_text for value in (CHANNEL, VIDEO, TITLE, 'studio.youtube.com'))
+    assert result['diagnostics']['pages_read'] == 1
 
 
 @pytest.mark.parametrize('collector', [inv.collect_unlisted_title_inventory, inv.collect_scheduled_inventory])
@@ -450,3 +518,179 @@ def test_legacy_unknown_without_slot_blocks_allocation(monkeypatch):
     monkeypatch.setattr(queue, 'get_unresolved_scheduling_claims', lambda _: [{'video_id': VIDEO}])
     assert asyncio.run(owner._sync_scheduled_videos()) is False
     owner.tracker.sync_from_youtube.assert_not_called()
+
+
+# Native pending-request inspection: no intake, claims or real browser work.
+@pytest.fixture
+def native_request_inspection(tmp_path, monkeypatch):
+    from contextlib import contextmanager
+    from types import ModuleType
+    import sys
+    from modules.platform_integration.youtube_shorts_scheduler import cli
+    from modules.communication.livechat.src import automation_gates, operator_command_queue
+    from modules.communication.livechat.src import operator_stream_schedule_owner as stream_owner
+    from modules.infrastructure.shared_utilities import youtube_channel_registry
+
+    monkeypatch.setenv('YT_AUTOMATION_STOP_FILE', str(tmp_path / 'STOP'))
+    monkeypatch.setenv('YT_AUTOMATION_ENABLED', 'true')
+    monkeypatch.setenv('YT_SHORTS_SCHEDULING_ENABLED', 'true')
+    queue = operator_command_queue.OperatorCommandQueue(None, tmp_path / 'inbox.json',
+        tmp_path / 'ack.json', tmp_path / 'state.json')
+    commands = [{'id': 'inspect-recorded', 'action': stream_owner.ACTION, 'payload': {
+        'recorded_source': {'channel_id': CHANNEL, 'parent_video_id': OTHER, 'stream_title': TITLE},
+        'first_test_only': True}},
+        {'id': 'unrelated-announcement', 'action': 'announce', 'payload': {'message': 'Fixture only'}}]
+    queue.command_path.write_text(json.dumps({'version': 1, 'commands': commands}))
+    calls = []
+    settings = SimpleNamespace(busy=False, registered=True, role=True, ports=[9222],
+        native_result={'inspection_only': True, 'stream_schedule_requests': [
+            {'status': 'inspected', 'reason': 'inventory_incomplete',
+             'inventory_complete': False, 'matching_count': 0, 'diagnostics': {'pages_read': 1}}]})
+
+    @contextmanager
+    def lease():
+        if settings.busy:
+            raise TimeoutError('owner_busy')
+        calls.append('lease')
+        try:
+            yield
+        finally:
+            calls.append('released')
+
+    def launch(**kwargs):
+        assert calls == ['lease']
+        assert kwargs['stream_schedule_inspect_only'] is True
+        assert kwargs['browser'] == 'chrome' and kwargs['mode'] == 'schedule'
+        assert kwargs['max_per_channel'] == 1
+        requests = kwargs['stream_schedule_requests']
+        assert len(requests) == 1 and requests[0]['id'] == 'inspect-recorded'
+        calls.append('native_inspection')
+        return copy.deepcopy(settings.native_result)
+
+    module_name = 'modules.platform_integration.youtube_shorts_scheduler.scripts.launch'
+    native = ModuleType(module_name)
+    native.run_multi_channel_scheduler = launch
+    native.BROWSER_PORTS = {'chrome': 9222, 'edge': 9223}
+    monkeypatch.setitem(sys.modules, module_name, native)
+    monkeypatch.setattr(automation_gates, 'youtube_runtime_owner', lease)
+    monkeypatch.setattr(operator_command_queue, 'OperatorCommandQueue', lambda _: queue)
+    monkeypatch.setattr(youtube_channel_registry, 'get_channel_by_id', lambda channel: (
+        {'roles': {'shorts': settings.role}, 'browser': {'available_ports': settings.ports}}
+        if settings.registered and channel == CHANNEL else None))
+    return cli, queue, calls, settings, stream_owner
+
+
+def _inspection_bytes(queue):
+    return [path.read_bytes() if path.exists() else None for path in
+            (queue.command_path, queue.acknowledgement_path, queue.state_path)]
+
+
+def _deny_inspection_mutators(queue, monkeypatch):
+    refresh = AsyncMock(side_effect=AssertionError('inspection must not consume command'))
+    claim = Mock(side_effect=AssertionError('inspection must not claim'))
+    finish = Mock(side_effect=AssertionError('inspection must not finish'))
+    monkeypatch.setattr(queue, 'refresh_stream_schedule_request', refresh)
+    monkeypatch.setattr(queue, 'claim_stream_schedule_request', claim)
+    monkeypatch.setattr(queue, 'finish_stream_schedule_request', finish)
+    return refresh, claim, finish
+
+
+def test_native_cli_inspection_reads_accepted_pending_request_without_queue_writes(native_request_inspection, monkeypatch):
+    cli, queue, calls, _, _ = native_request_inspection
+    assert asyncio.run(queue.refresh_stream_schedule_request('inspect-recorded', recorded_only=True))
+    before = _inspection_bytes(queue)
+    denied = _deny_inspection_mutators(queue, monkeypatch)
+    result = cli.run_operator_request('inspect-recorded', 'chrome', inspect_only=True)
+    assert calls == ['lease', 'native_inspection', 'released']
+    assert result['status'] == 'request_inspected' and result['inspection_only'] is True
+    assert result['scheduling_verified'] is False and result['success'] is False
+    assert result['receipt']['execution_status'] == 'pending'
+    assert queue.inspect_command('unrelated-announcement')['received'] is False
+    assert _inspection_bytes(queue) == before
+    for mock in denied:
+        mock.assert_not_called()
+
+
+@pytest.mark.parametrize('native_result', [
+    {'inspection_only': True, 'stream_schedule_requests': [
+        {'status': 'pending', 'reason': 'same_target_access_unverified'}]},
+    {'error': 'browser_attachment_failed'},
+])
+def test_native_cli_inspection_does_not_claim_collector_ran_when_native_owner_blocked(
+        native_request_inspection, monkeypatch, native_result):
+    cli, queue, _, settings, _ = native_request_inspection
+    assert asyncio.run(queue.refresh_stream_schedule_request('inspect-recorded', recorded_only=True))
+    settings.native_result = native_result
+    before = _inspection_bytes(queue)
+    denied = _deny_inspection_mutators(queue, monkeypatch)
+    result = cli.run_operator_request('inspect-recorded', 'chrome', inspect_only=True)
+    assert result['status'] == 'inspection_blocked' and result['inspection_only'] is True
+    assert result['scheduling_verified'] is False and result['success'] is False
+    assert _inspection_bytes(queue) == before
+    for mock in denied:
+        mock.assert_not_called()
+
+
+@pytest.mark.parametrize('state', ['unseen', 'expired'])
+def test_native_cli_inspection_refuses_unseen_or_expired_without_consuming(native_request_inspection, monkeypatch, state):
+    cli, queue, calls, _, stream_owner = native_request_inspection
+    if state == 'expired':
+        request = asyncio.run(queue.refresh_stream_schedule_request('inspect-recorded', recorded_only=True))
+        monkeypatch.setattr(stream_owner.time, 'time', lambda: request['expires_at_unix'] + 1)
+    before = _inspection_bytes(queue)
+    denied = _deny_inspection_mutators(queue, monkeypatch)
+    result = cli.run_operator_request('inspect-recorded', 'chrome', inspect_only=True)
+    assert result['status'] == 'request_not_pending'
+    assert calls == ['lease', 'released'] and _inspection_bytes(queue) == before
+    for mock in denied:
+        mock.assert_not_called()
+
+
+@pytest.mark.parametrize('gate', ['busy', 'missing', 'role', 'port', 'stop', 'disabled'])
+def test_native_cli_inspection_retains_owner_and_operational_gates(native_request_inspection, monkeypatch, gate):
+    cli, queue, calls, settings, _ = native_request_inspection
+    assert asyncio.run(queue.refresh_stream_schedule_request('inspect-recorded', recorded_only=True))
+    before = _inspection_bytes(queue)
+    _deny_inspection_mutators(queue, monkeypatch)
+    if gate == 'busy': settings.busy = True
+    if gate == 'missing': settings.registered = False
+    if gate == 'role': settings.role = False
+    if gate == 'port': settings.ports = [9223]
+    if gate == 'stop': monkeypatch.setattr('modules.communication.livechat.src.automation_gates.stop_active', lambda _: True)
+    if gate == 'disabled': monkeypatch.setenv('YT_SHORTS_SCHEDULING_ENABLED', 'false')
+    if gate == 'busy':
+        with pytest.raises(TimeoutError):
+            cli.run_operator_request('inspect-recorded', 'chrome', inspect_only=True)
+    else:
+        assert cli.run_operator_request('inspect-recorded', 'chrome', inspect_only=True)['success'] is False
+    assert 'native_inspection' not in calls and _inspection_bytes(queue) == before
+
+
+def test_native_cli_inspection_flag_routes_to_read_only_request_owner(monkeypatch, capsys):
+    from modules.platform_integration.youtube_shorts_scheduler import cli
+    import dotenv
+    monkeypatch.setattr(dotenv, 'load_dotenv', lambda *_args, **_kwargs: None)
+    call = Mock(return_value={'status': 'request_inspected', 'inspection_only': True,
+                              'scheduling_verified': False, 'success': False})
+    monkeypatch.setattr(cli, 'run_operator_request', call)
+    assert cli.main(['--request-id', 'synthetic', '--browser', 'chrome', '--inspect-request']) == 2
+    call.assert_called_once_with('synthetic', 'chrome', inspect_only=True)
+    assert json.loads(capsys.readouterr().out)['inspection_only'] is True
+
+
+@pytest.mark.parametrize('arguments', [
+    ['--inspect-request'], ['--inspect-request', '--browser', 'chrome'],
+    ['--inspect-request', '--request-id', 'synthetic'],
+    *[['--inspect-request', '--request-id', 'synthetic', '--browser', 'chrome', *extra]
+      for extra in (['--dry-run'], ['--preflight'], ['--channel', 'fixture'],
+                    ['--max-videos', '1'], ['--video-ids', VIDEO], ['--preserve-metadata'],
+                    ['--list-channels'])],
+])
+def test_native_cli_inspection_rejects_missing_identity_or_conflicting_modes(monkeypatch, arguments):
+    from modules.platform_integration.youtube_shorts_scheduler import cli
+    invoked = Mock()
+    monkeypatch.setattr(cli, 'run_operator_request', invoked)
+    with pytest.raises(SystemExit) as caught:
+        cli.main(arguments)
+    assert caught.value.code == 2
+    invoked.assert_not_called()

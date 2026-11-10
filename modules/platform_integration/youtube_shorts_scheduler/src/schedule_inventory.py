@@ -57,6 +57,12 @@ const nativeIds = Array.from(new Set(nativeLocations.filter(value => typeof valu
 const text = list ? (list.innerText || '') : '';
 const loading = all(list, '[aria-busy="true"], tp-yt-paper-spinner[active]').some(visible);
 return {
+    list_present: !!list,
+    filter_present: !!filter,
+    native_channel_count: nativeIds.length,
+    next_control_native_id: !!next && next.id === 'navigate-after',
+    next_control_legacy_button: !!next && next.matches("button[aria-label='Navigate to the next page']"),
+    next_control: arguments[0] === true ? next : null,
     channel_id: nativeIds.length === 1 ? nativeIds[0] : null,
     url: window.location.href,
     chip_texts: chips.map(el => (el.innerText || el.textContent || '').trim()),
@@ -262,7 +268,7 @@ def collect_scheduled_inventory(dom, channel_id: str, *, max_pages: int = MAX_PA
             result["issues"].append("page_limit")
             break
         try:
-            dom.click_next_page()
+            dom.click_next_page(expected_page=page)
         except VerificationHandoff:
             raise
         except Exception:
@@ -312,34 +318,66 @@ def collect_unlisted_title_inventory(dom, channel_id: str, title: str, *, max_pa
     """
     from modules.infrastructure.foundups_selenium.src.youtube_verification import VerificationHandoff
     result = {'complete': False, 'video_ids': [], 'reason': 'inventory_unverified',
-              'selection_basis': 'operator_title_rule', 'channel_id': channel_id}
+              'selection_basis': 'operator_title_rule', 'channel_id': channel_id,
+              'diagnostics': {'pages_read': 0, 'rows_seen': 0}}
     if (not isinstance(title, str) or not title.strip() or len(title) > 100
             or type(max_pages) is not int or not 1 <= max_pages <= MAX_PAGES):
         result['reason'] = 'invalid_title_selection'
         return result
     seen, selected = set(), []
     for page_number in range(1, max_pages + 1):
+        phase = 'snapshot'
         try:
             page = dom.driver.execute_script(SCHEDULED_PAGE_SCRIPT)
-            if (not isinstance(page, dict) or not _channel_matches(page, channel_id)
-                    or urlsplit(page['url']).path != f'/channel/{channel_id}/videos/short'
-                    or page.get('loading') is not False or page.get('search_text')
-                    or page.get('previous_page') is not (page_number != 1)):
+            if not isinstance(page, dict):
+                result['reason'] = 'page_snapshot_invalid'
                 return result
+            # Content-free observations help diagnose a real page without copying
+            # channel/video identifiers, titles, search input or native page text.
+            diagnostics = result['diagnostics']
+            diagnostics.update(pages_read=page_number,
+                list_present=page.get('list_present') is True,
+                filter_present=page.get('filter_present') is True,
+                native_channel_present=isinstance(page.get('channel_id'), str),
+                channel_matches=_channel_matches(page, channel_id),
+                shorts_route=urlsplit(page.get('url', '')).path == f'/channel/{channel_id}/videos/short',
+                loading=page.get('loading') is not False,
+                search_present=bool(page.get('search_text')),
+                previous_page=page.get('previous_page') if type(page.get('previous_page')) is bool else None,
+                next_page=page.get('next_page') if type(page.get('next_page')) is bool else None,
+                chip_count=len(page['chip_texts']) if isinstance(page.get('chip_texts'), list) else None,
+                row_count=len(page['rows']) if isinstance(page.get('rows'), list) else None,
+                explicit_empty=page.get('empty') is True)
+            diagnostics.update(next_control_native_id=page.get('next_control_native_id') is True,
+                               next_control_legacy_button=page.get('next_control_legacy_button') is True)
+            for valid, reason in (
+                (diagnostics['channel_matches'], 'receiving_channel_unverified'),
+                (diagnostics['shorts_route'], 'shorts_route_unverified'),
+                (not diagnostics['loading'], 'page_loading'),
+                (not diagnostics['search_present'], 'unexpected_search_filter'),
+                (page.get('previous_page') is (page_number != 1), 'pagination_position_unverified'),
+            ):
+                if not valid:
+                    result['reason'] = reason
+                    return result
             chips = page.get('chip_texts')
             if (not isinstance(chips, list) or len(chips) != 1
                     or ' '.join(str(chips[0]).casefold().split()) not in
                     {'unlisted', 'visibility: unlisted', 'visibility unlisted'}):
+                result['reason'] = 'unlisted_filter_unverified'
                 return result
             rows = page.get('rows')
             if (not isinstance(rows, list) or len(rows) > 1000
                     or (not rows and page.get('empty') is not True)):
+                result['reason'] = 'page_rows_unqualified'
                 return result
+            diagnostics['rows_seen'] += len(rows)
             for row in rows:
                 if (not isinstance(row, dict) or not isinstance(row.get('video_id'), str)
                         or not _VIDEO_ID.fullmatch(row['video_id']) or row['video_id'] in seen
                         or not isinstance(row.get('title'), str)
                         or str(row.get('schedule_text', '')).strip().casefold() != 'unlisted'):
+                    result['reason'] = 'unlisted_row_unqualified'
                     return result
                 seen.add(row['video_id'])
                 if row['title'] == title:
@@ -348,11 +386,18 @@ def collect_unlisted_title_inventory(dom, channel_id: str, title: str, *, max_pa
                 return {**result, 'complete': True, 'video_ids': selected,
                         'reason': 'matched' if selected else 'no_matching_shorts'}
             if page.get('next_page') is not True or not rows:
+                result['reason'] = 'pagination_unverified'
                 return result
-            dom.click_next_page()
+            phase = 'pagination'
+            dom.click_next_page(expected_page=page)
         except VerificationHandoff:
             raise
-        except Exception:
+        except Exception as exc:
+            result['reason'] = 'pagination_failed' if phase == 'pagination' else 'inventory_read_failed'
+            result['diagnostics']['failure_type'] = (type(exc).__name__ if type(exc).__name__ in
+                {'TimeoutException', 'NoSuchElementException', 'StaleElementReferenceException',
+                 'WebDriverException', 'RuntimeError', 'ValueError', 'TypeError', 'KeyError', 'AttributeError'}
+                else 'other')
             return result
     result['reason'] = 'pagination_limit'
     return result

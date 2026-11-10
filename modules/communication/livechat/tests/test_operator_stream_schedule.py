@@ -209,13 +209,13 @@ def launcher(monkeypatch):
     scope = {}
     exec(compile(ast.fix_missing_locations(ast.Module(body=[fn], type_ignores=[])), str(path), 'exec'), scope)
     calls = []
-    settings = SimpleNamespace(verified=True, complete=True, ids=[SHORT], exception=None,
+    settings = SimpleNamespace(verified=True, complete=True, ids=[SHORT], exception=None, inspect_only=False,
                                result={'status': 'unknown', 'submitted_ids': [SHORT]})
     queue_ref = [None]
 
     class Scheduler:
         def __init__(self, key, dry_run):
-            assert key == 'fixture' and dry_run is False
+            assert key == 'fixture' and dry_run is settings.inspect_only
             self.channel_id = CHANNEL
             self.config = {'id': CHANNEL}
             self.tracker = SimpleNamespace(channel_id=CHANNEL)
@@ -225,7 +225,9 @@ def launcher(monkeypatch):
             # No manifest lock may be held during browser work.
             with queue_ref[0]._locked():
                 calls.append('discovery')
-            return {'complete': settings.complete, 'video_ids': settings.ids}
+            return {'complete': settings.complete, 'video_ids': settings.ids,
+                    'reason': 'matched' if settings.complete else 'unlisted_filter_unverified',
+                    'diagnostics': {'pages_read': 1}}
 
         async def run_scheduling_cycle(self, video_ids, max_videos, **options):
             with queue_ref[0]._locked():
@@ -257,16 +259,17 @@ def launcher(monkeypatch):
         calls.append('verify')
         if settings.exception == 'handoff':
             raise VerificationHandoff('fixture takeover')
-        return {'verified': settings.verified}
+        return {'verified': settings.verified, 'reason': 'studio_permission_denied'}
 
     substitute('modules.infrastructure.shared_utilities.youtube_channel_registry', get_channel_by_id=lambda channel: {'key': 'fixture'} if channel == CHANNEL else None)
     substitute('modules.platform_integration.youtube_shorts_scheduler.src.channel_config', verify_schedule_target_access=access)
     substitute('modules.platform_integration.youtube_shorts_scheduler.src.scheduler', YouTubeShortsScheduler=Scheduler)
-    substitute('modules.platform_integration.youtube_shorts_scheduler.src.dom_automation', YouTubeStudioDOM=lambda driver: object())
+    substitute('modules.platform_integration.youtube_shorts_scheduler.src.dom_automation',
+               YouTubeStudioDOM=lambda driver, **options: object())
     driver = SimpleNamespace(get=lambda url: calls.append(url))
-    def run(queue, requests):
+    def run(queue, requests, **options):
         queue_ref[0] = queue
-        return scope[fn.name](driver, requests, queue=queue)
+        return scope[fn.name](driver, requests, queue=queue, **options)
     return run, settings, calls
 
 
@@ -296,6 +299,8 @@ def test_launcher_denials_and_uncertainty_never_rotate_or_retry(tmp_path, launch
     status = result.inspect_command(request['id'])['execution_status']
     assert status == ('pending' if case in {'access', 'partial'} else 'unknown' if case == 'exception' else 'blocked')
     assert out['operator_handoff_required'] is (case not in {'access', 'partial'})
+    if case == 'access':
+        assert out['stream_schedule_requests'][0]['access_reason'] == 'studio_permission_denied'
     assert sum(isinstance(c, tuple) for c in calls) == (1 if case in {'exception', 'blocked'} else 0)
     if status != 'pending':
         count = len(calls)
@@ -310,6 +315,63 @@ def test_launcher_rejects_forged_snapshot_before_navigation(tmp_path, launcher):
     request['parent_video_id'] = OTHER
     run(result, [request])
     assert calls == []
+
+
+@pytest.mark.parametrize('case', ['complete', 'partial', 'empty', 'handoff', 'forged'])
+def test_native_inventory_inspection_cannot_claim_or_schedule(tmp_path, launcher, case):
+    run, settings, calls = launcher
+    settings.inspect_only = True
+    result = queue(tmp_path, [command(recorded_source={
+        'channel_id': CHANNEL, 'parent_video_id': PARENT, 'stream_title': TITLE},
+        first_test_only=True)])
+    result.dae = None
+    request = accept(result)
+    if case == 'partial': settings.complete = False
+    if case == 'empty': settings.ids = []
+    if case == 'handoff': settings.exception = 'handoff'
+    if case == 'forged': request['parent_video_id'] = OTHER
+    paths = [result.command_path, result.acknowledgement_path, result.state_path]
+    before = [p.read_bytes() for p in paths]
+    def forbidden(*args, **kwargs):
+        raise AssertionError('inspection attempted queue mutation')
+    result.claim_stream_schedule_request = forbidden
+    result.finish_stream_schedule_request = forbidden
+    out = run(result, [request], inspect_only=True)
+    assert [p.read_bytes() for p in paths] == before
+    assert out['inspection_only'] is True and out['saved_state_verified'] is False
+    assert not any(isinstance(c, tuple) for c in calls)
+    assert out['operator_handoff_required'] is (case == 'handoff')
+    if case in {'complete', 'partial', 'empty'}:
+        observed = out['stream_schedule_requests'][0]
+        assert observed['status'] == 'inspected'
+        assert observed['inventory_complete'] is (case != 'partial')
+        assert observed['diagnostics'] == {'pages_read': 1}
+        assert TITLE not in json.dumps(out) and SHORT not in json.dumps(out)
+    if case == 'forged': assert calls == []
+
+
+@pytest.mark.parametrize('case', ['live', 'multiple', 'empty'])
+def test_native_inspection_rejects_wider_scope_before_browser_work(tmp_path, launcher, case):
+    run, settings, calls = launcher
+    settings.inspect_only = True
+    result = queue(tmp_path)
+    request = accept(result)
+    requests = [request] if case == 'live' else [request, request] if case == 'multiple' else []
+    before = result.state_path.read_bytes()
+    out = run(result, requests, inspect_only=True)
+    assert out['stream_schedule_requests'][0]['reason'] == 'single_recorded_first_test_required'
+    assert calls == [] and result.state_path.read_bytes() == before
+    # The public attachment owner must reject the same scope before imports or
+    # webdriver construction. Retain its actual signature without import-only hints.
+    path = ROOT / 'modules/platform_integration/youtube_shorts_scheduler/scripts/launch.py'
+    fn = next(n for n in ast.parse(path.read_text(encoding='utf-8')).body
+              if isinstance(n, ast.FunctionDef) and n.name == 'run_multi_channel_scheduler')
+    for arg in fn.args.args: arg.annotation = None
+    fn.returns = None
+    scope = {}
+    exec(compile(ast.fix_missing_locations(ast.Module(body=[fn], type_ignores=[])), str(path), 'exec'), scope)
+    assert scope[fn.name](stream_schedule_requests=requests,
+                          stream_schedule_inspect_only=True)['error'] == 'inspection_requires_frozen_request'
 
 
 @pytest.mark.parametrize('blocked', [False, True])

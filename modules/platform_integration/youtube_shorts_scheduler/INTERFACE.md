@@ -2,6 +2,15 @@
 
 ## Recorded-stream first-test entry (2026-11-10)
 
+`cli --request-id <id> --browser chrome|edge --inspect-request` reads only an
+already accepted, pending recorded first-test snapshot. It never calls refresh,
+claim or finish. `stream_schedule_inspect_only=True` requires a frozen request
+and returns immediately after native inventory, before any scheduling claim.
+Tracker persistence and screenshot diagnostics are disabled for this inspection.
+The result keeps `scheduling_verified=False` and exit 2; `inspection_only=True`
+distinguishes it from attempted scheduling. Bounded booleans/counts and reason
+codes diagnose route, native identity, filters, loading, rows and pagination.
+
 `cli --request-id <id> --browser chrome|edge` resolves one existing private
 manifest command through `refresh_stream_schedule_request`. It loads only its
 own checkout's `.env` without overriding inherited values. Other CLI execution

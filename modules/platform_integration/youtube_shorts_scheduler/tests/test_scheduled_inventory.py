@@ -46,7 +46,7 @@ class Pages:
             raise value
         return copy.deepcopy(value)
 
-    def click_next_page(self):
+    def click_next_page(self, *, expected_page=None):
         self.clicks += 1
         if self.click_error:
             raise RuntimeError("synthetic pagination failure")

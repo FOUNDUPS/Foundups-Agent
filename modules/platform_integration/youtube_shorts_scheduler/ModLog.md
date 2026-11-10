@@ -1,5 +1,28 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-11-10 — Native inventory diagnosis without scheduling effects
+
+The direct Unlisted route reached the existing collector but returned incomplete
+inventory before selection. Add reason codes and content-free page observations
+to that collector, retaining every qualification check. The Agent CLI can inspect
+an already accepted pending recorded request under the same runtime lease and
+source/access/gate checks. The launcher returns before claim, reservation or Save;
+verification handoff also leaves the request untouched. No inbox refresh, new
+command, unknown-record recovery or continuation is introduced. WSP11/22/50/77/84/97.
+
+Final sealed offline qualification passed 283 calendar cases and 102 inventory
+cases, retaining all earlier selections with zero denied effects. Independent
+source review accepted the read-only effect boundary. Native inspection confirmed a pagination timeout: the qualified snapshot saw
+Studio's `#navigate-after` control while the legacy labelled-button wait failed.
+Reuse that observed native element through the existing DOM owner, bind it to
+the collector's exact page witness, click once and await changed rows. A changed
+channel, route, filter, search or row set blocks the click. No retry fallback is used.
+Native inspection reached this adapted control but did not observe changed rows
+before its bounded wait expired. Full inventory and scheduling remain unqualified;
+no selection claim, reservation or Save occurred. The request deadline subsequently
+expired and is preserved. Further execution requires qualified request recovery;
+this slice neither renews it nor clears prior uncertain records.
+
 ## 2026-11-10 — Native Unlisted navigation after first live observation
 
 The native recorded-stream request reached its verified parent/channel, then the

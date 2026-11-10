@@ -1,3 +1,15 @@
+## Stream inventory diagnostics metadata review — 2026-11-10
+
+The backend manifest refreshes three scheduler source checksums and retains
+all 1,487 runtime members. A pinned manifest scan and independent review at
+tree `f3c8bff5` verified 39 unchanged public source-path/SHA rows against
+base `f52608377`. Every row matches Git source at both revisions and has an
+exact prior approval. The new whole-manifest digest requires 39 renewed
+bindings, preserving all 4,380 earlier entries and other fields (4,419 total).
+Scanner rules, exclusions, fingerprint formula, and scan coverage stay the
+same. Exact proposal SHA256: `fad3f61c834a5d91ec993490571f02fca73a23aef1c1a34dc9a47c06eba44139`.
+Fresh full-tree and introduced-history checks remain required.
+
 ## Unlisted stream Shorts navigation metadata review — 2026-11-10
 
 The backend manifest refreshes the scheduler source checksum and retains all
