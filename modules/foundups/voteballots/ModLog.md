@@ -1,5 +1,41 @@
 # Vote/Ballots FoundUp — Module Log
 
+## 2026-11-10 — PolyVoice extension of the Voice integration proposal
+
+012 supplied a politician-facing meeting-transparency concept and requested
+latest-conversation recovery, WSP 97 research and existing-system concatenation
+before authoring. Extended the existing Voice integration review lane (#2337),
+not a new FoundUp or runtime. Voice intake remains issue #2330. Added
+[PolyVoice module information](docs/POLYVOICE_MODULE.md) and attached it from
+[the integration contract](docs/VOTE_VOICE_INTEGRATION.md#10-polyvoice-extension--2026-11-10).
+The existing README, roadmap and intake Solution already lead to that contract.
+
+The specification records outcome/solution/pain, an explicit reconciliation
+of the supplied draft, private-session versus public-disclosure records,
+PoC/prototype gates, retrieval parameters, test-reuse targets and primary-source
+research. Proposed ownership: Voice owns PolyVoice; VOTE reads reviewed metadata;
+AutoPost may supply qualified capture/media/perception components without
+inheriting social publishing. Preserve the selected VOTE candidate-card PoC.
+
+Read main dc1ef39df8a3d4150f54a6c1608a624216c767db and the existing PR head
+54d1bec4c74dbdffb0df6b8d46f689c62350230d. Read current external AutoPost contracts
+at reference c7fb644c1b8897f2af29f26d7e3dc3838a67ab18; that repository was not
+modified. Its real camera/local-perception surface supersedes the older mock-only
+audit as reuse evidence, but does not prove phone-local speech or diarization.
+
+VOTE and AutoPost TestModLogs were read before defining reuse. No new test
+implementation was authored; the illustrative synthetic JSON was parsed locally.
+Direct GitHub retrieval was used; native WSP_00 bootstrap, semantic HoloIndex,
+WRE worker dispatch, phone/network-egress tests, independent acceptance and
+full repository test execution were not performed in this connector pass.
+Historical suite results are not presented as fresh evidence. Final PR checks,
+qualified Work merge and main verification remain separate gates.
+
+No public assets, runtime code/schema, manifest, registry, credentials, recording,
+posting, token, blockchain or deployment changed. Prior log history is preserved.
+WSP 22/50/84/97 discipline; WSP 109 draft used as intake structure, not runtime
+admission. The specification contains the detailed source and recovery receipt.
+
 ## 2026-11-09 — MAGA/Oversight Phase One documentation reconciliation
 
 Consolidated the address, source ownership and four-entry landing contract in
@@ -175,7 +211,6 @@ Independent frozen tests reproduced4 failures/16 passes. One local Qwen proposal
 changed the wrong branch and produced7 failures/13 passes; it was rejected.
 The coordinator authored the actual repair; independent full module replay passed322.
 Strengthened oracle20 passed separately, with unchanged original frozen copies.
-CI now includes the module and retains its JUnit results alongside WRE checks.
 No worker promotion, live FEC access, public activation or native RSI is claimed.
 Exact trial and cost limits: [existing dispatch](../../../docs/operations/RSI_SWARM_DISPATCH.md#micro-verification-and-protected-native-composition--2026-11-01).
 The separate aggregate total_raised provenance defect is tracked in ROADMAP.
@@ -282,7 +317,6 @@ The separate aggregate total_raised provenance defect is tracked in ROADMAP.
 | NO_PUBLIC_LAUNCH | No route activation or public surface changes |
 | NO_MANIFEST_MUTATION | foundup_manifest.json unchanged |
 | NO_LLM_CALL | Pure data transformation |
-| NO_NEW_FACTS | Only repackages existing QuickAnswer data |
 
 ### Shell Payload Contract
 
@@ -414,7 +448,7 @@ The separate aggregate total_raised provenance defect is tracked in ROADMAP.
 ### Public API
 
 - `generate_quick_answer(scored_summary, format, max_lines)` — Core generation function
-- `generate_shell_answer(scored_summary)` — Convenience for shell display
+- `generate_shell_answer(scored_summary)` — Convenience for shell display format
 - `generate_markdown_answer(scored_summary)` — Convenience for markdown
 - `is_answer_ready_for_display(answer)` — Check if answer can be displayed without review
 
@@ -534,7 +568,7 @@ from modules.foundups.voteballots.src import (
 ### Test Coverage
 
 - 37 new tests, all passing
-- Total: 195 tests (46 FEC adapter + 70 entity resolution + 42 funding summary + 37 confidence scoring)
+- Total: 195 tests (46 FEC + 70 entity + 42 funding + 37 confidence scoring)
 - Covers: verified fact rules, source absent rules, trail termination, no dark money as fact, no foreign claim generated, human review triggers, source preservation, order preservation, error propagation, no prose, no persuasion, convenience functions, edge cases, full pipeline
 
 ### Updated
@@ -722,7 +756,7 @@ from modules.foundups.voteballots.src import (
 - `EXACT_ONE_MATCH` — Single candidate resolved
 - `MULTIPLE_MATCHES` — Disambiguation required
 - `NO_MATCH` — No candidates found (not hallucinated)
-- `ADAPTER_ERROR` — FEC adapter error
+- `ADAPTER_ERROR` — Adapter error
 - `INVALID_QUERY` — Invalid request parameters
 
 ### Data Types
