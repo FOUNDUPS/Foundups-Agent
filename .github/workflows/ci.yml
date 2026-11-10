@@ -165,6 +165,12 @@ jobs:
           modules/communication/livechat/tests/test_conversation_stewardship.py
           modules/communication/video_comments/tests/test_driver_handle_inheritance.py
           --junitxml=chat-capture-results.xml
+      - name: Verify human-only YouTube verification handoff offline
+        run: >-
+          python -B -m pytest --import-mode=importlib -o addopts=
+          -p pytest_asyncio.plugin -p no:cacheprovider -q --tb=short
+          modules/infrastructure/foundups_selenium/tests/test_youtube_verification.py
+          modules/infrastructure/dependency_launcher/tests/test_attach_recovery_no_kill.py
       - name: Preserve chat capture results
         if: always()
         uses: actions/upload-artifact@v4

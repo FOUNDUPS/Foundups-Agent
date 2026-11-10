@@ -680,6 +680,8 @@ def run_shorts_scheduler(
                 options = ChromeOptions()
                 options.add_experimental_option("debuggerAddress", f"127.0.0.1:{chrome_port}")
                 driver = webdriver.Chrome(options=options)
+            from modules.infrastructure.foundups_selenium.src.youtube_verification import install_youtube_verification_guard
+            install_youtube_verification_guard(driver, chrome_port)
         except Exception as e:
             print(f"[ERROR] Failed to connect to {browser_name}. Is it running with remote debugging?")
             print(f"  Error: {e}")
@@ -1012,6 +1014,8 @@ def run_multi_channel_scheduler(
             options = ChromeOptions()
             options.add_experimental_option("debuggerAddress", f"127.0.0.1:{port}")
             driver = webdriver.Chrome(options=options)
+        from modules.infrastructure.foundups_selenium.src.youtube_verification import install_youtube_verification_guard
+        install_youtube_verification_guard(driver, port)
         print(f"[OK] Connected to {browser.upper()}")
     except Exception as e:
         print(f"[ERROR] Failed to connect: {e}")

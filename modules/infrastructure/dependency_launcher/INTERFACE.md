@@ -7,6 +7,13 @@
 
 ## Public API
 
+Chrome/Edge retry helpers now install the
+[YouTube verification gate](../foundups_selenium/INTERFACE.md#youtube-human-verification-handoff)
+before returning an attached driver, including the existing no-page recovery
+branch. Attachment signatures are unchanged. Installation itself performs no
+browser effects; later effects may yield for human verification and raise
+`VerificationHandoff` instead of replaying an interrupted command.
+
 ### `ensure_dependencies(require_lm_studio: bool = True, *, model_key: Optional[str] = None) -> Dict[str, bool]`
 
 Ensure all dependencies are running before DAE starts.

@@ -50,6 +50,9 @@ class _FakeDriver:
     def current_url(self):
         return "https://studio.youtube.com/"
 
+    def execute(self, command, params=None):
+        raise AssertionError("Attach must not issue a browser effect")
+
 
 def _spy_subprocess_run():
     """Return (spy, taskkill_calls_list). taskkill_calls captures any taskkill."""

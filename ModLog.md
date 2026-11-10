@@ -1,3 +1,12 @@
+## 2026-11-10 — YouTube human verification handoff source slice
+
+Add a per-browser minimum30-second verification hold through existing Selenium
+attachment owners. Leave challenge completion to012; cancel interrupted effects,
+retain global STOP and unknown outcomes, and preserve the broader scheduler
+manual-takeover follow-up. Synthetic tests are distinct from installation and
+live popup qualification. WSP11/22/50/60/73/84/97. See foundups_selenium contracts
+and the private work ledger for exact revision and validation receipts.
+
 Packaging verification: eight backend-manifest cases pass; runtime membership stays
 1,485 with seven source bindings updated. Twelve scoped security-gate cases pass.
 Independent review verifies exactly 39 unchanged public checksum fingerprints,

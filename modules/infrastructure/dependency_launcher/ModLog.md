@@ -1,3 +1,11 @@
+## 2026-11-10 — Install human verification guard on attached drivers
+
+Both Chrome/Edge normal and existing recovery attachment paths now install the
+shared Selenium verification gate before returning their driver. The installer
+does not navigate or verify identity. Existing no-kill assertions are preserved;
+offline gate/attachment composition passes. Runtime installation and live popup
+qualification remain separate. WSP11/22/50/84/97.
+
 ## 2026-11-07 — LM Link configuration remediation and passive observation
 
 The runtime repair handoff observed the connector starting under `llmster`, then

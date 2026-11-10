@@ -1,3 +1,12 @@
+## 2026-11-10 — Cooperate with human browser verification
+
+Install the shared Selenium verification gate on the DAE reconnect drivers,
+Edge coordinator recovery, vision chat sender and party reactor attachments.
+This makes their browser effects participate in the same minimum30-second hold
+as Studio workers when a challenge is detected. No chat policy, command authority
+or API sender changes. Source/offline evidence is not live qualification or
+native WRE invocation; pending delivery outcomes remain uncertain. WSP22/50/84/97.
+
 ## 2026-11-07 — Quiet stakeholder conversation through shared routing
 
 WSP00/15/22/50/60/73/77/84/97. Replace unsolicited ordinary reply fallthrough with
