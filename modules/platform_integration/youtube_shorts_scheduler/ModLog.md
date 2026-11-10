@@ -1,5 +1,19 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-11-10 — Audit before scheduling; explicit audience configuration
+
+Extend existing detail Save guards with title/description completeness, observed
+audience and future date/time/timezone checks. Missing metadata consumes only
+matched eligible existing analysis; absent evidence blocks. Content-row scheduling
+enters the detail owner; unauditable inline writes refuse before claims/clicks.
+Keep manual-field protection, private directives and uncertain-save records.
+
+012's configuration correction removes channel-name audience defaults. Exact-ID
+Yes/No lists come from the runtime environment; explicit registry booleans survive
+normalization. Malformed, duplicate, conflicting or absent policy cannot select
+an audience or save. No configured ID enables a new channel's operational roles.
+Offline controls and installed/live qualification are separate. WSP11/22/50/84/97.
+
 ## 2026-11-10 — Guard direct launch attachments during verification
 
 Install the shared Selenium verification handoff on both launch attachment
@@ -2968,3 +2982,14 @@ skips it with `cadence_live_unqualified` until independent timezone and occupied
 receipts exist. Allocation/planning rejects unknown Studio timezone or any slot
 whose local date differs from its ET date (including Asia/Tokyo). This prevents
 clock-only conversion from silently publishing on the wrong calendar date.
+# 2026-11-10 — Scheduling pre-save completeness audit
+
+012 observed missing Audience answers, date-only music titles and empty bodies.
+Extended existing detail/save and index owners: repair incomplete metadata only
+from matched existing evidence, verify configured audience, and refuse incomplete
+or changed drafts and invalid schedule intent before Save. Content-page entry
+uses detail inspection; unqualified inline Save is held. Added the module-local
+audit skill and private AntifaFM candidate review without publishing or model calls.
+Offline tests cover actual guard/selection owners and durable unknown behavior;
+live installation, browser selectors, UI-TARS audience diagnosis and independent
+schedule readback remain separate qualification. WSP 10/22/50/84/95/97.

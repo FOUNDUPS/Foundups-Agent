@@ -1,3 +1,13 @@
+## 2026-11-10 — Pre-save audit and audience configuration
+
+The existing protected directives runner selects114 cases, including48 new
+pre-save audit/configuration controls. Synthetic drafts exercise actual preparation
+and Save owners: metadata completeness, eligible analysis reuse, observed audience,
+late changes, exact identity, invalid/DST slots and detail-owner handoff. Thirteen
+configuration cases cover native-ID Yes/No without enabling channels, invalid or
+conflicting configuration with zero writes, and registry audience round trips.
+All66 prior directive/upload controls remain. No browser/model/public action occurs.
+
 ## 2026-11-05 — Native visibility readiness regression
 
 The same four-file private-directive consumer selection now passes66 controls
@@ -176,3 +186,10 @@ When `YT_SCHEDULER_INDEX_WEAVE_ENABLED=true` (default), the production scheduler
 ## Last Updated
 
 - **V0.8.x** (2026-01-18): Production-aligned full cake; deterministic click cadence; page save hardened
+# Scheduling pre-save audit controls
+
+`test_presave_audit.py` exercises incomplete metadata, exact channel audience,
+unknown/changed controls, late draft changes, valid/invalid schedule intent,
+matched evidence repair and the content-row handoff to the detail owner. No live
+browser, GPU, model, upload or scheduling operation runs. Existing private-policy
+and durable readback controls remain applicable with fully specified draft fixtures.

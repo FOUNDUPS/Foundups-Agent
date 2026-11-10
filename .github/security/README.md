@@ -1,3 +1,21 @@
+## Scheduling audit metadata review — 2026-11-10
+
+The pre-save audit changes four runtime source bindings, keeping all 1,486
+members and package bounds. Foreground reconstruction against `80ada51cd`
+verifies 39 unchanged public source-path/SHA rows, each matching its staged
+source bytes and exact prior approval. Append only the 39 renewed whole-file
+bindings, preserving all 4,185 earlier entries and other fields (4,224 total).
+No scanner rules, exclusions, fingerprint formula or scan coverage changes.
+Private reconstruction receipt SHA256: `428f4d29a248dcd083818c17705da6b77948c2f5e010295435b4516fc347b48d`.
+This is source metadata review, not independent-agent or live behavior proof.
+Fresh full-tree and introduced-history CI remain required.
+
+The audience-configuration follow-up preserves the same1,486 members and all
+4,224 prior bindings. Reconstruction against `b8f6d326d` verifies the same39
+unchanged public path/SHA rows against committed and current source, then renews
+their exact whole-manifest bindings (4,263 total). No scanner scope/rule changes.
+Foreground receipt SHA256: `3e4661f42fa66e3a0c5c11df9ad11be9b93d2f1bea3ba8f0b2308d6183c23154`.
+
 ## YouTube verification-hold metadata review — 2026-11-10
 
 PR2343 head `c082a0318` adds one runtime file and updates six existing source

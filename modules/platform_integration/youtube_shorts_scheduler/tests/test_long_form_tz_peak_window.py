@@ -96,6 +96,9 @@ class _StubDom:
     def human_delay(self, *a, **k):
         return 0.0
 
+    def begin_policy_cycle(self):
+        return None
+
 
 class _CapturingScheduler(ContentPageScheduler):
     """
@@ -152,13 +155,16 @@ async def _run(channel_tz, start_date, n_rows=1, max_per_day=4):
 
     tracker.get_next_available_slot = pinned  # type: ignore[assignment]
 
-    await sched.schedule_all_visible(
-        tracker=tracker,
-        time_slots=get_peak_slots_et(),
-        max_per_day=max_per_day,
-        max_videos=n_rows,
-        channel_tz=channel_tz,
-    )
+    # Each detail audit invalidates its prior list snapshot. Reacquire the
+    # synthetic list on each cycle while retaining the real slot tracker.
+    for _ in range(n_rows):
+        await sched.schedule_all_visible(
+            tracker=tracker,
+            time_slots=get_peak_slots_et(),
+            max_per_day=max_per_day,
+            max_videos=n_rows,
+            channel_tz=channel_tz,
+        )
     return [t for _, t in sched.typed]
 
 

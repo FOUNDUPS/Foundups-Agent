@@ -1,5 +1,12 @@
 # shared_utilities Interface Specification
 
+### YouTube audience registry field (2026-11-10)
+
+`youtube_channel_registry` preserves `shorts.made_for_kids` in normalization,
+save and load. A literal boolean is explicit policy; None is unconfigured.
+Malformed input remains visible to the scheduling consumer for refusal, rather
+than being dropped or coerced. No channel identity or operational role is inferred.
+
 ### Code/triage native key selection and backend initialization (2026-11-05)
 
 `local_model_selection.resolve_role_native_key('code' | 'triage') -> str | None`

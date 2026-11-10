@@ -2708,8 +2708,61 @@ class YouTubeStudioDOM:
     def edit_description(self, new_description: str):
         self._stage_policy_field("description", new_description)
 
+    def prepare_schedule_audit(self):
+        """Repair incomplete metadata from existing evidence, then set the bound audience."""
+        from .video_policy import (DETAIL_SNAPSHOT_SCRIPT, PreSaveAuditBlocked,
+                                   metadata_audit_issues, audience_target, require_public_gate)
+        from .channel_config import CHANNELS
+        from .index_weave import build_index_metadata_context
+        session = self._policy_edit()
+        snapshot = self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT)
+        self._write_policy_fields(session.desired(snapshot))
+        snapshot = self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT)
+        session.check(snapshot)
+        issues = metadata_audit_issues(snapshot.get("title"), snapshot.get("description"))
+        if issues and session.allow_metadata:
+            keys = [key for key, value in CHANNELS.items() if value.get("id") == session.channel_id]
+            if len(keys) != 1:
+                raise PreSaveAuditBlocked("presave_audit:channel_config_unknown")
+            ctx = build_index_metadata_context(
+                channel_key=keys[0], video_id=session.video_id, original_title=snapshot["title"],
+                base_description="" if any(i.startswith("description_") for i in issues) else snapshot["description"],
+                inform_title=any(i.startswith("title_") for i in issues),
+                enhance_description=any(i.startswith("description_") for i in issues))
+            if ctx is not None:
+                self.edit_title(ctx.new_title)
+                self.edit_description(ctx.new_description)
+                snapshot = self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT)
+                session.check(snapshot)
+                issues = metadata_audit_issues(snapshot.get("title"), snapshot.get("description"))
+        if issues:
+            # The existing indexer owns Ask/Gemini. Do not start a competing
+            # analysis/browser session or invent a title from length/channel.
+            raise PreSaveAuditBlocked("presave_audit:" + ",".join(issues))
+        target = audience_target(session.channel_id)
+        if snapshot.get("audience_ready") is not True:
+            raise PreSaveAuditBlocked("presave_audit:audience_controls_unreadable")
+        if snapshot.get("made_for_kids") is not session.audience:
+            raise PreSaveAuditBlocked("presave_audit:audience_changed_by_other_owner")
+        if session.audience is not target:
+            name = "VIDEO_MADE_FOR_KIDS_MFK" if target else "VIDEO_MADE_FOR_KIDS_NOT_MFK"
+            choices = self.driver.find_elements(By.CSS_SELECTOR, f'tp-yt-paper-radio-button[name="{name}"]')
+            if len(choices) != 1 or not choices[0].is_displayed() or not choices[0].is_enabled():
+                raise PreSaveAuditBlocked("presave_audit:audience_control_ambiguous")
+            require_public_gate()
+            current = self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT)
+            session.check(current)
+            if current.get("made_for_kids") is not session.audience or current.get("audience_ready") is not True:
+                raise PreSaveAuditBlocked("presave_audit:audience_changed_before_selection")
+            self.safe_click(choices[0])
+            current = self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT)
+            session.check(current)
+            if current.get("made_for_kids") is not target or current.get("audience_ready") is not True:
+                raise PreSaveAuditBlocked("presave_audit:audience_selection_unverified")
+            session.audience = target
+
     def _guard_policy_save(self):
-        from .video_policy import DETAIL_SNAPSHOT_SCRIPT, scheduling_policy, VideoPolicyBlocked
+        from .video_policy import DETAIL_SNAPSHOT_SCRIPT, scheduling_policy, VideoPolicyBlocked, audit_schedule
         session = self._policy_edit()
         desired = session.desired(self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT))
         self._write_policy_fields(desired)
@@ -2719,6 +2772,7 @@ class YouTubeStudioDOM:
         if getattr(self, "_policy_scheduling", False):
             session.policies["scheduling"] = scheduling_policy(
                 session.channel_id, session.video_id, getattr(self, "_policy_cycle_attempts", 0))
+            audit_schedule(session, snapshot)
         return session
 
     def _submit_policy_save(self, callback):
@@ -3472,6 +3526,7 @@ class YouTubeStudioDOM:
     def click_done(self):
         """Click Done button to confirm scheduling."""
         import time
+        from .video_policy import PreSaveAuditBlocked
 
         # YouTube Studio variants:
         # - native <button> with inner <span>Done</span>
@@ -3519,14 +3574,20 @@ class YouTubeStudioDOM:
                     self.driver.execute_script("arguments[0].scrollIntoView({block:'center'});", el)
                 except Exception:
                     pass
+                if getattr(self, "_policy_scheduling", False):
+                    self._guard_policy_save()
                 self.safe_click(el)
                 time.sleep(1)
                 return
+            except PreSaveAuditBlocked:
+                raise
             except Exception:
                 continue
 
         # Last resort: JS click inside dialog (STRICT scope).
         try:
+            if getattr(self, "_policy_scheduling", False):
+                self._guard_policy_save()
             clicked = self.driver.execute_script(
                 """
                 const root = document.querySelector('tp-yt-paper-dialog#dialog') || document;
@@ -3544,13 +3605,15 @@ class YouTubeStudioDOM:
             if clicked:
                 time.sleep(1)
                 return
+        except PreSaveAuditBlocked:
+            raise
         except Exception:
             pass
 
         raise TimeoutException("Done/Save button not found/clickable")
 
     def schedule_video(self, date_str: str, time_str: str) -> bool:
-        from .video_policy import scheduling_policy, VideoPolicyBlocked
+        from .video_policy import scheduling_policy, VideoPolicyBlocked, PreSaveAuditBlocked
         self._policy_scheduling = True
         try:
             session = self._policy_edit()
@@ -3558,7 +3621,13 @@ class YouTubeStudioDOM:
                 "timezone": getattr(self, "_policy_timezone", None), "visibility": "scheduled"}
             scheduling_policy(session.channel_id, session.video_id,
                               getattr(self, "_policy_cycle_attempts", 0))
+            self.prepare_schedule_audit()
+            self._guard_policy_save()
             return self._schedule_video_workflow(date_str, time_str)
+        except PreSaveAuditBlocked as exc:
+            self._last_presave_audit_issue = str(exc)
+            logger.warning("[PRESAVE-AUDIT] %s", exc)
+            return False
         except VideoPolicyBlocked:
             logger.warning("[DOM] Scheduling refused by fresh directive guard")
             return False
@@ -3600,6 +3669,9 @@ class YouTubeStudioDOM:
             except Exception as e:
                 elapsed = time_module.time() - step_start
                 logger.error(f"[DOM] Scheduling failed at {step_name} ({elapsed:.1f}s): {type(e).__name__}: {e}")
+                from .video_policy import PreSaveAuditBlocked
+                if isinstance(e, PreSaveAuditBlocked):
+                    raise  # Retain the current draft for the owner; no Escape.
                 # Best-effort cleanup: close dialog so the next loop isn't blocked.
                 try:
                     ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()

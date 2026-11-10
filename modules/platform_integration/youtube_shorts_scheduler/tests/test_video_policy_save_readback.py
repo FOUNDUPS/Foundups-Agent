@@ -17,10 +17,12 @@ VIDEO = "a" * 11
 @pytest.fixture
 def owned_editor(tmp_path, monkeypatch):
     monkeypatch.setattr(time, "sleep", lambda *_: None)
+    from modules.platform_integration.youtube_shorts_scheduler.src import channel_config
+    monkeypatch.setitem(channel_config.CHANNELS, "audit_fixture", {"id": CHANNEL, "made_for_kids": False})
     owner = queue.OperatorCommandQueue(None, tmp_path / "inbox.json", tmp_path / "ack.json", tmp_path / "state.json")
     for name in ("get_video_policy", "record_video_policy_observation", "claim_video_policy_save", "verify_video_policy_save"):
         monkeypatch.setattr(queue, name, getattr(owner, name))
-    state = {"channel_id": CHANNEL, "url": f"https://studio.youtube.com/video/{VIDEO}/edit",
+    state = {"made_for_kids": False, "audience_ready": True, "channel_id": CHANNEL, "url": f"https://studio.youtube.com/video/{VIDEO}/edit",
              "title": " Exact original \n", "description": " Exact body \n",
              "save_disabled": False, "prompt_open": False}
     calls = {"clicks": 0, "refreshes": 0}
@@ -41,6 +43,7 @@ def owned_editor(tmp_path, monkeypatch):
     dom._edit_description_unchecked = lambda value: state.update(description=value)
     dom.begin_policy_cycle()
     dom.begin_policy_edit(CHANNEL, VIDEO)
+    dom._policy_timezone = "Asia/Tokyo"
     def click():
         calls["clicks"] += 1
         state["save_disabled"] = True
@@ -96,7 +99,7 @@ def test_metadata_readback_cannot_settle_schedule_operation(owned_editor, monkey
         raise AssertionError("metadata readback must not settle scheduling claim")
     monkeypatch.setattr(queue, "verify_video_policy_save", forbidden_verify)
     dom._policy_scheduling = True
-    dom._policy_edit().requested_schedule = {"date": "Nov 2, 2026", "time": "1:00 PM", "timezone": "Asia/Tokyo", "visibility": "scheduled"}
+    dom._policy_edit().requested_schedule = {"date": "Nov 2, 2099", "time": "1:00 PM", "timezone": "Asia/Tokyo", "visibility": "scheduled"}
     dom.click_save()
     assert calls["refreshes"] == 1
     assert owner._read_json(owner.state_path, {})["video_effect_claims"][-1]["outcome"] == "unknown"
@@ -109,7 +112,7 @@ def schedule_with_fake_picker(dom, during_time=None):
     dom.set_schedule_time = lambda _time: during_time() if during_time else None
     dom.click_done = lambda: None
     dom._policy_timezone = "Asia/Tokyo"
-    return dom.schedule_video("Nov 2, 2026", "1:00 PM")
+    return dom.schedule_video("Nov 2, 2099", "1:00 PM")
 
 
 def enqueue_title_policy(owner, mode):
