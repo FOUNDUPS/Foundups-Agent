@@ -15,31 +15,32 @@ and buildx available. Missing Docker, a file-specific ignore override, build
 failure, timeout, leaked fixture, or missing source is a failure, never a skip.
 The dedicated workflow executes it without application dependencies or credentials.
 
-## Merge scope pilot
+## Audit Markdown fast path
 
-CI validates drafts on open and synchronization, and still runs on
-reopen, edit and ready-for-review. A future reduction in metadata-triggered
-work must preserve fresh results when the base moves or a PR is retargeted.
+CI keeps the required check name `test (3.12)`. A repository administrator can
+set the Actions variable `CI_AUDIT_FAST_PATH_BASE` to an exact PR target branch.
+Until set, the Python job runs the existing suite. Set it to an isolated preview
+branch to qualify the shortcut before enabling `main`. Removing the variable
+restores the full suite on the next eligible PR event.
 
-The shadow job binds the GitHub test-merge commit to both event parents and
-compares its complete diff with the reviewed head diff. The initial ordinary
-prose allowlist is limited to direct Markdown children of
-`docs/ci-pilot/examples/`. Numbered WSPs, their master index and recognized
-agent instructions use the policy lane. Unknown paths and mixed runtime
-changes select full validation. Missing Git evidence fails the shadow job.
+The shortcut admits regular Markdown additions and edits under
+`docs/audits/prose/`, the dated Git workflow impact audit, and the existing
+`docs/ci-pilot/examples/` fixtures. Reserve the prose directory for human-readable
+reports. Policy, handoffs, CI, deployment, executable content and mixed changes
+use the full suite. The check verifies both parents of the exact test-merge
+commit and compares complete Git diffs. Missing classification evidence routes
+full. Failed scoped checks or a moving base fail the required check.
 
-The job checks whitespace and repository links and anchors, using the pinned
-Lychee release in offline mode. Policy changes also check changed WSP mirrors,
-numbering and the Codex projection. CI continues to run the full existing suite,
-including the tracked-tree and introduced-history secret scan. The shadow
-job adds no new required status.
+Both routes retain separate secret scanning and the other required checks.
+Scoped Markdown uses whitespace and offline relative link and anchor checks.
+The shadow job also checks WSP mirrors, numbering and the Codex projection.
+All original PR event types and post-merge tests remain in effect.
 
-Compare the shadow duration with the five required checks on the same PR head,
-base and test-merge SHA. Candidate fast-path time is the last of the shadow,
-secret-scan and HoloIndex checks to finish. Before cutover, qualify the policy
-checks on a real WSP revision, test bad links and unsafe diffs, and verify
-draft-to-ready and retarget behavior in GitHub. A required gate also needs
-independent review protection for changes to its workflow and validators.
+Before targeting `main`, require an independent code owner's approval for
+workflow and validator changes and enable GitHub's up-to-date branch
+requirement. Verify the fast and full paths and a rejected docs change on
+an isolated target. Compare event-to-green and runner time on the exact
+head, base and test-merge SHA.
 
 ## Change record — 2026-10-21
 

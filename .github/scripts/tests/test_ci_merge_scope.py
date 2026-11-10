@@ -56,11 +56,36 @@ class MergeScopeTest(unittest.TestCase):
         return self.base, head, self.git("rev-parse", "HEAD")
 
     def test_inert_prose_addition_and_edit(self):
-        extra = "docs/ci-pilot/examples/new-page.md"
-        self.write(_PROSE, "# Updated prose\n")
-        self.write(extra, "# New page\n")
+        files = (
+            _PROSE,
+            "docs/ci-pilot/examples/new-page.md",
+            "docs/audits/agent_git_workflow_impact_audit.md",
+            "docs/audits/prose/scoped-audit-20261110.md",
+        )
+        for filename in files:
+            self.write(filename, "# Updated prose\n")
         self.git("add", ".")
-        self.assertEqual(classify(*self.merge()), ("docs", [extra, _PROSE]))
+        self.assertEqual(classify(*self.merge()), ("docs", sorted(files)))
+
+    def test_audit_governance_stays_full(self):
+        governance = "docs/audits/governance/WSP97_TEST_INVENTORY_REUSE_GATE_WSP81_NOTIFICATION_20260826.md"
+        audit = "docs/audits/prose/current-audit.md"
+        for filename in (governance, audit):
+            self.write(filename, "# Audit\n")
+        self.git("add", ".")
+        self.assertEqual(classify(*self.merge()), ("full", [governance, audit]))
+
+    def test_interface_queue_stays_full(self):
+        queue = "docs/audits/INTERFACE_CLOSURE_QUEUE_BG.md"
+        self.write(queue, "# Interface closure queue\n")
+        self.git("add", ".")
+        self.assertEqual(classify(*self.merge()), ("full", [queue]))
+
+    def test_audit_prose_cannot_add_agent_instructions(self):
+        instructions = "docs/audits/prose/agents.md"
+        self.write(instructions, "# Agent instructions\n")
+        self.git("add", ".")
+        self.assertEqual(classify(*self.merge()), ("full", [instructions]))
 
     def test_policy_precedes_prose(self):
         files = [
