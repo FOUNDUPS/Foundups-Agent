@@ -12,6 +12,9 @@ import pytest
 def test_comment_driver_does_not_inherit_worker_pipe_handles(monkeypatch, browser, port):
     from selenium import webdriver
     from selenium.webdriver.common import utils
+    # Load the real driver classes before replacing Selenium's constructor.
+    # Otherwise the package initializer subclasses this function-shaped double.
+    from modules.infrastructure.foundups_selenium.src import youtube_verification
     monkeypatch.setattr(utils, "free_port", lambda: 9515)
     calls = []
 
