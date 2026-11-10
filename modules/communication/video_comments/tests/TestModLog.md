@@ -1,5 +1,19 @@
 # video_comments TestModLog
 
+## 2026-11-10 — Preserve package context in manifest inspection fixtures
+
+The stdlib AST fixture now retains module metadata when supplying typing names,
+and loads the real manifest queue/policy/stream helper definitions into one
+private package. Relative owner imports resolve without running production
+package startup or replacing validation with a stub. Existing private-context,
+replay-inertness and explicit-announcement assertions remain unchanged.
+All **15 cases pass** under the existing offline effect guard, with zero
+failures/errors/skips, denied effects or model imports and unchanged source
+hashes during the run. Provider/model-status messages are synthetic fixture
+outputs, not runtime observations. A bounded test-loader search found no other
+AST loader of the queue/policy owner; ordinary imports and consumer fakes remain
+unchanged. WSP11/22/50/97; hosted acceptance remains separate.
+
 ## 2026-11-10 — Preserve handle isolation with verification guard
 
 Extend the existing fake driver's interface without changing its Service or
