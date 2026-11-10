@@ -1,6 +1,6 @@
 # YUMORI.me / eSingularity — Grants, Subsidies, and PPP Support Registry
 
-Last verified: 2026-11-10 JST for F-03 official 2026-11-09 second-call opening, 2026-12-14 12:00 JST deadline and conditional DC rate/cap; 2026-11-09 JST for F-08 official 2026-11-06 third-round allocation result; 2026-11-08 JST for F-16 official 2026-11-06 budget-limit warning / historic two-track coverage; 2026-11-05 JST for P-01 deadline passage and F-15 dated coverage correction; 2026-11-01 JST for F-13 expiry of the officially published October 31 application window (no new extension visible); 2026-10-30 JST for F-12 exact deadline-time clarification; 2026-10-28 JST for F-13/F-14 coverage catch-up; 2026-10-26 targeted checks and other historical entries retain their own verification dates. These catch-up discoveries are not fresh official changes.
+Last verified: 2026-11-11 JST for F-15 official 2026-11-10 extension of the application deadline to 2026-12-24 23:59 JST; 2026-11-10 JST for F-03 official 2026-11-09 second-call opening, 2026-12-14 12:00 JST deadline and conditional DC rate/cap; 2026-11-09 JST for F-08 official 2026-11-06 third-round allocation result; 2026-11-08 JST for F-16 official 2026-11-06 budget-limit warning / historic two-track coverage; 2026-11-05 JST for P-01 deadline passage and F-15 dated coverage correction; 2026-11-01 JST for F-13 expiry of the officially published October 31 application window (no new extension visible); 2026-10-30 JST for F-12 exact deadline-time clarification; 2026-10-28 JST for F-13/F-14 coverage catch-up; 2026-10-26 targeted checks and other historical entries retain their own verification dates. These catch-up discoveries are not fresh official changes.
 
 ## Purpose and truth boundary
 
@@ -311,14 +311,14 @@ Do not book any F-10 subsidy revenue, do not treat the published rates as expect
 ## F-15 — 令和８年度 業務用建築物の脱炭素改修加速化事業（脱炭素ビルリノベ2026）
 
 - Agency: 環境省 / 執行団体 一般社団法人環境共創イニシアチブ (SII).
-- **Round state: OPEN as of 2026-11-05, subject to prior budget exhaustion.** This is a **2026-06-04 originally announced** opportunity discovered in coverage reconciliation on 2026-11-04, **not a newly opened November call**.
-- **Official deadline clock conflict — DO NOT ASSERT A FINAL HOUR:** MOE's 2026-06-04 announcement says **2026-11-30 17:00 JST 必着**, whereas the current SII administrator call page says **2026-11-30 23:59 JST**. Resolve with current binding guide and SII in writing before planning or submitting; use earlier clock as a protective internal planning gate only, not as a resolved official rule. Both pages agree on the November 30 date.
-- Primary sources, checked 2026-11-05: https://www.env.go.jp/press/press_04846.html and https://bl-renos.jp/r8/about/
+- **Round state: OPEN BY PUBLISHED WINDOW as of 2026-11-11, subject to early closure upon budget exhaustion. Official application deadline EXTENDED on 2026-11-10.** This is a **2026-06-04 originally announced** opportunity discovered in coverage reconciliation on 2026-11-04, **not a newly opened November call**.
+- **Updated official deadline: 2026-12-24 (Thursday), 23:59 JST**, extended from **2026-11-30** on 2026-11-10. The Ministry of the Environment independently published the extension (with the old 17:00 receipt cutoff struck out); the official SII administrator notice explicitly gives the NEW 23:59 cutoff, resolving the earlier conflicting cutoff for this extended call. Submission is via jGrants with GビズIDプライム, and the call may still close early if the budget is exhausted. Official extension: https://www.env.go.jp/press/press_05813.html ; administrator dated change notice: https://bl-renos.jp/r8/news/2026111001.html ; live call page: https://bl-renos.jp/r8/about/ .
+- Primary sources: Ministry extension 2026-11-10 https://www.env.go.jp/press/press_05813.html ; SII dated deadline change 2026-11-10 https://bl-renos.jp/r8/news/2026111001.html ; current call https://bl-renos.jp/r8/about/ ; initial historical ministry opening https://www.env.go.jp/press/press_04846.html
 - Support: eligible existing nonresidential building-envelope/energy retrofit; published conditional **1/2–1/3** of eligible equipment, construction and design costs; maximum **¥1,000,000,000** and minimum **¥2,000,000** per project, per administrator page and controlling guide. These are **not YUMORI funding**.
 - Potential components: building insulation, high-efficiency HVAC and commercial hot-water, controls/BEMS, possibly qualifying external high-efficiency heat sources under the specific program rule. This does not establish that a closed public onsen, a reused former school, server heat-pump package, or compute hardware qualifies.
 - Administrator's published main performance conditions include BPI ≤1.0 and use-dependent primary-energy reductions (roughly 30% for hotels/restaurants and 40% for offices/schools), BEMS and approved modelling; formal project-specific tests depend on the guide.
 - **YUMORI project boundary: VERIFIED PROGRAM only.** No qualifying applicant, ownership or use rights, operating/baseline conditions, proposal, selection or award established. Check City ownership versus eligible operator, public/private applicant criteria, buildings/application units, baseline methodology for closed properties, procurement only after award, stacking with F-07/F-10/F-11/F-14, and actual need for the retrofit.
-- Calendar handling: retain original FY2026 call permanently; mark 2027 successor **UNANNOUNCED / NOT VERIFIED**. The November 5 entry is historical coverage correction, not a new government clarification.
+- Calendar handling: retain original FY2026 call permanently; mark 2027 successor **UNANNOUNCED / NOT VERIFIED**. The November 5 entry is historical coverage correction, while the **November 10 application deadline extension is a new official material change**; retain both the original cutoff and new cutoff in the dated round record.
 
 ## F-16 — 令和8年度 企業における省エネ設備等導入支援事業補助金（福井県、通常枠／原油価格高騰枠）
 
@@ -425,6 +425,9 @@ Grant reimbursement timing, bridging finance and actual award allocation must be
 reconciled with the delivery schedule before a deployment gate can pass.
 
 ## Change log
+
+### 2026-11-11 — F-15 retrofit application deadline extended (official 2026-11-10)
+MOE and appointed administrator SII officially extended F-15 脱炭素ビルリノベ2026 from November 30 (historic MOE 17:00 versus SII 23:59 discrepancy) to **December 24, 2026 at 23:59 JST**. Date/time now corroborated by the November 10 official administrator notice and MOE extension announcement. This affects only the application window, not eligibility or YUMORI funding. Applicant, lawful public-property rights, baseline, equipment scope, procurement timing and cost stacking remain unresolved. Continue to treat ¥1 billion cap as a conditional ceiling, never project revenue. Official: https://bl-renos.jp/r8/news/2026111001.html and https://www.env.go.jp/press/press_05813.html .
 
 ### 2026-11-10 — F-03 second call open
 See F-03 details and official links above; YUMORI VERIFIED PROGRAM only.
