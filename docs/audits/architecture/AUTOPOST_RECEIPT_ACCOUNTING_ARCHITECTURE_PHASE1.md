@@ -124,6 +124,19 @@ No double-entry transaction is POSTED until the funding/payment source is confir
 
 This prevents the agent from inventing a credit-side account.
 
+The event schema allows unknown payment and account values during capture and
+review. `APPROVED` requires the reviewer, approval time, debit account, credit
+account, and confirmed payment source. `POSTED` also requires the original
+journal transaction ID. `REVERSED` keeps that ID and requires a separate
+reversal transaction ID.
+
+Enable date-time format checks when validating an event. Schema validation
+checks the shape of these claims. The accounting service must
+verify the approval and the referenced accounts, check that the journal
+balances, prevent duplicate posts, and write the journal before emitting
+`POSTED`. Only the service can emit `REVERSED` after verifying and writing a
+distinct reversing transaction. A capture client can submit evidence for review.
+
 ## Initial chart-of-accounts pattern
 
 Example only; projects may extend it:
