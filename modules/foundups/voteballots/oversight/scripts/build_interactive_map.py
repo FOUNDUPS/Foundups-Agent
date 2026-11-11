@@ -108,19 +108,31 @@ def edge_id(origin, target):
 
 def diagram(nodes, prefix=""):
     rows = []
-    for row in DIAGRAM:
-        items = []
-        for item in row:
-            if isinstance(item, tuple):
-                origin, target, label = item
+    for row_index, row in enumerate(DIAGRAM):
+        if isinstance(row[0], tuple):
+            # Connect the existing nodes without adding a second navigation layer.
+            origins, targets = DIAGRAM[row_index - 1], DIAGRAM[row_index + 1]
+            paths = []
+            for origin, target, _label in row:
                 if target not in dict(nodes[origin]["choices"]):
                     raise ValueError(f"Missing diagram connection {origin} to {target}")
-                classes = "map-wire conditional" if target == "coordination" else "map-wire"
-                description = f"{label}: {nodes[origin]['title']} to {nodes[target]['title']}"
-                items.append(f'<a class="{classes}" href="{prefix}#{edge_id(origin, target)}" aria-label="{escape(description)}">{escape(label)}</a>')
-            else:
-                label = "Independent state action" if item == "coordination" else nodes[item]["title"]
-                items.append(f'<a class="map-box map-box-{item}" href="{prefix}#{item}">{escape(label)}</a>')
+                x1 = (origins.index(origin) + .5) * 100 / len(origins)
+                x2 = (targets.index(target) + .5) * 100 / len(targets)
+                classes = "map-connector conditional" if target == "coordination" else "map-connector"
+                paths.append(
+                    f'<path class="{classes}" d="M{x1:g} 0 V12 H{x2:g} V24" '
+                    'vector-effect="non-scaling-stroke"/>'
+                )
+            rows.append(
+                '<svg class="map-connectors" viewBox="0 0 100 24" '
+                'preserveAspectRatio="none" aria-hidden="true" focusable="false">'
+                + "".join(paths) + '</svg>'
+            )
+            continue
+        items = []
+        for item in row:
+            label = "Independent state action" if item == "coordination" else nodes[item]["title"]
+            items.append(f'<a class="map-box map-box-{item}" href="{prefix}#{item}">{escape(label)}</a>')
         rows.append(f'<div class="map-row map-row-{len(row)}">{"".join(items)}</div>')
     return '<nav class="map-diagram" aria-label="Interactive oversight diagram">' + "".join(rows) + "</nav>"
 
@@ -137,7 +149,7 @@ def choice_cards(nodes, key, targets, labels=None):
     rows = []
     for target in targets:
         label = escape(labels[target] if labels else nodes[target]["title"])
-        rows.append(f'<li><a class="map-wire" href="#{edge_id(key, target)}" aria-label="Why this connection? {label}">Why this connection?</a><a class="map-box" href="#{target}">{label}</a></li>')
+        rows.append(f'<li><a class="map-box" href="#{target}">{label}</a></li>')
     return f'<ul class="map-choices">{"".join(rows)}</ul>'
 
 

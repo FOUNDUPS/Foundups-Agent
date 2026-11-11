@@ -90,7 +90,7 @@ test('Oversight serves the scoped maps, roadmap and manual contact offline', asy
     },
     caches: {
       open: async (name) => {
-        assert.equal(name, 'oversight-public-shell-v0.10.0:/web/');
+        assert.equal(name, 'oversight-public-shell-v0.11.0:/web/');
         return {match: async (key) => offline.get(key)};
       },
     },

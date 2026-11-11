@@ -166,3 +166,15 @@ p { margin: 0 0 1em; }
   .masthead, .accountability-hero, .hero-brief li { background: white; color: black; }
   .masthead a, .secondary, .hero-brief h2, .hero-sources, .hero-sources a { color: black; }
 }
+
+/* Phase One: four immediate actions and progressive-disclosure process panels. */
+.accountability-hero > .actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+.accountability-hero > .actions .button { display: flex; align-items: center; justify-content: center; min-height: 48px; text-align: center; }
+.hero-brief details { background: var(--navy-light); border-top: 2px solid var(--gold); padding: .9rem; min-width: 0; }
+.hero-brief summary { cursor: pointer; font-weight: 700; line-height: 1.4; }
+.hero-brief details[open] summary { margin-bottom: .75rem; }
+.hero-brief details p { margin: 0; }
+@media (max-width: 650px) {
+  .accountability-hero > .actions { grid-template-columns: 1fr; }
+  .hero-brief { grid-template-columns: 1fr; }
+}
