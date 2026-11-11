@@ -1,5 +1,17 @@
 # FoundUps MCP Bridge Interface
 
+## Separate private draft MCP interface
+
+On the dedicated Streamable HTTP endpoint, `inspect_draft()` returns draft and
+message IDs, From, recipients, attachment hashes, a raw SHA-256 digest, and
+sender-metadata conflict flags. It returns no body or attachment bytes.
+`set_draft_sender(draft_id, expected_digest, approved_sender, request_id,
+dry_run=True)` returns a preview or a fixed hold reason by default. A write
+requires both caller scope and a private bounded request grant. The receipt
+attests exact readback only; it contains digests, IDs and verification flags.
+Unknown tools/arguments fail closed. There is no send, create, delete or
+settings-mutation route. See [private setup](docs/PRIVATE_DRAFT_MCP.md).
+
 ## Stored-settings gate for snapshot publication — 2026-11-01
 
 The [Holo API](../../../holo_index/INTERFACE.md#stored-chroma-settings-admission--2026-11-01) governs raw-model admission and captured metrics before any

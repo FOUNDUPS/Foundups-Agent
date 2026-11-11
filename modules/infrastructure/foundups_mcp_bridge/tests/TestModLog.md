@@ -1,5 +1,14 @@
 # foundups_mcp_bridge TestModLog
 
+## 2026-11-11: Private draft sender verification scope
+
+Synthetic suites cover the fixed provider allowlist, OAuth audience/scope
+and revocation, Japanese MIME/attachments, one-shot approval, encrypted
+snapshot, concurrent editing, uncertain updates and duplicate reconciliation.
+The separate-process test uses the official MCP client against a real
+loopback listener and verifies discovery, invocation, reconnect and shutdown.
+Live provider and Codex-stopped ChatGPT evidence remain outside this result.
+
 ## 2026-10-26: FastMCP 3.4.11 exact-contract candidate
 
 - Retain the existing 49-case Windows compatibility selection and exact quartet
