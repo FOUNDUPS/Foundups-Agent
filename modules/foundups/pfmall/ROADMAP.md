@@ -4,7 +4,7 @@
 
 The source candidate supplies a separate ASGI factory around the existing draft
 handler and verifier, with explicit bounded server policy loading and per-app
-policy. Local814 cases pass,
+policy. Only proposal and minimal health routes are exposed. Local814 cases pass,
 including all786 originals and28 test-first host cases; independent/publication
 review remains required. This is not a deployed host or live Clerk qualification.
 Next serving layer: package/qualify the actual server and minimal source closure,
@@ -67,7 +67,7 @@ private local capture followed by an authenticated, scoped attachment. Read
   its existing media repository; prove two items, reload, missing/duplicate
   originals, temporary fallback and late/disabled AI behavior.
 - [ ] C2: implement the authenticated shared media/private item adapter with
-  verified principal/FoundUp scope, remote-byte checks, idempotentent revisions,
+  verified principal/FoundUp scope, remote-byte checks, idempotent revisions,
   conflict handling and truthful durable acknowledgment.
 - [ ] C3: connect permitted garment records to the existing grouped Mall field;
   prove cross-owner denial, media access, revocation and navigation parity.
