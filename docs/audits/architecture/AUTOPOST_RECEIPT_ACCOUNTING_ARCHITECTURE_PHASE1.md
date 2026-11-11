@@ -1,8 +1,11 @@
 # AutoPost Receipt -> Accounting Architecture, Phase 1
 
-**Status:** DECISION / CONTRACT SLICE  
-**Scope:** AutoPost capture extension + FoundUp accounting boundary  
-**Initial consumer:** YUMORI  
+**Status:** DECISION / CONTRACT SLICE
+
+**Scope:** AutoPost capture extension + FoundUp accounting boundary
+
+**Initial consumer:** YUMORI
+
 **Privacy rule:** NO receipt image, bank data, member financial data, or live accounting rows in the public repository.
 
 ## Decision
