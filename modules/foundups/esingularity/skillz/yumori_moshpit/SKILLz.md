@@ -91,9 +91,10 @@ Routine successful checks and ordinary bookkeeping do not belong in 0102 Moshpit
 Moshpit is a reverse-chronological activity projection, not a second mailbox or database. Reusable instructions and registry belong in repository Skillz. The live Doc should have a short skill pointer followed immediately by the newest day, rather than a long operating manual. Migrate existing introductions only through verified lossless revision-controlled edits; preserve historical evidence.
 
 Canonical live Doc registry (verify identity before write):
-- YUMORI project: 1Le5foHxTHWa8QMAfqTJ0PZFUULw3oNgJTgghlXaHEYM — project actions.
-- SUNVISTA case: 1RbhWc_OrF1dyjG7J7X7WuHN0Kp8uWn2bR-8gnqxzrzk — case and correspondence evidence.
-- 0102 learning: 1kkexJx9YEsV5Jr5rWDovr9Oo7XhyhGUQavYC892iirE — agent errors and repairs.
+- YUMORI project — project actions; resolve its canonical Doc using the established private operator handoff and provider search.
+- SUNVISTA case — case and correspondence evidence; resolve its canonical Doc using the established private case handoff and provider search.
+- 0102 learning — agent errors and repairs; resolve its canonical private Doc from the authenticated operator context.
+Do not embed private Google Doc IDs, private correspondence identifiers, or raw email bodies in public Git skill definitions. Verify the actual provider document ID, title, permissions, and revision on each write.
 
 For all Moshpits, convert provider evidence time to Asia/Tokyo before calculating day anchor and action order. VPN/IP and US Gmail display time do not control chronology. Use one YYYY-MM-DD — DAY START anchor per day where supported; newest action immediately below anchor; newest day immediately after minimal skill pointer. Actions and day blocks sort newest-first. Preserve unknown times without guessing. Routine retrieval reads newest day and relevant scoped receipts, expanding older history only on demand. Read back changed day and adjacent boundary after write; never bulk-reorder historical events without verified event timestamps.
 
