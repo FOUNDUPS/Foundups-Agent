@@ -154,7 +154,7 @@ def _store_outcome(result: Dict[str, Any]) -> bool:
 
 def run_skill(
     *,
-    cap: int = HARD_CAP_PER_DAY,
+    cap: Optional[int] = None,
     channels: Optional[List[Dict[str, str]]] = None,
     load_schedule: Optional[Callable[[str], tuple]] = None,
     today: Optional[datetime] = None,

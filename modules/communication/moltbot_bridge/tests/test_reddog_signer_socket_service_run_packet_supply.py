@@ -48,6 +48,24 @@ _PRINCIPAL_PUBLIC_KEY = encode_ed25519_public_key(bytes(range(32)))
 _REDDOG_PUBLIC_KEY = encode_ed25519_public_key(bytes(range(32, 64)))
 
 
+def test_initial_handshake_run_packet_reuses_public_entrypoint(tmp_path):
+    from modules.communication.moltbot_bridge.tests.test_reddog_signer_socket_service_config_supply import _initial_config
+    repo, payload = _initial_config(tmp_path)
+    repo.mkdir()
+    runtime = Path(payload["runtime_root"])
+    path = _write_json(runtime / "signer_service_config.json", payload)
+    owner = tmp_path / "owner" / "owner.json"
+    result = run_reddog_signer_socket_service_run_packet_supply(
+        repo_root=repo, config_path=path, output_path=runtime / "run-packet.json",
+        owner_authority_config_path=owner,
+    )
+    assert result.accepted, result.rejection_reasons
+    packet = json.loads((runtime / "run-packet.json").read_text())
+    assert packet["profile_count"] == 1
+    assert packet["socket_path"] == payload["socket_path"]
+    assert packet["argv"][2] == "modules.communication.moltbot_bridge.src.reddog_signer_system_service_entrypoint"
+
+
 def _repo(tmp_path: Path) -> Path:
     path = tmp_path / "repo"
     path.mkdir()

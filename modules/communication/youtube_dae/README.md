@@ -1,4 +1,21 @@
+## Conversation stewardship owner — 2026-11-07
+
+The running YouTube conversation owner is `modules/communication/livechat`, not this
+scaffold. Its [README](../livechat/README.md) and
+[reusable skill](../../../.claude/skills/youtube-conversation-stewardship/SKILL.md)
+describe quiet observation, scoped participant context, shared AI routing and bounded
+repair handoff. Native WRE offload and independently verified live behavior remain
+separate qualification gates.
+
 # youtube_dae
+
+## Operational entrypoint — 2026-11-07
+
+This directory remains a structural scaffold; the placeholder status and API
+examples below do not describe the running YouTube DAE. The existing operational
+owner and current repair checkpoint are in [LiveChat](../livechat/README.md#youtube-dae-repair-checkpoint--2026-11-07).
+Use its linked [repair work list](../../platform_integration/youtube_shorts_scheduler/ROADMAP.md#repair-work-list--2026-11-07)
+for installed-source, pending implementation and live-qualification boundaries.
 
 **Domain:** communication (ai_intelligence | communication | platform_integration | infrastructure | monitoring | development | foundups | gamification | blockchain)
 **Status:** POC (POC | Prototype | MVP | Production)

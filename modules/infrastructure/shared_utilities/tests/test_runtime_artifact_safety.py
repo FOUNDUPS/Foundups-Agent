@@ -65,6 +65,40 @@ def test_windows_containment_normalizes_extended_length_prefix() -> None:
     assert runtime_artifact_safety._is_relative_to(extended, ordinary) is True
 
 
+@pytest.mark.parametrize("candidate,parent,expected", [
+    ("/runtime/item", "/runtime", True),
+    ("/runtime", "/runtime", True),
+    ("/runtime-other/item", "/runtime", False),
+    ("/runtime", "/runtime/item", False),
+    ("/runtime", ".", False),
+    ("runtime/item", ".", True),
+    (".", "runtime", False),
+    (".", ".", True),
+    ("runtime/item", "/runtime", False),
+    ("/runtime/item", "runtime", False),
+    ("runtime/../item", "runtime", True),
+    ("runtime/../item", "runtime/..", True),
+    ("runtime/item", "runtime/..", False),
+    ("/runtime/item", "/", True),
+])
+def test_containment_preserves_lexical_scope(candidate, parent, expected):
+    # Resolution and no-follow checks are separate; this predicate is lexical.
+    assert runtime_artifact_safety._is_relative_to(Path(candidate), Path(parent)) is expected
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows Unicode path comparison")
+@pytest.mark.parametrize("candidate,parent", [
+    ("\u0130", "i\u0307"),
+    ("i\u0307", "\u0130"),
+    ("C:/\u0130/a", "c:/i\u0307"),
+])
+@pytest.mark.parametrize("path_type", [str, Path])
+def test_containment_preserves_windows_unicode_case(candidate, parent, path_type):
+    assert runtime_artifact_safety._is_relative_to(
+        path_type(candidate), path_type(parent)
+    ) is True
+
+
 def test_descriptor_final_path_rejects_unsupported_posix_platform(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -230,7 +264,7 @@ def test_runtime_artifact_path_rejects_windows_device_prefix(
         validate_runtime_artifact_path(path, repo_root=repo)
 
 
-def test_runtime_artifact_path_resolves_symlink_before_confinement(tmp_path: Path) -> None:
+def test_runtime_artifact_path_rejects_symlink_before_confinement(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     runtime = tmp_path / "runtime"
     outside = tmp_path / "outside"
@@ -243,7 +277,7 @@ def test_runtime_artifact_path_resolves_symlink_before_confinement(tmp_path: Pat
     except OSError:
         pytest.skip("symlink creation is unavailable")
 
-    with pytest.raises(ValueError, match="outside_runtime_root"):
+    with pytest.raises(ValueError, match="^runtime_artifact_path_link_rejected$"):
         validate_runtime_artifact_path(
             link / "receipt.jsonl",
             repo_root=repo,

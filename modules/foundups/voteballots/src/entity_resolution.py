@@ -181,9 +181,9 @@ def _validate_request(request: EntityResolutionRequest) -> Optional[str]:
             return f"Invalid office hint: {request.office_hint}. Use H, S, or P."
 
     # Validate cycle hint if provided
-    if request.cycle_hint:
-        if request.cycle_hint < 1900 or request.cycle_hint > 2100:
-            return f"Invalid cycle hint: {request.cycle_hint}. Use a valid election year."
+    year = request.cycle_hint
+    if year is not None and (type(year) is not int or not 1900 <= year <= 2100):
+        return "Invalid cycle hint. Use an integer election year from 1900 to 2100."
 
     return None
 

@@ -1,5 +1,14 @@
 # shared_utilities
 
+Legacy code/triage backend selection now uses the existing role owner for both
+the file and an explicit native key. Custom file names are never guessed into
+native IDs. The declared defaults remain configurable through scoped role keys;
+General and signed Gateway routes stay separate. Singleton factories make one
+resolution attempt, and exact native initialization retains a content-free status
+so installed-but-not-resident is not mislabeled as an unreachable server. Existing
+explicit file fallback remains operational behavior; preflight must not call
+model-initializing factories. See INTERFACE for the complete boundary.
+
 **Domain:** infrastructure (ai_intelligence | communication | platform_integration | infrastructure | monitoring | development | foundups | gamification | blockchain)
 **Status:** Prototype (POC | Prototype | MVP | Production)
 **WSP Compliance:** Compliant (Compliant | In Progress | Non-Compliant)
@@ -14,6 +23,11 @@
 - Intelligent delay calculation and throttling utilities
 - YouTube channel registry (shared rotation + scheduling metadata)
 - Cross-cutting concerns for infrastructure layer
+
+The native local chat adapter preserves explicit reasoning controls by default;
+callers selecting a model without that capability may pass `reasoning=None`
+to omit the optional field. This delegates to the server default, not a promise
+that reasoning is disabled. Existing defaults and exact instance checks remain.
 
 The local LLM adapter distinguishes installed models from exact resident
 instances through native `/api/v1/models`. Generic resolution remains

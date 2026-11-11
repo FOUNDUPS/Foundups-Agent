@@ -1,5 +1,11 @@
 # TestModLog - voice_command_ingestion
 
+## 2026-09-22 - Batch language evidence
+
+Added `test_transcript_language.py` for reported language, batch propagation,
+offsets and Unicode persistence. These use mocked inference and do not claim
+real Japanese recognition accuracy.
+
 ## 2026-09-10 — Japanese adapter and export regression coverage
 
 Inventory refreshed before extending the existing trigger/default test file.

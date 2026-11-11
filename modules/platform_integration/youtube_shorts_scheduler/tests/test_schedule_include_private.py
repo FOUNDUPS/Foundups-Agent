@@ -10,9 +10,10 @@ Proves the flag-gated PRIVATE pass on YouTubeShortsScheduler.run_scheduling_cycl
   * the edit-page visibility guard ACCEPTS "private" only when the private pass
     is active, and still REJECTS it on the unlisted pass.
 
-NO live browser: self.driver / self.dom / self.tracker are mocks. The scheduler
-is built with __new__ so __init__ (which connects config) is bypassed and only the
-attributes the cycle touches are wired by hand.
+NO live browser: driver/DOM are synthetic; preview uses an inert tracker and live
+scope fixtures use the real tracker in a disposable canonical directory with a
+synthetic qualified calendar. The scheduler is built with __new__ so __init__
+(which connects config) is bypassed. Submission remains unknown, not verified.
 
 NON-VACUITY: test_flag_off_never_navigates_private FAILS if the PRIVATE pass runs
 while the flag is off (it asserts navigate is NEVER called with PRIVATE). Reverting
@@ -22,6 +23,8 @@ _resolve_visibility_targets to always include PRIVATE makes that test fail.
 import asyncio
 import logging
 import os
+from types import SimpleNamespace
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -41,6 +44,7 @@ class _FakeTracker:
     def __init__(self):
         self.increments = []
         self._scheduled_ids = set()
+        self.reservations = {}
         self._n = 0
 
     def log_schedule_report(self):
@@ -99,6 +103,18 @@ class _RecordingDOM:
         return list(self._unlisted)
 
     # --- edit page / scheduling ---
+    def begin_policy_cycle(self):
+        self._policy_cycle_attempts = 0
+
+    def begin_policy_edit(self, channel_id, video_id, *, allow_metadata=True):
+        assert channel_id == "UC" + "a" * 22
+        self.session = SimpleNamespace(channel_id=channel_id, video_id=video_id,
+                                       original={"title": "Authoritative detail title", "description": "Detail body"})
+        return self.session
+
+    def _policy_edit(self):
+        return self.session
+
     def navigate_to_video(self, video_id):
         pass
 
@@ -106,6 +122,12 @@ class _RecordingDOM:
         return self._edit_vis
 
     def schedule_video(self, date_str, time_str):
+        self._policy_before_schedule_submit(self.session)
+        # Distinct production boundaries: reserve first, then enter submission.
+        self._policy_on_schedule_submitting(self.session)
+        return True
+
+    def schedule_editor_clean_after_submit(self):
         return True
 
     def human_delay(self, base, variance):
@@ -136,16 +158,35 @@ class _FakeDriver:
 def _make_scheduler(unlisted_rows, private_rows, dry_run=True, edit_vis="unlisted"):
     s = YouTubeShortsScheduler.__new__(YouTubeShortsScheduler)
     s.channel_key = "move2japan"
-    s.channel_id = "UC_TEST"
+    s.channel_id = "UC" + "a" * 22
     s.channel_name = "TestChannel"
-    s.channel_tz = None
+    s.channel_tz = "America/New_York"
     s.time_slots = ["5:30 AM"]
     s.max_per_day = 3
     s.dry_run = dry_run
-    s.tracker = _FakeTracker()
+    if dry_run:
+        s.tracker = _FakeTracker()
+    else:
+        # Scope tests use real persistence/reservations in a patched disposable
+        # canonical directory. Inventory parsing has separate owner fixtures.
+        from modules.platform_integration.youtube_shorts_scheduler.src.schedule_tracker import ScheduleTracker
+        s.tracker = ScheduleTracker(s.channel_id)
+        async def fresh_empty_calendar():
+            from modules.platform_integration.youtube_shorts_scheduler.src.schedule_inventory import collect_scheduled_inventory
+            page = {'channel_id': s.channel_id,
+                'url': f'https://studio.youtube.com/channel/{s.channel_id}/videos/short',
+                'chip_texts': ['Has schedule'], 'search_text': '', 'loading': False,
+                'empty': True, 'previous_page': False, 'next_page': False, 'rows': []}
+            inventory_dom = SimpleNamespace(driver=SimpleNamespace(execute_script=lambda _: page))
+            inventory = collect_scheduled_inventory(inventory_dom, s.channel_id)
+            assert s.tracker.sync_from_youtube([], inventory=inventory)
+            s.tracker.bind_calendar_timezone(s.channel_tz)
+            return True
+        s._sync_scheduled_videos = AsyncMock(side_effect=fresh_empty_calendar)
     dom = _RecordingDOM(unlisted_rows, private_rows, edit_vis=edit_vis)
     s.dom = dom
     s.driver = _FakeDriver(dom, private_rows)
+    dom.driver = s.driver
     # ensure_healthy_connection() is called at cycle start; force it healthy.
     s.ensure_healthy_connection = lambda: True
     return s
@@ -156,7 +197,10 @@ def _run(s, **kwargs):
 
 
 @pytest.fixture(autouse=True)
-def _clear_flag(monkeypatch):
+def _clear_flag(monkeypatch, tmp_path):
+    monkeypatch.setattr('modules.platform_integration.youtube_shorts_scheduler.src.schedule_tracker.TRACKER_DIR', tmp_path / 'calendar')
+    monkeypatch.setenv('YT_AUTOMATION_STOP_FILE', str(tmp_path / 'STOP'))
+    monkeypatch.setenv('YT_AUTOMATION_ENABLED', 'true')
     monkeypatch.delenv("YT_SCHEDULE_INCLUDE_PRIVATE", raising=False)
     # Keep optional side-channels off for deterministic mock runs.
     monkeypatch.delenv("YT_SCHEDULER_DO_SYNC", raising=False)
@@ -192,8 +236,8 @@ def test_resolve_targets_flag_non_one_is_off(monkeypatch):
 
 def test_flag_off_runs_only_unlisted_pass():
     s = _make_scheduler(
-        unlisted_rows=[{"video_id": "u1", "title": "U one"}],
-        private_rows=[{"video_id": "p1", "title": "P one"}],
+        unlisted_rows=[{"video_id": "u0000000001", "title": "U one"}],
+        private_rows=[{"video_id": "p0000000001", "title": "P one"}],
     )
     results = _run(s)
     assert results["visibility_targets"] == ["UNLISTED"]
@@ -206,8 +250,8 @@ def test_flag_off_never_navigates_private():
     """MUST-FAIL guard: if the private pass ever runs while the flag is off,
     navigate would be called with 'PRIVATE' and this assertion fails."""
     s = _make_scheduler(
-        unlisted_rows=[{"video_id": "u1", "title": "U one"}],
-        private_rows=[{"video_id": "p1", "title": "P one"}],
+        unlisted_rows=[{"video_id": "u0000000001", "title": "U one"}],
+        private_rows=[{"video_id": "p0000000001", "title": "P one"}],
     )
     _run(s)
     assert s.dom.navigate_calls.count("PRIVATE") == 0
@@ -215,13 +259,13 @@ def test_flag_off_never_navigates_private():
 
 def test_flag_off_no_private_scheduled():
     s = _make_scheduler(
-        unlisted_rows=[{"video_id": "u1", "title": "U one"}],
-        private_rows=[{"video_id": "p1", "title": "P one"}],
+        unlisted_rows=[{"video_id": "u0000000001", "title": "U one"}],
+        private_rows=[{"video_id": "p0000000001", "title": "P one"}],
     )
     results = _run(s)
     scheduled_ids = {v["video_id"] for v in results["scheduled"]}
-    assert scheduled_ids == {"u1"}
-    assert "p1" not in scheduled_ids
+    assert scheduled_ids == {"u0000000001"}
+    assert "p0000000001" not in scheduled_ids
 
 
 # ---------------------------------------------------------------------------
@@ -231,22 +275,22 @@ def test_flag_off_no_private_scheduled():
 def test_flag_on_runs_both_passes(monkeypatch):
     monkeypatch.setenv("YT_SCHEDULE_INCLUDE_PRIVATE", "1")
     s = _make_scheduler(
-        unlisted_rows=[{"video_id": "u1", "title": "U one"}],
-        private_rows=[{"video_id": "p1", "title": "P one"}],
+        unlisted_rows=[{"video_id": "u0000000001", "title": "U one"}],
+        private_rows=[{"video_id": "p0000000001", "title": "P one"}],
     )
     results = _run(s)
     assert results["visibility_targets"] == ["UNLISTED", "PRIVATE"]
     assert "UNLISTED" in s.dom.navigate_calls
     assert "PRIVATE" in s.dom.navigate_calls
     scheduled_ids = {v["video_id"] for v in results["scheduled"]}
-    assert {"u1", "p1"} <= scheduled_ids
+    assert {"u0000000001", "p0000000001"} <= scheduled_ids
 
 
 def test_flag_on_private_to_public_log_fires(monkeypatch, caplog):
     monkeypatch.setenv("YT_SCHEDULE_INCLUDE_PRIVATE", "1")
     s = _make_scheduler(
-        unlisted_rows=[{"video_id": "u1", "title": "U one"}],
-        private_rows=[{"video_id": "p1", "title": "P one"}],
+        unlisted_rows=[{"video_id": "u0000000001", "title": "U one"}],
+        private_rows=[{"video_id": "p0000000001", "title": "P one"}],
     )
     with caplog.at_level(logging.WARNING):
         _run(s)
@@ -255,18 +299,18 @@ def test_flag_on_private_to_public_log_fires(monkeypatch, caplog):
         if r.getMessage().startswith("[PRIVATE->PUBLIC]")
     ]
     assert len(breadcrumbs) == 1, breadcrumbs
-    assert "p1" in breadcrumbs[0]
+    assert "p0000000001" in breadcrumbs[0]
     # No breadcrumb for the unlisted video.
-    assert all("u1" not in b for b in breadcrumbs)
+    assert all("u0000000001" not in b for b in breadcrumbs)
 
 
 def test_flag_on_log_fires_once_per_private_video(monkeypatch, caplog):
     monkeypatch.setenv("YT_SCHEDULE_INCLUDE_PRIVATE", "1")
     s = _make_scheduler(
-        unlisted_rows=[{"video_id": "u1", "title": "U one"}],
+        unlisted_rows=[{"video_id": "u0000000001", "title": "U one"}],
         private_rows=[
-            {"video_id": "p1", "title": "P one"},
-            {"video_id": "p2", "title": "P two"},
+            {"video_id": "p0000000001", "title": "P one"},
+            {"video_id": "p0000000002", "title": "P two"},
         ],
     )
     with caplog.at_level(logging.WARNING):
@@ -276,7 +320,7 @@ def test_flag_on_log_fires_once_per_private_video(monkeypatch, caplog):
         if r.getMessage().startswith("[PRIVATE->PUBLIC]")
     ]
     assert len(breadcrumbs) == 2
-    assert {"p1", "p2"} == {b.split()[1] for b in breadcrumbs}
+    assert {"p0000000001", "p0000000002"} == {b.split()[1] for b in breadcrumbs}
 
 
 # ---------------------------------------------------------------------------
@@ -289,16 +333,18 @@ def test_edit_guard_accepts_private_on_private_pass(monkeypatch):
     monkeypatch.setenv("YT_SCHEDULE_INCLUDE_PRIVATE", "1")
     s = _make_scheduler(
         unlisted_rows=[],  # skip straight to the private pass
-        private_rows=[{"video_id": "p1", "title": "P one"}],
+        private_rows=[{"video_id": "p0000000001", "title": "P one"}],
         dry_run=False,
         edit_vis="private",
     )
     results = _run(s)
-    scheduled_ids = {v["video_id"] for v in results["scheduled"]}
-    assert "p1" in scheduled_ids
+    assert results['submitted_ids'] == ['p0000000001']
+    assert results['scheduled'] == [] and results['status'] == 'unknown'
+    assert results['saved_state_verified'] is False
+    s._sync_scheduled_videos.assert_awaited_once()
     # Not rejected as wrong visibility.
     assert not any(
-        sk.get("video_id") == "p1" and "Wrong visibility" in sk.get("reason", "")
+        sk.get("video_id") == "p0000000001" and "Wrong visibility" in sk.get("reason", "")
         for sk in results["skipped"]
     )
 
@@ -307,15 +353,15 @@ def test_edit_guard_rejects_private_on_unlisted_pass():
     """Non-dry-run, flag OFF: a video that reads 'private' on the edit page during
     the UNLISTED pass is still rejected as wrong visibility (guard NOT relaxed)."""
     s = _make_scheduler(
-        unlisted_rows=[{"video_id": "u1", "title": "U one"}],
+        unlisted_rows=[{"video_id": "u0000000001", "title": "U one"}],
         private_rows=[],
         dry_run=False,
         edit_vis="private",  # edit page disagrees with the unlisted list filter
     )
     results = _run(s)
     scheduled_ids = {v["video_id"] for v in results["scheduled"]}
-    assert "u1" not in scheduled_ids
+    assert "u0000000001" not in scheduled_ids
     assert any(
-        sk.get("video_id") == "u1" and "Wrong visibility" in sk.get("reason", "")
+        sk.get("video_id") == "u0000000001" and "Wrong visibility" in sk.get("reason", "")
         for sk in results["skipped"]
     )

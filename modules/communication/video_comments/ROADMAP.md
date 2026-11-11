@@ -1,5 +1,10 @@
 # Video Comments - ROADMAP
 
+> PR1478 reconciliation (2026-10-23): 53 focused offline cases and 116 adjacent
+> command/context cases pass locally; publication checks remain separate.
+> Historical completion/live-test labels below are not current deployment,
+> provider admission, or native RSI evidence. See tests/TestModLog.md.
+
 **Module:** communication/video_comments
 **WSP Reference:** WSP 22 (Module Roadmap Protocol)
 
@@ -18,7 +23,7 @@ Transform YouTube comment engagement from manual interaction to fully autonomous
 | A1 | ✅ | Basic comment retrieval (API) |
 | A2 | ✅ | Comment monitoring DAE |
 | A3 | ✅ | Browser automation (Like/Heart/Reply) |
-| A4 | ✅ | Intelligent reply system (Grok + Whack-a-MAGA) |
+| A4 | ✅ | Grounded local-Qwen reply system + classified response skills |
 | A5 | ✅ | YouTube DAE integration (Phase 3A/3B) |
 | **A6** | 🚧 | Unlimited engagement + Vision stream detection |
 | A7 | 🔮 | Cross-platform engagement intelligence |
@@ -59,8 +64,10 @@ Transform YouTube comment engagement from manual interaction to fully autonomous
 - [x] TROLL_RESPONSES for MAGA trolls (Whack-a-MAGA style)
 - [x] SUBSCRIBER_RESPONSES for subscribers
 - [x] Digital Twin drafting + decisioning (primary)
-- [x] Grok LLM for contextual replies (secondary)
-- [x] Qwen/LM Studio fallback
+- [x] LM Studio/general-Qwen contextual route (primary)
+- [x] Embedded general-Qwen fallback
+- [x] Grok removed from the default route; explicit legacy opt-in only
+- [ ] Provider-neutral RedDog/OpenRouter reply runner using daemon policy, signed runtime/model binding, and durable call evidence (no per-call 012 approval)
 - [x] Pattern responses (song → #FFCPLN, FFCPLN → ICE promo)
 - [x] Emoji-to-emoji replies (✊✋🖐️ sequences)
 
@@ -69,6 +76,14 @@ Transform YouTube comment engagement from manual interaction to fully autonomous
 - [x] DAE updated with `use_intelligent_reply` flag
 - [x] Tested with live YouTube Studio
 - [x] No @Unknown in replies
+
+### 2.4 Per-Comment Context Integrity ✅
+- [x] Extract video title/ID/URL from each YouTube Studio inbox row
+- [x] Forward target channel ID for channel-personality routing
+- [x] Preserve original comment when semantic guidance is added
+- [x] Query verified VoiceMemory with video title plus comment
+- [x] Capture each generation with its provider or content-aware strategy label; discarded model drafts cannot credit replacement text
+- [x] Skip generic template posting by default when grounded generation fails
 
 **Artifacts:**
 - `src/intelligent_reply_generator.py`

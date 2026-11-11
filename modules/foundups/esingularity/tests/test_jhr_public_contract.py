@@ -32,6 +32,40 @@ def test_jhr_001_is_updated_in_place_japanese_first_and_bilingual() -> None:
     assert "candidate status, operator intent" in page
 
 
+def test_jhr_003_is_latest_japanese_only() -> None:
+    layout = read(FRONTEND_ROOT / "app" / "reports" / "jhr" / "layout.tsx")
+    assert 'id="jhr-003"' in layout
+    assert layout.index('id="jhr-003"') < layout.index('id="jhr-002"')
+    latest = layout.split('id="jhr-003"', 1)[1].split('id="jhr-002"', 1)[0]
+    assert "誰が日本の「AI田んぼ」を持つのか" in latest
+    assert "廃校7,612校" in latest
+    assert "旧下宇坂小学校" in latest and "旧羽生小学校" in latest
+    assert "/jhr/jhr-003-ai-rice-fields.svg" in latest
+    assert "/jhr/jhr-003-hanyu-grid-field.svg" in latest
+    assert 'lang="en"' not in latest
+    assert "ENGLISH / SECONDARY" not in latest
+    assert "Digital Future構想" not in latest
+    assert "The Intelligence Age Must Be Built Right" not in latest
+    assert "The AI Company Founding Thesis" not in latest
+    assert (FRONTEND_ROOT / "public" / "jhr" / "jhr-003-ai-rice-fields.svg").is_file()
+    assert (FRONTEND_ROOT / "public" / "jhr" / "jhr-003-hanyu-grid-field.svg").is_file()
+
+
+def test_jhr_primary_metadata_follows_latest_rendered_issue() -> None:
+    """Prevent the archived JHR #001 page from overriding JHR #003 title/OG."""
+    reader = FRONTEND_ROOT / "app" / "reports" / "jhr"
+    page = read(reader / "page.tsx")
+    layout = read(reader / "layout.tsx")
+    assert 'id="jhr-003"' in layout
+    assert 'title: "JHR #003' in layout
+    assert 'alternates: { canonical: "https://esingularity.ai/reports/jhr" }' in layout
+    assert 'url: "https://esingularity.ai/reports/jhr"' in layout
+    assert 'type: "article"' in layout
+    # Page-level metadata overrides parent layouts in Next/Vinext. Keep single owner.
+    assert "export const metadata" not in page
+    assert "Japan Hyperscaler Report #001 | eSingularity" not in page
+
+
 def test_live_field_status_has_one_canonical_source_for_the_campaign_ticker() -> None:
     status = json.loads(read(FRONTEND_ROOT / "content" / "current-field-status.json"))
     ticker = read(FRONTEND_ROOT / "components" / "CampaignTicker.tsx")
@@ -52,7 +86,7 @@ def test_live_field_status_has_one_canonical_source_for_the_campaign_ticker() ->
     assert "https://esingularity.ai/${action.href}" in ticker
     assert "fieldStatus.message" in ticker
     assert "label: { ja: 'JHR', en: 'JHR', pt: 'JHR' }" in ticker
-    assert "href: '/reports/jhr#jhr-002'" in ticker
+    assert "href: '/reports/jhr#jhr-003'" in ticker
     assert "https://yumori.me/vote-no#council" in ticker
     assert "https://yumori.me/vote-no#mayor" in ticker
     assert "Monkとつながる" not in ticker
@@ -105,4 +139,4 @@ def test_jhr_is_visibly_reachable_across_esingularity_and_yumori_panels() -> Non
     assert project_page.count('href="/reports/jhr') >= 3
     assert "JHR・最新レポート" in project_page
     assert "const JHR_URL = '/reports/jhr'" in movement_page
-    assert "JAPAN HYPERSCALER REPORTを読む" in movement_page
+    assert "ジャパン・ハイパースケーラー・レポート（JHR）を読む" in movement_page

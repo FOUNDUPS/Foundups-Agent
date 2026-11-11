@@ -23,7 +23,7 @@ import os
 import time
 import logging
 from typing import Dict, List, Optional, Any
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import requests
 
 # Import model registry for centralized model management
@@ -56,7 +56,7 @@ class GatewayResult:
 class ProviderConfig:
     """Configuration for AI provider"""
     name: str
-    api_key: Optional[str]
+    api_key: Optional[str] = field(repr=False)
     base_url: str
     models: Dict[str, str]  # task_type -> model_name
     cost_per_token: float
@@ -64,6 +64,28 @@ class ProviderConfig:
     timeout: int = 30
     output_cost_per_token: float = 0.0
     automatic_routing_enabled: bool = True
+
+
+def _post_openai_request(provider: ProviderConfig, headers: dict, data: dict):
+    """Keep OpenRouter credentials and upstream diagnostics at this transport."""
+    try:
+        response = requests.post(
+            f"{provider.base_url}/chat/completions",
+            headers=headers,
+            json=data,
+            timeout=provider.timeout,
+            **({'allow_redirects': False} if provider.name == 'openrouter' else {}),
+        )
+        if provider.name == 'openrouter' and 300 <= getattr(response, 'status_code', 200) < 400:
+            raise requests.HTTPError('openrouter_redirect_rejected')
+        response.raise_for_status()
+        return response
+    except requests.RequestException as exc:
+        if provider.name != 'openrouter':
+            raise
+        # Preserve timeout classification without retaining raw request details.
+        error_type = requests.Timeout if isinstance(exc, requests.Timeout) else requests.RequestException
+        raise error_type('openrouter_request_failed') from None
 
 
 class AIGateway:
@@ -96,6 +118,17 @@ class AIGateway:
         }
 
         logger.info(f"[AI-GATEWAY] Initialized with {len([p for p in self.providers.values() if p.api_key])} active providers")
+
+    def call_youtube_task(self, *, system_prompt: str, prompt: str, stage: str,
+                          surface: str = 'comments', max_tokens: int = 400,
+                          response_format: Optional[dict] = None, cancel_event=None):
+        """Use the shared, task-scoped YouTube route; never generic fallback."""
+        from .youtube_model_routing import call_youtube_task
+        return call_youtube_task(
+            self, system_prompt=system_prompt, prompt=prompt, stage=stage,
+            surface=surface, max_tokens=max_tokens,
+            response_format=response_format, cancel_event=cancel_event,
+        )
 
     def _get_env_int(self, name: str, default: int) -> int:
         """Read an int from env with a safe fallback."""
@@ -513,13 +546,7 @@ class AIGateway:
         else:
             data['temperature'] = self._get_provider_temperature(provider.name, 0.7)
 
-        response = requests.post(
-            f"{provider.base_url}/chat/completions",
-            headers=headers,
-            json=data,
-            timeout=provider.timeout
-        )
-        response.raise_for_status()
+        response = _post_openai_request(provider, headers, data)
 
         result = response.json()
         return result['choices'][0]['message']['content'].strip()

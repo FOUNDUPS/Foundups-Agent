@@ -1,0 +1,2 @@
+# Preserve the public Site import byte-for-byte, including its existing line endings.
+site/** -text whitespace=cr-at-eol

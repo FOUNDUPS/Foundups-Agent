@@ -62,6 +62,10 @@ from modules.communication.livechat.src.rotation_checkpoint import (
     clear_checkpoint,
     get_remaining_channels,
 )
+from modules.communication.livechat.src.engagement_runner import (
+    _await_owned_completion,
+    _finish_subprocess,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +97,7 @@ class TaskState(Enum):
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
+    HALTED = "halted"
     TIMEOUT = "timeout"
     FAILED = "failed"
     KILLED = "killed"
@@ -148,6 +153,7 @@ class RotationResult:
     total_scheduled: int
     failed_channels: List[str]
     elapsed_seconds: float
+    halted: bool = False
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -157,6 +163,7 @@ class RotationResult:
             "total_scheduled": self.total_scheduled,
             "failed_channels": self.failed_channels,
             "elapsed_seconds": round(self.elapsed_seconds, 1),
+            "halted": self.halted,
         }
 
 
@@ -196,6 +203,7 @@ class RotationSupervisor:
         heartbeat_interval: float = 5.0,
         heartbeat_timeout: float = 60.0,
         task_timeout: float = 300.0,  # 5 min per channel (NOT 1 hour!)
+        get_confirmed_live_channel: Optional[Callable[[], Optional[str]]] = None,
     ):
         """
         Initialize rotation supervisor.
@@ -205,14 +213,18 @@ class RotationSupervisor:
             heartbeat_interval: Seconds between heartbeat checks
             heartbeat_timeout: Seconds without heartbeat before killing task
             task_timeout: Max seconds per channel task (hard timeout)
+            get_confirmed_live_channel: Current confirmed DAE session channel, if any
         """
         self.browser = browser
         self.browser_port = self.BROWSER_PORTS.get(browser, 9222)
         self.heartbeat_interval = heartbeat_interval
         self.heartbeat_timeout = heartbeat_timeout
         self.task_timeout = task_timeout
+        self.get_confirmed_live_channel = get_confirmed_live_channel
 
         self._active_tasks: Dict[str, TaskHeartbeat] = {}
+        self._owned_tasks: Dict[str, asyncio.Task] = {}
+        self._handoff_tasks = set()
         self._rotation_id = f"rot_{int(time.time())}"
 
         # Heartbeat file for subprocess communication
@@ -267,6 +279,112 @@ class RotationSupervisor:
             if token in {name, key, channel_id.lower()} and channel_id:
                 return channel_id
         return channel
+
+    def _is_live_channel(self, channel: str) -> bool:
+        """Protect confirmed session identity independently of the file signal TTL."""
+        channel_id = self._resolve_channel_id(channel)
+        if self.get_confirmed_live_channel:
+            confirmed = self.get_confirmed_live_channel()
+            if confirmed and self._resolve_channel_id(confirmed) == channel_id:
+                return True
+        try:
+            from modules.platform_integration.stream_resolver.src.live_stream_signal import get_live_channel
+        except ImportError:
+            return False
+        live_channel = get_live_channel()
+        return bool(live_channel and self._resolve_channel_id(live_channel) == channel_id)
+
+    async def settle_channel(self, channel_id: str) -> None:
+        """Cancel only the selected channel and wait for its complete child cleanup."""
+        task = self._owned_tasks.get(self._resolve_channel_id(channel_id))
+        if task is None:
+            return
+        if not task.done():
+            self._handoff_tasks.add(task)
+            task.cancel()
+        if await _await_owned_completion(task):
+            raise asyncio.CancelledError()
+        if not task.cancelled():
+            task.result()  # Do not report successful settlement after cleanup failed.
+        if self._channel_cleanup_pending(self._resolve_channel_id(channel_id)):
+            raise RuntimeError("Channel cleanup did not settle")
+
+    async def _run_channel_task(self, channel, operation, max_items, admitted):
+        """Own spawn, monitoring and cleanup as one channel-specific invocation."""
+        await admitted.wait()
+        heartbeat = None
+        try:
+            heartbeat = await self._spawn_task(channel, operation, max_items)
+            state = heartbeat.state
+            if state not in (TaskState.FAILED, TaskState.HALTED):
+                state = await self._monitor_task(heartbeat)
+            return heartbeat, state
+        finally:
+            if heartbeat is not None:
+                try:
+                    await self._kill_task(heartbeat)
+                finally:
+                    if self._cleanup_settled(heartbeat):
+                        self._active_tasks.pop(heartbeat.task_id, None)
+
+    def _cleanup_settled(self, heartbeat) -> bool:
+        """Only successful cleanup authorizes dropping a child's ownership record."""
+        cleanup = getattr(heartbeat, '_cleanup_task', None)
+        if cleanup is None:
+            return getattr(heartbeat, '_spawn_task', None) is None
+        return cleanup.done() and not cleanup.cancelled() and cleanup.exception() is None
+
+    def _channel_cleanup_pending(self, channel_id) -> bool:
+        """A cancelled owner still retains any child whose cleanup is unproved."""
+        return any(
+            self._resolve_channel_id(heartbeat.channel) == channel_id
+            and not self._cleanup_settled(heartbeat)
+            for heartbeat in self._active_tasks.values()
+        )
+
+    async def _await_channel_task(self, task):
+        """Keep targeted child cancellation distinct from parent shutdown."""
+        cancellation_count = asyncio.current_task().cancelling()
+        try:
+            return await asyncio.shield(task)
+        except asyncio.CancelledError:
+            parent_cancelled = asyncio.current_task().cancelling() > cancellation_count
+            if parent_cancelled:
+                task.cancel()
+            parent_cancelled |= await _await_owned_completion(task)
+            if parent_cancelled or task not in self._handoff_tasks:
+                raise
+            return None
+
+    async def _dispatch_channel(self, channel, operation, max_items):
+        """Admit one owned invocation without replacing unresolved channel work."""
+        from modules.communication.livechat.src.automation_gates import comment_stop_result
+        if operation == OperationType.COMMENTS and comment_stop_result():
+            heartbeat = TaskHeartbeat('comments-halted', channel, operation, state=TaskState.HALTED)
+            return heartbeat, TaskState.HALTED
+        channel_id = self._resolve_channel_id(channel)
+        prior = self._owned_tasks.get(channel_id)
+        if prior is not None:
+            if not prior.done():
+                raise RuntimeError("Channel operation is already owned")
+            if not prior.cancelled() and prior.exception() is not None:
+                raise RuntimeError("Prior channel operation has unresolved cleanup") from prior.exception()
+            if self._channel_cleanup_pending(channel_id):
+                raise RuntimeError("Prior channel operation has unresolved cleanup")
+        if self._is_live_channel(channel):
+            logger.info(f"[{self.browser.upper()}-ROTATION] {channel} deferred for live session")
+            return None
+        admitted = asyncio.Event()
+        owned = asyncio.create_task(self._run_channel_task(channel, operation, max_items, admitted))
+        self._owned_tasks[channel_id] = owned
+        admitted.set()
+        try:
+            return await self._await_channel_task(owned)
+        finally:
+            if (owned.done() and (owned.cancelled() or owned.exception() is None)
+                    and not self._channel_cleanup_pending(channel_id)):
+                self._owned_tasks.pop(channel_id, None)
+            self._handoff_tasks.discard(owned)
 
     def _check_escalation(self, operation: str) -> None:
         """
@@ -370,6 +488,9 @@ class RotationSupervisor:
         max_items: int = 10,
     ) -> TaskHeartbeat:
         """Spawn a CLI task and return heartbeat tracker."""
+        from modules.communication.livechat.src.automation_gates import comment_stop_result
+        if operation == OperationType.COMMENTS and comment_stop_result():
+            return TaskHeartbeat('comments-halted', channel, operation, state=TaskState.HALTED)
         cmd, task_id, heartbeat_file = self._build_task_command(channel, operation, max_items)
 
         heartbeat = TaskHeartbeat(
@@ -385,28 +506,47 @@ class RotationSupervisor:
 
         logger.info(f"[SUPERVISOR] Spawning task: {task_id}")
         logger.debug(f"[SUPERVISOR] Command: {' '.join(cmd)}")
-
+        self._active_tasks[task_id] = heartbeat
         try:
-            process = await asyncio.create_subprocess_exec(
-                *cmd,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-                cwd=str(Path(__file__).parent.parent.parent.parent.parent),
-            )
-            heartbeat.pid = process.pid
-            logger.info(f"[SUPERVISOR] Task spawned (PID: {process.pid})")
-
-            # Store process reference for killing
-            heartbeat._process = process
-            heartbeat._heartbeat_file = heartbeat_file
-
+            await self._start_process(heartbeat, cmd, heartbeat_file)
+        except asyncio.CancelledError:
+            try:
+                await self._kill_task(heartbeat)
+            finally:
+                if self._cleanup_settled(heartbeat):
+                    self._active_tasks.pop(task_id, None)
+            raise
         except Exception as e:
+            await self._kill_task(heartbeat)
             heartbeat.state = TaskState.FAILED
             heartbeat.error = str(e)
             logger.error(f"[SUPERVISOR] Failed to spawn task: {e}")
 
-        self._active_tasks[task_id] = heartbeat
         return heartbeat
+
+    async def _start_process(self, heartbeat, cmd, heartbeat_file):
+        """Keep the spawning handle and pipe readers attached to the registered child."""
+        heartbeat._drain_tasks = []
+        heartbeat._wait_task = None
+        heartbeat._spawn_task = asyncio.create_task(asyncio.create_subprocess_exec(
+            *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+            cwd=str(Path(__file__).parent.parent.parent.parent.parent),
+        ))
+        process = await asyncio.shield(heartbeat._spawn_task)
+        heartbeat.pid = process.pid
+        logger.info(f"[SUPERVISOR] Task spawned (PID: {process.pid})")
+        heartbeat._process = process
+        heartbeat._heartbeat_file = heartbeat_file
+        heartbeat._drain_tasks = [
+            asyncio.create_task(self._drain_task_stream(process.stdout)),
+            asyncio.create_task(self._drain_task_stream(process.stderr)),
+        ]
+        heartbeat._wait_task = asyncio.create_task(process.wait())
+
+    async def _drain_task_stream(self, stream) -> None:
+        """Consume bounded chunks so a noisy child cannot block on a full pipe."""
+        while await stream.read(65536):
+            pass
 
     async def _read_heartbeat_file(self, heartbeat: TaskHeartbeat) -> bool:
         """Read heartbeat progress from file (subprocess writes this)."""
@@ -437,7 +577,12 @@ class RotationSupervisor:
             # Check if process completed
             if process.returncode is not None:
                 elapsed = time.time() - start_time
-                if process.returncode == 0:
+                from modules.communication.livechat.src.automation_gates import COMMENTS_HALTED_EXIT_CODE, comment_stop_result
+                if heartbeat.operation == OperationType.COMMENTS and (
+                        process.returncode == COMMENTS_HALTED_EXIT_CODE or comment_stop_result()):
+                    heartbeat.state = TaskState.HALTED
+                    heartbeat.error = 'comments_halted'
+                elif process.returncode == 0:
                     heartbeat.state = TaskState.COMPLETED
                     logger.info(f"[SUPERVISOR] Task completed: {heartbeat.channel} ({elapsed:.1f}s)")
                 else:
@@ -473,7 +618,7 @@ class RotationSupervisor:
             # Wait before next ping
             try:
                 await asyncio.wait_for(
-                    process.wait(),
+                    asyncio.shield(heartbeat._wait_task),
                     timeout=self.heartbeat_interval,
                 )
                 # Process completed during wait
@@ -483,24 +628,20 @@ class RotationSupervisor:
                 pass
 
     async def _kill_task(self, heartbeat: TaskHeartbeat):
-        """Forcefully terminate a hung task."""
-        process = getattr(heartbeat, '_process', None)
-        if not process:
-            return
-
-        pid = heartbeat.pid
-        logger.info(f"[SUPERVISOR] Killing task (PID: {pid})")
-
-        try:
-            process.terminate()
-            await asyncio.sleep(2)
-            if process.returncode is None:
-                process.kill()
-                logger.info(f"[SUPERVISOR] Task killed (SIGKILL)")
-        except ProcessLookupError:
-            logger.debug(f"[SUPERVISOR] Process already exited")
-        except Exception as e:
-            logger.error(f"[SUPERVISOR] Kill failed: {e}")
+        """Terminate if needed, reap the child, and settle its pipe readers."""
+        cleanup = getattr(heartbeat, '_cleanup_task', None)
+        if cleanup is None:
+            spawn = getattr(heartbeat, '_spawn_task', None)
+            if spawn is None:
+                return
+            cleanup = asyncio.create_task(_finish_subprocess(
+                spawn, heartbeat._drain_tasks, heartbeat._wait_task,
+            ))
+            heartbeat._cleanup_task = cleanup
+        cancelled = await _await_owned_completion(cleanup)
+        cleanup.result()
+        if cancelled:
+            raise asyncio.CancelledError()
 
     async def run_rotation(
         self,
@@ -530,13 +671,18 @@ class RotationSupervisor:
 
         # G2: Load checkpoint for crash recovery
         checkpoint = load_checkpoint()
+        previously_processed = set()
         if checkpoint and checkpoint.get("browser") == self.browser and checkpoint.get("operation") == operation.value:
             # Resume from checkpoint
             channels = get_remaining_channels(channels, checkpoint)
             cycle_started_at = checkpoint.get("cycle_started_at", cycle_started_at)
+            previously_processed.update(checkpoint.get("processed_channels", []))
 
         channels_processed = []
         failed_channels = []
+        deferred_channels = []
+        from modules.communication.livechat.src.automation_gates import comment_stop_result
+        comments_halted = operation == OperationType.COMMENTS and bool(comment_stop_result())
         total_comments = 0
         total_scheduled = 0
 
@@ -549,6 +695,10 @@ class RotationSupervisor:
         logger.info("=" * 60)
 
         for idx, channel in enumerate(channels, 1):
+            from modules.communication.livechat.src.automation_gates import comment_stop_result
+            if comments_halted or (operation == OperationType.COMMENTS and comment_stop_result()):
+                comments_halted = True
+                break
             # G5: Cycle watchdog - check if cycle has exceeded max duration
             elapsed_hours = (time.time() - rotation_start) / 3600
             if elapsed_hours > MAX_CYCLE_DURATION_HOURS:
@@ -580,16 +730,20 @@ class RotationSupervisor:
             logger.info(f"[{tag}-ROTATION] [{idx}/{len(channels)}] {channel}")
             logger.info("-" * 40)
 
-            # Spawn task
-            heartbeat = await self._spawn_task(channel, operation, max_items_per_channel)
+            outcome = await self._dispatch_channel(channel, operation, max_items_per_channel)
+            if outcome is None:
+                deferred_channels.append(channel)
+                continue
+            heartbeat, final_state = outcome
+            if final_state == TaskState.HALTED:
+                comments_halted = True
+                logger.warning('[ROTATION] Comments halted; preserving unfinished checkpoint')
+                break
 
             if heartbeat.state == TaskState.FAILED:
                 failed_channels.append(channel)
                 logger.error(f"[{tag}-ROTATION] {channel} FAILED to spawn: {heartbeat.error}")
                 continue
-
-            # Monitor until done/timeout/killed
-            final_state = await self._monitor_task(heartbeat)
 
             if final_state in (TaskState.COMPLETED,):
                 channels_processed.append(channel)
@@ -615,7 +769,7 @@ class RotationSupervisor:
             # G2: Save checkpoint after each channel for crash recovery
             save_checkpoint(
                 browser=self.browser,
-                processed_channels=set(channels_processed),
+                processed_channels=previously_processed | set(channels_processed),
                 current_channel=None,
                 operation=operation.value,
                 cycle_started_at=cycle_started_at,
@@ -631,24 +785,33 @@ class RotationSupervisor:
             total_scheduled=total_scheduled,
             failed_channels=failed_channels,
             elapsed_seconds=elapsed,
+            halted=comments_halted,
         )
 
         logger.info("")
         logger.info("=" * 60)
-        logger.info(f"[{tag}-ROTATION] COMPLETE")
+        logger.info(f"[{tag}-ROTATION] FINISHED")
         logger.info(f"[{tag}-ROTATION] Channels: {len(channels_processed)}/{len(channels)} successful")
         logger.info(f"[{tag}-ROTATION] Comments: {total_comments}")
         logger.info(f"[{tag}-ROTATION] Time: {elapsed:.1f}s")
         if failed_channels:
             logger.warning(f"[{tag}-ROTATION] Failed: {failed_channels}")
+        if deferred_channels:
+            logger.info(f"[{tag}-ROTATION] Deferred for live session: {deferred_channels}")
         logger.info("=" * 60)
 
-        # G2: Clear checkpoint after successful rotation
-        clear_checkpoint()
+        self._finish_rotation_checkpoint(
+            operation, cycle_started_at, previously_processed | set(channels_processed),
+            complete=not comments_halted and not deferred_channels and not failed_channels and len(channels_processed) == len(channels),
+        )
+        self._record_rotation_complete(operation, len(channels), result)
+        return result
 
+    def _record_rotation_complete(self, operation, channel_count, result):
+        """Report the typed cycle outcome using its settled channel results."""
         # G3: Record rotation success for all processed channels
         # This tracks "when was this channel last part of a successful rotation cycle"
-        for channel in channels_processed:
+        for channel in result.channels_processed:
             self._record_channel_op(channel, "rotation", success=True)
 
         # Emit breadcrumb for activity routing
@@ -657,8 +820,8 @@ class RotationSupervisor:
             telemetry = get_breadcrumb_telemetry()
             telemetry.store_breadcrumb(
                 source_dae="rotation_supervisor",
-                event_type="rotation_complete",
-                message=f"{tag} rotation complete: {len(channels_processed)}/{len(channels)} channels",
+                event_type="rotation_halted" if result.halted else "rotation_complete",
+                message=f"{self.browser.upper()} rotation {'halted' if result.halted else 'complete'}: {len(result.channels_processed)}/{channel_count} channels",
                 phase=operation.value.upper(),
                 metadata=result.to_dict(),
             )
@@ -668,7 +831,19 @@ class RotationSupervisor:
         # G6: Check for channels requiring escalation (Phase 3)
         self._check_escalation(operation.value)
 
-        return result
+    def _finish_rotation_checkpoint(self, operation, cycle_started_at, processed, *, complete):
+        """Keep deferred, failed and watchdog-interrupted work resumable."""
+        if complete:
+            current = load_checkpoint()
+            if current is None or (
+                current.get("browser") == self.browser and current.get("operation") == operation.value
+            ):
+                clear_checkpoint()
+        else:
+            save_checkpoint(
+                browser=self.browser, processed_channels=processed, current_channel=None,
+                operation=operation.value, cycle_started_at=cycle_started_at,
+            )
 
     async def run_full_cycle(
         self,

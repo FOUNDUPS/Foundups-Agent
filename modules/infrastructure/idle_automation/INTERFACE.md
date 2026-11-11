@@ -21,6 +21,20 @@ wsp_cycle(input="interface", log=True)
 
 ## Primary Interface
 
+### Self-audit report status — 2026-10-07
+
+`SelfResearchRefresher.scan_self_audit()` now preserves the complete producer
+snapshot as `scan_status`. `events_opened` is its exact `event_count`, including
+`None` on an ordinary failed scan. Zero events does not prove input coverage or
+health: inspect `outcome`, `coverage`, and `error_codes`. `last_success` is scoped
+to the newly created scanner instance, not a durable success history.
+
+`top_signatures` remains historical data. `history_status` is `available`,
+`absent`, or `unavailable`; `signature_count` is `None` when history is unknown.
+Malformed history cannot suppress the current scan snapshot. These diagnostics
+do not authorize execution, establish an independently verified improvement,
+or convert historical signatures into current findings.
+
 ### Exact-SHA HoloIndex Post-Merge Coordination
 
 `coordinate_holoindex_postmerge()` observes `origin/main` from a configured

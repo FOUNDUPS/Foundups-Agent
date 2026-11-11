@@ -24,6 +24,11 @@ from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_revocat
     SignerGrantRevocationAuthorityBinding,
 )
 
+from .reddog_signer_system_service_runtime_dependencies import (
+    materialize_system_service_runtime_dependencies,
+)
+
+
 OwnerSupplier = Callable[[], Mapping[str, Any]]
 
 
@@ -61,6 +66,10 @@ def materialize_root_authority_service_dependencies(
         revocation_authority=_create_root_revocation_service_authority(
             owner_config_path=owner_config_path, repo_root=repo,
         ),
+        grant_peer_identity=(
+            (owner["independent_grant_authority"]["authority_service_uid"],
+             owner["independent_grant_authority"]["authority_service_gid"])
+            if "independent_grant_authority" in owner else None),
     )
 
 
@@ -115,8 +124,74 @@ def _root_policy(owner: Mapping[str, Any]) -> Mapping[str, Any]:
     return raw
 
 
+def materialize_system_service_revocation_oracle(
+    *, owner_config_path: Path | str, repo: Path, policy: Mapping[str, Any],
+    credential_binding: Any,
+) -> Any:
+    """Compose existing readers and root clients without holding a lease over RPC."""
+    from .reddog_signer_owner_e0_current_selection import lease_validated_owner_e0_current_admission
+    from .reddog_signer_owner_e0_capability_state import thaw_owner_e0_policy
+    from .reddog_signer_system_service_manifest_selection_loader import _load_owner_config
+    from .reddog_signer_system_service_wsp71_resolver_supply import (
+        build_system_service_root_request_signer, ROOT_LOAD_PURPOSE, ROOT_CONTROL_PURPOSE,
+    )
+    from .reddog_signer_secret_grant_root_protected_use_oracle import RootAuthorizedSignerGrantRevocationOracle
+
+    with lease_validated_owner_e0_current_admission(
+        owner_config_path=owner_config_path, repo_root=repo, policy=policy,
+    ) as lease:
+        owner = _load_owner_config(owner_config_path, repo=repo)
+        if owner["config_id"] != lease.policy["owner_config_id"]:
+            raise ValueError("startup_revocation_owner_mismatch")
+        binding, current_policy, resolver = lease.revocation_binding, thaw_owner_e0_policy(lease.policy), lease.resolver
+        descriptor = _root_policy(owner)["descriptor"]
+        signers = [build_system_service_root_request_signer(
+            owner_config_path=owner_config_path, repo_root=repo, policy=current_policy,
+            descriptor=descriptor, purpose=purpose, credential_binding=credential_binding,
+        ) for purpose in (ROOT_LOAD_PURPOSE, ROOT_CONTROL_PURPOSE)]
+    anchor = materialize_revocation_anchor_authority(
+        owner=owner, repo=repo, policy=current_policy, binding=binding,
+        request_signer=signers[0], now_epoch=None,
+    )
+    protected = materialize_root_protected_use_authority(
+        owner=owner, repo=repo, policy=current_policy, binding=binding,
+        request_signer=signers[1], now_epoch=None,
+    )
+    oracle = RootAuthorizedSignerGrantRevocationOracle(
+        durable=_materialize_durable_revocation_reader(repo, current_policy, binding, anchor, resolver),
+        protected_use=protected,
+    )
+    with lease_validated_owner_e0_current_admission(
+        owner_config_path=owner_config_path, repo_root=repo, policy=current_policy,
+    ) as current:
+        if not oracle.matches_owner(policy=current.policy, binding=current.revocation_binding):
+            raise ValueError("startup_revocation_owner_changed")
+    return oracle
+
+
+def _materialize_durable_revocation_reader(repo, policy, binding, anchor, resolver):
+    from .reddog_ed25519_signature_verifier_backend import Ed25519SignatureVerifier
+    from .reddog_signer_secret_grant_revocation_authority_reader import SignerGrantRevocationAuthorityReader
+    from .reddog_signer_secret_grant_revocation_durable_oracle import UncomposedDurableSignerGrantRevocationOracle
+    from .reddog_sqlite_monotonic_authority_store import SqliteMonotonicAuthorityReader
+
+    return UncomposedDurableSignerGrantRevocationOracle(
+        binding=binding, policy=policy,
+        reader=SignerGrantRevocationAuthorityReader(binding, repo_root=repo),
+        witness=SqliteMonotonicAuthorityReader(
+            binding.witness_path, allowed_root=binding.witness_root, repo_root=repo,
+            store_id=binding.witness_store_id,
+            durability_receipt_id=binding.witness_durability_receipt_id,
+        ),
+        anchor=anchor, principal_key_resolver=resolver,
+        signature_verifier=Ed25519SignatureVerifier(), clock=lambda: int(time.time()),
+    )
+
+
 __all__ = [
     "materialize_revocation_anchor_authority",
     "materialize_root_protected_use_authority",
     "materialize_root_authority_service_dependencies",
+    "materialize_system_service_revocation_oracle",
+    "materialize_system_service_runtime_dependencies",
 ]

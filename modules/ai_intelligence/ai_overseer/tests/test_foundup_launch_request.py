@@ -60,6 +60,48 @@ def test_maps_to_genesis_valid_envelope():
     assert res.is_valid, res.errors
 
 
+@pytest.mark.parametrize("form", ["dataclass", "dict"])
+def test_mapping_reference_urls_preserved_and_detached(form):
+    refs = ["https://example.com/second", "http://example.com/first",
+            "https://example.com/second"]
+    expected = list(refs)
+    payload = _clean_payload()
+    payload.reference_urls = refs
+    if form == "dict":
+        payload = dict(vars(payload))
+    env = to_genesis_envelope(payload, _authed())
+    assert env.prior_art == expected
+    assert env.prior_art is not refs
+    assert refs == expected
+    assert env.lifecycle_stage is LifecycleStage.IDEA
+    assert env.binding_state.value == "unbound"
+    assert env.external_repo_requested is False
+    assert env.requested_by == "alice"
+    refs.pop()
+    assert env.prior_art == expected
+    env.prior_art.append("https://example.com/output-only")
+    assert refs == expected[:-1]
+
+
+@pytest.mark.parametrize("form", ["dataclass", "missing", "empty", "null"])
+def test_mapping_reference_urls_defaults_are_independent(form):
+    payload = LaunchRequest(proposed_name="Reference Defaults")
+    if form != "dataclass":
+        payload = payload.to_dict()
+        if form == "missing":
+            payload.pop("reference_urls")
+        else:
+            payload["reference_urls"] = [] if form == "empty" else None
+    first = to_genesis_envelope(payload, _authed())
+    second = to_genesis_envelope(payload, _authed())
+    assert first.prior_art == second.prior_art == []
+    assert first.prior_art is not second.prior_art
+    first.prior_art.append("https://example.com/first-only")
+    assert second.prior_art == []
+    actual = payload.reference_urls if form == "dataclass" else payload.get("reference_urls")
+    assert actual == ([] if form in {"dataclass", "empty"} else None)
+
+
 # --- intake gate (Addendum C: context only) ---------------------------------
 
 def test_intake_gate_rejects_unauthenticated():
@@ -912,7 +954,7 @@ def test_error_category_message_only_no_raw_key_echo():
 
 
 # ===========================================================================
-# AST SKELETON PARITY -- structural backstop; message TEXT only, NO logic change.
+# AST SKELETON PARITY -- structural backstop; reviewed logic changes rebaseline.
 #
 # SELF-CONTAINED (SENTINEL CI-robustness): parse the CURRENT launch_request.py,
 # blank EVERY string/f-string constant, and assert the resulting skeleton matches a
@@ -921,15 +963,15 @@ def test_error_category_message_only_no_raw_key_echo():
 # unchanged, while any LOGIC change forces a conscious update of the expected hash.
 # This RUNS+PASSES in CI with zero skips (no git / origin/main / subprocess).
 #
-# The expected hash was captured from the message-only HEAD, which is BYTE-IDENTICAL
-# to origin/main's blanked skeleton (verified at slice time) -- i.e. this checked-in
-# value IS the origin baseline, frozen, with no runtime git dependency.
+# 2026-10-25: independent review approved one prior_art constructor keyword.
+# Removing that keyword restores the original message-only baseline AST exactly.
+# The new checked-in hash binds that reviewed mapping; no runtime git dependency.
 # To regenerate after a DELIBERATE logic change:
 #   python -c "import ast,hashlib;
 #     from pathlib import Path;
 #     src=Path('modules/ai_intelligence/ai_overseer/src/foundup_genesis/launch_request.py').read_text(encoding='utf-8');
 #     ... (same _Blanker/_skeleton as below) ...; print(hashlib.sha256(skeleton.encode()).hexdigest())"
-_EXPECTED_SKELETON_SHA256 = "05b00bb10401683580035ca470f8043738e7eed5588d86182cb7e8ca19eeab5a"
+_EXPECTED_SKELETON_SHA256 = "f8409a2b9109e35d82a1468cdd3bb27e004e38b7d577df9234ced8dac43a3a60"
 
 
 def _blanked_skeleton(src: str) -> str:
@@ -949,9 +991,9 @@ def _blanked_skeleton(src: str) -> str:
 
 def test_ast_skeleton_parity_self_consistent():
     """STRUCTURAL backstop (self-contained): the text-blanked AST skeleton of the CURRENT
-    launch_request.py must hash to the checked-in baseline. Proves the slice is message-only
-    (same control flow / calls / branches). Any logic change breaks this and must consciously
-    update _EXPECTED_SKELETON_SHA256."""
+    launch_request.py must hash to the checked-in reviewed baseline. Further logic changes
+    break this assertion and require conscious review before updating the expected hash.
+    The 2026-10-25 baseline includes only the approved prior_art mapping keyword."""
     import hashlib
     head_src = MODULE_SRC.read_text(encoding="utf-8")
     actual = hashlib.sha256(_blanked_skeleton(head_src).encode("utf-8")).hexdigest()

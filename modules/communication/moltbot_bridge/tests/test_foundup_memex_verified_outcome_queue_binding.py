@@ -31,6 +31,125 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestratio
 RECORDED_AT = "2026-08-04T00:00:00Z"
 
 
+def _produced_held_out_receipt():
+    from modules.infrastructure.wre_core.tests import (
+        test_wre_autonomous_slice_verifier_runtime as verifier_tests,
+        test_reddog_held_out_recursive_improvement_regression_gate as gate_tests,
+    )
+    from modules.infrastructure.wre_core.src import (
+        reddog_held_out_recursive_improvement_regression_gate as gate,
+    )
+    from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_receipt_rehydration import (
+        rehydrate_verified_slice_receipt,
+    )
+
+    verification = verifier_tests._verify(verifier_tests.valid_request())
+    assert verification.accepted
+    verifier = rehydrate_verified_slice_receipt(verification.receipt.to_dict())
+    request = gate_tests.valid_request()
+    request.update(work_order_id=verifier.work_order_id, slice_name=verifier.slice_name,
+                   worker_id=verifier.worker_id, verification_result=verification.to_dict())
+    request["held_out_regression"].update(
+        evidence_author_id=verifier.verifier_id, candidate_head_sha=verifier.head_sha,
+    )
+    ratchet = gate_tests.record_gate_fixture(request)
+    assert ratchet.accepted
+    request["ratchet_result"] = ratchet.to_dict()
+    result = gate.evaluate_held_out_recursive_improvement_regression_gate(request)
+    assert result.accepted
+    return result, verifier
+
+
+def test_current_gate_receipt_roundtrips_into_memex_without_identity_rewrite():
+    from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_receipt_rehydration import (
+        rehydrate_held_out_outcome_receipt,
+    )
+
+    result, verifier = _produced_held_out_receipt()
+    wire = result.to_dict()["receipt"]
+    restored = rehydrate_held_out_outcome_receipt(wire, verifier=verifier)
+    assert restored.to_dict() == wire
+    assert restored.gate_id == result.receipt.gate_id
+    assert wire["identity_version"] == 2
+    assert wire["evidence_digest"].startswith("sha256:")
+
+
+@pytest.mark.parametrize("case", [
+    "strip_both", "strip_version", "strip_digest", "bool_version", "float_version",
+    "string_version", "unknown_version", "legacy_version", "null_digest",
+    "empty_digest", "numeric_digest", "changed_digest", "extra_field",
+])
+def test_current_gate_receipt_rejects_tampering_and_downgrade(case):
+    from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_receipt_rehydration import (
+        rehydrate_held_out_outcome_receipt,
+    )
+
+    result, verifier = _produced_held_out_receipt()
+    wire = result.receipt.to_dict()
+    if case == "strip_both":
+        wire.pop("identity_version", None)
+        wire.pop("evidence_digest", None)
+    elif case == "strip_version":
+        wire.pop("identity_version", None)
+    elif case == "strip_digest":
+        wire.pop("evidence_digest", None)
+    elif case.endswith("_version"):
+        wire["identity_version"] = {
+            "bool_version": True, "float_version": 2.0, "string_version": "2",
+            "unknown_version": 3, "legacy_version": 1,
+        }[case]
+    elif case == "extra_field":
+        wire["unexpected"] = "value"
+    else:
+        wire["evidence_digest"] = {
+            "null_digest": None, "empty_digest": "", "numeric_digest": 1,
+            "changed_digest": "sha256:" + "0" * 64,
+        }[case]
+    with pytest.raises(ValueError):
+        rehydrate_held_out_outcome_receipt(wire, verifier=verifier)
+
+
+def test_legacy_held_out_receipt_preserves_exact_signed_wire_shape():
+    from modules.communication.moltbot_bridge.tests.test_foundup_memex_verified_outcome_authenticity import (
+        _verifier_receipt, _held_out_receipt,
+    )
+    from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_receipt_rehydration import (
+        rehydrate_verified_slice_receipt, rehydrate_held_out_outcome_receipt,
+    )
+
+    verifier_wire = _verifier_receipt()
+    wire = _held_out_receipt(verifier_wire)
+    restored = rehydrate_held_out_outcome_receipt(
+        wire, verifier=rehydrate_verified_slice_receipt(verifier_wire),
+    )
+    assert restored.to_dict() == wire
+    assert "identity_version" not in restored.to_dict()
+    assert "evidence_digest" not in restored.to_dict()
+
+
+@pytest.mark.parametrize("metadata", [
+    {"identity_version": True}, {"identity_version": 1.0},
+    {"evidence_digest": None}, {"evidence_digest": 0},
+])
+def test_legacy_serialization_does_not_hide_malformed_identity(metadata):
+    from dataclasses import replace
+    from modules.communication.moltbot_bridge.tests.test_foundup_memex_verified_outcome_authenticity import (
+        _verifier_receipt, _held_out_receipt,
+    )
+    from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_receipt_rehydration import (
+        rehydrate_verified_slice_receipt, rehydrate_held_out_outcome_receipt,
+    )
+
+    verifier_wire = _verifier_receipt()
+    verifier = rehydrate_verified_slice_receipt(verifier_wire)
+    legacy = rehydrate_held_out_outcome_receipt(
+        _held_out_receipt(verifier_wire), verifier=verifier,
+    )
+    wire = replace(legacy, **metadata).to_dict()
+    with pytest.raises(ValueError):
+        rehydrate_held_out_outcome_receipt(wire, verifier=verifier)
+
+
 def _chain() -> dict:
     state = {
         "schema_version": "reddog_resident_queue_chain_results.v1",

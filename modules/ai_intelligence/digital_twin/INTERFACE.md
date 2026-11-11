@@ -1,5 +1,21 @@
 # Digital Twin - Public Interface
 
+## VoiceMemory optional retrieval (2026-11-05)
+
+```python
+VoiceMemory.query(text, k=5, *, allow_cold_init=True, cancel_event=None)
+```
+
+Defaults preserve existing cold initialization and no-new-keyword calls to the
+private lookup/search collaborators. `allow_cold_init=False` reuses the existing
+`_video_index` cache without probing or constructing a cold index; an uninitialized
+embedding model also yields no video context. Ready-only skips do not poison
+the `None`/`False` cache sentinels. Local corpus retrieval is unchanged.
+An optional event with `is_set()` stops later phases and discards canceled
+results. It cannot interrupt an active native operation. An unsupported
+ready-only collaborator is not authority to retry a cold query. No background
+warmup, second cache, model router or publication authority is introduced.
+
 **WSP Compliance**: WSP 11 (Interface Protocol), WSP 00 (Zen State Attainment)
 
 ---
@@ -95,6 +111,85 @@ internally from the exact current signed principal conversation record and a
 principal-signed, one-use disclosure bound to the model runtime. The admission
 path exposes only public accepted operator statements and grants no work or
 FoundUp authority. It never projects data to a FoundUp automatically.
+
+---
+
+## AntifaFM station reply drafting
+
+```python
+from modules.ai_intelligence.digital_twin.src.comment_drafter import CommentDrafter
+
+drafter = CommentDrafter.for_station()  # Or for_station(llm=existing_local_llm).
+decision = drafter.draft_station_reply(
+    thread_context="@AntifaFM Where can I listen?",
+    context_url="https://example.org/posts/42",
+    reply_to_id="42",
+    initiated_by_listener=True,
+)
+```
+
+```python
+CommentDrafter.for_station(llm: Optional[LocalLLM] = None) -> CommentDrafter
+
+CommentDrafter.draft_station_reply(
+    thread_context: str,
+    *,
+    context_url: str,
+    reply_to_id: str,
+    initiated_by_listener: bool,
+) -> dict
+```
+
+Use the station factory only with `draft_station_reply()`. It does not construct
+`VoiceMemory` or `StyleGuardrails`, read the human voice corpus, or use the legacy
+identity prompts. The ordinary constructor, `draft()`, and `LocalLLM.generate()`
+retain their existing behavior. The factory initializes the existing configured
+local model unless an existing `LocalLLM` is supplied; reuse the instance.
+
+| Input | Contract |
+|-------|----------|
+| `thread_context` | Nonempty conversation text, at most 2,400 Python characters; larger input requires review and is not truncated. |
+| `context_url` | Nonempty HTTP(S) URL, at most 2,048 characters, with hostname and no embedded credentials. |
+| `reply_to_id` | Nonblank caller-owned reply target, at most 256 characters. |
+| `initiated_by_listener` | Must be the native boolean `True`; the caller establishes listener initiation independently of the conversation text. |
+
+No listener initiation or missing conversation produces `skip`. Invalid source
+binding produces `review_required`. For admitted context, the model returns an
+exact JSON object with string fields `action`, `intent`, `reply`, and `reason`.
+The parser forces unrelated, abusive, or political-persuasion intents to `skip`
+and unclear intent to `review_required`. Only music/station questions and music
+feedback are eligible for a draft. Semantic intent detection is model-dependent.
+
+The system policy is separate from the user message, which contains the source
+URL, reply target, and conversation serialized as untrusted JSON data. It permits
+only these station facts: AntifaFM is a music station at `https://antifafm.com/`,
+its music may contain strong language, and 0102 is an AI agent for UnDaoDu.
+It forbids ideological/affiliation inference, political persuasion, human
+impersonation, and unsupported catalogue, schedule, audience, or licensing claims.
+Drafts must disclose `0102`, `AI`, and `UnDaoDu`, stay within 280 Python characters,
+and may omit the station link. This bound uses Python string length; the caller
+retains platform-specific text validation before any publication.
+
+| Result field | Meaning |
+|--------------|---------|
+| `action` | `skip`, `draft_reply`, or `review_required`; never a publication instruction. |
+| `reason` | Short gate reason or model explanation, at most 160 characters. |
+| `reply` | Validated draft string; empty for skips, review decisions, and failures. |
+| `model` / `provider` | Model filename and `llama_cpp` when generation is attempted; otherwise empty model and `none`. |
+| `source_url` / `reply_to_id` | Caller-supplied binding; the model cannot replace these output fields. |
+| `no_publication_performed` | Always `True`. |
+| `no_execution_performed` | Legacy field, always `True`; means no external action, not absence of local inference. |
+
+The strict local generation path exposes no tools. A missing/unloaded model,
+mock mode, inference exception, incomplete response, tool-call response,
+malformed JSON, invalid decision shape, or failed reply validation returns
+review with no reply. It never uses mock/template text as a station draft.
+This interface does not fetch conversations, establish initiation, publish,
+schedule, or grant permission to act. These remain caller responsibilities.
+
+The 2026-10-18 focused result is 39 offline tests using a fixture chat backend
+and a genuinely missing model path. This validates the contract and error paths,
+not real-model semantic accuracy or resistance to every prompt injection.
 
 ---
 

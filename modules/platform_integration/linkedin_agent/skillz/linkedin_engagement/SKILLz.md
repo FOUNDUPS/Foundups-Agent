@@ -1,7 +1,7 @@
 ---
 name: linkedin_engagement
-description: Master LinkedIn activity router for full operations or scoped messages, connections, groups, feed, dedicated FoundUps ROC and JHR newsletters, publishing and continuity; retains the WRE bridge
-version: 1.4.0
+description: Master LinkedIn activity router for full operations or scoped messages, connections, professional contact diligence, groups, feed, dedicated FoundUps ROC and JHR newsletters, publishing and continuity; retains the WRE bridge
+version: 1.5.0
 author: 0102
 agents: [qwen]
 dependencies: [linkedin_social_adapter, browser_actions, wre_core]
@@ -26,7 +26,7 @@ For newsletter audits, development or a new series, use the existing
 [Red Dog -> 0102 editorial handoff](../linkedin_newsletters/references/editorial-workflow.md).
 Preserve request scope, issue revision, authority and evidence on the return path.
 
-Before selecting an action, read [LinkedIn review workflow](../../docs/LINKEDIN_REVIEW_WORKFLOW.md). The current full cycle starts with connection triage, then messages (Focused + Other), notifications, group queues and relevant feed; urgent commitments may override order. Route membership to [linkedin_group_moderation](../linkedin_group_moderation/SKILLz.md) and Good/Bad/Ugly automation discussions to [openclaw_group_news](../openclaw_group_news/SKILLz.md). Do not instantiate a competing LinkedIn orchestrator.
+Before selecting an action, read [LinkedIn review workflow](../../docs/LINKEDIN_REVIEW_WORKFLOW.md). The current full cycle starts with connection triage, then messages (Focused + Other), notifications, group queues and relevant feed; urgent commitments may override order. Route consequential funding, family-office, project-finance, government/institutional or sensitive-partnership contacts to [linkedin_contact_diligence](../linkedin_contact_diligence/SKILLz.md) before non-public disclosure or a material relationship decision. Route membership to [linkedin_group_moderation](../linkedin_group_moderation/SKILLz.md) and Good/Bad/Ugly automation discussions to [openclaw_group_news](../openclaw_group_news/SKILLz.md). Do not instantiate a competing LinkedIn orchestrator.
 
 Read/research/draft within scope. Every send, post, like, connection, moderation or access change requires exact human authorization and verified results. APS ranks work; it does not grant authority. Existing live executor routes are not certified safe by this documentation update.
 

@@ -1,5 +1,36 @@
 # Video Indexer Module
 
+## Studio indexing cost and routing boundary — 2026-11-07
+
+Source review of `fa7d487f3` found a separate unattended Gemini API enrichment
+pass in `src/studio_ask_indexer.py:2871`, triggered by newly indexed videos and
+key presence. The candidate removes only this paid pass, retaining browser
+Studio Ask results and the compatible empty `gemini_analysis` field. The
+[32-case offline selection](tests/TestModLog.md#2026-11-07--no-unattended-paid-enrichment-after-studio-indexing)
+passes; the key-presence regression fails on old source. Merge and deployment
+remain pending at this documentation checkpoint.
+
+012 requires the existing shared AI router across AI consumers. The migration
+audit remains **SPECIFIED_NOT_IMPLEMENTED**: current
+`ai_gateway/src/youtube_model_routing.py` accepts only `comments`/`livechat` and
+`assess`/`write`/`review`, not video analysis. Reusing its name or supplying a key
+does not establish capability, cost approval or provider availability. Follow
+the [existing ordered repair list](../../platform_integration/youtube_shorts_scheduler/ROADMAP.md#repair-work-list--2026-11-07);
+do not add a parallel provider fallback to satisfy this requirement.
+
+## YUMORI campaign evidence proposal
+
+The preserved [Moshpit video-evidence work order](YOUTUBE_DAE_YUMORI_MOSHPIT_VIDEO_EVIDENCE_WORK_ORDER.md)
+reuses current action and persistence owners. YUMORI-specific extraction and
+candidate projection remain SPECIFIED_NOT_IMPLEMENTED; this document does not
+authorize browser access, backfill, disclosure or publication. Existing
+single-video/channel/portfolio/daemon routes do not prove that campaign outcome.
+
+
+Japanese audio uses the existing `AudioAnalyzer(language="ja")`; automatic
+detection is the default for multilingual models; omitted language remains English
+for `.en` models. See [language evidence in the interface](INTERFACE.md#audioanalyzer).
+
 **WSP Compliance**: WSP 49 (Module Structure), WSP 3 (Domain Organization), WSP 72 (Independence)
 
 ## Purpose

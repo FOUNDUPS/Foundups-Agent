@@ -4,7 +4,7 @@ const AFTER_RELATIONS = new Set(['a', 'an', 'as', 'called', 'known', 'named', 't
 
 function tokens(value) {
   return String(value || '').normalize('NFKC').toLowerCase().replace(/found[\s-]?ups?/g, 'foundup')
-    .replace(/[_-]+/g, ' ').replace(/[^a-z0-9]+/g, ' ').trim().split(/\s+/).filter(Boolean);
+    .replace(/[_-]+/g, ' ').replace(/[^a-z0-9\u3040-\u30ff\u3400-\u9fff]+/g, ' ').trim().split(/\s+/).filter(Boolean);
 }
 
 function occurrences(values, phrase) {

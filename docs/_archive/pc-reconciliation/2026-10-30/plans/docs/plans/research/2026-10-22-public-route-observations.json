@@ -1,0 +1,141 @@
+{
+  "projection": {
+    "schema": "foundups.pc-reconciliation.historical-projection.v1",
+    "record_kind": "historical_projection_not_current_acceptance",
+    "source_path": "docs/plans/research/2026-10-22-public-route-observations.json",
+    "original_pc_head": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+    "source_full_file_sha256": "4d572e26ad816232c5c8ecfb8d57a6de82d4a0fe2e963fabbcffcb32c4d7f7e8",
+    "preserved_record_sha256": "4d572e26ad816232c5c8ecfb8d57a6de82d4a0fe2e963fabbcffcb32c4d7f7e8",
+    "projection_created_at_utc": "2026-10-30T02:00:12.626831+00:00",
+    "projection_timestamp_is_not_an_observation": true,
+    "comparison_reference": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+    "disposition": "Publish a sanitized historical route-observation envelope. Preserve observation dates and statuses; remove local command-host details. This record does not assert today's endpoints, current deployment revision or successful form/comment delivery.",
+    "current_owners": [
+      "modules/foundups/pfmall/ROADMAP.md"
+    ],
+    "original_observation_timestamps": "Retained in historical content; no observation is rerun or redated.",
+    "publication_status": "Proposed, pending independent auditor acceptance; not published by this worker.",
+    "runtime_and_commenting": "UNVERIFIED"
+  },
+  "historical_record": {
+    "date": "2026-10-22",
+    "repository_head": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+    "scope": "Anonymous bounded HTTP GETs of named public routes. No authentication, form submissions, redirects into private surfaces, or state-changing operations. Same final URL for each recorded request. Captured outputs from the parent route-probe tool call; not inferred from HTTP status alone.",
+    "method": {
+      "transport": "Python urllib.request",
+      "timeout_seconds": 20,
+      "max_bytes_per_response": 2000001,
+      "user_agent": "FoundUps-public-research/1.0",
+      "authentication": "none"
+    },
+    "records": [
+      {
+        "url": "https://foundups.com/",
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "bytes_read": 98748,
+        "sha256": "d78e5f63599ceea035232f9955b9cde25452b2652073e0e3fe635154224feeeb",
+        "title": "FoundUPS — Where Will You Aim Your Compute?",
+        "robots": []
+      },
+      {
+        "url": "https://foundups.com/f/",
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "bytes_read": 38426,
+        "sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "title": "FoundUps Mall | Entry",
+        "robots": [
+          "noindex, nofollow"
+        ]
+      },
+      {
+        "url": "https://foundups.com/about",
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "bytes_read": 98748,
+        "sha256": "d78e5f63599ceea035232f9955b9cde25452b2652073e0e3fe635154224feeeb",
+        "title": "FoundUPS — Where Will You Aim Your Compute?",
+        "robots": []
+      },
+      {
+        "url": "https://foundups.com/member/",
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "bytes_read": 50610,
+        "sha256": "a09fb4398bc20ee3b0f0c54e615b4fbc990501e30e012f8bdfa6184ed0808f05",
+        "title": "p.fMALL | FoundUPS",
+        "robots": [
+          "noindex, nofollow"
+        ]
+      },
+      {
+        "url": "https://foundups.com/f/public_catalog.json",
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "bytes_read": 38426,
+        "sha256": "2dd90ecfaf1e8932800e4108b9f8544380e330d6b3a5690648673ce597d69658",
+        "title": "FoundUps Mall | Entry",
+        "robots": [
+          "noindex, nofollow"
+        ],
+        "expected_kind": "JSON public projection",
+        "observation": "HTML fallback; not a successful catalog fetch"
+      }
+    ],
+    "observations": [
+      "/about response body is identical to /; no distinct About page established.",
+      "/f/public_catalog.json response body is identical to /f/ and is HTML, not JSON.",
+      "Local /f renderer uses the projected catalog; deployed renderer lacks that projection reference.",
+      "Member shell HTML retrieval does not prove authenticated access or successful app operation."
+    ],
+    "current_source_hashes": [
+      {
+        "path": "public/index.html",
+        "sha256": "d78e5f63599ceea035232f9955b9cde25452b2652073e0e3fe635154224feeeb"
+      },
+      {
+        "path": "public/f/index.html",
+        "sha256": "c93aa56a886c42371bcc69fa68533449c2655779dea8c1018b4f81a5c04d7fe5"
+      },
+      {
+        "path": "public/f/public_catalog.json",
+        "sha256": "519dfb90e5367fc300bec08a2a05a39d1bee341ecafa9c8626f24387d629a8ff"
+      },
+      {
+        "path": "firebase.json",
+        "sha256": "fa0f559fbb5a3786673c3f814570a29bb3da832e8c516a5fced2bb83bc4fcaac"
+      },
+      {
+        "path": "modules/foundups/foundup_registry.json",
+        "sha256": "aae1f9074ae4fac5541b2e41e7b4be9a629d6398bc5971e5cab75147cc5787ea"
+      },
+      {
+        "path": "modules/foundups/public_catalog_projector/src/projector.py",
+        "sha256": "b176182283bcf17b4ffeeedd969a895f1d68e09b360f2451b8de4146357ac8ce"
+      }
+    ],
+    "local_checks": {
+      "public_catalog_validator": {
+        "result": "PASS",
+        "violations": 0,
+        "registry_total": 16,
+        "portfolio_eligible": 3,
+        "projection_total": 3
+      },
+      "portfolio_validator": {
+        "result": "PASS",
+        "errors": 0,
+        "warnings": 0
+      },
+      "projector_tests": {
+        "command": "python -B -m pytest modules/foundups/public_catalog_projector/tests/test_projector.py -q --basetemp [PRIVATE_HOST_PATH_OMITTED] -p no:cacheprovider",
+        "passed": 42,
+        "failed": 0,
+        "duration_seconds": 0.58,
+        "isolation": "TMP/TEMP and FOUNDUPS_DB_PATH task-specific; PYTHONDONTWRITEBYTECODE=1; PYTHONIOENCODING=utf-8"
+      }
+    },
+    "date_timezone": "Asia/Tokyo"
+  }
+}

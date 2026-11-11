@@ -20,7 +20,7 @@ evidence, and historical memory. The canonical identity boundary is
 [`extensions/reddog/ARCHITECTURE.md`](../extensions/reddog/ARCHITECTURE.md):
 RedDog is the fast interaction/exchange surface, while 0102 is the deeper
 Digital Twin and orchestration layer. The map also owns navigation to Lick,
-Contact Memory, Mosh Pit, and the specified-not-implemented Memex emitter.
+Contact Memory, Moshpit, and the specified-not-implemented Memex emitter.
 
 ## Quick Navigation
 

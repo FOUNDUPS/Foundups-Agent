@@ -45,6 +45,8 @@ from modules.infrastructure.shared_utilities.ai_engine_singletons import get_qwe
 from modules.infrastructure.wre_core.src.wre_research_evaluator import (
     evaluate_target,
     load_target_config_from_source,
+    snapshot_cost_catalog,
+    snapshot_comparison_basis,
 )
 
 
@@ -196,14 +198,7 @@ class WREAutoResearcher:
         if type(requested) is not int or requested < 0:
             raise ValueError("max_iterations must be a non-negative integer")
         print(f"[AUTO-RESEARCHER] Starting research loop (max_iterations={requested}, dry_run={self.dry_run})")
-        report["phase"] = "baseline"
-        report["baseline_evaluations"] += 1
-        baseline_metrics = report["baseline"] = evaluate_target(self.working_target_path)
-        if "error" in baseline_metrics:
-            self._log_to_tsv(0, "failed_baseline", baseline_metrics, baseline_metrics["error"])
-            raise ValueError(f"Baseline validation failed: {baseline_metrics['error']}")
-        print(f"[BASELINE] Fitness: {baseline_metrics.get('fitness'):.4f} (ROC: {baseline_metrics.get('roc_ratio'):.4f})")
-        self._log_to_tsv(0, "baseline", baseline_metrics, "Initial baseline parameters")
+        baseline_metrics, evaluation_context = _evaluate_baseline(self, report)
 
         best_code = baseline_code
         best_metrics = report["optimized"] = baseline_metrics
@@ -214,7 +209,7 @@ class WREAutoResearcher:
             
             report["phase"] = "proposal"
             report["attempts_started"] += 1
-            proposed_code = _propose_dry_run(self, best_code, best_metrics, history)
+            proposed_code = _propose_for_report(self, report, iteration, best_code, best_metrics, history)
             if not proposed_code:
                 print("[WARNING] Could not generate new proposal. Skipping.")
                 self._log_to_tsv(iteration, "no_proposal", {}, "No proposal generated")
@@ -232,7 +227,7 @@ class WREAutoResearcher:
             try:
                 report["phase"] = "evaluation"
                 report["candidate_evaluations"] += 1
-                metrics = evaluate_target(self.working_target_path)
+                metrics = evaluate_target(self.working_target_path, **evaluation_context)
                 print(f"[EVALUATION] Fitness: {metrics.get('fitness'):.4f} (ROC: {metrics.get('roc_ratio'):.4f})")
 
                 # If error in evaluation
@@ -310,43 +305,7 @@ class WREAutoResearcher:
 
     def _propose_via_llm(self, current_code: str, current_metrics: Dict, history: List[Dict]) -> Optional[str]:
         """Ask the LLM to propose optimizations."""
-        history_summary = ""
-        for h in history[-3:]:  # Last 3 attempts for context
-            status = h.get("status")
-            fit = h.get("fitness", 0.0)
-            roc = h.get("roc_ratio", 0.0)
-            err = f" (Error: {h['error']})" if "error" in h else ""
-            history_summary += f"- Iteration {h['iteration']}: status={status}, fitness={fit:.4f}, ROC={roc:.4f}{err}\n"
-
-        prompt = f"""{self.program_instructions}
-
-### CURRENT CONFIGURATION CODE:
-```python
-{current_code}
-```
-
-### CURRENT PERFORMANCE METRICS:
-- Fitness score: {current_metrics.get('fitness'):.4f}
-- ROC Ratio: {current_metrics.get('roc_ratio'):.4f}
-- Is ROI Sustainable: {current_metrics.get('is_roi_sustainable')}
-- Monthly Margin: ${current_metrics.get('monthly_margin_usd', 0.0):,.2f}
-
-### HISTORY OF RECENT ATTEMPTS:
-{history_summary or "No previous attempts yet."}
-
-### TASK:
-Optimize the `AGENT_ALLOCATION` and `AGENT_PREMIUM_MULTIPLIERS` in `wre_research_target.py` to achieve a higher fitness score.
-You must output ONLY valid Python source containing the two literal dictionaries.
-Do not include imports, function calls, file access, network access, shell access,
-markdown formatting, or explanations.
-"""
-
-        try:
-            response = self.llm.generate_response(prompt, max_tokens=1024)
-            return self._parse_python_block(response)
-        except Exception as e:
-            print(f"[LLM ERROR] Prompt generation failed: {e}")
-            return None
+        return _propose_llm(self, current_code, current_metrics, history)
 
     def _propose_via_heuristic(self, current_code: str) -> Optional[str]:
         """Perturb values slightly to simulate heuristic optimization."""
@@ -401,6 +360,80 @@ AGENT_PREMIUM_MULTIPLIERS = {repr(multipliers)}
         return "\n".join(parsed_lines)
 
 
+def _propose_llm(researcher: WREAutoResearcher, current_code: str, current_metrics: Dict, history: List[Dict]) -> Optional[str]:
+    """Render once; identify the local attempted-call input, not a provider receipt."""
+    history_summary = ""
+    for h in history[-3:]:  # Last 3 attempts for context
+        status = h.get("status")
+        fit = h.get("fitness", 0.0)
+        roc = h.get("roc_ratio", 0.0)
+        err = f" (Error: {h['error']})" if "error" in h else ""
+        history_summary += f"- Iteration {h['iteration']}: status={status}, fitness={fit:.4f}, ROC={roc:.4f}{err}\n"
+
+    instructions = str.__str__(f"{researcher.program_instructions}")
+    prompt = f"""{instructions}
+
+### CURRENT CONFIGURATION CODE:
+```python
+{current_code}
+```
+
+### CURRENT PERFORMANCE METRICS:
+- Fitness score: {current_metrics.get('fitness'):.4f}
+- ROC Ratio: {current_metrics.get('roc_ratio'):.4f}
+- Is ROI Sustainable: {current_metrics.get('is_roi_sustainable')}
+- Monthly Margin: ${current_metrics.get('monthly_margin_usd', 0.0):,.2f}
+
+### HISTORY OF RECENT ATTEMPTS:
+{history_summary or "No previous attempts yet."}
+
+### TASK:
+Optimize the `AGENT_ALLOCATION` and `AGENT_PREMIUM_MULTIPLIERS` in `wre_research_target.py` to achieve a higher fitness score.
+You must output ONLY valid Python source containing the two literal dictionaries.
+Do not include imports, function calls, file access, network access, shell access,
+markdown formatting, or explanations.
+"""
+
+    try:
+        generate = researcher.llm.generate_response
+        _record_program_input(researcher, instructions)
+        response = generate(prompt, max_tokens=1024)
+        return researcher._parse_python_block(response)
+    except Exception as e:
+        print(f"[LLM ERROR] Prompt generation failed: {e}")
+        return None
+
+
+def _propose_for_report(researcher: WREAutoResearcher, report: Dict, iteration: int,
+                        code: str, metrics: Dict, history: List[Dict]):
+    """Scope diagnostic collection without changing three-argument callbacks."""
+    absent = object()
+    previous = getattr(researcher, "_program_input_context", absent)
+    researcher._program_input_context = (report["program_inputs"], iteration)
+    try:
+        return _propose_dry_run(researcher, code, metrics, history)
+    finally:
+        if previous is absent:
+            del researcher._program_input_context
+        else:
+            researcher._program_input_context = previous
+
+
+def _record_program_input(researcher: WREAutoResearcher, instructions: str):
+    """Encoding diagnostics cannot suppress an otherwise possible backend call."""
+    context = getattr(researcher, "_program_input_context", None)
+    if context is None:
+        return
+    records, iteration = context
+    digest, error = None, None
+    try:
+        digest = hashlib.sha256(str.encode(instructions, "utf-8")).hexdigest()
+    except UnicodeEncodeError:
+        error = "UnicodeEncodeError"
+    records.append({"iteration": iteration, "call_ordinal": len(records) + 1,
+                    "program_input_sha256": digest, "identity_error": error})
+
+
 def _prepare_proposal(researcher: WREAutoResearcher, report: Dict, iteration: int, proposed_code: str):
     """Record returned text before preparation can fail; this is not authority."""
     if not isinstance(proposed_code, str):
@@ -424,6 +457,23 @@ def _propose_dry_run(researcher: WREAutoResearcher, code: str, metrics: Dict, hi
     return proposed
 
 
+def _evaluate_baseline(researcher: WREAutoResearcher, report: Dict):
+    """Capture invocation costs and the profile guard before baseline evaluation."""
+    report["phase"] = "cost_capture"
+    context = {"cost_catalog": snapshot_cost_catalog()}
+    report["phase"] = "comparison_capture"
+    context["comparison_basis"] = snapshot_comparison_basis()
+    report["phase"] = "baseline"
+    report["baseline_evaluations"] += 1
+    metrics = report["baseline"] = evaluate_target(researcher.working_target_path, **context)
+    if "error" in metrics:
+        researcher._log_to_tsv(0, "failed_baseline", metrics, metrics["error"])
+        raise ValueError(f"Baseline validation failed: {metrics['error']}")
+    print(f"[BASELINE] Fitness: {metrics.get('fitness'):.4f} (ROC: {metrics.get('roc_ratio'):.4f})")
+    researcher._log_to_tsv(0, "baseline", metrics, "Initial baseline parameters")
+    return metrics, context
+
+
 def _new_run_report(researcher: WREAutoResearcher, baseline_code: str) -> Dict:
     """Reserve an invocation namespace; absence of report.json means incomplete."""
     directory = Path(tempfile.mkdtemp(prefix="invocation-", dir=researcher.results_dir))
@@ -435,9 +485,11 @@ def _new_run_report(researcher: WREAutoResearcher, baseline_code: str) -> Dict:
         "attempts_requested": requested if type(requested) is int and requested >= 0 else None,
         "attempts_started": 0, "baseline_evaluations": 0, "candidate_evaluations": 0,
         "baseline": None, "optimized": None, "history": [], "proposal_inputs": [],
+        "program_inputs": [],
         "baseline_input_sha256": hashlib.sha256(baseline_code.encode("utf-8")).hexdigest(),
         "failure": None, "cleanup_failure": None, "cleanup": "not_performed",
         "independently_verified": None, "retained_improvements": None, "resource_usage": None,
+        "rsi_measurements": None,
     }
 
 
@@ -498,7 +550,65 @@ def _summarize_run(report: Dict) -> Dict:
         iterations_run=report["attempts_started"], attempts_finished=len(history),
         outcome_counts=counts,
     )
+    report["rsi_measurements"] = _build_rsi_measurements(report)
     return report
+
+
+def _build_rsi_measurements(report: Dict) -> Dict:
+    """Emit the minimal RSI measurement bundle used by WRE diagnostics.
+
+    The current AutoResearcher evaluator is execution feedback: it runs a bounded
+    simulator/benchmark-like check over a candidate. It is not a formal verifier,
+    an independent learned judge, a held-out evaluator, or human research judgment.
+    The bundle records that truth instead of promoting a fitness delta into an RSI
+    completion claim.
+    """
+    baseline = report.get("baseline")
+    best = report.get("optimized")
+    baseline_fitness = baseline.get("fitness") if isinstance(baseline, dict) else None
+    best_fitness = best.get("fitness") if isinstance(best, dict) else None
+    absolute_gain = (
+        best_fitness - baseline_fitness
+        if type(baseline_fitness) in (int, float) and type(best_fitness) in (int, float)
+        else None
+    )
+    relative_gain = (
+        absolute_gain / abs(baseline_fitness)
+        if type(absolute_gain) in (int, float)
+        and type(baseline_fitness) in (int, float)
+        and baseline_fitness != 0
+        else None
+    )
+    counts = report.get("outcome_counts") or {}
+    return {
+        "schema": "wre_rsi_measurements.v1",
+        "verification_signal_class": "execution_feedback",
+        "verification_hierarchy_weak_to_strong": [
+            "intrinsic_signal",
+            "learned_judge",
+            "execution_feedback",
+            "formal_verifier",
+        ],
+        "research_direction_judgment": "human_not_substituted",
+        "verification_signal_independent": False,
+        "held_out_evaluation": False,
+        "baseline_fitness": baseline_fitness,
+        "best_fitness": best_fitness,
+        "absolute_gain": absolute_gain,
+        "relative_gain": relative_gain,
+        "candidate_evaluations": report.get("candidate_evaluations"),
+        "accepted_candidates": counts.get("accepted", 0),
+        "rejected_candidates": counts.get("rejected", 0),
+        "invalid_candidates": counts.get("failed_validation", 0),
+        "crashed_candidates": counts.get("crashed", 0),
+        "no_proposal_attempts": counts.get("no_proposal", 0),
+        "independently_verified": report.get("independently_verified"),
+        "retained_improvements": report.get("retained_improvements"),
+        "resource_usage": report.get("resource_usage"),
+        "activation_rollback_verified": None,
+        "successive_generation_gain": None,
+        "production_rsi_eligible": False,
+    }
 
 
 def _isolated_run_directory(results_dir: Optional[Path]) -> Path:

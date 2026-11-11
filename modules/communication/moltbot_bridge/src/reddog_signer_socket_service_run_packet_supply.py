@@ -22,6 +22,9 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply_contract import (
+    INITIAL_HANDSHAKE_CONFIG_SCHEMA_VERSION,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun import (
     PROVIDER_MODE_WSP71_PERMISSIONED,
 )
@@ -137,12 +140,8 @@ def run_reddog_signer_socket_service_run_packet_supply(
     assert config_resolved is not None
     assert output_resolved is not None
     assert owner_resolved is not None
-    if config.get("proposal_authority_policy") is not None:
-        return _reject(
-            (
-                FAIL_SIGNER_RUN_PACKET_PROPOSAL_RUNTIME_ADAPTERS_UNAVAILABLE,
-            )
-        )
+    # Proposal dependencies are supplied by the current owner's startup custody
+    # after process isolation. A packet is configuration, never admission.
     socket_path = Path(str(config["socket_path"])).resolve()
     profiles = tuple(config.get("key_provider_profiles") or ())
     executable = str(python_executable or sys.executable)
@@ -236,7 +235,7 @@ def _config_reasons(
     expected_runtime_root: Path,
     payload: Mapping[str, Any],
 ) -> tuple[str, ...]:
-    if payload.get("schema_version") != SIGNER_SERVICE_CONFIG_SCHEMA_VERSION:
+    if payload.get("schema_version") not in (SIGNER_SERVICE_CONFIG_SCHEMA_VERSION, INITIAL_HANDSHAKE_CONFIG_SCHEMA_VERSION):
         return (FAIL_SIGNER_RUN_PACKET_CONFIG_MALFORMED,)
     if payload.get("provider_mode") != PROVIDER_MODE_WSP71_PERMISSIONED:
         return (FAIL_SIGNER_RUN_PACKET_CONFIG_MALFORMED,)

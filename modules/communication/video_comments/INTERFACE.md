@@ -1,5 +1,162 @@
 # Video Comments - Public Interface
 
+## Visual evidence truth boundary (2026-11-05)
+
+`CommentProcessor.engage_comment` preserves the executor's `delivery_verified`
+result independently of `_inspect_posted_reply`. The latter returns
+`visual_observation` with `authoritative=False`, `text_verified=False`, and one
+of `not_requested`, `screenshot_unavailable`, `unavailable`, or
+`locator_returned`. A locator confidence is not a semantic or delivery verdict.
+The current bridge recaptures its own image, so `model_image_binding` is
+`unbound_recapture`; the saved screenshot/hash is not asserted to be the actual
+model input. Evidence append failure is `reply_evidence_status=append_unavailable`
+and does not revoke verified delivery. No observation can promote an uncertain
+submission. Existing language review, exact DOM readback and history claims
+remain authoritative for their separate responsibilities.
+
+## Owned Studio identity and empty baseline (2026-11-05)
+
+`comment_row_context.py` shares its original-comment metadata/author helpers
+between extraction and `matchesCommentTarget`. Both legacy
+`ytcp-video-thumbnail-with-info` links and the observed original-owned
+`ytcp-comment-video-thumbnail#video-thumbnail` are supported. Only an absolute
+HTTPS `i.ytimg.com/vi/<11-safe-character-ID>/default.jpg` image can supply modern
+thumbnail identity. Thumbnail-only context has `video_url=None`; multiple distinct
+qualified IDs leave identity and title absent.
+
+The additive `author_url` is the selected owned author anchor's trusted origin
+and pathname, rechecked when present in the captured target. Observed HTTP
+YouTube handle links are identity metadata only and are never fetched. Trusted
+host/protocol, credentials and port checks apply; an author UC ID can come only
+from that selected anchor's `/channel/` path. A handle never implies a UC ID.
+Nested/foreign authors or content cannot fill the original row's missing fields.
+
+`BrowserReplyExecutor.execute_reply` copies the supplied target, discards a caller
+`_target_channel_handle` and resolves the existing registry once by receiving UC
+ID. The returned entry must have that exact ID and a valid handle. Modern row
+binding, baseline and final Submit require this frozen context plus at least one
+matching native `CHANNEL_ID`; any present contradiction or malformed value fails.
+The exact Studio origin/channel path is also required. Legacy identity/readback
+behavior is retained; missing mapping never grants the modern route.
+
+`_reply_snapshot` qualifies the observed action-buttons > `div#toolbar` >
+show-replies host/native-button chain. Empty zero requires both disabled signals,
+both `aria-disabled=true`, `EXPAND`, exact zero text and no reply evidence.
+Expanded non-veto requires `thread[show-replies]`, `COLLAPSE`, enabled/aria-false
+controls and a settled visible native inventory. The label is not an inventory
+count: one displayed reply can accompany four loaded rows. Multiple supported
+reply containers, missing/duplicate IDs, hidden rows, loading, more or conflicting
+controls refuse a complete baseline.
+
+Modern readback requires a direct native `ytcp-comment-replies#replies` sibling,
+an owned expanded `[is-reply]` row with its raw parent-plus-suffix ID, and owned
+metadata containing the hidden name anchor and native `[is-creator]` badge.
+Their trusted YouTube handle links must agree with the frozen registry handle;
+the badge text must agree too. This is receiving-UC-to-known-handle context,
+never handle-to-UC inference. Only a new exact-text creator ID can settle the
+existing durable attempt. Historical matching IDs, nested submissions and unknown
+delivery reservations retain their existing refusal behavior.
+
+Native textarea clear/append/read/micro-edit operations use `value`; ordinary
+contenteditable operations use `textContent`. Stale recovery and micro-edit
+continuation require the actual input to be an exact prefix of the approved
+draft. A confirmed micro-edit updates the typing index. The final exact-text and
+pre-submit gates remain unchanged.
+
+## Optional memory lifetime (2026-11-05)
+
+`IntelligentReplyGenerator` passes the current generation cancellation event and
+`allow_cold_init=False` to the existing `VoiceMemory.query()` owner. It checks
+cancellation before/after personalization and voice grounding. An unavailable or
+unsupported ready-only collaborator supplies no optional memory; it is never
+retried through a cold legacy query. The caller's 10-second generation and
+separate 5-second review budgets are unchanged. This is cooperative stage gating,
+not hard cancellation of an active native operation or automatic warmup.
+
+## Shared YouTube model route (2026-11-01)
+
+Assessment, writer and exact final review now call the shared AI Gateway.
+Direct xAI and embedded local-provider fallback are retired for these consumers.
+Ordinary and themed live chat share this reviewed path. NVIDIA's shadow proposer
+remains evaluation-only; exact signed bindings govern dynamic production models.
+See [routing/configuration and evidence limits](../video_comments/LLM_INTEGRATION.md).
+
+## Quality-stop contract (2026-11-01)
+
+`ReplyGenerationResult` adds optional `rejection_reason=None`, preserving existing
+positional callers. `invalid_reply_text` denotes an actual nonempty rejected
+writer draft, not a missing provider or intentional skip. It resets under the
+existing per-generation lock and travels with that generation's receipt.
+`CommentProcessor` returns `halted_for_reply_quality=True` and a bounded
+`quality_halt_reason` for that code, `review_rejected`, or
+`review_unavailable_or_invalid`. No executor call follows. The DAE stops its
+current loop before events, nested work and refresh, and returns the same fields
+in its summary. It does not claim the inbox is clear after a quality halt.
+
+This does not persist a global suspension across orchestrator rotation/restart.
+The existing durable unknown-delivery reservations remain independent and are
+never released by a quality result. UI-TARS remains a visual observer; final
+meaning review is a separate general-language call, not calibrated correctness.
+
+`BrowserReplyExecutor` rechecks the existing gate snapshot before binding or
+claiming an attempt and again after typing/theme checks immediately before the
+single Submit script. STOP or disabled automation/engagement/reply blocks it.
+Unsubmitted claims retain the existing proven-no-submit release behavior.
+
+## Account-switch access contract (2026-10-29)
+
+`TarsAccountSwapper.swap_to(target, *, navigate_to_comments=True)` certifies
+matching native channel identity, exact HTTPS Studio channel path and an
+observed accessible shell. Comments remain the default surface; `False` retains
+content navigation through every recovery branch. The scheduler's private
+verifier passes a frozen `expected_channel_id`, preventing environment/registry
+changes from silently changing an already-bound receiving target. Unknown
+native identity or permission state returns failure. No screenshot Boolean
+substitutes for these checks.
+
+
+## 2026-10-29 inspected posting contract
+
+The posting wrapper supplies `semantic_context` to `generate_reply_with_source`.
+This selects meaning assessment → grounded language draft → final language
+review before browser submission; legacy tier/template shortcuts do not select
+the answer. Content-neutral cooldown, repetition and recent-reply controls remain.
+`ReplyGenerationResult(text, source, theme=None, context=None)` retains the
+generation's supplied history, verified memory, assessment and private theme.
+Inspection receives that snapshot plus the original author/channel/video.
+`generate_reply_with_source(..., reply_surface='comments', cancel_event=None)`
+keeps comments as the default, with existing history/cooldown and legacy reader
+behavior. The explicit `livechat` surface requires semantic context, reads only
+the livechat queue scope and records that surface in its receipt. Invalid surfaces
+and inspection/receipt surface mismatches fail closed. `inspect_reply` accepts
+`cancel_event`; `_reply_surface` selects the matching freshness reader.
+
+The livechat reuse path permits only general-role LM Studio HTTP calls (each has
+a three-second request timeout), rejects a busy generation/review lock and skips
+embedded Qwen/cloud/template fallbacks. Comments retain serialized blocking
+access and their existing provider chain. Cancellation is checked before provider
+dispatch and after returned results; it cannot terminate an active HTTP request.
+Explicit and discovered LM Studio writers must match `resolve_general_model_path`
+as well as the conservative role filter. This is source routing, not a signed
+provider-admission receipt or measured model quality.
+
+`BrowserReplyExecutor.execute_reply(..., expected_comment=..., pre_submit_guard=...)`
+requires original full text, author, real `comment_id`, `video_id` and
+`_target_channel_id` on the exact Studio origin. It rechecks those identities and
+exact entered text in the single submit script. Settled existing reply IDs form
+the baseline; verification requires a new reply ID with exact text and the actual
+creator channel. Hidden/ambiguous replies and row disappearance are uncertain.
+Nested submission remains disabled until equivalent qualification exists.
+
+The existing `CommenterHistoryStore` adds `reply_target_key`, `begin_reply_attempt`,
+`finish_reply_attempt`, `get_reply_attempts` and `append_reply_evidence`.
+Claims are keyed by receiving channel/video/comment independently of draft text;
+unknown and verified reservations block later attempts across restarts. Only a
+proven pre-submit failure releases a claim. Verified delivery and its existing
+interaction-history row commit together. Unique screenshots, hashes, review and
+inspection results remain private evidence. `YT_COMMENT_HISTORY_DB` may select an
+absolute shared database across release checkouts; default module memory remains.
+
 **Module:** communication/video_comments
 **WSP Reference:** WSP 11 (Interface Documentation)
 **Status:** Production
@@ -9,6 +166,62 @@
 This module provides autonomous YouTube Studio comment engagement through the `CommentEngagementDAE` class and `execute_skill()` function. All engagement actions (Like, Heart, Reply) are performed via Selenium DOM automation with optional UI-TARS vision verification.
 
 It also provides a lightweight **012 → Comment DAE control plane** for “broadcast” updates (e.g., promote a new channel) stored in module memory and injected into replies probabilistically to avoid spam signatures.
+
+### Shared 012 manifest context (bounded contract)
+
+`commenting_control_plane.load_broadcast()` first reads the LiveChat queue's
+`resolve_manifest_state_path()`, respecting `YT_012_MANIFEST_STATE_FILE` relative
+to the checkout (or an absolute configured path). Shared state requires integer
+version 1, an active context object, a nonempty allowlisted string-surface list
+containing `comments`, a nonempty message of at most 500 characters, and a finite
+numeric expiry strictly in the future. Boolean/string/nonfinite expiry is invalid.
+Missing, unreadable, invalid, expired or non-comment context leaves the legacy
+local broadcast fallback unchanged. Loading does not rewrite either file.
+Legacy `set_promo`/`clear_promo` affect only the legacy file; shared context remains
+queue-owned. 53 offline reader cases validate this boundary, not live posting.
+
+## Contextual reply contract (PR1478 offline qualification)
+
+The Studio row supplies comment text and video context; the receiving channel
+selects personality. Preserve the raw comment when adding semantic guidance,
+history and verified VoiceMemory. The same full prompt reaches the local
+service and embedded general-language model routes.
+
+The proposed route tries LM Studio with a three-second request bound, then
+embedded general Qwen via the existing role resolver. Grok is an explicit
+`YT_ENABLE_GROK_REPLIES=true` legacy opt-in. This source configuration is not
+current model availability, provider admission or a measured successful call.
+
+`generate_reply()` remains the string-returning interface. The processor uses
+`generate_reply_with_source(..., cancel_event=None)` and its immutable
+`ReplyGenerationResult(text, source)` snapshot under the same per-instance lock.
+The source used for the posting decision and later diagnostics belongs to that
+result; `get_last_llm_source()` is a legacy diagnostic, not a cross-thread receipt.
+The ten-second await invalidates queued work before provider invocation. It
+cannot terminate an already-running provider thread; that thread retains the
+lock until it finishes, and its timed-out result is not posted.
+
+The exact allowlist is `CommentProcessor.CONTEXTUAL_PROVIDERS`,
+`CONTEXTUAL_SKILLS` and `CONTEXTUAL_STRATEGIES`: recognized providers, supported
+skill/provider combinations, and specific content-aware greeting/emoji strategies.
+Unknown, malformed or substring-only labels reject. Replacing or discarding a
+model draft must discard its provider attribution. This local source snapshot is
+not an authenticated provider-call receipt or proof of semantic correctness.
+For example, the legacy `skill_0:grok_greeting` name identifies a local
+content-matched response-pool strategy; it does not establish a Grok call.
+`YT_ALLOW_GENERIC_REPLY_FALLBACK` explicitly restores generic legacy behavior;
+it does not prove grounded generation. Grok opt-in is checked at the actual call.
+
+`reply_context.py` owns pure prompt/personality assembly;
+`comment_row_context.py` owns row extraction and small context adapters. No new
+provider, store or scheduler is introduced. Missing or ambiguous row metadata
+must remain absent rather than falling back to another video's inbox context.
+
+This module does not acquire a RedDog/OpenRouter reply grant. The original PR's
+provider-neutral reply-runner proposal remains a future integration requiring
+current route/owner discovery and existing authenticated admission, budget and
+call-evidence contracts. It is not permission to use a private script bridge or
+a promise that signed inputs are presently configured.
 
 ## Primary Interface: execute_skill()
 
@@ -126,7 +339,15 @@ result = await dae.engage_comment(
 ```
 
 #### engage_all_comments(max_comments, ...) → Dict
-Engage with all visible comments.
+Engage with all visible comments. The existing `stats.all_processed` boolean is
+`True` only with zero remaining DOM threads, current positive empty-state
+evidence and no quality halt. A zero count, timeout, failed empty-state read or
+filtered/search-empty message leaves it `False` (completion unverified).
+Text evidence normalizes whitespace before the filtered-message veto.
+This qualifies the observed inbox view, not an unfiltered global inbox.
+`_wait_for_comments_loaded()` retains its integer count return; callers must
+not interpret zero alone as completion. Clear breadcrumbs and completion
+notifications also require a positive empty-state observation.
 ```python
 result = await dae.engage_all_comments(
     max_comments=10,

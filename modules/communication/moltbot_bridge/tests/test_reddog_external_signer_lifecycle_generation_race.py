@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import inspect
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -190,6 +191,7 @@ def test_verified_consumer_has_no_registry_injection(tmp_path, injection):
     consume = lifecycle_module.consume_verified_external_signer_lifecycle_admission
     assert set(inspect.signature(consume).parameters) == {
         "boundary", "capability", "requester_principal_id", "signer_profile_id",
+        "require_default_dependencies",
     }
     with pytest.raises(TypeError):
         _consume_verified(boundary, capability, **{injection: lambda *_: None})
@@ -320,3 +322,121 @@ def test_same_generation_other_boundary_cannot_consume_identity_capability(tmp_p
     with pytest.raises(ExternalSignerLifecycleAdmissionError):
         second.consume(capability)
     assert first.consume(capability).generation == 1
+
+
+def _default_selection_probe(tmp_path, monkeypatch, **overrides):
+    """Probe actual factory metadata with synthetic consume, never admission."""
+    repo, _, values = _runtime(tmp_path)
+    authority, reader = create_lifecycle_generation_authority(repo, values)
+    policy = _PolicyBoundary()
+    calls = []
+    response = SimpleNamespace(
+        requester_principal_id="github:mjtrout", signer_profile_id="reddog-work-authority",
+    )
+
+    def consume(marker):
+        calls.append(marker)
+        return response
+
+    monkeypatch.setattr(lifecycle_module, "_make_consume", lambda *_: consume)
+    boundary = create_external_signer_lifecycle_admission_boundary(
+        repo_root=repo, manifest_boundary=_SelectionBoundary(values),
+        generation_reader_authority=authority,
+        generation_reader_authority_boundary=reader,
+        os_policy_authority=policy, os_policy_authority_boundary=policy,
+        requester_principal_id="github:mjtrout", **overrides,
+    )
+    assert calls == []
+    return boundary, object(), response, calls
+
+
+@pytest.mark.parametrize("mode", [
+    "omitted", "explicit_observer", "explicit_health", "explicit_both", "none_clocks",
+    "observer", "observer_wrapper", "health", "health_wrapper", "wall", "monotonic",
+    "all", "falsey_wall", "falsey_monotonic",
+])
+def test_default_dependency_selection_controls_registered_dispatch(tmp_path, monkeypatch, mode):
+    defaults = inspect.signature(create_external_signer_lifecycle_admission_boundary).parameters
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("selection must not invoke dependency")
+
+    observer = defaults["os_observer"].default
+    health = defaults["healthcheck_runner"].default
+    overrides = {
+        "omitted": {}, "explicit_observer": {"os_observer": observer},
+        "explicit_health": {"healthcheck_runner": health},
+        "explicit_both": {"os_observer": observer, "healthcheck_runner": health},
+        "none_clocks": {"trusted_clock": None, "trusted_monotonic_clock": None},
+        "observer": {"os_observer": forbidden},
+        "observer_wrapper": {"os_observer": lambda *a, **k: observer(*a, **k)},
+        "health": {"healthcheck_runner": forbidden},
+        "health_wrapper": {"healthcheck_runner": lambda *a, **k: health(*a, **k)},
+        "wall": {"trusted_clock": forbidden},
+        "monotonic": {"trusted_monotonic_clock": forbidden},
+        "all": dict.fromkeys(
+            ("os_observer", "healthcheck_runner", "trusted_clock", "trusted_monotonic_clock"), forbidden,
+        ),
+        "falsey_wall": {"trusted_clock": 0}, "falsey_monotonic": {"trusted_monotonic_clock": 0},
+    }[mode]
+    boundary, marker, response, calls = _default_selection_probe(tmp_path, monkeypatch, **overrides)
+    if mode in ("omitted", "explicit_observer", "explicit_health", "explicit_both", "none_clocks"):
+        assert _consume_verified(boundary, marker, require_default_dependencies=True) is response
+        assert calls == [marker]  # Synthetic dispatch only; no real capability issued.
+    else:
+        with pytest.raises(ExternalSignerLifecycleAdmissionError, match="default_dependencies_required"):
+            _consume_verified(boundary, marker, require_default_dependencies=True)
+        assert calls == []
+        assert _consume_verified(boundary, marker) is response
+        assert calls == [marker]
+
+
+@pytest.mark.parametrize("requirement", [True, None, 0, 1, "true", []],
+                         ids=["strict", "none", "zero", "one", "text", "list"])
+def test_dependency_requirement_rejection_preserves_real_audit_handle(tmp_path, requirement):
+    boundary, selection, observer, healthcheck, *_ = _admission_boundary(tmp_path)
+    capability = boundary.admit(selection)
+    with pytest.raises(ExternalSignerLifecycleAdmissionError):
+        _consume_verified(boundary, capability, require_default_dependencies=requirement)
+    receipt = _consume_verified(boundary, capability)
+    assert receipt.authority_granted is receipt.valve_unlocked is receipt.effect_capability_issued is False
+    assert observer.calls == healthcheck.calls == 1
+    with pytest.raises(ExternalSignerLifecycleAdmissionError):
+        _consume_verified(boundary, capability)
+
+
+def test_explicit_false_preserves_legacy_audit_consumption(tmp_path):
+    boundary, selection, *_ = _admission_boundary(tmp_path)
+    capability = boundary.admit(selection)
+    assert _consume_verified(boundary, capability, require_default_dependencies=False).generation == 1
+    with pytest.raises(ExternalSignerLifecycleAdmissionError):
+        _consume_verified(boundary, capability, require_default_dependencies=False)
+
+
+@pytest.mark.parametrize("replacement", [False, True])
+def test_default_dependency_identity_is_captured_before_alias_rebinding(tmp_path, monkeypatch, replacement):
+    def forbidden(*args, **kwargs):
+        raise AssertionError("default selection must not invoke a dependency")
+
+    monkeypatch.setattr(lifecycle_module, "_DEFAULT_OS_OBSERVER", forbidden)
+    monkeypatch.setattr(lifecycle_module, "_DEFAULT_HEALTHCHECK_RUNNER", forbidden)
+    overrides = {"os_observer": forbidden, "healthcheck_runner": forbidden} if replacement else {}
+    boundary, marker, response, calls = _default_selection_probe(tmp_path, monkeypatch, **overrides)
+    if replacement:
+        with pytest.raises(ExternalSignerLifecycleAdmissionError, match="default_dependencies_required"):
+            _consume_verified(boundary, marker, require_default_dependencies=True)
+        assert calls == []
+    else:
+        assert _consume_verified(boundary, marker, require_default_dependencies=True) is response
+        assert calls == [marker]
+
+
+def test_strict_dispatch_ignores_public_boundary_method(tmp_path, monkeypatch):
+    boundary, marker, response, calls = _default_selection_probe(tmp_path, monkeypatch)
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("public consume cannot supply registered dispatch")
+
+    monkeypatch.setattr(type(boundary), "consume", forbidden)
+    assert _consume_verified(boundary, marker, require_default_dependencies=True) is response
+    assert calls == [marker]

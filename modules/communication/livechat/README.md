@@ -1,4 +1,170 @@
+## Frozen stream scheduling — 2026-11-10
+
+The existing private manifest accepts `schedule_stream_shorts` with a bounded
+expiry. It freezes the confirmed active stream and lets the existing browser
+owner select every exact-title UNLISTED Short on the same channel. Acceptance is
+pending work, not delivery. A claimed request yields that browser for operator
+review; unknown results never retry automatically. See the
+[request contract](docs/VIDEO_POLICY_INTERFACE.md#frozen-stream-scheduling-requests)
+for controls and the distinction between title selection and native lineage proof.
+Current qualification is offline; no live scheduling result is claimed.
+
+An ended stream can instead be explicitly bound with `recorded_source` and
+`first_test_only=true`. The native consumer refreshes only the named scheduling
+command; unrelated queued announcements stay untouched. The complete title-matching
+batch is frozen while only its first Short is admitted for a metadata-preserving
+test. The rest remain withheld pending separately qualified saved-state evidence;
+neither a new command nor restart retries the source. See the same request contract.
+
+## Quiet conversation stewardship — 2026-11-07
+
+The default DAE receive path observes every supplied text message before response
+selection. The whole received batch is captured before generation; ordinary
+candidates retain arrival order. Questions, direct requests and problem reports
+may reach the existing shared assessment/writer/reviewer. The model must explicitly
+choose `should_reply=true`; rejection, missing evidence, stale input or changed
+context stays quiet, without canned fallback. Bare emojis and political keywords
+are not engagement reasons. Timer trolling, automatic invite broadcasts and startup
+greetings are removed. Explicit operator announcements keep their existing owner.
+
+All participants are stakeholders. Generic platform moderator/owner flags remain
+compatibility metadata and command permissions; a managing moderator is a delegate
+when that assignment is independently established. Current ingestion cannot distinguish
+managing from standard moderators. Badges do not prioritize ordinary conversation.
+
+Initial budget: three attempts per ten minutes, at least two minutes apart globally,
+one per participant per ten minutes. Failure/abstention consumes a slot. Only fresh
+input (at most 120 seconds old) is eligible. Scoped context uses up to 20 current-session
+messages and five native-ID participant messages, 500 characters each, from the existing
+ChatMemoryManager database. No display-name identity join or cross-session profiling.
+The destination is rechecked after sender waits; existing STOP and reviewed-text/theme
+checks remain. Model availability and verified live delivery are separate requirements.
+
+Use the [conversation stewardship skill](../../../.claude/skills/youtube-conversation-stewardship/SKILL.md)
+for observation, diagnosis and a bounded repair handoff. Its host-agent instructions do
+not register an autonomous WRE executor or authorize production promotion. WSP 15
+prioritizes approved repairs, not participant worth. See INTERFACE for scope limits.
+
 # LiveChat
+
+## YouTube DAE repair checkpoint — 2026-11-07
+
+The repair handoff records PR2314 merged and installed at `fa7d487f3`: received
+text capture, Windows driver pipe isolation and contextual emoji-question
+routing are present in source. Live semantic qualification of the installed
+reply route remains pending. The 2026-11-07 02:32:34 UTC process observation found
+no `main.py` or worker, excluding inspection commands; an intended restart is not
+restart evidence. Menu recovery, model residency and
+a Submit click do not establish a correct delivered reply.
+
+Continue from the [ordered repair work list](../../platform_integration/youtube_shorts_scheduler/ROADMAP.md#repair-work-list--2026-11-07).
+Manual scheduler takeover, evidence-based Foundups YUMORI song metadata and the
+remaining shared AI router migration are separate unfinished work. Unknown
+comment and scheduling outcomes remain reserved; do not retry or clear them.
+
+The same handoff records LM Link connector startup/timeouts without peers,
+first under `llmster` and then LM Studio GUI. The supported `lms link disable`
+operation exited successfully and returned `forceDisabled=true`. All 36 passive
+samples over 36 seconds found no connector while the GUI remained present.
+This is bounded configuration verification, not a source window fix or proof
+that LM Studio model HTTP is unavailable or all model-memory dependencies are
+broken.
+
+## Emoji questions (2026-11-07)
+
+An authorized hand-emoji trigger containing text routes the complete message
+through the existing channel-bound, assessed and reviewed reply pipeline. It
+uses the current private live-chat context and preserves the reviewed text to
+the sender. Missing/disabled models, expiry, cancellation, quality rejection
+and rate/diversity limits produce no canned answer. Bare emoji acknowledgments,
+explicit code commands and slash-command precedence retain their existing paths.
+Only an entire emoji-plus-1–4 message is a quiz answer; a quiz with no result
+does not fall through to general generation. PR2314 is installed at the checkpoint
+above; activation in a fresh daemon and live semantic delivery remain unverified.
+
+## Scoped comment-quality halt (2026-11-05)
+
+Recognized rejected reply text latches a comments-only incident in the existing
+`memory/STOP_YT_AUTOMATION` file. The existing gates refuse further comment
+generation, reactions, submission, retries and channel advancement. A typed halt
+is not inbox clearance or rotation completion. Explicit live-chat and scheduling
+surfaces retain their other permission checks; every manual, empty, unknown,
+malformed or unreadable STOP remains global.
+
+The default and relative override paths resolve from the checkout root. An
+absolute `YT_AUTOMATION_STOP_FILE` override stays absolute. No private comment,
+draft or prompt is stored in this incident. Private manifest intake stays available
+and cannot reset it. See [the interface](INTERFACE.md) for the closed record,
+dedicated child exit code and explicit recovery boundary.
+
+Recovery first settles the old comment owners, then uses the existing STOP
+owner's exact matching compare-and-clear API and starts fresh comment owners.
+Removing the file does not reset an already halted parent, and clearing a quality
+incident never releases uncertain delivery reservations. There is no automatic
+expiry or generic resume action. This qualifies cooperating writers and offline
+synthetic collaborators; it does not prove a live reply was delivered.
+
+## Bounded subprocess output and handoff diagnostics (2026-11-05)
+
+The existing comment runner drains stdout/stderr in 65,536-byte chunks and
+retains physical lines up to 65,536 bytes before LF (including CR). It discards
+an entire oversized line, including JSON-looking suffixes, then continues with
+subsequent valid output. Fixed phase codes distinguish initialization, matching
+work settlement, observed direct-child exit and completed pipe readers.
+
+Completed reader/wait failures retain failed ownership through a constant
+RuntimeError. An inherited pipe held by a descendant still blocks settlement
+until actual EOF; this change adds no abandonment timeout or family kill.
+The original81 lifecycle controls plus20 new controls pass101 in a closed
+credential-free Windows run. This does not identify the live incident
+conclusively or verify chat delivery. See INTERFACE and tests/TestModLog.
+
+## Shared YouTube model route (2026-11-01)
+
+Assessment, writer and exact final review now call the shared AI Gateway.
+Direct xAI and embedded local-provider fallback are retired for these consumers.
+Ordinary and themed live chat share this reviewed path. NVIDIA's shadow proposer
+remains evaluation-only; exact signed bindings govern dynamic production models.
+See [routing/configuration and evidence limits](../video_comments/LLM_INTEGRATION.md).
+
+Private operator video directives now share the existing manifest queue. Scoped
+metadata/scheduling/Shorts policies refresh synchronously before writer guards;
+unknown outcomes remain durable and blocked. Private context activation stays
+independent of public send gates. See [the current policy API](docs/VIDEO_POLICY_INTERFACE.md)
+for offline qualification, exact expiry and persisted-readback boundaries.
+
+The private-theme route retains reviewed Grok replies and uses the existing local
+general-language assessment/writer/reviewer if Grok is unavailable or rejects a
+draft. The fallback requires LM Studio HTTP, keeps livechat scope and full native
+theme snapshots, and reviews the final `@mention` within 200 characters. Existing
+engagement/cooldown decisions precede the ten-second threaded wait; late results
+are discarded and busy shared generation/review locks reject immediately. See
+[the interface](INTERFACE.md) and [repair handoff](../video_comments/docs/CHAT_MANIFEST_REPAIR_20261029.md)
+for cancellation limits and remaining live qualification.
+
+## Current bounded live handoff
+
+Received text is captured through the existing ChatMemoryManager before reply
+filtering, command throttling or model generation. The immediate record is SQLite
+`chat_logs.db` in that manager's selected memory directory, carrying the session,
+author ID, display name, text, observed time and USER/MOD/OWNER role. Full and
+moderator-only text transcripts are exported by `end_session`; a per-stream JSON
+file is not the live capture authority. Inspect the selected runtime paths and
+new rows, not an old heartbeat or a send acknowledgement. In-memory message-ID
+deduplication is unchanged; this does not guarantee replay recovery or exactly-once
+capture across database failures or process restarts.
+The available initial API text batch is also captured, without triggering replies
+or old commands. Earlier text outside that provider batch is not reconstructed.
+
+PR841 preserves independent Chrome/Edge comment loops during a confirmed API live
+session while awaiting the matching channel's owned work before polling. The default
+termination call still shuts down the full supervisor. The session reservation
+survives an absent/stale file signal and is cleared on exit. See [INTERFACE](INTERFACE.md)
+and [offline acceptance](tests/README.md) for the actual ownership boundary.
+
+Subprocess workers are reaped; threads cannot be force-stopped and can keep a handoff
+waiting. Failed cleanup remains blocking. This does not prove systemwide browser
+quiescence, independent CommunityMonitor shutdown, live delivery or native authoring.
 
 ## [U+1F3E2] WSP Enterprise Domain: `communication`
 

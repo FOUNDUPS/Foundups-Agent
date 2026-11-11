@@ -1,4 +1,59 @@
+## PR1792 reusable brand core selection — 2026-10-25
+
+Run `node extensions/reddog/tests/test_foundup_work_grounding.js` and the existing
+package-manifest/surface scripts explicitly; the current Node fast tier does
+not discover this grounding suite. Grounding tests snapshot public registry
+entities into owned fixtures rather than treating a dirty checkout as clean.
+They retain existing generic/unknown-reference, scope and integrity assertions,
+then exercise synthetic child identity, Japanese aliases, dirty/missing evidence,
+private-path preread denial, junction/symlink and hard-link rejection.
+
+The existing Python target-verifier suite invokes the actual Node producer;
+provide Node on PATH or `REDDOG_TEST_NODE`. Missing Node is a failure, not a skip.
+Backend/schema selection currently contains 74 cases. Qualification receipts
+bind exact case identities, normal imports and effect guards. Package surface
+also checks the Git index and must be run after the owner stages the candidate.
+No protected brand activation or deployed-host result is implied.
+
+## Issuer composition closure count — 2026-10-16
+
+`node extensions/reddog/tests/test_backend_compatibility_contract.js` reproduced
+the generated1428-member manifest versus stale1426-member consumer cap. The
+updated boundary accepts1428 and rejects1429; digest, paths, hashes and byte
+limits remain enforced. CI now invokes this contract before existing preflight.
+Membership adds only the root request-role and extracted startup dependency owners.
+This verifies repository compatibility, not installed extension/runtime state.
+
+## Effect approval closure count — PR2090, 2026-10-07
+
+Backend runtime closure1419→1421 adds exactly `reddog_effect_consensus_proof.py`
+and `reddog_current_effect_signing_authority.py`, removes none. The existing
+compatibility cap and boundary regression now accept1421/reject1422, and require
+both named additions. Digest remainsbc84374ad861c79d9b51c79964722916a7f6b0e336a2356909fe486923e0259d;
+byte limits, allowlists and signatures are unchanged. No service/extension install.
+
+CI37507545251 passed signing677/3skip and startup248, then exposed the stale1419
+extension boundary. Local full fast tier15 members passed in9468ms after restoring
+required LF to changed JS files. Independent two-file review found no blocker;
+receipt `effect-signing-extension-count-review.json`, SHA256
+`d09b48a349f4016dd964ab0bae45440661c4e86dc2f4a0e9c74e3e60846b6bb4`.
+WSP00/6/15/22/50/84/97. New-head hosted checks pending; no native RSI claim.
+
 # RedDog Extension Tests
+
+## PR1638 local activity-ledger reconciliation
+
+Current scope and results: [integration receipt](../docs/PRINCIPAL_ACTIVITY_LEDGER_INTEGRATION_RECEIPT.md)
+and the PR1638 entry in `TestModLog.md`. Existing ledger/adapter suites now cover
+key concurrency/loss, authenticated append, partial I/O and cleanup, cooperating
+child-process locking, strict JSON, latest commitment status, and truthful
+bounded projections using temporary data and fake SecretStorage. Registration
+remains a static contract; real installed-host operation is unqualified.
+
+The fast tier has 18 members, including the three PAL tests. The package contract
+has 69 files (68 LF text, one binary) under its unchanged one MiB cap. Historical
+67-file release receipts below keep their original source scope. The focused
+Linux/Windows CI job is configured; hosted results require new-head execution.
 
 ## 0.4.141 identity / merged builder reconciliation candidate
 

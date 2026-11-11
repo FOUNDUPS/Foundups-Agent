@@ -54,6 +54,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_confi
     FAIL_SIGNER_CONFIG_SOCKET_PATH_INVALID,
     SIGNER_SERVICE_CONFIG_FILENAME,
     SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
+    INITIAL_HANDSHAKE_CONFIG_SCHEMA_VERSION,
     canonical_config_digest,
 )
 from modules.infrastructure.secrets_mcp.src.vault_resolver import parse_op_reference
@@ -61,6 +62,42 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     validate_runtime_artifact_path,
     validate_runtime_root_path,
 )
+
+
+def compose_initial_handshake_service_config(
+    *, repo_root: Path | str, runtime_root: Path | str,
+    signer_runtime_root: Path | str, socket_path: Path | str,
+    key_provider_profile: Any, peer_policy: Mapping[str, Any],
+    owner_e0_authority_binding_digest: str, timeout_s: float,
+    max_request_bytes: int, max_response_bytes: int,
+) -> dict[str, Any]:
+    """Compose approved initial bytes; E0 and per-request grants authorize use."""
+    from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun import SignerKeyProviderProfile
+    from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_rehydration import rehydrate_signer_socket_service_runtime_config
+
+    profile = (
+        asdict(key_provider_profile)
+        if type(key_provider_profile) is SignerKeyProviderProfile
+        else dict(key_provider_profile)
+    )
+    payload = {
+        "schema_version": INITIAL_HANDSHAKE_CONFIG_SCHEMA_VERSION,
+        "runtime_root": str(runtime_root),
+        "signer_runtime_root": str(signer_runtime_root),
+        "socket_path": str(socket_path),
+        "key_provider_profiles": [profile], "peer_policy": dict(peer_policy),
+        "provider_mode": PROVIDER_MODE_WSP71_PERMISSIONED,
+        "allow_test_only_key_material": False, "permission_snapshot_fresh": True,
+        "max_requests": 1, "timeout_s": timeout_s,
+        "max_request_bytes": max_request_bytes, "max_response_bytes": max_response_bytes,
+        "owner_e0_authority_binding_digest": owner_e0_authority_binding_digest,
+    }
+    if rehydrate_signer_socket_service_runtime_config(
+        Path(repo_root), Path(runtime_root), payload,
+        expected_config_digest=canonical_config_digest(payload),
+    ) is None:
+        raise ValueError("initial_handshake_config_invalid")
+    return payload
 
 
 _REQUIRED_AUTHORITY_FIELDS = (
@@ -576,6 +613,7 @@ def ascii_deep(value: object) -> bool:
 
 
 __all__ = [
+    "compose_initial_handshake_service_config",
     "ConfigInputs", "RuntimeArtifactPaths", "architect_publication_reasons",
     "authority_profile_reasons", "config_mapping", "conversation_scope_policy",
     "limit_reasons", "op_ref_reasons", "peer_policy", "proposal_runtime_inputs",

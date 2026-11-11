@@ -1,4 +1,4 @@
-﻿"""Chain-Agnostic Token Factory Adapter for FoundUps Agent Market.
+"""Chain-Agnostic Token Factory Adapter for FoundUps Agent Market.
 
 Provides a unified interface for token deployment across multiple chains
 without vendor lock-in. Implements the TokenFactoryAdapter contract.
@@ -8,10 +8,8 @@ WSP References:
 - WSP 30: Chain-agnostic design pattern
 - WSP 72: Module independence (no direct chain dependencies)
 
-Supported Chain Backends (via adapters):
-- In-Memory (testing/PoC)
-- Hedera HTS (via hedera_token_adapter)
-- EVM/ERC-20 (via evm_token_adapter)
+The bundled backend is in-memory simulation. Other chain types require an
+explicitly registered, connected backend; enum membership is not implementation.
 """
 
 from __future__ import annotations
@@ -25,6 +23,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
+from .exceptions import ValidationError
 from .interfaces import TokenFactoryAdapter
 from .models import Foundup, TokenTerms
 
@@ -198,14 +197,16 @@ class ChainAgnosticTokenFactory(TokenFactoryAdapter):
         address = factory.deploy_token(foundup, terms)
 
         # Deploy on specific chain
-        address = factory.deploy_token(foundup, terms, chain_hint="hedera")
+        terms.chain_hint = "hedera"
+        address = factory.deploy_token(foundup, terms)
     """
 
     def __init__(self, default_chain: ChainType = ChainType.MOCK) -> None:
         """Initialize token factory.
 
         Args:
-            default_chain: Default chain to use when not specified.
+            default_chain: Used only when chain_hint is None. MOCK preserves
+                the local PoC simulation; unavailable defaults never fall back.
         """
         self._backends: Dict[ChainType, ChainBackend] = {}
         self._default_chain = default_chain
@@ -224,37 +225,44 @@ class ChainAgnosticTokenFactory(TokenFactoryAdapter):
         Args:
             backend: ChainBackend implementation to register.
         """
-        self._backends[backend.chain_type] = backend
+        chain_type = backend.chain_type
+        if not isinstance(chain_type, ChainType):
+            raise ValidationError("Token backend chain type must be a ChainType")
+        self._backends[chain_type] = backend
         logger.info(
             "[TOKEN-FACTORY] Backend registered: %s",
-            backend.chain_type.value,
+            chain_type.value,
         )
 
-    def _get_backend(self, chain_hint: Optional[str] = None) -> ChainBackend:
-        """Get appropriate backend for chain hint."""
-        if chain_hint:
+    def _get_backend(
+        self, chain_hint: Optional[str] = None
+    ) -> tuple[ChainType, ChainBackend]:
+        """Resolve exactly one chain; reject invalid or unavailable selections."""
+        chain_type = self._default_chain
+        if chain_hint is not None:
+            if not isinstance(chain_hint, str):
+                raise ValidationError("Token chain hint must be a chain name or None")
             try:
-                chain_type = ChainType(chain_hint.lower())
-                if chain_type in self._backends:
-                    backend = self._backends[chain_type]
-                    if backend.is_connected():
-                        return backend
-                    logger.warning(
-                        "[TOKEN-FACTORY] Backend not connected: %s, falling back",
-                        chain_type.value,
-                    )
-            except ValueError:
-                logger.warning(
-                    "[TOKEN-FACTORY] Unknown chain hint: %s, using default",
-                    chain_hint,
-                )
+                chain_type = ChainType(chain_hint.strip().lower())
+            except ValueError as exc:
+                raise ValidationError("Unsupported token chain hint") from exc
 
-        # Use default chain
-        if self._default_chain in self._backends:
-            return self._backends[self._default_chain]
-
-        # Fallback to mock
-        return self._backends[ChainType.MOCK]
+        backend = self._backends.get(chain_type)
+        if backend is None:
+            raise ValidationError(f"No token backend registered for chain: {chain_type.value}")
+        if backend.chain_type is not chain_type:
+            raise ValidationError("Token backend chain identity mismatch")
+        try:
+            connected = backend.is_connected()
+        except Exception as exc:
+            raise ValidationError(
+                f"Could not check token backend connectivity: {chain_type.value}"
+            ) from exc
+        if not connected:
+            raise ValidationError(f"Token backend is disconnected: {chain_type.value}")
+        if backend.chain_type is not chain_type:
+            raise ValidationError("Token backend chain identity mismatch")
+        return chain_type, backend
 
     def deploy_token(self, foundup: Foundup, terms: TokenTerms) -> str:
         """Deploy a token for a FoundUp.
@@ -270,9 +278,11 @@ class ChainAgnosticTokenFactory(TokenFactoryAdapter):
             Token address string.
 
         Raises:
+            ValidationError: If the selected backend is invalid, unavailable,
+                or reports a different chain. No fallback is attempted.
             RuntimeError: If deployment fails.
         """
-        backend = self._get_backend(terms.chain_hint)
+        selected_chain, backend = self._get_backend(terms.chain_hint)
 
         result = backend.deploy_token(
             name=terms.token_name,
@@ -287,6 +297,8 @@ class ChainAgnosticTokenFactory(TokenFactoryAdapter):
 
         if not result.success:
             raise RuntimeError(f"Token deployment failed: {result.error}")
+        if result.chain_type is not selected_chain:
+            raise ValidationError("Token deployment result chain mismatch")
 
         # Track deployment
         self._deployments[foundup.foundup_id] = result
@@ -308,8 +320,11 @@ class ChainAgnosticTokenFactory(TokenFactoryAdapter):
         Args:
             token_address: Address of deployed token.
             terms: Token terms with vesting policy.
+
+        Raises:
+            ValidationError: If the selected backend is invalid or unavailable.
         """
-        backend = self._get_backend(terms.chain_hint)
+        _selected_chain, backend = self._get_backend(terms.chain_hint)
 
         vesting_policy = terms.vesting_policy or {}
         config = VestingConfig(

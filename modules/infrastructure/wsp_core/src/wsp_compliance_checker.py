@@ -1,36 +1,29 @@
-"""
-WSP Compliance Checker (Infrastructure)
-Scans the repository for WSP violations (platform-agnostic).
+"""Read-only WSP hints from Git-tracked working-tree files.
 
-WSP Compliance:
-- WSP 3: Architecture organization
-- WSP 22: ModLog documentation
-- WSP 57: Naming coherence
-- WSP 60: Pattern memory (false-positive recall)
-- WSP 62: File size limit
-- WSP 63: Component count
-- WSP 6: Test coverage
-- WSP 12: Dependency management
+No application source is imported and no pattern database is opened. This is a
+structural advisory scanner; FMAS owns exact-base size/exemption enforcement.
 """
+from __future__ import annotations
 
-import logging
-from datetime import datetime
-from pathlib import Path
+from collections import Counter
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
-from typing import Iterator, List, Optional, Any
+from pathlib import Path
+import stat
+import subprocess
+from typing import Iterable, List, Optional
 
-# Pattern memory for learned false positives (WSP 48/60)
-try:
-    from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory
-except Exception:
-    PatternMemory = None
-
-logger = logging.getLogger(__name__)
+from modules.infrastructure.wre_core.src.wre_git_bounded_io import (
+    git_read_environment, run_bounded_stdout,
+)
+from modules.infrastructure.wsp_core.src.wsp_domain_policy import (
+    ARCHITECTURAL_EXCEPTIONS, CORE_DOMAINS, RESERVED_BLOCK_NAMES,
+    evidenced_module_roots, unqualified_module_containers,
+)
 
 
 class WSPViolationType(Enum):
-    """Types of WSP violations"""
     NAMING_COHERENCE = "WSP 57 - Naming Coherence"
     FILE_SIZE = "WSP 62 - File Size Limit"
     COMPONENT_COUNT = "WSP 63 - Component Count"
@@ -39,410 +32,231 @@ class WSPViolationType(Enum):
     DOCUMENTATION = "WSP 22 - ModLog Documentation"
     TESTING = "WSP 6 - Test Coverage"
     DEPENDENCY = "WSP 12 - Dependency Management"
+    SCAN_INCOMPLETE = "WSP 50 - Incomplete Repository Inspection"
 
 
 @dataclass
 class WSPViolation:
-    """WSP violation information"""
     violation_type: WSPViolationType
     description: str
     affected_files: List[str]
-    severity: str  # "critical", "high", "medium", "low"
+    severity: str
     wsp_protocol: int
     detection_time: datetime
     auto_fixable: bool
     fix_suggestion: Optional[str] = None
 
 
+MAX_FILE_BYTES = 2 * 1024 * 1024
+MAX_TOTAL_BYTES = 128 * 1024 * 1024
+
+
+def _violation(kind, description, paths, severity, protocol, suggestion=None):
+    return WSPViolation(kind, description, list(paths), severity, protocol,
+                        datetime.now(), False, suggestion)
+
+
+def _incomplete(path, reason):
+    return _violation(WSPViolationType.SCAN_INCOMPLETE, reason, [path], "high", 50)
+
+
+def _valid_relative(value):
+    return (bool(value) and not any(c in value for c in "\\\x00:\r\n")
+            and all(p not in {"", ".", ".."} for p in value.split("/")))
+
+
+def _environment_path(value):
+    return any(p.casefold() == ".env" or p.casefold().startswith(".env.")
+               or p.casefold().endswith(".env") for p in value.split("/"))
+
+
 class WSPComplianceChecker:
-    """
-    Platform-agnostic WSP compliance scanner.
-    """
-    IGNORED_DIR_NAMES = {
-        ".git",
-        ".venv",
-        "venv",
-        "node_modules",
-        "__pycache__",
-        ".pytest_cache",
-    }
+    """Inspect a Git root; optionally recall an explicit in-memory suppression set."""
 
-    def __init__(self, project_root: Optional[Path] = None):
-        self.project_root = project_root or Path(__file__).resolve().parents[4]
-        self.pattern_memory: Optional[Any] = None
-        if PatternMemory:
-            try:
-                self.pattern_memory = PatternMemory()
-            except Exception as exc:
-                logger.warning("PatternMemory unavailable for false-positive checks: %s", exc)
+    def __init__(self, project_root: Optional[Path] = None, *,
+                 known_false_positives: Iterable[tuple[str, str]] = ()):
+        self.project_root = Path(project_root or Path(__file__).resolve().parents[4]).absolute()
+        self.known_false_positives = frozenset(known_false_positives)
+        if any(not isinstance(x, tuple) or len(x) != 2
+               or x[0] not in {"module", "root_file"}
+               or type(x[1]) is not str or not x[1] for x in self.known_false_positives):
+            raise ValueError("invalid_false_positive_snapshot")
+        self._files = frozenset()
+        self._remaining_bytes = MAX_TOTAL_BYTES
 
-    def _should_skip_path(self, path: Path) -> bool:
-        """Skip hidden, virtualenv, cache, and symlink-heavy paths."""
-        if path.name in self.IGNORED_DIR_NAMES:
-            return True
-        if path.is_symlink():
-            return True
-        return any(part in self.IGNORED_DIR_NAMES for part in path.parts)
+    def _git(self, *args, max_bytes=4 * 1024 * 1024):
+        return run_bounded_stdout(
+            ("git", "--no-optional-locks", "-C", str(self.project_root), *args),
+            cwd=self.project_root, max_bytes=max_bytes, timeout_s=30,
+            environment=git_read_environment(),
+        ).decode("utf-8", errors="strict")
 
-    def _safe_iterdir(self, path: Path) -> Iterator[Path]:
-        """Yield directory entries while tolerating inaccessible paths."""
-        try:
-            for entry in path.iterdir():
-                if self._should_skip_path(entry):
-                    continue
-                yield entry
-        except OSError as exc:
-            logger.debug("Skipping inaccessible directory %s: %s", path, exc)
+    def _inventory(self):
+        root = self.project_root
+        self._regular_metadata(root, directory=True)
+        top = Path(self._git("rev-parse", "--show-toplevel", max_bytes=32768).strip())
+        if top.resolve() != root.resolve():
+            raise ValueError("repository_root_mismatch")
+        inventory = self._git("ls-files", "--stage", "-z")
+        if inventory and not inventory.endswith("\0"):
+            raise ValueError("truncated_tracked_inventory")
+        records = inventory.split("\0")
+        files, errors = set(), []
+        if len(records) > 100001:
+            raise ValueError("tracked_inventory_limit")
+        for record in filter(None, records):
+            header, path = record.split("\t", 1)
+            mode, _oid, stage = header.split()
+            if stage != "0" or not _valid_relative(path) or path in files:
+                raise ValueError("invalid_tracked_inventory")
+            if _environment_path(path):
+                continue  # Never open environment content, even if named *.py.
+            if mode not in {"100644", "100755"}:
+                errors.append(_incomplete(path, "Tracked link/submodule was not inspected"))
+                continue
+            files.add(path)
+        self._files = frozenset(files)
+        return errors
 
-    def _safe_walk(self, root: Path) -> Iterator[Path]:
-        """Depth-first traversal that skips inaccessible or ignored paths."""
-        stack = [root]
-        while stack:
-            current = stack.pop()
-            for entry in self._safe_iterdir(current):
-                yield entry
-                try:
-                    if entry.is_dir():
-                        stack.append(entry)
-                except OSError as exc:
-                    logger.debug("Skipping inaccessible path %s: %s", entry, exc)
+    @staticmethod
+    def _regular_metadata(path, *, directory=False):
+        metadata = path.lstat()
+        if (stat.S_ISLNK(metadata.st_mode)
+                or getattr(metadata, "st_file_attributes", 0) & 0x400):
+            raise ValueError("redirected_path")
+        expected = stat.S_ISDIR if directory else stat.S_ISREG
+        if not expected(metadata.st_mode):
+            raise ValueError("unexpected_file_type")
+        return metadata
 
-    def _iter_python_files(self, root: Path) -> Iterator[Path]:
-        """Yield Python files under root using safe traversal."""
-        for path in self._safe_walk(root):
-            if path.suffix == ".py":
-                yield path
+    def _tracked_file(self, relative):
+        if relative not in self._files:
+            return None
+        path = self.project_root
+        parts = relative.split("/")
+        for index, part in enumerate(parts):
+            path = path / part
+            self._regular_metadata(path, directory=index < len(parts) - 1)
+        return path
 
-    def _iter_directories(self, root: Path) -> Iterator[Path]:
-        """Yield directories under root using safe traversal."""
-        for path in self._safe_walk(root):
-            try:
-                if path.is_dir():
-                    yield path
-            except OSError as exc:
-                logger.debug("Skipping inaccessible directory %s: %s", path, exc)
+    def _is_known_false_positive(self, entity_type, entity_name):
+        return (entity_type, entity_name) in self.known_false_positives
 
-    def _is_known_false_positive(self, entity_type: str, entity_name: str) -> bool:
-        """Check pattern memory for known false positives before flagging."""
-        if not self.pattern_memory:
-            return False
-        try:
-            details = self.pattern_memory.get_false_positive_reason(entity_type, entity_name)
-            if details:
-                reason = details.get("reason")
-                actual_location = details.get("actual_location")
-                note = f": {reason}" if reason else ""
-                if actual_location:
-                    note += f" (actual: {actual_location})"
-                logger.info("Skipping known false positive %s '%s'%s", entity_type, entity_name, note)
-                return True
-        except Exception as exc:
-            logger.warning("False-positive lookup failed for %s '%s': %s", entity_type, entity_name, exc)
-        return False
+    def _module_roots(self):
+        return [m for m in evidenced_module_roots(self._files)
+                if not self._is_known_false_positive("module", m.split("/")[-1])]
 
     async def scan(self) -> List[WSPViolation]:
-        """Run all WSP compliance scans."""
-        violations: List[WSPViolation] = []
-        violations.extend(await self._scan_naming_coherence())
-        violations.extend(await self._scan_file_sizes())
-        violations.extend(await self._scan_component_counts())
-        violations.extend(await self._scan_architecture_violations())
-        violations.extend(await self._scan_modlog_violations())
-        violations.extend(await self._scan_test_coverage())
-        violations.extend(await self._scan_dependency_violations())
-        violations.extend(await self._scan_root_directory_violations())  # WSP 3 root file check
+        """Refresh tracked inventory and return hints plus explicit incomplete-scan rows."""
+        self._files = frozenset()
+        self._remaining_bytes = MAX_TOTAL_BYTES
+        try:
+            violations = self._inventory()
+        except (OSError, ValueError, UnicodeError, RuntimeError, subprocess.SubprocessError):
+            return [_incomplete(".", "Git-tracked inventory unavailable or invalid")]
+        for scanner in (self._scan_naming_coherence, self._scan_file_sizes,
+                        self._scan_component_counts, self._scan_architecture_violations,
+                        self._scan_modlog_violations, self._scan_test_coverage,
+                        self._scan_dependency_violations, self._scan_root_directory_violations):
+            violations.extend(await scanner())
         return violations
 
-    async def _scan_naming_coherence(self) -> List[WSPViolation]:
-        violations: List[WSPViolation] = []
-        module_names = {}
-        modules_dir = self.project_root / "modules"
-        if modules_dir.exists():
-            for domain_dir in self._safe_iterdir(modules_dir):
-                try:
-                    is_domain_dir = domain_dir.is_dir()
-                except OSError as exc:
-                    logger.debug("Skipping inaccessible module domain %s: %s", domain_dir, exc)
-                    continue
-                if is_domain_dir and not domain_dir.name.startswith('.'):
-                    for module_dir in self._safe_iterdir(domain_dir):
-                        try:
-                            is_module_dir = module_dir.is_dir()
-                        except OSError as exc:
-                            logger.debug("Skipping inaccessible module directory %s: %s", module_dir, exc)
-                            continue
-                        if is_module_dir and not module_dir.name.startswith('.'):
-                            module_name = module_dir.name
-                            if self._is_known_false_positive("module", module_name):
-                                continue
-                            if module_name in module_names:
-                                violations.append(WSPViolation(
-                                    violation_type=WSPViolationType.NAMING_COHERENCE,
-                                    description=f"Duplicate module name '{module_name}' found",
-                                    affected_files=[str(module_names[module_name]), str(module_dir)],
-                                    severity="high",
-                                    wsp_protocol=57,
-                                    detection_time=datetime.now(),
-                                    auto_fixable=False,
-                                    fix_suggestion="Remove duplicate module or rename to ensure uniqueness"
-                                ))
-                            else:
-                                module_names[module_name] = module_dir
+    async def _scan_naming_coherence(self):
+        names, violations = {}, []
+        for module in self._module_roots():
+            name = module.split("/")[-1]
+            if name in names:
+                violations.append(_violation(WSPViolationType.NAMING_COHERENCE,
+                    f"Duplicate module name '{name}' found", [names[name], module], "high", 57))
+            else:
+                names[name] = module
         return violations
 
-    async def _scan_file_sizes(self) -> List[WSPViolation]:
-        violations: List[WSPViolation] = []
-        for py_file in self._iter_python_files(self.project_root):
-            if py_file.name.startswith('.') or 'test' in py_file.name:
+    def _line_count(self, relative):
+        path = self._tracked_file(relative)
+        limit = min(MAX_FILE_BYTES, self._remaining_bytes)
+        if limit <= 0:
+            raise ValueError("scan_byte_budget_exhausted")
+        with path.open("rb") as handle:
+            data = handle.read(limit + 1)
+        self._remaining_bytes -= len(data)
+        if len(data) > limit:
+            raise ValueError("source_byte_limit")
+        return len(data.splitlines())
+
+    async def _scan_file_sizes(self):
+        violations = []
+        for relative in sorted(self._files):
+            if not relative.endswith(".py"):
                 continue
             try:
-                rel_parts = py_file.relative_to(self.project_root).parts
-                if len(rel_parts) >= 3 and rel_parts[0] == "modules":
-                    module_name = rel_parts[2]
-                    if self._is_known_false_positive("module", module_name):
-                        continue
-            except ValueError:
-                pass
-            try:
-                with open(py_file, 'r', encoding='utf-8', errors='ignore') as f:
-                    line_count = sum(1 for _ in f)
-                if line_count > 500:
-                    violations.append(WSPViolation(
-                        violation_type=WSPViolationType.FILE_SIZE,
-                        description=f"File exceeds 500 lines ({line_count} lines)",
-                        affected_files=[str(py_file.relative_to(self.project_root))],
-                        severity="medium" if line_count < 750 else "high",
-                        wsp_protocol=62,
-                        detection_time=datetime.now(),
-                        auto_fixable=False,
-                        fix_suggestion="Refactor into smaller components or extract functionality"
-                    ))
-            except Exception as e:
-                logger.warning("Could not scan %s: %s", py_file, e)
+                count = self._line_count(relative)
+            except (OSError, ValueError):
+                violations.append(_incomplete(relative, "Tracked Python source could not be fully inspected"))
+                continue
+            if count >= 800:
+                violations.append(_violation(WSPViolationType.FILE_SIZE,
+                    f"File reaches WSP62 advisory review range ({count} lines)", [relative],
+                    "high" if count >= 1500 else "medium" if count > 1000 else "low", 62,
+                    "Use FMAS exact-base/exemption checks before planning a refactor"))
         return violations
 
-    async def _scan_component_counts(self) -> List[WSPViolation]:
-        violations: List[WSPViolation] = []
-        for directory in self._iter_directories(self.project_root):
-            if directory.name.startswith('.'):
-                continue
-            if self._is_known_false_positive("module", directory.name):
-                continue
-            py_files = list(self._iter_python_files(directory))
-            if len(py_files) > 20:
-                violations.append(WSPViolation(
-                    violation_type=WSPViolationType.COMPONENT_COUNT,
-                    description=f"Directory contains {len(py_files)} components (>20 limit)",
-                    affected_files=[str(directory.relative_to(self.project_root))],
-                    severity="medium",
-                    wsp_protocol=63,
-                    detection_time=datetime.now(),
-                    auto_fixable=False,
-                    fix_suggestion="Organize components into subdirectories by function"
-                ))
+    async def _scan_component_counts(self):
+        counts = Counter(p.rsplit("/", 1)[0] if "/" in p else "."
+                         for p in self._files if p.endswith(".py"))
+        return [_violation(WSPViolationType.COMPONENT_COUNT,
+                f"Directory contains {count} direct Python components (>20 guideline)",
+                [directory], "medium", 63)
+                for directory, count in sorted(counts.items()) if count > 20]
+
+    async def _scan_architecture_violations(self):
+        violations = []
+        domains = {p.split("/")[1] for p in self._files if p.startswith("modules/") and p.count("/") >= 2}
+        for domain in sorted(domains - CORE_DOMAINS - ARCHITECTURAL_EXCEPTIONS):
+            violations.append(_violation(WSPViolationType.ARCHITECTURE,
+                f"Module domain '{domain}' not in WSP3 specification", [f"modules/{domain}"], "high", 3))
+        misplaced = {"/".join(p.split("/")[:3]) for p in self._files
+                     if p.startswith("modules/") and len(p.split("/")) >= 4
+                     and p.split("/")[1] not in ARCHITECTURAL_EXCEPTIONS
+                     and p.split("/")[2] in {"src", "tests"}}
+        for path in sorted(misplaced):
+            violations.append(_violation(WSPViolationType.ARCHITECTURE,
+                "Domain-level source/tests must belong to an owned block", [path], "high", 3))
+        for path in unqualified_module_containers(self._files):
+            violations.append(_violation(WSPViolationType.ARCHITECTURE,
+                "Tracked container lacks src/tests/root-contract evidence; review ownership",
+                [path], "medium", 3))
         return violations
 
-    async def _scan_architecture_violations(self) -> List[WSPViolation]:
-        violations: List[WSPViolation] = []
-        modules_dir = self.project_root / "modules"
-        if not modules_dir.exists():
-            return violations
-        expected_domains = {
-            "ai_intelligence", "communication", "platform_integration",
-            "infrastructure", "foundups", "gamification", "blockchain",
-            "development", "aggregation", "wre_core"
-        }
-        for item in self._safe_iterdir(modules_dir):
-            try:
-                is_dir = item.is_dir()
-            except OSError as exc:
-                logger.debug("Skipping inaccessible module domain %s: %s", item, exc)
-                continue
-            if is_dir and not item.name.startswith('.'):
-                if self._is_known_false_positive("module", item.name):
-                    continue
-                if item.name not in expected_domains:
-                    violations.append(WSPViolation(
-                        violation_type=WSPViolationType.ARCHITECTURE,
-                        description=f"Module domain '{item.name}' not in WSP 3 specification",
-                        affected_files=[str(item.relative_to(self.project_root))],
-                        severity="high",
-                        wsp_protocol=3,
-                        detection_time=datetime.now(),
-                        auto_fixable=False,
-                        fix_suggestion="Move modules to appropriate WSP 3 domain or update specification"
-                    ))
-        return violations
+    def _required_file(self, module, suffix, kind, severity, protocol):
+        relative = f"{module}/{suffix}"
+        try:
+            present = self._tracked_file(relative) is not None
+        except (OSError, ValueError):
+            return [_incomplete(relative, "Tracked module document is unavailable or redirected")]
+        if present:
+            return []
+        return [_violation(kind, f"Missing tracked {suffix} file", [module], severity, protocol,
+                           "Review the owning module and write substantive documentation")]
 
-    async def _scan_modlog_violations(self) -> List[WSPViolation]:
-        violations: List[WSPViolation] = []
-        modules_dir = self.project_root / "modules"
-        if not modules_dir.exists():
-            return violations
-        for domain_dir in self._safe_iterdir(modules_dir):
-            try:
-                is_domain_dir = domain_dir.is_dir()
-            except OSError as exc:
-                logger.debug("Skipping inaccessible module domain %s: %s", domain_dir, exc)
-                continue
-            if not is_domain_dir or domain_dir.name.startswith('.'):
-                continue
-            for module_dir in self._safe_iterdir(domain_dir):
-                try:
-                    is_module_dir = module_dir.is_dir()
-                except OSError as exc:
-                    logger.debug("Skipping inaccessible module directory %s: %s", module_dir, exc)
-                    continue
-                if not is_module_dir or module_dir.name.startswith('.'):
-                    continue
-                if self._is_known_false_positive("module", module_dir.name):
-                    continue
-                modlog_file = module_dir / "ModLog.md"
-                if not modlog_file.exists():
-                    violations.append(WSPViolation(
-                        violation_type=WSPViolationType.DOCUMENTATION,
-                        description="Missing ModLog.md file",
-                        affected_files=[str(module_dir.relative_to(self.project_root))],
-                        severity="medium",
-                        wsp_protocol=22,
-                        detection_time=datetime.now(),
-                        auto_fixable=True,
-                        fix_suggestion="Create ModLog.md file with module development history"
-                    ))
-        return violations
+    async def _scan_modlog_violations(self):
+        return [v for m in self._module_roots() for v in self._required_file(
+            m, "ModLog.md", WSPViolationType.DOCUMENTATION, "medium", 22)]
 
-    async def _scan_test_coverage(self) -> List[WSPViolation]:
-        violations: List[WSPViolation] = []
-        modules_dir = self.project_root / "modules"
-        if not modules_dir.exists():
-            return violations
-        for domain_dir in self._safe_iterdir(modules_dir):
-            try:
-                is_domain_dir = domain_dir.is_dir()
-            except OSError as exc:
-                logger.debug("Skipping inaccessible module domain %s: %s", domain_dir, exc)
-                continue
-            if not is_domain_dir or domain_dir.name.startswith('.'):
-                continue
-            for module_dir in self._safe_iterdir(domain_dir):
-                try:
-                    is_module_dir = module_dir.is_dir()
-                except OSError as exc:
-                    logger.debug("Skipping inaccessible module directory %s: %s", module_dir, exc)
-                    continue
-                if not is_module_dir or module_dir.name.startswith('.'):
-                    continue
-                if self._is_known_false_positive("module", module_dir.name):
-                    continue
-                tests_dir = module_dir / "tests"
-                if not tests_dir.exists():
-                    violations.append(WSPViolation(
-                        violation_type=WSPViolationType.TESTING,
-                        description="Missing tests directory",
-                        affected_files=[str(module_dir.relative_to(self.project_root))],
-                        severity="medium",
-                        wsp_protocol=6,
-                        detection_time=datetime.now(),
-                        auto_fixable=True,
-                        fix_suggestion="Create tests directory with test files and README.md"
-                    ))
-                elif not (tests_dir / "README.md").exists():
-                    violations.append(WSPViolation(
-                        violation_type=WSPViolationType.TESTING,
-                        description="Missing tests/README.md file",
-                        affected_files=[str(tests_dir.relative_to(self.project_root))],
-                        severity="low",
-                        wsp_protocol=6,
-                        detection_time=datetime.now(),
-                        auto_fixable=True,
-                        fix_suggestion="Create tests/README.md with testing strategy documentation"
-                    ))
-        return violations
+    async def _scan_test_coverage(self):
+        # Presence is documentation evidence only, never behavioral coverage.
+        return [v for m in self._module_roots() for v in self._required_file(
+            m, "tests/README.md", WSPViolationType.TESTING, "medium", 6)]
 
-    async def _scan_dependency_violations(self) -> List[WSPViolation]:
-        violations: List[WSPViolation] = []
-        modules_dir = self.project_root / "modules"
-        if not modules_dir.exists():
-            return violations
-        for domain_dir in self._safe_iterdir(modules_dir):
-            try:
-                is_domain_dir = domain_dir.is_dir()
-            except OSError as exc:
-                logger.debug("Skipping inaccessible module domain %s: %s", domain_dir, exc)
-                continue
-            if not is_domain_dir or domain_dir.name.startswith('.'):
-                continue
-            for module_dir in self._safe_iterdir(domain_dir):
-                try:
-                    is_module_dir = module_dir.is_dir()
-                except OSError as exc:
-                    logger.debug("Skipping inaccessible module directory %s: %s", module_dir, exc)
-                    continue
-                if not is_module_dir or module_dir.name.startswith('.'):
-                    continue
-                if self._is_known_false_positive("module", module_dir.name):
-                    continue
-                py_files = list(self._iter_python_files(module_dir))
-                if py_files and not (module_dir / "requirements.txt").exists():
-                    violations.append(WSPViolation(
-                        violation_type=WSPViolationType.DEPENDENCY,
-                        description="Missing requirements.txt file",
-                        affected_files=[str(module_dir.relative_to(self.project_root))],
-                        severity="low",
-                        wsp_protocol=12,
-                        detection_time=datetime.now(),
-                        auto_fixable=True,
-                        fix_suggestion="Create requirements.txt with module dependencies"
-                    ))
-        return violations
+    async def _scan_dependency_violations(self):
+        return [v for m in self._module_roots()
+                if any(p.startswith(m + "/") and p.endswith(".py") for p in self._files)
+                for v in self._required_file(m, "requirements.txt", WSPViolationType.DEPENDENCY, "low", 12)]
 
-    async def _scan_root_directory_violations(self) -> List[WSPViolation]:
-        """
-        Scan for WSP 3 violations in project root directory.
-
-        Per WSP 3: Only specific entry point files should be in root.
-        All other Python files should be in modules/, tests/, or scripts/.
-
-        WSP 48: Checks pattern memory for known false positives before flagging.
-        """
-        violations: List[WSPViolation] = []
-
-        # Legitimate root files (entry points and navigation)
-        allowed_root_files = {
-            'holo_index.py',   # CLI entry point
-            'main.py',         # Main entry point
-            'NAVIGATION.py',   # Module navigation map (WSP 50)
-            'setup.py',        # Package setup
-            '__init__.py',     # Package marker
-        }
-
-        # Scan for Python files in root
-        for py_file in self.project_root.glob('*.py'):
-            if py_file.name in allowed_root_files:
-                continue
-
-            # WSP 48: Check if this is a known false positive
-            if self._is_known_false_positive('root_file', py_file.name):
-                continue
-
-            # Determine suggested location based on file prefix
-            suggestion = "Move to tests/ or scripts/ or module-specific directory"
-            if py_file.name.startswith('test_'):
-                suggestion = "Move to tests/ directory"
-            elif py_file.name.startswith(('check_', 'diagnose_', 'inspect_', 'troubleshoot_')):
-                suggestion = "Move to scripts/ directory"
-            elif py_file.name.startswith(('poc_', 'example_', 'demo_')):
-                suggestion = "Move to scripts/archive/ or delete if obsolete"
-
-            violations.append(WSPViolation(
-                violation_type=WSPViolationType.ARCHITECTURE,
-                description=f"Python file in root directory (should be in module/tests/scripts)",
-                affected_files=[py_file.name],
-                severity="medium",
-                wsp_protocol=3,
-                detection_time=datetime.now(),
-                auto_fixable=False,
-                fix_suggestion=suggestion
-            ))
-
-        return violations
+    async def _scan_root_directory_violations(self):
+        allowed = {"holo_index.py", "main.py", "NAVIGATION.py", "setup.py", "__init__.py"}
+        return [_violation(WSPViolationType.ARCHITECTURE,
+                "Tracked root Python file needs an explicit owner/location", [p], "medium", 3,
+                "Review callers and purpose before moving; preserve unique work")
+                for p in sorted(self._files) if "/" not in p and p.endswith(".py")
+                and p not in allowed and not self._is_known_false_positive("root_file", p)]

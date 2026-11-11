@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import os
+import multiprocessing
 import socket
+import sys
 import threading
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -31,6 +34,11 @@ from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_serv
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     SigningRequest,
     SigningResponse,
+    public_key_fingerprint,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_peer_credential_attestor import (
+    KernelPeerCredentialAttestor,
+    PeerCredentialPolicy,
 )
 
 
@@ -44,7 +52,7 @@ class FakeBackend:
             accepted=True,
             signature=f"sig:{request.nonce}",
             signer_public_key=request.signer_public_key,
-            key_fingerprint="fingerprint:abc",
+            key_fingerprint=public_key_fingerprint(request.signer_public_key),
             key_epoch=request.key_epoch,
             audit_mac=f"audit:{peer.peer_principal_id}:{request.nonce}",
             boundary_attested=True,
@@ -54,14 +62,12 @@ class FakeBackend:
         )
 
 
-class FixedPeerAttestor:
-    def attest(self, connection: socket.socket) -> SignerPeerAttestation:
-        return SignerPeerAttestation(
-            peer_principal_id="github:mjtrout",
-            transport="unix_socket",
-            credential_source="test_peer",
-            boundary_attested=True,
-        )
+def _kernel_attestor():
+    uid = os.getuid() if hasattr(os, "getuid") else 0
+    gid = os.getgid() if hasattr(os, "getgid") else 0
+    return KernelPeerCredentialAttestor(PeerCredentialPolicy(
+        {uid: "github:mjtrout"}, allowed_gids=(gid,),
+    ))
 
 
 def _request(nonce: str) -> SigningRequest:
@@ -77,6 +83,19 @@ def _request(nonce: str) -> SigningRequest:
         authority_tier="HIGH",
         consensus_receipt_digest="sha256:consensus",
     )
+
+
+def _assert_kernel_responses(first, second, backend):
+    if hasattr(socket, "SO_PEERCRED") or hasattr(socket.socket, "getpeereid"):
+        assert first.accepted is True
+        assert first.signature == "sig:nonce-1"
+        assert second.accepted is True
+        assert second.signature == "sig:nonce-2"
+        assert len(backend.requests) == 2
+    else:
+        assert first.rejection_code == "REJECT_SIGNER_SOCKET_PEER_NOT_ATTESTED"
+        assert second.rejection_code == "REJECT_SIGNER_SOCKET_PEER_NOT_ATTESTED"
+        assert backend.requests == []
 
 
 @pytest.mark.skipif(not hasattr(socket, "AF_UNIX"), reason="AF_UNIX required")
@@ -95,7 +114,7 @@ def test_bounded_resident_service_handles_multiple_client_requests(tmp_path: Pat
             repo_root=repo,
             socket_path=socket_path,
             backend=backend,
-            peer_attestor=FixedPeerAttestor(),
+            peer_attestor=_kernel_attestor(),
             max_requests=2,
             timeout_s=5,
             ready_callback=ready.set,
@@ -117,11 +136,7 @@ def test_bounded_resident_service_handles_multiple_client_requests(tmp_path: Pat
     second = client_result.client.sign(_request("nonce-2"))
     thread.join(5)
 
-    assert first.accepted is True
-    assert first.signature == "sig:nonce-1"
-    assert second.accepted is True
-    assert second.signature == "sig:nonce-2"
-    assert len(backend.requests) == 2
+    _assert_kernel_responses(first, second, backend)
     result = result_holder["result"]
     assert result.accepted is True
     assert result.status == SIGNER_SOCKET_RESIDENT_SERVICE_SERVED
@@ -196,3 +211,98 @@ def test_group_or_world_writable_socket_parent_is_rejected(tmp_path: Path) -> No
 
     assert result.accepted is False
     assert FAIL_SIGNER_SERVICE_SOCKET_PARENT_UNSAFE in result.rejection_reasons
+
+
+@pytest.mark.skipif(not hasattr(socket, "AF_UNIX"), reason="AF_UNIX required")
+def test_cleanup_rejects_reused_identity_with_different_change_time(tmp_path):
+    path = tmp_path / "signer.sock"
+    with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as server:
+        server.bind(str(path))
+        actual = resident_service._socket_identity(path)
+        stale = replace(actual, change_time_ns=actual.change_time_ns - 1)
+        assert resident_service._cleanup_socket(path, stale) is False
+        assert path.exists()
+        if os.name != "posix":
+            server.close()
+        assert resident_service._cleanup_socket(path, actual) is True
+
+
+def _native_cleanup_server(repo, path, mode, pipe, resume):
+    """Real transport; passive wrappers observe listener lifetime only."""
+    bound, observations = [], []
+    bind = resident_service._bound_server
+    cleanup = resident_service._cleanup_socket
+
+    def observed_bind(*args):
+        server, identity = bind(*args)
+        bound.append(server)
+        return server, identity
+
+    def observed_cleanup(*args):
+        observations.append(bound[0].fileno() >= 0)
+        return cleanup(*args)
+
+    def ready():
+        info = path.stat()
+        pipe.send((os.getpid(), info.st_dev, info.st_ino))
+        if not resume.wait(5):
+            raise RuntimeError("test_parent_timeout")
+        if mode != "success":
+            raise RuntimeError("test_callback_failure")
+
+    resident_service._bound_server = observed_bind
+    resident_service._cleanup_socket = observed_cleanup
+    result = serve_reddog_isolated_signer_socket_bounded(
+        repo_root=repo, socket_path=path, backend=FakeBackend(),
+        peer_attestor=_kernel_attestor(), max_requests=1, timeout_s=3,
+        ready_callback=ready,
+    )
+    pipe.send((result.accepted, result.socket_removed, observations,
+               bound[0].fileno() == -1))
+    pipe.close()
+
+
+@pytest.mark.skipif(sys.platform != "linux", reason="Linux inode and process qualification")
+@pytest.mark.parametrize("mode", ["success", "exception", "replacement"])
+def test_native_listener_pins_inode_through_cleanup(tmp_path, mode):
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    path = tmp_path / "signer.sock"
+    context = multiprocessing.get_context("fork")
+    parent, child = context.Pipe()
+    resume = context.Event()
+    process = context.Process(target=_native_cleanup_server,
+                              args=(repo, path, mode, child, resume))
+    replacement = None
+    process.start()
+    child.close()
+    try:
+        assert parent.poll(8)
+        pid, device, inode = parent.recv()
+        assert pid != os.getpid()
+        if mode == "replacement":
+            path.unlink()
+            replacement = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            replacement.bind(str(path))
+            assert (path.stat().st_dev, path.stat().st_ino) != (device, inode)
+        resume.set()
+        if mode == "success":
+            client = build_reddog_isolated_signer_socket_client(
+                repo_root=repo, socket_path=path, timeout_s=3)
+            assert client.client.sign(_request("native-cleanup")).accepted
+        assert parent.poll(8)
+        accepted, removed, observations, closed = parent.recv()
+        process.join(5)
+        assert process.exitcode == 0 and closed and observations and all(observations)
+        assert accepted is (mode == "success")
+        assert removed is (mode == "success")
+        assert path.exists() is (mode == "replacement")
+    finally:
+        resume.set()
+        if process.is_alive():
+            process.terminate()
+        process.join(5)
+        parent.close()
+        if replacement is not None:
+            replacement.close()
+        path.unlink(missing_ok=True)

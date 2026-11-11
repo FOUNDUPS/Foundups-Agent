@@ -45,7 +45,9 @@ SecurityState = Literal[
     "executed",       # Scan executed
     "unavailable",    # Tool unavailable
     "escalated",      # Escalated to 012
-    "completed",      # Flow completed
+    "completed",      # All requested scans completed
+    "partial",        # Some requested coverage incomplete
+    "error",          # No requested scans completed
 ]
 
 
@@ -72,6 +74,9 @@ class SecurityStackStatus:
     trigger_count: int = 0
     scans_proposed: int = 0
     scans_executed: int = 0
+    scans_completed: int = 0
+    scans_failed: int = 0
+    scans_partial: int = 0
     findings_stored: int = 0
     proposals_written: int = 0
     requires_012_count: int = 0
@@ -339,7 +344,7 @@ class SecurityStackController:
         self._status = SecurityStackStatus(
             last_run_at=_utc_iso(),
             generated_at=_utc_iso(),
-            mode="dry_run",
+            mode="dry_run" if self.report_only else "live",
             current_state="triggered",
         )
 
@@ -378,6 +383,8 @@ class SecurityStackController:
 
         for tool in tools_to_run:
             if not self._status.tools_available.get(tool, False):
+                self._status.scans_failed += 1
+                reports.append({"tool": tool, "target": target, "scan_status": "tool_unavailable"})
                 continue
 
             if self.report_only:
@@ -395,6 +402,12 @@ class SecurityStackController:
                 scan_report = self._executor.scan(tool, target)
                 reports.append(scan_report.to_dict())
                 self._status.scans_executed += 1
+                if scan_report.scan_status == "completed":
+                    self._status.scans_completed += 1
+                else:
+                    self._status.scans_failed += 1
+                    if scan_report.scan_status == "partial":
+                        self._status.scans_partial += 1
 
                 # Check for escalation
                 if scan_report.requires_012:
@@ -411,7 +424,14 @@ class SecurityStackController:
                     self._status.findings_stored += stored.get("new", 0) + stored.get("updated", 0)
 
         # Write status artifact
-        self._status.current_state = "completed"
+        if self._status.scans_failed:
+            self._status.current_state = "partial" if self._status.scans_completed or self._status.scans_partial else "error"
+        elif self._status.requires_012_count:
+            self._status.current_state = "escalated"
+        elif self._status.scans_completed:
+            self._status.current_state = "completed"
+        else:
+            self._status.current_state = "proposed"
         self._status.generated_at = _utc_iso()
         self._status.next_operator_action = self._determine_next_action()
         self.write_status()
@@ -502,7 +522,10 @@ class SecurityStackController:
                 "policy_decision": "report_only",
             }
 
-        if mode == "report_only" or self.report_only:
+        if mode not in {"report_only", "dry_run", "live"}:
+            raise ValueError("Unknown security scan mode")
+
+        if mode in {"report_only", "dry_run"} or self.report_only:
             # Don't actually scan, just check availability
             availability = self.check_tool_availability()
             tool_available = availability.get(tool, False) if tool != "all" else any(availability.values())
@@ -764,6 +787,8 @@ class SecurityStackController:
             return "install_security_tools"
         if self._status.requires_012_count > 0:
             return "review_critical_alerts"
+        if self._status.scans_failed:
+            return "repair_scan_coverage"
         if self._status.scans_executed == 0 and self._status.scans_proposed > 0:
             return "approve_proposed_scans"
         if self._status.findings_stored > 0:

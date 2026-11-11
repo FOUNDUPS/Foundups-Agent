@@ -7,6 +7,22 @@
 
 ## Public API
 
+### Verified API publication leaf
+
+`src/verified_x_publisher.py::publish_verified_x(...)` is an internal transport
+for the public `UnifiedXInterface.post_verified_x(...)` owner in
+`social_media_orchestrator`. It accepts an injected synchronous Tweepy-compatible
+client, explicit expected provider user ID and durable database path. Call the
+UnifiedX owner for input validation and dry-run; do not call the leaf directly.
+
+It verifies `get_me`, claims before `create_tweet`, persists the returned numeric
+ID and verifies author/content through `get_tweet`. Unknown write outcomes cannot
+retry creation; known IDs retry readback only. Live success requires a persisted
+`verified`/`already_verified` receipt. Request awaits are bounded to 30 seconds;
+the caller must additionally bound client socket I/O. Provider exception text is
+not returned. Package imports do not instantiate the legacy browser/DAE path.
+See `social_media_orchestrator/docs/ANTIFAFM_CAMPAIGN.md` for host operation.
+
 ### Core Classes
 - `XTwitterDAENode`: Main DAE communication node with full autonomous capabilities
 - `DAEAuthenticator`: WSP-27 entangled authentication protocol implementation

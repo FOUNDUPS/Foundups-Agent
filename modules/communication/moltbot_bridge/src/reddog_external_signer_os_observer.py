@@ -21,6 +21,8 @@ from dataclasses import asdict, dataclass
 from pathlib import Path, PurePosixPath
 from typing import Protocol
 
+from . import _reddog_unix_socket_identity as _socket_identity_reader
+
 
 EXTERNAL_SIGNER_OS_OBSERVATION_SCHEMA_VERSION = (
     "reddog_external_signer_os_observation.v1"
@@ -85,6 +87,15 @@ class ExternalSignerOsObserverBackend(Protocol):
 
     def current_gid(self) -> int:
         """Return the kernel group identity of the observing process."""
+
+    def current_pid(self) -> int:
+        """Return the PID in the observer's current namespace."""
+
+    def monotonic(self) -> float:
+        """Return the monotonic acceptance clock."""
+
+    def query_unix_socket(self, inode: int, cookie: tuple[int, int], timeout: float):
+        """Read one exact socket/VFS association from the local kernel."""
 
 
 class ExternalSignerOsPolicyAuthorityBoundary(Protocol):
@@ -190,13 +201,28 @@ class LinuxProcExternalSignerOsBackend:
         return os.stat(path, follow_symlinks=follow_symlinks)
 
     def listdir(self, path: str) -> list[str]:
-        return os.listdir(path)
+        names = []
+        with os.scandir(path) as entries:
+            for entry in entries:
+                if len(names) == _socket_identity_reader.FD_LIMIT:
+                    raise ValueError("socket_fd_budget_exceeded")
+                names.append(entry.name)
+        return names
 
     def current_uid(self) -> int:
         return os.geteuid()
 
     def current_gid(self) -> int:
         return os.getegid()
+
+    def current_pid(self) -> int:
+        return os.getpid()
+
+    def monotonic(self) -> float:
+        return time.monotonic()
+
+    def query_unix_socket(self, inode: int, cookie: tuple[int, int], timeout: float):
+        return _socket_identity_reader.query_unix_socket(inode, cookie, timeout)
 
 
 def observe_external_signer_os_state(
@@ -213,14 +239,14 @@ def observe_external_signer_os_state(
     before = _read_process(source, policy.pid)
     _validate_process(policy, before)
     socket_before = _read_socket(source, policy)
-    _require_process_socket_owner(source, policy.pid, socket_before)
+    ownership = _require_process_socket_owner(source, policy.pid, socket_before)
     after = _read_process(source, policy.pid)
     socket_after = _read_socket(source, policy)
-    _require_process_socket_owner(source, policy.pid, socket_after)
     if not _same_process(before, after):
         _fail(FAIL_OS_OBSERVER_PROCESS_CHANGED)
     if _socket_identity(socket_before) != _socket_identity(socket_after):
         _fail(FAIL_OS_OBSERVER_SOCKET_CHANGED)
+    _require_process_socket_owner(source, policy.pid, socket_after, previous=ownership)
     payload = _receipt_payload(
         policy,
         after,
@@ -388,19 +414,14 @@ def _require_process_socket_owner(
     backend: ExternalSignerOsObserverBackend,
     pid: int,
     metadata: os.stat_result,
-) -> None:
-    target = f"socket:[{int(metadata.st_ino)}]"
-    root = f"/proc/{pid}/fd"
+    *,
+    previous: _socket_identity_reader.SocketOwnership | None = None,
+) -> _socket_identity_reader.SocketOwnership:
     try:
-        links = (
-            backend.readlink(f"{root}/{name}")
-            for name in backend.listdir(root)
+        return _socket_identity_reader.require_socket_owner(
+            backend, pid, metadata, previous
         )
-        if target not in links:
-            _fail(FAIL_OS_OBSERVER_PROCESS_SOCKET_NOT_OWNED)
-    except ExternalSignerOsObservationError:
-        raise
-    except (AttributeError, OSError, TypeError, ValueError):
+    except (AttributeError, OSError, TypeError, ValueError, OverflowError):
         _fail(FAIL_OS_OBSERVER_PROCESS_SOCKET_NOT_OWNED)
 
 

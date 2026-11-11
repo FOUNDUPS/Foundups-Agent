@@ -113,7 +113,7 @@ def execute_lm_studio_model_transaction(
     lock_digest = _digest(lm_studio_node_identity(root))
     lock_wait = min(_bounded_timeout(timeout), MAX_LOCK_WAIT_SECONDS)
     with runtime_operation_lock(
-        f"lm-studio-node:{lock_digest}", timeout_seconds=lock_wait
+        lm_studio_node_lock_identity(root), timeout_seconds=lock_wait
     ):
         acquired = _acquire_lease(
             key, root, api_token, lease_mode, config, _bounded_timeout(timeout), lock_digest
@@ -128,6 +128,11 @@ def execute_lm_studio_model_transaction(
         if error is not None:
             raise error.with_traceback(error.__traceback__)
     return LMStudioModelTransactionResult(value=value, lifecycle_receipt=receipt)
+
+
+def lm_studio_node_lock_identity(base_url: str) -> str:
+    """Return the existing shared physical-node/port lifecycle lock identity."""
+    return f"lm-studio-node:{_digest(lm_studio_node_identity(base_url))}"
 
 
 def rehydrate_lm_studio_model_lifecycle_receipt(
@@ -509,5 +514,6 @@ __all__ = [
     "LMStudioModelLifecycleReceipt", "LMStudioModelState",
     "LMStudioModelTransactionResult", "LMStudioResidencyState",
     "execute_lm_studio_model_transaction", "inspect_lm_studio_model",
+    "lm_studio_node_lock_identity",
     "normalize_lm_studio_base_url", "rehydrate_lm_studio_model_lifecycle_receipt",
 ]

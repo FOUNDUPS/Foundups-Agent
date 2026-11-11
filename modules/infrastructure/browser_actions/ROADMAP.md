@@ -17,6 +17,15 @@ Provide a unified, intelligent interface for all platform browser automation, ro
 
 ---
 
+## Manager admission repair — 2026-09-24
+
+The qualified four-outcome gap is repaired in the existing action owner.
+Only fresh, target-matched, currently stored PENDING work can reach Connect.
+All 36 fixed cases pass locally and independently (baseline 11 fail/25 pass),
+including 23 preserved compatibility cases. Manager bookkeeping is unchanged.
+See [test log](tests/TestModLog.md) and the canonical backlog for publication and
+fresh selection. No live delivery, rollback or concurrent exactly-once claim.
+
 ## Current bounded checkpoint — 2026-09-23
 
 Requested-note repair 12/P2 passes 23 frozen cases locally and independently

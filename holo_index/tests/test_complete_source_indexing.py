@@ -39,6 +39,7 @@ class _StatefulCollection:
     def __init__(self, metadata: dict[str, str]) -> None:
         self.metadata = dict(metadata)
         self._model = SimpleNamespace(
+            configuration_json={"hnsw": {"space": "l2"}},
             serialized_schema={
                 "keys": {
                     "#embedding": {
@@ -504,3 +505,34 @@ def test_skillz_agent_identifiers_accept_mixed_scalar_values(tmp_path: Path) -> 
     assert result.failed_count == 0
     metadata = holo.skill_collection.add_calls[0]["metadatas"][0]
     assert metadata["agents"] == "97,66,worker"
+
+
+from holo_index.core.holo_index import HoloIndex
+from holo_index.tests.test_vector_segment_durability import ERROR, _Raw, _config, _with_ef, _call
+
+@pytest.mark.parametrize("operation", ["ensure", "reset-existing", "reset-created"])
+def test_real_core_maintenance_refuses_unsafe_handles_before_exposing_them(operation, tmp_path, monkeypatch):
+    monkeypatch.delenv("HOLOINDEX_QUERY_READONLY", raising=False)
+    bad = _with_ef("config", {"type": "unknown"})
+    good, deleted = _Raw(_config()), []
+    instance = object.__new__(HoloIndex)
+    instance.ssd_path, instance.index_embedding_backend = tmp_path, "test"
+    instance.index_embedding_model_id, instance.index_embedding_space_fingerprint = "test", "test"
+    instance.client = SimpleNamespace(get_or_create_collection=lambda *a, **k: good if operation == "reset-created" else bad,
+        get_collection=lambda *a, **k: good if operation == "reset-created" else bad,
+        delete_collection=lambda name: deleted.append(name), create_collection=lambda *a, **k: bad)
+    with pytest.raises(ValueError, match=ERROR):
+        (instance._ensure_collection if operation == "ensure" else instance._reset_collection)("navigation_code")
+    assert deleted == (["navigation_code"] if operation == "reset-created" else [])
+    assert bad.reads == []
+
+def test_real_core_immutable_query_branch_does_not_require_native_model_fields(tmp_path, monkeypatch):
+    monkeypatch.setenv("HOLOINDEX_QUERY_READONLY", "1")
+    sentinel = object()
+    instance = object.__new__(HoloIndex)
+    instance.ssd_path, instance.client = tmp_path, SimpleNamespace(get_collection=lambda name: sentinel)
+    assert instance._ensure_collection("navigation_code") is sentinel
+
+def test_harmless_column_names_do_not_trigger_substring_policies():
+    schema = {"keys": {"embedding_function.trust_remote_code": {}}}
+    assert _call(_Raw(_config(), schema)) == "l2"

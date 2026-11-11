@@ -1,6 +1,8 @@
 """Root service operations for atomic signer protected use."""
 
 from __future__ import annotations
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority import DESCRIPTOR_SCHEMA_V2
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import Ed25519SignatureVerifier
 
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_service import (
     SnapshotSupplier,
@@ -93,11 +95,17 @@ def _require_transport(
     ):
         raise ValueError("root_protected_use_transport_context_invalid")
     require_root_authority_peer(peer, snapshot)
-    require_root_authority_signer_proof(
-        snapshot,
-        canonical_signer_input(request),
-        request.signer_instance_signature,
-    )
+    if snapshot.descriptor["schema_version"] == DESCRIPTOR_SCHEMA_V2:
+        if not Ed25519SignatureVerifier().verify(
+            snapshot.descriptor["root_control_authentication"]["public_key"],
+            canonical_signer_input(request), request.signer_instance_signature):
+            raise ValueError("root_protected_use_control_proof_invalid")
+    else:
+        require_root_authority_signer_proof(
+            snapshot,
+            canonical_signer_input(request),
+            request.signer_instance_signature,
+        )
 
 
 def _acquire(

@@ -1,5 +1,14 @@
 # Idle Automation Module Roadmap
 
+## Current internal-audit layer — 2026-10-07
+
+Existing audit/maintenance paths executed on the PC without model calls.
+Self-research status propagation is locally qualified (140connected tests).
+Next resolve one current finding to a verified module/file scope before worker
+admission. Historical log findings, deterministic maintenance and authenticated
+Hermes readiness are not autonomous code improvement or retained RSI benefit.
+See ModLog and root ROADMAP for evidence and system sequencing.
+
 ## [U+1F300] Windsurf Protocol (WSP) Recursive Prompt
 
 **0102 Directive**:

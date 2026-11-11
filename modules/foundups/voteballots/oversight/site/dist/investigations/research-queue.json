@@ -1,0 +1,292 @@
+{
+  "version": "0.4.0",
+  "mode": "read-only-planning",
+  "updated": "2026-11-07",
+  "tickets": [
+    {
+      "ticket_id": "EPSTEIN-001",
+      "topic_id": "epstein",
+      "title": "Epstein records \u2014 public-source baseline",
+      "question": "Are DOJ disclosure, survivor safeguards and enforcement mechanisms adequate?",
+      "state": "proposed",
+      "effect_ceiling": "public-source-research-only",
+      "worker": null,
+      "reviewer": null,
+      "allowed_sources": [
+        "https://www.govinfo.gov/content/pkg/PLAW-119publ38/html/PLAW-119publ38.htm",
+        "https://www.govinfo.gov/content/pkg/BILLS-119hr9694ih/html/BILLS-119hr9694ih.htm",
+        "https://www.govinfo.gov/app/details/BILLS-119s5005is"
+      ],
+      "prohibited_actions": [
+        "confidential-intake",
+        "witness-contact",
+        "official-process",
+        "autonomous-publication"
+      ],
+      "acceptance": [
+        "Cite decisive primary passages with dates and pinpoints.",
+        "Separate law, proposal, fact, allegation, inference and unknown.",
+        "Record counterevidence, unresolved gaps and independent-review recommendation."
+      ],
+      "human_release": false
+    },
+    {
+      "ticket_id": "FINANCE-001",
+      "topic_id": "emoluments",
+      "title": "Foreign payments & emoluments \u2014 public-source baseline",
+      "question": "Do disclosure, consent and enforcement rules adequately address covered benefits?",
+      "state": "proposed",
+      "effect_ceiling": "public-source-research-only",
+      "worker": null,
+      "reviewer": null,
+      "allowed_sources": [
+        "https://www.govinfo.gov/"
+      ],
+      "prohibited_actions": [
+        "confidential-intake",
+        "witness-contact",
+        "official-process",
+        "autonomous-publication"
+      ],
+      "acceptance": [
+        "Cite decisive primary passages with dates and pinpoints.",
+        "Separate law, proposal, fact, allegation, inference and unknown.",
+        "Record counterevidence, unresolved gaps and independent-review recommendation."
+      ],
+      "human_release": false
+    },
+    {
+      "ticket_id": "CONFLICTS-001",
+      "topic_id": "conflicts",
+      "title": "Gifts, conflicts & official decisions \u2014 public-source baseline",
+      "question": "Do disclosure and recusal controls reveal improper influence?",
+      "state": "proposed",
+      "effect_ceiling": "public-source-research-only",
+      "worker": null,
+      "reviewer": null,
+      "allowed_sources": [
+        "https://www.govinfo.gov/"
+      ],
+      "prohibited_actions": [
+        "confidential-intake",
+        "witness-contact",
+        "official-process",
+        "autonomous-publication"
+      ],
+      "acceptance": [
+        "Cite decisive primary passages with dates and pinpoints.",
+        "Separate law, proposal, fact, allegation, inference and unknown.",
+        "Record counterevidence, unresolved gaps and independent-review recommendation."
+      ],
+      "human_release": false
+    },
+    {
+      "ticket_id": "SPENDING-001",
+      "topic_id": "spending",
+      "title": "Spending, contracts & grants \u2014 public-source baseline",
+      "question": "Do audit and payment controls detect false claims, waste and conflicts?",
+      "state": "proposed",
+      "effect_ceiling": "public-source-research-only",
+      "worker": null,
+      "reviewer": null,
+      "allowed_sources": [
+        "https://www.govinfo.gov/"
+      ],
+      "prohibited_actions": [
+        "confidential-intake",
+        "witness-contact",
+        "official-process",
+        "autonomous-publication"
+      ],
+      "acceptance": [
+        "Cite decisive primary passages with dates and pinpoints.",
+        "Separate law, proposal, fact, allegation, inference and unknown.",
+        "Record counterevidence, unresolved gaps and independent-review recommendation."
+      ],
+      "human_release": false
+    },
+    {
+      "ticket_id": "CRYPTO-001",
+      "topic_id": "crypto",
+      "title": "Crypto & stablecoins \u2014 public-source baseline",
+      "question": "Are custody, disclosure and capital-flow safeguards sufficient?",
+      "state": "proposed",
+      "effect_ceiling": "public-source-research-only",
+      "worker": null,
+      "reviewer": null,
+      "allowed_sources": [
+        "https://www.govinfo.gov/"
+      ],
+      "prohibited_actions": [
+        "confidential-intake",
+        "witness-contact",
+        "official-process",
+        "autonomous-publication"
+      ],
+      "acceptance": [
+        "Cite decisive primary passages with dates and pinpoints.",
+        "Separate law, proposal, fact, allegation, inference and unknown.",
+        "Record counterevidence, unresolved gaps and independent-review recommendation."
+      ],
+      "human_release": false
+    },
+    {
+      "ticket_id": "CORPORATE-001",
+      "topic_id": "corporate",
+      "title": "Corporate ownership & state nexus \u2014 public-source baseline",
+      "question": "What do public filings establish, and what remains unknown?",
+      "state": "proposed",
+      "effect_ceiling": "public-source-research-only",
+      "worker": null,
+      "reviewer": null,
+      "allowed_sources": [
+        "https://www.govinfo.gov/"
+      ],
+      "prohibited_actions": [
+        "confidential-intake",
+        "witness-contact",
+        "official-process",
+        "autonomous-publication"
+      ],
+      "acceptance": [
+        "Cite decisive primary passages with dates and pinpoints.",
+        "Separate law, proposal, fact, allegation, inference and unknown.",
+        "Record counterevidence, unresolved gaps and independent-review recommendation."
+      ],
+      "human_release": false
+    },
+    {
+      "ticket_id": "RECORDS-001",
+      "topic_id": "records",
+      "title": "Records & transparency \u2014 public-source baseline",
+      "question": "Are federal agency decisions adequately documented and preserved?",
+      "state": "proposed",
+      "effect_ceiling": "public-source-research-only",
+      "worker": null,
+      "reviewer": null,
+      "allowed_sources": [
+        "https://www.archives.gov/about/laws/fed-agencies.html"
+      ],
+      "prohibited_actions": [
+        "confidential-intake",
+        "witness-contact",
+        "official-process",
+        "autonomous-publication"
+      ],
+      "acceptance": [
+        "Cite decisive primary passages with dates and pinpoints.",
+        "Separate law, proposal, fact, allegation, inference and unknown.",
+        "Record counterevidence, unresolved gaps and independent-review recommendation."
+      ],
+      "human_release": false
+    },
+    {
+      "ticket_id": "EPSTEIN-002",
+      "topic_id": "epstein",
+      "title": "Epstein records \u2014 Survivor safeguards",
+      "question": "What do published redaction policies require, without processing sensitive individual records?",
+      "state": "proposed",
+      "effect_ceiling": "public-source-research-only",
+      "worker": null,
+      "reviewer": null,
+      "allowed_sources": [
+        "https://www.govinfo.gov/content/pkg/PLAW-119publ38/html/PLAW-119publ38.htm",
+        "https://www.govinfo.gov/content/pkg/BILLS-119hr9694ih/html/BILLS-119hr9694ih.htm",
+        "https://www.govinfo.gov/app/details/BILLS-119s5005is"
+      ],
+      "prohibited_actions": [
+        "confidential-intake",
+        "witness-contact",
+        "official-process",
+        "autonomous-publication"
+      ],
+      "acceptance": [
+        "Cite decisive primary passages with dates and pinpoints.",
+        "Separate law, proposal, fact, allegation, inference and unknown.",
+        "Record counterevidence, unresolved gaps and independent-review recommendation."
+      ],
+      "human_release": false
+    },
+    {
+      "ticket_id": "EPSTEIN-003",
+      "topic_id": "epstein",
+      "title": "Epstein records \u2014 Records preservation",
+      "question": "Which official retention and destruction-accounting policies apply?",
+      "state": "proposed",
+      "effect_ceiling": "public-source-research-only",
+      "worker": null,
+      "reviewer": null,
+      "allowed_sources": [
+        "https://www.govinfo.gov/content/pkg/PLAW-119publ38/html/PLAW-119publ38.htm",
+        "https://www.govinfo.gov/content/pkg/BILLS-119hr9694ih/html/BILLS-119hr9694ih.htm",
+        "https://www.govinfo.gov/app/details/BILLS-119s5005is"
+      ],
+      "prohibited_actions": [
+        "confidential-intake",
+        "witness-contact",
+        "official-process",
+        "autonomous-publication"
+      ],
+      "acceptance": [
+        "Cite decisive primary passages with dates and pinpoints.",
+        "Separate law, proposal, fact, allegation, inference and unknown.",
+        "Record counterevidence, unresolved gaps and independent-review recommendation."
+      ],
+      "human_release": false
+    },
+    {
+      "ticket_id": "EPSTEIN-004",
+      "topic_id": "epstein",
+      "title": "Epstein records \u2014 Law versus proposal",
+      "question": "How do the enacted 2025 Act and introduced 2026 measures differ section by section?",
+      "state": "proposed",
+      "effect_ceiling": "public-source-research-only",
+      "worker": null,
+      "reviewer": null,
+      "allowed_sources": [
+        "https://www.govinfo.gov/content/pkg/PLAW-119publ38/html/PLAW-119publ38.htm",
+        "https://www.govinfo.gov/content/pkg/BILLS-119hr9694ih/html/BILLS-119hr9694ih.htm",
+        "https://www.govinfo.gov/app/details/BILLS-119s5005is"
+      ],
+      "prohibited_actions": [
+        "confidential-intake",
+        "witness-contact",
+        "official-process",
+        "autonomous-publication"
+      ],
+      "acceptance": [
+        "Cite decisive primary passages with dates and pinpoints.",
+        "Separate law, proposal, fact, allegation, inference and unknown.",
+        "Record counterevidence, unresolved gaps and independent-review recommendation."
+      ],
+      "human_release": false
+    },
+    {
+      "ticket_id": "EPSTEIN-005",
+      "topic_id": "epstein",
+      "title": "Epstein records \u2014 House, Senate and state roles",
+      "question": "Which institution has each current or proposed power and what limits remain?",
+      "state": "proposed",
+      "effect_ceiling": "public-source-research-only",
+      "worker": null,
+      "reviewer": null,
+      "allowed_sources": [
+        "https://www.govinfo.gov/content/pkg/PLAW-119publ38/html/PLAW-119publ38.htm",
+        "https://www.govinfo.gov/content/pkg/BILLS-119hr9694ih/html/BILLS-119hr9694ih.htm",
+        "https://www.govinfo.gov/app/details/BILLS-119s5005is"
+      ],
+      "prohibited_actions": [
+        "confidential-intake",
+        "witness-contact",
+        "official-process",
+        "autonomous-publication"
+      ],
+      "acceptance": [
+        "Cite decisive primary passages with dates and pinpoints.",
+        "Separate law, proposal, fact, allegation, inference and unknown.",
+        "Record counterevidence, unresolved gaps and independent-review recommendation."
+      ],
+      "human_release": false
+    }
+  ]
+}

@@ -1,5 +1,16 @@
 # AI Gateway Module
 
+## YouTube task routing
+
+`call_youtube_task` owns stage/surface-specific routing for original-comment
+assessment, writing and exact final review. It uses the existing local general
+incumbent or an exact current signed production binding; it never uses the generic
+social/Grok fallback chain. The central registry nominates three observed free
+Gemma/Nemotron models for `youtube_reply` evaluation only. Discovery, catalog
+membership and NVIDIA shadow proposals do not promote them. See
+`modules/communication/video_comments/LLM_INTEGRATION.md` for configuration,
+privacy/cost boundaries, cancellation and evidence limits.
+
 **Module Purpose**: Unified AI service access with intelligent routing, fallback, and load balancing across multiple AI providers.
 
 **WSP Compliance Status**: [OK] WSP 49 (Module Structure), WSP 3 (Enterprise Domain), WSP 27 (DAE Architecture)
@@ -18,6 +29,15 @@ pairs retain their existing request behavior.
 
 [VERIFIED] The contract is covered by offline mocked-transport tests; it does
 not grant model promotion, provider availability, or live-call authority.
+
+## OpenRouter transport boundary
+
+OpenRouter requests disable redirects and reject 3xx responses before parsing.
+Transport exceptions expose a fixed diagnostic while preserving timeout
+classification; provider credentials are excluded from `ProviderConfig` repr.
+Other provider transport behavior and the K3 request contract remain unchanged.
+This controls displayed transport diagnostics, not arbitrary successful model
+output or exception-object memory. Live calls still require existing admission.
 
 ## Model Intelligence Catalog
 

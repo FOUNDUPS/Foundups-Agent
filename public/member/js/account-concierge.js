@@ -21,6 +21,17 @@
   var scrim = document.getElementById('accountPlaneScrim');
   if (!plane || !scrim) return;
 
+  // The old public alias remains supported. Product selection in /member/
+  // composes this modal owner with the existing account controller below.
+  if (plane.getAttribute('data-reddog-mode') === 'public-discovery') {
+    initializePublicDiscovery();
+    return;
+  }
+  var productDiscovery = plane.getAttribute('data-reddog-mode') === 'product-discovery';
+  var discoveryAdmitted = !productDiscovery;
+  var productDiscoveryController = null;
+  var productProfileBound = false;
+
   var avatarTrigger = document.getElementById('mallAvatarTrigger');
   var redDogTrigger = document.getElementById('redDogBtn');
   var invitesToggle = plane.querySelector('[data-account-invites-toggle]');
@@ -42,7 +53,15 @@
   var SWIPE_THRESHOLD = 60;
 
   // ---- open / close ----
-  function openPlane() {
+  function openPlane(event) {
+    if (productDiscoveryController) {
+      closeModes();
+      dismissSummary();
+      stopListening();
+      productDiscoveryController.open(event);
+      setAnchorState('active');
+      return;
+    }
     if (isOpen) return;
     isOpen = true;
     plane.classList.add('open');
@@ -52,6 +71,7 @@
   }
 
   function closePlane() {
+    if (productDiscoveryController) return productDiscoveryController.close();
     if (!isOpen) return;
     isOpen = false;
     plane.classList.remove('open');
@@ -60,9 +80,9 @@
     if (!listeningVisible) setAnchorState('idle');
   }
 
-  function togglePlane() {
+  function togglePlane(event) {
     if (isOpen) closePlane();
-    else openPlane();
+    else openPlane(event);
   }
 
   // ---- Red Dog anchor interaction grammar ----
@@ -87,6 +107,8 @@
   }
 
   function showSummary() {
+    if (productDiscovery && !discoveryAdmitted) return false;
+    if (productDiscovery && isOpen) closePlane();
     if (!summaryEl || !summaryContent) return;
     // Build shell-owned summary from loaded data
     var lines = [];
@@ -123,6 +145,8 @@
   }
 
   function startListening() {
+    if (productDiscovery && !discoveryAdmitted) return false;
+    if (productDiscovery && isOpen) closePlane();
     if (!listeningEl) return;
     isHolding = true;
     listeningVisible = true;
@@ -145,6 +169,7 @@
   if (redDogTrigger) {
     // Pointer-based interactions for tap / double-tap / hold
     redDogTrigger.addEventListener('pointerdown', function (e) {
+      if (productDiscovery && !discoveryAdmitted) return;
       e.stopPropagation();
       // Start hold timer
       holdTimer = setTimeout(function () {
@@ -153,6 +178,7 @@
     });
 
     redDogTrigger.addEventListener('pointerup', function (e) {
+      if (productDiscovery && !discoveryAdmitted) return;
       e.stopPropagation();
       clearTimeout(holdTimer);
 
@@ -174,7 +200,7 @@
         tapTimer = setTimeout(function () {
           lastTapTime = 0;
           if (summaryVisible) { dismissSummary(); return; }
-          togglePlane();
+          togglePlane({ currentTarget: redDogTrigger });
         }, DOUBLE_TAP_WINDOW);
       }
     });
@@ -193,6 +219,14 @@
     redDogTrigger.addEventListener('contextmenu', function (e) {
       e.preventDefault();
     });
+
+    if (productDiscovery) {
+      // Guests open the form immediately; admitted pointer gestures retain the
+      // shared tap/double-tap/hold grammar. Keyboard click has no pointerup.
+      redDogTrigger.addEventListener('click', function (e) {
+        if (!discoveryAdmitted || e.detail === 0) openPlane(e);
+      });
+    }
   }
 
   // ---- mode sheet (JS-injected into anchor) ----
@@ -243,6 +277,7 @@
   }
 
   function executeMode(mode) {
+    if (productDiscovery && !discoveryAdmitted) return false;
     currentMode = mode;
     closeModes();
 
@@ -302,6 +337,9 @@
   }
 
   function openModes() {
+    if (productDiscovery && !discoveryAdmitted) return false;
+    // The mode sheet lives in the shell, outside the search modal's focus trap.
+    if (productDiscovery && isOpen) closePlane();
     injectModeSheet();
     if (!modeSheetEl || modesVisible) return;
     modesVisible = true;
@@ -329,7 +367,7 @@
   var anchorSwiping = false;
   var ANCHOR_SWIPE_THRESHOLD = 40;
 
-  if (anchor) {
+  if (anchor && !productDiscovery) {
     anchor.addEventListener('touchstart', function (e) {
       // Only capture swipes that start on the anchor (not the button's pointer events)
       anchorTouchStartY = e.touches[0].clientY;
@@ -376,7 +414,7 @@
   if (avatarTrigger) {
     avatarTrigger.addEventListener('click', function (e) {
       e.stopPropagation();
-      togglePlane();
+      togglePlane(e);
     });
   }
 
@@ -390,7 +428,7 @@
 
   // ---- swipe-down to open (on Mall body) ----
   var mallShell = document.querySelector('.mall-shell');
-  if (mallShell) {
+  if (mallShell && !productDiscovery) {
     mallShell.addEventListener('touchstart', function (e) {
       if (isOpen) return;
       touchStartY = e.touches[0].clientY;
@@ -417,16 +455,19 @@
 
   // ---- swipe-up to close (on plane) ----
   plane.addEventListener('touchstart', function (e) {
+    if (productDiscovery) return;
     touchStartY = e.touches[0].clientY;
     isDragging = true;
   }, { passive: true });
 
   plane.addEventListener('touchmove', function (e) {
+    if (productDiscovery) return;
     if (!isDragging) return;
     touchCurrentY = e.touches[0].clientY;
   }, { passive: true });
 
   plane.addEventListener('touchend', function () {
+    if (productDiscovery) return;
     if (!isDragging) return;
     isDragging = false;
     if (touchStartY - touchCurrentY > SWIPE_THRESHOLD) {
@@ -439,6 +480,7 @@
   // ---- invites toggle ----
   if (invitesToggle && invitesDrawer) {
     invitesToggle.addEventListener('click', function () {
+      if (productDiscovery && !discoveryAdmitted) return;
       var expanded = invitesDrawer.classList.toggle('open');
       invitesToggle.classList.toggle('expanded', expanded);
     });
@@ -447,6 +489,7 @@
   // ---- sign out ----
   if (signOutBtn) {
     signOutBtn.addEventListener('click', async function () {
+      if (productDiscovery && !discoveryAdmitted) return;
       try {
         if (window.Clerk) await window.Clerk.signOut();
       } finally {
@@ -491,6 +534,7 @@
   }
 
   function setCategory(categoryId) {
+    if (productDiscovery) return false;
     currentCategory = categoryId;
     // Call B's API if available
     if (categoryId === 'all') {
@@ -508,6 +552,7 @@
   }
 
   function setDensity(presetId) {
+    if (productDiscovery && !discoveryAdmitted) return false;
     // Use requestDensity for device policy enforcement
     if (window.mallTileField && typeof window.mallTileField.requestDensity === 'function') {
       var result = window.mallTileField.requestDensity(presetId, { source: 'reddog' });
@@ -527,6 +572,7 @@
   }
 
   function setMotionMode(mode) {
+    if (productDiscovery && !discoveryAdmitted) return false;
     currentMotionMode = mode;
     if (window.mallTileField && typeof window.mallTileField.setMotionMode === 'function') {
       window.mallTileField.setMotionMode(mode);
@@ -558,6 +604,7 @@
   }
 
   function injectAITools() {
+    if (productDiscovery && !discoveryAdmitted) return;
     if (aiToolsEl) return;
     var conciergeHost = plane.querySelector('[data-reddog-concierge]');
     if (!conciergeHost) return;
@@ -568,27 +615,33 @@
 
     var html = '';
 
-    // Category projection
-    html += '<div class="reddog-tools-group">';
-    html += '<div class="reddog-tools-label">Category</div>';
-    html += '<div class="reddog-tools-row">';
-    for (var i = 0; i < CATEGORIES.length; i++) {
-      var c = CATEGORIES[i];
-      html += '<button class="reddog-tool-pill' + (c.id === currentCategory ? ' active' : '') + '"'
-            + ' data-reddog-category="' + c.id + '" type="button">' + esc(c.label) + '</button>';
-    }
-    html += '</div></div>';
+    // Global video projections do not own the selected product's house field.
+    if (!productDiscovery) {
+      // Category projection
+      html += '<div class="reddog-tools-group">';
+      html += '<div class="reddog-tools-label">Category</div>';
+      html += '<div class="reddog-tools-row">';
+      for (var i = 0; i < CATEGORIES.length; i++) {
+        var c = CATEGORIES[i];
+        html += '<button class="reddog-tool-pill' + (c.id === currentCategory ? ' active' : '') + '"'
+              + ' data-reddog-category="' + c.id + '" type="button">' + esc(c.label) + '</button>';
+      }
+      html += '</div></div>';
 
-    // Creator/entity projection hook
-    html += '<div class="reddog-tools-group">';
-    html += '<div class="reddog-tools-label">Creator / Entity</div>';
-    html += '<div class="reddog-tools-row">';
-    html += '<button class="reddog-tool-pill" data-reddog-creator-search type="button">Search\u2026</button>';
-    html += '</div></div>';
+      // Creator/entity projection hook
+      html += '<div class="reddog-tools-group">';
+      html += '<div class="reddog-tools-label">Creator / Entity</div>';
+      html += '<div class="reddog-tools-row">';
+      html += '<button class="reddog-tool-pill" data-reddog-creator-search type="button">Search\u2026</button>';
+      html += '</div></div>';
+    }
 
     // Density presets
     html += '<div class="reddog-tools-group">';
-    html += '<div class="reddog-tools-label">Density</div>';
+    html += '<div class="reddog-tools-label">Layout</div>';
+    if (!productDiscovery) {
+      html += '<button class="reddog-tool-pill" data-reddog-browse-rows type="button">Adaptive category rows</button>';
+    }
     html += '<div class="reddog-tools-row reddog-tools-row-wrap">';
     for (var j = 0; j < DENSITY_PRESETS.length; j++) {
       var d = DENSITY_PRESETS[j];
@@ -619,9 +672,17 @@
 
     // Wire click handlers
     aiToolsEl.addEventListener('click', function (e) {
+      if (productDiscovery && !discoveryAdmitted) return;
       var catBtn = e.target.closest('[data-reddog-category]');
       if (catBtn) {
         setCategory(catBtn.getAttribute('data-reddog-category'));
+        return;
+      }
+
+      if (e.target.closest('[data-reddog-browse-rows]')) {
+        if (!productDiscovery && window.mallTileField && typeof window.mallTileField.setLayoutMode === 'function') {
+          window.mallTileField.setLayoutMode('rows');
+        }
         return;
       }
 
@@ -639,9 +700,11 @@
 
       var creatorBtn = e.target.closest('[data-reddog-creator-search]');
       if (creatorBtn) {
-        emitRedDogCommand('search_creator', {});
-        injectChannels();
-        toggleSearchInput(true);
+        if (!productDiscovery) {
+          emitRedDogCommand('search_creator', {});
+          injectChannels();
+          toggleSearchInput(true);
+        }
         return;
       }
     });
@@ -682,6 +745,7 @@
   }
 
   function toggleChannelAttach(channelId) {
+    if (productDiscovery) return false;
     var current = attachedChannels[channelId] !== false;
     attachedChannels[channelId] = !current;
     var action = current ? 'detach_channel' : 'attach_channel';
@@ -691,6 +755,7 @@
   }
 
   function refreshChannelsUI() {
+    if (productDiscovery) return;
     if (!channelsEl) return;
     var channels = getChannelsFromCatalog();
     var listEl = channelsEl.querySelector('[data-reddog-channel-list]');
@@ -722,6 +787,7 @@
   }
 
   function injectChannels() {
+    if (productDiscovery && !discoveryAdmitted) return;
     if (channelsEl) return;
     var conciergeHost = plane.querySelector('[data-reddog-concierge]');
     if (!conciergeHost) return;
@@ -729,6 +795,15 @@
     channelsEl = document.createElement('div');
     channelsEl.className = 'reddog-channels-section';
     channelsEl.setAttribute('data-reddog-channels', '');
+
+    if (productDiscovery) {
+      channelsEl.innerHTML = '<div class="reddog-tools-label">Video Mall</div>'
+        + '<a class="reddog-tool-pill" href="/member/">Browse videos in Play Foundups</a>';
+      var productOptions = plane.querySelector('[data-reddog-options]');
+      if (productOptions) productOptions.parentNode.insertBefore(channelsEl, productOptions);
+      else plane.appendChild(channelsEl);
+      return;
+    }
 
     var html = '<div class="reddog-tools-label">Channels</div>';
     html += '<div data-reddog-channel-list></div>';
@@ -743,16 +818,16 @@
     // Search input (hidden by default)
     html += '<div class="reddog-search-container" data-reddog-search-container style="display:none;">';
     html += '<div class="reddog-search-row">';
-    html += '<input type="text" class="reddog-search-input" data-reddog-search-input placeholder="Search by creator..." autocomplete="off">';
+    html += '<input type="text" class="reddog-search-input" data-reddog-search-input placeholder="Show me videos on Fukui, houses, cars…" aria-label="Search the Mall catalog" maxlength="300" autocomplete="off">';
     html += '<button class="reddog-search-clear" data-reddog-search-clear type="button">&times;</button>';
     html += '</div>';
 
     // Category filter pills
     html += '<div class="reddog-filter-row" data-reddog-category-filters>';
     html += '<span class="reddog-filter-label">Category:</span>';
-    var categories = ['travel', 'music', 'media', 'startup', 'ai-education', 'ai-research', 'thought-leadership'];
+    var categories = Array.from(new Set(storedCatalog.map(function(item) { return item.category; }).filter(Boolean))).sort();
     for (var i = 0; i < categories.length; i++) {
-      html += '<button class="reddog-filter-pill" data-reddog-category="' + categories[i] + '" type="button">' + categories[i] + '</button>';
+      html += '<button class="reddog-filter-pill" data-reddog-category="' + esc(categories[i]).replace(/"/g, '&quot;') + '" type="button">' + esc(categories[i]) + '</button>';
     }
     html += '</div>';
 
@@ -824,9 +899,9 @@
     if (searchInput) {
       searchInput.addEventListener('input', function (e) {
         var query = e.target.value.trim();
-        if (window.mallTileField && typeof window.mallTileField.searchByCreator === 'function') {
+        if (window.mallTileField && typeof window.mallTileField.searchCatalog === 'function') {
           if (query.length > 0) {
-            window.mallTileField.searchByCreator(query);
+            window.mallTileField.searchCatalog(query);
           } else {
             window.mallTileField.clearFieldScope();
           }
@@ -895,6 +970,7 @@
    * @param {boolean} show - true to show, false to hide
    */
   function toggleSearchInput(show) {
+    if (productDiscovery) return show ? openPlane() : false;
     var container = document.querySelector('[data-reddog-search-container]');
     var input = document.querySelector('[data-reddog-search-input]');
     if (container) {
@@ -909,6 +985,7 @@
    * Clear search and hide input
    */
   function clearSearch() {
+    if (productDiscovery) return false;
     var input = document.querySelector('[data-reddog-search-input]');
     if (input) {
       input.value = '';
@@ -1039,8 +1116,11 @@
     briefingEl.setAttribute('role', 'status');
     briefingEl.setAttribute('aria-label', 'Red Dog context briefing');
 
-    // Insert at the top of the concierge section
-    conciergeHost.insertBefore(briefingEl, conciergeHost.firstChild);
+    // Product members keep their live account briefing outside the hidden
+    // video-only guide. The domain form remains in its own separate host.
+    var productOptions = productDiscovery && plane.querySelector('[data-reddog-options]');
+    if (productOptions) productOptions.parentNode.insertBefore(briefingEl, productOptions);
+    else conciergeHost.insertBefore(briefingEl, conciergeHost.firstChild);
   }
 
   // ---- recommended actions ----
@@ -1116,12 +1196,14 @@
   var MAX_RECOMMENDATIONS = 3;
 
   function getRecommendations() {
+    if (productDiscovery && !discoveryAdmitted) return [];
     var ctx = gatherContext();
     // Also check invites drawer expanded state
     ctx.invitesExpanded = invitesDrawer ? invitesDrawer.classList.contains('open') : false;
     var recs = [];
     for (var i = 0; i < RECOMMENDATION_RULES.length && recs.length < MAX_RECOMMENDATIONS; i++) {
       var rule = RECOMMENDATION_RULES[i];
+      if (productDiscovery && ['enter_foundup', 'reset_projection', 'view_active'].indexOf(rule.id) !== -1) continue;
       if (rule.test(ctx)) {
         recs.push({ id: rule.id, label: rule.label });
       }
@@ -1130,6 +1212,8 @@
   }
 
   function runRecommendation(id) {
+    if (productDiscovery && (!discoveryAdmitted ||
+        ['enter_foundup', 'reset_projection', 'view_active'].indexOf(id) !== -1)) return false;
     for (var i = 0; i < RECOMMENDATION_RULES.length; i++) {
       if (RECOMMENDATION_RULES[i].id === id) {
         RECOMMENDATION_RULES[i].run();
@@ -1165,9 +1249,15 @@
     recsEl.setAttribute('data-reddog-recommendations', '');
     recsEl.setAttribute('aria-label', 'Recommended actions');
 
-    // Insert after briefing (if present) or at top
-    var briefing = conciergeHost.querySelector('[data-reddog-briefing]');
-    if (briefing && briefing.nextSibling) {
+    // Product briefing is a sibling of the guide, so recommendations follow
+    // that same visible account owner. Ordinary Mall placement is unchanged.
+    var briefing = (productDiscovery ? plane : conciergeHost).querySelector('[data-reddog-briefing]');
+    if (productDiscovery && briefing) {
+      briefing.parentNode.insertBefore(recsEl, briefing.nextSibling);
+    } else if (productDiscovery && plane.querySelector('[data-reddog-options]')) {
+      var productOptions = plane.querySelector('[data-reddog-options]');
+      productOptions.parentNode.insertBefore(recsEl, productOptions);
+    } else if (briefing && briefing.nextSibling) {
       conciergeHost.insertBefore(recsEl, briefing.nextSibling);
     } else if (briefing) {
       conciergeHost.appendChild(recsEl);
@@ -1187,6 +1277,7 @@
   var savedEl = null;
 
   function injectSavedVideos() {
+    if (productDiscovery && !discoveryAdmitted) return;
     if (savedEl) {
       renderSavedVideos();
       return;
@@ -1210,6 +1301,7 @@
   }
 
   function renderSavedVideos() {
+    if (productDiscovery && !discoveryAdmitted) return;
     if (!savedEl) return;
 
     var player = window.mallVideoPlayer;
@@ -1269,6 +1361,7 @@
   }
 
   function reenterSavedVideo(foundupId, videoId) {
+    if (productDiscovery && !discoveryAdmitted) return;
     emitRedDogCommand('reenter_saved_video', { foundupId: foundupId, videoId: videoId });
 
     // Try to reconstruct queue from catalog and open fullscreen player
@@ -1307,6 +1400,7 @@
   var historyEl = null;
 
   function injectWatchHistory() {
+    if (productDiscovery && !discoveryAdmitted) return;
     if (historyEl) {
       renderWatchHistory();
       return;
@@ -1341,6 +1435,7 @@
   }
 
   function renderWatchHistory() {
+    if (productDiscovery && !discoveryAdmitted) return;
     if (!historyEl) return;
 
     var player = window.mallVideoPlayer;
@@ -1411,6 +1506,7 @@
   }
 
   function reenterHistoryVideo(foundupId, videoId, videoIndex) {
+    if (productDiscovery && !discoveryAdmitted) return;
     emitRedDogCommand('reenter_history_video', { foundupId: foundupId, videoId: videoId, videoIndex: videoIndex });
 
     // Try to reconstruct queue from catalog and open fullscreen player
@@ -1462,6 +1558,7 @@
   });
 
   function clearWatchHistory() {
+    if (productDiscovery && !discoveryAdmitted) return;
     var player = window.mallVideoPlayer;
     if (player && typeof player.clearHistory === 'function') {
       player.clearHistory();
@@ -1471,8 +1568,9 @@
 
   // Refresh briefing and recommendations every time plane opens
   var _origOpenPlane = openPlane;
-  openPlane = function () {
-    _origOpenPlane();
+  openPlane = function (event) {
+    _origOpenPlane(event);
+    if (productDiscovery && !discoveryAdmitted) return;
     injectBriefing();
     renderBriefing();
     injectRecommendations();
@@ -1545,6 +1643,12 @@
     refreshHistory: function () { renderWatchHistory(); },
     clearHistory: function () { clearWatchHistory(); },
 
+    searchCatalog: function(query) {
+      if (window.mallTileField && typeof window.mallTileField.searchCatalog === 'function') {
+        window.mallTileField.searchCatalog(query);
+      }
+    },
+
     searchByCreator: function (query) {
       emitRedDogCommand('search_creator', { query: query });
       if (window.mallTileField && typeof window.mallTileField.searchByCreator === 'function') {
@@ -1586,9 +1690,12 @@
 
       // Avatar tap goes to Clerk user profile
       var avatarLink = plane.querySelector('[data-account-avatar-link]');
-      if (avatarLink) {
+      if (avatarLink && (!productDiscovery || !productProfileBound)) {
+        if (productDiscovery) productProfileBound = true;
         avatarLink.addEventListener('click', function () {
+          if (productDiscovery && !discoveryAdmitted) return;
           if (window.Clerk && window.Clerk.openUserProfile) {
+            if (productDiscovery) closePlane();
             window.Clerk.openUserProfile({ appearance: window.FOUNDUPS_CLERK_APPEARANCE });
           }
         });
@@ -1597,6 +1704,19 @@
 
     /** Populate FoundUps grid from catalog data */
     setFoundUps: function (catalog) {
+      if (productDiscovery) {
+        // One card per unambiguous registered identity, never one per house.
+        var counts = Object.create(null);
+        (Array.isArray(catalog) ? catalog : []).forEach(function (item) {
+          if (item && typeof item.foundup_id === 'string' && /^[a-z0-9_]+$/.test(item.foundup_id)) {
+            counts[item.foundup_id] = (counts[item.foundup_id] || 0) + 1;
+          }
+        });
+        catalog = (Array.isArray(catalog) ? catalog : []).filter(function (item) {
+          return item && typeof item.foundup_id === 'string' &&
+            /^[a-z0-9_]+$/.test(item.foundup_id) && counts[item.foundup_id] === 1;
+        });
+      }
       storedCatalog = catalog || [];
       var grid = plane.querySelector('[data-account-foundups-grid]');
       if (!grid || !catalog) return;
@@ -1608,7 +1728,9 @@
         var status = item.status || item.launch_readiness || 'placeholder';
         var videoHint = (item.video_count > 0) ? ' data-video-count="' + item.video_count + '"' : '';
 
-        return '<a class="account-foundup-tile" href="/member/foundup.html?id=' + encodeURIComponent(item.foundup_id) + '"' + videoHint + '>'
+        var entry = productDiscovery ? '/f/' + encodeURIComponent(item.foundup_id)
+          : '/member/foundup.html?id=' + encodeURIComponent(item.foundup_id);
+        return '<a class="account-foundup-tile" href="' + entry + '"' + videoHint + '>'
           + '<div class="account-foundup-icon cat-' + esc(category) + '">' + esc(iconLabel.slice(0, 4)) + '</div>'
           + '<span class="account-foundup-name">' + esc(displayName) + '</span>'
           + '<span class="account-foundup-status status-' + esc(status) + '"></span>'
@@ -1737,6 +1859,10 @@
     }
   };
 
+  if (productDiscovery) {
+    composeProductDiscovery(api);
+  }
+
   // Primary API: window.redDog
   window.redDog = api;
 
@@ -1751,6 +1877,325 @@
       api.showVerificationAlert(e.detail);
     }
   });
+
+  /**
+   * Presentation admission comes only from the existing member runtime after
+   * its read-only account checks. This flag neither signs in nor grants any
+   * backend privilege. Revocation clears account data while preserving the
+   * domain-owned search form and results.
+   */
+  function composeProductDiscovery(memberApi) {
+    var memberSelector = '[data-reddog-state], [data-reddog-identity], [data-reddog-foundups], '
+      + '[data-reddog-invites], [data-reddog-options], [data-reddog-concierge], '
+      + '[data-reddog-tools], [data-reddog-channels], [data-reddog-briefing], '
+      + '[data-reddog-recommendations], [data-reddog-saved], [data-reddog-history]';
+    var presentation = [];
+    var host = plane.querySelector('[data-reddog-discovery]');
+    var accountAction = plane.querySelector('[data-reddog-discovery-account]');
+
+    function applyPresentation() {
+      plane.setAttribute('data-reddog-admitted', discoveryAdmitted ? 'true' : 'false');
+      plane.querySelectorAll(memberSelector).forEach(function (element) {
+        var saved = presentation.filter(function (entry) { return entry.element === element; })[0];
+        if (!saved) {
+          saved = { element: element, hidden: element.hidden, inert: element.hasAttribute('inert') };
+          presentation.push(saved);
+        }
+        // The old video gesture guide is not product help. Domain guidance is
+        // supplied by the unchanged form inside the separate discovery host.
+        var shown = discoveryAdmitted && !element.hasAttribute('data-reddog-concierge');
+        element.hidden = shown ? saved.hidden : true;
+        if (!shown || saved.inert) element.setAttribute('inert', '');
+        else element.removeAttribute('inert');
+      });
+      if (host) {
+        host.hidden = false;
+        host.removeAttribute('inert');
+      }
+      if (accountAction) accountAction.hidden = discoveryAdmitted;
+    }
+
+    function clearMemberPresentation() {
+      storedCatalog = [];
+      attachedChannels = {};
+      verificationAlerts = {};
+      verificationAlertCount = 0;
+      currentMode = 'idle';
+      clearTimeout(tapTimer);
+      clearTimeout(holdTimer);
+      tapTimer = holdTimer = null;
+      lastTapTime = 0;
+      isDragging = anchorSwiping = false;
+      closeModes();
+      dismissSummary();
+      stopListening();
+      if (summaryContent) summaryContent.innerHTML = '';
+      if (invitesDrawer) invitesDrawer.classList.remove('open');
+      if (invitesToggle) invitesToggle.classList.remove('expanded');
+      ['[data-account-name]', '[data-account-handle]', '[data-invite-count]'].forEach(function (selector) {
+        var element = plane.querySelector(selector);
+        if (element) element.textContent = '';
+      });
+      ['[data-account-foundups-grid]', '[data-account-invites-drawer]', '[data-reddog-briefing]',
+        '[data-reddog-recommendations]', '[data-reddog-saved]', '[data-reddog-history]'].forEach(function (selector) {
+        var element = plane.querySelector(selector);
+        if (element) element.innerHTML = '';
+      });
+      var avatarImg = plane.querySelector('[data-account-avatar-img]');
+      var avatarPlaceholder = plane.querySelector('[data-account-avatar-placeholder]');
+      var triggerImg = avatarTrigger && avatarTrigger.querySelector('img');
+      var triggerPlaceholder = avatarTrigger && avatarTrigger.querySelector('.account-avatar-placeholder');
+      [avatarImg, triggerImg].forEach(function (element) {
+        if (element) {
+          element.removeAttribute('src');
+          element.style.display = 'none';
+        }
+      });
+      [avatarPlaceholder, triggerPlaceholder].forEach(function (element) {
+        if (element) element.style.display = '';
+      });
+    }
+
+    // Guard the existing API dynamically, including references captured before
+    // revocation. Guest rendering never establishes an admitted account.
+    var discoveryMethods = ['open', 'close', 'toggle', 'isOpen', 'anchorState'];
+    var globalFieldMethods = ['setCategory', 'populateMyMall', 'openPersonalMall', 'searchCatalog', 'searchByCreator', 'clearSearch', 'toggleChannel'];
+    Object.keys(memberApi).forEach(function (name) {
+      if (discoveryMethods.indexOf(name) !== -1) return;
+      var method = memberApi[name];
+      if (typeof method !== 'function') return;
+      memberApi[name] = function () {
+        if (!discoveryAdmitted || globalFieldMethods.indexOf(name) !== -1) return false;
+        return method.apply(memberApi, arguments);
+      };
+    });
+
+    productDiscoveryController = initializePublicDiscovery({
+      publish: false,
+      skipPrimaryBindings: true,
+      open: function (event) { openPlane(event); },
+      onStateChange: function (opened) { isOpen = opened; },
+      onAnchorSwipe: function () {
+        if (discoveryAdmitted) openModes();
+        else openPlane();
+      }
+    });
+    memberApi.registerDiscoveryAdapter = productDiscoveryController.registerDiscoveryAdapter;
+    memberApi.openSearchMall = openPlane;
+    memberApi.isDiscoveryAdmitted = function () { return discoveryAdmitted; };
+    memberApi.setDiscoveryAdmission = function (admitted) {
+      discoveryAdmitted = admitted === true;
+      if (!discoveryAdmitted) clearMemberPresentation();
+      applyPresentation();
+      if (discoveryAdmitted && isOpen) {
+        openPlane();
+        applyPresentation();
+      }
+      productDiscoveryController.refreshFocus();
+      return discoveryAdmitted;
+    };
+    memberApi.setDiscoveryAdmission(false);
+  }
+
+  /**
+   * Optional public discovery controller. The normal member path above is
+   * unchanged. Domain code owns the form, validation and search results;
+   * this owner supplies the existing Red Dog plane, anchors and modal behavior.
+   */
+  function initializePublicDiscovery(options) {
+    options = options || {};
+    var host = plane.querySelector('[data-reddog-discovery]');
+    if (host) host.hidden = false;
+    var closeButton = plane.querySelector('[data-reddog-close]');
+    var background = document.querySelector('.mall-shell');
+    var trigger = document.getElementById('redDogBtn');
+    var triggers = Array.prototype.slice.call(document.querySelectorAll('[data-reddog-open-discovery]'));
+    if (trigger && triggers.indexOf(trigger) === -1) triggers.push(trigger);
+    var accountTrigger = document.getElementById('mallAvatarTrigger');
+    if (accountTrigger && triggers.indexOf(accountTrigger) === -1) triggers.push(accountTrigger);
+    var ring = trigger && trigger.querySelector('[data-reddog-anchor-state]');
+    var adapter = null;
+    var opened = false;
+    var returnFocus = null;
+    var backgroundWasInert = false;
+    var bodyWasOpen = false;
+    // The shell and plane are siblings. Never make the dialog's own ancestor inert.
+    if (background && background.contains(plane)) background = null;
+
+    function hiddenByDisclosure(element) {
+      for (var ancestor = element.parentElement; ancestor; ancestor = ancestor.parentElement) {
+        if (ancestor.tagName !== 'DETAILS' || ancestor.hasAttribute('open')) continue;
+        var summary = Array.prototype.filter.call(ancestor.children, function (child) {
+          return child.tagName === 'SUMMARY';
+        })[0];
+        if (!summary || !summary.contains(element)) return true;
+      }
+      return false;
+    }
+
+    function available(element) {
+      return !!element && element.isConnected && !element.disabled &&
+        !element.closest('[hidden], [inert], [aria-hidden="true"]') &&
+        !hiddenByDisclosure(element) &&
+        element.getClientRects().length > 0;
+    }
+
+    function controls() {
+      return Array.prototype.slice.call(plane.querySelectorAll(
+        'a[href], button, input, select, textarea, summary, [tabindex]'
+      )).filter(function (element) {
+        return element.tabIndex >= 0 && !element.matches(':disabled') && available(element);
+      });
+    }
+
+    function focusSearch() {
+      var candidates = controls();
+      var preferred = adapter && adapter.focusElement;
+      if (candidates.indexOf(preferred) === -1) {
+        preferred = candidates.filter(function (element) { return host && host.contains(element); })[0];
+      }
+      (preferred || candidates[0] || plane).focus({ preventScroll: true });
+    }
+
+    function setState() {
+      triggers.forEach(function (element) {
+        element.setAttribute('aria-expanded', opened ? 'true' : 'false');
+      });
+      if (ring) ring.setAttribute('data-reddog-anchor-state', opened ? 'active' : 'idle');
+      if (options.onStateChange) options.onStateChange(opened);
+    }
+
+    function openDiscovery(event) {
+      if (opened) return;
+      // Touch activation does not focus buttons in every browser.
+      returnFocus = event && triggers.indexOf(event.currentTarget) !== -1
+        ? event.currentTarget : document.activeElement;
+      // Use the existing detail owner to leave its modal before opening search.
+      if (window.mallPlanes && typeof window.mallPlanes.isOpen === 'function' &&
+          window.mallPlanes.isOpen() && typeof window.mallPlanes.closeView === 'function') {
+        window.mallPlanes.closeView();
+      }
+      backgroundWasInert = !!background && background.hasAttribute('inert');
+      bodyWasOpen = document.body.classList.contains('surface-open');
+      opened = true;
+      plane.removeAttribute('inert');
+      plane.setAttribute('aria-hidden', 'false');
+      plane.classList.add('open');
+      scrim.classList.add('open');
+      document.body.classList.add('surface-open');
+      if (background) background.setAttribute('inert', '');
+      setState();
+      focusSearch();
+    }
+
+    function closeDiscovery() {
+      if (!opened) return;
+      opened = false;
+      plane.classList.remove('open');
+      scrim.classList.remove('open');
+      plane.setAttribute('inert', '');
+      if (background && !backgroundWasInert) background.removeAttribute('inert');
+      if (!bodyWasOpen) document.body.classList.remove('surface-open');
+      setState();
+      var target = returnFocus !== document.body && available(returnFocus)
+        ? returnFocus : triggers.filter(available)[0];
+      if (target) target.focus({ preventScroll: true });
+      returnFocus = null;
+      plane.setAttribute('aria-hidden', 'true');
+    }
+
+    function registerDiscoveryAdapter(options) {
+      var element = options && options.element;
+      var focusElement = options && options.focusElement;
+      if (!host || !element || element.nodeType !== 1 || element.ownerDocument !== document ||
+          element === host || element.contains(host) ||
+          (focusElement && (focusElement.nodeType !== 1 || !element.contains(focusElement))) ||
+          (adapter && adapter.element !== element)) return false;
+      // Move, never clone or rebuild: form values and domain listeners survive.
+      if (!host.contains(element)) host.appendChild(element);
+      adapter = { element: element, focusElement: focusElement || null };
+      // Late catalog registration must not steal focus from an active form control.
+      if (opened && !plane.contains(document.activeElement)) focusSearch();
+      return true;
+    }
+
+    plane.setAttribute('role', 'dialog');
+    plane.setAttribute('aria-modal', 'true');
+    plane.setAttribute('aria-hidden', 'true');
+    plane.setAttribute('tabindex', '-1');
+    plane.setAttribute('inert', '');
+    scrim.setAttribute('aria-hidden', 'true');
+    triggers.forEach(function (element) {
+      element.setAttribute('aria-haspopup', 'dialog');
+      element.setAttribute('aria-controls', plane.id);
+      // Native click supports keyboard activation. It also stays idempotent
+      // after a shared gesture recognizer observes a swipe on the same anchor.
+      if (!options.skipPrimaryBindings || (element !== trigger && element !== accountTrigger)) {
+        element.addEventListener('click', options.open || openDiscovery);
+      }
+    });
+    setState();
+    if (closeButton) closeButton.addEventListener('click', closeDiscovery);
+    scrim.addEventListener('click', closeDiscovery);
+
+    document.addEventListener('keydown', function (event) {
+      if (!opened) return;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+        closeDiscovery();
+      } else if (event.key === 'Tab') {
+        var candidates = controls();
+        var index = candidates.indexOf(document.activeElement);
+        if (!candidates.length) {
+          event.preventDefault();
+          plane.focus({ preventScroll: true });
+        } else if (index === -1 || (event.shiftKey && index === 0) ||
+            (!event.shiftKey && index === candidates.length - 1)) {
+          event.preventDefault();
+          candidates[event.shiftKey ? candidates.length - 1 : 0].focus({ preventScroll: true });
+        }
+      }
+    }, true);
+    document.addEventListener('focusin', function (event) {
+      if (opened && !plane.contains(event.target)) focusSearch();
+    });
+
+    // Reuse the shared recognizer only at the protected anchors/handle.
+    // Swiping within the domain form remains native vertical scrolling.
+    if (window.gestureZone) {
+      var top = document.querySelector('[data-anchor="top"]');
+      var bottom = document.getElementById('redDogAnchor');
+      var handle = plane.querySelector('.account-plane-handle');
+      if (top) window.gestureZone(top, { onSwipe: function (direction) {
+        if (direction === 'down') (options.open || openDiscovery)();
+      } });
+      if (bottom) window.gestureZone(bottom, { onSwipe: function (direction) {
+        if (direction === 'up') (options.onAnchorSwipe || options.open || openDiscovery)();
+      } });
+      if (handle) window.gestureZone(handle, { onSwipe: function (direction) {
+        if (direction === 'up') closeDiscovery();
+      } });
+    }
+
+    var discoveryApi = {
+      open: openDiscovery,
+      openSearchMall: openDiscovery,
+      close: closeDiscovery,
+      toggle: function () { if (opened) closeDiscovery(); else openDiscovery(); },
+      isOpen: function () { return opened; },
+      anchorState: function () { return opened ? 'active' : 'idle'; },
+      registerDiscoveryAdapter: registerDiscoveryAdapter,
+      refreshFocus: function () {
+        if (opened && (!plane.contains(document.activeElement) || !available(document.activeElement))) focusSearch();
+      }
+    };
+    if (options.publish !== false) {
+      window.redDog = discoveryApi;
+      window.accountConcierge = discoveryApi;
+    }
+    return discoveryApi;
+  }
 
   // ---- escape helper ----
   function esc(s) {

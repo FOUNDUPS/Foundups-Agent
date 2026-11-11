@@ -1,7 +1,7 @@
 ---
 name: linkedin_jhr_newsletter
 description: Research, significance-gate, draft, maintain and publish the Japan Hyperscaler Report LinkedIn newsletter from the canonical eSingularity JHR evidence lane
-version: 1.2.0
+version: 1.3.0
 author: 0102
 agents: [qwen]
 intent_type: CONTENT_GENERATION
@@ -29,6 +29,23 @@ eSingularity Page articles or YUMORI.me campaign posts.
    repository/site JHR report numbers are interchangeable.
 3. Respect the JHR significance gate. A cycle may correctly produce `NO_REPORT`.
    Vendor repetition, weak sourcing or a duplicate story does not justify an edition.
+
+## Website-first canonical publication gate — 2026-10-13
+
+**Ordering is mandatory for JHR:** verified evidence -> approved JHR repository/site issue -> eSingularity.ai production deployment -> `WEBSITE_LIVE_VERIFIED` for the exact `https://esingularity.ai/reports/jhr#jhr-NNN` issue -> derived LinkedIn newsletter edition -> authorized LinkedIn publication and permalink readback. Check the current real issue anchor; the URL shape is an example, not proof that every `NNN` exists.
+
+The canonical public source of JHR facts and long-form copy is the **live eSingularity.ai article**, not a separately edited LinkedIn manuscript or Google Docs draft. The repository owns research/evidence and website source. A Google Docs master is for drafting and continuity; it does not supersede published website text. In `jhr` website publications follow `modules/foundups/esingularity/skills/website-update/SKILL.md`.
+
+Required upstream receipt before LinkedIn placement:
+
+- issue key and **exact live issue URL** (not only the JHR index);
+- website source revision, production deployment receipt and independently verified public content/date;
+- stable issue/content identity (e.g., a verified source hash or exact website revision);
+- authorized LinkedIn publisher/series, destination-specific approval, and existing LinkedIn article/draft/scheduled search.
+
+Use the live website article as the **sole editorial source** for the LinkedIn version. Adapt headline/length/format for LinkedIn and include the canonical website backlink, but introduce no new claims, figures, photos, endorsements or implications without first updating and verifying the website article. Preserve the article's provenance distinctions and Japanese-first direction. LinkedIn edition numbering is **not** guaranteed to equal website issue numbering. Match by canonical source URL and issue identity; do not create duplicate editions after a retry or minor website edit.
+
+A newly published JHR website issue advances to `LINKEDIN_READY` only after the website receipt and appropriate approval. An ordinary website edit, unfinished rollout or `NO_REPORT` must **not** trigger newsletter publishing. If the existing authorized publishing route/browser cannot publish, retain `WEBSITE_LIVE_VERIFIED / LINKEDIN_BLOCKED` with next actor. Neither this skill nor a website commit proves that a running automatic publisher exists.
 
 ## Japan research coverage
 

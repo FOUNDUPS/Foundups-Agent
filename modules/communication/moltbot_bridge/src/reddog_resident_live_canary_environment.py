@@ -5,6 +5,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Mapping
 
+from .reddog_artifact_generation_provider_modes import (
+    RUNTIME_MODE_FOUNDUPS_FUSION, production_artifact_generator_mode,
+)
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
     PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR_PATTERN_MEMORY,
 )
@@ -15,7 +18,7 @@ def build_live_canary_environment(
     queue_item_id: str, max_rounds: int,
 ) -> dict[str, str]:
     env = _runtime_paths(runtime_root)
-    env.update(_runtime_modes())
+    env.update(_runtime_modes(environ))
     env.update(_runtime_controls(max_rounds))
     env["REDDOG_WRE_QUEUE_ITEM_ID"] = queue_item_id
     env["REDDOG_AUTHORITY_PROFILE_SOURCE_RECEIPT_ID"] = str(
@@ -58,11 +61,25 @@ def _runtime_paths(runtime_root: Path) -> dict[str, str]:
     return paths
 
 
-def _runtime_modes() -> dict[str, str]:
+def live_canary_artifact_generator_mode(environ: Mapping[str, str]) -> str:
+    """Keep the legacy default; an explicit unsupported mode never falls back."""
+    raw = environ.get("REDDOG_ARTIFACT_GENERATOR_MODE")
+    return production_artifact_generator_mode(
+        RUNTIME_MODE_FOUNDUPS_FUSION if raw is None else raw
+    )
+
+
+def _runtime_modes(environ: Mapping[str, str]) -> dict[str, str]:
+    mode = live_canary_artifact_generator_mode(environ)
+    if not mode:
+        raise ValueError("unsupported_artifact_generator_mode")
     return {
         "REDDOG_SIGNATURE_VERIFIER_BACKEND": "ed25519",
         "REDDOG_WORK_ORDER_MATERIALIZER_MODE": "authority_profile",
-        "REDDOG_ARTIFACT_GENERATOR_MODE": "foundups_fusion",
+        "REDDOG_ARTIFACT_GENERATOR_MODE": mode,
+        "REDDOG_MODEL_RUNTIME_AVAILABLE_PROVIDERS": str(
+            environ.get("REDDOG_MODEL_RUNTIME_AVAILABLE_PROVIDERS") or ""
+        ),
         "REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_MODE": "real",
         "REDDOG_EVIDENCE_COMMAND_RUNNER_MODE": "real",
         "REDDOG_DRAFT_PR_RUNNER_MODE": "real",
@@ -102,4 +119,4 @@ def _runtime_controls(max_rounds: int) -> dict[str, str]:
     return controls
 
 
-__all__ = ["build_live_canary_environment"]
+__all__ = ["build_live_canary_environment", "live_canary_artifact_generator_mode"]

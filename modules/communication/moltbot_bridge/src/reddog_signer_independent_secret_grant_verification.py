@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import asdict
+from copy import deepcopy
+from contextlib import contextmanager
 from typing import Any, Mapping
 
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
@@ -32,6 +34,62 @@ from modules.communication.moltbot_bridge.src.reddog_signer_secret_access_grant_
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     constant_time_compare,
 )
+
+
+def issue_effect_secret_grant(provider, request, permit):
+    """Verify an effect grant across clean owner-fence exits, never across RPC."""
+    from . import reddog_signer_independent_secret_grant_provider as owner
+    from .reddog_effect_consensus_proof import consume_effect_signing_permit
+
+    if type(request) is not SigningRequest:
+        raise ValueError("secret_grant_request_invalid")
+    sealed = consume_effect_signing_permit(permit, signing_request=request, now=provider._now(), include_expiry=True)
+    if sealed is None:
+        raise ValueError("secret_grant_consensus_invalid")
+    proof, approval_expires = sealed
+    lease = owner.lease_validated_owner_e0_current_admission
+    inputs = dict(owner_config_path=provider.owner_config_path,
+                  repo_root=provider.repo_root.resolve(), policy=provider.owner_policy)
+    with lease(**inputs) as selected:
+        before = deepcopy(dict(selected.policy))
+        grant, signing_request, binding = provider._prepare_issue(request, selected, proof, approval_expires)
+    signed = provider._sign_grant(grant, signing_request)
+    with lease(**inputs) as selected:
+        if before != dict(selected.policy) or binding != provider._resolve_binding(selected):
+            raise ValueError("effect_grant_owner_changed")
+        require_final_secret_grant(signed, request, binding, selected.resolver, now_epoch=provider._now())
+    return signed
+
+
+@contextmanager
+def lease_independent_secret_grant(provider, request, consensus_proof, *, approval_expires=None):
+    """Release LOW RPC fencing, then fence validated caller use with fresh state."""
+    from . import reddog_signer_independent_secret_grant_provider as owner
+    lease = owner.lease_validated_owner_e0_current_admission
+    inputs = dict(owner_config_path=provider.owner_config_path,
+                  repo_root=provider.repo_root.resolve(), policy=provider.owner_policy)
+    with lease(**inputs) as selected:
+        from .reddog_parent_consensus_proof import SCHEMA as PARENT_PROOF_SCHEMA
+        parent_proof = type(consensus_proof) is dict and consensus_proof.get("schema_version") == PARENT_PROOF_SCHEMA
+        if request.authority_tier != "LOW" and not parent_proof:
+            yield provider._issue(request, selected, consensus_proof)
+            return
+        before = _owner_authority_snapshot(selected)
+        grant, signing_request, binding = provider._prepare_issue(request, selected, consensus_proof, approval_expires if parent_proof else None)
+    signed = provider._sign_grant(grant, signing_request)
+    with lease(**inputs) as selected:
+        current = _owner_authority_snapshot(selected)
+        if before != current or binding != provider._resolve_binding(selected):
+            raise ValueError("secret_grant_owner_changed")
+        require_final_secret_grant(signed, request, binding, selected.resolver, now_epoch=provider._now())
+        yield signed
+
+
+def _owner_authority_snapshot(selected):
+    """Compare authority identity, not each freshly validated observation window."""
+    observation = {"selection_issued_at", "selection_expires_at"}
+    selection = {key: value for key, value in selected.selection.items() if key not in observation}
+    return deepcopy((dict(selected.policy), selection))
 
 
 def require_secret_grant_signer_response(

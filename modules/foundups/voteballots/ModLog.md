@@ -1,5 +1,221 @@
 # Vote/Ballots FoundUp — Module Log
 
+## 2026-11-09 — MAGA/Oversight Phase One documentation reconciliation
+
+Consolidated the address, source ownership and four-entry landing contract in
+`oversight/README.md`. Recorded active Sites projects and current HTTPS results,
+the Voice naming conflict and DNS blockers, the Mall activation boundary and
+the reusable House Rules, Team and Execution destinations. Updated the module
+interfaces, roadmap and release ledger. The documentation slice preserved all
+website source and the pinned archive. WSP 22, 50, 84, 97.
+
+## 2026-11-07 — Interactive oversight maps
+
+Make the public hub diagram a navigation surface. Add committee authorities,
+question-led fictional investigations, per-connector evidence and approvals,
+independent state and legislative tracks, witness restrictions and sourced
+January 6 lessons. Keep the five-stage roadmap, source archive and senator
+lookup. Publish matching map records and scope offline access. WSP 22, 50, 97, 102.
+
+## 2026-11-07 — Oversight landing and DOJ bottleneck
+
+Lead with Pain, Solution and Outcome. Source and date the attorney general's
+prior representation, identify the impartiality concern as an assessment and
+explain the independent state-law pathway and federal contempt boundary.
+Synchronize the public indexes and advance the PWA shell cache. WSP 22, 50, 97.
+
+## 2026-11-07 — Legislative roadmap and senator contact
+
+Put a chamber-neutral roadmap first on Oversight. Document owners, decision
+records, approval and disclosure gates, legislative actions independent of DOJ,
+and the separate optional state referral. Add native senator dial links from the
+existing official directory, a browser-local optional state suggestion, and a
+private voicemail draft. Keep the roadmap and manual contact lookup in the PWA
+shell and preserve the 155-file archive. WSP 22, 50, 97, 102.
+
+## 2026-11-07 — Standalone Oversight staff site and phone navigation
+
+Projected a reviewed public allowlist from the preserved Oversight archive.
+Removed product references and unreviewed work materials from the public
+build. Added a staff-first hub diagram, sourced January 6 example, dated
+attorney general transition directory, and one upward-opening phone
+disclosure. Kept desktop navigation and the professional document URLs.
+The original 155 files and 13 mirror pairs remain pinned. WSP 22, 50, 97.
+
+## 2026-11-07 — Accountability landing, funding evidence and contact PoC
+
+Preserve the single Vote identity and stage a separate overlay on the
+155-file Oversight archive. Add directly readable institutional context,
+professional document links, and a source manifest. Publish selected filing
+excerpts through the existing Vote Site and add manual public office
+selection. Cycle review repaired no-JavaScript links, invalid election cycle
+inputs, unvalidated Vote precache redirects and Oversight scope escape.
+See [release accounting](docs/RELEASE_ACCOUNTING.md#accountability-integration)
+for facts, coverage limits and remaining activation gates. WSP 00, 22, 48,
+50, 97, 102, 104 and 109.
+
+## 2026-11-07 — Release accounting and Launch Pad
+
+Reconciled source, Sites, domain and browser evidence for Vote, Oversight and
+Coalition. Recorded each shipped capability and outstanding gate in the
+[release accounting](docs/RELEASE_ACCOUNTING.md), and distinguished the live
+informational landing from the candidate/evidence launch in the roadmap.
+Fresh DNS checks covered the three mtrout.com names, and HTTPS/page checks
+covered all seven public addresses. Recorded
+the Coalition clean-route offline gap and the stale registry labels as
+follow-up work. Scope is documentation. WSP 10, 22, 50 and 97.
+
+## 2026-11-07 — Independent Coalition tab and private draft export
+
+012 requested a Coalition tab on the current Vote site and an architecture
+audit of a proposed distributed organizing platform. Extend the existing
+static Vote PWA, project and branding. The public page contains a charter,
+participation pathways and a voluntary application draft preview/download.
+No draft is submitted, no membership or identity is verified, and no named
+creator's endorsement is assumed. Public House/Senate directories and the
+Capitol Switchboard are the same for every visitor; no location/affiliation
+targeting, campaign scripts, call logging or automatic dialing is included.
+
+The [audit](docs/COALITION_TAB_AUDIT.md) records the identity/role separation,
+cross-principal upsert, OAuth, incomplete schema and counter defects. It also
+records the existing signup-handler identity-binding risk. These findings do
+not activate a database, OAuth, CMS or calling/payment/voice backend.
+
+Preserve all prior public assets and routes; add three public files and advance
+the exact public-shell cache to v2. The form is local and text-only, with no
+draft network requests or persistent browser storage. The validation contract
+rejects unsafe or misleading profile URLs and fixed-schema authority spoofing.
+No domain, audience, registry, Mall namespace or Oversight source change.
+
+Validation: independent 107-case frozen draft oracle exposed 14 failures from
+redundant authority-like fields; retained its exact prefix and added seven URL
+regression/default-port cases. Final 114 pass, no skips. Existing Vote Python
+398 pass; source/syntax checks and exact 155-file/13-mirror Oversight preservation
+pass. Actual browser, hosted deployment and GitHub evidence remain separate
+from source validation. WSP 00/10/22/50/71/97.
+
+## 2026-11-07 — Preferred Vote and Oversight public addresses
+
+012 clarified the preferred map: `vote.mtrout.com` is the existing Vote public
+landing; `oversight.mtrout.com` is its Oversight Blueprint workstream;
+`maga.mtrout.com` remains an alias of that same workstream. The existing
+FoundUps aliases and generated Sites addresses are retained, not promoted
+or removed. Vote keeps one `voteballots` identity.
+
+The owning publisher added `vote.mtrout.com` to the existing Vote Sites
+project and recorded all three requested DNS additions at effective TTL 3600,
+with all 35 prior `mtrout.com` records unchanged (38 records afterward).
+Google/Cloudflare DNS and active hosting/SSL were recorded separately from
+publication. Independent 00:45 UTC checks confirmed the expected CNAME and
+strict certificate/hostname validation with HTTP 200 and the correct Vote or
+Oversight title on both public endpoints for all three `mtrout.com` addresses.
+
+Only the Vote README, landing README, Oversight README and this log change.
+The 155 preserved source files, snapshot manifest, runtime, public assets and
+deployment configuration are unchanged. Validation: documentation diff and
+whitespace checks plus the existing source-preservation verifier; no new
+tests or API/calling changes. WSP10/22/50/71/97.
+
+## 2026-11-07 — GitHub/PC reconciliation, Oversight preservation and Vote front door
+
+012 requested that Oversight become a Vote workstream, that all existing work
+be preserved, and that Work/GitHub changes be reconciled on the PC. Live GitHub
+metadata, branch/tree searches and ancestry checks found the related Vote PRs
+#2275/#2282/#2289/#2298 already merged and present locally. No separate Oversight
+repository, PR or indexed source was found among the connected account's 20
+accessible repositories. The PC fast-forwarded from e4ffddcb to main152d52dd
+with no unique local commits and unchanged pre-existing untracked status.
+
+Preserve all 155 public Oversight Site files under `oversight/site/`, including
+documents, data, authored instruction tree and both root/web copies. The exact
+source inventory, blob/working-file identities and Sites v5 publication are
+recorded in `oversight/source-snapshot.json`. Independent byte/provenance review
+confirmed all files and 13 mirror pairs. Scoped ignore/attribute rules preserve
+public bytes without admitting future credential files. No secret data or Git
+metadata is imported.
+
+`web/` adds the informational Vote landing/PWA. It links the published Oversight
+guide and honestly distinguishes internal funding work and planned claim
+verification from available features. This is an EXISTING_FOUNDUP_UPDATE under
+one `voteballots` identity. Canonical shell routes, data namespace, registry,
+manifest readiness and runtime admission remain unchanged. Separate-origin
+sites are not reported as an integrated Mall PWA or running autonomous RSI.
+
+Validation: existing Vote and related registry/projector/route selection yielded
+721 passed and three unrelated namespace-manifest failures; the exact three
+failures also reproduce on clean main152d52dd (EDUIT namespace, kids_episodes and
+Shield missing fields). The initial mixed legacy pytest import collision was
+resolved with importlib collection; no test was skipped or weakened. Static
+source, manifest, link, service-worker and preservation checks supplement those
+existing tests. Required hosted checks and final publication/readback remain
+separate release gates. WSP00/10/22/50/71/97/102/104/109.
+
+## 2026-11-01 — Aggregate-to-display provenance closure
+
+WSP00/15/22/48/50/97; base4c96d6b. Freeze independent scorer acceptance before
+one existing-WRE local Qwen proposal. Reject its unchanged fenced output; do not
+materialize it. The coordinator reuses the source policy for aggregate totals.
+Independent review finds a connected display defect despite passing scorer tests;
+freeze a separate consumer oracle before repairing quick-answer confidence and
+shell metadata. Missing/ambiguous/invalid total claims fail closed as UNKNOWN.
+Preserve valid direct sources, lower values, source identities and review/trail
+rules. Replace misleading aggregate_from_fec_records with aggregate_from_summary.
+Only two historical quick-answer fixtures need explicit claims for their stated
+scenarios; new acceptance assertions stay fixed. See tests/TestModLog for results.
+No native worker success, live data, public launch or measured retained gain.
+
+
+## 2026-11-01 — RSI micro qualification: indirect funding-source confidence
+
+WSP00/15/22/48/50/97; source baseline43b3b66. Production funding-source scoring
+must not inherit VERIFIED_FACT from an indirect reference. Reuse the existing
+scorer and integration suite; preserve lower/UNKNOWN values, direct-source
+controls, original input and reference identity. Add an explicit downgrade factor.
+Independent frozen tests reproduced4 failures/16 passes. One local Qwen proposal
+changed the wrong branch and produced7 failures/13 passes; it was rejected.
+The coordinator authored the actual repair; independent full module replay passed322.
+Strengthened oracle20 passed separately, with unchanged original frozen copies.
+CI now includes the module and retains its JUnit results alongside WRE checks.
+No worker promotion, live FEC access, public activation or native RSI is claimed.
+Exact trial and cost limits: [existing dispatch](../../../docs/operations/RSI_SWARM_DISPATCH.md#micro-verification-and-protected-native-composition--2026-11-01).
+The separate aggregate total_raised provenance defect is tracked in ROADMAP.
+
+---
+
+## 2026-10-30 — Political Claim Verification / Bullshit Meter Intake
+
+**Author**: 0102  
+**Slice**: `VOTE_POLITICAL_CLAIM_VERIFICATION_INTAKE_PHASE1`  
+**Scope**: documentation only; EXISTING_FOUNDUP_UPDATE  
+**References**: WSP 22, WSP 30, WSP 50, WSP 62, WSP 95, WSP 97, WSP 108, WSP 109  
+**Branch**: `docs/vote-claim-verification-20261030`
+
+### Source and purpose
+012 supplied a political claim-verification/scoring specification, then requested its addition to Vote's Outcome, Solution, Pain, roadmap and related documentation. The complete supplied text is retained as provenance; its proposed implementation instructions are not reported as executed.
+
+### Created
+- `docs/intake/CLAIM_VERIFICATION_SOURCE_20261030.md` — original feature specification and spoken-scope clarification.
+- `docs/POLITICAL_CLAIM_VERIFICATION_AND_SCORING_ENGINE.md` — integrated pipeline, evidence/score qualifications, proposed data model, four-stage roadmap, UI contracts, evaluation criteria, and primary methodology sources.
+
+### Updated
+- All eight canonical WSP 109 intake documents, including Outcome, Solution and Pain.
+- `README.md` and `ROADMAP.md` — linked the feature and preserved existing product phases.
+- `INTERFACE.md` — planned addendum without claiming runtime APIs. The historical 1,307-line AI hooks architecture file is unchanged to avoid growing existing documentation-size debt (WSP 62).
+- This module log; prior entries preserved.
+
+### Follow-up requirements verification
+- Explicit PoC -> Prototype -> MVP framing added inside Solution; unspecified MVP scope remains unspecified.
+- Pain now identifies implementation barriers; the manifest draft records observed tier/stage/token declaration/next-slice fields.
+- Actual genesis/diligence/pitch Skillz and WSP 95 were read and distinguished from candidate skills and runtime execution.
+- At 012's request, the shared FoundUps onboarding reference and domain README/ModLog record the repository-first rule for future work.
+
+### Decisions and validation scope
+- CV1 internal ten-speech evaluation may proceed alongside public PoC preparation; public/member release remains gated.
+- Preserve the supplied 300-850/index/overlay intent while separating verdict, confidence, context, conflicts and intent. Unknown evidence is unscored. Fixed polling thresholds, conflict weighting, recurrence penalties, and latency targets require qualification and validation.
+- Current GitHub documents/code were inspected with direct-path retrieval; semantic HoloIndex execution and the Windows checkout were not verified in this remote documentation pass.
+- Validation covers source preservation, changed-document links, unchanged historical entries, scope/status consistency, and the GitHub change set. No runtime test result is inferred from documentation checks.
+- The existing six-slice mock-data chain and historical May 25 `303 passed` record remain unchanged. No new engine, corpus run, score, database/migration, production code, runtime manifest/registry, route/catalog activation, live FEC integration, or deployment is claimed.
+
 ---
 
 ## 2026-08-26 — WSP 109 Canonicalization + Public PoC Reopen

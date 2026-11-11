@@ -83,9 +83,7 @@ class ResolvePerSignSignerBackend(IsolatedSignerBackend):
     principal_key_resolver: PrincipalKeyResolver
     backend_factory: EphemeralSignerBackendFactory
 
-    def sign(
-        self, request: SigningRequest, peer: SignerPeerAttestation
-    ) -> SigningResponse:
+    def sign(self, request: SigningRequest, peer: SignerPeerAttestation) -> SigningResponse:
         return _reject(REJECT_SECRET_GRANT_REQUIRED)
 
     def sign_with_secret_grant(
@@ -107,7 +105,7 @@ class ResolvePerSignSignerBackend(IsolatedSignerBackend):
             request, asdict(self.binding)
         ):
             return _reject(REJECT_SECRET_GRANT_INVALID)
-        if not factory_binding_matches(self.backend_factory, self.binding):
+        if not factory_binding_matches(self.backend_factory, self.binding, request=request):
             return _reject(REJECT_EPHEMERAL_BACKEND_INVALID)
         expected = self._expected(request, peer)
         if not (
@@ -128,9 +126,22 @@ class ResolvePerSignSignerBackend(IsolatedSignerBackend):
         return self._resolve_and_sign(request, peer, consumed_grant)
 
     def _resolve_and_sign(
-        self,
-        request: SigningRequest,
-        peer: SignerPeerAttestation,
+        self, request: SigningRequest, peer: SignerPeerAttestation,
+        consumed_grant: Mapping[str, Any],
+    ) -> SigningResponse:
+        def protected_action():
+            from modules.communication.moltbot_bridge.src.reddog_signer_wsp71_ephemeral_backend_factory import _lease_authenticated_factory
+            with _lease_authenticated_factory(self.backend_factory, self.binding, self.grant_boundary, request=request):
+                return self._resolve_and_sign_current(request, peer, consumed_grant)
+        try:
+            return SignerSecretAccessGrantBoundary.authorize_consumed_use(self.grant_boundary, consumed_grant, protected_action)
+        except SignerSecretAccessGrantRejected:
+            return _reject(REJECT_SECRET_GRANT_INVALID)
+        except Exception:
+            return _reject(REJECT_EPHEMERAL_BACKEND_INVALID)
+
+    def _resolve_and_sign_current(
+        self, request: SigningRequest, peer: SignerPeerAttestation,
         consumed_grant: Mapping[str, Any],
     ) -> SigningResponse:
         try:
@@ -142,11 +153,7 @@ class ResolvePerSignSignerBackend(IsolatedSignerBackend):
         if not provider_result_matches(built, self.binding):
             return _reject(REJECT_EPHEMERAL_BACKEND_INVALID)
         backend = built.backend
-        if (
-            backend is None
-            or backend is self
-            or not backend_identity_matches(backend, self.binding)
-        ):
+        if backend is None or backend is self or not backend_identity_matches(backend, self.binding):
             return _reject(REJECT_EPHEMERAL_BACKEND_INVALID)
         if type(backend) is Ed25519SignerBackend:
             try:
@@ -154,30 +161,21 @@ class ResolvePerSignSignerBackend(IsolatedSignerBackend):
             except (TypeError, ValueError):
                 return _reject(REJECT_EPHEMERAL_BACKEND_INVALID)
         try:
-            response = self.grant_boundary.authorize_consumed_use(
-                consumed_grant, lambda: backend.sign(request, peer)
-            )
+            self.grant_boundary.recheck_before_signing(consumed_grant)
+            response = backend.sign(request, peer)
             if type(response) is not SigningResponse or response.accepted is not True:
                 return _reject(REJECT_EPHEMERAL_BACKEND_INVALID)
             if not (
                 response_matches(response, request, self.binding)
-                and signature_matches(
-                    response, request, self.signature_verifier, self.binding
-                )
+                and signature_matches(response, request, self.signature_verifier, self.binding)
             ):
                 return _reject(REJECT_EPHEMERAL_BACKEND_INVALID)
             return response
-        except SignerSecretAccessGrantRejected:
-            return _reject(REJECT_SECRET_GRANT_INVALID)
-        except Exception:
-            return _reject(REJECT_EPHEMERAL_BACKEND_INVALID)
         finally:
             backend = None
             built = None
 
-    def _expected(
-        self, request: SigningRequest, peer: SignerPeerAttestation
-    ) -> ExpectedSignerSecretGrantBinding:
+    def _expected(self, request: SigningRequest, peer: SignerPeerAttestation) -> ExpectedSignerSecretGrantBinding:
         return ExpectedSignerSecretGrantBinding(
             **asdict(self.binding),
             signing_request_digest=signer_secret_access_request_digest(

@@ -37,6 +37,7 @@ def _conversation_config(tmp_path: Path, private_key: object):
         key_epoch="epoch-1",
     )
     config = _config(
+        tmp_path,
         public_key, repo_root=repo, runtime_root=tmp_path / "runtime",
         signer_runtime_root=signer_runtime,
         socket_path=tmp_path / "runtime/reddog-signer.sock",

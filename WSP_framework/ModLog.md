@@ -1,3 +1,123 @@
+## 2026-11-10 — Branch lifecycle boot and draft protocol registration
+
+Under 012's explicit continuation, PR #2335 records the WSP 00 boot obligation
+for owned branch and PR reconciliation. WSP 10 and WSP 97 govern preservation
+and acceptance. WSP 110 v0.2 remains draft guidance and is registered in both
+master indexes. Framework and
+knowledge copies match. The WSP 00 State Bridge fallback and coherence canary
+retain their original wording. The existing awakening gate remains unchanged.
+WSP 22/81/97 apply. Recovery is a focused revert of PR #2335.
+
+## 2026-11-05 — WSP26 micro-UPS preview qualification
+
+WSP81 NOTIFICATION_REQUIRED under 012's continuing architecture/docs request.
+The §1.2 [P4 pointer](../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p4-prospective-micro-ups-allocation-v1)
+and exact knowledge mirror now mark the bounded preview VERIFIED_SIMULATED after
+source-bound numerical/security acceptance. No F_i supply, BTC price, native-book/v2
+migration, custody or chain activation is selected. Failed ID/import runs stay evidence.
+0102 handles policy manually; no Qwen/model/pattern-store execution is claimed.
+WSP22/26/50/81/97; preserve prior text and recover through a focused Git revert.
+
+## 2026-11-02 — WSP26 restricted simulator-native transfer clarification
+
+Under 012 continuation, add the narrow §1.2 B03-P3 simulator-qualified version pointer;
+WSP81 NOTIFICATION_REQUIRED, notification recorded in the review/publication handoff.
+Framework/knowledge bytes match by proposal; independent validation follows application.
+No fee/supply/F_i/UPS atom, custody or chain authority changes; all prior text remains.
+0102 handles monetary scope manually; no Qwen/model invocation or pattern-store write.
+Recover by focused Git revert; WSP22/26/81/97 and independent review remain required.
+
+## 2026-11-01: WSP26 custody targets and agent signing boundaries
+
+Under 012's explicit security-document correction request, clarify only WSP26
+sections 4.2/4.3/4.5; WSP81 class NOTIFICATION_REQUIRED, with notification in the
+review/publication handoff. Wallet segregation, MPC/HSM and agent orchestration
+are target designs, not implemented custody or automatic independence/security.
+Record shared-seed and shared-control-plane risk; agents propose bounded intent
+without assumed raw-key/shard custody. Retain fees, supply, maturity, tiers and
+economic policy, and reuse existing 1.2/4.11 acceptance gates. Exact numbered
+knowledge mirror and independent source/scope review are required before commit.
+Base43b3b66cce8a01f28fb08577a9db84f731e50455; recover by focused Git revert.
+No runtime, key, signer, custody, chain or economic activation. WSP22/26/81/97.
+
+## 2026-10-31: Simulator-first economic change governance
+
+WSP81 class NOTIFICATION_REQUIRED: section addition and clarified cross-protocol
+acceptance under012's explicit simulator-first documentation/publication direction.
+012 notified in this session. Add WSP26 section1.2 and WSP27/29/100 pointers with
+exact knowledge mirrors; retain economics, active statuses, budgets and history.
+Base21ac89287449d8ca54385a116053a33655d86e6b; integrated source60d899fd6.
+Independent review required explicit chain-level adversarial/no-effect tests;
+the clarified gate remains blocked when chain hooks are absent. Fresh selected
+simulator/docs420 pass; final mirror/link checks and hosted gates remain separate.
+Recover through a focused Git revert, preserving prior evidence and local work.
+No archive duplicate, runtime policy, funding or deployment. WSP22/26/50/81/97.
+
+## 2026-10-29: WSP85 current root ownership and preservation boundaries
+
+Clarify foundational root ownership instead of a historical ten-file ceiling,
+name temporary/prompt artifacts, and require preservation and ownership review
+before relocation. Document the existing validator as an immediate-child,
+read-only classifier; proposed hooks are not installed enforcement. Mirror the
+numbered framework/knowledge protocol. WSP81 class: NOTIFICATION_REQUIRED;
+012 notified in this authorized audit-repair chat. Core foundational-only intent,
+WSP status and priorities remain unchanged; no automatic deletion is authorized.
+Base: main0d537a1f. Six root-validator cases, exact protocol mirror equality,
+relocation/link preservation and whitespace checks pass. Runtime manifest and
+test registry remain current and unchanged. Hosted/main/Holo acceptance remains
+pending; historical source remains
+in Git and recovery is a focused revert. WSP22/50/64/81/85/97.
+
+## 2026-10-29: WSP26 cryptographic claim correction
+
+Factual correction under explicit blockchain-security research direction;
+WSP15 C1/I4/D4/Impact4=13/P1. Retain the economic design while distinguishing
+Falcon State Proofs, native PQ accounts, Ed25519/multisig and consensus security.
+Remove unsupported universal/uniqueness/probability and automatic-bridge claims;
+reuse dated primary sources in the existing FX venue research document.
+Synchronize both numbered WSP26 copies per WSP81. Classify as a section/source
+clarification with 012 notification; no core economic, status or budget change.
+Base:362b4c62a665bd6c594904e39d974a7187a12649. Before publication require exact
+mirror equality, NAV syntax/data-only diff, link and scope readback; no runtime
+or cryptographic qualification is asserted. Recovery: focused Git revert.
+
+## 2026-10-29: WSP62 historical missing-expiry completion policy
+
+Specify the narrow first stage of F4a: an existing temporary exemption may
+record only its already-past review-quarter boundary, with every other field
+and limit unchanged. It remains expired debt. Require exact-base policy in
+both mirrors; reject renewal, new exemptions and candidate-authored authority.
+No audit implementation or exemption entry changes in this slice:
+`SPECIFIED_NOT_IMPLEMENTED`. WSP81 class: NOTIFICATION_REQUIRED (section and
+compliance clarification); 012 notified during the authorized audit repair.
+Base: `f304ba799f8fa835f0b5127efabe9e724315e3c8`. The numbered framework and
+knowledge files are synchronized; historical content is retained in Git.
+Recovery: focused revert. WSP22/50/62/64/81/97.
+
+Validation: exact mirror equality and whitespace checks pass. Existing
+`test_foundup_route_wsp62_exemptions.py`: five tests pass, one fails because
+the unchanged verifier is 591 lines against its unchanged 586-line ceiling.
+Git blob comparison proves the test, target and both exemption registries
+match the exact base. That inherited size debt remains open; no limit was raised.
+
+## 2026-10-13: WSP71 security review ownership and candidate triage
+
+Added sections 5.4–5.5 under 012's explicit direction to repair security gaps
+and enhance the existing WSP. 0102 owns routine evidence and remediation;
+012 receives material decisions, not a report-download task. Require source,
+PR base/head and deployment binding, truthful coverage, bounded exceptions,
+and credential-safe historical triage. Framework/knowledge copies synchronized
+per WSP81; pre-change content remains recoverable from main 4095ad9. Existing
+permission/production boundaries remain in force. Related implementation:
+CI stacked-branch trigger and existing secret-gate regression suite. WSP22/71/81/97.
+
+## 2026-09-29: WSP48 measurement scalar and provenance clarification
+
+Synchronize both existing WSP48 copies: typed finite metrics, integer counts,
+explicit unknowns and scope-limited formal verification. The verified Chen/Wang/Qu
+survey v2 motivates the hierarchy; FoundUps defines its own measurement bundle.
+
+- **2026-09-25**: **WSP 48 verification hierarchy and RSI measurement alignment** — Added the research-backed verification hierarchy (intrinsic signal < learned judge < execution feedback < formal verifier), kept human research judgment as the unresolved direction-setting boundary, and defined the minimal machine-readable RSI measurement bundle. Current WRE AutoResearcher is explicitly classified as execution feedback with no independent/held-out/activation/retained-generation proof and `production_rsi_eligible=false`. Framework/knowledge WSP 48 mirrors remain byte-identical. This is evidence/truth alignment, not a production RSI completion claim. (WSP 22/48/50/81/97)
 - **2026-09-13**: **R10 compact action preservation** — Aligned WSP 99 and its existing exact knowledge mirror with the optional explicit `A` field in the existing compiler. Legacy packets remain readable; default IMPLEMENT cannot establish action fidelity. Parsed scope/action and decompiled action now govern the existing gate. 158 focused tests pass after 99 pre-repair failures. No status, sovereignty, execution permission or full-prose fidelity claim. WSP 81 operational correction under 012’s instruction to rectify drift; recovery is a focused Git revert. Deterministic local evidence replaces unnecessary model analysis for this narrow defect. (WSP 22/50/81/97/99)
 - **2026-09-13**: **R03 vetted interpreter selection** — Corrected only WSP 00 retrieval recipe/context after bounded diagnostics found the ambient Python base excluded vetted NumPy. Reused the primary checkout venv with the selected source helper; matched-reference CURRENT/no-gap retrieval restored, current-main qualification remains open. Regenerated canonical-agent projection and synchronized the exact knowledge mirror. Existing runtime-selection tests: 2 passed / 16 deselected. WSP 81 operational clarification under existing 012 direction; no state semantics, status, budget, runtime code or sovereignty change. (WSP 00/22/50/81/87/97)
 - **2026-09-13**: **R03 retrieval entry alignment** — Replaced raw search/inline reindex bootstrap instructions with the existing source-bound owner helper and explicit local-bundle fallback. A primary checkout is not necessarily current main; search misses do not justify duplicate modules or fabricated Tier-0 stubs. Synchronized the exact WSP 00 knowledge mirror. WSP 97 comparison found the owner/selector/bundle/repair paths already implemented; 81 existing contract tests pass. Live semantic readiness remains unproved. WSP 81 classification: operational clarification and cross-reference additions under 012's instruction to continue and rectify drift; no state semantics, status, budget or sovereignty change. Separate PR #1636 remains untouched. Recovery: focused Git revert. (WSP 00/22/50/81/87/97)

@@ -13,6 +13,7 @@ from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_auth
 )
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_revocation_protocol import (
     OP_ADVANCE,
+    TARGET_ROLE,
     RootRevocationRequest,
     RootRevocationResponse,
     STATUS_ACCEPT,
@@ -50,6 +51,7 @@ def handle_root_revocation_request(
         with validate_root_revocation_operation(
             request, snapshot=snapshot, state=state,
             authority=revocation_authority, now_epoch=now_epoch,
+            peer=peer,
         ) as operation:
             current = state.load(operation.binding_digest)
             if request.operation == OP_ADVANCE:
@@ -71,10 +73,11 @@ def _require_transport(
         or abs(now_epoch - request.issued_at) > MAX_CLOCK_SKEW_SECONDS
     ):
         raise ValueError("root_revocation_transport_context_invalid")
-    require_root_authority_peer(peer, snapshot)
-    require_root_authority_signer_proof(
-        snapshot, canonical_signer_input(request), request.signer_instance_signature
-    )
+    if request.requester_role == TARGET_ROLE:
+        require_root_authority_peer(peer, snapshot)
+        require_root_authority_signer_proof(
+            snapshot, canonical_signer_input(request), request.signer_instance_signature
+        )
 
 
 def _advance(state, current, operation) -> ProposalReplayHighWater:

@@ -38,6 +38,8 @@ def _store(
     *,
     store_id: str = STORE_ID,
     durability_receipt_id: str = DURABILITY_RECEIPT,
+    require_existing: bool = False,
+    mutation_guard=None,
 ) -> SqliteMonotonicAuthorityStore:
     repo_root, authority_root = roots
     return SqliteMonotonicAuthorityStore(
@@ -46,6 +48,8 @@ def _store(
         repo_root=repo_root,
         store_id=store_id,
         durability_receipt_id=durability_receipt_id,
+        require_existing=require_existing,
+        mutation_guard=mutation_guard,
     )
 
 
@@ -467,3 +471,73 @@ def test_competing_restore_checkpoints_preserve_one_exact_winner(mirrors, roots)
     assert sum(accepted) == 1
     assert destination.load(BINDING) == candidates[accepted.index(True)][1]
     assert all(source.load(BINDING) == expected for source, expected in candidates)
+
+
+def test_require_existing_opens_real_store_and_preserves_cas(roots):
+    original = _store(roots)
+    guarded = _store(roots, require_existing=True)
+    first = _value(1, "1")
+    guarded.advance(BINDING, expected=None, next_value=first)
+    assert original.load(BINDING) == first
+    with pytest.raises(RuntimeError, match="conflict"):
+        guarded.advance(BINDING, expected=None, next_value=first)
+
+
+@pytest.mark.parametrize("state", ["missing", "empty", "wrong_identity", "missing_identity", "missing_schema", "wrong_schema"])
+def test_require_existing_never_initializes_or_repairs(roots, state):
+    path = roots[1] / "generation-witness.sqlite3"
+    if state == "empty":
+        path.touch()
+    elif state not in ("missing", "empty"):
+        _store(roots)
+        with sqlite3.connect(path) as connection:
+            if state == "wrong_identity":
+                connection.execute("UPDATE metadata SET store_id = 'foreign'")
+            elif state == "missing_identity":
+                connection.execute("DELETE FROM metadata")
+            else:
+                connection.execute("DROP TABLE high_water")
+                if state == "wrong_schema":
+                    connection.execute("CREATE TABLE high_water (binding_digest TEXT, sequence INTEGER, state_revision TEXT)")
+    before = path.read_bytes() if path.exists() else None
+    with pytest.raises((sqlite3.OperationalError, ValueError)):
+        _store(roots, require_existing=True)
+    assert (path.read_bytes() if path.exists() else None) == before
+
+
+@pytest.mark.parametrize("operation", ["load", "advance"])
+def test_require_existing_rejects_removed_store_on_every_connection(roots, operation):
+    _store(roots)
+    guarded = _store(roots, require_existing=True)
+    guarded.path.unlink()
+    with pytest.raises(sqlite3.OperationalError):
+        if operation == "load":
+            guarded.load(BINDING)
+        else:
+            guarded.advance(BINDING, expected=None, next_value=_value(1, "1"))
+    assert not guarded.path.exists()
+
+
+def test_require_existing_rechecks_metadata_before_writing(roots):
+    _store(roots)
+    guarded = _store(roots, require_existing=True)
+    with sqlite3.connect(guarded.path) as connection:
+        connection.execute("UPDATE metadata SET store_id = 'foreign'")
+    with pytest.raises(ValueError, match="identity_mismatch"):
+        guarded.advance(BINDING, expected=None, next_value=_value(1, "1"))
+    with sqlite3.connect(guarded.path) as connection:
+        assert connection.execute("SELECT * FROM high_water").fetchall() == []
+
+
+@pytest.mark.parametrize("reject_at", [1, 2])
+def test_mutation_guard_rejection_rolls_back_before_insert_or_commit(roots, reject_at):
+    _store(roots)
+    calls = []
+    def guard():
+        calls.append(True)
+        if len(calls) == reject_at:
+            raise ValueError("synthetic_lease_expired")
+    guarded = _store(roots, require_existing=True, mutation_guard=guard)
+    with pytest.raises(ValueError, match="synthetic_lease_expired"):
+        guarded.advance(BINDING, expected=None, next_value=_value(1, "1"))
+    assert len(calls) == reject_at and guarded.load(BINDING) is None

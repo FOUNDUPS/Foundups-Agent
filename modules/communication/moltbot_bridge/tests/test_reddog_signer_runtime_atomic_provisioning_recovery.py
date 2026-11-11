@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -28,6 +29,9 @@ def _fixed_clock(monkeypatch: pytest.MonkeyPatch) -> None:
     import modules.communication.moltbot_bridge.src.reddog_signer_runtime_atomic_provisioning as target
 
     monkeypatch.setattr(target, "_trusted_now", lambda: NOW)
+    if os.name != "nt":
+        # These tests exercise recovery with synthetic stores, not OS enrollment.
+        monkeypatch.setattr(target, "runtime_artifact_activation_lease", _test_only_activation_lease)
 
 
 def test_tampered_manifest_path_is_not_reported_as_preserved(

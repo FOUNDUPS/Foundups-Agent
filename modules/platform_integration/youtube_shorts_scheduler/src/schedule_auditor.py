@@ -108,17 +108,34 @@ class ScheduleAuditor:
             "missing_from_tracker": [],
             "time_collisions": [],
             "healed": [],
-            "healthy": True,
+            "healthy": None,
+            "status": "failed",
+            "total_scheduled": None,
         }
 
         try:
             # Step 1: Read scheduled videos from YouTube Studio DOM
-            youtube_videos = self._scrape_scheduled_videos()
+            from .schedule_inventory import qualified_inventory
+
+            inventory = self._read_scheduled_inventory()
+            youtube_videos = inventory["videos"]
+            report["inventory"] = inventory
+            report["status"] = inventory["status"]
+            report["total_scheduled"] = inventory["total_scheduled"]
+            report["observed_scheduled_count"] = len(youtube_videos)
             report["youtube_scheduled"] = youtube_videos
             logger.info(
-                f"[AUDITOR] Found {len(youtube_videos)} scheduled videos on YouTube "
+                f"[AUDITOR] Observed {len(youtube_videos)} qualified scheduled slots on YouTube "
                 f"for {self.channel_name}"
             )
+
+            if not qualified_inventory(inventory, self.channel_id):
+                report["status"] = inventory["status"] if inventory["status"] in {"partial", "failed"} else "failed"
+                report["total_scheduled"] = None
+                report["error"] = "scheduled_inventory_incomplete"
+                logger.warning("[AUDITOR] Inventory %s; total unknown; absence checks and auto-heal refused", inventory["status"])
+                return report
+            report["healthy"] = True
 
             # Step 2: Read tracker data
             tracker_ids = set(self.tracker.get_all_scheduled_video_ids())
@@ -176,20 +193,21 @@ class ScheduleAuditor:
                     logger.warning(f"[AUDITOR] TIME COLLISION: {slot_key} has {len(vids)} videos: {vids}")
 
         except Exception as e:
-            logger.error(f"[AUDITOR] Audit failed: {e}")
-            report["error"] = str(e)
-            report["healthy"] = False
+            logger.error("[AUDITOR] Audit failed (%s)", type(e).__name__)
+            report["error"] = "schedule_audit_failed"
+            report["healthy"] = None
+            report["status"] = "failed"
 
         # Log summary
         n_fp = len(report["false_positives"])
         n_miss = len(report["missing_from_tracker"])
         n_col = len(report["time_collisions"])
         n_healed = len(report["healed"])
-        status = "HEALTHY" if report["healthy"] else "ISSUES FOUND"
+        status = "UNKNOWN" if report["healthy"] is None else ("HEALTHY" if report["healthy"] else "ISSUES FOUND")
 
         logger.info(f"[AUDITOR] ╔══ AUDIT REPORT: {self.channel_name} ══╗")
         logger.info(f"[AUDITOR] ║ Status:           {status}")
-        logger.info(f"[AUDITOR] ║ YouTube scheduled: {len(report['youtube_scheduled']):>4}")
+        logger.info("[AUDITOR] YouTube scheduled total=%s observed=%s", report["total_scheduled"], len(report["youtube_scheduled"]))
         logger.info(f"[AUDITOR] ║ Tracker scheduled: {report.get('tracker_scheduled_count', 0):>4}")
         logger.info(f"[AUDITOR] ║ False positives:   {n_fp:>4}")
         logger.info(f"[AUDITOR] ║ Missing from trk:  {n_miss:>4}")
@@ -204,50 +222,25 @@ class ScheduleAuditor:
     # DOM SCRAPING
     # =========================================
 
-    def _scrape_scheduled_videos(self) -> List[Dict[str, str]]:
-        """
-        Navigate to SCHEDULED filter and scrape all video rows.
-
-        Returns:
-            List of dicts with: video_id, title, date, time, visibility
-        """
+    def _read_scheduled_inventory(self) -> Dict[str, Any]:
+        """Use the existing content-list navigator and the qualified DOM owner."""
+        from .content_page_scheduler import ContentPageScheduler
         from .dom_automation import YouTubeStudioDOM
+        from .schedule_inventory import failed_inventory
 
-        dom = YouTubeStudioDOM(self.driver)
+        dom = YouTubeStudioDOM(self.driver, capture_diagnostics=False)
+        if not ContentPageScheduler(self.driver, dom).navigate_to_scheduled(self.channel_key):
+            return failed_inventory(self.channel_id, "navigation_failed")
+        return dom.read_scheduled_inventory(self.channel_id)
 
-        # Navigate to scheduled shorts
-        logger.info(f"[AUDITOR] Navigating to SCHEDULED filter for {self.channel_name}...")
-        if not dom.navigate_to_shorts_with_fallback(self.channel_id, "SCHEDULED"):
-            logger.warning("[AUDITOR] Could not apply SCHEDULED filter — trying direct scrape")
-            return self._scrape_from_current_page()
+    def _scrape_scheduled_videos(self) -> List[Dict[str, str]]:
+        """Compatibility list: an incomplete scrape raises instead of becoming zero."""
+        from .schedule_inventory import qualified_inventory
 
-        time.sleep(2)
-
-        # Set page size to max for complete view
-        dom.set_page_size(50)
-        time.sleep(1)
-
-        # Scrape all pages
-        all_videos = []
-        page = 1
-
-        while True:
-            logger.info(f"[AUDITOR] Scraping page {page}...")
-            videos = self._scrape_from_current_page()
-            all_videos.extend(videos)
-
-            if not videos:
-                break
-
-            # Check for next page
-            if dom.has_next_page():
-                dom.click_next_page()
-                time.sleep(2)
-                page += 1
-            else:
-                break
-
-        return all_videos
+        inventory = self._read_scheduled_inventory()
+        if not qualified_inventory(inventory, self.channel_id):
+            raise RuntimeError("scheduled_inventory_incomplete")
+        return inventory["videos"]
 
     def _scrape_from_current_page(self) -> List[Dict[str, str]]:
         """

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Mapping
@@ -12,6 +13,14 @@ from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_artifact_suppl
 )
 from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_use_time_verifier import (
     ModelRuntimeBindingUseTimeVerifier,
+)
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admission import (
+    consume_verified_runtime_binding_capability,
+    discard_verified_runtime_binding_capability,
+    verified_runtime_binding_receipt,
+)
+from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_policy import (
+    ReviewerRuntimeEvidence,
 )
 from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
     read_reddog_runtime_json_outside_repo,
@@ -137,7 +146,69 @@ def _verifier(
     )
 
 
+@dataclass(frozen=True)
+class ReviewerRuntimeArtifacts:
+    """Caller-owned artifact pair and independently configured trusted verifier."""
+
+    model_id: str
+    selection: Mapping[str, Any]
+    binding: Mapping[str, Any]
+    verifier: ModelRuntimeBindingUseTimeVerifier
+
+
+class ModelRuntimeReviewerEvidenceResolver:
+    """Reverify cited artifacts, not execution provenance or principal authority.
+
+    The composition owner must supply trusted verifier inputs (for example via
+    build_model_runtime_verifier). This adapter does not authorize trust roots,
+    prove model authorship, grant permissions, or enroll a production runtime.
+    Each resolution snapshots the artifact pair and consumes a fresh capability.
+    """
+
+    def __init__(self, records: Mapping[str, ReviewerRuntimeArtifacts]):
+        if len(records) > 8:
+            raise ValueError("reviewer_runtime_artifact_limit_exceeded")
+        self._records = dict(records)
+
+    def resolve(self, reviewer_principal_id, model_selection_receipt_id,
+                model_runtime_binding_receipt_id) -> ReviewerRuntimeEvidence | None:
+        capability = None
+        try:
+            record = self._records.get(reviewer_principal_id)
+            if type(record) is not ReviewerRuntimeArtifacts or type(record.verifier) is not ModelRuntimeBindingUseTimeVerifier:
+                return None
+            selection, binding = deepcopy((record.selection, record.binding))
+            receipt = verified_runtime_binding_receipt(binding)
+            if (receipt is None or record.model_id not in receipt.model_ids
+                    or receipt.selection_receipt_id != model_selection_receipt_id
+                    or receipt.runtime_binding_receipt_id != model_runtime_binding_receipt_id):
+                return None
+            now = record.verifier.trusted_now_epoch()
+            if type(now) is not int or not receipt.verified_at <= now < receipt.valid_until:
+                return None
+            capability = ModelRuntimeBindingUseTimeVerifier.verify(
+                record.verifier, binding=binding, selection=selection,
+            )
+            verified = consume_verified_runtime_binding_capability(
+                capability, binding=binding, selection=selection, receipt=receipt,
+            )
+            finish = record.verifier.trusted_now_epoch()
+            if verified is None or type(finish) is not int or not now <= finish < verified.valid_until:
+                return None
+            return ReviewerRuntimeEvidence(
+                record.model_id, verified.selection_receipt_id,
+                verified.selection_receipt_digest, verified.runtime_binding_receipt_id,
+                verified.runtime_binding_digest, verified.valid_until,
+            )
+        except Exception:
+            return None
+        finally:
+            discard_verified_runtime_binding_capability(capability)
+
+
 __all__ = [
+    "ReviewerRuntimeArtifacts",
+    "ModelRuntimeReviewerEvidenceResolver",
     "ModelRuntimeVerifierConfig",
     "build_model_runtime_verifier",
 ]

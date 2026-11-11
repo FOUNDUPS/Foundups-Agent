@@ -1,10 +1,18 @@
 # RedDog
 
+The PR1638 local activity candidate adds explicit capture, context and status
+commands through the existing Principal Memex registration. It is not automatic
+conversation ingestion or permission to send personal context to a model.
+See [PAL interfaces](INTERFACE.md#principal-activity-ledger-candidate--pr1638)
+and [qualification/recovery limits](docs/PRINCIPAL_ACTIVITY_LEDGER_ARCHITECTURE.md).
+Installed-host qualification remains pending; the historical release statement
+below does not qualify the new ledger.
+
 Version: 0.4.141
 0.4.141 first binds the corrected fast-RedDog/deep-0102 identity boundary while preserving the 0.4.140 builder release: 1,398 backend files at `sha256:700d50f84e12...86e09ed` with one evidence-only held child. It changes no extension effect authority.
 
 Documentation entry points: the repository-wide [RedDog documentation map](../../docs/REDDOG_DOCUMENTATION_MAP.md) separates current product truth from audits and history; [RedDog architecture](ARCHITECTURE.md) defines the identity boundary.
-[Contact Memory](docs/CONTACT_MEMORY_ARCHITECTURE.md), [RedDog Lick](docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md), [Mosh Pit](docs/MOSH_PIT_ACTIVITY_MEMORY_ARCHITECTURE.md), and the [Memex projection emitter](docs/MEMEX_PROJECTION_EMITTER_ARCHITECTURE.md) specify planned continuity surfaces.
+[Contact Memory](docs/CONTACT_MEMORY_ARCHITECTURE.md), [RedDog Lick](docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md), [Moshpit](docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md), and the [Memex projection emitter](docs/MEMEX_PROJECTION_EMITTER_ARCHITECTURE.md) specify planned continuity surfaces.
 They are not implemented authority and do not grant biometric, identity, wallet, work, or execution effects. `ARCHITECTURE.md` and `.gitignore` remain repository-only inputs outside the executable VSIX.
 
 The parent reproves the exact inert builder composition around a suspended Job-contained child using `-I -S -B -E -s`, a fixed six-entry `sys.path`, closed O:/E: roots, and bounded path-free JSON.
@@ -86,12 +94,12 @@ Python, worker threads, and a materialized backend are required.
 The deny-by-default webview CSP permits only the packaged icon, VS Code-theme
 styles, and one fresh nonce-bound script; it admits no network script source.
 
-The VSIX surface is exactly 67 files: 62 root runtime JavaScript modules, the
+The VSIX source payload is exactly 69 files: 64 root runtime JavaScript modules, the
 Python bootstrap, and four public files. The packaged license must match root
 authority; tests, internal docs, caches, credentials, dependencies, and build
 artifacts remain excluded. `npm run test:package` proves two stable VSCE lists,
 regular non-symlink membership, and the 1 MiB raw cap without building a VSIX.
-Tracked attributes pin 66 packaged text members to LF and keep `icon.png`
+Tracked attributes pin 68 packaged text members to LF and keep `icon.png`
 binary. Receipt v2 binds effective-policy and sorted member-content digests;
 CR bytes or attribute overrides fail closed. Archive size remains verified on
 the built artifact. See `docs/REDDOG_PACKAGE_EOL_REPRODUCIBILITY_PHASE1.md`.
@@ -988,12 +996,15 @@ Set `OPENROUTER_API_KEY` in the environment used to launch Cursor. Do not store 
 ## Install
 
 Build the VSIX locally only after the package contract accepts the exact
-LF-governed working-tree bytes. Do not commit `*.vsix`.
+LF-governed working-tree bytes. Supply the extension subdirectory as the README
+link base; VSCE otherwise resolves this monorepo's links at the repository root.
+For a published release, use its verified commit in place of `main` to pin the
+documentation. Do not commit `*.vsix`.
 
 ```powershell
 cd extensions/reddog
 npm run test:package
-vsce package --no-dependencies
+vsce package --no-dependencies --baseContentUrl https://github.com/FOUNDUPS/Foundups-Agent/blob/main/extensions/reddog
 ```
 
 From Cursor, run `Extensions: Install from VSIX...`, choose `reddog-0.4.141.vsix` (or the current version), reload the window, then run `RedDog: Open`; do not use workspace-extension install for normal operation.

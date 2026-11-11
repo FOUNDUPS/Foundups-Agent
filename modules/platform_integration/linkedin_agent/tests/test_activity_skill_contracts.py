@@ -8,8 +8,9 @@ import unittest
 MODULE = Path(__file__).resolve().parents[1]
 ROOT = MODULE.parents[2]
 CHILDREN = (
-    "linkedin_inbox", "linkedin_connections", "linkedin_notifications",
-    "linkedin_group_moderation", "openclaw_group_news", "linkedin_agentic_reply",
+    "linkedin_inbox", "linkedin_connections", "linkedin_contact_diligence",
+    "linkedin_notifications", "linkedin_group_moderation", "openclaw_group_news",
+    "linkedin_agentic_reply",
     "linkedin_newsletters", "linkedin_foundups_newsletter",
     "linkedin_roc_newsletter", "linkedin_jhr_newsletter", "linkedin_publishing",
     "linkedin_article_targeting", "linkedin_outreach", "linkedin_continuity",
@@ -67,6 +68,21 @@ class ActivitySkillContracts(unittest.TestCase):
                      "read back first", "unknown", "never blindly retry"):
             self.assertIn(term, inbox)
 
+    def test_contact_diligence_is_evidence_bounded_and_non_authorizing(self):
+        text = self.text("skillz/linkedin_contact_diligence/SKILLz.md")
+        for term in (
+            "VERIFIED", "CLAIMED", "UNVERIFIED", "CONFLICTING",
+            "PUBLIC_OVERVIEW_ONLY", "absence", "not proof of fraud",
+            "family-office", "project-finance", "human-review",
+            "does not accept or reject a connection",
+        ):
+            self.assertIn(term.lower(), text.lower())
+        route = self.text("docs/LINKEDIN_ACTIVITY_ROUTING.md")
+        self.assertIn("linkedin_contact_diligence", route)
+        review = self.text("docs/LINKEDIN_REVIEW_WORKFLOW.md")
+        self.assertIn("linkedin_contact_diligence", review)
+        self.assertIn("absence of a public footprint is not proof of fraud", review)
+
     def test_membership_not_implied_by_message(self):
         group = self.text("skillz/linkedin_group_moderation/SKILLz.md")
         self.assertIn("Leave the application pending", group)
@@ -90,6 +106,23 @@ class ActivitySkillContracts(unittest.TestCase):
                     self.assertIn(term, lane)
         for term in ("VERIFIED_LIVE", "SCHEDULED_VERIFIED", "draft exists"):
             self.assertIn(term, news)
+
+    def test_jhr_website_first_newsletter_is_a_gated_downstream_action(self):
+        """Site article must be deployed and verified before a JHR LinkedIn edition."""
+        website = (ROOT / "modules/foundups/esingularity/skills/website-update/SKILL.md").read_text(encoding="utf-8")
+        jhr = self.text("skillz/linkedin_jhr_newsletter/SKILLz.md")
+        publishing = self.text("skillz/linkedin_publishing/SKILLz.md")
+        workflow = self.text("skillz/linkedin_newsletters/references/editorial-workflow.md")
+        for doc in (website, jhr, publishing, workflow):
+            self.assertIn("WEBSITE_LIVE_VERIFIED", doc)
+            self.assertIn("LinkedIn", doc)
+        self.assertIn("canonical public", jhr)
+        self.assertIn("canonical website backlink", jhr)
+        self.assertIn("NO_REPORT", jhr)
+        self.assertIn("not every change", website.lower())
+        self.assertIn("approval", publishing.lower())
+        self.assertIn("SUBMITTED_UNVERIFIED", publishing)
+        self.assertIn("no new asynchronous daemon", workflow.lower())
 
     def test_continuity_privacy_and_safe_pr_closure(self):
         text = self.text("skillz/linkedin_continuity/SKILLz.md")

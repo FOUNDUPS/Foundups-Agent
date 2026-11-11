@@ -15,7 +15,7 @@ from sqlalchemy.engine import Engine
 
 from ..exceptions import ValidationError
 
-LATEST_SCHEMA_VERSION = 2
+LATEST_SCHEMA_VERSION = 3
 
 
 @dataclass(frozen=True)
@@ -93,6 +93,29 @@ MIGRATIONS: tuple[SchemaMigration, ...] = (
             "CREATE INDEX IF NOT EXISTS idx_compute_ledger_actor_created ON compute_ledger_entries(actor_id, created_at)",
             "CREATE INDEX IF NOT EXISTS idx_compute_ledger_foundup_created ON compute_ledger_entries(foundup_id, created_at)",
             "CREATE INDEX IF NOT EXISTS idx_compute_sessions_foundup_created ON compute_sessions(foundup_id, created_at)",
+        ),
+    ),
+    SchemaMigration(
+        version=3,
+        description="add immutable local TestNet probe intents",
+        statements=(
+            """
+            CREATE TABLE IF NOT EXISTS testnet_transfer_intents (
+                intent_id TEXT NOT NULL PRIMARY KEY,
+                payout_id TEXT NOT NULL,
+                purpose TEXT NOT NULL CHECK(purpose='TEST_TRANSPORT_PROBE'),
+                format_version INTEGER NOT NULL CHECK(format_version=1),
+                state TEXT NOT NULL CHECK(state='PREPARED'),
+                foundup_id TEXT NOT NULL,
+                task_id TEXT NOT NULL,
+                actor_id TEXT NOT NULL,
+                identity_json TEXT NOT NULL,
+                identity_sha256 TEXT NOT NULL,
+                created_at_epoch_s INTEGER NOT NULL,
+                expires_at_epoch_s INTEGER NOT NULL,
+                CONSTRAINT uq_testnet_payout_purpose UNIQUE(payout_id,purpose)
+            )
+            """,
         ),
     ),
 )

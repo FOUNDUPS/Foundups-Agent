@@ -10,6 +10,7 @@ from typing import Any, Mapping, Sequence
 
 from modules.infrastructure.wre_core.src.wre_test_differential_runtime import (
     produce_test_differential_evidence,
+    validate_test_impact_policy_binding,
 )
 
 FAIL_REQUIRED_CHECKS = "FAIL_REQUIRED_CHECKS"
@@ -33,16 +34,46 @@ def execute_independent_test_evidence(
     request: Mapping[str, Any], *, runner: Any, operation_cwd: Path,
     worktree_path: Path, repo_root: Path, head_sha: str,
 ) -> IndependentTestEvidence:
-    """Run ordinary checks and one optional verifier-owned pytest differential."""
+    """Preflight the complete plan, then run checks and any owned differential."""
     checks = request.get("required_checks")
     if not isinstance(checks, list) or not checks or len(checks) > MAX_CHECKS:
         return _result(reasons=[FAIL_REQUIRED_CHECKS])
-    policy = request.get("test_impact_policy")
-    differential_requested = isinstance(policy, Mapping) and bool(policy)
+    differential_requested, policy_reasons = validate_test_impact_policy_binding(request)
+    if policy_reasons:
+        return _result(reasons=policy_reasons)
+    ordinary, reasons = _preflight_checks(
+        checks, request.get("test_impact_policy", {}), differential_requested,
+    )
+    if reasons:
+        return _result(reasons=reasons)
     records: list[dict[str, Any]] = []
     commands: list[dict[str, Any]] = []
-    reasons: list[str] = []
+    for item, args in ordinary:
+        _run_one(item, args, runner, operation_cwd, head_sha, records, commands, reasons)
+    differential: dict[str, Any] = {}
+    differential_capability: object | None = None
+    if differential_requested:
+        if reasons:
+            reasons.append(FAIL_REQUIRED_CHECKS)
+        else:
+            produced = produce_test_differential_evidence(
+                request, worktree_path=worktree_path, repo_root=repo_root
+            )
+            differential = produced.evidence
+            differential_capability = produced.verification_capability
+            reasons.extend(produced.rejection_reasons)
+    return _result(
+        records, commands, reasons, differential, differential_capability,
+    )
+
+
+def _preflight_checks(
+    checks: list[Any], policy: Mapping[str, Any], differential_requested: bool,
+) -> tuple[list[tuple[Mapping[str, Any], tuple[str, ...]]], list[str]]:
+    """Separate deterministic plan validation from all command execution."""
     deferred_pytest = 0
+    ordinary: list[tuple[Mapping[str, Any], tuple[str, ...]]] = []
+    reasons: list[str] = []
     for check in checks:
         item = check if isinstance(check, Mapping) else {}
         argv = item.get("argv")
@@ -55,22 +86,10 @@ def execute_independent_test_evidence(
             if list(_pytest_args(args)) != list(policy.get("selection_args", ())):
                 reasons.append(FAIL_CHECK_COMMAND_REJECTED)
             continue
-        _run_one(item, args, runner, operation_cwd, head_sha, records, commands, reasons)
-    differential: dict[str, Any] = {}
-    differential_capability: object | None = None
-    if differential_requested:
-        if deferred_pytest != 1 or reasons:
-            reasons.append(FAIL_REQUIRED_CHECKS)
-        else:
-            produced = produce_test_differential_evidence(
-                request, worktree_path=worktree_path, repo_root=repo_root
-            )
-            differential = produced.evidence
-            differential_capability = produced.verification_capability
-            reasons.extend(produced.rejection_reasons)
-    return _result(
-        records, commands, reasons, differential, differential_capability,
-    )
+        ordinary.append((item, args))
+    if differential_requested and deferred_pytest != 1:
+        reasons.append(FAIL_REQUIRED_CHECKS)
+    return ordinary, reasons
 
 
 def _run_one(

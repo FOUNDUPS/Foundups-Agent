@@ -85,6 +85,44 @@ def _run_openclaw_security_preflight(dae_name: str, quiet: bool = False) -> bool
     return True
 
 
+def dashboard_auto_enforce_enabled(*, interactive_menu: bool = False) -> bool:
+    """Displaying a menu is advisory; action admission remains enforced by default."""
+    explicit = os.getenv("WRE_DASHBOARD_AUTO_ENFORCE")
+    return explicit != "0" if explicit is not None else not interactive_menu
+
+
+def dashboard_readiness(health: dict, *, in_watch: bool, interactive_menu: bool = False) -> dict:
+    """One policy for startup, DAE actions and the operator readiness display."""
+    valid = isinstance(health, dict) and type(health.get("healthy")) is bool
+    health = health if isinstance(health, dict) else {}
+    alerts = health.get("alerts", [])
+    if not isinstance(alerts, list) or any(
+            not isinstance(alert, dict) or alert.get("severity") not in {"critical", "warning"}
+            for alert in alerts):
+        valid = False
+        alerts = []
+    coverage_unknown = health.get("insufficient_data") is True or bool(health.get("unknown_metrics"))
+    if not alerts and health.get("healthy") is not True and not coverage_unknown:
+        valid = False
+    enabled = os.getenv("WRE_DASHBOARD_PREFLIGHT", "1") != "0"
+    manual = os.getenv("WRE_DASHBOARD_PREFLIGHT_ENFORCED", "0") != "0"
+    auto = dashboard_auto_enforce_enabled(interactive_menu=interactive_menu)
+    auto_now = auto and not in_watch
+    critical = sum(a.get("severity") == "critical" for a in alerts)
+    warnings = sum(a.get("severity") == "warning" for a in alerts)
+    unknown = coverage_unknown or not valid
+    # Preserve cold-start admission: missing telemetry is not a measured failure.
+    # A sampled critical still blocks even when other metric families are unknown.
+    blocked = enabled and (manual or auto_now) and (critical > 0 or not valid)
+    status = "UNKNOWN" if not valid else "FAIL" if alerts else ("UNKNOWN" if unknown else "PASS")
+    readiness = ("UNKNOWN" if not valid else "DISABLED" if not enabled else "BLOCKED" if blocked else
+                 "DEGRADED" if alerts else "UNKNOWN" if unknown else "READY")
+    return dict(enabled=enabled, manual_enforced=manual, auto_enforce=auto,
+                auto_enforced=auto_now, enforced=manual or auto_now,
+                critical=critical, warnings=warnings, unknown=unknown,
+                status=status, readiness=readiness, allowed=not blocked, evidence_valid=valid)
+
+
 def run_dae_preflight(dae_name: str, quiet: bool = False) -> bool:
     """
     Run WRE dashboard preflight for any DAE.
@@ -116,12 +154,13 @@ def run_dae_preflight(dae_name: str, quiet: bool = False) -> bool:
         return True
 
     manual_enforced = os.getenv("WRE_DASHBOARD_PREFLIGHT_ENFORCED", "0") != "0"
-    auto_enforce = os.getenv("WRE_DASHBOARD_AUTO_ENFORCE", "1") != "0"
+    auto_enforce = dashboard_auto_enforce_enabled()
 
     try:
         from modules.infrastructure.wre_core.src.dashboard_alerts import (
             DashboardAlertMonitor,
             check_dashboard_health,
+            print_dashboard_evidence,
         )
 
         monitor = DashboardAlertMonitor()
@@ -133,22 +172,9 @@ def run_dae_preflight(dae_name: str, quiet: bool = False) -> bool:
         min_samples = health.get("min_samples", 25)
         in_watch = monitor.is_in_watch_period()
 
-        # Recursive enforcement logic
-        auto_enforced = (
-            auto_enforce
-            and not in_watch
-            and not insufficient_data
-        )
-        enforced = manual_enforced or auto_enforced
-
-        if insufficient_data:
-            if not quiet:
-                watch_label = "WATCH" if in_watch else "STABLE"
-                print(
-                    f"[{dae_name}] WRE preflight=PASS ({watch_label}, INSUFFICIENT_DATA) "
-                    f"samples={total_executions}/{min_samples}"
-                )
-            return True
+        policy = dashboard_readiness(health, in_watch=in_watch)
+        auto_enforced = policy["auto_enforced"]
+        enforced = policy["enforced"]
 
         # Build status
         alerts = health.get("alerts", [])
@@ -156,7 +182,7 @@ def run_dae_preflight(dae_name: str, quiet: bool = False) -> bool:
         warning_count = sum(1 for a in alerts if a.get("severity") == "warning")
         healthy = health.get("healthy", True)
 
-        status = "PASS" if healthy else "FAIL"
+        status = policy["status"]
 
         if in_watch:
             mode_label = "WATCH"
@@ -181,21 +207,25 @@ def run_dae_preflight(dae_name: str, quiet: bool = False) -> bool:
                 threshold = alert.get("threshold", 0)
                 print(f"  [{severity}] {metric}: {value:.3f} (threshold: {threshold:.3f})")
 
+        if insufficient_data or not quiet:
+            print_dashboard_evidence(health)
+
         # Block on critical if enforced
-        if critical_count > 0 and enforced:
+        if not policy["allowed"]:
             enforce_source = "AUTO" if auto_enforced else "MANUAL"
-            print(f"[{dae_name}] Startup blocked by {enforce_source} enforcement")
+            print(f"[{dae_name}] Startup blocked by {enforce_source} enforcement; readiness={status}")
             return False
 
         return True
 
     except ImportError as exc:
         logger.debug(f"[{dae_name}] WRE preflight not available: {exc}")
-        return True
+        print(f"[{dae_name}] WRE preflight=UNKNOWN; checker unavailable")
+        return not (manual_enforced or auto_enforce)
     except Exception as exc:
         logger.error(f"[{dae_name}] WRE preflight failed: {exc}")
-        if manual_enforced:
-            print(f"[{dae_name}] WRE preflight FAILED: {exc}")
+        if manual_enforced or auto_enforce:
+            print(f"[{dae_name}] WRE preflight=UNKNOWN; startup blocked (checker error: {type(exc).__name__})")
             return False
         return True
 

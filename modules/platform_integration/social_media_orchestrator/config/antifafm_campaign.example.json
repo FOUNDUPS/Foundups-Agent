@@ -1,0 +1,33 @@
+{
+  "schema": "antifafm_campaign.v1",
+  "enabled": false,
+  "accounts": {
+    "move2japan": {
+      "user_id": "",
+      "credential_env": {
+        "consumer_key": "M2J_X_KEY",
+        "consumer_secret": "M2J_X_SECRET",
+        "access_token": "MOVE2JAPAN_X_ACCESS_TOKEN",
+        "access_token_secret": "MOVE2JAPAN_X_ACCESS_TOKEN_SECRET"
+      }
+    },
+    "foundups": {
+      "user_id": "",
+      "credential_env": {
+        "consumer_key": "FOUNDUPS_X_API_KEY",
+        "consumer_secret": "FOUNDUPS_X_API_SECRET",
+        "access_token": "FOUNDUPS_X_ACCESS_TOKEN",
+        "access_token_secret": "FOUNDUPS_X_ACCESS_TOKEN_SECRET"
+      }
+    },
+    "antifafm": {
+      "user_id": "",
+      "credential_env": {
+        "consumer_key": "ANTIFAFM_X_API_KEY",
+        "consumer_secret": "ANTIFAFM_X_API_SECRET",
+        "access_token": "ANTIFAFM_X_ACCESS_TOKEN",
+        "access_token_secret": "ANTIFAFM_X_ACCESS_TOKEN_SECRET"
+      }
+    }
+  }
+}

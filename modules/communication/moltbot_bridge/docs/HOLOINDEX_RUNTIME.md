@@ -1,14 +1,65 @@
 # RedDog HoloIndex Runtime Contract
 
+## P16 operational recovery controls — 2026-10-05
+
+At source `6efbc3ac1`, four actual controller attempts ended in startup failure,
+snapshot-probe failure, retry-wait, then semantic-backend failure. The last attempt
+invalidated the canonical index before failure. Its saved
+`cli_maintenance_in_progress` receipt, original failed task and retry history remain
+preserved after normal new-head maintenance. Do not manually restore old receipts,
+create a fresh task database, bypass retry delays or admit generic `STALE_INDEX`.
+
+The bounded external launch qualified these exact process settings:
+
+- `PYDANTIC_DISABLE_PLUGINS=__all__` disables installed plugin enumeration while
+  retaining ordinary validation; prior denied startup observations remain evidence.
+- `GIT_CONFIG_COUNT=1`, `GIT_CONFIG_KEY_0=safe.directory`, and
+  `GIT_CONFIG_VALUE_0=O:/Foundups-Agent` replay the verified existing trusted entry
+  with private HOME. No wildcard or global Git change was made.
+- `TORCHINDUCTOR_CACHE_DIR=O:/rsi-p16-temp-20261005/maintenance/torchinductor`
+  selects owned private cache storage without importing an account username.
+
+Keep the actual refresh `-S -B` and pinned site through `PYTHONPATH`; no
+`site.addsitedir` change was needed. Offline paired imports measured the missing
+`pwd` failure at 6.750s and successful import at 8.000s. One subsequent cached
+MiniLM constructor and fixed encode passed in 8.047s parent time: 384 finite
+nonzero float32 values, observed CPU, stable pins and no recorded denials. The
+source-matched IPv6 loopback probe closed. These are finite diagnostics, not a
+filesystem sandbox, index proof or service admission.
+
+PR2063 merged/main-verified at `2eaa6de7`, with 181 hosted recovery cases. An
+incident pointer still requires durable current-head/root task/request validation.
+The actual 500.797s completion used normal admission for the new HEAD, not live
+pointer resume. Both owned runtimes stopped, the new task completed at retry 0,
+and the old task/three events stayed unchanged. A separate clean-checkout query
+proved CURRENT/no-gap for generation `b90d637c…`; the stale shared-checkout query
+remains a mismatch. Existing CLAUDE guidance already selects the correct source.
+This is captured exact-head grounding, not all optional collections, retrieval
+fitness or native RSI closure. See the [P16 checkpoint](../../../../docs/operations/RSI_SWARM_DISPATCH.md#existing-holo-grounding--p16-checkpoint).
+
 ## Post-merge controller
 
 `run_holoindex_postmerge_runtime_once(repo_root=..., query=...,
-timeout_seconds=...)` requires a clean HEAD equal to
+timeout_seconds=..., resume_incident_id=None)` requires a clean HEAD equal to
 `refs/remotes/origin/main`. A verified CURRENT owner returns without starting
 anything. Otherwise, only a sealed exact-head incident-repair receipt may
 admit the existing broker-managed chain:
 
 `OpenClaw poller -> AgentDB claim -> post-merge executor -> authority transaction -> atomic completion`
+
+To recover a previously admitted refresh after index invalidation, supply the
+original `incident_id` as `resume_incident_id` (also accepted by the one-shot
+JSON CLI). The controller returns this pointer after accepted admission and
+preserves it through execution or cleanup failure. It is not authority: the
+existing incident owner re-reads the exact root-owned event, task and request,
+validates their HEAD/root bindings, and allows only pending, failed or retry-wait
+tasks to reach the existing coordinator. Missing or altered admission rejects;
+generic `STALE_INDEX` without a pointer still rejects. Existing retry count and
+300-second delay remain authoritative; a resumed `RETRY_WAIT` returns non-success
+without starting broker runtimes. Completion and cleanup requirements remain.
+If main has advanced, the old pointer cannot admit work for the new HEAD: retain
+its history and use the existing fresh-head incident path. These are canonical
+store integrity checks, not protection against an arbitrary database writer.
 
 The ordinary post-merge transition first appears as a fail-closed
 `REPO_HEAD_MISMATCH`: the exact-main authority is current while the canonical

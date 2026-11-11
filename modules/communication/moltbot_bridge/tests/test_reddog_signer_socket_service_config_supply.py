@@ -43,6 +43,33 @@ _PRINCIPAL_PUBLIC_KEY = encode_ed25519_public_key(bytes(range(32)))
 _REDDOG_PUBLIC_KEY = encode_ed25519_public_key(bytes(range(32, 64)))
 
 
+def _initial_config(tmp_path: Path) -> tuple[Path, dict[str, object]]:
+    from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_composition import (
+        compose_initial_handshake_service_config, peer_policy,
+    )
+    from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import public_key_fingerprint
+
+    repo = tmp_path / "repo"
+    payload = compose_initial_handshake_service_config(
+        repo_root=repo, runtime_root=tmp_path / "artifacts",
+        signer_runtime_root=tmp_path / "signer-state",
+        socket_path=tmp_path / "socket-state" / "signer.sock",
+        key_provider_profile={
+            "signer_profile_id": "reddog-work-authority", "signer_agent_id": "signer:reddog",
+            "signing_key_ref": "op://prod-vault/reddog/private",
+            "audit_mac_key_ref": "op://prod-vault/reddog/audit",
+            "expected_public_key": _REDDOG_PUBLIC_KEY,
+            "expected_key_fingerprint": public_key_fingerprint(_REDDOG_PUBLIC_KEY),
+            "expected_key_epoch": "epoch-1",
+            "permission_snapshot_digest": "sha256:" + "1" * 64, "ttl_seconds": 60,
+        },
+        peer_policy=peer_policy({1001: "github:012"}, (1002,))[0],
+        owner_e0_authority_binding_digest="sha256:" + "2" * 64,
+        timeout_s=5.0, max_request_bytes=16384, max_response_bytes=16384,
+    )
+    return repo, payload
+
+
 def _repo(tmp_path: Path) -> Path:
     path = tmp_path / "repo"
     path.mkdir()

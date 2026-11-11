@@ -1,5 +1,28 @@
 # ModLog: FoundUps Tokenization System
 
+## 2026-11-02 — Restricted native UPS accounting qualification
+
+TOKENOMICS links the source-bound B03-P3 simulator version, not an issued asset/service.
+Exact native transfers do not select UPS atoms or F_i mint/release/21M policy.
+Global denomination D and backing/custody/chain holds remain; prior history unchanged.
+WSP22/26/81/97; exact WSP26 mirror required; separate delivery gates remain explicit.
+
+## 2026-10-29 — Separate design documents from executable interfaces
+
+**2026-10-31 governance alignment:** TOKENOMICS points to the WSP26 simulator-first
+change contract and current security reconciliation. Genesis denomination remains
+distinct from conflicting projection units. No runtime, price, supply or custody
+change. Governing WSP26/27/29/100 mirrors must match. WSP22/26/50/97.
+
+Add the missing INTERFACE with SPECIFIED_NOT_IMPLEMENTED status for this directory.
+The tracked inventory contains documents only; handoff code samples are not
+exported services or deployed contracts. Link the existing later CABR routing
+correction and identify earlier README/handoff mint-trigger wording as historical
+drift without creating a new economic policy or overriding the blockchain owner.
+No wallet, token, provider, deployment or runtime operation was performed. Validation
+is source/hash and relative-link review. WSP 11/22/49/50/84/97.
+
+
 ## 2026-02-17: CABR/UPS Semantics Canonicalization (Flow Routing, Not Mint Trigger)
 
 ### Changes

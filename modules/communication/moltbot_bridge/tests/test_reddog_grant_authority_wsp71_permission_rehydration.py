@@ -47,7 +47,7 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
     PermissionSnapshot,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import (
-    POLICY_SCHEMA_V7,
+    POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9,
 )
 
 
@@ -63,6 +63,64 @@ def test_valid_root_bound_permission_executes_one_callback_under_both_fences(
     assert calls == [GET_SECRET]
     assert setup["revocation_oracle"].authorize_calls == 1
     assert setup["e0"]["policy"]["schema_version"] == POLICY_SCHEMA_V7
+
+
+def test_permission_verification_rollover_uses_current_fenced_time(tmp_path, monkeypatch):
+    setup, receipt = _permission_setup(tmp_path, monkeypatch)
+    original = permission_module._permission_state
+    observed = []
+
+    def verified_then_rollover(*args):
+        result = original(*args)
+        observed.append(args[-1])
+        if len(observed) == 1:
+            current = receipt["issued_at"] + 1
+            setup["revocation_oracle"].now_epoch = current
+            monkeypatch.setattr(permission_module.time, "time", lambda: current)
+        return result
+
+    monkeypatch.setattr(permission_module, "_permission_state", verified_then_rollover)
+    calls = []
+    assert _authorize(setup, action=lambda: calls.append("effect") or "accepted") == "accepted"
+    assert observed == [receipt["issued_at"], receipt["issued_at"] + 1, receipt["issued_at"] + 1]
+    assert calls == ["effect"]
+
+
+@pytest.mark.parametrize("verification_number", [2, 3])
+@pytest.mark.parametrize("change", ["expiry", "rollback", "bool", "nan"])
+def test_delayed_guarded_verification_rechecks_time(tmp_path, monkeypatch, verification_number, change):
+    setup, receipt = _permission_setup(tmp_path, monkeypatch)
+    original = permission_module._permission_state
+    clock = [receipt["issued_at"] + 10]
+    setup["revocation_oracle"].now_epoch = clock[0]
+    monkeypatch.setattr(permission_module.time, "time", lambda: clock[0])
+    reads, effects = [], []
+    def delayed_verification(*args):
+        value = original(*args)
+        reads.append(args[-1])
+        if len(reads) == verification_number:
+            clock[0] = {"expiry": receipt["expires_at"], "rollback": receipt["issued_at"] + 9,
+                        "bool": True, "nan": float("nan")}[change]
+        return value
+    monkeypatch.setattr(permission_module, "_permission_state", delayed_verification)
+    with pytest.raises(RuntimeArtifactManifestError, match="grant_permission_(receipt_rejected|clock_invalid)"):
+        _authorize(setup, action=lambda: effects.append("effect") or "must-not-return")
+    assert effects == ([] if verification_number == 2 else ["effect"])
+
+
+def test_live_guarded_verification_rollover_remains_authorized(tmp_path, monkeypatch):
+    setup, receipt = _permission_setup(tmp_path, monkeypatch)
+    original = permission_module._permission_state
+    clock, effects = [receipt["issued_at"]], []
+    monkeypatch.setattr(permission_module.time, "time", lambda: clock[0])
+    def delayed_verification(*args):
+        result = original(*args)
+        clock[0] += 1
+        setup["revocation_oracle"].now_epoch = clock[0]
+        return result
+    monkeypatch.setattr(permission_module, "_permission_state", delayed_verification)
+    assert _authorize(setup, action=lambda: effects.append("effect") or "accepted") == "accepted"
+    assert effects == ["effect"] and clock[0] == receipt["issued_at"] + 3
 
 
 def test_legacy_v6_authority_cannot_reach_wsp71_effect(
@@ -558,13 +616,13 @@ class _RevocationOracle:
         self.revoke_during_action = False
         self.authorize_calls = 0
 
-    def authorize_key_epoch_use(
-        self, *, key_epoch: str, at_epoch: int, expires_at: int,
+    def authorize_current_key_epoch_use(
+        self, *, key_epoch: str, expires_at: int,
         action: Any,
     ) -> Any:
         assert key_epoch
         self.authorize_calls += 1
-        if at_epoch != self.now_epoch or at_epoch >= expires_at or self.revoked:
+        if self.now_epoch >= expires_at or self.revoked:
             raise RuntimeError("signer_key_epoch_use_rejected")
         result = action()
         if self.revoke_during_action:
@@ -572,3 +630,39 @@ class _RevocationOracle:
         if self.revoked or self.now_epoch >= expires_at:
             raise RuntimeError("signer_key_epoch_use_rejected")
         return result
+
+
+@pytest.mark.parametrize("schema", [POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9])
+@pytest.mark.parametrize("case", ["valid", "missing", "inconsistent", "archive", "oracle"])
+def test_provenance_policy_versions_preserve_permission_and_oracle(tmp_path, monkeypatch, schema, case):
+    setup, _ = _permission_setup(tmp_path, monkeypatch)
+    grant_fixture._use_provenance_policy_schema(setup, schema)
+    with permission_module.lease_validated_owner_e0_current_admission(
+        owner_config_path=setup["e0"]["owner_config_path"],
+        repo_root=setup["e0"]["boundary"]._repo_root,
+        policy=setup["e0"]["policy"],
+    ) as admission:
+        setup["revocation_oracle"].binding = admission.revocation_binding
+    if case in {"missing", "inconsistent"}:
+        grant_fixture._change_provenance_manifest(setup, case)
+    elif case == "archive":
+        authority = setup["harness"].authority_boundary.require(setup["harness"].authority)
+        archive = build_grant_service_archive_from_git(
+            repo_root=setup["harness"].repo_root,
+            source_commit_sha=str(authority["authorized_base_sha"]),
+            sources={"reddog_grant_authority_service.py": "service/attacker_selected_service.py"},
+        )
+        (setup["harness"].runtime_root / "grant_authority_service.pyz").write_bytes(archive)
+        _rebuild_grant_artifacts(setup)
+    elif case == "oracle":
+        setup["revocation_oracle"].binding = object()
+    calls = []
+    action = lambda: calls.append(GET_SECRET) or "resolved"
+    if case == "valid":
+        assert _authorize(setup, action=action) == "resolved"
+        assert calls == [GET_SECRET] and setup["revocation_oracle"].authorize_calls == 1
+    else:
+        expected = "git_authority_mismatch" if case == "archive" else None
+        with pytest.raises(RuntimeArtifactManifestError, match=expected):
+            _authorize(setup, action=action)
+        assert calls == [] and setup["revocation_oracle"].authorize_calls == 0

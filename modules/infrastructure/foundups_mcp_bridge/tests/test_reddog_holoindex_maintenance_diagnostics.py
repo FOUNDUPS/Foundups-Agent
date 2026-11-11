@@ -275,7 +275,7 @@ def test_default_refresh_runner_bounds_retained_stdout(tmp_path: Path) -> None:
         check=False,
     )
 
-    assert completed.returncode == 0
+    assert completed.output_read_failed is False
     assert completed.output_oversized is True
     assert len(completed.stdout) == handshake._REFRESH_STDOUT_MAX_BYTES
 

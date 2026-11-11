@@ -5374,7 +5374,8 @@
     "topic_family": "life",
     "related_lanes": [
       "undaodu",
-      "linkedin_012"
+      "linkedin_012",
+      "hpc"
     ],
     "display_order": 1,
     "tagline": "Expat life and FFCPLN activism from Fukui, Japan",
@@ -11400,5 +11401,42 @@
     "videos": [],
     "entry_url": "",
     "entry_copy": "HoloIndex is discoverable but remains in explicit stub mode until the backend relay clears."
+  },
+  {
+    "foundup_id": "hpc",
+    "title": "Hasan Piker Coalition",
+    "creator": "012",
+    "creator_id": "012",
+    "creator_display": "UnDaoDu (012)",
+    "entity": "Hasan Piker Coalition",
+    "source_type": "derived",
+    "source_id": "UC-LSSlOZwpGIRIYihaz8zCw",
+    "source_handle": "@MOVE2JAPAN",
+    "parent_channels": [
+      "move2japan"
+    ],
+    "derivation_method": "manual_curation",
+    "category": "media",
+    "tags": [
+      "012-lane",
+      "political-media",
+      "schumerout"
+    ],
+    "topic_family": "media",
+    "geo": "Global",
+    "status": "active",
+    "display_order": 101,
+    "related_lanes": [
+      "move2japan"
+    ],
+    "tagline": "Independent political commentary and satire",
+    "description": "A curated political-media FoundUp starting with the SchumerOUT collection of Move2Japan Shorts.",
+    "tier": "F0_DAE",
+    "lifecycle_stage": "incubating",
+    "launch_readiness": "discoverable_only",
+    "poster_url": "https://i.ytimg.com/vi/iJuguXpbRR4/oardefault.jpg",
+    "video_count": 0,
+    "videos": [],
+    "public_poc_url": "https://foundups.com/member/?foundup=hpc"
   }
 ]

@@ -1,4 +1,114 @@
+## Risk-based verification connection — 2026-10-28
+
+Readiness uses each metric's measured sample count. Missing measurements are
+UNKNOWN; database-lifetime aggregates are not current-run or model health proof.
+Sampled critical failures remain enforced even when other metrics are unknown.
+Cold-start UNKNOWN retains existing admission after security checks, without
+claiming PASS or READY. See the [readiness interface](INTERFACE.md#readiness-evidence-and-admission--2026-11-06).
+
+The existing verification path now preflights a complete policy/check plan
+before running commands and prevents declared differential evidence from being
+silently dropped at final acceptance. The [interface](INTERFACE.md#risk-verification-preflight-contract--2026-10-28)
+and [current roadmap](ROADMAP.md#current-verification-integration--2026-10-28)
+separate local execution from the remaining native admission and RSI gates.
+CI runs the connected verification contracts in an additive parallel job.
+
+## Exact parent identity for skill feedback
+
+Execution outcomes and non-production candidates now retain the digest of the
+loaded skill instructions; scanner-admission identity remains separate. The
+binding survives unavailable output serialization and SQLite reopen. See the
+[contract](INTERFACE.md#skill-feedback-source-binding--2026-10-22). This repairs
+lineage only; it does not enable Moshpit ingestion or automatic promotion.
+
+## Measured-zero fidelity — P15 checkpoint
+
+`PatternMemory.get_skill_fidelity_stats` preserves measured 0.0; only absent
+means use the existing fallbacks. The actual reopened selector now prefers a
+measured 0.4 skill over zero. Nine frozen cases and 42 disjoint connected controls
+pass. The coordinator authored the repair after one local proposal was rejected;
+PR2062 is merged/main-verified and the owned lane retired. Retained/control/
+recovery use selects positive → zero control → positive on unchanged saved rows.
+This verifies retention of a statistics repair,
+not model fitness, learning or native authority. See the [interface](INTERFACE.md#measured-zero-fidelity--p15-contract)
+and [checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#measured-zero-fidelity--p15-checkpoint).
+
+## Named registry-scope telemetry — P14 checkpoint
+
+The candidate `auto_test_registry_audit` v2.3 executor connects the existing
+bounded scope planner to WRE as TELEMETRY. Projection completion is separate
+from effect success; completion is recorded only as a `telemetry_projection`
+event. Existing admission/scanner counters remain.
+It does not run the selected tests, generate a model proposal or train outcomes.
+Source review is accepted after repairing independently reproduced shape and
+type-comparison gaps. Original75 and additive39 controls pass; stable connected
+306pass/two Windows link skips. Actual scanner/producer/private persistence
+now complete with isolated Cisco2.2.0 and short owned TEMP, following two
+preserved failed attempts. This qualified per-work-order configuration does
+not update the shared scanner or grant test execution. PR2061 is merged/main-verified; its owned lane is retired with recovery preserved. See the [candidate interface](INTERFACE.md#named-registry-scope-telemetry--p14-contract)
+and [canonical checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#named-registry-scope-telemetry--p14-checkpoint).
+
+## Local proposal output contract
+
+Skill-specific output instructions now take precedence in the existing local
+proposal wrapper. Generated text remains quarantined and can still be wrong.
+See [the interface](INTERFACE.md#local-proposal-framing--2026-10-04) and the
+[measured checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#local-worker-format-benchmark--2026-10-04).
+
+## Local proposal lifetime
+
+Each WRE local proposal call now explicitly closes the engine it constructs.
+Cleanup failure makes the proposal unavailable. Direct Qwen engine clients
+retain reuse and must explicitly call `close()` when finished. See the
+[ownership contract](INTERFACE.md#explicit-local-model-ownership--2026-10-01).
+Portable tests cover this lifecycle; runtime admission and native memory
+release remain separate qualifications.
+
+## Qualified native-chat proposal option
+
+The existing WRE-to-Qwen caller now has an explicit, default-off native-chat
+configuration. Use a trusted `local_proposal_mode="native_chat"` plus an exact
+`local_native_chat_profile` only after qualifying the runtime/model/template.
+See [the interface](INTERFACE.md#opt-in-local-native-chat-proposals) for the
+profile and errors. The default raw route is unchanged; generated text is a
+proposal, never action success. Portable/installed-source checks have passed;
+an actual-model caller trial, native admission and retained benefit are separate.
+
+## Measurement reader compatibility — 2026-09-29
+
+The existing explicitly selected research-report reader now rejects nested
+Boolean/number substitutions, nonfinite relative gain and omitted unknown
+fields. Complete v1 producer reports remain supported. Producer-to-file-to-reader
+controls and advisory output assertions are in the existing tests; see
+[the measurement interface](INTERFACE.md#advisory-autoresearcher-startup-display).
+This hardening supplies no independent verification or learning authority.
+
+## Git lifecycle reconciliation
+
+WRE startup refreshes GitHub branch and PR inventory. Codex SessionStart uses
+the same pass and may fast-forward a selected clean PC `main` worktree after
+the current GitHub commit passes its required checks. The receipt carries open
+and unverified PRs across runs and records both GitHub and PC proof on closure.
+
+The legacy merge sentinel now delegates to the observation pass. Governed
+promotion remains with the repository's merge authority. See
+[the lifecycle interface](INTERFACE.md#git-lifecycle-reconciliation).
+
 # WRE Core
+
+## Research evidence at startup
+
+The existing WRE dashboard preflight can display one selected AutoResearcher
+report using `WRE_RESEARCH_REPORT_PATH` (absolute local invocation `report.json`)
+and `WRE_RESEARCH_BASELINE_SHA256` (expected baseline text digest). Selection is
+explicit; no report discovery or researcher launch runs at startup. Missing or
+invalid selection displays unknown. Valid input is labelled unverified, with
+retention and actual resource usage unknown. The selected report must also carry
+the canonical RSI measurement bundle: the dashboard verifies that the current
+AutoResearcher signal is `execution_feedback`, exposes the measured fitness
+delta, and keeps production-RSI eligibility false while independent verification,
+held-out evaluation, rollback and retained-generation evidence are absent. See
+the [reader contract](INTERFACE.md#advisory-autoresearcher-startup-display).
 
 WRE Core is the governed recursive-work control plane for FoundUps. It admits
 Skillz, routes bounded work, records execution truth, and provides evidence
@@ -32,6 +142,8 @@ WRE Core owns:
 - content-bound supply-chain scanning and manifest verification;
 - registry-adjacent programmatic executor dispatch;
 - proposal-only local model inference;
+  prompt JSON excludes reserved parent continuity metadata while lineage
+  retains the original object; unrelated serialization failures remain closed;
 - structural fidelity and durable execution-outcome storage;
 - bounded ReAct retries;
 - candidate variation storage;
@@ -47,11 +159,19 @@ artifact activation/rollback, a hundred-agent scheduler, or a proven
 production RSI canary.
 
 The existing ROC Auto Researcher remains a dry-run proposal/evaluation loop.
+Each invocation now captures immutable numeric cost totals and known-agent names
+for its baseline and all candidates. Later runs refresh costs. This prevents
+dependency-only cost changes from appearing as candidate improvement. A separate
+comparison basis now rejects persistent drift in consumed economic inputs and
+actual method defaults before or after evaluation. This is a sampled guard, not
+immutable consumption or concurrency protection; transient change-and-restore,
+authenticated oracle identity and independently retained benefit remain open. See
+the [comparison contract](INTERFACE.md#roc-research-evaluator-and-dry-run-producer).
 Its [evaluator](src/wre_research_evaluator.py) parses literal target dictionaries
 without executing target code. It now rejects negative/out-of-range allocations,
 non-finite values, booleans and unknown catalog agents before simulation;
 allocation totals must equal one within `1e-9`. An invalid negative allocation
-previously outscored the baseline. The [109 focused tests](tests/test_wre_auto_researcher.py)
+previously outscored the baseline. The [lifecycle tests](tests/test_wre_auto_researcher.py)
 include invalid-input rejection, cancellation/failure cleanup and the invalid
 baseline gate. The producer restores its scratch baseline on Python exception
 exits and surfaces cleanup errors; process termination and storage failure are
@@ -69,7 +189,15 @@ live source. Each run freezes the current `original_code` text, prepares scratch
 and uses that snapshot for the initial proposal and terminal cleanup. The report's
 `baseline_input_sha256` hashes the captured text encoded as UTF-8. Constructor
 reads normalize newlines; this is not a raw-file or authenticated source identity.
-Program, oracle, environment and reader qualification remain outstanding.
+Reports now include `program_inputs` for each locally attempted backend call:
+iteration, invocation-wide ordinal and SHA-256 of the rendered instruction text.
+Instructions remain mutable between calls; the producer hashes the same text
+used in each prompt. UTF-8 encoding failure records a null digest with an error
+label while preserving the call. Failed calls remain visible; heuristic and
+zero-attempt paths do not fabricate consumption. See the
+[report contract](INTERFACE.md#roc-research-evaluator-and-dry-run-producer).
+Authenticated program provenance, oracle, environment and reader qualification
+remain outstanding.
 
 Reports also record `proposal_inputs`: the iteration and SHA-256 of each nonempty
 proposal text reaching candidate preparation after the existing mode gate. The

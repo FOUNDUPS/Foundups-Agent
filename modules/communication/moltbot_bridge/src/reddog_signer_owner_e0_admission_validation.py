@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Mapping
 
+from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_selection_binding import require_initial_handshake_policy_scope
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     public_key_fingerprint,
 )
@@ -98,6 +99,7 @@ def require_policy_authorities(
     if not verified:
         raise ValueError("e0_policy_signature_invalid")
 def require_policy_config_binding(policy: Mapping[str, Any], config: Any) -> Any:
+    require_initial_handshake_policy_scope(policy, config)
     if (
         config.provider_mode != PROVIDER_MODE_WSP71_PERMISSIONED
         or config.allow_test_only_key_material is not False
@@ -139,8 +141,11 @@ def require_policy_config_binding(policy: Mapping[str, Any], config: Any) -> Any
 
 
 def require_policy_runtime_paths(
-    policy: Mapping[str, Any], *, repo_root: Path, signer_runtime_root: Path
+    policy: Mapping[str, Any], *, repo_root: Path, signer_runtime_root: Path,
+    initial_config: Any | None = None,
 ) -> None:
+    socket_root = (Path(initial_config.socket_path).resolve().parent
+                   if getattr(initial_config, "initial_handshake_only", False) else None)
     roots: list[Path] = []
     for prefix in ("replay", "revocation"):
         root = validate_runtime_root_path(policy[f"{prefix}_root"], repo_root=repo_root)
@@ -162,6 +167,11 @@ def require_policy_runtime_paths(
     )
     if any(_paths_overlap(binding.witness_root, root) for root in roots):
         raise ValueError("e0_policy_runtime_roots_not_disjoint")
+    if socket_root is not None and any(
+        _paths_overlap(socket_root, root)
+        for root in (*roots, binding.witness_root, signer_runtime_root)
+    ):
+        raise ValueError("e0_policy_socket_root_not_disjoint")
 
 
 def _paths_overlap(left: str | Path, right: str | Path) -> bool:

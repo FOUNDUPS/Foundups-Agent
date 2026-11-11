@@ -11,6 +11,7 @@ not a new executor, daemon, or certification of legacy automation.
 | Run LinkedIn / full LinkedIn | [linkedin_engagement](../skillz/linkedin_engagement/SKILLz.md) | Full cycle below |
 | Check messages / respond / send approved messages | [linkedin_inbox](../skillz/linkedin_inbox/SKILLz.md) | Inbox or named approved batch only |
 | Review connections | [linkedin_connections](../skillz/linkedin_connections/SKILLz.md) | Connection requests, not group membership |
+| Due diligence / who is this person / investor / family office / consequential partner | [linkedin_contact_diligence](../skillz/linkedin_contact_diligence/SKILLz.md) | Evidence-based professional diligence before sensitive disclosure or material relationship decisions |
 | Check notifications | [linkedin_notifications](../skillz/linkedin_notifications/SKILLz.md) | Relevant notification targets |
 | Review OpenClaw members / pending posts | [linkedin_group_moderation](../skillz/linkedin_group_moderation/SKILLz.md) | Membership and moderation queues |
 | Good, Bad and Ugly / group news | [openclaw_group_news](../skillz/openclaw_group_news/SKILLz.md) | Research and group discussion; no membership changes |
@@ -46,6 +47,10 @@ BLOCKED_IDENTITY. New issues and new series use different template paths.
    continuity. Reconstruct unfinished actions and scheduled items before mutations.
 2. Triage connection requests first, then Focused/Other inbox and notifications.
    A time-sensitive existing commitment may take priority. Read threads first.
+   When a connection or message creates a consequential funding, project-finance,
+   legal, government, infrastructure or sensitive-partnership question, route the
+   contact through [linkedin_contact_diligence](../skillz/linkedin_contact_diligence/SKILLz.md)
+   before non-public disclosure or a material relationship decision.
 3. Review OpenClaw membership, pending posts and unanswered discussions. Route
    an editorial Good/Bad/Ugly item separately; do not manufacture a daily quota.
 4. Inspect a bounded relevant feed slice. Route ideas to the appropriate

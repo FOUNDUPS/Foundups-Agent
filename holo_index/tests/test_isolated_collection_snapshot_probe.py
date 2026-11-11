@@ -34,6 +34,8 @@ class _Collection:
     def __init__(self, name: str, count: int = 2) -> None:
         self.name = name
         self._count = count
+        self._model = SimpleNamespace(configuration_json={"hnsw": {"space": "l2"}},
+                                      serialized_schema=None)
         self.metadata = {
             "embedding_backend": "test-embedding",
             "embedding_model": "test-model",

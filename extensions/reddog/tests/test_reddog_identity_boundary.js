@@ -51,7 +51,7 @@ const map = read('docs/REDDOG_DOCUMENTATION_MAP.md');
 for (const required of [
   'extensions/reddog/ARCHITECTURE.md',
   'extensions/reddog/docs/CONTACT_MEMORY_ARCHITECTURE.md',
-  'extensions/reddog/docs/MOSH_PIT_ACTIVITY_MEMORY_ARCHITECTURE.md',
+  'extensions/reddog/docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md',
   'extensions/reddog/docs/MEMEX_PROJECTION_EMITTER_ARCHITECTURE.md',
   'extensions/reddog/docs/prompts/WSP97_M2M_MEMEX_EMITTER_IMPLEMENTATION_PROMPT.md'
 ]) {
@@ -61,7 +61,7 @@ for (const required of [
 
 assert(read('extensions/reddog/docs/CONTACT_MEMORY_ARCHITECTURE.md')
   .includes('Status: `ARCHITECTURE_VISION` / `SPECIFIED_NOT_IMPLEMENTED`'));
-assert(read('extensions/reddog/docs/MOSH_PIT_ACTIVITY_MEMORY_ARCHITECTURE.md')
+assert(read('extensions/reddog/docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md')
   .includes('Status: `PARTIALLY_SUPPORTED` / `UNIFIED_RENDERER_NOT_IMPLEMENTED`'));
 assert(read('extensions/reddog/docs/MEMEX_PROJECTION_EMITTER_ARCHITECTURE.md')
   .includes('Status: `SPECIFIED_NOT_IMPLEMENTED`'));

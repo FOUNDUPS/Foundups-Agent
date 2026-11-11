@@ -1,6 +1,7 @@
 # Vote/Ballots FoundUp
 
-**Status**: Internal PoC implementation complete; public PoC not launched  
+**Status**: Public informational Sites live. Candidate and funding application remains an internal PoC.
+
 **Module Version**: 0.6.0 (`src/__init__.py`)  
 **FoundUp ID**: `voteballots`  
 **Token Symbol**: `VOTE`  
@@ -18,9 +19,73 @@ VOTE then expands behind the existing pfMALL/member gate into deeper candidate r
 
 ---
 
+## Relationship to Voice and Oversight
+
+**Vote is the existing umbrella civic FoundUp** (`voteballots`). **Voice is a proposed, separately identified but interoperable civic-participation FoundUp**, not yet an implemented or admitted tenant. The proposed relationship is a consented, capability-scoped handoff through Play FoundUps shared contracts, not a merged application or cloned backend.
+
+**Oversight is currently a strategy and documentation/reference workstream** organized under Vote, not a FoundUp. It can inform both Vote's research and Voice's future civic-action experiences without creating a separate Oversight identity. Whether a later internal Voice feature should serve Oversight is **undecided and out of scope**; do not invent a Voice sub-product, route or runtime on that assumption.
+
+See [Oversight source classification](oversight/README.md). WSP 97 verifies actual repository state and WSP 109 governs any later independent FoundUp decision. No registry, manifest, token, tenant, route or public deployment change follows from this clarification.
+
 ## Current Truth State
 
-The original README/manifest/registry labels predate the implemented PoC chain and are partially stale.
+### Accountability integration and bounded public PoC
+
+The Oversight source provides a legislative roadmap with named decision owners,
+model documents and separate paths for congressional action and optional state
+referrals. Its public diagram opens connected authority and investigation maps
+with committee rules, decision gates, and fictional walkthroughs. Its senator
+lookup offers public office numbers and optional local state suggestions.
+The staff reference includes agent-readable source indexes.
+Vote's funding evidence page presents reviewed excerpts from original
+FEC filings and links separate official roll calls. Contact Congress builds a
+visitor-selected list from a dated House/Senate directory snapshot. The
+[release accounting](docs/RELEASE_ACCOUNTING.md#accountability-integration)
+tracks source, verification and publication separately.
+
+The broader public candidate lookup and live FEC pipeline remain gated. The
+existing `voteballots` manifest and Mall route still own that future admission.
+
+The public Vote landing, Oversight Blueprint and Coalition pages are live. The
+candidate/evidence app is an internal PoC. The original registry and manifest
+labels predate the implemented chain. See the
+[release accounting and Launch Pad](docs/RELEASE_ACCOUNTING.md) for evidence,
+launch gates and the next product decisions.
+
+### Oversight classification clarification (2026-11-09)
+
+Oversight is a **strategy and documentation/reference workstream**, not an independent FoundUp. Its current ownership under `voteballots` is organizational and does not make the Oversight strategy a separate FoundUp. A future interactive Oversight FoundUp is a hypothesis requiring WSP 97 evidence and WSP 109 entity classification before manifest, registry, route, token, or runtime changes. Preserve the existing strategy site; do not treat documentation presentation as proof of an implemented FoundUp.
+
+
+### 2026-11-07: Oversight workstream and public front door
+
+Oversight Blueprint is a Vote workstream under the existing `voteballots`
+FoundUp, classified as an `EXISTING_FOUNDUP_UPDATE`. It does not introduce a
+second tenant, token, registry entity or agent authority. WSP 109 permits a
+future derivative FoundUp, but independent governance/runtime needs have not
+been established for this workstream.
+
+- [Preserved Oversight source and release procedure](oversight/README.md):
+  all 155 public Site files, documents, data and instruction bundles are
+  preserved with exact file identities from Sites source `c66d22af`.
+- [Vote landing source](web/README.md): an informational PWA front door, separate
+  from the unlaunched candidate/evidence application described below.
+- [Coalition tab audit](docs/COALITION_TAB_AUDIT.md): independent public principles
+  and a private, downloadable application draft. No creator participation,
+  enrollment, account ownership or official status is implied or verified by
+  preparing a draft. OAuth, intake and membership permissions are not live.
+
+The [Phase One landing contract](oversight/README.md#phase-one-landing-contract)
+owns the public address model, the four-entry handoff and the Vote/Voice
+distinction. MAGA and Oversight are one Site. Vote remains its separately hosted
+informational civic surface. The proposed Voice destination is a later
+stakeholder surface and has its own availability gate. See the
+[dated live audit](docs/RELEASE_ACCOUNTING.md#2026-11-09-documentation-audit).
+
+The canonical shell routes remain `/f/voteballots` and `/f/voteballots/app`,
+with `idb_voteballots` unchanged. Separate-origin public PWAs do not share Mall
+authentication, storage or service-worker scope. Imported instruction files
+are authored content; they are not admitted or running OpenClaw/WRE skills.
 
 ### Implemented Internal PoC Chain
 
@@ -38,7 +103,8 @@ Canonical closure evidence: `docs/audits/architecture/VOTE_POC_CHAIN_OBSERVATION
 ### Not Yet Publicly Activated
 
 - `entry_url` remains empty
-- public Vote app is not launched
+- public Vote candidate/evidence app is not launched; an informational landing
+  does not satisfy that application launch gate
 - current shell integration is a local payload contract only
 - Vote is present in the canonical FoundUp registry but is not currently listed in `public/member/mall-catalog.json` or `public/f/portfolio_data.json`
 - registry/manifest implementation labels require a dedicated reconciliation slice before promotion
@@ -89,6 +155,21 @@ The in-app parallel ballot must be explicitly labeled **non-binding / not an off
 See `docs/intake/PROTOTYPE_GATE.md`.
 
 ---
+
+## Planned Feature - Political Claim Verification / Bullshit Meter
+The 2026-10-30 intake adds a staged claim-verification capability to the existing Vote FoundUp:
+
+1. **CV1**: asynchronous transcript analysis, ten-speech internal evaluation, CLI/review dashboard, and primary-source evidence trees.
+2. **CV2**: statistical/methodological and funding/incentive audits.
+3. **CV3**: caption/video evidence overlays through reusable extension/media components.
+4. **CV4**: streaming ASR and a live meter with explicit pending/unknown states.
+
+The requested 300-850 score and color bands are experimental proposals. Unknown evidence remains unscored; factual contradiction, uncertainty, funding conflict, and intent are separate. The feature is **planned / not implemented**. Internal evaluation may run alongside public PoC preparation, while public/member exposure retains its existing gates.
+
+- [Canonical feature specification](docs/POLITICAL_CLAIM_VERIFICATION_AND_SCORING_ENGINE.md)
+- [Original 012 specification](docs/intake/CLAIM_VERIFICATION_SOURCE_20261030.md)
+
+The current mock-data funding chain, live-data limitation, and public-not-launched status remain unchanged.
 
 ## Reuse-First Architecture
 

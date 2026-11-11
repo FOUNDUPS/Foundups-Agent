@@ -1,5 +1,16 @@
 ﻿# LinkedIn Agent Test Module Log
 
+## 2026-09-28 — Contact-diligence contract regression and CI coverage
+
+Fresh RSI observation of PR1927 reproduced seven passing cases and one failure:
+the existing test requires `not proof of fraud`, while the new skill used an
+equivalent sentence without that literal. Reconcile the skill with the shared
+review contract; retain all eight test cases and assertions unchanged. The same
+stdlib-only command now passes all eight cases locally and is selected explicitly
+in the existing CI workflow. Independent review and actual PR/main checks remain
+separate closure gates in the [canonical backlog](../../../../docs/roadmaps/rsi_swarm_backlog.json).
+No browser, platform executor, live account or retained-learning test ran.
+
 ## 2026-09-23 — Research reference validation
 
 Reused all seven offline activity-contract cases; the existing references glob validates the new research contract and source-note links from lane skills. No new test or runtime import. Independent instruction scenarios cover unsupported Gemini claims, Champion/COGDC comparison, inert RSI evidence, concurrent Docs edits, WSP 15 ordering and dialogue-training separation. All six returned the intended bounded decisions. Review identified APS/MPS wording tension and permissive dataset-builder paths; clarified the newsletter ordering exception and warned against assuming runtime eligibility enforcement. Moshpit instructions cover stable lane/issue identities and preservation of prior history.

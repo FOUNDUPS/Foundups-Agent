@@ -1,0 +1,55 @@
+name: FoundUp project nomination
+description: Suggest a public project or idea for review.
+title: '[FoundUp nomination] '
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Anyone may nominate a project as a supporter; repository control is not required.
+        This is a public nomination for review, not a verified ownership claim,
+        FoundUp admission, token entitlement or market listing. Submitting or closing
+        this issue grants none of those rights.
+  - type: input
+    id: proposed_name
+    attributes:
+      label: Project name
+      description: The proposed or existing project name.
+    validations:
+      required: true
+  - type: input
+    id: project_url
+    attributes:
+      label: Public project URL
+      description: A public GitHub repository or project website; a reference is not proof of control.
+      placeholder: https://example.org/project
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome
+      description: What should people be able to achieve? State the vision and distinguish it from what exists today.
+      placeholder: "Wouldn't it be great if..."
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solution, when known
+      description: Describe the approach. Include PoC, Prototype and MVP under Solution if known; mark unplanned stages as unknown.
+    validations:
+      required: false
+  - type: textarea
+    id: pain
+    attributes:
+      label: Pain or obstacles, when known
+      description: What obstacles stand in the way of delivering the Solution? Leave blank if unknown.
+    validations:
+      required: false
+  - type: checkboxes
+    id: public_information
+    attributes:
+      label: Public submission
+      options:
+        - label: I am submitting only public information, with no credentials, secrets or private project material.
+          required: true

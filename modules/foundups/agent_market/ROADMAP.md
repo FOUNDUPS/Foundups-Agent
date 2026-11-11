@@ -1,4 +1,63 @@
+## Security-first simulator sequence — 2026-11-01
+
+PR2279 delivered the retained quantity/revalidation source on main9925.
+Follow the [current sprint and roadmap](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#current-sprint-and-blockchain-roadmap--2026-11-01):
+A10/B01 policy isolation, then A07/B02 full epoch effects; units, mined/staked
+issuance, funded reservations and authentic independent grants remain gates.
+The unsigned consumer stays later15/P1; revalidate existing intent before/after
+I/O with admitted producer/facts. No implicit reissue, signing or PAID transition.
+Local simulator policy acceptance is not funded FAM settlement qualification.
+
 ﻿# ROADMAP - FoundUps Agent Market
+## Exact quantity admission — 2026-10-29
+
+**2026-10-31 promotion rule:** follow [WSP26](../../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract)
+and the [reconciliation report](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md).
+Integer admission and unsigned intent revalidation do not establish funded
+conservation. Resolve units, pending/aggregate caps, replay and independent
+authority through simulator validation before economic chain activation.
+
+Implemented eight constructor type guards and optional-task validation before
+launch adapter effects. Frozen acceptance reproduced 27 failures, then passed
+132 focused and 333 connected cases (overlapping scopes); independent review
+accepted source and test preservation. Hosted/main publication remains separate.
+Next P0 gates: authenticated controller independence, funded aggregate caps,
+asset units/range, durable attempt/reissue ownership, signing and confirmation.
+Separate compute dictionary/ORM inputs are not qualified by this change.
+
+## Pre-chain safety delivery — 2026-10-25
+
+- [x] P0A: reject invalid/unavailable/disconnected requested or default token
+  backends; freeze chain identity through health checks and result validation.
+  Keep explicitly identified default/mock simulation; no fallback to simulation.
+- [x] P0B host-context boundary: default-deny exact caller/FoundUp role grants;
+  independent stored-proof checks before verification and payout, including
+  legacy records. Local 690-case connected and independent 115-case runs pass.
+- [ ] Authenticated transport/domain issuer and current-grant resolution. The
+  Python context itself supplies no signature, expiry or revocation mechanism.
+- [ ] Real testnet adapter, independently confirmed effects and settlement.
+- [x] Opt-in local `TEST_TRANSPORT_PROBE` intent preparation: immutable explicit
+  units/host policy, current authority, strict SQLite v3 schema and complete
+  content-bound replay. Final all-FAM 459 and independent 16 pass; see TestModLog.
+- [ ] Resident caller integration and any required generated source-closure
+  admission for the new explicit module API. No resident import/export is added.
+- [ ] Independently verify real TestNet genesis, asset properties, address
+  checksum/control, expected signer and restricted funding before unsigned
+  transaction preparation, broadcast/finality/recovery qualification.
+- [ ] Resolve reward denomination, issuance/vesting and WSP26 transfer policy
+  before connecting a probe to reward settlement. Existing payout stays pending.
+
+The [delivery plan](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md)
+records pre-execution WSP 15 priorities and evidence. Existing atomic SQLite
+verification and pending-payout repairs below remain in place.
+
+## Existing-intent revalidation allocation — 2026-10-25
+
+- [x] Locally qualified existing-only full-DTO revalidation; supplied policy/
+  authority rechecked, missing rows deny without recreation. Host resolves freshness.
+- [x] Kept schema 3 and prepare/get-or-create; qualified no-write/reopen
+  checks before a separately allocated formatter. Revalidation is point-in-time.
+
 ## Domain Alignment References
 - `modules/foundups/ROADMAP.md`
 - `modules/foundups/docs/OCCAM_LAYERED_EXECUTION_PLAN.md`
@@ -47,6 +106,22 @@ CRUD compression or a duplicate module merely to conceal this debt.
 
 This repair changes no schema, adds no module and activates no live effect. The
 in-memory completed-payment simulation remains distinct from persistent initiation.
+
+## Shared ORM cohesion prerequisite — 2026-09-23
+
+- [x] Extract Base/13 row mappings once into internal `persistence/orm_models.py`; preserve existing sqlite_adapter export identities and single registry.
+- [x] Validate unchanged declaration/adapter ASTs and128 connected cases locally/independently (three compatibility controls plus125 existing cases, including the five known verification failure witnesses).
+- Adapter1330→1125; ORM owner238; adapter class remains816. Combined source+33 lines is extraction/import documentation overhead, not removed functionality. The1330 ceiling above remains a maximum; inherited critical-window/class debt still needs scoped remediation.
+- Old pickle globals resolve; new pickles use the ORM file's module path. Preserve that file when handling new pickles during rollback. No schema/migration or PostgreSQL runtime qualification is implied.
+- PR1893 merged with verified exact PR/main checks and retired its lane. The following verification repair reuses the transaction/compute helpers under fixed desired acceptance.
+
+## Persistent proof verification — contract checkpoint 2026-09-23
+
+- [x] Specify existing post-finalization WRE to FAM handoff and exact identity/recovery boundaries in [R24](../../../docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md#persistent-proof-verification-handoff-contract--2026-09-23); planning14/P1, independently source-reviewed.
+- [x] Qualify five disposable SQLite verification retry/failure controls in the existing persistent compute test owner (12/P2): same five cases pass locally/independently and reproduce double debit, partial commits and non-idempotent retry. These are failure witnesses, not production acceptance.
+- [x] Local 14/P1 verification atomicity/replay repair: 164 fixed cases pass locally and independently after 23 baseline failures. Decision/debit/event/task commit together; exact retries preserve outcomes and later legitimate state; ambiguous legacy history holds without effects. Candidate publication/closure remains in the canonical backlog. No domain authority or settlement integration.
+- [ ] Obtain explicit domain issuer/delegation policy before signed verification integration; repository-write and compute access are not verifier entitlement.
+- [ ] Qualify the integrated admitted caller and independent verifier before any native AmIBot/RSI claim. Settlement remains separately admitted.
 
 ## Prototype (Current)
 ### Goal

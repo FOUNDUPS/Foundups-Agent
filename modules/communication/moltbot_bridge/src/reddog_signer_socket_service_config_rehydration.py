@@ -12,6 +12,12 @@ from typing import Any, Mapping
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply import (
     SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply_contract import (
+    INITIAL_HANDSHAKE_CONFIG_FIELDS, INITIAL_HANDSHAKE_CONFIG_SCHEMA_VERSION,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_authority_policy_runtime import (
+    initial_handshake_socket_path,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_wiring import (
     SignerSocketServiceRuntimeWiringConfig,
     architect_proposal_security_context_digest,
@@ -76,6 +82,15 @@ def _header_valid(
         payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True
     )
     actual = "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    if payload.get("schema_version") == INITIAL_HANDSHAKE_CONFIG_SCHEMA_VERSION:
+        return bool(
+            set(payload) == INITIAL_HANDSHAKE_CONFIG_FIELDS
+            and _sha256(payload.get("owner_e0_authority_binding_digest"))
+            and payload.get("allow_test_only_key_material") is False
+            and payload.get("permission_snapshot_fresh") is True
+            and expected_digest is not None
+            and hmac.compare_digest(expected_digest, actual)
+        )
     proposal = payload.get("proposal_authority_policy") is not None
     return bool(
         payload.get("schema_version") == SIGNER_SERVICE_CONFIG_SCHEMA_VERSION
@@ -96,7 +111,7 @@ def _header_valid(
 
 def _runtime_paths(
     repo: Path, expected: Path, payload: Mapping[str, Any]
-) -> tuple[Path, Path, Path, Path] | None:
+) -> tuple[Path, Path, Path, Path | None] | None:
     runtime = validate_runtime_root_path(payload["runtime_root"], repo_root=repo)
     signer = validate_runtime_root_path(
         payload["signer_runtime_root"], repo_root=repo
@@ -108,6 +123,11 @@ def _runtime_paths(
         or signer in runtime.parents
     ):
         return None
+    if payload.get("schema_version") == INITIAL_HANDSHAKE_CONFIG_SCHEMA_VERSION:
+        socket_path = initial_handshake_socket_path(
+            repo, runtime, signer, payload["socket_path"]
+        )
+        return runtime, signer, socket_path, None
     socket_path = validate_runtime_artifact_path(
         payload["socket_path"], repo_root=repo, allowed_root=runtime
     )
@@ -192,7 +212,7 @@ def _profile_inputs(
 
 def _config(
     repo: Path, payload: Mapping[str, Any], runtime: Path, signer: Path,
-    socket_path: Path, control_anchor: Path,
+    socket_path: Path, control_anchor: Path | None,
     conversation: tuple[Path | None, Mapping[str, Any] | None],
     proposal: tuple[Any, Any, Path | None, str | None, str | None],
     profiles: tuple[dict[str, Any] | None, tuple[dict[str, Any], ...], dict[str, Any]],
@@ -220,6 +240,9 @@ def _config(
         proposal_nonce_store_path=nonce_path,
         proposal_replay_high_water_store_id=store_id,
         proposal_replay_high_water_durability_receipt_id=durability,
+        initial_handshake_only=(
+            payload.get("schema_version") == INITIAL_HANDSHAKE_CONFIG_SCHEMA_VERSION
+        ),
     )
 
 

@@ -196,6 +196,23 @@ for (const runtimePath of [
 
 {
   const fixture = writeFixture();
+  const generated = fs.readFileSync(path.join(repoRoot, preflight.BACKEND_MANIFEST_PATH), 'utf8');
+  const lf = generated.replace(/\r\n/g, '\n');
+  for (const serialized of [lf, lf.replace(/\n/g, '\r\n')]) {
+    const raw = Buffer.from(serialized, 'utf8');
+    assert(raw.length <= preflight.MAX_MANIFEST_BYTES);
+    fs.writeFileSync(fixture.manifestPath, raw);
+    const accepted = runFixture(fixture);
+    assert.strictEqual(accepted.passed, true);
+    assert.strictEqual(accepted.backend_manifest_integrity_verified, true);
+  }
+  const raw = Buffer.from(lf, 'utf8');
+  const maximum = Buffer.concat([
+    raw, Buffer.alloc(preflight.MAX_MANIFEST_BYTES - raw.length, 0x20)
+  ]);
+  assert.strictEqual(maximum.length, preflight.MAX_MANIFEST_BYTES);
+  fs.writeFileSync(fixture.manifestPath, maximum);
+  assert.strictEqual(runFixture(fixture).passed, true);
   fs.writeFileSync(fixture.manifestPath, 'x'.repeat(preflight.MAX_MANIFEST_BYTES + 1), 'utf8');
   const result = runFixture(fixture);
   assert.strictEqual(result.passed, false);

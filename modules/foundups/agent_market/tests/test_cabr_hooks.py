@@ -7,6 +7,7 @@ WSP References:
 
 import pytest
 
+from modules.foundups.agent_market.src.authorization import CallerAuthorization
 from modules.foundups.agent_market.src.cabr_hooks import (
     CABRInput,
     CABROutput,
@@ -20,6 +21,9 @@ from modules.foundups.agent_market.src.models import (
     TaskStatus,
     Verification,
 )
+
+VERIFIER_AUTHORIZATION = CallerAuthorization("verifier_1", frozenset({("f_test", "verifier")}))
+TREASURY_AUTHORIZATION = CallerAuthorization("treasury_1", frozenset({("f_test", "treasury")}))
 
 
 class TestCABRInput:
@@ -164,8 +168,9 @@ class TestPersistentCABRHooks:
                 approved=True,
                 reason="ok",
             ),
+            authorization=VERIFIER_AUTHORIZATION,
         )
-        market.trigger_payout("t3", "treasury_1")
+        market.trigger_payout("t3", "treasury_1", authorization=TREASURY_AUTHORIZATION)
 
         # Create hooks with market as task source
         hooks = PersistentCABRHooks(task_source=market)

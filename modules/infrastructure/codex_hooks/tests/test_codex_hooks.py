@@ -209,7 +209,7 @@ def test_pre_tool_use_emits_supported_deny_shape(tmp_path: Path) -> None:
     assert output["permissionDecision"] == "deny"
 
 
-def test_session_start_runs_awakening_then_strict_gate(tmp_path: Path) -> None:
+def test_session_start_runs_awakening_then_strict_gate(tmp_path: Path, monkeypatch) -> None:
     awakening = tmp_path / "WSP_agentic" / "scripts" / "functional_0102_awakening_v2.py"
     tracker = tmp_path / "modules" / "infrastructure" / "monitoring" / "src" / "wsp_00_zen_state_tracker.py"
     awakening.parent.mkdir(parents=True)
@@ -217,6 +217,15 @@ def test_session_start_runs_awakening_then_strict_gate(tmp_path: Path) -> None:
     awakening.touch()
     tracker.touch()
     runner = FakeRunner(tmp_path)
+
+    def reconcile(root, *, synchronize_pc, runner):
+        assert root == tmp_path
+        assert synchronize_pc is True
+        assert "--strict" in fake_runner.calls[-1]
+        return {"coverage": "complete", "pc": {"status": "PC_SYNC_VERIFIED"}, "pending_prs": [2335]}
+
+    fake_runner = runner
+    monkeypatch.setattr(codex_hooks, "reconcile_git_lifecycle", reconcile)
 
     result = codex_hooks.handle_session_start(
         {"cwd": str(tmp_path), "source": "startup"},
@@ -226,6 +235,8 @@ def test_session_start_runs_awakening_then_strict_gate(tmp_path: Path) -> None:
     assert result["continue"] is True
     context = result["hookSpecificOutput"]["additionalContext"]
     assert "is_zen_compliant=true" in context
+    assert "PC=PC_SYNC_VERIFIED" in context
+    assert "Pending PRs=1" in context
     assert "agent/hook-test" not in context
     assert any("functional_0102_awakening_v2.py" in " ".join(call) for call in runner.calls)
     assert any("--strict" in call for call in runner.calls)

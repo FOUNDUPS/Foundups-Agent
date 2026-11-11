@@ -1,5 +1,23 @@
 # LinkedIn review: protocol, membership and discussion
 
+## RSI manager admission repair — 2026-09-24
+
+The browser owner now requires a fresh manager-admitted request before Connect.
+It checks pre-call pending/connected presence, the actual PENDING enum, matching
+target and returned/stored object identity. Quota rejection, existing connected or
+pending work, simulation failure, missing/malformed result and invalid stored
+identity fail before invitation UI or success credit. Policy-denial results and
+all preview/note/navigation compatibility remain unchanged.
+
+The same 36 frozen cases pass locally and independently after a baseline of
+11 fail/25 pass; four legacy constructor cases are excluded and two known warnings
+remain. Source, class and method shrink. Existing manager bookkeeping is preserved,
+including its pre-simulation pending entry; no rollback, quota repair, concurrent
+exactly-once or live delivery is proved. Source-bound evidence is under
+`O:/Foundups-Agent-audits/20260924-rsi-manager-guard`; exact closure and fresh WSP 15
+selection remain in the [canonical backlog](../../../../docs/roadmaps/rsi_swarm_backlog.json).
+Historical qualification sections below describe the original source.
+
 Contract updated 2026-09-22. Use [master activity routing](LINKEDIN_ACTIVITY_ROUTING.md) for scope, child skills and full-cycle order. This compact index connects the existing LinkedIn skills; it is not a new orchestrator, background service or claim of live executor compliance.
 
 ## Load the authored operating stack
@@ -19,9 +37,10 @@ The 2026-09-15 user correction is authoritative for this workflow: research and 
 1. Existing `linkedin_engagement` entrypoint routes the review. Full runs triage connection requests before the inbox; narrow runs open only their selected queues.
 2. Inspect recent Focused AND Other messages and unread filters. Record coverage, timestamps and missing access. Prioritize replies and commitments; an older unread item is not necessarily urgent.
 3. Classify work as routine-draftable, human-decision-needed, waiting or no-action. Personal relationships, commitments, financial/legal questions and access changes deserve explicit human review. 0102 can research and draft; outbound execution remains separately authorized.
-4. Run [linkedin_group_moderation](../skillz/linkedin_group_moderation/SKILLz.md) for pending members and posts. Inspect automatic approval; researched DM, sent verification, reply review and membership decision are distinct states.
-5. Inspect a bounded relevant feed slice after queues. Treat feed assertions as research leads; verify before repeating. Recommend useful engagement, not automatic likes or pitches.
-6. When requested or due for consideration, run [openclaw_group_news](../skillz/openclaw_group_news/SKILLz.md) for the Good/Bad/Ugly automation discussion. Read prior group posts before drafting; no duplicate daily news bot.
+4. For consequential contacts involving investment, family-office or project-finance claims, government/institutional introductions, strategic partnerships or requests for non-public material, run [linkedin_contact_diligence](../skillz/linkedin_contact_diligence/SKILLz.md). Keep VERIFIED / CLAIMED / UNVERIFIED / CONFLICTING evidence separate; absence of a public footprint is not proof of fraud. Diligence informs disclosure and questions, never auto-accepts, auto-rejects or authorizes a send.
+5. Run [linkedin_group_moderation](../skillz/linkedin_group_moderation/SKILLz.md) for pending members and posts. Inspect automatic approval; researched DM, sent verification, reply review and membership decision are distinct states.
+6. Inspect a bounded relevant feed slice after queues. Treat feed assertions as research leads; verify before repeating. Recommend useful engagement, not automatic likes or pitches.
+7. When requested or due for consideration, run [openclaw_group_news](../skillz/openclaw_group_news/SKILLz.md) for the Good/Bad/Ugly automation discussion. Read prior group posts before drafting; no duplicate daily news bot.
 
 The portfolio orchestrator may prioritize urgent items or select a narrow job. This document does not place Gmail under LinkedIn, replace Social Media DAE, or enable cross-project data sharing. Every item must retain account, FoundUp/project, channel and target identity.
 
@@ -53,7 +72,7 @@ Use the existing authorized account-scoped journal or mosh-pit adapter after ver
 }
 ```
 
-Do not store passwords, cookies, tokens, private message bodies or applicant dossiers in public source control, reusable skills or training data. Reference private drafts rather than duplicating them. Historical verified state is not current state. On a possible send/post without confirmation, inspect before retrying.
+Do not store passwords, cookies, tokens, private message bodies or applicant/contact dossiers in public source control, reusable skills or training data. Professional diligence may retain only the minimum private decision receipt needed for continuity; raw search results and sensitive personal information do not belong in that receipt. Reference private drafts rather than duplicating them. Historical verified state is not current state. On a possible send/post without confirmation, inspect before retrying.
 
 ## Readiness boundary
 
@@ -62,6 +81,33 @@ The skill documents now express the review contract. Existing executors still in
 In Work, use the advertised browser skill. Do not reuse repository session cookies, Selenium or anti-detection helpers as alternate Work control paths. No cron, scheduler, daemon or private-data ingestion is created by this documentation change.
 
 ## Retrieval audit and acceptance
+
+### RSI manager-result qualification — 2026-09-24
+
+The12/P2 qualification extends the existing browser-actions policy tests. Six
+new cases plus23 unchanged controls pass locally and independently (29 unique,
+four legacy constructor cases excluded, two known warnings per run). Real
+source leaves run with inert router/import boundaries and constructor bypass;
+no browser, provider or live connection is qualified.
+
+| Manager outcome | Current fake UI and bookkeeping observation |
+|---|---|
+| Fresh PENDING | Stores the returned object, reaches Connect/Send, credits success. |
+| Quota WITHDRAWN | Leaves prior history unchanged but still reaches UI and credits success. |
+| Already CONNECTED | Leaves the connection unchanged but still reaches UI and credits success. |
+| Prior PENDING | Returns the identical prior object, adds no request, still reaches UI and credits success. |
+| Simulation failure | StoresPENDING first, returns distinctWITHDRAWN with the same request_id under the fixed test clock, still reaches UI and credits success. |
+| Policy BLOCKED | Appends blocked history; navigation occurs, but no pending request, Connect/Send or success credit. |
+
+Prospective repair13/P1: before any Connect/Send, accept only newly created
+PENDING work matching the target and stored object, with no preexisting pending
+request or connection. Reject withdrawn/connected/blocked, missing or mismatched
+results without success credit. Preserve existing preview, policy, requested-note
+and no-message contracts. Do not infer admission from request_id equality alone.
+This guard would not repair existing history/quota accounting, roll back a
+simulator failure, prove delivery, or provide concurrent exactly-once behavior.
+The current sprint is qualification only; production source remains unchanged.
+Exact freeze, review and publication are in the canonical RSI backlog.
 
 ### RSI requested-note repair — 2026-09-23
 

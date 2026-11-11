@@ -15,7 +15,7 @@ if __name__ == '__main__' and sys.platform.startswith('win'):
         pass
 # === END UTF-8 ENFORCEMENT ===
 
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 NAVIGATION.py - 0102 Code Discovery System
 ===========================================

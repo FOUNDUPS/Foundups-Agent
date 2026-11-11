@@ -1,3 +1,13 @@
+## Current conversation memory — 2026-11-07
+
+Ordinary replies use MessageProcessor._conversation_response and the shared
+assess/write/review gateway. Observe quietly; native-ID/session context replaces
+name-based history, and generic platform badges do not prioritize conversation.
+WSP15 is for approved repair work. The canonical host workflow is
+`.claude/skills/youtube-conversation-stewardship/SKILL.md`; it is not a registered
+native WRE executor. Preserve command permissions, initial capture-only history,
+STOP and uncertain writes. See current README/INTERFACE before older patterns below.
+
 # CLAUDE.md - LiveChat Module Memory
 
 ## [STOP] STOP - ANTI-VIBECODING CHECKPOINT

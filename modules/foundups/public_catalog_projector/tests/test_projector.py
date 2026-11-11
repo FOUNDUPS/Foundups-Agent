@@ -268,6 +268,66 @@ def test_round_trip_real_registry_generate_validate():
     assert report.is_safe, [v.to_dict() for v in report.violations]
 
 
+def test_registered_move2japan_public_housing_poc_projection():
+    """The existing tenant exposes public housing without app or token promotion."""
+    registry = load_registry(find_repo_root())
+    entries = [e for e in registry["entities"] if e["foundup_id"] == "move2japan"]
+    assert len(entries) == 1
+    entry = entries[0]
+    assert entry["entity_type"] == "foundup"
+    assert entry["stage"] == "incubating"
+    assert entry["poc_status"] == "poc"
+    assert entry["public_surface_status"] == "discoverable"
+    assert entry["mall_entry_status"] == "discoverable_only"
+    assert entry["prototype_gate_status"] == "pending"
+    assert entry["public_url_or_route"] == "/f/move2japan"
+    assert entry["token_status"] == "TOKEN_DEFERRED"
+    assert entry["token_symbol"] is None and entry["app_url"] is None
+    assert entry["portfolio_ready"] is False
+
+    projection = generate_projection(registry)
+    projected = [e for e in projection["entities"] if e["foundup_id"] == "move2japan"]
+    assert len(projected) == 1
+    item = projected[0]
+    assert item["poc_url"] == "https://foundups.com/member/?foundup=move2japan"
+    assert item["poc_url"] == entry["poc_url"]
+    assert "token_symbol" not in item and item["app_url"] is None
+    assert set(item).issubset(PUBLIC_ALLOWLIST_SET)
+    assert not set(item).intersection(KNOWN_MEMBER_SCOPED_FIELDS)
+    assert validate_projection(projection, registry).is_safe
+
+
+def test_move2japan_manifest_declares_same_shell_poc_and_isolated_namespace():
+    """Registration is declarative; it cannot authorize publisher or agent work."""
+    from modules.foundups.agent.src.foundup_manifest_validator import validate_manifest_file
+
+    root = find_repo_root()
+    registry = load_registry(root)
+    entry = next(e for e in registry["entities"] if e["foundup_id"] == "move2japan")
+    assert entry["manifest_status"] == "exists"
+    path = root / entry["manifest_path"]
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    assert manifest["foundup_id"] == "move2japan"
+    assert manifest["routing_prefix"] == entry["public_url_or_route"] == "/f/move2japan"
+    assert manifest["data_namespace"] == "idb_move2japan"
+    assert manifest["entry_url"] == entry["poc_url"]
+    assert manifest["launch_readiness"] == "discoverable_only"
+    assert manifest["required_subscription_tier"] == "free"
+    assert manifest["is_invite_only"] is entry["invite_required"] is False
+    assert manifest["token_status"] == "TOKEN_DEFERRED"
+    assert manifest["token_symbol"] is None
+    assert manifest["agent_routes"] == []
+    assert manifest["signature"] == ""
+    readiness = manifest["build_contract"]["readiness"]
+    assert readiness["manifest_ready"] is False
+    assert readiness["build_ready"] is False
+    assert readiness["autonomous_execution_ready"] is False
+    assert manifest["execution_routing"]["declarative_only"] is True
+    assert manifest["execution_routing"]["can_self_authorize"] is False
+    result = validate_manifest_file(path)
+    assert result.ok, result.errors
+
+
 def test_committed_artifact_is_safe_and_scope_free():
     """The committed public_catalog.json validates clean against the registry."""
     repo_root = find_repo_root()

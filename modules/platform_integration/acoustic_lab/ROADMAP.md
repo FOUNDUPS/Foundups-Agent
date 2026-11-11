@@ -10,8 +10,16 @@
 - [x] Synthetic audio library framework ([Audio Library](./docs/architecture_design.md#audio-library-implementation))
 - [x] Triangulation algorithm design ([Triangulation Engine](./docs/architecture_design.md#triangulation-engine))
 - [x] IP geofencing implementation ([Security Layer](./docs/architecture_design.md#security-architecture))
-- [x] Ethereum testnet logging ([Blockchain Proof](./docs/implementation_walkthrough.md#ethereum-proof-of-existence))
+- [x] Educational Ethereum logging simulation ([Blockchain Proof](./docs/implementation_walkthrough.md#ethereum-proof-of-existence))
+- [ ] Actual testnet transaction logging and authenticated receipt verification (`_real_logging` currently delegates to simulation)
 - [x] Security-first architecture (no persistence) ([Security Architecture](./docs/architecture_design.md#security-architecture))
+
+Web3 compatibility checkpoint (2026-10-23): the Web3 7.15.0 / eth-account 0.13.6
+pair and layer-zero `ExtraDataToPOAMiddleware` repair pass full dependency checks
+and the 18-case guarded Windows selection. Independent negative controls reject
+broken middleware and invalid acceptance evidence. Fresh hosted Python 3.11/3.12,
+publication and main closure remain due. This does not complete the unchecked
+transaction/receipt work above or the four historical broader test failures.
 
 ### [DATA] Phase 1 Metrics
 - **Lines of Code**: ~500 (estimated)

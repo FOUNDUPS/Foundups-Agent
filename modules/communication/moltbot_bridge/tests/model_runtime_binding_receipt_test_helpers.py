@@ -546,3 +546,40 @@ def _content_digest(value: Any) -> str:
         default=str,
     ).encode("utf-8")
     return "sha256:" + hashlib.sha256(encoded).hexdigest()
+
+
+def _real_model_evidence_signatures(monkeypatch):
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+    from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
+    from modules.ai_intelligence.ai_gateway.tests import model_signed_evidence_test_helpers as signed
+    from modules.communication.moltbot_bridge.tests import model_runtime_binding_receipt_test_helpers as bound
+    from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
+        Ed25519SignatureVerifier, encode_ed25519_public_key, encode_ed25519_signature,
+    )
+    keys = {}
+    for name in ("BENCHMARK_PUBLIC_KEY", "PROMOTION_PUBLIC_KEY"):
+        key = Ed25519PrivateKey.generate()
+        public = encode_ed25519_public_key(key.public_key().public_bytes(Encoding.Raw, PublicFormat.Raw))
+        keys[public] = key
+        monkeypatch.setattr(signed, name, public)
+        monkeypatch.setattr(bound, name, public)
+    monkeypatch.setattr(signed, "deterministic_signature",
+                        lambda public, message: encode_ed25519_signature(keys[public].sign(message.encode("utf-8"))))
+    monkeypatch.setattr(signed, "DeterministicSignatureVerifier", Ed25519SignatureVerifier)
+    monkeypatch.setattr(bound, "DeterministicSignatureVerifier", Ed25519SignatureVerifier)
+
+
+def _corrupt_model_evidence_signature(value):
+    from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import build_model_signed_evidence_receipt
+    from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import encode_ed25519_signature
+    if isinstance(value, dict):
+        if "signature" in value:
+            fields = {k: v for k, v in value.items() if k not in {"receipt_id", "schema_version"}}
+            fields["signature"] = encode_ed25519_signature(bytes(64))
+            value.update(build_model_signed_evidence_receipt(**fields).to_dict())
+        else:
+            for item in value.values():
+                _corrupt_model_evidence_signature(item)
+    elif isinstance(value, list):
+        for item in value:
+            _corrupt_model_evidence_signature(item)

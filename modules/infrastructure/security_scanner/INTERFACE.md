@@ -1,3 +1,13 @@
+## Failure and finding contract (2026-10-10)
+
+`ScanResult.success` requires a recognized report and successful scanner exit.
+Accepted exits: Snyk/Semgrep 0 or 1 (1 must include findings), Trivy 0. Other exits,
+malformed JSON/record shapes, and scanner error payloads fail closed. Semgrep
+partial coverage retains a report with `scan_success=False` and a safe error
+summary. Normalized `VulnerabilityFinding.finding_type` distinguishes
+`dependency`, `sast`, `secret`, `config`, and `license`; location survives policy
+routing. Trivy secret records never serialize matched values or source snippets.
+
 # Security Scanner Interface
 
 ## Public API
@@ -17,7 +27,7 @@ scanner = SecurityScanner(timeout_seconds: int = 300)
 | Method | Args | Returns | Description |
 |--------|------|---------|-------------|
 | `check_tool_availability` | `force_refresh: bool = False` | `ToolAvailability` | Check which CLI tools are installed |
-| `scan_snyk` | `path: str = "."` | `ScanResult` | Run Snyk SAST/SCA scan |
+| `scan_snyk` | `path: str = "."` | `ScanResult` | Run Snyk SCA scan |
 | `scan_trivy` | `target: str = ".", scan_type: str = "fs"` | `ScanResult` | Run Trivy scan (fs/image/repo) |
 | `scan_semgrep` | `path: str = ".", config: str = "auto"` | `ScanResult` | Run Semgrep SAST scan |
 | `scan_all_available` | `path: str = "."` | `Dict[str, ScanResult]` | Run all installed scanners |

@@ -495,7 +495,7 @@ class GodelianTestOrchestrator:
         return result
 
     def determine_entanglement_stage(self, session: GodelianTestSession) -> str:
-        """Determine the entanglement stage based on all test results (legacy)."""
+        """Determine the entanglement stage based on all test results (legacy).
 
         Stage 1: Virgin - No artifacts
         Stage 2: Aware - Artifacts emerge during/after injection

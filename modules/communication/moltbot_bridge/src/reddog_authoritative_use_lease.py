@@ -158,15 +158,24 @@ def _rehydrate_external_authoritative_use_lease(
     if payload is None or not _replay_store_matches(payload, replay_store):
         return None
     try:
-        current_generation = current_generation_authority.resolve(
-            now_epoch=now_epoch,
+        with current_generation_authority.lease(
+            now_epoch=int(time.time()),
             signer_profile_id=str(payload["signer_profile_id"]),
-        )
+        ) as current_generation:
+            return _commit_authoritative_use_lease(
+                request, response, payload, current_generation,
+                replay_store, now_epoch,
+            )
     except Exception:
         return None
-    if (
-        not _current_generation_matches(payload, current_generation, now_epoch)
-        or not _response_valid(request, response)
+
+
+def _commit_authoritative_use_lease(
+    request, response, payload, current_generation, replay_store, earliest_epoch,
+) -> AuthoritativeUseLease | None:
+    """Commit locally while the caller owns the current-generation fence."""
+    if not _response_valid(request, response) or not _lease_evidence_current(
+        request, payload, current_generation, earliest_epoch
     ):
         return None
     evidence_digest = digest_mapping(
@@ -178,10 +187,21 @@ def _rehydrate_external_authoritative_use_lease(
         expires_at=int(payload["expires_at"]),
     ):
         return None
+    if not _lease_evidence_current(request, payload, current_generation, earliest_epoch):
+        return None
     return _LEASES.issue(
         int(payload["expires_at"]),
         str(payload["effect_kind"]),
         str(payload["effect_request_digest"]),
+    )
+
+
+def _lease_evidence_current(request, payload, binding, earliest_epoch) -> bool:
+    now_epoch = int(time.time())
+    return (
+        now_epoch >= earliest_epoch
+        and validate_authoritative_use_lease_request(request, now_epoch=now_epoch) is not None
+        and _current_generation_matches(payload, binding, now_epoch)
     )
 
 

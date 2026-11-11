@@ -86,6 +86,7 @@ def test_generated_closure_binds_executable_and_dynamic_load_sentinels(
         "holoindex_postmerge_claim_contract.py",
         "modules/infrastructure/idle_automation/src/holoindex_postmerge_coordinator.py",
         "modules/infrastructure/database/src/database.py",
+        "modules/infrastructure/wsp_core/src/wsp_domain_policy.py",
         "modules/infrastructure/dependency_launcher/src/wsl_agent_runtime.py",
     )
     assert set(required).issubset(runtime)
@@ -193,6 +194,10 @@ def _assert_signer_and_memex_runtime_files(generated: dict) -> None:
     )
     assert all(path in required for path in expected)
     for filename in (
+        "reddog_grant_authority_service.py",
+        "reddog_grant_authority_high_service.py",
+        "reddog_grant_authority_runtime_dependencies.py",
+        "reddog_grant_authority_wsp71_permission_rehydration.py",
         "foundup_verified_outcome_root_authority_client.py",
         "foundup_verified_outcome_root_authority_protocol.py",
         "foundup_verified_outcome_root_authority_service.py",
@@ -257,7 +262,10 @@ def test_checked_in_manifest_matches_independent_generation(
     generated = generated_manifest
 
     assert checked_in == generated
-    assert generator.MANIFEST_PATH.stat().st_size <= 320 * 1024
+    assert generator.MANIFEST_PATH.stat().st_size <= 332 * 1024
+    lf_bytes = generator.MANIFEST_PATH.read_bytes().replace(b"\r\n", b"\n")
+    assert len(lf_bytes.replace(b"\n", b"\r\n")) <= 332 * 1024
+    assert "modules/platform_integration/social_media_orchestrator/src/petition_campaign.py" in generated["required_runtime_files"]
     _assert_registry_and_builder_runtime_files(generated)
     _assert_signer_and_memex_runtime_files(generated)
     result_module = (
@@ -270,8 +278,21 @@ def test_checked_in_manifest_matches_independent_generation(
 
 
 def _assert_manifest_digest_pin(generated: dict[str, object]) -> None:
+    for member in (
+        'modules/communication/livechat/src/operator_stream_schedule_owner.py',
+        'modules/communication/livechat/src/operator_video_policy_owner.py',
+        'modules/communication/livechat/src/video_policy.py',
+        'modules/platform_integration/youtube_shorts_scheduler/src/video_policy.py',
+        'modules/ai_intelligence/ai_gateway/src/model_autoresearch_canonical_prompt_guard.py',
+        'modules/ai_intelligence/ai_gateway/src/model_autoresearch_configured_gateway_atomic_create.py',
+        'modules/ai_intelligence/ai_gateway/src/model_autoresearch_configured_gateway_durability.py',
+        'modules/ai_intelligence/ai_gateway/src/model_autoresearch_configured_gateway_evidence.py',
+        'modules/ai_intelligence/ai_gateway/src/model_autoresearch_configured_gateway_posix_recovery.py',
+        'modules/ai_intelligence/ai_gateway/src/youtube_model_routing.py',
+    ):
+        assert member in generated["required_runtime_files"]
     digest = generator.canonical_manifest_digest(generated)
-    assert digest == "14be2b44b35155e67248dd71e165d8409b9b0ca7b33d35cf618d82be98129c5a"
+    assert digest == "c44d72c3a2b9e5cafbf4eec7fefd2f6b74d2570fd116f5952cac1d2ed0b95493"
     constants = (
         REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js"
     ).read_text(encoding="utf-8")

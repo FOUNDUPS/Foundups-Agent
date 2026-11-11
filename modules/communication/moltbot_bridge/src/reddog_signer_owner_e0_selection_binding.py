@@ -9,6 +9,17 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
 )
 
 
+def require_initial_handshake_policy_scope(policy: Mapping[str, Any], config: Any) -> None:
+    """Require independent E0 authorization for the exact initial service scope."""
+    if getattr(config, "initial_handshake_only", False) and (
+        type(policy.get("generation")) is not int or policy["generation"] != 1
+        or tuple(policy["allowed_operations"]) != ("signer_socket_peer_handshake",)
+        or tuple(policy["allowed_authority_tiers"]) != ("LOW",)
+        or tuple(policy["consensus_required_tiers"]) != ()
+    ):
+        raise ValueError("e0_initial_handshake_scope_invalid")
+
+
 def require_policy_selection_binding(
     policy: Mapping[str, Any], selection: Mapping[str, Any]
 ) -> None:

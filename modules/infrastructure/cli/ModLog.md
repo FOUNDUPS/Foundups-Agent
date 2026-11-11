@@ -2,6 +2,24 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## 2026-11-06 — Connect WRE readiness truth
+
+Use shared readiness policy; UNKNOWN coverage no longer claims READY or a
+connected worker. Checker errors and malformed minimum-sample configuration
+remain diagnostic UNKNOWN. The root command and headless consumer are covered
+alongside the menu path, including mixed unknown and measured critical evidence.
+No terminal rendering cause or live training success is inferred. WSP11/15/22/97.
+
+## 2026-11-05 — Preserve interactive menu prompts
+
+Background services were logging over `Select option:` after main startup.
+The existing utility owner now filters background records only at existing
+console handlers during main-menu input, retaining file evidence and foreground
+records. Prior filters survive normal input, EOF and interruption. No global
+input/stdout replacement or daemon shutdown. Four isolated behavioral/wiring
+cases pass; raw/native writes and other menu-module prompts remain out of scope.
+WSP00/11/22/50/97. See tests/TestModLog.md for execution limits.
+
 ## V0.3.16 — Japanese STT reuse for phone prototype (2026-09-10)
 
 **WSP Protocol:** 05, 06, 22, 97

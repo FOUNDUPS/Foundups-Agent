@@ -1,5 +1,17 @@
 # Digital Twin Tests
 
+## Ready-only reply retrieval
+
+The bounded cross-owner selection is
+`modules/communication/video_comments/tests/test_reply_memory_readiness.py`.
+Its 23 controls compile complete VoiceMemory/VideoContentIndex/reply definitions
+with synthetic collections, embeddings and Gateway judgments. Constructor and
+model-loader spies guard cold omission; warm results, cache preservation,
+cooperative cancellation and unchanged legacy defaults are positive controls.
+Run only through the existing credential-free EffectGuard owner. The four
+legacy `test_voice_memory.py` build/corpus tests can initialize ML dependencies
+and are not automatically offline-safe or part of this selection.
+
 ## Test Strategy (WSP 34)
 - Keep unit tests deterministic; avoid external model/network dependencies.
 - Use mock LLM paths or local fixtures for repeatable outputs.
@@ -21,8 +33,37 @@
 - Use minimal fixtures embedded in tests or small local JSON snippets.
 - Avoid using production corpora in unit tests.
 
+## AntifaFM station reply coverage
+
+`test_comment_drafter.py` includes the station-only factory and decision contract
+alongside the three legacy drafter tests. Run it offline with:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 \
+python -B -m pytest -q -p no:cacheprovider \
+modules/ai_intelligence/digital_twin/tests/test_comment_drafter.py
+```
+
+The fixture backend returns controlled chat-completion JSON through the actual
+`LocalLLM.generate_station_json()` wrapper. Cases check source/policy separation,
+listener-initiation and missing-context skips, the 2,400-character context bound,
+source binding, intent/action validation, malformed output, generation failures,
+AI disclosure, unsupported claims/links, optional station links, and exact
+280-character acceptance versus 281-character review. A genuinely missing model
+path confirms that the station path returns review instead of mock/template text.
+All decisions carry source metadata and `no_publication_performed=True`.
+
+Result on 2026-10-18: **39 passed**. These are contract tests, not evidence that an
+actual model correctly understands each conversation, resists every injection,
+or produces factually accurate replies. No live local-model inference, network
+request, or publication is required. See `TestModLog.md` for the recorded result
+and separate guarded real-import smoke check.
+
 ## Expected Behavior
 - Comment drafting returns structured `CommentDraft` with bounded length.
+- Station drafting returns a dictionary with `skip`, `draft_reply`, or
+  `review_required`; unavailable or invalid generation has an empty reply and
+  never falls back to the legacy mock path.
 - Guardrails strip fillers and report violations consistently.
 - Decision policy respects thresholds and cooldown logic.
 - Unknown/ambiguous conversation defaults to `CHAT / FAST / NONE`; security,

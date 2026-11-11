@@ -67,6 +67,7 @@ class ArchitectFixPromotionTransactionInputs:
     freshness_receipt_id: str
     holoindex_evidence: Mapping[str, Any]
     agentdb_fix_promotion_claim_fence: Mapping[str, Any]
+    proposal_verification_inputs: Mapping[str, Any] | None = None
 
 
 @dataclass(frozen=True)
@@ -173,6 +174,11 @@ def _reconstruct_committed_result(
         **profile,
         "promotion_publication_id": publication_id,
     }
+    # Historical publication IDs must retain their exact original profile bytes.
+    legacy = {key: value for key, value in profile.items()
+              if key != "proposal_verification_inputs"}
+    if canonical_digest(legacy) == promotion.get("authority_profile_digest"):
+        profile = legacy
     profile_digest = canonical_digest(profile)
     committed_fence_digest = str(
         promotion.get("agentdb_fix_promotion_claim_fence_digest") or ""
@@ -419,6 +425,7 @@ def _build_profile(inputs, digests, records):
             queue_item_id=records.queue_item_id,
             claim_id=records.claim_id,
             holoindex_evidence=inputs.holoindex_evidence,
+            proposal_verification_inputs=inputs.proposal_verification_inputs,
         )
     )
 

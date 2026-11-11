@@ -1,4 +1,4 @@
-﻿"""Persistent Task Pipeline Service for FoundUps Agent Market.
+"""Persistent Task Pipeline Service for FoundUps Agent Market.
 
 Implements TaskPipelineService interface with SQLite persistence.
 Manages complete task lifecycle: create → claim → submit → verify → payout.
@@ -16,10 +16,12 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
+from .authorization import CallerAuthorization
 from .exceptions import InvalidStateTransitionError, NotFoundError, PermissionDeniedError, ValidationError
 from .interfaces import TaskPipelineService
 from .models import EventRecord, Payout, Proof, Task, TaskStatus, Verification
 from .persistence.sqlite_adapter import SQLiteAdapter
+from .persistence.verification import verify_proof_atomic
 
 logger = logging.getLogger(__name__)
 
@@ -236,8 +238,11 @@ class PersistentTaskPipeline(TaskPipelineService):
         logger.info("Proof %s submitted for task %s", proof.proof_id, task.task_id)
         return updated
 
-    def verify_proof(self, task_id: str, verification: Verification) -> Task:
-        """Verify submitted proof.
+    def verify_proof(
+        self, task_id: str, verification: Verification, *,
+        authorization: Optional[CallerAuthorization] = None,
+    ) -> Task:
+        """Atomically record a SQLite decision or replay its original outcome.
 
         Args:
             task_id: ID of task to verify.
@@ -248,57 +253,21 @@ class PersistentTaskPipeline(TaskPipelineService):
 
         Raises:
             NotFoundError: If task not found.
-            StateTransitionError: If task not in SUBMITTED state.
+            StateTransitionError: If a new decision targets a non-SUBMITTED task.
             ValidationError: If verification rejected (approved=False).
         """
-        task = self._adapter.get_task(task_id)
-        self._validate_transition(task.status, TaskStatus.VERIFIED)
+        return verify_proof_atomic(self._adapter, task_id, verification, authorization=authorization)
 
-        if verification.task_id != task_id:
-            raise ValidationError(f"Verification task_id mismatch: {verification.task_id} != {task_id}")
-        self._enforce_compute_access(
-            actor_id=verification.verifier_id,
-            capability="proof.verify",
-            foundup_id=task.foundup_id,
-            reason="verify_proof",
-        )
-
-        # Save verification
-        self._adapter.create_verification(verification)
-
-        if not verification.approved:
-            # Rejected - emit event but don't transition
-            self._emit_event(
-                event_type="proof.rejected",
-                actor_id=verification.verifier_id,
-                payload={"reason": verification.reason, "approved": False},
-                foundup_id=task.foundup_id,
-                task_id=task_id,
-            )
-            raise ValidationError(f"Proof rejected: {verification.reason}")
-
-        # Approved - transition to VERIFIED
-        task.status = TaskStatus.VERIFIED
-        task.verification_id = verification.verification_id
-
-        updated = self._adapter.update_task(task)
-        self._emit_event(
-            event_type="proof.verified",
-            actor_id=verification.verifier_id,
-            payload={"reason": verification.reason, "approved": True},
-            foundup_id=task.foundup_id,
-            task_id=task_id,
-        )
-        logger.info("Task %s verified by %s", task_id, verification.verifier_id)
-        return updated
-
-    def trigger_payout(self, task_id: str, actor_id: str) -> Payout:
+    def trigger_payout(
+        self, task_id: str, actor_id: str, *,
+        authorization: Optional[CallerAuthorization] = None,
+    ) -> Payout:
         """Record pending initiation atomically; an exact retry has no new effects.
 
         The task remains VERIFIED until a separate confirmed settlement owner
         exists. SQLite is required; this method grants no payment authority.
         """
-        return self._adapter.initiate_payout(task_id, actor_id)
+        return self._adapter.initiate_payout(task_id, actor_id, authorization=authorization)
 
     def get_task(self, task_id: str) -> Task:
         """Get a task by ID.

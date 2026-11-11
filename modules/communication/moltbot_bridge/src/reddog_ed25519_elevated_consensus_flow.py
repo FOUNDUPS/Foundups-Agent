@@ -7,6 +7,7 @@ from typing import Any, Mapping
 from modules.communication.moltbot_bridge.src.reddog_elevated_consensus_signer_reservation import (
     commit_elevated_consensus_nonce,
     rollback_elevated_consensus_nonce,
+    elevated_consensus_reservation_current,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     SigningRequest,
@@ -57,9 +58,17 @@ def requires_signer_audit_attestation(
     )
 
 
+def sign_prepared_consensus(reservation, signer, backend, request, peer, payloads):
+    """Check retained approval immediately before invoking the signing callback."""
+    if reservation is not None and not elevated_consensus_reservation_current(reservation):
+        return None, "REJECT_ED25519_SIGNER_REQUEST_INVALID"
+    return signer(backend, request, peer, requires_signer_audit_attestation(request, *payloads))
+
+
 __all__ = [
     "complete_elevated_consensus_signing",
     "consensus_signing_rejection",
     "requires_signer_audit_attestation",
+    "sign_prepared_consensus",
     "rollback_elevated_consensus_nonce",
 ]

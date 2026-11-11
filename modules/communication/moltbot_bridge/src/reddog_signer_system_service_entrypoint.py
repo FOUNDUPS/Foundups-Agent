@@ -3,8 +3,8 @@
 The operating system service manager starts this module with only the fixed
 repository root and root-owned owner-authority configuration path. Rotating
 runtime paths are accepted only from one authenticated current-generation
-capability. Secret resolution remains fail closed until the E0 boundary is
-implemented. The entrypoint never executes serialized argv and does not spawn
+capability. Authenticated startup dependencies are deferred until isolation;
+legacy configurations retain unavailable secret resolution. The entrypoint never executes serialized argv and does not spawn
 the signer process or invoke a shell.
 """
 
@@ -127,20 +127,24 @@ def _run_entrypoint_args(
     except Exception:
         emit(_receipt_json(None, (FAIL_SYSTEM_SERVICE_SELECTION,)))
         return 2
+    dependency_supplier = getattr(startup, "runtime_dependencies_supplier", None)
     result = run_reddog_signer_socket_service_runtime_bootstrap(
         repo_root=root,
         config_path=None,
-        resolver_factory=resolver_factory,
+        resolver_factory=resolver_factory if dependency_supplier is None else None,
+        runtime_dependencies_supplier=dependency_supplier,
         serve_bounded=serve_bounded,
         expected_config_digest=None,
         run_packet_path=None,
         expected_session_id=None,
         expected_owner_authority_config_path=owner_path,
-        principal_key_resolver=principal_key_resolver,
+        principal_key_resolver=principal_key_resolver if dependency_supplier is None else None,
         conversation_scope_principal_resolver_supplier=(
             startup.conversation_principal_authority_resolver_supplier
         ),
-        proposal_replay_high_water_store=proposal_replay_high_water_store,
+        proposal_replay_high_water_store=(
+            proposal_replay_high_water_store if dependency_supplier is None else None
+        ),
         verified_outcome_signing_authority_supplier=(
             startup.verified_outcome_authority_supplier
         ),
@@ -172,7 +176,7 @@ def _receipt_json(
         ),
         "no_serialized_argv_executed": True,
         "no_signer_process_spawned": True,
-        "secret_resolution_mode": "fail_closed_e0_not_admitted",
+        "secret_resolution_mode": "governed_runtime_result" if accepted else "not_admitted",
         "no_shell_invoked": True,
         "no_main_runtime_wiring": True,
         "no_openclaw_enqueue_performed": True,

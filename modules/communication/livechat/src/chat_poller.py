@@ -68,6 +68,13 @@ class ChatPoller:
                     snippet = item["snippet"]
                     author = item.get("authorDetails", {})
                     event_type = snippet.get("type")
+
+                    # Preserve the available initial text batch without replaying
+                    # old commands, donations or response triggers after reconnect.
+                    if (self.first_poll and snippet.get("displayMessage")
+                            and event_type not in {"messageDeletedEvent", "userBannedEvent"}):
+                        messages.append({**item, "_capture_only": True})
+                        continue
                     
                     # Handle moderation events (bans/timeouts)
                     if event_type == "messageDeletedEvent":
@@ -223,7 +230,7 @@ class ChatPoller:
                 self.first_poll = False
                 self.connection_time = time.time()
                 if messages:
-                    logger.info(f"[DATA] Ignoring {len(messages)} historical events from before connection")
+                    logger.info(f"[CAPTURE] Retaining {len(messages)} initial text messages without reply processing")
             
             if messages:
                 logger.debug(f"📨 Received {len(messages)} new items")
@@ -304,4 +311,4 @@ class ChatPoller:
         """Reset polling state (useful after reconnection)."""
         self.next_page_token = None
         self.error_backoff_seconds = 5
-        logger.info("[REFRESH] Polling state reset") 
+        logger.info("[REFRESH] Polling state reset")

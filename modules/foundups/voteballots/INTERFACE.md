@@ -6,6 +6,110 @@
 
 ---
 
+## 2026-11-09 Phase One landing handoff
+
+The [Oversight landing contract](oversight/README.md#phase-one-landing-contract)
+owns the ordered Voice, House Rules, Team and Execution entries and the address
+roles. The proposed interface changes the existing public landing presentation
+only. Existing staff routes, fragments, indexes, contact tools, origin boundaries
+and cache scopes are part of the preservation contract. The Voice entry is an
+outbound link gated on destination verification. It carries no session,
+stakeholder entitlement, message or case data. Current published behavior and
+the proposed entry list have separate status in the
+[release audit](docs/RELEASE_ACCOUNTING.md#2026-11-09-documentation-audit).
+
+## 2026-11-07 Public Presentation and Oversight Source Contract
+
+The Vote Site exposes `/evidence` and `/contact`; the corresponding source
+pages are `evidence.html` and `contact.html`. Evidence records bind the filer,
+candidate, recipient, filing, transaction, election designation, amount and
+source hash. Verified means the displayed item matches a specific filing.
+Unknown covers incomplete totals and unverified or absent coverage. The page
+has no live query endpoint or aggregate calculation.
+
+The contact page consumes the same-origin `contact-roster.json`, schema 1,
+and filters public Washington offices by manually selected state and chamber.
+The page maintains a maximum of 1, 3 or 5 manually chosen contacts in memory.
+Only an explicit visitor action opens a `tel:` link. Advance and remove
+operate on the displayed list.
+
+Oversight publishes `/accountability.json` (schema 1) and `/llms.txt`.
+Its public-release builder stages a reviewed overlay over the pinned
+155-file snapshot. Existing professional fragment routes remain supported.
+The manifest distinguishes public records, editorial assessment, proposed
+institutional mechanisms and published guide materials. It grants no tool or
+execution authority.
+
+`/explore` opens the public maps. A node fragment names a screen, and an
+`edge-<source>--<target>` fragment names the authority or evidence check between
+screens. The browser supports native history and a canonical parent breadcrumb.
+`/map-data.json` (schema 1) publishes the same nodes, choice pairs, source links
+and optional fictional connection evidence. `/web/explore` has a separate PWA
+scope with the same navigation. The map is a read-only reference.
+
+Oversight exposes `/legislative-roadmap` and `/contact`, with `.html` aliases and
+equivalent routes under `/web/`. The roadmap is a static staff reference. The
+contact page reuses the existing official directory snapshot and validated
+telephone formatter. Visitors select a state or opt into a browser-local state
+suggestion and confirm it before office numbers appear. Coordinates and optional
+voicemail notes stay in page memory. The cached PWA supports manual state lookup
+and roadmap reading offline after installation. The contact action is a native
+`tel:` link to a listed office.
+
+`web/coalition.html` adds an independent Coalition information and voluntary
+application-draft page. `web/coalition-draft.mjs` exposes the pure
+`createCoalitionDraft(input, createdAtISO)` validation/export contract. Successful
+output remains `DRAFT_NOT_SUBMITTED` and `UNVERIFIED`; it is not an account,
+enrollment receipt, ownership proof or role grant. The browser prepares and
+downloads the draft without transmitting it or persisting form data. See the
+[audit and exact release boundary](docs/COALITION_TAB_AUDIT.md).
+
+`web/` owns Vote's static informational landing/PWA. It publishes no candidate
+lookup, scores, ballot submissions or authenticated backend API. Existing
+Python funding and shell-payload interfaces remain unchanged.
+
+`oversight/site/` preserves the complete reviewed Oversight Sites source;
+`oversight/source-snapshot.json` binds its paths, sizes, hashes and publication
+identities. `oversight/scripts/verify_snapshot.py` validates the inventory and
+can compare it with the retained Sites checkout. See [the release owner](oversight/README.md).
+
+Oversight belongs to the existing `voteballots` FoundUp. No nested runtime
+identity, tenant namespace, token or cross-origin session is created. Public
+hostnames are presentation aliases, not authority or confidential-data grants.
+The existing `/f/voteballots/app` mount and manifest readiness gates remain.
+
+## 2026-11-01 Implemented Funding-Source Confidence Correction
+
+The existing Python `score_funding_summary_confidence` preserves original labels
+and references. For individual funding sources, upstream VERIFIED_FACT requires
+`fec_filing`, `state_filing` or `court_record`; other source types cap it at
+HIGH_CONFIDENCE_INFERENCE and add `downgraded_from_verified_due_to_indirect_source`.
+Lower/UNKNOWN values and approved direct sources are unchanged. A type label is
+not source authentication. Aggregate total_raised remained a separate known
+provenance gap at this checkpoint; see the correction below. This is not the
+planned general claim-verification API.
+
+## 2026-11-01 Aggregate Confidence and Display Correction
+
+Aggregate `total_raised` uses the same existing provenance policy as funding
+source items. Missing/indirect VERIFIED inputs cap at HIGH with the existing
+downgrade reasons; lower/UNKNOWN values and original references are preserved.
+The generic aggregate factor is `aggregate_from_summary`, not a claim that every
+input came from FEC records. Source-type eligibility does not authenticate evidence.
+
+The total line uses its unique `total_raised` claim's confidence, never a child
+source's confidence. A missing, ambiguous or invalid total label is UNKNOWN.
+Answer/shell confidence remains conservative: it cannot exceed either existing
+overall confidence or the displayed total claim. Other source labels, review,
+trail and line-count rules are unchanged. No public activation or live data access.
+
+## 2026-10-30 Planned Claim-Verification Addendum
+The [Political Claim Verification and Scoring Engine](docs/POLITICAL_CLAIM_VERIFICATION_AND_SCORING_ENGINE.md) adds proposed transcript, atomic-claim, evidence-graph, methodological/funding-audit, versioned-assessment, and score-snapshot contracts. Exact API signatures are reserved for the build packet. These are **planned / not implemented** and must not be reported as exports from the current Python v0.6.0 funding pipeline.
+
+Verdict, WSP 97 evidence confidence, context, conflicts, review state, and intent are separate fields. Unknown/uncheckable/pending cases are unscored; every published assessment requires exact source locators and a correction history. The April API below remains design specification, not proof of delivered speech, search, graph, or challenge functionality.
+
+---
+
 ## Public API
 
 ### Primary Entry Point

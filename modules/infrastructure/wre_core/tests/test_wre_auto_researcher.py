@@ -156,6 +156,47 @@ def test_evaluator_keeps_valid_numeric_boundaries(tmp_path, multiplier, expected
     assert math.isfinite(metrics["fitness"])
 
 
+def test_rsi_measurement_bundle_tracks_signal_strength_and_gain():
+    report = {
+        "baseline": {"fitness": 2.0},
+        "optimized": {"fitness": 3.0},
+        "candidate_evaluations": 4,
+        "outcome_counts": {
+            "accepted": 1,
+            "rejected": 1,
+            "failed_validation": 1,
+            "crashed": 1,
+            "no_proposal": 0,
+        },
+        "independently_verified": None,
+        "retained_improvements": None,
+        "resource_usage": None,
+    }
+
+    bundle = researcher_module._build_rsi_measurements(report)
+
+    assert bundle["schema"] == "wre_rsi_measurements.v1"
+    assert bundle["verification_signal_class"] == "execution_feedback"
+    assert bundle["verification_hierarchy_weak_to_strong"] == [
+        "intrinsic_signal", "learned_judge", "execution_feedback", "formal_verifier"]
+    assert bundle["research_direction_judgment"] == "human_not_substituted"
+    assert bundle["verification_signal_independent"] is False
+    assert bundle["held_out_evaluation"] is False
+    assert bundle["baseline_fitness"] == 2.0
+    assert bundle["best_fitness"] == 3.0
+    assert bundle["absolute_gain"] == 1.0
+    assert bundle["relative_gain"] == pytest.approx(0.5)
+    assert bundle["candidate_evaluations"] == 4
+    assert bundle["accepted_candidates"] == 1
+    assert bundle["rejected_candidates"] == 1
+    assert bundle["invalid_candidates"] == 1
+    assert bundle["crashed_candidates"] == 1
+    assert bundle["no_proposal_attempts"] == 0
+    assert bundle["activation_rollback_verified"] is None
+    assert bundle["successive_generation_gain"] is None
+    assert bundle["production_rsi_eligible"] is False
+
+
 def test_auto_researcher_rejects_impossible_allocation(temp_research_env, tmp_path, monkeypatch):
     target_path, program_path = temp_research_env
     original_code = target_path.read_text(encoding="utf-8")
@@ -176,9 +217,91 @@ def test_auto_researcher_rejects_impossible_allocation(temp_research_env, tmp_pa
     assert result["history"][0]["status"] == "failed_validation"
     assert result["optimized"] == result["baseline"]
     assert result["improvement"] == 0.0
+    assert result["rsi_measurements"]["verification_signal_class"] == "execution_feedback"
+    assert result["rsi_measurements"]["absolute_gain"] == 0.0
+    assert result["rsi_measurements"]["production_rsi_eligible"] is False
     assert not any(op["operation"] == "commit" for op in runner.planned_operations)
     assert target_path.read_text(encoding="utf-8") == original_code
     assert researcher.working_target_path.read_text(encoding="utf-8") == original_code
+
+
+@pytest.mark.parametrize("proposal_kind,expected", [
+    ("same", "rejected"), ("absent", "no_proposal"),
+    ("invalid", "failed_validation"), ("accepted", "accepted"),
+])
+def test_research_producer_persisted_dashboard_round_trip(
+    temp_research_env, tmp_path, monkeypatch, capsys, proposal_kind, expected,
+):
+    from modules.infrastructure.wre_core.src import dashboard_alerts
+
+    target, program = temp_research_env
+    original = target.read_text(encoding="utf-8")
+    proposals = {
+        "same": original,
+        "absent": None,
+        "invalid": "AGENT_ALLOCATION = {'basic_search': -1.0}\nAGENT_PREMIUM_MULTIPLIERS = {'basic_search': 1.0}\n",
+        "accepted": "AGENT_ALLOCATION = {'basic_search': 1.0}\nAGENT_PREMIUM_MULTIPLIERS = {'basic_search': 5.0}\n",
+    }
+    researcher = WREAutoResearcher(target, program, max_iterations=1, results_dir=tmp_path / "runs")
+    monkeypatch.setattr(researcher, "_propose_change", lambda *args: proposals[proposal_kind])
+    for _ in range(2):
+        report = researcher.run()
+        saved = json.loads(Path(report["report_path"]).read_text(encoding="utf-8"))
+        assert saved == report
+        summary = dashboard_alerts.read_research_report_summary(
+            report["report_path"], hashlib.sha256(original.encode("utf-8")).hexdigest(),
+        )
+        assert summary["state"] == "unverified_diagnostic"
+        assert summary["outcome_counts"][expected] == 1
+        assert summary["improvement"] == report["optimized"]["fitness"] - report["baseline"]["fitness"]
+        assert summary["production_rsi_eligible"] is False
+        assert all(summary[key] is None for key in (
+            "independently_verified", "retained_improvements", "resource_usage",
+        ))
+        monkeypatch.setenv("WRE_RESEARCH_REPORT_PATH", report["report_path"])
+        monkeypatch.setenv("WRE_RESEARCH_BASELINE_SHA256", report["baseline_input_sha256"])
+        capsys.readouterr()
+        dashboard_alerts.print_research_report_summary()
+        displayed = capsys.readouterr().out
+        assert "[WRE-RESEARCH] unverified_diagnostic" in displayed
+        assert "signal=execution_feedback" in displayed
+        assert "production_rsi_eligible=false" in displayed
+        assert "verified=unknown retained=unknown resource_usage=unknown" in displayed
+        assert researcher.working_target_path.read_text(encoding="utf-8") == original
+    assert len(list(researcher.results_dir.glob("invocation-*/report.json"))) == 2
+    assert target.read_text(encoding="utf-8") == original
+
+
+@pytest.mark.parametrize("cleanup_fails", [False, True])
+def test_research_producer_persisted_dashboard_failure(
+    temp_research_env, tmp_path, monkeypatch, cleanup_fails,
+):
+    from modules.infrastructure.wre_core.src import dashboard_alerts
+
+    target, program = temp_research_env
+    original = target.read_text(encoding="utf-8")
+    researcher = WREAutoResearcher(target, program, max_iterations=1, results_dir=tmp_path / "runs")
+    def interrupted(*args):
+        raise KeyboardInterrupt("synthetic interruption")
+    def cleanup_error(*args):
+        raise OSError("synthetic cleanup failure")
+    monkeypatch.setattr(researcher, "_propose_change", interrupted)
+    if cleanup_fails:
+        monkeypatch.setattr(researcher, "_rollback", cleanup_error)
+    with pytest.raises(OSError if cleanup_fails else KeyboardInterrupt):
+        researcher.run()
+    path = next(researcher.results_dir.glob("invocation-*/report.json"))
+    report = json.loads(path.read_text(encoding="utf-8"))
+    assert report["status"] == "aborted"
+    assert report["cleanup"] == ("failed" if cleanup_fails else "restored")
+    assert report["failure"]["type"] == "KeyboardInterrupt"
+    assert report["attempts_started"] == 1 and report["attempts_finished"] == 0
+    assert report["candidate_evaluations"] == 0
+    result = dashboard_alerts.read_research_report_summary(path, report["baseline_input_sha256"])
+    assert result["state"] == "unknown"
+    assert result["rsi_absolute_gain"] is None
+    assert result["independently_verified"] is None
+    assert target.read_text(encoding="utf-8") == original
 
 
 def test_evaluator_does_not_execute_target_code(tmp_path):
@@ -348,11 +471,11 @@ def test_dry_run_restores_after_diff_interruption(temp_research_env, tmp_path, m
     if phase in ("baseline", "evaluation"):
         actual_evaluate = researcher_module.evaluate_target
         calls = []
-        def evaluate(path):
+        def evaluate(path, *, cost_catalog=None, comparison_basis=None):
             calls.append(path)
             if phase == "baseline" or len(calls) > 1:
                 interrupted_diff()
-            return actual_evaluate(path)
+            return actual_evaluate(path, cost_catalog=cost_catalog, comparison_basis=comparison_basis)
         monkeypatch.setattr(researcher_module, "evaluate_target", evaluate)
     else:
         monkeypatch.setattr(runner if phase == "diff" else researcher,
@@ -540,11 +663,11 @@ def test_invocation_uses_one_baseline_snapshot(temp_research_env, tmp_path, monk
     assert researcher.working_target_path.read_text(encoding="utf-8") == original
     source_bytes = target.read_bytes()
     evaluated, proposed = [], []
-    def evaluate(path):
+    def evaluate(path, *, cost_catalog=None, comparison_basis=None):
         evaluated.append(path.read_text(encoding="utf-8"))
         if drift == "baseline":
             researcher.original_code = changed
-        return evaluate_target(path)
+        return evaluate_target(path, cost_catalog=cost_catalog, comparison_basis=comparison_basis)
     def propose(code, *args):
         proposed.append(code)
         if drift in ("proposal", "interrupted"):
@@ -589,7 +712,7 @@ def test_completed_run_accounts_for_every_attempt(temp_research_env, tmp_path, m
         active.append(state)
         return None if state == "no_proposal" else original.decode("utf-8") + "\n# candidate\n"
 
-    def evaluate(path):
+    def evaluate(path, *, cost_catalog=None, comparison_basis=None):
         calls.append(path)
         metrics = dict(fitness=0.0, roc_ratio=1.0, monthly_margin_usd=0.0, is_roi_sustainable=False)
         if active:
@@ -638,7 +761,7 @@ def test_invalid_attempt_cap_rejects_before_output(temp_research_env, tmp_path, 
     monkeypatch.setattr(researcher_module, "get_qwen_engine", lambda: None)
     researcher = WREAutoResearcher(target, program, max_iterations=0, results_dir=tmp_path / "valid")
     researcher.max_iterations = cap
-    monkeypatch.setattr(researcher_module, "evaluate_target", lambda path: pytest.fail("invalid cap evaluated baseline"))
+    monkeypatch.setattr(researcher_module, "evaluate_target", lambda path, **kwargs: pytest.fail("invalid cap evaluated baseline"))
     with pytest.raises(ValueError, match="max_iterations"):
         researcher.run()
 
@@ -652,7 +775,7 @@ def test_failed_acceptance_preserves_reported_best(temp_research_env, tmp_path, 
     metrics = iter([baseline, candidate])
     researcher = WREAutoResearcher(target, program, max_iterations=1, results_dir=tmp_path / "runs")
     monkeypatch.setattr(researcher, "_propose_change", lambda *args: original + "\n# candidate\n")
-    monkeypatch.setattr(researcher_module, "evaluate_target", lambda path: next(metrics))
+    monkeypatch.setattr(researcher_module, "evaluate_target", lambda path, **kwargs: next(metrics))
     log = researcher._log_to_tsv
 
     def fail(*args):
@@ -722,7 +845,7 @@ def test_mode_drift_cannot_delegate_commit_or_skip_cleanup(temp_research_env, tm
     def diff(*args):
         researcher.dry_run = mode
         return ""
-    def evaluate(path):
+    def evaluate(path, *, cost_catalog=None, comparison_basis=None):
         evaluated.append(path)
         if timing == "evaluation" and len(evaluated) > 1:
             researcher.dry_run = mode
@@ -843,11 +966,11 @@ def test_aborted_proposal_keeps_input_identity(temp_research_env, tmp_path, monk
         if fault == "diff":
             raise RuntimeError("diff failed")
         return ""
-    def evaluate(path):
+    def evaluate(path, *, cost_catalog=None, comparison_basis=None):
         evaluated.append(path)
         if fault == "evaluation" and len(evaluated) == 2:
             raise KeyboardInterrupt()
-        return evaluator(path)
+        return evaluator(path, cost_catalog=cost_catalog, comparison_basis=comparison_basis)
     monkeypatch.setattr(Path, "write_text", write)
     monkeypatch.setattr(researcher.runner, "diff", diff)
     monkeypatch.setattr(researcher_module, "evaluate_target", evaluate)
@@ -923,7 +1046,7 @@ def guard(event, args):
 sys.addaudithook(guard)
 def unused(*args):
     raise AssertionError("unused loader")
-for name, values in (("modules.infrastructure.shared_utilities.ai_engine_singletons", {"get_qwen_engine": lambda: None}), (owner + ".wre_research_evaluator", {"evaluate_target": lambda path: {"fitness": 1.0, "roc_ratio": 1.0, "monthly_margin_usd": 1.0}, "load_target_config_from_source": unused})):
+for name, values in (("modules.infrastructure.shared_utilities.ai_engine_singletons", {"get_qwen_engine": lambda: None}), (owner + ".wre_research_evaluator", {"evaluate_target": lambda path, **kwargs: {"fitness": 1.0, "roc_ratio": 1.0, "monthly_margin_usd": 1.0}, "load_target_config_from_source": unused, "snapshot_cost_catalog": lambda: {"fixture": 1.0}, "snapshot_comparison_basis": lambda: "fixture"})):
     module = types.ModuleType(name)
     module.__dict__.update(values)
     sys.modules[name] = module

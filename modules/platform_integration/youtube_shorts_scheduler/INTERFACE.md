@@ -1,19 +1,195 @@
 # YouTube Shorts Scheduler - Interface Documentation
 
+## Recorded-stream first-test entry (2026-11-10)
+
+`cli --request-id <id> --browser chrome|edge --inspect-request` reads only an
+already accepted, pending recorded first-test snapshot. It never calls refresh,
+claim or finish. `stream_schedule_inspect_only=True` requires a frozen request
+and returns immediately after native inventory, before any scheduling claim.
+Tracker persistence and screenshot diagnostics are disabled for this inspection.
+The result keeps `scheduling_verified=False` and exit 2; `inspection_only=True`
+distinguishes it from attempted scheduling. Bounded booleans/counts and reason
+codes diagnose route, native identity, filters, loading, rows and pagination.
+
+`cli --request-id <id> --browser chrome|edge` resolves one existing private
+manifest command through `refresh_stream_schedule_request`. It loads only its
+own checkout's `.env` without overriding inherited values. Other CLI execution
+modes cannot be combined. A host runtime lease excludes cooperating full DAE
+runs; older processes and pre-DAE setup still require runtime observation.
+
+`verify_schedule_target_access(..., expected_title=...)` additionally compares
+the actual parent editor title for recorded-source requests. Browser preference
+does not establish channel access. Full Unlisted Shorts selection is frozen,
+but `first_test_only` passes only its first ID, `max_videos=1` and
+`update_metadata=False`. The effect guard rejects a different member or a session
+that permits metadata updates. Required metadata/Audience/calendar gates remain.
+
+The CLI reports inspection and execution separately, exits 2 without independently
+verified scheduling, and never retries a terminal request. The remaining frozen
+IDs are withheld; no continuation or saved-slot verifier is introduced here.
+
+## Frozen stream Shorts request (2026-11-10)
+
+The existing private manifest action `schedule_stream_shorts` freezes the confirmed
+live session's native channel, parent video, title and deadline when accepted.
+The existing DAE browser owner consumes it through `run_multi_channel_scheduler`
+with `stream_schedule_requests`. The request branch verifies parent editor access
+on its supplied browser, discovers every exact-title Unlisted Short on that
+channel, then durably claims the immutable ID batch. This is an explicit operator
+title rule, not proof of YouTube parent-child lineage. No substring match, private
+video, other channel or ordinary backlog is included. Ending or switching streams
+after acceptance cannot retarget the frozen request.
+
+`discover_stream_title_batch(title)` requires a complete native-channel, Unlisted,
+Shorts-tab, first-to-last-page inventory. Partial reads return no executable IDs.
+The request uses the same attached driver throughout; expiry, STOP, scheduling
+switch, cancellation, detail identity and original title are rechecked before
+staging and Save. A browser port or configuration entry is not access proof.
+
+Every live `run_scheduling_cycle` requires a fresh complete Scheduled inventory,
+including selected batches. Exact occupied instants and retained unknown slots
+govern allocation, with cadence spacing, local daily caps and ET-to-local date
+rollover. Partial inventory, ambiguous timezone/DST, unresolved old claims without
+recoverable slots, or nonpersistent/noncanonical tracking refuse writes. A native
+channel lock serializes local scheduling owners. A slot reservation is durable at
+the guarded Save boundary, after metadata/audience and observed Studio timezone
+checks. Existing bookings are not moved. External manual changes still require
+fresh reconciliation; the local lock is not a YouTube transaction.
+
+Live results distinguish `reserved_ids` from `submitted_ids` and
+`submission_attempts` with unknown outcome;
+`scheduled`/`total_scheduled` are not populated from Save booleans. A clean editor
+only permits the next distinct candidate. Unknown reservations cannot be replayed
+or silently cleared. Readback qualification remains separate from request receipt,
+browser access, workflow return values and native WRE skill invocation.
+
+`schedule_all_visible` delegates its exact visible Unlisted IDs to this same
+detail/calendar owner. A long-form list is refused instead of treated as Shorts.
+The separate general manual-takeover and persisted-schedule readback work remains
+open; this request branch does not invoke an additional sender or model.
+
+## Pre-save completeness audit (2026-11-10)
+
+`prepare_schedule_audit()` consumes matched existing index evidence for incomplete
+metadata when metadata changes are permitted, then selects the exact configured
+Audience answer and reads it back. `audit_schedule(session, snapshot)` rechecks
+metadata completeness, audience, draft identity, future date/time and explicit
+timezone at the scheduling save owner. `PreSaveAuditBlocked` carries reason codes,
+never private text. The audience value is included in the durable schedule digest.
+The radio check requires exactly one enabled, visible native Yes and No control.
+
+`CHANNELS[*].made_for_kids` accepts a literal boolean from the registry's
+`shorts.made_for_kids`, preserved by registry normalization/save/load.
+`configured_audience(channel_id)` additionally reads the current environment's
+`YT_MADE_FOR_KIDS_CHANNEL_IDS` and `YT_NOT_MADE_FOR_KIDS_CHANNEL_IDS` lists.
+Entries must be exact native IDs, unique within and across lists. A conflicting
+registry answer or duplicate registry identity refuses; missing policy is unknown.
+There is no channel-name default or duration inference. The helper never loads
+dotenv itself, adds a channel or enables its roles; startup owns environment loading.
+
+`schedule_video_from_row` now verifies the row identity and uses the detail owner;
+`schedule_all_visible` delegates its bounded list snapshot to the calendar owner.
+Legacy inline submission is refused before a durable claim or click. A full
+description/audience audit cannot be inferred from a popup or stale cached receipt.
+Valid intent does not prove live inventory completeness or persisted timezone/slot.
+
+## Private operator directives (2026-11-01)
+
+Existing 012 queue `get_video_policy(channel_id, video_id, surface=...)` supplies
+sparse metadata/scheduling fields. No field means existing behavior; unavailable,
+busy, corrupt or blocked input refuses writes. Private context/sources are never
+copied into titles, descriptions or public feedback. A directive does not open
+the existing automation gate or establish account access.
+
+The actual detail Save and inline popup button owners recheck current policy,
+STOP/automation, receiving identity and cycle cap immediately before submission.
+`begin_policy_edit(channel_id, video_id, *, allow_metadata=True)` captures exact
+detail-page strings before our edits. Preserve restores that original only while
+current fields still equal our known draft; a foreign/manual change refuses Save.
+The CLI's preserve-metadata flag continues to prevent metadata edits. Exact
+replacement uses queue-validated single-video text with no promotional appendix.
+
+Durable queue save claims precede clicks. An uncertain receiving-video save is
+blocked across navigation/restart even if its draft or policy changes. Save bools
+remain click-workflow receipts. Metadata-only saves can settle `applied` after a
+same-window, clean/disabled-Save/no-prompt check, fresh-document reload witness,
+and exact native channel/video/title/description readback. This conditional tab
+check is not exclusive ownership or protection from all concurrent human work.
+Scheduling claims bind intended slot/timezone/visibility as well as metadata;
+they remain unknown because no complete account-timezone/slot readback owner is
+qualified here. No automatic undo or retry follows uncertain submission.
+
+Inline writes additionally require one visible popup explicitly associated with
+the exact connected row (containment or ARIA reference). An unassociated portal
+popup refuses before claim/click; row presence alone is insufficient. Installed
+selector/association qualification remains separate from controlled offline tests.
+
+## Qualified scheduled inventory
+
+`YouTubeStudioDOM.read_scheduled_inventory(channel_id, *, max_pages=100) -> dict`
+reads the current filtered list without account navigation or content changes.
+`status` is `complete`, `partial` or `failed`; `total_scheduled` is an integer
+only for a complete read, including a qualified empty result. Other fields are
+`channel_id`, `channel_verified`, `filter_verified`, `start_verified`,
+`pagination_complete`, `pages_read`, `rows_seen`, `rows_parsed`,
+`observed_scheduled_count`, `videos`, `unparsed_rows` and `issues`.
+Each qualified video includes exact `video_id`, displayed `date`/`time`, raw
+`visibility_text`, raw `date_text`/`date_label`, and `schedule_source` equal to
+`visibility_cell` or `schedule_labeled_date_cell`. A Date cell supplies a slot
+only when its own text/aria-label/title explicitly says Scheduled, with no
+Uploaded/Published contradiction. Unlabeled/upload dates never supply one. These are channel-local displayed wall
+times, not an assertion of timezone or a verified publication write.
+
+Native receiving ID (`ytcfg.get` or `yt.config_`, with conflicts refused) and exact Studio path must agree on every page. An actual
+single Scheduled/Has schedule chip, no extra search/filter, an observed first
+page and known final pagination state are required. Missing pagination controls,
+repeated pages/IDs, invalid slots, changed channel/filter, parse failures or the
+100-page bound retain partial observations and leave the total unknown.
+
+`ContentPageScheduler.audit_calendar` adds `status`, `inventory`,
+`observed_scheduled_count`, `observed_conflicts` and `observed_heavy_days`.
+Partial reads have no automatic `conflicts`/`heavy_days` repair input and cannot
+recommend a clean calendar. `ScheduleAuditor.run_audit` returns `healthy=None`
+when incomplete, with no absence-based comparisons or tracker auto-heal.
+`ScheduleTracker.sync_from_youtube(videos, *, inventory=None) -> bool` refuses
+to reset state without a complete matching receipt, returning false unchanged.
+`resolve_conflicts(..., *, inventory=None)` requires a complete receipt and every
+supplied member/slot bound to it. `thin_schedule` requires matching complete
+inventory, video list, channel config and tracker identity before any repair.
+These read receipts establish observed inputs, not live write/readback authority.
+
+Rotation binds canonical receiving IDs to scheduler/config/tracker/cache and
+verifies native ID, Studio path and known permission before any writer. Unknown
+or failed switches skip writers; fallback is deferred to its own canonical
+entry. Unbound/incomplete zero caches are ignored. This is an additive receipt
+and deliberate safety change for historical unqualified tracker-sync callers.
+
+## Channel cadence
+
+Omitted daily cap now resolves per channel: Move2Japan is eight/day at
+08:00,10:00,12:00,14:00,16:00,18:00,20:00,22:00 America/New_York;
+all other/unknown channels retain three/day. Explicit lower caps are preserved.
+The global ET environment override does not override this explicit Move2Japan
+policy. Its slots have no random jitter. Aggregate plan `cap: null` means
+per-channel policy; each channel plan contains its resolved numeric cap.
+
+
+Remote requirements and current gaps: [remote runbook](docs/REMOTE_SCHEDULING.md).
+
 ## CLI Interface (Agent-Callable)
 
 ```bash
-# Schedule videos for a channel
-python -m modules.platform_integration.youtube_shorts_scheduler.cli --channel move2japan
+# Check the configured host transport
+python -m modules.platform_integration.youtube_shorts_scheduler.cli --channel move2japan --preflight
 
 # Schedule with limit
-python -m modules.platform_integration.youtube_shorts_scheduler.cli --channel undaodu --max-videos 5
+python -m modules.platform_integration.youtube_shorts_scheduler.cli --channel undaodu --video-ids abcdefghijk,lmnopqrstuv --max-videos 1 --preserve-metadata
 
 # List available channels
 python -m modules.platform_integration.youtube_shorts_scheduler.cli --list-channels
 
 # Dry run (show what would be scheduled)
-python -m modules.platform_integration.youtube_shorts_scheduler.cli --channel move2japan --dry-run
+python -m modules.platform_integration.youtube_shorts_scheduler.cli --channel move2japan --video-ids abcdefghijk,lmnopqrstuv --dry-run --preserve-metadata
 ```
 
 ### CLI Arguments
@@ -21,11 +197,31 @@ python -m modules.platform_integration.youtube_shorts_scheduler.cli --channel mo
 | Argument | Type | Default | Description |
 |----------|------|---------|-------------|
 | `--channel`, `-c` | str | required | Channel key: move2japan, undaodu, foundups |
-| `--max-videos`, `-m` | int | 10 | Maximum videos to schedule |
+| `--max-videos`, `-m` | int | 0 | Optional limit; 0 processes the entire batch |
+| `--video-ids` | str | required for preview/apply | Comma-separated exact recording-batch IDs |
 | `--list-channels` | flag | - | List available channels and exit |
 | `--dry-run` | flag | - | Show what would be scheduled |
-| `--browser`, `-b` | str | chrome | Browser: chrome or edge |
+| `--preflight` | flag | - | Probe local browser transport only; no launch or scheduling |
+| `--preserve-metadata` | flag | - | Retain existing titles/descriptions |
+| `--browser`, `-b` | str | channel registry | Validate browser: chrome or edge |
 | `--verbose`, `-v` | flag | - | Enable verbose logging |
+
+The CLI defaults to `max_videos=0` (all clips); only an explicit positive value
+limits a request. Negative or non-integer API limits are rejected. Attempts, including failed writes, consume the shared cross-visibility limit. It returns a
+JSON receipt and a nonzero exit on failure. Preview reports `planned` and
+`total_planned`; `scheduled=[]` and `total_scheduled=0`. With `--video-ids`,
+inventory pagination collects the exact batch before edits (at most 100 pages per visibility pass) and preserves
+requested order within each visibility pass. Preview scans that entire batch,
+without persisting tracker changes or
+running channel-wide sync or postcycle audit/autoheal. Simulated tracker state is discarded after each preview invocation. Preview connections disable DOM diagnostic screenshot writes; importing the DOM module does not create its diagnostics directory. These guarantees cover scheduler tracker and screenshot effects, not all optional telemetry or host logging. Preflight success proves transport only.
+Use `--video-ids=...` when an ID starts with a hyphen. Empty or malformed
+selections fail before connecting. Missing/failed IDs appear in
+`unresolved_video_ids`; `batch_complete=false` makes the CLI return failure.
+Without explicit IDs, the remote CLI returns `clip_selection_required` before
+connecting; preflight/list-channels remain read-only exceptions. Automatic
+recent discovery must extend the existing Work `publish_daily_clips` prototype.
+Generated metadata manifests are not yet supported.
+`main.py` is not required for this one-shot entry point.
 
 ---
 
@@ -33,60 +229,24 @@ python -m modules.platform_integration.youtube_shorts_scheduler.cli --channel mo
 
 ### YouTubeShortsScheduler
 
-Main orchestrator class for scheduling automation.
+Main orchestrator class for scheduling automation. Current callable contract:
 
 ```python
-class YouTubeShortsScheduler:
-    def __init__(self, channel: str, driver: WebDriver = None):
-        """
-        Initialize scheduler for a specific channel.
-
-        Args:
-            channel: "move2japan", "undaodu", or "foundups"
-            driver: Optional existing Selenium WebDriver
-        """
-
-    def gather_existing_schedule(self) -> Dict[str, int]:
-        """
-        Scan scheduled videos and build schedule tracker.
-
-        Returns:
-            Dict mapping date strings to video counts
-            e.g., {"Jan 4, 2026": 2, "Jan 5, 2026": 1}
-        """
-
-    def get_unlisted_videos(self) -> List[Dict]:
-        """
-        Get all unlisted Shorts for this channel.
-
-        Returns:
-            List of dicts with video_id, title, href
-        """
-
-    def get_next_available_slot(self) -> Tuple[str, str]:
-        """
-        Find next available scheduling slot.
-
-        Returns:
-            (date_str, time_str) e.g., ("Jan 5, 2026", "5:00 AM")
-        """
-
-    def schedule_video(self, video_id: str, date_str: str, time_str: str) -> bool:
-        """
-        Schedule a specific video.
-
-        Returns:
-            True if successful
-        """
-
-    def run_scheduling_workflow(self, max_videos: int = 10) -> Dict:
-        """
-        Main automation loop.
-
-        Returns:
-            Summary dict with scheduled count, errors, etc.
-        """
+scheduler = YouTubeShortsScheduler(channel_key="move2japan", storage_dir=None, dry_run=True)
+if scheduler.connect_browser():
+    try:
+        result = await scheduler.run_scheduling_cycle(video_ids=recorded_clip_ids, update_metadata=False)
+    finally:
+        scheduler.disconnect()  # Leave the shared host browser running.
 ```
+
+Both DAE and remote CLI default to `0 = unlimited`. Batch size is independent
+of daily slot spacing. Internal dry-run rows retain the legacy `scheduled` key; the CLI
+normalizes them to `planned`. `await preview_slots(count=10)` uses a nonpersistent
+copy of the current tracker, including custom storage.
+
+Legacy `channel=`/`driver=` constructor arguments and
+`run_scheduling_workflow()` are not implemented. Use the current contract above.
 
 ### ChannelConfig
 
@@ -121,8 +281,11 @@ Persistent schedule state management.
 
 ```python
 class ScheduleTracker:
-    def __init__(self, channel_id: str):
+    def __init__(self, channel_id: str, storage_dir=None, *, persist: bool = True):
         """Load/create schedule state for channel."""
+
+    def preview_copy(self):
+        """Independent in-memory copy; no directories or tracker files written."""
 
     def get_count(self, date_str: str) -> int:
         """Get video count for a date."""
@@ -159,3 +322,40 @@ class AuthError(SchedulerError):
 class QuotaError(SchedulerError):
     """Rate limited by YouTube."""
 ```
+
+### Selected edit and receipt boundary (2026-10-22)
+
+Before a selected clip is changed, its Studio edit URL and current visibility
+must match the requested ID/pass. Failed metadata updates stop that clip.
+`attempted_video_ids` records attempts; partial batches remain unsuccessful.
+Preserve mode retains existing description-sync evidence. Metadata updates mark
+sync unverified (`synced_to_youtube=false`, `independent_readback_required`);
+this is lack of verification, not proof of absence on YouTube.
+RedDog requires process success plus an explicit boolean success receipt, no
+errors, and no incomplete-batch marker. Missing/malformed receipts fail closed.
+
+
+## Evidence-bound metadata and learning (2026-10-25)
+
+`src/content_generator.py::validated_video_evidence(index, video_id)` is an offline
+identity/provenance gate, not a factual verifier. Metadata generation requires a
+matching, retrieval-eligible existing artifact containing explicit Studio Ask,
+Gemini video-summary, or timestamped YouTube/Whisper transcript evidence.
+Missing/ineligible evidence preserves existing metadata; schedule-only mode
+continues to bypass enrichment. No analyzer is launched by the scheduler.
+`YT_SCHEDULER_INDEX_INFORM_TITLE` retains its existing opt-in. Description opt-out
+preserves the complete description. Proposals reject platform-limit overflow.
+
+`record_schedule_outcome` retains its Boolean storage return. A positive learning
+outcome now additionally requires `details.requested_timezone` and independent
+`details.readback` with matching `channel_id`, `video_id`, `date_str`, `time_str`,
+`timezone` and `visibility="scheduled"`. Old callers remain recorded with
+`reported_success=true`, but no verified success or positive fidelity score.
+Audience performance is always marked unmeasured; no analytics/model promotion
+is connected here.
+
+Move2Japan cadence is not qualified for live reschedule apply: that legacy adapter
+skips it with `cadence_live_unqualified` until independent timezone and occupied-slot
+receipts exist. Allocation/planning rejects unknown Studio timezone or any slot
+whose local date differs from its ET date (including Asia/Tokyo). This prevents
+clock-only conversion from silently publishing on the wrong calendar date.

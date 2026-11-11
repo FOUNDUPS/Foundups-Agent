@@ -19,6 +19,7 @@ import sys
 import time
 from pathlib import Path
 from typing import Any, Dict, Optional
+from urllib.parse import urlsplit
 
 # Add project root to sys.path
 project_root = Path(__file__).parent.parent.parent.parent.parent
@@ -165,7 +166,15 @@ class TarsAccountSwapper:
         else:
             logger.warning(f"[TARS-SWAP] No URL mapped for {target}")
 
-    async def _detect_current_channel_id(self) -> Optional[str]:
+    async def _navigate_to_target_surface(self, target: str, comments: bool) -> None:
+        if comments:
+            await self.navigate_to_comments(target)
+        else:
+            target_id = self.CHANNELS[target]["id"]
+            self.driver.get(f"https://studio.youtube.com/channel/{target_id}/videos/short")
+            await asyncio.sleep(3)
+
+    async def _detect_current_channel_id(self, *, require_native: bool = False) -> Optional[str]:
         """Robustly detect current channel ID from browser state."""
         try:
             # Try script execution first (most reliable in Studio)
@@ -174,10 +183,13 @@ class TarsAccountSwapper:
                 "(window.ytcfg && typeof window.ytcfg.get === 'function' && window.ytcfg.get('CHANNEL_ID')) || "
                 "null;"
             )
-            if channel_id:
+            if isinstance(channel_id, str) and channel_id:
                 return channel_id
         except Exception:
             pass
+
+        if require_native:
+            return None
 
         # Fallback to URL regex
         try:
@@ -230,10 +242,11 @@ class TarsAccountSwapper:
         logger.warning(f"[TARS-SWAP] Unknown channel ID: {channel_id}")
         return None
 
-    def _is_permission_error(self) -> bool:
+    def _is_permission_error(self, *, require_observation: bool = False) -> bool:
         """Detect Studio permission error page."""
         try:
-            return bool(self.driver.execute_script(
+            observed = self.driver.execute_script(
+                ("if (!document.body || !document.querySelector('ytcp-app')) return null;" if require_observation else "") +
                 "const t=(document.body&&document.body.innerText)||'';"
                 "const norm=t.toLowerCase().replace(/\\u2019/g, \"'\");"
                 "return ("
@@ -244,9 +257,12 @@ class TarsAccountSwapper:
                 "norm.includes(\"switch account\") || "
                 "norm.includes(\"return to studio\")"
                 ");"
-            ))
+            )
+            if require_observation and type(observed) is not bool:
+                return True
+            return bool(observed)
         except Exception:
-            return False
+            return require_observation
 
     def _click_permission_switch(self) -> bool:
         """Click the Switch account button on permission error page.
@@ -412,9 +428,9 @@ class TarsAccountSwapper:
         if not self._is_permission_error():
             logger.warning("[TARS-SWAP] Not on OOPS page - falling back to normal swap")
             # Avoid infinite recursion: swap_to now calls swap_from_oops_page, so navigate directly
-            await self.navigate_to_comments(target)
+            await self._navigate_to_target_surface(target, navigate_to_comments)
             await asyncio.sleep(3)
-            return await self._ensure_target_access(target)
+            return await self._ensure_target_access(target, navigate_to_comments=navigate_to_comments)
 
         # 2026-02-03: Emit OOPS breadcrumb to orchestration switchboard
         _emit_oops_signal("oops_page_detected", channel_name=target, browser="unknown", attempt_count=1)
@@ -447,7 +463,7 @@ class TarsAccountSwapper:
                     await asyncio.sleep(3)
 
                 # Verify we made it
-                if await self._ensure_target_access(target):
+                if await self._ensure_target_access(target, navigate_to_comments=navigate_to_comments):
                     try:
                         final_url = self.driver.current_url
                         logger.info(f"[TARS-SWAP] 🚀 OOPS page switch to {target} successful!")
@@ -486,7 +502,7 @@ class TarsAccountSwapper:
                     await self.navigate_to_comments(target)
                     await asyncio.sleep(3)
 
-                if await self._ensure_target_access(target):
+                if await self._ensure_target_access(target, navigate_to_comments=navigate_to_comments):
                     logger.info(f"[TARS-SWAP] 🚀 Return to Studio + direct navigate to {target} successful!")
                     _emit_oops_signal("oops_page_recovered", channel_name=target, recovery_method="return_to_studio_direct")
                     return True
@@ -510,7 +526,7 @@ class TarsAccountSwapper:
                                 await self.navigate_to_comments(target)
                                 await asyncio.sleep(3)
 
-                            if await self._ensure_target_access(target):
+                            if await self._ensure_target_access(target, navigate_to_comments=navigate_to_comments):
                                 logger.info(f"[TARS-SWAP] 🚀 Return to Studio + smart swap to {target} successful!")
                                 _emit_oops_signal("oops_page_recovered", channel_name=target, recovery_method="return_to_studio_swap")
                                 return True
@@ -519,10 +535,10 @@ class TarsAccountSwapper:
 
         # === CASCADE 3: Direct URL navigation (last resort) ===
         logger.info(f"[TARS-SWAP] Step 4: LAST RESORT - Direct URL navigation to {target}...")
-        await self.navigate_to_comments(target)
+        await self._navigate_to_target_surface(target, navigate_to_comments)
         await asyncio.sleep(5)
 
-        if await self._ensure_target_access(target):
+        if await self._ensure_target_access(target, navigate_to_comments=navigate_to_comments):
             logger.info(f"[TARS-SWAP] 🚀 Direct URL navigation to {target} successful!")
             _emit_oops_signal("oops_page_recovered", channel_name=target, recovery_method="direct_url")
             return True
@@ -532,13 +548,29 @@ class TarsAccountSwapper:
                           attempt_count=2, recovery_failed=True)
         return False
 
-    async def _ensure_target_access(self, target: str) -> bool:
-        """Verify we are on the target comments page with access."""
+    async def _ensure_target_access(self, target: str, *, navigate_to_comments: bool = True,
+                                    expected_channel_id: Optional[str] = None) -> bool:
+        """Require matching native identity and Studio URL on the requested surface."""
         target_id = self.CHANNELS.get(target, {}).get("id")
-        current_id = self._current_channel_id()
-        if current_id == target_id and not self._is_permission_error():
-            return True
-        return False
+        if expected_channel_id is not None and target_id != expected_channel_id:
+            return False
+        if expected_channel_id is not None:
+            target_id = expected_channel_id
+        if not isinstance(target_id, str) or not target_id:
+            return False
+        try:
+            page = urlsplit(self.driver.current_url or "")
+            match = re.fullmatch(r"/channel/([^/]+)(/.*)?", page.path)
+            if page.scheme != "https" or page.hostname != "studio.youtube.com" or not match:
+                return False
+            if match.group(1) != target_id:
+                return False
+            if navigate_to_comments and not re.match(r"/comments(?:/|$)", match.group(2) or ""):
+                return False
+            current_id = await self._detect_current_channel_id(require_native=True)
+            return current_id == target_id and not self._is_permission_error(require_observation=True)
+        except Exception:
+            return False
 
     async def click_avatar(self) -> bool:
         """Step 1: Click the avatar button (works on both YouTube and Studio)."""
@@ -734,18 +766,8 @@ class TarsAccountSwapper:
         target_id = self.CHANNELS[target]["id"]
         logger.debug(f"[TARS-SWAP] Channel IDs - current: {current_id}, target: {target_id}")
 
-        # 2026-01-29: BUG FIX - fast-check must verify we're NOT on OOPS page
-        # URL might contain correct channel ID but still be an error page
-        if current_id == target_id:
-            if self._is_permission_error():
-                logger.info(f"[TARS-SWAP] fast-check: On target URL but OOPS/permission page detected - proceeding with full swap")
-            else:
-                logger.info(f"[TARS-SWAP] fast-check: Already on {target} ({target_id}) - skipping swap")
-                return True
-
-        # If already on target comments page and accessible, skip switching
-        if await self._ensure_target_access(target):
-            logger.info(f"[TARS-SWAP] Already on {target} comments page - skipping account switch")
+        if await self._ensure_target_access(target, navigate_to_comments=navigate_to_comments):
+            logger.info(f"[TARS-SWAP] Already on the requested {target} Studio surface - skipping account switch")
             return True
 
         # 2026-02-03: OOPS PAGE PRE-CHECK - Route to swap_from_oops_page() BEFORE click_avatar
@@ -796,7 +818,7 @@ class TarsAccountSwapper:
             await self.navigate_to_comments(target)
 
         # Verify access; retry once if permission error detected
-        if not await self._ensure_target_access(target):
+        if not await self._ensure_target_access(target, navigate_to_comments=navigate_to_comments):
             logger.warning(f"[TARS-SWAP] Access mismatch after switch; attempting recovery for {target}")
             if self._is_permission_error() and self._click_permission_switch():
                 await self.sleep_human(2.0, 0.5)
@@ -805,7 +827,7 @@ class TarsAccountSwapper:
                     if navigate_to_comments:
                         await self.navigate_to_comments(target)
 
-            if not await self._ensure_target_access(target):
+            if not await self._ensure_target_access(target, navigate_to_comments=navigate_to_comments):
                 logger.error(f"[TARS-SWAP] Failed to reach {target} comments page with access")
                 return False
         

@@ -77,6 +77,20 @@ Both pages retain their separate purposes and join actions. Preserve JHR access,
 
 For announcement-only edits, use `.claude/skills/esingularity-ticker/SKILL.md` (Codex projection: `.agents/skills/esingularity-ticker/SKILL.md`). Keep event date, location, end time and link consistent; do not renew an expired invitation unless 012 confirms it. The live payload contains Japanese, English and Portuguese together and expires automatically; hidden, expired or invalid data falls back to the durable campaign action.
 
+## JHR website-first publishing handoff — 2026-10-13
+
+For **Japan Hyperscaler Report (JHR)** article/issue work, `eSingularity.ai` is the canonical **public** publisher and source for downstream LinkedIn newsletter editions. The source files live under `modules/foundups/esingularity/jhr/`; the rendered JHR website reader currently lives in `frontend/app/reports/jhr/layout.tsx` and `frontend/app/reports/jhr/page.tsx`, with issue anchors such as `/reports/jhr#jhr-003`. A repository research file or Google Doc is a working/evidence artifact, **not** the verified published website edition.
+
+Apply this sequence only to a **new approved JHR issue or a material issue correction**, not every change to a homepage, ticker, CSS, metadata or unrelated article:
+
+1. Run the JHR evidence/significance gate and update the existing JHR repository report and rendered website issue together. Preserve issue number, source citations, Japanese-first copy, claims and previous editions. Do not regenerate a new issue for a correction.
+2. Verify source/build/regression checks, complete the existing authorized Git/hosting release, and independently open the **canonical public JHR URL and exact issue anchor**. Record the source revision/commit, deployment receipt, public URL, issue key and verified live date/content. A branch, PR merge, preview, build or submitted deploy alone is **not** `WEBSITE_LIVE_VERIFIED`.
+3. Only after `WEBSITE_LIVE_VERIFIED`, hand off the immutable **website publication receipt** to `modules/platform_integration/linkedin_agent/skillz/linkedin_jhr_newsletter/SKILLz.md` and `linkedin_publishing`. The LinkedIn edition is a derived distribution adaptation of that published article, not a separately authoritative manuscript. Use the exact site issue URL as its primary backlink.
+4. Before any LinkedIn publishing, verify the current LinkedIn publisher/series, existing edition/draft/schedule and the exact action's authorization. Match subject, factual assertions, issue/source revision and links to the live site. Do not cross-post unrelated website changes or silently reissue an already distributed edition. A material site correction may require an **approved edit to the existing edition**, not an automatic new edition.
+5. Publish/schedule via the existing authorized LinkedIn execution route **only after** its own checks; read back the resulting draft/schedule/permalink. Return the LinkedIn receipt to the existing JHR/LinkedIn continuity surface. If inaccessible or uncertain, record `LINKEDIN_BLOCKED` or `SUBMITTED_UNVERIFIED`; keep the site issue live without claiming LinkedIn publication and never blind-retry.
+
+Minimal handoff fields: `issue_key`, `canonical_website_url`, `website_source_revision`, `website_release_receipt`, `website_live_verified_at`, `website_content_identity` (hash or equivalent verified revision), `linkedin_publisher`, `linkedin_series`, `approval_scope`, `duplicate_check`, `linkedin_delivery_state`, `linkedin_permalink`. Reuse existing receipts/continuity, not a new publication database or autonomous posting service. This is an instruction-level dependency contract until a governed running dispatcher is independently verified. **Never claim automatic cross-posting or an actual LinkedIn publication from a skill edit alone.**
+
 ## Verification and publication
 
 Run from repository root:

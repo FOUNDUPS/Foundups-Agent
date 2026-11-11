@@ -137,8 +137,37 @@ sudo -u acoustic bash -c "cd /var/www/acoustic-lab && python3.11 -m venv venv"
 sudo -u acoustic bash -c "cd /var/www/acoustic-lab && source venv/bin/activate && pip install --upgrade pip setuptools wheel"
 
 # Install dependencies
-sudo -u acoustic bash -c "cd /var/www/acoustic-lab && source venv/bin/activate && pip install -r requirements.txt"
+sudo -u acoustic bash -c "cd /var/www/acoustic-lab && source venv/bin/activate && pip install -r modules/platform_integration/acoustic_lab/requirements.txt"
 ```
+
+### Gunicorn factory and qualification boundary
+
+The checked-in config uses Gunicorn's recognized `wsgi_app` setting to call
+`modules.platform_integration.acoustic_lab.src.web_app:create_app()`. The systemd
+service retains its config-only command; no positional application argument or
+environment-provided application binding is required:
+
+```bash
+# From the repository root, after the documented account/path provisioning:
+venv/bin/gunicorn --config modules/platform_integration/acoustic_lab/scripts/gunicorn.conf.py
+```
+
+Gunicorn 22.0.0 is the security-update target. Strict request-framing defaults,
+sync workers, preloading, foreground execution and production timeout settings
+remain unchanged. The module requirements must be selected explicitly after the
+inner deployment shell enters the repository root. Neither this source repair
+nor a test fixture runs `deploy.sh`, provisions the acoustic account, starts
+systemd/nginx, or certifies a VPS deployment.
+
+The dedicated Linux test selection loads this exact config with fixture-only
+numeric runner UID/GID, temporary paths, one worker and an OS-assigned loopback
+port. These replacements occur before Gunicorn validates the config; CLI user
+overrides are too late if the production account is absent. The application
+binding is not replaced. Parser rejection controls and actual `/` and `/health`
+requests require a separate foreground master/worker cleanup receipt. This
+candidate still requires hosted Linux execution; Windows source checks do not
+establish Gunicorn execution. The four broader application-test failures and
+the separate FFmpeg timeout-child defect remain outside this repair.
 
 ### Step 5: Environment Configuration
 

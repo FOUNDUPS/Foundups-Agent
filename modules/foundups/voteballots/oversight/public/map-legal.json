@@ -1,0 +1,296 @@
+{
+  "coordination": {
+    "title": "Coordination and referral",
+    "summary": "Prepare a state-law path early when the facts suggest one. Congress retains its own work and the receiving office makes its own decision.",
+    "parent": "authority",
+    "facts": [
+      ["Who starts", "Committee counsel screens for a possible state-law issue and identifies which office could act."],
+      ["What can move now", "Authorized contacts may discuss jurisdiction and handling procedures without transmitting protected evidence."]
+    ],
+    "links": [["Roadmap step 5", "/legislative-roadmap#decide-referral"], ["State jurisdiction guide", "/02-state-referrals.html"]],
+    "choices": [
+      ["coordination-screen", "Identify a plausible state statute and a factual link to the state before treating an office as a possible recipient."],
+      ["coordination-handling", "Draft a handling plan in advance. Use placeholders until the recipient and scope are verified."],
+      ["congressional-action", "Keep the congressional track moving even if a state-law basis is unavailable or the recipient declines."]
+    ]
+  },
+  "coordination-screen": {
+    "title": "Screen jurisdiction",
+    "summary": "Check the statute, its elements, the facts connecting the conduct to the state, venue, timing and the receiving office’s authority.",
+    "parent": "coordination",
+    "facts": [["Working record", "Record the proposed law, fact-to-element match, open questions, responsible counsel and any special appointment or referral required."]],
+    "choices": [
+      ["coordination-new-york", "Use this New York example if the facts support a New York issue. Confirm the law and office on the specific matter."],
+      ["coordination-washington", "Use this Washington example if the facts support a Washington issue. Confirm the law and office on the specific matter."],
+      ["coordination-other-state", "Use the jurisdiction checklist and official directories for a state without a worked example."],
+      ["coordination-no-recipient", "Pause the state pathway when a statute, factual connection, venue or office authority is missing."]
+    ]
+  },
+  "coordination-other-state": {
+    "title": "Check another state",
+    "summary": "The map includes worked examples for New York and Washington. For another jurisdiction, counsel must verify which law and office apply before routing evidence.",
+    "parent": "coordination-screen",
+    "facts": [
+      ["Attorney general", "Find the serving office in the official directory and verify the specific statute or appointment under which it could act."],
+      ["Local prosecutor", "Check the relevant county, venue and any special assignments under state law."],
+      ["Regulator", "Check the activity, charter or license and the agency's enforcement authority."],
+      ["No established recipient", "Record the missing legal or factual basis and hold the referral while congressional work continues."]
+    ],
+    "links": [["Official state attorney general directory", "https://www.usa.gov/state-attorney-general"], ["State and territorial transitions", "/state-ag-transitions.html"]],
+    "choices": [["coordination-contacts", "Once an office's authority is verified, identify the authorized contact and confirm the secure channel."], ["coordination-no-recipient", "Hold the proposed referral when office authority or jurisdiction is unresolved."]]
+  },
+  "coordination-new-york": {
+    "title": "New York",
+    "summary": "Select the office type after checking the applicable New York statute and the facts. The presence of an account in New York alone supplies no decision about a referral.",
+    "parent": "coordination-screen",
+    "choices": [
+      ["coordination-ny-ag", "Check a specific statutory grant or a valid executive or agency referral before identifying the Attorney General as a criminal recipient."],
+      ["coordination-ny-prosecutor", "For a state crime, check the county’s venue and any special prosecutorial assignment."],
+      ["coordination-ny-regulator", "Check whether the activity and entity fall within the Department of Financial Services’ supervisory authority."],
+      ["coordination-no-recipient", "Record no established recipient when no jurisdictional or agency basis can be confirmed."]
+    ]
+  },
+  "coordination-ny-ag": {
+    "title": "New York Attorney General",
+    "summary": "Executive Law § 63 provides different authorities for different matters. Section 63(12) provides a civil path for repeated fraudulent or illegal acts or persistent fraud or illegality in business. Sections 63(2) and (3) describe distinct criminal referral routes.",
+    "parent": "coordination-new-york",
+    "links": [["New York Executive Law § 63", "https://www.nysenate.gov/legislation/laws/EXC/63"], ["Attorney General’s office", "https://ag.ny.gov/about/about-office"]],
+    "choices": [["coordination-contacts", "Verify which subdivision or other statute applies and which unit is authorized for this matter."]]
+  },
+  "coordination-ny-prosecutor": {
+    "title": "New York district attorney",
+    "summary": "County Law § 700 sets out a district attorney’s duties for crimes cognizable by the county courts, subject to exceptions. Counsel checks venue and any special assignment.",
+    "parent": "coordination-new-york",
+    "links": [["New York County Law § 700", "https://www.nysenate.gov/legislation/laws/CNT/700"]],
+    "choices": [["coordination-contacts", "Verify the competent county office through its official channel before discussing a proposed transfer."]]
+  },
+  "coordination-ny-regulator": {
+    "title": "New York financial regulator",
+    "summary": "The Department of Financial Services supervises covered financial entities and activities. Verify the entity’s license or charter and the governing regulatory provision.",
+    "parent": "coordination-new-york",
+    "links": [["Who DFS supervises", "https://www.dfs.ny.gov/who_we_supervise"]],
+    "choices": [["coordination-contacts", "Confirm that the agency supervises this entity and activity, and verify its official contact for the matter."]]
+  },
+  "coordination-washington": {
+    "title": "Washington",
+    "summary": "Select the office type after checking the Washington statute and facts. Criminal prosecution and financial supervision have separate authorities.",
+    "parent": "coordination-screen",
+    "choices": [
+      ["coordination-wa-ag", "Check whether the statutory process for an Attorney General prosecution applies."],
+      ["coordination-wa-prosecutor", "Check the county prosecutor’s authority and venue for the conduct at issue."],
+      ["coordination-wa-regulator", "Check the institution’s charter, license and regulated activity before routing to DFI."],
+      ["coordination-no-recipient", "Record no established recipient if no state-law or agency basis can be confirmed."]
+    ]
+  },
+  "coordination-wa-ag": {
+    "title": "Washington Attorney General",
+    "summary": "RCW 43.10.232 grants concurrent authority upon a qualifying written request or concurrence. The relevant county prosecutor, the governor or a majority of the organized crime oversight committee can supply it.",
+    "parent": "coordination-washington",
+    "facts": [["Before prosecution", "The Attorney General and the county must reach an agreement on payment of prosecution costs under this section."]],
+    "links": [["RCW 43.10.232", "https://app.leg.wa.gov/RCW/default.aspx?cite=43.10.232"], ["Attorney General’s Criminal Justice Division", "https://www.atg.wa.gov/criminal-justice"]],
+    "choices": [["coordination-contacts", "Confirm any necessary request or concurrence and the authorized unit before treating this office as a recipient."]]
+  },
+  "coordination-wa-prosecutor": {
+    "title": "Washington county prosecutor",
+    "summary": "RCW 36.27.020 assigns prosecutorial duties to county prosecutors. Confirm the relevant county and any statutory allocation or exception for the matter.",
+    "parent": "coordination-washington",
+    "links": [["RCW 36.27.020", "https://app.leg.wa.gov/rcw/default.aspx?cite=36.27.020"]],
+    "choices": [["coordination-contacts", "Verify the competent county office through its official channel before discussing a proposed transfer."]]
+  },
+  "coordination-wa-regulator": {
+    "title": "Washington financial regulator",
+    "summary": "The Department of Financial Institutions supervises covered providers, including Washington state-chartered banks and certain licensed money transmitters. Charter or license helps identify the correct regulator.",
+    "parent": "coordination-washington",
+    "links": [["Who DFI regulates", "https://dfi.wa.gov/about-dfi/who-dfi-regulates"], ["Verify a Washington financial license", "https://dfi.wa.gov/consumers/verify-license"]],
+    "choices": [["coordination-contacts", "Confirm the entity and activity are within the agency’s authority, and verify the appropriate unit."]]
+  },
+  "coordination-no-recipient": {
+    "title": "No established recipient",
+    "summary": "Hold the state referral. Record the missing fact, legal basis or authority and the condition for reconsidering the decision.",
+    "parent": "coordination-screen",
+    "choices": [["congressional-action", "Take any supported legislative action within the committee’s own authority."]]
+  },
+  "coordination-contacts": {
+    "title": "Verify authorized contacts",
+    "summary": "Verify the office, authorized contact and secure intake channel independently. Discuss process at first and obtain agreement before any case material moves.",
+    "parent": "coordination",
+    "facts": [["Who can act", "Authorized congressional staff and the verified receiving office contact. Each side confirms its authority and capacity."], ["What is missing", "A case-specific recipient and the materials each side is authorized to receive, use or retain."]],
+    "links": [["State jurisdiction guide", "/02-state-referrals.html"]],
+    "choices": [["coordination-handling", "With both offices identified, record which channels and handling rules each office approves."]]
+  },
+  "coordination-handling": {
+    "title": "Agree on handling procedures",
+    "summary": "Document ownership, permitted uses, access, security, retention, corrections, witness issues and independent decision-making before any transfer.",
+    "parent": "coordination",
+    "facts": [["Authority", "A handling agreement sets procedures. Each disclosure still requires its own legal basis and approval."], ["Record", "Name the sending and receiving custodians, correction contacts, secure channel and how access is reviewed."]],
+    "links": [["Shared hub charter", "/templates/central-hub-charter.html"]],
+    "choices": [
+      ["coordination-disclosure", "Only when the recipient and procedure are verified may counsel assess each item for possible disclosure."],
+      ["witness-restricted", "If a record could be restricted by immunity, privilege or safety concerns, route it to authorized counsel for review."]
+    ]
+  },
+  "coordination-disclosure": {
+    "title": "Approve each disclosure",
+    "summary": "Identify the exact materials, authority to disclose, restrictions, required redactions and authorized committee decision. Use the verified secure channel.",
+    "parent": "coordination",
+    "facts": [["Approval", "Counsel checks privilege, immunity, privacy and other restrictions. The authorized official records what may move, to whom and for which purpose."], ["Hold condition", "Keep protected or unapproved items in their authorized system. Reassess a narrower disclosure if the packet cannot proceed."]],
+    "links": [["State referral packet", "/templates/appendix-d-state-referral.html"], ["Litigation and privilege", "/05-litigation-and-privilege.html"]],
+    "choices": [
+      ["coordination-disposition", "Send only the approved version after documenting state-law basis, authorized recipient, disclosures and transfer channel."],
+      ["coordination-hold-disclosure", "Hold the referral if disclosure approval or secure transfer remains unresolved, even if the receiving office is known."]
+    ]
+  },
+  "coordination-hold-disclosure": {
+    "title": "Hold the disclosure",
+    "summary": "Record which item, approval or transfer condition is unresolved. Preserve the existing authorization and record restrictions while counsel reviews options.",
+    "parent": "coordination-disclosure",
+    "choices": [["coordination-disclosure", "Reassess an authorized redaction, narrower packet or verified secure channel only if counsel identifies a lawful option."]]
+  },
+  "coordination-disposition": {
+    "title": "Referral and disposition",
+    "summary": "Track approval, delivery and any confirmed disposition separately. The receiving office may decline, investigate or pursue a remedy under its own law.",
+    "parent": "coordination",
+    "facts": [["What delivery establishes", "A receipt confirms delivery. Record further action only when the office confirms it and disclosure of the status is authorized."], ["What happens next", "Assign an authorized follow-up owner and a review date. Preserve a correction and version history."]],
+    "links": [["Roadmap step 5", "/legislative-roadmap#decide-referral"]],
+    "choices": [["congressional-action", "Congress continues its separately authorized response without depending on a state enforcement decision."]]
+  },
+  "witnesses": {
+    "title": "Witness cooperation and immunity",
+    "summary": "Seek complete, truthful information and corroborate it. Keep voluntary cooperation, compelled testimony under an immunity order and clemency separate.",
+    "parent": "review",
+    "choices": [
+      ["witness-voluntary", "Identify the authorized interviewer or prosecutor and confirm the witness’s voluntary participation or the agreement’s legal authority."],
+      ["witness-compelled", "If the witness invokes the privilege against self-incrimination, counsel checks the statutory procedure and its risks before seeking an order."],
+      ["witness-clemency", "Only the legally empowered authority can decide whether to grant clemency."],
+      ["witness-restricted", "Apply the record-specific limits before access, further review or any transfer."]
+    ]
+  },
+  "witness-voluntary": {
+    "title": "Voluntary or negotiated cooperation",
+    "summary": "Authorized congressional staff may request a voluntary interview. A prosecutor with jurisdiction may negotiate within that office’s authority and any required approvals.",
+    "parent": "witnesses",
+    "facts": [["Terms", "Identify the covered conduct, parties, duties, consequences for false statements and any office outside the agreement’s scope."], ["Evidence", "Seek a truthful account regardless of whether it supports the hypothesis. Corroborate important details with independent records or testimony."]],
+    "links": [["Federal cooperation policy example", "https://www.justice.gov/jm/jm-9-27000-principles-federal-prosecution#9-27.600"]],
+    "choices": [["witness-restricted", "Confirm permitted uses and who may review the interview and agreement before sharing either."]]
+  },
+  "witness-compelled": {
+    "title": "Compelled congressional testimony",
+    "summary": "Under 18 U.S.C. §§ 6002 and 6005, a duly authorized congressional representative requests a federal district court order when the witness refuses on self-incrimination grounds.",
+    "parent": "witnesses",
+    "facts": [["Approval", "For a chamber proceeding, a majority of members present must approve. For a committee or subcommittee proceeding, two-thirds of the members of the full committee must approve."], ["Notice and court order", "Serve the U.S. attorney general at least 10 days before requesting the order. On the attorney general’s application the court must defer issuance for the specified period, up to 20 days from the request. The presiding officer communicates the order to the witness."]],
+    "links": [["18 U.S.C. § 6005", "https://uscode.house.gov/us/usc/119-124/t18/s6005/"], ["18 U.S.C. § 6002", "https://uscode.house.gov/us/usc/119-124/t18/s6002/"]],
+    "choices": [["witness-independent", "Decide how to isolate compelled material and demonstrate independent provenance before an authorized prosecution team sees evidence."]]
+  },
+  "witness-independent": {
+    "title": "Independent evidence sources",
+    "summary": "The compelled information and what derives from it generally cannot be used against that witness in a criminal case. The statute has limited exceptions for perjury, false statements and noncompliance.",
+    "parent": "witnesses",
+    "facts": [["Burden", "Under Kastigar, the prosecution must demonstrate a legitimate independent source for evidence it proposes to use once the immunity issue is raised as required."], ["Proposed safeguard", "Keep compelled testimony and its leads separate. Track how and when the independent team obtained each item and record any exposure for counsel review."]],
+    "links": [["Kastigar v. United States", "https://www.govinfo.gov/content/pkg/USREPORTS-406/pdf/USREPORTS-406-441.pdf"], ["18 U.S.C. § 6002", "https://uscode.house.gov/us/usc/119-124/t18/s6002/"]],
+    "choices": [["witness-restricted", "Apply role-based access and keep an exposure log before anyone opens a record or follows a lead."]]
+  },
+  "witness-clemency": {
+    "title": "Pardon or commutation",
+    "summary": "Clemency is a separate decision by the legally empowered authority. Check the jurisdiction, covered conduct and terms of the grant.",
+    "parent": "witnesses",
+    "facts": [["Federal", "The President’s pardon power covers offenses against the United States. State-law offenses fall under state clemency authority."], ["State example", "In Washington the governor holds clemency powers under state law and the board makes recommendations. Check the applicable state’s own constitution and statutes."]],
+    "links": [["U.S. Constitution, Article II", "https://www.archives.gov/founding-docs/constitution-transcript#articleII2"], ["Office of the Pardon Attorney", "https://www.justice.gov/pardon/frequently-asked-questions"], ["Washington clemency process", "https://www.atg.wa.gov/reprieves-pardons-commutations"]],
+    "choices": [["lessons-clemency", "Review the historical proclamation and its actual scope before drawing conclusions about another matter."]]
+  },
+  "witness-restricted": {
+    "title": "Restricted records and access",
+    "summary": "In an authorized workspace, show each record’s restrictions and permitted roles. A blocked team sees the reason and an approved review route without receiving protected contents.",
+    "parent": "witnesses",
+    "facts": [["Proposed access model", "Separate private collection, counsel review and authorized publication. Keep compelled material, derived leads, independent sources and exposure histories separately controlled."], ["Public map", "Only public material and fictional examples belong here. Secure record handling and real permissions live in the authorized institution’s own systems."]],
+    "links": [["Evidence review checklist", "/14-worker-review-and-quality.html"], ["Litigation and privilege", "/05-litigation-and-privilege.html"]],
+    "choices": [
+      ["review", "Return to evidence review with only the material this team may access."],
+      ["coordination-disclosure", "Review any proposed external disclosure item by item through authorized counsel."]
+    ]
+  },
+  "lessons": {
+    "title": "January 6 lessons and failure points",
+    "summary": "Follow the public record from collection and contested requests through referrals, federal prosecutions and clemency. Each screen separates the historical record from a proposed safeguard.",
+    "parent": "overview",
+    "links": [["Readiness briefing", "/04-jan6-and-readiness.html"], ["Select Committee archive", "https://www.govinfo.gov/collection/january-6th-committee-final-report"]],
+    "choices": [
+      ["lessons-preservation", "Start with the documented public record and its custody."],
+      ["lessons-delay", "Check how authorization and decision dates constrain the work."],
+      ["lessons-contested", "Examine the documented privilege dispute and its outcome."],
+      ["lessons-witnesses", "Separate witness testimony, corroboration and lawful limits."],
+      ["lessons-referrals", "Distinguish committee referrals from prosecutorial decisions."],
+      ["lessons-prosecutions", "Use dated charging and court records to evaluate outcomes."],
+      ["lessons-clemency", "Read the proclamation to determine who and what it covered."]
+    ]
+  },
+  "lessons-preservation": {
+    "title": "Evidence preservation",
+    "summary": "The House Select Committee published its final report and released hearing and supporting materials. GovInfo preserves a collection of those public records.",
+    "parent": "lessons",
+    "facts": [["Proposed safeguard", "Assign custody at the outset and record source, date, original format and access limits. Maintain an approved publication copy and a separate preservation record."]],
+    "links": [["Select Committee archive", "https://www.govinfo.gov/collection/january-6th-committee-final-report"], ["House records access rules", "https://www.archives.gov/legislative/research/rules-of-access.html"]],
+    "choices": [["lessons-delay", "Check preservation and authorized milestones before setting investigative deadlines."]]
+  },
+  "lessons-delay": {
+    "title": "Delay and deadlines",
+    "summary": "The House established the Select Committee on June 30, 2021. Its final report is dated December 22, 2022. Requests and disputes had to fit within the committee’s work period.",
+    "parent": "lessons",
+    "facts": [["Proposed safeguard", "Set milestones for preservation, responses, enforcement review and reporting. Assign an owner and a fallback source for every critical request."]],
+    "links": [["Select Committee final report", "https://www.govinfo.gov/content/pkg/GPO-J6-REPORT/html-submitted/index.html"]],
+    "choices": [["lessons-contested", "Assess delay one request at a time using the request, objection, court action and actual production dates."]]
+  },
+  "lessons-contested": {
+    "title": "Contested requests",
+    "summary": "A dispute over presidential records reached the Supreme Court. On January 19, 2022 it denied a request to stay the mandate and enjoin disclosure pending review in Trump v. Thompson.",
+    "parent": "lessons",
+    "facts": [["Proposed safeguard", "Record the scope, response date, asserted privilege and accommodation options. Counsel assesses enforcement separately from preserving an alternate source."]],
+    "links": [["Supreme Court docket, Trump v. Thompson", "https://www.supremecourt.gov/docket/docketfiles/html/public/21A272.html"], ["Litigation and privilege", "/05-litigation-and-privilege.html"]],
+    "choices": [["lessons-witnesses", "Identify which objections concern witnesses and which concern records before choosing a response."]]
+  },
+  "lessons-witnesses": {
+    "title": "Witness handling",
+    "summary": "The Select Committee reported that more than 30 witnesses invoked the Fifth Amendment privilege against self-incrimination. Its final report discusses witness credibility and corroboration.",
+    "parent": "lessons",
+    "facts": [["Proposed safeguard", "Keep a record of the testimony or asserted privilege, corroborating sources and access restrictions. An invocation alone does not establish the underlying allegation."]],
+    "links": [["Select Committee final report", "https://www.govinfo.gov/content/pkg/GPO-J6-REPORT/html-submitted/index.html"]],
+    "choices": [
+      ["lessons-referrals", "Separate the corroborated findings that a committee can disclose from protected testimony and other restricted material."],
+      ["witnesses", "Use the distinct cooperation, immunity and clemency branches to evaluate lawful options."]
+    ]
+  },
+  "lessons-referrals": {
+    "title": "Referrals",
+    "summary": "The Select Committee referred possible federal offenses to the Department of Justice. Its report separately proposed legislative changes.",
+    "parent": "lessons",
+    "facts": [["Proposed safeguard", "Record what was approved and sent. Track committee findings, legal referrals and receiving-office outcomes as separate entries."]],
+    "links": [["Select Committee recommendations", "https://www.govinfo.gov/content/pkg/GPO-J6-REPORT/html-submitted/rec.html"]],
+    "choices": [["lessons-prosecutions", "Check DOJ records and case dispositions separately from the committee’s referral record."]]
+  },
+  "lessons-prosecutions": {
+    "title": "Prosecution outcomes",
+    "summary": "On January 6, 2025 DOJ reported charging more than 1,500 people for crimes around the attack. Federal prosecutions produced convictions, including the linked trial example.",
+    "parent": "lessons",
+    "facts": [["What remains separate", "The aggregate charging count does not establish the result for any particular person or theory. Case-specific judgments and dispositions answer that question."], ["Proposed safeguard", "Use dated court records to track charges, convictions, dismissals, sentences and later clemency separately."]],
+    "links": [["DOJ anniversary statement", "https://www.justice.gov/archives/opa/pr/attorney-general-merrick-b-garland-statement-fourth-anniversary-january-6-attack-capitol"], ["DOJ example of a trial conviction", "https://www.justice.gov/usao-dc/pr/virginia-man-convicted-felony-and-misdemeanor-charges-related-his-conduct-january-6-0"]],
+    "choices": [["lessons-clemency", "Check which federal proceedings and sentences the later proclamation addressed."]]
+  },
+  "lessons-clemency": {
+    "title": "Clemency effects",
+    "summary": "On January 20, 2025 the President commuted specified sentences, pardoned other covered convicted individuals and directed the attorney general to seek dismissal with prejudice of pending covered indictments.",
+    "parent": "lessons",
+    "facts": [["Proposed safeguard", "Check federal clemency and court dispositions against the specific conduct and case. A state route requires genuinely independent state-law authority and facts supporting it."]],
+    "links": [["January 20 proclamation", "https://www.whitehouse.gov/presidential-actions/2025/01/granting-pardons-and-commutation-of-sentences-for-certain-offenses-relating-to-the-events-at-or-near-the-united-states-capitol-on-january-6-2021/"], ["Federal clemency scope", "https://www.justice.gov/pardon/frequently-asked-questions"]],
+    "choices": [
+      ["lessons-presidential-immunity", "Analyze presidential immunity separately from clemency and state-law jurisdiction."],
+      ["coordination-screen", "Counsel may assess a possible state-law issue after identifying independently supportable facts."]
+    ]
+  },
+  "lessons-presidential-immunity": {
+    "title": "Presidential immunity",
+    "summary": "Trump v. United States distinguishes absolute criminal immunity for acts within exclusive constitutional authority, at least presumptive immunity for other official acts, and no immunity under that doctrine for unofficial acts.",
+    "parent": "lessons",
+    "facts": [["Proposed safeguard", "Counsel assesses the conduct and applicable evidentiary and jurisdictional limits independently. The classification and outcome depend on the specific acts and applicable law."]],
+    "links": [["Supreme Court opinion, Trump v. United States", "https://www.supremecourt.gov/opinions/23pdf/23-939_e2pg.pdf"]],
+    "choices": [["coordination-screen", "Continue only if counsel identifies a separate state-law issue and can support the factual and legal basis for the next step."]]
+  }
+}

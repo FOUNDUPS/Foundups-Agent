@@ -130,7 +130,7 @@ def prepare_elevated_authority_signing_permit(
 
 
 def consume_elevated_authority_signing_permit(
-    permit: Any, *, signing_request: Any, now: int,
+    permit: Any, *, signing_request: Any, now: int, include_expiry=False,
 ) -> Mapping[str, Any] | None:
     """Consume one exact child request and durably commit nonce on first use."""
 
@@ -149,10 +149,11 @@ def consume_elevated_authority_signing_permit(
         seal.signing_request_digests.remove(request_digest)
         if not seal.signing_request_digests:
             _PERMITS.pop(permit, None)
-        return {
+        proof = {
             **copy.deepcopy(dict(seal.consensus_proof)),
             "target_signing_request": signing_request.to_dict(),
         }
+        return (proof, seal.expires_at) if include_expiry else proof
 
 
 def discard_elevated_authority_signing_permit(permit: Any) -> None:

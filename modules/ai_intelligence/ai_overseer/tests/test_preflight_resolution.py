@@ -417,6 +417,56 @@ def test_main_py_wre_dashboard_critical_alert_blocks_for_autonomous_24x7_runtime
     assert "Startup blocked by AUTO enforcement" in printed
 
 
+def test_main_wre_research_display_preserves_health_gate(monkeypatch, capsys):
+    import main
+    from modules.infrastructure.wre_core.src import dashboard_alerts as dashboard
+
+    calls = []
+    def reader(path, digest):
+        calls.append((path, digest))
+        return {"state": "unknown", "reason": "unavailable"}
+    monkeypatch.setattr(dashboard, "read_research_report_summary", reader)
+    monkeypatch.setenv("WRE_RESEARCH_REPORT_PATH", "explicit-selection")
+    monkeypatch.setenv("WRE_RESEARCH_BASELINE_SHA256", "a" * 64)
+    monkeypatch.setenv("WRE_DASHBOARD_PREFLIGHT", "1")
+    monkeypatch.setenv("WRE_DASHBOARD_AUTO_ENFORCE", "0")
+    health = {"healthy": False, "total_executions": 30, "min_samples": 25,
+              "alerts": [{"severity": "critical"}]}
+    monkeypatch.setattr(dashboard, "check_dashboard_health", lambda: health)
+    with patch.object(dashboard, "DashboardAlertMonitor") as monitor:
+        monitor.return_value.is_in_watch_period.return_value = False
+        with patch.object(pr, "on_preflight_fail") as dispatch:
+            monkeypatch.setenv("WRE_DASHBOARD_PREFLIGHT_ENFORCED", "0")
+            assert main.run_wre_dashboard_preflight(Path(".")) is True
+            dispatch.assert_not_called()
+            monkeypatch.setenv("WRE_DASHBOARD_PREFLIGHT_ENFORCED", "1")
+            assert main.run_wre_dashboard_preflight(Path(".")) is False
+            dispatch.assert_called_once()
+    assert calls == [("explicit-selection", "a" * 64)] * 2
+    assert capsys.readouterr().out.count("[WRE-RESEARCH] unknown") == 2
+    monkeypatch.setenv("WRE_DASHBOARD_PREFLIGHT", "0")
+    assert main.run_wre_dashboard_preflight(Path(".")) is True
+    assert len(calls) == 2
+
+
+def test_main_wre_research_reader_error_cannot_block_health(monkeypatch, capsys):
+    import main
+    from modules.infrastructure.wre_core.src import dashboard_alerts as dashboard
+
+    def failed(*args):
+        raise RuntimeError("private diagnostic detail")
+    monkeypatch.setattr(dashboard, "read_research_report_summary", failed)
+    monkeypatch.setenv("WRE_RESEARCH_REPORT_PATH", "explicit-selection")
+    monkeypatch.setenv("WRE_RESEARCH_BASELINE_SHA256", "a" * 64)
+    monkeypatch.setattr(dashboard, "check_dashboard_health", lambda: {"healthy": True})
+    monkeypatch.setenv("WRE_DASHBOARD_PREFLIGHT", "1")
+    monkeypatch.setenv("WRE_DASHBOARD_PREFLIGHT_ENFORCED", "1")
+    assert main.run_wre_dashboard_preflight(Path(".")) is True
+    output = capsys.readouterr().out
+    assert "[WRE-RESEARCH] unknown" in output
+    assert "private diagnostic detail" not in output
+
+
 # === DJ2-C OAuth preflight dispatch tests ===
 
 

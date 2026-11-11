@@ -1,3 +1,37 @@
+## 2026-09-28: RSI contact-diligence contract and CI repair
+
+- WSP00/15/22/50/95/97; C1/I3/D3/Impact3 = 10/P2. Fresh main inspection found the new offline contract failing despite green PR1927 checks; the CI workflow did not invoke this suite.
+- Align the existing skill's anti-accusation sentence with the unchanged assertion and shared review contract. Add the existing eight-case stdlib suite to CI; no test oracle, suite, runtime API or platform action is added.
+- Baseline seven pass/one fail; candidate eight pass locally. Independent review, exact-head/main CI and owned cleanup are receipt-bound in the canonical RSI backlog. This is instruction validation, not R25 consent, retained RSI learning or autonomous LinkedIn admission.
+
+## 2026-09-28: Consequential-contact professional diligence skill
+
+- WSP 00/15/22/50/95/97; added `linkedin_contact_diligence` as an instruction-only AUDIT child under the existing LinkedIn master rather than extending the title/photo profile evaluator into financial trust decisions.
+- Trigger scope covers consequential investment, family-office, project-finance, government/institutional, infrastructure and sensitive-partnership contacts from connection requests, existing connections or inbox threads.
+- Evidence is separated as VERIFIED / CLAIMED / UNVERIFIED / CONFLICTING; missing public footprint is explicitly not proof of fraud. The skill produces no legitimacy score and does not auto-accept, auto-reject, send, or authorize disclosure.
+- Capital-contact diligence asks for entity/mandate, check size, geography, instrument/project stage, fee model, comparable transactions and relevant regulatory status before non-public financial disclosure. Default disclosure state is PUBLIC_OVERVIEW_ONLY.
+- Routed from the master activity map, engagement master and shared review workflow; extended the existing offline contract owner so the new child/link/privacy/authority boundary is testable. No LinkedIn live action, contact dossier, private message body, runtime executor or autonomous background job is added.
+
+## 2026-09-24: Browser owner honors manager admission
+
+- WSP 00/15/22/34/50/62/84/97; C3/I3/D4/Impact3 = 13/P1. The existing action owner now requires no prior pending/connected target, the actual PENDING enum, a matching target and identity with the currently stored pending object before Connect. Rejections return `connection_request_not_admitted` without invitation UI or success credit. Existing policy denials, previews, navigation failures and manager bookkeeping are preserved.
+- Frozen acceptance: baseline 11 fail/25 pass; repaired and independent runs each pass the same 36 unique cases. All 23 earlier compatibility cases remain; four legacy constructor cases are deselected and two known plugin warnings remain. Seven malformed/state controls supplement the six manager outcomes. File/class/method shrink; no new module or skill.
+- Backend binding changes one source digest among 1401 unchanged members and updates two existing pins. Eight manifest tests, the 67-file package and unchanged 1659-file test registry pass. Two premature manifest preparations each yielded 1 fail/7 pass: an old loaded pin, then a partially staged index. Both are preserved; the completed, coherently staged candidate passes the sequential rerun.
+- Evidence: `O:/Foundups-Agent-audits/20260924-rsi-manager-guard`; exact publication/closure is recorded there and in the canonical system backlog. This proves a local admission guard, not live delivery, bookkeeping rollback, quota repair, concurrent exactly-once execution, OS confinement or retained native RSI.
+
+## 2026-09-24: Remove credential-shaped instruction examples
+
+- WSP 00/15/22/50/97; C1/I4/D5/Impact3 = 13/P1. Replaced exactly two configuration assignments in the existing module CLAUDE.md with inert placeholders and added the existing memory-boundary rule for documentation, logs and worker packets.
+- Static validation preserves all other instruction text, all 42 ranked task identities and all 26 planning packets. No runtime, API, tests, registry or manifest changes; no new skill or module. Independent review and exact publication/closure evidence are bound in the system backlog.
+- This is current-source redaction only. Credential validity and rotation remain unknown; earlier Git history is unchanged. No values reproduced in receipts, no credential use or account action.
+
+## 2026-09-24: Manager-result to UI admission qualification
+
+- WSP00/15/22/34/50/62/84/97; C3/I3/D3/Impact3=12/P2. Extended the existing policy test owner with six fixed current-behavior cases; all23 prior cases and original test AST/fixtures preserved. Production source, backend manifest and registry remain unchanged.
+- Same29 cases pass locally and independently, four legacy constructor cases deselected, two known config warnings. Quota WITHDRAWN, already CONNECTED, prior PENDING and simulator-failure WITHDRAWN still reach fake Connect/Send and gain credit; freshPENDING and policyBLOCKED controls distinguish admission.
+- Returned/stored object identity is checked: under the fixed test clock, exception fallback shares the storedPENDING request_id but is a different object; priorPENDING reuses the exact existing object. Canonical workflow records a prospective13/P1 fresh-work guard, not a completed repair. No live delivery, rollback, concurrent exactly-once or retained-RSI claim.
+- Test inventory reconciled against six actual files; established required canonical tests/TestModLog. Source-only instruction hygiene was separately discovered/scored13/P1 without reproducing or using credential-shaped values. Exact evidence/closure and next selection are in the system backlog.
+
 ## 2026-09-22 — Live newsletter archive reconciliation
 
 - Reconciled the three editorial lanes against live LinkedIn and public article read-back: JHR series 7505133867079536640 with two editions, personal ROC series 7448137996484182016 with nine editions, and Foundups - Eat the Startup series 7376428210558808065.

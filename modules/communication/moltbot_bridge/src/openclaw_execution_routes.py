@@ -27,6 +27,31 @@ async def execute_plan(dae: Any, plan: Any) -> str:
     intent = plan.intent
     route = plan.route
 
+    # Explicit story requests only. The outer process keeps its existing plan
+    # permission gate; direct calls also require the existing local trust model.
+    story_match = re.match(r"^\s*(?:kids|eduit) story:", intent.raw_message, re.IGNORECASE)
+    if story_match:
+        if (getattr(intent, "is_authorized_commander", False) is not True
+                or getattr(intent, "channel", None) not in ("voice_repl", "local_repl")):
+            return "BLOCKED: Kids story production requires an authenticated local commander."
+        from uuid import uuid4
+        from modules.foundups.kids_episodes.src.work_order_adapter import (
+            prepare_episode_request, dispatch_episode_request,
+        )
+        try:
+            request = prepare_episode_request(
+                intent.raw_message[story_match.end():], request_id="story_" + uuid4().hex,
+            )
+        except ValueError as exc:
+            return f"BLOCKED: {exc}"
+        # Host-only bindings, never read from user text or ingress metadata.
+        result = dispatch_episode_request(
+            request, wre=dae.wre,
+            workspace=getattr(dae, "kids_story_workspace", None),
+            execution_binding_digest=getattr(dae, "kids_story_execution_binding_digest", None),
+        )
+        return json.dumps(result, ensure_ascii=False)
+
     if route == "holo_index":
         return await execute_query(dae, intent)
     if route == "wre_orchestrator":

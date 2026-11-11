@@ -13,7 +13,7 @@ Local retrieval manifest for the RedDog extension thin-client lane.
 - `scripts/advisory_model_once.py` - OpenRouter bridge and redaction gate (repo root)
 - `scripts/reddog_holoindex_owner_query_once.py` - authenticated generation-bound owner query bridge (repo root)
 - `modules/communication/moltbot_bridge/src/reddog_public_policy.py` - public guest origins, caps, and unsigned Lick Verification input; no identity or private authority
-- `modules/communication/moltbot_bridge/src/reddog_public_session_gate.py` - injected AgentDB SQLite guest quotas, expiry, replay, withdrawal and concurrency accounting
+- `modules/communication/moltbot_bridge/src/reddog_public_session_gate.py` - injected AgentDB SQLite guest/Lick quotas, one-use host leases, owner-bound completion and expired-owner recovery; resident activation still gated
 - `modules/communication/moltbot_bridge/src/reddog_public_http.py` - opt-in public-only ASGI router; unmounted until host/responder/ingress proof
 - `modules/foundups/mobile_worker_skills/foundups-contact-discovery/SKILL.md` - public contact discovery worker: canonical identity anchor, official/public email + social discovery, cross-verification, purpose separation, provenance/confidence, no guessed private data
 
@@ -23,8 +23,9 @@ Local retrieval manifest for the RedDog extension thin-client lane.
 - `docs/REDDOG_PUBLIC_SURFACE_ADMISSION.md` - bounded guest admission for AutoPost, foundups.com and eSingularity.ai; implementation evidence, 3V Verification linkage and live activation gaps
 - `docs/prompts/WSP97_REDDOG_PUBLIC_SURFACE_REMOTE_PROMPT.md` - next host/mobile/site integration work order; HoloIndex requery/repair, existing database/host reuse, no knowledge-answer unlock
 - `docs/CONTACT_MEMORY_ARCHITECTURE.md` - principal-scoped relationship memory: encrypted capture, entity/event graph, semantic retrieval, provenance, AutoPost ingest, Breadcrumb/Brain/Memex projection linkage, and Lick encounter/identity linkage
+- `docs/CONTACT_COMMUNICATION_ACTION_PROTOCOL.md` - manual pre-compose identity/context policy; index-first discovery does not outrank current Contacts or fresh provider routing. Existing Python V3 sender, Contacts and native Docs owners retain authority; JS compatibility stays BLOCK. Contact Memory automation remains specified, not implemented.
 - `docs/contact_research/FUKUI_CITY_COUNCIL_PUBLIC_CONTACTS_2026-09-11.md` - alpha evidence seed for all 31 sitting Fukui City councilors: city-listed phones, verified public political emails/social hubs, purpose labels, provenance, confidence, unresolved contacts and identity-collision warnings
-- `docs/MOSH_PIT_ACTIVITY_MEMORY_ARCHITECTURE.md` - Mosh Pit as a reverse-chronological projection over Breadcrumbs + Brain/Memex; actor attribution, open-loop recall, Git evidence, STT normalization, disclosure views, and RedDog status/history retrieval contract
+- `docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md` - Moshpit as a reverse-chronological projection over Breadcrumbs + Brain/Memex; actor attribution, open-loop recall, Git evidence, STT normalization, disclosure views, and RedDog status/history retrieval contract
 - `docs/MEMEX_PROJECTION_EMITTER_ARCHITECTURE.md` - secure read-only projection/emitter layer for RedDog/founder views; principal+FoundUp+disclosure authorization, deterministic JSON/Markdown rendering, sink isolation, and threat model
 - `docs/prompts/WSP97_M2M_MEMEX_EMITTER_IMPLEMENTATION_PROMPT.md` - implementation work order: WSP_00 intake, WSP 97/HoloIndex ownership discovery, bounded M2M slices, fail-closed security tests, no parallel memory store, no external mutation authority
 - `README.md`, `INTERFACE.md`, `ModLog.md`, `ROADMAP.md`
@@ -35,7 +36,28 @@ Local retrieval manifest for the RedDog extension thin-client lane.
 
 - `buildCopyMarkdown`, `buildRunTraceSection`, `holoIndexMetaFromBundle`, `evaluateTargetRecall`
 - `isGenerationBoundHoloQueryAccepted`, `mergeGenerationBoundHoloResult`, `buildMetaFromBundle`
-- `PublicPolicy`, `PublicSessionGate`, `PublicSurfaceBinding`, `lick_verification_evidence`
+- `PublicPolicy`, `PublicSessionGate`, `PublicSurfaceBinding`, `lick_verification_evidence`, `register_host`, `renew_host`, `reclaim_orphaned_turns`
+
+## Communication action recall target
+
+Before composing for a known/purported contact, recall
+[the existing protocol](docs/CONTACT_COMMUNICATION_ACTION_PROTOCOL.md).
+It consolidates PR1659/PR1663 policy without a new skill, store or release gate.
+
+```text
+current authorized identity index/source + principal/FoundUp scope
+-> minimum verified identity/relationship context
+-> fresh provider correspondence and current routing restrictions
+-> internal draft; unresolved destination means NOT_SEND_READY
+-> existing channel authority, audit, exact transaction and readback
+-> private receipt + authorized sanitized material-history update
+```
+
+The protocol links the current Contacts/native Docs owners and Python V3 sender.
+Its six-operation service contract does not implement arbitrary scheduling or
+intercept direct connectors; JavaScript compatibility remains BLOCK. STT/aliases,
+retrieved prose, 0102 direction and cached receipts never grant recipient or send
+authority. Automatic Contact Memory resolution/persistence is unimplemented.
 
 ## Memory / history recall targets
 
@@ -51,7 +73,7 @@ Target composition:
 ```text
 Breadcrumb history + Brain/Memex current/open state + relevant evidence
 -> authorized Memex Projection Emitter
--> project-scoped Mosh Pit / compact status projection
+-> project-scoped Moshpit / compact status projection
 -> RedDog / founder view
 ```
 

@@ -307,3 +307,21 @@ Out of scope for this document:
 ---
 
 *Contract complete. SoftProto begins inside FoundUp interiors, not in the Mall shell.*
+
+
+## 12. Responsive category-row projection — 2026-10-18
+
+The default browse projection is vertically stacked category groups with horizontal
+tracks. Vertical movement visits another group; horizontal movement stays within
+that group. Category sorting alone does not establish a relevance/distance score:
+those earlier axis descriptions remain projection intent until such data exists.
+
+Visible card count follows available space, not a fixed 3x2 grid or fixed number
+of rows. Existing density presets select an explicit grid projection. Pinch-out
+opens the selected FoundUp's videos; pinch-in returns to the rows. Independent
+row offsets restore locally, using category keys and original catalog indexes.
+
+All FoundUps reuse this grammar and the catalog search/presentation APIs. A future
+housing projection may group by location through a separately declared adapter;
+this slice groups by catalog category only. No unseen listings, location hierarchy,
+personalized ranking or voice runtime is claimed.

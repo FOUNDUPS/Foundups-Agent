@@ -1,4 +1,4 @@
-﻿"""Treasury Governance Service for FoundUps Agent Market.
+"""Treasury Governance Service for FoundUps Agent Market.
 
 Manages treasury proposals, approvals, and transfers with
 multi-signature support and audit trail.
