@@ -17,8 +17,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="/move2japan/move2japan.css">
+  <link rel="stylesheet" href="/member/css/mall-video-projection.css">
 
+  <script src="/member/js/mall-video-projection.js"></script>
   <!-- Clerk Authentication SDK -->
+  <template id="memberClerkSdk">
   <script
     async
     crossorigin="anonymous"
@@ -26,6 +29,16 @@
     src="https://supreme-oyster-20.clerk.accounts.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
     type="text/javascript"
   ></script>
+  </template>
+  <script>
+    // Normalize the dedicated host before any other product prepares the shell.
+    if (window.mallVideoProjection?.hostScope(window.location) && window.location.search) {
+      window.history.replaceState(window.history.state, '', window.location.pathname + window.location.hash);
+    }
+    if (!window.mallVideoProjection?.resolve(window.location)) {
+      document.head.appendChild(document.getElementById('memberClerkSdk').content.cloneNode(true));
+    }
+  </script>
   <script>
     // FoundUPS Clerk Theme - Dark premium aesthetic
     window.FOUNDUPS_CLERK_APPEARANCE = {
@@ -82,7 +95,7 @@
   <link rel="stylesheet" href="css/account-concierge.css">
   <link rel="stylesheet" href="css/mall-planes.css">
   <link rel="stylesheet" href="css/mall-tile-field.css">
-  <link rel="stylesheet" href="css/mall-video-player.css">
+  <link rel="stylesheet" href="css/mall-video-player.css?v=6">
 </head>
 <body>
   <!-- Loading state (shown while checking auth) -->
@@ -266,6 +279,13 @@
     <div class="mall-shell">
       <!-- TOP ANCHOR: Self / Account -->
       <header class="mall-header mall-anchor-top" data-anchor="top">
+        <div id="videoScopeHeader" class="mall-video-scope-header" hidden>
+          <div>
+            <h1 id="videoScopeTitle"></h1>
+            <p id="videoScopeIdentity"></p>
+          </div>
+          <button id="videoScopeInfo" type="button" aria-label="About this FoundUp" aria-haspopup="dialog">i</button>
+        </div>
         <a href="/" class="mall-brand-minimal" aria-label="FoundUPS home">
           <img src="/logo-dog.png" alt="" class="mall-brand-logo-sm">
         </a>
@@ -280,6 +300,21 @@
 
       <!-- MIDDLE FIELD: Discovery / Navigation -->
       <main class="mall-main mall-anchor-middle" data-anchor="middle">
+        <div id="videoScopeBar" class="mall-video-scope-bar" hidden>
+          <div>
+            <h2 id="videoScopeTopic"></h2>
+            <p id="videoScopeCredit"></p>
+          </div>
+          <a id="videoScopeVoice" class="mall-video-scope-voice" referrerpolicy="no-referrer">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11v1a7 7 0 0 0 14 0v-1m-7 8v3m-3 0h6"/></svg>
+            <span>Voice Your Opinion<small>Contact Congress</small></span>
+          </a>
+        </div>
+        <dialog id="videoScopeDisclosure" class="mall-video-scope-disclosure" aria-labelledby="videoScopeDisclosureTitle">
+          <h2 id="videoScopeDisclosureTitle">About this FoundUp</h2>
+          <p id="videoScopeDisclosureText"></p>
+          <form method="dialog"><button type="submit" autofocus>Close</button></form>
+        </dialog>
         <!-- Projection Controls (compact, subordinate to tiles) -->
         <nav id="mallProjection" class="mall-projection" aria-label="Sort FoundUps">
           <button class="mall-projection-chip active" data-projection="default">All</button>
@@ -366,6 +401,7 @@
 
   <!-- Firebase SDK (for Firestore data) + Clerk Auth -->
   <script type="module" id="memberRuntime">
+    const publicVideo = !!window.mallVideoProjection?.resolve(window.location);
     const publicProduct = !!window.Move2JapanSearch && window.Move2JapanSearch.isShellProductRoute(window.location);
 
     async function initializeMemberRuntime() {
@@ -1248,11 +1284,11 @@
       if (window.Clerk.user) await initializeMemberRuntime();
     }
 
-    if (publicProduct) {
+    if (!publicVideo && publicProduct) {
       connectExistingProductAccount().catch(error => {
         console.warn('[Move2Japan] Account connection unavailable:', error);
       });
-    } else {
+    } else if (!publicVideo) {
       initializeMemberRuntime().catch(error => {
         console.error('Failed to initialize member runtime:', error);
         document.getElementById('loadingState').style.display = 'none';
@@ -1273,15 +1309,18 @@
   <script src="js/gesture-engine.js"></script>
   <script src="js/gesture-hints.js"></script>
   <script src="js/shell-bridge-interceptor.js"></script>
-  <script src="js/mall-planes.js"></script>
-  <script src="js/mall-tile-field.js"></script>
-  <script src="js/mall-video-player.js"></script>
+  <script src="js/mall-planes.js?v=6"></script>
+  <script src="js/mall-tile-field.js?v=6"></script>
+  <script src="js/mall-video-player.js?v=6"></script>
   <script src="js/account-concierge.js"></script>
   <script src="js/red-dog-concierge.js"></script>
-  <script src="js/mall-state-restore.js"></script>
+  <script src="js/mall-state-restore.js?v=6"></script>
 
   <script id="productDiscoveryBoot">
-    if (window.Move2JapanSearch && window.Move2JapanSearch.isShellProductRoute(window.location)) {
+    const publicVideoScope = window.mallVideoProjection?.resolve(window.location);
+    if (publicVideoScope) {
+      window.mallVideoProjection.mount(publicVideoScope);
+    } else if (window.Move2JapanSearch && window.Move2JapanSearch.isShellProductRoute(window.location)) {
       window.mallStateRestore.selectProduct('move2japan');
       window.Move2JapanSearch.mount(window, '/move2japan/properties.json');
     }

@@ -1,5 +1,14 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-11-11: Isolated private draft sender
+
+WSP 00/10/22/50/71/96/97. Keep draft effects out of the existing Holo MCP
+allowlist. The new service bounds OAuth caller, mailbox, sender, revision,
+scope, approval window, MIME bytes and provider routes. A durable reservation
+and encrypted snapshot precede the only allowed update. Exact readback or
+a hold determines the result; provider CAS is unavailable. No credentials,
+case material, or activation are shipped.
+
 ## 2026-11-01 — Snapshot admission qualified within local scope
 
 WSP11/15/22/48/50/62/84/97. Existing snapshot publication uses the shared

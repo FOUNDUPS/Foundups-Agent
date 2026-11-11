@@ -19,6 +19,30 @@ VOTE then expands behind the existing pfMALL/member gate into deeper candidate r
 
 ---
 
+## Relationship to Voice and Oversight
+
+**Vote is the existing umbrella civic FoundUp** (`voteballots`). **Voice is a proposed, separately identified but interoperable civic-participation FoundUp**, not yet an implemented or admitted tenant. The proposed relationship is a consented, capability-scoped handoff through Play FoundUps shared contracts, not a merged application or cloned backend.
+
+**Oversight is currently a strategy and documentation/reference workstream** organized under Vote, not a FoundUp. It can inform both Vote's research and Voice's future civic-action experiences without creating a separate Oversight identity. Whether a later internal Voice feature should serve Oversight is **undecided and out of scope**; do not invent a Voice sub-product, route or runtime on that assumption.
+
+See [Oversight source classification](oversight/README.md). WSP 97 verifies actual repository state and WSP 109 governs any later independent FoundUp decision. No registry, manifest, token, tenant, route or public deployment change follows from this clarification.
+
+## Poly ownership and separate roadmaps — 2026-11-12
+
+[Poly Vote](polyvote/README.md) is a separately documented module within this
+FoundUp, with its own [roadmap](polyvote/ROADMAP.md) and interface. It does not
+create a separate FoundUp identity or duplicate public Vote discovery.
+[Poly Voice](../polyvoice/README.md) is a separate **planned FoundUp**, with its
+own [roadmap](../polyvoice/ROADMAP.md), interface and intake. It owns private
+meeting records and commitment receipts, not Voice's public calling workflow.
+
+The [current integration index](docs/VOTE_VOICE_INTEGRATION.md) links Vote,
+HPC, Voice, Poly Vote, Poly Voice and Oversight; detailed module requirements
+stay with their owners. The [reconciliation receipt](docs/POLY_RECONCILIATION_20261112.md)
+preserves earlier source research and records what changed. These are
+Markdown planning changes only, not registration or runtime activation.
+HPC and shared-Mall implementation, documents and active PRs remain untouched.
+
 ## Current Truth State
 
 ### Accountability integration and bounded public PoC
@@ -43,6 +67,11 @@ candidate/evidence app is an internal PoC. The original registry and manifest
 labels predate the implemented chain. See the
 [release accounting and Launch Pad](docs/RELEASE_ACCOUNTING.md) for evidence,
 launch gates and the next product decisions.
+
+### Oversight classification clarification (2026-11-09)
+
+Oversight is a **strategy and documentation/reference workstream**, not an independent FoundUp. Its current ownership under `voteballots` is organizational and does not make the Oversight strategy a separate FoundUp. A future interactive Oversight FoundUp is a hypothesis requiring WSP 97 evidence and WSP 109 entity classification before manifest, registry, route, token, or runtime changes. Preserve the existing strategy site; do not treat documentation presentation as proof of an implemented FoundUp.
+
 
 ### 2026-11-07: Oversight workstream and public front door
 
@@ -123,18 +152,6 @@ Candidate-card PoC minimum:
 - details / ask RedDog action
 
 See `docs/intake/POC_SCOPE.md`.
-
-### 2026-11-10 selected collection and Voice relationship
-
-The [Vote/Voice integration contract](docs/VOTE_VOICE_INTEGRATION.md) records
-012's card-first Democratic-Senate collection and Prima's audit of Tertia's
-issue/evidence/action proposal. It narrows the first build without deleting
-the broader roadmap or existing public content. Reuse the Play FoundUps Mall
-scaffold; Vote composes external evidence rather than creating another political
-database. Proposed Voice owns issue discovery and voluntary participation.
-Their shared switchboard is a deferred capability, not a deployed third FoundUp.
-The contract separates contribution/spending types, unknown data, pepper opinions,
-source rights and user-approved effects. No new runtime or tenant is activated.
 
 ---
 

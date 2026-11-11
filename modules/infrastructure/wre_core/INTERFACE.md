@@ -222,66 +222,31 @@ return `Error: Qwen chat response generation failed` and log only exception type
 Text remains `success=False`, `_effect_evidence=False`: admission, execution,
 acceptance and retention remain separate existing gates. No automatic activation.
 
-## Merge sentinel prerequisite contract — 2026-09-27
+## Git lifecycle reconciliation
 
-`run_main_merge_sentinel(repo_root, force=False)` keeps its dictionary interface.
-`passed` means startup may continue; it is not merge verification. Failed branch
-resolution, empty/detached branch, unavailable/empty/unrecognizable worktree
-inventory, failed/dirty status and failed fetch all return `merged=False`.
-For these failures, `passed` is false only when
-`GIT_MAIN_MERGE_SENTINEL_ENFORCED` is enabled. Dirty status includes untracked
-files even when Git configuration normally hides them.
+`reconcile_git_lifecycle(repo_root, synchronize_pc=False, tracked_prs=())`
+returns paginated inventory coverage, current GitHub main and required-check
+evidence, PR dispositions and PC synchronization state. It stores the latest
+receipt in `foundups-git-lifecycle.json` under the shared Git directory. The
+existing runtime lock serializes callers on that Git directory. Partial source
+coverage and tracked obligations remain explicit.
 
-Fixed new error values: `named_branch_required`, `worktree_discovery_failed`,
-`working_tree_status_failed`, `working_tree_dirty`, `fetch_failed`.
-The existing branch-resolution and other-main-worktree errors are preserved.
-Default-disabled and already-main calls retain their early skip behavior.
-The private worktree helper uses `None` for unavailable discovery, distinct
-from a readable inventory with no competing main checkout.
+The Git config `foundups.lifecyclePCWorktree` selects an absolute checkout
+belonging to the same Git directory and using the same origin. Without a
+selection the current primary checkout may serve when it is on main.
+`synchronize_pc=True` enables a clean, checked main worktree to fast-forward.
+Git rechecks the target, local branch, ancestry and working-tree status before
+and after updating. Dirty, diverged and unverified work retains its own lane.
 
-The post-merge cleanup check also explicitly includes untracked files and runs
-before local branch-force, checkout or explicit branch deletion. New errors
-`cleanup_working_tree_dirty` and `cleanup_status_failed` return immediately,
-with `passed = not ENFORCED`. The compatibility field `merged=True` means only
-that a remote command reported success; it does not mean verified main, complete
-cleanup or rollback. The helper neither auto-stashes/pops work nor supplies
-`--delete-branch` to GitHub CLI. After successful synchronization and checkout,
-`GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH=1` (also its unset default) now returns
-`cleanup_deletion_unqualified`, appends a blocked-deletion action and sets
-`passed = not ENFORCED`. The helper issues no branch-deletion commands, retains
-prior actions and keeps `merged=True` as remote-command success only. Explicit
-`DELETE_BRANCH=0` leaves the successful no-delete path unchanged. `force=True`
-bypasses enablement only, never this gate. This does not prove a remote branch
-still exists after independent server-side deletion.
+For a known merged PR, completion requires successful required checks on its
+merge SHA and current main, merge ancestry in main and a clean PC checkout
+at the verified current SHA. Closed unmerged and unreadable PRs retain a
+follow-up disposition. Repository merge authority and branch retirement
+remain separate from this receipt.
 
-After the initial cleanup status guard, fetch explicitly from origin
-`refs/heads/main` into `refs/remotes/origin/main`, resolve that ref as a commit,
-and capture one full 40/64-character hexadecimal object ID. Read status again
-after the fetch/resolution, then update local main using the captured ID.
-Fetch, resolution, status or branch-update failure stops before checkout and
-explicit deletion; there is no cached-target fallback.
-If checkout itself fails, `cleanup_checkout_failed` is returned with the failure
-message in actions and `passed = not ENFORCED`. The earlier local-main update
-is retained; no rollback or later deletion is attempted. `merged=True` still
-means only prior remote-command success. The existing startup error display
-consumes this structured field without a caller change.
-
-New synchronization errors are `cleanup_fetch_failed`,
-`cleanup_commit_resolution_failed` and `cleanup_main_update_failed`.
-Late status failures reuse `cleanup_working_tree_dirty`/`cleanup_status_failed`.
-All preserve `merged=True` as prior remote-command success only and
-`passed = not ENFORCED`; no rollback is implied. Commit peeling, not the string
-shape alone, checks commit type. Local branch-force uses the captured ID.
-
-These are snapshots, not an atomic worktree/ref lock. Ref movement before
-commit capture and worktree/ref changes after the final status remain races.
-The fetch updates the remote-tracking ref even if a later check blocks local
-main. Freshness does not prove intended content, checks or merge authority.
-Direct/backup pushes, unchecked PR merging, main readback and server-side
-auto-delete remain open. Automatic branch retirement is blocked pending a
-qualified combined containment/expected-ref/worktree-ownership contract.
-Default-off remains required; this does not certify WSP 97 terminal convergence
-or authorize native RSI.
+`run_main_merge_sentinel(repo_root, force=False)` keeps the legacy result
+shape. Enablement and enforcement apply to observation coverage. The legacy
+`merged` field is false because promotion is handled by its own authority.
 
 # WRE Core Interface
 

@@ -1,3 +1,41 @@
+## 2026-11-10 — Recorded-source queue qualification
+
+The new `test_operator_recorded_stream_schedule.py` selection passes 35 cases,
+zero failures/errors/skips and zero denied effects/model imports under the existing
+offline effect guard. Source hashes match before and after execution. Fixtures use
+real disposable queue state and verify that only the requested action is consumed;
+unrelated announcements/context remain unacknowledged. Legacy frozen live records
+retain their exact shape/digest. Recorded requests cannot report a later or second
+submission, resume remaining IDs, or bypass source reservation with the live form.
+Review additions prove recorded-only intake leaves unseen/accepted live requests
+untouched before claim, and parent IDs are refused at claim and persisted-state reload.
+No source installation, real browser test or saved-schedule proof claimed.
+WSP22/50/77/97.
+
+The integrated sealed calendar selection passes 215 cases, preserving all 154
+previous names and adding 61 queue/CLI/access/selection cases. The shared runtime
+lease and shutdown qualification passes 20 lifecycle cases plus the two existing
+request-worker settlement cases. These checks use isolated state and the existing
+effect guard; they do not establish live scheduling or a native WRE invocation.
+
+## 2026-11-10 — Frozen stream request contracts
+
+Final focused selection: 49 passed, zero failures/errors/skips under the existing
+checked-in offline effect guard, with model imports denied and no real browser,
+network or child process effects. Real disposable manifest claims and synthetic
+launcher/DAE execution establish no browser work under the manifest lock, no
+retargeting/retry, and retained browser ownership until worker settlement.
+Held-browser results survive supervisor health checks; no automatic restart or
+later social/comment phase can consume that held browser. Legacy live scheduling
+refuses before attachment, and both launcher attachments use the CDP guard.
+The source getter reads exact unknown scheduling claims without consuming commands.
+The earlier seven-file expansion passed 301 cases, excluding only three existing
+subprocess cases from this process-denying private runner. Hosted coverage retains
+those cases. Initial failures were obsolete preview/live tracker fixtures; corrected
+fixtures use a synthetic qualified inventory with real disposable persistence and
+keep every selected-ID, visibility, metadata and unknown-outcome assertion.
+Live scheduling/readback and hosted checks are separate gates. WSP22/50/77/97.
+
 Packaging verification: eight backend-manifest cases pass; runtime membership stays
 1,485 with seven source bindings updated. Twelve scoped security-gate cases pass.
 Independent review verifies exactly 39 unchanged public checksum fingerprints,

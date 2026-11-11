@@ -5,6 +5,10 @@ mobile creator seam below is specified only (updated 2026-10-18).
 **Boundary**: p.fMALL is a platform/presentation layer, not a FoundUp, model
 host, OpenClaw instance, or Hermes worker.
 
+The [member shell](../../../public/member/INTERFACE.md#public-video-projection)
+owns the shared video UI. The [HPC media incident](MEDIA_PLAYBACK_INCIDENT_HPC.md)
+records provider and layout constraints, reproduction and regression evidence.
+
 ## Python package exports
 
 `modules.foundups.pfmall` exports the following shell-core surface:
@@ -134,6 +138,13 @@ explicit generation command. It writes the projected member catalog and is not
 called by catalog reads or Holo queries.
 
 ## Browser/member interface
+
+The public HPC video projection enters the same browser shell at
+`/member/?foundup=hpc`. The generated public video catalog contains the
+reviewed derived lane. The member video catalog contains its discovery card
+and uses the same registry identity. The browser route selects presentation,
+while the WSP 104 app handoff and server checks own membership and capabilities.
+See [HPC's interface](../hpc/INTERFACE.md).
 
 The static homepage's FX anchor targets the existing `/f/` public directory.
 Its project/ticker search consumes only the scope-free public projection; no

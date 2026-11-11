@@ -1,5 +1,113 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-11-10 — Native inventory diagnosis without scheduling effects
+
+The direct Unlisted route reached the existing collector but returned incomplete
+inventory before selection. Add reason codes and content-free page observations
+to that collector, retaining every qualification check. The Agent CLI can inspect
+an already accepted pending recorded request under the same runtime lease and
+source/access/gate checks. The launcher returns before claim, reservation or Save;
+verification handoff also leaves the request untouched. No inbox refresh, new
+command, unknown-record recovery or continuation is introduced. WSP11/22/50/77/84/97.
+
+Final sealed offline qualification passed 283 calendar cases and 102 inventory
+cases, retaining all earlier selections with zero denied effects. Independent
+source review accepted the read-only effect boundary. Native inspection confirmed a pagination timeout: the qualified snapshot saw
+Studio's `#navigate-after` control while the legacy labelled-button wait failed.
+Reuse that observed native element through the existing DOM owner, bind it to
+the collector's exact page witness, click once and await changed rows. A changed
+channel, route, filter, search or row set blocks the click. No retry fallback is used.
+Native inspection reached this adapted control but did not observe changed rows
+before its bounded wait expired. Full inventory and scheduling remain unqualified;
+no selection claim, reservation or Save occurred. The request deadline subsequently
+expired and is preserved. Further execution requires qualified request recovery;
+this slice neither renews it nor clears prior uncertain records.
+
+## 2026-11-10 — Native Unlisted navigation after first live observation
+
+The native recorded-stream request reached its verified parent/channel, then the
+legacy ContentPageScheduler Unlisted sidebar selector timed out before selection
+or Save. Reuse the existing filtered Shorts URL helper for frozen-request discovery
+and selected navigation. A row timeout still permits strict explicit-empty
+readback; URL parameters alone never qualify the inventory. Preserve native
+channel, applied-chip, title and complete-pagination checks, late STOP checks and
+verification handoff. The frozen selected path no longer enters the model fallback.
+No unknown record or request reservation is cleared. WSP10/22/50/77/84/97.
+
+Sealed calendar qualification: 233 passed, retaining all 215 prior cases and
+adding 18 URL/readback/handoff/selection controls, with zero denied effects.
+Independent source review accepted; repaired native behavior awaits execution.
+
+## 2026-11-10 — Native first-test dispatch for an ended stream
+
+Extend the existing Agent CLI with exact-request consumption and the shared DAE
+runtime lease. Recorded parent identity and observed title must match before
+complete Unlisted Shorts discovery. Preserve the full frozen selection but permit
+only its first member with unchanged title/description. Recheck this bound at the
+existing scheduling effect guard; no fallback member, ordinary rotation or title
+variation follows. Missing metadata blocks the first test. Save/readback and
+remaining-batch continuation remain unqualified. WSP10/11/22/50/77/84/97.
+
+Validation: the sealed calendar selection passes 215 cases, with all 154 previous
+names retained and zero denied effects. First-test guards reject parent targets,
+later batch members, changed titles, metadata rewriting and competing runtime
+ownership. Live scheduling remains unqualified until independent saved-slot proof.
+
+## 2026-11-10 — Frozen stream title batch through the existing DAE
+
+Extend the private command queue and owned scheduler path with exact-title
+Unlisted Shorts discovery on the frozen confirmed stream channel. Require complete
+calendar inventory even for selected batches, bind the supplied access-verified
+browser without reconnect, and recheck expiry, cancellation, configured gates and
+detail identity/title before editing. Audit committed picker values and observed
+timezone before reserving a slot and entering the existing Save claim/callback.
+Reservations and submission attempts are separate; neither populates verified
+scheduled results. Preserve verification handoffs through fallback catchers.
+The legacy single-channel live shortcut refuses instead of bypassing this owner.
+
+The request branch yields its DAE browser after claimed work; the supervisor
+retains the held state. Ordinary general manual-takeover, full saved-state
+reconciliation, native WRE invocation and live Studio qualification remain separate.
+No channel identifiers or private instructions are added to source. WSP11/22/50/77/84/97.
+
+## 2026-11-10 — Exact calendar slots and durable unknown reservations
+
+Keep exact occupied slots from complete channel inventory and allocate against
+the combined observed and pending calendar. Preserve ET-to-channel date rollover,
+minimum spacing across midnight and the channel-local daily cap. Ambiguous
+observed times block the calendar. Allocation skips unrepresentable DST slots.
+
+Live reservations require persisted state and a fresh qualified calendar bound
+to the account timezone; Save separately observes the native picker. Duplicate or malformed state fails closed. A same-task nested
+operation reuses the channel lock, and another task or process must acquire it
+independently. Atomic saves retain unknown reservations across reloads and empty
+or failed inventory. State is scoped to the installed checkout's tracker folder.
+Qualified offline controls cover 34 calendar and persistence cases. WSP22/50/84/97.
+
+## 2026-11-10 — Audit before scheduling; explicit audience configuration
+
+Extend existing detail Save guards with title/description completeness, observed
+audience and future date/time/timezone checks. Missing metadata consumes only
+matched eligible existing analysis; absent evidence blocks. Content-row scheduling
+enters the detail owner; unauditable inline writes refuse before claims/clicks.
+Keep manual-field protection, private directives and uncertain-save records.
+
+012's configuration correction removes channel-name audience defaults. Exact-ID
+Yes/No lists come from the runtime environment; explicit registry booleans survive
+normalization. Malformed, duplicate, conflicting or absent policy cannot select
+an audience or save. No configured ID enables a new channel's operational roles.
+Offline controls and installed/live qualification are separate. WSP11/22/50/84/97.
+
+## 2026-11-10 — Guard direct launch attachments during verification
+
+Install the shared Selenium verification handoff on both launch attachment
+paths before extra-tab cleanup or navigation. Detected challenges yield for
+at least30 seconds and until clear; no verification completion or pending-effect
+replay. Existing unknown-save claims are untouched. This is a narrow verification
+slice, not completion of the separate60-second manual draft/date-time takeover
+requirement below. Source installation and live qualification remain separate.
+WSP11/22/50/84/97.
+
 ## 2026-11-07 — Record manual takeover and YUMORI metadata requirements
 
 WSP00/22/50/77/97. Source review at `fa7d487f3` found that detail/CPS workflow
@@ -2958,3 +3066,14 @@ skips it with `cadence_live_unqualified` until independent timezone and occupied
 receipts exist. Allocation/planning rejects unknown Studio timezone or any slot
 whose local date differs from its ET date (including Asia/Tokyo). This prevents
 clock-only conversion from silently publishing on the wrong calendar date.
+# 2026-11-10 — Scheduling pre-save completeness audit
+
+012 observed missing Audience answers, date-only music titles and empty bodies.
+Extended existing detail/save and index owners: repair incomplete metadata only
+from matched existing evidence, verify configured audience, and refuse incomplete
+or changed drafts and invalid schedule intent before Save. Content-page entry
+uses detail inspection; unqualified inline Save is held. Added the module-local
+audit skill and private AntifaFM candidate review without publishing or model calls.
+Offline tests cover actual guard/selection owners and durable unknown behavior;
+live installation, browser selectors, UI-TARS audience diagnosis and independent
+schedule readback remain separate qualification. WSP 10/22/50/84/95/97.

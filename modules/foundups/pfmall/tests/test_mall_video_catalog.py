@@ -23,6 +23,115 @@ def catalog() -> list[dict]:
     return json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
 
 
+def test_hpc_catalog_rebuild_is_isolated_and_idempotent(catalog):
+    from scripts.refresh_mall_catalog import project_public_video_lanes
+
+    rebuilt, scoped = project_public_video_lanes(catalog)
+    assert rebuilt == catalog
+    assert scoped == json.loads(
+        CATALOG_PATH.with_name("mall-public-video-catalog.json").read_text(encoding="utf-8")
+    )
+    assert list(scoped) == ["hpc"]
+    projection = scoped["hpc"]
+    lane = projection["lane"]
+    discovery = next(item for item in catalog if item["foundup_id"] == "hpc")
+    assert discovery["videos"] == []
+    assert discovery["public_poc_url"] == "https://foundups.com/member/?foundup=hpc"
+    assert lane["parent_channels"] == ["move2japan"]
+    assert lane["source_id"] == "UC-LSSlOZwpGIRIYihaz8zCw"
+    assert projection["voice_resource_url"] == "https://vote.mtrout.com/contact"
+    assert projection["topic"] == "#SchumerOUT"
+    assert lane["video_count"] == len(lane["videos"]) == 8
+    for video in lane["videos"]:
+        video_id = video["video_id"]
+        assert video["embed_url"] == f"https://www.youtube.com/embed/{video_id}"
+        assert video["source_url"] == f"https://www.youtube.com/shorts/{video_id}"
+        assert video["thumbnail_url"] == f"https://i.ytimg.com/vi/{video_id}/oardefault.jpg"
+        assert video["source_label"] == "Move2Japan"
+        assert video["editorial_label"] in {"Opinion", "Commentary", "Satire"}
+        assert "jeffries" not in video["title"].lower()
+
+
+def test_scoped_source_audit_paginates_uploads_and_batches_all_metadata():
+    from scripts.refresh_mall_catalog import audit_scoped_youtube_source
+
+    channel_id = "UC-source"
+    ids = [f"vid{i:08d}" for i in range(54)]
+    calls = []
+
+    class Endpoint:
+        def __init__(self, method):
+            self.method = method
+
+        def list(self, **params):
+            self.params = params
+            calls.append((self.method, params))
+            return self
+
+        def execute(self):
+            if self.method == "channels":
+                return {"items": [{
+                    "contentDetails": {"relatedPlaylists": {"uploads": "UU-source"}},
+                    "statistics": {"videoCount": "56"},
+                }]}
+            if self.method == "playlistItems":
+                first = "pageToken" not in self.params
+                return {
+                    "items": [{"contentDetails": {"videoId": v}} for v in
+                              (ids[:50] if first else ids[49:])],
+                    **({"nextPageToken": "next"} if first else {}),
+                }
+            return {"items": [{
+                "id": v,
+                "snippet": {
+                    "channelId": channel_id, "publishedAt": "2026-11-10T00:00:00Z",
+                    "title": "#SCHUMEROUT" if v == ids[0] else "Other",
+                    "description": "Schumer  out" if v == ids[50] else "",
+                    "tags": ["SchumerOut"] if v == ids[52] else [],
+                },
+                "status": {"privacyStatus": "public", "embeddable": v != ids[50]},
+                "contentDetails": {"duration": "PT30S"},
+            } for v in self.params["id"].split(",") if v != ids[-1]]}
+
+    class YouTube:
+        def channels(self):
+            return Endpoint("channels")
+
+        def playlistItems(self):
+            return Endpoint("playlistItems")
+
+        def videos(self):
+            return Endpoint("videos")
+
+    result = audit_scoped_youtube_source(YouTube(), channel_id)
+    assert result["pages"] == 2
+    assert result["playlist_items"] == 55 and result["unique_ids"] == 54
+    assert result["channel_video_count"] == 56
+    assert result["duplicate_ids"] == [ids[49]]
+    assert result["missing_metadata_ids"] == [ids[-1]]
+    assert [len(params["id"].split(",")) for method, params in calls if method == "videos"] == [50, 4]
+    by_id = {item["video_id"]: item for item in result["candidates"]}
+    assert {v: item["matched_fields"] for v, item in by_id.items()} == {
+        ids[0]: ["title"], ids[50]: ["description"], ids[52]: ["tags"],
+    }
+    assert by_id[ids[50]]["embeddable"] is False
+
+
+def test_hpc_registry_parent_is_registered_and_acyclic():
+    path = CATALOG_PATH.parents[2] / "modules" / "foundups" / "foundup_registry.json"
+    registry = json.loads(path.read_text(encoding="utf-8"))
+    entities = {entry["foundup_id"]: entry for entry in registry["entities"]}
+    assert entities["hpc"]["parent_foundup_id"] == "voteballots"
+    for foundup_id, entry in entities.items():
+        visited = {foundup_id}
+        parent_id = entry.get("parent_foundup_id")
+        while parent_id:
+            assert parent_id in entities, f"{foundup_id}: unknown parent {parent_id}"
+            assert parent_id not in visited, f"{foundup_id}: parent cycle at {parent_id}"
+            visited.add(parent_id)
+            parent_id = entities[parent_id].get("parent_foundup_id")
+
+
 class TestCatalogStructure:
     """Test overall catalog structure."""
 

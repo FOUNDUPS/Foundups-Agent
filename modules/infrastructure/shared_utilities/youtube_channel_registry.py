@@ -148,6 +148,9 @@ def _normalize_channel(channel: Dict[str, Any]) -> Dict[str, Any]:
         "time_slots": list(shorts.get("time_slots") or _DEFAULT_TIME_SLOTS),
         "max_per_day": int(shorts.get("max_per_day", 3)),
         "description_template": str(shorts.get("description_template", "ffcpln")),
+        # Preserve explicit policy, including malformed input for consumer refusal.
+        # Never coerce a string such as "false" to a truthy audience selection.
+        "made_for_kids": shorts.get("made_for_kids"),
     }
 
     # Content types: what this channel produces (short, upload)

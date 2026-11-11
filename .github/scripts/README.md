@@ -15,6 +15,33 @@ and buildx available. Missing Docker, a file-specific ignore override, build
 failure, timeout, leaked fixture, or missing source is a failure, never a skip.
 The dedicated workflow executes it without application dependencies or credentials.
 
+## Audit Markdown fast path
+
+CI keeps the required check name `test (3.12)`. A repository administrator can
+set the Actions variable `CI_AUDIT_FAST_PATH_BASE` to an exact PR target branch.
+Until set, the Python job runs the existing suite. Set it to an isolated preview
+branch to qualify the shortcut before enabling `main`. Removing the variable
+restores the full suite on the next eligible PR event.
+
+The shortcut admits regular Markdown additions and edits under
+`docs/audits/prose/`, the dated Git workflow impact audit, and the existing
+`docs/ci-pilot/examples/` fixtures. Reserve the prose directory for human-readable
+reports. Policy, handoffs, CI, deployment, executable content and mixed changes
+use the full suite. The check verifies both parents of the exact test-merge
+commit and compares complete Git diffs. Missing classification evidence routes
+full. Failed scoped checks or a moving base fail the required check.
+
+Both routes retain separate secret scanning and the other required checks.
+Scoped Markdown uses whitespace and offline relative link and anchor checks.
+The shadow job also checks WSP mirrors, numbering and the Codex projection.
+All original PR event types and post-merge tests remain in effect.
+
+Before targeting `main`, require an independent code owner's approval for
+workflow and validator changes and enable GitHub's up-to-date branch
+requirement. Verify the fast and full paths and a rejected docs change on
+an isolated target. Compare event-to-green and runner time on the exact
+head, base and test-merge SHA.
+
 ## Change record — 2026-10-21
 
 ### Application image build budget — 2026-10-26

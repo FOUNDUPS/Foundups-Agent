@@ -45,6 +45,98 @@ provided. The producer should attach the enqueue-time deadline so offline queued
 work cannot start a fresh hour days later. Legacy commands without a deadline
 retain first-observation TTL. `set_context` and `announce` honor the same deadline.
 
+## Frozen stream scheduling requests
+
+`schedule_stream_shorts` accepts `ttl_seconds` and `expires_at_unix` with
+the same bounds. Without an explicit recorded source, the existing watcher freezes the confirmed running LiveChatCore
+channel, video, exact stream title, chat and memory session at acceptance. No
+speculative DAE video or later stream supplies missing fields. The title rule is
+operator authorization to select every matching UNLISTED Short on that channel;
+it is not independent evidence of a native parent-child relationship. A later
+stream ending or changing does not retarget the frozen request.
+
+For an ended stream, the same action accepts the paired fields
+`recorded_source={channel_id, parent_video_id, stream_title}` and
+`first_test_only=true`. All three source fields are required and native IDs are
+validated; alternate keys or a missing/false test flag are rejected. This is an
+explicit operator target, not proof that the parent is accessible or has the
+claimed title. The browser owner must freshly verify both before discovery.
+The immutable record adds `source_kind=recorded` and `first_test_only=true`, with
+empty chat/session IDs rather than an invented live session. Legacy live records
+retain their exact shape and digest. Both forms share the same channel/parent
+reservation, so another command or mode cannot retry an uncertain source.
+
+`await queue.refresh_stream_schedule_request(command_id, recorded_only=False)` validates the existing
+inbox, ledger and state under the current manifest lock, and consumes only that
+exact scheduling action using the existing claim/finish owner. It never polls or
+dispatches unrelated announcements, policies or context commands. It returns a
+copied unexpired pending request, or `None` for missing, other-action or terminal
+work; corrupt/conflicting state and unknown intake raise. No acknowledged command
+is dispatched again. Browser work must begin after this method releases the lock.
+The native recorded-only consumer passes `recorded_only=True`: legacy live and
+non-first-test commands are neither claimed nor returned, including already
+accepted live work. General daemon callers retain live intake by default.
+
+In recorded first-test mode the complete matching batch is frozen, but only its
+first ID may be submitted, with metadata preserved. Remaining IDs are withheld,
+not a new pending batch. The queue permits at most that first submitted ID in its
+result, preserves the full selection through restart and keeps the request
+terminal unknown after an uncertain attempt. A later continuation requires a
+separately qualified existing-owner transition after exact saved-schedule proof;
+replay, a new command or a successful click cannot authorize it. This queue layer
+does not implement that readback or continuation.
+The parent video itself is excluded from every selected batch, for both live and
+recorded sources, before claim and whenever persisted selections are validated.
+Recorded-only inspection reports `first_test_only`, `withheld_count` (all selected
+IDs after the first) and `submission_recorded_count`. These are admission/attempt
+counts, not verified schedules; `delivery_verified` remains false and private
+source title/channel/video fields are not exposed by inspection.
+
+`operator_stream_schedule_owner.py` uses the existing queue state, acknowledgements,
+receipts and lock. There is no separate inbox, worker or publisher. The dispatch
+only persists a pending request. The existing browser Phase3 obtains pending
+requests and performs exact parent/channel access verification and complete title
+discovery outside the manifest lock. A verified candidate atomically freezes the
+selected native IDs before any scheduling write. Another browser may verify the
+same target before that claim, but cannot claim it twice. Incomplete discovery or
+unverified access leaves pending work until expiry; complete empty discovery
+terminates as `no_matching_shorts`. No branch widens to unmatched backlog.
+
+The dedicated launcher branch skips ordinary rotation, extra-tab cleanup, later
+audits and origin restoration. It passes the already-verified driver and frozen
+request to the existing scheduler, retaining STOP, metadata/audience and unknown
+Save controls. Browser ownership remains held until the request thread settles,
+including timeouts and repeated cancellation. A verification handoff blocks an
+unclaimed request when it can still claim it; it never transfers an already-owned
+request or automatically retries uncertain work.
+
+After any claim or verification handoff, that browser loop yields for operator
+review before later social/comment phases. Its supervisor retains the explicit
+hold result instead of treating it as a worker crash and restarting it. The
+other browser and main/livechat owner remain separate. Direct launcher attachments
+use the existing connection-specific CDP/verification guard. Legacy live
+`run_shorts_scheduler(mode='schedule')` refuses before attachment because it lacks
+the qualified calendar owner; enhancement and preview retain their existing paths.
+
+Queue instance methods are `get_pending_stream_schedule_requests()`,
+`claim_stream_schedule_request(request, video_ids)` and
+`finish_stream_schedule_request(command_id, reason=..., submitted_ids=...,
+no_submission=False)`. Consumers must use the current immutable queue snapshot.
+Inspection separates accepted intake from `execution_status` (`pending`,
+`blocked`, `unknown`), selection count and expiry. No scheduler count or Submit
+click establishes delivery; these requests never report verified completion.
+Source identity deduplication survives new command IDs and restart. An unknown
+claim remains terminal; no queue record or STOP control is cleared automatically.
+
+`get_unresolved_scheduling_claims(channel_id)` (queue instance and module export)
+returns copied matching unknown Save claims containing a scheduling fingerprint.
+It validates the current state under the existing lock without dispatching inbox
+work. Corrupt/unreadable state raises; legacy claims without a slot must be
+reconciled by the calendar owner, not discarded or treated as free capacity.
+
+This slice has offline fixture qualification only. Live scheduling, persisted
+readback and operator-visible completion remain separate acceptance gates.
+
 ## Writer API
 
 Module exports and `OperatorCommandQueue` instance methods:

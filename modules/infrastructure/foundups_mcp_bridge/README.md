@@ -4,6 +4,14 @@ Private, read-only MCP bridge for AI-assisted architectural execution.
 
 **Version**: 1.4.0 (perception + recall + state compression)
 
+## Private draft sender PoC
+
+A separate loopback MCP process can inspect one approved Gmail draft and
+preview a From-only correction. A commit requires a scoped caller and a
+one-shot private approval. The [admission and proof runbook](docs/PRIVATE_DRAFT_MCP.md)
+covers the dedicated runtime, OAuth, tunnel, and ChatGPT registration.
+The Holo launcher and its read-only allowlist are unchanged.
+
 ## MCP runtime compatibility
 
 The HTTP launcher requires the exact quartet in `requirements.txt`: FastMCP

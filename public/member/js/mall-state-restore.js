@@ -27,6 +27,7 @@
   var STORAGE_KEY = 'pfmall_mall_state_v1';
   var PRODUCT_KEYS = { move2japan: 'pfmall_product_move2japan_state_v1' };
   var selectedProduct = null;
+  var selectedVideoScope = null;
   var RETURN_KEY = 'pfmall_product_return_v1';
   var RETURN_TTL_MS = 15 * 60 * 1000;
   var FILTER_KEYS = ['q', 'country', 'prefecture', 'city', 'locality', 'max', 'land', 'sort', 'group', 'large', 'tour'];
@@ -38,11 +39,24 @@
   var VALID_PROJECTIONS = ['default', 'alpha', 'readiness', 'category'];
 
   function storageKey() {
+    if (selectedVideoScope) return 'pfmall_video_scope_' + selectedVideoScope + '_v1';
     return selectedProduct ? PRODUCT_KEYS[selectedProduct] : STORAGE_KEY;
   }
 
+  function stateStorage() {
+    return selectedVideoScope ? sessionStorage : localStorage;
+  }
+
+  function selectVideoScope(scope) {
+    if (selectedProduct || typeof scope !== 'string' || !/^[a-z][a-z0-9_]{2,49}$/.test(scope)) return false;
+    clearTimeout(scrollTimer);
+    scrollTimer = null;
+    selectedVideoScope = scope;
+    return true;
+  }
+
   function selectProduct(product) {
-    if (product !== null && (typeof product !== 'string' || !Object.prototype.hasOwnProperty.call(PRODUCT_KEYS, product))) return false;
+    if (selectedVideoScope || (product !== null && (typeof product !== 'string' || !Object.prototype.hasOwnProperty.call(PRODUCT_KEYS, product)))) return false;
     clearTimeout(scrollTimer);
     scrollTimer = null;
     selectedProduct = product;
@@ -110,7 +124,7 @@
 
   function loadState() {
     try {
-      var raw = localStorage.getItem(storageKey());
+      var raw = stateStorage().getItem(storageKey());
       if (raw && raw.length > 131072) return null;
       return raw ? JSON.parse(raw) : null;
     } catch (e) {
@@ -120,7 +134,7 @@
 
   function saveState(state) {
     try {
-      localStorage.setItem(storageKey(), JSON.stringify(state));
+      stateStorage().setItem(storageKey(), JSON.stringify(state));
     } catch (e) {
       // Private mode or quota — fail silently
     }
@@ -132,6 +146,12 @@
     var state = {};
     var tf = window.mallTileField;
     if (!tf) return selectedProduct ? null : state;
+
+    var wrapper = document.querySelector('.mall-tile-field-wrapper');
+    if (selectedVideoScope) {
+      return tf.getVideoGridState?.() ||
+        (wrapper ? { scrollTop: wrapper.scrollTop, scrollLeft: wrapper.scrollLeft } : null);
+    }
 
     if (selectedProduct) {
       var geographic = typeof tf.getGeographicState === 'function' ? tf.getGeographicState() : null;
@@ -157,7 +177,6 @@
     }
 
     // Scroll position (from tile field wrapper)
-    var wrapper = document.querySelector('.mall-tile-field-wrapper');
     if (wrapper) {
       state.scrollTop = wrapper.scrollTop;
       state.scrollLeft = wrapper.scrollLeft;
@@ -177,6 +196,13 @@
 
   function isValidState(state) {
     if (!state || typeof state !== 'object') return false;
+    if (selectedVideoScope) {
+      var keys = Object.keys(state);
+      if (![state.scrollTop, state.scrollLeft].every(function(value) { return Number.isFinite(value) && value >= 0; })) return false;
+      if (keys.length === 2) return true; // legacy scoped positions
+      return keys.length === 4 && typeof state.anchorVideoId === 'string' &&
+        /^[A-Za-z0-9_-]{1,128}$/.test(state.anchorVideoId) && Number.isFinite(state.anchorOffset);
+    }
     if (selectedProduct) {
       return !Array.isArray(state) && state.schema_version === 'pfmall_product_state.v1' &&
         state.product_id === selectedProduct && state.geographic && typeof state.geographic === 'object' &&
@@ -208,6 +234,19 @@
 
     if (selectedProduct) {
       return typeof tf.restoreGeographicState === 'function' && tf.restoreGeographicState(state.geographic) === true;
+    }
+
+    if (selectedVideoScope) {
+      var scope = selectedVideoScope;
+      requestAnimationFrame(function() {
+        if (selectedVideoScope !== scope || tf.restoreVideoGridState?.(state)) return;
+        var wrapper = document.querySelector('.mall-tile-field-wrapper');
+        if (wrapper) {
+          wrapper.scrollTop = state.scrollTop;
+          wrapper.scrollLeft = state.scrollLeft;
+        }
+      });
+      return true;
     }
 
     var restored = false;
@@ -253,7 +292,7 @@
 
   function clear() {
     try {
-      localStorage.removeItem(storageKey());
+      stateStorage().removeItem(storageKey());
     } catch (e) {
       // fail silently
     }
@@ -327,6 +366,9 @@
   // ─── Public API ───
 
   window.mallStateRestore = {
+    /** Keep a fixed video field's scroll in its own browser tab. */
+    selectVideoScope: selectVideoScope,
+
     /** Select a registered product namespace before loading its catalog. */
     selectProduct: selectProduct,
 

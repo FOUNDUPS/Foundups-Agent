@@ -1,0 +1,207 @@
+.mall-video-scope-header:not([hidden]) {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+[data-mall-video-scope] :is(.mall-self-anchor, #mallProjection, #redDogAnchor > :not(#videoScopeActions),
+    #accountPlane, #accountPlaneScrim, #gestureHints) {
+  display: none !important;
+}
+
+[data-mall-video-scope] .mall-shell {
+  height: 100dvh;
+  padding-top: max(0.5rem, var(--safe-top));
+  padding-inline: 0.65rem;
+  padding-bottom: calc(4.25rem + var(--safe-bottom));
+  background: radial-gradient(ellipse at top left, #251c3f 0, var(--bg-deep, #08080f) 28rem);
+}
+
+[data-mall-video-scope] .mall-header {
+  position: sticky;
+  top: 0;
+  justify-content: flex-start;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 0.55rem;
+  margin-bottom: 0.45rem;
+}
+
+[data-mall-video-scope] .mall-brand-minimal {
+  order: -1;
+  flex: 0 0 auto;
+  min-width: 44px;
+  min-height: 44px;
+  justify-content: center;
+}
+
+[data-mall-video-scope] #redDogAnchor {
+  right: max(0.65rem, var(--safe-right));
+  bottom: calc(0.5rem + var(--safe-bottom));
+}
+
+[data-mall-video-scope] .mall-main {
+  overflow: hidden;
+}
+
+[data-mall-video-scope] .mall-tile-field-wrapper {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  scroll-behavior: auto;
+  overflow-x: hidden;
+  overflow-anchor: none;
+  overscroll-behavior-x: none;
+  touch-action: pan-y;
+}
+
+[data-mall-video-scope] .mall-tile-field {
+  align-content: start;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+[data-mall-video-scope] .mall-tile:active {
+  transform: none;
+}
+
+[data-mall-video-scope] .mall-tile-field-wrapper::before,
+[data-mall-video-scope] .mall-tile-field-wrapper::after {
+  display: none;
+}
+
+[data-mall-video-scope] .mall-tile-expand {
+  top: 0;
+  right: 0;
+  bottom: auto;
+  min-width: 44px;
+  min-height: 44px;
+  opacity: 1;
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+
+[data-mall-video-scope] .mall-tile-expand svg {
+  width: 21px;
+  height: 21px;
+  padding: 3px;
+  border-radius: 4px;
+  background: #08080fcc;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+[data-mall-video-scope] .mall-tile-inner {
+  display: none;
+}
+
+.mall-inline-player-slot,
+.mall-video-grid-tail {
+  min-width: 0;
+  grid-column: 1 / -1;
+}
+
+.mall-video-grid-tail {
+  padding: 0.65rem 0;
+  color: #d9cde9;
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+.mall-video-grid-tail button {
+  min-height: 44px;
+}
+
+.mall-video-scope-header h1,
+.mall-video-scope-header h2,
+.mall-video-scope-header p {
+  margin: 0;
+}
+
+.mall-video-scope-header h1 {
+  color: #fff4dc;
+  font-size: clamp(1rem, 4vw, 1.45rem);
+  line-height: 1.15;
+}
+
+.mall-video-scope-header p {
+  margin-top: 0.12rem;
+  color: #d9cde9;
+  font-size: 0.73rem;
+}
+
+.mall-video-scope-header h2 {
+  color: #ffd982;
+  font-size: 0.82rem;
+}
+
+#videoScopeInfo,
+.mall-video-scope-disclosure button {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid #d6bdf880;
+  border-radius: 0.65rem;
+  background: #302049;
+  color: #fff4dc;
+  font: inherit;
+  cursor: pointer;
+}
+
+.mall-video-scope-voice {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0.38rem 0.55rem;
+  border-radius: 0.65rem;
+  background: #ffd982;
+  color: #21172c;
+  text-decoration: none;
+  font-size: 0.73rem;
+  font-weight: 750;
+  line-height: 1.25;
+}
+
+.mall-video-scope-voice svg {
+  width: 1.05rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+.mall-video-scope-voice small {
+  display: block;
+  font-weight: 500;
+}
+
+.mall-video-scope-disclosure {
+  width: min(25rem, calc(100% - 2rem));
+  margin: auto;
+  padding: 1.25rem;
+  border: 1px solid #d6bdf880;
+  border-radius: 0.9rem;
+  background: #241a36;
+  color: #fff4dc;
+}
+
+.mall-video-scope-disclosure::backdrop {
+  background: #08080fc9;
+}
+
+.mall-video-scope-disclosure h2 {
+  font-size: 1.2rem;
+}
+
+.mall-video-scope-disclosure p {
+  margin: 0.65rem 0 1rem;
+  line-height: 1.5;
+}
+
+.mall-video-scope-disclosure button {
+  padding: 0 0.85rem;
+}

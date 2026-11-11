@@ -1,3 +1,36 @@
+## 2026-11-10 — Native request inventory inspection
+
+The sealed calendar suite retains all 233 previous cases and adds 50 controls.
+Real disposable queue bytes stay unchanged during inspection, including unseen,
+expired, access-blocked, verification-handoff and widened-scope requests. The
+actual launcher exits before claim/finish or scheduling. Diagnostics keep only
+bounded counts, flags and reason codes; tests reject titles/IDs/URLs in that data.
+The inventory suite retains its 102 cases. Pagination tests bind the qualified
+page witness, require a single observed-control click and changed rows, and refuse
+scope drift before clicking. No real browser, account, model, network or provider
+action occurs in these tests.
+
+## 2026-11-10 — Frozen stream browser access
+
+`test_remote_cli.py` exercises `verify_schedule_target_access` with synthetic
+Studio observations. A verified receipt requires the exact native channel,
+parent video edit URL, detail fields and observed permission. Oops, missing
+observations and mismatched identities block that candidate. A verification
+handoff propagates to the browser owner. The helper observes the supplied
+driver after the caller navigates under its browser lock. Port preferences
+only order candidates. The fixture covers source behavior and leaves live
+Studio qualification separate.
+
+## 2026-11-10 — Pre-save audit and audience configuration
+
+The existing protected directives runner selects114 cases, including48 new
+pre-save audit/configuration controls. Synthetic drafts exercise actual preparation
+and Save owners: metadata completeness, eligible analysis reuse, observed audience,
+late changes, exact identity, invalid/DST slots and detail-owner handoff. Thirteen
+configuration cases cover native-ID Yes/No without enabling channels, invalid or
+conflicting configuration with zero writes, and registry audience round trips.
+All66 prior directive/upload controls remain. No browser/model/public action occurs.
+
 ## 2026-11-05 — Native visibility readiness regression
 
 The same four-file private-directive consumer selection now passes66 controls
@@ -176,3 +209,10 @@ When `YT_SCHEDULER_INDEX_WEAVE_ENABLED=true` (default), the production scheduler
 ## Last Updated
 
 - **V0.8.x** (2026-01-18): Production-aligned full cake; deterministic click cadence; page save hardened
+# Scheduling pre-save audit controls
+
+`test_presave_audit.py` exercises incomplete metadata, exact channel audience,
+unknown/changed controls, late draft changes, valid/invalid schedule intent,
+matched evidence repair and the content-row handoff to the detail owner. No live
+browser, GPU, model, upload or scheduling operation runs. Existing private-policy
+and durable readback controls remain applicable with fully specified draft fixtures.

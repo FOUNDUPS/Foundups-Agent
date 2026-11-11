@@ -1,3 +1,12 @@
+## 2026-11-10 — Verification gate backend binding
+
+The first final-source hosted binding selection rejected both stale consumer
+digest pins (2 failed,91 passed,18 skipped in the wider mixed suite). Update
+the exact expected canonical digest to the independently generated1486-member
+manifest and the matching extension constant. Preserve all source-byte/index
+assertions and byte caps; the Node count boundary now rejects1487. These changes
+bind one new runtime leaf; they do not establish native WRE or live activation.
+
 ## 2026-11-01 — Private operator directives backend closure
 
 The canonical registry generator reports1800 tracked tests,260 quarantined,

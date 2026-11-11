@@ -46,7 +46,7 @@ class Pages:
             raise value
         return copy.deepcopy(value)
 
-    def click_next_page(self):
+    def click_next_page(self, *, expected_page=None):
         self.clicks += 1
         if self.click_error:
             raise RuntimeError("synthetic pagination failure")
@@ -415,15 +415,20 @@ def test_qualified_conflict_remains_a_useful_repair_input(monkeypatch):
 
 
 @pytest.mark.parametrize("complete", [True, False])
-def test_scheduler_sync_routes_only_qualified_inventory(monkeypatch, complete):
-    monkeypatch.setenv("YT_SCHEDULER_DO_SYNC", "true")
+def test_scheduler_sync_routes_only_qualified_inventory(monkeypatch, tmp_path, complete):
+    monkeypatch.setenv('YT_012_MANIFEST_FILE', str(tmp_path / 'inbox.json'))
+    monkeypatch.setenv('YT_012_MANIFEST_ACK_FILE', str(tmp_path / 'ack.json'))
+    monkeypatch.setenv('YT_012_MANIFEST_STATE_FILE', str(tmp_path / 'state.json'))
     monkeypatch.setattr(ContentPageScheduler, "navigate_to_scheduled", lambda *_: True)
     owner = object.__new__(YouTubeShortsScheduler)
     owner.channel_id, owner.channel_key, owner.driver = CHANNEL, "foundups", None
+    owner.channel_tz = 'America/New_York'
     result = receipt() if complete else receipt(page(next_page=None))
     owner.dom = SimpleNamespace(read_scheduled_inventory=lambda *_: result)
-    owner.tracker = Mock()
-    asyncio.run(owner._sync_scheduled_videos())
+    owner.tracker = ScheduleTracker(CHANNEL, tmp_path, persist=False)
+    owner.tracker.sync_from_youtube = Mock(wraps=owner.tracker.sync_from_youtube)
+    assert asyncio.run(owner._sync_scheduled_videos()) is complete
+    assert owner.tracker.calendar_ready is complete
     assert owner.tracker.sync_from_youtube.call_count == int(complete)
     if complete:
         assert owner.tracker.sync_from_youtube.call_args.kwargs["inventory"] == result

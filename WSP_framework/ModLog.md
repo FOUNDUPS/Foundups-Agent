@@ -1,3 +1,13 @@
+## 2026-11-10 — Branch lifecycle boot and draft protocol registration
+
+Under 012's explicit continuation, PR #2335 records the WSP 00 boot obligation
+for owned branch and PR reconciliation. WSP 10 and WSP 97 govern preservation
+and acceptance. WSP 110 v0.2 remains draft guidance and is registered in both
+master indexes. Framework and
+knowledge copies match. The WSP 00 State Bridge fallback and coherence canary
+retain their original wording. The existing awakening gate remains unchanged.
+WSP 22/81/97 apply. Recovery is a focused revert of PR #2335.
+
 ## 2026-11-05 — WSP26 micro-UPS preview qualification
 
 WSP81 NOTIFICATION_REQUIRED under 012's continuing architecture/docs request.

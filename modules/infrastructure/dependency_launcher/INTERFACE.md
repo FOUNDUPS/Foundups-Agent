@@ -7,6 +7,19 @@
 
 ## Public API
 
+Chrome/Edge retry helpers now install the
+[YouTube verification gate](../foundups_selenium/INTERFACE.md#youtube-human-verification-handoff)
+before returning an attached driver, including the existing no-page recovery
+branch. Attachment signatures are unchanged. Installation itself performs no
+browser effects; later effects may yield for human verification and raise
+`VerificationHandoff` instead of replaying an interrupted command.
+
+Each attached Chrome or Edge connection gets its own command map and the
+matching CDP route (`goog` or `ms`) before the guard is installed. This keeps
+later Chromium attachments from changing that connection's CDP destination.
+An attachment proves transport readiness. Studio access needs separate target
+verification.
+
 ### `ensure_dependencies(require_lm_studio: bool = True, *, model_key: Optional[str] = None) -> Dict[str, bool]`
 
 Ensure all dependencies are running before DAE starts.

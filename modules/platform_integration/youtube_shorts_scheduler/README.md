@@ -1,5 +1,79 @@
 # YouTube Shorts Scheduler
 
+## First test after a stream ends
+
+For an already accepted, pending request, add `--inspect-request` to the native
+CLI command below to diagnose Unlisted inventory through the same browser owner.
+It reads only that request and returns content-free page checks and match counts.
+It does not consume inbox commands, claim a batch, reserve slots or save content.
+Expired or terminal requests are not inspectable through this execution entry.
+Inspection retains the runtime lease, source/access checks and verification handoff.
+
+An explicit private `recorded_source` and `first_test_only: true` request can
+name an ended stream without inventing a live session. The native Agent CLI
+accepts `--request-id <id> --browser chrome|edge` after the producer enqueues it.
+It consumes only that named command and uses the same host runtime lease as the
+DAE. Do not run it beside older processes that do not participate in this lease.
+
+The agent verifies the native parent channel, video and exact observed title,
+then reads Shorts filtered to Unlisted. It freezes every exact-title match but
+permits only the first ID through the existing calendar and Save owner, with
+title/description preserved. Incomplete metadata blocks this test instead of
+being rewritten. No alternate Short is attempted when the first is blocked.
+All remaining IDs stay held. Save attempts remain unknown; an independent
+saved-slot proof and a separately qualified continuation are required before
+title variation or the rest of the batch. This is native scheduler execution,
+not proof of a registered WRE skill invocation.
+
+## Schedule Shorts from the current stream
+
+The private `schedule_stream_shorts` command uses the confirmed live session at
+acceptance. It freezes that channel and stream title, finds all Unlisted Shorts
+with that exact title, and claims that fixed batch. This follows 012's title
+selection rule; it does not infer native clip lineage from a matching title.
+No Short links are required. A stopped daemon or missing confirmed session cannot
+accept the command. A later stream or title change cannot redirect it.
+
+The existing browser owner must demonstrate access to the exact source stream.
+Before allocating, it reads the channel's complete scheduled calendar and keeps
+existing bookings. It uses empty future slots, configured cadence and timezone,
+plus durable reservations for uncertain earlier saves. The detail editor audits
+metadata, Audience and Studio's displayed date/time/timezone before Save. Missing
+or contradictory evidence blocks the batch. It does not enable disabled gates.
+
+Reservations, actual Save attempts and independently verified saved schedules are
+separate outcomes. Unknown saves remain protected. After executing a request or
+yielding for verification, that browser's DAE loop stays held for operator review;
+the supervisor does not silently restart it. The other browser and live chat have
+their own owners. Source/offline validation does not establish live Studio access,
+calendar timezone semantics, saved delivery or native WRE skill invocation.
+
+Use one installed checkout's canonical tracker directory for live scheduling.
+Preview may use disposable/custom storage; live allocation refuses it. The legacy
+single-channel `run_shorts_scheduler` live scheduling branch now refuses before
+attachment; use the existing primary scheduling owner/private request path.
+See [the request contract](../../communication/livechat/docs/VIDEO_POLICY_INTERFACE.md)
+and [scheduler interface](INTERFACE.md).
+
+## Scheduling pre-save audit — 2026-11-10
+
+The [audit skill](skillz/youtube-presave-audit/SKILL.md) binds title, description,
+Audience and schedule intent to the existing detail Save guard. Missing/date-only
+metadata can be repaired from matched existing index evidence; otherwise Save is
+blocked. Audience comes from explicit native-ID configuration, with no channel-name
+defaults. In the existing runtime `.env`, `YT_MADE_FOR_KIDS_CHANNEL_IDS` and
+`YT_NOT_MADE_FOR_KIDS_CHANNEL_IDS` accept comma-separated exact channel IDs.
+The registry also supports a literal `shorts.made_for_kids` boolean. Missing,
+malformed, duplicate or conflicting policy holds scheduling. These settings do
+not enable any channel's scheduler, comments or indexing roles. Manual draft
+changes and private preserve policies remain protected.
+
+Content-list scheduling hands its exact visible Unlisted snapshot to the audited
+detail/calendar owner. Legacy inline Save refuses because it cannot inspect the complete
+draft. Offline validation does not qualify installed selectors, permission to
+access UnDaoDu, UI-TARS diagnosis, browser-wide takeover or persisted schedules.
+Existing uncertain save claims are retained.
+
 ## Pending operator-control repair — 2026-11-07
 
 **SPECIFIED_NOT_IMPLEMENTED:** when 012 takes over a scheduling edit, wait at
@@ -205,3 +279,11 @@ L5.5: REFRESH (F5) ← CRITICAL before loop
 
 - **`YT_SCHEDULER_PRE_SAVE_DELAY_SEC`**: default `1.0`
   - Delay between dialog Done/Save and page-level Save click (stabilizes Studio animation timing).
+
+## Frozen-request list navigation
+
+The native stream request opens Shorts with the Unlisted URL filter through the
+existing DOM owner. It then qualifies the actual applied chip, receiving channel,
+rows and complete pagination before selecting exact-title matches. A URL or row
+wait alone is insufficient. Frozen selected navigation uses the same route without
+model fallback; ordinary channel rotation retains its existing behavior.

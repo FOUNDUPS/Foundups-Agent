@@ -1,5 +1,98 @@
 # YouTube Shorts Scheduler - Interface Documentation
 
+## Recorded-stream first-test entry (2026-11-10)
+
+`cli --request-id <id> --browser chrome|edge --inspect-request` reads only an
+already accepted, pending recorded first-test snapshot. It never calls refresh,
+claim or finish. `stream_schedule_inspect_only=True` requires a frozen request
+and returns immediately after native inventory, before any scheduling claim.
+Tracker persistence and screenshot diagnostics are disabled for this inspection.
+The result keeps `scheduling_verified=False` and exit 2; `inspection_only=True`
+distinguishes it from attempted scheduling. Bounded booleans/counts and reason
+codes diagnose route, native identity, filters, loading, rows and pagination.
+
+`cli --request-id <id> --browser chrome|edge` resolves one existing private
+manifest command through `refresh_stream_schedule_request`. It loads only its
+own checkout's `.env` without overriding inherited values. Other CLI execution
+modes cannot be combined. A host runtime lease excludes cooperating full DAE
+runs; older processes and pre-DAE setup still require runtime observation.
+
+`verify_schedule_target_access(..., expected_title=...)` additionally compares
+the actual parent editor title for recorded-source requests. Browser preference
+does not establish channel access. Full Unlisted Shorts selection is frozen,
+but `first_test_only` passes only its first ID, `max_videos=1` and
+`update_metadata=False`. The effect guard rejects a different member or a session
+that permits metadata updates. Required metadata/Audience/calendar gates remain.
+
+The CLI reports inspection and execution separately, exits 2 without independently
+verified scheduling, and never retries a terminal request. The remaining frozen
+IDs are withheld; no continuation or saved-slot verifier is introduced here.
+
+## Frozen stream Shorts request (2026-11-10)
+
+The existing private manifest action `schedule_stream_shorts` freezes the confirmed
+live session's native channel, parent video, title and deadline when accepted.
+The existing DAE browser owner consumes it through `run_multi_channel_scheduler`
+with `stream_schedule_requests`. The request branch verifies parent editor access
+on its supplied browser, discovers every exact-title Unlisted Short on that
+channel, then durably claims the immutable ID batch. This is an explicit operator
+title rule, not proof of YouTube parent-child lineage. No substring match, private
+video, other channel or ordinary backlog is included. Ending or switching streams
+after acceptance cannot retarget the frozen request.
+
+`discover_stream_title_batch(title)` requires a complete native-channel, Unlisted,
+Shorts-tab, first-to-last-page inventory. Partial reads return no executable IDs.
+The request uses the same attached driver throughout; expiry, STOP, scheduling
+switch, cancellation, detail identity and original title are rechecked before
+staging and Save. A browser port or configuration entry is not access proof.
+
+Every live `run_scheduling_cycle` requires a fresh complete Scheduled inventory,
+including selected batches. Exact occupied instants and retained unknown slots
+govern allocation, with cadence spacing, local daily caps and ET-to-local date
+rollover. Partial inventory, ambiguous timezone/DST, unresolved old claims without
+recoverable slots, or nonpersistent/noncanonical tracking refuse writes. A native
+channel lock serializes local scheduling owners. A slot reservation is durable at
+the guarded Save boundary, after metadata/audience and observed Studio timezone
+checks. Existing bookings are not moved. External manual changes still require
+fresh reconciliation; the local lock is not a YouTube transaction.
+
+Live results distinguish `reserved_ids` from `submitted_ids` and
+`submission_attempts` with unknown outcome;
+`scheduled`/`total_scheduled` are not populated from Save booleans. A clean editor
+only permits the next distinct candidate. Unknown reservations cannot be replayed
+or silently cleared. Readback qualification remains separate from request receipt,
+browser access, workflow return values and native WRE skill invocation.
+
+`schedule_all_visible` delegates its exact visible Unlisted IDs to this same
+detail/calendar owner. A long-form list is refused instead of treated as Shorts.
+The separate general manual-takeover and persisted-schedule readback work remains
+open; this request branch does not invoke an additional sender or model.
+
+## Pre-save completeness audit (2026-11-10)
+
+`prepare_schedule_audit()` consumes matched existing index evidence for incomplete
+metadata when metadata changes are permitted, then selects the exact configured
+Audience answer and reads it back. `audit_schedule(session, snapshot)` rechecks
+metadata completeness, audience, draft identity, future date/time and explicit
+timezone at the scheduling save owner. `PreSaveAuditBlocked` carries reason codes,
+never private text. The audience value is included in the durable schedule digest.
+The radio check requires exactly one enabled, visible native Yes and No control.
+
+`CHANNELS[*].made_for_kids` accepts a literal boolean from the registry's
+`shorts.made_for_kids`, preserved by registry normalization/save/load.
+`configured_audience(channel_id)` additionally reads the current environment's
+`YT_MADE_FOR_KIDS_CHANNEL_IDS` and `YT_NOT_MADE_FOR_KIDS_CHANNEL_IDS` lists.
+Entries must be exact native IDs, unique within and across lists. A conflicting
+registry answer or duplicate registry identity refuses; missing policy is unknown.
+There is no channel-name default or duration inference. The helper never loads
+dotenv itself, adds a channel or enables its roles; startup owns environment loading.
+
+`schedule_video_from_row` now verifies the row identity and uses the detail owner;
+`schedule_all_visible` delegates its bounded list snapshot to the calendar owner.
+Legacy inline submission is refused before a durable claim or click. A full
+description/audience audit cannot be inferred from a popup or stale cached receipt.
+Valid intent does not prove live inventory completeness or persisted timezone/slot.
+
 ## Private operator directives (2026-11-01)
 
 Existing 012 queue `get_video_policy(channel_id, video_id, surface=...)` supplies

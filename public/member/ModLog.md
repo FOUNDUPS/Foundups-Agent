@@ -1,5 +1,25 @@
 # Member Area Module Change Log
 
+## 2026-11-11 · In-context playback recovery candidate
+
+Reuse the shared player for scoped inline playback and immersive expansion,
+with one iframe, local provider diagnostics, vertical batching, safe-area
+navigation and stable video return. The candidate cache is v7: installation
+reloads the public shell assets at their existing URLs and omits credentials.
+The scoped projection moves the existing controls in the DOM; the member HTML
+and its reviewed authentication metadata are byte-for-byte unchanged. See the
+[incident](../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md) and
+[test log](tests/TestModLog.md) for the live v6 baseline and independent gates.
+
+## 2026-11-11 · HPC public video projection
+
+Use the existing grid and immersive player for the SchumerOUT collection.
+The exact dedicated hostname or explicit public query selects the field.
+The scoped route uses a tab-local scroll key for Vote contact return.
+Member entry, geographic product state and the global catalog retain their
+own routes and state. Service worker v6 distinguishes the public catalog
+cache key and declares the changed versioned assets.
+
 ## 2026-10-25 — FX1 public directory discovery
 
 Expose the existing `/f/` public directory through a normal homepage FX link.

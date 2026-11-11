@@ -7,6 +7,22 @@
 
 ---
 
+## Separate Poly roadmaps — 2026-11-12 documentation reconciliation
+
+| Workstream | Canonical roadmap | Relationship / gate |
+| --- | --- | --- |
+| Poly Vote | [Own module roadmap](polyvote/ROADMAP.md) | Child module within Vote; verified-office nominations/preferences; no separate FoundUp registration |
+| Poly Voice | [Own FoundUp roadmap](../polyvoice/ROADMAP.md) | Separate planned FoundUp; local private meeting records and optional commitment receipts |
+| Vote / Voice integration | [Current ownership index](docs/VOTE_VOICE_INTEGRATION.md) | Parent dependencies and consented handoffs only; detailed Poly acceptance stays with each owner |
+
+This is documentation authoring, not a passed implementation gate. Preserve
+HPC's active stabilization work and acceptance unchanged; later Vote/Voice/Poly
+implementation must use the accepted shared Mall rather than compete with it.
+The [source/reconciliation receipt](docs/POLY_RECONCILIATION_20261112.md) records
+superseded ownership and public-JSON wording, preserved source history and
+retrieval limits. General community-ballot research in Phase 4 is not an
+implemented Poly Vote office-verification or anonymity system.
+
 ## Current State
 
 ### MAGA/Oversight Phase One
@@ -310,26 +326,21 @@ Before each slice:
 
 ---
 
-## 2026-11-10 Vote/Voice selected sequence
+## Voice handoff and qualification gates
 
-The [integration contract](docs/VOTE_VOICE_INTEGRATION.md) is the current
-product-discovery clarification from 012 and audited Tertia input. The general
-phases above remain a wider roadmap, not authorization to build all layers now.
+[Voice intake issue #2330](https://github.com/FOUNDUPS/Foundups-Agent/issues/2330) owns the proposed separate FoundUp. The [Vote/Voice integration candidate](https://github.com/FOUNDUPS/Foundups-Agent/pull/2337) is a separate specification under review.
 
-- [ ] Vote: qualify the existing Mall grid/player/gesture/rating interfaces and
-  a sourced Democratic-Senate card collection; preserve the existing public
-  writing and routes. Resolve pepper semantics before collecting opinions.
-- [ ] Data: prove one external-source-to-card-to-wiki journey with IDs, period,
-  provenance, contribution/spending separation and zero/unknown states. No
-  replacement political warehouse or unqualified bulk ingestion.
-- [ ] Voice: complete separate FoundUp intake/reuse qualification under existing
-  issue #2330; prove voluntary issue -> evidence -> official-contact navigation.
-- [ ] Shared action: reuse manual/native dialing first. Assisted hold/IVR/bridge
-  capability is a separate consent, provider, legal, abuse, privacy and technical
-  qualification decision; do not promise zero wait or deploy automated outreach.
+| Evidence state | Capability |
+| --- | --- |
+| Implemented and tested | Vote's [Contact Congress](https://vote.mtrout.com/contact) uses a dated official House and Senate contact snapshot, state/territory and chamber selection, a private in-page list, official source links and explicit native dialer entry. Vote's Node fixtures cover roster validation and queue handling. HPC uses that destination and restores its Mall scroll on browser Back. |
+| Implemented outside Voice, civic integration unverified | OpenClaw CLI microphone capture and speech recognition, the communication voice engine, and the separate ElevenLabs/Twilio single-call adapter with offline tests. Their existing receipts cover those components. Civic handset playback, call control and provider behavior require dedicated evidence. |
+| Specified | Voice issue discovery, scoped Vote evidence handoff, native dialing first, and explicit consent for optional speech or provider assistance. |
+| Missing | A registered Voice tenant and typed entry/return contract, civic speech UI, verified provider call initiation/termination and recovery, recording consent and retention, and abuse and privacy controls for production use. |
 
-No runtime, manifest, registry, WSP, source-provider account or deployment change
-is made by recording this sequence. Merge execution remains in the Work lane.
+- Qualify Voice intake, jurisdiction coverage and an official-source refresh path. Preserve office and role evidence when an office cannot be verified.
+- Prove issue → evidence → manual contact in the shared Mall. Establish a versioned handoff with explicit consent, minimal data and a bounded return route.
+- Test optional speech recognition independently for microphone consent, denied permission, local failure, and recovery. Preserve review and correction before any external action.
+- Before provider calling, verify initiation and hang-up under human control, interruption, retries, failure recovery, and explicit privacy and recording consent. Recording defaults off. Qualify provider rules, abuse limits and retention separately.
 
 ## Canonical Intake Packet
 

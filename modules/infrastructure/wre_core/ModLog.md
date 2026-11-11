@@ -1,3 +1,11 @@
+## 2026-11-11 — GitHub and PC lifecycle reconciliation
+
+Connect WRE and Codex startup to one persisted Git lifecycle pass. Inventory
+GitHub with pagination, verify the current main checks and fast-forward the
+selected clean PC main worktree. Carry prior PR obligations until the GitHub
+merge and PC proofs agree. Retire unchecked promotion from the legacy sentinel.
+WSP 10, 15, 22, 34, 50, 97 and 110.
+
 ## Readiness evidence and cold-start distinction — 2026-11-06
 
 Replace global-count qualification and fabricated zero rates with per-metric

@@ -131,6 +131,46 @@
   margin: 0 0.75rem;
 }
 
+.video-player-caption .video-player-title {
+  display: block;
+}
+
+.scoped-player .video-player-top-bar-left,
+.scoped-player .video-player-caption {
+  min-width: 0;
+}
+
+.scoped-player .video-player-top-bar-left .video-player-btn {
+  flex-shrink: 0;
+}
+
+.scoped-player .video-player-source:not([hidden]) {
+  display: block;
+  margin: 0.25rem 0.75rem 0;
+  color: #ffdd99;
+  font-size: 0.72rem;
+}
+
+.video-player-fullscreen:is(.scoped-player, .provider-youtube) .video-player-top-bar {
+  position: relative;
+  flex-shrink: 0;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.video-player-fullscreen:is(.scoped-player, .provider-youtube) {
+  overflow-y: auto;
+}
+
+.video-player-fullscreen:is(.scoped-player, .provider-youtube) .video-player-stage {
+  min-height: 200px;
+}
+
+.scoped-player [data-action="enter"],
+.scoped-player [data-action="more"] {
+  display: none;
+}
+
 /* ─── Video Stage ─── */
 .video-player-stage {
   flex: 1;
@@ -151,6 +191,34 @@
 
 .video-player-stage iframe {
   border: none;
+}
+
+.video-player-status {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  color: #fff4dc;
+  background: #241a36;
+  font-size: 0.85rem;
+}
+
+.video-player-btn[hidden],
+.video-player-status[hidden],
+.video-player-manual-play[hidden] {
+  display: none;
+}
+
+.video-player-manual-play {
+  align-self: flex-start;
+  flex-shrink: 0;
+  min-height: 44px;
+  margin: 0.25rem 0.75rem;
+  padding: 0.25rem 0.8rem;
+  border: 1px solid #d6bdf880;
+  border-radius: 0.4rem;
+  background: #302049;
+  color: #fff4dc;
+  font: inherit;
+  cursor: pointer;
 }
 
 /* Loading/error states */
@@ -287,6 +355,47 @@
 
 .video-player-gesture-hint.show {
   opacity: 1;
+}
+
+.video-player-fullscreen:is(.scoped-player, .provider-youtube) .video-player-queue-rail {
+  position: relative;
+  flex-shrink: 0;
+  transform: none;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.video-player-fullscreen:is(.scoped-player, .provider-youtube) .video-player-edge-trigger {
+  display: none;
+}
+
+.scoped-player .video-player-queue-item {
+  width: 132px;
+}
+
+.video-player-fullscreen:is(.scoped-player, .provider-youtube) .video-player-gesture-hint {
+  position: static;
+  transform: none;
+  padding: 0;
+  min-height: 1.25rem;
+  text-align: center;
+}
+
+.video-player-fullscreen.video-player-inline {
+  position: relative;
+  inset: auto;
+  z-index: auto;
+  overflow: visible;
+  border-radius: 0.65rem;
+}
+
+.video-player-inline .video-player-stage {
+  flex: 0 0 auto;
+  height: clamp(200px, 58vw, 420px);
+}
+
+.video-player-fullscreen.video-player-inline :is(.video-player-queue-rail, .video-player-gesture-hint) {
+  display: none;
 }
 
 /* ─── Expand Control (On Tiles) ─── */

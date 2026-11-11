@@ -160,6 +160,19 @@ a separately audited clean body before any send.
 This is a composition/quality policy, not proof that the direct ChatGPT Gmail
 connector is intercepted by the Red Dog service-owned sender boundary.
 
+## Same-thread incremental-dialogue send gate (2026-11-11 incident)
+
+Before every external send, including direct Gmail connector sends, re-read the latest relevant Gmail Sent, Inbox and drafts for the exact thread, the project Moshpit's newest day, and scoped correspondence state. Moshpit is not send proof; provider Sent is transaction truth. Previous successful sends do not authorize subsequent sends.
+
+- Classify each new conversational instruction against already-sent content: ALREADY_SENT, NEW_MATERIAL_DELTA, CORRECTION, or UNSENT_REVISION. "Improve", "add", "audit", "quote", "update the site", and "make sure" after a send default to editing the unsent artifact, not a new send.
+- For the same recipient, topic and thread, compare proposed asks, claims, recipients, attachments and deadlines against the latest Sent body, not only subject or message ID. Substantial repetition means HOLD. A materially new fact, correction or explicit new notice may justify one consolidated follow-up after independent preflight.
+- Accumulate incremental instructions into one pending draft. Heighten scrutiny for a same-day second send; record why a new external effect is necessary.
+- Convert source provider timestamps to Asia/Tokyo for Moshpit calendar-day grouping and ordering regardless of VPN, IP location, Gmail UI locale or source offset. Never relabel a US-local clock time as JST; unknown precision remains unknown.
+- After sending, verify the exact Gmail Sent ID and log a concise JST receipt in the project Moshpit. Full message bodies belong only in an explicitly authorized private case archive, never public Git or runtime state cache.
+- If latest Sent, provider delta or current Moshpit day cannot be reconciled, HOLD; never blind-send.
+
+Regression scenarios: one send plus two conversational improvements must produce one Sent and two unsent revisions; genuinely new incoming reply can be answered after preflight; same-subject distinct IDs still require body/ask dedup; US-offset timestamps convert to JST; missing Sent state means UNKNOWN/HOLD.
+
 ## Before sending
 
 A cached `CLEAR` is not send authority.
