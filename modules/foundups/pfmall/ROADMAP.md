@@ -4,7 +4,7 @@
 
 The source candidate supplies a separate ASGI factory around the existing draft
 handler and verifier, with explicit bounded server policy loading and per-app
-policy. Only proposal and minimal health routes are exposed. Local814 cases pass,
+policy. Local814 cases pass,
 including all786 originals and28 test-first host cases; independent/publication
 review remains required. This is not a deployed host or live Clerk qualification.
 Next serving layer: package/qualify the actual server and minimal source closure,
@@ -67,7 +67,7 @@ private local capture followed by an authenticated, scoped attachment. Read
   its existing media repository; prove two items, reload, missing/duplicate
   originals, temporary fallback and late/disabled AI behavior.
 - [ ] C2: implement the authenticated shared media/private item adapter with
-  verified principal/FoundUp scope, remote-byte checks, idempotent revisions,
+  verified principal/FoundUp scope, remote-byte checks, idempotentent revisions,
   conflict handling and truthful durable acknowledgment.
 - [ ] C3: connect permitted garment records to the existing grouped Mall field;
   prove cross-owner denial, media access, revocation and navigation parity.
@@ -183,24 +183,74 @@ priorities and active member-runtime PRs intact.
   independent supporter benefits/follow persistence and controlled muted previews.
   Six simultaneous autoplay streams are not required for responsive browsing.
 
-## P1 proposal — Shared bottom search, Red Dog agent dock and responsive WikiTube theater (2026-11-11; not implemented)
+## Responsive HPC PoC — shared WikiTube theater and phone grid (2026-11-11; acceptance open)
 
-**Source:** 012's HPC/mobile+desktop demonstration. HPC is a consumer of the shared p.fMALL shell, **not** the implementation owner of global controls. This staged request does not supersede current P0 media playback recovery or other FoundUp release gates. Its immediate context is [HPC roadmap](../hpc/ROADMAP.md#h1--responsive-wikitube-style-discovery-and-shared-thumb-dock-specified-012-request-2026-11-11) and [shared media incident](MEDIA_PLAYBACK_INCIDENT_HPC.md).
+012's clarified PoC requires **one shared Mall with two responsive presentations**.
+Desktop uses the centered main video, search directly below it, and horizontal
+thumbnail strip beneath search. Phone uses the compact three-column video grid,
+fixed header and bottom thumb controls. This is not permission to build another
+HPC shell, change every FoundUp's layout, or call a density-only patch complete.
+The detailed contract and planning allocation are in [HPC H1](../hpc/ROADMAP.md#h1--responsive-wikitube-style-discovery-and-shared-thumb-dock-specified-012-request-2026-11-11).
 
-**Research gate:** Inventory `public/member/` actual runtime, canonical shell contracts, category/creator search, PMCTRL1 and RedDog controls, fullscreen queue and state restoration. Retrieve WikiTube TV historical source if accessible; user-described prior deployment `wikitube-tv-56566376153.us-west1.run.app` is only a lead. The `FOUNDUPS` repository search did **not** locate a WikiTube-named repository or direct current WikiTube integration; do not fabricate an owner or reuse status. Inspect AutoPost's external UI/capture contracts without importing an unrelated PWA.
+### Required planning gate
 
-**UI contract to evaluate:** responsive single-shell variants—not two implementations. Desktop: bounded main player, bottom WikiTube-style thumbnail/queue carousel, bottom search that repopulates the playlist, user-initiated video followed by sequential eligible playback when allowed. Phone: existing compact three-column vertical video wall, fixed header, floating **bottom search and thumb dock**; left `+` opens an upward sheet of admitted agents; right Red Dog press/hold for agent speech; adjacent mic for device-supported dictated search and camera for explicit AutoPost handoff. Search remains scoped to active FoundUp permissions even when visually accessible. Add keyboard/screen-reader routes and distinguish user activation from platform-autoplay blocking.
+Before another product/build mutation, reconcile the current root/module roadmaps,
+owning INTERFACE, actual code, tests and active PRs with the request. Record its
+stage, owner, fit/drift decision, superseded requirement, acceptance and recovery
+path. Apply the existing [strategic diligence skill](../../ai_intelligence/ai_overseer/skillz/strategic_diligence_gate/SKILLz.md)
+for cross-module/high-impact decisions; do not create a duplicate build skill.
 
-**Execution architecture gate:** The currently documented Mall resident RedDog adapter and browser-to-OpenClaw admission are not implemented. The present concierge and dispatcher cannot be described as voice-to-agent execution merely because they render menus, `startListening`, progress indicators or a text query. Research browser/OS STT availability, privacy/permissions, real authenticated agent inventories, selected-agent capability constraints, consented hold-to-talk and safe fallback to plain dictated text. Require execution/audit receipts before promising reorganization by agent voice. Model picker chooses only authorized capabilities; browser never acquires raw WRE/Hermes authority. AutoPost remains source owner for its camera; use approved cross-FoundUp route and explicit safe return, not a camera-code fork.
+WSP 97 section 1.2.1 asks **Do I need it? Can I afford it? Can I live without it
+now?** These questions project WSP 15's C + I + D + Impact scoring. WSP 30, not
+WSP 15 alone, supplies staged build orchestration. Record scores and verification
+cost before implementation; no unauthenticated planning record grants execution
+or merge authority. H1 records documentation 14/P1, responsive repair 17/P0, and
+scoped search 13/P1, with rationale. These are task-scoped planning priorities,
+not reprioritization of unrelated system work.
 
-**Increment plan and promotion:**
+### Reuse and current gaps
 
-- **PFWD-0 (audit/document):** current contract matrix, WikiTube retrieval status, desktop/mobile wire interaction test plan, catalog/search/playback/source-owner boundaries; no invented prior implementation.
-- **PFWD-1 (shared UI PoC):** one bottom search control and responsive desktop queue / mobile tile projections using existing Mall search/field/player/state APIs. Test scoped/guest permissions, selection, back navigation, stable video anchors, portrait/landscape, safe areas and keyboard accessibility.
-- **PFWD-2 (speech/agents prototype):** real mic→STT→bounded query; RedDog press-and-hold→authenticated resident ingress→admitted agent→read-only field update; device/unsupported-mode fallback and explicit call receipts. Verify plus-sheet inventory against real availability and secure model selection.
-- **PFWD-3 (AutoPost handoff):** permissioned camera navigation, authenticated context where required, no duplicated capture implementation, reliable return/revocation and denied/unavailable states.
-- **PFWD-4 (MVP qualification):** real-device PWA and desktop sequential playback, YouTube iframe/bot challenge/error taxonomy, external fallback, performance and large-catalog pagination, privacy/abuse review and other-FoundUp regression evidence.
+- Inspect `public/member/` field, player, existing theater/queue rendering,
+  scoped catalog, query and state APIs before proposing markup or another player.
+  WikiTube TV source/history remains a retrieval target, not a verified current
+  integration. Do not repeat an unsourced historical deployment address.
+- PR #2357's scoped layout uses three columns at all sizes and a separate player
+  slot after a calculated row. The PC regression is reported by 012. A CSS-only
+  density correction such as draft #2359 does not fix the player placement and
+  must also reconcile fixed-column JavaScript arithmetic before acceptance.
+- Desktop requests first-video startup playback and sequential queue advancement.
+  Preserve provider controls, one active player, and truthful blocked-autoplay
+  recovery. A thumbnail, iframe load or API availability flag is not playback.
+- Phone tap plays within the selected tile/context, not a detached second mini-
+  player. Provider minimum dimensions and iframe touch boundaries must be measured;
+  any active-tile enlargement belongs in the explicit shared contract.
+- Scoped search repopulates the existing queue/field. It supersedes hidden-search
+  presentation only within the active permitted catalog; global/remote search is
+  later work and never bypasses authorization.
 
-**Playback blocker:** The existing `MEDIA_PLAYBACK_INCIDENT_HPC.md` separates YouTube anti-bot challenges, video-specific embed restrictions, origin/referrer and browser/PWA constraints from Mall UI bugs. Verify player events and real embedded playback (not just loaded thumbnails or metadata). No unsupported login workaround, authentication bypass or unlicensed stream relay. Do not claim physical iPhone success or general autoplay where not observed.
+### Ordered slices and acceptance
 
-**Invariants:** retain canonical catalog/registry, WSP 00/97/102/104/109 boundaries, independent Voice/AutoPost owners, public HPC permissions and explicit master-Mall return. Document changes and tests before merge/deploy; avoid overlapping active PRs, duplicating shell components or creating stale branches.
+| Slice | Stage / work | Promotion evidence |
+| --- | --- | --- |
+| PFWD-0 | Reconcile current owners, source history and acceptance | Roadmap/contract references, source SHAs, existing-test inventory and bounded recovery plan; documentation is not runtime success. |
+| PFWD-1A | PoC: desktop theater plus preserved phone grid | PC and phone composition, correct click target/player, one iframe/audio session, original-ID return, resize/rotation and other-FoundUp regressions. |
+| PFWD-1B | PoC: bottom scoped search / queue update | Search between desktop main video and bottom tiles; phone thumb access; loaded-catalog filtering, empty results, queue advancement, safe-area/keyboard tests and no scope leak. |
+| PFWD-2 | Prototype: speech/agent controls | Real mic-to-STT path; Red Dog hold-to-talk via authenticated resident ingress; admitted device-compatible selection, cancellation, permission denial and bounded action receipts. |
+| PFWD-3 | Prototype: AutoPost handoff | Existing capture owner, explicit permission, approved route/origin and return state; no copied camera stack. |
+| PFWD-4 | MVP hardening | Measured large-catalog performance, privacy/abuse review, provider/device recovery and release evidence beyond the PoC acceptance matrix. |
+
+Do not defer ordinary desktop/phone playback verification to PFWD-4: it is a
+PFWD-1 PoC acceptance gate. Extend the existing browser fixtures; phone emulation
+is not physical iPhone standalone evidence. Preserve shared search, channel
+expansion, protected operations and other projections.
+
+The left `+` upward options sheet, right Red Dog press/hold, adjacent dictation
+mic and AutoPost camera remain retained later-stage requirements. A listening
+animation or model menu is not resident execution. Existing agent admission,
+WRE/Hermes authority, privacy and capture ownership remain unchanged.
+
+The existing [media incident](MEDIA_PLAYBACK_INCIDENT_HPC.md) owns provider-error,
+bot-challenge, origin/referrer and availability evidence. Fix application defects
+without inventing authentication bypasses or claiming an unobserved iPhone pass.
+Report commit, qualified merge, main verification, deployment and PC sync as
+separate outcomes. This roadmap/skill update changes no runtime or live site.
