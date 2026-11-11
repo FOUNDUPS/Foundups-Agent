@@ -1,8 +1,8 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1829,
-  "quarantined_tests": 258,
+  "total_tests": 1832,
+  "quarantined_tests": 259,
   "tests": [
     {
       "id": "test::.github::scripts::tests::test_ci_merge_policy",
@@ -20520,17 +20520,64 @@
       "description": "Adversarial tests for immutable create-scaffold route snapshots."
     },
     {
+      "id": "test::modules::infrastructure::wre_core::tests::test_git_lifecycle",
+      "path": "modules/infrastructure/wre_core/tests/test_git_lifecycle.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-01",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Test resumable GitHub-to-PC completion through the WRE lifecycle owner."
+    },
+    {
+      "id": "test::modules::infrastructure::wre_core::tests::test_git_lifecycle_github",
+      "path": "modules/infrastructure/wre_core/tests/test_git_lifecycle_github.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "operational",
+      "shard_id": "modules-infrastructure-wre-core-operational",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "operational",
+      "collectable": false,
+      "timeout_s": 900,
+      "quarantine_reasons": [
+        "module_scope_local_function_invocation"
+      ],
+      "description": "Exercise lifecycle inventory with deterministic Git and GitHub responses."
+    },
+    {
+      "id": "test::modules::infrastructure::wre_core::tests::test_git_lifecycle_pc",
+      "path": "modules/infrastructure/wre_core/tests/test_git_lifecycle_pc.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-02",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Exercise PC main synchronization against disposable Git repositories."
+    },
+    {
       "id": "test::modules::infrastructure::wre_core::tests::test_git_main_merge_sentinel",
       "path": "modules/infrastructure/wre_core/tests/test_git_main_merge_sentinel.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-01",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
-      "description": "Tests for git main-merge sentinel startup safety."
+      "description": "Tests for the legacy startup interface to Git lifecycle reconciliation."
     },
     {
       "id": "test::modules::infrastructure::wre_core::tests::test_hermes_delegate_import_path",
@@ -21007,7 +21054,7 @@
       "path": "modules/infrastructure/wre_core/tests/test_security_analysis_assistant.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-02",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -21020,7 +21067,7 @@
       "path": "modules/infrastructure/wre_core/tests/test_security_control_hooks.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-02",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -21464,7 +21511,7 @@
       "path": "modules/infrastructure/wre_core/wre_gateway/tests/test_dae_gateway_policyflags_guards.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-04",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -21479,7 +21526,7 @@
       "path": "modules/infrastructure/wre_core/wre_master_orchestrator/tests/test_ironclaw_worker_plugin.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-04",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,

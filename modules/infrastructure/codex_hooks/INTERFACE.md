@@ -23,7 +23,8 @@ The handler:
 2. executes `WSP_agentic/scripts/functional_0102_awakening_v2.py` from Git root;
 3. removes `WSP_AWAKENING_WRITE_TRACKED` from the child environment;
 4. executes the tracker with `--check --strict --json`;
-5. returns bounded additional context on success or `continue=false` on failure.
+5. runs the WRE Git lifecycle pass with PC synchronization enabled;
+6. reports bounded lifecycle context, or returns `continue=false` if WSP 00 fails.
 
 ### UserPromptSubmit
 
@@ -59,5 +60,5 @@ from modules.infrastructure.codex_hooks import dispatch_hook
 response = dispatch_hook(event)
 ```
 
-`dispatch_hook()` is deterministic except for read-only Git queries and the
-explicit WSP_00 subprocesses used by `SessionStart`.
+`SessionStart` uses the same GitHub evidence and receipt as WRE startup.
+Only the selected clean PC main worktree can advance.

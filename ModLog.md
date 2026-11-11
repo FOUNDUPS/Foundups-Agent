@@ -1,3 +1,12 @@
+## 2026-11-11 — Git lifecycle priority and PC convergence
+
+Use one WRE Git lifecycle pass at WRE and Codex startup. Preserve existing
+local work and fast-forward the selected clean main checkout only after
+current GitHub checks pass. Keep each tracked PR open until merge checks,
+main ancestry and exact PC state agree. The legacy sentinel delegates to
+observation. The live PC replay verified main at f0d08839 and recovered the
+protected source ref for #2335. WSP 10, 15, 22, 34, 50, 97 and 110.
+
 ## 2026-11-10 — Stream-specific Shorts scheduling through existing owners
 
 Add the private `schedule_stream_shorts` action: freeze the confirmed stream,
