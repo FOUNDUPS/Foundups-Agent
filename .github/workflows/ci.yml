@@ -379,6 +379,40 @@ jobs:
           modules/communication/livechat/tests/test_live_handoff_selective_cancellation.py
           modules/communication/livechat/tests/test_engagement_runner_lifecycle.py
 
+  private-draft-mcp:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    timeout-minutes: 8
+    permissions:
+      contents: read
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+      PYTHON_DOTENV_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
+      - name: Install the separate draft MCP runtime
+        run: python -m pip --isolated install -r modules/infrastructure/foundups_mcp_bridge/requirements-draft-sender.txt pytest==9.0.3
+      - name: Verify draft, OAuth, MIME, and separate process boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip check
+          printf '[pytest]\n' > "$RUNNER_TEMP/draft-pytest.ini"
+          python -B -m pytest -q -c "$RUNNER_TEMP/draft-pytest.ini" --noconftest \
+            --import-mode=importlib -o pythonpath=. -p no:cacheprovider \
+            modules/infrastructure/foundups_mcp_bridge/tests/test_draft_*.py
+
   mcp-runtime-compatibility:
     runs-on: windows-latest
     timeout-minutes: 10

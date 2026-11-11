@@ -1,5 +1,13 @@
 # foundups_mcp_bridge Tests
 
+## Private draft sender
+
+The focused `test_draft_*.py` suites use the separate requirements and synthetic
+data. They cover strict token and tool admission, fixed Gmail routes, MIME
+and attachment preservation, stale or ambiguous state, durable reservation,
+readback and reconciliation, and a real loopback MCP process with clean
+shutdown. No Google, ChatGPT or tunnel service is called.
+
 ## Stored-settings snapshot controls — 2026-11-01
 
 The existing snapshot owner tests inert getters, complete baseline preflight,
