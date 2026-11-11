@@ -4,7 +4,10 @@
 
 Reuse the shared player for scoped inline playback and immersive expansion,
 with one iframe, local provider diagnostics, vertical batching, safe-area
-navigation and stable video return. The candidate cache is v7. See the
+navigation and stable video return. The candidate cache is v7: installation
+reloads the public shell assets at their existing URLs and omits credentials.
+The scoped projection moves the existing controls in the DOM; the member HTML
+and its reviewed authentication metadata are byte-for-byte unchanged. See the
 [incident](../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md) and
 [test log](tests/TestModLog.md) for the live v6 baseline and independent gates.
 

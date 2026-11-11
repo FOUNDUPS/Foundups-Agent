@@ -301,9 +301,11 @@ function swRuntime() {
       return {
         async match(key) { return entries.get(keyOf(key))?.clone(); },
         async put(key, response) { entries.set(keyOf(key), response.clone()); },
-        async addAll(paths) {
-          precached.push(...paths);
-          for (const path of paths) {
+        async addAll(requests) {
+          precached.push(...requests);
+          for (const request of requests) {
+            const url = new URL(keyOf(request));
+            const path = url.pathname + url.search;
             entries.set(keyOf(path), new Response(path === '/member/' ? 'public /member/' : 'public ' + path, {
               headers: { 'Content-Type': path === '/member/' ? 'text/html' : 'text/plain' }
             }));
@@ -324,7 +326,7 @@ function swRuntime() {
       skipWaiting: () => Promise.resolve(),
       clients: { claim: () => Promise.resolve() }
     },
-    URL, Response, Headers, caches,
+    URL, Request, Response, Headers, caches,
     fetch: (request, options = {}) => {
       calls.push({ request: typeof request === 'string' ? request : request.url, options: copy(options) });
       return Promise.resolve().then(() => network(request, options));
@@ -355,14 +357,20 @@ function swRuntime() {
   };
 }
 
-await check('install precaches only explicit shell and product assets', async () => {
+await check('install reloads only explicit public shell and product assets', async () => {
   const h = swRuntime();
   await h.event('install');
-  for (const path of ['/member/js/mall-tile-field.js?v=7', '/member/js/mall-video-projection.js?v=7', '/move2japan/property-search.js', '/move2japan/move2japan.css']) {
-    assert.equal(h.precached.includes(path), true);
+  const installed = h.precached.map(request => {
+    const url = new URL(request.url);
+    assert.equal(url.origin, ORIGIN);
+    assert.equal(request.cache, 'reload');
+    assert.equal(request.credentials, 'omit');
+    return url.pathname + url.search;
+  });
+  for (const path of ['/member/js/mall-tile-field.js?v=6', '/member/js/mall-video-projection.js', '/move2japan/property-search.js', '/move2japan/move2japan.css']) {
+    assert.equal(installed.includes(path), true);
   }
-  assert.equal(h.precached.includes('/move2japan/properties.json'), false);
-  assert.equal(h.precached.every(path => path.startsWith('/')), true);
+  assert.equal(installed.includes('/move2japan/properties.json'), false);
   assert.equal(h.stores.has('pfmall-member-v7'), true);
 });
 
@@ -438,11 +446,11 @@ await check('private routes, query assets, foreign origins and non-GET remain un
 
 await check('declared static assets keep cache-first behavior and video fallback stays explicit', async () => {
   const h = swRuntime();
-  const first = await h.request('/member/js/mall-tile-field.js?v=7');
+  const first = await h.request('/member/js/mall-tile-field.js?v=6');
   const body = await first.response.text();
   assert.equal(h.calls.length, 1);
   h.setNetwork(async () => { throw new Error('offline'); });
-  const cached = await h.request('/member/js/mall-tile-field.js?v=7');
+  const cached = await h.request('/member/js/mall-tile-field.js?v=6');
   assert.equal(await cached.response.text(), body);
   assert.equal(h.calls.length, 1);
   const video = await h.request('/member/mall-video-catalog.json');

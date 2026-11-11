@@ -722,6 +722,7 @@
     bindInteractions();
     bindProjectionChips();
     if (fixedVideoField) bindScopedPlayerHistory(mallCatalog[0].foundup_id);
+    else initTileObserver();
   }
 
   /** Replace a public result set. This is presentation, not an access-control gate. */

@@ -170,17 +170,33 @@ remain NOT_VERIFIED. No channel website is framed.
   Host Close retained focus; Escape removed the iframe and restored the tile.
   Player SHA-256 `f23a2a82a15031c4ae800c3789ec64b57d9bbf51dd71f2e2c850889e1afcb6cd`.
   This covers the focus correction after the 04:05 all-eight probe.
-- Final runtime bytes with the compact single-row header were retested at
+- The first compact-header candidate was retested at
   04:12:40–04:13:08 UTC. All eight at 390 × 844 and the manual case at 320 × 700
   reached playing and advanced by more than 0.25 s. The local v7 cache
   controlled the page. Every observed embed returned HTTP 200 with the
   naturally generated localhost Referer. The first expansion kept the iframe;
   all nine closes restored the selected tile. The three decoded-grid/player
   screenshots and public-only playback receipt are in the local task outputs.
+- PR #2357's first secret scan rejected an existing exact-reviewed finding
+  after the shared HTML file changed. The repair now keeps that HTML identical
+  to base, including its reviewed auth metadata, and moves only the scoped
+  topic and Voice controls through the existing projection owner. The scan
+  rules and approvals are unchanged. Cache v7 reloads the existing public
+  asset URLs with credentials omitted; the query suffix is not the cache
+  generation. A Chromium upgrade probe confirmed fresh bytes replaced a warm
+  HTTP response, v6 was retired, another app's cache survived and the catalog
+  and shell reopened offline. An already open page must reload to run the
+  newly cached JavaScript after activation.
+- Post-correction Chromium replay completed at 04:30:57 UTC with all eight
+  Shorts advancing at 390 × 844, plus manual Play at 320 × 700. Each tested
+  embed response returned HTTP 200 with the expected Referer; the first
+  inline-to-immersive transition kept its iframe, and all nine closes removed
+  the frame and restored focus. The local receipt hashes the final runtime.
 - Focused route, field, player, state and catalog checks: 503 passed. Existing
-  ordinary Mall responsive browser checks passed. Broad suite: 585 passed and
-  12 failures reproduced at the base; the legacy global catalog, obsolete
-  Red Dog guidance and old cache regex expectations are outside this repair.
+  ordinary Mall responsive browser checks passed. A final broad member and
+  catalog suite returned 1,540 passed with 11 failures confirmed at the base;
+  these are legacy global catalog shape and navigation copy expectations.
+  The separate catalog refresh safety suite passed all 12 tests.
 - Real physical iPhone Safari vs Home Screen PWA, P02–P05, and Meta remain
   NOT_VERIFIED. Do not infer these passes from desktop mobile emulation.
   Next: collect iPhone browser/standalone playback and return evidence before
