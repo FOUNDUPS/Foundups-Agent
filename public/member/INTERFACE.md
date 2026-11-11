@@ -8,16 +8,27 @@
 ### Public video projection
 
 `/member/?foundup=hpc` or the exact HPC hostname selects a fixed guest
-video field from `mall-public-video-catalog.json`. The grid uses
-`mallTileField.initialize([lane], { fixedVideoField: true })` and the
-shared player. The scoped player returns keyboard focus to the selected
-tile when closed.
+video field from `mall-public-video-catalog.json`.
+`mallTileField.initialize([lane], { fixedVideoField: true })` presents three
+portrait columns with six-item vertical batches. Tap or Enter opens an inline
+row with the shared `mallVideoPlayer`; the explicit corner control and pinch-out
+open immersive playback. Promotion retains the active iframe. Closing, Escape,
+browser Back or pinch-in on the immersive chrome restores the tile and focus.
 
-`mallStateRestore.selectVideoScope(id)` selects tab-local scroll storage.
-The Vote contact handoff saves only the wrapper position. Browser Back
-uses the same scope key. Member and geographic product state keep their
-existing keys. The dedicated hostname sets presentation and the canonical
-`/f/{id}/app` handoff preserves member admission.
+The player uses YouTube's IFrame API, `playsinline`, origin-level Referer and
+distinct ready/state/error/autoplay/timeout outcomes. The local
+`mallVideoPlayback` event and `getPlaybackSnapshot()` expose only the provider
+state, video ID, code and observable media time. No event is sent externally.
+A thumbnail below 120 × 70 opens the player with a separate Play video
+action. One provider iframe is active. A source link remains explicit.
+
+`mallStateRestore.selectVideoScope(id)` selects tab-local storage. It restores
+legacy offsets and the current stable video ID/offset, loading enough rows
+to position the anchor. The shared header logo links to `/member/` on the
+canonical host. The bottom anchor links to Vote's manual contact resource.
+The dedicated hostname sets presentation and `/f/{id}/app` preserves member
+admission. See the [shared media incident](../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md)
+for verification boundaries and the v6 → v7 candidate migration.
 
 ### Public FX directory — 2026-10-25
 
@@ -101,7 +112,7 @@ Product restoration never applies video scope or layout. Deferred video scroll
 callbacks recheck the selected product. A loading product cannot overwrite its
 previous geographic state with an empty capture. The return is consumed only by
 the normal Mall initializer after Clerk/invite/username admission succeeds.
-Service-worker cache `pfmall-member-v5` normalizes member query navigations to one
+The shared service worker normalizes member query navigations to one
 shell entry; public property JSON uses network-first validation and dated cached
 fallback. Auth, account, dynamic and cross-origin requests are not cached.
 

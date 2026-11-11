@@ -1,3 +1,15 @@
+## 2026-11-11 · Scoped playback recovery
+
+The independent Chromium fixture verified a 31-record collection, three
+columns, pinned chrome, one inline player, in-place immersive expansion,
+focus/Back/scroll restoration, and provider status recovery. The 320 px
+manual Play fixture now checks host focus and Escape after playback.
+The shared state/SW VM passed all 20 checks with v7. The broad comparison
+returned 585 passed and 12 failures reproduced at the base (legacy
+catalog shape, stale service-worker matchers, and old double-tap guidance).
+The [incident](../../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md)
+separates real provider playback from mocked events and physical iOS.
+
 ## 2026-11-11 · HPC scoped video and state
 
 The shared product-state and service-worker VM covers exact hostname/query

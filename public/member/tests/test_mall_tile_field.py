@@ -51,7 +51,7 @@ class TestTileFieldStructure:
 
     def test_tile_field_js_loaded(self, index_html):
         """Tile field JS is loaded."""
-        assert 'src="js/mall-tile-field.js?v=6"' in index_html
+        assert 'src="js/mall-tile-field.js?v=7"' in index_html
 
     def test_mall_copy_removed(self, index_html):
         """Mall copy section removed entirely (anchor model chrome reduction)."""

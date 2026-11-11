@@ -1,3 +1,10 @@
+## 2026-11-11 · Shared media recovery candidate
+
+The [HPC media incident](MEDIA_PLAYBACK_INCIDENT_HPC.md) records the reproduced
+tap-routing and curation faults, provider evidence and remaining iOS gate.
+The member-shell owners now support one in-context player with in-place
+expansion and a stable return anchor. WSP 22, 60, 97 and 104 apply.
+
 ## 2026-11-11 · Public scoped video discovery
 
 HPC joins the canonical FoundUp registry and public discovery projector under

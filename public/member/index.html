@@ -17,9 +17,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="/move2japan/move2japan.css">
-  <link rel="stylesheet" href="/member/css/mall-video-projection.css">
+  <link rel="stylesheet" href="/member/css/mall-video-projection.css?v=7">
 
-  <script src="/member/js/mall-video-projection.js"></script>
+  <script src="/member/js/mall-video-projection.js?v=7"></script>
   <!-- Clerk Authentication SDK -->
   <template id="memberClerkSdk">
   <script
@@ -95,7 +95,7 @@
   <link rel="stylesheet" href="css/account-concierge.css">
   <link rel="stylesheet" href="css/mall-planes.css">
   <link rel="stylesheet" href="css/mall-tile-field.css">
-  <link rel="stylesheet" href="css/mall-video-player.css?v=6">
+  <link rel="stylesheet" href="css/mall-video-player.css?v=7">
 </head>
 <body>
   <!-- Loading state (shown while checking auth) -->
@@ -283,10 +283,11 @@
           <div>
             <h1 id="videoScopeTitle"></h1>
             <p id="videoScopeIdentity"></p>
+            <h2 id="videoScopeTopic"></h2>
           </div>
           <button id="videoScopeInfo" type="button" aria-label="About this FoundUp" aria-haspopup="dialog">i</button>
         </div>
-        <a href="/" class="mall-brand-minimal" aria-label="FoundUPS home">
+        <a id="mallHomeLink" href="/" class="mall-brand-minimal" aria-label="FoundUPS home">
           <img src="/logo-dog.png" alt="" class="mall-brand-logo-sm">
         </a>
         <div class="mall-self-anchor">
@@ -300,16 +301,7 @@
 
       <!-- MIDDLE FIELD: Discovery / Navigation -->
       <main class="mall-main mall-anchor-middle" data-anchor="middle">
-        <div id="videoScopeBar" class="mall-video-scope-bar" hidden>
-          <div>
-            <h2 id="videoScopeTopic"></h2>
-            <p id="videoScopeCredit"></p>
-          </div>
-          <a id="videoScopeVoice" class="mall-video-scope-voice" referrerpolicy="no-referrer">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11v1a7 7 0 0 0 14 0v-1m-7 8v3m-3 0h6"/></svg>
-            <span>Voice Your Opinion<small>Contact Congress</small></span>
-          </a>
-        </div>
+        <p id="videoScopeCredit" hidden></p>
         <dialog id="videoScopeDisclosure" class="mall-video-scope-disclosure" aria-labelledby="videoScopeDisclosureTitle">
           <h2 id="videoScopeDisclosureTitle">About this FoundUp</h2>
           <p id="videoScopeDisclosureText"></p>
@@ -330,6 +322,12 @@
 
       <!-- BOTTOM ANCHOR: Red Dog / Digital Twin -->
       <div id="redDogAnchor" class="red-dog-anchor mall-anchor-bottom" data-anchor="bottom" data-reddog-anchor>
+        <nav id="videoScopeActions" aria-label="Video collection actions" hidden>
+          <a id="videoScopeVoice" class="mall-video-scope-voice" referrerpolicy="no-referrer">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11v1a7 7 0 0 0 14 0v-1m-7 8v3m-3 0h6"/></svg>
+            <span>Voice Your Opinion<small>Contact Congress</small></span>
+          </a>
+        </nav>
         <button id="redDogBtn" class="red-dog-btn" data-reddog-trigger aria-label="Open Red Dog">
           <img src="/logo-dog.png" alt="">
           <span class="red-dog-state-ring" data-reddog-anchor-state="idle"></span>
@@ -1310,11 +1308,11 @@
   <script src="js/gesture-hints.js"></script>
   <script src="js/shell-bridge-interceptor.js"></script>
   <script src="js/mall-planes.js?v=6"></script>
-  <script src="js/mall-tile-field.js?v=6"></script>
-  <script src="js/mall-video-player.js?v=6"></script>
+  <script src="js/mall-tile-field.js?v=7"></script>
+  <script src="js/mall-video-player.js?v=7"></script>
   <script src="js/account-concierge.js"></script>
   <script src="js/red-dog-concierge.js"></script>
-  <script src="js/mall-state-restore.js?v=6"></script>
+  <script src="js/mall-state-restore.js?v=7"></script>
 
   <script id="productDiscoveryBoot">
     const publicVideoScope = window.mallVideoProjection?.resolve(window.location);

@@ -358,22 +358,22 @@ function swRuntime() {
 await check('install precaches only explicit shell and product assets', async () => {
   const h = swRuntime();
   await h.event('install');
-  for (const path of ['/member/js/mall-tile-field.js?v=6', '/member/js/mall-video-projection.js', '/move2japan/property-search.js', '/move2japan/move2japan.css']) {
+  for (const path of ['/member/js/mall-tile-field.js?v=7', '/member/js/mall-video-projection.js?v=7', '/move2japan/property-search.js', '/move2japan/move2japan.css']) {
     assert.equal(h.precached.includes(path), true);
   }
   assert.equal(h.precached.includes('/move2japan/properties.json'), false);
   assert.equal(h.precached.every(path => path.startsWith('/')), true);
-  assert.equal(h.stores.has('pfmall-member-v6'), true);
+  assert.equal(h.stores.has('pfmall-member-v7'), true);
 });
 
 await check('activation retires only obsolete caches owned by this Mall', async () => {
   const h = swRuntime();
-  for (const name of ['pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4', 'pfmall-member-v5', 'pfmall-member-v6', 'pfmall-properties-v1', 'pfmall-posters-v1', 'gotjunk-offline-v1', 'other-app-cache']) {
+  for (const name of ['pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4', 'pfmall-member-v5', 'pfmall-member-v6', 'pfmall-member-v7', 'pfmall-properties-v1', 'pfmall-posters-v1', 'gotjunk-offline-v1', 'other-app-cache']) {
     await h.caches.open(name);
   }
   await h.event('activate');
-  assert.deepEqual(h.deleted.sort(), ['pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4', 'pfmall-member-v5']);
-  assert.equal(h.stores.has('pfmall-member-v6'), true);
+  assert.deepEqual(h.deleted.sort(), ['pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4', 'pfmall-member-v5', 'pfmall-member-v6']);
+  assert.equal(h.stores.has('pfmall-member-v7'), true);
   assert.equal(h.stores.has('gotjunk-offline-v1'), true);
   assert.equal(h.stores.has('other-app-cache'), true);
 });
@@ -409,7 +409,7 @@ await check('product navigation shares one static member shell without query cac
   assert.equal(online.response.status, 200);
   assert.equal(h.calls.at(-1).request, '/member/');
   assert.equal(h.calls.at(-1).options.credentials, 'omit');
-  const cache = await h.caches.open('pfmall-member-v6');
+  const cache = await h.caches.open('pfmall-member-v7');
   assert.equal((await cache.keys()).some(key => {
     const url = new URL(key.url);
     return url.pathname === '/member/' && !!url.search;
@@ -438,11 +438,11 @@ await check('private routes, query assets, foreign origins and non-GET remain un
 
 await check('declared static assets keep cache-first behavior and video fallback stays explicit', async () => {
   const h = swRuntime();
-  const first = await h.request('/member/js/mall-tile-field.js?v=6');
+  const first = await h.request('/member/js/mall-tile-field.js?v=7');
   const body = await first.response.text();
   assert.equal(h.calls.length, 1);
   h.setNetwork(async () => { throw new Error('offline'); });
-  const cached = await h.request('/member/js/mall-tile-field.js?v=6');
+  const cached = await h.request('/member/js/mall-tile-field.js?v=7');
   assert.equal(await cached.response.text(), body);
   assert.equal(h.calls.length, 1);
   const video = await h.request('/member/mall-video-catalog.json');

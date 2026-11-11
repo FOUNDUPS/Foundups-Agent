@@ -4,6 +4,18 @@ Read [TestModLog.md](TestModLog.md) before extending a fixture. It records the
 existing suites, historical results and their limits; those results are not a
 fresh test run.
 
+### Scoped video
+
+Run `python -B public/member/tests/mall_scoped_video_browser.py` with the
+existing Python Playwright and Chromium test runtime. It serves the real
+shell from local files with a 31-video fixture and controlled provider events.
+The test covers vertical batching, one active inline iframe, immersive
+promotion, Back and Escape, deep Vote return, orientation, diagnostics and
+manual Play at 320 px. `node public/member/tests/mall_product_state_vm.mjs`
+covers v6 retirement, v7 shell and scoped offline cache behavior. Real YouTube
+time progression and physical-device gates are separate in the
+[incident](../../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md).
+
 ## Public directory and gateway owners
 
 - `test_route_contract_bridge.py` covers the canonical public `/f/` directory,

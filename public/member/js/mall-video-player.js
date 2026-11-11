@@ -1,5 +1,5 @@
 /**
- * Mall Video Player — Fullscreen video layer with queue rail.
+ * Mall Video Player — shared in-context and immersive video playback.
  *
  * Manages:
  *   - Fullscreen video playback from FoundUp queue
@@ -27,6 +27,8 @@
   var RAIL_AUTO_HIDE_MS = 4000;
   var CHROME_AUTO_HIDE_MS = 3000;
   var PINCH_THRESHOLD = 0.7; // scale < this = exit
+  var YOUTUBE_TIMEOUT_MS = 12000;
+  var YOUTUBE_HOSTS = ['www.youtube.com', 'youtube.com', 'www.youtube-nocookie.com', 'youtube-nocookie.com'];
 
   // ─── State ───
   var container = null;
@@ -38,6 +40,18 @@
   var gestureHint = null;
   var titleEl = null;
   var saveBtn = null;
+  var statusEl = null;
+  var playBtn = null;
+  var requestYouTubePlay = null;
+  var inline = false;
+  var onClose = null;
+  var autoplayRequested = true;
+  var previousOverflow = null;
+  var inertElements = [];
+  var stageObserver = null;
+  var renderGeneration = 0;
+  var playbackTimer = null;
+  var playbackStatus = null;
 
   var isOpen = false;
   var currentQueue = [];       // Array of video objects from one FoundUp
@@ -59,32 +73,56 @@
   var COMPLETE_RATIO = 0.97;
   var pendingResumeSeconds = null;
   var ytPlayer = null;           // YouTube IFrame API player instance
-  var ytAPIReady = false;        // YouTube IFrame API loaded
+  var ytLoad = null;
 
   // ─── YouTube IFrame API ───
-  function ensureYouTubeAPI(callback) {
-    if (window.YT && window.YT.Player) {
-      ytAPIReady = true;
-      callback();
-      return;
-    }
-    var prev = window.onYouTubeIframeAPIReady;
-    window.onYouTubeIframeAPIReady = function () {
-      ytAPIReady = true;
-      if (prev) prev();
-      callback();
-    };
-    if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
-      var tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      document.head.appendChild(tag);
-    }
+  function ensureYouTubeAPI() {
+    if (window.YT?.Player) return Promise.resolve();
+    if (ytLoad) return ytLoad;
+    ytLoad = new Promise(function(resolve, reject) {
+      var previous = window.onYouTubeIframeAPIReady;
+      var existing = document.querySelector('script[src="https://www.youtube.com/iframe_api"]');
+      var script = existing || document.createElement('script');
+      var timer = setTimeout(failed, YOUTUBE_TIMEOUT_MS);
+      function cleanup() {
+        clearTimeout(timer);
+        script.removeEventListener('error', failed);
+        if (window.onYouTubeIframeAPIReady === ready) window.onYouTubeIframeAPIReady = previous;
+      }
+      function ready() {
+        cleanup();
+        resolve();
+        if (typeof previous === 'function') previous();
+      }
+      function failed() {
+        cleanup();
+        if (!existing) script.remove();
+        reject(new Error('YouTube API unavailable'));
+      }
+      window.onYouTubeIframeAPIReady = ready;
+      script.addEventListener('error', failed, { once: true });
+      if (!existing) {
+        script.src = 'https://www.youtube.com/iframe_api';
+        document.head.appendChild(script);
+      }
+    }).finally(function() { ytLoad = null; });
+    return ytLoad;
   }
 
   function extractYouTubeVideoId(embedUrl) {
+    var url = parseYouTubeEmbed(embedUrl);
+    return url?.pathname.match(/^\/embed\/([A-Za-z0-9_-]{11})\/?$/)?.[1] || null;
+  }
+
+  function parseYouTubeEmbed(embedUrl) {
     if (!embedUrl) return null;
-    var m = embedUrl.match(/youtube\.com\/embed\/([A-Za-z0-9_-]+)/);
-    return m ? m[1] : null;
+    try {
+      var url = new URL(embedUrl);
+      return url.protocol === 'https:' && !url.port && !url.username && !url.password &&
+        YOUTUBE_HOSTS.includes(url.hostname) ? url : null;
+    } catch (e) {
+      return null;
+    }
   }
 
   function destroyYTPlayer() {
@@ -92,6 +130,48 @@
       try { ytPlayer.destroy(); } catch (e) { /* already destroyed */ }
       ytPlayer = null;
     }
+  }
+
+  function resetPlayback() {
+    renderGeneration += 1;
+    clearTimeout(playbackTimer);
+    playbackStatus = null;
+    requestYouTubePlay = null;
+    playBtn.hidden = true;
+    statusEl.hidden = true;
+    statusEl.textContent = '';
+    destroyYTPlayer();
+    stage.replaceChildren();
+  }
+
+  function reportYouTube(state, message, code, providerState) {
+    var video = currentQueue[currentIndex];
+    playbackStatus = { provider: 'youtube', state: state, videoId: video?.video_id || null };
+    if (code !== undefined) playbackStatus.code = code;
+    if (providerState !== undefined) playbackStatus.providerState = providerState;
+    statusEl.textContent = message || '';
+    statusEl.hidden = !message;
+    playBtn.hidden = !requestYouTubePlay || !['manual-play', 'autoplay-blocked', 'provider-unknown', 'paused'].includes(state);
+    if (inline && (state === 'manual-play' || state === 'autoplay-blocked') && !playBtn.hidden && canStartYouTube()) {
+      playBtn.scrollIntoView({ block: 'nearest' });
+    }
+    window.dispatchEvent(new CustomEvent('mallVideoPlayback', { detail: { ...playbackStatus } }));
+  }
+
+  function getPlaybackSnapshot() {
+    if (!playbackStatus) return null;
+    var positionSeconds = null;
+    try {
+      var time = ytPlayer?.getCurrentTime?.();
+      if (Number.isFinite(time)) positionSeconds = time;
+    } catch (e) { /* provider may already be gone */ }
+    return { ...playbackStatus, positionSeconds };
+  }
+
+  function pausePlayback() {
+    autoplayRequested = false;
+    try { ytPlayer?.pauseVideo?.(); } catch (e) { /* provider not ready */ }
+    stage?.querySelector('video')?.pause();
   }
 
   function normalizeResumeSeconds(sec, durationSec) {
@@ -160,6 +240,9 @@
       '    </div>',
       '  </div>',
       '  <div class="video-player-top-bar-right">',
+      '    <button type="button" class="video-player-btn" data-action="expand" aria-label="Expand video" hidden>',
+      '      <svg viewBox="0 0 24 24"><path d="M14 4h6v6m0-6-6 6M10 20H4v-6m0 6 6-6"/></svg>',
+      '    </button>',
       '    <button class="video-player-btn video-player-enter-btn" data-action="enter" aria-label="Enter FoundUp">',
       '      <svg viewBox="0 0 24 24"><path d="M15 3h6v6M14 10l6.1-6.1M9 21H3v-6M10 14l-6.1 6.1"/></svg>',
       '    </button>',
@@ -175,6 +258,8 @@
       '  </div>',
       '</div>',
       '<div class="video-player-stage"></div>',
+      '<p class="video-player-status" role="status" hidden></p>',
+      '<button class="video-player-manual-play" type="button" hidden>Play video</button>',
       '<div class="video-player-edge-trigger"></div>',
       '<div class="video-player-queue-rail">',
       '  <div class="video-player-queue-track"></div>',
@@ -185,6 +270,9 @@
     document.body.appendChild(container);
 
     stage = container.querySelector('.video-player-stage');
+    statusEl = container.querySelector('.video-player-status');
+    playBtn = container.querySelector('.video-player-manual-play');
+    playBtn.addEventListener('click', function() { requestYouTubePlay?.(); });
     topBar = container.querySelector('.video-player-top-bar');
     queueRail = container.querySelector('.video-player-queue-rail');
     queueTrack = container.querySelector('.video-player-queue-track');
@@ -201,13 +289,63 @@
 
     // Keyboard
     document.addEventListener('keydown', handleKeydown);
+    document.addEventListener('visibilitychange', function() {
+      if (isOpen && document.hidden) pausePlayback();
+    });
+    window.addEventListener('pagehide', function() {
+      if (!isOpen) return;
+      flushCurrentPlaybackPosition();
+      pausePlayback();
+    });
   }
 
-  // ─── Open Fullscreen ───
+  function enterImmersive() {
+    inline = false;
+    container.classList.remove('video-player-inline');
+    container.setAttribute('role', 'dialog');
+    container.setAttribute('aria-label', 'Fullscreen video player');
+    topBar.querySelector('[data-action="expand"]').hidden = true;
+    topBar.querySelector('[data-action="back"]').setAttribute('aria-label', 'Back');
+    previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    if (returnTile) {
+      container.setAttribute('aria-modal', 'true');
+      var member = document.getElementById('memberArea');
+      // An inline iframe keeps its parent when expanded. Inert its siblings,
+      // rather than an ancestor that also contains the active player.
+      if (member && member.contains(container)) {
+        for (var node = container; node !== member; node = node.parentElement) {
+          Array.from(node.parentElement.children).forEach(function(sibling) {
+            if (sibling !== node && !sibling.inert) {
+              sibling.inert = true;
+              inertElements.push(sibling);
+            }
+          });
+        }
+      } else if (member && !member.inert) {
+        member.inert = true;
+        inertElements.push(member);
+      }
+    }
+    attachGestures();
+    resetChromeTimer();
+    if (returnTile) topBar.querySelector('[data-action="back"]').focus({ preventScroll: true });
+  }
+
+  function expandInline() {
+    if (!isOpen || !inline) return false;
+    stageObserver?.disconnect();
+    stageObserver = null;
+    enterImmersive();
+    return true;
+  }
+
+  // ─── Open selected media ───
   function open(foundupId, queue, startIndex, resumeOpts) {
     if (!queue || !queue.length) return;
 
     ensureDOM();
+    if (isOpen) close({ restore: false });
 
     var rs = null;
     if (resumeOpts != null && resumeOpts !== undefined) {
@@ -220,11 +358,9 @@
     pendingResumeSeconds = normalizeResumeSeconds(rs, 0);
 
     returnTile = resumeOpts?.returnTile || null;
+    onClose = resumeOpts?.onClose || null;
+    autoplayRequested = resumeOpts?.autoplay !== false;
     container.classList.toggle('scoped-player', !!returnTile);
-    if (returnTile) {
-      container.setAttribute('aria-modal', 'true');
-      document.getElementById('memberArea').inert = true;
-    }
 
     currentFoundUpId = foundupId;
     currentQueue = queue;
@@ -232,13 +368,31 @@
     isOpen = true;
 
     container.classList.add('open');
-    document.body.style.overflow = 'hidden';
+    inline = !!resumeOpts?.inlineMount;
+    if (inline) {
+      resumeOpts.inlineMount.appendChild(container);
+      container.classList.add('video-player-inline');
+      container.setAttribute('role', 'region');
+      container.setAttribute('aria-label', 'Inline video player');
+      topBar.querySelector('[data-action="expand"]').hidden = false;
+      topBar.querySelector('[data-action="back"]').setAttribute('aria-label', 'Close player');
+      container.scrollIntoView({ block: 'nearest' });
+      topBar.querySelector('[data-action="back"]').focus({ preventScroll: true });
+      if (typeof IntersectionObserver !== 'undefined') {
+        var observer = new IntersectionObserver(function(entries) {
+          if (stageObserver === observer && inline && entries.some(function(entry) { return entry.intersectionRatio <= 0.5; })) {
+            pausePlayback();
+          }
+        }, { threshold: [0.5] });
+        stageObserver = observer;
+        stageObserver.observe(stage);
+      }
+    } else {
+      enterImmersive();
+    }
 
     renderVideo(currentQueue[currentIndex]);
     renderRail();
-    attachGestures();
-    resetChromeTimer();
-    if (returnTile) topBar.querySelector('[data-action="back"]').focus();
 
     // Update save button state
     updateSaveButtonState(isVideoSaved(currentFoundUpId, currentQueue[currentIndex]));
@@ -252,20 +406,28 @@
     }));
   }
 
-  // ─── Close Fullscreen ───
-  function close() {
+  // ─── Close and return ───
+  function close(options) {
     if (!isOpen) return;
+    var restore = options?.restore !== false;
 
     flushCurrentPlaybackPosition();
     pendingResumeSeconds = null;
 
     isOpen = false;
     container.classList.remove('open');
-    document.body.style.overflow = '';
+    container.classList.remove('video-player-inline');
+    if (previousOverflow !== null) document.body.style.overflow = previousOverflow;
+    previousOverflow = null;
+    inertElements.forEach(function(element) { element.inert = false; });
+    inertElements = [];
+    stageObserver?.disconnect();
+    stageObserver = null;
 
     // Stop video
-    destroyYTPlayer();
-    stage.innerHTML = '';
+    resetPlayback();
+    if (container.parentNode !== document.body) document.body.appendChild(container);
+    inline = false;
 
     // Cleanup
     if (gestureRef) { gestureRef.destroy(); gestureRef = null; }
@@ -282,12 +444,14 @@
     currentFoundUpId = null;
     currentIndex = -1;
 
+    var afterClose = onClose;
+    onClose = null;
+    if (afterClose) afterClose(restore);
     if (returnTile) {
-      document.getElementById('memberArea').inert = false;
       var tile = returnTile.isConnected ? returnTile : document.querySelector(
         '#mallTileField .mall-tile[data-index="' + Number(returnTile.dataset.index) + '"]'
       );
-      tile?.focus({ preventScroll: true });
+      if (restore) tile?.focus({ preventScroll: true });
       container.removeAttribute('aria-modal');
       returnTile = null;
     }
@@ -332,6 +496,127 @@
     }
   }
 
+  function handleVideoEnded() {
+    if (inline) return;
+    nextVideo();
+  }
+
+  function canStartYouTube() {
+    if (document.hidden) return false;
+    var rect = stage.getBoundingClientRect();
+    if (rect.width < 200 || rect.height < 200) return false;
+    var wrapper = inline && container.closest('.mall-tile-field-wrapper');
+    var bounds = wrapper?.getBoundingClientRect?.();
+    var width = Math.max(0, Math.min(rect.right, window.innerWidth, bounds?.right ?? Infinity) -
+      Math.max(rect.left, 0, bounds?.left ?? 0));
+    var height = Math.max(0, Math.min(rect.bottom, window.innerHeight, bounds?.bottom ?? Infinity) -
+      Math.max(rect.top, 0, bounds?.top ?? 0));
+    return width * height > rect.width * rect.height / 2;
+  }
+
+  var YOUTUBE_ERRORS = {
+    2: ['configuration', 'YouTube rejected the video configuration.'],
+    5: ['playback-error', 'YouTube could not play this video in this browser.'],
+    100: ['unavailable', 'This video is unavailable on YouTube.'],
+    101: ['embedding-disabled', 'The creator has disabled embedded playback.'],
+    150: ['embedding-disabled', 'The creator has disabled embedded playback.'],
+    153: ['client-identification', 'YouTube could not identify this embedded player.']
+  };
+
+  function renderYouTube(embed, videoId) {
+    var generation = renderGeneration;
+    var src = new URL('/embed/' + videoId, embed.origin);
+    src.searchParams.set('enablejsapi', '1');
+    src.searchParams.set('playsinline', '1');
+    src.searchParams.set('controls', '1');
+    src.searchParams.set('rel', '0');
+    if (/^https?:$/.test(window.location.protocol)) src.searchParams.set('origin', window.location.origin);
+
+    var iframe = document.createElement('iframe');
+    iframe.title = 'YouTube video · ' + titleEl.textContent;
+    iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+    iframe.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+    iframe.allowFullscreen = true;
+    iframe.src = src.href;
+    stage.appendChild(iframe);
+
+    function current() {
+      return isOpen && generation === renderGeneration && iframe.isConnected;
+    }
+    function waitForPlayback(state, message) {
+      clearTimeout(playbackTimer);
+      playbackTimer = setTimeout(function() {
+        if (!current()) return;
+        autoplayRequested = false;
+        reportYouTube(state, message);
+      }, YOUTUBE_TIMEOUT_MS);
+    }
+    function failed(state, message, code) {
+      if (!current()) return;
+      clearTimeout(playbackTimer);
+      autoplayRequested = false;
+      reportYouTube(state, message, code);
+    }
+    reportYouTube('loading', 'Loading YouTube player…');
+    waitForPlayback('timeout', 'YouTube did not finish loading. Try its Play control or open the source.');
+
+    ensureYouTubeAPI().then(function() {
+      if (!current()) return;
+      ytPlayer = new window.YT.Player(iframe, {
+        events: {
+          onReady: function(ev) {
+            if (!current()) return;
+            clearTimeout(playbackTimer);
+            reportYouTube('ready');
+            requestYouTubePlay = function() {
+              if (!current()) return;
+              if (!canStartYouTube()) stage.scrollIntoView({ block: 'nearest' });
+              if (!canStartYouTube()) {
+                reportYouTube('manual-play', 'Bring the video into view before playing.');
+                return;
+              }
+              waitForPlayback('provider-unknown', 'YouTube did not start. Try its Play control or open the source.');
+              if (document.activeElement === playBtn) {
+                topBar.querySelector('[data-action="back"]').focus({ preventScroll: true });
+              }
+              reportYouTube('starting', 'Starting video…');
+              try { ev.target.playVideo(); }
+              catch (e) { failed('provider-unknown', 'YouTube did not start. Try again or open the source.'); }
+            };
+            if (autoplayRequested && canStartYouTube()) {
+              requestYouTubePlay();
+            } else {
+              reportYouTube('manual-play', 'The video is ready to play.');
+            }
+          },
+          onStateChange: function(ev) {
+            if (!current()) return;
+            var state = ev.data;
+            if (state === 1 || (state === 2 && requestYouTubePlay) || state === 0) {
+              clearTimeout(playbackTimer);
+              reportYouTube({ 1: 'playing', 2: 'paused', 0: 'ended' }[state],
+                state === 2 ? 'Playback paused.' : '', undefined, state);
+              if (state === 0) handleVideoEnded();
+            } else {
+              window.dispatchEvent(new CustomEvent('mallVideoPlayback', {
+                detail: { provider: 'youtube', state: 'provider-state', videoId: videoId, providerState: state }
+              }));
+            }
+          },
+          onError: function(ev) {
+            var result = YOUTUBE_ERRORS[ev.data] || ['provider-unknown', 'YouTube could not start this video.'];
+            failed(result[0], result[1] + ' Open the source to check it on YouTube.', ev.data);
+          },
+          onAutoplayBlocked: function() {
+            failed('autoplay-blocked', 'Your browser blocked automatic playback. Use Play video to try again.');
+          }
+        }
+      });
+    }).catch(function() {
+      failed('timeout', 'YouTube controls may still work. Try Play in the video or open the source.');
+    });
+  }
+
   // ─── Render Video ───
   function renderVideo(video) {
     if (!video) return;
@@ -345,43 +630,28 @@
       sourceLink.setAttribute('aria-label', 'Original Short on YouTube · ' + sourceLink.textContent);
     }
 
-    destroyYTPlayer();
+    resetPlayback();
     titleEl.textContent = video.title || '';
 
     // Determine embed type
     var embedUrl = video.embed_url || video.embedUrl;
     var sourceUrl = video.source_url || video.sourceUrl;
+    var youtube = parseYouTubeEmbed(embedUrl);
     var ytId = extractYouTubeVideoId(embedUrl);
+    container.classList.toggle('provider-youtube', !!youtube);
 
     if (ytId) {
       pendingResumeSeconds = null; // cannot read playback time from YouTube embed; resume N/A
-      // YouTube embed via IFrame API — onStateChange gives us ended detection
-      var holderDiv = document.createElement('div');
-      holderDiv.id = 'ytPlayerHost_' + Date.now();
-      stage.innerHTML = '';
-      stage.appendChild(holderDiv);
-
-      function createYTPlayer() {
-        if (!isOpen || !holderDiv.isConnected) return;
-        destroyYTPlayer();
-        ytPlayer = new window.YT.Player(holderDiv.id, {
-          videoId: ytId,
-          playerVars: { autoplay: 1, rel: 0, modestbranding: 1 },
-          events: {
-            onStateChange: function (ev) {
-              if (ev.data === window.YT.PlayerState.ENDED) {
-                handleVideoEnded();
-              }
-            }
-          }
-        });
+      if (!originalUrl) {
+        sourceLink.href = 'https://www.youtube.com/watch?v=' + ytId;
+        sourceLink.textContent = 'Source on YouTube';
+        sourceLink.setAttribute('aria-label', 'Open source on YouTube');
+        sourceLink.hidden = false;
       }
-
-      if (ytAPIReady && window.YT && window.YT.Player) {
-        createYTPlayer();
-      } else {
-        ensureYouTubeAPI(createYTPlayer);
-      }
+      renderYouTube(youtube, ytId);
+    } else if (youtube || (returnTile && embedUrl)) {
+      pendingResumeSeconds = null;
+      reportYouTube('configuration', 'The YouTube video ID is invalid.', 2);
     } else if (embedUrl) {
       pendingResumeSeconds = null;
       // Non-YouTube embed (Vimeo, etc.) — raw iframe, no ended detection
@@ -474,6 +744,7 @@
   function resetChromeTimer() {
     container.classList.remove('chrome-hidden');
     clearTimeout(chromeTimer);
+    if (inline) return;
     chromeTimer = setTimeout(function () {
       container.classList.add('chrome-hidden');
     }, CHROME_AUTO_HIDE_MS);
@@ -562,6 +833,9 @@
       case 'back':
         close();
         break;
+      case 'expand':
+        expandInline();
+        break;
       case 'enter':
         // Enter FoundUp: navigate to canonical /f/{foundup_id} route (WSP 104)
         if (currentFoundUpId && !returnTile) {
@@ -599,6 +873,8 @@
 
   function handleKeydown(e) {
     if (!isOpen) return;
+    if (e.defaultPrevented || e.target?.closest?.('dialog[open]')) return;
+    if (e.key !== 'Escape' && (inline || e.target?.closest?.('button, a, input, textarea, select'))) return;
 
     switch (e.key) {
       case 'Escape':
@@ -809,6 +1085,8 @@
      * Close the fullscreen player.
      */
     close: close,
+    expandInline: expandInline,
+    getPlaybackSnapshot: getPlaybackSnapshot,
 
     /**
      * Navigate to a specific video in the current queue.
