@@ -9,7 +9,7 @@
 // Auth flows (Clerk, Firebase) are NEVER cached.
 // Catalog is network-first with cache fallback.
 
-const CACHE_NAME = 'pfmall-member-v6';
+const CACHE_NAME = 'pfmall-member-v7';
 const POSTER_CACHE_NAME = 'pfmall-posters-v1';
 const PROPERTY_CACHE_NAME = 'pfmall-properties-v1';
 const MAX_POSTER_ENTRIES = 60;
@@ -65,7 +65,11 @@ function shouldNeverCache(url) {
 self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(CACHE_NAME).then(function(cache) {
-      return cache.addAll(SHELL_ASSETS);
+      // A new shell generation must not precache a previous HTTP response
+      // just because its static URL is unchanged.
+      return cache.addAll(SHELL_ASSETS.map(function(path) {
+        return new Request(new URL(path, self.location.origin), { cache: 'reload', credentials: 'omit' });
+      }));
     })
   );
   self.skipWaiting();

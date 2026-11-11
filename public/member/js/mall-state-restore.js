@@ -149,7 +149,8 @@
 
     var wrapper = document.querySelector('.mall-tile-field-wrapper');
     if (selectedVideoScope) {
-      return wrapper ? { scrollTop: wrapper.scrollTop, scrollLeft: wrapper.scrollLeft } : null;
+      return tf.getVideoGridState?.() ||
+        (wrapper ? { scrollTop: wrapper.scrollTop, scrollLeft: wrapper.scrollLeft } : null);
     }
 
     if (selectedProduct) {
@@ -196,8 +197,11 @@
   function isValidState(state) {
     if (!state || typeof state !== 'object') return false;
     if (selectedVideoScope) {
-      return Object.keys(state).length === 2 &&
-        [state.scrollTop, state.scrollLeft].every(function(value) { return Number.isFinite(value) && value >= 0; });
+      var keys = Object.keys(state);
+      if (![state.scrollTop, state.scrollLeft].every(function(value) { return Number.isFinite(value) && value >= 0; })) return false;
+      if (keys.length === 2) return true; // legacy scoped positions
+      return keys.length === 4 && typeof state.anchorVideoId === 'string' &&
+        /^[A-Za-z0-9_-]{1,128}$/.test(state.anchorVideoId) && Number.isFinite(state.anchorOffset);
     }
     if (selectedProduct) {
       return !Array.isArray(state) && state.schema_version === 'pfmall_product_state.v1' &&
@@ -233,7 +237,9 @@
     }
 
     if (selectedVideoScope) {
+      var scope = selectedVideoScope;
       requestAnimationFrame(function() {
+        if (selectedVideoScope !== scope || tf.restoreVideoGridState?.(state)) return;
         var wrapper = document.querySelector('.mall-tile-field-wrapper');
         if (wrapper) {
           wrapper.scrollTop = state.scrollTop;

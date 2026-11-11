@@ -31,6 +31,10 @@
     element('loadingState').style.display = 'none';
     element('memberArea').style.display = 'block';
     field.setAttribute('aria-label', 'Shorts');
+    const home = document.querySelector('.mall-header .mall-brand-minimal');
+    home.href = 'https://foundups.com/member/';
+    home.setAttribute('aria-label', 'Return to Play FoundUps Mall');
+    home.addEventListener('click', function () { window.mallStateRestore.save(); });
 
     try {
       const response = await fetch('/member/mall-public-video-catalog.json', { cache: 'no-store', credentials: 'omit' });
@@ -46,9 +50,13 @@
 
       document.title = projection.lane.title + ' | Play FoundUps Mall';
       element('videoScopeTitle').textContent = projection.lane.title;
-      element('videoScopeIdentity').textContent = projection.identity;
-      element('videoScopeTopic').textContent = projection.topic;
+      const identity = element('videoScopeIdentity');
+      const topic = element('videoScopeTopic');
+      identity.textContent = projection.identity;
+      topic.textContent = projection.topic;
+      identity.after(topic);
       element('videoScopeCredit').textContent = projection.credit + ' Shorts · Commentary and satire';
+      field.setAttribute('aria-describedby', 'videoScopeCredit');
       element('videoScopeDisclosureText').textContent = projection.disclosure;
       const disclosure = element('videoScopeDisclosure');
       element('videoScopeInfo').addEventListener('click', () => disclosure.showModal());
@@ -56,9 +64,13 @@
       const voice = element('videoScopeVoice');
       voice.href = voiceResource.href;
       voice.addEventListener('click', () => window.mallStateRestore.save());
+      const actions = document.createElement('nav');
+      actions.id = 'videoScopeActions';
+      actions.setAttribute('aria-label', 'Video collection actions');
+      actions.append(voice);
+      element('redDogAnchor').prepend(actions);
 
       element('videoScopeHeader').hidden = false;
-      element('videoScopeBar').hidden = false;
       window.mallStateRestore.selectVideoScope(scope);
       window.mallTileField.initialize([projection.lane], { fixedVideoField: true });
       window.mallStateRestore.restore();

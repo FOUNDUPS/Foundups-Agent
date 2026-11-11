@@ -5,6 +5,10 @@ mobile creator seam below is specified only (updated 2026-10-18).
 **Boundary**: p.fMALL is a platform/presentation layer, not a FoundUp, model
 host, OpenClaw instance, or Hermes worker.
 
+The [member shell](../../../public/member/INTERFACE.md#public-video-projection)
+owns the shared video UI. The [HPC media incident](MEDIA_PLAYBACK_INCIDENT_HPC.md)
+records provider and layout constraints, reproduction and regression evidence.
+
 ## Python package exports
 
 `modules.foundups.pfmall` exports the following shell-core surface:

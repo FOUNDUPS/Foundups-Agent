@@ -5,6 +5,14 @@
 
 ## Overview
 
+### Public scoped video
+
+HPC uses this shell's shared field, player, header brand and bottom anchor.
+The recovery candidate offers three portrait columns, in-context play,
+explicit immersive expansion, and stable Back/return. The
+[shared media incident](../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md)
+tracks real provider playback and the open physical iPhone gate.
+
 ### Public FX directory
 
 The homepage's **FX** navigation link opens the existing public `/f/` directory.
@@ -54,7 +62,8 @@ links target the canonical Foundups host, including from a private review mirror
 Geographic browsing uses `pfmall_product_move2japan_state_v1`; video browsing keeps
 `pfmall_mall_state_v1`. Returning from the account gateway consumes a bounded,
 single-use session record only after actual admission. The shared service worker
-uses `pfmall-member-v5` and explicit public assets; it never caches account data.
+uses explicit public assets and separate catalog keys. The recovery candidate
+uses `pfmall-member-v7`; it never caches account data.
 
 ## Runtime Shape
 

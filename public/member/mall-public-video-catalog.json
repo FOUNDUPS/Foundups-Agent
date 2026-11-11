@@ -32,13 +32,35 @@
       "tier": "F0_DAE",
       "lifecycle_stage": "incubating",
       "launch_readiness": "discoverable_only",
-      "poster_url": "https://i.ytimg.com/vi/BXCzUOh9Y8M/oar2.jpg",
-      "video_count": 5,
+      "poster_url": "https://i.ytimg.com/vi/iJuguXpbRR4/oardefault.jpg",
+      "video_count": 8,
       "videos": [
+        {
+          "video_id": "iJuguXpbRR4",
+          "title": "MAGA ACCOUNTABILITY not REVENGE! Chuck Schumer OUT",
+          "thumbnail_url": "https://i.ytimg.com/vi/iJuguXpbRR4/oardefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/iJuguXpbRR4",
+          "source_url": "https://www.youtube.com/shorts/iJuguXpbRR4",
+          "timestamp": "2026-11-11T01:00:25Z",
+          "duration_seconds": 60,
+          "editorial_label": "Opinion",
+          "source_label": "Move2Japan"
+        },
+        {
+          "video_id": "sSzWdw7MNjs",
+          "title": "BREAKING: “Chuck #SchumerOUT 💙🌊”#HasanPiker Coalition in action",
+          "thumbnail_url": "https://i.ytimg.com/vi/sSzWdw7MNjs/oardefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/sSzWdw7MNjs",
+          "source_url": "https://www.youtube.com/shorts/sSzWdw7MNjs",
+          "timestamp": "2026-11-10T22:00:29Z",
+          "duration_seconds": 51,
+          "editorial_label": "Satire",
+          "source_label": "Move2Japan"
+        },
         {
           "video_id": "BXCzUOh9Y8M",
           "title": "Chuck Schumer Out — call senators NOW",
-          "thumbnail_url": "https://i.ytimg.com/vi/BXCzUOh9Y8M/oar2.jpg",
+          "thumbnail_url": "https://i.ytimg.com/vi/BXCzUOh9Y8M/oardefault.jpg",
           "embed_url": "https://www.youtube.com/embed/BXCzUOh9Y8M",
           "source_url": "https://www.youtube.com/shorts/BXCzUOh9Y8M",
           "timestamp": "2026-11-08T11:00:22Z",
@@ -47,9 +69,20 @@
           "source_label": "Move2Japan"
         },
         {
+          "video_id": "OTTz58wPi24",
+          "title": "⁠@Vaush Schumer OUT: Hasan Piker & Vaush Midterm Bluek coalistion EXPOSE the Senate weakness",
+          "thumbnail_url": "https://i.ytimg.com/vi/OTTz58wPi24/oardefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/OTTz58wPi24",
+          "source_url": "https://www.youtube.com/shorts/OTTz58wPi24",
+          "timestamp": "2026-11-08T02:36:49Z",
+          "duration_seconds": 60,
+          "editorial_label": "Opinion",
+          "source_label": "Move2Japan"
+        },
+        {
           "video_id": "fp2BkIS2FNI",
           "title": "Here’s a reason why Schumer should be replaced! Chuck #SchumerOUT",
-          "thumbnail_url": "https://i.ytimg.com/vi/fp2BkIS2FNI/oar2.jpg",
+          "thumbnail_url": "https://i.ytimg.com/vi/fp2BkIS2FNI/oardefault.jpg",
           "embed_url": "https://www.youtube.com/embed/fp2BkIS2FNI",
           "source_url": "https://www.youtube.com/shorts/fp2BkIS2FNI",
           "timestamp": "2026-11-07T20:00:02Z",
@@ -60,7 +93,7 @@
         {
           "video_id": "DDAfdpJeUP0",
           "title": "CHUCK #SchumerOUT call the senate U.S. Capitol Switchboard * Phone: (202) 224-3121",
-          "thumbnail_url": "https://i.ytimg.com/vi/DDAfdpJeUP0/oar2.jpg",
+          "thumbnail_url": "https://i.ytimg.com/vi/DDAfdpJeUP0/oardefault.jpg",
           "embed_url": "https://www.youtube.com/embed/DDAfdpJeUP0",
           "source_url": "https://www.youtube.com/shorts/DDAfdpJeUP0",
           "timestamp": "2026-11-07T19:23:30Z",
@@ -71,7 +104,7 @@
         {
           "video_id": "Pdz1Q5tHmJQ",
           "title": "BREAKING: “Chuck #SchumerOUT 💙🌊”#HasanPikerCoalition",
-          "thumbnail_url": "https://i.ytimg.com/vi/Pdz1Q5tHmJQ/oar2.jpg",
+          "thumbnail_url": "https://i.ytimg.com/vi/Pdz1Q5tHmJQ/oardefault.jpg",
           "embed_url": "https://www.youtube.com/embed/Pdz1Q5tHmJQ",
           "source_url": "https://www.youtube.com/shorts/Pdz1Q5tHmJQ",
           "timestamp": "2026-11-07T17:14:22Z",
@@ -82,7 +115,7 @@
         {
           "video_id": "urXOSlVgPdk",
           "title": "“I WANT DO!! Every minute of the day, I WANT DO!” Chuck #SchumerOUT NOW",
-          "thumbnail_url": "https://i.ytimg.com/vi/urXOSlVgPdk/oar2.jpg",
+          "thumbnail_url": "https://i.ytimg.com/vi/urXOSlVgPdk/oardefault.jpg",
           "embed_url": "https://www.youtube.com/embed/urXOSlVgPdk",
           "source_url": "https://www.youtube.com/shorts/urXOSlVgPdk",
           "timestamp": "2026-11-07T14:00:24Z",
@@ -93,7 +126,7 @@
       ]
     },
     "identity": "Independent satirical FoundUp",
-    "topic": "SchumerOUT",
+    "topic": "#SchumerOUT",
     "credit": "Move2Japan",
     "voice_resource_url": "https://vote.mtrout.com/contact",
     "disclosure": "This is an independent satirical FoundUp. It is not affiliated with, endorsed by, or operated by Hasan Piker or any other person depicted or discussed. Videos and images belong to their respective creators and rights holders. Commentary and satire do not imply endorsement."

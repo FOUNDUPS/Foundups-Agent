@@ -301,9 +301,11 @@ function swRuntime() {
       return {
         async match(key) { return entries.get(keyOf(key))?.clone(); },
         async put(key, response) { entries.set(keyOf(key), response.clone()); },
-        async addAll(paths) {
-          precached.push(...paths);
-          for (const path of paths) {
+        async addAll(requests) {
+          precached.push(...requests);
+          for (const request of requests) {
+            const url = new URL(keyOf(request));
+            const path = url.pathname + url.search;
             entries.set(keyOf(path), new Response(path === '/member/' ? 'public /member/' : 'public ' + path, {
               headers: { 'Content-Type': path === '/member/' ? 'text/html' : 'text/plain' }
             }));
@@ -324,7 +326,7 @@ function swRuntime() {
       skipWaiting: () => Promise.resolve(),
       clients: { claim: () => Promise.resolve() }
     },
-    URL, Response, Headers, caches,
+    URL, Request, Response, Headers, caches,
     fetch: (request, options = {}) => {
       calls.push({ request: typeof request === 'string' ? request : request.url, options: copy(options) });
       return Promise.resolve().then(() => network(request, options));
@@ -355,25 +357,31 @@ function swRuntime() {
   };
 }
 
-await check('install precaches only explicit shell and product assets', async () => {
+await check('install reloads only explicit public shell and product assets', async () => {
   const h = swRuntime();
   await h.event('install');
+  const installed = h.precached.map(request => {
+    const url = new URL(request.url);
+    assert.equal(url.origin, ORIGIN);
+    assert.equal(request.cache, 'reload');
+    assert.equal(request.credentials, 'omit');
+    return url.pathname + url.search;
+  });
   for (const path of ['/member/js/mall-tile-field.js?v=6', '/member/js/mall-video-projection.js', '/move2japan/property-search.js', '/move2japan/move2japan.css']) {
-    assert.equal(h.precached.includes(path), true);
+    assert.equal(installed.includes(path), true);
   }
-  assert.equal(h.precached.includes('/move2japan/properties.json'), false);
-  assert.equal(h.precached.every(path => path.startsWith('/')), true);
-  assert.equal(h.stores.has('pfmall-member-v6'), true);
+  assert.equal(installed.includes('/move2japan/properties.json'), false);
+  assert.equal(h.stores.has('pfmall-member-v7'), true);
 });
 
 await check('activation retires only obsolete caches owned by this Mall', async () => {
   const h = swRuntime();
-  for (const name of ['pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4', 'pfmall-member-v5', 'pfmall-member-v6', 'pfmall-properties-v1', 'pfmall-posters-v1', 'gotjunk-offline-v1', 'other-app-cache']) {
+  for (const name of ['pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4', 'pfmall-member-v5', 'pfmall-member-v6', 'pfmall-member-v7', 'pfmall-properties-v1', 'pfmall-posters-v1', 'gotjunk-offline-v1', 'other-app-cache']) {
     await h.caches.open(name);
   }
   await h.event('activate');
-  assert.deepEqual(h.deleted.sort(), ['pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4', 'pfmall-member-v5']);
-  assert.equal(h.stores.has('pfmall-member-v6'), true);
+  assert.deepEqual(h.deleted.sort(), ['pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4', 'pfmall-member-v5', 'pfmall-member-v6']);
+  assert.equal(h.stores.has('pfmall-member-v7'), true);
   assert.equal(h.stores.has('gotjunk-offline-v1'), true);
   assert.equal(h.stores.has('other-app-cache'), true);
 });
@@ -409,7 +417,7 @@ await check('product navigation shares one static member shell without query cac
   assert.equal(online.response.status, 200);
   assert.equal(h.calls.at(-1).request, '/member/');
   assert.equal(h.calls.at(-1).options.credentials, 'omit');
-  const cache = await h.caches.open('pfmall-member-v6');
+  const cache = await h.caches.open('pfmall-member-v7');
   assert.equal((await cache.keys()).some(key => {
     const url = new URL(key.url);
     return url.pathname === '/member/' && !!url.search;
