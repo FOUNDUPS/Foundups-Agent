@@ -182,3 +182,75 @@ priorities and active member-runtime PRs intact.
 - Next: device Safari/pinch/accessibility verification, provider-confirmed live tiles,
   independent supporter benefits/follow persistence and controlled muted previews.
   Six simultaneous autoplay streams are not required for responsive browsing.
+
+## Responsive HPC PoC — shared WikiTube theater and phone grid (2026-11-11; acceptance open)
+
+012's clarified PoC requires **one shared Mall with two responsive presentations**.
+Desktop uses the centered main video, search directly below it, and horizontal
+thumbnail strip beneath search. Phone uses the compact three-column video grid,
+fixed header and bottom thumb controls. This is not permission to build another
+HPC shell, change every FoundUp's layout, or call a density-only patch complete.
+The detailed contract and planning allocation are in [HPC H1](../hpc/ROADMAP.md#h1--responsive-wikitube-style-discovery-and-shared-thumb-dock-specified-012-request-2026-11-11).
+
+### Required planning gate
+
+Before another product/build mutation, reconcile the current root/module roadmaps,
+owning INTERFACE, actual code, tests and active PRs with the request. Record its
+stage, owner, fit/drift decision, superseded requirement, acceptance and recovery
+path. Apply the existing [strategic diligence skill](../../ai_intelligence/ai_overseer/skillz/strategic_diligence_gate/SKILLz.md)
+for cross-module/high-impact decisions; do not create a duplicate build skill.
+
+WSP 97 section 1.2.1 asks **Do I need it? Can I afford it? Can I live without it
+now?** These questions project WSP 15's C + I + D + Impact scoring. WSP 30, not
+WSP 15 alone, supplies staged build orchestration. Record scores and verification
+cost before implementation; no unauthenticated planning record grants execution
+or merge authority. H1 records documentation 14/P1, responsive repair 17/P0, and
+scoped search 13/P1, with rationale. These are task-scoped planning priorities,
+not reprioritization of unrelated system work.
+
+### Reuse and current gaps
+
+- Inspect `public/member/` field, player, existing theater/queue rendering,
+  scoped catalog, query and state APIs before proposing markup or another player.
+  WikiTube TV source/history remains a retrieval target, not a verified current
+  integration. Do not repeat an unsourced historical deployment address.
+- PR #2357's scoped layout uses three columns at all sizes and a separate player
+  slot after a calculated row. The PC regression is reported by 012. A CSS-only
+  density correction such as draft #2359 does not fix the player placement and
+  must also reconcile fixed-column JavaScript arithmetic before acceptance.
+- Desktop requests first-video startup playback and sequential queue advancement.
+  Preserve provider controls, one active player, and truthful blocked-autoplay
+  recovery. A thumbnail, iframe load or API availability flag is not playback.
+- Phone tap plays within the selected tile/context, not a detached second mini-
+  player. Provider minimum dimensions and iframe touch boundaries must be measured;
+  any active-tile enlargement belongs in the explicit shared contract.
+- Scoped search repopulates the existing queue/field. It supersedes hidden-search
+  presentation only within the active permitted catalog; global/remote search is
+  later work and never bypasses authorization.
+
+### Ordered slices and acceptance
+
+| Slice | Stage / work | Promotion evidence |
+| --- | --- | --- |
+| PFWD-0 | Reconcile current owners, source history and acceptance | Roadmap/contract references, source SHAs, existing-test inventory and bounded recovery plan; documentation is not runtime success. |
+| PFWD-1A | PoC: desktop theater plus preserved phone grid | PC and phone composition, correct click target/player, one iframe/audio session, original-ID return, resize/rotation and other-FoundUp regressions. |
+| PFWD-1B | PoC: bottom scoped search / queue update | Search between desktop main video and bottom tiles; phone thumb access; loaded-catalog filtering, empty results, queue advancement, safe-area/keyboard tests and no scope leak. |
+| PFWD-2 | Prototype: speech/agent controls | Real mic-to-STT path; Red Dog hold-to-talk via authenticated resident ingress; admitted device-compatible selection, cancellation, permission denial and bounded action receipts. |
+| PFWD-3 | Prototype: AutoPost handoff | Existing capture owner, explicit permission, approved route/origin and return state; no copied camera stack. |
+| PFWD-4 | MVP hardening | Measured large-catalog performance, privacy/abuse review, provider/device recovery and release evidence beyond the PoC acceptance matrix. |
+
+Do not defer ordinary desktop/phone playback verification to PFWD-4: it is a
+PFWD-1 PoC acceptance gate. Extend the existing browser fixtures; phone emulation
+is not physical iPhone standalone evidence. Preserve shared search, channel
+expansion, protected operations and other projections.
+
+The left `+` upward options sheet, right Red Dog press/hold, adjacent dictation
+mic and AutoPost camera remain retained later-stage requirements. A listening
+animation or model menu is not resident execution. Existing agent admission,
+WRE/Hermes authority, privacy and capture ownership remain unchanged.
+
+The existing [media incident](MEDIA_PLAYBACK_INCIDENT_HPC.md) owns provider-error,
+bot-challenge, origin/referrer and availability evidence. Fix application defects
+without inventing authentication bypasses or claiming an unobserved iPhone pass.
+Report commit, qualified merge, main verification, deployment and PC sync as
+separate outcomes. This roadmap/skill update changes no runtime or live site.
