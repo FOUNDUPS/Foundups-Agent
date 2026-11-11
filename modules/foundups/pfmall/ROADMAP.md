@@ -182,3 +182,25 @@ priorities and active member-runtime PRs intact.
 - Next: device Safari/pinch/accessibility verification, provider-confirmed live tiles,
   independent supporter benefits/follow persistence and controlled muted previews.
   Six simultaneous autoplay streams are not required for responsive browsing.
+
+## P1 proposal — Shared bottom search, Red Dog agent dock and responsive WikiTube theater (2026-11-11; not implemented)
+
+**Source:** 012's HPC/mobile+desktop demonstration. HPC is a consumer of the shared p.fMALL shell, **not** the implementation owner of global controls. This staged request does not supersede current P0 media playback recovery or other FoundUp release gates. Its immediate context is [HPC roadmap](../hpc/ROADMAP.md#h1--responsive-wikitube-style-discovery-and-shared-thumb-dock-specified-012-request-2026-11-11) and [shared media incident](MEDIA_PLAYBACK_INCIDENT_HPC.md).
+
+**Research gate:** Inventory `public/member/` actual runtime, canonical shell contracts, category/creator search, PMCTRL1 and RedDog controls, fullscreen queue and state restoration. Retrieve WikiTube TV historical source if accessible; user-described prior deployment `wikitube-tv-56566376153.us-west1.run.app` is only a lead. The `FOUNDUPS` repository search did **not** locate a WikiTube-named repository or direct current WikiTube integration; do not fabricate an owner or reuse status. Inspect AutoPost's external UI/capture contracts without importing an unrelated PWA.
+
+**UI contract to evaluate:** responsive single-shell variants—not two implementations. Desktop: bounded main player, bottom WikiTube-style thumbnail/queue carousel, bottom search that repopulates the playlist, user-initiated video followed by sequential eligible playback when allowed. Phone: existing compact three-column vertical video wall, fixed header, floating **bottom search and thumb dock**; left `+` opens an upward sheet of admitted agents; right Red Dog press/hold for agent speech; adjacent mic for device-supported dictated search and camera for explicit AutoPost handoff. Search remains scoped to active FoundUp permissions even when visually accessible. Add keyboard/screen-reader routes and distinguish user activation from platform-autoplay blocking.
+
+**Execution architecture gate:** The currently documented Mall resident RedDog adapter and browser-to-OpenClaw admission are not implemented. The present concierge and dispatcher cannot be described as voice-to-agent execution merely because they render menus, `startListening`, progress indicators or a text query. Research browser/OS STT availability, privacy/permissions, real authenticated agent inventories, selected-agent capability constraints, consented hold-to-talk and safe fallback to plain dictated text. Require execution/audit receipts before promising reorganization by agent voice. Model picker chooses only authorized capabilities; browser never acquires raw WRE/Hermes authority. AutoPost remains source owner for its camera; use approved cross-FoundUp route and explicit safe return, not a camera-code fork.
+
+**Increment plan and promotion:**
+
+- **PFWD-0 (audit/document):** current contract matrix, WikiTube retrieval status, desktop/mobile wire interaction test plan, catalog/search/playback/source-owner boundaries; no invented prior implementation.
+- **PFWD-1 (shared UI PoC):** one bottom search control and responsive desktop queue / mobile tile projections using existing Mall search/field/player/state APIs. Test scoped/guest permissions, selection, back navigation, stable video anchors, portrait/landscape, safe areas and keyboard accessibility.
+- **PFWD-2 (speech/agents prototype):** real mic→STT→bounded query; RedDog press-and-hold→authenticated resident ingress→admitted agent→read-only field update; device/unsupported-mode fallback and explicit call receipts. Verify plus-sheet inventory against real availability and secure model selection.
+- **PFWD-3 (AutoPost handoff):** permissioned camera navigation, authenticated context where required, no duplicated capture implementation, reliable return/revocation and denied/unavailable states.
+- **PFWD-4 (MVP qualification):** real-device PWA and desktop sequential playback, YouTube iframe/bot challenge/error taxonomy, external fallback, performance and large-catalog pagination, privacy/abuse review and other-FoundUp regression evidence.
+
+**Playback blocker:** The existing `MEDIA_PLAYBACK_INCIDENT_HPC.md` separates YouTube anti-bot challenges, video-specific embed restrictions, origin/referrer and browser/PWA constraints from Mall UI bugs. Verify player events and real embedded playback (not just loaded thumbnails or metadata). No unsupported login workaround, authentication bypass or unlicensed stream relay. Do not claim physical iPhone success or general autoplay where not observed.
+
+**Invariants:** retain canonical catalog/registry, WSP 00/97/102/104/109 boundaries, independent Voice/AutoPost owners, public HPC permissions and explicit master-Mall return. Document changes and tests before merge/deploy; avoid overlapping active PRs, duplicating shell components or creating stale branches.
