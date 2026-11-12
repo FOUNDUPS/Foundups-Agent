@@ -31,13 +31,14 @@ the page mode, iframe dimensions, player events and advancing media time.
 **Compare with the official YouTube embed** opens the same clip on the same
 origin with YouTube's Play control. Copying is an explicit user action.
 
-For an isolated Hosting preview, stage `hpc_iphone_playback_probe.js` as
+For an isolated Hosting preview, stage
+`modules/foundups/pfmall/tests/fixtures/hpc_iphone_playback_probe.js` as
 `public/member/playback-probe/probe.js` and
-`hpc_iphone_playback_reference.html` as
+`modules/foundups/pfmall/tests/fixtures/hpc_iphone_playback_reference.html` as
 `public/member/playback-probe/reference.html`. Load the deferred probe
-script in the staged member document. The normal member entry does not load
-the fixture. Use an online device. Hold the phone and network constant across
-the browser, Home Screen and official-embed cases.
+script in the staged member document. The fixture sources live outside
+the Hosting public root. Use an online device and hold the phone and
+network constant across the browser, Home Screen and official-embed cases.
 
 Let the first Short advance for a few seconds. If it fails, capture the
 provider event after the load timeout and test Play inside the official
