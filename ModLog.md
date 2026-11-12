@@ -1,3 +1,13 @@
+## 2026-11-12 — Bounded host launches and build security preflight
+
+Make WSP 91 lifecycle and WSP 71 security review explicit in canonical agent
+startup instructions and the existing WRE security-scan skill. Temporary helpers
+need owned termination, not only a heartbeat; resident services need authorized
+renewal. Required missing/stale security evidence blocks build/launch. Preserve
+the scanner's prototype/manual scope and existing runtime ownership. This is
+governance and instruction integration, not retrofitted universal enforcement.
+WSP 22/71/81/91/95/97 apply; generated AGENTS and exact WSP mirrors are validated.
+
 ## 2026-11-11 — Git lifecycle priority and PC convergence
 
 Use one WRE Git lifecycle pass at WRE and Codex startup. Preserve existing
