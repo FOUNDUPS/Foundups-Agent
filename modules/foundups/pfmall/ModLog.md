@@ -1,3 +1,11 @@
+## 2026-11-13 · Scoped member entry
+
+The dedicated host mounts the public video projection. The FoundUps member
+route uses its existing invitation check before mounting the same scope.
+The public discovery card and admitted Mall card lead to their respective
+entrances. The [media incident](MEDIA_PLAYBACK_INCIDENT_HPC.md) holds the
+verification and release status. WSP 22, 97 and 104 apply.
+
 ## 2026-11-12 · Scoped phone identity and dock
 
 The shared projection selects HPC install metadata before catalog load.

@@ -5,14 +5,14 @@
 | Surface | Contract |
 | --- | --- |
 | `/f/hpc` | WSP 104 public discovery landing, generated from the FoundUp registry. `#red-dog` opens its existing public Red Dog briefing. |
-| `/member/?foundup=hpc` | Public, fixed video projection in the member shell |
-| `hpc.foundups.com/` | Dedicated host selects the same projection at `/member/`. Hosting, DNS and TLS are release gates. |
+| `foundups.com/member/?foundup=hpc` | Same collection for admitted members. The existing sign-in, invitation and username checks run before the projection mounts. |
+| `hpc.foundups.com/` | Public entrance. The dedicated host selects the guest projection at `/member/`. |
 | `/f/hpc/app` | Existing protected tenant handoff. HPC declares no tenant bundle, account grant or agent routes. |
 | Voice Your Opinion | The phone header's right action opens Vote's manual [Contact Congress](https://vote.mtrout.com/contact). Desktop keeps the action in the bottom anchor. Back restores the video anchor and offset. |
 | Hasan portrait | The header portrait opens the master Mall at `https://foundups.com/member/`. Ordinary member admission still applies there. |
 | HPC Home Screen app | `hpc.webmanifest` registers **Hasan Piker Coalition**, short name **HPC**, with a scoped launch URL and standalone display. The supplied satirical artwork provides the portrait and 180 px Apple touch icon. |
 
-The registry's `parent_foundup_id: voteballots` expresses the editorial and civic relationship. It delegates no access, ownership, wallet, token or execution authority. HPC uses the FoundUp manifest namespace `idb_hpc`. The shared Mall state owner stores the tab-local video anchor, offset and scoped query. Shared player saves and history remain browser-local and keyed by FoundUp and video. Public browsing requires no sign-in. Server-side member checks retain authority.
+The registry's `parent_foundup_id: voteballots` expresses the editorial and civic relationship. It delegates no access, ownership, wallet, token or execution authority. HPC uses the FoundUp manifest namespace `idb_hpc`. The shared Mall state owner stores the tab-local video anchor, offset and scoped query. Shared player saves and history remain browser-local and keyed by FoundUp and video. The dedicated host is available to guests. The same-tab member sign-in return stores the registered scope and is consumed after admission. Server-side capability checks retain authority.
 
 ## Media contract
 

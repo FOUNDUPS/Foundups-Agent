@@ -309,3 +309,85 @@ and advancing media time. The fixture stays in test previews.
 
 [BrowserStack iOS PWA workflow](https://www.browserstack.com/support/faq/live/features-live/how-can-i-progressive-web-app-pwa-specific-scenarios-on-devices-in-live) ·
 [Apple Web Inspector](https://developer.apple.com/documentation/safari-developer-tools/inspecting-ios)
+
+## 2026-11-13 · Responsive acceptance and member entry
+
+012 confirmed that the HPC hostname is the public entrance and the
+FoundUps member entrance requires an invitation. Fresh signed-out browser
+checks found that the live apex URL `/member/?foundup=hpc` mounts the guest
+grid, `/member/` takes the sign-in path, and `/members` falls back to the
+public FoundUps homepage. The deployed Firebase version `25aefb1f3c293a98`
+served `pfmall-member-v7`. The desktop visit still showed the grid. This
+is a delivery gap for the merged theater.
+
+| Requirement and roadmap | Owner and current evidence | Disposition |
+| --- | --- | --- |
+| H1B desktop theater and queue | Shared field and player. #2359 merged at `99e91db629c5`. The `b7cce23a3` controlled browser baseline verified muted startup, search and queue advancement, and breakpoint continuity. | REUSE_AS_IS. Verify the deployed bundle separately. |
+| H1B phone grid and selected tile | Shared field, dock and state. The same baseline verified three columns, selected-tile row replacement, one iframe, rotation and civic-resource Back. | REUSE_AS_IS. Physical Safari and Home Screen playback are VERIFICATION_ONLY. |
+| H1B member/public boundary | Projection resolver and existing Clerk/invite boot. The live apex query is a guest entry. Existing boot and state fixtures cover the ordinary Mall and the Move2Japan return. | EXTEND_EXISTING. Limit public entry to the dedicated host and test scoped entry through the existing member gate. |
+| Voice and member agent expansion | The existing Vote contact destination and scoped dock. | LATER_STAGE. Keep the manual civic link. |
+
+**Change packet.** The 012 route clarification changes H1 acceptance. The
+baseline is `22900559f` with the same Mall runtime as the tested `b7cce23a3`.
+The projection resolver and member boot own the repair. Route the plural
+alias to the singular entry, put apex HPC selection behind existing
+admission and use the existing bounded return record. Regenerate discovery
+links from the registry. The member shell, provider runtime, scoped catalog
+content, tenant checks and other product routes keep their existing owners.
+Extend the boot and cache fixtures and independently test their actual
+entry paths. Rollback is the route patch and generated outputs together.
+The WSP 15 allocation is P0 for the admission gap. The cost is a focused
+boot and browser rerun, independent review and CI. A provisioned phone is
+still required for the separate device gate.
+
+The browser admission gate controls entry to the member interface. The
+aggregate video catalog is currently a static Hosting asset. Anonymous
+requests to both hosts returned it during this audit. Private delivery of
+that file would require an authenticated server-side serving contract.
+
+Provider guidance refreshed on 2026-11-13 JST. Autoplay blocking, missing
+client identification (153) and embed refusal (101/150) are distinct.
+The official minimum player viewport remains 200 × 200 CSS px. The
+active-tile expansion meets that constraint while the rest of the grid
+stays compact. The installed iPhone refusal and earlier verification
+challenge remain user-reported for the affected device.
+
+[YouTube player events](https://developers.google.com/youtube/iframe_api_reference) ·
+[Player parameters](https://developers.google.com/youtube/player_parameters) ·
+[Embed requirements](https://developers.google.com/youtube/terms/required-minimum-functionality) ·
+[Developer policies](https://developers.google.com/youtube/terms/developer-policies-guide) ·
+[YouTube embed help](https://support.google.com/youtube/answer/171780) ·
+[Chrome autoplay](https://developer.chrome.com/blog/autoplay) ·
+[WebKit iOS video policy](https://webkit.org/blog/6784/new-video-policies-for-ios/) ·
+[WebKit Home Screen website data](https://webkit.org/blog/14787/webkit-features-in-safari-17-2/)
+
+The route patch passed controlled Chromium at 1440 × 900 and 390 × 844.
+The member case checked guest sign-in redirect, invite denial and a
+one-use return to the admitted theater. Public discovery links to the
+dedicated host. Cache v12 versions the changed routing scripts so a warm
+client can load them with the new document. The shell independently requires
+the dedicated host for guest entry. Chromium with the old resolver confirmed
+that apex visitors still reach sign-in. The old discovery helper name also
+accepts the exact previous registry URL and leads to the public host.
+
+The Firebase Hosting emulator returned 302 for `/members` and `/members/`,
+kept the `foundup=hpc` query, and left `/members/elsewhere` on the existing
+fallback. The redirect uses a bounded RE2 pattern. The catalog generators
+changed only the two discovery URLs. All eight scoped video records stayed
+byte-identical. The broader catalog suite had the same eight shape and
+metadata failures on `22900559f` and the candidate.
+
+A separate browser-local run used the candidate Mall assets with real
+YouTube on Windows. Chromium 143 desktop and WebKit 26 at 390 CSS px both
+reported player state 1 for `iJuguXpbRR4` and advanced from about 0.26 to
+1.62 seconds. The phone-sized player measured 369.2 × 226.2 CSS px. This
+run qualifies browser playback on the PC. Physical iPhone Safari and
+Home Screen playback remain unverified.
+
+The author and independent reviewer scanned the base and staged Git HTML
+with checksum-verified Gitleaks 8.30.1. Each scan identified the same
+public Clerk frontend declaration at `public/member/index.html:28`,
+rule `generic-api-key`. The complete SDK block is byte-identical. The
+review ledger retains the previous binding and adds one binding for the
+staged blob `90ea6afcd8ac53acb68fc8a66b66da07a17eee8a`. The scanner and its
+scope are unchanged. [Clerk frontend configuration](https://clerk.com/docs/guides/development/clerk-environment-variables)

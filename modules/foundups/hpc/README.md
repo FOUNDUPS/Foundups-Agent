@@ -15,7 +15,9 @@ public HPC briefing. A fresh Home Screen install uses the HPC name and portrait.
 
 ## Route Namespace
 
-`/f/hpc` is the canonical public landing. The shared Mall accepts the registered public projection at `/member/?foundup=hpc`.
+`hpc.foundups.com` is the public video entrance. The public directory entry
+at `/f/hpc` links there. Members can open the same collection from the
+invite-gated FoundUps Mall at `/member/?foundup=hpc`.
 
 ## App Mount
 

@@ -53,7 +53,7 @@ function stateRuntime(href = ORIGIN + '/member/?foundup=move2japan') {
     clearFieldScope() { calls.push(['clear']); this.scope = null; }
   };
   const doc = { querySelector: () => wrapper, addEventListener: add, visibilityState: 'visible' };
-  const win = { location: { href }, mallTileField: tf, addEventListener: (kind, fn) => add('window:' + kind, fn) };
+  const win = { location: new URL(href), mallTileField: tf, addEventListener: (kind, fn) => add('window:' + kind, fn) };
   const context = {
     window: win, document: doc, localStorage: storage(local), sessionStorage: storage(session),
     URL, URLSearchParams, Date: { now: () => clock },
@@ -61,6 +61,7 @@ function stateRuntime(href = ORIGIN + '/member/?foundup=move2japan') {
     setTimeout: fn => { timers.set(++timerId, fn); return timerId; },
     clearTimeout: id => timers.delete(id)
   };
+  runInNewContext(videoProjectionSource, { window: win, URLSearchParams });
   runInNewContext(stateSource, context);
   return {
     api: win.mallStateRestore, local, session, calls, events, win, tf, context, wrapper, bindings,
@@ -71,22 +72,47 @@ function stateRuntime(href = ORIGIN + '/member/?foundup=move2japan') {
   };
 }
 
-await check('scoped video route is exact and the dedicated host wins over query selection', () => {
+await check('public and member video routes have separate exact selectors', () => {
   const window = {};
   runInNewContext(videoProjectionSource, { window, URLSearchParams });
   const route = window.mallVideoProjection;
   for (const path of ['/member/?foundup=hpc', '/member/index.html?foundup=hpc&account=1']) {
-    assert.equal(route.resolve(new URL(path, ORIGIN)), 'hpc');
+    assert.equal(route.resolve(new URL(path, ORIGIN)), null);
+    assert.equal(route.resolveMember(new URL(path, ORIGIN)), 'hpc');
   }
   for (const path of ['/member/?foundup=hpc&foundup=move2japan', '/member/?foundup=__proto__', '/f/hpc/app?foundup=hpc']) {
     assert.equal(route.resolve(new URL(path, ORIGIN)), null);
+    assert.equal(route.resolveMember(new URL(path, ORIGIN)), null);
   }
   assert.equal(route.resolve(new URL('https://hpc.foundups.com/member/?foundup=move2japan')), 'hpc');
+  assert.equal(route.resolve(new URL('https://hpc.foundups.com/f/hpc/app')), null);
+  assert.equal(route.resolveMember(new URL('https://hpc.foundups.com/member/?foundup=hpc')), null);
   assert.equal(route.hostScope(new URL('https://hpc.foundups.com/')), 'hpc');
   assert.equal(route.hostScope(new URL('https://hpc.foundups.com.example.org/')), null);
-  assert.equal(route.discoveryPath('hpc', ORIGIN + '/member/?foundup=hpc'), '/member/?foundup=hpc');
-  assert.equal(route.discoveryPath('hpc', 'https://example.org/member/?foundup=hpc'), null);
-  assert.equal(route.discoveryPath('move2japan', ORIGIN + '/member/?foundup=hpc'), null);
+  const publicUrl = 'https://hpc.foundups.com/';
+  assert.equal(route.discoveryPath('hpc', publicUrl), publicUrl);
+  assert.equal(route.discoveryPath('hpc', ORIGIN + '/member/?foundup=hpc'), publicUrl);
+  assert.equal(route.discoveryPath('hpc', 'https://example.invalid/member/?foundup=hpc'), null);
+  assert.equal(route.discoveryPath('move2japan', publicUrl), null);
+  assert.equal(route.memberPath('hpc'), '/member/?foundup=hpc');
+  assert.equal(route.memberPath('move2japan'), null);
+});
+
+await check('HPC sign-in return is bounded to a registered member path and one use', () => {
+  const h = stateRuntime(ORIGIN + '/member/?foundup=hpc&next=https%3A%2F%2Fexample.invalid#account');
+  assert.equal(h.api.rememberMemberVideoReturn(), true);
+  const record = JSON.parse(h.session.get(RETURN_KEY));
+  assert.deepEqual(record, { product_id: 'hpc', created_at: 1000000, filters: {} });
+  assert.equal(h.api.consumeProductReturn(), '/member/?foundup=hpc');
+  assert.equal(h.api.consumeProductReturn(), null);
+  h.session.set(RETURN_KEY, JSON.stringify({ ...record, filters: { q: 'unused' } }));
+  assert.equal(h.api.consumeProductReturn(), null);
+  h.session.set(RETURN_KEY, JSON.stringify(record));
+  h.time(1900001);
+  assert.equal(h.api.consumeProductReturn(), null);
+  for (const url of ['https://hpc.foundups.com/member/?foundup=hpc', ORIGIN + '/member/?foundup=hpc&foundup=hpc']) {
+    assert.equal(stateRuntime(url).api.rememberMemberVideoReturn(), false);
+  }
 });
 
 await check('fixed video projection restores only tab-local position', () => {
@@ -376,21 +402,22 @@ await check('install reloads only explicit public shell and product assets', asy
     assert.equal(request.credentials, 'omit');
     return url.pathname + url.search;
   });
-  for (const path of ['/member/js/mall-tile-field.js?v=6', '/member/js/mall-video-projection.js', '/member/hpc.webmanifest', '/member/hpc-icon-180.png', '/member/hpc-icon-192.png', '/member/hpc-icon-512.png', '/move2japan/property-search.js', '/move2japan/move2japan.css']) {
+  for (const path of ['/member/js/mall-tile-field.js?v=6', '/member/js/mall-video-projection.js?v=12', '/member/js/mall-state-restore.js?v=12', '/member/js/mall-planes.js?v=12', '/member/hpc.webmanifest', '/member/hpc-icon-180.png', '/member/hpc-icon-192.png', '/member/hpc-icon-512.png', '/move2japan/property-search.js', '/move2japan/move2japan.css']) {
     assert.equal(installed.includes(path), true);
   }
   assert.equal(installed.includes('/move2japan/properties.json'), false);
-  assert.equal(h.stores.has('pfmall-member-v11'), true);
+  assert.equal(installed.includes('/member/js/mall-video-projection.js'), false);
+  assert.equal(h.stores.has('pfmall-member-v12'), true);
 });
 
 await check('activation retires only obsolete caches owned by this Mall', async () => {
   const h = swRuntime();
-  for (const name of ['pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4', 'pfmall-member-v5', 'pfmall-member-v6', 'pfmall-member-v7', 'pfmall-member-v8', 'pfmall-member-v9', 'pfmall-member-v10', 'pfmall-member-v11', 'pfmall-properties-v1', 'pfmall-posters-v1', 'gotjunk-offline-v1', 'other-app-cache']) {
+  for (const name of ['pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4', 'pfmall-member-v5', 'pfmall-member-v6', 'pfmall-member-v7', 'pfmall-member-v8', 'pfmall-member-v9', 'pfmall-member-v10', 'pfmall-member-v11', 'pfmall-member-v12', 'pfmall-properties-v1', 'pfmall-posters-v1', 'gotjunk-offline-v1', 'other-app-cache']) {
     await h.caches.open(name);
   }
   await h.event('activate');
-  assert.deepEqual(h.deleted.sort(), ['pfmall-member-v10', 'pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4', 'pfmall-member-v5', 'pfmall-member-v6', 'pfmall-member-v7', 'pfmall-member-v8', 'pfmall-member-v9']);
-  assert.equal(h.stores.has('pfmall-member-v11'), true);
+  assert.deepEqual(h.deleted.sort(), ['pfmall-member-v10', 'pfmall-member-v11', 'pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4', 'pfmall-member-v5', 'pfmall-member-v6', 'pfmall-member-v7', 'pfmall-member-v8', 'pfmall-member-v9']);
+  assert.equal(h.stores.has('pfmall-member-v12'), true);
   assert.equal(h.stores.has('gotjunk-offline-v1'), true);
   assert.equal(h.stores.has('other-app-cache'), true);
 });
@@ -426,7 +453,7 @@ await check('product navigation shares one static member shell without query cac
   assert.equal(online.response.status, 200);
   assert.equal(h.calls.at(-1).request, '/member/');
   assert.equal(h.calls.at(-1).options.credentials, 'omit');
-  const cache = await h.caches.open('pfmall-member-v11');
+  const cache = await h.caches.open('pfmall-member-v12');
   assert.equal((await cache.keys()).some(key => {
     const url = new URL(key.url);
     return url.pathname === '/member/' && !!url.search;

@@ -8,6 +8,9 @@
 ### Public scoped video
 
 HPC uses this shell's shared field, player, header brand and bottom anchor.
+Guests enter at `hpc.foundups.com`. The FoundUps `/member/` route and its
+`/members` alias require the existing member admission. Members can select
+HPC from the Mall.
 Desktop opens a centered video with scoped search and a thumbnail queue.
 Touch and narrow layouts keep three portrait columns. Playback replaces
 the selected tile in its original row. The phone dock holds

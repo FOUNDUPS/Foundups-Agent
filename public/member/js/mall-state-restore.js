@@ -80,6 +80,11 @@
     return allowed[key] && allowed[key].indexOf(value) !== -1 ? value : '';
   }
 
+  function storeProductReturn(product, filters) {
+    sessionStorage.setItem(RETURN_KEY, JSON.stringify({ product_id: product, created_at: Date.now(), filters: filters }));
+    return true;
+  }
+
   /** Capture filters from this actual product view, never a caller-supplied URL. */
   function rememberProductReturn(product) {
     if (product !== 'move2japan' || selectedProduct !== product) return false;
@@ -94,8 +99,15 @@
         var value = values.length === 1 ? safeFilter(key, values[0]) : '';
         if (value) filters[key] = value;
       });
-      sessionStorage.setItem(RETURN_KEY, JSON.stringify({ product_id: product, created_at: Date.now(), filters: filters }));
-      return true;
+      return storeProductReturn(product, filters);
+    } catch (e) { return false; }
+  }
+
+  /** Remember a requested member video view through the normal sign-in redirect. */
+  function rememberMemberVideoReturn() {
+    try {
+      var scope = window.mallVideoProjection?.resolveMember(window.location);
+      return !!scope && storeProductReturn(scope, {});
     } catch (e) { return false; }
   }
 
@@ -106,11 +118,15 @@
       sessionStorage.removeItem(RETURN_KEY);
       if (!raw || raw.length > 4096) return null;
       var record = JSON.parse(raw);
-      if (!record || record.product_id !== 'move2japan' ||
+      if (!record ||
           Object.keys(record).some(function(key) { return ['product_id', 'created_at', 'filters'].indexOf(key) === -1; }) ||
           !Number.isFinite(record.created_at) || Date.now() < record.created_at || Date.now() - record.created_at > RETURN_TTL_MS ||
-          !record.filters || typeof record.filters !== 'object' || Array.isArray(record.filters) ||
-          Object.keys(record.filters).some(function(key) { return FILTER_KEYS.indexOf(key) === -1; })) return null;
+          !record.filters || typeof record.filters !== 'object' || Array.isArray(record.filters)) return null;
+      if (record.product_id !== 'move2japan') {
+        if (Object.keys(record.filters).length) return null;
+        return window.mallVideoProjection?.memberPath(record.product_id) || null;
+      }
+      if (Object.keys(record.filters).some(function(key) { return FILTER_KEYS.indexOf(key) === -1; })) return null;
       var query = new URLSearchParams({ foundup: 'move2japan' });
       FILTER_KEYS.forEach(function(key) {
         var value = safeFilter(key, record.filters[key]);
@@ -381,6 +397,7 @@
 
     /** Remember this product's filters for an explicit account handoff. */
     rememberProductReturn: rememberProductReturn,
+    rememberMemberVideoReturn: rememberMemberVideoReturn,
 
     /** Consume a safe, short-lived product return after real member admission. */
     consumeProductReturn: consumeProductReturn,

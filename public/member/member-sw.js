@@ -9,7 +9,7 @@
 // Auth flows (Clerk, Firebase) are NEVER cached.
 // Catalog is network-first with cache fallback.
 
-const CACHE_NAME = 'pfmall-member-v11';
+const CACHE_NAME = 'pfmall-member-v12';
 const POSTER_CACHE_NAME = 'pfmall-posters-v1';
 const PROPERTY_CACHE_NAME = 'pfmall-properties-v1';
 const MAX_POSTER_ENTRIES = 60;
@@ -32,13 +32,13 @@ const SHELL_ASSETS = [
   '/member/css/mall-video-projection.css',
   '/member/js/gesture-engine.js',
   '/member/js/shell-bridge-interceptor.js',
-  '/member/js/mall-planes.js?v=6',
+  '/member/js/mall-planes.js?v=12',
   '/member/js/mall-tile-field.js?v=6',
   '/member/js/mall-video-player.js?v=6',
-  '/member/js/mall-video-projection.js',
+  '/member/js/mall-video-projection.js?v=12',
   '/member/js/account-concierge.js',
   '/member/js/red-dog-concierge.js',
-  '/member/js/mall-state-restore.js?v=6',
+  '/member/js/mall-state-restore.js?v=12',
   '/move2japan/property-search.js',
   '/move2japan/move2japan.css',
   '/logo-dog.png',

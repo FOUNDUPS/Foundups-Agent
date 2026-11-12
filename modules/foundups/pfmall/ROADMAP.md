@@ -216,8 +216,8 @@ not reprioritization of unrelated system work.
   integration. Do not repeat an unsourced historical deployment address.
 - PR #2357 used three columns at every width. The original CSS-only #2359
   draft reproduced a six-column display with three-column player placement.
-  The responsive candidate in #2359 mounts the existing stage and queue as a
-  desktop theater while preserving the phone row layout and shared media session.
+  The merged #2359 repair mounts the existing stage and queue as a desktop
+  theater and preserves the phone layout and shared media session.
 - Desktop requests first-video startup playback and sequential queue advancement.
   Preserve provider controls, one active player, and truthful blocked-autoplay
   recovery. A thumbnail, iframe load or API availability flag is not playback.
@@ -235,6 +235,7 @@ not reprioritization of unrelated system work.
 | PFWD-0 | Reconcile current owners, source history and acceptance | Roadmap/contract references, source SHAs, existing-test inventory and bounded recovery plan; documentation is not runtime success. |
 | PFWD-1A | PoC: desktop theater plus preserved phone grid | PC and phone composition, correct click target/player, one iframe/audio session, original-ID return, resize/rotation and other-FoundUp regressions. |
 | PFWD-1B | PoC: scoped search and phone dock | Search between desktop main video and bottom tiles; phone thumb access, scoped install identity and optional local dictation. Verify loaded-catalog filtering, empty results, queue advancement, safe areas, keyboard and standalone launch. |
+| PFWD-1C | PoC entry and membership | Dedicated public HPC host, invited FoundUps member access and scoped sign-in return. Verify each entry independently. |
 | PFWD-2 | Prototype: resident speech and agent controls | Red Dog hold-to-talk via authenticated resident ingress, admitted device-compatible selection, cancellation, permission denial and bounded action receipts. |
 | PFWD-3 | Prototype: AutoPost handoff | Existing capture owner, explicit permission, approved route/origin and return state; no copied camera stack. |
 | PFWD-4 | MVP hardening | Measured large-catalog performance, privacy/abuse review, provider/device recovery and release evidence beyond the PoC acceptance matrix. |
