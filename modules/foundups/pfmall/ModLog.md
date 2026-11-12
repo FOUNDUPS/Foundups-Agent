@@ -1,3 +1,11 @@
+## 2026-11-12 · Scoped phone identity and dock
+
+The shared projection selects HPC install metadata before catalog load.
+The existing bottom anchor holds the scoped search, options and Red Dog
+entry. The field filters the same tile IDs and preserves a mounted provider
+across layout changes. State retains the phone query with its anchor.
+Cache v10 includes the HPC manifest and icons. WSP 22, 97 and 104 apply.
+
 ## 2026-11-12 · Scoped desktop search submission
 
 The shared theater centers its search form beneath the player. Typing

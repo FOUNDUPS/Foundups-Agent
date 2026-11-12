@@ -197,7 +197,8 @@
   function isValidState(state) {
     if (!state || typeof state !== 'object') return false;
     if (selectedVideoScope) {
-      var keys = Object.keys(state).filter(function(key) { return key !== 'theater'; });
+      var keys = Object.keys(state).filter(function(key) { return key !== 'theater' && key !== 'phoneQuery'; });
+      if ('phoneQuery' in state && (typeof state.phoneQuery !== 'string' || state.phoneQuery.length > 300)) return false;
       if ('theater' in state) {
         var theater = state.theater;
         if (!theater || typeof theater !== 'object' || Object.keys(theater).length !== 2 ||

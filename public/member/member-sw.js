@@ -9,7 +9,7 @@
 // Auth flows (Clerk, Firebase) are NEVER cached.
 // Catalog is network-first with cache fallback.
 
-const CACHE_NAME = 'pfmall-member-v9';
+const CACHE_NAME = 'pfmall-member-v10';
 const POSTER_CACHE_NAME = 'pfmall-posters-v1';
 const PROPERTY_CACHE_NAME = 'pfmall-properties-v1';
 const MAX_POSTER_ENTRIES = 60;
@@ -20,6 +20,10 @@ const PROPERTY_CATALOG_URL = '/move2japan/properties.json';
 const SHELL_ASSETS = [
   '/member/',
   '/member/manifest.json',
+  '/member/hpc.webmanifest',
+  '/member/hpc-icon-180.png',
+  '/member/hpc-icon-192.png',
+  '/member/hpc-icon-512.png',
   '/member/css/member.css',
   '/member/css/account-concierge.css',
   '/member/css/mall-planes.css',

@@ -3,7 +3,7 @@
 | Stage | Status | Dependencies | Acceptance criteria and evidence |
 | --- | --- | --- | --- |
 | 0 · Genesis | Existing implementation | WSP 109, Vote ID, registry and manifest validators | Eight intake artifacts, valid genesis envelope, canonical `hpc` registry and `/f/hpc` namespace. Evidence in [intake](docs/intake/INTAKE_SOURCE.md) and [ModLog](ModLog.md). |
-| 1 · PoC | Partial. Playback recovery merged in #2357. The responsive candidate is in #2359. | Shared Mall shell, reviewed Move2Japan metadata, Vote's manual contact page | Existing eight-Short collection plus the H1 desktop/phone acceptance below. The desktop regression was reproduced on Windows. Physical iPhone and live release verification remain independent. [Shared incident](../pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md) retains provider evidence. |
+| 1 · PoC | Playback and responsive desktop work merged in #2357, #2359 and #2364. Phone identity and dock are implemented for verification. | Shared Mall shell, reviewed Move2Japan metadata, Vote's manual contact page | Existing eight-Short collection plus H1 desktop and phone acceptance. Physical iPhone and live release verification remain independent. [Shared incident](../pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md) retains provider evidence. |
 | 2 · Prototype | Specified; follows accepted PoC layout/playback | PoC acceptance, provenance and rights policy, shared preference owner and privacy review | Nomination, duplicate/source review, moderation, discoverable filters, persistent seven-level preferences, edit/clear, and abuse tests. Admitted speech/model and AutoPost integrations use shared owners. Accepted events remain separate from evidence and economics. |
 | 3 · MVP | Specified | Qualified moderation and escalation, independent Voice admission, preference aggregation and governance review | Moderated community submissions, working consented Voice handoff and recovery, reproducible aggregate reports and governance interfaces with correction and appeal. |
 | 4 · Federation | Specified | WSP 103/104 interoperability, verified Vote/Voice interfaces and tenant isolation | Cross-FoundUp discovery, versioned context with consent, provenance and access scopes preserved in conformance tests. |
@@ -32,7 +32,7 @@ Use the existing [strategic diligence skill](../../ai_intelligence/ai_overseer/s
 | --- | --- | --- |
 | PC / monitor | Centered main video above a continuous horizontal thumbnail strip. Search sits **between the main video and the bottom tiles**. The main player is not forced browser fullscreen. | Desktop screenshots and browser interaction tests must show this composition; oversized three-column posters or an extra player inserted below a selected row do not satisfy it. |
 | Desktop startup / queue | Request playback of the first eligible clip on entry, then advance through the queue. Preserve one active player and deliberate sound controls. | Test actual provider state and advancing time. Where the browser blocks startup, show a truthful user-activation recovery; never claim guaranteed audible autoplay. No duplicate or hidden players. |
-| Search | Center a compact search bar beneath the desktop video. Typing filters the scoped queue. Submit plays the next match or the first available match. Preserve stable IDs, selection and return state. Phone scoped search remains an open acceptance item. | PoC search is HPC-scoped existing catalog search, not fabricated web search or whole-Mall discovery. Cross-FoundUp discovery remains a later permissioned expansion. |
+| Search | Center a compact search bar beneath the desktop video. Typing filters the scoped queue. Submit plays the next match or the first available match. The phone search submits a grid filter and offers local dictation where available. | Search uses existing HPC catalog metadata. Test stable IDs, selection, no results, return state and the phone keyboard. Cross-FoundUp discovery remains a later permissioned expansion. |
 | Phone | Compact three-column portrait grid, fixed header, thumb-accessible bottom controls, vertical browsing through eligible clips. Tap plays in the selected tile/context; explicit expand or supported pinch opens immersive playback and returns to the original position. | Do not treat a detached second mini-player as tile playback. Verify provider minimum dimensions and touch ownership; any required active-tile enlargement must be explicit in the shared contract. |
 | Breakpoint / rotation | Change presentation without duplicating the media session or losing video identity, queue, query and browsing position. | Test desktop, phone portrait/landscape, resizing and keyboard access independently. Do not classify all large tablets by pointer alone without testing. |
 | Shared-regression guard | Preserve ordinary Mall channel expansion, other FoundUp projections, guest/member boundaries, provider diagnostics, save/history and return navigation. | Reuse existing tests and fixtures; add cases to their owners rather than a competing HPC grid or player. |
@@ -42,7 +42,7 @@ This request supersedes earlier hidden-search wording only for **HPC-scoped bott
 ### H1C · Evidence and recovery before implementation
 
 - Revalidate current main, related heads and deployed assets separately. PR #2357 introduced a hard-coded three-column scoped grid and `openScopedVideo()` inserts `.mall-inline-player-slot` after a calculated row. The reported desktop result is a regression candidate, not a fully reproduced cause of every playback failure.
-- The original #2359 draft changed desktop density alone. Browser reproduction showed that six CSS columns still used three-column JavaScript row placement. The responsive candidate in the same PR uses the shared player and queue for desktop, retains phone row playback, and adds desktop scoped search. Touch search and the thumb dock remain open in H1.
+- The original #2359 draft changed desktop density alone. Browser reproduction showed that six CSS columns still used three-column JavaScript row placement. #2359 and #2364 restored the shared desktop theater and search. The H1 phone follow-up reuses that query matcher and the shared row player.
 - Retrieve actual WikiTube TV / WikiTubeTV source and history through available repositories or the PC before copying/rebuilding. Earlier search found no direct current integration; this is a retrieval gap, not proof that source does not exist. No historical deployment URL is accepted without source evidence.
 - Reuse `public/member/` field, player, query and state APIs. Investigate the existing fullscreen queue/theater composition before introducing markup. Keep provider errors, unavailable media, autoplay blocking and bot/session challenges distinct in the [existing incident](../pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md).
 - A full revert of #2357 would also discard catalog and diagnostic work. Prefer the smallest validated responsive correction; retain a known-base recovery path and compare its complete diff before any authorized revert.
@@ -67,7 +67,19 @@ Build one validated layer at a time: reconcile -> repair responsive playback -> 
 
 ### H1E · Retained later-stage requirements
 
-After PoC acceptance, retain the left `+` options sheet, admitted/device-compatible agent selector, Red Dog press-and-hold speech, separate mic dictation, and camera handoff to external AutoPost. UI listening effects are not a working speech-to-agent connection. Reuse existing identity/admission and capture owners, verify consent and return context, and do not expose credentials or raw execution authority in the browser. Seven-level preferences, community nominations, comics/story panels and whole-Mall discovery remain separately scoped roadmap work, not prerequisites for this layout repair.
+FITS_POC for the 012 phone follow-up on 2026-11-12. HPC supplies the install
+name and the portrait cropped from 012's supplied satire artwork. The shared
+Mall supplies the phone header and thumb dock. The dock gives direct access to
+scoped search, a separate device dictation input, an upward options sheet and
+the existing public Red Dog briefing. Check iPhone standalone installation
+and keyboard dictation against a hosted build before accepting that device.
+
+Prototype work includes an admitted device-compatible agent selector, Red
+Dog press-and-hold speech, and camera handoff to AutoPost. Reuse existing
+identity, admission and capture owners. Verify consent, cancellation,
+supported device models and return context before exposing actions.
+Seven-level preferences, community nominations, comics/story panels and
+whole-Mall discovery keep their existing stages.
 
 ## 2026-11-11 reconciliation receipt
 

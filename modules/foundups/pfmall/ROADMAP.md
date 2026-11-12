@@ -234,8 +234,8 @@ not reprioritization of unrelated system work.
 | --- | --- | --- |
 | PFWD-0 | Reconcile current owners, source history and acceptance | Roadmap/contract references, source SHAs, existing-test inventory and bounded recovery plan; documentation is not runtime success. |
 | PFWD-1A | PoC: desktop theater plus preserved phone grid | PC and phone composition, correct click target/player, one iframe/audio session, original-ID return, resize/rotation and other-FoundUp regressions. |
-| PFWD-1B | PoC: bottom scoped search / queue update | Search between desktop main video and bottom tiles; phone thumb access; loaded-catalog filtering, empty results, queue advancement, safe-area/keyboard tests and no scope leak. |
-| PFWD-2 | Prototype: speech/agent controls | Real mic-to-STT path; Red Dog hold-to-talk via authenticated resident ingress; admitted device-compatible selection, cancellation, permission denial and bounded action receipts. |
+| PFWD-1B | PoC: scoped search and phone dock | Search between desktop main video and bottom tiles; phone thumb access, scoped install identity and optional local dictation. Verify loaded-catalog filtering, empty results, queue advancement, safe areas, keyboard and standalone launch. |
+| PFWD-2 | Prototype: resident speech and agent controls | Red Dog hold-to-talk via authenticated resident ingress, admitted device-compatible selection, cancellation, permission denial and bounded action receipts. |
 | PFWD-3 | Prototype: AutoPost handoff | Existing capture owner, explicit permission, approved route/origin and return state; no copied camera stack. |
 | PFWD-4 | MVP hardening | Measured large-catalog performance, privacy/abuse review, provider/device recovery and release evidence beyond the PoC acceptance matrix. |
 
@@ -244,10 +244,11 @@ PFWD-1 PoC acceptance gate. Extend the existing browser fixtures; phone emulatio
 is not physical iPhone standalone evidence. Preserve shared search, channel
 expansion, protected operations and other projections.
 
-The left `+` upward options sheet, right Red Dog press/hold, adjacent dictation
-mic and AutoPost camera remain retained later-stage requirements. A listening
-animation or model menu is not resident execution. Existing agent admission,
-WRE/Hermes authority, privacy and capture ownership remain unchanged.
+HPC is the first scoped phone dock consumer. The left `+` opens Home,
+disclosure and device-model availability. The search mic supports local
+recognition when available or opens the input for keyboard dictation. The
+right Red Dog button opens the public briefing. Resident hold-to-talk and
+actual model loading belong to PFWD-2. AutoPost capture belongs to PFWD-3.
 
 The existing [media incident](MEDIA_PLAYBACK_INCIDENT_HPC.md) owns provider-error,
 bot-challenge, origin/referrer and availability evidence. Fix application defects

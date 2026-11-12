@@ -10,7 +10,9 @@
 HPC uses this shell's shared field, player, header brand and bottom anchor.
 Desktop opens a centered video with scoped search and a thumbnail queue.
 Touch and narrow layouts keep three portrait columns, in-context play,
-explicit immersive expansion, and stable Back/return. The
+explicit immersive expansion, and stable Back/return. The phone dock holds
+options, collection search, dictation and the public Red Dog briefing link.
+HPC supplies its own standalone install name and artwork. The
 [shared media incident](../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md)
 tracks real provider playback and the open physical iPhone gate.
 

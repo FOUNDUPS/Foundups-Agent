@@ -1,5 +1,15 @@
 # HPC ModLog
 
+## 2026-11-12 · Phone install identity and thumb dock
+
+FITS_POC under H1. 012 supplied the satire artwork and approved the portrait,
+phone header action and bottom control order. HPC selects its own Home Screen
+name and icons in the shared shell. Voice Your Opinion uses Vote's existing
+contact resource. The bottom dock adds scoped search, optional local
+dictation and a link to the public Red Dog briefing. The plus sheet keeps
+Home and the disclosure accessible. Device-model admission and resident
+hold-to-talk remain PFWD-2. WSP 22, 97 and 104 apply.
+
 ## 2026-11-12 · Desktop search playback
 
 FITS_POC under H1. 012 requested a Google-sized bar under the PC video and

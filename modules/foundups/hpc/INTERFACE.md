@@ -4,14 +4,15 @@
 
 | Surface | Contract |
 | --- | --- |
-| `/f/hpc` | WSP 104 public discovery landing, generated from the FoundUp registry |
+| `/f/hpc` | WSP 104 public discovery landing, generated from the FoundUp registry. `#red-dog` opens its existing public Red Dog briefing. |
 | `/member/?foundup=hpc` | Public, fixed video projection in the member shell |
 | `hpc.foundups.com/` | Dedicated host selects the same projection at `/member/`. Hosting, DNS and TLS are release gates. |
 | `/f/hpc/app` | Existing protected tenant handoff. HPC declares no tenant bundle, account grant or agent routes. |
-| Voice Your Opinion | The shared bottom anchor opens Vote's manual [Contact Congress](https://vote.mtrout.com/contact) in the same tab. Back restores the video anchor and offset. |
-| FoundUps dog logo | The shared header link opens the master Mall at `https://foundups.com/member/`. Ordinary member admission still applies there. |
+| Voice Your Opinion | The phone header's right action opens Vote's manual [Contact Congress](https://vote.mtrout.com/contact). Desktop keeps the action in the bottom anchor. Back restores the video anchor and offset. |
+| Hasan portrait | The header portrait opens the master Mall at `https://foundups.com/member/`. Ordinary member admission still applies there. |
+| HPC Home Screen app | `hpc.webmanifest` registers **Hasan Piker Coalition**, short name **HPC**, with a scoped launch URL and standalone display. The supplied satirical artwork provides the portrait and 180 px Apple touch icon. |
 
-The registry's `parent_foundup_id: voteballots` expresses the editorial and civic relationship. It delegates no access, ownership, wallet, token or execution authority. HPC uses the manifest namespace `idb_hpc`. The shared Mall state owner stores the tab-local video anchor and offset. Shared player saves and history remain browser-local and keyed by FoundUp and video. Public browsing has no sign-in, Red Dog or search gate. Server-side member checks retain authority.
+The registry's `parent_foundup_id: voteballots` expresses the editorial and civic relationship. It delegates no access, ownership, wallet, token or execution authority. HPC uses the FoundUp manifest namespace `idb_hpc`. The shared Mall state owner stores the tab-local video anchor, offset and scoped query. Shared player saves and history remain browser-local and keyed by FoundUp and video. Public browsing requires no sign-in. Server-side member checks retain authority.
 
 ## Media contract
 
@@ -52,8 +53,21 @@ on the surrounding chrome restores the tile and focus. YouTube owns touches
 inside the iframe. The provider viewport is at least 200 × 200. A thumbnail
 below 120 × 70 selects the player and offers explicit Play. [YouTube embed requirements](https://developers.google.com/youtube/terms/required-minimum-functionality).
 
-Viewport changes keep the active iframe and selected video. Tab-local state
-retains the tile anchor, theater selection and query for civic-resource return.
-See the shared incident for local, live and physical-device verification.
+The floating phone dock puts **More options** at the left, scoped search and
+its dictation microphone in the middle, and **Red Dog** at the right. Search
+submits against the loaded collection. Its results keep the source IDs and
+the same row player. The microphone fills the field when the browser has
+local recognition available. Otherwise it focuses the field for keyboard
+dictation. The visitor submits the resulting query. **More options** opens
+Home, the independent-site disclosure, and device-model availability. The
+current device-model list is empty. Red Dog opens the public read-only briefing.
+
+Viewport changes keep the active iframe and selected video. If a desktop
+selection falls outside the phone filter, its tile appears alongside the
+filtered results while the player is open. Tab-local state retains the tile
+anchor, theater selection and queries for return. Physical iPhone Home Screen
+install, keyboard dictation and standalone handoffs require device verification.
+An earlier Mall shortcut can be replaced with a fresh install to pick up the
+HPC identity.
 
 The player provides local Save and Share. HPC shares the original Short URL. A save is a bookmark. The preference selector, verification and valuation have separate roadmap gates.

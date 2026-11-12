@@ -35,11 +35,22 @@ A thumbnail below 120 × 70 opens the player with a separate Play video
 action. One provider iframe is active. A source link remains explicit.
 
 `mallStateRestore.selectVideoScope(id)` selects tab-local storage. It restores
-legacy offsets, the stable tile ID/offset, and optional theater selection and
-query. An actual navigation return restores selection and query. The active
-iframe keeps its media time during in-page resizing. The shared header logo
-links to `/member/` on the
-canonical host. The bottom anchor links to Vote's manual contact resource.
+legacy offsets, the stable tile ID/offset, and optional theater and phone
+queries. The active iframe keeps its media time during in-page resizing.
+`setScopedPhoneQuery(query)` applies the existing metadata matcher to the
+touch grid on submit and retains source tile indices. On resize, an active
+desktop selection outside the phone filter is visible until the player closes.
+
+HPC selects `/member/hpc.webmanifest` and its touch icon in the document head
+when the public route resolves. A fresh standalone launch opens the scoped
+collection. The header portrait links to the canonical Mall. On the phone
+the header action opens Vote's manual contact resource. The bottom anchor
+holds the options dialog, query field and dictation button, and the existing
+public Red Dog briefing link. Device speech recognition starts by request
+only when the browser reports an available local language. The keyboard
+mic remains the alternative. The options dialog includes Home, disclosure
+and device-model availability. Both off-page actions save scoped state.
+
 The dedicated hostname sets presentation and `/f/{id}/app` preserves member
 admission. See the [shared media incident](../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md)
 for verification boundaries and service-worker version evidence.

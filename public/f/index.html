@@ -1004,6 +1004,9 @@
         resolvedDiscoveryId = item.foundup_id;
         renderEntry(item);
         populateConciergeContext(item);
+        if (resolvedDiscoveryId === 'hpc' && !subpath && window.location.hash === '#red-dog') {
+          window.entryRedDog.open();
+        }
       })
       .catch(function(err) {
         console.error('Catalog load error:', err);
