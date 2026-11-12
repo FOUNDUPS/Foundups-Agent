@@ -256,3 +256,33 @@ bot-challenge, origin/referrer and availability evidence. Fix application defect
 without inventing authentication bypasses or claiming an unobserved iPhone pass.
 Report commit, qualified merge, main verification, deployment and PC sync as
 separate outcomes. This roadmap/skill update changes no runtime or live site.
+
+## Desktop poster browsing PoC
+
+012's desktop reference calls for a dense wall of mixed FoundUp cards and
+a full viewer with WikiTube-style playback. This section covers the
+ordinary invited Mall. HPC's scoped desktop theater and phone grid use
+[H1 acceptance](../hpc/ROADMAP.md).
+
+The existing field rendered eight columns and 15 cards at 1440 × 900
+after selecting its grid mode. Category rows are the current default.
+The [navigation contract](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#46-desktop-poster-browsing)
+maps the current input, playback and quick-view owners.
+
+1. Choose the existing grid on wide fine-pointer screens when there is no
+   saved layout. Restore saved layout and position through the existing
+   state owner. Use the same catalog for video lanes and non-video cards.
+2. Expose the existing full-player action on video tiles. An accessible
+   Watch or WikiTube label can identify the action. Reuse the selected lane
+   queue, provider controls and return state. Card selection keeps the
+   existing quick view and listings keep their detail.
+3. Qualify muted hover for a rights-cleared first-party clip in a separate
+   test. Start with one preview and measure playback requests and bytes.
+   The [media contract](../docs/PFMALL_MEDIA_DELIVERY_CONTRACT.md#84-desktop-previews-and-bandwidth)
+   defines the provider viewport and preview constraints.
+
+The desktop browse slice is WSP 15 priority 13/P1 (C2, I4, D3, Impact4).
+It reuses the current shell, field and player. Verify both saved and fresh
+layout, mixed card selection, keyboard and Ctrl+wheel navigation, one
+active media session, focus and scroll return, and actual player dimensions.
+Run those checks on the desktop candidate before qualifying its release.

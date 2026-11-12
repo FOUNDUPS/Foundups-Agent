@@ -1,3 +1,12 @@
+## 2026-11-13 · Desktop poster browsing audit
+
+Mapped the ordinary Mall's mixed catalog, category rows, existing desktop
+grid, Ctrl+wheel navigation, quick view and shared full player. Measured
+the current tile preview and recorded the provider and bandwidth constraints
+in the [media contract](../docs/PFMALL_MEDIA_DELIVERY_CONTRACT.md#84-desktop-previews-and-bandwidth).
+The [roadmap](ROADMAP.md#desktop-poster-browsing-poc) defines the smallest
+desktop PoC slice. WSP 22 and 97 apply.
+
 ## 2026-11-13 · Scoped member entry
 
 The dedicated host mounts the public video projection. The FoundUps member
