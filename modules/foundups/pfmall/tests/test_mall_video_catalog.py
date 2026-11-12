@@ -36,7 +36,7 @@ def test_hpc_catalog_rebuild_is_isolated_and_idempotent(catalog):
     lane = projection["lane"]
     discovery = next(item for item in catalog if item["foundup_id"] == "hpc")
     assert discovery["videos"] == []
-    assert discovery["public_poc_url"] == "https://foundups.com/member/?foundup=hpc"
+    assert discovery["public_poc_url"] == "https://hpc.foundups.com/"
     assert lane["parent_channels"] == ["move2japan"]
     assert lane["source_id"] == "UC-LSSlOZwpGIRIYihaz8zCw"
     assert projection["voice_resource_url"] == "https://vote.mtrout.com/contact"

@@ -1,5 +1,13 @@
 # HPC ModLog
 
+## 2026-11-13 · Public host and invited member entry
+
+012 confirmed the guest entrance at `hpc.foundups.com`. The registry sends
+public discovery there. Invited members can open HPC through the shared
+Mall, with a one-time scoped return after sign-in. The [shared incident](../pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md)
+records the live v7 baseline, routing tests and open physical device gate.
+WSP 22, 97 and 104 apply.
+
 ## 2026-11-12 · Selected tile playback
 
 CHANGES_POC_ACCEPTANCE under H1. 012 specified playback in place of the

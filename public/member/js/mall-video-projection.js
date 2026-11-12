@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  // Public presentation routes. Membership and tenant capabilities are checked elsewhere.
+  // Only a dedicated host can start a guest projection.
   const dedicatedHosts = new Map([['hpc.foundups.com', 'hpc']]);
   const publicScopes = new Set(dedicatedHosts.values());
   const memberPaths = new Set(['/member', '/member/', '/member/index.html']);
@@ -11,16 +11,28 @@
   }
 
   function resolve(location) {
-    if (!memberPaths.has(location.pathname)) return null;
+    return memberPaths.has(location.pathname) ? hostScope(location) : null;
+  }
+
+  // Member boot uses this presentation selection after checking admission.
+  function resolveMember(location) {
+    if (!memberPaths.has(location.pathname) || hostScope(location)) return null;
     const requested = new URLSearchParams(location.search).getAll('foundup');
-    return hostScope(location) ||
-      (requested.length === 1 && publicScopes.has(requested[0]) ? requested[0] : null);
+    return requested.length === 1 && publicScopes.has(requested[0]) ? requested[0] : null;
+  }
+
+  function memberPath(foundupId) {
+    return publicScopes.has(foundupId) ? '/member/?foundup=' + foundupId : null;
   }
 
   function discoveryPath(foundupId, pocUrl) {
-    if (!publicScopes.has(foundupId)) return null;
-    const path = '/member/?foundup=' + foundupId;
-    return pocUrl === 'https://foundups.com' + path ? path : null;
+    for (const [host, scope] of dedicatedHosts) {
+      if (foundupId !== scope) continue;
+      const url = 'https://' + host + '/';
+      // Recognize a cached discovery card from before the host split.
+      if (pocUrl === url || pocUrl === 'https://foundups.com' + memberPath(scope)) return url;
+    }
+    return null;
   }
 
   // Select install metadata in the head, before the public catalog loads.
@@ -235,5 +247,5 @@
     }
   }
 
-  window.mallVideoProjection = { hostScope, resolve, discoveryPath, mount };
+  window.mallVideoProjection = { hostScope, resolve, resolveMember, memberPath, discoveryPath, mount };
 })();

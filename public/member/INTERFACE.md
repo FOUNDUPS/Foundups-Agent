@@ -7,8 +7,12 @@
 
 ### Public video projection
 
-`/member/?foundup=hpc` or the exact HPC hostname selects a fixed guest
-video field from `mall-public-video-catalog.json`. Touch and narrow views use
+The dedicated HPC hostname selects a fixed guest video field from
+`mall-public-video-catalog.json`. FoundUps `/members` and `/members/`
+redirect to `/member/`. On FoundUps, `?foundup=hpc` selects the same
+field after the existing sign-in, invitation and username checks. The
+same-tab sign-in handoff retains the registered scope for up to 15 minutes
+and consumes it once after admission. Touch and narrow views use
 three portrait columns with six-item vertical batches. Tap or Enter replaces
 the selected thumbnail with the shared player across its original row.
 Neighboring thumbnails reflow around it. The corner control and pinch-out

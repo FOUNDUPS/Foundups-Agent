@@ -141,6 +141,16 @@ class TestFirebaseRouting:
         firebase_path = os.path.join(REPO_ROOT, "firebase.json")
         assert os.path.isfile(firebase_path)
 
+    def test_plural_member_alias_uses_the_existing_member_entry(self):
+        with open(os.path.join(REPO_ROOT, "firebase.json"), encoding="utf-8") as f:
+            redirects = json.load(f)["hosting"]["redirects"]
+        alias = next(rule for rule in redirects if rule["destination"] == "/member/")
+        assert alias["type"] == 302
+        assert re.fullmatch(alias["regex"], "/members")
+        assert re.fullmatch(alias["regex"], "/members/")
+        for unrelated in ("/member/", "/members/other", "/f/hpc/app"):
+            assert re.fullmatch(alias["regex"], unrelated) is None
+
     def test_f_route_rewrite_exists(self):
         """Firebase has rewrite rule for /f/**."""
         firebase_path = os.path.join(REPO_ROOT, "firebase.json")

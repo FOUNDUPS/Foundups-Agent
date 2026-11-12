@@ -236,4 +236,4 @@ def test_actual_member_product_boot_and_account_transitions():
         text=True, capture_output=True, timeout=20, check=False,
     )
     assert result.returncode == 0, result.stdout + result.stderr
-    assert "21 actual member boot checks passed" in result.stdout
+    assert "26 actual member boot checks passed" in result.stdout

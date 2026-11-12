@@ -139,11 +139,11 @@ called by catalog reads or Holo queries.
 
 ## Browser/member interface
 
-The public HPC video projection enters the same browser shell at
-`/member/?foundup=hpc`. The generated public video catalog contains the
-reviewed derived lane. The member video catalog contains its discovery card
-and uses the same registry identity. The browser route selects presentation,
-while the WSP 104 app handoff and server checks own membership and capabilities.
+The dedicated `hpc.foundups.com` host enters the shared browser shell as a
+guest. On FoundUps, `/members` redirects to `/member/` and the HPC query
+mounts its projection after member admission. The public video catalog
+contains the reviewed lane and the aggregate catalog contains its discovery
+card. WSP 104 app handoff and server checks own capability authorization.
 See [HPC's interface](../hpc/INTERFACE.md).
 
 The static homepage's FX anchor targets the existing `/f/` public directory.

@@ -406,6 +406,67 @@ def expect_playing(page, index):
     }""", arg=videos[index]["video_id"])
 
 
+def verify_member_entry(browser_type):
+    browser = browser_type.launch()
+    context = browser.new_context(viewport={"width": 1440, "height": 900}, service_workers="block")
+    context.add_init_script(provider)
+    account = None
+    requested = []
+
+    def route_member(route):
+        url = urlsplit(route.request.url)
+        requested.append(url.path)
+        if url.hostname and url.hostname.endswith(".clerk.accounts.dev") and url.path.endswith("/clerk.browser.js"):
+            account_data = json.dumps(account)
+            body = f"""window.fixtureMemberAccount = {account_data};
+                window.Clerk = {{user: window.fixtureMemberAccount && {{id:'fixture-member'}}, load: async () => {{}}}};"""
+        elif url.hostname == "www.gstatic.com" and url.path.endswith("/firebase-app.js"):
+            body = "export const initializeApp = () => ({});"
+        elif url.hostname == "www.gstatic.com" and url.path.endswith("/firebase-firestore.js"):
+            body = """export const getFirestore = () => ({}), doc = () => ({});
+                export const getDoc = async () => ({exists: () => true, data: () => window.fixtureMemberAccount});"""
+        elif url.path == "/js/firebase-runtime-config.js":
+            body = "export const loadFirebaseRuntimeConfig = async () => ({});"
+        elif url.hostname == "foundups.com" and url.path == "/" and url.query == "signin=required":
+            route.fulfill(status=200, content_type="text/html", body="<h1>Member sign-in destination</h1>")
+            return
+        else:
+            return route_local(route)
+        route.fulfill(status=200, content_type="text/javascript", body=body,
+                      headers={"Access-Control-Allow-Origin": "*"})
+
+    context.route("**/*", route_member)
+    page = context.new_page()
+    page.set_default_timeout(10000)
+    scoped = "https://foundups.com/member/?foundup=hpc"
+    page.goto(scoped, wait_until="domcontentloaded")
+    page.wait_for_url("https://foundups.com/?signin=required")
+    assert page.evaluate("sessionStorage.getItem('pfmall_product_return_v1')")
+    assert not any(path.endswith("catalog.json") for path in requested)
+
+    account = {"username": "fixture"}
+    page.goto("https://foundups.com/member/", wait_until="domcontentloaded")
+    expect(page.locator("#inviteGate")).to_be_visible()
+    assert page.evaluate("sessionStorage.getItem('pfmall_product_return_v1')")
+    assert not any(path.endswith("catalog.json") for path in requested)
+
+    account = {"username": "fixture", "inviteValidated": True}
+    page.goto("https://foundups.com/member/", wait_until="domcontentloaded")
+    page.wait_for_url(scoped)
+    expect(page.get_by_role("region", name="Video theater")).to_be_visible()
+    expect_playing(page, 0)
+    assert page.evaluate("sessionStorage.getItem('pfmall_product_return_v1')") is None
+    assert requested.count("/member/mall-public-video-catalog.json") == 1
+    assert "/member/mall-video-catalog.json" not in requested
+    page.goto("https://foundups.com/f/hpc", wait_until="domcontentloaded")
+    expect(page.get_by_role("link", name="Browse Shorts")).to_have_attribute(
+        "href", "https://hpc.foundups.com/"
+    )
+    browser.close()
+    print(json.dumps({"member_sign_in_return": True, "uninvited_blocked": True,
+                      "admitted_desktop_theater": True, "public_discovery_destination": True}))
+
+
 def verify_desktop(browser_type):
     browser = browser_type.launch()
     context = browser.new_context(viewport={"width":1440,"height":900}, service_workers="block")
@@ -574,3 +635,4 @@ if __name__ == "__main__":
     verify_diagnostics()
     with sync_playwright() as p:
         verify_desktop(p.chromium)
+        verify_member_entry(p.chromium)

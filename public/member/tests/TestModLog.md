@@ -1,3 +1,13 @@
+## 2026-11-13 · Public HPC and admitted member entry
+
+The controlled Chromium fixture follows the real member shell through
+sign-in redirect, invitation denial, return after admission and the HPC
+theater. It also checks the registry link to the dedicated public host.
+The actual boot fixture passes 26 cases and the state and service-worker
+fixture passes 21. The latter checks v12 route assets, obsolete Mall cache
+retirement and unrelated cache retention. Physical iPhone playback and
+production member admission remain separate verification gates.
+
 ## 2026-11-12 · In-place phone video playback
 
 The scoped browser fixture verifies that the selected thumbnail disappears

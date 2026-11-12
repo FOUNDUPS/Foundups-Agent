@@ -1,5 +1,12 @@
 # Member Area Module Change Log
 
+## 2026-11-13 · Public HPC and invited member routes
+
+Guest video entry resolves on the dedicated host. The FoundUps HPC query
+selects the same view after member admission and survives the existing
+sign-in redirect. Cache v12 installs versioned routing assets together.
+WSP 22, 97 and 104 apply.
+
 ## 2026-11-12 · Phone video replaces the selected tile
 
 The shared player takes the selected tile's original row and hides its
