@@ -73,6 +73,7 @@
   // ─── localStorage Keys ───
   var SAVED_KEY = 'pfmall_saved_videos';
   var returnTile = null;
+  var returnScroll = null;
   var scopedPlayer = false;
   var HISTORY_KEY = 'pfmall_watch_history';
   var HISTORY_MAX = 50; // Max history entries
@@ -404,6 +405,8 @@
 
     scopedPlayer = !!resumeOpts?.returnTile;
     returnTile = resumeOpts?.returnTile || resumeOpts?.returnFocusTo || null;
+    var browseField = resumeOpts?.returnFocusTo?.closest('.mall-tile-field-wrapper');
+    returnScroll = browseField ? { field: browseField, top: browseField.scrollTop, left: browseField.scrollLeft } : null;
     onClose = resumeOpts?.onClose || null;
     autoplayRequested = resumeOpts?.autoplay !== false;
     muteOnStart = resumeOpts?.theater === true;
@@ -411,6 +414,7 @@
     queueSearch.value = resumeOpts?.query || '';
     filteredIndices = null;
     container.classList.toggle('scoped-player', scopedPlayer);
+    container.classList.toggle('desktop-poster-player', !!returnScroll);
 
     currentFoundUpId = foundupId;
     currentQueue = queue;
@@ -496,10 +500,16 @@
       var tile = returnTile.isConnected ? returnTile : document.querySelector(
         '#mallTileField .mall-tile[data-index="' + Number(returnTile.dataset.index) + '"]'
       );
-      if (restore) tile?.focus({ preventScroll: true });
+      if (restore) {
+        tile?.focus({ preventScroll: true });
+        if (returnScroll) {
+          returnScroll.field.scrollTo({ top: returnScroll.top, left: returnScroll.left, behavior: 'instant' });
+        }
+      }
       container.removeAttribute('aria-modal');
       returnTile = null;
     }
+    returnScroll = null;
 
     window.dispatchEvent(new CustomEvent('videoPlayerClose'));
   }
@@ -932,8 +942,9 @@
       case 'enter':
         // Enter FoundUp: navigate to canonical /f/{foundup_id} route (WSP 104)
         if (currentFoundUpId && !scopedPlayer) {
+          var destination = '/f/' + encodeURIComponent(currentFoundUpId);
           close();
-          window.location.href = '/f/' + encodeURIComponent(currentFoundUpId);
+          window.location.href = destination;
         }
         break;
       case 'save':

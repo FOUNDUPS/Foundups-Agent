@@ -291,8 +291,9 @@ in view and a single automatically playing YouTube embed per page.
 
 Desktop poster selection opens YouTube video in the shared full player with
 provider controls, branding, pointer access and keyboard access visible and
-usable. Posters smaller than 120 × 70 CSS px open with manual Play. Crop
-the poster art to fit the tile. `modestbranding` has no
+usable. Posters smaller than 120 × 70 CSS px open with manual Play. The
+desktop full-player rail sizes its playable thumbnails to the same minimum.
+Crop the poster art to fit the tile. `modestbranding` has no
 effect and `rel=0` confines recommendations to the same channel.
 [YouTube player parameters](https://developers.google.com/youtube/player_parameters)
 

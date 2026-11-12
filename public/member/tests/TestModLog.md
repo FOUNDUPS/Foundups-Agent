@@ -2,13 +2,17 @@
 
 The new browser case reproduced category rows on fresh desktop entry at
 base `09da53549`. The candidate opened 15 mixed cards in eight columns at
-1440 × 900 CSS px. The controlled player held one 1440 × 712 iframe, retained
+1440 × 900 CSS px. The controlled player kept one provider iframe, retained
 it on resize, and advanced the queue after both autoplay and manual Play.
-Escape restored focus and scroll in the expanded lane. The saved rows,
-wide touch, card quick view and scoped HPC cases passed in the same suite.
+The new desktop rail thumbnails meet the 120 × 70 CSS px minimum.
+WebKit exposed a scroll snap that moved the originating tile out of view.
+Explicit scroll restoration returned to the focused tile. Enter FoundUp
+went to `/f/move2japan` after the player closed. The saved rows, wide touch,
+card quick view and scoped HPC cases passed in the Chromium suite.
 
 In a separate Windows Chromium 143 localhost dev-harness run, real YouTube
-clip `JFp2l1fnf_4` advanced from about 0.42 s to 1.03 s. The diagnostic saw
+clip `JFp2l1fnf_4` advanced from about 0.41 s to 1.02 s in a 1440 × 694
+CSS px iframe. The diagnostic saw
 zero provider document or media requests before tile selection and zero
 remaining player frames after closing. Live invited admission, deployment
 and physical iPhone playback remain separate gates. The v13 cache fixture

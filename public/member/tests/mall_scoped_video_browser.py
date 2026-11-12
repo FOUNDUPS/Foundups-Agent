@@ -446,6 +446,11 @@ def verify_member_poster_grid(page):
     page.set_viewport_size({"width": 1440, "height": 900})
     page.evaluate("fixturePlayback.finishCurrent()")
     expect_playing_id(page, clips[1]["video_id"])
+    queued = player.locator(".video-player-queue-item").nth(2)
+    thumbnail = queued.locator("img").bounding_box()
+    assert thumbnail and thumbnail["width"] >= 120 and thumbnail["height"] >= 70
+    queued.click()
+    expect_playing_id(page, clips[2]["video_id"])
     expect(page.locator("iframe")).to_have_count(1)
     page.keyboard.press("Escape")
     expect(player).not_to_be_visible()
@@ -463,10 +468,15 @@ def verify_member_poster_grid(page):
     lane_tile.dispatch_event("wheel", {"ctrlKey": True, "deltaY": -100})
     clip_tile = field.locator('.mall-tile[data-foundup-id="move2japan_video_48"]')
     expect(clip_tile).to_be_attached()
-    clip_tile.scroll_into_view_if_needed()
+    # Finish focus scrolling to the tile's snap point before activating it.
+    clip_tile.evaluate("tile => { tile.focus(); tile.scrollIntoView({block: 'start'}); }")
+    page.wait_for_function("""tile => {
+        const wrapper = tile.closest('.mall-tile-field-wrapper');
+        return Math.abs(tile.getBoundingClientRect().top - wrapper.getBoundingClientRect().top) <= 3;
+    }""", arg=clip_tile.element_handle(), timeout=4000)
     offset = page.locator(".mall-tile-field-wrapper").evaluate("el => el.scrollTop")
     assert offset > 0
-    clip_tile.press("Enter")
+    page.keyboard.press("Enter")
     expect_playing_id(page, clips[48]["video_id"])
     page.keyboard.press("Escape")
     expect(player).not_to_be_visible()
@@ -489,6 +499,10 @@ def verify_member_poster_grid(page):
     page.evaluate("mallTileField.setLayoutMode('rows'); mallStateRestore.save()")
     page.reload(wait_until="domcontentloaded")
     expect(field).to_have_attribute("data-layout", "rows")
+    page.evaluate("mallTileField.setLayoutMode('grid')")
+    lane_tile.click()
+    player.get_by_role("button", name="Enter FoundUp").click()
+    page.wait_for_url("https://foundups.com/f/move2japan")
     print(json.dumps({"member_desktop_columns": columns, "mixed_cards": len(ordinary),
                       "watch_viewport": box, "queue_advance_after_manual_play": True, "hover_frames": 0,
                       "quick_view_and_saved_rows": True, "expanded_clip_return": offset}))

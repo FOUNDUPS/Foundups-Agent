@@ -79,7 +79,7 @@ Entry point: `mallVideoPlayer.open(foundupId, queue, startIndex, resumeOpts?)`
 | `foundupId` | string | The FoundUp ID — constrains the queue |
 | `queue` | Array | Array of video objects from that FoundUp |
 | `startIndex` | number | Index to start at (default: 0) |
-| `resumeOpts` | object? | `resumeSeconds` seeks on HTML5 metadata load. `returnFocusTo` supplies the ordinary Mall tile for modal focus return. `autoplay: false` requests manual YouTube playback. |
+| `resumeOpts` | object? | `resumeSeconds` seeks on HTML5 metadata load. `returnFocusTo` identifies the ordinary Mall tile for modal focus and scroll restoration. `autoplay: false` requests manual YouTube playback. |
 
 **Behavior**:
 1. DOM container is created lazily on first open
@@ -150,6 +150,7 @@ Exit methods:
 | Button | Action | Event |
 |--------|--------|-------|
 | Back | Close player | none |
+| Enter FoundUp | Close and open the selected lane's `/f/{foundup_id}` route in the ordinary Mall | none |
 | Save | Toggle save (localStorage) | `videoPlayerSave` |
 | Share | Share video (native or clipboard) | `videoPlayerShare` |
 | More | Show options (stub) | none |
