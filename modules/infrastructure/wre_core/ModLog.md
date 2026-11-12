@@ -1,3 +1,13 @@
+## 2026-11-12 — Security-scan caller lifecycle obligations
+
+The existing security_scan skill now points build/launch callers to WSP 71
+Section 5.6 and WSP 91 Section 3.0. Scanner evidence does not itself authorize
+execution; missing required coverage blocks the affected action. Heartbeats,
+expiry, ownership and cleanup belong to existing runtime owners. Prototype and
+manual-trigger metadata remain unchanged; no provider or service was started.
+WSP 22/71/91/95/97. Validation covers protocol mirrors and agent projection;
+runtime lifecycle enforcement remains separately qualified work.
+
 ## 2026-11-12 — Read-only PC and GitHub inventory
 
 Reuse the Git lifecycle repository and selected PC binding for a bounded

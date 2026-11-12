@@ -1,3 +1,16 @@
+## 2026-11-12 — Host lifecycle and build security requirements
+
+Under 012's explicit directive after abandoned preview processes were stopped,
+WSP 91 Section 3.0 now requires accountable launch ownership, monitored status,
+finite jobs/authorized service leases, stop controls and observed descendant
+cleanup. WSP 71 Section 5.6 requires source-bound build/launch security coverage.
+Continuous-operation language is scoped to authorized availability. Extend
+existing DAE/lease/security owners, not a new supervisor or scanner. No legacy
+runtime enforcement or native RSI completion is certified by these additions.
+WSP 81 section-addition notification is delivered in the execution commentary;
+exact knowledge mirrors and generated agent instructions accompany the change.
+WSP 10/22/50/71/81/91/97; rollback is a focused revert of this change.
+
 ## 2026-11-10 — Branch lifecycle boot and draft protocol registration
 
 Under 012's explicit continuation, PR #2335 records the WSP 00 boot obligation
