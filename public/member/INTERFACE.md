@@ -18,9 +18,13 @@ anchor and focus.
 A viewport of at least 900 CSS px with a fine primary pointer and hover opens
 the shared theater. It displays the main player, then scoped video search, then
 the horizontal queue. Fresh entry requests the first clip muted, with manual
-Play recovery when needed. Filtering keeps the current video playing and
-sets the next candidates. Enter selects a focused thumbnail. Switching
-between layouts preserves the active iframe, media time, selected ID and query.
+Play recovery when needed. The centered desktop search form is up to
+584 CSS px wide and 52 px high. Typing filters the queue during playback.
+Submitting with Enter or the search button starts the next matching clip,
+or the first match when the current clip is outside the results or last.
+An empty query or no matches leaves playback alone. Enter on a focused
+thumbnail selects that video. Switching between layouts preserves the
+active iframe, media time, selected ID and query.
 The YouTube controls provide desktop fullscreen and sound controls.
 
 The player uses YouTube's IFrame API, `playsinline`, origin-level Referer and

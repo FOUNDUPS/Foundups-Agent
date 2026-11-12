@@ -327,15 +327,20 @@ def verify_desktop(browser_type):
     page.goto("https://hpc.foundups.com/member/", wait_until="domcontentloaded")
     player = page.get_by_role("region", name="Video theater")
     search = player.get_by_role("searchbox", name="Search videos")
+    search_form = player.get_by_role("search")
+    submit = search_form.get_by_role("button", name="Play search result")
     stage = player.locator(".video-player-stage")
     rail = player.locator(".video-player-queue-rail")
     cards = rail.get_by_role("button")
     expect_playing(page, 0)
     expect(cards).to_have_count(fixture_total)
     expect(page.locator(".mall-tile").first).to_be_hidden()
-    stage_box, search_box, rail_box = stage.bounding_box(), search.bounding_box(), rail.bounding_box()
+    stage_box, search_box, rail_box = stage.bounding_box(), search_form.bounding_box(), rail.bounding_box()
     assert stage_box["width"] >= 200 and stage_box["height"] >= 200
-    assert stage_box["y"] + stage_box["height"] <= search_box["y"] <= rail_box["y"]
+    assert abs(search_box["width"] - 584) <= 1 and abs(search_box["height"] - 52) <= 1
+    assert abs(search_box["x"] + search_box["width"]/2 - stage_box["x"] - stage_box["width"]/2) <= 1
+    assert stage_box["y"] + stage_box["height"] <= search_box["y"]
+    assert search_box["y"] + search_box["height"] <= rail_box["y"]
     assert rail_box["y"] + rail_box["height"] <= 900
     assert page.evaluate("!history.state?.pfmallScopedPlayer && document.activeElement === document.body")
     assert page.evaluate("window.fixturePlayback.mutes") == 1
@@ -346,17 +351,22 @@ def verify_desktop(browser_type):
     expect(cards).to_have_count(2)
     assert page.evaluate("window.originalFrame === document.querySelector('.video-player-stage iframe')")
     expect_playing(page, 0)
-    page.evaluate("window.fixturePlayback.finishCurrent()")
+    search.press("Enter")
     expect_playing(page, 2)
     page.evaluate("window.fixturePlayback.finishCurrent()")
     expect_playing(page, 20)
+    submit.click()
+    expect_playing(page, 2)
+    cards.nth(1).press("Enter")
+    expect_playing(page, 20)
 
     search.fill("no matching clip")
+    search.press("Enter")
     expect(rail.get_by_role("status")).to_have_text("No videos match your search.")
     expect(cards).to_have_count(0)
     expect_playing(page, 20)
     search.fill("theater selection")
-    cards.press("Enter")
+    submit.click()
     expect_playing(page, 24)
     expect(cards).to_have_attribute("aria-current", "true")
     expect(player.locator("iframe")).to_have_count(1)
@@ -429,7 +439,8 @@ def verify_desktop(browser_type):
     expect(page.get_by_role("region", name="Video theater")).to_have_count(0)
     browser.close()
     print(json.dumps({"desktop_theater": True, "startup_mute_and_block_recovery": True,
-                      "filtered_queue_advance": True, "breakpoint_kept_provider_context": True,
+                      "filtered_queue_advance": True, "search_submit_playback": True,
+                      "breakpoint_kept_provider_context": True,
                       "coarse_pointer_stays_grid": True}, sort_keys=True))
 
 

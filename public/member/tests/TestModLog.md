@@ -1,3 +1,12 @@
+## 2026-11-12 · Desktop search submission
+
+Chromium and WebKit verified the 584 × 52 CSS px form, placement below the
+video, Enter and magnifier playback, the no-result path, and continuity
+through the phone layout. Actual YouTube in the candidate browser advanced
+on desktop startup, Enter and magnifier selection, and 390 px inline play.
+The focused player and field suites passed 251 checks, and the state/SW
+fixture passed 20 with cache v9.
+
 ## 2026-11-12 · Desktop theater and breakpoint continuity
 
 The scoped fixture passed desktop and phone behavior in Chromium. Independent
