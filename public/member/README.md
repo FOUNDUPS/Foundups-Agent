@@ -8,7 +8,8 @@
 ### Public scoped video
 
 HPC uses this shell's shared field, player, header brand and bottom anchor.
-The recovery candidate offers three portrait columns, in-context play,
+Desktop opens a centered video with scoped search and a thumbnail queue.
+Touch and narrow layouts keep three portrait columns, in-context play,
 explicit immersive expansion, and stable Back/return. The
 [shared media incident](../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md)
 tracks real provider playback and the open physical iPhone gate.

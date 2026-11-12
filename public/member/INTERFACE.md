@@ -8,12 +8,20 @@
 ### Public video projection
 
 `/member/?foundup=hpc` or the exact HPC hostname selects a fixed guest
-video field from `mall-public-video-catalog.json`.
-`mallTileField.initialize([lane], { fixedVideoField: true })` presents three
-portrait columns with six-item vertical batches. Tap or Enter opens an inline
-row with the shared `mallVideoPlayer`; the explicit corner control and pinch-out
-open immersive playback. Promotion retains the active iframe. Closing, Escape,
-browser Back or pinch-in on the immersive chrome restores the tile and focus.
+video field from `mall-public-video-catalog.json`. Touch and narrow views use
+three portrait columns with six-item vertical batches. Tap or Enter opens a
+shared player in the selected tile's row context. The corner control and
+pinch-out open immersive playback. Expansion retains the provider iframe.
+Close, Escape, Back or pinch-in on the surrounding chrome restores the grid
+anchor and focus.
+
+A viewport of at least 900 CSS px with a fine primary pointer and hover opens
+the shared theater. It displays the main player, then scoped video search, then
+the horizontal queue. Fresh entry requests the first clip muted, with manual
+Play recovery when needed. Filtering keeps the current video playing and
+sets the next candidates. Enter selects a focused thumbnail. Switching
+between layouts preserves the active iframe, media time, selected ID and query.
+The YouTube controls provide desktop fullscreen and sound controls.
 
 The player uses YouTube's IFrame API, `playsinline`, origin-level Referer and
 distinct ready/state/error/autoplay/timeout outcomes. The local
@@ -23,12 +31,14 @@ A thumbnail below 120 × 70 opens the player with a separate Play video
 action. One provider iframe is active. A source link remains explicit.
 
 `mallStateRestore.selectVideoScope(id)` selects tab-local storage. It restores
-legacy offsets and the current stable video ID/offset, loading enough rows
-to position the anchor. The shared header logo links to `/member/` on the
+legacy offsets, the stable tile ID/offset, and optional theater selection and
+query. An actual navigation return restores selection and query. The active
+iframe keeps its media time during in-page resizing. The shared header logo
+links to `/member/` on the
 canonical host. The bottom anchor links to Vote's manual contact resource.
 The dedicated hostname sets presentation and `/f/{id}/app` preserves member
 admission. See the [shared media incident](../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md)
-for verification boundaries and the v6 → v7 candidate migration.
+for verification boundaries and service-worker version evidence.
 
 ### Public FX directory — 2026-10-25
 

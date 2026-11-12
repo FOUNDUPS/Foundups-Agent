@@ -1,3 +1,16 @@
+## 2026-11-12 · Desktop theater and breakpoint continuity
+
+The scoped fixture passed desktop and phone behavior in Chromium. Independent
+desktop verification in Chromium and WebKit confirmed queue search, startup
+recovery, Voice return and the same iframe browsing context across resize.
+The ordinary four-width browser fixture, property runtime, 21 admission cases,
+and 20 state/service-worker checks passed. A warm Chromium upgrade cached
+exact v8 bytes, retired v7, retained a separate cache and reopened HPC offline.
+
+The broader media and PWA check reported 333 passes and six failures at both
+990e320 and the candidate. The failures concern three absent empty media
+directories and three older service-worker source expressions.
+
 ## 2026-11-11 · Scoped playback recovery
 
 The independent Chromium fixture verified a 31-record collection, three

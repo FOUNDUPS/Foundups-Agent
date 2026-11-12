@@ -22,7 +22,8 @@ videos = []
 for i in range(fixture_total):
     video = deepcopy(prototype)
     identifier = f"HPC{i:08d}"
-    video.update(video_id=identifier, id=identifier, title=f"Fixture clip {i}",
+    suffix = " theater topic" if i in (2, 20) else " theater selection" if i == 24 else ""
+    video.update(video_id=identifier, id=identifier, title=f"Fixture clip {i}{suffix}",
                  embed_url=f"https://www.youtube.com/embed/{identifier}",
                  source_url=f"https://www.youtube.com/shorts/{identifier}",
                  thumbnail_url="/logo-dog.png", poster_url="/logo-dog.png")
@@ -32,7 +33,7 @@ lane.update(videos=videos, video_count=len(videos))
 provider = """(() => {
   if (window.top !== window) return;
   const trace = window.fixturePlayback = {
-    created: 0, destroyed: 0, pause: 0, plays: 0, events: [], error: null, block: false, hang: false
+    created: 0, destroyed: 0, pause: 0, plays: 0, events: [], error: null, block: false, hang: false, mutes: 0
   };
   window.addEventListener('mallVideoPlayback', e => trace.events.push(e.detail));
   window.YT = {
@@ -48,7 +49,7 @@ provider = """(() => {
         frame = iframe;
       }
       const events = options.events || {}, api = this, emit = (fn, data) => events[fn]?.({target:api, data});
-      let state = -1, dead = false, startedAt = null, elapsed = 0;
+      let state = -1, dead = false, startedAt = null, elapsed = 0, muted = false;
       this.getIframe = () => frame;
       this.getPlayerState = () => state;
       this.getDuration = () => 180;
@@ -69,8 +70,15 @@ provider = """(() => {
         emit('onStateChange', state);
       };
       this.destroy = () => { dead = true; trace.destroyed++; frame.remove(); };
-      this.mute = () => {};
-      this.unMute = () => {};
+      this.mute = () => { muted = true; trace.mutes++; };
+      this.unMute = () => { muted = false; };
+      this.isMuted = () => muted;
+      trace.finishCurrent = () => {
+        elapsed = this.getCurrentTime();
+        startedAt = null;
+        state = 0;
+        emit('onStateChange', state);
+      };
       setTimeout(() => {
         if (dead || trace.hang) return;
         if (trace.error !== null) emit('onError', trace.error);
@@ -302,6 +310,131 @@ def verify_diagnostics():
         browser.close()
         print(json.dumps(observed, sort_keys=True))
 
+def expect_playing(page, index):
+    page.wait_for_function("""id => {
+        const snapshot = window.mallVideoPlayer.getPlaybackSnapshot();
+        return snapshot?.videoId === id && snapshot.state === 'playing' && snapshot.positionSeconds > 0.1;
+    }""", arg=videos[index]["video_id"])
+
+
+def verify_desktop(browser_type):
+    browser = browser_type.launch()
+    context = browser.new_context(viewport={"width":1440,"height":900}, service_workers="block")
+    context.add_init_script(provider)
+    context.route("**/*", route_local)
+    page = context.new_page()
+    page.set_default_timeout(8000)
+    page.goto("https://hpc.foundups.com/member/", wait_until="domcontentloaded")
+    player = page.get_by_role("region", name="Video theater")
+    search = player.get_by_role("searchbox", name="Search videos")
+    stage = player.locator(".video-player-stage")
+    rail = player.locator(".video-player-queue-rail")
+    cards = rail.get_by_role("button")
+    expect_playing(page, 0)
+    expect(cards).to_have_count(fixture_total)
+    expect(page.locator(".mall-tile").first).to_be_hidden()
+    stage_box, search_box, rail_box = stage.bounding_box(), search.bounding_box(), rail.bounding_box()
+    assert stage_box["width"] >= 200 and stage_box["height"] >= 200
+    assert stage_box["y"] + stage_box["height"] <= search_box["y"] <= rail_box["y"]
+    assert rail_box["y"] + rail_box["height"] <= 900
+    assert page.evaluate("!history.state?.pfmallScopedPlayer && document.activeElement === document.body")
+    assert page.evaluate("window.fixturePlayback.mutes") == 1
+
+    page.evaluate("""window.originalFrame = document.querySelector('.video-player-stage iframe');
+        window.originalContext = window.originalFrame.contentWindow""")
+    search.fill("theater topic")
+    expect(cards).to_have_count(2)
+    assert page.evaluate("window.originalFrame === document.querySelector('.video-player-stage iframe')")
+    expect_playing(page, 0)
+    page.evaluate("window.fixturePlayback.finishCurrent()")
+    expect_playing(page, 2)
+    page.evaluate("window.fixturePlayback.finishCurrent()")
+    expect_playing(page, 20)
+
+    search.fill("no matching clip")
+    expect(rail.get_by_role("status")).to_have_text("No videos match your search.")
+    expect(cards).to_have_count(0)
+    expect_playing(page, 20)
+    search.fill("theater selection")
+    cards.press("Enter")
+    expect_playing(page, 24)
+    expect(cards).to_have_attribute("aria-current", "true")
+    expect(player.locator("iframe")).to_have_count(1)
+    assert page.evaluate("window.fixturePlayback.created - window.fixturePlayback.destroyed") == 1
+
+    page.evaluate("""window.selectedFrame = document.querySelector('.video-player-stage iframe');
+        window.selectedContext = window.selectedFrame.contentWindow""")
+    start_time = page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot().positionSeconds")
+    page.set_viewport_size({"width":899,"height":844})
+    inline = page.get_by_role("region", name="Inline video player")
+    expect(inline).to_be_visible()
+    expect(video(page, 24)).to_have_attribute("aria-current", "true")
+    assert page.evaluate("document.querySelector('.mall-inline-player-slot').previousElementSibling.dataset.index") == "26"
+    assert page.evaluate("window.selectedContext === document.querySelector('.video-player-stage iframe').contentWindow")
+    page.wait_for_function("start => window.mallVideoPlayer.getPlaybackSnapshot().positionSeconds > start + 0.1", arg=start_time)
+    page.set_viewport_size({"width":900,"height":844})
+    expect(search).to_have_value("theater selection")
+    expect(cards).to_have_count(1)
+    expect(cards).to_have_attribute("aria-current", "true")
+    assert page.evaluate("window.selectedFrame === document.querySelector('.video-player-stage iframe') && window.selectedContext === window.selectedFrame.contentWindow")
+    expect_playing(page, 24)
+
+    # A fresh load after the civic resource recovers the same tab-local query and video.
+    with page.expect_navigation(wait_until="domcontentloaded"):
+        page.locator("#videoScopeVoice").click()
+    expect(page.get_by_role("heading", name="Contact Congress fixture")).to_be_visible()
+    page.go_back(wait_until="domcontentloaded")
+    expect(search).to_have_value("theater selection")
+    expect_playing(page, 24)
+
+    page.set_viewport_size({"width":390,"height":844})
+    expect(inline).to_be_visible()
+    inline.get_by_role("button", name="Expand video", exact=True).click()
+    expect(page.get_by_role("dialog", name="Fullscreen video player")).to_be_visible()
+    page.evaluate("history.back()")
+    expect(page.locator("#videoPlayerFullscreen")).to_be_hidden()
+    expect(video(page, 24)).to_be_focused()
+    expect(video(page, 24)).to_be_in_viewport()
+    assert page.evaluate("document.querySelector('.mall-tile-field-wrapper').scrollTop") > 0
+    assert page.url == "https://hpc.foundups.com/member/"
+
+    video(page, 25).click(position={"x":25,"y":90})
+    expect_playing(page, 25)
+    page.evaluate("window.phoneContext = document.querySelector('.video-player-stage iframe').contentWindow")
+    page.set_viewport_size({"width":1440,"height":900})
+    expect(search).to_have_value("theater selection")
+    expect(cards).to_have_count(1)
+    assert page.evaluate("window.phoneContext === document.querySelector('.video-player-stage iframe').contentWindow")
+    expect_playing(page, 25)
+    context.close()
+
+    blocked = browser.new_context(viewport={"width":1280,"height":720}, service_workers="block")
+    blocked.add_init_script(provider.replace("block: false", "block: true", 1))
+    blocked.route("**/*", route_local)
+    page = blocked.new_page()
+    page.goto("https://hpc.foundups.com/member/", wait_until="domcontentloaded")
+    page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state === 'autoplay-blocked'")
+    page.evaluate("window.fixturePlayback.block = false")
+    page.get_by_role("button", name="Play video", exact=True).click()
+    expect_playing(page, 0)
+    blocked.close()
+
+    touch = browser.new_context(viewport={"width":1024,"height":768}, is_mobile=True, has_touch=True, service_workers="block")
+    touch.add_init_script(provider)
+    touch.route("**/*", route_local)
+    page = touch.new_page()
+    page.goto("https://hpc.foundups.com/member/", wait_until="domcontentloaded")
+    expect(video(page, 0)).to_be_visible()
+    assert len({t["x"] for t in info(page)["tiles"][:3]}) == 3
+    expect(page.get_by_role("region", name="Video theater")).to_have_count(0)
+    browser.close()
+    print(json.dumps({"desktop_theater": True, "startup_mute_and_block_recovery": True,
+                      "filtered_queue_advance": True, "breakpoint_kept_provider_context": True,
+                      "coarse_pointer_stays_grid": True}, sort_keys=True))
+
+
 if __name__ == "__main__":
     main()
     verify_diagnostics()
+    with sync_playwright() as p:
+        verify_desktop(p.chromium)

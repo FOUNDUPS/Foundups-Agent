@@ -36,6 +36,10 @@
   var topBar = null;
   var queueRail = null;
   var queueTrack = null;
+  var queueSearch = null;
+  var queueEmpty = null;
+  var filteredIndices = null;
+  var matchesQuery = null;
   var edgeTrigger = null;
   var gestureHint = null;
   var titleEl = null;
@@ -44,6 +48,8 @@
   var playBtn = null;
   var requestYouTubePlay = null;
   var inline = false;
+  var theater = false;
+  var muteOnStart = false;
   var onClose = null;
   var autoplayRequested = true;
   var previousOverflow = null;
@@ -152,7 +158,7 @@
     statusEl.textContent = message || '';
     statusEl.hidden = !message;
     playBtn.hidden = !requestYouTubePlay || !['manual-play', 'autoplay-blocked', 'provider-unknown', 'paused'].includes(state);
-    if (inline && (state === 'manual-play' || state === 'autoplay-blocked') && !playBtn.hidden && canStartYouTube()) {
+    if (inline && !theater && (state === 'manual-play' || state === 'autoplay-blocked') && !playBtn.hidden && canStartYouTube()) {
       playBtn.scrollIntoView({ block: 'nearest' });
     }
     window.dispatchEvent(new CustomEvent('mallVideoPlayback', { detail: { ...playbackStatus } }));
@@ -260,9 +266,11 @@
       '<div class="video-player-stage"></div>',
       '<p class="video-player-status" role="status" hidden></p>',
       '<button class="video-player-manual-play" type="button" hidden>Play video</button>',
+      '<input class="video-player-queue-search" type="search" aria-label="Search videos" placeholder="Search videos" maxlength="300" hidden>',
       '<div class="video-player-edge-trigger"></div>',
       '<div class="video-player-queue-rail">',
       '  <div class="video-player-queue-track"></div>',
+      '  <p class="video-player-queue-empty" role="status" hidden>No videos match your search.</p>',
       '</div>',
       '<div class="video-player-gesture-hint"></div>'
     ].join('\n');
@@ -276,6 +284,9 @@
     topBar = container.querySelector('.video-player-top-bar');
     queueRail = container.querySelector('.video-player-queue-rail');
     queueTrack = container.querySelector('.video-player-queue-track');
+    queueSearch = container.querySelector('.video-player-queue-search');
+    queueEmpty = container.querySelector('.video-player-queue-empty');
+    queueSearch.addEventListener('input', filterRail);
     edgeTrigger = container.querySelector('.video-player-edge-trigger');
     gestureHint = container.querySelector('.video-player-gesture-hint');
     titleEl = container.querySelector('.video-player-title');
@@ -301,6 +312,7 @@
 
   function enterImmersive() {
     inline = false;
+    topBar.querySelector('[data-action="back"]').hidden = false;
     container.classList.remove('video-player-inline');
     container.setAttribute('role', 'dialog');
     container.setAttribute('aria-label', 'Fullscreen video player');
@@ -332,8 +344,27 @@
     if (returnTile) topBar.querySelector('[data-action="back"]').focus({ preventScroll: true });
   }
 
-  function expandInline() {
+  function setTheater(enabled, tile) {
     if (!isOpen || !inline) return false;
+    if (tile) returnTile = tile;
+    theater = enabled;
+    container.classList.toggle('video-player-theater', enabled);
+    container.setAttribute('role', 'region');
+    container.setAttribute('aria-label', enabled ? 'Video theater' : 'Inline video player');
+    topBar.querySelector('[data-action="expand"]').hidden = enabled;
+    var back = topBar.querySelector('[data-action="back"]');
+    var active = document.activeElement;
+    back.hidden = enabled;
+    back.setAttribute('aria-label', 'Close player');
+    queueSearch.hidden = !enabled || !matchesQuery;
+    if (enabled && active === back && !queueSearch.hidden) queueSearch.focus({ preventScroll: true });
+    if (!enabled && (active === queueSearch || queueRail.contains(active))) back.focus({ preventScroll: true });
+    filterRail();
+    return true;
+  }
+
+  function expandInline() {
+    if (!isOpen || !inline || theater) return false;
     stageObserver?.disconnect();
     stageObserver = null;
     enterImmersive();
@@ -360,6 +391,10 @@
     returnTile = resumeOpts?.returnTile || null;
     onClose = resumeOpts?.onClose || null;
     autoplayRequested = resumeOpts?.autoplay !== false;
+    muteOnStart = resumeOpts?.theater === true;
+    matchesQuery = resumeOpts?.matchesQuery || null;
+    queueSearch.value = resumeOpts?.query || '';
+    filteredIndices = null;
     container.classList.toggle('scoped-player', !!returnTile);
 
     currentFoundUpId = foundupId;
@@ -372,12 +407,11 @@
     if (inline) {
       resumeOpts.inlineMount.appendChild(container);
       container.classList.add('video-player-inline');
-      container.setAttribute('role', 'region');
-      container.setAttribute('aria-label', 'Inline video player');
-      topBar.querySelector('[data-action="expand"]').hidden = false;
-      topBar.querySelector('[data-action="back"]').setAttribute('aria-label', 'Close player');
-      container.scrollIntoView({ block: 'nearest' });
-      topBar.querySelector('[data-action="back"]').focus({ preventScroll: true });
+      setTheater(resumeOpts?.theater === true);
+      if (!theater) {
+        container.scrollIntoView({ block: 'nearest' });
+        topBar.querySelector('[data-action="back"]').focus({ preventScroll: true });
+      }
       if (typeof IntersectionObserver !== 'undefined') {
         var observer = new IntersectionObserver(function(entries) {
           if (stageObserver === observer && inline && entries.some(function(entry) { return entry.intersectionRatio <= 0.5; })) {
@@ -389,10 +423,10 @@
       }
     } else {
       enterImmersive();
+      renderRail();
     }
 
     renderVideo(currentQueue[currentIndex]);
-    renderRail();
 
     // Update save button state
     updateSaveButtonState(isVideoSaved(currentFoundUpId, currentQueue[currentIndex]));
@@ -415,8 +449,9 @@
     pendingResumeSeconds = null;
 
     isOpen = false;
-    container.classList.remove('open');
-    container.classList.remove('video-player-inline');
+    container.classList.remove('open', 'video-player-inline', 'video-player-theater');
+    theater = false;
+    queueSearch.hidden = true;
     if (previousOverflow !== null) document.body.style.overflow = previousOverflow;
     previousOverflow = null;
     inertElements.forEach(function(element) { element.inert = false; });
@@ -462,6 +497,11 @@
   // ─── Navigate Queue ───
   function goToVideo(index) {
     if (index < 0 || index >= currentQueue.length) return;
+    if (theater) {
+      if (index === currentIndex) return;
+      autoplayRequested = true;
+      try { muteOnStart = ytPlayer?.isMuted?.() ?? muteOnStart; } catch (e) { /* provider not ready */ }
+    }
     flushCurrentPlaybackPosition();
     pendingResumeSeconds = null;
     currentIndex = index;
@@ -481,8 +521,9 @@
   }
 
   function nextVideo() {
-    if (currentIndex < currentQueue.length - 1) {
-      goToVideo(currentIndex + 1);
+    var next = filteredIndices ? filteredIndices[filteredIndices.indexOf(currentIndex) + 1] : currentIndex + 1;
+    if (next !== undefined && next < currentQueue.length) {
+      goToVideo(next);
       showHint('Next');
     } else {
       showHint('End of queue');
@@ -490,14 +531,15 @@
   }
 
   function prevVideo() {
-    if (currentIndex > 0) {
-      goToVideo(currentIndex - 1);
+    var previous = filteredIndices ? filteredIndices[filteredIndices.indexOf(currentIndex) - 1] : currentIndex - 1;
+    if (previous >= 0) {
+      goToVideo(previous);
       showHint('Previous');
     }
   }
 
   function handleVideoEnded() {
-    if (inline) return;
+    if (inline && !theater) return;
     nextVideo();
   }
 
@@ -567,6 +609,7 @@
           onReady: function(ev) {
             if (!current()) return;
             clearTimeout(playbackTimer);
+            if (muteOnStart) ev.target.mute();
             reportYouTube('ready');
             requestYouTubePlay = function() {
               if (!current()) return;
@@ -577,7 +620,8 @@
               }
               waitForPlayback('provider-unknown', 'YouTube did not start. Try its Play control or open the source.');
               if (document.activeElement === playBtn) {
-                topBar.querySelector('[data-action="back"]').focus({ preventScroll: true });
+                var focusTarget = theater ? iframe : topBar.querySelector('[data-action="back"]');
+                focusTarget.focus({ preventScroll: true });
               }
               reportYouTube('starting', 'Starting video…');
               try { ev.target.playVideo(); }
@@ -695,24 +739,41 @@
   }
 
   // ─── Render Rail ───
+  function filterRail() {
+    var query = theater ? queueSearch.value.trim().slice(0, 300) : '';
+    filteredIndices = query && matchesQuery ? currentQueue.reduce(function(indices, video, index) {
+      if (matchesQuery(video, query)) indices.push(index);
+      return indices;
+    }, []) : null;
+    renderRail();
+    queueTrack.scrollLeft = 0;
+  }
+
   function renderRail() {
-    queueTrack.innerHTML = currentQueue.map(function (video, i) {
+    var indices = filteredIndices || currentQueue.map(function(_, index) { return index; });
+    queueEmpty.hidden = indices.length !== 0;
+    queueTrack.innerHTML = indices.map(function (i) {
+      var video = currentQueue[i];
       var thumb = video.thumbnail_url || video.thumbnailUrl || video.poster_url || video.posterUrl || '';
       var title = video.title || 'Video ' + (i + 1);
-      var activeClass = i === currentIndex ? ' active' : '';
+      var selected = i === currentIndex;
       return [
-        '<div class="video-player-queue-item' + activeClass + '" data-index="' + i + '">',
+        '<button type="button" class="video-player-queue-item' + (selected ? ' active' : '') +
+          '" data-index="' + i + '"' + (selected ? ' aria-current="true"' : '') + '>',
         '  <img class="video-player-queue-thumb" src="' + esc(thumb) + '" alt="" loading="lazy">',
-        '  <div class="video-player-queue-label">' + esc(title) + '</div>',
-        '</div>'
+        '  <span class="video-player-queue-label">' + esc(title) + '</span>',
+        '</button>'
       ].join('');
     }).join('');
   }
 
   function updateRailSelection() {
     var items = queueTrack.querySelectorAll('.video-player-queue-item');
-    items.forEach(function (item, i) {
-      item.classList.toggle('active', i === currentIndex);
+    items.forEach(function (item) {
+      var selected = Number(item.dataset.index) === currentIndex;
+      item.classList.toggle('active', selected);
+      if (selected) item.setAttribute('aria-current', 'true');
+      else item.removeAttribute('aria-current');
     });
 
     // Scroll active into view
@@ -872,7 +933,7 @@
   }
 
   function handleKeydown(e) {
-    if (!isOpen) return;
+    if (!isOpen || theater) return;
     if (e.defaultPrevented || e.target?.closest?.('dialog[open]')) return;
     if (e.key !== 'Escape' && (inline || e.target?.closest?.('button, a, input, textarea, select'))) return;
 
@@ -1086,6 +1147,9 @@
      */
     close: close,
     expandInline: expandInline,
+    setTheater: setTheater,
+    isTheater: function() { return theater; },
+    getQueueQuery: function() { return queueSearch?.value.trim().slice(0, 300) || ''; },
     getPlaybackSnapshot: getPlaybackSnapshot,
 
     /**

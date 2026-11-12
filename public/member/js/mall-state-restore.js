@@ -197,7 +197,13 @@
   function isValidState(state) {
     if (!state || typeof state !== 'object') return false;
     if (selectedVideoScope) {
-      var keys = Object.keys(state);
+      var keys = Object.keys(state).filter(function(key) { return key !== 'theater'; });
+      if ('theater' in state) {
+        var theater = state.theater;
+        if (!theater || typeof theater !== 'object' || Object.keys(theater).length !== 2 ||
+            typeof theater.videoId !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(theater.videoId) ||
+            typeof theater.query !== 'string' || theater.query.length > 300) return false;
+      }
       if (![state.scrollTop, state.scrollLeft].every(function(value) { return Number.isFinite(value) && value >= 0; })) return false;
       if (keys.length === 2) return true; // legacy scoped positions
       return keys.length === 4 && typeof state.anchorVideoId === 'string' &&

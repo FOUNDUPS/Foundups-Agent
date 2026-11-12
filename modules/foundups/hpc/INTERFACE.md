@@ -34,8 +34,24 @@ The [shared incident](../pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md#source-reconcilia
 
 ## Interaction contract
 
-The global Mall tap starts or toggles lane playback, and pinch-out on a channel expands its video field. The scoped field displays `#SchumerOUT` in three portrait columns with vertical batches and an end state. Tap or Enter opens a full-width player row in the Mall. The corner button or pinch-out opens immersive playback; expanding an already playing clip retains its iframe. Close, Escape, browser Back or pinch-in on the surrounding immersive surface restores the originating tile and position. There is no separate double-tap action. YouTube owns touches inside its iframe. The provider viewport is at least 200 × 200; a thumbnail below 120 × 70 selects the player and offers an explicit Play video action. [YouTube embed requirements](https://developers.google.com/youtube/terms/required-minimum-functionality)
+The global Mall tap starts or toggles lane playback, and pinch-out on a channel
+expands its video field. The HPC projection uses the same player and catalog in
+two layouts. On a wide desktop with a fine pointer and hover, the centered
+player opens above HPC search and a horizontal thumbnail strip. The first
+clip requests muted autoplay. The shared queue advances on a provider end
+event and offers Play when the browser blocks startup. Search changes the queue
+without interrupting the active clip.
 
-The recovery candidate uses cache `pfmall-member-v7`; the observed deployed baseline uses v6. Real desktop Chromium playback and mocked recovery tests are recorded in the shared incident. Physical iPhone standalone remains unverified.
+The touch grid displays #SchumerOUT in three portrait columns with vertical
+batches and an end state. Tap or Enter opens the shared player in a full-width
+row beside the selected tile's browsing context. The corner button or pinch-out
+opens immersive playback with the same iframe. Close, Escape, Back or pinch-in
+on the surrounding chrome restores the tile and focus. YouTube owns touches
+inside the iframe. The provider viewport is at least 200 × 200. A thumbnail
+below 120 × 70 selects the player and offers explicit Play. [YouTube embed requirements](https://developers.google.com/youtube/terms/required-minimum-functionality).
+
+Viewport changes keep the active iframe and selected video. Tab-local state
+retains the tile anchor, theater selection and query for civic-resource return.
+See the shared incident for local, live and physical-device verification.
 
 The player provides local Save and Share. HPC shares the original Short URL. A save is a bookmark. The preference selector, verification and valuation have separate roadmap gates.

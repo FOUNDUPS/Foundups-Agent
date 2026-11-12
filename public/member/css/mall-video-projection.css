@@ -60,7 +60,6 @@
 
 [data-mall-video-scope] .mall-tile-field {
   align-content: start;
-  /* Mobile HPC: retain the established three-column Shorts field. */
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
@@ -207,11 +206,17 @@
   padding: 0 0.85rem;
 }
 
-/* Restore the pre-#2357 desktop density: three columns were intended for
-   touch-sized screens, not for a wide WikiTube-style monitor. This is a
-   regression repair, not the planned desktop theater/search implementation. */
-@media (min-width: 900px) and (pointer: fine) {
-  [data-mall-video-scope] .mall-tile-field {
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, max(120px, 16%)), 1fr));
-  }
+/* The active player stays in the same slot when switching presentations. */
+[data-mall-video-scope] .mall-tile-field:has(.video-player-theater) {
+  display: flex;
+  height: 100%;
+}
+
+[data-mall-video-scope] .mall-tile-field:has(.video-player-theater) > :is(.mall-tile, .mall-video-grid-tail) {
+  display: none;
+}
+
+[data-mall-video-scope] .mall-tile-field:has(.video-player-theater) > .mall-inline-player-slot {
+  width: 100%;
+  min-height: 0;
 }
