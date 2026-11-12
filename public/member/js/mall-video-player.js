@@ -356,6 +356,7 @@
     if (!isOpen || !inline) return false;
     if (tile) returnTile = tile;
     theater = enabled;
+    setPinchTarget(!enabled && returnTile ? topBar : null);
     container.classList.toggle('video-player-theater', enabled);
     container.setAttribute('role', 'region');
     container.setAttribute('aria-label', enabled ? 'Video theater' : 'Inline video player');
@@ -474,12 +475,7 @@
 
     // Cleanup
     if (gestureRef) { gestureRef.destroy(); gestureRef = null; }
-    if (pinchTarget) {
-      pinchTarget.removeEventListener('touchstart', handlePinchStart);
-      pinchTarget.removeEventListener('touchmove', handlePinchMove);
-      pinchTarget = null;
-    }
-    initialPinchDistance = 0;
+    setPinchTarget(null);
     clearTimeout(railTimer);
     clearTimeout(chromeTimer);
 
@@ -568,8 +564,8 @@
     2: ['configuration', 'YouTube rejected the video configuration.'],
     5: ['playback-error', 'YouTube could not play this video in this browser.'],
     100: ['unavailable', 'This video is unavailable on YouTube.'],
-    101: ['embedding-disabled', 'The creator has disabled embedded playback.'],
-    150: ['embedding-disabled', 'The creator has disabled embedded playback.'],
+    101: ['embedding-disabled', 'YouTube refused to play this embedded video.'],
+    150: ['embedding-disabled', 'YouTube refused to play this embedded video.'],
     153: ['client-identification', 'YouTube could not identify this embedded player.']
   };
 
@@ -870,10 +866,17 @@
       }
     });
 
-    // Pinch detection (for pinch-in return)
-    pinchTarget = returnTile ? container : stage;
-    pinchTarget.addEventListener('touchstart', handlePinchStart, { passive: true });
-    pinchTarget.addEventListener('touchmove', handlePinchMove, { passive: false });
+    setPinchTarget(returnTile ? container : stage);
+  }
+
+  function setPinchTarget(target) {
+    if (pinchTarget === target) return;
+    pinchTarget?.removeEventListener('touchstart', handlePinchStart);
+    pinchTarget?.removeEventListener('touchmove', handlePinchMove);
+    initialPinchDistance = 0;
+    pinchTarget = target;
+    pinchTarget?.addEventListener('touchstart', handlePinchStart, { passive: true });
+    pinchTarget?.addEventListener('touchmove', handlePinchMove, { passive: false });
   }
 
   function handlePinchStart(e) {
@@ -888,7 +891,10 @@
     var currentDistance = getPinchDistance(e.touches);
     var scale = currentDistance / initialPinchDistance;
 
-    if (scale < PINCH_THRESHOLD) {
+    if (inline && scale > 1 / PINCH_THRESHOLD) {
+      e.preventDefault();
+      expandInline();
+    } else if (!inline && scale < PINCH_THRESHOLD) {
       e.preventDefault();
       close();
       initialPinchDistance = 0;

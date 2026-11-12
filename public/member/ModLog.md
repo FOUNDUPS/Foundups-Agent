@@ -1,5 +1,12 @@
 # Member Area Module Change Log
 
+## 2026-11-12 · Phone video replaces the selected tile
+
+The shared player takes the selected tile's original row and hides its
+thumbnail until close. The existing iframe survives expansion and responsive
+transitions. Cache v11 refreshes the field and player assets. YouTube 101 and
+150 report an embed refusal. WSP 22, 97 and 104 apply.
+
 ## 2026-11-11 · In-context playback recovery candidate
 
 Reuse the shared player for scoped inline playback and immersive expansion,

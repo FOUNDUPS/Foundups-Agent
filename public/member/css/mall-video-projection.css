@@ -243,6 +243,10 @@
   display: none;
 }
 
+[data-mall-video-scope] .mall-tile[data-video-replaced] {
+  display: none;
+}
+
 .mall-inline-player-slot,
 .mall-video-grid-tail,
 .mall-video-grid-empty {

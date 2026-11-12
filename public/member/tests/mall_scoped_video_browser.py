@@ -191,9 +191,15 @@ def main():
 
         wrapper.evaluate("(el) => el.scrollTop = 0")
         selected = video(page, 2)
+        original_row = selected.evaluate("tile => tile.offsetTop")
         selected.tap(position={"x":25,"y":90})
         player = page.locator("#videoPlayerFullscreen")
         expect(player).to_have_attribute("aria-label","Inline video player")
+        expect(selected).to_be_hidden()
+        slot = page.locator(".mall-inline-player-slot")
+        expect(slot).to_have_count(1)
+        assert abs(slot.evaluate("slot => slot.offsetTop") - original_row) <= 1
+        assert video(page, 0).evaluate("tile => tile.offsetTop") > original_row
         expect(player.locator("iframe")).to_have_count(1)
         page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot().state === 'playing'")
         state = info(page)
@@ -215,15 +221,23 @@ def main():
         page.evaluate("history.back()")
         page.wait_for_function("!history.state?.pfmallScopedPlayer")
         expect(player).to_be_hidden()
+        expect(selected).to_be_visible()
+        assert abs(selected.evaluate("tile => tile.offsetTop") - original_row) <= 1
         expect(selected).to_be_focused()
         expect_position(page, 0)
         expect(player.locator("iframe")).to_have_count(0)
-        observed["expand_retained_provider_and_returned_focus"] = True
+        observed["tile_row_replacement_and_same_iframe_expand"] = True
 
-        video(page, 1).tap(position={"x":25,"y":90})
+        middle = video(page, 1)
+        row = middle.evaluate("tile => tile.offsetTop")
+        middle.tap(position={"x":25,"y":90})
         page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot().state === 'playing'")
+        expect(middle).to_be_hidden()
+        assert abs(slot.evaluate("slot => slot.offsetTop") - row) <= 1
         video(page, 0).tap(position={"x":25,"y":90})
         page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot().state === 'playing'")
+        expect(middle).to_be_visible()
+        expect(video(page, 0)).to_be_hidden()
         expect(player.locator("iframe")).to_have_count(1)
         trace = page.evaluate("window.fixturePlayback")
         assert trace["created"] == 3 and trace["destroyed"] == 2, trace
@@ -254,7 +268,15 @@ def main():
         assert abs(oriented["width"] - oriented["contentWidth"]) <= 1
         assert page.locator("#videoScopeHeader").bounding_box()["y"] >= 0
         assert page.locator("#videoScopeVoice").bounding_box()["y"] < 390
-        observed["landscape_no_horizontal_overflow"] = True
+        video(page, 4).tap(position={"x":25,"y":90})
+        expect_playing(page, 4)
+        expect(video(page, 4)).to_be_hidden()
+        landscape_stage = player.locator(".video-player-stage").bounding_box()
+        assert 200 <= landscape_stage["height"] <= 235
+        player.get_by_role("button", name="Close player").tap()
+        page.wait_for_function("!history.state?.pfmallScopedPlayer")
+        expect(video(page, 4)).to_be_visible()
+        observed["landscape_playback_without_horizontal_overflow"] = True
 
         page.set_viewport_size({"width":320, "height":640})
         voice = page.locator("#videoScopeVoice").bounding_box()
@@ -330,6 +352,8 @@ def verify_diagnostics():
             page.wait_for_function("(expected) => window.mallVideoPlayer.getPlaybackSnapshot()?.state === expected", arg=state)
             snapshot = page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot()")
             assert snapshot["code"] == code
+            if code in (101, 150):
+                expect(page.get_by_text("YouTube refused to play this embedded video.", exact=False)).to_be_visible()
             expect(player.locator(".video-player-status")).to_be_visible()
             expect(player.locator(".video-player-source")).to_have_attribute("href", videos[0]["source_url"])
             expect(player.locator("iframe")).to_have_count(1)
@@ -444,7 +468,8 @@ def verify_desktop(browser_type):
     inline = page.get_by_role("region", name="Inline video player")
     expect(inline).to_be_visible()
     expect(video(page, 24)).to_have_attribute("aria-current", "true")
-    assert page.evaluate("document.querySelector('.mall-inline-player-slot').previousElementSibling.dataset.index") == "26"
+    expect(video(page, 24)).to_be_hidden()
+    assert page.evaluate("document.querySelector('.mall-inline-player-slot').nextElementSibling.dataset.index") == "24"
     assert page.evaluate("window.selectedContext === document.querySelector('.video-player-stage iframe').contentWindow")
     page.wait_for_function("start => window.mallVideoPlayer.getPlaybackSnapshot().positionSeconds > start + 0.1", arg=start_time)
     page.set_viewport_size({"width":900,"height":844})
@@ -464,7 +489,13 @@ def verify_desktop(browser_type):
 
     page.set_viewport_size({"width":390,"height":844})
     expect(inline).to_be_visible()
-    inline.get_by_role("button", name="Expand video", exact=True).click()
+    inline.locator(".video-player-top-bar").evaluate("""bar => {
+      for (const [type, distance] of [['touchstart', 40], ['touchmove', 90]]) {
+        const event = new Event(type, { bubbles: true, cancelable: true });
+        Object.defineProperty(event, 'touches', { value: [{clientX: 0, clientY: 0}, {clientX: distance, clientY: 0}] });
+        bar.dispatchEvent(event);
+      }
+    }""")
     expect(page.get_by_role("dialog", name="Fullscreen video player")).to_be_visible()
     page.evaluate("history.back()")
     expect(page.locator("#videoPlayerFullscreen")).to_be_hidden()

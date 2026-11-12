@@ -1803,20 +1803,21 @@
     return getTileElement(index);
   }
 
-  function positionScopedSlot(slot, index) {
+  function replaceScopedTile(slot, tile) {
     var indices = scopedRenderedIndices;
+    var index = Number(tile.dataset.index);
     var rank = indices ? indices.indexOf(index) : index;
-    var lastInRow = Math.min(scopedVisibleCount() - 1,
-      rank + FIXED_VIDEO_COLUMNS - 1 - rank % FIXED_VIDEO_COLUMNS);
-    var lastTile = getScopedTile(indices ? indices[lastInRow] : lastInRow);
+    var firstInRow = rank - rank % FIXED_VIDEO_COLUMNS;
+    var firstTile = getTileElement(indices ? indices[firstInRow] : firstInRow);
     if (!slot.isConnected) {
-      lastTile.after(slot);
-    } else if (slot.previousElementSibling !== lastTile) {
+      firstTile.before(slot);
+    } else if (slot.nextElementSibling !== firstTile) {
       // Move the tiles around the slot so resizing leaves the provider iframe mounted.
       var tiles = Array.from(tileField.querySelectorAll('.mall-tile'));
-      slot.before(...tiles.slice(0, lastInRow + 1));
-      slot.after(...tiles.slice(lastInRow + 1));
+      slot.before(...tiles.slice(0, firstInRow));
+      slot.after(...tiles.slice(firstInRow));
     }
+    tile.setAttribute('data-video-replaced', '');
   }
 
   function setScopedTheater(enabled) {
@@ -1834,6 +1835,7 @@
     syncScopedTiles();
     if (enabled) {
       if (player.isOpen()) {
+        tileField.querySelector('[data-video-replaced]')?.removeAttribute('data-video-replaced');
         player.setTheater?.(true);
       } else {
         var restoredIndex = lane.videos.findIndex(function(video) {
@@ -1848,8 +1850,8 @@
     rememberTheater();
     var slot = tileField.querySelector('.mall-inline-player-slot');
     var index = player.getCurrentIndex();
-    positionScopedSlot(slot, index);
-    var tile = getTileElement(index);
+    var tile = getScopedTile(index);
+    replaceScopedTile(slot, tile);
     player.setTheater(false, tile);
     if (!scopedPhonePlaybackIndices && scopedPlaybackPosition?.anchorVideoId !== tile.dataset.videoId) {
       scopedPlaybackPosition = { scrollTop: 0, scrollLeft: 0, anchorVideoId: tile.dataset.videoId, anchorOffset: 0 };
@@ -1881,15 +1883,16 @@
     tile = getScopedTile(index);
     if (!tile) return;
     var theater = scopedTheaterRequested && !immersive;
+    var thumbnail = tile.getBoundingClientRect();
     scopedPlaybackPosition = captureFixedPosition(theater ? null : tile);
     if (!theater) pushScopedPlayerHistory(lane.foundup_id);
     var slot = null;
     if (!immersive) {
       slot = document.createElement('div');
       slot.className = 'mall-inline-player-slot';
-      positionScopedSlot(slot, index);
+      if (theater) tileField.prepend(slot);
+      else replaceScopedTile(slot, tile);
     }
-    var thumbnail = tile.getBoundingClientRect();
     tile.setAttribute('aria-current', 'true');
     player.open(lane.foundup_id, lane.videos, index, {
       inlineMount: slot,
@@ -1901,6 +1904,7 @@
       autoplay: theater || (thumbnail.width >= 120 && thumbnail.height >= 70),
       onClose: function(restore) {
         slot?.remove();
+        tileField.querySelector('[data-video-replaced]')?.removeAttribute('data-video-replaced');
         tileField.querySelector('.mall-tile[aria-current]')?.removeAttribute('aria-current');
         var position = scopedPlaybackPosition;
         scopedPlaybackPosition = null;

@@ -221,9 +221,9 @@ not reprioritization of unrelated system work.
 - Desktop requests first-video startup playback and sequential queue advancement.
   Preserve provider controls, one active player, and truthful blocked-autoplay
   recovery. A thumbnail, iframe load or API availability flag is not playback.
-- Phone tap plays within the selected tile/context, not a detached second mini-
-  player. Provider minimum dimensions and iframe touch boundaries must be measured;
-  any active-tile enlargement belongs in the explicit shared contract.
+- Phone tap replaces the selected tile with the shared player in its original
+  row. Nearby tiles reflow and the original tile returns on close. Measure
+  the provider viewport and keep controls clear of the iframe.
 - Scoped search repopulates the existing queue/field. It supersedes hidden-search
   presentation only within the active permitted catalog; global/remote search is
   later work and never bypasses authorization.

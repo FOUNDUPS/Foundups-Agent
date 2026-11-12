@@ -394,7 +394,7 @@
 
 .video-player-inline .video-player-stage {
   flex: 0 0 auto;
-  height: clamp(200px, 58vw, 420px);
+  height: clamp(200px, 58vw, min(420px, 60dvh));
 }
 
 .video-player-fullscreen.video-player-inline:not(.video-player-theater) .video-player-queue-rail,

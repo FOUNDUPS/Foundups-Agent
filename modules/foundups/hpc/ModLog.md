@@ -1,5 +1,12 @@
 # HPC ModLog
 
+## 2026-11-12 · Selected tile playback
+
+CHANGES_POC_ACCEPTANCE under H1. 012 specified playback in place of the
+selected thumbnail. The shared Mall uses the original grid row and restores
+the card on close. The [shared incident](../pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md)
+owns the iPhone YouTube investigation and provider fallback evidence.
+
 ## 2026-11-12 · Phone install identity and thumb dock
 
 FITS_POC under H1. 012 supplied the satire artwork and approved the portrait,
