@@ -18,7 +18,7 @@ stay in the module.
 
 The buildless public files include `index.html`, `cover.css`, `cover.js`,
 the five supplied reference images as WebPs in `comics/`, and `guide.html` with the
-original `style.css` and `app.js`. Deploy `sw.js`, `manifest.webmanifest`,
+original `style.css`. The cover and guide share `app.js` for installation. Deploy `sw.js`, `manifest.webmanifest`,
 the three icons and the `/coalition`, `/evidence` and `/contact` pages with
 their existing local assets. The contact page
 uses the reviewed `contact-roster.json` and `contact-queue.mjs`. This README
@@ -65,11 +65,11 @@ All assets are local, the content policy is self-only, and the install control
 appears only when the browser offers installation. The service worker registers
 relative to this directory and caches only exact, same-origin public shell
 paths. It does not cache API requests, external links, query variants or writes.
-The v5 worker precaches the cover, local comic assets, and the canonical
+The v6 worker precaches the cover, local comic assets, and the canonical
 `/guide`, `/coalition`, `/evidence` and `/contact` routes. Legacy HTML
 navigation has a canonical offline fallback. The cover transfers previous
 root fragments to the original section on `/guide`. The manifest keeps its
-existing identity and launches the civic guide. Installation validates each
+existing identity and launches the responsive cover from either install entry. Installation validates each
 response status, MIME type and URL before filling the cache.
 
 Vote retains `/f/voteballots`, `/f/voteballots/app` and `idb_voteballots` in the

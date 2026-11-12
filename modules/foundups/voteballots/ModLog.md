@@ -1,5 +1,12 @@
 # Vote/Ballots FoundUp — Module Log
 
+## 2026-11-12 — Vote cover readability and install entry
+
+Give the cover and guide one install flow and open the standalone Vote app at
+the cover. Use two wider issue columns on larger screens and one on phones.
+Make the speaker link, Twitch destination and money-graphic labels readable.
+Keep the same offline shell paths under v6. WSP 22, 50, 84, 97, 102.
+
 ## 2026-11-12 — Vote bottom ticker
 
 Add a bottom ticker with pause and reduced-motion support. Keep the campaign

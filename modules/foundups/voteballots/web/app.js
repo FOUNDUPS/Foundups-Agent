@@ -1,7 +1,7 @@
 'use strict';
 
 // This informational front door has no account, candidate lookup, scoring or intake API.
-const installButton = document.getElementById('install-app');
+const installButton = document.querySelector('#install-vote, #install-app');
 let installPrompt = null;
 
 window.addEventListener('beforeinstallprompt', (event) => {
