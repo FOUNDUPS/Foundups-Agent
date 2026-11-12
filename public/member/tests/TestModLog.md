@@ -1,3 +1,14 @@
+## 2026-11-12 · HPC phone install and dock
+
+The Chromium scoped fixture passed a manifest read, three-column phone
+layout, dictation fallback and simulated local speech, search, disclosure,
+and return from Vote and the public Red Dog briefing. It also checked
+filtered playback continuity and immersive resize. Independent WebKit
+checks covered the phone layout and install metadata, stable filter return
+and the existing desktop theater. The focused member suite passed 432 tests,
+the HPC catalog tests passed two, and the boot fixture passed 21. Physical
+iPhone Home Screen installation and real device speech remain open.
+
 ## 2026-11-12 · Desktop search submission
 
 Chromium and WebKit verified the 584 × 52 CSS px form, placement below the
