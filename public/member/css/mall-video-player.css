@@ -288,6 +288,8 @@
 
 .video-player-queue-item {
   flex: 0 0 auto;
+  padding: 0;
+  background: transparent;
   width: 100px;
   scroll-snap-align: start;
   cursor: pointer;
@@ -318,6 +320,7 @@
 }
 
 .video-player-queue-label {
+  display: block;
   padding: 0.25rem 0.4rem;
   background: rgba(0,0,0,0.7);
   color: #fff;
@@ -394,8 +397,44 @@
   height: clamp(200px, 58vw, 420px);
 }
 
-.video-player-fullscreen.video-player-inline :is(.video-player-queue-rail, .video-player-gesture-hint) {
+.video-player-fullscreen.video-player-inline:not(.video-player-theater) .video-player-queue-rail,
+.video-player-inline .video-player-gesture-hint {
   display: none;
+}
+
+.video-player-fullscreen.video-player-theater {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.video-player-theater .video-player-stage {
+  flex: 1 0 200px;
+  height: auto;
+  width: 100%;
+}
+
+.video-player-queue-search {
+  flex-shrink: 0;
+  box-sizing: border-box;
+  min-height: 44px;
+  margin: 0.5rem 0.75rem 0;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid #d6bdf880;
+  border-radius: 0.5rem;
+  background: #241a36;
+  color: #fff4dc;
+  font: inherit;
+}
+
+.video-player-queue-search::placeholder {
+  color: #d9cde9;
+}
+
+.video-player-queue-empty {
+  margin: 0.25rem 0;
+  padding-inline: 0.25rem;
+  color: #fff4dc;
+  font-size: 0.85rem;
 }
 
 /* ─── Expand Control (On Tiles) ─── */

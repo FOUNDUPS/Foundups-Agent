@@ -214,10 +214,10 @@ not reprioritization of unrelated system work.
   scoped catalog, query and state APIs before proposing markup or another player.
   WikiTube TV source/history remains a retrieval target, not a verified current
   integration. Do not repeat an unsourced historical deployment address.
-- PR #2357's scoped layout uses three columns at all sizes and a separate player
-  slot after a calculated row. The PC regression is reported by 012. A CSS-only
-  density correction such as draft #2359 does not fix the player placement and
-  must also reconcile fixed-column JavaScript arithmetic before acceptance.
+- PR #2357 used three columns at every width. The original CSS-only #2359
+  draft reproduced a six-column display with three-column player placement.
+  The responsive candidate in #2359 mounts the existing stage and queue as a
+  desktop theater while preserving the phone row layout and shared media session.
 - Desktop requests first-video startup playback and sequential queue advancement.
   Preserve provider controls, one active player, and truthful blocked-autoplay
   recovery. A thumbnail, iframe load or API availability flag is not playback.

@@ -205,3 +205,18 @@
 .mall-video-scope-disclosure button {
   padding: 0 0.85rem;
 }
+
+/* The active player stays in the same slot when switching presentations. */
+[data-mall-video-scope] .mall-tile-field:has(.video-player-theater) {
+  display: flex;
+  height: 100%;
+}
+
+[data-mall-video-scope] .mall-tile-field:has(.video-player-theater) > :is(.mall-tile, .mall-video-grid-tail) {
+  display: none;
+}
+
+[data-mall-video-scope] .mall-tile-field:has(.video-player-theater) > .mall-inline-player-slot {
+  width: 100%;
+  min-height: 0;
+}

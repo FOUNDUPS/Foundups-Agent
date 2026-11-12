@@ -1,5 +1,16 @@
 # HPC ModLog
 
+## 2026-11-12 · Responsive desktop theater candidate
+
+FITS_POC under H1. 012's Work handoff specifies the centered desktop player,
+search directly below it, and a thumbnail queue. Reused draft #2359 on main
+990e320 and retained the shared catalog, player, phone grid, and Vote route.
+Desktop requests muted startup and advances the scoped queue. One provider
+iframe survives breakpoint changes, and the existing tab-local state retains
+theater selection and query. Touch search and the thumb dock remain H1 work.
+See the shared media incident for playback, cache, and release evidence.
+WSP 15, 22, 30, 97 and 104 apply.
+
 ## 2026-11-11 · Responsive PoC and build-gate reconciliation
 
 - Reused PR #2358 rather than creating another branch. Updated HPC and shared

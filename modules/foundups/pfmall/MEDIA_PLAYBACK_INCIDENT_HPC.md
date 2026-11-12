@@ -219,3 +219,28 @@ Official sources accessed 2026-11-11:
 - [WebKit video activation policies](https://webkit.org/blog/6784/new-video-policies-for-ios/) and [Home Screen website data](https://webkit.org/blog/14787/webkit-features-in-safari-17-2/)
 - [Meta embedded player](https://developers.facebook.com/docs/plugins/embedded-video-player/) and [SDK API](https://developers.facebook.com/docs/plugins/embedded-video-player/api/) (retrieval rate-limited)
 - [FoundUp Memex boundary](../../../docs/adr/ADR_REDDOG_FOUNDUPS_SECOND_BRAIN_BOUNDARY.md) and [HoloIndex retrieval boundary](../../../docs/adr/ADR_OPENCLAW_MEMORY_HOLOINDEX_BOUNDARY.md)
+
+## 2026-11-12 · Desktop layout recovery in PR #2359
+
+At the start of this pass, live Firebase version 25aefb1f3c293a98 served
+pfmall-member-v7. Sampled public runtime bytes matched main 990e320. In a fresh
+1440 × 900 Windows Chromium session, the scoped grid showed three 469 px tiles
+across and opened the player below the row. The original draft 895118a used
+six CSS columns with a three-column JavaScript row calculation.
+
+The responsive candidate uses the existing player, queue, field slot and
+catalog matcher. Desktop starts muted on an eligible clip and advances the
+scoped queue. Search leaves the active clip running. Touch keeps the inline
+row and immersive controls. Repositioning tiles around the slot keeps the
+provider iframe connected. The existing tab-local state retains the desktop
+query and video ID for Back from Vote. The v8 cache migration keeps existing
+public asset URLs and the unrelated caches.
+
+A candidate preview on the HPC origin with real YouTube observed advancing
+media time for desktop startup iJuguXpbRR4, natural advancement to
+sSzWdw7MNjs, search selection of OTTz58wPi24, and 390 px emulated touch
+inline playback. Chromium and WebKit fixtures verified selection, queue
+advancement, manual Play, resize continuity and Back. Physical iPhone
+standalone remains NOT_VERIFIED. The phone search and thumb dock are open
+roadmap work. GitHub checks, merge, and hosting deployment each have separate
+receipts.

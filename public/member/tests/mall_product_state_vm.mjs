@@ -106,6 +106,15 @@ await check('fixed video projection restores only tab-local position', () => {
   h.flushFrames();
   assert.equal(h.wrapper.scrollTop, 40);
   assert.deepEqual(h.calls, []);
+  const desktop = { scrollTop: 40, scrollLeft: 0, anchorVideoId: 'HPC00000024', anchorOffset: -12,
+    theater: { videoId: 'HPC00000012', query: 'creator commentary' } };
+  h.session.set(key, JSON.stringify(desktop));
+  assert.equal(h.api.restore(), true);
+  h.flushFrames();
+  assert.deepEqual(JSON.parse(h.session.get(key)), desktop);
+  h.session.set(key, JSON.stringify({ ...desktop, theater: { videoId: 'bad/id', query: 'x'.repeat(301) } }));
+  assert.equal(h.api.restore(), false);
+  assert.equal(h.session.has(key), false);
   h.session.set(key, JSON.stringify({ scrollTop: 40, scrollLeft: 0, fieldScope: {} }));
   assert.equal(h.api.restore(), false);
   assert.equal(h.session.has(key), false);
@@ -371,17 +380,17 @@ await check('install reloads only explicit public shell and product assets', asy
     assert.equal(installed.includes(path), true);
   }
   assert.equal(installed.includes('/move2japan/properties.json'), false);
-  assert.equal(h.stores.has('pfmall-member-v7'), true);
+  assert.equal(h.stores.has('pfmall-member-v8'), true);
 });
 
 await check('activation retires only obsolete caches owned by this Mall', async () => {
   const h = swRuntime();
-  for (const name of ['pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4', 'pfmall-member-v5', 'pfmall-member-v6', 'pfmall-member-v7', 'pfmall-properties-v1', 'pfmall-posters-v1', 'gotjunk-offline-v1', 'other-app-cache']) {
+  for (const name of ['pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4', 'pfmall-member-v5', 'pfmall-member-v6', 'pfmall-member-v7', 'pfmall-member-v8', 'pfmall-properties-v1', 'pfmall-posters-v1', 'gotjunk-offline-v1', 'other-app-cache']) {
     await h.caches.open(name);
   }
   await h.event('activate');
-  assert.deepEqual(h.deleted.sort(), ['pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4', 'pfmall-member-v5', 'pfmall-member-v6']);
-  assert.equal(h.stores.has('pfmall-member-v7'), true);
+  assert.deepEqual(h.deleted.sort(), ['pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4', 'pfmall-member-v5', 'pfmall-member-v6', 'pfmall-member-v7']);
+  assert.equal(h.stores.has('pfmall-member-v8'), true);
   assert.equal(h.stores.has('gotjunk-offline-v1'), true);
   assert.equal(h.stores.has('other-app-cache'), true);
 });
@@ -417,7 +426,7 @@ await check('product navigation shares one static member shell without query cac
   assert.equal(online.response.status, 200);
   assert.equal(h.calls.at(-1).request, '/member/');
   assert.equal(h.calls.at(-1).options.credentials, 'omit');
-  const cache = await h.caches.open('pfmall-member-v7');
+  const cache = await h.caches.open('pfmall-member-v8');
   assert.equal((await cache.keys()).some(key => {
     const url = new URL(key.url);
     return url.pathname === '/member/' && !!url.search;

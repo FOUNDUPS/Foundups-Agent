@@ -1,3 +1,12 @@
+## 2026-11-12 · Responsive shared video presentation
+
+The fixed public projection selects theater on wide fine-pointer displays and
+the existing grid on touch and narrow screens. The shared player owns the
+startup request, queue, scoped search, and breakpoint lifecycle. The existing
+state namespace retains the selected video and query. Cache v8 refreshes the
+existing shared assets. See the [HPC incident](MEDIA_PLAYBACK_INCIDENT_HPC.md)
+for browser and release evidence. WSP 22, 30, 97 and 104 apply.
+
 ## 2026-11-11 · Shared media recovery candidate
 
 The [HPC media incident](MEDIA_PLAYBACK_INCIDENT_HPC.md) records the reproduced
