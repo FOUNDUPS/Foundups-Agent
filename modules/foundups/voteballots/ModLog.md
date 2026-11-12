@@ -1,5 +1,11 @@
 # Vote/Ballots FoundUp — Module Log
 
+## 2026-11-13 — Vote funding banner crop
+
+Frame “Every State a Little Israel!” from the supplied comic in two readable
+lines beside Schumer. Reuse the existing image and advance the offline shell
+to v8. WSP 22, 50, 84, 97, 102.
+
 ## 2026-11-12 — Antifa FM radio on the Vote cover
 
 Add the AntifaFM.com link and the native public Icecast player using the

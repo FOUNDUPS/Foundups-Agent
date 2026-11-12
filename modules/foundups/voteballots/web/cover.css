@@ -297,19 +297,36 @@ a:focus-visible, summary:focus-visible {
 
 .cover-money-print {
   display: grid;
-  align-items: center;
+  align-content: center;
+  gap: .35rem;
   min-width: 0;
-  padding: 7%;
+  padding: 5%;
 }
 
 .cover-photo-funding {
-  --frame: 276 / 207;
-  --photo-width: 463.77%;
-  --photo-left: -363.77%;
-  --photo-top: -117.87%;
-  border: 2px solid var(--ink);
-  background: var(--white);
-  box-shadow: 3px 3px 0 var(--ink);
+  background: var(--blue);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.cover-photo-funding img {
+  transform: rotate(4deg);
+  transform-origin: var(--photo-origin);
+}
+
+.cover-photo-funding-first {
+  --frame: 419 / 82;
+  --photo-width: 305.49%;
+  --photo-left: -37.71%;
+  --photo-top: -260.98%;
+  --photo-origin: 28.71% 35.52%;
+}
+
+.cover-photo-funding-last {
+  --frame: 531 / 84;
+  --photo-width: 241.05%;
+  --photo-left: -108.66%;
+  --photo-top: -211.90%;
+  --photo-origin: 65.82% 30.64%;
 }
 
 .cover-issue-art {
