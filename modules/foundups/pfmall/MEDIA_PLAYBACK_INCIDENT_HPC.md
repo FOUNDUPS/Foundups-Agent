@@ -276,3 +276,36 @@ an independent gate.
 
 [IFrame errors](https://developers.google.com/youtube/iframe_api_reference#onError) ·
 [Video metadata and embed restrictions](https://developers.google.com/youtube/data/reference/rest/v3/videos)
+
+## Physical iPhone verification
+
+The 012 report shows a refusal on an installed iPhone. The existing Mall
+receipts establish PC and phone-sized browser playback. No recorded
+physical iPhone pass or provisioned real-device runner surfaced in the
+repository and workspace audit. BrowserStack Live documents Safari
+and Home Screen installation on physical iOS devices. Access requires
+a provisioned account. Apple Web Inspector supports Home Screen apps
+on an iPhone connected to a Mac.
+
+The ordinary Mall lane preview requests muted autoplay through
+`YT.Player` parameters. The scoped HPC player creates its inline iframe
+and requests playback after the ready event. That timing difference is
+a device-test hypothesis. The existing iPhone report does not identify
+an activation failure.
+
+Use the [phone playback fixture](../../../public/member/tests/README.md#physical-iphone-playback)
+with the same iPhone, network, preview origin and clip `iJuguXpbRR4`.
+Compare the Mall tile in Safari and standalone. On a failure, try the
+official iframe with its own Play control in the same mode. Record display
+mode, iOS version, selected ID, provider states, error code, player size
+and advancing media time. The fixture stays in test previews.
+
+| Device evidence | Follow-up |
+| --- | --- |
+| Mall reports blocked autoplay or stalls and direct Play succeeds | Investigate asynchronous activation and direct provider Play recovery. |
+| Both Mall and official iframe return 101 or 150 in the same mode | Record embed refusal. Check owner restrictions when available and offer the original link or a rights-cleared first-party original. |
+| Either frame returns 153 | Inspect the actual Referer and embed client identification on the affected device. |
+| Both render and provider time advances in standalone | Record the physical run with the host and exact build. Repeat Safari on the same device. |
+
+[BrowserStack iOS PWA workflow](https://www.browserstack.com/support/faq/live/features-live/how-can-i-progressive-web-app-pwa-specific-scenarios-on-devices-in-live) ·
+[Apple Web Inspector](https://developer.apple.com/documentation/safari-developer-tools/inspecting-ios)

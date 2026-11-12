@@ -21,6 +21,32 @@ obsolete Mall cache retirement and scoped offline behavior. Real YouTube time
 progression and physical-device gates are separate in the
 [incident](../../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md).
 
+### Physical iPhone playback
+
+Use a physical iPhone with Safari and a Home Screen install of the same
+diagnostic preview. BrowserStack Live also supports this workflow on
+provisioned real devices. The preview uses the regular Mall, its existing
+manifest and the first HPC Short. From **+**, **Copy playback result** reports
+the page mode, iframe dimensions, player events and advancing media time.
+**Compare with the official YouTube embed** opens the same clip on the same
+origin with YouTube's Play control. Copying is an explicit user action.
+
+For an isolated Hosting preview, stage `hpc_iphone_playback_probe.js` as
+`public/member/playback-probe/probe.js` and
+`hpc_iphone_playback_reference.html` as
+`public/member/playback-probe/reference.html`. Load the deferred probe
+script in the staged member document. The normal member entry does not load
+the fixture. Use an online device. Hold the phone and network constant across
+the browser, Home Screen and official-embed cases.
+
+Let the first Short advance for a few seconds. If it fails, capture the
+provider event after the load timeout and test Play inside the official
+embed. In Safari Share, use **Add to Home Screen** and enable **Open as Web
+App** when offered. Check that the second receipt says **Home Screen web
+app**. Record the actual phone and iOS version separately from the
+browser-reported string. A provider `playing` state and advancing time
+qualify playback. Desktop and simulator results remain separate evidence.
+
 ## Public directory and gateway owners
 
 - `test_route_contract_bridge.py` covers the canonical public `/f/` directory,
