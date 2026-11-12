@@ -1,7 +1,7 @@
 'use strict';
 
 // Only this public guide's exact same-origin shell paths are eligible for caching.
-const CACHE = 'vote-public-guide-v8';
+const CACHE = 'vote-public-guide-v9';
 const PAGES = ['guide', 'coalition', 'evidence', 'contact'];
 const SHELL = [
   './', ...PAGES.map((page) => './' + page),

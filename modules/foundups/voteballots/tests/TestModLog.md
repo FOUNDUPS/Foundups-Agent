@@ -2,6 +2,11 @@
 
 <!-- WSP 22: anti-vibecoding test inventory. NEWEST entries at TOP. -->
 
+## [2026-11-13] — Vote cover editorial and phone layout
+
+Extend the worker fixture to cover v8 retirement. Exercise the six panels,
+phone and tablet layouts, installability and offline navigation in browsers.
+
 ## [2026-11-13] — Vote funding banner crop
 
 Verify the v8 worker retires v7 and keeps the existing local artwork available

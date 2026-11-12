@@ -1,5 +1,12 @@
 # Vote/Ballots FoundUp — Module Log
 
+## 2026-11-13 — Vote cover editorial and phone layout
+
+Pair the Antifa FM player with its Discord channel, clarify the Speaker ask,
+and replace oversized props with compact issue briefs. Show the October 2026
+BLS grocery and gasoline figures with a dated source. Advance the offline
+shell to v9. WSP 22, 50, 84, 97, 102.
+
 ## 2026-11-13 — Vote funding banner crop
 
 Frame “Every State a Little Israel!” from the supplied comic in two readable
