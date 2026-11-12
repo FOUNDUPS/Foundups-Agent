@@ -477,10 +477,12 @@ interface InviteDoc {
 
 **FoundUp View (expanded)**:
 - pinch-in: collapse back to Mall
-- swipe up: close FoundUp view
-- swipe left/right: navigate between FoundUps
-- double-tap: toggle shell-local save (localStorage)
+- desktop Ctrl+wheel down: collapse back to Mall
+- Save in the shared player: toggle the browser-local bookmark
 - "Full details" link: navigate to `/member/foundup.html?id={foundup_id}` (deep-linkable)
+
+See the [desktop browse map](../../modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#46-desktop-poster-browsing)
+for current mouse, keyboard, card and full-player behavior.
 
 **Red Dog Plane**:
 - swipe down from top or tap avatar: open Red Dog plane

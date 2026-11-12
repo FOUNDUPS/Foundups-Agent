@@ -96,10 +96,13 @@ X axis = category / cluster / similarity band
 | Gesture | Mall Action | Status |
 |---------|-------------|--------|
 | swipe | Navigate: snapped field motion (default) or glide (override) | RUNTIME |
-| tap tile | Start lane autoplay through FoundUp's video queue (Shorts-style) | RUNTIME |
+| tap or click video tile | Start or toggle the existing inline preview. A FoundUp tile starts at the first clip in its lane. An expanded tile selects its own clip. | RUNTIME |
+| tap or click non-video tile | Open the FoundUp quick view or the property listing detail. | RUNTIME |
+| hover tile on desktop | Show available tile controls. | RUNTIME |
+| Expand button | Open the shared full player for the selected video or lane. | RUNTIME |
 | Enter button | Navigate to `/f/{foundup_id}` (WSP 104 canonical) | RUNTIME |
-| pinch-out tile | Expand FoundUp into its video field | RUNTIME |
-| pinch-in (expanded) | Collapse back to Mall | RUNTIME |
+| pinch-out on an ordinary video lane | Expand the FoundUp into its video field. Desktop Ctrl+wheel up uses the same handler. | RUNTIME |
+| pinch-in in the expanded field | Collapse back to the Mall. Desktop Ctrl+wheel down uses the same handler. | RUNTIME |
 | long-press | Reserved (future: quick actions) | RESERVED |
 
 ### 4.3 Motion Modes (Runtime)
@@ -119,7 +122,8 @@ Set via `mallTileField.setMotionMode('snap')` or `mallTileField.setMotionMode('g
 | Arrow Down | Navigate: nearer | FIXED |
 | Arrow Left | Navigate: cluster left | FIXED |
 | Arrow Right | Navigate: cluster right | FIXED |
-| Enter | Enter focused FoundUp | FIXED |
+| Enter on a video tile | Open the shared full player. Scoped HPC phone tiles use their in-context player. | RUNTIME |
+| Space on a tile | Use the tile's tap action. | RUNTIME |
 | Escape | Reset view / close overlay | FIXED |
 
 ### 4.5 What Users Cannot Do
@@ -131,6 +135,44 @@ Users cannot:
 - Move Mall anchor zones
 - Enter "edit mode" for the Mall itself
 - Reposition FoundUp cards manually
+
+### 4.6 Desktop poster browsing
+
+The ordinary Mall enters through `foundups.com/member/` and checks member
+admission before mounting the member catalog. The shell loads lane and card
+metadata and hands it to the shared field. Category rows are the fresh-view
+default. The same field already renders an adaptive poster grid through
+`setLayoutMode('grid')`. The state owner restores the selected layout and
+position. [Member shell](../../../public/member/index.html) ·
+[Tile field](../../../public/member/js/mall-tile-field.js) ·
+[State restore](../../../public/member/js/mall-state-restore.js)
+
+The grid can show video-backed FoundUps and cards for apps, repositories
+and services. Non-video selection opens the existing quick view. Listings
+use their detail view. The separate full-player action loads the selected
+video and queue through the shared renderer. WikiTube is the design
+reference for the full viewer and continuous queue. [Catalog schema](PFMALL_VIDEO_MALL_CATALOG_SCHEMA.md) ·
+[Quick view](../../../public/member/js/mall-planes.js) ·
+[Full player](PFMALL_FULLSCREEN_PLAYER_CONTRACT.md)
+
+The gesture engine recognizes double-tap and double-click. The tile field
+binds click, keyboard activation and pinch handlers. FLIP animates expansion
+and collapse of a FoundUp video field. Save and Share use explicit player
+controls. [Gesture engine](../../../public/member/js/gesture-engine.js) ·
+[Tile interactions](../../../public/member/js/mall-tile-field.js)
+
+In a controlled Windows Chromium 143 run at 1440 × 900 CSS px, the member
+shell opened in rows. Selecting the existing grid gave eight columns and
+15 cards. Hover mounted zero iframes. Clicking a video lane mounted one.
+Enter opened the shared full player, Ctrl+wheel expanded and collapsed the
+Move2Japan lane, and clicking AutoPost opened its quick view. This run used
+the real shell and catalog with a provider fixture at source `4c1d1e7d`.
+
+HPC uses a fixed scoped collection. Its wide fine-pointer view opens the
+shared theater and its narrow or touch view opens the portrait grid.
+The ordinary desktop browse proposal is tracked in the shared roadmap.
+[HPC acceptance](../hpc/ROADMAP.md) ·
+[Desktop poster browsing PoC](../pfmall/ROADMAP.md#desktop-poster-browsing-poc)
 
 ---
 
