@@ -1,5 +1,12 @@
 # Member Area Module Change Log
 
+## 2026-11-13 · Invited desktop poster grid
+
+Fresh wide fine-pointer entry uses the existing grid. Click and keyboard
+selection open the shared full player for video posters and quick view for
+other cards. Escape closes the player before collapsing the field. The
+member worker installs these assets in v13. WSP 22, 97 and 104 apply.
+
 ## 2026-11-13 · Public HPC and invited member routes
 
 Guest video entry resolves on the dedicated host. The FoundUps HPC query

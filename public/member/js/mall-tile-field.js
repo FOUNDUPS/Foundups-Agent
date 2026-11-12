@@ -36,6 +36,7 @@
   // Projection state
   var currentProjection = 'default';
   var layoutMode = 'rows';
+  var desktopPosterBrowsing = false;
   var rowOffsets = Object.create(null);
   var escapeBound = false;
   var originalOrder = [];  // Preserve original catalog order
@@ -706,6 +707,8 @@
     }
 
     configureGroups(options);
+    desktopPosterBrowsing = window.matchMedia?.('(min-width: 1024px) and (hover: hover) and (pointer: fine)').matches === true;
+    if (desktopPosterBrowsing && !fixedVideoField && groupDefinitions === null) layoutMode = 'grid';
 
     // Create collapse hint
     if (fixedVideoField) setMotionMode('glide');
@@ -1259,10 +1262,12 @@
       : itemsToRender.length;
     if (append && end <= start) return;
     var grouped = groupDefinitions !== null && expandedFoundUp === null;
+    var desktopGrid = usesDesktopGrid();
     visibleGroups = grouped ? resolveGroups() : [];
     tileField.setAttribute('data-layout', grouped ? 'grouped' : layoutMode);
     tileFieldWrapper.classList.toggle('mall-field-grouped-wrapper', grouped);
     tileFieldWrapper.classList.toggle('browse-rows', !grouped && layoutMode === 'rows');
+    tileFieldWrapper.classList.toggle('desktop-poster-grid', desktopGrid);
 
     if ((!grouped && !itemsToRender.length) || (grouped && !visibleGroups.length)) {
       if (tileObserver) tileObserver.disconnect();
@@ -1295,14 +1300,15 @@
       var tileType = isAvatarTile ? 'avatar' : 'video';
 
       // Determine if tile has videos (includes expanded video tiles with video_data)
-      var hasVideos = (item.videos && item.videos.length) || item.video_count || item.video_data;
+      var hasVideos = item.videos?.length || item.video_data || (!desktopGrid && item.video_count);
+      var inlineControls = hasVideos && !fixedVideoField && !desktopGrid;
 
       // Queue count (true_video_count preferred, then video_count, then videos array length)
       var queueCount = item.true_video_count || item.video_count || (item.videos ? item.videos.length : 0);
       var queueBadge = queueCount > 0 ? '<span class="mall-tile-queue-count">' + queueCount + ' videos</span>' : '';
 
       // Play indicator — video tiles only
-      var playIndicator = hasVideos && !fixedVideoField ? '<div class="mall-tile-play-indicator"></div>' : '';
+      var playIndicator = inlineControls ? '<div class="mall-tile-play-indicator"></div>' : '';
 
       // Corner expand button for explicit fullscreen entry — video tiles only
       var expandIcon = fixedVideoField
@@ -1312,14 +1318,14 @@
 
       // Enter FoundUp button (bottom-left, visible during preview) — video tiles only
       // Uses stable foundup_id for WSP 104 canonical routing
-      var enterFoundupBtn = hasVideos && !fixedVideoField ? '<button class="mall-tile-enter" aria-label="Enter FoundUp" title="Enter FoundUp"><svg viewBox="0 0 24 24"><path d="M15 3h6v6M14 10l6.1-6.1M9 21H3v-6M10 14l-6.1 6.1"/></svg></button>' : '';
+      var enterFoundupBtn = inlineControls ? '<button class="mall-tile-enter" aria-label="Enter FoundUp" title="Enter FoundUp"><svg viewBox="0 0 24 24"><path d="M15 3h6v6M14 10l6.1-6.1M9 21H3v-6M10 14l-6.1 6.1"/></svg></button>' : '';
 
       // Inline preview container (YouTube iframe or HTML5 video goes here) — video tiles only
-      var previewContainer = hasVideos && !fixedVideoField ? '<div class="mall-tile-preview"><div class="mall-tile-preview-stage"></div></div>' : '';
+      var previewContainer = inlineControls ? '<div class="mall-tile-preview"><div class="mall-tile-preview-stage"></div></div>' : '';
 
       // Speaker button for mute/unmute (top-left, video-backed only)
       var speakerSvg = '<svg viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
-      var audioBtn = hasVideos && !fixedVideoField ? '<button class="mall-tile-audio" aria-label="Start muted preview" title="Start muted preview">' + speakerSvg + '</button>' : '';
+      var audioBtn = inlineControls ? '<button class="mall-tile-audio" aria-label="Start muted preview" title="Start muted preview">' + speakerSvg + '</button>' : '';
 
       // Non-video source type action badge
       var sourceTypeActions = {
@@ -1599,7 +1605,7 @@
     var tiles = batch || tileField.querySelectorAll('.mall-tile');
 
     tiles.forEach(function(tile) {
-      // Touch/click handling: tap = lane autoplay (no double-tap entry)
+      // Tap selects playback or quick view according to the active layout.
       // FoundUp entry is explicit via fullscreen "Enter FoundUp" button
       tile.addEventListener('click', function(e) {
         // Ignore tap if guard is active (just finished dragging)
@@ -1608,15 +1614,14 @@
 
         var index = Number(tile.dataset.index || 0);
         if (groupDefinitions !== null) rememberActiveTile(tile);
-        // Single tap: start/toggle lane autoplay
         togglePlay(index);
       });
 
       // Keyboard support
-      // Space = lane autoplay, Enter = expand to fullscreen (where Enter FoundUp lives)
       tile.addEventListener('keydown', function(e) {
         var index = Number(tile.dataset.index || 0);
-        if (fixedVideoField && e.target !== tile) return;
+        var desktopGrid = usesDesktopGrid();
+        if ((fixedVideoField || desktopGrid) && e.target !== tile) return;
         if (groupDefinitions !== null && tileField.closest('[inert]')) return;
         if (groupDefinitions !== null && /^Arrow(Left|Right|Up|Down)$/.test(e.key)) {
           e.preventDefault();
@@ -1627,7 +1632,7 @@
         } else if (e.key === 'Enter') {
           e.preventDefault();
           // Open fullscreen context (Enter FoundUp available there)
-          if (fixedVideoField) togglePlay(index);
+          if (fixedVideoField || desktopGrid) togglePlay(index);
           else openFullscreenFromTile(index);
         }
       });
@@ -1733,10 +1738,12 @@
     });
   }
 
+  function usesDesktopGrid() {
+    return desktopPosterBrowsing && !fixedVideoField && groupDefinitions === null && layoutMode === 'grid';
+  }
+
   /**
-   * Toggle play/pause for a tile
-   * In Mall mode: starts lane autoplay through the FoundUp's videos[] queue
-   * In expanded mode: plays the specific video
+   * Activate a tile using the current field's playback or quick-view path.
    * @param {number} index - Tile index
    */
   function togglePlay(index) {
@@ -1744,7 +1751,6 @@
       openScopedVideo(index, false);
       return;
     }
-    var tiles = tileField.querySelectorAll('.mall-tile');
     var targetTile = getTileElement(index);
 
     // Immediate visual feedback: tap pulse
@@ -1767,7 +1773,8 @@
       }
       return;
     }
-    var hasVideos = item && ((item.videos && item.videos.length) || item.video_count || item.video_data);
+    var desktopGrid = usesDesktopGrid();
+    var hasVideos = item && (item.videos?.length || item.video_data || (!desktopGrid && item.video_count));
 
     // Non-video tiles: open quick-view instead of trying inline preview
     if (!hasVideos) {
@@ -1775,6 +1782,11 @@
       if (foundupId && window.mallPlanes && typeof window.mallPlanes.openFoundUpById === 'function') {
         window.mallPlanes.openFoundUpById(foundupId);
       }
+      return;
+    }
+
+    if (desktopGrid) {
+      openFullscreenFromTile(index);
       return;
     }
 
@@ -1883,7 +1895,7 @@
     tile = getScopedTile(index);
     if (!tile) return;
     var theater = scopedTheaterRequested && !immersive;
-    var thumbnail = tile.getBoundingClientRect();
+    var autoplay = theater || canAutoplayFromTile(tile);
     scopedPlaybackPosition = captureFixedPosition(theater ? null : tile);
     if (!theater) pushScopedPlayerHistory(lane.foundup_id);
     var slot = null;
@@ -1900,8 +1912,7 @@
       theater: theater,
       query: scopedTheaterState?.query,
       matchesQuery: matchesScopedVideo,
-      // YouTube thumbnail activation requires 120 × 70 CSS pixels.
-      autoplay: theater || (thumbnail.width >= 120 && thumbnail.height >= 70),
+      autoplay: autoplay,
       onClose: function(restore) {
         slot?.remove();
         tileField.querySelector('[data-video-replaced]')?.removeAttribute('data-video-replaced');
@@ -1948,13 +1959,18 @@
       return;
     }
     if (!window.mallVideoPlayer) return;
+    var resumeOpts;
+    if (usesDesktopGrid()) {
+      var tile = getTileElement(index);
+      resumeOpts = { returnFocusTo: tile, autoplay: canAutoplayFromTile(tile) };
+    }
 
     if (expandedFoundUp !== null) {
       // Expanded mode: tiles are individual videos from one FoundUp
       var parentItem = mallCatalog[expandedFoundUp];
       if (!parentItem || !parentItem.videos || !parentItem.videos.length) return;
       var foundupId = parentItem.foundup_id || parentItem.id || '';
-      window.mallVideoPlayer.open(foundupId, parentItem.videos, index);
+      window.mallVideoPlayer.open(foundupId, parentItem.videos, index, resumeOpts);
     } else {
       // Mall mode: tiles are FoundUps — open queue at first video
       var item = mallCatalog[index];
@@ -1962,8 +1978,14 @@
       var foundupId = item.foundup_id || item.id || '';
       var queue = item.videos || [];
       if (!queue.length) return; // No videos to play
-      window.mallVideoPlayer.open(foundupId, queue, 0);
+      window.mallVideoPlayer.open(foundupId, queue, 0, resumeOpts);
     }
+  }
+
+  function canAutoplayFromTile(tile) {
+    // YouTube requires at least 120 × 70 CSS pixels for an autoplay trigger.
+    var rect = tile?.getBoundingClientRect();
+    return !!rect && rect.width >= 120 && rect.height >= 70;
   }
 
   /**

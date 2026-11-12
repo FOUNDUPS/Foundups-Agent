@@ -1,3 +1,13 @@
+## 2026-11-13 · Desktop poster browsing and full player
+
+The invited Mall selects its poster grid on fresh wide fine-pointer entry.
+The shared field keeps the poster wall in its own scroll container and opens
+video posters in the existing full player. It returns focus and scroll on
+close and retains the expanded lane until collapse. Cache v13 refreshes the
+changed assets. See the [roadmap](ROADMAP.md#desktop-poster-browsing-poc)
+and [browser tests](../../../public/member/tests/README.md#member-poster-grid).
+WSP 22 and 97 apply.
+
 ## 2026-11-13 · Desktop poster browsing audit
 
 Mapped the ordinary Mall's mixed catalog, category rows, existing desktop

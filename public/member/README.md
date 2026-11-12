@@ -100,7 +100,7 @@ public/member/
 | File | Role |
 |------|------|
 | `account-concierge.js` | Unified Red Dog plane. Exposes `window.redDog` API. |
-| `mall-tile-field.js` | Shared category rows, explicit grid and geographic property rows. Exposes `window.mallTileField` API. |
+| `mall-tile-field.js` | Shared category rows, desktop poster grid and geographic property rows. Exposes `window.mallTileField` API. |
 | `mall-planes.js` | FoundUp view planes. Exposes `window.mallPlanes` API. |
 | `gesture-engine.js` | Touch/mouse gesture detection. |
 | `red-dog-concierge.js` | Legacy FAQ topics. Will be removed when OpenClaw lands. |
@@ -109,12 +109,12 @@ public/member/
 
 ### Shared responsive discovery (2026-10-18)
 
-The default Mall uses vertical category groups with independently scrollable
-horizontal tracks. Card width adapts to available viewport space; there is no
-fixed count of visible rows and no six-tile cap. Resize/rotation uses CSS without
-rebuilding the catalog. Explicit density controls still select the legacy grid;
-**Adaptive category rows** returns to the shared browse mode. Pinch-out expands
-one channel into its video field; pinch-in returns to the category rows.
+The invited Mall opens the poster grid on a fresh visit at 1024 CSS px or
+wider with a fine primary pointer and hover. Touch and narrower visits open
+vertical category groups with independent horizontal tracks. Saved layout
+takes precedence. Density adapts to the viewport and explicit density
+controls select grid. **Adaptive category rows** selects rows. Pinch-out
+expands a channel into its video field and pinch-in returns to the browse layout.
 
 Search Mall accepts short requests such as “show me videos on Fukui”, “show me
 houses”, “show me cars”, “show me clothes” and “I'm looking for clothing”.
@@ -138,15 +138,16 @@ Row offsets are saved locally alongside the existing outer scroll position.
 
 ### Mall Navigation
 - swipe or scroll horizontally through FoundUps (desktop: mouse drag on carousel track)
-- tap a tile to start lane autoplay through its video queue (Shorts-style)
+- in category rows, tap a video tile to start lane playback in the tile
+- in the desktop poster grid, click a video tile to play its queue in the full player
 - Enter FoundUp button to navigate to `/f/{foundup_id}` (tile or fullscreen)
 - pinch-out on tile to expand into FoundUp's video field
 - pinch-in (expanded) to collapse back to Mall
 
 ### FoundUp View
 - swipe up to close, swipe left/right to navigate between FoundUps
-- double-tap/click to save locally (heart indicator, localStorage)
-- "Full details" link navigates to dedicated entry page (`foundup.html?id={id}`)
+- Save in the full player bookmarks a video locally
+- Quick-view links use the selected FoundUp's configured destination
 
 ### Red Dog Unified Plane
 - swipe down from top or tap avatar to open Red Dog plane

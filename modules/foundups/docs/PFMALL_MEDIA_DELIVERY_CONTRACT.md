@@ -273,8 +273,9 @@ When a poster fails to load:
 
 ### 8.4 Desktop previews and bandwidth
 
-Use poster images for the dense browse view. The tile observer loads poster
-art near the viewport. The current catalog at `4c1d1e7d` ships 15 lanes
+Use poster images for the dense browse view. Rendered cards set their poster
+URLs immediately. The tile observer records visibility and load state. The
+catalog at `4c1d1e7d` ships 15 lanes
 with 1,205 listed videos in a 500,578-byte Git blob. The eight-video HPC
 projection is 5,832 bytes. A full-lane expansion can still build hundreds
 of poster nodes. Measure catalog transfer, poster requests, DOM size and
@@ -288,9 +289,10 @@ the player. Scripted autoplay requires a visible player with more than half
 in view and a single automatically playing YouTube embed per page.
 [YouTube player requirements](https://developers.google.com/youtube/terms/required-minimum-functionality)
 
-For the desktop PoC, open YouTube video in the shared full player, with the
-provider controls, branding, pointer access and keyboard access visible
-and usable. Crop the poster art to fit the tile. `modestbranding` has no
+Desktop poster selection opens YouTube video in the shared full player with
+provider controls, branding, pointer access and keyboard access visible and
+usable. Posters smaller than 120 × 70 CSS px open with manual Play. Crop
+the poster art to fit the tile. `modestbranding` has no
 effect and `rel=0` confines recommendations to the same channel.
 [YouTube player parameters](https://developers.google.com/youtube/player_parameters)
 

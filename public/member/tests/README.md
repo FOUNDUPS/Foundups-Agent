@@ -18,10 +18,20 @@ civic-resource return. The phone cases check the selected install manifest,
 options, scoped search, fixture dictation and Red Dog return. The member
 case uses controlled Clerk and Firestore responses to check sign-in return,
 invitation denial, admitted theater and the public discovery link.
-`node public/member/tests/mall_product_state_vm.mjs` covers v12 installation,
+`node public/member/tests/mall_product_state_vm.mjs` covers v13 installation,
 obsolete Mall cache retirement and scoped offline behavior. Real YouTube time
 progression and physical-device gates are separate in the
 [incident](../../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md).
+
+### Member poster grid
+
+The same browser suite opens the ordinary invited route with the real catalog.
+It checks a fresh eight-column grid at 1440 × 900, no media frame on hover,
+one full player with native controls enabled, queue advance and manual Play
+for dense tiles, quick view, saved rows and wide touch entry. It checks that
+Escape restores focus and scroll in the expanded Move2Japan lane and that
+Ctrl+wheel returns to the browse position. Account and provider events use
+fixtures.
 
 ### Physical iPhone playback
 

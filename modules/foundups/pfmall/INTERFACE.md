@@ -146,6 +146,12 @@ contains the reviewed lane and the aggregate catalog contains its discovery
 card. WSP 104 app handoff and server checks own capability authorization.
 See [HPC's interface](../hpc/INTERFACE.md).
 
+The ordinary invited Mall uses the adaptive poster grid on fresh wide
+fine-pointer visits. It hands the selected lane to the shared full player
+and keeps the grid's scroll and focus through dismissal. Saved layouts
+take precedence. The [navigation contract](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#46-desktop-poster-browsing)
+defines how desktop poster selection, category rows and card quick views work.
+
 The static homepage's FX anchor targets the existing `/f/` public directory.
 Its project/ticker search consumes only the scope-free public projection; no
 Python/HTTP API or router is added. See

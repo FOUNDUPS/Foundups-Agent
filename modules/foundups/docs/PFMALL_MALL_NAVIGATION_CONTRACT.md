@@ -96,7 +96,7 @@ X axis = category / cluster / similarity band
 | Gesture | Mall Action | Status |
 |---------|-------------|--------|
 | swipe | Navigate: snapped field motion (default) or glide (override) | RUNTIME |
-| tap or click video tile | Start or toggle the existing inline preview. A FoundUp tile starts at the first clip in its lane. An expanded tile selects its own clip. | RUNTIME |
+| tap or click video tile | Open the full player in the desktop poster grid, the in-context player in the HPC phone grid, or the inline preview in ordinary category rows. A lane starts at its first clip. An expanded tile selects its own clip. | RUNTIME |
 | tap or click non-video tile | Open the FoundUp quick view or the property listing detail. | RUNTIME |
 | hover tile on desktop | Show available tile controls. | RUNTIME |
 | Expand button | Open the shared full player for the selected video or lane. | RUNTIME |
@@ -124,7 +124,7 @@ Set via `mallTileField.setMotionMode('snap')` or `mallTileField.setMotionMode('g
 | Arrow Right | Navigate: cluster right | FIXED |
 | Enter on a video tile | Open the shared full player. Scoped HPC phone tiles use their in-context player. | RUNTIME |
 | Space on a tile | Use the tile's tap action. | RUNTIME |
-| Escape | Reset view / close overlay | FIXED |
+| Escape | Close the active desktop poster player first. The next Escape can collapse the expanded lane. | FIXED |
 
 ### 4.5 What Users Cannot Do
 
@@ -140,18 +140,23 @@ Users cannot:
 
 The ordinary Mall enters through `foundups.com/member/` and checks member
 admission before mounting the member catalog. The shell loads lane and card
-metadata and hands it to the shared field. Category rows are the fresh-view
-default. The same field already renders an adaptive poster grid through
-`setLayoutMode('grid')`. The state owner restores the selected layout and
-position. [Member shell](../../../public/member/index.html) ·
+metadata and hands it to the shared field. On entry at 1024 CSS px or wider
+with a fine primary pointer and hover, the default is the adaptive poster
+grid. Touch and narrower entry use category rows. Saved layout takes
+precedence, and the desktop grid retains its layout while resize adapts its
+density. The state owner restores the selected layout and position.
+[Member shell](../../../public/member/index.html) ·
 [Tile field](../../../public/member/js/mall-tile-field.js) ·
 [State restore](../../../public/member/js/mall-state-restore.js)
 
 The grid can show video-backed FoundUps and cards for apps, repositories
 and services. Non-video selection opens the existing quick view. Listings
-use their detail view. The separate full-player action loads the selected
-video and queue through the shared renderer. WikiTube is the design
-reference for the full viewer and continuous queue. [Catalog schema](PFMALL_VIDEO_MALL_CATALOG_SCHEMA.md) ·
+use their detail view. In the desktop grid, click, Enter, Space and the
+fullscreen button open the selected video and its queue in the shared
+player. Hover reveals the action without mounting media. Escape or Back
+closes the player and returns focus at the original scroll position.
+WikiTube is the design reference for the full viewer and continuous queue.
+[Catalog schema](PFMALL_VIDEO_MALL_CATALOG_SCHEMA.md) ·
 [Quick view](../../../public/member/js/mall-planes.js) ·
 [Full player](PFMALL_FULLSCREEN_PLAYER_CONTRACT.md)
 
@@ -161,16 +166,17 @@ and collapse of a FoundUp video field. Save and Share use explicit player
 controls. [Gesture engine](../../../public/member/js/gesture-engine.js) ·
 [Tile interactions](../../../public/member/js/mall-tile-field.js)
 
-In a controlled Windows Chromium 143 run at 1440 × 900 CSS px, the member
-shell opened in rows. Selecting the existing grid gave eight columns and
-15 cards. Hover mounted zero iframes. Clicking a video lane mounted one.
+Before this change, a controlled Windows Chromium 143 run at 1440 × 900 CSS px
+showed the member shell opening in rows. Selecting the grid gave eight columns
+and 15 cards. Hover mounted zero iframes. Clicking a video lane mounted one.
 Enter opened the shared full player, Ctrl+wheel expanded and collapsed the
 Move2Japan lane, and clicking AutoPost opened its quick view. This run used
 the real shell and catalog with a provider fixture at source `4c1d1e7d`.
 
 HPC uses a fixed scoped collection. Its wide fine-pointer view opens the
 shared theater and its narrow or touch view opens the portrait grid.
-The ordinary desktop browse proposal is tracked in the shared roadmap.
+Desktop verification and the remaining preview work are tracked in the
+shared roadmap.
 [HPC acceptance](../hpc/ROADMAP.md) ·
 [Desktop poster browsing PoC](../pfmall/ROADMAP.md#desktop-poster-browsing-poc)
 

@@ -79,20 +79,21 @@ Entry point: `mallVideoPlayer.open(foundupId, queue, startIndex, resumeOpts?)`
 | `foundupId` | string | The FoundUp ID — constrains the queue |
 | `queue` | Array | Array of video objects from that FoundUp |
 | `startIndex` | number | Index to start at (default: 0) |
-| `resumeOpts` | object? | Optional `{ resumeSeconds: number }` — seeks after metadata load (HTML5 `<video>` only; embeds ignore) |
+| `resumeOpts` | object? | `resumeSeconds` seeks on HTML5 metadata load. `returnFocusTo` supplies the ordinary Mall tile for modal focus return. `autoplay: false` requests manual YouTube playback. |
 
 **Behavior**:
 1. DOM container is created lazily on first open
 2. `document.body.style.overflow = 'hidden'` prevents page scroll
 3. Container gets `.open` class (triggers `display: flex`)
-4. First video begins autoplay
+4. First video requests autoplay when enabled and the provider viewport is visible. Manual Play remains available.
 5. Queue rail renders (hidden until revealed)
 6. Chrome auto-hide timer starts (3s)
 7. Dispatches `videoPlayerOpen` CustomEvent
 
 **Entry triggers** (from Mall field):
 - Corner expand control on tile
-- Double-tap on video tile (if already playing)
+- Click, Enter or Space on a video tile in the desktop poster grid
+- Enter on a video tile in category rows
 - Programmatic call from tile-field.js
 
 ---
@@ -111,7 +112,8 @@ Exit methods:
 2. `document.body.style.overflow` restored
 3. Video/iframe removed from stage
 4. Queue and state cleared
-5. Dispatches `videoPlayerClose` CustomEvent
+5. If supplied, focus returns to the originating tile without moving its scroll position
+6. Dispatches `videoPlayerClose` CustomEvent
 
 ### 6.1 Resume position (Phase 1, shell-local)
 

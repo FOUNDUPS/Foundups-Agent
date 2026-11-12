@@ -400,15 +400,104 @@ def verify_diagnostics():
         print(json.dumps(observed, sort_keys=True))
 
 def expect_playing(page, index):
+    expect_playing_id(page, videos[index]["video_id"])
+
+
+def expect_playing_id(page, video_id):
     page.wait_for_function("""id => {
         const snapshot = window.mallVideoPlayer.getPlaybackSnapshot();
         return snapshot?.videoId === id && snapshot.state === 'playing' && snapshot.positionSeconds > 0.1;
-    }""", arg=videos[index]["video_id"])
+    }""", arg=video_id)
+
+
+def verify_member_poster_grid(page):
+    ordinary = json.loads((public / "member/mall-video-catalog.json").read_text(encoding="utf-8"))
+    clips = next(item["videos"] for item in ordinary if item["foundup_id"] == "move2japan")
+    page.goto("https://foundups.com/member/", wait_until="domcontentloaded")
+    field = page.locator("#mallTileField")
+    expect(field).to_have_attribute("data-layout", "grid")
+    tiles = field.locator(".mall-tile")
+    expect(tiles).to_have_count(len(ordinary))
+    columns = tiles.evaluate_all("tiles => new Set(tiles.map(tile => tile.offsetLeft)).size")
+    assert columns == 8
+    row_gap = tiles.evaluate_all("(tiles, columns) => tiles[columns].offsetTop - tiles[0].offsetTop - tiles[0].offsetHeight", columns)
+    assert 0 <= row_gap <= 8
+
+    lane_tile = field.locator('.mall-tile[data-foundup-id="move2japan"]')
+    assert lane_tile.evaluate("tile => getComputedStyle(tile).backgroundSize") == "contain"
+    assert lane_tile.evaluate("tile => getComputedStyle(tile).backgroundPosition") == "50% 50%"
+    lane_tile.hover()
+    expect(field.locator("iframe, video")).to_have_count(0)
+    expect(lane_tile.locator(".mall-tile-audio")).to_have_count(0)
+    expect(lane_tile.get_by_role("button", name="Open fullscreen")).to_be_visible()
+    lane_tile.click()
+    player = page.get_by_role("dialog", name="Fullscreen video player")
+    expect(player).to_have_attribute("aria-modal", "true")
+    expect(player.get_by_role("button", name="Enter FoundUp")).to_be_visible()
+    expect_playing_id(page, clips[0]["video_id"])
+    frame = player.locator("iframe")
+    expect(frame).to_have_count(1)
+    assert "controls=1" in frame.get_attribute("src")
+    box = frame.bounding_box()
+    assert box and min(box["width"], box["height"]) >= 200
+    frame.evaluate("el => { window.originalPlayerFrame = el; }")
+    page.set_viewport_size({"width": 1010, "height": 768})
+    assert frame.evaluate("el => el === window.originalPlayerFrame")
+    page.set_viewport_size({"width": 1440, "height": 900})
+    page.evaluate("fixturePlayback.finishCurrent()")
+    expect_playing_id(page, clips[1]["video_id"])
+    expect(page.locator("iframe")).to_have_count(1)
+    page.keyboard.press("Escape")
+    expect(player).not_to_be_visible()
+    expect(lane_tile).to_be_focused()
+    expect(page.locator("iframe")).to_have_count(0)
+
+    app = field.locator('.mall-tile[data-foundup-id="autopost"]')
+    app.press("Enter")
+    expect(page.locator("#foundupViewPlane")).to_have_class("foundup-view-plane open")
+    expect(page.locator("#foundupViewBody")).to_contain_text("AutoPost")
+    page.locator("#foundupViewClose").click()
+    expect(app).to_be_focused()
+
+    browse_offset = page.locator(".mall-tile-field-wrapper").evaluate("el => el.scrollTop")
+    lane_tile.dispatch_event("wheel", {"ctrlKey": True, "deltaY": -100})
+    clip_tile = field.locator('.mall-tile[data-foundup-id="move2japan_video_48"]')
+    expect(clip_tile).to_be_attached()
+    clip_tile.scroll_into_view_if_needed()
+    offset = page.locator(".mall-tile-field-wrapper").evaluate("el => el.scrollTop")
+    assert offset > 0
+    clip_tile.press("Enter")
+    expect_playing_id(page, clips[48]["video_id"])
+    page.keyboard.press("Escape")
+    expect(player).not_to_be_visible()
+    expect(clip_tile).to_be_focused()
+    expect_position(page, offset)
+    assert page.evaluate("mallTileField.isExpanded()")
+    clip_tile.dispatch_event("wheel", {"ctrlKey": True, "deltaY": 100})
+    expect(lane_tile).to_be_visible()
+    expect_position(page, browse_offset)
+
+    page.evaluate("mallTileField.setDensity('15x4')")
+    lane_tile.get_by_role("button", name="Open fullscreen").press("Enter")
+    page.wait_for_function("mallVideoPlayer.getPlaybackSnapshot()?.state === 'manual-play'")
+    player.get_by_role("button", name="Play video", exact=True).click()
+    expect_playing_id(page, clips[0]["video_id"])
+    page.evaluate("fixturePlayback.finishCurrent()")
+    expect_playing_id(page, clips[1]["video_id"])
+    player.get_by_role("button", name="Back").click()
+
+    page.evaluate("mallTileField.setLayoutMode('rows'); mallStateRestore.save()")
+    page.reload(wait_until="domcontentloaded")
+    expect(field).to_have_attribute("data-layout", "rows")
+    print(json.dumps({"member_desktop_columns": columns, "mixed_cards": len(ordinary),
+                      "watch_viewport": box, "queue_advance_after_manual_play": True, "hover_frames": 0,
+                      "quick_view_and_saved_rows": True, "expanded_clip_return": offset}))
 
 
 def verify_member_entry(browser_type):
     browser = browser_type.launch()
-    context = browser.new_context(viewport={"width": 1440, "height": 900}, service_workers="block")
+    context = browser.new_context(viewport={"width": 1440, "height": 900}, service_workers="block",
+                                  reduced_motion="reduce")
     context.add_init_script(provider)
     account = None
     requested = []
@@ -462,9 +551,17 @@ def verify_member_entry(browser_type):
     expect(page.get_by_role("link", name="Browse Shorts")).to_have_attribute(
         "href", "https://hpc.foundups.com/"
     )
+    verify_member_poster_grid(page)
+    touch = browser.new_context(viewport={"width": 1100, "height": 800}, has_touch=True,
+                                is_mobile=True, service_workers="block")
+    touch.route("**/*", route_member)
+    touch_page = touch.new_page()
+    touch_page.goto("https://foundups.com/member/", wait_until="domcontentloaded")
+    expect(touch_page.locator("#mallTileField")).to_have_attribute("data-layout", "rows")
     browser.close()
     print(json.dumps({"member_sign_in_return": True, "uninvited_blocked": True,
-                      "admitted_desktop_theater": True, "public_discovery_destination": True}))
+                      "admitted_desktop_theater": True, "public_discovery_destination": True,
+                      "member_wide_touch_rows": True}))
 
 
 def verify_desktop(browser_type):

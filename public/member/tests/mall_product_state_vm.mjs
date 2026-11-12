@@ -407,17 +407,17 @@ await check('install reloads only explicit public shell and product assets', asy
   }
   assert.equal(installed.includes('/move2japan/properties.json'), false);
   assert.equal(installed.includes('/member/js/mall-video-projection.js'), false);
-  assert.equal(h.stores.has('pfmall-member-v12'), true);
+  assert.equal(h.stores.has('pfmall-member-v13'), true);
 });
 
 await check('activation retires only obsolete caches owned by this Mall', async () => {
   const h = swRuntime();
-  for (const name of ['pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4', 'pfmall-member-v5', 'pfmall-member-v6', 'pfmall-member-v7', 'pfmall-member-v8', 'pfmall-member-v9', 'pfmall-member-v10', 'pfmall-member-v11', 'pfmall-member-v12', 'pfmall-properties-v1', 'pfmall-posters-v1', 'gotjunk-offline-v1', 'other-app-cache']) {
+  for (const name of ['pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4', 'pfmall-member-v5', 'pfmall-member-v6', 'pfmall-member-v7', 'pfmall-member-v8', 'pfmall-member-v9', 'pfmall-member-v10', 'pfmall-member-v11', 'pfmall-member-v12', 'pfmall-member-v13', 'pfmall-properties-v1', 'pfmall-posters-v1', 'gotjunk-offline-v1', 'other-app-cache']) {
     await h.caches.open(name);
   }
   await h.event('activate');
-  assert.deepEqual(h.deleted.sort(), ['pfmall-member-v10', 'pfmall-member-v11', 'pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4', 'pfmall-member-v5', 'pfmall-member-v6', 'pfmall-member-v7', 'pfmall-member-v8', 'pfmall-member-v9']);
-  assert.equal(h.stores.has('pfmall-member-v12'), true);
+  assert.deepEqual(h.deleted.sort(), ['pfmall-member-v10', 'pfmall-member-v11', 'pfmall-member-v12', 'pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4', 'pfmall-member-v5', 'pfmall-member-v6', 'pfmall-member-v7', 'pfmall-member-v8', 'pfmall-member-v9']);
+  assert.equal(h.stores.has('pfmall-member-v13'), true);
   assert.equal(h.stores.has('gotjunk-offline-v1'), true);
   assert.equal(h.stores.has('other-app-cache'), true);
 });
@@ -453,7 +453,7 @@ await check('product navigation shares one static member shell without query cac
   assert.equal(online.response.status, 200);
   assert.equal(h.calls.at(-1).request, '/member/');
   assert.equal(h.calls.at(-1).options.credentials, 'omit');
-  const cache = await h.caches.open('pfmall-member-v12');
+  const cache = await h.caches.open('pfmall-member-v13');
   assert.equal((await cache.keys()).some(key => {
     const url = new URL(key.url);
     return url.pathname === '/member/' && !!url.search;

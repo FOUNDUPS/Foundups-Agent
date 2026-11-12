@@ -1,3 +1,20 @@
+## 2026-11-13 · Invited desktop poster grid
+
+The new browser case reproduced category rows on fresh desktop entry at
+base `09da53549`. The candidate opened 15 mixed cards in eight columns at
+1440 × 900 CSS px. The controlled player held one 1440 × 712 iframe, retained
+it on resize, and advanced the queue after both autoplay and manual Play.
+Escape restored focus and scroll in the expanded lane. The saved rows,
+wide touch, card quick view and scoped HPC cases passed in the same suite.
+
+In a separate Windows Chromium 143 localhost dev-harness run, real YouTube
+clip `JFp2l1fnf_4` advanced from about 0.42 s to 1.03 s. The diagnostic saw
+zero provider document or media requests before tile selection and zero
+remaining player frames after closing. Live invited admission, deployment
+and physical iPhone playback remain separate gates. The v13 cache fixture
+passed 21 cases. The 600-case Python comparison had the same three inherited
+assertions in `test_navigation_planes.py` as the base.
+
 ## 2026-11-13 · Public HPC and admitted member entry
 
 The controlled Chromium fixture follows the real member shell through
