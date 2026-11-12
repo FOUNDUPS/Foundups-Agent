@@ -153,6 +153,45 @@
   position: relative;
 }
 
+/* Keep the desktop poster wall in the field's own saved scroll container. */
+.mall-shell:has(.desktop-poster-grid) {
+  height: 100dvh;
+  box-sizing: border-box;
+}
+
+.mall-tile-field-wrapper.desktop-poster-grid {
+  min-height: 0;
+  overflow-x: hidden;
+}
+
+.desktop-poster-grid .mall-tile-field {
+  align-content: start;
+}
+
+.desktop-poster-grid .mall-tile[data-tile-type] {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.desktop-poster-grid .mall-tile[data-tile-type="avatar"] {
+  background-size: contain;
+}
+
+.desktop-poster-grid :is(.mall-tile-action-badge, .mall-tile-queue-count) {
+  top: 1.3rem;
+  bottom: auto;
+}
+
+.desktop-poster-grid .mall-tile-inner {
+  background: linear-gradient(transparent 60%, rgba(0, 0, 0, 0.9));
+}
+
+.desktop-poster-grid .mall-tile-name {
+  color: #fff;
+  font-size: 0.8rem;
+}
+
 /* Active drag state */
 .mall-tile-field-wrapper.is-dragging {
   cursor: grabbing;

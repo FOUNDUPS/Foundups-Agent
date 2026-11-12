@@ -469,7 +469,10 @@ interface InviteDoc {
 ### UI Contract
 
 **Mall Context (tile field)**:
-- tap tile: start lane autoplay through FoundUp's video queue (Shorts-style)
+- category rows play the selected lane in the tile
+- the desktop poster grid opens the shared full player on click, Enter,
+  Space or the fullscreen button. Hover reveals the button. Back and
+  Escape restore focus and scroll without collapsing an expanded lane.
 - Enter FoundUp button: navigate to `/f/{foundup_id}` (WSP 104 canonical)
 - pinch-out on tile: expand into FoundUp's video field
 - swipe: navigate snapped field (default) or glide (override)
@@ -640,8 +643,10 @@ The dispatcher tracks a local `sessionState` ( `overrideActive`, `overrideApplie
 
 ## Responsive browse and local query API — 2026-10-18
 
-- `mallTileField.setLayoutMode('rows'|'grid') -> boolean`: rows are default;
-  legacy density requests explicitly select grid. Both reuse the same tile/player API.
+- `mallTileField.setLayoutMode('rows'|'grid') -> boolean` chooses an explicit
+  layout. On first entry the ordinary field defaults to grid at 1024 CSS px
+  or wider with a fine primary pointer and hover, and to rows elsewhere.
+  Stored layout takes precedence. Density requests can also select grid.
 - `getLayoutMode()`, `getRowOffsets()`, `restoreRowOffsets(offsets)` expose
   presentation state; row keys are category strings, offsets nonnegative finite numbers.
 - `searchCatalog(query)` and `redDog.searchCatalog(query)` apply the same

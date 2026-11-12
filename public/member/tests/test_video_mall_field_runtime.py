@@ -1146,9 +1146,9 @@ class TestLaneAutoplay:
         assert "enterFoundUp(index)" not in click_handler
 
     def test_keyboard_enter_respects_the_active_projection(self):
-        """Enter plays the fixed grid in context and retains ordinary fullscreen."""
+        """Enter uses the fixed or desktop grid path and retains row-mode fullscreen."""
         js = _read("js/mall-tile-field.js")
         idx = js.index("e.key === 'Enter'")
         section = js[idx:js.index("});", idx)]
-        assert "if (fixedVideoField) togglePlay(index);" in section
+        assert "if (fixedVideoField || desktopGrid) togglePlay(index);" in section
         assert "else openFullscreenFromTile(index);" in section
