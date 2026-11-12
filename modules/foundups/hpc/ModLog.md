@@ -1,5 +1,13 @@
 # HPC ModLog
 
+## 2026-11-12 · Desktop search playback
+
+FITS_POC under H1. 012 requested a Google-sized bar under the PC video and
+playback from search. The shared theater uses a centered 584 × 52 CSS px form.
+Typing filters the existing queue. Submitting starts the next matching Short
+or the first result. The phone grid retains its row player. Cache v9 updates
+the existing assets. WSP 22, 97 and 104 apply.
+
 ## 2026-11-12 · Responsive desktop theater candidate
 
 FITS_POC under H1. 012's Work handoff specifies the centered desktop player,

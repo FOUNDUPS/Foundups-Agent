@@ -36,6 +36,7 @@
   var topBar = null;
   var queueRail = null;
   var queueTrack = null;
+  var queueSearchForm = null;
   var queueSearch = null;
   var queueEmpty = null;
   var filteredIndices = null;
@@ -266,7 +267,12 @@
       '<div class="video-player-stage"></div>',
       '<p class="video-player-status" role="status" hidden></p>',
       '<button class="video-player-manual-play" type="button" hidden>Play video</button>',
-      '<input class="video-player-queue-search" type="search" aria-label="Search videos" placeholder="Search videos" maxlength="300" hidden>',
+      '<form class="video-player-queue-search" role="search" hidden>',
+      '  <input type="search" aria-label="Search videos" placeholder="Search videos" maxlength="300">',
+      '  <button type="submit" aria-label="Play search result" title="Play search result">',
+      '    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 4.5 4.5"/></svg>',
+      '  </button>',
+      '</form>',
       '<div class="video-player-edge-trigger"></div>',
       '<div class="video-player-queue-rail">',
       '  <div class="video-player-queue-track"></div>',
@@ -284,7 +290,9 @@
     topBar = container.querySelector('.video-player-top-bar');
     queueRail = container.querySelector('.video-player-queue-rail');
     queueTrack = container.querySelector('.video-player-queue-track');
-    queueSearch = container.querySelector('.video-player-queue-search');
+    queueSearchForm = container.querySelector('.video-player-queue-search');
+    queueSearch = queueSearchForm.querySelector('input');
+    queueSearchForm.addEventListener('submit', playSearchResult);
     queueEmpty = container.querySelector('.video-player-queue-empty');
     queueSearch.addEventListener('input', filterRail);
     edgeTrigger = container.querySelector('.video-player-edge-trigger');
@@ -356,9 +364,9 @@
     var active = document.activeElement;
     back.hidden = enabled;
     back.setAttribute('aria-label', 'Close player');
-    queueSearch.hidden = !enabled || !matchesQuery;
-    if (enabled && active === back && !queueSearch.hidden) queueSearch.focus({ preventScroll: true });
-    if (!enabled && (active === queueSearch || queueRail.contains(active))) back.focus({ preventScroll: true });
+    queueSearchForm.hidden = !enabled || !matchesQuery;
+    if (enabled && active === back && !queueSearchForm.hidden) queueSearch.focus({ preventScroll: true });
+    if (!enabled && (queueSearchForm.contains(active) || queueRail.contains(active))) back.focus({ preventScroll: true });
     filterRail();
     return true;
   }
@@ -451,7 +459,7 @@
     isOpen = false;
     container.classList.remove('open', 'video-player-inline', 'video-player-theater');
     theater = false;
-    queueSearch.hidden = true;
+    queueSearchForm.hidden = true;
     if (previousOverflow !== null) document.body.style.overflow = previousOverflow;
     previousOverflow = null;
     inertElements.forEach(function(element) { element.inert = false; });
@@ -747,6 +755,17 @@
     }, []) : null;
     renderRail();
     queueTrack.scrollLeft = 0;
+  }
+
+  function playSearchResult(event) {
+    event.preventDefault();
+    if (!theater) return;
+    filterRail();
+    if (!filteredIndices?.length) return;
+
+    var result = filteredIndices[filteredIndices.indexOf(currentIndex) + 1] ?? filteredIndices[0];
+    if (result !== currentIndex) goToVideo(result);
+    else if (playbackStatus?.state !== 'playing') requestYouTubePlay?.();
   }
 
   function renderRail() {

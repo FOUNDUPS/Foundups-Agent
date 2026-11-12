@@ -1,3 +1,10 @@
+## 2026-11-12 · Scoped desktop search submission
+
+The shared theater centers its search form beneath the player. Typing
+filters the scoped rail and submitting selects the next matching video
+through the existing queue owner. Cache v9 refreshes the shared assets.
+WSP 22, 97 and 104 apply.
+
 ## 2026-11-12 · Responsive shared video presentation
 
 The fixed public projection selects theater on wide fine-pointer displays and

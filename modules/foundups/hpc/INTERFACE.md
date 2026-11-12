@@ -39,8 +39,10 @@ expands its video field. The HPC projection uses the same player and catalog in
 two layouts. On a wide desktop with a fine pointer and hover, the centered
 player opens above HPC search and a horizontal thumbnail strip. The first
 clip requests muted autoplay. The shared queue advances on a provider end
-event and offers Play when the browser blocks startup. Search changes the queue
-without interrupting the active clip.
+event and offers Play when the browser blocks startup. The compact search bar
+is centered under the video. Typing filters the queue while the clip plays.
+Enter or the search button starts the next match, with the first match used
+when the current clip is outside the results or last.
 
 The touch grid displays #SchumerOUT in three portrait columns with vertical
 batches and an end state. Tap or Enter opens the shared player in a full-width
