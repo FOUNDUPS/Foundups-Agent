@@ -6,7 +6,8 @@ base `09da53549`. The candidate opened 15 mixed cards in eight columns at
 it on resize, and advanced the queue after both autoplay and manual Play.
 The new desktop rail thumbnails meet the 120 × 70 CSS px minimum.
 WebKit exposed a scroll snap that moved the originating tile out of view.
-Explicit scroll restoration returned to the focused tile. Enter FoundUp
+Explicit scroll restoration returned to the focused tile. A close at 680 px
+after opening at 1440 px restored the same tile in its new row. Enter FoundUp
 went to `/f/move2japan` after the player closed. The saved rows, wide touch,
 card quick view and scoped HPC cases passed in the Chromium suite.
 

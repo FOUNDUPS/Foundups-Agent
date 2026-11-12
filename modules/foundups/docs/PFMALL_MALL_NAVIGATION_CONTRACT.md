@@ -155,6 +155,7 @@ use their detail view. In the desktop grid, click, Enter, Space and the
 fullscreen button open the selected video and its queue in the shared
 player. Hover reveals the action without mounting media. Escape or Back
 closes the player and returns focus at the original scroll position.
+After density reflow, dismissal restores the same tile in its new row.
 WikiTube is the design reference for the full viewer and continuous queue.
 [Catalog schema](PFMALL_VIDEO_MALL_CATALOG_SCHEMA.md) ·
 [Quick view](../../../public/member/js/mall-planes.js) ·

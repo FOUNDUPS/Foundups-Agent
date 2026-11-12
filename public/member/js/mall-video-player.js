@@ -406,7 +406,13 @@
     scopedPlayer = !!resumeOpts?.returnTile;
     returnTile = resumeOpts?.returnTile || resumeOpts?.returnFocusTo || null;
     var browseField = resumeOpts?.returnFocusTo?.closest('.mall-tile-field-wrapper');
-    returnScroll = browseField ? { field: browseField, top: browseField.scrollTop, left: browseField.scrollLeft } : null;
+    returnScroll = browseField ? {
+      field: browseField,
+      top: browseField.scrollTop,
+      left: browseField.scrollLeft,
+      height: browseField.clientHeight,
+      tileTop: returnTile.offsetTop
+    } : null;
     onClose = resumeOpts?.onClose || null;
     autoplayRequested = resumeOpts?.autoplay !== false;
     muteOnStart = resumeOpts?.theater === true;
@@ -503,7 +509,15 @@
       if (restore) {
         tile?.focus({ preventScroll: true });
         if (returnScroll) {
-          returnScroll.field.scrollTo({ top: returnScroll.top, left: returnScroll.left, behavior: 'instant' });
+          var field = returnScroll.field;
+          var top = returnScroll.top;
+          if (tile && field.contains(tile) &&
+              (tile.offsetTop !== returnScroll.tileTop || field.clientHeight !== returnScroll.height)) {
+            // Density reflow can move the tile far beyond its old scroll offset.
+            var anchor = Math.max(0, returnScroll.tileTop - top);
+            top = tile.offsetTop - Math.min(anchor, Math.max(0, field.clientHeight - tile.offsetHeight));
+          }
+          field.scrollTo({ top: top, left: returnScroll.left, behavior: 'instant' });
         }
       }
       container.removeAttribute('aria-modal');

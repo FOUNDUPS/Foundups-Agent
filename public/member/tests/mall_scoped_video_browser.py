@@ -483,6 +483,21 @@ def verify_member_poster_grid(page):
     expect(clip_tile).to_be_focused()
     expect_position(page, offset)
     assert page.evaluate("mallTileField.isExpanded()")
+
+    page.keyboard.press("Enter")
+    expect_playing_id(page, clips[48]["video_id"])
+    frame.evaluate("el => { window.originalPlayerFrame = el; }")
+    page.set_viewport_size({"width": 680, "height": 600})
+    assert frame.evaluate("el => el === window.originalPlayerFrame")
+    page.keyboard.press("Escape")
+    expect(clip_tile).to_be_focused()
+    page.wait_for_function("""tile => {
+        const tileBounds = tile.getBoundingClientRect();
+        const fieldBounds = tile.closest('.mall-tile-field-wrapper').getBoundingClientRect();
+        return tileBounds.bottom > fieldBounds.top && tileBounds.top < fieldBounds.bottom;
+    }""", arg=clip_tile.element_handle(), timeout=4000)
+    assert page.evaluate("mallTileField.isExpanded()")
+    page.set_viewport_size({"width": 1440, "height": 900})
     clip_tile.dispatch_event("wheel", {"ctrlKey": True, "deltaY": 100})
     expect(lane_tile).to_be_visible()
     expect_position(page, browse_offset)
