@@ -2,6 +2,12 @@
 
 <!-- WSP 22: anti-vibecoding test inventory. NEWEST entries at TOP. -->
 
+## [2026-11-13] — Vote funding banner crop
+
+Verify the v8 worker retires v7 and keeps the existing local artwork available
+offline. Browser checks cover the supplied two-line banner at desktop and
+phone widths.
+
 ## [2026-11-12] — Vote radio and supplied funding artwork
 
 Extend the existing worker fixture to cover v6 retirement and exclude the
