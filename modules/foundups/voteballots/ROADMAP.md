@@ -7,6 +7,22 @@
 
 ---
 
+## Separate Poly roadmaps — 2026-11-12 documentation reconciliation
+
+| Workstream | Canonical roadmap | Relationship / gate |
+| --- | --- | --- |
+| Poly Vote | [Own module roadmap](polyvote/ROADMAP.md) | Child module within Vote; verified-office nominations/preferences; no separate FoundUp registration |
+| Poly Voice | [Own FoundUp roadmap](../polyvoice/ROADMAP.md) | Separate planned FoundUp; local private meeting records and optional commitment receipts |
+| Vote / Voice integration | [Current ownership index](docs/VOTE_VOICE_INTEGRATION.md) | Parent dependencies and consented handoffs only; detailed Poly acceptance stays with each owner |
+
+This is documentation authoring, not a passed implementation gate. Preserve
+HPC's active stabilization work and acceptance unchanged; later Vote/Voice/Poly
+implementation must use the accepted shared Mall rather than compete with it.
+The [source/reconciliation receipt](docs/POLY_RECONCILIATION_20261112.md) records
+superseded ownership and public-JSON wording, preserved source history and
+retrieval limits. General community-ballot research in Phase 4 is not an
+implemented Poly Vote office-verification or anonymity system.
+
 ## Current State
 
 ### MAGA/Oversight Phase One

@@ -1,5 +1,41 @@
 # Vote/Ballots FoundUp — Module Log
 
+## 2026-11-10 — PolyVoice extension of the Voice integration proposal
+
+012 supplied a politician-facing meeting-transparency concept and requested
+latest-conversation recovery, WSP 97 research and existing-system concatenation
+before authoring. Extended the existing Voice integration review lane (#2337),
+not a new FoundUp or runtime. Voice intake remains issue #2330. Added
+[PolyVoice module information](docs/POLYVOICE_MODULE.md) and attached it from
+[the integration contract](docs/VOTE_VOICE_INTEGRATION.md#10-polyvoice-extension--2026-11-10).
+The existing README, roadmap and intake Solution already lead to that contract.
+
+The specification records outcome/solution/pain, an explicit reconciliation
+of the supplied draft, private-session versus public-disclosure records,
+PoC/prototype gates, retrieval parameters, test-reuse targets and primary-source
+research. Proposed ownership: Voice owns PolyVoice; VOTE reads reviewed metadata;
+AutoPost may supply qualified capture/media/perception components without
+inheriting social publishing. Preserve the selected VOTE candidate-card PoC.
+
+Read main dc1ef39df8a3d4150f54a6c1608a624216c767db and the existing PR head
+54d1bec4c74dbdffb0df6b8d46f689c62350230d. Read current external AutoPost contracts
+at reference c7fb644c1b8897f2af29f26d7e3dc3838a67ab18; that repository was not
+modified. Its real camera/local-perception surface supersedes the older mock-only
+audit as reuse evidence, but does not prove phone-local speech or diarization.
+
+VOTE and AutoPost TestModLogs were read before defining reuse. No new test
+implementation was authored; the illustrative synthetic JSON was parsed locally.
+Direct GitHub retrieval was used; native WSP_00 bootstrap, semantic HoloIndex,
+WRE worker dispatch, phone/network-egress tests, independent acceptance and
+full repository test execution were not performed in this connector pass.
+Historical suite results are not presented as fresh evidence. Final PR checks,
+qualified Work merge and main verification remain separate gates.
+
+No public assets, runtime code/schema, manifest, registry, credentials, recording,
+posting, token, blockchain or deployment changed. Prior log history is preserved.
+WSP 22/50/84/97 discipline; WSP 109 draft used as intake structure, not runtime
+admission. The specification contains the detailed source and recovery receipt.
+
 ## 2026-11-09 — MAGA/Oversight Phase One documentation reconciliation
 
 Consolidated the address, source ownership and four-entry landing contract in
