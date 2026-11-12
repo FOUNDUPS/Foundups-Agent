@@ -7,7 +7,8 @@
   --red: #b81925;
   --blue: #0b4fb4;
   --yellow: #ffcf42;
-  --display: "Archivo Black", Impact, "Arial Black", sans-serif;
+  --reading: "Source Sans 3", system-ui, sans-serif;
+  --display: "Archivo Black", "Arial Black", var(--reading);
 }
 
 * { box-sizing: border-box; }
@@ -18,7 +19,7 @@ body {
   background-image: radial-gradient(#8e4c1b19 .55px, transparent .7px);
   background-size: 4px 4px;
   color: var(--ink);
-  font: 1rem/1.45 "Source Sans 3", system-ui, sans-serif;
+  font: 1rem/1.45 var(--reading);
 }
 
 a { color: inherit; }
@@ -41,7 +42,7 @@ a:focus-visible, summary:focus-visible {
 .cover-skip:focus { transform: translateY(0); }
 
 .cover-shell {
-  width: min(100% - 2rem, 80rem);
+  width: min(100% - clamp(2rem, 6vw, 5rem), 96rem);
   margin-inline: auto;
 }
 
@@ -68,14 +69,14 @@ a:focus-visible, summary:focus-visible {
 
 .cover-brand h1 {
   margin: .15em 0 0;
-  font: italic 900 clamp(2.15rem, 7vw, 6.4rem)/.95 var(--display);
+  font: 900 clamp(2.1rem, 5.5vw, 5rem)/1 var(--display);
   letter-spacing: -.035em;
   text-transform: uppercase;
 }
 
 .cover-brand em {
   color: var(--red);
-  font-style: inherit;
+  font-style: normal;
 }
 
 .cover-gates, .cover-footer nav {
@@ -91,6 +92,13 @@ a:focus-visible, summary:focus-visible {
   font-weight: 700;
 }
 
+.cover-disclosure a {
+  color: #06498f;
+  text-underline-offset: .15em;
+}
+
+.cover-button[hidden] { display: none; }
+
 .cover-button {
   display: inline-flex;
   min-height: 44px;
@@ -101,9 +109,8 @@ a:focus-visible, summary:focus-visible {
   padding: .46rem .72rem;
   background: var(--white);
   color: var(--ink);
-  font-size: .86rem;
-  font-weight: 900;
-  line-height: 1.15;
+  font: 850 .88rem/1.15 var(--reading);
+  cursor: pointer;
   text-decoration: none;
 }
 
@@ -137,7 +144,7 @@ a:focus-visible, summary:focus-visible {
 }
 
 .cover-head {
-  padding: .8rem .9rem .85rem;
+  padding: .9rem clamp(.85rem, 2vw, 1.35rem);
   border-bottom: 2px solid var(--ink);
 }
 
@@ -145,9 +152,8 @@ a:focus-visible, summary:focus-visible {
 
 .cover-head h2 {
   margin: .25em 0 0;
-  font: italic 900 clamp(1.55rem, 3.5vw, 2.2rem)/1.02 var(--display);
-  letter-spacing: -.015em;
-  text-transform: uppercase;
+  font: 850 clamp(1.55rem, 3vw, 2.65rem)/1.12 var(--reading);
+  letter-spacing: -.023em;
   overflow-wrap: break-word;
 }
 
@@ -156,9 +162,48 @@ a:focus-visible, summary:focus-visible {
   color: white;
 }
 
-.cover-lead .cover-kicker { color: var(--yellow); }
+.cover-schumer-tag {
+  margin: 0;
+  color: var(--yellow);
+  font-size: .9rem;
+  font-weight: 850;
+  letter-spacing: .025em;
+  text-align: right;
+}
 
-.cover-lead h2 { font-size: clamp(2rem, 6vw, 4.4rem); }
+.cover-lead h2 {
+  margin-top: .12em;
+  font-size: clamp(2rem, 5vw, 4.4rem);
+  line-height: 1.06;
+}
+
+.cover-video-link {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .28rem .75rem;
+  text-decoration: none;
+}
+
+.cover-video-link > span:first-child {
+  text-decoration: underline;
+  text-decoration-thickness: .045em;
+  text-underline-offset: .14em;
+}
+
+.cover-video-link:focus-visible { outline-color: var(--yellow); }
+
+.cover-speaker-four { color: var(--yellow); }
+
+.cover-video-destination {
+  display: inline-block;
+  padding: .18rem .48rem;
+  background: var(--white);
+  color: var(--ink);
+  font: 800 .84rem/1.4 var(--reading);
+  text-decoration: none;
+  white-space: nowrap;
+}
 
 .cover-money .cover-head {
   background: var(--red);
@@ -167,7 +212,7 @@ a:focus-visible, summary:focus-visible {
 
 .cover-money .cover-kicker { color: #fff1bb; }
 
-.cover-money h2 { font-size: clamp(1.75rem, 4vw, 3rem); }
+.cover-money h2 { font-size: clamp(1.75rem, 3.25vw, 3rem); }
 
 .cover-crop {
   position: relative;
@@ -215,6 +260,12 @@ a:focus-visible, summary:focus-visible {
 
 .cover-money-props { position: relative; }
 
+.cover-balloon, .cover-megaphone {
+  font: 850 clamp(1.05rem, 3.2vw, 2.05rem)/1 var(--reading);
+  letter-spacing: .06em;
+  white-space: nowrap;
+}
+
 .cover-balloon {
   position: absolute;
   top: 7%;
@@ -227,9 +278,10 @@ a:focus-visible, summary:focus-visible {
   border-radius: 54% 46% 58% 42%;
   background: var(--red);
   color: white;
-  font: 900 clamp(.82rem, 3.2vw, 1.5rem)/1 var(--display);
   transform: rotate(-12deg);
 }
+
+.cover-balloon > span { transform: rotate(12deg); }
 
 .cover-balloon::after {
   content: "";
@@ -278,9 +330,10 @@ a:focus-visible, summary:focus-visible {
   background: var(--blue);
   clip-path: polygon(0 0, 86% 31%, 100% 31%, 100% 64%, 81% 64%, 73% 97%, 57% 97%, 58% 73%, 0 98%);
   color: white;
-  font: italic 900 clamp(.8rem, 3vw, 1.35rem)/1 var(--display);
   transform: rotate(-16deg);
 }
+
+.cover-megaphone > span { transform: rotate(16deg); }
 
 .cover-bag {
   position: absolute;
@@ -682,30 +735,23 @@ a:focus-visible, summary:focus-visible {
   .cover-ticker-toggle { display: none; }
 }
 
-@media (min-width: 39rem) {
-  .cover-shell { width: min(100% - 3rem, 80rem); }
-
+@media (min-width: 44rem) {
   .cover-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.2rem;
+    gap: clamp(1.15rem, 2vw, 1.75rem);
   }
 
   .cover-lead, .cover-money { grid-column: 1 / -1; }
-
-  .cover-money-art { max-height: 23rem; }
+  .cover-small .cover-head { min-height: 6.5rem; }
 }
 
-@media (min-width: 57rem) {
+@media (min-width: 64rem) {
   .cover-masthead { grid-template-columns: minmax(0, 1fr) auto; }
 
   .cover-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
-
-  .cover-lead { grid-column: span 8; }
-  .cover-money { grid-column: span 4; }
-  .cover-small { grid-column: span 3; }
-
-  .cover-small .cover-head { min-height: 9.5rem; }
-  .cover-small h2 { font-size: clamp(1.4rem, 2.55vw, 2.15rem); }
+  .cover-lead { grid-column: span 7; }
+  .cover-money { grid-column: span 5; }
+  .cover-small { grid-column: span 6; }
 }
 
 @media (forced-colors: active) {

@@ -7,7 +7,10 @@
   <meta name="description" content="Six political cartoons, the facts behind them and a direct entrance to Vote's civic tools.">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="cover.css">
+  <script src="app.js" defer></script>
   <script src="cover.js" defer></script>
   <title>The Vote Dispatch · Independent political satire</title>
 </head>
@@ -21,8 +24,9 @@
     <nav class="cover-gates" aria-label="Vote tools">
       <a class="cover-button cover-enter" href="guide">Enter Vote <span aria-hidden="true">→</span></a>
       <a class="cover-button" href="contact">Voice your opinion</a>
+      <button class="cover-button" id="install-vote" type="button" hidden>Install Vote</button>
     </nav>
-    <p class="cover-disclosure">Independent campaign and satire. No affiliation with or endorsement by Hasan Piker or anyone depicted.</p>
+    <p class="cover-disclosure">Independent campaign and satire. No affiliation with or endorsement by <a href="https://www.twitch.tv/hasanabi" aria-label="Hasan Piker on Twitch">Hasan Piker</a> or anyone depicted.</p>
   </header>
   <main class="cover-shell" id="comic-cover" tabindex="-1">
     <noscript>
@@ -38,8 +42,8 @@
     <div class="cover-grid">
       <article class="cover-tile cover-lead" aria-labelledby="speaker-headline">
         <div class="cover-head">
-          <p class="cover-kicker">#HasanForSpeaker</p>
-          <h2 id="speaker-headline">Have you tried changing the Speaker?</h2>
+          <p class="cover-schumer-tag">#SchumerOUT</p>
+          <h2 id="speaker-headline"><a class="cover-video-link" href="https://www.youtube.com/results?search_query=Hasan+Piker+for+Speaker" aria-label="Hasan 4 Speaker videos on YouTube"><span>Hasan <span class="cover-speaker-four">4</span> Speaker</span> <span class="cover-video-destination" aria-hidden="true">YouTube ↗</span></a></h2>
         </div>
         <figure class="cover-crop cover-photo-speaker">
           <img src="comics/photo-2.webp" width="1280" height="353" alt="Comic caricature of Hasan Piker wearing a draped Israeli flag at a microphone in front of the Capitol." fetchpriority="high">
@@ -70,9 +74,9 @@
             <img src="comics/photo-1.webp" width="1280" height="667" alt="Close-up caricature of Chuck Schumer in tears." loading="lazy">
           </div>
           <div class="cover-money-props" aria-hidden="true">
-            <span class="cover-balloon">AIPAC</span>
+            <span class="cover-balloon"><span>AIPAC</span></span>
             <span class="cover-pin"></span>
-            <span class="cover-megaphone">UDP</span>
+            <span class="cover-megaphone"><span>UDP</span></span>
             <span class="cover-bag cover-bag-back">$</span>
             <span class="cover-bag">$</span>
           </div>

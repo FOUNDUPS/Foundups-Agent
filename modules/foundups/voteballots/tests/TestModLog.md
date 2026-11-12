@@ -2,6 +2,12 @@
 
 <!-- WSP 22: anti-vibecoding test inventory. NEWEST entries at TOP. -->
 
+## [2026-11-12] — Vote cover install and layout
+
+Extend the existing public cache fixture to verify v5 retirement. Browser
+checks cover manifest installability, the shared install prompt, width-based
+panel reflow, outbound links, legibility and the offline cover.
+
 ## [2026-11-12] — Vote bottom ticker
 
 Extend the existing worker fixture to check retirement of the v4 cache while

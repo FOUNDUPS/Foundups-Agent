@@ -8,7 +8,8 @@
 
 ## 2026-11-12 Vote cover and guide routes
 
-The Vote Site's root presents an independent, sourced political-satire cover.
+The Vote Site's root presents the responsive, installable Vote cover. The cover
+and guide share the manifest identity and the standalone app opens at the root.
 `/guide` serves the original Vote landing and handles earlier root section
 bookmarks. `/evidence`, `/contact`, `/coalition` and the external Oversight
 Blueprint remain directly available. `/contact` is the cover's manual Voice
