@@ -1,5 +1,12 @@
 # Vote/Ballots FoundUp — Module Log
 
+## 2026-11-12 — Vote bottom ticker
+
+Add a bottom ticker with pause and reduced-motion support. Keep the campaign
+healthcare question distinct from SIPRI’s dated military spending and aid
+figures. Show the supplied flag artwork through the full vertical lead crop.
+Advance the existing shell cache for offline readers. WSP 22, 50, 84, 97, 102.
+
 ## 2026-11-12 — Vote satire cover
 
 Add six comic panels with native source disclosures, a visitor-initiated

@@ -17,7 +17,7 @@ function worker() {
   const handlers = {};
   const contents = new Map();
   const requests = [];
-  const names = ['unrelated', 'vote-public-guide-v2', 'vote-public-guide-v3', 'vote-public-guide-v4'];
+  const names = ['unrelated', 'vote-public-guide-v2', 'vote-public-guide-v3', 'vote-public-guide-v4', 'vote-public-guide-v5'];
   const deleted = [];
   const cache = {
     match: async (url) => contents.get(url),
@@ -63,7 +63,7 @@ test('canonical and prior HTML navigation use the same cached document offline',
   assert.equal(sw.contents.size, 25);
   assert.ok(sw.requests.every(({options}) => options.redirect === 'error'));
   await sw.event('activate', '/');
-  assert.deepEqual(sw.deleted, ['vote-public-guide-v2', 'vote-public-guide-v3']);
+  assert.deepEqual(sw.deleted, ['vote-public-guide-v2', 'vote-public-guide-v3', 'vote-public-guide-v4']);
   sw.changeResponse(() => { throw new TypeError('offline'); });
   for (const path of ['/guide', '/contact', '/evidence', '/coalition']) {
     assert.equal(await sw.event('fetch', path), sw.contents.get(origin + path));
@@ -90,6 +90,7 @@ test('the cover hands every original guide fragment back to the guide', () => {
     URL,
     location,
     navigator: {},
+    document: { querySelector: () => null },
     window: {
       addEventListener: (name, callback) => { if (name === 'hashchange') hashChanged = callback; },
     },

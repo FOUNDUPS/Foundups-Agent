@@ -2,6 +2,13 @@
 
 <!-- WSP 22: anti-vibecoding test inventory. NEWEST entries at TOP. -->
 
+## [2026-11-12] — Vote bottom ticker
+
+Extend the existing worker fixture to check retirement of the v4 cache while
+preserving the existing offline shell and guide fragment checks. Browser
+verification covers ticker movement, pause and resume, reduced motion, static
+fallback and layout at desktop and phone widths.
+
 ## [2026-11-12] — Vote cover and legacy guide migration
 
 Extend the public worker regression to cover the v4 exact-path precache,

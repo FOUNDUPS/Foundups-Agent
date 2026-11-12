@@ -24,6 +24,23 @@ function openLegacyGuideFragment() {
 openLegacyGuideFragment();
 window.addEventListener('hashchange', openLegacyGuideFragment);
 
+const ticker = document.querySelector('.cover-ticker');
+if (ticker) {
+  const track = ticker.querySelector('.cover-ticker-track');
+  const repeat = track.firstElementChild.cloneNode(true);
+  repeat.setAttribute('aria-hidden', 'true');
+  track.append(repeat);
+  ticker.classList.add('cover-ticker--moving');
+
+  const toggle = ticker.querySelector('.cover-ticker-toggle');
+  toggle.hidden = false;
+  toggle.addEventListener('click', () => {
+    const label = ticker.classList.toggle('cover-ticker--paused') ? 'Play' : 'Pause';
+    toggle.textContent = label;
+    toggle.setAttribute('aria-label', label + ' ticker');
+  });
+}
+
 if ('serviceWorker' in navigator && window.isSecureContext) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js').catch(() => {});

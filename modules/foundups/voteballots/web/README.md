@@ -4,7 +4,10 @@ This directory owns the six-panel independent satire cover at `/` and Vote's
 existing evidence-first civic guide at `/guide`. **Enter Vote** opens the
 original guide and **Voice your opinion** opens the existing manual contact
 page. The cover's political headlines are satire. Each panel links to its
-sources and offers a visitor-initiated House switchboard link.
+sources and offers a visitor-initiated House switchboard link. The bottom
+ticker presents the campaign demand and dated factual context. Its public
+copy lives in `index.html`. The ticker can be paused and its headlines can be
+scrolled manually with keyboard focus, reduced motion, or JavaScript disabled.
 
 ## Source and deployment
 
@@ -62,7 +65,7 @@ All assets are local, the content policy is self-only, and the install control
 appears only when the browser offers installation. The service worker registers
 relative to this directory and caches only exact, same-origin public shell
 paths. It does not cache API requests, external links, query variants or writes.
-The v4 worker precaches the cover, local comic assets, and the canonical
+The v5 worker precaches the cover, local comic assets, and the canonical
 `/guide`, `/coalition`, `/evidence` and `/contact` routes. Legacy HTML
 navigation has a canonical offline fallback. The cover transfers previous
 root fragments to the original section on `/guide`. The manifest keeps its
