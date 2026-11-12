@@ -4,18 +4,20 @@ import { test } from 'node:test';
 import vm from 'node:vm';
 
 const code = readFileSync(new URL('../web/sw.js', import.meta.url), 'utf8');
+const coverCode = readFileSync(new URL('../web/cover.js', import.meta.url), 'utf8');
+const guideMarkup = readFileSync(new URL('../web/guide.html', import.meta.url), 'utf8');
 const origin = 'https://vote.test';
 const MIME = {
   css: 'text/css', js: 'text/javascript', mjs: 'text/javascript',
   json: 'application/json', webmanifest: 'application/manifest+json',
-  svg: 'image/svg+xml', png: 'image/png',
+  svg: 'image/svg+xml', png: 'image/png', webp: 'image/webp',
 };
 
 function worker() {
   const handlers = {};
   const contents = new Map();
   const requests = [];
-  const names = ['unrelated', 'vote-public-guide-v2', 'vote-public-guide-v3'];
+  const names = ['unrelated', 'vote-public-guide-v2', 'vote-public-guide-v3', 'vote-public-guide-v4'];
   const deleted = [];
   const cache = {
     match: async (url) => contents.get(url),
@@ -58,21 +60,54 @@ function worker() {
 test('canonical and prior HTML navigation use the same cached document offline', async () => {
   const sw = worker();
   await sw.event('install', '/');
-  assert.equal(sw.contents.size, 17);
+  assert.equal(sw.contents.size, 25);
   assert.ok(sw.requests.every(({options}) => options.redirect === 'error'));
   await sw.event('activate', '/');
-  assert.deepEqual(sw.deleted, ['vote-public-guide-v2']);
+  assert.deepEqual(sw.deleted, ['vote-public-guide-v2', 'vote-public-guide-v3']);
   sw.changeResponse(() => { throw new TypeError('offline'); });
-  for (const path of ['/contact', '/evidence', '/coalition']) {
+  for (const path of ['/guide', '/contact', '/evidence', '/coalition']) {
     assert.equal(await sw.event('fetch', path), sw.contents.get(origin + path));
     assert.equal(await sw.event('fetch', path + '.html'), sw.contents.get(origin + path));
   }
   assert.equal(await sw.event('fetch', '/index.html'), sw.contents.get(origin + '/'));
+  for (const path of ['/cover.css', '/cover.js', ...[1, 2, 3, 4, 5].map((n) => `/comics/photo-${n}.webp`)]) {
+    assert.ok(sw.contents.has(origin + path));
+    assert.equal(await sw.event('fetch', path), sw.contents.get(origin + path));
+  }
   assert.equal(await sw.event('fetch', '/contact.html#main'), sw.contents.get(origin + '/contact'));
   for (const path of ['/contact?track=1', '/api', 'https://another.test/contact']) {
     assert.equal(sw.event('fetch', path), undefined);
   }
   assert.equal(sw.event('fetch', '/contact', 'POST'), undefined);
+});
+
+test('the cover hands every original guide fragment back to the guide', () => {
+  const location = new URL(origin + '/?from=bookmark#comic-cover');
+  const redirects = [];
+  location.replace = (destination) => redirects.push(destination.href);
+  let hashChanged;
+  vm.runInNewContext(coverCode, {
+    URL,
+    location,
+    navigator: {},
+    window: {
+      addEventListener: (name, callback) => { if (name === 'hashchange') hashChanged = callback; },
+    },
+  });
+  assert.deepEqual(redirects, []);
+  for (const [, id] of guideMarkup.matchAll(/\bid="([^"]+)"/g)) {
+    location.hash = id;
+    hashChanged();
+    assert.equal(redirects.pop(), origin + '/guide?from=bookmark#' + id);
+  }
+  location.hash = '%6fversight';
+  hashChanged();
+  assert.equal(redirects.pop(), origin + '/guide?from=bookmark#%6fversight');
+  for (const id of ['%E0%A4', 'comic-cover', '//outside.test/path']) {
+    location.hash = id;
+    hashChanged();
+  }
+  assert.deepEqual(redirects, []);
 });
 
 test('Oversight serves the scoped maps, roadmap and manual contact offline', async () => {

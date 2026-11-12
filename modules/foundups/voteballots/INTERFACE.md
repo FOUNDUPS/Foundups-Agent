@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-11-12 Vote cover and guide routes
+
+The Vote Site's root presents an independent, sourced political-satire cover.
+`/guide` serves the original Vote landing and handles earlier root section
+bookmarks. `/evidence`, `/contact`, `/coalition` and the external Oversight
+Blueprint remain directly available. `/contact` is the cover's manual Voice
+destination. Each comic panel opens the visitor's dialer through the public
+House switchboard link. The cover has no nomination, ballot or call backend.
+
 ## 2026-11-09 Phase One landing handoff
 
 The [Oversight landing contract](oversight/README.md#phase-one-landing-contract)

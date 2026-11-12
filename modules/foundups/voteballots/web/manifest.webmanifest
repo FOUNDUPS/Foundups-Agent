@@ -3,7 +3,7 @@
   "name": "Vote · Civic field guide",
   "short_name": "Vote",
   "description": "Evidence-first civic research and the Oversight Blueprint workstream.",
-  "start_url": "./",
+  "start_url": "./guide",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f5f2eb",
