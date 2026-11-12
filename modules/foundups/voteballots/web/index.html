@@ -3,73 +3,205 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#102a3a">
-  <meta name="description" content="Vote is an evidence-first civic FoundUp. Explore the public Oversight Blueprint research prototype and the path toward clearer civic evidence.">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="theme-color" content="#fff2d7">
+  <meta name="description" content="Six political cartoons, the facts behind them and a direct entrance to Vote's civic tools.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="style.css">
-  <title>Vote · Evidence first. Judgment yours.</title>
+  <link rel="stylesheet" href="cover.css">
+  <script src="cover.js" defer></script>
+  <title>The Vote Dispatch · Independent political satire</title>
 </head>
 <body>
-  <a class="skip-link" href="#main">Skip to content</a>
-  <header class="site-header">
-    <a class="brand" href="#top" aria-label="Vote home"><svg viewBox="0 0 44 44" aria-hidden="true"><path d="M8 15 20 32 37 8"/><circle cx="35" cy="33" r="4"/></svg><span>VOTE<small>A CIVIC FOUNDUP</small></span></a>
-    <nav class="header-nav" aria-label="Main navigation"><a href="#oversight">Oversight Blueprint</a><a href="evidence">Funding evidence</a><a href="contact">Contact Congress</a><a href="coalition">Coalition</a></nav>
-    <button class="install-button" id="install-app" type="button" hidden>Install guide <span aria-hidden="true">↓</span></button>
+  <a class="cover-skip" href="#comic-cover">Skip to comics</a>
+  <header class="cover-masthead cover-shell">
+    <div class="cover-brand">
+      <p class="cover-kicker">Independent political satire</p>
+      <h1>The Vote <em>Dispatch</em></h1>
+    </div>
+    <nav class="cover-gates" aria-label="Vote tools">
+      <a class="cover-button cover-enter" href="guide">Enter Vote <span aria-hidden="true">→</span></a>
+      <a class="cover-button" href="contact">Voice your opinion</a>
+    </nav>
+    <p class="cover-disclosure">Independent campaign and satire. No affiliation with or endorsement by Hasan Piker or anyone depicted.</p>
   </header>
-  <main id="main" tabindex="-1">
-    <section class="hero" id="top" aria-labelledby="hero-title">
-      <div class="hero-copy">
-        <p class="eyebrow"><span></span>EVIDENCE-FIRST CIVIC INTELLIGENCE</p>
-        <h1 id="hero-title">The public record.<br><em>Made clearer.</em></h1>
-        <p class="hero-lede">Public power should be understandable. Vote is building a place to follow the evidence, see its limits, and reach your own judgment.</p>
-        <p class="hero-start">Start with <strong>Oversight Blueprint</strong>, our public research prototype for congressional preparation and independent state pathways.</p>
-        <div class="hero-actions"><a class="button button-gold" href="evidence">Explore funding evidence <span aria-hidden="true">→</span></a><a class="text-link light-link" href="https://maga.mtrout.com/">Open Oversight Blueprint <span aria-hidden="true">↗</span></a></div>
-        <p class="release-note"><span class="status-dot"></span>Public guide · Candidate tools remain in development</p>
-      </div>
-      <div class="project-map" aria-label="Vote workstreams and their current status">
-        <div class="map-heading"><span>THE PROJECT MAP</span><span aria-hidden="true">01 — 03</span></div>
-        <div class="map-parent"><span class="map-wordmark">VOTE</span><span>Evidence first.<br>Judgment yours.</span></div>
-        <div class="map-branch" aria-hidden="true"></div>
-        <a class="map-item map-active" href="https://maga.mtrout.com/"><span class="map-number">01</span><span><span class="map-status">PUBLIC RESEARCH PROTOTYPE</span><strong>Oversight Blueprint</strong><span class="map-description">Rules, people & lawful coordination</span></span><span class="map-arrow" aria-hidden="true">↗</span></a>
-        <a class="map-item" href="evidence"><span class="map-number">02</span><span><span class="map-status">PUBLIC FILING EXCERPTS</span><strong>Funding evidence</strong><span class="map-description">Selected records, original filings and limits</span></span><span class="map-arrow" aria-hidden="true">→</span></a>
-        <a class="map-item" href="#claims-status"><span class="map-number">03</span><span><span class="map-status">PLANNED</span><strong>Claim verification</strong><span class="map-description">The Bullshit Meter research track</span></span><span class="map-arrow" aria-hidden="true">↓</span></a>
-        <p class="map-caption">One civic project. Distinct workstreams.<br>Readiness stays visible at every step.</p>
-      </div>
-      <div class="hero-footer"><span>A FOUNDUPS PROJECT</span><span>Independent research. No government affiliation.</span></div>
-    </section>
-    <div class="principle-strip" aria-label="Project principles"><span><b>01</b> Follow the source</span><span><b>02</b> Show what is unknown</span><span><b>03</b> Leave room for correction</span></div>
-    <section class="oversight-section section-shell" id="oversight" aria-labelledby="oversight-title">
-      <div class="section-heading"><p class="eyebrow">THE PUBLIC WORKSTREAM</p><span class="status-label"><span class="status-dot"></span>RESEARCH PROTOTYPE</span></div>
-      <div class="oversight-layout">
-        <div class="oversight-copy"><h2 id="oversight-title">Prepare the people.<br><em>Connect the oversight.</em></h2><p>Oversight Blueprint turns a complex institutional plan into a readable starting point: prepare rules and people, connect professional capacity, and review lawful referrals.</p><ul class="editorial-list"><li><span>House & Senate</span>Separate authorities. Shared preparation.</li><li><span>Professional support</span>Legal, forensic, evidence and review capacity.</li><li><span>Independent states</span>Lawful referrals, with no chain of command.</li></ul><a class="button button-ink" href="https://oversight.mtrout.com/">Open Oversight Blueprint <span aria-hidden="true">↗</span></a><p class="small-note">Prepared drafts and source-linked methods. Human legal review remains required.</p></div>
-        <div class="blueprint-preview">
-          <div class="preview-heading"><span>INSIDE THE BLUEPRINT</span><span class="preview-cross" aria-hidden="true">＋</span></div>
-          <h3>One hub.<br>Separate powers.</h3>
-          <div class="authority-diagram" aria-label="House and Senate committees keep their own authority, use shared professional support and review lawful referrals to independent state offices."><div class="chamber-row"><div><strong>HOUSE</strong><span>Committee authority</span></div><div><strong>SENATE</strong><span>Committee authority</span></div></div><div class="diagram-connectors" aria-hidden="true"><span></span><span></span></div><div class="shared-hub"><span>SHARED PROFESSIONAL HUB</span><strong>Support the work.<br>Keep authority separate.</strong></div><div class="referral-line"><span>LAWFUL REFERRAL · NO COMMAND</span></div><div class="state-office"><strong>INDEPENDENT STATE AGs / DAs</strong><span>They decide jurisdiction and enforcement.</span></div></div>
-          <a href="https://oversight.mtrout.com/" class="preview-link">Explore the working prototype <span aria-hidden="true">↗</span></a>
+  <main class="cover-shell" id="comic-cover" tabindex="-1">
+    <noscript>
+      <nav class="cover-legacy" aria-label="Original Vote guide sections">
+        <a id="top" href="guide">Open the original Vote guide</a>
+        <a id="oversight" href="guide#oversight">Oversight Blueprint</a>
+        <a id="approach" href="guide#approach">Research method</a>
+        <a id="progress" href="guide#progress">Workstream progress</a>
+        <a id="funding-status" href="guide#funding-status">Funding evidence status</a>
+        <a id="claims-status" href="guide#claims-status">Claim verification status</a>
+      </nav>
+    </noscript>
+    <div class="cover-grid">
+      <article class="cover-tile cover-lead" aria-labelledby="speaker-headline">
+        <div class="cover-head">
+          <p class="cover-kicker">#HasanForSpeaker</p>
+          <h2 id="speaker-headline">Have you tried changing the Speaker?</h2>
         </div>
-      </div>
-    </section>
-    <section class="approach-section section-shell" id="approach" aria-labelledby="approach-title">
-      <div class="section-heading"><p class="eyebrow">THE STANDARD WE’RE BUILDING TOWARD</p><span class="section-index" aria-hidden="true">/ METHOD</span></div>
-      <h2 id="approach-title">A conclusion should come<br>with a way to check it.</h2>
-      <div class="method-list"><article><span class="method-number">01</span><div><h3>Follow the original record.</h3><p>Start with public filings, official records and exact source references. Keep the path back to the evidence visible.</p></div><span class="method-symbol" aria-hidden="true">↗</span></article><article><span class="method-number">02</span><div><h3>Separate evidence from inference.</h3><p>A disclosed fact, a reasonable inference and an unanswered question are different things. Missing evidence should stay unknown.</p></div><span class="method-symbol" aria-hidden="true">≠</span></article><article><span class="method-number">03</span><div><h3>Challenge the assessment.</h3><p>Preserve contrary evidence, disclose limitations and leave a correction trail. A score should never replace the underlying record.</p></div><span class="method-symbol" aria-hidden="true">↻</span></article></div>
-      <a class="text-link" href="https://github.com/FOUNDUPS/Foundups-Agent/blob/main/modules/foundups/voteballots/docs/intake/OUTCOME.md">Read the project’s evidence principles <span aria-hidden="true">↗</span></a>
-    </section>
-    <section class="progress-section section-shell" id="progress" aria-labelledby="progress-title">
-      <div class="section-heading"><p class="eyebrow">WHAT’S READY, WHAT COMES NEXT</p><span class="section-index" aria-hidden="true">/ PROGRESS</span></div>
-      <div class="progress-intro"><h2 id="progress-title">What you can<br>use today.</h2><p>Read the Oversight Blueprint, check selected public filings or prepare your own list of congressional offices.</p></div>
-      <div class="status-list"><article class="status-row"><div class="status-track"><span class="status-dot"></span><span>PUBLIC PROTOTYPE</span></div><div><h3>Oversight Blueprint</h3><p>Explore preparation drafts, source-linked methods, the House and Senate’s separate roles, and independent state referral pathways.</p><a href="https://maga.mtrout.com/">Open the blueprint <span aria-hidden="true">↗</span></a></div></article><article class="status-row" id="funding-status"><div class="status-track"><span class="status-dot"></span><span>PUBLIC PROOF OF CONCEPT</span></div><div><h3>Funding evidence</h3><p>Review selected FEC filings for two congressional leaders, with a separate source trail for each record. Coverage is limited to the records shown.</p><a href="evidence">Read the filings <span aria-hidden="true">→</span></a></div></article><article class="status-row"><div class="status-track"><span class="status-dot"></span><span>PUBLIC PROTOTYPE</span></div><div><h3>Contact Congress</h3><p>Use public office numbers from official directories. Choose the offices yourself, open your own dialer and advance through your list manually.</p><a href="contact">Find an office <span aria-hidden="true">→</span></a></div></article><article class="status-row" id="claims-status"><div class="status-track status-planned"><span class="status-dot"></span><span>PLANNED</span></div><div><h3>Claim verification / Bullshit Meter</h3><p>A planned path from exact claims to primary evidence, uncertainty and reviewable assessments. Public scores, video overlays and a live meter are not active.</p><a href="https://github.com/FOUNDUPS/Foundups-Agent/blob/main/modules/foundups/voteballots/docs/POLITICAL_CLAIM_VERIFICATION_AND_SCORING_ENGINE.md">Explore the proposed method <span aria-hidden="true">↗</span></a></div></article></div>
-      <a class="text-link roadmap-link" href="https://github.com/FOUNDUPS/Foundups-Agent/blob/main/modules/foundups/voteballots/ROADMAP.md">See the full project roadmap <span aria-hidden="true">↗</span></a>
-    </section>
-    <section class="coalition-callout section-shell" aria-labelledby="coalition-callout-title"><div><p class="eyebrow">INTRODUCING VOTE COALITION</p><h2 id="coalition-callout-title">A place for a shared standard.</h2><p>Explore an independent collaboration proposal for creators, public officials and communities. Read the charter or prepare a private application draft. There are no confirmed members; enrollment is not open.</p></div><a class="button button-ink" href="coalition.html">Explore Coalition <span aria-hidden="true">→</span></a></section>
-    <section class="questions-section section-shell" aria-labelledby="questions-title"><p class="eyebrow">BEFORE YOU EXPLORE</p><div class="questions-layout"><h2 id="questions-title">A few clear<br>boundaries.</h2><div class="questions-list"><details><summary>How current is the funding evidence?</summary><p>Each record has a filing date, election cycle and source link. The selected records are reviewed snapshots. Live lookup and complete totals remain future work.</p></details><details><summary>Does Vote tell me how to vote?</summary><p>Vote presents source evidence so readers can reach their own conclusions. Ballot services and candidate endorsements are outside this public tool.</p></details><details><summary>What can I do today?</summary><p>Read the Oversight drafts, inspect the funding filings, choose public offices to contact, or prepare a local Coalition application draft.</p></details></div></div></section>
-    <section class="closing-section section-shell"><div><p class="eyebrow">START WITH WHAT YOU CAN EXPLORE</p><h2>Read the blueprint.<br><em>Follow the evidence.</em></h2></div><a class="button button-gold" href="https://oversight.mtrout.com/">Open Oversight Blueprint <span aria-hidden="true">↗</span></a></section>
+        <figure class="cover-crop cover-photo-speaker">
+          <img src="comics/photo-2.webp" width="1280" height="353" alt="Comic caricature of Hasan Piker speaking into a microphone in front of the Capitol." fetchpriority="high">
+        </figure>
+        <div class="cover-body">
+          <p class="cover-ask">Ask your representative to nominate or vote for Hasan Piker. Put healthcare, education and housing for every state on the House agenda.</p>
+          <div class="cover-lead-call">
+            <a class="cover-button cover-call" href="tel:+12022243121">Call your House member <span aria-hidden="true">↗</span></a>
+            <p>House switchboard · (202) 224-3121<br>Ask for your representative. The link opens your dialer.</p>
+          </div>
+          <details class="cover-facts">
+            <summary>Read the story / facts</summary>
+            <p>The U.S. House elects its Speaker. This campaign asks House members to nominate or vote for Hasan Piker. Only House members cast votes in that election.</p>
+            <ul>
+              <li><a href="https://www.govinfo.gov/content/pkg/HMAN-119/html/HMAN-119-pg4.htm">House Rules and Manual · Speaker election</a></li>
+              <li><a href="https://www.house.gov/representatives/find-your-representative">U.S. House · Find your representative and switchboard</a></li>
+            </ul>
+          </details>
+        </div>
+      </article>
+      <article class="cover-tile cover-money" aria-labelledby="funding-headline">
+        <div class="cover-head">
+          <p class="cover-kicker">AIPAC / United Democracy Project</p>
+          <h2 id="funding-headline">Democracy. Batteries sold separately.</h2>
+        </div>
+        <figure class="cover-money-art">
+          <div class="cover-crop cover-photo-schumer">
+            <img src="comics/photo-1.webp" width="1280" height="667" alt="Close-up caricature of Chuck Schumer in tears." loading="lazy">
+          </div>
+          <div class="cover-money-props" aria-hidden="true">
+            <span class="cover-balloon">AIPAC</span>
+            <span class="cover-pin"></span>
+            <span class="cover-megaphone">UDP</span>
+            <span class="cover-bag cover-bag-back">$</span>
+            <span class="cover-bag">$</span>
+          </div>
+        </figure>
+        <div class="cover-body">
+          <p class="cover-caption">United Democracy Project is a separate AIPAC-backed super PAC. It registered with the FEC in January 2022.</p>
+          <div class="cover-poll">
+            <p>Positive views · NBC News poll</p>
+            <dl>
+              <div><dt>Hakeem Jeffries</dt><dd>18%</dd></div>
+              <div><dt>Chuck Schumer</dt><dd>13%</dd></div>
+            </dl>
+            <small>1,000 registered voters · Oct. 28–30, 2026</small>
+          </div>
+          <details class="cover-facts">
+            <summary>Read the story / facts</summary>
+            <p>The FEC records AIPAC's PAC and United Democracy Project as separate committees. Vote's research page shows selected original filings for Chuck Schumer and Hakeem Jeffries.</p>
+            <p>UDP reported <a href="https://www.fec.gov/data/committee/C00799031/?cycle=2026#total-spent">$53.6 million in independent election spending</a> across candidates from Jan. 1, 2025 through Oct. 14, 2026.</p>
+            <ul>
+              <li><a href="https://www.fec.gov/data/committee/C00799031/?cycle=2022&amp;tab=about-committee">FEC · United Democracy Project</a></li>
+              <li><a href="https://aipac.org/politics">AIPAC · PAC and super PAC</a></li>
+              <li><a href="evidence">Vote · Selected Schumer and Jeffries filings</a></li>
+              <li><a href="https://www.aol.com/articles/poll-voters-demand-change-check-140000000.html">NBC News poll and methodology · syndicated by AOL</a></li>
+            </ul>
+            <div class="cover-fact-note">
+              <p><strong>Military spending.</strong> SIPRI estimated Israel’s total military expenditure at <strong>$48.3 billion in 2025</strong>. Its April 2025 release initially estimated <strong>$46.5 billion for 2024</strong>.</p>
+              <p><a href="https://www.sipri.org/publications/2026/sipri-fact-sheets/trends-world-military-expenditure-2025">SIPRI · 2025 estimate</a> · <a href="https://www.sipri.org/publications/2025/sipri-fact-sheets/trends-world-military-expenditure-2024">Original 2024 estimate</a></p>
+            </div>
+          </details>
+          <a class="cover-button cover-call" href="tel:+12022243121">Call your House member <span aria-hidden="true">↗</span></a>
+        </div>
+      </article>
+      <article class="cover-tile cover-small" aria-labelledby="hospitals-headline">
+        <div class="cover-head">
+          <p class="cover-kicker">Healthcare / Hospitals</p>
+          <h2 id="hospitals-headline">Hospital advised to become a super PAC.</h2>
+        </div>
+        <div class="cover-issue-art cover-issue-art--hospitals" aria-hidden="true">
+          <div class="cover-crop cover-photo-capitol">
+            <img src="comics/photo-4.webp" width="1280" height="716" alt="" loading="lazy">
+          </div>
+          <span class="cover-hospital-sign">✚ <strong>ER</strong></span>
+        </div>
+        <div class="cover-body">
+          <details class="cover-facts">
+            <summary>Read the story / facts</summary>
+            <p>The Center for Healthcare Quality and Payment Reform identified nearly 700 rural hospitals at risk of closing in its October 2026 analysis. Israel's national health insurance covers residents and generally requires contributions.</p>
+            <ul>
+              <li><a href="https://ruralhospitals.chqpr.org/downloads/Rural_Hospitals_at_Risk_of_Closing.pdf">CHQPR · Rural hospitals at risk of closing</a></li>
+              <li><a href="https://www.gov.il/en/pages/national-health-insurance-faq">Israel · National health insurance</a></li>
+            </ul>
+          </details>
+          <a class="cover-button cover-call" href="tel:+12022243121">Call your House member <span aria-hidden="true">↗</span></a>
+        </div>
+      </article>
+      <article class="cover-tile cover-small" aria-labelledby="housing-headline">
+        <div class="cover-head">
+          <p class="cover-kicker">Housing</p>
+          <h2 id="housing-headline">Rent now accepts thoughts and prayers.</h2>
+        </div>
+        <div class="cover-issue-art cover-issue-art--housing" aria-hidden="true">
+          <div class="cover-crop cover-photo-housing">
+            <img src="comics/photo-3.webp" width="1280" height="718" alt="" loading="lazy">
+          </div>
+          <span class="cover-slip cover-rent"><strong>Rent</strong><span>Amount due</span></span>
+        </div>
+        <div class="cover-body">
+          <details class="cover-facts">
+            <summary>Read the story / facts</summary>
+            <p>HUD's Housing Choice Voucher program helps eligible households pay rent. Israel's public housing assistance also has eligibility requirements.</p>
+            <ul>
+              <li><a href="https://www.hud.gov/topics/housing_choice_voucher_program_section_8">HUD · Housing Choice Vouchers</a></li>
+              <li><a href="https://www.gov.il/en/pages/olim_public_housing_eligibility">Israel · Public housing eligibility</a></li>
+            </ul>
+          </details>
+          <a class="cover-button cover-call" href="tel:+12022243121">Call your House member <span aria-hidden="true">↗</span></a>
+        </div>
+      </article>
+      <article class="cover-tile cover-small" aria-labelledby="education-headline">
+        <div class="cover-head">
+          <p class="cover-kicker">Education / School meals</p>
+          <h2 id="education-headline">Congress asks lunch to pay for itself.</h2>
+        </div>
+        <div class="cover-issue-art cover-issue-art--education" aria-hidden="true">
+          <div class="cover-crop cover-photo-school">
+            <img src="comics/photo-3.webp" width="1280" height="718" alt="" loading="lazy">
+          </div>
+          <div class="cover-lunch-tray"><span></span><span></span><span></span></div>
+        </div>
+        <div class="cover-body">
+          <details class="cover-facts">
+            <summary>Read the story / facts</summary>
+            <p>The National School Lunch Program provides free or reduced-price lunches to eligible children. Some schools offer meals to all students through the Community Eligibility Provision.</p>
+            <ul><li><a href="https://www.ers.usda.gov/topics/food-nutrition-assistance/child-nutrition-programs/national-school-lunch-program">USDA · National School Lunch Program</a></li></ul>
+          </details>
+          <a class="cover-button cover-call" href="tel:+12022243121">Call your House member <span aria-hidden="true">↗</span></a>
+        </div>
+      </article>
+      <article class="cover-tile cover-small" aria-labelledby="prices-headline">
+        <div class="cover-head">
+          <p class="cover-kicker">Cost of living</p>
+          <h2 id="prices-headline">Economy thriving. Grocery receipt disagrees.</h2>
+        </div>
+        <div class="cover-issue-art cover-issue-art--prices" aria-hidden="true">
+          <div class="cover-crop cover-photo-states">
+            <img src="comics/photo-5.webp" width="1280" height="954" alt="" loading="lazy">
+          </div>
+          <span class="cover-slip cover-receipt"><strong>Groceries</strong><span>Total</span></span>
+        </div>
+        <div class="cover-body">
+          <details class="cover-facts">
+            <summary>Read the story / facts</summary>
+            <p>The Bureau of Labor Statistics tracks grocery prices in the Consumer Price Index's “food at home” category.</p>
+            <ul><li><a href="https://www.bls.gov/news.release/cpi.t02.htm">BLS · Consumer Price Index, food at home</a></li></ul>
+          </details>
+          <a class="cover-button cover-call" href="tel:+12022243121">Call your House member <span aria-hidden="true">↗</span></a>
+        </div>
+      </article>
+    </div>
   </main>
-  <footer class="site-footer"><div class="footer-top"><a class="footer-brand" href="#top">VOTE<span>Evidence first. Judgment yours.</span></a><nav aria-label="Project resources"><a href="https://github.com/FOUNDUPS/Foundups-Agent/tree/main/modules/foundups/voteballots">Project source <span aria-hidden="true">↗</span></a><a href="https://github.com/FOUNDUPS/Foundups-Agent/blob/main/modules/foundups/voteballots/ROADMAP.md">Roadmap <span aria-hidden="true">↗</span></a><a href="https://foundups.com/">FoundUps <span aria-hidden="true">↗</span></a></nav></div><div class="footer-bottom"><p>Independent civic project. No government affiliation.<br>This site does not provide official election services.</p><p>Vote / voteballots<br>Oversight is a workstream within Vote.</p></div></footer>
-  <script src="app.js" defer></script>
+  <footer class="cover-footer cover-shell">
+    <nav aria-label="Explore existing Vote resources">
+      <a href="guide">Enter Vote</a>
+      <a href="evidence">Funding evidence</a>
+      <a href="contact">Contact Congress</a>
+      <a href="coalition">Coalition</a>
+      <a href="https://oversight.mtrout.com/">Oversight Blueprint <span aria-hidden="true">↗</span></a>
+    </nav>
+    <p>The cartoon headlines are satire. Calls are visitor-initiated. This site provides no official nomination, ballot or election services.</p>
+  </footer>
 </body>
 </html>

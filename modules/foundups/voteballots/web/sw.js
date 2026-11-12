@@ -1,10 +1,12 @@
 'use strict';
 
 // Only this public guide's exact same-origin shell paths are eligible for caching.
-const CACHE = 'vote-public-guide-v3';
-const PAGES = ['coalition', 'evidence', 'contact'];
+const CACHE = 'vote-public-guide-v4';
+const PAGES = ['guide', 'coalition', 'evidence', 'contact'];
 const SHELL = [
   './', ...PAGES.map((page) => './' + page),
+  './cover.css', './cover.js',
+  ...[1, 2, 3, 4, 5].map((photo) => `./comics/photo-${photo}.webp`),
   './style.css', './app.js', './manifest.webmanifest',
   './coalition.js', './coalition-draft.mjs', './evidence.css',
   './contact.js', './contact.css', './contact-queue.mjs', './contact-roster.json',
@@ -25,6 +27,7 @@ const CONTENT_TYPES = new Map([
   ['webmanifest', 'application/manifest+json'],
   ['svg', 'image/svg+xml'],
   ['png', 'image/png'],
+  ['webp', 'image/webp'],
 ]);
 
 function isShellResponse(response, url) {

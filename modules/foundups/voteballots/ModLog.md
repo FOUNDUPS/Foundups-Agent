@@ -1,5 +1,13 @@
 # Vote/Ballots FoundUp — Module Log
 
+## 2026-11-12 — Vote satire cover
+
+Add six comic panels with native source disclosures, a visitor-initiated
+House switchboard link and a direct entrance to the original guide. Preserve
+the legacy guide document, section bookmarks and the evidence, contact,
+Coalition and Oversight destinations. Scope the v4 worker to the same-origin
+public shell and keep the existing manifest identity. WSP 22, 50, 84, 97, 102.
+
 ## 2026-11-09 — MAGA/Oversight Phase One documentation reconciliation
 
 Consolidated the address, source ownership and four-entry landing contract in

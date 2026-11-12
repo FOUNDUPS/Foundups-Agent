@@ -1,9 +1,10 @@
 # Vote public landing
 
-This directory is the canonical editable source for Vote's informational
-front door. It introduces the existing `voteballots` FoundUp and links to its
-available Oversight Blueprint workstream. It is not the candidate/funding
-application, an official ballot, confidential intake or a running agent service.
+This directory owns the six-panel independent satire cover at `/` and Vote's
+existing evidence-first civic guide at `/guide`. **Enter Vote** opens the
+original guide and **Voice your opinion** opens the existing manual contact
+page. The cover's political headlines are satire. Each panel links to its
+sources and offers a visitor-initiated House switchboard link.
 
 ## Source and deployment
 
@@ -12,9 +13,11 @@ styles, scripts and official directory snapshot. Deployment includes the
 reviewed HTML, CSS, JS, JSON, manifest and icons. Operator scripts and tests
 stay in the module.
 
-The buildless public files include `index.html`, `style.css`, `app.js`,
-`sw.js`, `manifest.webmanifest`, the three icons, and the `/coalition`,
-`/evidence` and `/contact` HTML pages with their local assets. The contact page
+The buildless public files include `index.html`, `cover.css`, `cover.js`,
+the five supplied reference images as WebPs in `comics/`, and `guide.html` with the
+original `style.css` and `app.js`. Deploy `sw.js`, `manifest.webmanifest`,
+the three icons and the `/coalition`, `/evidence` and `/contact` pages with
+their existing local assets. The contact page
 uses the reviewed `contact-roster.json` and `contact-queue.mjs`. This README
 is operator documentation outside the deployed static directory.
 
@@ -59,10 +62,12 @@ All assets are local, the content policy is self-only, and the install control
 appears only when the browser offers installation. The service worker registers
 relative to this directory and caches only exact, same-origin public shell
 paths. It does not cache API requests, external links, query variants or writes.
-The v3 worker precaches the canonical `/coalition`, `/evidence` and
-`/contact` routes. Legacy HTML navigation has the corresponding canonical
-offline fallback. Installation validates response status, type and exact URL
-before filling the cache. Real-device acceptance is a separate check.
+The v4 worker precaches the cover, local comic assets, and the canonical
+`/guide`, `/coalition`, `/evidence` and `/contact` routes. Legacy HTML
+navigation has a canonical offline fallback. The cover transfers previous
+root fragments to the original section on `/guide`. The manifest keeps its
+existing identity and launches the civic guide. Installation validates each
+response status, MIME type and URL before filling the cache.
 
 Vote retains `/f/voteballots`, `/f/voteballots/app` and `idb_voteballots` in the
 FoundUps shell. A separately hosted landing and Oversight Site do not implement
@@ -74,7 +79,7 @@ admission gates are unchanged by publishing this guide.
 
 ## Validation
 
-Run `node --check` on `app.js` and `sw.js`; validate the manifest, local assets,
+Run `node --check` on `app.js`, `cover.js` and `sw.js`; validate the manifest, local assets,
 anchors, HTTPS links and service-worker eligibility. Check desktop and phone
 layout when browser control is available. A source check or successful deploy
 does not itself establish browser-rendering QA or custom-domain activation.

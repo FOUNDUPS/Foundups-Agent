@@ -2,6 +2,13 @@
 
 <!-- WSP 22: anti-vibecoding test inventory. NEWEST entries at TOP. -->
 
+## [2026-11-12] — Vote cover and legacy guide migration
+
+Extend the public worker regression to cover the v4 exact-path precache,
+WebP MIME, old cache removal, offline comic assets and the legacy guide HTML
+alias. Exercise all original guide IDs through the cover's fragment handoff
+with query preservation, encoded fragments and an invalid-fragment control.
+
 ## [2026-11-07] — Interactive oversight maps
 
 The release projection checks mirrored map routes, graph node and connector
