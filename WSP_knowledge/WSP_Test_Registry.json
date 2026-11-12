@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1838,
+  "total_tests": 1840,
   "quarantined_tests": 260,
   "tests": [
     {
@@ -18152,6 +18152,21 @@
       "description": "Synthetic provider and real Streamable HTTP transport contract tests."
     },
     {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_git_inventory_oauth",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_git_inventory_oauth.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [
+        "network"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Private OAuth discovery, scope enforcement and tool inventory."
+    },
+    {
       "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_holo_query_bundle_public",
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_bundle_public.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
@@ -18513,7 +18528,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_base_runtime_contract.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -18977,7 +18992,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_packaging.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -20641,6 +20656,21 @@
       "description": "Exercise lifecycle inventory with deterministic Git and GitHub responses."
     },
     {
+      "id": "test::modules::infrastructure::wre_core::tests::test_git_lifecycle_inventory",
+      "path": "modules/infrastructure/wre_core/tests/test_git_lifecycle_inventory.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-02",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Regression checks for the read-only PC Git inventory receipt."
+    },
+    {
       "id": "test::modules::infrastructure::wre_core::tests::test_git_lifecycle_pc",
       "path": "modules/infrastructure/wre_core/tests/test_git_lifecycle_pc.py",
       "owner": "modules/infrastructure/wre_core",
@@ -21130,7 +21160,7 @@
       "path": "modules/infrastructure/wre_core/tests/test_route_foundup_job_live_mode_gate.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-02",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -21587,7 +21617,7 @@
       "path": "modules/infrastructure/wre_core/tests/test_wre_worker_git_cwd_guard.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-04",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
