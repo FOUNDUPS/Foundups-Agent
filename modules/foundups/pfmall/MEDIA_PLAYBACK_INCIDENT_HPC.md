@@ -244,3 +244,35 @@ advancement, manual Play, resize continuity and Back. Physical iPhone
 standalone remains NOT_VERIFIED. The phone search and thumb dock are open
 roadmap work. GitHub checks, merge, and hosting deployment each have separate
 receipts.
+
+## 2026-11-12 · Installed iPhone embed refusal
+
+012 reported “This content isn't available” on the first Short
+`iJuguXpbRR4` in the installed iPhone app. The purple Mall message in
+the photo maps to YouTube error 101 or 150. The precise code and trigger
+are unverified. At 13:50:42 UTC, the public Data API returned public,
+processed and `embeddable=true`, with no reported age or region restriction.
+YouTube documents that platform policies or claims can still block an embed.
+
+All eight live Shorts advanced in a phone-sized WebKit 26 window on
+Windows 11. The first also advanced in Chromium 143, on the v10 preview
+and in a same-origin browser-local official embed. The live iframe was
+369.2 × 226.2 CSS px with the browser-generated Referer, `enablejsapi=1`
+and `playsinline=1`. Manual Play advanced the first clip at 320 px.
+The [v10 identity and dock PR](https://github.com/FOUNDUPS/Foundups-Agent/pull/2366)
+merged as `7d6ea553f` and passed main CI. The tested Firebase preview was
+`f3d88fad9c24ea16`. The dedicated production host served v7.
+
+Compare the same first tile in Safari and the Home Screen app on the
+physical iPhone. The original Short link is the immediate fallback. The
+shared native player can use a rights-cleared original MP4 for owned media.
+The workspace search found no original file for this ID. Retain source
+attribution and verify byte-range delivery if a file is supplied.
+
+012 separately rejected the placement of the player below the selected row.
+The touch grid now replaces the selected thumbnail with the shared player
+across the original row. This is a placement change. Device playback remains
+an independent gate.
+
+[IFrame errors](https://developers.google.com/youtube/iframe_api_reference#onError) ·
+[Video metadata and embed restrictions](https://developers.google.com/youtube/data/reference/rest/v3/videos)

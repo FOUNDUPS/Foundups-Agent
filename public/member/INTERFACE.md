@@ -9,9 +9,11 @@
 
 `/member/?foundup=hpc` or the exact HPC hostname selects a fixed guest
 video field from `mall-public-video-catalog.json`. Touch and narrow views use
-three portrait columns with six-item vertical batches. Tap or Enter opens a
-shared player in the selected tile's row context. The corner control and
-pinch-out open immersive playback. Expansion retains the provider iframe.
+three portrait columns with six-item vertical batches. Tap or Enter replaces
+the selected thumbnail with the shared player across its original row.
+Neighboring thumbnails reflow around it. The corner control and pinch-out
+on a thumbnail or the player toolbar open immersive playback. Expansion
+retains the provider iframe.
 Close, Escape, Back or pinch-in on the surrounding chrome restores the grid
 anchor and focus.
 

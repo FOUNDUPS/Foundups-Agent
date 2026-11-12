@@ -1,3 +1,13 @@
+## 2026-11-12 · In-place phone video playback
+
+The scoped browser fixture verifies that the selected thumbnail disappears
+and the player occupies its original row for left, middle and right clips.
+Close restores the card, focus and scroll position. The fixture verifies
+landscape playback, toolbar pinch-out, filtered tiles, the same provider
+frame across expansion and desktop resize, and the neutral 101/150 message.
+The focused member suite passed 432 checks and the boot fixture passed 21.
+Service-worker tests cover retiring v10 and installing v11.
+
 ## 2026-11-12 · HPC phone install and dock
 
 The Chromium scoped fixture passed a manifest read, three-column phone

@@ -46,8 +46,9 @@ Enter or the search button starts the next match, with the first match used
 when the current clip is outside the results or last.
 
 The touch grid displays #SchumerOUT in three portrait columns with vertical
-batches and an end state. Tap or Enter opens the shared player in a full-width
-row beside the selected tile's browsing context. The corner button or pinch-out
+batches and an end state. Tap or Enter replaces the selected thumbnail with
+the shared player across its original row. Neighboring tiles reflow. The
+corner button or pinch-out on a thumbnail or the active player's toolbar
 opens immersive playback with the same iframe. Close, Escape, Back or pinch-in
 on the surrounding chrome restores the tile and focus. YouTube owns touches
 inside the iframe. The provider viewport is at least 200 × 200. A thumbnail
@@ -56,7 +57,7 @@ below 120 × 70 selects the player and offers explicit Play. [YouTube embed requ
 The floating phone dock puts **More options** at the left, scoped search and
 its dictation microphone in the middle, and **Red Dog** at the right. Search
 submits against the loaded collection. Its results keep the source IDs and
-the same row player. The microphone fills the field when the browser has
+the same in-place player. The microphone fills the field when the browser has
 local recognition available. Otherwise it focuses the field for keyboard
 dictation. The visitor submits the resulting query. **More options** opens
 Home, the independent-site disclosure, and device-model availability. The
