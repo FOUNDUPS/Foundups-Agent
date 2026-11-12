@@ -82,6 +82,7 @@ jobs:
           modules/infrastructure/wre_core/tests/test_git_main_merge_sentinel.py
           modules/infrastructure/wre_core/tests/test_git_lifecycle.py
           modules/infrastructure/wre_core/tests/test_git_lifecycle_github.py
+          modules/infrastructure/wre_core/tests/test_git_lifecycle_inventory.py
           modules/infrastructure/wre_core/tests/test_git_lifecycle_pc.py
           modules/infrastructure/codex_hooks/tests/test_codex_hooks.py
       - name: Verify Vote micro-trial production oracle and downstream consumers
@@ -486,15 +487,15 @@ jobs:
                      '-p', 'no:cacheprovider', '-o', 'pythonpath='+str(root),
                      '--basetemp=O:/pytest-temp', '--junitxml=O:/evidence/tests.xml',
                      '-v', '--tb=short', *[suite+n for n in (
-                       'test_mcp_launcher_http.py', 'test_mcp_server_sse.py',
+                       'test_mcp_launcher_http.py', 'test_mcp_server_sse.py', 'test_git_inventory_oauth.py',
                        'test_reddog_holoindex_query_runtime_candidate_binding.py')]]
           result = subprocess.run(command, env=env, cwd=root, timeout=300, check=False)
           if result.returncode: raise SystemExit(result.returncode)
           cases = ET.parse(out/'tests.xml').findall('.//testcase')
-          if len(cases) != 49 or any(c.find(tag) is not None for c in cases
+          if len(cases) != 60 or any(c.find(tag) is not None for c in cases
                                     for tag in ('failure','error','skipped')):
-              raise SystemExit('Expected all 49 MCP criteria to pass without skips')
-          print('MCP compatibility: 49 passed; owned Windows lifecycle included')
+              raise SystemExit('Expected all 60 MCP criteria to pass without skips')
+          print('MCP compatibility: 60 passed; owned Windows lifecycle included')
           '@ | python -I -B -
           if ($LASTEXITCODE -ne 0) { throw 'MCP qualification failed' }
       - name: Verify shared runtime path and Windows stream contracts

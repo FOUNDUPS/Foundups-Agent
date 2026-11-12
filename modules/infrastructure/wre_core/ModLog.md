@@ -1,3 +1,10 @@
+## 2026-11-12 — Read-only PC and GitHub inventory
+
+Reuse the Git lifecycle repository and selected PC binding for a bounded
+Git read with a request-bound digest. Preserve worktree paths and changed
+filenames locally. The MCP adapter can call the reader without writing the
+lifecycle ledger or modifying either repository. WSP 21, 50, 84 and 97.
+
 ## 2026-11-11 — GitHub and PC lifecycle reconciliation
 
 Connect WRE and Codex startup to one persisted Git lifecycle pass. Inventory
