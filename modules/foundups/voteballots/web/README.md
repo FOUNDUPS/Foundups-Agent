@@ -12,7 +12,10 @@ The cover includes a native player for the Antifa FM station's public Icecast
 feed, as used by the existing Antifa FM DJ skill. Browsers decide whether to
 allow autoplay with sound. Play and Pause remain available, and the station
 player is linked when playback fails. The cover's media policy allows the
-specific stream URL. Offline shell caching remains same-origin.
+specific stream URL. The Discord link opens the Antifa FM voice channel for
+FoundUps server members. Offline shell caching remains same-origin. The issue
+briefs show dated sources, including the archived CPI release for the grocery
+and gasoline price check.
 
 ## Source and deployment
 

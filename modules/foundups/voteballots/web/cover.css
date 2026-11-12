@@ -42,7 +42,7 @@ a:focus-visible, summary:focus-visible {
 .cover-skip:focus { transform: translateY(0); }
 
 .cover-shell {
-  width: min(100% - clamp(2rem, 6vw, 5rem), 96rem);
+  width: min(100% - clamp(1.25rem, 6vw, 5rem), 96rem);
   margin-inline: auto;
 }
 
@@ -116,6 +116,15 @@ a:focus-visible, summary:focus-visible {
 
 .cover-button:hover { background: var(--yellow); }
 
+.cover-external-arrow {
+  display: inline-block;
+  width: .52em;
+  height: .52em;
+  border-top: .12em solid currentColor;
+  border-right: .12em solid currentColor;
+  background: linear-gradient(135deg, transparent 41%, currentColor 42% 58%, transparent 59%);
+}
+
 .cover-enter {
   border-color: var(--red);
   background: var(--red);
@@ -129,10 +138,10 @@ a:focus-visible, summary:focus-visible {
 }
 
 .cover-radio {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  flex-wrap: wrap;
-  gap: .45rem 1rem;
+  gap: .45rem .85rem;
   margin-block-end: 1rem;
   border: 2px solid var(--ink);
   padding: .4rem .65rem;
@@ -144,7 +153,9 @@ a:focus-visible, summary:focus-visible {
   font: 850 1rem/1.2 var(--reading);
 }
 
-.cover-radio a {
+.cover-radio h2 span { color: var(--red); white-space: nowrap; }
+
+.cover-radio a:not(.cover-button) {
   color: #06498f;
   font-size: .85rem;
   font-weight: 750;
@@ -152,15 +163,36 @@ a:focus-visible, summary:focus-visible {
 }
 
 .cover-radio audio {
-  flex: 1 1 10rem;
   width: 100%;
   max-width: 17rem;
   min-width: 0;
   height: 44px;
 }
 
+.cover-radio-community {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: end;
+  gap: .35rem .65rem;
+}
+
+.cover-radio-community > span {
+  color: #073a8c;
+  font-size: .91rem;
+  font-weight: 850;
+}
+
+.cover-discord {
+  border-color: #073a8c;
+  background: #073a8c;
+  color: white;
+}
+
+.cover-discord:hover { color: var(--ink); }
+
 .cover-radio-error {
-  flex-basis: 100%;
+  grid-column: 1 / -1;
   margin: 0;
   font-size: .86rem;
 }
@@ -199,27 +231,31 @@ a:focus-visible, summary:focus-visible {
   color: white;
 }
 
-.cover-schumer-tag {
-  margin: 0;
+.cover-campaign-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: .12rem .72rem;
+  margin: 0 0 .3rem;
   color: var(--yellow);
-  font-size: .9rem;
-  font-weight: 850;
-  letter-spacing: .025em;
-  text-align: right;
+  font-size: clamp(.93rem, 2vw, 1.38rem);
+  font-weight: 900;
+  line-height: 1.2;
 }
 
 .cover-lead h2 {
   margin-top: .12em;
-  font-size: clamp(2rem, 5vw, 4.4rem);
+  font-size: clamp(1.9rem, 5.7vw, 4.25rem);
   line-height: 1.06;
 }
 
 .cover-video-link {
-  display: inline-flex;
+  display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   gap: .28rem .75rem;
   text-decoration: none;
+  min-height: 44px;
 }
 
 .cover-video-link > span:first-child {
@@ -329,162 +365,136 @@ a:focus-visible, summary:focus-visible {
   --photo-origin: 65.82% 30.64%;
 }
 
-.cover-issue-art {
-  position: relative;
-  aspect-ratio: 1.9;
-  overflow: hidden;
-  background-color: #c3dfff;
-  background-image: radial-gradient(#0f1a4933 1px, transparent 1.25px);
-  background-size: 5px 5px;
+.cover-small .cover-head {
+  background: var(--ink);
+  color: var(--white);
 }
 
-.cover-issue-art .cover-crop {
-  position: absolute;
-  width: 66%;
-  height: 100%;
+.cover-small .cover-kicker { color: var(--yellow); }
+
+.cover-small h2 { font-size: clamp(1.45rem, 2.25vw, 2.1rem); }
+
+.cover-issue-art {
+  display: grid;
+  grid-template-columns: minmax(0, 35%) minmax(0, 1fr);
+  min-height: 8rem;
+  background-color: var(--issue-paper, #e6effb);
+  background-image: radial-gradient(#10183324 .65px, transparent .8px);
+  background-size: 4px 4px;
+}
+
+.cover-issue-art .cover-crop { border-right: 2px solid var(--ink); }
+
+.cover-issue-art .cover-crop img {
+  top: 50%;
+  transform: translateY(var(--photo-center));
 }
 
 .cover-photo-capitol {
-  --frame: auto;
-  --photo-width: 533.33%;
-  --photo-left: -310.42%;
-  right: 0;
+  --photo-width: 490%;
+  --photo-left: -314%;
+  --photo-center: -18%;
+  background: #b6d8f4;
 }
 
-.cover-hospital-sign {
-  position: absolute;
-  bottom: 13%;
-  left: 8%;
-  padding: .14em .38em;
-  border: 3px solid var(--ink);
-  background: var(--white);
-  box-shadow: 3px 3px 0 var(--ink);
-  color: var(--red);
-  font: 900 clamp(1.7rem, 5vw, 2.8rem)/1.2 var(--display);
-  transform: rotate(-9deg);
-}
-
-.cover-hospital-sign strong { color: var(--ink); }
-
-.cover-issue-art--housing { background-color: #a9dbb6; }
+.cover-issue-art--housing { --issue-paper: #e4f0df; }
 
 .cover-photo-housing {
-  --frame: auto;
-  --photo-width: 556.52%;
-  --photo-left: -235.65%;
-  --photo-top: -218%;
+  --photo-width: 440%;
+  --photo-left: -151%;
+  --photo-center: -65%;
+  background: #aec9e4;
 }
 
-.cover-slip {
-  position: absolute;
-  top: 9%;
-  right: 9%;
-  width: 48%;
-  min-height: 82%;
-  border: 2px solid var(--ink);
-  padding: .45rem .4rem;
-  background: var(--white);
-  box-shadow: 3px 3px 0 var(--ink);
-  color: var(--ink);
-  font-size: clamp(.61rem, 2vw, .82rem);
-  line-height: 1.1;
-  text-transform: uppercase;
-  transform: rotate(12deg);
-}
-
-.cover-slip strong {
-  display: block;
-  border-bottom: 2px solid var(--red);
-  padding-bottom: .24em;
-  font: 900 1.25em/1.1 var(--display);
-}
-
-.cover-slip span {
-  display: block;
-  margin-top: .45em;
-  font-weight: 800;
-}
-
-.cover-slip::after {
-  content: "";
-  display: block;
-  width: 80%;
-  height: 1.8rem;
-  margin-top: .35rem;
-  background: repeating-linear-gradient(to bottom, #1726498a 0 1px, transparent 1px 6px);
-}
-
-.cover-issue-art--education { background-color: #ffd584; }
+.cover-issue-art--education { --issue-paper: #fff0c5; }
 
 .cover-photo-school {
-  --frame: auto;
-  --photo-width: 533.33%;
-  --photo-left: -204.58%;
-  --photo-top: -133%;
-  right: 0;
+  --photo-width: 410%;
+  --photo-left: -119%;
+  --photo-center: -49%;
+  background: #f1dfae;
 }
 
-.cover-lunch-tray {
-  position: absolute;
-  left: 8%;
-  bottom: 12%;
-  display: grid;
-  grid-template-columns: 1.1fr .7fr;
-  grid-template-rows: 1fr 1fr;
-  gap: .3rem;
-  width: 57%;
-  height: 55%;
-  border: 3px solid var(--ink);
-  border-radius: .65rem;
-  padding: .36rem;
-  background: var(--red);
-  box-shadow: 3px 3px 0 var(--ink);
-  transform: rotate(-11deg);
-}
-
-.cover-lunch-tray span {
-  border: 2px solid var(--ink);
-  border-radius: .4rem;
-  background: #ffd570;
-}
-
-.cover-lunch-tray span:first-child {
-  grid-row: span 2;
-  background: var(--white);
-}
-
-.cover-lunch-tray span:last-child { background: #83d190; }
-
-.cover-issue-art--prices { background-color: #f9ac9d; }
+.cover-issue-art--prices { --issue-paper: #fbe4db; }
 
 .cover-photo-states {
-  --frame: auto;
-  --photo-width: 230%;
-  --photo-left: -118%;
-  --photo-top: -171%;
-  inset-block-start: 14%;
-  inset-inline-start: 0;
+  --photo-width: 630%;
+  --photo-left: -524%;
+  background: #eed8b5;
 }
 
-.cover-receipt {
-  right: 15%;
-  min-height: 102%;
-  transform: rotate(-11deg);
+.cover-issue-art .cover-photo-states img {
+  top: auto;
+  bottom: 0;
+  transform: none;
+}
+
+.cover-issue-note {
+  align-self: center;
+  margin: 0;
+  padding: .65rem clamp(.65rem, 1.55vw, 1.2rem);
+  font-size: .99rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.cover-issue-note strong {
+  display: block;
+  margin-bottom: .16em;
+  font: 900 clamp(1.06rem, 2.25vw, 1.55rem)/1.12 var(--reading);
+}
+
+.cover-issue-note > span {
+  display: block;
+  margin-top: .32rem;
+  font-size: .86rem;
+  font-weight: 650;
+}
+
+.cover-price-check dl { margin: 0; }
+
+.cover-price-check dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: .25rem;
+  border-bottom: 1px solid #10183355;
+  padding: .1rem 0;
+}
+
+.cover-price-check dd {
+  margin: 0;
+  color: #9f1720;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
 }
 
 .cover-body {
   flex: 1;
   padding: .65rem .85rem .8rem;
   border-top: 2px solid var(--ink);
-  font-size: .9rem;
+  font-size: 1rem;
 }
 
+.cover-small .cover-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  align-content: flex-start;
+  justify-content: space-between;
+  gap: .15rem .65rem;
+}
+
+.cover-small .cover-facts[open] { flex-basis: 100%; }
+.cover-small .cover-call { margin-top: 0; }
+
 .cover-ask {
-  margin: 0 0 .6rem;
-  font-size: clamp(.98rem, 2vw, 1.16rem);
+  margin: 0 0 .22rem;
+  font-size: clamp(1.16rem, 2vw, 1.44rem);
   font-weight: 850;
   line-height: 1.28;
 }
+
+.cover-demand { margin: 0 0 .7rem; }
 
 .cover-lead-call {
   display: flex;
@@ -495,7 +505,7 @@ a:focus-visible, summary:focus-visible {
 
 .cover-lead-call p, .cover-caption { margin: 0; }
 
-.cover-lead-call p { font-size: .79rem; }
+.cover-lead-call p { font-size: .9rem; }
 
 .cover-lead .cover-call {
   border-color: var(--red);
@@ -689,6 +699,15 @@ a:focus-visible, summary:focus-visible {
   .cover-ticker-toggle { display: none; }
 }
 
+@media (max-width: 39rem) {
+  .cover-radio { grid-template-columns: minmax(0, 1fr) auto; }
+  .cover-radio audio { grid-row: 2; grid-column: 1 / -1; max-width: none; }
+  .cover-radio-community { display: grid; justify-items: end; }
+  .cover-radio-community > span { font-size: .78rem; }
+  .cover-discord { grid-row: 1; }
+  .cover-lead .cover-video-link { gap: .24rem .6rem; }
+}
+
 @media (min-width: 44rem) {
   .cover-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -696,7 +715,6 @@ a:focus-visible, summary:focus-visible {
   }
 
   .cover-lead, .cover-money { grid-column: 1 / -1; }
-  .cover-small .cover-head { min-height: 6.5rem; }
 }
 
 @media (min-width: 64rem) {
