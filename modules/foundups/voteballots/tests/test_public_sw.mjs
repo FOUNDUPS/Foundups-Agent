@@ -17,7 +17,7 @@ function worker() {
   const handlers = {};
   const contents = new Map();
   const requests = [];
-  const names = ['unrelated', 'vote-public-guide-v2', 'vote-public-guide-v3', 'vote-public-guide-v4', 'vote-public-guide-v5', 'vote-public-guide-v6'];
+  const names = ['unrelated', 'vote-public-guide-v2', 'vote-public-guide-v3', 'vote-public-guide-v4', 'vote-public-guide-v5', 'vote-public-guide-v6', 'vote-public-guide-v7'];
   const deleted = [];
   const cache = {
     match: async (url) => contents.get(url),
@@ -63,7 +63,7 @@ test('canonical and prior HTML navigation use the same cached document offline',
   assert.equal(sw.contents.size, 25);
   assert.ok(sw.requests.every(({options}) => options.redirect === 'error'));
   await sw.event('activate', '/');
-  assert.deepEqual(sw.deleted, ['vote-public-guide-v2', 'vote-public-guide-v3', 'vote-public-guide-v4', 'vote-public-guide-v5']);
+  assert.deepEqual(sw.deleted, ['vote-public-guide-v2', 'vote-public-guide-v3', 'vote-public-guide-v4', 'vote-public-guide-v5', 'vote-public-guide-v6']);
   sw.changeResponse(() => { throw new TypeError('offline'); });
   for (const path of ['/guide', '/contact', '/evidence', '/coalition']) {
     assert.equal(await sw.event('fetch', path), sw.contents.get(origin + path));
@@ -79,6 +79,7 @@ test('canonical and prior HTML navigation use the same cached document offline',
     assert.equal(sw.event('fetch', path), undefined);
   }
   assert.equal(sw.event('fetch', '/contact', 'POST'), undefined);
+  assert.equal(sw.event('fetch', 'https://a12.asurahosting.com/listen/antifafm/radio.mp3'), undefined);
 });
 
 test('the cover hands every original guide fragment back to the guide', () => {

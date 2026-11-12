@@ -1,5 +1,13 @@
 # Vote/Ballots FoundUp — Module Log
 
+## 2026-11-12 — Antifa FM radio on the Vote cover
+
+Add the AntifaFM.com link and the native public Icecast player using the
+existing DJ feed. Allow autoplay through browser policy and keep manual
+playback and a station fallback. Replace the money illustration beside Schumer
+with the red stamp from the supplied comic. Keep the feed outside the v7
+offline cache. WSP 22, 50, 84, 97, 102.
+
 ## 2026-11-12 — Vote cover readability and install entry
 
 Give the cover and guide one install flow and open the standalone Vote app at
