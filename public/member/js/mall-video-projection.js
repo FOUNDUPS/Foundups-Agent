@@ -75,6 +75,12 @@
       window.mallTileField.initialize([projection.lane], { fixedVideoField: true });
       window.mallStateRestore.restore();
       window.mallStateRestore.bindAutoSave();
+
+      const desktop = window.matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)');
+      const applyPresentation = () => window.mallTileField.setScopedTheater?.(desktop.matches);
+      desktop.addEventListener('change', applyPresentation);
+      // The shared state owner restores the tab's browse position before startup.
+      requestAnimationFrame(applyPresentation);
     } catch (error) {
       console.warn('[Mall] Public video projection unavailable:', error);
       field.textContent = 'This video collection is unavailable. Reload the page to try again.';

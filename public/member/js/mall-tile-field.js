@@ -76,6 +76,8 @@
   var fixedRenderedCount = 0;
   var fixedTailObserver = null;
   var fixedBrowsePosition = null;
+  var scopedTheaterRequested = false;
+  var scopedTheaterState = null;
   var scopedPlaybackPosition = null;
   var SCOPED_PLAYER_HISTORY = 'pfmallScopedPlayer';
   var browseScrollTop = 0;
@@ -675,6 +677,8 @@
     originalOrder = mallCatalog.slice();  // Preserve original order
     currentFieldScope = null;  // Reset scope on init
     fixedVideoField = options?.fixedVideoField === true && mallCatalog.length === 1;
+    scopedTheaterRequested = false;
+    scopedTheaterState = null;
     if (fixedVideoField) {
       expandedFoundUp = 0;
       layoutMode = 'grid';
@@ -1456,20 +1460,30 @@
     return state;
   }
 
+  function rememberTheater() {
+    var player = window.mallVideoPlayer;
+    if (!player?.isTheater?.()) return;
+    scopedTheaterState = {
+      videoId: mallCatalog[0].videos[player.getCurrentIndex()].video_id,
+      query: player.getQueueQuery()
+    };
+  }
+
   function getVideoGridState() {
-    return fixedVideoField ? scopedPlaybackPosition || captureFixedPosition() : null;
+    if (!fixedVideoField) return null;
+    rememberTheater();
+    var position = scopedPlaybackPosition || captureFixedPosition();
+    return position && scopedTheaterState ? { ...position, theater: scopedTheaterState } : position;
   }
 
   function restoreVideoGridState(state) {
     if (!fixedVideoField || !state || !tileFieldWrapper) return false;
+    if (state.theater) scopedTheaterState = state.theater;
     var queue = mallCatalog[0].videos || [];
     var index = state.anchorVideoId ? queue.findIndex(function(video) {
       return video.video_id === state.anchorVideoId;
     }) : -1;
-    if (index >= fixedRenderedCount) {
-      renderTiles(Math.ceil((index + 1) / FIXED_VIDEO_BATCH) * FIXED_VIDEO_BATCH);
-    }
-    var tile = getTileElement(index);
+    var tile = getScopedTile(index);
     var targetTop = state.scrollTop;
     if (tile) {
       var rect = tile.getBoundingClientRect();
@@ -1714,49 +1728,108 @@
     }
   }
 
-  /**
-   * Open fullscreen player from a tile interaction.
-   * In Mall mode: opens the FoundUp's video queue starting at first video.
-   * In expanded mode: opens at the specific video index.
-   * @param {number} index - Tile index
-   */
+  function getScopedTile(index) {
+    if (index >= fixedRenderedCount) {
+      renderTiles(Math.ceil((index + 1) / FIXED_VIDEO_BATCH) * FIXED_VIDEO_BATCH);
+    }
+    return getTileElement(index);
+  }
+
+  function positionScopedSlot(slot, index) {
+    var lastInRow = Math.min(mallCatalog[0].videos.length - 1,
+      index + FIXED_VIDEO_COLUMNS - 1 - index % FIXED_VIDEO_COLUMNS);
+    var lastTile = getScopedTile(lastInRow);
+    if (!slot.isConnected) {
+      lastTile.after(slot);
+    } else if (slot.previousElementSibling !== lastTile) {
+      // Move the tiles around the slot so resizing leaves the provider iframe mounted.
+      var tiles = Array.from(tileField.querySelectorAll('.mall-tile'));
+      slot.before(...tiles.slice(0, lastInRow + 1));
+      slot.after(...tiles.slice(lastInRow + 1));
+    }
+  }
+
+  function setScopedTheater(enabled) {
+    if (!fixedVideoField) return;
+    scopedTheaterRequested = enabled;
+    var player = window.mallVideoPlayer;
+    var lane = mallCatalog[0];
+    if (enabled) {
+      if (player.isOpen()) {
+        player.setTheater?.(true);
+      } else {
+        var restoredIndex = lane.videos.findIndex(function(video) {
+          return video.video_id === scopedTheaterState?.videoId;
+        });
+        openScopedVideo(Math.max(0, restoredIndex), false);
+      }
+      return;
+    }
+    if (!player.isTheater?.()) return;
+
+    rememberTheater();
+    var slot = tileField.querySelector('.mall-inline-player-slot');
+    var index = player.getCurrentIndex();
+    positionScopedSlot(slot, index);
+    var tile = getTileElement(index);
+    player.setTheater(false, tile);
+    if (scopedPlaybackPosition?.anchorVideoId !== tile.dataset.videoId) {
+      scopedPlaybackPosition = { scrollTop: 0, scrollLeft: 0, anchorVideoId: tile.dataset.videoId, anchorOffset: 0 };
+    }
+    tileField.querySelector('.mall-tile[aria-current]')?.removeAttribute('aria-current');
+    tile.setAttribute('aria-current', 'true');
+    pushScopedPlayerHistory(lane.foundup_id);
+    slot.scrollIntoView({ block: 'nearest' });
+  }
+
+  function pushScopedPlayerHistory(foundupId) {
+    if (window.history.state?.[SCOPED_PLAYER_HISTORY] !== foundupId) {
+      window.history.pushState({ ...window.history.state, [SCOPED_PLAYER_HISTORY]: foundupId }, '');
+    }
+  }
+
   function openScopedVideo(index, immersive) {
     var player = window.mallVideoPlayer;
     var lane = mallCatalog[0];
-    var tile = getTileElement(index);
-    if (!player || !tile || !lane?.videos?.[index]) return;
+    if (!player || !lane?.videos?.[index]) return;
+    var tile = getScopedTile(index);
     if (player.isOpen() && player.getFoundUpId() === lane.foundup_id && player.getCurrentIndex() === index) {
       if (immersive) player.expandInline();
       return;
     }
     player.close({ restore: false });
-    var position = captureFixedPosition(tile);
-    scopedPlaybackPosition = position;
-    if (window.history.state?.[SCOPED_PLAYER_HISTORY] !== lane.foundup_id) {
-      window.history.pushState({ ...window.history.state, [SCOPED_PLAYER_HISTORY]: lane.foundup_id }, '');
-    }
+    var theater = scopedTheaterRequested && !immersive;
+    scopedPlaybackPosition = captureFixedPosition(theater ? null : tile);
+    if (!theater) pushScopedPlayerHistory(lane.foundup_id);
     var slot = null;
     if (!immersive) {
       slot = document.createElement('div');
       slot.className = 'mall-inline-player-slot';
-      var lastInRow = Math.min(fixedRenderedCount - 1,
-        index + FIXED_VIDEO_COLUMNS - 1 - index % FIXED_VIDEO_COLUMNS);
-      getTileElement(lastInRow).after(slot);
+      positionScopedSlot(slot, index);
     }
     var thumbnail = tile.getBoundingClientRect();
     tile.setAttribute('aria-current', 'true');
     player.open(lane.foundup_id, lane.videos, index, {
       inlineMount: slot,
       returnTile: tile,
+      theater: theater,
+      query: scopedTheaterState?.query,
+      matchesQuery: function(video, query) {
+        return matchesCatalogQuery({ creator: video.source_label, videos: [video] }, query);
+      },
       // YouTube thumbnail activation requires 120 × 70 CSS pixels.
-      autoplay: thumbnail.width >= 120 && thumbnail.height >= 70,
+      autoplay: theater || (thumbnail.width >= 120 && thumbnail.height >= 70),
       onClose: function(restore) {
         slot?.remove();
-        tile.removeAttribute('aria-current');
+        tileField.querySelector('.mall-tile[aria-current]')?.removeAttribute('aria-current');
+        var position = scopedPlaybackPosition;
         scopedPlaybackPosition = null;
         if (restore) {
           restoreVideoGridState(position);
           if (window.history.state?.[SCOPED_PLAYER_HISTORY] === lane.foundup_id) window.history.back();
+          if (scopedTheaterRequested) queueMicrotask(function() {
+            if (scopedTheaterRequested && !player.isOpen()) openScopedVideo(index, false);
+          });
         }
       }
     });
@@ -1771,7 +1844,8 @@
     }
     window.addEventListener('popstate', function() {
       if (window.history.state?.[SCOPED_PLAYER_HISTORY] !== foundupId &&
-          window.mallVideoPlayer?.getFoundUpId() === foundupId) {
+          window.mallVideoPlayer?.getFoundUpId() === foundupId &&
+          !window.mallVideoPlayer.isTheater?.()) {
         window.mallVideoPlayer.close();
       }
     });
@@ -2694,6 +2768,7 @@
     getGeographicState: getGeographicState,
     restoreGeographicState: restoreGeographicState,
     getVideoGridState: getVideoGridState,
+    setScopedTheater: setScopedTheater,
     restoreVideoGridState: restoreVideoGridState,
     enterFoundUp: enterFoundUp,
     navigateToFoundUp: navigateToFoundUp,

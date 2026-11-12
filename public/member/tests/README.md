@@ -11,8 +11,11 @@ existing Python Playwright and Chromium test runtime. It serves the real
 shell from local files with a 31-video fixture and controlled provider events.
 The test covers vertical batching, one active inline iframe, immersive
 promotion, Back and Escape, deep Vote return, orientation, diagnostics and
-manual Play at 320 px. `node public/member/tests/mall_product_state_vm.mjs`
-covers v6 retirement, v7 shell and scoped offline cache behavior. Real YouTube
+manual Play at 320 px. The desktop cases cover first-video startup,
+filtered queue advancement, keyboard selection, breakpoint continuity and
+civic-resource return. `node public/member/tests/mall_product_state_vm.mjs`
+covers v8 installation, obsolete Mall cache retirement and scoped offline behavior.
+Real YouTube
 time progression and physical-device gates are separate in the
 [incident](../../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md).
 
