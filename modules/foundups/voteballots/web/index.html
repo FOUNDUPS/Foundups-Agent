@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#fff2d7">
   <meta name="description" content="Six political cartoons, the facts behind them and a direct entrance to Vote's civic tools.">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src https://a12.asurahosting.com/listen/antifafm/radio.mp3; object-src 'none'; base-uri 'none'; form-action 'none'">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="manifest" href="manifest.webmanifest">
@@ -28,6 +28,16 @@
     </nav>
     <p class="cover-disclosure">Independent campaign and satire. No affiliation with or endorsement by <a href="https://www.twitch.tv/hasanabi" aria-label="Hasan Piker on Twitch">Hasan Piker</a> or anyone depicted.</p>
   </header>
+  <aside class="cover-radio cover-shell" aria-labelledby="radio-title">
+    <div>
+      <h2 id="radio-title">Antifa FM Radio</h2>
+      <a href="https://antifafm.com/">AntifaFM.com <span aria-hidden="true">↗</span></a>
+    </div>
+    <audio aria-label="Antifa FM live audio" controls autoplay preload="none" src="https://a12.asurahosting.com/listen/antifafm/radio.mp3">
+      <a href="https://a12.asurahosting.com/public/antifafm">Open the station player</a>
+    </audio>
+    <p class="cover-radio-error" role="status" hidden>Radio is unavailable here. <a href="https://a12.asurahosting.com/public/antifafm">Open the station player</a>.</p>
+  </aside>
   <main class="cover-shell" id="comic-cover" tabindex="-1">
     <noscript>
       <nav class="cover-legacy" aria-label="Original Vote guide sections">
@@ -73,12 +83,10 @@
           <div class="cover-crop cover-photo-schumer">
             <img src="comics/photo-1.webp" width="1280" height="667" alt="Close-up caricature of Chuck Schumer in tears." loading="lazy">
           </div>
-          <div class="cover-money-props" aria-hidden="true">
-            <span class="cover-balloon"><span>AIPAC</span></span>
-            <span class="cover-pin"></span>
-            <span class="cover-megaphone"><span>UDP</span></span>
-            <span class="cover-bag cover-bag-back">$</span>
-            <span class="cover-bag">$</span>
+          <div class="cover-money-print">
+            <div class="cover-crop cover-photo-funding">
+              <img src="comics/photo-3.webp" width="1280" height="718" alt="Red comic stamp reading No to AIPAC." loading="lazy">
+            </div>
           </div>
         </figure>
         <div class="cover-body">

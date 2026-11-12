@@ -128,6 +128,43 @@ a:focus-visible, summary:focus-visible {
   color: white;
 }
 
+.cover-radio {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .45rem 1rem;
+  margin-block-end: 1rem;
+  border: 2px solid var(--ink);
+  padding: .4rem .65rem;
+  background: var(--white);
+}
+
+.cover-radio h2 {
+  margin: 0;
+  font: 850 1rem/1.2 var(--reading);
+}
+
+.cover-radio a {
+  color: #06498f;
+  font-size: .85rem;
+  font-weight: 750;
+  text-underline-offset: .15em;
+}
+
+.cover-radio audio {
+  flex: 1 1 10rem;
+  width: 100%;
+  max-width: 17rem;
+  min-width: 0;
+  height: 44px;
+}
+
+.cover-radio-error {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: .86rem;
+}
+
 .cover-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -258,122 +295,22 @@ a:focus-visible, summary:focus-visible {
   background: #eee0bf;
 }
 
-.cover-money-props { position: relative; }
-
-.cover-balloon, .cover-megaphone {
-  font: 850 clamp(1.05rem, 3.2vw, 2.05rem)/1 var(--reading);
-  letter-spacing: .06em;
-  white-space: nowrap;
-}
-
-.cover-balloon {
-  position: absolute;
-  top: 7%;
-  left: 8%;
+.cover-money-print {
   display: grid;
-  width: 69%;
-  min-height: 24%;
-  place-items: center;
-  border: 3px solid var(--ink);
-  border-radius: 54% 46% 58% 42%;
-  background: var(--red);
-  color: white;
-  transform: rotate(-12deg);
+  align-items: center;
+  min-width: 0;
+  padding: 7%;
 }
 
-.cover-balloon > span { transform: rotate(12deg); }
-
-.cover-balloon::after {
-  content: "";
-  position: absolute;
-  top: 96%;
-  left: 58%;
-  width: .8rem;
-  height: 1.55rem;
-  border-right: 2px solid var(--ink);
-  border-radius: 50%;
-  transform: rotate(24deg);
-}
-
-.cover-pin {
-  position: absolute;
-  top: 25%;
-  right: 5%;
-  width: 24%;
-  height: 3px;
-  background: var(--ink);
-  transform: rotate(24deg);
-}
-
-.cover-pin::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  top: -4px;
-  width: 11px;
-  height: 11px;
+.cover-photo-funding {
+  --frame: 276 / 207;
+  --photo-width: 463.77%;
+  --photo-left: -363.77%;
+  --photo-top: -117.87%;
   border: 2px solid var(--ink);
-  border-radius: 50%;
   background: var(--white);
+  box-shadow: 3px 3px 0 var(--ink);
 }
-
-.cover-megaphone {
-  position: absolute;
-  z-index: 1;
-  top: 39%;
-  left: 1%;
-  display: grid;
-  width: 67%;
-  min-height: 31%;
-  place-items: center;
-  padding-right: 12%;
-  background: var(--blue);
-  clip-path: polygon(0 0, 86% 31%, 100% 31%, 100% 64%, 81% 64%, 73% 97%, 57% 97%, 58% 73%, 0 98%);
-  color: white;
-  transform: rotate(-16deg);
-}
-
-.cover-megaphone > span { transform: rotate(16deg); }
-
-.cover-bag {
-  position: absolute;
-  right: 7%;
-  bottom: 8%;
-  display: grid;
-  width: 48%;
-  height: 39%;
-  place-items: end center;
-  padding-bottom: .18em;
-  border: 3px solid var(--ink);
-  border-radius: 53% 47% 25% 28%;
-  background: #ffdb68;
-  color: var(--ink);
-  font: 900 clamp(1.4rem, 4vw, 2.5rem)/1 var(--display);
-  transform: rotate(8deg);
-}
-
-.cover-bag::before {
-  content: "";
-  position: absolute;
-  top: -19%;
-  left: 30%;
-  width: 41%;
-  height: 24%;
-  border: 2px solid var(--ink);
-  border-radius: 0 0 44% 44%;
-  background: #ffdb68;
-}
-
-.cover-bag-back {
-  right: 40%;
-  bottom: 5%;
-  width: 37%;
-  height: 28%;
-  background: var(--white);
-  transform: rotate(-13deg);
-}
-
-.cover-bag-back::before { background: var(--white); }
 
 .cover-issue-art {
   position: relative;

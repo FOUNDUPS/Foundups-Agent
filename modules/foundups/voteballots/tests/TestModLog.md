@@ -2,6 +2,12 @@
 
 <!-- WSP 22: anti-vibecoding test inventory. NEWEST entries at TOP. -->
 
+## [2026-11-12] — Vote radio and supplied funding artwork
+
+Extend the existing worker fixture to cover v6 retirement and exclude the
+external radio stream from the offline shell. Browser checks exercise playback
+under both autoplay policies, the station links and the cropped supplied artwork.
+
 ## [2026-11-12] — Vote cover install and layout
 
 Extend the existing public cache fixture to verify v5 retirement. Browser

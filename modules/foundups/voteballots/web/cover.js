@@ -24,6 +24,15 @@ function openLegacyGuideFragment() {
 openLegacyGuideFragment();
 window.addEventListener('hashchange', openLegacyGuideFragment);
 
+const radio = document.querySelector('.cover-radio audio');
+if (radio) {
+  const notice = document.querySelector('.cover-radio-error');
+  const showError = () => { notice.hidden = false; };
+  radio.addEventListener('error', showError);
+  radio.addEventListener('playing', () => { notice.hidden = true; });
+  if (radio.error) showError();
+}
+
 const ticker = document.querySelector('.cover-ticker');
 if (ticker) {
   const track = ticker.querySelector('.cover-ticker-track');
