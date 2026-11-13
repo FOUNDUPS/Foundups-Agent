@@ -15,9 +15,18 @@ Desktop opens a centered video with scoped search and a thumbnail queue.
 Touch and narrow layouts keep three portrait columns. Playback replaces
 the selected tile in its original row. The phone dock holds
 options, collection search, dictation and the public Red Dog briefing link.
+Expand opens the shared player with search above the horizontal queue.
 HPC supplies its own standalone install name and artwork. The
 [shared media incident](../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md)
 tracks real provider playback and the open physical iPhone gate.
+
+### Invited Mall video browsing
+
+Select a video-backed card to play at that card. Expand keeps the same
+player and shows the floating queue search. On phones, swipe the thumbnail
+queue sideways to browse the current lane. The plus button opens options
+and a tap on Red Dog opens the concierge. Hold the dog or use the microphone
+to dictate search on supported devices. The square finishes dictation.
 
 ### Public FX directory
 

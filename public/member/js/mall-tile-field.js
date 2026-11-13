@@ -1267,8 +1267,8 @@
       : itemsToRender.length;
     if (append && end <= start) return;
     var grouped = groupDefinitions !== null && expandedFoundUp === null;
-    var desktopPlayer = usesDesktopPlayer();
-    var desktopGrid = desktopPlayer && layoutMode === 'grid';
+    var memberPlayer = usesMemberVideoPlayer();
+    var desktopGrid = memberPlayer && desktopPosterBrowsing && layoutMode === 'grid';
     visibleGroups = grouped ? resolveGroups() : [];
     tileField.setAttribute('data-layout', grouped ? 'grouped' : layoutMode);
     tileFieldWrapper.classList.toggle('mall-field-grouped-wrapper', grouped);
@@ -1306,8 +1306,8 @@
       var tileType = isAvatarTile ? 'avatar' : 'video';
 
       // Determine if tile has videos (includes expanded video tiles with video_data)
-      var hasVideos = item.videos?.length || item.video_data || (!desktopPlayer && item.video_count);
-      var inlineControls = hasVideos && !fixedVideoField && !desktopPlayer;
+      var hasVideos = item.videos?.length || item.video_data || (!memberPlayer && item.video_count);
+      var inlineControls = hasVideos && !fixedVideoField && !memberPlayer;
 
       // Queue count (true_video_count preferred, then video_count, then videos array length)
       var queueCount = item.true_video_count || item.video_count || (item.videos ? item.videos.length : 0);
@@ -1626,8 +1626,8 @@
       // Keyboard support
       tile.addEventListener('keydown', function(e) {
         var index = Number(tile.dataset.index || 0);
-        var desktopPlayer = usesDesktopPlayer();
-        if ((fixedVideoField || desktopPlayer) && e.target !== tile) return;
+        var memberPlayer = usesMemberVideoPlayer();
+        if ((fixedVideoField || memberPlayer) && e.target !== tile) return;
         if (groupDefinitions !== null && tileField.closest('[inert]')) return;
         if (groupDefinitions !== null && /^Arrow(Left|Right|Up|Down)$/.test(e.key)) {
           e.preventDefault();
@@ -1637,8 +1637,8 @@
           togglePlay(index);
         } else if (e.key === 'Enter') {
           e.preventDefault();
-          // Match click behavior in the video grids and keep the row shortcut.
-          if (fixedVideoField || desktopPlayer) togglePlay(index);
+          // Match the pointer path in the shared video presentations.
+          if (fixedVideoField || memberPlayer) togglePlay(index);
           else openFullscreenFromTile(index);
         }
       });
@@ -1744,8 +1744,8 @@
     });
   }
 
-  function usesDesktopPlayer() {
-    return desktopPosterBrowsing && !fixedVideoField && groupDefinitions === null &&
+  function usesMemberVideoPlayer() {
+    return !fixedVideoField && groupDefinitions === null &&
       typeof window.mallVideoPlayer?.openDesktopVideo === 'function';
   }
 
@@ -1780,8 +1780,8 @@
       }
       return;
     }
-    var desktopPlayer = usesDesktopPlayer();
-    var hasVideos = item && (item.videos?.length || item.video_data || (!desktopPlayer && item.video_count));
+    var memberPlayer = usesMemberVideoPlayer();
+    var hasVideos = item && (item.videos?.length || item.video_data || (!memberPlayer && item.video_count));
 
     // Non-video tiles: open quick-view instead of trying inline preview
     if (!hasVideos) {
@@ -1793,7 +1793,7 @@
       return;
     }
 
-    if (desktopPlayer) {
+    if (memberPlayer) {
       openDesktopVideo(index, false);
       return;
     }
@@ -1919,6 +1919,7 @@
       returnTile: tile,
       theater: theater,
       query: scopedTheaterState?.query,
+      queueQuery: scopedPhoneQuery,
       matchesQuery: matchesScopedVideo,
       autoplay: autoplay,
       onClose: function(restore) {
@@ -1967,7 +1968,7 @@
       return;
     }
     if (!window.mallVideoPlayer) return;
-    if (usesDesktopPlayer()) {
+    if (usesMemberVideoPlayer()) {
       openDesktopVideo(index, true);
       return;
     }
@@ -2011,7 +2012,7 @@
       inlineMount: immersive ? null : function() {
         slot = document.createElement('div');
         slot.className = 'mall-member-inline-slot';
-        if (tile.parentElement === tileField) sizeDesktopVideoSlot(slot);
+        if (tile.parentElement === tileField) sizeMemberVideoSlot(slot);
         tile.before(slot);
         tile.hidden = true;
         tile.setAttribute('aria-current', 'true');
@@ -2042,10 +2043,12 @@
     return !!rect && rect.width >= 120 && rect.height >= 70;
   }
 
-  function sizeDesktopVideoSlot(slot) {
+  function sizeMemberVideoSlot(slot) {
     var columns = window.getComputedStyle(tileField).gridTemplateColumns.split(' ');
     var width = parseFloat(columns[0]) || 1;
-    slot.style.setProperty('--member-inline-columns', Math.min(columns.length, Math.ceil(360 / width)));
+    if (columns.length > 1) {
+      slot.style.setProperty('--member-inline-columns', Math.min(columns.length, Math.ceil(360 / width)));
+    }
   }
 
   /**
@@ -2545,7 +2548,7 @@
     }
     autoSelectDensity();
     if (desktopInlineTile?.parentElement === tileField) {
-      sizeDesktopVideoSlot(desktopInlineTile.previousElementSibling);
+      sizeMemberVideoSlot(desktopInlineTile.previousElementSibling);
     }
   }
 
@@ -2942,6 +2945,7 @@
     setScopedTheater: setScopedTheater,
     getScopedPhoneQuery: function() { return scopedPhoneQuery; },
     setScopedPhoneQuery: setScopedPhoneQuery,
+    matchesVideoQuery: matchesScopedVideo,
     restoreVideoGridState: restoreVideoGridState,
     enterFoundUp: enterFoundUp,
     navigateToFoundUp: navigateToFoundUp,

@@ -25,6 +25,17 @@
     return publicScopes.has(foundupId) ? '/member/?foundup=' + foundupId : null;
   }
 
+  function scopedRedDogPath(scope) {
+    return publicScopes.has(scope) ? '/f/' + encodeURIComponent(scope) + '#red-dog' : null;
+  }
+
+  function openScopedRedDog(scope) {
+    const path = scopedRedDogPath(scope);
+    if (!path) return;
+    window.mallStateRestore?.save();
+    window.location.assign(path);
+  }
+
   function discoveryPath(foundupId, pocUrl) {
     for (const [host, scope] of dedicatedHosts) {
       if (foundupId !== scope) continue;
@@ -60,18 +71,39 @@
     const hint = 'Use the microphone on your keyboard to dictate.';
     let attempt = 0;
     let active = null;
+    let starting = false;
+    let timer;
+    function idle() {
+      clearTimeout(timer);
+      active = null;
+      starting = false;
+      button.removeAttribute('data-dictating');
+      button.setAttribute('aria-label', 'Dictate search');
+    }
     function cancel() {
       attempt += 1;
-      active?.abort();
-      active = null;
+      const recognition = active;
+      idle();
+      recognition?.abort();
       status.textContent = '';
+    }
+    function stop() {
+      if (!active) {
+        if (starting) cancel();
+        return;
+      }
+      try { active.stop(); } catch { cancel(); }
     }
     window.addEventListener('pagehide', cancel);
     document.addEventListener('visibilitychange', () => { if (document.hidden) cancel(); });
     input.addEventListener('input', cancel);
-    input.addEventListener('blur', cancel);
-    button.addEventListener('click', async () => {
+    input.addEventListener('blur', (event) => { if (event.relatedTarget !== button) cancel(); });
+    function retainInputFocus(event) { if (active || starting) event.preventDefault(); }
+    button.addEventListener('pointerdown', retainInputFocus);
+    button.addEventListener('mousedown', retainInputFocus);
+    async function start() {
       cancel();
+      if (document.hidden || !input.getClientRects().length) return;
       input.focus(); // Keep iOS keyboard dictation reachable on the original tap.
       const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!Recognition?.available || !('processLocally' in Recognition.prototype)) {
@@ -80,35 +112,99 @@
       }
       const request = attempt;
       const lang = navigator.language || 'en-US';
+      starting = true;
+      button.setAttribute('data-dictating', '');
+      button.setAttribute('aria-label', 'Stop dictation');
+      timer = setTimeout(cancel, 15000);
       try {
         const availability = await Recognition.available({ langs: [lang], processLocally: true });
         if (request !== attempt || document.hidden) return;
         if (availability !== 'available') {
+          idle();
           status.textContent = hint;
           return;
         }
         const recognition = new Recognition();
         recognition.lang = lang;
         recognition.processLocally = true;
+        recognition.onstart = () => {
+          if (request === attempt) status.textContent = 'Listening for search…';
+        };
         recognition.onresult = (event) => {
           if (request !== attempt) return;
           input.value = event.results[0][0].transcript.trim().slice(0, input.maxLength);
           status.textContent = 'Dictation added. Press Search.';
+          input.dispatchEvent(new Event('change', { bubbles: true }));
         };
         recognition.onerror = () => { if (request === attempt) status.textContent = hint; };
         recognition.onend = () => {
-          if (active === recognition) active = null;
-          if (request === attempt && status.textContent === 'Listening…') status.textContent = hint;
+          if (request !== attempt) return;
+          idle();
+          if (status.textContent !== 'Dictation added. Press Search.') status.textContent = hint;
         };
         active = recognition;
-        status.textContent = 'Listening…';
+        status.textContent = 'Starting dictation…';
         recognition.start();
       } catch {
         if (request === attempt) {
-          active = null;
+          idle();
           status.textContent = hint;
         }
       }
+    }
+    button.addEventListener('click', () => { if (active || starting) stop(); else start(); });
+    return { start, stop, cancel };
+  }
+
+  function bindOptions(trigger, open) {
+    trigger.addEventListener('click', open);
+    if (!window.gestureZone) return;
+    window.gestureZone(trigger, {
+      onSwipe(direction) {
+        if (direction !== 'up') return;
+        open();
+      }
+    });
+    // Keep the parent Red Dog mode sheet out of the same swipe.
+    trigger.addEventListener('touchstart', (event) => event.stopPropagation(), { passive: true });
+    trigger.addEventListener('touchend', (event) => event.stopPropagation(), { passive: true });
+  }
+
+  function bindDictationHold(trigger, dictation) {
+    let timer;
+    let held = false;
+    let pressed = false;
+    function cancel() {
+      clearTimeout(timer);
+      if (pressed && held) dictation.cancel();
+      pressed = false;
+      held = false;
+    }
+    trigger.title = 'Hold to dictate a search';
+    trigger.addEventListener('pointerdown', (event) => {
+      if (!event.isPrimary || event.button !== 0) return;
+      held = false;
+      pressed = true;
+      timer = setTimeout(() => {
+        held = true;
+        dictation.start();
+      }, 500);
+    });
+    trigger.addEventListener('pointerup', () => {
+      if (!pressed) return;
+      pressed = false;
+      clearTimeout(timer);
+      if (held) dictation.stop();
+    });
+    trigger.addEventListener('pointerleave', cancel);
+    trigger.addEventListener('pointercancel', cancel);
+    trigger.addEventListener('contextmenu', (event) => event.preventDefault());
+    trigger.addEventListener('click', (event) => {
+      if (event.detail && held) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+      held = false;
     });
     return cancel;
   }
@@ -122,12 +218,13 @@
       '<form role="search"><input type="search" maxlength="300" enterkeyhint="search">',
       '<button type="submit" aria-label="Search" hidden></button>',
       '<button type="button" aria-label="Dictate search"><svg viewBox="0 0 24 24" aria-hidden="true">',
-      '<rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11v1a7 7 0 0 0 14 0v-1m-7 8v3m-3 0h6"/></svg></button></form>',
+      '<rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11v1a7 7 0 0 0 14 0v-1m-7 8v3m-3 0h6"/></svg>',
+      '<svg class="mall-dictation-stop" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg></button></form>',
       openRedDog ? '<button type="button" aria-label="Open Red Dog"><img src="/logo-dog.png" alt="" width="30" height="30"></button>' : '',
       '</div><p role="status"></p>',
       '<dialog class="mall-member-search-options" aria-label="Search options">',
       '<a href="https://foundup-japan-ai-autopost-camera-56566376153.us-west1.run.app/" target="_blank" rel="noopener noreferrer">AutoPost camera and photos</a>',
-      '<p>Device models are unavailable in this Mall.</p>',
+      '<label>Browser AI <select disabled><option>No device model connected</option></select></label>',
       '<form method="dialog"><button type="submit">Close</button></form></dialog>'
     ].join('');
     const bar = element.querySelector('.mall-member-search-bar');
@@ -139,27 +236,38 @@
     form.setAttribute('aria-label', label);
     input.setAttribute('aria-label', label);
     input.placeholder = label;
-    const cancel = bindDictation(form.querySelector('[aria-label="Dictate search"]'), input, status);
+    const dictation = bindDictation(form.querySelector('[aria-label="Dictate search"]'), input, status);
     form.addEventListener('submit', (event) => {
       event.preventDefault();
-      cancel();
+      dictation.cancel();
       submit(input.value.trim());
     });
-    options.addEventListener('click', () => {
-      cancel();
+    function showOptions() {
+      if (dialog.open || element.hidden) return;
+      dictation.cancel();
       const rect = options.getBoundingClientRect();
       dialog.style.insetInlineStart = Math.max(16, Math.min(rect.left, window.innerWidth - 288)) + 'px';
       dialog.style.insetBlockEnd = window.innerHeight - rect.top + 8 + 'px';
       dialog.showModal();
-    });
+    }
+    bindOptions(options, showOptions);
     dialog.addEventListener('cancel', (event) => {
       event.preventDefault();
       event.stopPropagation();
       dialog.close();
     });
-    dialog.querySelector('a').addEventListener('click', () => dialog.close());
-    if (openRedDog) bar.lastElementChild.addEventListener('click', openRedDog);
-    return { element, input, dialog, hide() { dialog.close(); cancel(); element.hidden = true; } };
+    const autoPost = dialog.querySelector('a');
+    autoPost.addEventListener('click', () => dialog.close());
+    let cancelHold;
+    if (openRedDog) {
+      cancelHold = bindDictationHold(bar.lastElementChild, dictation);
+      bar.lastElementChild.addEventListener('click', openRedDog);
+    }
+    return {
+      element, input, dialog, dictation,
+      setScoped(scoped) { autoPost.hidden = scoped; },
+      hide() { cancelHold?.(); dialog.close(); dictation.cancel(); element.hidden = true; }
+    };
   }
 
   function mountMemberDock() {
@@ -178,12 +286,13 @@
       }
     });
     anchor.prepend(dock.element);
+    window.redDog.bindSearchDictation?.(dock.dictation);
     dock.dialog.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') event.stopPropagation();
     });
     window.visualViewport?.addEventListener('resize', () => {
       const viewport = window.visualViewport;
-      const keyboard = document.activeElement === dock.input && viewport.scale === 1
+      const keyboard = dock.element.contains(document.activeElement) && viewport.scale === 1
         ? Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop) : 0;
       anchor.style.setProperty('--member-dock-keyboard', keyboard + 'px');
     });
@@ -199,7 +308,8 @@
       '<form role="search" aria-label="Search this collection">',
       '<input type="search" aria-label="Search videos" placeholder="Search videos" maxlength="300" enterkeyhint="search">',
       '<button type="button" aria-label="Dictate search"><svg viewBox="0 0 24 24" aria-hidden="true">',
-      '<rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11v1a7 7 0 0 0 14 0v-1m-7 8v3m-3 0h6"/></svg></button>',
+      '<rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11v1a7 7 0 0 0 14 0v-1m-7 8v3m-3 0h6"/></svg>',
+      '<svg class="mall-dictation-stop" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg></button>',
       '</form>',
       '<a aria-label="Red Dog"><img src="/logo-dog.png" alt="" width="32" height="32"></a>',
       '<p class="video-scope-dictation-status" role="status"></p>',
@@ -207,7 +317,7 @@
       '<h2 id="videoScopeOptionsTitle">More options</h2>',
       '<button type="button" data-action="home">Home</button>',
       '<button type="button" data-action="about">About this FoundUp</button>',
-      '<h3>Device models</h3><p>No on-device models are connected.</p>',
+      '<label>Browser AI <select disabled><option>No device model connected</option></select></label>',
       '<form method="dialog"><button type="submit">Close</button></form></dialog>'
     ].join('');
     actions.append(dock);
@@ -227,9 +337,10 @@
       input.addEventListener('blur', alignWithKeyboard);
     }
     const dog = dock.querySelector('a');
-    dog.href = '/f/' + scope + '#red-dog';
+    dog.href = scopedRedDogPath(scope);
     dog.addEventListener('click', () => window.mallStateRestore.save());
-    const cancelDictation = bindDictation(form.querySelector('button'), input, dock.querySelector('[role="status"]'));
+    const dictation = bindDictation(form.querySelector('button'), input, dock.querySelector('[role="status"]'));
+    const cancelHold = bindDictationHold(dog, dictation);
 
     function search(query) {
       field.setScopedPhoneQuery(query);
@@ -238,16 +349,22 @@
     }
     form.addEventListener('submit', (event) => {
       event.preventDefault();
-      cancelDictation();
+      dictation.cancel();
       search(input.value);
     });
     input.addEventListener('input', () => { if (!input.value && field.getScopedPhoneQuery()) search(''); });
-    dock.querySelector('[aria-haspopup="dialog"]').addEventListener('click', () => menu.showModal());
+    const options = dock.querySelector('[aria-haspopup="dialog"]');
+    function showOptions() {
+      if (menu.open || dock.hidden) return;
+      dictation.cancel();
+      menu.showModal();
+    }
+    bindOptions(options, showOptions);
     menu.querySelector('[data-action="home"]').addEventListener('click', () => { menu.close(); search(''); });
     menu.querySelector('[data-action="about"]').addEventListener('click', () => { menu.close(); disclosure.showModal(); });
     return {
       show(visible) {
-        if (!visible) { menu.close(); cancelDictation(); }
+        if (!visible) { cancelHold(); menu.close(); dictation.cancel(); }
         dock.hidden = !visible;
         if (visible) input.value = field.getScopedPhoneQuery();
       }
@@ -329,5 +446,5 @@
     }
   }
 
-  window.mallVideoProjection = { hostScope, resolve, resolveMember, memberPath, discoveryPath, mount, createMemberDock, mountMemberDock };
+  window.mallVideoProjection = { hostScope, resolve, resolveMember, memberPath, discoveryPath, mount, createMemberDock, mountMemberDock, openScopedRedDog };
 })();

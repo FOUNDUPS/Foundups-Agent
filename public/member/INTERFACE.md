@@ -154,13 +154,22 @@ The root of `play.foundups.com` sends visitors to that shell on the same
 origin. The sign-in return page stays at the root with `signin=required`.
 Storage and service worker registrations are origin-local.
 
-The ordinary Mall dock searches the loaded catalog. Its left options button
-links to the public AutoPost app, and its microphone uses local
-dictation if available or focuses the keyboard. The Red Dog button retains
-the existing concierge. In the desktop viewer the same dock layout filters
-the current queue. Red Dog there closes playback, returns to the poster and
-opens the concierge. Device model selection, resident speech and capture
-handoff follow the shared roadmap.
+The ordinary Mall dock searches the loaded catalog. Tap or swipe up on its
+plus button for options and the public AutoPost link. The mic or a hold on
+Red Dog dictates into the search field using an installed local recognizer.
+On unsupported devices the control focuses the input for keyboard dictation.
+Release a hold or press the square to finish dictation. The result stays
+editable, and hiding the dock or backgrounding the page cancels capture.
+Tap Red Dog to open the existing concierge.
+
+The shared full viewer puts the same floating dock between the video and
+horizontal queue on PC and phone. A query filters the current lane while
+the active clip continues. Selecting a result or submitting an idle queue
+starts a matching clip. The media area can scroll independently on short
+screens. Escape first dismisses options or leaves the input, then returns
+to the originating card. In the ordinary viewer, tapping Red Dog returns
+to the card and opens the concierge. In HPC it opens the public briefing.
+Device model selection and resident speech follow the shared roadmap.
 
 It owns:
 - invite-gated post-auth landing

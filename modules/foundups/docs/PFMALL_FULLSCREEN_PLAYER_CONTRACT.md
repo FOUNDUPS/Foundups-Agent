@@ -138,7 +138,7 @@ Exit methods:
 **Keyboard**:
 | Key | Action |
 |-----|--------|
-| Escape | Exit fullscreen |
+| Escape | Dismiss open options or leave queue search, then exit fullscreen |
 | ArrowUp / ArrowLeft | Previous video |
 | ArrowDown / ArrowRight | Next video |
 | Space | Toggle chrome |
@@ -182,9 +182,14 @@ Exit methods:
 - Tap thumbnail = autoplay that video
 
 **Visibility**:
-- Hidden by default (`transform: translateY(100%)`)
-- Revealed by swipe-up from bottom edge trigger or hover
-- Auto-hides after 4 seconds
+- WikiTube-style queues keep search above the visible thumbnail rail on PC
+  and phone. Short screens scroll the media area independently. Provider
+  controls remain within the reserved player area.
+- The legacy rail uses the bottom edge or hover to reveal it and auto-hides
+  after 4 seconds. That behavior applies to viewers without the search dock.
+- The horizontal queue uses native touch and trackpad scrolling. Its dock
+  and buttons do not start player pinch gestures. Search, options and
+  keyboard focus do not reset the selected player.
 
 **Constraint**:
 - Queue rail only shows videos from the current FoundUp

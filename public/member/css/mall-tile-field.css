@@ -171,7 +171,7 @@
 .mall-tile[hidden] { display: none; }
 .mall-member-inline-slot { min-width: 0; scroll-snap-align: start; }
 .mall-tile-field > .mall-member-inline-slot { grid-column: span var(--member-inline-columns, 3); }
-.mall-tile-field-wrapper.desktop-poster-grid.member-inline-open {
+.mall-tile-field-wrapper.member-inline-open {
   overflow-anchor: none;
   scroll-snap-type: none;
 }
@@ -1542,6 +1542,13 @@
   overscroll-behavior-x: contain;
   touch-action: pan-x pan-y;
   padding: .25rem .25rem .75rem;
+}
+.mall-category-track > .mall-member-inline-slot {
+  min-width: min(240px, calc(100vw - 1.5rem));
+}
+.mall-category-track:has(> .mall-member-inline-slot) {
+  grid-auto-columns: minmax(clamp(148px, 22vw, 240px), max-content);
+  scroll-snap-type: none;
 }
 .mall-tile-field[data-layout="rows"] .mall-tile {
   aspect-ratio: 16 / 9;

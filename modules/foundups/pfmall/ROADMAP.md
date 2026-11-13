@@ -312,3 +312,35 @@ Hover retains the poster affordance. A first-party muted hover clip still
 requires media and bandwidth evidence. Roll back the scoped shell changes as
 one slice if the browser or admission gates regress. The apex member path
 remains available during domain qualification.
+
+#### Phone viewer and foreground input
+
+012's November 14 follow-up extends PFWD-1B from the desktop queue and
+phone browse dock to the phone's expanded viewer. The shared player keeps
+the video above a floating search and a horizontally scrollable queue.
+The dock stays available when a short screen requires scrolling the video
+area. Search changes the queue while the active clip continues. Outside
+the viewer, ordinary Mall video cards use the existing player at the
+selected card. The separate expand control keeps that player mounted.
+HPC keeps its three-column browse grid and registered catalog scope.
+
+| Slice | WSP 15 | Decision and acceptance |
+| --- | --- | --- |
+| PFWD-1B phone viewer | 15/P1 (C4, I4, D3, Impact4) | Extend the shared player and tests from `510079b91`. Check one iframe, horizontal touch scrolling, query and keyboard behavior, tile return, the minimum provider viewport, and existing product routes. |
+| PFWD-1B foreground dictation | 13/P1 (C3, I4, D3, Impact3) | Reuse local browser dictation on the mic or a deliberate Red Dog hold. Release or the square finishes the current utterance. Cancel on navigation or loss of visibility. Keep the transcript editable in the current search. The plus button or an upward swipe on it opens options. |
+| PFWD-2 resident speech and browser AI | Later stage | Admit the resident conversation transport and use AI Gateway capability results for model choice. Verify a phone's support and resource use before offering a download or an available model. A visible foreground recording session, Stop, and review before sharing are separate acceptance criteria. |
+
+Chrome's [built-in model requirements](https://developer.chrome.com/docs/ai/get-started#required-hardware)
+currently exclude Android and iOS for its foundation-model APIs. A browser
+model picker remains pending an admitted runtime and a measured mobile
+option. A PWA can capture foreground audio with permission, but the
+[Red Dog contract](../../../public/member/RED_DOG_DIGITAL_TWIN_CONTRACT.md)
+has no resident voice transport. Leave ambient listening and automatic
+learning out of the PoC. A later foreground hands-free session needs
+explicit start, visible listening state, a stop action, an expiry, and
+no implicit recording retention. AutoPost remains the capture owner.
+
+The regression fixture checks the shared phone and desktop compositions.
+Physical Safari, Home Screen playback and keyboard behavior, and live
+invited admission remain separate release gates. Roll back the shared
+dock, tile presentation and matching service-worker generation together.

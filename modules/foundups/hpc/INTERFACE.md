@@ -61,7 +61,14 @@ the same in-place player. The microphone fills the field when the browser has
 local recognition available. Otherwise it focuses the field for keyboard
 dictation. The visitor submits the resulting query. **More options** opens
 Home, the independent-site disclosure, and device-model availability. The
-current device-model list is empty. Red Dog opens the public read-only briefing.
+Browser AI shows its unavailable state until an admitted model is connected.
+Tap Red Dog to open the public read-only briefing or hold for local search
+dictation on supported devices. Release or tap the square to finish.
+
+The expanded viewer keeps the search pill between the video and its
+horizontally scrollable queue. Filtering during playback keeps the active
+iframe and stays within the HPC collection. The scope-specific options and
+public briefing do not grant member or agent access.
 
 Viewport changes keep the active iframe and selected video. If a desktop
 selection falls outside the phone filter, its tile appears alongside the
