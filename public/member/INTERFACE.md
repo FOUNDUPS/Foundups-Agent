@@ -155,7 +155,7 @@ origin. The sign-in return page stays at the root with `signin=required`.
 Storage and service worker registrations are origin-local.
 
 The ordinary Mall dock searches the loaded catalog. Its left options button
-links to the registered AutoPost FoundUp, and its microphone uses local
+links to the public AutoPost app, and its microphone uses local
 dictation if available or focuses the keyboard. The Red Dog button retains
 the existing concierge. In the desktop viewer the same dock layout filters
 the current queue. Red Dog there closes playback, returns to the poster and

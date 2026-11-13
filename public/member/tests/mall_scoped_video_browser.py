@@ -480,11 +480,22 @@ def verify_member_poster_grid(page):
     expect(player.get_by_text("Use the microphone on your keyboard to dictate.")).to_be_visible()
     player.get_by_role("button", name="Search options").click()
     options = player.get_by_role("dialog", name="Search options")
-    expect(options.get_by_role("link", name="AutoPost camera and photos")).to_have_attribute("href", "/f/autopost")
     expect(options.get_by_text("Device models are unavailable in this Mall.")).to_be_visible()
     page.keyboard.press("Escape")
     expect(options).not_to_be_visible()
     expect(player).to_be_visible()
+    player.get_by_role("button", name="Search options").click()
+    with page.expect_popup() as opened:
+        options.get_by_role("link", name="AutoPost camera and photos").click()
+    capture = opened.value
+    capture.wait_for_url("https://foundup-japan-ai-autopost-camera-56566376153.us-west1.run.app/")
+    expect(capture.get_by_role("heading", name="AutoPost fixture")).to_be_visible()
+    capture.close()
+    expect(options).not_to_be_visible()
+    assert frame.evaluate("el => el === window.originalPlayerFrame")
+    if page.evaluate("mallVideoPlayer.getPlaybackSnapshot()?.state === 'paused'"):
+        player.get_by_role("button", name="Play video", exact=True).click()
+        expect_playing_id(page, clips[0]["video_id"])
     page.set_viewport_size({"width": 1010, "height": 768})
     assert frame.evaluate("el => el === window.originalPlayerFrame")
     page.set_viewport_size({"width": 1440, "height": 900})
@@ -599,6 +610,9 @@ def verify_member_entry(browser_type):
                 export const getDoc = async () => ({exists: () => true, data: () => window.fixtureMemberAccount});"""
         elif url.path == "/js/firebase-runtime-config.js":
             body = "export const loadFirebaseRuntimeConfig = async () => ({});"
+        elif url.hostname == "foundup-japan-ai-autopost-camera-56566376153.us-west1.run.app" and url.path == "/":
+            route.fulfill(status=200, content_type="text/html", body="<h1>AutoPost fixture</h1>")
+            return
         elif url.hostname in {"foundups.com", "play.foundups.com"} and url.path == "/" and url.query == "signin=required":
             route.fulfill(status=200, content_type="text/html", body="<h1>Member sign-in destination</h1>")
             return

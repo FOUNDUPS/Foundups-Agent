@@ -126,7 +126,7 @@
       openRedDog ? '<button type="button" aria-label="Open Red Dog"><img src="/logo-dog.png" alt="" width="30" height="30"></button>' : '',
       '</div><p role="status"></p>',
       '<dialog class="mall-member-search-options" aria-label="Search options">',
-      '<a href="/f/autopost" target="_blank" rel="noopener">AutoPost camera and photos</a>',
+      '<a href="https://foundup-japan-ai-autopost-camera-56566376153.us-west1.run.app/" target="_blank" rel="noopener noreferrer">AutoPost camera and photos</a>',
       '<p>Device models are unavailable in this Mall.</p>',
       '<form method="dialog"><button type="submit">Close</button></form></dialog>'
     ].join('');

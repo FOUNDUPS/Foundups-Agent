@@ -301,6 +301,11 @@ This extends the invited Mall on `f0804bd35` and retains the HPC scope.
 | Play entry | 13/P1 (C3, I4, D3, Impact3) | Bind `play.foundups.com` to the existing Hosting site. Root opens the admitted Mall and the existing sign-in return remains available. Qualify DNS, TLS, signed-out and invited paths independently. |
 | PFWD-2/3 | Later stage | Device model selection needs an admitted runtime and measured device support. Plan mode and plugins need an authorized Red Dog contract. AutoPost keeps capture and private attachment ownership. |
 
+The options menu opens the deployed AutoPost app listed on its
+[repository](https://github.com/FOUNDUPS/autopost). The existing public
+directory has no AutoPost record. The custom AutoPost hostname timed out
+in the release check, while the owner-listed app returned HTTP 200.
+
 The PoC supersedes desktop poster click-to-fullscreen. Click requests in-tile
 playback and the separate fullscreen action opens the WikiTube-style viewer.
 Hover retains the poster affordance. A first-party muted hover clip still
