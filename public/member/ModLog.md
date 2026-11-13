@@ -1,5 +1,14 @@
 # Member Area Module Change Log
 
+## 2026-11-14 · Phone WikiTube viewer and dictation
+
+Ordinary member phone cards use the existing selected-card player. The
+expanded viewer reserves space for a persistent search dock and horizontal
+queue on phone and desktop. The plus button accepts tap and upward swipe.
+The mic or Red Dog hold starts foreground local search dictation where
+available, and the square finishes it. Worker v15 refreshes the shell.
+WSP 22 and 97 apply.
+
 ## 2026-11-14 · WikiTube controls and member entry
 
 Added the shared member search dock and reuse of local dictation. The full

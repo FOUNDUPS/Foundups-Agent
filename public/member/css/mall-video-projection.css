@@ -475,6 +475,20 @@
   stroke-width: 1.75;
 }
 
+:is(.mall-member-search-dock, #videoScopePhoneDock) button .mall-dictation-stop,
+:is(.mall-member-search-dock, #videoScopePhoneDock) button[data-dictating] svg:not(.mall-dictation-stop) {
+  display: none;
+}
+
+:is(.mall-member-search-dock, #videoScopePhoneDock) button[data-dictating] .mall-dictation-stop {
+  display: block;
+  fill: currentColor;
+}
+
+:is(.mall-member-search-bar > button:first-child, #videoScopePhoneDock > button:first-child) {
+  touch-action: none;
+}
+
 .mall-member-search-dock > [role="status"] {
   margin: .25rem 0 0;
   font-size: .8rem;
@@ -493,8 +507,28 @@
   border: 1px solid #9582bf;
   border-radius: 1rem;
   max-width: calc(100vw - 2rem);
+  max-height: 65dvh;
+  overflow-y: auto;
 }
 
 .mall-member-search-options::backdrop { background: #0008; }
 .mall-member-search-options a { color: #e0cdff; }
 .mall-member-search-options button { min-height: 44px; }
+
+:is(.mall-member-search-options, #videoScopeOptions) label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .4rem;
+  margin-block: .65rem;
+}
+
+:is(.mall-member-search-options, #videoScopeOptions) select {
+  max-width: 100%;
+  padding: .35rem;
+  border: 1px solid #9582bf;
+  border-radius: .4rem;
+  color: inherit;
+  background: #39294f;
+  font: inherit;
+}

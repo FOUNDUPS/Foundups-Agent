@@ -1,3 +1,11 @@
+## 2026-11-14 · WikiTube phone viewer
+
+Extended PFWD-1B from the desktop queue and phone grid to the shared
+expanded phone viewer. The player, catalog, return state and admission
+owners stay shared. Foreground dictation feeds the editable search.
+The [roadmap](ROADMAP.md#phone-viewer-and-foreground-input) records the
+resident speech and model-selection dependencies. WSP 15, 22 and 97 apply.
+
 ## 2026-11-14 · WikiTube search and Play hostname
 
 The ordinary admitted Mall reuses the shared catalog and player for the

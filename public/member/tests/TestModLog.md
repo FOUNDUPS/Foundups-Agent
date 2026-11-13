@@ -1,3 +1,15 @@
+## 2026-11-14 · Phone WikiTube viewer
+
+The base `510079b91` passed the existing scoped and desktop cases. The
+phone regression uses the real member shell with controlled admission,
+media and local speech. It checks in-card playback, the same iframe
+through expansion and queue search, 320/390/430 px portrait and 844 × 390
+landscape, native horizontal touch scrolling in Chromium, plus menu swipe,
+foreground dictation with Stop and pointer cancellation, focus and scroll
+return, and one provider frame. The worker fixture covers v14 to v15
+upgrade and unrelated-cache retention. Physical devices and provider
+playback are separate verification.
+
 ## 2026-11-14 · Member WikiTube controls
 
 The controlled Chromium and WebKit member cases cover the Play root route,
