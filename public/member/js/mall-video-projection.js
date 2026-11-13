@@ -38,6 +38,11 @@
   // Select install metadata in the head, before the public catalog loads.
   const hpcTitle = 'Hasan Piker Coalition';
   const hpcPortrait = '/member/hpc-icon-192.png';
+  const playLocation = window.location;
+  if (playLocation?.hostname === 'play.foundups.com' && playLocation.pathname === '/' &&
+      !new URLSearchParams(playLocation.search).has('signin')) {
+    playLocation.replace('/member/' + playLocation.search + playLocation.hash);
+  }
   if (typeof document !== 'undefined' && window.location && resolve(window.location) === 'hpc') {
     document.title = hpcTitle;
     document.querySelector('link[rel="manifest"]').href = '/member/hpc.webmanifest';
@@ -106,6 +111,83 @@
       }
     });
     return cancel;
+  }
+
+  function createMemberDock(label, submit, openRedDog) {
+    const element = document.createElement('div');
+    element.className = 'mall-member-search-dock';
+    element.innerHTML = [
+      '<div class="mall-member-search-bar">',
+      '<button type="button" aria-label="Search options" aria-haspopup="dialog">+</button>',
+      '<form role="search"><input type="search" maxlength="300" enterkeyhint="search">',
+      '<button type="submit" aria-label="Search" hidden></button>',
+      '<button type="button" aria-label="Dictate search"><svg viewBox="0 0 24 24" aria-hidden="true">',
+      '<rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11v1a7 7 0 0 0 14 0v-1m-7 8v3m-3 0h6"/></svg></button></form>',
+      openRedDog ? '<button type="button" aria-label="Open Red Dog"><img src="/logo-dog.png" alt="" width="30" height="30"></button>' : '',
+      '</div><p role="status"></p>',
+      '<dialog class="mall-member-search-options" aria-label="Search options">',
+      '<a href="https://foundup-japan-ai-autopost-camera-56566376153.us-west1.run.app/" target="_blank" rel="noopener noreferrer">AutoPost camera and photos</a>',
+      '<p>Device models are unavailable in this Mall.</p>',
+      '<form method="dialog"><button type="submit">Close</button></form></dialog>'
+    ].join('');
+    const bar = element.querySelector('.mall-member-search-bar');
+    const form = bar.querySelector('form');
+    const input = form.querySelector('input');
+    const status = element.querySelector('[role="status"]');
+    const dialog = element.querySelector('dialog');
+    const options = bar.firstElementChild;
+    form.setAttribute('aria-label', label);
+    input.setAttribute('aria-label', label);
+    input.placeholder = label;
+    const cancel = bindDictation(form.querySelector('[aria-label="Dictate search"]'), input, status);
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      cancel();
+      submit(input.value.trim());
+    });
+    options.addEventListener('click', () => {
+      cancel();
+      const rect = options.getBoundingClientRect();
+      dialog.style.insetInlineStart = Math.max(16, Math.min(rect.left, window.innerWidth - 288)) + 'px';
+      dialog.style.insetBlockEnd = window.innerHeight - rect.top + 8 + 'px';
+      dialog.showModal();
+    });
+    dialog.addEventListener('cancel', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      dialog.close();
+    });
+    dialog.querySelector('a').addEventListener('click', () => dialog.close());
+    if (openRedDog) bar.lastElementChild.addEventListener('click', openRedDog);
+    return { element, input, dialog, hide() { dialog.close(); cancel(); element.hidden = true; } };
+  }
+
+  function mountMemberDock() {
+    const anchor = document.getElementById('redDogAnchor');
+    if (!anchor || !window.redDog?.open || anchor.querySelector('.mall-member-search-dock')) return;
+    const field = window.mallTileField;
+    const dock = createMemberDock('Search the Mall', (query) => {
+      field.searchCatalog(query);
+      window.mallStateRestore?.save();
+    });
+    dock.input.value = field.getFieldScope()?.query || '';
+    dock.input.addEventListener('input', () => {
+      if (!dock.input.value && field.getFieldScope()?.type === 'query') {
+        field.searchCatalog('');
+        window.mallStateRestore?.save();
+      }
+    });
+    anchor.prepend(dock.element);
+    dock.dialog.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') event.stopPropagation();
+    });
+    window.visualViewport?.addEventListener('resize', () => {
+      const viewport = window.visualViewport;
+      const keyboard = document.activeElement === dock.input && viewport.scale === 1
+        ? Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop) : 0;
+      anchor.style.setProperty('--member-dock-keyboard', keyboard + 'px');
+    });
+    dock.input.addEventListener('blur', () => anchor.style.removeProperty('--member-dock-keyboard'));
   }
 
   function createPhoneDock(actions, scope, disclosure) {
@@ -247,5 +329,5 @@
     }
   }
 
-  window.mallVideoProjection = { hostScope, resolve, resolveMember, memberPath, discoveryPath, mount };
+  window.mallVideoProjection = { hostScope, resolve, resolveMember, memberPath, discoveryPath, mount, createMemberDock, mountMemberDock };
 })();

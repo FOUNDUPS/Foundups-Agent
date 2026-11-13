@@ -73,6 +73,7 @@
   // ─── localStorage Keys ───
   var SAVED_KEY = 'pfmall_saved_videos';
   var returnTile = null;
+  var memberQueueDock = null;
   var returnScroll = null;
   var scopedPlayer = false;
   var HISTORY_KEY = 'pfmall_watch_history';
@@ -161,7 +162,8 @@
     statusEl.textContent = message || '';
     statusEl.hidden = !message;
     playBtn.hidden = !requestYouTubePlay || !['manual-play', 'autoplay-blocked', 'provider-unknown', 'paused'].includes(state);
-    if (inline && !theater && (state === 'manual-play' || state === 'autoplay-blocked') && !playBtn.hidden && canStartYouTube()) {
+    if (inline && !theater && !returnScroll &&
+        (state === 'manual-play' || state === 'autoplay-blocked') && !playBtn.hidden && canStartYouTube()) {
       playBtn.scrollIntoView({ block: 'nearest' });
     }
     window.dispatchEvent(new CustomEvent('mallVideoPlayback', { detail: { ...playbackStatus } }));
@@ -301,6 +303,20 @@
     gestureHint = container.querySelector('.video-player-gesture-hint');
     titleEl = container.querySelector('.video-player-title');
     saveBtn = container.querySelector('[data-action="save"]');
+    memberQueueDock = window.mallVideoProjection?.createMemberDock?.(
+      'Search this queue',
+      playMemberSearchResult,
+      function() {
+        close();
+        window.redDog?.open?.();
+        document.querySelector('#accountPlane.open button:not([hidden])')?.focus();
+      }
+    );
+    if (memberQueueDock) {
+      memberQueueDock.element.hidden = true;
+      memberQueueDock.input.addEventListener('input', filterRail);
+      queueSearchForm.after(memberQueueDock.element);
+    }
 
     // Attach listeners
     topBar.addEventListener('click', handleTopBarClick);
@@ -311,7 +327,14 @@
     // Keyboard
     // The poster modal closes before the shell's expanded-lane Escape handler.
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && returnTile && !scopedPlayer) handleKeydown(e);
+      if (e.key !== 'Escape') return;
+      if (memberQueueDock?.dialog.open) {
+        e.preventDefault();
+        e.stopPropagation();
+        memberQueueDock.dialog.close();
+        return;
+      }
+      if (returnTile && !scopedPlayer) handleKeydown(e);
     }, true);
     document.addEventListener('keydown', handleKeydown);
     document.addEventListener('visibilitychange', function() {
@@ -354,6 +377,9 @@
       }
     }
     attachGestures();
+    if (memberQueueDock && returnScroll && matchesQuery && window.redDog?.open) {
+      memberQueueDock.element.hidden = false;
+    }
     resetChromeTimer();
     if (returnTile) topBar.querySelector('[data-action="back"]').focus({ preventScroll: true });
   }
@@ -406,18 +432,22 @@
     scopedPlayer = !!resumeOpts?.returnTile;
     returnTile = resumeOpts?.returnTile || resumeOpts?.returnFocusTo || null;
     var browseField = resumeOpts?.returnFocusTo?.closest('.mall-tile-field-wrapper');
+    var rowTrack = resumeOpts?.returnFocusTo?.closest('.mall-category-track');
     returnScroll = browseField ? {
       field: browseField,
       top: browseField.scrollTop,
       left: browseField.scrollLeft,
       height: browseField.clientHeight,
-      tileTop: returnTile.offsetTop
+      tileTop: returnTile.offsetTop,
+      rowTrack: rowTrack,
+      rowLeft: rowTrack?.scrollLeft
     } : null;
     onClose = resumeOpts?.onClose || null;
     autoplayRequested = resumeOpts?.autoplay !== false;
-    muteOnStart = resumeOpts?.theater === true;
+    muteOnStart = resumeOpts?.theater === true || resumeOpts?.muted === true;
     matchesQuery = resumeOpts?.matchesQuery || null;
     queueSearch.value = resumeOpts?.query || '';
+    if (memberQueueDock) memberQueueDock.input.value = '';
     filteredIndices = null;
     container.classList.toggle('scoped-player', scopedPlayer);
     container.classList.toggle('desktop-poster-player', !!returnScroll);
@@ -430,11 +460,25 @@
     container.classList.add('open');
     inline = !!resumeOpts?.inlineMount;
     if (inline) {
-      resumeOpts.inlineMount.appendChild(container);
+      var mount = resumeOpts.inlineMount;
+      if (typeof mount === 'function') mount = mount();
+      mount.appendChild(container);
       container.classList.add('video-player-inline');
-      setTheater(resumeOpts?.theater === true);
+      if (returnScroll) {
+        container.setAttribute('role', 'region');
+        container.setAttribute('aria-label', 'Inline video player');
+        topBar.querySelector('[data-action="expand"]').hidden = false;
+        var closeButton = topBar.querySelector('[data-action="back"]');
+        closeButton.hidden = false;
+        closeButton.setAttribute('aria-label', 'Close player');
+        setPinchTarget(topBar);
+        renderRail();
+      } else {
+        setTheater(resumeOpts?.theater === true);
+      }
       if (!theater) {
-        container.scrollIntoView({ block: 'nearest' });
+        if (returnScroll) container.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' });
+        else container.scrollIntoView({ block: 'nearest' });
         topBar.querySelector('[data-action="back"]').focus({ preventScroll: true });
       }
       if (typeof IntersectionObserver !== 'undefined') {
@@ -452,6 +496,7 @@
     }
 
     renderVideo(currentQueue[currentIndex]);
+    if (inline) resumeOpts.alignInline?.();
 
     // Update save button state
     updateSaveButtonState(isVideoSaved(currentFoundUpId, currentQueue[currentIndex]));
@@ -477,6 +522,7 @@
     container.classList.remove('open', 'video-player-inline', 'video-player-theater');
     theater = false;
     queueSearchForm.hidden = true;
+    memberQueueDock?.hide();
     if (previousOverflow !== null) document.body.style.overflow = previousOverflow;
     previousOverflow = null;
     inertElements.forEach(function(element) { element.inert = false; });
@@ -518,6 +564,7 @@
             top = tile.offsetTop - Math.min(anchor, Math.max(0, field.clientHeight - tile.offsetHeight));
           }
           field.scrollTo({ top: top, left: returnScroll.left, behavior: 'instant' });
+          returnScroll.rowTrack?.scrollTo({ left: returnScroll.rowLeft, behavior: 'instant' });
         }
       }
       container.removeAttribute('aria-modal');
@@ -531,7 +578,7 @@
   // ─── Navigate Queue ───
   function goToVideo(index) {
     if (index < 0 || index >= currentQueue.length) return;
-    if (theater) {
+    if (theater || returnScroll) {
       if (index === currentIndex) return;
       autoplayRequested = true;
       try { muteOnStart = ytPlayer?.isMuted?.() ?? muteOnStart; } catch (e) { /* provider not ready */ }
@@ -582,12 +629,12 @@
     if (document.hidden) return false;
     var rect = stage.getBoundingClientRect();
     if (rect.width < 200 || rect.height < 200) return false;
-    var wrapper = inline && container.closest('.mall-tile-field-wrapper');
-    var bounds = wrapper?.getBoundingClientRect?.();
-    var width = Math.max(0, Math.min(rect.right, window.innerWidth, bounds?.right ?? Infinity) -
-      Math.max(rect.left, 0, bounds?.left ?? 0));
-    var height = Math.max(0, Math.min(rect.bottom, window.innerHeight, bounds?.bottom ?? Infinity) -
-      Math.max(rect.top, 0, bounds?.top ?? 0));
+    var bounds = inline && container.closest('.mall-tile-field-wrapper')?.getBoundingClientRect();
+    var track = inline && container.closest('.mall-category-track')?.getBoundingClientRect();
+    var width = Math.max(0, Math.min(rect.right, window.innerWidth, bounds?.right ?? Infinity, track?.right ?? Infinity) -
+      Math.max(rect.left, 0, bounds?.left ?? 0, track?.left ?? 0));
+    var height = Math.max(0, Math.min(rect.bottom, window.innerHeight, bounds?.bottom ?? Infinity, track?.bottom ?? Infinity) -
+      Math.max(rect.top, 0, bounds?.top ?? 0, track?.top ?? 0));
     return width * height > rect.width * rect.height / 2;
   }
 
@@ -739,7 +786,8 @@
       // Direct video file — resume seek when pendingResumeSeconds is valid
       var resumeTarget = pendingResumeSeconds;
       pendingResumeSeconds = null;
-      stage.innerHTML = '<video src="' + esc(sourceUrl) + '" autoplay controls playsinline></video>';
+      stage.innerHTML = '<video src="' + esc(sourceUrl) + '"' + (muteOnStart ? ' muted' : '') +
+        (autoplayRequested ? ' autoplay' : '') + ' controls playsinline></video>';
       var ve = stage.querySelector('video');
       if (ve) {
         // Queue autoplay: advance to next video when current ends
@@ -775,7 +823,9 @@
 
   // ─── Render Rail ───
   function filterRail() {
-    var query = theater ? queueSearch.value.trim().slice(0, 300) : '';
+    var input = theater ? queueSearch : null;
+    if (memberQueueDock && !memberQueueDock.element.hidden) input = memberQueueDock.input;
+    var query = input ? input.value.trim().slice(0, 300) : '';
     filteredIndices = query && matchesQuery ? currentQueue.reduce(function(indices, video, index) {
       if (matchesQuery(video, query)) indices.push(index);
       return indices;
@@ -793,6 +843,17 @@
     var result = filteredIndices[filteredIndices.indexOf(currentIndex) + 1] ?? filteredIndices[0];
     if (result !== currentIndex) goToVideo(result);
     else if (playbackStatus?.state !== 'playing') requestYouTubePlay?.();
+  }
+
+  function playMemberSearchResult() {
+    filterRail();
+    if (!filteredIndices?.length || ['playing', 'loading', 'starting', 'provider-state'].includes(playbackStatus?.state)) return;
+    var media = stage.querySelector('video');
+    if (media && !media.paused && !media.ended) return;
+    var first = filteredIndices[0];
+    if (first !== currentIndex) goToVideo(first);
+    else if (requestYouTubePlay) requestYouTubePlay();
+    else if (media) media.play().catch(function() {});
   }
 
   function renderRail() {
@@ -1195,6 +1256,7 @@
 
   // ─── Public API ───
   window.mallVideoPlayer = {
+    openDesktopVideo: open,
     /**
      * Open fullscreen player with a FoundUp's video queue.
      * @param {string} foundupId - The FoundUp ID (queue constraint)

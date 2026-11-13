@@ -168,6 +168,14 @@
   align-content: start;
 }
 
+.mall-tile[hidden] { display: none; }
+.mall-member-inline-slot { min-width: 0; scroll-snap-align: start; }
+.mall-tile-field > .mall-member-inline-slot { grid-column: span var(--member-inline-columns, 3); }
+.mall-tile-field-wrapper.desktop-poster-grid.member-inline-open {
+  overflow-anchor: none;
+  scroll-snap-type: none;
+}
+
 .desktop-poster-grid .mall-tile[data-tile-type] {
   background-position: center;
   background-repeat: no-repeat;

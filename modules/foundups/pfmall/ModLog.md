@@ -1,3 +1,18 @@
+## 2026-11-14 · WikiTube search and Play hostname
+
+The ordinary admitted Mall reuses the shared catalog and player for the
+bottom browse dock, a left-aligned queue dock, and inline desktop playback.
+The separate full-view action keeps the provider frame. Search leaves the
+active clip playing and starts the first match when idle. The options menu
+links to AutoPost and reports the current device-model boundary.
+
+Firebase site `foundupscom` in `gen-lang-client-0061781628` accepted the
+custom hostname `play.foundups.com`. GoDaddy saved Firebase's exact CNAME,
+`play` → `foundupscom.web.app`, and a public resolver returned it.
+TLS and live release qualification are tracked separately. The Play root
+route preserves the admitted shell and sign-in return. WSP 15, 22 and 97
+apply. See the [roadmap](ROADMAP.md#wikitube-search-and-play-hostname).
+
 ## 2026-11-13 · Desktop poster browsing and full player
 
 The invited Mall selects its poster grid on fresh wide fine-pointer entry.

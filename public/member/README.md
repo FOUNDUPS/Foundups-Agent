@@ -139,7 +139,8 @@ Row offsets are saved locally alongside the existing outer scroll position.
 ### Mall Navigation
 - swipe or scroll horizontally through FoundUps (desktop: mouse drag on carousel track)
 - in category rows, tap a video tile to start lane playback in the tile
-- in the desktop poster grid, click a video tile to play its queue in the full player
+- on wide desktop, click a video tile for muted in-context playback and use
+  the separate fullscreen button for the full viewer
 - Enter FoundUp button to navigate to `/f/{foundup_id}` (tile or fullscreen)
 - pinch-out on tile to expand into FoundUp's video field
 - pinch-in (expanded) to collapse back to Mall

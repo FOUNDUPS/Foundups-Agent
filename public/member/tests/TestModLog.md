@@ -1,3 +1,16 @@
+## 2026-11-14 · Member WikiTube controls
+
+The controlled Chromium and WebKit member cases cover the Play root route,
+guest sign-in, admitted grid and rows, inline dimensions, iframe continuity
+into full view, queue search and keyboard return, plus and Red Dog actions.
+The existing Chromium HPC cases cover the public route, responsive theater
+and phone layout. The v14 fixture covers the cache upgrade.
+
+Real YouTube in Chromium 143 played `JFp2l1fnf_4` inside a 512.5 × 240
+CSS px selected slot. The same provider window advanced from 0.52 to
+1.06 seconds while the clip expanded and an active queue search was
+submitted. Closing left zero iframes. This run used the local Mall harness.
+
 ## 2026-11-13 · Invited desktop poster grid
 
 The new browser case reproduced category rows on fresh desktop entry at

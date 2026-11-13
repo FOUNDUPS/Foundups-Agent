@@ -11,6 +11,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 import json
 import mimetypes
+import re
 from playwright.sync_api import expect, sync_playwright
 
 public = Path("public").resolve()
@@ -94,7 +95,7 @@ provider = """(() => {
 
 def route_local(route):
     u = urlsplit(route.request.url)
-    if u.hostname in {"hpc.foundups.com", "foundups.com"}:
+    if u.hostname in {"hpc.foundups.com", "foundups.com", "play.foundups.com"}:
         if u.path == "/member/mall-public-video-catalog.json":
             route.fulfill(status=200, json=catalog)
             return
@@ -430,17 +431,71 @@ def verify_member_poster_grid(page):
     expect(field.locator("iframe, video")).to_have_count(0)
     expect(lane_tile.locator(".mall-tile-audio")).to_have_count(0)
     expect(lane_tile.get_by_role("button", name="Open fullscreen")).to_be_visible()
+    mall_search = page.get_by_role("searchbox", name="Search the Mall")
+    expect(mall_search).to_be_visible()
+    mall_search.fill("AutoPost")
+    mall_search.press("Enter")
+    expect(tiles).to_have_count(1)
+    mall_search.fill("")
+    expect(tiles).to_have_count(len(ordinary))
+
     lane_tile.click()
+    inline = page.get_by_role("region", name="Inline video player")
+    expect(inline).to_be_visible()
+    expect(lane_tile).to_be_hidden()
+    expect_playing_id(page, clips[0]["video_id"])
+    inline_frame = inline.locator("iframe")
+    inline_box = inline_frame.bounding_box()
+    assert inline_box and min(inline_box["width"], inline_box["height"]) >= 200
+    inline_frame.evaluate("el => { window.originalPlayerFrame = el; }")
+    inline.get_by_role("button", name="Expand video").click()
     player = page.get_by_role("dialog", name="Fullscreen video player")
     expect(player).to_have_attribute("aria-modal", "true")
     expect(player.get_by_role("button", name="Enter FoundUp")).to_be_visible()
     expect_playing_id(page, clips[0]["video_id"])
     frame = player.locator("iframe")
     expect(frame).to_have_count(1)
+    assert frame.evaluate("el => el === window.originalPlayerFrame")
     assert "controls=1" in frame.get_attribute("src")
     box = frame.bounding_box()
     assert box and min(box["width"], box["height"]) >= 200
-    frame.evaluate("el => { window.originalPlayerFrame = el; }")
+    query = player.get_by_role("searchbox", name="Search this queue")
+    query_box = query.bounding_box()
+    rail_box = player.locator(".video-player-queue-rail").bounding_box()
+    assert query_box and rail_box and box["y"] + box["height"] <= query_box["y"] < rail_box["y"]
+    assert query_box["x"] < box["width"] / 4
+    query.fill("vulnpocalypse")
+    query.press("Enter")
+    expect_playing_id(page, clips[0]["video_id"])
+    assert frame.evaluate("el => el === window.originalPlayerFrame")
+    matches = player.locator(".video-player-queue-item")
+    expect(matches.first).to_be_visible()
+    assert matches.count() < len(clips)
+    query.fill("no-such-queue-match-298")
+    expect(player.get_by_text("No videos match your search.")).to_be_visible()
+    query.fill("")
+    expect(matches).to_have_count(len(clips))
+    page.evaluate("window.SpeechRecognition = window.webkitSpeechRecognition = undefined")
+    player.get_by_role("button", name="Dictate search").click()
+    expect(player.get_by_text("Use the microphone on your keyboard to dictate.")).to_be_visible()
+    player.get_by_role("button", name="Search options").click()
+    options = player.get_by_role("dialog", name="Search options")
+    expect(options.get_by_text("Device models are unavailable in this Mall.")).to_be_visible()
+    page.keyboard.press("Escape")
+    expect(options).not_to_be_visible()
+    expect(player).to_be_visible()
+    player.get_by_role("button", name="Search options").click()
+    with page.expect_popup() as opened:
+        options.get_by_role("link", name="AutoPost camera and photos").click()
+    capture = opened.value
+    capture.wait_for_url("https://foundup-japan-ai-autopost-camera-56566376153.us-west1.run.app/")
+    expect(capture.get_by_role("heading", name="AutoPost fixture")).to_be_visible()
+    capture.close()
+    expect(options).not_to_be_visible()
+    assert frame.evaluate("el => el === window.originalPlayerFrame")
+    if page.evaluate("mallVideoPlayer.getPlaybackSnapshot()?.state === 'paused'"):
+        player.get_by_role("button", name="Play video", exact=True).click()
+        expect_playing_id(page, clips[0]["video_id"])
     page.set_viewport_size({"width": 1010, "height": 768})
     assert frame.evaluate("el => el === window.originalPlayerFrame")
     page.set_viewport_size({"width": 1440, "height": 900})
@@ -486,9 +541,9 @@ def verify_member_poster_grid(page):
 
     page.keyboard.press("Enter")
     expect_playing_id(page, clips[48]["video_id"])
-    frame.evaluate("el => { window.originalPlayerFrame = el; }")
+    inline.locator("iframe").evaluate("el => { window.originalPlayerFrame = el; }")
     page.set_viewport_size({"width": 680, "height": 600})
-    assert frame.evaluate("el => el === window.originalPlayerFrame")
+    assert inline.locator("iframe").evaluate("el => el === window.originalPlayerFrame")
     page.keyboard.press("Escape")
     expect(clip_tile).to_be_focused()
     page.wait_for_function("""tile => {
@@ -505,17 +560,27 @@ def verify_member_poster_grid(page):
     page.evaluate("mallTileField.setDensity('15x4')")
     lane_tile.get_by_role("button", name="Open fullscreen").press("Enter")
     page.wait_for_function("mallVideoPlayer.getPlaybackSnapshot()?.state === 'manual-play'")
-    player.get_by_role("button", name="Play video", exact=True).click()
-    expect_playing_id(page, clips[0]["video_id"])
-    page.evaluate("fixturePlayback.finishCurrent()")
+    query.fill("vulnpocalypse")
+    query.press("Enter")
     expect_playing_id(page, clips[1]["video_id"])
+    query.fill("")
+    page.evaluate("fixturePlayback.finishCurrent()")
+    expect_playing_id(page, clips[2]["video_id"])
     player.get_by_role("button", name="Back").click()
 
     page.evaluate("mallTileField.setLayoutMode('rows'); mallStateRestore.save()")
     page.reload(wait_until="domcontentloaded")
     expect(field).to_have_attribute("data-layout", "rows")
-    page.evaluate("mallTileField.setLayoutMode('grid')")
     lane_tile.click()
+    expect_playing_id(page, clips[0]["video_id"])
+    row_box = inline.locator("iframe").bounding_box()
+    assert row_box and min(row_box["width"], row_box["height"]) >= 200
+    inline.get_by_role("button", name="Expand video").click()
+    player.get_by_role("button", name="Open Red Dog").click()
+    expect(player).not_to_be_visible()
+    expect(page.locator("#accountPlane")).to_have_class(re.compile(r"\bopen\b"))
+    page.evaluate("redDog.close()")
+    lane_tile.get_by_role("button", name="Open fullscreen").press("Enter")
     player.get_by_role("button", name="Enter FoundUp").click()
     page.wait_for_url("https://foundups.com/f/move2japan")
     print(json.dumps({"member_desktop_columns": columns, "mixed_cards": len(ordinary),
@@ -545,7 +610,10 @@ def verify_member_entry(browser_type):
                 export const getDoc = async () => ({exists: () => true, data: () => window.fixtureMemberAccount});"""
         elif url.path == "/js/firebase-runtime-config.js":
             body = "export const loadFirebaseRuntimeConfig = async () => ({});"
-        elif url.hostname == "foundups.com" and url.path == "/" and url.query == "signin=required":
+        elif url.hostname == "foundup-japan-ai-autopost-camera-56566376153.us-west1.run.app" and url.path == "/":
+            route.fulfill(status=200, content_type="text/html", body="<h1>AutoPost fixture</h1>")
+            return
+        elif url.hostname in {"foundups.com", "play.foundups.com"} and url.path == "/" and url.query == "signin=required":
             route.fulfill(status=200, content_type="text/html", body="<h1>Member sign-in destination</h1>")
             return
         else:
@@ -556,6 +624,10 @@ def verify_member_entry(browser_type):
     context.route("**/*", route_member)
     page = context.new_page()
     page.set_default_timeout(10000)
+    page.goto("https://play.foundups.com/", wait_until="domcontentloaded")
+    page.wait_for_url("https://play.foundups.com/?signin=required")
+    assert "/member/" in requested
+    assert not any(path.endswith("catalog.json") for path in requested)
     scoped = "https://foundups.com/member/?foundup=hpc"
     page.goto(scoped, wait_until="domcontentloaded")
     page.wait_for_url("https://foundups.com/?signin=required")
@@ -569,6 +641,10 @@ def verify_member_entry(browser_type):
     assert not any(path.endswith("catalog.json") for path in requested)
 
     account = {"username": "fixture", "inviteValidated": True}
+    page.goto("https://play.foundups.com/", wait_until="domcontentloaded")
+    page.wait_for_url("https://play.foundups.com/member/")
+    expect(page.get_by_role("searchbox", name="Search the Mall")).to_be_visible()
+    requested.clear()
     page.goto("https://foundups.com/member/", wait_until="domcontentloaded")
     page.wait_for_url(scoped)
     expect(page.get_by_role("region", name="Video theater")).to_be_visible()

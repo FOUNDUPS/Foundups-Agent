@@ -1,5 +1,12 @@
 # Member Area Module Change Log
 
+## 2026-11-14 · WikiTube controls and member entry
+
+Added the shared member search dock and reuse of local dictation. The full
+player filters its existing queue. Desktop posters request muted playback
+in the selected slot and keep a separate full-view action. The Play hostname
+uses the same invited shell. Worker v14 refreshes the member assets.
+
 ## 2026-11-13 · Invited desktop poster grid
 
 Fresh wide fine-pointer entry uses the existing grid. Click and keyboard

@@ -397,6 +397,29 @@
   height: clamp(200px, 58vw, min(420px, 60dvh));
 }
 
+.mall-member-inline-slot .desktop-poster-player.video-player-inline .video-player-stage {
+  height: 240px;
+}
+
+.desktop-poster-player > .mall-member-search-dock:not([hidden]) {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  max-width: calc(100% - 1.5rem);
+  margin: .4rem max(.75rem, env(safe-area-inset-left));
+}
+
+.desktop-poster-player .mall-member-search-bar { max-width: 100%; }
+
+.desktop-poster-player > :is(.video-player-queue-rail, .video-player-top-bar) {
+  position: relative;
+  flex-shrink: 0;
+  transform: none;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.desktop-poster-player > .video-player-edge-trigger { display: none; }
+
 .video-player-fullscreen.video-player-inline:not(.video-player-theater) .video-player-queue-rail,
 .video-player-inline .video-player-gesture-hint {
   display: none;
