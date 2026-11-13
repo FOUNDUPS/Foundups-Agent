@@ -284,3 +284,26 @@ The [member browser test](../../../public/member/tests/README.md#member-poster-g
 covers fresh and saved layout, mixed card selection, keyboard and Ctrl+wheel
 navigation, one active player, focus and scroll return, and provider dimensions.
 Release qualification requires a real invited session and a deployed asset match.
+
+### WikiTube search and Play hostname
+
+The [WikiTube archive](https://docs.google.com/document/d/1XzJDkZWsXbHHaDAsNT3zhFo-Nu3t579PE1niPQ9kEzw/edit)
+describes putting search by the queue, keeping a playing video, and starting
+the first result when idle. The [2010 mockups](https://drive.google.com/open?id=0B5a_mx1oJTbONDg3NWZhNDYtZWIwMy00MTQwLTk0M2YtZmNiYjYzN2M3ZWFl)
+show the main player and thumbnail rail. The 2026-11-14 request places the
+search dock above the rail and aligns it left in the immersive Mall player.
+This extends the invited Mall on `f0804bd35` and retains the HPC scope.
+
+| Slice | WSP 15 | Owner and acceptance |
+| --- | --- | --- |
+| PoC dock | 14/P1 (C3, I4, D3, Impact4) | Use the existing catalog and queue matching. Check search without reloading active media, local dictation fallback, menu dismissal, Red Dog and AutoPost handoff, and no overlap with provider controls. |
+| PoC tile playback | 15/P1 (C4, I4, D3, Impact4) | Play in the selected desktop tile using the shared player. Keep the separate full-view action, one iframe, provider dimensions, and original-card return. Use fixture and real-provider evidence. |
+| Play entry | 13/P1 (C3, I4, D3, Impact3) | Bind `play.foundups.com` to the existing Hosting site. Root opens the admitted Mall and the existing sign-in return remains available. Qualify DNS, TLS, signed-out and invited paths independently. |
+| PFWD-2/3 | Later stage | Device model selection needs an admitted runtime and measured device support. Plan mode and plugins need an authorized Red Dog contract. AutoPost keeps capture and private attachment ownership. |
+
+The PoC supersedes desktop poster click-to-fullscreen. Click requests in-tile
+playback and the separate fullscreen action opens the WikiTube-style viewer.
+Hover retains the poster affordance. A first-party muted hover clip still
+requires media and bandwidth evidence. Roll back the scoped shell changes as
+one slice if the browser or admission gates regress. The apex member path
+remains available during domain qualification.

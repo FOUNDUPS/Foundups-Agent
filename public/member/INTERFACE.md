@@ -149,7 +149,18 @@ fallback. Auth, account, dynamic and cross-origin requests are not cached.
 
 ### Runtime Surface
 
-`/member/` is now the admitted-user p.fMALL shell hosted from Firebase static assets.
+`/member/` is the admitted-user p.fMALL shell hosted from Firebase static assets.
+The root of `play.foundups.com` sends visitors to that shell on the same
+origin. The sign-in return page stays at the root with `signin=required`.
+Storage and service worker registrations are origin-local.
+
+The ordinary Mall dock searches the loaded catalog. Its left options button
+links to the registered AutoPost FoundUp, and its microphone uses local
+dictation if available or focuses the keyboard. The Red Dog button retains
+the existing concierge. In the desktop viewer the same dock layout filters
+the current queue. Red Dog there closes playback, returns to the poster and
+opens the concierge. Device model selection, resident speech and capture
+handoff follow the shared roadmap.
 
 It owns:
 - invite-gated post-auth landing
@@ -470,9 +481,9 @@ interface InviteDoc {
 
 **Mall Context (tile field)**:
 - category rows play the selected lane in the tile
-- the desktop poster grid opens the shared full player on click, Enter,
-  Space or the fullscreen button. Hover reveals the button. Back and
-  Escape restore focus and scroll without collapsing an expanded lane.
+- wide desktop video tiles play in context on click, Enter or Space. The
+  separate fullscreen action opens the full viewer. Hover reveals the
+  button. Back and Escape restore focus and scroll in the expanded lane.
 - Enter FoundUp button: navigate to `/f/{foundup_id}` (WSP 104 canonical)
 - pinch-out on tile: expand into FoundUp's video field
 - swipe: navigate snapped field (default) or glide (override)

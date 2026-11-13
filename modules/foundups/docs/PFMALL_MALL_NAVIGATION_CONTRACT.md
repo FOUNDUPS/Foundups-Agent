@@ -96,7 +96,7 @@ X axis = category / cluster / similarity band
 | Gesture | Mall Action | Status |
 |---------|-------------|--------|
 | swipe | Navigate: snapped field motion (default) or glide (override) | RUNTIME |
-| tap or click video tile | Open the full player in the desktop poster grid, the in-context player in the HPC phone grid, or the inline preview in ordinary category rows. A lane starts at its first clip. An expanded tile selects its own clip. | RUNTIME |
+| tap or click video tile | On wide desktop entry and in the HPC phone grid, open the shared player at the selected tile. Other category rows use their existing inline preview. A lane starts at its first clip. An expanded tile selects its own clip. | RUNTIME |
 | tap or click non-video tile | Open the FoundUp quick view or the property listing detail. | RUNTIME |
 | hover tile on desktop | Show available tile controls. | RUNTIME |
 | Expand button | Open the shared full player for the selected video or lane. | RUNTIME |
@@ -122,7 +122,7 @@ Set via `mallTileField.setMotionMode('snap')` or `mallTileField.setMotionMode('g
 | Arrow Down | Navigate: nearer | FIXED |
 | Arrow Left | Navigate: cluster left | FIXED |
 | Arrow Right | Navigate: cluster right | FIXED |
-| Enter on a video tile | Open the shared full player. Scoped HPC phone tiles use their in-context player. | RUNTIME |
+| Enter on a video tile | Match click on wide desktop and HPC phone entry. Other ordinary rows open the full player. | RUNTIME |
 | Space on a tile | Use the tile's tap action. | RUNTIME |
 | Escape | Close the active desktop poster player first. The next Escape can collapse the expanded lane. | FIXED |
 
@@ -138,8 +138,10 @@ Users cannot:
 
 ### 4.6 Desktop poster browsing
 
-The ordinary Mall enters through `foundups.com/member/` and checks member
-admission before mounting the member catalog. The shell loads lane and card
+The ordinary Mall checks member admission before mounting the member
+catalog. `foundups.com/member/` remains an entry. The exact Play hostname
+root forwards to its own `/member/` and permits the `/?signin=required`
+return page. The shell loads lane and card
 metadata and hands it to the shared field. On entry at 1024 CSS px or wider
 with a fine primary pointer and hover, the default is the adaptive poster
 grid. Touch and narrower entry use category rows. Saved layout takes
@@ -151,12 +153,17 @@ density. The state owner restores the selected layout and position.
 
 The grid can show video-backed FoundUps and cards for apps, repositories
 and services. Non-video selection opens the existing quick view. Listings
-use their detail view. In the desktop grid, click, Enter, Space and the
-fullscreen button open the selected video and its queue in the shared
-player. Hover reveals the action without mounting media. Escape or Back
-closes the player and returns focus at the original scroll position.
+use their detail view. Click, Enter or Space on a wide desktop video poster
+enlarges its selected position and requests muted playback with the shared
+player. The fullscreen button opens the full viewer. Expand from the inline
+controls retains the same provider iframe. Hover reveals the action without
+mounting media. Escape or Back returns focus and scroll to the poster.
 After density reflow, dismissal restores the same tile in its new row.
 WikiTube is the design reference for the full viewer and continuous queue.
+The admitted browse dock searches the loaded Mall catalog. The full viewer
+places its left-aligned queue search beneath the video and above the rail.
+Search filters the active lane. Submit starts the first match when idle.
+It leaves active playback alone.
 [Catalog schema](PFMALL_VIDEO_MALL_CATALOG_SCHEMA.md) ·
 [Quick view](../../../public/member/js/mall-planes.js) ·
 [Full player](PFMALL_FULLSCREEN_PLAYER_CONTRACT.md)

@@ -37,6 +37,7 @@
   var currentProjection = 'default';
   var layoutMode = 'rows';
   var desktopPosterBrowsing = false;
+  var desktopInlineTile = null;
   var rowOffsets = Object.create(null);
   var escapeBound = false;
   var originalOrder = [];  // Preserve original catalog order
@@ -733,7 +734,10 @@
     bindInteractions();
     bindProjectionChips();
     if (fixedVideoField) bindScopedPlayerHistory(mallCatalog[0].foundup_id);
-    else initTileObserver();
+    else {
+      initTileObserver();
+      if (groupDefinitions === null) window.mallVideoProjection?.mountMemberDock?.();
+    }
   }
 
   /** Replace a public result set. This is presentation, not an access-control gate. */
@@ -1249,6 +1253,7 @@
   }
 
   function renderTiles(appendThrough, keepSlot) {
+    if (desktopInlineTile) window.mallVideoPlayer.close({ restore: false });
     var groupedFocus = captureGroupState();
     captureRowOffsets();
     var itemsToRender = expandedFoundUp !== null ? getExpandedVideos() : mallCatalog;
@@ -1262,7 +1267,8 @@
       : itemsToRender.length;
     if (append && end <= start) return;
     var grouped = groupDefinitions !== null && expandedFoundUp === null;
-    var desktopGrid = usesDesktopGrid();
+    var desktopPlayer = usesDesktopPlayer();
+    var desktopGrid = desktopPlayer && layoutMode === 'grid';
     visibleGroups = grouped ? resolveGroups() : [];
     tileField.setAttribute('data-layout', grouped ? 'grouped' : layoutMode);
     tileFieldWrapper.classList.toggle('mall-field-grouped-wrapper', grouped);
@@ -1300,8 +1306,8 @@
       var tileType = isAvatarTile ? 'avatar' : 'video';
 
       // Determine if tile has videos (includes expanded video tiles with video_data)
-      var hasVideos = item.videos?.length || item.video_data || (!desktopGrid && item.video_count);
-      var inlineControls = hasVideos && !fixedVideoField && !desktopGrid;
+      var hasVideos = item.videos?.length || item.video_data || (!desktopPlayer && item.video_count);
+      var inlineControls = hasVideos && !fixedVideoField && !desktopPlayer;
 
       // Queue count (true_video_count preferred, then video_count, then videos array length)
       var queueCount = item.true_video_count || item.video_count || (item.videos ? item.videos.length : 0);
@@ -1620,8 +1626,8 @@
       // Keyboard support
       tile.addEventListener('keydown', function(e) {
         var index = Number(tile.dataset.index || 0);
-        var desktopGrid = usesDesktopGrid();
-        if ((fixedVideoField || desktopGrid) && e.target !== tile) return;
+        var desktopPlayer = usesDesktopPlayer();
+        if ((fixedVideoField || desktopPlayer) && e.target !== tile) return;
         if (groupDefinitions !== null && tileField.closest('[inert]')) return;
         if (groupDefinitions !== null && /^Arrow(Left|Right|Up|Down)$/.test(e.key)) {
           e.preventDefault();
@@ -1631,8 +1637,8 @@
           togglePlay(index);
         } else if (e.key === 'Enter') {
           e.preventDefault();
-          // Open fullscreen context (Enter FoundUp available there)
-          if (fixedVideoField || desktopGrid) togglePlay(index);
+          // Match click behavior in the video grids and keep the row shortcut.
+          if (fixedVideoField || desktopPlayer) togglePlay(index);
           else openFullscreenFromTile(index);
         }
       });
@@ -1738,8 +1744,9 @@
     });
   }
 
-  function usesDesktopGrid() {
-    return desktopPosterBrowsing && !fixedVideoField && groupDefinitions === null && layoutMode === 'grid';
+  function usesDesktopPlayer() {
+    return desktopPosterBrowsing && !fixedVideoField && groupDefinitions === null &&
+      typeof window.mallVideoPlayer?.openDesktopVideo === 'function';
   }
 
   /**
@@ -1773,11 +1780,12 @@
       }
       return;
     }
-    var desktopGrid = usesDesktopGrid();
-    var hasVideos = item && (item.videos?.length || item.video_data || (!desktopGrid && item.video_count));
+    var desktopPlayer = usesDesktopPlayer();
+    var hasVideos = item && (item.videos?.length || item.video_data || (!desktopPlayer && item.video_count));
 
     // Non-video tiles: open quick-view instead of trying inline preview
     if (!hasVideos) {
+      if (desktopInlineTile) window.mallVideoPlayer.close();
       var foundupId = item && (item.foundup_id || item.id);
       if (foundupId && window.mallPlanes && typeof window.mallPlanes.openFoundUpById === 'function') {
         window.mallPlanes.openFoundUpById(foundupId);
@@ -1785,8 +1793,8 @@
       return;
     }
 
-    if (desktopGrid) {
-      openFullscreenFromTile(index);
+    if (desktopPlayer) {
+      openDesktopVideo(index, false);
       return;
     }
 
@@ -1959,10 +1967,9 @@
       return;
     }
     if (!window.mallVideoPlayer) return;
-    var resumeOpts;
-    if (usesDesktopGrid()) {
-      var tile = getTileElement(index);
-      resumeOpts = { returnFocusTo: tile, autoplay: canAutoplayFromTile(tile) };
+    if (usesDesktopPlayer()) {
+      openDesktopVideo(index, true);
+      return;
     }
 
     if (expandedFoundUp !== null) {
@@ -1970,7 +1977,7 @@
       var parentItem = mallCatalog[expandedFoundUp];
       if (!parentItem || !parentItem.videos || !parentItem.videos.length) return;
       var foundupId = parentItem.foundup_id || parentItem.id || '';
-      window.mallVideoPlayer.open(foundupId, parentItem.videos, index, resumeOpts);
+      window.mallVideoPlayer.open(foundupId, parentItem.videos, index);
     } else {
       // Mall mode: tiles are FoundUps — open queue at first video
       var item = mallCatalog[index];
@@ -1978,14 +1985,67 @@
       var foundupId = item.foundup_id || item.id || '';
       var queue = item.videos || [];
       if (!queue.length) return; // No videos to play
-      window.mallVideoPlayer.open(foundupId, queue, 0, resumeOpts);
+      window.mallVideoPlayer.open(foundupId, queue, 0);
     }
+  }
+
+  function openDesktopVideo(index, immersive) {
+    var player = window.mallVideoPlayer;
+    var tile = getTileElement(index);
+    var lane = mallCatalog[expandedFoundUp ?? index];
+    var videoIndex = expandedFoundUp === null ? 0 : index;
+    if (!tile || !lane?.videos?.[videoIndex]) return;
+    if (desktopInlineTile === tile) {
+      if (immersive) player.expandInline();
+      return;
+    }
+    stopInlinePreview();
+    player.close({ restore: false });
+    var tileOffset = tile.getBoundingClientRect().top - tileFieldWrapper.getBoundingClientRect().top;
+    var slot = null;
+    player.openDesktopVideo(lane.foundup_id || lane.id, lane.videos, videoIndex, {
+      returnFocusTo: tile,
+      matchesQuery: matchesScopedVideo,
+      autoplay: canAutoplayFromTile(tile),
+      muted: !immersive,
+      inlineMount: immersive ? null : function() {
+        slot = document.createElement('div');
+        slot.className = 'mall-member-inline-slot';
+        if (tile.parentElement === tileField) sizeDesktopVideoSlot(slot);
+        tile.before(slot);
+        tile.hidden = true;
+        tile.setAttribute('aria-current', 'true');
+        desktopInlineTile = tile;
+        tileFieldWrapper.classList.add('member-inline-open');
+        return slot;
+      },
+      alignInline: function() {
+        if (!slot || slot.parentElement !== tileField) return;
+        var offset = slot.getBoundingClientRect().top - tileFieldWrapper.getBoundingClientRect().top;
+        var anchor = Math.min(Math.max(0, tileOffset), Math.max(0, tileFieldWrapper.clientHeight - slot.offsetHeight));
+        tileFieldWrapper.scrollTo({ top: tileFieldWrapper.scrollTop + offset - anchor, behavior: 'instant' });
+      },
+      onClose: function() {
+        if (!slot) return;
+        slot.remove();
+        tile.hidden = false;
+        tile.removeAttribute('aria-current');
+        tileFieldWrapper.classList.remove('member-inline-open');
+        desktopInlineTile = null;
+      }
+    });
   }
 
   function canAutoplayFromTile(tile) {
     // YouTube requires at least 120 × 70 CSS pixels for an autoplay trigger.
     var rect = tile?.getBoundingClientRect();
     return !!rect && rect.width >= 120 && rect.height >= 70;
+  }
+
+  function sizeDesktopVideoSlot(slot) {
+    var columns = window.getComputedStyle(tileField).gridTemplateColumns.split(' ');
+    var width = parseFloat(columns[0]) || 1;
+    slot.style.setProperty('--member-inline-columns', Math.min(columns.length, Math.ceil(360 / width)));
   }
 
   /**
@@ -2484,6 +2544,9 @@
       return;
     }
     autoSelectDensity();
+    if (desktopInlineTile?.parentElement === tileField) {
+      sizeDesktopVideoSlot(desktopInlineTile.previousElementSibling);
+    }
   }
 
   /**
