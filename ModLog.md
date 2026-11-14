@@ -63583,3 +63583,18 @@ the official CPU index, verifies that build after the unchanged requirements,
 and avoids restoring/retaining the former GPU pip cache. Runtime requirements
 and all acceptance commands remain unchanged. Hosted validation is pending.
 WSP10/22/50/97. No package installation or model change on the Windows PC.
+## 2026-11-14 - Trusted, default-off CI documentation verification
+
+Extend the landed #2338/#2340 pilot with exact-base verifier loading, one scoped
+gate result and an unregistered proposal-only Skill document schema. Keep
+required check names and every full-route command; fail required aggregation on
+absent, pending, failed, cancelled or stale scope evidence. Security/other required
+gates and post-merge full verification remain. Preserve existing WRE differential
+and exact-main owners; no scheduler, router, permission or runtime admission is
+added. See [.github/scripts/README.md](.github/scripts/README.md#audit-markdown-fast-path).
+
+Production activation remains held: current server opt-in absent, strict base
+freshness false and protected workflow ownership unestablished. No settings were
+changed. Python narrowing remains held without authenticated dependency closure.
+WSP 6/10/15/22/34/50/71/87/91/95/97/99/110. Validation and exact-head/main receipts
+are recorded in the focused PR and existing active slice ledger.
