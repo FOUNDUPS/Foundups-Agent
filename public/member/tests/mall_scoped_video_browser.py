@@ -218,7 +218,7 @@ def main():
         expect(player).to_have_attribute("aria-label", "Fullscreen video player")
         assert page.evaluate("window.originalFixtureIframe === document.querySelector('#videoPlayerFullscreen iframe')")
         assert page.evaluate("window.fixturePlayback.created") == 1
-        immersive_query = player.get_by_role("searchbox", name="Search this queue")
+        immersive_query = player.get_by_role("textbox", name="Search this queue")
         immersive_query.fill("theater topic")
         immersive_query.press("Enter")
         expect_playing(page, 2)
@@ -295,7 +295,7 @@ def main():
         voice = page.locator("#videoScopeVoice").bounding_box()
         assert voice["x"] + voice["width"] <= 320
         more = dock.get_by_role("button", name="More options")
-        search = dock.get_by_role("searchbox")
+        search = dock.get_by_role("textbox", name="Search videos")
         red_dog = dock.get_by_role("link", name="Red Dog")
         assert more.bounding_box()["x"] < search.bounding_box()["x"] < red_dog.bounding_box()["x"]
         page.evaluate("window.SpeechRecognition = window.webkitSpeechRecognition = undefined")
@@ -331,7 +331,12 @@ def main():
         expect(page.locator(".mall-video-grid-empty")).to_have_text("No videos match your search.")
         more.tap()
         menu = page.get_by_role("dialog", name="More options")
+        assert menu.bounding_box()["x"] <= more.bounding_box()["x"] + 1
+        assert menu.bounding_box()["y"] + menu.bounding_box()["height"] < dock.bounding_box()["y"]
         expect(menu.get_by_role("combobox", name="Browser AI")).to_be_disabled()
+        page.touchscreen.tap(20, 120)
+        expect(menu).to_be_hidden()
+        more.tap()
         menu.get_by_role("button", name="About this FoundUp").tap()
         disclosure = page.get_by_role("dialog", name="About this FoundUp")
         expect(disclosure).to_contain_text("independent satirical FoundUp")
@@ -443,7 +448,7 @@ def verify_member_poster_grid(page):
     expect(field.locator("iframe, video")).to_have_count(0)
     expect(lane_tile.locator(".mall-tile-audio")).to_have_count(0)
     expect(lane_tile.get_by_role("button", name="Open fullscreen")).to_be_visible()
-    mall_search = page.get_by_role("searchbox", name="Search the Mall")
+    mall_search = page.get_by_role("textbox", name="Search the Mall")
     expect(mall_search).to_be_visible()
     mall_search.fill("AutoPost")
     mall_search.press("Enter")
@@ -471,7 +476,7 @@ def verify_member_poster_grid(page):
     assert "controls=1" in frame.get_attribute("src")
     box = frame.bounding_box()
     assert box and min(box["width"], box["height"]) >= 200
-    query = player.get_by_role("searchbox", name="Search this queue")
+    query = player.get_by_role("textbox", name="Search this queue")
     query_box = query.bounding_box()
     rail_box = player.locator(".video-player-queue-rail").bounding_box()
     assert query_box and rail_box and box["y"] + box["height"] <= query_box["y"] < rail_box["y"]
@@ -623,7 +628,7 @@ def verify_member_phone(page, context, supports_cdp):
 
     inline.get_by_role("button", name="Expand video").tap()
     player = page.get_by_role("dialog", name="Fullscreen video player")
-    query = player.get_by_role("searchbox", name="Search this queue")
+    query = player.get_by_role("textbox", name="Search this queue")
     rail = player.locator(".video-player-queue-track")
     frame = player.locator("iframe")
     same_context = "frame => frame === window.phoneFrame && frame.contentWindow === window.phoneFrameContext"
@@ -674,6 +679,8 @@ def verify_member_phone(page, context, supports_cdp):
     page.keyboard.press("Escape")
     expect(player.get_by_role("dialog", name="Search options")).to_be_hidden()
 
+    transcript = "Please show me the Move2Japan videos about the Vulnpocalypse in this queue."
+    page.evaluate("value => { window.fixtureTranscript = value; }", transcript)
     page.evaluate("""() => {
       window.fixtureSpeech = {starts: 0, stops: 0, aborts: 0};
       window.SpeechRecognition = class {
@@ -682,24 +689,40 @@ def verify_member_phone(page, context, supports_cdp):
         start() { if (this.local) { fixtureSpeech.starts++; this.onstart(); } }
         stop() {
           fixtureSpeech.stops++;
-          this.onresult({results: [[{transcript:'vulnpocalypse'}]]});
+          this.onresult({results: [[{transcript: fixtureTranscript}]]});
           this.onend();
         }
         abort() { fixtureSpeech.aborts++; }
       };
     }""")
     dog = player.get_by_role("button", name="Open Red Dog")
+    dog_position = dog.bounding_box()
+    idle_height = query.bounding_box()["height"]
     dog.dispatch_event("pointerdown", {"isPrimary":True,"button":0})
     stop = player.get_by_role("button", name="Stop dictation")
     expect(stop).to_be_visible()
     expect(stop.locator(".mall-dictation-stop")).to_be_visible()
+    assert abs(stop.bounding_box()["x"] - dog_position["x"]) <= 1
+    assert abs(stop.bounding_box()["y"] - dog_position["y"]) <= 1
+    assert dog.evaluate("el => { const r = el.getBoundingClientRect(); return el.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)); }")
     dog.dispatch_event("pointerup", {"isPrimary":True,"button":0})
-    expect(query).to_have_value("vulnpocalypse")
+    expect(query).to_have_value(transcript)
+    assert query.bounding_box()["height"] > idle_height
     assert page.evaluate("fixtureSpeech.starts === 1 && fixtureSpeech.stops === 1")
     assert frame.evaluate(same_context)
-    player.get_by_role("button", name="Dictate search").tap()
+    mic = player.get_by_role("button", name="Dictate search")
+    mic.tap()
+    expect(mic).to_have_attribute("aria-pressed", "true")
+    expect(dog).to_be_hidden()
+    assert stop.bounding_box()["x"] > mic.bounding_box()["x"]
     stop.tap()
     page.wait_for_function("fixtureSpeech.starts === 2 && fixtureSpeech.stops === 2")
+    expect(dog).to_be_visible()
+    expect(query).to_have_value(transcript)
+    expect_playing_id(page, clips[0]["video_id"])
+    query.press("End")
+    query.press("Backspace")
+    expect(query).to_have_value(transcript[:-1])
     dog.dispatch_event("pointerdown", {"isPrimary":True,"button":0})
     expect(stop).to_be_visible()
     dog.dispatch_event("pointercancel", {"isPrimary":True,"button":0})
@@ -714,17 +737,31 @@ def verify_member_phone(page, context, supports_cdp):
         assert frame.evaluate(same_context)
         frame_box = frame.bounding_box()
         assert min(frame_box["width"], frame_box["height"]) >= 200
+        assert query.bounding_box()["y"] < rail.bounding_box()["y"]
     page.set_viewport_size({"width":390, "height":844})
     expect(query).to_be_in_viewport()
     expect(rail).to_be_in_viewport()
+    query.fill("")
+    assert query.bounding_box()["height"] == idle_height
     player.get_by_role("button", name="Back").tap()
     expect(player).to_be_hidden()
     expect(tile).to_be_focused()
     expect_position(page, start_scroll)
     assert page.locator("iframe").count() == 0
+
+    anchor = page.locator('#redDogAnchor')
+    page.evaluate("redDog.openModes()")
+    anchor.locator('[data-reddog-mode="listen"]').tap()
+    anchor.get_by_role("button", name="Stop dictation").tap()
+    expect(anchor.get_by_role("textbox", name="Search the Mall")).to_have_value(transcript)
+    assert page.evaluate("fixtureSpeech.starts === 4 && fixtureSpeech.stops === 3")
+    expect(anchor.get_by_role("button", name="Open Red Dog")).to_be_visible()
+
     print(json.dumps({"member_phone_inline_and_immersive": True,
                       "horizontal_touch_scroll": supports_cdp,
                       "foreground_dictation_hold_and_stop": True,
+                      "red_dog_mode_sheet_stop": True,
+                      "multiline_editing_and_stop_in_red_dog_slot": True,
                       "queue_search_portrait_and_landscape": True}))
 
 
@@ -783,7 +820,7 @@ def verify_member_entry(browser_type):
     account = {"username": "fixture", "inviteValidated": True}
     page.goto("https://play.foundups.com/", wait_until="domcontentloaded")
     page.wait_for_url("https://play.foundups.com/member/")
-    expect(page.get_by_role("searchbox", name="Search the Mall")).to_be_visible()
+    expect(page.get_by_role("textbox", name="Search the Mall")).to_be_visible()
     requested.clear()
     page.goto("https://foundups.com/member/", wait_until="domcontentloaded")
     page.wait_for_url(scoped)
@@ -912,7 +949,7 @@ def verify_desktop(browser_type):
     assert page.evaluate("document.querySelector('.mall-tile-field-wrapper').scrollTop") > 0
     assert page.url == "https://hpc.foundups.com/member/"
 
-    phone_search = page.locator("#videoScopePhoneDock").get_by_role("searchbox")
+    phone_search = page.locator("#videoScopePhoneDock").get_by_role("textbox", name="Search videos")
     phone_search.fill("fixture clip 25")
     phone_search.press("Enter")
     expect(page.locator(".mall-tile")).to_have_count(1)

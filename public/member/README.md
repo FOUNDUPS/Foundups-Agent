@@ -26,7 +26,8 @@ Select a video-backed card to play at that card. Expand keeps the same
 player and shows the floating queue search. On phones, swipe the thumbnail
 queue sideways to browse the current lane. The plus button opens options
 and a tap on Red Dog opens the concierge. Hold the dog or use the microphone
-to dictate search on supported devices. The square finishes dictation.
+to dictate search on supported devices. The square in Red Dog's position
+finishes dictation. Longer text wraps for review and editing before search.
 
 ### Public FX directory
 

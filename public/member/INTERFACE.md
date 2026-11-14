@@ -155,12 +155,15 @@ origin. The sign-in return page stays at the root with `signin=required`.
 Storage and service worker registrations are origin-local.
 
 The ordinary Mall dock searches the loaded catalog. Tap or swipe up on its
-plus button for options and the public AutoPost link. The mic or a hold on
-Red Dog dictates into the search field using an installed local recognizer.
+plus button for an anchored options panel and the public AutoPost link.
+Search and dictated text wrap into a bounded editable field above the
+controls when they outgrow the compact pill. Enter or the search icon
+submits. The mic or a hold on Red Dog dictates into the search field using
+an installed local recognizer.
 On unsupported devices the control focuses the input for keyboard dictation.
-Release a hold or press the square to finish dictation. The result stays
-editable, and hiding the dock or backgrounding the page cancels capture.
-Tap Red Dog to open the existing concierge.
+Release a hold or press the square Stop in Red Dog's position to finish
+dictation. The result stays editable, and hiding the dock or backgrounding
+the page cancels capture. Tap Red Dog at rest to open the existing concierge.
 
 The shared full viewer puts the same floating dock between the video and
 horizontal queue on PC and phone. A query filters the current lane while

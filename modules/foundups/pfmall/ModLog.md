@@ -1,3 +1,11 @@
+## 2026-11-14 · Phone search reference refinement
+
+PFWD-1B shares the compact dock across browse and viewer. Plus anchors the
+options panel above the dock. Longer search text wraps above the controls
+for review. The far-right Stop uses the existing foreground dictation
+lifecycle. The worker advances from v15 to v16 with the dock assets.
+Verification is tracked in the [member tests](../../../public/member/tests/TestModLog.md).
+
 ## 2026-11-14 · WikiTube phone viewer
 
 Extended PFWD-1B from the desktop queue and phone grid to the shared

@@ -417,6 +417,7 @@
     if (memberQueueDock && matchesQuery && (!scopedPlayer || memberQueueDock.setScoped)) {
       memberQueueDock.setScoped?.(scopedPlayer);
       memberQueueDock.element.hidden = false;
+      memberQueueDock.fitInput?.();
       container.classList.add('video-player-queue-docked');
       filterRail();
     }

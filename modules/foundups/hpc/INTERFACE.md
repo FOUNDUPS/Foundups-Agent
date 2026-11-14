@@ -54,8 +54,9 @@ on the surrounding chrome restores the tile and focus. YouTube owns touches
 inside the iframe. The provider viewport is at least 200 × 200. A thumbnail
 below 120 × 70 selects the player and offers explicit Play. [YouTube embed requirements](https://developers.google.com/youtube/terms/required-minimum-functionality).
 
-The floating phone dock puts **More options** at the left, scoped search and
-its dictation microphone in the middle, and **Red Dog** at the right. Search
+The shared floating phone dock puts **More options** at the left, scoped
+search and its dictation microphone in the middle, and **Red Dog** at the
+right. Longer queries expand into an editable field above those controls. Search
 submits against the loaded collection. Its results keep the source IDs and
 the same in-place player. The microphone fills the field when the browser has
 local recognition available. Otherwise it focuses the field for keyboard
@@ -63,7 +64,8 @@ dictation. The visitor submits the resulting query. **More options** opens
 Home, the independent-site disclosure, and device-model availability. The
 Browser AI shows its unavailable state until an admitted model is connected.
 Tap Red Dog to open the public read-only briefing or hold for local search
-dictation on supported devices. Release or tap the square to finish.
+dictation on supported devices. Release the hold or tap the square **Stop**
+in Red Dog's position to finish. The transcript remains editable until submitted.
 
 The expanded viewer keeps the search pill between the video and its
 horizontally scrollable queue. Filtering during playback keeps the active
