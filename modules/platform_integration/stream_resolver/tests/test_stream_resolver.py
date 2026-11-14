@@ -46,25 +46,25 @@ class TestCalculateDynamicDelay(unittest.TestCase):
         self.assertGreaterEqual(delay, 5.0)  
         self.assertLessEqual(delay, 7.0)  # With jitter
 
-    @patch('modules.platform_integration.stream_resolver.src.stream_config.FORCE_DEV_DELAY', False)
     def test_calculate_dynamic_delay_with_low_activity(self):
         """Test delay calculation with low chat activity."""
         delay = calculate_dynamic_delay(active_users=5)
-        # Should be close to MAX_DELAY
-        self.assertGreaterEqual(delay, 48.0)  
-        self.assertLessEqual(delay, 60.0)  # With upper bound
+        # New contract: very low activity (1-10 users) = 30s base with jitter
+        self.assertGreaterEqual(delay, 27.0)  # 30 - 10% jitter
+        self.assertLessEqual(delay, 33.0)  # 30 + 10% jitter
 
-    @patch('modules.platform_integration.stream_resolver.src.stream_config.FORCE_DEV_DELAY', False)
     def test_calculate_dynamic_delay_with_failures(self):
         """Test delay increase with consecutive failures."""
-        base_delay = calculate_dynamic_delay(active_users=100)
-        increased_delay = calculate_dynamic_delay(active_users=100, consecutive_failures=3)
+        # New contract: consecutive_failures only applies when active_users=0
+        # (activity-based delay overrides failure-based delay when stream is live)
+        base_delay = calculate_dynamic_delay(active_users=0, consecutive_failures=0)
+        increased_delay = calculate_dynamic_delay(active_users=0, consecutive_failures=3)
         self.assertGreater(increased_delay, base_delay)
 
-    @patch('modules.platform_integration.stream_resolver.src.stream_config.FORCE_DEV_DELAY', True)
     def test_calculate_dynamic_delay_dev_mode(self):
         """Test that dev mode forces a 1-second delay."""
-        delay = calculate_dynamic_delay(active_users=1000)
+        # New API: force_dev_delay is passed as parameter, not module constant
+        delay = calculate_dynamic_delay(active_users=1000, force_dev_delay=True)
         self.assertEqual(delay, 1.0)
 
     @patch('modules.platform_integration.stream_resolver.src.stream_config.FORCE_DEV_DELAY', False)
@@ -145,6 +145,7 @@ class TestMaskSensitiveId(unittest.TestCase):
 class TestYouTubeAPICalls(unittest.TestCase):
     """Test suite for YouTube API interaction functions."""
 
+    @pytest.mark.skip(reason="Functionality moved to YouTubeAPIOperations - see youtube_api_operations/tests/")
     @patch('modules.platform_integration.stream_resolver.src.stream_resolver.time.sleep')  # Skip sleeps
     def test_check_video_details(self, mock_sleep):
         """Test video details retrieval."""
@@ -173,6 +174,7 @@ class TestYouTubeAPICalls(unittest.TestCase):
         self.assertEqual(result["id"], "test_video_id")
         self.assertEqual(result["liveStreamingDetails"]["activeLiveChatId"], "test_chat_id")
 
+    @pytest.mark.skip(reason="Functionality moved to YouTubeAPIOperations - see youtube_api_operations/tests/")
     @patch('modules.platform_integration.stream_resolver.src.stream_resolver.time.sleep')  # Skip sleeps
     @patch('modules.platform_integration.stream_resolver.src.stream_resolver.check_video_details')
     def test_search_livestreams(self, mock_check_video, mock_sleep):
@@ -207,6 +209,7 @@ class TestYouTubeAPICalls(unittest.TestCase):
         # Verify result contains expected data
         self.assertEqual(result, "test_video_id")
 
+    @pytest.mark.skip(reason="Functionality moved to YouTubeAPIOperations - see youtube_api_operations/tests/")
     @patch('modules.platform_integration.stream_resolver.src.stream_resolver.time.sleep')  # Skip sleeps
     def test_search_livestreams_no_results(self, mock_sleep):
         """Test search with no livestreams found."""
@@ -228,6 +231,7 @@ class TestYouTubeAPICalls(unittest.TestCase):
         # Verify result is None when no streams found
         self.assertIsNone(result)
 
+    @pytest.mark.skip(reason="Functionality moved to YouTubeAPIOperations - see youtube_api_operations/tests/")
     @patch('modules.platform_integration.stream_resolver.src.stream_resolver.time.sleep')  # Skip sleeps
     @patch('modules.platform_integration.stream_resolver.src.stream_resolver.search_livestreams')
     @patch('modules.platform_integration.stream_resolver.src.stream_resolver.check_video_details')
@@ -254,6 +258,7 @@ class TestYouTubeAPICalls(unittest.TestCase):
         # Verify result contains expected data
         self.assertEqual(result, ("test_video_id", "test_chat_id"))
 
+    @pytest.mark.skip(reason="Functionality moved to YouTubeAPIOperations - see youtube_api_operations/tests/")
     @patch('modules.platform_integration.stream_resolver.src.stream_resolver.time.sleep')  # Skip sleeps
     @patch('modules.platform_integration.stream_resolver.src.stream_resolver.search_livestreams')
     @patch('modules.platform_integration.stream_resolver.src.stream_resolver.check_video_details')
@@ -285,6 +290,7 @@ class TestYouTubeAPICalls(unittest.TestCase):
         # Verify result contains expected data
         self.assertEqual(result, ("test_upcoming_id", "test_upcoming_chat_id"))
 
+    @pytest.mark.skip(reason="Functionality moved to YouTubeAPIOperations - see youtube_api_operations/tests/")
     @patch('modules.platform_integration.stream_resolver.src.stream_resolver.time.sleep')  # Skip sleeps
     @patch('modules.platform_integration.stream_resolver.src.stream_resolver.search_livestreams')
     def test_get_active_livestream_none_found(self, mock_search, mock_sleep):
@@ -302,6 +308,7 @@ class TestYouTubeAPICalls(unittest.TestCase):
         # Verify result is None when no streams found
         self.assertIsNone(result)
 
+    @pytest.mark.skip(reason="Functionality moved to YouTubeAPIOperations - see youtube_api_operations/tests/")
     @patch('modules.platform_integration.stream_resolver.src.stream_resolver.time.sleep')  # Skip sleeps
     @patch('modules.platform_integration.stream_resolver.src.stream_resolver.get_env_variable')
     def test_check_video_details_with_empty_response(self, mock_get_env, mock_sleep):
@@ -344,6 +351,7 @@ class TestYouTubeAPICalls(unittest.TestCase):
         # Verify result is None when an exception occurs
         self.assertIsNone(result)
 
+    @pytest.mark.skip(reason="Functionality moved to YouTubeAPIOperations - see youtube_api_operations/tests/")
     @patch('modules.platform_integration.stream_resolver.src.stream_resolver.time.sleep')  # Skip sleeps
     @patch('modules.platform_integration.stream_resolver.src.stream_resolver.circuit_breaker')
     @patch('modules.platform_integration.stream_resolver.src.stream_resolver.get_env_variable')
@@ -585,6 +593,7 @@ except Exception as e_guard:
             # Clean up the temporary file
             os.unlink(path)
 
+    @pytest.mark.skip(reason="Functionality moved to YouTubeAPIOperations - see youtube_api_operations/tests/")
     @patch('modules.platform_integration.stream_resolver.src.stream_resolver.time.sleep')
     @patch('modules.platform_integration.stream_resolver.src.stream_resolver.circuit_breaker')
     def test_check_video_details_quota_error_max_retries(self, mock_circuit_breaker, mock_sleep):
@@ -611,6 +620,7 @@ except Exception as e_guard:
                     # Should have logged the error message
                     mock_logger.error.assert_any_call("Max retries (3) reached for quota errors with current credentials.")
 
+    @pytest.mark.skip(reason="Functionality moved to YouTubeAPIOperations - see youtube_api_operations/tests/")
     @patch('modules.platform_integration.stream_resolver.src.stream_resolver.time.sleep')
     @patch('modules.platform_integration.stream_resolver.src.stream_resolver.circuit_breaker')
     def test_search_livestreams_quota_error_max_retries_immediate_fail(self, mock_circuit_breaker, mock_sleep):
