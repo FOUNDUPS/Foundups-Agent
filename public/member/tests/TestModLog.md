@@ -1,3 +1,19 @@
+## 2026-11-14 · Shared dock phone reference
+
+The existing Chromium and WebKit browser fixtures check the shared dock at
+320/390/430 px portrait and 844 × 390 landscape. The updated tests exercise
+the anchored plus panel, backdrop dismissal, the square in Red Dog's slot,
+pointer release and cancellation, and a multiline transcript that can be
+edited while the same provider frame plays. The state fixture checks v16
+installation, v15 retirement and retention of unrelated caches.
+
+The broader targeted Python run had 601 passes and the same three existing
+navigation assertions on the candidate and base `ebfce5717`.
+`TestFoundUpHandoff` expects `fv-open-link` and `routing_prefix` and
+`TestGestureHints` expects the former tap-to-play/pause hint. These are
+outside the dock change. Browser fixtures use controlled provider and
+speech events. They leave physical iPhone and real dictation verification open.
+
 ## 2026-11-14 · Phone WikiTube viewer
 
 The base `510079b91` passed the existing scoped and desktop cases. The

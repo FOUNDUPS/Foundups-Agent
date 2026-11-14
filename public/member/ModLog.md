@@ -1,5 +1,13 @@
 # Member Area Module Change Log
 
+## 2026-11-14 · Shared search dock and transcript editing
+
+The scoped grid, invited grid and expanded player use the same plus menu,
+editable search and foreground dictation controls. The far-right action
+shows the square Stop during capture. A longer transcript opens above the
+controls and stays available to edit. The queue and provider keep their
+positions while the dock grows. Cache v16 refreshes the shared assets.
+
 ## 2026-11-14 · Phone WikiTube viewer and dictation
 
 Ordinary member phone cards use the existing selected-card player. The
