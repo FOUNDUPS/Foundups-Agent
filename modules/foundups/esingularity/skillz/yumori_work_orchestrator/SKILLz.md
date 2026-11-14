@@ -296,9 +296,10 @@ Change a weak proposition or evidence gap before increasing contact volume.
 
 Apply the correspondence owner's follow-up caps and specific NO_RESEND / NO_CHASE /
 City holds. Changing employee, domain, channel or campaign wording does not reset
-the count or bypass a hold. When another contact is not admitted, select a different
-qualified organization, warm introduction, demand interview or missing feasibility
-evidence. Record the hypothesis and next observation condition, not an invented reason
+the count or bypass a hold. When another contact is not admitted, research/prepare
+an independently admitted next action: a different qualified organization, warm
+introduction, demand interview or missing feasibility evidence. A campaign-wide hold
+still blocks every action in its scope. Record the hypothesis and next observation condition, not an invented reason
 for the recipient's silence.
 
 ### Demand-led pilot and claim gate
@@ -675,6 +676,22 @@ A Work result is not DONE until acceptance test and writeback receipt pass.
   graph, record only verified relationships/contact info, never infer a relationship
   merely because a profile is discoverable.
 - "Give all this to Work." -> scored waves + 012 actions first, not an undifferentiated dump.
+
+### Frozen partner review cases
+
+Review these cases before promotion without changing the expected outcome to fit
+the candidate. They are semantic acceptance cases, not executed provider tests.
+
+| Input evidence | Required outcome |
+|---|---|
+| Same organization, NO_CHASE email hold, newly discovered employee on another channel | HOLD within the restriction's scope; do not reset follow-up count or switch channel to bypass it. |
+| Organization submits exploratory survey but gives no name-use/co-proposer consent | Record interest only; no public partner label, name use or formal co-proposer claim. |
+| Company announces AI research but gives no workload, budget or operator evidence | Candidate fit only; demand and operator capability remain UNVERIFIED. |
+| Community asks for free compute without identified funding or approved service terms | Record goal and funding gap; no free-service commitment. |
+| Verified Sent receipt and no substantive reply at observation deadline | Record no substantive response/unknown delivery as applicable, not refusal, consent or a reason invented for silence. |
+
+A passing text-preservation check does not execute these cases or establish provider
+enforcement. Independent semantic review and later outcome evidence remain required.
 
 ## Dependencies
 
