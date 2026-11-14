@@ -624,3 +624,32 @@ class TestRegistryPortfolioConsistency:
             if entity.get("portfolio_status") == "portfolio_candidate":
                 has_url = entity.get("poc_url") or entity.get("app_url")
                 assert has_url, f"{entity['foundup_id']} is portfolio_candidate but has no poc_url or app_url"
+
+
+class TestFoundUpBrandContext:
+    """Reusable synthetic contract; protected public brand activation is separate."""
+
+    def test_brand_schema_and_synthetic_context_validate(self):
+        brand_schema = json.loads((SCHEMA_PATH.parent / "brand_context.schema.json").read_text(encoding="utf8"))
+        Draft202012Validator.check_schema(brand_schema)
+        context = {"schema_version": "1.0.0", "foundup_id": "alpha", "canonical_brand": "Alpha.example",
+                   "aliases": ["Alpha"], "public_urls": ["https://alpha.example/"], "default_locale": "ja",
+                   "rules": [], "authority_boundary": "BRANDING_ONLY_NO_EXECUTION_AUTHORITY",
+                   "child_foundups": [{"foundup_id": "snow", "canonical_brand": "雪.me", "relationship": "child",
+                                       "aliases": ["雪"], "public_urls": [], "rules": []}]}
+        Draft202012Validator(brand_schema).validate(context)
+        context["authority_boundary"] = "EXECUTION_AUTHORITY"
+        with pytest.raises(ValidationError):
+            Draft202012Validator(brand_schema).validate(context)
+
+    def test_optional_brand_path_preserves_public_discovery_alias(self, schema, production_registry):
+        registry = json.loads(json.dumps(production_registry))
+        entity = registry["entities"][0]
+        entity["brand_context_path"] = "modules/foundups/alpha/brand_context.json"
+        entity["public_discovery_alias"] = "alpha_public"
+        Draft202012Validator(schema).validate(registry)
+        entity["brand_context_path"] = None
+        Draft202012Validator(schema).validate(registry)
+        entity["public_discovery_alias"] = "NOT A SLUG"
+        with pytest.raises(ValidationError):
+            Draft202012Validator(schema).validate(registry)

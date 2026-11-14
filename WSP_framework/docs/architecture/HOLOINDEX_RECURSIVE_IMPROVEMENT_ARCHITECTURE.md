@@ -1,8 +1,17 @@
 # HoloIndex Recursive Self-Improvement Architecture
 
-**Status**: [AI] QUANTUM INTELLIGENCE EVOLUTION  
+**Status**: HISTORICAL TARGET ARCHITECTURE; PRODUCTION RSI NO-GO
 **Vision**: Transform HoloIndex from static search to adaptive learning system  
 **WSP Compliance**: WSP 48 (Recursive Improvement), WSP 60 (Memory Architecture), WSP 87 (Navigation)  
+
+> **Operational truth (2026-08-28):** This document describes the target loop,
+> not implemented production behavior. Governed generation-bound retrieval and
+> deterministic public evaluation work. A live generic proposer, independently
+> administered evaluator, authenticated admission, shadow canary, signed ranker
+> promotion, ranker rollback, candidate-bound outcome learning, and exact
+> runtime closure do not. Interaction logs or self-scored metrics are not proof
+> of RSI. Current acceptance truth is owned by `holo_index/README.md`,
+> `holo_index/ROADMAP.md`, and fresh governed receipts.
 
 ## [U+1F3AF] THE QUANTUM LEAP VISION
 
@@ -344,7 +353,7 @@ HoloIndex independently identifies and suggests system improvements
 
 **This transforms HoloIndex from a search tool into a continuously evolving AI partner that grows smarter with every 0102 interaction!** [AI][U+1F680]
 
-## [TOOL][U+FE0F] **READY TO BUILD**
+## [TOOL][U+FE0F] **TARGET BUILD SEQUENCE**
 
 The recursive self-improving HoloIndex will:
 1. **Learn** from every 0102 interaction
@@ -353,4 +362,7 @@ The recursive self-improving HoloIndex will:
 4. **Anticipate** 0102 needs proactively
 5. **Collaborate** as an intelligent development partner
 
-Would you like me to start implementing the **interaction logging system** as the foundation for this recursive intelligence evolution?
+Implementation must proceed through independently verified layers: exact
+runtime closure, disjoint administered evaluation, generic candidate proposal,
+fixed quality gates, signed admission, shadow canary, promotion/rollback, and
+candidate-bound production outcomes. Logging alone does not complete this loop.

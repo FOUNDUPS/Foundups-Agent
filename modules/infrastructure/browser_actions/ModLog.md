@@ -1,11 +1,66 @@
 # Browser Actions - ModLog
 
+## 2026-10-29 — Make the legacy Gemini probe safe to import
+
+Repaired the malformed Step 5 block in `test_final_autonomous_gemini.py` and
+moved browser/provider imports, browser construction, navigation and heart
+clicking behind explicit `main()` invocation. All four functions stay below
+50 lines; root discovery now resolves the repository. Existing prompt and
+selector fallback order remain; the browser closes through finally cleanup.
+`WRE_TEST_MODE = "manual"` preserves exclusion from automated evidence.
+The bounded import regression denies runtime/provider imports and verifies
+silence and unchanged sys.path. No Chrome, model or live action was run;
+manual behavior remains IMPLEMENTED_NOT_VALIDATED. WSP22/34/50/62/97.
+
+## 2026-09-24: Manager admission guard
+
+- WSP 00/15/22/34/50/62/84/97; C3/I3/D4/Impact3 = 13/P1. The existing action owner now requires no prior pending/connected target, the actual PENDING enum, a matching target and identity with the currently stored pending object before Connect. Rejections return `connection_request_not_admitted` without invitation UI or success credit. Existing policy denials, previews, navigation failures and manager bookkeeping are preserved.
+- Frozen acceptance: baseline 11 fail/25 pass; repaired and independent runs each pass the same 36 unique cases. All 23 earlier compatibility cases remain; four legacy constructor cases are deselected and two known plugin warnings remain. Seven malformed/state controls supplement the six manager outcomes. File/class/method shrink; no new module or skill.
+- Backend binding changes one source digest among 1401 unchanged members and updates two existing pins. Eight manifest tests, the 67-file package and unchanged 1659-file test registry pass. Two premature manifest preparations each yielded 1 fail/7 pass: an old loaded pin, then a partially staged index. Both are preserved; the completed, coherently staged candidate passes the sequential rerun.
+- Evidence: `O:/Foundups-Agent-audits/20260924-rsi-manager-guard`; exact publication/closure is recorded there and in the canonical system backlog. This proves a local admission guard, not live delivery, bookkeeping rollback, quota repair, concurrent exactly-once execution, OS confinement or retained native RSI.
+
+## 2026-09-24: Manager-result to UI admission qualification
+
+- WSP00/15/22/34/50/62/84/97; C3/I3/D3/Impact3=12/P2. Extended the existing policy test owner with six fixed current-behavior cases; all23 prior cases and original test AST/fixtures preserved. Production source, backend manifest and registry remain unchanged.
+- Same29 cases pass locally and independently, four legacy constructor cases deselected, two known config warnings. Quota WITHDRAWN, already CONNECTED, prior PENDING and simulator-failure WITHDRAWN still reach fake Connect/Send and gain credit; freshPENDING and policyBLOCKED controls distinguish admission.
+- Returned/stored object identity is checked: under the fixed test clock, exception fallback shares the storedPENDING request_id but is a different object; priorPENDING reuses the exact existing object. Canonical workflow records a prospective13/P1 fresh-work guard, not a completed repair. No live delivery, rollback, concurrent exactly-once or retained-RSI claim.
+- Test inventory reconciled against six actual files; established required canonical tests/TestModLog. Source-only instruction hygiene was separately discovered/scored13/P1 without reproducing or using credential-shaped values. Exact evidence/closure and next selection are in the system backlog.
+
+
 **Module:** infrastructure/browser_actions
 **WSP Reference:** WSP 22 (ModLog Protocol)
 
 ---
 
 ## Change Log
+
+## 2026-09-23: Requested-note ordering and acknowledgment repair
+
+- WSP00/10/15/22/34/50/62/84/97; C3/I3/D3/Impact3=12/P2. Existing LinkedIn owner prepares requested notes before one explicit Send; failed Add/typing suppress Send and success credit. Unattempted Send is None. Preserve no-message fallback and manager/policy/preview behavior.
+- Frozen 23 cases: baseline 4 fail/19 pass, candidate 23 pass and independent same 23 pass; 17 compatibility controls/four legacy constructor definitions preserved, four deselected, two known warnings per run. Same-file bounded helpers reduce inherited size debt; no live delivery/browser/OS-isolation proof.
+- One backend digest and two pins refreshed; 1401 members unchanged. Eight manifest tests, 67-file package and canonical registry verified. Existing backlog records the separately scored next qualification; no native RSI or automatic runtime-upgrade claim.
+
+
+## 2026-09-23: LinkedIn invitation acknowledgment qualification
+
+- WSP00/15/22/34/50/62/84/97; C2/I3/D3/Impact3=11/P2. Seven new finite acknowledgment cases reuse the existing inert fixture; existing17 compatibility cases and four legacy constructor definitions are preserved. Production source and backend manifest unchanged.
+- Same24 cases pass locally and independently, four legacy deselected, two known config warnings per run. Initial Send precedes requested note entry; type failure can still report success; no-message missing Send remains ambiguous. No live delivery, browser or OS-isolation claim.
+- Existing workflow/backlog records the separate message-path ordering/acknowledgment repair contract12/P2; required direct-connect UI and bookkeeping boundaries remain explicit.
+
+
+## 2026-09-22: Connection policy-only preview repair
+
+- WSP00/10/15/22/50/62/84/97;12/P2. Reuse policy evaluation before request mutation; both allow/deny previews preserve bookkeeping and omit request status. Browser access remains separate.
+- Frozen17 cases: baseline12fail/5pass; repaired and independent17pass. Four original constructor tests unchanged/excluded, two known warnings per run; fake-live controls preserved.
+- Same-file result projection reduces method194→171, class2718→2695, file2827→2826. No new module. Backend digest/pins refreshed without adding runtime members or updating services.
+
+
+## 2026-09-22: Connection dry-run state qualification
+
+- WSP00/15/22/50/62/84/97; 12/P2. Ten fixed current-behavior cases pass locally and independently; four original tests remain unchanged/deselected. Production source unchanged; inert routing, constructor bypass and patched sleep only.
+- Preview currently calls the manager before its guard: pending/history mutation, blocked-history quota and simulation are observable. Existing policy evaluation supports a narrow future no-bookkeeping-mutation preview; browser access remains separate.
+- [Current evidence and prospective repair](../../platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-connection-policy-qualification--2026-09-22). No live action, runtime update or retained-learning claim.
+
 
 ### 2026-03-07: LinkedIn Registry Migration
 **By:** 0102

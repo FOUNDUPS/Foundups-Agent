@@ -1,0 +1,15 @@
+# audio_content_classifier (R&D PoC) requirements
+#
+# Unit tests require NONE of these (features + whisper segments are mocked/injected).
+# These are needed only for the LIVE entrypoint (scripts/live_classify.py).
+
+librosa>=0.11        # already present in repo env (verified 0.11.0)
+numpy>=2             # already present (verified 2.4.4)
+openai-whisper       # already present (verified importable); STT fusion signals
+
+# faster-whisper deliberately NOT a dependency (it is NOT installed in this env).
+
+# LIVE video-id path only (NOT needed for unit tests):
+#   yt-dlp            # VideoArchiveExtractor.extract_audio (reused)
+#   ffmpeg            # system binary, audio -> 16kHz mono wav
+#   soundfile         # persist fetched float32 audio to a temp .wav

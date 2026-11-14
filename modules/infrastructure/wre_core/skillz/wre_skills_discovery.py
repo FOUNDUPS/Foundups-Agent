@@ -3,7 +3,11 @@
 WRE Skills Discovery - Filesystem Scanner for Phase 2
 Scans filesystem to discover all SKILL.md files (not just registry-based)
 
-WSP Compliance: WSP 96 (WRE Skills), WSP 50 (Pre-Action Verification)
+WSP Compliance: WSP 95 (WRE Skillz), WSP 50 (Pre-Action Verification)
+
+Truth boundary: this module inventories files and generates diagnostic export
+or template proposals. Discovery, fidelity metadata, export, and generated text
+do not satisfy WSP 95 production admission or prove execution.
 """
 
 import yaml
@@ -147,13 +151,16 @@ class WRESkillsDiscovery:
 
     def discover_production_ready(self, min_fidelity: float = 0.90) -> List[DiscoveredSkill]:
         """
-        Discover skills ready for production promotion
+        Return legacy "production-ready" discovery candidates.
+
+        The name is retained for compatibility. Production-state metadata and
+        structural fidelity alone do not authorize admission or promotion.
 
         Args:
             min_fidelity: Minimum pattern fidelity threshold
 
         Returns:
-            Production-ready skills
+            Diagnostic candidates only
         """
         all_skills = self.discover_all_skills()
 
@@ -165,7 +172,12 @@ class WRESkillsDiscovery:
             and skill.metadata.get("pattern_fidelity", 0.0) >= min_fidelity
         ]
 
-        logger.info(f"[WRE-DISCOVERY] Found {len(filtered)} production-ready skills (fidelity>={min_fidelity})")
+        logger.info(
+            "[WRE-DISCOVERY] Found %s legacy production candidates "
+            "(fidelity>=%s; not admission)",
+            len(filtered),
+            min_fidelity,
+        )
         return filtered
 
     def discover_healthy_skills(self) -> List[DiscoveredSkill]:
@@ -445,7 +457,10 @@ class WRESkillsDiscovery:
         discovered_skills: List[DiscoveredSkill]
     ) -> None:
         """
-        Export discovered skills to registry JSON format
+        Export discovered skills to a caller-selected diagnostic JSON file.
+
+        This writes ``output_path``. The export is not the canonical production
+        registry and is not WSP 95 admission or promotion evidence.
 
         Args:
             output_path: Where to write registry JSON
@@ -650,9 +665,9 @@ class WRESkillsDiscovery:
 
     def suggest_skillz_md_for_orphan(self, orphan_cli: Dict[str, Any]) -> str:
         """
-        Generate SKILLz.md template for an orphan CLI.
+        Generate a proposal-only SKILLz.md template for an orphan CLI.
 
-        This enables Gemma pattern-matching to suggest WRE connection.
+        No model is invoked; returned text is not registered, admitted, or run.
 
         Args:
             orphan_cli: Dict from discover_orphan_clis()

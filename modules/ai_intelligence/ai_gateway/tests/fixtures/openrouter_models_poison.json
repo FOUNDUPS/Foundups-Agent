@@ -1,0 +1,9 @@
+{
+  "data": [
+    {"id": "publisher/model", "context_length": 4096},
+    {"id": "publisher/model", "context_length": true},
+    {"id": "safe/model", "context_length": 1024},
+    {"id": "UPPER/not-admitted", "context_length": 1024},
+    {"id": "secret/sk-abcdefghijklmnopqrstuvwxyz", "context_length": 1024}
+  ]
+}

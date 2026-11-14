@@ -46,7 +46,12 @@ BROWSER_PORTS = {
     "edge": 9223,
 }
 
-# Fallback time slots when channel config unavailable
+# LEGACY bare per-account fallback slots (overnight-heavy, NO US-peak / tz
+# awareness). RETAINED for reference only -- the long-form path now uses the
+# canonical US-ET peak slots (peak_window.get_peak_slots_et) DST-converted to
+# each channel's Studio-account tz, identical to the shorts path
+# (LONG_FORM_TZ_PEAK_WINDOW_PHASE1, #847 follow-up). Do not reintroduce these
+# as a long-form source; they publish off the US peak for non-ET channels.
 _DEFAULT_TIME_SLOTS_FALLBACK = [
     "12:00 AM", "3:00 AM", "6:00 AM", "9:00 AM",
     "12:00 PM", "3:00 PM", "6:00 PM", "9:00 PM",
@@ -90,7 +95,7 @@ def _save_schedule_cache(cache: dict) -> None:
         print(f"[CACHE] Warning: could not save schedule cache: {e}")
 
 
-def _should_skip_channel(channel_key: str, cache: dict) -> bool:
+def _should_skip_channel(channel_key: str, cache: dict, *, channel_id: str = None) -> bool:
     """
     Return True if this channel had 0 unlisted videos on the last cycle
     AND the cooldown hasn't expired yet.
@@ -101,6 +106,9 @@ def _should_skip_channel(channel_key: str, cache: dict) -> bool:
     entry = cache.get(channel_key)
     if not entry:
         return False  # Never checked → must process
+    expected = channel_id or (get_channel_by_key(channel_key) or {}).get("id")
+    if not expected or entry.get("channel_id") != expected or entry.get("inventory_complete") is not True:
+        return False
 
     last_unlisted = entry.get("last_unlisted_count", -1)
     last_ts = entry.get("last_checked_ts", 0)
@@ -111,14 +119,291 @@ def _should_skip_channel(channel_key: str, cache: dict) -> bool:
     return False
 
 
-def _record_channel_result(channel_key: str, cache: dict, unlisted_count: int, skipped_count: int) -> None:
+def _record_channel_result(channel_key: str, cache: dict, unlisted_count: int, skipped_count: int,
+                           *, channel_id: str = None, inventory_complete: bool = False) -> None:
     """Record this cycle's result for future pre-checks."""
     cache[channel_key] = {
+        "channel_id": channel_id or (get_channel_by_key(channel_key) or {}).get("id"),
+        "inventory_complete": inventory_complete is True,
         "last_unlisted_count": unlisted_count,
         "last_skipped_count": skipped_count,
         "last_checked_ts": _time.time(),
         "last_checked": __import__("datetime").datetime.now().isoformat(),
     }
+
+
+# ---------------------------------------------------------------------------
+# Schedule-priority steering (SHORTS_PRIORITY_WIRING_PHASE1 +
+#                             YOUTUBE_SHORTS_ROTATION_LIVE_SCHEDULE_SIGNAL_PRIORITY_PHASE1 +
+#                             YOUTUBE_ROTATION_UNIFIED_SHORTS_VIDEOS_SIGNAL_PHASE1)
+#
+# Flag-gated, default-off, fallback-safe. When YT_SCHEDULE_PRIORITY_ENABLED=1
+# we consume the read-only `what_should_i_schedule` ranking (deficit per channel
+# over the upcoming window) to (a) process the highest-need channel first and
+# (b) DROP channels whose deficit==0 (already at the hard cap -> nothing to
+# schedule, so no work is lost by skipping them). On ANY error we return the
+# ORIGINAL channel order unchanged -> the scheduler never breaks. This only
+# orders/skips; it never mutates schedule content.
+#
+# LIVE SIGNAL WIRING: When BOTH YT_SCHEDULE_PRIORITY_ENABLED=1 AND
+# YT_LIVE_SCHEDULE_SIGNAL_ENABLED=1 AND a driver is supplied, the ranking uses
+# the live 'Has schedule' DOM check (shorts_live_schedule_signal) as the count
+# source instead of the offline tracker JSON. A channel that the live signal
+# confirms has 0 scheduled items gets a maximum-deficit override (ranks FIRST
+# regardless of what the tracker holds). If the live check fails for any channel
+# or the flag is off, that channel falls back to the offline tracker count
+# transparently (never drops a channel from the ranking).
+#
+# VIDEOS LIVE SIGNAL (YOUTUBE_ROTATION_UNIFIED_SHORTS_VIDEOS_SIGNAL_PHASE1):
+# When YT_VIDEO_PROCESSING_ENABLED=1 a parallel videos ranking is computed using
+# the same build_live_count_fn factory with content_type="upload". Result is
+# stored in _videos_ranking_result for the video loop to consume (priority-only;
+# no upload scheduling behavior changes). If this second ranking fails entirely,
+# the videos loop falls back to original channel order (safe).
+# Decision: IF Shorts=0 AND Videos=0 -> Shorts first (deterministic).
+# ---------------------------------------------------------------------------
+
+# Module-level pass-local store for the videos priority ranking.
+# Set by _prioritize_channels; consumed by the video loop in run_multi_channel_scheduler.
+# Reset to None at the start of each call to _prioritize_channels to ensure no
+# cross-pass contamination. Thread safety: the channel rotation loop is single-threaded
+# per browser pass so a module-level dict is sufficient.
+_pass_video_ranking: "dict[str, list]" = {}
+
+
+def _prioritize_channels(channels: "list[str]", driver=None) -> "list[str]":
+    """Reorder `channels` (channel KEYS) highest scheduling-need first and drop
+    deficit==0 channels, gated on YT_SCHEDULE_PRIORITY_ENABLED.
+
+    When YT_LIVE_SCHEDULE_SIGNAL_ENABLED=1 AND a driver is provided, the
+    ranking substitutes the live shorts_live_schedule_signal count for the
+    offline tracker count (deficit override when live says 0). If the live
+    check is disabled, unavailable, or fails for a channel, the offline tracker
+    count is used for that channel (fallback contract, never breaks).
+
+    When YT_VIDEO_PROCESSING_ENABLED=1, also computes a videos ranking
+    (content_type="upload") and stores it in _pass_video_ranking for the video
+    loop to consume. Videos ranking failure falls back gracefully; Shorts ranking
+    is NEVER affected by the videos ranking pass.
+
+    Args:
+        channels: original rotation order (list of registry channel keys).
+        driver: optional Selenium WebDriver (already connected) for the live
+                DOM check. None -> offline tracker only (existing behavior).
+
+    Returns:
+        Reordered+filtered keys when the flag is on and ranking succeeds;
+        otherwise the ORIGINAL `channels` list (fallback-safe, default-off).
+    """
+    # Reset the pass-local video ranking at the start of each call.
+    _pass_video_ranking.clear()
+
+    if os.getenv("YT_SCHEDULE_PRIORITY_ENABLED", "0") != "1":
+        return channels
+
+    try:
+        from modules.platform_integration.youtube_shorts_scheduler.skillz.what_should_i_schedule.executor import (
+            build_live_count_fn,
+            rank_channels_by_need,
+        )
+        from modules.infrastructure.shared_utilities.youtube_channel_registry import (
+            get_channels,
+        )
+
+        # Map channel_id -> key for the shorts channels so we can translate the
+        # ranking (which is keyed by channel_id) back onto the rotation keys.
+        id_to_key = {
+            ch.get("id"): ch.get("key")
+            for ch in get_channels(role="shorts")
+            if ch.get("id") and ch.get("key")
+        }
+
+        # LIVE SIGNAL (SHORTS): when the flag is on AND a driver is available,
+        # build the live-aware count_fn for shorts. On any import error fall back
+        # gracefully (None -> rank_channels_by_need uses the offline tracker).
+        live_count_fn = None
+        live_signal_active = False
+        shorts_count_source = "offline_tracker"
+        if driver is not None and os.getenv("YT_LIVE_SCHEDULE_SIGNAL_ENABLED", "0") == "1":
+            try:
+                live_count_fn = build_live_count_fn(driver, content_type="short")
+                live_signal_active = True
+                shorts_count_source = "live"
+                logger.info("[PRIORITY] live schedule signal ACTIVE (YT_LIVE_SCHEDULE_SIGNAL_ENABLED=1)")
+            except Exception as _live_exc:
+                logger.warning(
+                    "[PRIORITY] build_live_count_fn(short) failed; using offline tracker: %s", _live_exc,
+                )
+
+        # Build kwargs: inject live_count_fn only when available.
+        rank_kwargs: "dict" = {}
+        if live_count_fn is not None:
+            rank_kwargs["count_fn"] = live_count_fn
+
+        ranking = rank_channels_by_need(**rank_kwargs)  # read-only; tracker or live
+
+        logger.info(
+            "[PRIORITY] shorts ranking source=%s channels=%d",
+            shorts_count_source,
+            len(ranking),
+        )
+
+        # Walk the ranking in need order; keep only keys present in this
+        # browser's rotation and whose deficit > 0 (something to schedule).
+        original = list(channels)
+        original_set = set(original)
+        ordered: "list[str]" = []
+        skipped: "list[str]" = []
+        seen: set = set()
+
+        # Per-channel breadcrumb data (Addendum G).
+        channel_breadcrumbs: "dict[str, dict]" = {}
+
+        for row in ranking:
+            key = id_to_key.get(row.get("channel_id"))
+            if key is None or key not in original_set or key in seen:
+                continue
+            seen.add(key)
+            ch_deficit = int(row.get("total_deficit", 0))
+            channel_breadcrumbs[key] = {
+                "shorts_live_count": row.get("total_deficit"),
+                "shorts_count_source": shorts_count_source,
+            }
+            if ch_deficit > 0:
+                ordered.append(key)
+            else:
+                skipped.append(key)
+
+        # Any rotation key the ranking didn't cover (registry/ranking drift):
+        # keep it, in original order, so we never silently drop real work.
+        uncovered = [k for k in original if k not in seen]
+        result = ordered + uncovered
+
+        if not result:
+            # Everything was deficit==0 (or ranking covered nothing actionable).
+            # Don't hand the scheduler an empty list -- fall back to original.
+            logger.info("[PRIORITY] all channels at cap (deficit==0); using original order")
+            return original
+
+        # VIDEOS LIVE SIGNAL (YOUTUBE_ROTATION_UNIFIED_SHORTS_VIDEOS_SIGNAL_PHASE1):
+        # Only run when YT_VIDEO_PROCESSING_ENABLED=1 AND driver available AND live
+        # signal enabled. Failure of this block MUST NOT affect Shorts ranking/result.
+        # Addendum F: does NOT enable video processing, does NOT change scheduling.
+        video_processing_enabled = os.getenv("YT_VIDEO_PROCESSING_ENABLED", "false").lower() in (
+            "1", "true", "yes"
+        )
+        if video_processing_enabled and driver is not None and os.getenv(
+            "YT_LIVE_SCHEDULE_SIGNAL_ENABLED", "0"
+        ) == "1":
+            try:
+                video_live_count_fn = build_live_count_fn(driver, content_type="upload")
+                video_ranking = rank_channels_by_need(count_fn=video_live_count_fn)
+                # Store for the video loop: channel_key -> {total_deficit, days_empty, ...}
+                for vrow in video_ranking:
+                    vkey = id_to_key.get(vrow.get("channel_id"))
+                    if vkey:
+                        _pass_video_ranking[vkey] = vrow
+                        # Merge into channel breadcrumbs (Addendum G).
+                        bc = channel_breadcrumbs.setdefault(vkey, {})
+                        bc["videos_live_count"] = vrow.get("total_deficit")
+                        bc["videos_count_source"] = "live"
+                        # Deterministic decision: if both empty -> Shorts first.
+                        s_count = bc.get("shorts_live_count", 1)
+                        v_count = vrow.get("total_deficit", 1)
+                        if s_count == 0 and v_count == 0:
+                            bc["decision"] = "both_empty_shorts_first"
+                        elif s_count == 0:
+                            bc["decision"] = "shorts_priority"
+                        elif v_count == 0:
+                            bc["decision"] = "videos_priority"
+                        else:
+                            bc["decision"] = "both_sufficient"
+                logger.info(
+                    "[PRIORITY] videos ranking computed source=live channels=%d",
+                    len(video_ranking),
+                )
+            except Exception as _vexc:
+                # Videos ranking failure MUST NOT affect Shorts result.
+                # Addendum E (systemic videos failure): all channels fall back
+                # for videos; Shorts ranking unaffected.
+                logger.warning(
+                    "[PRIORITY] videos live ranking failed (systemic); "
+                    "video loop will use original order: %s", _vexc,
+                )
+                # Mark all video breadcrumbs as error_fallback.
+                for k in original:
+                    bc = channel_breadcrumbs.setdefault(k, {})
+                    bc["videos_live_count"] = None
+                    bc["videos_count_source"] = "error_fallback"
+                    bc["decision"] = "videos_systemic_fallback"
+        elif not video_processing_enabled:
+            # Addendum H: YT_VIDEO_PROCESSING_ENABLED=0 -> video live check NOT run.
+            for k in original:
+                bc = channel_breadcrumbs.setdefault(k, {})
+                bc["videos_live_count"] = None
+                bc["videos_count_source"] = "disabled"
+                bc["decision"] = bc.get("decision", "shorts_only_videos_disabled")
+
+        _emit_priority_breadcrumb(
+            original, result, skipped,
+            live_signal_active=live_signal_active,
+            channel_breadcrumbs=channel_breadcrumbs,
+        )
+        logger.info(
+            "[PRIORITY] reordered %s -> %s (skipped deficit==0: %s)",
+            original, result, skipped,
+        )
+        return result
+    except Exception as exc:
+        # Never break the scheduler: fall back to the original order untouched.
+        logger.warning("[PRIORITY] ranking failed, using original order: %s", exc)
+        return channels
+
+
+def _emit_priority_breadcrumb(
+    original: "list[str]",
+    chosen: "list[str]",
+    skipped: "list[str]",
+    *,
+    live_signal_active: bool = False,
+    channel_breadcrumbs: "dict | None" = None,
+) -> None:
+    """Emit a WSP 91 breadcrumb of the chosen priority order + skips (best-effort).
+
+    The `live_signal_active` flag is included in the metadata so the operator
+    (and WRE pattern memory) can tell whether the live DOM signal or the offline
+    tracker drove the ranking decision for this rotation pass (WSP 91 breadcrumb).
+
+    channel_breadcrumbs: per-channel low-cardinality signal summary (Addendum G).
+    Keys per channel: shorts_live_count, videos_live_count, shorts_count_source,
+    videos_count_source, decision. No DOM text, no auth material.
+    """
+    try:
+        from modules.communication.livechat.src.breadcrumb_telemetry import (
+            get_breadcrumb_telemetry,
+        )
+
+        signal_label = "live_schedule_signal" if live_signal_active else "offline_tracker"
+        get_breadcrumb_telemetry().store_breadcrumb(
+            source_dae="youtube_shorts_scheduler",
+            event_type="schedule_priority_order",
+            message=(
+                f"priority steer [{signal_label}]: {len(chosen)} channel(s) by need; "
+                f"order={chosen}; skipped(deficit==0)={skipped}"
+            ),
+            phase="SHORTS_PRIORITY_WIRING",
+            metadata={
+                "original_order": original,
+                "chosen_order": chosen,
+                "skipped_sufficient": skipped,
+                "ranking_signal": signal_label,
+                "live_signal_active": live_signal_active,
+                # Addendum G: low-cardinality per-channel breadcrumb.
+                "channel_signals": channel_breadcrumbs or {},
+            },
+        )
+    except Exception as exc:  # pragma: no cover - telemetry is best-effort
+        logger.warning(f"[PRIORITY] breadcrumb emit failed: {exc}")
 
 
 # ---------------------------------------------------------------------------
@@ -318,6 +603,10 @@ def run_shorts_scheduler(
         batch: Process all unlisted shorts (not just first)
         dry_run: Preview changes without saving
     """
+    if mode == 'schedule' and dry_run is not True:
+        print('[BLOCKED] Legacy live scheduling has no qualified calendar owner. '
+              'Use run_multi_channel_scheduler or the selected-batch scheduler CLI.')
+        return
     import os
     import time
     import re
@@ -395,6 +684,8 @@ def run_shorts_scheduler(
                 options = ChromeOptions()
                 options.add_experimental_option("debuggerAddress", f"127.0.0.1:{chrome_port}")
                 driver = webdriver.Chrome(options=options)
+            from modules.infrastructure.dependency_launcher.src.dae_dependencies import _guard_attached_chromium_driver
+            driver = _guard_attached_chromium_driver(driver, chrome_port, 'ms' if use_edge else 'goog')
         except Exception as e:
             print(f"[ERROR] Failed to connect to {browser_name}. Is it running with remote debugging?")
             print(f"  Error: {e}")
@@ -434,20 +725,14 @@ def run_shorts_scheduler(
         # This prevents collisions when the JSON tracker is stale.
         if mode == "schedule":
             try:
-                dom.navigate_to_shorts(channel_id, "SCHEDULED")
-                time.sleep(2)
-                scheduled_all = []
-                while True:
-                    scheduled_all.extend(dom.get_scheduled_videos())
-                    if dom.has_next_page():
-                        dom.click_next_page()
-                        time.sleep(1)
-                    else:
-                        break
-                tracker.sync_from_youtube(scheduled_all)
+                if dom.navigate_to_shorts_with_fallback(channel_id, "SCHEDULED"):
+                    inventory = dom.read_scheduled_inventory(channel_id)
+                    if not tracker.sync_from_youtube(inventory.get("videos", []), inventory=inventory):
+                        print("[SYNC] Scheduled inventory is incomplete; existing tracker retained")
+                else:
+                    print("[SYNC] Scheduled filter not verified; existing tracker retained")
             except Exception:
-                # Proceed with existing tracker state (degraded but functional)
-                pass
+                print("[SYNC] Scheduled inventory unavailable; existing tracker retained")
         
         # Layer 1: Navigate and filter
         print("\n[LAYER 1] Navigating to unlisted shorts...")
@@ -469,21 +754,17 @@ def run_shorts_scheduler(
         print(f"[OK] Editing video: {video_id}")
         time.sleep(2)
         
-        # Extract current content
-        current_title = dom.get_current_title()
-        current_desc = dom.get_current_description()
-        
-        print(f"\n[CURRENT TITLE] {current_title[:60]}..." if current_title else "[WARN] No title found")
-        
-        # Enhance using SKILLz
-        print("\n[SKILLZ] Enhancing with FFCPLN music titles...")
+        # Capture exact detail-page originals, never the stale list-row title.
+        dom.begin_policy_cycle()
+        session = dom.begin_policy_edit(channel_id, video_id)
+        current_title = session.original["title"]
+        current_desc = session.original["description"]
         skill = FFCPLNTitleEnhanceSkill()
         result = skill.execute(SkillContext(
-            original_title=current_title or "",
-            original_description=current_desc or "",
-            video_duration=60
+            original_title=current_title, original_description=current_desc,
+            video_duration=60, video_id=video_id,
         ))
-        
+
         safe_title_for_console = _ascii_safe(_strip_console_only_emojis(result.enhanced_title))
         print(f"[NEW TITLE] {safe_title_for_console}")
         print(f"[CONFIDENCE] {result.confidence}")
@@ -495,19 +776,9 @@ def run_shorts_scheduler(
         # Apply enhanced content via JavaScript
         print("\n[APPLYING] Setting new title and description...")
         
-        dom.driver.execute_script(f"""
-            const titleField = document.querySelector('ytcp-social-suggestions-textbox#title-textarea #textbox');
-            if (titleField) {{
-                titleField.innerText = "{result.enhanced_title.replace('"', '\\"')}";
-                titleField.dispatchEvent(new Event('input', {{ bubbles: true }}));
-            }}
-            const descField = document.querySelector('ytcp-social-suggestions-textbox#description-textarea #textbox');
-            if (descField) {{
-                descField.innerText = `{result.enhanced_description.replace('`', '\\`')}`;
-                descField.dispatchEvent(new Event('input', {{ bubbles: true }}));
-            }}
-        """)
-        
+        dom.edit_title(result.enhanced_title)
+        dom.edit_description(result.enhanced_description)
+
         time.sleep(1)
 
         if mode == "schedule":
@@ -548,23 +819,9 @@ def run_shorts_scheduler(
         else:
             # Enhance-only: click Save once
             print("[SAVING] Clicking Save button...")
-            save_result = dom.driver.execute_script("""
-                const saveBtn = document.querySelector('#save-button button, ytcp-button#save-button');
-                if (saveBtn && !saveBtn.disabled) {
-                    saveBtn.click();
-                    return {success: true};
-                }
-                return {success: false};
-            """)
-            
-            if save_result.get('success'):
-                print("[OK] Save clicked! Waiting for confirmation...")
-                time.sleep(3)
-                print(f"\n[SUCCESS] Video {video_id} enhanced and saved!")
-                print(f"   NEW TITLE: {safe_title_for_console}")
-            else:
-                print("[WARN] Save button not found or disabled")
-        
+            dom.click_save()
+            print("[UNVERIFIED] Save submitted; independent same-video readback required")
+
     except Exception as e:
         print(f"\n[ERROR] Shorts scheduler failed: {e}")
         logger.error(f"Shorts scheduler error: {e}", exc_info=True)
@@ -640,12 +897,162 @@ def run_selenium_test(test_name: str) -> bool:
         return False
 
 
+async def _has_schedule_target_access(swapper, channel_key: str, expected_channel_id: str) -> bool:
+    """Bind the shared account verifier to the canonical registry identity."""
+    try:
+        channel = get_channel_by_key(channel_key)
+        if (not isinstance(expected_channel_id, str) or not expected_channel_id
+                or not channel or channel.get("id") != expected_channel_id):
+            return False
+        name = {"move2japan": "Move2Japan", "undaodu": "UnDaoDu",
+                "foundups": "FoundUps", "antifafm": "antifaFM"}.get(channel_key)
+        if not name or swapper.CHANNELS.get(name, {}).get("id") != channel["id"]:
+            return False
+        return await swapper._ensure_target_access(name, navigate_to_comments=False,
+                                                  expected_channel_id=expected_channel_id) is True
+    except Exception:
+        return False
+
+
+def _run_stream_schedule_requests(driver, requests, *, dry_run=False, stop_event=None, queue=None,
+                                  inspect_only=False):
+    """Consume frozen manifest work through this already-owned browser only.
+
+    No ordinary rotation, extra-tab cleanup, audit navigation or origin restore
+    follows this branch. Discovery is read-only; the queue lock covers only the
+    immutable claim, never browser work or a scheduler Save.
+    """
+    if inspect_only and (not isinstance(requests, list) or len(requests) != 1
+            or not isinstance(requests[0], dict) or requests[0].get('source_kind') != 'recorded'
+            or requests[0].get('first_test_only') is not True):
+        return {'stream_schedule_requests': [{'status': 'blocked', 'reason': 'single_recorded_first_test_required'}],
+                'saved_state_verified': False, 'operator_handoff_required': False, 'inspection_only': True}
+    import asyncio
+    from modules.communication.livechat.src.operator_command_queue import OperatorCommandQueue
+    from modules.communication.livechat.src.automation_gates import stop_active, _env_truthy
+    from modules.infrastructure.shared_utilities.youtube_channel_registry import get_channel_by_id
+    from modules.infrastructure.foundups_selenium.src.youtube_verification import VerificationHandoff
+    from modules.platform_integration.youtube_shorts_scheduler.src.channel_config import verify_schedule_target_access
+    from modules.platform_integration.youtube_shorts_scheduler.src.scheduler import YouTubeShortsScheduler
+    from modules.platform_integration.youtube_shorts_scheduler.src.dom_automation import YouTubeStudioDOM
+
+    queue = queue if queue is not None else OperatorCommandQueue(None)
+    outcomes = []
+    handoff_required = False
+    for request in requests:
+        claimed = None
+        try:
+            # Validate current queue-owned snapshots before any navigation.
+            if request not in queue.get_pending_stream_schedule_requests():
+                outcomes.append({'status': 'blocked', 'reason': 'request_not_pending'})
+                continue
+            if (dry_run or stop_active('scheduling') or not _env_truthy('YT_AUTOMATION_ENABLED', 'true')
+                    or not _env_truthy('YT_SHORTS_SCHEDULING_ENABLED', 'true')
+                    or (stop_event is not None and stop_event.is_set())):
+                outcomes.append({'status': 'blocked', 'reason': 'stream_schedule_gate_closed'})
+                break
+            config = get_channel_by_id(request['channel_id'])
+            if not config:
+                outcomes.append({'status': 'blocked', 'reason': 'receiving_channel_not_registered'})
+                continue
+            driver.get(f"https://studio.youtube.com/video/{request['parent_video_id']}/edit")
+            access_options = ({'expected_title': request['stream_title']}
+                              if request.get('source_kind') == 'recorded' else {})
+            access = verify_schedule_target_access(driver, request['channel_id'],
+                                                    request['parent_video_id'], **access_options)
+            if access.get('verified') is not True:
+                outcomes.append({'status': 'pending', 'reason': 'same_target_access_unverified',
+                                 'access_reason': access.get('reason') if access.get('reason') in {
+                                     'invalid_schedule_target', 'studio_permission_denied',
+                                     'studio_permission_unobserved', 'studio_parent_title_changed',
+                                     'studio_parent_access_unverified'} else 'studio_parent_access_unverified'})
+                continue
+            scheduler = YouTubeShortsScheduler(config['key'], dry_run=inspect_only)
+            if (scheduler.channel_id != request['channel_id']
+                    or scheduler.config['id'] != request['channel_id']
+                    or scheduler.tracker.channel_id != request['channel_id']):
+                raise ValueError('stream_schedule_channel_mismatch')
+            scheduler.driver = driver
+            scheduler.request_driver = driver
+            scheduler.dom = YouTubeStudioDOM(driver, capture_diagnostics=not inspect_only)
+            scheduler.stream_schedule_request = request
+            scheduler.stop_event = stop_event
+            batch = scheduler.discover_stream_title_batch(request['stream_title'])
+            if inspect_only:
+                outcomes.append({'status': 'inspected', 'reason': batch.get('reason'),
+                                 'inventory_complete': batch.get('complete') is True,
+                                 'matching_count': len(batch.get('video_ids', [])),
+                                 'diagnostics': batch.get('diagnostics', {})})
+                break  # Inspection never claims a batch, reserves a slot or saves.
+            if batch.get('complete') is not True:
+                outcomes.append({'status': 'pending', 'reason': 'stream_title_inventory_incomplete',
+                                 'inventory_reason': batch.get('reason'),
+                                 'diagnostics': batch.get('diagnostics', {})})
+                continue
+            claimed = queue.claim_stream_schedule_request(request, batch['video_ids'])
+            handoff_required = True
+            scheduler.stream_schedule_request = claimed
+            if not claimed['video_ids']:
+                queue.finish_stream_schedule_request(request['id'], reason='no_matching_shorts', no_submission=True)
+                outcomes.append({'status': 'blocked', 'reason': 'no_matching_shorts'})
+                break
+            # Freeze the complete discovery, but the recorded-stream qualification
+            # phase permits only its first member. A failed first member cannot
+            # fall through to a different Short. Remainder stays held in the queue.
+            first_test = claimed.get('first_test_only') is True
+            options = ({'video_ids': claimed['video_ids'][:1], 'max_videos': 1,
+                        'update_metadata': False} if first_test else
+                       {'video_ids': claimed['video_ids'], 'max_videos': 0})
+            result = asyncio.run(scheduler.run_scheduling_cycle(**options))
+            submitted = result.get('submitted_ids') if isinstance(result, dict) else None
+            no_submission = (isinstance(result, dict) and result.get('status') == 'blocked'
+                             and submitted == [])
+            queue.finish_stream_schedule_request(request['id'], reason='scheduler_no_submission' if no_submission else 'schedule_readback_unqualified',
+                                                 submitted_ids=submitted or [], no_submission=no_submission)
+            outcomes.append({'status': 'blocked' if no_submission else 'unknown',
+                             'reason': 'scheduler_no_submission' if no_submission else 'schedule_readback_unqualified',
+                             'saved_state_verified': False})
+            break  # Preserve the claimed request's final editor for operator review.
+        except VerificationHandoff:
+            handoff_required = True
+            if inspect_only:
+                outcomes.append({'status': 'blocked', 'reason': 'verification_handoff'})
+                break
+            # Never try another request/browser after manual or authentication takeover.
+            if claimed is None:
+                try:
+                    claimed = queue.claim_stream_schedule_request(request, [])
+                except (ValueError, TimeoutError):
+                    pass
+            if claimed is not None:
+                queue.finish_stream_schedule_request(request['id'], reason='verification_handoff',
+                                                     no_submission=not claimed['video_ids'])
+            outcomes.append({'status': 'blocked' if claimed is None or not claimed['video_ids'] else 'unknown',
+                             'reason': 'verification_handoff'})
+            break
+        except Exception:
+            if claimed is not None:
+                # Any exception after ownership claim is terminal, including a
+                # partial submission whose provider outcome cannot be observed.
+                try:
+                    queue.finish_stream_schedule_request(request['id'], reason='execution_outcome_unknown')
+                except (OSError, ValueError, TimeoutError):
+                    pass  # The already-durable unknown claim remains authoritative.
+            outcomes.append({'status': 'unknown' if claimed else 'blocked',
+                             'reason': 'execution_outcome_unknown' if claimed else 'request_unavailable'})
+            break
+    return {'stream_schedule_requests': outcomes, 'saved_state_verified': False,
+            'operator_handoff_required': handoff_required, 'inspection_only': inspect_only}
+
+
 def run_multi_channel_scheduler(
     browser: str = "edge",
     mode: str = "schedule",
     max_per_channel: int = 9999,  # Run until complete
     dry_run: bool = False,
     stop_event: "threading.Event | None" = None,
+    stream_schedule_requests: Optional[List[dict]] = None,
+    stream_schedule_inspect_only: bool = False,
 ) -> dict:
     """
     Run scheduler across multiple channels in a single browser session.
@@ -663,11 +1070,18 @@ def run_multi_channel_scheduler(
     Returns:
         Dict with results per channel
     """
+    if stream_schedule_inspect_only and (not isinstance(stream_schedule_requests, list)
+            or len(stream_schedule_requests) != 1 or not isinstance(stream_schedule_requests[0], dict)
+            or stream_schedule_requests[0].get('source_kind') != 'recorded'
+            or stream_schedule_requests[0].get('first_test_only') is not True):
+        return {'error': 'inspection_requires_frozen_request', 'inspection_only': True,
+                'saved_state_verified': False}
     import os
     import asyncio
     from selenium import webdriver
     from selenium.webdriver.chrome.options import Options as ChromeOptions
     from selenium.webdriver.edge.options import Options as EdgeOptions
+    from modules.platform_integration.youtube_shorts_scheduler.src.peak_window import get_peak_slots_et
     
     # Reuse LEGO blocks from multi_channel_coordinator (oops detection)
     from modules.communication.livechat.src.multi_channel_coordinator import (
@@ -694,12 +1108,40 @@ def run_multi_channel_scheduler(
     channels = BROWSER_CHANNELS[browser]
     port = BROWSER_PORTS[browser]
 
+    # SHORTS_SCHEDULE_ROTATION_FAIRNESS_PHASE1: per-channel per-pass budget.
+    # Without this, each channel is scheduled with max_videos=max_per_channel
+    # (default 9999), so the FIRST channel drains its ENTIRE backlog (up to the
+    # 60-day window / ~180 videos at the HARD_CAP_PER_DAY=3 spread) before the
+    # loop ever reaches the next channel -> unfair, channel-starving.
+    #
+    # FAIRNESS: cap each channel to ~3 days of content per pass
+    # (YT_SHORTS_PER_CHANNEL_PER_PASS, default "9" = 3 days x 3/day). The loop
+    # then ROTATES to the next channel, and the daemon's NEXT PHASE 3 cycle
+    # re-invokes run_multi_channel_scheduler -> draining continues round-robin
+    # until every backlog is empty. This requires NO change to
+    # run_scheduling_cycle internals: max_videos only limits the count.
+    #
+    # Default-ON (this is the requested rotation behavior). Tunable: set
+    # YT_SHORTS_PER_CHANNEL_PER_PASS very high to restore old drain-one-fully.
+    try:
+        per_channel_per_pass = int(os.getenv("YT_SHORTS_PER_CHANNEL_PER_PASS", "9"))
+    except (TypeError, ValueError):
+        per_channel_per_pass = 9
+    if per_channel_per_pass <= 0:
+        per_channel_per_pass = 9
+
     print(f"\n[MULTI-CHANNEL] {browser.upper()} Rotation Scheduler")
     print("=" * 60)
     print(f"Browser: {browser.upper()} (port {port})")
     print(f"Channels: {' -> '.join(channels)}")
     print(f"Mode: {mode.upper()}")
     print(f"Max per channel: {max_per_channel}")
+    # SHORTS_SCHEDULE_ROTATION_FAIRNESS_PHASE1 breadcrumb: rotation active.
+    print(
+        f"[ROTATION] Per-channel budget this pass: {per_channel_per_pass} "
+        f"(~{per_channel_per_pass / 3:.0f} days @ 3/day) -> rotate to next channel, "
+        f"daemon's next PHASE 3 continues draining"
+    )
     print(f"Dry run: {dry_run}")
     print(vitals.to_dashboard())  # Show initial vitals
     print("=" * 60)
@@ -715,10 +1157,17 @@ def run_multi_channel_scheduler(
             options = ChromeOptions()
             options.add_experimental_option("debuggerAddress", f"127.0.0.1:{port}")
             driver = webdriver.Chrome(options=options)
+        from modules.infrastructure.dependency_launcher.src.dae_dependencies import _guard_attached_chromium_driver
+        driver = _guard_attached_chromium_driver(driver, port, 'ms' if browser == 'edge' else 'goog')
         print(f"[OK] Connected to {browser.upper()}")
     except Exception as e:
         print(f"[ERROR] Failed to connect: {e}")
         return {"error": str(e)}
+
+    if stream_schedule_requests is not None:
+        return _run_stream_schedule_requests(driver, stream_schedule_requests,
+                                             dry_run=dry_run, stop_event=stop_event,
+                                             inspect_only=stream_schedule_inspect_only)
 
     # FIX: Close extra tabs if session restore opened multiple (2026-01-18)
     # HARDENED 2026-03-18: Handle Chrome 146 timeout issues gracefully
@@ -747,6 +1196,15 @@ def run_multi_channel_scheduler(
     from modules.platform_integration.youtube_shorts_scheduler.src.scheduler import YouTubeShortsScheduler
     from modules.communication.video_comments.skillz.tars_account_swapper.account_swapper_skill import TarsAccountSwapper
 
+    # SHORTS_PRIORITY_WIRING_PHASE1 + YOUTUBE_SHORTS_ROTATION_LIVE_SCHEDULE_SIGNAL_PRIORITY_PHASE1:
+    # Priority steering is now done AFTER driver connect so the live 'Has schedule'
+    # DOM check (shorts_live_schedule_signal) can be wired in when
+    # YT_LIVE_SCHEDULE_SIGNAL_ENABLED=1. When the flag is off or driver is
+    # unavailable, _prioritize_channels degrades to offline tracker (no behavior
+    # change vs. the original SHORTS_PRIORITY_WIRING_PHASE1 path). On any error
+    # the original channel order is returned unchanged -> scheduler never breaks.
+    channels = _prioritize_channels(channels, driver=driver)
+
     results = {"browser": browser, "channels": {}}
 
     # 2026-01-30: Load schedule cache for pre-check (skip empty channels)
@@ -770,7 +1228,8 @@ def run_multi_channel_scheduler(
         "antifafm": "antifaFM",
     }
 
-    # Process each channel with rotation
+    attempted_channel_ids = set()
+    # Process each canonical receiving channel at most once in this rotation.
     for i, channel_key in enumerate(channels):
         # 2026-02-01: STOP SIGNAL — if caller set stop_event, abort gracefully.
         # This prevents thread leak: when Phase 3 timeout fires in the DAE loop,
@@ -783,9 +1242,20 @@ def run_multi_channel_scheduler(
         print(f"\n[CHANNEL {i+1}/{len(channels)}] Processing {channel_key.upper()}")
         print("-" * 40)
 
+        channel_config = get_channel_by_key(channel_key) or {}
+        expected_channel_id = channel_config.get("id")
+        if not isinstance(expected_channel_id, str) or not expected_channel_id:
+            results["channels"][channel_key] = {"error": "channel_identity_unconfigured", "total_errors": 1}
+            vitals.record_channel(processed=False)
+            continue
+        if expected_channel_id in attempted_channel_ids:
+            results.setdefault("duplicate_channel_entries", []).append(channel_key)
+            continue
+        attempted_channel_ids.add(expected_channel_id)
+
         # 2026-01-30: PRE-CHECK — skip channels that had 0 unlisted videos recently.
         # Avoids a 30s account-swap + navigate + filter round-trip for nothing.
-        if _should_skip_channel(channel_key, schedule_cache):
+        if _should_skip_channel(channel_key, schedule_cache, channel_id=expected_channel_id):
             cache_entry = schedule_cache.get(channel_key, {})
             mins_ago = (_time.time() - cache_entry.get("last_checked_ts", 0)) / 60
             cooldown_mins = _SKIP_COOLDOWN_SECONDS / 60
@@ -797,22 +1267,40 @@ def run_multi_channel_scheduler(
             vitals.record_channel(processed=True)
             continue
 
-        # Switch account if not first channel
-        if i > 0:
-            print(f"[SWITCH] Switching to {channel_key}...")
-            try:
-                swapper = TarsAccountSwapper(driver)
-                target_name = _DISPLAY_NAMES.get(channel_key, channel_key)
+        # The first channel needs the same access proof as later channels.
+        # Failed access must stay outside the broad scheduling/CPS fallback.
+        target_name = _DISPLAY_NAMES.get(channel_key, channel_key)
+        try:
+            swapper = TarsAccountSwapper(driver)
+            switch_ok = asyncio.run(swapper.swap_to(target_name, navigate_to_comments=False))
+            access_ok = switch_ok is True and asyncio.run(_has_schedule_target_access(swapper, channel_key, expected_channel_id))
+        except Exception:
+            access_ok = False
+        if not access_ok:
+            result = {"error": "receiving_channel_not_verified", "total_errors": 1,
+                      "requested_channel_id": expected_channel_id}
+            fallback = CHANNEL_FALLBACKS.get(target_name)
+            if fallback:
+                # Never change the requested label after binding its scheduler.
+                # The fallback gets its own canonical rotation entry and budget.
+                result["fallback_deferred_to"] = fallback
+            results["channels"][channel_key] = result
+            print(f"[BLOCKED] {channel_key}: receiving account not verified; no scheduling attempted")
+            vitals.record_channel(processed=False)
+            continue
 
-                switch_ok = asyncio.run(swapper.swap_to(target_name, navigate_to_comments=False))
-                if not switch_ok:
-                    print(f"[WARN] Account switch may have failed, attempting schedule anyway...")
-            except Exception as e:
-                print(f"[WARN] Account switch error: {e}")
-
+        # Exceptions after entering a writer have an unknown outcome; they do
+        # not authorize a second writer against the same channel.
+        cycle_started = False
         # Run scheduler for this channel
         try:
             scheduler = YouTubeShortsScheduler(channel_key, dry_run=dry_run)
+            if (scheduler.channel_id != expected_channel_id
+                    or scheduler.config.get("id") != expected_channel_id
+                    or scheduler.tracker.channel_id != expected_channel_id):
+                results["channels"][channel_key] = {"error": "scheduler_channel_binding_mismatch", "total_errors": 1}
+                vitals.record_channel(processed=False)
+                continue
             scheduler.driver = driver  # Reuse existing driver
             scheduler.dom = None  # Will be created on first use
 
@@ -825,33 +1313,32 @@ def run_multi_channel_scheduler(
                 print(f"[OOPS] 🚨 Permission error detected for {channel_key}")
                 vitals.record_oops()  # Track oops event
                 
-                # Try fallback channel (bidirectional)
-                target_name = _DISPLAY_NAMES.get(channel_key, channel_key)
-                fallback_channel = CHANNEL_FALLBACKS.get(target_name)
-                if fallback_channel:
-                    print(f"[FALLBACK] Trying {fallback_channel}...")
-                    fallback_key = fallback_channel.lower()
-                    swapper = TarsAccountSwapper(driver)
-                    switch_ok = asyncio.run(swapper.swap_to(fallback_channel, navigate_to_comments=False))
-                    if switch_ok and not _is_oops_page(driver):
-                        print(f"[FALLBACK] ✅ Switched to {fallback_channel}")
-                        channel_key = fallback_key
-                        vitals.record_fallback(success=True)
-                    else:
-                        print(f"[FALLBACK] ❌ Failed - skipping channel")
-                        vitals.record_fallback(success=False)
-                        vitals.record_channel(processed=False)
-                        results["channels"][channel_key] = {"error": "oops_page_no_fallback"}
-                        continue
-                else:
-                    print(f"[OOPS] No fallback available - skipping {channel_key}")
-                    vitals.record_channel(processed=False)
-                    results["channels"][channel_key] = {"error": "oops_page"}
-                    continue
+                results["channels"][channel_key] = {"error": "oops_page", "total_errors": 1,
+                    "fallback_deferred_to": CHANNEL_FALLBACKS.get(target_name)}
+                vitals.record_channel(processed=False)
+                continue
 
+            if not asyncio.run(_has_schedule_target_access(swapper, channel_key, expected_channel_id)):
+                results["channels"][channel_key] = {"error": "receiving_channel_changed", "total_errors": 1}
+                vitals.record_channel(processed=False)
+                continue
+
+            # SHORTS_SCHEDULE_ROTATION_FAIRNESS_PHASE1: cap THIS channel to the
+            # per-pass budget so we schedule ~3 days then rotate. max_videos only
+            # limits the count inside run_scheduling_cycle (no other behavior).
+            pass_budget = min(max_per_channel, per_channel_per_pass)
+            cycle_started = True
             channel_results = asyncio.run(
-                scheduler.run_scheduling_cycle(max_videos=max_per_channel)
+                scheduler.run_scheduling_cycle(max_videos=pass_budget)
             )
+            if (not isinstance(channel_results, dict)
+                    or channel_results.get("channel_id") != expected_channel_id
+                    or not asyncio.run(_has_schedule_target_access(swapper, channel_key, expected_channel_id))):
+                results["channels"][channel_key] = {"error": "post_cycle_receiving_channel_not_verified",
+                    "requested_channel_id": expected_channel_id, "total_errors": 1,
+                    "outcome": "unverified", "reported_cycle": channel_results}
+                continue
+            channel_results["requested_channel_id"] = expected_channel_id
             results["channels"][channel_key] = channel_results
             
             # Track vitals
@@ -864,6 +1351,12 @@ def run_multi_channel_scheduler(
             vitals.record_channel(processed=True)
             
             print(f"[OK] {channel_key}: Scheduled {scheduled}, Errors {errors}")
+            # SHORTS_SCHEDULE_ROTATION_FAIRNESS_PHASE1 breadcrumb: per-channel
+            # scheduled count vs per-pass budget; rotation moves to next channel.
+            print(
+                f"[ROTATION] {channel_key}: scheduled {scheduled}/{pass_budget} this pass "
+                f"-> rotating to next channel (remaining backlog drains next PHASE 3)"
+            )
             print(vitals.to_dashboard())  # Show updated vitals
             vitals.emit_to_telemetry(phase=f"channel_{channel_key}")  # Store for 012 review
 
@@ -871,62 +1364,158 @@ def run_multi_channel_scheduler(
             # "unlisted_found" = total videos the scheduler saw (scheduled + skipped + errors).
             # If 0, the channel had no unlisted content at all → skip next cycle.
             unlisted_found = scheduled + errors + len(channel_results.get("skipped", []))
-            _record_channel_result(channel_key, schedule_cache, unlisted_found, len(channel_results.get("skipped", [])))
+            inventory_complete = channel_results.get("inventory_complete") is True
+            if unlisted_found > 0 or inventory_complete:
+                _record_channel_result(channel_key, schedule_cache, unlisted_found,
+                    len(channel_results.get("skipped", [])), channel_id=expected_channel_id,
+                    inventory_complete=inventory_complete)
             
-            # 2026-02-05: VIDEO PROCESSING PASS — process Videos tab for channels
+            # 2026-02-05: VIDEO PROCESSING PASS -- process Videos tab for channels
             # that produce uploads (vlogs), not just shorts (FFCPLN songs).
-            # Gated by YT_VIDEO_PROCESSING_ENABLED env var (default: false).
+            # LONG_FORM_SCHEDULING_ENABLE_PHASE1: master-gated by
+            # YT_VIDEO_PROCESSING_ENABLED (DEFAULT OFF -- OUTWARD-FACING: scheduling a
+            # long-form upload publishes it PUBLIC at its slot, so 012 enables this
+            # deliberately). When ON, every channel whose registry content_types
+            # include "upload" runs the Videos-tab pass (now all 4 channels).
+            #
+            # YOUTUBE_ROTATION_UNIFIED_SHORTS_VIDEOS_SIGNAL_PHASE1 priority gate:
+            # If _pass_video_ranking has a ranking for this channel and its
+            # total_deficit == 0 (videos coverage sufficient), skip the video pass
+            # for this channel this cycle. This is priority-ONLY: does NOT change
+            # YT_VIDEO_PROCESSING_ENABLED default, does NOT alter upload scheduling
+            # behavior, does NOT create new navigation outside the existing pass.
+            # Addendum F: VIDEO_PASS_PRIORITY_ONLY_NO_VIDEO_BEHAVIOR_CHANGE.
             video_processing_enabled = os.getenv("YT_VIDEO_PROCESSING_ENABLED", "false").lower() in ("1", "true", "yes")
+            if video_processing_enabled and not asyncio.run(_has_schedule_target_access(swapper, channel_key, expected_channel_id)):
+                channel_results["video_pass_error"] = "receiving_channel_changed"
+                channel_results["total_errors"] = channel_results.get("total_errors", 0) + 1
+                continue
             if video_processing_enabled:
-                reg_channel = get_channel_by_key(channel_key)
-                channel_content_types = (reg_channel or {}).get("content_types", ["short"])
-                if "upload" in channel_content_types:
-                    print(f"\n[VIDEO] Processing Videos tab for {channel_key}...")
-                    try:
-                        from modules.platform_integration.youtube_shorts_scheduler.src.content_page_scheduler import ContentPageScheduler
-                        from modules.platform_integration.youtube_shorts_scheduler.src.schedule_tracker import ScheduleTracker
+                # YOUTUBE_ROTATION_UNIFIED_SHORTS_VIDEOS_SIGNAL_PHASE1 priority gate:
+                # If _pass_video_ranking has an entry for this channel with
+                # total_deficit == 0, skip the video pass (coverage sufficient).
+                # Addendum F: priority-only, no video scheduling behavior change.
+                _vrow = _pass_video_ranking.get(channel_key)
+                _video_pass_skipped = (
+                    _vrow is not None and int(_vrow.get("total_deficit", 1)) == 0
+                )
+                if _video_pass_skipped:
+                    print(
+                        f"[VIDEO][PRIORITY] {channel_key}: videos coverage sufficient "
+                        f"(deficit=0 from live signal) -> skipping video pass this cycle"
+                    )
+                    results["channels"].setdefault(channel_key, {}).update(
+                        {"video_pass_skipped_reason": "videos_deficit_zero_live_signal"}
+                    )
+                else:
+                    reg_channel = get_channel_by_key(channel_key)
+                    channel_content_types = (reg_channel or {}).get("content_types", ["short"])
+                    if "upload" in channel_content_types:
+                        print(f"\n[VIDEO] Processing Videos tab for {channel_key}...")
+                        try:
+                            from modules.platform_integration.youtube_shorts_scheduler.src.content_page_scheduler import ContentPageScheduler
+                            from modules.platform_integration.youtube_shorts_scheduler.src.schedule_tracker import ScheduleTracker
 
-                        vps = ContentPageScheduler(driver)
-                        if vps.navigate_to_content(channel_key, content_type="upload", visibility="UNLISTED"):
-                            vps_tracker = ScheduleTracker(channel_key)
-                            vps_config = None
-                            try:
-                                from modules.platform_integration.youtube_shorts_scheduler.src.channel_config import get_channel_config
-                                vps_config = get_channel_config(channel_key)
-                            except Exception:
-                                pass
+                            vps = ContentPageScheduler(driver)
+                            if (vps.navigate_to_content(channel_key, content_type="upload", visibility="UNLISTED")
+                                    and asyncio.run(_has_schedule_target_access(swapper, channel_key, expected_channel_id))):
+                                vps_tracker = ScheduleTracker(expected_channel_id)
+                                vps_config = None
+                                try:
+                                    from modules.platform_integration.youtube_shorts_scheduler.src.channel_config import get_channel_config
+                                    vps_config = get_channel_config(channel_key)
+                                except Exception:
+                                    pass
 
-                            vps_time_slots = (vps_config or {}).get("time_slots", _DEFAULT_TIME_SLOTS_FALLBACK)
-                            vps_max = min(max_per_channel, 5)  # Conservative for videos
+                                # LONG_FORM_TZ_PEAK_WINDOW_PHASE1: use the canonical
+                                # US-ET peak slots as the ET base (identical to the
+                                # shorts path scheduler.py:90), NOT the bare per-account
+                                # time_slots. These ET slots get DST-converted to the
+                                # channel account tz inside schedule_all_visible via the
+                                # channel_tz forwarded below (#847 conversion path), so
+                                # long-form publishes at the US peak for EVERY channel.
+                                vps_time_slots = get_peak_slots_et()
 
-                            vps_results = asyncio.run(
-                                vps.schedule_all_visible(
-                                    tracker=vps_tracker,
-                                    time_slots=vps_time_slots,
-                                    max_per_day=4,  # Lower rate for long-form videos
-                                    max_videos=vps_max,
-                                    stop_event=stop_event,
+                                # LONG_FORM_SCHEDULING_ENABLE_PHASE1: per-channel per-pass
+                                # ROTATION budget (mirror of the shorts #858 fairness fix).
+                                # Without this the FIRST upload-eligible channel would drain
+                                # its whole long-form backlog (bounded only by max_per_channel)
+                                # before the loop rotates -> channel-starving. Cap each channel
+                                # to a few days of long-form per pass; the daemon's next PHASE 3
+                                # re-invocation continues draining round-robin.
+                                # Default "8" = 2 days x 4/day (max_per_day=4 below). Tunable via
+                                # YT_VIDEO_PER_CHANNEL_PER_PASS; non-positive/garbage -> default.
+                                try:
+                                    vps_per_pass = int(os.getenv("YT_VIDEO_PER_CHANNEL_PER_PASS", "8"))
+                                except (TypeError, ValueError):
+                                    vps_per_pass = 8
+                                if vps_per_pass <= 0:
+                                    vps_per_pass = 8
+                                vps_max = min(max_per_channel, vps_per_pass)  # rotation-budgeted
+
+                                # LONG_FORM_TZ_PEAK_WINDOW_PHASE1 (#847 follow-up, GAP CLOSED):
+                                # The channel's Studio-account tz (registry field) is now
+                                # forwarded into schedule_all_visible, which DST-converts the
+                                # canonical ET peak slots above to that account's local
+                                # wall-clock -- identical to the shorts path
+                                # (scheduler.py self.channel_tz). So long-form publishes at the
+                                # US-ET peak for EVERY channel: identity for ET-account channels
+                                # (foundups/antifafm), shifted for Asia/Tokyo (move2japan/undaodu).
+                                vps_channel_tz = (vps_config or {}).get("timezone")
+                                vps_tz = vps_channel_tz or "as-is"
+
+                                # LONG_FORM_SCHEDULING_ENABLE_PHASE1 breadcrumb: pass is running.
+                                # tz here is now the ET->account conversion target, not a warning.
+                                print(
+                                    f"[VIDEO][LONG-FORM] {channel_key}: pass START "
+                                    f"(budget={vps_max}/pass, max_per_day=4, "
+                                    f"ET-peak->tz={vps_tz})"
                                 )
-                            )
 
-                            vps_scheduled = vps_results.get("total_scheduled", 0)
-                            vps_errors = vps_results.get("total_errors", 0)
-                            print(f"[VIDEO] {channel_key}: {vps_scheduled} videos scheduled, {vps_errors} errors")
+                                vps_results = asyncio.run(
+                                    vps.schedule_all_visible(
+                                        tracker=vps_tracker,
+                                        time_slots=vps_time_slots,
+                                        max_per_day=4,  # Lower rate for long-form videos
+                                        max_videos=vps_max,
+                                        stop_event=stop_event,
+                                        channel_tz=vps_channel_tz,
+                                    )
+                                )
 
-                            # Track in vitals
-                            vitals.record_scheduling_cycle(vps_scheduled)
-                            for _ in range(vps_scheduled):
-                                vitals.record_op(success=True)
-                            for _ in range(vps_errors):
-                                vitals.record_op(success=False)
+                                vps_results["requested_channel_id"] = expected_channel_id
+                                vps_results["channel_id"] = expected_channel_id
+                                if not asyncio.run(_has_schedule_target_access(swapper, channel_key, expected_channel_id)):
+                                    results["channels"][f"{channel_key}_videos"] = {
+                                        "error": "post_cycle_receiving_channel_not_verified", "total_errors": 1,
+                                        "requested_channel_id": expected_channel_id, "outcome": "unverified",
+                                        "reported_cycle": vps_results}
+                                    continue
+                                vps_scheduled = vps_results.get("total_scheduled", 0)
+                                vps_errors = vps_results.get("total_errors", 0)
+                                print(f"[VIDEO] {channel_key}: {vps_scheduled} videos scheduled, {vps_errors} errors")
+                                # LONG_FORM_SCHEDULING_ENABLE_PHASE1 breadcrumb: per-channel
+                                # scheduled count vs per-pass budget; rotation moves to next.
+                                print(
+                                    f"[VIDEO][LONG-FORM] {channel_key}: scheduled "
+                                    f"{vps_scheduled}/{vps_max} this pass -> rotating "
+                                    f"(remaining long-form backlog drains next PHASE 3)"
+                                )
 
-                            # Store video results alongside shorts
-                            results["channels"][f"{channel_key}_videos"] = vps_results
-                        else:
-                            print(f"[VIDEO] Navigation to Videos tab failed for {channel_key}")
-                    except Exception as vps_err:
-                        print(f"[VIDEO] Video processing error for {channel_key}: {vps_err}")
-                        logger.error(f"Video processing error: {vps_err}", exc_info=True)
+                                # Track in vitals
+                                vitals.record_scheduling_cycle(vps_scheduled)
+                                for _ in range(vps_scheduled):
+                                    vitals.record_op(success=True)
+                                for _ in range(vps_errors):
+                                    vitals.record_op(success=False)
+
+                                # Store video results alongside shorts
+                                results["channels"][f"{channel_key}_videos"] = vps_results
+                            else:
+                                print(f"[VIDEO] Navigation to Videos tab failed for {channel_key}")
+                        except Exception as vps_err:
+                            print(f"[VIDEO] Video processing error for {channel_key}: {vps_err}")
+                            logger.error(f"Video processing error: {vps_err}", exc_info=True)
 
             # AUTO-STOP: Check for critical vitals
             alert = vitals.check_and_alert()
@@ -947,20 +1536,24 @@ def run_multi_channel_scheduler(
             print(f"[ERROR] {channel_key} failed: {e}")
             vitals.record_op(success=False)
             vitals.record_channel(processed=False)
-            results["channels"][channel_key] = {"error": str(e)}
+            results["channels"][channel_key] = {"error": str(e), "total_errors": 1,
+                "requested_channel_id": expected_channel_id,
+                "outcome": "unverified" if cycle_started else "not_submitted"}
 
             # 2026-02-01: CONTENT PAGE FALLBACK — if per-video scheduling fails,
             # try the Content Page Scheduler (inline popup from video list table).
             cps_enabled = os.getenv("YT_CPS_FALLBACK_ENABLED", "true").lower() in ("1", "true", "yes")
-            if cps_enabled and not dry_run:
+            if (cps_enabled and not dry_run and not cycle_started
+                    and asyncio.run(_has_schedule_target_access(swapper, channel_key, expected_channel_id))):
                 print(f"[FALLBACK] Trying Content Page Scheduler for {channel_key}...")
                 try:
                     from modules.platform_integration.youtube_shorts_scheduler.src.content_page_scheduler import ContentPageScheduler
                     from modules.platform_integration.youtube_shorts_scheduler.src.schedule_tracker import ScheduleTracker
 
                     cps = ContentPageScheduler(driver)
-                    if cps.navigate_to_content(channel_key, visibility="UNLISTED"):
-                        cps_tracker = ScheduleTracker(channel_key)
+                    if (cps.navigate_to_content(channel_key, visibility="UNLISTED")
+                            and asyncio.run(_has_schedule_target_access(swapper, channel_key, expected_channel_id))):
+                        cps_tracker = ScheduleTracker(expected_channel_id)
                         cps_config = None
                         try:
                             from modules.platform_integration.youtube_shorts_scheduler.src.channel_config import get_channel_config
@@ -984,6 +1577,12 @@ def run_multi_channel_scheduler(
                             )
                         )
 
+                        cps_results["requested_channel_id"] = expected_channel_id
+                        cps_results["channel_id"] = expected_channel_id
+                        if not asyncio.run(_has_schedule_target_access(swapper, channel_key, expected_channel_id)):
+                            results["channels"][channel_key].update({"outcome": "unverified",
+                                "requested_channel_id": expected_channel_id, "reported_cycle": cps_results})
+                            continue
                         cps_scheduled = cps_results.get("total_scheduled", 0)
                         cps_errors = cps_results.get("total_errors", 0)
                         print(f"[FALLBACK] CPS result: {cps_scheduled} scheduled, {cps_errors} errors")
@@ -1014,15 +1613,18 @@ def run_multi_channel_scheduler(
                 audit_result = audit_cps.audit_calendar(channel_key_audit, max_per_day=8)
                 conflicts = len(audit_result.get("conflicts", []))
                 heavy_days = len(audit_result.get("heavy_days", []))
-                total_scheduled = audit_result.get("total_scheduled", 0)
-                print(f"[AUDIT] {channel_key_audit}: {total_scheduled} scheduled, {conflicts} conflicts, {heavy_days} heavy days")
+                if audit_result.get("status") == "complete":
+                    total_scheduled = audit_result.get("total_scheduled")
+                    print(f"[AUDIT] {channel_key_audit}: {total_scheduled} scheduled, {conflicts} conflicts, {heavy_days} heavy days")
+                else:
+                    print(f"[AUDIT] {channel_key_audit}: incomplete inventory; scheduled total unknown")
                 results["channels"].setdefault(channel_key_audit, {})["audit"] = audit_result
             except Exception as audit_err:
                 print(f"[AUDIT] {channel_key_audit} audit failed: {audit_err}")
 
     # Summary
     print("\n" + "=" * 60)
-    print("[SUMMARY] Multi-Channel Scheduling Complete")
+    print("[SUMMARY] Multi-Channel Scheduling Results")
     print("=" * 60)
     total_scheduled = 0
     total_errors = 0

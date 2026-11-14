@@ -1,4 +1,98 @@
+## 2026-11-10 — Isolate attached Chromium command routes
+
+Copy the Selenium connection command map and pin each Chrome/Edge attachment's
+CDP endpoint before installing the shared verification guard. Existing recovery
+and direct scheduler attachments reuse this owner. The 35 attachment controls and
+11 target-access fixtures passed offline; installed/live browser behavior remains
+separately qualified. No browser launch, kill, account switch or model probe was
+performed by validation. WSP11/22/50/84/97.
+
+## 2026-11-10 — Install human verification guard on attached drivers
+
+Both Chrome/Edge normal and existing recovery attachment paths now install the
+shared Selenium verification gate before returning their driver. The installer
+does not navigate or verify identity. Existing no-kill assertions are preserved;
+offline gate/attachment composition passes. Runtime installation and live popup
+qualification remain separate. WSP11/22/50/84/97.
+
+## 2026-11-07 — LM Link configuration remediation and passive observation
+
+The runtime repair handoff observed the connector starting under `llmster`, then
+LM Studio GUI, with startup/timeouts and no peers. The supported
+`lms link disable` command exited 0 and acknowledged `forceDisabled=true`. All 36 passive
+samples over 36 seconds then found no connector; the GUI remained present in
+every sample. This is configuration-only remediation, not a dependency-launcher
+source window fix. It does not prove model HTTP availability, model residency,
+future restart behavior or indefinite connector absence. No credentials, private
+configuration paths or host identifiers are recorded here. See the [YouTube DAE
+checkpoint](../../communication/livechat/README.md#youtube-dae-repair-checkpoint--2026-11-07).
+WSP00/22/50/77/97.
+
+## Preserve browser sessions during attachment — 2026-11-05
+
+- Monitoring observed the old repeated-readiness-failure branch execute an
+  image-wide Chrome termination. This predates the modern Studio row repair.
+  The observed log does not establish which HTTP failure caused the branch.
+- Separate valid no-page inventories from unknown CDP state in the existing
+  owner, invoke the tab-recovery helper at most once, and remove all four Chrome/Edge image-wide
+  kill/relaunch paths. Retain public signatures and read-only boolean readiness;
+  startup remains separate. Generic driver failures preserve sessions too.
+- Extended the existing test owner with actual fake HTTP-to-retry composition:
+  22 failures/13 passes before source repair, then35 passes. Original11 cases
+  retain their assertions; eight readiness mocks now target the private probe.
+  The focused+adjacent startup selection passes84 cases. Independent injected
+  HTTP witnesses pass60 cases plus28 exception-race cases. These are separate
+  overlapping checks, not a combined end-to-end count. Runtime promotion remains
+  separate. A lost PUT response followed by the existing GET fallback cannot
+  prove a single physical tab; only helper-invocation count is bounded here.
+- Retrieval: task-source lexical bundle binds main76cb579b, freshness UNKNOWN
+  with index gap retained. README/INTERFACE/ROADMAP/test memory/NAVIGATION read;
+  no module memory/README exists. Broad historical docs were noisy, so prioritize
+  exact retry and HTTP owners. No duplicate lifecycle system or new dependency.
+  Manual source repair is appropriate for this HTTP/Selenium composition defect;
+  live local model capacity remains with the running DAE. WSP00/10/11/22/50/84/97.
+
+## Recover documented native startup configuration — 2026-10-31
+
+Complete the README configuration table for the existing `LMS_CLI_PATH` and
+`LM_STUDIO_PREFER_LLMSTER` settings. Source review confirms the current facade
+passes the preference to the bounded startup owner; false does not authorize a
+cold GUI launch. No implementation, model default, autoload or startup test is
+replaced. Old helper API-v1 deltas remain preserved for lifecycle-owner review.
+This is documentation recovery, not a fresh server/model observation. WSP 11/22/50/97.
+
 # Dependency Launcher Module - ModLog
+
+## 2026-10-29 — Local bounded native server startup layer
+
+- Retained the existing facade and legacy model helper APIs; extracted bounded
+  startup into one sibling to reduce the existing monolith. Prefer headless CLI;
+  require known process state, the existing lifecycle node lock, checked command
+  exits/timeouts and explicit loopback bind. Uncertain failures never launch an
+  alternate runtime. Cold GUI spawning is refused/manual action after independent
+  review found persisted GUI autostart/LAN settings unqualified. Existing GUI
+  native reuse and explicit CLI loopback start remain supported. External GUI
+  owners remain outside this coordination lock.
+- Native HTTP and exact selected residency replace TCP/fuzzy readiness. The
+  legacy `load_model` startup flag now verifies without calling automatic model
+  helpers. Missing models are not-ready/manual action; no persistent preload
+  service or model lifecycle ownership was added.
+- Forward explicit native keys through `ensure_dependencies`; YouTube General
+  selection uses `LM_STUDIO_NATIVE_MODEL_KEY` or unchanged qwen3.5-4b default.
+  Explicit vision callers retain UI-TARS checks; General does not certify vision.
+- Actual owned-source selection passed94 cases (49 startup,21 routing/boundary,
+  24 lifecycle), zero failures/skips. Real effect APIs were denied; test journals
+  and OS-lock namespaces were private. The corrected harness uses an explicit
+  credential-free child environment and constant-message effect denials; mock
+  assertions do not serialize kwargs. The earlier49 draft cases overlap.
+  Independent review remains separate; no live startup,
+  model action, main.py execution, remote publication or scheduler result claimed.
+- Retrieval: task-source Holo returned `HOLOINDEX_MAINTENANCE_ACTIVE`; lexical
+  bundle bound clean01b87f0e, UNKNOWN freshness/index-gap retained. Direct owner
+  contracts replaced noisy unrelated hits. Both Gemini sources match, tests are
+  AST-equivalent; differing historical docs were not copied wholesale.
+- WSP00/10/11/22/50/62/84/97. Local-only work; root owns publication and runtime.
+
 
 **Module:** infrastructure/dependency_launcher
 **WSP Reference:** WSP 22 (ModLog Protocol)
@@ -6,6 +100,212 @@
 ---
 
 ## Change Log
+
+### 2026-09-22: Qualify signed runtime-expectation projection
+
+- WSP00/15/22/50/62/84/97/99;13/P1. Extended existing INTERFACE/ROADMAP/test
+  documentation with exact mapping, use-time verification and capability
+  disposal requirements, plus a fixed synthetic acceptance matrix.
+- Current AI Gateway signed MODEL/PANEL evidence does not declare the general/
+  code compatibility slots or an installed inference-engine artifact. Named
+  existing policy/supply/inventory owners must resolve these before source work.
+- Existing49 security/supplier/receipt cases pass locally. This is owner-level
+  verification, not end-to-end projection or production cryptographic proof.
+  Source/tests/v1 receipts remain unchanged; no update, provider or service ran.
+  Independent review and exact publication state: canonical RSI backlog.
+
+### 2026-09-20: Default WSL availability checks to metadata-only
+
+- Added a separate default-off `FOUNDUPS_AGENT_WSL_COMMAND_PROBE_ENABLED` control
+  in the existing probe. Enable-only calls validate registration/base and return
+  `NOT_READY` without command execution; both controls opt into the existing
+  version path. Existing enable-only configurations intentionally change behavior.
+- Capture mode before resolver callbacks. Preserve disabled receipt bytes,
+  explicit-mode parsing/commands, trusted resolver exports, fail-soft callers and
+  existing structural guards; source remains238 lines. No new runtime authority.
+- Local43 focused and four connected checks pass; exact red/green, independent
+  review and remote state live in the canonical RSI backlog. Added the missing
+  WSP97-required TestModLog inventory; generated registry changes only this
+  suite's corrected description. No live WSL, update, provider or FoundUp effects.
+  WSP00/15/22/50/62/84/97/99; selected source12/P2.
+
+### 2026-09-20: Qualify the WSL advisory lifecycle boundary
+
+- WSP15 13/P1 contract qualification complete locally; source/test behavior is
+  unchanged. Corrected current README/INTERFACE/ROADMAP claims: enabled version
+  commands execute programs and may cold-start WSL/services; disabled remains
+  no-host-access. A running-state precheck cannot eliminate the later-exec race.
+- Existing 25 tests pass; seven external injected witnesses pass with zero real
+  WSL calls. Independent contract/caller reviews accept the separate 12/P2 next
+  repair: default-off command opt-in within the same owner, preserving Gateway
+  exports, fail-soft startup, receipt limits and structural guards.
+- The new control is not implemented. No runtime/update/provider activation,
+  main wiring, new module/skill or AmIBot work is included. Exact evidence and
+  fresh selection are in the canonical RSI backlog. WSP00/15/22/50/62/97/99.
+
+### 2026-09-13: Recognize installed OpenClaw numeric release suffix
+
+- RSI readiness inspection found the existing WSL advisory rejected installed
+  `OpenClaw 2026.7.1-2 (0790d9f)` while the existing Gateway command transport
+  successfully returned that version. Extended only the existing version regex
+  to accept numeric release suffixes; preserved full-match output filtering.
+- Extended existing positive and content-rejection tests: two new suffix cases
+  failed before the repair; 68 focused WSL/Gateway tests passed afterward.
+  A fresh version-only WSL probe reports both OpenClaw and Hermes available.
+- PASS remains unverified availability, not service health or model/dispatch
+  authority. No install, provider inference, service reconfiguration or new
+  module. WSP 22, 50, 84, 97; R07 readiness groundwork.
+
+---
+
+### 2026-08-05: Runtime compatibility test clock consistency
+
+- Removed a calendar-bound fixture failure by composing publication evidence at
+  the test's current instant.
+- Preserved the wall-clock production API and all integrity-only, nonblocking,
+  no-update authority boundaries. (WSP 15/22/50/97)
+
+---
+
+### 2026-08-02: Trusted WSL resolver exported for upstream agent dispatch
+
+- Exported the existing System32-only WSL executable resolver for reuse by the
+  bounded OpenClaw Gateway command transport.
+- Preserved the prior injected test seam and the read-only advisory behavior.
+- No PATH lookup, shell execution, package update, Gateway lifecycle action,
+  or ambient agent authority was added. (WSP 22/50/62/84/97)
+
+---
+
+### 2026-08-02: Canonical E-Drive WSL Agent Runtime Binding
+
+**Slice:** `OPENCLAW_HERMES_WSL_RUNTIME_LOCATION_BINDING_PHASE1`
+
+- Added a read-only, shell-free probe for exact OpenClaw and Hermes executables
+  inside the named `Ubuntu-24.04` WSL distribution.
+- Added an optional expected-base-path check so a stale or broken WSL
+  registration reports `NOT_READY` before component probes.
+- Wired the probe into the existing nonblocking runtime-compatibility startup
+  boundary; menu access remains available on all probe failures.
+- Kept the executable probe opt-in, resolved `wsl.exe` only from Windows
+  System32, and constrained output to normalized product version lines.
+- Boundary: no package installation/update, onboarding, gateway start, worker
+  dispatch, repository mutation, or authority expansion.
+- WSP references: WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 84, WSP 97.
+
+Focused validation covers distro/component allowlists, base-path mismatch,
+missing components, content-free failures, shell/network/update denial, and
+startup fail-soft behavior.
+
+---
+
+### 2026-08-02: Governed Runtime Compatibility Evidence Supplier
+
+**Slice:** `OPENCLAW_HERMES_QWEN_GOVERNED_FRESHNESS_EVIDENCE_SUPPLIER_PHASE1`
+
+- Extended the existing OpenClaw ecosystem watchlist refresh instead of
+  creating a second network updater.
+- Added exact installed-observation and expected-binding source receipts with
+  recomputed IDs, bounded ASCII fields, TTL/future-skew checks, and exact
+  component-set enforcement.
+- Restricted network retrieval to the official OpenClaw and Hermes latest
+  release API endpoints, with redirect and response-size rejection.
+- Required Qwen general, Qwen code, and inference-backend expectations to come
+  from promoted runtime-binding references rather than model-name inference.
+- Reused the canonical runtime-artifact safety layer for confined reads and
+  descriptor-verified, locked replacement outside the repository.
+- Boundary: advisory evidence only; no install/update, command execution,
+  model load, route change, HoloIndex mutation, or update authority.
+- Truth boundary: source self-hashes prove integrity, not signer identity.
+  Integrity-only envelopes can report `OBSERVED_MATCH`/`OBSERVED_DRIFT`, but
+  the overall receipt remains `NOT_READY` with
+  `evidence_authentication_not_verified`; recomputed hashes never yield
+  authenticated `CURRENT`.
+- Rejected supply/output path aliasing before retrieval and added a regression
+  that exercises the production redirect-handler construction.
+- WSP references: WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 84, WSP 97.
+
+Focused validation covers recomputed-hash forgery, tampering, expiry,
+source-set mismatch, unofficial release URLs, redirects, oversized responses,
+prior-cache preservation, path aliasing, and the absence of
+execution/model-loading surfaces.
+
+---
+
+### 2026-08-02: OpenClaw/Hermes/Qwen Runtime Compatibility Advisory
+
+**Slice:** `OPENCLAW_HERMES_QWEN_RUNTIME_FRESHNESS_AND_COMPATIBILITY_RECEIPT_PHASE1`
+
+- Added a typed, digest-bound compatibility receipt for OpenClaw, Hermes,
+  general/coding Qwen bindings, and the inference backend.
+- Added a bounded off-repo evidence loader and a nonblocking startup advisory.
+- Reused the existing WRE ecosystem-watchlist and model-promotion direction;
+  this slice does not create another updater or model selector.
+- Fail-closed evidence rules cover schema, self-integrity, TTL, future timestamps,
+  duplicate/missing components, component verification, and allowlisted scope.
+- Boundary: no network, package update, model download/load, inference, route
+  mutation, process execution, HoloIndex maintenance, or startup blocking.
+- WSP references: WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 84, WSP 97.
+
+Focused validation: receipt/advisory tests plus the full `main.py` startup
+bootstrap suite.
+
+---
+
+### 2026-06-17: Non-Destructive Attach Recovery - Open a Tab, Do NOT Kill (Phase 1)
+
+**By:** 0102 (Worker-Lane: ATTACH-AUTHOR)
+**Slice:** BROWSER_ATTACH_RECOVERY_NO_KILL_PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 50 (Pre-Action), WSP 84 (Code Reuse), WSP 87 (Navigation), WSP 97 (Truth Boundary)
+
+**Problem (012 live-observed):** When the operator-prepared Chrome on 9222 is UP
+(DevTools /json/version works) but has NO discoverable page target (/json
+page-list empty -> Selenium raises "unable to discover open pages"),
+`connect_chrome_with_retry` ran `taskkill /F /IM chrome.exe` and relaunched a
+fresh Chrome. This DESTROYED the operator's authenticated/prepared window,
+relaunched a Chrome whose auth/active-channel state is uncertain, and confounded
+every live test. Edge had the identical destructive path.
+
+**Solution (NO_KILL contract):** On the discover-pages (no-page) condition, RECOVER
+NON-DESTRUCTIVELY:
+1. New helper `open_devtools_page(port, url='about:blank')` opens a normal tab via
+   the DevTools HTTP endpoint - HTTP PUT `/json/new?about:blank` (modern Chrome/Edge)
+   with GET fallback. Reuses the existing `urllib.request` + `/json` pattern from
+   `is_devtools_responding` (no new HTTP machinery, no new dependency).
+2. `connect_chrome_with_retry` / `connect_edge_with_retry` no-page branch now calls
+   `open_devtools_page`, re-checks `is_devtools_responding`, and RETRIES the attach.
+3. If a tab cannot be opened (endpoint blocked), they log a CLEAR actionable error
+   ("open a normal tab in the debug Chrome/Edge, or relaunch with
+   --remote-allow-origins") and return None - NEVER taskkill. The success attach
+   path is unchanged.
+
+**Reuse:** Checked for an existing DevTools open-tab helper. `foundups_selenium/src/
+devtools_mcp_adapter.py:new_page()` (:510) exists but requires an already-initialized
+driver/MCP backend (`self._driver.execute_script("window.open")`), so it CANNOT
+recover the pre-attach no-driver case. No repo code uses `/json/new` or
+`Target.createTarget`. Reused the in-file urllib/`/json` HTTP pattern instead.
+
+**Out of scope / follow-up:** The genuinely-DevTools-DOWN path (port not answering
+/json/version twice) still taskkills+relaunches; left in place, logged loudly, and
+tracked as **BROWSER_ATTACH_RECOVERY_DEVTOOLS_DOWN_PHASE2**.
+
+**Files Changed:**
+- `src/dae_dependencies.py`: added `open_devtools_page()`; rewrote the no-page branch
+  of `connect_chrome_with_retry` and `connect_edge_with_retry` to be non-destructive.
+- `tests/test_attach_recovery_no_kill.py`: 11 mock-only tests (no live browser).
+- `INTERFACE.md`: documented `open_devtools_page` + recovery behavior.
+
+**Tests:** `python -m pytest modules/infrastructure/dependency_launcher/` -> 11 passed.
+No-kill proof: the core `test_*_no_kill_on_discover_pages` tests FAIL on the base
+SHA (which invokes `taskkill /F /IM chrome.exe` at the discover-pages branch and
+has no `open_devtools_page`); they PASS on this change.
+
+**HONEST LIVE GAP:** Whether PUT/GET `/json/new` actually opens a discoverable tab
+on real Chrome 149 is MOCK-validated ONLY. 012 live-validates by re-running with an
+operator-prepared 9222 that has no normal tab: expect a NEW tab opened + successful
+attach + NO "killing stale Chrome" in the logs.
+
+---
 
 ### 2026-03-22: Multi-Model Auto-Loading (WSP 77 Agent Coordination)
 

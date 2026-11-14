@@ -1,0 +1,119 @@
+[
+  {
+    "name": "ordinary_chat_defaults_zero_effect",
+    "text": "Hello RedDog, how are you today?",
+    "interaction_intent": "CHAT",
+    "reasoning_depth": "FAST",
+    "effect_ceiling": "NONE",
+    "requires_authenticated_authority": false
+  },
+  {
+    "name": "read_only_explanation",
+    "text": "Explain how the resolver works.",
+    "interaction_intent": "RESEARCH",
+    "reasoning_depth": "FAST",
+    "effect_ceiling": "READ_ONLY",
+    "requires_authenticated_authority": false
+  },
+  {
+    "name": "security_audit_raises_reasoning_only",
+    "text": "Audit authentication secrets and security boundaries.",
+    "interaction_intent": "RESEARCH",
+    "reasoning_depth": "PANEL",
+    "effect_ceiling": "READ_ONLY",
+    "requires_authenticated_authority": false
+  },
+  {
+    "name": "explicit_work_stops_at_proposal",
+    "text": "Implement and harden the lifecycle adapter.",
+    "interaction_intent": "PROPOSE",
+    "reasoning_depth": "CRITIC",
+    "effect_ceiling": "PROPOSAL",
+    "requires_authenticated_authority": false
+  },
+  {
+    "name": "authorization_language_still_stops_at_proposal",
+    "text": "Authorize the proposal and execute the change set.",
+    "interaction_intent": "AUTHORIZE",
+    "reasoning_depth": "CRITIC",
+    "effect_ceiling": "PROPOSAL",
+    "requires_authenticated_authority": true
+  },
+  {
+    "name": "ambiguous_do_it_is_not_authority",
+    "text": "Do it.",
+    "interaction_intent": "CHAT",
+    "reasoning_depth": "FAST",
+    "effect_ceiling": "NONE",
+    "requires_authenticated_authority": false
+  },
+  {
+    "name": "status_is_read_only",
+    "text": "What is the status of the current task?",
+    "interaction_intent": "STATUS",
+    "reasoning_depth": "FAST",
+    "effect_ceiling": "READ_ONLY",
+    "requires_authenticated_authority": false
+  },
+  {
+    "name": "cancel_text_requires_separate_authority",
+    "text": "Cancel the current job.",
+    "interaction_intent": "CANCEL",
+    "reasoning_depth": "FAST",
+    "effect_ceiling": "NONE",
+    "requires_authenticated_authority": true
+  },
+  {
+    "name": "explicit_panel_does_not_raise_effect",
+    "text": "Use a full panel to compare these options.",
+    "interaction_intent": "RESEARCH",
+    "reasoning_depth": "PANEL",
+    "effect_ceiling": "READ_ONLY",
+    "requires_authenticated_authority": false
+  },
+  {
+    "name": "risk_can_raise_chat_reasoning_without_effect",
+    "text": "We need to talk about money.",
+    "interaction_intent": "CHAT",
+    "reasoning_depth": "CRITIC",
+    "effect_ceiling": "NONE",
+    "requires_authenticated_authority": false
+  },
+  {
+    "name": "conversational_draft_is_chat_not_file_write",
+    "text": "Draft a reply to this message.",
+    "interaction_intent": "CHAT",
+    "reasoning_depth": "FAST",
+    "effect_ceiling": "NONE",
+    "requires_authenticated_authority": false
+  },
+  {
+    "name": "bare_continue_is_not_work_authority",
+    "text": "Continue.",
+    "interaction_intent": "CHAT",
+    "reasoning_depth": "FAST",
+    "effect_ceiling": "NONE",
+    "requires_authenticated_authority": false
+  },
+  {
+    "name": "continue_named_work_stops_at_proposal",
+    "text": "Continue the RedDog work.",
+    "interaction_intent": "PROPOSE",
+    "reasoning_depth": "CRITIC",
+    "effect_ceiling": "PROPOSAL",
+    "requires_authenticated_authority": false
+  },
+  {
+    "name": "astral_text_uses_unicode_scalar_bound",
+    "text_repeat": {"value": "😀", "count": 6001},
+    "interaction_intent": "CHAT",
+    "reasoning_depth": "FAST",
+    "effect_ceiling": "NONE",
+    "requires_authenticated_authority": false
+  },
+  {
+    "name": "astral_text_over_scalar_bound_rejects",
+    "text_repeat": {"value": "😀", "count": 12001},
+    "error": "conversation_plane_operator_text_invalid"
+  }
+]

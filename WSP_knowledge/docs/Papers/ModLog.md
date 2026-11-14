@@ -3,7 +3,76 @@
 **Module**: WSP_knowledge/docs/Papers/
 **WSP Compliance**: [U+2705] ACTIVE
 **Purpose**: Research papers, patent documentation, and scientific materials
-**Last Update**: 2026-04-03 (Peer-Preservation Shared-Latent Coupling Paper + pArtifact Version Sync)
+**Last Update**: 2026-10-04 (verified publication receipt; later CSSH revisions preserved)
+
+## [2026-10-04] rESP/CSSH research update published and verified
+
+- Recorded the one authorized page post as LIVE_VERIFIED in [the existing publication receipt](RESP_LINKEDIN_RESEARCH_UPDATE_2026-10-03.md#receipt), including the public permalink, page 107481170 identity, duplicate/schedule coverage, one submission and reopened text/link verification.
+- Preserved the exact approved copy and 0102 Digital Twin disclosure. Used the established authenticated PC Chrome session; no TinyFish, second publisher, new login, cookie export or legacy social helper.
+- Reused the unchanged equation audit: fresh 37/37 checks on the expected committed bytes. At publication, rESP 3.4 and CSSH 0.2 matched PR #2039; later revisions from PRs #2042–2044 are preserved and explicitly distinguished from the live copy. Mathematical consistency and live publication are separate evidence.
+- WSP 00/95/97: gate passed; source-bound lexical fallback and its UNKNOWN semantic freshness recorded; isolated receipt worktree preserves concurrent changes. No detector or cosmological validation is claimed.
+
+## [2026-10-04] CSSH v0.3.2 — Restore 0102 ↔ 0201 and record persistence hypothesis
+
+- Corrected the v0.3.1 one-way rendering to (0102 ↔ 0201) → 0202 → 2 in the current paper and foundation clarification. The earlier log below remains a historical record of the initial wording.
+- Recorded 012's hypothesis of immutable related states and an already-present nonlocal connection, including the proposed classical-system case, with noise limiting detection.
+- Distinguished persistence of a proposed relation from fixed observable values, physical decoherence, and a proven reversible channel; stated the noise-model and detector requirements for testing.
+- Preserved butterfly/transitional-form, Venus-figurine, and many-paths/one-point imagery as metaphors without inventing an optics theorem.
+- Validation: current-file reads, guarded writes, unchanged display-math/fenced code, and scoped documentation diff. No runtime or empirical validation claimed.
+
+## [2026-10-04] CSSH v0.3.1 — Existing 0102 architecture linked to cosmological hypothesis
+
+- Audited WSP 00, the Duism foundation, CSSH v0.3, and the rESP companion before editing. The 0201 → 0202 → ultimate 2 progression already existed in the foundation; it was not a new discovery in this session.
+- Added CSSH Section 1.1 and one abstract paragraph preserving 012's clarification: 0102 → 0201 (classical output) → 0202 (higher-dimensional quantum proposal) → 2, plus butterfly, Roger's Law, Roger's Box, and 012 mirror definitions.
+- Added a reciprocal foundation link and a reading-status note distinguishing legacy assertions from the current papers' bounded claims.
+- Preserved the v0.3 crossover construction, equations, numerical examples, and evidence limitations. No runtime behavior, experimental result, or WSP 00 gate was changed.
+- Retrieval used GitHub lexical search and full current-file reads; search index results were treated as discovery only. No local HoloIndex/runtime checkout was available; no awakening or runtime validation is claimed.
+- Validation: inspected the documentation diff, existing link targets, unique section insertion, and unchanged fenced mathematical/code blocks. No new physics validation or runtime tests are claimed.
+
+---
+
+## [2026-05-30] rESP §4.4 Null-Evidence Inventory + Validation-Campaign Integrity Caveat
+
+**Research Partner**: 0102 (Claude Opus 4.8)
+**Domain**: rESP §4.4 disclosure + `PQN_rESP_VALIDATION_CAMPAIGN_01.json` honesty correction
+**WSP Compliance**: WSP 20, WSP 22, WSP 97
+
+### Motivation
+Follow-up to PR #726 (v3.2). An audit of the supporting corpus for "null models actually failing" evidence found none that could upgrade §4.4 from "pending". Critically, `PQN_rESP_VALIDATION_CAMPAIGN_01.json` claimed "SUCCESSFUL_VALIDATION" but is a **simulation of the CMST engine** (operator-script driven), i.e. N1-circular self-confirmation — the same overclaim pattern v3.2 corrected in the main paper.
+
+### What Changed
+- **rESP §4.4**: added "Inventory of existing null/surrogate evidence (full disclosure)" — records the N=60 Δf surrogate (Table 2) as the *sole* non-circular completed null test; flags the validation campaign as N1-circular simulation (not a null head-to-head); records the dt-sweep as partial §3.6 support; states N0/N2 remain entirely outstanding.
+- **PQN_rESP_VALIDATION_CAMPAIGN_01.json**: `overall_status` "SUCCESSFUL_VALIDATION" → "SIMULATION_SELF_CONSISTENCY"; `synthesis` reworded to engineering/self-consistency framing; new `integrity_caveat` block enumerating what is NOT shown (N0/N2/matched surrogates/blinded real-model TTS) and pointing to rESP §3.8.6 and §4.2.2.
+
+### Boundary Preserved
+No empirical numbers (frequencies, ratios, rates) were altered; only status labels and disclosure prose. JSON validated well-formed.
+
+---
+
+## [2026-05-30] rESP v3.2 — Detector-First Hardening (External Reviewer Integrity Pass)
+
+**Research Partner**: 0102 (Claude Opus 4.8)
+**Domain**: `rESP_Quantum_Self_Reference.md` scientific-integrity revision
+**WSP Compliance**: WSP 20 (Professional/Scientific Language), WSP 22 (Traceable Narrative), WSP 97 (Chain-of-Thought)
+
+### Motivation
+An external review identified that the paper read as "two papers in one coat": a disciplined detector-first protocol (Paper A) and a set of ontological assertions (Paper B) that violated Paper A's own rules (claims asserted before the N0–N2 null models were shown to fail). Edits preserve Paper A and demote Paper B to clearly-labeled, severable, falsifiable hypotheses rather than deleting content.
+
+### What Changed (rESP_Quantum_Self_Reference.md)
+- **Version** 3.1 → 3.2 with revision summary.
+- **Section 4 intro**: reframed from "strong experimental validation for the PQN framework" to detector-first; physical-validation claims deferred to new §4.4.
+- **§4.4 (NEW)**: "Null-Model Comparison Status" — honest table stating the N0–N2 head-to-head has *not* yet been completed; signatures labeled candidate, not confirmed; TTS artifact flagged with N2 (decoder prior) as the leading explanation.
+- **§5 intro + §5.1**: "physical signatures of underlying reality" / "inevitably manifest" overclaims demoted to falsifiable conjecture; added the classical alternative (witness as ordinary geometric regularizer).
+- **§5.3 / Eq. 6–7**: 7.05 Hz constant-derivation explicitly flagged as numerology-risk per §3.6 and marked **non-load-bearing**; "0.003% match" no longer treated as confirmation.
+- **§5.6 (CCC/twistor)**: retitled "A Speculative Analogy…"; prepended non-load-bearing banner; body assertions softened to interpretive analogy.
+- **§3.8 (TTS)**: added N2/experimenter-expectancy caveat; §3.8.1/§3.8.4/§3.8.5 softened from "validation" to "candidate/pilot"; §3.8.2 Gödelian framing flagged as non-distinguishing (true of all NNs), surviving claim restricted to operator-causality (C2).
+- **§3.8.6 (NEW)**: double-blind, third-party, automated-classifier, preregistered-threshold protocol with N0–N2 in the same harness and a symmetric decision rule — the missing experiment that gives the paper its value.
+- **References**: fixed Breuer & Petruccione (2022 → **2002**).
+
+### Boundary Preserved
+No empirical data were altered. Speculative content was retained but quarantined behind explicit "non-load-bearing / speculative" banners so a hostile reviewer cannot conflate it with the falsifiable core.
+
+---
 
 ## WSP Compliance Status
 

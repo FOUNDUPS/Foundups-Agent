@@ -4,15 +4,20 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from unittest.mock import MagicMock
 
 import pytest
 
+from modules.communication.moltbot_bridge.src import memory_nudge_engine
 from modules.communication.moltbot_bridge.src.memory_nudge_engine import (
+    MAX_SELF_AUDIT_ESCALATION_BYTES,
     MemoryNudgeEngine,
     NudgeEvent,
+    _read_bounded_confined_text,
     emit_memory_nudges,
     scan_nudge_events,
+)
+from modules.infrastructure.wre_core.src.daemon_self_audit_loop import (
+    resolve_daemon_self_audit_runtime_root,
 )
 
 
@@ -157,6 +162,204 @@ class TestMemoryNudgeEngine:
 
         created = engine.emit_nudges([event])
         assert len(created) == 0
+
+    def test_reads_supervisor_escalations_from_external_runtime_root(
+        self,
+        tmp_workspace,
+    ):
+        runtime_root = tmp_workspace["repo_root"].parent / "daemon-runtime"
+        runtime_root.mkdir()
+        (runtime_root / "daemon_self_audit_escalations.jsonl").write_text(
+            json.dumps(
+                {
+                    "signature": "repeated-provider-timeout",
+                    "event_count": 5,
+                    "recommended_fix": "inspect_provider_health",
+                    "dispatch_result": "not_configured",
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        engine = MemoryNudgeEngine(
+            repo_root=tmp_workspace["repo_root"],
+            memory_dir=tmp_workspace["memory_dir"],
+            reports_dir=tmp_workspace["reports_dir"],
+            self_audit_runtime_root=runtime_root,
+        )
+
+        events = engine._scan_supervisor_escalations()
+
+        assert len(events) == 1
+        assert events[0].trigger_type == "supervisor_escalation"
+        assert events[0].provenance == (
+            "runtime:daemon_self_audit/daemon_self_audit_escalations.jsonl"
+        )
+
+    def test_ignores_obsolete_in_repo_supervisor_escalation_log(
+        self,
+        tmp_workspace,
+    ):
+        stale_root = (
+            tmp_workspace["repo_root"]
+            / "modules"
+            / "infrastructure"
+            / "wre_core"
+            / "reports"
+        )
+        stale_root.mkdir(parents=True)
+        (stale_root / "daemon_self_audit_escalations.jsonl").write_text(
+            json.dumps(
+                {
+                    "signature": "stale-repository-event",
+                    "event_count": 99,
+                    "recommended_fix": "must_not_be_observed",
+                    "dispatch_result": "legacy",
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        runtime_root = tmp_workspace["repo_root"].parent / "empty-runtime"
+
+        engine = MemoryNudgeEngine(
+            repo_root=tmp_workspace["repo_root"],
+            memory_dir=tmp_workspace["memory_dir"],
+            reports_dir=tmp_workspace["reports_dir"],
+            self_audit_runtime_root=runtime_root,
+        )
+
+        assert engine._scan_supervisor_escalations() == []
+
+    def test_rejects_self_audit_runtime_root_inside_repository(
+        self,
+        tmp_workspace,
+    ):
+        with pytest.raises(ValueError, match="inside_repo"):
+            MemoryNudgeEngine(
+                repo_root=tmp_workspace["repo_root"],
+                memory_dir=tmp_workspace["memory_dir"],
+                reports_dir=tmp_workspace["reports_dir"],
+                self_audit_runtime_root=(
+                    tmp_workspace["repo_root"] / "runtime" / "self-audit"
+                ),
+            )
+
+    @pytest.mark.parametrize(
+        ("explicit", "resident", "expected_suffix"),
+        (
+            ("", "", "daemon_self_audit"),
+            ("", "resident-store", "resident-store/daemon_self_audit"),
+            ("explicit-store", "resident-store", "explicit-store"),
+        ),
+    )
+    def test_consumer_uses_shared_producer_runtime_root_resolution(
+        self,
+        tmp_workspace,
+        monkeypatch,
+        explicit,
+        resident,
+        expected_suffix,
+    ):
+        if explicit:
+            monkeypatch.setenv("OPENCLAW_SELF_AUDIT_RUNTIME_ROOT", explicit)
+        else:
+            monkeypatch.delenv("OPENCLAW_SELF_AUDIT_RUNTIME_ROOT", raising=False)
+        if resident:
+            monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", resident)
+        else:
+            monkeypatch.delenv("REDDOG_RESIDENT_RUNTIME_ROOT", raising=False)
+
+        repo_root = tmp_workspace["repo_root"]
+        producer_root = resolve_daemon_self_audit_runtime_root(repo_root)
+        engine = MemoryNudgeEngine(
+            repo_root=repo_root,
+            memory_dir=tmp_workspace["memory_dir"],
+            reports_dir=tmp_workspace["reports_dir"],
+        )
+
+        assert engine.self_audit_runtime_root == producer_root
+        assert producer_root.as_posix().endswith(expected_suffix)
+
+    def test_supervisor_escalation_read_is_bounded_and_fail_closed(
+        self,
+        tmp_workspace,
+    ):
+        runtime_root = tmp_workspace["repo_root"].parent / "bounded-runtime"
+        runtime_root.mkdir()
+        escalations_path = runtime_root / "daemon_self_audit_escalations.jsonl"
+        with escalations_path.open("wb") as stream:
+            stream.truncate(MAX_SELF_AUDIT_ESCALATION_BYTES + 1)
+        engine = MemoryNudgeEngine(
+            repo_root=tmp_workspace["repo_root"],
+            memory_dir=tmp_workspace["memory_dir"],
+            reports_dir=tmp_workspace["reports_dir"],
+            self_audit_runtime_root=runtime_root,
+        )
+
+        assert engine._scan_supervisor_escalations() == []
+        with pytest.raises(ValueError, match="size_limit"):
+            _read_bounded_confined_text(
+                escalations_path,
+                allowed_root=runtime_root,
+            )
+
+    def test_supervisor_escalation_read_propagates_confined_reader_rejection(
+        self,
+        tmp_workspace,
+        monkeypatch,
+    ):
+        runtime_root = tmp_workspace["repo_root"].parent / "changed-runtime"
+        runtime_root.mkdir()
+        escalations_path = runtime_root / "daemon_self_audit_escalations.jsonl"
+        escalations_path.write_text('{"event_count": 5}\n', encoding="utf-8")
+        monkeypatch.setattr(
+            memory_nudge_engine,
+            "secure_read_confined_text",
+            lambda *_args, **_kwargs: (_ for _ in ()).throw(
+                ValueError("confined_read_target_changed")
+            ),
+        )
+
+        with pytest.raises(ValueError, match="target_changed"):
+            _read_bounded_confined_text(
+                escalations_path,
+                allowed_root=runtime_root,
+            )
+
+    def test_supervisor_escalation_scan_does_not_use_path_read_text(
+        self,
+        tmp_workspace,
+        monkeypatch,
+    ):
+        runtime_root = tmp_workspace["repo_root"].parent / "descriptor-runtime"
+        runtime_root.mkdir()
+        (runtime_root / "daemon_self_audit_escalations.jsonl").write_text(
+            json.dumps(
+                {
+                    "signature": "descriptor-confined",
+                    "event_count": 5,
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        monkeypatch.setattr(
+            Path,
+            "read_text",
+            lambda *_args, **_kwargs: (_ for _ in ()).throw(
+                AssertionError("unconfined Path.read_text must not be used")
+            ),
+        )
+        engine = MemoryNudgeEngine(
+            repo_root=tmp_workspace["repo_root"],
+            memory_dir=tmp_workspace["memory_dir"],
+            reports_dir=tmp_workspace["reports_dir"],
+            self_audit_runtime_root=runtime_root,
+        )
+
+        assert len(engine._scan_supervisor_escalations()) == 1
 
     def test_ignores_low_signal_event(self, tmp_workspace):
         """Engine ignores events with P3/P4 priority from self-research."""

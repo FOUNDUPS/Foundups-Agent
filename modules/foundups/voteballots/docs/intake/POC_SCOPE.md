@@ -1,0 +1,101 @@
+# Vote/Ballots - POC Scope
+
+The [MAGA/Oversight Phase One landing](../../oversight/README.md#phase-one-landing-contract)
+is a separate presentation slice. The planned Voice outbound link leaves
+the new stakeholder experience to a later slice. The Vote evidence journey
+below remains this intake's product PoC scope.
+
+## Bounded public Sites slice
+
+The standalone Vote Site presents selected, dated and verified filing items
+for two officeholders, separately sourced chamber roles and votes, and
+explicit unknowns for unverified independent spending and full-cycle totals.
+The standalone Oversight Site presents the legislative roadmap through
+connected authority and investigation maps, with public records, model
+documents and clearly labeled fictional examples. It has a separate
+senator directory with manual state selection, optional on-device suggestions
+and native dial links. Vote's Contact Congress page uses public office directory
+snapshots, manual state/chamber filtering and a visitor-managed phone list.
+
+This slice uses exact real source records and leaves the general live-data,
+locality-to-race, shared Mall tenant, capture and RedDog gates below open.
+See [release accounting](../RELEASE_ACCOUNTING.md#accountability-integration).
+
+## Minimum Viable Public POC
+A public visitor opens the canonical Vote FoundUp landing surface and immediately sees an evidence-first view of the relevant election context: local/area races where resolvable, candidate cards, and a minimal funding/influence summary for each candidate. The visitor can open a card for the source trail or invoke RedDog/capture input to research a political object or candidate. No invite is required for this public truth layer.
+
+The current internal six-slice Vote evidence chain is the starting implementation asset, not the PoC destination. The next PoC work is to expose that evidence safely through the canonical public FoundUp surface and add the minimum locality/candidate-roster/capture adapters needed for the user experience.
+
+## Included in Public POC
+- Public `/f/{foundup_id}` Vote landing/funnel surface using existing pfMALL/WSP 104 routing.
+- Location/context permission flow sufficient to identify relevant election geography when reliable data is available; manual locality fallback if not.
+- Relevant race/candidate roster cards from authoritative/public-source adapters.
+- Minimal funding/influence card using existing Vote FEC/entity/funding/confidence/quick-answer pipeline.
+- WSP 97 labels: VERIFIED / INFERRED / UNKNOWN plus trail-stop/source provenance.
+- Candidate detail drill-down to existing evidence/funding data.
+- RedDog conversational routing into Vote research.
+- Capture/scan entry contract that reuses the AutoPost/shared capture work where possible; the PoC may begin with an adapter/stub if the reusable capture extraction is not yet production-ready.
+- Public-to-gated CTA that routes deeper functionality into the existing pfMALL/member/invite flow.
+- Explicit status text that VOTE is an informational civic FoundUp and that any later in-app parallel ballot is non-binding unless separately certified/authorized.
+
+## Public Candidate Card - PoC Minimum
+- candidate identity / office / race
+- funding exposure summary
+- major disclosed committee/donor sources available from current evidence
+- evidence strength / confidence
+- trail-stop indicator
+- open details / ask RedDog action
+
+Do not require the full spider chart for PoC. Reserve additional dimensions for later slices while keeping hooks in the card contract.
+
+## Explicitly Excluded from Public POC
+- Official election ballot casting.
+- Blockchain vote execution.
+- Non-binding parallel ballot execution.
+- Registration-record remediation or automated official correspondence.
+- Voter-resilience rings, mesh coordination, transport coordination, or ballot-curing workflows.
+- Influencer analytics, amplification, or political targeting.
+- Personalized candidate recommendations or 'who should I vote for' outputs.
+- Full voting-history/social-risk/radar scorecard.
+- Narrative coordination detection and real-time alerts.
+- New capture engine, new map engine, new auth stack, or new blockchain implementation where reusable components already exist.
+
+## Required Reopen Criteria
+- V1: live FEC/API activation, if used by public PoC.
+- V2: public route / entry surface activation.
+- V3: registry/catalog promotion only after public surface truth is verified.
+- V8: shell contract change if the existing local payload contract must expand.
+
+## HoloIndex Pre-Build Queries
+1. `VOTE_POC_CHAIN_OBSERVATION_SNAPSHOT Vote shell payload 303 tests`
+2. `public FoundUp landing /f app pfMALL WSP 102 WSP 104`
+3. `Vote locality geolocation candidate roster district race adapter`
+4. `AutoPost reusable capture engine capture source image scan`
+5. `GotJunk geolocation map shared component`
+6. `foundup registry mall catalog portfolio voteballots public surface`
+
+## Success Criteria
+- Public landing renders without member authentication.
+- A user can identify the relevant race/candidate context or receives an explicit UNKNOWN/data-unavailable state.
+- Candidate funding summaries preserve existing source/confidence semantics without new unsourced claims.
+- At least one end-to-end path works: public landing -> candidate card -> evidence detail / RedDog query.
+- Public page does not imply an official ballot, official voter-registration status, CABR readiness, payout readiness, or SmartDAO activation.
+- WSP 97 truth audit passes and public-surface state is reconciled before registry/catalog promotion.
+
+## Internal Claim-Verification Evaluation Track - Planned CV1
+The October 30 **Bullshit Meter** intake adds an internal research/evaluation track alongside public PoC preparation; it does not replace the public candidate/race/funding scope above or activate a public meter.
+
+- [ ] Select and freeze ten historical speeches across 2-5 public figures with source URLs, dates, hashes, and documented selection/access rules.
+- [ ] Extract source-aligned atomic factual claims; preserve context, exclusions, and transcript uncertainty.
+- [ ] Retrieve relevant primary documents/datasets with exact evidence locators and explicit unavailable/conflicting-source states.
+- [ ] Produce structured claim/assessment JSON, a clickable evidence tree, internal CLI and review-dashboard outputs, and an independent evaluation report.
+- [ ] Apply minimum methodology/provenance checks immediately; deeper automated funding/method parsing belongs to CV2.
+- [ ] Keep unsupported/uncheckable/pending cases unscored. Any 300-850 output requires a reviewed experimental rubric and sufficient coverage; otherwise return a null score with reasons.
+- [ ] Evaluate extraction, citation support, verdict errors, abstention, deduplication, temporal context, and correction propagation before promotion.
+
+The corpus, schema/migrations, extraction/search implementation, dashboards, evaluations, and scores are not created by this documentation update. Full methodology/funding automation, public rankings, browser overlays, and live ASR/meter operation remain outside CV1.
+
+See [the feature specification](../POLITICAL_CLAIM_VERIFICATION_AND_SCORING_ENGINE.md) for the requested six-table PostgreSQL/pgvector proposal, reuse gate, phased rollout, scoring qualifications, and developer handoff. Apply V5/V6/V8 where confidence, new facts/model output, or shell contracts change; public V1/V2/V3/V7 activations remain separately gated.
+
+## Trust Wedge
+Free public truth: "Who is on my ballot/race context, who funds them, what is verified, and where does the evidence trail stop?"

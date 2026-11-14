@@ -5,7 +5,7 @@ Post-commit social runner.
 
 Fast local git hooks should call this script in the background instead of
 posting directly. The runner builds a durable git_push event, appends it to a
-JSONL spool, and then dispatches through the SocialMediaEventRouter.
+JSONL spool. Dispatch through SocialMediaEventRouter requires explicit opt-in.
 """
 
 from __future__ import annotations
@@ -101,7 +101,7 @@ async def run_runner(
     repo_root: Path,
     events_file: Path,
     results_file: Path,
-    enqueue_only: bool = False,
+    enqueue_only: bool = True,
 ) -> int:
     event = build_git_push_event(repo_root)
     append_jsonl_record(events_file, event)
@@ -140,7 +140,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--repo-root", default=".", help="Repository root")
     parser.add_argument("--events-file", default=None, help="JSONL spool file for git_push events")
     parser.add_argument("--results-file", default=None, help="JSONL file for dispatch results")
-    parser.add_argument("--enqueue-only", action="store_true", help="Only queue the event; do not dispatch")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--enqueue-only", dest="enqueue_only", action="store_true",
+                      help="Only queue the event (default); do not dispatch")
+    mode.add_argument("--dispatch", dest="enqueue_only", action="store_false",
+                      help="Queue and explicitly dispatch through the social router")
+    parser.set_defaults(enqueue_only=True)
     return parser.parse_args()
 
 

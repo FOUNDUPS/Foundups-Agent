@@ -120,16 +120,17 @@ def _try_ai_proposal(event: PreflightFailureEvent) -> Optional[Dict[str, Any]]:
             AutonomousRefactoringOrchestrator,
         )
 
-        orchestrator = AutonomousRefactoringOrchestrator(Path("."))
-        if not hasattr(orchestrator, "propose_preflight_fix"):
+        # Inspect capability before a constructor that can acquire local models.
+        if not callable(getattr(AutonomousRefactoringOrchestrator, "propose_preflight_fix", None)):
             return {
                 "engine": "qwen",
                 "available": False,
                 "reason": "propose_preflight_fix method not implemented",
             }
+        orchestrator = AutonomousRefactoringOrchestrator(Path("."))
         return orchestrator.propose_preflight_fix(event.to_dict())
     except Exception as exc:
-        logger.debug(f"[PREFLIGHT-DISPATCH] AI proposal unavailable: {exc}")
+        logger.debug("[PREFLIGHT-DISPATCH] AI proposal unavailable: %s", type(exc).__name__)
         return None
 
 

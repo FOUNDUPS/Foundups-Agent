@@ -2,9 +2,51 @@
 
 **Version**: 2.1.0
 **Date**: 2026-02-17
-**Status**: Architecture Complete, Simulator Operational
-**Canonical Spec**: [WSP 26: FoundUPS DAE Tokenization](../../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md)
-**Implementation**: [`modules/foundups/simulator/economics/`](../../../modules/foundups/simulator/economics/__init__.py)
+**Status**: Simulator implemented; blockchain activation blocked by open economic and security gates
+**Canonical Spec**: [WSP 26: FoundUPS DAE Tokenization](../../../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md)
+**Implementation**: [`modules/foundups/simulator/economics/`](../../../../modules/foundups/simulator/economics/__init__.py)
+
+## Current qualification status — 2026-10-31
+
+The version/date identify the 2026-02-17 model baseline. Its former Architecture
+Complete/Simulator Operational label was design status; the current header states
+the open activation gates rather than claiming economic completion.
+Follow the [WSP 26 §1.2 simulator-first change contract](../../../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract).
+Only valid behavior with fresh source-bound tests and independent acceptance is
+the implementation reference; existing defects and disputed rules are excluded.
+Activity/mint wording, stage versus continuous release, units, pool denominators,
+fees and decay/burn variants below remain explicit conflicts, not new decisions.
+See the [dated conflict inventory](../../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#5-economic-conflicts-and-0102-decisions).
+Resolve/version changes in the simulator, independently accept them, update the
+affected governing mirrors, then prove chain parity before separate activation.
+No source publication or simulator result grants funding, signing or settlement.
+
+### Security-first status — 2026-11-01
+
+[The current roadmap](../../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#current-sprint-and-blockchain-roadmap--2026-11-01)
+starts with wallet-policy isolation and complete epoch-effect accounting.
+Adoption expands the released ceiling within the intended21M total; work-mint
+capacity subtracts already mined supply. The separate staked F_i counter does
+not prove a combined cap. Units, fees, denominators, funded backing and exits
+remain unresolved; no new asset, schedule, solvency or issuance rule is selected.
+
+### Prospective micro-UPS quantity policy — 2026-11-05
+
+The [B03-P4 preview](../../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p4-prospective-micro-ups-allocation-v1)
+is VERIFIED_SIMULATED: `ups_micro_v1` uses 1,000,000 integer atoms per UPS for
+actual-roster allocation planning. Terminal-lane floors retain R-C without carry.
+Six decimals select quantity/range, not UPS/BTC valuation or redemption; F_i's
+eight-decimal/21M policy remains separate. Native books/v2, staker conversion,
+fees, source backing and durable settlement are not migrated by this preview.
+P3 source delivery closed at PR2300/main 95516e81; P4's delivery gates stay separate.
+
+### Restricted native UPS simulator version — 2026-11-02
+
+[The source-bound B03-P3 decision](../../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p3-exact-native-transfer-v1)
+qualifies opt-in exact native source/recipient/fund transfers or full-epoch refusal.
+Default legacy and F_i mint/release/21M policy stay. A synthetic source losing actual
+posted gains proves no external backing, UPS atom scale, custody or chain settlement.
+Global unit/precision D and full B03/B05 remain open; no implicit migration.
 
 ## Executive Summary
 

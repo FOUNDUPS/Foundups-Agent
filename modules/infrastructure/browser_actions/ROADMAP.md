@@ -17,6 +17,26 @@ Provide a unified, intelligent interface for all platform browser automation, ro
 
 ---
 
+## Manager admission repair — 2026-09-24
+
+The qualified four-outcome gap is repaired in the existing action owner.
+Only fresh, target-matched, currently stored PENDING work can reach Connect.
+All 36 fixed cases pass locally and independently (baseline 11 fail/25 pass),
+including 23 preserved compatibility cases. Manager bookkeeping is unchanged.
+See [test log](tests/TestModLog.md) and the canonical backlog for publication and
+fresh selection. No live delivery, rollback or concurrent exactly-once claim.
+
+## Current bounded checkpoint — 2026-09-23
+
+Requested-note repair 12/P2 passes 23 frozen cases locally and independently
+(baseline 4 fail/19 pass). Add/type now precede one explicit Send; failed preparation
+prevents Send and success credit. No-message fallback/bookkeeping are unchanged.
+The root backlog re-scores manager-result/UI-admission qualification separately.
+[Contract](../../platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-requested-note-repair--2026-09-23).
+
+The sprint map below is historical planning: source such as `action_router.py`
+already exists. Its unchecked boxes are not a verified current completion audit.
+
 ## Sprint Map (Aligned with foundups_vision)
 
 ### Sprint A1: Action Router Foundation

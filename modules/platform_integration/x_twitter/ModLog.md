@@ -2,6 +2,18 @@
 
 ## Latest Changes
 
+### 2026-10-18 — API-only verified station publication
+
+Added `src/verified_x_publisher.py`, called only through the existing UnifiedX
+owner's explicit verified route. Authenticated numeric identity, durable claim,
+numeric create ID and exact author/text readback are required for live success.
+Unknown outcomes retain their claims; known IDs retry readback only. API waits
+are bounded with nonblocking cancellation, and callers must bound socket I/O.
+Package exports are now lazy, preserving API names without browser initialization
+on importing the verified leaf. No browser/simulator fallback or live posting.
+The owning social module's `test_verified_x_publication.py` passed 19 offline
+cases, including denied-I/O real imports, concurrent SQLite claims and timeouts.
+
 ### **V028 - Prevent Chrome :9222 Session Hijack (BrowserManager + dae_name)**
 #### **Change**: Removed the default attempt to attach to the shared Chrome debug port `:9222` and switched to BrowserManager-managed profiles with explicit DAE ownership (`dae_name`).
 #### **Why**: `:9222` is reserved for YouTube Studio engagement; attaching from the X DAE can hijack the active Studio session and break comment processing.

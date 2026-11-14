@@ -1,0 +1,140 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "376628fbcd4f3b36bcb0cba8f06905f68ea035b5"
+  },
+  "execution_id": "HOLOINDEX_QUERY_RUNTIME_BUILDER_AUTHORITY_PHASE2B",
+  "execution_plane": "local_tools_and_wsp00_subagents",
+  "outcome": "completed",
+  "system_verdict": {
+    "slice": "inert_holoindex_query_runtime_builder_component_authority",
+    "component_scaffolding": "verified",
+    "public_candidate_build_and_reproof": "fail_closed_builder_runtime_unbound",
+    "pinned_git_worktree_porcelain": "removed_external_filter_surface",
+    "live_oe_git_proof": "capability_unavailable_expected_skip",
+    "authenticated_builder_producer": false,
+    "candidate_activation": false,
+    "holoindex_a_grade": "blocked",
+    "retrieval_quality_rsi": "not_operational",
+    "doc_index_projection": "targeted_entry_verified_full_generator_timeout",
+    "extension_backend_pin": "source_updated_package_pending",
+    "merged_exact_main_replay": "pending"
+  },
+  "wsp15_allocation": {
+    "receipt_id": "sha256:f65adc74402d6fe07326ae46fc56703f7cf78bbbb98855fc30f992aef9112aa6",
+    "complexity": 5,
+    "importance": 5,
+    "deferability": 5,
+    "impact": 5,
+    "total": 20,
+    "priority": "P0",
+    "reasoning_tier": "ULTRA",
+    "decision": "complete and falsify only inert component authority; keep public build, execution, and promotion unavailable"
+  },
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_83_Documentation_Tree_Attachment_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_87_Code_Navigation_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "WSP_00 detector-backed awakening completed at coherence 0.727 and the strict tracker reported is_zen_compliant=true before this continuation.",
+      "Governed Holo retrieval was CURRENT at exact authority HEAD 376628fbcd4f3b36bcb0cba8f06905f68ea035b5 with no index gap, no reindex, and no authority mutation; generation was sha256:0c23119bf8a6c5d9b18a27a23d00177814d4fd03d55c034429550b931dab28fc.",
+      "Holo results found the exact manifest generator/test and WRE bounded-I/O surfaces but were committed-HEAD-only and noisy for the uncommitted overlay; direct exact-file reads closed that declared retrieval gap.",
+      "Three WSP_00/WSP_97 verifier lanes were used for architecture, security, and test/scale falsification; blockers were repaired rather than waived."
+    ],
+    "research": [
+      "Phase 2A already supplied an inert candidate schema but intentionally rejected public build/reproof because parser and producer execution provenance were absent.",
+      "Existing process-image, composition, dependency inventory, confined-byte reader, Windows stream, and backend-manifest primitives were reused rather than duplicated.",
+      "A caller-supplied Git executable digest is only a pin; durable trust anchor, native loader closure, and authenticated producer provenance require a later sealed child.",
+      "Repository-local filters can be executed by worktree porcelain, so exact bound source bytes versus HEAD are safer and sufficient for this component than a global-clean claim."
+    ],
+    "micro_pass": [
+      "Five builder component suites plus six bounded-I/O cases passed 83 tests with one expected unprovisioned O:/E: Git-image skip; 16 unrelated nodes were deselected.",
+      "The public candidate build/reproof falsifier passed and still requires QUERY_RUNTIME_CANDIDATE_BUILDER_RUNTIME_UNBOUND.",
+      "The opt-in upper-shape tier passed 72,261 packaging rows plus 1,500 Git/source rows in 34.438 seconds with +6 handles and +77,557,760 RSS bytes.",
+      "All five builder production modules are 320-484 lines with maximum functions 24-45 lines; the WRE public wrapper/process pump are 109/143 lines and their largest function is 48 lines."
+    ],
+    "macro_pass": [
+      "Backend manifest check binds 1,378 runtime files at 48a91fa832bd99de90d9580394ac2a5da492a0925aed36b90c3cea7508d3fc1d and all eight independent generator tests pass.",
+      "The canonical test registry is current at 1,631 tests with 268 quarantined; the contract suite is collectable, all 28 registry tests pass, and every new builder suite is projected.",
+      "README and INTERFACE returned to exact base line counts; ROADMAP, ModLogs, test inventories, navigation, assumption audit, registry, manifest, and extension compatibility pin were updated together.",
+      "The full DocDAE cross-reference rebuild timed out after 604 seconds without writing; its exact per-document methods produced and validated the one new entry in the sorted unique 538-document index.",
+      "No query, owner, route, maintenance, Holo replica, dependency installation, queue, external service, or production worker state was changed."
+    ],
+    "hard_think": [
+      "Typed same-interpreter wrappers are structural misuse guards, not authenticated producer capabilities.",
+      "Observed module origins and loader fields bind metadata, not pre-import executed bytes or dynamic/native/subprocess closure.",
+      "Two exact source-binding observations close the reproduced second-origin-pass mutation race but do not prove write denial or ABA resistance.",
+      "A synthetic nine-row packaging fixture and algorithmic 72,261-row soak do not prove a physically materialized source-only packaging runtime.",
+      "The current host cannot earn a public source proof because no independently sealed Git executable is provisioned on O:/E:."
+    ],
+    "dialectic_sweep": [
+      "Keeping git status for a global-clean claim was rejected after a verifier reproduced the repository-configured filter-process execution surface.",
+      "Accepting C:-resident Git or the ambient 42-row packaging installation was rejected because both violate the declared authority boundary.",
+      "Expanding directly to activation was rejected; the smallest safe layer is independently falsifiable inert component evidence with every operational claim false.",
+      "Leaving the 234-line bounded-I/O module was rejected by the registry subsystem's 200-line WSP_62 gate; the process pump was extracted without weakening tests."
+    ],
+    "first_principles": [
+      "Authority requires exact producer identity and bounded observed bytes; deterministic-looking JSON alone grants nothing.",
+      "Only files that are loaded or explicitly required are bound to exact HEAD bytes; the component does not claim the entire worktree or index equals HEAD.",
+      "Every potentially operational claim remains false until a separately authenticated child proves loader, subprocess, determinism, signature, and write-denial closure.",
+      "Offline release-gate work must remain absent from the interactive query hot path."
+    ],
+    "execute": [
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_contract.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_git.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_process.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_source.py",
+      "modules/infrastructure/wre_core/src/wre_git_bounded_io.py",
+      "modules/infrastructure/wre_core/src/wre_git_process_io.py",
+      "scripts/reddog_backend_manifest.json",
+      "WSP_knowledge/WSP_Test_Registry.json",
+      "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_AUTHORITY_ASSUMPTION_AUDIT_PHASE2B.md"
+    ]
+  },
+  "nonclaims": [
+    "No public query-runtime candidate was built, reproof-authorized, materialized, loaded, executed, activated, or routed; both public entry points remain runtime-unbound.",
+    "No global clean worktree/index claim is made and no worktree status, diff, checkout, or content-filter Git surface is used by the pinned authority.",
+    "No native/DLL, dynamic import, subprocess, pre-import, deterministic-effect, signature, empirical write-denial, authenticated provenance, or exact-runtime closure was proved.",
+    "No HoloIndex maintenance, reindex, replica replacement, owner mutation, route mutation, ACL change, queue mutation, or production OpenClaw/Hermes dispatch occurred.",
+    "No HoloIndex A-grade or retrieval-quality RSI promotion is claimed.",
+    "No new VSIX was built, installed, or released in this source transaction; merged exact-main replay and packaging remain later release gates.",
+    "No successful full DocDAE projection is claimed; the validated targeted entry closes this slice while the quadratic full-index path remains recorded scalability debt."
+  ],
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_6",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_62",
+    "WSP_83",
+    "WSP_84",
+    "WSP_87",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/infrastructure/HOLOINDEX_QUERY_RUNTIME_BUILDER_AUTHORITY_WSP15_ALLOCATION_RECEIPT_PHASE2B.json",
+    "docs/audits/infrastructure/HOLOINDEX_QUERY_RUNTIME_BUILDER_AUTHORITY_WSP97_EXECUTION_RECEIPT_PHASE2B.json",
+    "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_AUTHORITY_ASSUMPTION_AUDIT_PHASE2B.md",
+    "docs/doc_index.json",
+    "modules/infrastructure/foundups_mcp_bridge/README.md",
+    "modules/infrastructure/foundups_mcp_bridge/INTERFACE.md",
+    "modules/infrastructure/foundups_mcp_bridge/ROADMAP.md",
+    "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/README.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/TestModLog.md",
+    "modules/infrastructure/wre_core/ModLog.md",
+    "WSP_knowledge/WSP_Test_Registry.json",
+    "scripts/reddog_backend_manifest.json"
+  ]
+}

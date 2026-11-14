@@ -1,1149 +1,365 @@
-# WSP 95: WRE Skills Wardrobe Protocol
+# WSP 95: WRE Skillz Wardrobe Protocol
 
-**Version**: 1.4 (Skill Supply-Chain Security Gate)
-**Date**: 2026-02-07
+**Version**: 2.1 (Admission Receipt Binding)
+**Date**: 2026-08-26
 **Status**: Active
-**Authority**: 0102 + User Specification
-**Compliance**: WSP 3 (Module Organization), WSP 77 (Agent Coordination), WSP 50 (Pre-Action), WSP 22 (ModLog)
+**Authority**: WSP framework under 012 sovereignty
+**Relationships**: WSP 3, WSP 22, WSP 46, WSP 48, WSP 50, WSP 62, WSP 71, WSP 73, WSP 77, WSP 84, WSP 97
 
 ---
 
-## 2026-02-19 Implementation Alignment Addendum
+## 1. Purpose
 
-This addendum is normative for current WRE runtime behavior:
+WSP 95 governs how task-specific Skillz are discovered, admitted, executed,
+measured, evolved, and considered for production. A Skillz document is an
+instruction artifact. It is not code authority, effect authority, an
+authenticated outcome, or proof of recursive self-improvement.
 
-- **File preference and compatibility**:
-  - Canonical skill filename is `SKILLz.md`.
-  - Runtime loader must support fallback to legacy `SKILL.md` when `SKILLz.md` is absent.
-- **Discovery path normalization**:
-  - Discovery treats both `.../skills/...` and `.../skillz/...` as production wardrobes.
-  - Path normalization must be cross-platform (`/` and `\` separators).
-- **Loader resilience requirement**:
-  - Missing skill registry/file in production must not hard-crash orchestration loops.
-  - Runtime must degrade to deterministic fallback instructions and continue with explicit telemetry.
-- **Pattern-memory isolation requirement**:
-  - Shared singleton memory is permitted for default production DB.
-  - Explicit DB paths (especially test runs) must be isolated to prevent cross-run contamination.
+The Wardrobe pattern distributes Skillz beside the module that owns them while
+the WRE registry provides exact discovery and admission metadata. This supports
+many FoundUps without granting filesystem location or model output implicit
+authority.
 
-These rules align wardrobe protocol text with deployed WRE behavior and test gates.
+This version replaces the contradictory fallback, automatic-promotion,
+automatic-rollback, and model-as-verifier wording formerly retained in this
+protocol. Git history preserves that historical design; it is not active
+runtime authority.
 
 ---
 
-## First Principles
+## 2. Canonical terms
 
-### What Is a Skill?
-
-A **skill** is a discrete, task-specific instruction set that tells an AI agent **how to act** when performing a specific task.
-
-**Not Documentation** - Skills are **executable instructions**, like a recipe or playbook.
-
-**Not Monolithic Prompts** - Skills are **step-by-step reasoning chains** with validation at each step (Micro Chain-of-Thought paradigm).
-
-**Trainable Weights** - Skills evolve through feedback loops, analogous to neural network parameters:
-- Instructions = weight values
-- Pattern fidelity = loss function
-- Qwen variations = gradient descent
-- A/B testing = validation
-- Version update = weight checkpoint
+- **Skillz**: a task-specific instruction document named `SKILLz.md`.
+- **Legacy Skill**: a `SKILL.md` accepted only when `SKILLz.md` is absent.
+- **Wardrobe**: the distributed set of module-owned Skillz directories.
+- **Registry**: `skills_registry_v2.json`, whose checkout-relative location
+  is the only generic WRE discovery authority.
+- **Programmatic executor**: an optional adjacent `executor.py`.
+- **Structural fidelity**: a shape/completeness signal. It is not correctness.
+- **Effect receipt**: a typed record declared by an admitted programmatic
+  executor for an attempted effect. Its presence is necessary but does not by
+  itself authenticate the effect outside the executor trust boundary.
+- **Outcome quality**: independently evaluated quality evidence. It is unknown
+  until an authenticated evaluator supplies it.
+- **Candidate**: a non-production variation awaiting independent verification.
+- **Production admission**: an explicit authority decision bound to an exact
+  artifact, runtime, evidence set, and rollback plan.
 
 ---
 
-### Micro Chain-of-Thought Paradigm
+## 3. Lifecycle
 
-**Key Innovation**: Skills are NOT single-shot prompts. They are **multi-step reasoning chains** where each step is validated before proceeding to the next.
+| State | Meaning | Runtime effect authority |
+|---|---|---|
+| `prototype` | Design and local evaluation | None |
+| `staged` | Controlled evaluation with evidence collection | None by state alone |
+| `candidate_ready` | A/B or research evidence nominated a candidate | None |
+| `production` | Registry/frontmatter state eligible for runtime admission | Conditional on every runtime gate |
 
-**Architecture**:
-```yaml
-Step 1: Strategic Analysis (Qwen)
-  ↓ Gemma validates: Did Qwen follow instructions?
-Step 2: Decision Logic (Qwen)
-  ↓ Gemma validates: Is the decision correct?
-Step 3: Action Generation (Qwen)
-  ↓ Gemma validates: Does action match decision?
-Step 4: Execution Planning (Qwen)
-  ↓ Gemma validates: Is the plan complete?
+A lifecycle label never proves safety, correctness, or promotion authority.
+Movement between locations is an administrative operation, not promotion
+evidence. HoloIndex discovery or reindexing never grants runtime authority.
+
+### 3.1 Promotion authority
+
+Production admission requires all of the following:
+
+1. exact Skillz and optional executor digests;
+2. independently verified held-out outcome evidence;
+3. regression and security evidence;
+4. an exact runtime/model/tool binding;
+5. an explicit authorized promotion receipt;
+6. a tested rollback capability;
+7. immutable lineage from proposer through verifier and promoter.
+
+The proposer/author cannot be the sole verifier or promoter. Model consensus,
+structural fidelity, A/B statistics, or PatternMemory state cannot replace the
+independent authority chain. 012 remains sovereign.
+
+`PatternMemory.promote_variation()` is a legacy compatibility name that fails
+closed until the independent signed promoter exists.
+
+---
+
+## 4. Registry and source contract
+
+### 4.1 Registry requirements
+
+Every executable registry entry must contain a checkout-relative module path.
+Absolute paths, drive-qualified paths, traversal, links, junctions, and reparse
+points fail admission.
+
+For production entries, registry values and Skillz frontmatter must agree
+exactly for:
+
+- `name`;
+- `version`;
+- `intent_type`;
+- `promotion_state: production`.
+
+Provider-neutral role Skillz must also use an allowlisted schema and exact
+logical-role bindings. Model names in prose, memory, or Skillz content are not
+runtime authority.
+
+JSON command/action configurations are not Skillz. They must be invoked by
+their owning handler and must not be registered as executable WRE Skillz.
+
+### 4.2 Source files
+
+The canonical source is:
+
+```text
+modules/<domain>/<module>/skillz/<skill_name>/SKILLz.md
 ```
 
-**Why This Works**:
-- **Gemma (270M)**: Fast pattern validation (<10ms per check)
-- **Qwen (1.5B+)**: Strategic thinking in focused steps
-- **Each step validated**: High overall fidelity
-- **Failures isolated**: Easy to debug and evolve
+`SKILL.md` is a compatibility fallback only when `SKILLz.md` is absent.
+An optional programmatic executor must be exactly:
 
-**Example - qwen_gitpush Skill** (see [modules/infrastructure/git_push_dae/skills/qwen_gitpush/SKILL.md](../../../modules/infrastructure/git_push_dae/skills/qwen_gitpush/SKILL.md)):
-
-**Step 1: Analyze Git Diff** (Qwen 200-500ms)
-```yaml
-Input: git_diff, files_changed, lines_added/deleted
-Output: {change_type, summary, critical_files, confidence}
-Gemma Validation: All required fields present?
+```text
+modules/<domain>/<module>/skillz/<skill_name>/executor.py
 ```
 
-**Step 2: Calculate WSP 15 MPS Score** (Qwen 100-200ms)
-```yaml
-Formula: MPS = Complexity + Importance + Deferability + Impact
-Output: {complexity: 3, importance: 4, deferability: 3, impact: 4, mps_score: 14, priority: "P1"}
-Gemma Validation: Sum correct? Priority mapped correctly?
+Repository-wide same-name search cannot substitute a different executor.
+
+### 4.3 Manifest and scanner gate
+
+Every production Skillz directory requires `SKILL_MANIFEST.json`. The
+manifest binds every present `SKILLz.md`, legacy `SKILL.md`, and
+`executor.py` by SHA-256.
+
+Before execution, WRE must:
+
+1. verify exact production registry/frontmatter agreement;
+2. resolve the registered Skillz inside the active checkout;
+3. reject link/reparse components before resolution;
+4. verify the manifest and unexpected-file set;
+5. execute the configured skill scanner in required/enforced mode;
+6. bind any scanner cache to the exact current bundle fingerprint;
+7. prove the bundle fingerprint is unchanged after scanning;
+8. bind dispatch to that exact admitted fingerprint and captured executor bytes.
+
+Disabling either production scanner requirement or verdict enforcement is a
+misconfiguration and must fail admission closed.
+
+A TTL-only path cache is insufficient. A changed Skillz, executor, or manifest
+must produce a different fingerprint and a new admission decision.
+
+---
+
+## 5. Execution truth
+
+### 5.1 Fail-closed loading
+
+Missing, malformed, retired, unhealthy, unregistered, unreadable, or
+non-production Skillz fail that execution closed without crashing the
+orchestration process.
+
+Synthetic fallback instructions cannot create a successful outcome. A cache
+hit cannot bypass a fresh hygiene decision, and cached content must be bound to
+the current source digest.
+
+### 5.2 Local model boundary
+
+Local model inference produces a proposal only. Non-empty text, structured
+text, refusal text, or apparent completion language is not effect evidence.
+Unsupported agents, unavailable model paths, import failures, initialization
+failures, and generation exceptions return stable typed failures without raw
+exception text.
+
+A proposal may inform a later governed action. It cannot be stored as a
+successful effect execution.
+
+### 5.3 Programmatic executor boundary
+
+An executor is eligible only when it is:
+
+- adjacent to the exact registry-bound Skillz document;
+- a regular non-link/non-reparse file;
+- included in the adjacent manifest;
+- read with the manifest-bound digest;
+- dispatched only after production admission and scanner success;
+- captured with the exact bundle whose fingerprint passed admission.
+
+Executor results require an exact built-in Boolean `success`. Truthy strings
+and integers are malformed. A successful result also requires a non-empty list
+of typed effect receipts containing at least `receipt_id` and `effect_type`.
+Missing/malformed results, reported failure, import/compile failure, and
+exceptions remain failures. Raw exception text must not enter logs, returned
+records, PatternMemory, or continuity breadcrumbs.
+
+### 5.4 PatternMemory and fidelity
+
+Structural fidelity answers only whether expected fields or patterns were
+present. It cannot establish:
+
+- effect success;
+- outcome quality;
+- semantic correctness;
+- non-regression;
+- security;
+- production authority.
+
+Post-dispatch outcomes may be stored with actual effect success. Failed
+execution has `outcome_quality = 0.0`. Successful execution also retains
+`outcome_quality = 0.0` until an independently authenticated evaluator binds
+stronger evidence. Admission failures may be recorded by a separate typed audit
+surface; absence from PatternMemory is not success.
+
+### 5.5 ReAct acceptance
+
+A ReAct attempt exposes two separate facts:
+
+- `execution_success`: an admitted executor supplied effect evidence;
+- `success`: execution succeeded and structural fidelity met the requested
+  acceptance threshold.
+
+Exhausting retries with low fidelity returns `success: false`, even when the
+last underlying executor attempt succeeded.
+
+### 5.6 A/B boundary
+
+Generic WRE runtime A/B selection is blocked until the treatment content or
+executable is bound to an exact immutable candidate digest and runtime receipt.
+Control content must never be recorded as treatment evidence.
+
+Generic evolution may store a proposed variation, but it must not automatically
+schedule an unbound runtime test. Scheduling is an explicit governed action.
+Each named arm must meet its own sample target, and every outcome requires an
+exact Boolean. Closing a test durably records only its statistical label.
+
+A/B statistics may call `stage_variation_candidate()` to set
+`candidate_ready`. They must not update the production artifact, activate
+recall, reindex HoloIndex, authorize effects, or emit a promotion claim.
+
+### 5.7 Legacy experimental paths
+
+Generic CodeAct execution is a prototype and must fail closed until it uses the
+same production admission, immutable receipt, and effect-result contract.
+Legacy direct Agentic RAG access is not an authorized Holo query route and must
+remain disabled. Production retrieval requires the generation-bound read-only
+owner service; an unavailable or stale owner route fails closed.
+
+---
+
+## 6. WRE, RSI, and RedDog
+
+WRE is the intended recursive-improvement control plane. WSP 95 supplies one
+governed learning boundary inside it:
+
+```text
+admit Skillz
+  -> execute exact authority
+  -> record execution truth
+  -> evaluate independently
+  -> nominate candidate
+  -> verify held-out/regression/security evidence
+  -> authorize promotion
+  -> bind production artifact/runtime
+  -> monitor and retain rollback
 ```
 
-**Step 3: Generate Semantic Commit Message** (Qwen 300-500ms)
-```yaml
-Format: <type>(<scope>): <subject>\n\n<body>\n\nWSP: <wsps>\nMPS: <priority> (<score>)
-Output: "feat(gitpush): Add autonomous commit decision via WSP 15 MPS..."
-Gemma Validation: Message follows format? Matches diff content?
-```
+Only the first three capabilities exist in the generic legacy path.
+Candidate storage exists, but governed end-to-end promotion does not. Therefore
+generic WRE must not claim production RSI.
 
-**Step 4: Decide Push Action** (Qwen 50-100ms)
-```yaml
-Decision Matrix: P0 → push_now, P1 → push if >10 files OR >1hr, etc.
-Output: {action: "push_now", reason: "MPS P1 + 14 files + 90min elapsed"}
-Gemma Validation: Action matches MPS threshold logic?
-```
-
-**Total Time**: ~1 second
-**Fidelity Target**: >90% (each step validated independently)
-
-**Benefits Over Monolithic Prompts**:
-1. **Isolation**: Failure in Step 2 doesn't invalidate Step 1's analysis
-2. **Validation**: Gemma checks each step's output before next step begins
-3. **Evolution**: Can improve individual steps without rewriting entire skill
-4. **Debugging**: Know exactly which step failed (not generic "skill failed")
-5. **Performance**: Small, focused reasoning at each step (not one giant prompt)
-
-**Implementation Pattern**:
-```python
-# Skill execution with micro chain-of-thought
-async def execute_skill(skill: Skill, context: dict):
-    results = {}
-
-    for step_num, step in enumerate(skill.steps, 1):
-        # Qwen executes step
-        qwen_output = await qwen.execute(step.instructions, context)
-        results[f"step_{step_num}"] = qwen_output
-
-        # Gemma validates step output
-        validation = await gemma.validate(qwen_output, step.validation_pattern)
-
-        if not validation.passed:
-            # Step failed validation - stop here
-            return SkillResult(
-                success=False,
-                failed_at_step=step_num,
-                validation_errors=validation.errors,
-                partial_results=results
-            )
-
-        # Pass validated output to next step's context
-        context[f"step_{step_num}_output"] = qwen_output
-
-    # All steps validated successfully
-    return SkillResult(success=True, results=results)
-```
-
-**Reference Implementation**: [qwen_gitpush/SKILL.md](../../../modules/infrastructure/git_push_dae/skills/qwen_gitpush/SKILL.md) (3,500+ words, 4-step chain-of-thought with WSP 15 MPS scoring)
-
-### Core Axiom: "The Wardrobe Tells Agents How to Act"
-
-**Wardrobe** = Collection of skills an agent can "wear" for different tasks.
-
-Just as humans wear different outfits for different occasions:
-- Business suit → Professional meeting
-- Lab coat → Scientific work
-- Chef's apron → Cooking
-
-AI agents "wear" different skills:
-- `youtube_spam_detection` → Gemma moderates chat
-- `youtube_banter_response` → Qwen generates creative responses
-- `wsp_compliance_check` → Qwen validates code
-
-**The skill defines behavior. The agent executes.**
+RedDog may use WRE to plan and supervise work, OpenClaw to apply governed policy,
+and Hermes to execute bounded leaf work. WSP 95 grants none of those systems
+authority merely because a Skillz document names them.
 
 ---
 
-## Architecture: Prototype Centrally, Deploy Modularly (Occam's Razor)
+## 7. Scale and modularity
 
-### The Scalability Problem
+Wardrobes are module-local LEGO blocks. A registry may index hundreds of
+Skillz across hundreds of FoundUps, but runtime execution must remain
+tenant-scoped and content-bound.
 
-**Central Repository Breaks at Scale**:
-```
-100 modules × 5 skills each = 500 skills
-Central .claude/skills/ = 500 directories (CHAOS, flat hell)
-Distributed modules/*/skills/ = 5 per module (MANAGEABLE, cohesive)
-```
+Scaling requirements:
 
-**First Principle**: Skills belong WITH the modules they serve (cohesion, not centralization).
+- metadata discovery before full-content loading;
+- deterministic registry lookup, never repository-wide executor search;
+- content-fingerprint scanner caches and collision-free per-bundle reports;
+- no global mutable production promotion state;
+- per-FoundUp namespaces and work-item lineage;
+- bounded queues, leases, retries, and independent verification under WSP 77;
+- observable typed failures under WSP 91.
 
-**Occam's Razor**: If code lives in `modules/communication/livechat/src/`, then skills for that code live in `modules/communication/livechat/skills/`.
-
----
-
-### Prototype-Then-Deploy Architecture
-
-**Phase 1: 0102 Testing Environment (`.claude/skills/[name]_prototype/`)**
-
-**Purpose**: 0102 tests skills using Claude Code before production deployment
-
-**Location**: `.claude/skills/[skill_name]_prototype/SKILL.md`
-
-**Execution Context**: Claude Code skill system (0102's testing sandbox)
-
-**Agents in Testing**:
-- **Primary**: Claude Sonnet 4.5 (0102) validates skill
-- **Secondary**: Gemma/Qwen CAN execute via Claude Code (for testing compatibility)
-
-**Entry Point**: Claude Code's skill auto-discovery mechanism
-
-**Lifecycle**:
-1. Qwen generates baseline `SKILL.md` template
-2. 0102 manually tests using Claude Code
-3. 0102 runs benchmark test cases
-4. Gemma/Qwen can be invoked via Claude Code for compatibility testing
-5. If valid, promote to staged for extended testing
-
-**Why Test Here?**
-- Claude Code provides skill execution environment for 0102
-- Fast iteration without production deployment overhead
-- Safe sandbox for experimental skills
-- 0102 can validate before deploying to native agents
-
-**CRITICAL**: This is 0102's **testing environment**, NOT production for native agents.
+WSP 95 does not implement the hundred-agent scheduler. WSP 46, WSP 77,
+WSP 80, WSP 98, and WSP 104 own those surrounding contracts.
 
 ---
 
-**Phase 2: 0102 Staged Testing (`.claude/skills/[name]_staged/`)**
+## 8. Current implementation truth
 
-**Purpose**: Extended 0102 testing with metrics collection before production
-
-**Location**: `.claude/skills/[skill_name]_staged/SKILL.md`
-
-**Execution Context**: Still Claude Code (0102's testing environment)
-
-**Agents in Testing**:
-- **Primary**: 0102 executes via Claude Code
-- **Secondary**: Gemma/Qwen execute via Claude Code (testing only)
-
-**Metrics Tracking**:
-- Pattern fidelity (0102 manually validates, Gemma scores)
-- Outcome correctness (0102 reviews decisions)
-- Performance timing (execution speed measured)
-
-**Lifecycle**:
-1. Skill promoted from prototype after 0102 approval
-2. Extended testing with real-world-like workloads
-3. Metrics collected to JSON (append-only)
-4. After ≥100 test executions with ≥90% fidelity, ready for production
-5. If fidelity <85%, rollback to prototype for fixes
-
-**Why Stage Here?**
-- 0102 validates skill stability before production deployment
-- Metrics collected in controlled environment
-- Easy rollback to prototype if issues found
-- Final validation before native agent deployment
-
-**CRITICAL**: This is still 0102's **testing environment**, NOT production.
+| Capability | State |
+|---|---|
+| Checkout-local registered Skillz resolution | Implemented |
+| Production registry/frontmatter admission | Implemented |
+| Hygiene before digest-bound cache return | Implemented |
+| Manifest/scanner bundle admission | Implemented |
+| Scanner receipt-bound captured executor dispatch | Implemented |
+| Exact Boolean result and typed effect-receipt validation | Implemented |
+| Local model proposal-only boundary | Implemented |
+| Post-dispatch failure propagation into PatternMemory | Implemented |
+| ReAct success/fidelity separation | Implemented |
+| `candidate_ready` storage primitive | Implemented |
+| Generic CodeAct execution | Prototype; runtime blocked |
+| Governed Holo owner retrieval adapter | Not implemented; direct path blocked |
+| Authenticated A/B candidate/runtime binding | Not implemented; runtime blocked |
+| Independent durable production promoter | Not implemented |
+| Automatic artifact update and governed rollback | Not implemented |
+| HoloIndex promotion activation | Not implemented |
+| Production end-to-end RSI canary | Not proven |
 
 ---
 
-**Phase 3: Production Deployment (`modules/[domain]/[block]/skills/[name]/`)**
+## 9. Verification requirements
 
-**Purpose**: Native Gemma/Qwen/Grok/UI-TARS execution in production DAEs
+The owning module tests must prove at minimum:
 
-**Location**: `modules/[domain]/[block]/skills/[skill_name]/SKILL.md`
+- retired/unhealthy cache poisoning fails;
+- unregistered and non-production Skillz fail;
+- registry/frontmatter drift fails;
+- link/reparse and checkout escape paths fail;
+- manifests include adjacent executors and reject digest mismatch;
+- mutation during scanning or between scan and dispatch fails;
+- truthy-string success fails;
+- success without typed effect receipts fails;
+- executor exceptions do not leak exception text;
+- local model failures return stable failures;
+- local model text remains proposal-only;
+- structural fidelity cannot create outcome quality;
+- low-fidelity ReAct exhaustion returns failure;
+- active unbound A/B runtime selection fails closed;
+- framework and knowledge copies of WSP 95 are byte-identical.
 
-**Execution Context**: Production DAEs (Gemma/Qwen/Grok/UI-TARS native execution)
-
-**Agents**: Qwen 1.5B, Gemma 3 270M, Grok (xAI), UI-TARS 1.5 7B
-
-**Entry Point**: `WRESkillsLoader` (progressive disclosure + dependency injection)
-
-**Lifecycle**:
-1. Skill promoted from staged after passing 0102's validation gates
-2. **MOVED** from `.claude/skills/*_staged/` to `modules/[domain]/[block]/skills/[name]/`
-3. File deleted from `.claude/skills/` (staged location)
-4. WRE loader injects into native agent prompts at runtime
-5. Gemma scores pattern fidelity after every production execution
-6. Qwen generates variations if fidelity drops below 90%
-7. Best variation becomes new version (checked into version control)
-
-**Why Deploy to Modules?**
-- **Production Context**: Native agents execute from module location
-- **Cohesion**: Skills live WHERE THEY'RE USED
-- **Scalability**: 5 skills per module (not 500 in one directory)
-- **Modularity**: Module imports work naturally with co-located skills
-- **Discovery**: HoloIndex indexes module structure (already does!)
-- **WSP 3 Compliance**: Domain → Block → Cube pattern (skills/ is part of block)
-
-**CRITICAL**: This is where **production native agents execute skills**, not `.claude/skills/`.
+Tests must isolate `TMP`, `TEMP`, `FOUNDUPS_DB_PATH`, pattern-memory DBs,
+pytest base temp, and pytest cache to approved non-production locations.
 
 ---
 
-### Real-World Example: Unicode Daemon Monitor
+## 10. Documentation and change control
 
-**Prototype Phase**:
-```
-.claude/skills/unicode_daemon_monitor_prototype/SKILL.md
-- 0102 creates initial version
-- Tests with manual daemon output
-- Validates fix patterns work
-- Multi-agent testing (0102, QWEN, Gemma)
-```
+Any runtime behavior change must update the owning README, INTERFACE, ROADMAP,
+ModLog, tests README, and TestModLog as applicable. Framework and knowledge
+copies of WSP 95 must remain byte-identical under WSP 32.
 
-**Staged Phase**:
-```
-.claude/skills/unicode_daemon_monitor_staged/SKILL.md
-- Promoted after 0102 approval
-- Live monitoring of YouTube daemon
-- Gemma scores: 97% fidelity (145/150 executions)
-- Performance: <30s fix cycle (baseline: 15-30min manual)
-- Ready for production promotion
-```
-
-**Production Phase**:
-```
-modules/communication/livechat/skills/unicode_daemon_monitor/SKILL.md
-- MOVED from staged (not copied)
-- Lives with livechat module (cohesion)
-- Native QWEN/Gemma execution
-- Full integration with chat_sender, message_processor
-- Version controlled with module code
-```
-
-**Why This Works**:
-- Prototype: Fast iteration, no module overhead
-- Staged: Real-world testing, metrics validation
-- Production: Module cohesion, scalable organization
+WSP 62 applies to runtime and documentation. A candidate cannot authorize its
+own exemption. A touched hard-limit file must be reduced below the limit or use
+an exemption already present at the exact comparison base.
 
 ---
 
-## Occam's Razor: Why Three Phases?
-
-**Question**: Why not just develop directly in `modules/*/skills/`?
-
-**Answer**: Separation of concerns + risk management.
-
-| Aspect | Prototype | Staged | Production |
-|--------|-----------|--------|------------|
-| **Location** | `.claude/skills/*_prototype/` | `.claude/skills/*_staged/` | `modules/[domain]/[block]/skills/` |
-| **Execution Context** | Claude Code (0102 testing) | Claude Code (0102 testing) | Production DAEs (native agents) |
-| **Purpose** | Initial testing by 0102 | Extended testing by 0102 | Native agent execution |
-| **Primary Agent** | 0102 via Claude Code | 0102 via Claude Code | Gemma/Qwen/Grok/UI-TARS |
-| **Secondary Agents** | Gemma/Qwen via Claude Code | Gemma/Qwen via Claude Code | None (native only) |
-| **Risk** | High (experimental) | Medium (testing) | Low (validated) |
-| **Metrics** | Manual observation | Automated collection | Automated + evolution |
-| **Rollback** | Delete | To prototype | To staged |
-| **Scope** | Central (0102 sandbox) | Central (0102 sandbox) | Distributed (module cohesion) |
-
-**First Principle**: Test in 0102's sandbox (`.claude/skills/` via Claude Code), deploy to production modules (`modules/*/skills/` for native agents).
-
-**Occam's Razor**: Don't mix execution contexts. 0102 tests via Claude Code. Native agents execute from modules.
-
----
-
-## Skills Directory Structure (WSP 3 Integration)
-
-### Standard Module with Skills
-
-```
-modules/[domain]/[block]/
-├── src/                          # The Cube (implementation)
-│   ├── __init__.py
-│   └── *.py
-├── skills/                       # The Wardrobe (AI instructions)
-│   ├── [skill_name]/
-│   │   ├── SKILLz.md             # Instructions (YAML + Markdown) - Note the 'z'!
-│   │   ├── versions/
-│   │   │   ├── v1.0_baseline.md
-│   │   │   ├── v1.1_improved.md
-│   │   │   └── v1.2_optimized.md
-│   │   ├── metrics/              # Pattern fidelity scores
-│   │   │   └── fidelity.json
-│   │   ├── variations/           # A/B test candidates
-│   │   │   ├── var_a.md
-│   │   │   └── var_b.md
-│   │   └── CHANGELOG.md          # Evolution rationale
-│   └── ...                       # Additional skills
-├── tests/
-├── docs/
-├── INTERFACE.md
-├── README.md
-├── ModLog.md
-└── requirements.txt
-```
-
-**Compliance**: WSP 3 (Module Organization) mandates `skills/` directory at block level.
-
----
-
-## SKILLz.md Format Specification
-
-> **Why "SKILLz"?** The 'z' suffix makes skill files immediately recognizable as FoundUps/WRE agent instructions. When you see `SKILLz.md`, you know it's a recipe for AI, not documentation.
-
-### Structure
-
-```yaml
----
-# Metadata (YAML Frontmatter)
-name: skill_name_intent_type
-description: One-line description of task
-version: 1.0_production
-author: qwen_baseline_generator | 0102 | qwen_variation_generator
-created: 2025-10-20
-agents: [primary_agent, fallback_agent]
-primary_agent: gemma | qwen | grok | ui-tars
-intent_type: CLASSIFICATION | DECISION | GENERATION | TELEMETRY
-promotion_state: prototype | staged | production
-pattern_fidelity_threshold: 0.90
-test_status: passing | failing | needs_validation
-
-# Dependencies
-dependencies:
-  data_stores:
-    - name: youtube_telemetry_store
-      type: sqlite
-      path: modules/communication/livechat/src/youtube_telemetry_store.py
-  mcp_endpoints:
-    - endpoint_name: holo_index
-      methods: [semantic_search, wsp_lookup]
-  throttles:
-    - name: youtube_api_quota
-      max_rate: 10000_units_per_day
-      cost_per_call: 5_units
-  required_context:
-    - last_100_messages: "Recent chat message history"
-    - user_message_frequency: "Rate limiting data"
-
-# Metrics Configuration
-metrics:
-  pattern_fidelity_scoring:
-    enabled: true
-    frequency: every_execution
-    scorer_agent: gemma
-    write_destination: modules/infrastructure/wre_core/recursive_improvement/metrics/[skill_name]_fidelity.json
-  promotion_criteria:
-    min_pattern_fidelity: 0.90
-    min_outcome_quality: 0.85
-    min_execution_count: 100
-    required_test_pass_rate: 0.95
----
-
-# [Skill Name]
-
-**Purpose**: Concise description of what this skill accomplishes
-
-**Intent Type**: [CLASSIFICATION | DECISION | GENERATION | TELEMETRY]
-
-**Agent**: [gemma | qwen | grok | ui-tars]
-
----
-
-## Task
-
-[1-2 paragraph description of the task this AI performs]
-
-## Instructions (For AI Agent)
-
-### 1. [INSTRUCTION_NAME]
-**Rule**: IF [condition] THEN [action]
-**Expected Pattern**: [pattern_name]=True
-
-**Steps**:
-1. [Step 1]
-2. [Step 2]
-3. If [condition] → decision="X", reason="Y"
-4. Log: `{"pattern": "[pattern_name]", "value": true, ...}`
-
-**Examples**:
-- ✅ [Positive example that should pass]
-- ❌ [Negative example that should fail]
-
-### 2. [NEXT_INSTRUCTION]
-[... repeat pattern ...]
-
----
-
-## Expected Patterns Summary
-
-Pattern fidelity scoring expects these patterns logged:
-
-```json
-{
-  "execution_id": "exec_001",
-  "patterns": {
-    "pattern_1_executed": true,
-    "pattern_2_executed": true,
-    "pattern_3_executed": false
-  }
-}
-```
-
-**Fidelity Calculation**: `(patterns_executed / total_patterns)`
-
----
-
-## Benchmark Test Cases
-
-### Test Set 1: [Category] (N cases)
-1. Input: `[input]` → Expected: `[output]` (Reason: [why])
-2. Input: `[input]` → Expected: `[output]` (Reason: [why])
-...
-
-**Total**: N test cases across M categories
-
----
-
-## Success Criteria
-
-- ✅ Pattern fidelity ≥ 90%
-- ✅ Outcome quality ≥ 85%
-- ✅ Zero false negatives on critical decisions
-- ✅ False positive rate < 5%
-```
-
-**Compliance**: Format based on Anthropic Skills specification + WRE extensions
-
----
-
-## Mandatory Skill Safety Gate (Supply Chain + Runtime)
-
-All skills entering staged or production must pass automated scanner checks.
-
-**Minimum required policy**:
-- Scanner runs before every promotion gate decision.
-- Default posture is fail-closed when scanner is unavailable.
-- Promotion is blocked when findings exceed configured severity threshold.
-- Runtime mutating routes execute cached preflight scans with bounded TTL.
-- Every block/allow decision is auditable and linked to the skill artifact version.
-
-**Reference implementation target**:
-- Scanner CLI: `skill-scanner` (Cisco AI Skill Scanner or equivalent approved tool)
-- Threshold default: `medium`
-- Required mode default: enabled
-- Enforced mode default: enabled
-
----
-
-## Promotion Lifecycle (3 States)
-
-### State 1: Prototype (`.claude/skills/[skill_name]_prototype/`)
-
-**Purpose**: 0102 manual validation
-
-**Requirements**:
-- Baseline `SKILL.md` generated by Qwen
-- Benchmark test cases defined
-- 0102 executes tests manually
-
-**Promotion Gate**: prototype → staged
-- ✅ Pattern fidelity ≥ 90% across all benchmark tests
-- ✅ Outcome quality ≥ 85%
-- ✅ Zero critical false negatives
-- ✅ False positive rate < 5%
-- ✅ WSP 50 approval (no duplication)
-- ✅ Test coverage complete
-- ✅ Dependencies validated
-- ✅ Security reviewed
-- Skill scanner pass (severity <= policy threshold; required mode enforced)
-- ✅ 0102 (AI supervisor) approval record in database
-
-**Automation**: None (manual validation only)
-
----
-
-### State 2: Staged (`.claude/skills/[skill_name]_staged/`)
-
-**Purpose**: Live testing with automated metrics collection
-
-**Requirements**:
-- Promoted from prototype
-- Automated metrics enabled
-- Gemma pattern fidelity scoring active
-
-**Promotion Gate**: staged → production
-- ✅ Sustained pattern fidelity ≥ 90% over 100 executions
-- ✅ Sustained outcome quality ≥ 85% over 100 executions
-- ✅ Zero regressions vs prototype baseline
-- ✅ No critical failures (exceptions)
-- ✅ Gemma validation: Consistent patterns
-- ✅ Production readiness confirmed
-- ✅ Integration approved
-- ✅ Monitoring configured
-- ✅ Rollback plan tested
-- ✅ Documentation updated
-- Skill scanner pass (severity <= policy threshold; required mode enforced)
-- ✅ 0102 (AI supervisor) approval record in database
-
-**Automation**:
-- Gemma scores every execution
-- Qwen reviews daily
-- SQLite ingestion hourly
-
----
-
-### State 3: Production (`modules/[domain]/[block]/skills/[skill_name]/`)
-
-**Purpose**: Native Qwen/Gemma/Grok/UI-TARS execution in production
-
-**Requirements**:
-- Promoted from staged
-- **MOVED** to module's `skills/` directory (not copied - file deleted from `.claude/skills/*_staged/`)
-- WRE loader integration complete
-- HoloIndex re-indexed to reflect new location
-
-**Promotion Process**:
-```bash
-# Executed by skills_registry_v2.py::promote_skill()
-1. Check promotion gate criteria (≥100 executions, ≥90% fidelity)
-2. Run skill scanner and validate severity threshold policy
-3. Verify human approval exists in database
-4. MOVE SKILL.md from .claude/skills/[name]_staged/ to modules/[domain]/[block]/skills/[name]/
-5. Update skills_registry.json (promotion_state: "production")
-6. Trigger HoloIndex re-index
-7. Update ModLog with promotion event
-8. Append promotion_event to metrics JSON
-```
-
-**Rollback Triggers** (Automated):
-- Pattern fidelity < 85% (sustained over 10 executions)
-- Outcome quality < 80% (sustained)
-- Exception rate > 5%
-- Dependency failure
-- Execution time > 3x baseline
-- Skill scan result exceeds policy threshold
-- Skill scanner unavailable while required mode is enabled
-
-**Rollback Process**:
-```bash
-# Executed by skills_registry_v2.py::rollback_skill()
-1. MOVE SKILL.md from modules/[domain]/[block]/skills/[name]/ to .claude/skills/[name]_staged/
-2. Update skills_registry.json (promotion_state: "staged")
-3. Trigger HoloIndex re-index
-4. Update ModLog with rollback event (reason, trigger metric)
-5. Append rollback_event to metrics JSON
-```
-
-**Automation**:
-- Gemma scores every execution
-- Qwen reviews weekly
-- Automatic rollback on threshold violations
-- Runtime preflight skill scan with TTL-bounded cache
-- HoloIndex re-indexed on state changes
-- ModLog updated automatically
-
----
-
-## Agent Specialization (WSP 77 Integration)
-
-| Agent | Role | Skill Types | Example Skills |
-|-------|------|-------------|----------------|
-| **Gemma 3 270M** | Fast classification, pattern validation | CLASSIFICATION | youtube_spam_detection, youtube_toxic_filtering, youtube_message_classification |
-| **Qwen 1.5B** | Strategic planning, coordination | DECISION, GENERATION, TELEMETRY | youtube_channel_prioritization, youtube_banter_response, wsp_compliance_check |
-| **Grok (xAI)** | Creative generation, analysis | GENERATION | social_content_generation, log_analysis_diagnosis, hashtag_optimization |
-| **UI-TARS 1.5 7B** | Browser automation, visual tasks | DECISION | browser_automation_scheduling, form_field_detection |
-
-**Principle**: Each agent has specialized capabilities. Skills are assigned to agents based on intent type and task requirements.
-
-**Fallback**: Skills can specify fallback agents (e.g., `primary: gemma, fallback: qwen` for toxic filtering escalation).
-
----
-
-## Pattern Fidelity Scoring (Gemma Validation)
-
-### Concept
-
-**Pattern fidelity** = How well the agent followed the skill instructions
-
-**Analogy**: Like grading a student on whether they followed the assignment rubric.
-
-### Process
-
-1. **Agent executes skill** (e.g., Gemma runs youtube_spam_detection)
-2. **Agent logs patterns**:
-   ```json
-   {
-     "execution_id": "exec_001",
-     "patterns": {
-       "caps_check_executed": true,
-       "repetition_check_executed": true,
-       "rate_limit_applied": false,
-       "toxicity_check_executed": true,
-       "allowed_and_routed": false
-     }
-   }
-   ```
-3. **Gemma scores fidelity**:
-   ```python
-   fidelity = patterns_followed / total_patterns_in_skill
-   # Example: 3 / 5 = 0.60 (60% fidelity - FAILING)
-   ```
-4. **Store metric**:
-   ```bash
-   modules/infrastructure/wre_core/recursive_improvement/metrics/youtube_spam_detection_fidelity.json
-   ```
-5. **Promote or rollback based on threshold**:
-   - If fidelity ≥ 90%: Continue or promote
-   - If fidelity < 85%: Trigger rollback or Qwen variation generation
-
----
-
-## Skill Evolution (Qwen Variation Generation)
-
-### When to Evolve
-
-**Triggers**:
-- Pattern fidelity drops below 90% (but > 85%)
-- Outcome quality degrades
-- New edge cases discovered
-- 0102 requests improvement
-
-### Process
-
-1. **Qwen analyzes weak patterns**:
-   ```python
-   weak_patterns = [p for p in patterns if fidelity[p] < 0.90]
-   ```
-
-2. **Qwen generates variations**:
-   ```markdown
-   # Variation A: Add explicit step
-   ### 2. REPETITION CHECK
-   **Rule**: IF message in recent_history AND count >= 3 → BLOCK
-   **Expected Pattern**: repetition_check_executed=True
-
-   **NEW STEP**: Before checking history, normalize message (lowercase, strip whitespace)
-   ```
-
-3. **A/B test variations**:
-   - Run variation A on 50% of traffic
-   - Run current version on 50% of traffic
-   - Compare fidelity scores after 100 executions each
-
-4. **Promote winner**:
-   - If variation A has higher fidelity → Update SKILL.md
-   - Save old version to `versions/v1.1_[description].md`
-   - Update CHANGELOG.md with rationale
-
-5. **Archive losing variations**:
-   - Store in `variations/rejected/`
-   - Document why rejected for future reference
-
----
-
-## 0102 (AI Supervisor) Approval Tracking (WSP 50 Integration)
-
-### Database Schema
-
-```sql
-CREATE TABLE ai_0102_approvals (
-    approval_id TEXT PRIMARY KEY,
-    skill_id TEXT NOT NULL,
-    promotion_path TEXT NOT NULL,  -- "prototype->staged", "staged->production"
-    approver TEXT NOT NULL,         -- "0102" (AI supervisor, not 012 human)
-    approval_ticket TEXT NOT NULL,
-
-    -- WSP 50 Pre-Action Verification
-    wsp_50_no_duplication BOOLEAN NOT NULL,
-    wsp_50_evidence TEXT,
-
-    -- Test coverage
-    test_coverage_complete BOOLEAN NOT NULL,
-    test_evidence TEXT,
-
-    -- Instruction clarity
-    instruction_clarity_approved BOOLEAN NOT NULL,
-
-    -- Dependencies validated
-    dependencies_validated BOOLEAN NOT NULL,
-    dependency_evidence TEXT,
-
-    -- Security review
-    security_reviewed BOOLEAN NOT NULL,
-    security_notes TEXT,
-
-    -- Production-specific
-    production_readiness BOOLEAN,
-    integration_approved BOOLEAN,
-    monitoring_configured BOOLEAN,
-    rollback_tested BOOLEAN,
-    documentation_updated BOOLEAN,
-
-    approval_timestamp TIMESTAMP NOT NULL,
-    notes TEXT
-)
-```
-
-**Location**: `modules/infrastructure/wre_core/skills/skills_metrics.db`
-
-**Enforcement**: `WRESkillsRegistryV2` blocks promotion without valid 0102 approval record.
-
-**Key Point**: 0102 (AI supervisor, Claude) approves promotions, NOT 012 (human). Qwen/Gemma are smaller AIs that cannot make promotion decisions - 0102 provides the necessary oversight and WSP 50 verification.
-
----
-
-## Metrics Collection Architecture
-
-### Hybrid System (JSON + SQLite)
-
-**Design Principle**: Fast writes (JSON), structured queries (SQLite)
-
-### Layer 1: JSON Append-Only (Real-Time)
-
-**Purpose**: Fast, concurrent writes from multiple DAEs
-
-**Tool**: `MetricsAppenderV2` with file locking
-
-**Format**: Newline-delimited JSON (NDJSON)
-
-**Files**:
-```
-modules/infrastructure/wre_core/recursive_improvement/metrics/
-├── [skill_name]_fidelity.json          # Pattern fidelity scores
-├── [skill_name]_outcomes.json          # Decision correctness
-├── [skill_name]_performance.json       # Execution timing
-└── [skill_name]_promotion_log.json     # State transitions
-```
-
-**Benefits**:
-- Fast appends (no database locks)
-- Easy diffing (git-friendly)
-- Rollback-friendly (restore from file)
-- Human-readable
-
----
-
-### Layer 2: SQLite Analytics (Batch)
-
-**Purpose**: Structured queries for promotion gating and analytics
-
-**Tool**: `MetricsIngestorV2` with hourly batch processing
-
-**Database**: `modules/infrastructure/wre_core/skills/skills_metrics.db`
-
-**Schema**:
-```sql
--- Separate tables (no field overwrites)
-fidelity_metrics (execution_id, skill_id, pattern_fidelity, patterns_followed, patterns_missed, ...)
-outcome_metrics (execution_id, skill_id, decision, correct, confidence, ...)
-performance_metrics (execution_id, skill_id, execution_time_ms, exception, ...)
-
--- Promotion tracking
-promotion_events (event_id, skill_id, from_state, to_state, approver, ...)
-rollback_events (event_id, skill_id, trigger_reason, trigger_metric, ...)
-human_approvals (approval_id, skill_id, wsp_50_no_duplication, ...)
-```
-
-**Benefits**:
-- Aggregations (AVG, MIN, MAX, COUNT)
-- Joins across tables
-- Indexed lookups (fast promotion checks)
-- No external dependencies
-
----
-
-## WRE Skills Loader (Entry Point)
-
-### Progressive Disclosure
-
-**Principle**: Load metadata first, full content on-demand (performance)
-
-```python
-from modules.infrastructure.wre_core.skills.wre_skills_loader import WRESkillsLoader
-
-loader = WRESkillsLoader()
-
-# Step 1: Discover skills (metadata only)
-skills = loader.discover_skills(agent_type="gemma", intent_type="CLASSIFICATION")
-# Returns: [SkillMetadata(name, description, intent_type, ...)]
-
-# Step 2: Load full skill content (on-demand)
-skill_content = loader.load_skill("youtube_spam_detection", agent_type="gemma")
-
-# Step 3: Inject into agent prompt (WRE entry point)
-augmented_prompt = loader.inject_skill_into_prompt(base_prompt, "youtube_spam_detection", "gemma")
-```
-
-### Dependency Injection
-
-**Context Prepared**:
-```python
-context = {
-    'data_stores': {
-        'youtube_telemetry_store': load_store('...')
-    },
-    'mcp_endpoints': {
-        'holo_index': mcp_client.get_endpoint('holo_index')
-    },
-    'throttles': {
-        'youtube_api_quota': ThrottleManager('youtube', max_rate=10000, cost_per_call=5)
-    },
-    'required_context': {
-        'last_100_messages': fetch_recent_messages(100),
-        'user_message_frequency': load_rate_data()
-    }
-}
-```
-
-**Injected into Skill**: Skill instructions reference `context['data_stores']['youtube_telemetry_store']`
-
----
-
-## Registry & Promotion Automation
-
-### Skills Registry
-
-**File**: `modules/infrastructure/wre_core/skills/skills_registry.json`
-
-**Contents**:
-```json
-{
-  "version": "1.0",
-  "last_updated": "2025-10-20T14:23:15Z",
-  "skills": {
-    "youtube_spam_detection": {
-      "promotion_state": "production",
-      "location": "modules/communication/livechat/skills/youtube_spam_detection/",
-      "primary_agent": "gemma",
-      "intent_type": "CLASSIFICATION",
-      "last_promoted": "2025-10-20T12:00:00Z",
-      "last_rollback": null,
-      "metrics_path": "modules/infrastructure/wre_core/recursive_improvement/metrics/youtube_spam_detection_*.json"
-    }
-  }
-}
-```
-
-**Principle**: Single source of truth for skill states
-
----
-
-### Promotion Commands
-
-```bash
-# Check promotion readiness
-python modules/infrastructure/wre_core/skills/promoter.py status \
-  --skill youtube_spam_detection --target-state production
-
-# Promote skill
-python modules/infrastructure/wre_core/skills/promoter.py promote \
-  --skill youtube_spam_detection \
-  --from prototype --to staged \
-  --approver 0102 \
-  --approval-ticket APPROVAL_20251020_001
-
-# Rollback skill (automatic or manual)
-python modules/infrastructure/wre_core/skills/promoter.py rollback \
-  --skill youtube_spam_detection \
-  --from production --to staged \
-  --reason pattern_fidelity_drop \
-  --trigger-metric fidelity=0.83
-```
-
-**Automation**:
-- HoloIndex re-indexed after promotions/rollbacks
-- ModLog updated automatically (WSP 22)
-- Metrics ingested before promotion checks
-
----
-
-## Documentation Reference Map
-
-| Document | Purpose | Location |
-|----------|---------|----------|
-| **AI_ENTRY_POINTS_MAPPING.md** | ~50 skills identified across codebase | `modules/infrastructure/wre_core/` |
-| **PROMOTION_ROLLBACK_POLICY.md** | Complete promotion lifecycle | `modules/infrastructure/wre_core/skills/` |
-| **SESSION_SUMMARY.md** | Implementation handoff document | `modules/infrastructure/wre_core/skills/` |
-| **METRICS_INGESTION_FIX.md** | Critical issues identified & fixed | `modules/infrastructure/wre_core/skills/` |
-| **FIXES_COMPLETE.md** | v2 implementation summary | `modules/infrastructure/wre_core/skills/` |
-| **skills_graph.json** | Dependency graph (11 nodes, 8 edges) | `modules/infrastructure/wre_core/skills/` |
-| **skills_registry.json** | Current skill states | `modules/infrastructure/wre_core/skills/` |
-| **WRE_SKILLS_SYSTEM_DESIGN.md** | First principles design | `modules/infrastructure/wre_core/` |
-| **ANTHROPIC_SKILLS_DEEP_DIVE.md** | Anthropic Skills spec | `.claude/skills/_meta/` |
-| **WSP_3_Module_Organization_UPDATE_SKILLS.md** | skills/ directory mandate | `WSP_knowledge/src/` |
-
----
-
-## Compliance Matrix
-
-| WSP | Requirement | How Skills System Complies |
-|-----|-------------|----------------------------|
-| **WSP 3** | Module Organization | `skills/` directory at block level |
-| **WSP 77** | Agent Coordination | Skills assigned by agent specialization |
-| **WSP 50** | Pre-Action Verification | Human approvals tracked in database |
-| **WSP 22** | ModLog Documentation | Auto-updates on promotions/rollbacks |
-| **WSP 91** | DAEMON Observability | JSON + SQLite metrics telemetry |
-| **WSP 48** | Recursive Self-Improvement | Qwen variation generation loop |
-
----
-
-## First Principles Summary
-
-### 1. Prototype Centrally, Deploy Modularly
-
-**Prototype** (`.claude/skills/*_prototype/`) = Fast iteration, central discovery
-**Staged** (`.claude/skills/*_staged/`) = Metrics validation, central monitoring
-**Production** (`modules/[domain]/[block]/skills/`) = Module cohesion, distributed scalability
-
-**Scalability**: 500 skills distributed across 100 modules (5 per module) beats 500 in one directory.
-
-### 2. Skills Belong With Modules (Cohesion)
-
-If code lives in `modules/communication/livechat/src/`, then skills live in `modules/communication/livechat/skills/`.
-
-**Why?** Same reason we organize code by domain - cohesion, maintainability, discoverability via module structure.
-
-### 3. Progressive Disclosure
-
-Load metadata first (fast), full content on-demand (efficient).
-
-### 4. Trainable Weights Analogy
-
-Skills are not static docs. They evolve like neural network weights:
-- Gemma scoring = loss function
-- Qwen variations = gradient descent
-- A/B testing = validation
-- Version updates = weight checkpoints
-
-### 5. Human-in-Loop Gates
-
-0102 approval required at prototype→staged and staged→production gates. Automation assists, humans decide.
-
-### 6. MOVE, Not Copy
-
-**Promotion**: Skill MOVES from `.claude/skills/*_staged/` to `modules/*/skills/` (original deleted)
-**Rollback**: Skill MOVES from `modules/*/skills/` back to `.claude/skills/*_staged/`
-
-**Why?** Single source of truth. No stale copies. HoloIndex always knows current location.
-
-### 7. Metrics Before Promotion
-
-Can't promote without evidence. ≥100 executions, ≥90% fidelity, ≥85% outcome quality, human approval.
-
-### 8. Automatic Rollback
-
-Production can't wait for humans. If fidelity < 85% sustained, rollback immediately to staged.
-
----
-
-## Known Limitations
-
-1. **No unit tests yet** - v2 implementations need test coverage
-2. **Promoter CLI not built** - Manual promotion for now
-3. **Qwen variation generator not implemented** - Manual variations only
-4. **Gemma pattern scorer not built** - Placeholder for now
-5. **Dependency injection incomplete** - Context structure defined but not wired
-
----
-
-## Roadmap
-
-### Phase 1: Foundation (COMPLETE)
-- ✅ AI entry points mapped (~50 skills)
-- ✅ Promotion/rollback policy defined
-- ✅ Metrics pipeline built (v2 with fixes)
-- ✅ WRE loader created
-- ✅ Human approval tracking added
-- ✅ Skills dependency graph created
-
-### Phase 2: Baseline Templates (NEXT)
-- [ ] Qwen reads AI_ENTRY_POINTS_MAPPING.md
-- [ ] Qwen generates 8 baseline SKILL.md templates (YouTube DAE Phase 1)
-- [ ] 0102 validates each prototype manually
-- [ ] 0102 creates approval records in database (ai_0102_approvals table)
-- [ ] Promote to staged
-
-### Phase 3: Automation
-- [ ] Build promoter CLI (`promoter.py`)
-- [ ] Implement Gemma pattern fidelity scorer
-- [ ] Implement Qwen variation generator
-- [ ] Add unit tests for v2 implementations
-- [ ] Wire dependency injection in WRE loader
-
-### Phase 4: Production
-- [ ] Promote Phase 1 skills to production
-- [ ] Expand to Phase 2 (Social Media - 5 skills)
-- [ ] Expand to Phase 3 (WSP Orchestrator - 3 skills)
-- [ ] Monitor metrics, iterate on variations
-
----
-
-## Questions & Answers
-
-### Q: Why not keep all skills in `.claude/skills/` centrally?
-
-**A**: **Scalability breaks at scale**. With 100 modules and 500 skills, a central directory becomes flat chaos. Distributed organization (5 skills per module) maintains cohesion and human-parseable structure.
-
-**Analogy**: Would you put all 500 Python files in one directory? No - you organize by domain/module. Skills follow same principle.
-
-**HoloIndex solves discovery**: Modular location doesn't matter for finding skills - HoloIndex indexes everything. Structure matters for maintenance.
-
-### Q: Why use `.claude/skills/` for prototype/staged if production goes to `modules/*/skills/`?
-
-**A**: **`.claude/skills/` is 0102's testing environment using Claude Code**:
-- **Prototype/Staged**: 0102 tests skills via Claude Code before deploying to native agents
-- **Production**: Native Gemma/Qwen/Grok/UI-TARS execute from `modules/*/skills/`
-
-**Execution Contexts**:
-- `.claude/skills/`: Claude Code skill system (0102 testing sandbox)
-- `modules/*/skills/`: Production DAEs (native agent execution)
-
-**Don't pollute production modules with experimental skills under test**. Don't force 0102 to test in production locations. Test in Claude Code sandbox, deploy to modules after validation.
-
-### Q: What happens to `.claude/skills/unicode_daemon_monitor_prototype/` at promotion?
-
-**A**:
-1. **prototype → staged** (still 0102 testing): COPY to `.claude/skills/unicode_daemon_monitor_staged/` (prototype kept for reference, both in Claude Code)
-2. **staged → production** (deploy to native agents): MOVE to `modules/communication/livechat/skills/unicode_daemon_monitor/` (staged deleted, HoloIndex re-indexed)
-
-**Result**:
-- **Testing**: 0102 uses Claude Code to test skill in `.claude/skills/`
-- **Production**: Native agents execute skill from `modules/communication/livechat/skills/` (no longer in `.claude/skills/`)
-
-### Q: Can skills be shared across agents?
-
-**A**: Yes, with fallback mechanism. Example: `youtube_toxic_filtering` uses Gemma as primary, Qwen as fallback for escalation. Skill can specify agent preference in YAML frontmatter.
-
-### Q: What if a skill never reaches 90% fidelity?
-
-**A**: Qwen generates variations. If variations also fail, skill remains in prototype/staged. 0102 investigates: Is task too complex? Are instructions unclear? Is agent not capable? Iterate until viable or abandon.
-
-### Q: How do we prevent skills from conflicting?
-
-**A**: Skills are scoped to specific tasks within specific modules. Dependency graph tracks relationships. If conflicts emerge, refactor skills or merge into single skill.
-
-### Q: Can skills call other skills?
-
-**A**: Yes, via composition. Skill instructions can reference: "After completing this task, route to `youtube_banter_response` skill for response generation."
-
-### Q: Why does HoloIndex matter if skills are distributed across modules?
-
-**A**: **HoloIndex makes location transparent for discovery**:
-
-```bash
-python holo_index.py --search "monitor unicode daemon errors"
-
-# Returns (regardless of location):
-# modules/communication/livechat/skills/unicode_daemon_monitor/SKILL.md
-```
-
-**The index enables search**. **The structure enables maintenance**. Best of both worlds.
-
----
-
-## Version History
-
-| Version | Date | Changes | Author |
-|---------|------|---------|--------|
-| 1.0 | 2025-10-20 | Initial protocol (dual systems architecture) | 0102 + User |
-| 1.1 | 2025-10-20 | REVISED: Prototype-then-deploy architecture (modular production deployment) | 0102 + User |
-| 1.2 | 2025-10-20 | CLARIFIED: `.claude/skills/` is 0102 testing environment only (via Claude Code), production in `modules/*/skills/` | 0102 + User |
-| 1.3 | 2025-10-23 | ADDED: Micro Chain-of-Thought paradigm - skills as multi-step reasoning chains with Gemma validation at each step. Reference implementation: qwen_gitpush skill with WSP 15 MPS scoring. Updated "What Is a Skill?" definition to clarify skills are NOT monolithic prompts. | 0102 + User |
-| 1.4 | 2026-02-07 | ADDED: Mandatory skill supply-chain scanner gate for promotion and runtime execution with fail-closed defaults and severity policy enforcement. | 0102 + User |
-
----
-
-**Status**: ✅ ACTIVE
-**Next Review**: After Phase 1 WRE skills deployed to production (qwen_gitpush baseline testing)
-**Contact**: 0102 (Claude Code supervisor)
-
----
-
-**Principle**: "The wardrobe tells the agents how to act. Skills are step-by-step reasoning chains. Gemma validates each step. Qwen thinks strategically. 0102 supervises."
+## 11. Version history
+
+- **2.1 (2026-08-26)**: Bound scanner success to stable pre/post bundle
+  fingerprints and captured executor bytes; blocked unadmitted CodeAct and
+  direct legacy Holo access.
+- **2.0 (2026-08-26)**: Consolidated execution truth; removed contradictory
+  automatic fallback/promotion/rollback claims; defined production admission,
+  proposal/effect separation, typed effect receipts, content-bound caching,
+  A/B blocking, independent promotion authority, and exact implementation truth.
+- **1.6 (2026-08-26)**: Added execution-truth and promotion-authority addendum.
+- **1.5 (2026-07-29)**: Added provider-neutral role Skillz constraints.
+- **1.4 and earlier**: Historical Wardrobe lifecycle and automatic evolution
+  design; superseded where inconsistent with version 2.1.

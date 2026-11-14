@@ -30,7 +30,12 @@ import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
+
+from .foundup_scaffold_route_contract import (
+    CreateScaffoldRequest,
+    canonical_json_copy,
+)
 
 logger = logging.getLogger("wre_foundup_job_router")
 
@@ -67,6 +72,7 @@ class TargetBackend(str, Enum):
     """
     Execution backend targets.
 
+    HERMES_SCAFFOLD  : create_foundup dry-run scaffold planner
     HERMES_BUILDER   : Hermes FoundUp builder (build/extract)
     HERMES_VALIDATOR : Hermes validation (validate)
     OPENCLAW_QUEUE   : OpenClaw job queue (queue_foundup_job)
@@ -74,6 +80,7 @@ class TargetBackend(str, Enum):
     NONE             : No routing target (blocked/failed/unsupported)
     """
 
+    HERMES_SCAFFOLD = "hermes_scaffold"
     HERMES_BUILDER = "hermes_builder"
     HERMES_VALIDATOR = "hermes_validator"
     OPENCLAW_QUEUE = "openclaw_queue"
@@ -83,6 +90,7 @@ class TargetBackend(str, Enum):
 
 # Action -> Backend mapping
 _ACTION_BACKEND_MAP: Dict[str, TargetBackend] = {
+    "create_foundup": TargetBackend.HERMES_SCAFFOLD,
     "build_foundup": TargetBackend.HERMES_BUILDER,
     "extract_foundup": TargetBackend.HERMES_BUILDER,
     "validate_foundup": TargetBackend.HERMES_VALIDATOR,
@@ -110,6 +118,7 @@ class RouteReasonCode(str, Enum):
     BLOCKED_MISSING_ACTION = "BLOCKED_MISSING_ACTION"
     BLOCKED_TERMINAL_STATUS = "BLOCKED_TERMINAL_STATUS"
     BLOCKED_POLICY_GATE = "BLOCKED_POLICY_GATE"
+    BLOCKED_INVALID_CREATE_BINDING = "BLOCKED_INVALID_CREATE_BINDING"
 
     # Unsupported
     UNSUPPORTED_ACTION = "UNSUPPORTED_ACTION"
@@ -324,6 +333,7 @@ def detect_envelope_type(envelope: Dict[str, Any]) -> EnvelopeType:
     # Check for canonical actions
     action = envelope.get("requested_action", "")
     if action and action in {
+        "create_foundup",
         "build_foundup",
         "extract_foundup",
         "validate_foundup",
@@ -332,6 +342,64 @@ def detect_envelope_type(envelope: Dict[str, Any]) -> EnvelopeType:
         return EnvelopeType.FOUNDUP_JOB
 
     return EnvelopeType.GENERIC_DAE
+
+
+def _sanitize_untrusted_policy_flags_dict(
+    policy_flags: Dict[str, Any],
+) -> Tuple[Dict[str, bool], bool]:
+    """Sanitize a raw, untrusted envelope ``policy_flags`` dict at the router boundary.
+
+    SECURITY (FOUNDUP_JOB_ROUTER_POLICYFLAGS_BOUNDARY_SANITIZATION, #752):
+    A raw ``policy_flags`` dict arriving on an inbound envelope is UNTRUSTED.
+    A malicious or stale caller can self-assert any gate/token flag (e.g.
+    ``security_gate_passed=True``) by carrying ``True`` in the dict. This is the
+    untrusted-envelope trust boundary: every server-authored gate/token flag
+    (all of ``_SERVER_AUTHORED_FLAGS`` — security_gate_*, permission_gate_*,
+    exfoliation_gate_*, wsp_preflight_*, capability_token_*) is FORCED to False
+    here regardless of inbound data. Server authority for those flags comes
+    EXCLUSIVELY from a server-authored ``PolicyFlags`` object snapshot (the
+    ``hasattr(policy_flags, "to_dict")`` branch), never from a raw dict.
+
+    Only ``dry_run_mode`` survives from inbound data: it is operator-authored and
+    ``True`` is the safe/sandbox direction. ``PolicyFlags.from_dict`` yields
+    ``dry_run_mode=False`` when the key is absent, which would mis-classify a
+    missing flag as LIVE; this function restores the router's safe default so an
+    absent ``dry_run_mode`` is treated as dry-run (True), NOT live.
+
+    Args:
+        policy_flags: Raw untrusted dict from the inbound envelope.
+
+    Returns:
+        Tuple of (sanitized_policy_snapshot, dry_run_defaulted) where the snapshot
+        has all server-authored gate/token flags forced False and a safe
+        ``dry_run_mode`` default applied when the inbound dict omitted it.
+    """
+    # Deferred import to avoid a circular dependency (router <-> contract); matches
+    # the existing deferred-import pattern used elsewhere in this module.
+    from modules.communication.moltbot_bridge.src.foundup_job_contract import PolicyFlags
+
+    # from_dict zeroes ALL _SERVER_AUTHORED_FLAGS and preserves only dry_run_mode.
+    sanitized = PolicyFlags.from_dict(policy_flags).to_dict()
+
+    dry_run_defaulted = "dry_run_mode" not in policy_flags
+    return sanitized, dry_run_defaulted
+
+
+def _normalize_policy_flags(value: Any) -> Tuple[Dict[str, bool], bool]:
+    """Normalize policy provenance without representation-dependent live mode."""
+    if value is None:
+        return {"dry_run_mode": True}, True
+    if isinstance(value, dict):
+        return _sanitize_untrusted_policy_flags_dict(value)
+
+    from modules.communication.moltbot_bridge.src.foundup_job_contract import PolicyFlags
+
+    if type(value) is PolicyFlags:
+        # A public dataclass instance proves shape, not server provenance.
+        # Preserve only the safe operator-authored dry-run direction and clear
+        # every asserted gate through the same untrusted normalization path.
+        return PolicyFlags.from_dict(value.to_dict()).to_dict(), False
+    return {"dry_run_mode": True}, True
 
 
 def validate_foundup_job_envelope(envelope: Dict[str, Any]) -> EnvelopeValidationResult:
@@ -411,25 +479,20 @@ def validate_foundup_job_envelope(envelope: Dict[str, Any]) -> EnvelopeValidatio
     dry_run_defaulted = False
 
     if policy_flags is None:
-        # WSP 97: Default dry_run to True for safety
-        dry_run_defaulted = True
-        policy_snapshot = {"dry_run_mode": True}
+        policy_snapshot, dry_run_defaulted = _normalize_policy_flags(None)
         logger.info(
             "[WSP97] FoundUpJob envelope missing policy_flags - dry_run_mode defaulted to True"
         )
     elif isinstance(policy_flags, dict):
-        policy_snapshot = policy_flags
-        if "dry_run_mode" not in policy_flags:
-            dry_run_defaulted = True
-            policy_snapshot["dry_run_mode"] = True
+        # SECURITY (#752): raw envelope dict is UNTRUSTED. Sanitize so self-asserted
+        # gate/token flags cannot survive; preserve safe dry_run default.
+        policy_snapshot, dry_run_defaulted = _normalize_policy_flags(policy_flags)
+        if dry_run_defaulted:
             logger.info(
                 "[WSP97] FoundUpJob envelope missing dry_run_mode - defaulted to True"
             )
-    elif hasattr(policy_flags, "to_dict"):
-        policy_snapshot = policy_flags.to_dict()
-        if not policy_snapshot.get("dry_run_mode"):
-            dry_run_defaulted = True
-            policy_snapshot["dry_run_mode"] = True
+    else:
+        policy_snapshot, dry_run_defaulted = _normalize_policy_flags(policy_flags)
 
     # Determine if this is live mode (explicit dry_run_mode=False)
     is_live_mode = policy_snapshot.get("dry_run_mode") is False and not dry_run_defaulted
@@ -564,8 +627,14 @@ def _validate_live_mode_gates(
 
     Required gates for Phase 1:
       - human_approval=True OR permission_gate_passed=True
-      - security_gate_passed=True (if security_gate_checked=True)
+      - security_gate_passed=True (required in live mode)
       - Non-empty evidence_refs (evidence_pending=False)
+
+    SECURITY (#752): Gate 2 is FAIL-CLOSED. In live mode, security MUST have
+    passed; ``security_gate_passed`` is read from a server-authored snapshot only
+    (raw envelope dicts are sanitized to False upstream), so a self-asserted raw
+    dict can never satisfy this gate. The legacy ``security_gate_checked`` opt-in
+    is no longer a precondition.
 
     Args:
         policy_snapshot: Policy flags at validation time
@@ -584,12 +653,18 @@ def _validate_live_mode_gates(
     if not human_approval and not permission_gate_passed:
         missing_gates.append("human_approval")
 
-    # Gate 2: Security gate (if checked, must pass)
+    # Gate 2: Security gate (FAIL-CLOSED) — must pass in live mode.
+    # security_gate_checked is retained for logging only; it is NOT a precondition.
     security_gate_checked = policy_snapshot.get("security_gate_checked", False)
     security_gate_passed = policy_snapshot.get("security_gate_passed", False)
 
-    if security_gate_checked and not security_gate_passed:
+    if not security_gate_passed:
         missing_gates.append("security_gate_passed")
+        logger.info(
+            "[WSP97] Live mode security_gate_passed=False "
+            "(security_gate_checked=%s) - fail-closed",
+            security_gate_checked,
+        )
 
     # Gate 3: Evidence must be present (not pending)
     if evidence_pending or evidence_count == 0:
@@ -940,7 +1015,7 @@ def _validate_compute_budget(
 # ---------------------------------------------------------------------------
 
 
-@dataclass
+@dataclass(frozen=True)
 class RouteEnvelope:
     """
     WRE routing decision envelope.
@@ -991,6 +1066,31 @@ class RouteEnvelope:
     foundup_id: Optional[str] = None
     """Target FoundUp ID from source job (if present)."""
 
+    creation_mode: Optional[str] = None
+    """Typed create_foundup mode binding carried from the source job."""
+
+    genesis_envelope_digest: Optional[str] = None
+    """Typed create_foundup genesis-envelope lineage digest."""
+
+    scaffold_contract_digest: Optional[str] = None
+    """Typed create_foundup scaffold-contract lineage digest."""
+
+    scaffold_request: Optional[CreateScaffoldRequest] = None
+    """Immutable canonical create_foundup request admitted by the router."""
+
+    def __post_init__(self) -> None:
+        """Detach nested evidence so routing receipts cannot alias caller state."""
+        object.__setattr__(
+            self,
+            "evidence_refs",
+            list(canonical_json_copy(self.evidence_refs)),
+        )
+        object.__setattr__(
+            self,
+            "policy_summary",
+            canonical_json_copy(self.policy_summary),
+        )
+
     def to_dict(self) -> Dict[str, Any]:
         """Serialize to dict for JSON/logging."""
         return {
@@ -1001,18 +1101,25 @@ class RouteEnvelope:
             "route_status": self.route_status.value,
             "reason_code": self.reason_code.value,
             "reason_human": self.reason_human,
-            "evidence_refs": self.evidence_refs,
-            "policy_summary": self.policy_summary,
+            "evidence_refs": canonical_json_copy(self.evidence_refs),
+            "policy_summary": canonical_json_copy(self.policy_summary),
             "routed_at": self.routed_at.isoformat(),
             "source_job_status": self.source_job_status,
             "foundup_id": self.foundup_id,
+            "creation_mode": self.creation_mode,
+            "genesis_envelope_digest": self.genesis_envelope_digest,
+            "scaffold_contract_digest": self.scaffold_contract_digest,
+            "scaffold_request": (
+                self.scaffold_request.to_dict()
+                if self.scaffold_request is not None
+                else None
+            ),
         }
 
 
 # ---------------------------------------------------------------------------
 # Router Implementation
 # ---------------------------------------------------------------------------
-
 
 def route_foundup_job(job: Any) -> RouteEnvelope:
     """
@@ -1032,140 +1139,21 @@ def route_foundup_job(job: Any) -> RouteEnvelope:
         Nothing — returns failed/blocked envelope on errors
     """
     try:
-        # === Identity Validation ===
-        job_id = getattr(job, "job_id", None)
-        if not job_id or not str(job_id).strip():
-            return _make_blocked_envelope(
-                job_id="",
-                tenant_id=getattr(job, "tenant_id", "") or "",
-                action=getattr(job, "requested_action", "") or "",
-                reason_code=RouteReasonCode.BLOCKED_MISSING_JOB_ID,
-                reason_human="Job ID is required for routing",
-            )
+        from .foundup_job_route_decision import route_foundup_job_impl
 
-        tenant_id = getattr(job, "tenant_id", None)
-        if not tenant_id or not str(tenant_id).strip():
-            return _make_blocked_envelope(
-                job_id=job_id,
-                tenant_id="",
-                action=getattr(job, "requested_action", "") or "",
-                reason_code=RouteReasonCode.BLOCKED_MISSING_TENANT_ID,
-                reason_human="Tenant ID is required for routing",
-            )
-
-        # === Action Validation ===
-        requested_action = getattr(job, "requested_action", None)
-        if not requested_action or not str(requested_action).strip():
-            return _make_blocked_envelope(
-                job_id=job_id,
-                tenant_id=tenant_id,
-                action="",
-                reason_code=RouteReasonCode.BLOCKED_MISSING_ACTION,
-                reason_human="Requested action is required for routing",
-            )
-
-        # === Terminal Status Check ===
-        job_status = getattr(job, "status", None)
-        status_str = job_status.value if hasattr(job_status, "value") else str(job_status or "")
-
-        # Check for terminal status (import here to avoid circular deps)
-        try:
-            from modules.communication.moltbot_bridge.src.foundup_job_contract import (
-                is_terminal_status,
-                JobStatus,
-            )
-            if job_status and is_terminal_status(job_status):
-                return _make_blocked_envelope(
-                    job_id=job_id,
-                    tenant_id=tenant_id,
-                    action=requested_action,
-                    reason_code=RouteReasonCode.BLOCKED_TERMINAL_STATUS,
-                    reason_human=f"Job is in terminal status: {status_str}",
-                    source_status=status_str,
-                    foundup_id=getattr(job, "foundup_id", None),
-                )
-        except ImportError:
-            # If contract not available, assume non-terminal
-            pass
-
-        # === Policy Check ===
-        policy_flags = getattr(job, "policy_flags", None)
-        policy_summary: Dict[str, bool] = {}
-        if policy_flags:
-            if hasattr(policy_flags, "to_dict"):
-                policy_summary = policy_flags.to_dict()
-            elif isinstance(policy_flags, dict):
-                policy_summary = policy_flags
-
-            # Check for blocking policy state
-            if policy_summary.get("security_gate_checked") and not policy_summary.get("security_gate_passed"):
-                return _make_blocked_envelope(
-                    job_id=job_id,
-                    tenant_id=tenant_id,
-                    action=requested_action,
-                    reason_code=RouteReasonCode.BLOCKED_POLICY_GATE,
-                    reason_human="Security gate check failed",
-                    source_status=status_str,
-                    foundup_id=getattr(job, "foundup_id", None),
-                    policy_summary=policy_summary,
-                )
-
-        # === Route to Backend ===
-        target_backend = _ACTION_BACKEND_MAP.get(requested_action)
-
-        if target_backend is None:
-            return RouteEnvelope(
-                job_id=job_id,
-                tenant_id=tenant_id,
-                target_backend=TargetBackend.NONE,
-                requested_action=requested_action,
-                route_status=RouteStatus.UNSUPPORTED,
-                reason_code=RouteReasonCode.UNSUPPORTED_ACTION,
-                reason_human=f"Action '{requested_action}' is not supported",
-                policy_summary=policy_summary,
-                source_job_status=status_str,
-                foundup_id=getattr(job, "foundup_id", None),
-            )
-
-        # === Queue Action Special Case ===
-        if requested_action == "queue_foundup_job":
-            return RouteEnvelope(
-                job_id=job_id,
-                tenant_id=tenant_id,
-                target_backend=TargetBackend.OPENCLAW_QUEUE,
-                requested_action=requested_action,
-                route_status=RouteStatus.QUEUED,
-                reason_code=RouteReasonCode.OK_QUEUED,
-                reason_human="Job queued for later processing",
-                policy_summary=policy_summary,
-                source_job_status=status_str,
-                foundup_id=getattr(job, "foundup_id", None),
-            )
-
-        # === Success ===
-        return RouteEnvelope(
-            job_id=job_id,
-            tenant_id=tenant_id,
-            target_backend=target_backend,
-            requested_action=requested_action,
-            route_status=RouteStatus.ROUTED,
-            reason_code=RouteReasonCode.OK_ROUTED,
-            reason_human=f"Job routed to {target_backend.value}",
-            policy_summary=policy_summary,
-            source_job_status=status_str,
-            foundup_id=getattr(job, "foundup_id", None),
+        return route_foundup_job_impl(job)
+    except Exception:
+        logger.error(
+            "FoundUp job routing failed closed",
+            extra={"event": "foundup_job_routing_failed"},
         )
-
-    except Exception as e:
-        logger.exception(f"Routing failed: {e}")
         return RouteEnvelope(
-            job_id=getattr(job, "job_id", "") or "",
-            tenant_id=getattr(job, "tenant_id", "") or "",
+            job_id="", tenant_id="",
             target_backend=TargetBackend.NONE,
-            requested_action=getattr(job, "requested_action", "") or "",
+            requested_action="",
             route_status=RouteStatus.FAILED,
             reason_code=RouteReasonCode.FAIL_INTERNAL,
-            reason_human=f"Internal routing error: {str(e)}",
+            reason_human="Internal routing error",
         )
 
 
@@ -1178,6 +1166,9 @@ def _make_blocked_envelope(
     source_status: str = "",
     foundup_id: Optional[str] = None,
     policy_summary: Optional[Dict[str, bool]] = None,
+    creation_mode: Optional[str] = None,
+    genesis_envelope_digest: Optional[str] = None,
+    scaffold_contract_digest: Optional[str] = None,
 ) -> RouteEnvelope:
     """Helper to construct blocked/failed envelopes."""
     return RouteEnvelope(
@@ -1191,6 +1182,9 @@ def _make_blocked_envelope(
         policy_summary=policy_summary or {},
         source_job_status=source_status,
         foundup_id=foundup_id,
+        creation_mode=creation_mode,
+        genesis_envelope_digest=genesis_envelope_digest,
+        scaffold_contract_digest=scaffold_contract_digest,
     )
 
 

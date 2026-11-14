@@ -79,6 +79,17 @@ from destructive_action_guard import (
     GuardBlockReasonCode,
 )
 
+# HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1 (#746):
+# Import the token issuer via the FULL package path so the issued
+# CapabilityToken's class identity matches the executor's internal import.
+from pathlib import Path as _Path
+_PROJECT_ROOT = _Path(__file__).parent.parent.parent.parent.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
+from modules.infrastructure.wre_core.src.capability_token_validator import (
+    LocalCapabilityTokenIssuer,
+)
+
 
 # ===========================================================================
 # SECTION 1: Test Fixtures
@@ -106,21 +117,50 @@ def _create_d3_job_with_all_gates(
     foundup_id: str = "test_foundup",
     requested_action: str = "build_foundup",
 ) -> FoundUpJob:
-    """Create a job with all gates True for D3 sandbox execution."""
+    """Create a job with all gates True for D3 sandbox execution.
+
+    HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1 (#746): capability_token_*
+    flags are now server-authored by the executor's runtime write-back. So we
+    supply a REAL valid token in the payload (broad scopes/actions so it
+    validates against whatever action class the test patches in) instead of
+    forging the capability flags. security_gate_* is still set directly
+    (server-authored; this executor has no security-gate evaluator). For
+    D4/D5/D6 tests the token validates but the GUARD blocks by class.
+    """
     job = create_job(
         tenant_id="tenant_test",
         requested_action=requested_action,
         foundup_id=foundup_id,
+        payload={
+            "capability_token": LocalCapabilityTokenIssuer().issue_token(
+                subject="agent_hxa25",
+                audience="wre-local",
+                # Broad scopes so the token authorizes whichever class the test
+                # patches (D3 passes guard; D4/D5/D6 are blocked by the guard).
+                scopes=[
+                    "d3:sandbox",
+                    "d4:repo",
+                    "d5:external",
+                    "d6:delete",
+                ],
+                allowed_actions=[
+                    "build_foundup",
+                    "extract_foundup",
+                    "create_repo",
+                    "send_email",
+                    "delete_permanently",
+                ],
+                allowed_paths=["modules/foundups"],
+                # Validates whether executor runs dry_run True or False; the
+                # guard still bounds execution (D3 dry-run only; D4/D5/D6 blocked).
+                dry_run_only=False,
+            ),
+        },
     )
-    # Set all capability token flags True
-    job.policy_flags.capability_token_checked = True
-    job.policy_flags.capability_token_present = True
-    job.policy_flags.capability_token_validated = True
-    job.policy_flags.capability_token_scope_authorized = True
-    # Set security gate True
+    # Security gate set by direct (server-authored) assignment.
     job.policy_flags.security_gate_checked = True
     job.policy_flags.security_gate_passed = True
-    # Set dry run mode True
+    # Operator-authored dry run mode.
     job.policy_flags.dry_run_mode = True
     return job
 

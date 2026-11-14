@@ -1,0 +1,62 @@
+## Current security-first sequence — 2026-11-01
+
+Source codec/framing and existing-intent revalidation are delivered through
+main9925; dated pending-publication statements below remain historical.
+The [current roadmap](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#current-sprint-and-blockchain-roadmap--2026-11-01)
+prioritizes A10/B01 policy isolation and A07/B02 complete accounting. The bounded
+unsigned consumer remains15/P1 after its authority/facts gates; preserve52 tests.
+No wallet, signer, real asset, funding, current-ledger fact or live TestNet result
+is supplied by this source publication. Later chain parity remains mandatory.
+
+# Algorand module roadmap
+
+2026-10-31 current reconciliation supersedes historical publication-pending prose:
+
+Source publication is now authorized separately from deployment. The
+[WSP26 simulator-first contract](../../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract)
+governs any economic mapping into this adapter. Preserve unsigned format tests;
+require independent chain tests and simulator transition parity before admission.
+The dated local-only evidence below remains historical, not a publication block.
+
+PR2206 and PR2211 are merged into actual main4050. Unchanged format owner freshly
+passes52 exact cases through the existing strict offline qualifier and preserved
+SDK profile. This is not patched production-runtime admission or an integrated
+FAM signer/transport. Retain Algorand TestNet as the bounded candidate; qualify
+network/account/algorithm support and independent authority before any signing.
+No GitHub mutation or chain call occurred in this local-only mission.
+
+2026-10-29: reconcile the unique codec with current main and qualify its exact
+existing 28-case format profile before parent/child PR convergence. Retain the
+old interpreter/profile identity; patched production-runtime admission remains
+unproved. Before signing, require controller-level verifier separation, immutable
+intent/artifact/attempt/reissue records, authenticated network/account/ASA facts,
+exact signature/fee policy, funded bounds and independent confirmation/recovery.
+Native Falcon accounts do not make every address, ASA or consensus automatically
+post-quantum secure. No new cryptographic implementation is planned here.
+
+## Canonical JSON framing layer
+
+- Locally qualified: one bounded bytes entrypoint in the existing codec.
+- Retain the original28 ASTs/oracles and add24 ordinary framing methods.
+- Record exact52 inventory and fresh versioned source/profile/results separately;
+  previous local/hosted28 results cannot qualify changed code automatically.
+- Main delivery still requires the pending parent and current hosted/security gates.
+- FAM consumption, producer admission, fee/round facts and durable artifact/reissue
+  ownership remain separate allocations; this layer creates no runtime caller.
+
+1. **Locally qualified layer:** strict scalar-to-unsigned-byte codec and test-first
+   independent vectors; all 28 exact methods pass in the reviewed materialized
+   profile. Source authoring and local qualification grant no network authority.
+2. **Hosted layer qualified:** run40173561283 passes all28 exact methods in the
+   distinct Windows pip installation; see tests/TestModLog.md for source/profile
+   bindings and retained earlier failures. Canonical unit shard has no skips,
+   import aliases or dependency stubs. Publication security gates remain open.
+3. Allocate a consumer in the existing durable FAM TestNet intent owner. Bind
+   admitted intent identity to immutable artifact, attempt and explicit reissue;
+   do not add a second ledger or infer reward units from generic payout amounts.
+4. Separately admit authenticated ledger facts: realm/snapshot provenance, current
+   rounds, address/rekey authority, ASA decimals, holdings/opt-in/freeze, spendable
+   balance and exact fee policy. Address checksum alone proves none of these.
+5. Only a later explicitly authorized signer/transport layer may consider signing
+   or submission. UTC expiry, confirmation, replay and paid-state gates remain
+   independent. No SDK account, key or client capability is admitted by this module.

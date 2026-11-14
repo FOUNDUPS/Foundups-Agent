@@ -1,0 +1,79 @@
+exemptions:
+  - file: "scripts/advisory_model_once.py"
+    reason: >-
+      Legacy RedDog model bridge integration boundary. The focused empty-panel
+      security slice moves the new fail-closed panel guard into a compliant
+      wrapper and preserves the manual Fusion core body, but that inherited
+      core and the CLI router require a separate parity refactor.
+    threshold_override: 1200
+    function_threshold_override: 201
+    functions: ["_run_foundups_fusion_core", "main"]
+    temporary: true
+    owner: "RedDog Maintainers"
+    expires_on: "2026-09-30"
+    review_date: "2026-Q3"
+    reviewer: "0102 Technical Architect"
+    remediation: "extensions/reddog/ROADMAP.md#reddog-advisory-python-bridge-wsp_62-decomposition"
+
+  - file: "main.py"
+    reason: >-
+      Legacy application entrypoint and RedDog preflight integration boundary.
+      This focused repair retains only the existing explicit 160 KiB signer
+      request budget and conversation-authentication bootstrap calls;
+      decomposing unrelated startup and queue control flows here would expand
+      the security review surface.
+    threshold_override: 4978
+    function_threshold_override: 954
+    functions:
+      - "monitor_youtube"
+      - "run_ironclaw_runtime_preflight"
+      - "run_dependency_security_preflight"
+      - "run_env_hygiene_preflight"
+      - "run_brain_artifact_preflight"
+      - "run_connect_wre"
+      - "run_wre_dashboard_preflight"
+      - "run_wsp_framework_preflight"
+      - "run_git_main_merge_sentinel_preflight"
+      - "run_reddog_readonly_operational_bootstrap_preflight"
+      - "run_reddog_authoritative_work_state_refresh_preflight"
+      - "run_reddog_wre_queue_consumer_preflight"
+      - "_run_reddog_startup_blocker_diagnostic"
+      - "run_reddog_architect_fix_promotion_preflight"
+      - "run_reddog_resident_queue_orchestration_plan_preflight"
+      - "run_reddog_resident_queue_next_stage_dispatch_preflight"
+      - "run_reddog_resident_queue_serial_loop_preflight"
+      - "_reddog_record_queue_control_result"
+      - "run_reddog_resident_queue_control_loop_preflight"
+      - "run_reddog_openclaw_signed_worker_claim_loop_preflight"
+      - "bootstrap_runtime_dae_launches"
+      - "main"
+      - "run_headless"
+    temporary: true
+    review_date: "2026-Q3"
+    reviewer: "0102 Technical Architect"
+    remediation: >-
+      ROADMAP.md#terminal-entrypoint-mainpy-roadmap and
+      modules/communication/moltbot_bridge/ROADMAP.md#2026-07-18-reddog--holoindex-truth-boundary-follow-ups
+    owner: "Foundups-Agent"
+    architect_reviewer: "0102 Technical Architect"
+    expires_on: "2026-09-30"
+    no_growth_ceiling:
+      file_lines: 4978
+      functions:
+        run_reddog_wre_queue_consumer_preflight: 60
+        run_reddog_resident_queue_next_stage_dispatch_preflight: 84
+        run_reddog_resident_queue_serial_loop_preflight: 617
+
+  - file: "ModLog.md"
+    reason: >-
+      Legacy root WSP_22 reverse-chronological journal. This slice appends one
+      bounded entry; rewriting or splitting historical traceability would be a
+      separate governed archive operation.
+    threshold_override: 58000
+    temporary: true
+    expires_on: "2026-09-30"
+    review_date: "2026-Q3"
+    reviewer: "0102 Technical Architect"
+    remediation: >-
+      Archive historical journal epochs only through a dedicated WSP_22
+      traceability-maintenance slice that preserves reverse chronology.

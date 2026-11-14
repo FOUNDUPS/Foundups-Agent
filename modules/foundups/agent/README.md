@@ -11,6 +11,13 @@ Provides canonical agent state management including:
 - Coherence tracking for state transitions
 - Wallet/public key integration
 
+The read-only `create_foundup_dryrun` planner fails closed when its
+authoritative registry is missing, unreadable, malformed, or schema-invalid.
+Validation reads the canonical `foundup_registry.schema.json` directly through
+`Draft202012Validator`; no parallel schema definition is maintained.
+Legacy genesis envelopes without `created_at` receive a deterministic
+validation sentinel; planning never writes the registry or scaffold.
+
 ## Agent State Machine
 
 ```
@@ -103,8 +110,15 @@ daemon.emit(
 - `modules/foundups/simulator/`: Mesa model agent simulation
 - `modules/ai_intelligence/0102_orchestrator/`: 0102 orchestration
 
+## Safety Defaults
+
+`HermesFoundUpBuilder` is **dry-run by default**. Real filesystem writes require BOTH
+`HERMES_BUILDER_ALLOW_REAL_WRITES=1` and `HERMES_BUILDER_DRY_RUN=0` (double opt-in). See
+[INTERFACE.md](INTERFACE.md) and
+`docs/audits/architecture/HERMES_BUILDER_DRYRUN_DEFAULT_SAFETY_PHASE1.md`.
+
 ## Status
 
 - **Phase**: PoC
 - **Version**: 0.1.0
-- **Last Updated**: 2026-02-15
+- **Last Updated**: 2026-07-04

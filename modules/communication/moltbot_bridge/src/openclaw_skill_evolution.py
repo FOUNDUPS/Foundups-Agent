@@ -231,14 +231,18 @@ def get_active_ab_test_status(pattern_memory: Any, skill_name: str) -> Optional[
             "sample_size_target": ab_test.get("sample_size_target", 20),
         }
     except Exception as exc:
-        logger.debug("[MUTATION-SURFACE] get_active_ab_test failed: %s", exc)
+        logger.debug(
+            "[MUTATION-SURFACE] get_active_ab_test failed; error_type=%s",
+            type(exc).__name__,
+        )
         return None
 
 
 def check_ab_promotion_status(pattern_memory: Any, skill_name: str) -> Dict[str, Any]:
-    """Check if treatment should be promoted using PatternMemory.check_ab_promotion().
+    """Read the statistical A/B winner without granting promotion authority.
 
-    Reuses PatternMemory.check_ab_promotion() - does NOT create duplicate logic.
+    The function name and ``promotion_decision`` key are compatibility surfaces.
+    A treatment result is candidate-nomination evidence only.
     """
     result: Dict[str, Any] = {
         "has_active_test": False,
@@ -264,8 +268,11 @@ def check_ab_promotion_status(pattern_memory: Any, skill_name: str) -> Dict[str,
         if decision is None:
             result["blocked_reason"] = "insufficient_samples_or_inconclusive"
     except Exception as exc:
-        logger.debug("[MUTATION-SURFACE] check_ab_promotion failed: %s", exc)
-        result["blocked_reason"] = f"check_failed: {str(exc)[:100]}"
+        logger.debug(
+            "[MUTATION-SURFACE] check_ab_promotion failed; error_type=%s",
+            type(exc).__name__,
+        )
+        result["blocked_reason"] = "check_failed"
 
     return result
 
@@ -302,8 +309,11 @@ def check_promotion_readiness(
     except ImportError:
         result["blocked_reason"] = "WRESkillsRegistryV2_not_available"
     except Exception as exc:
-        logger.debug("[MUTATION-SURFACE] check_promotion_readiness failed: %s", exc)
-        result["blocked_reason"] = f"check_failed: {str(exc)[:100]}"
+        logger.debug(
+            "[MUTATION-SURFACE] promotion readiness failed; error_type=%s",
+            type(exc).__name__,
+        )
+        result["blocked_reason"] = "check_failed"
 
     return result
 
@@ -333,7 +343,7 @@ def build_mutation_surface_entry(
     # Active A/B test status (query only)
     active_ab_test = get_active_ab_test_status(pattern_memory, skill_name)
 
-    # A/B promotion status (query only)
+    # A/B statistical winner (query only; no promotion authority)
     ab_promotion = check_ab_promotion_status(pattern_memory, skill_name)
 
     # WRE promotion readiness (query only)
@@ -358,7 +368,7 @@ def build_mutation_surface_entry(
         mutation_status = "ab_test_active"
         blocked_reason = None
         if ab_promotion["promotion_decision"] == "treatment":
-            recommended_action = "promote_treatment"
+            recommended_action = "nominate_treatment_candidate"
         elif ab_promotion["promotion_decision"] == "control":
             recommended_action = "archive_treatment"
         else:

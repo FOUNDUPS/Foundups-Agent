@@ -1,0 +1,103 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "d35d3478839b15a9f713e4d9e84ab956bfdf3fbe"
+  },
+  "execution_id": "REDDOG_PR1606_POST_IDENTITY_REBIND_PHASE1",
+  "execution_plane": "local_git_architecture_runtime_reconciliation",
+  "outcome": "completed",
+  "wsp15_allocation": {
+    "receipt_id": "reddog-pr1606-post-identity-rebind-phase1",
+    "complexity": 4,
+    "importance": 5,
+    "deferability": 5,
+    "impact": 5,
+    "total": 19,
+    "priority": "P0"
+  },
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+      "WSP_framework/src/WSP_12_Dependency_Management.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_34_Git_Operations_Protocol.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_73_012_Digital_Twin_Architecture.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "The governed Holo query failed closed with HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH: authority d35d3478839b15a9f713e4d9e84ab956bfdf3fbe versus the concurrent YUMORI workspace 0c81418fe94a7786cfd55f01e138ddc5d510583d; no query-time mutation or reindex occurred.",
+      "Repository fallback inspected exact current main d35d3478839b15a9f713e4d9e84ab956bfdf3fbe, identity source commit 1184a236815c13e1135186a948b03bcf14621e5e, PR 1606 merge 415f8223e76d131ab7f7d671d62eb7a60f356340, every textual conflict, package rules, generated contract shards, backend manifest, module memory, and historical receipts.",
+      "Three WSP_00/WSP_97 audit workers independently reviewed PR 1606 reconciliation, RedDog documentation navigation, and the RedDog-surface/0102-deep runtime boundary."
+    ],
+    "research": [
+      "The local identity candidate established RedDog as the fast interaction/exchange surface and 0102 as the principal-scoped deep cognition/orchestration layer; canonical main first receives that correction in 0.4.141.",
+      "PR 1606 merged as the 0.4.140 builder release with beneficial bounded backend evidence but retained superseded identity truth; the correction therefore applies above exact merged main.",
+      "The original builder-child WSP 15, assumption-audit, WSP 97, physical-run, release, and VSIX artifacts remain immutable exact-commit history rather than evidence for this rebased candidate."
+    ],
+    "micro_pass": [
+      "Rebound package and extension metadata to 0.4.141 and regenerated the 18 authenticated contract shards at 6,942 lines and 492 assertions.",
+      "Reverified the already merged deterministic ignore expectations and exact ordering for repository-only .gitignore and ARCHITECTURE.md.",
+      "Removed a hard-coded O:\\tmp test assumption so the test and production runner use the same validated process temp root; Windows admission still rejects any root outside O: or E:.",
+      "Focused identity, conversation, shard, Holo incident, tiering, and manifest contracts pass; the deterministic package is 67 files and 950,193 bytes at sha256:cb6e5d4bb38da303ea9c9d7c79b862bbc7561566514edc8fb16ffb4015b281b8."
+    ],
+    "macro_pass": [
+      "Canonical main documentation remains the shared retrieval authority; the implementation candidate consumes it and cannot overwrite it with the older RedDog-equals-0102 model.",
+      "The 1,398-file backend remains bound at sha256:700d50f84e12d6deece513092ee6cab153defcc99c51f5a543aafdd1286e09ed and the test registry is current at 1,641 tests with 269 quarantined.",
+      "YUMORI tracked and untracked state was not modified, stashed, switched, or incorporated into this transaction."
+    ],
+    "hard_think": [
+      "Rejected resolving conflicts by mechanically preferring either parent because identity truth and builder implementation belong to different parent lineages.",
+      "Rejected relabeling historical 0.4.140 physical and VSIX evidence as 0.4.141 evidence because a rebind changes the exact source identity.",
+      "Rejected removing the builder child because its bounded evidence contract is useful and independently falsified; the smallest valid move is the identity correction above the merged builder base."
+    ],
+    "dialectic_sweep": [
+      "Direct-to-main canonical documentation is correct for shared retrieval, while implementation code remains reviewable in a focused PR; the branch must merge main truth forward rather than make documentation undiscoverable until implementation promotion.",
+      "A separate clone was used only because the active YUMORI checkout and sandbox Git boundary could not safely host an in-progress merge; no duplicate product implementation or alternate authority was created.",
+      "Nested Git from Node and pytest temporary-directory ACL behavior remain sandbox capability limits, so direct parent-process checks are recorded without claiming the aggregate release or a new VSIX."
+    ],
+    "first_principles": [
+      "One canonical truth belongs on main; every implementation branch must absorb it before promotion.",
+      "RedDog is the fast surface, 0102 is the deep principal-scoped cognition layer, and a builder child is evidence rather than effect authority.",
+      "Focused validation cannot be promoted into full-release evidence, and historical hashes cannot be reused across a changed exact commit."
+    ],
+    "execute": [
+      "Applied the identity correction and builder rebind corrections as one focused squash above exact current main d35d3478839b15a9f713e4d9e84ab956bfdf3fbe.",
+      "Preserved the exact 0.4.140 builder documentation and evidence, applied the identity correction in 0.4.141, and updated current ModLog and test memory.",
+      "Prepared one focused reconciliation commit without modifying the concurrent YUMORI checkout."
+    ]
+  },
+  "nonclaims": [
+    "No fresh 0.4.141 aggregate release, VSIX archive, or exact-current-main post-merge proof is claimed.",
+    "No new Git, HoloIndex owner, route, maintenance, activation, execution, or effect authority is granted to the extension or builder child.",
+    "No retrieval RSI, A-grade, persistent write denial, signed producer provenance, or current-patch CPython claim is made."
+  ],
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_6",
+    "WSP_12",
+    "WSP_15",
+    "WSP_22",
+    "WSP_34",
+    "WSP_50",
+    "WSP_62",
+    "WSP_73",
+    "WSP_84",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/architecture/REDDOG_PR1606_POST_IDENTITY_REBIND_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+    "docs/audits/architecture/REDDOG_SURFACE_0102_IDENTITY_ALIGNMENT_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+    "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_CHILD_WSP15_RECEIPT_PHASE2C3C.json",
+    "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_CHILD_WSP97_EXECUTION_RECEIPT_PHASE2C3C.json",
+    "extensions/reddog/ModLog.md",
+    "extensions/reddog/tests/TestModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+    "WSP_knowledge/WSP_Test_Registry.json",
+    "scripts/reddog_backend_manifest.json"
+  ]
+}

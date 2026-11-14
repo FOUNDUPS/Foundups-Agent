@@ -16,6 +16,8 @@ trigger:
 ---
 # LinkedIn Company Poster Skill
 
+Follow the [LinkedIn master](../../../../platform_integration/linkedin_agent/docs/LINKEDIN_ACTIVITY_ROUTING.md) and its publishing child. This is a legacy execution helper, not standing approval for daily or commit-triggered posts. Verify current author/page/series and exact approved copy before mutation; verify native mentions by entity identity and read back the published result. Do not run git hooks or posting commands as tests. Work uses its advertised browser skill. Static names, URLs and selectors below require live verification.
+
 ## Purpose
 Post updates and articles to FoundUps LinkedIn company page (1263645) with 0102🦞 signature.
 

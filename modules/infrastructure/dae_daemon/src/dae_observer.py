@@ -104,14 +104,14 @@ class DAEObserver:
 
     def _get_runtime_status(self, dae_id: str) -> Dict[str, Any]:
         try:
-            from modules.infrastructure.dae_daemon.src.dae_launch_broker import get_dae_launch_broker
+            from modules.infrastructure.dae_daemon.src.dae_launch_broker import get_existing_dae_launch_broker
 
-            broker = get_dae_launch_broker()
+            broker = get_existing_dae_launch_broker()
         except Exception:
             return {}
 
         try:
-            return broker.get_runtime_status(dae_id)
+            return broker.get_runtime_status(dae_id) if broker is not None else {}
         except Exception:
             return {}
 

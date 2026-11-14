@@ -40,6 +40,17 @@ _qwen_initialized: bool = False
 _gemma_initialized: bool = False
 
 
+def _resolve_selected_engine(role, resolve_backend, *, n_ctx, n_threads=4):
+    """Resolve role configuration once, then make one backend attempt."""
+    from modules.infrastructure.shared_utilities.local_model_selection import (
+        resolve_model_selection, resolve_role_native_key,
+    )
+    selected = resolve_model_selection(role)
+    native_key = resolve_role_native_key(role)
+    return resolve_backend(model_path=selected.path if selected.exists else None,
+                           native_model_key=native_key, n_ctx=n_ctx, n_threads=n_threads)
+
+
 def is_qwen_loaded() -> bool:
     """Check if Qwen engine is already loaded (no side effects)."""
     return _qwen_initialized and _qwen_engine is not None
@@ -60,8 +71,8 @@ def get_qwen_engine(
     Get or create singleton Qwen inference engine.
 
     Uses local_llm_resolver to select best available backend:
-    1. LM Studio API (if available) - avoids file lock conflicts, no config needed
-    2. Direct llama_cpp loading (fallback) - requires QwenAdvisorConfig
+    1. The existing code role's exact configured native key (borrow-only)
+    2. Its existing selected GGUF file through the explicit fallback contract
 
     Args:
         max_tokens: Maximum tokens to generate (unused by backend, kept for API compat)
@@ -85,20 +96,7 @@ def get_qwen_engine(
         start_time = time.time()
         logger.info("[AI-SINGLETON] Resolving Qwen backend...")
 
-        # First try without model_path (LM Studio path - no config needed)
-        engine = resolve_qwen_backend(n_ctx=context_length)
-
-        # If LM Studio unavailable, try with config for llama_cpp fallback
-        if engine is None:
-            try:
-                from holo_index.qwen_advisor.config import QwenAdvisorConfig
-                config = QwenAdvisorConfig.from_env()
-                engine = resolve_qwen_backend(
-                    model_path=config.model_path,
-                    n_ctx=context_length,
-                )
-            except Exception as config_err:
-                logger.debug(f"[AI-SINGLETON] Config load failed, LM Studio was only option: {config_err}")
+        engine = _resolve_selected_engine("code", resolve_qwen_backend, n_ctx=context_length)
 
         if engine is not None:
             load_time = (time.time() - start_time) * 1000
@@ -127,8 +125,8 @@ def get_gemma_engine(
     Get or create singleton Gemma inference engine.
 
     Uses local_llm_resolver to select best available backend:
-    1. LM Studio API (if available) - avoids file lock conflicts, no config needed
-    2. Direct llama_cpp loading (fallback) - requires model path resolution
+    1. The existing triage role's exact configured native key (borrow-only)
+    2. Its existing selected GGUF file through the explicit fallback contract
 
     Args:
         n_ctx: Context window size
@@ -151,23 +149,7 @@ def get_gemma_engine(
         start_time = time.time()
         logger.info("[AI-SINGLETON] Resolving Gemma backend...")
 
-        # First try without model_path (LM Studio path - no config needed)
-        engine = resolve_gemma_backend(n_ctx=n_ctx, n_threads=n_threads)
-
-        # If LM Studio unavailable, try with model path for llama_cpp fallback
-        if engine is None:
-            try:
-                from modules.infrastructure.shared_utilities.local_model_selection import (
-                    resolve_triage_model_path,
-                )
-                model_path = resolve_triage_model_path()
-                engine = resolve_gemma_backend(
-                    model_path=model_path,
-                    n_ctx=n_ctx,
-                    n_threads=n_threads,
-                )
-            except Exception as path_err:
-                logger.debug(f"[AI-SINGLETON] Model path resolution failed, LM Studio was only option: {path_err}")
+        engine = _resolve_selected_engine("triage", resolve_gemma_backend, n_ctx=n_ctx, n_threads=n_threads)
 
         if engine is not None:
             load_time = (time.time() - start_time) * 1000

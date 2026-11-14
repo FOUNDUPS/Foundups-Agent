@@ -1,0 +1,123 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "724954fa3799b19174a7ac0b653da8c95e9ccf13"
+  },
+  "execution_id": "REDDOG_HOLO_OWNER_QUERY_WORKSPACE_ROOT_PHASE2",
+  "execution_plane": "local_tools_and_wsp00_subagents",
+  "outcome": "completed",
+  "system_verdict": {
+    "slice": "holo_owner_query_workspace_authority_root_separation",
+    "candidate_code_and_release": "verified",
+    "merged_exact_main_controller_replay": "pending",
+    "maintenance_replica_rsi": "working",
+    "retrieval_quality_rsi": "not_operational",
+    "holoindex_a_grade": "blocked",
+    "runtime_environment_exact_closure_verified": false,
+    "live_route_changed": false
+  },
+  "wsp15_allocation": {
+    "complexity": 3,
+    "importance": 5,
+    "deferability": 5,
+    "impact": 5,
+    "total": 18,
+    "priority": "P0",
+    "decision": "separate the query workspace entry root from the independently selected verification authority before any further retrieval RSI work"
+  },
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_87_Code_Navigation_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "WSP_00 awakening and WSP_97 operator loop were completed before the phase-2 edit.",
+      "Governed Holo evidence at exact main 724954fa3799b19174a7ac0b653da8c95e9ccf13 was CURRENT, no-gap, and no-reindex at generation sha256:4ede3b9d714e2484256d587fbf798b00deb3c64c47f1c0aa2ad881274e066922.",
+      "Retrieval evaluation found the correct controller, classifier, incident, recovery, authority-selector, interface, roadmap, ModLog, and closest tests; direct source resolved the uncommitted candidate overlay.",
+      "NAVIGATION, module README, INTERFACE, ROADMAP, ModLog, runtime contract, tests README, TestModLog, and release contracts were read before release edits."
+    ],
+    "research": [
+      "The exact-main OpenClaw transaction completed maintenance and atomic completion before the controller returned owner_result_invalid_after_completion.",
+      "Live reproduction proved query_once entered at the selected authority returns HOLOINDEX_AUTHORITY_ROOT_INVALID because configured authority then equals workspace.",
+      "The original control root reached that same authority and returned CURRENT in 35.3 seconds; full verification preserved 33 artifacts and 222617459 bytes.",
+      "A WSP_00/WSP_97 read-only audit independently identified all four production caller paths and rejected resolver weakening."
+    ],
+    "micro_pass": [
+      "The direct root/selector selection passed 21 tests.",
+      "The affected postcompletion, controller, incident, recovery, owner-query, and authority selection passed 190 tests.",
+      "Independent WSP 62 review reduced the bridge README to 999 lines from base 1001 and kept INTERFACE at its inherited 1527-line ceiling; controller is 673/675 and all touched production functions are within the communication 60-line limit.",
+      "The canonical test registry is current at 1610 tests with 268 quarantined entries; registry and Holo indexing passed 52 tests.",
+      "Backend manifest generation and staged-index binding passed 8 tests at 1365 files and sha256:bacffc8e18b495496ac4b9dbfaa8984e1e1531ce50564f4a2e97db98a8076645.",
+      "RedDog fast 14-member, conversation 32-test, contract 3-member, deterministic package, and candidate WSP 62 gates passed."
+    ],
+    "macro_pass": [
+      "The exhaustive RedDog release verifier passed all four groups in 184.6 seconds without group or release timeout.",
+      "The 18-shard 6942-line 492-assertion contract is sha256:3c951718cb1307e89387365fbea492b18d331b4a2a2449152e69b538e14a7f1f.",
+      "The deterministic 67-file package is 946244 bytes at sha256:e8e2329154f5efde76c54b33f60e345ad5a7c7613a74bc7fe5344b111852246e.",
+      "O:/RedDog-Releases/reddog-0.4.134.vsix is 275758 bytes at sha256:0bd21de0974bc95b9a4411326762f69dd3f2a3939bc5bb574ac64f10a2a37e23; inspection found 69 safe entries, 67 exact source members, no duplicate, encryption, unsafe, sensitive filename, or credential-value hits.",
+      "No Holo reindex, maintenance replay, route mutation, extension installation, Hermes dispatch, or live production authority was performed by this candidate transaction."
+    ],
+    "hard_think": [
+      "The query-entry workspace and verification authority are distinct evidence roles even when they belong to the same Git repository and commit.",
+      "Recycling the authority as the workspace makes independent configured-authority selection self-referential; the correct resolver rejection must remain intact.",
+      "Passing an explicit internal workspace root is smaller and safer than environment mutation, fallback, a preselected-authority API, or repeated maintenance.",
+      "Candidate tests and a production-shaped CURRENT proof do not replace the first merged exact-main controller replay."
+    ],
+    "dialectic_sweep": [
+      "Weakening authority-equals-workspace validation would make the failed controller appear green but collapse the independent clean-authority boundary.",
+      "Letting query_once accept a preselected authority would avoid selection repetition but create a privileged bypass surface without a demonstrated need.",
+      "Clearing the authority environment is compact but process-global and race-prone; explicit data flow preserves concurrency and provenance.",
+      "Repeating maintenance could hide the false negative but add external effects after a transaction that already succeeded."
+    ],
+    "first_principles": [
+      "A read begins at the caller workspace, independently selects current clean authority, and accepts only evidence bound to that selection.",
+      "The prompt supplies query content only; controller roots remain internal trusted inputs.",
+      "Every production caller must preserve the same root separation and every malformed topology must fail closed.",
+      "This slice repairs controller truth only; exact runtime closure, A-grade, retrieval-quality RSI, and merged live acceptance remain separate gates."
+    ],
+    "execute": [
+      "modules/communication/moltbot_bridge/src/reddog_holoindex_owner_result_verification.py",
+      "modules/communication/moltbot_bridge/src/holoindex_postmerge_runtime_controller.py",
+      "modules/communication/moltbot_bridge/src/reddog_holoindex_incident_repair_runtime.py",
+      "modules/communication/moltbot_bridge/src/reddog_holoindex_blocked_request_recovery.py",
+      "modules/communication/moltbot_bridge/tests/test_reddog_holoindex_owner_query_root_binding.py",
+      "holo_index/tests/test_holoindex_authority_worktree.py",
+      "extensions/reddog/package.json",
+      "extensions/reddog/backend_compatibility_constants.js",
+      "scripts/reddog_backend_manifest.json"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_6",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_62",
+    "WSP_84",
+    "WSP_87",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/infrastructure/REDDOG_HOLO_OWNER_QUERY_WORKSPACE_ROOT_WSP97_EXECUTION_RECEIPT_PHASE2.json",
+    "docs/audits/security/REDDOG_HOLO_OWNER_QUERY_WORKSPACE_ROOT_ASSUMPTION_AUDIT_20260828.md",
+    "modules/communication/moltbot_bridge/README.md",
+    "modules/communication/moltbot_bridge/INTERFACE.md",
+    "modules/communication/moltbot_bridge/ROADMAP.md",
+    "modules/communication/moltbot_bridge/ModLog.md",
+    "modules/communication/moltbot_bridge/tests/README.md",
+    "modules/communication/moltbot_bridge/tests/TestModLog.md",
+    "extensions/reddog/README.md",
+    "extensions/reddog/ROADMAP.md",
+    "extensions/reddog/ModLog.md",
+    "extensions/reddog/tests/README.md",
+    "extensions/reddog/tests/TestModLog.md"
+  ]
+}

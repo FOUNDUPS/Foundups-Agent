@@ -1,7 +1,252 @@
 # INTERFACE - FoundUps Simulator
 
+## Prospective micro-UPS interface — 2026-11-05
+
+**VERIFIED_SIMULATED bounded preview.** The [P4 contract](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p4-prospective-micro-ups-allocation-v1)
+implements `ups_micro_v1`: 1 UPS = 1,000,000 atoms; built-in amount/epoch integers
+are bounded by `0..2**63-1`. `parse_ups_atoms(text)` accepts the frozen ASCII decimal
+grammar exactly, at most six fractional digits/20 characters; trailing zeroes are
+allowed, while `.1`, `1.`, signs, whitespace, exponents and coercible objects refuse.
+`PoolDistributor.plan_atom_epoch(epoch, total_reward_atoms, *, foundup_id)` captures
+its real locked roster and returns immutable `UPSAtomPlan`. No source/balance,
+ledger/cache or reservation write; native staker positions refuse. Stakeholder
+entitlements sum exactly then floor once; network floors separately and fund once.
+Factory plans export detached JSON with decimal-string amounts/epoch. Context,
+roster and version identify data, never authority. `source_retained_atoms` is R-C
+in the plan, not an observed Treasury balance; no carry or new beneficiary.
+Defaults/P3/v2 receipts stay; current source qualification is scoped in the central record.
+
+## Restricted native UPS epoch transfers — 2026-11-02
+
+`SimulatorConfig.epoch_funding_mode` defaults to `legacy_unfunded`; opt-in
+`sim_native_epoch_transfer_v1` is simulator-qualified. Unknown modes refuse.
+PoolDistributor keeps legacy construction and adds keyword-only `funding=None`,
+bound once to the actual fresh source/ledger by the private factory.
+The [decision](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p3-exact-native-transfer-v1)
+owns full R<=S, component/receipt/book equality, native C and exact source loss;
+unknown/present liabilities HOLD. Misaligned books may stall the whole epoch.
+No F_i/21M, global unit, external funding, restart or chain authority follows.
+
+## Native pool credit refusal — 2026-11-01
+
+The class B candidate guards exactly four PoolDistributor additions: stakeholder
+and network participant balances, accumulated fund and lifetime drip counter.
+For finite nonnegative built-in operands, compute the existing native addition;
+if its increment is positive but result <= prior book, raise ValueError while
+plans remain private. Pool/optional-ledger publication follows all preparation.
+Failed new epochs retain participating balances, tiers, shared positions, receipts
+and markers; accepted exact/late retries keep their saved decision before recalculation.
+Earlier Mesa decay/counters are not rolled back; this is not historical repair.
+Existing order/types/zero/fractional arithmetic remain. Partial rounding/over-credit,
+receipt/local/hurdle accumulator absorption, standalone StakerPosition, underflow
+to zero and zero-increment conversion are excluded. No exact conservation, source
+debit, funded entitlement, restart recovery, unit/precision selection or chain grant.
+B03 source transfer remains SPECIFIED_NOT_IMPLEMENTED, arithmetic NOT_SELECTED/code HOLD.
+
+## Same-ID trade-prevention candidate — 2026-11-01
+
+For ordinary native orders/string IDs under serialized hosting, a best crossing
+same-ID maker causes cancellation of the incoming remainder, fixed reason
+`self_trade_prevention`, one incoming-side rejection-count increment and no heap
+reinsertion. Maker state and preceding external fills remain; no skipping to
+worse prices. Price-only ordering, seller price and accepted fee math stay.
+Rejection counters now include this cancellation even after a filled prefix;
+placement/cancellation records are allowed effects, not a wholly no-effect refusal.
+Direct same-ID `_execute_trade` raises ValueError before all counters/fills/history.
+CANCELLED with no trades returns FAILED/zero amounts. With an external prefix,
+DEX_BUY reports actual trade notional/F_i/fee sums and historical order ID;
+message says cancelled remainder, never pending. Ordinary live partial behavior
+stays. Mesa refunds only unused `remaining_allocation`, not wallet cash.
+No funded debit, fee-payer policy, ownership/alias/Sybil proof, whole-market
+rollback, concurrency/restart or complete A08/B11 protection is supplied.
+
+## Hourly queue readiness — 2026-11-01
+
+`CircuitBreaker.process_queue()` retains its no-argument call and FIFO count rule:
+`max(1, int(current_queue_length * queue_release_per_hour))`. The first eligible
+nonempty call releases immediately; later dequeues need at least 3,600 monotonic
+seconds. Native slices are prepared before the final clock observation and
+queue/timer publication. Long gaps earn one batch, with no catch-up credits.
+Empty, EMERGENCY and early calls leave queue/timer unchanged; drain/refill retains
+the timer. Existing datetime cooldown, requested-at, outflow and rate policy stay.
+The private timer is excluded from constructor, repr and equality; `asdict` gains
+additive bookkeeping. A postmutation logging failure leaves the dequeue/timer
+committed: no successful return, lost-result recovery or retry permission follows.
+The delivered queue implementation supports ordinary native dataclass/list state under serialized
+calls within one live instance. Hostile hooks, concurrent/direct state mutation,
+copy/recreation, restart durability, funded payment and authenticated recovery
+are excluded. It does not close all A12 or change the B03 C/D unit conflict.
+
+## Opt-in simulator reserve quote observation — 2026-11-01
+
+`snapshot_simulator_quote(reserve: BTCReserve, *, context_id: str, tick: int)`
+returns a frozen, slotted `SimulatorQuoteSnapshot`. The receiver must be an exact
+BTCReserve. It reads only `total_btc`, `total_ups_circulating` and
+`genesis_ups_per_btc`; each must be an exact built-in int/float, finite and
+nonnegative, with genesis strictly positive. Bool, subclasses and coercible
+objects reject with ValueError without invoking their numeric hooks. Only immutable
+copies of the three source values are retained; no reserve reference is retained
+or source state changed. USD rate and inflow history are not read.
+
+| Field | Produced type and meaning |
+| --- | --- |
+| `format_version` | int, fixed `1` |
+| `interpretation` | str, fixed `decimal_view_v1` |
+| `source_kind` | str, fixed `simulator_state` |
+| `context_id` | Exact built-in str, 1–128 ASCII chars: first `[A-Za-z0-9]`, remainder `[A-Za-z0-9._:-]`; observation label |
+| `tick` | Exact built-in int in `0..2**63-1`; observation label |
+| `branch` | str, `genesis_notional` or `reserve_ratio` |
+| `reserve_btc` | Reduced immutable `(numerator, denominator)` built-in int tuple |
+| `circulating_ups` | Reduced immutable built-in int rational tuple |
+| `genesis_ups_per_btc` | Reduced immutable built-in int rational tuple |
+| `sats_per_ups` | Reduced immutable built-in int rational tuple |
+| `identity_sha256` | 64 lowercase hexadecimal chars; content/context identity |
+
+All denominators are positive. Ints remain exact; finite floats use their
+canonical decimal spelling before exact rational arithmetic. Zero circulation
+selects `genesis_notional`: `100000000 / genesis`, including positive BTC with
+zero UPS. Positive BTC and circulation select `reserve_ratio`:
+`100000000 * BTC / UPS`. Zero BTC with outstanding UPS raises ValueError only in
+this API; the differing legacy properties, all defaults and callers are preserved.
+This view does not recover historical precision or change global Decimal context.
+
+Work limits are 1100 input-int bits before conversion, 330 decimal digits per
+source-pair component, 668 per derived-quote component and 8192 payload bytes.
+These bound format work, not asset precision, supply or economic caps. Identity
+hashes ASCII `foundups.simulator.reserve-quote.v1`, one NUL byte, then sorted-key
+compact ASCII JSON of all fields except `identity_sha256`; tuples become arrays,
+with no newline or nonfinite tokens. Changed labels/content change identity;
+there is no replay-conflict or consumption store.
+
+A trusted host must serialize observation with source writes; concurrent
+multiscalar capture is not atomic. Public construction, immutability, labels and
+digest are data, not authentication, currentness, funded backing, issuance or
+settlement evidence. No consumer may infer authority from a self-supplied record
+or digest. This opt-in class A representation leaves the class D unit conflict
+and future class C economic decisions open, with no default or chain activation.
+
+## Pool epoch effect contract — 2026-11-01
+
+`PoolDistributor(ledger=None)` keeps the no-argument constructor and existing
+`distribute_epoch(epoch, total_ups_rewards, foundup_id=None)` call. A supplied
+ledger must be an actual `EpochLedger`. Epochs are nonnegative built-in integers;
+amounts are finite nonnegative built-in int/float values, excluding bool and
+coercible/subclass objects. Context is None or a nonempty built-in string. An
+explicit context must match the bound ledger. None and an explicit matching
+context remain distinct request identities; None preserves legacy callers.
+
+One distributor owns one epoch sequence for its process lifetime. Numerically
+equivalent amounts such as 100 and 100.0 identify an exact retry; large integers
+are not rounded for identity. Exact retries, including after later epochs,
+return a fresh detached copy of the original result without recalculation or
+further balance effects. Altered amounts/contexts and unseen older epochs reject;
+new increasing epochs may have gaps. Changes to roster, configuration or earlier
+returned dictionaries do not change the saved decision.
+
+Before participating writes, the pool prepares participant balances/tiers,
+shared staker cumulative BTC and first-lock state, fund/drip totals, receipt
+copies and optional ledger evidence. Public register/activity/statistics calls
+serialize with distributions. Bound publication holds pool then ledger locks;
+a preexisting ledger entry without this pool's own receipt cannot prove payment.
+Ordinary preparation failures leave those participating effects unchanged. Valid
+percentages, activity shares, missing-tier residuals and arithmetic order remain.
+Shared `StakerPosition` references preserve original sequential hurdle crossing.
+
+Mesa binds its existing F0 ledger to the pool. A failed distribution tail retains
+its epoch and amount and resumes before another demurrage pass. The epoch counter
+and pending state finalize before observers. A validated coordinated receipt
+allows at most one local observer attempt per epoch, marked before I/O; ordinary
+observer/logging exceptions cannot report an economic abort. BaseException is
+not swallowed. Failed telemetry may be lost. Direct mock connector force behavior
+is unchanged; automatic model retries do not republish an observed epoch.
+
+This is **VERIFIED_SIMULATED (process-local)** scope only after the linked current
+acceptance. It does not make earlier demurrage, MetaGPT work resets, fee-runner
+downstream account credits or external delivery atomic. Restart recovery,
+cross-process writers, Treasury funding, exact chain units and real settlement
+remain absent. Process death, allocation failure and arbitrary unsynchronized
+mutation of public objects/configuration are outside this guarantee. See the
+[current evidence and AI threat map](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#replay-safe-epoch-settlement-and-ai-threat-update--2026-11-01).
+
+## Native allocation admission contract — 2026-11-01
+
+Execution and independent scoped source review are accepted:
+The 171 frozen cases plus 25 independent held-outs passed: 196 cases. The 311
+original regressions passed with exact prior case IDs. Zero errors, skips or guard
+denials were recorded; 174 simulator/FAM Python source snapshots remained stable.
+Independent source/AST/budget review reports no material findings within the
+frozen native-state contract.
+The implemented scoped contract covers `AgentExecutionWallet.receive_allocation`,
+`HumanUPSAccount.allocate_to_agent`, `TokenEconomicsEngine.human_allocates_to_agent`
+and `SwarmFoundUp.register_agent` with supported native account/wallet state under
+a trusted serialized host. Exact built-in int/float operands/results must be
+finite and nonnegative under the existing arithmetic; bool, numeric subclasses
+and coercible objects are rejected without executing numeric hooks. Relevant
+existing balances/counters, prospective results and policy are prepared before
+participating numeric/policy/MetaGPT registration changes. Composite source is
+mandatory: None is invalid source state and never an absence/unfunded-credit
+sentinel. Standalone wallet receipt uses separate checked additions.
+
+Composite human/engine/MetaGPT allocation omits the previous standalone wallet
+receipt INFO log, as allowed before implementation. Logging is neither settlement
+evidence nor rollback authority.
+
+Keep legacy missing/wrong-allocator and unknown-owner precedence. A valid request
+above funds still leaves core balances unchanged; MetaGPT retains zero-wallet
+registration for valid insufficient funds. Existing empty-policy behavior stays
+as specified below. This is no arbitrary override/property-hook rollback,
+postcommit logging rollback, concurrency/durability guarantee, global precision
+choice, funded conservation, signing authority or full A02 protection.
+
+## AgentExecutionWallet policy contract — 2026-11-01
+
+Constructor and trusted `policy_gates = value` replacement accept a plain dict
+with only `allowed_ops` and `max_per_task`. Operations must be a plain list/tuple
+of nonempty plain strings; the limit must be a nonnegative built-in int or finite
+float (not bool/subclasses/coercible objects). Integers retain their precision.
+Invalid policy raises ValueError before allocation balance changes. Installed
+policy is detached; reads return a mapping proxy with immutable operation tuples.
+`receive_allocation` and `human_allocates_to_agent` retain the previous policy for
+None or {}; a valid policy is installed only after successful funding. Direct
+host replacement with {} clears restrictions, preserving the existing API.
+
+This closes caller-container alias mutation, not arbitrary same-process access:
+raw object storage and trusted replacement remain host authority. Dataclass
+`asdict` serialization of the mapping-proxy view is not a qualified interface.
+No new issuer authentication, pending/global limits, precision conversion,
+concurrency isolation, signing, or funded blockchain settlement is supplied.
+
+
+## CABR and breaker admission — 2026-10-31
+
+Economic promotion follows the [WSP26 change contract](../../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract).
+The [source matrix](contracts/source_of_truth_matrix.json) is an evidence map, not
+a runtime permission or settlement guarantee. Conflicting units and known failed
+security oracles block activation; documented mock behavior stays mock behavior.
+
+`route_cabr_ups_flow` raises ValueError unless PoB is an exact bool and all
+four numeric fields are finite built-in int/float. Signed finite clamps and
+valid formulas are unchanged. This pure calculation neither authenticates PoB
+nor consumes Treasury funds. `CircuitBreaker.check_conditions` rejects invalid
+backing/price/outflow/reference values before transition, prioritizes the highest
+severity and applies existing cooldown/empty-queue recovery to all downgrades.
+Thresholds and multipliers are unchanged. Emergency plus queued exits stays
+held; authenticated recovery/cancellation, oracle freshness and global funded
+withdrawal enforcement are not implemented by this interface.
+
 ## Module Contract
 FoundUps Simulator provides real-time event streaming via Server-Sent Events (SSE) for the cube visualization frontend, bridging FAMDaemon observability data to the web UI.
+
+## FAM bridge authority boundary
+
+`FAMBridge.verify_task` and `trigger_payout` retain their existing signatures.
+They pass CallerAuthorization for the configured simulation host identities
+`verifier_0`/`treasury_0` and the stored task's exact FoundUp. Caller-supplied IDs
+must match that independent host context. Self-verification and unbound stored
+proofs are rejected by FAM; IDs and legacy role labels cannot grant authority.
+This does not implement a production principal resolver, issuer, revocation
+service, token mint or confirmed payment. In-memory completed rewards remain
+simulation; persistent initiation has separate pending semantics.
 
 ## CABR Canonical Intent
 - CABR = Consensus-Driven Autonomous Benefit Rate (also referred to as Collective Autonomous Benefit Rate).
@@ -10,6 +255,114 @@ FoundUps Simulator provides real-time event streaming via Server-Sent Events (SS
 - RESULT: PoB drives protocol allocation/distribution; ROI is a downstream financial readout.
 
 ## Core Schemas
+
+### Selected economic numeric admission
+
+Work, stake and unstake entrypoints validate exact built-in int/float operands
+before participating wallet, pool, adoption or account mutations. Bool, text,
+custom numeric objects, negatives, nonfinite values and unsupported arithmetic
+results raise ValueError. Selected operation fees satisfy `0 <= rate < 1`;
+unsupported positive amounts that round to zero net also reject. Configurable
+fees and discounts are checked at use. Optional adoption work=None still means
+no increment. Existing finite zero/fractional arithmetic and insufficient-funds
+results remain; engine work retains its existing float normalization after
+strict admission and its historical double work-metric increment.
+
+`economics/_token_numeric.py` owns only private pure scalar calculations.
+Prospective participating balances are validated before live assignments;
+composite success logs follow those assignments. Unknown valid-but-insufficient
+work no longer registers a wallet/pool before preparation fails. Public method
+signatures and existing object references remain. This does not provide
+concurrent isolation, whole-engine or outer Mesa/CABR batch atomicity, aggregate
+issuance limits, monetary precision, chain-unit conversion or funded settlement.
+
+### Mock BTC anchor contract
+
+`BTCAnchorConnector` retains its constructor, publish, confirmation, status and
+statistics signatures. Configured mode/path are read-only. Only `AnchorMode.MOCK`
+is supported; other modes reject before database side effects regardless of the
+feature flag. The singleton rejects explicit unsupported mode/path substitutions;
+no-argument reuse remains. Mesa rejects malformed selected modes.
+
+Fresh `publish_commitment` input must contain exactly the complete known v2
+scalar fields emitted by the epoch producer. Unknown/unversioned formats and
+extra/missing fields reject. Identity strings are nonempty built-in strings;
+hashes use lowercase hex with lengths40/64. Epochs are built-in integers in
+`0..2**63-1`, reflecting SQLite capacity; counts are nonnegative built-in integers.
+Amounts use the existing v2 finite/nonnegative built-in int/float normalization,
+including integral floats and signed zero, without monetary conversion. JSON
+conversion failures reject before dispatch or partial records. `force` must be an
+exact bool. UTC-aware timestamps are required but retained verbatim: `Z` and
+`+00:00` spellings are distinct identities. No freshness claim is inferred.
+
+Canonical sorted compact JSON binds the full validated payload and mock realm.
+The existing table adds nullable format/realm/digest/JSON identity columns under
+a SQLite write fence. Existing rows keep their values and NULL identity fields;
+they remain readable as `legacy_unclassified`. No inferred backfill or semantic
+promotion occurs. Unsupported required column/types/primary-key/nullability or
+noncanonical/partial/missing business-key uniqueness rejects at construction,
+without rebuilding or dropping data. The key remains `(foundup_id,epoch)`.
+
+One transaction compares identity and performs only pure deterministic mock work.
+Exact non-force replay returns the stored receipt. Exact same-content mock force
+still performs a second simulated publish with the same reference, a false
+`idempotent_hit` and another publication statistic; first receipt/confirmation
+history remains. Conflict, foreign realm, legacy, pending or failed records deny
+without overwrite/dispatch. Only bound published/confirmed mock receipts with a
+matching reference can gain mock confirmation counts. Invalid thresholds reject.
+Returned status rows label identity classification; that label is not authority.
+
+Public result keys remain, with additive version/realm/digest/mock diagnostics.
+`real_publishing_implemented` is false. Fifteen prior BTC case oracles remain;
+the former test requiring TestNet-to-mock coercion is deliberately replaced.
+Unversioned fixture payloads now explicitly declare current v2 metadata.
+
+This proves local replay admission, not source authenticity, Merkle entitlement,
+funded balances, reserve backing or payment. The fence is not an external-I/O
+transaction/recovery design; no real publisher or confirmation source exists.
+
+### Epoch evidence contract
+
+`economics/epoch_ledger.py` owns the existing process-local ledger. Recording and
+commitment method signatures remain; `MerkleProof.verify` now requires all four
+keyword arguments:
+
+```python
+proof.verify(expected_root=trusted_root, expected_foundup_id="project_a",
+             expected_epoch=1, expected_participant_id="alice")
+```
+
+Verification recomputes the amount/participant leaf and binds FoundUp, epoch and
+`foundups.epoch.v2`. The expected root/context must come from a trusted checkpoint,
+not from the submitted proof. Missing arguments cannot pass. Unknown formats,
+malformed hashes/path directions, mismatched contexts and altered claims reject.
+This proves inclusion of the proof's amount, not work eligibility or settlement.
+
+Amounts accept exact built-in int/float only, excluding bool, negative values,
+NaN and infinities. Integers remain exact; integral floats become integers and
+signed zero becomes zero. Fractional floats retain their value. Hash JSON uses
+sorted keys, compact separators and `allow_nan=False`; leaves, nodes, empty roots
+and entries have explicit domains/context. No financial precision, rounding,
+tolerance, conservation equation or chain unit conversion is added. Individual
+finite values do not establish safe aggregate arithmetic for every magnitude.
+
+`record_epoch` validates and builds before publishing under its instance lock.
+An exact normalized retry returns the original frozen entry/time/hash/tree,
+including after newer epochs. Conflicts reject without mutation. New epochs
+increase with gaps allowed. Entries are tuple snapshots, recorded mappings are
+read-only copies, tree levels/proof paths are tuples, and `to_dict`/commitment
+results are detached ordinary dictionaries. These are in-process guarantees;
+there is no durable epoch recovery or cross-epoch work-source consumption here.
+`verify_chain` checks the listed snapshots themselves and their canonical epoch
+index consistency; a separate valid indexed entry cannot mask list corruption.
+
+Commitments retain `status=pre_settlement`, `wsp_78_layer=D_pending`, the existing
+summary fields and an added `format_version`. Anchors use the finalized entry
+timestamp/context, so repeated preparation is stable. V2 digests differ from the
+old format. Legacy BTC connector rows remain unclassified rather than being
+promoted to v2 receipts. Non-mock effects and recovery remain blocked. Pool
+distribution evidence retains its current units, including the historical
+`total_fi_distributed` field name; it is not a canonical spendable F_i ledger.
 
 ### SSE Event Envelope
 ```python

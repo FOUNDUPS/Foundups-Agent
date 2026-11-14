@@ -444,7 +444,7 @@ if __name__ == "__main__":
             print(f"\nRequest: {request}")
             print(f"Routing: {decision.route_type.value} (confidence: {decision.confidence:.2f})")
             print(f"Tools: {', '.join(decision.tools_to_use)}")
-            print(".4f"            print(f"Reasoning: {decision.reasoning}")
+            print(f"Reasoning: {decision.reasoning}")
 
         # Show metrics
         metrics = gateway.get_gateway_metrics()

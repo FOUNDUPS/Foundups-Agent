@@ -1,0 +1,108 @@
+{
+  "source": "modules/foundups/foundup_registry.json",
+  "head": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+  "entities": [
+    {
+      "foundup_id": "gotjunk_001",
+      "entity_type": "foundup",
+      "stage": "proto",
+      "module_path": "modules/foundups/gotjunk"
+    },
+    {
+      "foundup_id": "kosei",
+      "entity_type": "foundup",
+      "stage": "incubating",
+      "module_path": "modules/foundups/kosei"
+    },
+    {
+      "foundup_id": "voteballots",
+      "entity_type": "skeleton_candidate",
+      "stage": "incubating",
+      "module_path": "modules/foundups/voteballots"
+    },
+    {
+      "foundup_id": "trade",
+      "entity_type": "skeleton_candidate",
+      "stage": "incubating",
+      "module_path": "modules/foundups/trade"
+    },
+    {
+      "foundup_id": "magadoom_001",
+      "entity_type": "foundup",
+      "stage": "incubating",
+      "module_path": "modules/gamification/whack_a_magat"
+    },
+    {
+      "foundup_id": "antifafm_001",
+      "entity_type": "foundup",
+      "stage": "proto",
+      "module_path": "modules/platform_integration/antifafm_broadcaster"
+    },
+    {
+      "foundup_id": "pfmall",
+      "entity_type": "platform_layer",
+      "stage": null,
+      "module_path": "modules/foundups/pfmall"
+    },
+    {
+      "foundup_id": "agent_market",
+      "entity_type": "infra_service",
+      "stage": null,
+      "module_path": "modules/foundups/agent_market"
+    },
+    {
+      "foundup_id": "move2japan",
+      "entity_type": "access_service",
+      "stage": null,
+      "module_path": "modules/foundups/move2japan"
+    },
+    {
+      "foundup_id": "simulator",
+      "entity_type": "tool_simulator",
+      "stage": null,
+      "module_path": "modules/foundups/simulator"
+    },
+    {
+      "foundup_id": "social_twin",
+      "entity_type": "infra_service",
+      "stage": null,
+      "module_path": "modules/foundups/social_twin"
+    },
+    {
+      "foundup_id": "autopost",
+      "entity_type": "external_foundup",
+      "stage": "incubating",
+      "module_path": null
+    },
+    {
+      "foundup_id": "pqn_portal",
+      "entity_type": "skeleton_candidate",
+      "stage": "incubating",
+      "module_path": "modules/foundups/pqn_portal"
+    },
+    {
+      "foundup_id": "science_swarm_hub",
+      "entity_type": "external_foundup",
+      "stage": "proto",
+      "module_path": "modules/foundups/pqn_swarm_hub"
+    },
+    {
+      "foundup_id": "holoindex_prod_01",
+      "entity_type": "infra_service",
+      "stage": "incubating",
+      "module_path": "modules/foundups/holoindex_prod_01"
+    },
+    {
+      "foundup_id": "esingularity_001",
+      "entity_type": "foundup",
+      "stage": "proto",
+      "module_path": "modules/foundups/esingularity"
+    },
+    {
+      "foundup_id": "shield",
+      "entity_type": "foundup",
+      "stage": "incubating",
+      "module_path": "modules/foundups/shield"
+    }
+  ]
+}

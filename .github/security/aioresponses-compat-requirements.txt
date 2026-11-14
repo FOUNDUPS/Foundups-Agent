@@ -1,0 +1,2 @@
+# Released wheel only; the separately recorded CI overlay is applied afterwards.
+aioresponses==0.7.9 --hash=sha256:94f9617f841c5bd7ee088ed783284f2cf4e6acc85d3933d92fc2fc7bd572a1b0

@@ -4,11 +4,35 @@
 Track development progress and changes for the WSP 48 Recursive Self-Improvement implementation.
 
 ## Status
-**Current**: Active Development (Sprint 2, Task 1)  
-**Phase**: RED CUBE Implementation  
-**Coverage**: Core engine complete, testing pending  
+**Current**: Proposal-learning compatibility module; production RSI incomplete
+**Phase**: Execution-truth hardening
+**Coverage**: Focused smoke/regression coverage; quantum-state and metrics gaps remain
 
 ## Change Log
+
+### 2026-08-26 - Shutdown and Background-Persistence Hardening
+
+- Replaced the nonexistent `save_quantum_state()` shutdown call with a bounded
+  stop/join plus final `QuantumStatePersistence.save_state()` result.
+- Made background auto-save explicit opt-in through
+  `WRE_RECURSIVE_AUTO_SAVE=1`; default engine construction starts no immortal
+  persistence thread.
+- Added success and redacted-failure regressions. This remains proposal/state
+  persistence, not artifact evaluation, promotion, or activation.
+  (WSP 00/15/22/50/62/97)
+
+### 2026-08-26 - Execution-Truth Audit Correction
+
+- Reclassified this module as proposal/pattern memory rather than completed
+  automatic RSI.
+- Made `apply_improvement()` fail closed instead of marking an unexecuted
+  proposal applied and assigning fabricated effectiveness.
+- Removed synthetic token-savings aggregation and marked reduction unmeasured.
+- Reconciled README, INTERFACE, ROADMAP, and the retained historical completion
+  filename to the implemented boundary. Older autonomy and efficiency claims
+  below are historical and superseded. (WSP 00/22/50/62/95/97)
+
+---
 
 ### Sprint 2, Task 1 - Initial Implementation
 **Changes**:

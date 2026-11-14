@@ -1,0 +1,287 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "92ae3690073fc66c05a29975952aee53a16f08b1"
+  },
+  "execution_id": "FOUNDUPS_EPOCH_COMMITMENT_20261025",
+  "execution_plane": "Local source/test preparation; no WRE runtime or chain effects",
+  "outcome": "completed",
+  "scope": "Process-local epoch evidence implementation and offline validation only; PR/main convergence still required.",
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_6",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_62",
+    "WSP_87",
+    "WSP_97"
+  ],
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_87_Code_Navigation_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "docs/architecture/FOUNDUPS_EPOCH_COMMITMENT_HARDENING_20261025.md",
+      "NAVIGATION.py",
+      "modules/foundups/simulator/README.md",
+      "modules/foundups/simulator/INTERFACE.md",
+      "modules/foundups/simulator/tests/README.md",
+      "modules/foundups/simulator/tests/TestModLog.md"
+    ],
+    "research": [
+      "Canonical Holo owner query again failed HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; explicit degraded direct-source/doc reads, no reindex.",
+      "docs/architecture/FOUNDUPS_EPOCH_COMMITMENT_HARDENING_20261025.md"
+    ],
+    "micro_pass": [
+      "modules/foundups/simulator/economics/epoch_ledger.py",
+      "modules/foundups/simulator/tests/test_epoch_ledger_settlement_commitment.py"
+    ],
+    "macro_pass": [
+      "modules/foundups/simulator/mesa_model.py",
+      "modules/foundups/simulator/economics/participation_sentinel.py",
+      "modules/foundups/simulator/economics/btc_anchor_connector.py"
+    ],
+    "hard_think": [
+      "Bind the actual amount and subject to a trusted external checkpoint; separate UPS distribution evidence from spendable F_i/payment state.",
+      "Independent review found a private list/index checker divergence; RED2 and a four-line correction are preserved."
+    ],
+    "dialectic_sweep": [
+      "docs/architecture/FOUNDUPS_EPOCH_COMMITMENT_HARDENING_20261025.md",
+      "Extend the one existing ledger/test owner; no new ledger, new financial policy, chain signer or SDK."
+    ],
+    "first_principles": [
+      "Immutable finalized evidence, exact retry or conflict, context-bound inclusion and stable pending commitment."
+    ],
+    "execute": [
+      "modules/foundups/simulator/ModLog.md",
+      "modules/foundups/simulator/tests/TestModLog.md",
+      "docs/architecture/receipts/FOUNDUPS_EPOCH_COMMITMENT_20261025.testcases.json"
+    ]
+  },
+  "compliance_evidence": [
+    "docs/architecture/FOUNDUPS_EPOCH_COMMITMENT_HARDENING_20261025.md",
+    "Existing two original test bodies and module docstring AST-preserved; no new test file.",
+    "Source closure independently rehashed1470 staged blobs with exact pins/caps; no installed-runtime action."
+  ],
+  "allocations": {
+    "product": {
+      "C": 3,
+      "I": 5,
+      "D": 5,
+      "impact": 5,
+      "sum": 18,
+      "priority": "P0"
+    },
+    "derived_source_closure": {
+      "C": 2,
+      "I": 5,
+      "D": 5,
+      "impact": 4,
+      "sum": 16,
+      "priority": "P0"
+    },
+    "known_metadata": {
+      "C": 1,
+      "I": 4,
+      "D": 5,
+      "impact": 4,
+      "sum": 14,
+      "priority": "P1"
+    }
+  },
+  "test_runs": {
+    "baseline": {
+      "counts": {
+        "passed": 20
+      },
+      "collected": 20,
+      "source_drift": false,
+      "network_attempts": 0,
+      "external_receipt_sha256": "cbb2c20f60669478922bf893cf59199044a6e6d475040055110356085317be26"
+    },
+    "red": {
+      "counts": {
+        "passed": 2,
+        "failed": 84
+      },
+      "collected": 86,
+      "source_drift": false,
+      "network_attempts": 0,
+      "external_receipt_sha256": "0d45f54f39c16407cb2b523bd6bcf98bcdf21cf2dc9ff9348452c83bc845271a"
+    },
+    "green_candidate": {
+      "counts": {
+        "passed": 104
+      },
+      "collected": 104,
+      "source_drift": false,
+      "network_attempts": 0,
+      "external_receipt_sha256": "6d6a5a50af76627072ffb002e803ffdd6353d184c43f3a357b4fed97da4b0c9e"
+    },
+    "red_chain_index": {
+      "counts": {
+        "failed": 2
+      },
+      "collected": 2,
+      "source_drift": false,
+      "network_attempts": 0,
+      "external_receipt_sha256": "0da0a6cfd7701e02ed541d7f1b878d3e885dd7f03f8ca375772146443a318aa7"
+    },
+    "green_chain_index": {
+      "counts": {
+        "passed": 106
+      },
+      "collected": 106,
+      "source_drift": false,
+      "network_attempts": 0,
+      "external_receipt_sha256": "3d278cea4355a06cc62417bcd939482ba5c4164d27c467abe2290c1010cd40c4"
+    },
+    "coverage_corrected": {
+      "counts": {
+        "passed": 106
+      },
+      "collected": 106,
+      "source_drift": false,
+      "network_attempts": 0,
+      "external_receipt_sha256": "6c698c0f477c81fcba87adbe5386fdca3b8996fecb8dd4001bdb04a77101ba86"
+    },
+    "full_simulator": {
+      "counts": {
+        "passed": 410
+      },
+      "collected": 410,
+      "deselected": [
+        "modules/foundups/simulator/tests/test_sse_server.py::test_sim_events_endpoint_denies_without_invite_key",
+        "modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_denies_when_protected",
+        "modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_allows_with_valid_invite"
+      ],
+      "source_drift": false,
+      "network_attempts": 0,
+      "external_receipt_sha256": "d497cbbfd1fd677ddec86567af430492fda8e1aeee608c170c581f6d56f3be0f"
+    },
+    "independent_numeric_context": {
+      "counts": {
+        "passed": 30
+      },
+      "network_attempts": 0,
+      "source_drift": false
+    },
+    "independent_publication": {
+      "counts": {
+        "passed": 11
+      },
+      "network_attempts": 0,
+      "source_drift": false
+    }
+  },
+  "exact_test_inventory": {
+    "path": "docs/architecture/receipts/FOUNDUPS_EPOCH_COMMITMENT_20261025.testcases.json",
+    "sha256": "7d480dd27bc5a86db788909d3e7fb19792cb8a77309ea56f586dbfd9eb9990fc",
+    "counts_overlap": true
+  },
+  "source_snapshot": [
+    {
+      "path": "modules/foundups/simulator/economics/epoch_ledger.py",
+      "working_sha256": "970a8faaf2127db2c2c89160c109d9c6e1a05fc1db6a66935af31fb08350469f",
+      "git_normalized_sha256": "3c5194fe581ba5b88dac2c8f3d3be98a4ac9e37c379e2f059bc63e107fbd87c9",
+      "lines": 336
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_epoch_ledger_settlement_commitment.py",
+      "working_sha256": "d89bcf1503bd9e77a3f0e263c60ad6280ad2cb70f94d76ffcf3ee84c086a2751",
+      "git_normalized_sha256": "e9381fae4f9a8dedf82ac520ab9a392ba9a52a7f09b55e5e51d7fd4c69ff59b1",
+      "lines": 327
+    }
+  ],
+  "coverage": {
+    "scope": "changed epoch_ledger.py only",
+    "instrumented_runs": [
+      "coverage_corrected106 existing cases",
+      "unchanged independent publication11 script copied to fresh scratch"
+    ],
+    "covered_lines": 205,
+    "num_statements": 213,
+    "percent": 96.24413145539906,
+    "whole_module_or_repository_claim": false,
+    "setup_limitation": "Initial inherited livechat source config collected no coverage data; explicit external configuration corrected it. Corrected106-only coverage was86%; adding measurement of the existing independent11 replay gives96%, with no new test or product edits."
+  },
+  "known_review_defect": {
+    "scope": "Latent private list/index divergence; no public mutation/import path",
+    "old_candidate": "104 focused and30+11 independent cases passed, but divergence reproduced",
+    "red_correction_cases": 2,
+    "repair": "List/index cardinality, canonical identity and actual listed entry hash",
+    "remaining_material_findings": 0
+  },
+  "validation_limits": [
+    "Python-level socket/DNS guards are not OS network isolation or independent runtime admission.",
+    "Two inherited inactive asyncio configuration warnings remain addressed as an environment limitation.",
+    "Three named SSE HTTP cases excluded; no live SSE, model, provider, chain, signer, payment or reserve proof.",
+    "Formal whole-module/repository WSP6 audit and authenticated OS-isolated runner qualification are not claimed.",
+    "V2 roots differ; existing content-blind BTC connector rows are not migrated.",
+    "Ledger is process-local; no durable work-source consumption, aggregate issuance/CABR budget or conservation-policy repair."
+  ],
+  "foundation_publication": {
+    "pr": "https://github.com/FOUNDUPS/Foundups-Agent/pull/2188",
+    "terminal_state": "MERGED_VERIFIED_MAIN",
+    "merged_commit": "92ae3690073fc66c05a29975952aee53a16f08b1",
+    "reviewed_head": "352fab3bb337a3a9aa675aa43b0e1b9502a86e07",
+    "whole_tree_equal": true,
+    "all_hosted_checks_passed": true,
+    "fx_url": "https://foundups.com/f/",
+    "hosting_only_deployed": true,
+    "production_checks": [
+      {
+        "url": "https://foundups.com/",
+        "status": 200,
+        "final_url": "https://foundups.com/",
+        "content_type": "text/html; charset=utf-8",
+        "sha256": "fc58406fa13f37ec23b6a18968372658cc5030f23cc70c318692d6acb0fa9301",
+        "matches_artifact": true
+      },
+      {
+        "url": "https://foundups.com/f/",
+        "status": 200,
+        "final_url": "https://foundups.com/f/",
+        "content_type": "text/html; charset=utf-8",
+        "sha256": "5adfed66475bcd25de54671e82beab08e6457bf26c0d4b68166e69d35163a8aa",
+        "matches_artifact": true
+      },
+      {
+        "url": "https://foundups.com/f/public_catalog.json",
+        "status": 200,
+        "final_url": "https://foundups.com/f/public_catalog.json",
+        "content_type": "application/json",
+        "sha256": "1b6ac81f53c1a9bc5aaf94aba8311c4c22755994192d95862d75048a1f901a21",
+        "matches_artifact": true
+      }
+    ],
+    "production_browser": {
+      "initial": "First verification tab reached a browser connection-error document after clicking the correct root FX link; no server outage inferred.",
+      "recovery": "Fresh tab in the same in-app browser loaded the production FX page.",
+      "verified": [
+        "5 public listings",
+        "case-insensitive $kosei search returns Kosei only",
+        "Polished readiness plus that search returns explicit empty state",
+        "clearing filters restores all5"
+      ],
+      "final_url": "https://foundups.com/f/"
+    }
+  },
+  "publication": {
+    "terminal_state": "ACTIVE_OWNED_WORK",
+    "requires": [
+      "dedicated PR",
+      "fresh exact-head CI/security",
+      "main readback"
+    ],
+    "parent_alignment": "Owned unpublished branch moved to identical-tree verified squash main with soft reset; index, working diff and status independently compared unchanged."
+  }
+}

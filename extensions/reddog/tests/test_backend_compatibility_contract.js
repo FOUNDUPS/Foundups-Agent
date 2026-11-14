@@ -1,0 +1,315 @@
+'use strict';
+
+const assert = require('assert');
+const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
+
+const extensionRoot = path.resolve(__dirname, '..');
+const repoRoot = path.resolve(extensionRoot, '..', '..');
+const preflight = require('../backend_compatibility_preflight');
+const manifest = JSON.parse(
+  fs.readFileSync(path.join(repoRoot, preflight.BACKEND_MANIFEST_PATH), 'utf8')
+);
+const extensionSource = fs.readFileSync(path.join(extensionRoot, 'extension.js'), 'utf8');
+const interfaceSource = fs.readFileSync(path.join(extensionRoot, 'INTERFACE.md'), 'utf8');
+const preflightSource = fs.readFileSync(
+  path.join(extensionRoot, 'backend_compatibility_preflight.js'),
+  'utf8'
+);
+const asyncSource = fs.readFileSync(
+  path.join(extensionRoot, 'backend_compatibility_async.js'),
+  'utf8'
+);
+const holoOwnerRuntimeSource = fs.readFileSync(
+  path.join(extensionRoot, 'holoindex_owner_runtime.js'), 'utf8'
+);
+
+function canonicalize(value) {
+  if (Array.isArray(value)) {
+    return value.map(canonicalize);
+  }
+  if (!value || typeof value !== 'object') {
+    return value;
+  }
+  return Object.fromEntries(
+    Object.keys(value).sort().map((key) => [key, canonicalize(value[key])])
+  );
+}
+
+function assertManifestContract() {
+  assert.strictEqual(manifest.schema_version, preflight.BACKEND_MANIFEST_SCHEMA);
+  assert.strictEqual(manifest.product, preflight.BACKEND_PRODUCT);
+  assert.strictEqual(manifest.backend_api_version, preflight.BACKEND_API_VERSION);
+  assert.deepStrictEqual(
+    manifest.required_executable_files.slice().sort(),
+    preflight.REQUIRED_EXECUTABLE_FILES.slice().sort()
+  );
+  assert.deepStrictEqual(
+    manifest.required_bridge_files.slice().sort(),
+    preflight.REQUIRED_BRIDGE_FILES.slice().sort()
+  );
+  assert.deepStrictEqual(
+    Object.keys(manifest.required_runtime_sha256).sort(),
+    manifest.required_runtime_files.slice().sort()
+  );
+  assert(manifest.required_runtime_files.length >= 900);
+  for (const executable of preflight.REQUIRED_EXECUTABLE_FILES) {
+    assert(manifest.required_runtime_files.includes(executable));
+  }
+  for (const sentinel of [
+    'holo_index.py',
+    'modules/communication/moltbot_bridge/src/openclaw_dae.py',
+    'modules/foundups/src/foundup_registry_loader.py',
+    'modules/platform_integration/linkedin_agent/src/linkedin_agent.py',
+    'modules/platform_integration/social_media_orchestrator/src/petition_campaign.py'
+  ]) {
+    assert(manifest.required_runtime_files.includes(sentinel), sentinel);
+  }
+}
+
+function assertPinnedDigest() {
+  const digest = crypto.createHash('sha256')
+    .update(JSON.stringify(canonicalize(manifest)))
+    .digest('hex');
+  assert.strictEqual(digest, preflight.EXPECTED_MANIFEST_SHA256);
+}
+
+function assertRuntimeOrdering() {
+  const askStart = extensionSource.indexOf('function wireFusionWebview');
+  const askEnd = extensionSource.indexOf('function killBridgeChild', askStart);
+  const askSource = extensionSource.slice(askStart, askEnd);
+  const gate = askSource.indexOf('blockIncompatibleBackend');
+  assert(askStart >= 0 && askEnd > askStart);
+  assert(gate >= 0);
+  assert(gate < askSource.indexOf('prepareFusionRequest(message, worker)'));
+  assert(namedFunctionSource('prepareFusionRequest').includes('classifyTaskForRedDog'));
+  assert(gate < askSource.indexOf('buildContextForRequest'));
+  const contextBuilder = namedFunctionSource('buildContextForRequest');
+  assert(contextBuilder.includes('holoGenerationBoundQuery.buildOwnedContext'));
+  assert(contextBuilder.includes('buildBoundedRepoContextAsync'));
+  assert(holoOwnerRuntimeSource.includes('async function buildOwnedContext'));
+  assert(holoOwnerRuntimeSource.includes('registry.begin()'));
+  assert(holoOwnerRuntimeSource.includes('registry.release(lifecycle)'));
+  assertFusionRuntimeOrdering(askSource);
+}
+
+function assertFusionRuntimeOrdering(askSource) {
+  assert(askSource.includes('backendCompatibility.enforceRuntimeGate'));
+  assert(
+    askSource.indexOf('backendCompatibility.enforceRuntimeGate')
+      < askSource.indexOf('runGithubPermissionProbeBridge')
+  );
+  assert(asyncSource.includes('async function blockIncompatibleBackend'));
+  assert(asyncSource.includes('backend_compatibility_worker_failed'));
+  const fusionStart = extensionSource.indexOf('function callFusion');
+  const fusionEnd = extensionSource.indexOf('function buildSystemPrompt', fusionStart);
+  const fusionSource = extensionSource.slice(fusionStart, fusionEnd);
+  assert(fusionSource.includes('currentBackendCompatibility()'));
+  assert(
+    fusionSource.indexOf('currentBackendCompatibility()')
+      < fusionSource.indexOf('new Promise')
+  );
+  for (const functionName of ['runRepairGuard', 'runJudgmentVerifier']) {
+    const source = namedFunctionSource(functionName);
+    assert(source.includes('currentBackendCompatibilitySync()'), functionName);
+    assert(
+      source.indexOf('currentBackendCompatibilitySync()')
+        < source.indexOf('cp.execFileSync'),
+      functionName
+    );
+  }
+}
+
+function namedFunctionSource(name) {
+  const lines = extensionSource.split(/\r?\n/);
+  const start = lines.findIndex((line) => (
+    line.startsWith('function ' + name)
+    || line.startsWith('async function ' + name)
+  ));
+  assert(start >= 0, name);
+  let depth = 0;
+  for (let end = start; end < lines.length; end += 1) {
+    depth += (lines[end].match(/{/g) || []).length;
+    depth -= (lines[end].match(/}/g) || []).length;
+    if (end > start && depth === 0) return lines.slice(start, end + 1).join('\n');
+  }
+  return '';
+}
+
+function functionLineCount(name) {
+  return namedFunctionSource(name).split(/\r?\n/).length;
+}
+
+function assertSafeBlockedProjection() {
+  const client = {
+    extensionId: 'foundups.reddog',
+    legacyExtensionId: 'foundups.foundups-fusion-worker',
+    extensionVersion: '0.4.34',
+    buildInstallStateSection: () => ''
+  };
+  const result = preflight.buildBlockedResult({
+    extension_id: 'secret-extension-id',
+    backend_compatibility: {
+      checked: true,
+      passed: false,
+      rejection_reasons: [
+        'backend_api_version_mismatch',
+        'secret value must not cross'
+      ],
+      workspace_root_digest: 'sha256:' + '0'.repeat(64),
+      product: 'secret-product-value'
+    }
+  }, client);
+  const serialized = JSON.stringify(result);
+  assert.strictEqual(result.ok, false);
+  assert.strictEqual(result.review_packet.made_network_call, false);
+  assert(!serialized.includes(repoRoot));
+  assert(!serialized.includes('secret-product-value'));
+  assert(!serialized.includes('secret value must not cross'));
+  assert(!serialized.includes('secret-extension-id'));
+
+  const audit = preflight.buildAuditDegradedResult({
+    extension_id: 'secret-extension-id',
+    backend_compatibility: {
+      checked: true,
+      passed: false,
+      rejection_reasons: ['backend_manifest_integrity_mismatch', 'secret value must not cross']
+    }
+  }, client);
+  const auditSerialized = JSON.stringify(audit);
+  assert.strictEqual(audit.ok, true);
+  assert.strictEqual(audit.reason, 'backend_compatibility_audit_degraded');
+  assert.strictEqual(audit.review_packet.no_model_call_performed, true);
+  assert.strictEqual(audit.review_packet.made_network_call, false);
+  assert.strictEqual(audit.review_packet.no_work_order_emitted, true);
+  assert(!auditSerialized.includes('secret value must not cross'));
+  assert(!auditSerialized.includes('secret-extension-id'));
+}
+
+function assertConfigurationMigrationPrecedence() {
+  const configuration = (namespace) => ({
+    get: () => namespace === 'reddog' ? true : false,
+    inspect: () => namespace === 'foundupsFusion'
+      ? { globalValue: false, defaultValue: true }
+      : { defaultValue: true }
+  });
+  const vscode = { workspace: { getConfiguration: configuration } };
+  assert.strictEqual(
+    preflight.configurationValue(
+      vscode, 'reddog', 'foundupsFusion', 'enableResidentArchitectSession', true
+    ),
+    false,
+    'an explicitly configured legacy opt-out must outrank a new canonical default'
+  );
+  const canonical = {
+    workspace: {
+      getConfiguration: (namespace) => ({
+        get: () => namespace === 'reddog' ? true : false,
+        inspect: () => namespace === 'reddog'
+          ? { workspaceValue: true, defaultValue: true }
+          : { globalValue: false, defaultValue: true }
+      })
+    }
+  };
+  assert.strictEqual(
+    preflight.configurationValue(
+      canonical, 'reddog', 'foundupsFusion', 'enableResidentArchitectSession', true
+    ),
+    true,
+    'an explicitly configured canonical value must outrank the legacy namespace'
+  );
+  const emptyCanonical = {
+    workspace: {
+      getConfiguration: (namespace) => ({
+        get: () => namespace === 'reddog' ? '' : 'legacy-python',
+        inspect: () => namespace === 'reddog'
+          ? { globalValue: '', defaultValue: 'python' }
+          : { globalValue: 'legacy-python', defaultValue: 'python' }
+      })
+    }
+  };
+  assert.strictEqual(
+    preflight.configurationValue(
+      emptyCanonical, 'reddog', 'foundupsFusion', 'pythonPath', 'python'
+    ),
+    'legacy-python',
+    'an explicitly empty string must not suppress legacy or fallback resolution'
+  );
+}
+
+function assertRuntimeFileCountBoundary() {
+  for (const member of [
+    'modules/infrastructure/dependency_launcher/src/lm_studio_startup.py',
+    'modules/platform_integration/youtube_shorts_scheduler/src/schedule_inventory.py',
+    'modules/infrastructure/wsp_core/src/wsp_domain_policy.py'
+  ]) {
+    assert(manifest.required_runtime_files.includes(member));
+  }
+  assert(manifest.required_runtime_files.includes(
+    'modules/foundups/simulator/economics/_token_numeric.py'
+  ));
+  assert(manifest.required_runtime_files.includes(
+    'modules/foundups/simulator/_mesa_epoch.py'
+  ));
+  assert(manifest.required_runtime_files.includes(
+    'modules/communication/livechat/src/engagement_lifecycle.py'
+  ));
+  assert(manifest.required_runtime_files.includes(
+    'modules/communication/livechat/src/operator_command_queue.py'
+  ));
+  for (const name of ['reddog_effect_consensus_proof.py', 'reddog_current_effect_signing_authority.py', 'reddog_external_signer_authoritative_use_lease.py']) {
+    assert(manifest.required_runtime_files.includes(`modules/communication/moltbot_bridge/src/${name}`));
+  }
+  for (const member of [
+    'modules/communication/livechat/src/operator_video_policy_owner.py',
+    'modules/communication/livechat/src/video_policy.py',
+    'modules/platform_integration/youtube_shorts_scheduler/src/video_policy.py',
+    'modules/ai_intelligence/ai_gateway/src/model_autoresearch_canonical_prompt_guard.py',
+    'modules/ai_intelligence/ai_gateway/src/model_autoresearch_configured_gateway_atomic_create.py',
+    'modules/ai_intelligence/ai_gateway/src/model_autoresearch_configured_gateway_durability.py',
+    'modules/ai_intelligence/ai_gateway/src/model_autoresearch_configured_gateway_evidence.py',
+    'modules/ai_intelligence/ai_gateway/src/model_autoresearch_configured_gateway_posix_recovery.py',
+    'modules/ai_intelligence/ai_gateway/src/youtube_model_routing.py',
+    'modules/communication/livechat/src/operator_stream_schedule_owner.py'
+  ]) {
+    assert(manifest.required_runtime_files.includes(member));
+  }
+  const validator = require('../backend_compatibility_manifest');
+  const candidate = JSON.parse(JSON.stringify(manifest));
+  const addMember = (index) => {
+    const member = `modules/infrastructure/wre_core/src/cap_fixture_${index}.py`;
+    candidate.required_runtime_files.push(member);
+    candidate.required_runtime_sha256[member] = '0'.repeat(64);
+  };
+  while (candidate.required_runtime_files.length < 1487) {
+    addMember(candidate.required_runtime_files.length);
+  }
+  assert.strictEqual(candidate.required_runtime_files.length, 1487);
+  assert.deepStrictEqual(validator.validateManifest(candidate), []);
+  addMember(1487);
+  assert.strictEqual(candidate.required_runtime_files.length, 1488);
+  assert.deepStrictEqual(validator.validateManifest(candidate), [
+    'backend_runtime_file_contract_mismatch'
+  ]);
+}
+
+assertRuntimeFileCountBoundary();
+assertManifestContract();
+assertPinnedDigest();
+assertRuntimeOrdering();
+assertSafeBlockedProjection();
+assertConfigurationMigrationPrecedence();
+assert(functionLineCount('wireFusionWebview') <= 581);
+assert(interfaceSource.includes(
+  'before target extraction, HoloIndex lookup, model execution, permission probing, or work-order creation'
+));
+const current = preflight.runBackendCompatibilityPreflight(repoRoot);
+assert.strictEqual(current.passed, true);
+assert.strictEqual(current.no_holoindex_query_performed, true);
+assert.strictEqual(current.no_model_call_performed, true);
+for (const forbidden of ['child_process', 'execFile', 'spawn(', 'holo_index.py --index']) {
+  assert.strictEqual(preflightSource.includes(forbidden), false, forbidden);
+}
+
+console.log('backend compatibility contract tests passed');

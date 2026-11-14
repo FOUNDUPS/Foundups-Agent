@@ -1,0 +1,753 @@
+{
+  "authority": {
+    "title": "Authority map",
+    "summary": "Find who can act, what they can request, and what must be approved before evidence moves.",
+    "parent": "overview",
+    "facts": [
+      ["Rules snapshot","119th Congress, checked November 7, 2026. The map features selected committees and subcommittees. Confirm the current chamber rules, committee rules and any authorizing orders before using them, especially when a new Congress organizes."],
+      ["What this map does","It links to official authority and model work documents. A role or a link does not confer investigative power."]
+    ],
+    "choices": [
+      ["house","Start with House Rule X and the specific committee’s jurisdiction, then check Rule XI and the committee’s procedures."],
+      ["senate","Start with Senate Rule XXV jurisdiction and Rule XXVI procedure, then check the committee’s rules."],
+      ["review","The originating office must document its lawful source and any restrictions before sharing evidence with an authorized review team."],
+      ["coordination","Counsel may verify a possible state-law nexus and approved points of contact before any transfer of evidence."],
+      ["congressional-action","A committee can use its authorized legislative tools based on reviewed findings, within its jurisdiction and applicable rules."]
+    ]
+  },
+  "house": {
+    "title": "House",
+    "summary": "Choose a committee by the legislative question and the program involved.",
+    "parent": "authority",
+    "facts": [
+      ["Starting rule","House Rule X assigns jurisdiction. Rule XI sets baseline procedure for hearings, subpoenas and executive-session material."],
+      ["Overlapping work","Identify the committee with a legislative purpose and document coordination with other committees. Each committee acts under its own authorization."],
+      ["Disclosure","House Rule XI, clause 2(k)(7), governs release or public use of evidence taken in executive session. Committee authorization for covered material is separate from authority to request it."]
+    ],
+    "links": [
+      ["Official House committee directory","https://www.house.gov/committees"],
+      ["House Rule X","https://www.govinfo.gov/content/pkg/HMAN-119/html/HMAN-119-pg463.htm"],
+      ["House Rule XI","https://www.govinfo.gov/content/pkg/HMAN-119/html/HMAN-119-pg577.htm"]
+    ],
+    "choices": [
+      ["house-financial-services","Match the inquiry to financial institutions, securities or another subject within House Financial Services jurisdiction."],
+      ["house-judiciary","Match the question to federal law, court administration, civil liberties or another Judiciary subject."],
+      ["house-oversight","Check Rule X’s government management and special oversight jurisdiction and identify any committee with overlapping authority."],
+      ["review","House custody and disclosure restrictions travel with the evidence. A hearing or request approval does not by itself authorize transfer."]
+    ]
+  },
+  "senate": {
+    "title": "Senate",
+    "summary": "Choose a committee by its Senate jurisdiction and procedural rules.",
+    "parent": "authority",
+    "facts": [
+      ["Starting rule","Senate Rule XXV assigns standing committee jurisdiction. Rule XXVI permits investigations and procedural tools within that jurisdiction. Each committee publishes its own rules."],
+      ["Overlapping work","Identify which office may make requests, who may authorize a subpoena and who controls disclosure. House and Senate approvals remain separate."],
+      ["Disclosure","An office considering outside disclosure must check Senate and committee confidentiality rules and any restrictions attached to the evidence."]
+    ],
+    "links": [
+      ["Official Senate committee directory","https://www.senate.gov/committees/"],
+      ["Senate Rules XXV and XXVI","https://www.rules.senate.gov/rules-of-the-senate"]
+    ],
+    "choices": [
+      ["senate-judiciary","Match the legislative question to the administration of justice, constitutional rights or another Judiciary subject."],
+      ["senate-hsgac","Match the legislative question to government operations or another topic within HSGAC’s authority."],
+      ["review","Senate committee confidentiality, record ownership and required approvals govern what the originating office can share."]
+    ]
+  },
+  "house-financial-services": {
+    "title": "Financial Services",
+    "summary": "Banking, markets, and federal financial oversight.",
+    "parent": "house",
+    "links": [
+      ["119th committee rules and adopted amendment","https://financialservices.house.gov/about/rules.htm"],
+      ["Official subcommittee directory","https://financialservices.house.gov/subcommittees/"]
+    ],
+    "choices": [
+      ["house-financial-services-subcommittees","Open selected subcommittee assignments and confirm any referral or delegation under the committee’s rules."],
+      ["house-financial-services-jurisdiction","Match the legislative question to the chamber rule and any assigned subcommittee subject."],
+      ["house-financial-services-records","Document the purpose, scope and requested record holder before choosing a request or hearing."],
+      ["house-financial-services-approvals","Identify the specific decision-maker, notice, consultation or vote required before the step."],
+      ["house-financial-services-limits","Review legal limits and custody before collection, publication or transfer."],
+      ["house-financial-services-example","Walk through a fictional inquiry that tests the scope and evidence."],
+      ["house-financial-services-documents","Use model work documents to record the rule, approvals, scope and evidence review."]
+    ]
+  },
+  "house-financial-services-subcommittees": {
+    "title": "Subcommittees",
+    "summary": "Selected assignments for this committee. The official directory lists the complete roster.",
+    "parent": "house-financial-services",
+    "links": [
+      ["Official subcommittee directory","https://financialservices.house.gov/subcommittees/"],
+      ["119th committee rules and adopted amendment","https://financialservices.house.gov/about/rules.htm"]
+    ],
+    "choices": [
+      ["house-financial-institutions","A banking-supervision question fits only to the extent covered by the assigned Rule 5 subjects."],
+      ["house-capital-markets","A trading question belongs here only when tied to securities law, market structure or other assigned jurisdiction."],
+      ["house-financial-investigations","An overlapping inquiry still needs a legislative purpose within the parent committee’s jurisdiction."]
+    ]
+  },
+  "house-financial-institutions": {
+    "title": "Financial Institutions",
+    "summary": "The official directory identifies this subcommittee. Rule 5 assigns oversight and legislative work on specified deposit-taking institutions and related regulators.",
+    "parent": "house-financial-services-subcommittees",
+    "facts": [
+      ["Authority check","A banking-supervision question fits only to the extent covered by the assigned Rule 5 subjects."]
+    ],
+    "links": [
+      ["Official subcommittee directory","https://financialservices.house.gov/subcommittees/"],
+      ["119th committee rules and adopted amendment","https://financialservices.house.gov/about/rules.htm"]
+    ],
+    "choices": [
+      ["house-financial-services-records","Use the parent committee’s record-collection guidance together with any separate subcommittee delegation."],
+      ["house-financial-services-approvals","Check the parent and subcommittee rules before a request, hearing or compulsory step."]
+    ]
+  },
+  "house-capital-markets": {
+    "title": "Capital Markets",
+    "summary": "Rule 5 assigns securities, market infrastructure and oversight of specified regulators including the SEC.",
+    "parent": "house-financial-services-subcommittees",
+    "facts": [
+      ["Authority check","A trading question belongs here only when tied to securities law, market structure or other assigned jurisdiction."]
+    ],
+    "links": [
+      ["Official subcommittee directory","https://financialservices.house.gov/subcommittees/"],
+      ["119th committee rules and adopted amendment","https://financialservices.house.gov/about/rules.htm"]
+    ],
+    "choices": [
+      ["house-financial-services-records","Use the parent committee’s record-collection guidance together with any separate subcommittee delegation."],
+      ["house-financial-services-approvals","Check the parent and subcommittee rules before a request, hearing or compulsory step."]
+    ]
+  },
+  "house-financial-investigations": {
+    "title": "Oversight and Investigations",
+    "summary": "Rule 5 assigns oversight across Financial Services jurisdiction.",
+    "parent": "house-financial-services-subcommittees",
+    "facts": [
+      ["Authority check","An overlapping inquiry still needs a legislative purpose within the parent committee’s jurisdiction."]
+    ],
+    "links": [
+      ["Official subcommittee directory","https://financialservices.house.gov/subcommittees/"],
+      ["119th committee rules and adopted amendment","https://financialservices.house.gov/about/rules.htm"]
+    ],
+    "choices": [
+      ["house-financial-services-records","Use the parent committee’s record-collection guidance together with any separate subcommittee delegation."],
+      ["house-financial-services-approvals","Check the parent and subcommittee rules before a request, hearing or compulsory step."]
+    ]
+  },
+  "house-financial-services-jurisdiction": {
+    "title": "Jurisdiction",
+    "summary": "House Rule X, clause 1(h), covers banks and banking, money and credit, securities, insurance generally and specified housing and international financial subjects. Identify the federal law, regulator or program the proposed inquiry would evaluate.",
+    "parent": "house-financial-services",
+    "links": [
+      ["Chamber jurisdiction","https://www.govinfo.gov/content/pkg/HMAN-119/html/HMAN-119-pg463.htm"],
+      ["119th committee rules and adopted amendment","https://financialservices.house.gov/about/rules.htm"],
+      ["Legislative purpose memo","/templates/appendix-b-legislative-purpose.html"]
+    ]
+  },
+  "house-financial-services-records": {
+    "title": "Records and hearings",
+    "summary": "Start with public records and appropriately scoped voluntary requests. Rule XI hearings and subpoenas support a legislative inquiry. Before considering protected customer records, show why public or agency records cannot answer the question.",
+    "parent": "house-financial-services",
+    "links": [
+      ["119th committee rules and adopted amendment","https://financialservices.house.gov/about/rules.htm"],
+      ["Scoped evidence request","/templates/appendix-c-subpoena-and-wave-one.html"]
+    ],
+    "choices": [
+      ["house-financial-services-approvals","Use the committee’s approval procedure before a compulsory request or other step requiring authorization."],
+      ["house-financial-services-example","Follow a fictional question from lawful records to a preliminary finding."]
+    ]
+  },
+  "house-financial-services-approvals": {
+    "title": "Who must approve?",
+    "summary": "Committee Rule 3(e), as amended by Barr #1A, delegates authorization and issuance to the committee chair. The rule calls for written notice to the ranking minority member with the proposed subpoena at least 48 hours in advance, with an exigency exception.",
+    "parent": "house-financial-services",
+    "facts": [
+      ["Disclosure is a separate decision","Confirm with counsel which actor must authorize release of this particular record and record any limits. Do this before sharing outside the authorized team."]
+    ],
+    "links": [
+      ["119th committee rules and adopted amendment","https://financialservices.house.gov/about/rules.htm"],
+      ["Adopted Barr #1A amendment","https://republicans-financialservices.house.gov/UploadedFiles/Barr_1A.pdf"],
+      ["Committee operating plan","/templates/committee-node-operating-plan.html"]
+    ],
+    "choices": [
+      ["review","Check the source record, access permissions and disclosure decision before moving into evidence review."]
+    ]
+  },
+  "house-financial-services-limits": {
+    "title": "Limits",
+    "summary": "Define the legislative purpose and minimize unnecessary sensitive data. Counsel should review protections for financial records and any separation-of-powers issues. Committee Rule 4(d) distinguishes reports approved by the committee from other study reports.",
+    "parent": "house-financial-services",
+    "links": [
+      ["119th committee rules and adopted amendment","https://financialservices.house.gov/about/rules.htm"],
+      ["Litigation and privilege","/05-litigation-and-privilege.html"],
+      ["Trump v. Mazars","https://www.supremecourt.gov/opinions/19pdf/19-715_febh.pdf"]
+    ]
+  },
+  "house-financial-services-example": {
+    "title": "Fictional example",
+    "summary": "A fictional payment platform’s audit shows recurring gaps in a federal reporting program. Start with the regulator’s aggregate reports and voluntary requests for the platform’s data definitions. A bank’s role as custodian does not establish misconduct.",
+    "parent": "house-financial-services-records",
+    "fictional": true,
+    "links": [
+      ["Legislative purpose memo","/templates/appendix-b-legislative-purpose.html"],
+      ["Evidence review checklist","/14-worker-review-and-quality.html"]
+    ],
+    "choices": [
+      ["review","Document which parts of the example are established and identify remaining gaps before proposing any action."]
+    ]
+  },
+  "house-financial-services-documents": {
+    "title": "Working documents",
+    "summary": "Use these existing public models as starting points for the authorized committee team.",
+    "parent": "house-financial-services",
+    "links": [
+      ["Legislative purpose memo","/templates/appendix-b-legislative-purpose.html"],
+      ["Scoped evidence request","/templates/appendix-c-subpoena-and-wave-one.html"],
+      ["Committee operating plan","/templates/committee-node-operating-plan.html"],
+      ["Evidence report","/templates/evidentiary-report.html"]
+    ]
+  },
+  "house-judiciary": {
+    "title": "Judiciary",
+    "summary": "Federal law, courts, civil liberties, and administration of justice.",
+    "parent": "house",
+    "links": [
+      ["119th adopted Judiciary rules","https://judiciary.house.gov/sites/evo-subsites/judiciary.house.gov/files/evo-media-document/119-hjc-rules_adopted.pdf"],
+      ["Official subcommittee directory","https://judiciary.house.gov/about/subcommittees"]
+    ],
+    "choices": [
+      ["house-judiciary-subcommittees","Open selected subcommittee assignments and confirm any referral or delegation under the committee’s rules."],
+      ["house-judiciary-jurisdiction","Match the legislative question to the chamber rule and any assigned subcommittee subject."],
+      ["house-judiciary-records","Document the purpose, scope and requested record holder before choosing a request or hearing."],
+      ["house-judiciary-approvals","Identify the specific decision-maker, notice, consultation or vote required before the step."],
+      ["house-judiciary-limits","Review legal limits and custody before collection, publication or transfer."],
+      ["house-judiciary-example","Walk through a fictional inquiry that tests the scope and evidence."],
+      ["house-judiciary-documents","Use model work documents to record the rule, approvals, scope and evidence review."]
+    ]
+  },
+  "house-judiciary-subcommittees": {
+    "title": "Subcommittees",
+    "summary": "Selected assignments for this committee. The official directory lists the complete roster.",
+    "parent": "house-judiciary",
+    "links": [
+      ["Official subcommittee directory","https://judiciary.house.gov/about/subcommittees"],
+      ["119th adopted Judiciary rules","https://judiciary.house.gov/sites/evo-subsites/judiciary.house.gov/files/evo-media-document/119-hjc-rules_adopted.pdf"]
+    ],
+    "choices": [
+      ["house-judiciary-crime","For an inquiry about clemency administration, identify the legislative issue and the appropriate source of process records."],
+      ["house-judiciary-oversight","Start with the assigned component and statutory responsibility. Coordinate with other committees where jurisdiction overlaps."]
+    ]
+  },
+  "house-judiciary-crime": {
+    "title": "Crime and Federal Government Surveillance",
+    "summary": "Committee Rule VI assigns federal criminal law, sentencing, parole and pardons, and other criminal enforcement subjects.",
+    "parent": "house-judiciary-subcommittees",
+    "facts": [
+      ["Authority check","For an inquiry about clemency administration, identify the legislative issue and the appropriate source of process records."]
+    ],
+    "links": [
+      ["Official subcommittee directory","https://judiciary.house.gov/about/subcommittees"],
+      ["119th adopted Judiciary rules","https://judiciary.house.gov/sites/evo-subsites/judiciary.house.gov/files/evo-media-document/119-hjc-rules_adopted.pdf"]
+    ],
+    "choices": [
+      ["house-judiciary-records","Use the parent committee’s record-collection guidance together with any separate subcommittee delegation."],
+      ["house-judiciary-approvals","Check the parent and subcommittee rules before a request, hearing or compulsory step."]
+    ]
+  },
+  "house-judiciary-oversight": {
+    "title": "Judiciary Oversight",
+    "summary": "Committee Rule VI assigns oversight of departments, agencies and components within the parent committee’s jurisdiction.",
+    "parent": "house-judiciary-subcommittees",
+    "facts": [
+      ["Authority check","Start with the assigned component and statutory responsibility. Coordinate with other committees where jurisdiction overlaps."]
+    ],
+    "links": [
+      ["Official subcommittee directory","https://judiciary.house.gov/about/subcommittees"],
+      ["119th adopted Judiciary rules","https://judiciary.house.gov/sites/evo-subsites/judiciary.house.gov/files/evo-media-document/119-hjc-rules_adopted.pdf"]
+    ],
+    "choices": [
+      ["house-judiciary-records","Use the parent committee’s record-collection guidance together with any separate subcommittee delegation."],
+      ["house-judiciary-approvals","Check the parent and subcommittee rules before a request, hearing or compulsory step."]
+    ]
+  },
+  "house-judiciary-jurisdiction": {
+    "title": "Jurisdiction",
+    "summary": "House Rule X, clause 1(l), covers federal courts, civil liberties, the federal criminal code and other specified subjects. Use Committee Rule VI to distinguish the relevant subcommittee’s assignment from that of the full committee.",
+    "parent": "house-judiciary",
+    "links": [
+      ["Chamber jurisdiction","https://www.govinfo.gov/content/pkg/HMAN-119/html/HMAN-119-pg463.htm"],
+      ["119th adopted Judiciary rules","https://judiciary.house.gov/sites/evo-subsites/judiciary.house.gov/files/evo-media-document/119-hjc-rules_adopted.pdf"],
+      ["Legislative purpose memo","/templates/appendix-b-legislative-purpose.html"]
+    ]
+  },
+  "house-judiciary-records": {
+    "title": "Records and hearings",
+    "summary": "The committee can pursue voluntary requests and authorized hearings. Committee Rule IV governs compulsory requests and requires the inquiry to fit the committee’s jurisdiction.",
+    "parent": "house-judiciary",
+    "links": [
+      ["119th adopted Judiciary rules","https://judiciary.house.gov/sites/evo-subsites/judiciary.house.gov/files/evo-media-document/119-hjc-rules_adopted.pdf"],
+      ["Scoped evidence request","/templates/appendix-c-subpoena-and-wave-one.html"]
+    ],
+    "choices": [
+      ["house-judiciary-approvals","Use the committee’s approval procedure before a compulsory request or other step requiring authorization."],
+      ["house-judiciary-example","Follow a fictional question from lawful records to a preliminary finding."]
+    ]
+  },
+  "house-judiciary-approvals": {
+    "title": "Who must approve?",
+    "summary": "Under Rule IV, the committee chair may authorize and issue a subpoena after consulting the ranking minority member. The chair normally provides the draft at least one calendar day before issuance. A committee or subcommittee vote is a separate route and requires a majority present and a majority of those voting in favor.",
+    "parent": "house-judiciary",
+    "facts": [
+      ["Disclosure is a separate decision","Confirm with counsel which actor must authorize release of this particular record and record any limits. Do this before sharing outside the authorized team."]
+    ],
+    "links": [
+      ["119th adopted Judiciary rules","https://judiciary.house.gov/sites/evo-subsites/judiciary.house.gov/files/evo-media-document/119-hjc-rules_adopted.pdf"],
+      ["Committee operating plan","/templates/committee-node-operating-plan.html"]
+    ],
+    "choices": [
+      ["review","Check the source record, access permissions and disclosure decision before moving into evidence review."]
+    ]
+  },
+  "house-judiciary-limits": {
+    "title": "Limits",
+    "summary": "Apply hearing rules, review privilege and separation-of-powers questions with counsel, and protect material from private proceedings. For a president’s personal records, assess the additional concerns discussed in Trump v. Mazars.",
+    "parent": "house-judiciary",
+    "links": [
+      ["119th adopted Judiciary rules","https://judiciary.house.gov/sites/evo-subsites/judiciary.house.gov/files/evo-media-document/119-hjc-rules_adopted.pdf"],
+      ["Litigation and privilege","/05-litigation-and-privilege.html"],
+      ["Trump v. Mazars","https://www.supremecourt.gov/opinions/19pdf/19-715_febh.pdf"]
+    ]
+  },
+  "house-judiciary-example": {
+    "title": "Fictional example",
+    "summary": "A fictional review asks whether the Department of Justice documents its clemency intake consistently. Compare public guidance and aggregate administrative records before deciding whether an authorized request is needed. An unexplained timeline cannot establish an improper exchange.",
+    "parent": "house-judiciary-records",
+    "fictional": true,
+    "links": [
+      ["Legislative purpose memo","/templates/appendix-b-legislative-purpose.html"],
+      ["Evidence review checklist","/14-worker-review-and-quality.html"]
+    ],
+    "choices": [
+      ["review","Document which parts of the example are established and identify remaining gaps before proposing any action."]
+    ]
+  },
+  "house-judiciary-documents": {
+    "title": "Working documents",
+    "summary": "Use these existing public models as starting points for the authorized committee team.",
+    "parent": "house-judiciary",
+    "links": [
+      ["Legislative purpose memo","/templates/appendix-b-legislative-purpose.html"],
+      ["Scoped evidence request","/templates/appendix-c-subpoena-and-wave-one.html"],
+      ["Committee operating plan","/templates/committee-node-operating-plan.html"],
+      ["Evidence report","/templates/evidentiary-report.html"]
+    ]
+  },
+  "house-oversight": {
+    "title": "Oversight and Government Reform",
+    "summary": "Federal operations, records, procurement, and cross-agency oversight.",
+    "parent": "house",
+    "links": [
+      ["119th adopted Oversight rules","https://oversight.house.gov/wp-content/uploads/2025/01/119th-Committee-Rules.pdf"],
+      ["Official 119th subcommittee assignments","https://oversight.house.gov/release/chairman-comer-announces-republican-subcommittee-assignments/"]
+    ],
+    "choices": [
+      ["house-oversight-subcommittees","Open selected subcommittee assignments and confirm any referral or delegation under the committee’s rules."],
+      ["house-oversight-jurisdiction","Match the legislative question to the chamber rule and any assigned subcommittee subject."],
+      ["house-oversight-records","Document the purpose, scope and requested record holder before choosing a request or hearing."],
+      ["house-oversight-approvals","Identify the specific decision-maker, notice, consultation or vote required before the step."],
+      ["house-oversight-limits","Review legal limits and custody before collection, publication or transfer."],
+      ["house-oversight-example","Walk through a fictional inquiry that tests the scope and evidence."],
+      ["house-oversight-documents","Use model work documents to record the rule, approvals, scope and evidence review."]
+    ]
+  },
+  "house-oversight-subcommittees": {
+    "title": "Subcommittees",
+    "summary": "Selected assignments for this committee. The official directory lists the complete roster.",
+    "parent": "house-oversight",
+    "links": [
+      ["Official 119th subcommittee assignments","https://oversight.house.gov/release/chairman-comer-announces-republican-subcommittee-assignments/"],
+      ["119th adopted Oversight rules","https://oversight.house.gov/wp-content/uploads/2025/01/119th-Committee-Rules.pdf"]
+    ],
+    "choices": [
+      ["house-oversight-operations","Use the parent chair’s referral and hearing approvals for a procurement or federal records question."],
+      ["house-oversight-law-enforcement","Document which agency and oversight function are in scope. Identify any overlapping committee authority before seeking records."]
+    ]
+  },
+  "house-oversight-operations": {
+    "title": "Government Operations",
+    "summary": "Rule 6 assigns procurement, public information and records, emergency management and certain federal-state relations.",
+    "parent": "house-oversight-subcommittees",
+    "facts": [
+      ["Authority check","Use the parent chair’s referral and hearing approvals for a procurement or federal records question."]
+    ],
+    "links": [
+      ["Official 119th subcommittee assignments","https://oversight.house.gov/release/chairman-comer-announces-republican-subcommittee-assignments/"],
+      ["119th adopted Oversight rules","https://oversight.house.gov/wp-content/uploads/2025/01/119th-Committee-Rules.pdf"]
+    ],
+    "choices": [
+      ["house-oversight-records","Use the parent committee’s record-collection guidance together with any separate subcommittee delegation."],
+      ["house-oversight-approvals","Check the parent and subcommittee rules before a request, hearing or compulsory step."]
+    ]
+  },
+  "house-oversight-law-enforcement": {
+    "title": "Federal Law Enforcement",
+    "summary": "Rule 6 assigns oversight of criminal justice, homeland security and federal enforcement, among other specified subjects.",
+    "parent": "house-oversight-subcommittees",
+    "facts": [
+      ["Authority check","Document which agency and oversight function are in scope. Identify any overlapping committee authority before seeking records."]
+    ],
+    "links": [
+      ["Official 119th subcommittee assignments","https://oversight.house.gov/release/chairman-comer-announces-republican-subcommittee-assignments/"],
+      ["119th adopted Oversight rules","https://oversight.house.gov/wp-content/uploads/2025/01/119th-Committee-Rules.pdf"]
+    ],
+    "choices": [
+      ["house-oversight-records","Use the parent committee’s record-collection guidance together with any separate subcommittee delegation."],
+      ["house-oversight-approvals","Check the parent and subcommittee rules before a request, hearing or compulsory step."]
+    ]
+  },
+  "house-oversight-jurisdiction": {
+    "title": "Jurisdiction",
+    "summary": "House Rule X covers government management, operations, public information and records. Clause 4(c) gives this committee special oversight responsibilities. Document the legislative purpose and check which other committees cover the subject program.",
+    "parent": "house-oversight",
+    "links": [
+      ["Chamber jurisdiction","https://www.govinfo.gov/content/pkg/HMAN-119/html/HMAN-119-pg463.htm"],
+      ["119th adopted Oversight rules","https://oversight.house.gov/wp-content/uploads/2025/01/119th-Committee-Rules.pdf"],
+      ["Legislative purpose memo","/templates/appendix-b-legislative-purpose.html"]
+    ]
+  },
+  "house-oversight-records": {
+    "title": "Records and hearings",
+    "summary": "Use public or voluntarily supplied procurement and agency records first. Rule 12(g) addresses subpoenas. Rule 15 separately addresses depositions and requires consultation with the ranking minority member.",
+    "parent": "house-oversight",
+    "links": [
+      ["119th adopted Oversight rules","https://oversight.house.gov/wp-content/uploads/2025/01/119th-Committee-Rules.pdf"],
+      ["Scoped evidence request","/templates/appendix-c-subpoena-and-wave-one.html"]
+    ],
+    "choices": [
+      ["house-oversight-approvals","Use the committee’s approval procedure before a compulsory request or other step requiring authorization."],
+      ["house-oversight-example","Follow a fictional question from lawful records to a preliminary finding."]
+    ]
+  },
+  "house-oversight-approvals": {
+    "title": "Who must approve?",
+    "summary": "The committee chair authorizes and issues subpoenas under Rule 12(g) and House Rule XI. The full committee chair refers matters and approves subcommittee hearing dates under Rules 6 and 7. Confirm any additional applicable House orders.",
+    "parent": "house-oversight",
+    "facts": [
+      ["Disclosure is a separate decision","Confirm with counsel which actor must authorize release of this particular record and record any limits. Do this before sharing outside the authorized team."]
+    ],
+    "links": [
+      ["119th adopted Oversight rules","https://oversight.house.gov/wp-content/uploads/2025/01/119th-Committee-Rules.pdf"],
+      ["Committee operating plan","/templates/committee-node-operating-plan.html"]
+    ],
+    "choices": [
+      ["review","Check the source record, access permissions and disclosure decision before moving into evidence review."]
+    ]
+  },
+  "house-oversight-limits": {
+    "title": "Limits",
+    "summary": "Committee Rule 10 governs records and public proceedings. House Rule XI governs executive-session evidence. Check the record’s provenance, privacy and release approval before any public finding or outside transfer.",
+    "parent": "house-oversight",
+    "links": [
+      ["119th adopted Oversight rules","https://oversight.house.gov/wp-content/uploads/2025/01/119th-Committee-Rules.pdf"],
+      ["Litigation and privilege","/05-litigation-and-privilege.html"],
+      ["Trump v. Mazars","https://www.supremecourt.gov/opinions/19pdf/19-715_febh.pdf"]
+    ]
+  },
+  "house-oversight-example": {
+    "title": "Fictional example",
+    "summary": "A fictional federal contract file omits a scoring memo. Ask the agency for the evaluation record and check whether a later correction was made. A missing memo alone supports a records-management question, without establishing favoritism.",
+    "parent": "house-oversight-records",
+    "fictional": true,
+    "links": [
+      ["Legislative purpose memo","/templates/appendix-b-legislative-purpose.html"],
+      ["Evidence review checklist","/14-worker-review-and-quality.html"]
+    ],
+    "choices": [
+      ["review","Document which parts of the example are established and identify remaining gaps before proposing any action."]
+    ]
+  },
+  "house-oversight-documents": {
+    "title": "Working documents",
+    "summary": "Use these existing public models as starting points for the authorized committee team.",
+    "parent": "house-oversight",
+    "links": [
+      ["Legislative purpose memo","/templates/appendix-b-legislative-purpose.html"],
+      ["Scoped evidence request","/templates/appendix-c-subpoena-and-wave-one.html"],
+      ["Committee operating plan","/templates/committee-node-operating-plan.html"],
+      ["Evidence report","/templates/evidentiary-report.html"]
+    ]
+  },
+  "senate-judiciary": {
+    "title": "Judiciary",
+    "summary": "Federal courts, civil rights and administration of federal justice.",
+    "parent": "senate",
+    "links": [
+      ["119th Senate Judiciary rules","https://www.judiciary.senate.gov/imo/media/doc/119th_judiciary_rules.pdf"],
+      ["Official subcommittee jurisdictions","https://www.judiciary.senate.gov/about/subcommittees"]
+    ],
+    "choices": [
+      ["senate-judiciary-subcommittees","Open selected subcommittee assignments and confirm any referral or delegation under the committee’s rules."],
+      ["senate-judiciary-jurisdiction","Match the legislative question to the chamber rule and any assigned subcommittee subject."],
+      ["senate-judiciary-records","Document the purpose, scope and requested record holder before choosing a request or hearing."],
+      ["senate-judiciary-approvals","Identify the specific decision-maker, notice, consultation or vote required before the step."],
+      ["senate-judiciary-limits","Review legal limits and custody before collection, publication or transfer."],
+      ["senate-judiciary-example","Walk through a fictional inquiry that tests the scope and evidence."],
+      ["senate-judiciary-documents","Use model work documents to record the rule, approvals, scope and evidence review."]
+    ]
+  },
+  "senate-judiciary-subcommittees": {
+    "title": "Subcommittees",
+    "summary": "Selected assignments for this committee. The official directory lists the complete roster.",
+    "parent": "senate-judiciary",
+    "links": [
+      ["Official subcommittee jurisdictions","https://www.judiciary.senate.gov/about/subcommittees"],
+      ["119th Senate Judiciary rules","https://www.judiciary.senate.gov/imo/media/doc/119th_judiciary_rules.pdf"]
+    ],
+    "choices": [
+      ["senate-judiciary-crime","Use the official assignment and confirm the committee chair’s referral under Rule VII. Rule IX governs any compulsory request."],
+      ["senate-judiciary-courts","A grant-oversight or court-administration question requires its own Senate legislative purpose and appropriate Rule VII referral."]
+    ]
+  },
+  "senate-judiciary-crime": {
+    "title": "Crime and Counterterrorism",
+    "summary": "The committee assigns oversight of the Office of the Pardon Attorney, among other criminal justice and enforcement functions.",
+    "parent": "senate-judiciary-subcommittees",
+    "facts": [
+      ["Authority check","Use the official assignment and confirm the committee chair’s referral under Rule VII. Rule IX governs any compulsory request."]
+    ],
+    "links": [
+      ["Official subcommittee jurisdictions","https://www.judiciary.senate.gov/about/subcommittees"],
+      ["119th Senate Judiciary rules","https://www.judiciary.senate.gov/imo/media/doc/119th_judiciary_rules.pdf"]
+    ],
+    "choices": [
+      ["senate-judiciary-records","Use the parent committee’s record-collection guidance together with any separate subcommittee delegation."],
+      ["senate-judiciary-approvals","Check the parent and subcommittee rules before a request, hearing or compulsory step."]
+    ]
+  },
+  "senate-judiciary-courts": {
+    "title": "Federal Courts, Oversight, Agency Action and Federal Rights",
+    "summary": "The published assignment includes federal courts, certain administrative procedures, and oversight of DOJ grants.",
+    "parent": "senate-judiciary-subcommittees",
+    "facts": [
+      ["Authority check","A grant-oversight or court-administration question requires its own Senate legislative purpose and appropriate Rule VII referral."]
+    ],
+    "links": [
+      ["Official subcommittee jurisdictions","https://www.judiciary.senate.gov/about/subcommittees"],
+      ["119th Senate Judiciary rules","https://www.judiciary.senate.gov/imo/media/doc/119th_judiciary_rules.pdf"]
+    ],
+    "choices": [
+      ["senate-judiciary-records","Use the parent committee’s record-collection guidance together with any separate subcommittee delegation."],
+      ["senate-judiciary-approvals","Check the parent and subcommittee rules before a request, hearing or compulsory step."]
+    ]
+  },
+  "senate-judiciary-jurisdiction": {
+    "title": "Jurisdiction",
+    "summary": "Apply Senate Rule XXV’s Judiciary jurisdiction and the committee’s published subcommittee assignments. Keep a record of the Senate’s legislative question even if the House studies the same topic.",
+    "parent": "senate-judiciary",
+    "links": [
+      ["Chamber jurisdiction","https://www.rules.senate.gov/rules-of-the-senate"],
+      ["119th Senate Judiciary rules","https://www.judiciary.senate.gov/imo/media/doc/119th_judiciary_rules.pdf"],
+      ["Legislative purpose memo","/templates/appendix-b-legislative-purpose.html"]
+    ]
+  },
+  "senate-judiciary-records": {
+    "title": "Records and hearings",
+    "summary": "Senate Rule XXVI supplies the procedural framework. Committee Rules II, IX and X distinguish hearings, compulsory requests and depositions. Start with authorized voluntary collection where practical.",
+    "parent": "senate-judiciary",
+    "links": [
+      ["119th Senate Judiciary rules","https://www.judiciary.senate.gov/imo/media/doc/119th_judiciary_rules.pdf"],
+      ["Scoped evidence request","/templates/appendix-c-subpoena-and-wave-one.html"]
+    ],
+    "choices": [
+      ["senate-judiciary-approvals","Use the committee’s approval procedure before a compulsory request or other step requiring authorization."],
+      ["senate-judiciary-example","Follow a fictional question from lawful records to a preliminary finding."]
+    ]
+  },
+  "senate-judiciary-approvals": {
+    "title": "Who must approve?",
+    "summary": "Committee Rule IX permits the committee chair to subpoena with the ranking member’s agreement or by committee vote. The chair or designated committee member signs. Under Rule VII, subcommittee referrals normally come from the chair, subject to the rule’s alternatives.",
+    "parent": "senate-judiciary",
+    "facts": [
+      ["Disclosure is a separate decision","Confirm with counsel which actor must authorize release of this particular record and record any limits. Do this before sharing outside the authorized team."]
+    ],
+    "links": [
+      ["119th Senate Judiciary rules","https://www.judiciary.senate.gov/imo/media/doc/119th_judiciary_rules.pdf"],
+      ["Committee operating plan","/templates/committee-node-operating-plan.html"]
+    ],
+    "choices": [
+      ["review","Check the source record, access permissions and disclosure decision before moving into evidence review."]
+    ]
+  },
+  "senate-judiciary-limits": {
+    "title": "Limits",
+    "summary": "Rule X generally provides for private depositions and gives both sides the opportunity to participate. A chair and ranking member may agree to waive the member-presence rule. Counsel should separately verify any release authority.",
+    "parent": "senate-judiciary",
+    "links": [
+      ["119th Senate Judiciary rules","https://www.judiciary.senate.gov/imo/media/doc/119th_judiciary_rules.pdf"],
+      ["Litigation and privilege","/05-litigation-and-privilege.html"],
+      ["Trump v. Mazars","https://www.supremecourt.gov/opinions/19pdf/19-715_febh.pdf"]
+    ]
+  },
+  "senate-judiciary-example": {
+    "title": "Fictional example",
+    "summary": "A fictional program review finds that similarly situated clemency applicants received inconsistent status notices. Seek process data and the agency’s explanation. Distinguish a notice-policy finding from conclusions about individual decisions.",
+    "parent": "senate-judiciary-records",
+    "fictional": true,
+    "links": [
+      ["Legislative purpose memo","/templates/appendix-b-legislative-purpose.html"],
+      ["Evidence review checklist","/14-worker-review-and-quality.html"]
+    ],
+    "choices": [
+      ["review","Document which parts of the example are established and identify remaining gaps before proposing any action."]
+    ]
+  },
+  "senate-judiciary-documents": {
+    "title": "Working documents",
+    "summary": "Use these existing public models as starting points for the authorized committee team.",
+    "parent": "senate-judiciary",
+    "links": [
+      ["Legislative purpose memo","/templates/appendix-b-legislative-purpose.html"],
+      ["Scoped evidence request","/templates/appendix-c-subpoena-and-wave-one.html"],
+      ["Committee operating plan","/templates/committee-node-operating-plan.html"],
+      ["Evidence report","/templates/evidentiary-report.html"]
+    ]
+  },
+  "senate-hsgac": {
+    "title": "Homeland Security and Governmental Affairs",
+    "summary": "Government operations and Senate investigative oversight.",
+    "parent": "senate",
+    "links": [
+      ["119th HSGAC rules","https://www.hsgac.senate.gov/wp-content/uploads/Rules-of-Procedure-HSGAC-119.pdf"],
+      ["Official HSGAC jurisdiction and rules","https://www.hsgac.senate.gov/about/jurisdiction-and-rules/"]
+    ],
+    "choices": [
+      ["senate-hsgac-subcommittees","Open selected subcommittee assignments and confirm any referral or delegation under the committee’s rules."],
+      ["senate-hsgac-jurisdiction","Match the legislative question to the chamber rule and any assigned subcommittee subject."],
+      ["senate-hsgac-records","Document the purpose, scope and requested record holder before choosing a request or hearing."],
+      ["senate-hsgac-approvals","Identify the specific decision-maker, notice, consultation or vote required before the step."],
+      ["senate-hsgac-limits","Review legal limits and custody before collection, publication or transfer."],
+      ["senate-hsgac-example","Walk through a fictional inquiry that tests the scope and evidence."],
+      ["senate-hsgac-documents","Use model work documents to record the rule, approvals, scope and evidence review."]
+    ]
+  },
+  "senate-hsgac-subcommittees": {
+    "title": "Subcommittees",
+    "summary": "Selected assignments for this committee. The official directory lists the complete roster.",
+    "parent": "senate-hsgac",
+    "links": [
+      ["Official HSGAC jurisdiction and rules","https://www.hsgac.senate.gov/about/jurisdiction-and-rules/"],
+      ["119th HSGAC rules","https://www.hsgac.senate.gov/wp-content/uploads/Rules-of-Procedure-HSGAC-119.pdf"]
+    ],
+    "choices": [
+      ["senate-psi","Check the scope assigned to PSI and its separate rules for authorizing an investigation, hearing or subpoena."],
+      ["senate-hsgac-workforce","Review the official subcommittee rules and HSGAC Rule 8(E) before considering compulsory process."]
+    ]
+  },
+  "senate-psi": {
+    "title": "Permanent Subcommittee on Investigations",
+    "summary": "PSI examines government efficiency and economy and other matters within its delegated investigative jurisdiction.",
+    "parent": "senate-hsgac-subcommittees",
+    "facts": [
+      ["Open an investigation","PSI Rule 1 requires approval from the subcommittee chair and ranking minority member, with notice to all subcommittee members."],
+      ["Hold a public hearing","Rule 1 permits approval by the chair and ranking member or a subcommittee majority. If all minority members object, a full committee majority must approve. Check the advance notice rule."],
+      ["Request compulsory records","PSI Rule 2 allows authorization and issuance by the subcommittee chair or a designated subcommittee member, with notice. Check its 48-hour rule and the parent Rule 8(E) notice and timing conditions before issuance."]
+    ],
+    "links": [
+      ["Adopted 119th PSI rules","https://www.govinfo.gov/content/pkg/CREC-2025-02-24/pdf/CREC-2025-02-24-senate.pdf"],
+      ["119th HSGAC rules","https://www.hsgac.senate.gov/wp-content/uploads/Rules-of-Procedure-HSGAC-119.pdf"]
+    ],
+    "choices": [
+      ["senate-hsgac-records","Use the parent committee’s record-collection guidance together with any separate subcommittee delegation."],
+      ["senate-hsgac-approvals","Check the parent and subcommittee rules before a request, hearing or compulsory step."]
+    ]
+  },
+  "senate-hsgac-workforce": {
+    "title": "Border Management, Federal Workforce and Regulatory Affairs",
+    "summary": "The committee identifies border operations, workforce and regulatory oversight within this subcommittee’s portfolio.",
+    "parent": "senate-hsgac-subcommittees",
+    "facts": [
+      ["Authority check","Review the official subcommittee rules and HSGAC Rule 8(E) before considering compulsory process."]
+    ],
+    "links": [
+      ["Official subcommittee rules and jurisdiction","https://www.hsgac.senate.gov/subcommittees/bmfwra/"],
+      ["119th HSGAC rules","https://www.hsgac.senate.gov/wp-content/uploads/Rules-of-Procedure-HSGAC-119.pdf"]
+    ],
+    "choices": [
+      ["senate-hsgac-records","Use the parent committee’s record-collection guidance together with any separate subcommittee delegation."],
+      ["senate-hsgac-approvals","Check the parent and subcommittee rules before a request, hearing or compulsory step."]
+    ]
+  },
+  "senate-hsgac-jurisdiction": {
+    "title": "Jurisdiction",
+    "summary": "Apply Senate Rule XXV and HSGAC’s authority over government operations and the Department of Homeland Security. Review the governing resolution and Rule 8 for any subcommittee assignment.",
+    "parent": "senate-hsgac",
+    "links": [
+      ["Chamber jurisdiction","https://www.rules.senate.gov/rules-of-the-senate"],
+      ["119th HSGAC rules","https://www.hsgac.senate.gov/wp-content/uploads/Rules-of-Procedure-HSGAC-119.pdf"],
+      ["Legislative purpose memo","/templates/appendix-b-legislative-purpose.html"]
+    ]
+  },
+  "senate-hsgac-records": {
+    "title": "Records and hearings",
+    "summary": "Consider voluntary agency records, interviews, authorized hearings and subpoenas. The full committee’s Rule 5(C) and the subcommittee rules under Rule 8(E) establish separate procedures.",
+    "parent": "senate-hsgac",
+    "links": [
+      ["119th HSGAC rules","https://www.hsgac.senate.gov/wp-content/uploads/Rules-of-Procedure-HSGAC-119.pdf"],
+      ["Scoped evidence request","/templates/appendix-c-subpoena-and-wave-one.html"]
+    ],
+    "choices": [
+      ["senate-hsgac-approvals","Use the committee’s approval procedure before a compulsory request or other step requiring authorization."],
+      ["senate-hsgac-example","Follow a fictional question from lawful records to a preliminary finding."]
+    ]
+  },
+  "senate-hsgac-approvals": {
+    "title": "Who must approve?",
+    "summary": "Full committee Rule 5(C) authorizes the chair to subpoena with notice to the ranking minority member. Written notice ordinarily starts a 72-hour wait, excluding Saturdays and Sundays. The rule allows a ranking member waiver or written urgency certification by the chair.",
+    "parent": "senate-hsgac",
+    "facts": [
+      ["Disclosure is a separate decision","Confirm with counsel which actor must authorize release of this particular record and record any limits. Do this before sharing outside the authorized team."]
+    ],
+    "links": [
+      ["119th HSGAC rules","https://www.hsgac.senate.gov/wp-content/uploads/Rules-of-Procedure-HSGAC-119.pdf"],
+      ["Committee operating plan","/templates/committee-node-operating-plan.html"]
+    ],
+    "choices": [
+      ["review","Check the source record, access permissions and disclosure decision before moving into evidence review."]
+    ]
+  },
+  "senate-hsgac-limits": {
+    "title": "Limits",
+    "summary": "Rule 7 governs confidential proceedings. Restrict access as required. Rule 8(E) allows subcommittees separate subpoena rules subject to its notice and timing conditions. Consult both rule sets before issuance.",
+    "parent": "senate-hsgac",
+    "links": [
+      ["119th HSGAC rules","https://www.hsgac.senate.gov/wp-content/uploads/Rules-of-Procedure-HSGAC-119.pdf"],
+      ["Litigation and privilege","/05-litigation-and-privilege.html"],
+      ["Trump v. Mazars","https://www.supremecourt.gov/opinions/19pdf/19-715_febh.pdf"]
+    ]
+  },
+  "senate-hsgac-example": {
+    "title": "Fictional example",
+    "summary": "A fictional agency uses an intermediary to deliver services and records two conflicting completion dates. Compare invoices, performance records and an auditor’s account before deciding whether there is a procurement controls issue.",
+    "parent": "senate-hsgac-records",
+    "fictional": true,
+    "links": [
+      ["Legislative purpose memo","/templates/appendix-b-legislative-purpose.html"],
+      ["Evidence review checklist","/14-worker-review-and-quality.html"]
+    ],
+    "choices": [
+      ["review","Document which parts of the example are established and identify remaining gaps before proposing any action."]
+    ]
+  },
+  "senate-hsgac-documents": {
+    "title": "Working documents",
+    "summary": "Use these existing public models as starting points for the authorized committee team.",
+    "parent": "senate-hsgac",
+    "links": [
+      ["Legislative purpose memo","/templates/appendix-b-legislative-purpose.html"],
+      ["Scoped evidence request","/templates/appendix-c-subpoena-and-wave-one.html"],
+      ["Committee operating plan","/templates/committee-node-operating-plan.html"],
+      ["Evidence report","/templates/evidentiary-report.html"]
+    ]
+  }
+}

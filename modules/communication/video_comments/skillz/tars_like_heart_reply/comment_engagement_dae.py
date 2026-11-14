@@ -42,6 +42,9 @@ from typing import Any, Dict, List, Optional
 # WSP 62 Refactoring: Extracted modules for size compliance (absolute imports for subprocess compatibility)
 from modules.communication.video_comments.skillz.tars_like_heart_reply.src.reply_executor import BrowserReplyExecutor
 from modules.communication.video_comments.skillz.tars_like_heart_reply.src.comment_processor import CommentProcessor
+from modules.communication.video_comments.skillz.tars_like_heart_reply.src.comment_row_context import (
+    create_comment_processor, comment_event_payload,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -657,15 +660,23 @@ class CommentEngagementDAE:
         try:
             if use_edge:
                 from selenium.webdriver.edge.options import Options as EdgeOptions
+                from selenium.webdriver.edge.service import Service as EdgeService
                 edge_options = EdgeOptions()
                 edge_options.add_experimental_option("debuggerAddress", f"127.0.0.1:{CHROME_PORT}")
-                self.driver = webdriver.Edge(options=edge_options)
+                # Windows Service defaults can keep the worker's inherited pipes
+                # open after cancellation, preventing the live-chat handoff.
+                self.driver = webdriver.Edge(
+                    options=edge_options, service=EdgeService(popen_kw={"close_fds": True}))
             else:
                 from selenium.webdriver.chrome.options import Options
+                from selenium.webdriver.chrome.service import Service as ChromeService
                 chrome_options = Options()
                 chrome_options.add_experimental_option("debuggerAddress", f"127.0.0.1:{CHROME_PORT}")
-                self.driver = webdriver.Chrome(options=chrome_options)
+                self.driver = webdriver.Chrome(
+                    options=chrome_options, service=ChromeService(popen_kw={"close_fds": True}))
 
+            from modules.infrastructure.foundups_selenium.src.youtube_verification import install_youtube_verification_guard
+            install_youtube_verification_guard(self.driver, CHROME_PORT)
             logger.info(f"[DAE-CONNECT] {browser_name} entangled: {self.driver.current_url[:60]}...")
 
             # Initialize human behavior simulator for anti-detection (WSP 49)
@@ -684,22 +695,7 @@ class CommentEngagementDAE:
             logger.info("[DAE-CONNECT] Reply executor initialized")
 
             # Initialize comment processor (WSP 62 refactoring Phase 2)
-            self.comment_processor = CommentProcessor(
-                driver=self.driver,
-                human=self.human,
-                stats=self.stats,
-                reply_executor=self.reply_executor,
-                selectors=self.SELECTORS,
-                vision_descriptions=self.VISION_DESCRIPTIONS,
-                use_vision=self.use_vision,
-                use_dom=True,
-                ui_tars_bridge=None,  # Will be set after vision connection
-                check_moderators=self.check_moderators,
-                mod_lookup=self.mod_lookup,
-                reply_debug_tags=self.reply_debug_tags,
-                video_title=self.video_title,  # NEW (2025-12-30): Video context for alignment detection
-                session_id=self.session_id,  # Pre-action snapshots + action switch telemetry
-            )
+            self.comment_processor = create_comment_processor(self, CommentProcessor)
             logger.info("[DAE-CONNECT] Comment processor initialized")
         except Exception as e:
             logger.error(f"[DAE-CONNECT] Browser entanglement failed: {e}")
@@ -752,6 +748,32 @@ class CommentEngagementDAE:
 
         logger.info(f"[DAE-NAV] Page ready for engagement")
 
+    def _has_empty_inbox_indicator(self) -> bool:
+        """Read existing positive empty-view evidence; zero threads is insufficient."""
+        try:
+            return bool(self.driver.execute_script(r"""
+                const bodyText = (document.body.innerText || '').replace(/\s+/g, ' ').trim();
+                // This is also shown for filtered/search results, not global emptiness.
+                if (bodyText.includes('No comments found. Try searching for something else or removing filters.')) {
+                    return false;
+                }
+                const emptySelectors = [
+                    'ytcp-comments-empty-state',
+                    '.empty-state-content',
+                    '[data-empty-state]',
+                    '.ytcp-comment-surface-empty'
+                ];
+                for (const sel of emptySelectors) {
+                    if (document.querySelector(sel)) return true;
+                }
+                return bodyText.includes('No comments to respond to') ||
+                    bodyText.includes('All caught up') ||
+                    bodyText.includes('No new comments');
+            """))
+        except Exception:
+            logger.debug('[DAE-WAIT] Empty state unavailable; inbox status unverified')
+            return False
+
     async def _wait_for_comments_loaded(self, timeout: float = 15.0) -> int:
         """
         Wait for YouTube Studio inbox to fully load comments.
@@ -759,8 +781,8 @@ class CommentEngagementDAE:
         YouTube Studio uses lazy loading - comments are loaded via JavaScript
         after initial page render. This method waits for either:
         1. `ytcp-comment-thread` elements to appear (comments exist)
-        2. A "no comments" indicator (inbox is truly empty)
-        3. Timeout (fallback to DOM query)
+        2. An existing positive empty-view indicator
+        3. Timeout (return the count without claiming an empty inbox)
 
         FIX (2025-12-30): Resolves 0-comment false positives after account switch.
         The DOM query was returning 0 because JavaScript hadn't finished loading yet.
@@ -784,39 +806,10 @@ class CommentEngagementDAE:
                 logger.info(f"[DAE-WAIT] ✅ Found {count} comment(s) after {elapsed:.1f}s")
                 return count
 
-            # Check for "no comments" indicator (inbox truly empty)
-            # YouTube Studio shows specific text when inbox is empty
-            try:
-                no_comments_indicator = self.driver.execute_script("""
-                    // Check for empty state indicators
-                    const emptySelectors = [
-                        'ytcp-comments-empty-state',
-                        '.empty-state-content',
-                        '[data-empty-state]',
-                        '.ytcp-comment-surface-empty'
-                    ];
-                    for (const sel of emptySelectors) {
-                        if (document.querySelector(sel)) return true;
-                    }
-
-                    // Check for text indicators
-                    const bodyText = document.body.innerText || '';
-                    if (bodyText.includes('No comments to respond to') ||
-                        bodyText.includes('All caught up') ||
-                        bodyText.includes('No new comments')) {
-                        return true;
-                    }
-
-                    return false;
-                """)
-
-                if no_comments_indicator:
-                    elapsed = time.time() - start_time
-                    logger.info(f"[DAE-WAIT] ✅ Empty inbox confirmed after {elapsed:.1f}s (no comments indicator found)")
-                    return 0
-
-            except Exception as e:
-                logger.debug(f"[DAE-WAIT] Empty state check failed: {e}")
+            if self._has_empty_inbox_indicator():
+                elapsed = time.time() - start_time
+                logger.info(f"[DAE-WAIT] Empty inbox view confirmed after {elapsed:.1f}s")
+                return 0
 
             # Wait before next poll
             await asyncio.sleep(poll_interval)
@@ -861,6 +854,19 @@ class CommentEngagementDAE:
         # Fallback to simple response
         return "Thanks for the comment!"
     
+    def _comments_halt_summary(self, halted, results, processed):
+        """A typed halt never enters the completion/vision/retry path."""
+        self.stats['all_processed'] = False
+        summary = {**halted, 'state': 'halted', 'session_id': self.session_id,
+                   'channel_id': self.channel_id, 'total_processed': processed,
+                   'stats': self.stats, 'results': results}
+        try:
+            with (TELEMETRY_DIR / f'session_{self.session_id}.json').open('w') as stream:
+                json.dump(summary, stream, indent=2, default=str)
+        except OSError:
+            logger.warning('[REPLY-QUALITY] Halted; private session receipt unavailable')
+        return summary
+
     async def engage_all_comments(
         self,
         max_comments: int = 10,
@@ -898,6 +904,10 @@ class CommentEngagementDAE:
         - Agentic: Execute Like + Heart + Reply (based on switches)
         - Refresh: Remove processed comment
         """
+        from modules.communication.livechat.src.automation_gates import comment_stop_result
+        halted = comment_stop_result()
+        if halted:
+            return self._comments_halt_summary(halted, [], 0)
         # IMPORTANT: max_comments=0 means UNLIMITED processing
         unlimited_mode = (max_comments == 0)
         effective_max = max_comments if max_comments > 0 else 999999
@@ -922,6 +932,9 @@ class CommentEngagementDAE:
         bot_replied_threads = set()  # Training Mode: Track threads where bot posted replies
 
         while total_processed < effective_max:
+            halted = comment_stop_result()
+            if halted:
+                return self._comments_halt_summary(halted, all_results, total_processed)
             logger.debug(f"[DAEMON][CARDIOVASCULAR] 💗 Loop iteration {total_processed + 1}/{effective_max}")
             # Orphan detection: Check if parent YouTube DAE is still running
             if self.parent_pid and PSUTIL_AVAILABLE:
@@ -948,16 +961,19 @@ class CommentEngagementDAE:
             logger.debug(f"[DAEMON][PHASE--1]   DOM count: {comment_count} (Occam: {has_comment})")
 
             if not has_comment:
-                logger.info(f"[DAEMON][PHASE--1] ⚪ NO COMMENTS FOUND - Inbox is clear!")
-                logger.info("[DAE] No comments found")
+                empty_confirmed = self._has_empty_inbox_indicator()
+                if empty_confirmed:
+                    logger.info('[DAEMON][PHASE--1] Empty inbox view confirmed')
+                else:
+                    logger.info('[DAEMON][PHASE--1] No DOM threads; inbox status unverified')
 
                 # BREADCRUMB: Store for WRE/AI Overseer analysis
-                if self.livechat_sender:
+                if self.livechat_sender and empty_confirmed:
                     self.livechat_sender.store_breadcrumb(
                         source_dae='comment_engagement',
                         phase='PHASE--1',
                         event_type='no_comments_detected',
-                        message='Inbox cleared via Occam detection (pre-loop)',
+                        message='Inbox view cleared; positive empty-state indicator (pre-loop)',
                         metadata={
                             'comment_count': 0,
                             'detection_method': 'DOM',
@@ -967,9 +983,9 @@ class CommentEngagementDAE:
                     )
 
                 # ANTI-SPAM: Notify livechat that inbox is clear (prevents infinite refresh loops)
-                if self.livechat_sender and total_processed > 0:
+                if self.livechat_sender and total_processed > 0 and empty_confirmed:
                     try:
-                        message = f"✊✋🖐️ Comment inbox cleared! Processed {total_processed} comment{'s' if total_processed != 1 else ''} this session."
+                        message = f"✊✋🖐️ Current comment inbox view cleared! Processed {total_processed} comment{'s' if total_processed != 1 else ''} this session."
                         await self.livechat_sender.send_chat_message(
                             message_text=message,
                             response_type='general',
@@ -998,6 +1014,13 @@ class CommentEngagementDAE:
                 use_intelligent_reply=use_intelligent_reply
             )
             all_results.append(result)
+            if result.get('halted_for_reply_quality') is True or result.get('halted_for_comments_stop') is True:
+                logger.error('[REPLY-QUALITY] Halting this session after rejected output; review before restarting')
+                return self._comments_halt_summary(result, all_results, total_processed)
+            if not result.get('reply') and result.get('reply_submission_status') in {'unknown', 'verified'}:
+                logger.warning('[REPLY-INSPECT] Halting session for outcome reconciliation; no automatic retry')
+                result['halted_for_reconciliation'] = True
+                break
 
             # FAM DAEmon: Publish comment engagement event (Training Mode observability)
             if FAM_DAEMON_AVAILABLE and not result.get('no_comment_exists'):
@@ -1011,23 +1034,10 @@ class CommentEngagementDAE:
                     else:
                         event_type = FAMEventType.COMMENT_IGNORED
 
-                    fam_payload = {
-                        'session_id': self.session_id,
-                        'comment_idx': total_processed + 1,
-                        'commenter_handle': result.get('commenter_handle') or result.get('author_name', 'Unknown'),
-                        'commenter_channel_id': result.get('commenter_channel_id'),
-                        'classification': result.get('commenter_type', 'unknown'),
-                        'comment_text': result.get('comment_text', '')[:500],  # Truncate for storage
-                        'like': result.get('like', False),
-                        'heart': result.get('heart', False),
-                        'reply': result.get('reply', False),
-                        'reply_text_posted': result.get('reply_text_posted', ''),
-                        'reply_source': result.get('reply_source', 'bot'),
-                        'llm_source': result.get('llm_source', 'unknown'),  # NEW (2026-02-21): Track which LLM/skill generated reply
-                        'video_id': self.video_id,
-                        'channel_id': self.channel_id,
-                        'timestamp': datetime.now().isoformat(),
-                    }
+                    fam_payload = comment_event_payload(
+                        result, self.session_id, total_processed + 1,
+                        self.channel_id, datetime.now().isoformat(),
+                    )
                     fam.publish(event_type, fam_payload)
                     logger.debug(f"[DAE][FAM] Published {event_type.value}: {result.get('commenter_handle')}")
                 except Exception as e:
@@ -1035,8 +1045,8 @@ class CommentEngagementDAE:
 
             # OCCAM'S RAZOR: Check if no comment exists (first principles detection)
             if result.get('no_comment_exists'):
-                logger.info(f"[DAEMON][PHASE-2] ✅ NO MORE COMMENTS - DOM detection (Occam's Razor)")
-                logger.info(f"[DAE] Inbox cleared - no DOM thread at index 1")
+                logger.info('[DAEMON][PHASE-2] No DOM thread at requested index; final evidence required')
+                logger.info('[DAE] No DOM thread at index 1; inbox status unverified')
 
                 # BREADCRUMB: Store for WRE/AI Overseer analysis
                 if self.livechat_sender:
@@ -1044,7 +1054,7 @@ class CommentEngagementDAE:
                         source_dae='comment_engagement',
                         phase='PHASE-2',
                         event_type='no_comments_detected',
-                        message='Inbox cleared via Occam detection (in-loop)',
+                        message='No DOM thread at index 1; inbox status unverified',
                         metadata={
                             'comment_count': 0,
                             'detection_method': 'DOM',
@@ -1053,7 +1063,7 @@ class CommentEngagementDAE:
                         }
                     )
 
-                break  # Exit loop immediately - no vision check needed!
+                break  # Final completion check still requires positive empty evidence.
 
             total_processed += 1
 
@@ -1098,25 +1108,10 @@ class CommentEngagementDAE:
                             else:
                                 event_type = FAMEventType.COMMENT_IGNORED
 
-                            fam_payload = {
-                                'session_id': self.session_id,
-                                'comment_idx': f"{total_processed}.{nested_idx}",  # Parent.Nested format
-                                'commenter_handle': nested_result.get('commenter_handle') or nested_result.get('author_name', 'Unknown'),
-                                'commenter_channel_id': nested_result.get('commenter_channel_id'),
-                                'classification': nested_result.get('commenter_type', 'unknown'),
-                                'comment_text': nested_result.get('comment_text', '')[:500],
-                                'like': nested_result.get('like', False),
-                                'heart': nested_result.get('heart', False),
-                                'reply': nested_result.get('reply', False),
-                                'reply_text_posted': nested_result.get('reply_text_posted', ''),
-                                'reply_source': nested_result.get('reply_source', 'bot'),
-                                'llm_source': nested_result.get('llm_source', 'unknown'),  # NEW (2026-02-21): Track LLM source
-                                'is_nested': True,
-                                'parent_comment_idx': total_processed,
-                                'video_id': self.video_id,
-                                'channel_id': self.channel_id,
-                                'timestamp': datetime.now().isoformat(),
-                            }
+                            fam_payload = comment_event_payload(
+                                nested_result, self.session_id, f"{total_processed}.{nested_idx}",
+                                self.channel_id, datetime.now().isoformat(), parent_idx=total_processed,
+                            )
                             fam.publish(event_type, fam_payload)
                         logger.debug(f"[DAE][FAM] Published {len(nested_results)} nested reply events")
                     except Exception as e:
@@ -1233,11 +1228,14 @@ class CommentEngagementDAE:
             if await self.comment_processor._vision_exists(self.VISION_DESCRIPTIONS["has_comment"], min_confidence=0.4, timeout=60):
                 remaining_comments = 1
                 logger.info(f"[DAEMON][PHASE-4]   Vision detected remaining comments")
-        all_processed = (remaining_comments == 0)
+        quality_halt = next((row for row in all_results if row.get('halted_for_reply_quality') is True), None)
+        empty_confirmed = remaining_comments == 0 and self._has_empty_inbox_indicator()
+        all_processed = empty_confirmed and quality_halt is None
 
         if all_processed:
-            logger.info(f"[DAEMON][PHASE-4] ✅ ALL COMMENTS PROCESSED - Inbox is 100% clear!")
-            logger.info("[DAE] ALL COMMENTS PROCESSED - Community tab is clear!")
+            logger.info('[DAEMON][PHASE-4] ALL COMMENTS PROCESSED - empty inbox view confirmed')
+        elif remaining_comments == 0:
+            logger.info('[DAEMON][PHASE-4] Completion unverified; zero DOM threads alone is insufficient')
         else:
             logger.info(f"[DAEMON][PHASE-4] ⚪ Partial completion - {remaining_comments} comments remaining")
         
@@ -1249,6 +1247,8 @@ class CommentEngagementDAE:
             'total_processed': total_processed,
             'stats': self.stats,
             'results': all_results,
+            'halted_for_reply_quality': quality_halt is not None,
+            'quality_halt_reason': quality_halt.get('quality_halt_reason') if quality_halt else None,
         }
         
         telemetry_file = TELEMETRY_DIR / f"session_{self.session_id}.json"
@@ -1395,6 +1395,10 @@ async def execute_skill(
     Returns:
         Engagement session summary with commenter classifications
     """
+    from modules.communication.livechat.src.automation_gates import comment_stop_result
+    halted = comment_stop_result()
+    if halted:
+        return halted
     dae = CommentEngagementDAE(
         channel_id=channel_id,
         video_id=video_id,
@@ -1416,3 +1420,4 @@ async def execute_skill(
         )
     finally:
         dae.close()
+

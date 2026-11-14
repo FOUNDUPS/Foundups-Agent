@@ -15,13 +15,13 @@ if __name__ == '__main__' and sys.platform.startswith('win'):
         pass
 # === END UTF-8 ENFORCEMENT ===
 
-WSP 85 Violation Prevention Script
-Automatically detects and prevents root directory pollution
+WSP 85 Read-Only Root Validator
+Classifies immediate root entries and suggests placement for review
 
 WSP 85 Compliance:
 - Monitors root directory for prohibited files
 - Provides guidance on correct file placement
-- Enforces WSP 85 Anti-Pollution Protocol
+- Does not move, delete, or enforce cleanup of reported paths
 """
 
 import os
@@ -54,6 +54,8 @@ class WSP85Validator:
         "*_temp.py",
         "*_debug.py",
         "temp_*",
+        "tmp_*",
+        ".prompt_*.md",
         "debug_*"
     ]
     
@@ -62,10 +64,16 @@ class WSP85Validator:
         "main.py",
         "README.md",
         "CLAUDE.md",
+        "AGENTS.md",
+        "MEMORY.md",
         "ModLog.md",
         "ROADMAP.md",
         "requirements.txt",
+        "requirements-trust-bootstrap.txt",
+        "wsp_62_exemptions.yaml",
         ".gitignore",
+        ".gitattributes",
+        ".gitmodules",
         ".env",
         ".env.example",
         ".coveragerc",
@@ -114,8 +122,10 @@ class WSP85Validator:
         "verify_*.sh": "scripts/verification/ or module tests/",
         "*_script.py": "modules/{domain}/{module}/scripts/",
         "SESSION_BACKUP_*.md": "logs/",
-        "*_temp.*": "modules/{domain}/{module}/temp/ (or delete)",
-        "*_debug.*": "modules/{domain}/{module}/debug/ (or delete)"
+        "tmp_*": "an owned temporary workspace outside the repository root",
+        ".prompt_*.md": "the owning module docs/prompts directory",
+        "*_temp.*": "modules/{domain}/{module}/temp/ (review ownership and recovery before cleanup)",
+        "*_debug.*": "modules/{domain}/{module}/debug/ (review ownership and recovery before cleanup)"
     }
     
     def __init__(self, project_root: str = "."):
@@ -137,7 +147,12 @@ class WSP85Validator:
                     elif not item.name.startswith('.'):  # Ignore hidden files
                         violations["unknown_files"].append(str(item))
                         
-            elif item.is_dir() and item.name in self.PROHIBITED_ROOT_DIRS:
+            elif item.is_dir() and (
+                item.name in self.PROHIBITED_ROOT_DIRS
+                or (len(item.name) >= 2 and item.name[0] in
+                    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+                    and item.name[1] == "\uf03a")
+            ):
                 violations["prohibited_dirs"].append(str(item))
                 
         return violations

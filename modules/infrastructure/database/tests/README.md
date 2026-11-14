@@ -17,6 +17,14 @@ This suite validates database infrastructure behavior, with emphasis on:
   - legacy compatibility coverage for `AgentDB`/`QuantumAgentDB`
 - `test_corruption_prevention.py`
   - legacy Chroma corruption prevention checks
+- `test_holoindex_postmerge_claim_security.py`
+  - v2 claim ID/issued-time/expiry/context integrity and canonical lease bounds
+  - atomic late-completion rejection, exact replay, and tamper resistance
+- `test_holoindex_postmerge_claim_atomicity.py`
+  - real SQLite writer contention across claim, start, and completion clocks
+  - PostgreSQL row-lock helper seam; live PostgreSQL contention remains pending
+- `test_holoindex_postmerge_reserved_namespace.py`
+  - protected task lifecycle and expiry-proven reclaim
 
 ## Run
 

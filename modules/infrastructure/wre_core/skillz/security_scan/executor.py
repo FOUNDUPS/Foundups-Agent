@@ -50,7 +50,7 @@ class SecurityScanReport:
 
     # Tool status
     tool_available: bool
-    scan_status: str  # "completed", "tool_unavailable", "error"
+    scan_status: str  # "completed", "partial", "tool_unavailable", "error"
 
     # Findings
     findings: List[Dict[str, Any]] = field(default_factory=list)
@@ -172,8 +172,8 @@ class SecurityScanExecutor:
         if not self._ensure_policy():
             # Default to report_only if policy unavailable
             return {
-                "escalation": "report_only",
-                "requires_012": severity.lower() == "critical",
+                "escalation": "gate_012" if severity.lower() == "critical" or finding_type == "secret" else "report_only",
+                "requires_012": severity.lower() == "critical" or finding_type == "secret",
                 "reason": "SEC2 policy unavailable, using defaults",
             }
 
@@ -207,8 +207,8 @@ class SecurityScanExecutor:
         except Exception as e:
             logger.error("Policy decision failed: %s", e)
             return {
-                "escalation": "report_only",
-                "requires_012": severity.lower() == "critical",
+                "escalation": "gate_012" if severity.lower() == "critical" or finding_type == "secret" else "report_only",
+                "requires_012": severity.lower() == "critical" or finding_type == "secret",
                 "reason": f"Policy error: {e}",
             }
 
@@ -296,16 +296,26 @@ class SecurityScanExecutor:
                 error_message=f"Unknown tool: {tool}",
             )
 
-        result = scan_method(target)
+        try:
+            result = scan_method(target)
+        except Exception:
+            logger.error("Security scanner invocation failed: %s", tool)
+            return SecurityScanReport(
+                generated_at=generated_at, scan_tool=tool, target=target,
+                tool_available=True, scan_status="error",
+                error_message="Scanner invocation failed",
+                recommended_next_action="repair_scan_coverage",
+            )
 
-        if not result.success:
+        if not result.report:
             return SecurityScanReport(
                 generated_at=generated_at,
                 scan_tool=tool,
                 target=target,
                 tool_available=True,
                 scan_status="error",
-                error_message=result.error_message,
+                error_message=result.error_message or "Scanner returned no report",
+                recommended_next_action="repair_scan_coverage",
             )
 
         # Extract findings
@@ -319,15 +329,23 @@ class SecurityScanExecutor:
                     "package_name": finding.package_name,
                     "fix_available": finding.fix_available,
                     "fix_version": finding.fix_version,
-                    "finding_type": "dependency",  # Default for package vulns
+                    "finding_type": getattr(finding, "finding_type", "dependency"),
+                    "file_path": getattr(finding, "file_path", None),
+                    "line_number": getattr(finding, "line_number", None),
+                    "scanner": getattr(finding, "scanner", tool),
                 })
 
-        # Get policy decision
+        complete = result.success and getattr(result.report, "scan_success", True)
+        scan_status = "completed" if complete else ("partial" if findings else "error")
+
+        # Get policy decision even for findings from an incomplete scan.
         policy_result = self._determine_overall_policy(findings)
 
         # Determine recommended action
         if policy_result["requires_012"]:
             recommended_action = "escalate_012"
+        elif not complete:
+            recommended_action = "repair_scan_coverage"
         elif policy_result["escalation"] == "modlog_only":
             recommended_action = "log_modlog"
         elif policy_result["escalation"] == "report_only":
@@ -345,7 +363,8 @@ class SecurityScanExecutor:
             scan_tool=tool,
             target=target,
             tool_available=True,
-            scan_status="completed",
+            scan_status=scan_status,
+            error_message=result.error_message or getattr(result.report, "error_message", None),
             findings=findings,
             max_severity=result.report.max_severity.value if result.report else None,
             total_findings=result.report.total_findings if result.report else 0,
@@ -406,6 +425,7 @@ class SecurityScanExecutor:
         tools_run: List[str] = []
         errors: List[str] = []
         any_available = False
+        completed_count = 0
 
         for tool in ["snyk", "trivy", "semgrep"]:
             result = self._run_single_scan(tool, target)
@@ -414,10 +434,12 @@ class SecurityScanExecutor:
                 any_available = True
                 tools_run.append(tool)
 
+                # Retain findings even when a scanner reports incomplete coverage.
+                all_findings.extend(result.findings)
                 if result.scan_status == "completed":
-                    all_findings.extend(result.findings)
-                elif result.error_message:
-                    errors.append(f"{tool}: {result.error_message}")
+                    completed_count += 1
+                else:
+                    errors.append(f"{tool}: {result.error_message or result.scan_status}")
             else:
                 errors.append(f"{tool}: not available")
 
@@ -431,6 +453,9 @@ class SecurityScanExecutor:
                 error_message="No security scanning tools available",
                 recommended_next_action="Install snyk, trivy, or semgrep",
             )
+
+        complete = completed_count == 3
+        scan_status = "completed" if complete else ("partial" if completed_count or all_findings else "error")
 
         # Calculate aggregate severity counts
         critical_count = sum(1 for f in all_findings if f.get("severity") == "critical")
@@ -456,6 +481,8 @@ class SecurityScanExecutor:
         # Determine recommended action
         if policy_result["requires_012"]:
             recommended_action = "escalate_012"
+        elif not complete:
+            recommended_action = "repair_scan_coverage"
         elif policy_result["escalation"] == "modlog_only":
             recommended_action = "log_modlog"
         elif policy_result["escalation"] == "report_only":
@@ -468,7 +495,7 @@ class SecurityScanExecutor:
             scan_tool=f"all ({','.join(tools_run)})",
             target=target,
             tool_available=True,
-            scan_status="completed" if not errors else "partial",
+            scan_status=scan_status,
             findings=all_findings,
             max_severity=max_severity,
             total_findings=len(all_findings),
@@ -534,7 +561,12 @@ def main() -> int:
     else:
         print(output_json)
 
-    # Return non-zero if 012 gate required
+    # Coverage failures are distinct from policy findings. Never signal clean
+    # completion when a scanner is unavailable, errored, or only partial.
+    if report.scan_status != "completed":
+        logger.error("Security scan coverage incomplete: %s", report.scan_status)
+        return 2
+
     if report.requires_012:
         logger.warning("CRITICAL: 012 gate required")
         return 1

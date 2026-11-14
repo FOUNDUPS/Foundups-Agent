@@ -3,6 +3,27 @@
 > [!TIP]
 > Use Ollama for zero-cost local inference without API keys.
 
+## Foundups fallback configuration
+
+OpenClaw defaults to `qwen-overseer:latest`, for which
+`models/Modelfile.qwen-overseer` supplies a definition. Its GGUF source is an
+absolute machine-specific path: verify or adapt that path before creating the
+model with `ollama create qwen-overseer -f models/Modelfile.qwen-overseer`.
+Alternatively set `OPENCLAW_OLLAMA_MODEL` to an already installed model;
+an explicitly blank setting disables this fallback. No model creation is
+performed by OpenClaw's configuration change.
+
+The chat request uses `OPENCLAW_OLLAMA_TIMEOUT_SEC` (default 120 seconds,
+finite range 15–300). Blank, invalid and non-finite values fall back to 120.
+This is a Requests connect/read timeout, not a total-response deadline;
+synchronous waiting may delay cancellation until the existing post-call check.
+A larger timeout does not establish cold-start readiness.
+
+For operator-managed Windows storage, set `OLLAMA_MODELS` to a suitable existing
+data volume before starting Ollama, and restart Ollama after changing it. The
+preserved PC proposal used `E:\0102_Digital_Twin\models`; this path is an example,
+not a portable requirement or a verified relocation in this slice.
+
 ## Ollama Setup
 
 ### 1. Install Ollama

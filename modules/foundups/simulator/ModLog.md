@@ -1,4 +1,368 @@
+## 2026-11-05 — Micro-UPS preview qualification and continuity
+
+WSP15/22/26/50/62/81/97; root-selected class C, 19/P0. The [P4 preview](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p4-prospective-micro-ups-allocation-v1)
+is VERIFIED_SIMULATED: 360 focused/1,404 broad and independent 15 pass, retaining
+RED/integration failures and old assertions. Controlled legacy trace bytes match.
+Actual numeric/pool sizes 208/1,071, pool class 296, plan class 29/new method 18;
+promoted owner 693 <=700. Preallocated growth preserves inherited size debt, not
+broad compliance; split legacy models before posting expansion. Source/package/
+delivery gates are recorded separately. P3 PR2300/main 95516e81 remains delivered.
+Legacy `_require_numbers` tuple-membership is a separate static follow-up; P4's
+identity-only atom ingress does not use it. No exploit execution or global hardening claim.
+
+## 2026-11-02 — Restricted native UPS transfer qualification
+
+WSP15/22/26/48/62/81/97; class C, 19/P0. Root implements the [versioned mode](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p3-exact-native-transfer-v1);
+independent desired/held-out/source review stays attributed. Final focused 337 and
+broad 1,324 pass with legacy trace parity; scopes overlap, not an aggregate.
+Exact-type review failures and identity repairs remain evidence. Pool 994/class 277,
+helper 172 and no-growth Mesa 2,020 fit allocation; inherited size debt remains.
+This is restricted synthetic-source transfer, not general accounting/funding or F_i policy.
+
+## 2026-11-01 — Native positive pool-credit candidate
+
+WSP15/22/26/48/50/62/97; class B, 17/P0. One private six-line helper replaces four
+additions before publication, rejecting positive increments with result <= prior.
+Native arithmetic/order and exact retries stay. Source 976 <= 990/helper 6 <= 10;
+PoolDistributor 260-line class debt is inherited and unchanged, not broad compliance.
+Original 192; frozen 40 RED 14 pass/26 fail; focused 232 pass. IDs/ASTs independently accepted.
+Broad 1,276/parity, five held-outs and package eight Python/three Node pass; security/publication pending.
+Partial rounding, receipt/hurdle accumulators and underflow are excluded; no funding.
+B03 PR2296/main 1787: 23 PR/21 main checks, 29 PC bindings/187 files preserved.
+Arithmetic NOT_SELECTED/source-transfer code HOLD; sealed diagnostics/history stay intact.
+
+## 2026-11-01 — B11-S1 matching and allocation candidate
+
+WSP15 16/P1 class B; WSP11/22/26/48/62/97. Cancel only same-ID taker remainder,
+count its rejection once, preserve maker/external prefix and use truthful matched
+allocation labels. Focused 209, corrected independent six and supplemental Mesa
+two pass; broad 1,236 passes with independent confirmation. First independent
+five pass/one failure routed to DIRECT_STAKE; setup-only correction retains assertions.
+Files 590/523 fit 620/540; buy-allocation method grows 74→85 lines above 50,
+FiOrderBook 398→412 and AllocationEngine 385→396 above 200: explicit inherited
+debt, not broad compliance. Package eight Python/three Node pass; security/delivery
+remain pending. B09 is
+delivered at 430f9ef9; older candidate-pending entries below remain dated history.
+
+## 2026-11-01 — Hourly queue cadence candidate
+
+WSP15 14/P1 class B; WSP11/22/26/48/62/97. Existing breaker candidate is 324
+lines: monotonic observation after native slice preparation, one first batch,
+then at least 3,600 seconds; no catch-up or drain/refill reset. Preserve FIFO,
+minimum-one/rate math, datetime cooldown and original oracles. Actual baseline
+35 passes; desired RED 12 pass/7 fail; focused 54 and independent five pass.
+Promoted/broad 1,209 passes retain the same three SSE HTTP deselections, no
+failures/errors/skips/guards and 174 stable snapshots. New 19 are within that
+run; five held-outs are outside it. Source review reports no material finding;
+324 source/28 method lines fit 330/35; inherited class size already exceeds 200,
+and remains explicit debt, not broad compliance. Package eight Python/three Node
+pass; security/publication remain pending.
+Private `asdict` state is additive; postmutation log failure is not rollback or
+successful-return proof. No funded/concurrent/restart/authenticated recovery claim.
+
+## 2026-11-01 — Native allocation numeric preparation candidate
+
+WSP11/15/22/26/48/50/62/84/97; class B, 18/P0 (4/5/5/4). Reuse the existing wallet,
+human and engine allocation owners plus MetaGPT registration: strict built-in
+finite nonnegative admission and prospective arithmetic/policy preparation before
+participating state writes. Preserve legacy lookup/allocator precedence, valid
+arithmetic and valid insufficient zero-wallet registration.
+The 171 frozen cases plus 25 independent held-outs passed: 196 cases. The 311
+original regressions passed with exact prior case IDs. Zero errors, skips or guard
+denials were recorded; 174 simulator/FAM Python source snapshots remained stable.
+Independent source/AST/budget review reports no material findings within the
+frozen native-state contract.
+Fresh de baseline/candidate 240-tick raw traces match under the finite profile;
+broad execution passes 1,190 with the same three SSE HTTP deselections. Promoted
+173 is a derived subset; the 25 external held-outs are outside that run. Package
+eight Python/three Node and registry 1,800/260 pass with the same 1,481 members,
+two resident hashes changed and unchanged caps. Fresh security/publication and
+candidate-main/PC/Holo remain pending. Composite allocation
+omits the prior standalone wallet receipt INFO log, permitted before code;
+logging is not settlement evidence or rollback authority. This is supported
+native state under trusted serialized hosting, not arbitrary receiver/logging
+rollback, durable funding, full A02, unit resolution or signing authority.
+PR2288/d927 source publication and fresh de6917 source 21/21/PC checks are separate;
+Reserve-source C/O queries are CURRENT with no index gap, committed-head only; exact runtime
+closure remains false. Historical source/test/package evidence remains unchanged.
+
+## 2026-11-01 — Bounded reserve quote observation
+
+Class A, WSP15 16/P0 (3/4/5/4); WSP11/22/26/50/62/84/97. Add only an opt-in
+module-level observer and frozen slotted record in btc_reserve.py: 597 lines under
+620; record 13, function 29 and three helpers 11/6/6 fit the allocated limits. The
+397-line BTCReserve class and all original module nodes remain unchanged.
+Exact integer/decimal rational data and domain-bound content identity introduce
+no consumer, global unit, fee, supply, funding, provider or chain effect. Reject
+zero reserve with outstanding UPS only in this API; preserve both legacy views.
+Trusted-host serialization is required; the snapshot/digest is not authority,
+currentness, backed value or unique consumption. No historical precision recovery.
+Frozen baseline 7 pass/89 fail; independently reviewed source passes 113 cases,
+with zero guard denials and 174 unchanged simulator/FAM Python source snapshots,
+including tests. Promoted 96 and
+broader 1,019 pass, same three SSE HTTP deselections, no errors/skips/guard denials;
+counts overlap. Controlled fb58 reference and two candidate traces match exactly
+under the fixed process/hash-seed profile; no seed-only portability claim.
+Package eight Python cases/three Node entrypoints pass; the same 1,478 paths,
+byte caps and 1,794-owner registry remain. Publication is pending.
+B02 delivered through PR2285, 23 PR/21 main checks plus
+separate PC/Holo qualification; no live activation or governing unit decision.
+
+## 2026-11-01 — Complete local epoch effects and replay-safe Mesa tail
+
+WSP15 18/P0 class B; WSP22/26/29/48/50/62/84/97. Reuse PoolDistributor and
+EpochLedger with pure preparation, fixed pool-to-ledger lock order and detached
+per-epoch decisions. Exact retries do not credit balances/fund/drip/hurdles again;
+conflicts reject. Preserve existing formulas and shared-position sequencing.
+Extract only private Mesa tail/observer orchestration: Mesa shrinks2061→2020;
+helper89, pool968 and ledger358 fit their frozen ceilings. Keep pending request
+identity before another decay, finalize counters before one observer attempt.
+Ordinary postcommit observer/log failures cannot falsely report an economic abort.
+
+Fresh baseline154 passes. Frozen desired40 first2 pass/38 fail; final independent
+57 pass including16 held-outs and a separately reproduced/repaired None-return
+regression. Promoted41 controls extend three existing owners:192 pass, every
+prior test AST preserved. Initial seeded-process traces differ and remain smoke
+evidence; controlled fresh-process/hash-seed baseline and two candidates match
+byte-for-byte. Broader simulator930 passes with the same3 SSEHTTP deselections,
+zero failures/errors/skips/guard denials. Full evidence is in the current audit.
+Canonical runtime closure1477→1478 adds only the private helper;8 generator/index
+cases and3 Node entrypoints pass, old member identities retained and byte caps
+unchanged. The canonical test registry remains1794; no new test owner is needed.
+No durable recovery, whole outer-cycle transaction, funded budget, integer chain
+unit, signing or activation claim. No economic percentage or cap decision changed.
+
+## 2026-11-01 — Detached, validated agent-wallet policy
+
+WSP15 17/P0, class B; WSP22/26/48/50/84/97. Frozen 76-case desired policy
+suite reproduced 70 failures/6 passes before repair; 235 original regressions
+passed. Candidate now passes all311 without changing prior tests or economic
+formulas. Snapshot exact built-in policy values before allocation effects and
+expose a read-only public view; preserve trusted host replacement and empty-policy
+semantics. No new runtime owner or custody authority. Independently frozen tests
+and full source/publication verification are tracked in the current audit.
+
+## Simulator-first publication alignment — 2026-10-31
+
+Link the single WSP26 change contract and preserve historical source evidence.
+The source matrix now marks incompatible projection and genesis units as class D,
+CONFLICTING and activation BLOCKED. Extend the existing documentation test to
+check actual genesis/matrix consistency and governing mirrors; the frozen new
+assertion first fails on the old matrix. No economic constants or runtime change.
+WSP10/15/22/26/50/83/97; current qualification lives in the reconciliation report.
+
+## Local CABR/breaker security and parity audit — 2026-10-31
+
+WSP15 14/P1; WSP22/26/27/29/48/50/81/84/97/100. Local-only scope at main4050.
+Added strict CABR input admission and breaker severity/cooldown guards within
+existing owners. Preserved valid arithmetic, clamps, thresholds and fee policy.
+Test-first 79 cases: 12 pass/67 fail before repair; connected repaired selection
+414 passes, independent6 passes. Original3 CABR test ASTs unchanged.
+Separate external7 attack probes: 1 pass/6 desired-security failures; none hidden.
+Documented pending funding, replay side effects, self-trade, policy alias, oracle
+and queue timing gaps. No chain signing, runtime activation or economic policy
+rewrite. Initial harness/setup failures and exact evidence remain in the portable
+reconciliation receipt; no production/PQ/compliance assurance follows.
+
+## FoundUps selected numeric source closure — 2026-10-25
+
+Pre-edit WSP15 allocation16/P0 in the numeric plan permits exactly one required
+private arithmetic member. Runtime1470->1471; the existing explicit Node boundary
+now accepts1471 and rejects1472. The old boundary oracle first failed its
+1470 expected-count assertion on actual1471, before calling the validator.
+That RED is an oracle-count mismatch, not evidence of old-validator execution. All328KiB manifest,2MiB/source and32MiB total caps remain unchanged.
+Only token_economics.py's existing LF digest changes, plus _token_numeric.py.
+The alignment test owner is outside runtime membership: an initial parent
+measurement assertion wrongly expected its digest, before any pins changed.
+
+Canonical write/check, all8 existing generator cases and3 existing Node
+compatibility/preflight/blocked-recovery entrypoints pass. Existing Python pin
+and JS pin advance together. All1614 evidence hashes stay stable after deliberate
+write/cap edits; zero instrumented Python/Node network or dotenv attempts.
+No generator/source-discovery algorithm, runtime authority, dependency or API
+change. Evidence count1614 differs from actual1471 runtime members.
+
+Exact commands, IDs, timings and source maps are external under
+foundups-numeric-source-closure-f3jex_4s and in the numeric portable receipt.
+Known38 metadata findings are proposed, pending independent review:37 sources/
+contexts unchanged and1 known arithmetic-source SHA256 value changed. No blanket
+rule/path exemption, unknown finding approval, OS isolation, installed-runtime
+promotion, real chain effect or additional economic coverage follows.
+
+## 2026-10-25 — Work/stake/unstake numeric admission candidate
+
+WSP00/6/11/15/22/50/62/84/97; pre-code15/P1 and revised pure extraction
+allocation are in docs/architecture/FOUNDUPS_NUMERIC_ADMISSION_20261025.md.
+Current contracts/consumers preceded edits; Holo authority mismatch remains
+explicit. Strict built-in quantities and at-use fees, prospective finite balances
+and pure shared preflight reject before selected mutations. Preserve valid fees,
+references, double-work math, float normalization after strict admission and
+insufficient-funds outcomes. Composite success logs now follow assignments;
+unknown valid-insufficient work defers registry insertion.
+
+Core shrinks1375->1351 lines; one private156-line scalar owner is required.
+Focused226 and independent28 pass. Initial full633 predates BTC main; fresh
+combined-main736 passes against merge89486886f, including all6 originals and8
+adjacent cases, with exactly3 inherited SSE HTTP exclusions. Counts overlap.
+Zero instrumented network/dotenv/checkout writes; all13532 SQLite connections
+scratch/memory, central source stable and default store stats unchanged. Guards
+are process instrumentation, not OS isolation. No new unit/aggregate-cap policy,
+concurrent or outer-batch atomicity, custody or funded settlement is claimed.
+
+## 2026-10-25 — Reconciled BTC/Mesa runtime source closure
+
+WSP15 derived16/P0 (C2/I5/D5/Impact4) allocation precedes regeneration in the
+BTC architecture plan. Parent integration uses main f11d7559746 at merge
+d9a57ab1d; original211/513/21 mock-test evidence retains actual base b6d2cf316.
+All168 raw simulator/FAM source hashes still match that tested freeze.
+
+Canonical RedDog regeneration changes exactly the BTC connector/Mesa normalized
+digests;1470 members and all byte/+1 limits remain fixed. Both existing pins
+advance together. Unchanged generator8 and three existing Node entrypoints pass
+with stable source snapshots and zero guarded network/dotenv attempts. No new
+simulator test run, product behavior, installed runtime, authority or chain effect.
+Three binding paths are staged only; parent owns commit/push and publication.
+
+The portable receipt distinguishes current base/merge context from old test
+execution. A38-record known-metadata rebinding proof is proposed externally,
+pending independent approval and fresh hosted scan; the finding ledger is
+untouched. Exact commands/hashes/limits belong in the existing test log/receipt.
+
+## 2026-10-25 — Mock BTC content/realm replay integrity
+
+WSP00/6/11/15/22/50/62/84/97; pre-authoring allocation14/P1 is recorded in
+`docs/architecture/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.md`. Owner retrieval
+remained authority-head-mismatched with no reindex; current docs/consumers and
+degraded direct-source retrieval preceded edits. Optional mock infrastructure
+is not presented as an Algorand transfer prerequisite.
+
+The existing connector now stores a detached full-v2 canonical payload, realm,
+format and digest; serializes pure mock admission; rejects conflicting/unknown/
+legacy/unresolved identities; preserves same-content force and first confirmation
+history; and validates stored receipts before simulated confirmation. Selected
+non-mock modes and invalid Mesa modes reject rather than becoming simulation.
+Configured mode/path and singleton explicit selection cannot silently retarget.
+Legacy columns/rows remain visible and unclassified, without identity backfill.
+
+Parent review reproduced replay success from a supplied unsupported schema with
+two current rows and no business-key uniqueness. Six desired controls failed
+before the minimal constructor schema check. Required columns/types, primary key,
+nullability and full canonical uniqueness now validate before additive migration;
+no rebuild/drop occurs. Scope is unsupported persisted state, not an ordinary
+canonical-schema public mutation. Connector563→399 lines; its class435→161.
+Only Mesa's existing builder changes; no dependency, backend or financial policy.
+
+Repaired focused211, affected simulator513 and independent21 pass, with zero
+guarded network and stable source hashes. Exactly3 existing SSE HTTP cases remain
+excluded. Counts overlap. First-candidate205/507, initial fixture/runner failures,
+WAL initialization race and review history remain in tests/TestModLog.md.
+Parent verified prior epoch PR2192 main convergence; BTC publication/CI/readback
+remain parent-owned. No BTC/Algorand signer, transfer or confirmation is delivered.
+
+## 2026-10-25 — P0C epoch commitment integrity
+
+WSP00/6/11/15/22/50/62/84/97; pre-authoring allocation is
+`docs/architecture/FOUNDUPS_EPOCH_COMMITMENT_HARDENING_20261025.md`, C3/I5/D5/Impact5=18/P0.
+The current Holo owner query remained authority-head-mismatched; direct source,
+live consumers and all six module memory owners preceded the change. Generated
+training JSON was duplicate/stale retrieval noise, not contract evidence.
+
+The existing ledger now binds v2 leaves/nodes/empty roots to their context and
+requires external root/FoundUp/epoch/participant expectations. It preserves exact
+large integers, rejects invalid amounts, freezes nested snapshots, builds before
+publishing under a lock, accepts exact old retries and rejects conflicting or
+out-of-order new epochs. Anchors reuse finalized time. The same owner shrank;
+no helper file, second ledger, connector or financial policy was introduced.
+
+Unchanged baseline:20 passes. New tests first:84 failures plus the two original
+passes. Candidate focused/adjacent closure:104 passes, zero guarded network
+attempts and no source drift. Exact inventory/isolation/artifacts are in
+tests/TestModLog.md. Original test docstring and both test bodies/oracles remain.
+Independent review, publication and main readback are parent-owned gates.
+
+Independent review then found a latent `verify_chain` checker defect: replacing
+a private list entry while retaining the original epoch index could certify the
+indexed entry instead of the listed one. Public frozen/tuple properties expose
+no write path and no persisted import exists; this was not a demonstrated public
+authorization bypass. Two appended controls, with stale and recomputed hashes,
+both failed against the first frozen candidate before correction. The checker
+now checks list/index cardinality and canonical-entry consistency plus the actual
+listed entry hash. Repaired focused/adjacent closure:106 passes (88 ledger+18
+adjacent), zero guarded network attempts and no in-run source drift. The earlier
+104-case and parent-reported30 held-out results qualify only the first candidate;
+they are not repair evidence. See the new raw receipt paths in tests/TestModLog.
+
+Final parent repaired-source qualification:410 simulator cases pass with3 named
+SSE HTTP exclusions; independent replay passes41 held-outs. Counts overlap.
+The changed ledger owner has205/213 statements covered over existing focused
+and independent publication cases; no whole-module coverage or OS-isolated
+promotion claim. Original two test ASTs and module docstring remain identical.
+The portable epoch receipt and test log bind exact IDs, source hashes and limits.
+Existing backend manifest/pins rebind only this owner with1470 members and all
+caps unchanged; eight generator cases and three Node entrypoints pass. Dedicated
+PR, new-head hosted gates and main readback remain pending.
+
+This is process-local pre-settlement evidence. Old connector rows/version
+migration, durable work-source replay protection, aggregate supply, CABR epoch
+allowance and confirmed settlement remain open. No chain/provider/signer call.
+
+## 2026-10-25 — Explicit simulation authority at the FAM bridge
+
+WSP00/6/11/15/22/50/84/97; shared P0B C4/I5/D5/Impact5=19/P0 allocation.
+The existing bridge passes fixed host simulation identities and exact FoundUp
+role grants to FAM's new default-deny verification/payout boundary. Existing
+lifecycle tests remain; impostor actor IDs and legacy-role overrides cannot
+supply authority. No schema, issuer, chain operation or new orchestration plane.
+
+Combined closure: 690 FAM/simulator passes, three unchanged SSE HTTP cases
+excluded, zero network attempts. Parent independently passed115 FAM authority/
+verification controls. Test inventory/isolation is in tests/TestModLog.md.
+Fresh simulator Markdown refresh occurred after compatibility authoring; source
+and callsites were inspected before. The timing gap is preserved in the receipt.
+
+## 2026-10-22 — CA trust build protection
+
+WSP12/22/97. Container build dependency downloads now use the reviewed
+incident-fixed runtime/trust bootstrap; build contexts and entrypoints remain.
+See `docs/audits/security/PYTHON_CA_TRUST_20261022.md` for scope and checks.
+No production image rebuild or rollout is claimed.
+
 # Simulator ModLog
+
+## 2026-10-21 — UPS genesis denomination regression closure
+
+- Retained PR #941's architecture correction: the existing default of 100,000 UPS per BTC implies 1,000 sats per UPS at genesis. No reserve, fee, token or financial-policy implementation changed.
+- Extended the existing reserve test to verify a non-genesis circulating value after reserve growth. Extended the existing docs-alignment case to read the architecture's denomination and check it against the reserve constant; corrected the test README's coverage description.
+- Regenerated the canonical test registry: only the existing reserve test's description changed. The owning checkout passed all 12 reserve/docs cases; a fixed-genesis-value mutation and a reverted one-sat architecture statement each failed exactly the intended case. Exact source restoration returned all 12 cases to passing.
+- WSP 00 gate passed; HoloIndex returned `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH` with UNKNOWN freshness/index gap, so review used exact main/PR source. WSP 15/22/50/97. Validation is offline simulator/documentation evidence, not live token, deployment or financial-operation acceptance; current hosted checks and main readback remain closure gates.
+
+## 2026-06-14 - Nomenclature Alignment: Universal Compute Account (UCA) & internal flows
+
+### Why
+Align definitions and notation across documentation as directed by 012: the macro
+structures keep the "Universal" prefix (UCA / UBA / UBR / UBD), while the internal
+sub-flow acronyms drop the prefix and resolve to `ca` / `cr` / `cd`.
+
+### Updated
+- `docs/ROC_FORMULA_DERIVATION.md`
+  - Kept UCA (Universal Compute Account).
+  - Kept UBA / UBR / UBD (Universal Basic Allocation / Reserve / Dividend).
+  - Canonical native sub-flows: `ca` = Compute Award, `cr` = Compute Reward, `cd` = Compute Dividend.
+  - Translation bridge `UCA = UBA + UBR + UBD`; native flow `UCA = ca + cr + cd`.
+  - Updated formulas, tables, concept mappings, and the Truth Boundary checklist to match.
+
+### W6 repair (2026-06-15)
+- Canonicalized notation: removed math-dollar delimiters (fenced code / backticks instead),
+  made native-flow definitions rg-matchable, dropped any u-prefixed native-flow tokens, removed
+  the dollar-suffixed UPS literal, and removed the unverified WebSearch/WebFetch footer claim.
+- HoloIndex retrieval marked NOT re-run this docs-only pass (no fabricated ratings).
+
+### WSP References
+- WSP 00: Zen State Attainment
+- WSP 22: ModLog documentation
+- WSP 97: Truth Boundary
+
+---
 
 ## 2026-04-01 - Founding Channel Partner Public-Seat Framing Clarification
 

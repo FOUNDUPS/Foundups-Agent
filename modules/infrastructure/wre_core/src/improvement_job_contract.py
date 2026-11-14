@@ -38,7 +38,6 @@ NAVIGATION:
 from __future__ import annotations
 
 import fnmatch
-import hashlib
 import json
 import logging
 import secrets
@@ -47,6 +46,11 @@ from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
+
+from .improvement_job_identity import (
+    canonical_improvement_repo_path,
+    generate_idempotent_improvement_job_id,
+)
 
 logger = logging.getLogger("improvement_job_contract")
 
@@ -254,12 +258,11 @@ def _parse_improvement_reason_code(value: str) -> ImprovementReasonCode:
 @dataclass(slots=True)
 class WSP15Priority:
     """
-    WSP 15 Low-Lying Fruit priority scoring.
+    Legacy WSP-15-inspired execution-risk hints.
 
-    Helps prioritize improvements that are:
-      - Low effort, high impact
-      - Safe to execute without deep review
-      - Bounded in scope
+    This is not canonical numeric WSP 15 C/I/D/Impact MPS evidence and must
+    not be serialized as an allocation receipt. It only preserves compatibility
+    hints for local ordering until an architect supplies real MPS scores.
     """
 
     low_lying_fruit: bool = False
@@ -300,7 +303,7 @@ class WSP15Priority:
 
     @classmethod
     def for_low_risk(cls, reason: str = "Auto-classified as low-risk") -> WSP15Priority:
-        """Factory for low-risk, auto-approvable improvements."""
+        """Factory for low-risk proposal hints; no execution authority."""
         return cls(
             low_lying_fruit=True,
             estimated_complexity="trivial",
@@ -377,27 +380,68 @@ class ImprovementScope:
         Returns:
             True if path is allowed, False if blocked or out of scope.
         """
-        # Normalize path
-        path_str = str(path).replace("\\", "/")
+        path_str = canonical_improvement_repo_path(str(path))
+        if path_str is None:
+            return False
+        module_path = canonical_improvement_repo_path(self.module_path)
+        if self.module_path and module_path is None:
+            return False
+        if module_path and not (
+            path_str == module_path or path_str.startswith(f"{module_path}/")
+        ):
+            return False
 
         # Check blocked paths first (deny takes precedence)
         for blocked in self.blocked_paths:
-            if fnmatch.fnmatch(path_str, blocked):
+            blocked_pattern = canonical_improvement_repo_path(blocked, allow_glob=True)
+            if blocked_pattern is None:
+                return False
+            if fnmatch.fnmatch(path_str, blocked_pattern):
                 return False
 
         # If file_paths specified, check exact match
         if self.file_paths:
             for allowed_file in self.file_paths:
-                if path_str.endswith(allowed_file) or allowed_file in path_str:
+                expected = canonical_improvement_repo_path(allowed_file)
+                if expected is None:
+                    return False
+                if module_path and not expected.startswith("modules/"):
+                    expected = f"{module_path}/{expected}"
+                if path_str == expected:
                     return True
             return False
 
         # Check allowed patterns
         for allowed in self.allowed_paths:
-            if fnmatch.fnmatch(path_str, allowed):
+            allowed_pattern = canonical_improvement_repo_path(allowed, allow_glob=True)
+            if allowed_pattern is None:
+                return False
+            if fnmatch.fnmatch(path_str, allowed_pattern):
                 return True
 
         return False
+
+    def is_well_formed(self) -> bool:
+        """Return whether every declared scope path is canonical and confined."""
+        module_path = canonical_improvement_repo_path(self.module_path)
+        if self.module_path and module_path is None:
+            return False
+        if not module_path and not self.file_paths:
+            return False
+        for path in self.file_paths:
+            canonical = canonical_improvement_repo_path(path)
+            if canonical is None:
+                return False
+            if module_path and not (
+                canonical == module_path or canonical.startswith(f"{module_path}/")
+            ):
+                return False
+            if not self.validate_path(canonical):
+                return False
+        for pattern in (*self.allowed_paths, *self.blocked_paths):
+            if canonical_improvement_repo_path(pattern, allow_glob=True) is None:
+                return False
+        return True
 
     def to_dict(self) -> Dict[str, Any]:
         """Serialize to dict."""
@@ -582,15 +626,17 @@ class ImprovementJob:
 
     def can_auto_approve(self) -> bool:
         """
-        Check if this job can be auto-approved without architect review.
+        Check local eligibility only; this is not provenance or effect authority.
 
         Returns:
-            True if LOW risk AND low_lying_fruit AND dry_run=True.
+            True if LOW risk, bounded scope, low_lying_fruit, and dry_run=True.
         """
         return (
             self.risk_level == ImprovementRiskLevel.LOW
             and self.wsp15_priority.low_lying_fruit
             and not self.wsp15_priority.requires_architect_review
+            and self.dry_run
+            and self.scope.is_well_formed()
         )
 
     def requires_architect_review(self) -> bool:
@@ -705,6 +751,7 @@ def create_improvement_job(
     risk_level: ImprovementRiskLevel = ImprovementRiskLevel.MEDIUM,
     requested_by: str = "system",
     payload: Optional[Dict[str, Any]] = None,
+    idempotency_key: Optional[str] = None,
 ) -> ImprovementJob:
     """
     Factory function to create a new ImprovementJob.
@@ -720,7 +767,11 @@ def create_improvement_job(
     Returns:
         ImprovementJob in PENDING state with dry_run=True.
     """
-    job_id = generate_improvement_job_id(improvement_type)
+    job_id = (
+        generate_idempotent_improvement_job_id(improvement_type, idempotency_key)
+        if idempotency_key is not None
+        else generate_improvement_job_id(improvement_type)
+    )
 
     # Default priority based on risk level
     if risk_level == ImprovementRiskLevel.LOW:

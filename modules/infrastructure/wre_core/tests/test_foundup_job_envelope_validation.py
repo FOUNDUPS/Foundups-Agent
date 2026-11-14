@@ -21,10 +21,36 @@ from typing import Dict, Any
 from modules.infrastructure.wre_core.src.foundup_job_router import (
     detect_envelope_type,
     validate_foundup_job_envelope,
+    _validate_live_mode_gates,
+    _validate_compute_budget,
     EnvelopeType,
     EnvelopeValidationCode,
     EnvelopeValidationResult,
 )
+
+
+def _server_authored_live_snapshot(
+    *,
+    security_gate_passed: bool = True,
+    permission_gate_passed: bool = True,
+) -> dict:
+    """Build a SERVER-AUTHORED live-mode policy snapshot for _validate_live_mode_gates.
+
+    #752 fail-closed semantics: a legitimate live pass requires a server-authored
+    snapshot (security/permission gates set True by a trusted server path), NOT a
+    raw envelope dict (which is sanitized to all-gates-False). The router's object
+    branch additionally coerces any PolicyFlags object whose dry_run_mode is falsy
+    back to dry-run, so a legitimate live PASS is reachable at the gate function
+    surface — which is what these tests exercise directly. (See dispatch Test #6:
+    "do not require a raw dict to live-pass".)
+    """
+    return {
+        "dry_run_mode": False,
+        "security_gate_checked": True,
+        "security_gate_passed": security_gate_passed,
+        "permission_gate_checked": True,
+        "permission_gate_passed": permission_gate_passed,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -200,27 +226,32 @@ class TestFoundUpJobDryRunDefault:
         assert result.policy_flags_snapshot.get("dry_run_mode") is True
 
     def test_foundup_envelope_with_explicit_dry_run_false_not_defaulted(self):
-        """FoundUpJob envelope with explicit dry_run_mode=False is not defaulted."""
+        """FoundUpJob envelope with explicit dry_run_mode=False is not defaulted.
+
+        #752: the sanitizer PRESERVES an explicit dry_run_mode=False (only absent
+        flags default to True), so is_live_mode is correctly True. Under fail-closed
+        Gate 2, a raw live dict without a server-authored security pass is BLOCKED.
+        """
         envelope = {
             "job_id": "job_003",
             "foundup_id": "move2japan",
             "tenant_id": "tenant_carol",
             "requested_action": "extract_foundup",
             "policy_flags": {
-                "dry_run_mode": False,  # Explicit live mode
-                "human_approval": True,  # Required for live mode
+                "dry_run_mode": False,  # explicit -> preserved, NOT defaulted
             },
-            "evidence_refs": ["manifest.json"],  # Required for live mode
-            "compute_budget": 5000,  # Required for live mode
+            "evidence_refs": ["manifest.json"],
+            "compute_budget": 5000,
         }
 
         result = validate_foundup_job_envelope(envelope)
 
-        assert result.valid is True
+        # Explicit dry_run_mode=False is preserved (not defaulted) -> live mode.
+        assert result.dry_run_defaulted is False
         assert result.is_live_mode is True
-        # Note: dry_run_defaulted logic checks if dry_run_mode is missing or falsy
-        # When explicitly set to False, we still default to True for safety per WSP 97
-        # This is the safety-first approach
+        # Fail-closed: a raw self-asserted live dict cannot pass live-mode security.
+        assert result.valid is False
+        assert "security_gate_passed" in result.missing_live_gates
 
 
 # ---------------------------------------------------------------------------
@@ -687,18 +718,18 @@ class TestEvidenceRefsWSP97TruthFields:
     """Test evidence_refs do not change WSP 97 truth fields."""
 
     def test_valid_evidence_does_not_set_verification_complete(self):
-        """Valid evidence_refs does NOT set verification_complete=True."""
+        """Valid evidence_refs does NOT set verification_complete=True.
+
+        #752: the WSP-97 truth guarantee (verification_complete=False) is
+        mode-independent. A valid dry-run envelope with evidence still must not
+        claim verification.
+        """
         envelope = {
             "job_id": "job_017",
             "foundup_id": "kosei",
             "tenant_id": "tenant_quinn",
             "requested_action": "validate_foundup",
-            "policy_flags": {
-                "dry_run_mode": False,
-                "human_approval": True,  # Required for live mode
-            },
             "evidence_refs": ["manifest.json", "proof_abc123"],
-            "compute_budget": 5000,  # Required for live mode
         }
 
         result = validate_foundup_job_envelope(envelope)
@@ -876,43 +907,42 @@ class TestLiveModeWithoutEvidenceFails:
     """Test live-mode envelope without evidence fails."""
 
     def test_live_mode_with_empty_evidence_fails(self):
-        """Live mode with empty evidence_refs fails."""
-        envelope = {
-            "job_id": "job_live_005",
-            "foundup_id": "pqn_portal",
-            "tenant_id": "tenant_eve",
-            "requested_action": "validate_foundup",
-            "policy_flags": {
-                "dry_run_mode": False,
-                "human_approval": True,
-            },
-            "evidence_refs": [],
-        }
+        """Live mode with empty evidence_refs fails (evidence is a required gate).
 
-        result = validate_foundup_job_envelope(envelope)
+        #752: a legitimate live pass is only reachable at the gate function
+        (server-authored snapshot; the router object branch coerces falsy
+        dry_run_mode back to dry-run). Exercise _validate_live_mode_gates directly
+        with approval+security passing so evidence is the SOLE missing gate.
+        """
+        snapshot = _server_authored_live_snapshot()
 
-        assert result.valid is False
-        assert result.validation_code == EnvelopeValidationCode.LIVE_MODE_REQUIRES_EVIDENCE
-        assert "evidence_refs" in result.missing_live_gates
+        result = _validate_live_mode_gates(
+            policy_snapshot=snapshot,
+            evidence_count=0,  # empty evidence
+            evidence_pending=False,
+        )
+
+        assert result["valid"] is False
+        assert result["code"] == EnvelopeValidationCode.LIVE_MODE_REQUIRES_EVIDENCE
+        assert "evidence_refs" in result["missing_gates"]
 
     def test_live_mode_with_no_evidence_field_fails(self):
-        """Live mode without evidence_refs field fails."""
-        envelope = {
-            "job_id": "job_live_006",
-            "foundup_id": "gotjunk",
-            "tenant_id": "tenant_frank",
-            "requested_action": "build_foundup",
-            "policy_flags": {
-                "dry_run_mode": False,
-                "human_approval": True,
-            },
-        }
+        """Live mode with pending evidence fails (evidence is a required gate).
 
-        result = validate_foundup_job_envelope(envelope)
+        #752: exercised directly on _validate_live_mode_gates with approval+security
+        passing (server-authored) so evidence_pending is the SOLE missing gate.
+        """
+        snapshot = _server_authored_live_snapshot()
 
-        assert result.valid is False
-        assert result.validation_code == EnvelopeValidationCode.LIVE_MODE_REQUIRES_EVIDENCE
-        assert "evidence_refs" in result.missing_live_gates
+        result = _validate_live_mode_gates(
+            policy_snapshot=snapshot,
+            evidence_count=0,
+            evidence_pending=True,  # no evidence provided -> pending
+        )
+
+        assert result["valid"] is False
+        assert result["code"] == EnvelopeValidationCode.LIVE_MODE_REQUIRES_EVIDENCE
+        assert "evidence_refs" in result["missing_gates"]
 
 
 class TestLiveModeWithMalformedEvidenceFails:
@@ -958,118 +988,125 @@ class TestLiveModeWithMalformedEvidenceFails:
 
 
 class TestLiveModeWithApprovalAndEvidenceNoVerification:
-    """Test live-mode envelope with approval and evidence does not claim verification."""
+    """Test live-mode gate pass does not imply verification/CABR/payout.
 
-    def test_live_mode_valid_does_not_set_verification_complete(self):
-        """Valid live mode envelope does NOT set verification_complete."""
+    #752: a legitimate live PASS is reachable at the gate function with a
+    SERVER-AUTHORED snapshot (the router object branch coerces falsy dry_run_mode
+    back to dry-run, and raw dicts are sanitized to all-gates-False). The WSP-97
+    truth guarantees (verification_complete/cabr_ready/payout_ready always False)
+    are mode-independent properties of EnvelopeValidationResult, asserted here on a
+    valid envelope. Both facets of the original intent are preserved.
+    """
+
+    def test_live_mode_gate_pass_does_not_imply_verification_complete(self):
+        """Live gates can pass (server-authored) AND result never claims verification."""
+        # Gate-level legitimate live PASS (server-authored snapshot).
+        gate = _validate_live_mode_gates(
+            policy_snapshot=_server_authored_live_snapshot(),
+            evidence_count=2,
+            evidence_pending=False,
+        )
+        assert gate["valid"] is True
+
+        # WSP-97 truth guarantee on a valid envelope (mode-independent).
         envelope = {
             "job_id": "job_live_009",
             "foundup_id": "social_twin",
             "tenant_id": "tenant_ivan",
             "requested_action": "build_foundup",
-            "policy_flags": {
-                "dry_run_mode": False,
-                "human_approval": True,
-            },
             "evidence_refs": ["manifest.json", "proof.json"],
-            "compute_budget": 5000,  # Required for live mode
         }
-
         result = validate_foundup_job_envelope(envelope)
-
         assert result.valid is True
-        assert result.is_live_mode is True
-        assert result.live_mode_gates_passed is True
-        assert result.verification_complete is False  # WSP 97
+        assert result.verification_complete is False  # WSP 97: Always False
 
-    def test_live_mode_valid_does_not_set_cabr_ready(self):
-        """Valid live mode envelope does NOT set cabr_ready."""
+    def test_live_mode_gate_pass_does_not_imply_cabr_ready(self):
+        """Live gates can pass (server-authored) AND result never claims cabr_ready."""
+        gate = _validate_live_mode_gates(
+            policy_snapshot=_server_authored_live_snapshot(),
+            evidence_count=1,
+            evidence_pending=False,
+        )
+        assert gate["valid"] is True
+
         envelope = {
             "job_id": "job_live_010",
             "foundup_id": "pqn_portal",
             "tenant_id": "tenant_judy",
             "requested_action": "validate_foundup",
-            "policy_flags": {
-                "dry_run_mode": False,
-                "permission_gate_passed": True,  # Alternative approval
-            },
             "evidence_refs": ["cabr_evidence.json"],
-            "compute_budget": 5000,  # Required for live mode
         }
-
         result = validate_foundup_job_envelope(envelope)
-
         assert result.valid is True
         assert result.cabr_ready is False  # WSP 97
 
-    def test_live_mode_valid_does_not_set_payout_ready(self):
-        """Valid live mode envelope does NOT set payout_ready."""
+    def test_live_mode_gate_pass_does_not_imply_payout_ready(self):
+        """Live gates can pass (server-authored) AND result never claims payout_ready."""
+        gate = _validate_live_mode_gates(
+            policy_snapshot=_server_authored_live_snapshot(),
+            evidence_count=1,
+            evidence_pending=False,
+        )
+        assert gate["valid"] is True
+
         envelope = {
             "job_id": "job_live_011",
             "foundup_id": "gotjunk",
             "tenant_id": "tenant_kevin",
             "requested_action": "extract_foundup",
-            "policy_flags": {
-                "dry_run_mode": False,
-                "human_approval": True,
-                "security_gate_checked": True,
-                "security_gate_passed": True,
-            },
             "evidence_refs": ["payout_ready_evidence.json"],
-            "compute_budget": 5000,  # Required for live mode
         }
-
         result = validate_foundup_job_envelope(envelope)
-
         assert result.valid is True
         assert result.payout_ready is False  # WSP 97
 
 
 class TestLiveModeSecurityGate:
-    """Test live mode security gate validation."""
+    """Test live mode security gate validation (#752: FAIL-CLOSED)."""
 
-    def test_live_mode_security_gate_checked_but_not_passed_fails(self):
-        """Live mode with security_gate_checked=True but security_gate_passed=False fails."""
-        envelope = {
-            "job_id": "job_live_012",
-            "foundup_id": "kosei",
-            "tenant_id": "tenant_larry",
-            "requested_action": "build_foundup",
-            "policy_flags": {
-                "dry_run_mode": False,
-                "human_approval": True,
-                "security_gate_checked": True,
-                "security_gate_passed": False,
-            },
-            "evidence_refs": ["manifest.json"],
+    def test_live_mode_security_gate_passed_false_fails(self):
+        """Live mode with security_gate_passed=False fails (fail-closed).
+
+        #752: exercised at the gate surface (the legitimate live surface). Gate 1
+        passes via permission_gate_passed; security_gate_passed=False -> Gate 2
+        fail-closed -> blocked with LIVE_MODE_REQUIRES_SECURITY_GATE.
+        """
+        snapshot = _server_authored_live_snapshot(security_gate_passed=False)
+
+        result = _validate_live_mode_gates(
+            policy_snapshot=snapshot,
+            evidence_count=1,
+            evidence_pending=False,
+        )
+
+        assert result["valid"] is False
+        assert result["code"] == EnvelopeValidationCode.LIVE_MODE_REQUIRES_SECURITY_GATE
+        assert "security_gate_passed" in result["missing_gates"]
+
+    def test_live_mode_security_gate_required_even_when_not_checked(self):
+        """#752 FAIL-CLOSED inversion: live mode REQUIRES security_gate_passed=True.
+
+        Previously a missing security_gate_checked meant the gate was optional.
+        Under fail-closed, security MUST pass in live mode; a snapshot with
+        security_gate_checked=False (so the legacy opt-in would NOT fire) is still
+        blocked because security_gate_passed is not True.
+        """
+        snapshot = {
+            "dry_run_mode": False,
+            "permission_gate_passed": True,  # Gate 1 satisfied (server-authored)
+            "security_gate_checked": False,  # legacy opt-in would NOT trigger
+            "security_gate_passed": False,  # but fail-closed still requires True
         }
 
-        result = validate_foundup_job_envelope(envelope)
+        result = _validate_live_mode_gates(
+            policy_snapshot=snapshot,
+            evidence_count=1,
+            evidence_pending=False,
+        )
 
-        assert result.valid is False
-        assert result.validation_code == EnvelopeValidationCode.LIVE_MODE_REQUIRES_SECURITY_GATE
-        assert "security_gate_passed" in result.missing_live_gates
-
-    def test_live_mode_security_gate_not_checked_passes(self):
-        """Live mode without security_gate_checked passes (gate not required if not checked)."""
-        envelope = {
-            "job_id": "job_live_013",
-            "foundup_id": "move2japan",
-            "tenant_id": "tenant_mary",
-            "requested_action": "validate_foundup",
-            "policy_flags": {
-                "dry_run_mode": False,
-                "human_approval": True,
-                "security_gate_checked": False,  # Not checked, so not required
-            },
-            "evidence_refs": ["evidence.json"],
-            "compute_budget": 5000,  # Required for live mode
-        }
-
-        result = validate_foundup_job_envelope(envelope)
-
-        assert result.valid is True
-        assert result.live_mode_gates_passed is True
+        assert result["valid"] is False
+        assert result["code"] == EnvelopeValidationCode.LIVE_MODE_REQUIRES_SECURITY_GATE
+        assert "security_gate_passed" in result["missing_gates"]
 
 
 class TestLiveModeValidationErrorDetails:
@@ -1134,28 +1171,40 @@ class TestLiveModeValidationErrorDetails:
         assert "human_approval" in result.validation_message or "gates" in result.validation_message
 
     def test_live_mode_fields_in_serialized_result(self):
-        """Live mode fields appear in to_dict() output."""
+        """Live mode fields appear in to_dict() output; is_live_mode reflects intent.
+
+        #752: an explicit live raw dict reaches is_live_mode=True at the envelope
+        level (the sanitizer preserves dry_run_mode=False), so the serialized
+        fields are present and is_live_mode=True. The gate PASS itself is proven at
+        the gate surface (a raw live dict is fail-closed, so live_mode_gates_passed
+        is False on the envelope result by design).
+        """
         envelope = {
             "job_id": "job_live_017",
             "foundup_id": "kosei",
             "tenant_id": "tenant_quinn",
             "requested_action": "build_foundup",
-            "policy_flags": {
-                "dry_run_mode": False,
-                "human_approval": True,
-            },
+            "policy_flags": {"dry_run_mode": False},  # explicit live (raw, untrusted)
             "evidence_refs": ["complete_evidence.json"],
-            "compute_budget": 5000,  # Required for live mode
+            "compute_budget": 5000,
         }
 
         result = validate_foundup_job_envelope(envelope)
         result_dict = result.to_dict()
 
+        # Serialization shape is preserved.
         assert "is_live_mode" in result_dict
         assert "live_mode_gates_passed" in result_dict
         assert "missing_live_gates" in result_dict
         assert result_dict["is_live_mode"] is True
-        assert result_dict["live_mode_gates_passed"] is True
+
+        # Legitimate gate PASS is reachable only at the gate surface (server-authored).
+        gate = _validate_live_mode_gates(
+            policy_snapshot=_server_authored_live_snapshot(),
+            evidence_count=1,
+            evidence_pending=False,
+        )
+        assert gate["valid"] is True
 
 
 # ---------------------------------------------------------------------------
@@ -1484,46 +1533,35 @@ class TestLiveModeRequiresComputeBudget:
     """Test live mode requires explicit compute_budget."""
 
     def test_live_mode_with_budget_passes(self):
-        """Live mode with explicit compute_budget passes."""
+        """Live mode with explicit compute_budget passes the budget gate.
+
+        #752: the live compute-budget requirement is a property of
+        _validate_compute_budget(is_live_mode=True); exercised directly because a
+        legitimate live PASS is unreachable through the public envelope API (raw
+        dicts sanitized, object branch coerces falsy dry_run_mode to dry-run).
+        """
         envelope = {
-            "job_id": "job_budget_020",
-            "foundup_id": "pqn_portal",
-            "tenant_id": "tenant_tina",
-            "requested_action": "validate_foundup",
-            "policy_flags": {
-                "dry_run_mode": False,
-                "human_approval": True,
-            },
-            "evidence_refs": ["manifest.json"],
             "compute_budget": 5000,
         }
 
-        result = validate_foundup_job_envelope(envelope)
+        result = _validate_compute_budget(envelope, is_live_mode=True)
 
-        assert result.valid is True
-        assert result.is_live_mode is True
-        assert result.compute_budget_value == 5000
+        assert result["valid"] is True
+        assert result["budget"] == 5000
 
     def test_live_mode_without_budget_fails(self):
-        """Live mode without compute_budget fails."""
+        """Live mode without compute_budget fails (LIVE_MODE_REQUIRES_COMPUTE_BUDGET).
+
+        #752: exercised directly on _validate_compute_budget(is_live_mode=True).
+        """
         envelope = {
-            "job_id": "job_budget_021",
-            "foundup_id": "gotjunk",
-            "tenant_id": "tenant_uma",
-            "requested_action": "build_foundup",
-            "policy_flags": {
-                "dry_run_mode": False,
-                "human_approval": True,
-            },
-            "evidence_refs": ["evidence.json"],
             "compute_budget": None,
         }
 
-        result = validate_foundup_job_envelope(envelope)
+        result = _validate_compute_budget(envelope, is_live_mode=True)
 
-        assert result.valid is False
-        assert result.validation_code == EnvelopeValidationCode.LIVE_MODE_REQUIRES_COMPUTE_BUDGET
-        assert result.is_live_mode is True
+        assert result["valid"] is False
+        assert result["code"] == EnvelopeValidationCode.LIVE_MODE_REQUIRES_COMPUTE_BUDGET
 
     def test_dry_run_without_budget_passes(self):
         """Dry-run mode without compute_budget passes (allowed for dry-run)."""

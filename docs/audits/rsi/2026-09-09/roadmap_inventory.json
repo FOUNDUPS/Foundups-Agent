@@ -1,0 +1,1090 @@
+[
+  {
+    "path": ".agents/skills/qwen_roadmap_auditor_prototype/SKILL.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "Qwen Roadmap Auditor (Prototype)",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "8295a07b5c7c442c13cf55e07eb4e08d95baf41b153f1ab1d27ed81da3e19c61"
+  },
+  {
+    "path": ".claude/skills/qwen_roadmap_auditor_prototype/SKILL.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "Qwen Roadmap Auditor (Prototype)",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "8295a07b5c7c442c13cf55e07eb4e08d95baf41b153f1ab1d27ed81da3e19c61"
+  },
+  {
+    "path": "ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "[U+1F310] FoundUps Intelligent Internet Orchestration System \u2014 Strategic Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "451088ca032178b65b92df7669013e450c924dac6d742065cf0b4e68f0892b76"
+  },
+  {
+    "path": "WSP_framework/docs/Phase5_Integrated_WSP_Analysis_Results.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "Phase 5: Integrated WSP Analysis Results",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "94e2a02ef2163b10e88438c9b05037cbd2844532b1fb4019da5054618627bdef"
+  },
+  {
+    "path": "WSP_framework/docs/annexes/MODLOG_ROADMAP_TEMPLATES_REFERENCE.md",
+    "checked": 0,
+    "unchecked": 29,
+    "heading": "WSP 22: ModLog and Roadmap Protocol",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "5d6c902adb1037d1fc5fabb9178daa7f44f9a1db67f116f91f57adebe8e29147"
+  },
+  {
+    "path": "WSP_framework/src/WSP_37_Roadmap_Scoring_System.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "WSP 37: Roadmap Scoring System",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "4dc97c67ee603e108dbe5f79d8392bf37dfeb6c119a5b761ab763579fdbb8947"
+  },
+  {
+    "path": "WSP_knowledge/docs/wiki/Implementation-Roadmap.md",
+    "checked": 0,
+    "unchecked": 17,
+    "heading": "Implementation Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "57c56dcc42ac44f31d0c68ef7d62be4ba856d3a55652e5dc258a5ac92c563ea5"
+  },
+  {
+    "path": "WSP_knowledge/docs/wiki/Phase-1-Foundation.md",
+    "checked": 0,
+    "unchecked": 12,
+    "heading": "Phase 1: Foundation - WRE Core and WSP Framework completion [OK]",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "7491ef2a0374efd068c8d6bcb53b76f8464af9ba8e1a98eeb64d114a18e0a4b9"
+  },
+  {
+    "path": "WSP_knowledge/docs/wiki/Phase-2-Agent-Ecosystem.md",
+    "checked": 0,
+    "unchecked": 16,
+    "heading": "Phase 2: Agent Ecosystem - Autonomous development capabilities",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "fa631178370f4641ffe06df5342ce8c93bf199212776d7c2fd2b53b1c892a64a"
+  },
+  {
+    "path": "WSP_knowledge/docs/wiki/Phase-3-Economic-Integration.md",
+    "checked": 0,
+    "unchecked": 16,
+    "heading": "Phase 3: Economic Integration - Bitcoin and blockchain integration",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "6fb8c78a6184f89d2a0520d4f57bc250fb944909f13c18c8058b7d949f33c1c3"
+  },
+  {
+    "path": "WSP_knowledge/docs/wiki/Phase-4-Planetary-Scale.md",
+    "checked": 0,
+    "unchecked": 16,
+    "heading": "Phase 4: Planetary Scale - Global deployment and impact",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "4b44c5c764ae119aa50b23911cf88008ef04802bb33007d3025d17d11a3d8e4b"
+  },
+  {
+    "path": "WSP_knowledge/src/WSP_37_Roadmap_Scoring_System.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "WSP 37: Roadmap Scoring System",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "4dc97c67ee603e108dbe5f79d8392bf37dfeb6c119a5b761ab763579fdbb8947"
+  },
+  {
+    "path": "docs/PHASE_3A_INTEGRATION_STATUS.md",
+    "checked": 0,
+    "unchecked": 16,
+    "heading": "Phase 3A Integration Status Report",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "5f5644df590ba59cd42ca1ed1946e744328e91c1c62c1314cb44470f8b657196"
+  },
+  {
+    "path": "docs/PHASE_3B_MODERATOR_NOTIFICATIONS_DESIGN.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "Phase 3B: Moderator Notifications - Integration Design",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "4e46bdba1c647804465d2e653b208d915db2c17ca727ea1e4fc2162efa4e529d"
+  },
+  {
+    "path": "docs/orphan_analysis/Orphan_Integration_Roadmap.md",
+    "checked": 0,
+    "unchecked": 12,
+    "heading": "Orphan Integration Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "a69a5a5aee9c6e03183230d2ba1b568f8a7c46ab9aabdd7c99f61470ce844645"
+  },
+  {
+    "path": "docs/sessions/PHASE_1A_MANUAL_VERIFICATION.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "Sprint 1 Phase 1A: Manual DOM Coordinate Verification",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "7f9744a961baeb4009d36e0bd9fa308bc711a3905447bcc09f1dc6171c1b98d8"
+  },
+  {
+    "path": "extensions/reddog/ROADMAP.md",
+    "checked": 19,
+    "unchecked": 6,
+    "heading": "RedDog Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "9b5bb925f1ff8f9f455645e347c9396cc06c899e40f4749befa0423f59437bb9"
+  },
+  {
+    "path": "holo_index/ROADMAP.md",
+    "checked": 5,
+    "unchecked": 6,
+    "heading": "HoloIndex Development Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "21985a9ce22972645fb0900923f22020a05c5ad827bd39853a154a98037926a8"
+  },
+  {
+    "path": "holo_index/monitoring/root_violation_monitor/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "[U+1F300] Root Violation Monitor - Development Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "8999c8cfb91a33164c98630093de0d220c53bbaaac4cfa3629da0f4ea0b1443f"
+  },
+  {
+    "path": "modules/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "FoundUps Module Development Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "dfdfcdf73ade0d673f4328cd4e77953d9506643394dad411ce11dacf12729cca"
+  },
+  {
+    "path": "modules/ai_intelligence/0102_orchestrator/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "ROADMAP (WSP 22)",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "3e03bc31fab824f03acf72ca20cc87851093eb9a3175df7246a3b911aee8e0ae"
+  },
+  {
+    "path": "modules/ai_intelligence/ai_gateway/ROADMAP.md",
+    "checked": 22,
+    "unchecked": 11,
+    "heading": "AI Gateway Module Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "93245f7339fdd17365eca8d31e4a7e86b1a6c7345b2d73cd6dce6747ba03a1b2"
+  },
+  {
+    "path": "modules/ai_intelligence/ai_overseer/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "AI Overseer - FoundUp Genesis Intake ROADMAP",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "55f5a0b8407e2a7ab549150e7a7b92f674cc46282b8feaad2f287ea3383efcd1"
+  },
+  {
+    "path": "modules/ai_intelligence/banter_engine/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 15,
+    "heading": "Banter Engine Module - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "2d49cd8af4ef68b9b769f9f3473e4664ee295ef66210703c031f06094dff3b19"
+  },
+  {
+    "path": "modules/ai_intelligence/code_analyzer/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "ROADMAP (WSP 22)",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "3e03bc31fab824f03acf72ca20cc87851093eb9a3175df7246a3b911aee8e0ae"
+  },
+  {
+    "path": "modules/ai_intelligence/digital_twin/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "Digital Twin Module - ROADMAP",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "e5f3b685bc2b99537af130fad65a1e7c2d8fcd296da52a7c16ab56555259e638"
+  },
+  {
+    "path": "modules/ai_intelligence/livestream_coding_agent/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "ROADMAP (WSP 22)",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "3e03bc31fab824f03acf72ca20cc87851093eb9a3175df7246a3b911aee8e0ae"
+  },
+  {
+    "path": "modules/ai_intelligence/menu_handler/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "ROADMAP (WSP 22)",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "3e03bc31fab824f03acf72ca20cc87851093eb9a3175df7246a3b911aee8e0ae"
+  },
+  {
+    "path": "modules/ai_intelligence/multi_agent_system/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 15,
+    "heading": "Multi Agent System Module - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "54cce49d983a8ec6e43c3ce6a7d1acfa261a868c118f70fa128b7a526dab82c5"
+  },
+  {
+    "path": "modules/ai_intelligence/openai_integration/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "OpenAI Integration Module Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "139a8e3146780f7379fd80ef39d33de71a16b618df4e4cb0dc109501f9fd4434"
+  },
+  {
+    "path": "modules/ai_intelligence/post_meeting_feedback/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "ROADMAP (WSP 22)",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "3e03bc31fab824f03acf72ca20cc87851093eb9a3175df7246a3b911aee8e0ae"
+  },
+  {
+    "path": "modules/ai_intelligence/post_meeting_summarizer/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "ROADMAP (WSP 22)",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "3e03bc31fab824f03acf72ca20cc87851093eb9a3175df7246a3b911aee8e0ae"
+  },
+  {
+    "path": "modules/ai_intelligence/pqn_alignment/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "ROADMAP \u2014 PQN Alignment Module",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "beed738969af30d64726df71571735cdc272114f7ede644451bf39e71e54a8e7"
+  },
+  {
+    "path": "modules/ai_intelligence/pqn_mcp/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "ROADMAP \u2014 PQN MCP Server Module",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "a8e7bb0baec71ba4ef048654f7c19b5f987f3c454cc753343af9799f9ef20a0f"
+  },
+  {
+    "path": "modules/ai_intelligence/priority_scorer/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "ROADMAP (WSP 22)",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "3e03bc31fab824f03acf72ca20cc87851093eb9a3175df7246a3b911aee8e0ae"
+  },
+  {
+    "path": "modules/ai_intelligence/rESP_o1o2/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 15,
+    "heading": "Resp O1O2 Module - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "b858d45951e4142f981931ccd9327d818abe39727dfdd29ec037885245907b5d"
+  },
+  {
+    "path": "modules/ai_intelligence/ric_dae/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "Vision",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "85649e99fdcbd1599022303a3bba70a08f46f5341c06b7338433e239929d8ec4"
+  },
+  {
+    "path": "modules/ai_intelligence/social_media_dae/SOCIAL_MEDIA_DAE_ROADMAP.md",
+    "checked": 0,
+    "unchecked": 15,
+    "heading": "Social Media DAE - WSP-Prioritized Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "a65f76b4596a1f867717c2d4c004231e6081058f2121d21df89c368b15a960f6"
+  },
+  {
+    "path": "modules/ai_intelligence/social_media_dae/docs/SOCIAL_MEDIA_EXPANSION_ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "Social Media Expansion Roadmap - Top 10 Platforms",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "63c1b228b38982ba661f4422dbf5e38b8354c0b215c718307f4e7c0f80f0edd2"
+  },
+  {
+    "path": "modules/ai_intelligence/video_indexer/ROADMAP.md",
+    "checked": 55,
+    "unchecked": 23,
+    "heading": "Video Indexer Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "fc4b71c15cfab4d0611202e0da79228b8f0a7f4952e65e16e49affcb9fa4282d"
+  },
+  {
+    "path": "modules/blockchain/src/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 15,
+    "heading": "Src Module - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "ca6e422a7341543b51832536b9ff657365b61b340fd1d90d038a3467bfe9b79b"
+  },
+  {
+    "path": "modules/blockchain/tests/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 15,
+    "heading": "Tests Module - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "98f874079a4b7f67f2a9a95ae9fc4e2a10bf9f8b87f67f49d5f85b826986e3d0"
+  },
+  {
+    "path": "modules/communication/auto_meeting_orchestrator/ROADMAP.md",
+    "checked": 23,
+    "unchecked": 92,
+    "heading": "AMO Development Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "165c9f2f6dab8d91c29ef81d00ce6f2c6a4490fc2cd5fa1923473e24c0c90b78"
+  },
+  {
+    "path": "modules/communication/channel_selector/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "ROADMAP (WSP 22)",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "3e03bc31fab824f03acf72ca20cc87851093eb9a3175df7246a3b911aee8e0ae"
+  },
+  {
+    "path": "modules/communication/chat_rules/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 69,
+    "heading": "Chat Rules Engine - Development Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "44af2e7567d40beeaedf6259a6a169832b57366fa859f78c471173013c970583"
+  },
+  {
+    "path": "modules/communication/consent_engine/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "ROADMAP (WSP 22)",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "3e03bc31fab824f03acf72ca20cc87851093eb9a3175df7246a3b911aee8e0ae"
+  },
+  {
+    "path": "modules/communication/headless_video_orchestrator/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "Headless Video Orchestrator - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "74c9a965aa6da5da098a308316a5bf7d6218cd867562290ef304c35843a50be1"
+  },
+  {
+    "path": "modules/communication/intent_manager/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "ROADMAP (WSP 22)",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "3e03bc31fab824f03acf72ca20cc87851093eb9a3175df7246a3b911aee8e0ae"
+  },
+  {
+    "path": "modules/communication/liberty_alert/ROADMAP.md",
+    "checked": 5,
+    "unchecked": 65,
+    "heading": "Liberty Alert Development Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "dcf65be2d64c99b6f8d8e97309e4ad1076e77f070501d8be04721c482b97d7df"
+  },
+  {
+    "path": "modules/communication/live_chat_poller/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 15,
+    "heading": "Live Chat Poller Module - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "eb5801f7dce4de3d6e108442e03b065b44a67d5fa226bb2a617ce38024bfb08f"
+  },
+  {
+    "path": "modules/communication/live_chat_processor/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 15,
+    "heading": "Live Chat Processor Module - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "9ff63d15b50f9536d2f1592a27c1423c5dbd3851fd9d4861d2011846461d6579"
+  },
+  {
+    "path": "modules/communication/livechat/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 15,
+    "heading": "Livechat Module - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "9e01330e7b2d6b4f782833d2c2d66bb39bbec9b261cd3d45c2e05f8a93c77b22"
+  },
+  {
+    "path": "modules/communication/livechat/docs/YouTube_DAE_Gemma_Enhancement_Roadmap.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "YouTube DAE Gemma Enhancement Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "77b1814055a13040877bb939bcb33713773cce56e41600200fae0fad8c400281"
+  },
+  {
+    "path": "modules/communication/moltbot_bridge/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "moltbot_bridge Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "66823b4172f932c02c7cdcde0c86d8c4c8445b63107372ebaf975a18701fa506"
+  },
+  {
+    "path": "modules/communication/moltbot_bridge/workspace/HERMES_INSPIRED_FOUNDUPS_NATIVE_ROADMAP_2026-03-23.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "Hermes-Inspired FoundUps Native Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "64dbb60ec1e4a7c9deab3618fdcd363d34fa6020bb62177f68f6d3cde4da88f8"
+  },
+  {
+    "path": "modules/communication/presence_aggregator/ROADMAP.md",
+    "checked": 31,
+    "unchecked": 106,
+    "heading": "Presence Aggregator Development Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "b9ea6bdfe5576be7013b6c0078d3b7d49b1d239430246bdf31e442eb4985bc3d"
+  },
+  {
+    "path": "modules/communication/video_comments/ROADMAP.md",
+    "checked": 39,
+    "unchecked": 9,
+    "heading": "Video Comments - ROADMAP",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "9161dabde5bbdc483001737af8d325bd9981666757ee34cca494d701a657704a"
+  },
+  {
+    "path": "modules/communication/voice_command_ingestion/ROADMAP.md",
+    "checked": 36,
+    "unchecked": 6,
+    "heading": "voice_command_ingestion Roadmap (Sprint Plan)",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "4c20da1e59934b43bfd7beda5b28a3a4e1edb9938ae826f3f2cb78ca320c0998"
+  },
+  {
+    "path": "modules/development/cursor_multi_agent_bridge/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "Cursor Multi-Agent Bridge Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "495fc0c88aafd5055b7144c8558567a427b2380caa3d09c0c0e6df6057889cab"
+  },
+  {
+    "path": "modules/development/ide_foundups/ROADMAP.md",
+    "checked": 35,
+    "unchecked": 5,
+    "heading": "IDE FoundUps Module - Development Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "d46e82e1846da0feee9b3e117a6f3050a083ebbf6dd4b64a93ae9caa66966931"
+  },
+  {
+    "path": "modules/development/module_creator/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "ROADMAP (WSP 22)",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "3e03bc31fab824f03acf72ca20cc87851093eb9a3175df7246a3b911aee8e0ae"
+  },
+  {
+    "path": "modules/development/wre_interface_extension/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "ROADMAP (WSP 22)",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "3e03bc31fab824f03acf72ca20cc87851093eb9a3175df7246a3b911aee8e0ae"
+  },
+  {
+    "path": "modules/foundups/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "FoundUps Domain Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "954f2c93ea11fb1eeb0b4b891ee714266c091d01e279e3fd02756d720dad7ba8"
+  },
+  {
+    "path": "modules/foundups/agent/ROADMAP.md",
+    "checked": 14,
+    "unchecked": 20,
+    "heading": "Agent Module Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "1f01d769a9a3829686830b2e4282d8d913994d565516819fefb5448a447b7204"
+  },
+  {
+    "path": "modules/foundups/agent_market/ROADMAP.md",
+    "checked": 23,
+    "unchecked": 5,
+    "heading": "Domain Alignment References",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "4337df7f82eebe0ebfae78b20e1c7b2ff98d1ba5af7d6c18cd4c72fa9609eb7f"
+  },
+  {
+    "path": "modules/foundups/docs/FOUNDUPS_PAVS_IRONCLAW_AGENT_BUILDER_DIGITAL_TWIN_ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "FoundUps pAVS IronClaw Roadmap (Agent Builder + Digital Twin)",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "eb4b76c24377adc7b8945d09973bb0dd664f6c86faf44b5ed2a1cceeb8d87e9e"
+  },
+  {
+    "path": "modules/foundups/ecosystem_animation/ROADMAP.md",
+    "checked": 8,
+    "unchecked": 16,
+    "heading": "Ecosystem Animation Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "5076fb8fff60d8d1f8171afeebac0f8df634bd6acb7076ca382b068e9c64aa7c"
+  },
+  {
+    "path": "modules/foundups/esingularity/ROADMAP.md",
+    "checked": 9,
+    "unchecked": 7,
+    "heading": "Project eSingularity roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "cc5ee3765692926002f3821e3dafce4caa8980908c101c2a9830a220126d4e6a"
+  },
+  {
+    "path": "modules/foundups/gotjunk/ROADMAP.md",
+    "checked": 21,
+    "unchecked": 136,
+    "heading": "GotJUNK? FoundUp - Development Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "7a02adad98a0fbcf1c4c1428f856d860984710c13c5d1182930205f2a28008a1"
+  },
+  {
+    "path": "modules/foundups/kosei/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "Kosei AI Systems \u2014 ROADMAP",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "f5c28acfac96d589cb15bfff0a388b3f5ec494013e3d7552605ced1ecd8f86ca"
+  },
+  {
+    "path": "modules/foundups/move2japan/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "Move2Japan FoundUp \u2014 ROADMAP.md",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "a54557abc79cb521b7de65c99dcac65f3d26a5b4694b887e7c6e2c2c9f4c13d1"
+  },
+  {
+    "path": "modules/foundups/pfmall/ROADMAP.md",
+    "checked": 2,
+    "unchecked": 12,
+    "heading": "p.fMALL Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "5ddd0b3d07763b75be5be475b61fb468a2d6ea98fdf320b8081a6544c7bb6908"
+  },
+  {
+    "path": "modules/foundups/pqn_portal/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "ROADMAP \u2014 PQN Portal FoundUp",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "eceb33afa40a668537e0a26c0bba1b2203eb0eced8765bdd4d00b24f6935724c"
+  },
+  {
+    "path": "modules/foundups/pqn_swarm_hub/ROADMAP.md",
+    "checked": 44,
+    "unchecked": 0,
+    "heading": "ROADMAP - PQN Swarm Hub FoundUp",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "ac249524c545f267927affc59881a056c647d5150b4f2cde9472af83f18cd8b3"
+  },
+  {
+    "path": "modules/foundups/shield/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 19,
+    "heading": "Shield Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "12c6d1a597bb9064cea73485d10e0b440d149cf92c1c88d119e51214009755a0"
+  },
+  {
+    "path": "modules/foundups/simulator/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "ROADMAP - FoundUps Simulator",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "9f593b9f5b0ccd824cd4935288b3533d84413c63a69756afc574b702c3270ddc"
+  },
+  {
+    "path": "modules/foundups/social_twin/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "Social Twin FoundUp Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "fa29adb2eea983e8aa2322191f7b03ecee8e5d2fc7dcf03acb2c3d4a3860c247"
+  },
+  {
+    "path": "modules/foundups/src/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "ROADMAP (WSP 22)",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "3e03bc31fab824f03acf72ca20cc87851093eb9a3175df7246a3b911aee8e0ae"
+  },
+  {
+    "path": "modules/foundups/tests/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 15,
+    "heading": "Tests Module - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "666558f4fca264bd0ac617ffb7a609a48a692e15600b8d721fea15f7d4fe8332"
+  },
+  {
+    "path": "modules/foundups/trade/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "Trade FoundUp - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "689cf4318098a8e3418799a26163a4df5a7109185a1357b554e6641724e3f210"
+  },
+  {
+    "path": "modules/foundups/voteballots/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 53,
+    "heading": "Vote/Ballots FoundUp - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "1cfde01627bbf1bdf4a5d09fa9350a6bb880a93a8b21a48864a4aca31f84eba4"
+  },
+  {
+    "path": "modules/gamification/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 15,
+    "heading": "Gamification Domain - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "d496a5cb924bfbbe59d893608f2f30152705e1e3400e8f278b36c87db7e6878d"
+  },
+  {
+    "path": "modules/gamification/tests/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 15,
+    "heading": "Tests Module - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "57e7bf941795581be6ba34b4e6563fff6c02c233860c908d2fafad6ad6032d8a"
+  },
+  {
+    "path": "modules/gamification/whack_a_magat/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "ROADMAP \u2014 MAGADOOM Whack-a-Magat DAE",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "2ea8f322e8b89f5d5e84ecf884dba24a799f03d10e87ceadaf79d2414f1704a5"
+  },
+  {
+    "path": "modules/infrastructure/browser_actions/ROADMAP.md",
+    "checked": 1,
+    "unchecked": 21,
+    "heading": "Browser Actions - Sprint Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "ddaf95f4faeb1f09db3bb1a03a177c274ac19b39df0cbf39ac83ccea26f54cf8"
+  },
+  {
+    "path": "modules/infrastructure/codex_hooks/ROADMAP.md",
+    "checked": 6,
+    "unchecked": 4,
+    "heading": "Codex Hooks Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "5ef965b961f073bb1d6cfdea6f2378ea71a9a438f772b1af4dcd463f33e8f853"
+  },
+  {
+    "path": "modules/infrastructure/cross_platform_memory/ROADMAP.md",
+    "checked": 9,
+    "unchecked": 28,
+    "heading": "Cross-Platform Memory Orchestrator Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "b021f966baca1e1eebb9d14a873b57749578e540e0869e074af0f182c874f61e"
+  },
+  {
+    "path": "modules/infrastructure/dae_infrastructure/docs/IMPLEMENTATION_PLAN_DAEMON_MONITORING.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "Implementation Plan: Live Chat Daemon Monitoring",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "a249fdda85ffd748074e5582a8c596de575a9184868daf3cc53eb95d049fa3f1"
+  },
+  {
+    "path": "modules/infrastructure/dependency_launcher/ROADMAP.md",
+    "checked": 10,
+    "unchecked": 12,
+    "heading": "Dependency Launcher Module - ROADMAP",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "3946ca632ba56095e64ab98fa4c56db59e444e8759d80716ab385745c05cfa7a"
+  },
+  {
+    "path": "modules/infrastructure/deployment/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "Infrastructure Deployment Module Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "e9565014729aa7faa63db1c3e6cae3be827196b55d1aef2156719af6c6da0497"
+  },
+  {
+    "path": "modules/infrastructure/foundups_mcp_bridge/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "foundups_mcp_bridge Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "8166e4cf129bab336d7f67cec16aceccab28366d0e2654fb27ec2cadbf8608d6"
+  },
+  {
+    "path": "modules/infrastructure/foundups_vision/ROADMAP.md",
+    "checked": 8,
+    "unchecked": 16,
+    "heading": "FoundUps Vision - Sprint Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "fd861bd15b28cd00d6668362c0dc70859afce0260b5d2a4e4fe563b9c38ba6ac"
+  },
+  {
+    "path": "modules/infrastructure/foundups_vision/docs/PHASE_4H_HYBRID_ARCHITECTURE.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "Phase 4H: Hybrid DOM + UI-TARS Training Architecture",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "cd2b7daaaef70db3081591c03b2323ecb05a51c0c34c28846e5eed36e521c4e2"
+  },
+  {
+    "path": "modules/infrastructure/git_push_dae/ROADMAP.md",
+    "checked": 5,
+    "unchecked": 21,
+    "heading": "GitPushDAE Development Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "7f0ce116ea94b58875dc3b3edbb9561776ee32f0f9be839bb63a1034854aae92"
+  },
+  {
+    "path": "modules/infrastructure/github_orchestrator/ROADMAP.md",
+    "checked": 12,
+    "unchecked": 13,
+    "heading": "GitHub Orchestrator Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "9744a589aaeccd713b31e1fbf7cd2872547ebb8ad154d139dcc0d25e86bd9c08"
+  },
+  {
+    "path": "modules/infrastructure/idle_automation/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "Idle Automation Module Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "62f6a1a25f7594f90a20545e4e7e80d6e1e6adf7f20dbf2f9795302d4297e32c"
+  },
+  {
+    "path": "modules/infrastructure/link_sentinel/ROADMAP.md",
+    "checked": 15,
+    "unchecked": 16,
+    "heading": "Link Sentinel - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "f45fb93b3b13045b1df7a9a62ddbc2d99e93acd3d7fce006b64ad3271441edb4"
+  },
+  {
+    "path": "modules/infrastructure/mcp_daemon/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "MCP DAEmons Development Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "e4695949c8879c20f3cd92a9a9bfa64a228fae32578f77b67cdbba4368dc2ba5"
+  },
+  {
+    "path": "modules/infrastructure/navigation/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "Navigation Module Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "d8f448fb2ca00ba3a08e5b8ecbb14cc2855f61ed9026cba5ec18f058e73b901b"
+  },
+  {
+    "path": "modules/infrastructure/pavs_mcp/ROADMAP.md",
+    "checked": 2,
+    "unchecked": 26,
+    "heading": "pAVS MCP Server Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "317c892f6cc6dfa34678ca29908ec339dad4d0dd51d63a4431f1772a85bce539"
+  },
+  {
+    "path": "modules/infrastructure/shared_utilities/audit_logger/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "ROADMAP (WSP 22)",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "3e03bc31fab824f03acf72ca20cc87851093eb9a3175df7246a3b911aee8e0ae"
+  },
+  {
+    "path": "modules/infrastructure/shared_utilities/block_orchestrator/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "ROADMAP (WSP 22)",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "3e03bc31fab824f03acf72ca20cc87851093eb9a3175df7246a3b911aee8e0ae"
+  },
+  {
+    "path": "modules/infrastructure/shared_utilities/llm_client/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 15,
+    "heading": "Llm Client Module - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "02804e89497b94ae85320a2164074703720be6ea322c271d789002417c34ab79"
+  },
+  {
+    "path": "modules/infrastructure/shared_utilities/log_monitor/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 7,
+    "heading": "Log Monitor Module - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "74c7617a2f366886b66a45fab8769930769e62ae5306d35286e497b5e7011a29"
+  },
+  {
+    "path": "modules/infrastructure/wre_core/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "WRE Core Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "a93f537d93380d4720f2a7390528397a93876438a3c7a9d4ac6956aa5ea5100a"
+  },
+  {
+    "path": "modules/infrastructure/wre_core/recursive_improvement/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "Recursive Improvement Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "cd6eb81f5f3ff53ce9acfd90c14713013264d744ff7147d2a0392376cb774dd4"
+  },
+  {
+    "path": "modules/infrastructure/wre_core/wre_master_orchestrator/ROADMAP.md",
+    "checked": 2,
+    "unchecked": 12,
+    "heading": "WRE Master Orchestrator - Development Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "0183ce0ae00f5b0d3e5d7944220a09038d58e4904c8649a2c00285130b36cf9e"
+  },
+  {
+    "path": "modules/platform_integration/acoustic_lab/ROADMAP.md",
+    "checked": 8,
+    "unchecked": 0,
+    "heading": "Acoustic Lab - Development Roadmap (WSP 22)",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "274e6ab3cbb39d34175273a0c6288e6bc4deec94b3ea8bda8602216e20533c5e"
+  },
+  {
+    "path": "modules/platform_integration/acoustic_lab/docs/phase1_implementation.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "Phase 1 Implementation - Acoustic Lab Educational Platform",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "58ac1e51cadbd97125b52a9ee434fa36f827ec9fce107a009d1d1eec332e8fb9"
+  },
+  {
+    "path": "modules/platform_integration/antifafm_broadcaster/ROADMAP.md",
+    "checked": 69,
+    "unchecked": 68,
+    "heading": "antifaFM Broadcaster - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "7a5556955d8e9f6dfb591a6c57019831d3b79036c81fae91d1f4ba24d372355e"
+  },
+  {
+    "path": "modules/platform_integration/antifafm_broadcaster/schemas/entangled/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "Entangled Schema - ROADMAP",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "9b3f9054c79c620e08338625d5e8ae517a89a2f860db6f1885a01bc7cbde3097"
+  },
+  {
+    "path": "modules/platform_integration/antifafm_broadcaster/schemas/karaoke/ROADMAP.md",
+    "checked": 4,
+    "unchecked": 3,
+    "heading": "Karaoke Schema - ROADMAP",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "11e1414b5b725d2a3e1f520447d388ad25a71494e1084168c4475a95bb3af6e5"
+  },
+  {
+    "path": "modules/platform_integration/antifafm_broadcaster/schemas/livecam/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 10,
+    "heading": "Livecam Schema - ROADMAP",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "815c042f20361252766626b0397d5cdac411c147eb5e97a9ace17d3f7cdde174"
+  },
+  {
+    "path": "modules/platform_integration/antifafm_broadcaster/schemas/news_ticker/ROADMAP.md",
+    "checked": 2,
+    "unchecked": 7,
+    "heading": "News Ticker Schema - ROADMAP",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "7512688c7a87020fc1778c9a75c7ba1e37992a5d970fd878edc32ef6cc9c12ae"
+  },
+  {
+    "path": "modules/platform_integration/antifafm_broadcaster/schemas/spectrum/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "Spectrum Schema - ROADMAP",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "a9abfdf1d92850706e75cccf1d2ff4e7bb30faecebf9b653aac12d887b25676a"
+  },
+  {
+    "path": "modules/platform_integration/antifafm_broadcaster/schemas/video_loop/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "Video Loop Schema - ROADMAP",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "75d76bc9dd090942a73878315a6b68a987a78e2145f448f422e8b817d07717bb"
+  },
+  {
+    "path": "modules/platform_integration/antifafm_broadcaster/schemas/waveform/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "Waveform Schema - ROADMAP",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "40e9201d35f800104b9cd8a36928a7b5a8029e8044d779ecd083ded65f352592"
+  },
+  {
+    "path": "modules/platform_integration/foundups_sdk/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "FoundUps SDK Module Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "83a6c3743cf620f995cda97da48c8837de0eced0d3295d6351dac75d15a3ebb4"
+  },
+  {
+    "path": "modules/platform_integration/github_integration/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "ROADMAP (WSP 22)",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "3e03bc31fab824f03acf72ca20cc87851093eb9a3175df7246a3b911aee8e0ae"
+  },
+  {
+    "path": "modules/platform_integration/linkedin_agent/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 15,
+    "heading": "Linkedin Agent Module - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "de72ee260ec4399808fde9091e1718f836c1c9e244f378bba37d54161d6bb44b"
+  },
+  {
+    "path": "modules/platform_integration/linkedin_scheduler/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 15,
+    "heading": "Linkedin Scheduler Module - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "2c57cd60c7a3abde52b2a5521a40a912001e6240492bcfaefe487cff4fc24cce"
+  },
+  {
+    "path": "modules/platform_integration/remote_builder/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 15,
+    "heading": "\ud83d\udfe2 FoundUps Remote Builder Module \u2013 Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "b1f0386da422c336fc41848ca79e2f4b718387e3061df17c795540f307d22c69"
+  },
+  {
+    "path": "modules/platform_integration/session_launcher/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "ROADMAP (WSP 22)",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "3e03bc31fab824f03acf72ca20cc87851093eb9a3175df7246a3b911aee8e0ae"
+  },
+  {
+    "path": "modules/platform_integration/social_media_orchestrator/ROADMAP.md",
+    "checked": 3,
+    "unchecked": 30,
+    "heading": "Social Media Orchestrator - ROADMAP",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "7f310df0db3dc67b6207165df402b4e7ce2fc45b18a32e6a077fa76f8d1f0013"
+  },
+  {
+    "path": "modules/platform_integration/stream_resolver/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 15,
+    "heading": "Stream Resolver Module - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "1581592625ffec12f1ab8ffb7deb7e30dc3a6468216cc42bec42160d7d11daaf"
+  },
+  {
+    "path": "modules/platform_integration/tests/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 9,
+    "heading": "tests Module - Development Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "a07bd9fb68a8369321838984d56f804161bbe19394aca695e2ef3da612074067"
+  },
+  {
+    "path": "modules/platform_integration/utilities/blockchain_integration/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 15,
+    "heading": "Blockchain Integration Module - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "829dbdf614d3c3c6cfd2ac88823a4e95406e4395e31edf0cdf10775d54c11976"
+  },
+  {
+    "path": "modules/platform_integration/utilities/consent_engine/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 0,
+    "heading": "ROADMAP (WSP 22)",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "3e03bc31fab824f03acf72ca20cc87851093eb9a3175df7246a3b911aee8e0ae"
+  },
+  {
+    "path": "modules/platform_integration/utilities/oauth_management/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 15,
+    "heading": "Oauth Management Module - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "6fae8d0f421f060881c1be9fe74397ddb87dd19296b2262f227f42d4b1bad7e4"
+  },
+  {
+    "path": "modules/platform_integration/utilities/token_manager/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 15,
+    "heading": "Token Manager Module - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "52184e0b40c58effd75d8592015044b613ba7dae47280b9078e0a21b4aa741d1"
+  },
+  {
+    "path": "modules/platform_integration/x_twitter/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 40,
+    "heading": "X Twitter DAE Communication Node - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "92128b37577e83f1f2147d1b26e83a44c8a1ac6c04bdd4a93e74c29f0f11e5dc"
+  },
+  {
+    "path": "modules/platform_integration/youtube_auth/ROADMAP.md",
+    "checked": 5,
+    "unchecked": 10,
+    "heading": "YouTube Auth Module - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "99f1e3cb5c5bdb2be555d1e3c9a64c58be0799b1b2897d7c16de73db4455fcf8"
+  },
+  {
+    "path": "modules/platform_integration/youtube_live_audio/ROADMAP.md",
+    "checked": 27,
+    "unchecked": 10,
+    "heading": "youtube_live_audio Roadmap (Sprint Plan)",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "04d45517ce48a700aa8cf752321c02831df171f2054658903117790825500226"
+  },
+  {
+    "path": "modules/platform_integration/youtube_proxy/ROADMAP.md",
+    "checked": 0,
+    "unchecked": 14,
+    "heading": "YouTube Proxy Module - Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "a3bba607d148531132c677129341da6bc936c982b3dbb01dc4c353a4c3f82008"
+  },
+  {
+    "path": "modules/platform_integration/youtube_shorts_scheduler/ROADMAP.md",
+    "checked": 6,
+    "unchecked": 12,
+    "heading": "YouTube Shorts Scheduler - ROADMAP",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "f446f41d11728a67e0229e48070c9affbd4b7a12d2a785a17f157e218f64a830"
+  },
+  {
+    "path": "public/member/ROADMAP.md",
+    "checked": 9,
+    "unchecked": 25,
+    "heading": "Member Area Roadmap",
+    "classification": "DOCUMENT_CLAIMS_ONLY",
+    "sha256": "6ac9239f0ded7be14a1389667b88e587b842d4c13d877e2cf69917454aa3aa4c"
+  }
+]

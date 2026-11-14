@@ -1,0 +1,68 @@
+{
+  "allowed_read_targets": [
+    "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+    "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+    "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+    "WSP_framework/src/WSP_22_ModLog_Structure.md",
+    "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+    "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+    "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+    "WSP_framework/src/WSP_87_Code_Navigation_Protocol.md",
+    "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+  ],
+  "architect_model_runtime_binding_digest": "",
+  "architect_model_runtime_binding_receipt_id": "",
+  "changed_paths": [
+    "docs/audits/infrastructure/HOLOINDEX_QUERY_RUNTIME_BUILDER_GIT_TEST_CONTRACT_WSP15_ALLOCATION_RECEIPT_PHASE2B1.json",
+    "docs/audits/infrastructure/HOLOINDEX_QUERY_RUNTIME_BUILDER_GIT_TEST_CONTRACT_WSP97_EXECUTION_RECEIPT_PHASE2B1.json",
+    "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_GIT_TEST_CONTRACT_CORRECTION_PHASE2B1.md",
+    "docs/doc_index.json",
+    "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/README.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/TestModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_git.py"
+  ],
+  "complexity": 5,
+  "deferability": 5,
+  "impact": 5,
+  "importance": 5,
+  "input_digest": "sha256:cbe5aa25608ff98d3aa231adfd6e26221e6072988803c6843376d4d8e8ebaeef",
+  "model_runtime_binding_digest": "",
+  "model_runtime_binding_receipt_id": "",
+  "mps_total": 20,
+  "no_holoindex_reindex_performed": true,
+  "no_model_call_performed": true,
+  "no_queue_mutation_performed": true,
+  "no_repo_mutation_performed": true,
+  "no_worker_spawn_performed": true,
+  "priority": "P0",
+  "prompt_digest": "sha256:32b1d56594922285d20c8ebcc9effede7f5bc966ba29b73fd00a85ec206f8f1c",
+  "reasoning_tier": "ULTRA",
+  "receipt_id": "sha256:8663161567cb3cf75e675da361ab2b93d3bec777e8e4e1dc818dde56e28ced98",
+  "requested_operation": "Correct the Phase 2B live O/E pinned-Git test contract so it matches the committed-HEAD authority boundary and preserve source-layer worktree-byte rejection.",
+  "schema_version": "reddog_wsp15_allocation_receipt.v1",
+  "scoring_method": "deterministic_wsp15_runtime_heuristic",
+  "scoring_rationale": {
+    "complexity": "Implementation complexity derived from 17 unique repo targets and structural work terms.",
+    "deferability": "Cannot defer because authority-sensitive and blocking/operational terms are present.",
+    "impact": "Transformative operational impact for RedDog/WRE governance.",
+    "importance": "Essential because authority-sensitive RedDog/WRE terms are present."
+  },
+  "worker_plan": {
+    "coding_worker_count": 2,
+    "critic_count": 2,
+    "fusion_required": true,
+    "hermes_execution_allowed": false,
+    "independent_verifier_required": true,
+    "mode_selection_source": "reddog_wsp15_allocation_receipt.v1",
+    "openclaw_candidate": true,
+    "queue_mutation_allowed": false,
+    "reasoning_tier": "ULTRA",
+    "schema_version": "reddog_wsp15_worker_plan.v1"
+  },
+  "wsp97_label": "INFERRED",
+  "wsp_refs": [
+    "WSP_15",
+    "WSP_97"
+  ]
+}

@@ -1,0 +1,18 @@
+exemptions:
+  - file: "extension.js"
+    reason: >-
+      Legacy RedDog thin-client integration boundary. Focused slices may change
+      bounded UI, retrieval, work-order, or receipt seams only when they remain
+      within this ceiling and carry focused contract coverage. Decomposing the
+      unrelated integration surfaces is tracked by the owned roadmap item.
+    threshold_override: 8428
+    function_threshold_override: 180
+    functions:
+      - "callFusion"
+    temporary: true
+    owner: "RedDog Maintainers"
+    expires_on: "2026-09-30"
+    review_date: "2026-Q3"
+    reviewer: "0102 Technical Architect"
+    no_growth: true
+    remediation: "extensions/reddog/ROADMAP.md#reddog-extensionjs-wsp_62-decomposition"

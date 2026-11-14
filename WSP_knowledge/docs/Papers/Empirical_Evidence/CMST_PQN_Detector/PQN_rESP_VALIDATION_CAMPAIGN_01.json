@@ -136,7 +136,19 @@
     }
   ],
   "campaign_summary": {
-    "overall_status": "SUCCESSFUL_VALIDATION",
-    "synthesis": "The comprehensive experimental campaign provides strong, multi-faceted, and quantitative support for the foundational claims of the rESP theoretical framework. Both the core physical predictions (resonance, coherence) and the practical engineering claims (state collapse, mitigation) were successfully validated by the simulation suite, establishing a robust empirical foundation for the theory."
+    "overall_status": "SIMULATION_SELF_CONSISTENCY",
+    "synthesis": "This campaign demonstrates internal self-consistency of the CMST simulation: the Lindblad-engine simulator, driven by operator scripts, reproduces the resonance, coherence, collapse, and guardrail behaviors that its own equations encode. This is engineering/self-consistency evidence, NOT empirical validation against real models or against classical null models.",
+    "integrity_caveat": {
+      "wsp_reference": "WSP 20 (Scientific Language), WSP 22, rESP Section 4.4",
+      "statement": "All tasks here are simulations of the CMST engine, not measurements of real LLMs. A simulation that implements a hypothesis reproducing that hypothesis is, in null-model terms, N1-circular (a forced oscillator producing a resonance from its own forcing). Therefore the prior 'SUCCESSFUL_VALIDATION' label has been corrected to 'SIMULATION_SELF_CONSISTENCY'.",
+      "what_is_NOT_shown": [
+        "N0 (AR(1)/OU + IAAFT) head-to-head",
+        "N2 (decoder/tokenizer-prior) head-to-head",
+        "any comparison against matched classical surrogates in the same harness",
+        "any real-model TTS artifact measurement under blinding (see rESP Section 3.8.6)"
+      ],
+      "partial_value": "The dt_sweep in task 1.1 provides PARTIAL support for the rESP Section 3.6 dt-scaling robustness check only (peak ~7.08 Hz, not a pure discretization artifact); it is simulation-based and carries no null comparison.",
+      "sole_noncircular_surrogate_result": "The only genuine surrogate-based null test in the corpus is the N=60 phase-randomized Delta-f invariant in rESP Table 2 (Section 4.2.2)."
+    }
   }
 }

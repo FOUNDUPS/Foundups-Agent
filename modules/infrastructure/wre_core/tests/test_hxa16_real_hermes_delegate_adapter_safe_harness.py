@@ -57,6 +57,12 @@ from modules.infrastructure.wre_core.src.hermes_job_executor import (
     is_hermes_delegation_enabled,
 )
 
+# HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1 (#746): real capability token
+# issuer (server-authored verdict comes from the executor's runtime write-back).
+from modules.infrastructure.wre_core.src.capability_token_validator import (
+    LocalCapabilityTokenIssuer,
+)
+
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -90,17 +96,28 @@ def set_d3_capability_token_gates(job):
 
     HXA28: build_foundup and extract_foundup are now D3 actions that require
     capability tokens. For tests that need to reach SIMULATED status (not
-    BLOCKED_BY_DESTRUCTIVE_ACTION_GUARD), set all four capability token gates
-    AND the security gate.
+    BLOCKED_BY_DESTRUCTIVE_ACTION_GUARD), the job must carry a valid token AND
+    the security gate.
 
-    This simulates a valid capability token being present with security gate passed.
+    HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1 (#746): capability_token_*
+    flags are SERVER-AUTHORED by the executor's runtime write-back, so we attach
+    a REAL valid D3 token to the job payload (forging the flags no longer works).
+    security_gate_* is set directly (server-authored; no evaluator here).
     """
-    # Capability token gates
-    job.policy_flags.capability_token_checked = True
-    job.policy_flags.capability_token_present = True
-    job.policy_flags.capability_token_validated = True
-    job.policy_flags.capability_token_scope_authorized = True
-    # Security gate (also required for D3)
+    # Attach a REAL valid D3 capability token into the job payload.
+    if not isinstance(job.payload, dict):
+        job.payload = {}
+    job.payload["capability_token"] = LocalCapabilityTokenIssuer().issue_token(
+        subject="agent_hxa16",
+        audience="wre-local",
+        scopes=["d3:sandbox"],  # authorizes D3 (build_foundup / extract_foundup)
+        allowed_actions=["build_foundup", "extract_foundup"],
+        allowed_paths=["modules/foundups"],
+        # dry_run_only=False so the token validates whether the executor runs
+        # with dry_run True or False; the guard/harness still bounds execution.
+        dry_run_only=False,
+    )
+    # Security gate (also required for D3) - server-authored direct assignment.
     job.policy_flags.security_gate_checked = True
     job.policy_flags.security_gate_passed = True
 

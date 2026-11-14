@@ -1,0 +1,130 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "3d882013d28846e7f78f2585a644e4fa8cc04884"
+  },
+  "execution_id": "HOLOINDEX_INERT_DEPENDENCY_RUNTIME_PHASE1",
+  "execution_plane": "local_tools_and_wsp00_subagents",
+  "outcome": "completed",
+  "system_verdict": {
+    "slice": "inert_exact_dependency_payload_materialization",
+    "holoindex_a_grade": "blocked",
+    "maintenance_replica_rsi": "working",
+    "retrieval_quality_rsi": "not_operational",
+    "runtime_environment_exact_closure_verified": false,
+    "resident_authenticated_owner": false,
+    "live_route_changed": false
+  },
+  "wsp15_allocation": {
+    "complexity": 4,
+    "importance": 5,
+    "deferability": 5,
+    "impact": 5,
+    "total": 19,
+    "priority": "P0",
+    "decision": "complete the inert exact dependency-byte prerequisite before signed activation, residency, or retrieval promotion"
+  },
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_83_Documentation_Tree_Attachment_Protocol.md",
+      "WSP_framework/src/WSP_87_Code_Navigation_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "WSP_00 awakening and strict tracker gate passed at coherence 0.744.",
+      "Governed Holo owner query receipt sha256:43f04cc1ae1fe4b6508328928ab04cee2b5a36e2e733d7d7af7eacbf4ed57c41 was CURRENT at base commit, no-gap, no-reindex, and reported runtime_environment_exact_closure_verified=false.",
+      "A focused Windows-path Holo query was CURRENT/no-gap/no-reindex but returned moderately noisy committed-head results; exact untracked candidate surfaces were then verified directly.",
+      "Module README, INTERFACE, ROADMAP, ModLog, tests README, TestModLog, closest copy/materializer tests, NAVIGATION evidence, and shared runtime-artifact primitives were inspected before changes."
+    ],
+    "research": [
+      "Existing replica materialization retained all source-file handles and could not scale to the installed dependency tree, so a distinct depth-bounded dependency payload layer was required.",
+      "The existing confined byte reader, artifact snapshot, StoreProof, Windows raw-handle leases, no-replace publisher, orphan quarantine, atomic JSON publisher, and machine-wide operation lock were reused rather than duplicated.",
+      "Independent audits found ordinary versus extended-path lock aliasing, Windows execute-bit projection, file and directory ADS, POSIX lock-root substitution, false descriptor claims, missing direct-limit validation, and hard-crash recovery debt.",
+      "Hard-crash retention/recovery, signed write denial, interpreter/stdlib/native closure, route-v2 activation, resident ownership, and retrieval promotion remain separate authority transactions."
+    ],
+    "micro_pass": [
+      "Focused dependency-runtime and shared-security suite passed 72 tests with 6 expected host-capability skips.",
+      "Adjacent artifact-manifest, model-copy, replica plan/materializer/descriptor/activation, runtime-environment, and sealed-runtime suite passed 139 tests with 5 expected host-capability skips.",
+      "The direct Windows path regression proved full materialize, publish, verification, empty-directory preservation, and exact reuse with source below 260 characters and destination payload paths beyond legacy MAX_PATH.",
+      "WSP_62 AST verification found no candidate file over 500 lines, function over 50 lines, or class over 200 lines.",
+      "The deterministic test registry passed twice at 1,598 tests with 267 quarantined entries; registry contract tests passed 45 tests.",
+      "The backend manifest passed write/write/check determinism at 1,357 runtime files and sha256:3ccb0d6bd22754485e70b6769d83df4207efb2984eb6470570931830f8f5b827; its focused generator contract passed 8 tests.",
+      "RedDog 0.4.125 passed fast 14/14, conversation 32/32, contract 3/3, deterministic package, and exhaustive 4/4 release groups; the exact final package passed in 178.717 seconds."
+    ],
+    "macro_pass": [
+      "Synthetic production shape passed 72,261 files and 11,639 child directories: first materialization 1708.812 seconds, reuse 836.969 seconds, peak handles +6, peak RSS +543744000 bytes.",
+      "The first real installed-payload attempt failed closed at the exact 248-character Windows directory-creation boundary and preserved its staging tree under the orphan namespace.",
+      "The repaired real 1,853,891,335-byte tree passed 72,261 files and 11,639 child directories as generation sha256:1f02b47c362a1ad489511a8f463f8e9fde41b5458947a325eaafdf07bab3fe84: first 2250.675 seconds, reuse 798.191 seconds, one generation, zero successful-root orphans, peak handles +31, peak RSS +537284608 bytes.",
+      "The production-scale proof used disposable outside-repository O:-local roots and changed no live Holo route, replica, model, owner, maintenance state, or index.",
+      "The release artifact O:/RedDog-Releases/reddog-0.4.125.vsix is 275634 bytes at sha256:e3dc0884f8e411245385734aae0abb3a783c3129a24971d3642beaf7d07f8b31; independent archive inspection found 69 entries, no duplicate or unsafe names, zero package-member byte mismatches, and package version 0.4.125."
+    ],
+    "hard_think": [
+      "Per-query dependency hashing is not scalable; exact bytes must be sealed once and reused by a later resident authenticated owner.",
+      "A content-addressed generation is not an activation authority. The descriptor therefore hard-codes write_denial_verified=false and activation_eligible=false.",
+      "Machine-wide serialization must bind proved store identity rather than path spelling, or ordinary and extended Windows aliases can duplicate a multi-gigabyte build.",
+      "Arbitrarily long control roots are not implied by deep payload support; broad control-root hardening remains separately scored P2 debt."
+    ],
+    "dialectic_sweep": [
+      "Copying the entire legacy dependency tree appears wasteful, but current exact runtime closure cannot truthfully select only imports until an authenticated interpreter/native dependency graph exists.",
+      "Reusing RECORD metadata would be faster but does not prove installed payload bytes and therefore cannot support exact closure.",
+      "Read-only attributes or chmod appear to provide immutability on Windows but do not deny the same user write/delete/ACL authority; activation remains blocked pending a distinct restricted query identity and empirical DACL proof.",
+      "The real WinError 206 falsified unit-only confidence; the smallest correction was extended-length syscall spelling at deep filesystem boundaries, not a relaxed path limit or truncated generation identity."
+    ],
+    "first_principles": [
+      "An exact dependency generation binds every admitted file byte, relative path, size, and directory including empty directories.",
+      "Planning and verification are bounded by explicit file, directory, depth, path, byte, inventory, and descriptor limits.",
+      "Publication is staging-first, fully verified, atomic no-replace, canonically reverified, and fail-closed with owned quarantine.",
+      "This prerequisite completes only inert materialization; HoloIndex remains non-A-grade until exact signed activation, resident authenticated service, and independently governed retrieval RSI all pass."
+    ],
+    "execute": [
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_dependency_runtime_contract.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_dependency_runtime_copy.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_dependency_runtime_copy_windows.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_dependency_runtime_descriptor.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_dependency_runtime_materializer.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_artifact_manifest.py",
+      "modules/infrastructure/shared_utilities/runtime_artifact_confined_byte_reader.py",
+      "modules/infrastructure/shared_utilities/runtime_artifact_windows_streams.py",
+      "modules/infrastructure/shared_utilities/runtime_operation_locking.py",
+      "extensions/reddog/package.json",
+      "extensions/reddog/extension.js",
+      "extensions/reddog/backend_compatibility_constants.js",
+      "extensions/reddog/tests/contract_shards/manifest.json",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_dependency_runtime.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_dependency_runtime_contract.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_dependency_runtime_edges.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_dependency_runtime_scale.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_dependency_runtime_windows_copy_scale.py"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_62",
+    "WSP_83",
+    "WSP_87",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/infrastructure/HOLOINDEX_INERT_DEPENDENCY_RUNTIME_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+    "docs/doc_index.json",
+    "modules/infrastructure/foundups_mcp_bridge/README.md",
+    "modules/infrastructure/foundups_mcp_bridge/INTERFACE.md",
+    "modules/infrastructure/foundups_mcp_bridge/ROADMAP.md",
+    "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/README.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/TestModLog.md",
+    "modules/infrastructure/shared_utilities/README.md",
+    "modules/infrastructure/shared_utilities/INTERFACE.md",
+    "modules/infrastructure/shared_utilities/ModLog.md",
+    "modules/infrastructure/shared_utilities/tests/README.md",
+    "modules/infrastructure/shared_utilities/tests/TestModLog.md"
+  ]
+}

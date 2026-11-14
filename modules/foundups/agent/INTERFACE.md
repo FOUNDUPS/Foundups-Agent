@@ -1,6 +1,520 @@
 # Agent Module Interface
 
-Public API and schema contracts for agent lifecycle management, BuildPlan generation, and controlled execution.
+Public API and schema contracts for agent lifecycle management, BuildPlan generation, controlled execution, read-only manifest provenance, source-authority contract, validated module-path resolution, and the read-only ContextBundle dry-run consumer.
+
+## create_foundup Dry-Run Planner
+
+`plan_create_foundup_dry_run(envelope, actor_id, registry_path)` returns a
+side-effect-free scaffold plan. Registry inspection is authoritative and
+fail-closed: missing, unreadable, malformed, or schema-invalid data returns
+`FAIL_REGISTRY_UNAVAILABLE` with stable redacted text. Omitted legacy
+`created_at` values are normalized deterministically. Validation uses
+`Draft202012Validator` with the canonical
+`modules/foundups/foundup_registry.schema.json`; the planner does not define a
+second registry schema.
+
+## Hermes -> Resident RedDog Thin Client
+
+`hermes_reddog_resident_client_adapter.py` exposes Hermes as a transport to the
+single canonical resident RedDog AgentDB cycle. It accepts only
+`hermes_reddog_resident_request.v1` operations preserve the already-grounded
+`reddog_intent.v2` route. `hermes_reddog_resident_request.v2` accepts bounded
+natural-language `work_focus` plus an authorized `foundup_id`, then uses the
+transport-neutral backend grounding service to produce the same immutable v2
+intent. Status/cancel/resume load the persisted intent by ID and reject a
+replacement intent. The authenticated principal and allowed FoundUp scope are
+supplied by the host, not request prose.
+
+`scripts/hermes_reddog_resident_client_once.py` is the bounded JSON instrument
+bridge. The host must set `REDDOG_AUTHENTICATED_PRINCIPAL_ID` and the
+comma-separated `REDDOG_AUTHORIZED_FOUNDUP_IDS`. The bridge does
+not invoke a Hermes model or builder and grants no shell, repository-write,
+worktree, PR, merge, HoloIndex-indexing, or execution authority.
+
+`reddog_transport_neutral_grounding_service.py` classifies repository paths,
+semantic targets, external research URLs, and quoted reference blocks. Repo
+paths must resolve to governed in-repo files. Semantic targets require a
+CURRENT generation-bound HoloIndex owner response with supporting evidence.
+Quoted blocks remain context-only. External URLs fail closed until an approved
+research retriever is configured; this service never re-indexes HoloIndex.
+
+## ContextBundle Dry-Run Consumer (WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_PHASE1)
+
+First consumer wiring of the read-only #775 ContextBundle into the EXISTING
+dry-run evidence path. STANDALONE and return-value-only: it consumes a
+ContextBundle as its TRUSTED input and RETURNS a typed `DryRunResult`
+describing what a FoundUp dry-run WOULD do. It performs NO live build, NO real
+execution, NO subprocess, NO Hermes real delegation, NO executor sink, NO FAM
+event, and NO file write. The return-value-only component is now called by
+`wre_core/src/foundup_job_consumer.py::_attach_context_bundle_dry_run` on the
+existing SIMULATED/no-real-execution/disabled-delegation branch. That attachment
+is implemented; live worker execution is not. The surrounding executor may write
+evidence artifacts, so invoking the whole consumer is not a read-only query.
+See `wre_core/tests/test_foundup_job_consumer_context_bundle_wiring.py`; its real
+seam positive fixture uses `validate_foundup`, not a completed product build.
+
+```python
+# modules/foundups/agent/src/context_bundle_dry_run_consumer.py  (NEW)
+
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, Optional, Tuple
+
+from modules.communication.moltbot_bridge.src.foundup_job_contract import FoundUpJob
+from modules.foundups.agent.src.context_bundle_builder import ContextBundle
+
+
+@dataclass(frozen=True)
+class PlannedAction:
+    """A build/test action the dry-run WOULD run -- declared, never executed."""
+    name: str
+    argv: Optional[Tuple[str, ...]]   # declared tokens; never executed
+    would_mutate: bool
+    executed: bool                    # ALWAYS False
+
+
+@dataclass(frozen=True)
+class DryRunResult:
+    """Return-value-only dry-run preview. No side effects produced it."""
+    consumer_version: str
+    bundle_id: str
+    foundup_id: str
+    resolved_module_path: str         # validated canonical; never a payload value
+    source_authority: str             # always "monorepo_poc"
+    planned_actions: Tuple[PlannedAction, ...]
+    gates_to_recheck: Tuple[str, ...]  # gate NAMES; never pass-state
+    readiness_flags: Dict[str, bool]   # echoed; all False
+    evidence_refs: Tuple[Dict[str, Any], ...]  # path+sha256+size+role; NO bodies
+    rejected_input: Dict[str, Any]     # observable-ignore of any payload value
+    dry_run: bool = True
+    real_execution_performed: bool = False
+    def to_dict(self) -> Dict[str, Any]: ...
+
+
+class DryRunConsumerRejected(Exception):
+    """Raised on non-monorepo_poc authority, resolver mismatch, promoted
+    readiness, external-agent-allowed, or cross-FoundUp payload substitution.
+    The consumer NEVER returns a DryRunResult on rejection."""
+
+
+def consume_context_bundle_dry_run(
+    bundle: ContextBundle,
+    *,
+    job: Optional[FoundUpJob] = None,
+    repo_root: Optional[Path] = None,
+) -> DryRunResult:
+    """Consume a trusted ContextBundle and RETURN a dry-run preview.
+
+    - The bundle is the TRUSTED input; trust is NOT re-derived from a payload.
+    - module_path is ALWAYS the bundle's validated canonical value. When a
+      ``job`` is supplied, the SHARED ``_resolve_validated_module_path``
+      (#778/#779) re-validates defensively and its effective path MUST match
+      the bundle's; the payload candidate is observable-ignore only.
+    - source_authority MUST equal "monorepo_poc" (no stage promotion).
+    - required_gates are NAMES to re-check, never pass-state.
+    - dry_run=True / real_execution_performed=False; no sink invoked.
+    """
+```
+
+## Shared Module-Path Resolver (BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1)
+
+The validated-module-path resolver originally introduced in
+[`hermes_foundup_job_executor.py`](src/hermes_foundup_job_executor.py) by #778
+has been EXTRACTED into a shared module -- single source of truth for the
+module-path trust rule across the agent module.
+
+```python
+# modules/foundups/agent/src/module_path_resolution.py  (NEW in this slice)
+
+from dataclasses import dataclass
+from typing import Optional
+
+
+@dataclass(frozen=True)
+class ResolvedModulePath:
+    """Observable-ignore shape mirroring source_authority.resolve_source_authority.
+    Identical to the #778 surface; moved verbatim."""
+    effective: Optional[str]
+    ignored: Optional[str]
+    failed: bool
+    fail_token: Optional[str]
+    fail_human: str
+
+
+def _resolve_validated_module_path(
+    job: FoundUpJob, repo_root: Path,
+) -> ResolvedModulePath:
+    """Resolve a job's module_path through the #773 validator. Fail-closed.
+    
+    Pinned design unchanged from #778. Closed-set tokens:
+    {syntactic_reject, manifest_mismatch, manifest_missing, cross_foundup_mismatch}.
+    """
+
+
+# Plus DEFAULT_REPO_ROOT, _MANIFEST_SEARCH_GLOBS, the four FAIL_TOKEN_* constants,
+# ALL_FAIL_TOKENS, _stringify_ignored, _find_manifest_for_foundup_id.
+```
+
+### Behavior-preserving back-compat shim (Addendum C #3)
+
+The Hermes executor re-exports every name so existing imports keep working
+with **zero edits** in `test_hermes_foundup_job_executor.py` (proven by a
+46-test pass after extraction):
+
+```python
+# modules/foundups/agent/src/hermes_foundup_job_executor.py
+from modules.foundups.agent.src.module_path_resolution import (  # noqa: F401
+    ALL_FAIL_TOKENS,
+    DEFAULT_REPO_ROOT,
+    FAIL_TOKEN_CROSS_FOUNDUP_MISMATCH,
+    FAIL_TOKEN_MANIFEST_MISMATCH,
+    FAIL_TOKEN_MANIFEST_MISSING,
+    FAIL_TOKEN_SYNTACTIC_REJECT,
+    ResolvedModulePath,
+    _find_manifest_for_foundup_id,
+    _MANIFEST_SEARCH_GLOBS,
+    _resolve_validated_module_path,
+    _stringify_ignored,
+)
+```
+
+Identity is preserved: `hermes_foundup_job_executor._resolve_validated_module_path
+is module_path_resolution._resolve_validated_module_path` is `True`.
+`build_plan_generator` imports the SAME function from the shared module.
+The single-source-of-truth invariant is mechanically pinned by AST scans
+on both files (`TestSharedResolverIsSingleSourceOfTruth`).
+
+## BuildPlan Generator -- Validated Resolution (BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1)
+
+The build_plan_generator no longer trusts raw `payload.module_path` /
+`source_module`, no longer infers from `KNOWN_FOUNDUP_PATHS` (deleted as
+dead code), no longer synthesizes `modules/foundups/{foundup_id}` (deleted),
+and no longer uses the prefix-only `.lower()` `_is_valid_foundup_path`
+gate (deleted). All module-identity flows through the shared resolver.
+
+```python
+# modules/foundups/agent/src/build_plan_generator.py
+
+@dataclass
+class GenerationValidationResult:
+    """Result of job validation for BuildPlan generation."""
+    valid: bool
+    error_code: Optional[str] = None                  # closed-set #778 tokens on resolver failure
+    error_message: Optional[str] = None
+    inferred_module_path: Optional[str] = None        # manifest-derived canonical (None on failure)
+    rejected_payload_value: Optional[str] = None      # observable-ignore (mirrors resolver.ignored)
+
+
+def validate_job_for_build_plan(
+    job: FoundUpJob, repo_root: Optional[Path] = None,
+) -> GenerationValidationResult:
+    """Pre-gate (MISSING_FOUNDUP_ID / UNSUPPORTED_ACTION / UNKNOWN_ACTION)
+    then the shared resolver. ``error_code`` on resolver failure is one of
+    {syntactic_reject, manifest_mismatch, manifest_missing, cross_foundup_mismatch}."""
+
+
+def build_target_from_job(
+    job: FoundUpJob, repo_root: Optional[Path] = None,
+) -> BuildTarget:
+    """ALWAYS calls the resolver and uses the canonical ``effective``
+    module_path. PWA-surface ruling: DERIVED_ONLY -- ``pwa_surface_path``
+    is derived from the canonical module_path's basename; payload-supplied
+    surface paths are NOT trusted as module identity."""
+```
+
+### KNOWN_FOUNDUP_PATHS retention ruling
+
+**DELETE_AS_DEAD_CODE.** Phase-0 census found 2 PATH_IDENTITY_USE sites
+(both removed by this slice) and 1 DISPLAY_CATALOG_USE inline error
+string co-located inside the severed branch. Zero non-test cross-module
+callers. The constant and its `get_known_foundup_path()` wrapper are gone.
+
+### PWA-surface ruling
+
+**DERIVED_ONLY.** `BuildTarget.pwa_surface_path` is derived as
+`f"public/member/foundups/{module_basename}/"` where `module_basename`
+is the last segment of the resolver's canonical `module_path`. The
+legacy admit of `public/member/foundups/<id>` paths as module identity
+is gone -- they reject at `syntactic_reject` because they don't
+`startswith("modules/")`.
+
+### Greppable failure tokens (closed set, unchanged from #778)
+
+```python
+FAIL_TOKEN_SYNTACTIC_REJECT       = "syntactic_reject"
+FAIL_TOKEN_MANIFEST_MISMATCH      = "manifest_mismatch"
+FAIL_TOKEN_MANIFEST_MISSING       = "manifest_missing"
+FAIL_TOKEN_CROSS_FOUNDUP_MISMATCH = "cross_foundup_mismatch"
+```
+
+### Consumer-wiring precondition status
+
+This slice closes the last #778 carry-forward (the
+build_plan_generator trust surface that was OUT_OF_SCOPE_NAMED_FOLLOWUP
+in #778's ruling). `WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_PHASE1` no
+longer needs to gate on a generator hardening precondition; the single
+source of truth is in place across both consumers.
+
+## Validated Module-Path Resolution (HERMES_MODULE_PATH_TRUST_REMOVAL_PHASE1)
+
+Closes the #774 carry-forward by forcing every job's `module_path` through the
+#773 manifest validator before the Hermes executor's subprocess sink is reached.
+This is the LAST consumer-wiring precondition.
+
+```python
+# modules/foundups/agent/src/hermes_foundup_job_executor.py
+from dataclasses import dataclass
+from typing import Optional
+
+
+@dataclass(frozen=True)
+class ResolvedModulePath:
+    """Outcome of validated module-path resolution. Observable-ignore shape."""
+    effective: Optional[str]              # canonical module_path from validated manifest
+    ignored: Optional[str]                # stringified payload-declared value (None iff no declaration)
+    failed: bool
+    fail_token: Optional[str]             # closed-set greppable token, or None on success
+    fail_human: str                       # token-prefixed explanation; empty on success
+
+
+def _resolve_validated_module_path(
+    job: FoundUpJob,
+    repo_root: Path,
+) -> ResolvedModulePath:
+    """Resolve a job's module_path through the #773 validator. Fail-closed.
+
+    Pinned design:
+    - candidate = payload.module_path | payload.source_module (alias).
+    - empty-string is ABSENT (Addendum D #4).
+    - foundup_id-as-path heuristic REMOVED ("/" in foundup_id is never a source).
+    - syntactic hardening BEFORE manifest contact: backslashes / absolute /
+      UNC / ".." traversal / not-under-modules/ all reject pre-manifest.
+    - manifest located: <repo_root>/<canonical>/foundup_manifest.json, OR
+      bounded foundup_id scan when candidate absent.
+    - validator gate: validate_manifest_file (#773); never raises.
+    - cross-FoundUp substitution defense (Addendum D #1, load-bearing):
+      the manifest's foundup_id MUST equal job.foundup_id; otherwise reject.
+    - case-variant defense (Addendum D #3): candidate canonical exact-string
+      compared against manifest canonical (case-sensitive).
+    - observable ignored: payload-declared value visible in result.ignored
+      even on success (mirrors source_authority.resolve_source_authority).
+    """
+```
+
+### Greppable failure-mode tokens
+
+`StatusReasonCode` stays frozen at `FAIL_VALIDATION_ERROR`; granularity is
+emitted as a token prefix on `reason_human` plus a parallel
+`evidence_refs` entry (`fail_token:<token>`):
+
+```python
+FAIL_TOKEN_SYNTACTIC_REJECT       = "syntactic_reject"        # absolute / UNC / .. / backslash / not-under-modules/
+FAIL_TOKEN_MANIFEST_MISMATCH      = "manifest_mismatch"       # validator returned shape error or candidate != manifest canonical
+FAIL_TOKEN_MANIFEST_MISSING       = "manifest_missing"        # file not found / unreadable / JSON-invalid
+FAIL_TOKEN_CROSS_FOUNDUP_MISMATCH = "cross_foundup_mismatch"  # manifest foundup_id != job.foundup_id
+
+ALL_FAIL_TOKENS: frozenset = frozenset({
+    "syntactic_reject", "manifest_mismatch", "manifest_missing", "cross_foundup_mismatch",
+})
+```
+
+### Evidence-trail contract (`execute_foundup_job` failure path)
+
+When the resolver fails, `execute_foundup_job` calls
+`job.fail(reason_code=FAIL_VALIDATION_ERROR, reason_human=resolved.fail_human,
+evidence_refs=evidence)` BEFORE `job.start(...)`, so the subprocess sink
+(`HermesFoundUpBuilder.run_hermes_extraction` per the #774 audit) is
+never reached. The evidence list includes:
+
+- `rejected_payload_value:<stringified declaration>` (only if the payload
+  actually declared something), and
+- `fail_token:<one of ALL_FAIL_TOKENS>` (always).
+
+### Consumer-wiring precondition status
+
+This slice satisfies the #774 carry-forward at the Hermes executor seam.
+The follow-up `BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1`
+(Phase-0 ruling: `OUT_OF_SCOPE_NAMED_FOLLOWUP`, Addendum B/D tie-break:
+"current reachability decides") is a hard precondition for
+`WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_PHASE1` or any other slice that
+makes `build_plan_generator` reachable from a real-execution sink.
+
+## Source-Authority Contract (FOUNDUP_LIFECYCLE_SOURCE_AUTHORITY_CONTRACT_PHASE1)
+
+Contract doc: [docs/architecture/FOUNDUP_SOURCE_AUTHORITY_CONTRACT.md](../../../docs/architecture/FOUNDUP_SOURCE_AUTHORITY_CONTRACT.md).
+
+```python
+# modules/foundups/agent/src/source_authority.py
+import enum
+from typing import NoReturn, Optional, Tuple, Union
+
+
+class SourceAuthority(str, enum.Enum):
+    """The five source-authority stages defined by the Phase-1 contract.
+    Exactly 5 members; string values are EXACT and stable."""
+    MONOREPO_POC   = "monorepo_poc"     # ACTIVE in Phase-1
+    EXTERNAL_PROTO = "external_proto"   # defined; UNREACHABLE in Phase-1
+    MVP_RUNTIME    = "mvp_runtime"      # defined; UNREACHABLE in Phase-1
+    DAO_MANAGED    = "dao_managed"      # defined; UNREACHABLE in Phase-1
+    ARCHIVED       = "archived"         # defined; UNREACHABLE in Phase-1
+
+
+# Exactly one entry in Phase-1. Downstream code may compare against this set
+# to decide whether to proceed without crossing the Phase-1 boundary.
+ACTIVE_STAGES: frozenset = frozenset({SourceAuthority.MONOREPO_POC})
+
+
+def resolve_source_authority(
+    declared: Optional[Union[str, SourceAuthority]] = None,
+) -> Tuple[SourceAuthority, Optional[str]]:
+    """Resolve the effective source-authority stage. ALWAYS returns MONOREPO_POC.
+
+    NEVER raises. NEVER trusts ``declared``. Returns
+    ``(MONOREPO_POC, ignored_declaration_stringified_or_None)``. The
+    caller can observe the second element to detect a (potentially
+    malicious) declaration attempt. Garbage input (wrong type, casing
+    variants, control chars, ints, dicts) is treated identically:
+    ignored and reported.
+    """
+
+
+def request_promotion(
+    target: Union[str, SourceAuthority],
+) -> NoReturn:
+    """Promotion request. ALWAYS raises NotImplementedError in Phase-1.
+
+    Promotion is not a function call; it is a multi-WSP multi-evidence
+    event (sovereign-valve decision + federation/OPO/SmartDAO gate +
+    CABR readiness + signed evidence envelope). None implemented here.
+    The error message points readers at the contract doc.
+    """
+```
+
+### The hard rule (verbatim, load-bearing)
+
+> A context bundle / manifest must be lifecycle-aware but CANNOT promote
+> its lifecycle stage by declaration; promotion requires evidence + WSP
+> gate + CABR / DAO proof. A declared stage from any manifest / external
+> input is NEVER trusted.
+
+Phase-1 enforcement:
+
+- `SOURCE_AUTHORITY` is a BUILDER constant
+  ([context_bundle_builder.py:132](src/context_bundle_builder.py#L132)),
+  NOT read from any manifest. The enum module's
+  `SourceAuthority.MONOREPO_POC.value` is value-parity tested against
+  this constant (drift guard; the enum is NOT yet wired into the builder
+  -- see follow-up `SOURCE_AUTHORITY_BUILDER_ENUM_UNIFICATION_PHASE2`).
+- `resolve_source_authority(declared)` ALWAYS returns MONOREPO_POC.
+- `request_promotion(target)` ALWAYS raises `NotImplementedError`.
+- The laundering-fix precedent (`96314ab6c`) is why this is enforced
+  in code, not by guideline.
+
+### Citation triad
+
+- WSP 27 Section 11 (canonical maturity lifecycle).
+- WSP 103 lines 616-617 (Pre-OPO `F0_DAE` / Post-OPO `F1_OPO+` gate).
+- WSP 109 lines 42, 89-103, 350-360 (RedDog intake actor; `entity_type`).
+
+## ContextBundle Builder (WRE_CONTEXT_BUNDLE_BUILDER_PHASE1)
+
+```python
+# modules/foundups/agent/src/context_bundle_builder.py
+from pathlib import Path
+
+def build_context_bundle(
+    manifest_path: Path,
+    repo_root: Path,
+    *,
+    created_at: str,                # REQUIRED non-empty; injected, not wall-clock
+    max_context_bytes: int = 65536, # total cap, fail-closed
+) -> ContextBundle:
+    """Build a read-only ContextBundle from a validated manifest.
+
+    Calls modules.foundups.agent.src.foundup_manifest_validator
+    .validate_manifest_file BEFORE trusting build_contract.module_path
+    (PR #773). Imports the validator; does NOT reimplement it.
+
+    Raises ContextBundleRejected on validation failure, readiness
+    promotion, non-declarative routing, external_agent_allowed=True,
+    can_self_authorize=True, module_path escape, or any safety refusal.
+    The builder NEVER produces a bundle on rejection.
+    """
+```
+
+### ContextBundle Dataclasses (frozen, read-only)
+
+```python
+@dataclass(frozen=True)
+class FileRef:
+    path: str            # repo-relative POSIX
+    sha256: str          # 64-hex lowercase, stream-computed
+    size_bytes: int
+    role: str            # "manifest" | "readme" | "interface" | "modlog" |
+                         # "roadmap" | "testmodlog" | "requirements" | "test"
+
+@dataclass(frozen=True)
+class ProvenanceRecord:
+    builder_version: str
+    validator_module_path: str
+    validator_sha256: str
+    repo_root: str
+    source_manifest_sha256: str
+    wsps_applied: Tuple[str, ...]
+
+@dataclass(frozen=True)
+class ContextBundle:
+    bundle_version: str
+    bundle_id: str                       # sha256-derived, deterministic
+    created_at: str                      # injected by caller
+    source_manifest_path: str
+    source_manifest_sha256: str
+    foundup_id: str
+    module_path: str                     # canonical, repo-relative POSIX
+    contract_version: str
+    build_contract_status: str
+    execution_routing_summary: Dict[str, Any]
+    dry_run_required: bool
+    readiness_flags: Dict[str, bool]     # echoed verbatim; NEVER promoted
+    required_gates_to_recheck: Tuple[str, ...]  # NAMES only, not booleans
+    forbidden_paths: Tuple[str, ...]
+    safe_mutation_surface: Tuple[str, ...]
+    included_file_refs: Tuple[FileRef, ...]      # refs + sha256 only; NO bodies
+    excluded_paths_summary: Dict[str, int]       # reason -> count
+    max_context_bytes: int
+    total_referenced_bytes: int                  # <= max_context_bytes
+    validator_result_summary: Dict[str, Any]
+    provenance: ProvenanceRecord
+    def to_dict(self) -> Dict[str, Any]: ...
+```
+
+### WSP 97 Truth Boundaries (ContextBundle)
+
+- Read-only. No subprocess / Popen / os.system / eval / exec /
+  dynamic import / network / runtime command execution.
+- File bodies are NEVER included; only path + sha256 + size + role.
+- Hashes are stream-computed in 64 KiB chunks; oversized files
+  (> `PER_FILE_READ_CAP_BYTES`, default 4 MiB) are recorded as excluded
+  without ever opening the body.
+- `max_context_bytes` enforced fail-closed; over-cap candidates are
+  recorded under `excluded_paths_summary["over_total_cap"]`, never
+  silently truncated.
+- Symlinks that resolve outside `module_root` (after `Path.resolve()`)
+  are excluded.
+- Forbidden paths excluded by segment screen: `.env*`, `main.py`,
+  `*_dae.py`, `vendor/`, `wallet/`, `token/`, `reward/`, `payout/`,
+  `cabr/`, `blockchain/`, `credentials*`, `secrets*`.
+- `bundle_id = sha256(source_manifest_sha256 + "|" + module_path + "|" + bundle_version)`.
+  Deterministic. `created_at` is recorded but is NOT part of the
+  bundle_id fingerprint.
+- Bundle NEVER serializes gate pass-or-fail authority: no
+  `gate_passed` / `security_passed` / `permission_passed` /
+  `dry_run_passed` / `build_ready` / `autonomous_execution_ready` /
+  `cabr_ready` / `payout_ready` / `dao_ready = True` fields.
+- This module does NOT call Hermes / OpenClaw / WRE consumer / AI
+  Overseer / FoundUpJob queue. The bundle's `module_path` is sourced
+  from the validated manifest only -- never from an external job
+  payload (#774 carry-forward).
 
 ## BuildPlan Pipeline (OC8/OC9/OC12)
 
@@ -518,3 +1032,21 @@ agent_ranked:   "founder_001 rank UP: 2→3 (Contributor)"
 agent_earned:   "founder_001 earned 50 F₁"
 agent_leaves:   "0xfound001... logs off (1250 F_i)"
 ```
+
+---
+
+## HermesFoundUpBuilder Environment Contract (HERMES_BUILDER_DRYRUN_DEFAULT_SAFETY_PHASE1)
+
+`HermesFoundUpBuilder` (`src/hermes_adapter.py`) is **dry-run by default**. Real filesystem writes
+(e.g. `generate_adapters` adapter stubs) require an explicit **double opt-in**:
+
+| Env var | Default | Meaning |
+|---------|---------|---------|
+| `HERMES_BUILDER_ALLOW_REAL_WRITES` | `0` | Must be `1` to permit any real write |
+| `HERMES_BUILDER_DRY_RUN` | unset = dry-run | Must be explicitly `0` to permit any real write |
+
+`self.dry_run` is `False` **only** when `HERMES_BUILDER_ALLOW_REAL_WRITES=1` AND
+`HERMES_BUILDER_DRY_RUN=0`. Every other combination (including all-unset) is dry-run. `self.dry_run`
+is surfaced in `extract_foundup` / `build_foundup` / `generate_adapters` result dicts and written
+back to `FoundUpJob.policy_flags.dry_run_mode` by the executor. Callers that already force dry-run
+(`execute_foundup_job(..., force_dry_run=True)`, or `HERMES_BUILDER_DRY_RUN=1`) are unchanged.

@@ -12,20 +12,12 @@ Implements WRE pattern (WSP 46): Qwen coordinates, Gemma executes
 
 import asyncio
 from typing import Optional, Dict, Any
-from holo_index.qwen_advisor.pattern_memory import PatternMemory
 import os
 
 # WRE CoT preflight - recursive enforcement after watch period
-try:
-    from modules.infrastructure.wre_core.src.dae_preflight import preflight_guard
-except ImportError:
-    def preflight_guard(name, quiet=True):
-        def decorator(func):
-            return func
-        return decorator
+from modules.infrastructure.wre_core.src.dae_preflight import run_dae_preflight
 
 
-@preflight_guard("training_system_dae")
 def run_training_system():
     """
     Qwen/Gemma Training System submenu.
@@ -33,22 +25,13 @@ def run_training_system():
     """
     from pathlib import Path
 
-    # Import UTF-8 hygiene functions from canonical module (WSP 62)
-    from modules.ai_intelligence.utf8_hygiene.scripts.scanner import run_utf8_hygiene_scan
-
     repo_root = Path(__file__).resolve().parents[4]
     corpus_name = os.getenv("OPENCLAW_TRAINING_CORPUS", "012.txt")
     corpus_path = repo_root / corpus_name
     total_lines = None
-    if corpus_path.exists():
-        try:
-            with open(corpus_path, "r", encoding="utf-8", errors="ignore") as f:
-                total_lines = sum(1 for _ in f) or 1
-        except Exception:
-            pass
-
     def load_memory() -> tuple[Optional[Any], Optional[Dict[str, Any]]]:
         try:
+            from holo_index.qwen_advisor.pattern_memory import PatternMemory
             mem = PatternMemory()
             stats = mem.get_stats()
             return mem, stats
@@ -58,26 +41,16 @@ def run_training_system():
             return None, None
 
     while True:
-        memory, stats = load_memory()
+        memory, stats = None, None
 
         print("\n" + "=" * 60)
         print("[MENU] QWEN/GEMMA TRAINING SYSTEM")
         print("=" * 60)
-        print("Implements WRE Pattern (WSP 46): Qwen coordinates, Gemma executes")
+        print("Pattern/corpus learning (RAG); this menu is not production RSI readiness.")
+        print("Actions require preflight. Opening this menu loads no corpus, model or pattern memory.")
         lines_display = f"{total_lines:,}" if total_lines else "unknown"
         print(f"Training Data: {corpus_name} ({lines_display} lines of operational decisions)")
         print("=" * 60)
-
-        if stats:
-            print(f"\n[INFO] CURRENT STATUS:")
-            print(f"   Patterns Stored: {stats['total_patterns']}")
-            if total_lines:
-                prog_pct = (stats['checkpoint_line'] / total_lines) * 100
-                print(f"   {corpus_name} Progress: {stats['checkpoint_line']}/{total_lines} ({prog_pct:.1f}%)")
-            else:
-                print(f"   {corpus_name} Progress: {stats['checkpoint_line']} lines (corpus not found, total unknown)")
-            print(f"   Verification Rate: {stats['verification_rate']:.1%}")
-            print(f"   Sources: {stats['sources']}")
 
         print("\n" + "-" * 60)
         print("TRAINING OPTIONS:")
@@ -91,16 +64,43 @@ def run_training_system():
         print("7. Test Qwen/Gemma Routing (Adaptive AI)")
         print("8. View Training Metrics")
         print("9. Clear Pattern Memory (Reset)")
+        print("D. Read-only WRE diagnostics")
         print("0. Back to Main Menu")
         print("-" * 60)
 
-        choice = input("\nSelect option (0-9): ").strip()
+        choice = input("\nSelect option (0-9, D): ").strip()
 
         if choice == "0":
             print("[INFO] Returning to main menu...")
             break
 
-        elif choice == "1":
+        if choice.lower() == "d":
+            try:
+                from modules.infrastructure.wre_core.src.dashboard_alerts import (
+                    check_dashboard_health, print_dashboard_evidence, print_research_report_summary,
+                )
+                health = check_dashboard_health()
+                print(f"[DIAGNOSTICS] WRE evidence={health['status']}; action admission is checked separately")
+                print_dashboard_evidence(health)
+                print_research_report_summary()
+            except Exception as err:
+                print(f"[DIAGNOSTICS] UNKNOWN: {type(err).__name__}; no training started")
+            continue
+
+        if choice in {"1", "2", "5", "6", "7", "8", "9"}:
+            if not run_dae_preflight("training_system_dae", quiet=False):
+                print("[BLOCKED] Training action not started. Use D for diagnostics or 0 to return.")
+                continue
+            if choice in {"2", "5", "6", "8"}:
+                memory, stats = load_memory()
+            if choice in {"5", "8"} and corpus_path.is_file():
+                try:
+                    with corpus_path.open("r", encoding="utf-8", errors="ignore") as stream:
+                        total_lines = sum(1 for _ in stream) or 1
+                except OSError:
+                    total_lines = None
+
+        if choice == "1":
             print("\n[INFO] Starting Batch Training...")
             print("=" * 60)
             try:
@@ -125,6 +125,7 @@ def run_training_system():
             input("\nPress Enter to continue...")
 
         elif choice == "2":
+            from modules.ai_intelligence.utf8_hygiene.scripts.scanner import run_utf8_hygiene_scan
             run_utf8_hygiene_scan(memory)
 
         elif choice == "3":
@@ -139,7 +140,7 @@ def run_training_system():
             print("\n[INFO] Training Progress")
             print("=" * 60)
             try:
-                mem = memory or PatternMemory()
+                mem = memory
                 prog_stats = mem.get_stats()
 
                 processed = prog_stats["checkpoint_line"]
@@ -192,7 +193,7 @@ def run_training_system():
                 continue
 
             try:
-                mem = memory or PatternMemory()
+                mem = memory
                 patterns = mem.recall_similar(query, n=5, min_similarity=0.3)
                 if patterns:
                     print(f"\n[INFO] Found {len(patterns)} similar patterns:\n")
@@ -320,7 +321,7 @@ def run_training_system():
             print("\n[INFO] Training Metrics")
             print("=" * 60)
             try:
-                mem = memory or PatternMemory()
+                mem = memory
                 metrics = mem.get_stats()
                 print(f"\n[INFO] Performance Metrics:")
                 print(f"   Total Patterns: {metrics['total_patterns']}")
@@ -359,7 +360,7 @@ def run_training_system():
             confirm = input("\nType 'CONFIRM' to proceed: ").strip()
             if confirm == "CONFIRM":
                 try:
-                    mem = memory or PatternMemory()
+                    mem, _ = load_memory()
                     mem.clear_all(confirm=True)
                     mem.save_checkpoint(0)
                     print("\n[INFO] Pattern memory cleared successfully.")
@@ -372,7 +373,7 @@ def run_training_system():
             input("\nPress Enter to continue...")
 
         else:
-            print(f"[ERROR] Invalid choice '{choice}'. Please enter 0-9.")
+            print(f"[ERROR] Invalid choice '{choice}'. Please enter 0-9 or D.")
             input("\nPress Enter to continue...")
 
 

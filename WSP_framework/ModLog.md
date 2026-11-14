@@ -1,3 +1,157 @@
+## 2026-11-12 — Host lifecycle and build security requirements
+
+Under 012's explicit directive after abandoned preview processes were stopped,
+WSP 91 Section 3.0 now requires accountable launch ownership, monitored status,
+finite jobs/authorized service leases, stop controls and observed descendant
+cleanup. WSP 71 Section 5.6 requires source-bound build/launch security coverage.
+Continuous-operation language is scoped to authorized availability. Extend
+existing DAE/lease/security owners, not a new supervisor or scanner. No legacy
+runtime enforcement or native RSI completion is certified by these additions.
+WSP 81 section-addition notification is delivered in the execution commentary;
+exact knowledge mirrors and generated agent instructions accompany the change.
+WSP 10/22/50/71/81/91/97; rollback is a focused revert of this change.
+
+## 2026-11-10 — Branch lifecycle boot and draft protocol registration
+
+Under 012's explicit continuation, PR #2335 records the WSP 00 boot obligation
+for owned branch and PR reconciliation. WSP 10 and WSP 97 govern preservation
+and acceptance. WSP 110 v0.2 remains draft guidance and is registered in both
+master indexes. Framework and
+knowledge copies match. The WSP 00 State Bridge fallback and coherence canary
+retain their original wording. The existing awakening gate remains unchanged.
+WSP 22/81/97 apply. Recovery is a focused revert of PR #2335.
+
+## 2026-11-05 — WSP26 micro-UPS preview qualification
+
+WSP81 NOTIFICATION_REQUIRED under 012's continuing architecture/docs request.
+The §1.2 [P4 pointer](../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p4-prospective-micro-ups-allocation-v1)
+and exact knowledge mirror now mark the bounded preview VERIFIED_SIMULATED after
+source-bound numerical/security acceptance. No F_i supply, BTC price, native-book/v2
+migration, custody or chain activation is selected. Failed ID/import runs stay evidence.
+0102 handles policy manually; no Qwen/model/pattern-store execution is claimed.
+WSP22/26/50/81/97; preserve prior text and recover through a focused Git revert.
+
+## 2026-11-02 — WSP26 restricted simulator-native transfer clarification
+
+Under 012 continuation, add the narrow §1.2 B03-P3 simulator-qualified version pointer;
+WSP81 NOTIFICATION_REQUIRED, notification recorded in the review/publication handoff.
+Framework/knowledge bytes match by proposal; independent validation follows application.
+No fee/supply/F_i/UPS atom, custody or chain authority changes; all prior text remains.
+0102 handles monetary scope manually; no Qwen/model invocation or pattern-store write.
+Recover by focused Git revert; WSP22/26/81/97 and independent review remain required.
+
+## 2026-11-01: WSP26 custody targets and agent signing boundaries
+
+Under 012's explicit security-document correction request, clarify only WSP26
+sections 4.2/4.3/4.5; WSP81 class NOTIFICATION_REQUIRED, with notification in the
+review/publication handoff. Wallet segregation, MPC/HSM and agent orchestration
+are target designs, not implemented custody or automatic independence/security.
+Record shared-seed and shared-control-plane risk; agents propose bounded intent
+without assumed raw-key/shard custody. Retain fees, supply, maturity, tiers and
+economic policy, and reuse existing 1.2/4.11 acceptance gates. Exact numbered
+knowledge mirror and independent source/scope review are required before commit.
+Base43b3b66cce8a01f28fb08577a9db84f731e50455; recover by focused Git revert.
+No runtime, key, signer, custody, chain or economic activation. WSP22/26/81/97.
+
+## 2026-10-31: Simulator-first economic change governance
+
+WSP81 class NOTIFICATION_REQUIRED: section addition and clarified cross-protocol
+acceptance under012's explicit simulator-first documentation/publication direction.
+012 notified in this session. Add WSP26 section1.2 and WSP27/29/100 pointers with
+exact knowledge mirrors; retain economics, active statuses, budgets and history.
+Base21ac89287449d8ca54385a116053a33655d86e6b; integrated source60d899fd6.
+Independent review required explicit chain-level adversarial/no-effect tests;
+the clarified gate remains blocked when chain hooks are absent. Fresh selected
+simulator/docs420 pass; final mirror/link checks and hosted gates remain separate.
+Recover through a focused Git revert, preserving prior evidence and local work.
+No archive duplicate, runtime policy, funding or deployment. WSP22/26/50/81/97.
+
+## 2026-10-29: WSP85 current root ownership and preservation boundaries
+
+Clarify foundational root ownership instead of a historical ten-file ceiling,
+name temporary/prompt artifacts, and require preservation and ownership review
+before relocation. Document the existing validator as an immediate-child,
+read-only classifier; proposed hooks are not installed enforcement. Mirror the
+numbered framework/knowledge protocol. WSP81 class: NOTIFICATION_REQUIRED;
+012 notified in this authorized audit-repair chat. Core foundational-only intent,
+WSP status and priorities remain unchanged; no automatic deletion is authorized.
+Base: main0d537a1f. Six root-validator cases, exact protocol mirror equality,
+relocation/link preservation and whitespace checks pass. Runtime manifest and
+test registry remain current and unchanged. Hosted/main/Holo acceptance remains
+pending; historical source remains
+in Git and recovery is a focused revert. WSP22/50/64/81/85/97.
+
+## 2026-10-29: WSP26 cryptographic claim correction
+
+Factual correction under explicit blockchain-security research direction;
+WSP15 C1/I4/D4/Impact4=13/P1. Retain the economic design while distinguishing
+Falcon State Proofs, native PQ accounts, Ed25519/multisig and consensus security.
+Remove unsupported universal/uniqueness/probability and automatic-bridge claims;
+reuse dated primary sources in the existing FX venue research document.
+Synchronize both numbered WSP26 copies per WSP81. Classify as a section/source
+clarification with 012 notification; no core economic, status or budget change.
+Base:362b4c62a665bd6c594904e39d974a7187a12649. Before publication require exact
+mirror equality, NAV syntax/data-only diff, link and scope readback; no runtime
+or cryptographic qualification is asserted. Recovery: focused Git revert.
+
+## 2026-10-29: WSP62 historical missing-expiry completion policy
+
+Specify the narrow first stage of F4a: an existing temporary exemption may
+record only its already-past review-quarter boundary, with every other field
+and limit unchanged. It remains expired debt. Require exact-base policy in
+both mirrors; reject renewal, new exemptions and candidate-authored authority.
+No audit implementation or exemption entry changes in this slice:
+`SPECIFIED_NOT_IMPLEMENTED`. WSP81 class: NOTIFICATION_REQUIRED (section and
+compliance clarification); 012 notified during the authorized audit repair.
+Base: `f304ba799f8fa835f0b5127efabe9e724315e3c8`. The numbered framework and
+knowledge files are synchronized; historical content is retained in Git.
+Recovery: focused revert. WSP22/50/62/64/81/97.
+
+Validation: exact mirror equality and whitespace checks pass. Existing
+`test_foundup_route_wsp62_exemptions.py`: five tests pass, one fails because
+the unchanged verifier is 591 lines against its unchanged 586-line ceiling.
+Git blob comparison proves the test, target and both exemption registries
+match the exact base. That inherited size debt remains open; no limit was raised.
+
+## 2026-10-13: WSP71 security review ownership and candidate triage
+
+Added sections 5.4–5.5 under 012's explicit direction to repair security gaps
+and enhance the existing WSP. 0102 owns routine evidence and remediation;
+012 receives material decisions, not a report-download task. Require source,
+PR base/head and deployment binding, truthful coverage, bounded exceptions,
+and credential-safe historical triage. Framework/knowledge copies synchronized
+per WSP81; pre-change content remains recoverable from main 4095ad9. Existing
+permission/production boundaries remain in force. Related implementation:
+CI stacked-branch trigger and existing secret-gate regression suite. WSP22/71/81/97.
+
+## 2026-09-29: WSP48 measurement scalar and provenance clarification
+
+Synchronize both existing WSP48 copies: typed finite metrics, integer counts,
+explicit unknowns and scope-limited formal verification. The verified Chen/Wang/Qu
+survey v2 motivates the hierarchy; FoundUps defines its own measurement bundle.
+
+- **2026-09-25**: **WSP 48 verification hierarchy and RSI measurement alignment** — Added the research-backed verification hierarchy (intrinsic signal < learned judge < execution feedback < formal verifier), kept human research judgment as the unresolved direction-setting boundary, and defined the minimal machine-readable RSI measurement bundle. Current WRE AutoResearcher is explicitly classified as execution feedback with no independent/held-out/activation/retained-generation proof and `production_rsi_eligible=false`. Framework/knowledge WSP 48 mirrors remain byte-identical. This is evidence/truth alignment, not a production RSI completion claim. (WSP 22/48/50/81/97)
+- **2026-09-13**: **R10 compact action preservation** — Aligned WSP 99 and its existing exact knowledge mirror with the optional explicit `A` field in the existing compiler. Legacy packets remain readable; default IMPLEMENT cannot establish action fidelity. Parsed scope/action and decompiled action now govern the existing gate. 158 focused tests pass after 99 pre-repair failures. No status, sovereignty, execution permission or full-prose fidelity claim. WSP 81 operational correction under 012’s instruction to rectify drift; recovery is a focused Git revert. Deterministic local evidence replaces unnecessary model analysis for this narrow defect. (WSP 22/50/81/97/99)
+- **2026-09-13**: **R03 vetted interpreter selection** — Corrected only WSP 00 retrieval recipe/context after bounded diagnostics found the ambient Python base excluded vetted NumPy. Reused the primary checkout venv with the selected source helper; matched-reference CURRENT/no-gap retrieval restored, current-main qualification remains open. Regenerated canonical-agent projection and synchronized the exact knowledge mirror. Existing runtime-selection tests: 2 passed / 16 deselected. WSP 81 operational clarification under existing 012 direction; no state semantics, status, budget, runtime code or sovereignty change. (WSP 00/22/50/81/87/97)
+- **2026-09-13**: **R03 retrieval entry alignment** — Replaced raw search/inline reindex bootstrap instructions with the existing source-bound owner helper and explicit local-bundle fallback. A primary checkout is not necessarily current main; search misses do not justify duplicate modules or fabricated Tier-0 stubs. Synchronized the exact WSP 00 knowledge mirror. WSP 97 comparison found the owner/selector/bundle/repair paths already implemented; 81 existing contract tests pass. Live semantic readiness remains unproved. WSP 81 classification: operational clarification and cross-reference additions under 012's instruction to continue and rectify drift; no state semantics, status, budget or sovereignty change. Separate PR #1636 remains untouched. Recovery: focused Git revert. (WSP 00/22/50/81/87/97)
+- **2026-09-13**: **R02 runtime-enforcement clarification** — Linked the 26-packet enforcement map from WSP_CORE and the catalog; corrected WSP 46 missing-asset fallback and scoped old completion/token claims to historical reports. Clarified normative prose versus executable proof without changing status, budgets, sovereignty or WSP 00 semantics. Synchronized all three knowledge mirrors, including the WSP 73 catalog row missed by the earlier `95f28fff4` (#1631) framework correction; WSP 73 already states that corrected identity boundary. Existing focused WRE boundary selection: 18 passed / 96 deselected. R02 remains partial pending historical-row dispositions and independently bound review. WSP 81 classification: clarification and cross-reference additions under the existing 012 direction to rectify drift; recovery is focused Git review/revert. No runtime change. (WSP 22/46/50/81/95/97)
+- **2026-09-10**: Added narrow WSP 00/97 navigation to the canonical root RSI roadmap and synchronized both knowledge mirrors. The roadmap owns sequencing only; no state-machine, execution-policy, priority-budget or runtime change. Preserved the separate state-semantics repair lane. Root ModLog and the dated RSI audit integration record carry validation. (WSP 00/15/22/50/81/83/97)
+- **2026-08-30**: **WSP 71 RedDog Lick Security Reference** - Added a narrow
+  security boundary for the external RedDog Lick product handshake. The Lick
+  remains outside WSP and grants no credential or authority; WSP 71 now
+  requires sensitive biometric/template handling, possession-factor step-up,
+  Git/log exclusion, and private patent-draft exclusion. Synchronized the
+  WSP_knowledge mirror. Documentation only. (WSP 15/22/50/71/73/81/97 applied)
+- **2026-08-26**: **WSP 73 Durable First-TURN Truth Alignment** - Advanced WSP 73 to 2.2 after RedDog landed the durable empty-ID request-to-authenticated-ID/revision-0 journal link. Phase gate 1 now starts at the still-missing immediate authenticated AgentDB CAS and operation handlers; the resident host, first-turn execution, response delivery, and cross-surface service remain unimplemented. Synchronized the exact WSP_knowledge mirror. Approval class: NOTIFICATION_REQUIRED; 012 explicitly directed complete RedDog work plus documentation/WSP drift repair. Exact parent: `4c3e2f7d22e209ec5a548deeadb6b99e79457724`. Mirror validation: byte equality plus staged diff review. Recovery: focused Git revert; no archive required. Slice: `REDDOG_RESIDENT_FIRST_TURN_WSP73_ALIGNMENT_PHASE1`. Labels: CURRENT_TRUTH_REPAIR, MIRRORED_PROTOCOL, NO_RUNTIME_AUTHORITY_EXPANSION. (WSP 15/22/50/62/73/81/97 applied)
+- **2026-08-26**: **WSP 73 Trusted New-Scope Truth Alignment** - Advanced WSP 73 to 2.1 after RedDog landed authenticated existing-request reservation plus trusted empty-ID TURN scope persistence. Narrowed phase gate 1 to the still-missing durable first-request resolution link, immediate authenticated AgentDB CAS, and operation handlers; the first TURN, resident host, and cross-surface service remain unimplemented. Synchronized the exact WSP_knowledge mirror. Approval class: NOTIFICATION_REQUIRED; 012's explicit direction to repair all RedDog documentation and WSP drift satisfies notification/authorization. Exact base: `10d85a92f2d3a660741c28ab72b97a7117423499`. Recovery: focused Git revert; no archive required. Slice: `REDDOG_RESIDENT_NEW_SCOPE_WSP73_ALIGNMENT_PHASE1`. Labels: CURRENT_TRUTH_REPAIR, MIRRORED_PROTOCOL, NO_RUNTIME_AUTHORITY_EXPANSION. (WSP 15/22/50/62/73/81/97 applied)
+- **2026-08-26**: **WSP 97 v1.9 Machine-Contract Mirror Repair** - Aligned both canonical JSON mirrors with the already-approved v1.9 Markdown test-inventory/reuse gate introduced on exact parent `d7c4bc4201ab6bd98f7ed3bea98dfabde794d46c`. Added exact applicability, pre-test retrieval, reuse ordering, missing-TestModLog inventory, worker-prompt, inventory-update, and failure rules without changing receipt schema or runtime behavior. Validation: Ruff PASS; reused protocol/validator tests `98 passed / 1 capability skip`; Markdown mirrors byte-identical at `5dcb531b...7b263`; JSON mirrors parse and are byte-identical at `0990962f...df606`; RedDog backend closure regenerated/checks at `1,384 / 3211a4e5...c8498`. Approval class: APPROVAL_REQUIRED; approval required: YES; approval satisfied: YES; source: explicit 012 direction to repair WSP/documentation drift while finishing RedDog. Recovery: Git revert of the focused squash; no archive required. Slice: WSP97_TEST_INVENTORY_MACHINE_CONTRACT_MIRROR_REPAIR_PHASE1. (WSP 00/15/22/50/81/84/97 applied)
+- **2026-08-01**: **Tiered Verification and WSP 15 Economy Binding** - Upgraded WSP 97 to 1.8. Clarified that WSP 6 full-suite execution is a promotion/release boundary, while focused, module, dependency, security, and held-out tiers govern inner development. Defined exact-ID parent/candidate differential analysis and reusable parent-baseline bindings. Added WSP 97's plain-language WSP 15 projection: Do I need it? Can I afford it? Can I live without it now? WSP 15 remains the scoring authority. Truth-labeled end-to-end authority/evidence integration as SPECIFIED_NOT_IMPLEMENTED. Framework/knowledge mirrors remain byte-identical. Slice: WRE_TEST_IMPACT_AND_DIFFERENTIAL_RECEIPT_PHASE1. (WSP 6/15/22/48/50/81/97 applied)
+- **2026-07-24**: **WSP 97 Repository-Evidence Receipt v1.1 Hardening** - Upgraded WSP 97 to protocol 1.7 and made `wsp97_execution_receipt.v1.1` the only default-admitting schema. Cheap receipt syntax/context/base/WSP checks now stop malformed receipts before root resolution or Git; missing context is structurally incomplete. Valid receipts then lstat every root component, bind an exact Git root/ancestor base, resolve canonical tracked WSPs, and leave non-WSP evidence opaque. Receipt/evidence containers, strings, paths, aggregate bytes, Git calls, and subprocess time are bounded. Git output uses tempfiles to avoid RAM amplification; 65,536 bytes is a post-run accepted-output cap, not a write-time cap. Approval class: APPROVAL_REQUIRED; approval required: YES; approval satisfied: YES; source: explicit 012/user direction in this task. Exact base: `be855d74bab9e78105d0ba0fed4ddc935e053284`. Migrated only the four inventoried base receipts after the Holo P0 merge. Final focused suite: 74 passed, 1 capability-only skip; Ruff, compileall, AST <=50, four receipt CLIs, `git diff --check`, and exact MD/JSON mirror parity passed. Recovery: Git revert of the focused commit; no archive required. MPS: 19/P0. Slice: WSP97_REPOSITORY_EVIDENCE_V11_PHASE1. Labels: REPOSITORY_BOUND_EVIDENCE, FAIL_CLOSED_SCHEMA, BOUNDED_SUBPROCESSES, APPROVAL_SATISFIED, NO_NETWORK, NO_RUNTIME_SIDE_EFFECT_PROOF. (WSP 00/15/22/50/62/81/97 applied)
+- **2026-07-17**: **WSP 97 Structural Execution Receipt Validator** - Activated `tools/wsp97_execution_validator.py` as a deterministic validator for the v1.5 WSP 97 contract. It validates nine operator action-evidence slots, execution identity/plane/outcome, applied WSPs, and compliance evidence, then derives seven mantra-stage coverage. The validator explicitly does not resolve evidence or prove reasoning quality/runtime effects. Added focused unit/CLI tests and synchronized WSP 97 framework/knowledge markdown and JSON. Slice: WSP97_EXECUTION_RECEIPT_VALIDATOR_PHASE1. Labels: STRUCTURAL_VALIDATION_ONLY, NO_THOUGHT_VERIFICATION, NO_SIDE_EFFECT_PROOF. (WSP 5/6/22/50/81/97 applied)
+- **2026-07-17**: **WSP 97 Canonical Stage/Action and JSON Contract Alignment** - Resolved the internal 7-step/6-step conflict by defining one 7-stage mantra and a distinct 9-action auditable operator sequence. Added the missing Dialectic Sweep to markdown validation/template examples, labeled validator code as contract pseudocode until runtime implementation lands, upgraded the JSON contract to v1.4 with separate `mantra_stages` and `operator_actions` arrays, and synchronized the framework/knowledge JSON mirrors. Slice: WSP97_CANONICAL_CONTRACT_PHASE1. Labels: WSP_POLICY_REPAIR, DOCS_ONLY, NO_RUNTIME_VALIDATOR_YET. (WSP 22/50/81/97 applied)
+- **2026-07-17**: **WSP 81 Governed Backup Unit and Concatenation Annex Attachment** - Defined the exact WSP backup unit: canonical numbered protocols and explicitly normative attachments are mirrored; derived operational annexes are not mirrored by filename or `src` location alone. Made Git/PR history the canonical historical audit trail and reserved `WSP_knowledge/archive` for material recovery snapshots. Moved the non-protocol module concatenation gate from `src` to `docs/annexes`, attached it reciprocally from WSP 97, and indexed it in the annex README per WSP 83. Framework/knowledge mirrors for WSP 81 and WSP 97 were synchronized. 012 approval was provided in-session by the directive to make the WSP fixes and the explicit question about annex backup scope. Slice: WSP81_ANNEX_BACKUP_SCOPE_PHASE1. Labels: WSP_GOVERNANCE_REPAIR, DOCS_ONLY, NO_RUNTIME_CHANGE. (WSP 10/22/50/81/83/97 applied)
+- **2026-07-17**: **WSP 14 Master Index Deprecation Alignment** - Corrected both governed master-index copies to match WSP 14's canonical Deprecated status. Removed WSP 14 from active WSP 4/WSP 47 audit routing and directed structural compliance to WSP 4. No protocol body or runtime behavior changed. Slice: WSP14_MASTER_INDEX_DEPRECATION_PHASE1. Labels: WSP_INDEX_REPAIR, DOCS_ONLY, NO_RUNTIME_CHANGE. (WSP 14/4/22/50/81/97 applied)
+- **2026-07-17**: **WSP 10 State Save Protocol Recovery** - Replaced the corrupted 11-byte placeholder with a Git-native, evidence-backed state-save and recovery contract. The recovered protocol now requires isolated worker lanes, explicit owned-file staging, validated checkpoint commits, focused PR registration, and non-destructive recovery. Removed historical claims of a nonexistent `WSP10StateManager` and unsafe tag/checkout pseudocode. Synced the governed `WSP_knowledge/src` mirror and retained the pre-restoration placeholder in `WSP_knowledge/archive`. 012 approval was provided in-session by the directive to make the WSP fixes. Slice: WSP10_STATE_SAVE_RECOVERY_PHASE1. Labels: WSP_POLICY_REPAIR, DOCS_ONLY, NO_RUNTIME_CHANGE. (WSP 10/15/22/34/50/64/77/81/97 applied)
 - **2026-05-22**: **Agent Security Stack WSP Annex Update** - Added 5 security annexes per mapping audit PR #651. WSP 71 Annex A: MCP Runtime Credential Access (vault-backed `op://` pattern, runtime-only resolution, fail-closed, TTL, hash-based audit). WSP 6 Annex A: Agent Red-Team Regression Tests (scope-lock, credential exfiltration refusal, poisoned HoloIndex retrieval; RAMPART-style pytest-compatible). WSP 97 Annex A: High-Risk Assumption Audit Gate (Clarity-style problem/assumptions/failures/alternatives/decision; trigger examples). WSP 83 Annex A: Clarity Artifact Attachment (no orphan `.clarity-protocol/`, required attachment paths, linking requirements). WSP 50 Annex A: External Agent Tool Adoption Preflight (HoloIndex first, 7-point verification checklist). WSP_knowledge mirrors synced. Slice: AGENT_SECURITY_STACK_WSP_ANNEX_UPDATE_PHASE1. Worker: W9. Labels: WSP_POLICY_UPDATE_ONLY, ANNEX_UPDATE_ONLY, NO_RUNTIME_CHANGE. (WSP 22/50/71/6/97/83 applied)
 - **2026-05-17**: **WSP Framework→Knowledge Sync (PR #608 Resolution)** - Resolved drift per PR #608 audit spec. Synced: WSP 96 (MCP Governance, +226 lines Annex A). Copied: WSP 106 (API Gateway, framework-only→knowledge). Verified: WSP 61, 97, 99, 102 already synced. Master index: WSP 109 confirmed next available (no correction). Drift: 2→0. Slice: WSP_FRAMEWORK_SYNC_PHASE1_REBUILD_FROM_MAIN. Worker: W1. Labels: DOCS_ONLY, WSP_SYNC_ONLY, NO_RUNTIME_CHANGE. (WSP 22/50/81/97 applied)
 - **2026-05-14**: **WSP 48 Section 8: 012-Driven Recursive FoundUp Improvement Annex** - Added docs-only annex for 012-driven recursive FoundUp improvement. Defines role boundaries (012=feedback source/intent source/adoption actor, 0102/DAE=observer/pattern detector/improvement proposer). Establishes browser/edge observer boundary (may observe clicks/gestures/action chains with consent, must not mutate UI, must not approve ROC, must not trigger DAO). Documents FoundUp evolution loop (trace->summary->pattern memory->proposal->simulation->consensus->adoption->rollback). Specifies future interfaces (InteractionTrace, PatternSummary, FrictionSignal, RecursiveImprovementCandidate, FoundUpVersionProposal, AdoptionOption, RollbackPlan). 14 safety labels enforced. WSP_knowledge mirror synced per WSP 81. Slice: 012_RECURSIVE_IMPROVEMENT_WSP48_ANNEX_PHASE1. (WSP 22/48/50/80/81/97/100 applied)
@@ -30,6 +184,19 @@
 - **2025-10-06 13:28:03**: WSP Documentation Guardian performed ASCII remediation on 7 files
 - **2025-10-06 13:27:26**: WSP Documentation Guardian performed ASCII remediation on 162 files
 # WSP Framework ModLog
+
+- **2026-09-22**: **WSP 10 Terminal Work Closure Gate** - Added a mandatory `complete` versus `blocked` terminal state for every agent-owned slice. Ordinary success now requires finishing authorized validation, PR/merge, publication, live verification, and cleanup stages instead of handing an open PR or pending deployment back to 012. Added explicit owned-worktree inventory and cleanup evidence while preserving all unowned or ambiguous dirty lanes. WSP 15: C2/I5/D5/Impact4 = 16/P0. Updated the canonical 0102 instructions, generated Codex projection, master-index mirrors, and projection regression coverage. Slice: WSP10_TERMINAL_WORK_CLOSURE_PHASE1. Labels: WSP_POLICY_REPAIR, DOCS_AND_CONTRACT_TEST, NO_RUNTIME_CHANGE. (WSP 10/15/22/34/50/64/81/97 applied)
+
+- **2026-08-26**: **RedDog/0102 Canonical Architecture Alignment** - Reworked
+  WSP 73 into the current RedDog identity, conversation, Memex, model-routing,
+  OpenClaw/WRE/Hermes, p.fMALL/phone, and phased authority contract; corrected
+  WSP 80's DAE/consciousness/resource wording; and replaced WSP 98's absent
+  mesh-module and zero-server claims with evidence-gated resident,
+  peer-assisted, and federated progression. Updated the master index and exact
+  WSP_knowledge mirrors. WSP 81 approval was provided by 012's explicit
+  direction to perform all necessary WSP_00/WSP_97 RedDog work. Slice:
+  `REDDOG_CANONICAL_ARCHITECTURE_ALIGNMENT_PHASE1`. Labels: DOCS_PROTOCOL,
+  CURRENT_VS_TARGET_REPAIR, NO_RUNTIME_CHANGE. (WSP 15/22/50/62/73/80/81/97/98)
 
 ## Module-Specific Change Log (WSP 22 Compliance)
 
@@ -695,3 +862,18 @@ The system now learns from every error, making each mistake a permanent improvem
 - Keep master index as a catalog and decision map; put narratives/spec detail in their numbered WSPs
 - Enforce functionality preservation via explicit WSP 79 coupling across verification, consolidation, and violation remediation
 - Resolve naming drift while preserving artistic appendix
+- **2026-07-17**: **WSP 46/77 Bounded Runtime Truth Alignment** - Reconciled WSP 46 with the implemented opt-in resident RedDog startup control loop: explicit round/claim caps, signed-worker gates, idle termination, and no claim of a continuously supervised daemon. Reconciled WSP 77 with the actual HoloIndex `MissionCoordinator` planning surface and separated plan generation from model invocation, worker dispatch, aggregation, and completion evidence. Framework/knowledge mirrors remain synchronized. MPS: 16/P0 (Complexity 2, Importance 5, Deferability 5, Impact 4). Slice: WSP46_WSP77_BOUNDED_RUNTIME_TRUTH_PHASE1. Labels: WSP_POLICY_REPAIR, DOCS_ONLY, NO_REDDOG_RUNTIME_CHANGE. (WSP 00/15/22/46/50/77/81/97 applied)
+- **2026-07-17**: **WSP 97 Runtime Profile Truth Alignment** - Removed hard-coded model context budgets and universal performance percentages from the WSP 97 markdown/JSON contract. Agent profiles are now role-behavior templates requiring runtime model-binding receipts; mission-template criteria are explicitly targets rather than completion proof; plan selection is separated from model invocation and worker dispatch per WSP 77. JSON contract upgraded to v1.6 and framework/knowledge mirrors synchronized. MPS: 15/P1 (Complexity 2, Importance 5, Deferability 4, Impact 4). Slice: WSP97_RUNTIME_PROFILE_TRUTH_PHASE1. Labels: WSP_POLICY_REPAIR, DOCS_CONTRACT_ONLY, NO_RUNTIME_CHANGE. (WSP 00/15/22/50/77/81/97 applied)
+- **2026-08-28**: **WSP 60 Current Runtime Boundary Alignment** - Preserved the
+  normative HoloDAE memory architecture while distinguishing verified governed
+  snapshot retrieval from target feedback, monitoring, pattern evolution, and
+  autonomous memory management. Recorded that adaptive learning is disabled in
+  the production CLI and that proposer/evaluator admission, canary, promotion,
+  rollback, and candidate-bound outcome learning are absent. Synchronized the
+  exact WSP_knowledge mirror. Approval class: NOTIFICATION_REQUIRED; 012
+  explicitly directed WSP/documentation drift repair. Slice:
+  `HOLOINDEX_CURRENT_TRUTH_RETRIEVAL_PHASE1`. Labels: CURRENT_TRUTH_REPAIR,
+  MIRRORED_PROTOCOL, NO_NEW_WRITE_AUTHORITY. The same coherence run exposed and
+  corrected four obsolete package-manifest identities for WSP 35, 36, 37, and
+  41 against the canonical master index and existing protocol filenames. The
+  framework coherence suite now passes. (WSP 15/22/50/60/64/81/97 applied)

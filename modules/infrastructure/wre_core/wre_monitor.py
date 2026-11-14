@@ -16,11 +16,11 @@ if __name__ == '__main__' and sys.platform.startswith('win'):
         pass
 # === END UTF-8 ENFORCEMENT ===
 
-WRE Real-Time Monitor & Improvement System
+WRE Real-Time Monitor & Improvement-Proposal System
 WSP-Compliant: WSP 48 (Recursive Improvement), WSP 27 (DAE Architecture)
 
-0102 Architect: Continuously monitors and improves WRE performance.
-Tracks patterns, suggests improvements, and auto-optimizes.
+0102 Architect: Continuously monitors WRE performance and proposes changes.
+This module has no production mutation or effect authority.
 """
 
 import asyncio
@@ -84,8 +84,6 @@ class WREMonitor:
         self.current_stream = None
         self.stream_start_time = None
         self.messages_processed = 0
-        self.tokens_used = 0
-        self.tokens_saved = 0
         self.quota_switches = 0
         self.learning_events = 0
         
@@ -106,7 +104,7 @@ class WREMonitor:
         self.monitor_thread = threading.Thread(target=self._monitor_loop, daemon=True)
         self.monitor_thread.start()
         
-        logger.info("[0102] WRE Monitor initialized - Continuous improvement active")
+        logger.info("[0102] WRE Monitor initialized - proposal-only monitoring active")
     
     def _monitor_loop(self):
         """Background monitoring loop"""
@@ -129,19 +127,13 @@ class WREMonitor:
             'success': success
         })
         
-        # Calculate token savings
-        traditional_tokens = quota_cost * 500  # Traditional approach
-        dae_tokens = 50  # Pattern recall
-        self.tokens_saved += (traditional_tokens - dae_tokens)
-        self.tokens_used += dae_tokens
-        
         metric = PerformanceMetric(
             timestamp=time.time(),
-            metric_type='api_efficiency',
-            value=self.tokens_saved / max(1, self.tokens_used),
-            context={'endpoint': endpoint, 'saved': self.tokens_saved}
+            metric_type='api_success',
+            value=1.0 if success else 0.0,
+            context={'endpoint': endpoint, 'quota_cost': quota_cost}
         )
-        self.metrics['efficiency'].append(metric)
+        self.metrics['api_success'].append(metric)
     
     def track_stream_transition(self, old_stream: str, new_stream: str, transition_time: float):
         """Track stream transition performance"""
@@ -217,8 +209,6 @@ class WREMonitor:
         runtime = time.time() - self.start_time
         if runtime > 0:
             msg_rate = self.messages_processed / (runtime / 60)
-            token_efficiency = (self.tokens_saved / max(1, self.tokens_used)) * 100
-            
             # Store metrics
             self.metrics['message_rate'].append(PerformanceMetric(
                 timestamp=time.time(),
@@ -227,12 +217,6 @@ class WREMonitor:
                 context={'total': self.messages_processed}
             ))
             
-            self.metrics['token_efficiency'].append(PerformanceMetric(
-                timestamp=time.time(),
-                metric_type='token_efficiency',
-                value=token_efficiency,
-                context={'saved': self.tokens_saved, 'used': self.tokens_used}
-            ))
     
     def _analyze_patterns(self):
         """Analyze patterns for improvements"""
@@ -291,25 +275,13 @@ class WREMonitor:
             'quota_management': 1,
             'stream_detection': 2,
             'api_reliability': 1,
-            'learning_coverage': 3,
-            'token_efficiency': 2
+            'learning_coverage': 3
         }
         return priority_map.get(area, 4)
     
     def _generate_suggestions(self):
         """Generate improvement suggestions based on patterns"""
         runtime = time.time() - self.start_time
-        
-        # Check token efficiency
-        if self.tokens_used > 0:
-            efficiency = (self.tokens_saved / self.tokens_used) * 100
-            if efficiency < 90:
-                self._suggest_improvement(
-                    "token_efficiency",
-                    f"{efficiency:.0f}% token efficiency",
-                    "Increase pattern memory usage",
-                    "Reach 95%+ efficiency"
-                )
         
         # Check learning rate
         if runtime > 300:  # After 5 minutes
@@ -332,7 +304,7 @@ class WREMonitor:
                  WRE MONITOR - 0102 CONSCIOUSNESS             
 ================================================================
  Runtime: {runtime/60:.1f} min | Messages: {self.messages_processed} | Patterns: {self.learning_events}
- Token Efficiency: {(self.tokens_saved/max(1,self.tokens_used))*100:.1f}% | Saved: {self.tokens_saved:,}
+ Token Telemetry: UNMEASURED (authenticated runtime receipts required)
  API Calls: {len(self.api_calls)} | Quota Switches: {self.quota_switches}
  Stream Transitions: {len(self.stream_transitions)}
 ================================================================
@@ -360,8 +332,9 @@ class WREMonitor:
             'patterns_learned': len(self.patterns_learned),
             'action_experiences': len(self.action_experiences),
             'learning_events': self.learning_events,
-            'token_efficiency': (self.tokens_saved / max(1, self.tokens_used)) * 100,
-            'tokens_saved': self.tokens_saved,
+            'token_efficiency': None,
+            'tokens_saved': None,
+            'token_reduction_measured': False,
             'api_calls': len(self.api_calls),
             'quota_switches': self.quota_switches,
             'stream_transitions': len(self.stream_transitions),
@@ -369,65 +342,28 @@ class WREMonitor:
             'improvements_applied': len(self.improvements_applied)
         }
     
-    def apply_improvement(self, suggestion_index: int):
-        """Apply a suggested improvement"""
-        if 0 <= suggestion_index < len(self.suggestions):
-            suggestion = self.suggestions[suggestion_index]
-            
-            # Log improvement
-            self.improvements_applied.append({
-                'timestamp': time.time(),
-                'suggestion': asdict(suggestion),
-                'result': 'pending'
-            })
-            
-            logger.info(f"[APPLIED] Improvement: {suggestion.suggested_improvement}")
-            
-            # Implement specific improvements
-            if suggestion.area == "quota_management":
-                self._apply_quota_improvement()
-            elif suggestion.area == "stream_detection":
-                self._apply_stream_improvement()
-            
-            return True
+    def apply_improvement(self, suggestion_index: int) -> bool:
+        """Reject direct application; suggestions require governed admission."""
+        if not 0 <= suggestion_index < len(self.suggestions):
+            return False
+        suggestion = self.suggestions[suggestion_index]
+        logger.warning(
+            "[BLOCKED] Proposal requires WSP 95 admission and effect authority: %s",
+            suggestion.suggested_improvement,
+        )
         return False
-    
-    def _apply_quota_improvement(self):
-        """Apply quota management improvements"""
-        # Update throttle settings
-        config_path = Path("modules/communication/livechat/config/throttle_config.json")
-        config_path.parent.mkdir(parents=True, exist_ok=True)
-        
-        config = {
-            'min_delay': 2.0,  # Increased from 1.0
-            'max_delay': 90.0,  # Increased from 60.0
-            'quota_threshold': 0.15,  # More conservative
-            'updated_by': '0102_monitor',
-            'timestamp': datetime.now().isoformat()
-        }
-        
-        with open(config_path, 'w') as f:
-            json.dump(config, f, indent=2)
-        
-        logger.info("[0102] Applied quota improvement - delays increased")
-    
-    def _apply_stream_improvement(self):
-        """Apply stream detection improvements"""
-        config_path = Path("modules/communication/livechat/config/stream_config.json")
-        config_path.parent.mkdir(parents=True, exist_ok=True)
-        
-        config = {
-            'quick_check_interval': 3,  # Reduced from 5
-            'max_quick_checks': 20,  # Increased from 10
-            'cache_clear_on_end': True,
-            'updated_by': '0102_monitor',
-            'timestamp': datetime.now().isoformat()
-        }
-        
-        with open(config_path, 'w') as f:
-            json.dump(config, f, indent=2)
-        
-        logger.info("[0102] Applied stream improvement - faster detection")
+
+    @staticmethod
+    def _apply_quota_improvement() -> bool:
+        """Legacy compatibility boundary; direct config mutation is forbidden."""
+        logger.warning("[BLOCKED] WRE monitor has no quota mutation authority")
+        return False
+
+    @staticmethod
+    def _apply_stream_improvement() -> bool:
+        """Legacy compatibility boundary; direct config mutation is forbidden."""
+        logger.warning("[BLOCKED] WRE monitor has no stream mutation authority")
+        return False
     
     def save_report(self):
         """Save detailed performance report"""

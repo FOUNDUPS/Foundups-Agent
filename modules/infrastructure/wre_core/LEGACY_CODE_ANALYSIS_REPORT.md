@@ -1,5 +1,9 @@
 # Legacy Code Analysis Report - Critical Cleanup Required
 
+> **Historical analysis, not current authority.** Counts, topology, completion,
+> and efficiency claims require re-verification against current main. Token
+> reduction percentages below were not measured from authenticated receipts.
+
 ## Executive Summary
 **CRITICAL ISSUE**: The codebase has extensive legacy agent code contamination with 190+ files referencing non-existent agents. Two separate wre_core folders exist creating confusion.
 

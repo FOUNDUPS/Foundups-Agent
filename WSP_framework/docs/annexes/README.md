@@ -7,11 +7,13 @@ Naming Rule:
 - Annexes in this folder use plain names without `WSP_`.
 
 Current Annexes:
+- `MODULE_CONCATENATION_GATE.md`
 - `MODULE_DECISION_MATRIX.md`
 - `MODULE_PLACEMENT_GUIDE.md`
 - `ORCHESTRATION_HIERARCHY_ANNEX.md`
 
 Canonical Mapping:
+- Cross-module execution-plane concatenation -> `WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md`
 - Domain routing and placement policy -> `WSP_framework/src/WSP_3_Enterprise_Domain_Organization.md`
 - Module structure and placement sanity gate -> `WSP_framework/src/WSP_49_Module_Directory_Structure_Standardization_Protocol.md`
 - Orchestration tier responsibilities -> `WSP_framework/src/WSP_46_Windsurf_Recursive_Engine_Protocol.md`

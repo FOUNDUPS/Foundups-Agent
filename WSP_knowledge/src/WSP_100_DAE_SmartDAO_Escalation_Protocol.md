@@ -609,6 +609,12 @@ Protocols are listed as **researched examples** for architecture planning. Actua
 
 ## 11. ROC State Machine Annex (Specification Only)
 
+Economic changes and chain ports follow [WSP 26 §1.2](WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract).
+Simulator adoption/tier thresholds do not independently authorize token release,
+payout or governance handover. Preserve the review-only/future-blocked boundaries
+below until the corresponding versioned simulator decision, independent tests,
+affected governing mirrors, chain parity and separate activation gates pass.
+
 ### 11.1 Purpose and Critical WSP 97 Constraints
 
 This annex defines the ROC (Readiness-Oriented Consensus) state machine specification for documentation and architecture planning purposes ONLY.

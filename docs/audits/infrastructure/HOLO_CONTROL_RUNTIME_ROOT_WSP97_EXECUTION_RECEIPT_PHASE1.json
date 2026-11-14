@@ -1,0 +1,93 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "8842cbcdbeb5cd53407fcc3f60a2a9f774941e70"
+  },
+  "execution_id": "HOLO_CONTROL_RUNTIME_ROOT_PHASE1",
+  "execution_plane": "local_tools_and_wsp00_subagent_audit",
+  "outcome": "completed",
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_87_Code_Navigation_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "The governed owner query initially failed closed because the dedicated authority checkout was stale, with no owner attempt, reindex, or route mutation. After sealed recovery it returned CURRENT at exact base 8842cbcdbeb5cd53407fcc3f60a2a9f774941e70, no gap, no reindex, first attempt, generation sha256:cd6a5c415891714ee50aeea4e87d062b3c578386c2ddc592638446fc3cc10704.",
+      "The first real OpenClaw replay from a clean linked control checkout claimed and ran the exact task but failed at HOLOINDEX_FINAL_COLLECTION_SNAPSHOT_PROBE_FAILED because that checkout had no dependency runtime. Direct replay with O:/Foundups-Agent as dependency runtime and the dedicated authority checkout as semantic source succeeded.",
+      "Full post-query replica verification remained unchanged at E:/HQR/cd6a5c41-r1: 33 artifacts, 222595640 bytes, descriptor sha256:62806d7f61ccada9fcf14efdf94917aa09a09e52a5212c2646af4be00c85a22d, replica sha256:8cd45d758d5a849b16338c4cdabeaf4fb087eaec5e0aae75690cf35f7db42d07.",
+      "Governed retrieval found the existing authority_worktree runtime resolver and its same-repository primary-worktree tests. Results were relevant and correctly ordered with no duplicate implementation; exact inspection supplied the missing executor caller and revealed the live-replay evidence gap. Staleness risk was closed by the CURRENT exact-base receipt before editing."
+    ],
+    "research": [
+      "Read idle_automation README, INTERFACE, ROADMAP, ModLog, tests README/TestModLog, executor/coordinator/authority-order contracts, Holo authority-worktree resolver/tests, sealed authority transaction, RedDog package/release contracts, backend manifest generator, and historical WSP_97 receipts before changing code.",
+      "WSP_62 inspection showed the 599-line authority transaction should not absorb caller-specific runtime selection. The existing 374-line executor was the narrow integration boundary and the existing resolver was the reusable LEGO.",
+      "Three read-only WSP_00/WSP_97 audits separately assessed Holo A-grade, RSI authority, and WRE/OpenClaw control-plane truth. The implementation reviewer reproduced an escaping resolver exception and documentation overclaims; both were corrected before final GO."
+    ],
+    "micro_pass": [
+      "Reused resolve_holoindex_runtime_root() through a 27-line executor helper while preserving the dedicated authority as repo_root and using the resolved primary only as workspace_root/runtime identity witness.",
+      "Normalized OSError, RuntimeError, and ValueError from runtime-root resolution to postmerge_runtime_root_resolution_failed and durable failed-task finalization without calling the authority transaction.",
+      "Added one bounded 155-line test module covering distinct runtime/source arguments, resolver failure, and persisted-context, claim, authority, request, and start rejection gates. The inherited oversized test modules did not grow; the main executor function shrank from 186 to 181 lines.",
+      "Corrected README, INTERFACE, ROADMAP, module/test ModLogs, RedDog release docs, root ModLog, and the security assumption audit without claiming installed dependency-byte closure, A-grade retrieval, RSI, or automatic live replay."
+    ],
+    "macro_pass": [
+      "Idle automation coordinator/authority/runtime-root selection passed 38 tests; backend manifest generator passed 8 and remained exact at 1365 files with digest b58778d3358e1888f7c047cdda8973b43bd49e28e73b24a8d47b4b95719dc7b6.",
+      "The canonical WRE test registry was regenerated from the staged bounded test module and independently rechecked current at 1609 tracked Python tests / 268 quarantined; its focused contract passed 28 tests.",
+      "RedDog fast 14-member, conversation 32-test, contract 3-member, deterministic package, candidate WSP_62, and authenticated 18-shard gates passed. The final staged-candidate four-group replay passed in 224617 ms under the unchanged 420000 ms ceiling.",
+      "RedDog 0.4.133 package surface is 67 files / 946123 bytes at sha256:89f19ddb703b5a278dcc5cb644bff00a8b5b4c68f717a634d5c1d234b491e773; the contract is 18 shards / 6942 lines / 492 assertions at sha256:b8d9b4c787cc4b4aa7c37470931e2ff3915dd945c566f112546ff78009d9db63.",
+      "Read-only VSIX inspection found version 0.4.133, 275743 bytes, sha256:0cd9288febe912b7f7a08989027fcdbff718ccae21d521c44572b85d95c17971, 69 safe entries, 67 extension files, zero duplicate/encrypted/unsafe/sensitive-name/source-byte mismatches, and zero credential-value-pattern hits."
+    ],
+    "hard_think": [
+      "WSP_15 scored control/runtime decoupling C3/I5/D5/Impact5 = 18/P0 because every clean linked post-merge controller otherwise requires a duplicate environment or manual recovery.",
+      "The smallest safe correction was reuse of the same-common-directory resolver at the executor boundary. A new environment variable, copied virtual environment, dirty-control exception, or authority-transaction expansion would increase drift or authority surface.",
+      "Exact runtime closure contract v2 remains the next Holo A-grade P0 at 17/20. Authenticated retrieval-candidate admission is 18/20 but depends on exact closure and therefore remains a later focused transaction."
+    ],
+    "dialectic_sweep": [
+      "A clean control checkout proves task/control state but does not need to own dependencies. The primary dependency runtime can be reused only because same-repository identity and the dedicated authority digest are independently re-proven.",
+      "The final snapshot probe proves operational compatibility and snapshot behavior, not every installed dependency byte. Documentation now separates those claims and keeps runtime_environment_exact_closure_verified=false.",
+      "Focused mocked argument forwarding was insufficient: the independent reviewer injected a resolver fault and found a stranded executing task. Failure normalization plus the five-gate no-effect matrix converted the candidate from NO-GO to GO.",
+      "A VSIX and exhaustive release prove package integrity and extension contracts; they do not substitute for the pending automatic stale-main OpenClaw replay, A-grade Holo evaluation, or operational RSI."
+    ],
+    "first_principles": [
+      "Control authority, indexed-source authority, and dependency provisioning are separate capabilities and must remain separately proven.",
+      "A maintenance task must never be stranded by a dependency-discovery exception after execution begins; every admitted setup failure needs a durable terminal result.",
+      "Current semantic evidence must be exact-commit and immutable-generation bound. A stale authority must fail closed and be repaired only through the governed maintenance path.",
+      "Recursive improvement requires authenticated proposal, independent evaluation, admission, canary, promotion, observation, and rollback. Retrieval or packaging success alone is not RSI."
+    ],
+    "execute": [
+      "Branch fix/holo-control-runtime-root-phase1 at base 8842cbcdbeb5cd53407fcc3f60a2a9f774941e70.",
+      "modules/infrastructure/idle_automation/src/holoindex_postmerge_executor.py",
+      "modules/infrastructure/idle_automation/tests/test_holoindex_postmerge_runtime_root.py",
+      "docs/audits/security/REDDOG_HOLO_CONTROL_RUNTIME_ROOT_ASSUMPTION_AUDIT_20260828.md",
+      "scripts/reddog_backend_manifest.json",
+      "extensions/reddog/package.json",
+      "extensions/reddog/tests/contract_shards/manifest.json",
+      "O:/RedDog-Releases/reddog-0.4.133.vsix (275743 bytes; sha256:0cd9288febe912b7f7a08989027fcdbff718ccae21d521c44572b85d95c17971; 69 safe entries; 67 exact source-byte matches; zero credential-value-pattern hits)"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_6",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_62",
+    "WSP_84",
+    "WSP_87",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/infrastructure/HOLO_CONTROL_RUNTIME_ROOT_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+    "docs/audits/security/REDDOG_HOLO_CONTROL_RUNTIME_ROOT_ASSUMPTION_AUDIT_20260828.md",
+    "modules/infrastructure/idle_automation/ModLog.md",
+    "modules/infrastructure/idle_automation/tests/TestModLog.md",
+    "extensions/reddog/ModLog.md",
+    "extensions/reddog/tests/TestModLog.md",
+    "ModLog.md"
+  ]
+}

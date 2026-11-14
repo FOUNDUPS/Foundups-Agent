@@ -1,5 +1,262 @@
 # WSP Module ModLog: Shared Utilities
+
+## 2026-11-10 — Preserve explicit YouTube audience policy
+
+Registry normalization now retains `shorts.made_for_kids` through save/load.
+Absent values remain None and malformed values remain distinguishable so the
+scheduling owner can refuse them; no truthiness conversion or channel default.
+The scheduler's offline audit controls cover true/false/absent/string round trips.
+No channel IDs, operational roles or existing registry files changed in source.
+WSP11/22/50/84/97; live qualification remains separate.
+
+## 2026-11-05 — Role-owned native keys and truthful initialization status
+
+WSP11/22/50/62/84/97. Extended the existing role selector with scoped code/triage
+native keys, preserving declared defaults and refusing basename guesses for
+custom paths. One shared resolver handles both legacy entry points. Singleton
+factories resolve current file/native settings once and make one backend attempt;
+they no longer perform pathless-then-config retries or import-time advisor-path
+selection. Existing cache/force-reinit and explicit GGUF fallback remain.
+
+LMStudioBackend retains its actual native initialization state for diagnostics.
+Reachable nonresident, SDK failure and authentication are distinguished from an
+unreachable server. Native inference/authentication/instance/retry controls,
+General selection and signed Gateway paths are unchanged. No service/model
+launch, native load/unload, download or arbitrary resident selection was added.
+The new24 offline controls recorded21 RED failures then24 GREEN. The combined75
+selection (including the24) passed with native/SDK/file collaborators and zero denied effects,
+processes, SQLite or dotenv calls. No real model/service was exercised.
+Final existing startup owner adapter passed176 with final source bytes, preserving
+the original94 names/digest and adding scoped role/preflight/sentinel controls.
+Canonical admission, full conftests and unchanged effect guards were active.
+
+## 2026-11-01 — Shared YouTube language-role and bounded dispatch
+
+Expose the existing general-language model role guard for Gateway consumers,
+excluding visual/coder/audio/triage/xAI routes. LMStudioBackend accepts optional
+`max_retries` and `pre_dispatch_check`; absent values preserve generic behavior.
+YouTube sets zero SDK retries and checks cancellation/deadline after the native
+instance probe and immediately before dispatch. Support its explicit reasoning-off
+control. Scoped diagnostics now report exception classes rather than raw messages.
+Exact residency checks, loopback policy and model lifecycle owners are preserved.
+WSP11/22/50/62/77/84/97; no model/server/public action during qualification.
+
+## 2026-10-29 — Export the existing LM Studio node-lock identity
+
+- Added `lm_studio_node_lock_identity` within the existing lifecycle owner;
+  transactions and explicit dependency startup reuse the same prior lock name.
+  No new lock/lease/service manager, journal format or model action was added.
+- Three alias controls compare the prior canonical-JSON hash protocol and the
+  actual borrow-only transaction lock/journal digest. These are included in the
+  dependency launcher's49 startup cases within94 actual-source offline checks,
+  not a separate additive total. No real server/model/process call was made.
+- Existing General/code role selection and defaults remain unchanged. WSP11/22/84/97.
+
 **WSP Compliance**: WSP 22 (Module ModLog and Roadmap Protocol)
+
+## 2026-10-19 - Preserve path semantics while removing POSIX containment exceptions
+
+WSP5/6/15/22/50/62/84/97. Existing runtime guard profiling identified repeated
+lexical containment exceptions. Reuse the same normalization; compare POSIX
+anchors and component prefixes directly, and retain Windows `pathlib`
+comparison through `is_relative_to`. Surrounding filesystem, link, descriptor,
+authority and expiry checks remain in place. No validation cache or new owner.
+
+Independent review rejected an initial raw-parts variant for six Windows
+Unicode mismatches. Revised production bytes match the original in12,717 cases
+on each Windows3.12.10/Linux3.12.3. Focused Windows tests49pass/1skip (symlink
+creation unavailable). Pure predicate timings do not establish guard latency,
+native admission or retained RSI gain. Connected Linux safety/lock/runtime-guard/
+isolation tests111pass/8Windows skips, manifest8pass and three Node entrypoints
+pass. Installed process observations in unit tests remain synthetic. Existing
+Windows/Linux CI jobs now run the related path tests. No native qualification
+or publication of this production candidate is claimed by those results.
+
+
+## 2026-10-13 - Close optional SDK assumption exposed by remote CI
+
+WSP6/22/50/97: remote CI failed three offline residency tests because their mock
+decorators imported an uninstalled optional SDK. Replace only the test boundary
+with an explicit restored module fixture; preserve all behavior assertions.
+Reproducer: 3 failed/5 passed. Connected suites: 61 passed with SDK absent and
+61 passed normally. No production code changes or dependency expansion.
+
+The next CI run exposed the same import-before-mock issue in the llama_cpp
+initialization test: loading the real native library terminated Python with an
+illegal instruction. Replace that test's import boundary with a restored module
+double and assert the returned instance and constructor arguments. An unavailable
+import reproduces 1 failure/2 passes; all 61 connected cases pass with both SDK
+imports unavailable. This validates offline adapter contracts, not native inference.
+
+## 2026-10-11 - Explicit native reasoning omission after local audit trial
+
+WSP00/6/11/15/22/50/84/97. The actual installed non-reasoning Qwen Coder route
+returnedHTTP400 when the adapter forced reasoning=off. Preserve the existing
+native API and add explicitNone omission; existing defaultoff, instance checks,
+request/response bounds and storage/streaming settings remain unchanged. None
+means server default; the caller checks model capability, with no automatic retry.
+
+Regression first failed1/passed1; connected backend/lifecycle/topology-proposer
+61pass. Independent source review accepted the repair and identified quotation
+errors in model output. Real post-repair coder calls completed with lifecycle
+load/unload confirmed; both outputs still fail the frozen review contract.
+See `docs/operations/RSI_SWARM_DISPATCH.md` for source-bound measurements.
+This is a coordinator-authored reusable repair prompted by real model trials,
+not autonomous code repair, native author admission or model promotion.
+
+## 2026-08-28 - Windows confined identity and alternate-stream proof
+
+- Corrected confined identity comparison for Windows' suffix-projected execute
+  bits without weakening file type, read/write mode, object identity, size,
+  timestamps, attributes, link count, or final-path checks.
+- Added a bounded `GetFileInformationByHandleEx(FileStreamInfo)` helper that
+  admits only the unnamed file data stream and rejects named file or directory
+  streams. Existing topology guards remain mandatory at every call site.
+- Reused its canonical extended-length Windows spelling for deep runtime tree
+  creation, enumeration, metadata, stream, and confined-digest checks after a
+  real dependency payload exposed an ordinary-path `WinError 206` boundary.
+- Extracted Windows-specific falsifiers to a dedicated WSP_62-bounded test file;
+  the inherited runtime-artifact safety host retains its exact baseline content.
+- Hardened the POSIX machine-wide lock namespace against symlink, replacement,
+  ownership, permission, and hardlink attacks by pinning a private directory
+  descriptor and opening the lock relative to it.
+  (WSP 22/50/62/83/97)
+
+## 2026-08-23 - Confined streaming digest identity proof
+
+- Added a bounded streaming SHA-256 proof that opens one confined no-follow
+  descriptor, requires an expected full file identity, and rechecks descriptor
+  plus path identity after hashing. Windows descriptor/path creation-time
+  representation is handled without dropping the final path comparison.
+- Added replacement, mutation, restored-mtime, link, bound, and stable-success
+  coverage. The existing confined byte-read API is unchanged.
+
+## 2026-08-22 - Exact LM Studio Residency and Managed Model Transactions
+
+- Replaced `/v1/models` presence as residency proof with exact native
+  `/api/v1/models` `loaded_instances` verification.
+- Added a bounded loopback-only managed transaction with one node/port-wide
+  cross-process capacity lock, bounded acquisition, native maximum-context
+  preflight, zero-additive-residency admission, and a durable outside-repository
+  interrupted-load intent. Because native inventory exposes no server
+  generation, restart never auto-unloads any resident instance—even a matching
+  ID may be reused. Zero residency recovers; all residency is quarantined.
+- Re-observation after load requires exactly the one owned node instance;
+  concurrent foreign residency causes owned-only cleanup and fails closed.
+- Split native transport/inventory, lease ownership, recovery intent, and
+  platform locking into WSP-62-bounded sibling modules. Exact instance identity
+  is revalidated immediately before and after inference.
+- Lifecycle and proposer-call receipts are deterministic, content-free
+  structural evidence. They are jointly validated, but authenticated trust is
+  explicitly delegated to the existing signed proposer-provenance envelope.
+- Added optional API-token forwarding to native and OpenAI-compatible calls;
+  tokens never enter lease representation/equality, receipts, journal records,
+  logs, or errors. Redirects, implicit/JIT loads,
+  ambiguity, oversized/malformed responses, and blind load retry fail closed.
+- Governed native transport now disables environment-proxy inheritance so a
+  loopback Bearer request cannot be forwarded by `HTTP_PROXY`; legacy
+  OpenAI-compatible convenience calls remain outside lifecycle authority.
+- Corrected probe state terminology from model-ready to server-reachable. The
+  resolver and ordinary `main.py` preflight remain non-launching/non-loading.
+
+## 2026-08-21 - Bounded LM Studio Native Chat
+
+- Added a bounded native LM Studio chat method with explicit reasoning control,
+  disabled storage/streaming, exact model identity, timeout and response-byte
+  caps, and no launch/fallback behavior. Request construction and bounded read
+  validation are decomposed below the ordinary WSP 62 function ceiling.
+- Added per-call OpenAI-compatible timeouts and allowlisted structured/sampling
+  controls. Arbitrary `extra_body` remains blocked; `enable_thinking` is a strict
+  boolean projected to the documented chat-template field.
+
+## 2026-08-14 - Exact Confined Byte Reads
+
+- Extracted the confined byte reader behind its existing public function so the
+  no-growth runtime-artifact safety host shrank rather than gained an exemption.
+- Removed the silent one-MiB cap: reads now honor the caller's explicit bound
+  through one verified descriptor, including tails of bounded service archives.
+
+## 2026-07-31 - RedDog Runtime Artifact Generation Fence
+
+- Added a bounded shared generation fence for canonical RedDog runtime
+  artifact producers and signed-manifest publication.
+- Kept the inherited runtime-artifact safety host at its exact no-growth
+  ceiling; the new primitive reuses its confined lock and root validation.
+
+## 2026-07-28 - Runtime Artifact Safety WSP 62 Remediation
+
+- Recorded the inherited runtime-artifact safety host under an exact temporary
+  no-growth ceiling with a bounded decomposition plan.
+- Kept the current Windows/POSIX security repair behavior unchanged; a later
+  parity slice will split redaction, confined I/O, and platform locking.
+
+## 2026-07-28 - Windows Extended-Length Runtime Artifacts
+
+- Routed confined descriptor opens and cleanup through Windows
+  extended-length paths while retaining final-descriptor confinement checks.
+- Extended the authority-store create, hard-link, stat, read, replace, rename,
+  recovery, and cleanup operations to the same path representation.
+- Added a publication regression where the configured target remains below
+  260 characters while internal atomic paths exceed it.
+
+## 2026-07-28 - Windows Confined Lock Initialization Race
+
+- Serialized first-byte initialization under the existing machine-global
+  runtime mutex before acquiring the Windows byte-range lock.
+- Made resolved-path containment comparisons honor Windows case-insensitive
+  filesystem semantics and normalize `\\?\` extended-length prefixes,
+  including runtime roots created by another process.
+- Preserved POSIX descriptor locking and the existing confinement checks.
+
+## 2026-07-27 - Cross-Session Runtime Operation Lock
+
+- Moved the Windows runtime-operation mutex from the session-local namespace
+  to the machine-global mutex namespace so signer-side serialization remains
+  effective across service and interactive Windows sessions.
+- Preserved the existing identity digest and POSIX confined lock-file behavior.
+- Added a descriptor-verified confined lock-file primitive for authorities
+  that require one canonical runtime-root lock independent of temporary
+  directory configuration. Descriptor verification is supported on Windows
+  and Linux with procfs; other POSIX environments fail closed.
+
+## 2026-07-25 - Stable Descriptor-Confined Runtime Text Reads
+
+- Added a bounded UTF-8 reader that opens one descriptor, verifies its final
+  path, and rejects link, size, identity, timestamp, or content-length changes.
+- Kept the helper read-only and rooted in the existing runtime-artifact safety
+  boundary.
+
+## 2026-07-18 - Runtime Artifact Safety and Telemetry Redaction
+
+- Added shared fail-closed runtime-root/path validation, descriptor-bound
+  locked append/replacement, and bounded secret redaction helpers.
+- Runtime artifacts reject repository paths, source ancestors, ambiguous
+  Windows names, device/UNC paths, symlinks, junctions, and hardlinks.
+
+## 2026-05-30 - LM Studio Dependency Boundary Doc + Gate (LM_STUDIO_DEPENDENCY_BOUNDARY_DOC_AND_GATE_PHASE1)
+
+- **Problem**: LM Studio is an optional local dependency, but absence produced a
+  silent `None` from `resolve_*_backend` / `ai_engine_singletons` and an
+  ambiguous, non-actionable warning. Required-LM-Studio callers had no named
+  state to branch on.
+- **Solution** (probe-only, additive — no existing signature/return type changed):
+  - `local_llm_resolver.py`:
+    - `LocalLLMAvailability` (Enum): `LM_STUDIO_SERVER_REACHABLE` / `FALLBACK_LLAMA_CPP` / `UNAVAILABLE`; reachability does not prove model residency
+    - `probe_backend_availability(model_path=None)`: probe-only classifier (HTTP probe + GGUF filesystem check); never launches LM Studio
+    - `operator_action_for(status)`: operator-actionable guidance per state
+    - `LMStudioUnavailableError` + `require_lm_studio_backend(model_id, base_url=None)`: named error for paths that strictly require LM Studio
+    - `resolve_qwen_backend` / `resolve_gemma_backend`: clearer fallback INFO ("using local GGUF fallback via llama.cpp … resolver does not auto-launch it") and operator-actionable WARNING when no fallback exists
+- **Boundary preserved**: LM Studio launch stays solely in
+  `dependency_launcher.dae_dependencies.launch_lm_studio` (explicit DAE/menu path).
+  Resolver imports no `subprocess`/launch symbols.
+- **Non-scope (verified)**: `main.py` never probes/launches LM Studio at boot;
+  HoloIndex timeout defaults (#730) and OBS boundaries (#720/#721) untouched.
+- **Files**:
+  - `local_llm_resolver.py` (UPDATED — additive)
+  - `tests/test_lm_studio_dependency_boundary.py` (NEW — 16 tests)
+  - `docs/audits/architecture/LM_STUDIO_DEPENDENCY_BOUNDARY_DOC_AND_GATE_PHASE1.md` (NEW)
+- **Predecessors**: #720, #721, #728, #730, #732
+- **WSP Compliance**: WSP 77 (Agent Coordination), WSP 91 (Observability), WSP 97 (Truthful state distinction)
 
 ## 2026-04-13 - Local LLM Backend Adapter Layer (LM Studio API Support)
 

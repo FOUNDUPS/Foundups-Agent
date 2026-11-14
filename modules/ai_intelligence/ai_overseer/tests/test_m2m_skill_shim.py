@@ -7,6 +7,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from modules.ai_intelligence.ai_overseer.src.ai_overseer import AIIntelligenceOverseer
+from modules.ai_intelligence.ai_overseer.src import m2m_holo_retrieval_benchmark
 
 
 def _make_overseer(repo_root: Path) -> AIIntelligenceOverseer:
@@ -100,3 +101,25 @@ def test_execute_m2m_stage_promote_safe_requires_target_path(tmp_path: Path):
 
     assert result["status"] == "FAIL"
     assert "target_path is required" in result["result"]["error"]
+
+
+def test_execute_m2m_holo_benchmark_routes_verified_result(monkeypatch, tmp_path: Path):
+    _write_skill(tmp_path, "m2m_holo_retrieval_benchmark")
+    overseer = _make_overseer(tmp_path)
+    expected = {
+        "success": True,
+        "benchmark_run": {"receipt_id": "run"},
+        "verification": {"accepted": True},
+    }
+    monkeypatch.setattr(
+        m2m_holo_retrieval_benchmark,
+        "execute_m2m_holo_retrieval_benchmark",
+        lambda **kwargs: expected,
+    )
+
+    result = overseer.execute_m2m_skill(
+        "m2m_holo_retrieval_benchmark", {}, m2m=False
+    )
+
+    assert result["status"] == "OK"
+    assert result["result"] == expected

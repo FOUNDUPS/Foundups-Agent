@@ -32,7 +32,6 @@ from modules.infrastructure.shared_utilities.linkedin_account_registry import (
 
 # Directory to store browser session info for cross-process reconnection
 BROWSER_SESSION_DIR = Path("O:/Foundups-Agent/modules/infrastructure/foundups_selenium/data/sessions")
-BROWSER_SESSION_DIR.mkdir(parents=True, exist_ok=True)
 
 # Port range for debugging (each profile gets unique port)
 BASE_DEBUG_PORT = 9222
@@ -78,6 +77,7 @@ class BrowserManager:
     def _save_session(self, browser_key: str, port: int, profile_dir: str) -> None:
         """Save browser session info for cross-process reconnection."""
         session_file = self._get_session_file(browser_key)
+        session_file.parent.mkdir(parents=True, exist_ok=True)
         session_data = {
             "port": port,
             "profile_dir": profile_dir,

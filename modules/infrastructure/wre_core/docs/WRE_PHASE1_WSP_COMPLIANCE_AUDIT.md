@@ -1,5 +1,9 @@
 # WRE Phase 1 - WSP Compliance Audit Report
 
+> **Historical pre-repair audit — superseded and non-authoritative.**
+> Findings below describe the 2025 snapshot and intentionally remain as audit
+> memory. They do not override current module documentation or WSP 95 v2.1.
+
 **Date**: 2025-10-23
 **Auditor**: 0102
 **Status**: VIOLATIONS FOUND - Phase 1 NOT COMPLETE

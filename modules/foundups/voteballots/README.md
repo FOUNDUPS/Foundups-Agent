@@ -1,166 +1,263 @@
 # Vote/Ballots FoundUp
 
-**Status**: Design Specification  
-**Version**: 0.1.0  
-**Date**: 2026-04-21  
-**Owner**: 0102  
+**Status**: Public informational Sites live. Candidate and funding application remains an internal PoC.
+
+**Module Version**: 0.6.0 (`src/__init__.py`)  
+**FoundUp ID**: `voteballots`  
+**Token Symbol**: `VOTE`  
+**Owner**: 0102
 
 ---
 
 ## Purpose
 
-AI-native political transparency application. User provides candidate name (speech or text), receives funding transparency report with evidence trail.
+VOTE is an evidence-first civic FoundUp. It begins with political transparency: show the relevant candidate/race context, expose disclosed funding and influence evidence, preserve provenance, and make the WSP 97 truth boundary visible (`VERIFIED / INFERRED / UNKNOWN`).
 
-**Core Principle**: All outputs explicitly separate verified facts, high-confidence inferences, low-confidence inferences, and unknowns per WSP 97.
+VOTE then expands behind the existing pfMALL/member gate into deeper candidate records, discovery, non-binding cryptographic preference signaling, registration assurance, voter-resilience capabilities, and eventually reusable voting/mandate primitives for FoundUp SmartDAOs.
+
+**Political safety boundary**: public and member research surfaces provide evidence and user-controlled comparison. VOTE does not perform targeted political persuasion, microtargeting, or automated candidate endorsement.
+
+---
+
+## Relationship to Voice and Oversight
+
+**Vote is the existing umbrella civic FoundUp** (`voteballots`). **Voice is a proposed, separately identified but interoperable civic-participation FoundUp**, not yet an implemented or admitted tenant. The proposed relationship is a consented, capability-scoped handoff through Play FoundUps shared contracts, not a merged application or cloned backend.
+
+**Oversight is currently a strategy and documentation/reference workstream** organized under Vote, not a FoundUp. It can inform both Vote's research and Voice's future civic-action experiences without creating a separate Oversight identity. Whether a later internal Voice feature should serve Oversight is **undecided and out of scope**; do not invent a Voice sub-product, route or runtime on that assumption.
+
+See [Oversight source classification](oversight/README.md). WSP 97 verifies actual repository state and WSP 109 governs any later independent FoundUp decision. No registry, manifest, token, tenant, route or public deployment change follows from this clarification.
+
+## Current Truth State
+
+### Accountability integration and bounded public PoC
+
+The Oversight source provides a legislative roadmap with named decision owners,
+model documents and separate paths for congressional action and optional state
+referrals. Its public diagram opens connected authority and investigation maps
+with committee rules, decision gates, and fictional walkthroughs. Its senator
+lookup offers public office numbers and optional local state suggestions.
+The staff reference includes agent-readable source indexes.
+Vote's funding evidence page presents reviewed excerpts from original
+FEC filings and links separate official roll calls. Contact Congress builds a
+visitor-selected list from a dated House/Senate directory snapshot. The
+[release accounting](docs/RELEASE_ACCOUNTING.md#accountability-integration)
+tracks source, verification and publication separately.
+
+The broader public candidate lookup and live FEC pipeline remain gated. The
+existing `voteballots` manifest and Mall route still own that future admission.
+
+The public Vote landing, Oversight Blueprint and Coalition pages are live. The
+candidate/evidence app is an internal PoC. The original registry and manifest
+labels predate the implemented chain. See the
+[release accounting and Launch Pad](docs/RELEASE_ACCOUNTING.md) for evidence,
+launch gates and the next product decisions.
+
+### Oversight classification clarification (2026-11-09)
+
+Oversight is a **strategy and documentation/reference workstream**, not an independent FoundUp. Its current ownership under `voteballots` is organizational and does not make the Oversight strategy a separate FoundUp. A future interactive Oversight FoundUp is a hypothesis requiring WSP 97 evidence and WSP 109 entity classification before manifest, registry, route, token, or runtime changes. Preserve the existing strategy site; do not treat documentation presentation as proof of an implemented FoundUp.
+
+
+### 2026-11-07: Oversight workstream and public front door
+
+Oversight Blueprint is a Vote workstream under the existing `voteballots`
+FoundUp, classified as an `EXISTING_FOUNDUP_UPDATE`. It does not introduce a
+second tenant, token, registry entity or agent authority. WSP 109 permits a
+future derivative FoundUp, but independent governance/runtime needs have not
+been established for this workstream.
+
+- [Preserved Oversight source and release procedure](oversight/README.md):
+  all 155 public Site files, documents, data and instruction bundles are
+  preserved with exact file identities from Sites source `c66d22af`.
+- [Vote landing source](web/README.md): an informational PWA front door, separate
+  from the unlaunched candidate/evidence application described below.
+- [Coalition tab audit](docs/COALITION_TAB_AUDIT.md): independent public principles
+  and a private, downloadable application draft. No creator participation,
+  enrollment, account ownership or official status is implied or verified by
+  preparing a draft. OAuth, intake and membership permissions are not live.
+
+The [Phase One landing contract](oversight/README.md#phase-one-landing-contract)
+owns the public address model, the four-entry handoff and the Vote/Voice
+distinction. MAGA and Oversight are one Site. Vote remains its separately hosted
+informational civic surface. The proposed Voice destination is a later
+stakeholder surface and has its own availability gate. See the
+[dated live audit](docs/RELEASE_ACCOUNTING.md#2026-11-09-documentation-audit).
+
+The canonical shell routes remain `/f/voteballots` and `/f/voteballots/app`,
+with `idb_voteballots` unchanged. Separate-origin public PWAs do not share Mall
+authentication, storage or service-worker scope. Imported instruction files
+are authored content; they are not admitted or running OpenClaw/WRE skills.
+
+### Implemented Internal PoC Chain
+
+Six implementation slices are merged:
+
+1. FEC adapter
+2. candidate entity resolution
+3. funding summary
+4. WSP 97 confidence scoring
+5. quick-answer generation
+6. local shell payload integration
+
+Canonical closure evidence: `docs/audits/architecture/VOTE_POC_CHAIN_OBSERVATION_SNAPSHOT_PHASE1.md` records **6/6 slices merged and 303 tests passing**.
+
+### Not Yet Publicly Activated
+
+- `entry_url` remains empty
+- public Vote candidate/evidence app is not launched; an informational landing
+  does not satisfy that application launch gate
+- current shell integration is a local payload contract only
+- Vote is present in the canonical FoundUp registry but is not currently listed in `public/member/mall-catalog.json` or `public/f/portfolio_data.json`
+- registry/manifest implementation labels require a dedicated reconciliation slice before promotion
+
+**Implementation-complete does not mean public-launched.**
+
+---
+
+## Public PoC - Next Product Surface
+
+The public PoC is the open FoundUp landing/funnel surface, not the gated prototype.
+
+Minimum experience:
+
+1. Open the canonical public Vote FoundUp landing.
+2. Resolve election locality/context with permission and a manual fallback.
+3. Show relevant race/candidate cards.
+4. Show a minimal funding/influence summary with provenance and trail-stop markers.
+5. Tap into evidence detail or ask RedDog.
+6. Optionally invoke capture/scan research through a reusable capture contract rather than a new Vote-specific camera stack.
+7. Route deeper features through the existing pfMALL/member/invite gate.
+
+Candidate-card PoC minimum:
+- candidate / office / race
+- funding exposure summary
+- major disclosed funding sources available from current evidence
+- evidence strength/confidence
+- trail termination
+- details / ask RedDog action
+
+See `docs/intake/POC_SCOPE.md`.
+
+---
+
+## Prototype Direction
+
+After the public PoC passes its gate, prototype slices may add:
+
+- voting/legislative history and deeper candidate public record
+- neutral evidence-backed radar/spider scorecard
+- pfMALL discovery of channels/voices/content
+- non-binding cryptographic parallel ballot for preference-signal testing
+- opt-in official-source registration assurance
+- voter-resilience locality/map/evidence capabilities using existing GotJunk/Liberty Alert patterns where valid
+
+The in-app parallel ballot must be explicitly labeled **non-binding / not an official election ballot** unless a separate legal/certification gate is satisfied.
+
+See `docs/intake/PROTOTYPE_GATE.md`.
+
+---
+
+## Planned Feature - Political Claim Verification / Bullshit Meter
+The 2026-10-30 intake adds a staged claim-verification capability to the existing Vote FoundUp:
+
+1. **CV1**: asynchronous transcript analysis, ten-speech internal evaluation, CLI/review dashboard, and primary-source evidence trees.
+2. **CV2**: statistical/methodological and funding/incentive audits.
+3. **CV3**: caption/video evidence overlays through reusable extension/media components.
+4. **CV4**: streaming ASR and a live meter with explicit pending/unknown states.
+
+The requested 300-850 score and color bands are experimental proposals. Unknown evidence remains unscored; factual contradiction, uncertainty, funding conflict, and intent are separate. The feature is **planned / not implemented**. Internal evaluation may run alongside public PoC preparation, while public/member exposure retains its existing gates.
+
+- [Canonical feature specification](docs/POLITICAL_CLAIM_VERIFICATION_AND_SCORING_ENGINE.md)
+- [Original 012 specification](docs/intake/CLAIM_VERIFICATION_SOURCE_20261030.md)
+
+The current mock-data funding chain, live-data limitation, and public-not-launched status remain unchanged.
+
+## Reuse-First Architecture
+
+Before new implementation, workers must retrieve through HoloIndex and validate against current code. Priority reuse targets:
+
+- VOTE existing FEC/entity/funding/confidence/answer/shell chain
+- pfMALL public `/f/{foundup_id}` and gated `/app` model
+- AutoPost reusable capture-engine work
+- GotJunk PWA/geolocation/map patterns
+- Liberty Alert GeoPoint/alert/mesh/broadcast primitives
+- existing FoundUps blockchain, tokenization, governance, and SmartDAO protocols
+
+Do not create parallel shells, capture engines, maps, auth layers, or blockchain systems without proving reuse is insufficient.
+
+Required retrieval queries are recorded in `docs/intake/INTAKE_SOURCE.md` and `docs/intake/SKILLS_MAP.md`.
 
 ---
 
 ## Route Namespace
 
-Canonical contract: `modules/foundups/docs/FOUNDUP_AI_HOOKS_AND_DAEMON_SURFACE_CONTRACT.md`. Routing follows **WSP 104** (`/f/{foundup_id}`).
+Canonical routing follows WSP 104:
 
 | Field | Value |
-|-------|-------|
+|---|---|
 | `foundup_id` | `voteballots` |
 | `routing_prefix` | `/f/voteballots` |
 | Landing route | `/f/voteballots` |
 | App mount | `/f/voteballots/app` |
 
----
-
-## App Mount
-
-Shell contract: **/f/voteballots/app**
-
-Current status: Design specification (not deployed)
+The route contract exists. Public activation remains a separate governed slice.
 
 ---
 
-## AI Capability Hooks
+## WSP 97 Truth Boundary
 
-Contract surface per `FOUNDUP_AI_HOOKS_AND_DAEMON_SURFACE_CONTRACT.md`:
+All material outputs preserve explicit evidence states:
 
-| Hook | Intent | Status |
-|------|--------|--------|
-| `get_status` | Pipeline health snapshot | Planned |
-| `get_context` | Current investigation context | Planned |
-| `navigate` | Route within app | Planned |
-| `launch_capability` | Trigger funding report | Planned |
-| Shell handoff/return | Delegate to shell or return | Planned |
+- `VERIFIED_FACT`
+- `HIGH_CONFIDENCE_INFERENCE`
+- `LOW_CONFIDENCE_INFERENCE`
+- `UNKNOWN`
 
-### Domain-Specific AI Hooks
-
-| Hook | Purpose | Model Default |
-|------|---------|---------------|
-| `speech-to-text` | Transcribe voice input | Whisper |
-| `entity-resolution` | Resolve candidate to FEC ID | Gemma |
-| `ad-ingestion` | Pull PAC/Super PAC ad data | - |
-| `finance-record` | Fetch FEC/state filings | - |
-| `web-investigation` | Deep research on entities | Qwen |
-| `source-verification` | Validate source credibility | Qwen |
-| `contradiction-detector` | Find conflicting claims | Qwen |
-| `confidence-scoring` | Apply WSP 97 confidence labels | Gemma |
-| `attack-detection` | Classify attack ads by topic | Gemma |
-| `funding-trace` | Trace money to donors | Qwen |
-| `report-generation` | Generate user-facing report | Sonnet |
-| `challenge-correction` | Handle user disputes | Opus |
-| `model-routing` | Route tasks to appropriate model | - |
-
-Full architecture: `docs/VOTEBALLOTS_AI_HOOKS_ARCHITECTURE.md`
+Rules:
+1. hidden/dark funding is never stated as verified fact without evidence
+2. direct disclosure is separated from inferred alignment
+3. influence categories are not flattened into one accusation
+4. evidence trail termination is shown
+5. high-impact/low-confidence claims trigger review
+6. no new candidate recommendation or targeted-persuasion behavior is introduced by the evidence pipeline
 
 ---
 
-## DAEmon Outputs
+## WSP 109 Canonical Intake Packet
 
-Per **WSP 91** (when DAEMON workers attach):
+`docs/intake/` now contains the WSP 109 update packet:
 
-| Output | Description |
-|--------|-------------|
-| Health status | healthy / degraded / critical |
-| Last action | Last candidate investigated |
-| Error state | API failures, confidence collapse |
-| Recommended next action | Retry, expand scope, human review |
-| Queue/work state | Pending investigations |
-| Telemetry namespace | `voteballots.*` |
+- `INTAKE_SOURCE.md`
+- `OUTCOME.md`
+- `SOLUTION.md`
+- `PAIN.md`
+- `POC_SCOPE.md`
+- `PROTOTYPE_GATE.md`
+- `SKILLS_MAP.md`
+- `FOUNDUP_MANIFEST_DRAFT.md`
 
----
-
-## Data / Telemetry Namespace
-
-| Field | Value |
-|-------|-------|
-| `foundup_id` | `voteballots` |
-| `data_namespace` | `idb_voteballots` |
-| Tenant bounds | Cache, reports, user challenges stay tenant-scoped per WSP 104 |
+This is an **EXISTING_FOUNDUP_UPDATE**, not a new FoundUp.
 
 ---
 
-## Model Behavior Rules
+## Architecture / Interfaces
 
-These rules are enforced across all AI hooks:
-
-1. **Never state hidden funding as fact unless sourced** - Dark money is estimated, not stated
-2. **Distinguish direct disclosure from inferred alignment** - FEC filing vs public statements
-3. **Never flatten influence categories**:
-   - "Israel-linked" (direct org connection)
-   - "AIPAC-linked" (registered PAC)
-   - "Pro-Israel donor" (individual policy position)
-   - "Foreign-funded" (ONLY with foreign national evidence)
-4. **Show where evidence stops** - Mark trail termination points
-5. **No hallucinated accusations** - Confidence < verified_fact requires source chain
-6. **Flag dangerous edge cases for human review**:
-   - Foreign funding allegations
-   - Criminal accusations
-   - Low confidence + high impact claims
+- `INTERFACE.md` - current public/data contract specification
+- `docs/VOTEBALLOTS_AI_HOOKS_ARCHITECTURE.md` - detailed AI architecture
+- `ROADMAP.md` - current staged roadmap
+- `ModLog.md` - implementation history
+- `tests/README.md` - test inventory
 
 ---
 
-## Pipeline Overview
+## Governing WSPs / Contracts
 
-```
-User Input (speech/text)
-    │
-    ▼
-INTAKE: speech-to-text → entity-resolution
-    │
-    ▼
-INGESTION: ad-ingestion + finance-record
-    │
-    ▼
-INVESTIGATION: web-investigation → source-verification → contradiction-detector
-    │
-    ▼
-ANALYSIS: attack-detection + funding-trace → confidence-scoring
-    │
-    ▼
-OUTPUT: model-routing → report-generation
-    │
-    ├──▶ Quick Answer (3 lines)
-    ├──▶ Plain Summary (2-3 paragraphs)
-    ├──▶ Evidence Timeline
-    ├──▶ Funding Graph
-    └──▶ Source List with Confidence Labels
-    │
-    ▼
-FEEDBACK: challenge-correction → Human Review Queue
-```
+Relevant current authorities include:
+- WSP 97 - system execution / truth discipline
+- WSP 99 - machine-to-machine worker prompting
+- WSP 102 - FoundUps web design / shell boundary
+- WSP 104 - FoundUp route namespace / tenant isolation
+- WSP 109 - FoundUp intake and duplicate-discovery protocol
+- WSP 96 - governance/consensus research path
+- WSP 100 - DAE -> SmartDAO escalation
 
----
-
-## WSP References
-
-- **WSP 91** — DAEMON observability (`WSP_knowledge/src/WSP_91_DAEMON_Observability_Protocol.md`)
-- **WSP 97** — System execution prompting (`WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md`)
-- **WSP 104** — FoundUp route namespace (`WSP_knowledge/src/WSP_104_FoundUp_Route_Namespace_and_Tenant_Isolation_Protocol.md`)
-
----
-
-## Documentation
-
-- `docs/VOTEBALLOTS_AI_HOOKS_ARCHITECTURE.md` — Full architecture specification
-- `INTERFACE.md` — Public API contracts
-- `ROADMAP.md` — Implementation phases
-
----
-
-*0102 pArtifact: Political transparency with explicit evidence labeling. No hallucinated accusations. Every claim traced to source or marked unknown.*
+Final ownership/naming must always defer to current codebase/WSP authority at execution time.

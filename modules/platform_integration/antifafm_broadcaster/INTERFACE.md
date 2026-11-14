@@ -64,6 +64,10 @@ await broadcaster.stop() -> bool
 broadcaster.get_status() -> dict
 ```
 
+`enable_ai_monitoring=True` attempts to initialize an `AIOverseer` object. It
+does not bind an alert transport: `_notify_ai_overseer()` currently records a
+stable skipped/unimplemented warning and does not claim delivery.
+
 #### Status Dictionary
 
 ```python
@@ -207,6 +211,7 @@ builder.get_status() -> dict
 | `ANTIFAFM_DEFAULT_VISUAL` | No | `assets/default_visual.png` | Visual overlay |
 | `ANTIFAFM_HEARTBEAT_INTERVAL` | No | `30` | Health check interval |
 | `ANTIFAFM_TELEMETRY_PATH` | No | `modules/.../telemetry.jsonl` | Telemetry JSONL (runtime file; gitignored under default path) |
+| `ANTIFAFM_LYRICS_DB` | No | `data/ffcpln_lyrics.db` | Suno STT SQLite path; isolate in tests |
 
 ### Optional: Discord voice lane
 

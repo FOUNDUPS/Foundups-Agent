@@ -1,4 +1,4 @@
-﻿"""Persistent Observability Service for FoundUps Agent Market.
+"""Persistent Observability Service for FoundUps Agent Market.
 
 Implements ObservabilityService interface with SQLite persistence.
 Provides structured event logging and querying for audit trail.

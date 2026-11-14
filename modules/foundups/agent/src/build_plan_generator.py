@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-BuildPlan Generator — Generate BuildPlan from FoundUpJob
+BuildPlan Generator -- Generate BuildPlan from FoundUpJob
 
 Creates a BuildPlan from a FoundUpJob, bridging job-based orchestration
 to plan-based build control without enabling real execution.
@@ -15,15 +15,35 @@ WSP 97 TRUTH BOUNDARIES:
 Architecture:
   FoundUpJob (OpenClaw) -> Generator -> BuildPlan -> (Future: Executor)
 
+Module-path trust (BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1):
+  Closes the #778 carry-forward: this generator no longer trusts raw
+  payload.module_path / source_module, no longer infers from
+  KNOWN_FOUNDUP_PATHS, and no longer synthesizes
+  modules/foundups/{foundup_id}. All module-identity resolution flows
+  through the SHARED ``module_path_resolution._resolve_validated_module_path``
+  -- the same single source of truth the Hermes executor (#778) consumes
+  via shim.
+
+  Cross-FoundUp substitution, case-variant payload, absolute/UNC/
+  traversal/backslash forms, and KNOWN_FOUNDUP_PATHS-style heuristics all
+  produce a fail-closed GenerationValidationResult whose error_code is
+  one of the closed-set tokens
+  ``{syntactic_reject, manifest_mismatch, manifest_missing,
+  cross_foundup_mismatch}``. The rejected payload value is observable in
+  ``inferred_module_path=None`` and the error_message verbatim, and NEVER
+  propagates into the BuildTarget output.
+
 WSP Compliance:
   WSP 11  : Interface contract (typed API)
   WSP 50  : Pre-action validation (validate_job_for_build_plan)
   WSP 77  : Agent coordination (job->plan translation)
+  WSP 84  : Single source of truth (no second resolver implementation)
   WSP 97  : Truth boundaries (dry_run=True, no real execution)
 
 NAVIGATION:
   -> Uses: build_plan.py (BuildPlan, BuildTarget, BuildScope)
   -> Uses: foundup_job_contract.py (FoundUpJob, CANONICAL_ACTIONS)
+  -> Uses: module_path_resolution.py (#778 shared resolver, validator-gated)
   -> Spec: modules/foundups/docs/FOUNDUP_BUILD_PLAN_CONTRACT.md
   -> Called by: Internal VoteBallot PoC (future integration)
 """
@@ -51,6 +71,15 @@ from .build_plan import (
     generate_build_plan_id,
 )
 
+# Shared module-path resolver -- single source of truth across the agent
+# module (BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1).
+# The Hermes executor consumes the same resolver via a re-export shim.
+from .module_path_resolution import (
+    DEFAULT_REPO_ROOT,
+    ResolvedModulePath,
+    _resolve_validated_module_path,
+)
+
 logger = logging.getLogger("build_plan_generator")
 
 
@@ -72,28 +101,26 @@ BUILDPLAN_UNSUPPORTED_ACTIONS: frozenset[str] = frozenset({
 
 
 # ---------------------------------------------------------------------------
-# Known FoundUp Module Paths (repo evidence)
+# Module-Path Trust (BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1)
 # ---------------------------------------------------------------------------
-
-# Known FoundUp IDs with proven module paths in the repo
-# Used for module_path inference when payload doesn't specify
-KNOWN_FOUNDUP_PATHS: Dict[str, str] = {
-    "voteballots": "modules/foundups/voteballots",
-    "gotjunk": "modules/foundups/gotjunk",
-    "kosei": "modules/foundups/kosei",
-    "pqn_portal": "modules/foundups/pqn_portal",
-    "social_twin": "modules/foundups/social_twin",
-    "move2japan": "modules/foundups/move2japan",
-}
-
-
-def get_known_foundup_path(foundup_id: str) -> Optional[str]:
-    """
-    Get known module path for a FoundUp ID.
-
-    Returns None if not a known FoundUp with repo evidence.
-    """
-    return KNOWN_FOUNDUP_PATHS.get(foundup_id.lower())
+#
+# The prior KNOWN_FOUNDUP_PATHS dict + get_known_foundup_path() inference
+# helper, the f"modules/foundups/{job.foundup_id}" synthesis fallback, and
+# the case-insensitive prefix-only _is_valid_foundup_path validator were
+# all PATH_IDENTITY_USE trust seams that bypassed the #771/#773 manifest
+# validator (audit verdict in #774, Phase-0 census on this branch's
+# ModLog). They have been DELETED in this slice; module-identity resolution
+# now flows exclusively through the SHARED
+# ``module_path_resolution._resolve_validated_module_path`` resolver, which
+# is the same single source of truth the Hermes executor (#778) consumes
+# via shim.
+#
+# The Phase-0 KNOWN_FOUNDUP_PATHS consumer census found:
+#   - 2 PATH_IDENTITY_USE sites (the two payload-path fallbacks here),
+#   - 1 DISPLAY_CATALOG_USE inline error string co-located inside the
+#     severed branch (string interpolation of KNOWN_FOUNDUP_PATHS.keys()),
+#   - 0 non-test cross-module callers,
+# so the symbols qualified as DELETE_AS_DEAD_CODE and have been removed.
 
 
 # ---------------------------------------------------------------------------
@@ -103,7 +130,27 @@ def get_known_foundup_path(foundup_id: str) -> Optional[str]:
 
 @dataclass
 class GenerationValidationResult:
-    """Result of job validation for BuildPlan generation."""
+    """Result of job validation for BuildPlan generation.
+
+    Module-path trust contract (BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1):
+      - ``error_code`` on failure is one of:
+            ``MISSING_FOUNDUP_ID`` / ``UNSUPPORTED_ACTION`` / ``UNKNOWN_ACTION``
+            / the closed-set #778 tokens
+            ``syntactic_reject`` / ``manifest_mismatch`` / ``manifest_missing``
+            / ``cross_foundup_mismatch``.
+      - ``inferred_module_path`` is the manifest-derived canonical
+        module_path when the payload omitted a candidate AND the bounded
+        ``foundup_id`` scan in the shared resolver located the manifest.
+        On any failure it is ``None`` -- the rejected payload value is
+        captured only in ``error_message`` (observable, never used).
+      - ``rejected_payload_value`` is the stringified payload-declared
+        candidate, mirroring the resolver's ``ResolvedModulePath.ignored``
+        channel. ``None`` iff no payload candidate was supplied; otherwise
+        the value is reported even on success (no silent swallow).
+        The rejected value MUST NOT propagate into any BuildTarget /
+        BuildPlan / source-ref output -- WSP_97 row
+        REJECTED_VALUE_NOT_IN_BUILDPLAN_OUTPUT pins this.
+    """
 
     valid: bool
     """True if job can generate a BuildPlan."""
@@ -115,7 +162,13 @@ class GenerationValidationResult:
     """Human-readable error message if invalid."""
 
     inferred_module_path: Optional[str] = None
-    """Module path inferred from foundup_id if not in payload."""
+    """Manifest-derived canonical module_path when payload omitted a
+    candidate. None on any failure."""
+
+    rejected_payload_value: Optional[str] = None
+    """Stringified payload-declared candidate (observable-ignore). None iff
+    the caller supplied no candidate. Visible even on success; NEVER
+    propagated into BuildTarget output."""
 
 
 # ---------------------------------------------------------------------------
@@ -123,20 +176,37 @@ class GenerationValidationResult:
 # ---------------------------------------------------------------------------
 
 
-def validate_job_for_build_plan(job: FoundUpJob) -> GenerationValidationResult:
-    """
-    Validate that a FoundUpJob can generate a BuildPlan.
+def validate_job_for_build_plan(
+    job: FoundUpJob, repo_root: Optional[Path] = None
+) -> GenerationValidationResult:
+    """Validate that a FoundUpJob can generate a BuildPlan.
 
-    Checks:
-      1. foundup_id is present
-      2. requested_action is supported
-      3. module_path can be determined (from payload or inference)
-      4. Path is within allowed scope
+    Module-path trust contract (BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1):
 
-    Returns:
-        GenerationValidationResult with validation outcome.
+      1. ``job.foundup_id`` must be present.
+      2. ``job.requested_action`` must be in ``BUILDPLAN_SUPPORTED_ACTIONS``.
+      3. ``module_path`` is resolved through the SHARED resolver
+         ``module_path_resolution._resolve_validated_module_path`` (the
+         same single source of truth #778 consumes via shim). No raw
+         payload trust, no ``KNOWN_FOUNDUP_PATHS`` inference, no
+         ``foundup_id``-as-path synthesis, no case-insensitive prefix
+         match, no ``public/member/foundups/`` admit.
+
+    Failure shape:
+      ``error_code`` carries one of the closed-set #778 tokens
+      ``{syntactic_reject, manifest_mismatch, manifest_missing,
+      cross_foundup_mismatch}`` when the resolver rejects, OR one of
+      ``{MISSING_FOUNDUP_ID, UNSUPPORTED_ACTION, UNKNOWN_ACTION}`` for
+      pre-resolver gates. The rejected payload value is reported in
+      ``rejected_payload_value`` (mirrors the resolver's observable-
+      ignore channel) and NEVER propagates into BuildTarget output.
+
+    Args:
+        job: FoundUpJob to validate.
+        repo_root: Optional override for manifest lookup root (defaults to
+            ``module_path_resolution.DEFAULT_REPO_ROOT``).
     """
-    # Check foundup_id
+    # Pre-resolver gate: foundup_id must be present.
     if not job.foundup_id:
         return GenerationValidationResult(
             valid=False,
@@ -144,7 +214,7 @@ def validate_job_for_build_plan(job: FoundUpJob) -> GenerationValidationResult:
             error_message="FoundUpJob.foundup_id is required for BuildPlan generation",
         )
 
-    # Check requested_action is supported
+    # Pre-resolver gate: requested_action must be supported.
     action = job.requested_action
     if action in BUILDPLAN_UNSUPPORTED_ACTIONS:
         return GenerationValidationResult(
@@ -162,65 +232,37 @@ def validate_job_for_build_plan(job: FoundUpJob) -> GenerationValidationResult:
             f"Supported actions: {', '.join(sorted(BUILDPLAN_SUPPORTED_ACTIONS))}",
         )
 
-    # Determine module_path
-    payload = job.payload or {}
-    module_path = payload.get("module_path") or payload.get("source_module")
-
-    # Try to infer from foundup_id if not provided
-    inferred_path = None
-    if not module_path:
-        inferred_path = get_known_foundup_path(job.foundup_id)
-        if inferred_path:
-            module_path = inferred_path
-        else:
-            return GenerationValidationResult(
-                valid=False,
-                error_code="MISSING_MODULE_PATH",
-                error_message=(
-                    f"Cannot determine module_path for FoundUp '{job.foundup_id}'. "
-                    f"Provide payload.module_path or use a known FoundUp ID: "
-                    f"{', '.join(sorted(KNOWN_FOUNDUP_PATHS.keys()))}"
-                ),
-            )
-
-    # Validate path is within allowed scope
-    if not _is_valid_foundup_path(module_path):
+    # Module-path resolution via the SHARED #778 resolver. Fail-closed.
+    # The resolver enforces: syntactic hardening pre-manifest (backslash /
+    # absolute / UNC / traversal / not-under-modules/), bounded foundup_id
+    # scan when payload candidate absent, #773 manifest validator gate,
+    # cross-FoundUp substitution defense, case-variant defense.
+    effective_repo_root = repo_root or DEFAULT_REPO_ROOT
+    resolved: ResolvedModulePath = _resolve_validated_module_path(
+        job, effective_repo_root
+    )
+    if resolved.failed:
+        # The closed-set fail_token doubles as the GenerationValidationResult
+        # error_code so downstream auditors can grep on the same taxonomy
+        # used by the executor (#778). The rejected payload value is
+        # observable but NEVER used downstream.
         return GenerationValidationResult(
             valid=False,
-            error_code="INVALID_MODULE_PATH",
-            error_message=(
-                f"Module path '{module_path}' is outside allowed scope. "
-                f"Must be under modules/foundups/ or a recognized target path."
-            ),
+            error_code=resolved.fail_token or "manifest_missing",
+            error_message=resolved.fail_human,
+            inferred_module_path=None,
+            rejected_payload_value=resolved.ignored,
         )
 
+    # Success: the manifest's canonical module_path is the source of truth.
+    # When the payload supplied a candidate, ``ignored`` carries that value
+    # for observability but it is NOT used downstream (the BuildTarget will
+    # be built from ``resolved.effective`` in build_target_from_job).
     return GenerationValidationResult(
         valid=True,
-        inferred_module_path=inferred_path,
+        inferred_module_path=resolved.effective,
+        rejected_payload_value=resolved.ignored,
     )
-
-
-def _is_valid_foundup_path(path: str) -> bool:
-    """
-    Check if path is a valid FoundUp module path.
-
-    Valid paths:
-      - modules/foundups/<foundup_id>/...
-      - public/member/foundups/<foundup_id>/... (PWA surface)
-    """
-    normalized = path.replace("\\", "/").lower()
-
-    # Must be under foundups module or surface
-    valid_prefixes = [
-        "modules/foundups/",
-        "public/member/foundups/",
-    ]
-
-    for prefix in valid_prefixes:
-        if normalized.startswith(prefix):
-            return True
-
-    return False
 
 
 # ---------------------------------------------------------------------------
@@ -264,28 +306,65 @@ def infer_build_scope(job: FoundUpJob) -> BuildScope:
 # ---------------------------------------------------------------------------
 
 
-def build_target_from_job(job: FoundUpJob) -> BuildTarget:
-    """
-    Generate BuildTarget from FoundUpJob payload.
+def build_target_from_job(
+    job: FoundUpJob, repo_root: Optional[Path] = None
+) -> BuildTarget:
+    """Generate BuildTarget from a validated FoundUpJob.
 
-    Maps job.payload fields to BuildTarget fields.
+    Module-path trust contract (BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1):
+
+      The ``module_path`` field of the produced BuildTarget is ALWAYS the
+      validated manifest's canonical module_path (the resolver's
+      ``effective`` value). Raw ``payload.module_path`` /
+      ``payload.source_module`` / ``foundup_id``-synthesis values are
+      NEVER used as identity. PWA-surface ruling: DERIVED_ONLY -- the
+      ``pwa_surface_path`` is derived deterministically from the canonical
+      ``module_path`` plus a fixed ``public/member/foundups/<basename>/``
+      template; ``payload.pwa_surface_path`` is no longer trusted as the
+      module-identity surface (a future slice may revisit if BuildPlan
+      ever requires a payload-specified surface path).
+
+      Other BuildTarget fields (``tests_path``, ``docs_path``, ...) remain
+      payload-overridable; they are auto-derived from ``module_path`` by
+      ``BuildTarget`` itself when omitted (see ``build_plan.py`` BuildTarget
+      auto-derivation block). The payload-supplied alternates are not
+      module identity and do not affect the trust seam this slice closes.
+
+    Args:
+        job: FoundUpJob whose payload provides BuildTarget field overrides.
+            The job MUST have passed ``validate_job_for_build_plan`` first.
+        repo_root: Optional override for manifest lookup root.
+
+    Raises:
+        ValueError: when the job fails validated module-path resolution.
+            (``create_build_plan_from_job`` calls ``validate_job_for_build_plan``
+            first, so this raise is defense-in-depth.)
     """
     payload = job.payload or {}
 
-    # Determine module_path (validated before this is called)
-    module_path = payload.get("module_path") or payload.get("source_module")
-    if not module_path and job.foundup_id:
-        module_path = get_known_foundup_path(job.foundup_id)
+    # The module_path that lands in BuildTarget is ALWAYS the resolver's
+    # canonical ``effective`` value. The rejected-payload-value channel
+    # (resolver.ignored) is read here ONLY for the error-raise path; it
+    # never enters the BuildTarget output.
+    effective_repo_root = repo_root or DEFAULT_REPO_ROOT
+    resolved: ResolvedModulePath = _resolve_validated_module_path(
+        job, effective_repo_root
+    )
+    if resolved.failed:
+        # Mirror the ValueError shape used by create_build_plan_from_job
+        # so callers see one consistent failure path. The greppable token
+        # is preserved in the message head.
+        raise ValueError(f"[{resolved.fail_token}] {resolved.fail_human}")
+    module_path: str = resolved.effective or ""
 
-    if not module_path:
-        # Should not reach here if validation passed
-        module_path = f"modules/foundups/{job.foundup_id}"
-
-    # Extract optional paths from payload
-    pwa_surface_path = payload.get("pwa_surface_path")
-    if not pwa_surface_path and job.foundup_id:
-        # Default PWA surface path
-        pwa_surface_path = f"public/member/foundups/{job.foundup_id}/"
+    # PWA-surface derivation: ALWAYS from the canonical module_path's
+    # last segment, never from payload-supplied surface paths or from
+    # job.foundup_id. The basename of a validated canonical module_path
+    # is the on-disk module directory name and is a safe surface key.
+    module_basename = module_path.rsplit("/", 1)[-1] if module_path else ""
+    pwa_surface_path = (
+        f"public/member/foundups/{module_basename}/" if module_basename else None
+    )
 
     return BuildTarget(
         module_path=module_path,

@@ -71,7 +71,7 @@ class Solution:
     confidence: float  # 0.0 to 1.0
     source: str  # 'quantum', 'learned', 'manual'
     effectiveness: float = 0.0  # Measured after application
-    token_savings: int = 0
+    token_savings: int = 0  # Legacy unverified estimate; never measured usage
     
     def to_dict(self) -> Dict:
         """Convert to dictionary"""

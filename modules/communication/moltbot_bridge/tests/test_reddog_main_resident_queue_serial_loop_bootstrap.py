@@ -1,0 +1,4901 @@
+"""Tests for REDDOG_MAIN_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_PHASE1."""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import socket
+import threading
+from pathlib import Path
+from typing import Mapping
+from unittest.mock import patch
+
+import pytest
+
+from modules.communication.moltbot_bridge.src.reddog_verified_pattern_memory_sink import (
+    reddog_verified_pattern_memory_record_id,
+)
+from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap import (
+    REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED,
+    REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY,
+    _canonical_digest,
+    _derive_outcome_ratchet_request_from_chain,
+    _materialize_work_orders_from_authority_profile,
+    _operational_context_binding,
+    run_reddog_main_resident_queue_serial_loop_bootstrap as _run_bootstrap,
+)
+from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_runtime_dependency_bundle import (
+    REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+    REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY,
+)
+from modules.communication.moltbot_bridge.src.reddog_generic_agent_worktree_writer_dryrun import (
+    GENERIC_WRITER_DRYRUN_ACCEPT,
+    GenericAgentWorktreeDomainProfile,
+    plan_generic_agent_worktree_writer_dry_run,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_executor_dryrun import (
+    _proposed_worktree_path,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_governed_shell_runner_dryrun import (
+    GOVERNED_SHELL_DRYRUN_ACCEPT,
+    plan_governed_shell_runner_dry_run,
+)
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
+    encode_ed25519_public_key,
+)
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
+    Ed25519SignerBackend,
+)
+from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_protocol import (
+    SignerPeerAttestation,
+)
+from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_resident_service import (
+    SIGNER_SOCKET_RESIDENT_SERVICE_SERVED,
+    serve_reddog_isolated_signer_socket_bounded,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
+    SigningRequest,
+    RuntimeRejectCode,
+    SigningResponse,
+    public_key_fingerprint,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
+    CANONICAL_BINDING_FIELDS,
+    GovernedExecutionValveEnvironment,
+    VALVE_OPEN_WORKTREE_CREATE,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
+    canonical_work_authority_digest,
+)
+from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
+    GovernedValveUseTimeResolution,
+)
+from modules.communication.moltbot_bridge.tests.reddog_authoritative_use_lease_test_support import (
+    StubAuthoritativeUseLease,
+)
+from modules.communication.moltbot_bridge.tests.reddog_elevated_consensus_downstream_test_support import (
+    with_downstream_test_consensus,
+)
+from modules.communication.moltbot_bridge.src.reddog_bounded_artifact_generation_runtime import (
+    ArtifactGenerationModelResult,
+    RUNTIME_SURFACE_ARTIFACT_GENERATION,
+)
+from modules.communication.moltbot_bridge.tests.test_reddog_wre_queue_authorized_bounded_worker_pilot_invoke import (
+    _receipt_chain as _pilot_receipt_chain,
+    _selection_receipt as _pilot_selection_receipt,
+    _shell_profile as _pilot_shell_profile,
+    _signed_authority as _pilot_signed_authority,
+    _valve as _pilot_valve,
+)
+from modules.communication.moltbot_bridge.tests.test_reddog_wre_queue_authorized_verified_draft_pr_publish_invoke import (
+    FakeDraftPrRunner,
+)
+from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
+    model_runtime_binding_test_capability,
+    model_selection_and_runtime_binding_receipts,
+)
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admission import (
+    canonical_model_runtime_binding_digest,
+    verification_receipt_digest,
+    verified_runtime_binding_receipt,
+)
+from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
+    FakeAssuranceReservationStore,
+)
+from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
+    signed_stage_binding,
+)
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    admit_bounded_execution,
+)
+from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
+    allocate_reddog_wsp15_receipt,
+)
+from modules.infrastructure.wre_core.src.wre_autonomous_slice_verifier_runtime import (
+    AUTONOMOUS_SLICE_VERIFIER_ACCEPT,
+    verify_autonomous_slice_runtime,
+)
+from modules.infrastructure.wre_core.src.wre_independent_evidence_producer_runtime import (
+    CommandResult,
+)
+
+REPO_ROOT = Path(__file__).resolve().parents[4]
+NOW = "2026-07-14T00:00:00+00:00"
+EXPIRES = "2026-07-14T01:00:00+00:00"
+WORK_ORDER_ID = "resident-queue-work-order-001"
+FOUNDUP_ID = "paccess_001"
+PILOT_OPERATION = "queue_bounded_pilot_docs_patch"
+PILOT_DOMAIN_ID = FOUNDUP_ID
+PILOT_ARTIFACT = f"modules/foundups/{PILOT_DOMAIN_ID}/README.md"
+PERMISSION_DIGEST = "sha256:" + ("1" * 64)
+_ASSURANCE_RESERVATION_STORE = FakeAssuranceReservationStore()
+
+
+class _InjectedUseTimeResolver:
+    def __init__(self, resolution: GovernedValveUseTimeResolution) -> None:
+        self.resolution = resolution
+
+    def resolve(self, **_: object) -> GovernedValveUseTimeResolution:
+        return self.resolution
+
+
+def _sha256_json(payload: object) -> str:
+    raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _test_governed_environment(
+    work_order: Mapping[str, object], *, queue_item_id: str = "queue-1"
+) -> tuple[dict[str, object], dict[str, object]]:
+    allocation = work_order.get("wsp15_allocation_receipt")
+    allocation = (
+        allocation
+        if isinstance(allocation, Mapping)
+        else _queue_wsp15_allocation_receipt()
+    )
+    snapshot = work_order.get("repo_permission_snapshot")
+    snapshot = snapshot if isinstance(snapshot, Mapping) else {}
+    expected = {field: "" for field in CANONICAL_BINDING_FIELDS}
+    expected.update(
+        {
+            "work_order_id": work_order.get("work_order_id"),
+            "requested_operation": work_order.get("requested_operation"),
+            "valve_state_required": VALVE_OPEN_WORKTREE_CREATE,
+            "queue_item_id": queue_item_id,
+            "claim_id": "claim-1",
+            "determination_receipt_id": "sha256:determination-1",
+            "repo_full_name": work_order.get("repo_full_name"),
+            "foundup_id": work_order.get("foundup_id"),
+            "principal_id": "github:mjtrout",
+            "reddog_id": "reddog:abc123",
+            "key_epoch": "epoch-1",
+            "permission_snapshot_digest": snapshot.get("digest"),
+            "authority_profile_digest": _sha256_json({"profile": "test"}),
+            "work_state_revision": _sha256_json({"work_state": "test"}),
+            "wsp15_allocation_receipt_id": allocation.get("receipt_id"),
+            "wsp15_allocation_digest": _sha256_json(allocation),
+            "consensus_receipt_digest": _sha256_json({"consensus": "test"}),
+            "sovereign_authorization_digest": _sha256_json({"sovereign": "test"}),
+        }
+    )
+    authorization_mode = "signed_work_authority_consensus"
+    authorization_binding_digest = _sha256_json(
+        {
+            "authorization_mode": authorization_mode,
+            "bindings": {
+                field: expected[field] for field in sorted(CANONICAL_BINDING_FIELDS)
+            },
+        }
+    )
+    core = {
+        **expected,
+        "schema_version": "reddog_execution_valve_environment.v1",
+        "authorization_mode": authorization_mode,
+        "authorization_binding_digest": authorization_binding_digest,
+        "requested_valve_state": VALVE_OPEN_WORKTREE_CREATE,
+        "valve_dryrun_enabled": True,
+        "valve_live_enqueue_enabled": False,
+        "valve_worktree_create_enabled": True,
+        "progressive_execution_stage_ceiling": "BOUNDED_EXECUTION",
+    }
+    provenance = {
+        "schema_version": "reddog_execution_valve_environment_supply_receipt.v1",
+        "environment_digest": _sha256_json(core),
+        "authority_profile_digest": expected["authority_profile_digest"],
+        "work_state_revision": expected["work_state_revision"],
+        "permission_snapshot_digest": expected["permission_snapshot_digest"],
+        "resolver_supply_receipt_id": expected["resolver_supply_receipt_id"],
+        "no_secret_values_serialized": True,
+        "no_execution_performed": True,
+        "no_authority_minted": True,
+        "no_repo_mutation_performed": True,
+    }
+    provenance["receipt_id"] = _sha256_json(provenance)
+    return {**core, "supply_provenance": provenance}, expected
+
+
+@with_downstream_test_consensus
+def run_reddog_main_resident_queue_serial_loop_bootstrap(**kwargs: object):
+    """Exercise downstream stages with an explicitly injected governed resolution."""
+
+    if "runtime_allowed_root" not in kwargs and kwargs.get("work_state_path"):
+        kwargs["runtime_allowed_root"] = Path(kwargs["work_state_path"]).parent
+    kwargs.setdefault(
+        "assurance_reservation_store",
+        _ASSURANCE_RESERVATION_STORE,
+    )
+    valve_path = kwargs.get("valve_environment_path")
+    if valve_path:
+        work_order = _work_order()
+        work_orders_path = kwargs.get("work_orders_path")
+        if work_orders_path:
+            raw_orders = json.loads(Path(work_orders_path).read_text(encoding="utf-8"))
+            orders = raw_orders.get("work_orders", raw_orders)
+            work_order = next(iter(orders.values()))
+        elif kwargs.get("work_order_materializer_mode") == "authority_profile":
+            snapshot = json.loads(
+                Path(kwargs["work_state_path"]).read_text(encoding="utf-8")
+            )
+            profile = json.loads(
+                Path(kwargs["authority_profile_path"]).read_text(encoding="utf-8")
+            )
+            orders, reasons = _materialize_work_orders_from_authority_profile(
+                snapshot=snapshot,
+                authority_profile=profile,
+                requested_queue_item_id=str(
+                    kwargs.get("requested_queue_item_id") or "queue-1"
+                ),
+                now_iso=str(kwargs.get("now_iso") or NOW),
+            )
+            if orders and not reasons:
+                work_order = next(iter(orders.values()))
+        payload, expected = _test_governed_environment(
+            work_order,
+            queue_item_id=str(kwargs.get("requested_queue_item_id") or "queue-1"),
+        )
+        Path(valve_path).write_text(
+            json.dumps(payload, sort_keys=True), encoding="utf-8"
+        )
+        governed = GovernedExecutionValveEnvironment.from_mapping(payload)
+        injected_resolver = _InjectedUseTimeResolver(
+            GovernedValveUseTimeResolution(
+                environment=governed,
+                expected_bindings=expected,
+                permission_ttl_seconds=300,
+                permission_expires_at=EXPIRES,
+                rejection_reasons=(),
+                signed_authority_reverified=True,
+                authoritative_use_lease=StubAuthoritativeUseLease(
+                    lambda: True,
+                    expires_at_epoch=2_000_000_000,
+                    trusted_now_epoch=lambda: 1_000_000_000,
+                ),
+            )
+        )
+        with (
+            patch(
+                "modules.communication.moltbot_bridge.src.reddog_worktree_admission_capability.is_authoritative_use_lease",
+                return_value=True,
+            ),
+            patch(
+                "modules.communication.moltbot_bridge.src.reddog_worktree_admission_capability.consume_authoritative_use_lease",
+                side_effect=lambda value, **_expected: value.consume(),
+            ),
+            patch(
+                "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap.GovernedValveUseTimeAuthorityResolver",
+                return_value=injected_resolver,
+            ),
+        ):
+            return _run_bootstrap(**kwargs)
+    return _run_bootstrap(**kwargs)
+
+
+def _assert_bootstrap_yielded_at_assurance(
+    result: object,
+    chain_path: Path,
+) -> None:
+    """Assert admission was persisted before the bootstrap yielded control."""
+
+    assert result.accepted is True, result.rejection_reasons
+    assert result.steps_run == 10
+    assert result.dispatched_stages[-1] == "assurance_capacity_admission"
+    assert result.queue_chain_requeue_required is True
+    stored = json.loads(chain_path.read_text(encoding="utf-8"))
+    assert (
+        stored["stage_results"]["assurance_capacity_admission"]["decision"]
+        == "ASSURANCE_CAPACITY_ADMISSION_ACCEPT"
+    )
+    assert "bounded_worker_pilot" not in stored["stage_results"]
+    assert "slice_verifier" not in stored["stage_results"]
+
+
+def _queue_wsp15_allocation_receipt(
+    *,
+    requested_operation: str = "edit_foundup_module",
+    changed_path: str = PILOT_ARTIFACT,
+) -> dict[str, object]:
+    return allocate_reddog_wsp15_receipt(
+        requested_operation=requested_operation,
+        prompt_text="Fix one bounded FoundUp module defect",
+        changed_paths=(changed_path,),
+        allowed_read_targets=(changed_path,),
+    ).to_dict()
+
+
+def _snapshot(
+    *,
+    requested_operation: str = "edit_foundup_module",
+    changed_path: str = PILOT_ARTIFACT,
+) -> dict[str, object]:
+    allocation = _queue_wsp15_allocation_receipt(
+        requested_operation=requested_operation,
+        changed_path=changed_path,
+    )
+    determination_id = "sha256:determination-1"
+    selection_id = "sha256:model-selection-1"
+    memex_id = "sha256:memex-1"
+    stage = admit_bounded_execution(
+        determination_action="FIX",
+        allocation=allocation,
+        selected_slice="REDDOG_TEST_SLICE_PHASE1",
+        requested_operation=requested_operation,
+        changed_paths=tuple(allocation["changed_paths"]),
+        task_prompt_text="Fix one bounded FoundUp module defect",
+    )
+    queue_item = {
+        "queue_item_id": "queue-1",
+        "slice_id": "REDDOG_TEST_SLICE_PHASE1",
+        "claim_id": "claim-1",
+        "worker_id": "reddog-0102",
+        "status": "QUEUED",
+        "evidence_refs": [
+            "claim:claim-1",
+            "freshness:fresh-1",
+            f"wsp15_allocation:{allocation['receipt_id']}",
+            f"architect_determination:{determination_id}",
+            f"model_selection:{selection_id}",
+            f"memex_supply:{memex_id}",
+        ],
+        "source_determination_receipt_id": determination_id,
+        "model_selection_receipt_id": selection_id,
+        "model_selection_digest": "sha256:model-selection-digest",
+        "model_runtime_binding_receipt_id": "",
+        "model_runtime_binding_digest": "",
+        "memex_supply_receipt_id": memex_id,
+        "memex_supply_digest": "sha256:" + ("d" * 64),
+        "wsp15_allocation_receipt": allocation,
+        "progressive_policy_stage_receipt_id": stage.receipt_id,
+        "progressive_policy_stage_digest": _canonical_digest(stage.to_dict()),
+        "progressive_policy_stage_receipt": stage.to_dict(),
+        "independent_verifier_required": True,
+        "no_execution_performed": True,
+    }
+    return {
+        "schema_version": "reddog_authoritative_work_state.v1",
+        "freshness_receipts": [{"receipt_id": "fresh-1", "fresh": True}],
+        "worker_claims": [
+            {
+                "claim_id": "claim-1",
+                "slice_id": "REDDOG_TEST_SLICE_PHASE1",
+                "worker_id": "reddog-0102",
+                "status": "ACTIVE",
+                "expires_at": EXPIRES,
+                "freshness_receipt_id": "fresh-1",
+                "lane_id": "reddog_operational",
+                "reconciliation_report_id": "sha256:reconciliation-1",
+                "source_determination_receipt_id": determination_id,
+                "model_selection_receipt_id": selection_id,
+                "model_runtime_binding_receipt_id": "",
+                "memex_supply_receipt_id": memex_id,
+            }
+        ],
+        "wre_queue_items": [queue_item],
+    }
+
+
+def _profile(**overrides: object) -> dict[str, object]:
+    profile = {
+        "work_order_id": WORK_ORDER_ID,
+        "principal_id": "github:mjtrout",
+        "principal_provider": "github",
+        "principal_public_key": "pub:principal",
+        "reddog_id": "reddog:abc123",
+        "reddog_public_key": "pub:reddog",
+        "repo_full_name": "FOUNDUPS/Foundups-Agent",
+        "foundup_id": FOUNDUP_ID,
+        "base_ref": "main",
+        "allowed_paths": [PILOT_ARTIFACT],
+        "denied_paths": [],
+        "requested_operation": "edit_foundup_module",
+        "permission_snapshot_digest": PERMISSION_DIGEST,
+        "identity_nonce": "identity-nonce-0001",
+        "work_authority_nonce": "workauth-nonce-0001",
+        "issued_at": 1000,
+        "identity_expires_at": 4600,
+        "work_authority_expires_at": 1300,
+        "valve_state_required": VALVE_OPEN_WORKTREE_CREATE,
+        "key_epoch": "epoch-1",
+        "consensus_receipt_digest": "sha256:consensus",
+        "sovereign_authorization_digest": "sha256:012-token",
+        "snapshot_receipt_id": "sha256:snapshot-1",
+        "context_view_id": "sha256:context-view-1",
+        "evidence_bundle_id": "sha256:evidence-bundle-1",
+        "readonly_audit_decision_id": "sha256:decision-1",
+        "wsp15_allocation_receipt": _queue_wsp15_allocation_receipt(),
+        "model_selection_receipt_id": "sha256:model-selection-1",
+        "model_selection_digest": "sha256:model-selection-digest",
+        "memex_supply_receipt_id": "sha256:memex-1",
+        "memex_supply_digest": "sha256:" + ("d" * 64),
+        "holoindex_evidence": {
+            "holoindex_query": "RedDog resident queue materialized work order",
+            "holoindex_status": "bundle_json_ok",
+            "code_hits": [
+                "modules/communication/moltbot_bridge/src/reddog_main_resident_queue_serial_loop_bootstrap.py"
+            ],
+            "wsp_hits": ["WSP_framework/src/WSP_34_Git_Operations_Protocol.md"],
+            "skillz_hits": [],
+            "direct_read_fallback_used": True,
+            "index_gap_detected": False,
+            "applicable_wsps": ["WSP_34", "WSP_50", "WSP_97"],
+            "evidence_refs": [
+                "modules/communication/moltbot_bridge/src/reddog_main_resident_queue_serial_loop_bootstrap.py"
+            ],
+            "retrieval_quality": "HIGH",
+            "skillz_gap_detected": False,
+            "holoindex_freshness_receipt_digest": "sha256:holo-fresh",
+        },
+    }
+    profile.update(overrides)
+    if (
+        profile["requested_operation"] == PILOT_OPERATION
+        and "wsp15_allocation_receipt" not in overrides
+    ):
+        profile["wsp15_allocation_receipt"] = _queue_wsp15_allocation_receipt(
+            requested_operation=PILOT_OPERATION,
+            changed_path=PILOT_ARTIFACT,
+        )
+    return profile
+
+
+def _work_order(**overrides: object) -> dict[str, object]:
+    allocation = _queue_wsp15_allocation_receipt()
+    payload = {
+        "work_order_id": WORK_ORDER_ID,
+        "created_at": "2026-07-13T23:59:30+00:00",
+        "red_dog_instance_id": "reddog-main-bootstrap",
+        "authenticated_principal": "github:mjtrout",
+        "principal_provider": "github",
+        "repo_full_name": "FOUNDUPS/Foundups-Agent",
+        "foundup_id": FOUNDUP_ID,
+        "repo_permission_snapshot": {
+            "permission_level": "write",
+            "captured_at": "2026-07-13T23:59:30+00:00",
+            "source": "test",
+            "digest": PERMISSION_DIGEST,
+        },
+        "requested_operation": "edit_foundup_module",
+        "valve_state_required": VALVE_OPEN_WORKTREE_CREATE,
+        "authority_tier": "source",
+        "allowed_paths": [PILOT_ARTIFACT],
+        "denied_paths": [],
+        "branch_name": "feat/paccess-001-resident-queue",
+        "base_ref": "main",
+        "task_summary": "Resident queue startup reaches the execution valve only.",
+        "wsp_applicability": ["WSP_34", "WSP_50", "WSP_97"],
+        "holoindex_evidence_refs": [
+            "modules/communication/moltbot_bridge/src/reddog_main_resident_queue_serial_loop_bootstrap.py"
+        ],
+        "skillz_candidates": [],
+        "required_tests": ["pytest modules/communication/moltbot_bridge/tests"],
+        "slice_verifier_plan": _slice_verifier_plan(),
+        "required_policy_gates": [
+            "openclaw_policy_gate",
+            "signed_work_order_authority",
+        ],
+        "required_reviewers": [],
+        "sentinel_checks": [],
+        "rollback_plan": "No live worktree created by this bootstrap slice.",
+        "expiry": EXPIRES,
+        "nonce": "resident-queue-work-order-nonce-001",
+        "evidence_digest": "sha256:" + ("a" * 64),
+        "advisory_only_source_packet": {
+            "work_focus_digest": "sha256:" + ("b" * 64),
+            "wsp_prompt_digest": "sha256:" + ("c" * 64),
+            "copy_md_run_trace_digest": "sha256:" + ("d" * 64),
+        },
+        "holoindex_evidence": {
+            "holoindex_query": "RedDog resident queue execution valve bootstrap",
+            "holoindex_status": "bundle_json_ok",
+            "code_hits": [
+                "modules/communication/moltbot_bridge/src/reddog_resident_queue_execution_valve_handler.py"
+            ],
+            "wsp_hits": ["WSP_framework/src/WSP_34_Git_Operations_Protocol.md"],
+            "skillz_hits": [],
+            "direct_read_fallback_used": True,
+            "index_gap_detected": False,
+            "applicable_wsps": ["WSP_34", "WSP_97"],
+            "evidence_refs": [
+                "modules/communication/moltbot_bridge/src/reddog_wre_execution_valve.py"
+            ],
+            "retrieval_quality": "HIGH",
+            "skillz_gap_detected": False,
+        },
+        "wsp15_allocation_receipt": allocation,
+        "wsp15_allocation_receipt_id": allocation["receipt_id"],
+        "wsp15_allocation_digest": _canonical_digest(allocation),
+        "wsp15_priority": allocation["priority"],
+        "wsp15_mps_total": allocation["mps_total"],
+        "wsp15_reasoning_tier": allocation["reasoning_tier"],
+    }
+    payload.update(overrides)
+    return payload
+
+
+def test_authority_profile_materializer_carries_memex_supply_binding() -> None:
+    work_orders, reasons = _materialize_work_orders_from_authority_profile(
+        snapshot=_snapshot(),
+        authority_profile=_profile(),
+        requested_queue_item_id="queue-1",
+        now_iso=NOW,
+    )
+
+    assert reasons == ()
+    assert work_orders is not None
+    work_order = work_orders[WORK_ORDER_ID]
+    assert work_order["memex_supply_receipt_id"] == "sha256:memex-1"
+    assert work_order["memex_supply_digest"] == "sha256:" + ("d" * 64)
+
+
+def test_authority_profile_materializer_rejects_conflicting_memex_supply_binding() -> (
+    None
+):
+    snapshot = _snapshot()
+    profile = _profile(
+        memex_supply_receipt_id="sha256:attacker-memex",
+        memex_supply_digest="sha256:" + ("e" * 64),
+    )
+    snapshot_before = _canonical_digest(snapshot)
+    profile_before = _canonical_digest(profile)
+
+    work_orders, reasons = _materialize_work_orders_from_authority_profile(
+        snapshot=snapshot,
+        authority_profile=profile,
+        requested_queue_item_id="queue-1",
+        now_iso=NOW,
+    )
+
+    assert work_orders is None
+    assert "work_order_materializer_authority:FAIL_MEMEX_SUPPLY_BINDING" in reasons
+    assert _canonical_digest(snapshot) == snapshot_before
+    assert _canonical_digest(profile) == profile_before
+
+
+def test_authority_profile_materializer_carries_scoped_bounded_worker_plan() -> None:
+    plan = _pilot_bounded_worker_plan()
+    profile = _profile(
+        requested_operation=PILOT_OPERATION,
+        allowed_paths=_pilot_allowed_paths(),
+        bounded_worker_plan=plan,
+    )
+
+    work_orders, reasons = _materialize_work_orders_from_authority_profile(
+        snapshot=_snapshot(requested_operation=PILOT_OPERATION),
+        authority_profile=profile,
+        requested_queue_item_id="queue-1",
+        now_iso=NOW,
+    )
+
+    assert reasons == ()
+    assert work_orders is not None
+    assert work_orders[WORK_ORDER_ID]["bounded_worker_plan"] == plan
+
+
+def test_authority_profile_materializer_rejects_bounded_worker_plan_outside_scope() -> (
+    None
+):
+    plan = _pilot_bounded_worker_plan()
+    plan["planned_artifacts"] = ["modules/foundups/other_foundup/README.md"]
+
+    work_orders, reasons = _materialize_work_orders_from_authority_profile(
+        snapshot=_snapshot(requested_operation=PILOT_OPERATION),
+        authority_profile=_profile(
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=_pilot_allowed_paths(),
+            bounded_worker_plan=plan,
+        ),
+        requested_queue_item_id="queue-1",
+        now_iso=NOW,
+    )
+
+    assert work_orders is None
+    assert (
+        "work_order_materializer_bounded_worker_plan_artifact_outside_allowed_paths"
+        in reasons
+    )
+
+
+def test_authority_profile_materializer_rejects_bounded_worker_plan_domain_mismatch() -> (
+    None
+):
+    plan = _pilot_bounded_worker_plan()
+    plan["domain_id"] = "other_foundup"
+
+    work_orders, reasons = _materialize_work_orders_from_authority_profile(
+        snapshot=_snapshot(requested_operation=PILOT_OPERATION),
+        authority_profile=_profile(
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=_pilot_allowed_paths(),
+            bounded_worker_plan=plan,
+        ),
+        requested_queue_item_id="queue-1",
+        now_iso=NOW,
+    )
+
+    assert work_orders is None
+    assert (
+        "work_order_materializer_bounded_worker_plan_scope_mismatch:domain_id"
+        in reasons
+    )
+
+
+def test_authority_profile_materializer_rejects_non_ascii_bounded_worker_plan() -> None:
+    plan = _pilot_bounded_worker_plan()
+    plan["operation"] = "résumé_patch"
+
+    work_orders, reasons = _materialize_work_orders_from_authority_profile(
+        snapshot=_snapshot(),
+        authority_profile=_profile(
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=_pilot_allowed_paths(),
+            bounded_worker_plan=plan,
+        ),
+        requested_queue_item_id="queue-1",
+        now_iso=NOW,
+    )
+
+    assert work_orders is None
+    assert (
+        "work_order_materializer_bounded_worker_plan_non_ascii" in reasons
+        or "work_order_materializer_authority:FAIL_PROFILE_NON_ASCII" in reasons
+    )
+
+
+def _work_orders(**overrides: object) -> dict[str, object]:
+    order = _work_order(**overrides)
+    return {"work_orders": {WORK_ORDER_ID: order}}
+
+
+def test_derived_outcome_ratchet_request_carries_model_feedback_receipts() -> None:
+    selection, runtime_binding = model_selection_and_runtime_binding_receipts(
+        runtime_surface=RUNTIME_SURFACE_ARTIFACT_GENERATION,
+    )
+    chain_state = {
+        "schema_version": "reddog_resident_queue_chain_results.v1",
+        "stage_results": {
+            "slice_verifier": {
+                "verifier_result": {
+                    "accepted": True,
+                    "decision": AUTONOMOUS_SLICE_VERIFIER_ACCEPT,
+                    "receipt": {
+                        "receipt_id": "wre_slice_verify_1234",
+                        "work_order_id": WORK_ORDER_ID,
+                        "slice_name": "REDDOG_TEST_SLICE_PHASE1",
+                        "worker_id": "worker:author",
+                    },
+                }
+            },
+            "verified_draft_pr_publish": {
+                "publish_result": {
+                    "accepted": True,
+                    "decision": "VERIFIED_DRAFT_PR_PUBLISH_ACCEPT",
+                    "receipt": {
+                        "receipt_id": "verified_draft_pr_1234",
+                        "work_order_id": WORK_ORDER_ID,
+                    },
+                }
+            },
+        },
+    }
+    work_orders = _work_orders(
+        model_selection_receipt=selection,
+        model_runtime_binding_receipt=runtime_binding,
+    )
+
+    request = _derive_outcome_ratchet_request_from_chain(
+        chain_state,
+        work_orders=work_orders,
+    )
+
+    assert request is not None
+    assert request["model_selection_receipt"]["receipt_id"] == selection["receipt_id"]
+    assert (
+        request["model_runtime_binding_receipt"]["receipt_id"]
+        == runtime_binding["receipt_id"]
+    )
+
+
+def _valve_environment(**overrides: object) -> dict[str, object]:
+    env = {
+        "valve_worktree_create_enabled": True,
+        "sovereign_worktree_token": "012-sovereign-worktree-token",
+        "permission_expires_at": EXPIRES,
+    }
+    env.update(overrides)
+    return env
+
+
+def _pilot_allowed_paths() -> list[str]:
+    return [PILOT_ARTIFACT]
+
+
+def _pilot_domain_profile() -> GenericAgentWorktreeDomainProfile:
+    return GenericAgentWorktreeDomainProfile(
+        profile_id="resident_queue_paccess_docs_patch",
+        operation=PILOT_OPERATION,
+        artifact_contract_type="text_patch",
+        domain_id_pattern=r"[a-z][a-z0-9_]{2,49}",
+        canonical_root_template="modules/foundups/{domain_id}",
+        allowed_path_patterns=["modules/foundups/{domain_id}/**"],
+        denied_path_patterns=["**/.env", "**/secrets/**"],
+        required_tests=[
+            "python -m pytest "
+            "modules/communication/moltbot_bridge/tests/"
+            "test_reddog_main_resident_queue_serial_loop_bootstrap.py -q"
+        ],
+        branch_prefix="feat/",
+        draft_pr_only=True,
+        consensus_required=False,
+    )
+
+
+def _pilot_path_overrides() -> dict[str, object]:
+    return {
+        "requested_operation": PILOT_OPERATION,
+        "allowed_paths": [PILOT_ARTIFACT],
+        "denied_paths": [],
+        "wsp15_allocation_receipt": _queue_wsp15_allocation_receipt(
+            requested_operation=PILOT_OPERATION,
+            changed_path=PILOT_ARTIFACT,
+        ),
+        "required_tests": [
+            "python -m pytest "
+            "modules/communication/moltbot_bridge/tests/"
+            "test_reddog_main_resident_queue_serial_loop_bootstrap.py -q"
+        ],
+        "task_summary": "Resident queue startup materializes one declared fixture in an isolated worktree.",
+        "rollback_plan": "Remove isolated worktree and branch; no repo checkout write is permitted.",
+    }
+
+
+def _pilot_worktree_path(repo: Path, work_order: Mapping[str, object]) -> Path:
+    return Path(
+        _proposed_worktree_path(
+            str(repo),
+            str(work_order["work_order_id"]),
+            str(work_order["nonce"]),
+        )
+    )
+
+
+def _pilot_signed_authority_for_bootstrap() -> dict[str, object]:
+    authority = dict(_pilot_signed_authority(WORK_ORDER_ID))
+    authority["permission_snapshot_digest"] = PERMISSION_DIGEST
+    return authority
+
+
+def _pilot_payloads(
+    repo: Path, worktree: Path, work_order: Mapping[str, object]
+) -> dict[str, object]:
+    writer = plan_generic_agent_worktree_writer_dry_run(
+        {
+            "work_order_id": WORK_ORDER_ID,
+            "operation": PILOT_OPERATION,
+            "domain_id": PILOT_DOMAIN_ID,
+            "domain_profile": _pilot_domain_profile(),
+            "planned_artifacts": [PILOT_ARTIFACT],
+            "requested_allowed_paths": _pilot_allowed_paths(),
+            "target_branch": str(work_order["branch_name"]),
+            "repo_root": str(repo),
+            "worktree_path": str(worktree),
+            "operation_cwd": str(worktree),
+            "selection_receipt": _pilot_selection_receipt(),
+            "signed_authority": _pilot_signed_authority_for_bootstrap(),
+            "signed_receipt_chain": _pilot_receipt_chain(),
+            "execution_valve_decision": _pilot_valve(),
+            "permission_snapshot_digest": PERMISSION_DIGEST,
+            "holoindex_evidence": {"index_gap_detected": False},
+        }
+    )
+    assert writer.decision == GENERIC_WRITER_DRYRUN_ACCEPT
+
+    shell = plan_governed_shell_runner_dry_run(
+        {
+            "work_order_id": WORK_ORDER_ID,
+            "profile": _pilot_shell_profile(),
+            "argv": [
+                "python",
+                "-m",
+                "pytest",
+                "modules/communication/moltbot_bridge/tests/"
+                "test_reddog_main_resident_queue_serial_loop_bootstrap.py",
+                "-q",
+            ],
+            "operation_cwd": str(worktree),
+            "worktree_path": str(worktree),
+            "repo_root": str(repo),
+            "selection_receipt": _pilot_selection_receipt(),
+            "signed_authority": _pilot_signed_authority_for_bootstrap(),
+            "signed_receipt_chain": _pilot_receipt_chain(),
+            "execution_valve_decision": _pilot_valve(),
+            "generic_writer_dryrun_receipt": writer.receipt.to_dict(),
+            "permission_snapshot_digest": PERMISSION_DIGEST,
+            "stdin_policy": "none",
+            "env_policy": {"scrubbed": True},
+            "holoindex_evidence": {
+                "index_gap_detected": False,
+                "holoindex_freshness_receipt_digest": "sha256:holo-fresh",
+            },
+        }
+    )
+    assert shell.decision == GOVERNED_SHELL_DRYRUN_ACCEPT
+    return {
+        "generic_writer_dryrun_result": writer.to_dict(),
+        "governed_shell_dryrun_result": shell.to_dict(),
+        "artifact_contents": {
+            PILOT_ARTIFACT: (
+                "# Resident Queue Pilot\n\n"
+                "This artifact is materialized only inside the isolated worktree.\n"
+            )
+        },
+        "holoindex_evidence": {
+            "index_gap_detected": False,
+            "retrieval_quality": "HIGH",
+            "holoindex_freshness_receipt_digest": "sha256:holo-fresh",
+        },
+    }
+
+
+def _pilot_bounded_worker_plan() -> dict[str, object]:
+    return {
+        "operation": PILOT_OPERATION,
+        "domain_id": PILOT_DOMAIN_ID,
+        "domain_profile": _pilot_domain_profile().to_dict(),
+        "planned_artifacts": [PILOT_ARTIFACT],
+        "requested_allowed_paths": [PILOT_ARTIFACT],
+        "shell_profile": _pilot_shell_profile().to_dict(),
+        "shell_argv": [
+            "python",
+            "-m",
+            "pytest",
+            "modules/communication/moltbot_bridge/tests/"
+            "test_reddog_main_resident_queue_serial_loop_bootstrap.py",
+            "-q",
+        ],
+        "selection_receipt": _pilot_selection_receipt(),
+        "signed_receipt_chain": _pilot_receipt_chain(),
+        "stdin_policy": "none",
+        "env_policy": {"scrubbed": True},
+    }
+
+
+def _digest(ch: str) -> str:
+    return "sha256:" + ch * 64
+
+
+def _mapping_digest(value: Mapping[str, object]) -> str:
+    encoded = json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+        default=str,
+    ).encode("utf-8")
+    return "sha256:" + hashlib.sha256(encoded).hexdigest()
+
+
+def _signed_authority_fixture() -> dict[str, object]:
+    work_authority = {
+        "authority_id": "authority-test",
+        "work_order_id": WORK_ORDER_ID,
+    }
+    return {
+        **work_authority,
+        "accepted": True,
+        "signature_gate_digest": canonical_work_authority_digest(work_authority),
+    }
+
+
+def _slice_verifier_request() -> dict[str, object]:
+    base_sha = "b" * 40
+    head_sha = "a" * 40
+    return {
+        "work_order_id": WORK_ORDER_ID,
+        "slice_name": "REDDOG_MAIN_RESIDENT_QUEUE_SLICE_VERIFIER_BOOTSTRAP_PHASE1",
+        "worker_id": "worker:author",
+        "verifier_id": "worker:verifier",
+        "assurance_reservation_id": "assurance-reservation-resident-queue",
+        "assurance_reservation_digest": _digest("6"),
+        "verifier_task_id": "reddog-worker-dispatch-independent-verifier",
+        "base_sha": base_sha,
+        "head_sha": head_sha,
+        "allowed_path_patterns": _pilot_allowed_paths(),
+        "expected_changed_paths": [PILOT_ARTIFACT],
+        "forbidden_path_patterns": ["**/.env", "**/secrets/**"],
+        "diff_evidence": {
+            "source": "machine_derived",
+            "red_dog_prose_source": False,
+            "base_sha": base_sha,
+            "head_sha": head_sha,
+            "diff_digest": _digest("7"),
+            "changed_paths": [PILOT_ARTIFACT],
+            "added_lines": ["resident queue pilot fixture update"],
+        },
+        "test_evidence": {
+            "head_sha": head_sha,
+            "test_evidence_digest": _digest("8"),
+            "required_checks": [
+                {"name": "pytest", "head_sha": head_sha, "conclusion": "success"},
+                {"name": "security", "head_sha": head_sha, "conclusion": "pass"},
+            ],
+        },
+        "signed_authority": _signed_authority_fixture(),
+        "signed_receipt_chain": {
+            "accepted": True,
+            "terminal_receipt_hash": _digest("a"),
+        },
+        "holoindex_evidence": {
+            "index_gap_detected": False,
+            "holoindex_freshness_receipt_digest": _digest("b"),
+        },
+        "pattern_memory_write_performed": False,
+        "draft_pr_published": False,
+        "merge_performed": False,
+    }
+
+
+def _slice_verifier_plan() -> dict[str, object]:
+    return {
+        "slice_name": "REDDOG_MAIN_RESIDENT_QUEUE_SLICE_VERIFIER_BOOTSTRAP_PHASE1",
+        "worker_id": "worker:author",
+        "verifier_id": "worker:verifier",
+        "base_sha": "b" * 40,
+        "head_sha": "a" * 40,
+        "allowed_path_patterns": _pilot_allowed_paths(),
+        "expected_changed_paths": [PILOT_ARTIFACT],
+        "forbidden_path_patterns": ["**/.env", "**/secrets/**"],
+        "required_checks": [
+            {
+                "name": "pytest",
+                "argv": [
+                    "python",
+                    "-m",
+                    "pytest",
+                    "modules/communication/moltbot_bridge/tests/"
+                    "test_reddog_main_resident_queue_serial_loop_bootstrap.py",
+                    "-q",
+                ],
+                "timeout_s": 30,
+            }
+        ],
+        "signed_receipt_chain": {
+            "accepted": True,
+            "terminal_receipt_hash": _digest("a"),
+        },
+    }
+
+
+def _evidence_producer_request(repo: Path, worktree: Path) -> dict[str, object]:
+    return {
+        **_slice_verifier_request(),
+        "explicit_evidence_production_requested": True,
+        "repo_root": str(repo),
+        "worktree_path": str(worktree),
+        "operation_cwd": str(worktree),
+        "required_checks": [
+            {
+                "name": "pytest",
+                "argv": [
+                    "python",
+                    "-m",
+                    "pytest",
+                    "modules/communication/moltbot_bridge/tests/"
+                    "test_reddog_main_resident_queue_serial_loop_bootstrap.py",
+                    "-q",
+                ],
+                "timeout_s": 30,
+            }
+        ],
+    }
+
+
+def _artifact_generation_request(worktree: Path) -> dict[str, object]:
+    selection, runtime_binding = model_selection_and_runtime_binding_receipts(
+        runtime_surface=RUNTIME_SURFACE_ARTIFACT_GENERATION,
+    )
+    verification = verified_runtime_binding_receipt(runtime_binding)
+    assert verification is not None
+    signed_authority = _signed_authority_fixture()
+    signed_authority.update(
+        {
+            "model_selection_receipt_id": selection["receipt_id"],
+            "model_selection_digest": _mapping_digest(selection),
+            "model_runtime_binding_receipt_id": runtime_binding["receipt_id"],
+            "model_runtime_binding_digest": canonical_model_runtime_binding_digest(
+                runtime_binding
+            ),
+            "model_runtime_binding_verification_receipt_id": verification.receipt_id,
+            "model_runtime_binding_verification_digest": (
+                verification_receipt_digest(verification)
+            ),
+        }
+    )
+    return {
+        "explicit_artifact_generation_requested": True,
+        "work_order_id": WORK_ORDER_ID,
+        "slice_name": "REDDOG_TEST_SLICE_PHASE1",
+        "task_summary": "Generate one bounded pilot README artifact.",
+        "planned_artifacts": [PILOT_ARTIFACT],
+        "evidence_context": "The resident queue pilot is allowed to create only the README fixture.",
+        "worktree_path": str(worktree),
+        "holoindex_evidence": {
+            "index_gap_detected": False,
+            "retrieval_quality": "HIGH",
+            "holoindex_freshness_receipt_digest": _digest("b"),
+        },
+        "signed_authority": signed_authority,
+        "signed_receipt_chain": {
+            "accepted": True,
+            "terminal_receipt_hash": _digest("a"),
+        },
+        "model_selection_receipt": selection,
+        "model_runtime_binding_receipt": runtime_binding,
+        "timeout_seconds": 30,
+    }
+
+
+def _draft_pr_publish_request(worktree_path: Path) -> dict[str, object]:
+    return {
+        "work_order_id": WORK_ORDER_ID,
+        "pre_publish_branch_head_sha": "a" * 40,
+        "branch_name": "feat/reddog-resident-queue-paccess-pilot",
+        "base_branch": "main",
+        "pr_title": "feat(reddog): resident queue paccess pilot",
+        "pr_body": "Verified by WRE autonomous slice verifier.",
+        "worktree_path": str(worktree_path),
+        "draft_pr_only": True,
+        "mark_ready": False,
+        "merge": False,
+    }
+
+
+def _draft_pr_publish_plan() -> dict[str, object]:
+    return {
+        "branch_name": "feat/reddog-resident-queue-paccess-pilot",
+        "base_branch": "main",
+        "pr_title": "feat(reddog): resident queue paccess pilot",
+        "pr_body": "Verified by WRE autonomous slice verifier.",
+        "draft_pr_only": True,
+        "mark_ready": False,
+        "merge": False,
+    }
+
+
+def _outcome_ratchet_request(
+    verification_result: Mapping[str, object] | None = None,
+) -> dict[str, object]:
+    verifier_request = _slice_verifier_request()
+    verifier_result = dict(
+        verification_result
+        or verify_autonomous_slice_runtime(
+            verifier_request,
+            trusted_work_authority_digest=verifier_request["signed_authority"][
+                "signature_gate_digest"
+            ],
+        ).to_dict()
+    )
+    verifier_receipt = verifier_result["receipt"]
+    return {
+        "work_order_id": WORK_ORDER_ID,
+        "slice_name": verifier_receipt["slice_name"],
+        "outcome_status": "accepted",
+        "request_receipt": {
+            "request_id": "resident-queue-request-1",
+            "principal_id": "012",
+            "work_focus_digest": _digest("c"),
+        },
+        "execution_receipts": [
+            {"step": "worktree_created", "receipt_id": _digest("d")},
+            {"step": "bounded_worker_pilot", "receipt_id": _digest("e")},
+            {"step": "draft_pr_published", "receipt_id": "pending-publish-receipt"},
+        ],
+        "verification_result": verifier_result,
+        "publish_result": {
+            "accepted": False,
+            "decision": "VERIFIED_DRAFT_PR_PUBLISH_REJECT",
+            "receipt": {},
+        },
+        "cost_receipt": {
+            "total_tokens": 1234,
+            "estimated_cost_usd": 0.12,
+        },
+        "latency_receipt": {
+            "wall_time_ms": 1000,
+            "queue_time_ms": 10,
+        },
+        "acceptance_receipt": {
+            "accepted": True,
+            "reason": "queue verifier and draft PR publish accepted",
+        },
+        "failure_receipt": None,
+        "holoindex_evidence": {
+            "index_gap_detected": False,
+            "holoindex_freshness_receipt_digest": _digest("f"),
+        },
+        "enable_pattern_memory_write": False,
+    }
+
+
+def _held_out_gate_request(
+    verification_result: Mapping[str, object] | None = None,
+) -> dict[str, object]:
+    verifier_request = _slice_verifier_request()
+    verifier_result = dict(
+        verification_result
+        or verify_autonomous_slice_runtime(
+            verifier_request,
+            trusted_work_authority_digest=verifier_request["signed_authority"][
+                "signature_gate_digest"
+            ],
+        ).to_dict()
+    )
+    verifier_receipt = verifier_result["receipt"]
+    head_sha = str(verifier_receipt["head_sha"])
+    return {
+        "work_order_id": WORK_ORDER_ID,
+        "slice_name": verifier_receipt["slice_name"],
+        "worker_id": verifier_receipt["worker_id"],
+        "enable_pattern_memory_admission": True,
+        "improvement_job": {
+            "job_id": "imp_resident_queue_heldout_1234",
+            "finding_id": "resident-heldout-1",
+            "improvement_type": "resident_queue_bootstrap",
+            "status": "pending",
+            "dry_run": True,
+        },
+        "verification_result": verifier_result,
+        "held_out_regression": {
+            "suite_id": "heldout-resident-queue-001",
+            "is_held_out": True,
+            "independent": True,
+            "generated_by_author": False,
+            "evidence_author_id": verifier_receipt["verifier_id"],
+            "passed": True,
+            "test_count": 12,
+            "failure_count": 0,
+            "suite_digest": _digest("1"),
+            "baseline_digest": _digest("2"),
+            "candidate_digest": _digest("3"),
+            "candidate_head_sha": head_sha,
+        },
+        "holoindex_evidence": {
+            "index_gap_detected": False,
+            "holoindex_freshness_receipt_digest": _digest("4"),
+        },
+    }
+
+
+def _pattern_memory_admission_request() -> dict[str, object]:
+    return {
+        "work_order_id": WORK_ORDER_ID,
+        "admission_metadata": {
+            "source": "resident_queue_bootstrap",
+            "retention_policy": "verified_recursive_improvement_only",
+        },
+    }
+
+
+def _snapshots() -> dict[str, object]:
+    return {
+        "snapshots": {
+            PERMISSION_DIGEST: {
+                "evidence_digest": PERMISSION_DIGEST,
+                "expires_at": 1600,
+                "can_write": True,
+                "repo_full_name": "FOUNDUPS/Foundups-Agent",
+            }
+        }
+    }
+
+
+def _principals(principal_public_key: str = "pub:principal") -> dict[str, object]:
+    return {
+        "principals": {
+            "github:mjtrout": {
+                "principal_id": "github:mjtrout",
+                "principal_provider": "github",
+                "principal_public_key": principal_public_key,
+                "repo_scope": ["FOUNDUPS/Foundups-Agent"],
+                "foundup_scope": ["paccess_001"],
+                "verified_subject_digest": "sha256:verified-subject",
+                "reward_account": "reward:012",
+                "owner_dae": "dae:012",
+            }
+        }
+    }
+
+
+def _write_runtime_json(tmp_path: Path, name: str, payload: object) -> Path:
+    path = tmp_path / "runtime" / name
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
+    return path
+
+
+def _accepted_socket_signer(
+    socket_path: Path,
+    request_bytes: bytes,
+    timeout_s: float,
+    max_response_bytes: int,
+) -> bytes:
+    assert socket_path.is_absolute()
+    assert timeout_s > 0
+    assert max_response_bytes >= 1024
+    decoded = json.loads(request_bytes.decode("utf-8").strip())
+    request = decoded["request"]
+    public_key = str(request["signer_public_key"])
+    response = {
+        "accepted": True,
+        "signature": "sig:" + str(request["nonce"]),
+        "signer_public_key": public_key,
+        "key_fingerprint": public_key_fingerprint(public_key),
+        "key_epoch": str(request["key_epoch"]),
+        "audit_mac": "audit:" + str(request["payload_digest"]),
+        "boundary_attested": True,
+        "requester_identity_attested": True,
+        "signer_loads_no_untrusted_code": True,
+        "no_secret_material_returned": True,
+    }
+    return json.dumps(response, sort_keys=True).encode("utf-8")
+
+
+class _AuditMacBuilder:
+    def build(
+        self, request: SigningRequest, signature: str, peer: SignerPeerAttestation
+    ) -> str:
+        return "audit:" + request.payload_digest
+
+
+class _StaticSocketPeerAttestor:
+    def attest(self, connection) -> SignerPeerAttestation:
+        return SignerPeerAttestation(
+            peer_principal_id="github:mjtrout",
+            transport="unix_socket",
+            credential_source="SO_PEERCRED",
+            boundary_attested=True,
+        )
+
+
+class _SwitchingSignerBackend:
+    def __init__(self, backends: Mapping[str, Ed25519SignerBackend]) -> None:
+        self._backends = dict(backends)
+
+    def sign(
+        self, request: SigningRequest, peer: SignerPeerAttestation
+    ) -> SigningResponse:
+        from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_policy_gate import (
+            bind_exact_signing_request,
+        )
+
+        backend = self._backends.get(request.signer_public_key)
+        if backend is None:
+            return SigningResponse(
+                accepted=False,
+                rejection_code=RuntimeRejectCode.SIGNER_NOT_CONFIGURED,
+                no_secret_material_returned=True,
+            )
+        return bind_exact_signing_request(backend, request).sign(request, peer)
+
+
+class _FakeWorktreeRunner:
+    def __init__(self, *, ok: bool = True) -> None:
+        self.ok = ok
+        self.calls: list[tuple[str, str, str | None, str | None]] = []
+
+    def create_worktree(self, *, worktree_path: Path, branch_name: str, base_ref: str):
+        self.calls.append(
+            ("create_worktree", str(worktree_path), branch_name, base_ref)
+        )
+        if self.ok:
+            Path(worktree_path).mkdir(parents=True, exist_ok=True)
+        return {
+            "ok": self.ok,
+            "returncode": 0 if self.ok else 1,
+            "stdout": "",
+            "stderr": "",
+        }
+
+    def cleanup_worktree(self, *, worktree_path: Path):
+        self.calls.append(("cleanup_worktree", str(worktree_path), None, None))
+        return {"ok": True, "returncode": 0, "stdout": "", "stderr": ""}
+
+
+class _FakeEvidenceRunner:
+    def __init__(self, *, head: str = "a" * 40) -> None:
+        self.head = head
+        self.calls: list[tuple[str, ...]] = []
+
+    def run(self, argv, *, cwd: Path, timeout_s: int) -> CommandResult:
+        _ = (cwd, timeout_s)
+        argv_tuple = tuple(argv)
+        self.calls.append(argv_tuple)
+        if argv_tuple == ("git", "rev-parse", "HEAD"):
+            return CommandResult(returncode=0, stdout=self.head + "\n")
+        if argv_tuple[:3] == ("git", "diff", "--name-only"):
+            return CommandResult(returncode=0, stdout=PILOT_ARTIFACT + "\n")
+        if argv_tuple[:3] == ("git", "diff", "--unified=0"):
+            return CommandResult(
+                returncode=0,
+                stdout=(
+                    f"diff --git a/{PILOT_ARTIFACT} b/{PILOT_ARTIFACT}\n"
+                    f"+++ b/{PILOT_ARTIFACT}\n"
+                    "+resident queue produced independent evidence\n"
+                ),
+            )
+        return CommandResult(returncode=0, stdout="ok\n")
+
+
+class _FakeExactShaEvidenceRunner:
+    def __init__(self, *, branch_name: str) -> None:
+        self.branch_name = branch_name
+        self.head = "b" * 40
+        self.parent = "b" * 40
+        self.tree = "c" * 40
+        self.dirty = True
+        self.commit_message = ""
+        self.calls: list[tuple[str, ...]] = []
+
+    def run(self, argv, *, cwd: Path, timeout_s: int) -> CommandResult:
+        _ = (cwd, timeout_s)
+        args = tuple(argv)
+        self.calls.append(args)
+        if args == ("git", "symbolic-ref", "--short", "HEAD"):
+            return CommandResult(returncode=0, stdout=self.branch_name + "\n")
+        if args == ("git", "rev-parse", "HEAD"):
+            return CommandResult(returncode=0, stdout=self.head + "\n")
+        if args == ("git", "rev-parse", f"{self.head}^"):
+            return CommandResult(returncode=0, stdout=self.parent + "\n")
+        if args == ("git", "diff", "--cached", "--name-only"):
+            return CommandResult(returncode=0, stdout="")
+        if args == ("git", "diff", "--name-only"):
+            return CommandResult(
+                returncode=0,
+                stdout=(PILOT_ARTIFACT + "\n") if self.dirty else "",
+            )
+        if args == ("git", "ls-files", "--others", "--exclude-standard"):
+            return CommandResult(returncode=0, stdout="")
+        if args[:4] == ("git", "rev-list", "--parents", "-n"):
+            return CommandResult(
+                returncode=0,
+                stdout=f"{self.head} {self.parent}\n",
+            )
+        if args[:4] == ("git", "log", "-1", "--format=%B"):
+            return CommandResult(returncode=0, stdout=self.commit_message)
+        if args[:3] == ("git", "diff", "--name-only") and len(args) == 6:
+            return CommandResult(returncode=0, stdout=PILOT_ARTIFACT + "\n")
+        if args[:3] == ("git", "diff", "--unified=0"):
+            return CommandResult(
+                returncode=0,
+                stdout=(
+                    f"diff --git a/{PILOT_ARTIFACT} b/{PILOT_ARTIFACT}\n"
+                    f"+++ b/{PILOT_ARTIFACT}\n"
+                    "+resident queue produced independent evidence\n"
+                ),
+            )
+        if args == ("git", "rev-parse", f"{self.head}^{{tree}}"):
+            return CommandResult(returncode=0, stdout=self.tree + "\n")
+        return CommandResult(returncode=0, stdout="ok\n")
+
+
+class _FakeCommitDraftPrRunner(FakeDraftPrRunner):
+    def __init__(self, evidence_runner: _FakeExactShaEvidenceRunner) -> None:
+        super().__init__()
+        self.evidence_runner = evidence_runner
+
+    def commit_all(self, *, worktree_path: Path, add_paths, message: str):
+        self.calls.append(("commit_all", str(worktree_path), tuple(add_paths), message))
+        self.evidence_runner.head = "a" * 40
+        self.evidence_runner.parent = "b" * 40
+        self.evidence_runner.dirty = False
+        self.evidence_runner.commit_message = message
+        return {"ok": True, "returncode": 0, "stdout": "", "stderr": ""}
+
+
+class _FakeArtifactGenerator:
+    def __init__(self, *, content: str = "# generated by resident queue\n") -> None:
+        self.content = content
+        self.calls: list[dict[str, object]] = []
+
+    def generate_artifacts(
+        self,
+        *,
+        prompt: str,
+        context: str,
+        binding: Mapping[str, object],
+        timeout_seconds: int,
+    ) -> ArtifactGenerationModelResult:
+        self.calls.append(
+            {
+                "prompt": prompt,
+                "context": context,
+                "binding": dict(binding),
+                "timeout_seconds": timeout_seconds,
+            }
+        )
+        return ArtifactGenerationModelResult(
+            ok=True,
+            status="MODEL_OK",
+            artifact_contents={PILOT_ARTIFACT: self.content},
+            model_receipt_id="artifact-model-receipt-1",
+            model_result_digest=_digest("e"),
+            made_network_call=False,
+            rejection_reasons=(),
+        )
+
+
+class _FakeModelRuntimeBindingVerifier:
+    trusted_now_epoch = staticmethod(lambda: 1000)
+
+    def verify(self, *, binding: Mapping[str, object], selection: Mapping[str, object]):
+        capability = model_runtime_binding_test_capability(
+            dict(selection), dict(binding)
+        )
+        assert capability is not None
+        return capability
+
+
+class _FakePatternMemoryAdmissionSink:
+    def __init__(self) -> None:
+        self.records: list[dict[str, object]] = []
+        self.staged: dict[str, dict[str, object]] = {}
+
+    @property
+    def activation_ready(self) -> bool:
+        return True
+
+    def store_verified_outcome(self, record: Mapping[str, object]) -> str:
+        raise ValueError("verified_outcome_activation_capability_required")
+
+    def stage_verified_outcome(self, record: Mapping[str, object]) -> str:
+        record_id = reddog_verified_pattern_memory_record_id(record)
+        self.staged[record_id] = dict(record)
+        return record_id
+
+    def activate_verified_outcome(
+        self, record_id: str, record: Mapping[str, object]
+    ) -> str:
+        assert self.staged[record_id] == record
+        self.records.append(self.staged.pop(record_id))
+        return record_id
+
+
+class _FakeVerifiedOutcomePublisher:
+    def __init__(self) -> None:
+        self.records: dict[str, dict[str, object]] = {}
+
+    def publish(self, **payload: object) -> str:
+        record_id = str(payload["record_id"])
+        self.records[record_id] = dict(payload["record"])
+        return record_id
+
+    def activate(self, record_id: str) -> object:
+        return record_id
+
+
+class _FakeWorkerDispatchTaskWriter:
+    def __init__(self, *, accepted: bool = True) -> None:
+        self.accepted = accepted
+        self.calls: list[dict[str, object]] = []
+
+    def enqueue_signed_worker_dispatch_tasks(self, tasks, receipt):
+        task_ids = [task.task_id for task in tasks]
+        self.calls.append(
+            {
+                "task_ids": task_ids,
+                "receipt_id": receipt.receipt_id,
+            }
+        )
+        return {
+            "ok": self.accepted,
+            "created_task_ids": task_ids,
+            "receipt_id": receipt.receipt_id,
+        }
+
+    def activate_signed_worker_dispatch_tasks(self, tasks, receipt):
+        return {
+            "ok": self.accepted,
+            "created_task_ids": [task.task_id for task in tasks],
+            "receipt_id": receipt.receipt_id,
+        }
+
+
+def _ed25519_signing_material(*, principal_key=None, reddog_key=None):
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+    principal_key = principal_key or Ed25519PrivateKey.generate()
+    reddog_key = reddog_key or Ed25519PrivateKey.generate()
+    principal_public = encode_ed25519_public_key(
+        principal_key.public_key().public_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PublicFormat.Raw,
+        )
+    )
+    reddog_public = encode_ed25519_public_key(
+        reddog_key.public_key().public_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PublicFormat.Raw,
+        )
+    )
+    peer = SignerPeerAttestation(
+        peer_principal_id="github:mjtrout",
+        transport="test_connector",
+        credential_source="test_peer_attestation",
+        boundary_attested=True,
+    )
+    backends = {
+        principal_public: Ed25519SignerBackend(
+            private_key=principal_key,
+            public_key=principal_public,
+            key_epoch="epoch-1",
+            audit_mac_builder=_AuditMacBuilder(),
+        ),
+        reddog_public: Ed25519SignerBackend(
+            private_key=reddog_key,
+            public_key=reddog_public,
+            key_epoch="epoch-1",
+            audit_mac_builder=_AuditMacBuilder(),
+        ),
+    }
+
+    def connector(
+        socket_path: Path,
+        request_bytes: bytes,
+        timeout_s: float,
+        max_response_bytes: int,
+    ) -> bytes:
+        from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_policy_gate import (
+            bind_exact_signing_request,
+        )
+
+        assert socket_path.is_absolute()
+        assert timeout_s > 0
+        assert max_response_bytes >= 1024
+        decoded = json.loads(request_bytes.decode("utf-8").strip())
+        request = SigningRequest(**decoded["request"])
+        response = bind_exact_signing_request(
+            backends[request.signer_public_key], request
+        ).sign(request, peer)
+        return json.dumps(response.to_dict(), sort_keys=True).encode("utf-8")
+
+    return principal_public, reddog_public, connector
+
+
+def _ed25519_signing_material_with_socket_backend():
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+    principal_key = Ed25519PrivateKey.generate()
+    reddog_key = Ed25519PrivateKey.generate()
+    principal_public = encode_ed25519_public_key(
+        principal_key.public_key().public_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PublicFormat.Raw,
+        )
+    )
+    reddog_public = encode_ed25519_public_key(
+        reddog_key.public_key().public_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PublicFormat.Raw,
+        )
+    )
+    return (
+        principal_public,
+        reddog_public,
+        _SwitchingSignerBackend(
+            {
+                principal_public: Ed25519SignerBackend(
+                    private_key=principal_key,
+                    public_key=principal_public,
+                    key_epoch="epoch-1",
+                    audit_mac_builder=_AuditMacBuilder(),
+                ),
+                reddog_public: Ed25519SignerBackend(
+                    private_key=reddog_key,
+                    public_key=reddog_public,
+                    key_epoch="epoch-1",
+                    audit_mac_builder=_AuditMacBuilder(),
+                ),
+            }
+        ),
+    )
+
+
+def _ratchet_model_runtime_inputs(principal_public, reddog_public, overrides):
+    with patch(
+        "modules.ai_intelligence.ai_gateway.tests."
+        "model_signed_evidence_test_helpers.NOW",
+        1000,
+    ):
+        selection, binding = model_selection_and_runtime_binding_receipts(
+            runtime_surface=RUNTIME_SURFACE_ARTIFACT_GENERATION,
+            verified_at_epoch=1000,
+        )
+    verification = verified_runtime_binding_receipt(binding)
+    assert verification is not None
+    lineage = {
+        "model_selection_receipt_id": selection["receipt_id"],
+        "model_selection_digest": _mapping_digest(selection),
+        "model_runtime_binding_receipt_id": binding["receipt_id"],
+        "model_runtime_binding_digest": canonical_model_runtime_binding_digest(binding),
+        "model_runtime_binding_verification_receipt_id": verification.receipt_id,
+        "model_runtime_binding_verification_digest": verification_receipt_digest(
+            verification
+        ),
+    }
+    snapshot = _snapshot()
+    queue = snapshot["wre_queue_items"][0]
+    progressive = signed_stage_binding(
+        requested_operation=PILOT_OPERATION,
+        changed_paths=(PILOT_ARTIFACT,),
+    )
+    allocation = progressive["wsp15_allocation_receipt"]
+    queue.update(progressive)
+    queue.update(lineage)
+    snapshot["worker_claims"][0].update(
+        {
+            "model_selection_receipt_id": selection["receipt_id"],
+            "model_runtime_binding_receipt_id": binding["receipt_id"],
+            "model_runtime_binding_verification_receipt_id": verification.receipt_id,
+        }
+    )
+    queue["evidence_refs"] = [
+        item
+        for item in queue["evidence_refs"]
+        if not str(item).startswith("wsp15_allocation:")
+    ]
+    queue["evidence_refs"].append(f"wsp15_allocation:{allocation['receipt_id']}")
+    queue["evidence_refs"].extend(
+        f"{kind}:{value}"
+        for kind, value in (
+            ("model_selection", selection["receipt_id"]),
+            ("model_runtime_binding", binding["receipt_id"]),
+            ("model_runtime_binding_verification", verification.receipt_id),
+        )
+    )
+    common = {
+        "model_selection_receipt": selection,
+        "model_runtime_binding_receipt": binding,
+        **lineage,
+    }
+    profile = _profile(
+        principal_public_key=principal_public,
+        reddog_public_key=reddog_public,
+        requested_operation=PILOT_OPERATION,
+        allowed_paths=[PILOT_ARTIFACT],
+        denied_paths=[],
+        wsp15_allocation_receipt=allocation,
+        **common,
+    )
+    work_order_values = {
+        **overrides,
+        "requested_operation": PILOT_OPERATION,
+        "allowed_paths": [PILOT_ARTIFACT],
+        "denied_paths": [],
+        "wsp15_allocation_receipt": allocation,
+        "bounded_worker_plan": _pilot_bounded_worker_plan(),
+        **common,
+    }
+    work_order = _work_order(
+        **work_order_values,
+    )
+    return snapshot, profile, work_order
+
+
+def _repo(tmp_path: Path) -> Path:
+    path = tmp_path / "repo"
+    path.mkdir()
+    return path
+
+
+def _run_bootstrap_to_verified_outcome_ratchet(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    from modules.communication.moltbot_bridge.tests.reddog_outcome_ratchet_test_support import (
+        _run_bootstrap_to_verified_outcome_ratchet as run_support,
+    )
+
+    return run_support(tmp_path, monkeypatch)
+
+
+def _run_bootstrap_to_held_out_regression_gate(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> dict[str, object]:
+    ctx = _run_bootstrap_to_verified_outcome_ratchet(tmp_path, monkeypatch)
+    verifier_stage = ctx["verifier_stage"]
+    held_out_request = _write_runtime_json(
+        tmp_path,
+        "held_out_gate_request.json",
+        _held_out_gate_request(verifier_stage["verifier_result"]),
+    )
+    gate_run = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=ctx["repo"],
+        work_state_path=ctx["state"],
+        chain_results_path=ctx["chain"],
+        authority_profile_path=ctx["profile"],
+        held_out_gate_request_path=held_out_request,
+        now_iso=NOW,
+        requested_queue_item_id="queue-1",
+        max_steps=2,
+    )
+    assert gate_run.accepted is True
+    stored = json.loads(Path(ctx["chain"]).read_text(encoding="utf-8"))
+    assert stored["stage_results"]["model_feedback_admission"]["decision"] == (
+        "QUEUE_AUTHORIZED_MODEL_FEEDBACK_LEDGER_ADMISSION_INVOKE_ACCEPT"
+    )
+    assert (
+        stored["stage_results"]["model_feedback_admission"][
+            "model_feedback_write_performed"
+        ]
+        is False
+    )
+    assert stored["stage_results"]["held_out_regression_gate"]["decision"] == (
+        "QUEUE_AUTHORIZED_HELD_OUT_REGRESSION_GATE_INVOKE_ACCEPT"
+    )
+    return ctx
+
+
+def test_bootstrap_serial_loop_applies_one_stage_with_existing_dependencies(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(tmp_path, "profile.json", _profile())
+    chain = tmp_path / "runtime" / "chain_results.json"
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_order_materializer_mode="authority_profile",
+        now_iso=NOW,
+        requested_queue_item_id="queue-1",
+        max_steps=1,
+    )
+
+    assert result.accepted is True, result.rejection_reasons
+    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED
+    assert result.queue_item_id == "queue-1"
+    assert result.selected_slice == "REDDOG_TEST_SLICE_PHASE1"
+    assert result.steps_run == 1
+    assert result.dispatched_stages == ("authority_request",)
+    assert result.next_action == "RUN_QUEUE_AUTHORITY_RUNTIME_INVOKE"
+    assert result.store_revision is not None
+    assert result.no_repo_mutation_performed is True
+    assert result.no_holoindex_reindex_performed is True
+    stored = json.loads(chain.read_text(encoding="utf-8"))
+    assert (
+        stored["stage_results"]["authority_request"]["status"]
+        == "QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT"
+    )
+
+
+def test_bootstrap_serial_loop_fails_closed_when_later_dependency_missing(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(tmp_path, "profile.json", _profile())
+    chain = tmp_path / "runtime" / "chain_results.json"
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_order_materializer_mode="authority_profile",
+        now_iso=NOW,
+        requested_queue_item_id="queue-1",
+        max_steps=2,
+    )
+
+    assert result.accepted is False
+    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
+    assert result.steps_run == 1
+    assert result.dispatched_stages == ("authority_request",)
+    assert "FAIL_DISPATCH_REJECTED" in result.rejection_reasons
+    assert "FAIL_HANDLER_MISSING" in result.rejection_reasons
+    assert "stage:authority_runtime" in result.rejection_reasons
+
+
+def test_bootstrap_serial_loop_invokes_fail_closed_authority_runtime_bundle(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(tmp_path, "profile.json", _profile())
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(tmp_path, "principals.json", _principals())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_order_materializer_mode="authority_profile",
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        now_iso=NOW,
+        now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
+        requested_queue_item_id="queue-1",
+        max_steps=2,
+    )
+
+    assert result.accepted is False
+    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
+    assert (
+        result.runtime_dependency_bundle_status
+        == REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY
+    )
+    assert result.runtime_dependency_bundle_requested is True
+    assert result.steps_run == 1
+    assert result.dispatched_stages == ("authority_request",)
+    assert "FAIL_DISPATCH_REJECTED" in result.rejection_reasons
+    assert "FAIL_RECORD_REJECTED" in result.rejection_reasons
+    assert "FAIL_STAGE_REJECTED:authority_runtime" in result.rejection_reasons
+    assert "REJECT_DELEGATED_AUTHORITY_RUNTIME_REJECTED" in result.rejection_reasons
+    assert RuntimeRejectCode.SIGNER_NOT_CONFIGURED in result.rejection_reasons
+    stored = json.loads(chain.read_text(encoding="utf-8"))
+    assert "authority_runtime" not in stored["stage_results"]
+    assert (
+        stored["stage_results"]["authority_request"]["status"]
+        == "QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT"
+    )
+
+
+def test_bootstrap_serial_loop_uses_socket_signer_for_authority_runtime(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(tmp_path, "profile.json", _profile())
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(tmp_path, "principals.json", _principals())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_order_materializer_mode="authority_profile",
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=_accepted_socket_signer,
+        now_iso=NOW,
+        now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
+        requested_queue_item_id="queue-1",
+        max_steps=2,
+    )
+
+    assert result.accepted is True
+    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED
+    assert (
+        result.runtime_dependency_bundle_status
+        == REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY
+    )
+    assert result.runtime_dependency_bundle_requested is True
+    assert result.steps_run == 2
+    assert result.dispatched_stages == ("authority_request", "authority_runtime")
+    assert result.next_action == "RUN_QUEUE_AUTHORITY_VERIFICATION_INVOKE"
+    assert result.no_shell_command_executed is True
+    assert result.no_openclaw_enqueue_performed is True
+
+    stored = json.loads(chain.read_text(encoding="utf-8"))
+    assert (
+        stored["stage_results"]["authority_runtime"]["decision"]
+        == "QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT"
+    )
+    authority = json.loads(authority_state.read_text(encoding="utf-8"))
+    issued = authority["issued_authorities"]
+    assert len(issued) == 1
+    assert next(iter(issued.values()))["status"] == "DELEGATED_AUTHORITY_ISSUED"
+
+
+def test_bootstrap_serial_loop_verifies_ed25519_authority_when_configured(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(
+            principal_public_key=principal_public, reddog_public_key=reddog_public
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_order_materializer_mode="authority_profile",
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        now_iso=NOW,
+        now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
+        requested_queue_item_id="queue-1",
+        max_steps=3,
+    )
+
+    assert result.accepted is True
+    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED
+    assert (
+        result.runtime_dependency_bundle_status
+        == REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY
+    )
+    assert result.steps_run == 3
+    assert result.dispatched_stages == (
+        "authority_request",
+        "authority_runtime",
+        "authority_verification",
+    )
+    assert result.next_action == "RUN_QUEUE_SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN"
+    assert result.no_signature_verification_performed is False
+    assert result.no_worktree_created is True
+    assert result.no_shell_command_executed is True
+    assert result.no_openclaw_enqueue_performed is True
+
+    stored = json.loads(chain.read_text(encoding="utf-8"))
+    verification = stored["stage_results"]["authority_verification"]
+    assert verification["decision"] == "QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT"
+    assert verification["verification_result"]["accepted"] is True
+    authority = json.loads(authority_state.read_text(encoding="utf-8"))
+    assert authority.get("verified_work_authority_nonces", []) == []
+
+
+def test_bootstrap_serial_loop_verifies_authority_via_real_socket_service(
+    tmp_path_factory,
+) -> None:
+    if not hasattr(socket, "AF_UNIX"):
+        pytest.skip("AF_UNIX sockets are unavailable in this Python build")
+
+    # Keep the socket confined to its runtime root and below AF_UNIX path limits.
+    tmp_path = tmp_path_factory.mktemp("resident-socket")
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, backend = (
+        _ed25519_signing_material_with_socket_backend()
+    )
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(
+            principal_public_key=principal_public, reddog_public_key=reddog_public
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    ready = threading.Event()
+    service_result: dict[str, object] = {}
+
+    def serve_pair() -> None:
+        service_result["result"] = serve_reddog_isolated_signer_socket_bounded(
+            repo_root=repo,
+            socket_path=socket_path,
+            backend=backend,
+            peer_attestor=_StaticSocketPeerAttestor(),
+            max_requests=2,
+            timeout_s=5.0,
+            ready_callback=ready.set,
+        )
+
+    thread = threading.Thread(target=serve_pair, daemon=True)
+    thread.start()
+    assert ready.wait(5.0)
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_order_materializer_mode="authority_profile",
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        now_iso=NOW,
+        now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
+        requested_queue_item_id="queue-1",
+        max_steps=3,
+    )
+    thread.join(5.0)
+
+    assert thread.is_alive() is False
+    served = service_result["result"]
+    assert served.accepted is True, (served.rejection_reasons, result.rejection_reasons)
+    assert served.status == SIGNER_SOCKET_RESIDENT_SERVICE_SERVED
+    assert served.requests_handled == 2
+    assert len(served.response_digests) == 2
+    assert served.socket_removed is True
+    assert served.no_private_key_loaded is True
+    assert served.no_repo_mutation_performed is True
+    assert served.no_openclaw_enqueue_performed is True
+    assert served.no_holoindex_reindex_performed is True
+
+    assert result.accepted is True
+    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED
+    assert (
+        result.runtime_dependency_bundle_status
+        == REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY
+    )
+    assert result.steps_run == 3
+    assert result.dispatched_stages == (
+        "authority_request",
+        "authority_runtime",
+        "authority_verification",
+    )
+    assert result.next_action == "RUN_QUEUE_SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN"
+    assert result.no_signature_verification_performed is False
+    assert result.no_worktree_created is True
+    assert result.no_shell_command_executed is True
+    assert result.no_openclaw_enqueue_performed is True
+
+    stored = json.loads(chain.read_text(encoding="utf-8"))
+    runtime = stored["stage_results"]["authority_runtime"]
+    assert runtime["decision"] == "QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT"
+    verification = stored["stage_results"]["authority_verification"]
+    assert verification["decision"] == "QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT"
+    assert verification["verification_result"]["accepted"] is True
+    authority = json.loads(authority_state.read_text(encoding="utf-8"))
+    # Queue verification is preflight; only authoritative use consumes this nonce.
+    assert authority.get("verified_work_authority_nonces", []) == []
+    assert len(authority["issued_authorities"]) == 1
+    assert not socket_path.exists()
+
+
+def test_bootstrap_rejects_legacy_token_environment_before_execution_valve(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(
+            principal_public_key=principal_public, reddog_public_key=reddog_public
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
+    work_orders = _write_runtime_json(tmp_path, "work_orders.json", _work_orders())
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    worker_dispatch_writer = _FakeWorkerDispatchTaskWriter()
+
+    result = _run_bootstrap(
+        repo_root=repo,
+        runtime_allowed_root=tmp_path / "runtime",
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worker_dispatch_writer=worker_dispatch_writer,
+        now_iso=NOW,
+        now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
+        requested_queue_item_id="queue-1",
+        max_steps=8,
+    )
+
+    assert result.accepted is False
+    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
+    assert result.rejection_reasons == (
+        "governed_execution_valve_environment_required",
+    )
+    assert result.steps_run == 0
+    assert result.no_worker_spawn_performed is True
+    assert result.no_worktree_created is True
+    assert result.no_shell_command_executed is True
+    assert result.no_openclaw_enqueue_performed is True
+    assert result.no_hermes_dispatch_performed is True
+    assert result.no_repo_mutation_performed is True
+    assert result.no_holoindex_reindex_performed is True
+    assert result.no_pr_created is True
+    assert worker_dispatch_writer.calls == []
+    assert not chain.exists()
+
+
+def test_bootstrap_serial_loop_materializes_work_order_from_authority_profile(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            required_tests=["pytest modules/communication/moltbot_bridge/tests"],
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_order_materializer_mode="authority_profile",
+        valve_environment_path=valve_env,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        now_iso=NOW,
+        now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
+        requested_queue_item_id="queue-1",
+        max_steps=8,
+    )
+
+    assert result.accepted is True
+    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED
+    assert result.steps_run == 8
+    assert result.dispatched_stages == (
+        "authority_request",
+        "authority_runtime",
+        "authority_verification",
+        "worker_dispatch_dryrun",
+        "worker_dispatch_runtime",
+        "work_order_invocation",
+        "executor_plan",
+        "execution_valve",
+    )
+    assert result.next_action == "RUN_QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE"
+
+    stored = json.loads(chain.read_text(encoding="utf-8"))
+    stage_results = stored["stage_results"]
+    assert (
+        stage_results["work_order_invocation"]["decision"]
+        == "QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_ACCEPT"
+    )
+    invocation = stage_results["work_order_invocation"]["invocation_result"]
+    assert invocation["work_order_id"] == WORK_ORDER_ID
+    assert invocation["receipt_digest"]
+    assert invocation["policy_gate_receipt_digest"]
+    assert invocation["no_execution_performed"] is True
+    assert (
+        stage_results["executor_plan"]["decision"]
+        == "QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT"
+    )
+    assert (
+        stage_results["execution_valve"]["decision"]
+        == "QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT"
+    )
+    assert "work_orders.json" not in json.dumps(stored, sort_keys=True)
+
+
+def test_bootstrap_serial_loop_materializes_bounded_worker_plan_from_authority_profile(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    state = _write_runtime_json(
+        tmp_path,
+        "work_state.json",
+        _snapshot(requested_operation=PILOT_OPERATION),
+    )
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=_pilot_allowed_paths(),
+            bounded_worker_plan=_pilot_bounded_worker_plan(),
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    artifact_generator = _FakeArtifactGenerator(
+        content="# generated from profile plan\n"
+    )
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_order_materializer_mode="authority_profile",
+        valve_environment_path=valve_env,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worktree_runner=_FakeWorktreeRunner(),
+        pilot_dryrun_binding_enabled=True,
+        artifact_generation_request_binding_enabled=True,
+        artifact_generator=artifact_generator,
+        model_runtime_binding_verifier=_FakeModelRuntimeBindingVerifier(),
+        now_iso=NOW,
+        now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
+        requested_queue_item_id="queue-1",
+        max_steps=11,
+    )
+
+    _assert_bootstrap_yielded_at_assurance(result, chain)
+
+
+def test_bootstrap_serial_loop_creates_worktree_only_with_explicit_runner(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(
+            principal_public_key=principal_public, reddog_public_key=reddog_public
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
+    work_orders = _write_runtime_json(tmp_path, "work_orders.json", _work_orders())
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    runner = _FakeWorktreeRunner()
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worktree_runner=runner,
+        now_iso=NOW,
+        now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
+        requested_queue_item_id="queue-1",
+        max_steps=9,
+    )
+
+    assert result.accepted is True
+    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED
+    assert result.steps_run == 9
+    assert result.dispatched_stages == (
+        "authority_request",
+        "authority_runtime",
+        "authority_verification",
+        "worker_dispatch_dryrun",
+        "worker_dispatch_runtime",
+        "work_order_invocation",
+        "executor_plan",
+        "execution_valve",
+        "worktree_create",
+    )
+    assert result.next_action == "RUN_QUEUE_ASSURANCE_CAPACITY_ADMISSION"
+    assert result.no_worktree_created is False
+    assert result.no_repo_mutation_performed is False
+    assert result.no_worker_spawn_performed is True
+    assert result.no_shell_command_executed is True
+    assert result.no_openclaw_enqueue_performed is True
+    assert result.no_hermes_dispatch_performed is True
+    assert result.no_pr_created is True
+    assert [call[0] for call in runner.calls] == ["create_worktree"]
+
+    stored = json.loads(chain.read_text(encoding="utf-8"))
+    stage = stored["stage_results"]["worktree_create"]
+    assert stage["decision"] == "QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_ACCEPT"
+    assert stage["worktree_create_result"]["decision"] == "WORKTREE_CREATE_ACCEPT"
+    assert stage["worktree_create_result"]["no_task_execution_performed"] is True
+    assert stage["worktree_create_result"]["no_file_edit_performed"] is True
+    assert stage["no_openclaw_enqueue_performed"] is True
+    assert stage["no_hermes_dispatch_performed"] is True
+    assert Path(stage["worktree_create_result"]["worktree_path"]).exists()
+    assert "012-sovereign-worktree-token" not in json.dumps(stored, sort_keys=True)
+
+
+def test_bootstrap_serial_loop_reaches_bounded_worker_pilot_with_explicit_artifacts(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    pilot_overrides = _pilot_path_overrides()
+    state = _write_runtime_json(
+        tmp_path,
+        "work_state.json",
+        _snapshot(requested_operation=PILOT_OPERATION),
+    )
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=[PILOT_ARTIFACT],
+            denied_paths=[],
+            wsp15_allocation_receipt=pilot_overrides["wsp15_allocation_receipt"],
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
+    work_order = _work_order(**pilot_overrides)
+    work_orders = _write_runtime_json(
+        tmp_path,
+        "work_orders.json",
+        {"work_orders": {WORK_ORDER_ID: work_order}},
+    )
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    runner = _FakeWorktreeRunner()
+    worktree = _pilot_worktree_path(repo, work_order)
+    pilot_payloads = _pilot_payloads(repo, worktree, work_order)
+    generic_writer = _write_runtime_json(
+        tmp_path,
+        "generic_writer.json",
+        pilot_payloads["generic_writer_dryrun_result"],
+    )
+    governed_shell = _write_runtime_json(
+        tmp_path,
+        "governed_shell.json",
+        pilot_payloads["governed_shell_dryrun_result"],
+    )
+    artifacts = _write_runtime_json(
+        tmp_path,
+        "artifact_contents.json",
+        pilot_payloads["artifact_contents"],
+    )
+    holoindex = _write_runtime_json(
+        tmp_path,
+        "holoindex_evidence.json",
+        pilot_payloads["holoindex_evidence"],
+    )
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        generic_writer_dryrun_result_path=generic_writer,
+        governed_shell_dryrun_result_path=governed_shell,
+        artifact_contents_path=artifacts,
+        holoindex_evidence_path=holoindex,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worktree_runner=runner,
+        now_iso=NOW,
+        now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
+        requested_queue_item_id="queue-1",
+        max_steps=11,
+    )
+
+    _assert_bootstrap_yielded_at_assurance(result, chain)
+
+
+def test_bootstrap_serial_loop_binds_pilot_dryruns_from_resident_queue_state(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    pilot_overrides = _pilot_path_overrides()
+    state = _write_runtime_json(
+        tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION)
+    )
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=_pilot_allowed_paths(),
+            denied_paths=pilot_overrides["denied_paths"],
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
+    work_order = _work_order(
+        **{
+            **pilot_overrides,
+            "bounded_worker_plan": _pilot_bounded_worker_plan(),
+        }
+    )
+    work_orders = _write_runtime_json(
+        tmp_path,
+        "work_orders.json",
+        {"work_orders": {WORK_ORDER_ID: work_order}},
+    )
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    runner = _FakeWorktreeRunner()
+    artifacts = _write_runtime_json(
+        tmp_path,
+        "artifact_contents.json",
+        {
+            PILOT_ARTIFACT: (
+                "# Resident Queue Pilot\n\n"
+                "The dry-run planner receipts were bound from resident queue state.\n"
+            )
+        },
+    )
+    holoindex = _write_runtime_json(
+        tmp_path,
+        "holoindex_evidence.json",
+        {
+            "index_gap_detected": False,
+            "retrieval_quality": "HIGH",
+            "holoindex_freshness_receipt_digest": "sha256:holo-fresh",
+        },
+    )
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        pilot_dryrun_binding_enabled=True,
+        artifact_contents_path=artifacts,
+        holoindex_evidence_path=holoindex,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worktree_runner=runner,
+        now_iso=NOW,
+        now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
+        requested_queue_item_id="queue-1",
+        max_steps=11,
+    )
+
+    _assert_bootstrap_yielded_at_assurance(result, chain)
+
+
+def test_bootstrap_serial_loop_binds_slice_verifier_request_from_queue_state(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    pilot_overrides = _pilot_path_overrides()
+    state = _write_runtime_json(
+        tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION)
+    )
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=_pilot_allowed_paths(),
+            denied_paths=pilot_overrides["denied_paths"],
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
+    work_order = _work_order(
+        **{
+            **pilot_overrides,
+            "bounded_worker_plan": _pilot_bounded_worker_plan(),
+            "slice_verifier_plan": _slice_verifier_plan(),
+        }
+    )
+    work_orders = _write_runtime_json(
+        tmp_path,
+        "work_orders.json",
+        {"work_orders": {WORK_ORDER_ID: work_order}},
+    )
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    runner = _FakeWorktreeRunner()
+    artifacts = _write_runtime_json(
+        tmp_path,
+        "artifact_contents.json",
+        {
+            PILOT_ARTIFACT: (
+                "# Resident Queue Pilot\n\n"
+                "The verifier request was bound from resident queue state.\n"
+            )
+        },
+    )
+    holoindex = _write_runtime_json(
+        tmp_path,
+        "holoindex_evidence.json",
+        {
+            "index_gap_detected": False,
+            "retrieval_quality": "HIGH",
+            "holoindex_freshness_receipt_digest": _digest("b"),
+        },
+    )
+    evidence_runner = _FakeEvidenceRunner()
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        pilot_dryrun_binding_enabled=True,
+        artifact_contents_path=artifacts,
+        holoindex_evidence_path=holoindex,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worktree_runner=runner,
+        evidence_command_runner=evidence_runner,
+        slice_verifier_request_binding_enabled=True,
+        now_iso=NOW,
+        now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
+        requested_queue_item_id="queue-1",
+        max_steps=12,
+    )
+
+    _assert_bootstrap_yielded_at_assurance(result, chain)
+
+
+def test_bootstrap_serial_loop_reaches_slice_verifier_with_explicit_request(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    pilot_overrides = _pilot_path_overrides()
+    state = _write_runtime_json(
+        tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION)
+    )
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=_pilot_allowed_paths(),
+            denied_paths=pilot_overrides["denied_paths"],
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
+    work_order = _work_order(**pilot_overrides)
+    work_orders = _write_runtime_json(
+        tmp_path,
+        "work_orders.json",
+        {"work_orders": {WORK_ORDER_ID: work_order}},
+    )
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    runner = _FakeWorktreeRunner()
+    worktree = _pilot_worktree_path(repo, work_order)
+    pilot_payloads = _pilot_payloads(repo, worktree, work_order)
+    generic_writer = _write_runtime_json(
+        tmp_path,
+        "generic_writer.json",
+        pilot_payloads["generic_writer_dryrun_result"],
+    )
+    governed_shell = _write_runtime_json(
+        tmp_path,
+        "governed_shell.json",
+        pilot_payloads["governed_shell_dryrun_result"],
+    )
+    artifacts = _write_runtime_json(
+        tmp_path,
+        "artifact_contents.json",
+        pilot_payloads["artifact_contents"],
+    )
+    holoindex = _write_runtime_json(
+        tmp_path,
+        "holoindex_evidence.json",
+        pilot_payloads["holoindex_evidence"],
+    )
+    verifier = _write_runtime_json(
+        tmp_path,
+        "verifier_request.json",
+        _slice_verifier_request(),
+    )
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        generic_writer_dryrun_result_path=generic_writer,
+        governed_shell_dryrun_result_path=governed_shell,
+        artifact_contents_path=artifacts,
+        holoindex_evidence_path=holoindex,
+        verifier_request_path=verifier,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worktree_runner=runner,
+        now_iso=NOW,
+        now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
+        requested_queue_item_id="queue-1",
+        max_steps=12,
+    )
+
+    _assert_bootstrap_yielded_at_assurance(result, chain)
+
+
+def test_bootstrap_serial_loop_produces_independent_evidence_for_slice_verifier(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    pilot_overrides = _pilot_path_overrides()
+    state = _write_runtime_json(
+        tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION)
+    )
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=_pilot_allowed_paths(),
+            denied_paths=pilot_overrides["denied_paths"],
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
+    work_order = _work_order(**pilot_overrides)
+    work_orders = _write_runtime_json(
+        tmp_path,
+        "work_orders.json",
+        {"work_orders": {WORK_ORDER_ID: work_order}},
+    )
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    worktree_runner = _FakeWorktreeRunner()
+    evidence_runner = _FakeEvidenceRunner()
+    worktree = _pilot_worktree_path(repo, work_order)
+    pilot_payloads = _pilot_payloads(repo, worktree, work_order)
+    generic_writer = _write_runtime_json(
+        tmp_path,
+        "generic_writer.json",
+        pilot_payloads["generic_writer_dryrun_result"],
+    )
+    governed_shell = _write_runtime_json(
+        tmp_path,
+        "governed_shell.json",
+        pilot_payloads["governed_shell_dryrun_result"],
+    )
+    artifacts = _write_runtime_json(
+        tmp_path,
+        "artifact_contents.json",
+        pilot_payloads["artifact_contents"],
+    )
+    holoindex = _write_runtime_json(
+        tmp_path,
+        "holoindex_evidence.json",
+        pilot_payloads["holoindex_evidence"],
+    )
+    evidence_request = _write_runtime_json(
+        tmp_path,
+        "evidence_producer_request.json",
+        _evidence_producer_request(repo, worktree),
+    )
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        generic_writer_dryrun_result_path=generic_writer,
+        governed_shell_dryrun_result_path=governed_shell,
+        artifact_contents_path=artifacts,
+        holoindex_evidence_path=holoindex,
+        evidence_producer_request_path=evidence_request,
+        evidence_command_runner=evidence_runner,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worktree_runner=worktree_runner,
+        now_iso=NOW,
+        now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
+        requested_queue_item_id="queue-1",
+        max_steps=12,
+    )
+
+    _assert_bootstrap_yielded_at_assurance(result, chain)
+    assert evidence_runner.calls == []
+
+
+def test_bootstrap_serial_loop_reaches_verified_draft_pr_publish_with_injected_runner(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    pilot_overrides = _pilot_path_overrides()
+    state = _write_runtime_json(
+        tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION)
+    )
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=_pilot_allowed_paths(),
+            denied_paths=pilot_overrides["denied_paths"],
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
+    work_order = _work_order(**pilot_overrides)
+    work_orders = _write_runtime_json(
+        tmp_path,
+        "work_orders.json",
+        {"work_orders": {WORK_ORDER_ID: work_order}},
+    )
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    worktree_runner = _FakeWorktreeRunner()
+    worktree = _pilot_worktree_path(repo, work_order)
+    pilot_payloads = _pilot_payloads(repo, worktree, work_order)
+    generic_writer = _write_runtime_json(
+        tmp_path,
+        "generic_writer.json",
+        pilot_payloads["generic_writer_dryrun_result"],
+    )
+    governed_shell = _write_runtime_json(
+        tmp_path,
+        "governed_shell.json",
+        pilot_payloads["governed_shell_dryrun_result"],
+    )
+    artifacts = _write_runtime_json(
+        tmp_path,
+        "artifact_contents.json",
+        pilot_payloads["artifact_contents"],
+    )
+    holoindex = _write_runtime_json(
+        tmp_path,
+        "holoindex_evidence.json",
+        pilot_payloads["holoindex_evidence"],
+    )
+    verifier = _write_runtime_json(
+        tmp_path,
+        "verifier_request.json",
+        _slice_verifier_request(),
+    )
+    publish_request = _write_runtime_json(
+        tmp_path,
+        "publish_request.json",
+        _draft_pr_publish_request(worktree),
+    )
+    draft_pr_runner = FakeDraftPrRunner()
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        generic_writer_dryrun_result_path=generic_writer,
+        governed_shell_dryrun_result_path=governed_shell,
+        artifact_contents_path=artifacts,
+        holoindex_evidence_path=holoindex,
+        verifier_request_path=verifier,
+        publish_request_path=publish_request,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worktree_runner=worktree_runner,
+        draft_pr_runner=draft_pr_runner,
+        now_iso=NOW,
+        now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
+        requested_queue_item_id="queue-1",
+        max_steps=13,
+    )
+
+    _assert_bootstrap_yielded_at_assurance(result, chain)
+    assert draft_pr_runner.calls == []
+
+
+def test_bootstrap_serial_loop_binds_draft_pr_publish_request_from_queue_state(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    pilot_overrides = _pilot_path_overrides()
+    state = _write_runtime_json(
+        tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION)
+    )
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=_pilot_allowed_paths(),
+            denied_paths=pilot_overrides["denied_paths"],
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
+    work_order = _work_order(
+        **{
+            **pilot_overrides,
+            "bounded_worker_plan": _pilot_bounded_worker_plan(),
+            "slice_verifier_plan": _slice_verifier_plan(),
+            "draft_pr_publish_plan": _draft_pr_publish_plan(),
+        }
+    )
+    work_orders = _write_runtime_json(
+        tmp_path,
+        "work_orders.json",
+        {"work_orders": {WORK_ORDER_ID: work_order}},
+    )
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    worktree_runner = _FakeWorktreeRunner()
+    artifacts = _write_runtime_json(
+        tmp_path,
+        "artifact_contents.json",
+        {
+            PILOT_ARTIFACT: (
+                "# Resident Queue Pilot\n\n"
+                "The draft PR request was bound from resident queue state.\n"
+            )
+        },
+    )
+    holoindex = _write_runtime_json(
+        tmp_path,
+        "holoindex_evidence.json",
+        {
+            "index_gap_detected": False,
+            "retrieval_quality": "HIGH",
+            "holoindex_freshness_receipt_digest": _digest("b"),
+        },
+    )
+    evidence_runner = _FakeEvidenceRunner()
+    draft_pr_runner = FakeDraftPrRunner()
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        pilot_dryrun_binding_enabled=True,
+        artifact_contents_path=artifacts,
+        holoindex_evidence_path=holoindex,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worktree_runner=worktree_runner,
+        evidence_command_runner=evidence_runner,
+        slice_verifier_request_binding_enabled=True,
+        draft_pr_runner=draft_pr_runner,
+        draft_pr_publish_request_binding_enabled=True,
+        now_iso=NOW,
+        now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
+        requested_queue_item_id="queue-1",
+        max_steps=13,
+    )
+
+    _assert_bootstrap_yielded_at_assurance(result, chain)
+    assert draft_pr_runner.calls == []
+    assert evidence_runner.calls == []
+
+
+def test_bootstrap_serial_loop_reaches_verified_outcome_ratchet_with_jsonl_store(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    pilot_overrides = _pilot_path_overrides()
+    state = _write_runtime_json(
+        tmp_path,
+        "work_state.json",
+        _snapshot(requested_operation=PILOT_OPERATION),
+    )
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=[PILOT_ARTIFACT],
+            denied_paths=[],
+            wsp15_allocation_receipt=pilot_overrides["wsp15_allocation_receipt"],
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
+    work_order = _work_order(**pilot_overrides)
+    work_orders = _write_runtime_json(
+        tmp_path,
+        "work_orders.json",
+        {"work_orders": {WORK_ORDER_ID: work_order}},
+    )
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    worktree_runner = _FakeWorktreeRunner()
+    worktree = _pilot_worktree_path(repo, work_order)
+    pilot_payloads = _pilot_payloads(repo, worktree, work_order)
+    generic_writer = _write_runtime_json(
+        tmp_path,
+        "generic_writer.json",
+        pilot_payloads["generic_writer_dryrun_result"],
+    )
+    governed_shell = _write_runtime_json(
+        tmp_path,
+        "governed_shell.json",
+        pilot_payloads["governed_shell_dryrun_result"],
+    )
+    artifacts = _write_runtime_json(
+        tmp_path,
+        "artifact_contents.json",
+        pilot_payloads["artifact_contents"],
+    )
+    holoindex = _write_runtime_json(
+        tmp_path,
+        "holoindex_evidence.json",
+        pilot_payloads["holoindex_evidence"],
+    )
+    verifier = _write_runtime_json(
+        tmp_path,
+        "verifier_request.json",
+        _slice_verifier_request(),
+    )
+    outcome_store = tmp_path / "runtime" / "outcomes" / "ratchet.jsonl"
+    draft_pr_runner = FakeDraftPrRunner()
+
+    verifier_run = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        generic_writer_dryrun_result_path=generic_writer,
+        governed_shell_dryrun_result_path=governed_shell,
+        artifact_contents_path=artifacts,
+        holoindex_evidence_path=holoindex,
+        verifier_request_path=verifier,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worktree_runner=worktree_runner,
+        now_iso=NOW,
+        now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
+        requested_queue_item_id="queue-1",
+        max_steps=12,
+    )
+    _assert_bootstrap_yielded_at_assurance(verifier_run, chain)
+    assert not outcome_store.exists()
+    assert draft_pr_runner.calls == []
+
+
+def test_bootstrap_serial_loop_reaches_held_out_regression_gate_with_request(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    ctx = _run_bootstrap_to_verified_outcome_ratchet(tmp_path, monkeypatch)
+    verifier_stage = ctx["verifier_stage"]
+    held_out_request = _write_runtime_json(
+        tmp_path,
+        "held_out_gate_request.json",
+        _held_out_gate_request(verifier_stage["verifier_result"]),
+    )
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=ctx["repo"],
+        work_state_path=ctx["state"],
+        chain_results_path=ctx["chain"],
+        authority_profile_path=ctx["profile"],
+        held_out_gate_request_path=held_out_request,
+        now_iso=NOW,
+        requested_queue_item_id="queue-1",
+        max_steps=2,
+    )
+
+    assert result.accepted is True
+    assert result.steps_run == 2
+    assert result.dispatched_stages == (
+        "model_feedback_admission",
+        "held_out_regression_gate",
+    )
+    assert result.next_action == "RUN_QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE"
+    assert result.no_model_feedback_ledger_admission_performed is False
+    assert result.no_held_out_regression_gate_performed is False
+    assert result.no_verified_outcome_ratchet_performed is True
+    assert result.no_pattern_memory_client_created is True
+    assert result.no_reward_settlement_performed is True
+    assert result.no_holoindex_reindex_performed is True
+
+    stored = json.loads(Path(ctx["chain"]).read_text(encoding="utf-8"))
+    stage = stored["stage_results"]["held_out_regression_gate"]
+    assert (
+        stage["decision"] == "QUEUE_AUTHORIZED_HELD_OUT_REGRESSION_GATE_INVOKE_ACCEPT"
+    )
+    assert (
+        stage["gate_result"]["decision"]
+        == "HELD_OUT_RECURSIVE_IMPROVEMENT_REGRESSION_GATE_ACCEPT"
+    )
+    assert stage["gate_result"]["receipt"]["no_pattern_memory_write_performed"] is True
+    assert stage["no_command_execution_performed"] is True
+    assert stage["no_test_execution_performed"] is True
+    assert stage["no_pattern_memory_write_performed"] is True
+    assert stage["no_pr_publish_performed"] is True
+    assert stage["no_merge_performed"] is True
+    assert stage["no_reward_settlement_performed"] is True
+    assert stage["no_holoindex_reindex_performed"] is True
+
+
+def test_bootstrap_serial_loop_fails_closed_at_held_out_without_gate_request(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    ctx = _run_bootstrap_to_verified_outcome_ratchet(tmp_path, monkeypatch)
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=ctx["repo"],
+        work_state_path=ctx["state"],
+        chain_results_path=ctx["chain"],
+        authority_profile_path=ctx["profile"],
+        now_iso=NOW,
+        requested_queue_item_id="queue-1",
+        max_steps=2,
+    )
+
+    assert result.accepted is False
+    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
+    assert result.steps_run == 1
+    assert result.dispatched_stages == ("model_feedback_admission",)
+    assert "FAIL_HANDLER_MISSING" in result.rejection_reasons
+    assert "stage:held_out_regression_gate" in result.rejection_reasons
+    assert result.no_model_feedback_ledger_admission_performed is False
+    assert result.no_held_out_regression_gate_performed is True
+    assert result.no_pattern_memory_client_created is True
+
+
+def test_bootstrap_serial_loop_reaches_pattern_memory_admission_with_injected_sink(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    ctx = _run_bootstrap_to_held_out_regression_gate(tmp_path, monkeypatch)
+    admission_request = _write_runtime_json(
+        tmp_path,
+        "pattern_memory_admission_request.json",
+        _pattern_memory_admission_request(),
+    )
+    sink = _FakePatternMemoryAdmissionSink()
+    publisher = _FakeVerifiedOutcomePublisher()
+
+    with patch(
+        "modules.communication.moltbot_bridge.src."
+        "reddog_main_resident_queue_serial_loop_bootstrap."
+        "_outcome_binding.resolve_verified_outcome_publisher",
+        return_value=publisher,
+    ):
+        result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+            repo_root=ctx["repo"],
+            work_state_path=ctx["state"],
+            chain_results_path=ctx["chain"],
+            authority_profile_path=ctx["profile"],
+            admission_request_path=admission_request,
+            pattern_memory_admission_sink=sink,
+            now_iso=NOW,
+            requested_queue_item_id="queue-1",
+            max_steps=1,
+        )
+
+    assert result.accepted is True
+    assert result.steps_run == 1
+    assert result.dispatched_stages == ("pattern_memory_admission",)
+    assert result.next_action == "STOP_QUEUE_CHAIN_COMPLETE"
+    assert result.no_pattern_memory_admission_performed is False
+    assert result.no_pattern_memory_write_performed is False
+    assert result.no_pattern_memory_client_created is True
+    assert result.no_reward_settlement_performed is True
+    assert result.no_holoindex_reindex_performed is True
+
+    stored = json.loads(Path(ctx["chain"]).read_text(encoding="utf-8"))
+    stage = stored["stage_results"]["pattern_memory_admission"]
+    assert (
+        stage["decision"] == "QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_ACCEPT"
+    )
+    assert stage["pattern_memory_write_performed"] is True
+    assert stage["receipt"]["pattern_memory_record_id"].startswith(
+        "reddog_verified_outcome_"
+    )
+    assert stage["no_command_execution_performed"] is True
+    assert stage["no_pr_publish_performed"] is True
+    assert stage["no_merge_performed"] is True
+    assert stage["no_reward_settlement_performed"] is True
+    assert stage["no_holoindex_reindex_performed"] is True
+    assert len(sink.records) == 1
+    assert (
+        sink.records[0]["record_type"]
+        == "reddog_verified_recursive_improvement_outcome"
+    )
+    assert sink.records[0]["work_order_id"] == WORK_ORDER_ID
+
+
+def test_bootstrap_serial_loop_fails_closed_at_pattern_memory_without_injected_sink(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    ctx = _run_bootstrap_to_held_out_regression_gate(tmp_path, monkeypatch)
+    admission_request = _write_runtime_json(
+        tmp_path,
+        "pattern_memory_admission_request.json",
+        _pattern_memory_admission_request(),
+    )
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=ctx["repo"],
+        work_state_path=ctx["state"],
+        chain_results_path=ctx["chain"],
+        authority_profile_path=ctx["profile"],
+        admission_request_path=admission_request,
+        now_iso=NOW,
+        requested_queue_item_id="queue-1",
+        max_steps=1,
+    )
+
+    assert result.accepted is False
+    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
+    assert result.steps_run == 0
+    assert result.dispatched_stages == ()
+    assert "FAIL_HANDLER_MISSING" in result.rejection_reasons
+    assert "stage:pattern_memory_admission" in result.rejection_reasons
+    assert result.no_pattern_memory_admission_performed is True
+    assert result.no_pattern_memory_write_performed is True
+    assert result.no_pattern_memory_client_created is True
+
+
+def test_bootstrap_serial_loop_fails_closed_at_bounded_worker_without_pilot_artifacts(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    pilot_overrides = _pilot_path_overrides()
+    state = _write_runtime_json(
+        tmp_path,
+        "work_state.json",
+        _snapshot(requested_operation=PILOT_OPERATION),
+    )
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=[PILOT_ARTIFACT],
+            denied_paths=[],
+            wsp15_allocation_receipt=pilot_overrides["wsp15_allocation_receipt"],
+            bounded_worker_plan=_pilot_bounded_worker_plan(),
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
+    work_order = _work_order(
+        **pilot_overrides,
+        bounded_worker_plan=_pilot_bounded_worker_plan(),
+    )
+    work_orders = _write_runtime_json(
+        tmp_path,
+        "work_orders.json",
+        {"work_orders": {WORK_ORDER_ID: work_order}},
+    )
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    runner = _FakeWorktreeRunner()
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worktree_runner=runner,
+        now_iso=NOW,
+        now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
+        requested_queue_item_id="queue-1",
+        max_steps=11,
+    )
+
+    _assert_bootstrap_yielded_at_assurance(result, chain)
+
+
+def test_bootstrap_serial_loop_fails_closed_at_slice_verifier_without_request(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    pilot_overrides = _pilot_path_overrides()
+    state = _write_runtime_json(
+        tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION)
+    )
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=_pilot_allowed_paths(),
+            denied_paths=pilot_overrides["denied_paths"],
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
+    work_order = _work_order(**pilot_overrides)
+    work_orders = _write_runtime_json(
+        tmp_path,
+        "work_orders.json",
+        {"work_orders": {WORK_ORDER_ID: work_order}},
+    )
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    runner = _FakeWorktreeRunner()
+    worktree = _pilot_worktree_path(repo, work_order)
+    pilot_payloads = _pilot_payloads(repo, worktree, work_order)
+    generic_writer = _write_runtime_json(
+        tmp_path,
+        "generic_writer.json",
+        pilot_payloads["generic_writer_dryrun_result"],
+    )
+    governed_shell = _write_runtime_json(
+        tmp_path,
+        "governed_shell.json",
+        pilot_payloads["governed_shell_dryrun_result"],
+    )
+    artifacts = _write_runtime_json(
+        tmp_path,
+        "artifact_contents.json",
+        pilot_payloads["artifact_contents"],
+    )
+    holoindex = _write_runtime_json(
+        tmp_path,
+        "holoindex_evidence.json",
+        pilot_payloads["holoindex_evidence"],
+    )
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        generic_writer_dryrun_result_path=generic_writer,
+        governed_shell_dryrun_result_path=governed_shell,
+        artifact_contents_path=artifacts,
+        holoindex_evidence_path=holoindex,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worktree_runner=runner,
+        now_iso=NOW,
+        now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
+        requested_queue_item_id="queue-1",
+        max_steps=12,
+    )
+
+    _assert_bootstrap_yielded_at_assurance(result, chain)
+
+
+def test_bootstrap_serial_loop_fails_closed_at_verified_draft_pr_publish_without_runner(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    pilot_overrides = _pilot_path_overrides()
+    state = _write_runtime_json(
+        tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION)
+    )
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=_pilot_allowed_paths(),
+            denied_paths=pilot_overrides["denied_paths"],
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
+    work_order = _work_order(**pilot_overrides)
+    work_orders = _write_runtime_json(
+        tmp_path,
+        "work_orders.json",
+        {"work_orders": {WORK_ORDER_ID: work_order}},
+    )
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    runner = _FakeWorktreeRunner()
+    worktree = _pilot_worktree_path(repo, work_order)
+    pilot_payloads = _pilot_payloads(repo, worktree, work_order)
+    generic_writer = _write_runtime_json(
+        tmp_path,
+        "generic_writer.json",
+        pilot_payloads["generic_writer_dryrun_result"],
+    )
+    governed_shell = _write_runtime_json(
+        tmp_path,
+        "governed_shell.json",
+        pilot_payloads["governed_shell_dryrun_result"],
+    )
+    artifacts = _write_runtime_json(
+        tmp_path,
+        "artifact_contents.json",
+        pilot_payloads["artifact_contents"],
+    )
+    holoindex = _write_runtime_json(
+        tmp_path,
+        "holoindex_evidence.json",
+        pilot_payloads["holoindex_evidence"],
+    )
+    verifier = _write_runtime_json(
+        tmp_path,
+        "verifier_request.json",
+        _slice_verifier_request(),
+    )
+    publish_request = _write_runtime_json(
+        tmp_path,
+        "publish_request.json",
+        _draft_pr_publish_request(worktree),
+    )
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        generic_writer_dryrun_result_path=generic_writer,
+        governed_shell_dryrun_result_path=governed_shell,
+        artifact_contents_path=artifacts,
+        holoindex_evidence_path=holoindex,
+        verifier_request_path=verifier,
+        publish_request_path=publish_request,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worktree_runner=runner,
+        now_iso=NOW,
+        now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
+        requested_queue_item_id="queue-1",
+        max_steps=13,
+    )
+
+    _assert_bootstrap_yielded_at_assurance(result, chain)
+
+
+def test_bootstrap_serial_loop_fails_closed_at_verified_outcome_ratchet_without_store(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    pilot_overrides = _pilot_path_overrides()
+    state = _write_runtime_json(
+        tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION)
+    )
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=_pilot_allowed_paths(),
+            denied_paths=pilot_overrides["denied_paths"],
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
+    work_order = _work_order(**pilot_overrides)
+    work_orders = _write_runtime_json(
+        tmp_path,
+        "work_orders.json",
+        {"work_orders": {WORK_ORDER_ID: work_order}},
+    )
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    worktree_runner = _FakeWorktreeRunner()
+    worktree = _pilot_worktree_path(repo, work_order)
+    pilot_payloads = _pilot_payloads(repo, worktree, work_order)
+    generic_writer = _write_runtime_json(
+        tmp_path,
+        "generic_writer.json",
+        pilot_payloads["generic_writer_dryrun_result"],
+    )
+    governed_shell = _write_runtime_json(
+        tmp_path,
+        "governed_shell.json",
+        pilot_payloads["governed_shell_dryrun_result"],
+    )
+    artifacts = _write_runtime_json(
+        tmp_path,
+        "artifact_contents.json",
+        pilot_payloads["artifact_contents"],
+    )
+    holoindex = _write_runtime_json(
+        tmp_path,
+        "holoindex_evidence.json",
+        pilot_payloads["holoindex_evidence"],
+    )
+    verifier = _write_runtime_json(
+        tmp_path,
+        "verifier_request.json",
+        _slice_verifier_request(),
+    )
+    draft_pr_runner = FakeDraftPrRunner()
+
+    verifier_run = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        generic_writer_dryrun_result_path=generic_writer,
+        governed_shell_dryrun_result_path=governed_shell,
+        artifact_contents_path=artifacts,
+        holoindex_evidence_path=holoindex,
+        verifier_request_path=verifier,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worktree_runner=worktree_runner,
+        now_iso=NOW,
+        now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
+        requested_queue_item_id="queue-1",
+        max_steps=12,
+    )
+    _assert_bootstrap_yielded_at_assurance(verifier_run, chain)
+    assert draft_pr_runner.calls == []
+
+
+def test_bootstrap_serial_loop_fails_closed_at_worktree_without_runner(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(
+            principal_public_key=principal_public, reddog_public_key=reddog_public
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
+    work_orders = _write_runtime_json(tmp_path, "work_orders.json", _work_orders())
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        now_iso=NOW,
+        now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
+        requested_queue_item_id="queue-1",
+        max_steps=9,
+    )
+
+    assert result.accepted is False
+    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
+    assert result.steps_run == 8
+    assert result.dispatched_stages == (
+        "authority_request",
+        "authority_runtime",
+        "authority_verification",
+        "worker_dispatch_dryrun",
+        "worker_dispatch_runtime",
+        "work_order_invocation",
+        "executor_plan",
+        "execution_valve",
+    )
+    assert "FAIL_HANDLER_MISSING" in result.rejection_reasons
+    assert "stage:worktree_create" in result.rejection_reasons
+    assert result.no_worktree_created is True
+
+
+def test_bootstrap_rejects_unsupported_worktree_runner_mode(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(tmp_path, "profile.json", _profile())
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=tmp_path / "runtime" / "chain_results.json",
+        authority_profile_path=profile,
+        worktree_runner_mode="shell",
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert "unsupported_worktree_runner_mode" in result.rejection_reasons
+
+
+def test_bootstrap_rejects_unsupported_evidence_command_runner_mode(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(tmp_path, "profile.json", _profile())
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=tmp_path / "runtime" / "chain_results.json",
+        authority_profile_path=profile,
+        evidence_command_runner_mode="shell",
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert "unsupported_evidence_command_runner_mode" in result.rejection_reasons
+
+
+def test_bootstrap_serial_loop_fails_closed_before_work_order_without_resolver(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(
+            principal_public_key=principal_public, reddog_public_key=reddog_public
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        valve_environment_path=valve_env,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        now_iso=NOW,
+        now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
+        requested_queue_item_id="queue-1",
+        max_steps=6,
+    )
+
+    assert result.accepted is False
+    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
+    assert result.steps_run == 0
+    assert result.dispatched_stages == ()
+    assert "FAIL_HANDLER_MISSING" in result.rejection_reasons
+    assert "stage:authority_request" in result.rejection_reasons
+    assert result.no_worktree_created is True
+    assert result.no_shell_command_executed is True
+
+
+def test_bootstrap_rejects_malformed_work_orders(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(tmp_path, "profile.json", _profile())
+    work_orders = _write_runtime_json(
+        tmp_path, "work_orders.json", {"work_orders": {"bad": {}}}
+    )
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=tmp_path / "runtime" / "chain_results.json",
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert "malformed_work_orders" in result.rejection_reasons
+
+
+def test_bootstrap_rejects_unsupported_work_order_materializer_mode(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(tmp_path, "profile.json", _profile())
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=tmp_path / "runtime" / "chain_results.json",
+        authority_profile_path=profile,
+        work_order_materializer_mode="unsafe",
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert "unsupported_work_order_materializer_mode" in result.rejection_reasons
+
+
+def test_bootstrap_rejects_work_order_materializer_with_explicit_work_orders_path(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(tmp_path, "profile.json", _profile())
+    work_orders = _write_runtime_json(tmp_path, "work_orders.json", _work_orders())
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=tmp_path / "runtime" / "chain_results.json",
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        work_order_materializer_mode="authority_profile",
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert (
+        "work_order_materializer_conflicts_with_work_orders_path"
+        in result.rejection_reasons
+    )
+
+
+def test_bootstrap_rejects_work_order_materializer_with_empty_holoindex_evidence(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(
+        tmp_path, "profile.json", _profile(holoindex_evidence={})
+    )
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=tmp_path / "runtime" / "chain_results.json",
+        authority_profile_path=profile,
+        work_order_materializer_mode="authority_profile",
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert (
+        "work_order_materializer_malformed_holoindex_evidence:holoindex_query"
+        in result.rejection_reasons
+    )
+
+
+def test_bootstrap_rejects_work_order_materializer_without_context_binding(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _profile()
+    profile.pop("snapshot_receipt_id")
+    profile.pop("wsp15_allocation_receipt")
+    profile = _write_runtime_json(tmp_path, "profile.json", profile)
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=tmp_path / "runtime" / "chain_results.json",
+        authority_profile_path=profile,
+        work_order_materializer_mode="authority_profile",
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert (
+        "work_order_materializer_missing_context_binding:snapshot_receipt_id"
+        in result.rejection_reasons
+    )
+
+
+def test_bootstrap_materializer_uses_queue_wsp15_allocation_when_profile_omits_it(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile_payload = _profile()
+    profile_payload.pop("wsp15_allocation_receipt")
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    profile_payload["principal_public_key"] = principal_public
+    profile_payload["reddog_public_key"] = reddog_public
+    profile = _write_runtime_json(tmp_path, "profile.json", profile_payload)
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_order_materializer_mode="authority_profile",
+        valve_environment_path=valve_env,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        now_iso=NOW,
+        now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
+        requested_queue_item_id="queue-1",
+        max_steps=7,
+    )
+
+    assert result.accepted is True
+
+
+def test_materializer_context_binding_uses_queue_wsp15_allocation_as_authority() -> (
+    None
+):
+    profile = _profile()
+    profile.pop("wsp15_allocation_receipt")
+    allocation = _queue_wsp15_allocation_receipt()
+
+    binding, reasons = _operational_context_binding(
+        authority_profile=profile,
+        snapshot={},
+        queue_wsp15_allocation=allocation,
+        queue_wsp15_allocation_receipt_id=str(allocation["receipt_id"]),
+    )
+
+    assert reasons == ()
+    assert binding["wsp15_allocation_receipt"] == allocation
+
+
+def test_materializer_context_binding_rejects_conflicting_profile_wsp15_allocation() -> (
+    None
+):
+    allocation = _queue_wsp15_allocation_receipt()
+    conflicting = dict(allocation)
+    conflicting["priority"] = "P4"
+
+    _, reasons = _operational_context_binding(
+        authority_profile=_profile(wsp15_allocation_receipt=conflicting),
+        snapshot={},
+        queue_wsp15_allocation=allocation,
+        queue_wsp15_allocation_receipt_id=str(allocation["receipt_id"]),
+    )
+
+    assert (
+        "work_order_materializer_conflicting_wsp15_allocation_receipt:"
+        "authority_profile.wsp15_allocation_receipt"
+    ) in reasons
+
+
+def test_materializer_context_binding_rejects_conflicting_snapshot_wsp15_allocation() -> (
+    None
+):
+    allocation = _queue_wsp15_allocation_receipt()
+    conflicting = dict(allocation)
+    conflicting["mps_total"] = 19
+
+    _, reasons = _operational_context_binding(
+        authority_profile=_profile(),
+        snapshot={"wsp15_allocation_receipt": conflicting},
+        queue_wsp15_allocation=allocation,
+        queue_wsp15_allocation_receipt_id=str(allocation["receipt_id"]),
+    )
+
+    assert (
+        "work_order_materializer_conflicting_wsp15_allocation_receipt:"
+        "snapshot.wsp15_allocation_receipt"
+    ) in reasons
+
+
+def test_materializer_context_binding_rejects_queue_receipt_id_mismatch() -> None:
+    allocation = _queue_wsp15_allocation_receipt()
+
+    _, reasons = _operational_context_binding(
+        authority_profile=_profile(),
+        snapshot={},
+        queue_wsp15_allocation=allocation,
+        queue_wsp15_allocation_receipt_id="sha256:other-allocation",
+    )
+
+    assert "work_order_materializer_wsp15_allocation_receipt_id_mismatch" in reasons
+
+
+def test_materializer_context_binding_rejects_missing_queue_allocation_receipt_id() -> (
+    None
+):
+    profile = _profile()
+    profile.pop("wsp15_allocation_receipt")
+    allocation = _queue_wsp15_allocation_receipt()
+    allocation.pop("receipt_id")
+
+    _, reasons = _operational_context_binding(
+        authority_profile=profile,
+        snapshot={},
+        queue_wsp15_allocation=allocation,
+        queue_wsp15_allocation_receipt_id="",
+    )
+
+    assert (
+        "work_order_materializer_missing_queue_wsp15_allocation_receipt_id" in reasons
+    )
+    assert (
+        "work_order_materializer_malformed_wsp15_allocation_receipt:receipt_id"
+        in reasons
+    )
+
+
+def test_materializer_context_binding_rejects_malformed_mps_priority_relationship() -> (
+    None
+):
+    profile = _profile()
+    profile.pop("wsp15_allocation_receipt")
+    allocation = _queue_wsp15_allocation_receipt()
+    allocation["priority"] = "P4"
+
+    _, reasons = _operational_context_binding(
+        authority_profile=profile,
+        snapshot={},
+        queue_wsp15_allocation=allocation,
+        queue_wsp15_allocation_receipt_id=str(allocation["receipt_id"]),
+    )
+
+    assert (
+        "work_order_materializer_malformed_wsp15_allocation_receipt:priority" in reasons
+    )
+
+
+def test_bootstrap_rejects_valve_environment_inside_repo(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(tmp_path, "profile.json", _profile())
+    valve_env = repo / "valve_env.json"
+    valve_env.write_text(
+        json.dumps(_valve_environment(), sort_keys=True), encoding="utf-8"
+    )
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=tmp_path / "runtime" / "chain_results.json",
+        authority_profile_path=profile,
+        valve_environment_path=valve_env,
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert "valve_environment_path_inside_repo" in result.rejection_reasons
+
+
+def test_bootstrap_rejects_unsupported_artifact_generator_mode(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(tmp_path, "profile.json", _profile())
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=tmp_path / "runtime" / "chain_results.json",
+        authority_profile_path=profile,
+        artifact_generator_mode="unsafe",
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert "unsupported_artifact_generator_mode" in result.rejection_reasons
+
+
+def test_bootstrap_rejects_missing_authority_profile(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=tmp_path / "runtime" / "chain_results.json",
+        authority_profile_path=None,
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert "missing_authority_profile_path" in result.rejection_reasons
+
+
+def test_bootstrap_rejects_inputs_inside_repo(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    inside_state = repo / "work_state.json"
+    inside_state.write_text(json.dumps(_snapshot()), encoding="utf-8")
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        runtime_allowed_root=tmp_path / "runtime",
+        work_state_path=inside_state,
+        chain_results_path=tmp_path / "runtime" / "chain_results.json",
+        authority_profile_path=tmp_path / "runtime" / "profile.json",
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert "work_state_path_inside_repo" in result.rejection_reasons
+
+
+def test_main_serial_loop_preflight_is_disabled_by_default() -> None:
+    import main
+
+    with patch.dict("os.environ", {}, clear=True):
+        assert main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+
+
+def test_main_serial_loop_preflight_profile_enables_serial_loop(
+    tmp_path: Path,
+) -> None:
+    import main
+
+    runtime_root = tmp_path / "resident-runtime"
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap.run_reddog_main_resident_queue_serial_loop_bootstrap",
+        return_value=type(
+            "Result",
+            (),
+            {
+                "accepted": True,
+                "status": REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED,
+                "queue_item_id": "queue-1",
+                "selected_slice": "REDDOG_TEST_SLICE_PHASE1",
+                "steps_run": 1,
+                "dispatched_stages": ("authority_request",),
+                "next_action": "RUN_QUEUE_AUTHORITY_RUNTIME_INVOKE",
+                "chain_results_path": str(
+                    runtime_root / "resident_queue_chain_results.json"
+                ),
+                "store_revision": "sha256:revision",
+                "rejection_reasons": (),
+            },
+        )(),
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+            },
+            clear=True,
+        ):
+            assert (
+                main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+            )
+
+    assert mocked.called is True
+    assert mocked.call_args.kwargs["work_state_path"] == str(
+        runtime_root / "authoritative_work_state.json"
+    )
+
+
+def test_main_serial_loop_preflight_profile_materializes_authority_resolver_stores(
+    tmp_path: Path,
+) -> None:
+    import main
+
+    runtime_root = tmp_path / "resident-runtime"
+    runtime_root.mkdir(parents=True)
+    (runtime_root / "principal_authority_record.json").write_text(
+        json.dumps(
+            {
+                "principal_id": "github:mjtrout",
+                "principal_provider": "github",
+                "principal_public_key": "pub:principal",
+                "repo_scope": ["FOUNDUPS/Foundups-Agent"],
+                "foundup_scope": ["paccess_001"],
+                "verified_subject_digest": "sha256:verified-subject",
+                "reward_account": "reward:012",
+                "owner_dae": "dae:012",
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+    (runtime_root / "permission_snapshot.json").write_text(
+        json.dumps(
+            {
+                "evidence_digest": "sha256:snap-1",
+                "expires_at": 1600,
+                "can_write": True,
+                "repo_full_name": "FOUNDUPS/Foundups-Agent",
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap.run_reddog_main_resident_queue_serial_loop_bootstrap",
+        return_value=type(
+            "Result",
+            (),
+            {
+                "accepted": True,
+                "status": REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED,
+                "queue_item_id": "queue-1",
+                "selected_slice": "REDDOG_TEST_SLICE_PHASE1",
+                "steps_run": 1,
+                "dispatched_stages": ("authority_request",),
+                "next_action": "RUN_QUEUE_AUTHORITY_RUNTIME_INVOKE",
+                "chain_results_path": str(
+                    runtime_root / "resident_queue_chain_results.json"
+                ),
+                "store_revision": "sha256:revision",
+                "rejection_reasons": (),
+            },
+        )(),
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+            },
+            clear=True,
+        ):
+            assert (
+                main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+            )
+
+    principal_records = runtime_root / "principal_authority_records.json"
+    permission_snapshots = runtime_root / "permission_snapshots.json"
+    assert mocked.call_args.kwargs["authority_state_path"] == str(
+        runtime_root / "authority_runtime_state.json"
+    )
+    assert mocked.call_args.kwargs["principal_authority_records_path"] == str(
+        principal_records
+    )
+    assert mocked.call_args.kwargs["permission_snapshots_path"] == str(
+        permission_snapshots
+    )
+    assert mocked.call_args.kwargs["signer_socket_path"] == str(
+        runtime_root / "reddog_signer.sock"
+    )
+    assert (
+        mocked.call_args.kwargs["signature_verifier_backend"]
+        == REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519
+    )
+    verifier_config = main.run_reddog_resident_queue_serial_loop_preflight.authority_verification_config
+    assert (
+        verifier_config.signature_verifier_backend
+        == REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519
+    )
+    assert verifier_config.runtime_allowed_root == str(runtime_root)
+    assert verifier_config.authority_state_path == str(
+        runtime_root / "authority_runtime_state.json"
+    )
+    assert verifier_config.principal_authority_records_path == str(principal_records)
+    assert verifier_config.permission_snapshots_path == str(permission_snapshots)
+    assert (
+        "authority_verification_config"
+        not in main.run_reddog_resident_queue_serial_loop_preflight.last_result
+    )
+    principal_store = json.loads(principal_records.read_text(encoding="utf-8"))
+    snapshot_store = json.loads(permission_snapshots.read_text(encoding="utf-8"))
+    assert "github|github:mjtrout" in principal_store["principals"]
+    assert "sha256:snap-1" in snapshot_store["snapshots"]
+
+
+def test_main_serial_loop_preflight_explicit_zero_overrides_profile(
+    tmp_path: Path,
+) -> None:
+    import main
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap.run_reddog_main_resident_queue_serial_loop_bootstrap",
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP": "0",
+                "REDDOG_RESIDENT_RUNTIME_ROOT": str(tmp_path / "resident-runtime"),
+            },
+            clear=True,
+        ):
+            assert (
+                main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+            )
+
+    assert mocked.called is False
+
+
+def test_main_serial_loop_preflight_passes_when_bootstrap_applies(
+    tmp_path: Path,
+) -> None:
+    import main
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap.run_reddog_main_resident_queue_serial_loop_bootstrap",
+        return_value=type(
+            "Result",
+            (),
+            {
+                "accepted": True,
+                "status": REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED,
+                "queue_item_id": "queue-1",
+                "selected_slice": "REDDOG_TEST_SLICE_PHASE1",
+                "steps_run": 1,
+                "dispatched_stages": ("authority_request",),
+                "next_action": "RUN_QUEUE_AUTHORITY_RUNTIME_INVOKE",
+                "chain_results_path": str(tmp_path / "chain.json"),
+                "store_revision": "sha256:revision",
+                "rejection_reasons": (),
+            },
+        )(),
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP": "1",
+                "REDDOG_RESIDENT_RUNTIME_ROOT": str(tmp_path),
+                "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_MAX_STEPS": "1",
+                "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
+                "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(
+                    tmp_path / "chain.json"
+                ),
+                "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(
+                    tmp_path / "profile.json"
+                ),
+                "REDDOG_WORK_ORDERS_PATH": str(tmp_path / "work_orders.json"),
+                "REDDOG_WORK_ORDER_MATERIALIZER_MODE": "",
+                "REDDOG_EXECUTION_VALVE_ENV_PATH": str(tmp_path / "valve_env.json"),
+                "REDDOG_GENERIC_WRITER_DRYRUN_RESULT_PATH": str(
+                    tmp_path / "generic_writer.json"
+                ),
+                "REDDOG_GOVERNED_SHELL_DRYRUN_RESULT_PATH": str(
+                    tmp_path / "governed_shell.json"
+                ),
+                "REDDOG_ARTIFACT_CONTENTS_PATH": str(
+                    tmp_path / "artifact_contents.json"
+                ),
+                "REDDOG_ARTIFACT_GENERATION_REQUEST_PATH": str(
+                    tmp_path / "artifact_generation_request.json"
+                ),
+                "REDDOG_ARTIFACT_GENERATOR_MODE": "foundups_fusion",
+                "REDDOG_HOLOINDEX_EVIDENCE_PATH": str(
+                    tmp_path / "holoindex_evidence.json"
+                ),
+                "REDDOG_SLICE_VERIFIER_REQUEST_PATH": str(
+                    tmp_path / "verifier_request.json"
+                ),
+                "REDDOG_EVIDENCE_PRODUCER_REQUEST_PATH": str(
+                    tmp_path / "evidence_producer_request.json"
+                ),
+                "REDDOG_EVIDENCE_COMMAND_RUNNER_MODE": "real",
+                "REDDOG_DRAFT_PR_PUBLISH_REQUEST_PATH": str(
+                    tmp_path / "publish_request.json"
+                ),
+                "REDDOG_OUTCOME_RATCHET_REQUEST_PATH": str(
+                    tmp_path / "ratchet_request.json"
+                ),
+                "REDDOG_OUTCOME_RATCHET_STORE_PATH": str(tmp_path / "ratchet.jsonl"),
+                "REDDOG_MODEL_FEEDBACK_LEDGER_STORE_PATH": str(
+                    tmp_path / "model_feedback.jsonl"
+                ),
+                "REDDOG_HELD_OUT_GATE_REQUEST_PATH": str(
+                    tmp_path / "held_out_gate_request.json"
+                ),
+                "REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_PATH": str(
+                    tmp_path / "pattern_memory_admission_request.json"
+                ),
+                "REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH": str(
+                    tmp_path / "pattern_memory.db"
+                ),
+                "REDDOG_AUTHORITY_RUNTIME_STATE_PATH": str(
+                    tmp_path / "authority_state.json"
+                ),
+                "REDDOG_PERMISSION_SNAPSHOTS_PATH": str(tmp_path / "snapshots.json"),
+                "REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH": str(
+                    tmp_path / "principals.json"
+                ),
+                "REDDOG_SIGNER_SOCKET_PATH": str(tmp_path / "signer.sock"),
+                "REDDOG_SIGNER_SOCKET_TIMEOUT_S": "2.5",
+                "REDDOG_SIGNER_SOCKET_MAX_RESPONSE_BYTES": "8192",
+                "REDDOG_SIGNATURE_VERIFIER_BACKEND": REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+                "REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_MODE": "real",
+                "REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_TIMEOUT_S": "77",
+                "REDDOG_DRAFT_PR_RUNNER_MODE": "real",
+                "REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S": "88",
+                "REDDOG_RESIDENT_QUEUE_NOW_EPOCH": "1000",
+                "REDDOG_WRE_QUEUE_ITEM_ID": "queue-1",
+            },
+            clear=True,
+        ):
+            assert (
+                main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+            )
+
+    assert mocked.call_args.kwargs["work_state_path"] == str(tmp_path / "state.json")
+    assert mocked.call_args.kwargs["chain_results_path"] == str(tmp_path / "chain.json")
+    assert mocked.call_args.kwargs["authority_profile_path"] == str(
+        tmp_path / "profile.json"
+    )
+    assert mocked.call_args.kwargs["work_orders_path"] == str(
+        tmp_path / "work_orders.json"
+    )
+    assert (
+        mocked.call_args.kwargs["work_order_materializer_mode"] == "authority_profile"
+    )
+    assert mocked.call_args.kwargs["valve_environment_path"] == str(
+        tmp_path / "valve_env.json"
+    )
+    assert mocked.call_args.kwargs["pilot_dryrun_binding_enabled"] is True
+    assert mocked.call_args.kwargs["generic_writer_dryrun_result_path"] == str(
+        tmp_path / "generic_writer.json"
+    )
+    assert mocked.call_args.kwargs["governed_shell_dryrun_result_path"] == str(
+        tmp_path / "governed_shell.json"
+    )
+    assert mocked.call_args.kwargs["artifact_contents_path"] == str(
+        tmp_path / "artifact_contents.json"
+    )
+    assert mocked.call_args.kwargs["artifact_generation_request_path"] == str(
+        tmp_path / "artifact_generation_request.json"
+    )
+    assert (
+        mocked.call_args.kwargs["artifact_generation_request_binding_enabled"] is True
+    )
+    assert mocked.call_args.kwargs["artifact_generator_mode"] == "foundups_fusion"
+    assert mocked.call_args.kwargs["holoindex_evidence_path"] == str(
+        tmp_path / "holoindex_evidence.json"
+    )
+    assert mocked.call_args.kwargs["verifier_request_path"] == str(
+        tmp_path / "verifier_request.json"
+    )
+    assert mocked.call_args.kwargs["evidence_producer_request_path"] == str(
+        tmp_path / "evidence_producer_request.json"
+    )
+    assert mocked.call_args.kwargs["slice_verifier_request_binding_enabled"] is True
+    assert mocked.call_args.kwargs["evidence_command_runner_mode"] == "real"
+    assert mocked.call_args.kwargs["publish_request_path"] == str(
+        tmp_path / "publish_request.json"
+    )
+    assert mocked.call_args.kwargs["draft_pr_publish_request_binding_enabled"] is True
+    assert mocked.call_args.kwargs["ratchet_request_path"] == str(
+        tmp_path / "ratchet_request.json"
+    )
+    assert mocked.call_args.kwargs["outcome_ratchet_store_path"] == str(
+        tmp_path / "ratchet.jsonl"
+    )
+    assert mocked.call_args.kwargs["model_feedback_ledger_store_path"] == str(
+        tmp_path / "model_feedback.jsonl"
+    )
+    assert mocked.call_args.kwargs["outcome_ratchet_request_binding_enabled"] is True
+    assert mocked.call_args.kwargs["held_out_gate_request_path"] == str(
+        tmp_path / "held_out_gate_request.json"
+    )
+    assert mocked.call_args.kwargs["held_out_gate_request_binding_enabled"] is True
+    assert mocked.call_args.kwargs["admission_request_path"] == str(
+        tmp_path / "pattern_memory_admission_request.json"
+    )
+    assert (
+        mocked.call_args.kwargs["pattern_memory_admission_request_binding_enabled"]
+        is True
+    )
+    assert mocked.call_args.kwargs["pattern_memory_admission_sink"] is not None
+    assert str(mocked.call_args.kwargs["pattern_memory_admission_sink"].db_path) == str(
+        tmp_path / "pattern_memory.db"
+    )
+    assert mocked.call_args.kwargs["authority_state_path"] == str(
+        tmp_path / "authority_state.json"
+    )
+    assert mocked.call_args.kwargs["permission_snapshots_path"] == str(
+        tmp_path / "snapshots.json"
+    )
+    assert mocked.call_args.kwargs["principal_authority_records_path"] == str(
+        tmp_path / "principals.json"
+    )
+    assert mocked.call_args.kwargs["signer_socket_path"] == str(
+        tmp_path / "signer.sock"
+    )
+    assert mocked.call_args.kwargs["signer_socket_timeout_s"] == 2.5
+    assert mocked.call_args.kwargs["signer_socket_max_response_bytes"] == 8192
+    assert (
+        mocked.call_args.kwargs["signature_verifier_backend"]
+        == REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519
+    )
+    assert mocked.call_args.kwargs["worktree_runner_mode"] == "real"
+    assert mocked.call_args.kwargs["worktree_runner_timeout_s"] == 77
+    assert (
+        mocked.call_args.kwargs["draft_pr_runner"].__class__.__name__
+        == "RealWorktreeRunner"
+    )
+    assert mocked.call_args.kwargs["draft_pr_runner"].timeout_s == 88
+    assert mocked.call_args.kwargs["requested_queue_item_id"] == "queue-1"
+    assert mocked.call_args.kwargs["now_epoch"] != 1000
+    assert callable(mocked.call_args.kwargs["trusted_now_epoch"])
+    assert mocked.call_args.kwargs["trusted_now_epoch"]() != 1000
+    assert mocked.call_args.kwargs["max_steps"] == 1
+
+
+def test_main_serial_loop_preflight_worktree_profile_derives_model_and_worktree_modes(
+    tmp_path: Path,
+) -> None:
+    import main
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap.run_reddog_main_resident_queue_serial_loop_bootstrap",
+        return_value=type(
+            "Result",
+            (),
+            {
+                "accepted": True,
+                "status": REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED,
+                "queue_item_id": "queue-1",
+                "selected_slice": "REDDOG_TEST_SLICE_PHASE1",
+                "steps_run": 1,
+                "dispatched_stages": ("bounded_worker_pilot",),
+                "next_action": "STOP_QUEUE_CHAIN_COMPLETE",
+                "chain_results_path": str(tmp_path / "chain.json"),
+                "store_revision": "sha256:revision",
+                "rejection_reasons": (),
+            },
+        )(),
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP": "1",
+                "REDDOG_RESIDENT_RUNTIME_ROOT": str(tmp_path),
+                "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code_fusion_worktree",
+                "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
+                "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(
+                    tmp_path / "chain.json"
+                ),
+                "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(
+                    tmp_path / "profile.json"
+                ),
+            },
+            clear=True,
+        ):
+            assert (
+                main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+            )
+
+    assert (
+        mocked.call_args.kwargs["work_order_materializer_mode"] == "authority_profile"
+    )
+    assert (
+        mocked.call_args.kwargs["artifact_generation_request_binding_enabled"] is True
+    )
+    assert mocked.call_args.kwargs["artifact_generator_mode"] == "foundups_fusion"
+    assert mocked.call_args.kwargs["worktree_runner_mode"] == "real"
+    assert mocked.call_args.kwargs["evidence_command_runner_mode"] is None
+    assert mocked.call_args.kwargs["outcome_ratchet_store_path"] is None
+
+
+def test_main_serial_loop_preflight_profile_derives_mandatory_runtime_paths(
+    tmp_path: Path,
+) -> None:
+    import main
+
+    runtime_root = tmp_path / "resident-runtime"
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap.run_reddog_main_resident_queue_serial_loop_bootstrap",
+        return_value=type(
+            "Result",
+            (),
+            {
+                "accepted": True,
+                "status": REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED,
+                "queue_item_id": "queue-1",
+                "selected_slice": "REDDOG_TEST_SLICE_PHASE1",
+                "steps_run": 1,
+                "dispatched_stages": ("authority_request",),
+                "next_action": "RUN_QUEUE_AUTHORITY_RUNTIME_INVOKE",
+                "chain_results_path": str(
+                    runtime_root / "resident_queue_chain_results.json"
+                ),
+                "store_revision": "sha256:revision",
+                "rejection_reasons": (),
+            },
+        )(),
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP": "1",
+                "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+            },
+            clear=True,
+        ):
+            assert (
+                main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+            )
+
+    assert mocked.call_args.kwargs["work_state_path"] == str(
+        runtime_root / "authoritative_work_state.json"
+    )
+    assert mocked.call_args.kwargs["chain_results_path"] == str(
+        runtime_root / "resident_queue_chain_results.json"
+    )
+    assert mocked.call_args.kwargs["authority_profile_path"] == str(
+        runtime_root / "authority_profile.json"
+    )
+    assert mocked.call_args.kwargs["valve_environment_path"] is None
+    assert (
+        mocked.call_args.kwargs["work_order_materializer_mode"] == "authority_profile"
+    )
+    assert mocked.call_args.kwargs["artifact_generator_mode"] is None
+    assert not runtime_root.exists()
+
+
+def test_main_serial_loop_preflight_profile_derives_existing_valve_environment_path(
+    tmp_path: Path,
+) -> None:
+    import main
+
+    runtime_root = tmp_path / "resident-runtime"
+    runtime_root.mkdir(parents=True)
+    valve_env = runtime_root / "execution_valve_env.json"
+    valve_env.write_text("{}", encoding="utf-8")
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap.run_reddog_main_resident_queue_serial_loop_bootstrap",
+        return_value=type(
+            "Result",
+            (),
+            {
+                "accepted": True,
+                "status": REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED,
+                "queue_item_id": "queue-1",
+                "selected_slice": "REDDOG_TEST_SLICE_PHASE1",
+                "steps_run": 1,
+                "dispatched_stages": ("execution_valve",),
+                "next_action": "RUN_QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE",
+                "chain_results_path": str(
+                    runtime_root / "resident_queue_chain_results.json"
+                ),
+                "store_revision": "sha256:revision",
+                "rejection_reasons": (),
+            },
+        )(),
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP": "1",
+                "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+            },
+            clear=True,
+        ):
+            assert (
+                main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+            )
+
+    assert mocked.call_args.kwargs["valve_environment_path"] == str(valve_env)
+
+
+def test_main_serial_loop_preflight_draft_pr_profile_derives_draft_runner(
+    tmp_path: Path,
+) -> None:
+    import main
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap.run_reddog_main_resident_queue_serial_loop_bootstrap",
+        return_value=type(
+            "Result",
+            (),
+            {
+                "accepted": True,
+                "status": REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED,
+                "queue_item_id": "queue-1",
+                "selected_slice": "REDDOG_TEST_SLICE_PHASE1",
+                "steps_run": 1,
+                "dispatched_stages": ("verified_draft_pr_publish",),
+                "next_action": "STOP_QUEUE_CHAIN_COMPLETE",
+                "chain_results_path": str(tmp_path / "chain.json"),
+                "store_revision": "sha256:revision",
+                "rejection_reasons": (),
+            },
+        )(),
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP": "1",
+                "REDDOG_RESIDENT_RUNTIME_ROOT": str(tmp_path),
+                "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code_fusion_worktree_draft_pr",
+                "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
+                "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(
+                    tmp_path / "chain.json"
+                ),
+                "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(
+                    tmp_path / "profile.json"
+                ),
+                "REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S": "91",
+            },
+            clear=True,
+        ):
+            assert (
+                main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+            )
+
+    assert mocked.call_args.kwargs["artifact_generator_mode"] == "foundups_fusion"
+    assert mocked.call_args.kwargs["worktree_runner_mode"] == "real"
+    assert mocked.call_args.kwargs["evidence_command_runner_mode"] == "real"
+    assert mocked.call_args.kwargs["outcome_ratchet_store_path"] == str(
+        tmp_path / "outcome_ratchet" / "verified_outcomes.jsonl"
+    )
+    assert mocked.call_args.kwargs["model_feedback_ledger_store_path"] == str(
+        tmp_path / "model_feedback" / "model_feedback.jsonl"
+    )
+    assert mocked.call_args.kwargs["pattern_memory_admission_sink"] is None
+    assert (
+        mocked.call_args.kwargs["draft_pr_runner"].__class__.__name__
+        == "RealWorktreeRunner"
+    )
+    assert mocked.call_args.kwargs["draft_pr_runner"].timeout_s == 91
+
+
+def test_main_serial_loop_preflight_pattern_memory_profile_warns_without_outcome_authority(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    import main
+
+    ctx = _run_bootstrap_to_held_out_regression_gate(tmp_path, monkeypatch)
+    state_payload = json.loads(Path(ctx["state"]).read_text(encoding="utf-8"))
+    state_payload["worker_claims"][0]["expires_at"] = "2099-01-01T00:00:00+00:00"
+    Path(ctx["state"]).write_text(
+        json.dumps(state_payload, sort_keys=True),
+        encoding="utf-8",
+    )
+    admission_request = _write_runtime_json(
+        tmp_path,
+        "pattern_memory_admission_request.json",
+        _pattern_memory_admission_request(),
+    )
+
+    with patch.dict(
+        "os.environ",
+        {
+            "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP": "1",
+            "REDDOG_RESIDENT_RUNTIME_ROOT": str(tmp_path / "runtime"),
+            "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": (
+                "signed_0102_bounded_code_fusion_worktree_draft_pr_pattern_memory"
+            ),
+            "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(ctx["state"]),
+            "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(ctx["chain"]),
+            "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(ctx["profile"]),
+            "REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_PATH": str(admission_request),
+            "REDDOG_WRE_QUEUE_ITEM_ID": "queue-1",
+            "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_MAX_STEPS": "1",
+            "REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S": "93",
+        },
+        clear=True,
+    ):
+        assert main.run_reddog_resident_queue_serial_loop_preflight(ctx["repo"]) is True
+
+    captured = capsys.readouterr().out
+    assert "[REDDOG-QUEUE-LOOP] preflight=WARN" in captured
+    assert "FAIL_STAGE_REJECTED:pattern_memory_admission" in captured
+    assert "FAIL_VERIFIED_OUTCOME_EVIDENCE_PUBLICATION" in captured
+    stored = json.loads(Path(ctx["chain"]).read_text(encoding="utf-8"))
+    assert "pattern_memory_admission" not in stored["stage_results"]
+
+    db_path = tmp_path / "runtime" / "pattern_memory" / "pattern_memory.db"
+    assert not db_path.exists()
+    assert not (Path(ctx["repo"]) / ".reddog").exists()
+
+
+def test_main_serial_loop_preflight_blocks_when_enforced() -> None:
+    import main
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap.run_reddog_main_resident_queue_serial_loop_bootstrap",
+        return_value=type(
+            "Result",
+            (),
+            {
+                "accepted": False,
+                "status": REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY,
+                "queue_item_id": None,
+                "selected_slice": None,
+                "steps_run": 0,
+                "dispatched_stages": (),
+                "next_action": None,
+                "chain_results_path": None,
+                "store_revision": None,
+                "rejection_reasons": ("missing_authority_profile_path",),
+            },
+        )(),
+    ):
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP": "1",
+                "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_ENFORCED": "1",
+            },
+            clear=True,
+        ):
+            assert (
+                main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is False
+            )
+
+
+def test_main_serial_loop_preflight_rejects_unsupported_draft_pr_runner_mode_when_enforced() -> (
+    None
+):
+    import main
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap.run_reddog_main_resident_queue_serial_loop_bootstrap",
+        side_effect=AssertionError(
+            "bootstrap must not run for unsupported draft PR runner mode"
+        ),
+    ):
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP": "1",
+                "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_ENFORCED": "1",
+                "REDDOG_DRAFT_PR_RUNNER_MODE": "unsafe",
+            },
+            clear=True,
+        ):
+            assert (
+                main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is False
+            )

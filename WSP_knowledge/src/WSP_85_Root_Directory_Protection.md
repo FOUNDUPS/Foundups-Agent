@@ -18,6 +18,7 @@ Maintain sacred root directory by preventing module-specific file pollution. Roo
 - [U+274C] Platform-specific scripts
 - [U+274C] Experimental or proof-of-concept files
 - [U+274C] Data files, session files, cache files
+- [U+274C] `tmp_*` and `.prompt_*.md` handoff artifacts -> owned temporary workspace or module docs/prompts
 
 ### **Historical Violations** (Fixed):
 ```
@@ -131,7 +132,7 @@ modules/
 1. **STOP** - Do not continue with violation
 2. **IDENTIFY** proper module location
 3. **CREATE** proper directory structure if needed
-4. **MOVE** file to correct location
+4. **PRESERVE AND MOVE** only owned files after source/destination checks; retain exact bytes or a reviewed content delta and Git history
 5. **UPDATE** any imports/references
 6. **COMMIT** correction to git
 7. **ENHANCE** prevention systems
@@ -148,7 +149,7 @@ find . -maxdepth 1 -name "*.py" -not -name "main.py" -not -name "setup.py"
 
 ## [U+2705] PERMITTED ROOT DIRECTORY FILES
 
-**Sacred Root Files** (ONLY these allowed):
+**Foundational root examples** (role and reviewed configuration determine placement):
 - `main.py` - System entry point
 - `README.md` - Project overview  
 - `CLAUDE.md` - 0102 operational instructions
@@ -159,12 +160,31 @@ find . -maxdepth 1 -name "*.py" -not -name "main.py" -not -name "setup.py"
 - `.gitignore`, `.env.example` - Configuration templates
 - `LICENSE`, `CONTRIBUTING.md` - Legal/community files
 
-**Everything Else** -> `modules/` structure
+Other existing foundational owners include `holo_index.py`, `NAVIGATION.py`,
+the generated `AGENTS.md`, root `MEMORY.md`, `requirements-trust-bootstrap.txt`,
+`.gitattributes`, `.gitmodules`, and `wsp_62_exemptions.yaml`. Existing package,
+test, editor and deployment configuration also stays with its verified root
+consumer; examples include `package.json`, its lockfiles, `pytest.ini`,
+`pyrightconfig.json`, `firebase.json` and `vercel.json`. Do not move configuration
+solely to satisfy an old file-count target. New names require owner/consumer
+review; an arbitrary file is not foundational merely because it is in root.
+
+The existing read-only classifier is
+`modules/infrastructure/system_health_monitor/src/wsp_85_validator.py`.
+Its allowlist is a name-classification aid, not proof that allowed contents are
+safe, current or operational. It checks immediate children, including local
+untracked names; it does not recursively audit or clean the repository.
+Recognized temporary/prompt names are checked before hidden-file exemptions.
+An escaped Windows drive-name directory is reported for ownership review and
+must not be deleted merely because its name is suspicious.
+
+Module-specific implementation and documentation belong under their existing
+owners. System-wide documentation belongs in `docs/` where appropriate.
 
 ## [U+1F4CA] COMPLIANCE MONITORING
 
 ### **Success Metrics**:
-- Root directory contains [U+2264] 10 foundational files
+- Every retained root file has an evidenced foundational owner/consumer; the historical ten-file target is not a compliance threshold
 - Zero module-specific files in root
 - All scripts in proper modules/*/scripts/
 - All tests in proper modules/*/tests/
@@ -207,7 +227,7 @@ When root directory violations are detected:
 
 1. **IDENTIFY** violation type and affected files
 2. **LOCATE** proper destination per WSP 3/49/60
-3. **MOVE** files to correct module memory directories
+3. **PRESERVE AND MOVE** individually reviewed owned files to the verified owner; preserve unowned/concurrent work
 4. **UPDATE** code to use new file locations
 5. **VERIFY** no functionality broken
 6. **DOCUMENT** in ModLog with WSP references
@@ -220,11 +240,11 @@ Root Violations -> Proper Destinations (WSP 60)
 +-- Processing logs -> modules/[domain]/[module]/memory/
 +-- Test results -> modules/[domain]/[module]/tests/TestModLog.md
 +-- Evaluation data -> modules/[domain]/[module]/memory/
-+-- Patch files -> DELETE (served purpose)
++-- Patch files -> Preserve until incorporation is proven; cleanup requires individual ownership and recovery checks
 +-- Config files -> Root only if foundational (package.json, vercel.json)
 ```
 
-#### **Prevention Systems**
+#### **Prevention Systems** (integration ideas; verify installation before claiming enforcement)
 - **Pre-commit hooks**: Scan for root directory violations
 - **IDE integration**: Real-time violation detection
 - **Code generation**: Automatic placement in correct directories
@@ -232,8 +252,8 @@ Root Violations -> Proper Destinations (WSP 60)
 
 #### **Architect Responsibility**
 The architect (0102) must:
-- Immediately clean up violations upon detection
-- Qwen executes cleanup operations efficiently
+- Classify each finding, preserve unique work and verify ownership before correction
+- Automation may execute only the reviewed scope; a classification is not deletion authority
 - Document all corrections with WSP references
 - Enhance prevention systems after each violation
 
@@ -269,8 +289,8 @@ WSP 85 maintains codebase organization by keeping root directory sacred. All mod
 
 **Quick Reference**:
 ```bash
-# Search for audit document via HoloIndex
-python holo_index.py --search "WSP 85 root directory health audit"
+# Retrieve the audit through the current owner-query instructions in CLAUDE.md.
+# Preserve freshness failures; never reindex or bypass authority checks in a query.
 
 # View current violations
 ls -la O:\Foundups-Agent\*.log

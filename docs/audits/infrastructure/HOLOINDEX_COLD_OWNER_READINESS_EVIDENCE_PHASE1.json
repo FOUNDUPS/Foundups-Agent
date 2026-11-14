@@ -1,0 +1,187 @@
+{
+  "schema_version": "holoindex_cold_owner_readiness_evidence.v1",
+  "base_commit": "66526ae5cdd0467ce264c1db4122ab82eadb7733",
+  "evidence_class": "unsigned_local_runtime_observation",
+  "truth_boundary": "This evidence proves one exact-main post-merge transaction, single-owner cold and pre-warmed usability, and unchanged immutable replica state on one host. It is not an A-grade retrieval-quality result, horizontal scale proof, portable deployment attestation, or RSI promotion authorization.",
+  "wsp15": {
+    "work_item": "HOLOINDEX_COLD_OWNER_READINESS_PHASE1",
+    "complexity": 1,
+    "importance": 5,
+    "deferability": 4,
+    "impact": 4,
+    "score": 14,
+    "priority": "P1",
+    "decision": "Close the previously failed cold-owner evidence with exact-main live measurements. The packaged RedDog README changed, so rebind the immutable extension identity to 0.4.123; no timeout or backend behavior change was justified."
+  },
+  "postmerge_task": {
+    "task_id": "holoindex_postmerge_refresh:66526ae5cdd0467ce264c1db4122ab82eadb7733",
+    "assigned_to": "openclaw_supervisor",
+    "status": "completed",
+    "completed_at": "2026-08-27T23:46:07.620602",
+    "retry_count": 0,
+    "execution_path": "broker-managed resident -> OpenClawSupervisor -> AgentDB CAS claim -> sealed holoindex_postmerge executor -> atomic completion",
+    "listener_18800_after_stop": false
+  },
+  "route": {
+    "status": "CURRENT",
+    "revision": 10,
+    "route_file_digest": "sha256:19f18ccacd003175379a9c56087e805f2fdd5c5c85cd57a613691d11d8607046",
+    "authority_repo_head_sha": "66526ae5cdd0467ce264c1db4122ab82eadb7733",
+    "authority_root_digest": "sha256:704679bb2626fee765182e84d271940d1d2e6c5c367ea98d13f913dccc5bae45",
+    "generation_id": "sha256:f2013aeb8456ef45bad65befebcf69c36e72bb487f0d75ada0b7a6a231afc43b",
+    "freshness_receipt_digest": "sha256:1a6aa4174a2fefb41864829a05ce46771e9322b81fcc5db0a098f7571b426e17",
+    "descriptor_digest": "sha256:a2d8df89b8ef8b0846b5f461d6bc2ebcac030c7bc3cdedfe0b59f9937e9cc1ad",
+    "replica_id": "sha256:4c292a562f3e421bdd6330cb2501e825652dda5fe747eaa638d042ca12145ba6",
+    "path_identity_digest": "sha256:e1e2eb98a7e9ba20faabaa21657b567a704c5c3153c5ebc61c79c939ff3c3270",
+    "artifact_count": 33,
+    "artifact_bytes": 221204272
+  },
+  "owner_readiness": {
+    "existing_red_dog_operation_wall_ms": 60000,
+    "existing_supervisor_total_startup_wall_ms": 300000,
+    "timeout_changed": false,
+    "fresh_process_runs": [
+      {
+        "wall_ms": 34000,
+        "wall_ms_precision": "rounded_from_command_observation",
+        "semantic_latency_ms": 3469,
+        "owner_attempts": 1,
+        "query_receipt_id": "sha256:4f9f9ce5c824061c1e526854bcd2cc775ba04272c34296effc88a2f30618eab8"
+      },
+      {
+        "wall_ms": 33389,
+        "semantic_latency_ms": 3484,
+        "owner_attempts": 1,
+        "query_receipt_id": "sha256:856557d53edfe0a47596144a2a9f22e014eed50685c6d8c41ade485392901871"
+      },
+      {
+        "wall_ms": 33601,
+        "semantic_latency_ms": 3608,
+        "owner_attempts": 1,
+        "query_receipt_id": "not_retained_in_bounded_summary"
+      }
+    ],
+    "prewarmed_run": {
+      "bootstrap_status": "STARTED",
+      "bootstrap_wall_ms": 25453,
+      "governed_query_wall_ms": 10344,
+      "semantic_latency_ms": 3577,
+      "owner_attempts": 1
+    },
+    "common_result": {
+      "ok": true,
+      "freshness": "CURRENT",
+      "index_gap_detected": false,
+      "owner_retry_performed": false,
+      "no_holoindex_reindex_performed": true,
+      "no_authority_worktree_mutation_performed": true,
+      "retrieval_runtime_ranker_digest": "sha256:0f3eac6a9eb10d75c6bc8ed8815395eec529f919b83f5de149e27e8a187acc1f"
+    }
+  },
+  "post_query_replica_verification": {
+    "verified": true,
+    "wall_ms": 1078,
+    "artifact_count": 33,
+    "artifact_bytes": 221204272,
+    "descriptor_digest_unchanged": true,
+    "replica_id_unchanged": true,
+    "path_identity_digest_unchanged": true
+  },
+  "holo_retrieval_evaluation": {
+    "query": "HoloIndex cold owner startup readiness timeout supervisor query replica activation documentation",
+    "freshness": "CURRENT",
+    "noise": "moderate: generic supervisor documents ranked ahead of the RedDog owner-specific contract",
+    "ordering": "useful for runtime discovery; exact owner, activation, and supervisor files were present in the top ten",
+    "missing_artifacts": "the top-level semantic hits did not contain every requested module document, so direct canonical reads closed the documentation set",
+    "staleness_risk": "high in temporal roadmap prose; candidate, active-replica, and current-P0 wording was stale after merge and live activation",
+    "duplication": "no duplicate top-level hit paths observed",
+    "improvement_action": "repair the temporal documents in this transaction; do not reindex or alter ranker behavior during a query/evidence slice"
+  },
+  "qwen_roadmap_audit": {
+    "skill_id": "qwen_roadmap_auditor_v1_prototype",
+    "promotion_state": "prototype",
+    "declared_test_status": "needs_validation",
+    "execution_mode": "0102 bounded current-status review using the documented prototype as a checklist",
+    "qwen_model_invoked": false,
+    "reason_no_model_invocation": "The skill is registered and WRE has a generic execute_skill entrypoint, but registered_skill_executor rejects prototype promotion state and the skill has no programmatic executor or evaluator. Claiming a Qwen model run would be false.",
+    "audit_scope": "Current HoloIndex readiness wording in the four directly affected HoloIndex, bridge, RedDog, and moltbot_bridge roadmaps; no repository-wide roadmap audit was performed.",
+    "full_repository_scan_performed": false,
+    "bounded_scope_complete": true,
+    "roadmaps_audited": [
+      "holo_index/ROADMAP.md",
+      "modules/infrastructure/foundups_mcp_bridge/ROADMAP.md",
+      "extensions/reddog/ROADMAP.md",
+      "modules/communication/moltbot_bridge/ROADMAP.md"
+    ],
+    "patterns": {
+      "roadmaps_discovered_repository_wide": false,
+      "current_status_sections_analyzed_within_scope": true,
+      "mcp_integration_checked_repository_wide": false,
+      "skills_references_checked_repository_wide": false,
+      "wsp_compliance_checked_for_current_edits": true,
+      "bounded_audit_report_generated": true
+    },
+    "verified_drift": [
+      "HoloIndex still said once the candidate lands after the candidate merged.",
+      "The bridge roadmap still called the legacy 8.33 GB replica current after the narrow route was active.",
+      "The bridge roadmap still labeled the Phase-1 truth-boundary POC current P0 after exact-main live acceptance.",
+      "Next-slice bullets repeated post-merge and durable-task work that is already operational.",
+      "RedDog and moltbot_bridge still presented the superseded candidate cold-start failure as current P0 truth after exact-main live acceptance."
+    ]
+  },
+  "documentation_attachment": {
+    "wsp83_applied": true,
+    "doc_index_path": "docs/doc_index.json",
+    "focused_entries_added": [
+      "docs/audits/infrastructure/HOLOINDEX_COLD_OWNER_READINESS_EVIDENCE_PHASE1.json",
+      "docs/audits/infrastructure/HOLOINDEX_COLD_OWNER_READINESS_WSP97_EXECUTION_RECEIPT_PHASE1.json"
+    ],
+    "canonical_doc_dae_generation_attempt": "timed_out_without_writing_after_124_seconds",
+    "scalability_debt": "DocDAE reference discovery scans repository Markdown for each docs Markdown artifact; a full regeneration is not bounded enough for this focused transaction. Exact path/hash/size entries are attached manually without weakening WSP_83 identity."
+  },
+  "reddog_release": {
+    "version": "0.4.123",
+    "reason": "README.md is a packaged member; changing its current readiness truth requires a new immutable extension version rather than different bytes under 0.4.122.",
+    "artifact_path": "O:\\RedDog-Releases\\reddog-0.4.123.vsix",
+    "artifact_size_bytes": 275471,
+    "artifact_sha256": "sha256:10a7fa644c7492268259413fed536bf7a882c9dde9dce1cad5dafe11960ffb13",
+    "vsix_member_count": 69,
+    "unsafe_archive_paths": 0,
+    "high_confidence_secret_matches": 0,
+    "expected_extension_members": 67,
+    "missing_expected_extension_members": 0,
+    "current_package_member_byte_mismatches": 0,
+    "package_surface": {
+      "file_count": 67,
+      "raw_bytes": 944804,
+      "raw_byte_cap": 1048576,
+      "content_digest": "sha256:49f01a4632781a6de1dcfe5f231e26d579aff89fe0b6cb81202c5a84cc1d6ea5",
+      "eol_policy_digest": "sha256:830f1131154390e06e8d672de6066a59a0e99e3073a628a23e6087d34717ea78"
+    },
+    "backend_manifest": {
+      "runtime_files": 1355,
+      "digest": "sha256:4ee3e87327df96cae0f9b1fd127c8eaf40f062240b51852a55d2605a7d38bc78",
+      "check": "PASS"
+    },
+    "validation": {
+      "fast_tier": "PASS",
+      "conversation_tests": "32 passed",
+      "contract_tier": "PASS",
+      "package_tier": "PASS",
+      "release_groups": "4 passed within 420000 ms ceiling",
+      "wsp97_tests": "74 passed, 1 expected capability skip"
+    }
+  },
+  "current_grade_truth": {
+    "holoindex_usable_by_0102_and_reddog": true,
+    "exact_generation_maintenance_rsi_operational": true,
+    "retrieval_quality_a_grade": false,
+    "retrieval_quality_rsi_operational": false,
+    "blocking_reasons": [
+      "The last governed public quality baseline fails MRR and nDCG policy.",
+      "No sealed runtime_environment_digest binds executable, ABI/platform, exact dependency/build identities, model/runtime closure, and deterministic knobs.",
+      "Independent evaluator trust and authenticated proposer provenance are not deployed.",
+      "No non-test admission consumer is connected to a separate promotion, canary, rollback, and outcome-learning authority."
+    ]
+  }
+}

@@ -51,6 +51,108 @@ Lifecycle linkage: Beneficial Action -> PoB Validation (WSP 29) -> CABR-Sized UP
 
 **Canonical distinction**: BTC backs UPS value; CABR does not back value. CABR controls flow rate (pipe size) of UPS routed from treasury after PoB validation.
 
+### 1.2 Simulator-first change contract
+
+For economic transitions and chain ports, the implementation reference is valid
+simulator behavior qualified by fresh tests and independent review on identified
+source, configuration and economic decision versions. Executable behavior or a
+passing test alone does not ratify disputed economics, authenticate inputs or
+prove funding. Known defects must not be promoted as reference behavior. The
+simulator can improve through the versioned process below; it is not frozen.
+
+Classify each bounded change before authoring:
+
+| Class | Meaning | Acceptance boundary |
+| --- | --- | --- |
+| A — transport | Faithful port or integration preserving accepted valid economics | Preserve the economic oracles; document representation, authority and execution differences. |
+| B — security | Refuse invalid or unauthorized behavior while preserving accepted valid economics | Freeze desired refusal/no-effect tests, retain valid-operation controls and obtain independent review. A guard does not authenticate its input facts. |
+| C — economic enhancement | Deliberate change to economic behavior | Authorize and version the decision, its before/after examples, affected invariants and migration/recovery consequences before changing the simulator. |
+| D — unresolved conflict | Contradictory evidence or missing policy/trust contract | Preserve the conflict; block dependent chain/economic activation until a decision and acceptance exist. Do not silently choose through prose or code. |
+
+A class C decision belongs in the existing scoped delivery plan or owning
+contract. Record the affected rule/source, decision version and authority, asset
+and amount units, rights/recipients, limits including pending exposure, fees and
+residual owners, before/after examples, acceptance cases and open dependencies.
+Missing financial policy remains explicit; these fields do not invent it.
+
+Apply one validated Occam layer at a time (WSP 27):
+
+1. Record the authorized, versioned economic decision and unresolved conflicts.
+2. Freeze desired tests before implementation; retain the prior baseline and
+   independently review each intentional oracle change rather than weakening
+   assertions to make a candidate pass.
+3. Make the bounded simulator change; test deterministic/adversarial sequences,
+   conservation, replay, pending limits and recovery as applicable. Obtain
+   independent acceptance of the identified source and observed outcomes.
+4. Update the affected governing WSPs, their exact WSP_knowledge mirrors and
+   related module/tokenomics contracts under WSP 81. Retain dated prior evidence.
+5. Independently test chain parity against the accepted simulator version: transitions,
+   integer asset units and approved rounding/residuals, fees/beneficiaries,
+   authority, aggregate/pending limits, retries, rollback, recovery and settlement.
+   A/B promotion also requires independent chain-level refusal/no-effect and
+   adversarial tests for invalid authority, artifacts and replay. If chain hooks
+   are absent, mark this gate blocked; local source publication may still proceed.
+6. Authorize activation separately under WSP 97 and the existing runtime policy.
+   Source publication, simulation parity, mock commitments and unsigned packets
+   grant no signer, issuer, funding, broadcast, listing or live-reward authority.
+
+A/B changes retain accepted valid economics and explicit refusal regressions.
+Class D blocks its dependent behavior without forbidding unrelated validated
+source publication. Product milestones, adoption and governance maturity are
+separate inputs; none independently grants mint or payout permission. CABR sizes
+existing Treasury flow after validated PoB; it does not independently mint UPS.
+
+The dated [reconciliation conflict inventory](../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#5-economic-conflicts-and-0102-decisions)
+is non-normative implementation evidence, not another economic authority. WSP 29
+retains PoB/CABR responsibilities; WSP 100 retains maturity/activation gates.
+This written contract does not claim automatic runtime enforcement or settlement.
+
+### Prospective micro-UPS allocation policy — 2026-11-05
+
+The [B03-P4 class-C preview](../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p4-prospective-micro-ups-allocation-v1)
+is VERIFIED_SIMULATED for six-decimal `ups_micro_v1` actual-roster planning.
+Terminal-lane floors retain source-owned residue without carry; native stakers refuse.
+This selects no BTC price/redemption, F_i precision/supply or native-book/v2 migration.
+Global valuation, funded settlement, custody and chain parity remain separate gates.
+P3 source delivery is complete; preview hashes/JSON grant no economic or runtime authority.
+
+### Restricted native UPS simulator version — 2026-11-02
+
+The [B03-P3 class-C decision](../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p3-exact-native-transfer-v1)
+qualifies `sim_native_epoch_transfer_v1` only for an admitted fresh serialized
+simulator source/pool tail; default legacy stays unfunded. Exact native component,
+receipt/book/source equality restricts amounts; formula rounding remains model debt.
+This selects no UPS atoms/global precision, F_i mint/release/21M, external backing,
+custody or durable/chain settlement authority. Global unit conflicts remain D;
+independent source qualification and separate activation gates still apply.
+
+## Universal Compute Account (UCA)
+
+Universal Compute Account (UCA) is the FoundUps evolution of Universal Capital Accounts. Traditional UCA gives people access to capital. FoundUps UCA gives people access to compute, agents, participation, and Return on Compute. In the AI age, compute replaces capital as the primary productive asset. UCA is therefore not a bank account and not a cash-transfer system. It is a productive compute account through which 012 humans direct 0102 agents, participate in FoundUps, earn UPS rewards, receive awards for agentic output, and share dividends from beneficial compute activity.
+
+**Translation-era bridge formula**:
+
+```
+UCA = UBA + UBR + UBD
+```
+
+- **UBA - Universal Basic Award**: AI/0102 agents perform verifiable productive work. The FoundUp-specific token is awarded through productive compute output.
+- **UBR - Universal Basic Reward**: Human participants earn UPS through verification, validation, governance, consensus, and beneficial participation.
+- **UBD - Universal Basic Dividend**: Staked UPS or FoundUp participation produces ongoing dividend flow through Return on Compute, not cash income.
+
+**Native FoundUps compute-flow formula**:
+
+```
+UCA = ca + cr + cd
+```
+
+- **UCA - Universal Compute Account**: The macro wallet, identity, and economic container.
+- **ca - Compute Award**: The initial productive output generated by AI/0102 agents.
+- **cr - Compute Reward**: Human validation, governance, consensus, and beneficial participation reward flow.
+- **cd - Compute Dividend**: Ongoing dividend flow from staked UPS or FoundUp participation through Return on Compute.
+
+**Terminology boundary**: UCA keeps the policy acronym but changes the operating meaning from **Universal Capital Account** to **Universal Compute Account**. UBI remains the old cash/income model. UCA/Capital is the policy bridge. UCA/Compute is the FoundUps implementation. Uppercase **UCA** is the account/container/identity; lowercase **ca**, **cr**, and **cd** are the economic flows inside it. ROI is the old extraction metric; ROC is the FoundUps compute metric. UPS is participation/reward/energy, not money. CABR validates and routes benefit. A FoundUp token is the award/stake unit inside one FoundUp. Money remains a temporary interface layer while compute becomes the invisible accounting layer of a moneyless or post-money economy.
+
 ## 2. Economic Heritage
 
 ### 2.1 Theoretical Foundation: Gesell & Worgl
@@ -309,39 +411,47 @@ BTC enters system (via revenue, fees, or backing events)
 
 ### 4.2 Distributed Micro-Wallet Architecture
 
-Every FoundUp has its own Bitcoin micro-wallet. **There is no central vault.** The collective set of all micro-wallets IS the reserve. This provides:
+Target design, not implemented custody: each FoundUp has a segregated Bitcoin
+micro-wallet, and the collective wallets form the reserve rather than a pooled
+vault. Separate addresses alone do not establish these security properties:
 
-- **Blast radius containment**: If one wallet is compromised, only that FoundUp's backing is at risk  Enot the entire reserve
-- **Auditability**: Each FoundUp's BTC backing is independently verifiable
-- **No single point of failure**: No master key, no central custodian
-- **Proportional backing**: Each FoundUp's wallet reflects its actual economic activity
+- **Blast radius containment** requires independent keys, signing policies and control planes; a shared seed or administrator can expose many wallets.
+- **Auditability** requires verified holdings and reconciled backing records; an address or balance snapshot alone does not prove custody or liabilities.
+- **No single point of failure** is a target requiring independent custody and recovery; shared infrastructure can retain common failure modes.
+- **Proportional backing** remains the economic design; its accounting and custody enforcement require separate qualification.
+
+This clarification retains Section 4.1's non-extractable reserve target; it does
+not authorize BTC withdrawals. Section 4.4.1's no-breaker, implementation and
+100%-reserve assertions are not proof of funded solvency or security and do not
+override the acceptance gates in Section 1.2.
 
 ```json
 {
     "architecture": {
+        "status": "target_design_not_implemented_custody",
         "model": "one_micro_wallet_per_foundup",
         "collective": "all_wallets_form_distributed_reserve",
         "type": "non_pooled_segregated",
-        "access": "non_extractable",
+        "access": "non_extractable_policy_target",
         "purpose": "distributed_gold_reserve",
         "on_sunset": "wallet_backing_freed_to_ecosystem_release_capacity"
     },
     "security": {
         "key_management": {
-            "method": "MPC_threshold_signatures",
+            "method": "MPC_threshold_signatures_target",
             "threshold": "2_of_3_minimum",
-            "parties": ["foundup_dae", "ecosystem_guardian", "012_owner"],
-            "no_single_party_can_extract": true
+            "parties": ["foundup_authorized_signer", "ecosystem_guardian", "012_owner"],
+            "independent_parties_required": true
         },
         "isolation": {
-            "btc_layer": "globally_inaccessible_to_external_systems",
+            "btc_layer": "isolated_policy_gated_signer_target",
             "logic_layer": "ups_backing_only",
-            "no_btc_withdrawal_endpoint_exists": true
+            "agent_raw_signing_authority": false
         },
         "blast_radius": {
-            "compromised_wallet": "only_that_foundup_affected",
-            "max_loss": "single_foundup_btc_allocation",
-            "ecosystem_impact": "minimal"
+            "compromised_wallet": "containment_requires_verified_independence",
+            "max_loss": "requires_independently_enforced_funded_limits",
+            "ecosystem_impact": "not_established_by_address_segregation"
         }
     }
 }
@@ -349,30 +459,35 @@ Every FoundUp has its own Bitcoin micro-wallet. **There is no central vault.** T
 
 ### 4.3 Implementation: Build on Existing Infrastructure
 
-Building a custom BTC wallet from scratch would be massive and unnecessary. The micro-wallet architecture should build on top of existing wallet infrastructure:
+The following are proposed custody phases, not delivered wallet capabilities.
+Reuse existing infrastructure after the simulator-first gate in Section 1.2 and
+the chain/security qualification in Section 4.11; do not build custom cryptography.
 
-**PoC (Phase 0)**: Bitcoin testnet + open-source MPC library
+**PoC (Phase 0)**: Bitcoin testnet + evaluated open-source wallet infrastructure
 - Use Bitcoin testnet for development
-- `python-bitcoinlib` or `bdk` (Bitcoin Dev Kit) for wallet operations
-- Simple 2-of-3 multisig using native Bitcoin Script
-- Each FoundUp gets a derived address (BIP-32 HD wallet)
+- Evaluate `python-bitcoinlib` or `bdk` (Bitcoin Dev Kit) for wallet operations
+- Simple 2-of-3 native Bitcoin Script multisig is distinct from MPC signing
+- BIP-32 derived addresses can share a seed; seed compromise correlates their
+  exposure and does not provide independent FoundUp keys or quorum parties.
 
-**Prototype (Phase 1)**: Self-custodial MPC wallet infrastructure
-- **MPC (Multi-Party Computation) signatures**  Eno single key exists, threshold signing
-- Options: Fireblocks MPC (enterprise), ZenGo SDK (mobile), or open-source `tss-lib` (Binance)
-- Each FoundUp gets its own MPC key share set
-- Programmatic signing via DAE-controlled key shard
+**Prototype (Phase 1)**: Evaluated self-custodial MPC wallet infrastructure
+- **MPC signatures** distribute signing authority under a defined corruption
+  threshold; this does not establish secure devices, operators or transaction intent.
+- Candidates include Fireblocks MPC, ZenGo SDK or open-source `tss-lib`; current capabilities, licensing and security require separate evaluation.
+- Each FoundUp's proposed MPC share set needs independently qualified key generation, storage and recovery
+- A separate policy-gated signer handles approved operations; the DAE proposes bounded intent without assumed key-shard custody
 
-**MVP (Phase 2)**: Production hardened
-- Full MPC threshold signing (2-of-3 or 3-of-5)
-- Hardware Security Module (HSM) integration for ecosystem guardian shard
+**MVP (Phase 2)**: Target production hardening, subject to independent qualification
+- Full MPC threshold signing (2-of-3 or 3-of-5), with independently controlled parties and approval paths
+- HSM integration for the ecosystem guardian share requires qualified algorithm
+  support and transaction policy; non-exportable keys alone do not prevent misuse.
 - Automated BTC backing capacity tracking (decay->freed->release loop)
-- On-chain proof of reserves (periodic Merkle proof of wallet balances)
+- On-chain proof of reserves (periodic Merkle proof of wallet balances), without treating holdings alone as proof of liabilities or solvency
 
-**Decision rationale**: Building on existing MPC/multisig infrastructure (not building our own wallet) because:
-- BTC custody security is a solved problem with battle-tested tools
+**Decision rationale**: Reuse MPC/multisig components while qualifying the complete custody system:
+- Mature components exist; secure custody still depends on configuration, independent authorization, operations and recovery
 - Our innovation is the economic model (UPS decay, CABR-gated flow routing), not the wallet
-- Reduces attack surface  Ewe use proven cryptography, not custom crypto
+- Avoid custom cryptography; qualify selected dependencies instead of assuming that reuse makes the system secure
 
 ### 4.4 BTC Backing Capacity Model
 
@@ -458,30 +573,34 @@ BTC dumps 50%:
 
 ### 4.5 0102 Agent-as-Wallet-Manager
 
-012 humans never directly touch private keys. Their 0102 digital twin manages everything on their behalf  Ethis adds an encryption and security layer on top of the MPC wallet infrastructure.
+Target interaction model, not a deployed custody or encryption layer: the 0102
+digital twin proposes bounded intent on 012's behalf. Agent orchestration itself
+does not add encryption, key isolation or authority; Section 1.2 and 4.11 still govern.
 
 **The 0102 Wallet Flow**:
 ```
 012: "Hey, what FoundUps do you like?"
-  ↁE0102 researches FoundUps via HoloIndex (CABR scores, tiers, activity)
-    ↁE0102 presents recommendations with reasoning
-      ↁE012: "Go ahead, let's stake in FoundUp X and FoundUp Y"
-        ↁE0102 executes UPS→FoundUp token conversion (WSP 26 Section 3.7)
-          ↁE0102 manages ongoing positions (monitors CABR, tier changes, sunset warnings)
+  -> 0102 researches FoundUps via HoloIndex (CABR scores, tiers, activity)
+    -> 0102 presents recommendations with reasoning
+      -> 012: "Go ahead, let's stake in FoundUp X and FoundUp Y"
+        -> 0102 proposes bounded UPS->FoundUp conversion intent (Section 3.7)
+          -> Independent authority/policy checks admit the exact current operation
+            -> A qualified executor performs only that authorized transition
+              -> 0102 monitors positions, CABR, tier changes and sunset warnings
 ```
 
-**Agent Security Model**:
-- 0102 holds one MPC key shard (Section 4.2)  Ecannot extract BTC alone
-- 012 holds one shard (recovery/override)  Ecannot extract alone either
-- Ecosystem guardian holds third shard  Eno single party can move BTC
-- 0102 can execute UPS staking/unstaking within policy limits set by 012
-- 012 CAN instruct 0102 to send UPS value to external wallet (cash out)  Ebut the system is designed to be self-contained. Fees discourage extraction (Section 4.6).
+**Agent Security Model (target requirements)**:
+- Key material or MPC shares belong to separately qualified custody/signing boundaries; an agent is not assumed to hold a raw key shard.
+- 012 recovery/override requires a separately authenticated policy and recovery path; possession of a conversation or UI session does not establish it.
+- A threshold quorum requires independent keys, signers, verification displays and control planes; multiple approvals through one compromised path are not independent.
+- 0102 may request UPS staking/unstaking only within current authenticated authority and policy limits; independently checked intent controls execution.
+- 012 may request external UPS value transfer where permitted by the economic and custody policy; Section 4.6 fees are incentives, not signing or custody security.
 
 **Discovery and Investment**:
 - 0102 agents evaluate FoundUps based on: tier (WSP 27 Section 11), CABR score (WSP 29), agent swarm size, task completion velocity, cross-FoundUp collaboration
-- 012 makes the final decision  E"invest" means "stake my UPS in this FoundUp"
-- 0102 executes and monitors autonomously after 012 gives the go-ahead
-- This is the Play FoundUps dApp interaction model
+- 012 makes the final decision — "invest" means "stake my UPS in this FoundUp"
+- 0102 monitors autonomously; each value-changing operation still requires its exact delegated authority and policy checks
+- This is the target Play FoundUps dApp interaction model
 
 ### 4.6 Transaction Fee Revenue Model
 
@@ -709,9 +828,9 @@ The FoundUps economic infrastructure operates across three layers, each optimize
 |  - Staking / unstaking logic                     |
 |  - UPS allocation + decay math                   |
 |  - Subscription management                       |
-|  - QUANTUM RESISTANT (Falcon-1024, NIST)         |
+|  - Falcon: State Proofs / opt-in PQ accounts    |
 |  - ~$0.001/tx, 10K+ TPS, 3.3s finality          |
-|  - State Proofs ↁEbridge to Bitcoin              |
+|  - State Proofs: bridge verification primitive  |
 +-------------------------+------------------------+
                           | state proofs + BTC settlement
 +-------------------------v------------------------+
@@ -724,9 +843,22 @@ The FoundUps economic infrastructure operates across three layers, each optimize
 +--------------------------------------------------+
 ```
 
-**Why Algorand for Layer 1**: Only production blockchain with live quantum-resistant signatures (Falcon-1024, NIST-selected). 20% chance of cryptographically relevant quantum computers before 2030. "Harvest now, decrypt later" attacks are already occurring. Every FoundUp token issued on Algorand is quantum-safe from day one. State Proofs provide cryptographic bridge to Bitcoin without trust.
+**Why Algorand for Layer 1**: Algorand remains the proposed smart-contract layer.
+Falcon protects State Proof attestations, and native Falcon-1024 accounts are
+supported after consensus v42 (algod v5.0.0). Existing Ed25519 accounts and native
+Ed25519 multisig are not automatically migrated; consensus/VRF security remains
+a separate boundary. ASA issuance alone does not protect every holder or issuer
+authority. NIST-selected Falcon must not be presented as finalized FN-DSA.
 
-**Why not all-Bitcoin**: Bitcoin's L2 ecosystem (Lightning, RGB, Citrea) lacks quantum resistance as of 2026. When Bitcoin adopts post-quantum signatures, the system can migrate Layer 1. FAM's `TokenFactoryAdapter` is chain-agnostic  Eswap the backend, same contracts.
+State Proofs support verification; they do not themselves implement a Bitcoin
+bridge or protect Bitcoin spending keys. FoundUps bridge, custody and migration
+claims require separate implementation and qualification. For dated primary
+sources and migration limits, see [the security boundary](../../docs/architecture/FOUNDUPS_FX_VENUE_AND_PROJECT_CLAIM_RESEARCH_20261025.md#cryptographic-security-boundary-2026-10-29).
+
+**Why not all-Bitcoin**: Keep the existing Bitcoin reserve/settlement and Algorand
+smart-contract design. A future Bitcoin L2 remains an option after separate
+asset, authority, contract, bridge and security review; adapter interchangeability
+does not make assets or authorizers interchangeable.
 
 **Phased Rollout (Occam's Layers)**:
 

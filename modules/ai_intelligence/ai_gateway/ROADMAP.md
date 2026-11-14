@@ -1,10 +1,150 @@
 # AI Gateway Module Roadmap
 
+## YouTube consumer integration (2026-11-01)
+
+- Shared assessment/writer/review routing and exact source receipts are wired.
+- Free Gemma/Nemotron task candidates feed the existing evaluation/catalog owner.
+- Shadow Nemotron proposal, held-out benchmark, signed promotion and runtime
+  binding remain separate production gates; no candidate is auto-promoted.
+- Actual model quality, trusted production bindings and live daemon/public
+  behavior remain unverified by the offline consumer qualification.
+
 ## Current Status: [OK] MVP Complete
 - Basic fallback functionality implemented
 - Multi-provider support (OpenAI, Anthropic, Grok, Gemini)
 - Task-specific routing logic
 - Usage monitoring and statistics
+
+## Dynamic RedDog Model Evidence
+
+### Historical local-worker evidence — 2026-10-08
+
+PR2111 source `cc32547b9677f2d2a5adf09bb924e52edbe9a4de` recorded a panel
+probe with no prior-output forwarding, one rejected Qwen audit (0/1 accepted;
+3/4 facts correct;24.438s; unknown tokens) and catalog discovery368/99.
+The proposed metered single/layered/routed comparison was never executed.
+Its planning selection is superseded by the root October13 checkpoint; this
+archive does not reopen inference, routed admission or model promotion.
+See [historical evidence and limits](../../../docs/operations/RSI_SWARM_DISPATCH.md#layered-worker-qualification--2026-10-08).
+
+- [x] Strict positive integer use-time clock;55 connected offline tests pass.
+  This does not satisfy the production trust-configuration item below.
+
+- [x] Exact OpenRouter Kimi K3 request-truth boundary: explicit/env/default
+  resolution, 4,096 floor, 131,072 cap, mandatory maximum reasoning, no
+  temperature, and pre-transport rejection.
+- [x] Signed single-model benchmark and promotion evidence admission
+- [x] Signed aggregate PANEL evidence with ordered topology and runtime-context binding
+- [x] PANEL runtime binding fails closed without the verified aggregate
+- [x] Shared verified runtime-topology resolver with a 60-second one-shot
+  capability TTL bounded by the verified evidence expiry
+- [x] Evaluation-only local Nemotron proposal call with exact native model
+  lifecycle evidence, node-wide managed capacity, restart-safe zero-residency
+  recovery/otherwise-quarantine, joint structural call binding, and deterministic
+  admission; signed proposer provenance remains the authentication boundary
+- [x] Deterministically include the AI Gateway incumbent in every admitted
+  held-out topology benchmark, outside proposer control
+- [x] Compose resolved topology capabilities into the RedDog extension query,
+  Fusion, OpenClaw, and Hermes callers with explicit provider availability
+- [x] Authenticate and durably bind proposer call plus admission evidence to an
+  externally signed short-lived authority receipt
+- [x] Atomically reserve bounded configured task-by-candidate campaigns before
+  first egress and persist exact call evidence
+- [x] Bind authenticated SINGLE-model campaign promotion into the existing
+  independent signed-evidence and production runtime-binding supply, including
+  use-time signature/trust/revocation/expiry verification, exact durable
+  receipt plus non-mutating already-APPLIED publication proof, deterministic
+  preflight, zero-callback exact replay/conflict decisions, durable tokenized
+  claims and provider bundles, retained inode/content proofs, non-replacing
+  final publication, ownership-safe cleanup, crash-safe immutable store writes,
+  isolated pre-seal supply, terminal-v3 source identity, POSIX interrupted-link
+  repair, fail-closed provider-receipt presence, nonce-level pre-callback
+  reservation, terminal recovery, and restart-safe exact retry only after fresh authority,
+  signature, evidence, and runtime-time verification
+- [ ] Configure production external signer/trust/revocation/durable replay
+  services and supply live production evidence artifacts
+- [ ] Define independently signed aggregate panel-promotion semantics; panels
+  remain evaluation/shadow-only
+
+### Runtime binder decomposition
+
+- [ ] Extract receipt serialization from inherited `bind_reddog_runtime_models`
+  while preserving byte-for-byte receipt IDs and SINGLE/PANEL parity.
+
+### Configured AutoResearch bootstrap decomposition
+
+- [x] Extract configured runner/verifier assembly and exact AI Gateway,
+  LM Studio, and routed caller adapters from the startup bootstrap/runner;
+  preserve behavior while restoring the configured runner below its prior
+  769-line ceiling with no function above 50 lines.
+- [ ] Before 2026-09-30, extract the remaining admission evidence collection
+  from
+  `run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap`
+  while preserving exact rejection precedence and result truth flags.
+
+### Configured AutoResearch semantic-verifier decomposition
+
+- [ ] Before 2026-09-30, extract per-sample semantic evaluation from
+  `build_model_autoresearch_output_evidence_semantic_verifier` and its
+  `_verifier` closure while preserving byte-for-byte receipt IDs and reasons.
+
+### Configured AutoResearch live-admission blockers
+
+- [ ] Replace whole-file JSON/JSONL input and receipt reads with bounded,
+  streaming admission that fails closed before unbounded allocation.
+- [ ] Bind read freshness, write-target emptiness, and alias checks to an
+  exclusive runtime-directory claim so path replacement cannot create a
+  check/use race.
+- [ ] Keep configured live execution halted until these blockers and the
+  assumption audit's phase-B catalog, usage, and pre-buffer response-byte
+  transport gates are independently mitigated and re-audited.
+
+### ModLog archive
+
+- [x] Moved entries dated 2026-07-16 and earlier into
+  `docs/archives/ModLog_2026-07-16_and_earlier.md`; both journals are below
+  1,000 lines.
+- [x] Moved entries dated 2026-07-17 into
+  `docs/archives/ModLog_2026-07-17.md`; live and archived journals remain below
+  1,000 lines.
+
+### Direct provider catalog evidence
+
+- [x] Explicit bounded OpenRouter model-list discovery with injected offline
+  transport tests, strict candidate normalization, durable attempt receipts,
+  and outside-repository last-known-good persistence.
+- [x] Bound atomic candidate/attempt commits to post-write descriptor identity,
+  exact size/content, and single-link pathname validation.
+- [x] Retain verified object identity through Windows publication and restore
+  exact prior target state after detected publication failure or mismatch.
+- [x] Scheduled-only durable replay guard with per-invocation `ARMED` admission,
+  bounded terminal ledger evidence, pre-ledger migration, cross-process
+  serialization, and fail-closed replay recovery.
+- [x] Default-off idle scheduling POC for the exact daily OpenRouter refresh
+  claim, with canonical invocation mapping and a six-key evidence-only adapter.
+- [x] Preserve bounded optional OpenRouter reasoning/top-provider assertions and
+  derive exact-model, lineage-bound provider-asserted execution-control evidence.
+- [x] Add pure, externally supplied endpoint-route evidence and task-specific
+  single-call eligibility admission with exact route, sampling, token, cost,
+  response-byte, lineage, closed pricing schema, and evaluation-only status
+  policy controls. The admission independently derives its immutable emitted
+  parameter set and preserves optional request-price absence under a named,
+  digested PublicPricing schema policy. Chat Completions wire controls use exact
+  `max_tokens`, `reasoning`, and `provider` keys while the internal completion
+  budget remains `max_completion_tokens`.
+- [ ] Keep execution halted until authenticated endpoint supply, atomic
+  admission consumption, authoritative availability and usage, caller wiring,
+  pre-buffer response-byte enforcement, and runtime-directory identity are
+  supplied independently; eligibility receipts do not grant live authority.
+- [ ] General provider-discovery cadence and scheduler expansion remains out of
+  scope; the POC does not grant discovery any startup, selection, promotion,
+  registry, or runtime authority.
+- [x] Add fail-closed file plus directory-lineage durability through the store
+  root parent, with no-follow/type/identity checks on POSIX and pointer-width
+  directory-handle flush/close checks on Windows.
+- [ ] Exercise the POSIX directory-handle path in the target non-Windows
+  deployment matrix. Unsupported filesystems remain fail-closed; the separate
+  exclusive runtime-directory claim is still required against path replacement.
 
 ## Phase 1: Enhanced Intelligence (Next)
 - **Cost optimization algorithms** - Auto-select cheapest provider

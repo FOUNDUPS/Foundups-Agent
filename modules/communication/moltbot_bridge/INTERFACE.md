@@ -1,591 +1,575 @@
+## Ollama fallback configuration contract — 2026-10-29
+
+`initialize_control_plane_state` assigns `_ollama_model` from
+`OPENCLAW_OLLAMA_MODEL` (default `qwen-overseer:latest`; explicit blank disables)
+and `_ollama_timeout_sec` from `OPENCLAW_OLLAMA_TIMEOUT_SEC` (default 120).
+Malformed/blank/non-finite timeouts fall back to 120; finite values clamp to
+15–300 seconds. `execute_conversation` passes that value to the existing
+synchronous local `/api/chat` request. Routing, payload, token accounting,
+external-provider policy and pre/post-request cancellation checks are unchanged.
+
+This is a Requests connect/read timeout, not a whole-response or turn deadline.
+A blocked call can delay cancellation. The default model must be installed;
+the repository Modelfile contains a machine-specific GGUF source. No automatic
+model creation, daemon startup, storage relocation or live readiness claim.
+
+## Denied WSP preflight
+
+`OpenClawDAE.process()` delegates to `openclaw_process_loop.process_message()`.
+If `_wsp_preflight(intent)` returns false, emit `wsp_preflight` with result
+`blocked` and return `[SECURITY BLOCK] Execution prevented by WSP preflight: ...`.
+Preserve the original intent category/domain. Do not resolve permissions, build
+or execute a plan, invoke conversation fallback, or validate/store a result.
+This covers actual planner rejection of unauthorized COMMAND/SYSTEM and SCHEDULE
+without WRE. An authorized COMMAND without WRE retains its existing advisory
+path. Earlier continuity, classification, reporting and skill-safety work is not
+rolled back; this is not a claim of zero effects before preflight.
+
+**OpenClaw bridge interface directory.**
+
+The linked pages retain the complete contracts and their dated qualification
+boundaries. This split changes navigation only, not API semantics or status.
+Existing section headings remain below so previously published section links
+continue to resolve. Follow each contract link for its complete text.
+
+- [Grant Authority](docs/interfaces/GRANT_AUTHORITY.md)
+- [Effect And Process Lifecycle](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md)
+- [Repository And Conversation](docs/interfaces/REPOSITORY_AND_CONVERSATION.md)
+- [Public Api](docs/interfaces/PUBLIC_API.md)
+- [Auth And Operations](docs/interfaces/AUTH_AND_OPERATIONS.md)
+
+## Installed HIGH source integration — 2026-10-23
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-001).
+
+## Selected-clip adapter receipts — 2026-10-22
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-002).
+
+## Installed HIGH service connection — 2026-10-20
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-003).
+
+## Non-initial installed metadata checkpoint — 2026-10-20
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-004).
+
+## Protected consensus nonce supply — 2026-10-20
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-005).
+
+### Historical nonce-only import/composition status — 2026-10-20
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-006).
+
+## Exact parent-consent connection — 2026-10-19
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-007).
+
+## Issuer-only root LOAD — 2026-10-15
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-008).
+
+## Callable LOW grant service — 2026-10-15
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-009).
+
+## Grant bootstrap binding and LOW RPC — 2026-10-15
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-010).
+
+## Initial handshake configuration — 2026-10-15
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-011).
+
+## Initial runtime manifest enrollment — 2026-10-15
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-012).
+
+## Protected initial writer authority — 2026-10-14
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-013).
+
+## Initial high-water bootstrap v2 — 2026-10-14
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-014).
+
+## Initial generation anchor bootstrap — 2026-10-14
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-015).
+
+## Deferred proposal policy activation (implementation checkpoint)
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-016).
+
+## Current-generation Memex consumption
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-017).
+
+## Retained proposal verification inputs
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-018).
+
+## Current-generation model consumption
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-019).
+
+## Protected model verification inputs (owner v8)
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-020).
+
+## Resident fresh peer use — 2026-10-07
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-021).
+
+## Peer healthcheck prerequisites — 2026-10-07
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-022).
+
+## Principal use-time generation binding — 2026-10-07
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-023).
+
+## Resident final-decision effect join — 2026-10-07
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-024).
+
+## Single-effect approval to grant — 2026-10-07 reviewed candidate
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-025).
+
+## Outer consensus binding at grant signing — 2026-10-07 candidate
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-026).
+
+## Reviewer runtime artifact adapter — 2026-10-07
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-027).
+
+## Effect issuer grant handoff — merged PR2087, 2026-10-07
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-028).
+
+## Provider issuance handoff — 2026-10-06 (historical PR2084)
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-029).
+
+## Leased current-generation binding — 2026-10-06
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-030).
+
+## Deferred startup dependencies (unmerged integration, 2026-10-06)
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-031).
+
+## Exact permission evidence type — 2026-10-05
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-032).
+
+## Explicit local credential provider — 2026-10-05
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-033).
+
+## Bootstrap grant-admission handoff — 2026-10-05
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-034).
+
+## Authenticated effect consent — 2026-10-04
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-035).
+
+## Supplied effect-sovereign evidence API — 2026-10-04
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-036).
+
+## Current-generation review-set API — 2026-10-04
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-037).
+
+## Bounded effect-review quorum API — 2026-10-04
+
+[Read this contract](docs/interfaces/GRANT_AUTHORITY.md#contract-038).
+
+## Single-effect proof handoff design — 2026-10-01
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-039).
+
+### Conditional effect-review verification API — 2026-10-01
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-040).
+
+### Connected current reviewer verification API — 2026-10-01
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-041).
+
+### Authenticated effect-authority qualification — 2026-10-01
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-042).
+
+#### Reviewer-key designation contract — 2026-10-01
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-043).
+
+### Pure effect-context correlation API — 2026-10-01
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-044).
+
+### Inert effect-approval context API — 2026-10-01
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-045).
+
+### Decision and evidence
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-046).
+
+### Digest and carrier contract
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-047).
+
+### Existing ownership and lifecycle
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-048).
+
+### Layer gates and acceptance
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-049).
+
+## Effect-lease consensus qualification — 2026-10-01
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-050).
+
+## Canonical unsigned effect request preparation
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-051).
+
+## Effect-lease admission map — 2026-10-01
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-052).
+
+## Process visibility qualification boundary — 2026-09-27
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-053).
+
+## Connected socket ownership observation — 2026-09-27
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-054).
+
+## Socket characterization boundary — 2026-09-27
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-055).
+
+## External supervision source contract — 2026-09-27
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-056).
+
+### Three roles and the current source constraint
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-057).
+
+### Source and ownership
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-058).
+
+### Authenticated handoff and canonical consumption (specified, not wired)
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-059).
+
+### One-attempt lifetime
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-060).
+
+### Socket ownership prerequisite — source defect, not a live incident
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-061).
+
+## Healthcheck requester selection — 2026-09-27
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-062).
+
+### Resident handoff ownership (specified, not wired)
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-063).
+
+## Lifecycle default-dependency requirement — 2026-09-27
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-064).
+
 # OpenClaw Bridge Interface
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-065).
+
+## Governed use-time supplier admission
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-066).
+
+## YouTube scheduling command repair (2026-09-22)
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-067).
+
+## Public RedDog Lick PoC
+
+[Read this contract](docs/interfaces/EFFECT_AND_PROCESS_LIFECYCLE.md#contract-068).
+
+## HoloIndex runtime interface
+
+[Read this contract](docs/interfaces/REPOSITORY_AND_CONVERSATION.md#contract-069).
+
+## Receipt-bound artifact generation models
+
+[Read this contract](docs/interfaces/REPOSITORY_AND_CONVERSATION.md#contract-070).
+
+## RedDog advisory bridge support
+
+[Read this contract](docs/interfaces/REPOSITORY_AND_CONVERSATION.md#contract-071).
+
+## RedDog architect FIX promotion HoloIndex proof
+
+[Read this contract](docs/interfaces/REPOSITORY_AND_CONVERSATION.md#contract-072).
+
+## Governed repository-state intake
+
+[Read this contract](docs/interfaces/REPOSITORY_AND_CONVERSATION.md#contract-073).
+
+## Exact-Git grant-authority effect admission
+
+[Read this contract](docs/interfaces/REPOSITORY_AND_CONVERSATION.md#contract-074).
+
+## Principal Memex live resident source
+
+[Read this contract](docs/interfaces/REPOSITORY_AND_CONVERSATION.md#contract-075).
+
+## Exact-request signer admission
+
+[Read this contract](docs/interfaces/REPOSITORY_AND_CONVERSATION.md#contract-076).
+
+## Authenticated RedDog conversation scope
+
+[Read this contract](docs/interfaces/REPOSITORY_AND_CONVERSATION.md#contract-077).
 
 ## Public API
 
+[Read this contract](docs/interfaces/PUBLIC_API.md#contract-078).
+
+### Architect proposal validity and execution readiness
+
+[Read this contract](docs/interfaces/PUBLIC_API.md#contract-079).
+
+### Verified-outcome authority, signing and memory
+
+[Read this contract](docs/interfaces/PUBLIC_API.md#contract-080).
+
+### Resident queue exact-SHA commit stage
+
+[Read this contract](docs/interfaces/PUBLIC_API.md#contract-081).
+
+### Independent assurance capacity admission
+
+[Read this contract](docs/interfaces/PUBLIC_API.md#contract-082).
+
+### Generic provider-call evidence
+
+[Read this contract](docs/interfaces/PUBLIC_API.md#contract-083).
+
+### FoundUpJob intake and create_foundup lineage
+
+[Read this contract](docs/interfaces/PUBLIC_API.md#contract-084).
+
+### Durable Resident Architect Cycle
+
+[Read this contract](docs/interfaces/PUBLIC_API.md#contract-085).
+
+### Canonical RedDog execution-valve readiness
+
+[Read this contract](docs/interfaces/PUBLIC_API.md#contract-086).
+
+### RedDog HoloIndex Query Adapter
+
+[Read this contract](docs/interfaces/PUBLIC_API.md#contract-087).
+
+### FusionAdapter (advisory Fusion worker-panel, CONTRACT-ONLY)
+
+[Read this contract](docs/interfaces/PUBLIC_API.md#contract-088).
+
+#### WSP_97 Truth Boundary Checklist (HERMES_FUSION_ADAPTER_CONTRACT_PHASE1)
+
+[Read this contract](docs/interfaces/PUBLIC_API.md#contract-089).
+
+### Fusion Redaction Gate (CONTRACT-ONLY precondition; does NOT enable live modes)
+
+[Read this contract](docs/interfaces/PUBLIC_API.md#contract-090).
+
+#### WSP_97 Truth Boundary Checklist (HERMES_FUSION_REDACTION_GATE_PHASE1)
+
+[Read this contract](docs/interfaces/PUBLIC_API.md#contract-091).
+
+### Fusion ALIAS live path (VALVE-GATED OFF by default; first live OpenRouter integration)
+
+[Read this contract](docs/interfaces/PUBLIC_API.md#contract-092).
+
+#### WSP_97 Truth Boundary Checklist (HERMES_FUSION_ALIAS_MODE_PHASE2)
+
+[Read this contract](docs/interfaces/PUBLIC_API.md#contract-093).
+
 ### WebhookReceiver
 
-```python
-from modules.communication.moltbot_bridge.src.webhook_receiver import app
-
-# FastAPI app exposing:
-# POST /webhook/openclaw - Receives messages from OpenClaw Gateway
-# POST /webhook/moltbot - Legacy endpoint (compat)
-# GET /health - Health check endpoint
-```
+[Read this contract](docs/interfaces/PUBLIC_API.md#contract-094).
 
 ### Message Format (Inbound from OpenClaw)
 
-```python
-class MoltbotMessage(BaseModel):
-    message: str                    # User's message text
-    sessionKey: str                 # Session identifier
-    channel: str                    # Source channel (whatsapp, telegram, etc.)
-    sender: str                     # Sender identifier
-    metadata: dict = {}             # Additional context
-
-# OpenClawMessage is an alias of MoltbotMessage (preferred naming)
-```
+[Read this contract](docs/interfaces/PUBLIC_API.md#contract-095).
 
 ### Response Format (Outbound to OpenClaw)
 
-```python
-class FoundupsResponse(BaseModel):
-    text: str                       # Response text
-    deliver: bool = True            # Whether OpenClaw should deliver response
-    channel: str | None = None      # Override delivery channel
-    to: str | None = None           # Override recipient
-```
+[Read this contract](docs/interfaces/PUBLIC_API.md#contract-096).
 
 ### Standalone Action CLI (Direct Agent Invocation)
 
-```bash
-python -m modules.communication.moltbot_bridge.src.action_cli \
-  --command "linkedin action read_feed max_posts=3"
-```
-
-Supported command families:
-- `linkedin action <action> key=value`
-- `x action <action> key=value`
-- `social campaign <campaign_name> key=value`
-- `youtube action <action> key=value`
-- `yt action <action> key=value`
-
-Optional routing controls:
-- `--via-dae` (use full OpenClawDAE intent + permission path)
-- `--backend openclaw|ironclaw` (with `--via-dae`)
-- `--no-api-keys auto|on|off` (with `--via-dae`)
-- `--repeat N --interval-sec S` for repeatable standalone runs
-
-Safety note:
-- Direct adapter mode now runs Cisco skill-safety gate before execution.
-- `--via-dae` mode also applies OpenClawDAE skill-safety gating.
-
-LinkedIn `digital_twin` action parameters:
-- required: `comment_text`, `repost_text`, `schedule_date`, `schedule_time`
-- optional: `mentions` (comma-separated), `identity_cycle` (comma-separated), `dry_run`
-
-Current adapter behavior:
-- `execute_linkedin_action(action="digital_twin", ...)` forwards all above params to `LinkedInActions.run_digital_twin_flow(...)`.
-
-Structured result contract:
-
-```json
-{
-  "success": true,
-  "command": "youtube action comments channel=move2japan ...",
-  "mode": "adapter|dae",
-  "repeat": 1,
-  "results": [
-    {
-      "success": true,
-      "route": "youtube",
-      "action": "comments",
-      "iteration": 1,
-      "duration_ms": 1234,
-      "memory_stored": true
-    }
-  ]
-}
-```
+[Read this contract](docs/interfaces/PUBLIC_API.md#contract-097).
 
 ## Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `FOUNDUPS_WEBHOOK_TOKEN` | Yes | Shared secret with OpenClaw |
-| `OPENCLAW_GATEWAY_URL` | No | OpenClaw gateway (default: ws://127.0.0.1:18789) |
-| `MOLTBOT_GATEWAY_URL` | No | Legacy name (fallback) |
-| `OPENCLAW_RESIDENT_ENABLED` | No | Register resident OpenClaw webhook runtime at startup (default on) |
-| `OPENCLAW_RESIDENT_AUTOSTART` | No | Auto-start broker-managed resident OpenClaw service after preflights (default on) |
-| `OPENCLAW_SUPERVISOR_ENABLED` | No | Register broker-managed OpenClaw supervisor runtime at startup (default on) |
-| `OPENCLAW_SUPERVISOR_AUTOSTART` | No | Auto-start the OpenClaw supervisor after bootstrap (default on) |
-| `OPENCLAW_SUPERVISOR_POLL_SEC` | No | Poll interval for the OpenClaw supervisor state machine (default `10`) |
-| `OPENCLAW_SUPERVISOR_ALLOW_RESTART` | No | Allow the supervisor to restart resident OpenClaw when it is down (default on) |
-| `OPENCLAW_SUPERVISOR_MAX_RESTARTS` | No | Maximum resident OpenClaw restart attempts allowed inside the supervisor repair window (default `3`) |
-| `OPENCLAW_SUPERVISOR_RESTART_WINDOW_SEC` | No | Rolling window used for restart-budget enforcement before escalation (default `900`) |
-| `OPENCLAW_RESIDENT_HOST` | No | Host for resident OpenClaw webhook service (default `127.0.0.1`) |
-| `OPENCLAW_RESIDENT_PORT` | No | Port for resident OpenClaw webhook service (default `18800`) |
-| `OPENCLAW_RESIDENT_LOG_LEVEL` | No | Uvicorn log level for resident service (default `info`) |
-| `OPENCLAW_CONVERSATION_BACKEND` | No | `openclaw` (default) or `ironclaw` for sidecar conversational runtime |
-| `OPENCLAW_IRONCLAW_PREFLIGHT` | No | Enable IronClaw startup readiness preflight (default on) |
-| `OPENCLAW_IRONCLAW_PREFLIGHT_ALWAYS` | No | Run IronClaw readiness preflight even when backend is not `ironclaw` (default off) |
-| `OPENCLAW_IRONCLAW_PREFLIGHT_ENFORCED` | No | Explicitly block startup when IronClaw readiness fails |
-| `OPENCLAW_NO_API_KEYS` | No | `1` disables external/cloud LLM calls in OpenClaw/FAM paths |
-| `OPENCLAW_ALLOW_EXTERNAL_LLM` | No | `1` allows AI Gateway cloud fallback (auto-disabled when `*_NO_API_KEYS=1`) |
-| `OPENCLAW_OLLAMA_MODEL` | No | Ollama model ID for local fallback (default `qwen2.5-coder:7b`) |
-| `IRONCLAW_BASE_URL` | No | IronClaw OpenAI-compatible endpoint (default `http://127.0.0.1:3000`) |
-| `IRONCLAW_MODEL` | No | Model ID sent to IronClaw `/v1/chat/completions` |
-| `IRONCLAW_AUTH_TOKEN` | No | Optional bearer token for IronClaw gateway auth |
-| `IRONCLAW_NO_API_KEYS` | No | `1` enables key-isolation mode for IronClaw runtime launch |
-| `IRONCLAW_START_CMD` | No | Command used by CLI submenu to start IronClaw gateway |
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-098).
 
 ## Auth Headers
 
-- `Authorization: Bearer <token>`
-- `x-openclaw-token: <token>` (preferred)
-- `x-moltbot-token: <token>` (legacy)
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-099).
 
-### OpenClaw DAE (Frontal Lobe)
+### OpenClaw DAE and ExecutionBundle
 
-```python
-from modules.communication.moltbot_bridge.src.openclaw_dae import OpenClawDAE
-
-dae = OpenClawDAE(repo_root=Path("O:/Foundups-Agent"))
-
-# Full autonomy loop:
-# Ingress -> Intent -> Preflight -> Plan -> Permission -> Execute -> Validate -> Remember
-response = await dae.process(
-    message="What is the WRE orchestrator?",
-    sender="user123",
-    channel="telegram",
-    session_key="session-id",
-    metadata={},
-)
-```
-
-### 2026-03-28 Operating Contract
-
-Per `WSP 77`, OpenClaw is currently a bounded execution surface, not the primary architect.
-
-- `0102` = architecture authority, prioritization, review
-- `OpenClaw / Kohi` = bounded maintenance execution
-- `HoloIndex` = retrieval bundle for direction and available subroutines
-- `WRE` = deterministic execution plane
-
-Current OpenClaw use case:
-- fix simple codebase issues
-- run focused checks
-- emit runtime events
-- write durable reports / knowledge artifacts
-
-Current execution contract:
-
-`assigned work -> retrieve bounded HoloIndex bundle -> execute -> verify -> emit -> remember`
-
-### ExecutionBundle (WSP 87/97)
-
-```python
-from modules.communication.moltbot_bridge.src.openclaw_execution_bundle import (
-    ExecutionBundle,
-    build_execution_bundle,
-    retrieve_bundle_for_memory_query,
-)
-
-# Build pre-execution context for any query
-bundle = build_execution_bundle(
-    query="find test fixtures",
-    route="holo_index",
-    limit=5,
-    include_patterns=True,
-    include_docs=True,
-)
-
-# Bundle fields:
-# - query: The original request
-# - route: Execution route (holo_index, wre_orchestrator, etc.)
-# - docs: Relevant doc paths (README, INTERFACE, ModLog)
-# - patterns: Prior successful patterns from breadcrumbs
-# - candidate_paths: File paths likely relevant to execution
-# - constraints: WSP constraints or permission requirements
-# - verification_hints: Signals for verifying successful execution
-# - confidence: Bundle quality score (0.0-1.0)
-# - code_hits: Raw HoloIndex code search results (for route consumption)
-# - wsp_hits: Raw HoloIndex WSP search results (for route consumption)
-
-# Check if bundle has enough context
-if bundle.is_actionable():
-    # proceed with execution
-    pass
-
-# Specialized memory query bundle
-memory_bundle = retrieve_bundle_for_memory_query("decisions", topic="architecture")
-# Always high confidence (0.9) for deterministic memory queries
-```
-
-Design principles:
-- Bundles are execution aids, not architecture authorities
-- Compact only — no giant context dumps
-- Deterministic — same query produces same bundle shape
-- Suitable for bounded doer, not open-ended cognition
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-100).
 
 ### Intent Categories
 
-| Category | Route | Permission | Description |
-|----------|-------|------------|-------------|
-| QUERY | holo_index | ADVISORY | Read-only search/lookup |
-| COMMAND | wre_orchestrator | DOCS_TESTS+ | Execute tasks via WRE |
-| MONITOR | ai_overseer | ADVISORY | System status/health |
-| SCHEDULE | youtube_shorts_scheduler | METRICS | Time-bound scheduling |
-| SOCIAL | communication | METRICS | Engagement (comment/post) |
-| SYSTEM | infrastructure | SOURCE | System admin (commander only) |
-| AUTOMATION | auto_moderator_bridge | METRICS | YouTube automation routing |
-| FOUNDUP | fam_adapter | METRICS | FoundUp launch and FAM workflows |
-| CONVERSATION | digital_twin | ADVISORY | Casual dialogue |
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-101).
 
 ### Generic DAE Runtime Control
 
-Broker-managed runtime commands are now available through OpenClaw:
-- `list launchable daes`
-- `status openclaw`
-- `status openclaw live`
-- `tail openclaw`
-- `tail openclaw supervisor`
-- `watch openclaw since 42`
-- `status openclaw supervisor live`
-- `status holodae`
-- `stop holodae`
-- `stop git push dae`
-- `launch social media dae`
-- `stop social media dae`
-- `stop training system`
-- `status liberty alert`
-
-Routing contract:
-- OpenClaw deterministic runtime classification
-- `dae_runtime_adapter.py`
-- central `DAELaunchBroker`
-
-Authorization:
-- `list` and `status` are read-only
-- `launch` and `stop` require `012` authority
-
-Resident OpenClaw contract:
-- `main.py` registers `openclaw` as a launchable DAE using `scripts/launch.py`
-- `main.py` registers `openclaw_supervisor` as a separate broker-managed runtime
-- `main.py` runs IronClaw readiness preflight before runtime bootstrap when IronClaw is the active backend
-- bootstrap can autostart the resident webhook service after preflight
-- bootstrap can autostart the supervisor state machine after resident/runtime registration
-- CLI menu option `3` now reuses the broker-managed runtime when available instead of spawning a competing subprocess
-- live supervision now exposes a cursor contract:
-  - `tail <dae>` = recent window
-  - `watch|follow <dae> since <sequence>` = incremental follow with returned `next_cursor`
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-102).
 
 ### OpenClaw Supervisor Contract
 
-Canonical 0102 lifecycle owner:
-- runtime id: `openclaw_supervisor`
-- implementation: `src/openclaw_supervisor.py`
-- broker launch wrapper: `scripts/launch.py`
-
-Current explicit states:
-- `BOOT`
-- `PREFLIGHT`
-- `OBSERVE`
-- `TRIAGE`
-- `PLAN`
-- `EXECUTE`
-- `VERIFY`
-- `REMEMBER`
-- `ESCALATE`
-- `IDLE_WATCH`
-
-Current operational rule:
-- the supervisor owns the daemon self-audit loop when enabled
-- `main.py` only starts direct self-audit as a fallback when supervisor is disabled
-- resident OpenClaw restarts are policy-gated through the broker/runtime surface
-- restart attempts are bounded by `OPENCLAW_SUPERVISOR_MAX_RESTARTS` within `OPENCLAW_SUPERVISOR_RESTART_WINDOW_SEC`
-- when the repair budget is exhausted, the supervisor escalates instead of retrying indefinitely
-- the supervisor advances a DAEmon follow cursor every cycle so repair decisions are tied to observed runtime history
-- IronClaw runtime readiness is validated at startup before resident/runtime bootstrap when IronClaw is the selected backend
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-103).
 
 ### PQN Runtime Control
 
-PQN research runtime can now be controlled through research intent phrases:
-- `launch pqn research`
-- `status pqn research`
-- `stop pqn research`
-- `launch pqn architect`
-- `status pqn architect`
-
-Routing contract:
-- OpenClaw -> `pqn_research_adapter.py`
-- `pqn_research_adapter.py` -> central `DAELaunchBroker`
-- `DAELaunchBroker` -> broker-managed PQN runtime entrypoints in `modules/ai_intelligence/pqn/scripts/launch.py`
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-104).
 
 ### PQN Theory-Archive Simulation Control
 
-PQN simulation can now be triggered directly through research intent phrases:
-- `run pqn simulation`
-- `launch pqn simulation`
-- `status pqn simulation`
-- `stop pqn simulation`
-- `tail pqn simulation`
-- `watch pqn simulation since 42`
-- `show pqn simulation plan`
-
-Routing contract:
-- `run|launch|status|stop pqn simulation`:
-  - OpenClaw deterministic runtime classification or `pqn_research_adapter.py`
-  - `DAELaunchBroker`
-  - `modules/ai_intelligence/pqn/scripts/launch.py:run_pqn_simulation_once()`
-- `show pqn simulation plan`:
-  - OpenClaw RESEARCH route
-  - `pqn_research_adapter.py`
-  - `PQNAlignmentDAE.get_theory_archive_simulation_plan(...)`
-- supervision:
-  - generic DAE runtime observer surface
-  - `tail|watch pqn simulation ...`
-
-Operational rule:
-- simulation execution is a broker-managed runtime lane
-- simulation planning remains a read-only research query
-- archive remains hypothesis input only
-- returned interpretation remains comparative, not ontological
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-105).
 
 ### FOUNDUP Route Contract (FAM Adapter)
 
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-106).
+
 #### Catalog Commands (p.fMALL Integration)
 
-- `list foundups` - Show all FoundUps in catalog
-- `foundup catalog [category]` - Browse catalog by category (marketplace, media, science, games, community)
-- `foundup status <name>` - Show FoundUp status (manifest + state overlay)
-- `open <foundup>` - Get routing target URL (`/f/{foundup_id}`)
-
-Catalog commands consume:
-- Static manifests from `foundup_manifest.json` (per PFMALL_FOUNDUP_MANIFEST_SCHEMA.md)
-- State overlay via provider interface (per PFMALL_STATE_OVERLAY_CONTRACT.md)
-- Degrades gracefully when state provider unavailable (shows "unknown" status)
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-107).
 
 #### Launch Commands
 
-- `launch foundup <name> with token <SYMBOL>`
-- `create foundup <name> token <SYMBOL>`
-
-Token symbol resolution:
-- If token is omitted, parser auto-generates from FoundUp name.
-- If token is `AUTO` (or legacy `FUP` seed), adapter auto-generates and resolves collisions.
-- Collision resolution is deterministic (`BASE`, `BASE2`, `BASE3`, ...), then handed to Agent Market.
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-108).
 
 ### Autonomy Tiers (Graduated)
 
-| Tier | Who | Can Do |
-|------|-----|--------|
-| ADVISORY | Anyone | Read-only: search, status, chat |
-| METRICS | Commander | + Write metrics/logs |
-| DOCS_TESTS | Commander | + Edit tests and docs |
-| SOURCE | Commander (explicit) | + Edit source code |
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-109).
 
 ### WSP 73 Partner-Principal-Associate
 
-- **Partner**: OpenClaw bridge receives intent, owns dialogue
-- **Principal**: OpenClaw DAE decomposes tasks, selects domain DAEs
-- **Associates**: Domain DAEs execute (communication, platform, dev, content)
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-110).
 
 ### Security
 
-- Non-commanders: ADVISORY only (no mutations)
-- COMMAND/SYSTEM intents blocked for non-commanders (WSP 50)
-- Cisco skill scanner preflight runs before mutating/skill-driven routes:
-  `command`, `system`, `schedule`, `social`, `automation`, `foundup`
-- Secret patterns (AIza*, sk-*, oauth_token*) redacted from output
-- Key-isolation mode:
-  - `OPENCLAW_NO_API_KEYS=1` blocks cloud provider fallback in conversation/FAM paths.
-  - `IRONCLAW_NO_API_KEYS=1` scrubs provider API keys from IronClaw launch subprocess env.
-- All decisions logged to WRE pattern memory (WSP 22)
-- Standalone action CLI writes `SkillOutcome` records to PatternMemory with
-  `skill_name=action_cli_<route>_<action>` (WSP 60/48 memory recall path).
-- Skill boundary policy (workspace skills vs internal `skillz`) is codified in:
-  `modules/communication/moltbot_bridge/docs/SKILL_BOUNDARY_POLICY.md`
-- MONITOR responses include OpenClaw skill safety gate state:
-  - status, required/enforced, last check timestamp, and gate message.
-- MONITOR/SYSTEM routes now expose broker-managed DAE runtime inspection and control.
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-111).
 
 ### Skill Safety Environment
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `OPENCLAW_SKILL_SCAN_REQUIRED` | No | `1` fail-closed if scanner missing (default) |
-| `OPENCLAW_SKILL_SCAN_ENFORCED` | No | `1` block risky scans above threshold (default) |
-| `OPENCLAW_SKILL_SCAN_MAX_SEVERITY` | No | Scanner threshold (default `medium`) |
-| `OPENCLAW_SKILL_SCAN_TTL_SEC` | No | Cached scan TTL in seconds (default `900`) |
-| `OPENCLAW_SKILL_SCAN_ALWAYS` | No | `1` bypass TTL and scan every mutating route |
-| `OPENCLAW_SKILL_MANIFEST_REQUIRED` | No | `1` require workspace skill hash manifest (default) |
-| `OPENCLAW_SKILL_MANIFEST_ENFORCED` | No | `1` block on manifest mismatch/missing (default) |
-| `OPENCLAW_SKILL_MANIFEST_VERIFY_SIGNATURE` | No | `1` verify HMAC signature in manifest |
-| `OPENCLAW_SKILL_MANIFEST_ALLOW_EXTRA` | No | `1` allow skill files not listed in manifest |
-| `OPENCLAW_SKILL_MANIFEST_FILE` | No | Optional override path to manifest JSON |
-| `OPENCLAW_SKILL_MANIFEST_HMAC_KEY` | No | Optional HMAC key for signature verification |
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-112).
 
 ### Rate Limiting (Webhook)
 
-Token bucket rate limiting per sender and channel (WSP 95 defense-in-depth):
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `OPENCLAW_RATE_LIMITING_ENABLED` | No | `0` to disable rate limiting (default `1`) |
-| `OPENCLAW_RATE_SENDER_PER_SEC` | No | Tokens/sec per sender (default `2.0`) |
-| `OPENCLAW_RATE_SENDER_BURST` | No | Burst capacity per sender (default `10.0`) |
-| `OPENCLAW_RATE_CHANNEL_PER_SEC` | No | Tokens/sec per channel (default `5.0`) |
-| `OPENCLAW_RATE_CHANNEL_BURST` | No | Burst capacity per channel (default `20.0`) |
-
-When limits exceeded, webhook returns HTTP 429 with `X-Retry-After` header.
-
-```python
-from modules.communication.moltbot_bridge.src.webhook_receiver import WebhookRateLimiter
-
-limiter = WebhookRateLimiter()
-allowed, bucket_type = limiter.check_allowed(sender="user123", channel="telegram")
-# Returns (True, None) if allowed, or (False, "sender"|"channel") if blocked
-```
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-113).
 
 ### SOURCE Tier Permission Check
 
-SOURCE tier operations require explicit permission via AgentPermissionManager (fail-closed):
-
-```python
-from modules.communication.moltbot_bridge.src.openclaw_dae import OpenClawDAE
-
-dae = OpenClawDAE()
-granted, reason = dae._check_source_permission(intent)
-# granted=False, reason="permission manager unavailable" if manager missing
-# granted=False, reason=<agent_permission_manager reason> if denied
-# granted=True, reason="granted" if allowed
-```
-
-Permission denied events emitted with 60s dedupe window (WSP 71 forensics).
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-114).
 
 ### COMMAND Graceful Degradation
 
-When WRE is unavailable, COMMAND intents return deterministic advisory fallback:
-
-```python
-# Returns advisory with:
-# - "Advisory Mode" header
-# - Command recognition
-# - Three actionable options (CLI, retry, query mode)
-# - Optional error detail
-```
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-115).
 
 ## WSP Compliance
 
-- **WSP 46**: WRE Protocol (execution cortex)
-- **WSP 49**: Standard module structure
-- **WSP 50**: Pre-Action Verification (preflight gate)
-- **WSP 73**: Digital Twin architecture integration
-- **WSP 77**: Agent coordination (4-phase execution)
-- **WSP 91**: Observability (structured logging)
-- **WSP 96**: Skill execution (micro chain-of-thought)
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-116).
 
 ## WSP 97 Internal Module Boundaries
 
-OpenClaw runtime responsibilities are now split into dedicated modules under `src/`.
-This is the canonical internal layout for future work:
-
-- `openclaw_dae.py`: facade only
-- `openclaw_intent_planner.py`: classify -> preflight -> plan
-- `openclaw_permission_policy.py`: autonomy tier + containment + skill safety
-- `openclaw_execution_routes.py`: non-social route execution
-- `openclaw_social_controller.py`: social-routing bridge
-- `openclaw_conversation_engine.py`: dialogue execution
-- `openclaw_model_policy.py`: model selection and switching
-- `openclaw_identity_context.py`: identity + context-pack builders
-- `openclaw_runtime_support.py`: runtime/model probes and autostart
-- `openclaw_status_surface.py`: operator-facing status helpers
-- `openclaw_process_loop.py`: full autonomy loop orchestration
-- `openclaw_result_memory.py`: validate + remember
-- `openclaw_turn_state.py`: token telemetry and turn cancellation
-- `openclaw_action_ledger.py`: DAEmon action reporting
-- `openclaw_provider_chain.py`: external/IronClaw provider chain
-- `openclaw_bootstrap_config.py`: constructor-time control-plane state
-
-Refactor status:
-- `openclaw_dae.py` now stays below the large-file threshold at `1342` lines
-- execution-plane resolution now matches `WSP_97`: resolve intent -> gate -> plan -> route -> validate -> remember
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-117).
 
 ## Runtime Supervision Commands
 
-OpenClaw can now read the DAEmon live ledger for itself and broker-managed DAEs:
-
-- `tail openclaw`
-- `status openclaw live`
-- `tail pqn research`
-- `status pqn research live`
-- `tail holodae`
-
-These commands are read-only. They use the central DAEmon observer surface and do not mutate runtime state.
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-118).
 
 ## Skill Evolution Loop
 
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-119).
+
 ### Phase 1: Report Surface (Read-Only)
 
-```python
-from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
-    build_skill_evolution_report,
-    skill_evolution_report_due,
-    write_skill_evolution_report,
-)
-
-# Check if report generation is due (missing or stale)
-if skill_evolution_report_due(repo_root, max_age_sec=3600):
-    report = build_skill_evolution_report(pattern_memory)
-    write_skill_evolution_report(repo_root, report)
-```
-
-Phase 1 is **read-only**: surfaces review candidates from PatternMemory without mutating WRE skills or scheduling promotions.
-
-Report contract:
-- `generated_on`: ISO timestamp
-- `period_days`: Evaluation window
-- `skills_evaluated`: Count of `openclaw_*` skills found
-- `candidate_count`: Skills with `status=candidate_for_review`
-- `candidates[]`: Array with `skill_name`, `execution_count`, `avg_fidelity`, `recommendation`
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `OPENCLAW_SKILL_EVOLUTION_ENABLED` | `0` | Enable Phase 1 report generation on idle path |
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-120).
 
 ### Phase 2: Mutation Surface (Bounded, Gated)
 
-```python
-from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
-    build_mutation_surface_report,
-    mutation_surface_report_due,
-    write_mutation_surface_report,
-)
-
-# Only due when gate enabled AND report missing/stale
-if mutation_surface_report_due(repo_root, max_age_sec=3600):
-    report = build_mutation_surface_report(pattern_memory)
-    write_mutation_surface_report(repo_root, report)
-```
-
-Phase 2 adds a **bounded mutation surface** that:
-- Surfaces A/B test status and promotion readiness per skill
-- Gates all mutation operations behind explicit env vars (fail-closed)
-- Reuses existing WRE primitives (PatternMemory, WRESkillsRegistryV2)
-- Does NOT introduce duplicate A/B or promotion engines
-
-Mutation status values:
-- `stable`: High fidelity, no action needed
-- `ab_test_active`: A/B test in progress
-- `eligible_for_ab`: Candidate for A/B test scheduling
-- `blocked`: Insufficient data or other blocker
-
-Report contract (extends Phase 1):
-- `enabled`: Whether mutation surface gate is on
-- `summary`: Counts by mutation_status
-- `gates`: Current gate states
-- `candidates[]`: Extended with `mutation_status`, `active_ab_test`, `ab_promotion_status`, `promotion_readiness`
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `OPENCLAW_MUTATION_SURFACE_ENABLED` | `0` | Enable Phase 2 mutation surface report generation |
-| `OPENCLAW_AB_SCHEDULING_ENABLED` | `0` | Enable A/B test scheduling (future) |
-| `OPENCLAW_PROMOTION_ENABLED` | `0` | Enable skill promotion (future) |
-
-**All gates are fail-closed by default**. Setting to `"0"` or leaving unset disables the feature.
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-121).
 
 ### Supervisor Integration
 
-Both Phase 1 and Phase 2 reports are generated on the supervisor **idle path only** (lowest priority):
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-122).
 
-```python
-# In openclaw_supervisor.py _triage()
-idle_result = {"kind": "idle", "reason": "resident_openclaw_healthy"}
-if skill_evolution_report:
-    idle_result["skill_evolution_report"] = skill_evolution_report
-if mutation_surface_report:
-    idle_result["mutation_surface_report"] = mutation_surface_report
-```
+### RedDog Governed Work-Order Policy Gate (no execution)
 
-Higher-priority work (restarts, autonomous tasks, self-audit events) blocks skill evolution report generation.
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-123).
+
+### RedDog Signed Receipt Chain (verification only)
+
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-124).
+
+### RedDog OpenClaw Live Enqueue (valve-gated queue-write seam)
+
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-125).
+
+### RedDog Work-Order Receipt (Hermes-compatible audit trail, no execution)
+
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-126).
+
+### RedDog Work-Order Runtime Invocation Dry-Run (no execution)
+
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-127).
+
+### RedDog WRE Executor Dry-Run Planner (no mutation)
+
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-128).
+
+### RedDog WRE Worktree Create (worktree only, no task execution)
+
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-129).
+
+### RedDog WRE Worktree Operational Spine (worktree-create only)
+
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-130).
+
+### RedDog Recipient Transaction Preflight
+
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-131).
+
+### RedDog Correspondence Sender Boundary
+
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-132).
+
+### Moshpit projection layer
+
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-133).
+
+### RedDog Correspondence Continuity State
+
+[Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-134).

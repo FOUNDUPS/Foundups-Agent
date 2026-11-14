@@ -1,5 +1,35 @@
 # cli TestModLog
 
+## 2026-11-06 — Connect WRE evidence states
+
+Replace the legacy truthy-insufficient-data assertion with actual function-body
+coverage for READY, UNKNOWN, refusal, checker failure and invalid configuration.
+These cases run without importing the full main menu. Included in the 200-pass
+offline readiness selection (expanded to 207 after independent review); no daemon,
+model or browser was launched. WSP5/6/97.
+
+## 2026-11-05 — Prompt logging boundary
+
+Four new cases failed before the utility existed and pass after wiring the real
+definitions into synthetic input. Background console records are suppressed only
+while waiting; a real private FileHandler retains them, foreground records remain,
+and prior filters survive answer/EOF/KeyboardInterrupt. Combined with supervisor
+startup/plan controls: nine pass, zero errors/skips/denied effects under the
+existing startup EffectGuard and cleared credentials. Offline component evidence;
+no claim of a full Windows terminal session or native-output capture. WSP5/6/22/97.
+
+## 2026-09-10 — Japanese speech adapter and import boundary
+
+Read README, TestModLog and the existing cue-parsing test before authoring.
+Extended `test_openclaw_voice_cue_parsing.py` for Japanese Whisper configuration,
+Cohere processor language/chunk metadata and current/legacy decoding, Google
+ja-JP locale, and a fresh-process check that speech import does not load main_menu.
+The existing cue, barge and normalization cases remain in the same suite.
+Combined call-adapter validation is recorded in
+[elevenlabs_calls TestModLog](../../../platform_integration/elevenlabs_calls/tests/TestModLog.md).
+Physical microphone and model inference were not available; fixtures validate
+adapter contracts, not actual recognition quality. No whole-CLI coverage claim.
+
 ## 2026-03-18: OpenClaw menu broker-runtime alignment
 
 - Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest modules/infrastructure/cli/tests/test_openclaw_menu_runtime.py -q`

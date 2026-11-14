@@ -255,9 +255,14 @@ def save_batch_artifact(videos: List[Dict], channel: str) -> str:
 # Test Cases
 # =============================================================================
 
+@pytest.mark.live_browser
 @pytest.mark.integration
 class TestStage2BatchNavigation:
-    """Stage 2: Batch video navigation tests."""
+    """Stage 2: Batch video navigation tests.
+
+    LIVE BROWSER: attaches to a signed-in Chrome on port 9222 and navigates
+    YouTube Studio. Skipped by default; pass --run-live to run.
+    """
 
     def test_find_10_videos_undaodu(self):
         """Test: Find 10 oldest videos from UnDaoDu."""

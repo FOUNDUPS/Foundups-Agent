@@ -1,5 +1,10 @@
 # WRE Recursive Skills Orchestration: First Principles Architecture
 
+> **Historical WSP 96-era design — superseded and non-authoritative.** Automatic
+> A/B selection, promotion, production mutation, and efficiency claims below are
+> unimplemented design records. Current authority is WSP 95 v2.1 plus the root
+> WRE `README.md`, `INTERFACE.md`, and `ROADMAP.md`.
+
 **Date**: 2025-10-23
 **Architect**: 0102
 **Status**: ARCHITECTURAL DESIGN - Deep Think Complete

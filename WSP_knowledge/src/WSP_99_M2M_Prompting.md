@@ -20,6 +20,7 @@ L: <lane>           # A|B|C|QA|SENTINEL|ORCH
 S: <scope>          # File/module scope
 M: exec|plan|qa     # Mode
 T: <task_hash>      # Task identifier
+A: <action>         # Explicit verb in new compiler output; absent on legacy packets
 R: [wsp_list]       # Required WSP compliance
 I: {k:v invariants} # Constraints
 O: [deliverables]   # Required outputs
@@ -27,6 +28,21 @@ F: [fail_conditions] # Abort triggers
 ```
 
 **Trade-off**: Less readable to humans, but 0102 parses faster and cheaper.
+
+**Compiler compatibility (2026-09-13):** `prompt/swarm/m2m_compiler.py` now carries
+its extracted action in `A` (and `MISSION.ACTION` in its YAML rendering).
+The current reader preserves that action separately from execution mode.
+Legacy packets without `A` still parse and retain their mode-only rendering;
+they do not establish action preservation. Older readers that ignore `A` must
+not be used as action-fidelity validators. The fidelity gate compares the
+requested action with compiled, parsed and decompiled values, and compares the
+actual parsed scope with the requested/compiled scope. A default `IMPLEMENT`
+must not excuse a missing or changed action.
+
+These are field checks, not proof that arbitrary prose, the full objective,
+role/origin or CTX.HOLO crossed the wire. Compact output does not grant work
+authority. Keep the full source and applicable governed work contract until
+their independent preservation and admission requirements are satisfied.
 
 **Integration**:
 - Human-readable PROMETHEUS prompts are for principal or observer review only

@@ -1,0 +1,144 @@
+# Bypass Pattern Definitions
+# Contract: docs/contracts/REDDOG_WSP99_RTK_TOKEN_EFFICIENCY_CONTRACT_PHASE1.md Section 6a
+# WSP: WSP_97, WSP_99
+#
+# These patterns define which command outputs MUST bypass compression.
+# Fail-closed: if in doubt, bypass.
+
+version: "1.0"
+wsp_refs: [97, 99]
+
+bypass_classes:
+  BYPASS_SECURITY:
+    description: "Security scan output must not be summarized"
+    priority: 1
+    patterns:
+      - "CVE-\\d{4}-\\d+"
+      - "\\bVULNERABILITY\\b"
+      - "\\bEXPLOIT\\b"
+      - "\\bCRITICAL:\\s"
+      - "\\bHIGH:\\s"
+      - "\\bsecurity\\s+scan\\b"
+      - "\\bmalware\\b"
+      - "\\binjection\\b"
+      - "\\bXSS\\b"
+      - "\\bSQLi\\b"
+
+  BYPASS_AUTH:
+    description: "Credentials must never be compressed"
+    priority: 2
+    patterns:
+      - "\\btoken\\s*="
+      - "\\bkey\\s*="
+      - "\\bpassword\\s*="
+      - "\\bsecret\\s*="
+      - "\\bcredential"
+      - "\\bsession_id\\s*="
+      - "\\bauth_token\\b"
+      - "\\bapi_key\\b"
+      - "\\baccess_token\\b"
+      - "\\brefresh_token\\b"
+      - "\\bBearer\\s+[A-Za-z0-9_-]+"
+      - "\\bsk-[A-Za-z0-9]+"
+      - "\\bAIza[A-Za-z0-9]+"
+
+  BYPASS_PROVENANCE:
+    description: "Chain of custody must be preserved"
+    priority: 6
+    patterns:
+      - "\\bsigned\\s+by\\b"
+      - "\\bverified\\b"
+      - "\\battestation\\b"
+      - "\\bwitness\\b"
+      - "\\bcommit\\s+[a-f0-9]{7,40}\\b"
+      - "\\bgit\\s+diff\\b"
+      - "\\bgit\\s+log\\b"
+      - "\\bauthor:\\s"
+      - "\\bcommitter:\\s"
+      - "\\bsigned-off-by:\\s"
+
+  BYPASS_SIGNING:
+    description: "Crypto material must not be altered"
+    priority: 3
+    patterns:
+      - "\\bsignature:"
+      - "-----BEGIN\\s+[A-Z\\s]+-----"
+      - "-----END\\s+[A-Z\\s]+-----"
+      - "\\bpubkey:"
+      - "\\bpublic[_-]?key\\b"
+      - "\\bprivate[_-]?key\\b"
+      - "\\bfingerprint:"
+      - "\\bkey_epoch\\b"
+      - "\\bverifier\\b"
+      - "\\bssh-rsa\\b"
+      - "\\bssh-ed25519\\b"
+      - "\\becdsa-sha2\\b"
+
+  BYPASS_PERMISSION:
+    description: "Permission changes must be explicit"
+    priority: 4
+    patterns:
+      - "\\bALLOW\\b"
+      - "\\bDENY\\b"
+      - "\\bGRANT\\b"
+      - "\\bREVOKE\\b"
+      - "\\bscope:"
+      - "\\bprincipal[_-]?id\\b"
+      - "\\bdelegated[_-]?authority\\b"
+      - "\\bpermission[_-]?snapshot\\b"
+      - "\\brepo[_-]?scope\\b"
+      - "\\bfoundup[_-]?scope\\b"
+
+  BYPASS_RECEIPT:
+    description: "Settlement records must be verbatim"
+    priority: 5
+    patterns:
+      - "\\breceipt_id:"
+      - "\\bwork_order_id:"
+      - "\\bsettled_at:"
+      - "\\bproof[_-]?of[_-]?compute\\b"
+      - "\\baudit[_-]?chain\\b"
+      - "\\bexecution[_-]?receipt\\b"
+      - "\\bsigned[_-]?receipt\\b"
+
+command_lists:
+  safe_prefixes:
+    description: "Commands that are inherently safe to compress"
+    items:
+      - "ls"
+      - "dir"
+      - "cat"
+      - "head"
+      - "tail"
+      - "wc"
+      - "echo"
+      - "pwd"
+      - "cd"
+      - "tree"
+      - "find"
+      - "npm list"
+      - "pip list"
+      - "python --version"
+      - "node --version"
+
+  sensitive_prefixes:
+    description: "Commands that always need bypass"
+    items:
+      - "git log"
+      - "git diff"
+      - "git show"
+      - "git blame"
+      - "security"
+      - "npm audit"
+      - "pip audit"
+      - "safety check"
+      - "bandit"
+      - "semgrep"
+      - "trivy"
+      - "grype"
+      - "snyk"
+
+fail_closed:
+  unknown_command: true
+  classification_error: true
+  ambiguous_output: true

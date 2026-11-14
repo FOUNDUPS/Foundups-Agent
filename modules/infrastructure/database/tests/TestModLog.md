@@ -1,5 +1,80 @@
 # Database Module - Test Evolution Log
 
+## Entry: HoloIndex Post-Merge Claim-Clock Writer Fencing
+**Date**: 2026-08-28
+**Test File**: `test_holoindex_postmerge_claim_atomicity.py`
+**Coverage**:
+- SQLite claim issuance waits for the writer fence before setting issued/expiry.
+- Start and completion waits that cross expiry reject without state mutation.
+- PostgreSQL seam emits row-level `FOR UPDATE` without an eager statement;
+  live PostgreSQL contention remains unproven in this environment.
+**Result**: 4 passed; final combined claim/schema/WSP_62 selection 60 passed.
+**WSP References**: WSP 5, WSP 6, WSP 15, WSP 22, WSP 48, WSP 50, WSP 62, WSP 78, WSP 97
+
+## Entry: HoloIndex Post-Merge v2 Claim and Expiry Fence
+**Date**: 2026-08-28
+**Test Files**: `test_holoindex_postmerge_claim_security.py`,
+`test_agent_db_schema_compatibility.py`,
+`test_holoindex_postmerge_reserved_namespace.py`
+**Coverage**:
+- Claim ID, issued time, expiry, assignee, context digest, and assignment-time
+  equality; boolean/non-integer/overlong lease rejection.
+- Rehashed stored ID/expiry substitution cannot replace the issued caller
+  capability; first completion after expiry is atomically inert.
+- Exact completed replay after expiry requires a recorded pre-expiry terminal
+  time; reclaim requires actual expiry plus exact-row CAS.
+**WSP References**: WSP 5, WSP 6, WSP 15, WSP 22, WSP 50, WSP 62, WSP 78, WSP 97
+
+## Entry: Author-Side Assurance Quarantine Regression
+**Date**: 2026-07-28
+**Test File**: `test_signed_worker_quarantine_security.py`
+**Coverage**:
+- Author execution quarantine atomically transitions its reservation to
+  `QUARANTINED` and its paired verifier task to `cancelled`.
+- Exact replay and prior verifier quarantine validate the paired terminal state.
+- Expired signed execution without durable assurance is quarantined without a
+  fabricated result-ledger entry.
+**WSP References**: WSP 5, WSP 15, WSP 62, WSP 78, WSP 97
+
+## Entry: Signed-Worker Quarantine Namespace Isolation
+**Date**: 2026-07-28
+**Test File**: `test_signed_worker_quarantine_security.py`
+**Coverage**:
+- Direct quarantine of an ordinary assigned task with forged signed metadata
+  rejects before any database mutation.
+- Status, context, assignee, timestamps, and result history remain unchanged;
+  exact replay without an assurance reservation is idempotent.
+**WSP References**: WSP 5, WSP 15, WSP 62, WSP 78, WSP 97
+
+## Entry: Bounded Signed-Worker Assurance Security Suites
+**Date**: 2026-07-28
+**Test Files**: `test_signed_worker_assurance_*.py`,
+`test_signed_worker_quarantine_security.py`
+**Coverage**:
+- Process-local verification-proof forgery and stale-assignment rejection.
+- Active-lease finalization and failure-only expired recovery.
+- Atomic quarantine, assurance release, terminal ledger rollback, and restart
+  race behavior.
+- Concern-specific modules replace the former assurance test monolith.
+**WSP References**: WSP 5, WSP 15, WSP 62, WSP 78, WSP 97
+
+## Entry: Independent Assurance Reservation Tests
+**Date**: 2026-07-25
+**Test Files**: `test_signed_worker_assurance_*.py`
+**Coverage**:
+- Atomic concurrent claim with exactly one winner.
+- Separate author/work-order and verifier-task uniqueness paths.
+- Author/verifier task and principal separation.
+- Capability, runtime, snapshot, allocation and role binding.
+- Restart rehydration, deterministic digest rejection, expiry and revocation.
+- Immutable admission-digest preservation, bounded renewal count and lease
+  horizon, forged-renewal rejection, and author-completion prerequisites.
+- Cumulative six-hour admission horizon across every renewal.
+- Exactly-once terminal receipt binding, admission-digest revalidation, and
+  verifier-task lifecycle transitions.
+- Additive legacy migration for nullable `retry_not_before`.
+**WSP References**: WSP 5, WSP 15, WSP 78, WSP 97
+
 ## Entry: Quantum Compatibility Test Suite Created
 **Date**: 2025-09-27
 **Test File**: `test_quantum_compatibility.py`
