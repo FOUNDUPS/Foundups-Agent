@@ -156,6 +156,9 @@ Storage and service worker registrations are origin-local.
 
 The ordinary Mall dock searches the loaded catalog. Tap or swipe up on its
 plus button for an anchored options panel and the public AutoPost link.
+The panel displays the build of the loaded interface. The scoped video
+header repeats it beside the topic. Update the build and shell cache
+generation together. The runtime tests check their agreement.
 Search and dictated text wrap into a bounded editable field above the
 controls when they outgrow the compact pill. Enter or the search icon
 submits. The mic or a hold on Red Dog dictates into the search field using

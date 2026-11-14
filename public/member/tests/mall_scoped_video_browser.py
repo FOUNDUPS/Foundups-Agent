@@ -147,6 +147,9 @@ def main():
         page.goto("https://hpc.foundups.com/member/", wait_until="domcontentloaded")
         expect(page.locator("#videoScopeTitle")).to_have_text("Hasan Piker Coalition")
         expect(page.locator("#videoScopeHeader #videoScopeTopic")).to_have_text("#SchumerOUT")
+        build = page.locator("#videoScopeHeader .mall-build-label")
+        expect(build).to_have_text("Build v17")
+        expect(build).to_be_visible()
         expect(page.locator("#videoScopeHeader #videoScopeVoice")).to_have_attribute("href", "https://vote.mtrout.com/contact")
         expect(page.locator("#videoScopeInfo")).to_be_hidden()
         expect(page).to_have_title("Hasan Piker Coalition")
@@ -294,6 +297,7 @@ def main():
         page.set_viewport_size({"width":320, "height":640})
         voice = page.locator("#videoScopeVoice").bounding_box()
         assert voice["x"] + voice["width"] <= 320
+        assert build.bounding_box()["x"] + build.bounding_box()["width"] <= voice["x"]
         more = dock.get_by_role("button", name="More options")
         search = dock.get_by_role("textbox", name="Search videos")
         red_dog = dock.get_by_role("link", name="Red Dog")
@@ -331,6 +335,7 @@ def main():
         expect(page.locator(".mall-video-grid-empty")).to_have_text("No videos match your search.")
         more.tap()
         menu = page.get_by_role("dialog", name="More options")
+        expect(menu.get_by_text("Build v17", exact=True)).to_be_visible()
         assert menu.bounding_box()["x"] <= more.bounding_box()["x"] + 1
         assert menu.bounding_box()["y"] + menu.bounding_box()["height"] < dock.bounding_box()["y"]
         expect(menu.get_by_role("combobox", name="Browser AI")).to_be_disabled()
@@ -498,6 +503,7 @@ def verify_member_poster_grid(page):
     player.get_by_role("button", name="Search options").click()
     options = player.get_by_role("dialog", name="Search options")
     expect(options.get_by_role("combobox", name="Browser AI")).to_be_disabled()
+    expect(options.get_by_text("Build v17", exact=True)).to_be_visible()
     page.keyboard.press("Escape")
     expect(options).not_to_be_visible()
     expect(player).to_be_visible()
@@ -859,6 +865,7 @@ def verify_desktop(browser_type):
     page = context.new_page()
     page.set_default_timeout(8000)
     page.goto("https://hpc.foundups.com/member/", wait_until="domcontentloaded")
+    expect(page.locator("#videoScopeHeader .mall-build-label")).to_be_visible()
     player = page.get_by_role("region", name="Video theater")
     search = player.get_by_role("searchbox", name="Search videos")
     search_form = player.get_by_role("search")

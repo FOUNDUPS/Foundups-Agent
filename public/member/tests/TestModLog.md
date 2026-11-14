@@ -1,3 +1,10 @@
+## 2026-11-14 · Mall build identification
+
+The scoped browser fixture checks the build next to #SchumerOUT at desktop
+and phone widths, including space beside the civic action at 320 px. The
+HPC and member plus menus display the same build. The worker fixture checks
+that the label matches the installed v17 cache and that v16 is retired.
+
 ## 2026-11-14 · Shared dock phone reference
 
 The existing Chromium and WebKit browser fixtures check the shared dock at

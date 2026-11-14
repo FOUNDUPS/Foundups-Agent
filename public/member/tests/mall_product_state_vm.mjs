@@ -407,19 +407,22 @@ await check('install reloads only explicit public shell and product assets', asy
   }
   assert.equal(installed.includes('/move2japan/properties.json'), false);
   assert.equal(installed.includes('/member/js/mall-video-projection.js'), false);
-  assert.equal(h.stores.has('pfmall-member-v16'), true);
+  assert.equal(h.stores.has('pfmall-member-v17'), true);
+  const build = videoProjectionSource.match(/const mallBuild = '(v\d+)';/)?.[1];
+  assert.equal('pfmall-member-' + build, 'pfmall-member-v17');
 });
 
 await check('activation retires only obsolete caches owned by this Mall', async () => {
   const h = swRuntime();
-  for (const name of ['pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4', 'pfmall-member-v5', 'pfmall-member-v6', 'pfmall-member-v7', 'pfmall-member-v8', 'pfmall-member-v9', 'pfmall-member-v10', 'pfmall-member-v11', 'pfmall-member-v12', 'pfmall-member-v13', 'pfmall-member-v14', 'pfmall-member-v15', 'pfmall-member-v16', 'pfmall-properties-v1', 'pfmall-posters-v1', 'gotjunk-offline-v1', 'other-app-cache']) {
+  const obsoleteVersions = Array.from({ length: 15 }, (_, index) => `pfmall-member-v${index + 2}`);
+  for (const name of [...obsoleteVersions, 'pfmall-member-v17', 'pfmall-properties-v1',
+    'pfmall-posters-v1', 'gotjunk-offline-v1', 'other-app-cache']) {
     await h.caches.open(name);
   }
   await h.event('activate');
-  const obsoleteVersions = Array.from({ length: 14 }, (_, index) => `pfmall-member-v${index + 2}`);
   assert.deepEqual(h.deleted.sort(), obsoleteVersions.sort());
-  assert.equal(h.stores.has('pfmall-member-v15'), false);
-  assert.equal(h.stores.has('pfmall-member-v16'), true);
+  assert.equal(h.stores.has('pfmall-member-v16'), false);
+  assert.equal(h.stores.has('pfmall-member-v17'), true);
   assert.equal(h.stores.has('gotjunk-offline-v1'), true);
   assert.equal(h.stores.has('other-app-cache'), true);
 });
@@ -455,7 +458,7 @@ await check('product navigation shares one static member shell without query cac
   assert.equal(online.response.status, 200);
   assert.equal(h.calls.at(-1).request, '/member/');
   assert.equal(h.calls.at(-1).options.credentials, 'omit');
-  const cache = await h.caches.open('pfmall-member-v16');
+  const cache = await h.caches.open('pfmall-member-v17');
   assert.equal((await cache.keys()).some(key => {
     const url = new URL(key.url);
     return url.pathname === '/member/' && !!url.search;

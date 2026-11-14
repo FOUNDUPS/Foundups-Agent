@@ -1,5 +1,12 @@
 # Member Area Module Change Log
 
+## 2026-11-14 · Visible Mall build
+
+The scoped video header and shared options show the loaded build. Build
+v17 refreshes the shell cache with the same generation. The hosted v7
+comparison put the first Short below its row. The v16 preview placed the
+player at the start of the original row, in line with the current contract.
+
 ## 2026-11-14 · Shared search dock and transcript editing
 
 The scoped grid, invited grid and expanded player use the same plus menu,

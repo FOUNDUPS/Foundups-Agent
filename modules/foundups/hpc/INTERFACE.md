@@ -54,6 +54,9 @@ on the surrounding chrome restores the tile and focus. YouTube owns touches
 inside the iframe. The provider viewport is at least 200 × 200. A thumbnail
 below 120 × 70 selects the player and offers explicit Play. [YouTube embed requirements](https://developers.google.com/youtube/terms/required-minimum-functionality).
 
+The header shows the loaded Mall build beside #SchumerOUT. The same number
+appears in **More options**.
+
 The shared floating phone dock puts **More options** at the left, scoped
 search and its dictation microphone in the middle, and **Red Dog** at the
 right. Longer queries expand into an editable field above those controls. Search
