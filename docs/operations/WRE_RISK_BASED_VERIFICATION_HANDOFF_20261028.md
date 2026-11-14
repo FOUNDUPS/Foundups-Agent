@@ -19,6 +19,16 @@ same-source, equal-inventory comparison; its benefit is not established by this
 handoff. Keep these gates with their existing owners and authority.
 
 ## Mission
+
+2026-11-14 CI continuation: reuse the existing #2338/#2340 documentation pilot
+with exact-base verifier loading and explicit required-check aggregation. Its
+proposal-only Skill schema is a CI documentation boundary, not a change to WRE
+SYSTEMIC scope, dependency completeness, runtime admission or promotion. Python
+retains full verification while authenticated closure is unavailable. Production
+activation remains held on server freshness/ownership/hosted qualification; no
+settings are changed. See [the CI contract](../../.github/scripts/README.md#audit-markdown-fast-path)
+and the existing active slice ledger for this separate owned lane. Reference
+timings alone do not establish measured savings.
 Integrate the existing risk-based test-impact planning and verifier evidence into the authorized WRE/RSI worker completion lifecycle without a new scheduler, memory store, or self-authorizing judge. Optimize verified improvement per unit of compute while preserving non-bypassable safety, security and release gates. Do not mistake CI queueing for a universal requirement to run all workflows on every agent change.
 
 ## Authoritative retrieval order

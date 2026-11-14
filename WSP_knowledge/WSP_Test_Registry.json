@@ -11,7 +11,8 @@
       "suite_class": "unit",
       "shard_id": "github-unit",
       "capabilities": [
-        "import_path_mutation"
+        "import_path_mutation",
+        "process"
       ],
       "execution_type": "unit",
       "collectable": true,

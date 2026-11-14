@@ -19,14 +19,21 @@ _POLICY = re.compile(
     r"|\.(?:agent|agents|claude|codex)/skills/[A-Za-z0-9_/-]+/SKILL\.md"
     r"|\.github/(?:copilot-instructions\.md|instructions/[A-Za-z0-9_.-]+\.instructions\.md)"
 )
+_SKILL_PROPOSAL = re.compile(
+    r"modules/[a-z][a-z0-9_]*/[a-z][a-z0-9_]*/skillz/"
+    r"[a-z][a-z0-9_]*/SKILLz?\.md"
+)
+_REGISTRY = "modules/infrastructure/wre_core/skillz/skills_registry_v2.json"
+SCHEMA = "ci_merge_scope.v1"
 
 
 def _git(*args):
     try:
         return subprocess.run(
-            ["git", "--no-replace-objects", *args], check=True, capture_output=True
+            ["git", "--no-replace-objects", *args], check=True, capture_output=True,
+            timeout=30,
         ).stdout
-    except (OSError, subprocess.CalledProcessError) as error:
+    except (OSError, subprocess.SubprocessError) as error:
         raise ValueError(f"Git {args[0]} failed; evidence is unavailable") from error
 
 
@@ -46,6 +53,28 @@ def _changes(before, after):
             raise ValueError("Malformed Git diff record")
         changes[path] = fields
     return changes
+
+
+def _new_proposal(base, merge, path):
+    """Only a new, unregistered, non-executable proposal can use this pilot."""
+    directory = path.rsplit("/", 1)[0]
+    if _git("ls-tree", "-r", "--name-only", base, "--", directory).strip():
+        return False
+    members = _git("ls-tree", "-r", "--name-only", merge, "--", directory).splitlines()
+    if members != [path.encode("ascii")]:
+        return False
+    for revision in (base, merge):
+        registry = json.loads(_git("show", f"{revision}:{_REGISTRY}"))
+        skills = registry.get("skills") if isinstance(registry, dict) else None
+        if not isinstance(skills, dict) or any(not isinstance(x, dict) for x in skills.values()):
+            raise ValueError("Skill registry evidence is malformed")
+        if any(entry.get("location", "").rstrip("/") == directory for entry in skills.values()):
+            return False
+    content = _git("show", f"{merge}:{path}")
+    if len(content) > 128 * 1024 or b"\0" in content:
+        return False
+    text = content.decode("utf-8", errors="strict")
+    return not text.startswith("---") and "**Status:** PROPOSED / DOCUMENTATION ONLY" in text
 
 
 def classify(base: str, head: str, merge: str) -> tuple[str, list[str]]:
@@ -71,7 +100,7 @@ def classify(base: str, head: str, merge: str) -> tuple[str, list[str]]:
     if not paths or reviewed != integrated:
         return "full", paths
 
-    lane = "docs"
+    lanes = set()
     for path, (old_mode, new_mode, _, _, status) in reviewed.items():
         regular_change = (
             (old_mode, new_mode, status) == (b":000000", b"100644", b"A")
@@ -80,10 +109,37 @@ def classify(base: str, head: str, merge: str) -> tuple[str, list[str]]:
         if not regular_change:
             return "full", paths
         if _POLICY.fullmatch(path):
-            lane = "policy"
-        elif not _PROSE.fullmatch(path):
+            lanes.add("policy")
+        elif _PROSE.fullmatch(path):
+            lanes.add("docs")
+        elif _SKILL_PROPOSAL.fullmatch(path) and status == b"A":
+            try:
+                eligible = _new_proposal(base, merge, path)
+            except (ValueError, UnicodeError, TypeError, AttributeError):
+                eligible = False
+            if not eligible:
+                return "full", paths
+            lanes.add("skill-proposal")
+        else:
             return "full", paths
-    return lane, paths
+    # Preserve the historical policy shadow classification, never its omission.
+    if lanes <= {"docs", "policy"}:
+        return ("policy" if "policy" in lanes else "docs"), paths
+    return (next(iter(lanes)) if len(lanes) == 1 else "full"), paths
+
+
+def scope_plan(base, head, merge):
+    """An exact-Git CI plan, not WRE dependency or promotion authority."""
+    lane, paths = classify(base, head, merge)
+    gates = ["security", "lint", "holoindex_freshness"]
+    if lane in {"docs", "skill-proposal"}:
+        gates += ["markdown_structure_links"]
+        if lane == "skill-proposal":
+            gates += ["proposal_skill_governance"]
+    else:
+        gates += ["full_existing_ci", "wre_verification_contracts"]
+    return dict(schema_version=SCHEMA, base_sha=base, head_sha=head,
+                merge_sha=merge, lane=lane, paths=paths, required_gates=gates)
 
 
 def main():
@@ -93,10 +149,10 @@ def main():
     parser.add_argument("--merge", required=True)
     args = parser.parse_args()
     try:
-        lane, paths = classify(args.base, args.head, args.merge)
+        plan = scope_plan(args.base, args.head, args.merge)
     except ValueError as error:
         parser.exit(1, f"Merge scope unavailable: {error}\n")
-    print(json.dumps({"lane": lane, "paths": paths}))
+    print(json.dumps(plan))
 
 
 if __name__ == "__main__":
