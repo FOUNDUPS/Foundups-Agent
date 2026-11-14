@@ -95,6 +95,12 @@ For one FoundUp it should consolidate, without silently rewriting history:
 
 This is the layer that handles 012 moving rapidly between topics. A diversion does not need to be manually remembered by 012. Brain/Memex should retain the open loop so RedDog can later surface: "we still need to return to this."
 
+## Operational safety correction: timezone and send effects (2026-11-11)
+
+Live Moshpits should show the latest JST day first, actions newest-first, and only a minimal skill pointer above the feed. Skills own verbose instructions and the registry; historical evidence remains intact. Convert provider timestamps to Asia/Tokyo independently of VPN/IP locale. This is a view contract, not proof that a unified renderer is deployed.
+
+Moshpit history does not authorize or prove a Gmail send. Before any outbound effect reconcile exact-thread Gmail Sent, Inbox, drafts, latest Moshpit day and scoped asks. Incremental conversational improvements after a send default to an unsent revision. Another send needs a material delta and independent preflight. The November 11 Sunvista three-email incident exposed this missing guard. See reddog_correspondence_state/SKILLz.md and yumori_moshpit/SKILLz.md.
+
 ## Moshpit Projection
 
 Moshpit is the human-readable activity/history projection over selected Breadcrumbs plus current-state interpretation from Brain/Memex.

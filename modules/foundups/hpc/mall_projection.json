@@ -2,15 +2,36 @@
   "foundup_id": "hpc",
   "source_foundup_id": "move2japan",
   "identity": "Independent satirical FoundUp",
-  "topic": "SchumerOUT",
+  "topic": "#SchumerOUT",
   "voice_resource_url": "https://vote.mtrout.com/contact",
   "disclosure": "This is an independent satirical FoundUp. It is not affiliated with, endorsed by, or operated by Hasan Piker or any other person depicted or discussed. Videos and images belong to their respective creators and rights holders. Commentary and satire do not imply endorsement.",
   "videos": [
+    {
+      "video_id": "iJuguXpbRR4",
+      "title": "MAGA ACCOUNTABILITY not REVENGE! Chuck Schumer OUT",
+      "timestamp": "2026-11-11T01:00:25Z",
+      "duration_seconds": 60,
+      "editorial_label": "Opinion"
+    },
+    {
+      "video_id": "sSzWdw7MNjs",
+      "title": "BREAKING: “Chuck #SchumerOUT 💙🌊”#HasanPiker Coalition in action",
+      "timestamp": "2026-11-10T22:00:29Z",
+      "duration_seconds": 51,
+      "editorial_label": "Satire"
+    },
     {
       "video_id": "BXCzUOh9Y8M",
       "title": "Chuck Schumer Out — call senators NOW",
       "timestamp": "2026-11-08T11:00:22Z",
       "duration_seconds": 24,
+      "editorial_label": "Opinion"
+    },
+    {
+      "video_id": "OTTz58wPi24",
+      "title": "⁠@Vaush Schumer OUT: Hasan Piker & Vaush Midterm Bluek coalistion EXPOSE the Senate weakness",
+      "timestamp": "2026-11-08T02:36:49Z",
+      "duration_seconds": 60,
       "editorial_label": "Opinion"
     },
     {

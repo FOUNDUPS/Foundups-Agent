@@ -151,18 +151,18 @@
   font-size: 0.72rem;
 }
 
-.video-player-fullscreen.scoped-player .video-player-top-bar {
+.video-player-fullscreen:is(.scoped-player, .provider-youtube) .video-player-top-bar {
   position: relative;
   flex-shrink: 0;
   opacity: 1;
   pointer-events: auto;
 }
 
-.video-player-fullscreen.scoped-player {
+.video-player-fullscreen:is(.scoped-player, .provider-youtube) {
   overflow-y: auto;
 }
 
-.scoped-player .video-player-stage {
+.video-player-fullscreen:is(.scoped-player, .provider-youtube) .video-player-stage {
   min-height: 200px;
 }
 
@@ -191,6 +191,34 @@
 
 .video-player-stage iframe {
   border: none;
+}
+
+.video-player-status {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  color: #fff4dc;
+  background: #241a36;
+  font-size: 0.85rem;
+}
+
+.video-player-btn[hidden],
+.video-player-status[hidden],
+.video-player-manual-play[hidden] {
+  display: none;
+}
+
+.video-player-manual-play {
+  align-self: flex-start;
+  flex-shrink: 0;
+  min-height: 44px;
+  margin: 0.25rem 0.75rem;
+  padding: 0.25rem 0.8rem;
+  border: 1px solid #d6bdf880;
+  border-radius: 0.4rem;
+  background: #302049;
+  color: #fff4dc;
+  font: inherit;
+  cursor: pointer;
 }
 
 /* Loading/error states */
@@ -239,7 +267,7 @@
   opacity: 1;
 }
 
-.video-player-fullscreen.chrome-hidden .video-player-queue-rail {
+.video-player-fullscreen.chrome-hidden:not(.video-player-queue-docked) .video-player-queue-rail {
   opacity: 0;
   pointer-events: none;
 }
@@ -260,6 +288,8 @@
 
 .video-player-queue-item {
   flex: 0 0 auto;
+  padding: 0;
+  background: transparent;
   width: 100px;
   scroll-snap-align: start;
   cursor: pointer;
@@ -290,6 +320,7 @@
 }
 
 .video-player-queue-label {
+  display: block;
   padding: 0.25rem 0.4rem;
   background: rgba(0,0,0,0.7);
   color: #fff;
@@ -329,7 +360,7 @@
   opacity: 1;
 }
 
-.video-player-fullscreen.scoped-player .video-player-queue-rail {
+.video-player-fullscreen:is(.scoped-player, .provider-youtube, .video-player-queue-docked) .video-player-queue-rail {
   position: relative;
   flex-shrink: 0;
   transform: none;
@@ -337,20 +368,183 @@
   pointer-events: auto;
 }
 
-.scoped-player .video-player-edge-trigger {
+.video-player-fullscreen:is(.scoped-player, .provider-youtube, .video-player-queue-docked) .video-player-edge-trigger {
   display: none;
 }
 
-.scoped-player .video-player-queue-item {
+:is(.scoped-player, .desktop-poster-player, .video-player-queue-docked) .video-player-queue-item {
   width: 132px;
 }
 
-.scoped-player .video-player-gesture-hint {
+.video-player-fullscreen:is(.scoped-player, .provider-youtube) .video-player-gesture-hint {
   position: static;
   transform: none;
   padding: 0;
   min-height: 1.25rem;
   text-align: center;
+}
+
+.video-player-fullscreen.video-player-inline {
+  position: relative;
+  inset: auto;
+  z-index: auto;
+  overflow: visible;
+  border-radius: 0.65rem;
+}
+
+.video-player-inline .video-player-stage {
+  flex: 0 0 auto;
+  height: clamp(200px, 58vw, min(420px, 60dvh));
+}
+
+.mall-member-inline-slot .desktop-poster-player.video-player-inline .video-player-stage {
+  height: 240px;
+}
+
+.video-player-media-panel,
+.video-player-queue-panel { display: contents; }
+
+.video-player-queue-docked {
+  bottom: var(--video-player-keyboard, 0px);
+  overflow: hidden;
+  touch-action: pan-x pan-y pinch-zoom;
+}
+
+.video-player-fullscreen.video-player-queue-docked { overflow: hidden; }
+
+.video-player-queue-docked .video-player-media-panel {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+}
+
+.video-player-queue-docked .video-player-stage { min-height: 200px; }
+
+.video-player-queue-docked .video-player-queue-panel {
+  display: block;
+  flex: 0 0 auto;
+  background: #08080f;
+}
+
+.video-player-queue-panel > .mall-member-search-dock:not([hidden]) {
+  max-width: calc(100% - 1.5rem);
+  margin-inline: max(.75rem, env(safe-area-inset-left)) max(.75rem, env(safe-area-inset-right));
+  padding-block-start: .25rem;
+}
+
+.video-player-queue-panel .mall-member-search-bar { max-width: 100%; }
+
+.video-player-queue-docked .video-player-queue-track {
+  position: relative;
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
+}
+
+.video-player-queue-docked .video-player-top-bar {
+  position: relative;
+  flex-shrink: 0;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.desktop-poster-player :is(.video-player-queue-rail, .video-player-top-bar) {
+  position: relative;
+  flex-shrink: 0;
+  transform: none;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.desktop-poster-player > .video-player-edge-trigger { display: none; }
+
+.video-player-fullscreen.video-player-inline:not(.video-player-theater) .video-player-queue-rail,
+.video-player-inline .video-player-gesture-hint {
+  display: none;
+}
+
+.video-player-fullscreen.video-player-theater {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.video-player-theater .video-player-stage {
+  flex: 1 0 200px;
+  height: auto;
+  width: 100%;
+}
+
+.video-player-queue-search {
+  display: flex;
+  flex-shrink: 0;
+  align-self: center;
+  align-items: center;
+  box-sizing: border-box;
+  width: min(584px, calc(100% - 1.5rem));
+  min-height: 52px;
+  margin: 0.5rem 0 0;
+  padding-inline: 1rem 0.25rem;
+  border: 1px solid #d6bdf880;
+  border-radius: 26px;
+  background: #241a36;
+  color: #fff4dc;
+}
+
+.video-player-queue-search[hidden] {
+  display: none;
+}
+
+.video-player-queue-search:focus-within {
+  outline: 2px solid #d6bdf8;
+  outline-offset: 2px;
+}
+
+.video-player-queue-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  outline: none;
+}
+
+.video-player-queue-search input::placeholder {
+  color: #d9cde9;
+}
+
+.video-player-queue-search button {
+  display: grid;
+  flex: 0 0 44px;
+  place-items: center;
+  min-height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.video-player-queue-search button:hover {
+  background: #d6bdf824;
+}
+
+.video-player-queue-search svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.video-player-queue-empty {
+  margin: 0.25rem 0;
+  padding-inline: 0.25rem;
+  color: #fff4dc;
+  font-size: 0.85rem;
 }
 
 /* ─── Expand Control (On Tiles) ─── */

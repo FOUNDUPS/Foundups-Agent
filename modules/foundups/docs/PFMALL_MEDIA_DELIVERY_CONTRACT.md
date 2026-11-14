@@ -271,6 +271,40 @@ When a poster fails to load:
 
 **Rule**: `embed_url` must be YouTube only.
 
+### 8.4 Desktop previews and bandwidth
+
+Use poster images for the dense browse view. Rendered cards set their poster
+URLs immediately. The tile observer records visibility and load state. The
+catalog at `4c1d1e7d` ships 15 lanes
+with 1,205 listed videos in a 500,578-byte Git blob. The eight-video HPC
+projection is 5,832 bytes. A full-lane expansion can still build hundreds
+of poster nodes. Measure catalog transfer, poster requests, DOM size and
+provider sessions separately before expanding the preview behavior.
+
+The legacy click preview mounted a 159.8 × 213.7 CSS px YouTube viewport
+at 1440 × 900 in the controlled desktop grid. It used the tile's clipped
+preview layer and requested `controls=0`. YouTube requires an embedded
+viewport of at least 200 × 200 CSS px and prohibits obscuring any part of
+the player. Scripted autoplay requires a visible player with more than half
+in view and a single automatically playing YouTube embed per page.
+[YouTube player requirements](https://developers.google.com/youtube/terms/required-minimum-functionality)
+
+Wide desktop poster selection mounts the shared player at the selected tile
+with a visible 200 × 200 CSS px or larger stage. The dedicated full-player
+action retains the native controls, branding and input access. Posters smaller
+than 120 × 70 CSS px open with manual Play. The desktop full-player rail sizes
+its playable thumbnails to the same minimum. The viewport and scroll clips
+limit autoplay. Each desktop surface uses one provider at a time.
+Crop the poster art to fit the tile. `modestbranding` has no
+effect and `rel=0` confines recommendations to the same channel.
+[YouTube player parameters](https://developers.google.com/youtube/player_parameters)
+
+A later hover preview can use a rights-cleared first-party clip through
+the existing native video path. Start one muted preview after deliberate
+hover. Stop it on exit, scroll out of view, tab hiding or full-player
+entry. Give keyboard and touch users an explicit play action. Measure
+preview requests and bytes alongside the poster-only baseline.
+
 ---
 
 ## 9. Test Coverage

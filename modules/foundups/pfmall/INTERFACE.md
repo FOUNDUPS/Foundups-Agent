@@ -5,6 +5,10 @@ mobile creator seam below is specified only (updated 2026-10-18).
 **Boundary**: p.fMALL is a platform/presentation layer, not a FoundUp, model
 host, OpenClaw instance, or Hermes worker.
 
+The [member shell](../../../public/member/INTERFACE.md#public-video-projection)
+owns the shared video UI. The [HPC media incident](MEDIA_PLAYBACK_INCIDENT_HPC.md)
+records provider and layout constraints, reproduction and regression evidence.
+
 ## Python package exports
 
 `modules.foundups.pfmall` exports the following shell-core surface:
@@ -135,12 +139,18 @@ called by catalog reads or Holo queries.
 
 ## Browser/member interface
 
-The public HPC video projection enters the same browser shell at
-`/member/?foundup=hpc`. The generated public video catalog contains the
-reviewed derived lane. The member video catalog contains its discovery card
-and uses the same registry identity. The browser route selects presentation,
-while the WSP 104 app handoff and server checks own membership and capabilities.
+The dedicated `hpc.foundups.com` host enters the shared browser shell as a
+guest. On FoundUps, `/members` redirects to `/member/` and the HPC query
+mounts its projection after member admission. The public video catalog
+contains the reviewed lane and the aggregate catalog contains its discovery
+card. WSP 104 app handoff and server checks own capability authorization.
 See [HPC's interface](../hpc/INTERFACE.md).
+
+The ordinary invited Mall uses the adaptive poster grid on fresh wide
+fine-pointer visits. It hands the selected lane to the shared full player
+and keeps the grid's scroll and focus through dismissal. Saved layouts
+take precedence. The [navigation contract](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#46-desktop-poster-browsing)
+defines how desktop poster selection, category rows and card quick views work.
 
 The static homepage's FX anchor targets the existing `/f/` public directory.
 Its project/ticker search consumes only the scope-free public projection; no

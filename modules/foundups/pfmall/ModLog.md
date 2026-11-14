@@ -1,3 +1,92 @@
+## 2026-11-14 · Phone search reference refinement
+
+PFWD-1B shares the compact dock across browse and viewer. Plus anchors the
+options panel above the dock. Longer search text wraps above the controls
+for review. The far-right Stop uses the existing foreground dictation
+lifecycle. The worker advances from v15 to v16 with the dock assets.
+Verification is tracked in the [member tests](../../../public/member/tests/TestModLog.md).
+
+## 2026-11-14 · WikiTube phone viewer
+
+Extended PFWD-1B from the desktop queue and phone grid to the shared
+expanded phone viewer. The player, catalog, return state and admission
+owners stay shared. Foreground dictation feeds the editable search.
+The [roadmap](ROADMAP.md#phone-viewer-and-foreground-input) records the
+resident speech and model-selection dependencies. WSP 15, 22 and 97 apply.
+
+## 2026-11-14 · WikiTube search and Play hostname
+
+The ordinary admitted Mall reuses the shared catalog and player for the
+bottom browse dock, a left-aligned queue dock, and inline desktop playback.
+The separate full-view action keeps the provider frame. Search leaves the
+active clip playing and starts the first match when idle. The options menu
+links to AutoPost and reports the current device-model boundary.
+
+Firebase site `foundupscom` in `gen-lang-client-0061781628` accepted the
+custom hostname `play.foundups.com`. GoDaddy saved Firebase's exact CNAME,
+`play` → `foundupscom.web.app`, and a public resolver returned it.
+TLS and live release qualification are tracked separately. The Play root
+route preserves the admitted shell and sign-in return. WSP 15, 22 and 97
+apply. See the [roadmap](ROADMAP.md#wikitube-search-and-play-hostname).
+
+## 2026-11-13 · Desktop poster browsing and full player
+
+The invited Mall selects its poster grid on fresh wide fine-pointer entry.
+The shared field keeps the poster wall in its own scroll container and opens
+video posters in the existing full player. It returns focus and scroll on
+close and retains the expanded lane until collapse. Cache v13 refreshes the
+changed assets. See the [roadmap](ROADMAP.md#desktop-poster-browsing-poc)
+and [browser tests](../../../public/member/tests/README.md#member-poster-grid).
+WSP 22 and 97 apply.
+
+## 2026-11-13 · Desktop poster browsing audit
+
+Mapped the ordinary Mall's mixed catalog, category rows, existing desktop
+grid, Ctrl+wheel navigation, quick view and shared full player. Measured
+the current tile preview and recorded the provider and bandwidth constraints
+in the [media contract](../docs/PFMALL_MEDIA_DELIVERY_CONTRACT.md#84-desktop-previews-and-bandwidth).
+The [roadmap](ROADMAP.md#desktop-poster-browsing-poc) defines the smallest
+desktop PoC slice. WSP 22 and 97 apply.
+
+## 2026-11-13 · Scoped member entry
+
+The dedicated host mounts the public video projection. The FoundUps member
+route uses its existing invitation check before mounting the same scope.
+The public discovery card and admitted Mall card lead to their respective
+entrances. The [media incident](MEDIA_PLAYBACK_INCIDENT_HPC.md) holds the
+verification and release status. WSP 22, 97 and 104 apply.
+
+## 2026-11-12 · Scoped phone identity and dock
+
+The shared projection selects HPC install metadata before catalog load.
+The existing bottom anchor holds the scoped search, options and Red Dog
+entry. The field filters the same tile IDs and preserves a mounted provider
+across layout changes. State retains the phone query with its anchor.
+Cache v10 includes the HPC manifest and icons. WSP 22, 97 and 104 apply.
+
+## 2026-11-12 · Scoped desktop search submission
+
+The shared theater centers its search form beneath the player. Typing
+filters the scoped rail and submitting selects the next matching video
+through the existing queue owner. Cache v9 refreshes the shared assets.
+WSP 22, 97 and 104 apply.
+
+## 2026-11-12 · Responsive shared video presentation
+
+The fixed public projection selects theater on wide fine-pointer displays and
+the existing grid on touch and narrow screens. The shared player owns the
+startup request, queue, scoped search, and breakpoint lifecycle. The existing
+state namespace retains the selected video and query. Cache v8 refreshes the
+existing shared assets. See the [HPC incident](MEDIA_PLAYBACK_INCIDENT_HPC.md)
+for browser and release evidence. WSP 22, 30, 97 and 104 apply.
+
+## 2026-11-11 · Shared media recovery candidate
+
+The [HPC media incident](MEDIA_PLAYBACK_INCIDENT_HPC.md) records the reproduced
+tap-routing and curation faults, provider evidence and remaining iOS gate.
+The member-shell owners now support one in-context player with in-place
+expansion and a stable return anchor. WSP 22, 60, 97 and 104 apply.
+
 ## 2026-11-11 · Public scoped video discovery
 
 HPC joins the canonical FoundUp registry and public discovery projector under

@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="/move2japan/move2japan.css">
   <link rel="stylesheet" href="/member/css/mall-video-projection.css">
 
-  <script src="/member/js/mall-video-projection.js"></script>
+  <script src="/member/js/mall-video-projection.js?v=12"></script>
   <!-- Clerk Authentication SDK -->
   <template id="memberClerkSdk">
   <script
@@ -32,10 +32,11 @@
   </template>
   <script>
     // Normalize the dedicated host before any other product prepares the shell.
-    if (window.mallVideoProjection?.hostScope(window.location) && window.location.search) {
+    const dedicatedVideoHost = window.mallVideoProjection?.hostScope(window.location);
+    if (dedicatedVideoHost && window.location.search) {
       window.history.replaceState(window.history.state, '', window.location.pathname + window.location.hash);
     }
-    if (!window.mallVideoProjection?.resolve(window.location)) {
+    if (!dedicatedVideoHost || !window.mallVideoProjection.resolve(window.location)) {
       document.head.appendChild(document.getElementById('memberClerkSdk').content.cloneNode(true));
     }
   </script>
@@ -401,7 +402,8 @@
 
   <!-- Firebase SDK (for Firestore data) + Clerk Auth -->
   <script type="module" id="memberRuntime">
-    const publicVideo = !!window.mallVideoProjection?.resolve(window.location);
+    const publicVideo = !!(window.mallVideoProjection?.hostScope(window.location) &&
+      window.mallVideoProjection.resolve(window.location));
     const publicProduct = !!window.Move2JapanSearch && window.Move2JapanSearch.isShellProductRoute(window.location);
 
     async function initializeMemberRuntime() {
@@ -474,6 +476,7 @@
       currentClerkUser = user;
 
       if (!user) {
+        window.mallStateRestore?.rememberMemberVideoReturn?.();
         window.location.href = '/?signin=required';
         return;
       }
@@ -614,7 +617,12 @@
 
     async function initializeMall(clerkUserId, userData, clerkUser) {
       // The existing account gate consumes this only after actual admission.
+      const memberVideoScope = window.mallVideoProjection?.resolveMember?.(window.location);
       const productReturn = window.mallStateRestore?.consumeProductReturn();
+      if (memberVideoScope) {
+        await window.mallVideoProjection.mount(memberVideoScope);
+        return;
+      }
       if (productReturn) {
         window.location.replace(productReturn);
         return;
@@ -1309,15 +1317,16 @@
   <script src="js/gesture-engine.js"></script>
   <script src="js/gesture-hints.js"></script>
   <script src="js/shell-bridge-interceptor.js"></script>
-  <script src="js/mall-planes.js?v=6"></script>
+  <script src="js/mall-planes.js?v=12"></script>
   <script src="js/mall-tile-field.js?v=6"></script>
   <script src="js/mall-video-player.js?v=6"></script>
   <script src="js/account-concierge.js"></script>
   <script src="js/red-dog-concierge.js"></script>
-  <script src="js/mall-state-restore.js?v=6"></script>
+  <script src="js/mall-state-restore.js?v=12"></script>
 
   <script id="productDiscoveryBoot">
-    const publicVideoScope = window.mallVideoProjection?.resolve(window.location);
+    const publicVideoScope = window.mallVideoProjection?.hostScope(window.location) &&
+      window.mallVideoProjection.resolve(window.location);
     if (publicVideoScope) {
       window.mallVideoProjection.mount(publicVideoScope);
     } else if (window.Move2JapanSearch && window.Move2JapanSearch.isShellProductRoute(window.location)) {

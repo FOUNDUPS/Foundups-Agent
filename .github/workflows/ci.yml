@@ -12,7 +12,72 @@ on:
 jobs:
   merge-scope-pilot:
     name: Merge scope pilot (shadow)
-    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      fast_path: ${{ steps.validated.outputs.fast_path }}
+      base: ${{ steps.scope.outputs.base }}
+      head: ${{ github.event.pull_request.head.sha }}
+      merge: ${{ github.sha }}
+    permissions:
+      contents: read
+    env:
+      PR_BASE: ${{ github.event.pull_request.base.sha }}
+      PR_HEAD: ${{ github.event.pull_request.head.sha }}
+      FAST_PATH_BASE: ${{ vars.CI_AUDIT_FAST_PATH_BASE }}
+      BASE_REF: ${{ github.base_ref }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Load exact-base verification owners
+        if: github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          [[ "$PR_BASE" =~ ^[0-9a-f]{40}$ ]]
+          mkdir -p "$RUNNER_TEMP/trusted-ci"
+          for script in ci_merge_scope.py ci_merge_policy.py check_ci_merge_docs.sh; do
+            git --no-replace-objects show "$PR_BASE:.github/scripts/$script" > "$RUNNER_TEMP/trusted-ci/$script"
+          done
+      - name: Select complete exact-Git validation scope
+        id: scope
+        if: github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          python3 -I -B "$RUNNER_TEMP/trusted-ci/ci_merge_scope.py" \
+            --base "$PR_BASE" --head "$PR_HEAD" --merge "$GITHUB_SHA" \
+            > "$RUNNER_TEMP/merge-scope.json"
+          lane=$(python3 -I -B -c 'import json, sys; print(json.load(open(sys.argv[1]))["lane"])' "$RUNNER_TEMP/merge-scope.json")
+          printf 'lane=%s\nbase=%s\n' "$lane" "$PR_BASE" >> "$GITHUB_OUTPUT"
+          printf 'Shadow lane: %s\nBase: %s\nHead: %s\nTest merge: %s\n' \
+            "$lane" "$PR_BASE" "$PR_HEAD" "$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+      - name: Check documentation formatting and repository links
+        if: steps.scope.outputs.lane == 'docs' || steps.scope.outputs.lane == 'skill-proposal'
+        run: bash "$RUNNER_TEMP/trusted-ci/check_ci_merge_docs.sh" "$PR_BASE" "$GITHUB_SHA" "$RUNNER_TEMP/merge-scope.json"
+      - name: Check proposal-only Skill structure and WSP governance
+        if: steps.scope.outputs.lane == 'skill-proposal'
+        run: python3 -I -B "$RUNNER_TEMP/trusted-ci/ci_merge_policy.py" --skill-proposals "$PR_BASE" "$RUNNER_TEMP/merge-scope.json"
+      - name: Publish validated scope after all applicable gates
+        id: validated
+        env:
+          LANE: ${{ steps.scope.outputs.lane }}
+        run: |
+          set -euo pipefail
+          fast=false
+          if [[ "$LANE" == docs || "$LANE" == skill-proposal ]]; then
+            live_base=$(git ls-remote --exit-code --refs origin "refs/heads/$BASE_REF" | cut -f1)
+            [[ "$live_base" == "$PR_BASE" ]] || { echo 'Target moved: refresh and verify again.'; exit 1; }
+            # Older base classifiers have no bound schema and cannot authorize omission.
+            schema=$(python3 -I -B -c 'import json,sys; print(json.load(open(sys.argv[1])).get("schema_version", ""))' "$RUNNER_TEMP/merge-scope.json")
+            if [[ "$FAST_PATH_BASE" != '' && "$FAST_PATH_BASE" == "$BASE_REF" && "$schema" == ci_merge_scope.v1 ]]; then
+              fast=true
+            fi
+          fi
+          echo "fast_path=$fast" >> "$GITHUB_OUTPUT"
+          printf 'Validated fast path: %s (server opt-in required).\n' "$fast" >> "$GITHUB_STEP_SUMMARY"
+
+  ci-pipeline-regressions:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -25,28 +90,25 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Test validators and select validation scope
-        id: scope
+      - name: Test candidate CI pipeline without selection authority
+        run: python3 -I -B -m unittest discover -s .github/scripts/tests -p 'test_ci_merge_*.py'
+      - name: Shadow policy classification
+        id: policy
+        if: github.event_name == 'pull_request'
         run: |
           set -euo pipefail
-          python3 -B -m unittest discover -s .github/scripts/tests -p 'test_ci_merge_*.py'
-          python3 -B .github/scripts/ci_merge_scope.py \
-            --base "$PR_BASE" --head "$PR_HEAD" --merge "$GITHUB_SHA" \
-            > "$RUNNER_TEMP/merge-scope.json"
-          lane=$(python3 -c 'import json, sys; print(json.load(open(sys.argv[1]))["lane"])' "$RUNNER_TEMP/merge-scope.json")
+          python3 -I -B .github/scripts/ci_merge_scope.py --base "$PR_BASE" --head "$PR_HEAD" --merge "$GITHUB_SHA" > "$RUNNER_TEMP/policy-scope.json"
+          lane=$(python3 -I -B -c 'import json,sys; print(json.load(open(sys.argv[1]))["lane"])' "$RUNNER_TEMP/policy-scope.json")
           echo "lane=$lane" >> "$GITHUB_OUTPUT"
-          printf 'Shadow lane: %s\nBase: %s\nHead: %s\nTest merge: %s\n' \
-            "$lane" "$PR_BASE" "$PR_HEAD" "$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
       - name: Check policy mirrors, catalog and agent projection
-        if: steps.scope.outputs.lane == 'policy'
+        if: steps.policy.outputs.lane == 'policy'
         run: |
-          python3 -B .github/scripts/ci_merge_policy.py "$PR_BASE" "$RUNNER_TEMP/merge-scope.json"
+          python3 -I -B .github/scripts/ci_merge_policy.py "$PR_BASE" "$RUNNER_TEMP/policy-scope.json"
           python3 -B scripts/generate_codex_tooling_projection.py --check
-      - name: Check documentation formatting and repository links
-        if: steps.scope.outputs.lane == 'docs' || steps.scope.outputs.lane == 'policy'
-        run: bash .github/scripts/check_ci_merge_docs.sh "$PR_BASE" "$GITHUB_SHA" "$RUNNER_TEMP/merge-scope.json"
 
   wre-verification-contracts:
+    needs: [merge-scope-pilot, ci-pipeline-regressions]
+    if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -56,17 +118,41 @@ jobs:
       PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
       PYTHON_DOTENV_DISABLED: '1'
     steps:
+      - name: Require successful exact-SHA CI scope verification
+        id: ci-scope
+        env:
+          PLAN_RESULT: ${{ needs.merge-scope-pilot.result }}
+          PIPELINE_RESULT: ${{ needs.ci-pipeline-regressions.result }}
+          FAST_PATH: ${{ needs.merge-scope-pilot.outputs.fast_path }}
+          PLAN_BASE: ${{ needs.merge-scope-pilot.outputs.base }}
+          PLAN_HEAD: ${{ needs.merge-scope-pilot.outputs.head }}
+          PLAN_MERGE: ${{ needs.merge-scope-pilot.outputs.merge }}
+          EVENT_BASE: ${{ github.event.pull_request.base.sha }}
+          EVENT_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          [[ "$PLAN_RESULT" == success && "$PIPELINE_RESULT" == success && "$FAST_PATH" =~ ^(true|false)$ && "$PLAN_MERGE" == "$GITHUB_SHA" ]]
+          if [[ "$FAST_PATH" == true ]]; then
+            [[ "$PLAN_BASE" == "$EVENT_BASE" && "$PLAN_HEAD" == "$EVENT_HEAD" ]]
+          fi
+          echo "fast_path=$FAST_PATH" >> "$GITHUB_OUTPUT"
+          echo 'Applicable scope gates passed; WRE dependency/evidence policy remains unchanged.' >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/checkout@v4
+        if: steps.ci-scope.outputs.fast_path != 'true'
         with:
           persist-credentials: false
       - uses: actions/setup-python@v5
+        if: steps.ci-scope.outputs.fast_path != 'true'
         with:
           python-version: '3.12'
       - name: Bootstrap checksum-verified Python trust
+        if: steps.ci-scope.outputs.fast_path != 'true'
         run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
       - name: Install bounded offline test runner
+        if: steps.ci-scope.outputs.fast_path != 'true'
         run: python -m pip install pytest==9.0.3
       - name: Verify impact planning, execution and completion boundaries
+        if: steps.ci-scope.outputs.fast_path != 'true'
         run: >-
           python -B -m pytest -q --tb=short -c /dev/null --noconftest
           --import-mode=importlib -o pythonpath=. -p no:cacheprovider
@@ -80,25 +166,34 @@ jobs:
           modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_slice_verifier_request_binding.py
           modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_slice_verifier_handler.py
           modules/infrastructure/wre_core/tests/test_git_main_merge_sentinel.py
+          modules/infrastructure/wre_core/tests/test_git_lifecycle.py
+          modules/infrastructure/wre_core/tests/test_git_lifecycle_github.py
+          modules/infrastructure/wre_core/tests/test_git_lifecycle_inventory.py
+          modules/infrastructure/wre_core/tests/test_git_lifecycle_pc.py
+          modules/infrastructure/codex_hooks/tests/test_codex_hooks.py
       - name: Verify Vote micro-trial production oracle and downstream consumers
+        if: steps.ci-scope.outputs.fast_path != 'true'
         run: >-
           python -B -m pytest -q --tb=short -c /dev/null --noconftest
           --import-mode=importlib -o pythonpath=. -p no:cacheprovider
           --junitxml=vote-verification-results.xml
           modules/foundups/voteballots/tests
       - name: Verify preserved Oversight public-source inventory
+        if: steps.ci-scope.outputs.fast_path != 'true'
         run: python -B modules/foundups/voteballots/oversight/scripts/verify_snapshot.py
       - uses: actions/setup-node@v4
+        if: steps.ci-scope.outputs.fast_path != 'true'
         with:
           node-version: '24.22.1'
       - name: Verify Vote draft, contact and public cache boundaries
+        if: steps.ci-scope.outputs.fast_path != 'true'
         run: >-
           node --test
           modules/foundups/voteballots/tests/test_coalition_draft.mjs
           modules/foundups/voteballots/tests/test_contact.mjs
           modules/foundups/voteballots/tests/test_public_sw.mjs
       - name: Preserve exact-revision verification results
-        if: always()
+        if: always() && steps.ci-scope.outputs.fast_path != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: wre-verification-${{ github.sha }}
@@ -108,6 +203,8 @@ jobs:
           if-no-files-found: error
 
   principal-activity-ledger:
+    needs: merge-scope-pilot
+    if: needs.merge-scope-pilot.outputs.fast_path != 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -132,6 +229,8 @@ jobs:
           node extensions/reddog/tests/test_package_manifest.js
 
   youtube-operator-command:
+    needs: merge-scope-pilot
+    if: needs.merge-scope-pilot.outputs.fast_path != 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -283,6 +382,8 @@ jobs:
           if-no-files-found: error
 
   youtube-selected-batch:
+    needs: merge-scope-pilot
+    if: needs.merge-scope-pilot.outputs.fast_path != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -375,7 +476,45 @@ jobs:
           modules/communication/livechat/tests/test_live_handoff_selective_cancellation.py
           modules/communication/livechat/tests/test_engagement_runner_lifecycle.py
 
+  private-draft-mcp:
+    needs: merge-scope-pilot
+    if: needs.merge-scope-pilot.outputs.fast_path != 'true'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    timeout-minutes: 8
+    permissions:
+      contents: read
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+      PYTHON_DOTENV_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
+      - name: Install the separate draft MCP runtime
+        run: python -m pip --isolated install -r modules/infrastructure/foundups_mcp_bridge/requirements-draft-sender.txt pytest==9.0.3
+      - name: Verify draft, OAuth, MIME, and separate process boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip check
+          printf '[pytest]\n' > "$RUNNER_TEMP/draft-pytest.ini"
+          python -B -m pytest -q -c "$RUNNER_TEMP/draft-pytest.ini" --noconftest \
+            --import-mode=importlib -o pythonpath=. -p no:cacheprovider \
+            modules/infrastructure/foundups_mcp_bridge/tests/test_draft_*.py
+
   mcp-runtime-compatibility:
+    needs: merge-scope-pilot
+    if: needs.merge-scope-pilot.outputs.fast_path != 'true'
     runs-on: windows-latest
     timeout-minutes: 10
     steps:
@@ -448,15 +587,15 @@ jobs:
                      '-p', 'no:cacheprovider', '-o', 'pythonpath='+str(root),
                      '--basetemp=O:/pytest-temp', '--junitxml=O:/evidence/tests.xml',
                      '-v', '--tb=short', *[suite+n for n in (
-                       'test_mcp_launcher_http.py', 'test_mcp_server_sse.py',
+                       'test_mcp_launcher_http.py', 'test_mcp_server_sse.py', 'test_git_inventory_oauth.py',
                        'test_reddog_holoindex_query_runtime_candidate_binding.py')]]
           result = subprocess.run(command, env=env, cwd=root, timeout=300, check=False)
           if result.returncode: raise SystemExit(result.returncode)
           cases = ET.parse(out/'tests.xml').findall('.//testcase')
-          if len(cases) != 49 or any(c.find(tag) is not None for c in cases
+          if len(cases) != 60 or any(c.find(tag) is not None for c in cases
                                     for tag in ('failure','error','skipped')):
-              raise SystemExit('Expected all 49 MCP criteria to pass without skips')
-          print('MCP compatibility: 49 passed; owned Windows lifecycle included')
+              raise SystemExit('Expected all 60 MCP criteria to pass without skips')
+          print('MCP compatibility: 60 passed; owned Windows lifecycle included')
           '@ | python -I -B -
           if ($LASTEXITCODE -ne 0) { throw 'MCP qualification failed' }
       - name: Verify shared runtime path and Windows stream contracts
@@ -490,6 +629,8 @@ jobs:
           }
 
   acoustic-x-adapter:
+    needs: merge-scope-pilot
+    if: needs.merge-scope-pilot.outputs.fast_path != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
@@ -1191,10 +1332,11 @@ jobs:
           modules/foundups/gotjunk/tests/test_backend_security.py
 
   test:
+    needs: [merge-scope-pilot, ci-pipeline-regressions]
+    if: always()
     runs-on: ubuntu-latest
     env:
       PIP_NO_CACHE_DIR: '1'
-      AUDIT_FAST_PATH: ${{ github.event_name == 'pull_request' && vars.CI_AUDIT_FAST_PATH_BASE != '' && vars.CI_AUDIT_FAST_PATH_BASE == github.base_ref && 'enabled' || 'disabled' }}
     strategy:
       matrix:
         python-version: ['3.12']
@@ -1202,43 +1344,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: ${{ env.AUDIT_FAST_PATH == 'enabled' && '0' || '1' }}
+          persist-credentials: false
 
-      - name: Verify exact audit scope
+      - name: Require successful exact-SHA CI scope verification
         id: audit-scope
-        if: env.AUDIT_FAST_PATH == 'enabled'
         env:
-          CONFIGURED_BASE_REF: ${{ vars.CI_AUDIT_FAST_PATH_BASE }}
-          BASE_REF: ${{ github.base_ref }}
-          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PLAN_RESULT: ${{ needs.merge-scope-pilot.result }}
+          PIPELINE_RESULT: ${{ needs.ci-pipeline-regressions.result }}
+          FAST_PATH: ${{ needs.merge-scope-pilot.outputs.fast_path }}
+          PLAN_BASE: ${{ needs.merge-scope-pilot.outputs.base }}
+          PLAN_HEAD: ${{ needs.merge-scope-pilot.outputs.head }}
+          PLAN_MERGE: ${{ needs.merge-scope-pilot.outputs.merge }}
+          EVENT_BASE: ${{ github.event.pull_request.base.sha }}
+          EVENT_HEAD: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
-          scope="$RUNNER_TEMP/merge-scope.json"
-          if [[ "$BASE_REF" == "$CONFIGURED_BASE_REF" ]] &&
-             base=$(git rev-parse --verify "refs/remotes/origin/$BASE_REF^{commit}") &&
-             python3 -B .github/scripts/ci_merge_scope.py \
-               --base "$base" --head "$PR_HEAD" --merge "$GITHUB_SHA" > "$scope"; then
-            lane=$(python3 -c 'import json, sys; print(json.load(open(sys.argv[1]))["lane"])' "$scope")
-            printf 'lane=%s\nbase=%s\n' "$lane" "$base" >> "$GITHUB_OUTPUT"
-          else
-            echo 'Full Python suite selected because exact audit scope could not be verified.'
+          [[ "$PLAN_RESULT" == success && "$PIPELINE_RESULT" == success && "$FAST_PATH" =~ ^(true|false)$ && "$PLAN_MERGE" == "$GITHUB_SHA" ]]
+          lane=full
+          if [[ "$FAST_PATH" == true ]]; then
+            [[ "$PLAN_BASE" == "$EVENT_BASE" && "$PLAN_HEAD" == "$EVENT_HEAD" ]]
+            lane=docs
           fi
-
-      - name: Validate ordinary audit Markdown
-        if: steps.audit-scope.outputs.lane == 'docs'
-        env:
-          BASE_REF: ${{ github.base_ref }}
-          TESTED_BASE: ${{ steps.audit-scope.outputs.base }}
-        run: |
-          set -euo pipefail
-          bash .github/scripts/check_ci_merge_docs.sh \
-            "$TESTED_BASE" "$GITHUB_SHA" "$RUNNER_TEMP/merge-scope.json"
-          live_base=$(git ls-remote --exit-code --refs origin "refs/heads/$BASE_REF" | cut -f1)
-          if [[ "$live_base" != "$TESTED_BASE" ]]; then
-            echo 'The target branch advanced during audit validation. Refresh the PR and run CI again.'
-            exit 1
-          fi
-          printf 'Ordinary audit Markdown validated against %s.\n' "$TESTED_BASE" >> "$GITHUB_STEP_SUMMARY"
+          echo "lane=$lane" >> "$GITHUB_OUTPUT"
+          printf 'Applicable CI scope verified; Python route: %s.\n' "$lane" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Set up Python ${{ matrix.python-version }}
         if: steps.audit-scope.outputs.lane != 'docs'

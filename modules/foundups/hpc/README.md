@@ -2,7 +2,11 @@
 
 HPC is an independent satirical FoundUp for discovering attributed political-media clips. The first collection is SchumerOUT, sourced from public Move2Japan Shorts. [Vote/Ballots](../voteballots/) is its civic parent in the FoundUp registry.
 
-The PoC is a public projection of the existing Play FoundUps Mall. It uses the shared grid, player, gestures and browsing state. The microphone links to Vote's [Contact Congress](https://vote.mtrout.com/contact) resource. Voice remains a separate proposed FoundUp.
+The PoC is a public projection of the existing Play FoundUps Mall. It uses the
+shared grid, player, gestures and browsing state. On a phone, **Voice Your
+Opinion** opens Vote's [Contact Congress](https://vote.mtrout.com/contact)
+resource. The bottom microphone is for search dictation. Red Dog opens the
+public HPC briefing. A fresh Home Screen install uses the HPC name and portrait.
 
 - [Interface and source curation](INTERFACE.md)
 - [Roadmap and release gates](ROADMAP.md)
@@ -11,7 +15,9 @@ The PoC is a public projection of the existing Play FoundUps Mall. It uses the s
 
 ## Route Namespace
 
-`/f/hpc` is the canonical public landing. The shared Mall accepts the registered public projection at `/member/?foundup=hpc`.
+`hpc.foundups.com` is the public video entrance. The public directory entry
+at `/f/hpc` links there. Members can open the same collection from the
+invite-gated FoundUps Mall at `/member/?foundup=hpc`.
 
 ## App Mount
 

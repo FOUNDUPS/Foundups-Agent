@@ -80,6 +80,11 @@
     return allowed[key] && allowed[key].indexOf(value) !== -1 ? value : '';
   }
 
+  function storeProductReturn(product, filters) {
+    sessionStorage.setItem(RETURN_KEY, JSON.stringify({ product_id: product, created_at: Date.now(), filters: filters }));
+    return true;
+  }
+
   /** Capture filters from this actual product view, never a caller-supplied URL. */
   function rememberProductReturn(product) {
     if (product !== 'move2japan' || selectedProduct !== product) return false;
@@ -94,8 +99,15 @@
         var value = values.length === 1 ? safeFilter(key, values[0]) : '';
         if (value) filters[key] = value;
       });
-      sessionStorage.setItem(RETURN_KEY, JSON.stringify({ product_id: product, created_at: Date.now(), filters: filters }));
-      return true;
+      return storeProductReturn(product, filters);
+    } catch (e) { return false; }
+  }
+
+  /** Remember a requested member video view through the normal sign-in redirect. */
+  function rememberMemberVideoReturn() {
+    try {
+      var scope = window.mallVideoProjection?.resolveMember(window.location);
+      return !!scope && storeProductReturn(scope, {});
     } catch (e) { return false; }
   }
 
@@ -106,11 +118,15 @@
       sessionStorage.removeItem(RETURN_KEY);
       if (!raw || raw.length > 4096) return null;
       var record = JSON.parse(raw);
-      if (!record || record.product_id !== 'move2japan' ||
+      if (!record ||
           Object.keys(record).some(function(key) { return ['product_id', 'created_at', 'filters'].indexOf(key) === -1; }) ||
           !Number.isFinite(record.created_at) || Date.now() < record.created_at || Date.now() - record.created_at > RETURN_TTL_MS ||
-          !record.filters || typeof record.filters !== 'object' || Array.isArray(record.filters) ||
-          Object.keys(record.filters).some(function(key) { return FILTER_KEYS.indexOf(key) === -1; })) return null;
+          !record.filters || typeof record.filters !== 'object' || Array.isArray(record.filters)) return null;
+      if (record.product_id !== 'move2japan') {
+        if (Object.keys(record.filters).length) return null;
+        return window.mallVideoProjection?.memberPath(record.product_id) || null;
+      }
+      if (Object.keys(record.filters).some(function(key) { return FILTER_KEYS.indexOf(key) === -1; })) return null;
       var query = new URLSearchParams({ foundup: 'move2japan' });
       FILTER_KEYS.forEach(function(key) {
         var value = safeFilter(key, record.filters[key]);
@@ -149,7 +165,8 @@
 
     var wrapper = document.querySelector('.mall-tile-field-wrapper');
     if (selectedVideoScope) {
-      return wrapper ? { scrollTop: wrapper.scrollTop, scrollLeft: wrapper.scrollLeft } : null;
+      return tf.getVideoGridState?.() ||
+        (wrapper ? { scrollTop: wrapper.scrollTop, scrollLeft: wrapper.scrollLeft } : null);
     }
 
     if (selectedProduct) {
@@ -196,8 +213,18 @@
   function isValidState(state) {
     if (!state || typeof state !== 'object') return false;
     if (selectedVideoScope) {
-      return Object.keys(state).length === 2 &&
-        [state.scrollTop, state.scrollLeft].every(function(value) { return Number.isFinite(value) && value >= 0; });
+      var keys = Object.keys(state).filter(function(key) { return key !== 'theater' && key !== 'phoneQuery'; });
+      if ('phoneQuery' in state && (typeof state.phoneQuery !== 'string' || state.phoneQuery.length > 300)) return false;
+      if ('theater' in state) {
+        var theater = state.theater;
+        if (!theater || typeof theater !== 'object' || Object.keys(theater).length !== 2 ||
+            typeof theater.videoId !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(theater.videoId) ||
+            typeof theater.query !== 'string' || theater.query.length > 300) return false;
+      }
+      if (![state.scrollTop, state.scrollLeft].every(function(value) { return Number.isFinite(value) && value >= 0; })) return false;
+      if (keys.length === 2) return true; // legacy scoped positions
+      return keys.length === 4 && typeof state.anchorVideoId === 'string' &&
+        /^[A-Za-z0-9_-]{1,128}$/.test(state.anchorVideoId) && Number.isFinite(state.anchorOffset);
     }
     if (selectedProduct) {
       return !Array.isArray(state) && state.schema_version === 'pfmall_product_state.v1' &&
@@ -233,7 +260,9 @@
     }
 
     if (selectedVideoScope) {
+      var scope = selectedVideoScope;
       requestAnimationFrame(function() {
+        if (selectedVideoScope !== scope || tf.restoreVideoGridState?.(state)) return;
         var wrapper = document.querySelector('.mall-tile-field-wrapper');
         if (wrapper) {
           wrapper.scrollTop = state.scrollTop;
@@ -368,6 +397,7 @@
 
     /** Remember this product's filters for an explicit account handoff. */
     rememberProductReturn: rememberProductReturn,
+    rememberMemberVideoReturn: rememberMemberVideoReturn,
 
     /** Consume a safe, short-lived product return after real member admission. */
     consumeProductReturn: consumeProductReturn,

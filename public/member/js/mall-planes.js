@@ -147,10 +147,10 @@
     var primaryCtaHtml = '';
     var secondaryLinkHtml = '';
     var ctaDef = SOURCE_TYPE_CTA[item.source_type];
-    var publicProjection = window.mallVideoProjection?.discoveryPath(item.foundup_id, item.public_poc_url);
+    var memberProjection = window.mallVideoProjection?.memberPath(item.foundup_id);
 
-    if (publicProjection) {
-      primaryCtaHtml = '<a href="' + esc(publicProjection) + '" class="fv-primary-cta">Browse Shorts</a>';
+    if (memberProjection) {
+      primaryCtaHtml = '<a href="' + esc(memberProjection) + '" class="fv-primary-cta">Browse Shorts</a>';
     } else if (isNonVideo && ctaDef && item[ctaDef.urlField]) {
       // Non-video: primary CTA is the source action (View Repo, Open App, Open Service)
       primaryCtaHtml =

@@ -7,17 +7,59 @@
 
 ### Public video projection
 
-`/member/?foundup=hpc` or the exact HPC hostname selects a fixed guest
-video field from `mall-public-video-catalog.json`. The grid uses
-`mallTileField.initialize([lane], { fixedVideoField: true })` and the
-shared player. The scoped player returns keyboard focus to the selected
-tile when closed.
+The dedicated HPC hostname selects a fixed guest video field from
+`mall-public-video-catalog.json`. FoundUps `/members` and `/members/`
+redirect to `/member/`. On FoundUps, `?foundup=hpc` selects the same
+field after the existing sign-in, invitation and username checks. The
+same-tab sign-in handoff retains the registered scope for up to 15 minutes
+and consumes it once after admission. Touch and narrow views use
+three portrait columns with six-item vertical batches. Tap or Enter replaces
+the selected thumbnail with the shared player across its original row.
+Neighboring thumbnails reflow around it. The corner control and pinch-out
+on a thumbnail or the player toolbar open immersive playback. Expansion
+retains the provider iframe.
+Close, Escape, Back or pinch-in on the surrounding chrome restores the grid
+anchor and focus.
 
-`mallStateRestore.selectVideoScope(id)` selects tab-local scroll storage.
-The Vote contact handoff saves only the wrapper position. Browser Back
-uses the same scope key. Member and geographic product state keep their
-existing keys. The dedicated hostname sets presentation and the canonical
-`/f/{id}/app` handoff preserves member admission.
+A viewport of at least 900 CSS px with a fine primary pointer and hover opens
+the shared theater. It displays the main player, then scoped video search, then
+the horizontal queue. Fresh entry requests the first clip muted, with manual
+Play recovery when needed. The centered desktop search form is up to
+584 CSS px wide and 52 px high. Typing filters the queue during playback.
+Submitting with Enter or the search button starts the next matching clip,
+or the first match when the current clip is outside the results or last.
+An empty query or no matches leaves playback alone. Enter on a focused
+thumbnail selects that video. Switching between layouts preserves the
+active iframe, media time, selected ID and query.
+The YouTube controls provide desktop fullscreen and sound controls.
+
+The player uses YouTube's IFrame API, `playsinline`, origin-level Referer and
+distinct ready/state/error/autoplay/timeout outcomes. The local
+`mallVideoPlayback` event and `getPlaybackSnapshot()` expose only the provider
+state, video ID, code and observable media time. No event is sent externally.
+A thumbnail below 120 × 70 opens the player with a separate Play video
+action. One provider iframe is active. A source link remains explicit.
+
+`mallStateRestore.selectVideoScope(id)` selects tab-local storage. It restores
+legacy offsets, the stable tile ID/offset, and optional theater and phone
+queries. The active iframe keeps its media time during in-page resizing.
+`setScopedPhoneQuery(query)` applies the existing metadata matcher to the
+touch grid on submit and retains source tile indices. On resize, an active
+desktop selection outside the phone filter is visible until the player closes.
+
+HPC selects `/member/hpc.webmanifest` and its touch icon in the document head
+when the public route resolves. A fresh standalone launch opens the scoped
+collection. The header portrait links to the canonical Mall. On the phone
+the header action opens Vote's manual contact resource. The bottom anchor
+holds the options dialog, query field and dictation button, and the existing
+public Red Dog briefing link. Device speech recognition starts by request
+only when the browser reports an available local language. The keyboard
+mic remains the alternative. The options dialog includes Home, disclosure
+and device-model availability. Both off-page actions save scoped state.
+
+The dedicated hostname sets presentation and `/f/{id}/app` preserves member
+admission. See the [shared media incident](../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md)
+for verification boundaries and service-worker version evidence.
 
 ### Public FX directory — 2026-10-25
 
@@ -101,13 +143,39 @@ Product restoration never applies video scope or layout. Deferred video scroll
 callbacks recheck the selected product. A loading product cannot overwrite its
 previous geographic state with an empty capture. The return is consumed only by
 the normal Mall initializer after Clerk/invite/username admission succeeds.
-Service-worker cache `pfmall-member-v5` normalizes member query navigations to one
+The shared service worker normalizes member query navigations to one
 shell entry; public property JSON uses network-first validation and dated cached
 fallback. Auth, account, dynamic and cross-origin requests are not cached.
 
 ### Runtime Surface
 
-`/member/` is now the admitted-user p.fMALL shell hosted from Firebase static assets.
+`/member/` is the admitted-user p.fMALL shell hosted from Firebase static assets.
+The root of `play.foundups.com` sends visitors to that shell on the same
+origin. The sign-in return page stays at the root with `signin=required`.
+Storage and service worker registrations are origin-local.
+
+The ordinary Mall dock searches the loaded catalog. Tap or swipe up on its
+plus button for an anchored options panel and the public AutoPost link.
+The panel displays the build of the loaded interface. The scoped video
+header repeats it beside the topic. Update the build and shell cache
+generation together. The runtime tests check their agreement.
+Search and dictated text wrap into a bounded editable field above the
+controls when they outgrow the compact pill. Enter or the search icon
+submits. The mic or a hold on Red Dog dictates into the search field using
+an installed local recognizer.
+On unsupported devices the control focuses the input for keyboard dictation.
+Release a hold or press the square Stop in Red Dog's position to finish
+dictation. The result stays editable, and hiding the dock or backgrounding
+the page cancels capture. Tap Red Dog at rest to open the existing concierge.
+
+The shared full viewer puts the same floating dock between the video and
+horizontal queue on PC and phone. A query filters the current lane while
+the active clip continues. Selecting a result or submitting an idle queue
+starts a matching clip. The media area can scroll independently on short
+screens. Escape first dismisses options or leaves the input, then returns
+to the originating card. In the ordinary viewer, tapping Red Dog returns
+to the card and opens the concierge. In HPC it opens the public briefing.
+Device model selection and resident speech follow the shared roadmap.
 
 It owns:
 - invite-gated post-auth landing
@@ -427,7 +495,10 @@ interface InviteDoc {
 ### UI Contract
 
 **Mall Context (tile field)**:
-- tap tile: start lane autoplay through FoundUp's video queue (Shorts-style)
+- category rows play the selected lane in the tile
+- wide desktop video tiles play in context on click, Enter or Space. The
+  separate fullscreen action opens the full viewer. Hover reveals the
+  button. Back and Escape restore focus and scroll in the expanded lane.
 - Enter FoundUp button: navigate to `/f/{foundup_id}` (WSP 104 canonical)
 - pinch-out on tile: expand into FoundUp's video field
 - swipe: navigate snapped field (default) or glide (override)
@@ -435,10 +506,12 @@ interface InviteDoc {
 
 **FoundUp View (expanded)**:
 - pinch-in: collapse back to Mall
-- swipe up: close FoundUp view
-- swipe left/right: navigate between FoundUps
-- double-tap: toggle shell-local save (localStorage)
+- desktop Ctrl+wheel down: collapse back to Mall
+- Save in the shared player: toggle the browser-local bookmark
 - "Full details" link: navigate to `/member/foundup.html?id={foundup_id}` (deep-linkable)
+
+See the [desktop browse map](../../modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#46-desktop-poster-browsing)
+for current mouse, keyboard, card and full-player behavior.
 
 **Red Dog Plane**:
 - swipe down from top or tap avatar: open Red Dog plane
@@ -596,8 +669,10 @@ The dispatcher tracks a local `sessionState` ( `overrideActive`, `overrideApplie
 
 ## Responsive browse and local query API — 2026-10-18
 
-- `mallTileField.setLayoutMode('rows'|'grid') -> boolean`: rows are default;
-  legacy density requests explicitly select grid. Both reuse the same tile/player API.
+- `mallTileField.setLayoutMode('rows'|'grid') -> boolean` chooses an explicit
+  layout. On first entry the ordinary field defaults to grid at 1024 CSS px
+  or wider with a fine primary pointer and hover, and to rows elsewhere.
+  Stored layout takes precedence. Density requests can also select grid.
 - `getLayoutMode()`, `getRowOffsets()`, `restoreRowOffsets(offsets)` expose
   presentation state; row keys are category strings, offsets nonnegative finite numbers.
 - `searchCatalog(query)` and `redDog.searchCatalog(query)` apply the same

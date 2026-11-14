@@ -96,10 +96,13 @@ X axis = category / cluster / similarity band
 | Gesture | Mall Action | Status |
 |---------|-------------|--------|
 | swipe | Navigate: snapped field motion (default) or glide (override) | RUNTIME |
-| tap tile | Start lane autoplay through FoundUp's video queue (Shorts-style) | RUNTIME |
+| tap or click video tile | On wide desktop entry and in the HPC phone grid, open the shared player at the selected tile. Other category rows use their existing inline preview. A lane starts at its first clip. An expanded tile selects its own clip. | RUNTIME |
+| tap or click non-video tile | Open the FoundUp quick view or the property listing detail. | RUNTIME |
+| hover tile on desktop | Show available tile controls. | RUNTIME |
+| Expand button | Open the shared full player for the selected video or lane. | RUNTIME |
 | Enter button | Navigate to `/f/{foundup_id}` (WSP 104 canonical) | RUNTIME |
-| pinch-out tile | Expand FoundUp into its video field | RUNTIME |
-| pinch-in (expanded) | Collapse back to Mall | RUNTIME |
+| pinch-out on an ordinary video lane | Expand the FoundUp into its video field. Desktop Ctrl+wheel up uses the same handler. | RUNTIME |
+| pinch-in in the expanded field | Collapse back to the Mall. Desktop Ctrl+wheel down uses the same handler. | RUNTIME |
 | long-press | Reserved (future: quick actions) | RESERVED |
 
 ### 4.3 Motion Modes (Runtime)
@@ -119,8 +122,9 @@ Set via `mallTileField.setMotionMode('snap')` or `mallTileField.setMotionMode('g
 | Arrow Down | Navigate: nearer | FIXED |
 | Arrow Left | Navigate: cluster left | FIXED |
 | Arrow Right | Navigate: cluster right | FIXED |
-| Enter | Enter focused FoundUp | FIXED |
-| Escape | Reset view / close overlay | FIXED |
+| Enter on a video tile | Match click on wide desktop and HPC phone entry. Other ordinary rows open the full player. | RUNTIME |
+| Space on a tile | Use the tile's tap action. | RUNTIME |
+| Escape | Close the active desktop poster player first. The next Escape can collapse the expanded lane. | FIXED |
 
 ### 4.5 What Users Cannot Do
 
@@ -131,6 +135,58 @@ Users cannot:
 - Move Mall anchor zones
 - Enter "edit mode" for the Mall itself
 - Reposition FoundUp cards manually
+
+### 4.6 Desktop poster browsing
+
+The ordinary Mall checks member admission before mounting the member
+catalog. `foundups.com/member/` remains an entry. The exact Play hostname
+root forwards to its own `/member/` and permits the `/?signin=required`
+return page. The shell loads lane and card
+metadata and hands it to the shared field. On entry at 1024 CSS px or wider
+with a fine primary pointer and hover, the default is the adaptive poster
+grid. Touch and narrower entry use category rows. Saved layout takes
+precedence, and the desktop grid retains its layout while resize adapts its
+density. The state owner restores the selected layout and position.
+[Member shell](../../../public/member/index.html) ·
+[Tile field](../../../public/member/js/mall-tile-field.js) ·
+[State restore](../../../public/member/js/mall-state-restore.js)
+
+The grid can show video-backed FoundUps and cards for apps, repositories
+and services. Non-video selection opens the existing quick view. Listings
+use their detail view. Click, Enter or Space on a wide desktop video poster
+enlarges its selected position and requests muted playback with the shared
+player. The fullscreen button opens the full viewer. Expand from the inline
+controls retains the same provider iframe. Hover reveals the action without
+mounting media. Escape or Back returns focus and scroll to the poster.
+After density reflow, dismissal restores the same tile in its new row.
+WikiTube is the design reference for the full viewer and continuous queue.
+The admitted browse dock searches the loaded Mall catalog. The full viewer
+places its left-aligned queue search beneath the video and above the rail.
+Search filters the active lane. Submit starts the first match when idle.
+It leaves active playback alone.
+[Catalog schema](PFMALL_VIDEO_MALL_CATALOG_SCHEMA.md) ·
+[Quick view](../../../public/member/js/mall-planes.js) ·
+[Full player](PFMALL_FULLSCREEN_PLAYER_CONTRACT.md)
+
+The gesture engine recognizes double-tap and double-click. The tile field
+binds click, keyboard activation and pinch handlers. FLIP animates expansion
+and collapse of a FoundUp video field. Save and Share use explicit player
+controls. [Gesture engine](../../../public/member/js/gesture-engine.js) ·
+[Tile interactions](../../../public/member/js/mall-tile-field.js)
+
+Before this change, a controlled Windows Chromium 143 run at 1440 × 900 CSS px
+showed the member shell opening in rows. Selecting the grid gave eight columns
+and 15 cards. Hover mounted zero iframes. Clicking a video lane mounted one.
+Enter opened the shared full player, Ctrl+wheel expanded and collapsed the
+Move2Japan lane, and clicking AutoPost opened its quick view. This run used
+the real shell and catalog with a provider fixture at source `4c1d1e7d`.
+
+HPC uses a fixed scoped collection. Its wide fine-pointer view opens the
+shared theater and its narrow or touch view opens the portrait grid.
+Desktop verification and the remaining preview work are tracked in the
+shared roadmap.
+[HPC acceptance](../hpc/ROADMAP.md) ·
+[Desktop poster browsing PoC](../pfmall/ROADMAP.md#desktop-poster-browsing-poc)
 
 ---
 
