@@ -18,7 +18,10 @@
   was found in the bounded PR search; shared ModLog history is preserved.
   A separate isolated branch avoids touching existing local worktrees.
 - Validation: existing resident-RSI source-contract function passed in isolation;
-  prefix/suffix check confirms only the version and inserted section differ.
+  initial prefix/suffix check preserved the prior skill; final readback matches
+  the candidate. Independent source review found no authority weakening; its
+  campaign-wide-hold clarification and five frozen semantic review cases were
+  incorporated. Those cases are documented expectations, not executed tests.
   Full checkout tests, WSP_00 runtime bootstrap, HoloIndex freshness and native
   WRE evaluation were not run. Missing memory/README.md was recorded rather than
   replaced. Exact-head hosted checks and independent review remain merge gates.
