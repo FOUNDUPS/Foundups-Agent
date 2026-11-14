@@ -18,6 +18,10 @@ state_cache_retention_hours: 24
 success_key: is_zen_compliant
 -->
 
+## FoundUps product foundation — bootstrap pointer
+
+For FoundUps architecture, Mall/PWA, manifests or new FoundUp work, retrieve [FoundUps Master Architecture](../../modules/foundups/docs/FOUNDUPS_MASTER_ARCHITECTURE.md) and [FoundUps vision](../../docs/foundups_vision.md) before designing or modifying surfaces. **Play FoundUps Mall (p.fMALL)** is the PWA store/shell; **Play FoundUps** is the activity of interacting with a FoundUp. FoundUps are distinct manifest-defined experiences/ventures composed from reusable governed platform services and per-FoundUp skins; do not clone the backend for each skin. Preserve truthful implemented-versus-target status and use WSP_97 for evidence, drift reconciliation and verification. This pointer does not replace the session bootstrap gate.
+
 ## System roadmap navigation
 
 After bootstrap, read [the root system roadmap](../../ROADMAP.md#authority-and-fast-start) for completion gates, current planning priorities and the selected work packet. Follow its module and evidence links on demand. The roadmap owns cross-system sequencing; it does not redefine this protocol, certify completion, grant authority or replace a current signed work order. Historical plans are listed in the roadmap archive register.

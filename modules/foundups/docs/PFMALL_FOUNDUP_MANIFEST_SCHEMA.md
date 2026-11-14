@@ -8,6 +8,10 @@
 
 ---
 
+## Product naming and authority boundary
+
+**Play FoundUps Mall (p.fMALL)** is the PWA store and shared shell; **Play FoundUps** is the activity of interacting with FoundUps. A manifest identifies a FoundUp's skin/entry point, routes, capabilities and isolated namespace for composition; it does **not** create a separate platform backend, authorize an agent, or prove deployment. Reuse shared gesture, navigation, AI and governance interfaces. Any cross-FoundUp context transfer requires explicit consent and scoped contracts. Current signature and universal runtime limitations below still apply.
+
 ## 1. Purpose
 
 p.fMALL is an **AI interaction space** — a new way of interacting with AI and the world. Video is the default surface, but the paradigm extends to any content type: documents, community, FoundUps. The same interaction model (pinch, zoom, navigate) works everywhere, with AI mediating all engagement. Built for FoundUps first, with hooks into all content. Videos are the catalog layer — they tell each FoundUp's story.
