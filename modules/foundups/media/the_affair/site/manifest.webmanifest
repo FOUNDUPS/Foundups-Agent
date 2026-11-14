@@ -1,0 +1,10 @@
+{
+  "name": "The Huang Affair",
+  "short_name": "Huang Affair",
+  "description": "A fictionalized limited-series concept about love, access, and compute.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#080b0d",
+  "theme_color": "#080b0d",
+  "orientation": "any"
+}
