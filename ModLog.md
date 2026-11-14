@@ -1,3 +1,16 @@
+## 2026-11-14 — Reconcile the nested Claude instruction pointer
+
+Complete the bounded PR #729 instruction consolidation using the existing
+all-file audit. Replace the duplicated nested protocol with links to canonical
+root instructions and WSP 00; preserve current root CLAUDE and generated AGENTS.
+Retire the proposed mandatory read of the dated May 30 stack inventory and its
+unverified model/settings claims. Original head `1757a520c779c3b6a83ed8a4282f2eae13beb10a`
+and inventory blob `ef1823cd89221bd1c8611f03cd1d3039d4c961f7` remain in the
+branch ancestry and existing reconciliation receipt. No runtime change.
+Validation: existing tooling projection check, relative links, complete Git
+delta review and exact root-instruction preservation. Hosted acceptance remains
+bound to the resulting candidate, separately from these local checks.
+
 ## 2026-11-12 — Bounded host launches and build security preflight
 
 Make WSP 91 lifecycle and WSP 71 security review explicit in canonical agent
