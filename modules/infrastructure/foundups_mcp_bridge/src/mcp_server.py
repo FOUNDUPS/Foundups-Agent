@@ -30,7 +30,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, get_type_hints
+from typing import Any, Callable, Dict, List, Literal, Optional, Set, Tuple, get_type_hints
 
 # === UTF-8 ENFORCEMENT (WSP 90) ===
 if __name__ == "__main__" and sys.platform.startswith("win"):
@@ -46,6 +46,8 @@ logger = logging.getLogger(__name__)
 # Explicit Remote Read-Only Allowlist per WSP 97
 # Mutation, execution, or dispatch tools are strictly prohibited from remote registration.
 REMOTE_READ_ONLY_ALLOWLIST: Tuple[str, ...] = ("holo_query_bundle",)
+GIT_INVENTORY_ENV = "FOUNDUPS_MCP_ENABLE_GIT_INVENTORY"
+GIT_INVENTORY_TOOL = "get_git_inventory"
 
 
 def _get_repo_root() -> Path:
@@ -158,6 +160,26 @@ def build_mcp_server(repo_root: Optional[Path] = None) -> Any:
     return mcp
 
 
+def _register_git_inventory(mcp: Any, repo_root: Path, *, oauth_scope: str | None = None) -> None:
+    from mcp.types import ToolAnnotations
+    from modules.infrastructure.wre_core.src.git_lifecycle_inventory import get_git_inventory
+
+    def inventory(
+        request_id: str, section: Literal["summary", "branches", "worktrees"] = "summary",
+        offset: int = 0,
+    ) -> Dict[str, Any]:
+        return get_git_inventory(repo_root, request_id, section=section, offset=offset)
+
+    mcp.tool(
+        name=GIT_INVENTORY_TOOL,
+        description="Read bounded Git worktree and lifecycle evidence for the configured PC repository.",
+        meta={"securitySchemes": [{"type": "oauth2", "scopes": [oauth_scope]}]} if oauth_scope else None,
+        annotations=ToolAnnotations(
+            readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=True,
+        ),
+    )(inventory)
+
+
 class AuthMiddleware:
     """
     ASGI Middleware enforcing Authorization: Bearer <token> for remote access.
@@ -170,8 +192,12 @@ class AuthMiddleware:
       (?token= query parameter is deliberately rejected to prevent logging secrets).
     """
 
-    def __init__(self, app: Any, auth_token: str = "", require_auth: bool = True):
+    def __init__(
+        self, app: Any, auth_token: str = "", require_auth: bool = True,
+        tool_count: int = len(REMOTE_READ_ONLY_ALLOWLIST),
+    ):
         self.app = app
+        self.tool_count = tool_count
         if require_auth:
             token_clean = auth_token.strip() if auth_token else ""
             if not token_clean:
@@ -221,7 +247,7 @@ class AuthMiddleware:
             "status": "ok",
             "service": "foundups_mcp_bridge_http",
             "auth_required": self.require_auth,
-            "tool_count": len(REMOTE_READ_ONLY_ALLOWLIST),
+            "tool_count": self.tool_count,
         }).encode("utf-8")
         await self._send_response(
             send,
@@ -248,6 +274,7 @@ def build_asgi_app(
     auth_token: Optional[str] = None,
     require_auth: bool = True,
     host: str = "127.0.0.1",
+    *, enable_git_inventory: bool = False,
 ) -> Any:
     """
     Build the loopback Streamable HTTP ASGI application at exact path `/mcp`.
@@ -270,9 +297,18 @@ def build_asgi_app(
     if auth_enforced and not (token and token.strip()):
         raise ValueError("auth_token is required when require_auth=True (fail-closed per WSP 97)")
 
-    mcp = build_mcp_server(repo_root=repo_root)
+    inventory_enabled = enable_git_inventory is True
+    if inventory_enabled and not auth_enforced:
+        raise ValueError("Git inventory requires enforced bearer authentication")
+    root = Path(repo_root or _get_repo_root()).resolve()
+    mcp = build_mcp_server(repo_root=root)
+    if inventory_enabled:
+        _register_git_inventory(mcp, root)
     raw_app = mcp.http_app(path="/mcp", transport="streamable-http")
-    return AuthMiddleware(raw_app, auth_token=token, require_auth=auth_enforced)
+    return AuthMiddleware(
+        raw_app, auth_token=token, require_auth=auth_enforced,
+        tool_count=len(REMOTE_READ_ONLY_ALLOWLIST) + int(inventory_enabled),
+    )
 
 
 def main():
@@ -295,9 +331,27 @@ def main():
         default=int(os.getenv("FOUNDUPS_MCP_PORT", "8128")),
         help="Streamable HTTP port (default: 8128)",
     )
+    parser.add_argument(
+        "--git-inventory-oauth", action="store_true",
+        help="Run the OAuth-only PC Git inventory HTTP profile for a private tunnel.",
+    )
     args = parser.parse_args()
 
     root = _get_repo_root()
+    if args.git_inventory_oauth:
+        if args.transport != "http" or args.host != "127.0.0.1" or not 1024 <= args.port <= 65535:
+            parser.error("Git inventory OAuth requires HTTP on 127.0.0.1 with an unprivileged port")
+        import uvicorn
+
+        from .git_inventory_oauth import load_git_inventory_oauth_app
+
+        try:
+            app = load_git_inventory_oauth_app(root, args.port)
+        except (KeyError, ValueError):
+            parser.exit(2, "Git inventory OAuth startup refused: verify the private configuration.\n")
+        uvicorn.run(app, host=args.host, port=args.port, log_level="info", access_log=False)
+        return
+
     token = os.getenv("FOUNDUPS_MCP_AUTH_TOKEN", "")
     is_loopback = args.host in ("127.0.0.1", "localhost", "::1")
     if not is_loopback:
@@ -318,7 +372,7 @@ def main():
         import uvicorn
         asgi_app = build_asgi_app(
             repo_root=root, auth_token=token, require_auth=require_auth,
-            host=args.host,
+            host=args.host, enable_git_inventory=os.getenv(GIT_INVENTORY_ENV) == "1",
         )
         uvicorn.run(asgi_app, host=args.host, port=args.port, log_level="info", access_log=False)
 

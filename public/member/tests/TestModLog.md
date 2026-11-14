@@ -1,3 +1,153 @@
+## 2026-11-14 · Mall build identification
+
+The scoped browser fixture checks the build next to #SchumerOUT at desktop
+and phone widths, including space beside the civic action at 320 px. The
+HPC and member plus menus display the same build. The worker fixture checks
+that the label matches the installed v17 cache and that v16 is retired.
+
+## 2026-11-14 · Shared dock phone reference
+
+The existing Chromium and WebKit browser fixtures check the shared dock at
+320/390/430 px portrait and 844 × 390 landscape. The updated tests exercise
+the anchored plus panel, backdrop dismissal, the square in Red Dog's slot,
+pointer release and cancellation, and a multiline transcript that can be
+edited while the same provider frame plays. Independent review caught a
+Stop button that could not be tapped after starting dictation from the
+member mode sheet. The regression covers that entry separately from a
+held pointer. The state fixture checks v16
+installation, v15 retirement and retention of unrelated caches.
+
+The broader targeted Python run had 601 passes and the same three existing
+navigation assertions on the candidate and base `ebfce5717`.
+`TestFoundUpHandoff` expects `fv-open-link` and `routing_prefix` and
+`TestGestureHints` expects the former tap-to-play/pause hint. These are
+outside the dock change. Browser fixtures use controlled provider and
+speech events. They leave physical iPhone and real dictation verification open.
+
+## 2026-11-14 · Phone WikiTube viewer
+
+The base `510079b91` passed the existing scoped and desktop cases. The
+phone regression uses the real member shell with controlled admission,
+media and local speech. It checks in-card playback, the same iframe
+through expansion and queue search, 320/390/430 px portrait and 844 × 390
+landscape, native horizontal touch scrolling in Chromium, plus menu swipe,
+foreground dictation with Stop and pointer cancellation, focus and scroll
+return, and one provider frame. The worker fixture covers v14 to v15
+upgrade and unrelated-cache retention. Physical devices and provider
+playback are separate verification.
+
+## 2026-11-14 · Member WikiTube controls
+
+The controlled Chromium and WebKit member cases cover the Play root route,
+guest sign-in, admitted grid and rows, inline dimensions, iframe continuity
+into full view, queue search and keyboard return, plus and Red Dog actions.
+The existing Chromium HPC cases cover the public route, responsive theater
+and phone layout. The v14 fixture covers the cache upgrade.
+
+Real YouTube in Chromium 143 played `JFp2l1fnf_4` inside a 512.5 × 240
+CSS px selected slot. The same provider window advanced from 0.52 to
+1.06 seconds while the clip expanded and an active queue search was
+submitted. Closing left zero iframes. This run used the local Mall harness.
+
+## 2026-11-13 · Invited desktop poster grid
+
+The new browser case reproduced category rows on fresh desktop entry at
+base `09da53549`. The candidate opened 15 mixed cards in eight columns at
+1440 × 900 CSS px. The controlled player kept one provider iframe, retained
+it on resize, and advanced the queue after both autoplay and manual Play.
+The new desktop rail thumbnails meet the 120 × 70 CSS px minimum.
+WebKit exposed a scroll snap that moved the originating tile out of view.
+Explicit scroll restoration returned to the focused tile. A close at 680 px
+after opening at 1440 px restored the same tile in its new row. Enter FoundUp
+went to `/f/move2japan` after the player closed. The saved rows, wide touch,
+card quick view and scoped HPC cases passed in the Chromium suite.
+
+In a separate Windows Chromium 143 localhost dev-harness run, real YouTube
+clip `JFp2l1fnf_4` advanced from about 0.41 s to 1.02 s in a 1440 × 694
+CSS px iframe. The diagnostic saw
+zero provider document or media requests before tile selection and zero
+remaining player frames after closing. Live invited admission, deployment
+and physical iPhone playback remain separate gates. The v13 cache fixture
+passed 21 cases. The 600-case Python comparison had the same three inherited
+assertions in `test_navigation_planes.py` as the base.
+
+## 2026-11-13 · Public HPC and admitted member entry
+
+The controlled Chromium fixture follows the real member shell through
+sign-in redirect, invitation denial, return after admission and the HPC
+theater. It also checks the registry link to the dedicated public host.
+The actual boot fixture passes 26 cases and the state and service-worker
+fixture passes 21. The latter checks v12 route assets, obsolete Mall cache
+retirement and unrelated cache retention. Physical iPhone playback and
+production member admission remain separate verification gates.
+
+## 2026-11-12 · In-place phone video playback
+
+The scoped browser fixture verifies that the selected thumbnail disappears
+and the player occupies its original row for left, middle and right clips.
+Close restores the card, focus and scroll position. The fixture verifies
+landscape playback, toolbar pinch-out, filtered tiles, the same provider
+frame across expansion and desktop resize, and the neutral 101/150 message.
+The focused member suite passed 432 checks and the boot fixture passed 21.
+Service-worker tests cover retiring v10 and installing v11.
+
+## 2026-11-12 · HPC phone install and dock
+
+The Chromium scoped fixture passed a manifest read, three-column phone
+layout, dictation fallback and simulated local speech, search, disclosure,
+and return from Vote and the public Red Dog briefing. It also checked
+filtered playback continuity and immersive resize. Independent WebKit
+checks covered the phone layout and install metadata, stable filter return
+and the existing desktop theater. The focused member suite passed 432 tests,
+the HPC catalog tests passed two, and the boot fixture passed 21. Physical
+iPhone Home Screen installation and real device speech remain open.
+
+## 2026-11-12 · Desktop search submission
+
+Chromium and WebKit verified the 584 × 52 CSS px form, placement below the
+video, Enter and magnifier playback, the no-result path, and continuity
+through the phone layout. Actual YouTube in the candidate browser advanced
+on desktop startup, Enter and magnifier selection, and 390 px inline play.
+The focused player and field suites passed 251 checks, and the state/SW
+fixture passed 20 with cache v9.
+
+## 2026-11-12 · Desktop theater and breakpoint continuity
+
+The scoped fixture passed desktop and phone behavior in Chromium. Independent
+desktop verification in Chromium and WebKit confirmed queue search, startup
+recovery, Voice return and the same iframe browsing context across resize.
+The ordinary four-width browser fixture, property runtime, 21 admission cases,
+and 20 state/service-worker checks passed. A warm Chromium upgrade cached
+exact v8 bytes, retired v7, retained a separate cache and reopened HPC offline.
+
+The broader media and PWA check reported 333 passes and six failures at both
+990e320 and the candidate. The failures concern three absent empty media
+directories and three older service-worker source expressions.
+
+## 2026-11-11 · Scoped playback recovery
+
+The independent Chromium fixture verified a 31-record collection, three
+columns, pinned chrome, one inline player, in-place immersive expansion,
+focus/Back/scroll restoration, and provider status recovery. The 320 px
+manual Play fixture now checks host focus and Escape after playback.
+The shared state/SW VM passed all 20 checks with v7, including explicit public
+precache paths, reload on install and no credentials on those requests. A
+Chromium upgrade probe confirmed v7 replaces a warm HTTP response, retires
+the old Mall cache, preserves an unrelated app cache and reopens offline.
+The broad member/catalog pass returned 1,540 passed with 11 failures that
+also fail at the base (legacy global catalog shape and navigation copy).
+The 12 catalog refresh safety checks also passed separately.
+The [incident](../../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md)
+separates real provider playback from mocked events and physical iOS.
+
+## 2026-11-11 · HPC scoped video and state
+
+The shared product-state and service-worker VM covers exact hostname/query
+selection, tab-local scroll data, catalog separation and declared asset versions.
+The registry and catalog suites verify the Vote parent reference and reproducible
+public projection. Mobile Chromium preview checks the grid, disclosure, shared
+player, official YouTube embed, Vote handoff and sign-in boundary.
+
 ## 2026-10-25 | FX1 public directory and actual filter events
 
 Independent closeout: the same 300 cases passed again in 6.63s, with two inherited

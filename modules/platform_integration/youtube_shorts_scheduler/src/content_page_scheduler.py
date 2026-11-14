@@ -23,6 +23,8 @@ The popup uses the SAME ytcp-visibility-scheduler > ytcp-datetime-picker compone
 as the individual video edit page, so set_schedule_date/set_schedule_time reuse works.
 """
 
+from modules.infrastructure.foundups_selenium.src.youtube_verification import VerificationHandoff
+
 import asyncio
 import logging
 import os
@@ -281,6 +283,8 @@ class ContentPageScheduler:
         except TimeoutException:
             logger.warning(f"[CPS] Content page load timeout — no video rows found")
             return False
+        except VerificationHandoff:
+            raise
         except Exception as e:
             logger.error(f"[CPS] Navigation failed: {e}")
             return False
@@ -308,6 +312,8 @@ class ContentPageScheduler:
 
             logger.debug(f"[CPS] Tab '{tab_label}' not found — may already be active")
             return False
+        except VerificationHandoff:
+            raise
         except Exception as e:
             logger.debug(f"[CPS] Tab switch failed: {e}")
             return False
@@ -419,6 +425,8 @@ class ContentPageScheduler:
         except TimeoutException:
             logger.warning(f"[CPS] Timeout applying filter '{visibility}'")
             return False
+        except VerificationHandoff:
+            raise
         except Exception as e:
             logger.warning(f"[CPS] Filter application failed: {e}")
             return False
@@ -461,6 +469,8 @@ class ContentPageScheduler:
                 try:
                     vis_span = row.find_element(By.CSS_SELECTOR, self.sel.VISIBILITY_SPAN_CSS)
                     visibility = vis_span.text.strip().capitalize()
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     # Fallback: search all spans
                     try:
@@ -470,6 +480,8 @@ class ContentPageScheduler:
                             if text in ("unlisted", "private", "public", "scheduled", "draft"):
                                 visibility = text.capitalize()
                                 break
+                    except VerificationHandoff:
+                        raise
                     except Exception:
                         pass
 
@@ -478,6 +490,8 @@ class ContentPageScheduler:
                 try:
                     date_el = row.find_element(By.CSS_SELECTOR, self.sel.VIDEO_DATE_CELL_CSS)
                     date_text = date_el.text.strip().split("\n")[0]  # First line is date, second is "Uploaded"
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     pass
 
@@ -490,6 +504,8 @@ class ContentPageScheduler:
                 })
             except StaleElementReferenceException:
                 continue
+            except VerificationHandoff:
+                raise
             except Exception as e:
                 logger.debug(f"[CPS] Row parse error: {e}")
 
@@ -809,66 +825,33 @@ class ContentPageScheduler:
         time_str: str,
         video_id: str = "unknown",
     ) -> bool:
+        """Use the existing detail owner so title, description and Audience are observable.
+
+        This is the initial route, never a fallback after a popup submission.
+        The old inline button remains fail-closed without a complete detail audit.
         """
-        Schedule a single video from its content page row.
-
-        Full flow:
-        1. Click visibility edit triangle on the row
-        2. Expand schedule section in popup
-        3. Set date
-        4. Set time
-        5. Click "Schedule" button in popup
-
-        Args:
-            row_element: Selenium WebElement for the ytcp-video-row
-            date_str: Date like "Feb 5, 2026"
-            time_str: Time like "5:15 PM"
-            video_id: For logging purposes
-
-        Returns:
-            True if all steps succeeded
-        """
-        workflow_start = time_module.time()
-        self._policy_expected_video = video_id
-        self._policy_requested_schedule = {"date": date_str, "time": time_str,
-            "timezone": getattr(self, "_policy_timezone", None), "visibility": "scheduled"}
-        logger.info(f"[CPS] Scheduling {video_id} → {date_str} @ {time_str}")
-
-        steps = [
-            ("click_visibility_edit", lambda: self._click_visibility_edit_on_row(row_element)),
-            ("expand_schedule", lambda: self._expand_schedule_in_popup()),
-            ("set_date", lambda: self._set_date_in_popup(date_str)),
-            ("set_time", lambda: self._set_time_in_popup(time_str)),
-            ("click_schedule", lambda: self._click_popup_schedule_button()),
-        ]
-
-        step_times = []
-        for step_name, fn in steps:
-            step_start = time_module.time()
+        from .video_policy import inline_identity, VideoPolicyBlocked
+        try:
+            if getattr(self, "_policy_submission_started", False):
+                raise VideoPolicyBlocked("inline_submission_outcome_unknown")
+            channel_id, current = inline_identity(
+                self.driver, row_element, channel_id=getattr(self, "_policy_channel_id", None),
+                video_id=video_id)
+            # A pending inline draft must be resolved by its owner, not discarded.
+            if self.driver.find_elements(By.CSS_SELECTOR, "ytcp-video-visibility-edit-popup[opened]"):
+                raise VideoPolicyBlocked("inline_draft_open")
+            self.dom.navigate_to_video(current)
+            session = self.dom.begin_policy_edit(channel_id, current)
+            if self.dom.read_edit_page_visibility() not in ("unlisted", "private"):
+                raise VideoPolicyBlocked("detail_visibility_not_schedulable")
+            self.dom._policy_timezone = getattr(self, "_policy_timezone", None)
             try:
-                result = fn()
-                elapsed = time_module.time() - step_start
-                step_times.append((step_name, elapsed))
-
-                if result is False:
-                    logger.error(f"[CPS] Step '{step_name}' returned False for {video_id}")
-                    self._dismiss_popup()
-                    return False
-
-                logger.debug(f"[CPS] Step '{step_name}' OK ({elapsed:.1f}s)")
-            except Exception as e:
-                elapsed = time_module.time() - step_start
-                logger.error(
-                    f"[CPS] Step '{step_name}' failed for {video_id}: "
-                    f"{type(e).__name__}: {e} ({elapsed:.1f}s)"
-                )
-                self._dismiss_popup()
-                return False
-
-        total_time = time_module.time() - workflow_start
-        timing = ", ".join(f"{n}:{t:.1f}s" for n, t in step_times)
-        logger.info(f"[CPS] Scheduled {video_id} → {date_str} {time_str} in {total_time:.1f}s [{timing}]")
-        return True
+                return self.dom.schedule_video(date_str, time_str)
+            finally:
+                self._policy_submission_started = getattr(session, "submitting", False) is True
+        except VideoPolicyBlocked as exc:
+            logger.warning("[CPS] Detail scheduling refused: %s", exc)
+            return False
 
     async def schedule_all_visible(
         self,
@@ -901,99 +884,28 @@ class ContentPageScheduler:
         Returns:
             Dict with scheduled count, errors, video details
         """
-        results = {
-            "total_scheduled": 0,
-            "total_errors": 0,
-            "total_skipped": 0,
-            "scheduled": [],
-            "errors": [],
-        }
-        self.dom.begin_policy_cycle()
-        self._policy_channel_id = tracker.channel_id
-        self._policy_timezone = channel_tz
-
+        # The inline fallback shares the same calendar/claim owner as detail scheduling.
+        # Long-form lists are not silently reinterpreted as Shorts.
+        from urllib.parse import urlsplit
+        from .channel_config import CHANNELS
+        from .scheduler import YouTubeShortsScheduler
+        blocked = {"total_scheduled": 0, "total_errors": 1, "scheduled": [],
+                   "status": "blocked", "reason": "calendar_detail_handoff_unavailable"}
+        keys = [key for key, cfg in CHANNELS.items() if cfg.get("id") == tracker.channel_id]
+        if len(keys) != 1 or urlsplit(self.driver.current_url).path != f"/channel/{tracker.channel_id}/videos/short":
+            return blocked
+        if stop_event is not None and stop_event.is_set():
+            return {**blocked, "reason": "stop_requested"}
         rows = self.get_video_rows_with_data()
-        unlisted_rows = [r for r in rows if r["visibility"].lower() in ("unlisted", "private")]
-
-        if not unlisted_rows:
-            logger.info("[CPS] No unlisted/private videos found on content page")
-            return results
-
-        logger.info(f"[CPS] Found {len(unlisted_rows)} schedulable videos")
-
-        for i, row_data in enumerate(unlisted_rows):
-            if i >= max_videos:
-                logger.info(f"[CPS] Reached max_videos limit ({max_videos})")
-                break
-
-            if stop_event is not None and stop_event.is_set():
-                logger.info("[CPS] Stop signal received — aborting")
-                break
-
-            video_id = row_data["video_id"]
-            title = row_data["title"]
-
-            # Skip if already tracked
-            if tracker.is_video_scheduled(video_id):
-                logger.debug(f"[CPS] Skipping {video_id} — already scheduled in tracker")
-                results["total_skipped"] += 1
-                continue
-
-            # Get next available slot. Forward channel_tz so the canonical ET
-            # peak slot is DST-converted to the channel account's local
-            # wall-clock before typing (identity for ET-account channels;
-            # shifts for Asia/Tokyo etc.). Mirrors the shorts path (#847).
-            slot = tracker.get_next_available_slot(
-                time_slots, max_per_day, channel_tz=channel_tz
-            )
-            if slot is None:
-                logger.warning("[CPS] No more available slots — stopping")
-                break
-
-            date_str, time_str = slot
-
-            # Schedule it
-            try:
-                success = await self.schedule_video_from_row(
-                    row_element=row_data["row_element"],
-                    date_str=date_str,
-                    time_str=time_str,
-                    video_id=video_id,
-                )
-
-                if success:
-                    tracker.increment(date_str, video_id)
-                    results["total_scheduled"] += 1
-                    results["scheduled"].append({
-                        "video_id": video_id,
-                        "title": title,
-                        "date": date_str,
-                        "time": time_str,
-                    })
-                    logger.info(f"[CPS] [{i+1}/{len(unlisted_rows)}] {video_id} → {date_str} {time_str}")
-                else:
-                    results["total_errors"] += 1
-                    results["errors"].append({"video_id": video_id, "reason": "step_failed"})
-
-            except Exception as e:
-                logger.error(f"[CPS] Error scheduling {video_id}: {e}")
-                results["total_errors"] += 1
-                results["errors"].append({"video_id": video_id, "reason": str(e)})
-
-            # Human delay between videos
-            delay = self.dom.human_delay(2.0, 1.0)
-            await asyncio.sleep(delay)
-
-            # Refresh page after each successful schedule (row disappears)
-            if results["total_scheduled"] > 0 and results["total_scheduled"] % 3 == 0:
-                self.refresh_page()
-                # Re-fetch rows after refresh (stale elements)
-                rows = self.get_video_rows_with_data()
-                unlisted_rows = [r for r in rows if r["visibility"].lower() in ("unlisted", "private")]
-                # Adjust index (rows changed after refresh)
-                break  # Re-enter loop from schedule_all_visible caller if needed
-
-        return results
+        ids = [r["video_id"] for r in rows if r.get("visibility", "").lower() == "unlisted"]
+        if not ids:
+            return {**blocked, "total_errors": 0, "reason": "no_unlisted_shorts"}
+        owner = YouTubeShortsScheduler(keys[0])
+        owner.driver, owner.dom, owner.tracker = self.driver, self.dom, tracker
+        owner.request_driver, owner.stop_event = self.driver, stop_event
+        owner.max_per_day = min(owner.max_per_day, max_per_day)
+        # A stale row snapshot authorizes only these IDs, never an entire backlog.
+        return await owner.run_scheduling_cycle(video_ids=list(dict.fromkeys(ids)), max_videos=max_videos)
 
     # ============================================================
     # CALENDAR AUDIT

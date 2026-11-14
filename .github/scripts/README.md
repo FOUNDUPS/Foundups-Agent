@@ -15,6 +15,94 @@ and buildx available. Missing Docker, a file-specific ignore override, build
 failure, timeout, leaked fixture, or missing source is a failure, never a skip.
 The dedicated workflow executes it without application dependencies or credentials.
 
+## Audit Markdown fast path
+
+### Trusted scope and proposal Skill documents - 2026-11-14
+
+The existing scope job now loads its classifier and documentation verifiers
+from the exact PR base. It compares complete merge-base-to-head and
+event-base-to-test-merge raw diffs, including modes, status and blob IDs.
+Candidate regression tests run on a separate runner without selection authority.
+`ci_merge_scope.v1` records base, head, test-merge, complete paths and required
+gates. Only successful scoped checks, live-base equality, a supported schema and
+the server opt-in produce `fast_path=true`. Required `test (3.12)` and
+`wre-verification-contracts` explicitly reject missing, failed, cancelled, pending
+or malformed scope/regression results. Scoped gate failure cannot become success
+through a fallback.
+
+The `skill-proposal` lane admits additions named `SKILL.md` or `SKILLz.md` in a
+new module-local `skillz/<name>/` directory. Both exact-base and candidate registry
+evidence must be available. Registered names/locations, adjacent files, executors,
+manifests, links, frontmatter and existing directories stay outside this pilot.
+Its documentation schema requires an explicit PROPOSED / DOCUMENTATION ONLY
+status, nonempty intent/boundary, governance, acceptance/learning and handoff
+sections, and WSP 00/15/48/95/97/110 references. Formatting, offline repository
+links and blocking security scanning still apply. This proves structure only;
+independent review must assess content. It grants no runtime admission, production
+promotion, semantic guarantee or measured RSI benefit.
+
+The ordinary prose allowlist below is unchanged. WSP/security/runtime contracts,
+workflow changes, registered/executable skills, mixed docs/Skill changes, deleted
+or renamed paths, mode changes and unknown paths retain full verification.
+Python also remains full: WRE registry projections are not an authenticated
+general dependency graph. Existing `wre_test_impact_differential_gate.py`,
+`wre_test_registry_differential_plan_runtime.py` and
+`wre_test_differential_runtime.py` retain their planning/execution/evidence roles
+and SYSTEMIC/stale-evidence escalation. This CI documentation pilot is separate
+from WRE differential acceptance. Existing Git lifecycle verification still
+requires exact-main checks; passing PR-head checks do not verify resulting main.
+
+Security, lint, HoloIndex freshness, GotJunk security and report-only red-team
+observations remain unconditional. Six unrelated runtime jobs omit execution only
+under the validated pilot; all full-route commands and inventories remain.
+Main pushes always run full verification. Separate workflows, including Moshpit
+projection, retain their triggers. This is not global elimination of Python.
+
+**Production activation is held.** The 2026-11-14 readback found no fast-path
+variable, `strict_required_status_checks_policy=false`, and no CODEOWNERS file.
+The invoking workflow remains candidate-controlled: trusted-base loading alone
+does not prevent replacing the workflow. Separately protected workflow/policy
+ownership, fresh server-required checks, independent review and isolated hosted
+positive/negative/full-route qualification remain prerequisites. This change
+alters no protection, security setting or Actions variable. Removing the opt-in
+continues to restore full runtime execution. Unavailable exact-base verification
+owners or a moving documentation base now fail the required checks even with
+the opt-in off. Older stacked bases need the existing owners before qualification;
+missing evidence is not a passing shadow result.
+
+Reference [CI43583161268](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/43583161268)
+at #2387 head `4c73c6486c7a91e028ec3fcaef1d09d37203c541` ran
+`test (3.12)` for 484 seconds; an earlier run of that same head also ran full CI.
+These are observed durations, not a controlled before/after saving. No production
+compute reduction is claimed while activation is held.
+
+### Existing activation contract
+
+CI keeps the required check name `test (3.12)`. A repository administrator can
+set the Actions variable `CI_AUDIT_FAST_PATH_BASE` to an exact PR target branch.
+Until set, the Python job runs the existing suite. Set it to an isolated preview
+branch to qualify the shortcut before enabling `main`. Removing the variable
+restores the full suite on the next eligible PR event.
+
+The shortcut admits regular Markdown additions and edits under
+`docs/audits/prose/`, the dated Git workflow impact audit, and the existing
+`docs/ci-pilot/examples/` fixtures. Reserve the prose directory for human-readable
+reports. Policy, handoffs, CI, deployment, executable content and mixed changes
+use the full suite. The check verifies both parents of the exact test-merge
+commit and compares complete Git diffs. Missing classification evidence routes
+full. Failed scoped checks or a moving base fail the required check.
+
+Both routes retain separate secret scanning and the other required checks.
+Scoped Markdown uses whitespace and offline relative link and anchor checks.
+The shadow job also checks WSP mirrors, numbering and the Codex projection.
+All original PR event types and post-merge tests remain in effect.
+
+Before targeting `main`, require an independent code owner's approval for
+workflow and validator changes and enable GitHub's up-to-date branch
+requirement. Verify the fast and full paths and a rejected docs change on
+an isolated target. Compare event-to-green and runner time on the exact
+head, base and test-merge SHA.
+
 ## Change record — 2026-10-21
 
 ### Application image build budget — 2026-10-26

@@ -1,3 +1,34 @@
+## 2026-11-10 — Selected CI metadata fixtures
+
+Four existing scheduling positives now use a complete synthetic Studio calendar,
+private canonical tracker and manifest paths, and a strict DOM double that exposes
+the scheduling instance fields. They retain the original metadata assertions and
+verify that the Save double reaches durable reservation and clears the cycle guard.
+All 14 metadata-decoupling cases passed under the existing offline effect guard
+with zero failures, errors, skips or effect denials. WSP22/50/97.
+
+## 2026-11-10 — Stream batch and calendar boundaries
+
+The sealed calendar suite passed154:49 queue/DAE/launcher,71 selection/picker/Save
+boundaries,34 exact-slot/persistence cases. Zero failures, errors, skips, effect
+denials or model imports. The existing inventory102, directives114 and rotation35
+case inventories remain unchanged and passed after fixture migration. Attachment35
+and access11 controls passed; peak-window13 passed. Fixtures never publish.
+New cases cover exact-title selection, incomplete inventory, scope/driver changes,
+reserved versus attempted Save, contradictory timezone observations, committed
+picker mismatches, ambiguous Done/Save controls and supervisor handoff retention.
+Source and UI semantics remain separately qualified. WSP11/22/50/77/84/97.
+
+## 2026-11-10 — Scheduling draft audit
+
+The focused four-file selection passed98. Protected directives replay executed114
+cases with zero test issues; its fixed case manifest was updated from101 after
+adding13 configuration cases, preserving all earlier names. Invalid audience
+configuration cannot select/claim/save; environment policy enables no channel
+roles. Registry true/false/absent/malformed answers survive save/load unchanged.
+Source controls do not establish native selector or saved-state live qualification.
+WSP11/22/50/84/97.
+
 ## 2026-11-05 — Visible native schedule readiness
 
 Added six cases to `test_video_policy_consumers.py` without changing the existing
@@ -379,3 +410,22 @@ YouTube, no credentials. ASCII-only.
   base (this slice touches only `scheduler.py` and `index_weave.py`).
 
 ---
+# 2026-11-10 — Pre-save audit regression controls
+
+Added actual-owner tests for metadata completeness, audience selection/readback,
+kids/unknown-channel policy, late draft/identity changes, missing analysis and
+detail scheduling handoff. Updated old inline positive expectation: a popup with
+no description or audience now refuses before claim/click. Existing durable
+unknown-save tests use future explicit slots and observed Audience fixtures.
+These are offline controls, not live audience or scheduling qualification.
+
+## 2026-11-10 — Frozen-request Unlisted URL and strict re-entry
+
+The sealed calendar selection passes 233 cases, all 215 previous names retained,
+with zero failures/errors/skips or denied effects. Eighteen additions exercise the
+actual URL builder plus strict inventory, explicit-empty reads after row timeout,
+wrong/missing filters, channel/title/pagination changes, late STOP, verification
+handoff, and selection limited to previously frozen IDs. Frozen re-entry never
+calls the legacy page-size/filter/scrape/model fallback helpers. The native run
+that motivated this repair stopped at the old filter before selection or Save;
+this offline result does not establish a repaired live schedule. WSP22/50/77/97.

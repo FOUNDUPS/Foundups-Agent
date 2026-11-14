@@ -1,3 +1,28 @@
+## 2026-11-12 — Security-scan caller lifecycle obligations
+
+The existing security_scan skill now points build/launch callers to WSP 71
+Section 5.6 and WSP 91 Section 3.0. Scanner evidence does not itself authorize
+execution; missing required coverage blocks the affected action. Heartbeats,
+expiry, ownership and cleanup belong to existing runtime owners. Prototype and
+manual-trigger metadata remain unchanged; no provider or service was started.
+WSP 22/71/91/95/97. Validation covers protocol mirrors and agent projection;
+runtime lifecycle enforcement remains separately qualified work.
+
+## 2026-11-12 — Read-only PC and GitHub inventory
+
+Reuse the Git lifecycle repository and selected PC binding for a bounded
+Git read with a request-bound digest. Preserve worktree paths and changed
+filenames locally. The MCP adapter can call the reader without writing the
+lifecycle ledger or modifying either repository. WSP 21, 50, 84 and 97.
+
+## 2026-11-11 — GitHub and PC lifecycle reconciliation
+
+Connect WRE and Codex startup to one persisted Git lifecycle pass. Inventory
+GitHub with pagination, verify the current main checks and fast-forward the
+selected clean PC main worktree. Carry prior PR obligations until the GitHub
+merge and PC proofs agree. Retire unchecked promotion from the legacy sentinel.
+WSP 10, 15, 22, 34, 50, 97 and 110.
+
 ## Readiness evidence and cold-start distinction — 2026-11-06
 
 Replace global-count qualification and fabricated zero rates with per-metric
@@ -5792,3 +5817,12 @@ Phase 3 completes the autonomous execution chain:
 - Grounded by current Holo evidence at exact base
   `7269deb66f638cc6bbb8239aecf0c8b5ae6b8d22` and documented under WSP 15,
   WSP 50, WSP 62, and WSP 97 before resuming RedDog Phase 2C.
+## 2026-11-14 - CI documentation pilot reuses verification owners
+
+The existing CI scope pilot gains trusted-base selection and a proposal-only
+Skill documentation schema. WRE impact planning, registry projection,
+differential execution and exact-main evidence remain unchanged. Python and
+protected/systemic changes retain full verification; no model may supply
+dependency-completeness or downgrade authority. The CI README records activation
+holds and exact reference timing. No runtime admission or RSI transfer is claimed.
+WSP 6/15/22/50/71/95/97/110.

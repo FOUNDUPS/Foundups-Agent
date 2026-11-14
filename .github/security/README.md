@@ -1,3 +1,108 @@
+## HPC public Mall shell metadata review — 2026-11-11
+
+PR #2349's pinned Gitleaks run
+[`129930709412`](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/42845204382/job/129930709412)
+reported two current-tree `generic-api-key` candidates at
+`public/index.html:79` and `public/member/index.html:28`. The complete
+Clerk SDK elements at `359c91d29` are byte-identical to base `b7e7e1ac1`,
+where the matches on lines 75 and 25 have exact prior approvals. Clerk
+documents the frontend identifiers as publishable.
+[Clerk key documentation](https://clerk.com/docs/guides/secure/rotate-api-keys)
+
+The new whole-file digests and locations require two exact bindings. The
+ledger retains all 4,419 prior entries and appends only these two.
+The blocking scanner still covers the tracked tree and introduced history
+with the same rules and fingerprint algorithm.
+
+## Stream inventory diagnostics metadata review — 2026-11-10
+
+The backend manifest refreshes three scheduler source checksums and retains
+all 1,487 runtime members. A pinned manifest scan and independent review at
+tree `f3c8bff5` verified 39 unchanged public source-path/SHA rows against
+base `f52608377`. Every row matches Git source at both revisions and has an
+exact prior approval. The new whole-manifest digest requires 39 renewed
+bindings, preserving all 4,380 earlier entries and other fields (4,419 total).
+Scanner rules, exclusions, fingerprint formula, and scan coverage stay the
+same. Exact proposal SHA256: `fad3f61c834a5d91ec993490571f02fca73a23aef1c1a34dc9a47c06eba44139`.
+Fresh full-tree and introduced-history checks remain required.
+
+## Unlisted stream Shorts navigation metadata review — 2026-11-10
+
+The backend manifest refreshes the scheduler source checksum and retains all
+1,487 runtime members. A pinned manifest scan and independent review at tree
+`5263a3e3` verified 39 unchanged public source-path/SHA rows against base
+`e51f42f32`. Every row matches the source at both revisions and has an exact
+prior approval. The new whole-manifest digest requires 39 renewed exact
+bindings, preserving all 4,341 earlier entries and other fields (4,380 total).
+Scanner rules, exclusions, fingerprint formula, and scan coverage stay the
+same. Exact proposal SHA256: `b665f6474bc25aa503f6a23643eacbd4f8f3e847d61cec6942e7646d8dca1fe2`.
+Fresh full-tree and introduced-history checks remain required.
+
+## Ended-stream first-test metadata review — 2026-11-10
+
+The backend manifest refreshes seven source hashes and retains all 1,487
+runtime members. A pinned manifest scan and independent review at tree
+`0d65d756` verified 39 unchanged public source-path/SHA rows against base
+`750131610`. Each row matches the source at both revisions and has an exact
+prior approval. The new manifest digest requires 39 renewed exact bindings,
+preserving all 4,302 earlier entries and other fields (4,341 total). Scanner
+rules, exclusions, fingerprint formula, and scan coverage stay the same.
+Exact proposal SHA256: `ecdc5a19056d2b099801a4c60372bb1f6509101c786a623a7b7f23ccba813510`.
+Fresh full-tree and introduced-history checks remain required.
+
+## Frozen stream Shorts schedule metadata review — 2026-11-10
+
+PR 2345 head `0199b14ba` adds one runtime member and updates twelve existing
+source hashes. Hosted job 129745091959 reported 39 new manifest findings and
+zero introduced-history findings. A fresh pinned manifest scan and independent
+review verified 37 generic API key and two Discord token pattern matches as
+unchanged public source-path/SHA rows. Each row matches the Git source at both
+`769a21cf6` and `0199b14ba`, has an exact prior approval, and needs a new
+fingerprint for the regenerated manifest's whole-file digest and line binding.
+Append only the 39 approved fingerprints, preserving all 4,263 prior entries
+and other fields (4,302 total). Scanner rules, exclusions, fingerprint formula
+and scan coverage stay the same. Fresh full-tree and final-history checks are
+required. Private independent review receipt SHA256: `09dd0fb4a3a6b01b6e068785ee2471236656d4fa830c003594561bf75b4179b9`.
+
+## Scheduling audit metadata review — 2026-11-10
+
+The pre-save audit changes four runtime source bindings, keeping all 1,486
+members and package bounds. Foreground reconstruction against `80ada51cd`
+verifies 39 unchanged public source-path/SHA rows, each matching its staged
+source bytes and exact prior approval. Append only the 39 renewed whole-file
+bindings, preserving all 4,185 earlier entries and other fields (4,224 total).
+No scanner rules, exclusions, fingerprint formula or scan coverage changes.
+Private reconstruction receipt SHA256: `428f4d29a248dcd083818c17705da6b77948c2f5e010295435b4516fc347b48d`.
+This is source metadata review, not independent-agent or live behavior proof.
+Fresh full-tree and introduced-history CI remain required.
+
+The audience-configuration follow-up preserves the same1,486 members and all
+4,224 prior bindings. Reconstruction against `b8f6d326d` verifies the same39
+unchanged public path/SHA rows against committed and current source, then renews
+their exact whole-manifest bindings (4,263 total). No scanner scope/rule changes.
+Foreground receipt SHA256: `3e4661f42fa66e3a0c5c11df9ad11be9b93d2f1bea3ba8f0b2308d6183c23154`.
+
+## YouTube verification-hold metadata review — 2026-11-10
+
+PR2343 head `c082a0318` adds one runtime file and updates six existing source
+bindings. Full-tree job129609784671 reports39 unreviewed manifest findings;
+introduced history reports zero. Source reconstruction verifies all39 rows are
+unchanged public source-path/SHA pairs, match their committed source bytes, and
+have exact prior approvals at base `00187974d`. The changed whole-file digest
+and shifted lines require new bindings. Append only those39, preserving all4107
+prior ordered entries and other fields (4146 total). No scanner rule, scope,
+fingerprint formula or path exclusion changes. This is foreground source review,
+not a claim of a separate agent review. Private reconstruction receipt SHA256:
+`a84a8547472ea9c95bd5b901e7fd026601e2375e014d44ba8aa75de3490b270f`.
+Fresh final-tree and introduced-history CI remain required.
+
+The subsequent import-boundary correction changes only BrowserManager's source
+binding. Reconstruct the same39 unchanged metadata rows from exact staged Git
+bytes and the c082a0318 approvals; append39 bindings for the new whole-file digest
+while preserving the4146 prior entries (4185 total). Source reconstruction receipt
+SHA256: `3b95f929419d9f5d2963fad82e12a973875c530710d20a2f2e8b39e4a201786b`.
+No scanner/gate changes; fresh CI must verify the committed candidate.
+
 ## Live-chat capture and emoji-question metadata review — 2026-11-07
 
 PR2314 head `86183e654` regenerated four runtime source digests. Full-tree

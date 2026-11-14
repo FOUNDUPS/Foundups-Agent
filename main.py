@@ -1184,61 +1184,25 @@ def run_wsp_framework_preflight(repo_root: Path, overseer: Any | None = None) ->
 
 
 def run_git_main_merge_sentinel_preflight(repo_root: Path) -> bool:
-    """
-    Run git main-merge sentinel at startup.
-
-    Optionally auto-merges feature branches to main to prevent drift.
-
-    Env:
-        GIT_MAIN_MERGE_SENTINEL=1           Enable sentinel (default OFF)
-        GIT_MAIN_MERGE_SENTINEL_ENFORCED=0  If 1, block startup on failure
-        GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH=1  Request cleanup (currently retained)
-    """
-    if os.getenv("GIT_MAIN_MERGE_SENTINEL", "0") != "1":
-        logger.info("[GIT-MERGE-SENTINEL] Startup preflight disabled")
-        return True
-
+    """Refresh GitHub lifecycle evidence on the WRE startup path."""
+    enforced = (
+        os.getenv("GIT_MAIN_MERGE_SENTINEL", "0") == "1"
+        and os.getenv("GIT_MAIN_MERGE_SENTINEL_ENFORCED", "0") == "1"
+    )
     try:
-        from modules.infrastructure.wre_core.src.git_main_merge_sentinel import (
-            run_main_merge_sentinel,
+        from modules.infrastructure.wre_core.src.git_lifecycle import reconcile_git_lifecycle
+
+        receipt = reconcile_git_lifecycle(repo_root)
+        logger.info(
+            "[GIT-LIFECYCLE] coverage=%s pending_prs=%d pc=%s",
+            receipt["coverage"], len(receipt["pending_prs"]), receipt["pc"]["status"],
         )
-
-        result = run_main_merge_sentinel(repo_root)
-
-        # Build status line
-        status = "PASS" if result["passed"] else "FAIL"
-        merged = result.get("merged", False)
-        branch = result.get("branch") or "main"
-        actions_count = len(result.get("actions", []))
-
-        if result["error"]:
-            print(
-                f"[GIT-MERGE-SENTINEL] preflight={status} branch={branch} "
-                f"merged={merged} error={result['error']}"
-            )
-        else:
-            print(
-                f"[GIT-MERGE-SENTINEL] preflight={status} branch={branch} "
-                f"merged={merged} actions={actions_count}"
-            )
-
-        # Log actions for debugging
-        for action in result.get("actions", []):
-            logger.debug(f"[GIT-MERGE-SENTINEL] {action}")
-
-        return result["passed"]
-
-    except ImportError as exc:
-        logger.error(f"[GIT-MERGE-SENTINEL] Import failed: {exc}")
-        print(f"[GIT-MERGE-SENTINEL] preflight=WARN import_error")
-        return True  # Non-blocking import failure
-    except Exception as exc:
-        logger.error(f"[GIT-MERGE-SENTINEL] Startup preflight failed: {exc}")
-        if os.getenv("GIT_MAIN_MERGE_SENTINEL_ENFORCED", "0") == "1":
-            print(f"[GIT-MERGE-SENTINEL] preflight=FAIL error={exc}")
-            return False
-        print(f"[GIT-MERGE-SENTINEL] preflight=WARN error={exc}")
-        return True
+        return not enforced or (
+            receipt["coverage"] == "complete" and receipt.get("main_checks", {}).get("verified") is True
+        )
+    except (ImportError, OSError, ValueError) as exc:
+        logger.warning("[GIT-LIFECYCLE] startup unavailable (%s)", type(exc).__name__)
+        return not enforced
 
 
 def run_reddog_readonly_operational_bootstrap_preflight(repo_root: Path) -> bool:

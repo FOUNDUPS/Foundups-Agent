@@ -9,7 +9,7 @@
 // Auth flows (Clerk, Firebase) are NEVER cached.
 // Catalog is network-first with cache fallback.
 
-const CACHE_NAME = 'pfmall-member-v5';
+const CACHE_NAME = 'pfmall-member-v17';
 const POSTER_CACHE_NAME = 'pfmall-posters-v1';
 const PROPERTY_CACHE_NAME = 'pfmall-properties-v1';
 const MAX_POSTER_ENTRIES = 60;
@@ -20,19 +20,25 @@ const PROPERTY_CATALOG_URL = '/move2japan/properties.json';
 const SHELL_ASSETS = [
   '/member/',
   '/member/manifest.json',
+  '/member/hpc.webmanifest',
+  '/member/hpc-icon-180.png',
+  '/member/hpc-icon-192.png',
+  '/member/hpc-icon-512.png',
   '/member/css/member.css',
   '/member/css/account-concierge.css',
   '/member/css/mall-planes.css',
   '/member/css/mall-tile-field.css',
-  '/member/css/mall-video-player.css',
+  '/member/css/mall-video-player.css?v=6',
+  '/member/css/mall-video-projection.css',
   '/member/js/gesture-engine.js',
   '/member/js/shell-bridge-interceptor.js',
-  '/member/js/mall-planes.js',
-  '/member/js/mall-tile-field.js',
-  '/member/js/mall-video-player.js',
+  '/member/js/mall-planes.js?v=12',
+  '/member/js/mall-tile-field.js?v=6',
+  '/member/js/mall-video-player.js?v=6',
+  '/member/js/mall-video-projection.js?v=12',
   '/member/js/account-concierge.js',
   '/member/js/red-dog-concierge.js',
-  '/member/js/mall-state-restore.js',
+  '/member/js/mall-state-restore.js?v=12',
   '/move2japan/property-search.js',
   '/move2japan/move2japan.css',
   '/logo-dog.png',
@@ -41,6 +47,7 @@ const SHELL_ASSETS = [
 
 // Catalog: network-first with cache fallback
 const CATALOG_URL = '/member/mall-video-catalog.json';
+const PUBLIC_VIDEO_CATALOG_URL = '/member/mall-public-video-catalog.json';
 
 // URLs that must NEVER be cached — auth, SDK, dynamic API
 const NEVER_CACHE = [
@@ -62,7 +69,11 @@ function shouldNeverCache(url) {
 self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(CACHE_NAME).then(function(cache) {
-      return cache.addAll(SHELL_ASSETS);
+      // A new shell generation must not precache a previous HTTP response
+      // just because its static URL is unchanged.
+      return cache.addAll(SHELL_ASSETS.map(function(path) {
+        return new Request(new URL(path, self.location.origin), { cache: 'reload', credentials: 'omit' });
+      }));
     })
   );
   self.skipWaiting();
@@ -131,7 +142,7 @@ function emptyVideoCatalog() {
 }
 
 // Fetch strategy: exact same-origin public paths only. Member APIs, arbitrary
-// routes, query-bearing assets and third-party URLs remain network-only.
+// routes, unrecognized asset versions and third-party URLs remain network-only.
 self.addEventListener('fetch', function(event) {
   if (event.request.method !== 'GET') return;
   var url = new URL(event.request.url);
@@ -149,7 +160,8 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
-  if (url.search) return;
+  var assetKey = url.pathname + url.search;
+  if (url.search && SHELL_ASSETS.indexOf(assetKey) === -1) return;
 
   if (url.pathname === PROPERTY_CATALOG_URL) {
     event.respondWith(networkFirst(event.request, PROPERTY_CACHE_NAME, PROPERTY_CATALOG_URL, 'json', function() {
@@ -165,6 +177,15 @@ self.addEventListener('fetch', function(event) {
   // Catalog: network-first, cache fallback, empty-array last resort
   if (url.pathname === CATALOG_URL) {
     event.respondWith(networkFirst(event.request, CACHE_NAME, CATALOG_URL, 'json', emptyVideoCatalog));
+    return;
+  }
+
+  if (url.pathname === PUBLIC_VIDEO_CATALOG_URL) {
+    event.respondWith(networkFirst(event.request, CACHE_NAME, PUBLIC_VIDEO_CATALOG_URL, 'json', function() {
+      return new Response('{"error":"public_video_catalog_unavailable"}', {
+        status: 503, headers: { 'Content-Type': 'application/json', 'X-Offline-Fallback': '1' }
+      });
+    }));
     return;
   }
 
@@ -188,13 +209,13 @@ self.addEventListener('fetch', function(event) {
   }
 
   // Only declared static shell assets are eligible, not everything /member/*.
-  if (SHELL_ASSETS.indexOf(url.pathname) !== -1) {
+  if (SHELL_ASSETS.indexOf(assetKey) !== -1) {
     event.respondWith(
-      caches.open(CACHE_NAME).then(function(cache) { return cache.match(url.pathname); }).then(function(cached) {
+      caches.open(CACHE_NAME).then(function(cache) { return cache.match(assetKey); }).then(function(cached) {
         if (cached) return cached;
         return fetch(event.request, { credentials: 'omit' }).then(function(response) {
           if (response.ok && !response.redirected) {
-            return storeResponse(CACHE_NAME, url.pathname, response).then(function() { return response; });
+            return storeResponse(CACHE_NAME, assetKey, response).then(function() { return response; });
           }
           return response;
         });

@@ -503,3 +503,58 @@ class TestMCPServerFailureBoundaries:
         # Verify lock was NOT released
         mock_lock.release.assert_not_called()
         assert handle.lock is not None
+
+
+
+def test_git_inventory_only_registered_on_authenticated_opt_in_http(monkeypatch, tmp_path):
+    import httpx
+    from modules.infrastructure.foundups_mcp_bridge.src import mcp_server as server
+    from modules.infrastructure.wre_core.src import git_lifecycle_inventory
+
+    monkeypatch.setenv(server.GIT_INVENTORY_ENV, "1")
+    assert registered_tool_names(server.build_mcp_server(tmp_path)) == {"holo_query_bundle"}
+    with pytest.raises(ValueError, match="Git inventory requires enforced bearer authentication"):
+        server.build_asgi_app(tmp_path, auth_token="", require_auth=False, enable_git_inventory=True)
+
+    built = []
+    original_builder = server.build_mcp_server
+
+    def build(repo_root):
+        mcp = original_builder(repo_root)
+        built.append(mcp)
+        return mcp
+
+    calls = []
+
+    def inventory(repo_root, request_id, *, section, offset):
+        assert (section, offset) == ("summary", 0)
+        calls.append((repo_root, request_id))
+        return {"status": "ok"}
+
+    monkeypatch.setattr(server, "build_mcp_server", build)
+    monkeypatch.setattr(git_lifecycle_inventory, "get_git_inventory", inventory)
+    app = server.build_asgi_app(
+        tmp_path, auth_token="synthetic-token", enable_git_inventory=True,
+    )
+    assert registered_tool_names(built[0]) == {"holo_query_bundle", "get_git_inventory"}
+    tool = asyncio.run(built[0].get_tool("get_git_inventory"))
+    assert set(tool.to_mcp_tool().inputSchema["properties"]) == {"request_id", "section", "offset"}
+    assert tool.annotations.readOnlyHint is True
+    assert tool.annotations.openWorldHint is True
+
+    async def check_middleware():
+        async with httpx.AsyncClient(
+            transport=httpx.ASGITransport(app=app), base_url="http://127.0.0.1",
+        ) as client:
+            health = await client.get("/health")
+            assert health.json()["tool_count"] == 2
+            assert (await client.post("/mcp")).status_code == 401
+            assert (await client.post("/mcp?token=synthetic-token")).status_code == 401
+            assert (await client.post(
+                "/mcp", headers={"Authorization": "Bearer wrong-token"},
+            )).status_code == 401
+
+    asyncio.run(check_middleware())
+    assert calls == []
+    asyncio.run(tool.run({"request_id": "synthetic-request"}))
+    assert calls == [(tmp_path.resolve(), "synthetic-request")]

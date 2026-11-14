@@ -1,8 +1,69 @@
+## 2026-11-12 — Bounded host launches and build security preflight
+
+Make WSP 91 lifecycle and WSP 71 security review explicit in canonical agent
+startup instructions and the existing WRE security-scan skill. Temporary helpers
+need owned termination, not only a heartbeat; resident services need authorized
+renewal. Required missing/stale security evidence blocks build/launch. Preserve
+the scanner's prototype/manual scope and existing runtime ownership. This is
+governance and instruction integration, not retrofitted universal enforcement.
+WSP 22/71/81/91/95/97 apply; generated AGENTS and exact WSP mirrors are validated.
+
+## 2026-11-11 — Git lifecycle priority and PC convergence
+
+Use one WRE Git lifecycle pass at WRE and Codex startup. Preserve existing
+local work and fast-forward the selected clean main checkout only after
+current GitHub checks pass. Keep each tracked PR open until merge checks,
+main ancestry and exact PC state agree. The legacy sentinel delegates to
+observation. The live PC replay verified main at f0d08839 and recovered the
+protected source ref for #2335. WSP 10, 15, 22, 34, 50, 97 and 110.
+
+## 2026-11-10 — Stream-specific Shorts scheduling through existing owners
+
+Add the private `schedule_stream_shorts` action: freeze the confirmed stream,
+discover exact-title Unlisted Shorts on its channel, and execute the fixed batch
+through an access-verified browser. Require a complete calendar, occupied-slot
+allocation, durable uncertainty reservations and committed picker/audience/draft
+audits. Preserve request-specific browser handoff through supervision; isolate
+Chrome/Edge CDP routes and close the legacy live shortcut around the owner.
+
+The new sealed154-case suite passes, with existing inventory102, directives114
+and rotation35 inventories retained. Offline acceptance does not establish live
+Studio timezone semantics, saved schedules or native WRE invocation. Private
+channel configuration, evidence and unknown records remain outside this change.
+WSP10/11/22/50/77/84/97.
+
+## 2026-11-10 — YouTube human verification handoff source slice
+
+Add a per-browser minimum30-second verification hold through existing Selenium
+attachment owners. Leave challenge completion to012; cancel interrupted effects,
+retain global STOP and unknown outcomes, and preserve the broader scheduler
+manual-takeover follow-up. Synthetic tests are distinct from installation and
+live popup qualification. WSP11/22/50/60/73/84/97. See foundups_selenium contracts
+and the private work ledger for exact revision and validation receipts.
+
 Packaging verification: eight backend-manifest cases pass; runtime membership stays
 1,485 with seven source bindings updated. Twelve scoped security-gate cases pass.
 Independent review verifies exactly 39 unchanged public checksum fingerprints,
 appended without scanner/rule changes; fresh CI scanning is still required. Skill
 format and canonical Codex projection checks pass; registry is 1,819/258 quarantined.
+
+## 2026-11-10 — Branch-scoped audit Markdown checks
+
+Wire the verified audit Markdown route into the existing required Python
+check behind a repository Actions variable. Match the tested commit to the
+fetched base and recheck the live base after Markdown validation. Full Python,
+secret scanning and policy coverage continue for other paths. Qualify the
+branch-scoped switch before protected main activation.
+[CI audit fast path](.github/scripts/README.md#audit-markdown-fast-path).
+WSP 10, 22, 34, 50 and 97.
+
+## 2026-11-10 — CI merge latency pilot
+
+Add exact-diff shadow classification and scoped Markdown and WSP checks
+alongside the existing required suite. Keep draft, edit and retarget
+coverage while measuring same-revision duplicate runs and the cost of the
+proposed fast path. See [CI merge scope pilot](.github/scripts/README.md#merge-scope-pilot).
+WSP 10, 22, 34, 50 and 97.
 
 ## 2026-11-07 — YouTube conversation stewardship
 
@@ -63522,3 +63583,18 @@ the official CPU index, verifies that build after the unchanged requirements,
 and avoids restoring/retaining the former GPU pip cache. Runtime requirements
 and all acceptance commands remain unchanged. Hosted validation is pending.
 WSP10/22/50/97. No package installation or model change on the Windows PC.
+## 2026-11-14 - Trusted, default-off CI documentation verification
+
+Extend the landed #2338/#2340 pilot with exact-base verifier loading, one scoped
+gate result and an unregistered proposal-only Skill document schema. Keep
+required check names and every full-route command; fail required aggregation on
+absent, pending, failed, cancelled or stale scope evidence. Security/other required
+gates and post-merge full verification remain. Preserve existing WRE differential
+and exact-main owners; no scheduler, router, permission or runtime admission is
+added. See [.github/scripts/README.md](.github/scripts/README.md#audit-markdown-fast-path).
+
+Production activation remains held: current server opt-in absent, strict base
+freshness false and protected workflow ownership unestablished. No settings were
+changed. Python narrowing remains held without authenticated dependency closure.
+WSP 6/10/15/22/34/50/71/87/91/95/97/99/110. Validation and exact-head/main receipts
+are recorded in the focused PR and existing active slice ledger.

@@ -1,3 +1,30 @@
+## 2026-11-09 — Mesh validator JavaScript syntax repair
+
+WSP 22/50/84/97; base `6cfd3fbadc7ee59238ef9412ab03c0753874841f`.
+WSP 15 allocation: C1/I3/D3/Impact2. This is bounded local maintenance,
+not WRE runtime activation or a change to mesh networking behavior.
+
+Replaced two malformed logging expressions in `src/mesh/core/validate.js`
+with template strings that name the checked file. CodeQL had reported an
+unexpected U+2701 character at line 19; the same source predates the current
+documentation PRs. File coverage is preserved, with no analyzer exclusions.
+
+Verification on Node 24.22.1: the original fails `node --check`; the repair
+passes syntax checking and reports all five existing files when launched
+from both the repo root and an unrelated directory. Isolated mocked checks
+pass for all-present, all-missing and mixed existence results. Independent
+review approved the two-line repair. The README's Jest command is not wired
+in the root package, so no mesh TypeScript suite pass is claimed. Existing
+unconditional completion text and successful exit on missing files are
+unchanged; this script is not a completeness gate.
+
+HoloIndex's source-bound lexical bundle identified this exact base with
+semantic freshness UNKNOWN and an index gap; direct file reads supplied
+the evidence. WSP 00 used its documented tracker fallback because torch
+is unavailable; no detector witness is claimed. Exact-head CodeQL/CI still
+requires remote verification. This repair does not clear GitHub provider
+errors or missing required checks on PRs #2331–#2333. No deployment or merge.
+
 ## 2026-10-22 — CA trust build protection
 
 WSP12/22/97. Container build dependency downloads now use the reviewed

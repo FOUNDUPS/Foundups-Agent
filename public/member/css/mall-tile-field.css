@@ -153,6 +153,53 @@
   position: relative;
 }
 
+/* Keep the desktop poster wall in the field's own saved scroll container. */
+.mall-shell:has(.desktop-poster-grid) {
+  height: 100dvh;
+  box-sizing: border-box;
+}
+
+.mall-tile-field-wrapper.desktop-poster-grid {
+  min-height: 0;
+  overflow-x: hidden;
+}
+
+.desktop-poster-grid .mall-tile-field {
+  align-content: start;
+}
+
+.mall-tile[hidden] { display: none; }
+.mall-member-inline-slot { min-width: 0; scroll-snap-align: start; }
+.mall-tile-field > .mall-member-inline-slot { grid-column: span var(--member-inline-columns, 3); }
+.mall-tile-field-wrapper.member-inline-open {
+  overflow-anchor: none;
+  scroll-snap-type: none;
+}
+
+.desktop-poster-grid .mall-tile[data-tile-type] {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.desktop-poster-grid .mall-tile[data-tile-type="avatar"] {
+  background-size: contain;
+}
+
+.desktop-poster-grid :is(.mall-tile-action-badge, .mall-tile-queue-count) {
+  top: 1.3rem;
+  bottom: auto;
+}
+
+.desktop-poster-grid .mall-tile-inner {
+  background: linear-gradient(transparent 60%, rgba(0, 0, 0, 0.9));
+}
+
+.desktop-poster-grid .mall-tile-name {
+  color: #fff;
+  font-size: 0.8rem;
+}
+
 /* Active drag state */
 .mall-tile-field-wrapper.is-dragging {
   cursor: grabbing;
@@ -1495,6 +1542,13 @@
   overscroll-behavior-x: contain;
   touch-action: pan-x pan-y;
   padding: .25rem .25rem .75rem;
+}
+.mall-category-track > .mall-member-inline-slot {
+  min-width: min(240px, calc(100vw - 1.5rem));
+}
+.mall-category-track:has(> .mall-member-inline-slot) {
+  grid-auto-columns: minmax(clamp(148px, 22vw, 240px), max-content);
+  scroll-snap-type: none;
 }
 .mall-tile-field[data-layout="rows"] .mall-tile {
   aspect-ratio: 16 / 9;

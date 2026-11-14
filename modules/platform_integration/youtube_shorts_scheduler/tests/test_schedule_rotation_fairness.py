@@ -114,6 +114,7 @@ def rotation_harness(monkeypatch):
 
     # --- browser connection (selenium webdriver imported locally in the SUT) ---
     fake_driver = MagicMock(name="driver")
+    fake_driver.command_executor = SimpleNamespace(_commands={})
     fake_driver.window_handles = ["h0"]  # single tab -> skip the close-tabs path
     fake_driver.current_url = "https://studio.youtube.com/"
     monkeypatch.setattr("selenium.webdriver.Edge", lambda *a, **k: fake_driver)

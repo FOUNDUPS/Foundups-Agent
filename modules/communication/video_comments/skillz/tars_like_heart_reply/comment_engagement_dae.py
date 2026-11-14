@@ -675,6 +675,8 @@ class CommentEngagementDAE:
                 self.driver = webdriver.Chrome(
                     options=chrome_options, service=ChromeService(popen_kw={"close_fds": True}))
 
+            from modules.infrastructure.foundups_selenium.src.youtube_verification import install_youtube_verification_guard
+            install_youtube_verification_guard(self.driver, CHROME_PORT)
             logger.info(f"[DAE-CONNECT] {browser_name} entangled: {self.driver.current_url[:60]}...")
 
             # Initialize human behavior simulator for anti-detection (WSP 49)

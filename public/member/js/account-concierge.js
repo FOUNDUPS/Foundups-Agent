@@ -54,6 +54,7 @@
 
   // ---- open / close ----
   function openPlane(event) {
+    searchDictation?.cancel();
     if (productDiscoveryController) {
       closeModes();
       dismissSummary();
@@ -100,6 +101,7 @@
   var isHolding = false;
   var summaryVisible = false;
   var listeningVisible = false;
+  var searchDictation = null;
 
   // Anchor state: idle | active | listening
   function setAnchorState(state) {
@@ -126,7 +128,7 @@
     if (inviteText) {
       lines.push('Invites: ' + inviteText);
     }
-    lines.push('Tap to open \u00b7 Hold to talk');
+    lines.push(searchDictation ? 'Tap to open \u00b7 Hold to dictate a search' : 'Tap to open');
 
     summaryContent.innerHTML = lines.map(function (l) { return '<p>' + esc(l) + '</p>'; }).join('');
     summaryEl.hidden = false;
@@ -156,6 +158,11 @@
     if (redDogTrigger) redDogTrigger.classList.add('red-dog-btn-listening');
   }
 
+  function bindSearchDictation(dictation) {
+    searchDictation = dictation;
+    redDogTrigger?.setAttribute('title', 'Open Red Dog or hold to dictate a search');
+  }
+
   function stopListening() {
     if (!listeningEl) return;
     isHolding = false;
@@ -170,20 +177,26 @@
     // Pointer-based interactions for tap / double-tap / hold
     redDogTrigger.addEventListener('pointerdown', function (e) {
       if (productDiscovery && !discoveryAdmitted) return;
+      if (e.button != null && e.button !== 0) return;
       e.stopPropagation();
       // Start hold timer
       holdTimer = setTimeout(function () {
-        startListening();
+        if (searchDictation) {
+          isHolding = true;
+          searchDictation.start(true);
+        } else startListening();
       }, HOLD_THRESHOLD);
     });
 
     redDogTrigger.addEventListener('pointerup', function (e) {
       if (productDiscovery && !discoveryAdmitted) return;
+      if (e.button != null && e.button !== 0) return;
       e.stopPropagation();
       clearTimeout(holdTimer);
 
       // If we were holding, stop listening — don't fire tap
       if (isHolding) {
+        searchDictation?.stop();
         stopListening();
         return;
       }
@@ -207,12 +220,18 @@
 
     redDogTrigger.addEventListener('pointerleave', function () {
       clearTimeout(holdTimer);
-      if (isHolding) stopListening();
+      if (isHolding) {
+        searchDictation?.cancel();
+        stopListening();
+      }
     });
 
     redDogTrigger.addEventListener('pointercancel', function () {
       clearTimeout(holdTimer);
-      if (isHolding) stopListening();
+      if (isHolding) {
+        searchDictation?.cancel();
+        stopListening();
+      }
     });
 
     // Prevent context menu on long press (mobile)
@@ -225,6 +244,10 @@
       // shared tap/double-tap/hold grammar. Keyboard click has no pointerup.
       redDogTrigger.addEventListener('click', function (e) {
         if (!discoveryAdmitted || e.detail === 0) openPlane(e);
+      });
+    } else {
+      redDogTrigger.addEventListener('click', function (e) {
+        if (e.detail === 0) openPlane(e);
       });
     }
   }
@@ -256,9 +279,10 @@
     var html = '<div class="reddog-mode-sheet-actions" data-reddog-mode-actions>';
     for (var i = 0; i < MODE_ACTIONS.length; i++) {
       var a = MODE_ACTIONS[i];
+      var label = a.id === 'listen' && searchDictation ? 'Dictate search' : a.label;
       html += '<button class="reddog-mode-action" data-reddog-mode="' + a.id + '" type="button">'
             + '<span class="reddog-mode-action-icon">' + a.icon + '</span>'
-            + '<span class="reddog-mode-action-label">' + a.label + '</span>'
+            + '<span class="reddog-mode-action-label">' + label + '</span>'
             + '</button>';
     }
     html += '</div>';
@@ -286,7 +310,8 @@
         showSummary();
         break;
       case 'listen':
-        startListening();
+        if (searchDictation) searchDictation.start();
+        else startListening();
         break;
       case 'tools':
         openPlane();
@@ -1591,6 +1616,7 @@
     dismissSummary: dismissSummary,
     startListening: startListening,
     stopListening: stopListening,
+    bindSearchDictation: bindSearchDictation,
     anchorState: function () { return stateRing ? stateRing.getAttribute('data-reddog-anchor-state') : 'idle'; },
     openModes: openModes,
     closeModes: closeModes,

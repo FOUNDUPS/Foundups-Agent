@@ -11,12 +11,16 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 
 from modules.platform_integration.youtube_shorts_scheduler import cli
+from modules.platform_integration.youtube_shorts_scheduler.src.channel_config import verify_schedule_target_access
 from modules.platform_integration.youtube_shorts_scheduler.src.schedule_tracker import ScheduleTracker
 from modules.platform_integration.youtube_shorts_scheduler.src.scheduler import YouTubeShortsScheduler
 
 
 @pytest.fixture(autouse=True)
-def isolate_optional_side_effects(monkeypatch):
+def isolate_optional_side_effects(monkeypatch, tmp_path):
+    monkeypatch.setattr('modules.platform_integration.youtube_shorts_scheduler.src.schedule_tracker.TRACKER_DIR', tmp_path / 'calendar')
+    monkeypatch.setenv('YT_AUTOMATION_STOP_FILE', str(tmp_path / 'STOP'))
+    monkeypatch.setenv('YT_AUTOMATION_ENABLED', 'true')
     monkeypatch.setattr('modules.platform_integration.youtube_shorts_scheduler.src.scheduler.record_schedule_outcome', Mock())
     for name in ('YT_SCHEDULE_INCLUDE_PRIVATE', 'YT_SCHEDULER_DO_SYNC',
                  'YT_SCHEDULER_POST_AUDIT', 'YT_SCHEDULE_INDEX_WEAVE'):
@@ -28,6 +32,53 @@ def test_preflight_rejects_wrong_browser_without_probe():
         result = cli.scheduling_preflight('move2japan', 'edge')
     assert result['status'] == 'browser_channel_mismatch'
     probe.assert_not_called()
+
+
+@pytest.mark.parametrize("changes,reason", [
+    ({}, "studio_parent_access_verified"),
+    ({"permission": "denied"}, "studio_permission_denied"),
+    ({"permission": None}, "studio_permission_unobserved"),
+    ({"permission": False}, "studio_permission_unobserved"),
+    ({"channel_id": None}, "studio_parent_access_unverified"),
+    ({"channel_id": "UCbbbbbbbbbbbbbbbbbbbbbb"}, "studio_parent_access_unverified"),
+    ({"url": "https://studio.youtube.com/video/bbbbbbbbbbb/edit"}, "studio_parent_access_unverified"),
+    ({"url": "https://studio.youtube.com.invalid/video/aaaaaaaaaaa/edit"}, "studio_parent_access_unverified"),
+    ({"title": None}, "studio_parent_access_unverified"),
+])
+def test_schedule_target_access_requires_parent_channel_and_permission(changes, reason):
+    channel_id, video_id = "UC" + "a" * 22, "a" * 11
+    snapshot = {"channel_id": channel_id, "url": f"https://studio.youtube.com/video/{video_id}/edit",
+                "title": "Synthetic title", "description": "Synthetic description", "permission": "observed"}
+    snapshot.update(changes)
+    driver = Mock()
+    driver.execute_script.return_value = snapshot
+    result = verify_schedule_target_access(driver, channel_id, video_id)
+    assert result == {"verified": reason == "studio_parent_access_verified", "reason": reason}
+    assert [entry[0] for entry in driver.mock_calls] == ["execute_script"]
+
+
+def test_schedule_target_access_propagates_verification_handoff():
+    from modules.infrastructure.foundups_selenium.src.youtube_verification import VerificationHandoff
+
+    driver = Mock()
+    hold = VerificationHandoff("verification_cleared_revalidate_action")
+    driver.execute_script.side_effect = hold
+    with pytest.raises(VerificationHandoff) as caught:
+        verify_schedule_target_access(driver, "UC" + "a" * 22, "a" * 11)
+    assert caught.value is hold
+    driver.execute_script.assert_called_once()
+
+
+def test_schedule_target_access_refuses_bad_target_and_failed_observation():
+    driver = Mock()
+    assert verify_schedule_target_access(driver, "bad-channel", "a" * 11) == {
+        "verified": False, "reason": "invalid_schedule_target",
+    }
+    driver.execute_script.assert_not_called()
+    driver.execute_script.side_effect = RuntimeError("synthetic observation failure")
+    assert verify_schedule_target_access(driver, "UC" + "a" * 22, "a" * 11) == {
+        "verified": False, "reason": "studio_parent_access_unverified",
+    }
 
 
 def test_preflight_does_not_equate_port_with_authenticated_channel():
@@ -128,12 +179,15 @@ def test_execution_schedules_each_selected_clip_only(count):
     scheduler.dom.has_next_page = Mock(return_value=False)
     scheduler.dom.navigate_to_video = Mock(side_effect=lambda vid: setattr(
         scheduler.driver, 'current_url', f'https://studio.youtube.com/video/{vid}/edit'))
-    scheduler.dom.schedule_video = Mock(return_value=True)
+    scheduler.dom.schedule_video = Mock(wraps=scheduler.dom.schedule_video)
     scheduler.dom.edit_title = Mock()
     scheduler.dom.edit_description = Mock()
     with patch('asyncio.sleep', new=AsyncMock()), patch('modules.platform_integration.youtube_shorts_scheduler.src.scheduler.record_schedule_outcome'):
         result = asyncio.run(scheduler.run_scheduling_cycle(update_metadata=False, video_ids=ids))
-    assert result['batch_complete'] is True
+    assert result['batch_complete'] is False
+    assert result['submitted_ids'] == ids and result['scheduled'] == []
+    assert result['status'] == 'unknown' and result['saved_state_verified'] is False
+    scheduler._sync_scheduled_videos.assert_awaited_once()
     assert [call.args[0] for call in scheduler.dom.navigate_to_video.call_args_list] == ids
     assert scheduler.dom.schedule_video.call_count == count
     scheduler.dom.edit_title.assert_not_called()
@@ -317,16 +371,20 @@ def test_selected_edit_requires_matching_page_and_visibility(page, visibility):
 
 
 @pytest.mark.parametrize('dry_run,selection', [(True, None), (True, ['abcdefghijk']), (False, ['abcdefghijk'])])
-def test_preview_and_selected_batch_never_sync_channel_state(dry_run, selection, monkeypatch):
+def test_preview_never_syncs_but_live_selected_batch_requires_fresh_calendar(dry_run, selection, monkeypatch):
     from modules.platform_integration.youtube_shorts_scheduler.tests.test_schedule_include_private import _make_scheduler
     monkeypatch.setenv('YT_SCHEDULER_DO_SYNC', 'true')
     scheduler = _make_scheduler([{'video_id': 'abcdefghijk'}], [], dry_run=dry_run)
     scheduler.driver.current_url = 'https://studio.youtube.com/video/abcdefghijk/edit'
     scheduler.dom.has_next_page = Mock(return_value=False)
-    scheduler._sync_scheduled_videos = AsyncMock()
+    if dry_run:
+        scheduler._sync_scheduled_videos = AsyncMock()
     with patch('asyncio.sleep', new=AsyncMock()), patch('modules.platform_integration.youtube_shorts_scheduler.src.scheduler.record_schedule_outcome'):
         asyncio.run(scheduler.run_scheduling_cycle(update_metadata=False, video_ids=selection))
-    scheduler._sync_scheduled_videos.assert_not_awaited()
+    if dry_run:
+        scheduler._sync_scheduled_videos.assert_not_awaited()
+    else:
+        scheduler._sync_scheduled_videos.assert_awaited_once()
 
 
 def test_repeated_preview_does_not_retain_reservations(tmp_path):
@@ -359,12 +417,11 @@ def test_schedule_does_not_fabricate_description_sync(update_metadata):
     owner = 'modules.platform_integration.youtube_shorts_scheduler.src.scheduler'
     with patch('asyncio.sleep', new=AsyncMock()), patch(owner + '.load_index_json', return_value={'description_sync': previous}), patch(owner + '.save_index_json') as save:
         result = asyncio.run(scheduler.run_scheduling_cycle(video_ids=['abcdefghijk'], update_metadata=update_metadata))
-    assert result['batch_complete'] is True
-    sync = save.call_args.kwargs['data']['description_sync']
-    if update_metadata:
-        assert sync == {'synced_to_youtube': False, 'verification_status': 'independent_readback_required'}
-    else:
-        assert sync == previous
+    assert result['batch_complete'] is False
+    assert result['status'] == 'unknown' and result['saved_state_verified'] is False
+    assert result['submitted_ids'] == ['abcdefghijk'] and result['scheduled'] == []
+    save.assert_not_called()  # A scheduling attempt cannot manufacture index/readback proof.
+    if not update_metadata:
         scheduler._update_video_metadata.assert_not_awaited()
 
 

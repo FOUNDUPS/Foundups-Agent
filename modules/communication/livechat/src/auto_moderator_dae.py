@@ -416,6 +416,8 @@ class AutoModeratorDAE:
                 opts = Options()
                 opts.add_experimental_option("debuggerAddress", f"127.0.0.1:{chrome_port}")
                 driver = await asyncio.to_thread(webdriver.Chrome, options=opts)
+                from modules.infrastructure.foundups_selenium.src.youtube_verification import install_youtube_verification_guard
+                install_youtube_verification_guard(driver, chrome_port)
 
                 # Verify connection works
                 try:
@@ -463,6 +465,8 @@ class AutoModeratorDAE:
                 edge_opts = EdgeOptions()
                 edge_opts.add_experimental_option("debuggerAddress", f"127.0.0.1:{edge_port}")
                 driver = await asyncio.to_thread(webdriver.Edge, options=edge_opts)
+                from modules.infrastructure.foundups_selenium.src.youtube_verification import install_youtube_verification_guard
+                install_youtube_verification_guard(driver, edge_port)
 
                 # Verify connection works
                 try:
@@ -1349,6 +1353,12 @@ class AutoModeratorDAE:
                 for _browser in ("chrome", "edge"):
 
                     _task = _browser_tasks.get(_browser)
+                    if (_task is not None and _task.done() and not _task.cancelled()
+                            and _task.exception() is None
+                            and _task.result() == {'status': 'operator_handoff_required'}):
+                        # An intentional editor handoff is not a crashed worker.
+                        # Keep this browser held while supervising its peer.
+                        continue
                     if _task is None or _task.done():
                         _tag = _browser.upper()
                         # Log what happened
@@ -1592,6 +1602,7 @@ class AutoModeratorDAE:
                 shorts_enabled = os.getenv("YT_SHORTS_SCHEDULING_ENABLED", "true").lower() in ("1", "true", "yes")
                 scheduled_count = 0
                 error_count = 0
+                results = None
 
                 logger.info(f"[{tag}-LOOP] PHASE 3: SHORTS SCHEDULING")
                 logger.info(f"[{tag}-LOOP]   Enabled: {shorts_enabled} | Module: {self._shorts_scheduler_available}")
@@ -1617,6 +1628,9 @@ class AutoModeratorDAE:
                         max_shorts = int(os.getenv("YT_SHORTS_PER_CYCLE", "9999"))
 
                         phase3_timeout = int(os.getenv("YT_SHORTS_PHASE3_TIMEOUT", "3600"))  # 60 min default
+                        manifest_queue = getattr(self, 'operator_manifest_queue', None)
+                        stream_requests = (manifest_queue.get_pending_stream_schedule_requests()
+                                           if manifest_queue is not None else [])
                         logger.info(f"[{tag}-LOOP] Running scheduler for {browser_name} (max {max_shorts}/ch, timeout={phase3_timeout}s)...")
 
                         # run_multi_channel_scheduler uses asyncio.run() internally,
@@ -1624,26 +1638,48 @@ class AutoModeratorDAE:
                         # HARDENED: timeout prevents infinite hang on browser stall.
                         # 2026-02-01: stop_event lets us tell the thread to stop
                         # if the timeout fires (threads can't be interrupted directly).
+                        request_worker = None
                         try:
-                            results = await asyncio.wait_for(
-                                asyncio.to_thread(
-                                    run_multi_channel_scheduler,
-                                    browser=browser_name,
-                                    mode="schedule",
-                                    max_per_channel=max_shorts,
+                            if stream_requests:
+                                request_worker = asyncio.create_task(asyncio.to_thread(
+                                    run_multi_channel_scheduler, browser=browser_name,
+                                    mode="schedule", max_per_channel=max_shorts,
                                     stop_event=scheduler_stop_event,
-                                ),
-                                timeout=phase3_timeout,
-                            )
+                                    stream_schedule_requests=stream_requests,
+                                ))
+                                results = await asyncio.wait_for(asyncio.shield(request_worker), timeout=phase3_timeout)
+                            else:
+                                request_worker = asyncio.create_task(asyncio.to_thread(
+                                    run_multi_channel_scheduler, browser=browser_name,
+                                    mode="schedule", max_per_channel=max_shorts,
+                                    stop_event=scheduler_stop_event,
+                                ))
+                                results = await asyncio.wait_for(asyncio.shield(request_worker), timeout=phase3_timeout)
                         except asyncio.TimeoutError:
                             logger.error(f"[{tag}-LOOP] PHASE 3 TIMEOUT after {phase3_timeout}s")
-                            # Signal the leaked thread to stop driving the browser
+                            # Signal the owned thread and wait for it to settle below.
                             if scheduler_stop_event:
                                 scheduler_stop_event.set()
                                 logger.warning(f"[{tag}-LOOP] PHASE 3: Stop signal SENT to scheduler thread")
-                            # Give thread a moment to notice and stop
-                            await asyncio.sleep(5)
                             results = None
+                        except asyncio.CancelledError:
+                            if request_worker is not None:
+                                if scheduler_stop_event:
+                                    scheduler_stop_event.set()
+                            raise
+                        finally:
+                            if request_worker is not None:
+                                if not request_worker.done() and scheduler_stop_event:
+                                    scheduler_stop_event.set()
+                                # Existing settlement owner retains the browser
+                                # lock even through repeated cancellation.
+                                if await _await_owned_completion(request_worker):
+                                    raise asyncio.CancelledError()
+                                if stream_requests and not request_worker.cancelled():
+                                    if request_worker.exception() is not None:
+                                        results = {'operator_handoff_required': True}
+                                    elif results is None:
+                                        results = request_worker.result()
 
                         # Parse results
                         if isinstance(results, dict) and "channels" in results:
@@ -1686,6 +1722,10 @@ class AutoModeratorDAE:
                         if browser_lock and browser_lock.locked():
                             browser_lock.release()
                             logger.debug(f"[{tag}-LOOP] PHASE 3: Browser lock RELEASED")
+
+                if isinstance(results, dict) and results.get('operator_handoff_required') is True:
+                    logger.warning(f"[{tag}-LOOP] Stream scheduling owner settled; awaiting operator review")
+                    return {'status': 'operator_handoff_required'}
 
                 # ============================================
                 # PHASE 4: LINKEDIN FEED ENGAGEMENT (Edge only)
@@ -1832,33 +1872,41 @@ class AutoModeratorDAE:
             mode=mode
         )
     async def run(self):
-        """Own one operator watcher for the complete DAE run lifetime."""
+        """Hold host runtime ownership through the DAE and its owned shutdown."""
+        from .automation_gates import youtube_runtime_owner
+
         if getattr(self, "_operator_manifest_run_active", False):
             raise RuntimeError("AutoModeratorDAE.run is already active")
         self._operator_manifest_run_active = True
         watcher = None
         try:
-            # Independent of optional AI-overseer monitoring, but owned by run.
-            from .operator_command_queue import OperatorCommandQueue
-            self.operator_manifest_queue = OperatorCommandQueue(self)
-            watcher = asyncio.create_task(self.operator_manifest_queue.watch_forever())
-            self.operator_manifest_task = watcher
-            logger.info("[012-MANIFEST] Independent operator-manifest watcher started")
-            return await self._run_dae()
+            with youtube_runtime_owner():
+                try:
+                    # Independent of optional AI-overseer monitoring, but owned by run.
+                    from .operator_command_queue import OperatorCommandQueue
+                    self.operator_manifest_queue = OperatorCommandQueue(self)
+                    watcher = asyncio.create_task(self.operator_manifest_queue.watch_forever())
+                    self.operator_manifest_task = watcher
+                    logger.info("[012-MANIFEST] Independent operator-manifest watcher started")
+                    return await self._run_dae()
+                finally:
+                    tasks = ((watcher, "[012-MANIFEST] Operator watcher failed"),
+                             (getattr(self, '_comment_engagement_task', None), "[COMMUNITY] Owned engagement failed"))
+                    for task, _ in tasks:
+                        if task is not None and not task.done():
+                            task.cancel()
+                    cancelled = False
+                    for task, message in tasks:
+                        if task is None:
+                            continue
+                        cancelled = await _await_owned_completion(task) or cancelled
+                        if not task.cancelled() and task.exception() is not None:
+                            logger.error(message, exc_info=task.exception())
+                    if cancelled:
+                        raise asyncio.CancelledError()
         finally:
-            try:
-                if watcher is not None:
-                    watcher.cancel()
-                    try:
-                        await watcher
-                    except asyncio.CancelledError:
-                        pass
-                    except Exception:
-                        # Retrieve watcher failures without masking the DAE's exit.
-                        logger.exception("[012-MANIFEST] Operator watcher failed")
-            finally:
-                self.operator_manifest_task = None
-                self._operator_manifest_run_active = False
+            self.operator_manifest_task = None
+            self._operator_manifest_run_active = False
 
     async def _run_dae(self):
         """Existing startup, comment-only, and stream-monitoring lifecycle."""
