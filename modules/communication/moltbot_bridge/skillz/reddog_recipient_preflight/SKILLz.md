@@ -119,9 +119,14 @@ The complete routing and release contract is:
 
 ## Sender boundary
 
-The final provider mutation must run through the repository-owned host adapter:
+The final provider mutation must run through the repository-owned Python V3 service:
 
-`modules/communication/moltbot_bridge/host/reddog_correspondence_sender_boundary.mjs`
+`modules/communication/moltbot_bridge/src/reddog_correspondence_sender_boundary.py`
+
+Trusted service bootstrap owns provider access and reconciliation. The JavaScript
+V2 compatibility adapter remains quarantined (`BLOCK`, `provider_invoked=false`);
+it is not a send route. This service contract does not establish interception of
+direct connector calls or automatic enforcement of this prototype skill.
 
 For Gmail `send_email`, reply, `send_draft`, and recipient-specific delivery repair:
 
@@ -136,7 +141,7 @@ For Gmail `send_email`, reply, `send_draft`, and recipient-specific delivery rep
    coverage changed after receipt issuance;
 5. for `send_draft`, read the exact provider draft before submission and require its
    message/thread IDs, To/CC/BCC and content digest to match the bound transaction;
-6. submit only through the injected provider callback owned by the host adapter;
+6. submit only through the provider callback owned by the trusted service bootstrap;
 7. immediately read the exact provider Sent message and require message/thread IDs
    plus To/CC/BCC equality before returning `VERIFIED_SENT`.
 
@@ -172,7 +177,7 @@ Recipient evidence resolution:
 `modules/communication/moltbot_bridge/src/reddog_recipient_preflight.py`
 
 Provider-call enforcement:
-`modules/communication/moltbot_bridge/host/reddog_correspondence_sender_boundary.mjs`
+`modules/communication/moltbot_bridge/src/reddog_correspondence_sender_boundary.py`
 
 Core APIs:
 
