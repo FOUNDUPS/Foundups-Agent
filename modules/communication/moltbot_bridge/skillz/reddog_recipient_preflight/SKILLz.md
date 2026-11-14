@@ -84,7 +84,7 @@ Before every external send:
 1. Refresh exact provider thread, newest inbound, Sent messages, drafts, and domain Moshpit. Record last outbound message ID, timestamp, recipients, and complete content.
 2. Compare the proposed message against already-sent claims and requests by meaning, not just exact text. Classify each change as already sent, newly supported, correction, pending evidence, or document/website-only.
 3. Default to HOLD_EDIT_ONLY for rephrasing, elaboration, critique, or reinforcing already-sent requests. Update the case log, site, or a single unsent draft instead of sending.
-4. Send separately only on explicit renewed authorization acknowledging the prior send, or a material new fact, urgent correction, deadline, or reply requiring separate notice, with independent release verification.
+4. Send separately only with explicit renewed authorization acknowledging the prior send, or existing explicit authorization that covers the separate notice. A material new fact, urgent correction, deadline, or reply may justify proposing another message; it does not grant send authority. Require independent release verification before any authorized send.
 5. Consolidate pending additions into one message. A new conversational turn never renews SEND authority by itself.
 6. Bind last_sent_message_id, last_sent_at, last_sent_digest, thread_id, moshpit_revision, semantic_delta, and send_reason to release preflight. Changed Sent watermark invalidates authorization. Missing evidence or duplicate semantic coverage means BLOCK.
 7. Verify the exact provider Sent result and log one newest-first receipt; retain previous history and protect private correspondence.
