@@ -750,14 +750,7 @@ def verify_member_phone(page, context, supports_cdp):
     assert page.locator("iframe").count() == 0
 
     anchor = page.locator('#redDogAnchor')
-    anchor.evaluate("""anchor => {
-      for (const [type, y] of [['touchstart', 600], ['touchend', 440]]) {
-        const event = new Event(type, {bubbles: true});
-        Object.defineProperty(event, type === 'touchend' ? 'changedTouches' : 'touches',
-          {value: [{clientX: 30, clientY: y}]});
-        anchor.dispatchEvent(event);
-      }
-    }""")
+    page.evaluate("redDog.openModes()")
     anchor.locator('[data-reddog-mode="listen"]').tap()
     anchor.get_by_role("button", name="Stop dictation").tap()
     expect(anchor.get_by_role("textbox", name="Search the Mall")).to_have_value(transcript)
