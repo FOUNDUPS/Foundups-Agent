@@ -372,7 +372,7 @@
 .mall-member-search-options :is(button, a):focus-visible { outline: 2px solid #d1bbff; }
 
 .mall-member-search-bar svg,
-.mall-member-search-option svg {
+.mall-search-option svg {
   width: 20px;
   height: 20px;
   fill: none;
@@ -471,12 +471,14 @@
 
 .mall-search-option select {
   display: block;
+  appearance: none;
   max-width: 100%;
   margin-top: .25rem;
   padding: .3rem;
   border: 1px solid #ffffff38;
   border-radius: .5rem;
   color: #c6bfd6;
+  opacity: 1;
   background: #22202b;
   font: inherit;
   font-size: .85rem;
