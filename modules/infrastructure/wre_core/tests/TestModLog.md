@@ -1,3 +1,14 @@
+## 2026-11-15 — Git lifecycle branch dispositions and bundle verification
+
+Added 4 unit/integration regressions in `test_git_lifecycle.py` (7 total)
+covering all 9 `branch_dispositions` stages, `BRANCH_OPEN_PR_HEAD_MOVED`,
+non-`main` `PROTECTED_BRANCH` separation, fork/unknown `head_repository`
+rejection, multi-PR `pr_numbers` history preservation, partial PR coverage
+blocking `BRANCH_UNTRACKED`, `BRANCH_PR_HEAD_MISMATCH`, and deduplicated
+disposable bundle clone excluding dirty working-tree files. Ran full
+`wre-verification-contracts` suite offline plus `test_git_lifecycle_pc.py`
+outside sandbox MSYS2 block. WSP 5, 6, 22, 50, 97 and 110.
+
 ## 2026-11-06 — Readiness evidence and menu admission
 
 Initial baseline: 13 failures and eight import errors across the first 21
