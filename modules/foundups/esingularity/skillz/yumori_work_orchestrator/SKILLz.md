@@ -1,7 +1,7 @@
 ---
 name: yumori_work_orchestrator
 description: Convert 012/Red Dog YUMORI planning conversations into a verified, deduplicated, WSP 15-ranked backlog and bounded ChatGPT Work / RedDog handoff, including a governed capital-network expansion workflow.
-version: 0.2.1
+version: 0.2.2
 author: 0102
 agents: [0102, qwen, gemma]
 primary_agent: 0102
@@ -252,6 +252,86 @@ For each blocker:
 9. reconcile all prior outreach before any new message.
 
 A partner search that produces many names but no verified next action is not success.
+
+### Regional corporate partnership qualification
+
+Classify each candidate by evidenced role, not a generic "partner" label:
+operator / EPC / hosting provider; demand customer / offtaker; technical or research
+collaborator; funder; introducer. Multiple roles require separate evidence. An AI
+research announcement does not establish a GPU purchase need or willingness to operate
+a facility. Record role and evidence in the existing contact/work-item fields; do not
+create a parallel partner database or silently change the workbook schema.
+
+Use evidence-bearing progression: researched candidate -> verified route -> permitted
+contact -> provider-confirmed transmission -> substantive response -> concrete next
+exchange -> qualified role. Sent is not delivery, interest is not commitment, and a
+survey submission is not a partnership. Qualification requires a responsible
+decision-maker, an affirmative response, a specific next exchange, and evidence of
+capacity for the stated role; preserve legal/operator eligibility as a separate gate.
+
+### Organizational survey and audience routing
+
+Before linking a questionnaire, recover the existing artifact, public URL, owner,
+language, response destination and privacy notice. Verify the actual published
+Japanese experience; a saved editor revision or source commit is not publication.
+Keep individual membership, organizational exploratory interest, and formal
+co-proposer/name-use consent distinct. Do not repurpose membership responses as
+corporate consent or interpret a survey answer as authority to publish an organization
+name, share private data, or make commitments.
+
+Route responses through the existing correspondence owner: deduplicate against the
+organization/contact and provider thread, retain source/response identity and consent
+scope, record the stated role/use case, and create one bounded next action in the
+existing Action Queue. Collect only necessary business contact and feasibility
+information; do not solicit patient/student records or confidential workloads in a
+public form. Survey wording is exploratory and must allow disagreement or uncertainty.
+
+### Nonresponse diagnosis and pivot
+
+At the observation deadline, reconcile actual Sent, bounce/auto-reply, full thread,
+drafts and contact holds before diagnosing nonresponse. Classify evidence as
+route failure, unknown delivery, no substantive response, declined fit, requested
+later contact, or active discussion. Silence alone proves neither refusal nor consent.
+Change a weak proposition or evidence gap before increasing contact volume.
+
+Apply the correspondence owner's follow-up caps and specific NO_RESEND / NO_CHASE /
+City holds. Changing employee, domain, channel or campaign wording does not reset
+the count or bypass a hold. When another contact is not admitted, select a different
+qualified organization, warm introduction, demand interview or missing feasibility
+evidence. Record the hypothesis and next observation condition, not an invented reason
+for the recipient's silence.
+
+### Demand-led pilot and claim gate
+
+Before advocating a school or onsen retrofit, compare the smallest useful workload
+served through an existing data center/cloud, a small pilot and facility reuse.
+Recover the canonical economic model rather than starting another FIN. Identify
+workload, expected utilization, current alternative, data-control requirements,
+budget/willingness to pay, operator responsibility, power/fiber/building constraints
+and full operating/renewal costs. Unknown inputs remain unknown. A school feasibility
+lead does not establish site rights, available electrical capacity or customer demand;
+Sukatto is optional, not a prerequisite for a useful regional-compute experiment.
+
+Regional control and free or affordable access for schools, hospitals, municipalities
+and local companies are objectives to test. Identify who would fund access and under
+what conditions before promising it. Distinguish processing, storage, model training,
+contract terms and access control; never assert that every foreign provider trains on
+customer data or that domestic hosting alone guarantees privacy.
+
+### Partner-learning acceptance
+
+Before a bounded outreach/pilot experiment, record the current blocker, alternative,
+baseline, target audience, exact skill/content version and expected useful outcome.
+Use verified responsible-person conversations, concrete feasibility evidence and
+qualified next steps as outcomes, not candidate counts, emails sent or favorable
+survey votes. Evaluate cost and 012 intervention against the same objective metric.
+A nonresponse may support a hypothesis, not a causal claim about messaging.
+
+Nominate changes through the existing RSI learning contract below. Freeze regression
+cases for duplicate outreach, closed routes, unsupported demand, survey-consent
+confusion and unfunded free-compute promises before review. Candidate edits require
+independent review and normal promotion/rollback gates; a later unseen cycle and its
+independent outcome receipt are still required for retained improvement.
 
 ## RSI learning contract
 
