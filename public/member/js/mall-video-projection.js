@@ -5,6 +5,9 @@
   const dedicatedHosts = new Map([['hpc.foundups.com', 'hpc']]);
   const publicScopes = new Set(dedicatedHosts.values());
   const memberPaths = new Set(['/member', '/member/', '/member/index.html']);
+  // Keep this display label aligned with the shell cache generation.
+  const mallBuild = 'v17';
+  const buildLabel = `<small class="mall-build-label">Build ${mallBuild}</small>`;
 
   function hostScope(location) {
     return dedicatedHosts.get(location.hostname) || null;
@@ -273,6 +276,7 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 3v3m6-3v3M9 18v3m6-3v3M3 9h3m-3 6h3m12-6h3m-3 6h3"/></svg>
           <span>Browser AI <select aria-label="Browser AI" disabled><option>No device model connected</option></select></span>
         </label>
+        ${buildLabel}
         <form method="dialog"><button type="submit">Close</button></form>
       </dialog>`;
     const form = element.querySelector('.mall-member-search-bar');
@@ -468,7 +472,11 @@
       const topic = element('videoScopeTopic');
       identity.textContent = projection.identity;
       topic.textContent = projection.topic;
-      identity.after(topic);
+      const topicLine = document.createElement('div');
+      topicLine.className = 'mall-video-scope-topic-line';
+      topicLine.innerHTML = buildLabel;
+      topicLine.prepend(topic);
+      identity.after(topicLine);
       element('videoScopeCredit').textContent = projection.credit + ' Shorts · Commentary and satire';
       field.setAttribute('aria-describedby', 'videoScopeCredit');
       element('videoScopeDisclosureText').textContent = projection.disclosure;

@@ -180,6 +180,24 @@
   font-size: 0.82rem;
 }
 
+.mall-video-scope-topic-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.45rem;
+}
+
+.mall-build-label {
+  color: #c6bfd6;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.mall-member-search-options > .mall-build-label {
+  display: block;
+  padding: 0.35rem 0.65rem;
+}
+
 #videoScopeInfo,
 .mall-video-scope-disclosure button {
   min-width: 44px;
