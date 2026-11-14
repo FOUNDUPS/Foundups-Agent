@@ -1,3 +1,15 @@
+## 2026-11-15 — Hardened read-only GitHub branch dispositions
+
+Add and harden read-only `branch_dispositions` accounting in
+`reconcile_git_lifecycle()`: enforce exact `sha == head_sha` matching for both
+open and closed/merged PRs (`BRANCH_OPEN_PR_HEAD_MOVED` when moved), separate
+protected non-`main` branches into `PROTECTED_BRANCH`, require strict same-repo
+case-insensitive `head_repository` matching, preserve full sorted `pr_numbers`
+history per ref, emit `BRANCH_PR_OBSERVATION_INCOMPLETE` instead of
+`BRANCH_UNTRACKED` when PR observation is partial, and separate
+`BRANCH_PR_HEAD_MISMATCH` from never-PR'd `BRANCH_UNTRACKED`. WSP 10, 22, 50,
+84, 97 and 110.
+
 ## 2026-11-12 — Security-scan caller lifecycle obligations
 
 The existing security_scan skill now points build/launch callers to WSP 71
