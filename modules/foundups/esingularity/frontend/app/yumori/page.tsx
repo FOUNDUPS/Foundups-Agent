@@ -43,13 +43,13 @@ export default function YumoriPage() {
     <section id="monthly-meeting" style={{...panel, background:'#111511', color:'#f4f1e8', borderTop:'1px solid rgba(244,241,232,.18)', borderBottom:'1px solid rgba(244,241,232,.18)'}}>
       <p style={{fontWeight:850,letterSpacing:'.15em'}}>YUMORI MEMBER MEETING / 月例メンバーミーティング</p>
       <h2 style={title}>毎月第2火曜日、<br/>オンラインで集まります。</h2>
-      <p style={body}>YUMORI.me設立準備委員会の定例会を、毎月第2火曜日 19:00〜20:00（日本時間）に開催します。初回は<strong>2026年10月13日（火）</strong>です。Google Meetからオンライン参加できます。</p>
-      <p style={body}>初回は、委員会印章、主たる事務所・郵送先、郵便私書箱、委員会名義銀行口座、規約・会員名簿・活動実績・収支報告、三拠点YUMORI / eSingularity / AI Kobanの進捗を確認します。主たる事務所と銀行口座は準備中で、まだ完了扱いではありません。</p>
+      <p style={body}>YUMORI.me設立準備委員会の定例会を、毎月第2火曜日 19:00〜20:00（日本時間）に開催します。Google Meetからオンライン参加できます。</p>
+      <p style={body}>委員会印章、主たる事務所・郵送先、郵便私書箱、委員会名義銀行口座、規約・会員名簿・活動実績・収支報告、三拠点YUMORI / eSingularity / AI Kobanの進捗を確認します。主たる事務所と銀行口座は準備中で、まだ完了扱いではありません。</p>
       <div style={{display:'flex',gap:14,flexWrap:'wrap',marginTop:28}}>
         <a href={MONTHLY_MEET_URL} target="_blank" rel="noreferrer" style={join}>Google Meetで参加 ↗</a>
         <a href={FORM_URL} target="_blank" rel="noreferrer" style={{...join,background:'transparent',color:'#f4f1e8',border:'1px solid rgba(244,241,232,.45)'}}>準備委員会に参加する ↗</a>
       </div>
-      <p style={{marginTop:18,opacity:.65}}>定例：毎月第2火曜日 19:00〜20:00 JST / 次回：2026年10月13日</p>
+      <p style={{marginTop:18,opacity:.65}}>定例：毎月第2火曜日 19:00〜20:00 JST</p>
     </section>
 
     <section style={{...panel, background:'#e9e3d6', color:'#111511'}}>

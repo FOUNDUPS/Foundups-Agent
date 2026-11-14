@@ -193,7 +193,12 @@ def test_yumori_monthly_member_meeting_notice_is_public() -> None:
     page = read("app/yumori/page.tsx")
     assert "毎月第2火曜日" in page
     assert "19:00〜20:00" in page
-    assert "2026年10月13日（火）" in page
+    meeting = page.split('id="monthly-meeting"', 1)[1].split("</section>", 1)[0]
+    assert "毎月第2火曜日 19:00〜20:00（日本時間）" in meeting
+    assert "定例：毎月第2火曜日 19:00〜20:00 JST" in meeting
+    assert "次回：" not in meeting
+    assert "初回は" not in meeting
+    assert not re.search(r"\d{4}年\d{1,2}月\d{1,2}日", meeting)
     assert "https://meet.google.com/twb-ihey-bhu" in page
     assert 'id="monthly-meeting"' in page
     assert "主たる事務所と銀行口座は準備中" in page
