@@ -32,6 +32,8 @@ NAVIGATION:
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from modules.communication.moltbot_bridge.src.foundup_job_contract import (
@@ -53,12 +55,10 @@ from modules.foundups.agent.src.build_plan import (
 from modules.foundups.agent.src.build_plan_generator import (
     BUILDPLAN_SUPPORTED_ACTIONS,
     BUILDPLAN_UNSUPPORTED_ACTIONS,
-    KNOWN_FOUNDUP_PATHS,
     build_target_from_job,
     can_generate_build_plan,
     create_build_plan_from_job,
     get_generation_error,
-    get_known_foundup_path,
     infer_build_scope,
     validate_job_for_build_plan,
 )
@@ -484,31 +484,35 @@ class TestMissingFoundupIdFails:
 
 
 class TestModulePathInference:
-    """Test module_path inference from foundup_id."""
+    """Module-path derivation when payload omits module_path.
 
-    def test_known_foundup_paths_include_voteballots(self) -> None:
-        """KNOWN_FOUNDUP_PATHS includes voteballots."""
-        assert "voteballots" in KNOWN_FOUNDUP_PATHS
-        assert KNOWN_FOUNDUP_PATHS["voteballots"] == "modules/foundups/voteballots"
-
-    def test_get_known_foundup_path_returns_voteballots(self) -> None:
-        """get_known_foundup_path returns VoteBallots path."""
-        path = get_known_foundup_path("voteballots")
-        assert path == "modules/foundups/voteballots"
+    UPDATED (BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1, see
+    TestModLog): the prior ``KNOWN_FOUNDUP_PATHS`` / ``get_known_foundup_path``
+    inference helpers are DELETED. Module-path derivation now flows
+    exclusively through the shared resolver's bounded foundup_id scan,
+    which reads on-disk manifests rather than a hard-coded dict.
+    """
 
     def test_infer_module_path_for_voteballots(
         self, voteballot_job_no_module_path: FoundUpJob
     ) -> None:
-        """Can infer module_path for VoteBallots."""
+        """Payload omits module_path; resolver locates the real
+        ``modules/foundups/voteballots/foundup_manifest.json`` via the
+        bounded foundup_id scan and derives the canonical path."""
         result = validate_job_for_build_plan(voteballot_job_no_module_path)
 
         assert result.valid is True
         assert result.inferred_module_path == "modules/foundups/voteballots"
+        # No payload candidate was supplied; observable-ignore stays None.
+        assert result.rejected_payload_value is None
 
     def test_generate_plan_with_inferred_path(
         self, voteballot_job_no_module_path: FoundUpJob
     ) -> None:
-        """Can generate plan with inferred module_path."""
+        """Generated BuildPlan's target carries the manifest-derived
+        canonical module_path (NOT a synthesized
+        ``modules/foundups/{foundup_id}`` string -- that fallback was
+        deleted in this slice)."""
         plan = create_build_plan_from_job(voteballot_job_no_module_path)
 
         assert plan.target.module_path == "modules/foundups/voteballots"
@@ -516,11 +520,14 @@ class TestModulePathInference:
     def test_unknown_foundup_without_module_path_fails(
         self, unknown_foundup_job: FoundUpJob
     ) -> None:
-        """Unknown FoundUp without module_path fails."""
+        """Unknown FoundUp + no payload candidate -> bounded foundup_id
+        scan misses -> ``manifest_missing`` (NOT ``MISSING_MODULE_PATH``
+        which was the legacy error_code for the dead KNOWN_FOUNDUP_PATHS
+        branch)."""
         result = validate_job_for_build_plan(unknown_foundup_job)
 
         assert result.valid is False
-        assert result.error_code == "MISSING_MODULE_PATH"
+        assert result.error_code == "manifest_missing"
         assert "unknown_foundup_xyz" in result.error_message
 
 
@@ -530,10 +537,31 @@ class TestModulePathInference:
 
 
 class TestOutsideScopeRejected:
-    """Test outside-scope module_path is rejected."""
+    """Outside-scope module_path is rejected.
+
+    UPDATED (BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1, see
+    TestModLog): the prior ``_is_valid_foundup_path`` prefix-only gate
+    with case-insensitive ``.lower()`` compare is DELETED. The shared
+    resolver enforces a strict ``startswith("modules/")`` pre-manifest
+    syntactic check; non-``modules/foundups/`` paths still reach the
+    validator and reject with ``manifest_missing`` (no on-disk manifest
+    at that location) or ``manifest_mismatch``. The expected error_code
+    is now one of the closed-set #778 tokens instead of the legacy
+    ``INVALID_MODULE_PATH``.
+    """
+
+    @staticmethod
+    def _resolver_error_codes() -> set:
+        return {
+            "syntactic_reject",
+            "manifest_mismatch",
+            "manifest_missing",
+            "cross_foundup_mismatch",
+        }
 
     def test_infrastructure_path_rejected(self) -> None:
-        """Infrastructure module path is rejected."""
+        """``modules/infrastructure/wre_core`` is under modules/ but has
+        no FoundUp manifest -> ``manifest_missing``."""
         job = create_job(
             tenant_id="012",
             requested_action="build_foundup",
@@ -546,10 +574,12 @@ class TestOutsideScopeRejected:
         result = validate_job_for_build_plan(job)
 
         assert result.valid is False
-        assert result.error_code == "INVALID_MODULE_PATH"
+        assert result.error_code in self._resolver_error_codes()
+        assert result.error_code == "manifest_missing"
 
     def test_root_path_rejected(self) -> None:
-        """Root path is rejected."""
+        """``/etc/passwd`` is rejected at the pre-manifest syntactic-harden
+        step (absolute path -> ``syntactic_reject``)."""
         job = create_job(
             tenant_id="012",
             requested_action="build_foundup",
@@ -562,10 +592,11 @@ class TestOutsideScopeRejected:
         result = validate_job_for_build_plan(job)
 
         assert result.valid is False
-        assert result.error_code == "INVALID_MODULE_PATH"
+        assert result.error_code == "syntactic_reject"
 
     def test_ai_intelligence_path_rejected(self) -> None:
-        """AI intelligence module path is rejected."""
+        """``modules/ai_intelligence/agent_permissions`` is under modules/
+        but has no FoundUp manifest -> ``manifest_missing``."""
         job = create_job(
             tenant_id="012",
             requested_action="build_foundup",
@@ -578,7 +609,8 @@ class TestOutsideScopeRejected:
         result = validate_job_for_build_plan(job)
 
         assert result.valid is False
-        assert result.error_code == "INVALID_MODULE_PATH"
+        assert result.error_code in self._resolver_error_codes()
+        assert result.error_code == "manifest_missing"
 
 
 # ---------------------------------------------------------------------------
@@ -721,6 +753,512 @@ class TestConvenienceFunctions:
         error = get_generation_error(queue_job)
         assert error is not None
         assert "UNSUPPORTED_ACTION" in error
+
+
+# ===========================================================================
+# BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1: validated resolution
+# ===========================================================================
+#
+# The 14-test contract from the dispatch (Addenda C, B, D folded in). Every
+# negative test below would have PASSED under the legacy behavior (raw
+# payload trust + KNOWN_FOUNDUP_PATHS inference + foundup_id synthesis +
+# _is_valid_foundup_path prefix-only gate) and now FAILS.
+#
+# Resolver imports are read via the SHARED module (single source of truth)
+# AND via the executor shim (to verify both surfaces resolve to the same
+# objects per Addendum C #4).
+
+
+class TestSharedResolverValidationInGenerator:
+    """14 dispatch-required tests + Addendum-C extraction equivalence."""
+
+    @staticmethod
+    def _shared_module():
+        from modules.foundups.agent.src import module_path_resolution as m
+        return m
+
+    @staticmethod
+    def _executor_shim():
+        from modules.foundups.agent.src import hermes_foundup_job_executor as e
+        return e
+
+    # ------------------------------------------------------------------
+    # Test 1: payload path valid-looking but != manifest module_path
+    # ------------------------------------------------------------------
+
+    def test_payload_path_with_no_backing_manifest_rejected(self) -> None:
+        """Payload points at a syntactically-fine path with no backing
+        manifest -> ``manifest_missing``; the rejected value is observable
+        in ``rejected_payload_value`` and NEVER reaches the BuildTarget
+        (the validator returns before ``build_target_from_job`` runs)."""
+        job = create_job(
+            tenant_id="012",
+            requested_action="build_foundup",
+            foundup_id="voteballots",
+            payload={"module_path": "modules/foundups/nope_xyz_nobacking"},
+        )
+        result = validate_job_for_build_plan(job)
+        assert result.valid is False
+        assert result.error_code == "manifest_missing"
+        assert result.rejected_payload_value == "modules/foundups/nope_xyz_nobacking"
+        assert result.inferred_module_path is None
+
+    # ------------------------------------------------------------------
+    # Test 2: source_module alias receives the same validation
+    # ------------------------------------------------------------------
+
+    def test_source_module_alias_with_wrong_path_rejected(self) -> None:
+        job = create_job(
+            tenant_id="012",
+            requested_action="build_foundup",
+            foundup_id="voteballots",
+            payload={"source_module": "modules/foundups/nope_alias_xyz"},
+        )
+        result = validate_job_for_build_plan(job)
+        assert result.valid is False
+        assert result.error_code == "manifest_missing"
+        assert result.rejected_payload_value == "modules/foundups/nope_alias_xyz"
+
+    def test_source_module_alias_happy_path(self) -> None:
+        """The alias receives the same happy-path treatment as
+        ``module_path``."""
+        job = create_job(
+            tenant_id="012",
+            requested_action="build_foundup",
+            foundup_id="voteballots",
+            payload={"source_module": "modules/foundups/voteballots"},
+        )
+        result = validate_job_for_build_plan(job)
+        assert result.valid is True
+        assert result.inferred_module_path == "modules/foundups/voteballots"
+
+    # ------------------------------------------------------------------
+    # Test 3: cross-FoundUp substitution rejected
+    # ------------------------------------------------------------------
+
+    def test_cross_foundup_substitution_rejected(self) -> None:
+        """``job.foundup_id`` = A, payload points at B's REAL,
+        validator-passing manifest path. The manifest must bind to A;
+        resolving B's manifest and finding A != B is the load-bearing
+        defense from #778 Addendum D #1."""
+        job = create_job(
+            tenant_id="012",
+            requested_action="build_foundup",
+            foundup_id="voteballots",  # A
+            payload={"module_path": "modules/foundups/kosei"},  # B
+        )
+        result = validate_job_for_build_plan(job)
+        assert result.valid is False
+        assert result.error_code == "cross_foundup_mismatch"
+        assert "voteballots" in result.error_message
+        assert "kosei" in result.error_message
+        # The rejected B's path is observable but NEVER used downstream.
+        assert result.rejected_payload_value == "modules/foundups/kosei"
+
+    # ------------------------------------------------------------------
+    # Test 4: suffix / basename partial match rejected
+    # ------------------------------------------------------------------
+
+    def test_suffix_basename_partial_match_rejected(self) -> None:
+        """A bare basename ``voteballots`` that matches the LAST segment of
+        the manifest's module_path is REJECTED at the syntactic-harden
+        step (not under ``modules/``)."""
+        job = create_job(
+            tenant_id="012",
+            requested_action="build_foundup",
+            foundup_id="voteballots",
+            payload={"module_path": "voteballots"},
+        )
+        result = validate_job_for_build_plan(job)
+        assert result.valid is False
+        assert result.error_code == "syntactic_reject"
+
+    # ------------------------------------------------------------------
+    # Test 5: case-variant payload rejected (kills the .lower() compare)
+    # ------------------------------------------------------------------
+
+    def test_case_variant_payload_rejected(self) -> None:
+        """The legacy ``_is_valid_foundup_path`` did
+        ``path.replace('\\\\', '/').lower()`` -- this is dead. A case-variant
+        payload now rejects via the resolver's case-sensitive exact-match
+        against the manifest canonical."""
+        job = create_job(
+            tenant_id="012",
+            requested_action="build_foundup",
+            foundup_id="voteballots",
+            payload={"module_path": "modules/Foundups/voteballots"},
+        )
+        result = validate_job_for_build_plan(job)
+        assert result.valid is False
+        # Either syntactic_reject (caught at startswith) or manifest_mismatch
+        # (caught at step 7 exact-string compare). Both are valid rejections.
+        assert result.error_code in (
+            "syntactic_reject", "manifest_mismatch",
+        )
+
+    def test_uppercase_modules_prefix_rejected(self) -> None:
+        """``Modules/`` (uppercase) is rejected at the
+        ``startswith('modules/')`` syntactic guard. This is the test that
+        would have PASSED under the legacy ``.lower()`` compare."""
+        job = create_job(
+            tenant_id="012",
+            requested_action="build_foundup",
+            foundup_id="voteballots",
+            payload={"module_path": "Modules/foundups/voteballots"},
+        )
+        result = validate_job_for_build_plan(job)
+        assert result.valid is False
+        assert result.error_code == "syntactic_reject"
+
+    # ------------------------------------------------------------------
+    # Test 6: absolute / traversal / backslash rejected pre-manifest
+    # ------------------------------------------------------------------
+
+    def test_absolute_path_rejected_pre_manifest(self) -> None:
+        job = create_job(
+            tenant_id="012",
+            requested_action="build_foundup",
+            foundup_id="voteballots",
+            payload={"module_path": "/modules/foundups/voteballots"},
+        )
+        result = validate_job_for_build_plan(job)
+        assert result.valid is False
+        assert result.error_code == "syntactic_reject"
+
+    def test_drive_prefix_path_rejected_pre_manifest(self) -> None:
+        job = create_job(
+            tenant_id="012",
+            requested_action="build_foundup",
+            foundup_id="voteballots",
+            payload={"module_path": "O:/Foundups-Agent/modules/foundups/voteballots"},
+        )
+        result = validate_job_for_build_plan(job)
+        assert result.valid is False
+        assert result.error_code == "syntactic_reject"
+
+    def test_traversal_rejected_pre_manifest(self) -> None:
+        job = create_job(
+            tenant_id="012",
+            requested_action="build_foundup",
+            foundup_id="voteballots",
+            payload={"module_path": "../modules/foundups/voteballots"},
+        )
+        result = validate_job_for_build_plan(job)
+        assert result.valid is False
+        assert result.error_code == "syntactic_reject"
+
+    def test_backslash_rejected_pre_manifest(self) -> None:
+        job = create_job(
+            tenant_id="012",
+            requested_action="build_foundup",
+            foundup_id="voteballots",
+            payload={"module_path": r"modules\foundups\voteballots"},
+        )
+        result = validate_job_for_build_plan(job)
+        assert result.valid is False
+        assert result.error_code == "syntactic_reject"
+
+    # ------------------------------------------------------------------
+    # Test 7: empty-string payload path == ABSENT
+    # ------------------------------------------------------------------
+
+    def test_empty_string_payload_treated_as_absent(self) -> None:
+        """Empty string is ABSENT (#778 Addendum D #4). With a valid
+        foundup_id the bounded scan finds the real voteballots manifest
+        and derives the canonical path."""
+        job = create_job(
+            tenant_id="012",
+            requested_action="build_foundup",
+            foundup_id="voteballots",
+            payload={"module_path": ""},
+        )
+        result = validate_job_for_build_plan(job)
+        assert result.valid is True
+        assert result.inferred_module_path == "modules/foundups/voteballots"
+        assert result.rejected_payload_value is None
+
+    # ------------------------------------------------------------------
+    # Test 8: KNOWN_FOUNDUP_PATHS inference dead
+    # ------------------------------------------------------------------
+
+    def test_known_foundup_id_without_on_disk_manifest_fails_closed(self) -> None:
+        """The dispatch's example: a foundup_id that was in the dead
+        KNOWN_FOUNDUP_PATHS dict but does NOT have a real on-disk manifest
+        must now FAIL. ``pqn_portal``, ``social_twin``, ``move2japan`` were
+        all in the dead dict; none has a real manifest on disk."""
+        for legacy_id in ("pqn_portal", "social_twin", "move2japan"):
+            job = create_job(
+                tenant_id="012",
+                requested_action="build_foundup",
+                foundup_id=legacy_id,
+                payload={},
+            )
+            result = validate_job_for_build_plan(job)
+            assert result.valid is False, (
+                f"legacy dead-dict entry {legacy_id!r} unexpectedly resolved"
+            )
+            assert result.error_code == "manifest_missing"
+
+    def test_known_foundup_paths_symbol_is_gone(self) -> None:
+        """The symbol itself is gone. ``import KNOWN_FOUNDUP_PATHS`` raises
+        ImportError; this test fires the import inside the assert so a
+        future re-introduction of the symbol fails the test loudly."""
+        with pytest.raises(ImportError):
+            from modules.foundups.agent.src.build_plan_generator import (
+                KNOWN_FOUNDUP_PATHS,  # type: ignore[attr-defined]  # noqa: F401
+            )
+
+    # ------------------------------------------------------------------
+    # Test 9: foundup_id synthesis dead
+    # ------------------------------------------------------------------
+
+    def test_foundup_id_synthesis_dead_no_modules_foundups_fallback(self) -> None:
+        """The dead ``f"modules/foundups/{job.foundup_id}"`` synthesis at
+        line :282 is gone. A foundup_id that is NOT a real on-disk manifest
+        with payload absent -> fails ``manifest_missing``, NOT a fabricated
+        ``modules/foundups/<id>`` path."""
+        job = create_job(
+            tenant_id="012",
+            requested_action="build_foundup",
+            foundup_id="newly_invented_foundup_no_manifest",
+            payload={},
+        )
+        result = validate_job_for_build_plan(job)
+        assert result.valid is False
+        assert result.error_code == "manifest_missing"
+
+    def test_build_target_does_not_use_synthesized_path(self) -> None:
+        """``build_target_from_job`` raises ValueError instead of returning
+        a BuildTarget with a synthesized ``modules/foundups/<id>`` path.
+        Under legacy behavior the synthesis at :282 would have produced
+        a BuildTarget with module_path = "modules/foundups/synth_xyz" even
+        though no manifest exists at that location."""
+        job = create_job(
+            tenant_id="012",
+            requested_action="build_foundup",
+            foundup_id="synth_xyz_no_manifest",
+            payload={},
+        )
+        with pytest.raises(ValueError, match="manifest_missing"):
+            build_target_from_job(job)
+
+    # ------------------------------------------------------------------
+    # Test 10: public/member/foundups/ via payload as identity rejected
+    # ------------------------------------------------------------------
+
+    def test_pwa_surface_path_as_module_identity_rejected(self) -> None:
+        """The PWA surface
+        (``public/member/foundups/<id>/``) was admitted as module identity
+        by the dead ``_is_valid_foundup_path`` (line 216). The new resolver
+        enforces ``startswith('modules/')`` -- PWA surfaces are rejected
+        at syntactic_reject. (PWA-surface ruling: DERIVED_ONLY; surface
+        paths are derived from manifest module_path basename in
+        ``build_target_from_job``, never from payload.)"""
+        job = create_job(
+            tenant_id="012",
+            requested_action="build_foundup",
+            foundup_id="voteballots",
+            payload={"module_path": "public/member/foundups/voteballots"},
+        )
+        result = validate_job_for_build_plan(job)
+        assert result.valid is False
+        assert result.error_code == "syntactic_reject"
+
+    # ------------------------------------------------------------------
+    # Test 11: rejected/ignored payload value observable, never used
+    # ------------------------------------------------------------------
+
+    def test_rejected_value_observable_on_failure(self) -> None:
+        job = create_job(
+            tenant_id="012",
+            requested_action="build_foundup",
+            foundup_id="voteballots",
+            payload={"module_path": "modules/foundups/observable_test_no_manifest"},
+        )
+        result = validate_job_for_build_plan(job)
+        assert result.valid is False
+        assert result.rejected_payload_value == (
+            "modules/foundups/observable_test_no_manifest"
+        )
+        # The rejected value MUST be in the diagnostic message too
+        # (greppable evidence).
+        assert "observable_test_no_manifest" in result.error_message
+
+    def test_rejected_value_observable_on_success(self) -> None:
+        """Even on success, ``rejected_payload_value`` carries the
+        payload's declared candidate -- silent swallow is refused per
+        #777 / #778 convention."""
+        job = create_job(
+            tenant_id="012",
+            requested_action="build_foundup",
+            foundup_id="voteballots",
+            payload={"module_path": "modules/foundups/voteballots"},
+        )
+        result = validate_job_for_build_plan(job)
+        assert result.valid is True
+        assert result.rejected_payload_value == "modules/foundups/voteballots"
+
+    # ------------------------------------------------------------------
+    # Test 14: BuildPlan output must not contain rejected payload value
+    # ------------------------------------------------------------------
+
+    def test_rejected_payload_value_does_not_propagate_into_buildtarget(self) -> None:
+        """When the resolver rejects, the BuildTarget is never produced
+        (``create_build_plan_from_job`` raises ValueError before
+        ``build_target_from_job``). The rejected value is visible only as
+        evidence in the GenerationValidationResult."""
+        bogus_path = "modules/foundups/bogus_will_not_resolve"
+        job = create_job(
+            tenant_id="012",
+            requested_action="build_foundup",
+            foundup_id="voteballots",
+            payload={"module_path": bogus_path},
+        )
+        with pytest.raises(ValueError, match="manifest_missing"):
+            create_build_plan_from_job(job)
+        # And via the lower-level path: build_target_from_job also refuses
+        # to produce a BuildTarget carrying the rejected path.
+        with pytest.raises(ValueError, match="manifest_missing"):
+            build_target_from_job(job)
+
+    def test_buildplan_carries_only_canonical_when_payload_provided(self) -> None:
+        """When the payload-supplied path happens to match the manifest's
+        canonical path, the BuildTarget.module_path is the canonical
+        from the manifest (the source of truth), not the payload string."""
+        job = create_job(
+            tenant_id="012",
+            requested_action="build_foundup",
+            foundup_id="voteballots",
+            payload={"module_path": "modules/foundups/voteballots"},
+        )
+        plan = create_build_plan_from_job(job)
+        assert plan.target.module_path == "modules/foundups/voteballots"
+        # The pwa_surface_path is DERIVED from the canonical module_path's
+        # basename (DERIVED_ONLY ruling), not from any payload-supplied
+        # surface path.
+        assert plan.target.pwa_surface_path == "public/member/foundups/voteballots/"
+
+
+# ===========================================================================
+# Addendum C #4 + #5: extraction equivalence (single source of truth)
+# ===========================================================================
+
+
+class TestSharedResolverIsSingleSourceOfTruth:
+    """Addendum C: prove there is exactly ONE module-path resolver
+    implementation, and the executor shim resolves to the SAME object."""
+
+    def test_executor_shim_and_shared_module_resolve_same_function(self) -> None:
+        """``hermes_foundup_job_executor._resolve_validated_module_path`` IS
+        ``module_path_resolution._resolve_validated_module_path``. The
+        ``from ... import ...`` shim binds the same object; identity is
+        preserved across the import boundary."""
+        from modules.foundups.agent.src import hermes_foundup_job_executor as e
+        from modules.foundups.agent.src import module_path_resolution as m
+
+        assert e._resolve_validated_module_path is m._resolve_validated_module_path
+        assert e.ResolvedModulePath is m.ResolvedModulePath
+        assert e.DEFAULT_REPO_ROOT == m.DEFAULT_REPO_ROOT
+        assert e.ALL_FAIL_TOKENS is m.ALL_FAIL_TOKENS
+        assert e.FAIL_TOKEN_SYNTACTIC_REJECT == m.FAIL_TOKEN_SYNTACTIC_REJECT
+        assert e.FAIL_TOKEN_MANIFEST_MISMATCH == m.FAIL_TOKEN_MANIFEST_MISMATCH
+        assert e.FAIL_TOKEN_MANIFEST_MISSING == m.FAIL_TOKEN_MANIFEST_MISSING
+        assert e.FAIL_TOKEN_CROSS_FOUNDUP_MISMATCH == m.FAIL_TOKEN_CROSS_FOUNDUP_MISMATCH
+
+    def test_generator_uses_same_resolver_as_executor(self) -> None:
+        """``build_plan_generator`` and ``hermes_foundup_job_executor`` both
+        reference the SAME ``_resolve_validated_module_path`` object."""
+        from modules.foundups.agent.src import build_plan_generator as g
+        from modules.foundups.agent.src import hermes_foundup_job_executor as e
+
+        assert g._resolve_validated_module_path is e._resolve_validated_module_path
+
+    def test_no_second_resolver_implementation_in_executor(self) -> None:
+        """AST scan: ``hermes_foundup_job_executor.py`` does NOT define a
+        function literally named ``_resolve_validated_module_path``
+        anymore -- it only imports from the shared module. If a future
+        edit accidentally reintroduces an in-file definition, this test
+        catches the duplication."""
+        import ast
+        path = Path(__file__).resolve().parents[1] / "src" / "hermes_foundup_job_executor.py"
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        local_defs = [
+            node.name for node in ast.walk(tree)
+            if isinstance(node, ast.FunctionDef)
+        ]
+        assert "_resolve_validated_module_path" not in local_defs, (
+            "Second resolver implementation found in executor; the "
+            "shared module is the single source of truth."
+        )
+        assert "_find_manifest_for_foundup_id" not in local_defs
+        assert "_stringify_ignored" not in local_defs
+        class_defs = [
+            node.name for node in ast.walk(tree)
+            if isinstance(node, ast.ClassDef)
+        ]
+        assert "ResolvedModulePath" not in class_defs
+
+    def test_no_second_resolver_in_build_plan_generator(self) -> None:
+        """Symmetric scan on the generator file."""
+        import ast
+        path = Path(__file__).resolve().parents[1] / "src" / "build_plan_generator.py"
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        local_defs = [
+            node.name for node in ast.walk(tree)
+            if isinstance(node, ast.FunctionDef)
+        ]
+        assert "_resolve_validated_module_path" not in local_defs
+        assert "_is_valid_foundup_path" not in local_defs
+        assert "get_known_foundup_path" not in local_defs
+        # The KNOWN_FOUNDUP_PATHS module-level constant must also be gone.
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Assign):
+                for target in node.targets:
+                    if isinstance(target, ast.Name):
+                        assert target.id != "KNOWN_FOUNDUP_PATHS"
+
+
+# ===========================================================================
+# WSP_97 row HERMES_778_TESTS_UNCHANGED_GREEN: pin the cross-file invariant
+# ===========================================================================
+
+
+class TestHermes778TestsUnchanged:
+    """The #778 executor test file must keep passing with ZERO edits
+    (Addendum C #3). This is a meta-test: it asserts the test file has not
+    been modified to compensate for the extraction. The file's git status
+    is intentionally not checked here (CI would do that); instead we
+    verify the import statements the test relies on still resolve."""
+
+    def test_executor_test_imports_still_resolve(self) -> None:
+        """All names the executor test file imports from the executor module
+        still resolve via the shim."""
+        from modules.foundups.agent.src.hermes_foundup_job_executor import (  # noqa: F401
+            HermesJobExecutionResult,
+            SUPPORTED_ACTIONS,
+            WORKER_ID,
+            can_execute_action,
+            execute_foundup_job,
+            get_supported_actions,
+            DEFAULT_REPO_ROOT,
+            FAIL_TOKEN_MANIFEST_MISSING,
+            _resolve_validated_module_path,
+        )
+
+    def test_executor_attribute_access_pattern_still_works(self) -> None:
+        """The ``import ... as e`` + ``e._resolve_validated_module_path``
+        attribute-access pattern the executor test uses still works."""
+        from modules.foundups.agent.src import hermes_foundup_job_executor as e
+        assert callable(e._resolve_validated_module_path)
+        assert isinstance(e.DEFAULT_REPO_ROOT, Path)
+        assert e.FAIL_TOKEN_MANIFEST_MISSING == "manifest_missing"
+        assert e.FAIL_TOKEN_SYNTACTIC_REJECT == "syntactic_reject"
+        assert e.FAIL_TOKEN_MANIFEST_MISMATCH == "manifest_mismatch"
+        assert e.FAIL_TOKEN_CROSS_FOUNDUP_MISMATCH == "cross_foundup_mismatch"
+        assert e.ALL_FAIL_TOKENS == frozenset({
+            "syntactic_reject", "manifest_mismatch",
+            "manifest_missing", "cross_foundup_mismatch",
+        })
 
 
 if __name__ == "__main__":

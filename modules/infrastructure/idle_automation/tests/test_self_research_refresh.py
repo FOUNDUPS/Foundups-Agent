@@ -3,11 +3,99 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime
 from pathlib import Path
+from types import SimpleNamespace
+
+import pytest
 
 from modules.infrastructure.idle_automation.src.self_research_refresh import (
     SelfResearchRefresher,
     group_wsp_violations,
 )
+from modules.infrastructure.foundups_mcp_bridge.src import (
+    reddog_holoindex_maintenance_handshake as handshake,
+)
+
+
+def _audit_refresher(tmp_path, monkeypatch):
+    root = tmp_path / "repo"
+    root.mkdir()
+    runtime = tmp_path / "audit-runtime"
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_RUNTIME_ROOT", str(runtime))
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_LOG_GLOBS", "logs/*.log")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_AUTO_FIX", "0")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_IMPROVEMENT_PROPOSALS", "0")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_TELEMETRY", "0")
+    return SelfResearchRefresher(repo_root=root), runtime
+
+
+@pytest.mark.parametrize("has_input", [False, True])
+def test_self_audit_zero_events_preserves_input_coverage(tmp_path, monkeypatch, has_input):
+    refresher, _ = _audit_refresher(tmp_path, monkeypatch)
+    if has_input:
+        logs = refresher.repo_root / "logs"
+        logs.mkdir()
+        (logs / "clean.log").write_text("normal startup\n", encoding="utf-8")
+    result = refresher.scan_self_audit()
+    status = result["scan_status"]
+    assert result["events_opened"] == 0
+    assert status["outcome"] == "completed"
+    assert status["coverage"] == ("bounded" if has_input else "no_inputs")
+    assert (status["last_success"] is not None) is has_input
+
+
+def test_self_audit_partial_discovery_stays_partial(tmp_path, monkeypatch):
+    refresher, _ = _audit_refresher(tmp_path, monkeypatch)
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_LOG_GLOBS", "../outside.log")
+    result = refresher.scan_self_audit()
+    assert result["scan_status"]["outcome"] == "partial"
+    assert result["scan_status"]["coverage"] == "known_partial"
+    assert "discovery_excluded" in result["scan_status"]["error_codes"]
+    assert result["events_opened"] == result["scan_status"]["event_count"] == 0
+
+
+def test_self_audit_failure_preserves_unknown_count_and_historical_signatures(tmp_path, monkeypatch):
+    from modules.infrastructure.wre_core.src.daemon_self_audit_loop import DaemonSelfAuditLoop
+
+    refresher, runtime = _audit_refresher(tmp_path, monkeypatch)
+    runtime.mkdir()
+    (runtime / "daemon_self_audit_state.json").write_text(json.dumps({
+        "signature_stats": {"historical": {"count": 7, "recommended_fix": "inspect"}}
+    }), encoding="utf-8")
+
+    def fail(_self):
+        raise OSError("controlled read failure")
+
+    monkeypatch.setattr(DaemonSelfAuditLoop, "_scan_once_locked", fail)
+    result = refresher.scan_self_audit()
+    assert result["events_opened"] is None
+    assert result["scan_status"]["outcome"] == "failed"
+    assert result["scan_status"]["coverage"] == "unknown"
+    assert "scan_failed" in result["scan_status"]["error_codes"]
+    assert result["top_signatures"][0]["count"] == 7
+    assert result["history_status"] == "available"
+
+
+@pytest.mark.parametrize("history", [
+    ["invalid root"], {"signature_stats": {"broken": None}},
+    '{"signature_stats":{"broken":{"count":1e309}}}',
+])
+def test_self_audit_malformed_history_does_not_hide_scan_status(tmp_path, monkeypatch, history):
+    from modules.infrastructure.wre_core.src import daemon_self_audit_loop as owner
+
+    refresher, runtime = _audit_refresher(tmp_path, monkeypatch)
+    runtime.mkdir()
+    path = runtime / "daemon_self_audit_state.json"
+    path.write_text(history if isinstance(history, str) else json.dumps(history), encoding="utf-8")
+    status = {"outcome": "failed", "coverage": "unknown", "event_count": None,
+              "error_codes": ["scan_failed"]}
+    monkeypatch.setattr(owner, "DaemonSelfAuditLoop", lambda _root: SimpleNamespace(
+        state_path=path, scan_once_with_status=lambda: status, scan_once=lambda: 0))
+    result = refresher.scan_self_audit()
+    assert result["scan_status"] == status
+    assert result["events_opened"] is None
+    assert result["history_status"] == "unavailable"
+    assert result["signature_count"] is None
+    assert result["top_signatures"] == []
 
 
 def test_group_wsp_violations_aggregates_and_orders_by_severity():
@@ -41,6 +129,50 @@ def test_group_wsp_violations_aggregates_and_orders_by_severity():
     assert grouped[0]["count"] == 2
     assert grouped[0]["issue_type"] == "SIZE_VIOLATION"
     assert grouped[0]["affected_files"] == ["modules/b/src.py", "modules/c/src.py"]
+
+
+def test_holo_refresh_uses_exact_head_operational_handshake(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    calls: list[dict] = []
+    monkeypatch.setattr(
+        handshake,
+        "ensure_reddog_holoindex_operational",
+        lambda **kwargs: calls.append(kwargs)
+        or SimpleNamespace(
+            ready=True,
+            refreshed=True,
+            status="REFRESHED",
+            error="",
+            generation_id="sha256:generation",
+        ),
+    )
+    refresher = SelfResearchRefresher(repo_root=tmp_path)
+    result = refresher.refresh_holo_index()
+    assert result["refresh_success"] is True
+    assert result["freshness_generation_id"] == "sha256:generation"
+    assert calls[0]["auto_maintenance"] is True
+
+
+def test_holo_refresh_never_converts_handshake_rejection_to_success(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        handshake,
+        "ensure_reddog_holoindex_operational",
+        lambda **_kwargs: SimpleNamespace(
+            ready=False,
+            refreshed=False,
+            status="FAILED",
+            error="HOLOINDEX_MAINTENANCE_REPOSITORY_DIRTY",
+            generation_id="",
+        ),
+    )
+    result = SelfResearchRefresher(repo_root=tmp_path).refresh_holo_index()
+    assert result["refresh_success"] is False
+    assert result["code_stale"] is True
 
 
 def test_build_update_candidates_ranks_holo_failure_above_watchlist_noise(tmp_path: Path):
@@ -173,6 +305,36 @@ def test_run_reuses_cached_compliance_section(tmp_path: Path, monkeypatch):
     assert report["wsp_compliance"]["violation_count"] == 1
 
 
+def _stub_self_research_dependencies(
+    refresher: SelfResearchRefresher,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(refresher, "refresh_holo_index", lambda: {"skipped": True})
+    monkeypatch.setattr(
+        refresher,
+        "scan_wsp_compliance",
+        lambda: {"top_violation_groups": []},
+    )
+    monkeypatch.setattr(refresher, "scan_self_audit", lambda: {"top_signatures": []})
+    monkeypatch.setattr(refresher, "refresh_grant_watchlist", lambda: {"status": {}})
+    monkeypatch.setattr(
+        refresher,
+        "refresh_pqn_research_watchlist",
+        lambda: {"status": {}},
+    )
+    monkeypatch.setattr(
+        refresher,
+        "refresh_openclaw_ecosystem_watchlist",
+        lambda: {"status": {}},
+    )
+    monkeypatch.setattr(refresher, "publish_autonomous_tasks", lambda candidates: [])
+    monkeypatch.setattr(
+        refresher,
+        "remember_outcome",
+        lambda report, duration_ms: None,
+    )
+
+
 def test_run_emits_memory_nudges_when_high_value_events_detected(tmp_path: Path, monkeypatch):
     """Verify runtime wiring: emit_nudges=True calls memory nudge engine."""
     report_path = tmp_path / "reports" / "openclaw_self_research_status.json"
@@ -203,14 +365,7 @@ def test_run_emits_memory_nudges_when_high_value_events_detected(tmp_path: Path,
     refresher.repo_root = tmp_path
 
     # Stub out all scan methods to skip external dependencies
-    monkeypatch.setattr(refresher, "refresh_holo_index", lambda: {"skipped": True})
-    monkeypatch.setattr(refresher, "scan_wsp_compliance", lambda: {"top_violation_groups": []})
-    monkeypatch.setattr(refresher, "scan_self_audit", lambda: {"top_signatures": []})
-    monkeypatch.setattr(refresher, "refresh_grant_watchlist", lambda: {"status": {}})
-    monkeypatch.setattr(refresher, "refresh_pqn_research_watchlist", lambda: {"status": {}})
-    monkeypatch.setattr(refresher, "refresh_openclaw_ecosystem_watchlist", lambda: {"status": {}})
-    monkeypatch.setattr(refresher, "publish_autonomous_tasks", lambda candidates: [])
-    monkeypatch.setattr(refresher, "remember_outcome", lambda report, duration_ms: None)
+    _stub_self_research_dependencies(refresher, monkeypatch)
 
     report = refresher.run(
         write_tasks=False,
@@ -240,14 +395,7 @@ def test_run_skips_nudges_when_emit_nudges_false(tmp_path: Path, monkeypatch):
     refresher = SelfResearchRefresher(report_path=report_path)
 
     # Stub out all scan methods
-    monkeypatch.setattr(refresher, "refresh_holo_index", lambda: {"skipped": True})
-    monkeypatch.setattr(refresher, "scan_wsp_compliance", lambda: {"top_violation_groups": []})
-    monkeypatch.setattr(refresher, "scan_self_audit", lambda: {"top_signatures": []})
-    monkeypatch.setattr(refresher, "refresh_grant_watchlist", lambda: {"status": {}})
-    monkeypatch.setattr(refresher, "refresh_pqn_research_watchlist", lambda: {"status": {}})
-    monkeypatch.setattr(refresher, "refresh_openclaw_ecosystem_watchlist", lambda: {"status": {}})
-    monkeypatch.setattr(refresher, "publish_autonomous_tasks", lambda candidates: [])
-    monkeypatch.setattr(refresher, "remember_outcome", lambda report, duration_ms: None)
+    _stub_self_research_dependencies(refresher, monkeypatch)
 
     report = refresher.run(
         write_tasks=False,

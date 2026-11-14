@@ -221,10 +221,11 @@ class SecurityScanner:
             )
             duration_ms = int((datetime.now() - start_time).total_seconds() * 1000)
 
-            # Note: Some tools return non-zero when vulnerabilities found
-            # This is not a failure - it means scan completed with findings
+            # Only documented finding exits are successful; auth/config/runtime
+            # failures must never be interpreted as a clean scan.
+            accepted = {"snyk": {0, 1}, "trivy": {0}, "semgrep": {0, 1}}
             return (
-                True,
+                result.returncode in accepted.get(tool, {0}),
                 result.stdout,
                 result.stderr,
                 result.returncode,
@@ -243,7 +244,7 @@ class SecurityScanner:
 
     def scan_snyk(self, path: str = ".") -> ScanResult:
         """
-        Run Snyk SAST/SCA scan.
+        Run Snyk dependency (SCA) scan.
 
         Args:
             path: Path to scan (default: current directory)
@@ -274,7 +275,7 @@ class SecurityScanner:
                 success=False,
                 available=True,
                 error_output=stderr,
-                error_message=stderr or "Scan failed",
+                error_message=f"snyk scan failed (exit {exit_code})",
                 exit_code=exit_code,
                 duration_ms=duration_ms,
             )
@@ -283,26 +284,29 @@ class SecurityScanner:
         try:
             raw_json = json.loads(stdout)
             report = normalize_snyk_output(raw_json, scan_id, path)
+            if exit_code == 1 and not report.findings:
+                raise ValueError("Finding exit code without findings")
             report.scan_duration_ms = duration_ms
 
             return ScanResult(
                 tool="snyk",
-                success=True,
+                success=report.scan_success,
                 available=True,
                 report=report,
+                error_message=report.error_message,
                 raw_output=stdout,
                 exit_code=exit_code,
                 duration_ms=duration_ms,
             )
 
-        except json.JSONDecodeError as e:
+        except (ValueError, TypeError, AttributeError):
             return ScanResult(
                 tool="snyk",
                 success=False,
                 available=True,
                 raw_output=stdout,
                 error_output=stderr,
-                error_message=f"Failed to parse JSON output: {e}",
+                error_message="Invalid or incomplete scanner JSON report",
                 exit_code=exit_code,
                 duration_ms=duration_ms,
             )
@@ -331,7 +335,7 @@ class SecurityScanner:
         scan_id = f"trivy-{uuid.uuid4().hex[:8]}"
 
         # Trivy scan with JSON output (read-only)
-        cmd = ["trivy", scan_type, "--format", "json", target]
+        cmd = ["trivy", scan_type, "--scanners", "vuln,secret,misconfig", "--format", "json", target]
 
         success, stdout, stderr, exit_code, duration_ms = self._run_command(cmd, "trivy")
 
@@ -341,7 +345,7 @@ class SecurityScanner:
                 success=False,
                 available=True,
                 error_output=stderr,
-                error_message=stderr or "Scan failed",
+                error_message=f"trivy scan failed (exit {exit_code})",
                 exit_code=exit_code,
                 duration_ms=duration_ms,
             )
@@ -354,22 +358,23 @@ class SecurityScanner:
 
             return ScanResult(
                 tool="trivy",
-                success=True,
+                success=report.scan_success,
                 available=True,
                 report=report,
+                error_message=report.error_message,
                 raw_output=stdout,
                 exit_code=exit_code,
                 duration_ms=duration_ms,
             )
 
-        except json.JSONDecodeError as e:
+        except (ValueError, TypeError, AttributeError):
             return ScanResult(
                 tool="trivy",
                 success=False,
                 available=True,
                 raw_output=stdout,
                 error_output=stderr,
-                error_message=f"Failed to parse JSON output: {e}",
+                error_message="Invalid or incomplete scanner JSON report",
                 exit_code=exit_code,
                 duration_ms=duration_ms,
             )
@@ -408,7 +413,7 @@ class SecurityScanner:
                 success=False,
                 available=True,
                 error_output=stderr,
-                error_message=stderr or "Scan failed",
+                error_message=f"semgrep scan failed (exit {exit_code})",
                 exit_code=exit_code,
                 duration_ms=duration_ms,
             )
@@ -417,26 +422,29 @@ class SecurityScanner:
         try:
             raw_json = json.loads(stdout)
             report = normalize_semgrep_output(raw_json, scan_id, path)
+            if exit_code == 1 and not report.findings:
+                raise ValueError("Finding exit code without findings")
             report.scan_duration_ms = duration_ms
 
             return ScanResult(
                 tool="semgrep",
-                success=True,
+                success=report.scan_success,
                 available=True,
                 report=report,
+                error_message=report.error_message,
                 raw_output=stdout,
                 exit_code=exit_code,
                 duration_ms=duration_ms,
             )
 
-        except json.JSONDecodeError as e:
+        except (ValueError, TypeError, AttributeError):
             return ScanResult(
                 tool="semgrep",
                 success=False,
                 available=True,
                 raw_output=stdout,
                 error_output=stderr,
-                error_message=f"Failed to parse JSON output: {e}",
+                error_message="Invalid or incomplete scanner JSON report",
                 exit_code=exit_code,
                 duration_ms=duration_ms,
             )

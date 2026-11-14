@@ -23,6 +23,7 @@ from .telemetry_store import TelemetryStore
 from .foundup_typer import FoundupsTyper, get_typer
 from .human_behavior import HumanBehavior, get_human_behavior
 from .devtools_mcp_adapter import BrowserAdapter, get_browser_adapter, BrowserResult
+from .shadow_dom_finder import find_deep, shadow_query, first_deep
 
 __all__ = [
     "FoundUpsDriver",
@@ -36,6 +37,9 @@ __all__ = [
     "BrowserAdapter",
     "get_browser_adapter",
     "BrowserResult",
+    "find_deep",
+    "shadow_query",
+    "first_deep",
 ]
 
 __version__ = "1.1.0"

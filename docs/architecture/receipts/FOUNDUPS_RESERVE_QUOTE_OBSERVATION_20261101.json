@@ -1,0 +1,505 @@
+{
+  "schema": "foundups.simulator.reserve-quote.qualification.v1",
+  "status": "VERIFIED_SIMULATED_OBSERVATION_AND_LOCAL_PACKAGE; PUBLICATION_PENDING",
+  "recorded_at_utc": "2026-11-01T03:10:43.291505+00:00",
+  "base": "4c96d6b17429226248c3a82de5544262e773c41e",
+  "historical_RED_base": "fb58cd530d7b6887ce6218af282cb6ee7382ded5",
+  "source_identity": "Identified uncommitted overlay on the base; this receipt does not self-bind a future commit or its own hash. Later source publication/check evidence is separate.",
+  "classification": "A: opt-in simulator representation; unchanged default economics. B03 global unit/issuance decision remains C/D and unresolved.",
+  "scope": "Existing BTCReserve owner only; serialized host observation, no consumer activation.",
+  "wsp15": {
+    "complexity": 3,
+    "importance": 4,
+    "deferability": 5,
+    "impact": 4,
+    "score": 16,
+    "priority": "P0"
+  },
+  "sources": [
+    {
+      "path": "modules/foundups/simulator/economics/btc_reserve.py",
+      "git_lf_sha256": "9c3ff563c03a650c1e0b3baad79eaed7babb953d0e865361f736db7d1e24d594",
+      "lines": 597
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_btc_reserve_semantics.py",
+      "git_lf_sha256": "9df009d5b10575dd04f2524e62899a4bbffc7f83171ca5e8ad0e7c108c7fd55b",
+      "lines": 285
+    }
+  ],
+  "review": {
+    "verdict": "NO_MATERIAL_FINDINGS_WITHIN_SELECTED_CONTRACT; accepted by root",
+    "independent_reviewer": "/root/simulator_economics: separate product-source verifier; authored the frozen 89 desired cases and 17 additional held-outs. Test authorship is disclosed.",
+    "worker": "/root/blockchain_architecture",
+    "root_acceptance": {
+      "evidence_file": "root-source-acceptance.json",
+      "sha256": "f9871e956301e8a9f900065cf56d45826b4ff683fab27196138fe6eb06438d79"
+    },
+    "independent_review": {
+      "evidence_file": "independent-source-and-green-review.json",
+      "sha256": "9ad88652c29c78b02f34ae229cae066b7d3b2322c0d584f10bcd1b23b42a3562"
+    },
+    "contract": {
+      "evidence_file": "selected-contract.json",
+      "sha256": "bb5582e87998efb01caed3e4d0e2f23461963346ceea940c2e67d69ae02999d8"
+    },
+    "precode_allocation": {
+      "evidence_file": "precode-allocation.json",
+      "sha256": "38e97bb1839fbf634215524c2605febd1aa1b57f11e09d62fd25e9bb0560cb0e"
+    },
+    "worker_freeze": {
+      "evidence_file": "worker-candidate-freeze.json",
+      "sha256": "fdd4ba9d5040773b360025929f666237aed6d582bf10f172e29c64d95a2635bf"
+    },
+    "promotion_proof": {
+      "evidence_file": "test-promotion-proof.json",
+      "sha256": "935b203de3be6be0dcb556bdf2478bfd828d093d282a477beb363fd30f277769"
+    },
+    "final_acceptance": {
+      "evidence_file": "independent-acceptance-final.json",
+      "sha256": "111d8610fcb8f9e29c0fde72df6b98e39bb13cca4f9ee674fde8d5f6a0fc4c80"
+    },
+    "broader_review": {
+      "evidence_file": "broader-simulator-review.json",
+      "sha256": "06d61cecc7fb53a08539dfc592a69fac9404f417906e5e3c986cc240c5348425"
+    }
+  },
+  "contract": {
+    "api": "snapshot_simulator_quote(reserve: BTCReserve, *, context_id: str, tick: int) in existing btc_reserve.py",
+    "record": "Frozen slotted SimulatorQuoteSnapshot in the same owner",
+    "fields": [
+      "format_version",
+      "interpretation",
+      "source_kind",
+      "context_id",
+      "tick",
+      "branch",
+      "reserve_btc",
+      "circulating_ups",
+      "genesis_ups_per_btc",
+      "sats_per_ups",
+      "identity_sha256"
+    ],
+    "fixed": {
+      "format_version": 1,
+      "interpretation": "decimal_view_v1",
+      "source_kind": "simulator_state"
+    },
+    "numeric_fields": "Reduced immutable (numerator, denominator) builtin-int tuples; denominators strictly positive",
+    "ingress": "Exact BTCReserve receiver; exact builtin int/float source scalars; finite, nonnegative BTC/UPS and positive genesis. Reject bool/subclasses/coercible objects without invoking their hooks. Preserve all source state.",
+    "context": "Exact builtin str, 1..128 ASCII characters, first alphanumeric, remaining [A-Za-z0-9._:-]",
+    "tick": "Exact builtin int in 0..2**63-1; observation label only",
+    "branches": {
+      "zero_circulation": "genesis_notional, 100000000 / genesis_ups_per_btc, including positive BTC with zero UPS",
+      "positive_btc_and_circulation": "reserve_ratio, 100000000 * reserve_btc / circulating_ups",
+      "zero_btc_positive_circulation": "ValueError; preserve and test the two differing legacy properties unchanged"
+    },
+    "interpretation": "Ints remain exact; finite floats use their canonical decimal spelling then exact rational arithmetic. No intermediate float quote math, global Decimal context change or recovery claim about historic precision.",
+    "identity": {
+      "algorithm": "SHA256",
+      "domain_prefix_ascii": "foundups.simulator.reserve-quote.v1",
+      "append_one_nul_byte_before_payload": true,
+      "payload": "ASCII JSON of every field except identity_sha256, sorted keys, compact separators, no newline/nonfinite tokens; tuples encoded as arrays",
+      "meaning": "Content/context identity only, not authentication, freshness, consumption, backing or settlement evidence"
+    },
+    "bounds": {
+      "input_int_bit_length_precheck": 1100,
+      "source_pair_max_decimal_digits": 330,
+      "derived_quote_pair_max_decimal_digits": 668,
+      "canonical_payload_max_bytes": 8192,
+      "meaning": "Observation-format work limits covering finite binary64 decimal envelope, not currency precision or supply limits. Test reachable extrema and source cap+1; do not invent a public input that cannot reach a derived boundary."
+    },
+    "invalid_ingress_exception": "ValueError",
+    "non_guarantees": [
+      "No atomic multiscalar capture under concurrent unsynchronized writes; host serializes observation",
+      "No mutable reserve reference or unrelated USD/inflow state in record",
+      "No public constructor, digest or frozen instance grants trust to future consumers",
+      "No Mesa, fee carry, default BTCReserve property, global UPS-unit, token or chain changes"
+    ]
+  },
+  "actual_test_runs": [
+    {
+      "evidence_file": "reserve-original-baseline/result.json",
+      "sha256": "0dfd57a80fb8582ea1ee28920218d695c6ec969900e595f55d143a825929983b",
+      "phase": "reserve-original-baseline",
+      "exit": 0,
+      "cases": 7,
+      "outcomes": {
+        "passed": 7
+      },
+      "guard_denials": 0,
+      "source_snapshots": 174,
+      "sources_unchanged": true,
+      "source_inventory_scope": "simulator/FAM Python sources, including tests"
+    },
+    {
+      "evidence_file": "reserve-desired-red/result.json",
+      "sha256": "8916d242917c5045a0302a78d9f74b124ce82d32a8019a27e664a3072a943124",
+      "phase": "reserve-desired-red",
+      "exit": 1,
+      "cases": 96,
+      "outcomes": {
+        "failure": 89,
+        "passed": 7
+      },
+      "guard_denials": 0,
+      "source_snapshots": 174,
+      "sources_unchanged": true,
+      "source_inventory_scope": "simulator/FAM Python sources, including tests"
+    },
+    {
+      "evidence_file": "reserve-independent-green/result.json",
+      "sha256": "7f61ebc9bae006e00896bca1d2e9b83cd6e23efb8b245211a104246a638b0031",
+      "phase": "reserve-independent-green",
+      "exit": 0,
+      "cases": 113,
+      "outcomes": {
+        "passed": 113
+      },
+      "guard_denials": 0,
+      "source_snapshots": 174,
+      "sources_unchanged": true,
+      "source_inventory_scope": "simulator/FAM Python sources, including tests"
+    },
+    {
+      "evidence_file": "reserve-promoted-green/result.json",
+      "sha256": "4d8854c1d7c189f23e7ab698def416212965cde0a7b0ab420d519a5b9cc00c3a",
+      "phase": "reserve-promoted-green",
+      "exit": 0,
+      "cases": 96,
+      "outcomes": {
+        "passed": 96
+      },
+      "guard_denials": 0,
+      "source_snapshots": 174,
+      "sources_unchanged": true,
+      "source_inventory_scope": "simulator/FAM Python sources, including tests"
+    },
+    {
+      "evidence_file": "reserve-broader-simulator-green/result.json",
+      "sha256": "1ec639e8a41b219528f1e5038af867f0c575d0575e715a36a24c3a695682a65d",
+      "phase": "reserve-broader-simulator-green",
+      "exit": 0,
+      "cases": 1019,
+      "outcomes": {
+        "passed": 1019
+      },
+      "guard_denials": 0,
+      "source_snapshots": 174,
+      "sources_unchanged": true,
+      "deselected_exact_ids": [
+        "modules/foundups/simulator/tests/test_sse_server.py::test_sim_events_endpoint_denies_without_invite_key",
+        "modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_denies_when_protected",
+        "modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_allows_with_valid_invite"
+      ],
+      "source_inventory_scope": "simulator/FAM Python sources, including tests"
+    }
+  ],
+  "test_scope": "All GREEN selections overlap; do not add 113 + 96 + 1019. Original seven test ASTs and 397-line legacy BTCReserve AST are preserved; exact frozen 89 oracles promoted. The 17 held-outs remain external. Credential/effect guards and real scratch state are not OS/native confinement.",
+  "controlled_trace_qualification": {
+    "status": "PASS_WITHIN_FROZEN_PROCESS_PROFILE",
+    "evidence": {
+      "evidence_file": "controlled-trace-parity-result.json",
+      "sha256": "1e065c1613c5f470fb47a4303a3ddb97a8e42c3c81846ac9fcfe344e585aa331"
+    },
+    "profile_freeze": {
+      "evidence_file": "controlled-profile-freeze.json",
+      "sha256": "5c768fb46bae7921ebd8da315b70314c5e1035f5d1bc945966544d830bc3621f"
+    },
+    "runner_sha256": "62839898b03da5b858d03c0463f98f252248e2246adf4b5a3cb0ea23240bcfa0",
+    "case_sha256": "3506ad47741e75e7780c91620b7e75d1809e7ce089063d6ae5d149cce108c993",
+    "reference_actual_head": "fb58cd530d7b6887ce6218af282cb6ee7382ded5",
+    "candidate_actual_base": "4c96d6b17429226248c3a82de5544262e773c41e",
+    "runs": [
+      {
+        "phase": "controlled-reference-fb58",
+        "result_sha256": "75f2cee58e010f75d0476d15ba223e57e7cd34d23a0b7f8e629199c7900a600e",
+        "trace_sha256": "672d12c9d8fb6286624ea892fb3a5d0315c475ee45f8c83c9a271ba4328f0ff1",
+        "sources_stable": true,
+        "guard_denials": 0,
+        "passed": 1
+      },
+      {
+        "phase": "controlled-quote-candidate-1",
+        "result_sha256": "1190a7d7cf1168904ef392e3623f50aa41c2394576fae92a72f3498d86fe4b79",
+        "trace_sha256": "672d12c9d8fb6286624ea892fb3a5d0315c475ee45f8c83c9a271ba4328f0ff1",
+        "sources_stable": true,
+        "guard_denials": 0,
+        "passed": 1
+      },
+      {
+        "phase": "controlled-quote-candidate-2",
+        "result_sha256": "07f65c02179268d183f9ffeffc3f49f128f9977e1597cdba5f3eb21d5b3a62e7",
+        "trace_sha256": "672d12c9d8fb6286624ea892fb3a5d0315c475ee45f8c83c9a271ba4328f0ff1",
+        "sources_stable": true,
+        "guard_denials": 0,
+        "passed": 1
+      }
+    ],
+    "all_complete_trace_bytes_equal": true,
+    "normalization": "None; all emitted fields and complete raw bytes compared, no ignored monetary fields",
+    "scenario": {
+      "ticks": 240,
+      "founder_agents": 3,
+      "user_agents": 8,
+      "foundups_created": 6,
+      "paid_simulated_tasks": 214,
+      "epochs": 24,
+      "fi_outstanding": 6548.0
+    },
+    "process_profile": {
+      "python": "3.12.10",
+      "flags": [
+        "-P",
+        "-s"
+      ],
+      "PYTHONHASHSEED": "710007",
+      "fresh_process": true,
+      "credential_stripped_environment": true
+    },
+    "limitations": [
+      "The actual reference ran fb58, not 4c96; runtime source equivalence was separately checked.",
+      "One finite non-AI scenario, not config.seed-only portability, all model states or economic correctness.",
+      "The new observer is not used by existing model/fee consumers. Matching trace shows no observed change to that path, not active conversion, authenticated backing or settlement.",
+      "Exactly three repeated scenario runs use one retained frozen fixture. They are not additional distinct regression cases and are not added to 113/96/1019 counts."
+    ],
+    "reference_simulator_fam_python_sources174_equivalent_candidate_base": true,
+    "source_inventory_scope": "174 simulator/FAM Python source snapshots, including tests; distinct from the 1,478-member backend runtime closure."
+  },
+  "predecessor": {
+    "pr": 2285,
+    "resulting_main": "fb58cd530d7b6887ce6218af282cb6ee7382ded5",
+    "tree": "a40b2356d993e7455e51052e8bfa0e6d1ef6a80a",
+    "pr_checks_passed": 23,
+    "main_checks_passed": 21,
+    "pc": "Separate source/preservation qualification passed",
+    "holo_semantic": "CURRENT/no gap, committed_head_only at exactfb58; no current4c96/futurecandidate claim",
+    "holo_generation": "sha256:6b6d5cecdfa36e2fdef69843783ebceca3f8cb3d3a4545c6fe27ebc5d63bf494",
+    "holo_lexical_bundle": "UNKNOWN/gaptrue retained separately",
+    "runtime_environment_exact_closure_verified": false,
+    "owned_runtime_cleanup": true
+  },
+  "retrieval": {
+    "actual_base": "4c96 lexical bundle UNKNOWN/gaptrue; zero owner attempts, no reindex.",
+    "reference": "Semantic fb58 CURRENT/no gap; root verified all 174 simulator/FAM Python source blobs, including tests, equal docs-only 4c96 before implementation. This inventory is not the 1,478-member backend runtime closure."
+  },
+  "packaging": {
+    "status": "LOCAL_PACKAGE_CHECKS_PASS",
+    "evidence": {
+      "evidence_file": "canonical-packaging/package-result.json",
+      "sha256": "1188d3348f1c45b2fca320f9811f00c2c019876c80d5081a8dd691afb73c75a7"
+    },
+    "tested_binding": "Prepared working tree plus exact five staged source/test/manifest/pin entries; not relabelled as a later committed-head run",
+    "manifest": {
+      "canonical_before": "aa427f95b54afa093d42f75931a2928a4963245a9fad4103ae3d9b9a735b36a4",
+      "canonical_after": "f6b27bbb69af8429b3e3181b6fc785bbe1af622dea4831128d9fe4e78e3b18a5",
+      "members": 1478,
+      "member_list_sha256": "c16b85ce0b3eb17f802063625f6fccf1a77f42826f2e82ccb3afecbf41c570cc",
+      "same_ordered_members": true,
+      "all_non_runtimehash_fields_unchanged": true,
+      "changed_binding": {
+        "path": "modules/foundups/simulator/economics/btc_reserve.py",
+        "before": "c09840bffdcb51e2ca5e763a4c568c54e38ad146596fedbf975a9a21d738eea9",
+        "after": "9c3ff563c03a650c1e0b3baad79eaed7babb953d0e865361f736db7d1e24d594"
+      },
+      "schema": "reddog_backend_manifest.v3",
+      "api": 2,
+      "graph": 2,
+      "lf_bytes": 334222,
+      "crlf_bytes": 337251,
+      "unchanged_caps": {
+        "manifest_bytes": 337920,
+        "per_source_bytes": 2097152,
+        "total_source_bytes": 33554432,
+        "runtime_members": 1478
+      },
+      "raw_sha256": "fda6c2e9457432ec76f65d676bd125a89996b2457a30470390b8d550877669f6",
+      "git_lf_sha256": "fda6c2e9457432ec76f65d676bd125a89996b2457a30470390b8d550877669f6"
+    },
+    "python": {
+      "passed": 8,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "exact_cases": [
+        {
+          "id": "scripts.tests.test_generate_reddog_backend_manifest::test_package_initializers_resolve_relative_imports_from_their_package",
+          "outcome": "passed"
+        },
+        {
+          "id": "scripts.tests.test_generate_reddog_backend_manifest::test_generated_closure_binds_executable_and_dynamic_load_sentinels",
+          "outcome": "passed"
+        },
+        {
+          "id": "scripts.tests.test_generate_reddog_backend_manifest::test_generated_closure_binds_isolated_acceptance_entrypoint",
+          "outcome": "passed"
+        },
+        {
+          "id": "scripts.tests.test_generate_reddog_backend_manifest::test_newly_tracked_imported_runtime_dependency_cannot_be_omitted",
+          "outcome": "passed"
+        },
+        {
+          "id": "scripts.tests.test_generate_reddog_backend_manifest::test_untracked_local_import_fails_closed",
+          "outcome": "passed"
+        },
+        {
+          "id": "scripts.tests.test_generate_reddog_backend_manifest::test_checked_in_manifest_matches_independent_generation",
+          "outcome": "passed"
+        },
+        {
+          "id": "scripts.tests.test_generate_reddog_backend_manifest::test_extension_javascript_is_package_bound_not_backend_materialized",
+          "outcome": "passed"
+        },
+        {
+          "id": "scripts.tests.test_generate_reddog_backend_manifest::test_staged_index_manifest_is_self_consistent",
+          "outcome": "passed"
+        }
+      ],
+      "id_digest_domain": "SHA256 of compact ASCII JSON sorted ID list",
+      "exact_id_sha256": "c79331b519f932cabfd7a2951af684db0d183e55d404ffaaef6699fda9221be4",
+      "snapshot_count": 1485,
+      "source_unchanged": true,
+      "staged_preflight_and_post_run_pins_match": true
+    },
+    "node": {
+      "entrypoints": [
+        {
+          "owner": "test_backend_compatibility_contract.js",
+          "exit": 0,
+          "stdout_sha256": "284ab95c114e6e81c5337c017161d1e988b1bbb15c27ee32b8e6877a555f4570",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "owner": "test_backend_compatibility_preflight.js",
+          "exit": 0,
+          "stdout_sha256": "ba06b79af837dfa262685430ff8b660baa0b14603e0bb63f1f8f64d58dab220f",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "owner": "test_holoindex_blocked_request_recovery.js",
+          "exit": 0,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "sources_unchanged": true,
+      "scope": "Three existing entrypoints may import overlapping suites; no summed unique JS-case count claimed"
+    },
+    "registry": {
+      "exit": 0,
+      "owners": 1794,
+      "quarantined": 260,
+      "unchanged": true,
+      "sha256": "c527ab0a8d21b27f9be84a1977b9cf9de7440692a14593cf0138e4b570ca62c6"
+    },
+    "runtime_size": {
+      "members": 1478,
+      "total_normalized_source_bytes": 19785203,
+      "largest_normalized_source_bytes": 155360,
+      "all_preflight_hashes_stable": true
+    },
+    "artifact_bindings": [
+      {
+        "role": "generation",
+        "evidence_file": "canonical-packaging/generation/result.json",
+        "sha256": "e30e0c231717bee50df26590569da947cdc8ed7038eaabeea6f4029f4d793f0f"
+      },
+      {
+        "role": "generation_commands",
+        "evidence_file": "canonical-packaging/generation/commands.json",
+        "sha256": "cf7695a872ba14fe13bb9b86dd963f097198a2be3c927baa24b05bea28a7c776"
+      },
+      {
+        "role": "harness_provenance",
+        "evidence_file": "canonical-packaging/harness-provenance.json",
+        "sha256": "206024e3dbe167f20fc2084611ddc9be15cf9a4ce5d59e7f25152b75d6d47d56"
+      },
+      {
+        "role": "runtime_size_preflight",
+        "evidence_file": "canonical-packaging/runtime-size-preflight.json",
+        "sha256": "1c71c4b4246957205c1ed42e53b1899dff3190d2d6233a0e095391d50bc513f8"
+      },
+      {
+        "role": "staged_five_path_preflight",
+        "evidence_file": "canonical-packaging/python8-staged-preflight.json",
+        "sha256": "c6bdd51c32728b4f45fc4fd0f7a8c35c9cdcbddd25bef8a30f58e2d1053c2c17"
+      },
+      {
+        "role": "python8_result",
+        "evidence_file": "canonical-packaging/current-manifest-regression/manifest-consumer/result.json",
+        "sha256": "ef590451eed961e5bf202bc966ff74096af3286874df7c42ab4994e156ca4064"
+      },
+      {
+        "role": "python8_junit",
+        "evidence_file": "canonical-packaging/current-manifest-regression/manifest-consumer/junit.xml",
+        "sha256": "c9c19c72e96a000fec66dbfca9831a88c5d11c7a8c71e16be4402872bc40acbe"
+      },
+      {
+        "role": "node3_result",
+        "evidence_file": "canonical-packaging/node-manifest-checks/result.json",
+        "sha256": "a2aba59cbbd1fd97b10a9a2a37a2d91ec7bd6b2866732ebe05b3290efc7c714d"
+      },
+      {
+        "role": "registry_check",
+        "evidence_file": "canonical-packaging/registry-check/result.json",
+        "sha256": "7f2e57b8174297a6485744025b036a0a3443b51176fd67a9f68f79f7f319e7f7"
+      }
+    ],
+    "limits": [
+      "Unchanged credential-stripped local harnesses; Python socket guard is process instrumentation, not OS confinement",
+      "No unsupported numerical zero-attempt metric inferred where a harness has no counter",
+      "No installed-runtime, authenticated provider, funding, live chain, global unit resolution or deployment claim",
+      "Root owns remaining docs/index/commit/security/hosted/main/PC qualification; no worker source/test oracle change"
+    ]
+  },
+  "activation": "BLOCKED",
+  "non_guarantees": [
+    "No atomic multiscalar capture under concurrent unsynchronized writes; host serializes observation",
+    "No mutable reserve reference or unrelated USD/inflow state in record",
+    "No public constructor, digest or frozen instance grants trust to future consumers",
+    "No Mesa, fee carry, default BTCReserve property, global UPS-unit, token or chain changes",
+    "No authenticated source, oracle freshness, consumer admission, unique consumption, funding, custody, signing, broadcast, token issuance or chain settlement.",
+    "No global asset precision, supply-cap, mined/staked issuance, fee/rounding or accounting-unit decision. Work bounds are format limits only.",
+    "New API rejects zero BTC with outstanding UPS; both conflicting legacy property views remain unchanged.",
+    "A frozen public record, digest, context_id, tick or constructor grants no trusted authority."
+  ],
+  "evidence_policy": "Only retained evidence filenames and content hashes are public; private host paths, credentials and full runtime logs are excluded. Portable evidence is an observation, not an issuer or independent authority.",
+  "resources": {
+    "module_lines": 597,
+    "module_ceiling": 620,
+    "record_lines": 13,
+    "record_ceiling": 20,
+    "public_function_lines": 29,
+    "public_function_ceiling": 40,
+    "private_helpers_lines": [
+      11,
+      6,
+      6
+    ],
+    "private_helpers_max_count": 3,
+    "each_private_helper_ceiling": 25,
+    "legacy_BTCReserve_lines": 397,
+    "legacy_class_ast_sha256": "19141141a6d3b25099538fb07919e62f358dcf43129efa9d1f97d842764d2361",
+    "legacy_class_unchanged": true,
+    "test_owner_lines": 285,
+    "test_ceiling": 300,
+    "new_runtime_members": 0,
+    "new_test_owners": 0,
+    "README_lines_and_ceiling": 1043
+  },
+  "documentation_contract_checks": {
+    "status": "PASS",
+    "evidence": {
+      "evidence_file": "reserve-doc-contracts/result.json",
+      "sha256": "621597b312b12c59ffb27ed916cb29a615facec6e8f5ccdee33d98b604bb9a8a"
+    },
+    "cases": 6,
+    "outcomes": {
+      "passed": 6
+    },
+    "guard_denials": 0,
+    "simulator_fam_python_source_snapshots": 174,
+    "sources_unchanged": true,
+    "scope": "Existing economic documentation, governing mirror, source-map and event alignment cases; overlaps the broader 1,019. Not every Markdown link or a security certification."
+  }
+}

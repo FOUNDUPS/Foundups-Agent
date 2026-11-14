@@ -1,0 +1,132 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "f11a49b8b35a971c467f33fc06827fbcb03cf2a3"
+  },
+  "execution_id": "HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_WHEEL_ADMISSION_PHASE2C1",
+  "execution_plane": "local_tools_and_wsp00_subagent_audit",
+  "outcome": "completed",
+  "system_verdict": {
+    "slice": "phase2c1_reviewed_packaging_wheel_admission",
+    "reviewed_wheel": "packaging-26.0-py3-none-any.whl",
+    "reviewed_wheel_bytes": 74366,
+    "reviewed_wheel_sha256": "b36f1fef9334a5588b4166f8bcd26a14e521f2b55e6b9de3aaa80d3ff7a37529",
+    "admission": "held_descriptor_strict_archive_and_distribution_pass",
+    "source_generation": "not_implemented_phase2c2",
+    "dependency_materialization": "not_invoked",
+    "builder_runtime_authenticated": false,
+    "candidate_activation": false,
+    "holoindex_a_grade": "blocked",
+    "retrieval_quality_rsi": "not_operational"
+  },
+  "wsp15_allocation": {
+    "receipt_id": "sha256:768e7b90e8b63eaac5d6056181e38a002efef15c33a8db88efeada7a55146460",
+    "complexity": 5,
+    "importance": 5,
+    "deferability": 5,
+    "impact": 5,
+    "total": 20,
+    "priority": "P0",
+    "reasoning_tier": "ULTRA",
+    "decision": "admit one reviewed source wheel before any extraction or materialization layer"
+  },
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_87_Code_Navigation_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "WSP_00 detector-backed awakening passed at coherence 0.723 before the Phase 2C1 transaction.",
+      "Governed Holo retrieval was CURRENT at exact base HEAD f11a49b8b35a971c467f33fc06827fbcb03cf2a3 with no gap, no reindex, and generation sha256:19d1119ae2d22f3c2ac3b5622703f0286459957976fc36f282b298574e99220d.",
+      "The first three relevant results were the existing model-copy admission, Windows acceptance leases, and packaging ownership proof; no strict raw wheel reader existed.",
+      "Module README, INTERFACE, ROADMAP, ModLogs, test docs, dependency contract, packaging authority, Windows leases, registry, and manifest generator were inspected before their scoped changes."
+    ],
+    "research": [
+      "The PyPI JSON record and files.pythonhosted.org payload agreed on packaging 26.0, 74,366 bytes, and SHA-256 b36f1fef9334a5588b4166f8bcd26a14e521f2b55e6b9de3aaa80d3ff7a37529; this comparison is not cryptographic upstream authentication.",
+      "The reviewed wheel contains 24 regular non-executable deflate members, 276,911 expanded bytes, exact packaging and packaging-26.0.dist-info roots, purelib true, and py3-none-any.",
+      "Existing acceptance_windows retained-directory/file leases and dependency materialization contracts were reused; no new downloader, extractor, publisher, or runtime was invented."
+    ],
+    "micro_pass": [
+      "Authentic pre-implementation collection failed with ModuleNotFoundError for the absent wheel-admission module; that ordering exists in the operator transcript and is not claimed as independently Git-provable.",
+      "The corrected strict-wheel unit suite passed 63 tests in 0.37 seconds, including durable control-byte path and valid raw-archive payload ceiling falsifiers.",
+      "The exact physical O: wheel passed 200 equal admissions in 2.78 seconds with bounded handle/RSS deltas, 24 members, 276,911 expanded bytes, and unchanged source digest.",
+      "All new production modules are 197, 340, and 305 lines; the refactored existing packaging module is 435 lines; no inspected source or test function exceeds 50 lines."
+    ],
+    "macro_pass": [
+      "The complete builder selection with both physical and inherited scale gates passed 142 tests with one expected absent O:/E pinned-Git-image skip in 29.79 seconds.",
+      "Generated backend-manifest and WRE registry suites passed 36 tests in 99.08 seconds; registry is current at 1,633 tests / 268 quarantined and both new suites are collectable.",
+      "Backend closure is 1,381 runtime files at f3cdaacf716a115e4c1d411dddab3f6e1c13a83eb27b313c3ef388f9acd99054; two extension compatibility/package-surface tests passed.",
+      "The unrelated sites/ tree remained untracked and untouched."
+    ],
+    "hard_think": [
+      "A fixed digest read from a pathname is insufficient against a local mutation race, so the parent and source file remain leased through parse and final reproof.",
+      "A byte-only parser result cannot truthfully claim a repository-reviewed pin or held source lease; independent review forced a separate private byte proof and public post-reproof admission.",
+      "Source admission is the smallest validated layer; directory publication, extraction, and dependency materialization remain a separate Phase 2C2 transaction."
+    ],
+    "dialectic_sweep": [
+      "Using zipfile.ZipFile(path) was rejected because it reopens mutable path state and accepts a broader archive dialect than the reviewed artifact requires.",
+      "Treating PyPI comparison as authenticated provenance was rejected because no signature or transparency proof is bound.",
+      "The first green was rejected after independent reviews found six accepted Windows-illegal characters, false byte-seam authority, incomplete hostile tests, and missing generated/documentation bindings; every reproducible finding was corrected without weakening the claim.",
+      "A dedicated security subagent was blocked twice by the hosting cybersecurity gate and is not counted as completed evidence; architecture and test/scale verifiers covered the local defensive falsifiers."
+    ],
+    "first_principles": [
+      "Admission proves only that one held byte image equals the reviewed pin and satisfies the exact inert wheel/distribution contract.",
+      "Internal parse evidence and public authority-bearing evidence require different types.",
+      "No future extraction, publication, import, execution, or activation property can be inferred from this receipt."
+    ],
+    "execute": [
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_packaging_distribution_contract.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_strict_wheel_archive.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging_wheel.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_packaging_wheel.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_packaging_wheel_scale.py",
+      "WSP_knowledge/WSP_Test_Registry.json",
+      "scripts/reddog_backend_manifest.json",
+      "extensions/reddog/backend_compatibility_constants.js",
+      "modules/infrastructure/foundups_mcp_bridge/README.md",
+      "modules/infrastructure/foundups_mcp_bridge/INTERFACE.md",
+      "modules/infrastructure/foundups_mcp_bridge/ROADMAP.md",
+      "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+      "modules/infrastructure/foundups_mcp_bridge/tests/README.md",
+      "modules/infrastructure/foundups_mcp_bridge/tests/TestModLog.md",
+      "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_WHEEL_ASSUMPTION_AUDIT_PHASE2C1.md"
+    ]
+  },
+  "nonclaims": [
+    "The reviewed pin is a repository decision, not authenticated official provenance, a signature, or a transparency-log proof.",
+    "The production admission API performs no network access, download, extraction, installation, publication, import, child execution, route change, owner change, or activation.",
+    "No builder-runtime authentication, pre-import loader authority, native-loader closure, subprocess closure, exact-runtime closure, deterministic-effects, or write-denial proof is claimed.",
+    "The 200-admission gate is bounded local repeatability/leak evidence, not production throughput, concurrency, or horizontal-scale proof.",
+    "No candidate build/reproof, HoloIndex A-grade, or retrieval-quality RSI promotion is claimed; Phase 2C2 remains blocked."
+  ],
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_6",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_62",
+    "WSP_84",
+    "WSP_87",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_WHEEL_WSP15_RECEIPT_PHASE2C1.json",
+    "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_WHEEL_WSP97_EXECUTION_RECEIPT_PHASE2C1.json",
+    "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_WHEEL_ASSUMPTION_AUDIT_PHASE2C1.md",
+    "docs/doc_index.json",
+    "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/README.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/TestModLog.md",
+    "WSP_knowledge/WSP_Test_Registry.json",
+    "scripts/reddog_backend_manifest.json"
+  ]
+}

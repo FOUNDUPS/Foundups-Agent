@@ -1,0 +1,123 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "551a7dfdc2b694fd051b3152fb9809fcea17baf5"
+  },
+  "execution_id": "HOLOINDEX_QUERY_RUNTIME_BUILDER_DEPENDENCY_COMPOSITION_PHASE2C2B",
+  "execution_plane": "local_tools_and_wsp00_subagent_audit",
+  "outcome": "completed",
+  "system_verdict": {
+    "slice": "phase2c2b_sequential_builder_dependency_composition",
+    "source_observations": "s1_and_s2_live_reproof",
+    "dependency_materialization": "existing_inert_materializer_composed",
+    "cross_store_atomicity_verified": false,
+    "simultaneous_snapshot_verified": false,
+    "builder_runtime_authenticated": false,
+    "candidate_activation": false,
+    "holoindex_a_grade": "blocked",
+    "retrieval_quality_rsi": "not_operational"
+  },
+  "wsp15_allocation": {
+    "receipt_id": "sha256:26508a9124fb870494fd35bf8798dcef7e0da5f1723db8b785d27cc3a92b336e",
+    "complexity": 5,
+    "importance": 5,
+    "deferability": 5,
+    "impact": 5,
+    "total": 20,
+    "priority": "P0",
+    "reasoning_tier": "ULTRA",
+    "decision": "compose existing inert source and dependency generations sequentially without inventing cross-store authority"
+  },
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+      "WSP_framework/src/WSP_12_Dependency_Management.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "WSP_00 detector-backed awakening passed with 7/7 negative detector passes and coherence 0.707.",
+      "Governed Holo retrieval was CURRENT at exact base 551a7dfdc2b694fd051b3152fb9809fcea17baf5 with no gap, no reindex, and generation sha256:3824e5ad2124c82e2ae15fcdf48ac173cdf67eccef86dae584c3ffde0aaa7b91.",
+      "Retrieval correctly ranked the Phase 2C2a assumption audit and focused interface, then the source verifier, contract, and materializer; generic FoundUp, WSP, and paper hits were noise.",
+      "ROADMAP, ModLog, tests README, TestModLog, dependency materializer, backend generator, and WSP 12 were missing from the bounded semantic result and direct-read before changes; no duplicate authoritative implementation was found."
+    ],
+    "research": [
+      "Phase 2C2a already owns exact wheel-bound source publication and live reproof; the dependency materializer already owns content-addressed inert dependency publication.",
+      "The smallest missing layer was a sequential S1/dependency/S2 coordinator requiring durable S1 equals S2 and source tree digest equals dependency generation ID.",
+      "No new package dependency is introduced; WSP 12 therefore requires no requirements or lockfile change."
+    ],
+    "micro_pass": [
+      "The focused suite passed 19 falsifiers after authentic WindowsPath rejection and two independent type-confusion findings were repaired.",
+      "The public sealed coordinator composed and then fully reused the real reviewed 74,366-byte O: packaging wheel while its digest remained unchanged.",
+      "The two production modules are 226 and 207 lines; the test module is 384 lines; no inspected Python function exceeds 40 lines. The inherited 1,250-line INTERFACE remained unchanged and README decreased by one line."
+    ],
+    "macro_pass": [
+      "The exact 16-file builder/dependency adjacent closure passed 246 tests with seven expected opt-in or host-capability skips in 41.68 seconds.",
+      "Registry and backend-manifest coverage passed 58 tests in 125.30 seconds; WSP 97 validator coverage passed 66 tests with one expected capability skip in 9.01 seconds.",
+      "The WRE test registry is current at 1,636 tests and 269 quarantined entries.",
+      "The authenticated RedDog backend closure is 1,391 runtime files at a5831a36d548792b080aa841ebd308f972668f1daa2dc60b86891f97b5485509.",
+      "The extension backend compatibility contract passed. The pin does not call the coordinator or change conversation, owner, route, query, execution, or VSIX behavior.",
+      "The deterministic 67-file extension package surface passed at 948,777 bytes and sha256:e7196a12e2bac684bcd3ce424e30c4ce2d3299f12eaa97873abc4c2b7e120dd6; no VSIX was emitted for this backend-only slice.",
+      "The unrelated docs/doc_index.json overlay and sites/ tree remained unstaged and untouched by the transaction."
+    ],
+    "hard_think": [
+      "Holding both stores through one coordinator would add lock ordering and still would not prove a filesystem-wide atomic snapshot.",
+      "The source publication-lease field and all three reuse observations require exact booleans so hostile Path values cannot enter public truth fields.",
+      "Composition identity excludes only call-local publication truth; current live source proof is independently mandatory at both observations."
+    ],
+    "dialectic_sweep": [
+      "An outer or nested cross-store lock was rejected because neither materializer exports a retained-lease contract and the new lock cannot supply global filesystem atomicity.",
+      "Rollback or deletion was rejected because a valid content-addressed source remains owned by its completed source transaction when later work fails.",
+      "A persistent composition descriptor was rejected because no consumer requires it yet and it would add an unneeded publication, migration, and reproof surface.",
+      "Independent WSP_00/WSP_97 review found the publication-field type confusion; a second local audit found and closed the same class on reuse observations."
+    ],
+    "first_principles": [
+      "Sequential reproof establishes only that the durable source identity remained equal around one dependency transaction and the two tree identities match.",
+      "Equal content identities do not authenticate an upstream producer, seal imports or child effects, or prove simultaneous-store observation.",
+      "Therefore provenance, signing, install/import/execution, builder/loader/native/subprocess/exact-runtime closure, write denial, activation, A-grade, and retrieval RSI remain false."
+    ],
+    "execute": [
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_dependency_composition_contract.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_dependency_composition.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_dependency_composition.py",
+      "modules/infrastructure/foundups_mcp_bridge/docs/clarity/REDDOG_BUILDER_DEPENDENCY_COMPOSITION_INTERFACE_PHASE2C2B.md",
+      "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_DEPENDENCY_COMPOSITION_ASSUMPTION_AUDIT_PHASE2C2B.md",
+      "scripts/generate_reddog_backend_manifest.py",
+      "scripts/reddog_backend_manifest.json",
+      "WSP_knowledge/WSP_Test_Registry.json",
+      "extensions/reddog/backend_compatibility_constants.js"
+    ]
+  },
+  "nonclaims": [
+    "No cross-store atomicity, simultaneous snapshot, persistent write denial, rollback, deletion, or post-return immutability is proved.",
+    "No official provenance, signature, installation, import, child execution, authenticated builder, loader/native/subprocess/exact-runtime closure, or deterministic effect is proved.",
+    "No owner, route, query, conversation, extension behavior, VSIX, activation, A-grade, or retrieval-quality RSI authority is added."
+  ],
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_6",
+    "WSP_12",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_62",
+    "WSP_84",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_DEPENDENCY_COMPOSITION_WSP15_RECEIPT_PHASE2C2B.json",
+    "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_DEPENDENCY_COMPOSITION_WSP97_EXECUTION_RECEIPT_PHASE2C2B.json",
+    "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_DEPENDENCY_COMPOSITION_ASSUMPTION_AUDIT_PHASE2C2B.md",
+    "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/docs/clarity/REDDOG_BUILDER_DEPENDENCY_COMPOSITION_INTERFACE_PHASE2C2B.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/README.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/TestModLog.md",
+    "WSP_knowledge/WSP_Test_Registry.json",
+    "scripts/reddog_backend_manifest.json"
+  ]
+}

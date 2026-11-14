@@ -35,6 +35,37 @@
   transform: translateY(0);
 }
 
+/* Public and admitted products reuse the account plane's modal owner. */
+.account-plane:is([data-reddog-mode="public-discovery"], [data-reddog-mode="product-discovery"]) {
+  max-height: 90vh;
+  max-height: 90dvh;
+  overscroll-behavior: contain;
+}
+.account-plane:is([data-reddog-mode="public-discovery"], [data-reddog-mode="product-discovery"]):not(.open) {
+  visibility: hidden;
+}
+.account-plane:is([data-reddog-mode="public-discovery"], [data-reddog-mode="product-discovery"]) [data-reddog-close] {
+  min-width: 44px;
+  min-height: 44px;
+}
+.account-plane:is([data-reddog-mode="public-discovery"], [data-reddog-mode="product-discovery"]) [data-reddog-discovery] {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Hide member UI before boot and after revocation. The member runtime alone
+   selects admitted presentation after its actual stored account checks. */
+.account-plane[data-reddog-mode="product-discovery"] [data-reddog-browse-rows],
+.account-plane[data-reddog-mode="product-discovery"] [data-reddog-concierge],
+.account-plane[data-reddog-mode="product-discovery"] [hidden],
+.account-plane[data-reddog-mode="product-discovery"]:not([data-reddog-admitted="true"]) :is(
+  [data-reddog-state], [data-reddog-identity], [data-reddog-foundups],
+  [data-reddog-invites], [data-reddog-options], [data-reddog-tools],
+  [data-reddog-channels], [data-reddog-briefing], [data-reddog-recommendations],
+  [data-reddog-saved], [data-reddog-history]
+) {
+  display: none !important;
+}
+
 /* Drag handle */
 .account-plane-handle {
   display: flex;

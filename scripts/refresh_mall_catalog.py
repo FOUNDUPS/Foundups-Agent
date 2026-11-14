@@ -5,6 +5,8 @@ Refresh Mall Video Catalog - Update channel avatars and video counts.
 SAFETY: Dry-run by default. Use --apply to actually write changes.
 
 Usage:
+    python scripts/refresh_mall_catalog.py --scoped-only --apply # Build reviewed public video projections offline
+    python scripts/refresh_mall_catalog.py --audit-scoped-source hpc # Read-only candidate reconciliation
     python scripts/refresh_mall_catalog.py --info-only          # Preview: avatars + counts (13 units)
     python scripts/refresh_mall_catalog.py --info-only --apply  # Apply: avatars + counts
     python scripts/refresh_mall_catalog.py --delta              # Preview: new videos only (~100 units)
@@ -20,6 +22,8 @@ Recommended workflow:
 
 import json
 import logging
+import os
+import re
 import sys
 from pathlib import Path
 from datetime import datetime
@@ -28,16 +32,13 @@ from datetime import datetime
 REPO_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-from modules.platform_integration.youtube_auth.src.youtube_auth import get_authenticated_service
-from modules.communication.youtube_channel_pull.src.channel_puller import (
-    fetch_channel_info,
-    fetch_channel_videos,
-)
-
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
 
 CATALOG_PATH = REPO_ROOT / "public" / "member" / "mall-video-catalog.json"
+SCOPED_CATALOG_PATH = CATALOG_PATH.with_name("mall-public-video-catalog.json")
+SCOPED_PROJECTIONS = ("modules/foundups/hpc/mall_projection.json",)
+SCHUMER_OUT = re.compile(r"\bschumer[\s_-]*out\b", re.IGNORECASE)
 
 
 def load_catalog() -> list:
@@ -68,6 +69,174 @@ def save_catalog(catalog: list, dry_run: bool = True) -> None:
     logger.info(f"Saved catalog to {CATALOG_PATH}")
 
 
+def project_public_video_lanes(catalog: list, repo_root: Path = REPO_ROOT) -> tuple[list, dict]:
+    """Build public-only media lanes from reviewed records and canonical identities."""
+    def read_json(relative_path):
+        return json.loads((repo_root / relative_path).read_text(encoding="utf-8"))
+
+    registry = read_json("modules/foundups/foundup_registry.json")["entities"]
+    entries = {entry["foundup_id"]: entry for entry in registry}
+    lanes = {entry["foundup_id"]: entry for entry in catalog}
+    scoped = {}
+    for path in SCOPED_PROJECTIONS:
+        config = read_json(path)
+        foundup_id = config["foundup_id"]
+        entry = entries[foundup_id]
+        manifest = read_json(entry["manifest_path"])
+        source = lanes[config["source_foundup_id"]]
+        if (manifest["foundup_id"] != foundup_id or entry["invite_required"]
+                or manifest["entry_url"] or source["source_type"] != "youtube_channel"):
+            raise ValueError(f"Invalid public video projection contract for {foundup_id}")
+
+        reviewed = {}
+        for video in config["videos"]:
+            video_id = video["video_id"]
+            if video_id in reviewed or not re.fullmatch(r"[A-Za-z0-9_-]{11}", video_id):
+                raise ValueError(f"Invalid or duplicate YouTube ID for {foundup_id}")
+            reviewed[video_id] = {
+                "video_id": video_id,
+                "title": video["title"],
+                "thumbnail_url": f"https://i.ytimg.com/vi/{video_id}/oardefault.jpg",
+                "embed_url": f"https://www.youtube.com/embed/{video_id}",
+                "source_url": f"https://www.youtube.com/shorts/{video_id}",
+                "timestamp": video["timestamp"],
+                "duration_seconds": video["duration_seconds"],
+            }
+        if not reviewed:
+            raise ValueError(f"Public video projection {foundup_id} has no reviewed videos")
+
+        # Relate the derived collection without rewriting the general source feed.
+        lanes[source["foundup_id"]] = {
+            **source,
+            "related_lanes": list(dict.fromkeys([*source["related_lanes"], foundup_id])),
+        }
+        videos = [
+            {
+                **reviewed[video["video_id"]],
+                "editorial_label": video["editorial_label"],
+                "source_label": source["entity"],
+            }
+            for video in config["videos"]
+        ]
+        previous = lanes.get(foundup_id)
+        lane = {
+            "foundup_id": foundup_id,
+            "title": manifest["name"],
+            "creator": source["creator"],
+            "creator_id": source["creator_id"],
+            "creator_display": source["creator_display"],
+            "entity": entry["display_name"],
+            "source_type": "derived",
+            "source_id": source["source_id"],
+            "source_handle": source["source_handle"],
+            "parent_channels": [source["foundup_id"]],
+            "derivation_method": "manual_curation",
+            "category": manifest["category"],
+            "tags": ["012-lane", "political-media", config["topic"].lstrip("#").lower()],
+            "topic_family": "media",
+            "geo": "Global",
+            "status": "active",
+            "display_order": previous["display_order"] if previous else max(
+                item["display_order"] for item in lanes.values()
+            ) + 1,
+            "related_lanes": [source["foundup_id"]],
+            "tagline": manifest["tagline"],
+            "description": manifest["description"],
+            "tier": manifest["tier"],
+            "lifecycle_stage": manifest["lifecycle_stage"],
+            "launch_readiness": manifest["launch_readiness"],
+            "poster_url": videos[0]["thumbnail_url"],
+            "video_count": len(videos),
+            "videos": videos,
+        }
+        # The global Mall offers discovery. Playback belongs to the fixed public field.
+        lanes[foundup_id] = {**lane, "videos": [], "video_count": 0, "public_poc_url": entry["poc_url"]}
+        scoped[foundup_id] = {
+            "lane": lane,
+            "identity": config["identity"],
+            "topic": config["topic"],
+            "credit": source["entity"],
+            "voice_resource_url": config["voice_resource_url"],
+            "disclosure": config["disclosure"],
+        }
+    return list(lanes.values()), scoped
+
+
+def audit_scoped_youtube_source(youtube, channel_id: str) -> dict:
+    """Enumerate public uploads and inspect all available snippets in 50-ID batches."""
+    channels = youtube.channels().list(
+        part="contentDetails,statistics", id=channel_id,
+    ).execute()["items"]
+    if len(channels) != 1:
+        raise ValueError("Expected one public source channel")
+    channel = channels[0]
+    playlist = channel["contentDetails"]["relatedPlaylists"]["uploads"]
+    ids, seen, duplicates, page_tokens = [], set(), [], set()
+    token, pages, raw_count = None, 0, 0
+    while True:
+        params = {"part": "contentDetails", "playlistId": playlist, "maxResults": 50}
+        if token:
+            params["pageToken"] = token
+        response = youtube.playlistItems().list(**params).execute()
+        pages += 1
+        for item in response.get("items", []):
+            raw_count += 1
+            video_id = item["contentDetails"]["videoId"]
+            if video_id in seen:
+                duplicates.append(video_id)
+            else:
+                ids.append(video_id)
+                seen.add(video_id)
+        token = response.get("nextPageToken")
+        if not token:
+            break
+        if token in page_tokens:
+            raise ValueError("Repeated uploads page token")
+        page_tokens.add(token)
+
+    returned, candidates = set(), []
+    non_public_count = 0
+    for offset in range(0, len(ids), 50):
+        batch = ids[offset:offset + 50]
+        response = youtube.videos().list(
+            part="snippet,status,contentDetails", id=",".join(batch),
+        ).execute()
+        for video in response.get("items", []):
+            video_id = video["id"]
+            if video_id not in batch or video_id in returned:
+                raise ValueError("Unexpected YouTube video metadata response")
+            returned.add(video_id)
+            status = video["status"]
+            if status.get("privacyStatus") != "public":
+                non_public_count += 1
+                continue
+            snippet = video["snippet"]
+            fields = [
+                key for key in ("title", "description")
+                if SCHUMER_OUT.search(snippet.get(key, ""))
+            ]
+            if any(SCHUMER_OUT.search(tag) for tag in snippet.get("tags", [])):
+                fields.append("tags")
+            if not fields:
+                continue
+            candidates.append({
+                "video_id": video_id, "title": snippet["title"], "timestamp": snippet["publishedAt"],
+                "matched_fields": fields, "source_channel_match": snippet.get("channelId") == channel_id,
+                "privacy": status.get("privacyStatus"), "embeddable": status.get("embeddable"),
+                "duration": video["contentDetails"].get("duration"),
+                "region_restriction": video["contentDetails"].get("regionRestriction"),
+                "shorts_candidate_url": f"https://www.youtube.com/shorts/{video_id}",
+            })
+    return {
+        "source_channel_id": channel_id, "uploads_playlist": playlist,
+        "channel_video_count": int(channel.get("statistics", {}).get("videoCount", 0)),
+        "pages": pages, "playlist_items": raw_count, "unique_ids": len(ids),
+        "duplicate_ids": duplicates, "missing_metadata_ids": [v for v in ids if v not in returned],
+        "non_public_metadata_count": non_public_count,
+        "candidates": sorted(candidates, key=lambda v: v["timestamp"], reverse=True),
+    }
+
+
 def refresh_catalog(
     fetch_videos: bool = True,
     fetch_all: bool = False,
@@ -88,6 +257,12 @@ def refresh_catalog(
         return
 
     logger.info(f"Loaded {len(catalog)} entries from catalog")
+
+    from modules.communication.youtube_channel_pull.src.channel_puller import (
+        fetch_channel_info,
+        fetch_channel_videos,
+    )
+    from modules.platform_integration.youtube_auth.src.youtube_auth import get_authenticated_service
 
     # Get YouTube service
     try:
@@ -172,6 +347,8 @@ def refresh_catalog(
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="Refresh Mall Video Catalog")
+    parser.add_argument("--scoped-only", action="store_true", help="Project reviewed public lanes without YouTube credentials")
+    parser.add_argument("--audit-scoped-source", choices=("hpc",), help="Read-only official YouTube candidate audit")
     parser.add_argument("--full", action="store_true", help="Fetch ALL videos (quota heavy)")
     parser.add_argument("--info-only", action="store_true", help="Only fetch channel info (cheap) - RUN ONCE")
     parser.add_argument("--delta", action="store_true", help="Only fetch NEW videos since last run (efficient)")
@@ -181,7 +358,38 @@ def main():
     dry_run = not args.apply
     mode_suffix = "" if args.apply else " [DRY-RUN]"
 
-    if args.info_only:
+    if args.audit_scoped_source:
+        if args.scoped_only or args.info_only or args.delta or args.full or args.apply:
+            parser.error("--audit-scoped-source is read-only and must run alone")
+        configs = [json.loads((REPO_ROOT / path).read_text(encoding="utf-8")) for path in SCOPED_PROJECTIONS]
+        config = next((item for item in configs if item["foundup_id"] == args.audit_scoped_source), None)
+        if not config:
+            parser.error("Unknown scoped projection")
+        source = next((item for item in load_catalog() if item["foundup_id"] == config["source_foundup_id"]), None)
+        if not source or source["source_type"] != "youtube_channel":
+            parser.error("The configured source is not a public YouTube channel lane")
+        api_key = os.environ.get("YOUTUBE_API_KEY")
+        if not api_key:
+            parser.error("--audit-scoped-source requires an existing public Data API key in YOUTUBE_API_KEY")
+        try:
+            from googleapiclient.discovery import build
+
+            # Public Data API only. This audit never loads owner OAuth sessions.
+            youtube = build("youtube", "v3", developerKey=api_key, cache_discovery=False)
+            print(json.dumps(audit_scoped_youtube_source(youtube, source["source_id"]), indent=2))
+        except Exception as error:
+            parser.exit(1, f"Scoped source audit incomplete: {type(error).__name__}\n")
+    elif args.scoped_only:
+        if args.info_only or args.delta or args.full:
+            parser.error("--scoped-only cannot be combined with a YouTube refresh")
+        catalog, scoped = project_public_video_lanes(load_catalog())
+        save_catalog(catalog, dry_run=dry_run)
+        if not dry_run:
+            SCOPED_CATALOG_PATH.write_text(
+                json.dumps(scoped, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+            )
+        logger.info(f"Public projections: {', '.join(scoped)}{mode_suffix}")
+    elif args.info_only:
         logger.info(f"Mode: Info only (avatars + counts) - ~13 quota units{mode_suffix}")
         refresh_catalog(fetch_videos=False, dry_run=dry_run)
     elif args.delta:

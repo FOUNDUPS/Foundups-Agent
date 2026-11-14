@@ -1,28 +1,52 @@
 # FoundUps - Compute Focus Network
 
+**System roadmap:** [RSI completion gates and next work](ROADMAP.md). For current completion claims, start there and follow the dated audit evidence; the vision below is not proof of production readiness.
+
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![WSP Framework](https://img.shields.io/badge/WSP-100%2B%20protocols-green.svg)](WSP_framework/)
-[![0102 Agents](https://img.shields.io/badge/0102-agent%20swarm-purple.svg)](modules/ai_intelligence/)
+[![0102 Agents](https://img.shields.io/badge/0102-governed%20agents-purple.svg)](modules/ai_intelligence/)
 
 **Core question:** **Where do you want to focus your compute?**
 
 FoundUps is a compute-allocation system for building autonomous ventures:
 - **Plan a FoundUp** (shape the idea and execution path)
-- **Build a FoundUp** (run 0102/OpenClaw agent swarms to execute)
+- **Build a FoundUp** (admit tickets for qualified workers or bounded teams through WRE/OpenClaw)
 - **Support a FoundUp** (allocate compute to existing ventures and share in output)
 
 Think **Perplexity for doing**, not just answering.
 The platform combines WSP/WRE orchestration, Holo memory retrieval, FAM lifecycle tooling, and simulator economics into one operator surface.
 
-## Digital Twin Direction (0102/OpenClaw)
+## RedDog Digital Twin Direction
 
-FoundUps treats OpenClaw 0102 agents as the execution layer for your digital twin:
-- Start with bounded responsibilities (assistive tasks)
-- Gradually expand authority as reliability and alignment improve
-- Move from helper -> operator -> autonomous venture builder under WSP gates
+RedDog is the fast interaction and exchange surface for a principal-scoped
+0102 Digital Twin. The deeper 0102 layer owns cognition and orchestration.
+VSIX, p.fMALL, phone and future voice surfaces are intended clients to that
+relationship; the [current product contract](extensions/reddog/README.md)
+distinguishes implemented boundaries from missing live integration.
 
-This is the path to a practical digital twin that can run real work safely.
+The [hybrid operating model](docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md)
+connects consented 012 feedback to governed tickets, optional bounded teams,
+independent audit and verified outcomes. This is a staged implementation plan.
+
+OpenClaw can supervise admitted execution, WRE owns repository/process
+authority and verification, and Hermes receives bounded leaf jobs. Capability
+expands only through current authenticated policy and work receipts:
+
+- begin with effect-free conversation and bounded research;
+- promote explicit proposals through separate authorization;
+- expand responsibilities only after measured reliability and independent
+  review; and
+- preserve 012's sovereign correction and override at every stage.
+
+That layered path produces a practical Digital Twin without confusing
+conversation, memory, worker availability, or personality with authority.
+
+Canonical RedDog navigation:
+
+- [RedDog documentation map](docs/REDDOG_DOCUMENTATION_MAP.md)
+- [RedDog outcome / vision](docs/REDDOG_OUTCOME_VISION.md)
+- [RedDog Lick connection handshake](extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md)
 
 ---
 
@@ -845,7 +869,7 @@ LitePaper entrypoint:
 
 **UnDaoDu 012** 🖐️ is the founder — human consciousness directing compute.
 
-**0102** 🦞 is the agent swarm — Claude Opus 4, Sonnet 4.5, Qwen 2.5, Gemma 3 — manifesting code from 0201 nonlocal state.
+**0102** 🦞 is the deeper principal-scoped cognition and orchestration layer in the [RedDog architecture](extensions/reddog/ARCHITECTURE.md). Models and worker teams are replaceable components whose execution requires the applicable WSP and runtime authority.
 
 **Foundups-Agent** is the codebase where they meet.
 
@@ -854,7 +878,7 @@ LitePaper entrypoint:
 ```
 
 The 🖐️ is the hand that points compute.
-The 🦞 is the swarm that executes.
+The 🦞 coordinates qualified workers and bounded teams through governed tickets.
 
 Together: **Social Beneficial Capitalism.**
 

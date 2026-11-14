@@ -52,10 +52,23 @@ def utc_iso(dt: Optional[datetime]) -> Optional[str]:
 # All workers (W1/W4/W5/W6) MUST use these exact strings.
 # Short forms (build, extract, validate, queue) are NOT supported.
 CANONICAL_ACTIONS: frozenset[str] = frozenset({
+    "create_foundup",     # NEW: author a NEW monorepo FoundUp scaffold from a
+                          # validated genesis envelope. Distinct from
+                          # build_foundup/extract_foundup (which operate on an
+                          # EXISTING module). See
+                          # docs/audits/architecture/FOUNDUP_SCAFFOLD_CONTRACT_PHASE1.md.
     "build_foundup",      # W4: Hermes builds FoundUp from spec
     "extract_foundup",    # W4: Hermes extracts FoundUp to external repo
     "validate_foundup",   # W4: Hermes validates FoundUp manifest/gates
     "queue_foundup_job",  # W5: WRE queues job for later execution
+})
+
+# Actions that operate on an EXISTING module (extraction/build). create_foundup
+# MUST NOT be routed to any of these (FOUNDUP_SCAFFOLD_CONTRACT_PHASE1 Section 3,
+# no-alias rule). A future executor branches on the action string BEFORE dispatch.
+EXISTING_MODULE_ACTIONS: frozenset[str] = frozenset({
+    "build_foundup",
+    "extract_foundup",
 })
 
 
@@ -180,6 +193,11 @@ class StatusReasonCode(str, Enum):
     # Failed - Action
     FAIL_UNSUPPORTED_ACTION = "FAIL_UNSUPPORTED_ACTION"
 
+    # Failed - create_foundup (FOUNDUP_CREATE_ACTION_DRYRUN_PHASE1)
+    FAIL_FOUNDUP_ID_EXISTS = "FAIL_FOUNDUP_ID_EXISTS"
+    FAIL_CREATE_ALIASED_TO_EXTRACT = "FAIL_CREATE_ALIASED_TO_EXTRACT"
+    FAIL_ENVELOPE_NOT_GATE_PASSED = "FAIL_ENVELOPE_NOT_GATE_PASSED"
+
     # Unknown
     UNKNOWN = "UNKNOWN"
 
@@ -187,6 +205,32 @@ class StatusReasonCode(str, Enum):
 # ---------------------------------------------------------------------------
 # Policy Flags
 # ---------------------------------------------------------------------------
+
+
+# HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1 (#746):
+# Security/token gate flags are SERVER-AUTHORED ONLY. They MUST NOT be trusted
+# from deserialized (untrusted) job data. PolicyFlags.from_dict forces every
+# field in this frozenset to False regardless of inbound data; server authority
+# comes exclusively from runtime validation write-back in the executor.
+#
+# NOT in this set (preserved across deserialization):
+#   - dry_run_mode: operator-authored; True is the safe/sandbox direction.
+_SERVER_AUTHORED_FLAGS: frozenset = frozenset(
+    {
+        "security_gate_checked",
+        "security_gate_passed",
+        "permission_gate_checked",
+        "permission_gate_passed",
+        "exfoliation_gate_checked",
+        "exfoliation_gate_passed",
+        "wsp_preflight_checked",
+        "wsp_preflight_passed",
+        "capability_token_checked",
+        "capability_token_present",
+        "capability_token_validated",
+        "capability_token_scope_authorized",
+    }
+)
 
 
 @dataclass(slots=True)
@@ -220,7 +264,7 @@ class PolicyFlags:
     wsp_preflight_checked: bool = False
     wsp_preflight_passed: bool = False
 
-    dry_run_mode: bool = False
+    dry_run_mode: bool = True
 
     # HXA24: Capability token policy flags
     capability_token_checked: bool = False
@@ -256,22 +300,42 @@ class PolicyFlags:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> PolicyFlags:
-        """Deserialize from dict."""
+        """Deserialize from dict.
+
+        SECURITY (HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1, #746):
+        Deserialized gate/token state is UNTRUSTED and is FORCED to False.
+        Every field in ``_SERVER_AUTHORED_FLAGS`` (all security/permission/
+        exfoliation/wsp-preflight gate flags and all four capability_token_*
+        flags) is zeroed REGARDLESS of inbound data — a malicious or stale
+        payload can never grant itself a passing gate or a valid token by
+        carrying ``True`` here.
+
+        A direct ``PolicyFlags(...)`` constructor is also only a shape carrier;
+        it is not authority. Live execution must use the signed WRE valve path,
+        not Boolean fields on this public dataclass.
+
+        ONLY ``dry_run_mode`` is preserved from inbound data: it is
+        operator-authored and ``True`` is the safe/sandbox direction.
+        """
+        # Single deserialization chokepoint. Both FoundUpJob.from_dict and
+        # FoundUpJob.__post_init__ route here, so this covers every path.
         return cls(
-            security_gate_checked=bool(data.get("security_gate_checked", False)),
-            security_gate_passed=bool(data.get("security_gate_passed", False)),
-            permission_gate_checked=bool(data.get("permission_gate_checked", False)),
-            permission_gate_passed=bool(data.get("permission_gate_passed", False)),
-            exfoliation_gate_checked=bool(data.get("exfoliation_gate_checked", False)),
-            exfoliation_gate_passed=bool(data.get("exfoliation_gate_passed", False)),
-            wsp_preflight_checked=bool(data.get("wsp_preflight_checked", False)),
-            wsp_preflight_passed=bool(data.get("wsp_preflight_passed", False)),
-            dry_run_mode=bool(data.get("dry_run_mode", False)),
-            # HXA24: Capability token policy flags (backward compatible)
-            capability_token_checked=bool(data.get("capability_token_checked", False)),
-            capability_token_present=bool(data.get("capability_token_present", False)),
-            capability_token_validated=bool(data.get("capability_token_validated", False)),
-            capability_token_scope_authorized=bool(data.get("capability_token_scope_authorized", False)),
+            # Server-authored gate/token flags: forced False (untrusted input
+            # is NOT read). See _SERVER_AUTHORED_FLAGS.
+            security_gate_checked=False,
+            security_gate_passed=False,
+            permission_gate_checked=False,
+            permission_gate_passed=False,
+            exfoliation_gate_checked=False,
+            exfoliation_gate_passed=False,
+            wsp_preflight_checked=False,
+            wsp_preflight_passed=False,
+            capability_token_checked=False,
+            capability_token_present=False,
+            capability_token_validated=False,
+            capability_token_scope_authorized=False,
+            # Operator-authored: preserved (True is the safe/sandbox direction).
+            dry_run_mode=bool(data.get("dry_run_mode", True)),
         )
 
 
@@ -362,6 +426,12 @@ class FoundUpJob:
     OpenClaw and Hermes agree on payload schema per action.
     """
 
+    creation_mode: Optional[str] = None
+    """Creation contract mode. ``create_foundup`` requires ``new_scaffold``."""
+    genesis_envelope_digest: Optional[str] = None
+    """SHA-256 binding to the validated FoundUp genesis envelope."""
+    scaffold_contract_digest: Optional[str] = None
+    """SHA-256 binding to the dry-run FoundUp scaffold contract."""
     # === Compute Metering ===
     compute_tier: str = "freemium"
     """Compute tier: freemium | basic | enterprise. Determines model routing."""
@@ -577,6 +647,9 @@ class FoundUpJob:
             "evidence_refs": self.evidence_refs,
             "policy_flags": self.policy_flags.to_dict(),
             "payload": self.payload,
+            "creation_mode": self.creation_mode,
+            "genesis_envelope_digest": self.genesis_envelope_digest,
+            "scaffold_contract_digest": self.scaffold_contract_digest,
             "compute_tier": self.compute_tier,
             "compute_budget": self.compute_budget,
             "compute_used": self.compute_used,
@@ -612,6 +685,9 @@ class FoundUpJob:
             evidence_refs=data.get("evidence_refs", []),
             policy_flags=PolicyFlags.from_dict(data.get("policy_flags", {})),
             payload=data.get("payload", {}),
+            creation_mode=data.get("creation_mode"),
+            genesis_envelope_digest=data.get("genesis_envelope_digest"),
+            scaffold_contract_digest=data.get("scaffold_contract_digest"),
             compute_tier=data.get("compute_tier", "freemium"),
             compute_budget=data.get("compute_budget"),
             compute_used=data.get("compute_used", 0),
@@ -673,6 +749,9 @@ def create_job(
     intent_id: Optional[str] = None,
     payload: Optional[Dict[str, Any]] = None,
     generate_idempotency: bool = True,
+    creation_mode: Optional[str] = None,
+    genesis_envelope_digest: Optional[str] = None,
+    scaffold_contract_digest: Optional[str] = None,
 ) -> FoundUpJob:
     """
     Factory function to create a new FoundUpJob.
@@ -684,6 +763,9 @@ def create_job(
         intent_id: Source request correlation (optional)
         payload: Action-specific payload (optional)
         generate_idempotency: Auto-generate idempotency key
+        creation_mode: Typed create_foundup mode binding (optional)
+        genesis_envelope_digest: Typed genesis-envelope lineage binding (optional)
+        scaffold_contract_digest: Typed scaffold-contract lineage binding (optional)
 
     Returns:
         FoundUpJob in QUEUED state
@@ -705,4 +787,7 @@ def create_job(
         requested_action=requested_action,
         idempotency_key=idempotency_key,
         payload=payload,
+        creation_mode=creation_mode,
+        genesis_envelope_digest=genesis_envelope_digest,
+        scaffold_contract_digest=scaffold_contract_digest,
     )

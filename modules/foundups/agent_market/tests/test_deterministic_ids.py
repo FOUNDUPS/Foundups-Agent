@@ -6,6 +6,7 @@ WSP References:
 
 import pytest
 
+from modules.foundups.agent_market.src.authorization import CallerAuthorization
 from modules.foundups.agent_market.src.in_memory import (
     DeterministicIdGenerator,
     InMemoryAgentMarket,
@@ -16,6 +17,9 @@ from modules.foundups.agent_market.src.models import (
     Task,
     Verification,
 )
+
+VERIFIER_AUTHORIZATION = CallerAuthorization("verifier_1", frozenset({("f_det", "verifier")}))
+TREASURY_AUTHORIZATION = CallerAuthorization("treasury_1", frozenset({("f_det", "treasury")}))
 
 
 class TestDeterministicIdGenerator:
@@ -219,9 +223,10 @@ class TestInMemoryMarketDeterminism:
                 approved=True,
                 reason="approved",
             ),
+            authorization=VERIFIER_AUTHORIZATION,
         )
 
-        payout = market.trigger_payout("t_det", "treasury_1")
+        payout = market.trigger_payout("t_det", "treasury_1", authorization=TREASURY_AUTHORIZATION)
 
         # Payout ID should be deterministic
         assert payout.payout_id == "pay_0001"

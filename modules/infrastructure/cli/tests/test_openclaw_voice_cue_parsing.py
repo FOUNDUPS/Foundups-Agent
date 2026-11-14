@@ -2,6 +2,14 @@
 Unit tests for OpenClaw voice cue parsing and STT artifact tolerance.
 """
 
+from contextlib import nullcontext
+import subprocess
+import sys
+from types import SimpleNamespace
+
+import numpy as np
+import pytest
+
 from modules.infrastructure.cli.src.openclaw_voice import (
     _control_command,
     _extract_barge_payload,
@@ -9,6 +17,58 @@ from modules.infrastructure.cli.src.openclaw_voice import (
     _is_meaningful_utterance_mode,
     _normalize_stt_aliases,
 )
+
+
+def test_speech_import_does_not_boot_main_menu():
+    result = subprocess.run([sys.executable, "-c",
+        "import sys; import modules.infrastructure.cli.src.openclaw_voice; "
+        "assert 'modules.infrastructure.cli.src.main_menu' not in sys.modules"],
+        capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+
+
+def test_whisper_backend_language_environment_and_override(monkeypatch):
+    from modules.infrastructure.cli.src.openclaw_voice import WhisperSTTBackend
+    monkeypatch.setenv("OPENCLAW_VOICE_STT_LANGUAGE", "ja")
+    backend = WhisperSTTBackend()
+    assert backend.available() and backend._stt.language == "ja"
+    explicit = WhisperSTTBackend(language="en")
+    assert explicit.available() and explicit._stt.language == "en"
+
+
+@pytest.mark.parametrize("decoder", ["modern_string", "modern_list", "legacy_batch"])
+def test_cohere_passes_japanese_to_processor(monkeypatch, decoder):
+    from modules.infrastructure.cli.src import openclaw_voice as voice
+    seen = []
+    class Processor:
+        def __call__(self, audio, **kwargs):
+            seen.append(kwargs)
+            return {"audio_chunk_index": [(0, None)]}
+        def decode(self, tokens, **kwargs):
+            assert kwargs["language"] == "ja"
+            assert kwargs["audio_chunk_index"] == [(0, None)]
+            return "日本語です" if decoder == "modern_string" else ["日本語です"]
+        def batch_decode(self, tokens, **kwargs):
+            return ["日本語です"]
+    processor = Processor()
+    if decoder == "legacy_batch":
+        processor.decode = None
+    model = SimpleNamespace(parameters=lambda: iter([SimpleNamespace(device="cpu")]),
+                            generate=lambda **kw: [[1]])
+    monkeypatch.setitem(sys.modules, "torch", SimpleNamespace(no_grad=nullcontext))
+    monkeypatch.setattr(voice, "_get_cohere_stt_singleton", lambda: (processor, model))
+    result = voice.CohereTranscribeBackend(language="ja").transcribe(np.zeros(16000))
+    assert result == "日本語です" and seen[0]["language"] == "ja"
+
+
+def test_google_uses_japanese_locale(monkeypatch):
+    from modules.infrastructure.cli.src.openclaw_voice import GoogleSTTBackend
+    seen = []
+    monkeypatch.setitem(sys.modules, "speech_recognition", SimpleNamespace(AudioData=lambda *a: a))
+    backend = GoogleSTTBackend(language="ja")
+    backend._recognizer = SimpleNamespace(recognize_google=lambda audio, **kw: seen.append(kw) or "日本語")
+    assert backend.transcribe(np.zeros(16000)) == "日本語"
+    assert seen == [{"language": "ja-JP"}]
 
 
 def test_extract_barge_payload_accepts_standard_cue_prefix():

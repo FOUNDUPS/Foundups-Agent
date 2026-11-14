@@ -74,7 +74,15 @@ Token Naming (STANDARDIZED):
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
+import re
+from dataclasses import dataclass, field, replace
+from contextlib import nullcontext
+from threading import RLock
+
+from .._mesa_epoch import _EpochFunding
+from .epoch_ledger import EpochLedger, _epoch, _number, _identifier, _digest
+from ._token_numeric import _ups_atoms, _ups_atom_lanes
+from ._token_numeric import parse_ups_atoms as parse_ups_atoms
 from enum import IntEnum
 from typing import Dict, List, Optional, Tuple
 
@@ -550,17 +558,156 @@ class EpochDistribution:
         return abs(expected - actual) < 1e-9
 
 
+@dataclass
+class _PositionPlan:
+    position: StakerPosition
+    cumulative: float
+    locked: bool
+    locked_at: Optional[float]
+    target: float
+    initially_locked: bool
+
+
+@dataclass
+class _ParticipantPlan:
+    participant: Participant
+    activity: ActivityLevel
+    balance: float
+    position: Optional[_PositionPlan]
+
+
+def _finite(value):
+    _number(value)
+    return value
+
+
+def _credit(balance, amount):
+    """Refuse completely absorbed credits; this is not exact-money accounting."""
+    result = _finite(_finite(balance) + _finite(amount))
+    if amount > 0 and result <= balance:
+        raise ValueError("positive pool credit is below balance precision")
+    return result
+
+
+def _distribution_copy(result):
+    return replace(result, participant_rewards=dict(result.participant_rewards))
+
+
+def _validate_distribution(result):
+    if type(result) is not EpochDistribution:
+        raise ValueError("expected an epoch distribution")
+    _epoch(result.epoch)
+    for name in EpochDistribution.__dataclass_fields__:
+        if name == "epoch":
+            continue
+        value = getattr(result, name)
+        if name == "participant_rewards":
+            if type(value) is not dict:
+                raise ValueError("expected participant rewards")
+            for participant_id, amount in value.items():
+                _identifier(participant_id)
+                _finite(amount)
+        else:
+            _finite(value)
+
+
+def _atom_identifier(value):
+    if (type(value) is not str or len(value) > 128
+            or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}", value) is None):
+        raise ValueError("atom plan identifiers require bounded ASCII strings")
+    return value
+
+
+def _atom_roster(participants):
+    if type(participants) is not dict or len(participants) > 10_000:
+        raise ValueError("atom planning requires a bounded built-in roster")
+    rows = []
+    for key, person in participants.items():
+        pid = _atom_identifier(key)
+        if (type(person) is not Participant or _atom_identifier(person.participant_id) != pid
+                or type(person.participant_type) is not ParticipantType
+                or type(person.activity_level) is not ActivityLevel):
+            raise ValueError("invalid atom plan participant or classification")
+        if person.staker_position is not None:
+            raise ValueError("native staker positions require an explicit atom migration")
+        rows.append((pid, person.participant_type.value, person.activity_level.value))
+    return tuple(sorted(rows))
+
+
+@dataclass(frozen=True, slots=True)
+class UPSAtomPlan:
+    """Detached prospective allocation data, never a funded receipt or authority."""
+
+    epoch: int
+    foundup_id: str
+    total_reward_atoms: int
+    roster: tuple
+    participant_rewards_atoms: tuple
+    fund_atoms: int
+    source_retained_atoms: int
+
+    def _payload(self):
+        return {"format_version": "foundups.ups-atom-plan.v1", "asset": "UPS",
+                "decimals": 6, "unit_policy": "ups_micro_v1",
+                "epoch": str(self.epoch), "foundup_id": self.foundup_id,
+                "total_reward_atoms": str(self.total_reward_atoms),
+                "roster": [list(row) for row in self.roster],
+                "participant_rewards_atoms": [[pid, str(n)] for pid, n in self.participant_rewards_atoms],
+                "fund_atoms": str(self.fund_atoms),
+                "source_retained_atoms": str(self.source_retained_atoms)}
+
+    @property
+    def identity_sha256(self):
+        return _digest(self._payload())
+
+    def to_dict(self):
+        """Fresh JSON view; decimal strings preserve money beyond JS safe integers."""
+        payload = self._payload()
+        return {**payload, "identity_sha256": _digest(payload)}
+
+
 class PoolDistributor:
-    """Distributes epoch rewards according to WSP 26 pool structure.
+    """Process-local pool effects with optional coordinated epoch evidence."""
 
-    Network 16% = Drip rewards re-injected into the system
-    Fund 4% = Ecosystem fund held for sustainability
-    """
-
-    def __init__(self):
+    def __init__(self, ledger: Optional[EpochLedger] = None, *, funding=None):
+        if ledger is not None and type(ledger) is not EpochLedger:
+            raise ValueError("expected an epoch ledger")
+        if funding is not None and type(funding) is not _EpochFunding:
+            raise ValueError("expected new-run simulation funding")
         self.participants: Dict[str, Participant] = {}
         self.accumulated_fund: float = 0.0
         self.total_drip_distributed: float = 0.0
+        self._ledger = ledger
+        self._lock = RLock()
+        self._epochs = {}
+        self._funding = funding
+        if funding is not None:
+            funding.bind(self)
+
+    def _add(self, left, right):
+        return left + right if self._funding is None else self._funding.add(left, right)
+
+    def _credit(self, balance, amount):
+        return _credit(balance, amount) if self._funding is None else self._add(balance, amount)
+
+    def plan_atom_epoch(self, epoch, total_reward_atoms, *, foundup_id):
+        """Preview ups_micro_v1 on the real roster without admitting or posting funds."""
+        epoch, total = _ups_atoms(epoch), _ups_atoms(total_reward_atoms)
+        context = _atom_identifier(foundup_id)
+        with self._lock, self._ledger._lock if self._ledger else nullcontext():
+            if self._ledger is not None and _atom_identifier(self._ledger.foundup_id) != context:
+                raise ValueError("atom plan context does not match the bound ledger")
+            roster = _atom_roster(self.participants)
+            counts = [[0] * 3 for _ in range(4)]
+            for _, participant_type, activity in roster:
+                for pool in range(participant_type + 1):
+                    counts[pool][activity] += 1
+                counts[3][activity] += 1
+            rewards = tuple((pid, sum(_ups_atom_lanes(total, counts, pt, activity)))
+                            for pid, pt, activity in roster)
+            fund = total * 4 // 100
+            retained = _ups_atoms(total - fund - sum(amount for _, amount in rewards))
+            return UPSAtomPlan(epoch, context, total, roster, rewards, fund, retained)
 
     def register_participant(
         self,
@@ -581,223 +728,243 @@ class PoolDistributor:
             is_genesis_member: Earns on ALL FoundUps (special class, closes at launch)
             staker_position: For anonymous stakers with degressive tier tracking
         """
-        participant = Participant(
-            participant_id=participant_id,
-            participant_type=p_type,
-            activity_level=activity,
-            has_active_membership=has_active_membership,
-            is_genesis_member=is_genesis_member,
-            staker_position=staker_position,
-        )
-        self.participants[participant_id] = participant
+        with self._lock:
+            participant = Participant(
+                participant_id=participant_id,
+                participant_type=p_type,
+                activity_level=activity,
+                has_active_membership=has_active_membership,
+                is_genesis_member=is_genesis_member,
+                staker_position=staker_position,
+            )
+            self.participants[participant_id] = participant
 
-        member_status = ""
-        if is_genesis_member:
-            member_status = " [GENESIS - ecosystem-wide]"
-        elif has_active_membership:
-            member_status = " [MEMBER]"
-        elif staker_position:
-            member_status = f" [STAKER: {staker_position.original_stake_btc:.4f} BTC]"
+            member_status = ""
+            if is_genesis_member:
+                member_status = " [GENESIS - ecosystem-wide]"
+            elif has_active_membership:
+                member_status = " [MEMBER]"
+            elif staker_position:
+                member_status = f" [STAKER: {staker_position.original_stake_btc:.4f} BTC]"
 
-        logger.info(
-            f"[Pool] Registered {participant_id} as {participant.classification} "
-            f"(type={p_type.name}, activity={activity.name}){member_status}"
-        )
-        return participant
+            logger.info(
+                f"[Pool] Registered {participant_id} as {participant.classification} "
+                f"(type={p_type.name}, activity={activity.name}){member_status}"
+            )
+            return participant
+
 
     def update_activity(self, participant_id: str, new_activity: ActivityLevel) -> None:
         """Update a participant's activity level (CABR-driven)."""
-        if participant_id in self.participants:
-            old = self.participants[participant_id].activity_level
-            self.participants[participant_id].activity_level = new_activity
-            logger.info(f"[Pool] {participant_id} activity: {old.name} -> {new_activity.name}")
+        with self._lock:
+            if participant_id in self.participants:
+                old = self.participants[participant_id].activity_level
+                self.participants[participant_id].activity_level = new_activity
+                logger.info(f"[Pool] {participant_id} activity: {old.name} -> {new_activity.name}")
 
-    def distribute_epoch(
-        self,
-        epoch: int,
-        total_ups_rewards: float,
-        foundup_id: Optional[str] = None,
-    ) -> EpochDistribution:
-        """Distribute an epoch's UPS rewards according to pool structure.
 
-        Args:
-            epoch: Epoch number
-            total_ups_rewards: Total UPS to distribute this epoch
-            foundup_id: Optional FoundUp context (for FoundUp Token distribution)
+    def distribute_epoch(self, epoch: int, total_ups_rewards: float,
+                         foundup_id: Optional[str] = None) -> EpochDistribution:
+        """Commit local effects once; exact retries return the original decision."""
+        epoch, identity = _epoch(epoch), _number(total_ups_rewards)
+        if foundup_id is not None:
+            _identifier(foundup_id)
+        with self._lock, self._ledger._lock if self._ledger else nullcontext():
+            previous = self._epochs.get(epoch)
+            if previous is not None:
+                if previous[0] != identity or previous[1] != foundup_id:
+                    raise ValueError("epoch distribution conflicts with existing content")
+                return _distribution_copy(previous[2])
+            if self._epochs and epoch <= max(self._epochs):
+                raise ValueError("new epoch must increase; gaps are allowed")
+            if self._ledger is not None:
+                if foundup_id is not None and foundup_id != self._ledger.foundup_id:
+                    raise ValueError("epoch context does not match ledger")
+                if epoch in self._ledger._by_epoch:
+                    raise ValueError("ledger evidence does not establish pool credit")
+            try:
+                result, people, positions, drip = self._prepare_distribution(epoch, total_ups_rewards)
+                transfer = self._funding.prepare(self, result, people) if self._funding else None
+            except (OverflowError, ZeroDivisionError) as exc:
+                raise ValueError("epoch arithmetic is out of range") from exc
+            snapshot, returned = _distribution_copy(result), _distribution_copy(result)
+            entry, publication = None, None
+            if self._ledger is not None:
+                pools = dict(zip(("un", "dao", "du", "network", "fund"),
+                    (result.un_pool, result.dao_pool, result.du_pool, result.network_pool, result.fund_pool)))
+                entry, publication = self._ledger._prepare_epoch(epoch, total_ups_rewards, pools, result.participant_rewards)
+            epochs = {**self._epochs, epoch: (identity, foundup_id, snapshot, entry)}
+            if publication is not None:
+                self._ledger._publish_epoch(publication)
+            self._publish_distribution(result, people, positions, drip)
+            if transfer is not None:
+                self._funding.publish(transfer)
+            self._epochs = epochs
+        self._log_distribution(result, positions)
+        return returned
 
-        Returns:
-            EpochDistribution with all allocations
-        """
-        result = EpochDistribution(epoch=epoch, total_rewards=total_ups_rewards)
+    def _publish_distribution(self, result, people, positions, drip):
+        for plan in people:
+            plan.participant.activity_level = plan.activity
+            plan.participant.ups_balance = plan.balance
+        for plan in positions.values():
+            plan.position.cumulative_distributions_btc = plan.cumulative
+            plan.position.post_hurdle_locked = plan.locked
+            plan.position.hurdle_locked_at_btc = plan.locked_at
+        self.accumulated_fund = result.fund_accumulated
+        self.total_drip_distributed = drip
 
-        # Calculate pool amounts
-        result.un_pool = total_ups_rewards * POOL_PERCENTAGES["stakeholder_un"]
-        result.dao_pool = total_ups_rewards * POOL_PERCENTAGES["stakeholder_dao"]
-        result.du_pool = total_ups_rewards * POOL_PERCENTAGES["stakeholder_du"]
-        result.network_pool = total_ups_rewards * POOL_PERCENTAGES["network"]
-        result.fund_pool = total_ups_rewards * POOL_PERCENTAGES["fund"]
+    def _position_plan(self, position):
+        if type(position) is not StakerPosition or type(position.post_hurdle_locked) is not bool:
+            raise ValueError("invalid staker position")
+        for value in (position.original_stake_btc, position.total_earned_fi,
+                      position.cumulative_distributions_btc, position.hurdle_target_multiple):
+            _finite(value)
+        if position.hurdle_locked_at_btc is not None:
+            _finite(position.hurdle_locked_at_btc)
+        return _PositionPlan(position, position.cumulative_distributions_btc,
+            position.post_hurdle_locked, position.hurdle_locked_at_btc,
+            _finite(position.hurdle_target_btc), position.post_hurdle_locked)
 
-        # Fund 4% is accumulated (held)
-        self.accumulated_fund += result.fund_pool
-        result.fund_accumulated = self.accumulated_fund
+    def _participant_plans(self):
+        people, positions = [], {}
+        for participant_id, participant in self.participants.items():
+            _identifier(participant_id)
+            if type(participant) is not Participant:
+                raise ValueError("invalid participant")
+            if _identifier(participant.participant_id) != participant_id:
+                raise ValueError("participant identity mismatch")
+            if (type(participant.participant_type) is not ParticipantType
+                    or type(participant.activity_level) is not ActivityLevel):
+                raise ValueError("invalid participant classification")
+            position = participant.staker_position
+            if position is not None and id(position) not in positions:
+                positions[id(position)] = self._position_plan(position)
+            activity = position.get_degressive_tier() if position is not None else participant.activity_level
+            people.append(_ParticipantPlan(participant, activity, _finite(participant.ups_balance),
+                                           positions.get(id(position))))
+        return people, positions
 
-        # Distribute stakeholder pools (80%)
-        self._distribute_stakeholder_pools(result)
+    def _prepare_distribution(self, epoch, total):
+        result = EpochDistribution(epoch=epoch, total_rewards=total)
+        amounts = [_finite(total * _finite(POOL_PERCENTAGES[name])) for name in
+                   ("stakeholder_un", "stakeholder_dao", "stakeholder_du", "network", "fund")]
+        result.un_pool, result.dao_pool, result.du_pool, result.network_pool, result.fund_pool = amounts
+        result.fund_accumulated = self._credit(self.accumulated_fund, result.fund_pool)
+        people, positions = self._participant_plans()
+        self._distribute_stakeholder_pools(result, people)
+        self._distribute_network_drip(result, people)
+        drip = self._credit(self.total_drip_distributed, result.drip_distributed)
+        _validate_distribution(result)
+        return result, people, positions, drip
 
-        # Network 16% is the drip - re-inject as additional rewards
-        self._distribute_network_drip(result)
-
-        logger.info(
-            f"[Pool] Epoch {epoch}: {total_ups_rewards:.2f} UPS distributed, "
-            f"drip={result.drip_distributed:.2f}, fund_total={self.accumulated_fund:.2f}"
-        )
-
-        return result
-
-    def _distribute_stakeholder_pools(self, result: EpochDistribution) -> None:
-        """Distribute the 80% stakeholder pools to participants.
-
-        CRITICAL: Pool shares are divided by count at each tier.
-        Example: 10 people at du tier share the 80% → each gets 8%
-        """
-        pools = {
-            "stakeholder_un": result.un_pool,
-            "stakeholder_dao": result.dao_pool,
-            "stakeholder_du": result.du_pool,
-        }
-
-        # Update staker tiers based on degressive model
-        for p in self.participants.values():
-            p.update_staker_tier()
-
-        # Count participants at each activity level for each pool
-        # This enables proper shared-pool division
-        pool_tier_counts: Dict[str, Dict[ActivityLevel, int]] = {
-            pool_name: {level: 0 for level in ActivityLevel}
-            for pool_name in pools.keys()
-        }
-
-        for p in self.participants.values():
-            for pool_name in p.get_accessible_pools():
-                pool_tier_counts[pool_name][p.activity_level] += 1
-
-        # Distribute pools with proper tier sharing
-        for participant in self.participants.values():
-            total_reward = 0.0
-            du_pool_reward = 0.0  # Track Du pool distribution for hurdle accounting
-
-            for pool_name in participant.get_accessible_pools():
-                pool_amount = pools.get(pool_name, 0.0)
-
-                # Get tier share (80%/16%/4% of pool)
-                tier_share = pool_amount * ACTIVITY_SHARES[participant.activity_level]
-
-                # Divide by count at this tier (critical: shared pool!)
-                count_at_tier = pool_tier_counts[pool_name][participant.activity_level]
-                if count_at_tier > 0:
-                    individual_share = tier_share / count_at_tier
-
-                    # Apply hurdle rate reduction for Du pool stakers
-                    if pool_name == "stakeholder_du" and participant.staker_position is not None:
-                        pre_reduction_share = individual_share  # Amount before hurdle reduction
-                        rate_factor = participant.staker_position.distribution_rate_factor
-                        individual_share = pre_reduction_share * rate_factor
-                        du_pool_reward = individual_share  # Track for BTC-equivalent recording
-
-                        # Track withheld amount for conservation accounting
-                        withheld = pre_reduction_share - individual_share
-                        result.du_hurdle_withheld += withheld
-                        result.du_actual_distributed += individual_share
-                    elif pool_name == "stakeholder_du":
-                        # Du pool participant without staker_position (full rate)
-                        result.du_actual_distributed += individual_share
-
-                    total_reward += individual_share
-
+    def _distribute_stakeholder_pools(self, result, people):
+        """Preserve tier division and sequential shared-position hurdle arithmetic."""
+        pools = {"stakeholder_un": result.un_pool, "stakeholder_dao": result.dao_pool,
+                 "stakeholder_du": result.du_pool}
+        counts = {name: {level: 0 for level in ActivityLevel} for name in pools}
+        for plan in people:
+            for name in plan.participant.get_accessible_pools():
+                counts[name][plan.activity] += 1
+        for plan in people:
+            total_reward, du_reward = 0.0, 0.0
+            for name in plan.participant.get_accessible_pools():
+                tier_share = pools.get(name, 0.0) * _finite(ACTIVITY_SHARES[plan.activity])
+                count = counts[name][plan.activity]
+                if count > 0:
+                    share = tier_share / count
+                    if name == "stakeholder_du":
+                        if plan.position is not None:
+                            rate = STAKER_POST_HURDLE_RATE_FACTOR if plan.position.locked else 1.0
+                            unreduced = share
+                            share = unreduced * _finite(rate)
+                            du_reward = share
+                            result.du_hurdle_withheld = self._add(result.du_hurdle_withheld, unreduced - share)
+                        result.du_actual_distributed = self._add(result.du_actual_distributed, share)
+                    total_reward = self._add(total_reward, share)
             if total_reward > 0:
-                participant.ups_balance += total_reward
-                result.participant_rewards[participant.participant_id] = (
-                    result.participant_rewards.get(participant.participant_id, 0.0) + total_reward
-                )
+                plan.balance = self._credit(plan.balance, total_reward)
+                pid = plan.participant.participant_id
+                result.participant_rewards[pid] = self._add(result.participant_rewards.get(pid, 0.0), total_reward)
+                if du_reward > 0 and plan.position is not None:
+                    position = plan.position
+                    position.cumulative = _finite(self._add(position.cumulative, du_reward * _finite(UPS_TO_BTC_RATE)))
+                    if not position.locked and position.target > 0 and position.cumulative >= position.target:
+                        position.locked = True
+                        position.locked_at = position.cumulative
 
-                # Record BTC-equivalent distribution for hurdle tracking (Du pool only)
-                if du_pool_reward > 0 and participant.staker_position is not None:
-                    btc_equivalent = du_pool_reward * UPS_TO_BTC_RATE
-                    participant.staker_position.record_distribution_btc(btc_equivalent)
-
-    def _distribute_network_drip(self, result: EpochDistribution) -> None:
-        """Distribute Network 16% as drip rewards (re-injected).
-
-        The Network pool is distributed proportionally to activity level:
-        - du (2): 80% of network pool = 12.8% of total
-        - dao (1): 16% of network pool = 2.56% of total
-        - un (0): 4% of network pool = 0.64% of total
-
-        This is the "drip" mechanism that keeps UPS flowing.
-        """
-        network_amount = result.network_pool
-
-        # Group participants by activity level
-        by_activity: Dict[ActivityLevel, List[Participant]] = {
-            ActivityLevel.UN: [],
-            ActivityLevel.DAO: [],
-            ActivityLevel.DU: [],
-        }
-
-        for p in self.participants.values():
-            by_activity[p.activity_level].append(p)
-
-        # Distribute network pool by activity level
-        for activity_level, participants in by_activity.items():
+    def _distribute_network_drip(self, result, people):
+        by_activity = {ActivityLevel.UN: [], ActivityLevel.DAO: [], ActivityLevel.DU: []}
+        for plan in people:
+            by_activity[plan.activity].append(plan)
+        for activity, participants in by_activity.items():
             if not participants:
                 continue
-
-            # Total share for this activity level
-            level_share = network_amount * ACTIVITY_SHARES[activity_level]
-
-            # Divide equally among participants at this level
+            level_share = result.network_pool * _finite(ACTIVITY_SHARES[activity])
             per_participant = level_share / len(participants)
+            for plan in participants:
+                plan.balance = self._credit(plan.balance, per_participant)
+                pid = plan.participant.participant_id
+                result.participant_rewards[pid] = self._add(result.participant_rewards.get(pid, 0.0), per_participant)
+                result.drip_distributed = self._add(result.drip_distributed, per_participant)
 
-            for p in participants:
-                p.ups_balance += per_participant
-                result.participant_rewards[p.participant_id] = (
-                    result.participant_rewards.get(p.participant_id, 0.0) + per_participant
-                )
-                result.drip_distributed += per_participant
+    def _validated_entry(self, result):
+        _validate_distribution(result)
+        with self._lock, self._ledger._lock if self._ledger else nullcontext():
+            previous = self._epochs.get(result.epoch)
+            if previous is None or result != previous[2] or self._ledger is None:
+                raise ValueError("distribution is not a coordinated receipt")
+            entry = previous[3]
+            if self._ledger._by_epoch.get(result.epoch) is not entry:
+                raise ValueError("coordinated epoch evidence is missing")
+            return entry
 
-        self.total_drip_distributed += result.drip_distributed
+    def _log_distribution(self, result, positions):
+        try:
+            for plan in positions.values():
+                if plan.locked and not plan.initially_locked:
+                    logger.info("[StakerPosition] Hurdle locked at %.6f BTC (target: %.6f BTC, multiple: %.1fx)",
+                                plan.locked_at, plan.target, plan.position.hurdle_target_multiple)
+            logger.info("[Pool] Epoch %s: %.2f UPS distributed, drip=%.2f, fund_total=%.2f",
+                        result.epoch, result.total_rewards, result.drip_distributed, result.fund_accumulated)
+        except Exception:
+            pass  # Telemetry failure cannot turn a committed decision into an abort.
 
     def get_distribution_stats(self) -> Dict:
         """Get overall distribution statistics."""
-        type_counts = {t: 0 for t in ParticipantType}
-        activity_counts = {a: 0 for a in ActivityLevel}
-        total_ups = 0.0
-        genesis_count = 0
-        member_count = 0
-        staker_count = 0
+        with self._lock:
+            type_counts = {t: 0 for t in ParticipantType}
+            activity_counts = {a: 0 for a in ActivityLevel}
+            total_ups = 0.0
+            genesis_count = 0
+            member_count = 0
+            staker_count = 0
 
-        for p in self.participants.values():
-            type_counts[p.participant_type] += 1
-            activity_counts[p.activity_level] += 1
-            total_ups += p.ups_balance
-            if p.is_genesis_member:
-                genesis_count += 1
-            if p.has_active_membership:
-                member_count += 1
-            if p.staker_position is not None:
-                staker_count += 1
+            for p in self.participants.values():
+                type_counts[p.participant_type] += 1
+                activity_counts[p.activity_level] += 1
+                total_ups += p.ups_balance
+                if p.is_genesis_member:
+                    genesis_count += 1
+                if p.has_active_membership:
+                    member_count += 1
+                if p.staker_position is not None:
+                    staker_count += 1
 
-        return {
-            "participants": len(self.participants),
-            "by_type": {t.name: c for t, c in type_counts.items()},
-            "by_activity": {a.name: c for a, c in activity_counts.items()},
-            "genesis_members": genesis_count,
-            "active_members": member_count,
-            "anonymous_stakers": staker_count,
-            "total_ups_distributed": total_ups,
-            "total_drip_distributed": self.total_drip_distributed,
-            "accumulated_fund": self.accumulated_fund,
-        }
+            return {
+                "participants": len(self.participants),
+                "by_type": {t.name: c for t, c in type_counts.items()},
+                "by_activity": {a.name: c for a, c in activity_counts.items()},
+                "genesis_members": genesis_count,
+                "active_members": member_count,
+                "anonymous_stakers": staker_count,
+                "total_ups_distributed": total_ups,
+                "total_drip_distributed": self.total_drip_distributed,
+                "accumulated_fund": self.accumulated_fund,
+            }
+
+
+
 
 
 class FoundUpTokenDistributor:

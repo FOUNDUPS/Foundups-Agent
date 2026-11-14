@@ -1,0 +1,373 @@
+"""Tests for REDDOG_RESIDENT_CYCLE_FIX_PROMOTION_ARTIFACT_HANDOFF_PHASE1."""
+
+from __future__ import annotations
+
+import ast
+import inspect
+import json
+from pathlib import Path
+from typing import Any, Mapping, Optional
+from unittest.mock import patch
+
+import pytest
+
+import modules.communication.moltbot_bridge.src.reddog_resident_fix_promotion_artifact_handoff as handoff_module
+from modules.communication.moltbot_bridge.src.reddog_backend_architect_determination_runtime import (
+    ACTION_RESEARCH_MORE,
+    InMemoryArchitectDeterminationStore,
+)
+from modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle import (
+    STATUS_DETERMINED,
+)
+from modules.communication.moltbot_bridge.src.reddog_resident_fix_promotion_artifact_handoff import (
+    RESIDENT_FIX_HANDOFF_APPLIED,
+    RESIDENT_FIX_HANDOFF_NOT_READY,
+    ResidentFixHandoffReason,
+    run_reddog_resident_fix_promotion_artifact_handoff as _run_handoff,
+)
+from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
+    NOW,
+    _determination,
+    _memex_supply,
+)
+
+
+REPO_ROOT = Path(__file__).resolve().parents[4]
+MODULE_PATH = (
+    REPO_ROOT
+    / "modules"
+    / "communication"
+    / "moltbot_bridge"
+    / "src"
+    / "reddog_resident_fix_promotion_artifact_handoff.py"
+)
+INTENT_ID = "sha256:intent-handoff"
+CYCLE_ID = "sha256:cycle-1"
+
+
+class _CycleStore:
+    def __init__(self, record: Optional[Mapping[str, Any]]) -> None:
+        self.record = dict(record) if record else None
+
+    def load_cycle_by_intent(self, intent_id: str) -> Optional[Mapping[str, Any]]:
+        return self.record if intent_id == INTENT_ID else None
+
+    def upsert_cycle(self, record: Mapping[str, Any]) -> Mapping[str, Any]:
+        raise AssertionError("not used")
+
+    def update_cycle(self, intent_id: str, updates: Mapping[str, Any]) -> Mapping[str, Any]:
+        raise AssertionError("not used")
+
+    def load_task_ids(self, determination_id: str) -> tuple[str, ...]:
+        raise AssertionError("not used")
+
+    def load_task_status_counts(self, task_ids) -> Mapping[str, int]:
+        raise AssertionError("not used")
+
+    def delete_cycle_tasks(self, task_ids) -> None:
+        raise AssertionError("not used")
+
+
+def _cycle(**overrides: Any) -> dict[str, Any]:
+    determination_id = _determination()["determination_receipt_id"]
+    memex = _memex_supply()
+    record = {
+        "schema_version": "reddog_resident_architect_cycle.v2",
+        "intent_id": INTENT_ID,
+        "intent": {
+            "foundup_id": memex["foundup_id"],
+            "principal_id": memex["principal_id"],
+        },
+        "cycle_id": CYCLE_ID,
+        "snapshot_id": _determination()["snapshot_receipt_id"],
+        "status": STATUS_DETERMINED,
+        "architect_action": "FIX",
+        "architect_determination_id": determination_id,
+        "_store_integrity_valid": True,
+        "initial_bootstrap": {
+            "memex_snapshot_supply_view_id": memex["memex_view_id"],
+            "memex_snapshot_supply_receipt": memex,
+        },
+    }
+    record.update(overrides)
+    return record
+
+
+def _architect_store(determination: Mapping[str, Any] | None = None) -> InMemoryArchitectDeterminationStore:
+    determination = determination or _determination()
+    return InMemoryArchitectDeterminationStore(
+        (
+            {
+                "cycle_id": CYCLE_ID,
+                "determination": dict(determination),
+            },
+        )
+    )
+
+
+def _claim_binding(cycle: Mapping[str, Any]) -> dict[str, str]:
+    determination = _determination()
+    candidate = determination["queue_candidate"]
+    allocation = candidate["wsp15_allocation_receipt"]
+    return {
+        "cycle_id": str(cycle.get("cycle_id") or ""),
+        "snapshot_id": str(cycle.get("snapshot_id") or ""),
+        "determination_id": str(determination["determination_receipt_id"]),
+        "queue_candidate_id": str(candidate["queue_candidate_id"]),
+        "wsp15_allocation_receipt_id": str(allocation["receipt_id"]),
+    }
+
+
+def _handoff(*, cycle_store=None, architect_store=None, **kwargs):
+    cycle_store = cycle_store or _CycleStore(_cycle())
+    architect_store = architect_store or _architect_store()
+    kwargs.setdefault("expected_claim_binding", _claim_binding(cycle_store.record))
+    with (
+        patch.object(
+            handoff_module,
+            "AgentDbResidentArchitectCycleStore",
+            return_value=cycle_store,
+        ),
+        patch.object(
+            handoff_module,
+            "load_agentdb_architect_determination",
+            side_effect=lambda _determination_id: (
+                architect_store.load_architect_determination_by_cycle(CYCLE_ID)
+            ),
+        ),
+    ):
+        return _run_handoff(**kwargs)
+
+
+def test_handoff_writes_determination_and_memex_artifacts_outside_repo(tmp_path: Path) -> None:
+    runtime = tmp_path / "runtime"
+
+    result = _handoff(
+        repo_root=REPO_ROOT,
+        intent_id=INTENT_ID,
+        architect_determination_output_path=runtime / "architect_determination.json",
+        memex_supply_receipt_output_path=runtime / "memex_supply_receipt.json",
+        cycle_store=_CycleStore(_cycle()),
+        architect_store=_architect_store(),
+        now_iso=NOW,
+    )
+
+    assert result.accepted is True
+    assert result.status == RESIDENT_FIX_HANDOFF_APPLIED
+    assert result.architect_determination_path == str((runtime / "architect_determination.json").resolve())
+    assert result.memex_supply_receipt_path == str((runtime / "memex_supply_receipt.json").resolve())
+    determination = json.loads(Path(result.architect_determination_path).read_text(encoding="utf-8"))
+    memex = json.loads(Path(result.memex_supply_receipt_path).read_text(encoding="utf-8"))
+    assert determination["determination_receipt_id"] == _determination()[
+        "determination_receipt_id"
+    ]
+    assert memex["schema_version"] == "reddog_operational_memex_snapshot_supply_receipt.v1"
+    assert memex["receipt_id"] == _memex_supply()["receipt_id"]
+    assert result.no_signing_performed is True
+    assert result.no_openclaw_enqueue_performed is True
+    assert result.no_holoindex_reindex_performed is True
+    assert not (REPO_ROOT / "architect_determination.json").exists()
+
+
+def test_handoff_rejects_non_fix_cycle_without_writes(tmp_path: Path) -> None:
+    result = _handoff(
+        repo_root=REPO_ROOT,
+        intent_id=INTENT_ID,
+        architect_determination_output_path=tmp_path / "runtime" / "architect.json",
+        memex_supply_receipt_output_path=tmp_path / "runtime" / "memex.json",
+        cycle_store=_CycleStore(_cycle(architect_action=ACTION_RESEARCH_MORE)),
+        architect_store=_architect_store(),
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert result.status == RESIDENT_FIX_HANDOFF_NOT_READY
+    assert ResidentFixHandoffReason.CYCLE_NOT_FIX in result.rejection_reasons
+    assert not (tmp_path / "runtime" / "architect.json").exists()
+
+
+def test_handoff_rejects_missing_memex_supply_receipt(tmp_path: Path) -> None:
+    cycle = _cycle(initial_bootstrap={})
+
+    result = _handoff(
+        repo_root=REPO_ROOT,
+        intent_id=INTENT_ID,
+        architect_determination_output_path=tmp_path / "runtime" / "architect.json",
+        memex_supply_receipt_output_path=tmp_path / "runtime" / "memex.json",
+        cycle_store=_CycleStore(cycle),
+        architect_store=_architect_store(),
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert ResidentFixHandoffReason.MISSING_MEMEX_SUPPLY_RECEIPT in result.rejection_reasons
+    assert not (tmp_path / "runtime" / "memex.json").exists()
+
+
+def test_handoff_rejects_memex_snapshot_mismatch(tmp_path: Path) -> None:
+    memex = _memex_supply(snapshot_receipt_id="sha256:other-snapshot")
+
+    result = _handoff(
+        repo_root=REPO_ROOT,
+        intent_id=INTENT_ID,
+        architect_determination_output_path=tmp_path / "runtime" / "architect.json",
+        memex_supply_receipt_output_path=tmp_path / "runtime" / "memex.json",
+        cycle_store=_CycleStore(
+            _cycle(
+                initial_bootstrap={
+                    "memex_snapshot_supply_view_id": memex["memex_view_id"],
+                    "memex_snapshot_supply_receipt": memex,
+                }
+            )
+        ),
+        architect_store=_architect_store(),
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert ResidentFixHandoffReason.MEMEX_SNAPSHOT_MISMATCH in result.rejection_reasons
+
+
+def test_handoff_rejects_outputs_inside_repo(tmp_path: Path) -> None:
+    result = _handoff(
+        repo_root=REPO_ROOT,
+        intent_id=INTENT_ID,
+        architect_determination_output_path=REPO_ROOT / "runtime" / "architect.json",
+        memex_supply_receipt_output_path=tmp_path / "runtime" / "memex.json",
+        cycle_store=_CycleStore(_cycle()),
+        architect_store=_architect_store(),
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert ResidentFixHandoffReason.DETERMINATION_OUTPUT_INVALID in result.rejection_reasons
+
+
+def test_handoff_rejects_aliased_output_paths_before_writing(tmp_path: Path) -> None:
+    output_path = tmp_path / "runtime" / "shared.json"
+    output_path.parent.mkdir(parents=True)
+    original = b"existing-artifact\n"
+    output_path.write_bytes(original)
+
+    result = _handoff(
+        repo_root=REPO_ROOT,
+        intent_id=INTENT_ID,
+        architect_determination_output_path=output_path,
+        memex_supply_receipt_output_path=output_path.parent / "." / output_path.name,
+        cycle_store=_CycleStore(_cycle()),
+        architect_store=_architect_store(),
+        now_iso=NOW,
+    )
+
+
+    assert result.accepted is False
+    assert result.status == RESIDENT_FIX_HANDOFF_NOT_READY
+    assert ResidentFixHandoffReason.OUTPUT_PATHS_ALIAS in result.rejection_reasons
+    assert result.architect_determination_path is None
+    assert result.memex_supply_receipt_path is None
+    assert output_path.read_bytes() == original
+    assert tuple(output_path.parent.iterdir()) == (output_path,)
+
+
+def test_handoff_rejects_fabricated_memex_receipt_before_writes(tmp_path: Path) -> None:
+    memex = _memex_supply(receipt_id="sha256:" + ("f" * 64))
+
+    result = _handoff(
+        repo_root=REPO_ROOT,
+        intent_id=INTENT_ID,
+        architect_determination_output_path=tmp_path / "runtime" / "architect.json",
+        memex_supply_receipt_output_path=tmp_path / "runtime" / "memex.json",
+        cycle_store=_CycleStore(
+            _cycle(initial_bootstrap={"memex_snapshot_supply_receipt": memex})
+        ),
+        architect_store=_architect_store(),
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert ResidentFixHandoffReason.MEMEX_SUPPLY_INVALID in result.rejection_reasons
+    assert not (tmp_path / "runtime" / "architect.json").exists()
+    assert not (tmp_path / "runtime" / "memex.json").exists()
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    (
+        ("foundup_id", "attacker_foundup"),
+        ("principal_id", "github:attacker"),
+        ("memex_view_id", "attacker-view"),
+    ),
+)
+def test_handoff_rejects_self_rehashed_authority_substitution(
+    tmp_path: Path,
+    field: str,
+    value: str,
+) -> None:
+    memex = _memex_supply(**{field: value})
+    cycle = _cycle()
+    cycle["initial_bootstrap"] = {
+        "memex_snapshot_supply_view_id": _memex_supply()["memex_view_id"],
+        "memex_snapshot_supply_receipt": memex,
+    }
+
+    result = _handoff(
+        repo_root=REPO_ROOT,
+        intent_id=INTENT_ID,
+        architect_determination_output_path=tmp_path / "runtime" / "architect.json",
+        memex_supply_receipt_output_path=tmp_path / "runtime" / "memex.json",
+        cycle_store=_CycleStore(cycle),
+        architect_store=_architect_store(),
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert ResidentFixHandoffReason.MEMEX_SUPPLY_INVALID in result.rejection_reasons
+    assert not (tmp_path / "runtime" / "architect.json").exists()
+    assert not (tmp_path / "runtime" / "memex.json").exists()
+
+
+def test_handoff_rejects_missing_durable_claim_binding(tmp_path: Path) -> None:
+    result = _handoff(
+        repo_root=REPO_ROOT,
+        intent_id=INTENT_ID,
+        architect_determination_output_path=tmp_path / "runtime" / "architect.json",
+        memex_supply_receipt_output_path=tmp_path / "runtime" / "memex.json",
+        expected_claim_binding=None,
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert "fix_claim_binding_missing" in result.rejection_reasons
+    assert not (tmp_path / "runtime" / "architect.json").exists()
+    assert not (tmp_path / "runtime" / "memex.json").exists()
+
+
+def test_public_handoff_has_no_store_injection_surface() -> None:
+    parameters = inspect.signature(_run_handoff).parameters
+
+    assert "cycle_store" not in parameters
+    assert "architect_store" not in parameters
+    assert "expected_claim_binding" in parameters
+
+
+def test_handoff_module_has_no_execution_network_or_reindex_imports() -> None:
+    tree = ast.parse(MODULE_PATH.read_text(encoding="utf-8"))
+    banned_import_roots = {
+        "subprocess",
+        "requests",
+        "urllib",
+        "http",
+        "socket",
+        "git",
+        "holo_index",
+    }
+    banned_calls = {"eval", "exec", "compile", "__import__"}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                assert alias.name.split(".", 1)[0] not in banned_import_roots
+        if isinstance(node, ast.ImportFrom) and node.module:
+            assert node.module.split(".", 1)[0] not in banned_import_roots
+        if isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Name):
+                assert node.func.id not in banned_calls

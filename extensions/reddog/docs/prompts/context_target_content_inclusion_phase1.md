@@ -1,0 +1,387 @@
+AUTHOR - REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1
+
+Operate in WSP_00. Apply WSP_97 CoT/CoR before any edit.
+
+PREREQUISITE GATE - SATISFIED:
+- #882 LANDED (`99d0e35c2`) - path ranking + `target_recall_ok` telemetry only.
+- EXT-ACC-001 probes (r1-r3) complete; 012 stopped reruns - evidence sufficient.
+- Model egress confirmed; RedDog correctly BLOCKed on missing source (partial_good).
+- **Do NOT** rerun full 15-pack until this slice lands and EXT-ACC-001 criterion #2 passes.
+
+LANE LOCK:
+External 012-facing Foundups(R)Agent bounded-context lane only.
+Do NOT touch Lane B / WRE / Sakana / OpenClaw execution dispatch.
+
+---
+
+BASELINE EVIDENCE (2026-06-26) - DO NOT IGNORE
+
+Core finding (distinct from #882):
+
+```text
+path hit in HoloIndex bundle-json does not equal source content in bounded bridge context
+```
+
+```yaml
+EXT-ACC-001_rerun:
+  verdict: needs_repair
+  model_egress: true
+  target_path_hit: true
+  target_source_content_included: false
+  target_recall_telemetry_active: false  # install trap; bump version in this slice
+  wsp97_source_findings: false
+  output_validation: failed
+  primary_next_slice: REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1
+
+PROBE_SIGNALS:
+  holoindex_status: bundle_json_ok
+  code_hits: 5
+  extension_js_path_similarity: 7.4%
+  context_mode: wsp_holo_skillz
+  context_chars: ~25982
+  model_finding_F1: >
+    HoloIndex code_hits lists extension.js path; no file contents, snippets,
+    or function signatures in bounded context packet.
+  redaction_primary: passed
+  architect_quality: partial_good  # correct BLOCK, no hallucinated review
+
+ROOT_CAUSE (direct-read, verify before acting):
+- extension.js `buildBoundedRepoContext()` embeds HoloIndex bundle-json JSON only
+  (`holoIndexOutput` -> `sections.push('### HoloIndex recall ...')`).
+- Bundle-json `task_retrieval.code_hits` returns paths + similarity - not file bodies.
+- `activeEditorContext()` already reads file/selection content with truncation -
+  reuse this pattern for inferred recall targets, not only active editor.
+- `inferRecallTargetPaths()` / `evaluateTargetRecall()` exist (#882) but no content egress step.
+
+INSTALL_TRAP (record; fix in content-inclusion slice with 0.3.22 bump):
+- #882 landed on label **0.3.21** without changing the version string.
+- Header `Build: 0.3.21` does not match Run Trace internals when host is stale (`v0.3.20` note, missing telemetry).
+- **Next version bump:** 0.3.22 in `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1` (not shipped yet).
+
+---
+
+PURPOSE
+
+When HoloIndex ranks a recall target path, **egress bounded source snippets** into
+`buildBoundedRepoContext` so the redaction-gated bridge receives actual file content
+for architecture / WSP_97 review tasks - not path metadata alone.
+
+After this slice lands:
+1. 012 reruns **EXT-ACC-001** only (then EXT-ACC-003 if #2 passes).
+2. Do **not** schedule full replacement pass until EXT-ACC-001 five-criteria gate evaluated.
+
+---
+
+HARD ACCEPTANCE CHECKS (must pass in PR)
+
+1. **Target content inclusion (EXT-ACC-001 criterion #2):**
+   For work focus reviewing `extensions/foundups_advisory_workers/extension.js`,
+   bounded context includes a `### Target recall content` (or equivalent) section
+   with **line-bounded snippets** from `extension.js` (function names, comments, or
+   claim strings visible - not path-only JSON).
+
+2. **Recall target inference reused:**
+   Content inclusion driven by `inferRecallTargetPaths(taskText)` - no hardcoded
+   one-off for EXT-ACC-001 only. Must also cover:
+   - `scripts/advisory_model_once.py` (bridge queries)
+   - `extensions/foundups_advisory_workers/docs/REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1.md`
+     when task matches acceptance patterns.
+
+3. **Run Trace telemetry (ADDENDUM C):**
+   Add and populate in HoloIndex / context scorecard after final context assembly:
+   ```text
+   target_content_included: true|false|unknown
+   target_content_paths: [<rel paths actually included>]
+   target_content_chars: <number>
+   target_content_omitted_reason: no_targets|path_missing|outside_root|binary_or_oversized|read_error|budget_omitted|none
+   target_content_truncated: true|false
+   ```
+   `target_content_included=true` ONLY if snippet section is present in final context string.
+   Preserve existing: `target_recall_ok`, `code_hits_count`, `index_gap_detected`.
+
+4. **WSP_97 task boost (minimal):**
+   When task text mentions `WSP_97` or `truth label`, include bounded excerpt from
+   `WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md` (first ~4KB or
+   truth-label section only). Label section `### WSP protocol excerpt (bounded)`.
+
+5. **Redaction + budget safety (ADDENDUM B):**
+   - All new content passes existing redaction gate (no raw secrets).
+   - Workspace-confined reads only; reject traversal, absolute paths, symlink escape.
+   - Respect `BRIDGE_MAX_CONTEXT_CHARS` (48000) and existing 42000 slice in
+     `buildBoundedRepoContext`; truncate with explicit `[TRUNCATED n chars]` marker.
+   - No policy weakening in `fusion_redaction_gate.py`.
+
+6. **Version bump:**
+   `package.json` + `EXTENSION_VERSION` -> **0.3.22** (install verification hygiene).
+
+7. **Contract tests (ADDENDUM D):**
+   Export and test new helpers; prove inclusion, rejection, and scorecard fields.
+
+Regression probe (document in PR, 012 runs live):
+```text
+EXT-ACC-001 work focus (RedDog Architect, wsp_holo_skillz):
+Review extensions/foundups_advisory_workers/extension.js for WSP_97 truth-label compliance...
+```
+Pass when criterion #2-#4 observable in Copy MD Run Trace + model cites source lines.
+
+---
+
+ADDENDUM A - ASCII / MOJIBAKE CLEAN DISPATCH
+
+Before implementation, clean this prompt and all touched docs to ASCII-safe text.
+
+Required:
+- Replace corrupted separators/arrows with ASCII: "->", "-", "does not equal", "Phase"
+- Do not introduce Unicode punctuation or corrupted markers in touched files.
+- Validation (run from repo root; use exported marker class from extension.js):
+```powershell
+node -e "const o=require('./extensions/foundups_advisory_workers/extension.js'); const p=o.MOJIBAKE_MARKERS.join('|'); console.log(p)"
+# Pipe that pattern to rg on touched files, or rely on detectMojibake in contract tests
+node extensions/foundups_advisory_workers/tests/verify_extension_contract.js
+```
+Must return no new mojibake hits in touched files, except documented detector examples
+already present before this slice (e.g. ModLog entries describing detectMojibake).
+
+---
+
+ADDENDUM B - TARGET CONTENT READ SAFETY
+
+Target snippet reading must be workspace-confined.
+
+Required:
+- Use only relative repo paths inferred by `inferRecallTargetPaths()`.
+- Resolve with `path.resolve(root, relPath)`, then realpath.
+- Reject absolute paths, ".." traversal, symlink escape, missing files, binary files, and oversized files.
+- Do not read `.env`, key files, credentials, `node_modules`, `.git`, or generated VSIX artifacts.
+- New helper exposes low-cardinality omit reasons:
+  `no_targets | path_missing | outside_root | binary_or_oversized | read_error | budget_omitted`
+- Redaction gate remains unchanged and remains the final egress boundary.
+
+Suggested helper surface:
+- `readBoundedTargetSnippets(root, taskText, opts)` -> `{ sections, meta }`
+- `buildTargetRecallContentSection(root, taskText, maxChars)` -> `{ text, meta }`
+
+---
+
+ADDENDUM C - FINAL-CONTEXT TELEMETRY
+
+Telemetry must describe what reached the **final** bounded context string.
+
+Required:
+- `target_content_included=true` only if a snippet section is present in the final context string sent toward the bridge (after `buildBoundedRepoContext` assembly, before or after char slice - document which boundary in INTERFACE).
+- `target_content_paths` lists only paths actually included.
+- `target_content_chars` is the actual included snippet character count.
+- Add `target_content_omitted_reason` and `target_content_truncated`.
+- Scorecard extraction must happen **after** content inclusion metadata is merged into `holoindex_meta`.
+
+---
+
+ADDENDUM D - TEST EXPORTS
+
+Export and contract-test the new helpers:
+- `readBoundedTargetSnippets` or equivalent
+- `buildTargetRecallContentSection` or equivalent
+- WSP_97 excerpt helper (name in implementation)
+
+Tests must prove:
+- extension.js review task includes extension.js snippet
+- buildCopyMarkdown task includes extension.js snippet
+- WSP_97 task includes bounded WSP_97 excerpt
+- traversal / absolute path is rejected
+- scorecard includes all `target_content_*` fields
+- `target_content_included=true` only when snippet section in final context
+
+Add to `module.exports` and `verify_extension_contract.js`.
+
+---
+
+READ BEFORE EDITING (WSP_87 direct-read after HoloIndex)
+
+- extensions/foundups_advisory_workers/extension.js
+  (`buildBoundedRepoContext`, `holoIndexOutput`, `activeEditorContext`,
+  `inferRecallTargetPaths`, `evaluateTargetRecall`, `extractHoloIndexScorecard`,
+  `applyBridgeContextBudget`, `BRIDGE_MAX_CONTEXT_CHARS`)
+- extensions/foundups_advisory_workers/docs/REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1.md
+  (five-criteria gate, probe results)
+- holo_index/cli/commands/bundle_json.py (read-only - path hits only, no change required)
+- extensions/foundups_advisory_workers/INTERFACE.md
+- extensions/foundups_advisory_workers/ROADMAP.md
+- modules/communication/moltbot_bridge/src/fusion_redaction_gate.py (read-only boundary)
+
+---
+
+SCOPE - IN
+
+- New helpers in extension.js (ADDENDUM B-D)
+- Wire into `buildBoundedRepoContext` after HoloIndex section
+- Scorecard + Run Trace fields per ADDENDUM C
+- Version bump 0.3.21 -> 0.3.22
+- Contract tests + ModLog / INTERFACE / TestModLog / ROADMAP updates
+- Optional: architect review doc `docs/REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_ARCHITECT_REVIEW_PHASE1.md`
+
+SCOPE - OUT (explicit)
+
+- HoloIndex ranking / bundle-json path fixes (#882 - done)
+- `REDDOG_OUTPUT_SCHEMA_REPAIR_HARDENING_PHASE1`
+- `REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1` (duplicate Work Trail - separate)
+- `REDDOG_MOJIBAKE_OUTPUT_SANITIZATION_PHASE1` (separate)
+- OpenRouter routing / model slug changes
+- Redaction policy weakening
+- Semantic HoloIndex mode switch (`skip_model: false`) - optional future, not this slice
+- WRE / Sakana / Lane B
+- Full 15-prompt replacement pass
+- VSIX commit to repo
+
+---
+
+IMPLEMENTATION HINTS (verify, do not blindly copy)
+
+Pattern to reuse - `activeEditorContext()` lines ~1442-1457:
+```javascript
+// fs read + language fence + truncation marker
+```
+
+Suggested flow in `buildBoundedRepoContext`:
+```text
+1. holoIndexOutput (unchanged bundle-json embed)
+2. inferRecallTargetPaths(taskText) + evaluateTargetRecall from bundle parse
+3. buildTargetRecallContentSection for file targets (ADDENDUM B safety)
+4. If task mentions WSP_97: append bounded WSP_97 protocol excerpt
+5. existing Skillz / editor / git sections
+6. merge final text; aggregate target_content_* meta -> holoindex_scorecard (ADDENDUM C)
+```
+
+Priority when budget tight: target file(s) from inference **before** Skillz noise
+(probe F5: Skillz returned unrelated modules at score 17).
+
+---
+
+VALIDATION
+
+```powershell
+node --check extensions/foundups_advisory_workers/extension.js
+node extensions/foundups_advisory_workers/tests/verify_extension_contract.js
+python -B -c "import ast, pathlib; ast.parse(pathlib.Path('scripts/advisory_model_once.py').read_text(encoding='utf-8'))"
+git diff --check -- extensions/foundups_advisory_workers
+# ADDENDUM A mojibake scan (see pattern in ADDENDUM A)
+```
+
+Optional local snippet smoke (no OpenRouter):
+```javascript
+// node -e harness calling buildBoundedRepoContext with fixture taskText
+```
+
+---
+
+BRANCH / PR
+
+Branch: `feat/reddog-context-target-content-inclusion-phase1`
+Title: feat(extension): egress bounded target file snippets into RedDog context
+Draft PR only. Stop at VERIFIED_READY. Do not merge without sovereign token.
+
+PR body must include:
+- EXT-ACC-001 probe evidence (path hit, no content)
+- Before/after bounded context excerpt (redacted - no secrets)
+- Hard acceptance checks 1-7 + ADDENDUM A-D evidence
+- Version 0.3.22 install verification note
+- Post-land: 012 reruns EXT-ACC-001 only
+
+WSP_97 rows (ModLog + PR):
+- PATH_HIT_DISTINCT_FROM_CONTENT_EGRESS
+- TARGET_SNIPPET_INCLUSION_ADDED
+- TARGET_CONTENT_TELEMETRY_FINAL_CONTEXT
+- WORKSPACE_CONFINED_READ_SAFETY
+- WSP97_PROTOCOL_EXCERPT_ON_TASK_MATCH
+- REDACTION_GATE_UNCHANGED
+- VERSION_BUMP_INSTALL_HYGIENE
+- ASCII_CLEAN_DISPATCH
+- NO_HOLOINDEX_RANKING_CHANGE
+- LANE_B_EXCLUDED
+- REPLACEMENT_PASS_NOT_IN_SCOPE
+
+WSP_15:
+| C | I | D | Impact | MPS | P |
+|---:|---:|---:|---:|---:|---|
+| 4 | 5 | 3 | 5 | 17 | **P0** |
+
+---
+
+ARCHITECT REVIEW STATUS
+
+```text
+REQUEST_CHANGES resolved in prompt revision (addenda A-D, ASCII clean).
+Decision after worker completes: APPROVE_WORKER_DISPATCH -> implement -> VERIFIED_READY PR.
+```
+
+---
+
+RETURN (worker -> architect review)
+
+1. Files changed
+2. Sample bounded context shape (redacted)
+3. Hard checks 1-7 + ADDENDUM A-D evidence
+4. Contract test output
+5. PR URL
+6. Residual NEEDS_VERIFICATION
+7. Ready for 012 EXT-ACC-001 rerun: yes/no
+
+---
+
+ADDENDUM E - 0102 TEST-FIRST EXECUTION
+
+Do not wait for 012 manual Cursor testing to prove implementation correctness.
+
+Add deterministic tests that run locally without OpenRouter or Cursor UI:
+
+1. inferRecallTargetPaths maps the EXT-ACC-001 prompt to:
+   extensions/foundups_advisory_workers/extension.js
+
+2. target snippet helper includes bounded source content for extension.js.
+
+3. buildBoundedRepoContext("wsp_holo_skillz", EXT-ACC-001 prompt) includes:
+   - "### Target recall content"
+   - "extensions/foundups_advisory_workers/extension.js"
+   - nonzero source snippet
+   - target_content_included=true
+   - target_content_chars > 0
+
+4. WSP_97 prompt includes:
+   - "### WSP protocol excerpt (bounded)"
+   - WSP_97_System_Execution_Prompting_Protocol.md excerpt
+
+5. Path safety rejects:
+   - absolute path
+   - ..
+   - symlink escape
+   - .env
+   - .git
+   - node_modules
+   - *.vsix
+
+6. No OpenRouter calls in tests.
+
+Validation:
+node --check extensions/foundups_advisory_workers/extension.js
+node extensions/foundups_advisory_workers/tests/verify_extension_contract.js
+git diff --check -- extensions/foundups_advisory_workers
+
+012 role after VERIFIED_READY PR: installed Cursor UX smoke on v0.3.22 only.
+
+---
+
+ADDENDUM F - REDACTION-SAFE TARGET SNIPPETS (REQUEST_CHANGES from 012 smoke)
+
+Problem:
+v0.3.22 includes target source snippets, but raw extension.js contains policy-boundary strings that trip Fusion redaction before OpenRouter.
+
+Required:
+1. Keep redaction gate unchanged.
+2. Do not weaken fusion_redaction_gate.py.
+3. Sanitize target snippets before adding them to bounded context:
+   - replace block-triggering source literals with neutral placeholders `[SANITIZED_BLOCK:NN]`
+   - preserve line/function/code shape enough for WSP_97 review
+   - record target_content_sanitized: true|false
+   - record target_content_sanitized_categories: [...]
+4. Redaction gate must pass for EXT-ACC-001 after target content inclusion.
+5. Contract test TCI-009/TCI-010: Python evaluate_redaction_gate on target section + full bounded context.
+6. Run Trace must show target_content_included: true, target_content_sanitized: true when replacements occurred, redaction gate status: passed.

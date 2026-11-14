@@ -1,0 +1,127 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "cfd1e0051ea0e5624c7a7fcc8f7e2bc4e442aae9"
+  },
+  "execution_id": "REDDOG_EXACT_MAIN_LIVE_ACCEPTANCE_PHASE1",
+  "execution_plane": "runtime",
+  "outcome": "completed",
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_34_Git_Operations_Protocol.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_83_Documentation_Tree_Attachment_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md",
+      "WSP_framework/src/WSP_108_Documentation_Compliance_Guardian.md"
+    ],
+    "retrieve_evidence": [
+      "WSP_framework/src/WSP_CORE.md",
+      "modules/infrastructure/idle_automation/README.md",
+      "modules/infrastructure/idle_automation/INTERFACE.md",
+      "modules/infrastructure/idle_automation/ROADMAP.md",
+      "modules/infrastructure/idle_automation/ModLog.md",
+      "modules/infrastructure/idle_automation/tests/README.md",
+      "modules/infrastructure/foundups_mcp_bridge/README.md",
+      "modules/infrastructure/foundups_mcp_bridge/INTERFACE.md",
+      "modules/infrastructure/foundups_mcp_bridge/ROADMAP.md",
+      "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+      "modules/infrastructure/foundups_mcp_bridge/tests/README.md",
+      "modules/infrastructure/foundups_mcp_bridge/docs/clarity/REDDOG_HOLO_POSTMERGE_ACTIVATION_ORDER_ASSUMPTION_AUDIT_20260827.md",
+      "modules/communication/moltbot_bridge/README.md",
+      "modules/communication/moltbot_bridge/ROADMAP.md",
+      "modules/communication/moltbot_bridge/ModLog.md",
+      "extensions/reddog/INTERFACE.md",
+      "extensions/reddog/ROADMAP.md",
+      "extensions/reddog/ModLog.md",
+      "extensions/reddog/tests/README.md",
+      "extensions/reddog/tests/TestModLog.md"
+    ],
+    "research": [
+      "WSP_15 scored the unusable exact-main Holo route at 17/P0; raw query-time reindex was rejected in favor of the existing incident-to-WRE/OpenClaw maintenance path.",
+      "The first governed query failed closed with HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH because the clean authority remained at a7302344 while the workspace was exact cfd1e005; no query-time mutation, reindex, or owner retry occurred.",
+      "Holo retrieval was CURRENT after repair but moderately noisy and omitted off-repository runtime artifacts; exact AgentDB IDs, route verification, immutable artifact hashes, and direct VSIX bytes closed those evidence gaps.",
+      "Root requirements declare FastAPI and Uvicorn; the ambient interpreter lacked FastAPI while the repository .venv imported both and was the runtime that completed acceptance."
+    ],
+    "micro_pass": [
+      "The governed owner query returned CURRENT at exact workspace and authority commit cfd1e0051ea0e5624c7a7fcc8f7e2bc4e442aae9, including a current uncommitted documentation overlay, with no gap, no reindex, no authority mutation, and one successful owner attempt; query receipt sha256:259eded2cceb97936352ada4f231cf3116e5524d0f73859151ff262e3fdc23ff.",
+      "Read-only AgentDB verification recomputed the exact OpenClaw claim binding and both request/completion payload digests; the task is completed, assigned to openclaw_supervisor, with retry count zero.",
+      "The route is CURRENT at revision 3; full production verification rehashed 33 artifacts / 220800343 bytes and immediate revalidation returned the identical descriptor, replica ID, and path identity.",
+      "RedDog fast passed 14/14, conversation passed 32/32, contract passed 3/3, and the deterministic package gate passed 67 files / 944930 bytes under the one MiB cap."
+    ],
+    "macro_pass": [
+      "The real broker-managed OpenClaw resident and OpenClawSupervisor claimed and completed the exact-SHA task through AgentDB and the sealed post-merge executor in 415453 milliseconds.",
+      "The four-group authenticated RedDog release supervisor passed in 172611 milliseconds without timeout.",
+      "The exact-cfd1e0051 VSIX is 275502 compressed bytes at sha256:6ee3902703774683aba78135f076630163a1ce4499094d909807ff7270f1adbb; independent archive audit matched all 67 extension members byte-for-byte to the accepted commit.",
+      "The resident stop completed and no listener remained on port 18800; independent task, report, audit-window, and VSIX secret scans found no concrete secret."
+    ],
+    "hard_think": [
+      "Treated fail-closed as correct incident behavior but rejected it as an acceptable steady state because RedDog and 0102 require a usable governed Holo consumer.",
+      "Preserved historical a7302344 failure truth while creating and completing a separate exact-cfd1e0051 task; no failed record was relabeled.",
+      "Classified the ambient missing-FastAPI attempt as interpreter provenance, not a Holo defect; it failed before task claim and granted no repair authority.",
+      "Kept the 415-second live transaction as release evidence rather than an interactive query-loop target; the normal owner query remains the read-only consumer proof."
+    ],
+    "dialectic_sweep": [
+      "Three independent WSP_00/WSP_97 auditors rechecked runtime correctness, security, documentation drift, AgentDB completion, immutable route identity, and VSIX bytes.",
+      "The documentation auditor issued NO-GO because current docs still called automatic activation pending; every identified current-truth boundary was repaired without rewriting historical entries.",
+      "A concurrent governed audit query transiently observed HOLOINDEX_QUERY_SERVICE_PORT_IN_USE and failed closed; its bounded retry returned CURRENT without maintenance or route mutation.",
+      "Environment audit found unrelated opentelemetry/importlib-metadata constraint drift; it was separated from this transaction and not misrepresented as the FastAPI cause."
+    ],
+    "first_principles": [
+      "A governed Holo failure is safe only if it is explicit and nonmutating; usability requires the existing maintenance authority to restore an exact generation before normal queries resume.",
+      "OpenClaw owns durable work execution, AgentDB owns task truth, and the Holo authority/activation controllers own refresh, replica publication, route CAS, and immutable verification.",
+      "One exact-main acceptance proves only its bound commit, generation, receipt, route, replica, and artifact closure; later HEADs require new evidence.",
+      "The VSIX remains a thin client: packaging does not move model, Git, Holo maintenance, secret, or worker authority into the extension."
+    ],
+    "execute": [
+      "ModLog.md",
+      "modules/infrastructure/idle_automation/README.md",
+      "modules/infrastructure/idle_automation/INTERFACE.md",
+      "modules/infrastructure/idle_automation/ROADMAP.md",
+      "modules/infrastructure/idle_automation/ModLog.md",
+      "modules/infrastructure/idle_automation/tests/README.md",
+      "modules/infrastructure/foundups_mcp_bridge/README.md",
+      "modules/infrastructure/foundups_mcp_bridge/INTERFACE.md",
+      "modules/infrastructure/foundups_mcp_bridge/ROADMAP.md",
+      "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+      "modules/infrastructure/foundups_mcp_bridge/tests/README.md",
+      "modules/infrastructure/foundups_mcp_bridge/docs/clarity/REDDOG_HOLO_POSTMERGE_ACTIVATION_ORDER_ASSUMPTION_AUDIT_20260827.md",
+      "modules/communication/moltbot_bridge/README.md",
+      "modules/communication/moltbot_bridge/INTERFACE.md",
+      "modules/communication/moltbot_bridge/ROADMAP.md",
+      "modules/communication/moltbot_bridge/ModLog.md",
+      "extensions/reddog/INTERFACE.md",
+      "extensions/reddog/ROADMAP.md",
+      "extensions/reddog/ModLog.md",
+      "extensions/reddog/tests/README.md",
+      "extensions/reddog/tests/TestModLog.md",
+      "docs/audits/infrastructure/REDDOG_EXACT_MAIN_LIVE_ACCEPTANCE_EVIDENCE_PHASE1.json",
+      "docs/audits/infrastructure/REDDOG_EXACT_MAIN_LIVE_ACCEPTANCE_WSP97_EXECUTION_RECEIPT_PHASE1.json"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_15",
+    "WSP_22",
+    "WSP_34",
+    "WSP_50",
+    "WSP_62",
+    "WSP_83",
+    "WSP_97",
+    "WSP_108"
+  ],
+  "compliance_evidence": [
+    "docs/audits/infrastructure/REDDOG_EXACT_MAIN_LIVE_ACCEPTANCE_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+    "docs/audits/infrastructure/REDDOG_EXACT_MAIN_LIVE_ACCEPTANCE_EVIDENCE_PHASE1.json",
+    "ModLog.md",
+    "modules/infrastructure/idle_automation/ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/docs/clarity/REDDOG_HOLO_POSTMERGE_ACTIVATION_ORDER_ASSUMPTION_AUDIT_20260827.md",
+    "modules/communication/moltbot_bridge/ModLog.md",
+    "extensions/reddog/ModLog.md",
+    "extensions/reddog/tests/TestModLog.md"
+  ]
+}

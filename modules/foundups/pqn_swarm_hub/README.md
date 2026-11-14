@@ -56,6 +56,12 @@ This directory contains:
 
 ## Links
 
+The [system RSI baseline](../../../docs/operations/RSI_SWARM_DISPATCH.md#baseline-and-context-preservation-checkpoint--2026-09-13)
+records 36 selected standalone tests at external commit
+`bdf0e15f019f83d76fa9cf94b131716bde559350`. They use an injected detector and
+disposable SQLite state; no live research, publication, settlement or retained
+RSI benefit is established. This stub remains the external repository entry.
+
 - **Standalone Repo**: https://github.com/FOUNDUPS/science-swarm-hub
 - **Contributing**: See `CONTRIBUTING.md` in the standalone repo
 - **Issues**: https://github.com/FOUNDUPS/science-swarm-hub/issues

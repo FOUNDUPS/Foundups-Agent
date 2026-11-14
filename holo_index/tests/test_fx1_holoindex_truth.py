@@ -160,21 +160,39 @@ class TestFX1C_ZenStatePermissionFallback:
 
 
 class TestFX2C_TimeoutDefaults:
-    """FX2-C: Verify timeout defaults are usable for semantic retrieval."""
+    """FX2-C: Verify timeout defaults are usable for semantic retrieval.
+
+    HOLOINDEX_COLD_MODEL_TIMEOUT_BOUNDARY_PHASE1: Defaults raised to 120s
+    to prevent false "not found" results on cold-process model load.
+    """
 
     def test_default_import_timeout_is_sufficient(self):
-        """Default HOLO_MODEL_IMPORT_TIMEOUT should be >= 15s for cold imports."""
+        """Default HOLO_MODEL_IMPORT_TIMEOUT should be >= 60s for cold imports."""
         original = os.environ.pop('HOLO_MODEL_IMPORT_TIMEOUT', None)
         try:
             for mod in list(sys.modules.keys()):
                 if mod.startswith('holo_index.core'):
                     del sys.modules[mod]
             from holo_index.core.holo_index import HOLO_MODEL_IMPORT_TIMEOUT
-            assert HOLO_MODEL_IMPORT_TIMEOUT >= 15, \
-                f"Default import timeout {HOLO_MODEL_IMPORT_TIMEOUT}s is too short (need >= 15s)"
+            assert HOLO_MODEL_IMPORT_TIMEOUT >= 60, \
+                f"Default import timeout {HOLO_MODEL_IMPORT_TIMEOUT}s is too short (need >= 60s for cold process)"
         finally:
             if original is not None:
                 os.environ['HOLO_MODEL_IMPORT_TIMEOUT'] = original
+
+    def test_default_load_timeout_is_sufficient(self):
+        """Default HOLO_MODEL_LOAD_TIMEOUT should be >= 60s for cold model load."""
+        original = os.environ.pop('HOLO_MODEL_LOAD_TIMEOUT', None)
+        try:
+            for mod in list(sys.modules.keys()):
+                if mod.startswith('holo_index.core'):
+                    del sys.modules[mod]
+            from holo_index.core.holo_index import HOLO_MODEL_LOAD_TIMEOUT
+            assert HOLO_MODEL_LOAD_TIMEOUT >= 60, \
+                f"Default load timeout {HOLO_MODEL_LOAD_TIMEOUT}s is too short (need >= 60s for cold process)"
+        finally:
+            if original is not None:
+                os.environ['HOLO_MODEL_LOAD_TIMEOUT'] = original
 
     def test_env_override_controls_import_timeout(self):
         """HOLO_MODEL_IMPORT_TIMEOUT env var should override default."""

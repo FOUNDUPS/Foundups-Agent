@@ -18,6 +18,18 @@ from typing import Any, Dict, Optional
 logger = logging.getLogger(__name__)
 
 
+def query_moshpit(request, *, source=None, capability=None):
+    """Read-only candidate; host authorization is mandatory, no legacy fallback.
+
+    This entrypoint is intentionally not mounted in conversational/HTTP routing.
+    The host must supply an authenticated, disclosure-aware activity source.
+    """
+    from modules.communication.moltbot_bridge.src.moshpit_projection import project_moshpit
+
+    return project_moshpit(request, source=source, capability=capability)
+
+
+
 # Time qualifiers that should be normalized to None (not treated as topics)
 TIME_ONLY_QUALIFIERS = {
     "yesterday",

@@ -1,0 +1,90 @@
+[
+  {
+    "id": "epstein",
+    "title": "Epstein records",
+    "question": "Are DOJ disclosure, survivor safeguards and enforcement mechanisms adequate?",
+    "nodes": "House Judiciary \u00b7 Senate Judiciary",
+    "document": "docs/13-oversight-topics-and-epstein.md",
+    "ticket_id": "EPSTEIN-001",
+    "status": "Existing law; proposals last verified at introduction",
+    "sources": [
+      {
+        "title": "Public Law 119-38, \u00a7\u00a7 2\u20133",
+        "url": "https://www.govinfo.gov/content/pkg/PLAW-119publ38/html/PLAW-119publ38.htm"
+      },
+      {
+        "title": "H.R. 9694 \u2014 introduced text",
+        "url": "https://www.govinfo.gov/content/pkg/BILLS-119hr9694ih/html/BILLS-119hr9694ih.htm"
+      },
+      {
+        "title": "S. 5005 \u2014 introduced record",
+        "url": "https://www.govinfo.gov/app/details/BILLS-119s5005is"
+      }
+    ]
+  },
+  {
+    "id": "emoluments",
+    "title": "Foreign payments & emoluments",
+    "question": "Do disclosure, consent and enforcement rules adequately address covered benefits?",
+    "nodes": "Oversight \u00b7 Judiciary \u00b7 relevant Senate committees",
+    "document": "docs/03-financial-forensics.md",
+    "ticket_id": "FINANCE-001",
+    "status": "Research question",
+    "sources": []
+  },
+  {
+    "id": "conflicts",
+    "title": "Gifts, conflicts & official decisions",
+    "question": "Do disclosure and recusal controls reveal improper influence?",
+    "nodes": "Oversight \u00b7 Judiciary \u00b7 relevant Senate committees",
+    "document": "docs/01-hub-and-authorities.md",
+    "ticket_id": "CONFLICTS-001",
+    "status": "Research question",
+    "sources": []
+  },
+  {
+    "id": "spending",
+    "title": "Spending, contracts & grants",
+    "question": "Do audit and payment controls detect false claims, waste and conflicts?",
+    "nodes": "Oversight \u00b7 relevant authorizing/appropriations committees",
+    "document": "templates/appendix-b-legislative-purpose.md",
+    "ticket_id": "SPENDING-001",
+    "status": "Research question",
+    "sources": []
+  },
+  {
+    "id": "crypto",
+    "title": "Crypto & stablecoins",
+    "question": "Are custody, disclosure and capital-flow safeguards sufficient?",
+    "nodes": "Financial Services \u00b7 Senate Banking",
+    "document": "docs/03-financial-forensics.md",
+    "ticket_id": "CRYPTO-001",
+    "status": "Research question",
+    "sources": []
+  },
+  {
+    "id": "corporate",
+    "title": "Corporate ownership & state nexus",
+    "question": "What do public filings establish, and what remains unknown?",
+    "nodes": "House/Senate relevant committees \u00b7 independent state authorities",
+    "document": "docs/02-state-referrals.md",
+    "ticket_id": "CORPORATE-001",
+    "status": "Research question",
+    "sources": []
+  },
+  {
+    "id": "records",
+    "title": "Records & transparency",
+    "question": "Are federal agency decisions adequately documented and preserved?",
+    "nodes": "Oversight \u00b7 HSGAC \u00b7 subject-matter committees",
+    "document": "docs/13-oversight-topics-and-epstein.md",
+    "ticket_id": "RECORDS-001",
+    "status": "Research question",
+    "sources": [
+      {
+        "title": "44 U.S.C. Chapter 31 \u2014 agency records",
+        "url": "https://www.archives.gov/about/laws/fed-agencies.html"
+      }
+    ]
+  }
+]

@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Read-only public research planning queue",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "mode",
+    "updated",
+    "tickets"
+  ],
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "mode": {
+      "const": "read-only-planning"
+    },
+    "updated": {
+      "type": "string",
+      "format": "date"
+    },
+    "tickets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ticket_id",
+          "topic_id",
+          "title",
+          "question",
+          "state",
+          "effect_ceiling",
+          "worker",
+          "reviewer",
+          "allowed_sources",
+          "prohibited_actions",
+          "acceptance",
+          "human_release"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 5
+          },
+          "question": {
+            "type": "string",
+            "minLength": 5
+          },
+          "ticket_id": {
+            "type": "string",
+            "pattern": "^[A-Z]+-[0-9]{3}$"
+          },
+          "topic_id": {
+            "type": "string",
+            "pattern": "^[a-z]+$"
+          },
+          "state": {
+            "const": "proposed"
+          },
+          "effect_ceiling": {
+            "const": "public-source-research-only"
+          },
+          "worker": {
+            "type": "null"
+          },
+          "reviewer": {
+            "type": "null"
+          },
+          "human_release": {
+            "const": false
+          },
+          "allowed_sources": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "format": "uri",
+              "pattern": "^https://"
+            }
+          },
+          "prohibited_actions": {
+            "type": "array",
+            "minItems": 4,
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            },
+            "allOf": [
+              {
+                "contains": {
+                  "const": "confidential-intake"
+                }
+              },
+              {
+                "contains": {
+                  "const": "witness-contact"
+                }
+              },
+              {
+                "contains": {
+                  "const": "official-process"
+                }
+              },
+              {
+                "contains": {
+                  "const": "autonomous-publication"
+                }
+              }
+            ]
+          },
+          "acceptance": {
+            "type": "array",
+            "minItems": 3,
+            "items": {
+              "type": "string",
+              "minLength": 20
+            }
+          }
+        }
+      }
+    }
+  }
+}

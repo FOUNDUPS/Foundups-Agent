@@ -1,5 +1,227 @@
 # Member Area Module Change Log
 
+## 2026-11-14 · Visible Mall build
+
+The scoped video header and shared options show the loaded build. Build
+v17 refreshes the shell cache with the same generation. The hosted v7
+comparison put the first Short below its row. The v16 preview placed the
+player at the start of the original row, in line with the current contract.
+
+## 2026-11-14 · Shared search dock and transcript editing
+
+The scoped grid, invited grid and expanded player use the same plus menu,
+editable search and foreground dictation controls. The far-right action
+shows the square Stop during capture. A longer transcript opens above the
+controls and stays available to edit. The queue and provider keep their
+positions while the dock grows. Cache v16 refreshes the shared assets.
+
+## 2026-11-14 · Phone WikiTube viewer and dictation
+
+Ordinary member phone cards use the existing selected-card player. The
+expanded viewer reserves space for a persistent search dock and horizontal
+queue on phone and desktop. The plus button accepts tap and upward swipe.
+The mic or Red Dog hold starts foreground local search dictation where
+available, and the square finishes it. Worker v15 refreshes the shell.
+WSP 22 and 97 apply.
+
+## 2026-11-14 · WikiTube controls and member entry
+
+Added the shared member search dock and reuse of local dictation. The full
+player filters its existing queue. Desktop posters request muted playback
+in the selected slot and keep a separate full-view action. The Play hostname
+uses the same invited shell. Worker v14 refreshes the member assets.
+
+## 2026-11-13 · Invited desktop poster grid
+
+Fresh wide fine-pointer entry uses the existing grid. Click and keyboard
+selection open the shared full player for video posters and quick view for
+other cards. Escape closes the player before collapsing the field. The
+member worker installs these assets in v13. WSP 22, 97 and 104 apply.
+
+## 2026-11-13 · Public HPC and invited member routes
+
+Guest video entry resolves on the dedicated host. The FoundUps HPC query
+selects the same view after member admission and survives the existing
+sign-in redirect. Cache v12 installs versioned routing assets together.
+WSP 22, 97 and 104 apply.
+
+## 2026-11-12 · Phone video replaces the selected tile
+
+The shared player takes the selected tile's original row and hides its
+thumbnail until close. The existing iframe survives expansion and responsive
+transitions. Cache v11 refreshes the field and player assets. YouTube 101 and
+150 report an embed refusal. WSP 22, 97 and 104 apply.
+
+## 2026-11-11 · In-context playback recovery candidate
+
+Reuse the shared player for scoped inline playback and immersive expansion,
+with one iframe, local provider diagnostics, vertical batching, safe-area
+navigation and stable video return. The candidate cache is v7: installation
+reloads the public shell assets at their existing URLs and omits credentials.
+The scoped projection moves the existing controls in the DOM; the member HTML
+and its reviewed authentication metadata are byte-for-byte unchanged. See the
+[incident](../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md) and
+[test log](tests/TestModLog.md) for the live v6 baseline and independent gates.
+
+## 2026-11-11 · HPC public video projection
+
+Use the existing grid and immersive player for the SchumerOUT collection.
+The exact dedicated hostname or explicit public query selects the field.
+The scoped route uses a tab-local scroll key for Vote contact return.
+Member entry, geographic product state and the global catalog retain their
+own routes and state. Service worker v6 distinguishes the public catalog
+cache key and declares the changed versioned assets.
+
+## 2026-10-25 — FX1 public directory discovery
+
+Expose the existing `/f/` public directory through a normal homepage FX link.
+Reuse its renderer and readiness state, adding optional declared-ticker search
+alongside name, summary and canonical ID. Directory copy distinguishes declared
+symbols from deployment/trading evidence; no registry or economic action changes.
+
+Extend the existing route VM to retain and invoke actual input/change listeners,
+then cover matching, nullable/non-string symbols, readiness/clear/empty behavior,
+escaped ticker markup and the existing error/Mall-return path. Add the missing
+tests README before authoring and preserve the existing fixture/route checks.
+The two complete route/gateway test files passed 300 cases with two inherited
+pytest configuration warnings; see `tests/TestModLog.md` for commands and limits.
+WSP 15/22/50/84/97: parent allocation 15/P1; degraded Holo retrieval was replaced
+with current contract/source/test reads. Local source verification is not a
+deployment, browser, token, liquidity or trading claim.
+
+## 2026-10-23 — Preserve intent-bearing terms in bounded Mall queries
+
+Repair the existing local catalog matcher for “I'm looking for clothing” and
+equivalent explicit request prefixes. Normalize straight/curly apostrophe input,
+make clothes/clothing/apparel aliases reciprocal, and keep red/dog as item terms
+unless they form the recognized leading Red Dog address. Negation, budgets and
+size words stay literal; this does not implement semantic intent or commerce
+filters. Grouped product discovery continues to refuse global catalog queries.
+
+Advance the existing member service-worker shell cache from v4 to v5 so
+previously installed clients refresh the precached matcher on worker update.
+Keep poster/property cache generations unchanged. Align the existing product
+state/service-worker harness with the new shell generation and v4 retirement.
+
+Extend the existing actual-field VM harness rather than create another search
+owner or test fixture. The new request regression fails on the unchanged source
+and passes after the repair; dispatcher and concierge harnesses also pass.
+See `tests/TestModLog.md` for exact commands and limits. WSP 22/50/84/97:
+current-source retrieval, shared-owner reuse, bounded change and recorded proof.
+No catalog, private capture, publication, microphone, backend or payment change.
+
+## 2026-10-21 — Repair security test fixtures
+
+Strengthen existing hostile HTML assertions for mixed tag case and remove
+unneeded regex tag stripping from the bounded DOM fixture. Preserve runtime
+security assertions and scanner gates. Reconcile concurrent main's reviewed
+security evidence and regenerate the canonical test registry. WSP 22/50/97;
+research, scope and validation are recorded in tests/TestModLog.md.
+
+## 2026-10-18 — Move2Japan selects houses inside the actual member shell
+
+Correct the prior separate-page composition. The registered product opens
+`/member/?foundup=move2japan`; the existing page, field, detail plane, Red Dog,
+account owner, service worker and persistence remain shared. `/move2japan/` is a
+fixed alias. Templates supply the product form/toolbar and move the existing
+field node; they do not create another shell. Eight dated Fukui observations
+form five area rows, with combined geography/land/price filters.
+
+Preserve concurrent main's responsive category rows and global catalog queries.
+Explicit geographic groups take precedence; global video controls cannot mutate
+house results. Keep separate video/product state and a bounded account return.
+SW cache v4 serves only explicit public assets and validated public catalogs.
+Product account enrichment is read-only after the normal stored admission checks;
+generation guards prevent stale responses after sign-out/account switching.
+Guests do not depend on Firebase. Full shared member panels are visible after
+admission; the video-only guide stays hidden. A peer caught and verified the fix
+for briefing/recommendations accidentally nested under that hidden guide.
+
+WSP 00/22/50/84/97: recover exact retained source where available, rebuild missing
+segments against actual owners, and rerun tests. The remote PR remained at its
+original head during the stalled upload/executor interruption. No cause is
+invented for the executor state loss. Actual bootstrap and registry evidence are
+recorded in the [domain rebaseline](../../modules/foundups/move2japan/docs/08_HOUSING_DISCOVERY_REBASELINE.md).
+Fresh integrated execution: 1698 passed and the four independently confirmed
+pre-existing failures, no skips. Runtime/CI/deployment receipts remain distinct.
+No publisher, paid plan, token issuance, tenant admission or production cutover is
+implied by this public discovery change.
+
+## 2026-10-18 — Shared responsive rows and RedDog catalog search
+
+Extend existing Mall renderer rather than duplicate tenant apps. Default category
+tracks adapt card width to the viewport and preserve independent horizontal
+positions; vertical browsing has no fixed row cap. Keep explicit legacy grid,
+channel pinch/queue behavior and canonical entry. Repair drag-on-card exclusion,
+reobserve rerenders and clear stale media indexes on scope/projection changes.
+RedDog text and dispatcher share bounded metadata search; categories come from
+catalog data. Service-worker shell version advanced for updated assets.
+
+WSP 00: canonical bootstrap attempted; torch absent. Documented tracker fallback
+opened gate; detector witness absent. WSP 50/87: exact-head lexical bundle read,
+freshness UNKNOWN/index gap true; noisy retrieval supplemented by direct owner
+reads. No semantic freshness or reindex claimed. WSP 84/97: shared-owner reuse;
+voice, personalized mapping, payments and live ingestion remain future work.
+Validation details are recorded in public/member/tests/TestModLog.md.
+
+
+## 2026-10-17 — Shared Mall property discovery presentation
+
+Move2Japan's public house-search PoC reuses the existing tile field, detail
+plane, gestures, and styles. `source_type=property_listing` renders asking
+price, location, source area figures, and repair status. It ignores video,
+token, readiness and poster fields; source photographs remain at their origin.
+The existing member video catalog and account gate are unchanged.
+
+- Added `mallTileField.updateCatalog(catalog)` for result changes without
+  reinstalling page event listeners. Updating closes stale detail and syncs
+  the plane catalog. Initialization remains compatible with existing callers.
+- Added `mallPlanes.openListingById(foundupId, listingId)`: a listing retains
+  its FoundUp identity, with a separate key for selection and focus return.
+  Duplicate tuple identities are rejected rather than selecting the first.
+- Property tap, Enter, Space and pinch open detail; video controls retain
+  their existing paths. Details preserve source references/observation date
+  and unknown values; source-listed does not mean confirmed available.
+- Property source links require HTTPS and reject URL credentials/control
+  characters. Text/attributes are escaped. Closed planes are inert; opening
+  restores interaction, and property Tab/Shift-Tab stays inside the plane.
+- Independent review found detached source-link focus after navigation and
+  upward scrolling dismissing long property details. Navigation now focuses
+  the stable close button, Tab recovers outside focus, and property vertical
+  gestures retain native scrolling. Horizontal navigation and existing video
+  close gestures are preserved; the property hint matches its controls.
+- Extended the existing nonvideo quick-view test file with a dependency-free
+  Node VM runtime fixture. Focused execution passed. The first hostile-text
+  case exposed missing angle-bracket attribute escaping; corrected and
+  replayed. VM evidence is not browser layout or production deployment proof.
+
+WSP 00/22/50/84/97: current-source retrieval and existing test inventory preceded
+this bounded extension; property audit is owned by the Move2Japan module.
+No new auth, listing provider, upload, payment, token, global route or daemon.
+
+## 2026-09-21: Reconcile public-route validation with existing access boundary
+
+The existing route suite expected public tenant iframe launch after the public
+surface had moved to scope-free discovery and a membership handoff. Test-only
+repair changes 34 pass / 11 fail to 48 pass and removes comment/CSS false positives.
+Hosted CodeQL caught the initial regex parser gap; stdlib HTMLParser plus three
+case/attribute tests resolves it without changing production HTML.
+No route, catalog, admission, RedDog or frontend behavior changed. Existing
+WSP 104 identity-versus-authorization boundary is preserved; no AmIBot alias
+or public activation follows. Validation detail: `tests/TestModLog.md`. WSP 15/22/97.
+
+## [2026-08-26] REDDOG_CANONICAL_ARCHITECTURE_ALIGNMENT_PHASE1
+
+- Aligned the member Red Dog contract with RedDog as the continuous
+  principal-scoped 0102 identity across thin-client surfaces.
+- Split OpenClaw supervision, WRE repository/process authority, and Hermes
+  bounded leaf-worker responsibilities.
+- Kept the current browser concierge presentation-only and the authenticated
+  p.fMALL/phone resident adapter explicitly unimplemented.
+- Documentation-only; no member runtime, route, storage, or worker behavior
+  changed.
+
+
 ## [2026-05-22] FOUNDUPS_PORTFOLIO_DISPLAY_COMPONENT_PHASE1
 
 **Who**: 0102 - Worker H

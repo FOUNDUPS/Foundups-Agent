@@ -129,6 +129,16 @@ Use four statuses:
 
 ### Planning Reference
 
+- `modules/foundups/pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md`
+  - current AutoPost/Shop/GetK private-default ownership decision and item-photo
+    contract; grouping, authenticated shared-media attachment and private Mall
+    rendering remain specified, not implemented
+  - attached through module/domain docs, `NAVIGATION.py` and bounded
+    `modules/foundups/pfmall/doc_index.json`; no fresh Holo generation claimed
+- `extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md`
+  - RedDog-owned recurring engagement handshake used by FoundUps and AutoPost
+    flows; feasibility is one use case
+  - specified, not implemented; not a WSP and not identity authority
 - `modules/foundups/docs/OCCAM_LAYERED_EXECUTION_PLAN.md`
 - `modules/foundups/docs/CONTINUATION_RUNBOOK.md`
 - `modules/foundups/docs/SOFTPROTO_FOUNDATION_ARCHITECTURE_2026-04-01.md`
@@ -141,6 +151,8 @@ Use four statuses:
 - `modules/foundups/docs/PFMALL_FOUNDUP_MANIFEST_SCHEMA.md`
   - future full FoundUp runtime manifest (CABR, signing, capabilities)
   - distinct from current Video Mall catalog
+- `modules/foundups/docs/PFMALL_OPPORTUNITY_INSTANCE_MODEL.md`
+  - planning model for discovering concrete opportunity instances beneath reusable FoundUps without redefining RedDog or adding a new lifecycle layer
 - `modules/foundups/docs/FOUNDUP_FEDERATION_MIGRATION_PLAN.md`
   - useful, but still draft and not proof that all migrations have happened
 - submodule roadmaps:
@@ -206,9 +218,20 @@ Reason:
 - `AutoPost`
   - repo: `FOUNDUPS/autopost` (live on GitHub)
   - web: `autopost.foundups.com` (redirect)
-  - status: PoC — Vite + React + TypeScript + Gemini API, camera capture-to-post
+  - status: external source owns implementation truth; source reviewed
+    2026-10-23 at `3c0fc19d40e225ed7f826541a33c38293f9fe664` implements still-photo
+    capture, origin-local media persistence, real local model invocation,
+    provider-neutral `CaptureEvent`/`CaptureDecision` and bounded YouTube upload
+    code; this is not a fresh physical-phone or deployed-upload proof
   - classification: `CANDIDATE_FOUNDUP` (HIGH priority) — both a FoundUp AND a tool
-  - role: content pipeline for entire FOUNDUPS ecosystem (users post unlisted videos → YouTube → FoundUp routing → pfMALL display + social distribution)
+  - role: shared capture/perception product for FoundUps; private clothing/item
+    drafts use original-photo references. General FoundUp routing, authenticated
+    shared-media transfer and private Mall attachment remain missing. Unlisted
+    YouTube is not the private clothing-photo transport.
+  - continuation: `modules/foundups/pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md` plus
+    external AutoPost's README, ROADMAP, module registry and layer map
+  - Lick boundary: AutoPost can capture a permissioned encounter event; RedDog
+    owns the handshake and identity-confidence interpretation
   - part of: AI Automation service FoundUp
   - Discord: AUTOPOST category planned (#autopost-general doubles as user troubleshooting, monitored by 0102/OBAI)
   - docs: ROADMAP.md and ModLog.md added 2026-04-06

@@ -1,6 +1,30 @@
 # Browser Actions - Test Documentation
 
+## Manager admission acceptance — 2026-09-24
+
+The existing test file now covers 36 fixed cases. Baseline: 11 fail/25 pass;
+repair and independent replay: 36 pass each, four legacy constructor cases
+excluded, two known disabled-plugin warnings. All 23 prior compatibility cases
+remain unchanged. The six manager outcomes now enforce admission and seven
+malformed/state faults reject before invitation UI. Exact results, object identity,
+history, call order and success credit are checked.
+
+Bound runner, hashes, XML and independent review:
+`O:/Foundups-Agent-audits/20260924-rsi-manager-guard`. This remains an inert fixture
+proof, not process confinement or a live send. The historical 29-case qualification
+below characterized the original gap; it is superseded by this acceptance scope.
+
 **WSP Reference:** WSP 34 (Test Documentation)
+
+## Manual Gemini probe import safety — 2026-10-29
+
+`test_final_autonomous_gemini.py` now parses and can be imported without browser
+or provider imports, output or sys.path changes. It remains an explicitly
+manual live-action program, excluded from WRE automated evidence. The bounded
+regression is `tests/test_legacy_test_source_safety.py` at repository root.
+Running the program itself can click a live YouTube heart; that behavior was
+not executed or validated by this repair. Whole-folder collection is still
+outside the bounded acceptance scope because other integration harnesses remain.
 
 ## Test Strategy
 
@@ -11,26 +35,63 @@ Browser action testing uses:
 
 ## Test Files
 
-| File | Purpose |
-|------|---------|
-| `test_action_router.py` | Router logic tests |
-| `test_youtube_actions.py` | YouTube action tests |
-| `test_linkedin_actions.py` | LinkedIn action tests |
-| `test_x_actions.py` | X action tests |
-| `test_autonomous_gemini_heart.py` | Gemini Vision element detection with existing Chrome |
-| `test_final_autonomous_gemini.py` | Gemini Vision standalone infrastructure test |
-| `test_gemini_studio_heart.py` | Gemini Vision YouTube Studio heart button test |
-| `test_gemini_js_click.py` | Gemini Vision JavaScript click injection test |
+| File | Existing scope |
+|---|---|
+| `test_linkedin_connection_policy.py` |36 inert acceptance cases: policy/preview/note, manager admission and malformed results; four legacy constructor cases excluded. |
+| `test_linkedin_actions_unit.py` |Other action behaviors with fake router; not run in this qualification. |
+| `test_autonomous_gemini_heart.py` |Existing-Chrome Gemini heart integration harness; not run. |
+| `test_final_autonomous_gemini.py` |Standalone Chrome/Gemini integration harness; not run. |
+| `test_gemini_studio_heart.py` |Gemini Studio heart targeting harness; not run. |
+| `test_gemini_js_click.py` |Gemini/JavaScript click integration harness; not run. |
+
+## Manager-result qualification — 2026-09-24
+
+Six new fixed cases extend the same owner; all23 prior cases remain unchanged.
+Local and independent runs each pass29, with four legacy constructor cases
+deselected and two known plugin warnings. Passing characterizes the existing
+admission gap; it does not assert repaired behavior. Status, returned/stored
+object identity, fixed-clock same-ID failure, history, exact UI calls and success credit
+are checked. See [TestModLog](TestModLog.md) and the
+[contract](../../../platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-manager-result-qualification--2026-09-24).
+
+The source/hash-bound runner,29 IDs and XML live at
+`O:/Foundups-Agent-audits/20260924-rsi-manager-admission`. It uses the qualified
+Python interpreter with `-I -B`, no conftests/plugin autoload, inert eager-import
+boundaries, constructor bypass and fake simulator sleep. Whole-folder collection
+includes browser integration harnesses and is not this bounded proof.
+
+## Requested-note repair validation — 2026-09-23
+
+Frozen 23 cases select `test_connection_ack_`, `test_connection_preview_`,
+`test_connection_current_` and `test_connection_live_`. Baseline: 4 failures, 19 passes;
+candidate and independent runs pass 23; four legacy constructor tests excluded.
+Seventeen prior compatibility controls and all shared fixtures remain unchanged.
+The prospective cases enforce Add/type before one Send and zero sends on their
+failure, including None for an unattempted Send. None/empty message controls
+preserve fallback. The isolated runner and XML are bound in the RSI backlog;
+no live browser or external delivery proof is claimed. Two known warnings remain.
+See [contract](../../../platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-requested-note-repair--2026-09-23).
+
+## Connection preview validation — 2026-09-22
+
+PR1869's ten cases qualified the pre-repair mutation. The prospective dry-run
+oracles now replace those obsolete mutation expectations in the same owner.
+The frozen17-case matrix covers allow/deny supplied/extracted metadata,
+repeated previews with empty/pending/connected/quota state, fake-live click and
+policy-denial controls, and missing/unavailable early errors. Baseline12fail/5pass
+becomes17pass locally and independently; four original constructor tests stay
+unchanged/excluded and two disabled-plugin configuration warnings remain.
+The reviewed inert runner in the canonical backlog isolates eager imports,
+bypasses construction and forbids preview manager/send simulation calls.
+Whole-folder collection is not this bounded qualification. See the
+[contract](../../../platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-connection-policy-preview--2026-09-22).
 
 ## Running Tests
 
-```bash
-# Unit tests (mock drivers)
-pytest modules/infrastructure/browser_actions/tests/ -v
-
-# Integration tests (requires browser)
-pytest modules/infrastructure/browser_actions/tests/ -v -m integration
-```
+Use the reviewed, source-bound selection above for this qualification. Rebind
+the runner/source hashes in an isolated owned worktree before a later run;
+historical counts are not fresh execution. The integration harnesses require
+separate runtime and action authorization.
 
 ## Test Data
 

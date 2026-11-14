@@ -21,6 +21,74 @@ wsp_cycle(input="interface", log=True)
 
 ## Primary Interface
 
+### Self-audit report status — 2026-10-07
+
+`SelfResearchRefresher.scan_self_audit()` now preserves the complete producer
+snapshot as `scan_status`. `events_opened` is its exact `event_count`, including
+`None` on an ordinary failed scan. Zero events does not prove input coverage or
+health: inspect `outcome`, `coverage`, and `error_codes`. `last_success` is scoped
+to the newly created scanner instance, not a durable success history.
+
+`top_signatures` remains historical data. `history_status` is `available`,
+`absent`, or `unavailable`; `signature_count` is `None` when history is unknown.
+Malformed history cannot suppress the current scan snapshot. These diagnostics
+do not authorize execution, establish an independently verified improvement,
+or convert historical signatures into current findings.
+
+### Exact-SHA HoloIndex Post-Merge Coordination
+
+`coordinate_holoindex_postmerge()` observes `origin/main` from a configured
+clean authority worktree and creates one insert-only AgentDB task per commit
+SHA. It never indexes during query handling and never creates or repairs the
+authority worktree.
+
+The OpenClaw executor must first claim the task through
+`AgentDB.claim_holoindex_postmerge_task()`. The claim CAS binds the serialized
+task context to a one-use claim ID; the effect adapter must consume it through
+`assigned -> executing` and validate the request event before invoking the
+trusted authority transaction. Successful completion is committed
+atomically with the request resolution and exact generation receipt.
+The authority transaction runs canonical refresh under its first authority
+lease, releases that lease while the governed activation controller
+materializes/queries/commits the immutable replica, and reacquires the lease
+for final binding, clean-HEAD, and `origin/main` proof. `CURRENT` is returned
+only when the owner exactly matches the canonical HEAD, generation, and
+freshness-receipt digest. Failure leaves the task failed or retryable, the
+request pending, and the completion event absent.
+The executor resolves `resolve_holoindex_runtime_root(repo_root)` before calling
+the authority transaction. A clean linked control checkout therefore retains
+task/control authority while the same-repository primary checkout supplies only
+its dependency-runtime candidate (normally `.venv`) for the existing probe to
+validate. The clean dedicated authority worktree remains repository/index
+source authority. The resolver
+falls back to the supplied control root when a related primary worktree cannot
+be proven; maintenance then fails closed if that root lacks the required probe
+runtime.
+Claims have a 7500-second lease, covering the bounded 7200-second maintenance
+timeout plus margin. A crashed or interrupted worker is reclaimed
+by exact assignment timestamp and enters the existing bounded retry policy.
+
+Incident-bound coordination accepts `REPO_HEAD_MISMATCH` as a non-authority-
+root mismatch: the observed authority HEAD must equal the exact target HEAD.
+The communication bridge owns the preceding zero-attempt evidence and
+independent-query checks; this interface grants no query-side indexing.
+
+Runtime configuration:
+
+- `REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT`: absolute dedicated worktree.
+- `REDDOG_HOLOINDEX_QUERY_ROUTE_FILE`: absolute private stable route record.
+- `REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT`: legacy-only direct root; rejected when
+  the stable route-file value is also present.
+- `HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED=1`: enable periodic observation.
+- `HOLOINDEX_POSTMERGE_COORDINATOR_INTERVAL_SEC`: minimum 30 seconds.
+
+The process-local transaction lock spans both authority leases and activation.
+The automatic composer selects only absent replica/receipt targets and never
+overwrites a generation. This ordering passed production-shaped acceptance at
+exact main `cfd1e0051` through the real OpenClaw supervisor and AgentDB. A
+subsequent governed owner query was CURRENT/no-gap/no-reindex and immutable
+revalidation remained unchanged. Later HEADs require their own transaction.
+
 ### Class: IdleAutomationDAE
 
 ```python
@@ -136,6 +204,10 @@ if result["overall_success"]:
 | `AUTO_LINKEDIN_POST` | bool | `true` | Enable LinkedIn posting |
 | `IDLE_TASK_TIMEOUT` | int | `300` | Maximum execution time (seconds) |
 | `MAX_DAILY_EXECUTIONS` | int | `3` | Maximum executions per day |
+| `AUTO_SCHEDULED_ROUTINES` | bool | `true` | Enable scheduled routine claims and dispatch |
+| `IDLE_AUTOMATION_RUNTIME_ROOT` | path | `~/.foundups-agent/idle_automation` | Trusted private claim-state root outside the repository |
+| `AUTO_OPENROUTER_CATALOG_REFRESH` | bool | `false` | Enable the exact daily OpenRouter catalog refresh claim |
+| `OPENROUTER_CATALOG_RUNTIME_ROOT` | path | `~/.foundups-agent/ai_gateway/openrouter_catalog` | Trusted outside-repository provider evidence root |
 
 ### Safety Controls
 
@@ -231,6 +303,63 @@ All external dependencies can be mocked for testing:
 - Network checks via connectivity mocking
 - LinkedIn API via bridge mocking
 - WRE integration via mock objects
+
+## Scheduled Claim Interface
+
+### `ScheduleEvaluator.claim_schedule(spec, *, now=None)`
+
+Computes the canonical cadence window and asks `ScheduleClaimStore` to publish
+one durable claim. It returns `ScheduleClaim` only after the fixed
+`schedule_claim_state.json` artifact is atomically published under the trusted
+runtime root. Disabled, unknown, out-of-window, completed, actively leased, and
+backoff-blocked schedules return `None`.
+
+### `ScheduleEvaluator.finalize_claim(token, *, success, outcome_code, now=None)`
+
+Performs exact-token compare-and-set finalization. A token that expired may
+finalize only while it remains current; recovery immediately makes the old
+token stale. Outcome state stores only bounded codes or a digest, never raw
+dispatcher text.
+
+### Daily OpenRouter catalog claim
+
+`ScheduleParser` accepts `openrouter_catalog_refresh` only with `daily`
+cadence and generates canonical schedule ID `e324884d66c4`.
+`IdleAutomationDAE._claim_and_dispatch(...)` passes the full exact
+`ScheduleClaim` to the provider branch. The final boundary is default-off via
+`AUTO_OPENROUTER_CATALOG_REFRESH=false`.
+
+When enabled, the DAE supplies only the code-derived repository root and trusted
+`OPENROUTER_CATALOG_RUNTIME_ROOT` to the AI Gateway adapter. Its response must
+be an exact six-key dictionary. Success requires exact boolean `true`,
+`COMPLETED/completed`, an exact boolean replay flag, and canonical 64-hex
+receipt/candidate evidence IDs. Every other shape becomes the fixed
+`routine_failed` outcome without forwarding provider text.
+
+Claim finalization occurs before legacy `last_run` recording. A successful
+adapter projection records success only after exact-token finalization; failed
+or uncertain finalization leaves legacy suppression untouched. This interface
+collects candidate evidence only and grants no selection, promotion, registry,
+or runtime-binding authority.
+
+Cancellation propagates without finalizing or recording the claim. The claim
+remains leased for the existing bounded expiry and replay-recovery policy.
+
+### Durability Contract
+
+- Maximum claim lease: 3900 seconds, exceeding the 3600-second bounded routine
+  timeout plus margin.
+- Retry policy: 60 seconds, then 300 seconds; maximum three attempts.
+- Lease recovery: at most one expired-claim recovery per window.
+- Publication: same-directory temp, fsync, replace, post-replace byte proof,
+  and exact last-known-good restoration on uncertain replacer behavior.
+- Malformed, partial, duplicate-key, oversized, or noncanonical state fails
+  closed before dispatch.
+- A legacy `last_run` suppresses a window only when `last_result` has the
+  canonical `success:` prefix. Failed or unknown legacy results remain due and
+  enter durable claim/retry control.
+- Claims provide cooperative single ownership, not exactly-once side effects;
+  registered routines must be repeat-safe or independently fenced.
 
 ## WSP Compliance Matrix
 

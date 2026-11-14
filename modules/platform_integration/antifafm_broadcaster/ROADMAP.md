@@ -11,7 +11,7 @@
 - [x] Health monitoring
 - [x] JSONL telemetry
 - [x] CLI integration
-- [x] AI Overseer integration
+- [ ] Bind/test AI Overseer alerts (initialization exists; delivery unimplemented)
 - [x] **YouTube 12-hour limit auto-restart** (2026-03-04)
 
 ### YouTube Duration Limit (24/7 Streaming)

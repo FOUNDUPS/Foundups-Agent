@@ -1,14 +1,26 @@
 # Foundups-Agent Documentation Index
 
+**System execution planning:** [Root roadmap](../ROADMAP.md) → [dated RSI audit](audits/rsi/2026-09-09/README.md) → [production-line dispatch and cost control](operations/RSI_SWARM_DISPATCH.md) → [R24 implementation packet](roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md). [Hybrid architecture and current RedDog assessment](architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md) → [R25 feedback packet](roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md). [Superseded roadmap register](_archive/roadmaps/2026-09-10/README.md).
+
 **Purpose:** Central catalog of all architecture documentation, session reports, and design documents.
 
 **Status:** ACTIVE
 
-**Last Updated:** 2026-02-08
+**Last Updated:** 2026-09-11
 
 **WSP Compliance:** WSP 22 (ModLog), WSP 50 (Pre-Action Verification), WSP 87 (Code Navigation)
 
 ---
+
+## RedDog Canonical Navigation
+
+Start with [REDDOG_DOCUMENTATION_MAP.md](REDDOG_DOCUMENTATION_MAP.md). It
+separates current product truth, architecture, WSP authority, audits, test
+evidence, and historical memory. The canonical identity boundary is
+[`extensions/reddog/ARCHITECTURE.md`](../extensions/reddog/ARCHITECTURE.md):
+RedDog is the fast interaction/exchange surface, while 0102 is the deeper
+Digital Twin and orchestration layer. The map also owns navigation to Lick,
+Contact Memory, Moshpit, and the specified-not-implemented Memex emitter.
 
 ## Quick Navigation
 
@@ -19,7 +31,7 @@
 | [Vision & Automation](#vision--automation-systems) | 3 | Browser automation and vision AI systems |
 | [0102 Session Briefings](#0102-session-briefings) | 1 | Session-start onboarding digests for 0102 |
 | [Session Reports](#session-reports) | 6 | Completed work sessions and sprints |
-| [Analysis & Audits](#analysis--audits) | 12 | Deep dives, audits, and first principles analysis |
+| [Analysis & Audits](#analysis--audits) | 15 | Deep dives, audits, and first principles analysis |
 | [Implementation Plans](#implementation-plans) | 6 | Execution plans and implementation guides |
 
 ---
@@ -110,6 +122,12 @@
 |----------|------|------------|----------------|
 | [012_VISION_DEEP_THINK_ANALYSIS.md](012_VISION_DEEP_THINK_ANALYSIS.md) | Deep Analysis | 012 vision system analysis | WSP 25, WSP 44 |
 | [HOLO_COMPREHENSIVE_AUDIT_20251130.md](HOLO_COMPREHENSIVE_AUDIT_20251130.md) | Audit | HoloIndex comprehensive audit | WSP 50, WSP 87 |
+| [HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_WHEEL_ASSUMPTION_AUDIT_PHASE2C1.md](audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_WHEEL_ASSUMPTION_AUDIT_PHASE2C1.md) | Assumption Audit | Inert reviewed builder-wheel admission and nonclaims | WSP 15, WSP 50, WSP 62, WSP 97 |
+| [HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_SOURCE_ASSUMPTION_AUDIT_PHASE2C2A.md](audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_SOURCE_ASSUMPTION_AUDIT_PHASE2C2A.md) | Assumption Audit | Wheel-bound inert source generation and Phase 2C2b boundary | WSP 15, WSP 50, WSP 62, WSP 97 |
+| [HOLOINDEX_QUERY_RUNTIME_BUILDER_DEPENDENCY_COMPOSITION_ASSUMPTION_AUDIT_PHASE2C2B.md](audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_DEPENDENCY_COMPOSITION_ASSUMPTION_AUDIT_PHASE2C2B.md) | Assumption Audit | Sequential source/dependency composition and non-atomic boundary | WSP 15, WSP 50, WSP 62, WSP 97 |
+| [HOLOINDEX_QUERY_RUNTIME_BUILDER_RUNTIME_COMPOSITION_ASSUMPTION_AUDIT_PHASE2C3A.md](audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_RUNTIME_COMPOSITION_ASSUMPTION_AUDIT_PHASE2C3A.md) | Assumption Audit | Inert builder dependency/base-runtime composition and process-topology drift | WSP 15, WSP 50, WSP 62, WSP 97 |
+| [HOLOINDEX_QUERY_RUNTIME_BASE_PREFIX_CONSUMER_ASSUMPTION_AUDIT_PHASE2C3B.md](audits/security/HOLOINDEX_QUERY_RUNTIME_BASE_PREFIX_CONSUMER_ASSUMPTION_AUDIT_PHASE2C3B.md) | Assumption Audit | Real base-prefix consumer correction and false-green fixture repair | WSP 15, WSP 50, WSP 62, WSP 97 |
+| [HOLOINDEX_QUERY_RUNTIME_BUILDER_CHILD_ASSUMPTION_AUDIT_PHASE2C3C.md](audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_CHILD_ASSUMPTION_AUDIT_PHASE2C3C.md) | Assumption Audit | Held builder-child evidence boundary, real O: runtime, and explicit nonclaims | WSP 15, WSP 50, WSP 62, WSP 97 |
 | [HOLO_CLI_FIRST_PRINCIPLES_AUDIT.md](HOLO_CLI_FIRST_PRINCIPLES_AUDIT.md) | First Principles | HoloIndex CLI architecture | WSP 1 |
 | [HOLODAE_DEEP_DIVE_BECOMING_THE_HOLODAE.md](HOLODAE_DEEP_DIVE_BECOMING_THE_HOLODAE.md) | Deep Dive | HoloDAE consciousness and operation | WSP 80, WSP 91 |
 | [QWEN_AI_VS_SCRIPT_ANALYSIS.md](QWEN_AI_VS_SCRIPT_ANALYSIS.md) | Comparison | Qwen AI vs script automation analysis | WSP 77 |

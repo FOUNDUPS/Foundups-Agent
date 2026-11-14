@@ -1,5 +1,39 @@
 # GitHub Integration Testing Strategy
 
+## Current executable inventory (2026-10-26)
+
+Observation transport extends the existing client owner by32 parameter cases;
+the complete canonical shard is152 client plus15 permission-probe cases.
+Keep all original120 client cases and their assertions. Only the selector test's
+mock callback accepts the new private keyword; its behavioral oracle is unchanged.
+Coverage includes exact origin, same/cross-origin redirects, compression, actual
+2MiB boundaries with absent/low Content-Length, early declared oversize, fragmented
+reads, per-request options, whole timeout, cancellation/response release, media
+types, status, UTF-8/recursion sanitation and legacy large-response compatibility.
+The response and StreamReader mocks validate application policy/cleanup; they do
+not prove wire framing, actual decompression/reconnect behavior or OS isolation.
+
+The canonical unit shard contains exactly test_github_api_client.py (real client,
+mocked HTTP) and test_reddog_github_permission_probe.py (mock backend and dry-run
+mapping). Extend these owners; the proposed files in the historical strategy
+below do not establish that those files exist or have passed.
+
+The five other test_*.py files are explicitly quarantined by the canonical
+registry: basic functionality, GitHub integration and WSP automation mutate
+process streams; GitHub automation and WRE integration contain syntax errors.
+They are preserved, unexecuted operational work, not silently passing coverage.
+Helper directories contain mock adapters/extensions, not additional client suites.
+
+Use .github/workflows/github-client-contracts.yml for the pinned direct tools,
+explicit two-file selection and fresh JUnit/dependency artifacts. HTTP is mocked;
+the job does not prove network denial, zero host effects or production readiness.
+Do not collect the entire directory or use credentials for these unit cases.
+The hosted process must unset credential variables, rather than assign empty
+strings: the legacy presence check distinguishes those states. Pin rootdir to
+the workspace so JUnit case identities agree with local explicit-root evidence.
+
+## Historical strategy
+
 ## Testing Overview
 
 This directory contains comprehensive tests for the GitHub Integration module, covering both unit tests and integration tests with the actual GitHub API.

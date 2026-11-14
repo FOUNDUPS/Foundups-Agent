@@ -88,16 +88,16 @@ def get_overseer_summary(repo_root: Path) -> Dict[str, Any]:
         sources_used.append("overseer_status")
         confidence += 0.1
 
-        status_data = status["data"]
+        status_data = _get_data(status)
         summary["system_posture"] = _determine_system_posture(status_data)
 
-        if status_data.get("wsp_audit_status"):
+        if isinstance(status_data.get("wsp_audit_status"), dict):
             audit = status_data["wsp_audit_status"]
-            if audit.get("drift_count", 0) > 0:
+            if isinstance(audit, dict) and audit.get("drift_count", 0) > 0:
                 summary["top_concerns"].append({
                     "type": "drift_risk",
                     "summary": f"WSP drift detected: {audit['drift_count']} issues",
-                    "severity": audit.get("severity", "medium"),
+                    "severity": _normalize_severity(audit.get("severity", "medium")),
                 })
 
     # Source 2: Mission history
@@ -106,7 +106,7 @@ def get_overseer_summary(repo_root: Path) -> Dict[str, Any]:
         sources_used.append("mission_history")
         confidence += 0.1
 
-        mission_list = missions["data"].get("missions", [])
+        mission_list = _get_data(missions).get("missions", [])
         summary["mission_activity"] = _summarize_mission_activity(mission_list)
 
         # Check for failed missions
@@ -124,7 +124,7 @@ def get_overseer_summary(repo_root: Path) -> Dict[str, Any]:
         sources_used.append("failure_patterns")
         confidence += 0.1
 
-        failure_list = failures["data"].get("failures", [])
+        failure_list = _get_data(failures).get("failures", [])
         summary["failure_clusters"] = _cluster_failures(failure_list)[:5]
 
         if len(failure_list) > 10:
@@ -139,14 +139,14 @@ def get_overseer_summary(repo_root: Path) -> Dict[str, Any]:
     if hot_result.get("status") == "ok":
         sources_used.append("hot_modules")
         confidence += 0.1
-        summary["hot_modules"] = hot_result["data"].get("modules", [])[:5]
+        summary["hot_modules"] = _get_data(hot_result).get("modules", [])[:5]
 
     # Source 5: Recommended focus (computed)
     focus_result = get_recommended_focus(repo_root, limit=5)
     if focus_result.get("status") == "ok":
         sources_used.append("recommended_focus")
         confidence += 0.1
-        summary["recommended_focus"] = focus_result["data"].get("focus_items", [])[:5]
+        summary["recommended_focus"] = _get_data(focus_result).get("focus_items", [])[:5]
 
     # Sort concerns by severity
     severity_order = {"critical": 0, "high": 1, "medium": 2, "low": 3}
@@ -167,12 +167,21 @@ def get_overseer_summary(repo_root: Path) -> Dict[str, Any]:
     )
 
 
+def _get_data(response: Any) -> Dict[str, Any]:
+    """Safely extract data dict from tool response envelope."""
+    if isinstance(response, dict):
+        data = response.get("data")
+        if isinstance(data, dict):
+            return data
+    return {}
+
+
 def _determine_system_posture(status_data: Dict) -> str:
     """Determine overall system posture from status data."""
     if not status_data.get("available"):
         return "degraded"
 
-    audit = status_data.get("wsp_audit_status", {})
+    audit = status_data.get("wsp_audit_status") or {}
     if audit.get("severity") == "critical":
         return "critical"
     if audit.get("drift_count", 0) > 5:
@@ -231,6 +240,18 @@ def _cluster_failures(failures: List[Dict]) -> List[Dict]:
     return result
 
 
+def _normalize_severity(sev: Any) -> str:
+    """Normalize arbitrary severity strings to standard taxonomy."""
+    s = str(sev).lower().strip()
+    if s in ("critical", "fatal"):
+        return "critical"
+    if s in ("high", "error"):
+        return "high"
+    if s in ("medium", "warning", "warn"):
+        return "medium"
+    return "low"
+
+
 def _infer_failure_severity(failures: List[Dict]) -> str:
     """Infer severity from failure list."""
     for f in failures:
@@ -278,7 +299,7 @@ def get_hot_modules(repo_root: Path, limit: int = 10) -> Dict[str, Any]:
         sources_used.append("recent_changes")
         confidence += 0.15
 
-        grouped = diff_result["data"].get("grouped_by_module", {})
+        grouped = _get_data(diff_result).get("grouped_by_module", {})
         for module_key, files in grouped.items():
             module = _extract_module_name(module_key)
             if module:
@@ -304,7 +325,7 @@ def get_hot_modules(repo_root: Path, limit: int = 10) -> Dict[str, Any]:
         sources_used.append("failure_patterns")
         confidence += 0.1
 
-        for f in failures["data"].get("failures", []):
+        for f in _get_data(failures).get("failures", []):
             # Try to extract module from failure
             module = _extract_module_from_failure(f)
             if module:
@@ -317,7 +338,7 @@ def get_hot_modules(repo_root: Path, limit: int = 10) -> Dict[str, Any]:
     for module in list(module_scores.keys()):
         rdeps = dependency_tools.get_reverse_dependencies(repo_root, module_name=module)
         if rdeps.get("status") == "ok":
-            dep_count = rdeps["data"].get("dependent_count", 0)
+            dep_count = _get_data(rdeps).get("dependent_count", 0)
             module_scores[module]["dependency_count"] = dep_count
             if dep_count > 3:
                 module_scores[module]["score"] += dep_count * 0.05
@@ -406,14 +427,14 @@ def get_repeated_failures(repo_root: Path, limit: int = 10) -> Dict[str, Any]:
     if failures.get("status") == "ok":
         sources_used.append("known_failures")
         confidence += 0.15
-        all_failures.extend(failures["data"].get("failures", []))
+        all_failures.extend(_get_data(failures).get("failures", []))
 
     # Source 2: HoloIndex failure memory
     holo_failures = holo_tools.holo_failure_memory(repo_root, query="error failure", limit=30)
     if holo_failures.get("status") == "ok":
         sources_used.append("holo_failure_memory")
         confidence += 0.1
-        for f in holo_failures["data"].get("failures", []):
+        for f in _get_data(holo_failures).get("failures", []):
             # Normalize to common shape
             all_failures.append({
                 "type": f.get("source", "holo"),
@@ -532,7 +553,7 @@ def get_active_risks(repo_root: Path, limit: int = 10) -> Dict[str, Any]:
             repo_root, target_type="module", target=module
         )
         if impact.get("status") == "ok":
-            data = impact["data"]
+            data = _get_data(impact)
             if data.get("risk_level") in ("medium", "high", "critical"):
                 risks.append({
                     "risk_type": "dependency_risk",
@@ -554,12 +575,12 @@ def get_active_risks(repo_root: Path, limit: int = 10) -> Dict[str, Any]:
         sources_used.append("repeated_failures")
         confidence += 0.1
 
-        for cluster in repeated["data"].get("clusters", [])[:3]:
+        for cluster in _get_data(repeated).get("clusters", [])[:3]:
             if cluster["count"] >= 2:
                 risks.append({
                     "risk_type": "repeated_failure_risk",
                     "scope": ", ".join(cluster.get("modules", ["unknown"])[:3]),
-                    "severity": cluster.get("severity", "medium"),
+                    "severity": _normalize_severity(cluster.get("severity", "medium")),
                     "confidence": 0.6,
                     "evidence_sources": ["failure_clustering"],
                     "why_it_matters": f"Failure pattern occurred {cluster['count']} times",
@@ -572,12 +593,12 @@ def get_active_risks(repo_root: Path, limit: int = 10) -> Dict[str, Any]:
         sources_used.append("overseer_status")
         confidence += 0.1
 
-        audit = status["data"].get("wsp_audit_status", {})
-        if audit.get("drift_count", 0) > 0:
+        audit = _get_data(status).get("wsp_audit_status") or {}
+        if isinstance(audit, dict) and audit.get("drift_count", 0) > 0:
             risks.append({
                 "risk_type": "drift_risk",
                 "scope": "WSP framework",
-                "severity": audit.get("severity", "medium"),
+                "severity": _normalize_severity(audit.get("severity", "medium")),
                 "confidence": 0.7,
                 "evidence_sources": ["wsp_audit"],
                 "why_it_matters": f"{audit['drift_count']} WSP compliance issues detected",
@@ -588,7 +609,7 @@ def get_active_risks(repo_root: Path, limit: int = 10) -> Dict[str, Any]:
     if coord.get("status") == "ok":
         sources_used.append("coordination_state")
 
-        active_teams = coord["data"].get("active_teams", [])
+        active_teams = _get_data(coord).get("active_teams", [])
         if len(active_teams) > 3:
             risks.append({
                 "risk_type": "coordination_risk",
@@ -644,7 +665,7 @@ def get_recommended_focus(repo_root: Path, limit: int = 10) -> Dict[str, Any]:
         sources_used.append("active_risks")
         confidence += 0.15
 
-        for risk in risks["data"].get("risks", [])[:5]:
+        for risk in _get_data(risks).get("risks", [])[:5]:
             if risk.get("severity") in ("high", "critical"):
                 focus_items.append({
                     "focus": f"Address {risk['risk_type']} in {risk.get('scope', 'system')}",
@@ -660,7 +681,7 @@ def get_recommended_focus(repo_root: Path, limit: int = 10) -> Dict[str, Any]:
         sources_used.append("hot_modules")
         confidence += 0.1
 
-        for module in hot["data"].get("modules", [])[:3]:
+        for module in _get_data(hot).get("modules", [])[:3]:
             if module.get("heat_score", 0) > 1.0:
                 focus_items.append({
                     "focus": f"Review changes in {module['module']}",
@@ -676,7 +697,7 @@ def get_recommended_focus(repo_root: Path, limit: int = 10) -> Dict[str, Any]:
         sources_used.append("repeated_failures")
         confidence += 0.1
 
-        for cluster in repeated["data"].get("clusters", [])[:2]:
+        for cluster in _get_data(repeated).get("clusters", [])[:2]:
             if cluster["count"] >= 3:
                 focus_items.append({
                     "focus": f"Investigate recurring failure: {cluster.get('signature', 'unknown')[:50]}",
@@ -693,8 +714,8 @@ def get_recommended_focus(repo_root: Path, limit: int = 10) -> Dict[str, Any]:
             repo_root, target_type="module", target=module
         )
         if impact.get("status") == "ok":
-            coverage = impact["data"].get("test_coverage", {})
-            gaps = coverage.get("gaps", [])
+            coverage = _get_data(impact).get("test_coverage") or {}
+            gaps = coverage.get("gaps") or [] if isinstance(coverage, dict) else []
             if gaps:
                 sources_used.append("test_coverage")
                 focus_items.append({
@@ -771,7 +792,7 @@ def get_prompt_context_packet(
     if summary.get("status") == "ok":
         sources_used.append("overseer_summary")
         confidence += 0.1
-        packet["system_posture"] = summary["data"].get("system_posture", "unknown")
+        packet["system_posture"] = _get_data(summary).get("system_posture", "unknown")
 
     # Get hot modules (compressed)
     hot = get_hot_modules(repo_root, limit=5)
@@ -780,7 +801,7 @@ def get_prompt_context_packet(
         confidence += 0.1
         packet["hot_modules"] = [
             {"module": m["module"], "score": m["heat_score"]}
-            for m in hot["data"].get("modules", [])[:5]
+            for m in _get_data(hot).get("modules", [])[:5]
         ]
 
     # Get active risks (compressed)
@@ -794,7 +815,7 @@ def get_prompt_context_packet(
                 "scope": r["scope"],
                 "severity": r["severity"],
             }
-            for r in risks["data"].get("risks", [])[:5]
+            for r in _get_data(risks).get("risks", [])[:5]
         ]
 
     # Get repeated failures (compressed)
@@ -807,7 +828,7 @@ def get_prompt_context_packet(
                 "signature": c.get("signature", "")[:50],
                 "count": c["count"],
             }
-            for c in repeated["data"].get("clusters", [])[:3]
+            for c in _get_data(repeated).get("clusters", [])[:3]
         ]
 
     # Get recommended focus (compressed)
@@ -817,7 +838,7 @@ def get_prompt_context_packet(
         confidence += 0.1
         packet["recommended_focus"] = [
             {"focus": f["focus"], "priority": f["priority"]}
-            for f in focus["data"].get("focus_items", [])[:5]
+            for f in _get_data(focus).get("focus_items", [])[:5]
         ]
 
     # If task description provided, get task-specific context
@@ -832,7 +853,7 @@ def get_prompt_context_packet(
             sources_used.append("holo_task_packet")
             confidence += 0.1
 
-            task_data = task_packet["data"]
+            task_data = _get_data(task_packet)
             packet["task_relevance"] = {
                 "task": task_description,
                 "relevant_modules": [

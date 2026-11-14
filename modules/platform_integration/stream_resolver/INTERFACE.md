@@ -7,6 +7,16 @@ It also includes a no-quota scraping path (NoQuotaStreamChecker) that checks `/l
 
 **Note:** Since 2025-12-28, all potentially blocking I/O calls in this module are wrapped in `asyncio.to_thread` to prevent event loop stalls.
 
+## Optional API verification controls
+
+`NoQuotaStreamChecker` permits YouTube Data API confirmation only when
+`YOUTUBE_API_ENABLED` is truthy and `YT_STREAM_API_VERIFY` has not opted out.
+The global default is false; the stream-specific default is true. Global false
+or unset takes precedence over local true in both video and channel checks.
+Set the global switch explicitly for API confirmation. This gate preserves the
+existing local opt-out spelling (`false`, `0`, `no`) and does not alter scraping
+availability or establish a process-wide ban on all other YouTube API clients.
+
 ## Exports
 This module exports:
 - `get_active_livestream_video_id`: Function to find an active livestream and its chat ID

@@ -1,0 +1,1953 @@
+{
+  "projection": {
+    "schema": "foundups.pc-reconciliation.historical-projection.v1",
+    "record_kind": "historical_projection_not_current_acceptance",
+    "source_path": "docs/plans/research/2026-10-22-token-factory-fail-closed-receipt.json",
+    "original_pc_head": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+    "source_full_file_sha256": "f70ab78c44fd3b3e14cdc942684ccdfa76cb593d9bc699fd0f473947b2cc644b",
+    "preserved_record_sha256": "f70ab78c44fd3b3e14cdc942684ccdfa76cb593d9bc699fd0f473947b2cc644b",
+    "projection_created_at_utc": "2026-10-30T02:00:12.626831+00:00",
+    "projection_timestamp_is_not_an_observation": true,
+    "comparison_reference": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+    "disposition": "Publish a sanitized historical P0A receipt envelope with local stack and raw-receipt host locations removed. Token-factory fail-closed behavior is already on main, alongside newer caller authorization and atomic payout initiation. Preserve old test results, failed probes, network attribution and limitations as historical facts only; do not treat them as a fresh secret-free or offline test run.",
+    "current_owners": [
+      "modules/foundups/agent_market/src/token_factory.py",
+      "modules/foundups/agent_market/src/authorization.py",
+      "modules/foundups/agent_market/src/persistence/sqlite_adapter.py"
+    ],
+    "original_observation_timestamps": "Retained in historical content; no observation is rerun or redated.",
+    "publication_status": "Proposed, pending independent auditor acceptance; not published by this worker.",
+    "runtime_and_commenting": "UNVERIFIED"
+  },
+  "historical_record": {
+    "schema_version": "wsp97_execution_receipt.v1.1",
+    "repository_context": {
+      "base_commit": "0c81418fe94a7786cfd55f01e138ddc5d510583d"
+    },
+    "execution_id": "2026-10-22-foundups-p0a-token-factory-fail-closed",
+    "execution_plane": "local_working_overlay_no_runtime_admission",
+    "outcome": "completed",
+    "date": "2026-10-22",
+    "scope": "P0A only: exact backend selection, connectivity and chain-result consistency in ChainAgnosticTokenFactory; existing identified mock simulation retained.",
+    "wsps_applied": [
+      "WSP_00",
+      "WSP_6",
+      "WSP_11",
+      "WSP_22",
+      "WSP_50",
+      "WSP_84",
+      "WSP_97"
+    ],
+    "action_evidence": {
+      "retrieve_wsps": [
+        "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+        "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+        "WSP_framework/src/WSP_11_WRE_Standard_Command_Protocol.md",
+        "WSP_framework/src/WSP_22_ModLog_Structure.md",
+        "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+        "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+        "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md",
+        "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md"
+      ],
+      "retrieve_evidence": [
+        "modules/foundups/agent_market/README.md",
+        "modules/foundups/agent_market/INTERFACE.md",
+        "modules/foundups/agent_market/ROADMAP.md",
+        "modules/foundups/agent_market/ModLog.md",
+        "modules/foundups/agent_market/tests/README.md",
+        "modules/foundups/agent_market/tests/TestModLog.md",
+        "modules/foundups/agent_market/memory/README.md",
+        "NAVIGATION.py",
+        "WSP_framework/src/WSP_CORE.md",
+        "docs/plans/research/2026-10-22-blockchain-readiness-recheck.md"
+      ],
+      "research": [
+        "Canonical HoloIndex owner query failed HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; used verified direct source/docs and scoped callsite searches, without reindex.",
+        "modules/foundups/agent_market/src/token_factory.py",
+        "modules/foundups/agent_market/src/orchestrator.py",
+        "modules/foundups/agent_market/src/exceptions.py",
+        "modules/foundups/agent_market/tests/test_orchestrator.py"
+      ],
+      "micro_pass": [
+        "Retain constructor/public adapter signatures and default MOCK; normalize explicit hints and reject invalid/unregistered/unhealthy selection through domain ValidationError.",
+        "modules/foundups/agent_market/tests/test_orchestrator.py"
+      ],
+      "macro_pass": [
+        "LaunchOrchestrator handles ValidationError as failed launch; earlier registry row can remain. Simulator/FAM in-memory test doubles are not a real token-factory integration.",
+        "docs/architecture/FOUNDUPS_BLOCKCHAIN_TESTNET_ORCHESTRATION_PLAN.md"
+      ],
+      "hard_think": [
+        "Keep a frozen ChainType across selection, health checks, dispatch and success validation; a result mismatch is post-call rejection, not rollback.",
+        "Independent review reproduced chain identity drift during is_connected; both dispatch paths now reject before effect."
+      ],
+      "dialectic_sweep": [
+        "Rejected implicit mock fallback and a new global configuration/policy system. Keep explicit/default simulation for local PoC compatibility; unsupported live chains must reject.",
+        "No provider or chain adapter was invented to satisfy enum membership."
+      ],
+      "first_principles": [
+        "A request for one chain cannot succeed on another chain. Resolve once and fail closed; verify through effect-call counters, result/cache assertions and actual-factory launch integration."
+      ],
+      "execute": [
+        "modules/foundups/agent_market/src/token_factory.py",
+        "modules/foundups/agent_market/tests/test_orchestrator.py",
+        "modules/foundups/agent_market/tests/TestModLog.md",
+        "docs/plans/research/2026-10-22-token-factory-fail-closed-receipt.json#test_runs"
+      ]
+    },
+    "compliance_evidence": [
+      "modules/foundups/agent_market/ModLog.md",
+      "modules/foundups/agent_market/tests/TestModLog.md",
+      "WSP 00 bootstrap and tracker were run before retrieval/editing; script gate reported is_zen_compliant=true.",
+      "WSP 97 test-inventory/reuse check preceded authoring; extended existing test file and preserved original seven test bodies.",
+      "Closeout limitation: formal WSP 15 allocation receipt was not serialized before execution. Receipt validation cannot prove temporal procedural compliance."
+    ],
+    "process_limitations": {
+      "wsp15_allocation_record": "Not serialized before execution. Priority was selected from the existing P0A audit and explicit operator instruction. No retroactive pre-execution claim is made.",
+      "retrospective_priority_assessment": {
+        "complexity": 2,
+        "importance": 5,
+        "deferability": 5,
+        "impact": 4,
+        "sum": 16,
+        "priority": "P0",
+        "timing": "closeout only",
+        "need": "Stops synthetic mock success for an unavailable requested/default chain.",
+        "affordability": "One existing module source file, existing test file, no install or external service.",
+        "deferral": "Real-chain integration must not rely on silent fallback; other security gates remain deferred."
+      },
+      "validator_truth_boundary": "Validates structural completeness, tracked canonical WSP retrieval paths and worktree base ancestry. Does not authenticate other evidence, reasoning quality, timing, runtime effects or release/security readiness."
+    },
+    "retrieval_evaluation": {
+      "owner_query": {
+        "entrypoint": "scripts/reddog_holoindex_owner_query_once.py",
+        "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        "ok": false,
+        "freshness": "UNKNOWN",
+        "index_gap_detected": true,
+        "authority_head": "a519f0ad758618c5d82f0ebf8b48a3c4a0eae7f0",
+        "workspace_head": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+        "reindexed": false
+      },
+      "noise": "Broad blockchain/simulator search includes simulation and older roadmap claims; scoped to actual factory/callers/tests.",
+      "ordering": "Current README/INTERFACE and source before roadmap/history; existing test docs and fixtures before test edits.",
+      "missing_artifacts": [
+        "modules/foundups/agent_market/requirements.txt"
+      ],
+      "staleness_risk": "memory/README.md retains in-memory-only wording despite SQLite implementation; historical readiness probes remain explicitly pre-fix.",
+      "duplication": "Reused existing test_orchestrator.py, domain ValidationError and launch failure handler; no new module, backend or test file.",
+      "autonomy_decision": "Read-only delegate reviews covered exact source/contract boundaries. Manual patch used existing Python adapter patterns; no model download or Qwen/Gemma inference was started for this fix."
+    },
+    "test_inventory": {
+      "existing_module_test_files": [
+        "modules/foundups/agent_market/tests/test_cabr_gate.py",
+        "modules/foundups/agent_market/tests/test_cabr_hooks.py",
+        "modules/foundups/agent_market/tests/test_compute_access.py",
+        "modules/foundups/agent_market/tests/test_deterministic_ids.py",
+        "modules/foundups/agent_market/tests/test_distribution.py",
+        "modules/foundups/agent_market/tests/test_e2e_integration.py",
+        "modules/foundups/agent_market/tests/test_fam_daemon.py",
+        "modules/foundups/agent_market/tests/test_migrations.py",
+        "modules/foundups/agent_market/tests/test_mvp_offering.py",
+        "modules/foundups/agent_market/tests/test_orchestrator.py",
+        "modules/foundups/agent_market/tests/test_permissions.py",
+        "modules/foundups/agent_market/tests/test_persistence.py",
+        "modules/foundups/agent_market/tests/test_persistent_compute_wiring.py",
+        "modules/foundups/agent_market/tests/test_repository_factory.py",
+        "modules/foundups/agent_market/tests/test_schemas.py",
+        "modules/foundups/agent_market/tests/test_sqlite_adapter.py",
+        "modules/foundups/agent_market/tests/test_task_lifecycle.py"
+      ],
+      "new_test_files": 0,
+      "original_test_bodies_unchanged": [
+        "test_launch_foundup_existing_foundup",
+        "test_launch_foundup_happy_path_full",
+        "test_launch_foundup_minimal",
+        "test_launch_orchestrator_emits_traceable_events",
+        "test_repo_provision_different_providers",
+        "test_repo_provision_emits_event",
+        "test_repo_provision_records_deterministic_metadata"
+      ],
+      "original_case_count": 7,
+      "final_orchestrator_cases": 49,
+      "added_cases": 42,
+      "count_note": "Run counts overlap and are not additive."
+    },
+    "test_runs": {
+      "initial_red": {
+        "exit_code": 1,
+        "network_attempts": 0,
+        "cases": [
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_launch_foundup_happy_path_full",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_launch_foundup_minimal",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_launch_foundup_existing_foundup",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_launch_orchestrator_emits_traceable_events",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_repo_provision_records_deterministic_metadata",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_repo_provision_different_providers",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_repo_provision_emits_event",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[algorand-deploy]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[algorand-vesting]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[unknown-deploy]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[unknown-vesting]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[-deploy]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[-vesting]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[   -deploy]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[   -vesting]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[42-deploy]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[42-vesting]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unregistered_backend[evm-deploy]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unregistered_backend[evm-vesting]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unregistered_backend[hedera-deploy]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unregistered_backend[hedera-vesting]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unregistered_backend[solana-deploy]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unregistered_backend[solana-vesting]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unavailable_backend[False-deploy]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unavailable_backend[False-vesting]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unavailable_backend[connected1-deploy]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unavailable_backend[connected1-vesting]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_checks_configured_default[False-deploy]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_checks_configured_default[False-vesting]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_checks_configured_default[True-deploy]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_checks_configured_default[True-vesting]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_disconnected_mock[deploy]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_disconnected_mock[vesting]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_mock_remains_explicitly_identified[None]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_mock_remains_explicitly_identified[mock]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_mock_remains_explicitly_identified[ MOCK ]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_dispatches_only_to_selected_backend[None]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_dispatches_only_to_selected_backend[ EVM ]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_backend_identity_drift[deploy]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_backend_identity_drift[vesting]",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_result_chain_mismatch",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_launch_rejects_unavailable_chain_before_downstream_effects",
+            "phase": "call",
+            "outcome": "failed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_launch_with_actual_mock_factory_stays_simulated",
+            "phase": "call",
+            "outcome": "passed"
+          }
+        ],
+        "counts": {
+          "passed": 13,
+          "failed": 30
+        },
+        "raw_receipt_sha256": "4d72bf0f9088f179c1b6c2943e5d0aed36b24255b707873d07093240c0717634",
+        "raw_receipt_origin": "[PRIVATE_HOST_PATH_OMITTED]"
+      },
+      "interim_green": {
+        "exit_code": 0,
+        "network_attempts": 0,
+        "cases": [
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_launch_foundup_happy_path_full",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_launch_foundup_minimal",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_launch_foundup_existing_foundup",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_launch_orchestrator_emits_traceable_events",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_repo_provision_records_deterministic_metadata",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_repo_provision_different_providers",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_repo_provision_emits_event",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[algorand-deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[algorand-vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[unknown-deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[unknown-vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[-deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[-vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[   -deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[   -vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[42-deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[42-vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unregistered_backend[evm-deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unregistered_backend[evm-vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unregistered_backend[hedera-deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unregistered_backend[hedera-vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unregistered_backend[solana-deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unregistered_backend[solana-vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unavailable_backend[False-deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unavailable_backend[False-vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unavailable_backend[connected1-deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unavailable_backend[connected1-vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_checks_configured_default[False-deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_checks_configured_default[False-vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_checks_configured_default[True-deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_checks_configured_default[True-vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_disconnected_mock[deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_disconnected_mock[vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_mock_remains_explicitly_identified[None]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_mock_remains_explicitly_identified[mock]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_mock_remains_explicitly_identified[ MOCK ]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_dispatches_only_to_selected_backend[None]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_dispatches_only_to_selected_backend[ EVM ]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_backend_identity_drift[mock-deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_backend_identity_drift[mock-vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_backend_identity_drift[evm-deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_backend_identity_drift[evm-vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_result_chain_mismatch[mock]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_result_chain_mismatch[evm]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_non_enum_backend_registration",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_launch_rejects_unavailable_chain_before_downstream_effects",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_launch_with_actual_mock_factory_stays_simulated",
+            "phase": "call",
+            "outcome": "passed"
+          }
+        ],
+        "counts": {
+          "passed": 47
+        },
+        "raw_receipt_sha256": "062cebaa6c37eebf688525734f4d197273539bf33d0ae48e69400e168b116c06",
+        "raw_receipt_origin": "[PRIVATE_HOST_PATH_OMITTED]"
+      },
+      "final_module_closure": {
+        "exit_code": 0,
+        "seconds": 117.703,
+        "network_attempts": 2,
+        "cases": [
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_cabr_gate.py::test_cabr_gate_blocks_when_score_missing",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_cabr_gate.py::test_cabr_gate_blocks_when_score_below_threshold",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_cabr_gate.py::test_cabr_gate_allows_when_score_meets_threshold",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_cabr_gate.py::test_cabr_gate_allows_when_threshold_zero",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_cabr_gate.py::test_cabr_gate_uses_latest_score",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_cabr_gate.py::test_cabr_gate_event_includes_threshold",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_cabr_hooks.py::TestCABRInput::test_cabr_input_to_dict",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_cabr_hooks.py::TestCABROutput::test_cabr_output_to_dict",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_cabr_hooks.py::TestPersistentCABRHooks::test_build_cabr_input_no_sources",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_cabr_hooks.py::TestPersistentCABRHooks::test_build_cabr_input_with_task_source",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_cabr_hooks.py::TestPersistentCABRHooks::test_record_cabr_output_stores_in_evidence_chain",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_cabr_hooks.py::TestPersistentCABRHooks::test_get_latest_score_returns_most_recent",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_cabr_hooks.py::TestPersistentCABRHooks::test_get_latest_score_returns_none_when_empty",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_cabr_hooks.py::TestPersistentCABRHooks::test_get_score_history_respects_limit",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_cabr_hooks.py::TestPersistentCABRHooks::test_get_input_history_tracks_evidence",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_cabr_hooks.py::TestPersistentCABRHooks::test_evidence_chain_isolated_per_foundup",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_compute_access.py::test_compute_access_not_enforced_by_default",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_compute_access.py::test_compute_access_enforced_requires_active_plan",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_compute_access.py::test_compute_access_enforced_scout_tier_denied",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_compute_access.py::test_compute_access_builder_plan_debits_on_launch",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_compute_access.py::test_debit_credits_insufficient_emits_denied",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_compute_access.py::test_record_compute_session_emits_event",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_compute_access.py::test_rebate_credits_updates_wallet_and_ledger",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_compute_access.py::test_ensure_access_with_builder_and_balance",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_deterministic_ids.py::TestDeterministicIdGenerator::test_deterministic_mode_generates_sequential_ids",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_deterministic_ids.py::TestDeterministicIdGenerator::test_deterministic_mode_separate_counters_per_prefix",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_deterministic_ids.py::TestDeterministicIdGenerator::test_non_deterministic_mode_generates_uuid_ids",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_deterministic_ids.py::TestDeterministicIdGenerator::test_reset_clears_all_counters",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_deterministic_ids.py::TestInMemoryMarketDeterminism::test_deterministic_flag_enables_sequential_ids",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_deterministic_ids.py::TestInMemoryMarketDeterminism::test_reset_clears_all_state",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_deterministic_ids.py::TestInMemoryMarketDeterminism::test_reset_resets_id_counters",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_deterministic_ids.py::TestInMemoryMarketDeterminism::test_full_lifecycle_deterministic_ids",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_deterministic_ids.py::TestInMemoryMarketDeterminism::test_get_tasks_by_foundup",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_distribution.py::test_unverified_task_cannot_publish_distribution",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_distribution.py::test_verified_task_publish_is_idempotent",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2ELaunchToDistribution::test_full_flow_launch_to_cabr_gated_distribution",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2ELaunchToDistribution::test_e2e_cabr_gate_blocks_low_score",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2ELaunchToDistribution::test_e2e_cabr_gate_blocks_missing_score",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2ELaunchToDistribution::test_e2e_minimal_launch_no_token_no_repo",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2EOpenClawIntegration::test_fam_adapter_launch_request_parsing",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2EOpenClawIntegration::test_fam_adapter_launch_execution",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2EOpenClawIntegration::test_fam_adapter_handle_intent_launch",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2EOpenClawIntegration::test_fam_adapter_handle_intent_help",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2EOpenClawIntegration::test_fam_adapter_auto_symbol_when_missing_token",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2EOpenClawIntegration::test_fam_adapter_symbol_collision_resolution",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2EMoltbookDistribution::test_moltbook_adapter_publish_milestone",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2EMoltbookDistribution::test_moltbook_adapter_list_milestones",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2EMoltbookDistribution::test_moltbook_adapter_get_status",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMEventType::test_event_types_are_strings",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMEventType::test_required_event_types_exist",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMEventType::test_event_type_values_are_snake_case",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMEvent::test_event_creation_with_required_fields",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMEvent::test_event_to_dict_serialization",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMEvent::test_event_to_json_roundtrip",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMEvent::test_event_from_dict_with_defaults",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestDeterministicIds::test_event_id_is_deterministic",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestDeterministicIds::test_event_id_differs_on_input_change",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestDeterministicIds::test_dedupe_key_task_state_changed",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestDeterministicIds::test_dedupe_key_proof_submitted",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestDeterministicIds::test_dedupe_key_heartbeat",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestDeterministicIds::test_dedupe_key_default_uses_hash",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMEventStore::test_store_initialization",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMEventStore::test_write_event_success",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMEventStore::test_sequence_ids_are_monotonic",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMEventStore::test_dedupe_rejects_duplicate",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMEventStore::test_replay_protection",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMEventStore::test_query_by_event_type",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMEventStore::test_query_by_foundup_id",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMEventStore::test_query_since_sequence",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMEventStore::test_query_limit",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestJSONLSQLiteParity::test_parity_ok_on_empty_store",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestJSONLSQLiteParity::test_parity_ok_after_writes",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestJSONLSQLiteParity::test_parity_detects_jsonl_extra",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestJSONLSQLiteParity::test_dual_write_creates_both_files",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMDaemon::test_daemon_start_emits_event",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMDaemon::test_daemon_stop_emits_event",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMDaemon::test_heartbeat_loop",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMDaemon::test_emit_custom_event",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMDaemon::test_emit_with_string_event_type",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMDaemon::test_event_listeners",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMDaemon::test_listener_error_does_not_block",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMDaemonHealth::test_health_before_start",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMDaemonHealth::test_health_after_start",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMDaemonHealth::test_health_includes_event_stats",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMDaemonHealth::test_health_to_dict",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMDaemonHealth::test_get_status_alias",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMDaemonErrors::test_double_start_is_idempotent",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMDaemonErrors::test_double_stop_is_idempotent",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestFAMDaemonErrors::test_emit_duplicate_returns_false",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestModuleSingleton::test_get_fam_daemon_returns_singleton",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_fam_daemon.py::TestThreadSafety::test_concurrent_writes",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_migrations.py::TestMigrationManager::test_default_schema_version_applied",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_migrations.py::TestMigrationManager::test_migrations_are_idempotent",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_migrations.py::TestMigrationManager::test_rejects_target_behind_current",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_migrations.py::TestMigrationManager::test_expected_indexes_exist",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_mvp_offering.py::test_accrue_investor_terms_caps_at_five_terms",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_mvp_offering.py::test_place_mvp_bid_requires_hoarded_ups",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_mvp_offering.py::test_resolve_mvp_offering_highest_bidder_wins_and_injects_treasury",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_mvp_offering.py::test_resolve_mvp_offering_requires_treasury_role",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_launch_foundup_happy_path_full",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_launch_foundup_minimal",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_launch_foundup_existing_foundup",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_launch_orchestrator_emits_traceable_events",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_repo_provision_records_deterministic_metadata",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_repo_provision_different_providers",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_repo_provision_emits_event",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[algorand-deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[algorand-vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[unknown-deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[unknown-vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[-deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[-vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[   -deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[   -vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[42-deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unsupported_hint_without_fallback[42-vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unregistered_backend[evm-deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unregistered_backend[evm-vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unregistered_backend[hedera-deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unregistered_backend[hedera-vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unregistered_backend[solana-deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unregistered_backend[solana-vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unavailable_backend[False-deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unavailable_backend[False-vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unavailable_backend[connected1-deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_unavailable_backend[connected1-vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_checks_configured_default[False-deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_checks_configured_default[False-vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_checks_configured_default[True-deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_checks_configured_default[True-vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_disconnected_mock[deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_disconnected_mock[vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_mock_remains_explicitly_identified[None]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_mock_remains_explicitly_identified[mock]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_mock_remains_explicitly_identified[ MOCK ]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_dispatches_only_to_selected_backend[None]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_dispatches_only_to_selected_backend[ EVM ]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_backend_identity_drift[mock-deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_backend_identity_drift[mock-vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_backend_identity_drift[evm-deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_backend_identity_drift[evm-vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_result_chain_mismatch[mock]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_result_chain_mismatch[evm]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_non_enum_backend_registration",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_identity_drift_during_connectivity[deploy]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_identity_drift_during_connectivity[vesting]",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_launch_rejects_unavailable_chain_before_downstream_effects",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_orchestrator.py::test_launch_with_actual_mock_factory_stays_simulated",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_permissions.py::test_only_verifier_can_verify",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_permissions.py::test_only_treasury_can_trigger_payout",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_permissions.py::test_only_distribution_role_can_publish_verified_milestone",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_persistence.py::TestFoundupCRUD::test_create_and_get_foundup",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_persistence.py::TestFoundupCRUD::test_get_nonexistent_foundup_raises",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_persistence.py::TestFoundupCRUD::test_update_foundup_metadata",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_persistence.py::TestFoundupCRUD::test_list_foundups",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_persistence.py::TestFoundupCRUD::test_duplicate_token_symbol_raises",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_persistence.py::TestTaskCRUD::test_create_and_get_task",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_persistence.py::TestTaskCRUD::test_update_task_status",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_persistence.py::TestTaskCRUD::test_list_tasks_by_foundup",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_persistence.py::TestProofVerificationPayoutCRUD::test_create_and_get_proof",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_persistence.py::TestProofVerificationPayoutCRUD::test_create_and_get_verification",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_persistence.py::TestProofVerificationPayoutCRUD::test_create_and_get_payout",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_persistence.py::TestEventCRUD::test_create_and_query_events",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_persistence.py::TestEventCRUD::test_query_events_by_type",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_persistence.py::TestComputeAccessPersistence::test_activate_plan_and_wallet",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_persistence.py::TestComputeAccessPersistence::test_purchase_and_debit_and_rebate",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_persistence.py::TestComputeAccessPersistence::test_ensure_access_enforced",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_persistence.py::TestComputeAccessPersistence::test_compute_session_round_trip",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_persistence.py::TestComputeAccessPersistence::test_compute_session_missing_raises",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_persistent_compute_wiring.py::test_registry_enforces_compute_access",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_persistent_compute_wiring.py::test_registry_debits_launch_when_plan_active",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_persistent_compute_wiring.py::test_task_pipeline_enforces_and_debits_each_step",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_repository_factory.py::TestRepositoryFactory::test_default_factory_returns_sqlite",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_repository_factory.py::TestRepositoryFactory::test_unsupported_backend_raises",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_repository_factory.py::TestRepositoryFactory::test_postgres_path_uses_postgres_adapter",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_schemas.py::test_foundup_schema_validation_requires_name",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_schemas.py::test_task_schema_validation_requires_positive_reward",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_schemas.py::test_proof_and_payout_schema_validation",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_schemas.py::test_distribution_post_schema_validation",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_sqlite_adapter.py::TestSQLiteAdapterInit::test_creates_database_file",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_sqlite_adapter.py::TestSQLiteAdapterInit::test_creates_parent_directories",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_sqlite_adapter.py::TestSQLiteAdapterInit::test_wal_mode_enabled",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_sqlite_adapter.py::TestSQLiteAdapterInit::test_tables_created",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_sqlite_adapter.py::TestSessionManagement::test_session_commits_on_success",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_sqlite_adapter.py::TestSessionManagement::test_session_rollback_on_error",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_sqlite_adapter.py::TestORMModels::test_foundup_row_columns",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_sqlite_adapter.py::TestORMModels::test_task_row_columns",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_sqlite_adapter.py::TestEnvironmentConfig::test_default_db_path",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_task_lifecycle.py::test_token_symbol_uniqueness_in_memory",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_task_lifecycle.py::test_task_lifecycle_open_to_paid",
+            "phase": "call",
+            "outcome": "passed"
+          }
+        ],
+        "warnings": [
+          {
+            "category": "PytestConfigWarning",
+            "message": "Unknown config option: asyncio_default_fixture_loop_scope\n"
+          },
+          {
+            "category": "PytestConfigWarning",
+            "message": "Unknown config option: asyncio_mode\n"
+          }
+        ],
+        "counts": {
+          "passed": 190
+        },
+        "raw_receipt_sha256": "87bd993a50d33d691df9a1a005e1eb1fb064f3538266589bfa90ffecddcdb4cc",
+        "raw_receipt_origin": "[PRIVATE_HOST_PATH_OMITTED]"
+      },
+      "network_attribution": {
+        "exit_code": 0,
+        "cases": [
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2ELaunchToDistribution::test_full_flow_launch_to_cabr_gated_distribution",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2ELaunchToDistribution::test_e2e_cabr_gate_blocks_low_score",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2ELaunchToDistribution::test_e2e_cabr_gate_blocks_missing_score",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2ELaunchToDistribution::test_e2e_minimal_launch_no_token_no_repo",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2EOpenClawIntegration::test_fam_adapter_launch_request_parsing",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2EOpenClawIntegration::test_fam_adapter_launch_execution",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2EOpenClawIntegration::test_fam_adapter_handle_intent_launch",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2EOpenClawIntegration::test_fam_adapter_handle_intent_help",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2EOpenClawIntegration::test_fam_adapter_auto_symbol_when_missing_token",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2EOpenClawIntegration::test_fam_adapter_symbol_collision_resolution",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2EMoltbookDistribution::test_moltbook_adapter_publish_milestone",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2EMoltbookDistribution::test_moltbook_adapter_list_milestones",
+            "phase": "call",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2EMoltbookDistribution::test_moltbook_adapter_get_status",
+            "phase": "call",
+            "outcome": "passed"
+          }
+        ],
+        "network_attempts": [
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2EOpenClawIntegration::test_fam_adapter_handle_intent_help",
+            "stack": [
+              {
+                "file": "[PRIVATE_HOST_PATH_OMITTED]",
+                "line": 307,
+                "function": "http_backoff"
+              },
+              {
+                "file": "[PRIVATE_HOST_PATH_OMITTED]",
+                "line": 592,
+                "function": "request"
+              },
+              {
+                "file": "[PRIVATE_HOST_PATH_OMITTED]",
+                "line": 706,
+                "function": "send"
+              },
+              {
+                "file": "[PRIVATE_HOST_PATH_OMITTED]",
+                "line": 96,
+                "function": "send"
+              },
+              {
+                "file": "[PRIVATE_HOST_PATH_OMITTED]",
+                "line": 645,
+                "function": "send"
+              },
+              {
+                "file": "[PRIVATE_HOST_PATH_OMITTED]",
+                "line": 787,
+                "function": "urlopen"
+              },
+              {
+                "file": "[PRIVATE_HOST_PATH_OMITTED]",
+                "line": 464,
+                "function": "_make_request"
+              },
+              {
+                "file": "[PRIVATE_HOST_PATH_OMITTED]",
+                "line": 1093,
+                "function": "_validate_conn"
+              },
+              {
+                "file": "[PRIVATE_HOST_PATH_OMITTED]",
+                "line": 759,
+                "function": "connect"
+              },
+              {
+                "file": "[PRIVATE_HOST_PATH_OMITTED]",
+                "line": 204,
+                "function": "_new_conn"
+              },
+              {
+                "file": "[PRIVATE_HOST_PATH_OMITTED]",
+                "line": 60,
+                "function": "create_connection"
+              },
+              {
+                "file": "<stdin>",
+                "line": 9,
+                "function": "blocked"
+              }
+            ]
+          },
+          {
+            "nodeid": "modules/foundups/agent_market/tests/test_e2e_integration.py::TestE2EOpenClawIntegration::test_fam_adapter_handle_intent_help",
+            "stack": [
+              {
+                "file": "[PRIVATE_HOST_PATH_OMITTED]",
+                "line": 307,
+                "function": "http_backoff"
+              },
+              {
+                "file": "[PRIVATE_HOST_PATH_OMITTED]",
+                "line": 592,
+                "function": "request"
+              },
+              {
+                "file": "[PRIVATE_HOST_PATH_OMITTED]",
+                "line": 706,
+                "function": "send"
+              },
+              {
+                "file": "[PRIVATE_HOST_PATH_OMITTED]",
+                "line": 96,
+                "function": "send"
+              },
+              {
+                "file": "[PRIVATE_HOST_PATH_OMITTED]",
+                "line": 645,
+                "function": "send"
+              },
+              {
+                "file": "[PRIVATE_HOST_PATH_OMITTED]",
+                "line": 787,
+                "function": "urlopen"
+              },
+              {
+                "file": "[PRIVATE_HOST_PATH_OMITTED]",
+                "line": 464,
+                "function": "_make_request"
+              },
+              {
+                "file": "[PRIVATE_HOST_PATH_OMITTED]",
+                "line": 1093,
+                "function": "_validate_conn"
+              },
+              {
+                "file": "[PRIVATE_HOST_PATH_OMITTED]",
+                "line": 759,
+                "function": "connect"
+              },
+              {
+                "file": "[PRIVATE_HOST_PATH_OMITTED]",
+                "line": 204,
+                "function": "_new_conn"
+              },
+              {
+                "file": "[PRIVATE_HOST_PATH_OMITTED]",
+                "line": 60,
+                "function": "create_connection"
+              },
+              {
+                "file": "<stdin>",
+                "line": 9,
+                "function": "blocked"
+              }
+            ]
+          }
+        ],
+        "counts": {
+          "passed": 13
+        },
+        "raw_receipt_sha256": "75583ad93ec33122af9f6be2facfdb2e31ca71ee58f71a6614fa4dbfbbedff36",
+        "raw_receipt_origin": "[PRIVATE_HOST_PATH_OMITTED]"
+      }
+    },
+    "additional_red_evidence": {
+      "exact_nodes": [
+        "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_identity_drift_during_connectivity[deploy]",
+        "modules/foundups/agent_market/tests/test_orchestrator.py::test_token_factory_rejects_identity_drift_during_connectivity[vesting]"
+      ],
+      "note": "Review-driven targeted run produced 2 failures / 47 deselected before the post-health identity guard. Command/output in session; no separate JSON captured. Use final closure nodes as authoritative exact spelling."
+    },
+    "test_environment": {
+      "interpreter": ".venv/Scripts/python.exe -B",
+      "pytest_plugin_autoload": false,
+      "bytecode": false,
+      "cacheprovider": false,
+      "temporary_storage": "TEMP/TMP/FOUNDUPS_DB_PATH/FAM_DB_PATH and pytest basetemp redirected to per-run scratch outside repository.",
+      "module_command": "python -B -m pytest -q -p no:cacheprovider --tb=short --basetemp <scratch>/pytest modules/foundups/agent_market/tests",
+      "guard": "Process-local socket.connect/connect_ex/create_connection and getaddrinfo raise before network I/O; attempts counted.",
+      "final_module_seconds_pytest_output": 116.89,
+      "warnings": "Two PytestConfigWarnings for inactive asyncio config options with plugin autoload disabled.",
+      "limitation": "Guard evidence covers the instrumented Python process; not an OS-level network audit. No live-chain test."
+    },
+    "network_attribution": {
+      "blocked_module_attempts": 2,
+      "focused_factory_attempts": 0,
+      "attribution": "The separate guarded 13-case existing E2E rerun recorded two attempts in test_fam_adapter_handle_intent_help, through huggingface_hub HTTP requests. Stack function/path/line only; no request arguments/endpoints captured.",
+      "existing_dependency_note": "Help handling retrieves Holo context before help and can initialize local embedding/enrichment dependencies. No unrelated help/Holo code modified.",
+      "earlier_reporting_correction": "An initial commentary said zero module attempts before reading the detailed receipt; corrected immediately to two blocked attempts."
+    },
+    "independent_review": {
+      "reviewer": "/root/blockchain_architecture",
+      "code_finding": "P2: backend identity could change inside is_connected before dispatch. Reproduced with two cases and fixed by frozen selection plus post-health identity check.",
+      "final_code_review": "Finding resolved; no further findings.",
+      "doc_closeout_review": "No material overclaim or contradiction; simulation, post-call rejection, registry retention and open gates preserved.",
+      "macro_reviewer": "/root/simulator_economics",
+      "macro_result": "Recommended full FAM module closure after bounded callsite analysis. Initial inventory missed indirect help/Holo network dependency; corrected with trace."
+    },
+    "source_before_patch": {
+      "path": "modules/foundups/agent_market/src/token_factory.py",
+      "sha256": "f35caf3047b123e1c62bf9a476f33e3c9d10b5ec86164a8b98ef5774d306da6a",
+      "bytes": 12120
+    },
+    "artifact_snapshot": [
+      {
+        "path": "modules/foundups/agent_market/src/token_factory.py",
+        "sha256": "d2d969090820e9b42802b981d415164e9e564587f164d4fd1273b6fd340dd5b9",
+        "bytes": 13259
+      },
+      {
+        "path": "modules/foundups/agent_market/tests/test_orchestrator.py",
+        "sha256": "69047ce894b2e01efc013d1d91abe7e99577fcd4d0df9028c945b01e4ae96fb5",
+        "bytes": 19316
+      },
+      {
+        "path": "modules/foundups/agent_market/README.md",
+        "sha256": "7e588461daeaeba3eb79a7c32b39a23f0563c14039b025786d31c69cb2667a38",
+        "bytes": 4260
+      },
+      {
+        "path": "modules/foundups/agent_market/INTERFACE.md",
+        "sha256": "6e705b72f211479e0095eaf940d897357404d031ca312ee8f4f8891299ab0099",
+        "bytes": 15851
+      },
+      {
+        "path": "modules/foundups/agent_market/ROADMAP.md",
+        "sha256": "8349cd4461ac21519d98862397c0e643e0895a23c8d08411856b629733f358ab",
+        "bytes": 5522
+      },
+      {
+        "path": "modules/foundups/agent_market/ModLog.md",
+        "sha256": "00052fad12e07f7923d9b125ac76578685bf7277b37707a4113a3696cd6225e6",
+        "bytes": 26898
+      },
+      {
+        "path": "modules/foundups/agent_market/tests/README.md",
+        "sha256": "f562c9b1bb5d0f8861d42dc64d3af93b6c3bb9e8c00d55b465bb1f12a642dc4d",
+        "bytes": 1234
+      },
+      {
+        "path": "modules/foundups/agent_market/tests/TestModLog.md",
+        "sha256": "88611695dd1efedfa3aaa0ed473a32d618a596a80f29459cd01e7fbfadf18cd7",
+        "bytes": 10280
+      },
+      {
+        "path": "modules/foundups/ModLog.md",
+        "sha256": "ce0deef2646f3dcb9cfc74bd8699092fe8d17c570c6f0be0a0089fa292449fd6",
+        "bytes": 25180
+      },
+      {
+        "path": "docs/architecture/FOUNDUPS_BLOCKCHAIN_TESTNET_ORCHESTRATION_PLAN.md",
+        "sha256": "74e8c014929ef4886a0982fcd9c9772ebf3a7e173388d7682ef4a0c7cda13d58",
+        "bytes": 32584
+      },
+      {
+        "path": "docs/plans/research/2026-10-22-blockchain-readiness-recheck.md",
+        "sha256": "ae325f9b6181d64a286d389855835a56c4e7d789ec6e8dfb332a9c8c88a67b79",
+        "bytes": 13504
+      }
+    ],
+    "historical_evidence": {
+      "receipt": "docs/plans/research/2026-10-22-validation-receipt.json",
+      "status": "Unchanged historical audit snapshot. Its pre-patch source hashes are intentionally not refreshed. This implementation receipt supersedes only P0A readiness."
+    },
+    "material_limits": [
+      "Only MockChainBackend ships; default and explicit mock remain local simulation. No registered real adapter, live node, mint, signer or settlement is delivered.",
+      "Result chain metadata is backend-reported consistency, not independent blockchain proof. Mismatched result is rejected after backend invocation; no rollback guarantee.",
+      "Failed launch can leave a created registry row; deployment cache is local/in-memory; synthetic treasury helpers remain.",
+      "Authorization parity, independent verification, honest payment state, integer accounting, epoch/proof scope, idempotency/atomic outbox, signer admission and real confirmation remain open.",
+      "No PR, branch, merge, remote write, funding, wallet, credential, deployment or provider invocation was part of P0A. Existing guarded help test attempted Hugging Face access and was blocked."
+    ],
+    "next_slice": "P0B: common verifier/treasury authorization and payment truth, using existing contracts and tests after a fresh bounded pre-action/WSP15 allocation check.",
+    "closeout_checks": {
+      "wsp97_repository_evidence_validator": {
+        "command": "python -B tools/wsp97_execution_validator.py docs/plans/research/2026-10-22-token-factory-fail-closed-receipt.json --repo-root . --expected-base 0c81418fe94a7786cfd55f01e138ddc5d510583d --pretty",
+        "exit_code": 0,
+        "structurally_complete": true,
+        "violations": [],
+        "limitation": "Structural/repository-path validation only; process_limitations remain applicable."
+      },
+      "artifact_hashes_verified": 11,
+      "hash_drift": [],
+      "new_receipt_links_checked": 3,
+      "broken_new_links": [],
+      "markdown_fences": "balanced",
+      "module_diff_check": "PASS"
+    }
+  }
+}

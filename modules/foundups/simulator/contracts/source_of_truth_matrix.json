@@ -1,18 +1,38 @@
 {
-  "version": "2026-02-18",
+  "version": "2026-10-31",
+  "change_contract": "WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract",
   "economic_invariants": [
     {
       "id": "ups_sat_accounting_unit",
-      "statement": "1 UPS equals 1 sat accounting unit in simulator treasury and fee routing math.",
+      "statement": "Projection/fee accounting uses a one-satoshi convention while BTCReserve genesis uses 1000 satoshis per UPS. Neither is a universal funded settlement or redemption guarantee.",
+      "status": "CONFLICTING",
+      "decision_class": "D",
+      "chain_activation": "BLOCKED",
+      "observations": {
+        "projection_accounting": {
+          "satoshis_per_ups": 1,
+          "scope": "mesa_model fee conversion and ten_year_projection accounting assumption"
+        },
+        "btc_reserve_genesis": {
+          "ups_per_btc": 100000,
+          "satoshis_per_ups": 1000,
+          "scope": "tested BTCReserve genesis configuration; later dynamic ratios remain separate"
+        }
+      },
+      "resolution_required": "Versioned unit and conversion decision, exact-accounting simulator transitions and conservation tests, independent review, governing documentation, then chain parity. Do not silently relabel balances.",
       "code_refs": [
         "modules/foundups/simulator/mesa_model.py",
         "modules/foundups/simulator/economics/fee_revenue_tracker.py",
-        "modules/foundups/simulator/economics/ten_year_projection.py"
+        "modules/foundups/simulator/economics/ten_year_projection.py",
+        "modules/foundups/simulator/economics/btc_reserve.py"
       ],
       "doc_refs": [
         "modules/foundups/simulator/README.md",
         "modules/infrastructure/foundups_tokenization/docs/TOKENOMICS.md",
-        "WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md"
+        "WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md",
+        "docs/architecture/FOUNDUPS_BTC_RESERVE_TOKEN_ARCHITECTURE.md",
+        "docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md",
+        "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md"
       ]
     },
     {
@@ -38,6 +58,39 @@
       "doc_refs": [
         "modules/foundups/simulator/ModLog.md",
         "modules/foundups/simulator/INTERFACE.md"
+      ]
+    },
+    {
+      "id": "sim_native_epoch_transfer_v1",
+      "statement": "Opt-in restricted native UPS source/pool transfers require exact component, receipt, destination and source equality with full nominal admission. Default legacy is separate; no F_i or global unit policy follows.",
+      "status": "VERIFIED_SIMULATED",
+      "decision_class": "C",
+      "chain_activation": "BLOCKED",
+      "code_refs": [
+        "modules/foundups/simulator/_mesa_epoch.py",
+        "modules/foundups/simulator/economics/pool_distribution.py",
+        "modules/foundups/simulator/economics/epoch_ledger.py",
+        "modules/foundups/simulator/mesa_model.py"
+      ],
+      "doc_refs": [
+        "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md",
+        "modules/foundups/simulator/INTERFACE.md"
+      ]
+    },
+    {
+      "id": "ups_micro_v1_prospective_allocation",
+      "statement": "Prospective UPS quantity policy uses 1000000 atoms per UPS, bounded exact integers and terminal stakeholder/network/fund floors. R-C stays source-owned without carry. The actual-roster plan posts no source, balance, reservation or epoch.v2 state; native staker positions refuse.",
+      "status": "VERIFIED_SIMULATED",
+      "decision_class": "C",
+      "chain_activation": "BLOCKED",
+      "code_refs": [
+        "modules/foundups/simulator/economics/_token_numeric.py",
+        "modules/foundups/simulator/economics/pool_distribution.py"
+      ],
+      "doc_refs": [
+        "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md",
+        "modules/foundups/simulator/INTERFACE.md",
+        "WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md"
       ]
     }
   ],

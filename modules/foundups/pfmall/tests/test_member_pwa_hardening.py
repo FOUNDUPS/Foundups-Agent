@@ -119,7 +119,7 @@ class TestServiceWorker:
         """Each JS/CSS in SHELL_ASSETS should have a corresponding file on disk."""
         asset_matches = re.findall(r"'(/member/(?:js|css)/[^']+)'", sw_source)
         for asset_path in asset_matches:
-            rel = asset_path.lstrip("/")
+            rel = asset_path.partition("?")[0].lstrip("/")
             file_path = MEMBER_DIR.parent / rel
             assert file_path.exists(), f"Shell asset references missing file: {asset_path} -> {file_path}"
 

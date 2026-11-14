@@ -1,5 +1,25 @@
 # FoundUps Domain
 
+## Blockchain and simulator entry point — 2026-10-31
+
+Read the [simulator-first change contract](../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract),
+then the [source-backed reconciliation](../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md)
+and [delivery allocation](../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md).
+The simulator defines qualified economic behavior; unresolved units, issuance,
+funding, replay and authorization gaps block chain activation. Mall/FX discovery,
+pitch media and project claims do not bypass these gates or grant token rights.
+
+## Optional reusable brand context — PR1792 candidate, 2026-10-25
+
+`brand_context.schema.json` describes a parent brand and child names/aliases.
+A registry entity may declare `brand_context_path`; absence keeps the existing
+contract. `public_discovery_alias` remains independent. Context is public
+branding data with `BRANDING_ONLY_NO_EXECUTION_AUTHORITY`; it does not add a
+registered principal, token, routing or mutation scope. The existing grounding
+and backend verifier validate it at use time. Synthetic schema and actual
+producer/consumer tests qualify the reusable core only. Production payloads,
+registry activation, website and skill propagation remain original PR1792 work.
+
 ## Canonical Planning References
 
 For active execution, use these first:
@@ -8,8 +28,11 @@ For active execution, use these first:
 |----------|---------|
 | [FOUNDUPS_DOMAIN_CANONICAL_INDEX.md](docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md) | Domain truth: canonical vs planning vs pending-audit vs historical |
 | [ROADMAP.md](ROADMAP.md) | Domain-level layered roadmap |
+| [FoundUp intake/update retrieval rule](docs/FOUNDUP_ONBOARDING_PROTOCOL_PHASE1.md) | Standing 012 instruction: retrieve current repository requirements and applicable Skillz; preserve Outcome -> Solution -> Pain and PoC -> Prototype -> MVP |
+| [AutoPost item capture handoff](pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md) | Shop/GetK-style private photo grouping into the existing Mall; specified contracts and missing implementation gates |
 | [FOUNDUP_EXFOLIATION_PROTOCOL.md](docs/FOUNDUP_EXFOLIATION_PROTOCOL.md) | Core vs spin-out decision rule |
 | [PQN_SWARM_HUB_FOUNDUP_BRIEF.md](docs/PQN_SWARM_HUB_FOUNDUP_BRIEF.md) | Internal-first PQN swarm FoundUp brief |
+| [RedDog Lick connection handshake](../../extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md) | Cross-domain engagement contract; RedDog-owned, specified not implemented |
 
 ### Submodule Roadmaps
 
@@ -18,6 +41,7 @@ For active execution, use these first:
 | [agent_market/ROADMAP.md](agent_market/ROADMAP.md) | Execution ledger (active) |
 | [simulator/ROADMAP.md](simulator/ROADMAP.md) | Simulation and DEX (active) |
 | [social_twin/ROADMAP.md](social_twin/ROADMAP.md) | Human-in-the-loop (PoC lock) |
+| [pfmall/ROADMAP.md](pfmall/ROADMAP.md) | Shared discovery, private AutoPost item handoff and mobile creator integration |
 
 ---
 
@@ -344,3 +368,11 @@ This module operates under **WSP governance** and follows **[WSP 3: Enterprise D
 ---
 
 **Remember**: WSP defines the technical specifications, `/modules/foundups/` implements the specifications to create actual FoundUps. 
+
+
+## Hornet Hunter website handoff
+
+[Hornet Hunter](hornet_hunter/README.md) preserves the sanitized public website source,
+SEO work and maintenance contracts for hornethunter.com. Private correspondence,
+customer data and the unpublished filming manual are excluded. The existing Sites
+repository remains the deployment owner; this is not an automatic publishing integration.

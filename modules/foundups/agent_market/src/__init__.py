@@ -1,4 +1,4 @@
-﻿"""FoundUps Agent Market package."""
+"""FoundUps Agent Market package."""
 
 from .exceptions import (
     AgentMarketError,

@@ -100,6 +100,18 @@ SECURITY_PATTERNS: List[SecurityTriggerPattern] = [
         description="Rust dependencies",
         priority=2,
     ),
+    SecurityTriggerPattern(
+        pattern=r"(^|/)(pnpm-lock\.yaml|bun\.lockb?|uv\.lock|poetry\.lock|Pipfile(\.lock)?)$",
+        scan_type="sca",
+        description="Dependency lock file",
+        priority=2,
+    ),
+    SecurityTriggerPattern(
+        pattern=r"\.(py|js|jsx|ts|tsx|mjs|cjs|html?|vue|svelte|go|rb|php|java|c|cc|cpp|h|hpp|cs|rs|sh)$",
+        scan_type="sast",
+        description="Application or website source",
+        priority=2,
+    ),
     # Container files -> Trivy scan
     SecurityTriggerPattern(
         pattern=r"Dockerfile.*$",
@@ -165,8 +177,6 @@ SKIP_PATTERNS: List[str] = [
     r"\.txt$",
     r"\.rst$",
     r"\.json$",  # Generic JSON (not package.json)
-    r"docs/",
-    r"test.*\.py$",
     r"__pycache__/",
     r"\.git/",
 ]
@@ -262,11 +272,8 @@ class SecurityTriggerDetector:
 
     def _should_skip(self, filepath: str) -> bool:
         """Check if file should be skipped."""
-        # Don't skip package.json even though .json is in skip list
-        if "package.json" in filepath or "package-lock.json" in filepath:
-            return False
-        # Don't skip requirements*.txt files
-        if "requirements" in filepath.lower() and filepath.endswith(".txt"):
+        # Recognized security inputs win over generic suffix exclusions.
+        if self._match_patterns(filepath):
             return False
         for skip_re in self._compiled_skip:
             if skip_re.search(filepath):
@@ -309,6 +316,7 @@ class SecurityTriggerDetector:
         proposals_by_type: Dict[ScanType, ScanProposal] = {}
 
         for filepath in changed_files:
+            filepath = filepath.replace("\\", "/")
             # Check skip patterns
             if self._should_skip(filepath):
                 skipped_files.append(filepath)

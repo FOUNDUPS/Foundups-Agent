@@ -1,0 +1,71 @@
+## 2026-09-21: Implement optional canonical discovery aliases
+
+- WSP00/15/22/50/62/97/99/104; C4/I2/D2/Impact2=10/P2. PR1840 and both main workflows passed; fresh98peer heads and16 source bindings reconciled.
+- Reuse existing schema, projector and public shell. Validate global slug reservations before filtering; project only eligible explicitly visible aliases; canonicalize URL and identity before render/context. Preserve member app gating before catalog retrieval.
+- Extend existing tests with synthetic schema/projector cases and actual inline JavaScript under a mocked browser. Independent source review caught and corrected missing shell portfolio eligibility before final review. Local271 and independent271overlapping cases pass; speculative context IDs also remain null until resolution. Exact candidate CI remains pending in the canonical backlog; no production data/manifest, runtime/provider or deployment changes.
+- Retain all26 original packets and51 score histories. Retrieval first returned the shared-root overlay and was rejected; corrected owned adapter binds f83edabc3 with UNKNOWN freshness/index gap, no semantic CURRENT claim or reindex. Missing canonical projector TestModLog added under WSP97, existing member TestModLog reused.
+
+## 2026-09-21: Resolve the AmIBot public discovery alias contract
+
+- WSP00/15/22/50/97/99/104;10/P2 static contract follows verified PR1839 closure (ten PR checks and both main workflows passed). Existing canonical display-name discovery works; literal /f/amibot needs a generic shell-owned pre-entry alias.
+- Specify one explicit optional public_discovery_alias, global collision checks, visibility-qualified projection and canonical URL/ID before rendering. Preserve app membership-before-fetch and all tenant identities. Raw registry loader already preserves optional fields; no duplicate typed loader or new identity is needed.
+- Separate next source capability: C4/I2/D2/Impact2=10/P2, synthetic data/actual-code oracles, five existing source/schema/test owners. No production registry/catalog/manifest change or public/runtime activation; no tests/product imports/model/provider execution in this planning slice.
+- Independent review and exact source/ownership/evidence bindings are in the canonical backlog. Preserve old score history and original26packets; no new module or skill. Shared checkout and externally owned RedDog/YUMORI/eSingularity/AutoPost work remain untouched.
+
+## 2026-09-21: Qualify existing FoundUp build route and close preview-wiring drift
+
+- WSP00/15/22/50/97/99;15/P1 source/test-contract qualification after PR1833 and both main workflows passed. Existing WRE consumer targets the WRE executor; older agent build-to-extraction helper is a separate path.
+- Fresh executor defaults to dry-run; guard-admitted dry/disabled paths simulate, while unqualified build/extract can block first. Live delegation remains blocked. Controlled adapter mode does not call a live worker. Existing ContextBundle preview attachment is implemented; corrected stale interface/roadmap claims that it was still unwired.
+- Build/extract model requirements remain unspecified; consumer model admission applies only to validation. The mocked singleton test does not establish the documented consumer force-dry promise; qualify policy/instance isolation separately before source repair.
+- Exact owners, independent review and ranked follow-up are bound in the canonical RSI backlog and AmIBot package. No repository imports, product tests, queue drain, worker/model/service or deployment execution; no new modules, skills or runtime flags.
+
+## 2026-09-21: Qualify AmIBot planning scopes and dependency gates
+
+- WSP00/15/22/50/97/99/104/109; bounded15/P1 repair of the existing13-order package. Preserve existing `detect_ai` identity, roles, scores, roots and deliverables; no new scaffold or runtime code.
+- Five G1 writers share the module. Serialize them conservatively; G2 waits for all five; final success report waits for publication. Six dependency rows change; acyclic static success-DAG/root analysis reduces12 unordered overlaps to0. Deferred research stays excluded; controlled-failure evidence does not wait for success-only jobs.
+- Paths remain retrieval candidates, not executable allowlists. G0 shared-interface/hard-prerequisite qualification, exact scopes, current WRE admission and independent verification remain open. PR1832 closes route-test debt with48 local/independent passes, ten PR checks and both main workflows successful; protected peers preserved.
+- Evidence and fresh WSP15/97 queue: canonical RSI backlog. Structural validation only; no worker, provider, product tests, service, token or deployment effects.
+
+## 2026-09-21 - Existing draft reconciliation with current main
+
+Integrated main1f18a3ee into PR1751 lineage04ef322f. Only root planning conflicts
+were resolved; original declarative registry, manifest and13orders are unchanged.
+Local106pass/same5baseline failures, including the added AmIBot README pass;
+independent scope review and fresh hosted checks govern publication. No game,
+worker, route, model, token or deployment activation. WSP00/15/22/97/104/109.
+
+# AmIBot - ModLog
+
+## 2026-09-15 - AMIBOT_REGISTRY_ONBOARDING_PHASE1
+
+Continued the existing PR #1751 intake at `c9a33a124` on main `67db49496`.
+Registered one hidden `detect_ai` skeleton candidate; added only the required
+declarative manifest and INTERFACE to this module. Kept the existing 17 registry
+entries and 13 build-package work orders unchanged. Updated intake/package truth
+and declared inactive WSP 104 namespaces; `/f/amibot` remains owner-reconciled work.
+
+Applied the existing FoundUp Genesis Intake guidance and module onboarding
+protocol. The prototype skill was not activated as a runtime worker. Validation
+and baseline failures are recorded in [VALIDATION.md](docs/VALIDATION.md).
+No source-code implementation, catalog listing, domain, model, token, reward or
+runtime dispatch was introduced. WSP 00/15/22/49/50/91/95/97/104/109.
+
+## 2026-09-15 - DETECT_AI_WSP109_INTAKE_PHASE1
+
+Created the eight required WSP 109 intake documents and supporting browser-first, benchmark, research, and staged-roadmap contracts from 012's current conversation.
+
+Research confirmed an existing Human or Not game and a 2023 research predecessor. No verified source established the earlier claim that Grok leads this specific type of leaderboard. The product is differentiated by open-model efficiency comparisons, separate human/agent judges, consented learning, and FoundUps governance; novelty is not claimed for the core game.
+
+Repository evidence was read through the GitHub connector at main `b12d75400b3ff819d42c191f87c46e3ed3022e74`. The GitHub lexical index returned that same revision. Full HoloIndex semantic, catalog, bootstrap, and runtime checks were not executed; see intake provenance.
+
+Scope: documentation only. No existing runtime, registry, catalogs, token state, public routes, credentials, or SKILLz changed. Local packet checks establish document consistency only, not game functionality or independent review.
+
+Governing references: WSP 109 intake, WSP 97 retrieval/execution discipline, WSP 22 documentation. WSP 49 scaffolding and WSP 95 skill creation remain downstream.
+
+## 2026-09-15 - AMIBOT_CHAT_PWA_SAFETY_RESEARCH_PHASE1
+
+Updated the existing intake packet to the display name AmIBot, preserving internal `detect_ai` identity, branch and issue lineage. Added one research decision record rather than creating a second product node. Extended the roadmap, POC, prototype, solution and benchmark contracts with clean adult-only chat, mandatory pre-delivery moderation, PWA acceptance, deferred mature/age-assurance gates and opt-in unverified local-model practice.
+
+Verified all 14 baseline Markdown blobs against current PR #1751 before editing. Primary-source review found GAPITA random chat, its net6.0 target and legacy SignalR dependency; the technical recommendation is existing-owner-first Socket.IO, with Colyseus as the alternative. No external source code was copied, no package installed and no runtime or deployment created.
+
+Validation in this continuation is independently rerun document consistency only; see docs/VALIDATION.md. WSP 00 execution, HoloIndex acceptance, full catalog discovery, live browser/model/safety tests, independent review and WRE admission remain unperformed. WSP 109 intake and WSP 97 evidence boundaries are preserved.

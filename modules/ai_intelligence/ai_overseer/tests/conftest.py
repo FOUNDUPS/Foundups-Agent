@@ -5,9 +5,11 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 import pytest
 
 _ALLOWLIST = {
+    "test_preflight_model_boundary.py",
     "test_analysis.py",
     "test_planning.py",
     "test_execution.py",
@@ -22,11 +24,19 @@ _ALLOWLIST = {
     "test_wsp_framework_sentinel.py",
     "test_m2m_compression_sentinel.py",
     "test_m2m_skill_shim.py",
+    "test_m2m_holo_retrieval_benchmark.py",
+    "test_retrieval_autoresearch.py",
     "test_ai_overseer_ironclaw_runtime.py",
     "test_wsp49_interface_gap_scanner.py",
     "test_vulnerability_scan_policy.py",
     "test_preflight_resolution.py",
     "test_foundup_genesis_validator.py",
+    "test_autofix_executor_security.py",
+    "test_foundup_launch_request.py",
+    "test_intake_auth_provider.py",
+    "test_intake_transport.py",
+    "test_intake_packet_builder.py",
+    "test_github_nomination_review.py",
 }
 
 _HEAVY_TARGETS = [
@@ -53,5 +63,7 @@ def pytest_collection_modifyitems(config, items):
     )
 
     for item in items:
+        if not item.path.resolve().is_relative_to(Path(__file__).resolve().parent):
+            continue
         if item.fspath.basename not in _ALLOWLIST:
             item.add_marker(skip_marker)

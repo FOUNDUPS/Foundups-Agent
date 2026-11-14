@@ -14,20 +14,19 @@ Run with: python -m pytest tests/test_production_gates.py -v
 
 import os
 import sys
-import json
 import tempfile
 import random
 import statistics
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-import uuid
+
+import pytest
 
 # Add repo root to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent.parent))
 
-from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory, SkillOutcome
+from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory
 from modules.infrastructure.wre_core.src.skill_selector import SkillSelector
 from modules.infrastructure.wre_core.src.codeact_executor import CodeActExecutor, SafetyGates
 
@@ -66,7 +65,7 @@ class ProductionGateTester:
         if self.temp_db:
             try:
                 os.unlink(self.db_path)
-            except:
+            except OSError:
                 pass
 
     # ------------------------------------------------------------------ #
@@ -434,7 +433,7 @@ class ProductionGateTester:
             # May timeout or succeed quickly depending on system
             fault_results["timeout_handled"] = True  # Just verify no crash
             print(f"       Success: {result.success}")
-            print(f"       [PASS] No crash on timeout test")
+            print("       [PASS] No crash on timeout test")
         except Exception as e:
             fault_results["timeout_handled"] = False
             print(f"       [FAIL] Uncaught exception: {e}")
@@ -473,145 +472,28 @@ class ProductionGateTester:
     # ------------------------------------------------------------------ #
 
     def run_ops_gate(self) -> GateResult:
-        """
-        Ops gate: Verify env defaults locked in source of truth.
-
-        Creates canonical config file with all env defaults.
-        """
-        print("\n[GATE 4] Ops Gate - Locking env defaults...")
-
-        # Define canonical defaults
-        canonical_defaults = {
-            "# WRE CoT System Configuration": "",
-            "# Source of truth for all feature flags": "",
-            "# Last updated: 2026-02-24": "",
-            "": "",
-            "# Sprint 1: ReAct Loop (Gap A)": "",
-            "WRE_REACT_MODE": "1",
-            "WRE_REACT_MAX_ITER": "3",
-            "WRE_REACT_FIDELITY": "0.90",
-            "": "",
-            "# Sprint 2: Agentic RAG (Gap F)": "",
-            "WRE_AGENTIC_RAG": "1",
-            "": "",
-            "# Sprint 3: ToT Selection (Gap B)": "",
-            "WRE_TOT_SELECTION": "1",
-            "WRE_TOT_MAX_BRANCHES": "5",
-            "": "",
-            "# Sprint 3: CodeAct Execution (Gap E)": "",
-            "WRE_CODEACT_ENABLED": "1",
-            "": "",
-            "# Optional: Pattern Memory DB override": "",
-            "# WRE_PATTERN_MEMORY_DB": "/path/to/custom.db",
-            "": "",
-            "# Optional: IronClaw Worker": "",
-            "WRE_ENABLE_IRONCLAW_WORKER": "1"
-        }
-
-        # Generate config file content
-        config_lines = []
-        for key, value in canonical_defaults.items():
-            if key.startswith("#") or key == "":
-                config_lines.append(key)
-            else:
-                config_lines.append(f"{key}={value}")
-
-        config_content = "\n".join(config_lines)
-
-        # Write to canonical location (wre_core/config/)
-        config_path = Path(__file__).parent.parent / "config" / "wre_defaults.env"
-        config_path.parent.mkdir(parents=True, exist_ok=True)
-        config_path.write_text(config_content, encoding='utf-8')
-
-        print(f"  Config written to: {config_path}")
-
-        # Verify all defaults are documented
-        required_vars = [
+        """Verify canonical env defaults and runbook without mutating them."""
+        print("\n[GATE 4] Ops Gate - Verifying env defaults...")
+        config_root = Path(__file__).parent.parent / "config"
+        config_path = config_root / "wre_defaults.env"
+        runbook_path = config_root / "WRE_RUNBOOK.md"
+        required_vars = (
             "WRE_REACT_MODE",
             "WRE_REACT_MAX_ITER",
             "WRE_REACT_FIDELITY",
             "WRE_AGENTIC_RAG",
             "WRE_TOT_SELECTION",
             "WRE_TOT_MAX_BRANCHES",
-            "WRE_CODEACT_ENABLED"
-        ]
-
-        documented = {var: var in canonical_defaults for var in required_vars}
+            "WRE_CODEACT_ENABLED",
+        )
+        config_content = config_path.read_text(encoding="utf-8")
+        runbook_content = runbook_path.read_text(encoding="utf-8")
+        documented = {
+            var: f"{var}=" in config_content and var in runbook_content
+            for var in required_vars
+        }
         all_documented = all(documented.values())
-
-        print("  Required env vars documented:")
-        for var, status in documented.items():
-            print(f"    {var}: {'OK' if status else 'MISSING'}")
-
-        # Also create runbook entry
-        runbook_content = """# WRE CoT System - Operations Runbook
-
-## Quick Start
-
-1. Ensure Python 3.10+ installed
-2. Load environment defaults:
-   ```bash
-   source modules/infrastructure/wre_core/config/wre_defaults.env
-   ```
-
-## Feature Flags
-
-| Flag | Default | Description |
-|------|---------|-------------|
-| WRE_REACT_MODE | 1 | Enable ReAct retry loop (max 3 iterations) |
-| WRE_REACT_MAX_ITER | 3 | Maximum ReAct retry iterations |
-| WRE_REACT_FIDELITY | 0.90 | Fidelity threshold for success |
-| WRE_AGENTIC_RAG | 1 | Enable HoloIndex retrieval preflight |
-| WRE_TOT_SELECTION | 1 | Enable Tree-of-Thought skill selection |
-| WRE_TOT_MAX_BRANCHES | 5 | Maximum ToT candidates to evaluate |
-| WRE_CODEACT_ENABLED | 1 | Enable hybrid CodeAct execution |
-
-## Disabling Features
-
-To disable a feature, set its flag to 0:
-```bash
-export WRE_REACT_MODE=0  # Disable ReAct
-export WRE_TOT_SELECTION=0  # Disable ToT
-```
-
-## Monitoring
-
-Dashboard endpoint:
-```python
-from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory
-memory = PatternMemory()
-dashboard = memory.get_telemetry_dashboard()
-print(dashboard)
-```
-
-Key metrics:
-- `tot_confidence_rate`: Should be >70% for healthy ToT
-- `codeact_success_rate`: Should be >90% for healthy CodeAct
-- `retrieval_coverage`: Should be >80% for healthy RAG
-
-## Troubleshooting
-
-### Low fidelity scores
-1. Check ReAct is enabled: `WRE_REACT_MODE=1`
-2. Verify RAG retrieval: `WRE_AGENTIC_RAG=1`
-3. Check skill variations: `dashboard['variations_promoted']`
-
-### CodeAct failures
-1. Check safety gates in skill spec
-2. Verify allowed_commands includes required commands
-3. Check `codeact_gate_triggers` counter
-
-### ToT poor selection
-1. Verify sufficient execution history (need 5+ per skill)
-2. Check `tot_confidence_rate` in dashboard
-3. Consider increasing `WRE_TOT_MAX_BRANCHES`
-"""
-
-        runbook_path = config_path.parent / "WRE_RUNBOOK.md"
-        runbook_path.write_text(runbook_content, encoding='utf-8')
-        print(f"  Runbook written to: {runbook_path}")
-
-        passed = all_documented
+        passed = config_path.is_file() and runbook_path.is_file() and all_documented
 
         result = GateResult(
             gate_name="Ops Gate",
@@ -622,7 +504,10 @@ Key metrics:
                 "vars_documented": documented,
                 "all_documented": all_documented
             },
-            details=f"Config and runbook created, {sum(documented.values())}/{len(documented)} vars documented"
+            details=(
+                "Config and runbook verified read-only, "
+                f"{sum(documented.values())}/{len(documented)} vars documented"
+            )
         )
 
         print(f"  [{'PASS' if passed else 'FAIL'}] Ops Gate")
@@ -668,8 +553,6 @@ Key metrics:
 
 
 # Pytest fixtures and tests
-import pytest
-
 @pytest.fixture
 def gate_tester():
     """Create gate tester with temp database."""
@@ -699,8 +582,12 @@ def test_failure_gate(gate_tester):
 
 def test_ops_gate(gate_tester):
     """Test ops gate: env defaults locked in source of truth."""
+    config_root = Path(__file__).parent.parent / "config"
+    tracked = (config_root / "wre_defaults.env", config_root / "WRE_RUNBOOK.md")
+    before = {path: path.read_bytes() for path in tracked}
     result = gate_tester.run_ops_gate()
     assert result.passed, f"Ops gate failed: {result.details}"
+    assert {path: path.read_bytes() for path in tracked} == before
 
 
 # Main entry point

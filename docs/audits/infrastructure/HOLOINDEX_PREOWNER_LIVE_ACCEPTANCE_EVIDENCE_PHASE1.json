@@ -1,0 +1,77 @@
+{
+  "schema_version": "holoindex_preowner_live_acceptance_evidence.v1",
+  "evidence_class": "unsigned_local_runtime_observation",
+  "source_commit": "09e98fff04b4d94544d97a1dd7b795785d13db2e",
+  "source_pull_request": 1591,
+  "truth_boundary": "This proves one exact-commit pre-owner stale-HEAD repair through the governed OpenClaw/WRE path, one CURRENT owner query, and unchanged immutable replica verification on one Windows host. It is not portable attestation, exact runtime closure, A-grade retrieval evidence, horizontal scale, or retrieval-RSI promotion authority.",
+  "controller": {
+    "accepted": true,
+    "status": "COMPLETED",
+    "task_id": "holoindex_postmerge_refresh:09e98fff04b4d94544d97a1dd7b795785d13db2e",
+    "target_repo_head_sha": "09e98fff04b4d94544d97a1dd7b795785d13db2e",
+    "generation_id": "sha256:7869f238b391583dddaa899d5e7cf9b95e5cb5c3b6618eb71162d3328d1876d6",
+    "freshness_receipt_digest": "sha256:fd0a000588f1c2218991312b0119a6d132e49d2ca9b049899db8fc29d0b9982b",
+    "started_runtime_ids": [
+      "openclaw",
+      "openclaw_supervisor"
+    ],
+    "stopped_runtime_ids": [
+      "openclaw_supervisor",
+      "openclaw"
+    ],
+    "no_holoindex_reindex_performed_by_controller": true,
+    "wall_seconds": 471.4
+  },
+  "governed_query": {
+    "ok": true,
+    "source": "holoindex_owner_service",
+    "freshness": "CURRENT",
+    "index_gap_detected": false,
+    "no_reindex": true,
+    "owner_attempts": 1,
+    "owner_retry_performed": false,
+    "authority_repo_head_sha": "09e98fff04b4d94544d97a1dd7b795785d13db2e",
+    "workspace_repo_head_sha": "09e98fff04b4d94544d97a1dd7b795785d13db2e",
+    "workspace_overlay_present": false,
+    "authority_repo_root_digest": "sha256:704679bb2626fee765182e84d271940d1d2e6c5c367ea98d13f913dccc5bae45",
+    "freshness_receipt_digest": "sha256:fd0a000588f1c2218991312b0119a6d132e49d2ca9b049899db8fc29d0b9982b",
+    "runtime_environment_exact_closure_verified": false,
+    "bundle_ok": true,
+    "bundle_missing_required": []
+  },
+  "post_query_replica_verification": {
+    "verified": true,
+    "generation_id": "sha256:7869f238b391583dddaa899d5e7cf9b95e5cb5c3b6618eb71162d3328d1876d6",
+    "descriptor_digest": "sha256:af0e9a2a498a2fc0ab1a6f2ee7922546ea000e9ebb86e3de9c750254d67d0d4f",
+    "replica_id": "sha256:fb03a1db2080b9182cf9d98dca87f07d95dd37f2246a94587c18cfc4d50a78c3",
+    "path_identity_digest": "sha256:4d5c10b7250dfd1d1dcf9060507de70f540bfea5524c7a17311f93c43b7f1dfd",
+    "artifact_count": 33,
+    "artifact_bytes": 222719702,
+    "elapsed_ms": 2263,
+    "descriptor_digest_unchanged": true,
+    "replica_id_unchanged": true,
+    "path_identity_digest_unchanged": true
+  },
+  "retrieval_evaluation": {
+    "noise": "moderate: the broad RSI query returns useful cross-domain material together with historical and adjacent records",
+    "ordering": "the requested moltbot_bridge contracts are bound into the successful module bundle; semantic hits remain broad by design",
+    "missing_artifacts": "none required; the bundle reports an empty missing_required set",
+    "staleness_risk": "closed for the exact source commit by CURRENT freshness and equal workspace/authority HEADs; every later commit requires a new receipt",
+    "duplication": "no duplicate required path was observed",
+    "bounded_read_limits": "five large documents were truncated at 12000 bytes and the oversized ModLog was rejected from direct-read fallback; those disclosures prevent completeness overclaim",
+    "improvement_action": "reconcile temporal documentation only; retain bounded reads and do not alter ranking, indexing, route, or query authority in this slice"
+  },
+  "remaining_gates": {
+    "runtime_environment_exact_closure_verified": false,
+    "holoindex_a_grade": false,
+    "retrieval_rsi_operational": false,
+    "horizontal_scale_proven": false,
+    "next_p0": "seal and independently verify the interpreter, standard/native libraries, installed distribution payload bytes, write denial, and exact owner launch binding before any quality-RSI authority layer"
+  },
+  "reddog_release": {
+    "version": "0.4.136",
+    "vsix_path": "O:\\RedDog-Releases\\reddog-0.4.136.vsix",
+    "compressed_bytes": 276366,
+    "sha256": "sha256:ccf65001c726839856353694cf3579bf7ce1b3eb41abed2bc9cb33ded3ced3f8"
+  }
+}

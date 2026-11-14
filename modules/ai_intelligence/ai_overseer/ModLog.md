@@ -1,8 +1,933 @@
+## 2026-10-26: Qualify patched optional HTTP dependencies
+
+Initial profile metadata exposed published Starlette/cryptography advisories;
+hold promotion despite green functional/secrets gates. Allocation3bbbb2ee4
+selects a separate FastAPI0.162.0/Starlette1.10.0/PyJWT2.15.1/crypto50.0.2 profile.
+Same786 cases pass; product/oracles/legacy auth and original environment remain
+unchanged. Public metadata for25 resolved distributions reports zero published
+advisories, not a whole-system/binary audit. Independent inventory found older
+bootstrap pip outside those25; allocationc6557db8b precedes isolated/CI pip26.2.2
+repair, separately reported. Same786 cases pass again; all26 installed packages
+show zero published registry advisories. One reviewed HTTPX test-client warning;
+independent profile/metadata and final workflow reviews accept the bounded
+component, including unchanged11 held-outs plus separate optional-denied503.
+The patched-profile receipt binds those reports and root786; fresh exact-head
+hosted/security/main qualification remains required.
+
+## 2026-10-26: Connect member-authenticated draft intake (initial profile)
+
+15/P1 allocation6efb68f50, frozen tests2e46fd2aa, WSP00/6/11/15/22/50/77/84/97.
+Add one explicit Clerk server-only provider wrapper around the existing body-first
+intake_request seam, consumed by PFMall's actual POST route. Fixed public RSA,
+issuer/origin/time/v2 session policy; generic failures and pseudonymous handle.
+Legacy HMAC behavior/source/oracles and package exports remain unchanged. Optional
+HTTP dependencies are outside resident imports; no environment secrets, JWT/JWKS
+network fetch, nonce/data writes, deployment, admission/ownership/work/token grant.
+PFMall TestModLog records exact RED/GREEN786 evidence/one baseline warning.
+Independent11 held-outs and separate optional-import-denied ASGI probe pass after
+canonical PEM repair, with the original configuration finding retained. Current
+hosted/security/main gates remain separate. Durable claim state and real-session
+qualification are still required.
+
+## 2026-10-26: Consume public GitHub nominations as review drafts
+
+WSP00/3/6/11/15/22/49/50/62/84/97; C3/I4/D4/Impact4=15/P1.
+Add a bounded issue-form adapter/CLI and an opened-issue Actions consumer using
+the existing LaunchRequest mapper. Preserve OSP advisory data and separate the
+fixed review-service context from nominator identity and HTTP authentication.
+No owner, commander, registry, token or trading grant. Old mapper/auth code and
+AST oracles stay unchanged; the new owner is outside the resident closure.
+Baseline387PASS; original RED80FAIL/387PASS and strengthened RED81FAIL/387PASS
+remain retained. Final five-owner682PASS and actual CLI replay pass. The canonical
+test registry adds one unit file (1772 total/273 quarantined); manifest1471 and
+canonical c1f97e86 remain unchanged. Hosted/security/main gates remain required.
+Evidence: external foundups-nomination-review-20261026; workflow retains exact
+Junit cases/dependency report. No live issue-event or whole-system readiness claim.
+
+## 2026-09-21: Qualify the existing FoundUp genesis prototype
+
+- WSP 00/15/22/50/95/97/109; static qualification C3/I3/D2/Impact2 = 10/P2 after PR1838 merged its exact reviewed tree. The previous repair's245 overlapping local/independent cases and ten exact-head checks passed; its main workflows are tracked separately.
+- Existing prototype frontmatter, canonical registry/loader, safety scanner and typed intake contracts are distinct. Missing executable registration/manifest/outcome evidence does not justify a second skill, weaker admission or redundant generic tests.
+- The structured builder/gate is implemented but does not execute the prototype document or turn arbitrary prose into the full WSP109 packet. New-ID collision checking is explicit/injected; the default gate does not load current registry occupancy. Preserve the registered detect_ai identity when extending AmIBot.
+- This slice changes canonical planning/logs only. No production, skill, registry, manifest or test changes; no tests, product imports, scanner subprocess, model/provider or runtime activation. Source/AST/JSON checks and independent review are recorded in the backlog.
+
+## 2026-09-20: Reconcile four FoundUp validation fixture failures
+
+- WSP00/15/22/50/62/84/97/99: two existing test owners only; production guards unchanged. Reuse the canonical synthetic manifest under disposable repo-relative paths and classify the exact current command error.
+- Baseline4failed/197passed; focused205passed and connected677passed, no skips. Four added negative controls prove missing/wrong-FoundUp manifests reject before builder construction. Initial absolute-root fixture attempt5failed/200passed remains evidence.
+- Independent review and remote publication status are recorded in the root RSI backlog. Local mocked builder/receipt tests establish no live worker, runtime admission, active FoundUp result or retained RSI improvement.
+
 # AI Intelligence Overseer - ModLog
+
+## 2026-09-20: Prove commander draft handoff with the declared intent
+
+- Corrected the intake integration fixture that mistook an authority-denial response for success. Actual OpenClawIntent metadata now proves a queued, detached envelope only with explicit commander authority; the dry-run builder itself still does not queue.
+- Focused111pass and independent99overlap/31adversarial cases. Connected1048pass/4fail; all4 reproduced on clean d00b156f. Existing tests retain the13review-discovered regression cases.
+- Reconciled the scaffold roadmap against existing typed job/route/planner owners. Public intake grants draft rights only; planner digest, admission, registry and runtime execution remain separate.
+- WSP00/15/22/50/62/84/95/97/99/109. Exact evidence and PR closure: docs/roadmaps/rsi_swarm_backlog.json#current_observation. Preserved pre-existing ModLog NUL bytes; no unrelated cleanup.
+
+
+## 2026-09-13 - RSI context preservation evidence
+
+- Ran the existing deterministic M2M compiler and compile shim in a disposable replica of source bcc877829. The runbook shrank 186 to 14 lines but lost all eight declared boundary passages and failed YAML parsing.
+- A seven-line synthetic reference passed the YAML gate after losing its worker/verifier independence sentence. Rejected both candidates; original sources and executable Skillz remain unchanged. No model call, promotion or verified learning.
+- Corrected README, INTERFACE and the prototype compile-gate Skillz to describe implemented structural/YAML checks, actual result fields, side effects and unimplemented fidelity checks. This is a documentation correction, not a runtime fidelity repair.
+- Evidence and next acceptance requirements: docs/operations/RSI_SWARM_DISPATCH.md, linked from the root roadmap. WSP 22, 48, 50, 84, 97, 99.
 
 **Module**: `modules/ai_intelligence/ai_overseer/`
 **Status**: Active (Autonomous Code Patching + Daemon Restart + Activity Routing)
-**Version**: 0.10.4
+**Version**: 0.10.5
+
+---
+
+## 2026-08-27 - HOLO RUNTIME CANDIDATE BINDING HARDENING
+
+**Author**: 0102 | WSP: 00, 15, 22, 50, 62, 83, 87, 97
+
+- Changed the public benchmark to capture the authenticated owner's actual
+  runtime-environment digest instead of predicting child state from the parent.
+- Retained one owner across the probe and complete held-out corpus, with final
+  cleanup, eliminating repeated cold owner startup inside one benchmark.
+- Made A-grade composition reject every run whose query receipts do not prove
+  exact runtime closure. Installed dependency payload bytes remain unverified,
+  so current production evidence cannot pass this gate.
+- Added no ranker, index, route, repository, signer, or promotion authority.
+
+## 2026-08-27 - INDEPENDENT HOLO A-GRADE EVIDENCE GATE
+
+**Author**: 0102 | WSP: 00, 15, 22, 50, 62, 87, 97
+
+- Added a pure A-grade composition gate for the public generation-bound run
+  plus a caller-supplied signature-verifier seam for sealed-corpus evaluation.
+  The default policy binds
+  30 disjoint cases, Recall/MRR/nDCG >= .95, and p95 latency <= 5 seconds.
+- Exposed it through a backend-content-bound callable benchmark facade that
+  re-runs the governed public corpus rather than trusting caller-supplied
+  public status flags.
+- Kept authority explicit: even accepted evidence sets promotion authority and
+  performed promotion to false, with no gate-local ranker, index, route, or
+  repository effect. Effects of an injected external verifier are not attested.
+- Made the 30-case, .95 quality, and 5-second latency requirements
+  non-downgradable. The content-bound facade remains without a non-test/VSIX
+  caller pending independent evaluator trust administration.
+- Corrected the M2M sentinel graded judgment and added adversarial coverage for
+  corpus size/leakage, evaluator separation, metric regression, signature
+  failure, public-gate failure, and deterministic receipt integrity.
+- Corrected candidate truth binding so `ranker_digest` covers the extracted
+  retrieval/ranking implementation (including `core/search_engine.py`) and
+  every run rejects an owner-emitted loaded-runtime digest mismatch. The
+  benchmark explicitly pins semantic retrieval mode.
+- Focused validation evidence is recorded in the transaction receipt.
+
+## 2026-08-27 - HOLO OWNER-LIFECYCLE / RETRIEVAL TRUTH REPAIR
+
+**Author**: 0102 | WSP: 00, 15, 22, 50, 62, 97
+
+- Replaced the stale root-bound benchmark call with the canonical governed
+  one-shot owner lifecycle and derived authority root. Query-time maintenance,
+  callback injection, and repository writes remain rejected.
+- Preserved exact owner errors instead of masking them. Added regressions for
+  authority selection and failure propagation; the focused benchmark/navigation
+  matrix passed 56 tests.
+- The live fixed corpus returned recall@8 1.0, MRR .9167, nDCG .8718, mean
+  3829ms, and p95 4578ms. The result remains `quality_below_policy` because
+  nDCG is below 0.95; no promotion or AutoResearch success is claimed.
+
+## 2026-08-01 - HOLOINDEX_GENERATION_BOUND_RETRIEVAL_AUTORESEARCH_PHASE1
+
+**Author**: 0102 | WSP: 00, 15, 22, 50, 62, 97
+
+- Replaced the M2M Holo benchmark's query-time reindex and CLI-text parsing
+  with the authenticated generation-bound owner query.
+- Added fixed public-regression relevance requirements and deterministic
+  Recall@K, MRR, nDCG@K, mean-latency, and p95-latency evidence. This corpus is
+  excluded from train but is not independent promotion evidence.
+- Removed repository-local latest/JSONL writes from the query path. The skill
+  now returns a benchmark run and deterministically recomputed verification
+  receipt; it performs no generation promotion.
+- Reused the existing authenticated loopback owner client directly and removed
+  arbitrary query-runner injection from the public Skillz boundary.
+- Bound every run to the exact repository root and current Git HEAD, and made
+  relevance scoring case-exact over canonical repository paths.
+
+---
+
+## 2026-07-14 - MAIN_MENU_WRE_DASHBOARD_PREFLIGHT_CONTEXT_GUARD_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 50, 97
+
+- Hardened the `main.py` WRE dashboard startup preflight so ambient
+  `OPENCLAW_24X7=1` no longer blocks the interactive menu by default.
+- Preserved fail-closed behavior for autonomous/headless context via
+  `interactive_menu=False` and for explicit menu enforcement via
+  `WRE_DASHBOARD_AUTO_ENFORCE=1` or `WRE_DASHBOARD_PREFLIGHT_ENFORCED=1`.
+- Added regression coverage for menu warning behavior under ambient 24x7,
+  explicit menu enforcement, and autonomous 24x7 enforcement.
+
+---
+
+## 2026-07-04 - WSP 109 intake packet builder (dry-run): chat idea -> genesis envelope -> gate (WSP109_INTAKE_PACKET_BUILDER_PHASE1)
+
+**Author**: 0102 (RedDog Architect) | Commander: 012 | Gate: VERIFIED_READY draft PR (do NOT self-merge)
+**WSP**: 00, 15, 22, 50, 97, 109
+**Base**: `1c373279e` (main; contains #919 Hermes dry-run-default safety)
+**Slice**: WSP109_INTAKE_PACKET_BUILDER_PHASE1
+
+### Why
+
+The RedDog FoundUp-creation execution-path audit found the OpenClaw genesis gate BUILT and tested
+but INPUT-STARVED: nothing populates a FoundUpGenesisEnvelope from chat, so the valid-envelope
+launch branch was unreachable. This slice fills the builder/populator gap (dry-run only), making the
+already-built, already-tested gate reachable end-to-end.
+
+### Changed
+
+- NEW `src/foundup_genesis/intake_packet_builder.py`: `build_intake_packet_dry_run(idea_text)` parses
+  structured `key: value` intake into a typed `FoundUpGenesisEnvelope`, runs it through the EXISTING
+  OpenClaw genesis gate (`validate_genesis_before_execution`, lazy import), and returns a dry-run
+  result. Fail-closed: no FAM/Hermes/registry import; `dry_run` / `fam_called` / `hermes_called` /
+  `registry_mutated` telemetry pinned; the genesis validator is the authority on validity.
+- TEST `tests/test_intake_packet_builder.py` (8): empty->NO_ENVELOPE, valid->GATE_PASSED, invalid
+  foundup_id rejected, unparseable prose->NO_ENVELOPE, AST import guard (no FAM/Hermes writer),
+  dry-run-only (no fs side effect), OpenClaw dispatch simulation (envelope in payload -> passes;
+  without -> NOT_READY). All pass.
+- EDIT `tests/conftest.py`: allowlist the new light test so it runs in default CI.
+- DOCS INTERFACE.md (public API) + ROADMAP.md (new; foundup_genesis intake trajectory).
+
+### Boundary (Addendum B -- safety before intake)
+
+Depends on #919 (Hermes dry-run default, on main). This slice does NOT call Hermes real-write paths,
+does NOT scaffold a module tree, does NOT enqueue a build job. FAM/Hermes handoff stays blocked/stubbed.
+
+### Next
+
+P2 `FOUNDUP_SCAFFOLD_CONTRACT_PHASE1` (create_foundup action + WSP-49 scaffold contract).
+
+---
+
+## 2026-06-17 - FOUNDUP_LAUNCH_REQUEST_ERROR_NO_RAW_ECHO_PHASE1 (AUTHOR, public-intake validator: no raw-value echo)
+
+**Author**: 0102 (AUTHOR) | Commander: 012 | Gate: independent 5-lane SENTINEL (do NOT self-merge)
+**WSP**: 00, 50/87 (HoloIndex-first read), 64 (enhance-before-create), 84 (reuse #824 safe-error style), 97 (Truth Boundary)
+**Slice**: FOUNDUP_LAUNCH_REQUEST_ERROR_NO_RAW_ECHO_PHASE1
+**Base**: `6f651a8c6` (origin/main; contains #810/#821/#823/#824/#826)
+**Motivating finding**: the #826 sweep hardened the genesis validator but DEFERRED two
+`validate_launch_request` error strings that echo user-derived content:
+`launch_request.py:~195` (`"shell/code metacharacters in reference: {sorted(bad)}"`) and
+`launch_request.py:~236` (`"forbidden/unknown payload field: {key!r}"`).
+`validate_launch_request` is the PUBLIC-INTAKE validator (called by the #823 transport
+pre-flight and by `to_genesis_envelope`), so its error strings must be echo-free to match
+the #826 invariant. Closed here -- MESSAGE TEXT ONLY (validation behavior unchanged).
+
+**Scope (launch_request.py's OWN error sites only; message-only):**
+`launch_request.py` is the ONLY src file changed. Every `errors.append(...)` / `raise
+LaunchRequestError` reachable from `validate_launch_request` was enumerated by direct read.
+Sites changed (file:line, before -> after STYLE; field/family + rule/policy class only, NEVER
+the raw value / `repr()` / offending char / metachar list / raw byte):
+  - `_scan_auth_fields` (`launch_request.py:174-177`): dropped the raw `{trail}{key}` echo ->
+    `"payload contains a forbidden auth/authority field (intake facts come from the trusted
+    context, not the request)"` (names the auth/authority POLICY CLASS; field-family locality
+    kept per Addendum C).
+  - allowed-fields loop (`launch_request.py:236`): dropped `{key!r}` (arbitrary user input) ->
+    `"payload contains a forbidden or unknown field"` (field-class locality kept; a SAFE count
+    is allowed, never the key).
+  - `_check_url_ref` (`launch_request.py:195`): dropped the metachar LIST `{sorted(bad)}` ->
+    `"reference_urls[i] contains shell/code metacharacters"` (reference_urls[i] INDEX locality
+    kept, no list of chars).
+LEFT AS-IS (already safe; verified by direct read): the other `_check_url_ref` messages
+(`:186` non-empty URL string / `:189` printable ASCII / `:192` public http(s) URL -- all name
+the indexed field + rule, no raw value); `proposed_name is required` (`:251`); the intake-gate
+message (`:270-273`); and the #824 display-field reject messages (`_reject_display_field`,
+reused, not duplicated).
+
+**Behavior parity (HARD CONSTRAINT -- message-only, MECHANICALLY proven):**
+  1. AST control-flow skeleton: with every string constant + f-string blanked, the edited
+     `launch_request.py` AST `==` origin/main's (test `test_ast_skeleton_parity_with_origin_text_blanked`).
+     Proves same control flow, calls, branches -- no logic change.
+  2. Runtime ERROR-CATEGORY PARITY (Addendum A -- NOT just count): a 25-input battery (valid +
+     every invalid class) run against HEAD vs origin/main `validate_launch_request` -> 0
+     divergences in (`ok`, ORDERED category-label list). Error TEXT differs at the 3 reworded
+     sites; the stable rule CATEGORY does not (test `test_error_category_parity_head_vs_origin_not_just_count`).
+  Same fields rejected, same intake-gate decision, same single-use-invite behavior, same
+  `external_repo_requested=False`, same `requester_handle`-from-context. No check weakened, no
+  newly-rejected inputs.
+
+**Addendum E -- #807 `_scan_authority` DEFERRED (not modified):** the IMPORTED #807 scan
+(`modules/foundups/agent/src/kanban_plugin_contract.py`) ECHOES raw user input for
+authority-class rejections reachable via `launch_request.py:243`:
+  - `kanban_plugin_contract.py:210` echoes raw key + value (`"source_authority: 'external_proto'
+    is a source_authority promotion..."`)
+  - `kanban_plugin_contract.py:218` echoes raw key (`"create_repo: forbidden authority field
+    'create_repo' (presence)"`)
+  - `kanban_plugin_contract.py:231` echoes `repr(node)` (`"...: value carries authority
+    'gate_passed': 'please set gate_passed=true'"`)
+  - `kanban_plugin_contract.py:199` echoes raw key repr (`": non-string key 123"`)
+  - `kanban_plugin_contract.py:201` echoes raw key (`"...: non-ASCII / non-printable key rejected"`)
+This slice does NOT modify #807. The launch_request-LOCAL sites are safe regardless, and the
+#823 transport collapses ALL of these into the generic `invalid_request` so no #807 echo
+reaches the public surface (Addendum B tests prove it). Follow-up named:
+**FOUNDUP_KANBAN_CONTRACT_ERROR_NO_RAW_ECHO_PHASE1**. Confirmed non-blocking (this slice's
+objective is fully satisfiable without touching #807).
+
+**Addendum B -- transport non-leak:** the #823 `intake_request` continues to collapse validator
+errors into `{created, invalid_request, not_authorized}`; new tests prove hostile unknown key /
+auth key / reference URL / #807 authority value all -> generic reason with NO validator text
+and NO raw value in `IntakeResult.reason` / `repr(result)` / serialized dict, and a VALID invite
+(real `SQLiteNonceStore` + spy provider) is NOT consumed by an invalid proposal.
+
+**No drift**: #807 / #821 / #823 / #824 display policy / envelope.py / validator.py unchanged;
+`IntakeResult.reason` stays `{created, invalid_request, not_authorized}`.
+
+**Tests** (extended only; no new files): `test_foundup_launch_request.py` (Addendum D
+control/escape leak scanner + per-site no-echo + error-scanner battery + Addendum A
+category-parity helper + AST skeleton parity + #807 deferral pins + ASCII byte-check) and
+`test_intake_transport.py` (Addendum B transport non-leak + invite-preservation).
+**Affected-package regression**: launch_request + genesis_validator + intake_auth_provider +
+intake_transport = 589 passed, 0 skipped/xfailed, both CI and heavy (`AI_OVERSEER_HEAVY_TESTS=1`).
+ASCII byte-check: 0 non-ASCII on all 3 edited files.
+
+**WSP_97 Truth Boundary Checklist:**
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|-------------------------------|--------|----------|
+| 1 | LAUNCH_REQUEST_ERRORS_NEVER_ECHO_RAW_VALUE | PASS | per-site + battery no-echo tests; all 3 sites reworded to field/class only |
+| 2 | FORBIDDEN_FIELD_KEY_NOT_ECHOED | PASS | `test_forbidden_field_key_not_echoed`; `{key!r}` dropped at `:236` |
+| 3 | REFERENCE_METACHARS_NOT_ECHOED | PASS | `test_reference_metachars_not_echoed`; `{sorted(bad)}` dropped at `:195` |
+| 4 | AUTH_FIELD_KEY_NOT_ECHOED | PASS | `test_auth_authority_field_key_not_echoed`; `{trail}{key}` dropped at `:174` |
+| 5 | LAUNCHREQUESTERROR_MESSAGE_SAFE | PASS | `test_launchrequesterror_message_is_safe` + `_unknown_field_key_not_echoed` |
+| 6 | ERROR_CATEGORY_PARITY_PROVEN_NOT_JUST_COUNT | PASS | `test_error_category_parity_head_vs_origin_not_just_count`: 0 divergences (ok + ordered labels) |
+| 7 | FIELD_LOCALITY_PRESERVED_WITHOUT_RAW_ECHO | PASS | messages keep auth/authority class, reference_urls[i] index, forbidden-field class |
+| 8 | TRANSPORT_DOES_NOT_SURFACE_VALIDATOR_DETAILS | PASS | Addendum B transport tests: generic reason, no validator text/raw value |
+| 9 | VALID_INVITE_NOT_CONSUMED_BY_INVALID_PAYLOAD | PASS | `test_valid_invite_not_consumed_*` (SQLite + spy, zero provider calls) |
+| 10 | CONTROL_ESCAPE_FORMS_NOT_IN_ERRORS | PASS | Addendum D `_assert_error_is_leak_free` (raw + escaped \x00/ /\r/\n + repr) |
+| 11 | SINGLE_USE_INVITE_PRESERVED_UNCHANGED | PASS | invite-preservation tests; no logic change to provider/consume path |
+| 12 | VALIDATION_OUTCOME_PARITY_PROVEN | PASS | AST skeleton parity + runtime category battery (0 divergences) |
+| 13 | INTAKE_GATE_AND_TRUSTED_CONTEXT_UNCHANGED | PASS | gate message kept; parity battery covers unauthenticated/intake_gate |
+| 14 | NO_824_DISPLAY_POLICY_DRIFT | PASS | `_reject_display_field` reused not duplicated; display tests green; validator.py untouched |
+| 15 | KANBAN_807_SCAN_AUTHORITY_DEFERRED_NOT_MODIFIED | PASS | `test_807_*_deferred` + `test_807_module_not_modified_by_this_slice`; follow-up named |
+| 16 | ASCII_CLEAN | PASS | byte-check 0 non-ASCII on all 3 edited files; fixtures via chr()/\uXXXX |
+| 17 | NO_SKIP_XFAIL | PASS | 589 passed, 0 skipped/xfailed (`-rs -rx` shows none) |
+| 18 | FILE_SCOPE_EXACT | PASS | `git status --short`: only launch_request.py + 2 test files |
+
+---
+
+## 2026-06-16 - FOUNDUP_GENESIS_ID_ERROR_NO_RAW_VALUE_ECHO_PHASE1 (Lane A, genesis error-message hygiene: no raw-value echo)
+
+**Author**: 0102 (Worker-Lane A / AUTHOR) | Commander: 012 | Gate: independent 5-lane SENTINEL (do NOT self-merge)
+**WSP**: 00, 50/87 (HoloIndex-first read), 64 (enhance-before-create), 84 (reuse #824 safe-error style), 97 (Truth Boundary)
+**Slice**: FOUNDUP_GENESIS_ID_ERROR_NO_RAW_VALUE_ECHO_PHASE1
+**Base**: `8018a1f62` (origin/main; contains #810/#821/#823/#824)
+**Motivating finding**: the #824 leakage lane surfaced a PRE-EXISTING (#428) genesis validation error
+that echoed the RAW `foundup_id` into its message (`validator.py:~249-252` pre-fix:
+`f"foundup_id '{envelope.foundup_id}' invalid format..."`). A hand-built `FoundUpGenesisEnvelope`
+with a control char (e.g. U+0000) in `foundup_id` therefore surfaced a RAW control byte in that error
+string. NOT public-intake reachable (the public path slugs `foundup_id`, stripping control chars) and
+the id is rejected anyway -- so this is hygiene, not a live leak. Closed so NO genesis validation error
+echoes a raw user-controlled value.
+
+**Scope (Addendum A -- swept ALL `validate_genesis_envelope` error messages; message-only):**
+- `validator.py` is the ONLY src file changed. `envelope.py::is_valid_foundup_id`
+  (`envelope.py:290-302`) returns a bool and builds NO error message -> out of scope, untouched.
+- Error-building sites changed (file:line, before -> after STYLE; field + rule/policy + allowed-set
+  NAMES only, NEVER the raw value / `repr()` / offending char / raw byte):
+  - `validator.py:248-256` foundup_id format: `"foundup_id '{id}' invalid format..."` ->
+    `"foundup_id has invalid format..."` (stable "invalid format" label kept).
+  - `validator.py:263-265` reserved: `"foundup_id '{id}' is reserved..."` ->
+    `"foundup_id is reserved (infrastructure or existing)"` ("reserved" kept).
+  - `validator.py:267-269` already-exists: `"foundup_id '{id}' already exists"` ->
+    `"foundup_id already exists"` ("already exists" kept).
+  - `validator.py:277-280` lifecycle_stage: dropped `'{stage.value}'` echo -> field + allowed-set
+    NAMES only (`sorted(s.value for s in VALID_GENESIS_STAGES)`).
+  - `validator.py:286-290` binding_state: dropped `'{state.value}'` echo -> field + allowed-set NAMES.
+  - `validator.py:345-348` truth_state_map WSP-97: dropped raw `'{ts.feature}'` + `'{marker.value}'`
+    echo -> `"truth_state_map[i] claims an implementation marker but has no evidence. WSP 97 violation."`
+    (index + "WSP 97 violation" label kept).
+  - `validator.py:359-362` category: dropped `'{category}'` echo (Addendum A: no "Invalid category:
+    {cat}") -> `"category is unknown (not in standard list). Must be one of: {sorted(VALID_CATEGORIES)}"`
+    (allowed-set NAMES only).
+- LEFT AS-IS (already safe; verified): the #824/#823 display-field errors
+  (`_reject_display_field` + Check-11 loop, `validator.py:100-118`, `:376-382`) name the FIELD only and
+  are the safe-style reference reused here; `acceptance_criteria[i] missing fields: {missing}`
+  (`:316-317`, `missing` is a fixed list of LITERAL field-name strings) and
+  `truth_state_map[i] missing feature name` (`:337`, int index) interpolate NO user value;
+  `'{fld}' is required` (`:378`, `fld` from the literal `["name","tagline","description"]`) is a FIELD
+  NAME, not the value.
+
+**Behavior parity (Addendum B -- message-only, MECHANICALLY proven):** every input rejected before is
+still rejected with the SAME fields/classes and SAME `is_valid_*` checks; only message STRINGS changed.
+No rule loosened/tightened, no new rejected inputs. Proven: (1) all 12 pre-existing validator tests stay
+green -- their text assertions hit the kept stable labels (`"invalid format"`, `"reserved"`,
+`"already exists"`, `"WSP 97 violation"`, `"'name' is required"`); (2) new per-field tests assert SAME
+rejection (`not result.is_valid`) + SAME field/label present + raw value ABSENT.
+
+**Tests** (extended `test_foundup_genesis_validator.py`; no new files):
+- `TestGenesisErrorsNeverEchoRawValue`: per-field no-echo -- foundup_id with NUL / CRLF+ESC / DEL / bidi
+  RLO, a plain printable hostile id, reserved id, existing-id conflict, hostile `category`
+  (allowed-set names shown, bad input absent), `truth_state_map.feature` echo, lifecycle/binding
+  allowed-set-only shape.
+- `TestAdversarialErrorScanner` (Addendum C scanner): a battery of adversarial invalid envelopes covering
+  EVERY user-controlled field; `_assert_no_raw_echo` scans EVERY returned error string and asserts the
+  raw value is absent, none of `\x00,\r,\n,\t,ESC,DEL` or the #824 dangerous Cf chars appear literally,
+  no `\\xNN`/`\\uNNNN` repr-escape of those codepoints appears, AND a stable field/rule label is present;
+  `test_all_error_strings_are_pure_ascii` proves every emitted error is ASCII-encodable.
+- All adversarial fixtures built from `chr(codepoint)` / `\uXXXX` so test SOURCE stays pure ASCII.
+
+**Out-of-genesis raw-echo (Addendum D -- RECORDED as follow-up, NOT fixed this slice):** the public-intake
+boundary `launch_request.py` (pinned untouchable this slice) has 2 raw-echo error sites for a FOLLOW-UP:
+`:195` `"shell/code metacharacters in reference: {sorted(bad)}"` (echoes user-derived metachars, may
+include `\n\r\t\\`) and `:236` `"forbidden/unknown payload field: {key!r}"` (echoes `repr()` of a
+user key). Both are in the #824-pinned transport/auth path -> deferred, not message-only-in-genesis.
+
+**Results**: affected-package regression
+`test_foundup_genesis_validator + test_foundup_launch_request + test_intake_auth_provider + test_intake_transport`
+= **555 passed** in BOTH modes (heavy `AI_OVERSEER_HEAVY_TESTS=1` and CI). `-rsx`: no skip/xfail/error.
+Genesis validator file alone: **117 passed**. ASCII byte-check: 0 non-ASCII bytes on both edited files
+(`validator.py` -- the 3 pre-existing docstring em-dashes were normalized to `--` so the edited file is now
+fully ASCII; test file 0 non-ASCII). STOP at MERGE_READY for the independent SENTINEL gate (left dirty).
+
+**WSP_97 Truth Boundary checklist (13/13 YES):**
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|-------------------------------|--------|----------|
+| 1 | ALL_GENESIS_ERRORS_RAW_ECHO_SWEEP | YES | every `validate_genesis_envelope` error-building site enumerated + each user-controlled echo removed (validator.py:248-362); `TestAdversarialErrorScanner` battery covers every field |
+| 2 | ERROR_MESSAGES_FIELD_AND_RULE_ONLY | YES | each changed message = field name + rule/policy + allowed-set NAMES only; `_stable_label_present` asserts a stable label survives in every adversarial error |
+| 3 | CONTROL_AND_FORMAT_CHARS_NOT_IN_ERRORS | YES | `_assert_no_raw_echo` asserts none of the Cc sweep + pinned Cf codepoints (and their `\\xNN`/`\\uNNNN` repr-escapes) appear in any error (test_no_adversarial_error_echoes_raw_or_byte) |
+| 4 | VALIDATION_OUTCOME_PARITY_PROVEN | YES | only message STRINGS changed; 12 pre-existing tests green on kept labels; new tests assert SAME `not is_valid` + SAME field/label; no rule add/remove |
+| 5 | NO_AUTH_TRANSPORT_OR_DISPLAY_POLICY_DRIFT | YES | launch_request.py / intake_auth_provider.py / intake_transport.py / __init__.py UNCHANGED; #824 Cc+Cf policy + display-field errors untouched (git status --short) |
+| 6 | GENESIS_ERRORS_NEVER_ECHO_RAW_VALUE | YES | foundup_id/category/feature/lifecycle/binding echoes removed; per-field `assert raw not in e` (TestGenesisErrorsNeverEchoRawValue) |
+| 7 | FOUNDUP_ID_ERROR_NO_RAW_BYTE | YES | foundup_id with NUL/CRLF/ESC/DEL -> rejected, no raw byte in any error (test_foundup_id_with_control_char_no_raw_byte, ..._crlf_and_esc...) |
+| 8 | VALIDATION_BEHAVIOR_UNCHANGED_ONLY_MESSAGES | YES | no validation LOGIC touched; same `is_valid_foundup_id`/reserved/existing/enum/category/truth checks; same error COUNT per envelope (parity tests) |
+| 9 | REUSES_824_SAFE_ERROR_STYLE | YES | new messages mirror the #824 `_reject_display_field` field+policy style; codepoint logic NOT duplicated (no new helper added) -- WSP 84 |
+| 10 | PHASE810_821_823_824_UNCHANGED | YES | base `8018a1f62` contains #810/#821/#823/#824; only validator.py + its test suite touched; #823/#824 display-field tests still green |
+| 11 | ASCII_CLEAN | YES | 0 non-ASCII bytes on both edited files (validator.py docstring em-dashes normalized to `--`); fixtures via `chr()`/`\uXXXX` |
+| 12 | NO_SKIP_XFAIL | YES | `-rsx` shows `555 passed` (and `117 passed` genesis-only), no skip/xfail/error |
+| 13 | FILE_SCOPE_EXACT | YES | src: validator.py only; tests: test_foundup_genesis_validator.py only; + 3 ModLog/TestModLog docs; envelope.py / 3 intake src / __init__.py UNCHANGED |
+
+---
+
+
+
+**Author**: 0102 (Worker-Lane A / AUTHOR) | Commander: 012 | Gate: independent 5-lane SENTINEL (do NOT self-merge)
+**WSP**: 00, 50/87 (HoloIndex-first), 64 (enhance-before-create), 84 (single shared helper, reuse), 97 (Truth Boundary)
+**Slice**: FOUNDUP_GENESIS_NAME_CONTROL_CHAR_REJECT_PHASE1
+**Base**: `7eb1b8c6c` (origin/main)
+**Motivating finding**: the #823 independent re-review found a control char (e.g. U+0000) in
+`proposed_name` was ACCEPTED by the Phase-1 validators and silently SANITIZED into a normal
+display name at envelope construction (via `_normalize` NFKC + `redact_sensitive`), producing a
+draft FoundUp with a LAUNDERED display name. Public display fields are hostile input; a
+control/format char must be REJECTED before envelope creation, not sanitized.
+
+ARCHITECT-PINNED POLICY (Addendum A; no open fork): in ALL listed display fields, reject every
+Unicode category **Cc** (already covers TAB U+0009, LF U+000A, CR U+000D, NUL U+0000, ESC U+001B,
+DEL U+007F, C1 U+0080-U+009F) PLUS the dangerous **Cf** subset -- zero-width U+200B/200C/200D/FEFF/2060
+and bidi/isolates U+202A-202E, U+2066-2069. Newline in `description`/free-text is NOT exempt this
+phase (it is a Cc char). Reject -- do NOT sanitize/strip/coerce. Detection runs on the RAW value
+BEFORE any normalization/redaction.
+
+- ADD ONE shared helper in `src/foundup_genesis/validator.py` (single definition, reused -- WSP 84):
+  - `_contains_disallowed_display_char(s) -> bool` -- True iff `s` has a Cc codepoint
+    (`unicodedata.category(ch) == "Cc"`) OR a codepoint in `_DISALLOWED_FORMAT_CODEPOINTS`
+    (the pinned 14-codepoint Cf subset). The exact Cc+Cf set is documented in the helper docstring.
+  - `_reject_display_field(field_name, value, errors)` -- appends a SAFE error. A non-string display
+    field is INVALID (`"<field> must be a string ..."`); a string with a disallowed char yields
+    `"<field> contains disallowed control/format character"`. The error NEVER echoes the raw value,
+    `repr(value)`, raw bytes, or the offending character (Addendum B).
+- WIRE the reject in BOTH validators, ADJACENT to existing field checks, BEFORE envelope creation:
+  - `validate_launch_request` (`launch_request.py`): new step **5b** after the proposed_name
+    non-empty check (`launch_request.py:~252-264`). Display fields: `proposed_name` (required) +
+    `problem_statement`/`intended_users`/`requested_type` (optional -- absent/None preserved). The
+    reject reads the RAW payload value via `_raw_display_value` (the dataclass ATTRIBUTE, NOT
+    `to_dict()` which redacts; or the raw dict key), so detection is pre-normalization/redaction.
+  - `validate_genesis_envelope` (`validator.py`): Check 11 required-fields loop
+    (`validator.py:~293-307`) now also rejects a disallowed char in `name`/`tagline`/`description`.
+- TRANSPORT (#823 Addendum C) is covered FOR FREE: the transport preflight runs
+  `validate_launch_request` PRE-PROVIDER, so a control-char display field rejects with `invalid_request`
+  and ZERO `build_intake_context` calls -> the single-use invite nonce is NEVER consumed and the SAME
+  invite works in a later valid request (proven against InMemory AND a real SQLite nonce store).
+- NOT over-broadened (Addendum E): accented Latin, CJK, ordinary punctuation, and emoji (category So)
+  are NOT Cc/Cf and remain ACCEPTED. This is NOT an ASCII-only rule.
+- Phase-2 `intake_auth_provider.py` and the transport `intake_transport.py` are UNCHANGED (the reject
+  lives entirely in the two shared validators).
+
+**Tests** (extended existing allowlisted suites; no new files):
+- `test_foundup_launch_request.py`: per-display-field Cc sweep (00/09/0A/0D/1B/7F/85/9F) + pinned Cf set
+  (200B/200C/200D/FEFF/2060/202A-202E/2066-2069); non-string display field rejected; optional-absent
+  preserved; safe error carries no raw byte/value; negative controls (accented/CJK/punctuation) accepted;
+  Addendum D construction-not-reached (`to_genesis_envelope` raises + envelope ctor spied 0 calls).
+- `test_foundup_genesis_validator.py`: same Cc+Cf sweep on `name`/`tagline`/`description`; newline rejected
+  in `description`; safe error; negatives accepted.
+- `test_intake_transport.py`: Addendum C invite-preservation (InMemory + real SQLite store, spy proves
+  provider 0 calls + nonce reusable); pinned codepoint sweep pre-provider; optional-field control char;
+  generic no-leak reason; Addendum D envelope-construction-not-reached via the transport path.
+- All control/format/Unicode fixtures use `chr(codepoint)` / `\uXXXX` so test SOURCE stays pure ASCII.
+- The Addendum C + D regressions FAIL against pre-fix source (verified by stashing only the two src files:
+  5 representative new tests failed -- envelope built, no rejection -- then restored).
+
+**Results**: affected-package regression
+`test_foundup_launch_request + test_foundup_genesis_validator + test_intake_auth_provider + test_intake_transport`
+= **545 passed** in BOTH modes (heavy `AI_OVERSEER_HEAVY_TESTS=1` and CI). No skip/xfail/error.
+ASCII byte-check: 0 non-ASCII bytes on all created/edited content (pre-existing em-dashes in the
+`validator.py` docstring header are out of scope and untouched). STOP at MERGE_READY for the
+independent SENTINEL gate (do NOT self-merge; left dirty).
+
+**WSP_97 Truth Boundary checklist (17/17 YES):**
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|-------------------------------|--------|----------|
+| 1 | CONTROL_CHARS_REJECTED_NOT_SANITIZED | YES | `_reject_display_field` appends an error (no strip/coerce); a control-char name -> `not ok` / `LaunchRequestError`, no laundered envelope (test_control_char_rejected_before_envelope_construction) |
+| 2 | REJECT_BEFORE_ENVELOPE_CREATION | YES | step 5b runs inside `validate_launch_request`, which `to_genesis_envelope` calls first and raises on `not ok` -> `FoundUpGenesisEnvelope(...)` never reached (test_control_char_envelope_construction_not_reached_spy: ctor spied 0 calls) |
+| 3 | DISPLAY_FIELDS_COVERED_INTAKE_AND_GENESIS | YES | intake: proposed_name/problem_statement/intended_users/requested_type; genesis: name/tagline/description (test_cc_control_char_rejected_per_display_field, TestDisplayFieldControlChars::test_cc_control_char_rejected) |
+| 4 | DETECTION_ON_RAW_VALUE_PRE_NORMALIZATION | YES | `_raw_display_value` reads the dataclass ATTRIBUTE / raw dict key (NOT `to_dict()` redaction); dataclass-path raw control char rejected (test_control_char_rejected_on_launchrequest_dataclass_raw_value) |
+| 5 | SINGLE_SHARED_HELPER_NOT_DUPLICATED | YES | one `_contains_disallowed_display_char` + `_reject_display_field` in `validator.py`; `launch_request.py` imports `_reject_display_field` (no copy-pasted codepoint set) -- WSP 84 |
+| 6 | ARCHITECT_POLICY_PINNED_CC_AND_CF | YES | rejects all category Cc + exactly the pinned 14 Cf codepoints; `_DISALLOWED_FORMAT_CODEPOINTS == {200B,200C,200D,FEFF,2060,202A-202E,2066-2069}` (test_cf_format_char_rejected_per_display_field; set-equality smoke verified) |
+| 7 | NEWLINE_REJECTED_IN_DESCRIPTION_PHASE1 | YES | LF (Cc) in description/problem_statement rejected (test_newline_rejected_in_problem_statement_phase1, TestDisplayFieldControlChars::test_newline_rejected_in_description_phase1) |
+| 8 | NON_STRING_DISPLAY_FIELDS_REJECTED | YES | int/bool/dict/list/float present in a display field -> `"<field> must be a string"` (test_non_string_display_field_rejected) |
+| 9 | OPTIONAL_ABSENT_FIELDS_PRESERVED | YES | optional display field absent/None in a raw dict is allowed -- no false reject (test_optional_display_field_absent_is_preserved) |
+| 10 | TRANSPORT_INVITE_NOT_CONSUMED_ON_INVALID_DISPLAY_FIELD | YES | control-char name + valid invite -> `invalid_request`, spy provider 0 calls, nonce reusable later (test_control_char_proposed_name_rejected_pre_provider_invite_preserved, ..._real_sqlite_store) |
+| 11 | ENVELOPE_CONSTRUCTION_NOT_REACHED_ON_REJECTED_DISPLAY_FIELD | YES | ctor spied 0 calls on both the direct mapping path and the transport path (test_control_char_envelope_construction_not_reached_spy, test_control_char_name_envelope_construction_not_reached) |
+| 12 | UNICODE_LETTERS_NOT_FALSE_POSITIVE_REJECTED | YES | accented Latin / CJK / ASCII punctuation accepted; emoji (So) not rejected (test_unicode_letters_not_false_positive_rejected x2 suites; emoji smoke) |
+| 13 | NO_RAW_CONTROL_BYTE_IN_ERROR_OR_LOG | YES | error names field+policy class only; offending char / `Good...` value / `repr(value)` never echoed (test_reject_error_never_echoes_raw_control_char x2; transport test_control_char_result_reason_is_generic_no_leak) |
+| 14 | TRANSPORT_REJECTS_PRE_PROVIDER_INVITE_PRESERVED | YES | pinned codepoint sweep + optional field rejects pre-provider with spy 0 calls (test_control_or_format_char_in_display_field_rejected_pre_provider, test_control_char_in_optional_display_field_rejected_pre_provider) |
+| 15 | NO_REGRESSION_FULL_SUITE | YES | 545 passed in both heavy + CI modes across the 4 affected suites |
+| 16 | ASCII_CLEAN | YES | 0 non-ASCII bytes on all created/edited content; fixtures via `chr()`/`\uXXXX` (git-diff-added lines: 0 non-ASCII) |
+| 17 | NO_SKIP_XFAIL | YES | `-rsx` shows `545 passed`, no skip/xfail/error |
+| 18 | FILE_SCOPE_EXACT | YES | only validator.py + launch_request.py (src) + their 3 test suites touched; intake_auth_provider.py / intake_transport.py / __init__.py UNCHANGED |
+
+---
+
+## 2026-06-16 - FOUNDUP_LAUNCH_REQUEST_INTAKE_TRANSPORT_PHASE3 (Lane A, framework-agnostic intake adapter)
+
+**Author**: 0102 (Worker-Lane A / AUTHOR) | Commander: 012 | Gate: external 0102 + 5-lane SENTINEL (do NOT self-merge)
+**WSP**: 00, 50/87 (HoloIndex-first), 64 (enhance-before-create), 84 (reuse), 97 (Truth Boundary)
+**Slice**: FOUNDUP_LAUNCH_REQUEST_INTAKE_TRANSPORT_PHASE3
+**Base**: `a96c2e8b1` (origin/main; already contains #810 launch_request.py + #821 intake_auth_provider.py)
+**Predecessors**: #810 (FOUNDUP_LAUNCH_REQUEST_PHASE1 pipeline), #821 (AUTH_CONTEXT_PROVIDER_PHASE2 verifier)
+
+The framework-agnostic INTAKE ADAPTER that turns a transport-neutral request
+(headers + cookies + body) into a DRAFT `FoundUpGenesisEnvelope` or a SAFE rejection. It is
+PURE orchestration + token EXTRACTION: it pulls the session/invite token STRINGS only from
+TRANSPORT METADATA (headers/cookies), NEVER the body, then REUSES the EXISTING pipeline --
+`build_intake_context` (#821) -> `validate_launch_request` -> `to_genesis_envelope` (#810).
+It reimplements NONE of that verification/mapping, makes NO entitlement decision, writes NO
+catalog/repo/registry/Kanban, and speaks NO HTTP (imports no web framework). Additive --
+Phase-1 `launch_request.py` and Phase-2 `intake_auth_provider.py` are UNCHANGED (empty git diff).
+
+- ADD `src/foundup_genesis/intake_transport.py` -- public surface:
+  `intake_request(headers, body, *, cookies=None, nonce_store=None, now=None, secret_provider=None, max_body_bytes=16*1024, _provider=None) -> IntakeResult`
+  and `@dataclass IntakeResult(status, envelope, reason, http_status)`. `_provider` is an
+  injection seam (default = `build_intake_context`) so tests spy that the provider is called
+  EXACTLY ONCE without monkeypatching globals (Addendum D). Internal extraction helpers are
+  NOT exported (could leak a token). `intake_request` + `IntakeResult` + `SURFACE_BINDING_SLICE`
+  added to the `foundup_genesis` `__init__` (additive).
+- CRITICAL ORDERING (012's load-bearing requirement -- an invalid proposal must NOT consume a
+  single-use invite). The pipeline is STRICTLY ordered so EVERY body-shape failure is
+  PRE-PROVIDER (zero `build_intake_context` calls -> the invite nonce is never claimed):
+  1. normalize header/cookie NAMES case-insensitively; reject case-collisions [pre-provider]
+  2. enforce `max_body_bytes` BEFORE any decode/parse (oversize -> reject)      [pre-provider]
+  3. parse + validate the proposal body: UTF-8 only, JSON OBJECT only, allowlisted proposal
+     fields only, reject unknown/auth-ish/authority fields, require non-empty proposed_name
+     -- a body that fails THIS gate is rejected with ZERO provider calls          [pre-provider]
+  4. extract session/invite token strings from headers/cookies                  [pre-provider]
+  5. call `build_intake_context` EXACTLY ONCE (the ONLY provider call)           [PROVIDER]
+  6. `validate_launch_request(proposal_dict, context)`                          [post-provider]
+  7. `to_genesis_envelope(...)` -> draft envelope                               [post-provider]
+- PRE-PROVIDER failures (status=rejected, reason=`invalid_request`, ZERO provider calls,
+  invite NOT consumed): oversize body; invalid UTF-8 / non-JSON / non-object JSON; unknown /
+  forbidden / auth-ish proposal field; missing proposed_name; header/cookie case-collision.
+  POST-PROVIDER failures (provider WAS called once, reason=`not_authorized`): the verified
+  context opens no gate (nothing authenticated / invite not verified) -> #810 intake gate
+  fails. Missing/ambiguous tokens do NOT pre-empt the provider -- the per-mechanism token is
+  dropped to `None` and the ONE fail-closed auth decision is still made in #821.
+- HARDENING ADDENDA APPLIED:
+  - (A) HEADER/COOKIE PRECEDENCE + AMBIGUITY: session = Authorization Bearer, else session
+    cookie ONLY if Authorization absent; invite = `X-FoundUp-Invite` header, else invite
+    cookie ONLY if header absent. Multiple Bearer tokens / comma-list / malformed
+    Authorization -> reject that mechanism with NO cookie fallback. Header+cookie present but
+    DIFFER -> reject. Header NAMES case-normalized; case-colliding duplicate names/cookies ->
+    `invalid_request`. Body tokens never participate.
+  - (B) BODY PARSING / ALLOWLIST: JSON OBJECT only (arrays/strings/numbers/bools/null
+    rejected); `max_body_bytes` enforced BEFORE decode/parse; strict UTF-8; a Mapping body is
+    COPIED into a fresh plain dict (no proxy/mutable side effects); raw body never logged.
+    The proposal-field gate REUSES Phase-1 `ALLOWED_LAUNCH_FIELDS` + `_FORBIDDEN_AUTH_FIELDS`
+    + `_scan_auth_fields` + #807 `_scan_authority` + `_normalize` -- applied PRE-provider so an
+    invalid body is rejected BEFORE the provider (Phase-1 `validate_launch_request` also
+    rejects them, but post-provider; we run the SAME helpers earlier to protect the invite).
+  - (C) RESULT IS NOT A SECRET SIDE CHANNEL: `IntakeResult.reason` is low-cardinality enum-like
+    -- exactly one of `created` / `invalid_request` / `not_authorized`. Forged / expired /
+    replayed / missing / malformed tokens are INDISTINGUISHABLE (all -> `not_authorized`); no
+    token/signature/replay/nonce/body text in reason or `repr(result)`.
+  - (D) PROVIDER EXACTLY ONCE, ONLY AFTER BODY GATES: spy seam proves one call on a valid
+    request, ZERO on oversize / malformed-JSON, and that a VALID invite is NOT consumed when
+    the body is invalid (a real `InMemoryNonceStore` shows the nonce is still usable after).
+  - (E) DO NOT NORMALIZE TOKEN VALUES: header NAMES may be case-normalized; token VALUES are
+    NOT lowercased / NFKC-normalized / inner-stripped -- only external whitespace around the
+    WHOLE token is trimmed. Tokens with CR/LF/TAB, internal space, comma, or non-ASCII
+    (fullwidth lookalike) are rejected -- never coerced into a valid `sess.v1`/`invite.v1`.
+    The exact string passed to #821 equals the provided token after boundary-trim only.
+- REUSE (imports, NOT copies): `build_intake_context` (#821, the ONLY token verifier / invite
+  consumer); `validate_launch_request` + `to_genesis_envelope` (#810 pipeline); Phase-1
+  proposal-field policy helpers `ALLOWED_LAUNCH_FIELDS` (launch_request.py:66-74),
+  `_FORBIDDEN_AUTH_FIELDS` (78-83), `_scan_auth_fields` (144-156), `_scan_authority` + `_normalize`
+  (#807 via launch_request.py:37-41). Imports = stdlib (`json`, `dataclasses`, `typing`) + the
+  two sibling intake modules ONLY.
+- NOT ROUTED THROUGH (confused-deputy hazard, verified by direct read): `pfmall/http_api.py`
+  is GET-only (`@app.get` only, zero POST routes); `moltbot_bridge/src/webhook_receiver.py` is
+  a GENERIC OpenClaw router (`POST /webhook/openclaw -> OpenClawDAE.process`) -- routing
+  proposals through it would trust a relayed/generic assertion. No production caller constructs
+  an intake context today (only the two intake test files + `__init__` reference it), so this
+  adapter is the genuinely-missing wiring. It is framework-agnostic and wired into NEITHER.
+- GENERAL SECURITY: tokens ONLY from transport; a body field named `session_token` /
+  `invite_token` / `authenticated` can NEVER authenticate (rejected pre-provider as a
+  forbidden field). No relayed `X-Authenticated` / `on_behalf_of` / vouch header trusted. FAIL
+  CLOSED on any exception -> generic `not_authorized`. The envelope is a DRAFT, RETURNED only.
+- SENTINEL REVIEW FIXES (3 findings; Phase-1 `launch_request.py` + Phase-2
+  `intake_auth_provider.py` STILL UNCHANGED -- only `intake_transport.py` + its test edited):
+  - **FINDING 1 (HIGH) -- single-use invite burned by an invalid proposal.** The old
+    pre-provider gate `_proposal_fields_ok` reused Phase-1's field-allowlist + `_scan_auth_fields`
+    + `_scan_authority` + non-empty name but OMITTED Phase-1's `reference_urls` validation
+    (`_check_url_ref`, launch_request.py:159-170), which only runs POST-provider. So a proposal
+    whose only defect was a bad `reference_urls` entry passed the pre-gate, the provider was
+    called once, the invite nonce was CONSUMED, and validate THEN rejected it -> the invite was
+    permanently burned by a proposal that produced no FoundUp. FIX: the pre-gate is now a
+    COMPLETE SUPERSET of `validate_launch_request`'s PAYLOAD checks via a PAYLOAD PRE-FLIGHT --
+    `validate_launch_request(dict(data), LaunchRequestIntakeContext(authenticated=True))` run
+    BEFORE token extraction / `build_intake_context`. The dummy `authenticated=True` context is a
+    STRICTLY-LOCAL throwaway used ONLY to force the intake gate open so `preflight.ok` reflects
+    PAYLOAD VALIDITY ALONE (fields + auth-scan + authority-scan + `reference_urls` + non-empty
+    name); it is NEVER returned, NEVER the real context, and NEVER reaches the provider (the REAL
+    context still comes from `build_intake_context`, step 6). `validate_launch_request` has no
+    side effects (consumes no nonce), so preflight + the real validate are harmless. ANY payload
+    defect now rejects with ZERO provider calls -> the invite is NOT consumed.
+  - **FINDING 2 (MEDIUM) -- token-value over-trim coerced CR/LF/Unicode-whitespace into validity.**
+    `_trim_outer` and `_parse_single_bearer` used bare `str.strip()`, which strips the FULL
+    Unicode-whitespace class (CR, LF, VTAB 0x0B, FF 0x0C, NBSP U+00A0, U+2003, U+2028, ZWSP
+    U+200B), so a valid token decorated with one of those at a boundary was trimmed to validity
+    and authenticated. FIX (Addendum E -- RFC 7230 OWS = SP / HTAB only): both outer trims now
+    use `.strip(' \t')`; the scheme/token split uses an OWS-only `_split_first_ows` (not
+    `str.split(None,...)`), so a Unicode-whitespace separator cannot be coerced into the Bearer
+    delimiter either. Any residual control/CR/LF/non-ASCII char is then rejected by
+    `_token_value_ok` -> `not_authorized`. Ordinary leading/trailing SP or HTAB still works.
+  - **FINDING 3 (LOW) -- typed/null `proposed_name` evaded the non-empty check.**
+    `{"proposed_name": null}` and typed names (123/true/{}/[]) passed because
+    `str(None).strip() == 'None'` is non-empty, producing an envelope named `None`/`123`/etc. FIX:
+    the pre-gate now requires `proposed_name` to be a NON-EMPTY str INSTANCE (rejects None + non-str
+    types) BEFORE the preflight -- stricter than Phase-1's `str()` coercion, enforced in the ADAPTER
+    (Phase-1 unchanged). Typed/null names reject `invalid_request` with ZERO provider calls.
+- Tests: `tests/test_intake_transport.py` (152 tests, allowlisted in conftest so it runs in CI
+  WITHOUT `AI_OVERSEER_HEAVY_TESTS`). Covers every addendum + all 5 SENTINEL lanes
+  (transport-extraction / body-boundary / auth-oracle-leakage / pipeline-integrity /
+  scope-architecture AST) + positives (header session -> created; header invite -> created +
+  single-use across requests; both; clean body maps to proposal; `requested_by == verified
+  handle`, never a body `requester_handle`). NEW SENTINEL regression tests:
+  `test_payload_defect_rejected_pre_provider_and_invite_not_burned` (8 payload-defect classes
+  incl. all 6 `reference_urls` variants) + `test_bad_reference_urls_is_the_high_finding_regression`
+  + `test_missing_name_payload_defect_does_not_burn_invite` + `test_preflight_dummy_context_is_not_an_auth_bypass`
+  (FINDING 1, each asserts rejected/invalid_request + ZERO provider calls + a REAL nonce store
+  still usable afterward -- created); `test_session_header_{ows,non_ows}_decoration_*` /
+  `test_session_cookie_*_decoration_*` / `test_invite_{header,cookie}_non_ows_decoration_rejected`
+  / `test_invite_header_ows_decoration_accepted` / `test_unicode_separator_not_coerced_into_bearer_delimiter`
+  (FINDING 2, OWS {SP,HTAB} accepted; CR/LF/VTAB/FF/NBSP/U+2003/U+2028/ZWSP rejected on
+  Authorization + session cookie + invite header + invite cookie, via `\uXXXX` escapes);
+  `test_typed_or_null_proposed_name_rejected_pre_provider` + `test_null_name_does_not_produce_none_named_envelope`
+  (FINDING 3, null/int/bool/dict/list -> invalid_request, zero provider calls). The HIGH
+  `reference_urls` tests FAIL on the pre-fix code and PASS after. Forged tokens use the #821
+  `_make_*` signers with an explicit secret via `secret_provider`. AST sweep: no
+  web-framework/network/subprocess imports; only the two sibling intake modules + stdlib. No skip/xfail.
+- VALIDATION: `152 passed` heavy AND CI (no env var). Affected-package regression (transport +
+  intake_auth_provider + foundup_launch_request + foundup_genesis_validator) = `318 passed`,
+  both modes, no regression. New nonce-preservation + trim tests run 5x consecutively =
+  deterministic (`80 passed` each run). ASCII byte-check: 0 non-ASCII on all created/edited files
+  (the fullwidth-lookalike + Unicode-whitespace test fixtures use `\uXXXX` escapes so the source
+  stays pure ASCII).
+  Phase-1 `launch_request.py` AND Phase-2 `intake_auth_provider.py`: empty git diff.
+- **Follow-ups (named, BLOCKED until built):**
+  - `FOUNDUP_LAUNCH_REQUEST_INTAKE_SURFACE_BINDING_PHASE3C` -- bind this adapter to a concrete
+    transport surface (the function that reads a real request and calls `intake_request`).
+  - `FOUNDUP_LAUNCH_REQUEST_ENTITLEMENT_PHASE3B` -- decide what a verified handle is ALLOWED to
+    launch (authorization), deliberately out of scope here (authentication/intake only).
+- STOP at MERGE_READY for the external 0102 + 5-lane SENTINEL gate (do NOT self-merge; left dirty).
+
+**WSP_97 Truth Boundary checklist (29/29 YES):**
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|-------------------------------|--------|----------|
+| 1 | AUTH_TOKENS_FROM_TRANSPORT_NOT_BODY | YES | tokens extracted only in `_extract_session`/`_extract_invite` from headers/cookies; body session_token field -> `invalid_request` (test_body_session_token_field_cannot_authenticate) |
+| 2 | BODY_IS_PROPOSAL_FIELDS_ONLY | YES | `_proposal_fields_ok` allowlists ALLOWED_LAUNCH_FIELDS; unknown/auth-ish rejected (test_unknown_field_rejected_not_dropped, test_auth_ish_body_field_rejected) |
+| 3 | REUSES_821_PROVIDER_AND_810_PIPELINE_NOT_REIMPLEMENTED | YES | imports build_intake_context / validate_launch_request / to_genesis_envelope; AST test_module_imports_only_sibling_intake_modules_and_stdlib |
+| 4 | SINGLE_USE_INVITE_RESPECTED_ACROSS_REQUESTS | YES | shared InMemoryNonceStore -> 2nd request replays -> not_authorized (test_header_invite_creates_draft_and_is_single_use) |
+| 5 | NO_ENTITLEMENT_DECISION_DEFERRED_3B | YES | no entitlement logic; ENTITLEMENT_SLICE named (test_named_followup_slices_present) |
+| 6 | PRODUCES_DRAFT_NOT_PUBLISHED_NO_CATALOG_REPO_REGISTRY_KANBAN | YES | returns envelope.to_dict() only; AST test_module_makes_no_exec_process_or_network_calls (no write/open/connect) |
+| 7 | REJECTION_REASON_GENERIC_NO_LEAK_NO_ORACLE | YES | reason in {created, invalid_request, not_authorized}; forged/expired/replayed/missing all not_authorized (test_all_auth_failures_share_one_generic_reason) |
+| 8 | HEADER_EXTRACTION_CASE_INSENSITIVE_FAIL_CLOSED | YES | `_normalize_name_map` lowercases names; lower/upper both work (test_lowercase_and_uppercase_header_names_both_work) |
+| 9 | CONFUSED_DEPUTY_RELAYED_AUTH_HEADER_REJECTED | YES | X-Authenticated/X-On-Behalf-Of not trusted (test_relayed_already_authenticated_header_is_not_trusted) |
+| 10 | NO_TOKEN_COOKIE_SECRET_IN_LOGS_OR_REASON | YES | no logging import (AST test_module_has_no_logging_or_print); token not in repr/reason (test_no_token_substring_in_result) |
+| 11 | OVERSIZE_BODY_REJECTED_PRE_PARSE | YES | size checked before decode/parse; spy shows zero provider calls (test_oversize_body_rejected_before_parse) |
+| 12 | NO_WEB_FRAMEWORK_OR_NETWORK_OR_SUBPROCESS_AST | YES | AST test_module_imports_no_web_framework_network_or_subprocess (fastapi/flask/socket/urllib/subprocess banned) |
+| 13 | PHASE1_AND_PHASE2_MODULES_UNCHANGED | YES | empty `git diff` for launch_request.py + intake_auth_provider.py |
+| 14 | SURFACE_BINDING_DEFERRED_AND_NAMED | YES | SURFACE_BINDING_SLICE = FOUNDUP_LAUNCH_REQUEST_INTAKE_SURFACE_BINDING_PHASE3C (test_named_followup_slices_present) |
+| 15 | ASCII_CLEAN | YES | 0 non-ASCII bytes on all 4 created/edited files (fullwidth fixture via `\uXXXX` escapes) |
+| 16 | NO_SKIP_XFAIL | YES | no pytest.mark.skip/xfail in test_intake_transport.py; 64 passed both modes |
+| 17 | FILE_SCOPE_EXACT | YES | only intake_transport.py (new) + test_intake_transport.py (new) + __init__.py + conftest.py (additive) touched |
+| 18 | HEADER_COOKIE_PRECEDENCE_DETERMINISTIC | YES | header value used when present; cookie only if header absent (test_session_cookie_used_only_when_authorization_absent, test_invite_header_takes_precedence_over_cookie) |
+| 19 | HEADER_COOKIE_CONFLICT_REJECTED | YES | header+cookie differ -> reject (test_session_header_cookie_mismatch_rejected, test_invite_header_cookie_mismatch_rejected) |
+| 20 | TOKEN_VALUES_NOT_NORMALIZED_OR_LOGGED | YES | value passed byte-for-byte (outer-trim only) to #821 (test_token_value_preserved_byte_for_byte_to_provider); CR/LF/comma/space/fullwidth rejected |
+| 21 | BODY_JSON_OBJECT_ONLY | YES | `_json_object` rejects array/str/num/bool/null (test_array_body_rejected_pre_provider, test_non_object_json_rejected) |
+| 22 | UNKNOWN_AND_AUTH_BODY_FIELDS_REJECTED | YES | `_proposal_fields_ok` rejects unknown + auth-ish (test_unknown_field_rejected_not_dropped, test_auth_ish_body_field_rejected) |
+| 23 | PROVIDER_ZERO_CALL_ON_INVALID_BODY | YES | spy.calls == [] on oversize/malformed/invalid body (test_provider_zero_calls_on_oversize_body, test_provider_zero_calls_on_malformed_json) |
+| 24 | PROVIDER_EXACTLY_ONCE_ON_VALID_BODY | YES | spy len(calls)==1 on a normal request (test_provider_called_exactly_once_on_valid_request) |
+| 25 | RESULT_REASON_LOW_CARDINALITY_NO_AUTH_ORACLE | YES | reason set is {created, invalid_request, not_authorized} (test_reason_is_low_cardinality_enum, test_all_auth_failures_share_one_generic_reason) |
+| 26 | INVITE_NOT_CONSUMED_BY_INVALID_PROPOSAL + NO_SURFACE_BINDING_CREATED | YES | real nonce store still usable after invalid-body request (test_invalid_body_does_not_consume_invite_nonce); adapter binds to no transport surface (AST sibling-only imports) |
+| 27 | PRE_PROVIDER_GATE_COMPLETE_NO_NONCE_BURN_ON_ANY_PAYLOAD_DEFECT | YES | pre-gate is a COMPLETE SUPERSET of validate_launch_request's PAYLOAD checks via a payload preflight (dummy authenticated context, never the real context); ANY payload defect -- incl. bad reference_urls (file:// / local path / shell metachar / non-string / empty / non-ASCII), unknown/auth field, missing/typed/null name -- rejects with ZERO provider calls and the real invite nonce STILL USABLE (test_payload_defect_rejected_pre_provider_and_invite_not_burned [8 classes], test_bad_reference_urls_is_the_high_finding_regression, test_missing_name_payload_defect_does_not_burn_invite, test_preflight_dummy_context_is_not_an_auth_bypass) |
+| 28 | TOKEN_OUTER_TRIM_OWS_ONLY_NO_CONTROL_OR_UNICODE_WS | YES | outer trim is RFC-7230 OWS (SP/HTAB) only via `.strip(' \t')` + OWS-only scheme/token split (`_split_first_ows`, not str.split(None)); CR/LF/VTAB/FF/NBSP/U+2003/U+2028/ZWSP at either boundary -> not_authorized on Authorization + session cookie + invite header + invite cookie; SP/HTAB still accepted (test_session_header_{ows,non_ows}_decoration_*, test_session_cookie_*_decoration_*, test_invite_{header,cookie}_non_ows_decoration_rejected, test_invite_header_ows_decoration_accepted, test_unicode_separator_not_coerced_into_bearer_delimiter) |
+| 29 | PROPOSED_NAME_NONEMPTY_STRING_TYPE | YES | pre-gate requires proposed_name to be a NON-EMPTY str INSTANCE (rejects None + int/bool/dict/list) BEFORE the preflight, stricter than Phase-1 str() coercion and enforced in the ADAPTER (Phase-1 unchanged); typed/null -> invalid_request, ZERO provider calls (test_typed_or_null_proposed_name_rejected_pre_provider, test_null_name_does_not_produce_none_named_envelope) |
+
+---
+
+## 2026-06-16 - FOUNDUP_LAUNCH_REQUEST_AUTH_CONTEXT_PROVIDER_PHASE2 (Lane A, trusted intake verifier)
+
+**Author**: 0102 (Worker-Lane A / AUTHOR) | Commander: 012 | Gate: external 0102 (do NOT self-merge)
+**WSP**: 00, 50/87 (HoloIndex-first), 64 (enhance-before-create), 84 (reuse), 97 (Truth Boundary)
+**Slice**: FOUNDUP_LAUNCH_REQUEST_AUTH_CONTEXT_PROVIDER_PHASE2
+**Base**: `973a67e75` (origin/main)
+**Predecessors**: #806 (PFmall/Kanban/WRE launch flow), #807 (Kanban plugin contract), FOUNDUP_LAUNCH_REQUEST_PHASE1
+
+The trusted server-side verifier that POPULATES the Phase-1 `LaunchRequestIntakeContext`.
+It is the ONLY component permitted to set `authenticated` / `invite_token_verified` /
+`requester_handle`. PURE verifier: it sees ONLY two already-extracted token strings
+(session, invite), reads NO payload / PFmall / Kanban / relayed vouch assertion, does no
+HTTP parsing, imports no web framework. FAIL-CLOSED on any error / missing secret /
+malformed / forged / expired token / replayed invite. Additive integration -- Phase-1
+`launch_request.py` behavior is UNCHANGED.
+
+- ADD `src/foundup_genesis/intake_auth_provider.py` -- public surface:
+  `build_intake_context(session_token, invite_token, *, nonce_store=None, now=None, secret_provider=None) -> LaunchRequestIntakeContext`,
+  a `NonceStore` Protocol with the SINGLE atomic method `consume_once(nonce, *, expires_at, subject)`
+  + `InMemoryNonceStore` + durable `SQLiteNonceStore`, a `default_secret_provider()` env reader,
+  and TIME-policy constants `MAX_TTL_SESSION_SECONDS` / `MAX_TTL_INVITE_SECONDS` / `CLOCK_SKEW_SECONDS`.
+  TEST-ONLY mint helpers are `_make_session_token` / `_make_invite_token` (underscore, NOT exported,
+  require an explicit `secret` arg, never read env) -- NON-PRODUCTION-ISSUER (Addendum F).
+- HARDENING ADDENDA APPLIED (012-approved direction, pre-adversarial-review):
+  - (A) TOKEN KIND + VERSION: prefixes are the EXACT literals `sess.v1.` / `invite.v1.`; the
+    kind+version is part of the SIGNED bytes (a kind/version swap breaks the signature). A
+    `sess.v1` token can set ONLY `authenticated`; an `invite.v1` token ONLY `invite_token_verified`.
+    Cross-kind (invite-into-session / session-into-invite), `sess.v2.`, unknown/missing prefix -> fail closed.
+  - (B) UNAMBIGUOUS CANONICALIZATION: every field is INDEPENDENTLY base64url-encoded; the KINDVER
+    prefix is consumed by literal strip (not `.`-split), and the per-kind field count is FIXED
+    (session=3, invite=4), so a `.`/`|`/extra part inside a field can NEVER change field count or
+    meaning. Empty/whitespace subject/handle/nonce rejected; malformed base64 rejected. The same
+    logical token always signs the same exact bytes.
+  - (C) TIME + CLOCK SKEW: `exp` REQUIRED both kinds; `iat` REQUIRED (documented: enables precise
+    MAX-TTL). `CLOCK_SKEW_SECONDS = 0` (single trust domain, documented). Boundary `now == exp` ->
+    EXPIRED/rejected (valid iff `now < exp`, tested). MAX TTL enforced SEPARATELY from exp:
+    `exp - iat <= cap` with caps 3600s sessions / 604800s (7d) invites -- over-TTL rejected even
+    with a valid signature. Future `iat` rejected. (No `nbf` field in this format; documented.)
+  - (D) NONCE STORE = ONE ATOMIC METHOD: Protocol is now `consume_once(...) -> bool` only (no
+    `consume`/`verify` split). SQLite does ONE INSERT inside a transaction; `IntegrityError` ->
+    `False` (no pre-check, no raise escapes). Replay rejected ACROSS two `SQLiteNonceStore`
+    instances on the SAME db file (durable). `expires_at` + `subject` stored as columns.
+  - (E) ENV SECRET SEAM: injectable `secret_provider: () -> (current, previous)`; default reads
+    `os.getenv` (current + `_PREVIOUS`). Tests inject secrets WITHOUT mutating `os.environ`. NEVER
+    loads dotenv, NEVER prints/logs (no `logging` import, AST-asserted). Empty current -> fail
+    closed; previous accepted ONLY for verification, NEVER for signing; both missing -> fail closed.
+  - (F) MINT HELPERS CLASSIFIED: `_`-prefixed, excluded from `__all__` + package `__init__`,
+    explicit-`secret` only, never env, docstring marks them developer/test utilities (issuance
+    policy = `FOUNDUP_LAUNCH_REQUEST_INTAKE_TRANSPORT_PHASE3`).
+- Token model (final): compact ASCII; signed bytes = `KINDVER "." b64url(f0) "." ... "." b64url(fn)`
+  (the whole token minus `".<sig>"`); sig = urlsafe-b64 HMAC-SHA256, constant-time verify (loop does
+  not short-circuit on first match). Session = `sess.v1.b64(subject).b64(iat).b64(exp).sig` -> sets
+  `authenticated`. Invite = `invite.v1.b64(handle).b64(nonce).b64(iat).b64(exp).sig` ->
+  sets `invite_token_verified`, single-use.
+- REUSE (imports/patterns, NOT copies):
+  - HMAC-from-env + `_PREVIOUS` rotation + `hmac.compare_digest` constant-time compare:
+    `security_event_correlator.py:189-190, 1039-1070`.
+  - Fail-closed ORDERED gates + register-nonce-ONLY-after-all-gates-pass (atomic):
+    `capability_token_validator.py:50-86, 490-532, 619-620`.
+  - Handle hygiene (redact then normalize): `kanban_plugin_contract.py:105-112, 123-136`.
+- ANTI-PATTERN AVOIDED (did NOT copy): `magats_economy.py` `verify_claim()` (verifies nonce +
+  signature -> True) and `process_claim()` (consumes the nonce in a SEPARATE later call) =
+  verify/consume SPLIT = TOCTOU double-spend. Here verify-and-consume is ATOMIC in ONE
+  `consume_once` call: the invite nonce is claimed by a `UNIQUE(nonce)` insert (SQLite) only after
+  every prior gate passes; a second use returns `False` (IntegrityError translated, never raised).
+- Security decisions: (a) `os` is imported but used ONLY for `os.getenv` (asserted by a dedicated
+  AST test `test_os_used_only_for_getenv`) -- the secret is read via the injectable provider,
+  never printed/logged/returned; (b) handle is `redact_sensitive` FIRST then `_normalize`
+  (normalize-first would rewrite separators and defeat the `sk-`/`Bearer` credential regexes);
+  (c) a `None` nonce_store falls back to a fresh in-memory store so a missing store can NEVER make
+  replay succeed.
+- Tests: `tests/test_intake_auth_provider.py` (97 tests, allowlisted in conftest so it runs in CI
+  WITHOUT `AI_OVERSEER_HEAVY_TESTS`; +14 over the prior 83: 4 concurrency exactly-once race tests
+  and 10 strict-digit iat/exp parametrizations for the post-review hardening). Affected-package
+  regression `97 + 40 launch-request + 29 genesis-validator = 166 passed`. No skip/xfail.
+- Boundary (AST-proved): no web framework (fastapi/flask/starlette/django/aiohttp/...), no
+  Hermes/OpenClaw/WRE runtime, no network/subprocess, `os` getenv-only, the only file I/O is the
+  local SQLite NonceStore; sanctioned non-stdlib import is the #807 `kanban_plugin_contract`.
+- **Follow-ups (named, BLOCKED until built):**
+  - `FOUNDUP_LAUNCH_REQUEST_INTAKE_TRANSPORT_PHASE3` -- extracts the token strings from a real
+    HTTP request / cookie / header and feeds this verifier (this slice's inputs are already-extracted strings).
+  - `FOUNDUP_LAUNCH_REQUEST_ENTITLEMENT_PHASE3B` -- decides what a verified handle is ALLOWED to
+    launch (authorization), deliberately out of scope here (authentication only).
+- STOP at MERGE_READY for the external 0102 gate.
+
+**Post-review hardening (adversarial 5-lane review):** the replay/nonce lane found a HIGH
+double-spend break -- `SQLiteNonceStore` shared ONE `sqlite3.Connection`
+(`check_same_thread=False`), which is NOT thread-safe at the cursor level, so under
+concurrency the `IntegrityError` was not delivered deterministically and MULTIPLE callers
+received True for the SAME nonce (single-use invite double-spent; one trial even leaked
+`SystemError` from the corrupted shared connection). FIX: `consume_once` now serializes the
+claim with a `threading.Lock` (in-process races) and uses `BEGIN IMMEDIATE` + the on-disk
+`UNIQUE(nonce)` PRIMARY KEY + bounded `OperationalError`-locked retry/backoff (cross-process
+races); it returns True to AT MOST ONE caller per nonce, ever, and NEVER raises. The class
+docstring no longer claims the shared connection's on-disk uniqueness made the RETURN VALUE
+correct -- it states the Lock + BEGIN IMMEDIATE + PRIMARY KEY mechanism precisely.
+`InMemoryNonceStore` made its Lock explicit too. ALSO closed the crypto lane's non-breaking
+nit: `_parse_int_field` now requires the decoded iat/exp to be ASCII digits-only before
+`int()` (rejects sign/whitespace/Unicode-digit coercion). Phase-1 `launch_request.py`
+UNCHANGED. See WSP_97 rows 34-35.
+
+**WSP_97 Truth Boundary checklist (35/35 YES):**
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|-------------------------------|--------|----------|
+| 1 | PROVIDER_POPULATES_PHASE1_CONTEXT_NOT_PARALLEL_TYPE | YES | returns `LaunchRequestIntakeContext` (imported from launch_request); no new context type |
+| 2 | CONTEXT_BOOLEANS_SET_ONLY_BY_VERIFIED_MECHANISM | YES | `authenticated`/`invite_token_verified` set only after `_verify_session`/`_verify_invite` succeed |
+| 3 | PAYLOAD_NEVER_READ_FOR_AUTH_FACTS | YES | `build_intake_context` has no payload arg (test_provider_has_expected_signature_no_payload_confused_deputy) |
+| 4 | REQUESTER_HANDLE_FROM_VERIFIED_SUBJECT_ONLY | YES | handle taken from verified token only; genesis `requested_by` == verified handle, not payload |
+| 5 | INVITE_TOKEN_SIGNATURE_VERIFIED_HMAC_CONSTANT_TIME | YES | `_verify_sig` uses `hmac.compare_digest`, loop never short-circuits (forged/tampered rejected) |
+| 6 | INVITE_TOKEN_SINGLE_USE_ATOMIC_VERIFY_AND_CONSUME | YES | nonce consumed in same call as verify, last gate; single `consume_once` UNIQUE insert |
+| 7 | REPLAY_REJECTED_VIA_NONCE_REGISTRY | YES | 2nd use -> `consume_once()` False -> rejected, incl. across two SQLite instances on same file |
+| 8 | EXPIRY_ENFORCED | YES | `now >= exp` rejects; `now == exp` boundary tested EXPIRED; `now` param honored |
+| 9 | SESSION_TOKEN_SIGNATURE_VERIFIED_CONSTANT_TIME | YES | session uses same `_verify_sig` constant-time path |
+| 10 | FAIL_CLOSED_ON_EXCEPTION_OR_MISSING_SECRET | YES | whole body wrapped in try/except -> `LaunchRequestIntakeContext()`; empty/missing secret tests |
+| 11 | NO_DOWNGRADE_BETWEEN_MECHANISMS | YES | bad-session+good-invite sets ONLY invite, and vice-versa (2 tests) |
+| 12 | CONFUSED_DEPUTY_VOUCH_REJECTED | YES | no payload/vouch/on_behalf_of param; only token-string + nonce_store/now/secret_provider args |
+| 13 | SECRET_FROM_ENV_WITH_ROTATION_NEVER_PRINTED | YES | `_resolve_secrets` via injectable provider (env default) primary+`_PREVIOUS`; rotation tests |
+| 14 | NO_TOKEN_NONCE_SECRET_IN_LOGS_RETURN_OR_ENVELOPE | YES | no logger; context repr/dict carries no token/secret/nonce (leak test) |
+| 15 | PRODUCED_CONTEXT_OPENS_PHASE1_GATE | YES | `validate_launch_request(clean, ctx).ok` for session and invite |
+| 16 | MAPS_TO_GENESIS_REQUESTED_BY_FROM_CONTEXT | YES | `to_genesis_envelope(...).requested_by == verified handle`, not payload handle |
+| 17 | REUSES_807_AND_VALIDATOR_PATTERNS_NOT_REINVENTED | YES | imports #807 helpers; reuses correlator + validator patterns (cited file:line) |
+| 18 | DID_NOT_COPY_MAGATS_VERIFY_CONSUME_SPLIT | YES | atomic verify-and-consume in one `consume_once` call; no separate process_claim step |
+| 19 | NO_WEB_FRAMEWORK_OR_RUNTIME_IMPORT_AST | YES | AST test bans fastapi/flask/.../hermes/openclaw/wre + dotenv; passes |
+| 20 | PHASE1_CONTRACT_UNCHANGED | YES | `launch_request.py` untouched; integration is additive (git status / git diff --stat empty) |
+| 21 | ENTITLEMENT_DEFERRED_AND_NAMED | YES | `FOUNDUP_LAUNCH_REQUEST_ENTITLEMENT_PHASE3B` named here + as module constant |
+| 22 | TRANSPORT_DEFERRED_AND_NAMED | YES | `FOUNDUP_LAUNCH_REQUEST_INTAKE_TRANSPORT_PHASE3` named here + as module constant |
+| 23 | ASCII_CLEAN | YES | byte-check 0 non-ASCII in module + test (verified) ; ModLog uses `--`/`->` only |
+| 24 | NO_SKIP_XFAIL | YES | 0 skip/xfail in the new suite (83 tests) |
+| 25 | FILE_SCOPE_EXACT | YES | intake_auth_provider.py, test, conftest allowlist, package __init__, ModLog + TestModLog |
+| 26 | TOKEN_KIND_AND_VERSION_ENFORCED | YES | exact `sess.v1.`/`invite.v1.` prefixes, signed; `sess.v2.`/no-prefix/unknown-prefix rejected; kindver in signed bytes (kindver-swap-breaks-signature test) |
+| 27 | SESSION_INVITE_TOKEN_CONFUSION_REJECTED | YES | invite-into-session and session-into-invite both fail closed (kind-locked `_verify_session`/`_verify_invite`) |
+| 28 | UNAMBIGUOUS_CANONICALIZATION_INDEPENDENT_B64URL_FIELDS | YES | each field b64url-encoded, fixed per-kind count; `.extra`/`.`/`|` inside a field cannot change parsing; malformed b64 rejected |
+| 29 | EMPTY_OR_WHITESPACE_SUBJECT_HANDLE_NONCE_REJECTED | YES | `_clean_handle` + nonce `.strip()` reject empty/whitespace (6 tests) |
+| 30 | TIME_POLICY_IAT_REQUIRED_MAXTTL_BOUNDARY_SKEW_ZERO | YES | iat+exp required; `now==exp` EXPIRED; future-iat rejected; MAX TTL (3600s/7d) rejected with valid sig; `CLOCK_SKEW_SECONDS=0` |
+| 31 | NONCE_STORE_SINGLE_ATOMIC_CONSUME_ONCE_DURABLE | YES | Protocol has only `consume_once`; SQLite ONE INSERT/txn, IntegrityError->False (no raise escapes), durable across two instances on same file |
+| 32 | ENV_SECRET_READ_ONLY_NO_DOTENV_NO_PRINT | YES | injectable `secret_provider`, env default via `os.getenv`; tests inject without mutating `os.environ`; no dotenv/logging/print (AST-asserted); empty current -> fail closed; previous verify-only |
+| 33 | MINT_HELPERS_NON_PRODUCTION_ISSUER_NOT_EXPORTED | YES | `_make_session_token`/`_make_invite_token` underscore, not in `__all__`/`__init__`, require explicit `secret`, never read env (Addendum F tests) |
+| 34 | NONCE_STORE_CONCURRENCY_SAFE_EXACTLY_ONCE | YES | `SQLiteNonceStore.consume_once` returns True to AT MOST ONE caller per nonce under maximal concurrency (threads AND separate instances/processes on same file) and NEVER raises: in-process `threading.Lock` serializes the claim so the shared connection cannot deliver `IntegrityError` nondeterministically; cross-process `BEGIN IMMEDIATE` + on-disk `UNIQUE(nonce)` PRIMARY KEY + bounded `OperationalError`-locked retry. `InMemoryNonceStore` Lock-guarded too. Evidence: `test_sqlite_consume_once_exactly_one_true_under_thread_race`, `test_build_intake_context_same_invite_verified_exactly_once_under_race`, `test_sqlite_two_instances_same_file_exactly_one_true_under_race`, `test_inmemory_consume_once_exactly_one_true_under_thread_race` (24 threads x 8 trials, Barrier-synchronized; all four FAIL against the prior single-shared-connection impl -- reproduced 11/16+ True for one nonce -- and PASS against the fix; exactly 1 row per nonce) |
+| 35 | INT_FIELDS_STRICT_DIGITS_ONLY | YES | `_parse_int_field` requires the decoded iat/exp to be ASCII digits-only (`^[0-9]+$` via `isascii()`+`isdigit()`) BEFORE `int()`: a leading `+`/`-` sign, surrounding/embedded whitespace, or any non-digit (incl. Unicode digits) is rejected, never silently coerced. Evidence: `test_session_iat_with_sign_or_whitespace_rejected`, `test_session_exp_with_sign_or_whitespace_rejected`, `test_strict_digit_iat_still_accepted` |
+
+---
+
+## 2026-06-15 - FOUNDUP_LAUNCH_REQUEST_PHASE1 (Lane A, public intake seam)
+
+**Author**: 0102 (Worker-Lane A / AUTHOR) | Commander: 012 | Gate: external 0102 (do NOT self-merge)
+**WSP**: 00, 50/87 (HoloIndex-first), 64 (enhance-before-create), 84 (reuse), 97 (Truth Boundary), 104/109 (foundup_id / onboarding)
+**Slice**: FOUNDUP_LAUNCH_REQUEST_PHASE1
+**Base**: `01158a113` (origin/main after #807 LAND)
+**Predecessors**: #806 (PFmall/Kanban/WRE launch flow), #807 (Kanban plugin contract)
+
+The PUBLIC front-door seam (#806 seam [1] PFmall -> WRE). A typed `LaunchRequest`
+carries ONLY user-authored proposal data; authentication/invite facts come from a
+TRUSTED server-side `LaunchRequestIntakeContext`, never the public payload (Addendum C).
+A validated request PRODUCES the EXISTING `FoundUpGenesisEnvelope` (WSP 64 -- no parallel
+intake envelope). Contract + mapping ONLY: no Kanban publish, no PFmall UI, no repo
+creation, no source_authority claim.
+
+- ADD `src/foundup_genesis/launch_request.py` -- `LaunchRequest` (proposal-only),
+  `LaunchRequestIntakeContext` (trusted; never payload-populated), `validate_launch_request(payload, context)`,
+  `to_genesis_envelope(payload, context)`. REUSES (imports, does not copy) the #807
+  `kanban_plugin_contract` helpers `redact_sensitive` / `_scan_authority` / `_normalize`.
+- The load-bearing fix (Addendum C): a public payload can NEVER self-authenticate. Any
+  auth/gate/role/admin/invite/approved/verified field in the PAYLOAD is rejected even when
+  the context is authenticated; the intake gate opens ONLY on `context.authenticated` or
+  `context.invite_token_verified`. Evasions (camelCase / separator / UPPER / NFKC-fullwidth /
+  nesting) collapse via `_normalize` and are caught.
+- Mapping invariants: `external_repo_requested=False` (FORCED), lifecycle in {IDEA, INCUBATING},
+  no `source_authority` (envelope has no such field; the builder owns it), `requested_by` from
+  the TRUSTED context (or `public_intake`) -- NEVER the payload.
+- SENTINEL hardening: an independent 4-lane adversarial fan-out (self-auth evasion / code-repo-authority /
+  trusted-handle+urls / redaction+static) found ONE real break -- a RAW inbound dict bypassed
+  `LaunchRequest.to_dict()` redaction, leaking a secret from `problem_statement` into the envelope
+  `description`/`tagline`. Closed by redacting at the SINK in `to_genesis_envelope` (name/tagline/
+  description now `redact_sensitive`-wrapped) + a raw-dict regression test. Re-verified live: secret -> `[REDACTED]`.
+- Tests: `tests/test_foundup_launch_request.py` (40 tests, allowlisted in conftest so it runs in CI).
+  Affected-package regression `40 + 29 genesis-validator = 69 passed`. No skip/xfail.
+- Boundary (AST-proved): imports no Hermes/OpenClaw/WRE-consumer runtime; no subprocess/network/file-write;
+  the ONLY non-stdlib import is the sanctioned #807 `kanban_plugin_contract` (+ sibling envelope/validator).
+- **Follow-up (named, BLOCKED until built): `FOUNDUP_LAUNCH_REQUEST_AUTH_CONTEXT_PROVIDER_PHASE2`** --
+  the real server-side authn/invite verifier that POPULATES `LaunchRequestIntakeContext`. Phase 1 defines
+  ONLY the trusted-context contract.
+- STOP at MERGE_READY for the external 0102 gate.
+
+**WSP_97 Truth Boundary checklist (25/25 YES):**
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|-------------------------------|--------|----------|
+| 1 | LAUNCHREQUEST_TYPE_DEFINED | YES | `LaunchRequest` dataclass, allowed proposal fields only |
+| 2 | PRODUCES_EXISTING_GENESIS_ENVELOPE_NOT_PARALLEL | YES | `to_genesis_envelope` returns `FoundUpGenesisEnvelope` (WSP 64) |
+| 3 | PUBLIC_PAYLOAD_CANNOT_SELF_AUTHENTICATE | YES | `_scan_auth_fields` rejects auth/role/admin/approved/verified keys; SENTINEL 16-attempt lane clean |
+| 4 | TRUSTED_INTAKE_CONTEXT_REQUIRED | YES | `validate_launch_request` rejects non-`LaunchRequestIntakeContext` |
+| 5 | AUTH_INVITE_FACTS_NOT_USER_FIELDS | YES | gate reads context fields only (launch_request.py:229) |
+| 6 | INTAKE_GATE_DEPENDS_ON_CONTEXT_ONLY | YES | `context(False,False)+payload{authenticated:true}` stays CLOSED (test + SENTINEL) |
+| 7 | PUBLIC_INPUT_CANNOT_BECOME_CODE | YES | code/shell payload fields rejected; `_scan_authority` on keys+values |
+| 8 | NO_REPO_REQUEST | YES | `external_repo_requested`/`create_repo` payload fields rejected |
+| 9 | EXTERNAL_REPO_REQUESTED_FORCED_FALSE | YES | envelope hard-sets False; SENTINEL found no coercion |
+| 10 | NO_SOURCE_AUTHORITY_CLAIM | YES | no `source_authority` key in produced envelope; payload claim rejected |
+| 11 | MERGE_GATE_TOKENS_REJECTED | YES | merge/gate-pass tokens rejected via `_scan_authority` |
+| 12 | AUTHORITY_EVASION_NORMALIZED_KEYS_AND_VALUES | YES | `_normalize` NFKC+camel+casefold+sep; SENTINEL evasion lane clean |
+| 13 | REFERENCE_URLS_REFS_ONLY | YES | `_check_url_ref` http(s)-only, no local/file/shell metachars |
+| 14 | REDACTION_APPLIED | YES | free-text redacted in `to_dict` AND at envelope sink (SENTINEL fix) |
+| 15 | REQUESTER_HANDLE_FROM_CONTEXT_NOT_PAYLOAD | YES | `requested_by=context.requester_handle or 'public_intake'`; test proves 'attacker' never used |
+| 16 | PRODUCED_ENVELOPE_PASSES_GENESIS_VALIDATOR | YES | `validate_genesis_envelope(env, strict_mode=False).is_valid` |
+| 17 | NO_KANBAN_PUBLISH | YES | no CardSpec/publish/worker symbols (test_no_kanban_publish) |
+| 18 | NO_HERMES_IMPORT | YES | AST import scan: no hermes/openclaw/wre runtime |
+| 19 | AST_NO_RUNTIME_NETWORK_SUBPROCESS_FILEWRITE | YES | AST: no os/sys/subprocess/socket/urllib/open/exec/write |
+| 20 | REUSES_807_AND_GENESIS_NOT_REINVENTED | YES | imports #807 helpers + genesis envelope/validator |
+| 21 | NEGATIVE_CONTROL_TESTS_PASS | YES | clean payload+authed context validates and maps |
+| 22 | NO_SKIP_XFAIL | YES | 0 skip/xfail in the new suite |
+| 23 | CITES_806_807 | YES | this entry + module docstring |
+| 24 | ASCII_CLEAN | YES | byte-check 0 non-ASCII in module + test |
+| 25 | FILE_SCOPE_EXACT | YES | launch_request.py, test, conftest allowlist, package __init__, 3 ModLogs |
+
+---
+
+## 2026-06-07 - AI_OVERSEER_AUTOFIX_SHELL_EXEC_REMEDIATION_PHASE1 (W6, security)
+
+**Author**: 0102 (Worker-Lane W6)
+**WSP**: 00, 50/87 (HoloIndex-first), 84 (reuse), 97 (Truth Boundary)
+**Predecessor**: #767 governance audit (merged 0b55b5cdd)
+
+Eliminated the auto-fix arbitrary-shell-exec surface. Replaced freeform
+`subprocess.run(fix_command, shell=True)` with a typed, statically-allowlisted,
+`shell=False` executor (`src/autofix_executor.py`). Security property: config
+SELECTS an allowlisted `FixAction` (REAUTHORIZE, ROTATION_RECOVERY) with
+enum-validated discrete params; it can never inject a command string into a shell.
+
+- Migrated 4 shell paths through the executor: `ai_overseer._apply_auto_fix` (live
+  OAuth reauth, was :2659) + `daemon_monitor_mixin` reauth/install (:329), rotation
+  (:457), and `check_rotation_stalls` Popen (:807).
+- `install_missing_library` is latent (no live config) -> REJECTED, not implemented.
+- Deleted dead/stale duplicates `auto_fix_engine.py` (0 prod imports, shell=True) and
+  `ai_overseer.py.backup`.
+- Migrated live skill config `youtube_daemon_monitor.json` (removed fix_command /
+  fix_commands; runtime now REJECTS command-shaped config fields).
+- Autonomy preserved: no 012 runtime-approval gate; boundary is code-enforced.
+- Re-verified line numbers on 0b55b5cdd; corrected #767 reachability (daemon_monitor_mixin
+  paths are latent/orphaned, not inherited by the live overseer - migrated anyway).
+
+63 security tests pass + independent adversarial config-injection pass (refuted=true).
+**W10 micro-repair:** `EvidencePacket` now redacts captured stdout/stderr/error via
+`redact_sensitive()` BEFORE storage (tokens, OAuth codes/URLs, secrets) - value-level, not
+just key-level. Audit: `docs/audits/security/AI_OVERSEER_AUTOFIX_SHELL_EXEC_REMEDIATION_PHASE1.md`.
+WSP_97 Truth Boundary: 22/22 YES.
 
 ---
 
@@ -2425,3 +3350,31 @@ from modules.platform_integration.youtube_auth.src.mcp_quota_server import MCPQu
 
 ### Outcome
 - 0102 now has a reusable diligence skill for evaluating external open-source tools such as `karpathy/autoresearch`.
+
+## 2026-10-25 - Preserve public intake reference metadata
+
+WSP15 13/P1 allocation in the FX delivery plan; WSP22/50/84/97.
+Added one `prior_art=list(...)` constructor keyword and an untrusted-reference
+comment in the existing mapper. No new parser/auth/store/control or runtime member.
+Nine test-first cases cover order, copies, defaults and transport representations.
+Retained clean RED 596P/5F and old-pin 600P/1F; independent review approved rebaseline.
+Final four-owner selection: 601P, no skips or instrumented network/process/write attempts.
+All existing bytes of this log, including its NUL byte, are preserved as a prefix.
+## 2026-11-05: Model-free startup inspection and current WSP allocation
+
+Main's preflight factory now selects the existing overseer's explicit
+`initialize_models=False` constructor mode. This skips eager refactoring model
+and AutoGate construction while retaining deterministic security/WSP monitors
+and default operational initialization. The WSP sentinel derives the next
+available number from current files and indexed reservations instead of a stale
+literal 99. Missing, malformed, duplicate and occupied declarations still fail.
+Independent index controls plus constructor/factory regressions reproduced eight
+failures before repair and pass 19 cases afterward in a credential-free child
+with real external effects denied. This does not establish live model quality
+or resolve absent runtime authority. WSP00/11/22/50/77/97.
+
+The proposal capability is checked before constructing the model orchestrator.
+Four additional controls reproduced three failures before repair; the combined
+selection passes 23 cases, with no skips, errors or denied effects. Exception
+diagnostics retain only the exception class. An absent proposal capability
+remains unavailable without starting models for an unsupported operation.

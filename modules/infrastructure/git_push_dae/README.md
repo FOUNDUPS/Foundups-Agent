@@ -1,5 +1,47 @@
 # Git Push DAE - Autonomous Development Publishing
 
+## Safe queue default — 2026-10-04
+
+The tracked post-commit runner now queues only unless `--dispatch` is explicit.
+`--enqueue-only` remains supported; the two flags are mutually exclusive.
+`--dispatch-direct` remains unsupported. `run_runner()` also defaults to queue-only;
+programmatic dispatch requires `enqueue_only=False`.
+
+This intentionally makes the observed shared hook's default, `enqueue`,
+`background`, `sync` and fallback invocations queue-only: those modes supply no
+runner mode flag. The shared hook and import paths are unchanged. Queue success
+means an event was appended, not delivered or admitted for replay. Real dispatch
+still requires its own authorized, qualified caller/runtime; this repair does
+not qualify the production router or enable external posting.
+
+Twelve bounded entrypoint/API cases and the original three unit cases pass
+locally (15 total). See the current [test contract](tests/README.md).
+The Sept28 section below records the previous source behavior; PR1945 is merged
+in this slice's main baseline. Its qualification did not repair the default.
+
+## Post-commit runner qualification — 2026-09-28
+
+The tracked `scripts/post_commit_social_runner.py` first writes a `git_push`
+event, then attempts routing unless `--enqueue-only` is supplied. The observed
+shared hook labels its default mode `enqueue` but supplies no such flag; its
+`direct` mode supplies unsupported `--dispatch-direct`. This is a source-bound
+observation, not proof of the environment that produced earlier hook logs.
+
+Preserved task-local logs contain `No module named 'modules'`. Fixing the import
+path alone could activate real router imports and posting. The router's current
+transitive imports can also install a missing dependency, so this qualification
+keeps the production runner and shared hooks unchanged.
+
+Six controls in the [existing test owner](tests/test_post_commit_social_runner.py)
+exercise CLI parsing, real disposable Git context, event/result spools and the
+unchanged getter with an inert router. Candidate6/6 hosted results are independently
+verified; exact final-head/main checks remain pending. The fixture
+uses isolated Python and does not reproduce the ambient Windows hook or qualify
+real router dependencies/delivery. See [fixed acceptance](tests/README.md#runner-entrypoint-evidence--2026-09-28).
+
+Owned commits continue to use `FOUNDUPS_SKIP_POST_COMMIT=1`. Do not replay the
+preserved spool, repair production imports or enable a live hook from these tests.
+
 ## Module Purpose
 Fully autonomous git push daemon that monitors code changes and publishes development progress to social media platforms. Implements WSP 91 DAEMON observability standards for complete traceability of autonomous development decisions.
 

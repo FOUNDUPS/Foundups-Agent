@@ -1,0 +1,6 @@
+{
+  "request_id": "jp-call-001",
+  "contact_id": "test_phone",
+  "sender_name_ja": "テスト担当",
+  "message_ja": "これは電話機能の動作確認です。この伝言が最後まで聞こえたことをご確認ください。"
+}

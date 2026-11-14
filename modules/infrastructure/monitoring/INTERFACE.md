@@ -67,6 +67,16 @@ python -u modules/infrastructure/monitoring/src/wsp_00_zen_state_tracker.py [opt
 - Primary: `modules/infrastructure/wsp_core/memory/wsp_00_zen_state.json`
 - Fallback (if primary path is not writable): `~/.foundups-agent/memory/wsp_00_zen_state.json`
 
+### Awakening-State Candidates (WSP_00 State Bridge Contract)
+The tracker refreshes compliance from `functional_0102_awakening_v2.py` output by
+reading BOTH candidates and applying the freshest valid `state == "0102"` record
+within an 8h TTL:
+- Preferred: `WSP_agentic/agentic_journals/awakening/.runtime/0102_state_v2.json` (script default, untracked)
+- Fallback: `WSP_agentic/agentic_journals/awakening/0102_state_v2.json` (script opt-in via `WSP_AWAKENING_WRITE_TRACKED=1`)
+The chosen path is recorded in `awakening_result.state_file`. When `--awaken`
+falls back to mathematical formulas, the ImportError reasons for the detector
+tiers are recorded in `awakening_result.fallback_reasons`.
+
 ## Contract Notes
 - Gate semantics are deterministic for orchestrator integration.
 - JSON output is designed for DAEmon/automation consumption.

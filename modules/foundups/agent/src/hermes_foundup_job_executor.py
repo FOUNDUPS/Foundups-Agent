@@ -34,7 +34,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 from modules.communication.moltbot_bridge.src.foundup_job_contract import (
     FoundUpJob,
@@ -42,6 +42,26 @@ from modules.communication.moltbot_bridge.src.foundup_job_contract import (
     PolicyFlags,
     StatusReasonCode,
     is_terminal_status,
+)
+
+# Module-path resolution moved to a shared module in
+# BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1 (Addendum-C
+# behavior-preserving extraction). This back-compat shim re-exports every
+# name the prior in-file resolver exposed so existing imports keep working
+# with ZERO test edits per Addendum C #3. The same objects are bound (no
+# wrapping, no shadowing); identity is preserved across the import boundary.
+from modules.foundups.agent.src.module_path_resolution import (  # noqa: F401
+    ALL_FAIL_TOKENS,
+    DEFAULT_REPO_ROOT,
+    FAIL_TOKEN_CROSS_FOUNDUP_MISMATCH,
+    FAIL_TOKEN_MANIFEST_MISMATCH,
+    FAIL_TOKEN_MANIFEST_MISSING,
+    FAIL_TOKEN_SYNTACTIC_REJECT,
+    ResolvedModulePath,
+    _find_manifest_for_foundup_id,
+    _MANIFEST_SEARCH_GLOBS,
+    _resolve_validated_module_path,
+    _stringify_ignored,
 )
 
 logger = logging.getLogger("hermes_foundup_job_executor")
@@ -55,6 +75,14 @@ SUPPORTED_ACTIONS = frozenset({
     "extract_foundup",
     "validate_foundup",
 })
+
+
+# NOTE: DEFAULT_REPO_ROOT, _MANIFEST_SEARCH_GLOBS, the four FAIL_TOKEN_*
+# constants, ALL_FAIL_TOKENS, and the ResolvedModulePath dataclass are now
+# defined in modules/foundups/agent/src/module_path_resolution.py and
+# re-exported by the import block above (Addendum-C behavior-preserving
+# extraction). External imports of these names from this executor module
+# continue to work unchanged.
 
 
 class HermesJobExecutionResult:
@@ -150,21 +178,40 @@ def execute_foundup_job(
             error=f"Unsupported action: {action}",
         )
 
-    # Pre-validation: Module path must be provided
-    module_path = _extract_module_path(job)
-    if not module_path:
+    # Pre-validation: Module path must resolve via validated manifest (#773).
+    # Replaces the prior _extract_module_path raw-trust behavior; closes the
+    # #774 carry-forward "validator bypass risk" before this executor's
+    # subprocess sink (HermesFoundUpBuilder.run_hermes_extraction).
+    effective_repo_root = repo_root or DEFAULT_REPO_ROOT
+    resolved = _resolve_validated_module_path(job, effective_repo_root)
+    if resolved.failed:
         logger.warning(
-            "[HERMES-EXEC] Missing module_path for job %s",
+            "[HERMES-EXEC] Module-path resolution failed for job %s: %s",
             job.job_id,
+            resolved.fail_human,
         )
+        # Observable-ignore: a rejected payload value is recorded in
+        # evidence even when the failure_token is not strictly about it
+        # (mirrors #777's source_authority.resolve convention).
+        evidence: List[str] = []
+        if resolved.ignored is not None:
+            evidence.append(f"rejected_payload_value:{resolved.ignored}")
+        if resolved.fail_token:
+            evidence.append(f"fail_token:{resolved.fail_token}")
         job.fail(
             reason_code=StatusReasonCode.FAIL_VALIDATION_ERROR,
-            reason_human="Missing module_path in payload or foundup_id",
+            reason_human=resolved.fail_human,
+            evidence_refs=evidence if evidence else None,
         )
         return HermesJobExecutionResult(
             job=job,
-            error="Missing module_path",
+            error=resolved.fail_human,
         )
+    # ``resolved.effective`` is guaranteed non-None when ``failed`` is False
+    # (see ResolvedModulePath success path). Bind a narrowed local for the
+    # downstream type signature on _dispatch_action.
+    assert resolved.effective is not None
+    module_path: str = resolved.effective
 
     # Transition to RUNNING
     if not job.start(
@@ -214,27 +261,16 @@ def execute_foundup_job(
     return HermesJobExecutionResult(job=job, hermes_result=hermes_result)
 
 
-def _extract_module_path(job: FoundUpJob) -> Optional[str]:
-    """
-    Extract module path from job payload or foundup_id.
+# NOTE: _stringify_ignored, _find_manifest_for_foundup_id, and
+# _resolve_validated_module_path are now defined in
+# modules/foundups/agent/src/module_path_resolution.py and re-exported by
+# the import block above (Addendum-C behavior-preserving extraction).
+# External attribute access via `hermes_foundup_job_executor.<name>`
+# continues to resolve to the SAME objects (identity preserved).
+#
+# (Function bodies removed in BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1.)
 
-    Priority:
-        1. payload.module_path
-        2. payload.source_module
-        3. foundup_id (if it looks like a path)
-    """
-    payload = job.payload or {}
 
-    # Direct module_path in payload
-    module_path = payload.get("module_path") or payload.get("source_module")
-    if module_path:
-        return str(module_path)
-
-    # Fallback to foundup_id if it looks like a path
-    if job.foundup_id and "/" in job.foundup_id:
-        return job.foundup_id
-
-    return None
 
 
 def _dispatch_action(

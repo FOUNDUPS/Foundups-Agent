@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
+
 from modules.foundups.agent_market.src.fam_daemon import FAMDaemon
 from modules.foundups.agent_market.src.models import TaskStatus
 from modules.foundups.simulator.adapters.fam_bridge import FAMBridge
@@ -39,9 +41,22 @@ def test_bridge_supports_full_task_lifecycle(tmp_path) -> None:
     assert ok, msg
     assert proof_id is not None
 
+    # A payload ID, including a legacy role-map entry, gains no host authority.
+    bridge.get_market().actor_roles["imposter"] = "verifier"
+    before = deepcopy(bridge.get_market().get_trace(task_id))
+    ok, msg, verification_id = bridge.verify_task(task_id, verifier_id="imposter")
+    assert not ok and verification_id is None
+    assert bridge.get_market().get_trace(task_id) == before
+
     ok, msg, verification_id = bridge.verify_task(task_id)
     assert ok, msg
     assert verification_id is not None
+
+    bridge.get_market().actor_roles["imposter"] = "treasury"
+    before = deepcopy(bridge.get_market().get_trace(task_id))
+    ok, msg, payout_id = bridge.trigger_payout(task_id, treasury_actor_id="imposter")
+    assert not ok and payout_id is None
+    assert bridge.get_market().get_trace(task_id) == before
 
     ok, msg, payout_id = bridge.trigger_payout(task_id)
     assert ok, msg

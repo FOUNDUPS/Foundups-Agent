@@ -1,4 +1,172 @@
+## Recorded-source intake — 2026-11-10
+
+`test_operator_recorded_stream_schedule.py` has 35 sealed offline cases using
+actual queue owners and disposable manifests. They cover explicit ended-source
+validation, no invented live IDs, exact-action-only intake, untouched announcements,
+legacy record/digest compatibility, shared live/recorded deduplication, immutable
+first-only submission, withheld remainder, expiry, corrupted bindings and unknown
+intake replay refusal. No browser, daemon, provider or model is executed. These
+tests do not establish native parent access or saved-schedule readback.
+Recorded-only refresh preserves unseen/accepted legacy live requests byte-for-byte;
+both live and recorded claim/reload paths reject the parent as a selected Short.
+
+## Frozen stream scheduling — 2026-11-10
+
+`test_operator_stream_schedule.py` uses real queue validation/locks with disposable
+files, actual launcher and DAE method AST, and synthetic browser/scheduler owners.
+It covers confirmed source freezing, closed scope, expiry, source deduplication,
+uncertain/corrupt state, immutable selection, STOP, no retry, title discovery,
+manual handoff, lock-free Save delegation and ownership through repeated cancellation.
+Actual supervisor cases retain the yielded browser across health checks while the
+peer keeps running or restarts normally. Launcher cases verify connection-specific
+CDP routing and early refusal of the legacy live scheduling bypass.
+No browser, provider, model or daemon runs; these are source contracts, not live
+selection or scheduling-readback proof.
+
+## Conversation stewardship controls — 2026-11-07
+
+`test_conversation_stewardship.py` exercises actual owner definitions with synthetic
+model/sender collaborators and a disposable SQLite database. It covers role parity,
+quiet reactions, eligible requests/reports, freshness/rate/history rejection, budgets,
+channel/title/session changes, existing command routing, native identity/session history,
+explicit semantic abstention, batch order and destination changes during sender waits.
+The capture suite additionally proves whole-batch persistence before generation and
+once-only capture with duplicate IDs and initial history. The semantic assessment suite
+proves context reaches assessment, writing and exact final review through the existing
+router. Fixture judgments are not live model-quality or delivery proof.
+
 # LiveChat Module Test Suite
+
+## 2026-11-07 — Emoji questions use the existing reviewed reply owner
+
+`test_emoji_question_routing.py` compiles the actual processor methods and uses
+the real ModelReplyRequest/reviewed-string definitions. Its 27 cases cover full
+question/context/author preservation, exact returned carrier identity, emoji
+positions/selectors/skin tones, permission and rate gates, unavailable/changed
+context, bare emoji, whole-message quizzes, slash priority and explicit code
+commands. Model execution is inert. The existing guarded routing and semantic
+assessment selections separately test bounded inference and provenance rejection.
+
+## 2026-11-07 — Capture before response processing
+
+`test_capture_before_processing.py` runs actual core/poller method definitions
+with the existing ChatMemoryManager and a disposable SQLite database. It covers
+USER/MOD/OWNER roles, filters, commands, duplicate message IDs, distinct IDs with
+repeated commands, router handling, processor/model failures and capture-only
+initial history. Initial text, Super Chat and membership text are saved without
+replaying their actions; ban/timeout routing remains unchanged. No provider,
+browser or model is invoked. This proves received-message capture, not complete
+stream backfill or durable exactly-once ingestion across failures/restarts.
+
+Positive processing and schema-command controls ensure capture does not suppress
+current actions. Historical and subsequent live moderation events have separate
+poller assertions. The two new capture/driver files select 37 cases. Together
+with the unchanged 101 lifecycle cases, the Windows selection passes 138 cases. CI runs
+the new selection on Windows and Ubuntu with pinned Selenium dependencies.
+
+## 2026-11-05 — Scoped quality STOP controls
+
+`test_comment_quality_stop.py` selects68 cases against actual owner definitions
+and disposable private STOP/manifest/history files. It covers closed and duplicate
+JSON fields, unsafe/unreadable/manual global STOP, explicit scopes, checkout-rooted
+paths, exclusive cooperating-writer races, a fresh module owner, write failure,
+exact clear refusal and unchanged uncertain delivery claims. Useful processor,
+chat-send and rotation positives remain alongside typed halt, exit78, no-retry,
+no-next-channel and settled-comment-task/live-handoff controls.
+
+Use the fixed credential-free guarded selection: no subprocess fixture is
+admitted for this new group; only the existing private SQLite owner is allowed.
+Older processor and lifecycle fixtures redirect STOP to per-test private paths
+and load the actual new helper definitions. They neither stub away the latch nor
+clear a real runtime STOP. The existing101 lifecycle selection retains its exact
+finite Python-fixture admission and every old assertion. None of these controls
+proves live delivery or OS compare-and-swap against arbitrary manual file writes.
+
+## 2026-11-05 — Bounded pipe and handoff controls
+
+The same two lifecycle files now select101 cases: the original81 plus20 new
+controls. Actual runner/stdlib stream cases cover oversized lines and forged
+suffixes, subsequent JSON, EOF, cap boundaries, UTF-8/CRLF and event-loop progress.
+Finite source-defined Python children cover real oversized-output completion,
+cancellation and live handoff while another channel survives. An inherited-pipe
+descendant control verifies ownership remains held until controlled EOF. Reader
+OSError/CancelledError controls verify fixed failures retain the owner; phase
+checks distinguish process exit from completed readers.
+
+Use the existing two-file CI selector with a fixed credential-free parent,
+private temp/profile paths, dotenv/plugin autoload disabled and canonical test
+admission. Real subprocess fixtures must be admitted only by exact private
+program/argv; launch them isolated with explicit clean environments. The private
+qualification guard reused the existing effect policy and rejected every other
+process/network/model/credential-file effect. Do not collect historical live
+integrations or interpret these fixtures as current chat delivery evidence.
+
+The 2026-11-01 queue-owner selector is `test_video_policy.py` plus existing
+`test_operator_command_queue.py` and `test_operator_command_lifecycle.py`.
+Use a fixed credential-free child environment with private temp/profile paths;
+disable dotenv and plugin autoload before imports. It exercises disposable queue
+files and fake public effects, with no actual runtime command, browser or model.
+See [the policy contract](../docs/VIDEO_POLICY_INTERFACE.md) for exact scope and
+readback/uncertainty limits. Full runtime behavior remains a separate live gate.
+
+The 2026-10-29 private-theme fallback and bounded MessageProcessor checks reuse
+`modules/communication/video_comments/tests/test_reply_semantic_assessment.py`
+(from this directory: `../../video_comments/tests/`). See that module's
+tests README and this TestModLog for the explicit offline selector and boundaries.
+
+## Bounded confirmed-handoff acceptance (PR841)
+
+Run the two explicitly scoped files; do not collect historical live integrations:
+
+```powershell
+$env:PYTHONDONTWRITEBYTECODE='1'
+$env:PYTHON_DOTENV_DISABLED='1'
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+python -B -m pytest modules/communication/livechat/tests/test_live_handoff_selective_cancellation.py modules/communication/livechat/tests/test_engagement_runner_lifecycle.py --import-mode=importlib -o addopts= -p no:cacheprovider -p pytest_asyncio.plugin -q
+```
+
+Frozen local source result: **81 passed** on CPython3.12.2, with26 inherited
+`datetime.utcnow` deprecation warnings. Six external single-change controls reject
+14 cases for missing confirmed guard, settlement, retained failed ownership,
+heartbeat cleanup, process reaping or thread completion. Fixtures are restored
+exactly; original failures are preserved in `refresh/841-qualification`.
+
+The original PR841 file owns actual DAE/coordinator/browser flows; its companion
+owns subprocess/thread/rotation lifetime checks and shared safe source loaders.
+The complete lifecycle helper runs with its own imports/globals. Heavy owner methods
+are compiled unchanged from source, while provider/browser/telemetry/DB boundaries
+are explicit substitutes. Disposable children run only generated local scripts;
+controlled thread workers terminate through test events. Host credentials/config are
+not inherited by those process fixtures. Tests include racing spawn acquisition,
+terminate/kill/wait/drain ordering, other-browser survival before polling, missing/
+stale file signals, dynamic identity, fallback/retry paths, unknown-mode waiting,
+repeated cancellation, failed-cleanup retention, concurrent sessions and #848 indexing.
+
+These tests are not a complete package import/startup or installed-host qualification.
+They do not exercise independent CommunityMonitor work, live APIs/accounts/models,
+browser-side rollback/global quiescence or native RSI. Linux CI selects the
+same two files in the existing YouTube batch. Original-source and mutation controls
+are retained externally; they are not additional passing runtime cases.
+
+## Bounded operator command acceptance (PR1759)
+
+Run only the offline owners below with plugin autoload and dotenv loading disabled:
+
+```powershell
+$env:PYTHONDONTWRITEBYTECODE='1'
+$env:PYTHON_DOTENV_DISABLED='1'
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+python -B -m pytest --import-mode=importlib -p pytest_asyncio.plugin -q modules/communication/livechat/tests/test_operator_command_queue.py modules/communication/livechat/tests/test_operator_command_lifecycle.py modules/communication/video_comments/tests/test_commenting_control_plane.py
+```
+
+CPython 3.12, pytest 9.0.3 and pytest-asyncio 1.3.0: 116 cases passed locally.
+CI selects these paths on Windows and Linux. The queue and comment reader run
+with disposable files and fake senders. Child processes exercise real OS locks
+and process death. Lifecycle and heartbeat methods are compiled from current
+source with effectful dependencies replaced: these tests do not establish
+full DAE imports/startup, YouTube delivery, sandbox confinement or native RSI.
+Do not collect the entire historical suite as an offline validation shortcut;
+some tests are manual/live integrations.
 
 # [U+1F300] Windsurf Protocol (WSP) Recursive Prompt
 
@@ -111,4 +279,4 @@ python -m pytest modules/livechat/tests/ --cov=modules.livechat.src --cov-report
 - Viewer tracking tests added to test the `_update_viewer_count` method, including successful updates and handling of various error conditions 
 - Logging tests consolidated in test_livechat_logging.py, including comprehensive tests for the `_log_to_user_file` method with tests for success cases, file errors, directory creation errors, and JSON serialization errors 
 - Auto-moderation tests created in test_livechat_auto_moderation.py, covering the AutoModerator class functionality, integration with LiveChatListener, banned phrase detection, timeout logic, API error handling, and cooldown management
-- All specialized test files have been fully consolidated, with their functionality moved to the appropriate modular test files 
+- All specialized test files have been fully consolidated, with their functionality moved to the appropriate modular test files

@@ -1,0 +1,4 @@
+# Public FoundUp Catalog Projector (Phase 1)
+# Standard library only (json, dataclasses, pathlib, argparse).
+# Test dependency:
+pytest

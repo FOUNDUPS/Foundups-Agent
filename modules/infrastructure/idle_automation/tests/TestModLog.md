@@ -1,9 +1,154 @@
 # Idle Automation Test Module Log
 
+## 2026-10-07 — Self-audit report consumption
+
+Six frozen regressions failed before repair; final connected140passed in3.92s.
+Independent source review found history overflow (reproduced1fail/2pass), now
+isolated by the seventh regression. Covers real empty/bounded/partial/failed
+scanners, malformed historical shapes and nonfinite count. CI includes consumer
+and three producer suites. No test invokes a live worker or external API.
+Separate live report persistence retained scan coverage and historical signatures.
+Evidence: outputs/rsi-permission-evidence-20261006/internal-audit-status-*.xml.
+
+
 **Module**: `modules/infrastructure/idle_automation`
 **Framework**: pytest
-**Last Updated**: 2026-03-27
+**Last Updated**: 2026-08-28
 **WSP Compliance**: WSP 22 (Module ModLog Protocol), WSP 34 (Test Validation)
+
+---
+
+## 2026-08-29: Pre-owner exact-HEAD incident contract
+
+- The shared incident allowlist now includes `REPO_HEAD_MISMATCH`; durable
+  normalization continues requiring a current observed authority HEAD for all
+  non-authority-root incident kinds.
+- Fresh incident/root/coordinator result: **75 passed** with no live Holo or
+  OpenClaw effect.
+- The later exact-main acceptance at `09e98fff` used the real OpenClaw/WRE
+  path, completed the canonical task, returned CURRENT/no-gap/no-reindex on
+  the fresh query, and retained all 33 immutable replica artifacts. That live
+  receipt is separate from this no-effect test result.
+
+## 2026-08-28: Linked-control dependency runtime RED/GREEN
+
+- RED proved the post-merge executor forwarded its clean linked control
+  checkout directly to the authority transaction, reproducing the missing
+  `.venv`/snapshot-probe failure seen in the exact-main OpenClaw run.
+- GREEN reuses `resolve_holoindex_runtime_root()` and proves a distinct
+  same-repository primary runtime reaches the authority transaction while the
+  dedicated authority root remains unchanged.
+- Fresh focused result: **38 passed** across
+  `test_holoindex_postmerge_coordinator.py` and
+  `test_holoindex_postmerge_authority_order.py` plus the bounded
+  `test_holoindex_postmerge_runtime_root.py`, using O:-local temp storage.
+- The canonical WRE registry was regenerated from the staged new test and is
+  current at **1,609 tracked Python tests / 268 quarantined**; its focused
+  registry contract is **28 passed**.
+
+## 2026-08-27: Exact-SHA activation order and AgentDB truth
+
+- Added split-lease ordering, initial/final lease contention, post-activation
+  supersession, exact generation/receipt mismatch, sealed public signatures,
+  and owner-cleanup regressions.
+- Added both composed FakeDB and real SQLite AgentDB failure paths. A failed
+  route activation cannot create a completion event or resolve the durable
+  request, and the task is explicitly failed.
+- Focused authority/executor/coordinator/database result: **62 passed** with no
+  live Holo, Git, route, replica, or network mutation.
+- The module macro audit found two startup-dispatch tests executing live
+  self-research and pattern training, causing repeatable 90--240 second test
+  timeouts. Replaced them with exact mocked executor-boundary proofs. The tests
+  still verify constructor arguments, self-research keyword arguments,
+  dispatch selection, and result projection without launching real work.
+
+## 2026-07-24: Daily OpenRouter Catalog Schedule POC
+
+**Files:** `test_schedule_evaluator.py`,
+`test_scheduled_routines_integration.py`, and AI Gateway provider-catalog tests.
+
+- Proves the parser accepts only the exact daily routine and rejects forged
+  cadence before adapter/provider work.
+- Proves default-off execution makes zero adapter/provider calls and trusted
+  runtime roots are code/config owned.
+- Proves exact full-claim mapping, replay/finalize ordering, and no legacy
+  `last_run` after failed finalization.
+- Rejects truthy string/integer success, wrong status/reason, malformed replay,
+  missing/forged IDs, extra/missing keys, and secret-bearing projections with a
+  fixed content-free failure.
+- Runs a real offline concatenation from `add_schedule` through canonical ID
+  `e324884d66c4`, durable claim, DAE dispatch, exact-token finalization, and
+  successful legacy recording.
+- Proves cancellation propagates without finalization or legacy recording,
+  leaving the claim leased for bounded expiry/replay recovery.
+- Provider tests remain offline and verify no selection, promotion, registry,
+  runtime-binding, direct-discovery, or catalog-bridge authority expansion.
+
+**Focused Result:** `174 passed, 1 skipped`
+
+**Combined AI Gateway + IdleAutomation + Runtime-Artifact-Safety Result:**
+`575 passed, 3 skipped`
+
+## 2026-07-24: Canonical HoloIndex Maintenance Dispatch Mock
+
+**File**: `test_startup_maintenance_gate.py`
+
+- Replaced the obsolete `SelfResearchRefresher.refresh_holo_index` mock with
+  the canonical RedDog maintenance-handshake boundary.
+- Uses the production `RedDogHoloIndexOperationalResult` type and a complete,
+  secret-free ready receipt.
+- Proves exact `repo_root`, `requested=True`, and `auto_maintenance=True`
+  arguments without running HoloIndex, runtime maintenance, or network work.
+- Retains exact executor, success, structured receipt, and serialized receipt
+  assertions.
+
+**Targeted Result**: `1 passed`
+
+**Canonical Dispatch Result**: `3 passed`
+
+**Full Idle Automation Result**: `126 passed`
+
+---
+
+## 2026-07-24: Legacy Failed-Row Migration Regression
+
+- Proves a persisted current-window `failed:` row remains due after restart and
+  receives a durable claim.
+- Proves missing, empty, case-variant, and unknown legacy results fail safe as
+  due.
+- Proves only explicit canonical `success:` suppresses the current window.
+- Proves failed `record_execution()` calls do not advance `last_run`.
+
+**Focused Result**: `91 passed`
+
+**Full Module Result**: `125 passed, 1 pre-existing failure`
+
+**Neighbor Runtime Safety**: `11 passed, 1 skipped`
+
+---
+
+## 2026-07-24: Durable Schedule Claim Lease Phase 1
+
+**Files**: `test_schedule_claim_state.py`, `test_schedule_evaluator.py`,
+`test_scheduled_routines_integration.py`
+
+- Proves two independent stores cannot double-claim one canonical window.
+- Proves active-lease blocking, one expiry recovery, and stale-token rejection.
+- Proves restart completion idempotency and 60/300/max-three failure retry.
+- Proves malformed, partial, duplicate-key, timestamp-order, and token-collision
+  state fails closed without mutation.
+- Proves writer and wrong-success replacer failures preserve exact prior bytes
+  and leave no owned temp files.
+- Proves outside-repository confinement and payload path non-influence.
+- Proves disabled/unknown/out-of-window schedules create no claim.
+- Proves DAE performs zero dispatch on claim uncertainty and treats finalize
+  failure as completion unknown without legacy `last_run`.
+
+**Focused Result**: `83 passed`
+
+**Full Module Result**: `117 passed, 1 pre-existing failure`
+
+**Neighbor Runtime Safety**: `11 passed, 1 skipped`
 
 ---
 

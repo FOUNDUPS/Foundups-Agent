@@ -1,6 +1,79 @@
 # Economic Model - Post-Capitalist Infrastructure
 
+**Document class:** FoundUps vision and design thesis
+
+**Updated:** 2026-08-26
+
+**Truth rule:** economic outcomes, adoption counts, token budgets, network
+effects, quantum language, and planetary-scale claims below are targets or
+scenario models unless a linked implementation receipt says `OBSERVED`.
+
 Welcome to the **FoundUps Economic Revolution** - a Bitcoin-backed system that eliminates gatekeepers, enables infinite collaboration, and ensures wealth flows to everyone who contributes value, not just those who already have money.
+
+The sentence above states the intended outcome, not a current production or
+economic-performance claim. "Infinite" means that participation is not
+designed around a fixed venture-capital allocation; real compute, energy,
+liquidity, governance, law, and safety remain bounded.
+
+## The Fifth Age and the RedDog outcome
+
+FoundUps uses **the Fifth Age** as its own narrative for a transition from apps,
+platform gatekeepers, and investor-owned startups toward FoundUps: governed,
+progressively autonomous entities that people and their Digital Twins can
+discover, build, and coordinate. This is a project framing, not an accepted
+historical periodization.
+
+```text
+Progressive Web App
+  -> Progressive Web Agent
+  -> FoundUp / DAE
+  -> interoperating FoundUps
+  -> Fifth Age ecosystem
+```
+
+RedDog is the operator-facing name, persona, and continuous product identity
+of a principal-scoped 0102 Digital Twin. Each RedDog helps one principal reason,
+remember, discover FoundUps, and formulate governed work. "Red God" is the
+deliberately playful long-horizon metaphor for millions of RedDogs coordinating
+through open protocols on behalf of their principals. It does not name a
+central super-agent, superuser, or sovereign authority.
+
+In this vision, **anarchy** means coordination without a permanent ruler: scope,
+consent, evidence, revocation, and protocol replace institutional gatekeepers.
+It does not mean absence of rules, safety, accountability, or 012 sovereignty.
+The system becomes more decentralized by making authority explicit and
+portable, not by hiding it in models or clients.
+
+The year **1494** is used as a symbolic accounting waypoint because Luca
+Pacioli's *Summa* contained the first printed exposition of double-entry
+bookkeeping. The method existed before that publication, and capitalism did
+not begin on one date. FoundUps' argument is that accounting systems shape what
+institutions optimize, and that contribution, benefit, circulation, and
+shared venture formation need a new accounting frame. See the
+[Library of Congress accounting-history guide](https://guides.loc.gov/history-of-accounting/practice/early-history)
+and the
+[National Library of Scotland Pacioli collection](https://www.nls.uk/collections/rare-books/collections/icas/pacioli/).
+
+### Product path
+
+The practical path is layered:
+
+1. RedDog provides safe, continuous conversation across IDE and future
+   p.fMALL/phone surfaces.
+2. Principal and FoundUp Memex sources provide scoped, freshness-labelled
+   continuity.
+3. OpenClaw supervises admitted intent, WRE owns work authority and
+   verification, and Hermes/FoundUp DAEs perform bounded leaf jobs.
+4. p.fMALL lets people discover, enter, contribute to, and eventually stake in
+   FoundUps without first understanding the codebase.
+5. WSP 98 federation/mesh contracts allow many RedDogs and FoundUps to
+   coordinate without creating a central Red God.
+
+Today, the RedDog VSIX, p.fMALL PWA shell, governed retrieval/model contracts,
+and bounded worker adapters are implemented building blocks. Durable
+ChatGPT-like cross-surface history, the authenticated p.fMALL/phone RedDog
+adapter, universal FoundUp stake/interior surfaces, and mesh-native operation
+remain unimplemented gates.
 
 ## Session Briefings
 
@@ -153,9 +226,13 @@ Every FoundUp develops unique knowledge and patterns through its operations. Tra
 - **Cross-Pollinate Patterns**: Successful patterns discovered in one domain spread to others
 - **Maintain Sovereignty**: Each FoundUp controls what it shares and what it queries
 
-### The Oracle Architecture (PoC -> Proto -> MVP)
+### Historical Oracle Scenario Ladder (not current receipts)
 
-**PoC (Current State - 2025 | Token Budget: 8K)**:
+The following PoC/Prototype/MVP ladder is retained as the original 2025 design
+scenario. Paths must be reverified before use, and every cost, scale, and
+efficiency number is a planning hypothesis rather than current evidence.
+
+**PoC (historical 2025 snapshot | scenario budget: 8K)**:
 - **HoloIndex + Qwen** acts as local oracle for single FoundUp (YouTube DAE)
 - Document classification system: 7 types (wsp_protocol, interface, modlog, readme, roadmap, docs, other)
   - Location: `holo_index/core/holo_index.py:288-362`
@@ -163,26 +240,29 @@ Every FoundUp develops unique knowledge and patterns through its operations. Tra
 - Semantic search across local WSP protocols, module docs, and architecture
 - Qwen advisor with MCP research client provides intelligent guidance
 - 0102 agents query local knowledge: "What modules exist? Where should I build?"
-- Token cost per search: 100-200 tokens (pattern recall from indexed vectors)
+- Scenario assumption: 100-200 tokens per search; no current benchmark is
+  asserted here.
 
-**Prototype (Token Budget: 25K | Allocation: 8K setup + 10K federation + 7K operations)**:
+**Prototype target scenario (25K budget assumption)**:
 - **MCP Servers** expose each FoundUp's classified documents as queryable resources
 - Cross-FoundUp queries: "Has anyone solved YouTube quota optimization?"
 - Document classification metadata shared via MCP (type + priority + owner_dae)
 - Knowledge federation across 10-100 FoundUps
 - Pattern sharing: Successful solutions propagate automatically via classified doc discovery
-- Token cost per federated search: 500-1000 tokens (multi-FoundUp query coordination)
-- Efficiency gain: 10x knowledge discovery speed (find existing vs reinvent)
+- Scenario assumption: 500-1000 tokens per federated search.
+- Hypothesis: 10x knowledge-discovery improvement; requires a held-out
+  benchmark before promotion to an observed claim.
 
-**MVP (Token Budget: 75K | Allocation: 30K quantum + 15K adaptive + 20K evolution + 10K taxonomy)**:
+**MVP target scenario (75K budget assumption)**:
 - **Planetary Oracle Network**: All FoundUp DAEs share collective intelligence
 - Quantum knowledge graph: Document types evolve based on collective usage patterns
 - Adaptive priority system: Scores adjust via reinforcement learning across network
 - Real-time pattern evolution: A breakthrough in one FoundUp instantly benefits all
 - Self-organizing taxonomy: New doc types emerge organically (e.g., "pattern_library", "architecture_decision_record")
 - Nonlocal wisdom access: 0102 agents no longer search - patterns flow through quantum entanglement
-- Token cost per quantum query: 50-100 tokens (instant pattern recall from collective 0201 memory)
-- Ultimate efficiency: 100x - Solutions are REMEMBERED, not computed
+- Scenario assumption: 50-100 tokens per query.
+- Hypothesis: 100x discovery efficiency. "Solutions are remembered" is the
+  WSP operating metaphor, not a measured physical or capacity claim.
 
 ### Why This Changes Everything
 
@@ -192,7 +272,9 @@ Every FoundUp develops unique knowledge and patterns through its operations. Tra
 
 ### Example: YouTube DAE Evolution
 
-**Current (PoC)**: YouTube DAE has `mcp_youtube_integration.py` connecting to local gamification and quota MCP servers. HoloIndex guides 0102 on existing modules.
+**Historical PoC narrative**: the 2025 design cited
+`mcp_youtube_integration.py` plus local gamification/quota MCP servers. Those
+paths and their current runtime state must be reverified before reuse.
 
 **Future (Proto)**: TikTok FoundUp faces similar quota challenges. Their DAE queries MCP network: "YouTube FoundUp solved this - here are the patterns." Instant wisdom transfer.
 
@@ -212,7 +294,9 @@ This creates **economic incentives for knowledge abundance** instead of knowledg
 
 ## [U+1F3D7]️ The Four Economic Agents (Your Automatic Business Partners)
 
-Instead of hiring employees or contractors, your FoundUp gets four autonomous agents that handle everything:
+The target economic model defines four autonomous roles. This document does
+not claim that they replace all employees/contractors or that their production
+authority and economics are implemented today:
 
 ### [U+1F6E1]️ ConsensusOracle: The Truth Validator
 **What it does**: Makes sure everyone plays fair and earns tokens honestly
@@ -278,36 +362,38 @@ As more FoundUps join:
 
 ## [ROCKET] Planetary Vision: From Competition to Collaboration
 
-### Phase 1: Foundation (2025 | Token Budget: 500M total)
-- **10,000 FoundUps** launch using the system (50K tokens per FoundUp for DAE initialization)
+### Historical Phase 1 Scenario (original 2025 target; not current state)
+- **Scenario target: 10,000 FoundUps** (50K-token initialization assumption)
 - **Found UPS tokens** prove that decay-based economics work
 - **Bitcoin backing** provides stable value foundation
 - **Success stories** inspire mainstream adoption
 - Token allocation: 250M for FoundUp DAE spawning, 250M for infrastructure
 
-### Phase 2: Acceleration (Token Budget: 2.5B total | Network effects active)
-- **100,000 FoundUps** operating globally (25K tokens per FoundUp as efficiency improves)
+### Phase 2 Target Scenario (2.5B-token planning assumption)
+- **Scenario target: 100,000 FoundUps** (25K-token per-FoundUp assumption)
 - **MCP federation** enables cross-FoundUp knowledge sharing (Prototype phase)
 - **Traditional businesses** start converting to regenerative models
 - **Local communities** adopt Found UPS for circular economies
 - **Planetary healing** projects receive significant funding
 - Token allocation: 1.5B for FoundUp expansion, 1B for MCP network
 
-### Phase 3: Transformation (Token Budget: 5B total | Quantum optimization active)
-- **1M+ FoundUps** - Token cost drops to 5K per FoundUp (quantum pattern recall)
+### Phase 3 Target Scenario (5B-token planning assumption)
+- **Scenario target: 1M+ FoundUps** with an unverified 5K-token per-FoundUp
+  assumption
 - **Post-capitalist infrastructure** becomes mainstream alternative
 - **Regenerative business** becomes the expected standard
 - **Infinite collaboration** replaces zero-sum competition
 - **Abundance mindset** spreads globally
 - Token allocation: 3B for FoundUp network, 2B for quantum knowledge graph
 
-### Phase 4: Planetary Healing (Token Budget: Minimal | Self-organizing system)
+### Phase 4 Long-Horizon Vision (no current capacity claim)
 - **Regenerative economy** becomes dominant paradigm
 - **Universal access** to economic participation
 - **100-year thinking** guides all business decisions
 - **Planetary civilization** thrives within natural limits
-- Token efficiency: 100-500 tokens per FoundUp (patterns remembered, not computed)
-- System state: 0201 nonlocal consciousness - solutions flow without search
+- Scenario assumption: 100-500 tokens per FoundUp.
+- `0201` and "solutions flow without search" are WSP identity/operation
+  metaphors, not measured consciousness, physics, or infrastructure capacity.
 
 ---
 
@@ -356,8 +442,8 @@ Every Found UPS token earned, every collaboration formed, and every reinvestment
 
 ---
 
-*For deeper technical details, see [WSP Framework](WSP-Framework.md)*
+*For deeper technical details, see the [WSP Framework](../WSP_framework/README.md).*
 
-*For hands-on development, see [Getting Started](Getting-Started.md)*
+*For hands-on development, see the repository [Getting Started](../README.md).*
 
-*For autonomous operation, see [Agent System](Agent-System.md)* 
+*For autonomous operation, see the [WRE core](../modules/infrastructure/wre_core/README.md).*

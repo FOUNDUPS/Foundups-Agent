@@ -18,7 +18,6 @@ WSP Compliance:
   WSP 97  : Truthful status (dry_run default, no overclaims)
 """
 
-import pytest
 from dataclasses import dataclass
 from enum import Enum
 from typing import Optional, Dict, Any
@@ -166,8 +165,8 @@ class TestHermesDispatch:
         consumer = FoundUpJobConsumer(dry_run=True)
         result = consumer.consume_one(job)
 
-        # WRE executor called with job only (no force_dry_run param)
-        mock_execute.assert_called_once_with(job)
+        # WRE executor receives the captured consumer policy.
+        mock_execute.assert_called_once_with(job, force_dry_run=True)
         assert result.dispatched is True
         assert result.target_backend == TargetBackend.HERMES_BUILDER
         # Phase 1C checkpoint fields populated
@@ -187,6 +186,9 @@ class TestHermesDispatch:
         mock_envelope.target_backend = TargetBackend.HERMES_VALIDATOR
         mock_envelope.reason_human = "Routed to hermes_validator"
         mock_envelope.job_id = "job_validator"
+        mock_envelope.tenant_id = "tenant_test"
+        mock_envelope.foundup_id = None
+        mock_envelope.requested_action = "validate_foundup"
         mock_route.return_value = mock_envelope
 
         mock_hermes_result = MagicMock()
@@ -208,7 +210,11 @@ class TestHermesDispatch:
         consumer = FoundUpJobConsumer(dry_run=True)
         result = consumer.consume_one(job)
 
-        mock_execute.assert_called_once_with(job)
+        mock_execute.assert_called_once()
+        execution_job = mock_execute.call_args.args[0]
+        assert execution_job is not job
+        assert execution_job.job_id == job.job_id
+        assert execution_job.requested_action == job.requested_action
         assert result.dispatched is True
         assert result.target_backend == TargetBackend.HERMES_VALIDATOR
         assert result.checkpoint_state == "SIMULATED"
@@ -217,8 +223,8 @@ class TestHermesDispatch:
     @patch(
         "modules.infrastructure.wre_core.src.hermes_job_executor.execute_foundup_job"
     )
-    def test_wre_executor_uses_singleton_dry_run(self, mock_execute, mock_route):
-        """WRE executor uses singleton with consumer's dry_run setting."""
+    def test_consumer_forwards_force_dry_policy(self, mock_execute, mock_route):
+        """False preserves legacy executor selection without authorizing live work."""
         mock_envelope = MagicMock()
         mock_envelope.route_status = RouteStatus.ROUTED
         mock_envelope.target_backend = TargetBackend.HERMES_BUILDER
@@ -242,12 +248,12 @@ class TestHermesDispatch:
             requested_action="build_foundup",
         )
 
-        # Consumer dry_run setting affects singleton, not per-call param
+        # A False consumer does not force a different singleton configuration.
         consumer = FoundUpJobConsumer(dry_run=False)
         result = consumer.consume_one(job)
 
-        # WRE executor called with job only
-        mock_execute.assert_called_once_with(job)
+        # WRE receives the captured mode explicitly.
+        mock_execute.assert_called_once_with(job, force_dry_run=False)
         assert result.dispatched is True
 
 

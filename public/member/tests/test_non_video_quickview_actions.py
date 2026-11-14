@@ -11,8 +11,21 @@ WSP Compliance:
 
 import json
 import re
+import shutil
+import subprocess
+from pathlib import Path
 
 import pytest
+
+
+@pytest.mark.skipif(not shutil.which("node"), reason="node not on PATH")
+def test_property_listing_runtime():
+    """Run shared tile/plane behavior, beyond source-string assertions."""
+    script = Path(__file__).with_name("mall_property_listing_vm.mjs")
+    result = subprocess.run(
+        ["node", str(script)], capture_output=True, text=True, timeout=30,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
 
 # ── Paths ──
 MALL_PLANES_JS = "public/member/js/mall-planes.js"

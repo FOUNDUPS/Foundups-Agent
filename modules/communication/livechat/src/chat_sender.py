@@ -69,7 +69,12 @@ class ChatSender:
         Returns:
             True if message was sent successfully, False otherwise
         """
-        if stop_active():
+        reviewed_text = getattr(message_text, 'reviewed_text', None)
+        theme_snapshot = getattr(message_text, 'theme_snapshot', None)
+        destination_snapshot = getattr(message_text, 'destination_snapshot', None)
+        if response_type == 'conversation' and (reviewed_text is None or destination_snapshot is None):
+            return False
+        if stop_active('livechat'):
             run_id = os.getenv("YT_AUTOMATION_RUN_ID", "").strip()
             logger.warning(
                 f"[AUTOMATION-AUDIT] run_id={run_id or 'unset'} livechat_send=disabled (stop_file={stop_file_path()})"
@@ -169,6 +174,17 @@ class ChatSender:
                     f"[EMOJI] After conversion: {message_text.encode('ascii', 'backslashreplace').decode('ascii')}"
                 )
 
+                # Recheck after every await/delay and before the network effect.
+                if destination_snapshot is not None and destination_snapshot != (self.live_chat_id, self.bot_channel_id):
+                    logger.info('[CONVERSATION] Send suppressed: destination changed')
+                    return False
+                if reviewed_text is not None:
+                    from modules.communication.livechat.src.operator_command_queue import load_active_theme
+                    if str(message_text) != reviewed_text or load_active_theme('livechat') != theme_snapshot:
+                        return False
+
+                if stop_active('livechat'):
+                    return False
                 # Prepare message data
                 message_data = {
                     "snippet": {

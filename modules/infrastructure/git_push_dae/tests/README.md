@@ -1,5 +1,83 @@
 # GitPushDAE Test Suite
 
+## Queue-default acceptance — 2026-10-04
+
+Current matrix in the existing `TestEntrypointEvidence` supersedes the historical
+six-case matrix below. CLI controls use real disposable Git and isolated Python;
+router positives use an inert namespace. API controls use temporary spools,
+a fixed event builder and inert router. No production router, hook or account runs.
+
+| Cases | Required outcome |
+|---|---|
+| No flag and enqueue-only, each missing/inert router (4) | Exit0, one event, no result or router import/handoff |
+| Explicit dispatch, missing router (1) | Exit1, event and correlated import error |
+| Explicit dispatch, inert success/failure (2) | Exit0/1, event/result and one router handoff |
+| Conflicting modes in both orders, unsupported direct flag (3) | Exit2, no Git/event/spool/router work |
+| API omitted mode / explicit False (2) | Queue-only / existing inert dispatch respectively |
+
+Frozen before implementation: original source 4 pass/8 fail; candidate 12 pass.
+The original three pytest function ASTs remain unchanged and all pass, giving
+15 cases in the full file. Named CI command below selects 12 (overlapping coverage,
+not12 additional cases). False `delivered` fixtures are never delivery receipts.
+
+```sh
+python -I -B modules/infrastructure/git_push_dae/tests/test_post_commit_social_runner.py TestEntrypointEvidence -v
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -B -m pytest -q -c /dev/null --noconftest -o pythonpath=. -p no:cacheprovider modules/infrastructure/git_push_dae/tests/test_post_commit_social_runner.py
+```
+
+On Windows use `-c NUL`. Existing CI already selects the named class; no new job.
+The Sept28 original-default observations remain historical. PR1945 is in current
+main ancestry; its old pending publication labels are superseded by that fact,
+not by a claim of current delivery or broad runtime qualification.
+
+## Runner entrypoint evidence — 2026-09-28
+
+Existing owner: `test_post_commit_social_runner.py`. The three original pytest
+functions remain source-identical. The named hosted selection adds six unittest
+controls; it does not count the original three as freshly executed.
+
+```sh
+python -I -B modules/infrastructure/git_push_dae/tests/test_post_commit_social_runner.py TestEntrypointEvidence -v
+```
+
+| Fixed case | Exit | Event/result rows | Router import / constructor / handoff |
+|---|---:|---:|---:|
+| Missing root, default | 1 | 1 / 1 error | 1 / 0 / 0 |
+| Missing root, enqueue-only | 0 | 1 / 0 | 0 / 0 / 0 |
+| Inert router, default | 0 | 1 / 1 fake result | 1 / 1 / 1 |
+| Inert router, enqueue-only | 0 | 1 / 0 | 0 / 0 / 0 |
+| Inert router failure | 1 | 1 / 1 error | 1 / 1 / 1 |
+| Unsupported `--dispatch-direct` | 2 | 0 / 0 | 0 / 0 / 0 |
+
+Each case creates two commits in a disposable repository. Hooks/templates,
+global/system Git configuration, signing and credential helpers are disabled;
+All Git commands are local. Setup/check commands each have a 10s timeout. The
+unchanged production context collector has no per-command timeout; its nested
+Git reads are enclosed by the isolated child's 30s timeout. The child has
+controlled argv/environment/cwd and records its actual `sys.path`, argv and
+source hash.
+It first requires the application package to be absent. Missing-root controls
+then preserve the natural import failure; positive controls inject only inert
+modules with empty search paths before running the unchanged getter.
+
+The real parser/main/context collector and JSONL writer are exercised. Assertions
+check exact fixture metadata, dedupe/payload correlation, import/constructor/call
+counts, exit codes, expected-only spool files and temporary cleanup. Each passing
+case emits one `HOOK_EVIDENCE` record with the child-observed source hash,
+expected synthetic payload and exact JSONL text/digests for independent review. The fake
+result says `delivered=false`; exit0 is not verified social delivery.
+
+Candidate `5935983ef8` passed **6/6** fixed methods, zero failures/errors/skips, in 1.11s in [CI36424604965](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36424604965). All six original `HOOK_EVIDENCE` records, child-source/argv bindings and synthetic JSONL hashes/payloads were independently checked. All ten PR checks and CI/CodeQL passed.
+
+Final-head/main checks remain required. This is restricted hosted entrypoint evidence, not the
+ambient Windows shell hook, production router dependencies, durable crash recovery,
+spool replay, native work admission or retained learning. No real hook is run.
+
+Current inventory: `test_git_push_dae.py` covers daemon decisions/logging;
+`test_launch_runtime.py` covers runtime stop/lifecycle adapters; this file covers
+normalized events, spooling, mocked dispatch and the six bounded entrypoint cases.
+Do not launch the whole module suite as a substitute for the named effect review.
+
 ## Test Strategy
 
 The GitPushDAE test suite focuses on validating autonomous decision-making and WSP 91 observability compliance. Tests are designed to ensure the daemon makes correct push decisions based on agentic parameters without human intervention.

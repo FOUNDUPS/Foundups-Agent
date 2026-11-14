@@ -1,0 +1,2 @@
+# Offline inert query-runtime candidate evidence builder only; never launch MCP from this file.
+packaging==26.0

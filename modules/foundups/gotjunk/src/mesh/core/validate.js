@@ -16,9 +16,9 @@ console.log('🔍 Validating Mesh Core Module...');
 files.forEach(file => {
   const filePath = path.join(__dirname, file);
   if (fs.existsSync(filePath)) {
-    console.log(✁E exists);
+    console.log(`[OK] ${file} exists`);
   } else {
-    console.log(❁E missing);
+    console.log(`[MISSING] ${file} missing`);
   }
 });
 

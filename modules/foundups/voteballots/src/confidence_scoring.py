@@ -2,7 +2,7 @@
 Confidence Scoring for VoteBallots FoundUp.
 
 Applies WSP 97 confidence labels to structured funding summaries, separating:
-- VERIFIED_FACT: Direct FEC filing or source reference present
+- VERIFIED_FACT: Already verified claim with an approved direct source reference
 - HIGH_CONFIDENCE_INFERENCE: Multiple corroborating official/public sources
 - LOW_CONFIDENCE_INFERENCE: Single weak/non-official source
 - UNKNOWN: Missing source or trail termination
@@ -61,7 +61,7 @@ class ConfidenceLabel(Enum):
     """
 
     VERIFIED_FACT = "verified_fact"
-    """Direct FEC filing or source reference with high credibility confirms the claim."""
+    """Already verified claim with a direct filing or court-record reference."""
 
     HIGH_CONFIDENCE_INFERENCE = "high_confidence_inference"
     """Multiple corroborating official/public sources support the claim."""
@@ -308,12 +308,12 @@ def _confidence_level_to_label(level: ConfidenceLevel) -> ConfidenceLabel:
 
 
 def _determine_source_confidence_label(
-    source: FundingSourceSummary,
+    source: FundingSourceSummary | FundingSummaryResult,
 ) -> tuple[ConfidenceLabel, List[str]]:
-    """Determine confidence label for a funding source.
+    """Apply the same provenance policy to source items and aggregate summaries.
 
     Args:
-        source: Funding source summary.
+        source: Source item or summary supplying confidence and source_reference.
 
     Returns:
         Tuple of (confidence label, list of factors).
@@ -341,8 +341,8 @@ def _determine_source_confidence_label(
             factors.append(f"source_type:{source_type}")
             # Non-direct source type
             if source.confidence == ConfidenceLevel.VERIFIED_FACT:
-                # Verified in original, keep it
-                return ConfidenceLabel.VERIFIED_FACT, factors
+                factors.append("downgraded_from_verified_due_to_indirect_source")
+                return ConfidenceLabel.HIGH_CONFIDENCE_INFERENCE, factors
             elif source.confidence == ConfidenceLevel.HIGH_CONFIDENCE_INFERENCE:
                 return ConfidenceLabel.HIGH_CONFIDENCE_INFERENCE, factors
             else:
@@ -443,9 +443,9 @@ def _build_summary_claims(
 
     # Total raised claim
     if summary.total_raised > 0:
-        # Total raised confidence based on overall summary confidence
-        total_label = _confidence_level_to_label(summary.confidence)
-        total_factors = ["aggregate_from_fec_records"]
+        # Aggregate claims require the same source eligibility as source items.
+        total_label, total_factors = _determine_source_confidence_label(summary)
+        total_factors.insert(0, "aggregate_from_summary")
 
         if summary.source_reference is not None:
             total_factors.append("primary_source_reference_present")

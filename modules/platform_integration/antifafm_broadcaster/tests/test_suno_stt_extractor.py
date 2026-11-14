@@ -18,6 +18,8 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 import pytest
 
+REPO_ROOT = Path(__file__).resolve().parents[4]
+
 
 class TestSunoAudioDownloader:
     """Tests for SunoAudioDownloader CDN download functionality."""
@@ -178,13 +180,16 @@ class TestSunoSTTTranscriber:
 class TestSunoSTTLyricsExtractor:
     """Integration tests for full extraction pipeline."""
 
-    def test_extractor_initialization(self):
+    def test_extractor_initialization(self, tmp_path):
         """Test extractor initializes correctly."""
         from modules.platform_integration.antifafm_broadcaster.scripts.suno_stt_lyrics_extractor import (
             SunoSTTLyricsExtractor
         )
 
-        extractor = SunoSTTLyricsExtractor(model_size="tiny")
+        extractor = SunoSTTLyricsExtractor(
+            model_size="tiny",
+            db_path=tmp_path / "lyrics.db",
+        )
 
         assert extractor.downloader is not None
         assert extractor.transcriber is not None
@@ -198,13 +203,10 @@ class TestSunoSTTLyricsExtractor:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create extractor with temp DB
-            extractor = SunoSTTLyricsExtractor(model_size="tiny")
-
-            # Override deduplicator to use temp path
-            from modules.platform_integration.antifafm_broadcaster.scripts.suno_stt_lyrics_extractor import (
-                LyricsDeduplicator
+            extractor = SunoSTTLyricsExtractor(
+                model_size="tiny",
+                db_path=Path(tmpdir) / "test.db",
             )
-            extractor.deduplicator = LyricsDeduplicator(db_path=Path(tmpdir) / "test.db")
 
             # Initially not processed
             assert extractor.deduplicator.is_processed("song123") is False
@@ -221,7 +223,7 @@ class TestSunoSTTLyricsExtractor:
 class TestCLIIntegration:
     """Tests for CLI argument parsing and execution."""
 
-    def test_cli_help(self):
+    def test_cli_help(self, tmp_path):
         """Test CLI help runs without error."""
         import subprocess
 
@@ -229,14 +231,15 @@ class TestCLIIntegration:
             ["python", "modules/platform_integration/antifafm_broadcaster/scripts/suno_stt_lyrics_extractor.py", "--help"],
             capture_output=True,
             text=True,
-            cwd=str(Path(__file__).parent.parent.parent.parent.parent.parent)
+            cwd=str(REPO_ROOT),
+            env={**os.environ, "ANTIFAFM_LYRICS_DB": str(tmp_path / "lyrics.db")},
         )
 
         assert result.returncode == 0
         assert "playlist" in result.stdout.lower()
         assert "model" in result.stdout.lower()
 
-    def test_cli_stats(self):
+    def test_cli_stats(self, tmp_path):
         """Test CLI stats command."""
         import subprocess
 
@@ -244,7 +247,8 @@ class TestCLIIntegration:
             ["python", "modules/platform_integration/antifafm_broadcaster/scripts/suno_stt_lyrics_extractor.py", "--stats"],
             capture_output=True,
             text=True,
-            cwd=str(Path(__file__).parent.parent.parent.parent.parent.parent)
+            cwd=str(REPO_ROOT),
+            env={**os.environ, "ANTIFAFM_LYRICS_DB": str(tmp_path / "lyrics.db")},
         )
 
         assert result.returncode == 0
@@ -262,8 +266,8 @@ class TestLaunchIntegration:
 
         assert callable(run_suno_stt_extract)
 
-    def test_skill_json_valid(self):
-        """Test SKILLz JSON is valid."""
+    def test_direct_handler_action_config_json_valid(self):
+        """The launch-handler JSON is valid but is not executable WRE Skillz."""
         import json
 
         skill_path = Path(__file__).parent.parent / "skillz" / "suno_stt_extract.json"

@@ -16,7 +16,11 @@ Or programmatically:
 """
 
 import logging
+import json
+import math
 import os
+import re
+import stat
 from typing import Dict, List, Optional
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -163,19 +167,38 @@ class DashboardAlertMonitor:
 
         # Minimum sample threshold
         self.min_samples = int(os.getenv("WRE_DASHBOARD_MIN_SAMPLES", str(MIN_SAMPLES_DEFAULT)))
+        if self.min_samples < 1:
+            raise ValueError("WRE_DASHBOARD_MIN_SAMPLES must be positive")
         self.unknown_mode = os.getenv("WRE_DASHBOARD_UNKNOWN_MODE", "1") != "0"
 
     def _get_memory(self):
         """Lazy-load pattern memory."""
         if self.pattern_memory is None:
             from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory
-            self.pattern_memory = PatternMemory()
+            if not PatternMemory.default_db_path().exists():
+                raise FileNotFoundError("Pattern memory has not been created")
+            self.pattern_memory = PatternMemory(read_only=True)
         return self.pattern_memory
 
     def get_dashboard(self) -> Dict:
         """Get current dashboard metrics."""
-        memory = self._get_memory()
-        return memory.get_telemetry_dashboard()
+        owned = self.pattern_memory is None
+        try:
+            memory = self._get_memory()
+        except FileNotFoundError:
+            return {"total_executions": 0, "telemetry_scope": "database_lifetime",
+                    "storage_state": "not_created", "metric_evidence": {}}
+        try:
+            dashboard = memory.get_telemetry_dashboard()
+            count = dashboard.get("codeact_executions", 0)
+            dashboard["codeact_gate_trigger_rate"] = (
+                dashboard.get("codeact_gate_triggers", 0) / count if count > 0 else None
+            )
+            return dashboard
+        finally:
+            if owned:
+                memory.close()
+                self.pattern_memory = None
 
     def get_total_executions(self, dashboard: Optional[Dict] = None) -> int:
         """Get total skill executions from dashboard."""
@@ -184,8 +207,22 @@ class DashboardAlertMonitor:
         return int(dashboard.get("total_executions", 0))
 
     def has_sufficient_data(self, dashboard: Optional[Dict] = None) -> bool:
-        """Check if we have enough data to evaluate thresholds."""
-        return self.get_total_executions(dashboard) >= self.min_samples
+        """Every threshold needs its own measured denominator, never a global count."""
+        if dashboard is None:
+            dashboard = self.get_dashboard()
+        return not self.unknown_metrics(dashboard)
+
+    def unknown_metrics(self, dashboard: Dict, *, require_minimum: bool = True) -> List[str]:
+        evidence = dashboard.get("metric_evidence", {})
+        missing = []
+        for metric in dict.fromkeys(t.metric for t in self.thresholds):
+            value = dashboard.get(metric)
+            samples = evidence.get(metric, {}).get("samples")
+            minimum = self.min_samples if require_minimum and self.unknown_mode else 1
+            if (type(samples) is not int or samples < max(1, minimum)
+                    or type(value) not in (int, float) or not math.isfinite(value)):
+                missing.append(metric)
+        return missing
 
     def check_threshold(self, metric: str, value: float, threshold: AlertThreshold) -> Optional[Alert]:
         """Check if metric breaches threshold."""
@@ -207,7 +244,7 @@ class DashboardAlertMonitor:
             )
         return None
 
-    def check_all(self, skip_if_insufficient: bool = True) -> List[Alert]:
+    def check_all(self, skip_if_insufficient: bool = True, *, dashboard: Optional[Dict] = None) -> List[Alert]:
         """
         Check all metrics against thresholds.
 
@@ -219,28 +256,13 @@ class DashboardAlertMonitor:
             List of triggered alerts (empty if healthy or insufficient data)
         """
         alerts = []
-        dashboard = self.get_dashboard()
-
-        # Check for insufficient data - don't alert on zero-data startup
-        if skip_if_insufficient and self.unknown_mode:
-            if not self.has_sufficient_data(dashboard):
-                logger.debug(
-                    f"[WRE-DASHBOARD] Insufficient data: "
-                    f"{self.get_total_executions(dashboard)}/{self.min_samples} samples"
-                )
-                return []  # No alerts when data is insufficient
-
-        # Add computed metrics
-        codeact_total = dashboard.get("codeact_executions", 0)
-        codeact_triggers = dashboard.get("codeact_gate_triggers", 0)
-        if codeact_total > 0:
-            dashboard["codeact_gate_trigger_rate"] = codeact_triggers / codeact_total
-        else:
-            dashboard["codeact_gate_trigger_rate"] = 0.0
+        if dashboard is None:
+            dashboard = self.get_dashboard()
+        unknown = self.unknown_metrics(dashboard, require_minimum=skip_if_insufficient)
 
         # Check each threshold
         for threshold in self.thresholds:
-            if threshold.metric in dashboard:
+            if threshold.metric not in unknown:
                 value = dashboard[threshold.metric]
                 alert = self.check_threshold(threshold.metric, value, threshold)
                 if alert:
@@ -295,7 +317,9 @@ class DashboardAlertMonitor:
         Returns:
             True if all healthy, False if any alerts
         """
-        alerts = self.check_all()
+        dashboard = self.get_dashboard()
+        unknown = self.unknown_metrics(dashboard)
+        alerts = self.check_all(dashboard=dashboard)
 
         if verbose:
             print("=" * 60)
@@ -304,10 +328,13 @@ class DashboardAlertMonitor:
             print(f"Watch period: {self.watch_period_start.date()} to {self.watch_period_end.date()}")
             print(f"In watch period: {self.is_in_watch_period()}")
             print("=" * 60)
-            print(self.format_alerts(alerts))
+            if unknown:
+                print("[UNKNOWN] Insufficient per-metric evidence: " + ", ".join(unknown))
+            if alerts or not unknown:
+                print(self.format_alerts(alerts))
             print("=" * 60)
 
-        return len(alerts) == 0
+        return not alerts and not unknown
 
 
 def check_dashboard_health() -> Dict:
@@ -328,13 +355,16 @@ def check_dashboard_health() -> Dict:
     monitor = DashboardAlertMonitor()
     dashboard = monitor.get_dashboard()
     total_executions = monitor.get_total_executions(dashboard)
-    insufficient_data = not monitor.has_sufficient_data(dashboard)
+    unknown = monitor.unknown_metrics(dashboard)
+    insufficient_data = bool(unknown)
 
     # check_all will return empty list if insufficient data
-    alerts = monitor.check_all()
+    alerts = monitor.check_all(dashboard=dashboard)
 
     return {
-        "healthy": len(alerts) == 0,
+        "healthy": not alerts and not unknown,
+        "status": "FAIL" if alerts else ("UNKNOWN" if unknown else "PASS"),
+        "unknown_metrics": unknown,
         "alerts": [
             {
                 "metric": a.metric,
@@ -351,6 +381,218 @@ def check_dashboard_health() -> Dict:
         "min_samples": monitor.min_samples,
         "timestamp": datetime.now().isoformat()
     }
+
+
+def print_dashboard_evidence(health: Dict) -> None:
+    """Display counts and recorded age without exposing paths, queries or payloads."""
+    dashboard = health.get("dashboard", {})
+    print("[WRE-EVIDENCE] scope=database_lifetime; historical aggregates, not current-run proof")
+    unknown = set(health.get("unknown_metrics", []))
+    for metric, evidence in dashboard.get("metric_evidence", {}).items():
+        value = dashboard.get(metric)
+        measured = (f"{value:.3f}" if type(value) in (int, float) and math.isfinite(value) else "unknown")
+        label = f"UNKNOWN (measured={measured})" if metric in unknown or value is None else measured
+        print(f"  {metric}={label} samples={evidence.get('samples', 0)}")
+        # Date-only output keeps untrusted storage text out of terminal control sequences.
+        dates = [str(evidence.get(key) or "") for key in ("recorded_from", "recorded_to")]
+        dates = [value[:10] if re.fullmatch(r"\d{4}-\d{2}-\d{2}.*", value) else "unknown" for value in dates]
+        basis = evidence.get("time_basis")
+        if basis == "counter_last_updated":
+            print(f"    last_counter_updates={dates[0]}..{dates[1]} (not a sample window)")
+        elif basis == "retrieval_timestamp":
+            print(f"    recorded_samples={dates[0]}..{dates[1]} (not current-run proof)")
+        else:
+            print("    measurement_time=unknown")
+
+
+def _local_research_report_path(value):
+    """Check the selected/embedded path lexically, never resolve a network path."""
+    text = os.fspath(value)
+    if not isinstance(text, str) or text.startswith(("\\\\", "//", "\\/", "/\\")):
+        raise ValueError("local path required")
+    path = Path(text)
+    if (not path.is_absolute() or path.drive.startswith("\\\\")
+            or ".." in path.parts or path.name != "report.json"
+            or not re.fullmatch(r"invocation-[A-Za-z0-9_-]+", path.parent.name)):
+        raise ValueError("final invocation report required")
+    return path
+
+
+def _research_json_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("duplicate report field")
+        result[key] = value
+    return result
+
+
+def _research_report_numbers(report):
+    """Check only displayed accounting, not economic validity or authority."""
+    keys = ("attempts_requested", "attempts_started", "attempts_finished",
+            "iterations_run", "baseline_evaluations", "candidate_evaluations")
+    if any(type(report.get(k)) is not int or report[k] < 0 for k in keys):
+        raise ValueError("invalid counters")
+    attempts = report["attempts_requested"]
+    if any(report[k] != attempts for k in keys[1:4]) or report["baseline_evaluations"] != 1:
+        raise ValueError("inconsistent counters")
+    counts = dict.fromkeys(("accepted", "rejected", "crashed", "failed_validation", "no_proposal"), 0)
+    history = report.get("history")
+    if not isinstance(history, list) or len(history) != attempts:
+        raise ValueError("inconsistent history")
+    for iteration, row in enumerate(history, 1):
+        if (not isinstance(row, dict) or type(row.get("iteration")) is not int
+                or row["iteration"] != iteration or row.get("status") not in counts):
+            raise ValueError("invalid outcome")
+        counts[row["status"]] += 1
+    supplied = report.get("outcome_counts")
+    if (not isinstance(supplied, dict) or any(type(v) is not int for v in supplied.values())
+            or supplied != counts or report["candidate_evaluations"] != attempts - counts["no_proposal"]):
+        raise ValueError("inconsistent outcomes")
+    metrics = [report.get(k) for k in ("baseline", "optimized")]
+    if any(not isinstance(m, dict) for m in metrics):
+        raise ValueError("missing metrics")
+    baseline, best = (m.get("fitness") for m in metrics)
+    improvement = report.get("improvement")
+    if any(type(v) not in (int, float) or not math.isfinite(v) for v in (baseline, best, improvement)):
+        raise ValueError("invalid metrics")
+    if (improvement < 0 or improvement != best - baseline
+            or (counts["accepted"] > 0) != (improvement > 0)):
+        raise ValueError("inconsistent improvement")
+
+    rsi = report.get("rsi_measurements")
+    if not isinstance(rsi, dict):
+        raise ValueError("missing RSI measurements")
+    required_rsi = {
+        "schema": "wre_rsi_measurements.v1",
+        "verification_signal_class": "execution_feedback",
+        "research_direction_judgment": "human_not_substituted",
+        "verification_signal_independent": False,
+        "held_out_evaluation": False,
+        "production_rsi_eligible": False,
+        "baseline_fitness": baseline,
+        "best_fitness": best,
+        "absolute_gain": improvement,
+        "candidate_evaluations": report["candidate_evaluations"],
+        "accepted_candidates": counts["accepted"],
+        "rejected_candidates": counts["rejected"],
+        "invalid_candidates": counts["failed_validation"],
+        "crashed_candidates": counts["crashed"],
+        "no_proposal_attempts": counts["no_proposal"],
+    }
+    for key, expected in required_rsi.items():
+        value = rsi.get(key)
+        # JSON booleans compare equal to 0/1 in Python. Preserve the contract's
+        # integer counters and Boolean policy flags while allowing numeric fitness.
+        types = ((int, float) if key in ("baseline_fitness", "best_fitness", "absolute_gain")
+                 else (type(expected),))
+        if type(value) not in types or value != expected:
+            raise ValueError("inconsistent RSI measurements")
+    hierarchy = rsi.get("verification_hierarchy_weak_to_strong")
+    if hierarchy != ["intrinsic_signal", "learned_judge", "execution_feedback", "formal_verifier"]:
+        raise ValueError("invalid verification hierarchy")
+    relative_gain = rsi.get("relative_gain")
+    expected_relative = improvement / abs(baseline) if baseline != 0 else None
+    if ("relative_gain" not in rsi
+            or (expected_relative is not None and (
+                type(relative_gain) not in (int, float)
+                or not math.isfinite(relative_gain)
+                or not math.isfinite(expected_relative)))
+            or relative_gain != expected_relative):
+        raise ValueError("inconsistent relative gain")
+    if any(k not in rsi or rsi[k] is not None for k in (
+            "independently_verified", "retained_improvements", "resource_usage",
+            "activation_rollback_verified", "successive_generation_gain")):
+        raise ValueError("self-asserted RSI authority")
+
+    return {
+        "attempts": attempts,
+        "outcome_counts": counts,
+        "improvement": improvement,
+        "verification_signal_class": rsi["verification_signal_class"],
+        "rsi_absolute_gain": rsi["absolute_gain"],
+        "rsi_relative_gain": relative_gain,
+        "production_rsi_eligible": False,
+    }
+
+
+def read_research_report_summary(report_path, expected_baseline_sha256, *, max_age_seconds=86400):
+    """Read one explicitly selected local diagnostic; no execution/retention grant.
+
+    Caller supplies a trusted local regular-file location. Size is bounded; local
+    filesystem latency and hostile path replacement are not sandboxed. File mtime
+    is an unauthenticated age hint, never proof of current execution or benefit.
+    """
+    result = {"state": "unknown", "reason": "not_configured", "file_age_seconds": None,
+              "independently_verified": None, "retained_improvements": None, "resource_usage": None,
+              "verification_signal_class": None, "rsi_absolute_gain": None,
+              "rsi_relative_gain": None, "production_rsi_eligible": None}
+    if not report_path:
+        return result
+    try:
+        result["reason"] = "invalid_selection"
+        if (not isinstance(expected_baseline_sha256, str)
+                or not re.fullmatch(r"[0-9a-f]{64}", expected_baseline_sha256)
+                or type(max_age_seconds) not in (int, float)
+                or not math.isfinite(max_age_seconds) or max_age_seconds <= 0):
+            return result
+        path = _local_research_report_path(report_path)
+        result["reason"] = "unavailable"
+        if not stat.S_ISREG(path.lstat().st_mode):
+            return result
+        with path.open("rb") as stream:
+            info = os.fstat(stream.fileno())
+            if not stat.S_ISREG(info.st_mode):
+                return result
+            data = stream.read(1024 * 1024 + 1)
+        result["reason"] = "invalid_report"
+        if len(data) > 1024 * 1024:
+            return result
+        report = json.loads(data.decode("utf-8"), object_pairs_hook=_research_json_object)
+        if not isinstance(report, dict) or not _research_report_matches(report, path, expected_baseline_sha256):
+            return result
+        numbers = _research_report_numbers(report)
+        age = datetime.now().timestamp() - info.st_mtime
+        if not math.isfinite(age) or not 0 <= age <= max_age_seconds:
+            result["reason"] = "stale_file"
+            return result
+        result.update(numbers, state="unverified_diagnostic", reason="reported_completed", file_age_seconds=age)
+    except (OSError, ValueError, TypeError, OverflowError, RecursionError):
+        pass
+    return result
+
+
+def _research_report_matches(report, path, expected_digest):
+    required = {"schema": "wre_auto_research_report.v1", "status": "completed",
+                "stop_reason": "attempt_limit", "cleanup": "restored", "failure": None,
+                "cleanup_failure": None, "baseline_input_sha256": expected_digest,
+                "invocation_id": path.parent.name}
+    if any(k not in report or report[k] != v for k, v in required.items()) or report.get("dry_run") is not True:
+        return False
+    embedded = _local_research_report_path(report.get("report_path"))
+    return os.path.normcase(str(embedded)) == os.path.normcase(str(path))
+
+
+def print_research_report_summary():
+    """Advisory startup output; never let a diagnostic failure change health gates."""
+    try:
+        summary = read_research_report_summary(
+            os.getenv("WRE_RESEARCH_REPORT_PATH"), os.getenv("WRE_RESEARCH_BASELINE_SHA256"))
+        if summary["state"] == "unverified_diagnostic":
+            counts = summary["outcome_counts"]
+            detail = (f"attempts={summary['attempts']} accepted={counts['accepted']} "
+                      f"crashed={counts['crashed']} invalid={counts['failed_validation']} "
+                      f"signal={summary['verification_signal_class']} "
+                      f"reported_fitness_delta={summary['rsi_absolute_gain']:.6g} "
+                      f"production_rsi_eligible={str(summary['production_rsi_eligible']).lower()} "
+                      f"file_age_seconds={summary['file_age_seconds']:.0f}")
+        else:
+            detail = "reason=" + summary["reason"]
+        print(f"[WRE-RESEARCH] {summary['state']} {detail} "
+              "source=explicit_selection baseline=caller_expected "
+              "execution_freshness=unknown verified=unknown retained=unknown resource_usage=unknown")
+    except Exception:
+        print("[WRE-RESEARCH] unknown reason=diagnostic_unavailable")
 
 
 # CLI entry point

@@ -1,5 +1,11 @@
 # WRE Skills Promotion & Rollback Policy
 
+> **Historical policy v1.0 — superseded by WSP 95 v2.1.**
+> The lifecycle, commands, automated promotion, demotion, and rollback procedures
+> below are unimplemented design records, not active authority. Current WRE can
+> nominate proposals only; independent promotion, activation, authenticated
+> effect evaluation, and rollback executors remain fail-closed gaps.
+
 **Version**: 1.0
 **Date**: 2025-10-20
 **Authority**: 0102 (Human Supervision Required)

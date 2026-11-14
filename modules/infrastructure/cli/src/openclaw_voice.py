@@ -49,9 +49,11 @@ class WhisperSTTBackend:
         model_size: str = "base",
         use_vad_filter: Optional[bool] = None,
         vad_min_silence_ms: Optional[int] = None,
+        language: Optional[str] = None,
     ):
         self._stt = None
         self._model_size = model_size
+        self._language = language or os.getenv("OPENCLAW_VOICE_STT_LANGUAGE", "en")
         if use_vad_filter is None:
             use_vad_filter = _env_truthy("OPENCLAW_VOICE_STT_VAD_FILTER", "0")
         if vad_min_silence_ms is None:
@@ -73,6 +75,7 @@ class WhisperSTTBackend:
                 model_size=self._model_size,
                 use_vad_filter=self._use_vad_filter,
                 vad_min_silence_ms=self._vad_min_silence_ms,
+                language=self._language,
             )
             return True
         except Exception:
@@ -90,8 +93,9 @@ class GoogleSTTBackend:
 
     name = "Google Speech"
 
-    def __init__(self):
+    def __init__(self, language: Optional[str] = None):
         self._recognizer = None
+        self._language = language or os.getenv("OPENCLAW_VOICE_STT_LANGUAGE", "en")
 
     def available(self) -> bool:
         try:
@@ -109,7 +113,8 @@ class GoogleSTTBackend:
             # Convert float32 numpy to AudioData
             pcm = (audio * 32767).astype(np.int16).tobytes()
             audio_data = sr.AudioData(pcm, sample_rate, 2)
-            return self._recognizer.recognize_google(audio_data)
+            locale = {"en": "en-US", "ja": "ja-JP"}.get(self._language, self._language)
+            return self._recognizer.recognize_google(audio_data, language=locale)
         except Exception as exc:
             logger.debug("[STT-GOOGLE] Recognition failed: %s", exc)
             return None
@@ -219,8 +224,9 @@ class CohereTranscribeBackend:
 
     name = "Cohere Transcribe"
 
-    def __init__(self):
+    def __init__(self, language: Optional[str] = None):
         self._validated = None  # None = not checked, True/False = result
+        self._language = language or os.getenv("OPENCLAW_VOICE_STT_LANGUAGE", "en")
 
     def available(self) -> bool:
         """Check if Cohere Transcribe can be used (lightweight check)."""
@@ -264,18 +270,28 @@ class CohereTranscribeBackend:
                 audio,
                 sampling_rate=16000,
                 return_tensors="pt",
+                language=self._language,
             )
 
             device = next(model.parameters()).device
+            audio_chunk_index = inputs.pop("audio_chunk_index", None)
             inputs = {k: v.to(device) for k, v in inputs.items()}
 
             with torch.no_grad():
                 generated_ids = model.generate(**inputs, max_new_tokens=256)
 
-            transcription = processor.batch_decode(
-                generated_ids,
-                skip_special_tokens=True,
-            )[0].strip()
+            # Current Cohere processors expose decode; older local snapshots may
+            # only expose batch_decode. Chunk metadata belongs to the processor.
+            if callable(getattr(processor, "decode", None)):
+                decoded = processor.decode(
+                    generated_ids, skip_special_tokens=True,
+                    audio_chunk_index=audio_chunk_index, language=self._language,
+                )
+            else:
+                decoded = processor.batch_decode(generated_ids, skip_special_tokens=True)
+            if isinstance(decoded, (list, tuple)):
+                decoded = decoded[0] if decoded else ""
+            transcription = decoded.strip()
 
             return transcription if transcription else None
 
@@ -1650,6 +1666,4 @@ def run_voice_repl(
 
 if __name__ == "__main__":
     run_voice_repl()
-
-
 

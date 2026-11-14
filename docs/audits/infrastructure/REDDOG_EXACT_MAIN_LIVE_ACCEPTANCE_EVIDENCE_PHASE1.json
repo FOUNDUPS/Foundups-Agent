@@ -1,0 +1,104 @@
+{
+  "schema_version": "reddog_exact_main_live_acceptance_evidence.v1",
+  "base_commit": "cfd1e0051ea0e5624c7a7fcc8f7e2bc4e442aae9",
+  "evidence_class": "unsigned_local_runtime_observation",
+  "truth_boundary": "This receipt makes secret-free local runtime evidence reproducible. It is not a signature, portable deployment attestation, or proof for a later commit.",
+  "verification_method": {
+    "agentdb": "Open data/foundups.db with SQLite URI mode=ro; select the exact task/request/completion IDs; validate canonical contract digests; project exactly the listed secret-free fields; compute each record_digest over that object with record_digest omitted using sorted compact ensure_ascii JSON and SHA-256.",
+    "holoindex": "Run scripts/reddog_holoindex_owner_query_once.py through the repository .venv with the exclusive stable route configuration, then run the production descriptor verifier and compare all route bindings before and after query.",
+    "vsix": "Read the canonical O:-drive file directly; hash complete bytes; inspect the ZIP central directory; compare the 67 extension members with exact Git commit bytes after VSCE canonical README/LICENSE renames."
+  },
+  "holoindex": {
+    "workspace_repo_head_sha": "cfd1e0051ea0e5624c7a7fcc8f7e2bc4e442aae9",
+    "authority_repo_head_sha": "cfd1e0051ea0e5624c7a7fcc8f7e2bc4e442aae9",
+    "authority_root_digest": "sha256:704679bb2626fee765182e84d271940d1d2e6c5c367ea98d13f913dccc5bae45",
+    "freshness": "CURRENT",
+    "workspace_overlay_present": true,
+    "index_gap_detected": false,
+    "no_holoindex_reindex_performed": true,
+    "no_authority_worktree_mutation_performed": true,
+    "owner_attempts": 1,
+    "query_receipt_id": "sha256:259eded2cceb97936352ada4f231cf3116e5524d0f73859151ff262e3fdc23ff",
+    "generation_id": "sha256:60d062749983e9041460182aa7d509dbd3c1269bb85ff68eea957a3c906f3c66",
+    "freshness_receipt_digest": "sha256:74be7db6ba2179f8bbfdddbc255882e335c31db2cbf2044ebdbdbdd6d12ed0fa",
+    "route_revision": 3,
+    "route_file_digest": "sha256:938a8013b9daaa8cf7dd2843076f7a0586edbbf02e09859ee45634a3046ca01a",
+    "descriptor_digest": "sha256:1e043997eff2f96c0352b5b68f6ce7712ff7e464080df6c22ae46ba4d13c91b5",
+    "replica_id": "sha256:ab4fa4a01cf212cff5a2f379a59fc594294472585c4e2f2d0cea40b928aa31a4",
+    "path_identity_digest": "sha256:4a1bed679ae7b864eaeddd868d1d08e9608365ef961818fcf330e5e82cf5979c",
+    "artifact_count": 33,
+    "artifact_bytes": 220800343,
+    "full_revalidation_unchanged": true
+  },
+  "agentdb": {
+    "source_path": "data/foundups.db",
+    "open_mode": "ro",
+    "task": {
+      "task_id": "holoindex_postmerge_refresh:cfd1e0051ea0e5624c7a7fcc8f7e2bc4e442aae9",
+      "assigned_to": "openclaw_supervisor",
+      "status": "completed",
+      "completed_at": "2026-08-27T07:50:01.594545",
+      "retry_count": 0,
+      "claim_binding_verified": true,
+      "record_digest": "sha256:6d3197ad6f8c994fc15f732babe7ec9aa9c0bb344742dbecc82527840374455d"
+    },
+    "request_event": {
+      "event_id": "holoindex_postmerge_requested:cfd1e0051ea0e5624c7a7fcc8f7e2bc4e442aae9",
+      "resolution_status": "completed",
+      "payload_status": "REQUESTED",
+      "payload_digest": "sha256:12e024d6e62c19419c4bd2958ad5b2f60a62c1e840cb8a3373c8204758437eeb",
+      "payload_digest_verified": true,
+      "record_digest": "sha256:7921004b80e06e0ef47ffd46a922952d7f4d69eb5407e1c4da1817492054c84b"
+    },
+    "completion_event": {
+      "event_id": "holoindex_postmerge_completed:cfd1e0051ea0e5624c7a7fcc8f7e2bc4e442aae9",
+      "resolution_status": "pending",
+      "resolution_status_meaning": "downstream_consumption_state",
+      "payload_status": "COMPLETED",
+      "payload_digest": "sha256:05933d206849ce1f0d81889196d5d946a426690a7860512665980d3628262a26",
+      "payload_digest_verified": true,
+      "generation_id": "sha256:60d062749983e9041460182aa7d509dbd3c1269bb85ff68eea957a3c906f3c66",
+      "freshness_receipt_digest": "sha256:74be7db6ba2179f8bbfdddbc255882e335c31db2cbf2044ebdbdbdd6d12ed0fa",
+      "record_digest": "sha256:7d50c3c8271173b85ecf7d3df76b5d7dc8ec9c133203e086fc78ffac70a063d7"
+    }
+  },
+  "openclaw": {
+    "execution_path": "broker-managed resident -> OpenClawSupervisor -> AgentDB CAS claim -> sealed holoindex_postmerge executor -> atomic completion",
+    "duration_ms": 415453,
+    "resident_stopped": true,
+    "listener_18800_after_stop": false,
+    "ambient_missing_fastapi_attempt_claimed_task": false,
+    "accepted_runtime": "repository .venv",
+    "secret_scan_observed_values": 0
+  },
+  "vsix": {
+    "canonical_path": "O:\\RedDog-Releases\\reddog-0.4.115-cfd1e0051.vsix",
+    "exists": true,
+    "compressed_bytes": 275502,
+    "sha256": "sha256:6ee3902703774683aba78135f076630163a1ce4499094d909807ff7270f1adbb",
+    "archive_entry_count": 69,
+    "extension_file_count": 67,
+    "extension_raw_bytes": 944930,
+    "extension_content_digest": "sha256:f48a934ca411e1bb8273b6e8c0eb0387bfc1c0fb76a7c74ac9a7c086c9cb452c",
+    "duplicate_names": false,
+    "encrypted_entries": 0,
+    "unsafe_paths": 0,
+    "source_bytes_equal_exact_commit": true,
+    "version": "0.4.115"
+  },
+  "validation": {
+    "fast": "14/14 PASS",
+    "conversation": "32/32 PASS",
+    "contract": "3/3 PASS",
+    "package": "67 files / 944930 bytes PASS",
+    "release": "4/4 groups / 172611 ms PASS",
+    "wsp97_receipt": "COMPLIANT",
+    "wsp62_candidate": "PASS"
+  },
+  "known_limits": [
+    "Evidence is exact-commit-bound and must be regenerated for a later HEAD.",
+    "Concurrent one-shot owner startups can still fail closed with HOLOINDEX_QUERY_SERVICE_PORT_IN_USE; supervised cross-process owner leasing remains P1 scale debt.",
+    "Public ChatGPT tunnel/OAuth acceptance remains a separate pending deployment boundary.",
+    "The WSP 97 validator authenticates repository-bound WSP retrieval, not these opaque runtime observations."
+  ]
+}

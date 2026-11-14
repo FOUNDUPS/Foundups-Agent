@@ -1,6 +1,133 @@
 # FoundUps Simulator
 
+## Prospective micro-UPS allocation — 2026-11-05
+
+The [B03-P4 preview](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p4-prospective-micro-ups-allocation-v1)
+is VERIFIED_SIMULATED: exact six-decimal UPS atoms and an immutable actual-roster
+allocation plan. Focused 360/broad 1,404 and independent 15 pass; scopes overlap.
+Native balances/source/v2 receipts stay separate; this is no funded posting or BTC price.
+P3 [PR2300](https://github.com/FOUNDUPS/Foundups-Agent/pull/2300)/main 95516e81
+closed with 23 PR/21 main checks and independent PC/preservation verification.
+[Canonical continuity](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#p3-delivery-and-p4-continuity--2026-11-05)
+records the proof and remaining migration, dependency/Holo, custody and chain gates.
+
+## Restricted native UPS transfer — 2026-11-02
+
+The [versioned simulator-qualified mode](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p3-exact-native-transfer-v1)
+admits exact native source/recipient/fund changes or refuses the whole epoch.
+Default legacy remains unfunded; one bound synthetic source is not external backing.
+See the central record for actual overlapping test scopes and separate delivery gates.
+PR2297/main d65 delivered the earlier guard. Next: ratify units/rounding/residual rights
+before general settlement; full B03/B05, custody, Holo and chain holds remain.
+
+## Native pool credit refusal candidate — 2026-11-01
+
+Class B, 17/P0 candidate: four additions refuse completely absorbed positive credits.
+Original 192 and frozen 40 yield focused 232 passes; desired RED is 14 pass/26 fail.
+Partial rounding, receipts/hurdles/underflow and funding are excluded; see [contract](INTERFACE.md#native-pool-credit-refusal--2026-11-01).
+B03 PR2296/main 1787 delivered: 23 PR/21 main checks, 29 PC bindings/187 evidence files.
+Broad 1,276/parity, five held-outs and package eight Python/three Node pass; security/publication pending.
+
+## Same-ID trade-prevention candidate — 2026-11-01
+
+B11-S1 is a 16/P1 class-B matching control: cancel an incoming self-crossing
+remainder, preserve earlier external fills/maker state and correct allocation
+labels. Focused 209, corrected independent six and supplemental Mesa two pass;
+broader 1,236 passes with independent confirmation. Scopes overlap.
+Package eight Python/three Node pass; security/publication remain pending.
+This is not funding, Sybil defense
+or full A08/B11; see the [contract](INTERFACE.md#same-id-trade-prevention-candidate--2026-11-01).
+
+## Hourly queue readiness candidate — 2026-11-01
+
+B09's 14/P1 class-B implementation enforces elapsed hourly readiness in the existing
+breaker; first release, FIFO and minimum-one batch math stay unchanged. Focused
+54 (35 original plus 19 desired), five independent cases and broader 1,209 pass;
+source review finds no material issue within the frozen scope. The 19 are a
+subset of the broad run; five held-outs are outside it. Do not sum these scopes.
+Package eight Python/three Node pass; B09 delivered at 430f9ef9, 23 PR/21 main checks.
+This is native serialized-instance readiness, not payment, restart recovery
+or authenticated unfreeze.
+See the [contract](INTERFACE.md#hourly-queue-readiness--2026-11-01) and
+[current threat map](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#hourly-queue-readiness-candidate--2026-11-01).
+
+## Local security and opt-in reserve observations — 2026-11-01
+
+B02 source is delivered through PR2285; exact pool retries do not repeat local effects.
+Mesa retains failed tails and attempts observers once. Wallet policies stay detached,
+read-only, with trusted host replacement. The opt-in 11-field reserve observation
+uses rational decimal views; legacy economics and default consumers stay unchanged.
+Host serialization is required; its digest proves no authority/currentness/backing.
+[Contracts](INTERFACE.md) retain restart/funding limits; [current evidence](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md)
+keeps unit decisions, issuance, custody and chain activation separate.
+
 Visual simulation of the autonomous FoundUp ecosystem.
+
+## Simulator-first economic change rule — 2026-10-31
+
+The [WSP26 contract](../../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract)
+requires versioned simulator validation before economic changes reach blockchain
+code. Current passing tests qualify their specific transitions, not every model
+assumption. The [source matrix](contracts/source_of_truth_matrix.json) records the
+one-satoshi projection versus1000-satoshi genesis conflict; activation is blocked.
+Use [INTERFACE](INTERFACE.md), [tests](tests/README.md), [ROADMAP](ROADMAP.md) and
+the [current audit](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md)
+together. Historical sealed receipts remain evidence of their original sources.
+
+## Local security reconciliation — 2026-10-31
+
+CABR rejects non-boolean PoB decisions and nonfinite/coercible numbers; valid
+finite clamps and release math remain. The breaker prioritizes the strongest
+active signal and retains its cooldown/queue hold across every downgrade.
+These simulator controls do not authenticate PoB, reserves or funded settlement.
+Fresh connected selection: 414 passed; independent held-outs: 6 passed.
+Seven separate attack probes yielded one pass and six desired-security failures.
+See the [reconciliation and threat report](../../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md).
+
+## Work, stake and unstake numeric validation — 2026-10-25
+
+Selected economic operations now reject invalid quantities, mutable fees and
+overflowing prospective balances before participating mutations. Existing finite
+fee math, zero/fractional values and public signatures remain. A small private
+scalar owner shares preparation formulas with standalone mutators. See the
+[contract](INTERFACE.md#selected-economic-numeric-admission) and
+[allocated plan](../../../docs/architecture/FOUNDUPS_NUMERIC_ADMISSION_20261025.md).
+This is simulation arithmetic validation; asset units, aggregate issuance policy
+and funded blockchain settlement remain separate work.
+
+## Mock BTC anchor integrity — 2026-10-25
+
+The existing optional connector now binds each FoundUp/epoch to the full known
+`foundups.epoch.v2` payload and its fixed mock realm. SQLite serializes admission;
+conflicting content, unknown legacy identity and unresolved records cannot be
+overwritten or reported as successful retries. Legacy rows stay visible and
+unclassified. Exact same-content mock force republication remains supported.
+
+Only mock mode is implemented. Testnet/mainnet selection rejects before database
+initialization, regardless of `LAYER_D_ENABLED`; invalid Mesa modes never select
+mock implicitly. Mock confirmation counts are simulation. There is no real BTC
+publisher, signer, network confirmation or funded reward transfer. See the
+[connector contract](INTERFACE.md#mock-btc-anchor-contract) and
+[allocated plan](../../../docs/architecture/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.md).
+
+## Epoch commitment integrity — 2026-10-25
+
+The existing epoch ledger now uses `foundups.epoch.v2` context-bound hashes,
+immutable snapshots and atomic exact retries. Merkle verification requires an
+externally trusted root, FoundUp, epoch and participant; a proof's own root is
+not an authority source. Repeated commitment preparation retains its finalized
+timestamp. See [INTERFACE.md](INTERFACE.md#epoch-evidence-contract) for encoding
+and compatibility. This is process-local pre-settlement evidence, not a funded
+balance, unique work-receipt consumption or confirmed payment. Old BTC connector
+records have not been migrated to this changed hash format.
+
+## FAM authorization compatibility — 2026-10-25
+
+The FAM bridge supplies explicit host-configured simulation identities
+`verifier_0` and `treasury_0` with exact per-FoundUp grants. Changing the wrapper's
+requested actor ID does not create matching authority. FAM enforces stored proof
+binding and independent verification; simulation completion is not on-chain
+settlement or production authentication. See [the FAM contract](../agent_market/INTERFACE.md#taskpipelineservice).
 
 ## Planning References
 - `modules/foundups/simulator/ROADMAP.md`

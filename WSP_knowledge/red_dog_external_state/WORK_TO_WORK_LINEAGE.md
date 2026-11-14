@@ -1,5 +1,9 @@
 # Work-to-Work Lineage - PR/Slice Chain
 
+> **NON-AUTHORITATIVE HISTORICAL SNAPSHOT:** This is a curated closeout record,
+> not the current PR or branch registry. Verify live GitHub and Git state before
+> making merge, close, delete, or routing decisions.
+
 **Purpose**: Recent PR/slice chain for session continuity recovery.
 
 **Maintenance**: Update at session close (not live auto-refresh).

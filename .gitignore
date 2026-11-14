@@ -14,7 +14,9 @@
 # WSP 3: Module artifacts should stay in modules/
 # Firebase rules belong in modules/foundups/gotjunk/firestore.rules
 /firestore.rules
-/firebase.json
+# /firebase.json - TRACKED: hosting routing/headers are repo truth for reproducible
+#   PFmall deploy (no secrets). See docs/audits/domain_ops/. .firebaserc /
+#   firestore.* remain ignored (project IDs / per-module rules).
 
 # Firebase deployment artifacts (root level - not module-specific)
 /.firebase/
@@ -73,6 +75,7 @@ env/
 
 # Git worktrees (local working directories)
 .worktrees/
+.reddog/
 
 # Claude Code worktrees (local runtime artifacts)
 .claude/worktrees/
@@ -322,6 +325,9 @@ YOUTUBE_SHORTS_INVESTIGATION_FINDINGS.md
 # Session investigation and audit docs (per-session, not permanent)
 docs/investigations/
 docs/audits/*
+!docs/audits/prose/
+docs/audits/prose/*
+!docs/audits/prose/*.md
 !docs/audits/openclaw_reddog/
 !docs/audits/holoindex_external_foundup/
 !docs/audits/holoindex_external_foundup/**
@@ -355,6 +361,8 @@ docs/audits/*
 !docs/audits/architecture/**
 !docs/audits/wsp/
 !docs/audits/wsp/**
+!docs/audits/infrastructure/
+!docs/audits/infrastructure/**
 docs/sessions/
 
 # WSP agentic awakening runtime state (changes every session)
@@ -414,6 +422,9 @@ WSP_agentic/agentic_journals/awakening/awareness_log.md
 # WSP agentic .runtime/ directories (default untracked output for awakening scripts)
 WSP_agentic/agentic_journals/*/.runtime/
 
+# PQN detector logs (side effect of rESP partial import during tracker --awaken)
+WSP_agentic/tests/pqn_detection/dae_logs/
+
 # Data directories (runtime scraped/generated data)
 data/
 !modules/platform_integration/linkedin_agent/data/
@@ -449,3 +460,17 @@ modules/infrastructure/wre_core/reports/
 
 # AntifaFM telemetry (runtime event streams)
 modules/platform_integration/antifafm_broadcaster/telemetry/
+
+# Host account bindings; committed campaign example contains names only
+modules/platform_integration/social_media_orchestrator/config/antifafm_campaign.local.json
+
+# RedDog Fusion extension VSIX (build artifact — package with vsce, do not commit)
+extensions/foundups_advisory_workers/*.vsix
+extensions/reddog/*.vsix
+
+# Private patent drafts and unpublished enabling material
+private/patents/
+
+# WSP 85: keep new temporary work and handoff prompts out of the root.
+/tmp_*
+/.prompt_*.md

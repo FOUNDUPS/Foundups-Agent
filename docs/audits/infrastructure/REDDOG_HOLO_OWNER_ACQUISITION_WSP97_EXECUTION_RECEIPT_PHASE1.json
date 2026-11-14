@@ -1,0 +1,131 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "90e9eca19f810a03ffaacde0edfffbce2de9513b"
+  },
+  "execution_id": "REDDOG_HOLO_OWNER_ACQUISITION_RELIABILITY_PHASE1",
+  "execution_plane": "local_tools",
+  "outcome": "completed",
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_5_Test_Coverage_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_34_Git_Operations_Protocol.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_83_Documentation_Tree_Attachment_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_87_Code_Navigation_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "modules/infrastructure/foundups_mcp_bridge/README.md",
+      "modules/infrastructure/foundups_mcp_bridge/INTERFACE.md",
+      "modules/infrastructure/foundups_mcp_bridge/ROADMAP.md",
+      "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+      "modules/infrastructure/foundups_mcp_bridge/tests/README.md",
+      "modules/infrastructure/foundups_mcp_bridge/tests/TestModLog.md",
+      "modules/infrastructure/foundups_mcp_bridge/HOLO_QUERY_OWNER_RUNBOOK.md",
+      "scripts/reddog_holoindex_owner_query_once.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_owner_bootstrap.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_owner_replica_route.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/holo_query_service_supervisor.py",
+      "modules/infrastructure/foundups_mcp_bridge/scripts/launch.py"
+    ],
+    "research": [
+      "A plain governed Holo query initially failed from the long-lived caller while the same exact-base query passed CURRENT after explicit route normalization, proving caller continuity rather than Holo data was defective.",
+      "Governed retrieval after repair returned CURRENT at exact base 90e9eca19f810a03ffaacde0edfffbce2de9513b, generation sha256:c8b976504b55fb6f2502c73a42ceffdae83e4031141510d03751864d801ad21e, no gap, and no reindex.",
+      "Holo retrieval found the owner runbook, one-shot wrapper, bootstrap, supervisor, route resolver, and Windows MCP launcher contracts before edits.",
+      "Direct Git history and fixture comparison proved the macro failure came from one synthetic test writing the venv redirector where all canonical fixtures use the base executable."
+    ],
+    "micro_pass": [
+      "The final owner/bootstrap/candidate/one-shot delta closure passed 119 tests in 2.42 seconds.",
+      "The new owner-acquisition module passed 21 tests and the WSP 5 statement-coverage gate at 100 percent.",
+      "The corrected MCP launcher contract passed 14 tests.",
+      "The canonical test registry is current at 1,588 tests with 268 quarantined.",
+      "The authenticated RedDog backend closure is current at 1,350 files and includes the acquisition module; its generator suite passed 8 tests.",
+      "Compilation and Git diff whitespace validation passed for every changed Python path."
+    ],
+    "macro_pass": [
+      "The final complete foundups_mcp_bridge suite passed 1,117 tests with 10 expected host-capability skips in 515.45 seconds under O:\\RT\\r2.",
+      "A first final-macro attempt reached 1,116 passes before one deep replica fixture exceeded the long Windows temp-path budget; that exact test passed under a short O:-only root before the full green rerun.",
+      "Two independent plain PowerShell callers simultaneously returned exact-base CURRENT/no-gap/no-reindex results in 38.04 seconds, with distinct query receipt identities and both succeeding on attempt 1.",
+      "The exhaustive extension release supervisor passed all 4 groups in 166.480 seconds; its 18-shard contract and deterministic 67-file package surface were authenticated."
+    ],
+    "hard_think": [
+      "Rejected relaxing dual-route rejection, attaching to an unknown listener, persisting a bearer, killing a port owner, increasing the query timeout, and query-time maintenance or reindex.",
+      "Selected bounded process-sharded ports over a fixed-port cross-process lease because cold starts can exceed 30 seconds and serialized independent callers can exhaust the unchanged 60-second operation deadline.",
+      "Narrowed environment handling from a full process copy to an exact three-route-key allowlist after WSP 97 falsification exposed a contract mismatch.",
+      "Classified port sharding as bounded availability only; one authenticated current-user local-IPC resident broker remains the separate scalable architecture."
+    ],
+    "dialectic_sweep": [
+      "Independent pre-implementation WSP 00/WSP 97 auditors agreed Holo authority was healthy and identified stale process routing plus cross-process fixed-port contention as the actual boundary defect.",
+      "Security falsification removed credential/unrelated environment copying and retained every terminal route, binding, private-token, and foreign-listener boundary.",
+      "Differential WSP 62 review rejected a 61-line query_once and a 788-of-800 orchestration file; preparation and acquisition policy were extracted until production touched functions were at most 48 lines and the script was 769 lines.",
+      "The complete macro rejected an environment-dependent launcher fixture; the existing canonical base-executable test pattern repaired the evidence without changing production behavior."
+    ],
+    "first_principles": [
+      "HoloIndex is usable only when an ordinary supported caller reaches CURRENT exact-generation evidence without manual environment repair, reindex, or authority mutation.",
+      "A route pointer and a loopback port are configuration, never authority; exact route proof, an ephemeral private bearer, and authenticated exact binding remain mandatory.",
+      "Independent process availability and horizontal throughput are different claims; this phase proves only bounded acquisition continuity."
+    ],
+    "execute": [
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_owner_acquisition.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_owner_bootstrap.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_candidate_acceptance.py",
+      "scripts/reddog_holoindex_owner_query_once.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_owner_acquisition_reliability.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/reddog_holoindex_owner_bootstrap_support.py",
+      "scripts/tests/test_reddog_holoindex_owner_query_once.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_mcp_launcher_http.py",
+      "WSP_knowledge/WSP_Test_Registry.json",
+      "scripts/reddog_backend_manifest.json",
+      "scripts/tests/test_generate_reddog_backend_manifest.py",
+      "extensions/reddog/package.json",
+      "extensions/reddog/extension.js",
+      "extensions/reddog/backend_compatibility_constants.js",
+      "extensions/reddog/tests/contract_shards/manifest.json",
+      "extensions/reddog/tests/reddog_contract_execution.js",
+      "extensions/reddog/tests/test_extension_contract_shards.js",
+      "modules/infrastructure/foundups_mcp_bridge/README.md",
+      "modules/infrastructure/foundups_mcp_bridge/INTERFACE.md",
+      "modules/infrastructure/foundups_mcp_bridge/HOLO_QUERY_OWNER_RUNBOOK.md",
+      "modules/infrastructure/foundups_mcp_bridge/ROADMAP.md",
+      "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+      "modules/infrastructure/foundups_mcp_bridge/tests/README.md",
+      "modules/infrastructure/foundups_mcp_bridge/tests/TestModLog.md",
+      "extensions/reddog/README.md",
+      "extensions/reddog/ROADMAP.md",
+      "extensions/reddog/ModLog.md",
+      "extensions/reddog/tests/README.md",
+      "extensions/reddog/tests/TestModLog.md",
+      "docs/audits/infrastructure/REDDOG_HOLO_OWNER_ACQUISITION_EXECUTION_EVIDENCE_PHASE1.json",
+      "ModLog.md"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_5",
+    "WSP_6",
+    "WSP_15",
+    "WSP_22",
+    "WSP_34",
+    "WSP_50",
+    "WSP_62",
+    "WSP_83",
+    "WSP_84",
+    "WSP_87",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/infrastructure/REDDOG_HOLO_OWNER_ACQUISITION_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+    "docs/audits/infrastructure/REDDOG_HOLO_OWNER_ACQUISITION_EXECUTION_EVIDENCE_PHASE1.json",
+    "docs/audits/security/REDDOG_HOLO_OWNER_ACQUISITION_ASSUMPTION_AUDIT_20260827.md",
+    "ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/TestModLog.md"
+  ]
+}

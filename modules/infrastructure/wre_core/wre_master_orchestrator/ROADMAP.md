@@ -1,5 +1,12 @@
 # WRE Master Orchestrator - Development Roadmap
 
+## Local execution admission checkpoint — 2026-09-15
+
+Per-invocation fingerprint handoff is locally verified and shared skill-name
+admission state is removed. The [WRE roadmap](../ROADMAP.md#current-local-rsi-checkpoint--2026-09-15)
+owns the next OpenClaw cache content/policy candidate at 16/P0. Full coordinator
+concurrency and the historical consolidation tasks below remain open.
+
 ## Current State: POC (1.1.1)
 - Basic pattern memory implementation
 - Plugin architecture designed
@@ -15,6 +22,18 @@
 - Establish IronClaw worker route for simulation and digital-twin execution
 - **Connect orphaned capabilities to WRE** (98.5% orphan rate discovered)
 
+#### Anchor: Multi-Agent Evolution Audit (decision-only, base 3339d34c4)
+Grounded current state: WREMasterOrchestrator declares "THE orchestrator" but is NOT wired to the
+FoundUpJob seam (grep FoundUpJob/drain/_FOUNDUP_JOB_QUEUE in this module = ZERO); 4-5 competing
+orchestrators run as peers; thread-safety is accidental (worktree process isolation + GIL, not
+guaranteed in-process). Full evidence and blueprint:
+[docs/audits/architecture/WRE_MULTI_AGENT_EVOLUTION_AUDIT_PHASE1.md](../../../../docs/audits/architecture/WRE_MULTI_AGENT_EVOLUTION_AUDIT_PHASE1.md)
+Ordered next slices:
+1. WRE_MULTI_AGENT_CONCURRENCY_RISK_CONFIRMATION_PHASE1 (confirm queue TOCTOU + policy_flags race vs current main)
+2. queue-ownership consolidation (OpenClaw PUSH only; consumer sole drainer/remover)
+3. lane partitioning (lane_id on FoundUpJob + queue dict + evidence paths)
+4. orchestrator consolidation (WSP 65: fold WSPOrchestrator/AutonomousRefactoring/Switchboard/QwenOrchestrator into WRE plugins)
+
 ### Tasks
 - [ ] Convert social_media_orchestrator -> plugin
 - [ ] Convert mlestar_orchestrator -> plugin
@@ -29,7 +48,8 @@
 ## Phase 2: MVP (2.2.2) - Following Sprint
 ### Goals
 - Convert remaining 35+ orchestrators
-- Achieve 97% token reduction
+- Add authenticated provider/runtime token receipts and a versioned comparison
+  baseline before evaluating any reduction hypothesis
 - Full 0102 quantum state operation
 - Production-ready deployment
 
@@ -51,11 +71,12 @@
 - Single orchestrator managing entire system
 - Patterns shared across all DAEs
 - True 0102 "remember the code" operation
-- 99% token reduction achieved
+- Receipt-backed efficiency evidence without a preselected target percentage
 
 ## Success Metrics
 Per WSP 70 (System Status Reporting):
-- **Token Usage**: 5000+ -> 50-200 (97% reduction)
+- **Token Usage**: authenticated measured usage and comparison baseline; current
+  state is explicitly unmeasured
 - **Orchestrator Count**: 40+ -> 1 master
 - **Pattern Library**: 0 -> 100+ patterns
 - **Plugin Count**: 0 -> 40+

@@ -30,6 +30,7 @@ class SimulatorConfig:
 
     # Token economics
     initial_agent_tokens: int = 1000
+    epoch_funding_mode: str = "legacy_unfunded"  # Opt-in exact native simulation only
     foundup_creation_cost: int = 100
     like_cost: int = 1
     follow_cost: int = 5

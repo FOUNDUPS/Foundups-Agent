@@ -2,6 +2,41 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## 2026-11-06 — Connect WRE readiness truth
+
+Use shared readiness policy; UNKNOWN coverage no longer claims READY or a
+connected worker. Checker errors and malformed minimum-sample configuration
+remain diagnostic UNKNOWN. The root command and headless consumer are covered
+alongside the menu path, including mixed unknown and measured critical evidence.
+No terminal rendering cause or live training success is inferred. WSP11/15/22/97.
+
+## 2026-11-05 — Preserve interactive menu prompts
+
+Background services were logging over `Select option:` after main startup.
+The existing utility owner now filters background records only at existing
+console handlers during main-menu input, retaining file evidence and foreground
+records. Prior filters survive normal input, EOF and interruption. No global
+input/stdout replacement or daemon shutdown. Four isolated behavioral/wiring
+cases pass; raw/native writes and other menu-module prompts remain out of scope.
+WSP00/11/22/50/97. See tests/TestModLog.md for execution limits.
+
+## V0.3.16 — Japanese STT reuse for phone prototype (2026-09-10)
+
+**WSP Protocol:** 05, 06, 22, 97
+**Phase:** Enhancement
+**Agent:** 0102 / Codex
+
+- Added explicit language / `OPENCLAW_VOICE_STT_LANGUAGE` to Whisper, Cohere and
+  Google adapters. Japanese maps to Google's ja-JP locale; English remains default.
+- Current Cohere processor requires language and exposes `decode`; support that
+  contract and its chunk metadata, retaining legacy `batch_decode` compatibility.
+  Inspected the official transformers 5.17.0 wheel and model-card usage.
+- Made the package's main-menu export lazy, allowing microphone/STT reuse without
+  importing unrelated menus. The normal `run_main_menu` export remains available.
+- A new external adapter uses these contracts; no telephone action was installed
+  in general voice routing. See the [prototype](../../platform_integration/elevenlabs_calls/README.md).
+- Tests and live limitations: [tests/TestModLog.md](tests/TestModLog.md).
+
 ## V0.3.15 - Cohere Transcribe STT Backend (2026-03-30)
 
 ### Added

@@ -66,13 +66,26 @@ def record_schedule_outcome(
         "time_str": time_str,
         "mode": mode,
     }
+    # A click acknowledgement must not train the positive-success pattern.
+    details = details if isinstance(details, dict) else {}
+    readback = details.get("readback")
+    verified = bool(success) and isinstance(readback, dict) and all((
+        readback.get("independent") is True,
+        readback.get("channel_id") == channel_id,
+        readback.get("video_id") == video_id,
+        readback.get("date_str") == date_str,
+        readback.get("time_str") == time_str,
+        isinstance(details.get("requested_timezone"), str) and bool(details.get("requested_timezone").strip()),
+        readback.get("timezone") == details.get("requested_timezone"),
+        readback.get("visibility") == "scheduled",
+    ))
     output_result = {
-        "success": bool(success),
-        "details": details or {},
+        "success": verified, "reported_success": bool(success),
+        "verification_status": "verified" if verified else ("independent_readback_required" if success else "failed"),
+        "performance_measured": False, "details": details,
     }
-
-    fidelity = 1.0 if success else 0.0
-    quality = 1.0 if success else 0.0
+    fidelity = 1.0 if verified else 0.0
+    quality = 1.0 if verified else 0.0
 
     try:
         memory = PatternMemory(db_path=db_path) if db_path is not None else PatternMemory()
@@ -83,13 +96,13 @@ def record_schedule_outcome(
             timestamp=datetime.now().isoformat(),
             input_context=json.dumps(input_context, ensure_ascii=False),
             output_result=json.dumps(output_result, ensure_ascii=False),
-            success=bool(success),
+            success=verified,
             pattern_fidelity=float(fidelity),
             outcome_quality=float(quality),
             execution_time_ms=int((time.time() - start) * 1000),
             step_count=5,
-            failed_at_step=None if success else 3,
-            notes=None,
+            failed_at_step=None if verified else (5 if success else 3),
+            notes="Saved-state fidelity only; audience performance is unmeasured.",
         )
         memory.store_outcome(outcome)
         return True

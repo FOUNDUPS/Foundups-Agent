@@ -29,6 +29,24 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 from datetime import datetime
 
+from holo_index.embedding_space import (
+    configure_runtime_embedding_spaces,
+    resolve_sentence_transformer_snapshot,
+)
+from holo_index.storage_contract import (
+    COLLECTION_UNAVAILABLE_CODE,
+    STORAGE_PATH_MISMATCH_CODE,
+    STORAGE_UNAVAILABLE_CODE,
+    HoloIndexStorageError,
+    classify_storage_exception,
+    readonly_query_enabled,
+    resolve_holoindex_ssd_path,
+    storage_path_identity,
+)
+from holo_index.vector_segment_durability import (
+    durable_hnsw_configuration, validate_collection_raw_settings,
+)
+
 # Dependency bootstrap for this module
 # HOLOINDEX_AUTO_PIP_OPT_IN_PHASE1: Auto-install is now EXPLICIT OPT-IN only.
 # Default behavior is fail-closed (no network call, no pip install).
@@ -49,37 +67,46 @@ def _is_pip_install_allowed() -> bool:
     allow_val = os.getenv("HOLO_ALLOW_PIP_INSTALL", "").strip().lower()
     return allow_val in ("1", "true", "yes")
 
-try:
-    import chromadb
-except ImportError as exc:
-    if _is_pip_install_allowed():
-        # Explicit opt-in: auto-install chromadb
-        print("[HOLO] HOLO_ALLOW_PIP_INSTALL=1: Installing chromadb via pip...")
-        import subprocess
-        subprocess.check_call([__import__('sys').executable, "-m", "pip", "install", "chromadb"])
-        import chromadb
-    else:
-        # Fail-closed: no network call, actionable error message
-        raise ImportError(
-            "chromadb is required but not installed.\n"
-            "\n"
-            "To install manually (recommended):\n"
-            "    pip install chromadb\n"
-            "\n"
-            "To enable auto-install (network-capable, not recommended):\n"
-            "    Set HOLO_ALLOW_PIP_INSTALL=1\n"
-            "\n"
-            "HoloIndex requires chromadb for vector storage. Install it and retry."
-        ) from exc
+chromadb = None
+
+
+def _require_chromadb():
+    """Load the maintenance-only Chroma dependency on first use."""
+
+    global chromadb
+    if chromadb is not None:
+        return chromadb
+    try:
+        import chromadb as loaded_chromadb
+    except ImportError as exc:
+        if _is_pip_install_allowed():
+            print("[HOLO] HOLO_ALLOW_PIP_INSTALL=1: Installing chromadb via pip...")
+            import subprocess
+
+            subprocess.check_call(
+                [__import__('sys').executable, "-m", "pip", "install", "chromadb"]
+            )
+            import chromadb as loaded_chromadb
+        else:
+            raise ImportError(
+                "chromadb is required but not installed for HoloIndex maintenance.\n"
+                "Install it manually with: pip install chromadb\n"
+                "Or explicitly opt in to installation with HOLO_ALLOW_PIP_INSTALL=1."
+            ) from exc
+    chromadb = loaded_chromadb
+    return chromadb
 
 # Lazy load sentence_transformers to prevent crash on import
 SentenceTransformer = None
 
 # Timeout configuration for blocking operations (WSP 97 pre-flight compliance)
-HOLO_MODEL_IMPORT_TIMEOUT = float(os.getenv("HOLO_MODEL_IMPORT_TIMEOUT", "20"))  # 20s default (FX2-C: 5s too short for cold imports)
-HOLO_MODEL_LOAD_TIMEOUT = float(os.getenv("HOLO_MODEL_LOAD_TIMEOUT", "30"))     # 30s default (FX2-C: 10s too short for cold model load)
-HOLO_ENCODE_TIMEOUT = float(os.getenv("HOLO_ENCODE_TIMEOUT", "3"))              # 3s default
-HOLO_SEARCH_TIMEOUT = float(os.getenv("HOLO_SEARCH_TIMEOUT", "15"))             # 15s default
+# FX2-C / HOLOINDEX_COLD_MODEL_TIMEOUT_BOUNDARY_PHASE1: Cold-process SentenceTransformer
+# import/load can exceed 60s on some hardware. Defaults raised to 120s to prevent
+# false "not found" results when semantic engine simply didn't load in time.
+HOLO_MODEL_IMPORT_TIMEOUT = float(os.getenv("HOLO_MODEL_IMPORT_TIMEOUT", "120"))  # 120s default (cold import)
+HOLO_MODEL_LOAD_TIMEOUT = float(os.getenv("HOLO_MODEL_LOAD_TIMEOUT", "120"))      # 120s default (cold model load)
+HOLO_ENCODE_TIMEOUT = float(os.getenv("HOLO_ENCODE_TIMEOUT", "3"))                # 3s default (per-query)
+HOLO_SEARCH_TIMEOUT = float(os.getenv("HOLO_SEARCH_TIMEOUT", "15"))               # 15s default
 
 
 def _run_with_timeout(func, timeout_sec: float, default=None, error_msg: str = "Operation timed out",
@@ -88,31 +115,42 @@ def _run_with_timeout(func, timeout_sec: float, default=None, error_msg: str = "
     Execute a function with a hard timeout using ThreadPoolExecutor.
     Returns default value on timeout or exception instead of hanging.
 
-    Distinguishes between:
-    - Actual timeout (FuturesTimeoutError): Log as timeout with remediation hints
-    - Missing dependency (ImportError/ModuleNotFoundError): Log with install hint
-    - Other exceptions: Log with original error message
+    Distinguishes timeouts, missing dependencies, and other exceptions while
+    emitting stable diagnostics only. error_msg and missing_dep_hint remain
+    for call compatibility but are never logged because callers may derive
+    them from repository content, queries, paths, or secrets.
 
     WSP 97: Prevents indefinite hangs in HoloIndex operations.
     """
     from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 
     logger = logging.getLogger(__name__)
-    with ThreadPoolExecutor(max_workers=1) as executor:
-        future = executor.submit(func)
-        try:
-            return future.result(timeout=timeout_sec)
-        except FuturesTimeoutError:
-            logger.warning(f"{error_msg} (>{timeout_sec}s). Try HOLO_SKIP_MODEL=1 or HOLO_OFFLINE=1")
-            return default
-        except (ImportError, ModuleNotFoundError) as e:
-            # Missing dependency - distinct from timeout
-            hint = missing_dep_hint or "pip install -r holo_index/requirements.txt"
-            logger.warning(f"Missing dependency: {e}. Fix: {hint}")
-            return default
-        except Exception as e:
-            logger.warning(f"{error_msg}: {e}")
-            return default
+    executor = ThreadPoolExecutor(max_workers=1)
+    future = executor.submit(func)
+    try:
+        return future.result(timeout=timeout_sec)
+    except FuturesTimeoutError:
+        logger.warning(
+            "HOLOINDEX_OPERATION_TIMEOUT (>%.3fs); semantic search unavailable. "
+            "Raise the bounded model timeout or rerun after model warmup.",
+            timeout_sec,
+        )
+        return default
+    except (ImportError, ModuleNotFoundError) as e:
+        logger.warning(
+            "HOLOINDEX_DEPENDENCY_UNAVAILABLE (%s); install the declared "
+            "HoloIndex requirements or use explicit lexical diagnostics.",
+            type(e).__name__,
+        )
+        return default
+    except Exception as e:
+        logger.warning("HOLOINDEX_OPERATION_FAILED (%s)", type(e).__name__)
+        return default
+    finally:
+        # A context manager waits for a running worker during __exit__, which
+        # silently defeats the advertised timeout. Python cannot kill that
+        # thread, but callers regain control within the declared budget.
+        executor.shutdown(wait=False, cancel_futures=True)
 
 
 def _import_sentence_transformers():
@@ -123,7 +161,8 @@ def _import_sentence_transformers():
 
 def _load_model(model_class, model_name: str):
     """Load the model with timeout protection."""
-    return model_class(model_name)
+    kwargs = {"local_files_only": True} if os.getenv("HOLO_OFFLINE") == "1" else {}
+    return model_class(model_name, **kwargs)
 
 
 def _turboquant_enabled() -> bool:
@@ -166,6 +205,10 @@ class HoloIndex:
         if not silent and not getattr(self, "quiet", False):
             print(f"[{timestamp}] [HOLO-{action_tag}] {message}")
 
+        # Read-only query workers must not create or append repository logs.
+        if readonly_query_enabled():
+            return
+
         # Also log to shared file for other agents to follow
         try:
             log_file = Path("holo_index/logs/agent_activity.log")
@@ -191,7 +234,7 @@ class HoloIndex:
         print(f"[{datetime.now().strftime('%H:%M:%S')}] [BREADCRUMB] {hint}")
         self._breadcrumb_hint_shown = True
 
-    def __init__(self, ssd_path: str = "E:/HoloIndex", quiet: bool = False) -> None:
+    def __init__(self, ssd_path: str | Path | None = None, quiet: bool = False) -> None:
         """
         0102: Initialize HoloIndex with WSP-compliant architecture.
         
@@ -199,44 +242,129 @@ class HoloIndex:
             ssd_path: Path to SSD for persistent storage
             quiet: Suppress initialization logs
         """
-        # Fast path: reuse already-loaded state to avoid reinitializing models/Chroma
+        resolved_ssd_path = resolve_holoindex_ssd_path(ssd_path)
+        requested_storage_identity = storage_path_identity(resolved_ssd_path)
+
+        # Fast path: reuse already-loaded state to avoid reinitializing models/Chroma.
+        # Never silently bind a caller to a different store than it requested.
         if HoloIndex._initialized:
-            self.__dict__.update(HoloIndex._shared_state)
-            self.quiet = quiet  # allow caller to silence logs on reuse
-            return
+            cached_path = HoloIndex._shared_state.get("ssd_path")
+            if cached_path is None or storage_path_identity(cached_path) != requested_storage_identity:
+                # A deleted temporary/test store cannot be reused. Discard that
+                # stale binding; an existing different store remains a hard
+                # mismatch so callers are never silently served wrong data.
+                if cached_path is not None and not Path(cached_path).exists():
+                    HoloIndex._initialized = False
+                    HoloIndex._shared_state = {}
+                else:
+                    raise HoloIndexStorageError(
+                        STORAGE_PATH_MISMATCH_CODE,
+                        path=resolved_ssd_path,
+                        operation="reuse_initialized_store",
+                        detail=f"initialized_path={cached_path or '(missing)'}",
+                    )
+            if HoloIndex._initialized:
+                self.__dict__.update(HoloIndex._shared_state)
+                self.quiet = quiet  # allow caller to silence logs on reuse
+                return
 
         self.quiet = quiet
-        self._log_agent_action(f"Initializing HoloIndex on SSD: {ssd_path}", "INIT")
+        self._log_agent_action(f"Initializing HoloIndex on SSD: {resolved_ssd_path}", "INIT")
 
         # Persistent storage layout (mirrors pre-rebuild behaviour)
-        self.project_root = Path(__file__).parent.parent.parent
-        self.ssd_path = Path(ssd_path)
+        from holo_index.repository_state import runtime_repository_root
+        self.project_root = runtime_repository_root(Path(__file__).parent.parent.parent)
+        self.ssd_path = resolved_ssd_path
         self.vector_path = self.ssd_path / "vectors"
         self.cache_path = self.ssd_path / "cache"
         self.models_path = self.ssd_path / "models"
         self.indexes_path = self.ssd_path / "indexes"
-        for path in [self.vector_path, self.cache_path, self.models_path, self.indexes_path]:
-            path.mkdir(parents=True, exist_ok=True)
+        if readonly_query_enabled():
+            snapshot_path = self.vector_path / "query_snapshots"
+            required_paths = (self.ssd_path, self.vector_path, snapshot_path)
+            missing_paths = [path for path in required_paths if not path.exists()]
+            if missing_paths:
+                missing = ",".join(str(path) for path in missing_paths)
+                raise HoloIndexStorageError(
+                    STORAGE_UNAVAILABLE_CODE,
+                    path=self.ssd_path,
+                    operation="open_readonly_store",
+                    detail=f"missing_required_path={missing}",
+                )
+            if (
+                not self.ssd_path.is_dir()
+                or not self.vector_path.is_dir()
+                or not snapshot_path.is_dir()
+            ):
+                raise HoloIndexStorageError(
+                    STORAGE_UNAVAILABLE_CODE,
+                    path=self.ssd_path,
+                    operation="open_readonly_store",
+                    detail="invalid_storage_layout",
+                )
+        else:
+            try:
+                for path in [self.vector_path, self.cache_path, self.models_path, self.indexes_path]:
+                    path.mkdir(parents=True, exist_ok=True)
+            except Exception as exc:
+                raise classify_storage_exception(
+                    exc,
+                    path=self.ssd_path,
+                    operation="create_storage_layout",
+                ) from exc
 
-        self._log_agent_action("Setting up persistent ChromaDB collections...", "INFO")
-        self.client = chromadb.PersistentClient(path=str(self.vector_path))
-        self.code_collection = self._ensure_collection("navigation_code")
-        self.wsp_collection = self._ensure_collection("navigation_wsp")
-        self.test_collection = self._ensure_collection("navigation_tests")
-        self.skill_collection = self._ensure_collection("navigation_skills")
-        self.symbol_collection = self._ensure_collection("navigation_symbols")
-        # CFZ4: New collections for semantic separation
-        self.docs_collection = self._ensure_collection("navigation_docs")
-        self.knowledge_collection = self._ensure_collection("navigation_knowledge")
-        # Work Ledger: Slice tracking for WSP 15/60/70 work state queries
-        self.work_ledger_collection = self._ensure_collection("navigation_work_ledger")
+        storage_message = (
+            "Opening immutable query snapshots..."
+            if readonly_query_enabled()
+            else "Setting up persistent ChromaDB collections..."
+        )
+        self._log_agent_action(storage_message, "INFO")
+        if readonly_query_enabled():
+            from modules.infrastructure.foundups_mcp_bridge.src.holo_query_snapshot_store import (
+                open_query_snapshot_client,
+            )
+        try:
+            if readonly_query_enabled():
+                self.client = open_query_snapshot_client(self.vector_path)
+                self.query_snapshot_generation_id = self.client.generation_id
+            else:
+                self.client = _require_chromadb().PersistentClient(path=str(self.vector_path))
+        except Exception as exc:
+            raise classify_storage_exception(
+                exc,
+                path=self.ssd_path,
+                operation=(
+                    "open_query_snapshot"
+                    if readonly_query_enabled()
+                    else "open_chromadb"
+                ),
+            ) from exc
+        try:
+            self.code_collection = self._ensure_collection("navigation_code")
+            self.wsp_collection = self._ensure_collection("navigation_wsp")
+            self.test_collection = self._ensure_collection("navigation_tests")
+            self.skill_collection = self._ensure_collection("navigation_skills")
+            self.symbol_collection = self._ensure_collection("navigation_symbols")
+            # CFZ4: New collections for semantic separation
+            self.docs_collection = self._ensure_collection("navigation_docs")
+            self.knowledge_collection = self._ensure_collection("navigation_knowledge")
+            # Work Ledger: Slice tracking for WSP 15/60/70 work state queries
+            self.work_ledger_collection = (
+                None
+                if readonly_query_enabled()
+                else self._ensure_collection("navigation_work_ledger")
+            )
+        except Exception:
+            self.close()
+            raise
 
         self._log_agent_action("Loading sentence transformer (cached on SSD)...", "MODEL")
         os.environ['SENTENCE_TRANSFORMERS_HOME'] = str(self.models_path)
 
         model_name = "all-MiniLM-L6-v2"
         offline = os.getenv("HOLO_OFFLINE") == "1"
-        model_cached = self._model_cache_present(model_name)
+        model_snapshot = self._model_cache_snapshot(model_name)
+        model_cached = model_snapshot is not None
 
         # FX1-D / HIA-TAX1: retrieval_mode vs embedding_backend taxonomy
         # (semantic/lexical/failed) x (sentence_transformers/turboquant_onnx_int8/none).
@@ -245,6 +373,10 @@ class HoloIndex:
         # equivalent, while fp32 stays authoritative everywhere else.
         self.retrieval_mode = "failed"
         self.embedding_backend = "none"
+        self.embedding_model_id = ""
+        self.index_embedding_backend = ""
+        self.index_embedding_model_id = ""
+        self.index_embedding_space_fingerprint = ""
 
         # TQ3: per-collection routing state.
         #   embedders              : backend_key -> loaded embedder instance
@@ -265,10 +397,13 @@ class HoloIndex:
         self.embedders: Dict[str, Any] = {}
         self.routing_active: bool = False
         self.collection_backend_map: Dict[str, str] = {}
+        self.embedding_space_fingerprint_map: Dict[str, str] = {}
+        self.collection_embedding_space_map: Dict[str, str] = {}
 
         tq_requested = _turboquant_enabled()
         st_loaded = False
         tq_loaded = False
+        tq_model_dir: Path | None = None
 
         if os.environ.get("HOLO_SKIP_MODEL") == "1":
             self._log_agent_action("HOLO_SKIP_MODEL=1 -> skipping model load (lexical mode)", "WARN")
@@ -290,8 +425,9 @@ class HoloIndex:
 
             if SentenceTransformer:
                 self._log_agent_action(f"Loading fp32 model '{model_name}' (timeout={HOLO_MODEL_LOAD_TIMEOUT}s)...", "MODEL")
+                load_target = str(model_snapshot) if offline and model_snapshot else model_name
                 st_model = _run_with_timeout(
-                    lambda: _load_model(SentenceTransformer, model_name),
+                    lambda: _load_model(SentenceTransformer, load_target),
                     timeout_sec=HOLO_MODEL_LOAD_TIMEOUT,
                     default=None,
                     error_msg=f"Model '{model_name}' load timed out",
@@ -320,6 +456,7 @@ class HoloIndex:
                             tq_embedder = TurboQuantEmbedder()
                             tq_embedder._ensure_loaded()
                             self.embedders[_TQ_BACKEND_NAME] = tq_embedder
+                            tq_model_dir = tq_embedder.model_dir
                             tq_loaded = True
                         except Exception as load_err:
                             self._log_agent_action(
@@ -381,6 +518,14 @@ class HoloIndex:
             _collection_names,
             routing_active=self.routing_active,
             available_backends=self.embedders or None,
+        )
+        model_snapshot = model_snapshot or self._model_cache_snapshot(model_name)
+        configure_runtime_embedding_spaces(
+            self,
+            sentence_backend=_ROUTE_ST,
+            turboquant_backend=_ROUTE_TQ,
+            sentence_snapshot=model_snapshot,
+            turboquant_model_dir=tq_model_dir,
         )
 
         self.need_to: Dict[str, str] = {}
@@ -450,22 +595,64 @@ class HoloIndex:
     # --------- Collection Helpers --------- #
 
     def _ensure_collection(self, name: str):
+        if readonly_query_enabled():
+            try:
+                return self.client.get_collection(name)
+            except Exception as exc:
+                classified = classify_storage_exception(
+                    exc,
+                    path=self.ssd_path,
+                    operation=f"open_collection:{name}",
+                )
+                if classified.code != STORAGE_UNAVAILABLE_CODE:
+                    raise classified from exc
+                raise HoloIndexStorageError(
+                    COLLECTION_UNAVAILABLE_CODE,
+                    path=self.ssd_path,
+                    operation=f"open_collection:{name}",
+                    detail=f"{type(exc).__name__}: {str(exc).strip()}",
+                ) from exc
         try:
-            return self.client.get_collection(name)
-        except Exception:
-            return self.client.create_collection(name)
+            collection = self.client.get_or_create_collection(
+                name,
+                configuration=durable_hnsw_configuration(),
+            )
+        except Exception as exc:
+            raise classify_storage_exception(
+                exc,
+                path=self.ssd_path,
+                operation=f"get_or_create_collection:{name}",
+            ) from exc
+        validate_collection_raw_settings(collection)
+        return collection
 
     def _reset_collection(self, name: str):
+        if os.getenv("HOLOINDEX_QUERY_READONLY", "").strip().lower() in {"1", "true", "yes", "y", "on"}:
+            raise RuntimeError(
+                "HOLOINDEX_READONLY_QUERY_GUARD: refusing collection reset in read-only query context"
+            )
+        self._ensure_collection(name)
         try:
             self.client.delete_collection(name)
         except Exception:
             pass
-        return self.client.create_collection(name)
+        metadata = {
+            "embedding_backend": self.index_embedding_backend,
+            "embedding_model": self.index_embedding_model_id,
+            "embedding_space_fingerprint": self.index_embedding_space_fingerprint,
+        }
+        collection = self.client.create_collection(
+            name,
+            metadata=metadata,
+            configuration=durable_hnsw_configuration(),
+        )
+        validate_collection_raw_settings(collection)
+        return collection
 
     # --------- Data Loading --------- #
 
     def _load_navigation(self) -> None:
-        nav_path = Path("NAVIGATION.py")
+        nav_path = self.project_root / "NAVIGATION.py"
         if not nav_path.exists():
             self._log_agent_action("NAVIGATION.py not found", "WARN")
             return
@@ -491,17 +678,11 @@ class HoloIndex:
                 self._log_agent_action("WSP summary cache corrupted; rebuilding will overwrite on next index", "WARN")
                 self.wsp_summary = {}
 
+    def _model_cache_snapshot(self, model_name: str) -> Path | None:
+        return resolve_sentence_transformer_snapshot(self.models_path, model_name)
+
     def _model_cache_present(self, model_name: str) -> bool:
-        candidates = [
-            self.models_path / "sentence_transformers" / model_name,
-            self.models_path / model_name,
-        ]
-        for candidate in candidates:
-            if (candidate / "config.json").exists() or (candidate / "modules.json").exists():
-                return True
-            if candidate.exists() and candidate.is_dir():
-                return True
-        return False
+        return self._model_cache_snapshot(model_name) is not None
 
     def _get_embedding(self, text: str) -> List[float]:
         """Generate embedding or return dummy vector if model unavailable."""
@@ -561,10 +742,10 @@ class HoloIndex:
         from .indexing_engine import index_knowledge_entries as _idx_knowledge
         return _idx_knowledge(self)
 
-    def index_test_registry(self) -> None:
-        """WSP 98: Ingest the WSP Test Registry into ChromaDB for semantic search."""
+    def index_test_registry(self):
+        """WSP 98: Ingest the WSP Test Registry and return its IndexResult."""
         from .indexing_engine import index_test_registry as _idx_test
-        _idx_test(self)
+        return _idx_test(self)
 
     def index_skillz_entries(self):
         """WSP 95: Index SKILLz files for agent discovery.
@@ -592,6 +773,11 @@ class HoloIndex:
         """
         from .search_engine import execute_search
         return execute_search(self, query, limit, doc_type_filter)
+
+    def close(self) -> None:
+        """Release the vector client."""
+        if callable(close := getattr(self.client, "close", None)):
+            close()
 
     # --------- CLI Helpers --------- #
 

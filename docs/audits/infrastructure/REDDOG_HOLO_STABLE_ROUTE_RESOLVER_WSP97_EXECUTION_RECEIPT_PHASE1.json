@@ -1,0 +1,112 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "f058f87b375137342148e7c1a27103ef07c093ef"
+  },
+  "execution_id": "REDDOG_HOLO_STABLE_ROUTE_RESOLVER_PHASE1",
+  "execution_plane": "local_tools_and_wsp00_subagents",
+  "outcome": "completed",
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_5_Test_Coverage_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_34_Git_Operations_Protocol.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_83_Documentation_Tree_Attachment_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_87_Code_Navigation_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "The exact-f058f87b broker-managed OpenClaw task was inspected rather than inferred: candidate admission passed, route revision 6 committed generation sha256:cf1433b15d7454de5a4463b831f7b1f010cc52e86b13ca82e8db1c057a1b5ada, and both postcommit proofs failed ACTIVATION_QUERY_PROOF_INVALID.",
+      "The activation receipt remains COMMITTED_UNVERIFIED and AgentDB remains failed; neither historical artifact was relabeled or retried.",
+      "A fresh governed owner query returned ok true, freshness CURRENT, exact authority f058f87b375137342148e7c1a27103ef07c093ef, no gap, no reindex, one owner attempt, and receipt sha256:8659ae4755c53b95cdd83b09cc31f04ee755ae2f10b1cd8c8577ffd94121064."
+    ],
+    "research": [
+      "HoloIndex retrieval found the owner query wrapper, activation controller, exact activation tests, owner runbook, and OpenClaw interface under CURRENT committed-head authority.",
+      "The owner query wrapper supplies environment=route_environment when it invokes the resolver; the former stable callback expanded those kwargs and supplied environment a second time.",
+      "A production-shaped read-only canary reproduced Python duplicate-keyword TypeError, normalized as HOLOINDEX_QUERY_REPLICA_REQUIRED and then ACTIVATION_QUERY_PROOF_INVALID, while candidate admission succeeded because its resolver ignores kwargs."
+    ],
+    "micro_pass": [
+      "RED passed canonical roots plus a hostile existing environment mapping through the real resolver shape and reproduced COMMITTED_UNVERIFIED before the correction.",
+      "GREEN passed 13 activation tests with 1 expected host-capability skip and 90 percent activation-controller coverage.",
+      "The adjacent owner, bootstrap, candidate-acceptance, post-merge, authority, and coordinator closure passed 191 tests with 1 expected skip.",
+      "Authenticated backend-compatibility and 18-shard contract tests passed after exact generated identities were rebound."
+    ],
+    "macro_pass": [
+      "The complete foundups_mcp_bridge suite passed 1136 tests with 8 expected host-capability skips in 549.69 seconds.",
+      "RedDog fast passed 14 members, conversation passed 32 tests, contract authentication passed 3 members, and the deterministic package contract passed.",
+      "The authenticated RedDog four-group release supervisor passed in 191.972 seconds without timeout using the repository virtual environment.",
+      "The canonical test registry is current at 1588 tests and 268 quarantined programs.",
+      "The authenticated backend closure is current at 1350 files and digest 0de0c08c0181ee15966b7e9c786ed25c71086db3487011d11a675167f25afa28.",
+      "The 18-shard 6929-line 490-assertion contract aggregate is sha256:a6d2e50c1c970174e9cd6210411e0f086a7f6494cc54338b5ca7affd243ecfaa.",
+      "The deterministic package surface is 67 files and 945469 bytes at content digest 59a710359237b81b1e4be6932965f5c239b687ccf592c6cb371af5d7a25101de."
+    ],
+    "hard_think": [
+      "WSP_15 scored the deterministic false-negative completion defect 16/P0 because live Holo queries worked but every autonomous postmerge completion replay had to fail after committing a valid route.",
+      "Retry-only 0.4.118 was bounded and fail-closed but insufficient because both attempts repeated the same invalid Python call.",
+      "The correction replaces caller route inputs at the stable-resolution boundary with exactly the committed route-file capability; candidate admission, two-attempt bound, typed exception scope, authority checks, and immutable revalidation remain unchanged.",
+      "Production is 545 lines with a 39-line maximum function, within WSP_62."
+    ],
+    "dialectic_sweep": [
+      "Changing query_once to omit its canonical environment would weaken its general resolver contract; replacing route input only in the stable activation adapter is the narrower move.",
+      "Removing the bounded retry would discard valid transient resilience; retaining it while fixing the deterministic invocation defect preserves both availability and fail-closed truth.",
+      "Independent WSP_00/WSP_97 audit validated the root cause and resolver correction, then issued NO-GO because backend and contract identities were stale; both identities were rebound and their focused gates now pass.",
+      "Historical failed-task evidence, feature-branch validation, exact-merged-main completion, immutable replica verification, and final commit-bound VSIX proof remain separate facts."
+    ],
+    "first_principles": [
+      "A usable committed Holo route and a completed autonomous maintenance task are different contracts; both must pass for RedDog self-maintenance to be reliable.",
+      "The stable activation adapter must accept the generic owner-query resolver call shape while preventing ambient or legacy route inputs from overriding the committed route capability.",
+      "The post-merge exact-main OpenClaw run and immutable verification remain mandatory before building or publishing the 0.4.119 VSIX."
+    ],
+    "execute": [
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_replica_activation.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_replica_activation.py",
+      "modules/infrastructure/foundups_mcp_bridge/README.md",
+      "modules/infrastructure/foundups_mcp_bridge/INTERFACE.md",
+      "modules/infrastructure/foundups_mcp_bridge/ROADMAP.md",
+      "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+      "modules/infrastructure/foundups_mcp_bridge/tests/README.md",
+      "modules/infrastructure/foundups_mcp_bridge/tests/TestModLog.md",
+      "modules/infrastructure/foundups_mcp_bridge/docs/clarity/REDDOG_HOLO_POSTMERGE_ACTIVATION_ORDER_ASSUMPTION_AUDIT_20260827.md",
+      "modules/infrastructure/foundups_mcp_bridge/docs/clarity/REDDOG_HOLO_QUERY_REPLICA_ACTIVATION_ASSUMPTION_AUDIT_20260823.md",
+      "scripts/reddog_backend_manifest.json",
+      "extensions/reddog/package.json",
+      "extensions/reddog/extension.js",
+      "extensions/reddog/backend_compatibility_constants.js",
+      "extensions/reddog/README.md",
+      "extensions/reddog/ROADMAP.md",
+      "extensions/reddog/ModLog.md",
+      "extensions/reddog/tests/README.md",
+      "extensions/reddog/tests/TestModLog.md",
+      "extensions/reddog/tests/contract_shards/manifest.json",
+      "ModLog.md"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_5",
+    "WSP_15",
+    "WSP_22",
+    "WSP_34",
+    "WSP_50",
+    "WSP_62",
+    "WSP_83",
+    "WSP_84",
+    "WSP_87",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/infrastructure/REDDOG_HOLO_STABLE_ROUTE_RESOLVER_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+    "modules/infrastructure/foundups_mcp_bridge/docs/clarity/REDDOG_HOLO_POSTMERGE_ACTIVATION_ORDER_ASSUMPTION_AUDIT_20260827.md",
+    "modules/infrastructure/foundups_mcp_bridge/docs/clarity/REDDOG_HOLO_QUERY_REPLICA_ACTIVATION_ASSUMPTION_AUDIT_20260823.md",
+    "ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/TestModLog.md",
+    "extensions/reddog/ModLog.md",
+    "extensions/reddog/tests/TestModLog.md"
+  ]
+}

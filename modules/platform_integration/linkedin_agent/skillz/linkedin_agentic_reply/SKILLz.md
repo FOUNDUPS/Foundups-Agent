@@ -16,6 +16,10 @@ evals: []
 
 Execute agentic LinkedIn reply flows with OpenClaw/WSP controls.
 
+Read [master activity routing](../../docs/LINKEDIN_ACTIVITY_ROUTING.md) first. For feed discovery reuse the browser-actions post hunter; then read the complete selected post and relevant replies before drafting. Add a substantive point/question; no empty praise, forced ROC, compulsory FoundUps links or template-only personalization. ROC means Return on Compute. Treat feed claims as research leads, not verified facts. Route useful ideas to the appropriate newsletter without exposing private messages.
+
+Require exact authorized content, target and actor before posting. `dry_run=false` is a technical flag, not permission. Verify the rendered reply/permalink; inspect after uncertain submission before retry. Like, reply and repost-with-thoughts are independent actions, not an automatic bundle. Work uses the advertised browser, not these legacy execution helpers.
+
 ## Purpose
 
 - Read the visible or indexed LinkedIn post before replying.
@@ -45,7 +49,7 @@ Execute agentic LinkedIn reply flows with OpenClaw/WSP controls.
 2. Draft the reply using the preferred external OpenClaw model when configured.
 3. Fall back to digital twin / wardrobe generation if external drafting is unavailable.
 4. Return structured output with draft metadata.
-5. Only post when `dry_run=false`.
+5. Only post when `dry_run=false` AND exact action authorization and the complete call-chain safety checks hold; otherwise return the draft only.
 
 ## WSP Chain
 

@@ -14,8 +14,115 @@
 - [x] Mesa model lifecycle tracking integration
 - [x] SSE streaming to animation
 - [x] Ticker message templates in animation
-- [x] State machine documented (01(02) → 0102 → 01/02)
+- [x] State machine documented (01(02) -> 0102 -> 01/02)
 - [x] Rank system defined (1-7, mirror of 012)
+- [x] Read-only `foundup_manifest_validator` (PR #771)
+- [x] Validator hardened to canonical exact module_path match (PR #773)
+- [x] Read-only `context_bundle_builder` (WRE_CONTEXT_BUNDLE_BUILDER_PHASE1)
+  - Imports `validate_manifest_file` -- does not reimplement
+  - Deterministic sha256-derived `bundle_id`; `created_at` injected
+  - Stream-hashed file refs (no full-body load); per-file + total caps
+  - Refuses any readiness promotion, external agent, self-authorize
+  - No Hermes / OpenClaw / WRE consumer wiring
+- [x] Validated module-path resolution in Hermes executor
+  (HERMES_MODULE_PATH_TRUST_REMOVAL_PHASE1)
+  - Closes the #774 carry-forward: payload.module_path is no longer trusted
+  - `_resolve_validated_module_path` consumes the #773 validator;
+    `_extract_module_path` raw-trust function REMOVED
+  - foundup_id-as-path heuristic REMOVED (path-shaped foundup_id is not
+    a path source); bounded foundup_id scan used when payload omits path
+  - Cross-FoundUp substitution defense: manifest's foundup_id MUST equal
+    job.foundup_id (Addendum D #1)
+  - Case-variant + backslash + traversal + absolute + UNC all rejected
+    pre-manifest (`fail_token=syntactic_reject`)
+  - Greppable failure tokens: `syntactic_reject` / `manifest_mismatch` /
+    `manifest_missing` / `cross_foundup_mismatch`
+  - Observable-ignore: rejected payload value visible in evidence_refs
+  - StatusReasonCode unchanged (FAIL_VALIDATION_ERROR); no job-contract
+    schema changes; no validator / manifest / runtime / WSP touch
+- [x] Validated module-path resolution in build_plan_generator + shared
+  resolver extraction
+  (BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1)
+  - Closes the #778 carry-forward by reusing the #778 resolver via
+    extraction (Addendum-C behavior-preserving)
+  - NEW `modules/foundups/agent/src/module_path_resolution.py` --
+    single source of truth for the module-path trust rule across the
+    agent module
+  - Hermes executor re-exports the same names (back-compat shim);
+    test_hermes_foundup_job_executor.py passes with ZERO edits (46/46
+    tests, Addendum C #3 satisfied)
+  - DELETED `KNOWN_FOUNDUP_PATHS` dict + `get_known_foundup_path()`
+    wrapper + `_is_valid_foundup_path()` prefix-only gate +
+    `f"modules/foundups/{foundup_id}"` synthesis fallback
+  - GenerationValidationResult now carries closed-set #778
+    `error_code` tokens + `rejected_payload_value` observable channel
+  - PWA-surface ruling: DERIVED_ONLY (basename of canonical
+    module_path); payload-supplied surface paths NEVER trusted as
+    module identity
+  - `BuildTarget.module_path` is ALWAYS the resolver's canonical
+    `effective` value; the rejected payload value never propagates
+    into BuildPlan output (mechanically pinned in tests)
+  - Single-source-of-truth invariant pinned by AST scans on both
+    executor and generator
+  - No validator / manifest / runtime / WSP touch
+- [x] FoundUp source-authority contract (FOUNDUP_LIFECYCLE_SOURCE_AUTHORITY_CONTRACT_PHASE1)
+  - Authoritative definition doc at
+    `docs/architecture/FOUNDUP_SOURCE_AUTHORITY_CONTRACT.md`
+    (5 stages, per-stage matrix, maturity coupling table, transition
+    gates, hard rule)
+  - Minimal typed enum + 2 functions in
+    `modules/foundups/agent/src/source_authority.py`
+    (`SourceAuthority`, `ACTIVE_STAGES = {MONOREPO_POC}`,
+    `resolve_source_authority`, `request_promotion`)
+  - Value-parity tested against
+    `context_bundle_builder.SOURCE_AUTHORITY` (drift guard)
+  - Enum NOT wired into the builder; unification deferred to
+    `SOURCE_AUTHORITY_BUILDER_ENUM_UNIFICATION_PHASE2`
+  - WSP placement: docs/architecture (cites WSP 27/103/109 triad);
+    promotion to WSP deferred to
+    `FOUNDUP_LIFECYCLE_SOURCE_AUTHORITY_WSP_FORMALIZATION_PHASE1`
+- [x] ContextBundle dry-run consumer (WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_PHASE1)
+  - NEW `modules/foundups/agent/src/context_bundle_dry_run_consumer.py`:
+    `consume_context_bundle_dry_run(bundle, *, job=None, repo_root=None)`
+    returns a frozen `DryRunResult` (return-value-only, no side effects)
+  - First consumer wiring of the #775 ContextBundle into the EXISTING
+    dry-run evidence path (adopts the `BuildPlanExecutor` /
+    `hermes_foundup_job_executor` dry-run primitives STANDALONE)
+  - ContextBundle is the TRUSTED input; trust NOT re-derived from payload
+  - module_path is ALWAYS the bundle's validated canonical; when a job is
+    supplied, the SHARED `_resolve_validated_module_path` (#778/#779)
+    re-validates and its effective path MUST match the bundle's; payload
+    candidate is observable-ignore only; NO second resolver introduced
+  - source_authority MUST be `monorepo_poc` (via `resolve_source_authority`
+    + `ACTIVE_STAGES`); consumer CANNOT promote a stage
+  - `required_gates_to_recheck` carried as NAMES; no gate-pass boolean
+    computed or serialized
+  - DRY-RUN ONLY: `dry_run=True` / `real_execution_performed=False`; no
+    real build / subprocess / Hermes real delegation / executor sink;
+    `HERMES_DELEGATE_ENABLED` never set (real delegation stays BLOCKED)
+  - Return-value-only component; current WRE consumer now attaches its result
+    on the existing SIMULATED/no-real-execution/disabled-delegation branch
+  - No producer / validator / source_authority / WSP / manifest mutation
+  - [x] `WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_RUNTIME_WIRING_PHASE2`: existing
+    `_attach_context_bundle_dry_run` and its focused wiring suite are present.
+    This closes preview attachment only, not live authoring or runtime admission.
+
+### Existing-module build route qualification — 2026-09-21
+
+At main `1571ec55`, WRE `FoundUpJobConsumer` dispatches to the WRE
+`HermesJobExecutor`, not this module's older extraction-mapping executor.
+The fresh WRE singleton defaults to dry-run; guard-admitted dry/disabled paths
+simulate, while unqualified build/extract can block first. Enabled non-dry
+execution still blocks live delegation. Controlled adapter mode describes an interface without
+calling a live worker. `OpenClawFoundUpOrchestrator.build_foundup` returns genesis
+readiness; the separate commander path queues jobs and grants no execution.
+
+The existing AmIBot [package](../detect_ai/docs/launch/AMIBOT_AUTONOMOUS_BUILD_PACKAGE.md#existing-module-build-route--2026-09-21)
+records actual owners and remaining gates. Build/extract model requirements remain
+unspecified and consumer projection admission is validation-only. Qualify the
+consumer dry-run promise against warmed process-global executor reuse before any
+live build bridge; the mocked singleton test does not establish that promise.
+No runtime source, feature flag or acceptance gate changes in this qualification.
 
 ### Phase 1: Core State Machine (v0.2.0)
 

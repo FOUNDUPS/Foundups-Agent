@@ -2,6 +2,22 @@
 
 _Source: 012 voice-mode conversation, captured 2026-03-07_
 
+> Historical BC0 conversation specification. Its passport-first guidance applies
+> to optional relocation intake; it does not gate the current public house search.
+> URL spellings in the retained sample copy were corrected on 2026-10-17. These
+> samples are not evidence of deployed newsletter, roadmap-account or paid
+> services. The earlier separate `move2japan.foundups.com` PWA plan is superseded
+> by the product inside the existing Play Foundups Mall.
+> Current routes/status: [funnel architecture](07_FUNNEL_ARCHITECTURE.md).
+> Existing livechat code/skill responses were not changed by this documentation edit.
+> The current public POC selects eight-house discovery inside
+> `/member/?foundup=move2japan`, registered through `/f/move2japan`.
+> `/move2japan/` is a redirect alias. The shared account owner reads existing
+> Clerk/invite/username admission without blocking guest browse. BC0 passport or
+> signup prompts are not inserted before the houses. Production hosting, browser
+> checks and domain forwarding remain separate gates. The prior private Site
+> publication is superseded review history; it does not deploy the BC0 journey.
+
 ## Purpose
 
 Base Camp 0 is the **live-chat intake and gating skill**. Its job is not to solve the move. Its job is to identify where the stakeholder is on the mountain and keep them from skipping the trail.
@@ -44,7 +60,13 @@ BC0 is a **triage and routing layer**. Not the handbook. Not the visa engine. No
 
 ---
 
-## BC0 Canonical Flow
+## Retained BC0 conversation flow
+
+The following samples preserve the March service proposal. Before using them in
+live responses, verify the destination and offered capability. House discovery
+uses the registered Mall product; shared account entry uses the existing
+Foundups flow. Newsletter capture, personal roadmap accounts and the old
+secondary-domain CTA are not implemented by the housing POC.
 
 ### Step 1 — Trigger Received
 
@@ -81,7 +103,7 @@ After stakeholder answers, respond with light acknowledgment.
 >
 > Get your passport started first. Once that's in motion, come back and I'll help with the next stage.
 >
-> If you want updates and a simple move checklist, join here: **movetojapan.info**
+> If you want updates and a simple move checklist, join here: **move2japan.info**
 
 **If yes passport**:
 
@@ -89,7 +111,7 @@ After stakeholder answers, respond with light acknowledgment.
 >
 > Your next big step is figuring out your move path — work, study, family, remote income, or something else.
 >
-> If you want me to keep track of your roadmap, sign up here: **movetojapan.foundups.com**
+> If you want me to keep track of your roadmap, sign up here: **move2japan.foundups.com**
 
 ---
 
@@ -294,15 +316,15 @@ If someone is agitated, scared, or ranting, the agent should:
 
 **Casual stakeholders**:
 
-> If you want updates and relocation tips, join here: **movetojapan.info**
+> If you want updates and relocation tips, join here: **move2japan.info**
 
 **Serious stakeholders**:
 
-> If you want a roadmap account where I can keep track of your move stage, sign up here: **movetojapan.foundups.com**
+> If you want a roadmap account where I can keep track of your move stage, sign up here: **move2japan.foundups.com**
 
 **Passport-not-ready**:
 
-> Start the passport first. If you want reminders and step-by-step updates while you work on that, join here: **movetojapan.info**
+> Start the passport first. If you want reminders and step-by-step updates while you work on that, join here: **move2japan.info**
 
 ---
 

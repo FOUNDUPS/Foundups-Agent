@@ -161,6 +161,10 @@ class TestIndexCodeEntriesReturnsIndexResult:
 
     def test_positive_entries_returns_success(self, tmp_path: Path):
         """Positive code entries -> is_empty=False, success=True."""
+        (tmp_path / "NAVIGATION.py").write_text(
+            "NEED_TO = {'find files': 'src/main.py', 'search': 'holo_index/search.py'}\n",
+            encoding="utf-8",
+        )
         fake_holo = FakeHoloIndex(project_root=tmp_path)
         fake_holo.need_to = {"find files": "src/main.py", "search": "holo_index/search.py"}
 
@@ -306,7 +310,8 @@ class TestIndexKnowledgeEntriesReturnsIndexResult:
         result = index_knowledge_entries(fake_holo)
 
         assert result.discovered_count == 1
-        assert result.indexed_count == 1
+        # One summary plus one full-body section chunk.
+        assert result.indexed_count == 2
         assert result.is_empty is False
         assert result.success is True
 

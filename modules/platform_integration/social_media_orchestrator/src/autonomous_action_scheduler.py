@@ -28,11 +28,70 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
 import re
 
-from .simple_posting_orchestrator import SimplePostingOrchestrator, Platform
+from .simple_posting_orchestrator import SimplePostingOrchestrator, Platform, PostResponse, PostResult
+from modules.infrastructure.shared_utilities.runtime_atomic_replace import atomic_replace_runtime_text
 
 logger = logging.getLogger(__name__)
+
+
+def _posting_platforms(values: Any) -> Tuple[Platform, ...]:
+    """Capture supported, unique targets before a posting dependency can act."""
+    error = ('Invalid posting platforms: expected a nonempty unique '
+             'list of supported values')
+    if (not isinstance(values, list) or not values
+            or any(type(value) is not str for value in values)):
+        raise ValueError(error)
+    try:
+        platforms = tuple(Platform(value) for value in values)
+    except (TypeError, ValueError):
+        raise ValueError(error) from None
+    if len(set(platforms)) != len(platforms):
+        raise ValueError(error)
+    return platforms
+
+
+def _posting_result_error(response: Any, platforms: Tuple[Platform, ...]) -> Optional[str]:
+    """Require coherent complete dependency evidence; this does not verify delivery."""
+    if (type(response) is not PostResponse
+            or not isinstance(response.results, list) or not response.results):
+        return 'Invalid posting response: expected nonempty typed results'
+    if any(not isinstance(item, PostResult) or type(item.success) is not bool
+           or not isinstance(item.platform, Platform) for item in response.results):
+        return 'Invalid posting response: malformed platform result'
+    reported = [item.platform for item in response.results]
+    if len(set(reported)) != len(reported) or set(reported) != set(platforms):
+        return 'Invalid posting response: platform coverage mismatch'
+    successes = sum(item.success for item in response.results)
+    failures = len(response.results) - successes
+    if (type(response.success_count) is not int or type(response.failure_count) is not int
+            or response.success_count != successes or response.failure_count != failures):
+        return 'Invalid posting response: inconsistent counts'
+    if failures:
+        return 'Posting did not succeed on all requested platforms'
+    return None
+
+
+def _archive_posting_result(result: Any) -> Any:
+    """Project known posting evidence without changing the live response object."""
+    if type(result) is not PostResponse:
+        return result
+    return {
+        'request_id': result.request_id,
+        'results': [{
+            'success': item.success,
+            'platform': item.platform.value,
+            'message': item.message,
+            'timestamp': item.timestamp.isoformat(),
+            'url': item.url,
+        } for item in result.results],
+        'success_count': result.success_count,
+        'failure_count': result.failure_count,
+        'timestamp': result.timestamp.isoformat(),
+    }
+
 
 class ActionType(Enum):
     """Types of actions 0102 can schedule"""
@@ -306,11 +365,18 @@ class AutonomousActionScheduler:
                 logger.info(f"[0102 EXECUTOR] Type: {action.action_type.value}")
 
                 try:
-                    result = await self._execute_action(action)
-                    action.status = "executed"
+                    platforms = (_posting_platforms(action.parameters.get('platforms'))
+                                 if action.action_type == ActionType.POST_SOCIAL else ())
+                    result = await self._execute_action(action, platforms)
                     action.result = result
+                    action.error = (_posting_result_error(result, platforms)
+                                    if platforms else None)
+                    action.status = "failed" if action.error else "executed"
                     results.append((action_id, result))
-                    logger.info(f"[0102 EXECUTOR] [OK] Successfully executed {action_id}")
+                    if action.error:
+                        logger.error(f"[0102 EXECUTOR] [FAIL] Failed to execute {action_id}: {action.error}")
+                    else:
+                        logger.info(f"[0102 EXECUTOR] [OK] Completed scheduled operation {action_id}")
 
                 except Exception as e:
                     action.status = "failed"
@@ -323,29 +389,21 @@ class AutonomousActionScheduler:
 
         return results
 
-    async def _execute_action(self, action: ScheduledAction) -> Any:
+    async def _execute_action(
+        self, action: ScheduledAction, platforms: Tuple[Platform, ...] = ()
+    ) -> Any:
         """Execute a specific action based on its type"""
         if action.action_type == ActionType.POST_SOCIAL:
-            # Use the orchestrator to post
-            platforms = [Platform(p) for p in action.parameters['platforms']]
-            content = action.parameters['content']
-
-            # If we have stream metadata, use it
+            # Retain the existing required content field and stream-only boundary.
+            _ = action.parameters['content']
             metadata = action.parameters.get('metadata', {})
             if 'stream_url' in metadata:
-                response = await self.orchestrator.post_stream_notification(
+                targets = platforms or _posting_platforms(action.parameters.get('platforms'))
+                return await self.orchestrator.post_stream_notification(
                     stream_title=metadata.get('stream_title', 'Live Stream'),
                     stream_url=metadata['stream_url'],
-                    platforms=platforms
+                    platforms=list(targets)
                 )
-            else:
-                # For non-stream posts, we need to enhance the orchestrator
-                # For now, create a simple response
-                logger.info(f"[0102 EXECUTOR] Would post: {content}")
-                logger.info(f"[0102 EXECUTOR] To platforms: {platforms}")
-                response = {"posted": True, "platforms": [p.value for p in platforms]}
-
-            return response
 
         elif action.action_type == ActionType.REMIND:
             # Log the reminder
@@ -354,14 +412,7 @@ class AutonomousActionScheduler:
             logger.info(f"[0102 REMINDER] Requested by 012 at {action.requested_at}")
             return {"reminded": True, "message": message}
 
-        elif action.action_type == ActionType.CHECK_STREAM:
-            # Would integrate with stream resolver
-            logger.info("[0102 EXECUTOR] Checking stream status...")
-            return {"checked": True}
-
-        else:
-            logger.info(f"[0102 EXECUTOR] Executing custom action: {action.description}")
-            return {"executed": True}
+        raise NotImplementedError(f"Unsupported scheduled action: {action.action_type.value}")
 
     def load_schedule(self):
         """Load scheduled actions from file"""
@@ -381,10 +432,8 @@ class AutonomousActionScheduler:
                 logger.error(f"[0102 SCHEDULER] Error loading schedule: {e}")
 
     def save_schedule(self):
-        """Save scheduled actions to file"""
+        """Serialize before atomic publication; logged errors are not acknowledgements."""
         try:
-            os.makedirs("memory", exist_ok=True)
-
             data = {}
             for action_id, action in self.scheduled_actions.items():
                 action_dict = {
@@ -396,13 +445,13 @@ class AutonomousActionScheduler:
                     'requested_by': action.requested_by,
                     'requested_at': action.requested_at.isoformat(),
                     'status': action.status,
-                    'result': action.result,
+                    'result': _archive_posting_result(action.result),
                     'error': action.error
                 }
                 data[action_id] = action_dict
 
-            with open(self.schedule_file, 'w', encoding="utf-8") as f:
-                json.dump(data, f, indent=2)
+            serialized = json.dumps(data, indent=2)
+            atomic_replace_runtime_text(Path(self.schedule_file), serialized)
 
         except Exception as e:
             logger.error(f"[0102 SCHEDULER] Error saving schedule: {e}")

@@ -6,11 +6,13 @@ NO vibecoding - reuses modules/communication/liberty_alert/src/
 
 import sys
 from pathlib import Path
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 import json
+import os
+from modules.foundups.gotjunk.backend.security import BodyLimitMiddleware, require_writer
 from datetime import datetime
 
 # Optional PatternMemory for learned false positives (WSP 48/60)
@@ -95,11 +97,13 @@ if PATTERN_MEMORY_AVAILABLE:
 # CORS configuration for frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify actual origin
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=[origin.strip() for origin in os.environ.get("GOTJUNK_ALLOWED_ORIGINS", "").split(",") if origin.strip() and origin.strip() != "*"],
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Authorization", "Content-Type"],
 )
+
+app.add_middleware(BodyLimitMiddleware)
 
 # Initialize Liberty Alert backend (reusing EXISTING modules)
 try:
@@ -111,10 +115,10 @@ except Exception as e:
 
 # Pydantic models for API
 class AlertCreate(BaseModel):
-    latitude: float
-    longitude: float
-    message: str
-    video_url: Optional[str] = None
+    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-180, le=180)
+    message: str = Field(min_length=1, max_length=4000)
+    video_url: Optional[str] = Field(default=None, max_length=2048)
 
 class AlertResponse(BaseModel):
     id: str
@@ -151,7 +155,7 @@ async def get_alerts():
     return [a.dict() for a in alerts]
 
 @app.post("/api/liberty/alert")
-async def post_alert(alert_data: AlertCreate):
+async def post_alert(alert_data: AlertCreate, writer: str = Depends(require_writer)):
     """
     Create new Liberty Alert
     Uses EXISTING Alert model and AlertBroadcaster - NO vibecoding!
@@ -183,7 +187,7 @@ async def post_alert(alert_data: AlertCreate):
     return {"success": True, "alert_id": alert.id}
 
 @app.post("/api/liberty/alert/video")
-async def upload_alert_video(file: UploadFile = File(...), latitude: float = 0.0, longitude: float = 0.0):
+async def upload_alert_video(file: UploadFile = File(...), latitude: float = 0.0, longitude: float = 0.0, writer: str = Depends(require_writer)):
     """
     Upload video for Liberty Alert
     TODO: Implement video storage (Cloud Storage bucket)

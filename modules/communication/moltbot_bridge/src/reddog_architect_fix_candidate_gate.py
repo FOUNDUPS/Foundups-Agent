@@ -1,0 +1,340 @@
+"""Deterministic candidate and proposal checks before FIX promotion."""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from typing import Any, Mapping
+
+from holo_index.freshness_receipt import (
+    HoloIndexFreshnessReceipt,
+    evaluate_freshness_for_paths,
+)
+
+from modules.communication.moltbot_bridge.src.reddog_architect_proposal_executability_admission import (
+    ArchitectProposalExecutabilityReceipt,
+    EFFECT_REPOSITORY_CODE_CHANGE,
+    reevaluate_architect_proposal_promotion_preconditions,
+    validate_architect_proposal_executability_receipt,
+)
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    validate_bounded_execution_receipt,
+)
+
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
+    snapshot_seed_worker_plan,
+)
+from modules.communication.moltbot_bridge.src.reddog_backend_architect_queue_candidate import (
+    ARCHITECT_QUEUE_CANDIDATE_SCHEMA_VERSION,
+)
+
+
+CANDIDATE_MALFORMED = "candidate_malformed"
+PROPOSAL_ADMISSION_INVALID = "proposal_admission_invalid"
+REPO_HEAD_MISMATCH = "repo_head_mismatch"
+HOLOINDEX_BINDING_MISMATCH = "holoindex_binding_mismatch"
+
+
+def validate_architect_fix_candidate(
+    candidate: Mapping[str, Any],
+    determination: Mapping[str, Any],
+    *,
+    schema_version: str,
+) -> tuple[str, ...]:
+    expected_id = _digest(
+        {
+            "source_determination_receipt_id": str(
+                candidate.get("source_determination_receipt_id") or ""
+            ),
+            "slice_id": str(candidate.get("slice_id") or ""),
+            "snapshot_receipt_id": str(
+                determination.get("snapshot_receipt_id") or ""
+            ),
+            "report_bundle_id": str(determination.get("report_bundle_id") or ""),
+            "wsp15_allocation_receipt_id": str(
+                determination.get("wsp15_allocation_receipt_id") or ""
+            ),
+            "proposal_admission_receipt_id": str(
+                candidate.get("proposal_admission_receipt_id") or ""
+            ),
+        }
+    )
+    allocation = candidate.get("wsp15_allocation_receipt")
+    stage = candidate.get("progressive_policy_stage_receipt")
+    expected = (
+        candidate
+        and candidate.get("schema_version") == schema_version
+        and str(candidate.get("queue_candidate_id") or "") == expected_id
+        and str(candidate.get("source_determination_receipt_id") or "")
+        == str(determination.get("determination_receipt_id") or "")
+        and str(candidate.get("slice_id") or "")
+        == str(determination.get("next_slice_name") or "")
+        and str(candidate.get("status") or "").upper()
+        in {"CANDIDATE", "BLOCKED_CANDIDATE"}
+        and candidate.get("no_execution_performed") is True
+        and isinstance(allocation, Mapping)
+        and bool(allocation)
+        and isinstance(stage, Mapping)
+        and candidate.get("progressive_policy_stage_receipt_id")
+        == candidate.get("progressive_policy_stage_receipt", {}).get("receipt_id")
+        and candidate.get("progressive_policy_stage_digest")
+        == _digest(candidate.get("progressive_policy_stage_receipt"))
+        and candidate.get("independent_verifier_required") is True
+        and validate_bounded_execution_receipt(stage, allocation)
+    )
+    return () if expected else (CANDIDATE_MALFORMED,)
+
+
+def validate_architect_fix_proposal_admission(
+    *,
+    determination: Mapping[str, Any],
+    candidate: Mapping[str, Any],
+    current_work_state: Mapping[str, Any],
+    current_repo_head_sha: str | None,
+    current_holoindex_receipt: Any,
+    committed_retry_attestation_id: str = "",
+) -> tuple[ArchitectProposalExecutabilityReceipt | None, tuple[str, ...]]:
+    raw = determination.get("proposal_admission")
+    try:
+        receipt = validate_architect_proposal_executability_receipt(
+            raw if isinstance(raw, Mapping) else {}
+        )
+    except ValueError:
+        return None, (PROPOSAL_ADMISSION_INVALID,)
+    reasons = _lineage_reasons(
+        receipt=receipt,
+        determination=determination,
+        candidate=candidate,
+        current_work_state=current_work_state,
+        current_repo_head_sha=current_repo_head_sha,
+        current_holoindex_receipt=current_holoindex_receipt,
+        committed_retry_attestation_id=committed_retry_attestation_id,
+    )
+    if reevaluate_architect_proposal_promotion_preconditions(receipt):
+        reasons.append(PROPOSAL_ADMISSION_INVALID)
+    return (
+        receipt if not reasons else None,
+        tuple(dict.fromkeys(reasons)),
+    )
+
+
+def snapshot_architect_fix_plan_lineage(
+    value: Mapping[str, Any], plan: Mapping[str, Any] | None,
+) -> tuple[Mapping[str, Any], bool]:
+    """Freeze and check new plan-bearing lineage; retain the legacy branch."""
+    if type(value) is not dict:
+        raise ValueError("determination_not_plain_mapping")
+    admission = value.get("proposal_admission")
+    if admission is None:
+        return value, False
+    if type(admission) is not dict:
+        raise ValueError("plan_lineage_not_plain_mapping")
+    if "bounded_worker_plan" not in admission:
+        return value, False
+    # Validate/detach the typed plan before generic JSON can coerce its types.
+    nested_plan = snapshot_seed_worker_plan(admission["bounded_worker_plan"])
+    detached = json.loads(json.dumps(
+        {**value, "proposal_admission": {**admission, "bounded_worker_plan": nested_plan}},
+        allow_nan=False,
+    ))
+    receipt = validate_architect_proposal_executability_receipt(detached["proposal_admission"])
+    candidate = detached.get("queue_candidate")
+    if (plan is None or _digest(plan) != _digest(receipt.bounded_worker_plan)
+            or type(candidate) is not dict
+            or validate_architect_fix_candidate(
+                candidate, detached, schema_version=ARCHITECT_QUEUE_CANDIDATE_SCHEMA_VERSION,
+            )
+            or not architect_fix_receipt_candidate_lineage_matches(receipt, detached, candidate)):
+        raise ValueError("proposal_plan_lineage_mismatch")
+    return detached, True
+
+
+
+def _lineage_reasons(
+    *,
+    receipt: ArchitectProposalExecutabilityReceipt,
+    determination: Mapping[str, Any],
+    candidate: Mapping[str, Any],
+    current_work_state: Mapping[str, Any],
+    current_repo_head_sha: str | None,
+    current_holoindex_receipt: Any,
+    committed_retry_attestation_id: str,
+) -> list[str]:
+    work_state_revision_matches = (
+        receipt.work_state_revision
+        == str(current_work_state.get("revision") or "")
+        or _is_exact_publication_retry(
+            receipt=receipt,
+            determination=determination,
+            candidate=candidate,
+            current_work_state=current_work_state,
+            attestation_id=committed_retry_attestation_id,
+        )
+    )
+    expected = work_state_revision_matches and architect_fix_receipt_candidate_lineage_matches(
+        receipt, determination, candidate
+    )
+    reasons = [] if expected else [PROPOSAL_ADMISSION_INVALID]
+    if not current_repo_head_sha or receipt.repo_head_sha != current_repo_head_sha:
+        reasons.append(REPO_HEAD_MISMATCH)
+    if not _current_holoindex_binding_matches(
+        receipt,
+        current_holoindex_receipt=current_holoindex_receipt,
+        current_repo_head_sha=current_repo_head_sha,
+    ):
+        reasons.append(HOLOINDEX_BINDING_MISMATCH)
+    return reasons
+
+
+def architect_fix_receipt_candidate_lineage_matches(
+    receipt: ArchitectProposalExecutabilityReceipt,
+    determination: Mapping[str, Any],
+    candidate: Mapping[str, Any],
+) -> bool:
+    """Check supplied receipt lineage only, never current state or authority."""
+    expected_status = (
+        "CANDIDATE"
+        if receipt.admissible_to_authoritative_queue
+        else "BLOCKED_CANDIDATE"
+    )
+    return bool(
+        receipt.accepted is True
+        and receipt.proposal_validity == "VALID"
+        and receipt.action == "FIX"
+        and receipt.target_effect_plane == EFFECT_REPOSITORY_CODE_CHANGE
+        and receipt.slice_id == determination.get("next_slice_name")
+        and _valid_determination_id(determination, receipt)
+        and receipt.snapshot_receipt_id
+        == str(determination.get("snapshot_receipt_id") or "")
+        and receipt.snapshot_content_digest
+        == str(determination.get("snapshot_content_digest") or "")
+        and receipt.report_bundle_id
+        == str(determination.get("report_bundle_id") or "")
+        and receipt.wsp15_allocation_receipt_id
+        == str(determination.get("wsp15_allocation_receipt_id") or "")
+        and receipt.wsp15_allocation_digest
+        == str(determination.get("wsp15_allocation_digest") or "")
+        and str(candidate.get("status") or "").upper() == expected_status
+        and receipt.receipt_id
+        == str(candidate.get("proposal_admission_receipt_id") or "")
+        and _digest(receipt.to_dict())
+        == str(candidate.get("proposal_admission_digest") or "")
+        and receipt.progressive_policy_stage_receipt_id
+        == str(candidate.get("progressive_policy_stage_receipt_id") or "")
+        and _digest(receipt.progressive_policy_stage_receipt)
+        == str(candidate.get("progressive_policy_stage_digest") or "")
+        and receipt.independent_verifier_required is True
+    )
+
+
+def _is_exact_publication_retry(
+    *,
+    receipt: ArchitectProposalExecutabilityReceipt,
+    determination: Mapping[str, Any],
+    candidate: Mapping[str, Any],
+    current_work_state: Mapping[str, Any],
+    attestation_id: str,
+) -> bool:
+    """Allow a signed retry of one exact prepared or committed proposal."""
+
+    if not attestation_id:
+        return False
+    determination_id = str(determination.get("determination_receipt_id") or "")
+    promotions = [
+        item
+        for item in current_work_state.get("architect_fix_promotions") or ()
+        if isinstance(item, Mapping)
+        and str(item.get("architect_determination_receipt_id") or "")
+        == determination_id
+        and str(item.get("proposal_admission_receipt_id") or "")
+        == receipt.receipt_id
+        and str(item.get("proposal_admission_digest") or "")
+        == _digest(receipt.to_dict())
+        and str(item.get("proposal_authenticity_attestation_id") or "")
+        == attestation_id
+    ]
+    if len(promotions) != 1:
+        return False
+    publication_id = str(promotions[0].get("publication_id") or "")
+    publications = [
+        item
+        for item in current_work_state.get("architect_fix_publications") or ()
+        if isinstance(item, Mapping)
+        and str(item.get("publication_id") or "") == publication_id
+        and item.get("state") in {"STATE_PREPARED", "COMMITTED"}
+        and str(item.get("proposal_authenticity_attestation_id") or "")
+        == attestation_id
+    ]
+    return bool(publication_id) and len(publications) == 1
+
+
+def _valid_determination_id(
+    determination: Mapping[str, Any],
+    receipt: ArchitectProposalExecutabilityReceipt,
+) -> bool:
+    seed = {
+        "cycle_id": determination.get("cycle_id"),
+        "action": determination.get("action"),
+        "next_slice_name": determination.get("next_slice_name"),
+        "model_result_digest": determination.get("model_result_digest"),
+        "model_selection_digest": determination.get("model_selection_digest"),
+        "provider_call_id": determination.get("provider_call_id"),
+        "provider_call_receipt_id": determination.get("provider_call_receipt_id"),
+        "provider_call_evidence_digest": determination.get(
+            "provider_call_evidence_digest"
+        ),
+        "proposal_admission_receipt_id": receipt.receipt_id,
+    }
+    return str(determination.get("determination_receipt_id") or "") == _digest(seed)
+
+
+def _current_holoindex_binding_matches(
+    receipt: ArchitectProposalExecutabilityReceipt,
+    *,
+    current_holoindex_receipt: Any,
+    current_repo_head_sha: str | None,
+) -> bool:
+    if not isinstance(current_holoindex_receipt, HoloIndexFreshnessReceipt):
+        return False
+    payload = (
+        current_holoindex_receipt.to_dict()
+        if hasattr(current_holoindex_receipt, "to_dict")
+        else current_holoindex_receipt
+    )
+    if not isinstance(payload, Mapping):
+        return False
+    generation_id = str(payload.get("generation_id") or "")
+    if (
+        generation_id != receipt.holoindex_generation_id
+        or _digest(payload) != receipt.holoindex_freshness_receipt_digest
+    ):
+        return False
+    check = evaluate_freshness_for_paths(
+        current_holoindex_receipt,
+        receipt.allowed_paths,
+        expected_repo_head_sha=current_repo_head_sha,
+    )
+    return check.ok or receipt.holoindex_maintenance_exception_applied
+
+
+def _digest(payload: Any) -> str:
+    raw = json.dumps(
+        payload,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+        allow_nan=False,
+    )
+    return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+__all__ = [
+    "CANDIDATE_MALFORMED",
+    "HOLOINDEX_BINDING_MISMATCH",
+    "PROPOSAL_ADMISSION_INVALID",
+    "REPO_HEAD_MISMATCH",
+    "architect_fix_receipt_candidate_lineage_matches",
+    "snapshot_architect_fix_plan_lineage",
+    "validate_architect_fix_candidate",
+    "validate_architect_fix_proposal_admission",
+]

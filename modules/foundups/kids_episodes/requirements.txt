@@ -1,0 +1,3 @@
+# Core planner/controller: Python 3.10+ standard library.
+# Host rendering requires FFmpeg/ffprobe with libass.
+# Provider SDK/client/model configuration belongs to admitted host.

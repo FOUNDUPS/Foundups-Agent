@@ -1,8 +1,71 @@
 # shared_utilities Interface Specification
 
+### YouTube audience registry field (2026-11-10)
+
+`youtube_channel_registry` preserves `shorts.made_for_kids` in normalization,
+save and load. A literal boolean is explicit policy; None is unconfigured.
+Malformed input remains visible to the scheduling consumer for refusal, rather
+than being dropped or coerced. No channel identity or operational role is inferred.
+
+### Code/triage native key selection and backend initialization (2026-11-05)
+
+`local_model_selection.resolve_role_native_key('code' | 'triage') -> str | None`
+owns the exact native identity for the legacy Qwen/Gemma consumers. Explicit
+`LOCAL_MODEL_CODE_NATIVE_KEY` / `LOCAL_MODEL_TRIAGE_NATIVE_KEY` wins. Without
+role PATH/DIR/HOLO alias overrides, the existing declared native defaults remain
+`qwen-coder-7b` and `gemma-270m`. A custom role path without its scoped native key
+returns None: a file basename is not an installed-key mapping. Relocating only
+`LOCAL_MODEL_ROOT` retains the declared default. Blank/malformed explicit keys
+raise `ValueError`. General's `LM_STUDIO_NATIVE_MODEL_KEY`, General default and
+signed AI Gateway routes are independent and unchanged.
+
+`resolve_qwen_backend` / `resolve_gemma_backend` retain their public arguments,
+with additive keyword `native_model_key`: omission uses the role owner; None
+skips native lookup; a string selects that exact key. One actual backend
+initialization replaces the generic reachability preprobe. Its
+`last_initialization_status` is content-free: native state values, or
+`not_initialized`, `resident_ambiguous_or_changed`, `sdk_unavailable`,
+`authentication_required`, `initialization_failed`. Nonresident/SDK failure is
+never reported as server unreachable. Authentication still propagates through
+the resolver; inference, instance checks and retries retain their contracts.
+Direct `resolve_qwen_backend(model_path=custom)` remains native-role-first with
+that explicit file as fallback; use `native_model_key=None` for file-only intent.
+
+Singleton factories capture role file/native key once and make one resolver
+attempt. They retain existing cache and explicit `force_reinit` behavior; settings
+changes do not hot-swap a cached engine. An existing explicit GGUF fallback can
+still initialize llama.cpp during an operational factory/resolver call. Missing
+files are not sent to that loader. Startup/preflight callers must inspect status
+without invoking these operational factories. No native load/unload, server
+start/stop, download or arbitrary resident substitution is introduced.
+
+### Shared language-role and LM Studio dispatch controls
+
+`local_model_selection.is_general_language_model(model_id)` is the common
+conservative role guard used by YouTube and AI Gateway; it rejects visual,
+coder, audio, embedding, tiny triage and xAI model identifiers.
+
+`LMStudioBackend(..., max_retries=None, pre_dispatch_check=None)` preserves the
+SDK default when retry count is absent; explicit values are integers in [0,2].
+The optional trusted callback runs after the exact native-instance precheck and
+before completion/chat/native dispatch. YouTube passes zero retries plus its
+deadline/cancel guard. It cannot preempt an already in-flight request. Optional
+chat `reasoning_effort='none'` is validated and forwarded without altering other
+callers. No server/model startup, fallback or credential-file loading is added.
+
+### `lm_studio_node_lock_identity(base_url: str) -> str`
+
+Additive export from `lm_studio_model_lifecycle.py` for existing explicit server
+startup. Returns the existing `lm-studio-node:<digest>` identity computed from
+the canonical `loopback:<port>` node identity with the same JSON/SHA256 protocol.
+Loopback aliases share the same lock. It does not acquire a lock or grant model,
+server, or dispatch authority. Existing managed transactions use this helper;
+lock scope digests, journals, normalization, leases and cleanup remain unchanged.
+
+
 **WSP 11 Compliance:** Complete
-**Last Updated:** 2026-03-30
-**Version:** 0.3.0
+**Last Updated:** 2026-10-11
+**Version:** 0.5.1
 
 ## [OVERVIEW] Module Overview
 
@@ -11,7 +74,87 @@
 
 ## [API] Public API
 
+### Confined Runtime Artifact Reads
+
+`secure_digest_confined_file_impl(path, allowed_root=..., expected_identity=...,
+max_bytes=...)` streams one regular private file through a confined no-follow
+descriptor. It requires an exact `ConfinedFileIdentity`, enforces the byte
+bound, verifies descriptor/path identity before and after hashing, and returns
+`ConfinedFileDigestProof`. `secure_read_confined_bytes_impl` remains unchanged.
+
+On Windows, suffix-derived execute bits are excluded from mode equality because
+they are a Python filename projection rather than an NTFS permission change;
+all other identity fields remain exact. Callers that also need NTFS stream
+admission may invoke `require_unnamed_data_stream_only(path)`
+only after their normal no-follow/link/reparse and final-path checks. It accepts
+exactly `::$DATA` for a regular file and no returned streams for a directory;
+named streams fail closed. The helper uses one bounded handle and is not a
+standalone topology validator. `windows_extended_path(path)` returns the
+absolute Windows API spelling used by runtime-artifact callers whose valid
+internal paths can exceed legacy `MAX_PATH`; it grants no admission by itself.
+
+`runtime_operation_lock(identity, timeout_seconds=None)` hashes the opaque
+identity into an OS-owned Windows mutex or a POSIX advisory lock. POSIX lock
+storage requires one owner-private `0700` no-follow directory and a private,
+single-link, owner-matched regular lock file opened relative to its pinned
+directory descriptor. Unsafe pre-created lock namespaces reject.
+
 ### Local Model Selection
+
+### Local LM Studio Backend
+
+```python
+inspect_lm_studio_model(model_key, base_url=..., api_token=None)
+execute_lm_studio_model_transaction(
+    model_key=...,
+    operation=...,
+    mode=LMStudioLeaseMode.MANAGED_LOAD,
+    load_config={"context_length": 32768},
+)
+require_lm_studio_backend(
+    model_id, base_url=None, request_timeout=30.0, api_token=None
+)
+LMStudioBackend.create_native_chat(
+    input_text=...,
+    system_prompt=...,
+    max_output_tokens=...,
+    reasoning="off",
+    max_response_bytes=...,
+)
+```
+
+`reasoning` defaults to `"off"` as before. Explicit `None` omits this optional
+wire field for a caller-selected model that does not support reasoning controls.
+Omission means the server's model default, not a guarantee that reasoning is
+disabled. Callers must inspect capabilities and record the selected control;
+there is no automatic retry, capability substitution or provider fallback.
+See [the native API contract](https://lmstudio.ai/docs/developer/rest/chat).
+
+Native inventory exposes `SERVER_UNREACHABLE`, `NOT_INSTALLED`,
+`INSTALLED_NOT_RESIDENT`, and `RESIDENT`; OpenAI-compatible `/v1/models` is not
+accepted as residency proof. `require_lm_studio_backend` is borrow-only. The
+managed transaction loads only an exact installed key, verifies the returned
+instance, targets that instance for inference, revalidates it immediately
+before and after use, rejects implicit/JIT load evidence, and unloads only a
+transaction-owned instance. Managed loads share one physical node/port lock,
+fail when any resident model already occupies capacity, and reject context
+length above the native model maximum. Post-load inventory must contain exactly
+the one owned instance; concurrent foreign residency triggers owned cleanup and
+failure. A pre-existing instance is never
+unloaded. Load timeout/cancellation is durably quarantined. Because native
+inventory has no documented server-generation identity, restart proceeds only
+when inventory proves zero residency; even a matching reused instance ID is
+never auto-unloaded.
+Native requests are loopback HTTP only, reject redirects, accept an optional
+API token without exposing it in lease representation/equality or evidence,
+ignore environment proxy variables, disable storage/streaming, and cap
+request/response controls. The legacy OpenAI-compatible convenience methods
+perform pre/post native identity checks but are outside governed lifecycle
+authority because that SDK transport is not the native instance receipt path.
+Lifecycle and
+call receipts are content-addressed structural evidence, not authentication;
+the signed proposer-provenance layer supplies trust. The ordinary resolver and
+`main.py` do not launch or load LM Studio.
 
 Role-based model path resolution for local AI models. Models stored at `E:/HoloIndex/models/`.
 
@@ -333,6 +476,18 @@ class [SpecificError]([ModuleName]Error):
 ```
 
 ## [HISTORY] Version History
+
+### 0.5.0 (2026-08-22)
+- Added exact native installed/resident observation and managed model leases.
+- Bound owned load/unload confirmation to deterministic lifecycle receipts.
+- Rejected OpenAI-model-list residency assumptions, wrong/JIT instances,
+  redirects, ambiguity, blind load retry, and owned-cleanup mismatch.
+
+### 0.4.0 (2026-08-21)
+- Added bounded LM Studio native chat with explicit reasoning control, exact
+  model identity, disabled storage/streaming, timeout/response caps, and no
+  launch or fallback.
+- Restricted OpenAI-compatible controls and added strict thinking projection.
 
 ### 0.3.0 (2026-03-30)
 - Added `asr` and `tts` roles to local_model_selection.py

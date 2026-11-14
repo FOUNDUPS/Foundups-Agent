@@ -143,6 +143,26 @@ class TestRequestValidation:
         assert result.error_message is not None
         assert "cycle hint" in result.error_message.lower()
 
+    @pytest.mark.parametrize("cycle", [0, False, "", "2024", 2024.0, 1899, 2101])
+    def test_cycle_hint_rejects_invalid_inputs(self, adapter, cycle):
+        result = resolve_candidate_entity(EntityResolutionRequest(query="Test", cycle_hint=cycle), adapter)
+        assert result.status == EntityResolutionStatus.INVALID_QUERY
+        assert "cycle hint" in result.error_message.lower()
+
+    def test_cycle_hint_rejects_int_subclasses(self, adapter):
+        class CustomYear(int):
+            pass
+
+        result = resolve_candidate_entity(
+            EntityResolutionRequest(query="Test", cycle_hint=CustomYear(2024)), adapter
+        )
+        assert result.status == EntityResolutionStatus.INVALID_QUERY
+
+    @pytest.mark.parametrize("cycle", [None, 1900, 2024, 2100])
+    def test_cycle_hint_accepts_only_valid_years_or_omission(self, adapter, cycle):
+        result = resolve_candidate_entity(EntityResolutionRequest(query="Test", cycle_hint=cycle), adapter)
+        assert result.status != EntityResolutionStatus.INVALID_QUERY
+
     def test_valid_hints_accepted(self, adapter: MockFECAdapter):
         """Valid hints are accepted without error."""
         request = EntityResolutionRequest(

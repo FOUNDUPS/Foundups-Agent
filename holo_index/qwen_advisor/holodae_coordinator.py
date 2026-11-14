@@ -97,6 +97,20 @@ class HoloDAECoordinator:
                 'priority': 'P2'
             }
         ]
+
+        # Logging must exist before any discovery hooks run. Gate scanning uses
+        # _detailed_log, so initialize this before _scan_for_gates().
+        self.holo_console_enabled = os.getenv("HOLO_SILENT", "0").lower() not in {"1", "true", "yes"}
+        self.verbose = os.getenv('HOLO_VERBOSE', '').lower() in {"1", "true", "yes"}
+        self.session_id = f"holo-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+        self.logger = logging.getLogger('holodae_activity')
+        self.telemetry_logger = TelemetryLogger(self.session_id)
+        self.telemetry_formatter = TelemetryFormatter(
+            telemetry_logger=self.telemetry_logger,
+            current_work_context=self.current_work_context,
+            logger=self.logger
+        )
+        self.holo_agent_id = self.telemetry_logger.session_id
         
         # Initialize doc tracking
         self.doc_only_modules: Set[str] = set()
@@ -108,21 +122,6 @@ class HoloDAECoordinator:
         self.detected_gates: Dict[str, Any] = {}
         self._scan_for_gates()
 
-        # Environment + logging context
-        self.holo_console_enabled = os.getenv("HOLO_SILENT", "0").lower() not in {"1", "true", "yes"}
-        self.verbose = os.getenv('HOLO_VERBOSE', '').lower() in {"1", "true", "yes"}
-        self.session_id = f"holo-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
-        
-        # Initialize Telemetry
-        self.logger = logging.getLogger('holodae_activity')
-        self.telemetry_logger = TelemetryLogger(self.session_id)
-        self.telemetry_formatter = TelemetryFormatter(
-            telemetry_logger=self.telemetry_logger,
-            current_work_context=self.current_work_context,
-            logger=self.logger
-        )
-        self.holo_agent_id = self.telemetry_logger.session_id
-        
         # Initialize breadcrumb tracer
         self.breadcrumb_tracer = get_tracer()
 
@@ -318,6 +317,27 @@ class HoloDAECoordinator:
 
         return None
 
+    def _extract_search_result_paths(self, search_results: dict) -> List[str]:
+        """Extract repository paths from HoloIndex result records."""
+        paths: List[str] = []
+        for section in ("code", "wsps", "wsp"):
+            for result in search_results.get(section, []) or []:
+                if isinstance(result, str):
+                    candidate = result
+                elif isinstance(result, dict):
+                    candidate = (
+                        result.get("location")
+                        or result.get("file")
+                        or result.get("path")
+                        or result.get("source")
+                        or ""
+                    )
+                else:
+                    candidate = ""
+                if candidate and candidate not in paths:
+                    paths.append(candidate)
+        return paths
+
     def handle_holoindex_request(self, query: str, search_results: dict) -> str:
         """Handle HoloIndex search request - Main orchestration entry point"""
         self._detailed_log(f"[HOLODAE-COORDINATOR] Processing query: '{query}'")
@@ -373,10 +393,17 @@ class HoloDAECoordinator:
         # Update work context
         analysis_context = self.qwen_orchestrator.get_recent_analysis_context()
         session_actions = [f"{decision.recommended_action.value}:{decision.description}" for decision in arbitration_decisions]
-        if analysis_context['files'] or session_actions:
-            self.current_work_context = self.context_analyzer.analyze_work_context(analysis_context['files'], session_actions)
+        result_files = self._extract_search_result_paths(filtered_results)
+        context_files = result_files or analysis_context['files']
+        if context_files or session_actions:
+            self.current_work_context = self.context_analyzer.analyze_work_context(context_files, session_actions)
+            if result_files:
+                first_result_module = self.context_analyzer._extract_module(result_files[0])
+                if first_result_module:
+                    self.current_work_context.primary_module = first_result_module
             # Update formatter's context reference
             self.telemetry_formatter.current_work_context = self.current_work_context
+            self.monitoring_loop.current_work_context = self.current_work_context
 
         search_summary = {
             'code': search_results.get('code', []),
@@ -468,6 +495,23 @@ class HoloDAECoordinator:
 
     def enable_monitoring(self) -> None:
         self.monitoring_loop.enable_monitoring()
+
+    @property
+    def monitoring_active(self) -> bool:
+        """Compatibility access to the broker-owned monitoring state."""
+        return self.monitoring_loop.monitoring_active
+
+    @property
+    def last_monitoring_result(self) -> Optional[MonitoringResult]:
+        """Compatibility access for status/report tests and legacy callers."""
+        return self.monitoring_loop.last_monitoring_result
+
+    def run_monitoring_cycle(self) -> MonitoringResult:
+        """Run one read-only HoloDAE monitoring cycle."""
+        result = self.monitoring_loop.run_monitoring_cycle()
+        self.current_work_context = self.monitoring_loop.current_work_context
+        self.telemetry_formatter.current_work_context = self.current_work_context
+        return result
 
     def get_status_summary(self) -> Dict[str, Any]:
         """Get comprehensive status summary"""

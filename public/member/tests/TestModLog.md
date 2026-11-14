@@ -1,4 +1,404 @@
+## 2026-11-14 · Mall build identification
+
+The scoped browser fixture checks the build next to #SchumerOUT at desktop
+and phone widths, including space beside the civic action at 320 px. The
+HPC and member plus menus display the same build. The worker fixture checks
+that the label matches the installed v17 cache and that v16 is retired.
+
+## 2026-11-14 · Shared dock phone reference
+
+The existing Chromium and WebKit browser fixtures check the shared dock at
+320/390/430 px portrait and 844 × 390 landscape. The updated tests exercise
+the anchored plus panel, backdrop dismissal, the square in Red Dog's slot,
+pointer release and cancellation, and a multiline transcript that can be
+edited while the same provider frame plays. Independent review caught a
+Stop button that could not be tapped after starting dictation from the
+member mode sheet. The regression covers that entry separately from a
+held pointer. The state fixture checks v16
+installation, v15 retirement and retention of unrelated caches.
+
+The broader targeted Python run had 601 passes and the same three existing
+navigation assertions on the candidate and base `ebfce5717`.
+`TestFoundUpHandoff` expects `fv-open-link` and `routing_prefix` and
+`TestGestureHints` expects the former tap-to-play/pause hint. These are
+outside the dock change. Browser fixtures use controlled provider and
+speech events. They leave physical iPhone and real dictation verification open.
+
+## 2026-11-14 · Phone WikiTube viewer
+
+The base `510079b91` passed the existing scoped and desktop cases. The
+phone regression uses the real member shell with controlled admission,
+media and local speech. It checks in-card playback, the same iframe
+through expansion and queue search, 320/390/430 px portrait and 844 × 390
+landscape, native horizontal touch scrolling in Chromium, plus menu swipe,
+foreground dictation with Stop and pointer cancellation, focus and scroll
+return, and one provider frame. The worker fixture covers v14 to v15
+upgrade and unrelated-cache retention. Physical devices and provider
+playback are separate verification.
+
+## 2026-11-14 · Member WikiTube controls
+
+The controlled Chromium and WebKit member cases cover the Play root route,
+guest sign-in, admitted grid and rows, inline dimensions, iframe continuity
+into full view, queue search and keyboard return, plus and Red Dog actions.
+The existing Chromium HPC cases cover the public route, responsive theater
+and phone layout. The v14 fixture covers the cache upgrade.
+
+Real YouTube in Chromium 143 played `JFp2l1fnf_4` inside a 512.5 × 240
+CSS px selected slot. The same provider window advanced from 0.52 to
+1.06 seconds while the clip expanded and an active queue search was
+submitted. Closing left zero iframes. This run used the local Mall harness.
+
+## 2026-11-13 · Invited desktop poster grid
+
+The new browser case reproduced category rows on fresh desktop entry at
+base `09da53549`. The candidate opened 15 mixed cards in eight columns at
+1440 × 900 CSS px. The controlled player kept one provider iframe, retained
+it on resize, and advanced the queue after both autoplay and manual Play.
+The new desktop rail thumbnails meet the 120 × 70 CSS px minimum.
+WebKit exposed a scroll snap that moved the originating tile out of view.
+Explicit scroll restoration returned to the focused tile. A close at 680 px
+after opening at 1440 px restored the same tile in its new row. Enter FoundUp
+went to `/f/move2japan` after the player closed. The saved rows, wide touch,
+card quick view and scoped HPC cases passed in the Chromium suite.
+
+In a separate Windows Chromium 143 localhost dev-harness run, real YouTube
+clip `JFp2l1fnf_4` advanced from about 0.41 s to 1.02 s in a 1440 × 694
+CSS px iframe. The diagnostic saw
+zero provider document or media requests before tile selection and zero
+remaining player frames after closing. Live invited admission, deployment
+and physical iPhone playback remain separate gates. The v13 cache fixture
+passed 21 cases. The 600-case Python comparison had the same three inherited
+assertions in `test_navigation_planes.py` as the base.
+
+## 2026-11-13 · Public HPC and admitted member entry
+
+The controlled Chromium fixture follows the real member shell through
+sign-in redirect, invitation denial, return after admission and the HPC
+theater. It also checks the registry link to the dedicated public host.
+The actual boot fixture passes 26 cases and the state and service-worker
+fixture passes 21. The latter checks v12 route assets, obsolete Mall cache
+retirement and unrelated cache retention. Physical iPhone playback and
+production member admission remain separate verification gates.
+
+## 2026-11-12 · In-place phone video playback
+
+The scoped browser fixture verifies that the selected thumbnail disappears
+and the player occupies its original row for left, middle and right clips.
+Close restores the card, focus and scroll position. The fixture verifies
+landscape playback, toolbar pinch-out, filtered tiles, the same provider
+frame across expansion and desktop resize, and the neutral 101/150 message.
+The focused member suite passed 432 checks and the boot fixture passed 21.
+Service-worker tests cover retiring v10 and installing v11.
+
+## 2026-11-12 · HPC phone install and dock
+
+The Chromium scoped fixture passed a manifest read, three-column phone
+layout, dictation fallback and simulated local speech, search, disclosure,
+and return from Vote and the public Red Dog briefing. It also checked
+filtered playback continuity and immersive resize. Independent WebKit
+checks covered the phone layout and install metadata, stable filter return
+and the existing desktop theater. The focused member suite passed 432 tests,
+the HPC catalog tests passed two, and the boot fixture passed 21. Physical
+iPhone Home Screen installation and real device speech remain open.
+
+## 2026-11-12 · Desktop search submission
+
+Chromium and WebKit verified the 584 × 52 CSS px form, placement below the
+video, Enter and magnifier playback, the no-result path, and continuity
+through the phone layout. Actual YouTube in the candidate browser advanced
+on desktop startup, Enter and magnifier selection, and 390 px inline play.
+The focused player and field suites passed 251 checks, and the state/SW
+fixture passed 20 with cache v9.
+
+## 2026-11-12 · Desktop theater and breakpoint continuity
+
+The scoped fixture passed desktop and phone behavior in Chromium. Independent
+desktop verification in Chromium and WebKit confirmed queue search, startup
+recovery, Voice return and the same iframe browsing context across resize.
+The ordinary four-width browser fixture, property runtime, 21 admission cases,
+and 20 state/service-worker checks passed. A warm Chromium upgrade cached
+exact v8 bytes, retired v7, retained a separate cache and reopened HPC offline.
+
+The broader media and PWA check reported 333 passes and six failures at both
+990e320 and the candidate. The failures concern three absent empty media
+directories and three older service-worker source expressions.
+
+## 2026-11-11 · Scoped playback recovery
+
+The independent Chromium fixture verified a 31-record collection, three
+columns, pinned chrome, one inline player, in-place immersive expansion,
+focus/Back/scroll restoration, and provider status recovery. The 320 px
+manual Play fixture now checks host focus and Escape after playback.
+The shared state/SW VM passed all 20 checks with v7, including explicit public
+precache paths, reload on install and no credentials on those requests. A
+Chromium upgrade probe confirmed v7 replaces a warm HTTP response, retires
+the old Mall cache, preserves an unrelated app cache and reopens offline.
+The broad member/catalog pass returned 1,540 passed with 11 failures that
+also fail at the base (legacy global catalog shape and navigation copy).
+The 12 catalog refresh safety checks also passed separately.
+The [incident](../../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md)
+separates real provider playback from mocked events and physical iOS.
+
+## 2026-11-11 · HPC scoped video and state
+
+The shared product-state and service-worker VM covers exact hostname/query
+selection, tab-local scroll data, catalog separation and declared asset versions.
+The registry and catalog suites verify the Vote parent reference and reproducible
+public projection. Mobile Chromium preview checks the grid, disclosure, shared
+player, official YouTube embed, Vote handoff and sign-in boundary.
+
+## 2026-10-25 | FX1 public directory and actual filter events
+
+Independent closeout: the same 300 cases passed again in 6.63s, with two inherited
+config warnings and zero Python socket/DNS attempts. Exact executed IDs and
+warnings were captured in host scratch
+`foundups-fx1-independent-20261025-efwm62i1/results.json`; original worker red/green
+runs have session output, not a separate machine receipt. Parent browser checks
+confirmed root FX navigation, five public cards, `$junk` search, empty results
+and readiness filtering. Source and docs also received independent review with
+no material findings. These are local results; hosting deployment is pending.
+
+Base checkout: `8b2fccf64251097b647b7fc5a45dad75706a9192`. Read member/PFMall
+README, INTERFACE, ROADMAP, ModLog and test inventories before authoring. Holo
+owner retrieval failed `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH` with UNKNOWN
+freshness/index gap; exact current owner reads supplied the missing evidence.
+WSP 15 pre-authoring allocation: C3/I4/D4/Impact4 = 15/P1.
+
+Added the missing tests README first. Extended the existing
+`test_route_contract_bridge.py` Node VM to retain actual listeners and invoke
+bounded input/change actions, taking grid snapshots after each event. Reused the
+existing inline owner, DOM/fetch guard and route tests. Added no test file,
+framework, catalog record, network provider or model dependency.
+
+Coverage: canonical ID/name/summary/ticker (including `$` and case/spacing),
+missing/null/blank/non-string symbols, independent readiness/query interaction,
+clear and empty recovery, escaped ticker text, discovery wording, failed catalog
+and Return to Mall. Gateway navigation coverage extends the existing
+`test_gateway_roc_shell.py`; its existing admission tests remain included.
+
+Before the product change, `-k fx` produced **5 failed, 13 passed, 282 deselected**:
+missing ticker matches, resulting filter recovery, and missing homepage FX link.
+After the change, the two complete existing owners produced **300 passed,
+0 failed, 0 skipped**, with two inherited unknown asyncio-configuration warnings.
+
+```powershell
+$env:PYTHONDONTWRITEBYTECODE='1'
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+O:/Foundups-Agent/.venv/Scripts/python.exe -B -m pytest public/member/tests/test_route_contract_bridge.py modules/foundups/pfmall/tests/test_gateway_roc_shell.py --import-mode=importlib -o addopts= -p no:cacheprovider --basetemp <outside-checkout-scratch> -q
+```
+
+Fresh green scratch: `C:/Users/user/AppData/Local/Temp/foundups-fx1-green-524d67c6f19d48ff93cf2ada2a739b3f`.
+Node runs with controlled I/O and a scratch working
+directory. These tests verify source behavior and escaped output bytes; the VM
+does not parse browser HTML or prove real browser layout, deployed routing,
+provider authentication, claim verification, chain assets, liquidity or trading.
+No previous aggregate pass count is presented as this run's evidence.
+
+## 2026-10-23 | Bounded request normalization in the existing Mall field
+
+Source baseline: `a048c24071e1a651b161025ba3342f14f3047280`; existing field blob
+`966e59f748422a5aed2cf24694d01c6fe6636626` and property harness blob
+`7cd57d0dcab2682906c20e6da4d2b5611ecb7622`. Read the module interface, roadmap,
+this test inventory and the existing actual-field harness before extending it.
+No test file, external dependency or separate search runtime was added.
+
+Release-cache follow-up verified current main
+`f2e9408ba950a80fe549887db39289e6aff04f27`: member worker blob
+`89393c6f0ef95b6150873d819bb6ce5f45cc2be4` is unchanged from the baseline.
+The matcher is a precached, cache-first shell asset, so advance only its existing
+shell cache from v4 to v5. The existing product state/service-worker harness now
+expects v5 installation and retirement of v4 while retaining poster/property
+cache generations. Its original blob is
+`a7efa398b9a34c27f0acdca2144ac75ef029bbbb`; only version-bound assertions changed.
+
+The unchanged property harness passed first. The added “I'm looking for clothing”
+regression then failed on unchanged source with zero results instead of the three
+synthetic clothing records. After the bounded matcher repair, the same harness
+passes straight/curly contractions, case/spacing, addressed request prefixes,
+reciprocal clothing aliases, retained red/dog qualifiers, original query retention,
+and literal unsupported negation/budget/size terms. The grouped-product cases
+also refuse the new phrases without changing their declared projection.
+
+Fresh Node v24.19.0 execution:
+
+- `node public/member/tests/mall_property_listing_vm.mjs`: exit 0, all checks pass.
+- `node public/member/tests/pfmall_control_dispatcher_vm.mjs`: exit 0, all checks pass.
+- `node public/member/tests/public_discovery_concierge_vm.mjs`: 21 passed, 0 failed,
+  0 skipped.
+- `node public/member/tests/mall_product_state_vm.mjs`: 17 passed; this was the
+  only harness rerun for the subsequent cache-generation change.
+
+The first two harnesses do not emit numeric test totals. Existing navigation,
+grouping, video compatibility and domain-isolation assertions were retained.
+These receipts prove offline source behavior with bounded DOM fixtures, not
+browser layout, deployed inventory, semantic shopping filters, speech, uploads,
+payments or public release. Synthetic clothing records remain test data only.
+
+## 2026-10-21 | CodeQL fixture repair and main reconciliation
+
+Existing property VM now rejects raw script/image markup case-insensitively and
+exercises lower-, upper- and mixed-case payloads through the real field/detail
+owners. Leaf text reads decode escaped text without regex tag stripping; the
+fixture explicitly rejects unsupported non-leaf reads. No production sanitizer,
+scanner policy or suppression changed. The existing domain alias test extracts
+its trusted inline script case-insensitively with tag boundaries.
+
+Research: CodeQL `js/bad-tag-filter` and
+`js/incomplete-multi-character-sanitization` query documentation; existing
+module test inventories and the shared field/plane implementations.
+WSP 00 canonical attempt failed because torch is absent; tracker check passes,
+but no detector witness is claimed. WSP 97 lexical retrieval is bound to
+`c1a4a7eb16afc4f0e51d20797ad3ac88589a7812`, freshness UNKNOWN/index gap true.
+Missing semantic retrieval was supplemented by exact owner reads.
+
+WSP 15 allocation: C2/I4/D4/Impact3 = 13 (P1), bounded CI repair. Execution
+plane is repository maintenance; no WRE service or runtime activation.
+Verification starts with both existing Node fixtures, expands to shared member,
+projector, registry and security-gate tests, then requires exact-head CI.
+Main `1c277a3c0d0524e450ed1dd56d2373480d640ebd` conflicts were limited to
+security records and the generated test registry. Preserve the union of reviewed
+bindings; regenerate the registry with its existing owner. No new exception.
+Deployment and browser interaction remain separate, unverified gates.
+
+Integrated replay (Python 3.12, pytest 9.1.1, plugin auto-load disabled,
+`--import-mode=importlib`): **1673 passed, 3 failed, 0 skipped** across member,
+property wrapper, projector, registry-schema and security-gate suites. The three
+failure IDs are `TestFoundUpHandoff::test_open_link_exists`,
+`TestFoundUpHandoff::test_routing_prefix_surfaced` and
+`TestGestureHints::test_hint_items_present` in `test_navigation_planes.py`.
+All three also fail on exact main `1c277a3c` in the same environment (41 other
+navigation checks pass). No xfail/exclusion added. Initial collection without
+importlib collided on test package names; initial dependency-limited replay had
+missing-jsonschema failures/skips. Installing the declared test dependency and
+using isolated imports removed those coverage gaps. Registry: 1740 tracked test
+files, 270 quarantined; these are inventory counts, not executed test counts.
+
+## 2026-10-18 | Recovered actual Mall product integration
+
+Fresh final recovered-source command:
+
+```bash
+/tmp/move2japan-tests/bin/python -B -m pytest --import-mode=importlib \
+  public/member/tests modules/foundups/move2japan/tests \
+  modules/foundups/public_catalog_projector/tests/test_projector.py \
+  modules/foundups/tests/test_foundup_registry_schema.py -q
+```
+
+Result: **1698 passed, 4 failed, 0 skipped in 11.52 seconds**. The four failures
+are unchanged baseline expectations: navigation's `fv-open-link`,
+`routing_prefix`, obsolete `Tap to play/pause`, and BC0 intent classification of
+“is it expensive to live there”. The original tests and BC0 handler remain
+unchanged from main. No suppression or unrelated repair was added.
+
+Actual source VM receipts (counts overlap with Python wrappers):
+
+- `member_product_boot_vm.mjs`: 21 checks, complete `memberRuntime` inline script
+  with only dynamic imports routed to controlled test modules. Guest startup,
+  Clerk failure/timeout, actual stored admission, no public account writes,
+  missing invite status, sign-out and reversed account reads, same-account
+  generation races, ordinary gate, account return and explicit video entry.
+  Executed from the existing `test_localhost_dev_harness.py` owner.
+- `public_discovery_concierge_vm.mjs`: 21 checks against the actual member plane
+  and product template, real concierge and gestures. Includes visible shared
+  briefing/recommendations, invite action, focus/profile handoff, strict guest
+  revocation, captured callbacks and independent product filters.
+- `mall_product_state_vm.mjs`: 17 checks on actual state/SW source. Separate
+  namespaces, loading captures, bounded returns, deferred video restoration,
+  explicit public caching, network fallback and HTML rejection.
+- `mall_property_listing_vm.mjs`: actual field/plane/gesture behavior, both axes,
+  stable listing identity, empty filters, source safety, modal scroll/focus,
+  restored offsets and preserved ordinary category/grid behavior.
+- Dispatcher VM and independent actual-field/dispatcher composition: geography
+  refuses populated/empty global queries without mutation or success event;
+  shared density and ordinary queries remain functional.
+- Domain `property_search.cjs`: 28 factual catalog, geography, land, price, route
+  and alias checks.
+
+Independent reviewers replayed the field/state, concierge, boot and dispatcher
+boundaries and found no remaining material blocker. The restored field is exact
+blob `966e59f748422a5aed2cf24694d01c6fe6636626`; regenerated harness/account segments
+have fresh receipts, not claims of identical lost bytes. Canonical registry:
+1722 test files, 270 quarantined; generator output matches the previously uploaded
+blob `1af2a9330d932d9d121331152f0d1ac3ddc1e03c`. No registry gate is weakened.
+
+Browser layout, production auth, source availability, payments, live playback and
+real offline browser operation remain outside these VM receipts. The historical
+records below retain their original stage/source scope.
+
+## 2026-10-18 | Responsive shared Mall discovery
+
+Validation on the proposed branch:
+- 251 passed across test_video_mall_field_runtime.py, test_search_mall_concierge_wiring_phase1.py and test_mobile_blockers.py. Two environment config warnings for unavailable asyncio plugin options.
+- Existing pfmall_control_dispatcher_vm.mjs passed.
+- New mall_responsive_browse.mjs passed in headless Chromium: 390/768/1024/1440 viewport widths, both scroll axes, stable grouped indexes, desktop card dragging, query aliases/location, truthful empty results, search during expansion, vertical collapse restoration, saved horizontal position, dispatcher payload validation and legacy grid switching.
+- JavaScript syntax and git diff whitespace checks passed. Independent read-only review found no remaining material regressions after stable-index, category attribute and vertical restoration fixes.
+
+Browser fixture uses 60 synthetic channels and intercepts network requests. This does not establish real authentication, provider playback, Safari/iPad hardware behavior, voice conversation, or personalized ranking. Runtime-owned browser dependencies were used; repository dependencies unchanged.
+
+## 2026-10-17 | Property tiles and shared quick-view runtime
+
+Extended `test_non_video_quickview_actions.py` with a Node runtime check using
+`mall_property_listing_vm.mjs`. Existing dispatcher VM tests stub the render
+APIs and cannot cover this seam; the new fixture executes the actual shared
+gesture/tile/plane scripts with a bounded DOM. It requires only Node built-ins.
+
+Covered: two properties under one FoundUp; separate selection/focus keys;
+wrong-tenant/missing/duplicate identity rejection; tap/Enter/Space/pinch detail;
+arrow navigation; repeated filter/reorder/empty updates without added page
+listeners; inert state and Tab wrapping; HTTPS/no-userinfo source URLs; escaped
+hostile text; ignored property video/token/poster fields; and retained video
+Enter/fullscreen dispatch. Source checks and existing quick-view fixtures are
+retained. First adversarial execution failed on raw angle brackets in an
+attribute; escaping was fixed and the complete runtime replay passed.
+
+Independent review exposed detached focus after detail replacement and vertical
+scroll gestures closing long property details. The DOM fixture now models focus
+loss when innerHTML removes its target; that regression failed before the repair.
+Real gesture-engine touch events verify property scrolling remains open, lateral
+navigation still works, and non-property swipe-up still closes. Outside-dialog
+Tab/Shift-Tab recovery and the property-specific hint are checked as well.
+
+Command: `node public/member/tests/mall_property_listing_vm.mjs`.
+Focused pytest replay: **277 passed** across `test_non_video_quickview_actions.py`
+(including the Node runtime), `test_video_mall_field_runtime.py`,
+`test_tile_keyboard_a11y.py`, and `test_non_video_action_surfaces.py`.
+Two initial source-window regressions were resolved by keeping Enter on the
+existing fullscreen dispatch function and putting preview cleanup first;
+the original assertions were retained.
+Scope: local JavaScript behavior, no network, browser layout, live listings,
+authentication, payment, production deployment or media permission proof.
+
+## 2026-09-21 | Optional public discovery alias behavior (local and independent replay passed)
+
+Extend test_route_contract_bridge.py with the actual inline JavaScript in an isolated Node VM,
+synthetic Promise-based catalog responses and ordered history/render/context observations.
+Final author replay:128 passed; exact base HTML:62 failed/66 passed, with zero forbidden effects.
+The 48 existing cases remain intact;80 new cases cover aliases, paths, ambiguity, eligibility,
+failed history/catalog and membership-before-fetch. Pending/rejected discovery exports a null
+identity; successful canonical identity is preserved. Independent three-owner replay passed271overlapping cases, including these128; CI remains separate.
+No real browser/authentication, external scripts, network, provider or tenant runtime is exercised.
+
 # TestModLog — public/member/tests/
+
+## 2026-09-21 | Public discovery / participation route contract reconciliation
+
+`test_route_contract_bridge.py`: 34 passed / 11 failed on main `f7307291`;
+the final corrected suite has 48 passing tests, no skips (three parser cases added). Retain canonical
+identity, Firebase rewrite ordering, transitional member entry and tenant
+catalog checks. Replace retired public iframe/entry_url/deep-link launch
+expectations with the existing `/member/` participation handoff, scope-free
+public catalog, sanitized projection and safe public-link contracts.
+Inline-script checks exclude full-line comments and retired CSS, which had
+made member-catalog and launch checks pass without testing executable code.
+All HTML, JavaScript, catalogs and auth behavior remain byte-identical to main.
+Initial replay:45 pass. Hosted CodeQL rejected regex extraction of uppercase
+SCRIPT tags; replaced it with stdlib HTMLParser and three casing/attribute
+controls. Final independent replay:48 pass. All11 in-memory mutations rejected; mocked
+Node VM:6 route controls and4 mutations pass. These overlap the same contract;
+no real browser, sign-in or tenant execution. Registry generator updates only
+this module description;1651 entries/269 quarantined, classification unchanged.
+Exact-head CI remains separate. Evidence: canonical RSI backlog. WSP 15/22/97/104.
 
 Test evolution log for the p.fMALL member shell test suite.
 

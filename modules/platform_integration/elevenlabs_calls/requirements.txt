@@ -1,0 +1,2 @@
+# Core adapter: Python >=3.10, standard library only.
+# Microphone and verification dependencies are optional separate files.

@@ -1,5 +1,26 @@
 # Video Indexer Test Suite
 
+## Studio cycle paid-enrichment regression — 2026-11-07
+
+The offline selection `test_shorts_indexing_pass.py`, `test_action_surface.py`
+and `test_indexer_scheduler_order.py` passes **32 tests**. The actual cycle runs
+with fake browser/indexing collaborators and either no key or a synthetic key;
+the direct Gemini constructor and enrichment persistence must remain unused.
+The result retains three indexed pass receipts and `gemini_analysis={}`.
+The same two parameter cases on old source produce one failure (key present)
+and one pass. Existing action tests cover routing adapters; scheduler-order
+checks are source-text assertions, not live execution. No browser/model/provider
+call, video-capable shared route, deployment or saved schedule is qualified.
+The existing `youtube-selected-batch` CI job runs the same selection, requires
+32 non-skipped cases including key presence, and uploads its XML receipt.
+See [the test log](TestModLog.md#2026-11-07--no-unattended-paid-enrichment-after-studio-indexing).
+
+`test_audio_transcript_language.py` also constructs the real batch factory in
+temporary storage to verify omitted/explicit language compatibility, with model
+initialization forbidden. It covers the reused batch and local-file
+language parameters, Japanese/mixed/unknown labels and chunk start positions.
+Its extractor, metadata request and model are fake; no live content changes.
+
 **WSP Compliance**: WSP 5 (Test Coverage), WSP 6 (Test Audit), WSP 49 (Module Structure)
 
 ## Purpose

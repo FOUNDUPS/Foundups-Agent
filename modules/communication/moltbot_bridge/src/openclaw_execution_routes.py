@@ -27,6 +27,31 @@ async def execute_plan(dae: Any, plan: Any) -> str:
     intent = plan.intent
     route = plan.route
 
+    # Explicit story requests only. The outer process keeps its existing plan
+    # permission gate; direct calls also require the existing local trust model.
+    story_match = re.match(r"^\s*(?:kids|eduit) story:", intent.raw_message, re.IGNORECASE)
+    if story_match:
+        if (getattr(intent, "is_authorized_commander", False) is not True
+                or getattr(intent, "channel", None) not in ("voice_repl", "local_repl")):
+            return "BLOCKED: Kids story production requires an authenticated local commander."
+        from uuid import uuid4
+        from modules.foundups.kids_episodes.src.work_order_adapter import (
+            prepare_episode_request, dispatch_episode_request,
+        )
+        try:
+            request = prepare_episode_request(
+                intent.raw_message[story_match.end():], request_id="story_" + uuid4().hex,
+            )
+        except ValueError as exc:
+            return f"BLOCKED: {exc}"
+        # Host-only bindings, never read from user text or ingress metadata.
+        result = dispatch_episode_request(
+            request, wre=dae.wre,
+            workspace=getattr(dae, "kids_story_workspace", None),
+            execution_binding_digest=getattr(dae, "kids_story_execution_binding_digest", None),
+        )
+        return json.dumps(result, ensure_ascii=False)
+
     if route == "holo_index":
         return await execute_query(dae, intent)
     if route == "wre_orchestrator":
@@ -214,7 +239,7 @@ async def execute_command(dae: Any, intent: Any) -> str:
 def _build_wre_command_context(dae: Any, intent: Any) -> Dict[str, Any]:
     """Normalize OpenClaw COMMAND context for WRE entry points.
 
-    Includes parent continuity context for cross-surface tracking (OpenClaw → WRE).
+    Includes parent continuity context for cross-surface tracking (OpenClaw -> WRE).
     """
     ctx: Dict[str, Any] = {
         "type": "orchestration",
@@ -669,18 +694,68 @@ async def execute_automation(dae: Any, intent: Any) -> str:
         return f"Automation error: {exc}"
 
 
+# WAE-L0 (#737): launch/onboard/create/genesis verbs that would otherwise reach a
+# real ``fam_adapter.launch_foundup`` via FAM passthrough. The ImportError fallback
+# below must FAIL CLOSED for these verbs (the WSP 109 genesis gate lives in the
+# orchestrator; if the orchestrator import fails, the gate is unavailable and no
+# launch may proceed). Local/private predicate only - NOT a shared classifier.
+_LAUNCH_ONBOARD_GENESIS_VERBS = (
+    "launch foundup",
+    "launch this foundup",
+    "onboard",
+    "create foundup",
+    "genesis",
+    "go live",
+)
+
+
+def _is_launch_or_onboard_verb(message: str) -> bool:
+    """Detect launch/onboard/create-foundup/genesis verbs (WAE-L0, #737).
+
+    These verbs would reach a real FAM launch via passthrough and therefore MUST
+    pass the WSP 109 genesis gate first. The gate lives in the orchestrator, so if
+    the orchestrator import fails we cannot gate the intent and must fail closed.
+    Defensive against non-string ``raw_message`` (e.g. mock intents).
+    """
+    if not isinstance(message, str):
+        return False
+    msg_lower = message.lower().strip()
+    return any(verb in msg_lower for verb in _LAUNCH_ONBOARD_GENESIS_VERBS)
+
+
 def execute_foundup(dae: Any, intent: Any) -> str:
     """Route FOUNDUP intent through orchestrator entrypoint.
 
     Phase 1 (OC1): Orchestrator dispatches to FAM with safe fallback.
     Phase 2+: Will add genesis validation gate before FAM handoff.
+
+    WAE-L0 (#737): the ImportError fallback fails CLOSED for launch/onboard/create/
+    genesis verbs. The WSP 109 genesis gate lives in the orchestrator; if its import
+    fails the gate is unavailable, so a launch/onboard intent must return NOT_READY
+    rather than reaching ``fam_adapter.launch_foundup`` ungated. Non-launch advisory
+    queries keep the safe FAM passthrough.
     """
     try:
         from .openclaw_foundup_orchestrator import dispatch_foundup
 
         return dispatch_foundup(dae, intent)
     except ImportError as exc:
-        # Fallback: orchestrator unavailable, try direct FAM
+        # WAE-L0 (#737): orchestrator (and thus the WSP 109 genesis gate) is
+        # unavailable. For launch/onboard/create/genesis verbs we FAIL CLOSED - no
+        # ungated path may reach fam_adapter.launch_foundup.
+        if _is_launch_or_onboard_verb(getattr(intent, "raw_message", "")):
+            logger.warning(
+                "[OPENCLAW-DAE] Genesis gate unavailable (orchestrator import "
+                "failed); launch/onboard intent blocked NOT_READY: %s",
+                exc,
+            )
+            return (
+                "FoundUp launch/onboarding is NOT_READY: the WSP 109 genesis gate "
+                "is unavailable (orchestrator import failed), so this request is "
+                "blocked. No FoundUp was started. Required next action: restore the "
+                "FoundUp orchestrator, then retry."
+            )
+        # Non-launch advisory queries: orchestrator unavailable, safe FAM passthrough.
         logger.warning(
             "[OPENCLAW-DAE] Orchestrator unavailable, trying direct FAM: %s", exc
         )
@@ -865,11 +940,15 @@ def _start_training_batch() -> str:
 def execute_improvement(dae: Any, intent: Any) -> str:
     """Route IMPROVEMENT intent (codebase self-improvement requests).
 
-    WSP 97 Truth Boundary:
+    WSP 97 Truth Boundary (WAE-L1):
       - Classifies the improvement request
-      - Returns advisory acknowledgment
+      - OBSERVE -> PROPOSE: emits an ImprovementJob(PENDING, dry_run=True) via
+        the RedDog director (emits a proposal ONLY; executes nothing)
+      - DIRECT: RedDog assigns one direction (recommendation/priority/routing)
+      - Returns advisory acknowledgment with the proposal + RedDog direction
       - Does NOT execute autonomous repairs (not implemented)
       - Does NOT claim repair capability exists
+      - The execution seam (advance_to_execution) fails closed (NOT_READY)
 
     Supported improvement types (classification only):
       - WSP violations (fix violation, fix wsp, wsp violation)
@@ -901,16 +980,74 @@ def execute_improvement(dae: Any, intent: Any) -> str:
         intent.sender,
     )
 
+    # WAE-L1: OBSERVE -> PROPOSE -> DIRECT (dry-run only; executes nothing).
+    # The intent is the observed finding; emit exactly one ImprovementJob
+    # (PENDING, dry_run=True) and let RedDog assign one direction.
+    direction_summary = _emit_and_direct_improvement_proposal(
+        intent, improvement_type
+    )
+
     # WSP 97: Truthful advisory response - no repair execution claims
     return (
         f"**Improvement Intent Recognized**\n\n"
         f"- **Type**: `{improvement_type}`\n"
         f"- **Request**: {intent.extracted_task or intent.raw_message}\n\n"
-        f"**Status**: Classified but not executed.\n\n"
-        f"Autonomous codebase repair is not yet implemented. "
-        f"This intent was recognized and logged for future FMAS integration.\n\n"
+        f"{direction_summary}\n\n"
+        f"**Status**: Proposal emitted (PENDING, dry_run=True). Not executed.\n\n"
+        f"Autonomous codebase repair is not yet implemented. RedDog DIRECTS "
+        f"dry-run proposals; execution requires a hard verifier (L2) and "
+        f"012/DAO approval.\n\n"
         f"_WSP 97: AI surfaces improvement needs. Humans decide execution._"
     )
+
+
+def _emit_and_direct_improvement_proposal(
+    intent: Any,
+    improvement_type: str,
+) -> str:
+    """Emit one PENDING/dry_run ImprovementJob and apply RedDog direction.
+
+    WAE-L1 emission point. Builds a synthetic finding from the intent, runs it
+    through the RedDog director (observe -> propose -> direct), and returns a
+    human-readable summary of the proposal + assigned direction.
+
+    Executes, mutates, dispatches, and merges NOTHING. On any failure it
+    degrades to a truthful advisory note (no overclaim).
+    """
+    try:
+        from modules.infrastructure.wre_core.src.reddog_direction import (
+            RedDogDirector,
+        )
+
+        finding = {
+            "type": improvement_type,
+            "severity": "medium",
+            "message": (intent.extracted_task or intent.raw_message or "")[:200],
+            "source": "openclaw_improvement_intent",
+        }
+        director = RedDogDirector(requested_by="openclaw_improvement_intent")
+        proposals = director.observe_propose_direct([finding])
+        if not proposals:
+            return "**Proposal**: none emitted (finding not parseable)."
+
+        proposal = proposals[0]
+        job = proposal.job
+        return (
+            f"**Proposal** (RedDog WAE-L1):\n"
+            f"- **Job**: `{job.job_id}` "
+            f"(status=`{job.status.value}`, dry_run=`{job.dry_run}`)\n"
+            f"- **Risk**: `{job.risk_level.value}` | "
+            f"low-fruit=`{job.wsp15_priority.low_lying_fruit}`\n"
+            f"- **RedDog direction**: `{proposal.direction.value}` "
+            f"(ready_to_advance=`{proposal.ready_to_advance}`)\n"
+            f"- _{proposal.note}_"
+        )
+    except Exception as exc:  # pragma: no cover - defensive advisory degradation
+        logger.warning(
+            "[OPENCLAW-DAE] [IMPROVEMENT] RedDog proposal emission failed: %s",
+            exc,
+        )
+        return "**Proposal**: classified only (RedDog director unavailable)."
 
 
 def _try_memory_query(dae: Any, raw_message: str) -> Optional[str]:

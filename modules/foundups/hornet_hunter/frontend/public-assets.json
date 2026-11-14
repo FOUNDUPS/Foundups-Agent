@@ -1,0 +1,59 @@
+{
+  "source_commit": "7506868ef3e8f2858a68c871d39343d74b57a0e0",
+  "assets": [
+    {
+      "name": "bamboo-filming.jpg",
+      "url": "https://hornethunter.com/assets/bamboo-filming.jpg",
+      "sha256": "ea5d04cccffa48c7e78bc7aefe4502f754ec9c55770cb6dfa855e83405c2207c",
+      "bytes": 630405
+    },
+    {
+      "name": "field-team-private.png",
+      "url": "https://hornethunter.com/assets/field-team-private.png",
+      "sha256": "6438bc68277edd771117bf9d3a2e774dbeb5986ee603229afd0c9a3b72e9e502",
+      "bytes": 3196181
+    },
+    {
+      "name": "filming-camera-private.png",
+      "url": "https://hornethunter.com/assets/filming-camera-private.png",
+      "sha256": "3595fdcd27d4ed5f8b92288d5957f1793a4d4ca50a43049ee6e379ee699ded9a",
+      "bytes": 3562326
+    },
+    {
+      "name": "filming-preparation.jpg",
+      "url": "https://hornethunter.com/assets/filming-preparation.jpg",
+      "sha256": "6ea3ca363815ee4b5979ed0b50f34f30a8d504ce80a0a8d569a4cc6eb89885e7",
+      "bytes": 239405
+    },
+    {
+      "name": "japan-evening-private.png",
+      "url": "https://hornethunter.com/assets/japan-evening-private.png",
+      "sha256": "70df9eaec8be80e1bf1b2bd0668c0d33687d7ee8d70b97683021dbc40169d77c",
+      "bytes": 2238361
+    },
+    {
+      "name": "japan-field.jpg",
+      "url": "https://hornethunter.com/assets/japan-field.jpg",
+      "sha256": "a42768a3d8cdc02fad5141d5db641a44b5a711d23f48fd4e8f2f97a2687d537a",
+      "bytes": 1022692
+    },
+    {
+      "name": "japan-table-private.png",
+      "url": "https://hornethunter.com/assets/japan-table-private.png",
+      "sha256": "55f848866ed04bd3d05737a9d8f96fd22d4f15443bef3af9dc9481cd55947910",
+      "bytes": 2381560
+    },
+    {
+      "name": "manual-hornet.jpg",
+      "url": "https://hornethunter.com/assets/manual-hornet.jpg",
+      "sha256": "3fe7c5458e72182225a9d70a11e64a584a8d6205d29d07526b3f67e4a675462e",
+      "bytes": 717627
+    },
+    {
+      "name": "michael-trout.webp",
+      "url": "https://hornethunter.com/assets/michael-trout.webp",
+      "sha256": "f427153f9b2b6ad278e1095fb843c2210c680eeadffc0fab600af19321de2adb",
+      "bytes": 216950
+    }
+  ]
+}

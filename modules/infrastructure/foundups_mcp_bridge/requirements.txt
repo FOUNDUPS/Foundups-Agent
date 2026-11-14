@@ -1,2 +1,5 @@
-# FoundUps MCP Bridge dependencies
-# No external dependencies for v1 - uses stdlib only
+# Canonical Streamable HTTP runtime candidate (2026-10-26).
+fastmcp==3.4.11
+mcp==1.30.0
+pydantic==2.12.3
+uvicorn==0.38.0

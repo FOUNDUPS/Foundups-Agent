@@ -40,6 +40,7 @@ Slice: HXA23_HERMES_GUARD_INTEGRATION_PHASE1
 from __future__ import annotations
 
 import fnmatch
+import importlib.util
 import json
 import logging
 import os
@@ -607,9 +608,123 @@ class HermesJobExecutor:
             return os.path.abspath(env_root)
         return os.getcwd()
 
+    def _resolve_vendor_delegate_path(self) -> Path:
+        """
+        Resolve the absolute path to the vendored delegate_tool.py.
+
+        Resolution order:
+          1. workspace_root / vendor/hermes-agent/tools/delegate_tool.py
+          2. Repo root detected from this file's ancestry
+
+        Returns:
+            Path to delegate_tool.py (may not exist)
+        """
+        relative = Path("vendor") / "hermes-agent" / "tools" / "delegate_tool.py"
+
+        # Try workspace_root first (set by constructor or env)
+        if self.workspace_root:
+            candidate = Path(self.workspace_root) / relative
+            if candidate.is_file():
+                return candidate
+
+        # Fallback: walk from this file's location to find repo root
+        # hermes_job_executor.py lives at modules/infrastructure/wre_core/src/
+        this_dir = Path(__file__).resolve().parent
+        # Walk up to find a directory containing the vendor submodule
+        for ancestor in [this_dir] + list(this_dir.parents):
+            candidate = ancestor / relative
+            if candidate.is_file():
+                return candidate
+
+        # Return workspace_root-based path (caller checks .is_file())
+        return Path(self.workspace_root) / relative
+
+    def _load_delegate_task_from_vendor_path(self) -> bool:
+        """
+        Load delegate_task from vendored Hermes path using file-path import.
+
+        Uses importlib.util.spec_from_file_location to load the module
+        from vendor/hermes-agent/tools/delegate_tool.py (hyphenated path)
+        which cannot be addressed by a dotted Python import statement.
+
+        Validates the loaded module has a callable 'delegate_task' attribute.
+
+        Returns:
+            True if load succeeded and delegate_task is callable, False otherwise
+        """
+        vendor_path = self._resolve_vendor_delegate_path()
+
+        if not vendor_path.is_file():
+            self._import_error = (
+                f"Vendor delegate tool not found: {vendor_path}"
+            )
+            logger.warning(
+                "[HERMES-EXEC] Vendor delegate tool not found: %s",
+                vendor_path,
+            )
+            return False
+
+        try:
+            spec = importlib.util.spec_from_file_location(
+                "hermes_delegate_tool", str(vendor_path)
+            )
+            if spec is None or spec.loader is None:
+                self._import_error = (
+                    f"Could not create import spec for {vendor_path}"
+                )
+                logger.warning(
+                    "[HERMES-EXEC] Could not create import spec for %s",
+                    vendor_path,
+                )
+                return False
+
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+
+            delegate_fn = getattr(module, "delegate_task", None)
+            if delegate_fn is None or not callable(delegate_fn):
+                self._import_error = (
+                    f"Module {vendor_path} does not define callable delegate_task"
+                )
+                logger.warning(
+                    "[HERMES-EXEC] Module %s does not define callable delegate_task",
+                    vendor_path,
+                )
+                return False
+
+            self._delegate_task_fn = delegate_fn
+            logger.info(
+                "[HERMES-EXEC] delegate_task loaded from vendor path: %s",
+                vendor_path,
+            )
+            return True
+
+        except ImportError as exc:
+            self._import_error = (
+                f"Import error loading {vendor_path}: {exc}"
+            )
+            logger.warning(
+                "[HERMES-EXEC] Import error loading vendor delegate: %s",
+                exc,
+            )
+            return False
+        except Exception as exc:
+            self._import_error = (
+                f"Unexpected error loading {vendor_path}: {exc}"
+            )
+            logger.error(
+                "[HERMES-EXEC] Unexpected error loading vendor delegate: %s",
+                exc,
+            )
+            return False
+
     def _lazy_import_delegate_task(self) -> bool:
         """
         Lazy-load Hermes delegate_task function.
+
+        Uses file-path import via importlib.util.spec_from_file_location
+        to resolve vendor/hermes-agent/tools/delegate_tool.py (hyphenated
+        vendor submodule path that cannot be addressed by dotted import).
 
         Returns:
             True if import succeeded, False otherwise
@@ -618,27 +733,7 @@ class HermesJobExecutor:
             return self._delegate_task_fn is not None
 
         self._import_attempted = True
-
-        try:
-            from vendor.hermes_agent.tools.delegate_tool import delegate_task
-
-            self._delegate_task_fn = delegate_task
-            logger.info("[HERMES-EXEC] delegate_task imported successfully")
-            return True
-        except ImportError as exc:
-            self._import_error = str(exc)
-            logger.warning(
-                "[HERMES-EXEC] Failed to import delegate_task: %s",
-                exc,
-            )
-            return False
-        except Exception as exc:
-            self._import_error = f"Unexpected error: {exc}"
-            logger.error(
-                "[HERMES-EXEC] Unexpected import error: %s",
-                exc,
-            )
-            return False
+        return self._load_delegate_task_from_vendor_path()
 
     def _execute_controlled_delegate(
         self,
@@ -1155,6 +1250,60 @@ class HermesJobExecutor:
             job_id=job.job_id,
         )
 
+    def _writeback_token_verdict(
+        self,
+        job: "FoundUpJob",
+        token_validation_result: Optional[TokenValidationResult],
+    ) -> None:
+        """
+        Write the SERVER-AUTHORED token validation verdict into job.policy_flags.
+
+        HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1 (#746):
+        PolicyFlags.from_dict forces all capability_token_* flags to False on
+        deserialization (untrusted input). This method is the POSITIVE CONTROL:
+        it writes the real runtime validator verdict back onto the job BEFORE
+        the destructive-action guard reads it, so the guard sees server-authored
+        truth, never attacker-supplied flags.
+
+        Field sources (read from the real TokenValidationResult):
+          - capability_token_checked: True. execute() always runs token
+            validation, so a check was always performed.
+          - capability_token_present: a token was present in the payload iff the
+            validator returned a (non-None) result.
+          - capability_token_validated: the validator marked the token valid.
+          - capability_token_scope_authorized: the token is valid AND its scopes
+            authorize the classified action class (token_valid already implies
+            no scope/action-class mismatch; ``not scope_action_class_mismatch``
+            is a defensive belt-and-suspenders against future result shapes).
+
+        NOTE: security_gate_* is intentionally NOT written here. There is no
+        security-gate evaluator in this executor (the only writer of
+        security_gate_* is the separate
+        modules/foundups/agent/.../hermes_foundup_job_executor.py). Leaving it at
+        the server-default False keeps D3 blocked for valid tokens. Wiring a real
+        security-gate verdict is out of scope (future).
+
+        Args:
+            job: Source FoundUpJob (policy_flags mutated in place).
+            token_validation_result: Result from _validate_token_if_present
+                (None when no token was present in the payload).
+        """
+        if job.policy_flags is None:
+            return
+
+        result = token_validation_result
+        token_present = result is not None
+        token_valid = bool(token_present and result.token_valid)
+        scope_authorized = bool(
+            token_valid and not result.scope_action_class_mismatch
+        )
+
+        # A check is always performed: execute() always runs validation.
+        job.policy_flags.capability_token_checked = True
+        job.policy_flags.capability_token_present = token_present
+        job.policy_flags.capability_token_validated = token_valid
+        job.policy_flags.capability_token_scope_authorized = scope_authorized
+
     def _evaluate_destructive_action_guard(
         self,
         job: "FoundUpJob",
@@ -1457,6 +1606,14 @@ class HermesJobExecutor:
                 duration_seconds=time.monotonic() - start_time,
                 guard_result=None,  # Guard not yet evaluated
             )
+
+        # Step 2.4: HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1 (#746)
+        # Write the SERVER-AUTHORED token validation verdict into
+        # job.policy_flags BEFORE the guard reads it. PolicyFlags.from_dict
+        # zeroed all capability_token_* on (untrusted) deserialization; this is
+        # the positive control that re-establishes server authority from the
+        # real runtime validator result. MUST run before guard evaluation.
+        self._writeback_token_verdict(job, token_validation_result)
 
         # Step 2.5: HXA23 - Evaluate destructive action guard
         guard_result = self._evaluate_destructive_action_guard(job, request)
@@ -2177,9 +2334,7 @@ No implementation exists. No production code was generated.
             return None
 
 
-# ---------------------------------------------------------------------------
 # Module-Level Convenience Functions
-# ---------------------------------------------------------------------------
 
 _executor_singleton: Optional[HermesJobExecutor] = None
 
@@ -2200,10 +2355,11 @@ def get_executor(
     return _executor_singleton
 
 
-def execute_foundup_job(job: "FoundUpJob") -> HermesDelegationResult:
-    """
-    Convenience function to execute FoundUpJob via Hermes.
-
-    Uses default singleton executor with dry_run=True.
-    """
-    return get_executor().execute(job)
+def execute_foundup_job(
+    job: "FoundUpJob", *, force_dry_run: bool = False
+) -> HermesDelegationResult:
+    """Use an isolated dry executor when forced; otherwise retain the singleton."""
+    if type(force_dry_run) is not bool:
+        raise TypeError("force_dry_run must be a boolean")
+    executor = HermesJobExecutor(dry_run=True) if force_dry_run else get_executor()
+    return executor.execute(job)

@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0.0",
+  "record_type": "reddog_session_closeout",
+  "session_id": "2026-06-02__hermes-wsl-docker-bootstrap",
+  "source": "reddog_session",
+  "captured_at": "2026-06-02T12:00:00Z",
+  "lane": "architect",
+  "work_summary": "Hermes Agent installed and bounded in WSL Ubuntu for future delegation work. Hermes version 0.15.1 verified; install path /home/undaodu/.hermes. Terminal backend set to Docker; Docker Desktop WSL integration for Ubuntu confirmed working (docker run --rm hello-world passed). 'hermes doctor' confirms docker daemon, terminal tool, and file tool available. ripgrep installed in WSL. OpenClaw import preview was shown but cancelled - no OpenClaw migration applied. Nous Portal login was started but cancelled/not completed. Messaging/gateway not configured. FoundUps repo source was not changed. This capture pairs with the read-only HERMES_NOUS_AGENT_DELEGATE_BINDING_AUDIT_PHASE1 (PR #745), which found the WRE to vendored delegate_task binding is RUNTIME_DEPENDENCY_MISSING with an IMPORT_PATH_DRIFT (vendor.hermes_agent vs vendor/hermes-agent); real delegation remains BLOCKED_REAL_DELEGATION_NOT_IMPLEMENTED with HERMES_DELEGATE_ENABLED default off. Remaining issues are optional API/provider/tool config still pending, an invalid DeepSeek provider key (value not stored), and an agent-browser npm audit warning. No API key values, OAuth codes, or raw terminal transcript are stored in this record.",
+  "pr_refs": [],
+  "slice_refs": [
+    "HERMES_WSL_DOCKER_BOOTSTRAP_CAPTURE_PHASE1",
+    "HERMES_NOUS_AGENT_DELEGATE_BINDING_AUDIT_PHASE1"
+  ],
+  "decisions": [
+    "Docker containment chosen for the Hermes terminal backend",
+    "OpenClaw import blocked pending HERMES_OPENCLAW_IMPORT_PREVIEW_AUDIT_PHASE1",
+    "Messaging/gateway blocked pending HERMES_POLICY_AND_TOOL_PERMISSION_AUDIT_PHASE1"
+  ],
+  "carry_forward": [
+    "HERMES_NOUS_AGENT_DELEGATE_BINDING_AUDIT_PHASE1",
+    "HERMES_OPENCLAW_IMPORT_PREVIEW_AUDIT_PHASE1",
+    "HERMES_POLICY_AND_TOOL_PERMISSION_AUDIT_PHASE1"
+  ],
+  "redaction_notes": "Curated summary only; no raw terminal transcript. No API key values, OAuth/login codes, or .env contents stored. The install path is a WSL home path recorded for operational recovery; the username segment is the public 012 handle, not a secret.",
+  "main_head_sha": "d602d874b",
+  "gaps": [
+    "Optional API/provider/tool configuration not completed",
+    "Invalid DeepSeek provider key present (value not stored)",
+    "agent-browser npm audit warning unresolved",
+    "Nous Portal login not completed; messaging/gateway not configured"
+  ]
+}

@@ -79,6 +79,18 @@ from destructive_action_guard import (
     GuardBlockReasonCode,
 )
 
+# HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1 (#746):
+# Import the token issuer via the FULL package path so the issued
+# CapabilityToken's class identity matches the executor's internal import
+# (the executor checks isinstance(token, CapabilityToken)).
+from pathlib import Path as _Path
+_PROJECT_ROOT = _Path(__file__).parent.parent.parent.parent.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
+from modules.infrastructure.wre_core.src.capability_token_validator import (
+    LocalCapabilityTokenIssuer,
+)
+
 
 # ===========================================================================
 # SECTION 1: Test Fixtures
@@ -172,8 +184,14 @@ class TestPolicyFlagsSerialization:
         assert d["capability_token_validated"] is False
         assert d["capability_token_scope_authorized"] is False
 
-    def test_from_dict_restores_capability_token_fields(self):
-        """from_dict() should restore all capability token fields."""
+    def test_from_dict_sanitizes_capability_token_fields(self):
+        """from_dict() FORCES all capability token fields False (#746).
+
+        HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1: capability token state is
+        server-authored and untrusted on deserialization. A payload presenting
+        all four flags True is sanitized to all-False; server authority is
+        re-established only by the executor's runtime validator write-back.
+        """
         data = {
             "capability_token_checked": True,
             "capability_token_present": True,
@@ -182,10 +200,10 @@ class TestPolicyFlagsSerialization:
         }
         flags = PolicyFlags.from_dict(data)
 
-        assert flags.capability_token_checked is True
-        assert flags.capability_token_present is True
-        assert flags.capability_token_validated is True
-        assert flags.capability_token_scope_authorized is True
+        assert flags.capability_token_checked is False
+        assert flags.capability_token_present is False
+        assert flags.capability_token_validated is False
+        assert flags.capability_token_scope_authorized is False
 
     def test_from_dict_missing_fields_default_false(self):
         """from_dict() with missing fields should default to False."""
@@ -197,8 +215,13 @@ class TestPolicyFlagsSerialization:
         assert flags.capability_token_validated is False
         assert flags.capability_token_scope_authorized is False
 
-    def test_roundtrip_preserves_all_fields(self):
-        """to_dict/from_dict roundtrip should preserve all fields."""
+    def test_roundtrip_sanitizes_server_authored_preserves_dry_run(self):
+        """Roundtrip sanitizes server-authored flags; dry_run preserved (#746).
+
+        to_dict faithfully serializes server-authored True object state, but
+        from_dict zeroes every gate/token flag on the untrusted path. Only
+        dry_run_mode survives the roundtrip.
+        """
         original = PolicyFlags(
             security_gate_checked=True,
             security_gate_passed=True,
@@ -209,15 +232,21 @@ class TestPolicyFlagsSerialization:
             dry_run_mode=True,
         )
         data = original.to_dict()
+        # to_dict preserves server-authored object state
+        assert data["security_gate_passed"] is True
+        assert data["capability_token_validated"] is True
+
         restored = PolicyFlags.from_dict(data)
 
-        assert restored.security_gate_checked == original.security_gate_checked
-        assert restored.security_gate_passed == original.security_gate_passed
-        assert restored.capability_token_checked == original.capability_token_checked
-        assert restored.capability_token_present == original.capability_token_present
-        assert restored.capability_token_validated == original.capability_token_validated
-        assert restored.capability_token_scope_authorized == original.capability_token_scope_authorized
-        assert restored.dry_run_mode == original.dry_run_mode
+        # Server-authored gate/token flags sanitized to False on deserialization
+        assert restored.security_gate_checked is False
+        assert restored.security_gate_passed is False
+        assert restored.capability_token_checked is False
+        assert restored.capability_token_present is False
+        assert restored.capability_token_validated is False
+        assert restored.capability_token_scope_authorized is False
+        # Operator-authored flag preserved
+        assert restored.dry_run_mode is True
 
 
 # ===========================================================================
@@ -242,9 +271,15 @@ class TestJobSerializationWithCapabilityToken:
         assert policy_data["capability_token_checked"] is True
         assert policy_data["capability_token_present"] is True
 
-    def test_job_from_dict_restores_capability_token_flags(self):
-        """Job from_dict() should restore capability token flags."""
+    def test_job_from_dict_sanitizes_capability_token_flags(self):
+        """Job from_dict() FORCES capability token flags False (#746).
+
+        A serialized job whose payload pre-set the capability token flags True
+        is sanitized on the untrusted FoundUpJob.from_dict path; the bypass is
+        closed. Server authority comes only from executor write-back.
+        """
         job = create_job(tenant_id="t", requested_action="build_foundup")
+        # Server-authored object state (pre-serialization)
         job.policy_flags.capability_token_checked = True
         job.policy_flags.capability_token_present = True
         job.policy_flags.capability_token_validated = True
@@ -253,10 +288,11 @@ class TestJobSerializationWithCapabilityToken:
         data = job.to_dict()
         restored = FoundUpJob.from_dict(data)
 
-        assert restored.policy_flags.capability_token_checked is True
-        assert restored.policy_flags.capability_token_present is True
-        assert restored.policy_flags.capability_token_validated is True
-        assert restored.policy_flags.capability_token_scope_authorized is True
+        # Untrusted deserialization zeroes the capability token flags
+        assert restored.policy_flags.capability_token_checked is False
+        assert restored.policy_flags.capability_token_present is False
+        assert restored.policy_flags.capability_token_validated is False
+        assert restored.policy_flags.capability_token_scope_authorized is False
 
 
 # ===========================================================================
@@ -379,19 +415,30 @@ class TestAllFourTrueAllowsD3SandboxDryRun:
     """Test that all four capability token flags True allows D3 sandbox dry-run."""
 
     def test_all_four_true_with_security_gate_allows_d3(self, temp_workspace):
-        """D3 sandbox allowed when all four token flags True AND security gate passed."""
+        """D3 sandbox allowed with a REAL valid token AND security gate passed.
+
+        HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1 (#746): capability_token_*
+        flags are now SERVER-AUTHORED by the executor's runtime write-back, so a
+        REAL valid token must be supplied in the payload (forging the flags no
+        longer works). security_gate_* is still set by direct (server-authored)
+        assignment because this executor has no security-gate evaluator.
+        """
+        issuer = LocalCapabilityTokenIssuer()
+        token = issuer.issue_token(
+            subject="agent_hxa24",
+            audience="wre-local",
+            scopes=["d3:sandbox"],  # authorizes D3
+            allowed_actions=["build_foundup"],
+            allowed_paths=["modules/foundups"],
+        )
         executor = HermesJobExecutor(workspace_root=temp_workspace, dry_run=True)
         job = create_job(
             tenant_id="t1",
             requested_action="build_foundup",
             foundup_id="test",
+            payload={"capability_token": token},  # REAL token (server-authored verdict)
         )
-        # Set all capability token flags True
-        job.policy_flags.capability_token_checked = True
-        job.policy_flags.capability_token_present = True
-        job.policy_flags.capability_token_validated = True
-        job.policy_flags.capability_token_scope_authorized = True
-        # Also need security gate for D3
+        # Security gate set by direct assignment (server-authored; no evaluator here)
         job.policy_flags.security_gate_checked = True
         job.policy_flags.security_gate_passed = True
 
@@ -403,6 +450,9 @@ class TestAllFourTrueAllowsD3SandboxDryRun:
             with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
                 result = executor.execute(job)
 
+                # Write-back promoted the capability flags from the real verdict
+                assert job.policy_flags.capability_token_validated is True
+                assert job.policy_flags.capability_token_scope_authorized is True
                 # With all gates passing, D3 should be allowed as dry-run
                 # Guard allows, but overall status is SIMULATED (dry_run=True)
                 assert result.guard_result["allowed"] is True
@@ -410,19 +460,29 @@ class TestAllFourTrueAllowsD3SandboxDryRun:
                 assert result.status == HermesExecutionStatus.SIMULATED
 
     def test_all_four_true_but_missing_security_gate_blocks_d3(self, temp_workspace):
-        """D3 blocked when all token flags True BUT security gate not passed."""
+        """D3 blocked with a REAL valid token but security gate not passed.
+
+        HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1 (#746): the capability token
+        verdict is server-authored from a real token, so the capability flags go
+        True via write-back; but security_gate_passed stays False, so the guard
+        blocks on MISSING_SECURITY_GATE.
+        """
+        issuer = LocalCapabilityTokenIssuer()
+        token = issuer.issue_token(
+            subject="agent_hxa24",
+            audience="wre-local",
+            scopes=["d3:sandbox"],
+            allowed_actions=["build_foundup"],
+            allowed_paths=["modules/foundups"],
+        )
         executor = HermesJobExecutor(workspace_root=temp_workspace, dry_run=True)
         job = create_job(
             tenant_id="t1",
             requested_action="build_foundup",
             foundup_id="test",
+            payload={"capability_token": token},  # REAL valid token
         )
-        # Set all capability token flags True
-        job.policy_flags.capability_token_checked = True
-        job.policy_flags.capability_token_present = True
-        job.policy_flags.capability_token_validated = True
-        job.policy_flags.capability_token_scope_authorized = True
-        # But security gate NOT passed
+        # Security gate NOT passed (server-authored)
         job.policy_flags.security_gate_checked = True
         job.policy_flags.security_gate_passed = False  # Not passed
 
@@ -434,7 +494,9 @@ class TestAllFourTrueAllowsD3SandboxDryRun:
             with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
                 result = executor.execute(job)
 
-                # Security gate failed
+                # Capability token verdict promoted by write-back...
+                assert job.policy_flags.capability_token_validated is True
+                # ...but security gate failed -> blocked
                 assert result.status == HermesExecutionStatus.BLOCKED_BY_DESTRUCTIVE_ACTION_GUARD
                 assert result.guard_result["reason_code"] == "MISSING_SECURITY_GATE"
 

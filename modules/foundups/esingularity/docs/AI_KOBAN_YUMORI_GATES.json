@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0.0",
+  "date": "2026-10-13",
+  "execution_origin": "012_DIRECTED_WORK_RESEARCH_NOT_AUTO_SEND",
+  "rules": [
+    "First inspect canonical repo roadmap + both Moshpits + Gmail Sent/Inbox/current Drafts + Contacts/Email Log/Action Queue/Correspondence Routing",
+    "Deduplicate provider MID/organization/ask before any follow-up",
+    "No municipal property permission can be supplied by prefecture or utility",
+    "No utility study without demand location, load, desired supply date and appropriate retailer/authorization",
+    "No capital or operating commitment without evidence-backed demand and operator agreement"
+  ],
+  "states": [
+    {
+      "id": "RECONCILE",
+      "yes": "VALIDATE_ACTIVE_ASK",
+      "no": "REPAIR_EXISTING_EVENT_ONLY"
+    },
+    {
+      "id": "VALIDATE_ACTIVE_ASK",
+      "yes": "AUTHORITY",
+      "no": "WAIT_OR_CLOSE"
+    },
+    {
+      "id": "AUTHORITY",
+      "yes": "DEMAND",
+      "no": "WAIT_CITY_OR_OWNER;PARALLEL_RESEARCH_OK"
+    },
+    {
+      "id": "DEMAND",
+      "yes": "GRID_ROUTE",
+      "no": "CUSTOMER_INTERVIEWS_AND_NODE_SIZING"
+    },
+    {
+      "id": "GRID_ROUTE",
+      "yes": "ENGINEERING",
+      "no": "UTILITY_PRE_STUDY_HOLD"
+    },
+    {
+      "id": "ENGINEERING",
+      "yes": "FINANCE",
+      "no": "QUALIFIED_TECHNICAL_REVIEW"
+    },
+    {
+      "id": "FINANCE",
+      "yes": "AUTHORIZED_PILOT",
+      "no": "PIVOT_OR_REDUCE_SCOPE"
+    }
+  ],
+  "parallel_lanes": {
+    "prefecture": "Energy/GX policy coordination; no power allocation established",
+    "city": "Hanyu/Shimousaka Form1 answer; Nov30/Dec15 proposal gates",
+    "sukatto": "Separate legal/procurement route, optional",
+    "regional": "Official-domain facility leads to be de-duped; no automatic promotion to portfolio",
+    "brain": "Google Docs Moshpit is human projection; native Breadcrumbs/Brain ingestion unverified"
+  },
+  "last_provider_reply": {
+    "mid": "1a11e5995aa26b04",
+    "tid": "1a0db86ea80cfbe6",
+    "date": "2026-10-09",
+    "state": "PROCEDURE_ANSWERED",
+    "power_committed": false
+  }
+}

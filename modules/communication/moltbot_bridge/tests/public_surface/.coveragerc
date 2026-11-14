@@ -1,0 +1,10 @@
+[run]
+branch = True
+include =
+    */reddog_public_policy.py
+    */reddog_public_session_gate.py
+    */reddog_public_http.py
+
+[report]
+fail_under = 90
+show_missing = True

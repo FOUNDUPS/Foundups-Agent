@@ -1,0 +1,696 @@
+openapi: 3.1.0
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
+info:
+  title: Hub-and-Spoke Public Research Network API
+  version: 0.1.0
+  summary: Prospective service contract; no API server is implemented by this repository.
+  description: Public-source task leases, signed submissions and independent audits. Every endpoint described
+    here is a roadmap interface. Relative server path becomes meaningful only after an operator deploys
+    and verifies a concrete HTTPS origin. Restricted congressional, tax, SAR, grand-jury, private-account
+    or privileged evidence is prohibited. Administrative enrollment, auditor allocation and human legal/privacy
+    approval are separate controls; there is no automatic publication, merge, prosecutor contact or official-vault
+    access.
+servers:
+- url: /api/v1
+  description: Relative design base path; not evidence of a running service.
+security:
+- bearerAuth: []
+paths:
+  /auth/challenge:
+    post:
+      operationId: issueChallenge
+      summary: Issue a short-lived nonce to an enrolled principal
+      description: Design contract, not an implemented endpoint. Bearer scope challenge:issue required.
+        key_id must be bound to the caller; challenge has >=256 bits unpredictable entropy and expires
+        within 300 seconds. Does not enroll keys or grant task authority. Revoke/disable checks precede
+        issuance.
+      parameters:
+      - &id007
+        name: Idempotency-Key
+        in: header
+        required: true
+        description: Unique per authenticated principal and operation; retained for at least 24 hours.
+          Identical canonical body replay returns original response before nonce re-consumption. A different
+          body using the same key returns 409.
+        schema:
+          type: string
+          minLength: 16
+          maxLength: 128
+          pattern: ^[A-Za-z0-9_-]+$
+      - &id001
+        name: X-Request-ID
+        in: header
+        required: false
+        schema: &id013
+          type: string
+          pattern: ^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChallengeRequest'
+      responses:
+        '201':
+          description: Challenge issued for exactly one future operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Challenge'
+        '400': &id002
+          $ref: '#/components/responses/Error'
+        '401': &id003
+          $ref: '#/components/responses/Error'
+        '403': &id004
+          $ref: '#/components/responses/Error'
+        '409': &id008
+          $ref: '#/components/responses/Error'
+        '410': &id009
+          $ref: '#/components/responses/Error'
+        '413': &id010
+          $ref: '#/components/responses/Error'
+        '415': &id011
+          $ref: '#/components/responses/Error'
+        '422': &id012
+          $ref: '#/components/responses/Error'
+        '429': &id005
+          $ref: '#/components/responses/RateLimited'
+        '503': &id006
+          $ref: '#/components/responses/Unavailable'
+  /bounties/next:
+    get:
+      operationId: previewNextBounty
+      summary: Read-only preview of an eligible public research task
+      description: Bearer scope bounty:read required. This operation has no reservation or claim side
+        effect. Response 204 means no eligible work; clients stop quietly. Use ETag for caching and retry
+        policy for transient failures.
+      parameters:
+      - name: domain
+        in: query
+        schema:
+          type: string
+          enum:
+          - rules
+          - forensics
+          - state-law
+          - litigation
+          - methods
+      - name: If-None-Match
+        in: header
+        schema:
+          type: string
+          maxLength: 200
+      - *id001
+      responses:
+        '200':
+          description: Eligible task preview; version must be supplied when claiming.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bounty'
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: Opaque representation validator; not a lease.
+        '204':
+          description: No eligible task. No body and no lease.
+        '304':
+          description: Preview unchanged. No body.
+        '400': *id002
+        '401': *id003
+        '403': *id004
+        '429': *id005
+        '503': *id006
+  /bounties/{id}/claim:
+    post:
+      operationId: claimBounty
+      summary: Atomically acquire a bounded research lease
+      description: Bearer scope bounty:claim and a valid proof with purpose claim required. Compare-and-swap
+        expected_bounty_version, availability and lease expiry in one transaction; grant at most one active
+        lease. Increment monotonic fencing token on reassignment. agent_id must belong to caller. No implied
+        third-party data access. No renewal endpoint in this version.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema: &id014
+          type: string
+          pattern: ^SPOKE-[0-9]{3,}$
+      - *id007
+      - *id001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignedClaim'
+      responses:
+        '201':
+          description: Exclusive lease created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lease'
+        '400': *id002
+        '401': *id003
+        '403': *id004
+        '409': *id008
+        '410': *id009
+        '413': *id010
+        '415': *id011
+        '422': *id012
+        '429': *id005
+        '503': *id006
+  /evidence/submit:
+    post:
+      operationId: submitEvidence
+      summary: Quarantine a signed public packet for independent review
+      description: Bearer scope evidence:submit and proof purpose submit required. Enforce live lease
+        and fencing token, task ownership, packet task_id=bounty_id, schema and semantic checks, public-only
+        disclosure, request size <=2097152 bytes and max1000 claims/sources. Return 410 on expired lease;
+        409 for stale fence, assignment conflict or idempotency conflict. Recompute packet hash separately
+        from signed outer payload hash. No arbitrary attachment fetch and no automatic GitHub PR/merge.
+      parameters:
+      - *id007
+      - *id001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignedSubmission'
+      responses:
+        '202':
+          description: Packet accepted into public-data quarantine; not published or validated as true.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionReceipt'
+        '400': *id002
+        '401': *id003
+        '403': *id004
+        '409': *id008
+        '410': *id009
+        '413': *id010
+        '415': *id011
+        '422': *id012
+        '429': *id005
+        '503': *id006
+  /evidence/audit:
+    post:
+      operationId: submitEvidenceAudit
+      summary: Record an independently signed claim-level audit
+      description: Bearer scope evidence:audit and proof purpose audit required. Server verifies assignment,
+        key, independent enrolled operator, author/conflict exclusions, immutable packet digest, full
+        claim coverage and permitted verdict. Three eligible approve verdicts from distinct independent
+        operators on one digest create only human-review eligibility. Any unsupported/inconclusive claim
+        or dissent stops eligibility; new packet digest requires fresh audits. Require every supported
+        outcome to have independently retrieved matching primary source bytes and substantive reason.
+        A signature or live URL never proves support. Limit request size to2097152 bytes.
+      parameters:
+      - *id007
+      - *id001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignedAudit'
+      responses:
+        '202':
+          description: Audit recorded and gate recomputed; human review remains mandatory.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditReceipt'
+        '400': *id002
+        '401': *id003
+        '403': *id004
+        '409': *id008
+        '410': *id009
+        '413': *id010
+        '415': *id011
+        '422': *id012
+        '429': *id005
+        '503': *id006
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Short-lived audience-bound hub credential for an administratively enrolled principal.
+        Required scopes are stated per operation and checked server-side. Separate Ed25519 proof is additionally
+        mandatory for claim/submit/audit.
+  schemas:
+    Error:
+      type: object
+      additionalProperties: false
+      properties:
+        code: *id013
+        message: &id015
+          type: string
+          minLength: 1
+          maxLength: 20000
+        request_id: *id013
+        retryable:
+          type: boolean
+      required:
+      - code
+      - message
+      - request_id
+      - retryable
+    Bounty:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id014
+        version:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+        title:
+          type: string
+          minLength: 1
+          maxLength: 300
+        question: *id015
+        domain:
+          type: string
+          enum:
+          - rules
+          - forensics
+          - state-law
+          - litigation
+          - methods
+        skill_path:
+          type: string
+          pattern: ^skills/[a-z0-9/_-]+/SKILL\.md$
+        source_policy:
+          const: public-primary-only
+        acceptance_criteria:
+          type: array
+          items: *id015
+          minItems: 1
+          maxItems: 100
+        lease_min_seconds:
+          const: 60
+        lease_max_seconds:
+          const: 3600
+        status:
+          type: string
+          enum:
+          - open
+          - leased
+          - audit
+          - human_review
+          - closed
+      required:
+      - id
+      - version
+      - title
+      - question
+      - domain
+      - skill_path
+      - source_policy
+      - acceptance_criteria
+      - lease_min_seconds
+      - lease_max_seconds
+      - status
+    Lease:
+      type: object
+      additionalProperties: false
+      properties:
+        lease_id: *id013
+        bounty_id: *id014
+        agent_id: *id013
+        fencing_token:
+          type: integer
+          minimum: 1
+          maximum: 9007199254740991
+        expires_at: &id016
+          type: string
+          format: date-time
+        bounty_version:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+      required:
+      - lease_id
+      - bounty_id
+      - agent_id
+      - fencing_token
+      - expires_at
+      - bounty_version
+    ChallengeRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        key_id: *id013
+        purpose:
+          type: string
+          enum:
+          - claim
+          - submit
+          - audit
+      required:
+      - key_id
+      - purpose
+    Challenge:
+      type: object
+      additionalProperties: false
+      properties:
+        challenge_id: *id013
+        nonce:
+          type: string
+          pattern: ^[A-Za-z0-9_-]{43,128}$
+        key_id: *id013
+        purpose:
+          type: string
+          enum:
+          - claim
+          - submit
+          - audit
+        audience: &id017
+          type: string
+          format: uri
+          pattern: ^https://
+          maxLength: 2048
+        issued_at: *id016
+        expires_at: *id016
+      required:
+      - challenge_id
+      - nonce
+      - key_id
+      - purpose
+      - audience
+      - issued_at
+      - expires_at
+    Proof:
+      type: object
+      additionalProperties: false
+      properties:
+        version:
+          const: '1.0'
+        algorithm:
+          const: Ed25519
+        audience: *id017
+        method:
+          const: POST
+        path:
+          type: string
+          pattern: ^/api/v1/(bounties/SPOKE-[0-9]{3,}/claim|evidence/submit|evidence/audit)$
+        purpose:
+          type: string
+          enum:
+          - claim
+          - submit
+          - audit
+        key_id: *id013
+        challenge_id: *id013
+        nonce:
+          type: string
+          pattern: ^[A-Za-z0-9_-]{43,128}$
+        issued_at: *id016
+        expires_at: *id016
+        payload_sha256: &id018
+          type: string
+          pattern: ^[0-9a-f]{64}$
+        signature:
+          type: string
+          pattern: ^[A-Za-z0-9_-]{86}$
+      required:
+      - version
+      - algorithm
+      - audience
+      - method
+      - path
+      - purpose
+      - key_id
+      - challenge_id
+      - nonce
+      - issued_at
+      - expires_at
+      - payload_sha256
+      - signature
+      description: Verify pure Ed25519 (RFC 8032) over UTF-8 RFC 8785 JCS of this object after removing
+        signature. payload_sha256 must equal SHA-256 of the JCS request payload. Require known nonrevoked
+        key, exact registered HTTPS audience, operation method/path/purpose and one-use challenge; proof
+        lifetime <=300s, maximum accepted clock skew 60s. Challenge consumption and mutation are atomic.
+        Signature is 64 bytes unpadded base64url (86 chars). No duplicate JSON keys or non-I-JSON values
+        are accepted.
+    ClaimPayload:
+      type: object
+      additionalProperties: false
+      properties:
+        agent_id: *id013
+        expected_bounty_version:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+        lease_seconds:
+          type: integer
+          minimum: 60
+          maximum: 3600
+      required:
+      - agent_id
+      - expected_bounty_version
+      - lease_seconds
+    SignedClaim:
+      type: object
+      additionalProperties: false
+      properties:
+        payload:
+          $ref: '#/components/schemas/ClaimPayload'
+        proof:
+          $ref: '#/components/schemas/Proof'
+      required:
+      - payload
+      - proof
+    SubmissionPayload:
+      type: object
+      additionalProperties: false
+      properties:
+        agent_id: *id013
+        bounty_id: *id014
+        lease_id: *id013
+        fencing_token:
+          type: integer
+          minimum: 1
+          maximum: 9007199254740991
+        packet:
+          $ref: ../schemas/evidentiary-packet.schema.json
+      required:
+      - agent_id
+      - bounty_id
+      - lease_id
+      - fencing_token
+      - packet
+    SignedSubmission:
+      type: object
+      additionalProperties: false
+      properties:
+        payload:
+          $ref: '#/components/schemas/SubmissionPayload'
+        proof:
+          $ref: '#/components/schemas/Proof'
+      required:
+      - payload
+      - proof
+    SubmissionReceipt:
+      type: object
+      additionalProperties: false
+      properties:
+        submission_id: *id013
+        packet_id:
+          type: string
+          pattern: ^PKT-[0-9]{4}$
+        packet_sha256: *id018
+        status:
+          const: awaiting_independent_audits
+        received_at: *id016
+        required_auditors:
+          const: 3
+      required:
+      - submission_id
+      - packet_id
+      - packet_sha256
+      - status
+      - received_at
+      - required_auditors
+    SourceObservation:
+      type: object
+      additionalProperties: false
+      properties:
+        source_id:
+          type: string
+          pattern: ^SRC-[0-9]{3,}$
+        url: *id017
+        retrieved_at: *id016
+        sha256:
+          anyOf:
+          - *id018
+          - type: 'null'
+        fetch_status:
+          type: string
+          enum:
+          - retrieved
+          - unavailable
+          - changed
+          - blocked
+        pinpoint: *id015
+        observation: *id015
+      required:
+      - source_id
+      - url
+      - retrieved_at
+      - sha256
+      - fetch_status
+      - pinpoint
+      - observation
+      description: sha256 is mandatory and nonnull for retrieved bytes. Other outcomes cannot support
+        approval. URLs are evidence references and are never instructions or unrestricted server-fetch
+        requests.
+    ClaimAudit:
+      type: object
+      additionalProperties: false
+      properties:
+        claim_id:
+          type: string
+          pattern: ^CLM-[0-9]{3,}$
+        outcome:
+          type: string
+          enum:
+          - supported
+          - unsupported
+          - inconclusive
+        reasoning: *id015
+        source_observations:
+          type: array
+          items:
+            $ref: '#/components/schemas/SourceObservation'
+          minItems: 1
+          maxItems: 100
+        counterevidence:
+          type: array
+          items: *id015
+          minItems: 0
+          maxItems: 100
+      required:
+      - claim_id
+      - outcome
+      - reasoning
+      - source_observations
+      - counterevidence
+    AuditPayload:
+      type: object
+      additionalProperties: false
+      properties:
+        audit_assignment_id: *id013
+        auditor_agent_id: *id013
+        submission_id: *id013
+        packet_sha256: *id018
+        verdict:
+          type: string
+          enum:
+          - approve
+          - changes_requested
+          - dissent
+        claim_results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClaimAudit'
+          minItems: 1
+          maxItems: 1000
+        limitations:
+          type: array
+          items: *id015
+          minItems: 0
+          maxItems: 100
+        completed_at: *id016
+      required:
+      - audit_assignment_id
+      - auditor_agent_id
+      - submission_id
+      - packet_sha256
+      - verdict
+      - claim_results
+      - limitations
+      - completed_at
+      description: One result for every packet claim, no duplicate or unknown claim IDs. approve requires
+        all outcomes supported and successful independent primary retrievals. Operator independence and
+        conflicts are checked against an administrative registry, never trusted from a request declaration.
+        Audit assignment must belong to this principal and immutable packet digest.
+    SignedAudit:
+      type: object
+      additionalProperties: false
+      properties:
+        payload:
+          $ref: '#/components/schemas/AuditPayload'
+        proof:
+          $ref: '#/components/schemas/Proof'
+      required:
+      - payload
+      - proof
+    AuditReceipt:
+      type: object
+      additionalProperties: false
+      properties:
+        audit_id: *id013
+        submission_id: *id013
+        packet_sha256: *id018
+        status:
+          type: string
+          enum:
+          - awaiting_independent_audits
+          - changes_requested
+          - eligible_for_human_review
+        eligible_approvals:
+          type: integer
+          minimum: 0
+          maximum: 3
+        required_approvals:
+          const: 3
+        received_at: *id016
+      required:
+      - audit_id
+      - submission_id
+      - packet_sha256
+      - status
+      - eligible_approvals
+      - required_approvals
+      - received_at
+      description: 3/3 independent approvals on the same digest only creates eligibility for human legal/privacy
+        review. This response never authorizes publication, merge, referral or restricted-vault access.
+  responses:
+    Error:
+      description: Request rejected; no mutation performed. Error messages contain no secret material.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    RateLimited:
+      description: Rate or budget limit; retry only within authorized budget.
+      headers: &id019
+        Retry-After:
+          description: Seconds before retry after rate limit or temporary unavailability.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 86400
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unavailable:
+      description: Temporarily unavailable; bounded retry with jitter.
+      headers: *id019
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+x-implementation-status: contract-only
+x-source-references:
+- https://www.rfc-editor.org/rfc/rfc8785
+- https://www.rfc-editor.org/rfc/rfc8032
+- https://a2a-protocol.org/v1.0.0/specification/
+- https://modelcontextprotocol.io/specification/2026-07-28

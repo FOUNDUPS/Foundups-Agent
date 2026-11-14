@@ -128,6 +128,8 @@ class PartyReactor:
             opts = Options()
             opts.add_experimental_option("debuggerAddress", f"127.0.0.1:{port}")
             self.driver = webdriver.Chrome(options=opts)
+            from modules.infrastructure.foundups_selenium.src.youtube_verification import install_youtube_verification_guard
+            install_youtube_verification_guard(self.driver, port)
 
             # Log full connection details
             current_url = self.driver.current_url

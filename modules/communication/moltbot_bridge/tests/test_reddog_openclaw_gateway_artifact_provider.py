@@ -1,0 +1,460 @@
+"""Fail-closed tests for the real OpenClaw Gateway CLI adapter."""
+from __future__ import annotations
+import ast, json, sys
+from pathlib import Path, PureWindowsPath
+from types import SimpleNamespace
+from unittest.mock import patch
+import pytest
+from prompt.swarm.m2m_compiler import decode_m2m_envelope, encode_m2m_envelope
+from modules.communication.moltbot_bridge.src.reddog_artifact_generation_model_binding import artifact_generation_digest
+from modules.communication.moltbot_bridge.src.fusion_redaction_gate import REDACTION_GATE_PASSED, evaluate_redaction_gate
+from modules.communication.moltbot_bridge.src.reddog_artifact_generation_provider_contract import artifact_generation_output_contract
+from modules.communication.moltbot_bridge.src.reddog_openclaw_gateway_artifact_provider import (
+    FAIL_GATEWAY, OpenClawGatewayArtifactGenerationRunner,
+)
+from modules.communication.moltbot_bridge.src.reddog_openclaw_gateway_command_runner import (
+    OpenClawCommandResult, SystemOpenClawCommandRunner,
+)
+from modules.communication.moltbot_bridge.src import reddog_openclaw_gateway_command_runner as command_module
+
+
+class FakeRunner:
+    def __init__(self, invocation=None, *, status=None, sandbox=None):
+        self.calls, self.message = [], ""
+        self.invocation = invocation or _agent_result()
+        self.status = status or _status()
+        self.sandbox = sandbox
+
+    def run(self, argv, *, timeout_seconds):
+        args = tuple(argv)
+        self.calls.append((args, timeout_seconds))
+        if args[1:] == ("--version",):
+            return _command_result("OpenClaw 2026.7.1-2 (abc)\n")
+        if args[1:3] == ("gateway", "status"):
+            return _command_result(json.dumps(self.status))
+        if args[1:3] == ("agents", "list"):
+            return _command_result('[{"id":"reddog-artifact"}]')
+        if args[1:3] == ("sandbox", "explain"):
+            value = dict(self.sandbox or _sandbox(args[-2]))
+            value["sessionKey"] = args[-2]
+            return _command_result(json.dumps(value))
+        path = Path(args[args.index("--message-file") + 1])
+        self.message = path.read_text(encoding="utf-8")
+        return self.invocation
+
+
+class RaisingInvocationRunner(FakeRunner):
+    def run(self, argv, *, timeout_seconds):
+        if tuple(argv)[1:2] == ("agent",):
+            raise RuntimeError("provider_transport_failed")
+        return super().run(argv, timeout_seconds=timeout_seconds)
+
+
+def _command_result(stdout="", *, code=0, **changes):
+    return OpenClawCommandResult(code, stdout, process_started=True, **changes)
+
+
+def _status():
+    return {
+        "cli": {"version": "2026.7.1-2"},
+        "service": {"configAudit": {"ok": True, "issues": []}},
+        "config": {"cli": {"exists": True, "valid": True}},
+        "gateway": {"bindMode": "loopback", "version": "2026.7.1-2"},
+        "rpc": {"ok": True, "server": {"version": "2026.7.1-2"}},
+        "pluginVersionDrift": {"gatewayVersion": "2026.7.1-2", "drifts": []},
+    }
+
+
+def _sandbox(session_key, **changes):
+    value = {"agentId": "reddog-artifact", "sessionKey": session_key,
+             "sandbox": {"mode": "all", "sessionIsSandboxed": True,
+                         "workspaceAccess": "none", "workspaceSource": "sandbox",
+                         "runtimeWorkdir": "/workspace",
+                         "workspaceMounts": [{"hostRoot": "/home/user/.openclaw/sandboxes/agent-reddog-artifact-test",
+                                              "containerRoot": "/workspace", "writable": False,
+                                              "source": "workspace"}],
+                         "tools": {"allow": [], "deny": ["*"]}},
+             "elevated": {"enabled": False}}
+    value.update(changes)
+    return value
+
+
+def _agent_result(text=None, *, status="ok", **changes):
+    content = text or '{"artifact_contents":{"src/example.py":"ok"}}'
+    value = {"status": status, "runId": "run-1", "result": {"payloads": [{"text": content}]}}
+    value.update(changes)
+    return _command_result(json.dumps(value))
+
+
+def _provider(tmp_path, runner, *, agent_id="reddog-artifact"):
+    repo = tmp_path / "repo"
+    repo.mkdir(exist_ok=True)
+    return OpenClawGatewayArtifactGenerationRunner(repo, tmp_path / "runtime", agent_id, runner)
+
+
+def _generate(provider, *, prompt="secret prompt", context="private context",
+              model="qwen/qwen3-coder", provider_id="openrouter", verified_extra=None):
+    verified = {
+        "model_selection": {"receipt_id": "selection-1", "lead_model": model},
+        "resolved_runtime_topology": [{
+            "role": "principal", "model_id": model, "provider": provider_id,
+        }],
+    }
+    verified.update(verified_extra or {})
+    with patch("modules.communication.moltbot_bridge.src.reddog_openclaw_gateway_artifact_provider.consume_artifact_generation_model", return_value=verified):
+        return provider.generate_artifacts(prompt=prompt, context=context, binding=object(), timeout_seconds=17)
+
+
+def test_real_gateway_cli_path_is_exact_session_sandboxed_and_truthful(tmp_path):
+    runner = FakeRunner()
+    result = _generate(_provider(tmp_path, runner))
+    assert result.ok and result.artifact_contents == {"src/example.py": "ok"}
+    assert result.worker_process_spawn_count == 5
+    assert result.file_write_performed is True
+    assert result.external_side_effects_possible is True
+    assert runner.calls[3][0] == (
+        "openclaw", "gateway", "status", "--require-rpc", "--json"
+    )
+    sandbox_call, invocation = runner.calls[2][0], runner.calls[-1][0]
+    session = invocation[invocation.index("--session-key") + 1]
+    assert sandbox_call[-3:] == ("--session", session, "--json")
+    assert invocation[invocation.index("--agent") + 1] == "reddog-artifact"
+    assert invocation[invocation.index("--model") + 1] == "openrouter/qwen/qwen3-coder"
+    assert "--local" not in invocation and runner.calls[-1][1] == 47
+    assert list((tmp_path / "runtime").glob("reddog-openclaw-*.md")) == []
+
+
+def test_sessions_are_unique_and_prompt_is_never_argv(tmp_path):
+    runner = FakeRunner()
+    provider = _provider(tmp_path, runner)
+    _generate(provider, prompt="PROMPT_SECRET", context="CONTEXT_SECRET")
+    first = runner.calls[-1][0]
+    first_message = runner.message
+    _generate(provider)
+    second = runner.calls[-1][0]
+    assert first[first.index("--session-key") + 1] != second[second.index("--session-key") + 1]
+    assert "PROMPT_SECRET" not in " ".join(first)
+    assert "CONTEXT_SECRET" not in " ".join(first)
+    assert "PROMPT_SECRET" in first_message and "CONTEXT_SECRET" in first_message
+
+
+@pytest.mark.parametrize("sandbox", [
+    _sandbox("x", elevated={"enabled": True}),
+    _sandbox("x", sandbox={"mode": "all", "sessionIsSandboxed": True, "workspaceAccess": "none", "workspaceSource": "sandbox", "runtimeWorkdir": "/workspace", "workspaceMounts": [{"hostRoot": "/repo", "containerRoot": "/workspace", "writable": False, "source": "workspace"}], "tools": {"allow": [], "deny": ["*"]}}),
+    _sandbox("x", sandbox={"mode": "all", "sessionIsSandboxed": True, "workspaceAccess": "none", "workspaceSource": "sandbox", "runtimeWorkdir": "/workspace", "workspaceMounts": [{"hostRoot": "/home/user/.openclaw/sandboxes/agent-reddog-artifact-test", "containerRoot": "/workspace", "writable": False, "source": "workspace"}], "tools": {"allow": ["read"], "deny": ["*"]}}),
+    _sandbox("x", sandbox={"mode": "all", "sessionIsSandboxed": True, "workspaceAccess": "none", "workspaceSource": "sandbox", "runtimeWorkdir": "/workspace", "workspaceMounts": [{"hostRoot": "/home/user/.openclaw/sandboxes/agent-reddog-artifact-test", "containerRoot": "/workspace", "writable": False, "source": "workspace"}], "tools": {"allow": [], "deny": ["exec", "write"]}}),
+])
+def test_sandbox_requires_closed_tool_policy(tmp_path, sandbox):
+    runner = FakeRunner(sandbox=sandbox)
+    assert _generate(_provider(tmp_path, runner)).rejection_reasons == (FAIL_GATEWAY,)
+    assert len(runner.calls) == 4
+
+
+@pytest.mark.parametrize("status", [
+    {**_status(), "service": {"configAudit": {"ok": False, "issues": [{"code": "drift"}]}}},
+    {**_status(), "gateway": {"bindMode": "loopback", "version": "2026.7.1"}},
+    {**_status(), "pluginVersionDrift": {"gatewayVersion": "2026.7.1-2", "drifts": ["x"]}},
+])
+def test_service_or_version_metadata_drift_fails_preflight(tmp_path, status):
+    result = _generate(_provider(tmp_path, FakeRunner(status=status)))
+    assert result.rejection_reasons == (FAIL_GATEWAY,)
+
+
+@pytest.mark.parametrize("result", [
+    _command_result(code=124, timed_out=True, termination_confirmed=True),
+    _command_result(code=125, output_limit_exceeded=True),
+    _command_result(code=124, termination_confirmed=False),
+])
+def test_indeterminate_invocation_never_reports_a_clean_abort(tmp_path, result):
+    outcome = _generate(_provider(tmp_path, FakeRunner(result)))
+    assert outcome.ok is False
+    assert outcome.rejection_reasons == ("FAIL_OPENCLAW_AGENT_INDETERMINATE",)
+    assert outcome.run_abort_confirmed is False
+    assert outcome.effect_observation_complete is False
+
+
+def test_uncaught_invocation_failure_never_reports_a_clean_abort(tmp_path):
+    outcome = _generate(_provider(tmp_path, RaisingInvocationRunner()))
+    assert outcome.rejection_reasons == ("FAIL_OPENCLAW_AGENT_REJECTED",)
+    assert outcome.effect_observation_complete is False
+    assert outcome.run_abort_confirmed is False
+
+
+@pytest.mark.parametrize("text", [
+    "not-json", "{}", '{"artifact_contents":{}}',
+    '{"artifact_contents":{"x":1}}',
+    '{"artifact_contents":{"../escape.py":"bad"}}',
+    '{"artifact_contents":{"/tmp/escape":"bad"}}',
+    '{"artifact_contents":{"C:/escape.py":"bad"}}',
+    '{"artifact_contents":{"src//escape.py":"bad"}}',
+    '{"artifact_contents":{"CON.py":"bad"}}',
+    '{"artifact_contents":{"x.py":""}}',
+    '{"artifact_contents":{"x.py":"   "}}',
+    '{"artifact_contents":{"x":"one"},"artifact_contents":{"x":"two"}}',
+    '{"artifact_contents":{"x":"one","x":"two"}}',
+])
+def test_malformed_or_duplicate_output_rejects(tmp_path, text):
+    outcome = _generate(_provider(tmp_path, FakeRunner(_agent_result(text))))
+    assert outcome.rejection_reasons == ("FAIL_OPENCLAW_ARTIFACT_OUTPUT",)
+
+
+@pytest.mark.parametrize("unsafe_path", [
+    'a"b.txt', "a*.txt", "a<b.txt", "a>b.txt", "a?.txt", "a|b.txt",
+    "CLOCK$", "CONIN$", "CONOUT$",
+])
+def test_platform_invalid_artifact_paths_reject(tmp_path, unsafe_path):
+    text = json.dumps({"artifact_contents": {unsafe_path: "bad"}})
+    outcome = _generate(_provider(tmp_path, FakeRunner(_agent_result(text))))
+    assert outcome.rejection_reasons == ("FAIL_OPENCLAW_ARTIFACT_OUTPUT",)
+
+
+def test_invalid_binding_precedes_all_openclaw_processes(tmp_path):
+    runner = FakeRunner()
+    assert _generate(_provider(tmp_path, runner), model="--local").rejection_reasons == (
+        "FAIL_OPENCLAW_MODEL_BINDING",
+    )
+    assert runner.calls == []
+
+
+def test_mismatched_or_missing_signed_principal_precedes_processes(tmp_path):
+    runner = FakeRunner()
+    provider = _provider(tmp_path, runner)
+    verified = {"model_selection": {
+        "lead_model": "qwen/qwen3-coder",
+        "role_assignments": [{
+            "role": "principal", "canonical_model_id": "different/model",
+            "provider": "openrouter",
+        }],
+    }}
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_openclaw_gateway_artifact_provider.consume_artifact_generation_model",
+        return_value=verified,
+    ):
+        result = provider.generate_artifacts(
+            prompt="p", context="c", binding=object(), timeout_seconds=5
+        )
+    assert result.rejection_reasons == ("FAIL_OPENCLAW_MODEL_BINDING",)
+    assert runner.calls == []
+
+
+def test_redaction_block_precedes_binding_file_and_process(tmp_path):
+    runner = FakeRunner()
+    blocked = SimpleNamespace(status="BLOCKED_LOCALLY", redacted_prompt=None, redacted_context=None)
+    with patch("modules.communication.moltbot_bridge.src.reddog_openclaw_gateway_artifact_provider.evaluate_redaction_gate", return_value=blocked), patch("modules.communication.moltbot_bridge.src.reddog_openclaw_gateway_artifact_provider.consume_artifact_generation_model") as consume:
+        result = _provider(tmp_path, runner).generate_artifacts(prompt="p", context="c", binding=object(), timeout_seconds=5)
+    assert result.rejection_reasons == ("FAIL_OPENCLAW_REDACTION_BLOCKED",)
+    assert runner.calls == [] and consume.call_count == 0
+
+
+def test_system_transport_uses_trusted_wsl_and_rejects_other_commands(tmp_path, monkeypatch):
+    trusted = tmp_path / "wsl.exe"
+    trusted.write_bytes(b"")
+    monkeypatch.setattr(command_module, "os", SimpleNamespace(name="nt"))
+    monkeypatch.setattr(command_module, "Path", PureWindowsPath)
+    monkeypatch.setattr(command_module, "resolve_trusted_wsl_executable", lambda: trusted)
+    runner = SystemOpenClawCommandRunner(distro="Ubuntu-24.04")
+    command = runner._command(("openclaw", "agent", "--message-file", "E:/Agents/task.md"))
+    assert command[:5] == [str(trusted), "--distribution", "Ubuntu-24.04", "--exec", "/usr/local/bin/openclaw"]
+    assert command[-1] == "/mnt/e/Agents/task.md"
+    assert runner._command(("powershell", "-c", "unsafe")) == []
+
+
+def test_system_transport_invokes_openclaw_directly_on_posix(monkeypatch):
+    monkeypatch.setattr(command_module, "os", SimpleNamespace(name="posix"))
+    runner = SystemOpenClawCommandRunner(executable="/usr/local/bin/openclaw")
+    command = runner._command(
+        ("openclaw", "agent", "--message-file", "/srv/agents/task.md")
+    )
+    assert command == [
+        "/usr/local/bin/openclaw",
+        "agent",
+        "--message-file",
+        "/srv/agents/task.md",
+    ]
+    assert runner._command(("sh", "-c", "unsafe")) == []
+
+
+def test_system_transport_bounds_output_and_confirms_process_termination(monkeypatch):
+    monkeypatch.setattr(
+        SystemOpenClawCommandRunner, "_command",
+        lambda _self, _argv: [sys.executable, "-c", "print('x' * 10000)"],
+    )
+    result = SystemOpenClawCommandRunner(max_output_bytes=128).run(
+        ("openclaw", "--version"), timeout_seconds=5,
+    )
+    assert result.process_started is True
+    assert result.output_limit_exceeded is True
+    assert result.termination_confirmed is True
+
+
+def test_system_transport_bounds_time_and_confirms_process_termination(monkeypatch):
+    monkeypatch.setattr(
+        SystemOpenClawCommandRunner, "_command",
+        lambda _self, _argv: [sys.executable, "-c", "import time; time.sleep(10)"],
+    )
+    result = SystemOpenClawCommandRunner().run(
+        ("openclaw", "--version"), timeout_seconds=1,
+    )
+    assert result.timed_out is True
+    assert result.termination_confirmed is True
+
+
+def test_provider_has_no_local_or_shell_invocation():
+    source = Path("modules/communication/moltbot_bridge/src/reddog_openclaw_gateway_artifact_provider.py").read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    assert '"--local"' not in source and "'--local'" not in source
+    assert not any(isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                   and node.func.attr in {"Popen", "system", "popen"} for node in ast.walk(tree))
+
+
+_M2M_PROVIDER_CASES = (
+    "canonical", "legacy", "missing_digest", "missing_schema", "unbound",
+    "digest_null", "digest_mapping", "digest_malformed", "digest_changed",
+    "schema_changed", "raw_changed", "redacted_changed", "both_changed",
+    "noncanonical", "malformed", "duplicate_keys", "bound_legacy",
+    "unbound_redacted_canonical",
+)
+
+
+def _m2m_provider_case(case, *, context='{"output_schema":"artifact_contents","planned_artifacts":["src/example.py"]}'):
+    packet = {"schema": "0102_m2m_v1", "ROLE": "worker", "ORIGIN": "internal_handoff",
+              "PRINCIPAL_REF": "012", "L": "A", "S": "src/example.py", "M": "exec",
+              "T": "provider-egress-fixture", "A": "Write exactly src/example.py",
+              "R": [15, 97, 99], "I": {"values": [True, 1, 1.0, None, {"note": "unchanged"}]},
+              "O": ["src/example.py"], "F": ["scope_violation"]}
+    wire = encode_m2m_envelope(packet)
+    metadata = {"prompt_schema": "0102_m2m_v1", "m2m_prompt_digest": artifact_generation_digest(wire),
+                "m2m_context_digest": artifact_generation_digest(context)}
+    supplied = redacted = wire
+    if case == "missing_digest": metadata.pop("m2m_prompt_digest")
+    elif case == "missing_schema": metadata.pop("prompt_schema")
+    elif case == "unbound": metadata = {}
+    elif case == "digest_null": metadata["m2m_prompt_digest"] = None
+    elif case == "digest_mapping": metadata["m2m_prompt_digest"] = {"digest": "invalid"}
+    elif case == "digest_malformed": metadata["m2m_prompt_digest"] = "sha256:invalid"
+    elif case == "digest_changed": metadata["m2m_prompt_digest"] = artifact_generation_digest(wire + " ")
+    elif case == "schema_changed": metadata["prompt_schema"] = "0102_m2m_v2"
+    elif case in ("raw_changed", "both_changed"):
+        packet["I"]["values"][0] = 1
+        supplied = encode_m2m_envelope(packet)
+        if case == "both_changed": redacted = supplied
+    elif case == "redacted_changed": redacted = wire + " "
+    elif case in ("noncanonical", "malformed", "duplicate_keys"):
+        supplied = json.dumps(packet, indent=2) if case == "noncanonical" else '{"schema":"0102_m2m_v1"'
+        if case == "duplicate_keys": supplied = wire[:-1] + ',"A":"duplicate"}'
+        redacted = supplied
+        metadata["m2m_prompt_digest"] = artifact_generation_digest(supplied)
+    elif case == "bound_legacy": supplied = redacted = "legacy governed task"
+    elif case == "legacy": metadata, supplied, redacted = {}, "legacy governed task", "legacy governed task"
+    elif case == "unbound_redacted_canonical": metadata, supplied = {}, "legacy governed task"
+    return metadata, supplied, redacted
+
+
+@pytest.mark.parametrize("case", _M2M_PROVIDER_CASES)
+def test_m2m_prompt_integrity_precedes_gateway_effects(tmp_path, case):
+    runner = FakeRunner()
+    provider = _provider(tmp_path, runner)
+    metadata, supplied, redacted = _m2m_provider_case(case)
+    context = '{"output_schema":"artifact_contents","planned_artifacts":["src/example.py"]}'
+    gate = SimpleNamespace(status=REDACTION_GATE_PASSED, redacted_prompt=redacted, redacted_context=context)
+    with patch("modules.communication.moltbot_bridge.src.reddog_openclaw_gateway_artifact_provider.evaluate_redaction_gate", return_value=gate):
+        result = _generate(provider, prompt=supplied, context=context, verified_extra=metadata)
+    if case not in ("canonical", "legacy"):
+        assert result.rejection_reasons == ("FAIL_ARTIFACT_GENERATION_M2M_PROMPT_BINDING",)
+        assert runner.calls == [] and not provider.runtime_root.exists()
+        assert result.file_write_performed is False and result.worker_process_started is False
+        return
+    assert result.ok and runner.calls
+    task = runner.message.split("TASK:\n", 1)[1].split("\n\nGOVERNED CONTEXT:\n", 1)[0]
+    assert task == supplied and runner.message.endswith(context)
+    if case == "canonical":
+        values = decode_m2m_envelope(task)["I"]["values"]
+        assert [type(value) for value in values[:4]] == [bool, int, float, type(None)]
+
+
+_M2M_CONTEXT_CASES = (
+    "exact", "raw_changed", "empty", "none", "swapped_artifacts", "stripped_rules",
+    "missing_digest", "digest_null", "digest_mapping", "digest_malformed",
+    "digest_changed", "nonstring", "context_only", "context_only_null", "legacy",
+)
+
+
+def _m2m_context_case(case):
+    data = {**artifact_generation_output_contract(["src/example.py"]), "evidence_context": "synthetic evidence"}
+    context = json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    metadata, prompt, _ = _m2m_provider_case("canonical", context=context)
+    if case in ("raw_changed", "swapped_artifacts", "stripped_rules"):
+        if case == "raw_changed": data["evidence_context"] = "changed evidence"
+        elif case == "swapped_artifacts": data["planned_artifacts"] = ["src/other.py"]
+        else: data.pop("hard_rules")
+        context = json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    elif case == "empty": context = ""
+    elif case == "none": context = None
+    elif case == "nonstring": context = data
+    elif case == "missing_digest": metadata.pop("m2m_context_digest")
+    elif case == "digest_null": metadata["m2m_context_digest"] = None
+    elif case == "digest_mapping": metadata["m2m_context_digest"] = {"digest": "invalid"}
+    elif case == "digest_malformed": metadata["m2m_context_digest"] = "sha256:invalid"
+    elif case == "digest_changed": metadata["m2m_context_digest"] = artifact_generation_digest(context + " ")
+    elif case in ("context_only", "context_only_null"):
+        metadata = {"m2m_context_digest": metadata["m2m_context_digest"] if case == "context_only" else None}
+        prompt = "legacy governed task"
+    elif case == "legacy": metadata, prompt, _ = _m2m_provider_case("legacy")
+    return metadata, prompt, context
+
+
+@pytest.mark.parametrize("case", _M2M_CONTEXT_CASES)
+def test_m2m_raw_context_integrity_precedes_gateway_effects(tmp_path, case):
+    runner = FakeRunner()
+    provider = _provider(tmp_path, runner)
+    metadata, prompt, context = _m2m_context_case(case)
+    redacted = context if type(context) is str else "synthetic redacted context"
+    gate = SimpleNamespace(status=REDACTION_GATE_PASSED, redacted_prompt=prompt, redacted_context=redacted)
+    with patch("modules.communication.moltbot_bridge.src.reddog_openclaw_gateway_artifact_provider.evaluate_redaction_gate", return_value=gate):
+        result = _generate(provider, prompt=prompt, context=context, verified_extra=metadata)
+    if case not in ("exact", "legacy"):
+        assert result.rejection_reasons == ("FAIL_ARTIFACT_GENERATION_M2M_PROMPT_BINDING",)
+        assert runner.calls == [] and not provider.runtime_root.exists()
+        assert result.file_write_performed is False and result.worker_process_started is False
+        return
+    assert result.ok and len(runner.calls) == 5
+    task, delivered = runner.message.split("TASK:\n", 1)[1].split("\n\nGOVERNED CONTEXT:\n", 1)
+    assert task == prompt and delivered == context
+
+
+def _m2m_redaction_case(case):
+    metadata, prompt, context = _m2m_context_case("exact")
+    context = context.replace("synthetic evidence", "Synthetic contact fixture@example.invalid")
+    if case == "blocked": context = "<think>synthetic forbidden fixture</think>"
+    metadata["m2m_context_digest"] = artifact_generation_digest(context)
+    if case == "prompt_tamper": prompt += " "
+    return metadata, prompt, context, evaluate_redaction_gate(prompt, context, audit_mode=True)
+
+
+@pytest.mark.parametrize("case", ("redacted", "blocked", "prompt_tamper"))
+def test_m2m_gateway_real_redaction_and_final_frame(tmp_path, case):
+    runner = FakeRunner()
+    provider = _provider(tmp_path, runner)
+    metadata, prompt, context, gate = _m2m_redaction_case(case)
+    result = _generate(provider, prompt=prompt, context=context, verified_extra=metadata)
+    if case != "redacted":
+        expected = "FAIL_OPENCLAW_REDACTION_BLOCKED" if case == "blocked" else "FAIL_ARTIFACT_GENERATION_M2M_PROMPT_BINDING"
+        assert result.rejection_reasons == (expected,)
+        assert runner.calls == [] and not provider.runtime_root.exists()
+        assert result.file_write_performed is False and result.worker_process_started is False
+        return
+    assert gate.status == REDACTION_GATE_PASSED and gate.redacted_context != context
+    assert metadata["m2m_context_digest"] == artifact_generation_digest(context)
+    assert metadata["m2m_context_digest"] != artifact_generation_digest(gate.redacted_context)
+    assert result.ok and len(runner.calls) == 5
+    task, delivered = runner.message.split("TASK:\n", 1)[1].split("\n\nGOVERNED CONTEXT:\n", 1)
+    assert task == prompt and delivered == gate.redacted_context
+    assert "fixture@example.invalid" not in runner.message
+
+
+def test_gateway_context_argument_remains_required(tmp_path):
+    runner = FakeRunner()
+    provider = _provider(tmp_path, runner)
+    with pytest.raises(TypeError, match="context"):
+        provider.generate_artifacts(prompt="legacy task", binding=object(), timeout_seconds=5)
+    assert runner.calls == [] and not provider.runtime_root.exists()

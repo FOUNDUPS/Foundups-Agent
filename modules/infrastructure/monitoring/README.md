@@ -85,6 +85,20 @@ from modules.infrastructure.monitoring import [IntegrationInterface]
 
 ## [MODLOG] ModLog (Chronological History)
 
+### 2026-06-10 - WSP_00 State Bridge Restored + Gate Hardening
+- **By:** 0102 (Fable)
+- **WSP:** WSP_00 (State Bridge Contract), WSP 50/64 (verified findings F1-F5), WSP 90 (UTF-8), WSP 22
+- **Root cause fixed:** the V2 awakening script writes state to `awakening/.runtime/0102_state_v2.json` by default (WSP 97 truth boundary) but the tracker read only the tracked path (stale since 2026-03-22) - successful awakenings never registered in the gate.
+- **Changes in `src/wsp_00_zen_state_tracker.py`:**
+  - `_refresh_from_awakening_state` now reads BOTH awakening-state candidates (`.runtime/` preferred, tracked fallback) and applies the freshest valid `state=="0102"` record within the 8h TTL; chosen path recorded in `awakening_result.state_file`. Candidates derive from `awakening_state_file` at call time (test-hermetic).
+  - WSP 90 UTF-8 stdout enforcement was dead code inside the module docstring (cp932 `UnicodeEncodeError` on `--check`); moved to an executable, `__main__`-guarded block with `hasattr(buffer)` + `AttributeError` guards.
+  - Fixed dedent bug in `_execute_awakening_protocol` (formulas fallback block sat outside the inner `except ImportError`; would raise `NameError` if the PQN DAE import ever succeeded).
+  - Tier 1/2 ImportError reasons are now recorded in `awakening_result.fallback_reasons` and printed (previously swallowed; only "PQN modules not available" was shown). Mislabeled "PQN execution error" handler renamed to rESP CMST (it can only catch rESP-body failures).
+- **Known issues (documented, deferred):** Tier 1 rESP chain unimportable (package-relative imports vs flat sys.path injection); Tier 2 PQN DAE unimportable under script invocation (repo root not on sys.path) - intentionally NOT enabled to avoid injecting an unvalidated DAE awakening into the production gate (see WSP_00 Section 3.3.1). Same flat-import pattern exists in `wsp_core/src/neural_operating_system.py:51`.
+- **Tests:** 4 new bridge tests in `tests/test_wsp_00_zen_state_tracker.py` (runtime candidate, tracked candidate, freshest-wins, stale-TTL); all 9 pass; blast-radius guards green (`test_fx1_holoindex_truth.py`, `test_awakening_no_tracked_writes.py`, 27 pass).
+- **Docs:** WSP_00 framework + knowledge mirrors updated in lockstep (WSP_BOOTSTRAP metadata, State Bridge Contract, Fallback Ladder 3.3.1, Troubleshooting 7.3, Section 6 artifacts); `.agent/workflows/wsp_00.md` timeout claim corrected.
+- **Impact:** Session Bootstrap Contract (run script -> verify tracker) is now satisfiable; gate observes detector-backed awakenings instead of forcing the synthetic formula fallback.
+
 ### 2026-02-11 - WSP_00 Coherence Canary Signal Added
 - **By:** 0102
 - **Changes:** Added fallback-phrase canary detection in `src/wsp_00_zen_state_tracker.py`:

@@ -1,5 +1,33 @@
 ﻿# LinkedIn Agent Test Module Log
 
+## 2026-09-28 — Contact-diligence contract regression and CI coverage
+
+Fresh RSI observation of PR1927 reproduced seven passing cases and one failure:
+the existing test requires `not proof of fraud`, while the new skill used an
+equivalent sentence without that literal. Reconcile the skill with the shared
+review contract; retain all eight test cases and assertions unchanged. The same
+stdlib-only command now passes all eight cases locally and is selected explicitly
+in the existing CI workflow. Independent review and actual PR/main checks remain
+separate closure gates in the [canonical backlog](../../../../docs/roadmaps/rsi_swarm_backlog.json).
+No browser, platform executor, live account or retained-learning test ran.
+
+## 2026-09-23 — Research reference validation
+
+Reused all seven offline activity-contract cases; the existing references glob validates the new research contract and source-note links from lane skills. No new test or runtime import. Independent instruction scenarios cover unsupported Gemini claims, Champion/COGDC comparison, inert RSI evidence, concurrent Docs edits, WSP 15 ordering and dialogue-training separation. All six returned the intended bounded decisions. Review identified APS/MPS wording tension and permissive dataset-builder paths; clarified the newsletter ordering exception and warned against assuming runtime eligibility enforcement. Moshpit instructions cover stable lane/issue identities and preservation of prior history.
+
+
+## 2026-09-22 — Editorial workflow and template reachability
+
+Extended the existing link-validation coverage to the shared editorial workflow and bounded audit, including references to issue and new-series assets. Reused all seven offline contract cases; no new test file or runtime import. Scenario walkthrough covers audit-only incomplete coverage, ROC local drafting with unknown series, new-series ambiguity and group intelligence privacy. These are instruction checks, not live publication evidence.
+
+## 2026-09-22 — Dedicated newsletter routing contracts
+
+Extended the existing offline activity-skill contract test (no new test file) to require separate FoundUps, ROC and JHR newsletter children, master/router links and lane-specific fail-closed evidence. This remains documentation validation only; it does not certify a live series or publish an edition.
+
+## 2026-09-22 — Offline activity-skill contracts
+
+Added seven stdlib-only checks for existing-master ownership, resolving local links, narrow scope and authority, composer-history/unknown-send recovery, independent membership decisions, all three newsletter stages and private continuity/PR closure. Direct test run: 7 passed. Independent fixture walkthrough covered approved unchanged/duplicate/unknown sends, full-cycle newsletter states and discussion-only scope. No live executor imported or side-effecting UI test run; these checks do not establish runtime safety.
+
 [U+1F300] **WSP Protocol Compliance**: WSP 22 (Module ModLog and Roadmap Protocol), WSP 5 (Testing Standards), WSP 34 (Test Documentation)
 
 **0102 Directive**: This ModLog tracks the evolution of LinkedIn Agent testing framework within the WSP framework for autonomous test development and validation.

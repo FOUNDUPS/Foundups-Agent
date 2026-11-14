@@ -1,0 +1,114 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "dff50350eb198093fd33ad628af5a468496cc939"
+  },
+  "execution_id": "HOLOINDEX_QUERY_RUNTIME_BUILDER_GIT_TEST_CONTRACT_PHASE2B1",
+  "execution_plane": "local_tools_and_wsp00_subagent_audit",
+  "outcome": "completed",
+  "system_verdict": {
+    "slice": "phase2b1_pinned_git_live_gate_contract_correction",
+    "test_contract": "corrected_to_committed_head_authority",
+    "production_code_changed": false,
+    "source_authority_worktree_rejection": "preserved",
+    "live_oe_git_proof": "capability_unavailable_expected_skip",
+    "public_candidate_build_and_reproof": "fail_closed_builder_runtime_unbound",
+    "candidate_activation": false,
+    "holoindex_a_grade": "blocked",
+    "retrieval_quality_rsi": "not_operational"
+  },
+  "wsp15_allocation": {
+    "receipt_id": "sha256:8663161567cb3cf75e675da361ab2b93d3bec777e8e4e1dc818dde56e28ced98",
+    "complexity": 5,
+    "importance": 5,
+    "deferability": 5,
+    "impact": 5,
+    "total": 20,
+    "priority": "P0",
+    "reasoning_tier": "ULTRA",
+    "decision": "correct the false skipped expectation before adding the physical packaging artifact layer"
+  },
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_87_Code_Navigation_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "WSP_00 detector-backed awakening passed at coherence 0.736 before this continuation.",
+      "Governed Holo retrieval was CURRENT at exact base HEAD dff50350eb198093fd33ad628af5a468496cc939 with no gap, no reindex, and no authority mutation.",
+      "The Phase 2B Git implementation and its closest Git/source tests were read before the test was changed.",
+      "An independent WSP_00/WSP_97 architecture verifier reproduced the mismatch and issued GO only for this separate correction."
+    ],
+    "research": [
+      "Pinned-Git authority reads exact HEAD, index flags, tree entries, and committed blobs with constrained plumbing commands.",
+      "It intentionally never reads worktree bytes or invokes porcelain because repository filters can launch unpinned processes.",
+      "Source authority already rejects live bound bytes that differ from the backend manifest or exact committed HEAD blob."
+    ],
+    "micro_pass": [
+      "The Git and source suites passed 29 tests with one expected unavailable O:/E: Git-image skip.",
+      "All six builder suites passed 77 tests with two expected skips: unavailable O:/E: Git and the opt-in upper-shape tier.",
+      "The corrected live test now requires equal authority before and after a worktree-only mutation."
+    ],
+    "macro_pass": [
+      "The canonical registry suite passed 28 tests and remained current.",
+      "Backend-manifest check passed at 1,378 runtime files and digest 48a91fa832bd99de90d9580394ac2a5da492a0925aed36b90c3cea7508d3fc1d.",
+      "The new immutable audit addendum is attached in the sorted documentation index; unrelated sites/ bytes remain untouched."
+    ],
+    "hard_think": [
+      "Making production Git authority inspect worktree state would duplicate source authority and reintroduce an unsafe process surface.",
+      "A skipped integration test is still release-gate code and must be contract-correct before the missing capability arrives.",
+      "Historical Phase 2B receipts remain immutable; this addendum records the correction."
+    ],
+    "dialectic_sweep": [
+      "Adding git status to satisfy the old assertion was rejected because it weakens the boundary.",
+      "Ignoring the skipped defect was rejected because O:/E: Git provisioning would produce a false failure.",
+      "Bundling the correction with Phase 2C was rejected so production artifact work starts from a truthful baseline."
+    ],
+    "first_principles": [
+      "Git authority proves committed repository identity; source authority proves selected live source bytes.",
+      "A test must falsify the authority actually claimed, not a broader authority the component explicitly denies.",
+      "The smallest safe change is one expectation plus attached contract documentation and no production code."
+    ],
+    "execute": [
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_git.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/README.md",
+      "modules/infrastructure/foundups_mcp_bridge/tests/TestModLog.md",
+      "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+      "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_GIT_TEST_CONTRACT_CORRECTION_PHASE2B1.md",
+      "docs/doc_index.json"
+    ]
+  },
+  "nonclaims": [
+    "No production authority, public interface, candidate build/reproof, process launch, runtime, route, owner, maintenance, activation, signing, or write-denial behavior changed.",
+    "No global clean-worktree claim is made; worktree-byte rejection remains solely in source authority.",
+    "No successful live O:/E: pinned-Git proof is claimed because that independently provisioned capability is absent.",
+    "No HoloIndex A-grade or retrieval-quality RSI promotion is claimed."
+  ],
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_6",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_62",
+    "WSP_84",
+    "WSP_87",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/infrastructure/HOLOINDEX_QUERY_RUNTIME_BUILDER_GIT_TEST_CONTRACT_WSP15_ALLOCATION_RECEIPT_PHASE2B1.json",
+    "docs/audits/infrastructure/HOLOINDEX_QUERY_RUNTIME_BUILDER_GIT_TEST_CONTRACT_WSP97_EXECUTION_RECEIPT_PHASE2B1.json",
+    "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_GIT_TEST_CONTRACT_CORRECTION_PHASE2B1.md",
+    "docs/doc_index.json",
+    "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/README.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/TestModLog.md"
+  ]
+}

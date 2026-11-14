@@ -1,0 +1,882 @@
+{
+  "projection": {
+    "schema": "foundups.pc-reconciliation.historical-projection.v1",
+    "record_kind": "historical_projection_not_current_acceptance",
+    "source_path": "docs/plans/research/2026-10-22-validation-receipt.json",
+    "original_pc_head": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+    "source_full_file_sha256": "a7386e9dc1d8204d866cfe7ae4e1e86c993d7bf24f8628ad97fe4780e1861e68",
+    "preserved_record_sha256": "a7386e9dc1d8204d866cfe7ae4e1e86c993d7bf24f8628ad97fe4780e1861e68",
+    "projection_created_at_utc": "2026-10-30T02:00:12.626831+00:00",
+    "projection_timestamp_is_not_an_observation": true,
+    "comparison_reference": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+    "disposition": "Publish a sanitized historical validation envelope. Preserve each original extension date, old result and scope while removing host fixture/output paths. Its pitch, media, blockchain and route claims are not current release acceptance; durable execution and private asset delivery remain separately owned.",
+    "current_owners": [
+      "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md",
+      "modules/platform_integration/social_media_orchestrator/skillz/foundup_pitch_package/SKILLz.md",
+      "modules/foundups/docs/PFMALL_MEDIA_DELIVERY_CONTRACT.md"
+    ],
+    "original_observation_timestamps": "Retained in historical content; no observation is rerun or redated.",
+    "publication_status": "Proposed, pending independent auditor acceptance; not published by this worker.",
+    "runtime_and_commenting": "UNVERIFIED"
+  },
+  "historical_record": {
+    "schema_version": "1.0",
+    "date": "2026-10-22",
+    "timezone": "Asia/Tokyo",
+    "repository_head_start_and_finish": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+    "scope": "Repository research, public GET observations, documentation/vision enhancement and local prototype instruction skill with an isolated offline forward-test. No production application, provider, remote or chain operation.",
+    "audit_coverage": {
+      "typed_entity_ids_exactly_match_registry": true,
+      "typed_entities": 16,
+      "catalog_only_identities": 7,
+      "additional_unregistered_candidates": 2,
+      "anonymous_landing_http_observations": 35,
+      "source_hashes_verified": 10,
+      "source_hash_drift": []
+    },
+    "validation": {
+      "public_catalog_validator": "PASS, 0 violations",
+      "portfolio_validator": "PASS, 0 errors and 0 warnings",
+      "parent_projector_tests": {
+        "passed": 42,
+        "failed": 0,
+        "seconds": 0.58
+      },
+      "intake_lane_scoped_tests": {
+        "passed": 416,
+        "failed": 1,
+        "seconds": 2.4,
+        "note": "Includes projector tests, so counts are not additive. See intake report for exact paths and heavy-test opt-in. Failure: test_openclaw_dispatch_simulation stale expected NOT_READY vs current authenticated commander rejection; not repaired in research lane."
+      },
+      "new_document_relative_links": {
+        "checked": 30,
+        "broken": 0
+      },
+      "markdown_fences": "balanced",
+      "research_json": "parsed",
+      "independent_reviews": [
+        "blockchain lane: no material findings in chain/market/vision sections",
+        "intake lane: explicit IDEA/UNBOUND invariant and admission-before-mint requirements incorporated",
+        "landing lane: all16 entity rows and source/deployed counts verified; main sections1-3/9 reviewed with no material findings",
+        "media/voice continuation: navigation, queue, hold handler, projection and rating constraints reviewed; no material contradiction or capability overclaim found; pitch-revision preference policy recorded as open before persistence"
+      ],
+      "continuation_document_checks": {
+        "files": [
+          "docs/architecture/FOUNDUPS_DISCOVERY_AND_EXTERNAL_PROJECT_ONBOARDING_PLAN.md",
+          "docs/plans/research/2026-10-22-landing-page-audit.md",
+          "docs/plans/research/2026-10-22-project-intake-architecture.md",
+          "docs/plans/research/2026-10-22-external-project-tokenization.md"
+        ],
+        "relative_links_checked": 37,
+        "broken_links": [],
+        "balanced_fences": true,
+        "plan_lines": 581,
+        "json_files_parsed": 3,
+        "landing_audit_source_hashes_rechecked": 10,
+        "source_hash_drift": [],
+        "new_runtime_test_execution": false,
+        "reason": "This continuation only changes planning/vision/roadmap/ModLog and receipt documents. Prior runtime test results remain the separately dated observations above."
+      }
+    },
+    "artifacts": [
+      {
+        "path": "docs/architecture/FOUNDUPS_DISCOVERY_AND_EXTERNAL_PROJECT_ONBOARDING_PLAN.md",
+        "sha256": "20ff364d309240e3768d56d5b9e95fe2d1909a607923a0d995b996894f783960",
+        "bytes": 42105
+      },
+      {
+        "path": "docs/plans/research/2026-10-22-external-project-tokenization.md",
+        "sha256": "2ede2a723ae5a7d14478ea304562de6a39b4a505351b4e7a0b5eaf3630ce9c32",
+        "bytes": 29720
+      },
+      {
+        "path": "docs/plans/research/2026-10-22-landing-page-audit.json",
+        "sha256": "53a0dea5c368f3db7260266bbcc3f6e6b1876d965150df3859b48925870bf826",
+        "bytes": 151262
+      },
+      {
+        "path": "docs/plans/research/2026-10-22-landing-page-audit.md",
+        "sha256": "9a293bc726a7c5fe1c5d5210f5d7d1662c937b31d6bb30929ed586626e7a7e1d",
+        "bytes": 20387
+      },
+      {
+        "path": "docs/plans/research/2026-10-22-project-intake-architecture.md",
+        "sha256": "aeac4fa1a78699cf32fe287a25c4ba3061a7c2ea9936c9510348bb008c92788d",
+        "bytes": 29151
+      },
+      {
+        "path": "docs/plans/research/2026-10-22-public-route-observations.json",
+        "sha256": "4d572e26ad816232c5c8ecfb8d57a6de82d4a0fe2e963fabbcffcb32c4d7f7e8",
+        "bytes": 4553
+      },
+      {
+        "path": "docs/foundups_vision.md",
+        "sha256": "f4d62af6434fb167fbc9ae65fff0bf1c5a36821cc4da5b0b44d8e6fb0ac52f51",
+        "bytes": 27528
+      },
+      {
+        "path": "modules/foundups/ROADMAP.md",
+        "sha256": "6c5786b57035957a409406ee8d1550467e4a67c563214dc3d4ad830127289790",
+        "bytes": 8011
+      },
+      {
+        "path": "modules/foundups/ModLog.md",
+        "sha256": "ec95d8631e542b86185472933ec0ce677d59ddd55f0bbd49c8a8cfd06eac12f4",
+        "bytes": 24482
+      },
+      {
+        "path": "docs/architecture/FOUNDUPS_AUTONOMOUS_PITCH_DECK_AND_PROJECT_CLAIM_PLAN.md",
+        "sha256": "350ee3155bb696870e1e33023c868732d7c6176b5aa33598af6f6658bc678746",
+        "bytes": 22435
+      },
+      {
+        "path": "docs/architecture/FOUNDUPS_BLOCKCHAIN_TESTNET_ORCHESTRATION_PLAN.md",
+        "sha256": "be7bd288d377041bab93c5adcb2a7d36e2b8c2fbd521d3ce38f37f7180f63907",
+        "bytes": 32083
+      },
+      {
+        "path": ".agents/skills/foundup-pitch-package/SKILL.md",
+        "sha256": "3b400a1d40d7b4bad09122344218496791abb1acde73f446846035cd818784ba",
+        "bytes": 995
+      },
+      {
+        "path": "modules/platform_integration/social_media_orchestrator/skillz/foundup_pitch_package/SKILLz.md",
+        "sha256": "5558a3b3352dffed0568ba5029626b7813807e96d4fffc103cc904543a443f36",
+        "bytes": 8232
+      },
+      {
+        "path": "docs/README.md",
+        "sha256": "f0d7a2d93c0b4ce7e05993285dd7e1df3657e5596c4714784be774d33218b42c",
+        "bytes": 16998
+      },
+      {
+        "path": "modules/foundups/README.md",
+        "sha256": "a9eaf99bb9b10345aaa612b55084c64d6ee665bc811c0bdf842ca6161b31d822",
+        "bytes": 17871
+      },
+      {
+        "path": "modules/platform_integration/social_media_orchestrator/README.md",
+        "sha256": "1f4378831d12b5141baf48e15696b77bae75d2664a6172a311b69781cc0ccae3",
+        "bytes": 9483
+      },
+      {
+        "path": "modules/platform_integration/social_media_orchestrator/INTERFACE.md",
+        "sha256": "67478aa19379e35deedf17e7a9550e0eb48521df800a3dff7ac528ed0a8b10fc",
+        "bytes": 11414
+      },
+      {
+        "path": "modules/platform_integration/social_media_orchestrator/ROADMAP.md",
+        "sha256": "27dc3f7b28e8b857fc97f39ce591c302337ba5893755e68586019600c337601a",
+        "bytes": 7053
+      },
+      {
+        "path": "modules/platform_integration/social_media_orchestrator/ModLog.md",
+        "sha256": "dd2b7da7bc68ae1f751edf02de08895861b5766c0d8512e69b5a88f92011c251",
+        "bytes": 53118
+      },
+      {
+        "path": "docs/plans/research/2026-10-22-blockchain-readiness-recheck.md",
+        "sha256": "eac1864ab52f5b397a16d8836a72067def7a097e7e59a82d7da0c9f6e4af1699",
+        "bytes": 13066
+      }
+    ],
+    "execution_truth": {
+      "public_site_deployed": false,
+      "registry_or_catalog_mutated": false,
+      "asset_minted": false,
+      "wallet_or_pool_created": false,
+      "PR_or_branch_operation_performed": false,
+      "mainnet_enabled": false
+    },
+    "media_voice_extension": {
+      "date": "2026-10-22",
+      "requirements": [
+        "pain -> solution -> outcome canonical pitch",
+        "cross-project listening in displayed order",
+        "separate 1-7 audience pepper preference",
+        "RedDog hold-to-talk changes visible field via bounded validated projection",
+        "typed discovery equivalent and available before speech"
+      ],
+      "holo_retrieval": {
+        "query": "pFMALL elevator pitch ordered listening audience pepper rating RedDog hold voice semantic field scope",
+        "ok": false,
+        "freshness": "UNKNOWN",
+        "index_gap_detected": true,
+        "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        "authority_repo_head_sha": "a519f0ad758618c5d82f0ebf8b48a3c4a0eae7f0",
+        "workspace_repo_head_sha": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+        "no_reindex": true
+      },
+      "retrieval_evaluation": {
+        "noise": "Older pepper metaphors, aspirational voice language and general channel videos do not prove current audience rating, microphone or pitch capability.",
+        "ordering": "Current source handlers and published interface constraints before future architecture.",
+        "missing_artifacts": "No implemented canonical pitch, cross-project pitch queue, signed audience preference persistence or authenticated semantic voice-filter path established by the bounded search.",
+        "staleness_risk": "Source/deployment drift remains as recorded in the route audit; media capabilities are source observations, not a deployed UX test.",
+        "duplication": "Reuse Mall public projection, navigation grammar and dispatch boundary; preserve existing within-project queue and economic rating semantics."
+      },
+      "source_snapshot": [
+        {
+          "path": "modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md",
+          "sha256": "578702720fd03b1b28391199ce4b52f6408e2d5f5f0bb3ec5cd633df47c25c7f",
+          "bytes": 9401
+        },
+        {
+          "path": "modules/foundups/docs/PFMALL_VIDEO_MALL_CATALOG_SCHEMA.md",
+          "sha256": "90178ebef15a1c5173ef2cb1c5f054c9cf45916f6a4545ced7c054dbb7156906",
+          "bytes": 16079
+        },
+        {
+          "path": "public/member/INTERFACE.md",
+          "sha256": "d8685d597534741d4fb691363513262a7da4685da67dbf1e33d8826c2cc73742",
+          "bytes": 23305
+        },
+        {
+          "path": "public/member/js/account-concierge.js",
+          "sha256": "298a94f9b27b91c810f8bab44f774ddfa0a6c405c2a3f8e5a7bd67572f305a33",
+          "bytes": 64579
+        },
+        {
+          "path": "public/member/js/mall-tile-field.js",
+          "sha256": "11d13741fc5d07cca80ab8a722a5bd63c89be9ea6183336af9989aad49fc7fab",
+          "bytes": 67590
+        },
+        {
+          "path": "public/member/js/mall-video-player.js",
+          "sha256": "0349777e8b2487bed87f6791c12ade5f0856087299d56f1474bdc27fa1bd0bb0",
+          "bytes": 26639
+        },
+        {
+          "path": "public/member/js/pfmall-control-dispatcher.js",
+          "sha256": "49f44b4b85fd108351c1212a1b60b7e49c0e4ce589866cf481f15f7c6c2da8be",
+          "bytes": 29003
+        },
+        {
+          "path": "public/member/RED_DOG_DIGITAL_TWIN_CONTRACT.md",
+          "sha256": "435aad90e7d1a033ffdf55111dfbefd517849d7984e3a79b2f4137f02c2979c0",
+          "bytes": 8112
+        },
+        {
+          "path": "modules/foundups/pfmall/INTERFACE.md",
+          "sha256": "f5da368c4c5d5c8d752f58e00c39d24abc10425e743fae2720d38a197886965f",
+          "bytes": 6260
+        },
+        {
+          "path": "modules/foundups/simulator/economics/fi_rating.py",
+          "sha256": "463a69523b4537ce6abaec63965ba6ca5b470d581e5edd353b3a154899560425",
+          "bytes": 16574
+        }
+      ],
+      "browser_references": [
+        "https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition",
+        "https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia",
+        "https://developer.mozilla.org/en-US/docs/Web/Media/Guides/Autoplay"
+      ],
+      "implementation_status": "planned_not_implemented_or_deployed",
+      "narrative_order_superseded_by": "autonomous_pitch_deck_claim_extension; current presentation is vision/outcome first"
+    },
+    "autonomous_pitch_deck_claim_extension": {
+      "date": "2026-10-22",
+      "work_gate": {
+        "Closed groundwork": "Existing outcome-first WSP27/WSP109, structured intake, campaign brief placeholder, provider generation/assembly and public catalog seams retrieved.",
+        "Open target": "No integrated RedDog-to-pitch/deck/media worker or fresh public GitHub challenge verifier established.",
+        "Chosen slice": "Reusable local instruction skill, connected architecture/vision/roadmap and isolated forward-test.",
+        "Not this slice": "Production WRE admission, resident speech trigger, paid provider calls, publication, repository mutation, token effects or parallel PR cleanup."
+      },
+      "local_skill": {
+        "entry": ".agents/skills/foundup-pitch-package/SKILL.md",
+        "canonical": "modules/platform_integration/social_media_orchestrator/skillz/foundup_pitch_package/SKILLz.md",
+        "promotion_state": "prototype",
+        "quick_validate": "PASS",
+        "canonical_frontmatter": "PASS",
+        "programmatic_executor": false,
+        "WRE_registry_entry": false,
+        "implicit_social_domain_trigger": false
+      },
+      "narrative_order": [
+        "vision/outcome",
+        "why/problem",
+        "what/solution",
+        "how/proof",
+        "next step"
+      ],
+      "intake_packet_order": "WSP109 OUTCOME -> SOLUTION -> PAIN unchanged",
+      "retrieval": {
+        "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        "ok": false,
+        "freshness": "UNKNOWN",
+        "index_gap_detected": true,
+        "no_reindex": true,
+        "query": "foundup campaign pitch deck creative package media generation GitHub ownership claim challenge RedDog genesis intake"
+      },
+      "retrieval_evaluation": {
+        "noise": "Aspirational campaign/media/deck language and older provider defaults cannot establish live generation or admission.",
+        "ordering": "Current source handlers and WSP95/109 contracts before placeholders and historical briefs.",
+        "missing_artifacts": "Resident draft trigger, durable media/deck adapters and claim verifier remain planned; local instruction entry is authored here.",
+        "staleness_risk": "Module roadmap/header status varies and provider identifiers/prices require current execution-time verification. Historical bootstrap is not current repo state.",
+        "duplication": "Reuse CampaignBrief, intake/nonce, lower media generation and public projector; preserve campaign-distribution placeholder and existing WRE registry."
+      },
+      "autonomy_choice": "0102 authored the cross-contract narrative instruction and used independent delegated source/behavior review. Qwen/Gemma metadata proposals remain a later admitted runtime option; no local model service was invoked.",
+      "forward_test": {
+        "fixture": "BorrowBench fictional unadmitted IDEA",
+        "output_directory": "[PRIVATE_HOST_PATH_OMITTED]",
+        "brief_revision": "9c92be589468",
+        "brief_content_sha256": "9c92be589468ae1854a52d5c2f4496451795a9eb04fcfefc674886c7a6f2bfbc",
+        "brief_hash_independently_recomputed": true,
+        "artifact_hashes_verified": 10,
+        "artifacts": [
+          {
+            "path": "source-brief.md",
+            "sha256": "11eba8186f82220431c2848ff8881da4583f114bf8feda3a8ac62d8351527b0a",
+            "bytes": 497,
+            "status": "provided_source",
+            "brief_revision": "9c92be589468"
+          },
+          {
+            "path": "brief.json",
+            "sha256": "ab6fb5bf6331cb9c3bcab35f304f0f4ce2579e2d7711b94e5b0d052ec50ba41d",
+            "bytes": 5296,
+            "status": "draft_with_verified_content_sha256",
+            "brief_revision": "9c92be589468"
+          },
+          {
+            "path": "pitch.md",
+            "sha256": "76914150bdea8f85c99404dcf9ed3696785a5be71b46a1a117fa7aae3a5c0832",
+            "bytes": 1691,
+            "status": "finished_narration_draft",
+            "brief_revision": "9c92be589468"
+          },
+          {
+            "path": "storyboard.md",
+            "sha256": "065aa800ba392948b4f1d3108bb35a2fd14197841b2dea5d28583d00d52a3543",
+            "bytes": 3205,
+            "status": "finished_storyboard_draft",
+            "brief_revision": "9c92be589468"
+          },
+          {
+            "path": "deck.md",
+            "sha256": "8f9aa9c518d10d84530475e76514141e956667065db0ff96cdf0c70fb17e9e81",
+            "bytes": 2672,
+            "status": "finished_slide_copy_and_notes",
+            "brief_revision": "9c92be589468"
+          },
+          {
+            "path": "borrowbench-deck.pptx",
+            "sha256": "647264967262de1b1cd123ee56bd2319d85b3c7c809516eaef3a7dd5f38814af",
+            "bytes": 34423,
+            "status": "rendered_and_visually_inspected",
+            "brief_revision": "9c92be589468"
+          },
+          {
+            "path": "borrowbench-deck.html",
+            "sha256": "62c54e7949e52688b301e16b34362ca2b8f6b36b4b6c11e19a10e8c1d31b85ab",
+            "bytes": 3239,
+            "status": "rendered_mobile_desktop_and_visually_inspected",
+            "brief_revision": "9c92be589468"
+          },
+          {
+            "path": "media_requests.json",
+            "sha256": "cd30955c39f67aff00a5cfab7bef3cddd629981f9f5348634c26d9a8a2f7d3c2",
+            "bytes": 3145,
+            "status": "draft_not_submitted",
+            "brief_revision": "9c92be589468"
+          },
+          {
+            "path": "captions.draft.srt",
+            "sha256": "cf2f18f4f0e9787f7ba53d54f4a7bb617fa2de1d826dc2e1ce49a7a745d21a68",
+            "bytes": 1000,
+            "status": "draft_timings_unverified",
+            "brief_revision": "9c92be589468"
+          },
+          {
+            "path": "forward-test-report.md",
+            "sha256": "138c1e89d6b8357a1eef961f62f65ee03f2efd1f05d13cc2bb042dbcc8c93764",
+            "bytes": 3171,
+            "status": "observed_forward_test_report",
+            "brief_revision": "9c92be589468"
+          }
+        ],
+        "manifest_sha256": "78795e6b0395cff5112e94981165e0b2b96dc02f5bf1645057d020e618835727",
+        "render_observations": {
+          "brief_hash_verified": true,
+          "independent_brief_hash_review": "pass",
+          "original_completed_package_all_ten_artifacts_preserved": true,
+          "source_refs_resolved": 7,
+          "narrative_unchanged": true,
+          "caption_text_matches_narration": true,
+          "caption_bytes_unchanged": true,
+          "all_pitch_deck_html_media_revisions_match": true,
+          "pptx_slides_and_notes_revision_verified": 6,
+          "pptx_package_integrity": "pass",
+          "pptx_layout_findings": 0,
+          "pptx_first_party_import": "pass",
+          "final_pptx_slides_inspected": 6,
+          "html_desktop_slides_inspected": 6,
+          "html_mobile_slides_inspected": 6,
+          "html_horizontal_overflow": false,
+          "external_browser_resource_requests": 0,
+          "native_powerpoint_inspected": false,
+          "render_change_scope": "Only revision footer regions changed in 18 rendered images",
+          "evidence_paths": [
+            "../build-schema-v1/deck.validation.json",
+            "../build-schema-v1/render-checks.json"
+          ]
+        },
+        "audio": "not_generated",
+        "video": "not_generated",
+        "captions": "draft_timings_unverified",
+        "scope": "Offline local draft fixture; no external model/media/API, credential, publication or economic operation. Does not demonstrate resident integration."
+      },
+      "checks": {
+        "documents_checked": [
+          "docs/architecture/FOUNDUPS_DISCOVERY_AND_EXTERNAL_PROJECT_ONBOARDING_PLAN.md",
+          "docs/plans/research/2026-10-22-external-project-tokenization.md",
+          "docs/plans/research/2026-10-22-landing-page-audit.md",
+          "docs/plans/research/2026-10-22-project-intake-architecture.md",
+          "docs/architecture/FOUNDUPS_AUTONOMOUS_PITCH_DECK_AND_PROJECT_CLAIM_PLAN.md",
+          "docs/architecture/FOUNDUPS_BLOCKCHAIN_TESTNET_ORCHESTRATION_PLAN.md",
+          ".agents/skills/foundup-pitch-package/SKILL.md",
+          "modules/platform_integration/social_media_orchestrator/skillz/foundup_pitch_package/SKILLz.md"
+        ],
+        "relative_links_checked": 68,
+        "broken_links": [],
+        "balanced_fences": true,
+        "landing_audit_source_hashes_rechecked": 10,
+        "source_hash_drift": [],
+        "head_unchanged": true,
+        "runtime_tests_rerun": false
+      },
+      "independent_reviews": [
+        "Claim/control/sash/economic boundary review: no material issues.",
+        "Media/budget/publication/reward review: uncertain upload recovery finding fixed and re-reviewed.",
+        "Independent skill forward-test produced actual narration plus editable PPTX and responsive HTML; final schema/revision/render/hash checks passed."
+      ],
+      "source_snapshot": [
+        {
+          "path": "WSP_framework/src/WSP_27_pArtifact_DAE_Architecture.md",
+          "sha256": "575c0684b7d225c805453539c190e941309a35c2afdecfd7cc775da7576c7319",
+          "bytes": 56626
+        },
+        {
+          "path": "WSP_framework/src/WSP_95_WRE_SKILLz_Wardrobe_Protocol.md",
+          "sha256": "25eb07bf42d8b4c72e5aa465d3725e2d70a7058ce077f946d635f983ca5d26c3",
+          "bytes": 14491
+        },
+        {
+          "path": "WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md",
+          "sha256": "21cc5eb038f443e464fcf70f109054760932da81c72bf5b15af14edbd673c0ec",
+          "bytes": 25708
+        },
+        {
+          "path": "modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_packet_builder.py",
+          "sha256": "3e1e3705ee3a8e5b380163627e074b8460d6009672185271dfa516487d26e870",
+          "bytes": 10438
+        },
+        {
+          "path": "modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_auth_provider.py",
+          "sha256": "d220d35e80c9271836a1f695d7a33ff9ded2776238b3d54ae3c51abe8eca5b57",
+          "bytes": 36673
+        },
+        {
+          "path": "modules/platform_integration/social_media_orchestrator/skillz/foundup_campaign_operator/README.md",
+          "sha256": "1f1bb4a62b690ff2dc929ed85c59d792595ad22f48a7ae310f3c640b77883666",
+          "bytes": 2824
+        },
+        {
+          "path": "docs/audits/architecture/FOUNDUP_CAMPAIGN_OPERATOR_SKILLZ_PLACEHOLDER_PHASE1.md",
+          "sha256": "2bb9a4ad59f6950e4f44a6d063aea9e976c05a29606c52cb876e878420ef0ab4",
+          "bytes": 22042
+        },
+        {
+          "path": "modules/communication/youtube_shorts/src/veo3_generator.py",
+          "sha256": "62a36faabbd493b74f682e8163b95beb0744b7b915a0be8374da6673fba6854f",
+          "bytes": 23869
+        },
+        {
+          "path": "modules/communication/youtube_shorts/src/shorts_orchestrator.py",
+          "sha256": "07265c1b83d36caea1ea10e24191d7dbf5d73637b54aa71c5d14ae157fd51b18",
+          "bytes": 20463
+        },
+        {
+          "path": "modules/communication/youtube_shorts/src/youtube_uploader.py",
+          "sha256": "4f418e87a76ec664e8d94b2180f751ebcdf63579821af2fa96908928800512d8",
+          "bytes": 12547
+        },
+        {
+          "path": "modules/communication/headless_video_orchestrator/src/orchestrator.py",
+          "sha256": "62161fcac51aa523757563595ebab92ffb390dc58a96d7edde7e646c1af90944",
+          "bytes": 5304
+        },
+        {
+          "path": "modules/platform_integration/github_integration/src/github_api_client.py",
+          "sha256": "c0421610130b5dd450f32926cfec198d0224faf9ace9e051ec6f898a2816e7c9",
+          "bytes": 19878
+        },
+        {
+          "path": "modules/platform_integration/github_integration/src/reddog_github_permission_probe.py",
+          "sha256": "dcc505549c26960c29e925d2b1a9c9ad7df2a2eded8ce5748b2a888190d20437",
+          "bytes": 10369
+        }
+      ],
+      "execution_truth": {
+        "resident_RedDog_trigger_implemented": false,
+        "provider_media_generated": false,
+        "public_release_performed": false,
+        "GitHub_claim_verifier_implemented": false,
+        "claim_issued_or_consumed": false,
+        "WRE_registry_mutated": false,
+        "asset_or_reward_operation": false,
+        "PR_cleanup_touched": false
+      },
+      "evaluated_skill_version": "0.1.0",
+      "narrative_order_superseded_by": "three_pillar_correction"
+    },
+    "three_pillar_correction": {
+      "date": "2026-10-22",
+      "skill_version": "0.1.1",
+      "canonical_narrative": [
+        "outcome",
+        "solution",
+        "pain"
+      ],
+      "meaning": {
+        "outcome": "vision",
+        "solution": "PoC -> Prototype -> MVP path",
+        "pain": "problems and obstacles"
+      },
+      "nesting": "Why/what/how/CTA are supporting detail; stage/provenance/revision remain metadata; WSP109 eight-artifact intake preserved.",
+      "prior_instruction_artifacts": [
+        {
+          "path": ".agents/skills/foundup-pitch-package/SKILL.md",
+          "sha256": "b908182dc8a80f7f883b29a97be6f5d7aaed8c5c512480ce420dca9cdf7b42a5",
+          "bytes": 815
+        },
+        {
+          "path": "modules/platform_integration/social_media_orchestrator/skillz/foundup_pitch_package/SKILLz.md",
+          "sha256": "ff071309aadc5eafda2794a8c3c897839cc406c783fb9b7197832924ea0e28b8",
+          "bytes": 6529
+        }
+      ],
+      "source_snapshot": [
+        {
+          "path": "WSP_framework/src/WSP_27_pArtifact_DAE_Architecture.md",
+          "sha256": "575c0684b7d225c805453539c190e941309a35c2afdecfd7cc775da7576c7319",
+          "bytes": 56626
+        },
+        {
+          "path": "WSP_framework/src/WSP_30_Agentic_Module_Build_Orchestration.md",
+          "sha256": "d56bf01013aed620b1ce368f671024a3ba284770815873b5cdb5f80e323d00d2",
+          "bytes": 12425
+        },
+        {
+          "path": "WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md",
+          "sha256": "21cc5eb038f443e464fcf70f109054760932da81c72bf5b15af14edbd673c0ec",
+          "bytes": 25708
+        },
+        {
+          "path": "modules/foundups/move2japan/docs/04_POC_PROTOTYPE_MVP.md",
+          "sha256": "368c5d74e6b28162766dcf11078aba9f7891d88b426466be457be07f5a01fe9a",
+          "bytes": 2412
+        },
+        {
+          "path": "modules/foundups/identity_shield/docs/intake/POC_SCOPE.md",
+          "sha256": "84a1373cb8b2a166e52deeae4aaa266169139ebf55c2087b11ea9132fed9f64f",
+          "bytes": 2429
+        },
+        {
+          "path": "modules/foundups/voteballots/docs/intake/PROTOTYPE_GATE.md",
+          "sha256": "5ef96dd52d6604fd5619581df709ab4d57e873a73769df87be841f40dcef7ac8",
+          "bytes": 5201
+        }
+      ],
+      "retrieval": {
+        "query": "OUTCOME vision SOLUTION proof of concept prototype MVP PAIN obstacles FoundUp intake pitch",
+        "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        "ok": false,
+        "freshness": "UNKNOWN",
+        "index_gap_detected": true,
+        "no_reindex": true
+      },
+      "retrieval_evaluation": {
+        "noise": "Prior authored five-part marketing sequence and broad matches were not the canonical FoundUp model.",
+        "ordering": "WSP27 definitions, WSP109 intake contracts and WSP30 stage criteria before presentation prose; then existing project examples.",
+        "missing_artifacts": "No new protocol needed; existing outcome/solution/pain and project stage evidence reused.",
+        "staleness_risk": "Earlier local 0.1.0 rendering fixture predates the corrected narrative and is preserved as historical.",
+        "duplication": "Removed peer why/how/next-step pillars; nested those details in existing three objects rather than creating another model."
+      },
+      "validation": {
+        "skill_quick_validate": "PASS",
+        "relative_links_checked": 39,
+        "broken_links": [],
+        "balanced_fences": true,
+        "head_unchanged": true,
+        "independent_source_review": "WSP27/30/109 and project examples confirm model; no WSP changed.",
+        "semantic_forward_check": {
+          "status": "PASS",
+          "fixture_directory": "[PRIVATE_HOST_PATH_OMITTED]",
+          "brief_revision": "c3658b2ab8ea",
+          "content_sha256": "c3658b2ab8eace6d2426f7c1027583d31fa4e87d13f9df8b93456c2fd1b5f835",
+          "three_narrative_objects_verified": true,
+          "solution_stages_verified": true,
+          "later_stages_unspecified_verified": true,
+          "artifacts": [
+            {
+              "path": "[PRIVATE_HOST_PATH_OMITTED]",
+              "sha256": "03cbd4eb68120f2d09473036817b787ebae43d2834d82a9c6fed0c32fc0a2e97",
+              "bytes": 5155
+            },
+            {
+              "path": "[PRIVATE_HOST_PATH_OMITTED]",
+              "sha256": "93d69a4ad3f0b4fcd27f87907596bb6e3aeb682926bd531ffbcffde7bee940ba",
+              "bytes": 1196
+            },
+            {
+              "path": "[PRIVATE_HOST_PATH_OMITTED]",
+              "sha256": "e55959db95af33f44b1d0a3bffd9ab94508223cd4e91cd8917f30ee75051d18f",
+              "bytes": 2212
+            }
+          ],
+          "rendering_repeated": false,
+          "provider_calls": false,
+          "complete_rendered_package_claimed": false
+        },
+        "runtime_tests_rerun": false
+      },
+      "execution_truth": "Instruction/docs correction and isolated semantic fixture only; no runtime, provider, registry, claim, token, PR or deployment operation."
+    },
+    "blockchain_readiness_recheck": {
+      "date": "2026-10-22",
+      "report": "docs/plans/research/2026-10-22-blockchain-readiness-recheck.md",
+      "repository_head": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+      "readiness": "LOCAL_PROTOTYPE_REAL_TESTNET_SETTLEMENT_NOT_READY",
+      "security_clearance": false,
+      "production_runtime_changes_made": false,
+      "creative_alignment": {
+        "skill_version": "0.1.2",
+        "prior_instruction_artifacts": [
+          {
+            "path": ".agents/skills/foundup-pitch-package/SKILL.md",
+            "sha256": "0a868b1045205af524471326ad02dbdcdff8934958085b6330ac8fe2292385e7",
+            "bytes": 953
+          },
+          {
+            "path": "modules/platform_integration/social_media_orchestrator/skillz/foundup_pitch_package/SKILLz.md",
+            "sha256": "72e903b4c755844d7233b65123742f41c7197f47cdd34df641e922156afba313",
+            "bytes": 7915
+          }
+        ],
+        "source_review": "PASS, WSP27/30/109 and project intakes; three pillars retained.",
+        "pain_meaning": "obstacles to reaching/implementing Solution, retaining existing adoption evidence",
+        "final_deck": "released companion uses verified video/transcript/stills and same brief revision; offline previsualization stays draft",
+        "new_behavioral_render_tests": false
+      },
+      "current_model_research": {
+        "recommended_candidate": "gemini-omni-1.1-flash",
+        "basis": "Current Google video guide default recommendation and Omni API docs.",
+        "configured_or_called": false,
+        "account_access_verified": false,
+        "legacy_worker_models": [
+          "veo-3.0-generate-001",
+          "veo-3.0-fast-generate-001"
+        ],
+        "deprecation_scope": "Gemini API; GA Cloud route is separate.",
+        "sources": [
+          "https://ai.google.dev/gemini-api/docs/video",
+          "https://ai.google.dev/gemini-api/docs/omni",
+          "https://ai.google.dev/gemini-api/docs/deprecations",
+          "https://ai.google.dev/gemini-api/docs/pricing",
+          "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/veo/3-1-generate?hl=en"
+        ]
+      },
+      "product_interactions": {
+        "nomination": "planned additive typed intake, current genesis remains IDEA/UNBOUND/no external repo",
+        "join": "internal agent membership and profiles exist; public community/claim workflow not established",
+        "follow": "contract hook; no wired owned public persistence found",
+        "save_video": "browser-local implementation exists",
+        "directory_vote": "no endpoint/store established in bounded source search",
+        "audience_peppers": "planned; existing1-7 input is founder conviction",
+        "civic_vote": "internal research PoC is separate"
+      },
+      "current_tests": {
+        "fam": {
+          "passed": 50,
+          "files": [
+            "modules/foundups/agent_market/tests/test_task_lifecycle.py",
+            "modules/foundups/agent_market/tests/test_permissions.py",
+            "modules/foundups/agent_market/tests/test_persistent_compute_wiring.py",
+            "modules/foundups/agent_market/tests/test_schemas.py",
+            "modules/foundups/agent_market/tests/test_orchestrator.py",
+            "modules/foundups/agent_market/tests/test_persistence.py",
+            "modules/foundups/agent_market/tests/test_sqlite_adapter.py",
+            "modules/foundups/agent_market/tests/test_migrations.py"
+          ],
+          "representative_exact_node_ids": [
+            "modules/foundups/agent_market/tests/test_task_lifecycle.py::test_task_lifecycle_open_to_paid",
+            "modules/foundups/agent_market/tests/test_permissions.py::test_only_verifier_can_verify",
+            "modules/foundups/agent_market/tests/test_permissions.py::test_only_treasury_can_trigger_payout",
+            "modules/foundups/agent_market/tests/test_persistent_compute_wiring.py::test_task_pipeline_enforces_and_debits_each_step"
+          ],
+          "representatives_not_complete_node_inventory": true
+        },
+        "btc_commitment_runtime": {
+          "connector_passed": 16,
+          "commitment_passed": 2,
+          "runtime_passed": 2,
+          "files": [
+            "modules/foundups/simulator/tests/test_btc_anchor_connector.py",
+            "modules/foundups/simulator/tests/test_epoch_ledger_settlement_commitment.py",
+            "modules/foundups/simulator/tests/test_layer_d_anchor_runtime.py"
+          ]
+        },
+        "economics": {
+          "passed": 9,
+          "seconds": 0.76,
+          "exact_node_ids": [
+            "modules/foundups/simulator/tests/test_alignment_and_tokenomics.py::test_foundup_mint_respects_available_supply_cap",
+            "modules/foundups/simulator/tests/test_alignment_and_tokenomics.py::test_staking_roundtrip_fee_math",
+            "modules/foundups/simulator/tests/test_cabr_flow_router.py::test_valve_closed_routes_zero_flow",
+            "modules/foundups/simulator/tests/test_cabr_flow_router.py::test_pipe_size_controls_flow_rate",
+            "modules/foundups/simulator/tests/test_cabr_flow_router.py::test_release_budget_caps_flow",
+            "modules/foundups/simulator/tests/test_epoch_ledger_settlement_commitment.py::test_prepare_settlement_commitment_returns_none_when_epoch_missing",
+            "modules/foundups/simulator/tests/test_epoch_ledger_settlement_commitment.py::test_prepare_settlement_commitment_contains_expected_fields",
+            "modules/foundups/simulator/tests/test_fam_lifecycle_flow.py::test_bridge_supports_full_task_lifecycle",
+            "modules/foundups/simulator/tests/test_fam_lifecycle_flow.py::test_model_advances_claimed_task_to_paid_and_published"
+          ]
+        },
+        "counts_additive": false,
+        "warnings": "Inactive asyncio configuration with pytest plugin autoload disabled.",
+        "environment": "Existing .venv; bytecode/cache off; temporary DB/bridge storage outside repo; no installs.",
+        "network": "FAM/BTC lane sockets/DNS guarded with zero attempts. Economics/provider/chain calls not invoked.",
+        "limitation": "Passing existing tests do not cover the adversarial gaps; not full repository/contract/custody/live-node security audit."
+      },
+      "adversarial_observations": [
+        "Explicit unavailable/unknown/disconnected chain hints and missing default return mock success.",
+        "Modified supply under same mock identity overwrites balance; deployment forgotten after restart.",
+        "In-memory self-verification and mismatched task binding accepted; persistent self-verification without role accepted; persistent mismatched task ID correctly rejects.",
+        "Persistent unprivileged payout accepted with compute enforcement on/off for funded actors.",
+        "Persistent PAID/INITIATED/null-reference persists after restart; in-memory COMPLETED uses synthetic reference.",
+        "Crash between persistent payout creation and task update permits second durable payout row on retry.",
+        "Altered proof beneficiary/amount/epoch verifies; roots collide across tenant/epoch for identical rewards.",
+        "Duplicate epoch overwrites root; ledger chain verifies.",
+        "21M minted plus staking produces 21000097 aggregate F_i against21M cap.",
+        "Repeated router calls release20+19.6 despite initial20 budget; treasury conservation holds per call.",
+        "Completion API accepts two10F_i rewards without a source receipt/task identity.",
+        "BTC malformed/conflicting replay, publish-before-persist duplicate recovery and failed/no-tx confirmation reproduce in offline probes."
+      ],
+      "next_build_slice": "P0A fail-closed token backend selection, explicit honest simulation preserved; then shared auth, accounting/replay/outbox and independent confirmation before one funded localnet/testnet effect.",
+      "retrieval": {
+        "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        "ok": false,
+        "freshness": "UNKNOWN",
+        "index_gap_detected": true,
+        "no_reindex": true
+      },
+      "retrieval_evaluation": {
+        "noise": "Happy-path mock success, stage labels, economic/civic rating vocabulary and historic roadmap claims do not establish live settlement or directory participation.",
+        "ordering": "Current source and scoped negative probes before tests and planning prose.",
+        "missing_artifacts": "Real backend, durable bounded signed settlement and confirmed receipt path still missing.",
+        "staleness_risk": "Prior code hash baseline for these blockchain objects was not established; current source hashes captured. HEAD equality alone does not prove overlay equality.",
+        "duplication": "Reuse token factory/FAM/epoch ledger/projector/intake; no new runtime stack authored."
+      },
+      "source_snapshot": [
+        {
+          "path": "modules/foundups/agent_market/src/token_factory.py",
+          "sha256": "f35caf3047b123e1c62bf9a476f33e3c9d10b5ec86164a8b98ef5774d306da6a",
+          "bytes": 12120
+        },
+        {
+          "path": "modules/foundups/agent_market/src/models.py",
+          "sha256": "0e59488898c7fb25924db4a6271f74126a858bd6cbad06049a6885dbccdc2725",
+          "bytes": 9658
+        },
+        {
+          "path": "modules/foundups/agent_market/src/task_pipeline.py",
+          "sha256": "aedad594b16fd23cee81c1b619b48aff9d026f353b9f4155569029810ca13a4e",
+          "bytes": 15351
+        },
+        {
+          "path": "modules/foundups/agent_market/src/in_memory.py",
+          "sha256": "fc3a5e2548dd1553d7d422678c7269a317eab0b2336cdf1c68e97a8859953a24",
+          "bytes": 45853
+        },
+        {
+          "path": "modules/foundups/agent_market/src/persistence/sqlite_adapter.py",
+          "sha256": "eecd07cbedaf2e5c444a9d572d226eef11c699394cd80b1e6a4a5e5fe1252d67",
+          "bytes": 46373
+        },
+        {
+          "path": "modules/foundups/simulator/economics/epoch_ledger.py",
+          "sha256": "f92c194e09f2e17e41ac2bbf15e2048f9a085412330482d95b33328ca87f571b",
+          "bytes": 17592
+        },
+        {
+          "path": "modules/foundups/simulator/economics/token_economics.py",
+          "sha256": "55a817dc30680c6390416a0b154076afa2497f4800cbde9816336e1e8a4a1794",
+          "bytes": 52455
+        },
+        {
+          "path": "modules/foundups/simulator/economics/cabr_flow_router.py",
+          "sha256": "aac3c9cdd90ab3ddce78f021dfe6a633a707fcbf1600238ec1f4d34a586c2526",
+          "bytes": 2259
+        },
+        {
+          "path": "modules/foundups/simulator/economics/btc_anchor_connector.py",
+          "sha256": "07382b237039d1792142835fcfff2afe3bd5f649e74a7c1bafb295b0efbbf7ea",
+          "bytes": 18498
+        },
+        {
+          "path": "modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_packet_builder.py",
+          "sha256": "3e1e3705ee3a8e5b380163627e074b8460d6009672185271dfa516487d26e870",
+          "bytes": 10438
+        },
+        {
+          "path": "modules/ai_intelligence/ai_overseer/src/foundup_genesis/launch_request.py",
+          "sha256": "33e945615d6e9fd551ed87746272caccf1cf52aef5731e007f09954491eda9de",
+          "bytes": 14877
+        },
+        {
+          "path": "modules/communication/youtube_shorts/src/veo3_generator.py",
+          "sha256": "62a36faabbd493b74f682e8163b95beb0744b7b915a0be8374da6673fba6854f",
+          "bytes": 23869
+        },
+        {
+          "path": "public/member/INTERFACE.md",
+          "sha256": "d8685d597534741d4fb691363513262a7da4685da67dbf1e33d8826c2cc73742",
+          "bytes": 23305
+        },
+        {
+          "path": "public/member/js/mall-video-player.js",
+          "sha256": "0349777e8b2487bed87f6791c12ade5f0856087299d56f1474bdc27fa1bd0bb0",
+          "bytes": 26639
+        },
+        {
+          "path": "modules/foundups/simulator/economics/fi_rating.py",
+          "sha256": "463a69523b4537ce6abaec63965ba6ca5b470d581e5edd353b3a154899560425",
+          "bytes": 16574
+        }
+      ],
+      "validation": {
+        "skill_quick_validate": "PASS",
+        "canonical_frontmatter": "PASS0.1.2/prototype",
+        "relative_links_checked": 96,
+        "broken_links": [],
+        "balanced_fences": true,
+        "head_unchanged": true,
+        "independent_reviews": [
+          "FAM/BTC lane: readiness report sections1/2/5 factual QA passed; source refs/test scopes/P0A match fresh observations.",
+          "Economics lane: nine cases/probes/report scope/gates factual QA passed; no prior code hash baseline asserted.",
+          "Vision lane: skill0.1.2 and authored plans align with O/S/P, pain delivery barriers and final-deck/video relation; public interaction gaps correctly labeled."
+        ]
+      },
+      "execution_truth": {
+        "provider_or_signer_called": false,
+        "credential_values_viewed_or_exposed": false,
+        "chain_writes": false,
+        "funds_moved": false,
+        "deployment_or_mint": false,
+        "public_release": false,
+        "PR_or_branch_operation": false,
+        "blockchain_runtime_patched": false
+      }
+    }
+  }
+}

@@ -3,9 +3,8 @@
 WRE Skill Trigger Mixin — DAE-embedded skill scheduling.
 
 Lightweight mixin that any DAE can compose to fire WRE skills on a
-cadence.  Skills are discovered by `domain` tag in their SKILLz.md
-frontmatter and executed through the full WRE pipeline (libido gating,
-executor dispatch, A/B testing, PatternMemory, evolution).
+cadence. Production Skillz are selected from the exact WRE registry by domain
+and then pass the normal admission/execution-truth pipeline.
 
 Usage:
     class MyDAE(SkillTriggerMixin):
@@ -19,7 +18,7 @@ Usage:
                 await asyncio.sleep(600)
 
 WSP Compliance: WSP 27 (DAE Architecture), WSP 46 (WRE Protocol),
-                WSP 77 (Agent Coordination), WSP 96 (WRE Skills)
+                WSP 77 (Agent Coordination), WSP 95 (WRE Skillz)
 """
 
 import asyncio
@@ -85,25 +84,23 @@ class SkillTriggerMixin:
             self._trigger_orchestrator = WREMasterOrchestrator()
             return True
         except Exception as exc:
-            logger.warning("[SKILL-TRIGGER] Failed to init orchestrator: %s", exc)
+            logger.warning(
+                "[SKILL-TRIGGER] Failed to init orchestrator; error_type=%s",
+                type(exc).__name__,
+            )
             return False
 
     def _discover_domain_skills(self) -> List[str]:
-        """Discover skills matching this DAE's domain."""
+        """Select registered production Skillz matching this DAE domain."""
         try:
-            from modules.infrastructure.wre_core.skillz.wre_skills_discovery import (
-                WRESkillsDiscovery,
+            from modules.infrastructure.wre_core.skillz.wre_skills_loader import (
+                WRESkillsLoader,
             )
-            discovery = WRESkillsDiscovery(self._trigger_repo_root)
-            all_skills = discovery.discover_all_skills()
-
-            # Filter by domain tag in metadata
-            domain_skills = []
-            for skill in all_skills:
-                skill_domain = skill.metadata.get("domain", "").lower().strip()
-                if skill_domain == self._trigger_domain.lower():
-                    domain_skills.append(skill.skill_name)
-
+            loader = WRESkillsLoader(repo_root=self._trigger_repo_root)
+            domain_skills = loader.list_skills(
+                domain=self._trigger_domain,
+                promotion_state="production",
+            )
             self._trigger_discovered_skills = domain_skills
             logger.info(
                 "[SKILL-TRIGGER] Discovered %d skills for domain=%s: %s",
@@ -111,7 +108,10 @@ class SkillTriggerMixin:
             )
             return domain_skills
         except Exception as exc:
-            logger.warning("[SKILL-TRIGGER] Discovery failed: %s", exc)
+            logger.warning(
+                "[SKILL-TRIGGER] Discovery failed; error_type=%s",
+                type(exc).__name__,
+            )
             return []
 
     def _should_fire(self) -> bool:
@@ -120,6 +120,70 @@ class SkillTriggerMixin:
             return False
         elapsed = time.monotonic() - self._trigger_last_fire
         return elapsed >= self._trigger_cadence_s
+
+    def _trigger_context(self, extra_context: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+        context = dict(extra_context or {})
+        context.update({
+            "triggered_by": f"dae_{self._trigger_domain}",
+            "trigger_timestamp": datetime.now().isoformat(),
+            "domain": self._trigger_domain,
+        })
+        return context
+
+    def _trigger_failure(
+        self, skill_name: str, exc: Exception, *, mode: str
+    ) -> Dict[str, Any]:
+        logger.error(
+            "[SKILL-TRIGGER] %s failed for %s; error_type=%s",
+            mode,
+            skill_name,
+            type(exc).__name__,
+        )
+        return {
+            "skill_name": skill_name,
+            "success": False,
+            "error": "registered production Skillz execution failed",
+        }
+
+    async def _fire_one_skill(
+        self, skill_name: str, extra_context: Optional[Dict[str, Any]]
+    ) -> Dict[str, Any]:
+        try:
+            context = self._trigger_context(extra_context)
+            result = await asyncio.get_running_loop().run_in_executor(
+                None,
+                lambda: self._trigger_orchestrator.execute_skill(
+                    skill_name=skill_name,
+                    agent=self._trigger_agent,
+                    input_context=context,
+                ),
+            )
+            if not isinstance(result, dict):
+                raise TypeError("orchestrator result must be an object")
+            logger.info(
+                "[SKILL-TRIGGER] %s -> success=%s fidelity=%.2f",
+                skill_name,
+                result.get("success") is True,
+                result.get("pattern_fidelity", 0.0),
+            )
+            return result
+        except Exception as exc:
+            return self._trigger_failure(skill_name, exc, mode="async execution")
+
+    def _fire_one_skill_sync(
+        self, skill_name: str, extra_context: Optional[Dict[str, Any]]
+    ) -> Dict[str, Any]:
+        try:
+            result = self._trigger_orchestrator.execute_skill(
+                skill_name=skill_name,
+                agent=self._trigger_agent,
+                input_context=self._trigger_context(extra_context),
+            )
+            if not isinstance(result, dict):
+                raise TypeError("orchestrator result must be an object")
+            return result
+        except Exception as exc:
+            return self._trigger_failure(skill_name, exc, mode="sync execution")
 
     async def fire_pending_skills(
         self,
@@ -156,46 +220,12 @@ class SkillTriggerMixin:
         )
 
         for skill_name in skills:
-            try:
-                context = {
-                    "triggered_by": f"dae_{self._trigger_domain}",
-                    "trigger_timestamp": datetime.now().isoformat(),
-                    "domain": self._trigger_domain,
-                }
-                if extra_context:
-                    context.update(extra_context)
-
-                # Execute through WRE pipeline (sync call wrapped for async)
-                result = await asyncio.get_event_loop().run_in_executor(
-                    None,
-                    lambda sn=skill_name, ctx=context: self._trigger_orchestrator.execute_skill(
-                        skill_name=sn,
-                        agent=self._trigger_agent,
-                        input_context=ctx,
-                    ),
-                )
-                results.append(result)
-
-                success = result.get("success", False)
-                fidelity = result.get("pattern_fidelity", 0.0)
-                logger.info(
-                    "[SKILL-TRIGGER] %s -> success=%s fidelity=%.2f",
-                    skill_name, success, fidelity,
-                )
-            except Exception as exc:
-                logger.error(
-                    "[SKILL-TRIGGER] Failed to execute %s: %s", skill_name, exc
-                )
-                results.append({
-                    "skill_name": skill_name,
-                    "success": False,
-                    "error": str(exc)[:500],
-                })
+            results.append(await self._fire_one_skill(skill_name, extra_context))
 
         self._trigger_last_fire = time.monotonic()
         logger.info(
             "[SKILL-TRIGGER] Cycle complete: %d/%d succeeded",
-            sum(1 for r in results if r.get("success")), len(results),
+            sum(1 for r in results if r.get("success") is True), len(results),
         )
         return results
 
@@ -224,30 +254,7 @@ class SkillTriggerMixin:
         )
 
         for skill_name in skills:
-            try:
-                context = {
-                    "triggered_by": f"dae_{self._trigger_domain}",
-                    "trigger_timestamp": datetime.now().isoformat(),
-                    "domain": self._trigger_domain,
-                }
-                if extra_context:
-                    context.update(extra_context)
-
-                result = self._trigger_orchestrator.execute_skill(
-                    skill_name=skill_name,
-                    agent=self._trigger_agent,
-                    input_context=context,
-                )
-                results.append(result)
-            except Exception as exc:
-                logger.error(
-                    "[SKILL-TRIGGER] (sync) Failed %s: %s", skill_name, exc
-                )
-                results.append({
-                    "skill_name": skill_name,
-                    "success": False,
-                    "error": str(exc)[:500],
-                })
+            results.append(self._fire_one_skill_sync(skill_name, extra_context))
 
         self._trigger_last_fire = time.monotonic()
         return results

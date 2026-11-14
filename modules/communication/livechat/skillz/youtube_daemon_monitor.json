@@ -48,7 +48,6 @@
       },
       "qwen_action": "auto_fix",
       "fix_action": "run_reauthorization_script",
-      "fix_command": "python modules/platform_integration/youtube_auth/scripts/reauthorize_set1.py",
       "announcement_template": "012 fix applied - OAuth reauthorized"
     },
     "duplicate_post": {
@@ -147,12 +146,6 @@
       },
       "qwen_action": "auto_fix",
       "fix_action": "trigger_next_rotation",
-      "fix_commands": {
-        "chrome_comments": "python -m modules.communication.livechat.src.rotation_supervisor --browser chrome --operation comments --timeout 300",
-        "edge_comments": "python -m modules.communication.livechat.src.rotation_supervisor --browser edge --operation comments --timeout 300",
-        "chrome_shorts": "python -m modules.communication.livechat.src.rotation_supervisor --browser chrome --operation shorts --timeout 300",
-        "edge_shorts": "python -m modules.communication.livechat.src.rotation_supervisor --browser edge --operation shorts --timeout 300"
-      },
       "announcement_template": "012 rotation stall detected on {browser} - triggering CLI rotation"
     }
   },

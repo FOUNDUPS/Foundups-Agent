@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Move2Japan house discovery in the Foundups Mall.">
+  <link rel="canonical" href="https://foundups.com/f/move2japan">
+  <title>Move2Japan · Foundups Mall</title>
+  <script>
+    // Legacy entry only. The existing member page owns the shell and all controls.
+    (function () {
+      var incoming = new URLSearchParams(window.location.search);
+      var selected = new URLSearchParams({ foundup: 'move2japan' });
+      ['q', 'country', 'prefecture', 'city', 'locality', 'max', 'land', 'sort', 'group', 'large', 'tour'].forEach(function (key) {
+        var values = incoming.getAll(key);
+        if (values.length === 1 && values[0].length <= 80) selected.set(key, values[0]);
+      });
+      if (!selected.has('city') && incoming.getAll('area').length === 1 && incoming.get('area').length <= 80) {
+        selected.set('city', incoming.get('area'));
+      }
+      window.location.replace('/member/?' + selected.toString());
+    })();
+  </script>
+</head>
+<body><p><a href="/member/?foundup=move2japan">Browse Move2Japan houses in the Foundups Mall</a></p></body>
+</html>

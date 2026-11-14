@@ -1,0 +1,109 @@
+# Appendix B — Model Legislative Purpose and Collection Decision Memorandum
+
+**Instrument status:** Complete model language for adaptation and adoption by an authorized committee. It is not an issued subpoena, an actual committee finding, or an assertion that a bill has been introduced. Adoption requires a matter-specific certificate and evidentiary annex satisfying Part 10. No public contributor may sign or serve it as congressional process.
+
+**Model title:** Financial Conflict Transparency, Government Counterparty Identification, and Payment-System Oversight Study.
+
+**Addressees:** The chair, ranking minority member, committee members, designated investigative counsel, House Office of General Counsel, and authorized records officer of the adopting committee.
+
+## 1. Decision presented
+
+The committee is asked to approve a bounded study of whether federal disclosure and payment-system safeguards give Congress, responsible agencies, and the public sufficient information to identify material financial relationships between executive officials' business interests and government counterparties. The study will evaluate the policy choices described below and the costs, privacy effects, constitutional limits, and administrative feasibility of each choice.
+
+The committee is not asked to determine that any identified person committed a crime or violated an Emoluments Clause. Public allegations are leads requiring corroboration. Commercial relationships and contemporaneous government action do not, by themselves, prove an exchange of official action for financial benefit.
+
+Approval authorizes only the categories separately adopted in the collection schedule. It does not authorize all requests contained in the repository, expand committee jurisdiction, grant access to restricted tax information or suspicious activity reports, or direct a state prosecutor to open a case. Compulsory collection remains subject to the chamber's adopted rules, committee rules, applicable law, and the authentic subpoena signed and served by authorized officials.
+
+## 2. Policy choices under study
+
+### Policy Option One — Government Counterparty Transparency
+
+Consider prospective reporting of government-linked revenue received by businesses in which covered executive officials retain a defined financial interest. The study should compare transaction-level reporting, aggregation by counterparty class, thresholds, periodic disclosure, and confidential reporting to a designated ethics body. It should examine treatment of intermediaries, refunds, ordinary retail transactions, minority interests, widely held investment funds, and businesses whose ownership changes during service.
+
+The committee should evaluate the precision and cost of identifying a foreign state, an agency, a state-owned enterprise, a domestic public body, and an intermediary paying on another person's behalf. It should assess false matches, contested control, record-retention costs, and the consequences of requiring a merchant to classify customers. These definitions are proposed subjects for legislative deliberation, not declarations that every payment in a category is an emolument.
+
+### Policy Option Two — Traceable Executive Financial Disclosure
+
+Consider whether reports should provide consistent entity identifiers, ownership pathways, valuation methods, and links between reported income and operating entities. Current financial-disclosure content is governed in relevant part by 5 U.S.C. § 13104. The study should evaluate possible amendments rather than assume existing reports require all information researchers would find useful. [Official current provision](https://uscode.house.gov/us/usc/119-121/t5/s13104/).
+
+Possible alternatives include exact amounts or narrower value bands; confidential underlying schedules with public summaries; standardized descriptions of trusts and pass-through entities; rules for loans and contingent rights; and enhanced independent review. Compare the benefits against privacy, security, compliance burden, and the constitutional position of the Presidency. A recommendation may be to retain existing law if the evidence shows that additional reporting is unnecessary or disproportionately burdensome.
+
+### Policy Option Three — Bank and Digital-Asset Record Interoperability
+
+Consider prospective standards for consistent business-customer identifiers, provenance of payment messages, reconciliation of off-chain and on-chain transactions, and record availability for lawful oversight and enforcement. The study should distinguish data a bank already maintains from information it would have to infer or create. It should evaluate retention periods, error correction, access controls, small-business costs, cross-border constraints, and the risks of public dissemination.
+
+This option does not authorize requests for SARs from a bank or publication of protected financial intelligence. Where the question can be answered using ordinary transaction records, reporting standards, regulator testimony, or aggregate data, those routes should receive priority. Any request for restricted information requires an independent legal-access determination.
+
+## 3. Initial research questions and collection limits
+
+The initial study asks four questions. First, can a reported business interest be matched reliably to the operating entity that received revenue? Second, can an ordinary-course record identify a government-linked payer without an unjustified inference about beneficial ownership or control? Third, does the available reporting permit a meaningful comparison across transactions? Fourth, what additional record elements would materially improve prospective oversight, and at what cost?
+
+The presumptive study period is January 1, 2025, through December 31, 2026. Earlier formation or ownership documents may be included only to establish ownership or a contractual right during that interval. Later documents may be included only to explain a correction, refund, or reconciliation of an in-period transaction. A different period requires a written explanation identifying the policy question that the additional period answers.
+
+The covered-entity schedule must name each legal entity and record the primary-source basis for connecting it to the study. Related entities are not included merely because they share a name, address, registered agent, or service provider. Additions require an amended schedule. The study does not encompass all relatives, all lifetime transactions, all email accounts, all counterparties, or all political activity of an official.
+
+## 4. Proposed record-category decisions
+
+| Category | Information sought | Legislative decision it can inform | Limitation |
+| --- | --- | --- | --- |
+| Entity identification | Legal name, jurisdiction, entity identifier, in-period ownership and control documents | Whether standardized ownership-path reporting is feasible | Only scheduled entities; no automatic affiliate sweep |
+| Government-linked receipts | Existing invoices, payer identifiers, payment dates, amounts, refunds, and service descriptions for identified government-linked transactions | Whether transaction or aggregate disclosure would be administrable | No unrelated customer history; source and classification uncertainty retained |
+| Disclosure reconciliation | Existing schedules connecting reported income or interests to scheduled operating entities | Whether report fields are sufficiently traceable | No wholesale tax-return demand; request only specified underlying accounting records |
+| Payment-message sample | Existing message fields and reconciliation records for a small, specified transaction sample | Whether interoperability rules would improve traceability | Fixed sample identifiers; no generalized monitoring or all-customer export |
+| Recordkeeping process | Existing retention policies, data dictionaries, and systems descriptions relevant to the preceding categories | Whether preservation and field-standard proposals impose justified costs | No source code, credentials, unrelated security architecture, or production-system access |
+
+Communications are excluded from the initial demand except communications necessary to explain a specified discrepancy, ownership ambiguity, refund, or omitted field identified in the adopted annex. Any such request must identify the issue, custodians, search terms where appropriate, and bounded dates. Blanket requests for all communications about an official or business are not approved by this memorandum.
+
+## 5. Presidential-information review
+
+If a proposed category would obtain the President's personal information, the committee will complete the special review described in *Trump v. Mazars USA, LLP*, 591 U.S. 848 (2020), using the applicable current case law. The following four decisions must be supported by the actual matter record. A recitation of the policy options alone is insufficient. [Official opinion](https://www.supremecourt.gov/opinions/19pdf/19-715_febh.pdf).
+
+**Alternatives decision.** The research annex must identify public reports, agency records, commercial records unrelated to presidential personal information, aggregate information, expert testimony, and voluntary production already considered. Record what each supplies and the precise remaining gap. If a reasonably available alternative answers the question, use it and remove the presidential category. Do not presume alternatives are inadequate without testing them.
+
+**Scope decision.** For every retained category, explain the boundary in entities, time, transactions, fields, custodians, and communications. Identify one narrower alternative and explain whether it would answer the same question. Preserve a severable schedule so the committee can accept partial production or judicial narrowing without demanding unrelated material.
+
+**Evidence decision.** Attach the actual records supporting the connection between the requested information and a policy choice. Distinguish official records, sworn testimony, commercial records, reported allegations, and analyst inference. Identify missing evidence and contrary evidence. The memorandum may be supplemented openly, but the issuance record must preserve what was known when process was approved.
+
+**Burden decision.** Ask the recipient for a reasonable estimate of volume, retrieval effort, privileged review, cost, unavailable systems, and effects on presidential responsibilities. Assess the burden even when a private custodian possesses the records. Propose phased production, limited samples, de-duplication, and privacy protection where they meet the legislative need. Explain rejected accommodations in terms of the unanswered policy question.
+
+## 6. Evidentiary annex and counterevidence
+
+The annex must distinguish an established observation from its interpretation. Each material observation receives an exhibit identifier, primary-source citation, pinpoint, acquisition date, custodian where known, and an explanation of authenticity limitations. Analytical results must identify the software or method used and permit another reviewer to reproduce the calculation from lawfully accessible material.
+
+For every proposed adverse inference, state the strongest plausible non-wrongful explanation and the evidence that would support or contradict it. A transaction timeline must distinguish authorization, execution, settlement, reporting, and publication dates. A wallet-control inference must state its confidence and competing attribution. A registry filing supports what the filing records; it does not prove that undisclosed beneficial owners do not exist.
+
+News reporting may identify a lead, but a demand based on a disputed report should identify the report's limits and the targeted record needed to test it. A contributor's confidence score is not evidence. No factual finding will be described as verified solely because its packet passed schema or link validation.
+
+## 7. Privilege, rights, confidentiality, and production administration
+
+The committee requests production of responsive, nonprivileged records and reasonably segregable portions. The recipient may explain a legal objection and propose an accommodation. The committee will designate counsel to confer over the objection without requiring disclosure of the asserted privileged content in a public forum.
+
+The production instructions must establish a nonpublic counsel contact, secure delivery method, document identifiers, a reasonably intelligible privilege log, and a process for inadvertent disclosure. Logging categories must identify the basis for the objection sufficiently to permit evaluation. Questions of waiver, clawback, and committee treatment require a written agreement or governing authority; this memorandum does not promise a binding Federal Rule of Evidence 502 order or bind a nonparty court.
+
+Personal identifiers, customer information unrelated to the adopted categories, credentials, and irrelevant security details should be redacted or segregated by agreed procedure. Statutory restrictions and court orders remain applicable. A lawful congressional access route does not automatically create a public release route or state transmission route. Restricted records will enter only the compartment approved for their legal category, recipients, and permitted uses.
+
+For testimony, the notice must identify the authorized inquiry, permitted participants, governing procedure, rights to counsel, recording and transcript treatment, and a mechanism for objections. A witness's constitutional rights are retained. Compelled immunized testimony requires separate legal review and cannot be treated as an ordinary prosecutorial lead.
+
+## 8. Reporting, referrals, and institutional independence
+
+The study's scheduled outputs are a policy-options paper, a data-quality assessment, a cost-and-burden comparison, a set of recommended reporting fields if supported, and an explanation of rejected alternatives. Findings should include limitations and material counterevidence. Public presentation should explain the legislative choice the evidence informs.
+
+Evidence of possible unlawful conduct may be considered for a separate, lawful referral. The referral decision will identify the receiving authority's independent jurisdiction, confidentiality restrictions, compelled-testimony history, chain of custody, and independently obtainable sources. The committee will not demand a charge, promise immunity from federal or state liability, or condition a legislative recommendation on a prosecutor's decision.
+
+An authorized recipient decides whether further process is warranted. A referral is neither an adjudication nor proof of guilt. Public status must distinguish referral prepared, referral transmitted, receipt acknowledged, official public action, and final disposition; no unannounced prosecutorial decision will be inferred from silence.
+
+## 9. Enforcement and revision
+
+If a custodian does not comply, investigative counsel will document service, notice, the missing material, the objection, accommodation efforts, and the legislative consequence of delay. OGC will separately assess institutional authority to litigate and the threshold requirements and remedies of the proposed action. Internal preauthorization does not establish federal jurisdiction or guarantee accelerated relief.
+
+28 U.S.C. § 2201 permits declaratory relief only in an actual controversy within the court's jurisdiction; it is not an independent cure for an absent jurisdictional basis. A proposed complaint must identify the actual controversy, proper parties, jurisdiction, cause of action, and available relief. [Official current provision](https://uscode.house.gov/us/usc/119-121/t28/s2201/).
+
+The committee may narrow or withdraw a category when evidence, burden, legal developments, or the disappearance of a legislative need warrants doing so. Preserve each version, the approving decision, reasons for the change, and notice to the recipient. Do not silently substitute a broader instrument after approval.
+
+## 10. Matter-specific adoption certificate
+
+This model may be adopted only with a certificate that records all of the following concrete information: the adopting committee and applicable jurisdictional clauses; the actual authorizing resolution or committee action; the genuine study or matter identifier; the approving official and date; the named recipient and basis for believing the recipient possesses responsive records; the covered entities and supporting exhibits; the approved date interval and transaction sample; the category decisions; the available alternatives; the supporting and contrary evidence; burden and accommodation analysis; legal restrictions and authorized recipients; an independently reviewed privilege analysis; and the authenticated subpoena's service and return details.
+
+The certificate must state: “The approving official has reviewed this memorandum and its evidentiary annex, adopts only the specifically identified collection categories, and finds that those categories advance the committee's stated legislative work on the record presently available. Material contrary evidence, unresolved legal issues, and proposed accommodations have been disclosed to the approving official. No assertion in this certificate represents that a court has approved the process or that the recipient has committed unlawful conduct.”
+
+The reviewing attorney must state: “The review distinguishes current authority from proposed rules and policy options, evaluates the governing standard for the actual information requested, and identifies statutory and judicial restrictions affecting acquisition, retention, use, transmission, and publication. Required issuer, recipient, scope, authentication, and service facts are complete in the issuance record. The instrument shall not be represented as issued process before those conditions are satisfied.”
