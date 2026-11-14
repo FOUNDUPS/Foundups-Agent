@@ -57,6 +57,7 @@ Dates are ISO calendar dates. Times are JST. A dash means not established in thi
 | F-16A-2026-R1 | Fukui SME equipment efficiency, regular track / subsidy | FY2026 / regular | 2026-05-29 | Owned operating SME site generally required; narrow production/refrigeration equipment exception | 2026-11-30; hour unverified; first-come and possible early exhaustion | OPEN BY WINDOW; 2026-11-06 official budget-near-limit warning, grant availability not assured | VERIFIED PROGRAM; no YUMORI eligible applicant/property/application | 2026-11-08 | S17 |
 | F-16B-2026-R1 | Fukui SME equipment efficiency, energy-price-shock track / subsidy | FY2026 / special | 2026-08-07 | ≥5% historical energy-cost increase; cannot combine regular track | 2026-11-30; hour unverified, first-come | OPEN BY WINDOW; actual budget unverified; no new Nov06 notice evidenced | VERIFIED PROGRAM; historic existing program, no YUMORI eligibility/application | 2026-11-08 | S18 |
 | P-01-2026-P1 | Fukui large-DC feasibility study / procurement, NOT subsidy | FY2026 / Phase 1 | 2026-10-14 (notice) | Bidder qualification 2026-10-23 17:00 | 2026-11-04 17:00; qualified bidders only | CLOSED BY PUBLISHED DEADLINE 2026-11-04 17:00; result not established | VERIFIED PROGRAM/PROCUREMENT; no YUMORI contract or selection | 2026-11-05 | S13 |
+| P-02-2026-R2 | MLIT FY2026 second national PPP/PFI sounding / PUBLIC-BODY market dialogue (NOT grant) | FY2026 / 2nd online session | 2026-11-13 14:00 JST | City/public-facility manager authorization; MLIT online registration PLUS official case-registration template | 2026-12-04 17:00 JST | OPEN; dialogue scheduled 2027-01-28; case selection later | VERIFIED PROGRAM only; no City submission, YUMORI eligibility/participation, subsidy or award | 2026-11-16 (internal) | S19 |
 
 The separate F-10 ZEB diagnosis/planning track remains recorded in the canonical registry as closed 2026-10-16 17:00. Its exact opening and separate source must be reverified before adding a fully verified calendar row. Do not confuse it with ZEB construction rounds.
 
@@ -81,6 +82,8 @@ No FY2027 call date or continuation is asserted by this queue.
 | P-01 procurement intelligence | 2026-11-05 | Qualification closed 10/23; qualified-bidder proposals 11/04 | Check official procurement outcome/policy implications; never treat the study budget as a subsidy or assume annual recurrence. |
 
 ## Official sources
+
+ - S19: https://www.mlit.go.jp/report/press/sogo21_hh_000314.html ; https://www.mlit.go.jp/sogoseisaku/kanminrenkei/sosei_kanminrenkei_fr1_000175.html (national 2nd PPP/PFI sounding; Nov13 opening, Dec04 17:00 close; no subsidy).
 
 - S01: https://www.env.go.jp/press/press_05495.html
 - S02: https://www.env.go.jp/press/press_05570.html and https://rcespa.jp/r08-datacenter/r08-datacenter-no2
@@ -120,6 +123,11 @@ No FY2027 call date or continuation is asserted by this queue.
 - Synchronize the existing FIN `Grants & Subsidies` summary and `Grant Calendar` after registry changes; verify formulas and preserve the AWARDED-only financial gate.
 
 ## Change log
+
+### 2026-11-14 — P-02 newly opened nonfinancial PPP/PFI sounding case registration (MLIT November 13)
+
+Opened 2026-11-13 14:00 JST; case-intake closes 2026-12-04 17:00 JST; online national dialogue set for 2027-01-28. Only public-facility managers / governments can register, with BOTH official web form and intact MLIT registration document, then case selection. Not a grant/subsidy, not a private application, not Fukui City consent, not a PPP contract and not YUMORI funding. This is distinct from the Fukui City FY2026 former-school asset call, where Sukatto remains unlisted. P-02 counts as one new history record; prior 27 are retained. Registry authoritative for YUMORI project status. Primary: S19.
+
 
 ### 2026-11-11 — F-15 application window extension, published 2026-11-10
 MOE and appointed administrator SII changed F-15 closing date from **2026-11-30** to **2026-12-24 23:59 JST**. The SII announcement resolves the old MOE 17:00 / SII 23:59 discrepancy for the NEW extended window. Existing first-come/budget-exhaustion guard remains. No project eligibility or financing promotion; 27 retained round records unchanged. Sources: https://www.env.go.jp/press/press_05813.html ; https://bl-renos.jp/r8/news/2026111001.html .

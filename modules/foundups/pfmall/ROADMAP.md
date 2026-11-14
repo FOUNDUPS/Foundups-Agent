@@ -284,3 +284,68 @@ The [member browser test](../../../public/member/tests/README.md#member-poster-g
 covers fresh and saved layout, mixed card selection, keyboard and Ctrl+wheel
 navigation, one active player, focus and scroll return, and provider dimensions.
 Release qualification requires a real invited session and a deployed asset match.
+
+### WikiTube search and Play hostname
+
+The [WikiTube archive](https://docs.google.com/document/d/1XzJDkZWsXbHHaDAsNT3zhFo-Nu3t579PE1niPQ9kEzw/edit)
+describes putting search by the queue, keeping a playing video, and starting
+the first result when idle. The [2010 mockups](https://drive.google.com/open?id=0B5a_mx1oJTbONDg3NWZhNDYtZWIwMy00MTQwLTk0M2YtZmNiYjYzN2M3ZWFl)
+show the main player and thumbnail rail. The 2026-11-14 request places the
+search dock above the rail and aligns it left in the immersive Mall player.
+This extends the invited Mall on `f0804bd35` and retains the HPC scope.
+
+| Slice | WSP 15 | Owner and acceptance |
+| --- | --- | --- |
+| PoC dock | 14/P1 (C3, I4, D3, Impact4) | Use the existing catalog and queue matching. Check search without reloading active media, local dictation fallback, menu dismissal, Red Dog and AutoPost handoff, and no overlap with provider controls. |
+| PoC tile playback | 15/P1 (C4, I4, D3, Impact4) | Play in the selected desktop tile using the shared player. Keep the separate full-view action, one iframe, provider dimensions, and original-card return. Use fixture and real-provider evidence. |
+| Play entry | 13/P1 (C3, I4, D3, Impact3) | Bind `play.foundups.com` to the existing Hosting site. Root opens the admitted Mall and the existing sign-in return remains available. Qualify DNS, TLS, signed-out and invited paths independently. |
+| PFWD-2/3 | Later stage | Device model selection needs an admitted runtime and measured device support. Plan mode and plugins need an authorized Red Dog contract. AutoPost keeps capture and private attachment ownership. |
+
+The options menu opens the deployed AutoPost app listed on its
+[repository](https://github.com/FOUNDUPS/autopost). The existing public
+directory has no AutoPost record. The custom AutoPost hostname timed out
+in the release check, while the owner-listed app returned HTTP 200.
+
+The PoC supersedes desktop poster click-to-fullscreen. Click requests in-tile
+playback and the separate fullscreen action opens the WikiTube-style viewer.
+Hover retains the poster affordance. A first-party muted hover clip still
+requires media and bandwidth evidence. Roll back the scoped shell changes as
+one slice if the browser or admission gates regress. The apex member path
+remains available during domain qualification.
+
+#### Phone viewer and foreground input
+
+012's November 14 follow-up extends PFWD-1B from the desktop queue and
+phone browse dock to the phone's expanded viewer. The shared player keeps
+the video above a floating search and a horizontally scrollable queue.
+The dock stays available when a short screen requires scrolling the video
+area. Search changes the queue while the active clip continues. Outside
+the viewer, ordinary Mall video cards use the existing player at the
+selected card. The separate expand control keeps that player mounted.
+HPC keeps its three-column browse grid and registered catalog scope.
+
+| Slice | WSP 15 | Decision and acceptance |
+| --- | --- | --- |
+| PFWD-1B phone viewer | 15/P1 (C4, I4, D3, Impact4) | Extend the shared player and tests from `510079b91`. Check one iframe, horizontal touch scrolling, query and keyboard behavior, tile return, the minimum provider viewport, and existing product routes. |
+| PFWD-1B foreground dictation | 13/P1 (C3, I4, D3, Impact3) | Reuse local browser dictation on the mic or a deliberate Red Dog hold. Release or the square finishes the current utterance. Cancel on navigation or loss of visibility. Keep the transcript editable in the current search. The plus button or an upward swipe on it opens options. |
+| PFWD-1B phone reference refinement | 13/P1 (C3, I4, D3, Impact3) | Use one search dock in scoped browse, invited browse and the expanded viewer. The plus opens an anchored menu. Longer text wraps above the controls. Stop takes the Red Dog position during foreground dictation. Check editable transcripts, touch and keyboard, dismissal, narrow and rotated layouts, and provider continuity. |
+| PFWD-1B build identification | 12/P2 (C2, I4, D3, Impact3) | Show the loaded build beside the scoped topic and in the shared plus menu. Check the phone and desktop labels against the service worker generation during release testing. |
+| PFWD-2 resident speech and browser AI | Later stage | Admit the resident conversation transport and use AI Gateway capability results for model choice. Verify a phone's support and resource use before offering a download or an available model. A visible foreground recording session, Stop, and review before sharing are separate acceptance criteria. |
+
+Chrome's [built-in model requirements](https://developer.chrome.com/docs/ai/get-started#required-hardware)
+currently exclude Android and iOS for its foundation-model APIs. A browser
+model picker remains pending an admitted runtime and a measured mobile
+option. A PWA can capture foreground audio with permission, but the
+[Red Dog contract](../../../public/member/RED_DOG_DIGITAL_TWIN_CONTRACT.md)
+has no resident voice transport. Leave ambient listening and automatic
+learning out of the PoC. A later foreground hands-free session needs
+explicit start, visible listening state, a stop action, an expiry, and
+no implicit recording retention. AutoPost remains the capture owner.
+Camera and photos open AutoPost where that handoff is offered. Files,
+plugins and Plan mode from the November 14 reference remain PFWD-2/3
+work with their existing owners.
+
+The regression fixture checks the shared phone and desktop compositions.
+Physical Safari, Home Screen playback and keyboard behavior, and live
+invited admission remain separate release gates. Roll back the shared
+dock, tile presentation and matching service-worker generation together.

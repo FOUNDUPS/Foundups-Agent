@@ -1,3 +1,54 @@
+## 2026-11-14 · Mall build identification
+
+The scoped browser fixture checks the build next to #SchumerOUT at desktop
+and phone widths, including space beside the civic action at 320 px. The
+HPC and member plus menus display the same build. The worker fixture checks
+that the label matches the installed v17 cache and that v16 is retired.
+
+## 2026-11-14 · Shared dock phone reference
+
+The existing Chromium and WebKit browser fixtures check the shared dock at
+320/390/430 px portrait and 844 × 390 landscape. The updated tests exercise
+the anchored plus panel, backdrop dismissal, the square in Red Dog's slot,
+pointer release and cancellation, and a multiline transcript that can be
+edited while the same provider frame plays. Independent review caught a
+Stop button that could not be tapped after starting dictation from the
+member mode sheet. The regression covers that entry separately from a
+held pointer. The state fixture checks v16
+installation, v15 retirement and retention of unrelated caches.
+
+The broader targeted Python run had 601 passes and the same three existing
+navigation assertions on the candidate and base `ebfce5717`.
+`TestFoundUpHandoff` expects `fv-open-link` and `routing_prefix` and
+`TestGestureHints` expects the former tap-to-play/pause hint. These are
+outside the dock change. Browser fixtures use controlled provider and
+speech events. They leave physical iPhone and real dictation verification open.
+
+## 2026-11-14 · Phone WikiTube viewer
+
+The base `510079b91` passed the existing scoped and desktop cases. The
+phone regression uses the real member shell with controlled admission,
+media and local speech. It checks in-card playback, the same iframe
+through expansion and queue search, 320/390/430 px portrait and 844 × 390
+landscape, native horizontal touch scrolling in Chromium, plus menu swipe,
+foreground dictation with Stop and pointer cancellation, focus and scroll
+return, and one provider frame. The worker fixture covers v14 to v15
+upgrade and unrelated-cache retention. Physical devices and provider
+playback are separate verification.
+
+## 2026-11-14 · Member WikiTube controls
+
+The controlled Chromium and WebKit member cases cover the Play root route,
+guest sign-in, admitted grid and rows, inline dimensions, iframe continuity
+into full view, queue search and keyboard return, plus and Red Dog actions.
+The existing Chromium HPC cases cover the public route, responsive theater
+and phone layout. The v14 fixture covers the cache upgrade.
+
+Real YouTube in Chromium 143 played `JFp2l1fnf_4` inside a 512.5 × 240
+CSS px selected slot. The same provider window advanced from 0.52 to
+1.06 seconds while the clip expanded and an active queue search was
+submitted. Closing left zero iframes. This run used the local Mall harness.
+
 ## 2026-11-13 · Invited desktop poster grid
 
 The new browser case reproduced category rows on fresh desktop entry at

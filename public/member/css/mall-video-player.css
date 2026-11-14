@@ -267,7 +267,7 @@
   opacity: 1;
 }
 
-.video-player-fullscreen.chrome-hidden .video-player-queue-rail {
+.video-player-fullscreen.chrome-hidden:not(.video-player-queue-docked) .video-player-queue-rail {
   opacity: 0;
   pointer-events: none;
 }
@@ -360,7 +360,7 @@
   opacity: 1;
 }
 
-.video-player-fullscreen:is(.scoped-player, .provider-youtube) .video-player-queue-rail {
+.video-player-fullscreen:is(.scoped-player, .provider-youtube, .video-player-queue-docked) .video-player-queue-rail {
   position: relative;
   flex-shrink: 0;
   transform: none;
@@ -368,11 +368,11 @@
   pointer-events: auto;
 }
 
-.video-player-fullscreen:is(.scoped-player, .provider-youtube) .video-player-edge-trigger {
+.video-player-fullscreen:is(.scoped-player, .provider-youtube, .video-player-queue-docked) .video-player-edge-trigger {
   display: none;
 }
 
-:is(.scoped-player, .desktop-poster-player) .video-player-queue-item {
+:is(.scoped-player, .desktop-poster-player, .video-player-queue-docked) .video-player-queue-item {
   width: 132px;
 }
 
@@ -396,6 +396,69 @@
   flex: 0 0 auto;
   height: clamp(200px, 58vw, min(420px, 60dvh));
 }
+
+.mall-member-inline-slot .desktop-poster-player.video-player-inline .video-player-stage {
+  height: 240px;
+}
+
+.video-player-media-panel,
+.video-player-queue-panel { display: contents; }
+
+.video-player-queue-docked {
+  bottom: var(--video-player-keyboard, 0px);
+  overflow: hidden;
+  touch-action: pan-x pan-y pinch-zoom;
+}
+
+.video-player-fullscreen.video-player-queue-docked { overflow: hidden; }
+
+.video-player-queue-docked .video-player-media-panel {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+}
+
+.video-player-queue-docked .video-player-stage { min-height: 200px; }
+
+.video-player-queue-docked .video-player-queue-panel {
+  display: block;
+  flex: 0 0 auto;
+  background: #08080f;
+}
+
+.video-player-queue-panel > .mall-member-search-dock:not([hidden]) {
+  max-width: calc(100% - 1.5rem);
+  margin-inline: max(.75rem, env(safe-area-inset-left)) max(.75rem, env(safe-area-inset-right));
+  padding-block-start: .25rem;
+}
+
+.video-player-queue-panel .mall-member-search-bar { max-width: 100%; }
+
+.video-player-queue-docked .video-player-queue-track {
+  position: relative;
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
+}
+
+.video-player-queue-docked .video-player-top-bar {
+  position: relative;
+  flex-shrink: 0;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.desktop-poster-player :is(.video-player-queue-rail, .video-player-top-bar) {
+  position: relative;
+  flex-shrink: 0;
+  transform: none;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.desktop-poster-player > .video-player-edge-trigger { display: none; }
 
 .video-player-fullscreen.video-player-inline:not(.video-player-theater) .video-player-queue-rail,
 .video-player-inline .video-player-gesture-hint {

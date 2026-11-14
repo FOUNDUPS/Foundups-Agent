@@ -1,3 +1,34 @@
+## 2026-11-14 · Phone search reference refinement
+
+PFWD-1B shares the compact dock across browse and viewer. Plus anchors the
+options panel above the dock. Longer search text wraps above the controls
+for review. The far-right Stop uses the existing foreground dictation
+lifecycle. The worker advances from v15 to v16 with the dock assets.
+Verification is tracked in the [member tests](../../../public/member/tests/TestModLog.md).
+
+## 2026-11-14 · WikiTube phone viewer
+
+Extended PFWD-1B from the desktop queue and phone grid to the shared
+expanded phone viewer. The player, catalog, return state and admission
+owners stay shared. Foreground dictation feeds the editable search.
+The [roadmap](ROADMAP.md#phone-viewer-and-foreground-input) records the
+resident speech and model-selection dependencies. WSP 15, 22 and 97 apply.
+
+## 2026-11-14 · WikiTube search and Play hostname
+
+The ordinary admitted Mall reuses the shared catalog and player for the
+bottom browse dock, a left-aligned queue dock, and inline desktop playback.
+The separate full-view action keeps the provider frame. Search leaves the
+active clip playing and starts the first match when idle. The options menu
+links to AutoPost and reports the current device-model boundary.
+
+Firebase site `foundupscom` in `gen-lang-client-0061781628` accepted the
+custom hostname `play.foundups.com`. GoDaddy saved Firebase's exact CNAME,
+`play` → `foundupscom.web.app`, and a public resolver returned it.
+TLS and live release qualification are tracked separately. The Play root
+route preserves the admitted shell and sign-in return. WSP 15, 22 and 97
+apply. See the [roadmap](ROADMAP.md#wikitube-search-and-play-hostname).
+
 ## 2026-11-13 · Desktop poster browsing and full player
 
 The invited Mall selects its poster grid on fresh wide fine-pointer entry.

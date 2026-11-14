@@ -18,7 +18,7 @@ civic-resource return. The phone cases check the selected install manifest,
 options, scoped search, fixture dictation and Red Dog return. The member
 case uses controlled Clerk and Firestore responses to check sign-in return,
 invitation denial, admitted theater and the public discovery link.
-`node public/member/tests/mall_product_state_vm.mjs` covers v13 installation,
+`node public/member/tests/mall_product_state_vm.mjs` covers v16 installation,
 obsolete Mall cache retirement and scoped offline behavior. Real YouTube time
 progression and physical-device gates are separate in the
 [incident](../../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md).
@@ -27,8 +27,17 @@ progression and physical-device gates are separate in the
 
 The same browser suite opens the ordinary invited route with the real catalog.
 It checks a fresh eight-column grid at 1440 × 900, no media frame on hover,
-one full player with native controls enabled, queue advance and manual Play
-for dense tiles, quick view, saved rows and wide touch entry. It checks that
+one shared player from inline to full view, queue filtering and idle submit,
+manual Play for dense tiles, quick view, saved rows and wide touch entry.
+The phone case checks inline playback in the selected card, continuity into
+the full viewer, native horizontal touch scrolling in Chromium, and visible
+queue search in portrait and landscape. It exercises swipe on plus, hold
+and release on Red Dog, the square Stop in Red Dog's position, and dictation
+cancellation using a local recognizer fixture. It also verifies that a long
+transcript wraps, stays editable, and preserves the active provider frame.
+The bottom dock also checks AutoPost and
+keyboard fallback. The Play root uses the normal invitation and sign-in
+path. The suite checks that
 Escape restores focus and scroll in the expanded Move2Japan lane and that
 Ctrl+wheel returns to the browse position. Account and provider events use
 fixtures.

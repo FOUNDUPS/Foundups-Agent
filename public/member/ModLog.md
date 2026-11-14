@@ -1,5 +1,36 @@
 # Member Area Module Change Log
 
+## 2026-11-14 · Visible Mall build
+
+The scoped video header and shared options show the loaded build. Build
+v17 refreshes the shell cache with the same generation. The hosted v7
+comparison put the first Short below its row. The v16 preview placed the
+player at the start of the original row, in line with the current contract.
+
+## 2026-11-14 · Shared search dock and transcript editing
+
+The scoped grid, invited grid and expanded player use the same plus menu,
+editable search and foreground dictation controls. The far-right action
+shows the square Stop during capture. A longer transcript opens above the
+controls and stays available to edit. The queue and provider keep their
+positions while the dock grows. Cache v16 refreshes the shared assets.
+
+## 2026-11-14 · Phone WikiTube viewer and dictation
+
+Ordinary member phone cards use the existing selected-card player. The
+expanded viewer reserves space for a persistent search dock and horizontal
+queue on phone and desktop. The plus button accepts tap and upward swipe.
+The mic or Red Dog hold starts foreground local search dictation where
+available, and the square finishes it. Worker v15 refreshes the shell.
+WSP 22 and 97 apply.
+
+## 2026-11-14 · WikiTube controls and member entry
+
+Added the shared member search dock and reuse of local dictation. The full
+player filters its existing queue. Desktop posters request muted playback
+in the selected slot and keep a separate full-view action. The Play hostname
+uses the same invited shell. Worker v14 refreshes the member assets.
+
 ## 2026-11-13 · Invited desktop poster grid
 
 Fresh wide fine-pointer entry uses the existing grid. Click and keyboard

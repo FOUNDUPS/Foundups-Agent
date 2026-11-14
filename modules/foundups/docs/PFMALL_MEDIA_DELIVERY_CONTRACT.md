@@ -289,10 +289,12 @@ the player. Scripted autoplay requires a visible player with more than half
 in view and a single automatically playing YouTube embed per page.
 [YouTube player requirements](https://developers.google.com/youtube/terms/required-minimum-functionality)
 
-Desktop poster selection opens YouTube video in the shared full player with
-provider controls, branding, pointer access and keyboard access visible and
-usable. Posters smaller than 120 × 70 CSS px open with manual Play. The
-desktop full-player rail sizes its playable thumbnails to the same minimum.
+Wide desktop poster selection mounts the shared player at the selected tile
+with a visible 200 × 200 CSS px or larger stage. The dedicated full-player
+action retains the native controls, branding and input access. Posters smaller
+than 120 × 70 CSS px open with manual Play. The desktop full-player rail sizes
+its playable thumbnails to the same minimum. The viewport and scroll clips
+limit autoplay. Each desktop surface uses one provider at a time.
 Crop the poster art to fit the tile. `modestbranding` has no
 effect and `rel=0` confines recommendations to the same channel.
 [YouTube player parameters](https://developers.google.com/youtube/player_parameters)

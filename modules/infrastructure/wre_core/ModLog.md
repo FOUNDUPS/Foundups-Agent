@@ -5817,3 +5817,12 @@ Phase 3 completes the autonomous execution chain:
 - Grounded by current Holo evidence at exact base
   `7269deb66f638cc6bbb8239aecf0c8b5ae6b8d22` and documented under WSP 15,
   WSP 50, WSP 62, and WSP 97 before resuming RedDog Phase 2C.
+## 2026-11-14 - CI documentation pilot reuses verification owners
+
+The existing CI scope pilot gains trusted-base selection and a proposal-only
+Skill documentation schema. WRE impact planning, registry projection,
+differential execution and exact-main evidence remain unchanged. Python and
+protected/systemic changes retain full verification; no model may supply
+dependency-completeness or downgrade authority. The CI README records activation
+holds and exact reference timing. No runtime admission or RSI transfer is claimed.
+WSP 6/15/22/50/71/95/97/110.
