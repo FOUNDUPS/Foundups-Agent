@@ -143,6 +143,23 @@ After recovery, rerun the original validation plan and record the result in the 
 - **WSP 81:** governed framework/knowledge backup synchronization.
 - **WSP 97:** evidence-first execution and explicit current/future capability boundaries.
 
+## 9A. GitHub-to-PC Convergence Gate (Chat / Work / Codex)
+
+**Authority:** The verified remote default-branch commit is the shared integration baseline. A local PC checkout is an owned execution surface, not an independent competing authority. GitHub merge success does not establish PC synchronization.
+
+**Surface ownership:** Chat may research, triage and prepare bounded PRs; Work may implement, validate and merge only within available permissions and repository policy; Codex on the PC owns inspection, non-destructive local reconciliation and local validation. Dot may monitor and hand off receipts, but must not assert PC state without direct PC evidence. Tool capabilities, not product labels, determine actual execution authority.
+
+**Mandatory two-receipt handoff:**
+1. GitHub integration owner supplies repository, PR, head SHA, merged/default-branch SHA, check identifiers and outcomes, affected paths, conflicts, and a WSP_97 terminal state. No pending/absent check is represented as PASS.
+2. PC owner reads that receipt, runs `git status --short --branch`, `git worktree list`, `git remote -v`, and `git fetch`; verifies the remote SHA and inventories tracked, untracked, ignored and concurrent-owned changes before any update. Preserve unknown work. Never use blind `reset --hard`, `clean`, forced checkout or implicit stash.
+3. Reconcile only the explicitly owned clean worktree by safe fast-forward or a new isolated worktree at the verified SHA. Dirty/diverged work requires classification and a separate preservation/rebase/PR plan; do not overwrite it to achieve sync.
+4. Run relevant local tests and inspect the resulting checkout. Record PC HEAD, target remote SHA, worktree identity, status, validation results, exclusions and blockers. Claim `PC_SYNC_VERIFIED` only if exact SHA alignment and local postconditions are evidenced; otherwise `PC_SYNC_BLOCKED` or `PC_SYNC_PENDING`.
+5. Preserve separate receipts for `MERGED_VERIFIED_MAIN`, `PC_SYNC_VERIFIED`, and any deployment/live verification. A GitHub-only agent cannot issue the PC receipt. Every subsequent PC push must begin from a verified base and use a scoped branch/PR, never silently overwrite remote main.
+
+**WSP_99 handoff minimum:** `SENDER`, `RECEIVER`, `ROLE`, `ORIGIN`, `PRINCIPAL_REF`, `T`, `A`, `R`, `I`, `O`, `F`, with explicit source/target SHA and evidence references. Compression must preserve action and scope. A handoff conveys work context, not permission to bypass WSP_00, WSP_34, WSP_77, WSP_97, review or CI.
+
+**Acceptance test:** On a disposable isolated worktree, verify clean fast-forward success, dirty/untracked preservation, diverged-branch refusal, stale-SHA rejection, and truthful separate GitHub/PC receipts. Until exercised against a PC checkout, this is a documented contract, not an operationally verified automation.
+
 ## 9. Compliance Receipt
 
 For a high-risk slice, retain at least:
