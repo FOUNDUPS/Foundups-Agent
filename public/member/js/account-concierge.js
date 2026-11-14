@@ -183,7 +183,7 @@
       holdTimer = setTimeout(function () {
         if (searchDictation) {
           isHolding = true;
-          searchDictation.start();
+          searchDictation.start(true);
         } else startListening();
       }, HOLD_THRESHOLD);
     });

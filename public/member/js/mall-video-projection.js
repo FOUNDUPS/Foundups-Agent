@@ -385,7 +385,7 @@
     });
     anchor.prepend(dock.element);
     dock.setValue(field.getFieldScope()?.query || '');
-    window.redDog.bindSearchDictation?.({ ...dock.dictation, start: () => dock.dictation.start(true) });
+    window.redDog.bindSearchDictation?.(dock.dictation);
     window.visualViewport?.addEventListener('resize', () => {
       const viewport = window.visualViewport;
       const keyboard = dock.element.contains(document.activeElement) && viewport.scale === 1

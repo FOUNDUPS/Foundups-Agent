@@ -4,7 +4,10 @@ The existing Chromium and WebKit browser fixtures check the shared dock at
 320/390/430 px portrait and 844 × 390 landscape. The updated tests exercise
 the anchored plus panel, backdrop dismissal, the square in Red Dog's slot,
 pointer release and cancellation, and a multiline transcript that can be
-edited while the same provider frame plays. The state fixture checks v16
+edited while the same provider frame plays. Independent review caught a
+Stop button that could not be tapped after starting dictation from the
+member mode sheet. The regression covers that entry separately from a
+held pointer. The state fixture checks v16
 installation, v15 retirement and retention of unrelated caches.
 
 The broader targeted Python run had 601 passes and the same three existing

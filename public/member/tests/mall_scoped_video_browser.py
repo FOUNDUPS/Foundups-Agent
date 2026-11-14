@@ -748,9 +748,26 @@ def verify_member_phone(page, context, supports_cdp):
     expect(tile).to_be_focused()
     expect_position(page, start_scroll)
     assert page.locator("iframe").count() == 0
+
+    anchor = page.locator('#redDogAnchor')
+    anchor.evaluate("""anchor => {
+      for (const [type, y] of [['touchstart', 600], ['touchend', 440]]) {
+        const event = new Event(type, {bubbles: true});
+        Object.defineProperty(event, type === 'touchend' ? 'changedTouches' : 'touches',
+          {value: [{clientX: 30, clientY: y}]});
+        anchor.dispatchEvent(event);
+      }
+    }""")
+    anchor.locator('[data-reddog-mode="listen"]').tap()
+    anchor.get_by_role("button", name="Stop dictation").tap()
+    expect(anchor.get_by_role("textbox", name="Search the Mall")).to_have_value(transcript)
+    assert page.evaluate("fixtureSpeech.starts === 4 && fixtureSpeech.stops === 3")
+    expect(anchor.get_by_role("button", name="Open Red Dog")).to_be_visible()
+
     print(json.dumps({"member_phone_inline_and_immersive": True,
                       "horizontal_touch_scroll": supports_cdp,
                       "foreground_dictation_hold_and_stop": True,
+                      "red_dog_mode_sheet_stop": True,
                       "multiline_editing_and_stop_in_red_dog_slot": True,
                       "queue_search_portrait_and_landscape": True}))
 
