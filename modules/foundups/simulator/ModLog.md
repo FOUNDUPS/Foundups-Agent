@@ -1,3 +1,9 @@
+## 2026-11-15 — Observable Swarm Orchestration read-only telemetry slice
+- Created `modules/foundups/simulator/adapters/work_telemetry_provider.py` (`?mode=ro` + `PRAGMA query_only = ON` across `AgentDB` + `PatternMemory`, 8 canonical states, `_effect_evidence` gating, TTL stale detection, path/secret redaction, `observation_only=True`, `authority="none"`).
+- Extended `modules/foundups/simulator/frame_schema.py` (`CANONICAL_WORK_STATES`, `WorkUnitFrame`, `WorkTelemetrySnapshot`, optional `work_telemetry` on `SystemStateFrame`) while preserving `FRAME_SCHEMA_VERSION = "1.0.0"`.
+- Added `work_telemetry_sync` to `STREAMABLE_EVENT_TYPES` and GET-only `/api/work-telemetry` in `modules/foundups/simulator/sse_server.py` (preserving `scripts/reddog_backend_manifest.json` unchanged).
+- Updated `public/js/foundup-cube.js` for `workTelemetrySync`, non-monotonic `filledBlocks`, disabled Firestore/click promotions in observation-only mode, TTL stale transition, and `"OBSERVATION ONLY"` / `"NO AUTHORITY"` badges.
+
 ## 2026-11-05 — Micro-UPS preview qualification and continuity
 
 WSP15/22/26/50/62/81/97; root-selected class C, 19/P0. The [P4 preview](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p4-prospective-micro-ups-allocation-v1)

@@ -1,3 +1,26 @@
+## 2026-11-14 — Reconcile the nested Claude instruction pointer
+
+Complete the bounded PR #729 instruction consolidation using the existing
+all-file audit. Replace the duplicated nested protocol with links to canonical
+root instructions and WSP 00; preserve current root CLAUDE and generated AGENTS.
+Retire the proposed mandatory read of the dated May 30 stack inventory and its
+unverified model/settings claims. Original head `1757a520c779c3b6a83ed8a4282f2eae13beb10a`
+and inventory blob `ef1823cd89221bd1c8611f03cd1d3039d4c961f7` remain in the
+branch ancestry and existing reconciliation receipt. No runtime change.
+Validation: existing tooling projection check, relative links, complete Git
+delta review and exact root-instruction preservation. Hosted acceptance remains
+bound to the resulting candidate, separately from these local checks.
+
+## 2026-11-12 — Bounded host launches and build security preflight
+
+Make WSP 91 lifecycle and WSP 71 security review explicit in canonical agent
+startup instructions and the existing WRE security-scan skill. Temporary helpers
+need owned termination, not only a heartbeat; resident services need authorized
+renewal. Required missing/stale security evidence blocks build/launch. Preserve
+the scanner's prototype/manual scope and existing runtime ownership. This is
+governance and instruction integration, not retrofitted universal enforcement.
+WSP 22/71/81/91/95/97 apply; generated AGENTS and exact WSP mirrors are validated.
+
 ## 2026-11-11 — Git lifecycle priority and PC convergence
 
 Use one WRE Git lifecycle pass at WRE and Codex startup. Preserve existing
@@ -63573,3 +63596,18 @@ the official CPU index, verifies that build after the unchanged requirements,
 and avoids restoring/retaining the former GPU pip cache. Runtime requirements
 and all acceptance commands remain unchanged. Hosted validation is pending.
 WSP10/22/50/97. No package installation or model change on the Windows PC.
+## 2026-11-14 - Trusted, default-off CI documentation verification
+
+Extend the landed #2338/#2340 pilot with exact-base verifier loading, one scoped
+gate result and an unregistered proposal-only Skill document schema. Keep
+required check names and every full-route command; fail required aggregation on
+absent, pending, failed, cancelled or stale scope evidence. Security/other required
+gates and post-merge full verification remain. Preserve existing WRE differential
+and exact-main owners; no scheduler, router, permission or runtime admission is
+added. See [.github/scripts/README.md](.github/scripts/README.md#audit-markdown-fast-path).
+
+Production activation remains held: current server opt-in absent, strict base
+freshness false and protected workflow ownership unestablished. No settings were
+changed. Python narrowing remains held without authenticated dependency closure.
+WSP 6/10/15/22/34/50/71/87/91/95/97/99/110. Validation and exact-head/main receipts
+are recorded in the focused PR and existing active slice ledger.

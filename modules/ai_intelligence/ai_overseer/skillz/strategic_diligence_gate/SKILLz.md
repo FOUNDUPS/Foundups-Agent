@@ -104,6 +104,11 @@ must reuse the same catalog, tile/player/state owners and preserve other FoundUp
 Bind independent desktop, phone and breakpoint-transition acceptance before
 changing shared layout or gestures. A mobile-only pass cannot certify desktop.
 
+Keep HPC decisions, test evidence and follow-ups in the owning GitHub
+roadmap, interface, ModLog or shared Mall incident. In HPC playback work,
+“mosh pit” refers to the video grid. Reserve the Google Docs Mosh Pit for
+YUMORI and Sunvista work.
+
 Update the roadmap/owning interface before or with implementation, never after
 silently changing the contract. Preserve a source-bound carry-forward when the
 required runtime or verifier is unavailable. Do not claim this text creates an

@@ -1,3 +1,43 @@
+## 2026-11-15 — Fix MetricsIngestorV2 ai_0102_approvals index schema mismatch
+
+- **metrics_ingest_v2 (`skillz/metrics_ingest_v2.py`)**: Aligned `idx_approval_skill` creation index target from obsolete `human_approvals(skill_id)` to existing table `ai_0102_approvals(skill_id)` so fresh SQLite databases initialize cleanly alongside `WRESkillsRegistryV2`.
+- **Verification**: Added `tests/test_metrics_ingest_v2_schema.py` covering fresh schema initialization and `check_rollback_triggers()` healthy/degraded/exception paths.
+
+## 2026-11-15 — Parent-version-bound pattern recall and evolution lineage
+
+- **PatternMemory (`src/pattern_memory.py`)**: Added `_parent_version_filter` and optional `parent_version: Optional[str] = None` to `recall_successful_patterns()` and `recall_failure_patterns()`, filtering in SQL before `LIMIT` on `json_valid(output_result)=1` and `$._skill_binding.schema_version = 'wre_skill_execution_binding.v1'` + `$._skill_binding.loaded_skill_sha256` (fail-closed `[]` on blank/non-string inputs).
+- **WREMasterOrchestrator (`wre_master_orchestrator/src/wre_master_orchestrator.py`)**: Wired `loaded_skill_digest(skill_content)` into `evolve_skill()` pattern recall (`recall_failure_patterns`, `recall_successful_patterns`) and `store_variation(..., parent_version=...)` so foreign revisions cannot pollute candidate generation.
+- **Docs (`INTERFACE.md`)**: Documented `parent_version` recall filtering and `evolve_skill()` lineage binding.
+
+## 2026-11-15 — Hardened read-only GitHub branch dispositions
+
+Add and harden read-only `branch_dispositions` accounting in
+`reconcile_git_lifecycle()`: enforce exact `sha == head_sha` matching for both
+open and closed/merged PRs (`BRANCH_OPEN_PR_HEAD_MOVED` when moved), separate
+protected non-`main` branches into `PROTECTED_BRANCH`, require strict same-repo
+case-insensitive `head_repository` matching, preserve full sorted `pr_numbers`
+history per ref, emit `BRANCH_PR_OBSERVATION_INCOMPLETE` instead of
+`BRANCH_UNTRACKED` when PR observation is partial, and separate
+`BRANCH_PR_HEAD_MISMATCH` from never-PR'd `BRANCH_UNTRACKED`. WSP 10, 22, 50,
+84, 97 and 110.
+
+## 2026-11-12 — Security-scan caller lifecycle obligations
+
+The existing security_scan skill now points build/launch callers to WSP 71
+Section 5.6 and WSP 91 Section 3.0. Scanner evidence does not itself authorize
+execution; missing required coverage blocks the affected action. Heartbeats,
+expiry, ownership and cleanup belong to existing runtime owners. Prototype and
+manual-trigger metadata remain unchanged; no provider or service was started.
+WSP 22/71/91/95/97. Validation covers protocol mirrors and agent projection;
+runtime lifecycle enforcement remains separately qualified work.
+
+## 2026-11-12 — Read-only PC and GitHub inventory
+
+Reuse the Git lifecycle repository and selected PC binding for a bounded
+Git read with a request-bound digest. Preserve worktree paths and changed
+filenames locally. The MCP adapter can call the reader without writing the
+lifecycle ledger or modifying either repository. WSP 21, 50, 84 and 97.
+
 ## 2026-11-11 — GitHub and PC lifecycle reconciliation
 
 Connect WRE and Codex startup to one persisted Git lifecycle pass. Inventory
@@ -5800,3 +5840,12 @@ Phase 3 completes the autonomous execution chain:
 - Grounded by current Holo evidence at exact base
   `7269deb66f638cc6bbb8239aecf0c8b5ae6b8d22` and documented under WSP 15,
   WSP 50, WSP 62, and WSP 97 before resuming RedDog Phase 2C.
+## 2026-11-14 - CI documentation pilot reuses verification owners
+
+The existing CI scope pilot gains trusted-base selection and a proposal-only
+Skill documentation schema. WRE impact planning, registry projection,
+differential execution and exact-main evidence remain unchanged. Python and
+protected/systemic changes retain full verification; no model may supply
+dependency-completeness or downgrade authority. The CI README records activation
+holds and exact reference timing. No runtime admission or RSI transfer is claimed.
+WSP 6/15/22/50/71/95/97/110.

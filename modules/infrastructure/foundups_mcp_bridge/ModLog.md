@@ -1,5 +1,13 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-11-12: Read-only PC Git inventory
+
+WSP 21/50/84/97. Add an opt-in authenticated HTTP tool using the WRE Git
+lifecycle reader. Readiness checks the selected tool set and verifies a fresh
+Git receipt for the inventory profile. The default Holo and stdio profiles
+retain their existing tool sets. The Git-only OAuth profile uses the existing
+draft bridge's bounded introspection verifier with a fixed `git:read` scope.
+
 ## 2026-11-11: Isolated private draft sender
 
 WSP 00/10/22/50/71/96/97. Keep draft effects out of the existing Holo MCP

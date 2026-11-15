@@ -1,4 +1,4 @@
-"""OAuth resource-server verification for the private draft MCP endpoint."""
+"""Bounded OAuth resource-server verification for private MCP endpoints."""
 
 from __future__ import annotations
 
@@ -52,7 +52,7 @@ def _unique_object(pairs: list[tuple[str, object]]) -> dict[str, object]:
     return obj
 
 
-class DraftTokenVerifier(TokenVerifier):
+class ScopedTokenVerifier(TokenVerifier):
     """Verify each request via an operator-configured RFC 7662 endpoint.
 
     The issuer must report ``token_type=Bearer`` only for bearer access
@@ -69,6 +69,8 @@ class DraftTokenVerifier(TokenVerifier):
         client_id: str,
         introspection_client_id: str,
         introspection_client_secret: str,
+        required_scope: str,
+        allowed_scopes: frozenset[str],
     ) -> None:
         if not all(_https_url(value) for value in (issuer, introspection_url, resource_url)):
             raise ValueError("INVALID_DRAFT_OAUTH_URL")
@@ -83,6 +85,8 @@ class DraftTokenVerifier(TokenVerifier):
         self._resource_url = resource_url
         self._subject = subject
         self._client_id = client_id
+        self._required_scope = required_scope
+        self._allowed_scopes = allowed_scopes
         self._introspection_auth = httpx.BasicAuth(
             quote_plus(introspection_client_id), quote_plus(introspection_client_secret)
         )
@@ -121,8 +125,8 @@ class DraftTokenVerifier(TokenVerifier):
             return None
         scopes = scope.split(" ")
         if (
-            DRAFT_READ_SCOPE not in scopes
-            or not _DRAFT_SCOPES.issuperset(scopes)
+            self._required_scope not in scopes
+            or not self._allowed_scopes.issuperset(scopes)
             or len(scopes) != len(set(scopes))
         ):
             return None
@@ -152,3 +156,17 @@ class DraftTokenVerifier(TokenVerifier):
                     return None
                 body.extend(chunk)
             return json.loads(body.decode("utf-8"), object_pairs_hook=_unique_object)
+
+
+class DraftTokenVerifier(ScopedTokenVerifier):
+    """Preserve the draft caller's fixed read and optional write scopes."""
+
+    def __init__(self, *, issuer: str, introspection_url: str, resource_url: str,
+                 subject: str, client_id: str, introspection_client_id: str,
+                 introspection_client_secret: str) -> None:
+        super().__init__(
+            issuer=issuer, introspection_url=introspection_url, resource_url=resource_url,
+            subject=subject, client_id=client_id, introspection_client_id=introspection_client_id,
+            introspection_client_secret=introspection_client_secret,
+            required_scope=DRAFT_READ_SCOPE, allowed_scopes=_DRAFT_SCOPES,
+        )

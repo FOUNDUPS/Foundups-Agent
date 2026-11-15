@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import asyncio
+from contextlib import asynccontextmanager
 import json
 import os
 import pytest
 import subprocess
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 from modules.infrastructure.foundups_mcp_bridge.scripts import launch
@@ -423,3 +426,130 @@ def test_post_spawn_exception_retains_handle_and_lock_if_termination_fails(monke
     assert [call.kwargs for call in proc.wait.call_args_list] == [{"timeout": 3.0}, {"timeout": 2.0}]
     lock.release.assert_not_called()
     assert launch._active_runtime is handle and handle.lock is lock
+
+
+
+def test_inventory_launch_requires_auth_and_propagates_opt_in(monkeypatch, tmp_path):
+    monkeypatch.setenv(launch.GIT_INVENTORY_ENV, "1")
+    assert launch.run_mcp_bridge_http(
+        repo_root=tmp_path, auth_token="synthetic-token", require_auth=False,
+    ) == {"status": "error", "error": "git_inventory_requires_auth"}
+
+    options, error = launch._resolve_launch_options(
+        "127.0.0.1", 8128, "synthetic-token", True, tmp_path,
+    )
+    assert error is None and options.git_inventory_enabled
+    interpreter = tmp_path / "python.exe"
+    interpreter.write_bytes(b"test")
+    monkeypatch.setattr(launch, "_get_mcp_env_python", lambda _root: interpreter)
+    monkeypatch.setattr(launch, "_mcp_python_capable", lambda _path: True)
+    monkeypatch.setattr(launch, "_mcp_runtime_python", lambda path: (path, None))
+    command, env, error = launch._http_subprocess_spec(options)
+    assert error is None and env[launch.GIT_INVENTORY_ENV] == "1"
+    assert "synthetic-token" not in command
+
+    process = MagicMock()
+    process.poll.return_value = None
+    monkeypatch.setattr(launch, "_active_runtime", launch.MCPRuntimeHandle(
+        mode="subprocess", host="127.0.0.1", port=8128, started_at=0, proc=process,
+    ))
+    assert launch._existing_runtime_result(True) == {
+        "status": "error", "error": "mcp_runtime_profile_mismatch",
+    }
+
+
+def test_inventory_readiness_child_requires_exact_profile(monkeypatch, tmp_path):
+    interpreter = tmp_path / "python.exe"
+    interpreter.write_bytes(b"test")
+    monkeypatch.setattr(launch, "_get_mcp_env_python", lambda _root: interpreter)
+    monkeypatch.setattr(launch, "_mcp_python_capable", lambda _path: True)
+    monkeypatch.setattr(launch, "_mcp_runtime_python", lambda path: (path, None))
+    receipt = _readiness()
+
+    def run(command, **kwargs):
+        assert command[-1] == "--enable-git-inventory"
+        assert "synthetic-token" not in command
+        assert kwargs["env"]["FOUNDUPS_MCP_AUTH_TOKEN"] == "synthetic-token"
+        return subprocess.CompletedProcess([], 0, stdout=json.dumps(receipt), stderr="")
+
+    monkeypatch.setattr(launch.subprocess, "run", run)
+
+    def verify():
+        return launch._verify_readiness_subprocess(
+            tmp_path, "127.0.0.1", 8128, "synthetic-token", 2.0,
+            enable_git_inventory=True,
+        )
+
+    assert verify() == {"verified": False, "error": "mcp_readiness_response_invalid"}
+    receipt.update(tools_count=2, tool_names=["get_git_inventory", "holo_query_bundle"])
+    assert verify() == receipt
+    assert not launch._readiness_schema_valid(receipt)
+
+
+def test_inventory_canary_calls_and_checks_bound_receipt(monkeypatch):
+    import mcp
+    from mcp.client import streamable_http
+    from modules.infrastructure.wre_core.src import git_lifecycle_inventory
+
+    calls = []
+    tools = ["holo_query_bundle", "get_git_inventory"]
+    stale = False
+    next_cursor = None
+
+    class Session:
+        def __init__(self, *_streams):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_exc):
+            pass
+
+        async def initialize(self):
+            pass
+
+        async def list_tools(self):
+            return SimpleNamespace(
+                tools=[SimpleNamespace(name=name) for name in tools], nextCursor=next_cursor,
+            )
+
+        async def call_tool(self, name, arguments):
+            calls.append((name, arguments))
+            payload = arguments if not stale else {"request_id": "stale"}
+            return SimpleNamespace(structuredContent=payload)
+
+    @asynccontextmanager
+    async def client(_url, *, headers, **_kwargs):
+        assert headers == {"Authorization": "Bearer synthetic-token"}
+        yield None, None, None
+
+    monkeypatch.setattr(mcp, "ClientSession", Session)
+    monkeypatch.setattr(streamable_http, "streamablehttp_client", client)
+    monkeypatch.setattr(launch, "_mcp_call_payload_ok", lambda _result: True)
+    monkeypatch.setattr(
+        git_lifecycle_inventory, "verify_git_inventory_receipt",
+        lambda value, request_id: value == {"request_id": request_id},
+    )
+
+    def verify():
+        return asyncio.run(launch._verify_streamable_http(
+            "http://127.0.0.1:8128/mcp", {"Authorization": "Bearer synthetic-token"}, 1.0,
+            enable_git_inventory=True,
+        ))
+
+    assert verify() == set(tools)
+    assert [name for name, _arguments in calls] == tools
+    request_id = calls[1][1]["request_id"]
+    assert request_id.startswith("mcp-readiness-")
+    stale = True
+    with pytest.raises(ValueError, match="inventory receipt invalid"):
+        verify()
+    assert calls[-1][1]["request_id"] != request_id
+    tools.append("get_git_inventory")
+    with pytest.raises(ValueError, match="tool boundary mismatch"):
+        verify()
+    tools.pop()
+    next_cursor = "more-tools"
+    with pytest.raises(ValueError, match="tool boundary mismatch"):
+        verify()

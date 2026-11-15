@@ -1,3 +1,16 @@
+## WRE parent-bound recall backend manifest metadata review — 2026-11-15
+
+The backend manifest refreshes two WRE source checksums (`pattern_memory.py` and
+`wre_master_orchestrator.py`) and retains all 1,487 runtime members. Verification
+against base `0be2ae5820` confirmed 39 unchanged public source-path/SHA rows with
+exact prior approvals (`b7e7e1ac1` / `0be2ae5820`). The new whole-manifest digest
+`fd2d0fee9e17c7668482bfdd5c7dcc058ba7b44bb7e023bd097270c86fbb77bd` (canonical
+payload SHA256 `4d3c25cf67a11c39c110e884d9ca5380302797b3671ec509395783580218910d`)
+requires 39 renewed bindings, preserving all 4,422 earlier entries and other
+fields (`4,461` total). Scanner rules, exclusions, fingerprint formula, and scan
+coverage stay the same. Fresh full-tree and introduced-history checks remain
+required.
+
 ## HPC public Mall shell metadata review — 2026-11-11
 
 PR #2349's pinned Gitleaks run

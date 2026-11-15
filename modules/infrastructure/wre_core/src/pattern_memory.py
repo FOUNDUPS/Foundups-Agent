@@ -467,11 +467,29 @@ class PatternMemory(PatternABEvidenceMixin):
 
         return result
 
+    @staticmethod
+    def _parent_version_filter(
+        parent_version: Optional[str],
+    ) -> Optional[tuple[str, tuple[str, ...]]]:
+        """Return pre-LIMIT JSON1 SQL filter and params, or None to fail closed."""
+        if parent_version is None:
+            return ("", ())
+        if not isinstance(parent_version, str) or not parent_version.strip():
+            return None
+        clause = (
+            "\n              AND output_result IS NOT NULL"
+            "\n              AND json_valid(output_result) = 1"
+            "\n              AND json_extract(output_result, '$._skill_binding.schema_version') = ?"
+            "\n              AND json_extract(output_result, '$._skill_binding.loaded_skill_sha256') = ?"
+        )
+        return (clause, ("wre_skill_execution_binding.v1", parent_version))
+
     def recall_successful_patterns(
         self,
         skill_name: str,
         min_fidelity: float = 0.90,
-        limit: int = 10
+        limit: int = 10,
+        parent_version: Optional[str] = None,
     ) -> List[Dict]:
         """
         Recall successful execution patterns for a skill
@@ -487,20 +505,27 @@ class PatternMemory(PatternABEvidenceMixin):
             skill_name: Skill to recall patterns for
             min_fidelity: Minimum pattern fidelity threshold
             limit: Max number of patterns to recall
+            parent_version: Optional exact bound parent digest
+                (``$._skill_binding.loaded_skill_sha256``). Non-empty string
+                filters rows before ``LIMIT``; invalid/blank strings fail closed.
 
         Returns:
             List of successful execution records
         """
+        parent_filter = self._parent_version_filter(parent_version)
+        if parent_filter is None:
+            return []
+        parent_clause, parent_params = parent_filter
         cursor = self.conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT * FROM skill_outcomes
             WHERE skill_name = ?
               AND success = 1
-              AND pattern_fidelity >= ?
+              AND pattern_fidelity >= ?{parent_clause}
             ORDER BY pattern_fidelity DESC, timestamp DESC
             LIMIT ?
-        """, (skill_name, min_fidelity, limit))
+        """, (skill_name, min_fidelity, *parent_params, limit))
 
         rows = cursor.fetchall()
 
@@ -515,7 +540,8 @@ class PatternMemory(PatternABEvidenceMixin):
         self,
         skill_name: str,
         max_fidelity: float = 0.70,
-        limit: int = 10
+        limit: int = 10,
+        parent_version: Optional[str] = None,
     ) -> List[Dict]:
         """
         Recall failed execution patterns for learning
@@ -531,20 +557,27 @@ class PatternMemory(PatternABEvidenceMixin):
             skill_name: Skill to recall failures for
             max_fidelity: Maximum pattern fidelity (failures)
             limit: Max number of patterns to recall
+            parent_version: Optional exact bound parent digest
+                (``$._skill_binding.loaded_skill_sha256``). Non-empty string
+                filters rows before ``LIMIT``; invalid/blank strings fail closed.
 
         Returns:
             List of failed execution records
         """
+        parent_filter = self._parent_version_filter(parent_version)
+        if parent_filter is None:
+            return []
+        parent_clause, parent_params = parent_filter
         cursor = self.conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT * FROM skill_outcomes
             WHERE skill_name = ?
               AND pattern_fidelity <= ?
-              AND success = 0
+              AND success = 0{parent_clause}
             ORDER BY pattern_fidelity ASC, timestamp DESC
             LIMIT ?
-        """, (skill_name, max_fidelity, limit))
+        """, (skill_name, max_fidelity, *parent_params, limit))
 
         rows = cursor.fetchall()
 

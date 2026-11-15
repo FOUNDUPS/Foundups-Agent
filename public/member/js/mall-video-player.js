@@ -36,6 +36,12 @@
   var topBar = null;
   var queueRail = null;
   var queueTrack = null;
+  var mediaPanel = null;
+  var queueSearchForm = null;
+  var queueSearch = null;
+  var queueEmpty = null;
+  var filteredIndices = null;
+  var matchesQuery = null;
   var edgeTrigger = null;
   var gestureHint = null;
   var titleEl = null;
@@ -44,6 +50,8 @@
   var playBtn = null;
   var requestYouTubePlay = null;
   var inline = false;
+  var theater = false;
+  var muteOnStart = false;
   var onClose = null;
   var autoplayRequested = true;
   var previousOverflow = null;
@@ -66,6 +74,10 @@
   // ─── localStorage Keys ───
   var SAVED_KEY = 'pfmall_saved_videos';
   var returnTile = null;
+  var memberQueueDock = null;
+  var railQuery = null;
+  var returnScroll = null;
+  var scopedPlayer = false;
   var HISTORY_KEY = 'pfmall_watch_history';
   var HISTORY_MAX = 50; // Max history entries
   /** Local-only resume: omit sub-threshold & “finished” positions (HTML5 video only; embeds cannot read time). */
@@ -152,7 +164,8 @@
     statusEl.textContent = message || '';
     statusEl.hidden = !message;
     playBtn.hidden = !requestYouTubePlay || !['manual-play', 'autoplay-blocked', 'provider-unknown', 'paused'].includes(state);
-    if (inline && (state === 'manual-play' || state === 'autoplay-blocked') && !playBtn.hidden && canStartYouTube()) {
+    if (inline && !theater && !returnScroll &&
+        (state === 'manual-play' || state === 'autoplay-blocked') && !playBtn.hidden && canStartYouTube()) {
       playBtn.scrollIntoView({ block: 'nearest' });
     }
     window.dispatchEvent(new CustomEvent('mallVideoPlayback', { detail: { ...playbackStatus } }));
@@ -260,9 +273,16 @@
       '<div class="video-player-stage"></div>',
       '<p class="video-player-status" role="status" hidden></p>',
       '<button class="video-player-manual-play" type="button" hidden>Play video</button>',
+      '<form class="video-player-queue-search" role="search" hidden>',
+      '  <input type="search" aria-label="Search videos" placeholder="Search videos" maxlength="300">',
+      '  <button type="submit" aria-label="Play search result" title="Play search result">',
+      '    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 4.5 4.5"/></svg>',
+      '  </button>',
+      '</form>',
       '<div class="video-player-edge-trigger"></div>',
       '<div class="video-player-queue-rail">',
       '  <div class="video-player-queue-track"></div>',
+      '  <p class="video-player-queue-empty" role="status" hidden>No videos match your search.</p>',
       '</div>',
       '<div class="video-player-gesture-hint"></div>'
     ].join('\n');
@@ -276,10 +296,51 @@
     topBar = container.querySelector('.video-player-top-bar');
     queueRail = container.querySelector('.video-player-queue-rail');
     queueTrack = container.querySelector('.video-player-queue-track');
+    queueSearchForm = container.querySelector('.video-player-queue-search');
+    queueSearch = queueSearchForm.querySelector('input');
+    queueSearchForm.addEventListener('submit', playSearchResult);
+    queueEmpty = container.querySelector('.video-player-queue-empty');
+    queueSearch.addEventListener('input', filterRail);
     edgeTrigger = container.querySelector('.video-player-edge-trigger');
     gestureHint = container.querySelector('.video-player-gesture-hint');
     titleEl = container.querySelector('.video-player-title');
     saveBtn = container.querySelector('[data-action="save"]');
+    mediaPanel = document.createElement('div');
+    mediaPanel.className = 'video-player-media-panel';
+    topBar.before(mediaPanel);
+    mediaPanel.append(topBar, stage, statusEl, playBtn);
+    memberQueueDock = window.mallVideoProjection?.createMemberDock?.(
+      'Search this queue',
+      playMemberSearchResult,
+      function() {
+        if (scopedPlayer) return window.mallVideoProjection?.openScopedRedDog?.(currentFoundUpId);
+        close();
+        window.redDog?.open?.();
+        document.querySelector('#accountPlane.open button:not([hidden])')?.focus();
+      }
+    );
+    var queuePanel = document.createElement('div');
+    queuePanel.className = 'video-player-queue-panel';
+    queueRail.before(queuePanel);
+    queuePanel.append(queueRail);
+    if (memberQueueDock) {
+      memberQueueDock.element.hidden = true;
+      memberQueueDock.input.addEventListener('input', filterRail);
+      memberQueueDock.input.addEventListener('change', filterRail);
+      queuePanel.prepend(memberQueueDock.element);
+      var viewport = window.visualViewport;
+      if (viewport) {
+        var alignWithKeyboard = function() {
+          var keyboard = memberQueueDock.element.contains(document.activeElement) && viewport.scale === 1
+            ? Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop) : 0;
+          container.style.setProperty('--video-player-keyboard', keyboard + 'px');
+        };
+        viewport.addEventListener('resize', alignWithKeyboard);
+        viewport.addEventListener('scroll', alignWithKeyboard);
+        memberQueueDock.input.addEventListener('focus', alignWithKeyboard);
+        memberQueueDock.input.addEventListener('blur', alignWithKeyboard);
+      }
+    }
 
     // Attach listeners
     topBar.addEventListener('click', handleTopBarClick);
@@ -288,6 +349,30 @@
     edgeTrigger.addEventListener('mouseenter', showRail);
 
     // Keyboard
+    // Dismiss the innermost control before the shell's expanded-lane Escape handler.
+    document.addEventListener('keydown', function(e) {
+      if (e.key !== 'Escape' || !isOpen || e.isComposing) return;
+      if (memberQueueDock?.dialog.open) {
+        e.preventDefault();
+        e.stopPropagation();
+        memberQueueDock.dialog.close();
+        return;
+      }
+      if (memberQueueDock && !memberQueueDock.element.hidden && e.target === memberQueueDock.input) {
+        e.preventDefault();
+        e.stopPropagation();
+        memberQueueDock.input.blur();
+        topBar.querySelector('[data-action="back"]').focus({ preventScroll: true });
+        return;
+      }
+      if (memberQueueDock && !memberQueueDock.element.hidden) {
+        e.preventDefault();
+        e.stopPropagation();
+        close();
+        return;
+      }
+      if (returnTile && !scopedPlayer) handleKeydown(e);
+    }, true);
     document.addEventListener('keydown', handleKeydown);
     document.addEventListener('visibilitychange', function() {
       if (isOpen && document.hidden) pausePlayback();
@@ -301,6 +386,7 @@
 
   function enterImmersive() {
     inline = false;
+    topBar.querySelector('[data-action="back"]').hidden = false;
     container.classList.remove('video-player-inline');
     container.setAttribute('role', 'dialog');
     container.setAttribute('aria-label', 'Fullscreen video player');
@@ -308,7 +394,7 @@
     topBar.querySelector('[data-action="back"]').setAttribute('aria-label', 'Back');
     previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    if (returnTile) {
+    if (returnTile || matchesQuery) {
       container.setAttribute('aria-modal', 'true');
       var member = document.getElementById('memberArea');
       // An inline iframe keeps its parent when expanded. Inert its siblings,
@@ -328,12 +414,39 @@
       }
     }
     attachGestures();
+    if (memberQueueDock && matchesQuery && (!scopedPlayer || memberQueueDock.setScoped)) {
+      memberQueueDock.setScoped?.(scopedPlayer);
+      memberQueueDock.element.hidden = false;
+      memberQueueDock.fitInput?.();
+      container.classList.add('video-player-queue-docked');
+      filterRail();
+    }
     resetChromeTimer();
-    if (returnTile) topBar.querySelector('[data-action="back"]').focus({ preventScroll: true });
+    if (returnTile || matchesQuery) topBar.querySelector('[data-action="back"]').focus({ preventScroll: true });
+  }
+
+  function setTheater(enabled, tile) {
+    if (!isOpen || !inline) return false;
+    if (tile) returnTile = tile;
+    theater = enabled;
+    setPinchTarget(!enabled && returnTile ? topBar : null);
+    container.classList.toggle('video-player-theater', enabled);
+    container.setAttribute('role', 'region');
+    container.setAttribute('aria-label', enabled ? 'Video theater' : 'Inline video player');
+    topBar.querySelector('[data-action="expand"]').hidden = enabled;
+    var back = topBar.querySelector('[data-action="back"]');
+    var active = document.activeElement;
+    back.hidden = enabled;
+    back.setAttribute('aria-label', 'Close player');
+    queueSearchForm.hidden = !enabled || !matchesQuery;
+    if (enabled && active === back && !queueSearchForm.hidden) queueSearch.focus({ preventScroll: true });
+    if (!enabled && (queueSearchForm.contains(active) || queueRail.contains(active))) back.focus({ preventScroll: true });
+    filterRail();
+    return true;
   }
 
   function expandInline() {
-    if (!isOpen || !inline) return false;
+    if (!isOpen || !inline || theater) return false;
     stageObserver?.disconnect();
     stageObserver = null;
     enterImmersive();
@@ -357,10 +470,32 @@
     }
     pendingResumeSeconds = normalizeResumeSeconds(rs, 0);
 
-    returnTile = resumeOpts?.returnTile || null;
+    scopedPlayer = !!resumeOpts?.returnTile;
+    returnTile = resumeOpts?.returnTile || resumeOpts?.returnFocusTo || null;
+    var browseField = resumeOpts?.returnFocusTo?.closest('.mall-tile-field-wrapper');
+    var rowTrack = resumeOpts?.returnFocusTo?.closest('.mall-category-track');
+    returnScroll = browseField ? {
+      field: browseField,
+      top: browseField.scrollTop,
+      left: browseField.scrollLeft,
+      height: browseField.clientHeight,
+      tileTop: returnTile.offsetTop,
+      rowTrack: rowTrack,
+      rowLeft: rowTrack?.scrollLeft
+    } : null;
     onClose = resumeOpts?.onClose || null;
     autoplayRequested = resumeOpts?.autoplay !== false;
-    container.classList.toggle('scoped-player', !!returnTile);
+    muteOnStart = resumeOpts?.theater === true || resumeOpts?.muted === true;
+    matchesQuery = resumeOpts?.matchesQuery ||
+      (document.getElementById('redDogAnchor')?.querySelector(':scope > .mall-member-search-dock')
+        ? window.mallTileField?.matchesVideoQuery : null);
+    queueSearch.value = resumeOpts?.query || '';
+    if (memberQueueDock) memberQueueDock.input.value = resumeOpts?.queueQuery || '';
+    filteredIndices = null;
+    railQuery = null;
+    container.classList.toggle('scoped-player', scopedPlayer);
+    container.classList.toggle('desktop-poster-player', !!returnScroll);
+    mediaPanel.scrollTop = 0;
 
     currentFoundUpId = foundupId;
     currentQueue = queue;
@@ -370,14 +505,27 @@
     container.classList.add('open');
     inline = !!resumeOpts?.inlineMount;
     if (inline) {
-      resumeOpts.inlineMount.appendChild(container);
+      var mount = resumeOpts.inlineMount;
+      if (typeof mount === 'function') mount = mount();
+      mount.appendChild(container);
       container.classList.add('video-player-inline');
-      container.setAttribute('role', 'region');
-      container.setAttribute('aria-label', 'Inline video player');
-      topBar.querySelector('[data-action="expand"]').hidden = false;
-      topBar.querySelector('[data-action="back"]').setAttribute('aria-label', 'Close player');
-      container.scrollIntoView({ block: 'nearest' });
-      topBar.querySelector('[data-action="back"]').focus({ preventScroll: true });
+      if (returnScroll) {
+        container.setAttribute('role', 'region');
+        container.setAttribute('aria-label', 'Inline video player');
+        topBar.querySelector('[data-action="expand"]').hidden = false;
+        var closeButton = topBar.querySelector('[data-action="back"]');
+        closeButton.hidden = false;
+        closeButton.setAttribute('aria-label', 'Close player');
+        setPinchTarget(topBar);
+        renderRail();
+      } else {
+        setTheater(resumeOpts?.theater === true);
+      }
+      if (!theater) {
+        if (returnScroll) container.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' });
+        else container.scrollIntoView({ block: 'nearest' });
+        topBar.querySelector('[data-action="back"]').focus({ preventScroll: true });
+      }
       if (typeof IntersectionObserver !== 'undefined') {
         var observer = new IntersectionObserver(function(entries) {
           if (stageObserver === observer && inline && entries.some(function(entry) { return entry.intersectionRatio <= 0.5; })) {
@@ -389,10 +537,11 @@
       }
     } else {
       enterImmersive();
+      filterRail();
     }
 
     renderVideo(currentQueue[currentIndex]);
-    renderRail();
+    if (inline) resumeOpts.alignInline?.();
 
     // Update save button state
     updateSaveButtonState(isVideoSaved(currentFoundUpId, currentQueue[currentIndex]));
@@ -415,8 +564,10 @@
     pendingResumeSeconds = null;
 
     isOpen = false;
-    container.classList.remove('open');
-    container.classList.remove('video-player-inline');
+    container.classList.remove('open', 'video-player-inline', 'video-player-theater', 'video-player-queue-docked');
+    theater = false;
+    queueSearchForm.hidden = true;
+    memberQueueDock?.hide();
     if (previousOverflow !== null) document.body.style.overflow = previousOverflow;
     previousOverflow = null;
     inertElements.forEach(function(element) { element.inert = false; });
@@ -431,12 +582,7 @@
 
     // Cleanup
     if (gestureRef) { gestureRef.destroy(); gestureRef = null; }
-    if (pinchTarget) {
-      pinchTarget.removeEventListener('touchstart', handlePinchStart);
-      pinchTarget.removeEventListener('touchmove', handlePinchMove);
-      pinchTarget = null;
-    }
-    initialPinchDistance = 0;
+    setPinchTarget(null);
     clearTimeout(railTimer);
     clearTimeout(chromeTimer);
 
@@ -451,10 +597,25 @@
       var tile = returnTile.isConnected ? returnTile : document.querySelector(
         '#mallTileField .mall-tile[data-index="' + Number(returnTile.dataset.index) + '"]'
       );
-      if (restore) tile?.focus({ preventScroll: true });
-      container.removeAttribute('aria-modal');
+      if (restore) {
+        tile?.focus({ preventScroll: true });
+        if (returnScroll) {
+          var field = returnScroll.field;
+          var top = returnScroll.top;
+          if (tile && field.contains(tile) &&
+              (tile.offsetTop !== returnScroll.tileTop || field.clientHeight !== returnScroll.height)) {
+            // Density reflow can move the tile far beyond its old scroll offset.
+            var anchor = Math.max(0, returnScroll.tileTop - top);
+            top = tile.offsetTop - Math.min(anchor, Math.max(0, field.clientHeight - tile.offsetHeight));
+          }
+          field.scrollTo({ top: top, left: returnScroll.left, behavior: 'instant' });
+          returnScroll.rowTrack?.scrollTo({ left: returnScroll.rowLeft, behavior: 'instant' });
+        }
+      }
       returnTile = null;
     }
+    container.removeAttribute('aria-modal');
+    returnScroll = null;
 
     window.dispatchEvent(new CustomEvent('videoPlayerClose'));
   }
@@ -462,6 +623,11 @@
   // ─── Navigate Queue ───
   function goToVideo(index) {
     if (index < 0 || index >= currentQueue.length) return;
+    if (theater || returnScroll || container.classList.contains('video-player-queue-docked')) {
+      if (index === currentIndex) return;
+      autoplayRequested = true;
+      try { muteOnStart = ytPlayer?.isMuted?.() ?? muteOnStart; } catch (e) { /* provider not ready */ }
+    }
     flushCurrentPlaybackPosition();
     pendingResumeSeconds = null;
     currentIndex = index;
@@ -481,8 +647,9 @@
   }
 
   function nextVideo() {
-    if (currentIndex < currentQueue.length - 1) {
-      goToVideo(currentIndex + 1);
+    var next = filteredIndices ? filteredIndices[filteredIndices.indexOf(currentIndex) + 1] : currentIndex + 1;
+    if (next !== undefined && next < currentQueue.length) {
+      goToVideo(next);
       showHint('Next');
     } else {
       showHint('End of queue');
@@ -490,14 +657,16 @@
   }
 
   function prevVideo() {
-    if (currentIndex > 0) {
-      goToVideo(currentIndex - 1);
+    var previous = filteredIndices ? filteredIndices[filteredIndices.indexOf(currentIndex) - 1] : currentIndex - 1;
+    if (previous >= 0) {
+      goToVideo(previous);
       showHint('Previous');
     }
   }
 
   function handleVideoEnded() {
-    if (inline) return;
+    if (inline && !theater && !returnScroll) return;
+    autoplayRequested = true;
     nextVideo();
   }
 
@@ -505,12 +674,13 @@
     if (document.hidden) return false;
     var rect = stage.getBoundingClientRect();
     if (rect.width < 200 || rect.height < 200) return false;
-    var wrapper = inline && container.closest('.mall-tile-field-wrapper');
-    var bounds = wrapper?.getBoundingClientRect?.();
-    var width = Math.max(0, Math.min(rect.right, window.innerWidth, bounds?.right ?? Infinity) -
-      Math.max(rect.left, 0, bounds?.left ?? 0));
-    var height = Math.max(0, Math.min(rect.bottom, window.innerHeight, bounds?.bottom ?? Infinity) -
-      Math.max(rect.top, 0, bounds?.top ?? 0));
+    var bounds = inline ? container.closest('.mall-tile-field-wrapper')?.getBoundingClientRect()
+      : container.classList.contains('video-player-queue-docked') && mediaPanel.getBoundingClientRect();
+    var track = inline && container.closest('.mall-category-track')?.getBoundingClientRect();
+    var width = Math.max(0, Math.min(rect.right, window.innerWidth, bounds?.right ?? Infinity, track?.right ?? Infinity) -
+      Math.max(rect.left, 0, bounds?.left ?? 0, track?.left ?? 0));
+    var height = Math.max(0, Math.min(rect.bottom, window.innerHeight, bounds?.bottom ?? Infinity, track?.bottom ?? Infinity) -
+      Math.max(rect.top, 0, bounds?.top ?? 0, track?.top ?? 0));
     return width * height > rect.width * rect.height / 2;
   }
 
@@ -518,8 +688,8 @@
     2: ['configuration', 'YouTube rejected the video configuration.'],
     5: ['playback-error', 'YouTube could not play this video in this browser.'],
     100: ['unavailable', 'This video is unavailable on YouTube.'],
-    101: ['embedding-disabled', 'The creator has disabled embedded playback.'],
-    150: ['embedding-disabled', 'The creator has disabled embedded playback.'],
+    101: ['embedding-disabled', 'YouTube refused to play this embedded video.'],
+    150: ['embedding-disabled', 'YouTube refused to play this embedded video.'],
     153: ['client-identification', 'YouTube could not identify this embedded player.']
   };
 
@@ -567,6 +737,7 @@
           onReady: function(ev) {
             if (!current()) return;
             clearTimeout(playbackTimer);
+            if (muteOnStart) ev.target.mute();
             reportYouTube('ready');
             requestYouTubePlay = function() {
               if (!current()) return;
@@ -577,7 +748,8 @@
               }
               waitForPlayback('provider-unknown', 'YouTube did not start. Try its Play control or open the source.');
               if (document.activeElement === playBtn) {
-                topBar.querySelector('[data-action="back"]').focus({ preventScroll: true });
+                var focusTarget = theater ? iframe : topBar.querySelector('[data-action="back"]');
+                focusTarget.focus({ preventScroll: true });
               }
               reportYouTube('starting', 'Starting video…');
               try { ev.target.playVideo(); }
@@ -621,7 +793,7 @@
   function renderVideo(video) {
     if (!video) return;
     var sourceLink = topBar.querySelector('.video-player-source');
-    var originalUrl = returnTile ? scopedSourceUrl(video) : '';
+    var originalUrl = scopedPlayer ? scopedSourceUrl(video) : '';
     sourceLink.hidden = !originalUrl;
     if (originalUrl) {
       sourceLink.href = originalUrl;
@@ -649,7 +821,7 @@
         sourceLink.hidden = false;
       }
       renderYouTube(youtube, ytId);
-    } else if (youtube || (returnTile && embedUrl)) {
+    } else if (youtube || (scopedPlayer && embedUrl)) {
       pendingResumeSeconds = null;
       reportYouTube('configuration', 'The YouTube video ID is invalid.', 2);
     } else if (embedUrl) {
@@ -660,7 +832,8 @@
       // Direct video file — resume seek when pendingResumeSeconds is valid
       var resumeTarget = pendingResumeSeconds;
       pendingResumeSeconds = null;
-      stage.innerHTML = '<video src="' + esc(sourceUrl) + '" autoplay controls playsinline></video>';
+      stage.innerHTML = '<video src="' + esc(sourceUrl) + '"' + (muteOnStart ? ' muted' : '') +
+        (autoplayRequested ? ' autoplay' : '') + ' controls playsinline></video>';
       var ve = stage.querySelector('video');
       if (ve) {
         // Queue autoplay: advance to next video when current ends
@@ -695,30 +868,76 @@
   }
 
   // ─── Render Rail ───
+  function filterRail() {
+    var input = theater ? queueSearch : null;
+    if (memberQueueDock && !memberQueueDock.element.hidden) input = memberQueueDock.input;
+    var query = input ? input.value.trim().slice(0, 300) : '';
+    if (query === railQuery) return;
+    railQuery = query;
+    filteredIndices = query && matchesQuery ? currentQueue.reduce(function(indices, video, index) {
+      if (matchesQuery(video, query)) indices.push(index);
+      return indices;
+    }, []) : null;
+    renderRail();
+    queueTrack.scrollLeft = 0;
+  }
+
+  function playSearchResult(event) {
+    event.preventDefault();
+    if (!theater) return;
+    filterRail();
+    if (!filteredIndices?.length) return;
+
+    var result = filteredIndices[filteredIndices.indexOf(currentIndex) + 1] ?? filteredIndices[0];
+    if (result !== currentIndex) goToVideo(result);
+    else if (playbackStatus?.state !== 'playing') requestYouTubePlay?.();
+  }
+
+  function playMemberSearchResult() {
+    filterRail();
+    if (!filteredIndices?.length || ['playing', 'loading', 'starting', 'provider-state'].includes(playbackStatus?.state)) return;
+    var media = stage.querySelector('video');
+    if (media && !media.paused && !media.ended) return;
+    var first = filteredIndices[0];
+    if (first !== currentIndex) goToVideo(first);
+    else if (requestYouTubePlay) requestYouTubePlay();
+    else if (media) media.play().catch(function() {});
+  }
+
   function renderRail() {
-    queueTrack.innerHTML = currentQueue.map(function (video, i) {
+    var indices = filteredIndices || currentQueue.map(function(_, index) { return index; });
+    queueEmpty.hidden = indices.length !== 0;
+    queueTrack.innerHTML = indices.map(function (i) {
+      var video = currentQueue[i];
       var thumb = video.thumbnail_url || video.thumbnailUrl || video.poster_url || video.posterUrl || '';
       var title = video.title || 'Video ' + (i + 1);
-      var activeClass = i === currentIndex ? ' active' : '';
+      var selected = i === currentIndex;
       return [
-        '<div class="video-player-queue-item' + activeClass + '" data-index="' + i + '">',
+        '<button type="button" class="video-player-queue-item' + (selected ? ' active' : '') +
+          '" data-index="' + i + '"' + (selected ? ' aria-current="true"' : '') + '>',
         '  <img class="video-player-queue-thumb" src="' + esc(thumb) + '" alt="" loading="lazy">',
-        '  <div class="video-player-queue-label">' + esc(title) + '</div>',
-        '</div>'
+        '  <span class="video-player-queue-label">' + esc(title) + '</span>',
+        '</button>'
       ].join('');
     }).join('');
   }
 
   function updateRailSelection() {
     var items = queueTrack.querySelectorAll('.video-player-queue-item');
-    items.forEach(function (item, i) {
-      item.classList.toggle('active', i === currentIndex);
+    items.forEach(function (item) {
+      var selected = Number(item.dataset.index) === currentIndex;
+      item.classList.toggle('active', selected);
+      if (selected) item.setAttribute('aria-current', 'true');
+      else item.removeAttribute('aria-current');
     });
 
     // Scroll active into view
     var activeItem = queueTrack.querySelector('.video-player-queue-item.active');
     if (activeItem) {
-      activeItem.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      queueTrack.scrollTo({
+        left: activeItem.offsetLeft - (queueTrack.clientWidth - activeItem.offsetWidth) / 2,
+        behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+      });
     }
   }
 
@@ -790,13 +1009,22 @@
       }
     });
 
-    // Pinch detection (for pinch-in return)
-    pinchTarget = returnTile ? container : stage;
-    pinchTarget.addEventListener('touchstart', handlePinchStart, { passive: true });
-    pinchTarget.addEventListener('touchmove', handlePinchMove, { passive: false });
+    setPinchTarget(returnTile ? container : stage);
+  }
+
+  function setPinchTarget(target) {
+    if (pinchTarget === target) return;
+    pinchTarget?.removeEventListener('touchstart', handlePinchStart);
+    pinchTarget?.removeEventListener('touchmove', handlePinchMove);
+    initialPinchDistance = 0;
+    pinchTarget = target;
+    pinchTarget?.addEventListener('touchstart', handlePinchStart, { passive: true });
+    pinchTarget?.addEventListener('touchmove', handlePinchMove, { passive: false });
   }
 
   function handlePinchStart(e) {
+    initialPinchDistance = 0;
+    if (e.target?.closest?.('.video-player-queue-panel, button, a, input')) return;
     if (e.touches.length === 2) {
       initialPinchDistance = getPinchDistance(e.touches);
     }
@@ -808,7 +1036,10 @@
     var currentDistance = getPinchDistance(e.touches);
     var scale = currentDistance / initialPinchDistance;
 
-    if (scale < PINCH_THRESHOLD) {
+    if (inline && scale > 1 / PINCH_THRESHOLD) {
+      e.preventDefault();
+      expandInline();
+    } else if (!inline && scale < PINCH_THRESHOLD) {
       e.preventDefault();
       close();
       initialPinchDistance = 0;
@@ -838,9 +1069,10 @@
         break;
       case 'enter':
         // Enter FoundUp: navigate to canonical /f/{foundup_id} route (WSP 104)
-        if (currentFoundUpId && !returnTile) {
+        if (currentFoundUpId && !scopedPlayer) {
+          var destination = '/f/' + encodeURIComponent(currentFoundUpId);
           close();
-          window.location.href = '/f/' + encodeURIComponent(currentFoundUpId);
+          window.location.href = destination;
         }
         break;
       case 'save':
@@ -867,17 +1099,27 @@
 
     var index = parseInt(item.dataset.index, 10);
     if (!isNaN(index)) {
+      if (index === currentIndex && requestYouTubePlay &&
+          (theater || container.classList.contains('video-player-queue-docked')) &&
+          playbackStatus?.state !== 'playing') {
+        requestYouTubePlay();
+        return;
+      }
       goToVideo(index);
     }
   }
 
   function handleKeydown(e) {
-    if (!isOpen) return;
-    if (e.defaultPrevented || e.target?.closest?.('dialog[open]')) return;
+    if (!isOpen || theater) return;
+    if (e.defaultPrevented || e.isComposing || e.target?.closest?.('dialog[open]')) return;
     if (e.key !== 'Escape' && (inline || e.target?.closest?.('button, a, input, textarea, select'))) return;
 
     switch (e.key) {
       case 'Escape':
+        if (returnTile && !scopedPlayer) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
         close();
         break;
       case 'ArrowUp':
@@ -970,7 +1212,7 @@
     if (!currentFoundUpId || currentIndex < 0) return;
 
     var video = currentQueue[currentIndex];
-    var url = returnTile ? scopedSourceUrl(video) : getShareUrl(video);
+    var url = scopedPlayer ? scopedSourceUrl(video) : getShareUrl(video);
 
     if (!url) {
       showHint('No share link');
@@ -1073,6 +1315,7 @@
 
   // ─── Public API ───
   window.mallVideoPlayer = {
+    openDesktopVideo: open,
     /**
      * Open fullscreen player with a FoundUp's video queue.
      * @param {string} foundupId - The FoundUp ID (queue constraint)
@@ -1086,6 +1329,12 @@
      */
     close: close,
     expandInline: expandInline,
+    setTheater: setTheater,
+    isTheater: function() { return theater; },
+    getQueueQuery: function() {
+      var input = (memberQueueDock && !memberQueueDock.element.hidden) ? memberQueueDock.input : queueSearch;
+      return input?.value.trim().slice(0, 300) || '';
+    },
     getPlaybackSnapshot: getPlaybackSnapshot,
 
     /**

@@ -32,6 +32,11 @@ physical iPhone installed-PWA check when available. An unavailable environment
 is NOT_VERIFIED. The requested 20+ million Americans caption is UNVERIFIED and
 outside this repair's public copy.
 
+## 2026-11-15 — Build v18 discovery filters and inline continuity follow-up
+
+- Shared `#mallProjection` pill bar now receives dynamic JS discovery filters (`Videos`, `Apps`, and `/member/?foundup=hpc` `HPC` link) without modifying `public/member/index.html` (Clerk finding fingerprint intact).
+- Added `internal_app` handling (`GotJunk`, `Open App`) across `mall-planes.js` and `mall-tile-field.js`, synced docked `queueQuery` + desktop inline `ended` auto-advance in `mall-video-player.js`, aligned Red Dog concierge categories with live catalog entries, and bumped member shell cache generation to `pfmall-member-v18` / `Build v18`.
+
 ## Reproduction and disposition · 2026-11-11 UTC
 
 Live baseline at 03:39–03:44 UTC: `https://hpc.foundups.com/` returned HTTPS
@@ -219,3 +224,175 @@ Official sources accessed 2026-11-11:
 - [WebKit video activation policies](https://webkit.org/blog/6784/new-video-policies-for-ios/) and [Home Screen website data](https://webkit.org/blog/14787/webkit-features-in-safari-17-2/)
 - [Meta embedded player](https://developers.facebook.com/docs/plugins/embedded-video-player/) and [SDK API](https://developers.facebook.com/docs/plugins/embedded-video-player/api/) (retrieval rate-limited)
 - [FoundUp Memex boundary](../../../docs/adr/ADR_REDDOG_FOUNDUPS_SECOND_BRAIN_BOUNDARY.md) and [HoloIndex retrieval boundary](../../../docs/adr/ADR_OPENCLAW_MEMORY_HOLOINDEX_BOUNDARY.md)
+
+## 2026-11-12 · Desktop layout recovery in PR #2359
+
+At the start of this pass, live Firebase version 25aefb1f3c293a98 served
+pfmall-member-v7. Sampled public runtime bytes matched main 990e320. In a fresh
+1440 × 900 Windows Chromium session, the scoped grid showed three 469 px tiles
+across and opened the player below the row. The original draft 895118a used
+six CSS columns with a three-column JavaScript row calculation.
+
+The responsive candidate uses the existing player, queue, field slot and
+catalog matcher. Desktop starts muted on an eligible clip and advances the
+scoped queue. Search leaves the active clip running. Touch keeps the inline
+row and immersive controls. Repositioning tiles around the slot keeps the
+provider iframe connected. The existing tab-local state retains the desktop
+query and video ID for Back from Vote. The v8 cache migration keeps existing
+public asset URLs and the unrelated caches.
+
+A candidate preview on the HPC origin with real YouTube observed advancing
+media time for desktop startup iJuguXpbRR4, natural advancement to
+sSzWdw7MNjs, search selection of OTTz58wPi24, and 390 px emulated touch
+inline playback. Chromium and WebKit fixtures verified selection, queue
+advancement, manual Play, resize continuity and Back. Physical iPhone
+standalone remains NOT_VERIFIED. The phone search and thumb dock are open
+roadmap work. GitHub checks, merge, and hosting deployment each have separate
+receipts.
+
+## 2026-11-12 · Installed iPhone embed refusal
+
+012 reported “This content isn't available” on the first Short
+`iJuguXpbRR4` in the installed iPhone app. The purple Mall message in
+the photo maps to YouTube error 101 or 150. The precise code and trigger
+are unverified. At 13:50:42 UTC, the public Data API returned public,
+processed and `embeddable=true`, with no reported age or region restriction.
+YouTube documents that platform policies or claims can still block an embed.
+
+All eight live Shorts advanced in a phone-sized WebKit 26 window on
+Windows 11. The first also advanced in Chromium 143, on the v10 preview
+and in a same-origin browser-local official embed. The live iframe was
+369.2 × 226.2 CSS px with the browser-generated Referer, `enablejsapi=1`
+and `playsinline=1`. Manual Play advanced the first clip at 320 px.
+The [v10 identity and dock PR](https://github.com/FOUNDUPS/Foundups-Agent/pull/2366)
+merged as `7d6ea553f` and passed main CI. The tested Firebase preview was
+`f3d88fad9c24ea16`. The dedicated production host served v7.
+
+Compare the same first tile in Safari and the Home Screen app on the
+physical iPhone. The original Short link is the immediate fallback. The
+shared native player can use a rights-cleared original MP4 for owned media.
+The workspace search found no original file for this ID. Retain source
+attribution and verify byte-range delivery if a file is supplied.
+
+012 separately rejected the placement of the player below the selected row.
+The touch grid now replaces the selected thumbnail with the shared player
+across the original row. This is a placement change. Device playback remains
+an independent gate.
+
+[IFrame errors](https://developers.google.com/youtube/iframe_api_reference#onError) ·
+[Video metadata and embed restrictions](https://developers.google.com/youtube/data/reference/rest/v3/videos)
+
+## Physical iPhone verification
+
+The 012 report shows a refusal on an installed iPhone. The existing Mall
+receipts establish PC and phone-sized browser playback. No recorded
+physical iPhone pass or provisioned real-device runner surfaced in the
+repository and workspace audit. BrowserStack Live documents Safari
+and Home Screen installation on physical iOS devices. Access requires
+a provisioned account. Apple Web Inspector supports Home Screen apps
+on an iPhone connected to a Mac.
+
+The ordinary Mall lane preview requests muted autoplay through
+`YT.Player` parameters. The scoped HPC player creates its inline iframe
+and requests playback after the ready event. That timing difference is
+a device-test hypothesis. The existing iPhone report does not identify
+an activation failure.
+
+Use the [phone playback fixture](../../../public/member/tests/README.md#physical-iphone-playback)
+with the same iPhone, network, preview origin and clip `iJuguXpbRR4`.
+Compare the Mall tile in Safari and standalone. On a failure, try the
+official iframe with its own Play control in the same mode. Record display
+mode, iOS version, selected ID, provider states, error code, player size
+and advancing media time. The fixture stays in test previews.
+
+| Device evidence | Follow-up |
+| --- | --- |
+| Mall reports blocked autoplay or stalls and direct Play succeeds | Investigate asynchronous activation and direct provider Play recovery. |
+| Both Mall and official iframe return 101 or 150 in the same mode | Record embed refusal. Check owner restrictions when available and offer the original link or a rights-cleared first-party original. |
+| Either frame returns 153 | Inspect the actual Referer and embed client identification on the affected device. |
+| Both render and provider time advances in standalone | Record the physical run with the host and exact build. Repeat Safari on the same device. |
+
+[BrowserStack iOS PWA workflow](https://www.browserstack.com/support/faq/live/features-live/how-can-i-progressive-web-app-pwa-specific-scenarios-on-devices-in-live) ·
+[Apple Web Inspector](https://developer.apple.com/documentation/safari-developer-tools/inspecting-ios)
+
+## 2026-11-13 · Responsive acceptance and member entry
+
+012 confirmed that the HPC hostname is the public entrance and the
+FoundUps member entrance requires an invitation. Fresh signed-out browser
+checks found that the live apex URL `/member/?foundup=hpc` mounts the guest
+grid, `/member/` takes the sign-in path, and `/members` falls back to the
+public FoundUps homepage. The deployed Firebase version `25aefb1f3c293a98`
+served `pfmall-member-v7`. The desktop visit still showed the grid. This
+is a delivery gap for the merged theater.
+
+| Requirement and roadmap | Owner and current evidence | Disposition |
+| --- | --- | --- |
+| H1B desktop theater and queue | Shared field and player. #2359 merged at `99e91db629c5`. The `b7cce23a3` controlled browser baseline verified muted startup, search and queue advancement, and breakpoint continuity. | REUSE_AS_IS. Verify the deployed bundle separately. |
+| H1B phone grid and selected tile | Shared field, dock and state. The same baseline verified three columns, selected-tile row replacement, one iframe, rotation and civic-resource Back. | REUSE_AS_IS. Physical Safari and Home Screen playback are VERIFICATION_ONLY. |
+| H1B member/public boundary | Projection resolver and existing Clerk/invite boot. The live apex query is a guest entry. Existing boot and state fixtures cover the ordinary Mall and the Move2Japan return. | EXTEND_EXISTING. Limit public entry to the dedicated host and test scoped entry through the existing member gate. |
+| Voice and member agent expansion | The existing Vote contact destination and scoped dock. | LATER_STAGE. Keep the manual civic link. |
+
+**Change packet.** The 012 route clarification changes H1 acceptance. The
+baseline is `22900559f` with the same Mall runtime as the tested `b7cce23a3`.
+The projection resolver and member boot own the repair. Route the plural
+alias to the singular entry, put apex HPC selection behind existing
+admission and use the existing bounded return record. Regenerate discovery
+links from the registry. The member shell, provider runtime, scoped catalog
+content, tenant checks and other product routes keep their existing owners.
+Extend the boot and cache fixtures and independently test their actual
+entry paths. Rollback is the route patch and generated outputs together.
+The WSP 15 allocation is P0 for the admission gap. The cost is a focused
+boot and browser rerun, independent review and CI. A provisioned phone is
+still required for the separate device gate.
+
+The browser admission gate controls entry to the member interface. The
+aggregate video catalog is currently a static Hosting asset. Anonymous
+requests to both hosts returned it during this audit. Private delivery of
+that file would require an authenticated server-side serving contract.
+
+Provider guidance refreshed on 2026-11-13 JST. Autoplay blocking, missing
+client identification (153) and embed refusal (101/150) are distinct.
+The official minimum player viewport remains 200 × 200 CSS px. The
+active-tile expansion meets that constraint while the rest of the grid
+stays compact. The installed iPhone refusal and earlier verification
+challenge remain user-reported for the affected device.
+
+[YouTube player events](https://developers.google.com/youtube/iframe_api_reference) ·
+[Player parameters](https://developers.google.com/youtube/player_parameters) ·
+[Embed requirements](https://developers.google.com/youtube/terms/required-minimum-functionality) ·
+[Developer policies](https://developers.google.com/youtube/terms/developer-policies-guide) ·
+[YouTube embed help](https://support.google.com/youtube/answer/171780) ·
+[Chrome autoplay](https://developer.chrome.com/blog/autoplay) ·
+[WebKit iOS video policy](https://webkit.org/blog/6784/new-video-policies-for-ios/) ·
+[WebKit Home Screen website data](https://webkit.org/blog/14787/webkit-features-in-safari-17-2/)
+
+The route patch passed controlled Chromium at 1440 × 900 and 390 × 844.
+The member case checked guest sign-in redirect, invite denial and a
+one-use return to the admitted theater. Public discovery links to the
+dedicated host. Cache v12 versions the changed routing scripts so a warm
+client can load them with the new document. The shell independently requires
+the dedicated host for guest entry. Chromium with the old resolver confirmed
+that apex visitors still reach sign-in. The old discovery helper name also
+accepts the exact previous registry URL and leads to the public host.
+
+The Firebase Hosting emulator returned 302 for `/members` and `/members/`,
+kept the `foundup=hpc` query, and left `/members/elsewhere` on the existing
+fallback. The redirect uses a bounded RE2 pattern. The catalog generators
+changed only the two discovery URLs. All eight scoped video records stayed
+byte-identical. The broader catalog suite had the same eight shape and
+metadata failures on `22900559f` and the candidate.
+
+A separate browser-local run used the candidate Mall assets with real
+YouTube on Windows. Chromium 143 desktop and WebKit 26 at 390 CSS px both
+reported player state 1 for `iJuguXpbRR4` and advanced from about 0.26 to
+1.62 seconds. The phone-sized player measured 369.2 × 226.2 CSS px. This
+run qualifies browser playback on the PC. Physical iPhone Safari and
+Home Screen playback remain unverified.
+
+The author and independent reviewer scanned the base and staged Git HTML
+with checksum-verified Gitleaks 8.30.1. Each scan identified the same
+public Clerk frontend declaration at `public/member/index.html:28`,
+rule `generic-api-key`. The complete SDK block is byte-identical. The
+review ledger retains the previous binding and adds one binding for the
+staged blob `90ea6afcd8ac53acb68fc8a66b66da07a17eee8a`. The scanner and its
+scope are unchanged. [Clerk frontend configuration](https://clerk.com/docs/guides/development/clerk-environment-variables)

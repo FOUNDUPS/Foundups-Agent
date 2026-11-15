@@ -226,7 +226,7 @@ acceptance and retention remain separate existing gates. No automatic activation
 
 `reconcile_git_lifecycle(repo_root, synchronize_pc=False, tracked_prs=())`
 returns paginated inventory coverage, current GitHub main and required-check
-evidence, PR dispositions and PC synchronization state. It stores the latest
+evidence, PR dispositions, branch dispositions and PC synchronization state. It stores the latest
 receipt in `foundups-git-lifecycle.json` under the shared Git directory. The
 existing runtime lock serializes callers on that Git directory. Partial source
 coverage and tracked obligations remain explicit.
@@ -243,6 +243,21 @@ merge SHA and current main, merge ancestry in main and a clean PC checkout
 at the verified current SHA. Closed unmerged and unreadable PRs retain a
 follow-up disposition. Repository merge authority and branch retirement
 remain separate from this receipt.
+
+`branch_dispositions` classifies observed GitHub branches read-only against the
+current PR inventory and persisted completed PRs using strict same-repository
+case-insensitive `head_repository` matching and exact `sha == head_sha` tip
+matching. Each item exposes `{ref, sha, protected, pr_number, pr_numbers, stage,
+next_action}` where `pr_numbers` preserves all sorted known same-repository PR
+numbers for `ref`. Stages are `MAIN_BRANCH` (`main` only),
+`PROTECTED_BRANCH` (protected non-`main` refs without an active open PR),
+`BRANCH_OPEN_PR` (open PR at exact `sha`), `BRANCH_OPEN_PR_HEAD_MOVED` (open PR
+on `ref` whose `head_sha != sha`), `BRANCH_MERGED_PR_RETAINED`,
+`BRANCH_CLOSED_PR_UNMERGED`, `BRANCH_PR_OBSERVATION_INCOMPLETE` (when PR
+coverage is incomplete or partial), `BRANCH_PR_HEAD_MISMATCH` (complete PR
+observation with prior same-repo PR history on `ref` at another SHA) and
+`BRANCH_UNTRACKED` (complete PR observation with zero same-repo PRs on `ref`).
+Every retained branch still requires full-diff assessment before retirement.
 
 `run_main_merge_sentinel(repo_root, force=False)` keeps the legacy result
 shape. Enablement and enforcement apply to observation coverage. The legacy
@@ -785,6 +800,16 @@ fidelity alone does not classify an execution as failed. Skill filtering,
 ascending fidelity/descending timestamp ordering and the result limit remain
 unchanged; high-fidelity failures require a correspondingly higher cutoff.
 
+Both `recall_successful_patterns()` and `recall_failure_patterns()` accept an
+optional `parent_version: Optional[str] = None`. When supplied, recall filters
+outcomes in SQL (before `LIMIT`) to rows whose `output_result` JSON contains a
+valid `$._skill_binding` record (`schema_version =
+"wre_skill_execution_binding.v1"` and `loaded_skill_sha256 == parent_version`);
+non-string or blank `parent_version` values fail closed to `[]`.
+`WREMasterOrchestrator.evolve_skill()` binds variation recall and
+`store_variation(..., parent_version=...)` to `loaded_skill_digest(skill_content)`
+so unrelated historical skill versions do not pollute candidate evolution.
+
 `stage_variation_candidate(variation_id)` sets a non-production
 `candidate_ready` state. `promote_variation()` is a fail-closed compatibility
 method until the independent signed promoter is implemented.
@@ -830,8 +855,8 @@ location resolver only; it is not production admission.
 
 `PatternMemory` retains these callable groups:
 
-- outcomes: `store_outcome()`, `recall_successful_patterns()`,
-  `recall_failure_patterns()`, `get_skill_metrics()`;
+- outcomes: `store_outcome()`, `recall_successful_patterns(..., parent_version=None)`,
+  `recall_failure_patterns(..., parent_version=None)`, `get_skill_metrics()`;
 - false-positive records: `record_false_positive()`, `is_false_positive()`,
   `get_false_positive_reason()`;
 - evolution and continuity: `store_variation()`, `record_learning_event()`,

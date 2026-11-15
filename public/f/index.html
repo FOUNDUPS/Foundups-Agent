@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <script src="/member/js/mall-video-projection.js"></script>
+  <script src="/member/js/mall-video-projection.js?v=12"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>FoundUps Mall | Entry</title>
   <meta name="description" content="FoundUp landing in the FoundUps Mall shell.">
@@ -1004,6 +1004,9 @@
         resolvedDiscoveryId = item.foundup_id;
         renderEntry(item);
         populateConciergeContext(item);
+        if (resolvedDiscoveryId === 'hpc' && !subpath && window.location.hash === '#red-dog') {
+          window.entryRedDog.open();
+        }
       })
       .catch(function(err) {
         console.error('Catalog load error:', err);

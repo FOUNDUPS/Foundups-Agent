@@ -1,5 +1,12 @@
 # FoundUps Domain - ModLog
 
+## 2026-11-14 - SoftProto live co-design preview direction
+
+- Preserved 012's conversational design plus desktop/tablet/mobile/full-browser preview intent in [the existing SoftProto architecture](docs/SOFTPROTO_LIVE_CODESIGN_PREVIEW_EXTENSION.md).
+- Reused shared command/guardrail owners, WSP 102 design and WSP 95 skill boundaries; WSP 00 unchanged.
+- Documentation only. No editor runtime, deployment, live swarm or RSI completion claimed.
+
+
 ### 2026-10-30 — Persistent repository-first FoundUp intake rule
 
 **2026-10-31 blockchain alignment:** domain entry points now link WSP26's

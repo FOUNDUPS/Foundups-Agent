@@ -36,6 +36,8 @@
   // Projection state
   var currentProjection = 'default';
   var layoutMode = 'rows';
+  var desktopPosterBrowsing = false;
+  var desktopInlineTile = null;
   var rowOffsets = Object.create(null);
   var escapeBound = false;
   var originalOrder = [];  // Preserve original catalog order
@@ -76,7 +78,13 @@
   var fixedRenderedCount = 0;
   var fixedTailObserver = null;
   var fixedBrowsePosition = null;
+  var scopedTheaterRequested = false;
+  var scopedTheaterState = null;
   var scopedPlaybackPosition = null;
+  var scopedPhoneQuery = '';
+  var scopedPhoneIndices = null;
+  var scopedPhonePlaybackIndices = null;
+  var scopedRenderedIndices = null;
   var SCOPED_PLAYER_HISTORY = 'pfmallScopedPlayer';
   var browseScrollTop = 0;
   var expandSourceIndex = null; // Original tile index for collapse animation
@@ -675,6 +683,8 @@
     originalOrder = mallCatalog.slice();  // Preserve original order
     currentFieldScope = null;  // Reset scope on init
     fixedVideoField = options?.fixedVideoField === true && mallCatalog.length === 1;
+    scopedTheaterRequested = false;
+    scopedTheaterState = null;
     if (fixedVideoField) {
       expandedFoundUp = 0;
       layoutMode = 'grid';
@@ -698,6 +708,8 @@
     }
 
     configureGroups(options);
+    desktopPosterBrowsing = window.matchMedia?.('(min-width: 1024px) and (hover: hover) and (pointer: fine)').matches === true;
+    if (desktopPosterBrowsing && !fixedVideoField && groupDefinitions === null) layoutMode = 'grid';
 
     // Create collapse hint
     if (fixedVideoField) setMotionMode('glide');
@@ -722,7 +734,10 @@
     bindInteractions();
     bindProjectionChips();
     if (fixedVideoField) bindScopedPlayerHistory(mallCatalog[0].foundup_id);
-    else initTileObserver();
+    else {
+      initTileObserver();
+      if (groupDefinitions === null) window.mallVideoProjection?.mountMemberDock?.();
+    }
   }
 
   /** Replace a public result set. This is presentation, not an access-control gate. */
@@ -1237,26 +1252,39 @@
       '</div></article>';
   }
 
-  function renderTiles(appendThrough) {
+  function renderTiles(appendThrough, keepSlot) {
+    if (desktopInlineTile) window.mallVideoPlayer.close({ restore: false });
     var groupedFocus = captureGroupState();
     captureRowOffsets();
     var itemsToRender = expandedFoundUp !== null ? getExpandedVideos() : mallCatalog;
     var append = fixedVideoField && Number.isInteger(appendThrough);
+    if (fixedVideoField && !append) scopedRenderedIndices = scopedVisibleIndices();
+    var indices = fixedVideoField ? scopedRenderedIndices : null;
+    if (indices) itemsToRender = indices.map(function(index) { return itemsToRender[index]; });
     var start = append ? fixedRenderedCount : 0;
     var end = fixedVideoField
       ? Math.min(itemsToRender.length, append ? appendThrough : FIXED_VIDEO_BATCH)
       : itemsToRender.length;
     if (append && end <= start) return;
     var grouped = groupDefinitions !== null && expandedFoundUp === null;
+    var memberPlayer = usesMemberVideoPlayer();
+    var desktopGrid = memberPlayer && desktopPosterBrowsing && layoutMode === 'grid';
     visibleGroups = grouped ? resolveGroups() : [];
     tileField.setAttribute('data-layout', grouped ? 'grouped' : layoutMode);
     tileFieldWrapper.classList.toggle('mall-field-grouped-wrapper', grouped);
     tileFieldWrapper.classList.toggle('browse-rows', !grouped && layoutMode === 'rows');
+    tileFieldWrapper.classList.toggle('desktop-poster-grid', desktopGrid);
 
     if ((!grouped && !itemsToRender.length) || (grouped && !visibleGroups.length)) {
       if (tileObserver) tileObserver.disconnect();
       tileLoadStates = {};
       tileField.classList.remove('expanded-mode');
+      if (indices) {
+        fixedTailObserver?.disconnect();
+        fixedRenderedCount = 0;
+        tileField.innerHTML = '<p class="mall-video-grid-empty" role="status">No videos match your search.</p>';
+        return;
+      }
       tileField.innerHTML = '<div class="mall-tile-field-empty"><span class="mall-tile-field-empty-icon">&#x1F6D2;</span><span>No results match these filters</span></div>';
       if (grouped) restoreGroupState(groupedFocus);
       return;
@@ -1264,6 +1292,7 @@
 
     var tileMarkup = itemsToRender.slice(start, end).map(function(item, index) {
       index += start;
+      if (indices) index = indices[index];
       if (isPropertyListing(item)) return renderPropertyTile(item, index);
       var theme = escapeAttr(item.theme || item.foundup_id || CATEGORY_THEME[item.category] || 'default');
       var readiness = item.launch_readiness || item.status || 'discoverable_only';
@@ -1277,14 +1306,15 @@
       var tileType = isAvatarTile ? 'avatar' : 'video';
 
       // Determine if tile has videos (includes expanded video tiles with video_data)
-      var hasVideos = (item.videos && item.videos.length) || item.video_count || item.video_data;
+      var hasVideos = item.videos?.length || item.video_data || (!memberPlayer && item.video_count);
+      var inlineControls = hasVideos && !fixedVideoField && !memberPlayer;
 
       // Queue count (true_video_count preferred, then video_count, then videos array length)
       var queueCount = item.true_video_count || item.video_count || (item.videos ? item.videos.length : 0);
       var queueBadge = queueCount > 0 ? '<span class="mall-tile-queue-count">' + queueCount + ' videos</span>' : '';
 
       // Play indicator — video tiles only
-      var playIndicator = hasVideos && !fixedVideoField ? '<div class="mall-tile-play-indicator"></div>' : '';
+      var playIndicator = inlineControls ? '<div class="mall-tile-play-indicator"></div>' : '';
 
       // Corner expand button for explicit fullscreen entry — video tiles only
       var expandIcon = fixedVideoField
@@ -1294,19 +1324,20 @@
 
       // Enter FoundUp button (bottom-left, visible during preview) — video tiles only
       // Uses stable foundup_id for WSP 104 canonical routing
-      var enterFoundupBtn = hasVideos && !fixedVideoField ? '<button class="mall-tile-enter" aria-label="Enter FoundUp" title="Enter FoundUp"><svg viewBox="0 0 24 24"><path d="M15 3h6v6M14 10l6.1-6.1M9 21H3v-6M10 14l-6.1 6.1"/></svg></button>' : '';
+      var enterFoundupBtn = inlineControls ? '<button class="mall-tile-enter" aria-label="Enter FoundUp" title="Enter FoundUp"><svg viewBox="0 0 24 24"><path d="M15 3h6v6M14 10l6.1-6.1M9 21H3v-6M10 14l-6.1 6.1"/></svg></button>' : '';
 
       // Inline preview container (YouTube iframe or HTML5 video goes here) — video tiles only
-      var previewContainer = hasVideos && !fixedVideoField ? '<div class="mall-tile-preview"><div class="mall-tile-preview-stage"></div></div>' : '';
+      var previewContainer = inlineControls ? '<div class="mall-tile-preview"><div class="mall-tile-preview-stage"></div></div>' : '';
 
       // Speaker button for mute/unmute (top-left, video-backed only)
       var speakerSvg = '<svg viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
-      var audioBtn = hasVideos && !fixedVideoField ? '<button class="mall-tile-audio" aria-label="Start muted preview" title="Start muted preview">' + speakerSvg + '</button>' : '';
+      var audioBtn = inlineControls ? '<button class="mall-tile-audio" aria-label="Start muted preview" title="Start muted preview">' + speakerSvg + '</button>' : '';
 
       // Non-video source type action badge
       var sourceTypeActions = {
         'github_repo': 'View Repo',
         'external_app': 'Open App',
+        'internal_app': 'Open App',
         'internal_service': 'Open Service'
       };
       var sourceAction = !hasVideos && item.source_type && sourceTypeActions[item.source_type];
@@ -1377,6 +1408,11 @@
         });
       });
       restoreRowOffsets(rowOffsets);
+    } else if (keepSlot) {
+      Array.from(tileField.children).forEach(function(child) {
+        if (child !== keepSlot) child.remove();
+      });
+      keepSlot.insertAdjacentHTML('beforebegin', tileMarkup.join(''));
     } else {
       tileField.innerHTML = tileMarkup.join('');
     }
@@ -1456,27 +1492,43 @@
     return state;
   }
 
+  function rememberTheater() {
+    var player = window.mallVideoPlayer;
+    if (!player?.isTheater?.()) return;
+    scopedTheaterState = {
+      videoId: mallCatalog[0].videos[player.getCurrentIndex()].video_id,
+      query: player.getQueueQuery()
+    };
+  }
+
   function getVideoGridState() {
-    return fixedVideoField ? scopedPlaybackPosition || captureFixedPosition() : null;
+    if (!fixedVideoField) return null;
+    rememberTheater();
+    var position = scopedPlaybackPosition || captureFixedPosition();
+    if (!position) return null;
+    if (scopedTheaterState) position = { ...position, theater: scopedTheaterState };
+    return scopedPhoneQuery ? { ...position, phoneQuery: scopedPhoneQuery } : position;
   }
 
   function restoreVideoGridState(state) {
     if (!fixedVideoField || !state || !tileFieldWrapper) return false;
+    if (state.theater) scopedTheaterState = state.theater;
+    if (typeof state.phoneQuery === 'string' && state.phoneQuery !== scopedPhoneQuery) {
+      updateScopedPhoneQuery(state.phoneQuery);
+      syncScopedTiles();
+    }
     var queue = mallCatalog[0].videos || [];
     var index = state.anchorVideoId ? queue.findIndex(function(video) {
       return video.video_id === state.anchorVideoId;
     }) : -1;
-    if (index >= fixedRenderedCount) {
-      renderTiles(Math.ceil((index + 1) / FIXED_VIDEO_BATCH) * FIXED_VIDEO_BATCH);
-    }
-    var tile = getTileElement(index);
+    var tile = getScopedTile(index);
     var targetTop = state.scrollTop;
     if (tile) {
       var rect = tile.getBoundingClientRect();
       var offset = Math.max(1 - rect.height, Math.min(state.anchorOffset, tileFieldWrapper.clientHeight - 1));
       targetTop = tileFieldWrapper.scrollTop + rect.top - tileFieldWrapper.getBoundingClientRect().top - offset;
     }
-    while (fixedRenderedCount < queue.length &&
+    while (fixedRenderedCount < scopedVisibleCount() &&
         targetTop > tileFieldWrapper.scrollHeight - tileFieldWrapper.clientHeight) {
       renderTiles(fixedRenderedCount + FIXED_VIDEO_BATCH);
     }
@@ -1484,6 +1536,47 @@
     tileFieldWrapper.scrollLeft = 0;
     fixedBrowsePosition = captureFixedPosition();
     return true;
+  }
+
+  function scopedVisibleCount() {
+    return scopedRenderedIndices?.length ?? mallCatalog[0].videos.length;
+  }
+
+  function scopedVisibleIndices() {
+    return scopedTheaterRequested ? null : scopedPhonePlaybackIndices || scopedPhoneIndices;
+  }
+
+  function matchesScopedVideo(video, query) {
+    return matchesCatalogQuery({ creator: video.source_label, videos: [video] }, query);
+  }
+
+  function updateScopedPhoneQuery(query) {
+    scopedPhoneQuery = query.trim().slice(0, 300);
+    scopedPhoneIndices = scopedPhoneQuery ? [] : null;
+    scopedPhonePlaybackIndices = null;
+    if (scopedPhoneIndices) {
+      mallCatalog[0].videos.forEach(function(video, index) {
+        if (matchesScopedVideo(video, scopedPhoneQuery)) scopedPhoneIndices.push(index);
+      });
+    }
+  }
+
+  function replaceScopedTiles() {
+    renderTiles(undefined, tileField.querySelector('.mall-inline-player-slot'));
+    bindInteractions();
+  }
+
+  function syncScopedTiles() {
+    if (scopedRenderedIndices !== scopedVisibleIndices()) replaceScopedTiles();
+  }
+
+  function setScopedPhoneQuery(query) {
+    if (!fixedVideoField || scopedTheaterRequested || typeof query !== 'string') return;
+    window.mallVideoPlayer.close();
+    updateScopedPhoneQuery(query);
+    replaceScopedTiles();
+    tileFieldWrapper.scrollTop = 0;
+    fixedBrowsePosition = captureFixedPosition();
   }
 
   /**
@@ -1519,7 +1612,7 @@
     var tiles = batch || tileField.querySelectorAll('.mall-tile');
 
     tiles.forEach(function(tile) {
-      // Touch/click handling: tap = lane autoplay (no double-tap entry)
+      // Tap selects playback or quick view according to the active layout.
       // FoundUp entry is explicit via fullscreen "Enter FoundUp" button
       tile.addEventListener('click', function(e) {
         // Ignore tap if guard is active (just finished dragging)
@@ -1528,15 +1621,14 @@
 
         var index = Number(tile.dataset.index || 0);
         if (groupDefinitions !== null) rememberActiveTile(tile);
-        // Single tap: start/toggle lane autoplay
         togglePlay(index);
       });
 
       // Keyboard support
-      // Space = lane autoplay, Enter = expand to fullscreen (where Enter FoundUp lives)
       tile.addEventListener('keydown', function(e) {
         var index = Number(tile.dataset.index || 0);
-        if (fixedVideoField && e.target !== tile) return;
+        var memberPlayer = usesMemberVideoPlayer();
+        if ((fixedVideoField || memberPlayer) && e.target !== tile) return;
         if (groupDefinitions !== null && tileField.closest('[inert]')) return;
         if (groupDefinitions !== null && /^Arrow(Left|Right|Up|Down)$/.test(e.key)) {
           e.preventDefault();
@@ -1546,8 +1638,8 @@
           togglePlay(index);
         } else if (e.key === 'Enter') {
           e.preventDefault();
-          // Open fullscreen context (Enter FoundUp available there)
-          if (fixedVideoField) togglePlay(index);
+          // Match the pointer path in the shared video presentations.
+          if (fixedVideoField || memberPlayer) togglePlay(index);
           else openFullscreenFromTile(index);
         }
       });
@@ -1653,10 +1745,13 @@
     });
   }
 
+  function usesMemberVideoPlayer() {
+    return !fixedVideoField && groupDefinitions === null &&
+      typeof window.mallVideoPlayer?.openDesktopVideo === 'function';
+  }
+
   /**
-   * Toggle play/pause for a tile
-   * In Mall mode: starts lane autoplay through the FoundUp's videos[] queue
-   * In expanded mode: plays the specific video
+   * Activate a tile using the current field's playback or quick-view path.
    * @param {number} index - Tile index
    */
   function togglePlay(index) {
@@ -1664,7 +1759,6 @@
       openScopedVideo(index, false);
       return;
     }
-    var tiles = tileField.querySelectorAll('.mall-tile');
     var targetTile = getTileElement(index);
 
     // Immediate visual feedback: tap pulse
@@ -1687,14 +1781,21 @@
       }
       return;
     }
-    var hasVideos = item && ((item.videos && item.videos.length) || item.video_count || item.video_data);
+    var memberPlayer = usesMemberVideoPlayer();
+    var hasVideos = item && (item.videos?.length || item.video_data || (!memberPlayer && item.video_count));
 
     // Non-video tiles: open quick-view instead of trying inline preview
     if (!hasVideos) {
+      if (desktopInlineTile) window.mallVideoPlayer.close();
       var foundupId = item && (item.foundup_id || item.id);
       if (foundupId && window.mallPlanes && typeof window.mallPlanes.openFoundUpById === 'function') {
         window.mallPlanes.openFoundUpById(foundupId);
       }
+      return;
+    }
+
+    if (memberPlayer) {
+      openDesktopVideo(index, false);
       return;
     }
 
@@ -1714,49 +1815,128 @@
     }
   }
 
-  /**
-   * Open fullscreen player from a tile interaction.
-   * In Mall mode: opens the FoundUp's video queue starting at first video.
-   * In expanded mode: opens at the specific video index.
-   * @param {number} index - Tile index
-   */
+  function getScopedTile(index) {
+    var rank = scopedRenderedIndices ? scopedRenderedIndices.indexOf(index) : index;
+    if (rank < 0) return null;
+    if (rank >= fixedRenderedCount) {
+      renderTiles(Math.ceil((rank + 1) / FIXED_VIDEO_BATCH) * FIXED_VIDEO_BATCH);
+    }
+    return getTileElement(index);
+  }
+
+  function replaceScopedTile(slot, tile) {
+    var indices = scopedRenderedIndices;
+    var index = Number(tile.dataset.index);
+    var rank = indices ? indices.indexOf(index) : index;
+    var firstInRow = rank - rank % FIXED_VIDEO_COLUMNS;
+    var firstTile = getTileElement(indices ? indices[firstInRow] : firstInRow);
+    if (!slot.isConnected) {
+      firstTile.before(slot);
+    } else if (slot.nextElementSibling !== firstTile) {
+      // Move the tiles around the slot so resizing leaves the provider iframe mounted.
+      var tiles = Array.from(tileField.querySelectorAll('.mall-tile'));
+      slot.before(...tiles.slice(0, firstInRow));
+      slot.after(...tiles.slice(firstInRow));
+    }
+    tile.setAttribute('data-video-replaced', '');
+  }
+
+  function setScopedTheater(enabled) {
+    if (!fixedVideoField) return;
+    scopedTheaterRequested = enabled;
+    var player = window.mallVideoPlayer;
+    var lane = mallCatalog[0];
+    // Keep the immersive dialog's inert siblings mounted until it closes.
+    if (document.getElementById('videoPlayerFullscreen')?.getAttribute('aria-modal') === 'true') return;
+    if (!enabled && player.isTheater() && scopedPhoneIndices) {
+      var activeIndex = player.getCurrentIndex();
+      // Keep an out-of-filter desktop selection visible while it is playing.
+      scopedPhonePlaybackIndices = scopedPhoneIndices.includes(activeIndex) ? null : [activeIndex, ...scopedPhoneIndices];
+    }
+    syncScopedTiles();
+    if (enabled) {
+      if (player.isOpen()) {
+        tileField.querySelector('[data-video-replaced]')?.removeAttribute('data-video-replaced');
+        player.setTheater?.(true);
+      } else {
+        var restoredIndex = lane.videos.findIndex(function(video) {
+          return video.video_id === scopedTheaterState?.videoId;
+        });
+        openScopedVideo(Math.max(0, restoredIndex), false);
+      }
+      return;
+    }
+    if (!player.isTheater?.()) return;
+
+    rememberTheater();
+    var slot = tileField.querySelector('.mall-inline-player-slot');
+    var index = player.getCurrentIndex();
+    var tile = getScopedTile(index);
+    replaceScopedTile(slot, tile);
+    player.setTheater(false, tile);
+    if (!scopedPhonePlaybackIndices && scopedPlaybackPosition?.anchorVideoId !== tile.dataset.videoId) {
+      scopedPlaybackPosition = { scrollTop: 0, scrollLeft: 0, anchorVideoId: tile.dataset.videoId, anchorOffset: 0 };
+    }
+    tileField.querySelector('.mall-tile[aria-current]')?.removeAttribute('aria-current');
+    tile.setAttribute('aria-current', 'true');
+    pushScopedPlayerHistory(lane.foundup_id);
+    slot.scrollIntoView({ block: 'nearest' });
+  }
+
+  function pushScopedPlayerHistory(foundupId) {
+    if (window.history.state?.[SCOPED_PLAYER_HISTORY] !== foundupId) {
+      window.history.pushState({ ...window.history.state, [SCOPED_PLAYER_HISTORY]: foundupId }, '');
+    }
+  }
+
   function openScopedVideo(index, immersive) {
     var player = window.mallVideoPlayer;
     var lane = mallCatalog[0];
-    var tile = getTileElement(index);
-    if (!player || !tile || !lane?.videos?.[index]) return;
+    if (!player || !lane?.videos?.[index]) return;
+    var tile = getScopedTile(index);
+    if (!tile) return;
     if (player.isOpen() && player.getFoundUpId() === lane.foundup_id && player.getCurrentIndex() === index) {
       if (immersive) player.expandInline();
       return;
     }
     player.close({ restore: false });
-    var position = captureFixedPosition(tile);
-    scopedPlaybackPosition = position;
-    if (window.history.state?.[SCOPED_PLAYER_HISTORY] !== lane.foundup_id) {
-      window.history.pushState({ ...window.history.state, [SCOPED_PLAYER_HISTORY]: lane.foundup_id }, '');
-    }
+    syncScopedTiles();
+    tile = getScopedTile(index);
+    if (!tile) return;
+    var theater = scopedTheaterRequested && !immersive;
+    var autoplay = theater || canAutoplayFromTile(tile);
+    scopedPlaybackPosition = captureFixedPosition(theater ? null : tile);
+    if (!theater) pushScopedPlayerHistory(lane.foundup_id);
     var slot = null;
     if (!immersive) {
       slot = document.createElement('div');
       slot.className = 'mall-inline-player-slot';
-      var lastInRow = Math.min(fixedRenderedCount - 1,
-        index + FIXED_VIDEO_COLUMNS - 1 - index % FIXED_VIDEO_COLUMNS);
-      getTileElement(lastInRow).after(slot);
+      if (theater) tileField.prepend(slot);
+      else replaceScopedTile(slot, tile);
     }
-    var thumbnail = tile.getBoundingClientRect();
     tile.setAttribute('aria-current', 'true');
     player.open(lane.foundup_id, lane.videos, index, {
       inlineMount: slot,
       returnTile: tile,
-      // YouTube thumbnail activation requires 120 × 70 CSS pixels.
-      autoplay: thumbnail.width >= 120 && thumbnail.height >= 70,
+      theater: theater,
+      query: scopedTheaterState?.query,
+      queueQuery: scopedPhoneQuery,
+      matchesQuery: matchesScopedVideo,
+      autoplay: autoplay,
       onClose: function(restore) {
         slot?.remove();
-        tile.removeAttribute('aria-current');
+        tileField.querySelector('[data-video-replaced]')?.removeAttribute('data-video-replaced');
+        tileField.querySelector('.mall-tile[aria-current]')?.removeAttribute('aria-current');
+        var position = scopedPlaybackPosition;
         scopedPlaybackPosition = null;
+        scopedPhonePlaybackIndices = null;
         if (restore) {
+          syncScopedTiles();
           restoreVideoGridState(position);
           if (window.history.state?.[SCOPED_PLAYER_HISTORY] === lane.foundup_id) window.history.back();
+          if (scopedTheaterRequested) queueMicrotask(function() {
+            if (scopedTheaterRequested && !player.isOpen()) openScopedVideo(index, false);
+          });
         }
       }
     });
@@ -1771,7 +1951,8 @@
     }
     window.addEventListener('popstate', function() {
       if (window.history.state?.[SCOPED_PLAYER_HISTORY] !== foundupId &&
-          window.mallVideoPlayer?.getFoundUpId() === foundupId) {
+          window.mallVideoPlayer?.getFoundUpId() === foundupId &&
+          !window.mallVideoPlayer.isTheater?.()) {
         window.mallVideoPlayer.close();
       }
     });
@@ -1788,6 +1969,10 @@
       return;
     }
     if (!window.mallVideoPlayer) return;
+    if (usesMemberVideoPlayer()) {
+      openDesktopVideo(index, true);
+      return;
+    }
 
     if (expandedFoundUp !== null) {
       // Expanded mode: tiles are individual videos from one FoundUp
@@ -1803,6 +1988,68 @@
       var queue = item.videos || [];
       if (!queue.length) return; // No videos to play
       window.mallVideoPlayer.open(foundupId, queue, 0);
+    }
+  }
+
+  function openDesktopVideo(index, immersive) {
+    var player = window.mallVideoPlayer;
+    var tile = getTileElement(index);
+    var lane = mallCatalog[expandedFoundUp ?? index];
+    var videoIndex = expandedFoundUp === null ? 0 : index;
+    if (!tile || !lane?.videos?.[videoIndex]) return;
+    if (desktopInlineTile === tile) {
+      if (immersive) player.expandInline();
+      return;
+    }
+    stopInlinePreview();
+    player.close({ restore: false });
+    var tileOffset = tile.getBoundingClientRect().top - tileFieldWrapper.getBoundingClientRect().top;
+    var slot = null;
+    player.openDesktopVideo(lane.foundup_id || lane.id, lane.videos, videoIndex, {
+      returnFocusTo: tile,
+      matchesQuery: matchesScopedVideo,
+      queueQuery: currentFieldScope?.type === 'query' ? (currentFieldScope.query || '') : '',
+      autoplay: canAutoplayFromTile(tile),
+      muted: !immersive,
+      inlineMount: immersive ? null : function() {
+        slot = document.createElement('div');
+        slot.className = 'mall-member-inline-slot';
+        if (tile.parentElement === tileField) sizeMemberVideoSlot(slot);
+        tile.before(slot);
+        tile.hidden = true;
+        tile.setAttribute('aria-current', 'true');
+        desktopInlineTile = tile;
+        tileFieldWrapper.classList.add('member-inline-open');
+        return slot;
+      },
+      alignInline: function() {
+        if (!slot || slot.parentElement !== tileField) return;
+        var offset = slot.getBoundingClientRect().top - tileFieldWrapper.getBoundingClientRect().top;
+        var anchor = Math.min(Math.max(0, tileOffset), Math.max(0, tileFieldWrapper.clientHeight - slot.offsetHeight));
+        tileFieldWrapper.scrollTo({ top: tileFieldWrapper.scrollTop + offset - anchor, behavior: 'instant' });
+      },
+      onClose: function() {
+        if (!slot) return;
+        slot.remove();
+        tile.hidden = false;
+        tile.removeAttribute('aria-current');
+        tileFieldWrapper.classList.remove('member-inline-open');
+        desktopInlineTile = null;
+      }
+    });
+  }
+
+  function canAutoplayFromTile(tile) {
+    // YouTube requires at least 120 × 70 CSS pixels for an autoplay trigger.
+    var rect = tile?.getBoundingClientRect();
+    return !!rect && rect.width >= 120 && rect.height >= 70;
+  }
+
+  function sizeMemberVideoSlot(slot) {
+    var columns = window.getComputedStyle(tileField).gridTemplateColumns.split(' ');
+    var width = parseFloat(columns[0]) || 1;
+    if (columns.length > 1) {
+      slot.style.setProperty('--member-inline-columns', Math.min(columns.length, Math.ceil(360 / width)));
     }
   }
 
@@ -2302,6 +2549,9 @@
       return;
     }
     autoSelectDensity();
+    if (desktopInlineTile?.parentElement === tileField) {
+      sizeMemberVideoSlot(desktopInlineTile.previousElementSibling);
+    }
   }
 
   /**
@@ -2486,24 +2736,74 @@
    * Update projection chip active states
    */
   function updateProjectionChips() {
-    var chips = document.querySelectorAll('.mall-projection-chip');
+    var activeGroup = currentFieldScope && currentFieldScope.type === 'source_group'
+      ? currentFieldScope.query : null;
+    var chips = document.querySelectorAll('.mall-projection-chip[data-projection]');
     chips.forEach(function(chip) {
       var proj = chip.dataset.projection;
-      chip.classList.toggle('active', proj === currentProjection);
+      var active = activeGroup ? false : (proj === currentProjection);
+      chip.classList.toggle('active', active);
+    });
+    var groupChips = document.querySelectorAll('.mall-projection-chip[data-scope-group]');
+    groupChips.forEach(function(chip) {
+      chip.classList.toggle('active', chip.dataset.scopeGroup === activeGroup);
     });
   }
 
   /**
-   * Bind projection chip click handlers
+   * Bind projection chip click handlers and progressive Build v18 discovery pills
    */
   function bindProjectionChips() {
-    var chips = document.querySelectorAll('.mall-projection-chip');
+    var nav = document.getElementById('mallProjection');
+    if (nav && !fixedVideoField && groupDefinitions === null && !nav.dataset.discoveryFiltersBound) {
+      nav.dataset.discoveryFiltersBound = '1';
+      [
+        { group: 'videos', label: 'Videos' },
+        { group: 'apps', label: 'Apps' }
+      ].forEach(function(spec) {
+        if (nav.querySelector('[data-scope-group="' + spec.group + '"]')) return;
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'mall-projection-chip mall-filter-chip';
+        btn.dataset.scopeGroup = spec.group;
+        btn.textContent = spec.label;
+        btn.addEventListener('click', function() {
+          if (currentFieldScope && currentFieldScope.type === 'source_group' &&
+              currentFieldScope.query === spec.group) {
+            clearFieldScope();
+          } else {
+            filterBySourceGroup(spec.group);
+          }
+          window.mallStateRestore?.save?.();
+        });
+        nav.appendChild(btn);
+      });
+      if (!nav.querySelector('[data-hpc-shortcut]')) {
+        var hpcLink = document.createElement('a');
+        hpcLink.className = 'mall-projection-chip mall-filter-chip';
+        hpcLink.href = '/member/?foundup=hpc';
+        hpcLink.dataset.hpcShortcut = '1';
+        hpcLink.textContent = 'HPC';
+        hpcLink.addEventListener('click', function() {
+          window.mallStateRestore?.save?.();
+        });
+        nav.appendChild(hpcLink);
+      }
+    }
+    var chips = document.querySelectorAll('.mall-projection-chip[data-projection]');
     chips.forEach(function(chip) {
+      if (chip.dataset.projectionBound) return;
+      chip.dataset.projectionBound = '1';
       chip.addEventListener('click', function() {
         var proj = chip.dataset.projection || 'default';
-        setProjection(proj);
+        if (proj === 'default' && currentFieldScope !== null) {
+          clearFieldScope();
+        } else {
+          setProjection(proj);
+        }
       });
     });
+    updateProjectionChips();
   }
 
   // ========== Field Scope System ==========
@@ -2519,6 +2819,21 @@
     // Legacy string support
     if (scope === 'personal') {
       scope = { type: 'personal' };
+    }
+
+    if (scope.type === 'source_group' && scope.query) {
+      var groupKey = String(scope.query).toLowerCase();
+      if (groupKey === 'videos') {
+        return sortScopedResults(fullCatalog.filter(function(item) {
+          return ((item.videos && item.videos.length) || item.video_count || 0) > 0;
+        }));
+      }
+      if (groupKey === 'apps') {
+        return sortScopedResults(fullCatalog.filter(function(item) {
+          return ['github_repo', 'external_app', 'internal_app', 'internal_service'].indexOf(item.source_type) !== -1;
+        }));
+      }
+      return fullCatalog.slice();
     }
 
     if (scope.type === 'query' && typeof scope.query === 'string') {
@@ -2656,6 +2971,18 @@
   }
 
   /**
+   * Filter by content source group ('videos' | 'apps')
+   * @param {string} group - Source group identifier
+   */
+  function filterBySourceGroup(group) {
+    if (!group || !String(group).trim()) {
+      clearFieldScope();
+      return;
+    }
+    setFieldScope({ type: 'source_group', query: String(group).trim().toLowerCase() });
+  }
+
+  /**
    * Clear field scope (show all lanes)
    */
   function clearFieldScope() {
@@ -2694,6 +3021,10 @@
     getGeographicState: getGeographicState,
     restoreGeographicState: restoreGeographicState,
     getVideoGridState: getVideoGridState,
+    setScopedTheater: setScopedTheater,
+    getScopedPhoneQuery: function() { return scopedPhoneQuery; },
+    setScopedPhoneQuery: setScopedPhoneQuery,
+    matchesVideoQuery: matchesScopedVideo,
     restoreVideoGridState: restoreVideoGridState,
     enterFoundUp: enterFoundUp,
     navigateToFoundUp: navigateToFoundUp,
@@ -2745,6 +3076,7 @@
     searchByCreator: searchByCreator,
     filterByCategory: filterByCategory,
     filterByTag: filterByTag,
+    filterBySourceGroup: filterBySourceGroup,
 
     // Intelligent Grid Loading (PFM11B)
     getTileLoadState: getTileLoadState,

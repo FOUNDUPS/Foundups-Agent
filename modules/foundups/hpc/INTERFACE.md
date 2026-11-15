@@ -4,14 +4,15 @@
 
 | Surface | Contract |
 | --- | --- |
-| `/f/hpc` | WSP 104 public discovery landing, generated from the FoundUp registry |
-| `/member/?foundup=hpc` | Public, fixed video projection in the member shell |
-| `hpc.foundups.com/` | Dedicated host selects the same projection at `/member/`. Hosting, DNS and TLS are release gates. |
+| `/f/hpc` | WSP 104 public discovery landing, generated from the FoundUp registry. `#red-dog` opens its existing public Red Dog briefing. |
+| `foundups.com/member/?foundup=hpc` | Same collection for admitted members. The existing sign-in, invitation and username checks run before the projection mounts. |
+| `hpc.foundups.com/` | Public entrance. The dedicated host selects the guest projection at `/member/`. |
 | `/f/hpc/app` | Existing protected tenant handoff. HPC declares no tenant bundle, account grant or agent routes. |
-| Voice Your Opinion | The shared bottom anchor opens Vote's manual [Contact Congress](https://vote.mtrout.com/contact) in the same tab. Back restores the video anchor and offset. |
-| FoundUps dog logo | The shared header link opens the master Mall at `https://foundups.com/member/`. Ordinary member admission still applies there. |
+| Voice Your Opinion | The phone header's right action opens Vote's manual [Contact Congress](https://vote.mtrout.com/contact). Desktop keeps the action in the bottom anchor. Back restores the video anchor and offset. |
+| Hasan portrait | The header portrait opens the master Mall at `https://foundups.com/member/`. Ordinary member admission still applies there. |
+| HPC Home Screen app | `hpc.webmanifest` registers **Hasan Piker Coalition**, short name **HPC**, with a scoped launch URL and standalone display. The supplied satirical artwork provides the portrait and 180 px Apple touch icon. |
 
-The registry's `parent_foundup_id: voteballots` expresses the editorial and civic relationship. It delegates no access, ownership, wallet, token or execution authority. HPC uses the manifest namespace `idb_hpc`. The shared Mall state owner stores the tab-local video anchor and offset. Shared player saves and history remain browser-local and keyed by FoundUp and video. Public browsing has no sign-in, Red Dog or search gate. Server-side member checks retain authority.
+The registry's `parent_foundup_id: voteballots` expresses the editorial and civic relationship. It delegates no access, ownership, wallet, token or execution authority. HPC uses the FoundUp manifest namespace `idb_hpc`. The shared Mall state owner stores the tab-local video anchor, offset and scoped query. Shared player saves and history remain browser-local and keyed by FoundUp and video. The dedicated host is available to guests. The same-tab member sign-in return stores the registered scope and is consumed after admission. Server-side capability checks retain authority.
 
 ## Media contract
 
@@ -34,8 +35,52 @@ The [shared incident](../pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md#source-reconcilia
 
 ## Interaction contract
 
-The global Mall tap starts or toggles lane playback, and pinch-out on a channel expands its video field. The scoped field displays `#SchumerOUT` in three portrait columns with vertical batches and an end state. Tap or Enter opens a full-width player row in the Mall. The corner button or pinch-out opens immersive playback; expanding an already playing clip retains its iframe. Close, Escape, browser Back or pinch-in on the surrounding immersive surface restores the originating tile and position. There is no separate double-tap action. YouTube owns touches inside its iframe. The provider viewport is at least 200 × 200; a thumbnail below 120 × 70 selects the player and offers an explicit Play video action. [YouTube embed requirements](https://developers.google.com/youtube/terms/required-minimum-functionality)
+The global Mall tap starts or toggles lane playback, and pinch-out on a channel
+expands its video field. The HPC projection uses the same player and catalog in
+two layouts. On a wide desktop with a fine pointer and hover, the centered
+player opens above HPC search and a horizontal thumbnail strip. The first
+clip requests muted autoplay. The shared queue advances on a provider end
+event and offers Play when the browser blocks startup. The compact search bar
+is centered under the video. Typing filters the queue while the clip plays.
+Enter or the search button starts the next match, with the first match used
+when the current clip is outside the results or last.
 
-The recovery candidate uses cache `pfmall-member-v7`; the observed deployed baseline uses v6. Real desktop Chromium playback and mocked recovery tests are recorded in the shared incident. Physical iPhone standalone remains unverified.
+The touch grid displays #SchumerOUT in three portrait columns with vertical
+batches and an end state. Tap or Enter replaces the selected thumbnail with
+the shared player across its original row. Neighboring tiles reflow. The
+corner button or pinch-out on a thumbnail or the active player's toolbar
+opens immersive playback with the same iframe. Close, Escape, Back or pinch-in
+on the surrounding chrome restores the tile and focus. YouTube owns touches
+inside the iframe. The provider viewport is at least 200 × 200. A thumbnail
+below 120 × 70 selects the player and offers explicit Play. [YouTube embed requirements](https://developers.google.com/youtube/terms/required-minimum-functionality).
+
+The header shows the loaded Mall build beside #SchumerOUT. The same number
+appears in **More options**.
+
+The shared floating phone dock puts **More options** at the left, scoped
+search and its dictation microphone in the middle, and **Red Dog** at the
+right. Longer queries expand into an editable field above those controls. Search
+submits against the loaded collection. Its results keep the source IDs and
+the same in-place player. The microphone fills the field when the browser has
+local recognition available. Otherwise it focuses the field for keyboard
+dictation. The visitor submits the resulting query. **More options** opens
+Home, the independent-site disclosure, and device-model availability. The
+Browser AI shows its unavailable state until an admitted model is connected.
+Tap Red Dog to open the public read-only briefing or hold for local search
+dictation on supported devices. Release the hold or tap the square **Stop**
+in Red Dog's position to finish. The transcript remains editable until submitted.
+
+The expanded viewer keeps the search pill between the video and its
+horizontally scrollable queue. Filtering during playback keeps the active
+iframe and stays within the HPC collection. The scope-specific options and
+public briefing do not grant member or agent access.
+
+Viewport changes keep the active iframe and selected video. If a desktop
+selection falls outside the phone filter, its tile appears alongside the
+filtered results while the player is open. Tab-local state retains the tile
+anchor, theater selection and queries for return. Physical iPhone Home Screen
+install, keyboard dictation and standalone handoffs require device verification.
+An earlier Mall shortcut can be replaced with a fresh install to pick up the
+HPC identity.
 
 The player provides local Save and Share. HPC shares the original Short URL. A save is a bookmark. The preference selector, verification and valuation have separate roadmap gates.

@@ -1,5 +1,14 @@
 # foundups_mcp_bridge Tests
 
+## PC Git inventory
+
+The HTTP compatibility suite covers the opt-in tool set, required bearer
+authentication, propagation into the owned child and a request-bound readiness
+receipt. WRE's `test_git_lifecycle_inventory.py` covers Git reads against real
+temporary worktrees, with the GitHub response supplied as a fixture.
+`test_git_inventory_oauth.py` exercises exact audience discovery, the scoped
+single-tool profile, and denial of mismatched caller or token claims.
+
 ## Private draft sender
 
 The focused `test_draft_*.py` suites use the separate requirements and synthetic

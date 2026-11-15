@@ -1,5 +1,65 @@
 # Member Area Module Change Log
 
+## 2026-11-15 · Build v18 discovery pills, internal_app action routing, and concierge alignment
+
+- **Discovery Filter Pills (`js/mall-tile-field.js`, `css/mall-tile-field.css`)**: Added dynamic `Videos`, `Apps`, and `HPC` (`/member/?foundup=hpc`) discovery pills inside `#mallProjection` without modifying `public/member/index.html`, backed by `filterBySourceGroup('videos' | 'apps')`, `localStorage` `fieldScope` persistence via `mall-state-restore.js`, and compact <=380px chip layout rules preserving 44px touch height with zero horizontal overflow.
+- **`internal_app` Source Action (`js/mall-planes.js`, `js/mall-tile-field.js`)**: Added `internal_app` (`Open App`) to `NON_VIDEO_SOURCE_TYPES`, `SOURCE_TYPE_CTA`, and `sourceTypeActions` with `routing_prefix` / `entry_url` / `external_url` resolution so internal app FoundUps such as GotJunk render an honest primary `Open App` CTA in quick-view.
+- **Inline Queue Continuity (`js/mall-video-player.js`, `js/mall-tile-field.js`)**: Preserved docked `queueQuery` across inline/desktop handoff, read docked search input in `getQueueQuery()`, and allowed `ended` auto-advance in desktop member inline slots (`returnScroll`).
+- **Red Dog Concierge Categories (`js/account-concierge.js`)**: Added live catalog categories (`media`, `ai-education`, `ai-research`, `thought-leadership`) and wired `setCategory()` to `filterByCategory()` while preserving legacy sort-projection compatibility.
+- **Shell Generation (`member-sw.js`, `js/mall-video-projection.js`)**: Advanced cache/build identifier from `pfmall-member-v17` / `v17` to `pfmall-member-v18` / `v18`.
+
+## 2026-11-14 · Visible Mall build
+
+The scoped video header and shared options show the loaded build. Build
+v17 refreshes the shell cache with the same generation. The hosted v7
+comparison put the first Short below its row. The v16 preview placed the
+player at the start of the original row, in line with the current contract.
+
+## 2026-11-14 · Shared search dock and transcript editing
+
+The scoped grid, invited grid and expanded player use the same plus menu,
+editable search and foreground dictation controls. The far-right action
+shows the square Stop during capture. A longer transcript opens above the
+controls and stays available to edit. The queue and provider keep their
+positions while the dock grows. Cache v16 refreshes the shared assets.
+
+## 2026-11-14 · Phone WikiTube viewer and dictation
+
+Ordinary member phone cards use the existing selected-card player. The
+expanded viewer reserves space for a persistent search dock and horizontal
+queue on phone and desktop. The plus button accepts tap and upward swipe.
+The mic or Red Dog hold starts foreground local search dictation where
+available, and the square finishes it. Worker v15 refreshes the shell.
+WSP 22 and 97 apply.
+
+## 2026-11-14 · WikiTube controls and member entry
+
+Added the shared member search dock and reuse of local dictation. The full
+player filters its existing queue. Desktop posters request muted playback
+in the selected slot and keep a separate full-view action. The Play hostname
+uses the same invited shell. Worker v14 refreshes the member assets.
+
+## 2026-11-13 · Invited desktop poster grid
+
+Fresh wide fine-pointer entry uses the existing grid. Click and keyboard
+selection open the shared full player for video posters and quick view for
+other cards. Escape closes the player before collapsing the field. The
+member worker installs these assets in v13. WSP 22, 97 and 104 apply.
+
+## 2026-11-13 · Public HPC and invited member routes
+
+Guest video entry resolves on the dedicated host. The FoundUps HPC query
+selects the same view after member admission and survives the existing
+sign-in redirect. Cache v12 installs versioned routing assets together.
+WSP 22, 97 and 104 apply.
+
+## 2026-11-12 · Phone video replaces the selected tile
+
+The shared player takes the selected tile's original row and hides its
+thumbnail until close. The existing iframe survives expansion and responsive
+transitions. Cache v11 refreshes the field and player assets. YouTube 101 and
+150 report an embed refusal. WSP 22, 97 and 104 apply.
+
 ## 2026-11-11 · In-context playback recovery candidate
 
 Reuse the shared player for scoped inline playback and immersive expansion,

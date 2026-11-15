@@ -1,6 +1,6 @@
 # YUMORI.me / eSingularity — Grants, Subsidies, and PPP Support Registry
 
-Last verified: 2026-11-11 JST for F-15 official 2026-11-10 extension of the application deadline to 2026-12-24 23:59 JST; 2026-11-10 JST for F-03 official 2026-11-09 second-call opening, 2026-12-14 12:00 JST deadline and conditional DC rate/cap; 2026-11-09 JST for F-08 official 2026-11-06 third-round allocation result; 2026-11-08 JST for F-16 official 2026-11-06 budget-limit warning / historic two-track coverage; 2026-11-05 JST for P-01 deadline passage and F-15 dated coverage correction; 2026-11-01 JST for F-13 expiry of the officially published October 31 application window (no new extension visible); 2026-10-30 JST for F-12 exact deadline-time clarification; 2026-10-28 JST for F-13/F-14 coverage catch-up; 2026-10-26 targeted checks and other historical entries retain their own verification dates. These catch-up discoveries are not fresh official changes.
+Last verified: 2026-11-14 JST for P-02 new 2026-11-13 MLIT second national PPP/PFI sounding-case registration opening (not a grant), closing 2026-12-04 17:00 JST; 2026-11-11 JST for F-15 official 2026-11-10 extension of the application deadline to 2026-12-24 23:59 JST; 2026-11-10 JST for F-03 official 2026-11-09 second-call opening, 2026-12-14 12:00 JST deadline and conditional DC rate/cap; 2026-11-09 JST for F-08 official 2026-11-06 third-round allocation result; 2026-11-08 JST for F-16 official 2026-11-06 budget-limit warning / historic two-track coverage; 2026-11-05 JST for P-01 deadline passage and F-15 dated coverage correction; 2026-11-01 JST for F-13 expiry of the officially published October 31 application window (no new extension visible); 2026-10-30 JST for F-12 exact deadline-time clarification; 2026-10-28 JST for F-13/F-14 coverage catch-up; 2026-10-26 targeted checks and other historical entries retain their own verification dates. These catch-up discoveries are not fresh official changes.
 
 ## Purpose and truth boundary
 
@@ -330,6 +330,19 @@ Do not book any F-10 subsidy revenue, do not treat the published rates as expect
 - **Unresolved:** actual eligible operator/industry and premise ownership; narrow consent exception; current first-come funding availability; equipment baseline and CO2 proof; detailed formal submission time and documents; contract timing; cost segregation with F-07/F-11/F-14/F-15 and other subsidies. FY2027 successor and terms are **UNANNOUNCED / NOT VERIFIED**.
 - **Primary official sources:** 通常枠 https://www.pref.fukui.lg.jp/doc/chisangi/bosyu/syouene2026.html (last updated 2026-11-06); 原油価格高騰枠 https://www.pref.fukui.lg.jp/doc/chisangi/bosyu/syouene_genyuwaku2026.html (last updated 2026-08-07).
 
+## P-02 — 国土交通省 令和8年度 第2回「サウンディング（官民対話）」案件募集（PPP/PFI support; NOT subsidy）
+
+- Agency: **国土交通省 総合政策局 社会資本整備政策課**, national block-platform sounding program.
+- Official announcement: **2026-11-13**; open for **public-facility managers, local governments and other public bodies** from **2026-11-13 14:00 through 2026-12-04 17:00 JST**. Planned dialogue: **2027-01-28**, via web meeting.
+- Round state: **OPEN — PUBLIC-BODY CASE REGISTRATION**. This is a sounding/market-dialogue opportunity, **not a grant, subsidy, private-investor application, City acceptance of a PPP proposal, or project contract**. Subsidy rate and cap: **not applicable; none published**.
+- Eligible cases: public-sector projects at concept development, project structuring or operator-selection review stage. MLIT may prefer governments with no sounding experience or populations under 200,000, and may limit a body to one case.
+- Submission: an eligible public body must complete **both** the official online application and submission of the current **案件登録様式** from the official MLIT page. Registering only one is not an accepted application. Project selection is subsequent; participation is not guaranteed.
+- YUMORI boundary: **VERIFIED PROGRAM / OPEN ROUND ONLY**. No Fukui City commitment to submit, no YUMORI eligibility, case registration, selection, procurement, concession, grant or award is evidenced. If the City approves, **Sukatto Land Kuzuryu** may be a candidate topic for feasibility/market dialogue about lawful thermal-facility reuse and an integrated heat-reuse/AI-compute PPP; former Hanyu and Shimousaka schools must remain a separate City asset-proposal lane. National sounding is **not** Fukui City's FY2026 財産有効活用民間提案制度 filing.
+- **Unresolved decision:** Will Fukui City, as lawful public-facility manager, choose a sufficiently defined Sukatto PPP/PFI case, designate a responsible department, approve what nonconfidential facts to disclose, and submit the exact current registration materials before December 4 at 17:00 JST? The initiative cannot be filed on behalf of the City without City authority.
+- Official MLIT press release: https://www.mlit.go.jp/report/press/sogo21_hh_000314.html
+- Official MLIT second-session and template page: https://www.mlit.go.jp/sogoseisaku/kanminrenkei/sosei_kanminrenkei_fr1_000175.html
+- Current separate Fukui City FY2026 asset-list source (excludes Sukatto): https://www.city.fukui.lg.jp/sisei/plan/reform/p073300.html
+
 ## P-01 — 福井県 大型データセンター誘致可能性調査業務（フェーズ１） (procurement; NOT subsidy)
 
 - Agency: 福井県エネルギー環境部エネルギー課.
@@ -425,6 +438,11 @@ Grant reimbursement timing, bridging finance and actual award allocation must be
 reconciled with the delivery schedule before a deployment gate can pass.
 
 ## Change log
+
+### 2026-11-14 — P-02 national PPP/PFI sounding case intake opened (MLIT 2026-11-13)
+
+MLIT opened its FY2026 second national block-platform public-private sounding *case registration* for eligible public-facility managers, **2026-11-13 14:00–2026-12-04 17:00 JST**; dialogue is planned for 2027-01-28. This creates a possible **City-sponsored pre-project market dialogue** route for Sukatto distinct from Fukui City's listed-school asset call. No published financial subsidy/rate/cap, application by YUMORI, Fukui City sponsorship, eligibility confirmation, participation decision, contract or award. Exact official online form **and** MLIT case-registration document are required of the public body; no form regenerated or sent. Full P-02 source/constraints above. Other standing grant terms were not advanced.
+
 
 ### 2026-11-11 — F-15 retrofit application deadline extended (official 2026-11-10)
 MOE and appointed administrator SII officially extended F-15 脱炭素ビルリノベ2026 from November 30 (historic MOE 17:00 versus SII 23:59 discrepancy) to **December 24, 2026 at 23:59 JST**. Date/time now corroborated by the November 10 official administrator notice and MOE extension announcement. This affects only the application window, not eligibility or YUMORI funding. Applicant, lawful public-property rights, baseline, equipment scope, procurement timing and cost stacking remain unresolved. Continue to treat ¥1 billion cap as a conditional ceiling, never project revenue. Official: https://bl-renos.jp/r8/news/2026111001.html and https://www.env.go.jp/press/press_05813.html .
