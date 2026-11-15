@@ -3,20 +3,27 @@
 ## Included
 
 - responsive static PWA shell;
-- seven background plates with a locked environment;
+- fourteen responsive background plates: seven phone and seven desktop, each with a locked adult composition and empty center safe zone;
+- seven separate scalable center-poster images carrying the chapter-specific memory imagery;
 - crossfade state machine;
-- live center aperture;
-- seven numbered controls;
-- previous/next, swipe, and keyboard navigation;
+- adult Alice upper-left and Jensen upper-right in every plate;
+- authored seven-step gaze/expression arc tied to the chapter memories;
+- live HTML title with a one-time peel-on-load effect;
+- swipe and tap-edge navigation on phones plus keyboard navigation on desktop;
+- no persistent numbered season selector;
+- double-tap center-card flip with an `Enter`/`Space` accessible equivalent;
+- live HTML prospectus back containing documented-history framing, dramatized question, principal players, and opening/finale pitch only;
+- movie-ticket CTA routed to the existing FoundUps membership/login owner with fail-closed behavior;
+- preservation of the existing Site experience behind the new landing route;
 - offline shell cache with network-first content refresh;
 - reduced-motion support;
-- factual/dramatized status labels.
+- fictionalized-concept disclosure.
 
 ## Excluded
 
-- episode content;
+- detailed episode content and unapproved episode titles beyond the opening and finale placeholders;
 - producer dossiers;
-- scripts and member gating;
+- protected scripts or a new member-gating implementation;
 - research citations in the public interface;
 - analytics, accounts, payments, comments, or database writes;
 - public custom domain and marketing launch;

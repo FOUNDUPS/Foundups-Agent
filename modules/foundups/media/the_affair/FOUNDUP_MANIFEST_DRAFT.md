@@ -10,8 +10,17 @@ type: media_historical_fiction
 status: prototype
 owner: 012_0102_editorial
 presentation:
-  mode: seven_state_living_poster
+  mode: seven_swipeable_season_posters
   mobile_first: true
+  title_effect: peel_on_initial_load
+  visible_season_selector: false
+  layers:
+    responsive_backgrounds: fourteen
+    center_posters: seven
+    live_copy: true
+  center_flip: double_tap_or_keyboard
+  prospectus_back: documented_dramatized_players_opening_finale
+  ticket_cta: existing_foundups_member_login
   public_claims: false
 dependencies:
   mall: existing_pfmall_owner
