@@ -1,3 +1,31 @@
+## 2026-11-15 JST: Recover reusable social/newsletter instruction and source handoffs
+
+Reconcile the four preserved staged files from the isolated
+docs/social-community-newsletter-20261114 lane (base 0be2ae582020eab66b3aa8a1ab2deef802bebfeb)
+against main 28c1bf1f38f4dab3d24918227d68e40604688f9a. The original three tracked
+file blobs still match main; the staged reference is absent there. Preserve the
+PC checkout/index and original patch. Continue as one instruction-only concern,
+not a replacement orchestrator, skill, queue, database or provider executor.
+
+Retain campaign-operator v0.4.0/prototype and the recovered Reddit/Substack
+workflow. Link existing newsletter/ROC, issue-brief, research and video-index
+owners; reuse foundup_id and existing editorial/delivery vocabulary. Develop one
+manuscript collaboratively, then track audience-specific, source-revision-bound
+derivatives with separate approvals and receipts across qualified channels. Private
+manuscripts/source bindings stay outside public Git and social_content_brief.v1.
+Keep facts/commentary/fiction, summaries/transcripts, approval and delivery proof
+distinct. Require independent destination readback and original-action
+reconciliation across message retries. No new publication or production grant.
+
+The recovered lane reports WSP00/strict-tracker completion and a lexical Holo
+bundle with UNKNOWN freshness/index gap at its historical base. This connector
+continuation did not re-execute bootstrap, Holo or Python tests: no execution
+environment is available. Source retrieval, instruction/link validation and
+independent review are recorded separately from hosted exact-head/main checks.
+No platform posts, subscriber imports, account changes or runtime launches.
+WSP 00/11/15/22/50/95/97/99/110; WSP15 C2/I4/D4/Impact4=14/P1 planning estimate,
+not a signed runtime allocation. No runtime or existing test contracts changed.
+
 ## Recover pitch instruction interface navigation — 2026-10-31
 
 Restore the preserved interface entry using main's existing v0.1.3 pitch owner

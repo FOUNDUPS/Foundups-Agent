@@ -1,5 +1,18 @@
 # Social Media Orchestrator
 
+## Community/newsletter coordination — 2026-11-15 JST
+
+The existing [campaign skill](skillz/foundup_campaign_operator/SKILLz.md) includes
+a reusable [Reddit/Substack workflow](skillz/foundup_campaign_operator/references/community-newsletter-workflow.md).
+It reuses the current LinkedIn editorial/ROC and YouTube-index evidence owners.
+Develop one manuscript with 012, then track audience-specific derivatives and
+separate approval/delivery evidence for LinkedIn, X, YouTube, Reddit, Substack
+and other qualified channels. Identity, FoundUp, publication/community and
+authority are per-task inputs,
+not hardcoded personal values. This is instruction groundwork only: provider
+transports, native admission and live publishing remain unqualified. It creates
+no second scheduler or database and does not modify the WSP 97 protocol.
+
 ## Source-backed editorial packages — 2026-10-27
 
 `content_orchestrator.prepare_campaign(brief)` and the existing SOCIAL campaign

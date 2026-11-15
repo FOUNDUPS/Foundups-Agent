@@ -1,3 +1,18 @@
+## Community/newsletter instruction — 2026-11-15
+
+Recovered staged work extends the existing campaign skill with a reusable
+[community/newsletter workflow](skillz/foundup_campaign_operator/references/community-newsletter-workflow.md).
+It links current newsletter/ROC, issue-brief, source-verification and video-index
+owners without hardcoded campaign identities or private Drive pointers. No new
+executor, route, provider account, queue, native admission or cadence is installed.
+
+Next bounded slice: reuse existing content/admission owners for effect-free
+multi-destination preparation, then qualify one transport at a time. Keep the
+current compiler restricted to X/LinkedIn and Reddit/Substack
+DRAFT_OR_HANDOFF_ONLY. Require exact account/revision approval, independent
+destination readback, uncertain-write reconciliation and tested recovery before
+live automation. Instruction review is not runtime or RSI proof.
+
 ## Current content layer — 2026-10-27
 
 Source-backed editorial package compilation is implemented locally through the existing content owner/SOCIAL adapter; no model, scheduler or publication effect. [Contract](docs/CONTENT_CAMPAIGN.md), [Soro audit and ordered remaining work](docs/audits/SORO_SOCIAL_DAE_AUDIT_20261027.md). Qualified voice/research generation, durable admitted scheduling, generic verified publishing/CMS and measured performance feedback remain incomplete. Older phase checkboxes below are historical planning, not current runtime certification.

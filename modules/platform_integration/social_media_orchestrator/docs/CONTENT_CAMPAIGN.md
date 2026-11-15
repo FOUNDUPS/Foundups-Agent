@@ -66,3 +66,12 @@ assert package["publication_ready"] is False
 The [remaining build sequence](audits/SORO_SOCIAL_DAE_AUDIT_20261027.md#remaining-build-sequence-and-acceptance)
 covers research/model generation, admission/cadence, qualified publishing/CMS,
 provider metrics and independently evaluated strategy changes.
+
+## Community/newsletter instruction boundary
+
+The [existing campaign skill's reusable workflow](../skillz/foundup_campaign_operator/references/community-newsletter-workflow.md)
+coordinates private manuscripts, source evidence and platform-specific drafts.
+It does not extend this compiler's schema or supported platform set. Keep private
+issue/source bindings outside `social_content_brief.v1`; use only the supported,
+reviewed public projection. Reddit/Substack remain DRAFT_OR_HANDOFF_ONLY until
+their preparation and transport contracts are implemented and qualified.

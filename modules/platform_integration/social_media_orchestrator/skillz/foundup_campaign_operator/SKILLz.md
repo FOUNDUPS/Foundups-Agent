@@ -1,7 +1,7 @@
 ---
 name: foundup_campaign_operator
-description: Prepare and launch evidence-backed petitions with human authentication handoff, or operate the bounded AntifaFM campaign through the existing social interfaces.
-version: 0.3.0
+description: Coordinate reusable community/newsletter preparation, evidence-backed petitions with human authentication handoff, or the bounded AntifaFM campaign through existing social interfaces.
+version: 0.4.0
 author: 0102
 agents: [qwen]
 primary_agent: qwen
@@ -12,6 +12,13 @@ category: workflow
 evals: []
 ---
 # FoundUp Campaign Operator
+
+For Reddit communities, Substack publications, or coordinated website/community/
+newsletter requests, follow [the community/newsletter workflow](references/community-newsletter-workflow.md).
+Use campaign/account configuration, not hardcoded identities. This instruction
+does not add a Reddit/Substack executor, publication grant or resident cadence.
+WSP 95 governs skill placement/admission; WSP 97 remains the general evidence
+and completion protocol. Do not route these operations through AntifaFM.
 
 For "launch a petition" requests, follow
 [the petition workflow](references/petition-workflow.md) and
