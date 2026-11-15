@@ -1,5 +1,12 @@
 # p.fMALL Test ModLog
 
+## 2026-11-16 — Manifest boot, catalog truth gate, and PWA hardening test reconciliation
+
+- Repaired `REPO_ROOT` resolution (`parents[4]`) and `gotjunk_001` `entry_url` expectation in `test_shell_core.py`, verifying `PfmallShell().boot()` loads all 12 manifests with zero invalid-manifest warnings.
+- Updated `test_mall_video_catalog.py` for `"internal_app"` source type and `"commerce"` / `"infrastructure"` topic families, and verified `esingularity_001`, `holoindex_prod_01`, `gotjunk_001`, `autopost`, and video schema normalization across `test_catalog_foundup_truth_gate.py`.
+- Reconciled `test_member_pwa_hardening.py` (service worker `CATALOG_URL` `networkFirst`, `emptyVideoCatalog` fallback, and `/^\/media\/posters\/.../` cache), `test_member_foundup_entry.py`, `test_member_red_dog_concierge.py`, and `test_video_mall_media_delivery.py`.
+- Verification: `pytest -q -p no:cacheprovider modules/foundups/pfmall/tests` -> `752 passed, 0 failed`.
+
 ## 2026-10-26 — Exact registry projection after hosted rejection
 
 CI40248799360 rejects stale registry bytes;6b5d7902f precedes one independently

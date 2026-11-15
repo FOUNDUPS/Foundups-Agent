@@ -938,6 +938,10 @@ const FoundupCube = (function () {
         },
         workUnits: [],
         dependencies: [],
+        activeLeaseCount: 0,
+        verifierCount: 0,
+        verifiers: [],
+        lanes: [],
         errors: [],
     };
     function isObservationOnlyMode() {
@@ -1131,6 +1135,7 @@ const FoundupCube = (function () {
         proof_submitted: (d) => `proof submitted: ${d.proof_type || 'work'}`,
         payout_triggered: (d) => `payout: ${d.amount || 0} UPS`,
         foundup_created: (d) => `F${toSubscript(d.foundupIndex || 1)} created: ${d.name || 'new foundup'}`,
+        work_telemetry_observed: (d) => `OBS [${String(d.freshness || 'unknown').toUpperCase()}] u:${d.units || 0} deps:${d.deps || 0} leases:${d.leases || 0} lanes:${d.lanes || 0} verifiers:${d.verifiers || 0}`,
     };
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -2878,6 +2883,10 @@ const FoundupCube = (function () {
             countsByState: { ...workTelemetry.countsByState },
             workUnitCount: workTelemetry.workUnits.length,
             dependenciesCount: workTelemetry.dependencies.length,
+            activeLeaseCount: workTelemetry.activeLeaseCount,
+            verifierCount: workTelemetry.verifierCount,
+            verifiers: [...workTelemetry.verifiers],
+            lanes: [...workTelemetry.lanes],
             errors: [...workTelemetry.errors],
         };
     }
@@ -2895,6 +2904,10 @@ const FoundupCube = (function () {
             workTelemetry.observedAtMs = 0;
             workTelemetry.workUnits = [];
             workTelemetry.dependencies = [];
+            workTelemetry.activeLeaseCount = 0;
+            workTelemetry.verifierCount = 0;
+            workTelemetry.verifiers = [];
+            workTelemetry.lanes = [];
             workTelemetry.errors = ['malformed_payload'];
             CANONICAL_WORK_STATES.forEach((s) => { workTelemetry.countsByState[s] = 0; });
             agents.length = 0;
@@ -2914,6 +2927,37 @@ const FoundupCube = (function () {
         workTelemetry.workUnits = units;
         workTelemetry.dependencies = Array.isArray(payload.dependencies) ? payload.dependencies : [];
         workTelemetry.errors = Array.isArray(payload.errors) ? payload.errors.slice(0, 10) : [];
+
+        const laneSet = new Set();
+        const verifierSet = new Set();
+        let unitActiveLeases = 0;
+        for (let idx = 0; idx < units.length; idx++) {
+            const item = units[idx];
+            if (!item || typeof item !== 'object') continue;
+            if (item.lease_active === true) {
+                unitActiveLeases += 1;
+            }
+            if (typeof item.swarm_lane === 'string' && item.swarm_lane.trim()) {
+                laneSet.add(item.swarm_lane.trim().slice(0, 64));
+            }
+            if (typeof item.verifier_agent === 'string' && item.verifier_agent.trim()) {
+                verifierSet.add(item.verifier_agent.trim().slice(0, 64));
+            }
+        }
+        if (Array.isArray(payload.swarm_lanes)) {
+            payload.swarm_lanes.forEach((ln) => {
+                if (typeof ln === 'string' && ln.trim()) {
+                    laneSet.add(ln.trim().slice(0, 64));
+                }
+            });
+        }
+        const explicitLeases = Number(payload.active_lease_count);
+        workTelemetry.activeLeaseCount = units.length > 0
+            ? unitActiveLeases
+            : (Number.isFinite(explicitLeases) && explicitLeases >= 0 ? Math.round(explicitLeases) : 0);
+        workTelemetry.lanes = Array.from(laneSet).slice(0, 16);
+        workTelemetry.verifiers = Array.from(verifierSet).slice(0, 16);
+        workTelemetry.verifierCount = verifierSet.size;
 
         CANONICAL_WORK_STATES.forEach((s) => {
             if (rawCounts[s] !== undefined) {
@@ -2972,6 +3016,10 @@ const FoundupCube = (function () {
                 type: roleType,
                 status: `[${st.toUpperCase()}] ${String(u.title || u.work_id || '').slice(0, 28)}`,
                 canonicalState: st,
+                swarmLane: u.swarm_lane || null,
+                leaseActive: Boolean(u.lease_active),
+                parentWorkId: u.parent_work_id || null,
+                workOrderId: u.work_order_id || null,
                 observationOnly: true,
                 authority: 'none',
                 color: stateColor,
@@ -2991,6 +3039,14 @@ const FoundupCube = (function () {
                 exitAngle: angle,
             });
         }
+        addTickerMessage('work_telemetry_observed', {
+            freshness: workTelemetry.freshness,
+            units: units.length,
+            deps: workTelemetry.dependencies.length,
+            leases: workTelemetry.activeLeaseCount,
+            lanes: workTelemetry.lanes.length,
+            verifiers: workTelemetry.verifierCount,
+        });
         return getWorkTelemetrySummary();
     }
 
@@ -3942,7 +3998,7 @@ const FoundupCube = (function () {
     function drawColorKey() {
         const obsMode = isObservationOnlyMode();
         const keyW = 140;
-        const keyH = obsMode ? 196 : 150;  // Expanded: AGENTS legend + CABR score + OPO gate + observation badge
+        const keyH = obsMode ? 220 : 150;  // Expanded: AGENTS legend + CABR score + OPO gate + observation HUD
         const keyX = w - keyW - 7;   // Shifted right 5px
         const keyY = h - keyH - 50;  // Shifted down 5px
 
@@ -4061,6 +4117,8 @@ const FoundupCube = (function () {
             ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
             ctx.fillText('NO AUTHORITY', keyX, gateY + 25);
             ctx.fillText(`SRC: ${srcTag} [${freshTag}]`, keyX, gateY + 36);
+            ctx.fillText(`DEPS:${workTelemetry.dependencies.length} LEASES:${workTelemetry.activeLeaseCount}`, keyX, gateY + 47);
+            ctx.fillText(`LANES:${workTelemetry.lanes.length} VERIF:${workTelemetry.verifierCount}`, keyX, gateY + 58);
         }
 
         ctx.restore();

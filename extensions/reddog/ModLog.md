@@ -1,3 +1,12 @@
+## 2026-11-16 — Bind Wave 4 WRE/RSI and pfMALL runtime checksums
+
+Regenerate the backend manifest for the updated `pfmall/shell_core.py` and WRE
+recursive improvement (`core.py`, `learning.py`) source checksums and refresh
+both canonical digest pins (`568e8b402a77316b0b1952d26d7d8080f749d14dbe06fb2a8ee28a17cdc96d6e`).
+Runtime membership remains 1,487 and the contract still rejects 1,488; both
+line-ending variants fit the existing 332 KiB manifest cap and the 2 MiB
+per-source / 32 MiB aggregate limits stay unchanged. WSP 11, 22, and 97.
+
 ## 2026-11-10 — Bind the stream Shorts scheduling owner
 
 Regenerate the backend manifest with the stream schedule queue owner and refresh

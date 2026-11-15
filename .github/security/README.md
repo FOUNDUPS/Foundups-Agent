@@ -1,3 +1,29 @@
+## Wave 4 WRE/RSI, pfMALL, and member shell metadata review — 2026-11-16
+
+The backend manifest refreshes three runtime source checksums
+(`modules/foundups/pfmall/shell_core.py`,
+`modules/infrastructure/wre_core/recursive_improvement/src/core.py`, and
+`modules/infrastructure/wre_core/recursive_improvement/src/learning.py`) and
+retains all 1,487 runtime members. Verification against base `e62e9ebaf5`
+confirmed 39 unchanged public source-path/SHA rows with exact prior approvals.
+The new whole-manifest digest
+`373f8a1ccec6ef434cde98958355683e448f1374d6e74d259da5d06d7cc0f6ca` (canonical
+payload SHA256 `568e8b402a77316b0b1952d26d7d8080f749d14dbe06fb2a8ee28a17cdc96d6e`)
+requires 39 renewed bindings.
+
+PR #2404's hosted Gitleaks run
+[`132968872980`](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/43765283316/job/132968872980)
+confirmed all 39 manifest bindings and zero introduced-history findings, and
+reported one current-tree `generic-api-key` candidate at
+`public/member/index.html:28` after the `Build v19` service-worker cache-busting
+update (`2379101f51c0a40de8839a5a43a3fd333453484fa9f1a5587b5d21a755b4bbb2`).
+Line 28's publishable Clerk frontend SDK element is byte-identical to base
+`e62e9ebaf5` (prior approval `6be0ba14182d55ecbdc16066fc017dc49efab873be908a7d313b6096cc99dea9`).
+Appending this 1 renewed binding alongside the 39 manifest bindings preserves
+all 4,500 earlier entries (`4,540` total). Scanner rules, exclusions,
+fingerprint formula, and scan coverage stay the same. Fresh full-tree and
+introduced-history checks remain required.
+
 ## WRE/RSI bounded improvement and rollback backend manifest review — 2026-11-15
 
 The backend manifest refreshes one WRE recursive improvement source checksum

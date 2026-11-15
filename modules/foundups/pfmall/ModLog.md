@@ -1,3 +1,12 @@
+## 2026-11-16 · Manifest schema closure, infrastructure category, and Build v19 catalog reconciliation
+
+- **Manifest Discovery & Boot Closure (`shell_core.py`, `modules/foundups/{detect_ai,eduit,shield,holoindex_prod_01}/foundup_manifest.json`)**:
+  - Added `"infrastructure"` to `VALID_CATEGORIES` and hardened `load_manifest()` with null-coalescing defaults (`or ""` / `or []` / `or {}`) so explicit JSON `null` fields never bypass typed string/collection defaults.
+  - Repaired `detect_ai`, `eduit`, `shield`, and `holoindex_prod_01` manifests (`name`, `version`, WSP 104 `idb_{foundup_id}` / `/f/{foundup_id}` alignment, and `F3_INFRA` / `conditional` readiness for `holoindex_prod_01`), achieving 12/12 clean manifest loads with zero warnings on `PfmallShell().boot()`.
+- **Registry & Catalog Truth Alignment (`modules/foundups/foundup_registry.json`, `public/member/mall-video-catalog.json`)**:
+  - Registered `eduit` in `foundup_registry.json`, unified `autopost`'s live Cloud Run URL across registry, catalog, and projection helper, added `esingularity_001` to `mall-video-catalog.json`, reconciled `gotjunk_001` and `holoindex_prod_01`, and normalized video `duration_seconds` and ISO-8601 `Z` timestamps.
+- **Test Gate Alignment (`tests/`)**: Reconciled `test_shell_core.py`, `test_mall_video_catalog.py`, `test_member_pwa_hardening.py`, `test_member_foundup_entry.py`, and `test_member_red_dog_concierge.py` against current hardened member shell and manifest contracts (`752 passed, 0 failed`). WSP 22, 49, 50, 97, and 104 apply.
+
 ## 2026-11-14 · Phone search reference refinement
 
 PFWD-1B shares the compact dock across browse and viewer. Plus anchors the

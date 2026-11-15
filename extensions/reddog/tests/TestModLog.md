@@ -1,3 +1,12 @@
+## 2026-11-16: Wave 4 WRE/RSI and pfMALL packaging bindings
+
+Regenerated the 1,487-member backend manifest after updating `pfmall/shell_core.py`
+and WRE recursive improvement (`core.py`, `learning.py`), refreshing both canonical
+digest pins (`568e8b402a77316b0b1952d26d7d8080f749d14dbe06fb2a8ee28a17cdc96d6e`)
+while retaining all existing byte and member caps. All eight Python manifest and
+staged-index self-consistency tests pass locally alongside Node compatibility checks.
+Hosted CI and resulting-main verification remain separate gates. WSP 5/11/22/50/97.
+
 ## 2026-11-06: WRE readiness packaging bindings
 
 The first hosted run rejected stale WRE source hashes in two independent

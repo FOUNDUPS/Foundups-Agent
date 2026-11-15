@@ -1,3 +1,13 @@
+## 2026-11-16 — Wave 4 WRE/RSI and pfMALL backend digest pin
+
+Updated the expected canonical manifest digest pin in
+`scripts/tests/test_generate_reddog_backend_manifest.py` to
+`568e8b402a77316b0b1952d26d7d8080f749d14dbe06fb2a8ee28a17cdc96d6e` alongside
+`extensions/reddog/backend_compatibility_constants.js` after regenerating the
+unchanged 1,487-member runtime closure for `pfmall/shell_core.py` and WRE
+recursive improvement (`core.py`, `learning.py`). Verified all 8 manifest/index
+tests pass (`8 passed`). WSP 5/11/22/97.
+
 ## 2026-11-10 — Verification gate backend binding
 
 The first final-source hosted binding selection rejected both stale consumer

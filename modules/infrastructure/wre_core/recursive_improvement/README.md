@@ -1,23 +1,38 @@
 # Recursive Improvement
 
-**Status:** proposal and pattern-memory prototype; automatic artifact
-improvement is not implemented.
+**Status:** bounded verification-gated application, digest-verified rollback, and
+fail-closed measured-benefit accounting; unauthenticated automatic code editing
+remains blocked.
 
 The recursive-improvement module extracts error patterns, generates solution
-and improvement proposals, and persists those records. It is a source of
-candidate evidence for WRE. It is not an authenticated code editor, evaluator,
-promoter, rollback controller, or proof that a suggested change worked.
+and improvement proposals, persists those records, and gates bounded improvement
+application on independent verification, outcome ratcheting, held-out regression
+gates, and optional non-self-authored measurement receipts.
 
 ## Current behavior
 
 - `process_error()` records an error pattern, generates a solution proposal,
   and creates an `Improvement` proposal.
-- Generated confidence and legacy `token_savings` fields are heuristic proposal
-  metadata, not independent evaluation or measured usage.
-- `apply_improvement()` deliberately returns `False`, leaves `applied=False`,
-  and records `application_status=blocked_unimplemented`.
-- `get_metrics()` reports observed record counts. `tokens_saved` is `None` and
-  `token_reduction_measured` is `False`.
+- Generated confidence and legacy `Solution.token_savings` fields are heuristic
+  proposal metadata, not independent evaluation or measured usage.
+- Zero-evidence `apply_improvement(proposal)` fails closed (`False`), leaves
+  `applied=False`, and records `application_status="blocked_unimplemented"`.
+- Verification-gated `apply_improvement(proposal, verification_evidence=..., target_applicator=..., measurement_evidence=...)`
+  validates independent verifier (`AUTONOMOUS_SLICE_VERIFIER_ACCEPT`), outcome
+  ratchet (`OUTCOME_RATCHET_RECORDED`), and held-out regression gate
+  (`HELD_OUT_RECURSIVE_IMPROVEMENT_REGRESSION_GATE_ACCEPT`) receipts before
+  executing a reversible `target_applicator`.
+- Optional `measurement_evidence` validates fail-closed **before** target
+  mutation (requiring non-self-authored `evaluator_id != worker_id`, matching
+  `work_order_id`, non-regressive `candidate_tokens <= baseline_tokens`, and
+  optional `before_state_digest` / `after_state_digest` verification) or rejects
+  with `application_status="blocked_measurement_rejected"`.
+- `rollback_improvement(proposal)` restores `before_state`, verifies SHA-256
+  restoration, and subtracts any measured `tokens_saved` from
+  `engine.metrics["total_tokens_saved"]` (clamped `>= 0`).
+- `get_metrics()` preserves compatibility `tokens_saved=None` and
+  `token_reduction_measured=False` for unmeasured runs while tracking verified
+  receipt-backed deltas in `total_tokens_saved`.
 - The optional global exception handler records learning candidates only; it
   does not modify code or WSP artifacts.
 

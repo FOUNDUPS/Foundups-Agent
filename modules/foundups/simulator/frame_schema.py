@@ -6,7 +6,7 @@ Animation must consume snapshots only and never mutate simulator state.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, List, Mapping
+from typing import Dict, List, Mapping, Optional
 
 
 @dataclass(frozen=True)
@@ -78,6 +78,10 @@ class WorkUnitFrame:
     effect_evidence: bool = True
     stale: bool = False
     unknown_reason: str | None = None
+    parent_work_id: Optional[str] = None
+    work_order_id: Optional[str] = None
+    swarm_lane: Optional[str] = None
+    lease_active: bool = False
 
 
 @dataclass(frozen=True)
