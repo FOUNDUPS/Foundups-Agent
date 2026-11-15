@@ -333,6 +333,7 @@ Video Mall tile grid with field scope projections.
 | `searchByCreator(query)` | Case-insensitive creator search |
 | `filterByCategory(cat)` | Filter by category |
 | `filterByTag(tag)` | Filter by tag |
+| `filterBySourceGroup(group)` | Filter by source group (`'videos'` \| `'apps'`) |
 | `clearFieldScope()` | Clear scope, show all |
 | `getFieldScope()` | Get current scope object |
 
@@ -343,6 +344,7 @@ Video Mall tile grid with field scope projections.
 | `creator` | Substring match on creator/entity |
 | `category` | Exact match (case-insensitive) |
 | `tag` | Exact match in tags array |
+| `source_group` | `'videos'` (`videos.length > 0` / `video_count > 0`) or `'apps'` (`github_repo`, `external_app`, `internal_app`, `internal_service`) |
 
 ---
 

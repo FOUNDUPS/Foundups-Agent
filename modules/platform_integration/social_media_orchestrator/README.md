@@ -13,6 +13,12 @@ not hardcoded personal values. This is instruction groundwork only: provider
 transports, native admission and live publishing remain unqualified. It creates
 no second scheduler or database and does not modify the WSP 97 protocol.
 
+The same instruction maps existing Gemini-index evidence to a private,
+revision-verified Drive edit, then separately reviewed social/Substack and Mall
+handoffs. Two-or-three daily posts is a cap, not a target; actual queue/timezone
+and provider state remain required. Private Drive assets never become public
+catalog inputs by default, and no Substack transport or automation is activated.
+
 ## Source-backed editorial packages — 2026-10-27
 
 `content_orchestrator.prepare_campaign(brief)` and the existing SOCIAL campaign

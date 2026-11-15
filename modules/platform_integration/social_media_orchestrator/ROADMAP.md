@@ -1,3 +1,23 @@
+## Indexed editorial / Substack / Mall handoff assessment — 2026-11-15
+
+Extend the same community/newsletter instruction in PR2394; no new orchestrator,
+scheduler or runtime adapter. Reuse full video-index provenance, existing private
+Drive issue/manuscript owners, strict public-content compilation, qualified
+provider effects and the Mall registry/video projection owners. A metadata
+projection or load/save round trip is not a verified lossless source handoff.
+
+Substack remains DRAFT_OR_HANDOFF_ONLY. Daily two-or-three posting is an upper
+bound, never a target; use a conservative two-item proposal limit until a more
+specific publication policy is resolved. Actual account, calendar timezone,
+queued/published/in-flight state, separate web/email/Notes effects and independent
+readback remain unverified. Legacy retries/X pilot limits do not establish them.
+
+Public Mall projection must reject private Drive/raw index data and unreleased
+assets. The inspected scoped video projector is HPC-only; generic new-lane
+admission is separate. /member/media is public static delivery, not private
+storage. Next bounded implementation requires source-retention, private-to-public,
+cap/queue/restart and provider-readback tests under the existing owners.
+
 ## Community/newsletter instruction — 2026-11-15
 
 Recovered staged work extends the existing campaign skill with a reusable

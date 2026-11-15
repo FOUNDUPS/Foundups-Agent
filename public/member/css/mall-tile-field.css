@@ -25,6 +25,15 @@
   gap: 0.4rem;
   padding: 0 0 0.5rem;
   flex-wrap: wrap;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 380px) {
+  .mall-projection-chip {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+  }
 }
 
 /* ========== Density Controls ========== */

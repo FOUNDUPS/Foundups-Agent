@@ -1,3 +1,29 @@
+## 2026-11-15: Assess index-to-Drive, Substack cadence and Play FoundUps handoffs
+
+Continue the same PR2394 instruction owner after 012's requested integration;
+do not duplicate the campaign operator or touch the preserved PC staged lane.
+Source audit at main43f0eb918cdf928be64667fda582f93cf9ab58c6 found full saved
+Gemini provenance but lossy helper/DB projections, no verified automatic Drive
+exporter, and no qualified Substack scheduler. Reuse the private issue brief,
+native Doc revision/readback, source-linked derivatives and existing platform
+owners. Keep summaries retrieval-only; no verbatim/training/publication inference.
+
+Record two-or-three posts/day as a cap, not a target. Conservative proposals
+use at most two until an explicit applicable publication policy is resolved;
+live account/timezone/queued/published/in-flight inspection is still unavailable.
+Web, email, Notes and imports retain separate authority/receipts. No live queue
+reconciliation or cap enforcement is claimed by this instruction.
+
+Link existing Mall public-registry/video projector, schema and delivery owners.
+Review public-safe values; never expose private Drive/raw manifests or assets
+through /member/media or catalogs. The inspected video scopes are HPC-only.
+No producer/exporter/provider/catalog/runtime code, data or service changed.
+Current review is source/instruction evidence only; earlier head83283353 checks
+do not validate this continuation. Require fresh exact-head hosted checks and
+independent review. Draft-to-ready remains blocked by the recorded approval
+review; this scope update is not approval for that transition or a merge.
+WSP00/11/15/22/50/95/97/99/110; same bounded documentation concern.
+
 ## 2026-11-15 JST: Recover reusable social/newsletter instruction and source handoffs
 
 Reconcile the four preserved staged files from the isolated

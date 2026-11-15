@@ -537,7 +537,11 @@
     { id: 'travel',    label: 'Travel' },
     { id: 'music',     label: 'Music' },
     { id: 'food',      label: 'Food' },
-    { id: 'tech',      label: 'Tech' }
+    { id: 'tech',      label: 'Tech' },
+    { id: 'media',     label: 'Media' },
+    { id: 'ai-education', label: 'AI Education' },
+    { id: 'ai-research',  label: 'AI Research' },
+    { id: 'thought-leadership', label: 'Thought Leadership' }
   ];
 
   var DENSITY_PRESETS = [
@@ -563,11 +567,17 @@
     currentCategory = categoryId;
     // Call B's API if available
     if (categoryId === 'all') {
+      if (window.mallTileField && typeof window.mallTileField.clearFieldScope === 'function') {
+        window.mallTileField.clearFieldScope();
+      }
       if (window.mallTileField && typeof window.mallTileField.resetProjection === 'function') {
         window.mallTileField.resetProjection();
       }
     } else {
-      if (window.mallTileField && typeof window.mallTileField.setProjection === 'function') {
+      var mappedCategory = categoryId === 'startups' ? 'startup' : categoryId;
+      if (window.mallTileField && typeof window.mallTileField.filterByCategory === 'function') {
+        window.mallTileField.filterByCategory(mappedCategory);
+      } else if (window.mallTileField && typeof window.mallTileField.setProjection === 'function') {
         window.mallTileField.setProjection(categoryId);
       }
     }

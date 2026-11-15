@@ -1,3 +1,8 @@
+## 2026-11-15 — Build v18 discovery filters, internal_app quick-view, and viewport verification
+
+- Updated `mall_product_state_vm.mjs` (22 passed including `pfmall-member-v18` cache upgrade and `localStorage` `source_group` round-trip), `mall_scoped_video_browser.py` (`Build v18`), and `test_non_video_quickview_actions.py` (`internal_app`).
+- Verified `1440x900`, `390x844`, `844x390`, and `320x700` member viewports via Python Playwright against an ephemeral localhost server (`verify_sprint6_viewports.py`): zero horizontal overflow, dynamic `Videos`/`Apps`/`HPC` pills, `gotjunk_001` `Open App` CTA, and state reload persistence.
+
 ## 2026-11-14 · Mall build identification
 
 The scoped browser fixture checks the build next to #SchumerOUT at desktop

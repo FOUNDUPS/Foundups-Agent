@@ -407,22 +407,22 @@ await check('install reloads only explicit public shell and product assets', asy
   }
   assert.equal(installed.includes('/move2japan/properties.json'), false);
   assert.equal(installed.includes('/member/js/mall-video-projection.js'), false);
-  assert.equal(h.stores.has('pfmall-member-v17'), true);
+  assert.equal(h.stores.has('pfmall-member-v18'), true);
   const build = videoProjectionSource.match(/const mallBuild = '(v\d+)';/)?.[1];
-  assert.equal('pfmall-member-' + build, 'pfmall-member-v17');
+  assert.equal('pfmall-member-' + build, 'pfmall-member-v18');
 });
 
 await check('activation retires only obsolete caches owned by this Mall', async () => {
   const h = swRuntime();
-  const obsoleteVersions = Array.from({ length: 15 }, (_, index) => `pfmall-member-v${index + 2}`);
-  for (const name of [...obsoleteVersions, 'pfmall-member-v17', 'pfmall-properties-v1',
+  const obsoleteVersions = Array.from({ length: 16 }, (_, index) => `pfmall-member-v${index + 2}`);
+  for (const name of [...obsoleteVersions, 'pfmall-member-v18', 'pfmall-properties-v1',
     'pfmall-posters-v1', 'gotjunk-offline-v1', 'other-app-cache']) {
     await h.caches.open(name);
   }
   await h.event('activate');
   assert.deepEqual(h.deleted.sort(), obsoleteVersions.sort());
-  assert.equal(h.stores.has('pfmall-member-v16'), false);
-  assert.equal(h.stores.has('pfmall-member-v17'), true);
+  assert.equal(h.stores.has('pfmall-member-v17'), false);
+  assert.equal(h.stores.has('pfmall-member-v18'), true);
   assert.equal(h.stores.has('gotjunk-offline-v1'), true);
   assert.equal(h.stores.has('other-app-cache'), true);
 });
@@ -458,7 +458,7 @@ await check('product navigation shares one static member shell without query cac
   assert.equal(online.response.status, 200);
   assert.equal(h.calls.at(-1).request, '/member/');
   assert.equal(h.calls.at(-1).options.credentials, 'omit');
-  const cache = await h.caches.open('pfmall-member-v17');
+  const cache = await h.caches.open('pfmall-member-v18');
   assert.equal((await cache.keys()).some(key => {
     const url = new URL(key.url);
     return url.pathname === '/member/' && !!url.search;
@@ -513,6 +513,18 @@ await check('scoped catalog has a separate cache key and no fallback to the memb
   uncached.setNetwork(async () => { throw new Error('offline'); });
   assert.equal((await uncached.request(scoped)).response.status, 503);
   assert.equal((await h.request('/member/js/mall-tile-field.js?v=unrecognized')).intercepted, false);
+});
+
+await check('normal Mall round-trips source_group fieldScope in localStorage', () => {
+  const h = stateRuntime(ORIGIN + '/member/');
+  h.tf.scope = { type: 'source_group', query: 'apps' };
+  h.api.save();
+  const saved = JSON.parse(h.local.get(VIDEO_KEY));
+  assert.deepEqual(saved.fieldScope, { type: 'source_group', query: 'apps' });
+  h.calls.length = 0;
+  h.tf.scope = null;
+  assert.equal(h.api.restore(), true);
+  assert.deepEqual(h.calls.find(c => c[0] === 'scope'), ['scope', { type: 'source_group', query: 'apps' }]);
 });
 
 console.log('Mall product state and service worker runtime: ' + checks + ' passed.');
