@@ -1,0 +1,4 @@
+interface:
+  display_name: "Promote AntifaFM"
+  short_description: "Contextual station replies and verified X posts"
+  default_prompt: "Use $promote-antifafm to review listener mentions and prepare an AntifaFM station update."

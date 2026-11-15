@@ -12,6 +12,25 @@ Canonical code:
 - `tests/test_yumori_economic_model.py`
 - site assumptions: `docs/CANDIDATE_SITE_REGISTRY.md`
 
+## Japan-grounded feasibility evidence — 2026-10-01
+
+Use [Japanese operating precedents and public price evidence](JAPAN_COMPUTE_COMPARABLES_20261001.md)
+to compare a rented-GPU pilot, owned hardware in existing colocation, and a
+workload-sized local facility. The [Japanese inquiry reference pack](JAPAN_COMPUTE_INQUIRIES_JA_20261001.md)
+contains eight official organization routes and seven unsent templates.
+
+These are dated research inputs, not supplier quotations, Hanyu capacity,
+customer commitments or replacement numerical model assumptions. Preserve GPU,
+billing-unit, tax, geographic, kVA/kW and annual-PUE/experimental-pPUE distinctions.
+Public research can start feasibility modelling; investment and expansion still
+require the applicable site, utility, engineering, finance and demand evidence.
+
+All inquiry text is Japanese. No inquiry was sent by this research task. Reuse the
+existing held utility draft after private reconciliation; do not create a duplicate
+from the public reference template. Do not infer a new Highreso follow-up from
+its inclusion as a comparable. Sender-boundary issue [#1779](https://github.com/FOUNDUPS/Foundups-Agent/issues/1779)
+remains open and external SEND containment is unchanged.
+
 ## Two calculation layers
 
 ### 1. Demand-led node sizing — current decision model

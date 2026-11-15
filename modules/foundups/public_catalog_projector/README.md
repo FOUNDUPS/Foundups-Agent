@@ -39,10 +39,31 @@ derived-projection pattern. Context:
 The shell accepts aliases only on landing roots (one optional trailing slash),
 replaces the URL with `/f/{foundup_id}` and uses that canonical identity before
 rendering or concierge context. App/deep-app paths still hand off to `/member/`
-before catalog retrieval. This capability does not register, list or activate
-any FoundUp; the committed registry and catalog remain unchanged.
+before catalog retrieval. Alias support alone does not register, list or activate
+a FoundUp; inclusion requires an explicit canonical registry change.
 While discovery is pending or rejected, the public context exposes a null ID
 instead of the unvalidated request token, for both aliases and canonical URLs.
+
+## Registered Move2Japan public discovery
+
+The existing `move2japan` record is a discoverable, incubating FoundUp with a
+public housing POC. Its `poc_url` is
+`https://foundups.com/member/?foundup=move2japan`. The same allowlisted projector
+now includes that record in `public/f/public_catalog.json`; no projector schema
+or core algorithm change is needed. Its `app_url` stays null and its deferred
+token has no projected symbol.
+
+The canonical landing `/f/move2japan` and portfolio card offer **Browse houses**
+in the same tab, selecting the product inside the existing member-shell boot.
+The shell accepts this internal handoff only for the exact tenant ID and exact
+registered public POC URL. Query parameters cannot supply a different destination.
+The protected `/f/move2japan/app` and app deep-link gate still run before catalog
+retrieval. Public discovery creates no publisher, payment or token authority.
+
+The public renderer also initializes its index filter state before the index
+branch returns and renders a token label only when a real symbol is present.
+The private review Site is not a registry product URL. Production hosting and
+primary-domain forwarding require separate deployment receipts.
 
 ## CLI
 

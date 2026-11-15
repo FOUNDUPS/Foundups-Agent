@@ -2,6 +2,12 @@
 
 This module provides the command-line interface for the FoundUps Agent system.
 
+Main-menu prompts keep background Python logging out of existing console sinks
+while waiting for input. File logs, telemetry and foreground messages remain
+available. The filter is removed on answer, EOF or interruption. Raw/native
+output, newly installed handlers and prompts in other menu modules are outside
+this boundary; this does not globally replace Python input or stdout.
+
 Japanese STT: set `OPENCLAW_VOICE_STT_LANGUAGE=ja`; the Whisper, Cohere and Google
 adapters receive the selected language. Explicit adapter arguments override the
 environment. Cohere decoding supports current `decode` and older `batch_decode`

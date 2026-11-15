@@ -22,6 +22,7 @@ from sqlalchemy import create_engine, event, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
+from ..authorization import CallerAuthorization, require_authorization, require_bound_independent_verification
 from ..exceptions import InvalidStateTransitionError, NotFoundError, PermissionDeniedError, ValidationError
 from .migrations import LATEST_SCHEMA_VERSION, MigrationManager
 from ..models import (
@@ -146,6 +147,7 @@ def _payout_identity(sess, task):
     _payout_require(all(_payout_text(value) for value in (
         proof.artifact_uri, proof.artifact_hash, verification.verifier_id, verification.reason,
     )), "incomplete proof/verification")
+    require_bound_independent_verification(task.task_id, task, proof, verification)
     return {
         "initiation_version": 1, "foundup_id": task.foundup_id, "task_id": task.task_id,
         "proof_id": proof.proof_id, "verification_id": verification.verification_id,
@@ -642,11 +644,14 @@ class SQLiteAdapter:
             row.paid_at = payout.paid_at
         return self.get_payout(payout.payout_id)
 
-    def initiate_payout(self, task_id: str, actor_id: str) -> Payout:
+    def initiate_payout(
+        self, task_id: str, actor_id: str, *,
+        authorization: Optional[CallerAuthorization] = None,
+    ) -> Payout:
         """Atomically record an unsettled SQLite initiation or its exact retry.
 
         The write fence covers this operation, not unrelated wallet writers.
-        No treasury role or external settlement authority is conferred here.
+        Requires host-supplied treasury authority; no external settlement occurs.
         """
         if self.engine.dialect.name != "sqlite":
             raise ValidationError("Atomic payout initiation supports SQLite only")
@@ -656,6 +661,7 @@ class SQLiteAdapter:
             task = sess.get(TaskRow, task_id)
             if task is None:
                 raise NotFoundError(f"Task not found: {task_id}")
+            require_authorization(authorization, actor_id, task.foundup_id, "treasury")
             identity = _payout_identity(sess, task)
             checked = _payout_history(sess, task.foundup_id)
             rows = sess.query(PayoutRow).filter(PayoutRow.task_id == task_id).all()

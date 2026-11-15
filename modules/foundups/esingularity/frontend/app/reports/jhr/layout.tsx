@@ -8,8 +8,12 @@ const EVIDENCE_03 = "https://docs.google.com/document/d/1yeO6-6_mTLW8QswosVKmCVC
 export const metadata: Metadata = {
   title: "JHR #003｜誰が日本の「AI田んぼ」を持つのか｜eSingularity",
   description: "ハイパースケーラー、地域所有、廃校GPUデータセンター、福井のAI交番を一次資料と現地確認から追う日本語版JHR。",
+  alternates: { canonical: "https://esingularity.ai/reports/jhr" },
+  keywords: ["Japan Hyperscaler Report", "JHR", "AI田んぼ", "ハイパースケーラー", "AI交番", "福井", "eSingularity"],
   openGraph: {
     title: "JHR #003 — 誰が日本の「AI田んぼ」を持つのか",
+    url: "https://esingularity.ai/reports/jhr",
+    type: "article",
     description: "福井の土地と電力がAI時代を支えるなら、計算資源と価値を誰が持つのか。ハイパースケーラー、チャンピオン、AI交番を比較する。",
     images: [{ url: "/jhr/jhr-003-ai-rice-fields.svg", width: 560, height: 590, alt: "福井の「いま」と「これから」を対比するAI田んぼ構想図" }],
   },

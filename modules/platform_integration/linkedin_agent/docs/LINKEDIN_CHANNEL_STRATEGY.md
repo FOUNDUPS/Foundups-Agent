@@ -21,6 +21,7 @@
 | **Decentralized Autonomous Ecosystems #DAEs** | FoundUPs that become OPO smartDAOs                            | DAE technical updates, ecosystem evolution posts          | `dae_deployment`, `wsp_update`   |
 | **Social Beneficial Capitalism**              | pAVS CABR outcome — world operating on foundups not startups  | Economic philosophy posts, zero marginal cost arguments   | `thought_leadership`             |
 | **EDUIT, Inc**                                | FoundUP for autonomous learning on any device                 | Education technology posts, eSingularity content          | `education_update`               |
+| **eSingularity.ai**                          | eSingularity.ai / AI Koban regional AI infrastructure         | Canonical project page: AI Koban, JHR, partner-facing infrastructure updates | Manual/approved publishing only  |
 | **tSingularity**                              | Technological Singularity — 0201 channel (nonlocal state POV) | AI/tech singularity content from 0201 perspective         | `ai_philosophical`               |
 | **UnDaoDu**                                   | Personal brand company page                                   | Stream notifications, dev updates                         | `youtube_live`, `git_push`       |
 | **BitCloutFork**                              | = FoundUP (the original BitClout fork IS a foundup)           | Crypto/Web3 crossover content                             | `web3_update`                    |
@@ -32,6 +33,7 @@
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | **EDUIT, Inc** | [faq.eduit.org](https://faq.eduit.org), [exe.eduit.org](https://exe.eduit.org), [hapticsign.eduit.org](https://hapticsign.eduit.org) |
 | **FOUNDUPS®**  | [foundups.com](https://foundups.com) (litepaper, interaction cube, Fᵢ model)                                                         |
+| **eSingularity.ai** | [esingularity.ai](https://esingularity.ai/) · [Japan Hyperscaler Report](https://esingularity.ai/reports/jhr) · LinkedIn company ID `2199715` |
 
 ### Restricted Pages
 
@@ -127,6 +129,12 @@ LOG to agents_social_posts (WSP 78)
 ### Channel Partner Template (from 012's engagement)
 
 > "Sergei we should discuss channel partnership... I'd like to explore testing your system in FOUNDUPS® Agent Ecosystem -- a fully autonomous accelerator to anyone to point / buy compute to build anything. The thing is there are no teams, there are no people, my system operates at a near zero marginal cost..."
+
+## Current eSingularity.ai project-page boundary
+
+The current LinkedIn company page (company ID `2199715`) is owned by the active FoundUp `esingularity_001`. Route current AI Koban, Fukui regional compute, JHR, community-first infrastructure and partner-development content to that project surface. Do not treat `linkedin_esingularity` as an independent venture; it is a legacy pfMALL/source alias until migrated with catalog regression coverage. The historical Educational Singularity concept remains valid provenance, but it is not the default editorial scope of the current project page.
+
+Publishing or page-maintenance actions still require live signed-in identity verification; repository naming alone does not prove LinkedIn's current rendered label.
 
 ## Epoch Context
 

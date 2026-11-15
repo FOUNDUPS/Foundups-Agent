@@ -183,9 +183,9 @@ def test_shared_orm_compatibility_aliases():
     from modules.foundups.agent_market.src.persistence import orm_models, sqlite_adapter
 
     assert sqlite_adapter.Base is orm_models.Base is Base
-    assert set(Base.metadata.tables) == set(_ORM_TABLES.values())
+    assert set(Base.metadata.tables) == set(_ORM_TABLES.values()) | {"testnet_transfer_intents"}
     assert {mapper.class_ for mapper in Base.registry.mappers} == {
-        getattr(orm_models, name) for name in _ORM_TABLES}
+        getattr(orm_models, name) for name in _ORM_TABLES} | {orm_models.TestnetTransferIntentRow}
     for name, table in _ORM_TABLES.items():
         old = getattr(sqlite_adapter, name)
         assert old is getattr(orm_models, name)

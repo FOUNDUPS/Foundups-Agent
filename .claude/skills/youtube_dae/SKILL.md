@@ -11,6 +11,12 @@ trigger_keywords: [stream, youtube, moderation, chat, engagement, consciousness_
 category: workflow
 evals: []
 ---
+
+For ongoing live conversation, use the [conversation stewardship skill](../youtube-conversation-stewardship/SKILL.md).
+The templates below are drafting references, not automatic triggers or send authority.
+Quiet selection, stakeholder parity and shared model assessment/review take precedence
+for ordinary replies; do not send timer prompts or greetings merely to increase activity.
+
 # YouTube Live DAE Content Generation Skills
 
 ## Overview

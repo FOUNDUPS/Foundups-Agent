@@ -1,5 +1,58 @@
 # Testing Evolution Log - Stream Resolver
 
+## 2026-10-23 - Quota gate: full checker unit suite and negative controls
+
+WSP 00/5/22/34/50/97. Reused both existing test files; no new test family.
+The checker file retains all original cases, carries the six original helper
+matrix tests, and adds two real-entrypoint tests with seven combinations each.
+Global unset/local true is explicit. Fake auth/provider call counts prove that
+both gates admit confirmation only when authorized; the real service-cache
+accessor still runs. Lazy verifier tests assert a single fake construction.
+
+Owned-checkout command (CPython 3.12.2, requests already installed):
+
+```text
+PYTHONDONTWRITEBYTECODE=1 PYTHON_DOTENV_DISABLED=1
+python -B modules/platform_integration/stream_resolver/tests/test_no_quota_stream_checker.py -v
+```
+
+Result: **31 tests passed**. The whole checker/config source executes in a scoped
+fixture; package initializers are not executed. The fixture clears host
+environment input, substitutes database/verifier/auth boundaries, mocks HTTP
+responses and sleeps, and denies HTTP/socket/SQLite/subprocess effects. Teardown
+restores only its substituted modules and the environment and fails if any
+denied effect was attempted. No credentials, real database, model or service
+were accessed. This closes the prior fixture isolation gap without changing
+production cache, parsing or retry behavior.
+
+External reproducible review runner, not a repository test family:
+`refresh/pr782-offline-review.py <owned-checkout>` under the existing
+`O:/RedDog-Builder-Artifacts/pr-reconciliation-20261021` evidence root.
+It reruns 31/31; separately reverts each gate only in memory and observes exactly
+three failing protected subcases (defaults, global unset/local on, global off/
+local on), with no errors. It verifies exact source stability and module/
+environment restoration. The unchanged adjacent bodies run against the same
+checker with temporary legacy `src`/auth aliases: **13/13 passed** after adding
+an explicit both-gates-on decorator to the existing mocked API workflow.
+The first adjacent run with complete aliases was 12/13 because that fixture
+implicitly depended on the old API-on default; its failure is retained.
+
+Evidence files in `refresh/`: `pr782-checker-final.log`,
+`pr782-offline-review.json`, `pr782-positive.log`,
+`pr782-video_gate_reverted.log`, `pr782-channel_gate_reverted.log`,
+`pr782-adjacent.log`, `pr782-adjacent-before-opt-in.log`.
+Initial `pr782-checker-initial.log` records pytest collection failure on absent
+`googleapiclient`; `pr782-adjacent-initial.log` records incomplete external import
+aliases. Neither failure was suppressed or counted as a passing suite. The
+lean-runtime awakening attempt also lacked torch (`pr782-awakening.log`); the
+continuing session relies on its earlier successful bootstrap/gate, not that
+failed attempt. Backend/test registry checks are recorded in the final external
+implementation receipt.
+
+Truth boundary: bounded offline checker unit validation, not package integration,
+live quota accounting, operational YouTube, deployment, model evaluation or
+native RSI. Historical tests below retain their original scope and date.
+
 ## LATEST UPDATE - 2026-04-18 Truth Signal Hardening (Worker SR1) [OK]
 
 ### Test Run

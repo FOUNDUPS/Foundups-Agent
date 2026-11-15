@@ -1,0 +1,119 @@
+name: FoundUp nomination review
+
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    paths:
+      - 'requirements-trust-bootstrap.txt'
+      - 'modules/ai_intelligence/ai_overseer/src/foundup_genesis/**'
+      - 'modules/ai_intelligence/ai_overseer/tests/test_*intake*.py'
+      - 'modules/ai_intelligence/ai_overseer/tests/test_foundup_launch_request.py'
+      - 'modules/ai_intelligence/ai_overseer/tests/test_foundup_genesis_validator.py'
+      - 'modules/ai_intelligence/ai_overseer/tests/test_github_nomination_review.py'
+      - 'modules/foundups/agent/src/kanban_plugin_contract.py'
+      - 'modules/foundups/pfmall/http_api.py'
+      - 'modules/foundups/pfmall/intake_host.py'
+      - 'modules/foundups/pfmall/requirements.txt'
+      - 'modules/foundups/pfmall/tests/test_http_api.py'
+      - 'modules/foundups/pfmall/tests/test_clerk_proposal_intake.py'
+      - '.github/ISSUE_TEMPLATE/foundup-project-nomination.yml'
+      - '.github/workflows/foundup-nomination-review.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'requirements-trust-bootstrap.txt'
+      - 'modules/ai_intelligence/ai_overseer/src/foundup_genesis/**'
+      - 'modules/ai_intelligence/ai_overseer/tests/test_*.py'
+      - 'modules/foundups/agent/src/kanban_plugin_contract.py'
+      - 'modules/foundups/pfmall/http_api.py'
+      - 'modules/foundups/pfmall/intake_host.py'
+      - 'modules/foundups/pfmall/requirements.txt'
+      - 'modules/foundups/pfmall/tests/test_http_api.py'
+      - 'modules/foundups/pfmall/tests/test_clerk_proposal_intake.py'
+      - '.github/ISSUE_TEMPLATE/foundup-project-nomination.yml'
+      - '.github/workflows/foundup-nomination-review.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  review-nomination:
+    if: >-
+      github.event_name == 'issues' && github.repository == 'FOUNDUPS/Foundups-Agent' &&
+      startsWith(github.event.issue.title, '[FoundUp nomination] ')
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # For issues, github.sha is GitHub's default-branch commit, not project input.
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build the advisory draft from the bounded event file
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTHON_DOTENV_DISABLED: '1'
+        run: >-
+          env -u GITHUB_TOKEN -u GH_TOKEN python -B -m
+          modules.ai_intelligence.ai_overseer.src.foundup_genesis.github_nomination_review
+          --event-path "$GITHUB_EVENT_PATH"
+          --output-path "$RUNNER_TEMP/nomination-review.json"
+      - name: Preserve the draft for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: foundup-nomination-review-${{ github.run_id }}
+          path: ${{ runner.temp }}/nomination-review.json
+          if-no-files-found: error
+          retention-days: 14
+
+  nomination-contracts:
+    if: github.event_name != 'issues'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
+      - name: Install the bounded test runner
+        run: |
+          python -m pip --isolated --disable-pip-version-check install --only-binary=:all: --report "$RUNNER_TEMP/nomination-installer-pip.json" pip==26.2.2
+          python -m pip --isolated --disable-pip-version-check install --only-binary=:all: --report "$RUNNER_TEMP/nomination-pip.json" -r modules/foundups/pfmall/requirements.txt pytest==9.0.3 httpx==0.28.1
+          python -c 'import importlib.metadata as m,json; print(json.dumps(sorted([{"name": d.metadata["Name"], "version": d.version} for d in m.distributions()], key=lambda d: d["name"].lower())))' > "$RUNNER_TEMP/nomination-installed.json"
+      - name: Verify nomination and unchanged intake contracts
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTHON_DOTENV_DISABLED: '1'
+        run: >-
+          env -u GITHUB_TOKEN -u GH_TOKEN python -B -m pytest -q
+          -c /dev/null --rootdir="$GITHUB_WORKSPACE" --noconftest --import-mode=importlib
+          -o pythonpath=. -p no:cacheprovider --basetemp="$RUNNER_TEMP/nomination-pytest"
+          --junitxml="$RUNNER_TEMP/nomination-contracts.xml"
+          modules/ai_intelligence/ai_overseer/tests/test_github_nomination_review.py
+          modules/ai_intelligence/ai_overseer/tests/test_foundup_launch_request.py
+          modules/ai_intelligence/ai_overseer/tests/test_intake_transport.py
+          modules/ai_intelligence/ai_overseer/tests/test_intake_auth_provider.py
+          modules/ai_intelligence/ai_overseer/tests/test_foundup_genesis_validator.py
+          modules/foundups/pfmall/tests/test_http_api.py
+          modules/foundups/pfmall/tests/test_clerk_proposal_intake.py
+      - name: Retain exact test cases and dependency report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nomination-contract-evidence
+          path: |
+            ${{ runner.temp }}/nomination-contracts.xml
+            ${{ runner.temp }}/nomination-pip.json
+            ${{ runner.temp }}/nomination-installer-pip.json
+            ${{ runner.temp }}/nomination-installed.json
+          if-no-files-found: error
+          retention-days: 14

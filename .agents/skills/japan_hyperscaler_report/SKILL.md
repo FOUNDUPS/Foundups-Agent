@@ -82,6 +82,10 @@ Never transform a lead into a fact. Never describe publication as completed with
 
 Japanese is the default public language. Publish a complete English secondary version only when 012 explicitly requests a bilingual issue or English public edition. An explicit 012 instruction to publish a Japanese-only issue overrides the legacy bilingual pattern. Preserve already-published bilingual archive issues unless a separate correction is requested. Public JHR surfaces must link back to `YUMORI.me` and `YUMORI.info`.
 
+## Website-first / LinkedIn-secondary distribution gate — 2026-10-13
+
+A qualified JHR issue publishes **to eSingularity.ai first**. Reconcile the canonical JHR research/report with the rendered website issue; complete the existing production release and independently verify the actual public issue URL/anchor and content before any LinkedIn newsletter placement. Follow the site release skill (`modules/foundups/esingularity/skills/website-update/SKILL.md`), then hand the website receipt to `modules/platform_integration/linkedin_agent/skillz/linkedin_jhr_newsletter/SKILLz.md` and `linkedin_publishing`. LinkedIn is derived distribution from the website and links back to the canonical issue, not a second fact owner. `NO_REPORT`, site-only CSS/ticker fixes, blocked deployment or duplicate issue do not trigger LinkedIn. A site deploy never itself proves LinkedIn submission or gives unattended publishing permission.
+
 ## Image policy
 
 Prefer official maps, aerial/satellite context, planning maps, grid diagrams, and operator campus images with clear provenance. Do not fabricate a real aerial view. Generated diagrams must be labeled as illustrations.

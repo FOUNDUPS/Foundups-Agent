@@ -30,6 +30,11 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
 from datetime import datetime
+from fractions import Fraction
+import hashlib
+import json
+import math
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -496,6 +501,82 @@ class BTCReserve:
             "num_foundups_backed": len(self.btc_by_foundup),
             "total_inflows": len(self.inflows),
         }
+
+
+@dataclass(frozen=True, slots=True)
+class SimulatorQuoteSnapshot:
+    """Immutable simulator data; construction and identity confer no authority."""
+    format_version: int
+    interpretation: str
+    source_kind: str
+    context_id: str
+    tick: int
+    branch: str
+    reserve_btc: Tuple[int, int]
+    circulating_ups: Tuple[int, int]
+    genesis_ups_per_btc: Tuple[int, int]
+    sats_per_ups: Tuple[int, int]
+    identity_sha256: str
+
+
+def _quote_fraction(value):
+    if type(value) not in (int, float):
+        raise ValueError("quote source must be a built-in number")
+    if value < 0 or (type(value) is float and not math.isfinite(value)):
+        raise ValueError("quote source must be finite and nonnegative")
+    if type(value) is int and value.bit_length() > 1100:
+        raise ValueError("quote source exceeds work bound")
+    result = Fraction(value) if type(value) is int else Fraction(str(value))
+    if max(len(str(result.numerator)), len(str(result.denominator))) > 330:
+        raise ValueError("quote source exceeds digit bound")
+    return result
+
+
+def _quote_context(context_id, tick):
+    if (type(context_id) is not str or len(context_id) > 128
+            or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}", context_id) is None):
+        raise ValueError("invalid quote context")
+    if type(tick) is not int or not 0 <= tick <= 2**63 - 1:
+        raise ValueError("invalid quote tick")
+
+
+def _quote_identity(payload):
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"),
+                         ensure_ascii=True, allow_nan=False).encode("ascii")
+    if len(encoded) > 8192:
+        raise ValueError("quote payload exceeds work bound")
+    return hashlib.sha256(b"foundups.simulator.reserve-quote.v1\0" + encoded).hexdigest()
+
+
+def snapshot_simulator_quote(reserve: BTCReserve, *, context_id: str,
+                             tick: int) -> SimulatorQuoteSnapshot:
+    """Observe host-serialized state using the prospective decimal view.
+
+    This is not atomic across concurrent writes or proof of current funded value.
+    """
+    if type(reserve) is not BTCReserve:
+        raise ValueError("quote requires an exact BTCReserve")
+    _quote_context(context_id, tick)
+    source = (reserve.total_btc, reserve.total_ups_circulating, reserve.genesis_ups_per_btc)
+    if any(type(value) not in (int, float) for value in source):
+        raise ValueError("quote source must be a built-in number")
+    btc, ups, genesis = (_quote_fraction(value) for value in source)
+    if genesis <= 0:
+        raise ValueError("quote genesis must be positive")
+    if ups == 0:
+        branch, quote = "genesis_notional", Fraction(100_000_000) / genesis
+    elif btc > 0:
+        branch, quote = "reserve_ratio", Fraction(100_000_000) * btc / ups
+    else:
+        raise ValueError("quote cannot value outstanding UPS with zero reserve")
+    quote_pair = (quote.numerator, quote.denominator)
+    if max(len(str(value)) for value in quote_pair) > 668:
+        raise ValueError("derived quote exceeds digit bound")
+    pairs = [(value.numerator, value.denominator) for value in (btc, ups, genesis)]
+    payload = dict(format_version=1, interpretation="decimal_view_v1", source_kind="simulator_state",
+                   context_id=context_id, tick=tick, branch=branch, reserve_btc=pairs[0],
+                   circulating_ups=pairs[1], genesis_ups_per_btc=pairs[2], sats_per_ups=quote_pair)
+    return SimulatorQuoteSnapshot(**payload, identity_sha256=_quote_identity(payload))
 
 
 # Global singleton for the BTC Reserve

@@ -3,10 +3,13 @@
  *
  * Persists and restores:
  *   - Projection mode (default, alpha, readiness, category)
- *   - Field scope (personal, creator, category, tag + query)
+ *   - Field scope (personal, creator, category, tag, catalog query)
+ *   - Ordinary Mall layout and independent category row positions
  *   - Scroll position (tile field wrapper scroll offset)
  *
- * Storage: localStorage only. Fails silently if unavailable.
+ * Video and registered product views use separate localStorage namespaces.
+ * Explicit account handoff uses a bounded, single-use sessionStorage record.
+ * Storage failure never blocks discovery or admission.
  * Does NOT touch mall-tile-field.js internals — only reads/writes via
  * the public window.mallTileField API.
  *
@@ -22,6 +25,12 @@
   'use strict';
 
   var STORAGE_KEY = 'pfmall_mall_state_v1';
+  var PRODUCT_KEYS = { move2japan: 'pfmall_product_move2japan_state_v1' };
+  var selectedProduct = null;
+  var selectedVideoScope = null;
+  var RETURN_KEY = 'pfmall_product_return_v1';
+  var RETURN_TTL_MS = 15 * 60 * 1000;
+  var FILTER_KEYS = ['q', 'country', 'prefecture', 'city', 'locality', 'max', 'land', 'sort', 'group', 'large', 'tour'];
   var SCROLL_DEBOUNCE_MS = 300;
   var scrollTimer = null;
   var initialized = false;
@@ -29,11 +38,110 @@
   // Valid projection values for state validation
   var VALID_PROJECTIONS = ['default', 'alpha', 'readiness', 'category'];
 
+  function storageKey() {
+    if (selectedVideoScope) return 'pfmall_video_scope_' + selectedVideoScope + '_v1';
+    return selectedProduct ? PRODUCT_KEYS[selectedProduct] : STORAGE_KEY;
+  }
+
+  function stateStorage() {
+    return selectedVideoScope ? sessionStorage : localStorage;
+  }
+
+  function selectVideoScope(scope) {
+    if (selectedProduct || typeof scope !== 'string' || !/^[a-z][a-z0-9_]{2,49}$/.test(scope)) return false;
+    clearTimeout(scrollTimer);
+    scrollTimer = null;
+    selectedVideoScope = scope;
+    return true;
+  }
+
+  function selectProduct(product) {
+    if (selectedVideoScope || (product !== null && (typeof product !== 'string' || !Object.prototype.hasOwnProperty.call(PRODUCT_KEYS, product)))) return false;
+    clearTimeout(scrollTimer);
+    scrollTimer = null;
+    selectedProduct = product;
+    return true;
+  }
+
+  function safeFilter(key, value) {
+    if (typeof value !== 'string') return '';
+    value = value.replace(/[\u0000-\u001f\u007f]/g, ' ').trim();
+    if (['q', 'prefecture', 'city', 'locality'].indexOf(key) !== -1) return value.slice(0, 80);
+    if (key === 'country') return /^[a-z]{2}$/i.test(value) ? value.toUpperCase() : '';
+    if (key === 'max') {
+      var amount = Number(value);
+      return value && Number.isFinite(amount) && amount >= 0 && amount <= 1e12 ? String(amount) : '';
+    }
+    var allowed = {
+      land: ['with_land', 'no_land', 'unknown'],
+      sort: ['price_asc', 'price_desc', 'land_desc', 'town'],
+      group: ['city', 'locality'], large: ['1'], tour: ['1']
+    };
+    return allowed[key] && allowed[key].indexOf(value) !== -1 ? value : '';
+  }
+
+  function storeProductReturn(product, filters) {
+    sessionStorage.setItem(RETURN_KEY, JSON.stringify({ product_id: product, created_at: Date.now(), filters: filters }));
+    return true;
+  }
+
+  /** Capture filters from this actual product view, never a caller-supplied URL. */
+  function rememberProductReturn(product) {
+    if (product !== 'move2japan' || selectedProduct !== product) return false;
+    try {
+      var url = new URL(window.location.href);
+      if ((url.pathname !== '/member/' && url.pathname !== '/member/index.html') ||
+          url.searchParams.getAll('foundup').length !== 1 || url.searchParams.get('foundup') !== product) return false;
+      var filters = {};
+      FILTER_KEYS.forEach(function(key) {
+        var values = url.searchParams.getAll(key);
+        if (key === 'city' && !values.length) values = url.searchParams.getAll('area');
+        var value = values.length === 1 ? safeFilter(key, values[0]) : '';
+        if (value) filters[key] = value;
+      });
+      return storeProductReturn(product, filters);
+    } catch (e) { return false; }
+  }
+
+  /** Remember a requested member video view through the normal sign-in redirect. */
+  function rememberMemberVideoReturn() {
+    try {
+      var scope = window.mallVideoProjection?.resolveMember(window.location);
+      return !!scope && storeProductReturn(scope, {});
+    } catch (e) { return false; }
+  }
+
+  /** Called only by the existing admitted member path, after its actual gate. */
+  function consumeProductReturn() {
+    try {
+      var raw = sessionStorage.getItem(RETURN_KEY);
+      sessionStorage.removeItem(RETURN_KEY);
+      if (!raw || raw.length > 4096) return null;
+      var record = JSON.parse(raw);
+      if (!record ||
+          Object.keys(record).some(function(key) { return ['product_id', 'created_at', 'filters'].indexOf(key) === -1; }) ||
+          !Number.isFinite(record.created_at) || Date.now() < record.created_at || Date.now() - record.created_at > RETURN_TTL_MS ||
+          !record.filters || typeof record.filters !== 'object' || Array.isArray(record.filters)) return null;
+      if (record.product_id !== 'move2japan') {
+        if (Object.keys(record.filters).length) return null;
+        return window.mallVideoProjection?.memberPath(record.product_id) || null;
+      }
+      if (Object.keys(record.filters).some(function(key) { return FILTER_KEYS.indexOf(key) === -1; })) return null;
+      var query = new URLSearchParams({ foundup: 'move2japan' });
+      FILTER_KEYS.forEach(function(key) {
+        var value = safeFilter(key, record.filters[key]);
+        if (value) query.set(key, value);
+      });
+      return '/member/?' + query.toString() + '#account';
+    } catch (e) { return null; }
+  }
+
   // ─── Storage Helpers ───
 
   function loadState() {
     try {
-      var raw = localStorage.getItem(STORAGE_KEY);
+      var raw = stateStorage().getItem(storageKey());
+      if (raw && raw.length > 131072) return null;
       return raw ? JSON.parse(raw) : null;
     } catch (e) {
       return null;
@@ -42,7 +150,7 @@
 
   function saveState(state) {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      stateStorage().setItem(storageKey(), JSON.stringify(state));
     } catch (e) {
       // Private mode or quota — fail silently
     }
@@ -53,12 +161,28 @@
   function captureState() {
     var state = {};
     var tf = window.mallTileField;
-    if (!tf) return state;
+    if (!tf) return selectedProduct ? null : state;
+
+    var wrapper = document.querySelector('.mall-tile-field-wrapper');
+    if (selectedVideoScope) {
+      return tf.getVideoGridState?.() ||
+        (wrapper ? { scrollTop: wrapper.scrollTop, scrollLeft: wrapper.scrollLeft } : null);
+    }
+
+    if (selectedProduct) {
+      var geographic = typeof tf.getGeographicState === 'function' ? tf.getGeographicState() : null;
+      // Do not erase a saved product position before its public catalog loads.
+      if (!geographic || geographic.foundup_id !== selectedProduct) return null;
+      return { schema_version: 'pfmall_product_state.v1', product_id: selectedProduct, geographic: geographic };
+    }
 
     // Projection
     if (typeof tf.getProjection === 'function') {
       state.projection = tf.getProjection();
     }
+
+    if (typeof tf.getLayoutMode === 'function') state.layoutMode = tf.getLayoutMode();
+    if (typeof tf.getRowOffsets === 'function') state.rowOffsets = tf.getRowOffsets();
 
     // Field scope
     if (typeof tf.getFieldScope === 'function') {
@@ -69,7 +193,6 @@
     }
 
     // Scroll position (from tile field wrapper)
-    var wrapper = document.querySelector('.mall-tile-field-wrapper');
     if (wrapper) {
       state.scrollTop = wrapper.scrollTop;
       state.scrollLeft = wrapper.scrollLeft;
@@ -82,13 +205,33 @@
 
   function save() {
     var state = captureState();
-    saveState(state);
+    if (state) saveState(state);
   }
 
   // ─── Restore (Public) ───
 
   function isValidState(state) {
     if (!state || typeof state !== 'object') return false;
+    if (selectedVideoScope) {
+      var keys = Object.keys(state).filter(function(key) { return key !== 'theater' && key !== 'phoneQuery'; });
+      if ('phoneQuery' in state && (typeof state.phoneQuery !== 'string' || state.phoneQuery.length > 300)) return false;
+      if ('theater' in state) {
+        var theater = state.theater;
+        if (!theater || typeof theater !== 'object' || Object.keys(theater).length !== 2 ||
+            typeof theater.videoId !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(theater.videoId) ||
+            typeof theater.query !== 'string' || theater.query.length > 300) return false;
+      }
+      if (![state.scrollTop, state.scrollLeft].every(function(value) { return Number.isFinite(value) && value >= 0; })) return false;
+      if (keys.length === 2) return true; // legacy scoped positions
+      return keys.length === 4 && typeof state.anchorVideoId === 'string' &&
+        /^[A-Za-z0-9_-]{1,128}$/.test(state.anchorVideoId) && Number.isFinite(state.anchorOffset);
+    }
+    if (selectedProduct) {
+      return !Array.isArray(state) && state.schema_version === 'pfmall_product_state.v1' &&
+        state.product_id === selectedProduct && state.geographic && typeof state.geographic === 'object' &&
+        state.geographic.foundup_id === selectedProduct &&
+        Object.keys(state).every(function(key) { return ['schema_version', 'product_id', 'geographic'].indexOf(key) !== -1; });
+    }
     // Reject if projection is present but not a known value
     if (state.projection && VALID_PROJECTIONS.indexOf(state.projection) === -1) return false;
     // Reject if fieldScope is present but not an object
@@ -112,12 +255,37 @@
     var tf = window.mallTileField;
     if (!tf) return false;
 
+    if (selectedProduct) {
+      return typeof tf.restoreGeographicState === 'function' && tf.restoreGeographicState(state.geographic) === true;
+    }
+
+    if (selectedVideoScope) {
+      var scope = selectedVideoScope;
+      requestAnimationFrame(function() {
+        if (selectedVideoScope !== scope || tf.restoreVideoGridState?.(state)) return;
+        var wrapper = document.querySelector('.mall-tile-field-wrapper');
+        if (wrapper) {
+          wrapper.scrollTop = state.scrollTop;
+          wrapper.scrollLeft = state.scrollLeft;
+        }
+      });
+      return true;
+    }
+
     var restored = false;
+    if (state.layoutMode && typeof tf.setLayoutMode === 'function') tf.setLayoutMode(state.layoutMode);
+    if (state.rowOffsets && typeof tf.restoreRowOffsets === 'function') {
+      requestAnimationFrame(function() {
+        if (!selectedProduct) tf.restoreRowOffsets(state.rowOffsets);
+      });
+    }
 
     // Restore field scope first (it resets projection to default)
     if (state.fieldScope && typeof tf.setFieldScope === 'function') {
       tf.setFieldScope(state.fieldScope);
       restored = true;
+    } else if (!state.fieldScope && typeof tf.clearFieldScope === 'function') {
+      tf.clearFieldScope();
     }
 
     // Restore projection (after scope, since scope may reset it to default)
@@ -129,6 +297,8 @@
     // Restore scroll position (deferred to next frame for layout)
     if (state.scrollTop || state.scrollLeft) {
       requestAnimationFrame(function() {
+        // A product selection can occur before this deferred video restoration.
+        if (selectedProduct) return;
         var wrapper = document.querySelector('.mall-tile-field-wrapper');
         if (wrapper) {
           if (state.scrollTop) wrapper.scrollTop = state.scrollTop;
@@ -145,7 +315,7 @@
 
   function clear() {
     try {
-      localStorage.removeItem(STORAGE_KEY);
+      stateStorage().removeItem(storageKey());
     } catch (e) {
       // fail silently
     }
@@ -194,8 +364,16 @@
       wrapper.addEventListener('scroll', function() {
         clearTimeout(scrollTimer);
         scrollTimer = setTimeout(save, SCROLL_DEBOUNCE_MS);
-      }, { passive: true });
+      }, { passive: true, capture: true });
     }
+
+    // Native horizontal row scroll does not bubble. Capture just the shared
+    // product tracks so dynamic row replacement keeps the same one listener.
+    document.addEventListener('scroll', function(e) {
+      if (!selectedProduct || !e.target.matches || !e.target.matches('.mall-field-group-track')) return;
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(save, SCROLL_DEBOUNCE_MS);
+    }, { capture: true, passive: true });
 
     // Save on visibility change (user leaves tab or locks phone)
     document.addEventListener('visibilitychange', function() {
@@ -211,6 +389,19 @@
   // ─── Public API ───
 
   window.mallStateRestore = {
+    /** Keep a fixed video field's scroll in its own browser tab. */
+    selectVideoScope: selectVideoScope,
+
+    /** Select a registered product namespace before loading its catalog. */
+    selectProduct: selectProduct,
+
+    /** Remember this product's filters for an explicit account handoff. */
+    rememberProductReturn: rememberProductReturn,
+    rememberMemberVideoReturn: rememberMemberVideoReturn,
+
+    /** Consume a safe, short-lived product return after real member admission. */
+    consumeProductReturn: consumeProductReturn,
+
     /** Save current mall state to localStorage. */
     save: save,
 

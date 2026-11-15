@@ -1,3 +1,456 @@
+## Current RSI selection — 2026-11-01
+
+Follow the [canonical dispatch checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#micro-verification-and-protected-native-composition--2026-11-01).
+PR2276's assurance/receipt connection is merged and exact-main checked; its older
+publication instruction is closed. Native19/P0 now has an explicit protected
+requester/lease-consumption gap, not a safe ordinary-main factory call. R15's
+existing test-registry procedure remains the first admitted improvement target.
+The source-item and subsequent aggregate/display Vote proposals were independently
+rejected; coordinator repairs closed the bounded defects. The latter passes398
+module cases and demonstrates why consumers need independent verification after
+scorer tests pass. These qualify micro verification fixtures, not native G1–G5.
+See [the aggregate trial](../../../docs/operations/RSI_SWARM_DISPATCH.md#vote-aggregate-to-display-trial--2026-11-01).
+The October28 verification classification/CI observations below remain scoped
+historical evidence; their performance experiment remains queued, not the next
+native execution requirement. Preserve mandatory checks and current owners.
+
+## Current verification integration — 2026-10-28
+
+Source baseline: `4afb9284d32e9af24f578fda91063114263d5a39`.
+This selection supersedes the older "Current selection" below for the
+risk-verification lane only. [PR2248](https://github.com/FOUNDUPS/Foundups-Agent/pull/2248)
+is the [preserved handoff](../../../docs/operations/WRE_RISK_BASED_VERIFICATION_HANDOFF_20261028.md);
+its planning document is not runtime admission.
+
+WSP15: C3/I4/D4/Impact4 = **15/P1**. Reconcile the existing policy-to-execution
+connection before optimizing broad CI scheduling. Reuse wins over a new router,
+scheduler, memory store or supervisor. The nine-suite connected selection
+passes 384 cases locally; independent source/test review passes an overlapping
+93 cases. See [TestModLog](tests/TestModLog.md#2026-10-28--risk-verification-preflight-and-downgrade-regressions).
+
+| Connection | Classification | Current evidence and remaining boundary |
+|---|---|---|
+| WRE test-impact planning | IMPLEMENTED | `wre_test_impact_differential_gate.py` derives required scope deterministically; mandatory escalation is preserved. |
+| Registry and dependency selection | IMPLEMENTED | `wre_test_registry_differential_plan_runtime.py` verifies exact revisions, registry, recognized dependency/config parity and bounded shards. This is not a general dependency graph. |
+| Differential execution | IMPLEMENTED | `wre_test_differential_runtime.py` runs the trusted collector against archived parent/candidate trees. This is local execution, not OS-confined native authority. |
+| Independent outcome verification | TESTED_ONLY | Resident producer/capability/verifier wiring exists. New controls prevent a declared/bound policy from falling back to ordinary results. Local-only differential receipts still fail final acceptance. |
+| AI Gateway compute routing | IMPLEMENTED | Existing campaign admission, configured gateway and benchmark owners remain. This deterministic slice requires no model selection or provider calls; it does not qualify current live routes. |
+| Hybrid worker coordination | SPECIFIED | Existing AgentDB/resident queue owns tickets; the integrated hybrid team model remains unproved. Reuse [hybrid architecture](../../../docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md#verification-and-swarm-research-reconciliation--2026-10-28). |
+| WRE PatternMemory | IMPLEMENTED | The registry executor records `telemetry_projection`; loaded-skill bindings and real SQLite retention exist. A projection is not a learned improvement or promotion receipt. |
+| WSP97 completion | TESTED_ONLY | Existing merge-sentinel contracts cover failed/pending CI and exact-main identity. Hosted checks, squash merge and post-merge readback remain separate per-PR evidence. |
+| WSP48 improvement retention | BLOCKED | Generic `recursive_improvement/src/learning.py::apply_improvement` still fails closed. No authenticated activation, rollback and later-use benefit for this loop is demonstrated here. |
+
+**Closed in this slice:** complete policy/check-plan preflight before commands;
+bound-policy substitution/omission rejection; mandatory full-scope escalation;
+final-verifier downgrade rejection; additive parallel CI coverage for planner,
+producer, resident caller, final verifier and exact-main prerequisite contracts.
+No existing CI/security/release check is removed or weakened.
+
+**Next eligible layer:** measure the existing canonical shard projection and
+current CI critical path on the same exact source. Propose disjoint parallel
+batches with unchanged test inventory, mandatory checks and final aggregation;
+compare wall time, runner-minutes, accepted results, retries and escaped defects.
+WSP15 C3/I4/D3/Impact4 = 14/P1; an experiment cannot promote its own acceptance
+criteria. Do not claim savings from a shorter selected suite alone.
+
+Observed reference: [CI run 40624168626, test job 122605013062](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/40624168626/job/122605013062)
+took 525s. Signing composition 81s, startup/policy 64s, dependency cache 74s and
+dependency installation 65s are distinct contributors. These are observed step
+durations from a single reference run, not a before/after performance estimate.
+
+**Still blocked:** authenticated OS-isolated consumption of projected shards,
+accepted native worker outcome, controlled promotion/rollback, later measured
+retained benefit and bounded continuation. More unit tests do not close these
+gates. The bridge's existing runtime/admission owners supply the missing
+evidence; do not mint grants or replace them.
+
+## Skill-feedback lineage checkpoint — 2026-10-22
+
+The existing coordinator/result and variation paths now retain the loaded skill
+text identity; seven added controls plus connected suites pass 232 cases locally.
+Real SQLite reopen is exercised; scanner and model outputs are substituted.
+Next: admit evidence-backed corrections against these exact run/source bindings
+through existing owners. Moshpit nomination ingestion, authenticated evaluation,
+activation/rollback and later measured benefit remain incomplete. No new store,
+scheduler, production promoter or model execution is introduced.
+
+## Closed measured-zero layer — P15 checkpoint
+
+Selected 14/P1 (C2/I4/D4/Impact4): repair existing fidelity statistics without
+changing ranking or threshold semantics. Valid baseline: 4 failures/5 passes becomes 9 passes;
+42 disjoint connected controls pass. The coordinator supplied the minimal repair
+after one rejected local proposal. PR2062 is merged/main-verified at `6efbc3ac1`;
+retained/control/recovery use of unchanged baseline SQLite rows selects positive
+→ zero control → positive. The owned lane is retired with recovery preserved.
+This closes the measured consumer repair, not model learning or native admission.
+
+**Historical October5 selection:** [preserved checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#retain-the-direct-revocation-proof-regression--2026-10-05); superseded by the current selection above.
+At724bb684 the bounded existing local adapter produced two rejected regression
+proposals (0/2 accepted). Retain the independently verified team-authored coverage
+repair, then qualify installed models on the fixed task. The earlier registered
+`reddog_operations`14/P1 remains conditional on scanner, full-context capacity and
+admission; it is not an executable native worker. Native unattended18/P0 is separate.
+
+## Named telemetry layer — P14 checkpoint
+
+Selected 15/P1 (C3/I4/D4/Impact4): connect the existing registry scope projection
+to the named WRE TELEMETRY path and record one observation without effect success,
+outcome learning or model retries. Initial 75 cases pass after 75 missing-API
+baseline failures. Independent source review is accepted:39 additive controls
+and unchanged75 pass; stable connected306pass/two Windows link skips. Actual
+scanner/producer/private-persistence observation now completes:155 shards
+per side, one projected event and zero outcomes/variations. Earlier scanner
+and materialization failures are preserved. Isolated Cisco2.2.0 and short
+owned TEMP are qualified; shared runtime and global settings are unchanged.
+PR2061 is merged/main-verified at 0b3f6cbc3; its owned lane is retired. Recovery
+and short TEMP remain preserved, the latter following a tool-policy cleanup block. The initial failed, source-drifted
+connected observation remains historical.
+
+P13 PR2060 is now merged/main-verified at `b99d05309385e272cd5d0691fa23e5abb654864a`;
+its owned lane is retired with recovery preserved. Native unattended RSI remains
+blocked at 18/P0. Re-observe after this bounded layer; no new module or later
+runtime dispatch is selected here. See the [canonical checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#named-registry-scope-telemetry--p14-checkpoint).
+Earlier entries below are historical.
+
+## Retained local source layer — 2026-10-04
+
+PR2055 is merged/main-verified with its owned lanes retired. Existing saved
+benchmark receipts inform the later fresh-process validation:29pass retained,
+26pass/3fail under controlled rollback,29pass after exact restoration. One
+task-specific supervised repair benefit is retained; this does not activate
+native effects, autonomous promotion or learned variation retention. See the
+[current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#retained-local-repair-and-remaining-admission-gate--2026-10-04).
+Earlier entries below are historical.
+
+## Current execution-truth layer — 2026-10-04
+
+Merged PR2053's real WRE observation passed initial-proposal usefulness but its
+stored reflection was incomplete/unverified. No learned variation was promoted.
+The next 14/P1 owner repair prevents nonzero CodeAct command exits from reporting
+success: 21 focused/207 connected cases pass. Public CodeAct remains blocked;
+source publication and autonomous repair admission are separate. Follow the
+[canonical checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#codeact-exit-truth-and-proposal-checkpoint--2026-10-04).
+Earlier entries below are historical.
+
+## Local continuity proposal canary — 2026-10-04
+
+Existing local proposal/reflection repair:35 focused and173 connected passes.
+A real local Qwen native-chat worker supplied two expressions after raw mode
+failed the task. Publication and later retained use remain separate. Follow
+the canonical root roadmap/backlog for fresh selection; native18/P0 admission
+is still blocked. This supervised diagnostic does not activate production RSI.
+
+## Current repository repair layer — 2026-10-04
+
+Failure recall now separates execution success from structural fidelity.
+159 local regressions pass; existing CI includes the affected suites. The
+[canonical observation](../../../docs/roadmaps/rsi_swarm_backlog.json) records
+local worker measurements and OpenClaw/Hermes version readiness. Promotion and
+native admitted/retained operation remain separate gates. Earlier diagnostic
+entries below are historical; the prefix diagnostic remains closed.
+
+## Terminal fixture observation — 2026-10-02
+
+**fixture_inconclusive.** One reviewed terminal child returned normally in2.5s. The recorded7895232-byte fixture hash matched; import, params, backend interval/free, descriptor close and ERROR logger/capture restoration returned. Model load returned null; vocabulary/model-free were not attempted. Capture recorded0 writes/characters and no labels: fixture_inconclusive, diagnostic usefulness insufficient. The sole allowance and this diagnostic branch are closed; no usable worker or specific rejection explanation was established. No original-model access, inference/generation, provider call, production runtime change, WRE admission or retained RSI gain is established by this diagnostic.
+
+Blocked prerequisite **18/P0:** Native autonomous RSI admission.
+See [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#terminal-fixture-observation--2026-10-02)
+and backlog `terminal_fixture_observation_20261002`. Earlier entries remain historical.
+
+## Logger connection controls — 2026-10-02
+
+9/9 grouped model-free connection cases passed in one invocation (12 isolated intervals; child 0.063s, parent 0.328s), with no failed/unrun cases or outer guard denials. ERROR filtering preserves the synthetic EOF hint but drops CONT.
+Native coverage, admission and retained benefit remain open.
+Next **14/P1:** Prepare one terminal, separately reviewed fixture-only native decision integrating the qualified ERROR-level capture helper after import; retain the existing input, loader, model parameters and resource limits, with outcome-specific owner handoffs and no further diagnostic-loop expansion.
+See [checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#logger-connection-controls--2026-10-02) and backlog `logger_connection_controls_20261002`.
+Stop on insufficient diagnostic usefulness and rescore; no automatic native retry.
+
+## Diagnostic capture controls — 2026-10-02
+
+24/24 fixed inert capture cases passed in one bounded invocation (child 0.078s, parent 0.937s); no failed or unrun cases and no outer guard denials. Actual diagnostic capture remains unqualified; the prior null result is preserved.
+Next **13/P1:** Qualify the installed logger verbosity and callback path connected to the existing bounded diagnostic capture, with a finite model-free INFO/ERROR/CONT comparison and level-restoration controls before any new native allowance.
+See [checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#diagnostic-capture-controls--2026-10-02) and
+backlog `diagnostic_capture_controls_20261002`. No real null-device open, fixture/model read, native-package/model execution, provider call, production change, WRE admission or retained RSI gain occurred.
+
+## Native guarded diagnostic — 2026-10-02
+
+**fixture_inconclusive.** One reviewed fixture-only attempt returned exit0 in4.156 seconds. One exact7,895,232-byte Python fixture hash read matched the saved digest, with stable same-API path/descriptor identities and normal descriptor close. Native package import, backend initialization, default-parameter roundtrip and backend free returned. Model load returned a null handle; vocabulary and model free were not attempted. Zero audit denials or setup/cleanup/integrity flags. The evidence is accepted, but the fixture was not accepted; the sole allowance is closed without retry. No original-model access, inference/generation, provider call, production runtime change, WRE admission or retained RSI gain is established by this diagnostic.
+
+Next **13/P1:** Qualify bounded sanitized diagnostic capture at the existing audit worker Python stderr/logger boundary with fixed inert controls, preserving the actual native callback and parent stdio restrictions.
+See [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#native-guarded-diagnostic--2026-10-02)
+and backlog `native_guarded_diagnostic_20261002`. Earlier entries remain historical.
+
+## Null-device guard controls — 2026-10-02
+
+20/20 fixed inert guard cases passed in one bounded invocation (child 0.047s, parent 0.344s); no failed or unrun cases and no outer guard denials. Native import remains unqualified; the prior setup failure is preserved.
+Next **14/P1:** Prepare one fresh separately reviewed fixture-only native diagnostic packet using the qualified null-device guard and existing installed loader/lifetime/file/process owners, with unchanged limits.
+See [checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#null-device-guard-controls--2026-10-02) and
+backlog `null_device_guard_controls_20261002`. No real null-device open, fixture/model read, native-package/model execution, provider call, production change, WRE admission or retained RSI gain occurred.
+
+## Native fixture diagnostic — 2026-10-02
+
+**setup_invalid.** One bounded attempt returned child exit 1 in 2.5 seconds. The verified fixture descriptor supplied one exact 7,895,232-byte hash read matching the captured prefix. Native package import then failed with RuntimeError and one denied open_write event. The explicit native interval and parameter callback were not entered; backend_result is null. Descriptor close returned normally. Source/runtime pins matched; native import effects and aggregate native cleanup remain unknown. The one-call allowance is consumed and closed without retry. No original-model access, inference/generation, provider call, production runtime change, WRE admission or retained RSI gain is established by this diagnostic.
+
+Next **13/P1:** Qualify the existing diagnostic guard for the installed package null-device import opens and bounded denied-write detail, using fixed inert path/flags controls before considering a separately reviewed new native packet.
+See [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#native-fixture-diagnostic--2026-10-02)
+and backlog `native_fixture_diagnostic_20261002`. Earlier entries remain historical.
+
+## Backend lifetime controls qualified — 2026-10-02
+
+Sixteen of sixteen fixed inert backend-lifetime cases passed in one bounded invocation (child 0.062s, parent 0.312s), with no failed, skipped, missing cases or guard denials. One wrapper extends the existing audit probe; ownership and nested
+failure/cleanup accounting are tested with inert APIs. No original-model or captured-fixture access, native-model/backend execution, provider call, production runtime change, admission or retained RSI gain occurred.
+
+Next **14/P1:** Prepare one bounded fixture-only native vocabulary diagnostic using the existing installed loader and accepted backend/model lifetime wrappers; execute only after a separate exact-packet review.
+See [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#backend-lifetime-controls-qualified--2026-10-02)
+and backlog `backend_lifetime_controls_20261002`. Earlier entries remain historical.
+
+## Verified GGUF prefix extraction — 2026-10-02
+
+Eight of eight disposable-file connection cases passed in one bounded invocation (0.422s parent). A separately reviewed capture then read exactly 7,895,232 original bytes, wrote the same prefix exclusively and verified one 7,895,232-byte readback (1.016s parent). Actual 14 zero padding bytes and prefix hash equality are verified.
+No tensor payload access, native-model/backend loading, provider call, production runtime change, RSI admission or retained-gain demonstration occurred.
+
+Next **14/P1:** Qualify explicit backend initialization/probe/cleanup ownership around the existing raw-model diagnostic using finite inert controls before a separate fixture-only native packet.
+See [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#verified-gguf-prefix-extraction--2026-10-02)
+and backlog `gguf_prefix_extraction_20261002`. Prior entries remain historical.
+
+## Bounded prefix capture controls qualified — 2026-10-02
+
+One reviewed bounded child passed 32/32 fixed synthetic capture/output cases: child 0.016s, parent 0.250s; zero failures, skips, missing cases or guard denials. Two small audit helpers extend existing source; prior parser/handle AST is unchanged.
+One-read capture, typed frozen comparison, actual synthetic padding and exclusive
+write/close failure accounting are covered. No original model stat/read, real binary capture, native-model/backend/provider execution or production runtime change occurred. Native support, admission and retained benefit remain open.
+
+Next **14/P1:** Integrate the qualified capture helpers through one explicit verified-stream callback, qualify the narrow connection on disposable files, then separately gate one exact original-prefix capture and verified output readback in the same bounded packet.
+See [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#bounded-prefix-capture-controls-qualified--2026-10-02)
+and backlog `gguf_prefix_capture_controls_20261002`. Earlier entries remain historical.
+
+## Bounded original GGUF directory observed — 2026-10-02
+
+One independently reviewed original-file observation parsed 401 tensor-directory records. Actual reads: 3,240,638 bytes; directory end: 7,895,218; alignment: 32 (default); computed padding: 14 bytes; computed data start: 7,895,232. Frozen historical metadata matched and the descriptor was observed closed.
+
+Padding and tensor payload were not accessed. This establishes bounded structural observation, not complete-file validity, native compatibility, worker admission or retained RSI benefit. Production and installed runtime owners are unchanged.
+
+Next **14/P1:** Prepare a governed one-read, exact-length disposable GGUF prefix capture using the existing verified-file owner and unchanged parser, with independent finite capture oracles before any extraction.
+See [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#bounded-original-gguf-directory-observed--2026-10-02)
+and backlog `original_gguf_directory_20261002`. Earlier entries remain historical.
+
+## Bounded GGUF header controls qualified — 2026-10-02
+
+One independently reviewed audit child passed 24/24 fixed inert cases. Only
+existing `inspect()` changed; Reader and verified-file ownership stay unchanged.
+Computed alignment does not inspect padding or payload. No model/backend/provider
+call or original-file read occurred; no production runtime change.
+
+Next 14/P1: bounded original-file directory-read
+preparation, with fresh source/file identity and a separately reviewed allowance.
+Native compatibility, admitted execution and retained improvement remain open.
+See [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#bounded-gguf-header-controls-qualified--2026-10-02)
+and backlog `gguf_header_boundary_20261002`. Earlier entries are historical.
+
+## Raw-handle diagnostic lifetime qualified — 2026-10-02
+
+One reviewed audit child passed 17/17 fixed inert cases. The source-pinned
+existing scaffold gains one AST-only helper: own before vocabulary lookup,
+attempt free once, preserve primary/cleanup errors and never claim failed free
+as release. No installed or production code changed. Backend/native cleanup,
+model support and retained benefit are still unqualified; allowance closed.
+
+Next 14/P1: bounded GGUF header/parser preparation with the existing
+Reader and verified-file owners, preserving current ceilings. No original-file
+extraction or native call is allocated by this checkpoint.
+See [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#raw-handle-diagnostic-lifetime-qualified--2026-10-02)
+and backlog `native_raw_handle_lifetime_20261002`. Earlier entries are historical.
+
+## Worker committed-memory boundary qualified — 2026-10-02
+
+Existing process owners now provide an optional aggregate Windows Job commit
+cap, validated before creation and applied before resume. Defaults preserved.
+Local final evidence: 48 deterministic + 2 actual memory + 4 connected process
+and 8 manifest cases pass. The same 128 MiB bound accepts/releases 1 MiB and
+rejects 256 MiB. Prior failed harness/fixture/overflow-oracle attempts remain recorded.
+
+Next 14/P1: qualify input/read scope and cleanup for the existing no-allocation
+native metadata diagnostic. No native/model/provider execution, admission,
+retained benefit or whole-host containment is established by this layer.
+See [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#worker-committed-memory-boundary-qualified--2026-10-02)
+and backlog `child_memory_limit_qualification_20261002`. Earlier entries are historical.
+
+## Nemotron formatter qualified — 2026-10-02
+
+One reviewed model-free invocation passed6/6 fixed cases through the current
+engine and installed formatter/factory/converter source. Six renders, six
+synthetic tokenizer entries, two synthetic completion entries; zero native
+constructor attempts. Fit rejection and error redaction remain intact. Existing
+template obeys explicit thinking control in these cases. Allowance closed.
+
+Next 14/P1: existing-owner native metadata/vocabulary diagnostic
+preparation with explicit read/resource/cleanup bounds. High-level vocab_only
+still constructs a context; DLL strings are not support proof. No native call,
+model generation, new adapter, admission or retained gain is allocated.
+
+See the [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#nemotron-formatter-qualified--2026-10-02)
+and backlog `nemotron_formatter_qualification_20261002`. Earlier entries are historical.
+
+## Nemotron metadata qualified — 2026-10-02
+
+One exact-path metadata diagnostic passed independent review: 3,216,492 bytes
+read, 2.485s, descriptor closed. Existing reader/Windows owner reused with only
+path/size constants changed. Prior 15 generic fixtures reused, no new test count.
+
+Saved template consumes enable_thinking=False and selects an empty thinking
+prefix; actual formatter execution and native architecture/load support remain
+unverified. Next 13/P1: adapt the existing four-case installed-source native-chat
+harness to current engine and saved template, with at most two reviewed control
+cases. No model calls, new runtime adapter, native admission or retained gain.
+
+See the [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#nemotron-metadata-qualified--2026-10-02)
+and backlog `nemotron_metadata_qualification_20261002`. Earlier entries are historical.
+
+## Worker metadata reader qualified — 2026-10-02
+
+Existing Windows verified-file helpers resolved the audit reader's cross-API
+timestamp problem while retaining full same-API mutation checks. Disposable
+fixtures: 15 passed, 6 real owner opens. One bounded metadata read completed:
+5,195,563 bytes, 4.515s, descriptor closed; no model load/generation/render.
+
+GPT-OSS compatibility remains unqualified: its template ignores WRE's
+enable_thinking control, while final-channel extraction and native load support
+are not established. No actual generation failure is claimed. Next 14/P1:
+separately reviewed metadata qualification of the already inventoried Nemotron
+artifact using the same reader. GPT-OSS-specific work deferred 11/P2; no new
+runtime adapter, model budget, admission or retained benefit claimed.
+
+See the [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#worker-metadata-reader-qualified--2026-10-02)
+and backlog `worker_metadata_qualification_20261002`. Earlier entries are historical.
+
+## Guided worker comparison stopped — 2026-10-02
+
+The supervised existing WRE route consumed the exact stored768-byte procedure:
+808 input/134 output tokens,39.485s; context fit and production cleanup verified.
+The unchanged parser rejected `len`; source review also found invented
+`self._cached_token`. Accepted0/1, generated executions/tests0. Later-use and
+disabled-control cases were not run; all unused budgets closed. A coordinator
+prelaunch KeyError was preserved separately from the sole actual parser failure.
+
+Next14/P1: qualify a different installed worker's metadata/template against
+existing selector/adapter/Gateway owners. No load, generation or provider call
+allocated. No retained benefit, production skill promotion or native admission.
+See the [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#guided-worker-comparison-stopped--2026-10-02)
+and backlog `retained_procedure_comparison_20261002`. Earlier entries are historical.
+
+## Native baseline and loader qualification — 2026-10-02
+
+Actual supervised helper/adapter/native-chat baseline returned once: 658 input,
+122 output tokens, 44.313s. Existing production engine/native close each returned
+once with detached/reset ownership and no fallback. The unchanged parser rejected
+the proposal's `.strip()` call; no generated code was executed or tested.
+
+The real loader separately returned the reviewed 768-byte disposable procedure
+with hygiene enabled. Original prompt2601bytes → single-key treated prompt3406;
+this model-free check does not establish token fit or benefit. Next13/P1: qualify
+the finite treated/later-use/disabled-control packet. All current model budget
+is closed; admission and retained benefit remain open. No production code changed.
+See the [current checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#native-baseline-and-loader-qualification--2026-10-02)
+and backlog `proposal_conformance_baseline_20261002` for independent evidence.
+Earlier entries below retain historical scope.
+
+## Reviewer-authority closure and next RSI test — 2026-10-02
+
+Reviewer-key composition closed in PR #2014 at `44d833c`. Registry-audit experiment
+preparation ended objective-inconclusive; its single deterministic baseline has
+no measured improvement target. Next 13/P1: qualify the frozen proposal-conformance
+preflight using existing caller/loader owners and one disposable procedure-text
+change. No model budget, generated-code execution or native admission is granted.
+Unseeded sampling and the task-specific AST gate limit improvement claims.
+Earlier pending/next-selection entries are historical. See the canonical
+[closure and test checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#reviewer-authority-closure-and-next-rsi-test--2026-10-02)
+and backlog observation `reviewer_authority_closure_20261002` for gates and receipts.
+
+## Explicit per-call cleanup — 2026-10-01
+
+Existing Qwen engine and WRE adapter now own explicit per-call cleanup. The independently frozen portable selection reproduced22 missing-contract failures (40pass) before repair and passed62/62 after repair, without model/provider/database calls. This closes a resource-ownership contract, not native memory-release proof or RSI admission.
+
+| Selection | Passed | Failed | Errors / skipped |
+|---|---:|---:|---:|
+| Before repair, same frozen62 IDs | 40 | 22 | 0 / 0 |
+| After repair, same frozen62 IDs | 62 | 0 | 0 / 0 |
+
+The selection retains35 prior portable caller controls and adds27 lifecycle
+cases. Real helper/adapter/engine methods use fake model handles and inert
+unrelated constructor collaborators. Nineteen source bindings remained equal
+before/after each execution. Independent author and reviewer roles are separate
+from implementation. Python audit guards are not OS/native isolation, and
+sampled hashes are not immutable execution evidence. The existing CI step runs
+the complete execution-truth file; hosted results belong to publication receipts.
+
+Cleanup failure rejects otherwise valid text. Direct-engine reuse, reentrant
+close, owned-but-uninitialized models and primary interruptions are covered.
+The installed native destructor already exists: no persistent leak or actual
+native memory release is claimed. No grant, provider call, candidate application,
+held-out benefit or retained improvement occurred.
+
+WSP62 review: adapter51→50lines; new result helper12 and close11. Engine class
+305→317 retains cohesive resource ownership above its inherited review threshold.
+Existing test owner864→1103lines is in the review window below1500; new functions
+remain bounded. Keep its portability/oracle cohesion now; a future decomposition
+must preserve all case identities and fixtures. No exemption or threshold change.
+
+**Next eligible assessment, 13/P1:** Map the existing external-signer issuer to resident admission prerequisites without consuming authority.
+Re-observe fresh main and ownership after closure. Read-only prerequisite tracing
+does not mint grants or activate native workers. Native18/P0, Holo15/P1 and
+independent retained benefit remain open; AmIBot stays downstream. Do not retry
+the previously rejected proposal, relax its acceptance grammar, or touch active
+FoundUps/Remote AutoPost as part of this slice.
+
+Evidence: backlog `current_observation.local_engine_lifecycle_20261001` and
+`O:/Foundups-Agent-audits/20261001-rsi-engine-lifecycle/`.
+
+## Actual native caller trial — 2026-10-01
+
+One real local-model call through the implemented WRE helper, adapter and Qwen native-chat engine returned in 36.125 seconds (658 input/122 output tokens). Independent review accepted the bounded route evidence; the unchanged strict inspector rejected the proposal for an unapproved `.strip()` call. No candidate was executed or applied. Two zero-init setup attempts are recorded: one failed, one passed after a CRLF normalization repair. Native admission and retained improvement remain unproven.
+
+| Measurement | Observed |
+|---|---|
+| Setup attempts / failed / passed | 2 / 1 / 1 |
+| Model calls / returned / retries | 1 / 1 / 0 |
+| Scope-accepted / scope-rejected proposals | 0 / 1 |
+| Candidate executions / test cases | 0 / 0 |
+| Input / output tokens | 658 / 122 |
+| Native generation / bounded child seconds | 31.047 / 36.125 |
+| Provider requests | 0 |
+| Held-out / retained gain | unknown / unknown |
+
+The trial ran pinned source `eb39c4b07836a418f6da0e0ad0dd02df25b76933` with 19 repository and 516
+runtime-file bindings. Publication starts at `4c37297f47e0774d5b380bd06a6b936bfa201550`; the caller leaves
+are unchanged and PR #1996 terminology is preserved. Real formatter/tokenizer
+and model initialization ran with CPU 4/GPU 0, 2048 context and 512 output cap.
+The same 658-token vector was checked twice; output stopped after 122 tokens.
+Proposal quarantine, pre/post source/runtime/model hashes, explicit test-owned
+close and bounded process cleanup passed independent result review.
+
+Initial setup failed before construction/model use, with only RuntimeError
+recorded. Static review established a raw-CRLF versus preregistered-LF prompt
+mismatch; its exact first failure was not recoverable. A reviewed correction
+retained raw input hashes and added bounded diagnostics. Original evidence is
+preserved. Neither setup attempt loaded a model.
+
+The frozen parser rejected `.strip()`; no grammar relaxation, model retry or
+candidate application followed. Route success does not imply task success.
+These are same-process witnesses plus independent receipt review, not formal
+verification, pristine held-out evaluation or authenticated runtime authority.
+Inert unrelated constructor collaborators and externally owned model cleanup
+mean this is not a full admitted WRE/OpenClaw/Hermes execution.
+
+**Next 13/P1: Qualify explicit per-call model cleanup in the existing Qwen engine and WRE adapter.**
+The adapter creates a per-call engine but has no explicit cleanup. Installed
+Llama has a destructor, so this finding is not a demonstrated persistent leak.
+Extend the existing engine/adapter and existing portable tests; preserve direct
+engine reuse and stable failure reporting. No new model call is needed to
+qualify that contract. Native 18/P0 and Holo 15/P1 remain separately blocked;
+AmIBot stays downstream. Preserve active FoundUps and Remote AutoPost.
+
+Evidence: backlog `current_observation.native_caller_trial_20261001` and `O:/Foundups-Agent-audits/20260930-rsi-native-caller-trial/`.
+The one-call budget is closed; no retained improvement or autonomous RSI claim.
+
 ## Native proposal caller layer — 2026-09-30
 
 The existing master helper, local adapter and Qwen engine now support an explicit native-chat proposal mode. Raw completion remains the default. Local35-case portable contracts and4 installed-source formatter/handler controls passed independently reviewed checks; neither loaded a model. The original collection-only runner failure is preserved. Full native admission and retained improvement remain unproven.

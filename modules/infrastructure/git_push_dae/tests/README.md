@@ -1,5 +1,35 @@
 # GitPushDAE Test Suite
 
+## Queue-default acceptance — 2026-10-04
+
+Current matrix in the existing `TestEntrypointEvidence` supersedes the historical
+six-case matrix below. CLI controls use real disposable Git and isolated Python;
+router positives use an inert namespace. API controls use temporary spools,
+a fixed event builder and inert router. No production router, hook or account runs.
+
+| Cases | Required outcome |
+|---|---|
+| No flag and enqueue-only, each missing/inert router (4) | Exit0, one event, no result or router import/handoff |
+| Explicit dispatch, missing router (1) | Exit1, event and correlated import error |
+| Explicit dispatch, inert success/failure (2) | Exit0/1, event/result and one router handoff |
+| Conflicting modes in both orders, unsupported direct flag (3) | Exit2, no Git/event/spool/router work |
+| API omitted mode / explicit False (2) | Queue-only / existing inert dispatch respectively |
+
+Frozen before implementation: original source 4 pass/8 fail; candidate 12 pass.
+The original three pytest function ASTs remain unchanged and all pass, giving
+15 cases in the full file. Named CI command below selects 12 (overlapping coverage,
+not12 additional cases). False `delivered` fixtures are never delivery receipts.
+
+```sh
+python -I -B modules/infrastructure/git_push_dae/tests/test_post_commit_social_runner.py TestEntrypointEvidence -v
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -B -m pytest -q -c /dev/null --noconftest -o pythonpath=. -p no:cacheprovider modules/infrastructure/git_push_dae/tests/test_post_commit_social_runner.py
+```
+
+On Windows use `-c NUL`. Existing CI already selects the named class; no new job.
+The Sept28 original-default observations remain historical. PR1945 is in current
+main ancestry; its old pending publication labels are superseded by that fact,
+not by a claim of current delivery or broad runtime qualification.
+
 ## Runner entrypoint evidence — 2026-09-28
 
 Existing owner: `test_post_commit_social_runner.py`. The three original pytest

@@ -127,6 +127,7 @@ STREAMABLE_EVENT_TYPES = {
     # State sync for DRIVEN_MODE (simulator controls animation)
     "state_sync",             # Full state snapshot for animation sync
     "phase_command",          # Direct phase control command
+    "work_telemetry_sync",    # Read-only observed swarm/work telemetry snapshot
     # Synthetic user simulation (Simile AI pattern - pre-launch market testing)
     "synthetic_user_adopted", # Synthetic persona adopted a FoundUp
     "synthetic_user_rejected", # Synthetic persona rejected a FoundUp
@@ -783,6 +784,46 @@ async def health(request: Request):
     }
 
 
+@app.get("/api/work-telemetry")
+async def work_telemetry(request: Request):
+    """Read-only observed work telemetry endpoint (no orchestration authority)."""
+    allowed, reason, role = _authorize_member_request(
+        request,
+        required_role="observer_012",
+    )
+    if not allowed:
+        raise HTTPException(
+            status_code=403,
+            detail={"error": "member_access_denied", "reason": reason},
+        )
+
+    import math
+    from modules.foundups.simulator.adapters.work_telemetry_provider import (
+        DEFAULT_LIMIT,
+        DEFAULT_TTL_SECONDS,
+        get_work_telemetry_snapshot,
+    )
+
+    raw_limit = request.query_params.get("limit")
+    raw_ttl = request.query_params.get("ttl_seconds")
+    try:
+        limit = int(raw_limit) if raw_limit is not None else DEFAULT_LIMIT
+    except ValueError:
+        limit = DEFAULT_LIMIT
+    try:
+        parsed_ttl = float(raw_ttl) if raw_ttl is not None else DEFAULT_TTL_SECONDS
+        ttl_seconds = parsed_ttl if (math.isfinite(parsed_ttl) and parsed_ttl >= 0.0) else DEFAULT_TTL_SECONDS
+    except ValueError:
+        ttl_seconds = DEFAULT_TTL_SECONDS
+
+    payload = get_work_telemetry_snapshot(
+        ttl_seconds=ttl_seconds,
+        limit=limit,
+    )
+    payload["member_role"] = role
+    return payload
+
+
 @app.get("/")
 async def root():
     """Root endpoint with API info."""
@@ -791,6 +832,7 @@ async def root():
         "version": "1.0.0",
         "endpoints": {
             "/api/sim-events": "SSE stream of simulator events",
+            "/api/work-telemetry": "Read-only observed work telemetry snapshot (GET only, no authority)",
             "/api/health": "Health check",
         },
     }

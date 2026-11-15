@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 # Reuse the source-file loading pattern in the social scheduler evidence tests.
 # Importing the GitPushDAE package would also import its daemon implementation.
@@ -172,10 +173,10 @@ def _jsonl_rows(path):
 
 
 class TestEntrypointEvidence(unittest.TestCase):
-    """Six fixed source-entry controls; no real router or social delivery."""
+    """Queue-default and explicit dispatch controls; no real social delivery."""
 
     def _exercise(self, profile, arguments, exit_code, event_count, result_count,
-                  import_count, dispatch_count, error=None):
+                  import_count, dispatch_count, error=None, parse_error=None):
         with tempfile.TemporaryDirectory(prefix="git-hook-evidence-") as temporary:
             root = Path(temporary).resolve()
             environment = _fixture_environment(root)
@@ -202,7 +203,7 @@ class TestEntrypointEvidence(unittest.TestCase):
             self._check_payload(events, results, payload, error)
             self._check_handoff(context, payload, import_count, dispatch_count)
             if exit_code == 2:
-                self.assertIn("unrecognized arguments: --dispatch-direct", completed.stderr)
+                self.assertIn(parse_error, completed.stderr)
                 self.assertFalse((repository / "memory").exists())
             self.assertEqual(_fixture_git(repository, environment, "rev-parse", "HEAD"), before)
             self.assertEqual(_fixture_git(repository, environment, "diff", "--name-only", "HEAD"), "")
@@ -264,22 +265,65 @@ class TestEntrypointEvidence(unittest.TestCase):
         }, sort_keys=True))
 
     def test_missing_root_default(self):
-        self._exercise("missing", [], 1, 1, 1, 1, 0, "No module named 'modules'")
+        self._exercise("missing", [], 0, 1, 0, 0, 0)
 
     def test_missing_root_enqueue_only(self):
         self._exercise("missing", ["--enqueue-only"], 0, 1, 0, 0, 0)
 
     def test_inert_default(self):
-        self._exercise("inert", [], 0, 1, 1, 1, 1)
+        self._exercise("inert", [], 0, 1, 0, 0, 0)
 
     def test_inert_enqueue_only(self):
         self._exercise("inert", ["--enqueue-only"], 0, 1, 0, 0, 0)
 
     def test_inert_failure(self):
-        self._exercise("failure", [], 1, 1, 1, 1, 1, "fixture dispatch failure")
+        self._exercise("failure", ["--dispatch"], 1, 1, 1, 1, 1, "fixture dispatch failure")
+
+    def test_missing_root_explicit_dispatch(self):
+        self._exercise("missing", ["--dispatch"], 1, 1, 1, 1, 0, "No module named 'modules'")
+
+    def test_inert_explicit_dispatch(self):
+        self._exercise("inert", ["--dispatch"], 0, 1, 1, 1, 1)
+
+    def test_conflicting_modes_dispatch_first(self):
+        self._exercise("inert", ["--dispatch", "--enqueue-only"], 2, 0, 0, 0, 0,
+                       parse_error="not allowed with argument")
+
+    def test_conflicting_modes_enqueue_first(self):
+        self._exercise("inert", ["--enqueue-only", "--dispatch"], 2, 0, 0, 0, 0,
+                       parse_error="not allowed with argument")
 
     def test_unsupported_direct(self):
-        self._exercise("inert", ["--dispatch-direct"], 2, 0, 0, 0, 0)
+        self._exercise("inert", ["--dispatch-direct"], 2, 0, 0, 0, 0,
+                       parse_error="unrecognized arguments: --dispatch-direct")
+
+    def _programmatic(self, explicit_dispatch):
+        with tempfile.TemporaryDirectory(prefix="git-hook-api-") as temporary:
+            root = Path(temporary)
+            event = {"dedupe_key": "fixture", "payload": {"commits": []}}
+            calls = []
+
+            class InertRouter:
+                async def handle_event(self, event_type, payload):
+                    calls.append((event_type, payload))
+                    return {"fixture": True, "delivered": False}
+
+            with patch.object(runner, "build_git_push_event", return_value=event), \
+                 patch.object(runner, "_get_social_media_router_class", return_value=InertRouter) as getter:
+                kwargs = {"enqueue_only": False} if explicit_dispatch else {}
+                result = asyncio.run(runner.run_runner(root, root / "events.jsonl",
+                                                      root / "results.jsonl", **kwargs))
+                self.assertEqual(result, 0)
+                self.assertEqual(getter.call_count, int(explicit_dispatch))
+            self.assertEqual(_jsonl_rows(root / "events.jsonl"), [event])
+            self.assertEqual(len(_jsonl_rows(root / "results.jsonl")), int(explicit_dispatch))
+            self.assertEqual(calls, [("git_push", event["payload"])] if explicit_dispatch else [])
+
+    def test_programmatic_default_queues(self):
+        self._programmatic(False)
+
+    def test_programmatic_explicit_dispatch(self):
+        self._programmatic(True)
 
 
 if __name__ == "__main__":

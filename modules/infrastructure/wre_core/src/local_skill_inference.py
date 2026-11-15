@@ -36,6 +36,7 @@ def execute_local_skill_inference(
     """Generate a local proposal; model text alone is never effect success."""
     if agent.lower() != "qwen":
         return _failure("unsupported_local_agent")
+    engine = None
     try:
         profile = validate_local_proposal_config(proposal_mode, native_chat_profile)
         from holo_index.qwen_advisor.llm_engine import QwenInferenceEngine
@@ -63,9 +64,21 @@ def execute_local_skill_inference(
             )
     except Exception:
         return _failure("local_model_unavailable")
+    finally:
+        if engine is not None:
+            try:
+                engine.close()
+            except Exception:
+                # A proposal is unavailable when its owned resource cleanup fails.
+                response = None
 
     if not _is_safe_proposal(response):
         return _failure("local_model_unavailable")
+    return _proposal_result(response)
+
+
+def _proposal_result(response: str) -> dict[str, Any]:
+    """Keep generated text quarantined after successful owned cleanup."""
     return {
         "success": False,
         "output": "",
@@ -88,11 +101,12 @@ def _is_safe_proposal(response: Any) -> bool:
 
 def _build_prompt(skill_content: str, input_context: Mapping[str, Any]) -> str:
     return (
-        "Execute this skill step-by-step:\n\n"
+        "Prepare the proposal requested by this skill:\n\n"
         f"{skill_content}\n\n"
         "Input Context:\n"
-        f"{json.dumps(dict(input_context), indent=2)}\n\n"
-        "Draft a structured proposal. Do not claim that repository, shell, Git, "
+        f"{json.dumps({k: v for k, v in input_context.items() if k != 'parent_continuity_context'}, indent=2)}\n\n"
+        "Follow the skill's required output format for the proposal. "
+        "Do not claim that repository, shell, Git, "
         "network, or external effects occurred."
     )
 

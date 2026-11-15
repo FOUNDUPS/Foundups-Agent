@@ -1,3 +1,45 @@
+## 2026-11-05 — Reuse ready video embeddings for bounded optional replies
+
+WSP11/22/50/84/97. Add default-compatible ready-only/cancellation keywords to
+the existing video search/embedding methods. Ready-only calls skip an unloaded
+model before collection access and do not revive the legacy zero-vector path.
+Cancellation prevents later stages/results; active native calls retain their
+ordinary ownership. No initialization/health/indexing/warming owner changed.
+The video_comments focused cross-owner tests provide 23 new cases, passing with
+the existing quality37 (60 combined) under the unchanged effect guard. Actual
+Holo storage/model use and generation freshness are not qualified by fixtures.
+
+## 2026-11-01 — Bounded stored-settings guard qualified locally
+
+WSP11/15/22/48/50/62/84/97; class B, 18/P0. Existing owners enforce the scoped
+[raw settings contract](INTERFACE.md#stored-chroma-settings-admission--2026-11-01), including the pinned inert sparse sentinel.
+[TestModLog](tests/TestModLog.md#stored-settings-local-qualification--2026-11-01) retains failed native/fixture attempts and explicit oracle
+corrections beside final local evidence. Publication/new-source PC/Holo and
+controller release remain pending; no upstream advisory or global-runtime clearance.
+
+## 2026-10-04 — Preserve native Markdown until EOS
+
+- Qualified native chat supplies an empty caller stop list; formatter EOS text
+  and token criteria remain. Raw route, profile/context checks and caps unchanged.
+- Independent fixed baseline: 59 pass/4 expected failures; candidate 63 pass.
+  Connected WRE suites: 176 pass; overlapping selections, three new cases.
+- One local model proposal was malformed and rejected; coordinator applied the
+  one-line repair. Earlier real output truncation cause remains unproven.
+- WSP00/5/11/15/22/48/50/84/97. Existing manifest/pins refreshed. Publication and
+  retained usefulness are separate; see canonical dispatch/backlog checkpoint.
+
+## 2026-10-01 — Explicit per-call local-model cleanup
+
+- Existing engine gains idempotent explicit close; existing WRE adapter owns
+  cleanup in finally and rejects proposals when cleanup fails. Direct reusable
+  engines retain their lifetime semantics. No new module/skill/backend.
+- Frozen62 cases: baseline40pass/22fail; repaired62pass, zero errors/skips.
+  Separate author/reviewer; no model, provider, database, admission or retention.
+- WSP00/5/6/11/15/22/48/50/62/84/97: bounded same-owner change, source bindings,
+  refreshed existing runtime manifest/pins, exact-head publication receipts.
+- Evidence `O:/Foundups-Agent-audits/20261001-rsi-engine-lifecycle/`; backlog
+  `local_engine_lifecycle_20261001`. Next: source-only admission prerequisites.
+
 ## 2026-09-30 — Opt-in native-chat proposal caller
 
 - Extend existing master/adapter/Qwen route; copied trusted runtime/template

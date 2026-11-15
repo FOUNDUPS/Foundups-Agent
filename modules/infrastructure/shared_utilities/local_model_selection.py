@@ -76,6 +76,13 @@ ROLE_ENV_ALIASES: Dict[str, Tuple[str, ...]] = {
     "tts": (),
 }
 
+# Exact native keys for the legacy code/triage consumers. General's existing
+# LM_STUDIO_NATIVE_MODEL_KEY belongs to its own owner and is never reused here.
+ROLE_NATIVE_KEY_ENV_VARS = {
+    "code": "LOCAL_MODEL_CODE_NATIVE_KEY",
+    "triage": "LOCAL_MODEL_TRIAGE_NATIVE_KEY",
+}
+
 # Legacy file fallbacks (kept for compatibility while migrating).
 LEGACY_FILE_FALLBACKS: Dict[str, List[Path]] = {
     "triage": [
@@ -126,6 +133,19 @@ class ModelSelection:
     source: str
 
 
+def is_general_language_model(model_id):
+    """Conservative language-role guard shared by routing and public replies."""
+    if not isinstance(model_id, str) or not model_id.strip():
+        return False
+    name = model_id.lower().replace('_', '-').replace('/', '-')
+    denied = ('tars', 'vision', '-vl', 'embedding', 'embed', 'tts', 'audio',
+              'speech', 'whisper', 'bark', 'kokoro', 'rerank', 'computer-use', 'coder', 'code-',
+              'grok', 'x-ai', 'xai', '270m')
+    families = ('qwen', 'gemma', 'llama', 'mistral', 'ministral', 'phi-',
+                'deepseek', 'glm-', 'gpt-oss', 'nemotron', 'kimi')
+    return not any(part in name for part in denied) and any(part in name for part in families)
+
+
 def _get_env_path(name: str) -> Optional[Path]:
     value = os.getenv(name)
     if value is None:
@@ -143,6 +163,27 @@ def _env_truthy(name: str, default: str = "0") -> bool:
 def legacy_fallback_enabled() -> bool:
     """Return True when legacy fallback model paths are enabled."""
     return _env_truthy("LOCAL_MODEL_ENABLE_LEGACY_FALLBACK", "0")
+
+
+def resolve_role_native_key(role: str) -> Optional[str]:
+    """Return a configured exact key, or the unchanged declared role default.
+
+    A custom file/directory is not evidence of an installed native key. Such a
+    role needs its explicit scoped key; never infer one from the GGUF basename.
+    This selects configuration only: it does not inspect, load or swap a model.
+    """
+    if role not in ROLE_NATIVE_KEY_ENV_VARS:
+        raise ValueError("unsupported_native_model_role")
+    explicit = os.getenv(ROLE_NATIVE_KEY_ENV_VARS[role])
+    if explicit is not None:
+        key = explicit.strip()
+        if not key or len(key) > 512 or any(char in key for char in ("\r", "\n", "\x00")):
+            raise ValueError("invalid_role_native_key")
+        return key
+    overrides = (*ROLE_ENV_VARS[role], *ROLE_ENV_ALIASES.get(role, ()))
+    if any(os.getenv(name, "").strip() for name in overrides):
+        return None
+    return MODEL_DIR_DEFAULTS[role]
 
 
 def get_local_model_root() -> Path:

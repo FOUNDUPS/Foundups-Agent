@@ -120,6 +120,59 @@ Then:
 5. if provider evidence conflicts with the cache, provider evidence wins and the
    cache is repaired.
 
+## Recipient-facing link/source and HOLD-content gate (2026-10-16)
+
+Apply this to every external email, reply, forward and send-ready draft, including
+Gmail `send_email`, `reply`, `send_draft`, `create_draft` and `update_draft`.
+Run before provider mutation AND on the final rendered plain-text/HTML MIME.
+An archival draft is not a send-ready draft; keep archival text intact but require
+a separately audited clean body before any send.
+
+1. **Primary publisher first.** Link to the publisher-owned, verified article/
+   report page. Social syndication (e.g. LinkedIn) is secondary and may not
+   silently replace that source. Verify that the page exists and that its
+   displayed edition/title matches the claim immediately before release. If
+   issue #003 is not on the website yet, do not label the website page #003.
+2. **No giant naked links.** Do not paste long percent-encoded URLs, LinkedIn
+   `/pulse/` tracking/slugs or share parameters as visible email paragraphs.
+   Prefer a verified, human-readable canonical URL; if a long URL is
+   unavoidable, use a concise descriptive hyperlink in HTML/Markdown *only
+   after verifying its destination and the actual rendered recipient view*.
+   For official form or evidence links where the exact URL must be visible,
+   retain the authoritative URL and give an intelligible reference label.
+   Never invent a short link or use an unverified link shortener.
+3. **Need-to-read test.** Remove unrelated newsletter links from a narrow
+   government procedure/eligibility email. If a report is genuinely needed,
+   cite the exact verified web article (not a broad landing page disguised as
+   the precise edition) and one concise sentence explaining relevance.
+4. **Internal-only text never escapes.** If the proposed outbound includes
+   `内部保管・このまま送信しない`, `【HOLD`, `SUPERSEDED／送信禁止`,
+   historical archiving instructions, stale deadlines, or an internal
+   `DO NOT SEND` header, classify it HOLD; never forward the whole archive
+   as a new email. Preserve evidence in the source archive; compose a clean
+   recipient-only version from verified, current facts.
+5. **Release check.** Inspect To/CC/BCC, new body, rendered links (visible label
+   and href), automatic quoted/forwarded history, attachments and linked
+   source status. On a failed publication-source or link-quality check,
+   return REVISE/HOLD instead of releasing. Gmail provider success or a
+   Gmail draft label does not by itself prove these checks ran.
+
+This is a composition/quality policy, not proof that the direct ChatGPT Gmail
+connector is intercepted by the Red Dog service-owned sender boundary.
+
+## Same-thread incremental-dialogue send gate (2026-11-11 incident)
+
+Before every external send, including direct Gmail connector sends, re-read the latest relevant Gmail Sent, Inbox and drafts for the exact thread, the project Moshpit's newest day, and scoped correspondence state. Moshpit is not send proof; provider Sent is transaction truth. Previous successful sends do not authorize subsequent sends.
+
+- Classify each new conversational instruction against already-sent content: ALREADY_SENT, NEW_MATERIAL_DELTA, CORRECTION, or UNSENT_REVISION. "Improve", "add", "audit", "quote", "update the site", and "make sure" after a send default to editing the unsent artifact, not a new send.
+- For the same recipient, topic and thread, compare proposed asks, claims, recipients, attachments and deadlines against the latest Sent body, not only subject or message ID. Substantial repetition means HOLD. A materially new fact, correction or explicit new notice may justify one consolidated follow-up after independent preflight.
+- Accumulate incremental instructions into one pending draft. Heighten scrutiny for a same-day second send; record why a new external effect is necessary.
+- Convert source provider timestamps to Asia/Tokyo for Moshpit calendar-day grouping and ordering regardless of VPN, IP location, Gmail UI locale or source offset. Never relabel a US-local clock time as JST; unknown precision remains unknown.
+- After sending, verify the exact Gmail Sent ID and log a concise JST receipt in the project Moshpit. Full message bodies belong only in an explicitly authorized private case archive, never public Git or runtime state cache.
+- If latest Sent, provider delta or current Moshpit day cannot be reconciled, HOLD; never blind-send.
+
+Regression scenarios: one send plus two conversational improvements must produce one Sent and two unsent revisions; genuinely new incoming reply can be answered after preflight; same-subject distinct IDs still require body/ask dedup; US-offset timestamps convert to JST; missing Sent state means UNKNOWN/HOLD.
+
 ## Before sending
 
 A cached `CLEAR` is not send authority.

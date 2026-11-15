@@ -95,6 +95,10 @@ class SignerServiceHealthcheckResult:
     no_pr_created: bool = True
     no_reward_settlement_performed: bool = True
     no_holoindex_reindex_performed: bool = True
+    session_id: str | None = None
+    socket_path_digest: str | None = None
+    key_epoch: str | None = None
+    server_identity_verified: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -125,6 +129,9 @@ def run_reddog_signer_socket_service_healthcheck(
     signature_verifier: SignatureVerifier | None = None,
     manifest_id: str | None = None,
     artifact_generation_digest: str | None = None,
+    expected_server_uid: int | None = None, expected_server_gid: int | None = None,
+    trusted_socket_root: Path | str | None = None,
+    secret_access_grant_supplier: Callable[[Any], Mapping[str, Any] | None] | None = None,
 ) -> SignerServiceHealthcheckResult:
     """Validate run packet/config and probe an already-running signer socket."""
 
@@ -147,6 +154,8 @@ def run_reddog_signer_socket_service_healthcheck(
         signature_verifier=signature_verifier,
         manifest_id=manifest_id,
         artifact_generation_digest=artifact_generation_digest,
+        expected_server_uid=expected_server_uid, expected_server_gid=expected_server_gid,
+        trusted_socket_root=trusted_socket_root, grant_supplier=secret_access_grant_supplier,
     )
 
 
@@ -212,6 +221,8 @@ def _run_peer_handshake(
     signature_verifier: SignatureVerifier | None,
     manifest_id: str | None,
     artifact_generation_digest: str | None,
+    expected_server_uid: int | None, expected_server_gid: int | None,
+    trusted_socket_root: Path | str | None, grant_supplier: Callable | None,
 ) -> SignerServiceHealthcheckResult:
     rejected = _manifest_binding_rejection(
         context, manifest_id, artifact_generation_digest
@@ -219,7 +230,8 @@ def _run_peer_handshake(
     if rejected is not None:
         return rejected
     client, rejected = _healthcheck_client(
-        context, timeout_s, max_response_bytes, connector
+        context, timeout_s, max_response_bytes, connector,
+        expected_server_uid, expected_server_gid, trusted_socket_root,
     )
     if rejected is not None:
         return rejected
@@ -232,7 +244,10 @@ def _run_peer_handshake(
         trusted_now(),
         challenge_factory,
     )
-    response = client.sign(request)
+    response = _sign_peer_request(client, request, grant_supplier)
+    if response is None:
+        return _handshake_reject(context, request.to_dict(),
+            "signer_healthcheck_grant_unavailable", ("signer_healthcheck_grant_unavailable",))
     verification = verify_signer_peer_handshake_response(
         request, response, now_epoch=trusted_now(), verifier=signature_verifier
     )
@@ -242,8 +257,21 @@ def _run_peer_handshake(
             verification.rejection_reasons,
         )
     return _handshake_accept(
-        context, request.to_dict(), response.to_dict(), verification
+        context, request.to_dict(), response.to_dict(), verification,
+        server_identity_verified=expected_server_uid is not None and expected_server_gid is not None,
     )
+
+
+def _sign_peer_request(client, request, grant_supplier):
+    if grant_supplier is None:
+        return client.sign(request)
+    try:
+        grant = grant_supplier(request)
+        if not isinstance(grant, Mapping):
+            return None
+        return client.sign_with_secret_grant(request, grant)
+    except Exception:
+        return None
 
 
 def _manifest_binding_rejection(
@@ -294,6 +322,8 @@ def _healthcheck_client(
     timeout_s: float,
     max_response_bytes: int,
     connector: Optional[SignerSocketConnector],
+    expected_server_uid: int | None, expected_server_gid: int | None,
+    trusted_socket_root: Path | str | None,
 ) -> tuple[Any | None, SignerServiceHealthcheckResult | None]:
     built = build_reddog_isolated_signer_socket_client(
         repo_root=context.root,
@@ -301,6 +331,8 @@ def _healthcheck_client(
         timeout_s=timeout_s,
         max_response_bytes=max_response_bytes,
         connector=connector,
+        expected_server_uid=expected_server_uid, expected_server_gid=expected_server_gid,
+        trusted_socket_root=trusted_socket_root,
     )
     if not built.accepted or built.client is None:
         rejected = _reject(
@@ -320,6 +352,7 @@ def _handshake_accept(
     request: Mapping[str, Any],
     response: Mapping[str, Any],
     verification: VerifiedSignerPeerHandshake,
+    *, server_identity_verified: bool = False,
 ) -> SignerServiceHealthcheckResult:
     packet = context.packet
     profile = context.profile
@@ -339,6 +372,9 @@ def _handshake_accept(
         manifest_id=verification.manifest_id,
         artifact_generation_digest=verification.artifact_generation_digest,
         peer_handshake_verified=True,
+        session_id=verification.session_id, key_epoch=verification.key_epoch,
+        socket_path_digest="sha256:" + hashlib.sha256(str(context.socket_path).encode("utf-8")).hexdigest(),
+        server_identity_verified=server_identity_verified,
         peer_handshake_expires_at=verification.expires_at,
         rejection_reasons=(),
     )

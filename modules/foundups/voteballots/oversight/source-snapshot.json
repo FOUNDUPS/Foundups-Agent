@@ -1,0 +1,1300 @@
+{
+  "schema_version": "1.0.0",
+  "classification": "EXISTING_FOUNDUP_UPDATE",
+  "foundup_id": "voteballots",
+  "workstream_id": "oversight",
+  "canonical_editable_owner": "modules/foundups/voteballots/oversight/site",
+  "deployment_mirror": "Existing Sites source repository; original Git history remains there",
+  "source": {
+    "provider": "Sites cloudflare_artifact source repository",
+    "site_project_id": "appgprj_6aed5317a2e4819193b1fdfe340a1cea",
+    "original_import_commit": "a7bf6ab3f3685a0a905b04f5bc81fe4e4bab6081",
+    "snapshot_commit": "c66d22afc5795874f4020661dcadfdd69d3ad129",
+    "snapshot_selection": "git ls-files, clean committed source checkout",
+    "byte_basis": "Exact current checkout file bytes; source Git blob identity separately recorded; site/** is -text to preserve imported bytes in Git",
+    "history_preserved": "Original repository retained; this import does not rewrite, replace, or flatten its Git history",
+    "line_ending_observation": {
+      "git_blob_bytes_identical_files": 11,
+      "clean_checkout_crlf_representation_files": 144,
+      "other_content_differences": 0,
+      "policy": "Preserve exact current clean checkout bytes as requested; Git blob identities retain the original normalized representation."
+    }
+  },
+  "publication": {
+    "site_version": 5,
+    "deployment_id": "appgdep_6aee654bd6308191a3f0bca480e9aad3",
+    "status": "succeeded",
+    "receipt_authority": "Native Sites result observed by publishing lane on 2026-11-07 JST",
+    "deployed_commit": "c66d22afc5795874f4020661dcadfdd69d3ad129"
+  },
+  "public_aliases": [
+    {
+      "hostname": "maga.mtrout.com",
+      "role": "existing public alias"
+    },
+    {
+      "hostname": "oversight.mtrout.com",
+      "role": "existing public alias"
+    }
+  ],
+  "canonical_vote_routes": {
+    "landing": "/f/voteballots",
+    "app": "/f/voteballots/app",
+    "data_namespace": "idb_voteballots",
+    "separate_origin_runtime": true,
+    "shared_mall_pwa_runtime_claimed": false
+  },
+  "instruction_bundle_status": {
+    "purpose": "Authored research and review instruction content preserved from published source",
+    "runtime_admission": "not established by this import",
+    "running_agents_claimed": false,
+    "new_foundup_or_token_created": false
+  },
+  "file_count": 155,
+  "total_size_bytes": 2765555,
+  "inventory_sha256": "d75a8544dc1352c9e5dca2510835ea092a6824cc6adc2bfc95cff0c638e59e86",
+  "inventory_digest_format": "UTF-8 sorted lines: sha256 + two spaces + source_path + LF",
+  "excluded": "Untracked files, .git metadata, credentials, local helpers, runtime state, and build archives are not imported",
+  "files": [
+    {
+      "source_path": ".openai/hosting.json",
+      "export_path": "site/.openai/hosting.json",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "368f8d9467edca44c392f233362c81fac999937a",
+      "size_bytes": 112,
+      "sha256": "3bcdd6a8277a570b90642dca491ea8bfbb60c4854fc3d6e41178567cd1bb154f"
+    },
+    {
+      "source_path": "dist/.nojekyll",
+      "export_path": "site/dist/.nojekyll",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source_path": "dist/00-executive-summary.html",
+      "export_path": "site/dist/00-executive-summary.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "2918d430849ee37bc9ceea699f2504864e9965af",
+      "size_bytes": 9689,
+      "sha256": "2f40707e15efb3f906d4b6ce7ca5a8dac1de39adb48bc534994744afd2b2bb4e"
+    },
+    {
+      "source_path": "dist/01-hub-and-authorities.html",
+      "export_path": "site/dist/01-hub-and-authorities.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "69195ea805086df43fe8344724d1a44a06c44c89",
+      "size_bytes": 28984,
+      "sha256": "30a782e41e3de64dcf375c0ab017dcc7d916ef59e0ba957aa7e84a338736acfe"
+    },
+    {
+      "source_path": "dist/02-state-referrals.html",
+      "export_path": "site/dist/02-state-referrals.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "261e67f9026ee9a57c1302e9fba443d011a4135d",
+      "size_bytes": 33862,
+      "sha256": "524b34724f82f3f4b6e51145bca337b62b5f5fb0177f814168b6719f89df4d45"
+    },
+    {
+      "source_path": "dist/03-financial-forensics.html",
+      "export_path": "site/dist/03-financial-forensics.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "4b70586b263505ffd1e2319042ee08f9a4811955",
+      "size_bytes": 26927,
+      "sha256": "ad77ce2488844fb74f316701d5a79d01a1e89c8684dc863ed9ab2dcdf9e40470"
+    },
+    {
+      "source_path": "dist/04-jan6-and-readiness.html",
+      "export_path": "site/dist/04-jan6-and-readiness.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "badfeb024a4ae30de4a135afc9c0b94300970fa5",
+      "size_bytes": 33059,
+      "sha256": "727c82bf57d74b98e00e8c9b9abf57466f3d682a0cb0a80ec57b69ee2e6f1c7f"
+    },
+    {
+      "source_path": "dist/05-litigation-and-privilege.html",
+      "export_path": "site/dist/05-litigation-and-privilege.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "b6eeb5a1b0dcd02728f4bfae19bc004c1f90418e",
+      "size_bytes": 23199,
+      "sha256": "906e934b5ba0ea6a25413a6bb6f0c38fca7e017fe455e55a23b44bc102575c86"
+    },
+    {
+      "source_path": "dist/07-agent-skill-tree.html",
+      "export_path": "site/dist/07-agent-skill-tree.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "ce1276d4da0d912d32cb371df841641999eeb45e",
+      "size_bytes": 20237,
+      "sha256": "1329f2482cccc4deb8c2c5a9b7990b687cbac42256503b9bbadfa2225a8f766a"
+    },
+    {
+      "source_path": "dist/08-distributed-github-engine.html",
+      "export_path": "site/dist/08-distributed-github-engine.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "3d6b459030eb1dcf0e85e95494ec76b6be46cbd5",
+      "size_bytes": 13290,
+      "sha256": "1c962b435a8cc89b8fc64849af5e29fd43b440ded8baf8d1d6d7402f374c343e"
+    },
+    {
+      "source_path": "dist/09-public-portal.html",
+      "export_path": "site/dist/09-public-portal.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "d44208e601c7b319cc98614c77672a9ec4fdd925",
+      "size_bytes": 8997,
+      "sha256": "f1062e9f9ff62366486d76bebc85d8f76a793cb4c52643e50e2d7cb0303e8a55"
+    },
+    {
+      "source_path": "dist/10-autonomous-network.html",
+      "export_path": "site/dist/10-autonomous-network.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "8c1e4c4f913790ee9cb2f44c9793eacd9c8cdea0",
+      "size_bytes": 19380,
+      "sha256": "bbdd08f7bf233af1b6ffdf12f2e04d4ce8d203b64316fc87b9a72c93f6821648"
+    },
+    {
+      "source_path": "dist/11-house-first-pwa.html",
+      "export_path": "site/dist/11-house-first-pwa.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "dbeb80fd358440efe56ee9205ab003d531918e7f",
+      "size_bytes": 11103,
+      "sha256": "f403bc3c9374102b4afa3ce2416f7725df3a93383e807135c41839a3e64103dd"
+    },
+    {
+      "source_path": "dist/12-member-start-here.html",
+      "export_path": "site/dist/12-member-start-here.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "1a618669f79d32b023659a4957a977614dedb06f",
+      "size_bytes": 6118,
+      "sha256": "51a714310eb7424633029a0e45abde9803d7756533a9856f227487d07fd07c12"
+    },
+    {
+      "source_path": "dist/13-oversight-topics-and-epstein.html",
+      "export_path": "site/dist/13-oversight-topics-and-epstein.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "f6627cc70b0417bc1346ef05bf8c7d556db89f5a",
+      "size_bytes": 7480,
+      "sha256": "9e26c8057bd755104db7e758730673b4cf03cb5893c81dcfbf47b1b409b5f49b"
+    },
+    {
+      "source_path": "dist/14-worker-review-and-quality.html",
+      "export_path": "site/dist/14-worker-review-and-quality.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "077c85731ae7582eb3fefe3ab578cc659260a142",
+      "size_bytes": 6989,
+      "sha256": "79733def3d7f8ce30965b161e203cc625af00d34a21b895a6b2d4430d86c7f90"
+    },
+    {
+      "source_path": "dist/CONTRIBUTING.html",
+      "export_path": "site/dist/CONTRIBUTING.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "4c7317d18e01832579bb63a4aff2b299efa93357",
+      "size_bytes": 3302,
+      "sha256": "0b7b572a1f63fa17a459e587ab888871441b46b5fcde774fdeb27efefbe5f61e"
+    },
+    {
+      "source_path": "dist/CONTRIBUTING.md",
+      "export_path": "site/dist/CONTRIBUTING.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "50ef7949700c3eaec4989cc09356570e3563e707",
+      "size_bytes": 2520,
+      "sha256": "596dc22bc239f9d1435a5c5a147b8a7326baac56255941991e15cee808915df6"
+    },
+    {
+      "source_path": "dist/GOVERNANCE.html",
+      "export_path": "site/dist/GOVERNANCE.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "3ecc4f5a36762e57f0813c0983f13461b5cf93f5",
+      "size_bytes": 3006,
+      "sha256": "6b467d4911c991e1be72c36c234c60ec9a2de7284dff43eeed2eb518dce05d0d"
+    },
+    {
+      "source_path": "dist/GOVERNANCE.md",
+      "export_path": "site/dist/GOVERNANCE.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "1247dfafde263f1b73591c6424ef85aa276438fd",
+      "size_bytes": 2296,
+      "sha256": "d887251380f60dd99c705e86c785a268d63e66280f81d52d99eca726218532a7"
+    },
+    {
+      "source_path": "dist/HEARTBEAT.html",
+      "export_path": "site/dist/HEARTBEAT.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "1ed2c71f7480918eb9950351c79e7faeb185db07",
+      "size_bytes": 3143,
+      "sha256": "098215f20b1b9da15310dee410b391fd7684b7a33ef4011434b7e94066471937"
+    },
+    {
+      "source_path": "dist/HEARTBEAT.md",
+      "export_path": "site/dist/HEARTBEAT.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "65e8312c81fe14d63f5beba0cfc1c612e9757dc9",
+      "size_bytes": 2389,
+      "sha256": "cde95c86c757556bc314010350bb0b7d715745b152d882d87de8f6f26062954e"
+    },
+    {
+      "source_path": "dist/LICENSE",
+      "export_path": "site/dist/LICENSE",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "854e70d78544170d78c167117e6d2b829fde2e23",
+      "size_bytes": 1278,
+      "sha256": "4b709876e5ad7796d323412294c0269ccde663cf68f91c919ae2bb7519cc9d7d"
+    },
+    {
+      "source_path": "dist/MASTER_BLUEPRINT.html",
+      "export_path": "site/dist/MASTER_BLUEPRINT.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "959d03ddd6146c4819246f3ca2de8f03c9d165c4",
+      "size_bytes": 598216,
+      "sha256": "6ffec74f97b3dcffe2769ad3984dc562a4e3edb6a2264878decaeaf61cc9c75f"
+    },
+    {
+      "source_path": "dist/MASTER_BLUEPRINT.md",
+      "export_path": "site/dist/MASTER_BLUEPRINT.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "bdde2fc8f567d46b2dbef6e803435fc03d471349",
+      "size_bytes": 571214,
+      "sha256": "3875a0d75c9a9b5319529b4e3f4f393bd7d87c06c1768dd5e2f109aa27601744"
+    },
+    {
+      "source_path": "dist/ORCHESTRATOR_PROMPT.html",
+      "export_path": "site/dist/ORCHESTRATOR_PROMPT.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "06d5dc1bfac6c51b070f71a33e58d237f20fa271",
+      "size_bytes": 6084,
+      "sha256": "28e1c8e2934dd8893aaff6f34e35a4dbef212a8d32997bff9ffb9cf66b8ec8ea"
+    },
+    {
+      "source_path": "dist/ORCHESTRATOR_PROMPT.md",
+      "export_path": "site/dist/ORCHESTRATOR_PROMPT.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "fcd94d0b2fd38d2b496fb509627ad4dce34d6a97",
+      "size_bytes": 5300,
+      "sha256": "a67f5d7f31975d6cc3f7d1af5f2658576fdcfcecbc27560696242c9f047153f4"
+    },
+    {
+      "source_path": "dist/ROADMAP.html",
+      "export_path": "site/dist/ROADMAP.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "785d1c08d45233a4750522e7eea96074138ec211",
+      "size_bytes": 20159,
+      "sha256": "8e5b49865d3a7bd12132af06293042a0a9a05030a3c6fc65f2e98b072ed9e520"
+    },
+    {
+      "source_path": "dist/ROADMAP.md",
+      "export_path": "site/dist/ROADMAP.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "f7bb212a5694f306d0fbc7324a5a97da2fde910b",
+      "size_bytes": 17649,
+      "sha256": "530583f92c24367a60a42e0cb8fb8040ce92eef158fe4cdddf8025e453c5ff56"
+    },
+    {
+      "source_path": "dist/SECURITY.html",
+      "export_path": "site/dist/SECURITY.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "8ac26869a855dbdeb4b64aaf5647944577893e7e",
+      "size_bytes": 3307,
+      "sha256": "1abdb3746723a4f6769d89ac92230a6a7820072351f0770fb576fabb6b871b78"
+    },
+    {
+      "source_path": "dist/SECURITY.md",
+      "export_path": "site/dist/SECURITY.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "5f50c6fad6a1b407880a04c267eb66ed5a990e3f",
+      "size_bytes": 2605,
+      "sha256": "1c6f2585714d0cb3866bcba8bf5b3c5e61e597dba196a84219765237f71b3a9a"
+    },
+    {
+      "source_path": "dist/agent-onboarding.html",
+      "export_path": "site/dist/agent-onboarding.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "603d2e67730063707c44abd0bad5b73dedd581e5",
+      "size_bytes": 5237,
+      "sha256": "7c997f77197a95237d39274e4fedb1fd666881fc6481edb50e1156a051a4c0cb"
+    },
+    {
+      "source_path": "dist/agent-onboarding.md",
+      "export_path": "site/dist/agent-onboarding.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "41eba10ab0cc01515ffc24b235b4d044a2c2e91c",
+      "size_bytes": 4375,
+      "sha256": "108fca52364ef12f1e0ba2c3c591889b3497ba17bc5fe4856b69ef2a54ac599c"
+    },
+    {
+      "source_path": "dist/api/openapi.yaml",
+      "export_path": "site/dist/api/openapi.yaml",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "213756102f9f5b2eb73a45a2de9a01347704712a",
+      "size_bytes": 21457,
+      "sha256": "34f2c6cfc3aa45f35f5a6d99625db61e999d637cf998fe5adfddc433d16ff7ce"
+    },
+    {
+      "source_path": "dist/app.js",
+      "export_path": "site/dist/app.js",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "1ac43d3f5f4c4d351e4f30b6662dd37beafca13e",
+      "size_bytes": 33520,
+      "sha256": "6ef9c2146e40eb68227e7331cedf9570e5a9da8e79db3b3f4b24dc29d6892cc2"
+    },
+    {
+      "source_path": "dist/data/document-reviews.json",
+      "export_path": "site/dist/data/document-reviews.json",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "4f8889ef9268c9c5efd88f83f1cd1b6eeb94ee98",
+      "size_bytes": 10654,
+      "sha256": "c53235c5644a12786fea3a09b3df0872688dcd8fc469b12d2697edff4502621c"
+    },
+    {
+      "source_path": "dist/docs/00-executive-summary.md",
+      "export_path": "site/dist/docs/00-executive-summary.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "5c713006624027556682ecae36c0b099b09bcfd1",
+      "size_bytes": 8598,
+      "sha256": "b70df149e2163786f4a21a3e1d3175ed6d66b40e72ee9ff654aa55e71829fcb9"
+    },
+    {
+      "source_path": "dist/docs/01-hub-and-authorities.md",
+      "export_path": "site/dist/docs/01-hub-and-authorities.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "57115bb3d6ef367f921ae64c668a44a1dd32466e",
+      "size_bytes": 26945,
+      "sha256": "9125df98bba45452da1f0abf0a0b6d3aac603c0a244319f95ac8ed7bb8646985"
+    },
+    {
+      "source_path": "dist/docs/02-state-referrals.md",
+      "export_path": "site/dist/docs/02-state-referrals.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "15da4aa3fcda2dcacc4283deb245a261485fe47f",
+      "size_bytes": 31091,
+      "sha256": "a2ec0d61c717e542aee763ad9d6bdd85ccf366f941ada53191eee13fc1977529"
+    },
+    {
+      "source_path": "dist/docs/03-financial-forensics.md",
+      "export_path": "site/dist/docs/03-financial-forensics.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "ca41d5c2bd10a0c21284a1b71addd05c8a7ae4dd",
+      "size_bytes": 24945,
+      "sha256": "61585933bf4842c3901fccf195eeec400d2d6f7f3a4d3ae77c22e2fb761c4354"
+    },
+    {
+      "source_path": "dist/docs/04-jan6-and-readiness.md",
+      "export_path": "site/dist/docs/04-jan6-and-readiness.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "0cd8961c56de80a4159720be148b44d33c40f8a5",
+      "size_bytes": 30614,
+      "sha256": "5b997f322c3d1256ed1fa99701936cfe7cc32d9e6f9fd42e61dc2ff3adb2e14f"
+    },
+    {
+      "source_path": "dist/docs/05-litigation-and-privilege.md",
+      "export_path": "site/dist/docs/05-litigation-and-privilege.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "4d800c9b5e82551bc8ffe322041dea01fee6855c",
+      "size_bytes": 21594,
+      "sha256": "7051a9d4c1a749c542f30c5eb9441508aaac62048b887ced44cc0051fb79a97e"
+    },
+    {
+      "source_path": "dist/docs/07-agent-skill-tree.md",
+      "export_path": "site/dist/docs/07-agent-skill-tree.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "399fb96781fe29eaafe6d36fdc1186adbdcc6565",
+      "size_bytes": 18655,
+      "sha256": "6871b274c3ae1ce9c230da11fb7a75cde52ab7f3a405d7932a234c19983b0557"
+    },
+    {
+      "source_path": "dist/docs/08-distributed-github-engine.md",
+      "export_path": "site/dist/docs/08-distributed-github-engine.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "47b277396fd9ee335490c995d18a193490e9f131",
+      "size_bytes": 12171,
+      "sha256": "d9926c073367bcc224229ef693c231d64e8cbdcf2bd01c1ad75ada36b476a673"
+    },
+    {
+      "source_path": "dist/docs/09-public-portal.md",
+      "export_path": "site/dist/docs/09-public-portal.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "5ebfa01f7c943f6b711538c055eb148b5222313e",
+      "size_bytes": 8159,
+      "sha256": "47b994db2245eba30535ad1adfe290e02da12231cf53b76f2b91227364e553f4"
+    },
+    {
+      "source_path": "dist/docs/10-autonomous-network.md",
+      "export_path": "site/dist/docs/10-autonomous-network.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "52204eb5af2d79a9deccac7c655582df27215b87",
+      "size_bytes": 17548,
+      "sha256": "77f2de4390564c7855c98f70bb6b365915c37912b2de3379ab105340d8173f16"
+    },
+    {
+      "source_path": "dist/docs/11-house-first-pwa.md",
+      "export_path": "site/dist/docs/11-house-first-pwa.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "01fa640655b24805aaf9191c5a7e9437cb277f2c",
+      "size_bytes": 10006,
+      "sha256": "0961b984865aeece59cf0a3dfb3eaba886f277c5df3f99d8e22004ebeb27ab9a"
+    },
+    {
+      "source_path": "dist/docs/12-member-start-here.md",
+      "export_path": "site/dist/docs/12-member-start-here.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "abe70e9cedcf15cdf412f9f0207f7ec650d17f9f",
+      "size_bytes": 5173,
+      "sha256": "302310086a7c0353d8af9d3f68168e0166379c898998793c11ab366839d62ab7"
+    },
+    {
+      "source_path": "dist/docs/13-oversight-topics-and-epstein.md",
+      "export_path": "site/dist/docs/13-oversight-topics-and-epstein.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "e11fdf5f3775b18543be7ab9d040669503c65519",
+      "size_bytes": 6478,
+      "sha256": "97331c70b9f4767028b64bb22202062a155ce989bfc549d5c8bfe7de06f2ec85"
+    },
+    {
+      "source_path": "dist/docs/14-worker-review-and-quality.md",
+      "export_path": "site/dist/docs/14-worker-review-and-quality.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "6d3935395371149c07d5d69e0dadcc89ffadd816",
+      "size_bytes": 5961,
+      "sha256": "ab7328be1e50f7acbed03319391d6ea1116d30a07e768a77530a48b0be3e7e67"
+    },
+    {
+      "source_path": "dist/docs/audits/code-source-audit-2026-11-07.md",
+      "export_path": "site/dist/docs/audits/code-source-audit-2026-11-07.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "6abbd8e5e37da3e73ac4a44f52d442ab95ae52ea",
+      "size_bytes": 5237,
+      "sha256": "aeb55bb4ceb4281e4d4364b5db0acc9bf384f0e24a8e9ad21414a15b76fd4e7c"
+    },
+    {
+      "source_path": "dist/docs/audits/epstein-source-research-2026-11-07.md",
+      "export_path": "site/dist/docs/audits/epstein-source-research-2026-11-07.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "4eb5d47aa47557f62b7ab6cc97d8b14ce9a79325",
+      "size_bytes": 9327,
+      "sha256": "28d3cadaeb44480f9c006c3d7dfe82afe0745ef85947f8a856a92e03c4c345e0"
+    },
+    {
+      "source_path": "dist/docs/audits/financial-source-audit-2026-11-07.md",
+      "export_path": "site/dist/docs/audits/financial-source-audit-2026-11-07.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "5828b3cc688fd98e477c28ca52870aca9ebd414c",
+      "size_bytes": 7801,
+      "sha256": "990f7e61ae46cd0afcfb3a5310e8a5a0d003fdefcb56e02ce02ecf22e2d71ac0"
+    },
+    {
+      "source_path": "dist/docs/audits/legal-source-audit-2026-11-07.md",
+      "export_path": "site/dist/docs/audits/legal-source-audit-2026-11-07.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "55803e01e821be1ea243f854b8a178aa120f0e4d",
+      "size_bytes": 7807,
+      "sha256": "0065c3c5d858513b291c87ffd1a6ed97644aa548e3726c66b3bbcda38e52b101"
+    },
+    {
+      "source_path": "dist/docs/audits/member-experience-audit-2026-11-07.md",
+      "export_path": "site/dist/docs/audits/member-experience-audit-2026-11-07.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "658d8886d1a2149f5da89fb659dd5efb3d0ca2f5",
+      "size_bytes": 6440,
+      "sha256": "2c5d16f2ca4b11e66fbef5fc8c2321a4be8912b1869404685623c77a3d7fbcd1"
+    },
+    {
+      "source_path": "dist/docs/audits/pwa-execution-2026-11-06.md",
+      "export_path": "site/dist/docs/audits/pwa-execution-2026-11-06.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "572738db81234e83d26428a3239c858e716175c3",
+      "size_bytes": 6548,
+      "sha256": "9198c3452ea5f70decc3d023b63616f46176e63597877f9aa0d7926aad04c9bd"
+    },
+    {
+      "source_path": "dist/documents.js",
+      "export_path": "site/dist/documents.js",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "fcad36f8ff40853f7a2c94efe73a941d9697c0d1",
+      "size_bytes": 1580,
+      "sha256": "2d89afd0bcee8086a7afe63a76388fc4f2bd62dc01a04ee30f93ee93df3eb25f"
+    },
+    {
+      "source_path": "dist/documents.json",
+      "export_path": "site/dist/documents.json",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "694498e2252f7a50fd7d7f988f8c4862d6931f3c",
+      "size_bytes": 11011,
+      "sha256": "1ed9f3e7cd28e540537451ecec6b3ea73ed73c5e460b1cf3dcb8067fe9664ac9"
+    },
+    {
+      "source_path": "dist/explore.js",
+      "export_path": "site/dist/explore.js",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "d2e8401be49c54c9d39f6b6f75ebd488b0ba3927",
+      "size_bytes": 5957,
+      "sha256": "1cfed2dcdf9fe89d65de552d5a5d82c45ab6f89ef6b9f6903532950029c24565"
+    },
+    {
+      "source_path": "dist/findings.json",
+      "export_path": "site/dist/findings.json",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "0637a088a01e8ddab3bf3fa98dbe804cbde1a0dc",
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "source_path": "dist/icons/icon-192.png",
+      "export_path": "site/dist/icons/icon-192.png",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "a3f4ae8fd79d7a298ab490709d1f67344812b84c",
+      "size_bytes": 1387,
+      "sha256": "f694e1e08ecf3a353ca757baf0f1568fd3bdb2e9ff73bf40c56bf51e690a7278"
+    },
+    {
+      "source_path": "dist/icons/icon-512.png",
+      "export_path": "site/dist/icons/icon-512.png",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "eef8c698b0aafee80eab03200cd95b0da7e55e80",
+      "size_bytes": 3644,
+      "sha256": "614dd4b8b5373112ca8eec57b320a17db93df8e6ccb42a7cc7c65119ccdc8bb9"
+    },
+    {
+      "source_path": "dist/icons/icon.svg",
+      "export_path": "site/dist/icons/icon.svg",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "00d8d576f27095052d523bf7a4944879f9f7373d",
+      "size_bytes": 351,
+      "sha256": "82fd69bf2fbc2970e9149b7c24cbd2dacf1d3ce72f9ebcd79b810c959221f6b4"
+    },
+    {
+      "source_path": "dist/index.html",
+      "export_path": "site/dist/index.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "200fd720ef1b52ff81c4e3f06afd02fdae91fc89",
+      "size_bytes": 3529,
+      "sha256": "d244d4ecb58aa61df63935d4db3a6aa2023c2f9c6503238c79e3325ba535bc71"
+    },
+    {
+      "source_path": "dist/investigations/research-queue.json",
+      "export_path": "site/dist/investigations/research-queue.json",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "f434052381809a8f56931b043c45ea5fee187715",
+      "size_bytes": 11271,
+      "sha256": "58d780efea7a013ad6f4d677f95032ccef8880f66950466ccea0cfb1ef0a3b08"
+    },
+    {
+      "source_path": "dist/manifest.webmanifest",
+      "export_path": "site/dist/manifest.webmanifest",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "95d763d23017026ef66df61f21e4e0fa7484bd26",
+      "size_bytes": 450,
+      "sha256": "29288adbdae3bded1f0cdee5888fdf997d47ff4b0bdbcfb5e9a6c995f863f65a"
+    },
+    {
+      "source_path": "dist/openclaw.json",
+      "export_path": "site/dist/openclaw.json",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "035a9697a0a494b3c40ca8f4ad345666e7499eb6",
+      "size_bytes": 495,
+      "sha256": "93c64b5fef2c74fd4185ab95b601d55580bcf3768b762257c192195e80639f1e"
+    },
+    {
+      "source_path": "dist/phone-preview.html",
+      "export_path": "site/dist/phone-preview.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "7769b7e416973bb38069c5f07efb02bed8a0853e",
+      "size_bytes": 472,
+      "sha256": "7988715e0930e260dbaa156a71fc908e84a75b41fb043f9efac119e34cbd226b"
+    },
+    {
+      "source_path": "dist/research/alpha-sources.json",
+      "export_path": "site/dist/research/alpha-sources.json",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "5dcfc07e650dec651484d3eafbcbbd8350020f2e",
+      "size_bytes": 6954,
+      "sha256": "5415febc8b6d4da58619fa25bf1069aafa7d84fc8dc0ee41cce3534dae084e14"
+    },
+    {
+      "source_path": "dist/research/beta-sources.json",
+      "export_path": "site/dist/research/beta-sources.json",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "04b2e0772af57fdb903e49416928cabf7102b1c8",
+      "size_bytes": 4945,
+      "sha256": "a5c566f1bc9539257d61a1902cb4909b952875188416b0cc0e1ffd4f72c958e2"
+    },
+    {
+      "source_path": "dist/research/consolidated-sources.json",
+      "export_path": "site/dist/research/consolidated-sources.json",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "1002076cfc8b1d464cf2ab0f1ac0804cf893970a",
+      "size_bytes": 56954,
+      "sha256": "a8e3751bc90f0b86eb302240d796ffd7325adf0e6d1661f44a36bb300fae21dd"
+    },
+    {
+      "source_path": "dist/research/delta-sources.json",
+      "export_path": "site/dist/research/delta-sources.json",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "fae87e9800128b692e8325d7f90713fb72742c8e",
+      "size_bytes": 13068,
+      "sha256": "8e7ea9e487a3fda83a583cdc119d500e1bd3e0cafd518eef959e4a719523c0e4"
+    },
+    {
+      "source_path": "dist/research/epsilon-sources.json",
+      "export_path": "site/dist/research/epsilon-sources.json",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "4b4834e8120696e32b56c90399cd1a9c4abe0e19",
+      "size_bytes": 8495,
+      "sha256": "878aa108aa47cec7d685fa52f84e3cc9e99f8d8b0745d780596912ac159ab31c"
+    },
+    {
+      "source_path": "dist/research/eta-sources.json",
+      "export_path": "site/dist/research/eta-sources.json",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "b8eeef1ec0e8749cff8b259422b01716045e0570",
+      "size_bytes": 1257,
+      "sha256": "e1a20f446a63c9b44f74ea05ce1f6fb3fc2a3b4e80eecbd8230242c106c57d32"
+    },
+    {
+      "source_path": "dist/research/gamma-sources.json",
+      "export_path": "site/dist/research/gamma-sources.json",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "9fa1cb4323706c7489c43e67ca63de12f3e25887",
+      "size_bytes": 6965,
+      "sha256": "44d297143d3477e82916e9dc75b0102d0f0355e212b32fc21731555c9853f29a"
+    },
+    {
+      "source_path": "dist/research/house-readiness-sources.json",
+      "export_path": "site/dist/research/house-readiness-sources.json",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "233bb233637f72ac7f14a5c11913afac1cf05dc2",
+      "size_bytes": 566,
+      "sha256": "836a96a3c03f230499fd02b1ea10684b820e50511aad2d36c6103ae2272f5fb9"
+    },
+    {
+      "source_path": "dist/research/member-experience-sources.json",
+      "export_path": "site/dist/research/member-experience-sources.json",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "d656c41b968aa169d6dc328f98f8b2c4917cc05b",
+      "size_bytes": 3240,
+      "sha256": "a6cb8bb57c4c768d1f3ae03e67a91f8f2c54ac5e2b1ea7bd1cfe794565e42183"
+    },
+    {
+      "source_path": "dist/research/theta-sources.json",
+      "export_path": "site/dist/research/theta-sources.json",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "03bc42604878abaee8a81f2e5d1fbe09f075b61c",
+      "size_bytes": 5033,
+      "sha256": "bc13161311d2bace8107b5f0fb579e9960db04be9ff6f820e694a39f0381937a"
+    },
+    {
+      "source_path": "dist/schemas/evidentiary-packet.schema.json",
+      "export_path": "site/dist/schemas/evidentiary-packet.schema.json",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "62e5315c9f0cce9ff13a155be5b9381d06b68c8a",
+      "size_bytes": 11875,
+      "sha256": "40fc1b15d89e47b837901a665241b5ef9bed90220a680c576079f9f63b93531e"
+    },
+    {
+      "source_path": "dist/schemas/research-queue.schema.json",
+      "export_path": "site/dist/schemas/research-queue.schema.json",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "59714293ceda881c7f6555813935d8773a712e2f",
+      "size_bytes": 3056,
+      "sha256": "2c5f910b137fa95a1788af050dbdfc0bee3092d5748743d8ba3d87e6aa7e6e94"
+    },
+    {
+      "source_path": "dist/scripts/validate_document_reviews.py",
+      "export_path": "site/dist/scripts/validate_document_reviews.py",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "e0da869db0c47bc599d7514a0c1666cbabf961c9",
+      "size_bytes": 1339,
+      "sha256": "6b3dd7c8daadf0d5437eb9b3e23fefd616d57a7061b813a8a77cfeba31a74eeb"
+    },
+    {
+      "source_path": "dist/scripts/validate_research_queue.py",
+      "export_path": "site/dist/scripts/validate_research_queue.py",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "8d91a6e2d77b8fd1d22e908b608b467a708c3744",
+      "size_bytes": 1449,
+      "sha256": "1436eaf9e0d05de16d87bf88a7136be06dfa489bf2c7c170b4f0099a350f50dc"
+    },
+    {
+      "source_path": "dist/search.json",
+      "export_path": "site/dist/search.json",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "fe4e0c03adece57b9b50a97e1380a900f545bd9d",
+      "size_bytes": 231442,
+      "sha256": "1e091c45d848fd15911739d775407462568f4c36973a50989443d4e292a4bb36"
+    },
+    {
+      "source_path": "dist/skills/00-master-orchestrator/SKILL.md",
+      "export_path": "site/dist/skills/00-master-orchestrator/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "90ab4fb05064b36d34acac0c2682bc1c50900ce5",
+      "size_bytes": 5157,
+      "sha256": "8964026c15785fa919a1ae6dda8afef6636f04cd489ddda423cd2f9d983129c9"
+    },
+    {
+      "source_path": "dist/skills/00-master-orchestrator/references/evidence-contract.md",
+      "export_path": "site/dist/skills/00-master-orchestrator/references/evidence-contract.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "cb25c4ebf186635f57600fe498db674b68e43a46",
+      "size_bytes": 3212,
+      "sha256": "a7d4e3cce70c020b60ed5881050c7fd3c1f528b9d431130698674d2aa08ba5db"
+    },
+    {
+      "source_path": "dist/skills/00-master-orchestrator/schemas/skill-metadata.schema.json",
+      "export_path": "site/dist/skills/00-master-orchestrator/schemas/skill-metadata.schema.json",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "158708bc765b182f657a0406a85620fd35205f91",
+      "size_bytes": 1134,
+      "sha256": "242f1266f99f38d7c5bbbef68c75f0361647cb910101e4a03fc63c1928a999dd"
+    },
+    {
+      "source_path": "dist/skills/00-master-orchestrator/scripts/export_portable_skills.py",
+      "export_path": "site/dist/skills/00-master-orchestrator/scripts/export_portable_skills.py",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "0ce5a55633901aaaa5efde093abf01d74007784b",
+      "size_bytes": 1915,
+      "sha256": "0aa5883d018c8ccb6f834e59c35cf12fc683a27cf841f1898368c7757a4baf47"
+    },
+    {
+      "source_path": "dist/skills/00-master-orchestrator/scripts/validate_skill_tree.py",
+      "export_path": "site/dist/skills/00-master-orchestrator/scripts/validate_skill_tree.py",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "4ebfa0b9b93ebc9bad323e69ee41460a7c0851d0",
+      "size_bytes": 2078,
+      "sha256": "70635796626e74f1bbd9a5ca9e6eebc964a11299c46b2b4f935e7bebbbe54eeb"
+    },
+    {
+      "source_path": "dist/skills/00-master-orchestrator/sub-skills/cross-node-synthesis/SKILL.md",
+      "export_path": "site/dist/skills/00-master-orchestrator/sub-skills/cross-node-synthesis/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "5f04be4058c69dc3e53d468328d04263b3f11dd9",
+      "size_bytes": 3815,
+      "sha256": "f3dec79d4d63866fcd65a9c0b0516f2c769a66b027866e2c3deaa75ecd42e312"
+    },
+    {
+      "source_path": "dist/skills/00-master-orchestrator/sub-skills/evidentiary-verification/SKILL.md",
+      "export_path": "site/dist/skills/00-master-orchestrator/sub-skills/evidentiary-verification/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "07ba862a69e51e0a0431cd99e9e09b3c0e36f4ec",
+      "size_bytes": 4135,
+      "sha256": "de24f63712538b397e355f82d8c5742e4fd5fa62db58a91fa22bfb7c2ba79a4d"
+    },
+    {
+      "source_path": "dist/skills/00-master-orchestrator/sub-skills/task-decomposition/SKILL.md",
+      "export_path": "site/dist/skills/00-master-orchestrator/sub-skills/task-decomposition/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "6d2bcc26f2c3d4459a8c2c0ed0f0994312557947",
+      "size_bytes": 3697,
+      "sha256": "59de89d9e2c4fc0a52c67eea380a76f54c7ad9cf20309e925b73618506d31de6"
+    },
+    {
+      "source_path": "dist/skills/00-master-orchestrator/sub-skills/task-research-and-review/SKILL.md",
+      "export_path": "site/dist/skills/00-master-orchestrator/sub-skills/task-research-and-review/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "235db1c44132127300a7a4c55650134cf704b21d",
+      "size_bytes": 5505,
+      "sha256": "7445c7c7fca4752144a93e2a787a9efc997096519ea4b98e32168d142588d543"
+    },
+    {
+      "source_path": "dist/skills/00-master-orchestrator/templates/task-card.yaml",
+      "export_path": "site/dist/skills/00-master-orchestrator/templates/task-card.yaml",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "3af1c40e5a75cf6bfa199e0e3374b3b420d86cde",
+      "size_bytes": 1168,
+      "sha256": "39d95ee10e05d3c9e3ada24e4db37c124960f826e79c6c0eeb93268787d19a64"
+    },
+    {
+      "source_path": "dist/skills/01-congressional-rules-and-statutes/SKILL.md",
+      "export_path": "site/dist/skills/01-congressional-rules-and-statutes/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "877ea61fc08cf0dbf8656ff670e3181d0d3a7459",
+      "size_bytes": 4820,
+      "sha256": "265a16fe9ca070915c048470accbae27aee2b09bcc600ca945de93875a566b29"
+    },
+    {
+      "source_path": "dist/skills/01-congressional-rules-and-statutes/sub-skills/fincen-sar-access-review/SKILL.md",
+      "export_path": "site/dist/skills/01-congressional-rules-and-statutes/sub-skills/fincen-sar-access-review/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "d024084993bff7cc4249d5ed209a6d23ea006aa1",
+      "size_bytes": 4154,
+      "sha256": "9a277bd408eaf403e51a57ac2e885d6e5ad8989ffdf25d73661be3e1098dd5fe"
+    },
+    {
+      "source_path": "dist/skills/01-congressional-rules-and-statutes/sub-skills/house-rules-drafting/SKILL.md",
+      "export_path": "site/dist/skills/01-congressional-rules-and-statutes/sub-skills/house-rules-drafting/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "9c69fe13fb809b39176bbf387ba615fd2d137c00",
+      "size_bytes": 3810,
+      "sha256": "564fa89d8a0ce2ff74e506939643d0eb9390cddfce2fd934a78bc1c4e40b1b21"
+    },
+    {
+      "source_path": "dist/skills/01-congressional-rules-and-statutes/sub-skills/irc-6103-tax-requests/SKILL.md",
+      "export_path": "site/dist/skills/01-congressional-rules-and-statutes/sub-skills/irc-6103-tax-requests/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "ab81817bf14b445baa9b750a489e2ea9988b34f4",
+      "size_bytes": 4286,
+      "sha256": "fa28c96ede23ac98f409f36ead6b36abc494775637a6a2a5b0fc2d81a67cc614"
+    },
+    {
+      "source_path": "dist/skills/01-congressional-rules-and-statutes/sub-skills/mazars-purpose-memo-drafter/SKILL.md",
+      "export_path": "site/dist/skills/01-congressional-rules-and-statutes/sub-skills/mazars-purpose-memo-drafter/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "c829878e6da9c845b4784c85f4ae674380413ef5",
+      "size_bytes": 4211,
+      "sha256": "1ebd20f809cd4c456adf63621f66e35ee2222050f2dde570ef59b2967a100378"
+    },
+    {
+      "source_path": "dist/skills/02-forensic-financial-investigation/SKILL.md",
+      "export_path": "site/dist/skills/02-forensic-financial-investigation/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "b23508bb387d730a563021df1ba009a342d6feec",
+      "size_bytes": 4575,
+      "sha256": "cf0ef6e5cab8f7d0a88518c632ac42e97d5818692859619aeb743d06ed5c7906"
+    },
+    {
+      "source_path": "dist/skills/02-forensic-financial-investigation/sub-skills/corporate-veil-piercing/SKILL.md",
+      "export_path": "site/dist/skills/02-forensic-financial-investigation/sub-skills/corporate-veil-piercing/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "ea288cbe57a694721458685d2c024efdcd985244",
+      "size_bytes": 4432,
+      "sha256": "1427c2264e18e7dbba9df4c68c9e78b7c388ecb6fbb1cdcaeb7e301138caab60"
+    },
+    {
+      "source_path": "dist/skills/02-forensic-financial-investigation/sub-skills/corporate-veil-piercing/delaware-wyoming-llc-tracing/SKILL.md",
+      "export_path": "site/dist/skills/02-forensic-financial-investigation/sub-skills/corporate-veil-piercing/delaware-wyoming-llc-tracing/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "9b653cc65603c0ace374aa63b63e4992218ec334",
+      "size_bytes": 3680,
+      "sha256": "8fe5f975845dc93aea8681ab12a05ef0e8099e61787164e1cec3d23a9c26c4f5"
+    },
+    {
+      "source_path": "dist/skills/02-forensic-financial-investigation/sub-skills/corporate-veil-piercing/offshore-registry-correlation/SKILL.md",
+      "export_path": "site/dist/skills/02-forensic-financial-investigation/sub-skills/corporate-veil-piercing/offshore-registry-correlation/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "0ad0a2c8060f5cebd744ce34c9a186f9f1e51d3d",
+      "size_bytes": 3589,
+      "sha256": "89b0f64c8f9f50617f9a9ffafa6b92d0ed77c55b58fe1beb74bc7ab07dbbf0a4"
+    },
+    {
+      "source_path": "dist/skills/02-forensic-financial-investigation/sub-skills/corporate-veil-piercing/sec-edgar-beneficial-ownership/SKILL.md",
+      "export_path": "site/dist/skills/02-forensic-financial-investigation/sub-skills/corporate-veil-piercing/sec-edgar-beneficial-ownership/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "59c85a4c30848402b6d40c263074d5c2e0c42bf1",
+      "size_bytes": 3898,
+      "sha256": "70adefd11947f407602b15fe0c12c026938a65bf64ed4e655410fec6e8a2a279"
+    },
+    {
+      "source_path": "dist/skills/02-forensic-financial-investigation/sub-skills/crypto-and-defi-forensics/SKILL.md",
+      "export_path": "site/dist/skills/02-forensic-financial-investigation/sub-skills/crypto-and-defi-forensics/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "fb423841d2713c962dcf6c63e96f3d3307eac5ee",
+      "size_bytes": 4353,
+      "sha256": "be7bc943c9e02c66cf06adc4e94b99a67174a3e121f5e45339f02179b5bf7f43"
+    },
+    {
+      "source_path": "dist/skills/02-forensic-financial-investigation/sub-skills/crypto-and-defi-forensics/governance-token-inflow-tracker/SKILL.md",
+      "export_path": "site/dist/skills/02-forensic-financial-investigation/sub-skills/crypto-and-defi-forensics/governance-token-inflow-tracker/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "49128d32e0c81d4088ab5e2bdfd96e54ea60cca4",
+      "size_bytes": 3705,
+      "sha256": "727034872f78f9186065ad77db2f5e1b1cc4b7570182654783f20a54556f88bf"
+    },
+    {
+      "source_path": "dist/skills/02-forensic-financial-investigation/sub-skills/crypto-and-defi-forensics/on-chain-wallet-clustering/SKILL.md",
+      "export_path": "site/dist/skills/02-forensic-financial-investigation/sub-skills/crypto-and-defi-forensics/on-chain-wallet-clustering/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "1cbb0675e1a8c78db076f7c9b8e82e723d705aa3",
+      "size_bytes": 3545,
+      "sha256": "0d6381a5bd757d1e8529386c3046bb53c68794b2214facb1534a7e4356e8a781"
+    },
+    {
+      "source_path": "dist/skills/02-forensic-financial-investigation/sub-skills/crypto-and-defi-forensics/stablecoin-issuer-subpoena-builder/SKILL.md",
+      "export_path": "site/dist/skills/02-forensic-financial-investigation/sub-skills/crypto-and-defi-forensics/stablecoin-issuer-subpoena-builder/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "d9fc783efe05aea0a528e5addcbea4c3ae218634",
+      "size_bytes": 3778,
+      "sha256": "fb3961e82c70b0917b749b9c0f6c8dcb5e5cb26f104d5e7df9d496fe98da5349"
+    },
+    {
+      "source_path": "dist/skills/02-forensic-financial-investigation/sub-skills/emoluments-and-sovereign-tracking/SKILL.md",
+      "export_path": "site/dist/skills/02-forensic-financial-investigation/sub-skills/emoluments-and-sovereign-tracking/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "1311584c2cd4efc2046f3f8ac6d322e86bcab8b2",
+      "size_bytes": 4539,
+      "sha256": "1543b6749972159323e594f91beb7dd8448fb7aad769bec8583718cc41df2e3a"
+    },
+    {
+      "source_path": "dist/skills/02-forensic-financial-investigation/sub-skills/emoluments-and-sovereign-tracking/fara-filing-cross-reference/SKILL.md",
+      "export_path": "site/dist/skills/02-forensic-financial-investigation/sub-skills/emoluments-and-sovereign-tracking/fara-filing-cross-reference/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "d6e761d6b83aebab62462ea31da64572c6005da3",
+      "size_bytes": 3858,
+      "sha256": "e470df7b383a6720923bcdcfaccddad76c4aa866bd665025a6842f995b3bc1ec"
+    },
+    {
+      "source_path": "dist/skills/02-forensic-financial-investigation/sub-skills/emoluments-and-sovereign-tracking/hospitality-and-lease-auditor/SKILL.md",
+      "export_path": "site/dist/skills/02-forensic-financial-investigation/sub-skills/emoluments-and-sovereign-tracking/hospitality-and-lease-auditor/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "df0fb6e28c2601b15f4172ff9e5aac7fcd565d70",
+      "size_bytes": 3673,
+      "sha256": "f1c4717c411ce17f29b68ec6df7ab58dcda06bca0a6faaaebdefaab11077b6ca"
+    },
+    {
+      "source_path": "dist/skills/02-forensic-financial-investigation/sub-skills/emoluments-and-sovereign-tracking/policy-timeline-correlator/SKILL.md",
+      "export_path": "site/dist/skills/02-forensic-financial-investigation/sub-skills/emoluments-and-sovereign-tracking/policy-timeline-correlator/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "67f98e0312164c9ade5946c91c3fb8386044e17b",
+      "size_bytes": 3615,
+      "sha256": "5eca52de55dd32ddadb2101b50ab0907fbbed5ca4511ed4dc1abbdec6936c818"
+    },
+    {
+      "source_path": "dist/skills/03-state-ag-peel-off-engine/SKILL.md",
+      "export_path": "site/dist/skills/03-state-ag-peel-off-engine/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "869d26ce26bd7cf7fed029fbbf062d540d885997",
+      "size_bytes": 4767,
+      "sha256": "800f18925c8daa38c06e0baa1927c88ba87b33905d542dde963a5d2ecd2aaf3a"
+    },
+    {
+      "source_path": "dist/skills/03-state-ag-peel-off-engine/sub-skills/ca-udap-blue-sky-packager/SKILL.md",
+      "export_path": "site/dist/skills/03-state-ag-peel-off-engine/sub-skills/ca-udap-blue-sky-packager/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "53c6962eb13c5da29b283ab0ae21bc3c7398fedf",
+      "size_bytes": 3800,
+      "sha256": "1ba2c6be9f9acbde7ddf4135a2b6efc1e7c554f6b956cf3de5a1bc6faff7efad"
+    },
+    {
+      "source_path": "dist/skills/03-state-ag-peel-off-engine/sub-skills/de-charter-abuse-packager/SKILL.md",
+      "export_path": "site/dist/skills/03-state-ag-peel-off-engine/sub-skills/de-charter-abuse-packager/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "f3a005fa78d84f622ae80231bb50cee483701479",
+      "size_bytes": 3732,
+      "sha256": "506c1d94bc166aa12a72a9ab6382308ed3d00a51ff1cb5c8dfad4b84f7789ee4"
+    },
+    {
+      "source_path": "dist/skills/03-state-ag-peel-off-engine/sub-skills/ny-martin-act-packager/SKILL.md",
+      "export_path": "site/dist/skills/03-state-ag-peel-off-engine/sub-skills/ny-martin-act-packager/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "cf0bfbfd51662e6cfd23bc802f03fbb09615810d",
+      "size_bytes": 3750,
+      "sha256": "555a79b81b4c2ef79330d2b488fa0110ee61d84f6c81a2c4be0de9956529f0f7"
+    },
+    {
+      "source_path": "dist/skills/03-state-ag-peel-off-engine/sub-skills/real-estate-nexus-mapper/SKILL.md",
+      "export_path": "site/dist/skills/03-state-ag-peel-off-engine/sub-skills/real-estate-nexus-mapper/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "3e28df329b5ab7eea86612c5969824350d0d40e6",
+      "size_bytes": 3734,
+      "sha256": "89c1473773a02944f4f123a800b99dd54e98a6dab9f84de4e6f41b37c2a5e10d"
+    },
+    {
+      "source_path": "dist/skills/04-deposition-and-hearing-architect/SKILL.md",
+      "export_path": "site/dist/skills/04-deposition-and-hearing-architect/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "da162486f12c8c0c3653b0d97ebbb19fd3ed03e8",
+      "size_bytes": 4381,
+      "sha256": "01ee590f84101c5d6d4c586e16629f0b9fa247c2d2029fc276f20ce487704063"
+    },
+    {
+      "source_path": "dist/skills/04-deposition-and-hearing-architect/sub-skills/closed-door-deposition-outline-builder/SKILL.md",
+      "export_path": "site/dist/skills/04-deposition-and-hearing-architect/sub-skills/closed-door-deposition-outline-builder/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "fa8683e263859d32a5f3bbb05f180512f1e29e21",
+      "size_bytes": 3682,
+      "sha256": "74c31ee49f58d8f4fbb6e2be94af09797c325c733517fb00def953110f037d2f"
+    },
+    {
+      "source_path": "dist/skills/04-deposition-and-hearing-architect/sub-skills/impeachment-contradiction-finder/SKILL.md",
+      "export_path": "site/dist/skills/04-deposition-and-hearing-architect/sub-skills/impeachment-contradiction-finder/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "7aa8a93d785bbe1a8b0fd570f3c3abfb19cc587e",
+      "size_bytes": 3557,
+      "sha256": "8f34c246c4a8ba62e5316d29bfe7fbabb8b485c05010c117f4cc4c56b13e195a"
+    },
+    {
+      "source_path": "dist/skills/04-deposition-and-hearing-architect/sub-skills/multimedia-hearing-storyboarder/SKILL.md",
+      "export_path": "site/dist/skills/04-deposition-and-hearing-architect/sub-skills/multimedia-hearing-storyboarder/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "b847e648a583b8e8f582ec68dd4d51543ad847d0",
+      "size_bytes": 3691,
+      "sha256": "0716f5127e94dff57ebdc1aee371c5d85965c9efb57e7ff2feedb759cccbec58"
+    },
+    {
+      "source_path": "dist/skills/05-publication-and-civic-governance/SKILL.md",
+      "export_path": "site/dist/skills/05-publication-and-civic-governance/SKILL.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "d8c945ad4806ffff4436882db3859688e351d29d",
+      "size_bytes": 4052,
+      "sha256": "a0381be1cbe50d8f836678df7292c570855c6f234c7f5d8a3667758f644aeaf5"
+    },
+    {
+      "source_path": "dist/style.css",
+      "export_path": "site/dist/style.css",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "0b63354e53d0899ce10dc379dfccdbb1f0bfdbaa",
+      "size_bytes": 55291,
+      "sha256": "3c940512fc53c7cc403e76fc39b3d78990a9bc2163b22fbf4271dd3591bab9ed"
+    },
+    {
+      "source_path": "dist/sw.js",
+      "export_path": "site/dist/sw.js",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "b4ccaf8d0bf92a99f084f1ad06d44f5e461171ff",
+      "size_bytes": 1271,
+      "sha256": "130bec292cce2143ba433c42d9bada46fc8ce7ece8725f3bead1b8722089e379"
+    },
+    {
+      "source_path": "dist/templates/appendix-a-house-rules.html",
+      "export_path": "site/dist/templates/appendix-a-house-rules.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "2939064740c1fa88b3c12d1d822381de3d88b732",
+      "size_bytes": 17886,
+      "sha256": "a0b6b8c44e3e589dac5cf2c816ae9955861f8137f6fed42e885227b4716d9526"
+    },
+    {
+      "source_path": "dist/templates/appendix-a-house-rules.md",
+      "export_path": "site/dist/templates/appendix-a-house-rules.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "1c135fb0630ab5817c049e8645dbb58225ba4505",
+      "size_bytes": 16905,
+      "sha256": "017db77fdee39aeb695b5937c78c11e85ac94eda03924e7a16dc7c9ff48e7b35"
+    },
+    {
+      "source_path": "dist/templates/appendix-b-legislative-purpose.html",
+      "export_path": "site/dist/templates/appendix-b-legislative-purpose.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "3157d58b352d197bedd9dc5a484248fbde00d103",
+      "size_bytes": 19420,
+      "sha256": "55b1949c974c65ebb7349ed32266c93361ebe72e145235f7084cba9cb8c64ae0"
+    },
+    {
+      "source_path": "dist/templates/appendix-b-legislative-purpose.md",
+      "export_path": "site/dist/templates/appendix-b-legislative-purpose.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "102330f44055673ceaf83866dc1041f1e69983e7",
+      "size_bytes": 18080,
+      "sha256": "06c50ec34a4f1d87e10fbea0039fb392996b5a8cabb5047c37742160408e64d8"
+    },
+    {
+      "source_path": "dist/templates/appendix-c-subpoena-and-wave-one.html",
+      "export_path": "site/dist/templates/appendix-c-subpoena-and-wave-one.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "1696db36529c11c0e2733d156a8d1803a0a7dfe6",
+      "size_bytes": 17421,
+      "sha256": "10cacf66980a3e76ca6eacc3bcaf00e9fdc7771700eb0fde897bc0ba69739335"
+    },
+    {
+      "source_path": "dist/templates/appendix-c-subpoena-and-wave-one.md",
+      "export_path": "site/dist/templates/appendix-c-subpoena-and-wave-one.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "273f666764645825a0236d99e83f9cd91807157b",
+      "size_bytes": 16082,
+      "sha256": "6750f72af9e05cfeeeb64d87638d3e8a9ab76c11a73c905b95279eec19689532"
+    },
+    {
+      "source_path": "dist/templates/appendix-d-state-referral.html",
+      "export_path": "site/dist/templates/appendix-d-state-referral.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "6f7c28fba8420087fb60bccd08122df6c7e7206e",
+      "size_bytes": 17716,
+      "sha256": "8af239b008f03fac7269a9c2f4603b896804233214e2f2220261cde6fd9c7dbd"
+    },
+    {
+      "source_path": "dist/templates/appendix-d-state-referral.md",
+      "export_path": "site/dist/templates/appendix-d-state-referral.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "74047ade90aaef68ca2ae81ade617fffa638e3df",
+      "size_bytes": 16131,
+      "sha256": "caa8b60517994fff84936cddbbcf0c3a0842f4a922e3266f055888a134485d39"
+    },
+    {
+      "source_path": "dist/templates/central-hub-charter.html",
+      "export_path": "site/dist/templates/central-hub-charter.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "c056a373901b4082591f172fb9408e1c65471b3a",
+      "size_bytes": 8462,
+      "sha256": "7f10b632c7050cb20e1d14e0048141372ee5338889bbbe0f39f3fabc78c122f7"
+    },
+    {
+      "source_path": "dist/templates/central-hub-charter.md",
+      "export_path": "site/dist/templates/central-hub-charter.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "22381f771608b82c0f5747295e46538f8caa6c61",
+      "size_bytes": 7605,
+      "sha256": "0ff5cba571b80db01314e9ce8b129f6ba533d1f8638a2c413e14b899c431ccab"
+    },
+    {
+      "source_path": "dist/templates/committee-node-operating-plan.html",
+      "export_path": "site/dist/templates/committee-node-operating-plan.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "0c0f963d2526b17866ba939c63c6f4518361e52a",
+      "size_bytes": 8334,
+      "sha256": "41c863a65c5603f2514a9dfbfd7421563bd9f17cbcca89ada9f0c05791860b99"
+    },
+    {
+      "source_path": "dist/templates/committee-node-operating-plan.md",
+      "export_path": "site/dist/templates/committee-node-operating-plan.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "dc39e90e0bb11cee99c168e997c64937d300861c",
+      "size_bytes": 7168,
+      "sha256": "f4a984a5149170b9bf5464dd225200a83859927f3e04066653e0c1726d39d040"
+    },
+    {
+      "source_path": "dist/templates/evidentiary-report.html",
+      "export_path": "site/dist/templates/evidentiary-report.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "2463b2a4874943cd2e087df988280d4369dfae60",
+      "size_bytes": 3076,
+      "sha256": "26e5c90e5d0226028bf663ede5c1ddc7f6a4e4eb8272dd446da2e73596c1c603"
+    },
+    {
+      "source_path": "dist/templates/evidentiary-report.md",
+      "export_path": "site/dist/templates/evidentiary-report.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "03805edb8f385b19e960bbba663421e4f863d548",
+      "size_bytes": 2344,
+      "sha256": "78889aa4029e6cd0f23d5dae0f50690552407d4bd877b57403e86d6e48e13a97"
+    },
+    {
+      "source_path": "dist/templates/house-office-briefing.html",
+      "export_path": "site/dist/templates/house-office-briefing.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "9222aedeab5a98c2f11cbfa16ee66ce8b3ca8073",
+      "size_bytes": 5560,
+      "sha256": "32c1a5abc5f970c24536745eac5a2cde349428c86dbdbb38923bcb7666cde78a"
+    },
+    {
+      "source_path": "dist/templates/house-office-briefing.md",
+      "export_path": "site/dist/templates/house-office-briefing.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "1c7a8ebba05172dc56a6f3b6fe36e8ca746e1798",
+      "size_bytes": 4683,
+      "sha256": "48398c1a0d0be22e379b1cd3a12fcaca6985f9288a663b3d786485b030059ec6"
+    },
+    {
+      "source_path": "dist/templates/staffing-and-recruitment-plan.html",
+      "export_path": "site/dist/templates/staffing-and-recruitment-plan.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "99479c64adb9b32ebc0ab579bf17560d44fc5303",
+      "size_bytes": 9840,
+      "sha256": "353d1fd812ee28bded2a592b2a0053766c44dd2d3e88ec1389fc94143ca8ac14"
+    },
+    {
+      "source_path": "dist/templates/staffing-and-recruitment-plan.md",
+      "export_path": "site/dist/templates/staffing-and-recruitment-plan.md",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "7330b444eb7ac3cde6b00650bcd9c0d2d27226d0",
+      "size_bytes": 8546,
+      "sha256": "f96ff7e32efc8850bf72bf1705cb6c8b58507c55d5ee6024eb518e93d0cad0d1"
+    },
+    {
+      "source_path": "dist/topics.json",
+      "export_path": "site/dist/topics.json",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "8d8e1dee9802fdad53b3f265aef16eaac21b3988",
+      "size_bytes": 3383,
+      "sha256": "448952f0feea7ca74d33a36a842dd6f418f76bb5ef275a3c8473c156483135b3"
+    },
+    {
+      "source_path": "dist/web/app.js",
+      "export_path": "site/dist/web/app.js",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "1ac43d3f5f4c4d351e4f30b6662dd37beafca13e",
+      "size_bytes": 33520,
+      "sha256": "6ef9c2146e40eb68227e7331cedf9570e5a9da8e79db3b3f4b24dc29d6892cc2"
+    },
+    {
+      "source_path": "dist/web/documents.js",
+      "export_path": "site/dist/web/documents.js",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "fcad36f8ff40853f7a2c94efe73a941d9697c0d1",
+      "size_bytes": 1580,
+      "sha256": "2d89afd0bcee8086a7afe63a76388fc4f2bd62dc01a04ee30f93ee93df3eb25f"
+    },
+    {
+      "source_path": "dist/web/documents.json",
+      "export_path": "site/dist/web/documents.json",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "694498e2252f7a50fd7d7f988f8c4862d6931f3c",
+      "size_bytes": 11011,
+      "sha256": "1ed9f3e7cd28e540537451ecec6b3ea73ed73c5e460b1cf3dcb8067fe9664ac9"
+    },
+    {
+      "source_path": "dist/web/explore.js",
+      "export_path": "site/dist/web/explore.js",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "d2e8401be49c54c9d39f6b6f75ebd488b0ba3927",
+      "size_bytes": 5957,
+      "sha256": "1cfed2dcdf9fe89d65de552d5a5d82c45ab6f89ef6b9f6903532950029c24565"
+    },
+    {
+      "source_path": "dist/web/icons/icon-192.png",
+      "export_path": "site/dist/web/icons/icon-192.png",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "a3f4ae8fd79d7a298ab490709d1f67344812b84c",
+      "size_bytes": 1387,
+      "sha256": "f694e1e08ecf3a353ca757baf0f1568fd3bdb2e9ff73bf40c56bf51e690a7278"
+    },
+    {
+      "source_path": "dist/web/icons/icon-512.png",
+      "export_path": "site/dist/web/icons/icon-512.png",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "eef8c698b0aafee80eab03200cd95b0da7e55e80",
+      "size_bytes": 3644,
+      "sha256": "614dd4b8b5373112ca8eec57b320a17db93df8e6ccb42a7cc7c65119ccdc8bb9"
+    },
+    {
+      "source_path": "dist/web/icons/icon.svg",
+      "export_path": "site/dist/web/icons/icon.svg",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "00d8d576f27095052d523bf7a4944879f9f7373d",
+      "size_bytes": 351,
+      "sha256": "82fd69bf2fbc2970e9149b7c24cbd2dacf1d3ce72f9ebcd79b810c959221f6b4"
+    },
+    {
+      "source_path": "dist/web/index.html",
+      "export_path": "site/dist/web/index.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "200fd720ef1b52ff81c4e3f06afd02fdae91fc89",
+      "size_bytes": 3529,
+      "sha256": "d244d4ecb58aa61df63935d4db3a6aa2023c2f9c6503238c79e3325ba535bc71"
+    },
+    {
+      "source_path": "dist/web/manifest.webmanifest",
+      "export_path": "site/dist/web/manifest.webmanifest",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "95d763d23017026ef66df61f21e4e0fa7484bd26",
+      "size_bytes": 450,
+      "sha256": "29288adbdae3bded1f0cdee5888fdf997d47ff4b0bdbcfb5e9a6c995f863f65a"
+    },
+    {
+      "source_path": "dist/web/phone-preview.html",
+      "export_path": "site/dist/web/phone-preview.html",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "7769b7e416973bb38069c5f07efb02bed8a0853e",
+      "size_bytes": 472,
+      "sha256": "7988715e0930e260dbaa156a71fc908e84a75b41fb043f9efac119e34cbd226b"
+    },
+    {
+      "source_path": "dist/web/style.css",
+      "export_path": "site/dist/web/style.css",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "0b63354e53d0899ce10dc379dfccdbb1f0bfdbaa",
+      "size_bytes": 55291,
+      "sha256": "3c940512fc53c7cc403e76fc39b3d78990a9bc2163b22fbf4271dd3591bab9ed"
+    },
+    {
+      "source_path": "dist/web/sw.js",
+      "export_path": "site/dist/web/sw.js",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "b4ccaf8d0bf92a99f084f1ad06d44f5e461171ff",
+      "size_bytes": 1271,
+      "sha256": "130bec292cce2143ba433c42d9bada46fc8ce7ece8725f3bead1b8722089e379"
+    },
+    {
+      "source_path": "dist/web/topics.json",
+      "export_path": "site/dist/web/topics.json",
+      "git_mode": "100644",
+      "source_git_blob_sha1": "8d8e1dee9802fdad53b3f265aef16eaac21b3988",
+      "size_bytes": 3383,
+      "sha256": "448952f0feea7ca74d33a36a842dd6f418f76bb5ef275a3c8473c156483135b3"
+    }
+  ]
+}

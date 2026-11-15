@@ -1,0 +1,492 @@
+{
+  "schema_version": 1,
+  "review_date": "2026-10-13",
+  "target_sha": "0bb7e6c68f05dd82dd69579ae5d81b93b55871c7",
+  "scope": "Complete main ancestry: 3001 commits; excludes unfetched remote branch histories",
+  "scanner": "Gitleaks 8.30.1; pinned archive verified",
+  "scan_exit": 1,
+  "scan_stderr_bytes": 0,
+  "total_findings": 168,
+  "previously_reviewed": 24,
+  "newly_verified": 53,
+  "remaining_unreviewed": 91,
+  "findings": [
+    {
+      "fingerprint": "a876a67e0ead7c9c8e7af3213c8b2713dd9cff78ffb1714ef32465b6e3cefb0b",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "a3def2a83a2e9d67cb1f31bc08e9e19f73b6d0b3",
+      "line": 2137,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_key_provider_dryrun.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "6f91c29a39957e59ed418862082b74d89596b8d216748bb0c7610ee6b583ecd9",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "e1ddf2e89d9f55cfc72d66f34b9187adbe932c63",
+      "line": 2137,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_key_provider_dryrun.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "ef6d84cb201e430587864614c2bcbb81724b85b1939aa0ab8ca391301b4bb3eb",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "e1ddf2e89d9f55cfc72d66f34b9187adbe932c63",
+      "line": 2622,
+      "rule": "generic-api-key",
+      "source_path": "modules/infrastructure/secrets_mcp/src/systemd_credential_secret_resolver.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "a947cecee4c2745ef8d9fcbaf018b1eac3d63c247aa84e98d7ab9e7ce035d66f",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "975fe7c43861c7ad900785bed39ee057979d67f4",
+      "line": 2135,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_independent_secret_grant_binding.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "ba05c5daf2b7b8ac845930ffb19783fc5454d2df7c94bf39e681ba20341bb5e7",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "975fe7c43861c7ad900785bed39ee057979d67f4",
+      "line": 2161,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_secret_access_grant.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "e4e54955b4f96ea0f802c319b9af69fad5f44dd917a3ba19211baa0df4c19524",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "fdb23b0606800547edf664c0a665d0447392058b",
+      "line": 1980,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "40c8e62708ac48511823771f2e237db078a1661231908f4d9d8c059e90ed3fb0",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "cff2694e566b3cc5bd2724cf9452def43ab65446",
+      "line": 1950,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "020db701b7a0665eb25f51c9e6e4b0ae9c5f875d00dd75db94f02f8f6fea76e1",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "bfeb7810caf58d1277d74dd2291a5a8e1718b498",
+      "line": 1943,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_confinement.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "050444275f931c5ad655319d4f6da2898235e0d7340f7754dca2702c0a91671e",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "bfeb7810caf58d1277d74dd2291a5a8e1718b498",
+      "line": 1944,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_event_log.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "df7f92f64e9fe1223a0899534cc2476f4db007191bfacc9ee586abe9cbb56fb4",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "bfeb7810caf58d1277d74dd2291a5a8e1718b498",
+      "line": 1945,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "7721decbf96fdad1d2ea5c75ba663f206397fe942d395d9de78f26475e80011c",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "3a10fb73d46d5980970b8106e863874e7764525d",
+      "line": 1998,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_secret_grant_issuance.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "648213e524902304991c021c4c452b7dc2be196e2c4cd2b4f1dc000eeae4342e",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "9e85076e309713b2e3f41e9b9a92844282d19770",
+      "line": 2022,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_secret_grant_issuance.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "a068302bc43007046ed7c90663750d7b160ce1c9831582d7961ae664fac21c3c",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "5cf20a688f15e60b3b5acfb15caba8c258e18f4a",
+      "line": 1722,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_conversation_scope_authentication.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "b9f4d6b0e2a141a4d2bcdfa4fb243128d50c2ba592ec0959f5609ef0f3aa3049",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "7bf95036374cf9d0e3050714a21d12a5c3f4adee",
+      "line": 1901,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_secret_access_grant_contract.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "292f776099875f05787cebd9585135f11660c9667d0c06442ee4d7d2f55f1de7",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "d8e8a95afe147193ffd14053dfc07d95da3f8bfc",
+      "line": 1712,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_conversation_scope_authentication.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "4b58216d795bc8343e2beb9c9c379d8e8db299f633c354eeb26e34c60fe92d97",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "99d01e0e0253f5aa39b8f547c2681941ba5ea2ab",
+      "line": 1690,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_conversation_scope_authentication.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "7e44f81966fa6d0292e69371edc7e3f98512f705a19a7a66c749bdccc7b73852",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "99d01e0e0253f5aa39b8f547c2681941ba5ea2ab",
+      "line": 1699,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_conversation_session_credential.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "65d68c237b6115d88f8ef3ab59a6bae53ae469cfbd3b71c5cef1bd0ef8e74d66",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "cd305f27139cf858a9bfd4d2eef17fb37f3798b6",
+      "line": 1584,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_authenticity.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "03a65c7e578eb5f7dd46d54779c8781bfba4631379b0b9af0d1f5c8ac9a191e1",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "cd305f27139cf858a9bfd4d2eef17fb37f3798b6",
+      "line": 1642,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_architect_proposal_authenticity.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "82a9380ad29eb641e6043a4f9cea43b283172112ef7affd75240fb169a0359e6",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "cd305f27139cf858a9bfd4d2eef17fb37f3798b6",
+      "line": 1801,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_key_provider_dryrun.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "2ddfc43fa80a2b95ab5f3971467a953df9d372aaf0c8eb549ba427989a497145",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "cd305f27139cf858a9bfd4d2eef17fb37f3798b6",
+      "line": 1814,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_socket_peer_credential_attestor.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "2d9c377443528ebb2013f0c4a3d12f792a5220dd57cf4c5d16f37b0be2ceebe9",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "cd305f27139cf858a9bfd4d2eef17fb37f3798b6",
+      "line": 2171,
+      "rule": "generic-api-key",
+      "source_path": "modules/infrastructure/secrets_mcp/src/op_cli_secret_resolver.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "9b7891ba0f113241e47d35cdbfb7bb5c9632f13df6f1481aee802d556cec229d",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "cd305f27139cf858a9bfd4d2eef17fb37f3798b6",
+      "line": 2172,
+      "rule": "generic-api-key",
+      "source_path": "modules/infrastructure/secrets_mcp/src/secrets_mcp.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "830215354ac2016add6e0d05070a082570c1745b3086bc3193a17650b4eb3821",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "0d2cc2eb67cdc6ba4fa8a83850aff94ff6c03341",
+      "line": 1597,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_confinement.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "814b893ab8f900399fa146590dbe3aebcfa04d65b5c0de0d7d761ac4544cf896",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "0d2cc2eb67cdc6ba4fa8a83850aff94ff6c03341",
+      "line": 1598,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_event_log.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "4f8fd42dab32591fda57cfc02a72a6b8b8962599108e085a14bd6d6709859cbf",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "0d2cc2eb67cdc6ba4fa8a83850aff94ff6c03341",
+      "line": 1599,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "57850bb64f1093463d84f8f9879face735aa69cf7cf3fd791bd5e47dec1b5e6d",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "0d2cc2eb67cdc6ba4fa8a83850aff94ff6c03341",
+      "line": 1600,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_transport.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "6515cd540e8c9c1da4a1cc62327ab4ff1d57cdd567fabe84e6dd3e1805c5f9d2",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "20e0da2bacd0df1b83796cc7b2762cb7370bffe8",
+      "line": 1462,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_architect_proposal_authenticity.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "aef8ac1e8e82c36a96c422d3ef350f48ff04f9b5ecb3bff30a74a06501c401b1",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "20e0da2bacd0df1b83796cc7b2762cb7370bffe8",
+      "line": 1578,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_key_provider_dryrun.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "41b9c7c9f9a79699c73d2b63c953821f9c627d4d95f3fcef98ada1fcee282080",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "20e0da2bacd0df1b83796cc7b2762cb7370bffe8",
+      "line": 1580,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_socket_peer_credential_attestor.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "a2383a8fed665d2f040654e13b0728f65b9db544ee412b4d36c5cd4dcb8d9f89",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "c7bbc340a698aaa5091be4573dc580851804666e",
+      "line": 1305,
+      "rule": "discord-api-token",
+      "source_path": "modules/communication/livechat/src/discord_status_pusher.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "034dd3ae88ac2a1144a001607ef25c5c807957670b4af2ce73b3ddd55e98fc8c",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "c7bbc340a698aaa5091be4573dc580851804666e",
+      "line": 1870,
+      "rule": "discord-api-token",
+      "source_path": "modules/platform_integration/antifafm_broadcaster/src/discord_voice_output.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "3b6f2930265e8f7eaaf48d060d3bf5374e43504f18e23590e3c8ccae3b77b060",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "c7bbc340a698aaa5091be4573dc580851804666e",
+      "line": 1080,
+      "rule": "generic-api-key",
+      "source_path": "holo_index/memex_access_policy_receipt.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "91f5c87cc2f950f0b9ef91618947c50fc4ccb7e751aece2524a9d64ee6058de2",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "c7bbc340a698aaa5091be4573dc580851804666e",
+      "line": 1200,
+      "rule": "generic-api-key",
+      "source_path": "modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_auth_provider.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "be6abfa48faee5a57ca6e918c84ad4676af1a4d30ee32524e51e52f1077e8da4",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "c7bbc340a698aaa5091be4573dc580851804666e",
+      "line": 1236,
+      "rule": "generic-api-key",
+      "source_path": "modules/ai_intelligence/pqn_alignment/src/council/api.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "0c12898c9556ff22082a61ac7abeafdce4f41967a954ae8aae813f0699d40f98",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "c7bbc340a698aaa5091be4573dc580851804666e",
+      "line": 1237,
+      "rule": "generic-api-key",
+      "source_path": "modules/ai_intelligence/pqn_alignment/src/detector/api.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "bc5fcce18dbc5da686da95703e7ac6cfd16a0b6294eed519ef801300e920c526",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "c7bbc340a698aaa5091be4573dc580851804666e",
+      "line": 1239,
+      "rule": "generic-api-key",
+      "source_path": "modules/ai_intelligence/pqn_alignment/src/io/api.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "c9f911a15bfd00189f46c1561ac775bf0eb5451de1a1ee2c0f3f5317c2324f43",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "c7bbc340a698aaa5091be4573dc580851804666e",
+      "line": 1244,
+      "rule": "generic-api-key",
+      "source_path": "modules/ai_intelligence/pqn_alignment/src/sweep/api.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "70f3e9aef69dd57ab238a5ad9e799251c4800a676836dfeb294c6cac6667d799",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "c7bbc340a698aaa5091be4573dc580851804666e",
+      "line": 1463,
+      "rule": "generic-api-key",
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_key_provider_dryrun.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "d67cf95d7ba3f53f207e8f0c92a823d052e06e7378a278bc334fc38015b23c7b",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "c7bbc340a698aaa5091be4573dc580851804666e",
+      "line": 1570,
+      "rule": "generic-api-key",
+      "source_path": "modules/foundups/pfmall/api.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "03d9c81a67591519a79f1564e5b7a18affaec563aa562a7d11cfa3169da0d6a9",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "c7bbc340a698aaa5091be4573dc580851804666e",
+      "line": 1626,
+      "rule": "generic-api-key",
+      "source_path": "modules/foundups/simulator/economics/token_economics.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "708cb96cc91d7f5a5f3956980cc45eae362010f8a5b225cf94c2fe04bd75580f",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "c7bbc340a698aaa5091be4573dc580851804666e",
+      "line": 1757,
+      "rule": "generic-api-key",
+      "source_path": "modules/infrastructure/oauth_management/src/oauth_manager.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "c457991afd5217cc5af15bad7e70d87f3d6d3cd5de6fc0ce4581154581860ed0",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "c7bbc340a698aaa5091be4573dc580851804666e",
+      "line": 1763,
+      "rule": "generic-api-key",
+      "source_path": "modules/infrastructure/secrets_mcp/src/op_cli_secret_resolver.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "92f862862dc662b383b5708045ca983f5ffc61820449e7300a9e197ce73a38f6",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "c7bbc340a698aaa5091be4573dc580851804666e",
+      "line": 1764,
+      "rule": "generic-api-key",
+      "source_path": "modules/infrastructure/secrets_mcp/src/secrets_mcp.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "e9be0545047cfd2d8a1fcc34ffb14d65681116b9982c480e414d44c5ba851b96",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "c7bbc340a698aaa5091be4573dc580851804666e",
+      "line": 1772,
+      "rule": "generic-api-key",
+      "source_path": "modules/infrastructure/shared_utilities/key_hygiene.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "c3b8219583eb3afec79d7da2e5c37f7d070dff42cecc87946291edae7d8bf404",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "c7bbc340a698aaa5091be4573dc580851804666e",
+      "line": 1883,
+      "rule": "generic-api-key",
+      "source_path": "modules/platform_integration/github_integration/src/github_api_client.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "e1cc7f53f1c9a14625106479f4814b45a0a7114536a58f7589786312a320d9ec",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "c7bbc340a698aaa5091be4573dc580851804666e",
+      "line": 1934,
+      "rule": "generic-api-key",
+      "source_path": "modules/platform_integration/social_media_orchestrator/src/oauth/oauth_coordinator.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "1aca269175fe0a8d7b6d45d3dd1fec37811ce2f52e876028a95aa7c3aa792e5f",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "c7bbc340a698aaa5091be4573dc580851804666e",
+      "line": 1957,
+      "rule": "generic-api-key",
+      "source_path": "modules/platform_integration/utilities/oauth_management/src/oauth_manager.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "b34647b8deb665684a8de08818777c2c48d9beb7a4b4247a30cef2d3944f9038",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "c7bbc340a698aaa5091be4573dc580851804666e",
+      "line": 1963,
+      "rule": "generic-api-key",
+      "source_path": "modules/platform_integration/youtube_api_operations/src/youtube_api_operations.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "ef487cd9d230ffca94b6c4692a274f73409a538fa70c137d13ad5ab774ef968d",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "c7bbc340a698aaa5091be4573dc580851804666e",
+      "line": 1967,
+      "rule": "generic-api-key",
+      "source_path": "modules/platform_integration/youtube_auth/src/oauth_browser.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "1404bfacaea0721981d40eafbeaad50cada61f2443e8852896a186e3067d9640",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "c7bbc340a698aaa5091be4573dc580851804666e",
+      "line": 1968,
+      "rule": "generic-api-key",
+      "source_path": "modules/platform_integration/youtube_auth/src/oauth_health.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "6ad5bb86932ffefb9bf6f0b3ab85fe16944a90e2c12b207c919505d96f3dde55",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "c7bbc340a698aaa5091be4573dc580851804666e",
+      "line": 1972,
+      "rule": "generic-api-key",
+      "source_path": "modules/platform_integration/youtube_auth/src/youtube_auth.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    },
+    {
+      "fingerprint": "e328ceaad7d3956c8aa4ad89c78da5eaae0919aae88b3c72e6f49da23c7ecda6",
+      "file": "scripts/reddog_backend_manifest.json",
+      "commit": "c7bbc340a698aaa5091be4573dc580851804666e",
+      "line": 2019,
+      "rule": "generic-api-key",
+      "source_path": "utils/oauth_manager.py",
+      "verification": "SHA256 of referenced source bytes at the same commit exactly equals manifest entry"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+<section class="staff-section contact-page" id="contact" data-page-section="contact">
+  <p class="kicker">CONSTITUENT CONTACT</p>
+  <h1>Contact your U.S. senators</h1>
+  <p class="lead">Choose the state where you live to find your senators’ Washington office numbers. You can speak to office staff, leave a voicemail if offered, or use an official contact form.</p>
+  <div class="contact-controls">
+    <label for="contact-state">State or territory of residence</label>
+    <select id="contact-state" autocomplete="off" disabled>
+      <option value="">Choose your state or territory</option>
+    </select>
+    <div id="contact-location" hidden>
+      <button type="button" class="button outline" id="contact-locate" aria-describedby="contact-location-note">Suggest my current state</button>
+      <p id="contact-location-note">Optional. The lookup runs in your browser. This site keeps and sends no location coordinates. Confirm your home state, especially when traveling.</p>
+      <p id="contact-location-status" role="status"></p>
+    </div>
+    <div id="contact-suggestion" hidden>
+      <button type="button" class="button outline" id="contact-confirm">Use this state</button>
+    </div>
+  </div>
+  <p id="contact-status" role="status">Loading the office directory…</p>
+  <noscript><p>Use the official directories below to find an office number or contact form.</p></noscript>
+  <ul id="contact-offices" class="contact-offices" aria-label="Senate offices" hidden></ul>
+  <p id="contact-snapshot" class="contact-note" hidden></p>
+
+  <details class="contact-message">
+    <summary>Prepare a message or voicemail</summary>
+    <p>Start with your name and town if you’re comfortable sharing them with the office. Say what oversight question you’re calling about and what response you’d like. An office may ask for a ZIP code or callback number.</p>
+    <p>“Hello, I’m [name] from [town, state]. I’m calling about [oversight issue]. Could the senator’s office explain [specific question or next step]? Thank you.”</p>
+    <label for="contact-draft">Optional private draft</label>
+    <p id="contact-draft-note">Your draft stays in this page. Read it aloud when you call and share personal details directly with the office if needed.</p>
+    <textarea id="contact-draft" rows="4" autocomplete="off" autocorrect="off" spellcheck="false" aria-describedby="contact-draft-note"></textarea>
+  </details>
+
+  <h2 class="contact-fallback-title">Official directories and switchboard</h2>
+  <p>Calling opens your device’s dialer if available. You can also dial the displayed number yourself. The Senate directory links to each senator’s website and contact form.</p>
+  <ul class="contact-fallback">
+    <li><a href="https://www.senate.gov/senators/contact/">Official Senate contact directory</a></li>
+    <li><a href="https://www.house.gov/representatives/find-your-representative">Find your House office</a></li>
+    <li><a href="tel:+12022243121">Capitol Switchboard · (202) 224-3121</a></li>
+  </ul>
+  <p class="contact-note" id="contact-boundary-source" hidden>Location suggestions use generalized <a href="https://www.census.gov/geographies/mapping-files/2025/geo/carto-boundary-file.html">2025 Census state boundaries</a>.</p>
+</section>

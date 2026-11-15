@@ -32,6 +32,7 @@ class STTEvent:
     start_ms: int
     end_ms: int
     confidence: float = 1.0
+    language: str = "unknown"
 
 
 @dataclass(frozen=True)
@@ -167,7 +168,8 @@ class FasterWhisperSTT:
                 is_final=True,
                 start_ms=start_ms,
                 end_ms=end_ms,
-                confidence=confidence
+                confidence=confidence,
+                language=getattr(info, "language", None) or self.language or "unknown",
             )
 
         except Exception as e:
@@ -430,6 +432,7 @@ class TranscriptSegment:
     text: str
     confidence: float
     url: str  # Deep link URL with timestamp
+    language: str = "unknown"
 
 
 class BatchTranscriber:
@@ -447,7 +450,8 @@ class BatchTranscriber:
         self,
         model_size: str = "base",
         device: str = "cpu",
-        output_dir: Optional[str] = None
+        output_dir: Optional[str] = None,
+        language: Optional[str] = "en",
     ) -> None:
         """Initialize batch transcriber.
 
@@ -455,9 +459,10 @@ class BatchTranscriber:
             model_size: Whisper model size (tiny, base, small, medium, large-v3)
             device: Device for inference (cpu, cuda)
             output_dir: Directory for transcript JSONL files (default: memory/transcripts)
+            language: Whisper language code, or None for automatic detection.
         """
         from pathlib import Path
-        self._stt = FasterWhisperSTT(model_size=model_size, device=device)
+        self._stt = FasterWhisperSTT(model_size=model_size, device=device, language=language)
         self.output_dir = Path(output_dir) if output_dir else Path("memory/transcripts")
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self._progress: Dict[str, dict] = {}
@@ -503,7 +508,8 @@ class BatchTranscriber:
                 end_sec=end_sec,
                 text=event.text.strip(),
                 confidence=event.confidence,
-                url=url
+                url=url,
+                language=event.language,
             )
 
     def transcribe_channel(
@@ -604,11 +610,13 @@ class BatchTranscriber:
 def get_batch_transcriber(
     model_size: str = "base",
     device: str = "cpu",
-    output_dir: Optional[str] = None
+    output_dir: Optional[str] = None,
+    language: Optional[str] = "en",
 ) -> BatchTranscriber:
     """Get a configured batch transcriber instance."""
     return BatchTranscriber(
         model_size=model_size,
         device=device,
-        output_dir=output_dir
+        output_dir=output_dir,
+        language=language,
     )

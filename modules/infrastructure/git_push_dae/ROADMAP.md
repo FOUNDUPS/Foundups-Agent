@@ -1,5 +1,22 @@
 # GitPushDAE Development Roadmap
 
+## Queue default repair — 2026-10-04
+
+WSP15 C2/I4/D4/Impact3 = **13/P1**. Publication of the preceding RSI repair
+produced another missing-root dispatch error. Re-observation confirms default
+queue intent would dispatch if imports were repaired. The smallest valid move
+is explicit dispatch selection in the existing runner, preserving imports.
+
+- [x] Reconcile prior PR1945: merged and present in current main ancestry.
+- [x] Freeze acceptance before production edit; original source fails8/12 cases.
+- [x] Make CLI and API queue-only by default; retain explicit dispatch behavior.
+- [x] Candidate passes12 entrypoint/API cases and3 original unit cases locally.
+- [ ] Exact-head independent review, PR/CI/main verification and owned closure.
+
+Native RSI admission remains a separate18/P0 parent. The local Qwen worker's
+two proposals were rejected; coordinator implemented this repair. This is a
+repository-maintenance result, not native-worker qualification or production RSI.
+
 ## RSI runner entrypoint checkpoint — 2026-09-28
 
 WSP 15: Complexity2 + Importance3 + Deferability3 + Impact4 = **12/P2**.

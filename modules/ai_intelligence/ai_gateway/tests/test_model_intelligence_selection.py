@@ -371,3 +371,21 @@ def test_selector_has_no_network_or_command_execution_imports():
     assert "subprocess" not in imported
     assert "requests" not in imported
     assert "urllib" not in imported
+
+
+def test_youtube_free_candidates_are_evaluable_but_not_production_authority():
+    from modules.ai_intelligence.ai_gateway.src.model_intelligence_catalog import normalize_static_registry_cards
+    cards = [card for card in normalize_static_registry_cards() if 'youtube_reply' in card.task_families]
+    assert {card.canonical_model_id for card in cards} == {
+        'google/gemma-4-26b-a4b-it:free', 'google/gemma-4-31b-it:free',
+        'nvidia/nemotron-3.5-lightning:free'}
+    assert all(card.provider == 'openrouter' and card.promotion_state == PromotionState.CANDIDATE for card in cards)
+    snapshot = _snapshot(*cards)
+    evaluation = select_models_for_task(snapshot, ModelTaskRequirements(
+        task_family='youtube_reply', allowed_providers=('openrouter',)))
+    assert evaluation.decision == SelectionDecision.SELECTED
+    production = select_models_for_task(snapshot, ModelTaskRequirements(
+        task_family='youtube_reply', allowed_providers=('openrouter',),
+        purpose=SelectionPurpose.PRODUCTION, min_verifier_pass_rate=0.8))
+    assert production.decision == SelectionDecision.REJECTED
+    assert production.selected_model_ids == ()

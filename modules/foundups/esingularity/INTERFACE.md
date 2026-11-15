@@ -26,10 +26,31 @@ The current eSingularity redesign brief calls for three to four primary content 
 | --- | --- |
 | `/` | eSingularity project/vision landing on eSingularity.ai |
 | `/yumori` | YUMORI movement, case for support, participation and evidence; also served internally at YUMORI.me `/` |
+| `/yumori/partners` | Organization partner inquiry page; also served internally at YUMORI.me/www `/partners` |
 | `/vote-no` | YUMORI.me civic-action record: historical September 25 VOTE NO campaign, current post-vote PPP/PFI request, privacy-bounded council/mayor messages, and official contact routes |
 | `/future` | 福井の未来 / community-benefit explanation |
 | `/team` | Verified public team directory |
 | `/team/[slug]` | Individual public profile |
+
+## Organization partner inquiry contract
+
+- The `/partners` alias is an exact-path, internal `beforeFiles` rewrite limited
+  to YUMORI.me and www.YUMORI.me. It does not capture eSingularity.ai,
+  YUMORI.info, preview hosts, descendant paths, APIs, reports or assets.
+- The movement-page CTA uses the explicit `/yumori/partners` filesystem route
+  so it also works when viewing that page on the shared project's host.
+- The inquiry page keeps canonical `https://yumori.me/partners` metadata and
+  links the project identity to absolute `https://esingularity.ai/`.
+- Its `mailto:` action supplies an editable Japanese subject/body. Sending is
+  manual. No server-side form, automatic email, submission storage, consent
+  processing or delivery receipt is implemented by this route.
+- The visitor is requesting a discussion, not consenting to a partnership,
+  financing or contract. The three candidate-site roles and unconfirmed
+  feasibility conditions remain explicit.
+- Japanese-first visible copy and selected English/Portuguese equivalents use
+  the existing language owner. The shared homepage ticker and individual JOIN
+  path remain intact. Live publication and actual inquiry delivery require
+  separate observations.
 
 ## YUMORI presentation contract
 
@@ -145,3 +166,11 @@ and legacy five-year parity outputs remain unchanged.
 ## Costed planning API
 
 `load_planning_assumptions()` reads the versioned planning data; `run_planning_scenario(name="base", data=None)` returns demand-derived design, independent cost lines, debt/cash driver schedules, later-site standalone cash and the canonical portfolio result. Evidence readiness remains separate from numeric scenario results. `yumori_fin_projection.build_projection()` emits bounded native FIN batches and performs no network mutation.
+
+## Community interest security contract — 2026-10-10
+
+POST `/api/interest` accepts JSON only, streams at most 8 KiB before parsing, rejects cross-origin browser requests, and preserves the existing consent/field validation and honeypot. Responses are noncacheable. Invalid JSON/fields return 400, oversized input 413, wrong content type 415, origin rejection 403, durable admission rejection 429 with Retry-After, and storage failure 503.
+
+D1 admits at most five submissions per ingress client in a rolling hour and 100 globally per hour, and one normalized email per 24 hours. The guarded insert and admission receipt run in one transaction. Current/previous daily client digests preserve the rolling window across UTC midnight; no raw IP is stored and stale admission metadata is pruned. These application limits bound stored submissions, not volumetric traffic or D1 request charges; edge-level abuse controls remain an operations concern. Missing Cloudflare ingress metadata shares a conservative quota; forwarded headers are not trusted. Existing interest records are preserved.
+
+Unpublished portraits and unused unblurred originals are staged outside `public/`. This stops new static serving but does not erase Git history or previously fetched copies. Approved 012/0102 profile imagery stays published.

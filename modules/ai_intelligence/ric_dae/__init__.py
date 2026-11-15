@@ -1,1 +1,1 @@
-﻿"""ricDAE research ingestion cube package"""
+"""ricDAE research ingestion cube package"""

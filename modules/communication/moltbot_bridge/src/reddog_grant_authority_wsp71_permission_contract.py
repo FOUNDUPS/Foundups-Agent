@@ -70,6 +70,26 @@ def validate_permission_receipt(value: Mapping[str, Any]) -> dict[str, Any]:
     return raw
 
 
+def expected_permission_bindings(
+    policy: Mapping[str, Any], verified: Mapping[str, Any], config: Mapping[str, Any]
+) -> dict[str, Any]:
+    return {
+        "owner_config_id": policy["owner_config_id"],
+        "e0_manifest_id": policy["manifest_id"],
+        "e0_artifact_generation_digest": policy["artifact_generation_digest"],
+        "e0_generation": policy["generation"],
+        "e0_generation_revision": policy["generation_revision"],
+        "issuer_principal_id": policy["grant_authority_principal_id"],
+        "issuer_principal_provider": policy["grant_authority_principal_provider"],
+        "issuer_public_key": policy["grant_authority_public_key"],
+        "issuer_key_epoch": policy["grant_authority_key_epoch"],
+        "signer_agent_id": config["signer_agent_id"],
+        "signer_profile_id": config["signer_profile_id"],
+        "signing_key_ref_hash": config["signing_key_ref_hash"],
+        "audit_mac_key_ref_hash": config["audit_mac_key_ref_hash"],
+    }
+
+
 __all__ = [
     "FIELDS", "GET_SECRET", "MAX_RECEIPT_BYTES", "PERMISSION_FILENAME",
     "SCHEMA_VERSION", "SECRETS_READ", "permission_receipt_id",

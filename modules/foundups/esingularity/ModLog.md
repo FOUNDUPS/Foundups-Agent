@@ -1,3 +1,137 @@
+## 2026-10-30 — Reconcile organization-partner inquiry PR #2234
+
+- Preserve the original coalition/inquiry proposal while retaining both
+  homepages, the shared movement ticker and individual JOIN actions. Use the
+  existing language switcher for Japanese-first copy and complete selected
+  English/Portuguese equivalents; keep the Japanese email template explicit.
+- Add only the host-restricted `/partners` alias. Use `/yumori/partners` for the
+  movement CTA so navigation also works from the shared project host. The
+  inquiry remains a manually sent `mailto:` draft, not a form backend or an
+  automatic sender. Candidate-site and funding/approval conditions stay open.
+- Extend the existing routing suite for exact-path and negative-host behavior;
+  no new test file, localization system, credential, provider or deployment is
+  introduced. Fresh isolated validation on October 30 passes 85 module Python
+  tests, 32 routing tests and eight signup-security tests. The preserved October
+  29 lint/build/browser evidence is dated evidence, not a new run.
+- The current-main Holo owner query is CURRENT/no-gap at `cbef41fbae1b`; actual
+  candidate paths and owner contracts were checked directly. Metadata checks,
+  independent candidate audit, exact-head hosted checks and resulting-main
+  acceptance remain publication gates. Site publication and inquiry delivery
+  remain unverified. WSP 00/10/11/22/50/84/97; website workflow applied.
+
+## 2026-10-29 — Update Cloudflare tooling for Undici security fixes
+
+- The frontend lock pinned Undici 7.29.1 through Miniflare. GitHub reports four
+  high and one medium advisory for this path, all with first patched 7.30.1.
+  Update the matched upstream cohort: Cloudflare Vite plugin 1.66.0, Wrangler
+  4.154.0 and workers-types 5.20261023.1; both parents select Miniflare
+  5.20261023.1-beta with Undici 7.30.1. No major-version override is introduced.
+- Preserve Next 16.4.3, React/React DOM 19.2.8, Vinext 1.1.0 and Vite 8.3.5.
+  npm 11.19.1 reconciles optional WASM dependencies omitted by the first local
+  npm 11.6.2 lock update; clean-install acceptance must use the reconciled lock.
+- Existing tests pass: 85 Python contracts on both base and candidate, 26 Node
+  routing/signup-security cases on CI's Node 24.22.1, and catalog validation.
+  Final frontend lock audit reports zero known advisories. Clean install (488
+  packages with lifecycle scripts disabled), lint (zero errors/seven existing
+  image warnings) and the production build pass on Node 24.22.1/npm 11.19.1.
+  Hosted exact-head/resulting-main acceptance remains pending at preparation time.
+- Holo retrieval is CURRENT/no-gap at main4533; generic security results were
+  reranked to the actual package, config, workflow and test owners. Manual lock
+  resolution is appropriate because executable package compatibility is required.
+  No new tests, page edits, publication, provider actions or Chroma fix are claimed.
+  WSP 5/6/10/22/50/71/84/87/97; website-maintenance skill applied to validation.
+
+## 2026-10-23 — YUMORI resident RSI canary contract
+
+- Extended the existing registered `yumori_work_orchestrator` instead of creating another daemon/orchestrator. YUMORI is now the domain canary for the existing RedDog/OpenClaw/WRE resident loop under FoundUp scope `esingularity_001`.
+- Defined day-to-day continuity as evidence reconstruction across repository/Holo truth, authoritative work state, operational FoundUp Memex, Brain, Breadcrumbs, provider transaction truth, correspondence state, existing Contacts/Action Queue projections, YUMORI/0102 Moshpits and WRE PatternMemory/verified outcomes. No parallel memory database is introduced.
+- Added the autonomous project loop: recover -> observe deltas -> reconcile state -> identify the highest-leverage blocker -> compare actions -> WSP 15 select -> execute the highest admitted action -> independently verify -> write owned receipts/projections -> nominate learning.
+- Added Gmail autonomy requirements for provider-watermark deltas, complete-thread/Sent reconciliation, audience/route/sender/content validation, anti-spam/duplicate suppression, recipient preflight, provider readback and separate outcome tracking. `REDDOG_AUTO` external mutation remains truthfully gated on #1779 host deployment rather than bypassed.
+- Added autonomous partner discovery: derive the missing capability from the blocker, research direct precedent, cross against existing Contacts/Gmail/LinkedIn, verify roles and warm paths, rank fit, and prepare the smallest target-specific ask. Many names without a verified next action are not success.
+- Defined RSI success as later-cycle retained improvement with independent outcome evidence, not repetition, structural fidelity or non-empty model output. Metrics include blocker reduction, provider delta/replay behavior, wrong-audience prevention, partner progression, external-effect disposition, 012 intervention count, cost per useful verified outcome, and promoted/rejected learning candidates.
+
+## 2026-10-21 — Reconcile Moshpit event ordering policy PR #2007
+
+- Preserved the original event-owned timestamp, unknown-time placement, evidence-led historical repair and whole-day paragraph readback rules alongside PR #2110's private native-Docs safeguards.
+- Extended the existing Moshpit contract assertions; all 21 cases in `test_contracts.py` pass. Canonical agent projections still resolve the existing skill. Registry metadata is unchanged; its pre-existing 0.1.0 version versus canonical 0.1.2 is deferred from this policy slice.
+- This validates repository policy text, not live Docs mutation, automated ordering or end-to-end RSI. No correspondence, document or deployment effects. WSP 00/15/22/50/95/97; exact-head hosted checks and main readback remain publication gates.
+
+## 2026-10-21 — Close private Moshpit native-write policy PR #2110
+
+- Reconciled the existing private-log policy onto main a41a76053. Both canonical Google Docs require native content writes, exact error preservation, deduplication and readback; one pending learning delta must not replay a Gmail/CRM action.
+- Reused the existing `test_contracts.py` assertions. All 21 cases passed on refreshed PR head 5cadc75d4; this proves repository policy/registration contracts, not a live Docs write or deployed provider behavior.
+- Preserved private incident boundaries and existing action authority. No live document, correspondence or deployment effects. WSP 00/22/50/95/97; hosted checks and main readback remain publication gates.
+
+## 2026-10-13 — JHR website-first downstream newsletter contract (instruction-only)
+
+- 012 clarified: eSingularity.ai is the primary public publication for the Japan Hyperscaler Report. LinkedIn JHR is a **derived newsletter edition**, distributed after the exact site issue passes verified production deployment and live issue-anchor readback.
+- Updated the site workflow, JHR entrypoint and JHR README to require an explicit site release receipt before handing a source issue to the existing LinkedIn publishing skill. CSS, ticker, non-JHR site changes and NO_REPORT do not trigger social publication.
+- The upstream artifact identity and published permalink must survive the handoff; LinkedIn editorial copy cannot invent additional facts or preempt the site. No site content or website deployment changed in this slice; existing live articles retain their status. WSP00/97 evidence and exact-action approval remain required.
+
+## 2026-10-10 — Security audit remediation
+
+- Bound interest request bodies before JSON parsing, retained field/consent validation, rejected cross-origin requests, added transactional D1 client/global quotas and daily email deduplication. No existing submissions deleted.
+- Removed unpublished portraits and unused original group imagery from the static public root while preserving approved published profile images.
+- Corrected pre-existing PWA purpose typing and duplicate translation keys, retaining last-key-wins displayed copy, so type verification can run.
+- Added real SQLite admission tests and streamed request tests, including a midnight rotation regression found in independent review. Eight security tests, 18 domain-routing tests, and 82 existing module tests passed before integration. Deployment receipt is recorded separately; this entry alone is not proof of publication.
+- WSP00 documented torch-free bootstrap; source-bound lexical retrieval UNKNOWN freshness/index gap, direct file inspection at main b4f1a97 and Sites 90e539f. Manual review because no available verified production security overseer covers this repository. WSP22/50/77/97.
+
+## 2026-10-08 — Three-site scope and incremental recipient audit
+
+- Retain the three-site program while making the two schools the current feasibility focus; keep Sukatto conditional on public decisions, lawful procedures and independent feasibility. School investigation does not depend on Sukatto participation.
+- Separate the immediate request for municipal interest and a coordination contact from later governance, funding and property decisions. Reconcile the combined school consultation filing status without implying acceptance or eligibility approval.
+- Strengthen the recipient-document subskill: preserve the principal's current scope before compression, compare title/body/appendices and priority-change rules, and fix/read back one issue class at a time.
+- Validation: independent forward review passed four scope/cost/send-hold scenarios. Canonical Drive documents received sequential text readbacks and rendered-layout review; detailed source references remain technical annexes, not a required outbound package. No stakeholder email or attachment sent by this repair.
+
+## 2026-10-08 — Recipient document audit before correspondence release
+
+- Added a subordinate audience/document audit to the existing correspondence and City procedure owners: whole-package reading burden, purpose-first compression, first-use terminology, exact export/page/hash binding, all-page rendering and hidden-artifact checks.
+- Preserve official forms, required content, recipient supplement refusals, review-only instructions and existing send controls. A skill rule is not a mechanical sender-boundary fix.
+- Validation: independent forward review handled five synthetic cases (oversized package, refusal/review-only, official-form exception, missing glyphs, mutable document); clarified release-only progression and immediate revision recheck. Existing operational-skill contract passes.
+- Generalized the observed failure: internal technical evidence became required reading for a procedural recipient. Private correspondence and identifiers remain in Gmail/Drive logs, not Git.
+- Retrieval used the documented lexical module bundle (semantic freshness UNKNOWN); direct owner reads resolved the irrelevant protocol hits. Bootstrap used the documented torch-free gate fallback; detector witness absent. No stakeholder send or sender-boundary deployment in this change.
+
+## 2026-10-06 — Canonical LinkedIn page concatenated into eSingularity.ai
+
+- Elevated the current public FoundUp identity to **eSingularity.ai** in the FoundUp/module metadata.
+- Bound LinkedIn company page ID `2199715` to `esingularity_001` as the canonical social/publishing surface for AI Koban, JHR amplification, regional/sovereign AI infrastructure and partner development.
+- Reclassified `linkedin_esingularity` as a legacy pfMALL/source compatibility alias rather than a separate venture; no catalog deletion or runtime migration was performed in this change.
+- Preserved the WSP 97 publication boundary: live signed-in LinkedIn identity/page-name verification remains required before mutation, because cached public labels may lag.
+
+## 2026-10-05 — Preserve MLIT F-08 official-form evidence
+
+- Archived the untouched official application ZIP under docs/official with source URLs, SHA-256, inventory and structural/open verification.
+- Linked the record from Fukui City procedure, funding intelligence, module README and F-08; retained the Form 2-4 discrepancy and all applicant/send boundaries.
+- Verified ZIP/OOXML integrity, visible-sheet inventory, XML parsing and read-only Office-library loading; no submission acceptance or visual fidelity claim.
+- Documentation-only change. Bootstrap used the documented torch-free fallback (torch absent); detector witness absent. No City communication, application, funding award or Drive/FIN mutation.
+
+## 2026-10-02 — Separate 012-directed Work from Red Dog AUTO
+
+- Applied 012's explicit 19:09 JST operating correction: #1779 is not a blanket
+  block on specifically directed Work correspondence while Red Dog is developed.
+- Canonical correspondence/Work Skillz now bind execution origin and instruction
+  reference, retain every live Sent/recipient/capsule/readback gate, and keep AUTO
+  containment and message-specific engineering holds. Added a non-authorizing mode
+  classifier and regressions in the existing test owner. No mail/contact mutation.
+- Akida/Akita STT means Akira Hasegawa. #1779 remains open; no mechanical Work
+  connector isolation or Red Dog deployment is claimed. WSP00/50/95/97.
+
+## 2026-10-01 — Japan compute comparables and Japanese inquiry references
+
+- Added public-primary-source research covering five operating models, Japanese
+  workload examples, GPU tariff units/caps, Hokuriku electricity components and
+  experimental pPUE boundaries. Pricing and capacity retain source/date caveats.
+- Added eight official organization contact routes and seven Japanese, unsent
+  inquiry templates with placeholder signatures. Supplier/reference/support roles
+  remain separate from YUMORI customer or partner commitments.
+- Linked evidence through the existing economic-model owner and module README.
+  No model values, private correspondence, provider IDs or credentials are added.
+- Utility template is reference-only; existing held draft remains canonical after
+  private reconciliation. Highreso inclusion is research, not a new outreach step.
+- WSP00/22/50/97: documented torch-free gate fallback, detector witness absent;
+  local source-bound lexical retrieval retained UNKNOWN freshness. Documentation
+  and privacy/link checks only; no external correspondence, merge or deployment.
+
 ## 2026-09-30 — YUMORI Work orchestration + capital-network expansion
 
 - Added `yumori_work_orchestrator` on current main as the YUMORI domain adapter from 012/Red Dog planning conversation to live-state-reconciled work items, canonical WSP 15 ordering, explicit 012 physical/decision actions, and bounded ChatGPT Work / RedDog handoff.

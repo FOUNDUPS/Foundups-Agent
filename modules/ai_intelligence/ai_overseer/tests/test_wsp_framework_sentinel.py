@@ -54,7 +54,7 @@ class TestWSPFrameworkSentinel(unittest.TestCase):
                     "| WSP 15 | MPS |",
                     "| WSP 96 | MCP Governance |",
                     "| WSP 97 | System Prompting |",
-                    "- **Next Available Number**: WSP 99",
+                    "- **Next Available Number**: WSP 98",
                 ]
             ),
             encoding="utf-8",
@@ -64,6 +64,72 @@ class TestWSPFrameworkSentinel(unittest.TestCase):
 
     def tearDown(self) -> None:
         shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def _index_allocation_case(self, added, declaration, *, omit=(), index_only=()):
+        for number in added:
+            (self.framework_src / f"WSP_{number:02d}_Allocation.md").write_text(
+                f"WSP {number} fixture\n", encoding="utf-8")
+        ids = set(self.sentinel._hash_wsp_files(self.framework_src))
+        numbers = {int(name.split("_")[1]) for name in ids}
+        rows = sorted((numbers | set(index_only)) - set(omit) - {0})
+        text = ["| WSP | Title |", "|-----|-------|"]
+        text.extend(f"| WSP {number} | Fixture |" for number in rows)
+        text.append(declaration)
+        (self.framework_src / "WSP_MASTER_INDEX.md").write_text(
+            "\n".join(text) + "\n", encoding="utf-8")
+        return ids
+
+    def test_master_index_accepts_current_next_110(self) -> None:
+        ids = self._index_allocation_case(
+            (0, 109), "- **Next Available Number**: WSP 110")
+        self.assertEqual(self.sentinel._check_master_index(ids), [])
+
+    def test_master_index_accepts_new_allocation_110_then_next_111(self) -> None:
+        ids = self._index_allocation_case(
+            (109, 110), "- **Next Available Number**: WSP 111")
+        self.assertEqual(self.sentinel._check_master_index(ids), [])
+
+    def test_master_index_rejects_reused_or_skipped_next_number(self) -> None:
+        for number in (99, 109, 111):
+            with self.subTest(next_number=number):
+                ids = self._index_allocation_case(
+                    (109,), f"- **Next Available Number**: WSP {number}")
+                issues = self.sentinel._check_master_index(ids)
+                self.assertTrue(any("next available" in issue.lower() for issue in issues))
+
+    def test_master_index_rejects_missing_or_malformed_next_declaration(self) -> None:
+        for suffix in ("", "one hundred ten", "110.5", "110 trailing", "0", "-110", "+110"):
+            with self.subTest(declaration=suffix):
+                declaration = "- **Next Available Number**: WSP " + suffix if suffix else ""
+                ids = self._index_allocation_case((109,), declaration)
+                issues = self.sentinel._check_master_index(ids)
+                self.assertTrue(any("next available" in issue.lower() for issue in issues))
+
+    def test_master_index_rejects_duplicate_next_declarations(self) -> None:
+        for second in (110, 111):
+            with self.subTest(second_number=second):
+                declaration = ("- **Next Available Number**: WSP 110\n"
+                               f"- **Next Available Number**: WSP {second}")
+                ids = self._index_allocation_case((109,), declaration)
+                issues = self.sentinel._check_master_index(ids)
+                self.assertTrue(any("next available" in issue.lower() for issue in issues))
+
+    def test_master_index_still_requires_rows_for_actual_protocol_files(self) -> None:
+        ids = self._index_allocation_case(
+            (109,), "- **Next Available Number**: WSP 110", omit=(109,))
+        issues = self.sentinel._check_master_index(ids)
+        self.assertTrue(any("missing rows" in issue and "WSP 109" in issue for issue in issues))
+
+    def test_master_index_cannot_reuse_an_index_only_allocated_number(self) -> None:
+        ids = self._index_allocation_case(
+            (109,), "- **Next Available Number**: WSP 110", index_only=(110,))
+        issues = self.sentinel._check_master_index(ids)
+        self.assertTrue(any("next available" in issue.lower() for issue in issues))
+
+    def test_master_index_accepts_next_after_index_only_allocated_number(self) -> None:
+        ids = self._index_allocation_case(
+            (109,), "- **Next Available Number**: WSP 111", index_only=(110,))
+        self.assertEqual(self.sentinel._check_master_index(ids), [])
 
     def test_detects_drift_and_framework_knowledge_diff(self) -> None:
         status = self.sentinel.check(force=True)

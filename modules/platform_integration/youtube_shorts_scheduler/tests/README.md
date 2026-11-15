@@ -1,4 +1,106 @@
+## 2026-11-10 — Native request inventory inspection
+
+The sealed calendar suite retains all 233 previous cases and adds 50 controls.
+Real disposable queue bytes stay unchanged during inspection, including unseen,
+expired, access-blocked, verification-handoff and widened-scope requests. The
+actual launcher exits before claim/finish or scheduling. Diagnostics keep only
+bounded counts, flags and reason codes; tests reject titles/IDs/URLs in that data.
+The inventory suite retains its 102 cases. Pagination tests bind the qualified
+page witness, require a single observed-control click and changed rows, and refuse
+scope drift before clicking. No real browser, account, model, network or provider
+action occurs in these tests.
+
+## 2026-11-10 — Frozen stream browser access
+
+`test_remote_cli.py` exercises `verify_schedule_target_access` with synthetic
+Studio observations. A verified receipt requires the exact native channel,
+parent video edit URL, detail fields and observed permission. Oops, missing
+observations and mismatched identities block that candidate. A verification
+handoff propagates to the browser owner. The helper observes the supplied
+driver after the caller navigates under its browser lock. Port preferences
+only order candidates. The fixture covers source behavior and leaves live
+Studio qualification separate.
+
+## 2026-11-10 — Pre-save audit and audience configuration
+
+The existing protected directives runner selects114 cases, including48 new
+pre-save audit/configuration controls. Synthetic drafts exercise actual preparation
+and Save owners: metadata completeness, eligible analysis reuse, observed audience,
+late changes, exact identity, invalid/DST slots and detail-owner handoff. Thirteen
+configuration cases cover native-ID Yes/No without enabling channels, invalid or
+conflicting configuration with zero writes, and registry audience round trips.
+All66 prior directive/upload controls remain. No browser/model/public action occurs.
+
+## 2026-11-05 — Native visibility readiness regression
+
+The same four-file private-directive consumer selection now passes66 controls
+(retained60 plus six readiness cases). Actual `open_visibility_dialog` uses a
+synthetic driver: the existing visible native schedule radio and prior named/
+legacy paths pass; hidden, stale or absent native controls alone remain unready. The regression
+first failed only the native-radio case on the previous source. The existing
+qualified replay uses fixed credential-free children, private paths and effect
+denials; no real browser, Audience decision or schedule is exercised.
+
+## 2026-11-01 — Private operator directive consumers
+
+The fixed four-module consumer selection passed60 cases:19 detail/button,
+16 real queue claim/reload,9 inline popup and16 Shorts controls. Canonical test
+admission classified all four collectable without quarantine exceptions. Minimal
+explicit environment, private paths and denied browser/model/network/process
+effects were used; no captured JUnit streams or skipped cases.
+
+`test_video_policy_consumers.py` tests late preserve/pause/foreign edits at actual
+Save. `test_video_policy_save_readback.py` proves durable unknown retry refusal,
+fresh-document metadata readback and no verification from a no-op refresh or a
+metadata-only schedule read. `test_video_policy_inline.py` exercises actual popup
+submission with strict target association and no fallback after uncertain click.
+The fourth module is Shorts `test_operator_upload_policy.py`.
+
+Adjacent185 cases passed: existing selected-batch147, metadata evidence23 and
+publisher boundary15. Strict typed DOM fixtures gained the new explicit edit
+session contract; valid synthetic native IDs replaced invalid placeholders.
+All original assertions and selected-batch case counts remain.
+
+## 2026-10-29 — Qualified scheduled inventory, offline only
+
+`test_scheduled_inventory.py` exercises actual parser/collector and consumer
+definitions with synthetic DOM snapshots: useful multi-page slots and qualified
+empty; raw parse failures and upload-date rejection; native/URL account mismatch;
+extra/missing filters; unknown first/final pagination; repeated pages, limits,
+later drift and failed page transitions. Tracker/auditor/CPS/scheduler controls
+verify positive reads plus no clean/absence/auto-heal/reset on unknown. Existing
+visibility and post-audit breadcrumb tests remain adjacent regressions.
+The local selection passed102 cases, zero failures/errors/skips:86 inventory and
+consumer controls,9 existing visibility checks and7 breadcrumb controls. Useful
+positive repairs use fake writers; no schedule is changed. Explicitly Scheduled
+modern date cells/tooltips pass while generic/upload dates and contradictory
+slots fail. This does not qualify a live selector or a real saved schedule.
+
+The external local harness clears the child environment to a fixed credential-
+free allowlist before source imports, disables dotenv/bytecode/plugin autoload,
+denies process/HTTP/socket/SQLite effects and confines writes/registry/temporary
+storage outside Git. A timers/tasks-only test loop avoids Windows asyncio's
+otherwise real TCP wakeup socketpair. No browser, scheduler service, model or
+main.py is started. Synthetic inputs qualify logic, not installed DOM selectors
+or live scheduling. Manual browser suites below remain excluded.
+
+## Offline selected-batch closure (2026-10-22)
+
+The CI job `youtube-selected-batch` runs explicit mocked scheduler/adapter and
+transcript-language cases using `--import-mode=importlib -p pytest_asyncio.plugin`
+with dotenv loading and plugin autoload disabled. No browser/model is started.
+`test_remote_cli.py` covers edit identity and visibility, malformed receipts,
+partial results, attempted-write budgets, bounded pagination, repeatable preview,
+channel-sync suppression and honest description-sync evidence. Other manual
+browser suites below are not substituted by these offline checks.
+
 # YouTube Shorts Scheduler - Test Documentation
+
+Remote regression coverage: `test_remote_cli.py` exercises host preflight,
+nonpersistent previews, exact recording batches (3/8/13 and 61 across pages),
+whole-batch defaults, incomplete receipts and optional limits. It uses fake
+browser/model boundaries; no live publication. For combined module runs use
+`--import-mode=importlib` to avoid colliding `tests` package names.
 
 > **WSP 34 Compliance**: Test documentation for the youtube_shorts_scheduler module.
 
@@ -107,4 +209,10 @@ When `YT_SCHEDULER_INDEX_WEAVE_ENABLED=true` (default), the production scheduler
 ## Last Updated
 
 - **V0.8.x** (2026-01-18): Production-aligned full cake; deterministic click cadence; page save hardened
+# Scheduling pre-save audit controls
 
+`test_presave_audit.py` exercises incomplete metadata, exact channel audience,
+unknown/changed controls, late draft changes, valid/invalid schedule intent,
+matched evidence repair and the content-row handoff to the detail owner. No live
+browser, GPU, model, upload or scheduling operation runs. Existing private-policy
+and durable readback controls remain applicable with fully specified draft fixtures.

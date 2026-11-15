@@ -8,6 +8,38 @@
 
 ## Public API
 
+### YouTube human verification handoff
+
+`src.youtube_verification.install_youtube_verification_guard(driver, port)`
+wraps an already attached Selenium driver once, retaining its identity. It does
+not connect, launch a browser or complete authentication. Cooperating drivers on
+the same loopback debug port serialize effects using the existing runtime lock.
+
+Before an effect, a bounded passive target inventory detects official Google
+sign-in/challenge pages; a read-only Studio dialog probe recognizes English or
+Japanese verification headings, including open shadow roots. Ordinary comment
+text is not a verification signal. A detected challenge creates a shared hold
+for **at least 30 seconds**, extended while it remains present or unobservable.
+Navigation, refresh, close, typing, clicks, scripts, CDP and screenshots wait.
+Passive Selenium lookups remain available; global STOP exits without clearing
+the hold. No authentication text, URLs, screenshots or credentials are stored.
+
+The control record is `%USERPROFILE%/.foundups-agent/browser-verification/<port>.json`
+(home-directory equivalent elsewhere), containing monotonic start time and a
+hashed Selenium target handle. A clear observation on that same target after
+the minimum interval removes the hold and raises `VerificationHandoff`; the
+interrupted effect is **cancelled**, not replayed. An effect already dispatched
+retains its original exception and uncertain outcome. Existing owners must
+revalidate their page/action before another attempt and retain unknown writes.
+
+Malformed control state, lost original target or unavailable observations do
+not authorize effects. A lost target/stale record needs explicit owner recovery;
+never automatically discard it or clear another STOP. Coverage is limited to
+participating Selenium drivers and observable page/dialog signals. It does not
+cover native OS prompts, closed shadow roots or other browser clients, and does
+not implement the scheduler's separate 60-second draft/manual-takeover contract.
+Offline qualification is separate from installation and live popup acceptance.
+
 ### Main Class: FoundUpsDriver
 
 ```python

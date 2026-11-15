@@ -69,7 +69,9 @@ from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_pub
     ArchitectFixPromotionPublicationRequest,
 )
 from modules.communication.moltbot_bridge.src.reddog_architect_proposal_verified_authority import (
-    verify_architect_proposal_promotion_authority,
+    RETAINED_PROPOSAL_INPUTS_SCHEMA,
+    snapshot_retained_architect_proposal_inputs,
+    verify_retained_architect_proposal_authority,
 )
 from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_profile import (
     prepare_architect_fix_promotion_inputs,
@@ -257,13 +259,16 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
             [ArchitectFixPromotionReason.PROPOSAL_AUTHENTICITY_INVALID]
         )
     try:
-        proposal_authority = verify_architect_proposal_promotion_authority(
-            attestation=proposal_authenticity_attestation,
-            proposal_admission=proposal_admission.to_dict(),
-            determination=determination,
-            queue_candidate=candidate,
-            memex_supply_receipt=memex_verified,
-            authority_profile=authority_profile,
+        retained_inputs = snapshot_retained_architect_proposal_inputs({
+            "schema_version": RETAINED_PROPOSAL_INPUTS_SCHEMA,
+            "attestation": proposal_authenticity_attestation,
+            "proposal_admission": proposal_admission.to_dict(),
+            "determination": determination, "queue_candidate": candidate,
+            "memex_supply_receipt": memex_verified.to_dict(),
+            "original_authority_profile": authority_profile,
+        })
+        proposal_authority = verify_retained_architect_proposal_authority(
+            retained_inputs,
             signer_runtime_config=signer_runtime_config,
             principal_key_resolver=principal_key_resolver,
             now_epoch=int(now.timestamp()),
@@ -312,6 +317,7 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
             memex_supply=memex_verified.to_dict(),
             proposal_admission=proposal_admission.to_dict(),
             proposal_authority=proposal_authority,
+            proposal_verification_inputs=retained_inputs,
             selected_slice=selected_slice,
             determination_id=determination_id,
             worker_id=worker_id,

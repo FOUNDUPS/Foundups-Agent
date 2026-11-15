@@ -119,7 +119,7 @@ sudo -u $USER_NAME bash -c "cd $APP_DIR && source venv/bin/activate && pip insta
 # Install Python dependencies
 echo "[BOX] Installing Python dependencies..."
 cd $MODULE_DIR
-sudo -u $USER_NAME bash -c "cd $APP_DIR && source venv/bin/activate && pip install -r requirements.txt"
+sudo -u $USER_NAME bash -c "cd $APP_DIR && source venv/bin/activate && pip install -r modules/platform_integration/acoustic_lab/requirements.txt"
 
 # Create production .env file
 echo "[TOOL] Creating production environment configuration..."

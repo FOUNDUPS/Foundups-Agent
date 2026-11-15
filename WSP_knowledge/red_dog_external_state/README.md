@@ -17,7 +17,12 @@ Antigravity brain extractor does not watch.
 
 The existing brain artifact extractor at
 `modules/infrastructure/wre_core/scripts/extract_brain_artifacts.py`
-hardcodes its source to `C:\Users\user\.gemini\antigravity\brain`.
+resolves its default source portably from
+`Path.home() / ".gemini" / "antigravity" / "brain"`. The
+[September storage record](../../docs/_archive/pc-reconciliation/2026-10-30/plans/docs/audits/architecture/CODEX_STORAGE_SELF_AUDIT_WSP97_20260905.md)
+is retained as sanitized historical evidence. Its private junction target remains
+in the original custody record; the portable default above is verified from the
+current extractor source.
 
 Since work moved to Cursor/ChatGPT/RedDog lanes on 2026-05-25, the
 `WSP_knowledge/reasoning_traces/brain_artifact_*` files have been stale.

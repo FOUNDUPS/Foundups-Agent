@@ -1,0 +1,30 @@
+[
+  {
+    "title": "GitHub secure workflow guidance",
+    "url": "https://docs.github.com/en/actions/reference/security/secure-use",
+    "pinpoint": "Least privilege; untrusted inputs; third-party actions",
+    "proposition": "Workflow security boundaries and credential handling",
+    "accessed": "2026-11-05"
+  },
+  {
+    "title": "GitHub workflow syntax",
+    "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax",
+    "pinpoint": "permissions; events; jobs",
+    "proposition": "Separate build and deployment permissions",
+    "accessed": "2026-11-05"
+  },
+  {
+    "title": "GitHub repository REST API",
+    "url": "https://docs.github.com/en/rest/repos/repos",
+    "pinpoint": "Create a repository for the authenticated user",
+    "proposition": "Repository creation requires an endpoint/permission distinct from content writing",
+    "accessed": "2026-11-05"
+  },
+  {
+    "title": "GitHub Pages custom workflow",
+    "url": "https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages",
+    "pinpoint": "Artifact upload and deploy jobs",
+    "proposition": "Static artifact deployment requirements",
+    "accessed": "2026-11-05"
+  }
+]

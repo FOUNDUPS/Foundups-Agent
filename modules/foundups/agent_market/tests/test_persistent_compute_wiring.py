@@ -13,6 +13,7 @@ import pytest
 from sqlalchemy import delete, event, insert, select, update
 from sqlalchemy.exc import IntegrityError, InvalidRequestError, OperationalError
 
+from modules.foundups.agent_market.src.authorization import CallerAuthorization
 from modules.foundups.agent_market.src.exceptions import (
     AgentMarketError, InvalidStateTransitionError, PermissionDeniedError, ValidationError,
 )
@@ -22,6 +23,12 @@ from modules.foundups.agent_market.src.models import (
 from modules.foundups.agent_market.src.persistence.sqlite_adapter import Base, SQLiteAdapter
 from modules.foundups.agent_market.src.registry import PersistentFoundupRegistry
 from modules.foundups.agent_market.src.task_pipeline import PersistentTaskPipeline
+
+
+# Explicit trusted host fixture grants; compute plans and profiles confer none.
+_VERIFIER_AUTH = CallerAuthorization("verifier_1", frozenset({("f_1", "verifier")}))
+_TREASURY_AUTH = CallerAuthorization("treasury_1", frozenset({("f_1", "treasury"), ("f_2", "treasury")}))
+_OTHER_TREASURY_AUTH = CallerAuthorization("other_actor", frozenset({("f_1", "treasury")}))
 
 
 @pytest.fixture
@@ -102,8 +109,9 @@ def test_task_pipeline_enforces_and_debits_each_step(adapter):
             approved=True,
             reason="looks good",
         ),
+        authorization=_VERIFIER_AUTH,
     )
-    pipeline.trigger_payout(task.task_id, actor_id="treasury_1")
+    pipeline.trigger_payout(task.task_id, actor_id="treasury_1", authorization=_TREASURY_AUTH)
 
     owner_wallet = adapter.get_wallet("owner_1")
     agent_wallet = adapter.get_wallet("agent_1")
@@ -194,20 +202,20 @@ def _assert_initiation(adapter, task, payout, *, cost=1):
 def test_initiation_is_pending_and_disabled_enforcement_still_charges(adapter, enforced):
     pipeline, task = _ready_payout(adapter)
     adapter.compute_access_enforced = enforced
-    payout = pipeline.trigger_payout(task.task_id, "treasury_1")
+    payout = pipeline.trigger_payout(task.task_id, "treasury_1", authorization=_TREASURY_AUTH)
     _assert_initiation(adapter, task, payout)
     assert adapter.get_wallet("treasury_1")["credit_balance"] == 19
 
 
 def test_exact_retry_and_reopen_return_same_initiation_without_writes(adapter):
     pipeline, task = _ready_payout(adapter)
-    first = pipeline.trigger_payout(task.task_id, "treasury_1")
+    first = pipeline.trigger_payout(task.task_id, "treasury_1", authorization=_TREASURY_AUTH)
     before = _database_snapshot(adapter)
-    assert pipeline.trigger_payout(task.task_id, "treasury_1") == first
+    assert pipeline.trigger_payout(task.task_id, "treasury_1", authorization=_TREASURY_AUTH) == first
     assert _database_snapshot(adapter) == before
     reopened = SQLiteAdapter(adapter.db_path)
     try:
-        assert PersistentTaskPipeline(reopened).trigger_payout(task.task_id, "treasury_1") == first
+        assert PersistentTaskPipeline(reopened).trigger_payout(task.task_id, "treasury_1", authorization=_TREASURY_AUTH) == first
         _assert_initiation(reopened, task, first)
         assert _database_snapshot(reopened) == before
     finally:
@@ -218,23 +226,23 @@ def test_exact_retry_and_reopen_return_same_initiation_without_writes(adapter):
 def test_committed_retry_uses_cost_snapshot_not_current_policy(adapter, cost):
     pipeline, task = _ready_payout(adapter)
     adapter.compute_meter_costs["payout.trigger"] = cost
-    first = pipeline.trigger_payout(task.task_id, "treasury_1")
+    first = pipeline.trigger_payout(task.task_id, "treasury_1", authorization=_TREASURY_AUTH)
     _assert_initiation(adapter, task, first, cost=cost)
     adapter.compute_meter_costs["payout.trigger"] = 99
     _change_row(adapter, "compute_plans", "actor_id", "treasury_1", status="inactive")
     _change_row(adapter, "compute_wallets", "actor_id", "treasury_1", credit_balance=0)
     before = _database_snapshot(adapter)
-    assert pipeline.trigger_payout(task.task_id, "treasury_1") == first
+    assert pipeline.trigger_payout(task.task_id, "treasury_1", authorization=_TREASURY_AUTH) == first
     assert _database_snapshot(adapter) == before
 
 
 def test_changed_retry_actor_rejects_without_charge(adapter):
     pipeline, task = _ready_payout(adapter)
-    pipeline.trigger_payout(task.task_id, "treasury_1")
+    pipeline.trigger_payout(task.task_id, "treasury_1", authorization=_TREASURY_AUTH)
     adapter.activate_compute_plan("other_actor", tier="builder", monthly_credit_allocation=20)
     before = _database_snapshot(adapter)
     with pytest.raises(AgentMarketError):
-        pipeline.trigger_payout(task.task_id, "other_actor")
+        pipeline.trigger_payout(task.task_id, "other_actor", authorization=_OTHER_TREASURY_AUTH)
     assert _database_snapshot(adapter) == before
 
 
@@ -249,11 +257,11 @@ def test_changed_retry_actor_rejects_without_charge(adapter):
 ])
 def test_retry_rejects_mutated_persisted_lineage(adapter, table, key, field, value):
     pipeline, task = _ready_payout(adapter)
-    pipeline.trigger_payout(task.task_id, "treasury_1")
+    pipeline.trigger_payout(task.task_id, "treasury_1", authorization=_TREASURY_AUTH)
     _change_row(adapter, table, key, getattr(task, key), **{field: value})
     before = _database_snapshot(adapter)
     with pytest.raises(AgentMarketError):
-        pipeline.trigger_payout(task.task_id, "treasury_1")
+        pipeline.trigger_payout(task.task_id, "treasury_1", authorization=_TREASURY_AUTH)
     assert _database_snapshot(adapter) == before
 
 
@@ -272,7 +280,7 @@ def test_invalid_initial_lineage_rejects_before_writes(adapter, table, key, fiel
     _change_row(adapter, table, key, getattr(task, key), **{field: value})
     before = _database_snapshot(adapter)
     with pytest.raises(AgentMarketError):
-        pipeline.trigger_payout(task.task_id, "treasury_1")
+        pipeline.trigger_payout(task.task_id, "treasury_1", authorization=_TREASURY_AUTH)
     assert _database_snapshot(adapter) == before
 
 
@@ -292,7 +300,7 @@ def test_every_initiation_write_rolls_back_together(adapter, statement_start):
     event.listen(adapter.engine, "after_cursor_execute", interrupt)
     try:
         with pytest.raises(RuntimeError, match="injected after actual SQL write"):
-            pipeline.trigger_payout(task.task_id, "treasury_1")
+            pipeline.trigger_payout(task.task_id, "treasury_1", authorization=_TREASURY_AUTH)
     finally:
         event.remove(adapter.engine, "after_cursor_execute", interrupt)
     assert observed == [statement_start]
@@ -300,7 +308,7 @@ def test_every_initiation_write_rolls_back_together(adapter, statement_start):
     reopened = SQLiteAdapter(adapter.db_path)
     try:
         assert _database_snapshot(reopened) == before
-        payout = PersistentTaskPipeline(reopened).trigger_payout(task.task_id, "treasury_1")
+        payout = PersistentTaskPipeline(reopened).trigger_payout(task.task_id, "treasury_1", authorization=_TREASURY_AUTH)
         _assert_initiation(reopened, task, payout)
     finally:
         reopened.close()
@@ -318,7 +326,7 @@ def test_two_adapters_serialize_task_and_shared_wallet(adapter, same_task):
     def run(pipeline, task_id):
         barrier.wait(timeout=5)
         try:
-            return pipeline.trigger_payout(task_id, "treasury_1")
+            return pipeline.trigger_payout(task_id, "treasury_1", authorization=_TREASURY_AUTH)
         except PermissionDeniedError as exc:
             return exc
 
@@ -351,7 +359,7 @@ def test_legacy_payout_states_reject_without_reconciliation(adapter, kind):
         adapter.update_task(task)
     before = _database_snapshot(adapter)
     with pytest.raises(AgentMarketError):
-        pipeline.trigger_payout(task.task_id, "treasury_1")
+        pipeline.trigger_payout(task.task_id, "treasury_1", authorization=_TREASURY_AUTH)
     assert _database_snapshot(adapter) == before
 
 
@@ -387,15 +395,15 @@ def test_legacy_debit_residue_blocks_before_another_charge(adapter, kind):
     _legacy_debit(adapter, task, kind)
     before = _database_snapshot(adapter)
     with pytest.raises(AgentMarketError):
-        pipeline.trigger_payout(task.task_id, "treasury_1")
+        pipeline.trigger_payout(task.task_id, "treasury_1", authorization=_TREASURY_AUTH)
     assert _database_snapshot(adapter) == before
 
 
 def test_consistent_other_foundup_initiation_does_not_block(adapter):
     pipeline, first = _ready_payout(adapter)
     _, second = _ready_payout(adapter, "2", fund=False)
-    payout1 = pipeline.trigger_payout(first.task_id, "treasury_1")
-    payout2 = pipeline.trigger_payout(second.task_id, "treasury_1")
+    payout1 = pipeline.trigger_payout(first.task_id, "treasury_1", authorization=_TREASURY_AUTH)
+    payout2 = pipeline.trigger_payout(second.task_id, "treasury_1", authorization=_TREASURY_AUTH)
     _assert_initiation(adapter, first, payout1)
     _assert_initiation(adapter, second, payout2)
     assert payout1.payout_id != payout2.payout_id
@@ -408,7 +416,7 @@ def test_consistent_other_foundup_initiation_does_not_block(adapter):
 ])
 def test_retry_validates_complete_event_and_ledger_cardinality(adapter, corruption):
     pipeline, task = _ready_payout(adapter)
-    payout = pipeline.trigger_payout(task.task_id, "treasury_1")
+    payout = pipeline.trigger_payout(task.task_id, "treasury_1", authorization=_TREASURY_AUTH)
     _assert_initiation(adapter, task, payout)
     recorded = adapter.query_events(task_id=task.task_id, event_type="payout.initiated")[0]
     events = Base.metadata.tables["event_records"]
@@ -435,7 +443,7 @@ def test_retry_validates_complete_event_and_ledger_cardinality(adapter, corrupti
             conn.execute(insert(ledger), row)
     before = _database_snapshot(adapter)
     with pytest.raises(AgentMarketError):
-        pipeline.trigger_payout(task.task_id, "treasury_1")
+        pipeline.trigger_payout(task.task_id, "treasury_1", authorization=_TREASURY_AUTH)
     assert _database_snapshot(adapter) == before
 
 
@@ -455,7 +463,7 @@ def test_compute_denial_leaves_every_table_unchanged(adapter, denial):
             conn.execute(update(plans).where(plans.c.actor_id == "treasury_1").values(**{field: denial}))
     before = _database_snapshot(adapter)
     with pytest.raises(PermissionDeniedError):
-        pipeline.trigger_payout(task.task_id, "treasury_1")
+        pipeline.trigger_payout(task.task_id, "treasury_1", authorization=_TREASURY_AUTH)
     assert _database_snapshot(adapter) == before
 
 
@@ -474,7 +482,7 @@ def test_non_sqlite_rejects_before_session_or_compute_attribute_access(adapter, 
         for name in ("compute_access_enforced", "compute_meter_costs", "compute_default_credits"):
             patch.setattr(SQLiteAdapter, name, property(forbidden), raising=False)
         with pytest.raises(AgentMarketError):
-            pipeline.trigger_payout(task.task_id, "treasury_1")
+            pipeline.trigger_payout(task.task_id, "treasury_1", authorization=_TREASURY_AUTH)
     assert calls == []
     assert _database_snapshot(adapter) == before
 
@@ -482,7 +490,7 @@ def test_non_sqlite_rejects_before_session_or_compute_attribute_access(adapter, 
 def test_other_foundup_event_cannot_hide_target_scoped_wrong_reason_debit(adapter):
     pipeline, target = _ready_payout(adapter)
     _, other = _ready_payout(adapter, "2", fund=False)
-    payout = pipeline.trigger_payout(other.task_id, "treasury_1")
+    payout = pipeline.trigger_payout(other.task_id, "treasury_1", authorization=_TREASURY_AUTH)
     _assert_initiation(adapter, other, payout)
     recorded = adapter.query_events(task_id=other.task_id, event_type="payout.initiated")[0]
     linked = [row for row in _rows(adapter, "compute_ledger_entries")
@@ -492,7 +500,7 @@ def test_other_foundup_event_cannot_hide_target_scoped_wrong_reason_debit(adapte
                 foundup_id=target.foundup_id, reason="wrong")
     before = _database_snapshot(adapter)
     with pytest.raises(AgentMarketError):
-        pipeline.trigger_payout(target.task_id, "treasury_1")
+        pipeline.trigger_payout(target.task_id, "treasury_1", authorization=_TREASURY_AUTH)
     assert _database_snapshot(adapter) == before
 
 
@@ -514,7 +522,7 @@ def test_lost_response_after_commit_reopens_without_second_initiation(adapter):
     event.listen(adapter._SessionFactory, "after_commit", interrupt_response)
     try:
         with pytest.raises((RuntimeError, InvalidRequestError)) as raised:
-            pipeline.trigger_payout(task.task_id, "treasury_1")
+            pipeline.trigger_payout(task.task_id, "treasury_1", authorization=_TREASURY_AUTH)
     finally:
         event.remove(adapter._SessionFactory, "after_commit", interrupt_response)
         event.remove(adapter.engine, "after_cursor_execute", mark_payout)
@@ -529,7 +537,7 @@ def test_lost_response_after_commit_reopens_without_second_initiation(adapter):
     adapter.close()
     reopened = SQLiteAdapter(adapter.db_path)
     try:
-        assert PersistentTaskPipeline(reopened).trigger_payout(task.task_id, "treasury_1") == payout
+        assert PersistentTaskPipeline(reopened).trigger_payout(task.task_id, "treasury_1", authorization=_TREASURY_AUTH) == payout
         _assert_initiation(reopened, task, payout)
         assert _database_snapshot(reopened) == before
     finally:
@@ -539,15 +547,15 @@ def test_lost_response_after_commit_reopens_without_second_initiation(adapter):
 def test_task_cannot_substitute_another_valid_initiation_pointer(adapter):
     pipeline, target = _ready_payout(adapter)
     _, other = _ready_payout(adapter, "2", fund=False)
-    target_payout = pipeline.trigger_payout(target.task_id, "treasury_1")
-    other_payout = pipeline.trigger_payout(other.task_id, "treasury_1")
+    target_payout = pipeline.trigger_payout(target.task_id, "treasury_1", authorization=_TREASURY_AUTH)
+    other_payout = pipeline.trigger_payout(other.task_id, "treasury_1", authorization=_TREASURY_AUTH)
     _assert_initiation(adapter, target, target_payout)
     _assert_initiation(adapter, other, other_payout)
     assert target_payout.payout_id != other_payout.payout_id
     _change_row(adapter, "tasks", "task_id", target.task_id, payout_id=other_payout.payout_id)
     before = _database_snapshot(adapter)
     with pytest.raises(AgentMarketError):
-        pipeline.trigger_payout(target.task_id, "treasury_1")
+        pipeline.trigger_payout(target.task_id, "treasury_1", authorization=_TREASURY_AUTH)
     assert _database_snapshot(adapter) == before
 
 
@@ -570,7 +578,7 @@ def test_busy_writer_rejects_without_fallback_then_retries_after_release(adapter
             lock.exec_driver_sql("BEGIN IMMEDIATE")
             try:
                 with pytest.raises(OperationalError, match="locked"):
-                    pipeline.trigger_payout(task.task_id, "treasury_1")
+                    pipeline.trigger_payout(task.task_id, "treasury_1", authorization=_TREASURY_AUTH)
                 assert observed and set(observed) == {0}
                 assert _database_snapshot(adapter) == before
             finally:
@@ -579,7 +587,7 @@ def test_busy_writer_rejects_without_fallback_then_retries_after_release(adapter
         event.remove(adapter.engine, "checkout", no_wait)
         blocker.close()
     assert _database_snapshot(adapter) == before
-    payout = pipeline.trigger_payout(task.task_id, "treasury_1")
+    payout = pipeline.trigger_payout(task.task_id, "treasury_1", authorization=_TREASURY_AUTH)
     _assert_initiation(adapter, task, payout)
     assert adapter.get_wallet("treasury_1")["credit_balance"] == 19
 
@@ -658,7 +666,7 @@ def test_verification_interruption_reopen_acceptance(tmp_path, stage, first_erro
         event.listen(adapter.engine, "after_cursor_execute", interrupt)
         try:
             with pytest.raises(first_error) if first_error else nullcontext():
-                PersistentTaskPipeline(adapter).verify_proof(task.task_id, decision)
+                PersistentTaskPipeline(adapter).verify_proof(task.task_id, decision, authorization=_VERIFIER_AUTH)
         finally:
             event.remove(adapter.engine, "after_cursor_execute", interrupt)
         after = _database_snapshot(adapter)
@@ -671,7 +679,7 @@ def test_verification_interruption_reopen_acceptance(tmp_path, stage, first_erro
         adapter.compute_meter_costs["proof.verify"] = 2
         assert _database_snapshot(adapter) == after
         with pytest.raises(retry_error, match="Proof rejected") if retry_error else nullcontext():
-            PersistentTaskPipeline(adapter).verify_proof(task.task_id, decision)
+            PersistentTaskPipeline(adapter).verify_proof(task.task_id, decision, authorization=_VERIFIER_AUTH)
         assert _verification_observation(adapter, task, decision) == retry_state
         final = _database_snapshot(adapter)
         changed = {"tasks", "verifications", "event_records", "compute_wallets", "compute_ledger_entries"}

@@ -1,5 +1,15 @@
 # GitPushDAE Test Module Log
 
+## 2026-10-04 — Default enqueue and explicit dispatch regression
+
+Twelve fixed CLI/API cases cover both defaults, explicit success/import failure/
+router failure, conflicting modes in both orders, and rejected legacy direct
+flag. Original source: 4 pass/8 fail; repaired source: 12 pass. Original 3 pytest
+functions are AST-identical and pass; full-file result 15 pass, no skips/errors.
+The baseline expected behavior was fixed before production edits and independently
+reviewed. Named CI selects the 12-case class. No actual social delivery or native
+worker admission is tested. See tests/README.md for exact commands and limits.
+
 ## 2026-09-28 — Six entrypoint controls independently verified in hosted CI
 
 WSP5/15/22/97. Existing `test_post_commit_social_runner.py` is extended rather

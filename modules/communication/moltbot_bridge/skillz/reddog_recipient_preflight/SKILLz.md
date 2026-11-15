@@ -1,16 +1,24 @@
 ---
 name: reddog_recipient_preflight
-description: Fail-closed two-pass recipient authorization for outbound correspondence
-version: 1.0.0
+description: Fail-closed independent recipient and release audit for outbound correspondence
+version: 1.2.1
 author: 0102
-agents: [qwen, gemma]
+agents: [0102, qwen, gemma]
+primary_agent: 0102
 dependencies: [openclaw_dae]
 domain: communication
 intent_type: DECISION
 promotion_state: prototype
 pattern_fidelity_threshold: 0.99
 category: safety
-evals: []
+wsp_chain: [WSP_00, WSP_15, WSP_48, WSP_50, WSP_73, WSP_77, WSP_91, WSP_95, WSP_97]
+evals:
+  - composer_cannot_self_approve
+  - audience_and_need_to_know_checked
+  - rendered_links_verified
+  - privacy_and_attachment_release_gate
+  - concise_single_purpose_message
+  - same_thread_recent_send_delta_gate
 ---
 
 # RedDog Recipient Preflight
@@ -68,7 +76,78 @@ for that recipient.
 - compare against already-sent coverage to stop accidental resends;
 - block the entire transaction if any recipient fails.
 
+## Same-thread continuation and cumulative send-delta gate
+
+Continued user discussion, critique, wording improvements, website edits, or added evidence after a send are NOT new send authorization. Treat the conversation as one evolving work order.
+
+Before every external send:
+1. Refresh exact provider thread, newest inbound, Sent messages, drafts, and domain Moshpit. Record last outbound message ID, timestamp, recipients, and complete content.
+2. Compare the proposed message against already-sent claims and requests by meaning, not just exact text. Classify each change as already sent, newly supported, correction, pending evidence, or document/website-only.
+3. Default to HOLD_EDIT_ONLY for rephrasing, elaboration, critique, or reinforcing already-sent requests. Update the case log, site, or a single unsent draft instead of sending.
+4. Send separately only with explicit renewed authorization acknowledging the prior send, or existing explicit authorization that covers the separate notice. A material new fact, urgent correction, deadline, or reply may justify proposing another message; it does not grant send authority. Require independent release verification before any authorized send.
+5. Consolidate pending additions into one message. A new conversational turn never renews SEND authority by itself.
+6. Bind last_sent_message_id, last_sent_at, last_sent_digest, thread_id, moshpit_revision, semantic_delta, and send_reason to release preflight. Changed Sent watermark invalidates authorization. Missing evidence or duplicate semantic coverage means BLOCK.
+7. Verify the exact provider Sent result and log one newest-first receipt; retain previous history and protect private correspondence.
+
+Regression: On 2026-11-11 three different but overlapping SUNVISTA responses went to one EDION thread in roughly fourteen minutes while the user iteratively improved one argument. The initial response should have been followed by edits to the website/log or a consolidated unsent draft, not automatic further emails. See 0102 Moshpit.
+
+## Independent content and release audit
+
+Recipient resolution is necessary but not sufficient. Every external email,
+reply, forward, and send-ready draft must be audited by a verifier that did not
+compose the message. The verifier reads the final rendered transaction and
+records PASS/BLOCK for:
+
+- correct audience, exact recipient roles, consent, need-to-know, and current
+  thread;
+- supported material claims, bounded authority, and one clear purpose/ask;
+- concise audience-appropriate wording without duplicated or irrelevant context;
+- visible link labels, href destinations, redirects, canonical publisher, and
+  live destination/title agreement;
+- attachments, quoted history, and MIME for secrets, private data, stale/HOLD
+  content, or wrong files;
+- duplicate/stale-send protection and current provider watermark.
+
+Apply WSP 97: retrieve current evidence, challenge the proposed message from the
+recipient/security perspectives, separate facts from inference/unknowns, and
+bind the verifier's evidence to the final content digest. A model critique,
+draft label, syntax check, or successful provider response is not independent
+release evidence.
+
+The complete routing and release contract is:
+`modules/communication/moltbot_bridge/docs/clarity/gmail_wre_rsi_routing.md`.
+
 ## Sender boundary
+
+The final provider mutation must run through the repository-owned Python V3 service:
+
+`modules/communication/moltbot_bridge/src/reddog_correspondence_sender_boundary.py`
+
+Trusted service bootstrap owns provider access and reconciliation. The JavaScript
+V2 compatibility adapter remains quarantined (`BLOCK`, `provider_invoked=false`);
+it is not a send route. This service contract does not establish interception of
+direct connector calls or automatic enforcement of this prototype skill.
+
+For Gmail `send_email`, reply, `send_draft`, and recipient-specific delivery repair:
+
+1. read fresh Sent coverage immediately before preflight;
+2. build a machine-readable receipt that binds provider operation, correspondence
+   scope/purpose, Contact IDs, exact To/CC/BCC roles and addresses, content digest,
+   draft/thread identifiers, duplicate coverage, issue/expiry time and Sent watermark;
+3. require `decision=SEND` and an unexpired transaction-identical receipt at the
+   adapter boundary; missing, BLOCK, stale, altered or digest-invalid receipts make
+   the provider mutation unreachable;
+4. re-read Sent coverage at the boundary and reject if the watermark or duplicate
+   coverage changed after receipt issuance;
+5. for `send_draft`, read the exact provider draft before submission and require its
+   message/thread IDs, To/CC/BCC and content digest to match the bound transaction;
+6. submit only through the provider callback owned by the trusted service bootstrap;
+7. immediately read the exact provider Sent message and require message/thread IDs
+   plus To/CC/BCC equality before returning `VERIFIED_SENT`.
+
+A provider exception is `PROVIDER_STATE_UNKNOWN`; reconcile Sent before any retry.
+A read-back failure/mismatch is `PROVIDER_SENT_INTEGRITY_INCIDENT`, never a reason
+for an automatic resend.
 
 HIGH/CRITICAL correspondence must fail closed when a recipient is:
 
@@ -94,7 +173,11 @@ After a provider reports success:
 
 ## Reference implementation
 
+Recipient evidence resolution:
 `modules/communication/moltbot_bridge/src/reddog_recipient_preflight.py`
+
+Provider-call enforcement:
+`modules/communication/moltbot_bridge/src/reddog_correspondence_sender_boundary.py`
 
 Core APIs:
 

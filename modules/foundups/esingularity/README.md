@@ -1,3 +1,9 @@
+## Japan compute feasibility research — 2026-10-01
+
+- [Operating models and dated public benchmarks](docs/JAPAN_COMPUTE_COMPARABLES_20261001.md): school reuse, modular hosting, GPU rental and regional DR; explicit limits on pricing, power and cooling comparisons
+- [Japanese inquiry reference pack](docs/JAPAN_COMPUTE_INQUIRIES_JA_20261001.md): eight official organization routes and seven unsent draft templates with placeholder signatures
+- [Economic-model authority and evidence use](docs/YUMORI_ECONOMIC_MODEL.md#japan-grounded-feasibility-evidence--2026-10-01): no numerical model changes, customer commitments or send-completion claims
+
 # Project eSingularity FoundUp
 
 Project eSingularity combines a Japanese-first community campaign with a staged three-site distributed AI infrastructure / public-asset reuse program for Fukui. Hanyu is Priority 1 (Site 3), Shimousaka Priority 2 (Site 2), and Sukatto Priority 3 (Site 1), an optional onsen/community/education/thermal-reuse opportunity rather than a prerequisite for compute launch.
@@ -7,6 +13,15 @@ Project eSingularity combines a Japanese-first community campaign with a staged 
 **Canonical module**: `modules/foundups/esingularity`
 
 **Public site**: https://esingularity.ai/
+
+**Canonical LinkedIn project page**: https://www.linkedin.com/company/esingularity/  
+**LinkedIn company ID**: `2199715`
+
+The LinkedIn company page is a **social/publishing surface of `esingularity_001`**, not a separate FoundUp. Current partner-facing content should route through the eSingularity.ai project identity when the topic is AI Koban, regional/sovereign AI infrastructure, JHR, three-site feasibility, community-first compute, or strategic partner development. YUMORI.me remains the civic/community implementation surface. Historical Educational Singularity material is provenance, not the default scope of the current company page.
+
+The legacy pfMALL identifier `linkedin_esingularity` may remain temporarily as a compatibility/source alias, but it must not be treated as an independent venture beside `esingularity_001`. Migrate or retire that alias only through an explicit catalog change with regression coverage.
+
+LinkedIn mutation still requires live signed-in identity verification. Public naming and repository intent use **eSingularity.ai**; cached LinkedIn surfaces may lag, so a desired or cached label alone is not publication proof.
 
 **Lifecycle**: Internal Proto
 **Deployment**: OpenAI Sites
@@ -19,15 +34,18 @@ The WSP 97 workflow also covers bounded history/research, distinct homepage owne
 
 ## Government and correspondence operations skills
 
+- [MLIT F-08 official forms and verification](docs/official/mlit_ppp_study_20261005/README.md): preserved official ZIP, inventory, October 5 verification and unresolved Form 2-4 requirement.
+
 YUMORI operations use repository-owned skills instead of rebuilding procedure from chat memory:
 
 - [Fukui City procedure](skillz/fukui_city_procedure/SKILLz.md): Council 請願/陳情, exact official forms, executive PPP/PFI, information disclosure, procurement stages, meetings/access, routing and legal handoff.
-- [YUMORI.me correspondence / contact ledger](skillz/yumori_contact_ledger/SKILLz.md): YUMORI adapter over native Red Dog correspondence continuity, adding live provider/CRM reconciliation, routing consent, 0102 proxy voice, receipts and reusable operator learning.
+- [Recipient document audit](skillz/recipient_document_audit/SKILLz.md): mandatory subordinate review of proposals, PDFs/forms and linked packages for the intended reader, total reading burden, internal artifacts and exact final rendering; review-only remains unsent.
+- [YUMORI.me correspondence / contact ledger](skillz/yumori_contact_ledger/SKILLz.md): YUMORI adapter over native Red Dog correspondence continuity, adding live provider/CRM reconciliation, routing consent, explicit AI-operator versus human/committee voice selection, receipts and reusable operator learning.
 - `reddog_correspondence_state` in `modules/communication/moltbot_bridge/skillz/`: generic private runtime correspondence continuity; compact provider events + one materialized scope state per stakeholder/topic, with provider-watermark refresh and no raw mailbox bodies.
 - `reddog_recipient_preflight` in `modules/communication/moltbot_bridge/skillz/`: mandatory fail-closed recipient authorization before send-ready correspondence, including exact To/CC/BCC and provider read-back.
 - [YUMORI funding / PPP intelligence](skillz/yumori_funding_ppp_intelligence/SKILLz.md): current grant/subsidy/PPP status with primary-source and no-false-funding boundaries.
 - [YUMORI Moshpit](skillz/yumori_moshpit/SKILLz.md): campaign-history versus 0102-learning routing and JST ordering.
-- [YUMORI Work orchestrator](skillz/yumori_work_orchestrator/SKILLz.md): 012/Red Dog conversation → live-state reconciliation → WSP 15 work queue → 012 physical-action split → bounded ChatGPT Work handoff, including governed investor/capital-network expansion in the existing CONTACTS workbook.
+- [YUMORI Work orchestrator](skillz/yumori_work_orchestrator/SKILLz.md): 012/Red Dog conversation → live-state reconciliation → WSP 15 work queue → 012 physical-action split → bounded ChatGPT Work handoff. The same registered owner now defines the YUMORI resident RSI canary: daily Memex/Brain/Breadcrumb/provider-state recovery, autonomous Gmail triage, independent partner discovery through existing Contacts/Gmail/LinkedIn, effect-level authority gates, provider outcome verification and later-cycle retained-improvement measurement. The [2026-10-26 delegated 0102 operator handoff](docs/YUMORI_RESIDENT_0102_OPERATOR_HANDOFF_20261026.md) specifies Japanese AI-operator voice, OpenClaw supervision with optional Hermes workers, metered-browser budgets, and unverified production gates; it is not a running deployment.
 
 The live YUMORI.me Contacts / Correspondence Routing sheet remains the current recipient-state authority. Skills govern how to query and validate it; they do not create a second contact database.
 
@@ -52,6 +70,24 @@ Non-negotiable invariants:
 - Treat Git merge completion as source integration only. Production acceptance requires fresh-host verification against both domains.
 
 The executable routing and publication contract is in [INTERFACE.md](INTERFACE.md). The permanent regression and production-verification gates are in [tests/README.md](tests/README.md).
+
+### Organization partner inquiries
+
+The movement homepage includes a Japanese-first invitation for companies,
+universities and other organizations to discuss the conditions for a Fukui AI
+infrastructure partnership. Its existing individual JOIN flow and shared ticker
+remain present. The inquiry page is `frontend/app/yumori/partners/page.tsx`:
+`/partners` on YUMORI.me/www internally selects `/yumori/partners`, while the
+explicit `/yumori/partners` link also works on the shared frontend's other hosts.
+
+The inquiry action opens an editable Japanese email template. The visitor sends
+it manually; there is no connected dedicated form, provider sender or automatic
+intake. The page distinguishes an exploratory conversation from a commitment to
+participate, invest or contract. Site rights, power, customers, funding and
+administrative approval remain unconfirmed. English and Portuguese display copy
+reuse the existing language switcher; the email-template language is stated in
+the page. Source integration does not establish production publication or a
+received inquiry.
 
 ## eSingularity.ai project surface
 

@@ -7,6 +7,97 @@
 
 ## Public API
 
+### Local pitch-package instruction entry (prototype)
+
+`skillz/foundup_pitch_package/SKILLz.md` produces a versioned brief, narration/storyboard
+and companion deck from existing Outcome/Solution/Pain evidence. The Codex entry is
+`.agents/skills/foundup-pitch-package/SKILL.md` at repository root. It has no callable
+executor, WRE registry admission, resident trigger or publication authority. Use the
+current Skillz and `docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md`
+for the media-admission and separately granted campaign boundaries.
+
+### Source-backed editorial package
+
+```python
+content_orchestrator.prepare_campaign(brief: dict) -> dict
+async def execute_content_campaign(params: dict[str, str]) -> dict
+```
+
+The existing SOCIAL adapter accepts `social campaign content action=prepare
+dry_run=true brief='<JSON>'`. Inline input is bounded to64KiB with unique JSON
+keys. `social_content_brief.v1` requires an explicit brand projection, audience,
+objective, CTA, source excerpts, topics and offset-aware calendar parameters.
+Returns `social_content_package.v1`: deterministic editorial priorities,
+deduplicated evidence, source-preserving drafts, proposed UTC slots, review
+requirements and measurement join keys. See [the full contract](docs/CONTENT_CAMPAIGN.md).
+
+All evidence remains supplied/unverified. Brand rules and locale are carried for
+review, not automatically applied. Package revision is not signed authority;
+no account is selected, no source/credential/config is fetched and no model,
+scheduler, storage, browser or publisher runs. Unknown/live parameters reject.
+Length checks are raw Unicode prechecks; provider validation remains pending.
+Overlength drafts return no publishable content, preserving source text/links.
+
+### Petition intake plan
+
+```python
+async def execute_petition_campaign(params: dict[str, str]) -> dict
+```
+
+Owner: `src/petition_campaign.py`; the existing SOCIAL campaign adapter dispatches
+`social campaign petition`. Parameters: `action` (`preview`/`plan`), `dry_run`
+(`true` only), `petition_url`, `campaign_id`, `title`, `platforms`. Unknown or
+duplicate command parameters, unsupported operations and invalid public URLs
+reject. Conversational launch phrases route only to the effect-free petition
+branch, never the other existing publishers.
+
+Returns `petition_campaign_plan.v1` with `awaiting_petition_url` or `intake_ready`,
+canonical campaign identity, an in-memory brief projection and pending phases.
+All accounts/platforms are disabled; URL/identity/source/policy verification is
+pending. `plan_revision` is not a signature or execution job. The leaf reads no
+host config and performs no model, network, browser, storage or publication effect.
+Outer CLI/runtime audit and admission behavior remains outside that guarantee.
+Account creation, persistence, draft generation, publishing, analytics and local
+browser qualification remain separate. See [the runbook](docs/PETITION_CAMPAIGN.md).
+
+### AntifaFM campaign pilot
+
+```python
+async def execute_antifafm_campaign(
+    params: dict[str, str], *, settings=None, client=None, drafter=None, db_path=None
+) -> dict
+
+async def post_verified_x(
+    content: str, account: XAccount, campaign_id: str, job_id: str, *,
+    client, expected_user_id: str, db_path, dry_run: bool = True
+) -> dict
+```
+
+The campaign entry is `src/antifafm_campaign.py`; the existing SOCIAL router
+delegates to it. Actions: `preview`, `check_account`, `review_mentions`,
+`draft_reply`, `publish`. Accepted string parameters: `action`, `account`,
+`dry_run`, `post_id`, `limit`, `job_id`, `content`. Unknown keys, malformed
+AntifaFM command tokens and duplicate parameters reject. The default account is
+`move2japan`, default dry-run is true, and publishing requires an explicit stable
+job ID plus enabled private configuration. The other account labels are
+`foundups` and `antifafm`, each explicitly provider-ID-bound.
+
+Preview returns before host configuration, model, API or ledger access. Read
+operations require `dry_run=false` but can run with publication disabled. They
+verify account identity and return source-linked `draft_reply`, `skip` or
+`review_required` decisions; `review_complete` does not prove a usable draft.
+Context is at most five connected posts and 2,400 serialized characters; drafts
+are at most 280 characters. There is no reply publication action.
+
+`post_verified_x` is an API-only method and module helper in
+`src/unified_x_interface.py`. Live success requires durable `verified` or
+`already_verified` provider readback. Known IDs retry retrieval only; uncertain
+creates remain claimed. The campaign returns `publication_verified`; its
+`no_publication_performed` field is nullable after entering a live publisher.
+One new job per provider account/campaign per 24 hours is allowed; unresolved
+claims hold new jobs. Existing stream rows are unchanged. See the
+[runbook](docs/ANTIFAFM_CAMPAIGN.md) for configuration, status and recovery details.
+
 ### Core Classes
 - `SocialMediaOrchestrator`: Main orchestration service for unified social media management
 - `OAuthCoordinator`: Centralized OAuth management for all social platforms

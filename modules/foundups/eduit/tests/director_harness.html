@@ -1,0 +1,86 @@
+<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><title>Storytime interaction acceptance</title>
+<style>body{margin:0;font:14px system-ui;background:#ddd}nav{padding:8px}iframe{display:block;border:0}pre{white-space:pre-wrap;max-height:100px;overflow:auto}</style>
+<nav><button data-size="320,568">Small phone</button><button data-size="568,320">Small landscape</button><button data-size="390,844">Phone portrait</button><button data-size="844,390">Phone landscape</button><button data-size="768,1024">Tablet portrait</button><button data-size="1024,768">Tablet landscape</button><button id="rescue">Play rescue sequence</button><button id="run">Run acceptance</button><button id="phone-matrix">Run phone regression matrix</button></nav><pre id="results">Ready</pre><iframe id="app" src="/" width="390" height="844"></iframe>
+<script type="module">
+const frame=document.querySelector('#app'),results=document.querySelector('#results');
+for(const b of document.querySelectorAll('[data-size]'))b.onclick=()=>{const [w,h]=b.dataset.size.split(',');frame.width=w;frame.height=h;};
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+document.querySelector('#rescue').onclick=async()=>{
+ const d=frame.contentDocument,w=frame.contentWindow,$=id=>d.getElementById(id),g=$('game').contentDocument,api=$('game').contentWindow.storytimeReview;
+ try{
+ $('full-game').click();$('play').click();
+ for(const [id,taps,duration] of [['baby-1',1,2],['baby-2',2,2.4],['baby-3',2,2.2],['parent-1',3,4],['parent-2',4,4.5]]){
+  for(let attempt=0;attempt<150&&!g.querySelector(`[aria-label="Wake ${id}"]`);attempt++)await wait(100);
+  for(let n=0;n<taps;n++){const b=g.querySelector(`[aria-label="Wake ${id}"]`);if(b)b.click();await wait(300);}
+  const vine=g.querySelector('[aria-label="Move selected shrew to root"]');if(!vine)throw Error('No vine destination for '+id);vine.click();await wait((duration+.4)*1000);
+ }
+ for(let attempt=0;attempt<150&&api.status().phase!=='over';attempt++)await wait(100);const captured=api.freeze();if(captured.state.outcome!=='rescued'||captured.state.awards.length!==5)throw Error('Incomplete rescue');
+ results.textContent='PASS live DOM rescue: all five safe, '+captured.state.score+' points, '+captured.clock.toFixed(1)+' active seconds';
+ }catch(e){results.textContent='FAIL '+e.message+' '+JSON.stringify(api.freeze().state);}
+};
+document.querySelector('#run').onclick=async()=>{
+ for(let n=0;n<100&&!frame.contentDocument?.getElementById('game')?.contentWindow?.storytimeReview;n++)await wait(100);
+ const d=frame.contentDocument,w=frame.contentWindow,$=id=>d.getElementById(id),api=$('game').contentWindow.storytimeReview,checks=[];
+ function check(name,ok){checks.push({name,result:ok?'PASS':'FAIL'});results.textContent=JSON.stringify(checks,null,2);if(!ok)throw Error(name);}
+ try{
+ if($('story-intro').open){$('intro-skip').click();await wait(400);}
+ $('play').click();await wait(200);$('about-open').click();check('About pauses live game',api.status().paused&&$('story-info').open&&!$('about-content').hidden);const infoClock=api.status().clock;await wait(150);check('information does not consume game time',api.status().clock===infoClock);$('info-close').click();check('About returns without resetting',api.status().clock===infoClock);$('how-open').click();check('How shows manual instructions',!$('how-content').hidden&&$('about-content').hidden);$('info-close').click();
+ $('full-game').click();await wait(250);check('game fills selected viewport',$('game-panel').getBoundingClientRect().width===Number(frame.width));
+ $('play').click();await wait(450);check('stateful pause label',$('play').getAttribute('aria-label')==='Pause game');$('play').click();const clock=api.status().clock;await wait(150);check('pause holds clock',api.status().clock===clock);check('primary target scales for viewport', $('play').getBoundingClientRect().width + .1 >= (Math.min(w.innerWidth,w.innerHeight)<=450?(w.innerWidth<=360||w.innerHeight<=450?64:72):76.8));check('primary touch target is at least64px', $('play').getBoundingClientRect().width>=64&&$('play').getBoundingClientRect().height>=64);check('control rail stays in viewport', $('play').getBoundingClientRect().bottom<=w.innerHeight&&$('game-options').getBoundingClientRect().right<=w.innerWidth);
+ $('feedback').click();check('Pencil hides game controls',w.getComputedStyle(d.querySelector('.game-controls')).display==='none');check('Pencil retains fullscreen',$('game-panel').classList.contains('expanded')&&!$('ink').hidden);
+ const ink=$('ink'),rect=ink.getBoundingClientRect(),event=(type,id,x,y)=>ink.dispatchEvent(new w.PointerEvent(type,{pointerId:id,clientX:rect.x+x*rect.width,clientY:rect.y+y*rect.height,bubbles:true}));
+ // Synthetic events validate handlers only, not physical touch delivery.
+ const original=ink.setPointerCapture;ink.setPointerCapture=()=>{};
+ event('pointerdown',1,.2,.3);event('pointermove',1,.3,.4);event('pointerup',1,.3,.4);$('save').click();check('pointer stroke saved',JSON.parse($('record').value).entries.at(-1).strokes.length===1);const oldSize=[frame.width,frame.height],beforeRotation=$('record').value,freezeClock=api.status().clock;frame.width=oldSize[1];frame.height=oldSize[0];await wait(150);check('rotation retains frozen frame and saved marks',!ink.hidden&&api.status().clock===freezeClock&&$('record').value===beforeRotation);frame.width=oldSize[0];frame.height=oldSize[1];await wait(150);
+ $('mark-clear').click();$('mark-undo').click();$('save').click();check('Clear is reversible',JSON.parse($('record').value).entries.at(-1).strokes.length===1);
+ $('mark-clear').click();$('mark-clear').click();event('pointerdown',1,.6,.6);event('pointermove',1,.7,.7);event('pointerup',1,.7,.7);$('mark-undo').click();$('save').click();check('Undo removes newest stroke after Clear',JSON.parse($('record').value).entries.at(-1).strokes.length===0);$('mark-undo').click();$('save').click();check('Repeated Clear preserves recovery',JSON.parse($('record').value).entries.at(-1).strokes.length===1);
+ event('pointerdown',1,.4,.3);event('pointerdown',2,.5,.3);event('pointerup',2,.5,.3);event('pointerup',1,.4,.3);$('save').click();check('second finger cancels provisional ink',JSON.parse($('record').value).entries.at(-1).strokes.length===1);ink.setPointerCapture=original;
+ $('full-game').click();$('full-game').click();check('collapse/expand retains whiteboard',!ink.hidden);
+ $('share-image').click();for(let i=0;i<30&&!d.getElementById('picture').open;i++)await wait(100);check('snapshot is available in fullscreen',d.getElementById('picture').open);await d.querySelector('#picture img').decode();check('snapshot size',d.querySelector('#picture img').naturalWidth===1920);$('close-picture').click();
+ $('resume-game').click();await wait(150);$('play').click();$('to-video').click();check('direct switch retains fullscreen',$('video-panel').classList.contains('expanded'));check('switch pauses game',api.status().paused);const vr=$('video-panel').getBoundingClientRect(),cr=$('story-caption').getBoundingClientRect(),pr=$('video-play').getBoundingClientRect(),er=$('full-video').getBoundingClientRect();check('video fullscreen is fixed to viewport',Math.abs(vr.top)<1&&vr.height===w.innerHeight);check('caption and controls fit fullscreen',cr.top>=0&&cr.bottom<=pr.top&&pr.bottom<=w.innerHeight);check('exit does not overlap controls',er.left>=$('video-options').getBoundingClientRect().right);
+ $('video-options').click();$('restart-game').click();check('restart clears round and pauses',api.status().clock===0&&api.status().score===0&&api.status().paused);$('video-options').click();$('practice-game').click();check('practice is reachable',api.status().practice);$('video-options').click();$('practice-game').click();check('timed mode is recoverable',!api.status().practice);$('video-options').click();$('repeat').click();check('video repeat selected',$('video').loop);$('repeat').click();$('lock-child').click();check('child lock enabled',d.body.classList.contains('child-locked'));$('full-video').click();check('lock refuses collapse',$('video-panel').classList.contains('expanded'));$('to-game').click();check('locked switch works',$('game-panel').classList.contains('expanded'));check('locked adult control hidden',getComputedStyle($('feedback')).display==='none');
+ check('no horizontal overflow',d.documentElement.scrollWidth<=w.innerWidth);results.textContent+='\nComplete. Reload the fixture before another run.';
+ }catch(e){results.textContent+='\nERROR '+e.message;}
+};
+
+// Frozen regression oracle: actual bounds, mutually exclusive rails, and useful image size.
+const sizes=[[320,568],[390,844],[568,320],[844,390],[768,1024],[1024,768]];
+document.querySelector('#phone-matrix').onclick=async()=>{
+ const rows=[];results.textContent='Running';
+ const check=(name,ok,detail={})=>{rows.push({name,result:ok?'PASS':'FAIL',...detail});results.textContent=JSON.stringify(rows,null,2);if(!ok)throw Error(name);};
+ try{for(const entry of ['/', '/review/director.html'])for(const size of sizes){
+  const loaded=new Promise(resolve=>frame.addEventListener('load',resolve,{once:true}));frame.width=size[0];frame.height=size[1];frame.src=entry;await loaded;
+  const d=frame.contentDocument,w=frame.contentWindow,$=id=>d.getElementById(id);
+  for(let n=0;n<100&&!($('video-play')&&$('game').contentWindow.storytimeReview);n++)await wait(100);
+  const api=$('game').contentWindow.storytimeReview;if(!api)throw Error('Game failed to load');
+  if($('story-intro').open){$('intro-skip').click();await wait(400);}
+  const visible=e=>!!e&&e.getBoundingClientRect().width>0&&e.getBoundingClientRect().height>0&&w.getComputedStyle(e).visibility!=='hidden';
+  const overlap=(a,b)=>Math.min(a.right,b.right)-Math.max(a.left,b.left)>1&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>1;
+  function inspect(panel,mode,safe=[0,0,0,0]){
+   const r=panel.getBoundingClientRect(),surface=panel.querySelector('.surface').getBoundingClientRect();
+   const buttons=[...panel.querySelectorAll('button')].filter(visible),rects=buttons.map(b=>b.getBoundingClientRect());
+   check('panel fills viewport',Math.abs(r.x)<1&&Math.abs(r.y)<1&&Math.abs(r.width-size[0])<1&&Math.abs(r.height-size[1])<1,{entry,size,mode});
+   check('scene retains16:9',Math.abs(surface.width/surface.height-16/9)<.01,{size,mode,scene:[surface.width,surface.height]});
+   check('all visible controls at least64 and within safe bounds',rects.every(b=>b.width>=63.9&&b.height>=63.9&&b.left>=safe[3]&&b.top>=safe[0]&&b.right<=size[0]-safe[1]+.5&&b.bottom<=size[1]-safe[2]+.5),{size,mode,buttons:buttons.map((b,i)=>({id:b.id,w:rects[i].width,h:rects[i].height}))});
+   check('controls do not overlap',rects.every((a,i)=>rects.every((b,j)=>i===j||!overlap(a,b))),{size,mode});
+   check('controls receive pointer at center',buttons.every((b,i)=>{const r=rects[i],hit=d.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return b===hit||b.contains(hit);}),{size,mode});
+   if(mode==='video'&&size[0]>size[1]&&size[1]<=500)check('landscape video has useful size',surface.height>=(size[1]-safe[0]-safe[2])*.6,{size,height:surface.height});
+  }
+  $('full-game').click();inspect($('game-panel'),'game');$('feedback').click();
+  check('one rail while drawing',!visible(d.querySelector('.game-controls'))&&visible($('feedback-actions')),{entry,size});inspect($('game-panel'),'drawing');
+  const clock=api.status().clock;$('full-game').click();$('full-game').click();check('drawing and clock retained',!$('ink').hidden&&clock===api.status().clock,{size});
+  // Safe-area fixture tests arithmetic, not actual notched-device delivery.
+  const safe=size[0]>size[1]?[0,32,16,32]:[24,0,20,0];
+  ['top','right','bottom','left'].forEach((n,i)=>d.documentElement.style.setProperty('--safe-'+n,safe[i]+'px'));inspect($('game-panel'),'drawing-safe',safe);
+  $('resume-game').click();api.pause();$('to-video').click();inspect($('video-panel'),'video',safe);
+  if(size[0]>size[1]&&size[1]<=500){for(const time of [3.8,7,10]){const sought=new Promise(resolve=>$('video').addEventListener('seeked',resolve,{once:true}));$('video').currentTime=time;await sought;const caption=$('story-caption');check('actual phrase and picture fit sidebar',caption.scrollHeight<=caption.clientHeight+1&&caption.scrollWidth<=caption.clientWidth+1,{entry,size,time,text:caption.textContent});}}
+  ['top','right','bottom','left'].forEach(n=>d.documentElement.style.removeProperty('--safe-'+n));
+  check('page remains within width',d.documentElement.scrollWidth<=size[0],{entry,size});
+  if(size[0]===390){const bounds={left:20,top:80,width:350,height:600};for(const [n,v]of Object.entries(bounds))d.body.style.setProperty('--app-'+n,v+'px');$('video-options').click();const o=$('options').getBoundingClientRect();check('options follow offset visible viewport',o.left>=bounds.left&&o.top>=bounds.top&&o.right<=370.5&&o.bottom<=680.5,{entry});$('lock-child').click();const u=$('unlock').getBoundingClientRect();check('unlock follows offset visible viewport',u.left>=20&&u.top>=80&&u.right<=370.5&&u.bottom<=680.5,{entry});}
+
+ }
+ results.textContent+='\nCOMPLETE';
+ }catch(e){results.textContent+='\nERROR '+e.message;}
+};
+
+</script>

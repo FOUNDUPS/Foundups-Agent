@@ -1,0 +1,31 @@
+[Unit]
+Description=FoundUps private draft MCP resource server
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=foundups-draft
+Group=foundups-draft
+WorkingDirectory=/opt/foundups-draft/source
+EnvironmentFile=/etc/foundups/private-draft-mcp.env
+LoadCredentialEncrypted=FOUNDUPS_DRAFT_INTROSPECTION_CLIENT_SECRET
+LoadCredentialEncrypted=FOUNDUPS_DRAFT_GOOGLE_CLIENT_SECRET
+LoadCredentialEncrypted=FOUNDUPS_DRAFT_GOOGLE_REFRESH_TOKEN
+LoadCredentialEncrypted=FOUNDUPS_DRAFT_SNAPSHOT_KEY
+StateDirectory=foundups-draft
+StateDirectoryMode=0700
+Environment=FOUNDUPS_DRAFT_STATE_DIR=/var/lib/foundups-draft
+ExecStart=/opt/foundups-draft/venv/bin/python -B -m modules.infrastructure.foundups_mcp_bridge.src.draft_server --port 8178
+Restart=on-failure
+RestartPreventExitStatus=2
+RestartSec=5
+TimeoutStopSec=35
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+
+[Install]
+WantedBy=multi-user.target
