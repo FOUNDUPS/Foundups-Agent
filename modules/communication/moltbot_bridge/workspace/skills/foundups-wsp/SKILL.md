@@ -48,6 +48,33 @@ Maximum 2000 lines per file. Use HoloIndex for navigation.
 3. Verify module structure compliance
 4. Update ModLog.md after changes
 
+## Browser Outcome Verification (WSP 97)
+
+Before reporting that a requested browser/site outcome cannot be seen, inspect
+the tools available in the current session and the existing capability routes.
+Try an authorized built-in browser/rendered-page or screenshot observation, or
+delegate a bounded read-only check to an authorized vision-capable worker when
+available. A missing local UI-TARS model does not establish that every observation
+route is unavailable. Preserve other workers' browser ownership and scope.
+
+Bind the returned evidence to the requested URL, observed final URL/redirect,
+observation time with timezone, tool and environment (browser/host and viewport
+when relevant), and the exact assertions observed. Retain a permitted evidence
+reference and any error or coverage limit. Attribute delegated observations to
+the observing worker; a tool listing or source import is not a live check.
+
+Keep explicit DOM assertions, screenshots, and model/visual observations distinct.
+A screenshot capture alone does not prove its expected content; an unrun,
+disabled, unavailable or errored verifier is UNVERIFIED, never PASS. See
+`modules/infrastructure/foundups_selenium/INTERFACE.md` for the runner's evidence
+contract. Failed verification does not authorize replaying a consequential UI
+action; reconcile its actual outcome before any separately authorized retry.
+Sign-in, permission, verification-challenge and anti-bot gates remain in force.
+
+Feed corrections into the existing owning skill/module and its evidence record.
+This guidance grants no new route, execution authority, production admission or
+WSP 48 improvement claim; those require the existing independent gates.
+
 ## Tokenization-Consistency Checks (When touching simulator/economics/docs)
 
 1. Verify `modules/infrastructure/foundups_tokenization/docs/TOKENOMICS.md` matches:

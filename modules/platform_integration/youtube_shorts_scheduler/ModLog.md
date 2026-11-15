@@ -1,5 +1,15 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-11-15 - Stop the manual visual harness after unverified outcomes
+
+The existing Layer 3 `--wre-tars` caller now returns its summary immediately after
+an unverified visibility or Schedule step, so later UI edits cannot continue from
+that failure. Prompts describe visual localization targets; exact date/time values
+use explicit read-only DOM checks with the existing selectors. The CLI converts
+absent, empty, failed or inconsistent summaries to exit 1. Three offline cases
+exercise failure stops, matching/mismatched/missing readback and exit status. No live browser,
+model, saved schedule, publication, deployment or activation is implied. WSP22/50/97.
+
 ## 2026-11-10 — Native inventory diagnosis without scheduling effects
 
 The direct Unlisted route reached the existing collector but returned incomplete

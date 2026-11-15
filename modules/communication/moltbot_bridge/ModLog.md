@@ -1,3 +1,16 @@
+## 2026-11-15 - Browser outcome verification guidance
+
+Extend the existing managed `foundups-wsp` workspace skill: discover available
+browser/vision access and authorized read-only delegation before declaring a
+visibility gap; retain URL/time/environment/assertion evidence and distinguish
+DOM checks, captured images and observed visual results. Missing or unrun checks
+remain UNVERIFIED. Preserve browser ownership, auth/permission gates and uncertain
+UI effects; verification failure grants no replay authority. Refresh only this
+skill's hash through the existing manifest owner, retaining all other entries.
+This is repository guidance, not proof of installed use, live vision wiring or
+production RSI. WSP22/50/71/95/97; offline manifest integrity is checked separately
+from scanner, CI and runtime acceptance.
+
 ## 2026-11-05 — Lightweight supervisor advisory analysis
 
 The background supervisor was acquiring a second native model owner while main

@@ -1,3 +1,31 @@
+## Visual verification evidence correction — 2026-11-15
+
+Owner: delegated 0102 worker, origin internal_handoff from 012's Red Dog task.
+Base: `e62e9ebaf5583655d4855960723ee627d19b07a4`; lane
+`fix/wre-visual-verification-evidence-20261115`, isolated task worktree.
+Destination: proposed main change through draft PR only; no merge/deploy/activation.
+WSP15 allocation: C2/I4/D4/Impact3 = 13/P1. Correct the observed false-success
+path in the existing Selenium visual runner, observation retry semantics, its
+manual harness consumer, and existing guidance. Other lanes and the separately
+owned SUNVISTA browser/site are excluded. Recovery: retain/revert the scoped
+commit; never replay uncertain UI effects to recover verification.
+Acceptance: unavailable/error/unrun evidence cannot pass; explicit DOM evidence
+remains distinct; one action per step; evidence provenance survives summary and
+PatternMemory; offline regressions plus independent review. Native bootstrap
+and strict tracker check ran in this worktree. Lexical Holo bundle is source-bound
+to the base with UNKNOWN freshness/index gap; semantic owner was not started.
+No related open vision/runner/Selenium PR or named worktree overlap was found in
+the bounded ownership check. Original checkout's unrelated dirty WRE lifecycle
+work is preserved. Independent review accepts the bounded correction after
+repairing CLI failure exit status. Local evidence: runner25/caller3; final focused
+registry/import-safety selection71; prior adjacent selection118 (overlapping);
+CI contracts40; canonical registry/projection and managed skill manifest/safety
+scan passed. Exact-base negative controls expose both false passes. Sandbox
+asyncio/Bash runtime blocks and bounded outside-sandbox reruns are retained in
+TestModLog. Draft publication and exact-head hosted CI remain pending;
+installed/live vision and measured RSI transfer are unrun. Retain this lane for
+review; no merge or deployment is authorized in this assignment.
+
 ## Vote public release and next gates — 2026-11-07
 
 Vote v2 and Oversight v5 are live. PRs #2312, #2313 and #2317 are merged.
