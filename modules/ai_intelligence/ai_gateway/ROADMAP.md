@@ -17,7 +17,7 @@
 
 ## Dynamic RedDog Model Evidence
 
-### Historical local-worker evidence ? 2026-10-08
+### Historical local-worker evidence — 2026-10-08
 
 PR2111 source `cc32547b9677f2d2a5adf09bb924e52edbe9a4de` recorded a panel
 probe with no prior-output forwarding, one rejected Qwen audit (0/1 accepted;

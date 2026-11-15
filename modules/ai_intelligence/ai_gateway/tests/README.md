@@ -1,6 +1,6 @@
 # AI Gateway Tests
 
-## Native incumbent identity controls ? 2026-11-02
+## Native incumbent identity controls — 2026-11-02
 
 Seven additional held-out cases in `test_youtube_model_routing.py` distinguish
 the prepared General display alias from its exact native inventory key across
@@ -9,7 +9,7 @@ keep a signed local binding independent of the incumbent override. This makes
 50 routing plus 20 composition cases. Authored before the bounded production
 fix; no execution or installed-model qualification is claimed at this freeze.
 
-## YouTube consumer routing contract ? 2026-11-01
+## YouTube consumer routing contract — 2026-11-01
 
 The independent selection is 43 cases in `test_youtube_model_routing.py` and
 20 in `test_youtube_model_composition.py` (63 total). Both files stay within
@@ -22,7 +22,7 @@ non-echo. The real query composition uses the existing deterministic signed
 test verifier; it does not configure production trust or prove real model quality.
 Run only in the owner's minimal-environment/effect-guarded child. All transport,
 residency and provider results are synthetic; temporary artifacts stay outside Git.
-Held-out composition also exercises actual processor await �� final review,
+Held-out composition also exercises actual processor await → final review,
 independent review cancellation, persona refresh and target/requester role
 separation through complete production definitions with explicit collaborators.
 Target identity comes from explicit captured row IDs; display-name map keys,

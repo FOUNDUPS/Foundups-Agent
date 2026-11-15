@@ -1,6 +1,6 @@
 # AI Gateway Module Change Log
 
-## 2026-11-02 ? Preserve the prepared General model's native identity
+## 2026-11-02 — Preserve the prepared General model's native identity
 
 The prepared PC uses a display alias distinct from its native inventory key.
 The shared local incumbent now honors existing `LM_STUDIO_NATIVE_MODEL_KEY`,
@@ -18,7 +18,7 @@ it does not prove installed residency or live model quality. The existing CI
 selector now pins all 88 exact case names. WSP11/22/50/62/77/84/97.
 
 
-## 2026-11-01 ? Shared YouTube model orchestration
+## 2026-11-01 — Shared YouTube model orchestration
 
 WSP00/10/11/22/50/62/77/84/97. Replace consumer-owned provider chains with
 `AIGateway.call_youtube_task` for assessment, writer and exact final review.
