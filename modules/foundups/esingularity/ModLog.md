@@ -1,3 +1,10 @@
+## 2026-11-15 — Align React 19.3.1 dependency cohort (PR #2351 resolution)
+
+- Dependabot PR #2351 (`53fb430ae893`) bumped only `react-server-dom-webpack` from `19.2.8` to `19.3.1` while leaving `react` and `react-dom` pinned at `19.2.8`, causing `Validate eSingularity` `npm ci` to fail with `ERESOLVE` (`react-server-dom-webpack@19.3.1` requires peer `react@"^19.3.1"` and `react-dom@"^19.3.1"`).
+- Coordinate `react`, `react-dom`, and `react-server-dom-webpack` together to `19.3.1` in `frontend/package.json` and regenerate `frontend/package-lock.json` via `npm 11.19.1` (`--package-lock-only`), advancing transitive `scheduler` from `0.27.0` to `0.28.0`. All unrelated packages (`next` `16.4.3`, `vinext` `1.1.0`, `vite` `8.3.5`, `eslint` `9.39.4`, Cloudflare tooling, and existing optional WASM lock entries) are preserved without `--legacy-peer-deps` or `--force`.
+- Validation on PC Node `v24.11.1` / `npm 11.6.2` (CI uses Node `24.22.1` / `npm 11.19.1`): `npm ci` (490 packages) and `npm@11.19.1 ci --ignore-scripts` (488 packages) succeed cleanly; `npm audit --audit-level=high` reports zero high/critical advisories (7 pre-existing moderate advisories in `@typescript-eslint/*` / `minimatch`); `npm run lint` passes (0 errors, 7 existing `@next/next/no-img-element` warnings); `npm run build` (`vinext build`) completes across all 5 build passes; `test_domain_routing.mjs` passes 32/32; `interest-security.test.mjs` passes 8/8; module `pytest` passes 86/86; `public_catalog_projector --validate` is `SAFE` (`errors=0`); `generate_test_registry.py --check` is `current` (`total=1842`, `quarantined=260`).
+- Local validation does not replace CI `Validate eSingularity` on Node `24.22.1` or live site publication verification. WSP 10/22/50/71/84/97.
+
 ## 2026-10-30 — Reconcile organization-partner inquiry PR #2234
 
 - Preserve the original coalition/inquiry proposal while retaining both
