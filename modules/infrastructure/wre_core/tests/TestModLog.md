@@ -1,3 +1,7 @@
+## 2026-11-15 — Parent-version-bound recall & evolution continuity regressions
+
+- `test_pattern_memory.py`, `test_skill_evolution_continuity.py`, and `test_wre_master_orchestrator.py`: Added tests covering `parent_version` pre-`LIMIT` SQL filtering, legacy/untagged exclusion, fail-closed blank/invalid filter behavior, and `evolve_skill()` lineage isolation (87 passed).
+
 ## 2026-11-15 — Git lifecycle branch dispositions and bundle verification
 
 Added 4 unit/integration regressions in `test_git_lifecycle.py` (7 total)

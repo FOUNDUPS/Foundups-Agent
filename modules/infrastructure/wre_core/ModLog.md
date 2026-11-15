@@ -1,3 +1,9 @@
+## 2026-11-15 — Parent-version-bound pattern recall and evolution lineage
+
+- **PatternMemory (`src/pattern_memory.py`)**: Added `_parent_version_filter` and optional `parent_version: Optional[str] = None` to `recall_successful_patterns()` and `recall_failure_patterns()`, filtering in SQL before `LIMIT` on `json_valid(output_result)=1` and `$._skill_binding.schema_version = 'wre_skill_execution_binding.v1'` + `$._skill_binding.loaded_skill_sha256` (fail-closed `[]` on blank/non-string inputs).
+- **WREMasterOrchestrator (`wre_master_orchestrator/src/wre_master_orchestrator.py`)**: Wired `loaded_skill_digest(skill_content)` into `evolve_skill()` pattern recall (`recall_failure_patterns`, `recall_successful_patterns`) and `store_variation(..., parent_version=...)` so foreign revisions cannot pollute candidate generation.
+- **Docs (`INTERFACE.md`)**: Documented `parent_version` recall filtering and `evolve_skill()` lineage binding.
+
 ## 2026-11-15 — Hardened read-only GitHub branch dispositions
 
 Add and harden read-only `branch_dispositions` accounting in
