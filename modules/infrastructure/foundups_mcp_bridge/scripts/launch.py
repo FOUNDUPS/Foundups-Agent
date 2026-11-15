@@ -205,19 +205,61 @@ def _mcp_runtime_python(candidate: Path) -> tuple[Path, Path | None]:
     if not sys.platform.startswith("win"):
         return candidate, None
     environment_root = candidate.parent.parent
+    packages = environment_root / "Lib" / "site-packages"
+    if not packages.is_dir():
+        return candidate, None
+
     config = environment_root / "pyvenv.cfg"
+    if not config.is_file():
+        return candidate, None
+
     try:
-        fields = {
-            key.strip(): value.strip()
-            for line in config.read_text(encoding="utf-8").splitlines()
-            if "=" in line
-            for key, value in (line.split("=", 1),)
-        }
+        base = candidate
+        visited: set[Path] = {candidate.resolve()}
+        while True:
+            fields = {
+                key.strip(): value.strip()
+                for line in config.read_text(encoding="utf-8").splitlines()
+                if "=" in line
+                for key, value in (line.split("=", 1),)
+            }
+            executable_value = str(fields.get("executable") or "").strip()
+            home_value = str(fields.get("home") or "").strip()
+
+            next_base = Path(executable_value) if executable_value else None
+            resolved_next: Path | None = None
+            if next_base is not None:
+                if not next_base.is_absolute() or not next_base.is_file() or next_base.is_symlink():
+                    return candidate, None
+                resolved_next = next_base.resolve()
+                if resolved_next in visited:
+                    next_base = None
+
+            if next_base is None:
+                if not home_value:
+                    return candidate, None
+                next_base = Path(home_value) / base.name
+                if not next_base.is_absolute() or not next_base.is_file() or next_base.is_symlink():
+                    return candidate, None
+                resolved_next = next_base.resolve()
+                if resolved_next in visited:
+                    return candidate, None
+
+            assert resolved_next is not None
+            visited.add(resolved_next)
+            base = resolved_next
+            parent_parent_cfg = base.parent.parent / "pyvenv.cfg"
+            parent_cfg = base.parent / "pyvenv.cfg"
+            if parent_parent_cfg.is_file():
+                config = parent_parent_cfg
+            elif parent_cfg.is_file():
+                config = parent_cfg
+            else:
+                break
     except OSError:
         return candidate, None
-    base = Path(str(fields.get("executable") or "").strip())
-    packages = environment_root / "Lib" / "site-packages"
-    if not base.is_absolute() or not base.is_file() or base.is_symlink() or not packages.is_dir():
+
+    if not base.is_absolute() or not base.is_file() or base.is_symlink():
         return candidate, None
     return base.resolve(), packages.resolve()
 

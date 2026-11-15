@@ -10,6 +10,20 @@ Track development progress and changes for the WSP 48 Recursive Self-Improvement
 
 ## Change Log
 
+### 2026-11-15 - Verification-Gated Improvement Application & Rollback
+
+- Initialized `self._rollback_handlers` in `RecursiveLearningEngine.__init__` and added
+  `_get_rollback_handlers()` for `__new__`-constructed instances.
+- Extended `apply_improvement()` to preserve fail-closed `blocked_unimplemented`
+  semantics on legacy unauthenticated calls while verifying independent verifier,
+  ratchet, and held-out regression gate receipts plus reversible `target_applicator`
+  execution (`applied_verified` on pass, `blocked_verification_rejected` on reject)
+  without fabricating token-reduction metrics.
+- Added `rollback_improvement()` to execute registered rollback handlers, verify
+  restored state SHA-256 against `before_state`, update persistence/metrics, and
+  pop consumed handlers.
+- Added bounded RSI cycle, fail-closed, and rollback tests in `tests/test_learning.py`.
+
 ### 2026-08-26 - Shutdown and Background-Persistence Hardening
 
 - Replaced the nonexistent `save_quantum_state()` shutdown call with a bounded
