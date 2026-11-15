@@ -26,3 +26,11 @@ test('missing viewport API and browser zoom retain layout viewport instead of de
 test('visual viewport subscribes to movement as well as resize',()=>{
  const listeners=[];fixture({width:390,height:844,scale:1,addEventListener:(n)=>listeners.push(n)});assert.deepEqual(listeners,['resize','scroll']);
 });
+test('modal scrollbar restoration cannot stop the newly handed-off movie',()=>{
+ const v={width:390.39999,height:844,offsetLeft:0,offsetTop:0,scale:1,addEventListener(){}};
+ const f=fixture(v);f.document.documentElement.clientWidth=390;f.context.viewport();
+ f.document.documentElement.clientWidth=375;v.width=375.200012;f.context.viewport();
+ assert.equal(f.counts.video,0);assert.equal(f.counts.game,1);assert.equal(f.style.get('--app-width'),'375.200012px');
+ v.offsetTop=24;f.context.viewport();assert.equal(f.counts.video,1,'real visible offset change still pauses both');assert.equal(f.counts.game,2);
+ f.window.innerWidth=844;f.window.innerHeight=390;v.width=844;v.height=390;f.context.viewport();assert.equal(f.counts.video,2,'actual rotation still pauses');
+});
