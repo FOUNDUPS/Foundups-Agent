@@ -448,6 +448,68 @@ class TestWRESkillsIntegration:
         patterns = orchestrator.sqlite_memory.recall_successful_patterns(skill_name, min_fidelity=0.0, limit=20)
         assert patterns == []
 
+    @pytest.mark.skipif(not WRE_SKILLS_AVAILABLE, reason="WRE Skills infrastructure not available")
+    def test_evolve_skill_isolates_parent_version_patterns(self, orchestrator, monkeypatch):
+        """evolve_skill scopes both success and failure recall to loaded_skill_digest(skill_content)."""
+        from datetime import datetime
+        import json
+        from modules.infrastructure.wre_core.src.pattern_memory import SkillOutcome
+        from modules.infrastructure.wre_core.src.skill_execution_truth import (
+            bind_skill_execution_result,
+            loaded_skill_digest,
+        )
+
+        v_old = "# Skill old\n"
+        v_cur = "# Skill current\n"
+        fp = "c" * 64
+        orchestrator.sqlite_memory.store_outcome(SkillOutcome(
+            execution_id="old_hi_ok",
+            skill_name="fixture_effect_skill",
+            agent="qwen",
+            timestamp=datetime.now().isoformat(),
+            input_context=json.dumps({}),
+            output_result=json.dumps(bind_skill_execution_result(
+                {"output": "old ok"}, skill_content=v_old,
+                execution_id="old_hi_ok", admission_fingerprint=fp,
+            )),
+            success=True,
+            pattern_fidelity=0.99,
+            outcome_quality=0.99,
+            execution_time_ms=10,
+            step_count=1,
+        ))
+        orchestrator.sqlite_memory.store_outcome(SkillOutcome(
+            execution_id="cur_ok",
+            skill_name="fixture_effect_skill",
+            agent="qwen",
+            timestamp=datetime.now().isoformat(),
+            input_context=json.dumps({}),
+            output_result=json.dumps(bind_skill_execution_result(
+                {"output": "cur ok"}, skill_content=v_cur,
+                execution_id="cur_ok", admission_fingerprint=fp,
+            )),
+            success=True,
+            pattern_fidelity=0.92,
+            outcome_quality=0.92,
+            execution_time_ms=10,
+            step_count=1,
+        ))
+
+        seen = {}
+        monkeypatch.setattr(
+            orchestrator,
+            "_build_reflection_prompt",
+            lambda **kw: seen.update(kw) or "prompt",
+        )
+        monkeypatch.setattr(orchestrator, "_generate_variation_with_qwen", lambda *_: "# candidate")
+
+        assert orchestrator.evolve_skill(
+            "fixture_effect_skill", "qwen", v_cur, {"output": "err"}, {}, 0.50
+        ) is True
+        assert [r["execution_id"] for r in seen["success_patterns"]] == ["cur_ok"]
+        assert seen["failure_patterns"] == []
+        assert loaded_skill_digest(v_cur) != loaded_skill_digest(v_old)
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
