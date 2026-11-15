@@ -1,3 +1,7 @@
+## 2026-11-15 — PC Git inventory stashes and backlog summary regressions
+
+- `tests/test_git_lifecycle_inventory.py`: Added 5 regression tests covering SHA-only `section="stashes"` pagination and message/filename non-leakage, malformed/oversized stash reflogs, concurrent stash mutation blocking (`pc_state_changed_during_observation`), `github_main_present_on_pc` True vs False `pc_backlog_summary` and `worktree_summary` counts, and `verify_git_inventory_receipt()` rejection of malformed or tampered stashes and summaries. Ran alongside `test_git_lifecycle.py` and `test_git_lifecycle_github.py`.
+
 ## 2026-11-15 — MetricsIngestorV2 schema & rollback trigger regression
 
 - `test_metrics_ingest_v2_schema.py`: Verified fresh SQLite schema initialization with `idx_approval_skill` on `ai_0102_approvals(skill_id)` and `WRESkillsRegistryV2.check_rollback_triggers()` healthy, `pattern_fidelity_drop`, and `high_exception_rate` outcomes.

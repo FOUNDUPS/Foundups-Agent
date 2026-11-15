@@ -1,5 +1,13 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-11-15: Widen PC Git inventory tool section to stashes
+
+WSP 21/50/97. Widened `get_git_inventory` `section` parameter annotation in
+`src/mcp_server.py` from `Literal["summary", "branches", "worktrees"]` to
+`Literal["summary", "branches", "worktrees", "stashes"]` and added a `"stashes"`
+schema assertion inside `test_git_oauth_exact_discovery_and_single_tool` in
+`tests/test_git_inventory_oauth.py` (preserving the 60-case MCP compatibility count).
+
 ## 2026-11-12: Read-only PC Git inventory
 
 WSP 21/50/84/97. Add an opt-in authenticated HTTP tool using the WRE Git

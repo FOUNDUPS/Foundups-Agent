@@ -1241,9 +1241,12 @@ across the GitHub read. No caller-supplied paths, remotes, or Git commands are
 accepted. Worktree rows include HEAD, branch and flags, with the selected PC
 row marked. The selected PC row also has a cleanliness result.
 
-The summary gives counts and a digest of the complete observation without
-embedding every row. Request `section="branches"` or `section="worktrees"`
-for up to 20 rows and follow `next_offset` until it is null. Each page reads
+The summary gives counts (`branch_count`, `worktree_count`, `stash_count`,
+`pc_backlog_summary`, `worktree_summary`, and `github_main_present_on_pc`) and a
+digest of the complete observation without embedding every row. Request
+`section="branches"`, `section="worktrees"`, or `section="stashes"` for up to 20
+rows and follow `next_offset` until it is null. Stash rows contain only
+`{"sha": ...}` (never stash messages, subjects, or filenames). Each page reads
 fresh state. Compare `inventory_sha256` across pages to detect changes to the
 underlying inventory and restart the enumeration when the digest changes.
 

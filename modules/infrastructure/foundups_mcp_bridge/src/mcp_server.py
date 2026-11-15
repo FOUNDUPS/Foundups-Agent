@@ -165,7 +165,7 @@ def _register_git_inventory(mcp: Any, repo_root: Path, *, oauth_scope: str | Non
     from modules.infrastructure.wre_core.src.git_lifecycle_inventory import get_git_inventory
 
     def inventory(
-        request_id: str, section: Literal["summary", "branches", "worktrees"] = "summary",
+        request_id: str, section: Literal["summary", "branches", "worktrees", "stashes"] = "summary",
         offset: int = 0,
     ) -> Dict[str, Any]:
         return get_git_inventory(repo_root, request_id, section=section, offset=offset)

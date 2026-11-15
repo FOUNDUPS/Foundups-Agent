@@ -2,6 +2,7 @@
 
 from copy import deepcopy
 from datetime import datetime, timedelta
+import hashlib
 import subprocess
 
 import pytest
@@ -141,3 +142,224 @@ def test_inventory_pages_have_one_snapshot_digest_and_bounded_rows(checkout, mon
     assert inventory.get_git_inventory(checkout, REQUEST_ID, section="summary", offset=1) == {
         "status": "blocked", "reason": "page_invalid",
     }
+
+
+def _commit_file(root, hooks, name, content, message):
+    (root / name).write_text(content, encoding="utf-8")
+    _git(root, "add", name)
+    _git(
+        root, "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
+        "-c", f"core.hooksPath={hooks}", "commit", "--quiet", "-m", message,
+    )
+    return _git(root, "rev-parse", "HEAD")
+
+
+def _runner_with_main(main_sha, *, on_heads=None):
+    def run(args, *, cwd, timeout):
+        if "--heads" in args:
+            if on_heads is not None:
+                on_heads(cwd)
+            return subprocess.CompletedProcess(
+                args, 0, f"{main_sha}\trefs/heads/main\n", "",
+            )
+        return inventory.run_command(args, cwd=cwd, timeout=timeout)
+
+    return run
+
+
+def test_inventory_stashes_paginate_without_leaking_messages_or_filenames(
+    checkout, tmp_path, monkeypatch,
+):
+    hooks = tmp_path / "empty-hooks"
+    _commit_file(checkout, hooks, "secret-stash-file.txt", "base\n", "base file")
+    git_identity = ("-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid")
+    (checkout / "secret-stash-file.txt").write_text("v1\n", encoding="utf-8")
+    _git(checkout, *git_identity, "stash", "push", "-m", "secret-stash-msg-1")
+    (checkout / "secret-stash-file.txt").write_text("v2\n", encoding="utf-8")
+    _git(checkout, *git_identity, "stash", "push", "-m", "secret-stash-msg-2")
+    sha0 = _git(checkout, "rev-parse", "stash@{0}")
+    sha1 = _git(checkout, "rev-parse", "stash@{1}")
+
+    runner, _ = _runner()
+    full = inventory.get_git_inventory(checkout, REQUEST_ID, runner=runner)
+    assert inventory.verify_git_inventory_receipt(full, REQUEST_ID)
+    assert full["receipt"]["stashes"] == [{"sha": sha0}, {"sha": sha1}]
+    assert full["receipt"]["pc_backlog_summary"]["stash_count"] == 2
+    serialized = str(full)
+    for forbidden in ("secret-stash-msg-1", "secret-stash-msg-2", "secret-stash-file.txt"):
+        assert forbidden not in serialized
+
+    monkeypatch.setattr(inventory, "_PAGE_SIZE", 1)
+    summary = inventory.get_git_inventory(checkout, REQUEST_ID, section="summary", runner=runner)
+    page0 = inventory.get_git_inventory(checkout, REQUEST_ID, section="stashes", runner=runner)
+    page1 = inventory.get_git_inventory(
+        checkout, REQUEST_ID, section="stashes", offset=1, runner=runner,
+    )
+    for result in (summary, page0, page1):
+        assert inventory.verify_git_inventory_receipt(result, REQUEST_ID)
+        assert result["receipt"]["stash_count"] == 2
+        assert result["receipt"]["inventory_sha256"] == summary["receipt"]["inventory_sha256"]
+    assert summary["receipt"]["stashes"] == []
+    assert summary["receipt"]["next_offset"] is None
+    assert page0["receipt"]["stashes"] == [{"sha": sha0}]
+    assert page0["receipt"]["branches"] == page0["receipt"]["worktrees"] == []
+    assert page0["receipt"]["next_offset"] == 1
+    assert page1["receipt"]["stashes"] == [{"sha": sha1}]
+    assert page1["receipt"]["next_offset"] is None
+
+
+def test_read_stashes_rejects_malformed_or_oversized_reflog(tmp_path):
+    def bad_tip(cwd, *args, reason, timeout=6):
+        return "not-a-sha\n"
+
+    with pytest.raises(inventory._InventoryError, match="stash_inventory_invalid_or_too_large"):
+        inventory._read_stashes(bad_tip, tmp_path)
+
+    def too_many(cwd, *args, reason, timeout=6):
+        if "for-each-ref" in args:
+            return f"{'a' * 40}\n"
+        return "\n".join("b" * 40 for _ in range(inventory._MAX_ROWS + 1)) + "\n"
+
+    with pytest.raises(inventory._InventoryError, match="stash_inventory_invalid_or_too_large"):
+        inventory._read_stashes(too_many, tmp_path)
+
+    def empty_walk(cwd, *args, reason, timeout=6):
+        return f"{'a' * 40}\n" if "for-each-ref" in args else ""
+
+    with pytest.raises(inventory._InventoryError, match="stash_inventory_invalid_or_too_large"):
+        inventory._read_stashes(empty_walk, tmp_path)
+
+
+def test_inventory_blocks_when_stashes_change_during_remote_observation(checkout, tmp_path):
+    hooks = tmp_path / "empty-hooks"
+    _commit_file(checkout, hooks, "tracked.txt", "base\n", "base tracked")
+    (checkout / "tracked.txt").write_text("dirty\n", encoding="utf-8")
+
+    def mutate_stash_only(cwd):
+        stash_sha = _git(
+            cwd, "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
+            "stash", "create",
+        )
+        _git(cwd, "stash", "store", "-m", "concurrent-stash", stash_sha)
+
+    runner = _runner_with_main(GITHUB_HEAD, on_heads=mutate_stash_only)
+    assert inventory.get_git_inventory(checkout, REQUEST_ID, runner=runner) == {
+        "status": "blocked", "reason": "pc_state_changed_during_observation",
+    }
+
+
+def test_inventory_backlog_and_worktree_summaries_with_present_vs_absent_github_main(
+    checkout, tmp_path,
+):
+    hooks = tmp_path / "empty-hooks"
+    main_sha = _commit_file(checkout, hooks, "app.txt", "main\n", "advance main")
+    _git(checkout, "branch", "merged-unattached", main_sha)
+
+    _git(checkout, "checkout", "--quiet", "-b", "unmerged-unattached")
+    _commit_file(checkout, hooks, "unmerged.txt", "u1\n", "unmerged unattached")
+    _git(checkout, "checkout", "--quiet", "-b", "unmerged-attached", main_sha)
+    _commit_file(checkout, hooks, "attached.txt", "a1\n", "unmerged attached")
+    _git(checkout, "checkout", "--quiet", "main")
+
+    attached_wt = tmp_path / "attached-wt"
+    _git(checkout, "worktree", "add", "--quiet", str(attached_wt), "unmerged-attached")
+    _git(checkout, "worktree", "lock", str(attached_wt))
+
+    (checkout / "app.txt").write_text("stashed\n", encoding="utf-8")
+    _git(
+        checkout, "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
+        "stash", "push", "-m", "backlog-stash",
+    )
+
+    present = inventory.get_git_inventory(
+        checkout, REQUEST_ID, runner=_runner_with_main(main_sha),
+    )
+    assert inventory.verify_git_inventory_receipt(present, REQUEST_ID)
+    assert present["receipt"]["github_main_present_on_pc"] is True
+    assert present["receipt"]["pc_backlog_summary"] == {
+        "local_head_count": 5,
+        "attached_worktree_branch_count": 2,
+        "merged_into_github_main_count": 3,
+        "unmerged_unattached_head_count": 1,
+        "stash_count": 1,
+    }
+    assert present["receipt"]["worktree_summary"] == {
+        "total": 3, "attached": 2, "detached": 1, "bare": 0, "locked": 1, "prunable": 0,
+    }
+
+    absent = inventory.get_git_inventory(
+        checkout, REQUEST_ID, runner=_runner_with_main(GITHUB_HEAD),
+    )
+    assert inventory.verify_git_inventory_receipt(absent, REQUEST_ID)
+    assert absent["receipt"]["github_main_present_on_pc"] is False
+    assert absent["receipt"]["pc_backlog_summary"] == {
+        "local_head_count": 5,
+        "attached_worktree_branch_count": 2,
+        "merged_into_github_main_count": None,
+        "unmerged_unattached_head_count": None,
+        "stash_count": 1,
+    }
+    assert absent["receipt"]["worktree_summary"] == present["receipt"]["worktree_summary"]
+
+
+def _resign(result):
+    signed = deepcopy(result)
+    signed["sha256"] = hashlib.sha256(inventory._canonical(signed["receipt"])).hexdigest()
+    return signed
+
+
+def test_inventory_verifier_rejects_malformed_or_tampered_stashes_and_summaries(
+    checkout, tmp_path,
+):
+    hooks = tmp_path / "empty-hooks"
+    main_sha = _commit_file(checkout, hooks, "item.txt", "x\n", "main commit")
+    (checkout / "item.txt").write_text("y\n", encoding="utf-8")
+    _git(
+        checkout, "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
+        "stash", "push", "-m", "stash-msg",
+    )
+
+    present_result = inventory.get_git_inventory(
+        checkout, REQUEST_ID, runner=_runner_with_main(main_sha),
+    )
+    absent_result = inventory.get_git_inventory(
+        checkout, REQUEST_ID, runner=_runner_with_main(GITHUB_HEAD),
+    )
+    assert inventory.verify_git_inventory_receipt(present_result, REQUEST_ID)
+    assert inventory.verify_git_inventory_receipt(absent_result, REQUEST_ID)
+
+    bad_stashes = [
+        {"stashes": "not-a-list"},
+        {"stashes": [{"sha": "bad"}]},
+        {"stashes": [{"sha": "a" * 40, "message": "leak"}]},
+        {"stashes": []},
+    ]
+    for patch in bad_stashes:
+        tampered = deepcopy(present_result)
+        tampered["receipt"].update(patch)
+        assert not inventory.verify_git_inventory_receipt(tampered, REQUEST_ID)
+        assert not inventory.verify_git_inventory_receipt(_resign(tampered), REQUEST_ID)
+
+    tampered_bool = deepcopy(present_result)
+    tampered_bool["receipt"]["github_main_present_on_pc"] = 1
+    assert not inventory.verify_git_inventory_receipt(_resign(tampered_bool), REQUEST_ID)
+
+    tampered_none = deepcopy(present_result)
+    tampered_none["receipt"]["pc_backlog_summary"]["merged_into_github_main_count"] = None
+    assert not inventory.verify_git_inventory_receipt(_resign(tampered_none), REQUEST_ID)
+
+    tampered_absent = deepcopy(absent_result)
+    tampered_absent["receipt"]["pc_backlog_summary"]["merged_into_github_main_count"] = 0
+    assert not inventory.verify_git_inventory_receipt(_resign(tampered_absent), REQUEST_ID)
+
+    tampered_backlog_extra = deepcopy(present_result)
+    tampered_backlog_extra["receipt"]["pc_backlog_summary"]["extra"] = 1
+    assert not inventory.verify_git_inventory_receipt(_resign(tampered_backlog_extra), REQUEST_ID)
+
+    tampered_wt = deepcopy(present_result)
+    tampered_wt["receipt"]["worktree_summary"]["detached"] = 99
+    assert not inventory.verify_git_inventory_receipt(_resign(tampered_wt), REQUEST_ID)
+
+    tampered_wt_locked = deepcopy(present_result)
+    tampered_wt_locked["receipt"]["worktree_summary"]["locked"] = 99
+    assert not inventory.verify_git_inventory_receipt(_resign(tampered_wt_locked), REQUEST_ID)

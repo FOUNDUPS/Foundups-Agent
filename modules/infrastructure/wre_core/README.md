@@ -91,7 +91,11 @@ the current GitHub commit passes its required checks. The receipt carries open
 and unverified PRs across runs and records both GitHub and PC proof on closure.
 
 The legacy merge sentinel now delegates to the observation pass. Governed
-promotion remains with the repository's merge authority. See
+promotion remains with the repository's merge authority. Read-only PC Git
+inventory (`git_lifecycle_inventory.py`) additionally captures paginated
+`branches`, `worktrees`, SHA-only `stashes` (`section="stashes"` without stash
+messages or filenames), `pc_backlog_summary`, and `worktree_summary` under
+canonical SHA-256 receipts (`foundups_git_inventory.v1`). See
 [the lifecycle interface](INTERFACE.md#git-lifecycle-reconciliation).
 
 # WRE Core
