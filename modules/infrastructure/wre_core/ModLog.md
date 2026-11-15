@@ -1,3 +1,8 @@
+## 2026-11-15 — Fix MetricsIngestorV2 ai_0102_approvals index schema mismatch
+
+- **metrics_ingest_v2 (`skillz/metrics_ingest_v2.py`)**: Aligned `idx_approval_skill` creation index target from obsolete `human_approvals(skill_id)` to existing table `ai_0102_approvals(skill_id)` so fresh SQLite databases initialize cleanly alongside `WRESkillsRegistryV2`.
+- **Verification**: Added `tests/test_metrics_ingest_v2_schema.py` covering fresh schema initialization and `check_rollback_triggers()` healthy/degraded/exception paths.
+
 ## 2026-11-15 — Parent-version-bound pattern recall and evolution lineage
 
 - **PatternMemory (`src/pattern_memory.py`)**: Added `_parent_version_filter` and optional `parent_version: Optional[str] = None` to `recall_successful_patterns()` and `recall_failure_patterns()`, filtering in SQL before `LIMIT` on `json_valid(output_result)=1` and `$._skill_binding.schema_version = 'wre_skill_execution_binding.v1'` + `$._skill_binding.loaded_skill_sha256` (fail-closed `[]` on blank/non-string inputs).

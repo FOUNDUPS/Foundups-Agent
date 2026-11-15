@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1840,
+  "total_tests": 1841,
   "quarantined_tests": 260,
   "tests": [
     {
@@ -21021,6 +21021,19 @@
       "description": "Semantic-first HoloIndex contract for WRE memory preflight."
     },
     {
+      "id": "test::modules::infrastructure::wre_core::tests::test_metrics_ingest_v2_schema",
+      "path": "modules/infrastructure/wre_core/tests/test_metrics_ingest_v2_schema.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Regression tests for MetricsIngestorV2 schema and rollback triggers."
+    },
+    {
       "id": "test::modules::infrastructure::wre_core::tests::test_openclaw_voteballots_dryrun_proof",
       "path": "modules/infrastructure/wre_core/tests/test_openclaw_voteballots_dryrun_proof.py",
       "owner": "modules/infrastructure/wre_core",
@@ -21148,7 +21161,7 @@
       "path": "modules/infrastructure/wre_core/tests/test_reddog_verified_outcome_ratchet.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-02",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -21603,7 +21616,7 @@
       "path": "modules/infrastructure/wre_core/tests/test_wre_test_shard_collection_runtime.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-04",
       "capabilities": [
         "process"
       ],

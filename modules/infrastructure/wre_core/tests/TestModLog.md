@@ -1,3 +1,7 @@
+## 2026-11-15 — MetricsIngestorV2 schema & rollback trigger regression
+
+- `test_metrics_ingest_v2_schema.py`: Verified fresh SQLite schema initialization with `idx_approval_skill` on `ai_0102_approvals(skill_id)` and `WRESkillsRegistryV2.check_rollback_triggers()` healthy, `pattern_fidelity_drop`, and `high_exception_rate` outcomes.
+
 ## 2026-11-15 — Parent-version-bound recall & evolution continuity regressions
 
 - `test_pattern_memory.py`, `test_skill_evolution_continuity.py`, and `test_wre_master_orchestrator.py`: Added tests covering `parent_version` pre-`LIMIT` SQL filtering, legacy/untagged exclusion, fail-closed blank/invalid filter behavior, and `evolve_skill()` lineage isolation (87 passed).
