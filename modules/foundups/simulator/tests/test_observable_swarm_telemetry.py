@@ -315,24 +315,222 @@ def test_redact_sensitive_text_patterns() -> None:
     assert "[REDACTED_SECRET]" in clean
 
 
-def test_live_sprint_sqlite_sha256_invariance() -> None:
-    """Verify reading Sprint 4/5 SQLite artifacts leaves DB bytes untouched."""
-    if not SPRINT5_AGENT_DB.exists() or not SPRINT4_PATTERN_DB.exists():
-        pytest.skip("Sprint 4/5 verification DB artifacts not present in checkout")
-    before_agent = _sha256(SPRINT5_AGENT_DB)
-    before_pattern = _sha256(SPRINT4_PATTERN_DB)
+def test_live_sprint_sqlite_sha256_invariance(tmp_path: Path) -> None:
+    """Verify multi-table SQLite telemetry reads leave DB bytes untouched with zero skips."""
+    now = datetime(2026, 11, 15, 12, 0, 0, tzinfo=timezone.utc)
+    seeded_agent_db, seeded_pattern_db = _create_sample_dbs(tmp_path, now)
+
+    before_seeded_agent = _sha256(seeded_agent_db)
+    before_seeded_pattern = _sha256(seeded_pattern_db)
+
+    for call_limit in (5, 25, 50):
+        seeded_payload = get_work_telemetry_snapshot(
+            agent_db_path=seeded_agent_db,
+            pattern_db_path=seeded_pattern_db,
+            ttl_seconds=300.0,
+            limit=call_limit,
+            now=now,
+        )
+        assert seeded_payload["observation_only"] is True
+        assert seeded_payload["authority"] == "none"
+        assert seeded_payload["total_work_units"] > 0
+        assert seeded_payload["outcomes_summary"]["count"] > 0
+
+    assert _sha256(seeded_agent_db) == before_seeded_agent
+    assert _sha256(seeded_pattern_db) == before_seeded_pattern
+    for db_file in (seeded_agent_db, seeded_pattern_db):
+        for suffix in ("-wal", "-shm", "-journal"):
+            assert not Path(f"{db_file}{suffix}").exists()
+
+    if SPRINT5_AGENT_DB.exists() and SPRINT4_PATTERN_DB.exists():
+        before_agent = _sha256(SPRINT5_AGENT_DB)
+        before_pattern = _sha256(SPRINT4_PATTERN_DB)
+        before_sidecars = {}
+        for live_db in (SPRINT5_AGENT_DB, SPRINT4_PATTERN_DB):
+            for suffix in ("-wal", "-shm", "-journal"):
+                sidecar = Path(f"{live_db}{suffix}")
+                before_sidecars[sidecar] = _sha256(sidecar) if sidecar.exists() else None
+
+        for call_limit in (10, 25):
+            payload = get_work_telemetry_snapshot(
+                agent_db_path=SPRINT5_AGENT_DB,
+                pattern_db_path=SPRINT4_PATTERN_DB,
+                limit=call_limit,
+            )
+            assert payload["observation_only"] is True
+            assert payload["authority"] == "none"
+            assert payload["total_work_units"] > 0
+            assert payload["outcomes_summary"]["count"] > 0
+
+        assert _sha256(SPRINT5_AGENT_DB) == before_agent
+        assert _sha256(SPRINT4_PATTERN_DB) == before_pattern
+        for sidecar, prev_digest in before_sidecars.items():
+            if prev_digest is None:
+                assert not sidecar.exists()
+            else:
+                assert sidecar.exists()
+                assert _sha256(sidecar) == prev_digest
+
+
+def test_clean_checkout_sqlite_sha256_invariance_without_live_artifacts(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Verify clean checkouts without untracked Sprint 4/5 DBs still execute invariance checks."""
+    monkeypatch.setitem(
+        globals(),
+        "SPRINT5_AGENT_DB",
+        tmp_path / "absent_sprint5_agentdb.db",
+    )
+    monkeypatch.setitem(
+        globals(),
+        "SPRINT4_PATTERN_DB",
+        tmp_path / "absent_sprint4_pattern.db",
+    )
+    seeded_dir = tmp_path / "clean_checkout_seeded"
+    seeded_dir.mkdir()
+    test_live_sprint_sqlite_sha256_invariance(seeded_dir)
+
+
+def test_context_lineage_dependencies_and_lease_redaction(tmp_path: Path) -> None:
+    """Verify parent_task_id, depends_on, work_order_id, swarm_lane, lease_active, and dedup."""
+    now = datetime(2026, 11, 15, 12, 0, 0, tzinfo=timezone.utc)
+    fresh_ts = (now - timedelta(seconds=10)).isoformat()
+    valid_lease_ts = (now + timedelta(seconds=600)).isoformat()
+    expired_lease_ts = (now - timedelta(seconds=60)).isoformat()
+
+    agent_db = tmp_path / "lineage_agent.db"
+    aconn = sqlite3.connect(agent_db)
+    aconn.execute(
+        """
+        CREATE TABLE agents_autonomous_tasks (
+            task_id TEXT PRIMARY KEY,
+            description TEXT,
+            required_skills TEXT,
+            estimated_complexity REAL,
+            priority_score REAL,
+            discovered_by TEXT,
+            discovered_at TEXT,
+            context TEXT,
+            assigned_to TEXT,
+            assigned_at TEXT,
+            retry_not_before TEXT,
+            status TEXT,
+            completed_at TEXT,
+            origin_continuity_id TEXT
+        )
+        """
+    )
+    aconn.execute(
+        """
+        CREATE TABLE agents_signed_worker_execution_leases (
+            task_id TEXT PRIMARY KEY,
+            claim_receipt_id TEXT,
+            use_receipt_id TEXT,
+            assigned_to TEXT,
+            initial_claimed_at TEXT,
+            lease_expires_at TEXT,
+            max_expires_at TEXT,
+            renewal_count INTEGER,
+            updated_at TEXT
+        )
+        """
+    )
+    secret_tok = "ghp_" + "SecretTokenValue987654321"
+    ctx_child_list = json.dumps(
+        {
+            "parent_task_id": "task_root",
+            "depends_on": ["dep_alpha", "dep_beta", "dep_alpha", "task_child_list"],
+            "work_order_id": f"wo-list-{secret_tok}",
+            "swarm_lane": "lane-obs-3-" + ("x" * 80),
+        }
+    )
+    ctx_child_str = json.dumps(
+        {
+            "parent_task_id": "C:\\secret_dir\\parent_node",
+            "depends_on": "dep_gamma, dep_delta, dep_gamma",
+            "work_order_id": "wo-str-01",
+            "swarm_lane": "lane-truth-2",
+        }
+    )
+    ctx_done = json.dumps(
+        {
+            "_effect_evidence": True,
+            "parent_task_id": "task_child_list",
+            "work_order_id": "wo-done-02",
+            "swarm_lane": "lane-truth-2",
+        }
+    )
+    rows = [
+        ("task_root", "Root planner work", "[]", 1.0, 1.0, "0102", fresh_ts, "{}", None, None, None, "pending", None, None),
+        ("task_child_list", "Active leased lane work", "[]", 1.0, 1.0, "0102", fresh_ts, ctx_child_list, "worker-a", fresh_ts, None, "executing", None, None),
+        ("task_child_str", "Expired lease lane work", "[]", 1.0, 1.0, "0102", fresh_ts, ctx_child_str, "worker-b", fresh_ts, None, "claimed", None, None),
+        ("task_done_leaf", "Completed leaf with stale row", "[]", 1.0, 1.0, "0102", fresh_ts, ctx_done, "worker-c", fresh_ts, None, "completed", fresh_ts, None),
+    ]
+    aconn.executemany(
+        "INSERT INTO agents_autonomous_tasks VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        rows,
+    )
+    aconn.execute(
+        "INSERT INTO agents_signed_worker_execution_leases VALUES (?,?,?,?,?,?,?,?,?)",
+        ("task_child_list", "c1", "u1", "worker-a", fresh_ts, valid_lease_ts, valid_lease_ts, 0, fresh_ts),
+    )
+    aconn.execute(
+        "INSERT INTO agents_signed_worker_execution_leases VALUES (?,?,?,?,?,?,?,?,?)",
+        ("task_child_str", "c2", "u2", "worker-b", fresh_ts, expired_lease_ts, expired_lease_ts, 0, fresh_ts),
+    )
+    aconn.execute(
+        "INSERT INTO agents_signed_worker_execution_leases VALUES (?,?,?,?,?,?,?,?,?)",
+        ("task_done_leaf", "c3", "u3", "worker-c", fresh_ts, valid_lease_ts, valid_lease_ts, 0, fresh_ts),
+    )
+    aconn.commit()
+    aconn.close()
 
     payload = get_work_telemetry_snapshot(
-        agent_db_path=SPRINT5_AGENT_DB,
-        pattern_db_path=SPRINT4_PATTERN_DB,
-        limit=25,
+        agent_db_path=agent_db,
+        pattern_db_path=None,
+        ttl_seconds=300.0,
+        limit=50,
+        now=now,
     )
     assert payload["observation_only"] is True
     assert payload["authority"] == "none"
-    assert payload["total_work_units"] > 0
-    assert payload["outcomes_summary"]["count"] > 0
-    assert _sha256(SPRINT5_AGENT_DB) == before_agent
-    assert _sha256(SPRINT4_PATTERN_DB) == before_pattern
+    assert payload["active_lease_count"] == 1
+
+    units = {u["work_id"]: u for u in payload["work_units"]}
+    u_list = units["task_child_list"]
+    assert u_list["parent_work_id"] == "task_root"
+    assert u_list["lease_active"] is True
+    assert "[REDACTED_SECRET]" in u_list["work_order_id"]
+    assert secret_tok not in u_list["work_order_id"]
+    assert len(u_list["swarm_lane"]) <= 64
+    assert u_list["swarm_lane"].startswith("lane-obs-3-")
+
+    u_str = units["task_child_str"]
+    assert u_str["canonical_state"] == "stale"
+    assert u_str["lease_active"] is False
+    assert "[REDACTED_PATH]" in u_str["parent_work_id"]
+    assert "C:\\secret_dir" not in u_str["parent_work_id"]
+    assert u_str["work_order_id"] == "wo-str-01"
+    assert u_str["swarm_lane"] == "lane-truth-2"
+
+    u_done = units["task_done_leaf"]
+    assert u_done["canonical_state"] == "complete"
+    assert u_done["lease_active"] is False
+    assert u_done["parent_work_id"] == "task_child_list"
+
+    deps = payload["dependencies"]
+    dep_tuples = [(d["from"], d["to"], d["relation"]) for d in deps]
+    # Exact deduplication & self-edge exclusion
+    assert len(dep_tuples) == len(set(dep_tuples))
+    assert ("task_child_list", "task_child_list", "depends_on") not in dep_tuples
+    assert ("dep_alpha", "task_child_list", "depends_on") in dep_tuples
+    assert ("dep_beta", "task_child_list", "depends_on") in dep_tuples
+    assert ("task_root", "task_child_list", "parent_task") in dep_tuples
+    assert ("dep_gamma", "task_child_str", "depends_on") in dep_tuples
+    assert ("dep_delta", "task_child_str", "depends_on") in dep_tuples
+    assert ("[REDACTED_PATH]", "task_child_str", "parent_task") in dep_tuples
+    assert ("task_child_list", "task_done_leaf", "parent_task") in dep_tuples
+    assert len(payload["swarm_lanes"]) == 2
 
 
 def test_readonly_sql_pragma_refuses_writes(tmp_path: Path) -> None:
@@ -480,10 +678,9 @@ def test_foundup_cube_js_observation_only_vm() -> None:
     if shutil.which("node") is None:
         pytest.skip("Node.js runtime required for foundup-cube.js VM test")
 
-    now_iso = "2026-11-15T12:00:00Z"
-    stale_clock_ms = int(
-        datetime(2026, 11, 15, 12, 10, 0, tzinfo=timezone.utc).timestamp() * 1000
-    )
+    now_dt = datetime.now(timezone.utc).replace(microsecond=0)
+    now_iso = now_dt.isoformat().replace("+00:00", "Z")
+    stale_clock_ms = int((now_dt + timedelta(minutes=10)).timestamp() * 1000)
 
     script = f"""
 const fs = require('fs');
@@ -563,7 +760,7 @@ assert(cube, 'FoundupCube exported on window');
 cube.setFirestore(fakeDbProxy);
 cube.init('buildCanvas', {{ useSimEvents: false }});
 
-// First telemetry snapshot: 4 completed -> high block count
+// First telemetry snapshot: 4 completed -> high block count + lineage/lease/verifier HUD
 const res1 = cube.command('workTelemetrySync', {{
   observation_only: true,
   authority: 'none',
@@ -573,19 +770,37 @@ const res1 = cube.command('workTelemetrySync', {{
   latest_event_at: {json.dumps(now_iso)},
   ttl_seconds: 300,
   counts_by_state: {{ spawn: 0, claim: 0, progress: 0, complete: 4, fail: 0, cancel: 0, stale: 0, unknown: 0 }},
+  dependencies: [
+    {{ from: 'u1', to: 'u2', relation: 'depends_on' }},
+    {{ from: 'u2', to: 'u3', relation: 'parent_task' }},
+    {{ from: 'u3', to: 'u4', relation: 'independent_assurance' }},
+  ],
   work_units: [
-    {{ work_id: 'u1', title: 'task 1', canonical_state: 'complete' }},
-    {{ work_id: 'u2', title: 'task 2', canonical_state: 'complete' }},
-    {{ work_id: 'u3', title: 'task 3', canonical_state: 'complete' }},
-    {{ work_id: 'u4', title: 'task 4', canonical_state: 'complete' }},
+    {{ work_id: 'u1', title: 'task 1', canonical_state: 'complete', swarm_lane: 'lane-obs', lease_active: true, verifier_agent: 'verifier-a' }},
+    {{ work_id: 'u2', title: 'task 2', canonical_state: 'complete', swarm_lane: 'lane-obs', parent_work_id: 'u1', lease_active: true }},
+    {{ work_id: 'u3', title: 'task 3', canonical_state: 'complete', swarm_lane: 'lane-wre', parent_work_id: 'u2', lease_active: false, verifier_agent: 'verifier-b' }},
+    {{ work_id: 'u4', title: 'task 4', canonical_state: 'complete', swarm_lane: 'lane-wre', work_order_id: 'wo-9', lease_active: false, verifier_agent: 'verifier-a' }},
   ],
 }});
 assert.strictEqual(res1.observationOnly, true);
 assert.strictEqual(res1.authority, 'none');
+assert.strictEqual(res1.dependenciesCount, 3);
+assert.strictEqual(res1.activeLeaseCount, 2);
+assert.strictEqual(res1.verifierCount, 2);
+assert.deepStrictEqual(Array.from(res1.lanes), ['lane-obs', 'lane-wre']);
+assert.deepStrictEqual(Array.from(res1.verifiers), ['verifier-a', 'verifier-b']);
 const st1 = cube.command('getState');
 assert.strictEqual(st1.observationOnly, true);
 assert.strictEqual(st1.authority, 'none');
+assert.strictEqual(st1.workTelemetry.dependenciesCount, 3);
+assert.strictEqual(st1.workTelemetry.activeLeaseCount, 2);
 assert(st1.filledBlocks > 16, 'Expected blocks filled for complete tasks');
+
+fillTexts.length = 0;
+if (typeof rafCb === 'function') rafCb();
+assert(fillTexts.includes('DEPS:3 LEASES:2'), 'Canvas HUD must show dependency and active lease counts');
+assert(fillTexts.includes('LANES:2 VERIF:2'), 'Canvas HUD must show lane and verifier summary');
+assert(fillTexts.some((t) => t.includes('OBS [FRESH] u:4 deps:3 leases:2 lanes:2 verifiers:2')), 'Ticker must show observation telemetry summary');
 
 // Second telemetry snapshot: non-monotonic rollback (all tasks fail/cancel)
 cube.command('workTelemetrySync', {{
