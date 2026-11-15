@@ -357,3 +357,7 @@ It will be rolled out as:
 - plane audits third
 - isolated admitted-shell spike fourth
 - expansion only after proof
+
+## Live co-design extension (2026-11-14)
+
+See [the bounded live co-design and responsive preview extension](SOFTPROTO_LIVE_CODESIGN_PREVIEW_EXTENSION.md). This preserves 012's soft Proto development-cycle direction; it is documentation, not a claim that a collaborative editor or preview service is deployed. Keep existing owners and stage acceptance before runtime work.
