@@ -1,5 +1,17 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-11-15: Windows chained-venv `_mcp_runtime_python` hardening (PR #2402)
+
+Hardened `_mcp_runtime_python()` in `scripts/launch.py` to retain the outer
+Windows virtual environment's `Lib/site-packages` while walking multi-level
+`pyvenv.cfg` chains (`base.parent.parent / "pyvenv.cfg"` or
+`base.parent / "pyvenv.cfg"`) with a resolved-path `visited` cycle guard and
+clean `(candidate, None)` fallback on broken or cyclic chains. Widened
+`get_git_inventory` `section` literal to include `"stashes"`. All 60 cases in
+the MCP runtime compatibility selection (`test_mcp_launcher_http.py`,
+`test_mcp_server_sse.py`, `test_git_inventory_oauth.py`, and
+`test_reddog_holoindex_query_runtime_candidate_binding.py`) pass.
+
 ## 2026-11-11: Private draft MCP PoC
 
 The separate source and synthetic transport are qualified independently of

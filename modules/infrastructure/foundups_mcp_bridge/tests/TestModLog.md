@@ -1,5 +1,17 @@
 # foundups_mcp_bridge TestModLog
 
+## 2026-11-16: Windows chained-venv `_mcp_runtime_python` & 60-case MCP compatibility verification
+
+Verified PR #2402 chained `pyvenv.cfg` resolution and cycle fallback coverage in
+`test_windows_venv_runtime_uses_base_interpreter_and_preserves_pid`
+(`tests/test_mcp_launcher_http.py`) alongside `"stashes"` section schema
+coverage in `tests/test_git_inventory_oauth.py`. Full 60-case MCP compatibility
+selection (`test_mcp_launcher_http.py`, `test_mcp_server_sse.py`,
+`test_git_inventory_oauth.py`, and
+`test_reddog_holoindex_query_runtime_candidate_binding.py`) passed (`60 passed`)
+under the isolated MCP runtime environment with `-B`, `-p no:cacheprovider`, and
+outside-repository `--basetemp`. WSP 22/49/50/97.
+
 ## 2026-11-11: Private draft sender verification scope
 
 Synthetic suites cover the fixed provider allowlist, OAuth audience/scope

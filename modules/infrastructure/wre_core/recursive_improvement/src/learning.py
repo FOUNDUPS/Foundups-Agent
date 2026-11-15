@@ -4,6 +4,7 @@ import io
 
 import asyncio
 import json
+import math
 import multiprocessing
 import logging
 import os
@@ -79,6 +80,7 @@ class RecursiveLearningEngine:
             "solutions_generated": 0,
             "improvements_applied": 0,
             "tokens_saved": None, "token_reduction_measured": False,
+            "total_tokens_saved": 0,
             "learning_velocity": 0.1,
             # Enhanced metrics
             "cot_reasoning_steps": 0,
@@ -672,6 +674,104 @@ class RecursiveLearningEngine:
     def _is_nonempty_str(value: Any) -> bool:
         return isinstance(value, str) and bool(value.strip())
 
+    @staticmethod
+    def _is_nonneg_int(value: Any) -> bool:
+        return isinstance(value, int) and not isinstance(value, bool) and value >= 0
+
+    @staticmethod
+    def _is_nonneg_number(value: Any) -> bool:
+        return (
+            isinstance(value, (int, float))
+            and not isinstance(value, bool)
+            and math.isfinite(value)
+            and value >= 0
+        )
+
+    @staticmethod
+    def _parse_sha256_hex(value: Any) -> Optional[str]:
+        if not isinstance(value, str):
+            return None
+        cleaned = value.strip()
+        if cleaned.lower().startswith("sha256:"):
+            cleaned = cleaned[7:]
+        if not re.fullmatch(r"[0-9a-fA-F]{64}", cleaned):
+            return None
+        return cleaned.lower()
+
+    @classmethod
+    def _validate_measurement_evidence(
+        cls,
+        measurement_evidence: Any,
+        *,
+        worker_id: str,
+        work_order_id: str,
+        before_digest: str,
+        desired_after_state: Any,
+    ) -> Optional[Dict[str, Any]]:
+        """Validate receipt-backed non-self-authored measurement evidence fail-closed."""
+        if not isinstance(measurement_evidence, Mapping):
+            return None
+
+        m_receipt_id = measurement_evidence.get("measurement_receipt_id")
+        evaluator_id = measurement_evidence.get("evaluator_id")
+        m_work_order_id = measurement_evidence.get("work_order_id")
+        baseline_tokens = measurement_evidence.get("baseline_tokens")
+        candidate_tokens = measurement_evidence.get("candidate_tokens")
+
+        if not (
+            cls._is_nonempty_str(m_receipt_id)
+            and cls._is_nonempty_str(evaluator_id)
+            and evaluator_id.strip() != worker_id.strip()
+            and cls._is_nonempty_str(m_work_order_id)
+            and m_work_order_id == work_order_id
+            and cls._is_nonneg_int(baseline_tokens)
+            and cls._is_nonneg_int(candidate_tokens)
+            and int(candidate_tokens) <= int(baseline_tokens)
+        ):
+            return None
+
+        raw_before_digest = measurement_evidence.get("before_state_digest")
+        if raw_before_digest is not None:
+            expected_before_digest = cls._parse_sha256_hex(raw_before_digest)
+            if expected_before_digest is None or expected_before_digest != before_digest:
+                return None
+
+        expected_after_digest: Optional[str] = None
+        raw_after_digest = measurement_evidence.get("after_state_digest")
+        if raw_after_digest is not None:
+            expected_after_digest = cls._parse_sha256_hex(raw_after_digest)
+            if expected_after_digest is None:
+                return None
+            if isinstance(desired_after_state, str):
+                desired_after_digest = hashlib.sha256(
+                    desired_after_state.encode("utf-8")
+                ).hexdigest()
+                if expected_after_digest != desired_after_digest:
+                    return None
+
+        validated: Dict[str, Any] = {
+            "measurement_receipt_id": m_receipt_id.strip(),
+            "evaluator_id": evaluator_id.strip(),
+            "work_order_id": m_work_order_id,
+            "baseline_tokens": int(baseline_tokens),
+            "candidate_tokens": int(candidate_tokens),
+            "expected_after_digest": expected_after_digest,
+        }
+
+        b_lat = measurement_evidence.get("baseline_latency_ms")
+        c_lat = measurement_evidence.get("candidate_latency_ms")
+        s_lat = measurement_evidence.get("latency_ms_saved")
+        if cls._is_nonneg_number(b_lat):
+            validated["baseline_latency_ms"] = b_lat
+        if cls._is_nonneg_number(c_lat):
+            validated["candidate_latency_ms"] = c_lat
+        if cls._is_nonneg_number(s_lat):
+            validated["latency_ms_saved"] = s_lat
+        elif cls._is_nonneg_number(b_lat) and cls._is_nonneg_number(c_lat) and b_lat >= c_lat:
+            validated["latency_ms_saved"] = b_lat - c_lat
+
+        return validated
+
     @classmethod
     def _validate_verification_evidence(
         cls, verification_evidence: Optional[Mapping[str, Any]]
@@ -756,17 +856,25 @@ class RecursiveLearningEngine:
         *,
         verification_evidence: Optional[Mapping[str, Any]] = None,
         target_applicator: Optional[Callable[[str, str], Tuple[str, Callable[[], str]]]] = None,
+        measurement_evidence: Optional[Mapping[str, Any]] = None,
     ) -> bool:
         """
         Apply an improvement only when backed by verified non-self-authored
         ratchet + held-out gate evidence and a reversible target applicator.
 
         Legacy zero-evidence calls remain fail closed (`blocked_unimplemented`).
+        Optional `measurement_evidence` validates fail closed before mutation.
         """
         try:
-            if verification_evidence is None and target_applicator is None:
+            if (
+                verification_evidence is None
+                and target_applicator is None
+                and measurement_evidence is None
+            ):
                 improvement.applied = False
                 improvement.applied_at = None
+                improvement.tokens_saved = None
+                improvement.metrics["token_reduction_measured"] = False
                 improvement.metrics["application_status"] = "blocked_unimplemented"
                 save_improvement(self.memory_root, improvement)
                 return False
@@ -779,15 +887,43 @@ class RecursiveLearningEngine:
             ):
                 improvement.applied = False
                 improvement.applied_at = None
+                improvement.tokens_saved = None
+                improvement.metrics["token_reduction_measured"] = False
                 improvement.metrics["application_status"] = "blocked_verification_rejected"
                 save_improvement(self.memory_root, improvement)
                 return False
 
             before_digest = hashlib.sha256(improvement.before_state.encode("utf-8")).hexdigest()
+
+            validated_measurement: Optional[Dict[str, Any]] = None
+            if measurement_evidence is not None:
+                assert isinstance(verification_evidence, Mapping)
+                v_result = verification_evidence.get("verification_result")
+                v_receipt = self._evidence_field(v_result, "receipt")
+                v_worker_id = str(self._evidence_field(v_receipt, "worker_id"))
+                v_work_order_id = str(self._evidence_field(v_receipt, "work_order_id"))
+                validated_measurement = self._validate_measurement_evidence(
+                    measurement_evidence,
+                    worker_id=v_worker_id,
+                    work_order_id=v_work_order_id,
+                    before_digest=before_digest,
+                    desired_after_state=improvement.after_state,
+                )
+                if validated_measurement is None:
+                    improvement.applied = False
+                    improvement.applied_at = None
+                    improvement.tokens_saved = None
+                    improvement.metrics["token_reduction_measured"] = False
+                    improvement.metrics["application_status"] = "blocked_measurement_rejected"
+                    save_improvement(self.memory_root, improvement)
+                    return False
+
             applied_result = target_applicator(improvement.before_state, improvement.after_state)
             if not isinstance(applied_result, tuple) or len(applied_result) != 2:
                 improvement.applied = False
                 improvement.applied_at = None
+                improvement.tokens_saved = None
+                improvement.metrics["token_reduction_measured"] = False
                 improvement.metrics["application_status"] = "blocked_verification_rejected"
                 save_improvement(self.memory_root, improvement)
                 return False
@@ -796,6 +932,8 @@ class RecursiveLearningEngine:
             if not isinstance(applied_state, str) or not callable(rollback_fn):
                 improvement.applied = False
                 improvement.applied_at = None
+                improvement.tokens_saved = None
+                improvement.metrics["token_reduction_measured"] = False
                 improvement.metrics["application_status"] = "blocked_verification_rejected"
                 save_improvement(self.memory_root, improvement)
                 return False
@@ -804,7 +942,23 @@ class RecursiveLearningEngine:
             if after_digest == before_digest:
                 improvement.applied = False
                 improvement.applied_at = None
+                improvement.tokens_saved = None
+                improvement.metrics["token_reduction_measured"] = False
                 improvement.metrics["application_status"] = "blocked_verification_rejected"
+                save_improvement(self.memory_root, improvement)
+                return False
+
+            if (
+                validated_measurement is not None
+                and validated_measurement["expected_after_digest"] is not None
+                and after_digest != validated_measurement["expected_after_digest"]
+            ):
+                rollback_fn()
+                improvement.applied = False
+                improvement.applied_at = None
+                improvement.tokens_saved = None
+                improvement.metrics["token_reduction_measured"] = False
+                improvement.metrics["application_status"] = "blocked_measurement_rejected"
                 save_improvement(self.memory_root, improvement)
                 return False
 
@@ -825,6 +979,39 @@ class RecursiveLearningEngine:
             improvement.metrics["before_state_digest"] = f"sha256:{before_digest}"
             improvement.metrics["after_state_digest"] = f"sha256:{after_digest}"
             improvement.metrics["rollback_available"] = True
+
+            if validated_measurement is None:
+                improvement.tokens_saved = None
+                improvement.metrics["token_reduction_measured"] = False
+            else:
+                tokens_saved = (
+                    validated_measurement["baseline_tokens"]
+                    - validated_measurement["candidate_tokens"]
+                )
+                improvement.tokens_saved = tokens_saved
+                improvement.metrics["token_reduction_measured"] = True
+                improvement.metrics["measurement_receipt_id"] = validated_measurement[
+                    "measurement_receipt_id"
+                ]
+                improvement.metrics["evaluator_id"] = validated_measurement["evaluator_id"]
+                improvement.metrics["baseline_tokens"] = validated_measurement["baseline_tokens"]
+                improvement.metrics["candidate_tokens"] = validated_measurement["candidate_tokens"]
+                if "baseline_latency_ms" in validated_measurement:
+                    improvement.metrics["baseline_latency_ms"] = validated_measurement[
+                        "baseline_latency_ms"
+                    ]
+                if "candidate_latency_ms" in validated_measurement:
+                    improvement.metrics["candidate_latency_ms"] = validated_measurement[
+                        "candidate_latency_ms"
+                    ]
+                if "latency_ms_saved" in validated_measurement:
+                    improvement.metrics["latency_ms_saved"] = validated_measurement[
+                        "latency_ms_saved"
+                    ]
+                self.metrics["total_tokens_saved"] = (
+                    int(self.metrics.get("total_tokens_saved") or 0) + tokens_saved
+                )
+
             self.metrics["improvements_applied"] = int(self.metrics.get("improvements_applied", 0)) + 1
 
             save_improvement(self.memory_root, improvement)
@@ -860,6 +1047,20 @@ class RecursiveLearningEngine:
             ).isoformat()
             improvement.metrics["rollback_verified"] = True
             improvement.metrics["rollback_available"] = False
+
+            if (
+                improvement.metrics.get("token_reduction_measured") is True
+                and isinstance(improvement.tokens_saved, int)
+                and not isinstance(improvement.tokens_saved, bool)
+            ):
+                current_total = int(self.metrics.get("total_tokens_saved") or 0)
+                self.metrics["total_tokens_saved"] = max(
+                    0, current_total - improvement.tokens_saved
+                )
+                improvement.metrics["rolled_back_tokens_saved"] = improvement.tokens_saved
+                improvement.tokens_saved = None
+                improvement.metrics["token_reduction_measured"] = False
+
             self.metrics["improvements_applied"] = max(
                 0, int(self.metrics.get("improvements_applied", 0)) - 1
             )

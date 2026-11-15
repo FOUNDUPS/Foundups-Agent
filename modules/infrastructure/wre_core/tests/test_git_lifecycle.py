@@ -134,6 +134,7 @@ def test_branch_dispositions_classify_tracked_and_untracked_branches_by_exact_sh
     closed_sha = "7" * 40
     pc_pending_sha = "8" * 40
     newer_merged_sha = "9" * 40
+    complete_merged_sha = "a" * 40
     repo = "FOUNDUPS/Foundups-Agent"
     (git_dir / lifecycle._RECEIPT_NAME).write_text(
         json.dumps({
@@ -148,6 +149,10 @@ def test_branch_dispositions_classify_tracked_and_untracked_branches_by_exact_sh
                 {
                     "number": 12, "stage": "COMPLETE", "head_ref": "docs/reused",
                     "head_sha": HEAD_SHA, "head_repository": repo,
+                },
+                {
+                    "number": 16, "stage": "COMPLETE", "head_ref": "docs/complete-merged",
+                    "head_sha": complete_merged_sha, "head_repository": repo,
                 },
             ],
         }),
@@ -179,6 +184,7 @@ def test_branch_dispositions_classify_tracked_and_untracked_branches_by_exact_sh
             {"ref": "main", "sha": MAIN_SHA, "protected": True},
             {"ref": "docs/open", "sha": HEAD_SHA, "protected": False},
             {"ref": "docs/merged", "sha": newer_merged_sha, "protected": False},
+            {"ref": "docs/complete-merged", "sha": complete_merged_sha, "protected": False},
             {"ref": "docs/reused", "sha": reused_sha, "protected": False},
             {"ref": "docs/closed", "sha": closed_sha, "protected": False},
             {"ref": "docs/pc-pending", "sha": pc_pending_sha, "protected": False},
@@ -207,6 +213,11 @@ def test_branch_dispositions_classify_tracked_and_untracked_branches_by_exact_sh
         "ref": "docs/merged", "sha": newer_merged_sha, "protected": False,
         "pr_number": 15, "pr_numbers": [11, 15], "stage": "BRANCH_MERGED_PR_RETAINED",
         "next_action": "synchronize_selected_pc_worktree",
+    }
+    assert by_ref["docs/complete-merged"] == {
+        "ref": "docs/complete-merged", "sha": complete_merged_sha, "protected": False,
+        "pr_number": 16, "pr_numbers": [16], "stage": "BRANCH_MERGED_PR_RETAINED",
+        "next_action": "assess_retirement_diff_against_main",
     }
     assert by_ref["docs/reused"] == {
         "ref": "docs/reused", "sha": reused_sha, "protected": False,
