@@ -22,25 +22,43 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent.parent))
 
 
+@pytest.fixture
+def mock_scheduler(tmp_path, monkeypatch):
+    from modules.platform_integration.youtube_shorts_scheduler.src import scheduler as owner
+    from modules.platform_integration.youtube_shorts_scheduler.src import schedule_tracker
+    from modules.platform_integration.youtube_shorts_scheduler.src.content_page_scheduler import ContentPageScheduler
+    from modules.platform_integration.youtube_shorts_scheduler.src.schedule_inventory import collect_scheduled_inventory
+
+    channel_id = 'UC' + 'a' * 22
+    monkeypatch.setattr(schedule_tracker, 'TRACKER_DIR', tmp_path / 'calendar')
+    monkeypatch.setattr(owner, 'get_channel_config', lambda _: {
+        'id': channel_id, 'name': 'Fixture channel', 'chrome_port': 9222,
+        'timezone': 'America/New_York', 'max_per_day': 3,
+    })
+    monkeypatch.setattr(ContentPageScheduler, 'navigate_to_scheduled', lambda *_: True)
+    for variable, filename in (
+        ('YT_012_MANIFEST_FILE', 'inbox.json'),
+        ('YT_012_MANIFEST_ACK_FILE', 'ack.json'),
+        ('YT_012_MANIFEST_STATE_FILE', 'state.json'),
+    ):
+        monkeypatch.setenv(variable, str(tmp_path / filename))
+    scheduler = owner.YouTubeShortsScheduler('foundups')
+    scheduler.driver = MagicMock()
+    scheduler.dom = MagicMock(driver=scheduler.driver)
+    scheduler.driver.execute_script.return_value = {
+        'channel_id': channel_id, 'url': f'https://studio.youtube.com/channel/{channel_id}/videos/short',
+        'chip_texts': ['Visibility: Has schedule'], 'search_text': '', 'loading': False,
+        'empty': True, 'previous_page': False, 'next_page': False, 'rows': [],
+    }
+    scheduler.dom.read_scheduled_inventory.side_effect = lambda channel: collect_scheduled_inventory(scheduler.dom, channel)
+    scheduler.ensure_healthy_connection = MagicMock(return_value=True)
+    scheduler._run_visibility_pass = AsyncMock(return_value=False)
+    scheduler.tracker.log_schedule_report = MagicMock()
+    return scheduler
+
+
 class TestScheduleAuditBreadcrumbEmission:
     """Test G4: schedule_audit_unhealthy breadcrumb emission."""
-
-    @pytest.fixture
-    def mock_scheduler(self):
-        """Create scheduler with mocked dependencies."""
-        with patch("modules.platform_integration.youtube_shorts_scheduler.src.scheduler.YouTubeShortsScheduler.connect_browser", return_value=True), \
-             patch("modules.platform_integration.youtube_shorts_scheduler.src.scheduler.YouTubeStudioDOM"), \
-             patch("modules.platform_integration.youtube_shorts_scheduler.src.scheduler.ScheduleTracker"):
-            from modules.platform_integration.youtube_shorts_scheduler.src.scheduler import YouTubeShortsScheduler
-            scheduler = YouTubeShortsScheduler("foundups", dry_run=True)
-            scheduler.driver = MagicMock()
-            scheduler.dom = MagicMock()
-            scheduler.tracker = MagicMock()
-            # This consumer test must reach the live-cycle audit gate while all
-            # scheduling and tracker collaborators remain fake.
-            scheduler.dry_run = False
-            scheduler._run_visibility_pass = AsyncMock(return_value=False)
-            return scheduler
 
     @pytest.mark.asyncio
     async def test_breadcrumb_emitted_when_audit_unhealthy(self, mock_scheduler):
@@ -221,21 +239,6 @@ class TestScheduleAuditBreadcrumbEmission:
 
 class TestScheduleAuditAutoHeal:
     """Test auto-heal flag is passed correctly."""
-
-    @pytest.fixture
-    def mock_scheduler(self):
-        """Create scheduler with mocked dependencies."""
-        with patch("modules.platform_integration.youtube_shorts_scheduler.src.scheduler.YouTubeShortsScheduler.connect_browser", return_value=True), \
-             patch("modules.platform_integration.youtube_shorts_scheduler.src.scheduler.YouTubeStudioDOM"), \
-             patch("modules.platform_integration.youtube_shorts_scheduler.src.scheduler.ScheduleTracker"):
-            from modules.platform_integration.youtube_shorts_scheduler.src.scheduler import YouTubeShortsScheduler
-            scheduler = YouTubeShortsScheduler("foundups", dry_run=True)
-            scheduler.driver = MagicMock()
-            scheduler.dom = MagicMock()
-            scheduler.tracker = MagicMock()
-            scheduler.dry_run = False
-            scheduler._run_visibility_pass = AsyncMock(return_value=False)
-            return scheduler
 
     @pytest.mark.asyncio
     async def test_auto_heal_passed_to_auditor(self, mock_scheduler):

@@ -86,6 +86,20 @@ Write to **0102 Moshpit** when the event primarily answers “what did 0102 lear
 
 Routine successful checks and ordinary bookkeeping do not belong in 0102 Moshpit.
 
+## Universal Moshpit projection contract (2026-11-11)
+
+Moshpit is a reverse-chronological activity projection, not a second mailbox or database. Reusable instructions and registry belong in repository Skillz. The live Doc should have a short skill pointer followed immediately by the newest day, rather than a long operating manual. Migrate existing introductions only through verified lossless revision-controlled edits; preserve historical evidence.
+
+Canonical live Doc registry (verify identity before write):
+- YUMORI project — project actions; resolve its canonical Doc using the established private operator handoff and provider search.
+- SUNVISTA case — case and correspondence evidence; resolve its canonical Doc using the established private case handoff and provider search.
+- 0102 learning — agent errors and repairs; resolve its canonical private Doc from the authenticated operator context.
+Do not embed private Google Doc IDs, private correspondence identifiers, or raw email bodies in public Git skill definitions. Verify the actual provider document ID, title, permissions, and revision on each write.
+
+For all Moshpits, convert provider evidence time to Asia/Tokyo before calculating day anchor and action order. VPN/IP and US Gmail display time do not control chronology. Use one YYYY-MM-DD — DAY START anchor per day where supported; newest action immediately below anchor; newest day immediately after minimal skill pointer. Actions and day blocks sort newest-first. Preserve unknown times without guessing. Routine retrieval reads newest day and relevant scoped receipts, expanding older history only on demand. Read back changed day and adjacent boundary after write; never bulk-reorder historical events without verified event timestamps.
+
+Email entries are activity receipts, not send proof: reconcile exact Gmail Sent ID before claiming SENT. Full bodies are restricted to explicitly authorized private case archives; never public Git or unrelated campaign logs.
+
 ## Ordering rule
 
 YUMORI Moshpit is grouped by Asia/Tokyo calendar date and is **reverse chronological within each day**.

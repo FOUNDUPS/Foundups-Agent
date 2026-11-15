@@ -1,5 +1,48 @@
 # Vote/Ballots FoundUp — Module Log
 
+## 2026-11-13 — Vote cover editorial and phone layout
+
+Pair the Antifa FM player with its Discord channel, clarify the Speaker ask,
+and replace oversized props with compact issue briefs. Show the October 2026
+BLS grocery and gasoline figures with a dated source. Advance the offline
+shell to v9. WSP 22, 50, 84, 97, 102.
+
+## 2026-11-13 — Vote funding banner crop
+
+Frame “Every State a Little Israel!” from the supplied comic in two readable
+lines beside Schumer. Reuse the existing image and advance the offline shell
+to v8. WSP 22, 50, 84, 97, 102.
+
+## 2026-11-12 — Antifa FM radio on the Vote cover
+
+Add the AntifaFM.com link and the native public Icecast player using the
+existing DJ feed. Allow autoplay through browser policy and keep manual
+playback and a station fallback. Replace the money illustration beside Schumer
+with the red stamp from the supplied comic. Keep the feed outside the v7
+offline cache. WSP 22, 50, 84, 97, 102.
+
+## 2026-11-12 — Vote cover readability and install entry
+
+Give the cover and guide one install flow and open the standalone Vote app at
+the cover. Use two wider issue columns on larger screens and one on phones.
+Make the speaker link, Twitch destination and money-graphic labels readable.
+Keep the same offline shell paths under v6. WSP 22, 50, 84, 97, 102.
+
+## 2026-11-12 — Vote bottom ticker
+
+Add a bottom ticker with pause and reduced-motion support. Keep the campaign
+healthcare question distinct from SIPRI’s dated military spending and aid
+figures. Show the supplied flag artwork through the full vertical lead crop.
+Advance the existing shell cache for offline readers. WSP 22, 50, 84, 97, 102.
+
+## 2026-11-12 — Vote satire cover
+
+Add six comic panels with native source disclosures, a visitor-initiated
+House switchboard link and a direct entrance to the original guide. Preserve
+the legacy guide document, section bookmarks and the evidence, contact,
+Coalition and Oversight destinations. Scope the v4 worker to the same-origin
+public shell and keep the existing manifest identity. WSP 22, 50, 84, 97, 102.
+
 ## 2026-11-09 — MAGA/Oversight Phase One documentation reconciliation
 
 Consolidated the address, source ownership and four-entry landing contract in

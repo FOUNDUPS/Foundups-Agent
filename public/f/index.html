@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <script src="/member/js/mall-video-projection.js?v=12"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>FoundUps Mall | Entry</title>
   <meta name="description" content="FoundUp landing in the FoundUps Mall shell.">
@@ -900,6 +901,9 @@
     // field. DISCOVERY is public; PARTICIPATION stays gated behind /member/.
     var PUBLIC_CATALOG_URL = '/f/public_catalog.json';
     var MALL_HOME = '/member/';
+    if (window.mallVideoProjection?.hostScope(window.location)) {
+      MALL_HOME = 'https://foundups.com/member/';
+    }
 
     // Only fields on the public allowlist (mirrors PUBLIC_ALLOWLIST in
     // modules/foundups/public_catalog_projector). The renderer NEVER reads a
@@ -1000,6 +1004,9 @@
         resolvedDiscoveryId = item.foundup_id;
         renderEntry(item);
         populateConciergeContext(item);
+        if (resolvedDiscoveryId === 'hpc' && !subpath && window.location.hash === '#red-dog') {
+          window.entryRedDog.open();
+        }
       })
       .catch(function(err) {
         console.error('Catalog load error:', err);
@@ -1237,7 +1244,7 @@
         var siteSafe = safeUrl(entity.website_url);
         var discoveryPath = shellDiscoveryPath(entity);
         if (discoveryPath) {
-          linksContainer.appendChild(makeOutboundLink(discoveryPath, 'Browse houses', true));
+          linksContainer.appendChild(makeOutboundLink(discoveryPath, shellDiscoveryLabel(entity), true));
         } else if (pocSafe) {
           linksContainer.appendChild(makeOutboundLink(pocSafe, 'Demo App'));
         } else if (appSafe) {
@@ -1278,7 +1285,11 @@
           entity.poc_url === 'https://foundups.com/member/?foundup=move2japan') {
         return '/member/?foundup=move2japan';
       }
-      return null;
+      return window.mallVideoProjection?.discoveryPath(entity.foundup_id, entity.poc_url) || null;
+    }
+
+    function shellDiscoveryLabel(entity) {
+      return entity.foundup_id === 'move2japan' ? 'Browse houses' : 'Browse Shorts';
     }
 
     // Escape a value for safe use inside a CSS attribute selector ("...").
@@ -1331,7 +1342,7 @@
       };
       var discoveryPath = shellDiscoveryPath(item);
       if (discoveryPath) {
-        addLink('poc_url', 'Browse houses', discoveryPath, true);
+        addLink('poc_url', shellDiscoveryLabel(item), discoveryPath, true);
       } else {
         addLink('poc_url', 'View PoC', item.poc_url);
       }

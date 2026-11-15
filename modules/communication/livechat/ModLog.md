@@ -1,3 +1,44 @@
+## 2026-11-10 — Explicit recorded source and exact-request intake
+
+Extend the existing stream action with paired closed recorded-source/first-test
+fields; retain legacy live records and their digests. Add exact-ID scheduling
+refresh through the current lock/claim/receipt owner without consuming unrelated
+announcements or policies. Full selections remain frozen, with only the first
+submission permitted in recorded test mode; no replay or continuation transition
+is added. Recorded-only intake leaves legacy live requests untouched before claim;
+both source forms exclude their parent from selections. Thirty-five sealed offline
+queue cases pass with no effects or model
+imports. Native CLI/browser integration and live saved-state proof are separate
+gates. WSP15/22/50/77/84/97. See tests/TestModLog.md.
+
+The DAE and native first-test entry share a fixed host runtime lease. The DAE
+retains it through watcher and engagement shutdown; both ordinary and requested
+scheduler threads settle before browser ownership is released. Twenty lifecycle
+and two existing request-settlement cases pass under the offline guard. Older
+processes and pre-DAE startup do not participate, so live process inventory remains
+required before native qualification.
+
+## 2026-11-10 — Freeze bounded stream scheduling in the existing manifest
+
+Add closed `schedule_stream_shorts` intake, immutable confirmed stream/session
+binding, source deduplication and terminal selection claims in the current queue
+state. Existing Phase3/browser ownership performs access/discovery and scheduling
+outside the manifest lock; request runs cannot fall into ordinary backlog rotation.
+Retain browser ownership through timeout/cancellation settlement. Add a read-only
+unknown scheduling-claim getter for calendar reconciliation. The exact-title rule
+is operator selection, not lineage proof. Forty-nine sealed offline fixtures pass;
+no runtime execution, source installation or verified scheduling delivery claimed.
+WSP15/22/50/77/84/97. See docs/VIDEO_POLICY_INTERFACE.md and tests/TestModLog.md.
+
+## 2026-11-10 — Cooperate with human browser verification
+
+Install the shared Selenium verification gate on the DAE reconnect drivers,
+Edge coordinator recovery, vision chat sender and party reactor attachments.
+This makes their browser effects participate in the same minimum30-second hold
+as Studio workers when a challenge is detected. No chat policy, command authority
+or API sender changes. Source/offline evidence is not live qualification or
+native WRE invocation; pending delivery outcomes remain uncertain. WSP22/50/84/97.
+
 ## 2026-11-07 — Quiet stakeholder conversation through shared routing
 
 WSP00/15/22/50/60/73/77/84/97. Replace unsolicited ordinary reply fallthrough with
@@ -5038,4 +5079,3 @@ are preserved verbatim in [the legacy archive](_archive/completed/ModLog_legacy_
 - `modules/communication/livechat/tests/test_party_command.py`
 
 **Status**: [OK] `!party` now routes correctly and runs safely without blocking the poll loop.
-

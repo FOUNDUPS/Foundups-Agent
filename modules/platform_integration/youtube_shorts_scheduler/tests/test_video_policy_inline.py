@@ -42,11 +42,12 @@ def popup(monkeypatch):
     return owner, snapshot, active, calls
 
 
-def test_actual_popup_button_positive_claims_before_single_click(popup):
+def test_popup_without_description_and_audience_refuses_claim_and_click(popup):
     owner, snapshot, active, calls = popup
-    assert owner._click_popup_schedule_button() is True
-    assert calls == {"clicks": 1, "claims": 1}
-    assert owner.dom._policy_cycle_attempts == 1
+    with pytest.raises(policy.PreSaveAuditBlocked, match="detail_editor_required"):
+        owner._click_popup_schedule_button()
+    assert calls == {"clicks": 0, "claims": 0}
+    assert owner.dom._policy_cycle_attempts == 0
 
 
 @pytest.mark.parametrize("problem", ["popup_other_video", "channel", "row_video", "url", "pause", "cap", "unavailable"])
@@ -71,6 +72,6 @@ def test_unknown_popup_callback_is_not_retried_through_xpath_or_js(popup):
         calls["clicks"] += 1
         raise RuntimeError("synthetic lost response")
     owner.driver.find_element = lambda *_: SimpleNamespace(click=uncertain, is_displayed=lambda: True, is_enabled=lambda: True)
-    with pytest.raises(policy.VideoPolicyBlocked, match="outcome_unknown"):
+    with pytest.raises(policy.VideoPolicyBlocked, match="detail_editor_required"):
         owner._click_popup_schedule_button()
-    assert calls == {"clicks": 1, "claims": 1}
+    assert calls == {"clicks": 0, "claims": 0}

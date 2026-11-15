@@ -16,6 +16,7 @@ const require = createRequire(import.meta.url);
 const search = require('../../move2japan/property-search.js');
 const runtime = html.match(/<script type="module" id="memberRuntime">([\s\S]*?)<\/script>/)?.[1];
 const boot = html.match(/<script id="productDiscoveryBoot">([\s\S]*?)<\/script>/)?.[1];
+const videoProjection = fs.readFileSync(path.join(here, '../js/mall-video-projection.js'), 'utf8');
 assert.ok(runtime && boot, 'the actual shared member script and product boot must exist');
 const script = new vm.Script(runtime.replace(/\bimport\(/g, '__import('), { filename: 'member/index.html#memberRuntime' });
 const ordinaryCatalog = [{ foundup_id: 'foundups', source_type: 'youtube' }, { foundup_id: 'move2japan', source_type: 'youtube' }];
@@ -39,7 +40,8 @@ function harness(options = {}) {
     get: () => page.href, set: value => { page = new URL(value, page.href); },
   });
   const state = { imports: [], reads: [], writes: [], fetches: [], admissions: [], identities: [],
-    foundups: [], invites: [], opens: 0, field: [], planes: [], redirects: [], consumes: 0, errors: [] };
+    foundups: [], invites: [], opens: 0, field: [], planes: [], redirects: [], consumes: 0, returns: 0,
+    videoMounts: [], errors: [] };
   location.replace = value => state.redirects.push(value);
   const nodes = new Map();
   function node(id) {
@@ -75,6 +77,7 @@ function harness(options = {}) {
   const win = { location, document, localStorage, Clerk: clerk, redDog,
     Move2JapanSearch: search, FOUNDUPS_CLERK_APPEARANCE: {},
     mallStateRestore: {
+      rememberMemberVideoReturn() { state.returns++; },
       consumeProductReturn() { state.consumes++; return options.productReturn || null; },
       restore() {}, bindAutoSave() {},
     },
@@ -83,6 +86,9 @@ function harness(options = {}) {
     mallPlanes: { setCatalog(items) { state.planes.push(items); } },
     addEventListener() {},
   };
+  vm.runInNewContext(videoProjection, { window: win, URLSearchParams });
+  win.mallVideoProjection.mount = scope => state.videoMounts.push(scope);
+  if (options.staleVideoResolver) win.mallVideoProjection.resolve = () => 'hpc';
   let fetchNumber = 0;
   const fetch = async (url, init) => {
     state.fetches.push({ url, init });
@@ -107,6 +113,7 @@ function harness(options = {}) {
     clearTimeout() {},
     __import: async specifier => { state.imports.push(specifier); return modules[specifier]; },
   });
+  if (options.bootVideo) vm.runInContext(boot, context);
   script.runInContext(context);
   return { state, win, nodes, timers, storage, visibility,
     emit(account) { win.Clerk.user = account; listeners.forEach(callback => callback({ user: account })); },
@@ -272,6 +279,58 @@ await check('the original ordinary Mall still sends guests through its sign-in g
   assert.equal(h.state.imports.length, 3);
   assert.equal(h.win.location.href, 'https://foundups.com/?signin=required');
   assert.equal(h.state.field.length, 0);
+});
+
+await check('the dedicated HPC host mounts its video projection without member account reads', async () => {
+  const h = harness({ url: 'https://hpc.foundups.com/member/', bootVideo: true, noClerk: true });
+  await flush();
+  assert.deepEqual(h.state.videoMounts, ['hpc']);
+  assert.deepEqual(h.state.imports, []);
+  assert.deepEqual(h.state.reads, []);
+  assert.equal(h.state.consumes, 0);
+});
+
+await check('the apex HPC route sends a signed-out visitor to the member sign-in', async () => {
+  for (const staleVideoResolver of [false, true]) {
+    const h = harness({ url: 'https://foundups.com/member/?foundup=hpc', bootVideo: true, staleVideoResolver });
+    await flush();
+    assert.equal(h.win.location.href, 'https://foundups.com/?signin=required');
+    assert.equal(h.state.returns, 1);
+    assert.equal(h.state.consumes, 0);
+    assert.deepEqual(h.state.videoMounts, []);
+    assert.deepEqual(h.state.fetches, []);
+  }
+});
+
+await check('member HPC waits for both the invite and username', async () => {
+  const url = 'https://foundups.com/member/?foundup=hpc';
+  for (const [data, gate] of [[{ username: 'alpha' }, 'inviteGate'], [admitted(''), 'usernameModal']]) {
+    const h = harness({ url, bootVideo: true, user: user('A'), data });
+    await flush();
+    assert.equal(h.nodes.get(gate)?.style.display, 'flex');
+    assert.equal(h.state.consumes, 0);
+    assert.deepEqual(h.state.videoMounts, []);
+    assert.deepEqual(h.state.fetches, []);
+  }
+});
+
+await check('an admitted member opens scoped HPC and explicit selection wins over a stale return', async () => {
+  const h = harness({ url: 'https://foundups.com/member/?foundup=hpc', bootVideo: true, user: user('A'),
+    productReturn: '/member/?foundup=move2japan#account' });
+  await flush();
+  assert.equal(h.state.consumes, 1);
+  assert.deepEqual(h.state.redirects, []);
+  assert.deepEqual(h.state.videoMounts, ['hpc']);
+  assert.deepEqual(h.state.fetches, []);
+});
+
+await check('an admitted sign-in return reaches HPC through the existing member path', async () => {
+  const path = '/member/?foundup=hpc';
+  const h = harness({ url: 'https://foundups.com/member/', user: user('A'), productReturn: path });
+  await flush();
+  assert.deepEqual(h.state.redirects, [path]);
+  assert.deepEqual(h.state.videoMounts, []);
+  assert.deepEqual(h.state.fetches, []);
 });
 
 await check('the account return is consumed only after the normal admission gate succeeds', async () => {

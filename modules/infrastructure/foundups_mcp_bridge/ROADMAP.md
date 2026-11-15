@@ -1,5 +1,13 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-11-11: Private draft MCP PoC
+
+The separate source and synthetic transport are qualified independently of
+the Holo bridge. Private activation remains gated on an admitted host and
+supervisor, issuer and tunnel, Google consent, and one exact provider draft.
+Acceptance requires live readback and ChatGPT invocation observed while Codex
+is stopped. See the [operator runbook](docs/PRIVATE_DRAFT_MCP.md).
+
 ## 2026-10-19: MCP security dependency coordination
 
 MCP 1.30.0 is now declared consistently in requirements, the launcher's strict

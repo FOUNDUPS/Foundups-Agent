@@ -1,3 +1,18 @@
+## 2026-11-10 — Bind the stream Shorts scheduling owner
+
+Regenerate the backend manifest with the stream schedule queue owner and refresh
+both digest pins. The runtime closure has 1,487 members and the contract rejects
+1,488. Both line-ending variants fit the existing 332 KiB manifest limit. The
+2 MiB member and 32 MiB aggregate limits stay the same. WSP 11, 22, and 97.
+
+## 2026-11-10 — Bind the human verification gate
+
+Bind both digest pins to the regenerated backend manifest. Runtime membership
+increases from1485 to1486 for the single YouTube verification gate; retain the
+existing332KiB manifest,2MiB member and32MiB aggregate caps. The contract accepts
+the exact1486-member closure and rejects1487. This is source packaging, not
+extension installation, WRE invocation or live browser qualification. WSP11/22/97.
+
 ## 2026-11-06 — Bind WRE readiness source changes
 
 Regenerate the existing backend manifest after the readiness and training-menu

@@ -52,11 +52,17 @@ SUITES = {
         SCHEDULER_TESTS + 'test_schedule_audit_breadcrumb.py')),
     'rotation': (35, '664830788a43165c40b0166e2f7736d63cc06e1f73346db9b1d1f2cb1a0bc07d', (
         SCHEDULER_TESTS + 'test_schedule_rotation_fairness.py',)),
-    'directives': (66, '989aea728b2f018befd98e062516ff950e082fddcb337584c10a4a0af9e084f6', (
+    'directives': (114, '1325d6466530d3e89f41c97020080795ceb0f0ec79f739dbdeb7e7da9f27d432', (
+        SCHEDULER_TESTS + 'test_presave_audit.py',
         SCHEDULER_TESTS + 'test_video_policy_consumers.py',
         SCHEDULER_TESTS + 'test_video_policy_save_readback.py',
         SCHEDULER_TESTS + 'test_video_policy_inline.py',
         'modules/communication/youtube_shorts/tests/test_operator_upload_policy.py')),
+    'calendar': (283, '6f023a55efaa1140f8efee0c5f4e0cdfdb4c5142859be4fb022d691be91c2dd8', (
+        'modules/communication/livechat/tests/test_operator_stream_schedule.py',
+        'modules/communication/livechat/tests/test_operator_recorded_stream_schedule.py',
+        SCHEDULER_TESTS + 'test_stream_schedule_calendar.py',
+        SCHEDULER_TESTS + 'test_calendar_reservations.py')),
 }
 
 # Reviewed literals only; no caller-provided JavaScript or runtime browser.
@@ -197,7 +203,7 @@ class EffectGuard:
             self.in_socketpair = False
 
     def private_pair_event(self, event, args):
-        if (event in {'socket.bind', 'socket.connect'} and self.suite in {'startup', 'rotation', 'directives', 'quality', 'routing', 'quality_stop', 'studio'}
+        if (event in {'socket.bind', 'socket.connect'} and self.suite in {'startup', 'rotation', 'directives', 'quality', 'routing', 'quality_stop', 'studio', 'calendar'}
                 and self.in_socketpair):
             frame = sys._getframe(1)
             while frame and frame.f_code is not self.original_pair.__code__:
@@ -248,7 +254,7 @@ def install_effects(stack, guard):
     import socket
     from unittest.mock import patch
     socket.has_ipv6 = False  # Avoid urllib3's import-time IPv6 bind probe.
-    if guard.suite in {'startup', 'rotation', 'directives', 'quality', 'routing', 'quality_stop', 'studio'}:
+    if guard.suite in {'startup', 'rotation', 'directives', 'quality', 'routing', 'quality_stop', 'studio', 'calendar'}:
         socket.socketpair = guard.pair
     sys.addaudithook(guard.audit)
     stack.enter_context(patch('subprocess.run', new=guard.node_run if guard.suite == 'studio' else guard.deny))
@@ -336,7 +342,7 @@ def run_child(suite, out):
     guard = EffectGuard(out, suite)
     if suite == 'studio':
         os.environ['NODE_BINARY'] = str(guard.node)
-    if suite in {'quality', 'quality_stop'}:
+    if suite in {'quality', 'quality_stop', 'calendar'}:
         os.environ['YT_AUTOMATION_STOP_FILE'] = str(out / 'STOP')
     with ExitStack() as stack:
         install_effects(stack, guard)
@@ -346,7 +352,7 @@ def run_child(suite, out):
             prepare_startup(stack)
         elif suite == 'inventory':
             prepare_inventory(stack, out, guard)
-        elif suite in {'rotation', 'directives'}:
+        elif suite in {'rotation', 'directives', 'calendar'}:
             prepare_rotation(out)
         import pytest
         code = pytest.main(['-c', str(ROOT / 'pytest.ini'), '--import-mode=importlib',

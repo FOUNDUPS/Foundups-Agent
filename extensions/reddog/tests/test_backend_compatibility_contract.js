@@ -270,7 +270,8 @@ function assertRuntimeFileCountBoundary() {
     'modules/ai_intelligence/ai_gateway/src/model_autoresearch_configured_gateway_durability.py',
     'modules/ai_intelligence/ai_gateway/src/model_autoresearch_configured_gateway_evidence.py',
     'modules/ai_intelligence/ai_gateway/src/model_autoresearch_configured_gateway_posix_recovery.py',
-    'modules/ai_intelligence/ai_gateway/src/youtube_model_routing.py'
+    'modules/ai_intelligence/ai_gateway/src/youtube_model_routing.py',
+    'modules/communication/livechat/src/operator_stream_schedule_owner.py'
   ]) {
     assert(manifest.required_runtime_files.includes(member));
   }
@@ -281,13 +282,13 @@ function assertRuntimeFileCountBoundary() {
     candidate.required_runtime_files.push(member);
     candidate.required_runtime_sha256[member] = '0'.repeat(64);
   };
-  while (candidate.required_runtime_files.length < 1485) {
+  while (candidate.required_runtime_files.length < 1487) {
     addMember(candidate.required_runtime_files.length);
   }
-  assert.strictEqual(candidate.required_runtime_files.length, 1485);
+  assert.strictEqual(candidate.required_runtime_files.length, 1487);
   assert.deepStrictEqual(validator.validateManifest(candidate), []);
-  addMember(1485);
-  assert.strictEqual(candidate.required_runtime_files.length, 1486);
+  addMember(1487);
+  assert.strictEqual(candidate.required_runtime_files.length, 1488);
   assert.deepStrictEqual(validator.validateManifest(candidate), [
     'backend_runtime_file_contract_mismatch'
   ]);

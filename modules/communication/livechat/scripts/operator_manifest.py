@@ -45,7 +45,7 @@ def read_command(input_path=None, stream=None):
         raise ValueError("invalid_command_input")
     if "id" not in command:
         command["id"] = "operator-" + uuid4().hex
-    if command.get("action") in {"set_context", "set_video_policy", "announce"}:
+    if command.get("action") in {"set_context", "set_video_policy", "announce", "schedule_stream_shorts"}:
         payload = command["payload"]
         ttl = payload.setdefault("ttl_seconds", 3600)
         if type(ttl) is not int or not 60 <= ttl <= 86400:

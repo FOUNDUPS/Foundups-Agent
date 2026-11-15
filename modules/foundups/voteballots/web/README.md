@@ -1,9 +1,21 @@
 # Vote public landing
 
-This directory is the canonical editable source for Vote's informational
-front door. It introduces the existing `voteballots` FoundUp and links to its
-available Oversight Blueprint workstream. It is not the candidate/funding
-application, an official ballot, confidential intake or a running agent service.
+This directory owns the six-panel independent satire cover at `/` and Vote's
+existing evidence-first civic guide at `/guide`. **Enter Vote** opens the
+original guide and **Voice your opinion** opens the existing manual contact
+page. The cover's political headlines are satire. Each panel links to its
+sources and offers a visitor-initiated House switchboard link. The bottom
+ticker presents the campaign demand and dated factual context. Its public
+copy lives in `index.html`. The ticker can be paused and its headlines can be
+scrolled manually with keyboard focus, reduced motion, or JavaScript disabled.
+The cover includes a native player for the Antifa FM station's public Icecast
+feed, as used by the existing Antifa FM DJ skill. Browsers decide whether to
+allow autoplay with sound. Play and Pause remain available, and the station
+player is linked when playback fails. The cover's media policy allows the
+specific stream URL. The Discord link opens the Antifa FM voice channel for
+FoundUps server members. Offline shell caching remains same-origin. The issue
+briefs show dated sources, including the archived CPI release for the grocery
+and gasoline price check.
 
 ## Source and deployment
 
@@ -12,9 +24,11 @@ styles, scripts and official directory snapshot. Deployment includes the
 reviewed HTML, CSS, JS, JSON, manifest and icons. Operator scripts and tests
 stay in the module.
 
-The buildless public files include `index.html`, `style.css`, `app.js`,
-`sw.js`, `manifest.webmanifest`, the three icons, and the `/coalition`,
-`/evidence` and `/contact` HTML pages with their local assets. The contact page
+The buildless public files include `index.html`, `cover.css`, `cover.js`,
+the five supplied reference images as WebPs in `comics/`, and `guide.html` with the
+original `style.css`. The cover and guide share `app.js` for installation. Deploy `sw.js`, `manifest.webmanifest`,
+the three icons and the `/coalition`, `/evidence` and `/contact` pages with
+their existing local assets. The contact page
 uses the reviewed `contact-roster.json` and `contact-queue.mjs`. This README
 is operator documentation outside the deployed static directory.
 
@@ -59,10 +73,12 @@ All assets are local, the content policy is self-only, and the install control
 appears only when the browser offers installation. The service worker registers
 relative to this directory and caches only exact, same-origin public shell
 paths. It does not cache API requests, external links, query variants or writes.
-The v3 worker precaches the canonical `/coalition`, `/evidence` and
-`/contact` routes. Legacy HTML navigation has the corresponding canonical
-offline fallback. Installation validates response status, type and exact URL
-before filling the cache. Real-device acceptance is a separate check.
+The v8 worker precaches the cover, local comic assets, and the canonical
+`/guide`, `/coalition`, `/evidence` and `/contact` routes. Legacy HTML
+navigation has a canonical offline fallback. The cover transfers previous
+root fragments to the original section on `/guide`. The manifest keeps its
+existing identity and launches the responsive cover from either install entry. Installation validates each
+response status, MIME type and URL before filling the cache.
 
 Vote retains `/f/voteballots`, `/f/voteballots/app` and `idb_voteballots` in the
 FoundUps shell. A separately hosted landing and Oversight Site do not implement
@@ -74,7 +90,7 @@ admission gates are unchanged by publishing this guide.
 
 ## Validation
 
-Run `node --check` on `app.js` and `sw.js`; validate the manifest, local assets,
+Run `node --check` on `app.js`, `cover.js` and `sw.js`; validate the manifest, local assets,
 anchors, HTTPS links and service-worker eligibility. Check desktop and phone
 layout when browser control is available. A source check or successful deploy
 does not itself establish browser-rendering QA or custom-domain activation.

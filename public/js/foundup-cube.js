@@ -136,7 +136,7 @@ const FoundupCube = (function () {
         },
 
         async writeSessionStart() {
-            if (!this.db || !FLAGS.WRITE_FIRESTORE) return;
+            if (!this.db || !FLAGS.WRITE_FIRESTORE || isObservationOnlyMode()) return;
             try {
                 const { collection, addDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js');
                 await addDoc(collection(this.db, 'cube_sessions'), {
@@ -152,7 +152,7 @@ const FoundupCube = (function () {
         },
 
         async writeEvent(type, data) {
-            if (!this.db || !FLAGS.WRITE_FIRESTORE) return;
+            if (!this.db || !FLAGS.WRITE_FIRESTORE || isObservationOnlyMode()) return;
             if (!this.PERSIST_EVENTS.has(type)) return;
 
             try {
@@ -415,6 +415,10 @@ const FoundupCube = (function () {
                 target_phase: d.target_phase,
                 force: d.force || false,
             },
+        }),
+        'work_telemetry_sync': (d) => ({
+            type: 'work_telemetry_sync',
+            data: d || {},
         }),
 
         // Synthetic User Events (Simile AI pattern - pre-launch market testing)
@@ -743,6 +747,11 @@ const FoundupCube = (function () {
         if (mapped.type === 'phase_command') {
             setPhase(mapped.data.target_phase, { force: mapped.data.force });
         }
+
+        // Handle read-only observed swarm/work telemetry snapshots
+        if (mapped.type === 'work_telemetry_sync') {
+            handleWorkTelemetrySync(mapped.data);
+        }
     }
 
     // Pulse a builder's $ to show earning (synced with ticker event)
@@ -900,6 +909,40 @@ const FoundupCube = (function () {
     let fiEarned = 0;
     let loopCount = 0;
     let speedMultiplier = 1.0;  // Speed slider: 0.25x to 5x
+
+    const CANONICAL_WORK_STATES = [
+        'spawn', 'claim', 'progress', 'complete',
+        'fail', 'cancel', 'stale', 'unknown',
+    ];
+    const WORK_STATE_COLORS = {
+        spawn: '#38bdf8',
+        claim: '#818cf8',
+        progress: '#fbbf24',
+        complete: '#22c55e',
+        fail: '#ef4444',
+        cancel: '#94a3b8',
+        stale: '#f97316',
+        unknown: '#a855f7',
+    };
+    const workTelemetry = {
+        active: false,
+        observationOnly: true,
+        authority: 'none',
+        sourceMode: 'uninitialized',
+        freshness: 'unknown',
+        observedAtMs: 0,
+        ttlMs: 300000,
+        countsByState: {
+            spawn: 0, claim: 0, progress: 0, complete: 0,
+            fail: 0, cancel: 0, stale: 0, unknown: 0,
+        },
+        workUnits: [],
+        dependencies: [],
+        errors: [],
+    };
+    function isObservationOnlyMode() {
+        return Boolean(FLAGS.DRIVEN_MODE || workTelemetry.active);
+    }
 
     const agents = [];
     const filledBlocks = new Set();
@@ -1159,11 +1202,13 @@ const FoundupCube = (function () {
         });
         // Auto-add to ticker if template exists
         addTickerMessage(type, data);
-        // Phase 6: Write to Firestore
-        firestoreBridge.writeEvent(type, data);
-        // Track loop starts and Fi earned
-        if (type === 'loop_started') firestoreBridge.onLoopStart();
-        if (type === 'fi_ups_exchange' && data?.fiAmount) firestoreBridge.onFiEarned(data.fiAmount);
+        if (!isObservationOnlyMode()) {
+            // Phase 6: Write to Firestore
+            firestoreBridge.writeEvent(type, data);
+            // Track loop starts and Fi earned
+            if (type === 'loop_started') firestoreBridge.onLoopStart();
+            if (type === 'fi_ups_exchange' && data?.fiAmount) firestoreBridge.onFiEarned(data.fiAmount);
+        }
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -1221,8 +1266,8 @@ const FoundupCube = (function () {
         // Remove very old messages
         liveChat.messages = liveChat.messages.filter(m => m.alpha > 0.2);
 
-        // Add simulated activity messages during BUILD phase
-        if (currentPhase === 'BUILDING' && Math.random() < 0.004) {
+        // Add simulated activity messages during BUILD phase (disabled in observation-only mode)
+        if (!isObservationOnlyMode() && currentPhase === 'BUILDING' && Math.random() < 0.004) {
             const simTypes = [
                 'sim_holo_indexing', 'sim_planning', 'sim_researching',
                 'sim_creating_collaterals', 'sim_security_audit'
@@ -1231,14 +1276,14 @@ const FoundupCube = (function () {
             addTickerMessage(simType, {});
         }
 
-        // Add promoting messages during PROMOTING phase
-        if (currentPhase === 'PROMOTING' && Math.random() < 0.01) {
+        // Add promoting messages during PROMOTING phase (disabled in observation-only mode)
+        if (!isObservationOnlyMode() && currentPhase === 'PROMOTING' && Math.random() < 0.01) {
             addTickerMessage('sim_promoting', {});
         }
 
-        // Add F_i staking events during BUILD/PROMOTING (S-curve economics per WSP 26)
+        // Add F_i staking events during BUILD/PROMOTING (disabled in observation-only mode)
         // CABR/PoB: Stakers provide BTC liquidity → receive F_i distributions
-        if ((currentPhase === 'BUILDING' || currentPhase === 'PROMOTING') && Math.random() < 0.006) {
+        if (!isObservationOnlyMode() && (currentPhase === 'BUILDING' || currentPhase === 'PROMOTING') && Math.random() < 0.006) {
             const fi = loopCount;  // Current FoundUp (F_1, F_2, etc)
             // S-curve adoption: progress determines token release rate
             const totalBlocks = Math.pow(CONFIG.targetSize, 3);
@@ -1829,6 +1874,9 @@ const FoundupCube = (function () {
         }
         selectedAgent = clickedAgent;
         selectedAgentTime = Date.now();
+        if (isObservationOnlyMode()) {
+            return;
+        }
 
         const now = Date.now();
 
@@ -2033,6 +2081,9 @@ const FoundupCube = (function () {
     }
 
     function updateAgents() {
+        if (isObservationOnlyMode()) {
+            return;
+        }
         const cubeCenter = { x: w / 2, y: h * 0.45 };
 
         for (let i = agents.length - 1; i >= 0; i--) {
@@ -2765,6 +2816,184 @@ const FoundupCube = (function () {
         return true;
     }
 
+    function setTargetFilledBlocks(targetCount) {
+        const totalBlocks = Math.pow(CONFIG.targetSize, 3);
+        const clamped = Math.max(0, Math.min(totalBlocks, Math.round(Number(targetCount) || 0)));
+        if (clamped < filledBlocks.size) {
+            const keys = Array.from(filledBlocks);
+            while (filledBlocks.size > clamped && keys.length > 0) {
+                filledBlocks.delete(keys.pop());
+            }
+            jigsawIndex = 0;
+        } else if (clamped > filledBlocks.size) {
+            jigsawIndex = 0;
+            while (filledBlocks.size < clamped) {
+                const before = filledBlocks.size;
+                fillRandomBlock();
+                if (filledBlocks.size === before) {
+                    const size = CONFIG.targetSize;
+                    let added = false;
+                    for (let x = 0; x < size && !added; x++) {
+                        for (let y = 0; y < size && !added; y++) {
+                            for (let z = 0; z < size && !added; z++) {
+                                const k = `${x},${y},${z}`;
+                                if (!filledBlocks.has(k)) {
+                                    filledBlocks.add(k);
+                                    added = true;
+                                }
+                            }
+                        }
+                    }
+                    if (!added) break;
+                }
+            }
+        }
+    }
+
+    function refreshWorkTelemetryTtl(nowMs = Date.now()) {
+        if (!workTelemetry.active) {
+            return workTelemetry.freshness;
+        }
+        if (
+            workTelemetry.ttlMs > 0
+            && workTelemetry.observedAtMs > 0
+            && (nowMs - workTelemetry.observedAtMs) > workTelemetry.ttlMs
+            && workTelemetry.freshness !== 'unknown'
+        ) {
+            workTelemetry.freshness = 'stale';
+            workTelemetry.sourceMode = 'stale';
+        }
+        return workTelemetry.freshness;
+    }
+
+    function getWorkTelemetrySummary() {
+        return {
+            active: workTelemetry.active,
+            observationOnly: workTelemetry.observationOnly,
+            authority: workTelemetry.authority,
+            sourceMode: workTelemetry.sourceMode,
+            freshness: workTelemetry.freshness,
+            observedAtMs: workTelemetry.observedAtMs,
+            ttlMs: workTelemetry.ttlMs,
+            countsByState: { ...workTelemetry.countsByState },
+            workUnitCount: workTelemetry.workUnits.length,
+            dependenciesCount: workTelemetry.dependencies.length,
+            errors: [...workTelemetry.errors],
+        };
+    }
+
+    function handleWorkTelemetrySync(payload) {
+        workTelemetry.active = true;
+        workTelemetry.observationOnly = true;
+        workTelemetry.authority = 'none';
+        FLAGS.DRIVEN_MODE = true;
+        FLAGS.WRITE_FIRESTORE = false;
+
+        if (!payload || typeof payload !== 'object') {
+            workTelemetry.sourceMode = 'unknown';
+            workTelemetry.freshness = 'unknown';
+            workTelemetry.observedAtMs = 0;
+            workTelemetry.workUnits = [];
+            workTelemetry.dependencies = [];
+            workTelemetry.errors = ['malformed_payload'];
+            CANONICAL_WORK_STATES.forEach((s) => { workTelemetry.countsByState[s] = 0; });
+            agents.length = 0;
+            setTargetFilledBlocks(0);
+            return getWorkTelemetrySummary();
+        }
+
+        const ttlSec = Number(payload.ttl_seconds);
+        workTelemetry.ttlMs = Number.isFinite(ttlSec) && ttlSec >= 0 ? ttlSec * 1000 : 300000;
+        const parsedTs = Date.parse(payload.latest_event_at || payload.observed_at || '');
+        workTelemetry.observedAtMs = Number.isFinite(parsedTs) ? parsedTs : 0;
+
+        const rawCounts = payload.counts_by_state && typeof payload.counts_by_state === 'object'
+            ? payload.counts_by_state
+            : {};
+        const units = Array.isArray(payload.work_units) ? payload.work_units : [];
+        workTelemetry.workUnits = units;
+        workTelemetry.dependencies = Array.isArray(payload.dependencies) ? payload.dependencies : [];
+        workTelemetry.errors = Array.isArray(payload.errors) ? payload.errors.slice(0, 10) : [];
+
+        CANONICAL_WORK_STATES.forEach((s) => {
+            if (rawCounts[s] !== undefined) {
+                workTelemetry.countsByState[s] = Math.max(0, Number(rawCounts[s]) || 0);
+            } else {
+                workTelemetry.countsByState[s] = units.filter((u) => (u && u.canonical_state) === s).length;
+            }
+        });
+
+        const rawFresh = String(payload.freshness || '').toLowerCase();
+        const rawSource = String(payload.source_mode || '').toLowerCase();
+        workTelemetry.freshness = (rawFresh === 'fresh' || rawFresh === 'stale' || rawFresh === 'unknown')
+            ? rawFresh
+            : (units.length > 0 ? 'fresh' : 'unknown');
+        workTelemetry.sourceMode = rawSource || workTelemetry.freshness;
+        refreshWorkTelemetryTtl(Number.isFinite(Number(payload.now_ms)) ? Number(payload.now_ms) : Date.now());
+
+        const totalUnits = CANONICAL_WORK_STATES.reduce((acc, s) => acc + (workTelemetry.countsByState[s] || 0), 0);
+        if (payload.filled_blocks !== undefined) {
+            setTargetFilledBlocks(payload.filled_blocks);
+        } else if (totalUnits === 0 || workTelemetry.freshness === 'unknown') {
+            setTargetFilledBlocks(0);
+        } else {
+            const totalBlocks = Math.pow(CONFIG.targetSize, 3);
+            const completed = workTelemetry.countsByState.complete || 0;
+            const inFlight = (workTelemetry.countsByState.spawn || 0)
+                + (workTelemetry.countsByState.claim || 0)
+                + (workTelemetry.countsByState.progress || 0);
+            const targetFilled = Math.round(((completed + inFlight * 0.35) / totalUnits) * totalBlocks);
+            setTargetFilledBlocks(targetFilled);
+        }
+
+        agents.length = 0;
+        const maxDraw = Math.min(units.length, CONFIG.maxAgents || 25);
+        for (let i = 0; i < maxDraw; i++) {
+            const u = units[i] || {};
+            const st = CANONICAL_WORK_STATES.includes(u.canonical_state) ? u.canonical_state : 'unknown';
+            const angle = (i / Math.max(1, maxDraw)) * Math.PI * 2;
+            const radius = 110 + (i % 3) * 28;
+            const ax = (w || 800) / 2 + Math.cos(angle) * radius;
+            const ay = (h || 600) * 0.45 + Math.sin(angle) * radius * 0.5;
+            const stateColor = WORK_STATE_COLORS[st] || WORK_STATE_COLORS.unknown;
+            const roleType = u.verifier_agent ? 'staker' : (st === 'complete' ? 'promoter' : 'builder');
+            agents.push({
+                id: String(u.work_id || `work_${i}`),
+                sx: ax,
+                sy: ay,
+                x: ax,
+                y: ay,
+                tx: ax,
+                ty: ay,
+                progress: 1,
+                speed: 0,
+                size: FEATURES.maxAgentSize,
+                startSize: FEATURES.maxAgentSize,
+                type: roleType,
+                status: `[${st.toUpperCase()}] ${String(u.title || u.work_id || '').slice(0, 28)}`,
+                canonicalState: st,
+                observationOnly: true,
+                authority: 'none',
+                color: stateColor,
+                baseColor: stateColor,
+                trail: [],
+                showLabel: true,
+                behavior: 'focused',
+                fiEarned: 0,
+                level: 'OBS',
+                isSpazzing: false,
+                spazTimer: 0,
+                recruitCount: 0,
+                celebrateTimer: 0,
+                state: 'observed',
+                goldCarried: 0,
+                tripCount: 0,
+                exitAngle: angle,
+            });
+        }
+        return getWorkTelemetrySummary();
+    }
+
     // DRIVEN_MODE: Handle state_sync events from simulator
     function handleStateSync(data) {
         // Update phase if different
@@ -2775,17 +3004,9 @@ const FoundupCube = (function () {
         if (data.lifecycle_stage) {
             simBridge.lastLifecycleStage = data.lifecycle_stage;
         }
-        // Update block fill progress (for visual consistency)
+        // Update block fill progress (supports non-monotonic rollback)
         if (data.filled_blocks !== undefined) {
-            const targetFilled = data.filled_blocks;
-            const currentFilled = filledBlocks.size;
-            // If simulator has more blocks, fill them
-            if (targetFilled > currentFilled) {
-                const toFill = targetFilled - currentFilled;
-                for (let i = 0; i < toFill; i++) {
-                    fillRandomBlock();
-                }
-            }
+            setTargetFilledBlocks(data.filled_blocks);
         }
     }
 
@@ -3719,8 +3940,9 @@ const FoundupCube = (function () {
     }
 
     function drawColorKey() {
+        const obsMode = isObservationOnlyMode();
         const keyW = 140;
-        const keyH = 150;  // Expanded: AGENTS legend + CABR score + OPO gate
+        const keyH = obsMode ? 196 : 150;  // Expanded: AGENTS legend + CABR score + OPO gate + observation badge
         const keyX = w - keyW - 7;   // Shifted right 5px
         const keyY = h - keyH - 50;  // Shifted down 5px
 
@@ -3735,8 +3957,8 @@ const FoundupCube = (function () {
         ctx.fill();
 
         // Border - F_i RATING COLOR (color temperature gradient)
-        // Simulate rating progress if not connected to SSE
-        if (!FLAGS.USE_SIM_EVENTS || !simBridge.connected) {
+        // Simulate rating progress if not connected to SSE and not observation-only
+        if (!obsMode && (!FLAGS.USE_SIM_EVENTS || !simBridge.connected)) {
             const totalBlocks = Math.pow(CONFIG.targetSize, 3);
             const progress = filledBlocks.size / totalBlocks;
             fiRating.simulateProgress(currentPhase, progress);
@@ -3828,6 +4050,19 @@ const FoundupCube = (function () {
         ctx.textAlign = 'right';
         ctx.fillText(`${gateText} ${gateIcon}`, keyX + keyW - 16, gateY);
 
+        if (obsMode) {
+            const freshTag = (workTelemetry.freshness || 'UNKNOWN').toUpperCase();
+            const srcTag = (workTelemetry.sourceMode || 'DRIVEN').toUpperCase();
+            const obsColor = freshTag === 'FRESH' ? '#38bdf8' : (freshTag === 'STALE' ? '#f97316' : '#a855f7');
+            ctx.font = 'bold 8px monospace';
+            ctx.fillStyle = obsColor;
+            ctx.textAlign = 'left';
+            ctx.fillText('OBSERVATION ONLY', keyX, gateY + 14);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
+            ctx.fillText('NO AUTHORITY', keyX, gateY + 25);
+            ctx.fillText(`SRC: ${srcTag} [${freshTag}]`, keyX, gateY + 36);
+        }
+
         ctx.restore();
     }
 
@@ -3838,6 +4073,10 @@ const FoundupCube = (function () {
         ctx.clearRect(0, 0, w, h);
         time += 0.016;
 
+        if (workTelemetry.active) {
+            refreshWorkTelemetryTtl(Date.now());
+        }
+
         updatePhase();
         updateAgents();
         updateAgentBehaviors();
@@ -3847,14 +4086,14 @@ const FoundupCube = (function () {
         updateTicker();
         updateCamera();
 
-        // Spawn agents during building
-        if (currentPhase === 'BUILDING' && Math.random() < CONFIG.agentSpawnRate * speedMultiplier && agents.length < CONFIG.maxAgents) {
+        // Spawn agents during building (disabled in observation-only mode)
+        if (!isObservationOnlyMode() && currentPhase === 'BUILDING' && Math.random() < CONFIG.agentSpawnRate * speedMultiplier && agents.length < CONFIG.maxAgents) {
             const statuses = ['building...', 'coding...', 'testing...', 'designing...'];
             spawnAgent('builder', statuses[Math.floor(Math.random() * statuses.length)]);
         }
 
-        // Progressive block filling during BUILDING - ensures cube fills up over time
-        if (currentPhase === 'BUILDING') {
+        // Progressive block filling during BUILDING (disabled in observation-only mode)
+        if (!isObservationOnlyMode() && currentPhase === 'BUILDING') {
             const elapsed = getScaledElapsed(phaseStartTime);
             const buildDuration = PHASES.BUILDING.duration;
             const progress = elapsed / buildDuration;  // 0 to 1
@@ -4183,6 +4422,9 @@ const FoundupCube = (function () {
                 agents: agents.length,
                 blocks: filledBlocks.size,
                 fiEarned,
+                observationOnly: isObservationOnlyMode(),
+                authority: isObservationOnlyMode() ? 'none' : 'local_sim',
+                workTelemetry: getWorkTelemetrySummary(),
             }),
             destroy: () => {
                 if (animationFrameId !== null) {
@@ -4242,6 +4484,7 @@ const FoundupCube = (function () {
 
             case 'enableDrivenMode':
                 FLAGS.DRIVEN_MODE = true;
+                FLAGS.WRITE_FIRESTORE = false;
                 console.log('[CUBE] DRIVEN_MODE enabled - animation controlled by simulator');
                 return true;
 
@@ -4253,6 +4496,13 @@ const FoundupCube = (function () {
             case 'stateSync':
                 handleStateSync(params);
                 return true;
+
+            case 'workTelemetrySync':
+                return handleWorkTelemetrySync(params);
+
+            case 'advanceTelemetryClock':
+                refreshWorkTelemetryTtl(params.nowMs || Date.now());
+                return getWorkTelemetrySummary();
 
             case 'fillBlocks':
                 const count = params.count || 1;
@@ -4278,6 +4528,9 @@ const FoundupCube = (function () {
                     loopCount: loopCount,
                     fiEarned: fiEarned,
                     drivenMode: FLAGS.DRIVEN_MODE,
+                    observationOnly: isObservationOnlyMode(),
+                    authority: isObservationOnlyMode() ? 'none' : 'local_sim',
+                    workTelemetry: getWorkTelemetrySummary(),
                     lifecycleStage: getLifecycleStage(),
                 };
 
@@ -4293,6 +4546,10 @@ const FoundupCube = (function () {
 
     return { init, setFirestore, setSpeed, getSessionStats, command, STYLE, FLAGS };
 })();
+
+if (typeof window !== 'undefined') {
+    window.FoundupCube = FoundupCube;
+}
 
 // Auto-init if buildCanvas exists
 if (typeof document !== 'undefined') {

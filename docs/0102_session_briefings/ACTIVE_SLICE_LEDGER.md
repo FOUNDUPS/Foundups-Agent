@@ -1061,3 +1061,49 @@ When a slice lands:
 4. Commit this file as part of the slice's completion commit or immediately after
 
 This ledger is not a planning doc. It is repo-truth state.
+## CI verification selection - 2026-11-14
+
+Owner: 0102 CI optimization worker, internal handoff for 012's authorized WSP97
+CI task; destination `MERGE_TO_MAIN`.
+WSP15 C3/I4/D3/Impact4 = 14/P1. Base/head before edits:
+`45267ddabb1e714aca6cfe6233f5a2daf5b836ca`. Isolated branch
+`fix/ci-risk-selection-20261114`, worktree `agent-worktrees/ci-risk-selection-20261114`.
+Scope: existing CI pilot classifier/workflow/tests and their documentation.
+Reuse landed #2338/#2340 and WRE differential/evidence owners. Preserve #2387's
+separate closure owner, #408 publication hold and unrelated worktrees. Native
+Triage thread visibility is UNKNOWN, not an inactivity finding.
+
+Acceptance: complete exact Git diffs; trusted-base downgrade decisions; structure,
+links and proposal Skill governance; unchanged security/required checks; full
+runtime/systemic/mixed/unknown verification; independent review; exact-head and
+resulting-main CI. Production activation remains BLOCKED: observed main rules
+have strict freshness false, no CODEOWNERS, and no CI fast-path variable. This
+slice changes no server settings. Python narrowing also remains blocked without
+authenticated complete dependency evidence; preserve WRE SYSTEMIC escalation.
+Recovery: revert only this focused PR through normal gates. Next: implement and
+verify the default-off pilot, publish draft, inspect all applicable head checks,
+then eligible normal merge and exact-main verification or record the exact gate.
+
+Retrieval: source-bound Holo query at the recorded base returned
+`HOLOINDEX_AUTHORITY_ROOT_UNRELATED`, UNKNOWN freshness and an index gap. The
+lexical bundle had complete required WRE artifacts but generic WSP/no test hits.
+Direct CI/WRE paths and existing TestModLog/README inventory reduced noise and
+duplication; no semantic freshness or runtime-admission claim is made. Deterministic
+Git/policy verification needs no Qwen/Gemma inference or provider call.
+
+Local evidence: 39 initial CI regressions and 168 existing WRE differential/
+scope/exact-main cases pass. Security passes 52 cases under native Windows;
+the unchanged cleared-environment Bash test passes separately with explicit native
+Git Bash lookup. Default WSL lookup and earlier sandbox/encoding/import setup
+failures remain recorded. Canonical registry regeneration adds only the process
+capability to the extended policy test; inventory/quarantine membership stays.
+Independent source/schema review accepts the inactive pilot. The focused PR owns
+the immutable head, hosted checks, final main readback and terminal receipt; this
+prepublication checkpoint is not a completion or production-savings claim.
+
+Before publication, the owned unpublished branch fast-forwarded to verified main
+`7ced891b3e5cb246969596db782ae5a06d9cab0e`, which adds only the separate #2387
+proposal. No CI-source overlap or local overwrite occurred. Independent review
+accepts the frozen source hashes; the final scope suite has 22 passing cases
+alongside 18 policy cases. All five required main checks were observed successful
+at this base; the opt-in and non-strict rules remained unchanged.

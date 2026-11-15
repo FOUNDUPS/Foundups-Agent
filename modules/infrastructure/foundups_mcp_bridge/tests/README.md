@@ -1,5 +1,22 @@
 # foundups_mcp_bridge Tests
 
+## PC Git inventory
+
+The HTTP compatibility suite covers the opt-in tool set, required bearer
+authentication, propagation into the owned child and a request-bound readiness
+receipt. WRE's `test_git_lifecycle_inventory.py` covers Git reads against real
+temporary worktrees, with the GitHub response supplied as a fixture.
+`test_git_inventory_oauth.py` exercises exact audience discovery, the scoped
+single-tool profile, and denial of mismatched caller or token claims.
+
+## Private draft sender
+
+The focused `test_draft_*.py` suites use the separate requirements and synthetic
+data. They cover strict token and tool admission, fixed Gmail routes, MIME
+and attachment preservation, stale or ambiguous state, durable reservation,
+readback and reconciliation, and a real loopback MCP process with clean
+shutdown. No Google, ChatGPT or tunnel service is called.
+
 ## Stored-settings snapshot controls — 2026-11-01
 
 The existing snapshot owner tests inert getters, complete baseline preflight,

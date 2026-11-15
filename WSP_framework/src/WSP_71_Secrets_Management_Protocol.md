@@ -345,6 +345,38 @@ Implementation owner: [blocking repository secret gate](../../.github/security/R
 The scanner module and WRE wrapper retain their documented capability/promotion
 boundaries; this protocol does not activate a runtime or grant new permissions.
 
+### 5.6 Build and host launch security gate
+
+Every FoundUps build and launch requires a scope-appropriate security review,
+including local previews, tests, installers, generated code and temporary
+helpers. Before executing candidate-controlled build/install scripts, review
+their inputs and effects using existing trusted, bounded tooling. Building in
+a worktree is not OS isolation and does not grant host or credential access.
+
+Bind evidence to the exact source/overlay or artifact digest, dependency state,
+launch configuration, checker versions and approved execution scope. Review
+secrets, dependencies and executable supply chain, subprocess/command injection,
+filesystem effects, network listeners, credential exposure and authority as
+applicable. Mark irrelevant categories with a reason; do not silently omit them.
+Changed bytes, dependencies, permissions or configuration invalidate affected
+evidence. Do not execute the candidate merely to discover whether it is safe.
+
+Reuse the blocking repository security gate, existing security-scanner/WRE skill
+and WSP 95/96 skill preflight; no second scanner or policy authority is implied.
+The `security_scan` skill's prototype status and manual trigger remain unchanged.
+One scanner's exit zero is not complete launch approval. Missing, failed, stale
+or partial required checks block the affected build/launch; resolve coverage
+through the existing owner without weakening policy or self-issuing exceptions.
+Respect authorized scanner destinations; do not upload private source by default.
+
+Check the [WSP 91 host lifecycle contract](WSP_91_DAEMON_Observability_Protocol.md#30-host-launch-heartbeat-and-termination-contract)
+alongside security: ownership, monitored heartbeat, expiry, confined effects,
+stop control and verified cleanup. Record scope, result, remaining gaps and
+reviewer provenance in the existing WSP 97 evidence. Independent checks remain
+required where the owning workflow demands them; author review cannot impersonate
+independent acceptance. Reuse unchanged valid evidence rather than rerunning
+every scanner indiscriminately. Documentation alone does not prove enforcement.
+
 ## 6. Integration with WSP Framework
 
 ### 6.1 WSP 54 Agent Permission Integration

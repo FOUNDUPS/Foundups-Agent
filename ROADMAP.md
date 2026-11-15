@@ -16,6 +16,16 @@ The [Vote release accounting and Launch Pad](modules/foundups/voteballots/docs/R
 track the public Vote, Oversight and Coalition release and the remaining
 candidate/evidence and runtime gates.
 
+## WRE Git lifecycle and PC convergence — P0
+
+Prioritize shared GitHub-to-PC completion before further HPC feature work.
+WSP 15 allocation scores are complexity 3, importance 5, deferability 5 and
+impact 5. The existing WRE and Codex startup paths share a deterministic
+reconciliation pass. A tracked change closes after verified main and a
+matching PC checkout. Current runtime work is tracked in the
+[WRE lifecycle interface](modules/infrastructure/wre_core/INTERFACE.md#git-lifecycle-reconciliation)
+and [PR backlog issue](https://github.com/FOUNDUPS/Foundups-Agent/issues/2122).
+
 ## Micro verification and protected native composition — 2026-11-01
 
 The [native OpenClaw trial](docs/operations/RSI_SWARM_DISPATCH.md#native-openclaw-vote-qualification--2026-11-01)

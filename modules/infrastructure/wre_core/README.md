@@ -83,46 +83,16 @@ controls and advisory output assertions are in the existing tests; see
 [the measurement interface](INTERFACE.md#advisory-autoresearcher-startup-display).
 This hardening supplies no independent verification or learning authority.
 
-## Merge sentinel prerequisite guard — 2026-09-27
+## Git lifecycle reconciliation
 
-The optional `GIT_MAIN_MERGE_SENTINEL=1` startup helper now refuses to proceed
-without a named branch, readable worktree inventory, clean tracked/untracked
-status and successful fetch. Unknown or dirty state returns before push, PR,
-stash, checkout or deletion. `force=True` bypasses enablement only. ENFORCED
-still controls whether rejection also blocks application startup.
+WRE startup refreshes GitHub branch and PR inventory. Codex SessionStart uses
+the same pass and may fast-forward a selected clean PC `main` worktree after
+the current GitHub commit passes its required checks. The receipt carries open
+and unverified PRs across runs and records both GitHub and PC proof on closure.
 
-After remote command success, the helper checks status again before changing
-local main, checking out or explicitly deleting branches. Dirty or unreadable
-status preserves the detected work and reports incomplete cleanup. It never
-automatically stashes/pops work or asks GitHub CLI to delete the branch as part
-of PR merge. When deletion is requested (including the current unset default),
-successful synchronization/checkout now ends with `cleanup_deletion_unqualified`.
-The helper issues no local or remote branch-deletion commands. `passed` remains
-true in advisory mode and false with ENFORCED; prior actions are retained.
-`DELETE_BRANCH=0` keeps the successful no-delete path. `force=True` cannot
-bypass this retention gate. Server-side auto-delete may still occur independently.
-
-After the initial cleanup status guard, fetch explicitly from origin
-`refs/heads/main` into `refs/remotes/origin/main`, resolve that ref as a commit,
-and capture one full 40/64-character hexadecimal object ID. Read status again
-after the fetch/resolution, then update local main using the captured ID.
-Fetch, resolution, status or branch-update failure stops before checkout and
-explicit deletion; there is no cached-target fallback.
-If checkout itself fails, `cleanup_checkout_failed` is returned with the failure
-message in actions and `passed = not ENFORCED`. The earlier local-main update
-is retained; no rollback or later deletion is attempted. `merged=True` still
-means only prior remote-command success. The existing startup error display
-consumes this structured field without a caller change.
-
-These are snapshots, not an atomic worktree/ref lock. Ref movement before
-commit capture and worktree/ref changes after the final status remain races.
-The fetch updates the remote-tracking ref even if a later check blocks local
-main. Freshness does not prove intended content, checks or merge authority.
-Direct/backup pushes, unchecked PR merging, main readback and server-side
-auto-delete remain open. Automatic branch retirement is blocked pending a
-qualified combined containment/expected-ref/worktree-ownership contract.
-Default-off remains required; this does not certify WSP 97 terminal convergence
-or authorize native RSI.
+The legacy merge sentinel now delegates to the observation pass. Governed
+promotion remains with the repository's merge authority. See
+[the lifecycle interface](INTERFACE.md#git-lifecycle-reconciliation).
 
 # WRE Core
 

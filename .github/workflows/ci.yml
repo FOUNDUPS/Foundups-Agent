@@ -6,10 +6,109 @@ on:
   pull_request:
     # Stacked PRs need their own checks even when their base is a feature branch.
     # Retargeting a PR must also produce fresh evidence for its new base.
+    # Draft PRs already run on open and synchronize.
     types: [opened, synchronize, reopened, edited, ready_for_review]
 
 jobs:
+  merge-scope-pilot:
+    name: Merge scope pilot (shadow)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      fast_path: ${{ steps.validated.outputs.fast_path }}
+      base: ${{ steps.scope.outputs.base }}
+      head: ${{ github.event.pull_request.head.sha }}
+      merge: ${{ github.sha }}
+    permissions:
+      contents: read
+    env:
+      PR_BASE: ${{ github.event.pull_request.base.sha }}
+      PR_HEAD: ${{ github.event.pull_request.head.sha }}
+      FAST_PATH_BASE: ${{ vars.CI_AUDIT_FAST_PATH_BASE }}
+      BASE_REF: ${{ github.base_ref }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Load exact-base verification owners
+        if: github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          [[ "$PR_BASE" =~ ^[0-9a-f]{40}$ ]]
+          mkdir -p "$RUNNER_TEMP/trusted-ci"
+          for script in ci_merge_scope.py ci_merge_policy.py check_ci_merge_docs.sh; do
+            git --no-replace-objects show "$PR_BASE:.github/scripts/$script" > "$RUNNER_TEMP/trusted-ci/$script"
+          done
+      - name: Select complete exact-Git validation scope
+        id: scope
+        if: github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          python3 -I -B "$RUNNER_TEMP/trusted-ci/ci_merge_scope.py" \
+            --base "$PR_BASE" --head "$PR_HEAD" --merge "$GITHUB_SHA" \
+            > "$RUNNER_TEMP/merge-scope.json"
+          lane=$(python3 -I -B -c 'import json, sys; print(json.load(open(sys.argv[1]))["lane"])' "$RUNNER_TEMP/merge-scope.json")
+          printf 'lane=%s\nbase=%s\n' "$lane" "$PR_BASE" >> "$GITHUB_OUTPUT"
+          printf 'Shadow lane: %s\nBase: %s\nHead: %s\nTest merge: %s\n' \
+            "$lane" "$PR_BASE" "$PR_HEAD" "$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+      - name: Check documentation formatting and repository links
+        if: steps.scope.outputs.lane == 'docs' || steps.scope.outputs.lane == 'skill-proposal'
+        run: bash "$RUNNER_TEMP/trusted-ci/check_ci_merge_docs.sh" "$PR_BASE" "$GITHUB_SHA" "$RUNNER_TEMP/merge-scope.json"
+      - name: Check proposal-only Skill structure and WSP governance
+        if: steps.scope.outputs.lane == 'skill-proposal'
+        run: python3 -I -B "$RUNNER_TEMP/trusted-ci/ci_merge_policy.py" --skill-proposals "$PR_BASE" "$RUNNER_TEMP/merge-scope.json"
+      - name: Publish validated scope after all applicable gates
+        id: validated
+        env:
+          LANE: ${{ steps.scope.outputs.lane }}
+        run: |
+          set -euo pipefail
+          fast=false
+          if [[ "$LANE" == docs || "$LANE" == skill-proposal ]]; then
+            live_base=$(git ls-remote --exit-code --refs origin "refs/heads/$BASE_REF" | cut -f1)
+            [[ "$live_base" == "$PR_BASE" ]] || { echo 'Target moved: refresh and verify again.'; exit 1; }
+            # Older base classifiers have no bound schema and cannot authorize omission.
+            schema=$(python3 -I -B -c 'import json,sys; print(json.load(open(sys.argv[1])).get("schema_version", ""))' "$RUNNER_TEMP/merge-scope.json")
+            if [[ "$FAST_PATH_BASE" != '' && "$FAST_PATH_BASE" == "$BASE_REF" && "$schema" == ci_merge_scope.v1 ]]; then
+              fast=true
+            fi
+          fi
+          echo "fast_path=$fast" >> "$GITHUB_OUTPUT"
+          printf 'Validated fast path: %s (server opt-in required).\n' "$fast" >> "$GITHUB_STEP_SUMMARY"
+
+  ci-pipeline-regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    env:
+      PR_BASE: ${{ github.event.pull_request.base.sha }}
+      PR_HEAD: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Test candidate CI pipeline without selection authority
+        run: python3 -I -B -m unittest discover -s .github/scripts/tests -p 'test_ci_merge_*.py'
+      - name: Shadow policy classification
+        id: policy
+        if: github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          python3 -I -B .github/scripts/ci_merge_scope.py --base "$PR_BASE" --head "$PR_HEAD" --merge "$GITHUB_SHA" > "$RUNNER_TEMP/policy-scope.json"
+          lane=$(python3 -I -B -c 'import json,sys; print(json.load(open(sys.argv[1]))["lane"])' "$RUNNER_TEMP/policy-scope.json")
+          echo "lane=$lane" >> "$GITHUB_OUTPUT"
+      - name: Check policy mirrors, catalog and agent projection
+        if: steps.policy.outputs.lane == 'policy'
+        run: |
+          python3 -I -B .github/scripts/ci_merge_policy.py "$PR_BASE" "$RUNNER_TEMP/policy-scope.json"
+          python3 -B scripts/generate_codex_tooling_projection.py --check
+
   wre-verification-contracts:
+    needs: [merge-scope-pilot, ci-pipeline-regressions]
+    if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -19,17 +118,41 @@ jobs:
       PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
       PYTHON_DOTENV_DISABLED: '1'
     steps:
+      - name: Require successful exact-SHA CI scope verification
+        id: ci-scope
+        env:
+          PLAN_RESULT: ${{ needs.merge-scope-pilot.result }}
+          PIPELINE_RESULT: ${{ needs.ci-pipeline-regressions.result }}
+          FAST_PATH: ${{ needs.merge-scope-pilot.outputs.fast_path }}
+          PLAN_BASE: ${{ needs.merge-scope-pilot.outputs.base }}
+          PLAN_HEAD: ${{ needs.merge-scope-pilot.outputs.head }}
+          PLAN_MERGE: ${{ needs.merge-scope-pilot.outputs.merge }}
+          EVENT_BASE: ${{ github.event.pull_request.base.sha }}
+          EVENT_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          [[ "$PLAN_RESULT" == success && "$PIPELINE_RESULT" == success && "$FAST_PATH" =~ ^(true|false)$ && "$PLAN_MERGE" == "$GITHUB_SHA" ]]
+          if [[ "$FAST_PATH" == true ]]; then
+            [[ "$PLAN_BASE" == "$EVENT_BASE" && "$PLAN_HEAD" == "$EVENT_HEAD" ]]
+          fi
+          echo "fast_path=$FAST_PATH" >> "$GITHUB_OUTPUT"
+          echo 'Applicable scope gates passed; WRE dependency/evidence policy remains unchanged.' >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/checkout@v4
+        if: steps.ci-scope.outputs.fast_path != 'true'
         with:
           persist-credentials: false
       - uses: actions/setup-python@v5
+        if: steps.ci-scope.outputs.fast_path != 'true'
         with:
           python-version: '3.12'
       - name: Bootstrap checksum-verified Python trust
+        if: steps.ci-scope.outputs.fast_path != 'true'
         run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
       - name: Install bounded offline test runner
+        if: steps.ci-scope.outputs.fast_path != 'true'
         run: python -m pip install pytest==9.0.3
       - name: Verify impact planning, execution and completion boundaries
+        if: steps.ci-scope.outputs.fast_path != 'true'
         run: >-
           python -B -m pytest -q --tb=short -c /dev/null --noconftest
           --import-mode=importlib -o pythonpath=. -p no:cacheprovider
@@ -43,25 +166,34 @@ jobs:
           modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_slice_verifier_request_binding.py
           modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_slice_verifier_handler.py
           modules/infrastructure/wre_core/tests/test_git_main_merge_sentinel.py
+          modules/infrastructure/wre_core/tests/test_git_lifecycle.py
+          modules/infrastructure/wre_core/tests/test_git_lifecycle_github.py
+          modules/infrastructure/wre_core/tests/test_git_lifecycle_inventory.py
+          modules/infrastructure/wre_core/tests/test_git_lifecycle_pc.py
+          modules/infrastructure/codex_hooks/tests/test_codex_hooks.py
       - name: Verify Vote micro-trial production oracle and downstream consumers
+        if: steps.ci-scope.outputs.fast_path != 'true'
         run: >-
           python -B -m pytest -q --tb=short -c /dev/null --noconftest
           --import-mode=importlib -o pythonpath=. -p no:cacheprovider
           --junitxml=vote-verification-results.xml
           modules/foundups/voteballots/tests
       - name: Verify preserved Oversight public-source inventory
+        if: steps.ci-scope.outputs.fast_path != 'true'
         run: python -B modules/foundups/voteballots/oversight/scripts/verify_snapshot.py
       - uses: actions/setup-node@v4
+        if: steps.ci-scope.outputs.fast_path != 'true'
         with:
           node-version: '24.22.1'
       - name: Verify Vote draft, contact and public cache boundaries
+        if: steps.ci-scope.outputs.fast_path != 'true'
         run: >-
           node --test
           modules/foundups/voteballots/tests/test_coalition_draft.mjs
           modules/foundups/voteballots/tests/test_contact.mjs
           modules/foundups/voteballots/tests/test_public_sw.mjs
       - name: Preserve exact-revision verification results
-        if: always()
+        if: always() && steps.ci-scope.outputs.fast_path != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: wre-verification-${{ github.sha }}
@@ -71,6 +203,8 @@ jobs:
           if-no-files-found: error
 
   principal-activity-ledger:
+    needs: merge-scope-pilot
+    if: needs.merge-scope-pilot.outputs.fast_path != 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -95,6 +229,8 @@ jobs:
           node extensions/reddog/tests/test_package_manifest.js
 
   youtube-operator-command:
+    needs: merge-scope-pilot
+    if: needs.merge-scope-pilot.outputs.fast_path != 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -128,6 +264,12 @@ jobs:
           modules/communication/livechat/tests/test_conversation_stewardship.py
           modules/communication/video_comments/tests/test_driver_handle_inheritance.py
           --junitxml=chat-capture-results.xml
+      - name: Verify human-only YouTube verification handoff offline
+        run: >-
+          python -B -m pytest --import-mode=importlib -o addopts=
+          -p pytest_asyncio.plugin -p no:cacheprovider -q --tb=short
+          modules/infrastructure/foundups_selenium/tests/test_youtube_verification.py
+          modules/infrastructure/dependency_launcher/tests/test_attach_recovery_no_kill.py
       - name: Preserve chat capture results
         if: always()
         uses: actions/upload-artifact@v4
@@ -240,6 +382,8 @@ jobs:
           if-no-files-found: error
 
   youtube-selected-batch:
+    needs: merge-scope-pilot
+    if: needs.merge-scope-pilot.outputs.fast_path != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -302,8 +446,10 @@ jobs:
         run: python -I -B .github/scripts/youtube_repair_offline.py --suite inventory
       - name: Verify 35 rotation controls in a separate minimal child
         run: python -I -B .github/scripts/youtube_repair_offline.py --suite rotation
-      - name: Verify 66 scoped directive and actual save/upload boundary controls
+      - name: Verify 114 pre-save audit and directive/save/upload boundary controls
         run: python -I -B .github/scripts/youtube_repair_offline.py --suite directives
+      - name: Verify frozen stream requests and calendar occupancy in a separate minimal child
+        run: python -I -B .github/scripts/youtube_repair_offline.py --suite calendar
       - name: Preserve sanitized offline repair inventories
         if: always()
         uses: actions/upload-artifact@v4
@@ -318,6 +464,8 @@ jobs:
             ${{ runner.temp }}/youtube-repair-rotation/results.xml
             ${{ runner.temp }}/youtube-repair-directives/summary.json
             ${{ runner.temp }}/youtube-repair-directives/results.xml
+            ${{ runner.temp }}/youtube-repair-calendar/summary.json
+            ${{ runner.temp }}/youtube-repair-calendar/results.xml
           if-no-files-found: error
       - name: Verify stream checker global and local quota boundaries
         run: python -B modules/platform_integration/stream_resolver/tests/test_no_quota_stream_checker.py -v
@@ -328,7 +476,45 @@ jobs:
           modules/communication/livechat/tests/test_live_handoff_selective_cancellation.py
           modules/communication/livechat/tests/test_engagement_runner_lifecycle.py
 
+  private-draft-mcp:
+    needs: merge-scope-pilot
+    if: needs.merge-scope-pilot.outputs.fast_path != 'true'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    timeout-minutes: 8
+    permissions:
+      contents: read
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+      PYTHON_DOTENV_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
+      - name: Install the separate draft MCP runtime
+        run: python -m pip --isolated install -r modules/infrastructure/foundups_mcp_bridge/requirements-draft-sender.txt pytest==9.0.3
+      - name: Verify draft, OAuth, MIME, and separate process boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip check
+          printf '[pytest]\n' > "$RUNNER_TEMP/draft-pytest.ini"
+          python -B -m pytest -q -c "$RUNNER_TEMP/draft-pytest.ini" --noconftest \
+            --import-mode=importlib -o pythonpath=. -p no:cacheprovider \
+            modules/infrastructure/foundups_mcp_bridge/tests/test_draft_*.py
+
   mcp-runtime-compatibility:
+    needs: merge-scope-pilot
+    if: needs.merge-scope-pilot.outputs.fast_path != 'true'
     runs-on: windows-latest
     timeout-minutes: 10
     steps:
@@ -401,15 +587,15 @@ jobs:
                      '-p', 'no:cacheprovider', '-o', 'pythonpath='+str(root),
                      '--basetemp=O:/pytest-temp', '--junitxml=O:/evidence/tests.xml',
                      '-v', '--tb=short', *[suite+n for n in (
-                       'test_mcp_launcher_http.py', 'test_mcp_server_sse.py',
+                       'test_mcp_launcher_http.py', 'test_mcp_server_sse.py', 'test_git_inventory_oauth.py',
                        'test_reddog_holoindex_query_runtime_candidate_binding.py')]]
           result = subprocess.run(command, env=env, cwd=root, timeout=300, check=False)
           if result.returncode: raise SystemExit(result.returncode)
           cases = ET.parse(out/'tests.xml').findall('.//testcase')
-          if len(cases) != 49 or any(c.find(tag) is not None for c in cases
+          if len(cases) != 60 or any(c.find(tag) is not None for c in cases
                                     for tag in ('failure','error','skipped')):
-              raise SystemExit('Expected all 49 MCP criteria to pass without skips')
-          print('MCP compatibility: 49 passed; owned Windows lifecycle included')
+              raise SystemExit('Expected all 60 MCP criteria to pass without skips')
+          print('MCP compatibility: 60 passed; owned Windows lifecycle included')
           '@ | python -I -B -
           if ($LASTEXITCODE -ne 0) { throw 'MCP qualification failed' }
       - name: Verify shared runtime path and Windows stream contracts
@@ -443,6 +629,8 @@ jobs:
           }
 
   acoustic-x-adapter:
+    needs: merge-scope-pilot
+    if: needs.merge-scope-pilot.outputs.fast_path != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
@@ -1144,6 +1332,8 @@ jobs:
           modules/foundups/gotjunk/tests/test_backend_security.py
 
   test:
+    needs: [merge-scope-pilot, ci-pipeline-regressions]
+    if: always()
     runs-on: ubuntu-latest
     env:
       PIP_NO_CACHE_DIR: '1'
@@ -1153,15 +1343,42 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Require successful exact-SHA CI scope verification
+        id: audit-scope
+        env:
+          PLAN_RESULT: ${{ needs.merge-scope-pilot.result }}
+          PIPELINE_RESULT: ${{ needs.ci-pipeline-regressions.result }}
+          FAST_PATH: ${{ needs.merge-scope-pilot.outputs.fast_path }}
+          PLAN_BASE: ${{ needs.merge-scope-pilot.outputs.base }}
+          PLAN_HEAD: ${{ needs.merge-scope-pilot.outputs.head }}
+          PLAN_MERGE: ${{ needs.merge-scope-pilot.outputs.merge }}
+          EVENT_BASE: ${{ github.event.pull_request.base.sha }}
+          EVENT_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          [[ "$PLAN_RESULT" == success && "$PIPELINE_RESULT" == success && "$FAST_PATH" =~ ^(true|false)$ && "$PLAN_MERGE" == "$GITHUB_SHA" ]]
+          lane=full
+          if [[ "$FAST_PATH" == true ]]; then
+            [[ "$PLAN_BASE" == "$EVENT_BASE" && "$PLAN_HEAD" == "$EVENT_HEAD" ]]
+            lane=docs
+          fi
+          echo "lane=$lane" >> "$GITHUB_OUTPUT"
+          printf 'Applicable CI scope verified; Python route: %s.\n' "$lane" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Set up Python ${{ matrix.python-version }}
+        if: steps.audit-scope.outputs.lane != 'docs'
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Bootstrap checksum-verified Python trust
+        if: steps.audit-scope.outputs.lane != 'docs'
         run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
       - name: Install dependencies
+        if: steps.audit-scope.outputs.lane != 'docs'
         run: |
           python -m pip install --upgrade pip
           pip install pytest pytest-cov
@@ -1172,6 +1389,7 @@ jobs:
           python -c "import torch; assert torch.version.cuda is None, 'CPU CI requires CPU PyTorch'"
 
       - name: Verify audit expiry and exact-base authority contracts
+        if: steps.audit-scope.outputs.lane != 'docs'
         env:
           PYTHONUTF8: '1'
           PYTHONDONTWRITEBYTECODE: '1'
@@ -1190,10 +1408,12 @@ jobs:
           modules/communication/moltbot_bridge/tests/test_reddog_wsp62_security_repair_exemptions.py::test_interface_contract_pages_need_no_size_exemption
 
       - name: Verify canonical test registry
+        if: steps.audit-scope.outputs.lane != 'docs'
         run: |
           python modules/infrastructure/wre_core/scripts/generate_test_registry.py --check
 
       - name: Verify scaffold and test-source import safety
+        if: steps.audit-scope.outputs.lane != 'docs'
         env:
           PYTHONUTF8: '1'
           PYTHONDONTWRITEBYTECODE: '1'
@@ -1207,6 +1427,7 @@ jobs:
           modules/infrastructure/wre_core/tests/test_wre_test_registry.py
 
       - name: Verify OpenClaw preflight denial boundary
+        if: steps.audit-scope.outputs.lane != 'docs'
         env:
           PYTHONUTF8: '1'
           PYTHONDONTWRITEBYTECODE: '1'
@@ -1218,6 +1439,7 @@ jobs:
           modules/communication/moltbot_bridge/tests/test_openclaw_preflight_boundary.py
 
       - name: Verify OpenClaw Ollama fallback contract
+        if: steps.audit-scope.outputs.lane != 'docs'
         env:
           PYTHONUTF8: '1'
           PYTHONDONTWRITEBYTECODE: '1'
@@ -1229,6 +1451,7 @@ jobs:
           modules/communication/moltbot_bridge/tests/test_openclaw_ollama_contract.py
 
       - name: Verify read-only root artifact classification
+        if: steps.audit-scope.outputs.lane != 'docs'
         env:
           PYTHONUTF8: '1'
           PYTHONDONTWRITEBYTECODE: '1'
@@ -1240,6 +1463,7 @@ jobs:
           modules/infrastructure/system_health_monitor/tests/test_wsp_85_validator.py
 
       - name: Run Mall GotJunk public listing acceptance
+        if: steps.audit-scope.outputs.lane != 'docs'
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
           PYTHONDONTWRITEBYTECODE: '1'
@@ -1250,12 +1474,15 @@ jobs:
             modules/foundups/gotjunk/tests/test_migration_inventory.py
 
       - name: Run LinkedIn offline activity contracts
+        if: steps.audit-scope.outputs.lane != 'docs'
         run: python -I -B modules/platform_integration/linkedin_agent/tests/test_activity_skill_contracts.py -v
 
       - name: Run Qwen package import contracts
+        if: steps.audit-scope.outputs.lane != 'docs'
         run: python -I -S -B holo_index/tests/test_qwen_package_import.py -v
 
       - name: Verify stored Holo settings admission without native stores
+        if: steps.audit-scope.outputs.lane != 'docs'
         env:
           PYTHONUTF8: '1'
           PYTHONDONTWRITEBYTECODE: '1'
@@ -1284,11 +1511,13 @@ jobs:
           holo_index/tests/test_holoindex_storage_contract.py
 
       - name: Run social scheduler execution evidence
+        if: steps.audit-scope.outputs.lane != 'docs'
         env:
           PYTHONDONTWRITEBYTECODE: '1'
         run: python -I -B modules/platform_integration/social_media_orchestrator/tests/test_autonomous_scheduler.py TestExecutionEvidence TestPersistenceEvidence TestPublicationEvidence TestCallerPersistenceEvidence -v
 
       - name: Run contextual campaign and petition intake contracts
+        if: steps.audit-scope.outputs.lane != 'docs'
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
           PYTHONDONTWRITEBYTECODE: '1'
@@ -1305,11 +1534,13 @@ jobs:
             tests/test_codex_tooling_projection.py
 
       - name: Run post-commit runner entrypoint evidence
+        if: steps.audit-scope.outputs.lane != 'docs'
         env:
           PYTHONDONTWRITEBYTECODE: '1'
         run: python -I -B modules/infrastructure/git_push_dae/tests/test_post_commit_social_runner.py TestEntrypointEvidence -v
 
       - name: Run RedDog correspondence and recipient contracts
+        if: steps.audit-scope.outputs.lane != 'docs'
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
           PYTHONDONTWRITEBYTECODE: '1'
@@ -1329,6 +1560,7 @@ jobs:
             modules/communication/moltbot_bridge/tests/test_reddog_correspondence_sender_boundary.mjs
 
       - name: Run effect-lease consensus boundary qualification
+        if: steps.audit-scope.outputs.lane != 'docs'
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
           PYTHONDONTWRITEBYTECODE: '1'
@@ -2171,7 +2403,7 @@ jobs:
           PY
 
       - name: Upload effect-lease qualification evidence
-        if: always()
+        if: always() && steps.audit-scope.outputs.lane != 'docs'
         uses: actions/upload-artifact@v4
         with:
           name: effect-consensus-qualification
@@ -2182,6 +2414,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Run current reviewer Linux ownership contracts
+        if: steps.audit-scope.outputs.lane != 'docs'
         timeout-minutes: 4
         run: |
           sudo -- env -i PATH="$PATH" LANG=C.UTF-8 "$(command -v python)" -I -B \
@@ -2189,7 +2422,7 @@ jobs:
             "$RUNNER_TEMP/current-reviewer-linux"
 
       - name: Upload current reviewer Linux evidence
-        if: always()
+        if: always() && steps.audit-scope.outputs.lane != 'docs'
         uses: actions/upload-artifact@v4
         with:
           name: current-reviewer-linux
@@ -2198,6 +2431,7 @@ jobs:
           retention-days: 14
 
       - name: Run bounded worker process and backend binding contracts
+        if: steps.audit-scope.outputs.lane != 'docs'
         timeout-minutes: 10
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
@@ -2216,11 +2450,13 @@ jobs:
             scripts/tests/test_generate_reddog_backend_manifest.py
 
       - name: Set up Node for FoundUp grounding contracts
+        if: steps.audit-scope.outputs.lane != 'docs'
         uses: actions/setup-node@v4
         with:
           node-version: '24.22.1'
 
       - name: Run FoundUp grounding producer and consumer contracts
+        if: steps.audit-scope.outputs.lane != 'docs'
         id: foundup_grounding
         timeout-minutes: 4
         shell: bash
@@ -2323,7 +2559,7 @@ jobs:
           PY
 
       - name: Upload FoundUp grounding acceptance evidence
-        if: always() && steps.foundup_grounding.outcome != 'skipped'
+        if: always() && steps.foundup_grounding.outcome != 'skipped' && steps.audit-scope.outputs.lane != 'docs'
         uses: actions/upload-artifact@v4
         with:
           name: foundup-grounding-contracts
@@ -2335,6 +2571,7 @@ jobs:
           retention-days: 14
 
       - name: Run HoloIndex admitted recovery and lifecycle contracts
+        if: steps.audit-scope.outputs.lane != 'docs'
         timeout-minutes: 4
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
@@ -2355,6 +2592,7 @@ jobs:
             modules/infrastructure/idle_automation/tests/test_holoindex_postmerge_coordinator.py
 
       - name: Run initial enrollment producer and consumer contracts
+        if: steps.audit-scope.outputs.lane != 'docs'
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
           PYTHONDONTWRITEBYTECODE: '1'
@@ -2383,6 +2621,7 @@ jobs:
             modules/infrastructure/secrets_mcp/tests/test_systemd_credential_secret_resolver.py
 
       - name: Run scanner environment and WRE admission contracts
+        if: steps.audit-scope.outputs.lane != 'docs'
         timeout-minutes: 5
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
@@ -2406,6 +2645,7 @@ jobs:
             modules/infrastructure/wre_core/tests/test_wre_runtime_admission_truth.py
 
       - name: Run WRE proposal and memory contracts
+        if: steps.audit-scope.outputs.lane != 'docs'
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
           PYTHONDONTWRITEBYTECODE: '1'
@@ -2432,6 +2672,7 @@ jobs:
             modules/infrastructure/wre_core/wre_master_orchestrator/tests/test_wre_master_orchestrator.py
 
       - name: Run WRE RSI measurement contract tests
+        if: steps.audit-scope.outputs.lane != 'docs'
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
           PYTHONDONTWRITEBYTECODE: '1'
@@ -2460,6 +2701,7 @@ jobs:
             modules/infrastructure/wre_core/tests/test_daemon_self_audit_diagnostic_outcomes.py
 
       - name: Run WRE merge sentinel prerequisite tests
+        if: steps.audit-scope.outputs.lane != 'docs'
         id: merge_sentinel
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
@@ -2477,7 +2719,7 @@ jobs:
             modules/infrastructure/wre_core/tests/test_git_main_merge_sentinel.py
 
       - name: Upload merge sentinel prerequisite results
-        if: always() && steps.merge_sentinel.outcome != 'skipped'
+        if: always() && steps.merge_sentinel.outcome != 'skipped' && steps.audit-scope.outputs.lane != 'docs'
         uses: actions/upload-artifact@v4
         with:
           name: merge-sentinel-prerequisites
@@ -2485,6 +2727,7 @@ jobs:
           if-no-files-found: error
 
       - name: Run lifecycle dependency selection regression
+        if: steps.audit-scope.outputs.lane != 'docs'
         id: lifecycle_selection
         env:
           LIFECYCLE_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
@@ -2531,7 +2774,7 @@ jobs:
           exit "$failed"
 
       - name: Upload lifecycle dependency selection results
-        if: always() && steps.lifecycle_selection.outcome != 'skipped'
+        if: always() && steps.lifecycle_selection.outcome != 'skipped' && steps.audit-scope.outputs.lane != 'docs'
         uses: actions/upload-artifact@v4
         with:
           name: lifecycle-dependency-selection
@@ -2539,6 +2782,7 @@ jobs:
           if-no-files-found: error
 
       - name: Run RedDog grant-aware signing composition regression
+        if: steps.audit-scope.outputs.lane != 'docs'
         # Same-checkout jobs119109373540/119109577954: 3m timeout versus 97s pass.
         # Allow runner variation; individual test/runtime deadlines stay intact.
         timeout-minutes: 5
@@ -2592,6 +2836,7 @@ jobs:
               modules/communication/moltbot_bridge/tests/test_reddog_conversation_scope_durable_authentication_wsp62.py
 
       - name: Run installed runtime and separate grant replay ownership contracts
+        if: steps.audit-scope.outputs.lane != 'docs'
         timeout-minutes: 3
         run: |
           sudo -- env -i PATH="$PATH" LANG=C.UTF-8 \
@@ -2606,6 +2851,7 @@ jobs:
             modules/communication/moltbot_bridge/tests/test_reddog_grant_rate_store_two_uid.py
 
       - name: Run authenticated startup owner and policy compatibility regression
+        if: steps.audit-scope.outputs.lane != 'docs'
         timeout-minutes: 10
         env:
           PYTHONDONTWRITEBYTECODE: '1'
@@ -2665,10 +2911,12 @@ jobs:
             modules/communication/moltbot_bridge/tests/test_reddog_signer_current_generation_use_time_binding.py
 
       - name: Run RedDog fast test tier
+        if: steps.audit-scope.outputs.lane != 'docs'
         working-directory: extensions/reddog
         run: npm test
 
       - name: Run local model adapter and lifecycle contracts
+        if: steps.audit-scope.outputs.lane != 'docs'
         env:
           PYTHONDONTWRITEBYTECODE: '1'
           PYTHON_DOTENV_DISABLED: '1'
@@ -2681,14 +2929,17 @@ jobs:
             modules/ai_intelligence/ai_gateway/tests/test_model_topology_proposal_lm_studio.py
 
       - name: Run simulator tests
+        if: steps.audit-scope.outputs.lane != 'docs'
         run: |
           python -m pytest modules/foundups/simulator/tests/ -v --tb=short --ignore=modules/foundups/simulator/tests/test_sse_server.py
 
       - name: Run FAM tests
+        if: steps.audit-scope.outputs.lane != 'docs'
         run: |
           python -m pytest modules/foundups/agent_market/tests/ -v --tb=short
 
       - name: Run RedDog local diagnostic security gates
+        if: steps.audit-scope.outputs.lane != 'docs'
         run: |
           node extensions/reddog/tests/test_backend_compatibility_contract.js
           node extensions/reddog/tests/test_backend_compatibility_preflight.js
@@ -2698,6 +2949,7 @@ jobs:
           python -m pytest tests/test_reddog_model_freshness_query_once.py -v --tb=short
 
       - name: Run signed model use-time regression
+        if: steps.audit-scope.outputs.lane != 'docs'
         env:
           PYTHONPATH: ${{ github.workspace }}/modules/ai_intelligence/ai_gateway/tests:${{ github.workspace }}
         run: |
@@ -2709,6 +2961,7 @@ jobs:
             -q --tb=short
 
       - name: Run RedDog bounded resident-chain regression
+        if: steps.audit-scope.outputs.lane != 'docs'
         run: |
           python -m pip install "chromadb==1.5.5" "pytz>=2023.3" "psutil>=5.9.6"
           python -m pytest modules/platform_integration/youtube_shorts_scheduler/tests/test_launch_import.py -q --tb=short
@@ -2749,6 +3002,7 @@ jobs:
             -q --tb=short
 
       - name: Run RedDog provider-specific canary admission contracts
+        if: steps.audit-scope.outputs.lane != 'docs'
         env:
           PYTHONDONTWRITEBYTECODE: '1'
           PYTHON_DOTENV_DISABLED: '1'

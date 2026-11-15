@@ -2,6 +2,43 @@
 
 <!-- WSP 22: anti-vibecoding test inventory. NEWEST entries at TOP. -->
 
+## [2026-11-13] — Vote cover editorial and phone layout
+
+Extend the worker fixture to cover v8 retirement. Exercise the six panels,
+phone and tablet layouts, installability and offline navigation in browsers.
+
+## [2026-11-13] — Vote funding banner crop
+
+Verify the v8 worker retires v7 and keeps the existing local artwork available
+offline. Browser checks cover the supplied two-line banner at desktop and
+phone widths.
+
+## [2026-11-12] — Vote radio and supplied funding artwork
+
+Extend the existing worker fixture to cover v6 retirement and exclude the
+external radio stream from the offline shell. Browser checks exercise playback
+under both autoplay policies, the station links and the cropped supplied artwork.
+
+## [2026-11-12] — Vote cover install and layout
+
+Extend the existing public cache fixture to verify v5 retirement. Browser
+checks cover manifest installability, the shared install prompt, width-based
+panel reflow, outbound links, legibility and the offline cover.
+
+## [2026-11-12] — Vote bottom ticker
+
+Extend the existing worker fixture to check retirement of the v4 cache while
+preserving the existing offline shell and guide fragment checks. Browser
+verification covers ticker movement, pause and resume, reduced motion, static
+fallback and layout at desktop and phone widths.
+
+## [2026-11-12] — Vote cover and legacy guide migration
+
+Extend the public worker regression to cover the v4 exact-path precache,
+WebP MIME, old cache removal, offline comic assets and the legacy guide HTML
+alias. Exercise all original guide IDs through the cover's fragment handoff
+with query preservation, encoded fragments and an invalid-fragment control.
+
 ## [2026-11-07] — Interactive oversight maps
 
 The release projection checks mirrored map routes, graph node and connector

@@ -1,5 +1,13 @@
 # Dependency launcher test inventory
 
+## 2026-11-10 — Guard-compatible attachment double
+
+Extend the existing no-kill fake driver with `execute`, which raises if attach
+issues any browser command. Keep all existing assertions. The new Selenium
+handoff suite composes both actual attach owners with a fake driver and checks
+that a verification challenge cancels the first click after its 30-second hold.
+The combined second run passed73 cases; no live attachment occurred. WSP11/22/97.
+
 ## 2026-11-05 — Browser attachment HTTP composition
 
 Existing `test_attach_recovery_no_kill.py` now exercises the real version/page

@@ -139,6 +139,19 @@ def convert_et_to_channel_tz(et_time: str, channel_tz: str, on_date: datetime) -
         pytz.UnknownTimeZoneError: if channel_tz is not a valid IANA zone.
         ValueError: if et_time cannot be parsed.
     """
+    return _format_bare_time(_convert_et_instant(et_time, channel_tz, on_date, is_dst=False))
+
+
+def convert_et_to_channel_datetime(et_time: str, channel_tz: str, on_date: datetime) -> datetime:
+    """Convert the entire publishing instant, retaining local date rollover.
+
+    Ambiguous/nonexistent ET wall times are unresolved, never guessed. Calendar
+    allocation uses this owner; the legacy bare-time helper remains compatible.
+    """
+    return _convert_et_instant(et_time, channel_tz, on_date, is_dst=None)
+
+
+def _convert_et_instant(et_time: str, channel_tz: str, on_date: datetime, *, is_dst: bool | None) -> datetime:
     # Parse the ET time-of-day (accept "HH:MM" 24h or "I:MM AM/PM" 12h).
     parsed = None
     for fmt in ("%H:%M", "%I:%M %p"):
@@ -157,11 +170,11 @@ def convert_et_to_channel_tz(et_time: str, channel_tz: str, on_date: datetime) -
     naive = datetime(
         on_date.year, on_date.month, on_date.day, parsed.hour, parsed.minute
     )
-    et_dt = src_tz.localize(naive)
+    et_dt = src_tz.localize(naive, is_dst=is_dst)
 
     # Convert to the channel account tz; the wall-clock there is what we type.
     local_dt = et_dt.astimezone(dst_tz)
-    return _format_bare_time(local_dt)
+    return local_dt
 
 
 def get_peak_slots_for_channel(channel_tz: str, on_date: datetime) -> List[str]:

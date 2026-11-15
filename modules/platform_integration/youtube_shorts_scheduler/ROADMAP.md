@@ -1,5 +1,18 @@
 # YouTube Shorts Scheduler - ROADMAP
 
+## Pre-save audit follow-through — 2026-11-10
+
+Source now adds metadata completeness and observed audience checks to the existing
+detail scheduling guard. Incomplete metadata repairs consume matched existing
+analysis; content-list entry uses detail inspection, and legacy inline Save is
+blocked. See the [audit skill](skillz/youtube-presave-audit/SKILL.md).
+Remaining live qualification: native audience selectors on each configured channel,
+Us Story Time's exact native-ID policy, current AntifaFM fields and evidence-bound
+metadata application, structured UI-TARS audience diagnostics, and independent
+persisted schedule readback. Permission-page failures remain a separate access
+issue. The 60-second browser-wide manual takeover and shared router lanes below
+are not completed by this change.
+
 ## Repair work list — 2026-11-07
 
 This dated list supersedes older readiness shorthand below for the current

@@ -1,5 +1,37 @@
 # video_comments TestModLog
 
+## 2026-11-10 — Preserve package context in manifest inspection fixtures
+
+The stdlib AST fixture now retains module metadata when supplying typing names,
+and loads the real manifest queue/policy/stream helper definitions into one
+private package. Relative owner imports resolve without running production
+package startup or replacing validation with a stub. Existing private-context,
+replay-inertness and explicit-announcement assertions remain unchanged.
+All **15 cases pass** under the existing offline effect guard, with zero
+failures/errors/skips, denied effects or model imports and unchanged source
+hashes during the run. Provider/model-status messages are synthetic fixture
+outputs, not runtime observations. A bounded test-loader search found no other
+AST loader of the queue/policy owner; ordinary imports and consumer fakes remain
+unchanged. WSP11/22/50/97; hosted acceptance remains separate.
+
+## 2026-11-10 — Preserve handle isolation with verification guard
+
+Extend the existing fake driver's interface without changing its Service or
+close_fds assertions. Both actual connect branches also assert the configured
+port on the installed verification gate; any browser command during attach
+fails. Included in the83-pass offline handoff/attachment/shadow selection.
+WSP11/22/50/97; no real browser or child-driver launch.
+
+The first hosted capture selection exposed an import-order defect in the
+fixture: the Chrome constructor was replaced before the Selenium package
+initializer subclassed it (1 failed,100 passed on Linux). Preload the real
+guard/driver module before replacing the constructor; all original Service,
+close_fds and no-browser-effect assertions remain. This corrects the test
+fixture rather than removing the production guard. Hosted acceptance is rerun.
+The matching fresh-process capture selection then passed101 cases locally with
+zero skips/warnings. Its scope overlaps the83-case handoff selection and is not
+an additional end-to-end test count.
+
 ## 2026-11-07 — Close inherited worker handles in driver children
 
 Chrome and Edge connection controls verify real Selenium Service configuration,

@@ -1,3 +1,9 @@
+## Git lifecycle reconciliation — 2026-11-11
+
+The WRE CI job exercises GitHub pagination and App-bound check proof, the
+persisted PR completion condition, the compatibility sentinel and disposable
+Git worktrees. The PC suite covers dirty, ignored, stale and diverged state.
+
 ## Readiness evidence — 2026-11-06
 
 `test_dashboard_evidence.py` exercises real temporary SQLite storage and actual

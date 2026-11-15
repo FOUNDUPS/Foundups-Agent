@@ -8,11 +8,13 @@ not. This proves bounded lifecycle behavior, not full-module/runtime readiness.
 
 import ast
 import asyncio
+from contextlib import contextmanager
 from datetime import datetime
 import logging
 import os
 from pathlib import Path
 import sys
+import threading
 from types import MethodType, ModuleType
 
 import pytest
@@ -28,7 +30,23 @@ async def wait_event(event):
 
 
 @pytest.fixture
-def lifecycle(monkeypatch):
+def runtime_gates(monkeypatch):
+    from modules.communication.livechat.src import automation_gates
+
+    @contextmanager
+    def native_lock(identity, *, timeout_seconds):
+        assert identity == 'foundups-youtube-runtime-owner'
+        assert timeout_seconds == 0.01
+        yield
+
+    monkeypatch.setattr(automation_gates, 'runtime_operation_lock', native_lock)
+    return automation_gates
+
+
+@pytest.fixture
+def lifecycle(monkeypatch, runtime_gates):
+    from modules.communication.livechat.src.engagement_lifecycle import _await_owned_completion
+
     tree = ast.parse(_SOURCE.read_text(encoding="utf-8"), filename=str(_SOURCE))
     dae_node = next(node for node in tree.body if isinstance(node, ast.ClassDef)
                     and node.name == "AutoModeratorDAE")
@@ -44,6 +62,7 @@ def lifecycle(monkeypatch):
         "__package__": "modules.communication.livechat.src",
         "__file__": str(_SOURCE), "asyncio": asyncio, "os": os,
         "datetime": datetime, "logger": logging.getLogger(__name__),
+        "_await_owned_completion": _await_owned_completion,
     }
     exec(compile(isolated, str(_SOURCE), "exec"), namespace)
 
@@ -54,6 +73,8 @@ def lifecycle(monkeypatch):
             self.dae = dae
             self.started = asyncio.Event()
             self.finished = asyncio.Event()
+            self.cleanup_started = asyncio.Event()
+            self.cleanup_release = None
             self.task = None
             self.failure = None
             queues.append(self)
@@ -67,6 +88,9 @@ def lifecycle(monkeypatch):
                 await asyncio.Event().wait()
             finally:
                 # Cleanup needs a scheduling turn: cancellation alone is insufficient.
+                self.cleanup_started.set()
+                if self.cleanup_release is not None:
+                    await self.cleanup_release.wait()
                 await asyncio.sleep(0)
                 self.finished.set()
 
@@ -94,6 +118,149 @@ def assert_reaped(dae, queue, *, started=True):
     if started:
         assert queue.finished.is_set()
         assert queue.task.done()
+
+
+def test_runtime_owner_is_nonreentrant_across_threads(runtime_gates):
+    observed = []
+
+    def contender():
+        try:
+            with runtime_gates.youtube_runtime_owner():
+                observed.append('entered')
+        except TimeoutError:
+            observed.append('busy')
+
+    with runtime_gates.youtube_runtime_owner():
+        with pytest.raises(TimeoutError, match='youtube_runtime_owner_busy'):
+            with runtime_gates.youtube_runtime_owner():
+                pytest.fail('nested owner entered')
+        worker = threading.Thread(target=contender)
+        worker.start()
+        worker.join(timeout=5)
+        assert not worker.is_alive()
+        assert observed == ['busy']
+    with runtime_gates.youtube_runtime_owner():
+        pass
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('native_busy', [False, True])
+async def test_runtime_owner_refusal_precedes_watcher_and_resets_run(lifecycle, runtime_gates, monkeypatch, native_busy):
+    dae, queues, _ = lifecycle
+
+    @contextmanager
+    def refused(*_args, **_kwargs):
+        raise TimeoutError('native_busy')
+        yield
+
+    if native_busy:
+        with monkeypatch.context() as patch:
+            patch.setattr(runtime_gates, 'runtime_operation_lock', refused)
+            with pytest.raises(TimeoutError, match='native_busy'):
+                await dae.run()
+    else:
+        with runtime_gates.youtube_runtime_owner():
+            with pytest.raises(TimeoutError, match='youtube_runtime_owner_busy'):
+                await dae.run()
+    assert queues == [] and dae.operator_manifest_task is None
+    assert not dae._operator_manifest_run_active
+    await dae.run()
+    assert len(queues) == 1
+    assert_reaped(dae, queues[0], started=False)
+
+
+@pytest.mark.asyncio
+async def test_runtime_owner_waits_through_repeated_cancellation(lifecycle, runtime_gates):
+    dae, queues, _ = lifecycle
+    started, comments_started, comments_cleanup = asyncio.Event(), asyncio.Event(), asyncio.Event()
+    release_comments, release_watcher = asyncio.Event(), asyncio.Event()
+
+    async def comments():
+        comments_started.set()
+        try:
+            await asyncio.Event().wait()
+        finally:
+            comments_cleanup.set()
+            await release_comments.wait()
+
+    async def body(self):
+        queues[-1].cleanup_release = release_watcher
+        await wait_event(queues[-1].started)
+        self._comment_engagement_task = asyncio.create_task(comments())
+        await wait_event(comments_started)
+        started.set()
+        await asyncio.Event().wait()
+
+    dae._run_dae = MethodType(body, dae)
+    running = asyncio.create_task(dae.run())
+    try:
+        await wait_event(started)
+        running.cancel()
+        await wait_event(queues[0].cleanup_started)
+        await wait_event(comments_cleanup)
+        running.cancel()
+        release_watcher.set()
+        await wait_event(queues[0].finished)
+        assert not running.done()
+        with pytest.raises(TimeoutError, match='youtube_runtime_owner_busy'):
+            with runtime_gates.youtube_runtime_owner():
+                pytest.fail('foreground owner entered before comment cleanup')
+    finally:
+        release_watcher.set()
+        release_comments.set()
+        with pytest.raises(asyncio.CancelledError):
+            await running
+    assert_reaped(dae, queues[0])
+    assert dae._comment_engagement_task.cancelled()
+    with runtime_gates.youtube_runtime_owner():
+        pass
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('mode', ['timeout', 'cancel'])
+async def test_ordinary_phase3_waits_for_owned_scheduler_worker(monkeypatch, mode):
+    from modules.communication.livechat.src.engagement_lifecycle import _await_owned_completion
+
+    tree = ast.parse(_SOURCE.read_text(encoding='utf-8'))
+    method = next(node for node in ast.walk(tree) if isinstance(node, ast.AsyncFunctionDef)
+                  and node.name == '_browser_engagement_loop')
+    target = next(node for node in ast.walk(method) if isinstance(node, ast.Try) and any(
+        isinstance(part, ast.If) and isinstance(part.test, ast.Name) and part.test.id == 'stream_requests'
+        for part in node.body))
+    exercise = ast.parse('async def exercise():\n    request_worker = None\n').body[0]
+    exercise.body.append(target)
+    started, release = asyncio.Event(), asyncio.Event()
+    stop = threading.Event()
+
+    async def worker(_fn, **kwargs):
+        assert kwargs['stop_event'] is stop and 'stream_schedule_requests' not in kwargs
+        started.set()
+        await release.wait()
+        return {}
+
+    monkeypatch.setattr(asyncio, 'to_thread', worker)
+    namespace = {'asyncio': asyncio, '_await_owned_completion': _await_owned_completion,
+                 'stream_requests': [], 'run_multi_channel_scheduler': object(), 'browser_name': 'chrome',
+                 'max_shorts': 1, 'scheduler_stop_event': stop, 'phase3_timeout': .01 if mode == 'timeout' else 10,
+                 'logger': logging.getLogger(__name__), 'tag': 'OFFLINE'}
+    exec(compile(ast.fix_missing_locations(ast.Module(body=[exercise], type_ignores=[])), str(_SOURCE), 'exec'), namespace)
+    running = asyncio.create_task(namespace['exercise']())
+    try:
+        await wait_event(started)
+        if mode == 'cancel':
+            running.cancel()
+        async def wait_stop():
+            while not stop.is_set():
+                await asyncio.sleep(.001)
+        await asyncio.wait_for(wait_stop(), timeout=5)
+        assert not running.done()
+    finally:
+        release.set()
+        if mode == 'cancel':
+            with pytest.raises(asyncio.CancelledError):
+                await running
+        else:
+            await running
 
 
 @pytest.mark.asyncio

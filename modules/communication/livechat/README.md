@@ -1,3 +1,21 @@
+## Frozen stream scheduling — 2026-11-10
+
+The existing private manifest accepts `schedule_stream_shorts` with a bounded
+expiry. It freezes the confirmed active stream and lets the existing browser
+owner select every exact-title UNLISTED Short on the same channel. Acceptance is
+pending work, not delivery. A claimed request yields that browser for operator
+review; unknown results never retry automatically. See the
+[request contract](docs/VIDEO_POLICY_INTERFACE.md#frozen-stream-scheduling-requests)
+for controls and the distinction between title selection and native lineage proof.
+Current qualification is offline; no live scheduling result is claimed.
+
+An ended stream can instead be explicitly bound with `recorded_source` and
+`first_test_only=true`. The native consumer refreshes only the named scheduling
+command; unrelated queued announcements stay untouched. The complete title-matching
+batch is frozen while only its first Short is admitted for a metadata-preserving
+test. The rest remain withheld pending separately qualified saved-state evidence;
+neither a new command nor restart retries the source. See the same request contract.
+
 ## Quiet conversation stewardship — 2026-11-07
 
 The default DAE receive path observes every supplied text message before response

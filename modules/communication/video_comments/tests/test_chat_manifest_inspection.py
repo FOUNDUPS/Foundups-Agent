@@ -9,6 +9,7 @@ Run: python -B -m unittest discover -s modules/communication/video_comments/test
 import ast
 import asyncio
 from contextlib import contextmanager, nullcontext
+from copy import deepcopy
 import dataclasses
 from datetime import datetime, timezone
 from enum import Enum
@@ -60,10 +61,15 @@ def definitions(name, path):
             body.append(node)
     module = ModuleType(name)
     module.__file__ = str(ROOT / path)
+    module.__package__ = name.rpartition('.')[0]
     sys.modules[name] = module
-    module.__dict__.update(vars(typing))
+    if module.__package__:
+        setattr(sys.modules[module.__package__], name.rpartition('.')[2], module)
+    # Annotation names must not overwrite the synthetic module's package/name.
+    module.__dict__.update({key: value for key, value in vars(typing).items()
+                            if not key.startswith('__')})
     module.__dict__.update(
-        dataclass=dataclasses.dataclass, asyncio=asyncio, Enum=Enum, wraps=wraps,
+        dataclass=dataclasses.dataclass, deepcopy=deepcopy, asyncio=asyncio, Enum=Enum, wraps=wraps,
         RLock=threading.RLock, Event=threading.Event, threading=threading,
         os=os, Path=Path, time=time, json=json, math=math, random=random,
         hashlib=hashlib, datetime=datetime, timezone=timezone, uuid4=uuid4,
@@ -80,11 +86,16 @@ def definitions(name, path):
 CONTEXT = definitions('_inspection_context', 'modules/communication/video_comments/src/reply_context.py')
 GEN = definitions('_inspection_generator', 'modules/communication/video_comments/src/intelligent_reply_generator.py')
 ANALYSIS = definitions('_inspection_analysis', 'modules/communication/video_comments/src/comment_content_analyzer.py')
-POLICY = definitions('_inspection_video_policy', 'modules/communication/livechat/src/video_policy.py')
-POLICY_OWNER = definitions('_inspection_policy_owner', 'modules/communication/livechat/src/operator_video_policy_owner.py')
+MANIFEST_PACKAGE = ModuleType('_inspection_manifest')
+MANIFEST_PACKAGE.__path__ = []  # Private package; never execute production package startup.
+sys.modules[MANIFEST_PACKAGE.__name__] = MANIFEST_PACKAGE
+POLICY = definitions('_inspection_manifest.video_policy', 'modules/communication/livechat/src/video_policy.py')
+POLICY_OWNER = definitions('_inspection_manifest.operator_video_policy_owner', 'modules/communication/livechat/src/operator_video_policy_owner.py')
 POLICY_OWNER.video_policy = POLICY
-QUEUE = definitions('_inspection_queue', 'modules/communication/livechat/src/operator_command_queue.py')
-QUEUE.video_policy, QUEUE.policy_owner = POLICY, POLICY_OWNER
+STREAM_OWNER = definitions('_inspection_manifest.operator_stream_schedule_owner', 'modules/communication/livechat/src/operator_stream_schedule_owner.py')
+STREAM_OWNER.video_policy = POLICY
+QUEUE = definitions('_inspection_manifest.operator_command_queue', 'modules/communication/livechat/src/operator_command_queue.py')
+QUEUE.video_policy, QUEUE.policy_owner, QUEUE.stream_owner = POLICY, POLICY_OWNER, STREAM_OWNER
 EXECUTOR = definitions('_inspection_executor', 'modules/communication/video_comments/skillz/tars_like_heart_reply/src/reply_executor.py')
 PROCESSOR = definitions('_inspection_processor', 'modules/communication/video_comments/skillz/tars_like_heart_reply/src/comment_processor.py')
 CHAT = definitions('_inspection_livechat', 'modules/communication/livechat/src/intelligent_livechat_reply.py')

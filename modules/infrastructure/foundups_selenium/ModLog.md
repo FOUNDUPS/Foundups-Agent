@@ -1,5 +1,28 @@
 # ModLog — FoundUps Selenium
 
+## 2026-11-10 — Human-only verification hold
+
+Hosted Windows exposed a pre-existing package import side effect: BrowserManager
+created its O-drive session folder while importing the guard. Move that mkdir
+to the existing `_save_session` owner, preserving its configured destination and
+save behavior. A fresh-process no-mkdir import test and synthetic save/load test
+cover both sides. No browser session is created by guard installation.
+
+Add a shared per-debug-port effect gate at the existing YouTube attachment
+owners. Official auth targets and visible Studio verification dialogs yield
+for at least 30 seconds and until clear; interrupted effects are cancelled for
+owner revalidation. Reuse the runtime OS lock, preserve global STOP and original
+post-dispatch exceptions, and store only control metadata outside source.
+No CAPTCHA, credential, OTP, browser navigation or verification completion is
+automated by the gate. The broader scheduler 60-second manual takeover remains
+separate. Installation and live qualification are not claimed.
+
+Source-bound lexical Holo retrieval retained UNKNOWN freshness/index gap.
+Existing attachment and shadow-finder tests informed reuse: extend the attach
+double's WebDriver interface without relaxing its no-kill assertions; the
+distinct cross-owner handoff contract has its own synthetic test module.
+See tests/TestModLog.md for measured results. WSP11/22/50/60/73/84/97.
+
 ## V1.2.0 — Shadow-DOM deep finder (returns real WebElements)
 
 **Date**: 2026-06-17

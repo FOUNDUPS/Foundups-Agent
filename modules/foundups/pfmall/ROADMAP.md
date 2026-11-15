@@ -182,3 +182,170 @@ priorities and active member-runtime PRs intact.
 - Next: device Safari/pinch/accessibility verification, provider-confirmed live tiles,
   independent supporter benefits/follow persistence and controlled muted previews.
   Six simultaneous autoplay streams are not required for responsive browsing.
+
+## Responsive HPC PoC — shared WikiTube theater and phone grid (2026-11-11; acceptance open)
+
+012's clarified PoC requires **one shared Mall with two responsive presentations**.
+Desktop uses the centered main video, search directly below it, and horizontal
+thumbnail strip beneath search. Phone uses the compact three-column video grid,
+fixed header and bottom thumb controls. This is not permission to build another
+HPC shell, change every FoundUp's layout, or call a density-only patch complete.
+The detailed contract and planning allocation are in [HPC H1](../hpc/ROADMAP.md#h1--responsive-wikitube-style-discovery-and-shared-thumb-dock-specified-012-request-2026-11-11).
+
+### Required planning gate
+
+Before another product/build mutation, reconcile the current root/module roadmaps,
+owning INTERFACE, actual code, tests and active PRs with the request. Record its
+stage, owner, fit/drift decision, superseded requirement, acceptance and recovery
+path. Apply the existing [strategic diligence skill](../../ai_intelligence/ai_overseer/skillz/strategic_diligence_gate/SKILLz.md)
+for cross-module/high-impact decisions; do not create a duplicate build skill.
+
+WSP 97 section 1.2.1 asks **Do I need it? Can I afford it? Can I live without it
+now?** These questions project WSP 15's C + I + D + Impact scoring. WSP 30, not
+WSP 15 alone, supplies staged build orchestration. Record scores and verification
+cost before implementation; no unauthenticated planning record grants execution
+or merge authority. H1 records documentation 14/P1, responsive repair 17/P0, and
+scoped search 13/P1, with rationale. These are task-scoped planning priorities,
+not reprioritization of unrelated system work.
+
+### Reuse and current gaps
+
+- Inspect `public/member/` field, player, existing theater/queue rendering,
+  scoped catalog, query and state APIs before proposing markup or another player.
+  WikiTube TV source/history remains a retrieval target, not a verified current
+  integration. Do not repeat an unsourced historical deployment address.
+- PR #2357 used three columns at every width. The original CSS-only #2359
+  draft reproduced a six-column display with three-column player placement.
+  The merged #2359 repair mounts the existing stage and queue as a desktop
+  theater and preserves the phone layout and shared media session.
+- Desktop requests first-video startup playback and sequential queue advancement.
+  Preserve provider controls, one active player, and truthful blocked-autoplay
+  recovery. A thumbnail, iframe load or API availability flag is not playback.
+- Phone tap replaces the selected tile with the shared player in its original
+  row. Nearby tiles reflow and the original tile returns on close. Measure
+  the provider viewport and keep controls clear of the iframe.
+- Scoped search repopulates the existing queue/field. It supersedes hidden-search
+  presentation only within the active permitted catalog; global/remote search is
+  later work and never bypasses authorization.
+
+### Ordered slices and acceptance
+
+| Slice | Stage / work | Promotion evidence |
+| --- | --- | --- |
+| PFWD-0 | Reconcile current owners, source history and acceptance | Roadmap/contract references, source SHAs, existing-test inventory and bounded recovery plan; documentation is not runtime success. |
+| PFWD-1A | PoC: desktop theater plus preserved phone grid | PC and phone composition, correct click target/player, one iframe/audio session, original-ID return, resize/rotation and other-FoundUp regressions. |
+| PFWD-1B | PoC: scoped search and phone dock | Search between desktop main video and bottom tiles; phone thumb access, scoped install identity and optional local dictation. Verify loaded-catalog filtering, empty results, queue advancement, safe areas, keyboard and standalone launch. |
+| PFWD-1C | PoC entry and membership | Dedicated public HPC host, invited FoundUps member access and scoped sign-in return. Verify each entry independently. |
+| PFWD-2 | Prototype: resident speech and agent controls | Red Dog hold-to-talk via authenticated resident ingress, admitted device-compatible selection, cancellation, permission denial and bounded action receipts. |
+| PFWD-3 | Prototype: AutoPost handoff | Existing capture owner, explicit permission, approved route/origin and return state; no copied camera stack. |
+| PFWD-4 | MVP hardening | Measured large-catalog performance, privacy/abuse review, provider/device recovery and release evidence beyond the PoC acceptance matrix. |
+
+Do not defer ordinary desktop/phone playback verification to PFWD-4: it is a
+PFWD-1 PoC acceptance gate. Extend the existing browser fixtures; phone emulation
+is not physical iPhone standalone evidence. Preserve shared search, channel
+expansion, protected operations and other projections.
+
+HPC is the first scoped phone dock consumer. The left `+` opens Home,
+disclosure and device-model availability. The search mic supports local
+recognition when available or opens the input for keyboard dictation. The
+right Red Dog button opens the public briefing. Resident hold-to-talk and
+actual model loading belong to PFWD-2. AutoPost capture belongs to PFWD-3.
+
+The existing [media incident](MEDIA_PLAYBACK_INCIDENT_HPC.md) owns provider-error,
+bot-challenge, origin/referrer and availability evidence. Fix application defects
+without inventing authentication bypasses or claiming an unobserved iPhone pass.
+Report commit, qualified merge, main verification, deployment and PC sync as
+separate outcomes. This roadmap/skill update changes no runtime or live site.
+
+## Desktop poster browsing PoC
+
+012's desktop reference calls for a dense wall of mixed FoundUp cards and
+a full viewer with WikiTube-style playback. This section covers the
+ordinary invited Mall. HPC's scoped desktop theater and phone grid use
+[H1 acceptance](../hpc/ROADMAP.md).
+
+The [navigation contract](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#46-desktop-poster-browsing)
+maps the member entry, tile field, state, quick view and full player owners.
+
+1. **Implemented.** Use the existing grid on fresh wide fine-pointer entry.
+   Restore saved layout and position through the existing state owner.
+   Video lanes, app cards, repositories and services use the same catalog.
+2. **Implemented.** Open the shared full player from video posters. Keep
+   one active player with the selected lane's queue and provider controls.
+   Close returns to the selected tile. Card selection opens quick view and
+   listings use their detail view.
+3. **Specified.** Qualify muted hover for a rights-cleared first-party clip in a separate
+   test. Start with one preview and measure playback requests and bytes.
+   The [media contract](../docs/PFMALL_MEDIA_DELIVERY_CONTRACT.md#84-desktop-previews-and-bandwidth)
+   defines the provider viewport and preview constraints.
+
+The desktop browse slice is WSP 15 priority 13/P1 (C2, I4, D3, Impact4).
+The [member browser test](../../../public/member/tests/README.md#member-poster-grid)
+covers fresh and saved layout, mixed card selection, keyboard and Ctrl+wheel
+navigation, one active player, focus and scroll return, and provider dimensions.
+Release qualification requires a real invited session and a deployed asset match.
+
+### WikiTube search and Play hostname
+
+The [WikiTube archive](https://docs.google.com/document/d/1XzJDkZWsXbHHaDAsNT3zhFo-Nu3t579PE1niPQ9kEzw/edit)
+describes putting search by the queue, keeping a playing video, and starting
+the first result when idle. The [2010 mockups](https://drive.google.com/open?id=0B5a_mx1oJTbONDg3NWZhNDYtZWIwMy00MTQwLTk0M2YtZmNiYjYzN2M3ZWFl)
+show the main player and thumbnail rail. The 2026-11-14 request places the
+search dock above the rail and aligns it left in the immersive Mall player.
+This extends the invited Mall on `f0804bd35` and retains the HPC scope.
+
+| Slice | WSP 15 | Owner and acceptance |
+| --- | --- | --- |
+| PoC dock | 14/P1 (C3, I4, D3, Impact4) | Use the existing catalog and queue matching. Check search without reloading active media, local dictation fallback, menu dismissal, Red Dog and AutoPost handoff, and no overlap with provider controls. |
+| PoC tile playback | 15/P1 (C4, I4, D3, Impact4) | Play in the selected desktop tile using the shared player. Keep the separate full-view action, one iframe, provider dimensions, and original-card return. Use fixture and real-provider evidence. |
+| Play entry | 13/P1 (C3, I4, D3, Impact3) | Bind `play.foundups.com` to the existing Hosting site. Root opens the admitted Mall and the existing sign-in return remains available. Qualify DNS, TLS, signed-out and invited paths independently. |
+| PFWD-2/3 | Later stage | Device model selection needs an admitted runtime and measured device support. Plan mode and plugins need an authorized Red Dog contract. AutoPost keeps capture and private attachment ownership. |
+
+The options menu opens the deployed AutoPost app listed on its
+[repository](https://github.com/FOUNDUPS/autopost). The existing public
+directory has no AutoPost record. The custom AutoPost hostname timed out
+in the release check, while the owner-listed app returned HTTP 200.
+
+The PoC supersedes desktop poster click-to-fullscreen. Click requests in-tile
+playback and the separate fullscreen action opens the WikiTube-style viewer.
+Hover retains the poster affordance. A first-party muted hover clip still
+requires media and bandwidth evidence. Roll back the scoped shell changes as
+one slice if the browser or admission gates regress. The apex member path
+remains available during domain qualification.
+
+#### Phone viewer and foreground input
+
+012's November 14 follow-up extends PFWD-1B from the desktop queue and
+phone browse dock to the phone's expanded viewer. The shared player keeps
+the video above a floating search and a horizontally scrollable queue.
+The dock stays available when a short screen requires scrolling the video
+area. Search changes the queue while the active clip continues. Outside
+the viewer, ordinary Mall video cards use the existing player at the
+selected card. The separate expand control keeps that player mounted.
+HPC keeps its three-column browse grid and registered catalog scope.
+
+| Slice | WSP 15 | Decision and acceptance |
+| --- | --- | --- |
+| PFWD-1B phone viewer | 15/P1 (C4, I4, D3, Impact4) | Extend the shared player and tests from `510079b91`. Check one iframe, horizontal touch scrolling, query and keyboard behavior, tile return, the minimum provider viewport, and existing product routes. |
+| PFWD-1B foreground dictation | 13/P1 (C3, I4, D3, Impact3) | Reuse local browser dictation on the mic or a deliberate Red Dog hold. Release or the square finishes the current utterance. Cancel on navigation or loss of visibility. Keep the transcript editable in the current search. The plus button or an upward swipe on it opens options. |
+| PFWD-1B phone reference refinement | 13/P1 (C3, I4, D3, Impact3) | Use one search dock in scoped browse, invited browse and the expanded viewer. The plus opens an anchored menu. Longer text wraps above the controls. Stop takes the Red Dog position during foreground dictation. Check editable transcripts, touch and keyboard, dismissal, narrow and rotated layouts, and provider continuity. |
+| PFWD-1B build identification | 12/P2 (C2, I4, D3, Impact3) | Show the loaded build beside the scoped topic and in the shared plus menu. Check the phone and desktop labels against the service worker generation during release testing. |
+| PFWD-2 resident speech and browser AI | Later stage | Admit the resident conversation transport and use AI Gateway capability results for model choice. Verify a phone's support and resource use before offering a download or an available model. A visible foreground recording session, Stop, and review before sharing are separate acceptance criteria. |
+
+Chrome's [built-in model requirements](https://developer.chrome.com/docs/ai/get-started#required-hardware)
+currently exclude Android and iOS for its foundation-model APIs. A browser
+model picker remains pending an admitted runtime and a measured mobile
+option. A PWA can capture foreground audio with permission, but the
+[Red Dog contract](../../../public/member/RED_DOG_DIGITAL_TWIN_CONTRACT.md)
+has no resident voice transport. Leave ambient listening and automatic
+learning out of the PoC. A later foreground hands-free session needs
+explicit start, visible listening state, a stop action, an expiry, and
+no implicit recording retention. AutoPost remains the capture owner.
+Camera and photos open AutoPost where that handoff is offered. Files,
+plugins and Plan mode from the November 14 reference remain PFWD-2/3
+work with their existing owners.
+
+The regression fixture checks the shared phone and desktop compositions.
+Physical Safari, Home Screen playback and keyboard behavior, and live
+invited admission remain separate release gates. Roll back the shared
+dock, tile presentation and matching service-worker generation together.

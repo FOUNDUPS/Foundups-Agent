@@ -1,5 +1,17 @@
 # FoundUps MCP Bridge Interface
 
+## Separate private draft MCP interface
+
+On the dedicated Streamable HTTP endpoint, `inspect_draft()` returns draft and
+message IDs, From, recipients, attachment hashes, a raw SHA-256 digest, and
+sender-metadata conflict flags. It returns no body or attachment bytes.
+`set_draft_sender(draft_id, expected_digest, approved_sender, request_id,
+dry_run=True)` returns a preview or a fixed hold reason by default. A write
+requires both caller scope and a private bounded request grant. The receipt
+attests exact readback only; it contains digests, IDs and verification flags.
+Unknown tools/arguments fail closed. There is no send, create, delete or
+settings-mutation route. See [private setup](docs/PRIVATE_DRAFT_MCP.md).
+
 ## Stored-settings gate for snapshot publication — 2026-11-01
 
 The [Holo API](../../../holo_index/INTERFACE.md#stored-chroma-settings-admission--2026-11-01) governs raw-model admission and captured metrics before any
@@ -1166,7 +1178,7 @@ uses `meta.source="reddog_context"`; it grants no execution authority.
 
 ### FastMCP Streamable HTTP Server (v1.6)
 
-The loopback-only remote surface registers exactly one name in
+The default loopback-only remote surface registers exactly one name in
 `REMOTE_READ_ONLY_ALLOWLIST`: `holo_query_bundle`. Repository/documentation,
 Overseer/SQLite, dependency, mutation, ambient executable-backed repository,
 raw Holo, RedDog-state, signal, and execution tools are not remotely
@@ -1201,8 +1213,9 @@ not authentication of installed packages or a runtime execution grant.
 
 - `build_mcp_server(repo_root=None)` registers only the remote read allowlist
   and removes internal `repo_root` parameters from published tool schemas.
-- `build_asgi_app(repo_root=None, auth_token=None, require_auth=True)` raises
-  `ValueError` when authentication is required without a nonblank token.
+- `build_asgi_app(...)` raises `ValueError` when authentication is required
+  without a nonblank token. An authenticated HTTP profile can also register
+  `get_git_inventory`.
 - `run_mcp_bridge_http(...)` owns one direct-PID subprocess and the instance
   lock, and returns `running` only after the protocol canary succeeds. It uses
   the same capability-proven interpreter path whether the parent can import
@@ -1216,6 +1229,61 @@ not authentication of installed packages or a runtime execution grant.
   `holo_query_bundle` call before claiming readiness.
 - The deprecated SSE-named launch functions are aliases to this same runtime;
   no SSE route exists.
+
+#### PC Git inventory
+
+Call `get_git_inventory(request_id, section="summary", offset=0)` with a fresh 8–80 character request ID
+using letters, digits, underscores, or hyphens. The tool takes its repository
+from the supervisor's checkout and the selected PC worktree from the existing
+Git lifecycle configuration. It compares local branch tips with a fresh
+GitHub `ls-remote` read and checks that the observed PC state remained stable
+across the GitHub read. No caller-supplied paths, remotes, or Git commands are
+accepted. Worktree rows include HEAD, branch and flags, with the selected PC
+row marked. The selected PC row also has a cleanliness result.
+
+The summary gives counts and a digest of the complete observation without
+embedding every row. Request `section="branches"` or `section="worktrees"`
+for up to 20 rows and follow `next_offset` until it is null. Each page reads
+fresh state. Compare `inventory_sha256` across pages to detect changes to the
+underlying inventory and restart the enumeration when the digest changes.
+
+On success, the tool returns `status`, `receipt` and `sha256`. The digest
+covers the receipt as UTF-8 JSON with sorted keys, ASCII escaping, and `,`
+and `:` separators without spaces. Use WRE's
+`git_lifecycle_inventory.verify_git_inventory_receipt` to check the request ID,
+digest, repository and observation age (at most 120 seconds). Independently
+compare the reported `github_main` with GitHub and the selected HEAD with PC
+Git when verifying a deployment. The digest checks the bytes. Caller and
+server identity come from the authenticated transport. A blocked observation
+returns a stable `reason` without partial branch or worktree data.
+
+For a local bearer canary, enable `FOUNDUPS_MCP_ENABLE_GIT_INVENTORY=1`
+and `FOUNDUPS_MCP_REQUIRE_AUTH=1` and inject the local bearer through the
+supervisor. The launcher checks Holo and a fresh Git inventory receipt.
+
+For ChatGPT, run the same bridge entrypoint in the Git-only OAuth profile
+under a private supervisor using the pinned MCP environment:
+
+```powershell
+python -m modules.infrastructure.foundups_mcp_bridge.src.mcp_server --git-inventory-oauth --host 127.0.0.1 --port 8128
+```
+
+Set `FOUNDUPS_MCP_GIT_OAUTH_` settings on the supervisor. `ISSUER` is the
+browser-reachable OAuth issuer. `RESOURCE` is the exact external HTTPS MCP
+audience, including the path. `SUBJECT` and `CLIENT_ID` admit one operator and
+one ChatGPT OAuth client. `INTROSPECTION_URL`, `INTROSPECTION_CLIENT_ID` and
+`INTROSPECTION_CLIENT_SECRET` identify a separate confidential introspection
+client. Inject its secret from the private credential store. The issuer must
+issue bearer access tokens with sole audience `RESOURCE` and scope `git:read`.
+The verifier checks issuer, subject, client, expiry, audience and scope on
+each authenticated request. The profile advertises only `get_git_inventory`.
+
+Associate the outbound [Secure MCP Tunnel](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels)
+with the admitted Platform organization and ChatGPT workspace. Point the
+tunnel at `http://127.0.0.1:8128/mcp` and limit OAuth trusted origins to the
+issuer. Verify OAuth discovery through the tunnel and register a private
+OAuth app in ChatGPT with `git:read`. Call the tool with a new request ID from
+ChatGPT while Codex is stopped and compare the receipt with direct Git reads.
 
 ---
 

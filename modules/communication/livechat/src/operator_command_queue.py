@@ -23,6 +23,7 @@ from modules.communication.livechat.src.automation_gates import gate_snapshot
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import runtime_operation_lock
 from modules.communication.livechat.src import video_policy
 from modules.communication.livechat.src import operator_video_policy_owner as policy_owner
+from modules.communication.livechat.src import operator_stream_schedule_owner as stream_owner
 
 logger = logging.getLogger(__name__)
 COMMAND_FILE_ENV = "YT_012_MANIFEST_FILE"
@@ -85,13 +86,16 @@ def enqueue_operator_command(command: dict, *, command_path=None, acknowledgemen
         raise ValueError('manifest_paths_must_be_distinct')
     if (not isinstance(command, dict) or not isinstance(command.get('id'), str)
             or not 1 <= len(command['id']) <= 200
-            or command.get('action') not in {'status', 'set_context', 'clear_context', 'announce'} | video_policy.ACTIONS
+            or command.get('action') not in {'status', 'set_context', 'clear_context', 'announce', stream_owner.ACTION} | video_policy.ACTIONS
             or not isinstance(command.get('payload', {}), dict)):
         raise ValueError('invalid_command')
     identity = os.path.normcase(str(ledger_path))
     if command['action'] in video_policy.ACTIONS:
         video_policy.text(command['id'], 200)
         video_policy.validate_payload(command['action'], command.get('payload', {}))
+    if command['action'] == stream_owner.ACTION:
+        video_policy.text(command['id'], 200)
+        stream_owner.validate_payload(command.get('payload', {}))
     with runtime_operation_lock(identity, timeout_seconds=5):
         inbox = OperatorCommandQueue._read_json(inbox_path, {'version': 1, 'commands': []})
         ledger = OperatorCommandQueue._read_json(ledger_path, {'version': 1, 'acknowledgements': []})
@@ -193,6 +197,21 @@ class OperatorCommandQueue:
     def inspect_command(self, command_id):
         return policy_owner.inspect_command(self, command_id)
 
+    def get_unresolved_scheduling_claims(self, channel_id):
+        return policy_owner.get_unresolved_scheduling_claims(self, channel_id)
+
+    def get_pending_stream_schedule_requests(self):
+        return stream_owner.pending(self)
+
+    async def refresh_stream_schedule_request(self, command_id, *, recorded_only=False):
+        return stream_owner.refresh(self, command_id, recorded_only=recorded_only)
+
+    def claim_stream_schedule_request(self, request, video_ids):
+        return stream_owner.claim(self, request, video_ids)
+
+    def finish_stream_schedule_request(self, command_id, **kwargs):
+        return stream_owner.finish(self, command_id, **kwargs)
+
 
     def record_video_policy_observation(self, policy_ids, *, surface, channel_id, video_id, outcome, detail):
         return policy_owner.record_video_policy_observation(self, policy_ids, surface=surface, channel_id=channel_id, video_id=video_id, outcome=outcome, detail=detail)
@@ -228,6 +247,8 @@ class OperatorCommandQueue:
             return {"status": "rejected", "reason": "payload_must_be_an_object"}
         if action in video_policy.ACTIONS:
             return policy_owner._dispatch_video_policy(self, command, row)
+        if action == stream_owner.ACTION:
+            return stream_owner.dispatch(self, command, row)
         if action == "status":
             return {'status': 'accepted', 'result': policy_owner.private_status(self, gate_snapshot())}
         if action == "clear_context":
@@ -273,6 +294,10 @@ class OperatorCommandQueue:
 
 def get_video_policy(channel_id, video_id=None, *, surface='metadata'):
     return OperatorCommandQueue(None).get_video_policy(channel_id, video_id, surface=surface)
+
+def get_unresolved_scheduling_claims(channel_id):
+    """Read existing unknown scheduling Saves without consuming inbox work."""
+    return OperatorCommandQueue(None).get_unresolved_scheduling_claims(channel_id)
 
 def record_video_policy_observation(policy_ids, *, surface, channel_id, video_id, outcome, detail):
     return OperatorCommandQueue(None).record_video_policy_observation(

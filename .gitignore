@@ -325,6 +325,9 @@ YOUTUBE_SHORTS_INVESTIGATION_FINDINGS.md
 # Session investigation and audit docs (per-session, not permanent)
 docs/investigations/
 docs/audits/*
+!docs/audits/prose/
+docs/audits/prose/*
+!docs/audits/prose/*.md
 !docs/audits/openclaw_reddog/
 !docs/audits/holoindex_external_foundup/
 !docs/audits/holoindex_external_foundup/**

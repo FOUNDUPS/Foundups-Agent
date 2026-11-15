@@ -1,3 +1,12 @@
+## 2026-11-10 — Human verification gate before comment browser effects
+
+Wrap the worker's Chrome/Edge driver with the existing infrastructure handoff
+before human-interaction setup or scripts run. The gate holds detected identity
+verification for at least30 seconds, leaves completion to012, and cancels pending
+effects for owner revalidation. Reply selection, durable history, STOP and
+unknown outcomes retain their owners. No live reply or challenge test performed.
+WSP22/50/84/97.
+
 ## 2026-11-07 — Shared livechat usefulness assessment
 
 The existing semantic assessment/writer/reviewer accepts bounded conversation context

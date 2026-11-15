@@ -1,3 +1,12 @@
+## 2026-11-10 — Deterministic signer activation convergence
+
+Replay the CI interleaving from #2333 by pausing the first publisher after it
+writes the manifest. The second caller activates that generation before the
+publisher resumes. Verify one durable activation and manifest and the same
+persisted generation, revision and manifest ID for both callers. Recovery
+may be reported by both callers in this ordering. The 20-case file and the
+targeted CI-style activation fixture passed locally. WSP 6, 22 and 97.
+
 ## 2026-11-05 — Supervisor startup and plan preservation
 
 New startup control reproduced eager acquisition before repair. With model-free

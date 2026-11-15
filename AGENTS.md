@@ -109,6 +109,27 @@ print("[OK] 0102 systems operational - ready for task entanglement")
 
 ## [TARGET] "follow WSP" PROTOCOL
 
+### Mandatory host launch and build preflight
+
+- Follow [WSP 91 Section 3.0](WSP_framework/src/WSP_91_DAEMON_Observability_Protocol.md#30-host-launch-heartbeat-and-termination-contract)
+  for every FoundUps-controlled process, including temporary previews and helpers:
+  name its owner, observable heartbeat/status, finite job deadline or authorized
+  renewable service lease, stop mechanism and descendant cleanup owner before launch.
+- Short foreground jobs may use bounded supervisor polling; background processes
+  require monitored heartbeats. A heartbeat is not useful-work or security proof.
+  Missing lifecycle enforcement blocks new launch; do not leave `serve_forever`
+  or detached `Start-Process` work running after session closure without an
+  explicitly authorized resident owner. Reuse the DAE broker/OS supervisor.
+- Apply [WSP 71 Section 5.6](WSP_framework/src/WSP_71_Secrets_Management_Protocol.md#56-build-and-host-launch-security-gate)
+  before build/launch execution. Bind applicable security checks to exact source,
+  dependencies and configuration. Missing/stale required checks are not PASS.
+  Use existing security owners; a skill's prototype status is not promotion.
+- Hide noninteractive Windows consoles, preserve private diagnostics and verify
+  actual exit/port closure. Preserve unrelated processes; never kill by name or
+  age alone. Scheduled runs must respect timezone, window and missed-run policy.
+- Qualify timeout, stale heartbeat, cancellation and owner-loss cleanup before
+  accepting a new launch path. Record observed enforcement separately from policy.
+
 ### Step 1: Occam's Razor PoC (LAYER BY LAYER - NOT BIG BANG)
 **Question**: "What is the SIMPLEST solution?"
 - Break into first principles
