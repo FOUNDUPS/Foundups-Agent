@@ -1,5 +1,15 @@
 # p.fMALL Roadmap
 
+## Real HTTP serving qualification — 2026-10-26
+
+Allocate a minimal optional Uvicorn profile and three test-first actual-process
+loopback cases around the existing factory/verifier. No custom launcher. Preserve
+all814 ASGI/mapper cases; pin and inspect the separately resolved inventory before
+promotion. Resource flags and process cleanup do not prove OS limits or graceful
+shutdown. Next qualify a minimal Linux container with real import/static closure,
+then cloud policy/limits, actual member identity and browser wiring. The six existing
+Node functions and shared ignored source remain outside this serving change.
+
 ## Isolated proposal host bootstrap candidate — 2026-10-26
 
 The source candidate supplies a separate ASGI factory around the existing draft
