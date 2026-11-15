@@ -665,7 +665,7 @@
   }
 
   function handleVideoEnded() {
-    if (inline && !theater) return;
+    if (inline && !theater && !returnScroll) return;
     autoplayRequested = true;
     nextVideo();
   }
@@ -1331,7 +1331,10 @@
     expandInline: expandInline,
     setTheater: setTheater,
     isTheater: function() { return theater; },
-    getQueueQuery: function() { return queueSearch?.value.trim().slice(0, 300) || ''; },
+    getQueueQuery: function() {
+      var input = (memberQueueDock && !memberQueueDock.element.hidden) ? memberQueueDock.input : queueSearch;
+      return input?.value.trim().slice(0, 300) || '';
+    },
     getPlaybackSnapshot: getPlaybackSnapshot,
 
     /**
