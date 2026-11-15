@@ -1,6 +1,6 @@
 # YUMORI.me / eSingularity — Grants, Subsidies, and PPP Support Registry
 
-Last verified: 2026-10-26 JST for targeted rechecks and newly recorded opportunities below; remaining legacy entries retain their own verification dates.
+Last verified: 2026-11-14 JST for P-02 new 2026-11-13 MLIT second national PPP/PFI sounding-case registration opening (not a grant), closing 2026-12-04 17:00 JST; 2026-11-11 JST for F-15 official 2026-11-10 extension of the application deadline to 2026-12-24 23:59 JST; 2026-11-10 JST for F-03 official 2026-11-09 second-call opening, 2026-12-14 12:00 JST deadline and conditional DC rate/cap; 2026-11-09 JST for F-08 official 2026-11-06 third-round allocation result; 2026-11-08 JST for F-16 official 2026-11-06 budget-limit warning / historic two-track coverage; 2026-11-05 JST for P-01 deadline passage and F-15 dated coverage correction; 2026-11-01 JST for F-13 expiry of the officially published October 31 application window (no new extension visible); 2026-10-30 JST for F-12 exact deadline-time clarification; 2026-10-28 JST for F-13/F-14 coverage catch-up; 2026-10-26 targeted checks and other historical entries retain their own verification dates. These catch-up discoveries are not fresh official changes.
 
 ## Purpose and truth boundary
 
@@ -119,18 +119,19 @@ Potential YUMORI.me uses: heat recovery, heat exchangers, heat pumps, hot-water/
 ## F-08 — 令和8年度 官民連携基盤整備推進調査費 第3回案件募集
 
 - Agency: 国土交通省 国土政策局 地方政策課 調整室
-- Status: **CLOSED — FY2026 third call ended 2026-10-08; local-government applicant only; future-round consultation remains available**
+- Status: **CLOSED — FY2026 third call ended 2026-10-08; MLIT published its third-round sole selected municipal study on 2026-11-06 (Kitsuki City, Oita), not a Fukui City/YUMORI award; future-year consultation remains available**
 - Application window: 2026-09-17 through 2026-10-08
 - Subsidy rate: up to 1/2 of eligible study costs
 - Applicant: prefectures, special wards, municipalities and specified inter-municipal bodies
 - Primary source: https://www.mlit.go.jp/report/press/kokudoseisaku09_hh_000191.html
 - Program page: https://www.mlit.go.jp/kokudoseisaku/kanminrenkei.html
+- 2026-11-06 official allocation result: https://www.mlit.go.jp/report/press/kokudoseisaku09_hh_000195.html ; award list: https://www.mlit.go.jp/report/press/content/002029338.pdf
 
 This is not YUMORI.me construction CAPEX. It supports local-government study of public infrastructure developed in coordination with private investment. Potential study content can include demand/feasibility work, project-scheme examination, public/private responsibility allocation and other work needed to move a PPP concept toward implementation.
 
 **YUMORI.me relevance:** YUMORI.me cannot apply directly. Fukui City would need to determine whether a Sukatto reuse/COGDC proposal, or associated public infrastructure such as power, roads, water, communications or other qualifying infrastructure, fits the program. The current action is to show the published national program and future-round consultation route to Fukui City and request a written determination or referral to the responsible department. Do not claim eligibility until MLIT/Fukui City confirms the scope.
 
-**Retained FY2026 windows, rechecked 2026-10-26:** first call 2026-02-10 to 2026-03-06; second 2026-06-11 to 2026-06-30; third 2026-09-17 to 2026-10-08. The official program page accepts future-year consultations. These historical windows do not establish FY2027 dates or a YUMORI/City application. See the retained-round calendar before planning the next cycle.
+**Retained FY2026 windows, rechecked 2026-11-09:** first call 2026-02-10 to 2026-03-06; second 2026-06-11 to 2026-06-30; third 2026-09-17 to 2026-10-08. On **2026-11-06**, MLIT published the third-round allocation: **one** selected local-government study, for Kitsuki Station area improvement in **Kitsuki City, Oita Prefecture**, planned total study cost **¥18.4 million**, national allocation **¥9.2 million** (1/2). Fukui City/YUMORI is **not** in that published recipient list. This does **not** establish whether Fukui City submitted an application, nor determine YUMORI eligibility. These figures are a recipient-specific allocation, **not** an F-08 general cap or available YUMORI funding. The official program page accepts future-year consultations; FY2027 call dates and continuation have not been verified. See retained-round calendar before planning the next cycle.
 
 ### F-08 form verification — 2026-10-05 JST
 
@@ -193,15 +194,16 @@ Do not book any F-10 subsidy revenue, do not treat the published rates as expect
 ## F-03 — GX地域共創補助金 / 脱炭素電源地域貢献型投資促進事業
 
 - Agency: 経済産業省／資源エネルギー庁／GX地域共創補助金事務局
-- Status: **VERIFIED PROGRAM / FY2026 FIRST CALL CLOSED / SECOND CALL PRE-ANNOUNCED**
+- Status: **VERIFIED PROGRAM / FY2026 FIRST CALL CLOSED / SECOND CALL OPEN (2026-11-09 to 2026-12-14 12:00 JST)**; YUMORI applicant eligibility, application, selection and award NOT established
 - Program structure: GX戦略地域の地域認定（①〜③）とは別の、事業者選定型「④脱炭素電源地域貢献型」
 - Data-center track: **データセンター設備投資型**
 - Policy conditions: use decarbonized electricity and contribute to the host region of the relevant decarbonized power source; support is for large equipment investment by an electricity-demand business.
 - Official program page: https://www.meti.go.jp/policy/energy_environment/global_warming/gx_strategy_area/subsidy/subsidy.html
 - Official program office: https://gx-area-hojo.jp/
-- The office published a second-call pre-announcement on 2026-08-20. Treat exact second-call dates, rates and thresholds as controlled by the current second-call guide when released; do not copy first-call economics into FIN as expected funding.
+- **New official second call (2026-11-09):** the METI-appointed GX operator opened the FY2026 second call, including the データセンター設備投資型. **Application deadline: 2026-12-14 (Monday), 12:00 JST**, through Jグランツ/GビズIDプライム to obtain an account for the program portal and complete the substantive application there. The official DC-track page advertises only three location/power-procurement patterns, with conditional rates of up to **1/2 for qualifying non-large applicants** or **1/3 for large enterprises**, and maximum ceilings of **¥25 billion for patterns 1/2** and **¥10 billion for pattern 3**. These depend on sourcing decarbonized electricity, qualifying same-prefecture electricity procurement, power-source type, applicant category, and long commitments; the program-wide ¥206 billion budget is across both investment tracks and multiple rounds, NOT a round allocation. The detailed November 9 DC-track guide controls applicant size, minimum eligible investment, contracts, financing and eligible costs, and must be reviewed prior to any project-specific eligibility claim. **The August 20 advance notice is historical only, no longer the active status.** Primary official announcement: https://gx-area-hojo.jp/archives/1701/2026/25/09/09/ ; official second-round portal: https://r8.gx-area-hojo.jp/ .
+- **Material round-status news (2026-10-30):** the officially appointed GX office published its **FY2026 first-call selected-operator list for the データセンター設備投資型 track**. This is a published selection result for other program applicants, **not YUMORI project selection or awarded funding**. Selection-list publication did not itself open round two; the separate official opening was published 2026-11-09. Official news: https://gx-area-hojo.jp/archives/1668/2026/30/14/30/ ; official first-call evidence/list landing page: https://gx-area-hojo--dev1.sandbox.my.salesforce-sites.com/FirstRoundOfInformation (first call closed 2026-09-01 12:00 JST). The list attachment was not independently readable through the evidence fetch in this check; do not infer selected names/sites or a YUMORI status from it. Current second-call conditional rate/cap terms are recorded above from the official second-call portal; none is YUMORI expected or awarded funding.
 
-**YUMORI fit:** potentially relevant to a future Hanyu-led or other independently qualifying building-scale compute investment if an eligible operating company/SPV has lawful site rights, a qualifying decarbonized-power procurement structure, demand/offtake, finance, and a credible operating plan. The preparatory committee and current Form 1 filing are not themselves an eligible DC investment application.
+**YUMORI fit:** potentially relevant to a future sufficiently large, independently qualifying Hanyu-led or other building-scale compute investment if an eligible operating company/SPV has lawful site rights, a qualifying decarbonized-power procurement structure, demand/offtake, finance, and a credible operating plan. The initial modular Phase 1 has NOT demonstrated the current guide's minimum qualifying investment, power procurement, or implementation readiness; do not aggregate unrelated sites to create apparent eligibility. The preparatory committee and current Form 1 filing are not themselves an eligible DC investment application.
 
 **Required determination:** ask the GX program office whether a reuse/PPP data-center site in Fukui City can qualify under the DC investment track when it is outside the specific Inazu/Araki-Shinbo prefectural industrial-park parcel, provided the project satisfies the program's power-location, contribution, ownership, and investment requirements. Do not infer eligibility from Fukui City's GX Strategic Region status.
 
@@ -241,8 +243,18 @@ Do not book any F-10 subsidy revenue, do not treat the published rates as expect
 
 ## F-11 — 令和7年度補正予算 省エネ・非化石転換補助金（設備単位型）第4次公募
 
+### F-11 fifth call — NEW OFFICIAL ROUND (2026-11-06)
+- **Agency:** 経済産業省 / 一般社団法人環境共創イニシアチブ（SII）.
+- **Round status: OPEN.** Official start **2026-11-06**; **2026-12-25 17:00 JST 必着**. Send application by trackable post; hand delivery is not allowed. SII anticipates decisions in late February 2027.
+- **Material eligibility/round clarification:** **fifth call accepts MULTI-YEAR projects only; single-year applications are excluded.** SII says this is the last call for the FY2025 supplementary program and no sixth round is planned. This is not an announced FY2027 successor.
+- **Published conditional rates/caps:** ordinary (III) designated equipment up to **1/3, ¥100M per project**; new GX manufacturer-strengthening (III) track up to **1/3, ¥300M per project**; other GX top-performance, electrification/fuel-conversion and EMS tracks have distinct applicant/technology dependent rules. These are ceilings only, not projected YUMORI cash.
+- **New fifth-call tracks/terms:** the guide adds the GX manufacturer-strengthening equipment route and expands (IV) EMS to certain new sites/lines; verify every eligible-product list, GX condition and multi-year implementation rule against the *fifth-call guide*, not the prior fourth-call PDF.
+- **YUMORI project status: VERIFIED PROGRAM only.** Candidate equipment: specific eligible heat pumps, hot-water/HVAC, transformers, efficiency/EMS associated with a lawful Hanyu operator or separately qualifying onsen use. Whole GPU/modular-DC construction is not thereby eligible. **Unresolved:** actual multi-year project readiness, applicant/operator and site rights, equipment owner, closed-site operating/baseline proof, savings, award-before-contract procurement and no duplicate costs. Existing F-11 fourth round remains CLOSED (historical record below).
+- **Official fifth-call primary sources (verified 2026-11-07):** https://sii.or.jp/setsubi07r/overview5.html ; https://sii.or.jp/setsubi07r/uploads/r7h_st_01_kouboyouryou_5.pdf
+
+
 - Agency: 経済産業省 / 一般社団法人環境共創イニシアチブ (SII).
-- Status: **VERIFIED PROGRAM / FOURTH CALL OPEN; YUMORI ELIGIBILITY NOT ESTABLISHED**.
+- Status: **CLOSED — SII confirmed the fourth call ended 2026-10-30 at 17:00 JST; project boundary remains VERIFIED PROGRAM with YUMORI eligibility/application/award unestablished**. SII mentions a possible fifth-call schedule to be announced later; no fifth-call opening/deadline is established.
 - Open: 2026-10-05. Deadline: **2026-10-30 17:00 JST (physical receipt of application)**.
 - Official call: https://sii.or.jp/setsubi07r/overview4.html
 - Official guide: https://sii.or.jp/setsubi07r/uploads/r7h_st_01_kouboyouryou_4.pdf
@@ -254,7 +266,7 @@ Do not book any F-10 subsidy revenue, do not treat the published rates as expect
 
 - Agency: 環境省 / 一般社団法人静岡県環境資源協会 (SERA).
 - Status: **VERIFIED PROGRAM / THIRD CALL OPEN; YUMORI ELIGIBILITY NOT ESTABLISHED**.
-- Open: 2026-10-16. Deadline: **2026-12-15**; verify exact submission method and cutoff with current guide before any action.
+- Open: 2026-10-16. Deadline: **2026-12-15 17:00 JST (receipt required)**, explicitly stated in the Ministry of the Environment's 2026-10-16 primary release; verify the exact submission method with the administrator before action. Deadline-time evidence rechecked 2026-10-30 (not a new government amendment).
 - Round clarification, rechecked 2026-10-26: SERA identifies this as the **final FY2026 call**. This does not establish a FY2027 successor or opening date.
 - Official ministry release: https://www.env.go.jp/press/press_05673.html
 - Official administrator: https://siz-kankyou.com/2026co2/teitansokenzai3/
@@ -263,13 +275,95 @@ Do not book any F-10 subsidy revenue, do not treat the published rates as expect
 - **Possible fit, not eligibility:** a distinct future new-built ZEB/education/commercial building in the portfolio, if justified, with qualifying private/public applicant.
 - **Unresolved:** applicant ownership/legal land rights, City/core-city applicant restrictions, new-build use and materials, confirmed ZEB criteria, timeline and award-before-contracting requirements. A City lease or committee proposal alone is insufficient. No YUMORI selection or funding is established.
 
+## F-13 — 令和8年度企業の太陽光・蓄電池設備導入促進事業補助金
+
+- Agency: 福井県 エネルギー環境部 エネルギー課.
+- **Round state: CLOSED BY PUBLISHED DEADLINE as of 2026-11-01 JST.** FY2026 application window ran **2026-04-17 through 2026-10-31**. The official prefectural page still states October 31 without a published extension; the budget may have exhausted earlier. Email submissions were specified; cutoff hour and administrator's final receipt status are not independently confirmed. This date passage is not a YUMORI application, rejection or award; FY2027 continuation/dates are unannounced.
+- **YUMORI project boundary: VERIFIED PROGRAM only; no project eligibility inquiry, eligibility, submission, selection or award evidenced.** This is a previously existing FY2026 program discovered in a coverage catch-up, **not a new October 28 call or changed deadline**.
+- Primary source, rechecked 2026-11-01: https://www.pref.fukui.lg.jp/doc/dengen/shin-energy/fukui-taiyokou.html
+- Eligible applicants stated on the public page: a private enterprise with an established business establishment in Fukui Prefecture for at least one continuous year, or a qualifying lessor supplying such enterprise. Eligible installation form: self-consumption PV alone or PV **with** battery; battery-only funding is not established. At least 30% of generated electricity must be self-consumed, with 50% or more consumed in Fukui Prefecture. FIT/FIP, J-Credit registration and other subsidies for the same project are excluded.
+- Published equipment-unit grant amounts: PV with battery **¥50,000/kW, cap ¥5,000,000**; PV alone **¥30,000/kW, cap ¥3,000,000**. Commercial battery >20 kWh **¥63,000/kWh** (smaller battery **¥51,000/kWh**), battery cap **¥6,300,000** subject to actual cost/1/3 controls. A separate **¥20,000/kW, cap ¥2,000,000** addition is only for designated Reinan municipalities, **not Fukui City**. Each rate/cap is conditional, not a YUMORI forecast.
+- Candidate scope: solar generation and qualifying battery assets for a lawful future Fukui data-center/onsen operating site; **not** GPU purchase or unrestricted DC construction funding.
+- **Unresolved:** whether a future operator or lessor meets the one-year Fukui presence test, whether the approved land/building/lease and applicant equipment ownership satisfy the detailed guide, whether verified site load can establish self-consumption, and how PV/BESS costs avoid duplication with F-01, F-02, F-03 or other support. The current YUMORI preparatory committee/property-rights posture does not establish eligibility. Do not assume a program return or equivalent terms in FY2027.
+
+## F-14 — 令和7年度補正予算 省エネ・非化石転換補助金（工場・事業場型）第4次公募
+
+### F-14 fifth call — NEW OFFICIAL ROUND (2026-11-06)
+- **Agency:** 経済産業省 / 一般社団法人環境共創イニシアチブ（SII）.
+- **Round status: OPEN.** Official start **2026-11-06**; **2026-12-25 17:00 JST 必着**. Trackable postal receipt required; no hand delivery. Indicative selection/award timing is late February 2027.
+- **Material eligibility/round clarification:** **MULTI-YEAR projects only; single-year applications excluded.** This is the final announced FY2025-supplementary round; SII plans no sixth call.
+- **Published conditional rates/caps:** (I) advanced track up to **2/3 for SMEs** or **1/2 for large enterprises/other**, with a published **¥3B total project ceiling (¥1.5B annually)**, or **¥4B total (¥2B annually)** in a qualifying non-fossil conversion track. Other (I) general/SME and (IV) EMS categories have lower, distinct rates/caps; **(IV) EMS up to ¥100M per project** subject to the current guide. No cap is forecast funding.
+- **New fifth-call clarifications:** (I) now adds an equipment-level savings test in addition to facility-level tests, introduces an eligible four-or-more-firm supply-chain collaboration track; (IV) EMS expands to certain new establishments or production lines. Track-specific conditions and payback tests apply.
+- **YUMORI project status: VERIFIED PROGRAM only.** Potentially relevant to a qualified facility-wide thermal/heat-reuse/efficiency/EMS project with a real eligible operator and multi-year execution plan, not general DC/GPU capital. **Unresolved:** active baseline for a closed property, ownership/site lease, applicant class, quantified savings/payback, energy-monitoring design, eligible equipment and segregated costs, pre-award contracting rules. Historical fourth call remains CLOSED.
+- **Official fifth-call primary sources (verified 2026-11-07):** https://sii.or.jp/koujou07r/overview5.html ; https://sii.or.jp/koujou07r/uploads/r7h_kj_01_kouboyouryou_5.pdf
+
+
+- Agency: 経済産業省 / 一般社団法人環境共創イニシアチブ (SII).
+- **Round state:** **CLOSED — SII explicitly confirmed on 2026-10-30 that fourth-call receipt ended at 17:00 JST** (opened 2026-10-05); shipping required traceability and hand delivery was disallowed. SII says fifth-call details will be published when decided, but has not established a fifth-call date. This is a round closure, **not** YUMORI application, rejection or award.
+- **YUMORI project boundary: VERIFIED PROGRAM only; applicant, facility and use-right eligibility, application and award not established.**
+- Official call, checked 2026-10-28: https://sii.or.jp/koujou07r/overview4.html
+- Official administrator's program/type explanation: https://www.syouenehojyokin.sii.or.jp/about-type/kojyo.html
+- This is the separate **(I) factory/facility-wide energy-savings** and **(IV) energy-demand optimization/EMS** lane; do not merge it with F-11's (III) listed equipment/(II) electrification tracks. Official examples in (I) include facility/system-level engineering and heat reuse. Subsidy rates are **category/applicant dependent** (for example, advanced-track up to 2/3 for SMEs or 1/2 for large enterprises; general-track up to 1/2 or 1/3 respectively). Single-year caps can reach **¥1,500,000,000** in specified (I) tracks, with other and multi-year limits; controlling fourth-round guide and actual performance thresholds govern. These are **not** YUMORI finance estimates.
+- Potential component fit: a separately qualifying onsen/building-wide heat recovery/HVAC/DHW/electrical efficiency project or EMS optimization after lawful operation and sufficient baseline evidence, not unrestricted data-center/GPU CAPEX.
+- **Unresolved:** eligible applicant/site owner and licensed operator; baseline energy consumption at a currently closed public property; threshold energy savings/investment payback, installed equipment boundaries, design/construction start constraints, availability of a valid City property-rights route and no overlapping cost claims with F-07A, F-07B and F-11. A 2026 deadline cannot overcome current property or applicant uncertainty.
+- Retain the call for future-cycle comparison without asserting another supplementary round in 2027.
+
+## F-15 — 令和８年度 業務用建築物の脱炭素改修加速化事業（脱炭素ビルリノベ2026）
+
+- Agency: 環境省 / 執行団体 一般社団法人環境共創イニシアチブ (SII).
+- **Round state: OPEN BY PUBLISHED WINDOW as of 2026-11-11, subject to early closure upon budget exhaustion. Official application deadline EXTENDED on 2026-11-10.** This is a **2026-06-04 originally announced** opportunity discovered in coverage reconciliation on 2026-11-04, **not a newly opened November call**.
+- **Updated official deadline: 2026-12-24 (Thursday), 23:59 JST**, extended from **2026-11-30** on 2026-11-10. The Ministry of the Environment independently published the extension (with the old 17:00 receipt cutoff struck out); the official SII administrator notice explicitly gives the NEW 23:59 cutoff, resolving the earlier conflicting cutoff for this extended call. Submission is via jGrants with GビズIDプライム, and the call may still close early if the budget is exhausted. Official extension: https://www.env.go.jp/press/press_05813.html ; administrator dated change notice: https://bl-renos.jp/r8/news/2026111001.html ; live call page: https://bl-renos.jp/r8/about/ .
+- Primary sources: Ministry extension 2026-11-10 https://www.env.go.jp/press/press_05813.html ; SII dated deadline change 2026-11-10 https://bl-renos.jp/r8/news/2026111001.html ; current call https://bl-renos.jp/r8/about/ ; initial historical ministry opening https://www.env.go.jp/press/press_04846.html
+- Support: eligible existing nonresidential building-envelope/energy retrofit; published conditional **1/2–1/3** of eligible equipment, construction and design costs; maximum **¥1,000,000,000** and minimum **¥2,000,000** per project, per administrator page and controlling guide. These are **not YUMORI funding**.
+- Potential components: building insulation, high-efficiency HVAC and commercial hot-water, controls/BEMS, possibly qualifying external high-efficiency heat sources under the specific program rule. This does not establish that a closed public onsen, a reused former school, server heat-pump package, or compute hardware qualifies.
+- Administrator's published main performance conditions include BPI ≤1.0 and use-dependent primary-energy reductions (roughly 30% for hotels/restaurants and 40% for offices/schools), BEMS and approved modelling; formal project-specific tests depend on the guide.
+- **YUMORI project boundary: VERIFIED PROGRAM only.** No qualifying applicant, ownership or use rights, operating/baseline conditions, proposal, selection or award established. Check City ownership versus eligible operator, public/private applicant criteria, buildings/application units, baseline methodology for closed properties, procurement only after award, stacking with F-07/F-10/F-11/F-14, and actual need for the retrofit.
+- Calendar handling: retain original FY2026 call permanently; mark 2027 successor **UNANNOUNCED / NOT VERIFIED**. The November 5 entry is historical coverage correction, while the **November 10 application deadline extension is a new official material change**; retain both the original cutoff and new cutoff in the dated round record.
+
+## F-16 — 令和8年度 企業における省エネ設備等導入支援事業補助金（福井県、通常枠／原油価格高騰枠）
+
+- **Agency:** 福井県 産業労働部（担当窓口：企業における省エネ設備等導入支援事業補助金事務局）.
+- **Source-change intelligence (2026-11-06; verified 2026-11-08):** Fukui Prefecture's **通常枠** official page, last updated **2026-11-06**, now warns that application volume has brought the program **near its budget limit** and that even applications submitted within the advertised window may not receive support. This is a material **budget-availability warning, not a formal closure or changed cutoff**; the exact date the warning text was inserted is not independently proven beyond the official page's update date. F-16 was not previously recorded in this registry; the original May and August openings are **historical coverage catch-up, not November openings**.
+- **通常枠 round:** 2026-05-29 to **2026-11-30** (cutoff hour not shown on primary page); first-come within budget, possible earlier exhaustion. **Round state: OPEN BY PUBLISHED WINDOW / BUDGET NEAR LIMIT; administrator's actual allocation and remaining funds unverified.** Published **1/2** rate, **¥6,000,000 cap**, equipment purchase only (no installation/removal/transport/disposal). Replacement of eligible **existing operating** LED, HVAC, hot-water, production or refrigeration equipment with required CO2 reductions. Eligible applicant is a qualifying **Fukui SME in manufacturing or commercial/service business** with tax compliance and Fukui women's-advancement registration unless sole proprietor. **Critical property condition:** normally **owns its operating premises**; leased premises are excluded except qualifying production/refrigeration equipment with owner consent under the published exception. A City-owned/leased closed onsen or school cannot be assumed eligible.
+- **原油価格高騰枠 round:** Originally opened **2026-08-07**; published close **2026-11-30** (time unverified), first-come/budget-limited. **Rate 1/2; ¥10,000,000 cap**, equipment purchase only. Targets eligible existing operating boilers, industrial heat pumps, transformers, motors, cogeneration, industrial furnaces or specified production equipment; requires a **≥5% year-on-year increase in energy-related expenses for the most recent two months**, along with other applicant conditions. **Cannot apply for both F-16 tracks.** No November 6 budget warning is confirmed for this track. Special-track conditions do not establish a concession/City property exception.
+- **YUMORI boundary: VERIFIED PROGRAM only; no YUMORI inquiry, eligible applicant/site, submitted application, selection or award evidenced.** Candidate fit is narrow: a separate qualifying, **already operating** private SME-owned site with replaceable eligible equipment, or a specific exception for approved equipment. The currently closed Sukatto facility, public-school assets and a hypothetical future operator/site do not demonstrate the required applicant, premises title, operating-equipment baseline, emissions reduction or increased historic energy costs. Do not book cap or remaining program budget as project financing.
+- **Unresolved:** actual eligible operator/industry and premise ownership; narrow consent exception; current first-come funding availability; equipment baseline and CO2 proof; detailed formal submission time and documents; contract timing; cost segregation with F-07/F-11/F-14/F-15 and other subsidies. FY2027 successor and terms are **UNANNOUNCED / NOT VERIFIED**.
+- **Primary official sources:** 通常枠 https://www.pref.fukui.lg.jp/doc/chisangi/bosyu/syouene2026.html (last updated 2026-11-06); 原油価格高騰枠 https://www.pref.fukui.lg.jp/doc/chisangi/bosyu/syouene_genyuwaku2026.html (last updated 2026-08-07).
+
+## P-02 — 国土交通省 令和8年度 第2回「サウンディング（官民対話）」案件募集（PPP/PFI support; NOT subsidy）
+
+- Agency: **国土交通省 総合政策局 社会資本整備政策課**, national block-platform sounding program.
+- Official announcement: **2026-11-13**; open for **public-facility managers, local governments and other public bodies** from **2026-11-13 14:00 through 2026-12-04 17:00 JST**. Planned dialogue: **2027-01-28**, via web meeting.
+- Round state: **OPEN — PUBLIC-BODY CASE REGISTRATION**. This is a sounding/market-dialogue opportunity, **not a grant, subsidy, private-investor application, City acceptance of a PPP proposal, or project contract**. Subsidy rate and cap: **not applicable; none published**.
+- Eligible cases: public-sector projects at concept development, project structuring or operator-selection review stage. MLIT may prefer governments with no sounding experience or populations under 200,000, and may limit a body to one case.
+- Submission: an eligible public body must complete **both** the official online application and submission of the current **案件登録様式** from the official MLIT page. Registering only one is not an accepted application. Project selection is subsequent; participation is not guaranteed.
+- YUMORI boundary: **VERIFIED PROGRAM / OPEN ROUND ONLY**. No Fukui City commitment to submit, no YUMORI eligibility, case registration, selection, procurement, concession, grant or award is evidenced. If the City approves, **Sukatto Land Kuzuryu** may be a candidate topic for feasibility/market dialogue about lawful thermal-facility reuse and an integrated heat-reuse/AI-compute PPP; former Hanyu and Shimousaka schools must remain a separate City asset-proposal lane. National sounding is **not** Fukui City's FY2026 財産有効活用民間提案制度 filing.
+- **Unresolved decision:** Will Fukui City, as lawful public-facility manager, choose a sufficiently defined Sukatto PPP/PFI case, designate a responsible department, approve what nonconfidential facts to disclose, and submit the exact current registration materials before December 4 at 17:00 JST? The initiative cannot be filed on behalf of the City without City authority.
+- Official MLIT press release: https://www.mlit.go.jp/report/press/sogo21_hh_000314.html
+- Official MLIT second-session and template page: https://www.mlit.go.jp/sogoseisaku/kanminrenkei/sosei_kanminrenkei_fr1_000175.html
+- Current separate Fukui City FY2026 asset-list source (excludes Sukatto): https://www.city.fukui.lg.jp/sisei/plan/reform/p073300.html
+
 ## P-01 — 福井県 大型データセンター誘致可能性調査業務（フェーズ１） (procurement; NOT subsidy)
 
 - Agency: 福井県エネルギー環境部エネルギー課.
-- Status: **VERIFIED PROCUREMENT NOTICE / NO YUMORI CONTRACT OR AWARD**.
-- Published: 2026-10-14. Bidder eligibility submission closed **2026-10-23 17:00**; proposals due **2026-11-04 17:00** only for already-qualified bidders.
+- Round state: **CLOSED BY PUBLISHED DEADLINE as of 2026-11-05 JST**. The original Prefecture notice has not announced an extension or award, and final receipt/selection has not been independently established. **NOT A GRANT**.
+- YUMORI boundary: **NO QUALIFIED BID, CONTRACT, SITE SELECTION OR AWARD EVIDENCED**.
+- Published: 2026-10-14. Bidder eligibility submission deadline **2026-10-23 17:00**; proposal receipt deadline **2026-11-04 17:00** for already-qualified bidders only.
 - Official source: https://www.pref.fukui.lg.jp/doc/dengen/1014.html
 - Public research procurement ceiling **¥6,160,000 incl. tax** is NOT a grant cap or subsidy. Scope studies siting and infrastructure for very large data centers; no evidence any YUMORI site is selected or on the list. Possible complementary heat-reuse/decentralized-compute question is only a future inquiry hypothesis.
+
+### Watch reconciliation — 2026-11-07 JST
+SII officially opened F-11 and F-14 *fifth* rounds on 2026-11-06; both close 2026-12-25 at 17:00 JST physical receipt and accept **multi-year only** projects. SII identifies the fifth as the final FY2025-supplementary round. Existing fourth-round rows remain CLOSED. Recheck and separately preserve new fifth-call equipment/GX/EMS eligibility conditions; no YUMORI project status or committed amount changes. Official sources: https://sii.or.jp/setsubi07r/overview5.html and https://sii.or.jp/koujou07r/overview5.html .
+
+### Watch reconciliation — 2026-11-05 JST
+
+The published 2026-11-04 17:00 JST deadline for Fukui Prefecture's P-01 large-data-center feasibility consultancy passed. Its October 14 primary notice remained unchanged at review; mark **CLOSED BY PUBLISHED DEADLINE**, not award, rejected bid or confirmed final procurement outcome. It is **not a subsidy**, and has no YUMORI finance implication. Primary source: https://www.pref.fukui.lg.jp/doc/dengen/1014.html
+
+Record the already announced June 4 MOE/SII commercial-building retrofit call as F-15 for forward-cycle coverage. Its November 30 **time conflict (MOE 17:00 vs SII 23:59)** is unresolved and must be reported as conflicting official sources, not silently resolved. It is not a new opening or published change on November 5. No project-status promotion or committed funding.
+
+### Watch reconciliation — 2026-10-31 JST
+
+SII first-party October 30 notices confirm F-11 (equipment track) and F-14 (whole-facility track) fourth calls **CLOSED** at 17:00 JST (physical receipt). Both mention a possible fifth call, with no official opening, deadline, category rates or caps yet established. The GX program administrator published FY2026 F-03 first-call DC-track selection results on October 30; this is **not** a YUMORI eligibility or award receipt, and the second-call status remains PREANNOUNCED. F-13's official Fukui deadline is October 31 with possible earlier budget exhaustion; its page has not evidenced an extension or current unexhausted budget, so do not infer a current application slot from the calendar. No public-asset list or City filing route was promoted. Primary sources: https://sii.or.jp/setsubi07r/overview4.html , https://sii.or.jp/koujou07r/overview4.html , https://gx-area-hojo.jp/ , https://www.pref.fukui.lg.jp/doc/dengen/shin-energy/fukui-taiyokou.html . Status remains VERIFIED PROGRAM except F-01's separately retained ELIGIBILITY INQUIRY; no financial admission.
 
 ## Other tracked programs
 
@@ -317,6 +411,10 @@ across sites merely to meet a threshold or reuse the same eligible cost twice.
 | F-10 | Building-level ZEB retrofit / eligible technology (FY2026 round closed) | Each eligible school/Sukatto building independently | Eligible private/nonprofit building owner; City cannot apply in this METI/SII lane | Owner/leaseholder route, joint/multi-building application, track, equipment and pre-award procurement conditions require SII confirmation |
 | F-11 | Listed high-efficiency heat pumps/HVAC/hot water/transformers, ending 2026-10-30 | Lawful independently eligible buildings/equipment | Eligible operating applicant and equipment owner | City/site rights, listed equipment, savings and closed-facility baseline, timing and duplicate-subsidy rules |
 | F-12 | Low-carbon structural-material NEW-build ZEB only, ending 2026-12-15 | Distinct future qualifying new building | Eligible building owner/new-construction applicant | Municipality and applicant exclusion rules, land/title, ZEB performance and structural materials; not retrofit |
+| F-13 | Fukui enterprise PV + qualifying battery; existing call expires 2026-10-31 | Future eligible operating site only | Fukui private enterprise operating ≥1 year / eligible lessor | Verify land/use rights, no PPA assumption, applicant, consumption ratios and grant stacking; no current YUMORI eligibility |
+| F-14 | Facility-wide major energy savings / EMS; existing call expires 2026-10-30 | Lawful operating onsen/building, independently evaluated | Eligible building/energy equipment operator/entity | Verify closed-site energy baseline, owner/contracting, savings/payback, no double-counted F-07/F-11 costs |
+| F-16A | Fukui SME operating-equipment renewal, regular track; budget nearing limit (2026-11-06 warning) | Qualifying existing private SME-owned operating site, not unapproved municipal lease | Eligible SME with owned premises; narrow production/refrigeration owner-consent exception | Open by Nov30 published date, first-come; budget availability, property and equipment baseline unresolved |
+| F-16B | Fukui SME energy-price-shock equipment renewal (separate track) | Qualifying operating SME site with historic energy cost increase | SME with qualifying ≥5% two-month energy-cost increase; cannot claim both tracks | Original Aug7 opening (not new); Nov30 cutoff; budget/ownership/equipment/CO2 tests unresolved |
 
 Primary sources rechecked for the material mapping boundaries:
 - City school call and official guidelines: https://www.city.fukui.lg.jp/sisei/plan/reform/p073300.html
@@ -328,6 +426,8 @@ Primary sources rechecked for the material mapping boundaries:
 - 2026-10-26 update, MOE third new-build low-carbon ZEB call: https://www.env.go.jp/press/press_05673.html
 - 2026-10-26 update, Fukui large data-center site procurement (NOT grant): https://www.pref.fukui.lg.jp/doc/dengen/1014.html
 - 2026-10-26 update, MLIT closed FY2026 calls / future round consultation: https://www.mlit.go.jp/kokudoseisaku/kanminrenkei.html
+- 2026-10-28 coverage catch-up, Fukui enterprise PV/storage (FY2026 official 04/17 announcement, not new this week): https://www.pref.fukui.lg.jp/doc/dengen/shin-energy/fukui-taiyokou.html
+- 2026-10-28 coverage catch-up, SII facility-wide efficiency fourth call (official 10/05 announcement, not new this week): https://sii.or.jp/koujou07r/overview4.html
 - 2026-10-26 retained history, Cabinet Office annual/ongoing PPP support: https://www8.cao.go.jp/pfi/shien/r8/r8_index.html
 - 2026-10-26 retained history, Fukui DX deadline extension/no second FY2026 call: https://www.pref.fukui.lg.jp/doc/sinsan/dxkasoku.html
 - 2026-10-26 round clarification, SERA final FY2026 new-build ZEB call: https://siz-kankyou.com/2026co2/teitansokenzai3/
@@ -336,3 +436,16 @@ Other program rows retain their existing verification dates and status boundarie
 this mapping does not certify a new round, site eligibility or multi-site permission.
 Grant reimbursement timing, bridging finance and actual award allocation must be
 reconciled with the delivery schedule before a deployment gate can pass.
+
+## Change log
+
+### 2026-11-14 — P-02 national PPP/PFI sounding case intake opened (MLIT 2026-11-13)
+
+MLIT opened its FY2026 second national block-platform public-private sounding *case registration* for eligible public-facility managers, **2026-11-13 14:00–2026-12-04 17:00 JST**; dialogue is planned for 2027-01-28. This creates a possible **City-sponsored pre-project market dialogue** route for Sukatto distinct from Fukui City's listed-school asset call. No published financial subsidy/rate/cap, application by YUMORI, Fukui City sponsorship, eligibility confirmation, participation decision, contract or award. Exact official online form **and** MLIT case-registration document are required of the public body; no form regenerated or sent. Full P-02 source/constraints above. Other standing grant terms were not advanced.
+
+
+### 2026-11-11 — F-15 retrofit application deadline extended (official 2026-11-10)
+MOE and appointed administrator SII officially extended F-15 脱炭素ビルリノベ2026 from November 30 (historic MOE 17:00 versus SII 23:59 discrepancy) to **December 24, 2026 at 23:59 JST**. Date/time now corroborated by the November 10 official administrator notice and MOE extension announcement. This affects only the application window, not eligibility or YUMORI funding. Applicant, lawful public-property rights, baseline, equipment scope, procurement timing and cost stacking remain unresolved. Continue to treat ¥1 billion cap as a conditional ceiling, never project revenue. Official: https://bl-renos.jp/r8/news/2026111001.html and https://www.env.go.jp/press/press_05813.html .
+
+### 2026-11-10 — F-03 second call open
+See F-03 details and official links above; YUMORI VERIFIED PROGRAM only.

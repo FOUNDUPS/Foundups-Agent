@@ -981,14 +981,16 @@ class WREMasterOrchestrator:
             skill_name, current_fidelity,
         )
 
-        # 1. Recall failure patterns — what went wrong before?
+        parent_digest = loaded_skill_digest(skill_content)
+
+        # 1. Recall failure patterns — what went wrong before for this parent?
         failures = self.sqlite_memory.recall_failure_patterns(
-            skill_name, max_fidelity=0.89, limit=5
+            skill_name, max_fidelity=0.89, limit=5, parent_version=parent_digest
         )
 
-        # 2. Recall successful patterns — what worked?
+        # 2. Recall successful patterns — what worked for this parent?
         successes = self.sqlite_memory.recall_successful_patterns(
-            skill_name, min_fidelity=0.90, limit=3
+            skill_name, min_fidelity=0.90, limit=3, parent_version=parent_digest
         )
 
         # 3. Build reflection prompt and ask Qwen to generate variation
@@ -1018,7 +1020,7 @@ class WREMasterOrchestrator:
             variation_id=variation_id,
             skill_name=skill_name,
             variation_content=variation_content,
-            parent_version=loaded_skill_digest(skill_content),
+            parent_version=parent_digest,
             created_by=agent,
         )
 

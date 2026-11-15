@@ -1,4 +1,4 @@
-﻿"""In-memory adapter for FoundUps Agent Market PoC.
+"""In-memory adapter for FoundUps Agent Market PoC.
 
 Provides deterministic ID generation for repeatable tests when
 DETERMINISTIC_IDS=1 environment variable is set.

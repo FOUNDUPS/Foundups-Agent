@@ -75,5 +75,6 @@ the latest brief. Apply production skill's four ordered audits before delivery.
 
 The film retains one survivor; the game can rescue three babies and two slower
 parents through repeated select-then-root actions. Both use the same world timeline.
-The cave shelf is removed; all five start on the floor. See
+The cave shelf is removed; large parents remain above the three small babies
+in the approved stylized burrow perspective. See
 [rescue contract](../../../eduit/docs/RESCUE_GAME_REVIEW.md).

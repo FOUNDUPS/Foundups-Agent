@@ -1,5 +1,34 @@
 # Video Indexer Tests - ModLog
 
+## 2026-11-07 — No unattended paid enrichment after Studio indexing
+
+Extend the existing actual-cycle test with key-absent/key-present cases, a
+synthetic credential sentinel and a forbidden direct analyzer constructor.
+Assert that neither analyzer nor enrichment persistence runs, browser-pass
+summaries retain three indexed results, and `gemini_analysis` remains an empty
+mapping for compatibility. The new cases against old source yield **1 failed,
+1 passed**: the key-present case detects the unwanted constructor despite the
+old cycle's exception handler. No production credential or provider call is used.
+
+The corrected selection of `test_shorts_indexing_pass.py`, `test_action_surface.py`
+and `test_indexer_scheduler_order.py` yields **32 passed** offline. Existing
+adapter checks and source-text phase-order assertions are retained; they are
+not end-to-end browser or scheduler acceptance. No video-capable shared routing,
+live indexing, merge or deployment follows from this receipt. WSP00/5/6/22/50/77/97.
+
+The same selection is connected to the existing `youtube-selected-batch` job.
+Its XML check requires exactly 32 cases, no failures/errors/skips and the
+key-present regression; the existing artifact action retains the result. The
+CI-style command also passes 32 locally; hosted execution remains separate.
+
+The first PR head passed the hosted 32-case selection and exposed two stale
+backend-manifest bindings in general CI. The existing generator changes only
+this source hash, preserving all 1,485 runtime members; both canonical digest
+pins are refreshed without changing their assertions. Independent source review
+accepted the supplement. After generation and staging finished, all eight
+`scripts/tests/test_generate_reddog_backend_manifest.py` cases passed locally.
+An earlier overlapping generation/test run is not acceptance evidence.
+
 ## 2026-10-22 - Omitted language and real factory compatibility
 
 Added nine real-factory construction cases: omitted multilingual and `.en`

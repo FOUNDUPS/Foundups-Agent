@@ -557,3 +557,21 @@ def test_launch_with_actual_mock_factory_stays_simulated(token_factory_request):
     assert result.success is True
     assert result.token_address.startswith("mock_token_")
     assert factory.get_deployment_status(foundup.foundup_id).metadata == {"mock": True}
+
+
+@pytest.mark.parametrize("bad_reward", [True, False, 1.5, "1", float("nan"), float("inf"), -1])
+def test_initial_reward_refuses_before_any_launch_adapter_effect(token_factory_request, bad_reward):
+    from unittest.mock import Mock
+
+    foundup, terms = token_factory_request
+    services = Mock()
+    result = launch_foundup(
+        registry=services, token_adapter=services, repo_adapter=services,
+        task_pipeline=services, foundup=foundup, token_terms=terms,
+        repo_name="must-not-provision", initial_task_params={"reward_amount": bad_reward},
+    )
+    assert result.success is False
+    assert result.token_address is result.repo_url is result.initial_task is None
+    assert services.mock_calls == []
+    assert [event.event_type for event in result.events] == ["launch.failed"]
+    assert result.error == "reward_amount must be a positive integer"

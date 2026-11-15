@@ -1,5 +1,11 @@
 # AI Intelligence Overseer - WSP 77 Agent Coordination
 
+Ordinary `main.py` preflight constructs the existing overseer with
+`initialize_models=False`. Security and WSP checks remain active without loading
+Qwen/Gemma for a deterministic inspection. Operational inference still uses its
+role selection and admission contracts. An unavailable signed runtime binding
+remains unavailable; startup does not fabricate one from a model name.
+
 **Status**: Active mixed-maturity module; production RSI is not proven
 **Version**: 0.10.5
 **Date**: 2026-08-27

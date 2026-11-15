@@ -7,6 +7,59 @@
 
 ## Public API
 
+### Local pitch-package instruction entry (prototype)
+
+`skillz/foundup_pitch_package/SKILLz.md` produces a versioned brief, narration/storyboard
+and companion deck from existing Outcome/Solution/Pain evidence. The Codex entry is
+`.agents/skills/foundup-pitch-package/SKILL.md` at repository root. It has no callable
+executor, WRE registry admission, resident trigger or publication authority. Use the
+current Skillz and `docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md`
+for the media-admission and separately granted campaign boundaries.
+
+### Source-backed editorial package
+
+```python
+content_orchestrator.prepare_campaign(brief: dict) -> dict
+async def execute_content_campaign(params: dict[str, str]) -> dict
+```
+
+The existing SOCIAL adapter accepts `social campaign content action=prepare
+dry_run=true brief='<JSON>'`. Inline input is bounded to64KiB with unique JSON
+keys. `social_content_brief.v1` requires an explicit brand projection, audience,
+objective, CTA, source excerpts, topics and offset-aware calendar parameters.
+Returns `social_content_package.v1`: deterministic editorial priorities,
+deduplicated evidence, source-preserving drafts, proposed UTC slots, review
+requirements and measurement join keys. See [the full contract](docs/CONTENT_CAMPAIGN.md).
+
+All evidence remains supplied/unverified. Brand rules and locale are carried for
+review, not automatically applied. Package revision is not signed authority;
+no account is selected, no source/credential/config is fetched and no model,
+scheduler, storage, browser or publisher runs. Unknown/live parameters reject.
+Length checks are raw Unicode prechecks; provider validation remains pending.
+Overlength drafts return no publishable content, preserving source text/links.
+
+### Petition intake plan
+
+```python
+async def execute_petition_campaign(params: dict[str, str]) -> dict
+```
+
+Owner: `src/petition_campaign.py`; the existing SOCIAL campaign adapter dispatches
+`social campaign petition`. Parameters: `action` (`preview`/`plan`), `dry_run`
+(`true` only), `petition_url`, `campaign_id`, `title`, `platforms`. Unknown or
+duplicate command parameters, unsupported operations and invalid public URLs
+reject. Conversational launch phrases route only to the effect-free petition
+branch, never the other existing publishers.
+
+Returns `petition_campaign_plan.v1` with `awaiting_petition_url` or `intake_ready`,
+canonical campaign identity, an in-memory brief projection and pending phases.
+All accounts/platforms are disabled; URL/identity/source/policy verification is
+pending. `plan_revision` is not a signature or execution job. The leaf reads no
+host config and performs no model, network, browser, storage or publication effect.
+Outer CLI/runtime audit and admission behavior remains outside that guarantee.
+Account creation, persistence, draft generation, publishing, analytics and local
+browser qualification remain separate. See [the runbook](docs/PETITION_CAMPAIGN.md).
+
 ### AntifaFM campaign pilot
 
 ```python

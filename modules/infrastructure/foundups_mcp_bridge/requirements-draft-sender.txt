@@ -1,0 +1,8 @@
+# Separate, loopback-only draft sender process. The Holo launcher is unchanged.
+mcp==1.30.0
+pydantic==2.12.3
+uvicorn==0.38.0
+httpx==0.28.1
+anyio==4.16.0
+starlette==1.10.0
+cryptography==50.0.2

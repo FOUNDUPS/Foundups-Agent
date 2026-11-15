@@ -1,7 +1,7 @@
 ---
 name: foundup_campaign_operator
-description: Review AntifaFM listener requests with the existing comment drafter and publish bounded station updates through the verified X interface.
-version: 0.1.0
+description: Prepare and launch evidence-backed petitions with human authentication handoff, or operate the bounded AntifaFM campaign through the existing social interfaces.
+version: 0.3.0
 author: 0102
 agents: [qwen]
 primary_agent: qwen
@@ -12,6 +12,15 @@ category: workflow
 evals: []
 ---
 # FoundUp Campaign Operator
+
+For "launch a petition" requests, follow
+[the petition workflow](references/petition-workflow.md) and
+[planning runbook](../../docs/PETITION_CAMPAIGN.md). The existing SOCIAL route now
+supports petition preview/intake plans; no account-creation or publication
+executor is implemented. Prefer adopting the principal's public petition link.
+Do not send a
+petition through the AntifaFM-only router or inherit its station publication
+grant. The procedure below remains the AntifaFM branch.
 
 Execute the AntifaFM pilot through the existing SOCIAL campaign router. Use
 `https://antifafm.com/` as the station destination. Keep this skill in prototype;

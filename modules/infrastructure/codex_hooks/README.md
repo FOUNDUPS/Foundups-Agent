@@ -10,7 +10,7 @@ or transcript memory.
 
 Phase 1 supplies four boundaries:
 
-- `SessionStart`: execute the canonical WSP_00 awakening and strict tracker.
+- `SessionStart`: execute WSP 00, then refresh GitHub and reconcile the selected PC worktree.
 - `UserPromptSubmit`: reject provider credentials without echoing or storing them.
 - `PreToolUse`: deny non-negotiable unsafe operations.
 - `Stop`: require clean staged and unstaged `git diff --check` results.

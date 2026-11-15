@@ -1,5 +1,34 @@
 # YouTube Shorts Interface
 
+## Private operator policy consumption (2026-11-01)
+
+`YouTubeShortsUploader.get_shorts_policy()` reads the existing queue for its
+authenticated `channel_info.id`; unknown identity never becomes a default scope.
+Pause, unavailable policy, STOP or automation disabled refuses upload. The DAE
+reads scoped topics/interval each cycle and during bounded interruptible waits.
+`last_upload_attempt_unix` comes from existing durable upload claims, so an unknown
+attempt also delays a restarted DAE. Atomic claims enforce explicit interval
+policy against new artifacts. No second scheduler or policy store is introduced.
+
+`create_and_upload(..., policy_fingerprint=None)` accepts an optional frozen DAE
+selection fingerprint. Generation checks current topic guidance before starting,
+then rechecks the same snapshot after generation and at the actual uploader
+handoff. Changed/expired guidance retains the artifact without uploading it.
+`upload_short(..., *, policy_fingerprint=None)` forwards that binding into
+`publish_video(..., policy_surface="shorts", policy_fingerprint=...)`. Direct
+existing-file Shorts uploads still pass the current uploader gate/claim. Generic
+non-Shorts publisher paths keep their existing contract.
+
+The claim hashes the actual descriptor retained by `MediaFileUpload`, checking
+file identity stability and restoring stream position. A durable receiving-channel
++ artifact-byte claim precedes the API call; uncertain repeats remain blocked
+across restart or changed titles/policies. A different artifact after cadence is a
+new operation: no durable topic-generation deduplication is claimed. Topic index
+is process memory and resets on a new autonomous start. A URL/API acceptance is
+not independent saved-state/publication verification; new feedback says accepted
+with readback pending. The DAE stops after an unknown started upload instead of
+retrying hourly. Private context/sources never enter generated metadata or chat.
+
 **Module**: `youtube_shorts`
 **Domain**: `communication/`
 **WSP Reference**: WSP 11 (Public Interface Definition)

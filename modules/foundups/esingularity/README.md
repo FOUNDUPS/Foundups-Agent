@@ -71,6 +71,24 @@ Non-negotiable invariants:
 
 The executable routing and publication contract is in [INTERFACE.md](INTERFACE.md). The permanent regression and production-verification gates are in [tests/README.md](tests/README.md).
 
+### Organization partner inquiries
+
+The movement homepage includes a Japanese-first invitation for companies,
+universities and other organizations to discuss the conditions for a Fukui AI
+infrastructure partnership. Its existing individual JOIN flow and shared ticker
+remain present. The inquiry page is `frontend/app/yumori/partners/page.tsx`:
+`/partners` on YUMORI.me/www internally selects `/yumori/partners`, while the
+explicit `/yumori/partners` link also works on the shared frontend's other hosts.
+
+The inquiry action opens an editable Japanese email template. The visitor sends
+it manually; there is no connected dedicated form, provider sender or automatic
+intake. The page distinguishes an exploratory conversation from a commitment to
+participate, invest or contract. Site rights, power, customers, funding and
+administrative approval remain unconfirmed. English and Portuguese display copy
+reuse the existing language switcher; the email-template language is stated in
+the page. Source integration does not establish production publication or a
+received inquiry.
+
 ## eSingularity.ai project surface
 
 The current public journey is deliberately simple. The existing hero is followed by a ten-slide YUMORI presentation, while the existing campaign ticker carries one `NEW` notification linking to it:

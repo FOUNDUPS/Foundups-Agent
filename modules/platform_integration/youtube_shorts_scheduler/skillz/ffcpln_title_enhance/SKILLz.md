@@ -52,6 +52,15 @@ When inherited labels conflict with the analysis, inspect the actual clip or
 
 ## Existing executable contract
 
+Private operator directives are enforced by the existing scheduler/DOM Save
+owners, including this skill's manual launcher. The skill remains a proposal
+builder. Capture exact detail originals before proposing; never use a list-row
+title as restoration authority. Preserve/replacement is rechecked at the final
+button, and private directive context/sources must not be injected into the public
+description. A changed foreign draft refuses Save rather than being overwritten.
+Queue applied feedback requires independent persisted readback, not this result
+or the legacy scheduling bool.
+
 Pass `SkillContext(original_title, original_description, video_id, index_json,
 preserve_metadata)` using keyword arguments. Older title-only and description-only
 wrappers preserve their inputs because they carry no evidence. `_analyze_content`

@@ -7,12 +7,30 @@
 
 ## Public API
 
-### `ensure_dependencies(require_lm_studio: bool = True) -> Dict[str, bool]`
+Chrome/Edge retry helpers now install the
+[YouTube verification gate](../foundups_selenium/INTERFACE.md#youtube-human-verification-handoff)
+before returning an attached driver, including the existing no-page recovery
+branch. Attachment signatures are unchanged. Installation itself performs no
+browser effects; later effects may yield for human verification and raise
+`VerificationHandoff` instead of replaying an interrupted command.
+
+Each attached Chrome or Edge connection gets its own command map and the
+matching CDP route (`goog` or `ms`) before the guard is installed. This keeps
+later Chromium attachments from changing that connection's CDP destination.
+An attachment proves transport readiness. Studio access needs separate target
+verification.
+
+### `ensure_dependencies(require_lm_studio: bool = True, *, model_key: Optional[str] = None) -> Dict[str, bool]`
 
 Ensure all dependencies are running before DAE starts.
 
 **Parameters:**
-- `require_lm_studio`: Whether LM Studio is required (default: True)
+- `require_lm_studio`: Whether native server/selected-model readiness is required (default: True).
+- `model_key`: Exact native installed key. Default preserves the UI-TARS vision check;
+  YouTube language/DOM startup passes its explicit General key from
+  `LM_STUDIO_NATIVE_MODEL_KEY` or the unchanged `QWEN_MODEL_ID` default.
+- Returned `lm_studio=True` proves only the requested readiness at observation;
+  server-only checks and General readiness do not certify a vision model.
 
 **Returns:**
 ```python
@@ -50,18 +68,35 @@ Launch Chrome with remote debugging port.
 
 ---
 
-### `launch_lm_studio() -> Tuple[bool, str]`
+### `launch_lm_studio(load_model: bool = True, *, model_key: Optional[str] = None) -> Tuple[bool, str]`
 
-Launch LM Studio for UI-TARS vision.
+The existing facade delegates bounded server startup to `src/lm_studio_startup.py`.
+The optional `model_key` is an exact native key, not an OpenAI listing alias.
+Without it, `load_model=True` checks the existing UI-TARS key; false checks only
+native server reachability. An explicit key always requests exact residency.
 
-**Returns:**
-- `(True, "LM Studio started on port 1234")` on success
-- `(False, "error message")` on failure
+Compatibility change: the legacy flag is verification-only. Startup deliberately
+stops calling `load_all_models()`; those legacy helper APIs remain available but
+are not part of this qualified route. Installed-but-unloaded, missing, multiple
+resident instances, malformed inventory and identity mismatch are not-ready.
+Models must be loaded explicitly outside this server-startup layer.
 
-**Behavior:**
-- Creates detached process (non-blocking)
-- Waits up to 120 seconds for API to respond
-- Note: Model must be loaded manually in LM Studio
+Warm native readiness succeeds without CLI/process discovery. Cold startup
+requires the existing `lms` CLI, complete known process state, and the lifecycle
+owner's exact node lock from `lm_studio_node_lock_identity(base_url)`. Existing
+GUI/daemon processes may receive only `server start`; cold headless startup may
+run `daemon up` first. Cold GUI spawning is explicitly refused/manual action:
+persisted GUI autostart/LAN settings are outside this qualification. An already-
+running GUI remains eligible for an explicit CLI server command. Every server
+command binds `127.0.0.1` explicitly. Each command times out after30 seconds;
+API polling after30 seconds. These are per-phase limits, not a global startup
+deadline. Nonzero/timeout/unknown state returns failure without an alternate
+runtime. It never stops a shared server or model process.
+
+The lock serializes participating startup/model operations, not unrelated
+external GUI actions. No automatic model ownership, continuous health guarantee,
+full main.py startup or scheduler qualification is claimed.
+
 
 ---
 
@@ -69,17 +104,28 @@ Launch LM Studio for UI-TARS vision.
 
 Attach Selenium to the debug-port Chrome with retries and DevTools verification.
 
-**Non-destructive recovery (Phase 1):** if DevTools is UP but exposes no
-discoverable page target (Selenium "unable to discover open pages"), this opens a
-normal tab via `open_devtools_page()` and retries the attach. It does NOT taskkill
-the operator's prepared Chrome on this path; if a tab cannot be opened it logs a
-clear actionable error and returns `None`. The genuinely-DevTools-DOWN path still
-relaunches (follow-up: BROWSER_ATTACH_RECOVERY_DEVTOOLS_DOWN_PHASE2).
+**Non-destructive recovery:** valid DevTools version/page responses distinguish
+readiness, a live browser with no normal page, and unavailable/unknown state.
+An empty or worker-only inventory gets one recovery-tab attempt through the existing
+`open_devtools_page()` owner. Recheck readiness before attachment. The existing
+Selenium discover-pages race shares that helper-invocation limit. The helper's
+existing PUT/GET fallback means a lost response cannot prove a single tab was
+created. Failed tab creation,
+malformed/unreachable HTTP and generic attachment errors never kill or relaunch
+a browser; bounded retries return `None` with a diagnostic. Startup remains with
+`launch_chrome()` / `ensure_dependencies()`. `relaunch_on_fail` remains accepted
+for compatibility; neither value authorizes browser termination or relaunch.
 
 ### `connect_edge_with_retry(max_retries=3, retry_delay=2.0, relaunch_on_fail=True) -> Optional[WebDriver]`
 
 Same as `connect_chrome_with_retry` for Edge (port 9223), including the
-non-destructive no-page recovery (no `msedge.exe` taskkill on the no-page path).
+non-destructive recovery and compatibility-only `relaunch_on_fail` flag.
+
+### `is_devtools_responding(port, timeout=2.0) -> bool`
+
+Read-only page-readiness probe. Returns `True` only for typed version JSON and
+a valid target list containing a normal page. `False` is not proof the browser
+process is dead; the private probe retains the no-page versus unknown distinction.
 
 ### `open_devtools_page(port: int, url: str = "about:blank", timeout: float = 3.0) -> bool`
 
@@ -98,7 +144,7 @@ Check if Chrome debug port is responding.
 
 ### `is_lm_studio_running() -> bool`
 
-Check if LM Studio API is responding.
+Check native LM Studio HTTP inventory reachability; a TCP listener or OpenAI-compatible listing is insufficient. Does not assert selected-model residency.
 
 ---
 

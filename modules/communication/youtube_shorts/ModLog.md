@@ -1,5 +1,24 @@
 # YouTube Shorts AI Generator - ModLog
 
+## 2026-11-01 — Scoped directive checks through the uploader boundary
+
+WSP11/22/50/84/97. Kept existing generator/provider, hardened authentication,
+uploader and Shorts memory owners. DAE reads private pause/topics/interval and
+uses interruptible waits plus durable recent upload-attempt time. Frozen topic
+intent crosses DAE, orchestrator and final uploader check; changes/expiry stop
+stale artifacts before the API. Uploader claims actual retained stream bytes
+before submission and keeps uncertain same-artifact retries blocked across
+restart/new metadata. Different bytes after cadence remain a new operation;
+there is no topic ledger or promise of cross-restart generation deduplication.
+
+Replaced the new flow's LIVE claim with accepted/pending-readback feedback. No
+policy research context is broadcast. Added offline whole-production-definition
+controls with fake media/service/generation collaborators and actual private
+queue claims. No Google/model SDK is required for the new test selection. The
+existing publisher fixture now uses valid synthetic native identity literals;
+all original assertions remain. Live provider/browser/publication remains outside
+this local qualification.
+
 ## 2026-10-25 — First Little Shrew animated episode
 
 Reused the shared SVG rig, canonical first segment and existing FFmpeg renderer to produce three five-second shots with original code-composed instrumental/foley and timed captions. Added an optional local command with exclusive outputs, source/asset provenance and explicit unreviewed status. 140 focused tests pass; independent actual-frame/technical review passed. Audio listening remains unverified. See YouTube Shorts docs/KIDS_LOCAL_PRODUCTION.md for measured artifact evidence and exact autonomy owner/gap map, including the mock wallet boundary. Updated the disabled research-scout state; no WRE/provider/spending/upload activation.
@@ -856,3 +875,35 @@ EDUIT supplies one event sheet to synthesized foley and scene rendering. Added
 optional Boolean captions_in_scene to existing renderer, retaining SRT while
 skipping duplicate burn-in. Legacy audio/caption behavior remains the default.
 Actual three-cycle video review and residual limits are in EDUIT ModLog.
+
+
+## 2026-10-26 — Storytime panel focus and launch audit
+Shorts-owned viewer now places expand/collapse on each panel. EDUIT mounts the
+same source at its standalone root, preventing a viewport-less redirect launch.
+See EDUIT HOME_SCREEN_LAYOUT_REPAIR.md for evidence and physical-device limits.
+
+
+Iteration skill v0.2.4 adds five evidence-scoped1–5 diagnostic criteria, autonomous
+adjacent-surface checks and repair/stop/retain rules. WSP15 remains defect priority,
+not visual quality. Current grades keep native iOS and transfer evidence separate.
+
+
+## 2026-10-26 — Storytime preschool viewer milestone
+
+Existing kids_review viewer gains child-sized controls, fullscreen annotation,
+stateful playback, direct video/game switch, snapshot sharing, repeat and touch
+lock. Shared EDUIT renderer enlarges sound words without changing motion/audio.
+See [preschool review](../../foundups/eduit/docs/PRESCHOOL_VIEWER_REVIEW.md)
+for evidence and limits.
+
+## 2026-10-27 — Slow-rescue viewer integration
+Existing director gains64px toolbar,60px fullscreen controls, Restart and untimed
+practice, longer feedback-clock bounds and slow-rescue-11 record namespace.
+EDUIT owns slower engine/cues/scoring; original15s media unchanged. See
+../../foundups/eduit/docs/SLOW_RESCUE_AND_AGENT_ROADMAP.md. No upload/auth changes.
+
+## 2026-10-28 — Storytime learning shell
+Existing kids_review viewer now owns compact Play/About/How, science-bounded copy,
+channel link and responsive control sizing. EDUIT retains roadmap/education scope;
+no new publisher or credential surface. Film and game engine unchanged. See EDUIT
+LEARNING_SHELL_REVIEW.md and EVOLUTION_PLAY_AND_SHARING_ROADMAP.md.

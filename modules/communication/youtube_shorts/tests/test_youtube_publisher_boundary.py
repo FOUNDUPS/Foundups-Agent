@@ -32,11 +32,11 @@ class ExecuteCall:
 
 class UploadCall:
     def next_chunk(self):
-        return None, {"id": "video-123"}
+        return None, {"id": "aaaaaaaaaaa"}
 
 
 class Channels:
-    def __init__(self, channel_id="channel-10"):
+    def __init__(self, channel_id="UCaaaaaaaaaaaaaaaaaaaaaa"):
         self.channel_id = channel_id
 
     def list(self, **kwargs):
@@ -67,7 +67,7 @@ class PlaylistItems:
 
 
 class FakeYouTube:
-    def __init__(self, channel_id="channel-10"):
+    def __init__(self, channel_id="UCaaaaaaaaaaaaaaaaaaaaaa"):
         self._channels = Channels(channel_id)
         self._videos = Videos()
         self._playlist_items = PlaylistItems()
@@ -89,7 +89,7 @@ def video_file(tmp_path: Path, suffix=".mp4") -> str:
 
 
 def test_uses_hardened_pinned_auth_factory(monkeypatch):
-    monkeypatch.setenv("YT_UPLOAD_CHANNEL_ID_FOUNDUPS", "channel-10")
+    monkeypatch.setenv("YT_UPLOAD_CHANNEL_ID_FOUNDUPS", "UCaaaaaaaaaaaaaaaaaaaaaa")
     calls = []
 
     def factory(**kwargs):
@@ -99,7 +99,7 @@ def test_uses_hardened_pinned_auth_factory(monkeypatch):
     uploader = YouTubeShortsUploader("foundups", service_factory=factory)
 
     assert calls == [{"token_index": 10}]
-    assert uploader.get_channel_info() == {"id": "channel-10", "title": "Foundups"}
+    assert uploader.get_channel_info() == {"id": "UCaaaaaaaaaaaaaaaaaaaaaa", "title": "Foundups"}
 
 
 def test_rejects_authorized_channel_mismatch(monkeypatch):
@@ -117,7 +117,7 @@ def test_foundups_mall_requires_explicit_channel_pin(monkeypatch):
 
 
 def test_publishes_unlisted_and_attaches_playlist(tmp_path, monkeypatch):
-    monkeypatch.setenv("YT_UPLOAD_CHANNEL_ID_FOUNDUPS_MALL", "channel-10")
+    monkeypatch.setenv("YT_UPLOAD_CHANNEL_ID_FOUNDUPS_MALL", "UCaaaaaaaaaaaaaaaaaaaaaa")
     service = FakeYouTube()
     uploader = YouTubeShortsUploader("foundups-mall", youtube_service=service)
 
@@ -136,27 +136,27 @@ def test_publishes_unlisted_and_attaches_playlist(tmp_path, monkeypatch):
     assert service._videos.insert_args["notifySubscribers"] is False
     assert service._playlist_items.insert_args["body"]["snippet"] == {
         "playlistId": "playlist-1",
-        "resourceId": {"kind": "youtube#video", "videoId": "video-123"},
+        "resourceId": {"kind": "youtube#video", "videoId": "aaaaaaaaaaa"},
     }
-    assert result.video_id == "video-123"
+    assert result.video_id == "aaaaaaaaaaa"
     assert result.playlist_item_id == "playlist-item-1"
     assert result.privacy_status == "unlisted"
 
 
 def test_upload_short_keeps_backward_compatible_url(tmp_path, monkeypatch):
-    monkeypatch.setenv("YT_UPLOAD_CHANNEL_ID_FOUNDUPS", "channel-10")
+    monkeypatch.setenv("YT_UPLOAD_CHANNEL_ID_FOUNDUPS", "UCaaaaaaaaaaaaaaaaaaaaaa")
     service = FakeYouTube()
     uploader = YouTubeShortsUploader("foundups", youtube_service=service)
 
     url = uploader.upload_short(video_file(tmp_path), "Short", "Description")
 
-    assert url == "https://youtube.com/shorts/video-123"
+    assert url == "https://youtube.com/shorts/aaaaaaaaaaa"
     assert service._videos.insert_args["body"]["status"]["privacyStatus"] == "public"
     assert service._videos.insert_args["body"]["snippet"]["description"].endswith("#Shorts")
 
 
 def test_rejects_non_video_file(tmp_path, monkeypatch):
-    monkeypatch.setenv("YT_UPLOAD_CHANNEL_ID_FOUNDUPS", "channel-10")
+    monkeypatch.setenv("YT_UPLOAD_CHANNEL_ID_FOUNDUPS", "UCaaaaaaaaaaaaaaaaaaaaaa")
     uploader = YouTubeShortsUploader("foundups", youtube_service=FakeYouTube())
 
     with pytest.raises(YouTubeUploadError, match="Unsupported upload media type"):
@@ -205,7 +205,7 @@ def test_story_episode_uses_selected_oauth_and_kids_review_upload(tmp_path, monk
 
 
 def test_story_helper_refuses_other_channel_and_ambiguous_disclosure(tmp_path, monkeypatch):
-    monkeypatch.setenv("YT_UPLOAD_CHANNEL_ID_FOUNDUPS", "channel-10")
+    monkeypatch.setenv("YT_UPLOAD_CHANNEL_ID_FOUNDUPS", "UCaaaaaaaaaaaaaaaaaaaaaa")
     uploader = YouTubeShortsUploader("foundups", youtube_service=FakeYouTube())
     with pytest.raises(YouTubeUploadError, match="us_story_time"):
         uploader.publish_story_episode(video_file(tmp_path), "Title", "Preview",

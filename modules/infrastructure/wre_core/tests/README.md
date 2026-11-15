@@ -1,3 +1,32 @@
+## Git lifecycle reconciliation — 2026-11-11
+
+The WRE CI job exercises GitHub pagination and App-bound check proof, the
+persisted PR completion condition, the compatibility sentinel and disposable
+Git worktrees. The PC suite covers dirty, ignored, stale and diverged state.
+`test_git_lifecycle_inventory.py` also verifies read-only PC inventory receipts,
+SHA-only `stashes` pagination without message or filename leakage, concurrent
+stash mutation blocking, `github_main_present_on_pc` True/False
+`pc_backlog_summary` and `worktree_summary` counts, and receipt integrity
+rejection for malformed or tampered stashes and summaries.
+
+## Readiness evidence — 2026-11-06
+
+`test_dashboard_evidence.py` exercises real temporary SQLite storage and actual
+source-extracted startup/Connect WRE/headless functions. Pair it with
+`test_dashboard_snapshot_export.py`, `test_dae_preflight_security_behavior.py`,
+`test_pattern_memory.py`, the CLI Connect WRE tests and training-menu admission
+tests. No main startup, native models or live storage are needed. UNKNOWN
+coverage and admission permission are tested as distinct states.
+
+## Risk-verification integration — 2026-10-28
+
+The additive CI job `wre-verification-contracts` runs the exact nine-file
+selection in [TestModLog](TestModLog.md#2026-10-28--risk-verification-preflight-and-downgrade-regressions).
+It covers the planner, local execution, resident request/handler, final verifier
+and merge-sentinel prerequisite contracts. Recording fakes prove preflight
+makes zero calls; temporary Git repositories exercise real differential
+collection. Synthetic admission fixtures are not native authorization receipts.
+
 ## Measured-zero fidelity regression — P15
 
 Nine frozen cases in existing `test_pattern_memory.py` cover overall/recent/

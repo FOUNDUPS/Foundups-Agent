@@ -82,3 +82,12 @@ Series framing follows successive generations and branching lineages; do not
 present an individual shrew transforming into a human, or evolution as a planned
 ladder. Exact ancestors, dates and transitions require evidence before teaching
 them as fact. The title is a narrative framing, not a validated scientific claim.
+
+
+## Five composite tiles: planning only — 2026-10-28
+`src/tile_batch.py:prepare_tile_batch` creates an ordered five-tile build/review
+DAG plus series-join review. `check_review_record` checks complete, artifact-bound
+local evidence fields; it authenticates neither evidence nor independent actors.
+See [EDUIT RSI contract](../eduit/docs/TILE_PRODUCTION_RSI.md) for criteria,
+correction lineage, existing runtime owners and blocked integration gates.
+No executor, queue, scheduler, promotion or new FoundUp registration is installed.

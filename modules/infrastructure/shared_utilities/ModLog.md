@@ -1,4 +1,57 @@
 # WSP Module ModLog: Shared Utilities
+
+## 2026-11-10 — Preserve explicit YouTube audience policy
+
+Registry normalization now retains `shorts.made_for_kids` through save/load.
+Absent values remain None and malformed values remain distinguishable so the
+scheduling owner can refuse them; no truthiness conversion or channel default.
+The scheduler's offline audit controls cover true/false/absent/string round trips.
+No channel IDs, operational roles or existing registry files changed in source.
+WSP11/22/50/84/97; live qualification remains separate.
+
+## 2026-11-05 — Role-owned native keys and truthful initialization status
+
+WSP11/22/50/62/84/97. Extended the existing role selector with scoped code/triage
+native keys, preserving declared defaults and refusing basename guesses for
+custom paths. One shared resolver handles both legacy entry points. Singleton
+factories resolve current file/native settings once and make one backend attempt;
+they no longer perform pathless-then-config retries or import-time advisor-path
+selection. Existing cache/force-reinit and explicit GGUF fallback remain.
+
+LMStudioBackend retains its actual native initialization state for diagnostics.
+Reachable nonresident, SDK failure and authentication are distinguished from an
+unreachable server. Native inference/authentication/instance/retry controls,
+General selection and signed Gateway paths are unchanged. No service/model
+launch, native load/unload, download or arbitrary resident selection was added.
+The new24 offline controls recorded21 RED failures then24 GREEN. The combined75
+selection (including the24) passed with native/SDK/file collaborators and zero denied effects,
+processes, SQLite or dotenv calls. No real model/service was exercised.
+Final existing startup owner adapter passed176 with final source bytes, preserving
+the original94 names/digest and adding scoped role/preflight/sentinel controls.
+Canonical admission, full conftests and unchanged effect guards were active.
+
+## 2026-11-01 — Shared YouTube language-role and bounded dispatch
+
+Expose the existing general-language model role guard for Gateway consumers,
+excluding visual/coder/audio/triage/xAI routes. LMStudioBackend accepts optional
+`max_retries` and `pre_dispatch_check`; absent values preserve generic behavior.
+YouTube sets zero SDK retries and checks cancellation/deadline after the native
+instance probe and immediately before dispatch. Support its explicit reasoning-off
+control. Scoped diagnostics now report exception classes rather than raw messages.
+Exact residency checks, loopback policy and model lifecycle owners are preserved.
+WSP11/22/50/62/77/84/97; no model/server/public action during qualification.
+
+## 2026-10-29 — Export the existing LM Studio node-lock identity
+
+- Added `lm_studio_node_lock_identity` within the existing lifecycle owner;
+  transactions and explicit dependency startup reuse the same prior lock name.
+  No new lock/lease/service manager, journal format or model action was added.
+- Three alias controls compare the prior canonical-JSON hash protocol and the
+  actual borrow-only transaction lock/journal digest. These are included in the
+  dependency launcher's49 startup cases within94 actual-source offline checks,
+  not a separate additive total. No real server/model/process call was made.
+- Existing General/code role selection and defaults remain unchanged. WSP11/22/84/97.
+
 **WSP Compliance**: WSP 22 (Module ModLog and Roadmap Protocol)
 
 ## 2026-10-19 - Preserve path semantics while removing POSIX containment exceptions

@@ -1,3 +1,224 @@
+## 2026-11-15 — Observable Swarm Orchestration telemetry tests
+- Added `modules/foundups/simulator/tests/test_observable_swarm_telemetry.py` covering `work_telemetry_provider.py`, `/api/work-telemetry`, `frame_schema.py`, and `public/js/foundup-cube.js` via Node VM.
+
+## 2026-11-05 — P4 RED, import repair and verified preview
+
+P4 is VERIFIED_SIMULATED. Fresh 280 baseline passes; frozen v1 RED has 79 missing-API
+failures/one Windows setup error from an oversized parameter ID. The 100,000-character
+input stayed; an ID-only fix yields v2 RED 80 missing-API failures, then focused 360 pass.
+Promotion first lost the root draft's hashlib import: broad 1,403 pass/one NameError.
+Restoring the import, without oracle changes, yields final broad 1,404 pass with three
+SSE HTTP deselections, zero failures/errors/skips/recorded denials and 174 stable sources.
+Final old raw prefix/functions and frozen 80 remain; test owner 693 <=700.
+Lesson: verify whole-module import closure as well as function-body AST preservation.
+Independent 15/native JS max-plan JSON/BigInt pass separately; the 80 are within broad.
+Controlled 240-tick legacy trace matches bytes; scopes overlap, not aggregate counts.
+Legacy `_require_numbers` type-membership needs a separate static follow-up; the new
+atom guard does not call it, and this note claims no exploit execution.
+The [central decision](../../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p4-prospective-micro-ups-allocation-v1) owns source/delivery gates; P3 failure/history remains below.
+
+## 2026-11-02 — Native-transfer RED, repairs and final qualification
+
+simulator_economics froze 45: initial RED 1 pass/44 missing-API failures; v1 focused
+321 and vision_catalog's independent 11 pass. Metaclass equality exposed a no-hook
+claim gap; one helper then two upstream request/balance cases failed before identity repairs.
+Keep failed runs and initial reviews; the first pass missed the prior _number seam.
+Final focused 337 includes 276 prior/48 promoted/11 held-outs/two external repeats;
+broad 1,324 includes promoted cases. Zero errors/skips/recorded denials; 174 maps stable.
+Final controlled legacy trace matches baseline bytes; no whole-state or live-chain claim.
+
+## 2026-11-01 — Pool credit acceptance and actual focused result
+
+Fresh original staker/ledger/Layer-D selection passes 192. Frozen external v2 has 40
+cases: desired RED 14 pass/26 fail, no errors/skips; unchanged candidate focused 232
+passes. The 40 are within 232, not another aggregate. Old assertions remain required.
+Before execution, v1 setup issues (explicit zero network receipt and immutable
+MappingProxyType snapshotting) were corrected in v2; v1 was not executed.
+Promoted staker-hurdle owner 834 lines/145 appended fits <= 850/160. Independent review
+confirms original prefix/all test ASTs; no new test owner or registry entry.
+Selected refusal snapshots include pool/optional-ledger state; accepted retries
+retain the original receipt. Receipt/local/hurdle absorption and partial rounding stay excluded.
+Controlled baseline/candidate 240-tick raw traces match at hash seed 710007;
+6 FoundUps/24 epochs/214 simulated paid tasks. Broad 1,276 includes 232; five held-outs/package pass.
+Security/PR/main/PC remain pending. No fresh full-model or funded-recovery proof.
+Node is credential-stripped only; no general effect-guard claim is made.
+The 12 prior arithmetic observations and all failed/fixture evidence remain sealed.
+B03 PR2296 delivery is separate: 23 PR/21 main checks, 29 PC bindings/187 evidence files.
+
+## 2026-11-01 — B11-S1 RED, fixture history and current local results
+
+Original 182 pass; unchanged desired 27 yields 14 pass/13 fail, then focused 209
+pass. Independent first run five pass/one fixture-routing failure is preserved;
+approved setup-only correction with unchanged assertions passes six. Supplemental
+post-candidate real-Mesa two passes, not pre-candidate independent acceptance.
+Broad 1,236 passes, same three SSE HTTP deselections, zero failures/errors/skips/
+guard denials and 174 stable snapshots, independently confirmed. New 27
+are its derived subset; independent six and supplemental two remain external.
+Package eight Python/three Node pass; security/publication remain pending.
+B09 delivery is separately closed; the local registry check was not run.
+
+## 2026-11-01 — B09 desired cadence and focused result
+
+Freeze 13 functions / 19 cases before implementation; baseline 35 passes,
+desired RED 12 pass / 7 fail, no errors/skips/guard denials. Focused candidate
+passes the same 54 identities with stable source snapshots and zero guard denials.
+Original seven test ASTs and the 90-line raw prefix are retained in the actual
+240-line promoted owner. Broader 1,209 passes with the same three SSE HTTP
+deselections, zero failures/errors/skips/guards and 174 stable source snapshots.
+Tests check ordered object identity, not count alone. Logging failure retains
+committed cadence without promising successful return. Independent five pass;
+source review finds no material issue. The new 19 are within 1,209, five held-outs
+outside it; counts overlap. Package eight Python/three Node pass; security/publication remain pending.
+
+## 2026-11-01 — Allocation numeric preflight: RED and executed GREEN
+
+Root-verified original selection passes 311. Separately frozen four-entrypoint
+acceptance has 171 cases: 48 pass / 123 fail on the pre-edit source, not a candidate
+PASS. Preserve exact frozen oracles, old valid-call behavior and all failed
+attempts. No additional independent case count is claimed.
+
+- Independent reviewed candidate: The 171 frozen cases plus 25 independent held-outs passed: 196 cases. The 311
+  original regressions passed with exact prior case IDs. Zero errors, skips or guard
+  denials were recorded; 174 simulator/FAM Python source snapshots remained stable.
+  Independent source/AST/budget review reports no material findings within the
+  frozen native-state contract.
+- Promoted the 171 frozen controls into existing
+  `test_allocation_and_treasury_runtime.py` (336 lines): the original 3,068-byte
+  prefix/AST and frozen non-docstring AST are preserved. Promoted/broader results:
+  The broad run passed 1,190 cases: the prior 1,019 plus 171 promoted controls.
+  The promoted owner contributes 173 cases, derived from that broad result rather
+  than another run. The same three SSE HTTP cases were deselected; zero failures,
+  errors, skips or guard denials; 174 source snapshots remained stable. The 25
+  external held-outs are outside 1,190, and these overlapping scopes are not added.
+- Controlled trace and exact process/profile scope: Fresh de6917 baseline and candidate controlled 240-tick traces match raw bytes,
+  SHA256 `672d12c9d8fb6286624ea892fb3a5d0315c475ee45f8c83c9a271ba4328f0ff1`.
+  This finite process/profile observation is not seed-only or whole-model proof.
+- Canonical closure/pins/registry and unchanged caps: Canonical package qualification passed eight Python cases and three Node
+  entrypoints; registry 1,800/260 is unchanged. The same 1,481 ordered members remain,
+  with only the numeric-helper and token-economics runtime hashes changed; MetaGPT
+  is outside the closure. Canonical digest is
+  `7d35294b980d4f4e329edf003e7e96337e3a6413c288764e2f07d5a465c3980e`.
+  Manifest LF/CRLF sizes are 334,850/337,885 bytes under the unchanged 337,920 cap,
+  leaving 35 bytes; individual 2 MiB and total 32 MiB caps are unchanged. This
+  qualifies staged package bytes, not hosted checks, installed closure or activation.
+- Fresh security/publication/main/PC/Holo: Pending at this prepublication checkpoint: fresh immutable security gate, protected
+  PR, resulting-main checks and new-source PC/Holo qualification; later observations
+  belong in separately dated delivery evidence.
+
+The 196/311 scopes have zero errors/skips/guard denials and 174 stable source
+snapshots; the broad run passes 1,190 with the same three SSE HTTP deselections.
+Promoted 173 is its derived subset; the 25 external held-outs remain outside it.
+Package eight Python/three Node and registry 1,800/260 pass; security/publication
+and candidate-main/PC/Holo remain pending. Controlled
+trace is a repeated scenario, not an extra distinct regression case.
+Composite human/engine/MetaGPT allocation omits the previous standalone wallet
+receipt INFO log, as allowed before implementation. Logging is neither settlement
+evidence nor rollback authority. Admission/preparation covers native
+participating numeric/policy/MetaGPT registration state under a serialized host;
+postcommit logging, arbitrary receiver/property hooks, concurrency, durability,
+global units, full A02, funded conservation and live signing stay outside scope.
+
+## 2026-11-01 — Reserve quote test-first and independent source review
+
+Historical fb58 baseline: seven original cases pass; unchanged originals plus 89
+desired cases produce 7 pass/89 fail because the opt-in API is absent, with zero
+errors/skips/guard denials. All 174 simulator/FAM Python source blobs, including
+tests, remain unchanged on docs-only base 4c96; no new-base rerun is claimed.
+Source review and actual candidate selection pass 113 cases: 89 desired, seven
+originals and 17 additional held-outs, zero denials, 174 Python sources unchanged. Review
+finds no material defect within the selected contract. The fixed goldens bind
+literal domain-separated identities; source/derived bounds have distinct coverage.
+No unreachable public boundary probe is claimed. The entire 397-line legacy class
+and seven original test ASTs remain; promotion appends the exact frozen oracles
+to the existing owner (285 lines under 300). Promoted 96 and broader 1,019 pass,
+with 174 unchanged simulator/FAM Python source snapshots and zero errors/skips/
+guard denials. The broad
+selection retains exactly the three historical SSE HTTP deselections named in
+the receipt; no additional case is excluded.
+Fresh controlled reference fb58 (174 Python source hashes equal docs-only 4c96) and two
+candidate traces match completely: SHA256 `672d12c9d8fb6286624ea892fb3a5d0315c475ee45f8c83c9a271ba4328f0ff1`.
+All three use fresh Python 3.12.10 `-P -s` processes and explicit hash seed 710007:
+240 ticks, six FoundUps, 214 paid tasks, 24 epochs, zero guard denials. No monetary
+field is normalized. Actual reference fb58 is not a 4c96 run; one finite default
+path does not prove seed-only or whole-model reproducibility or qualify new economics.
+Canonical package eight Python cases/three Node entrypoints pass with tested
+staged bindings and all 1,478 runtime paths preserved; registry remains 1,794/260.
+Byte caps and count-boundary oracles are unchanged. Publication is separate.
+The 17 held-outs remain external; counts overlap, not independent additive coverage.
+Closed-env Python guards and real scratch state are not OS/native confinement.
+No authenticated source, currentness, funded backing, live chain or deployment
+qualification follows. Context/digest/frozen public construction are data only.
+
+## 2026-11-01 — Epoch effect, concurrency and controlled-process acceptance
+
+Independent frozen40: baseline2 pass/38 fail, zero setup errors/skips/guard
+denials. Candidate40 and separate16 held-outs pass. Root found a private Mesa
+callback returning a distribution instead of its original None; a separate
+frozen control reproduced the failure, then the one-line repair passes.
+Final independent selection57 passes with174 source snapshots unchanged.
+
+Promote the original40 and callback control into existing staker/epoch/Layer-D
+owners (689/431/206 lines). Their192 cases pass. All old raw content prefixes and
+test ASTs remain; only new helper names are disambiguated, with inverse-renaming
+AST equivalence to the frozen acceptance. The16 held-outs remain independent.
+Counts overlap and must not be summed as independent attack coverage.
+
+The fresh154 baseline includes real240-tick non-AI orchestration. First harness
+attempt:151 pass/3 fail (two forbidden default SQLite paths, one inspection typo).
+Correct only default scratch-store selection and `_fam_bridge` inspection;
+retain failures and unchanged guards. Initial candidate/repeat smoke passes but
+economic traces differ, so no parity was accepted from them. Stdlib diagnostics
+prove `-I` ignores PYTHONHASHSEED. A separately frozen `-P -s`/closed-env profile
+with explicit hash seed710007 and one case per fresh process produces identical
+baseline/candidate/candidate traces, SHA672d12c9d8fb6286624ea892fb3a5d0315c475ee45f8c83c9a271ba4328f0ff1.
+No monetary values were normalized or discarded. Real implementation imports,
+scratch FAM/central-daemon storage and Python effect guards remain; this is not
+OS confinement, model-seed-only portability, funded settlement or chain testing.
+
+Broader actual simulator:930 pass, exact3 historical SSEHTTP deselections, zero
+failures/errors/skips/guard denials; all174 inventoried source hashes unchanged.
+No optional enrichment stubs or broad daemon-path rewrite. The controlled seed
+trace is one separately qualified scenario, not a blanket reproducibility claim.
+
+Packaging: canonical generator write/check,8 original Python/index cases and3
+Node consumer entrypoints pass. Actual old1477 validator rejects the generated
+1478 closure before pins/count change; new boundary accepts1478/rejects1479.
+This differs from an old fixture's preliminary count assertion. All earlier
+members, byte caps and registry1794 owners remain; only one private helper is new.
+
+## 2026-11-01 — Wallet policy test-first qualification
+
+Frozen 76-case owner: 6 passed/70 failed on current base43b3. Existing three-owner
+baseline: 235 passed. Same frozen policy bytes plus originals on candidate:
+311 passed, 0 failures/errors/skips; sources unchanged and no effect-guard denial.
+Preserve initial wrong-filename run (exit4/0 tests) as setup failure, not a test.
+The reused credential-free runner imports real modules with scratch SQLite and
+central-daemon state. Its Python guards are not OS confinement. Independent
+13-case oracle was frozen before candidate edits and now passes independently.
+Connected simulator/docs selection: 489 passes; packaging: 8 Python cases and
+3 Node entrypoints pass. Counts overlap. See the current audit receipt for source
+hashes. No historical economic test was edited.
+
+## Publication documentation guardrails — 2026-10-31
+
+Existing documentation suite first produced5 passes/1 failure on the missing
+unit-conflict metadata. Added genesis-to-matrix consistency and exact economic
+protocol mirror checks; no historical oracle removed or weakened. The canonical
+registry retains all1792 main owners and adds the circuit-breaker owner. Fresh
+GREEN and connected counts are recorded in the current reconciliation addendum.
+
+## Local adversarial qualification — 2026-10-31
+
+Fresh244 selected baseline passes. Desired RED79:12 pass/67 fail; candidate320
+passes; connected414 passes after explicit real central-daemon scratch setup.
+Independent6 held-outs pass, original3 CABR ASTs preserved. Counts overlap.
+Seeded CABR properties:0/7/3102,256 decisions each; frozen clock for recovery.
+Separate seed310001 characterization:7 cases,1 pass/6 desired assertion failures,
+zero setup errors/skips/guard denials; sources unchanged. No xfail suppression.
+Retain initial pytest logging-guard failure, nonexistent-owner zero-test run and
+hostname/optional-SQLite diagnostic runs. Final configured run has no denied
+effects; Python instrumentation is not OS confinement or blockchain qualification.
+
 ## FoundUps selected numeric source closure — 2026-10-25
 
 Pre-edit WSP15 allocation16/P0 in the numeric plan permits exactly one required

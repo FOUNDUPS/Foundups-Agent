@@ -1,3 +1,22 @@
+## 2026-11-05 — Reuse ready video embeddings for bounded optional replies
+
+WSP11/22/50/84/97. Add default-compatible ready-only/cancellation keywords to
+the existing video search/embedding methods. Ready-only calls skip an unloaded
+model before collection access and do not revive the legacy zero-vector path.
+Cancellation prevents later stages/results; active native calls retain their
+ordinary ownership. No initialization/health/indexing/warming owner changed.
+The video_comments focused cross-owner tests provide 23 new cases, passing with
+the existing quality37 (60 combined) under the unchanged effect guard. Actual
+Holo storage/model use and generation freshness are not qualified by fixtures.
+
+## 2026-11-01 — Bounded stored-settings guard qualified locally
+
+WSP11/15/22/48/50/62/84/97; class B, 18/P0. Existing owners enforce the scoped
+[raw settings contract](INTERFACE.md#stored-chroma-settings-admission--2026-11-01), including the pinned inert sparse sentinel.
+[TestModLog](tests/TestModLog.md#stored-settings-local-qualification--2026-11-01) retains failed native/fixture attempts and explicit oracle
+corrections beside final local evidence. Publication/new-source PC/Holo and
+controller release remain pending; no upstream advisory or global-runtime clearance.
+
 ## 2026-10-04 — Preserve native Markdown until EOS
 
 - Qualified native chat supplies an empty caller stop list; formatter EOS text

@@ -1,4 +1,229 @@
+## 2026-11-10 — Explicit recorded source and exact-request intake
+
+Extend the existing stream action with paired closed recorded-source/first-test
+fields; retain legacy live records and their digests. Add exact-ID scheduling
+refresh through the current lock/claim/receipt owner without consuming unrelated
+announcements or policies. Full selections remain frozen, with only the first
+submission permitted in recorded test mode; no replay or continuation transition
+is added. Recorded-only intake leaves legacy live requests untouched before claim;
+both source forms exclude their parent from selections. Thirty-five sealed offline
+queue cases pass with no effects or model
+imports. Native CLI/browser integration and live saved-state proof are separate
+gates. WSP15/22/50/77/84/97. See tests/TestModLog.md.
+
+The DAE and native first-test entry share a fixed host runtime lease. The DAE
+retains it through watcher and engagement shutdown; both ordinary and requested
+scheduler threads settle before browser ownership is released. Twenty lifecycle
+and two existing request-settlement cases pass under the offline guard. Older
+processes and pre-DAE startup do not participate, so live process inventory remains
+required before native qualification.
+
+## 2026-11-10 — Freeze bounded stream scheduling in the existing manifest
+
+Add closed `schedule_stream_shorts` intake, immutable confirmed stream/session
+binding, source deduplication and terminal selection claims in the current queue
+state. Existing Phase3/browser ownership performs access/discovery and scheduling
+outside the manifest lock; request runs cannot fall into ordinary backlog rotation.
+Retain browser ownership through timeout/cancellation settlement. Add a read-only
+unknown scheduling-claim getter for calendar reconciliation. The exact-title rule
+is operator selection, not lineage proof. Forty-nine sealed offline fixtures pass;
+no runtime execution, source installation or verified scheduling delivery claimed.
+WSP15/22/50/77/84/97. See docs/VIDEO_POLICY_INTERFACE.md and tests/TestModLog.md.
+
+## 2026-11-10 — Cooperate with human browser verification
+
+Install the shared Selenium verification gate on the DAE reconnect drivers,
+Edge coordinator recovery, vision chat sender and party reactor attachments.
+This makes their browser effects participate in the same minimum30-second hold
+as Studio workers when a challenge is detected. No chat policy, command authority
+or API sender changes. Source/offline evidence is not live qualification or
+native WRE invocation; pending delivery outcomes remain uncertain. WSP22/50/84/97.
+
+## 2026-11-07 — Quiet stakeholder conversation through shared routing
+
+WSP00/15/22/50/60/73/77/84/97. Replace unsolicited ordinary reply fallthrough with
+fresh candidate selection, bounded attempt budgets and explicit semantic abstention.
+Capture batches before generation and remove badge priority for ordinary discussion;
+retain recognized command priority/permissions and explicit emoji limiter denial.
+Read current-session native-ID context from the complete existing SQLite owner.
+Remove timer trolling/invites and startup greeting generation. Bind conversation
+send destination across delays without changing reviewed text, STOP or unknown writes.
+Add canonical conversation stewardship skill and generated Codex projection; native
+WRE execution is not established. Current default daemon path only; alternate router
+mode and cross-restart capture remain follow-ons. See tests/TestModLog for evidence.
+
 # Livechat Module - ModLog
+
+## 2026-11-07 — Reconcile installed repair and remaining operational proof
+
+WSP00/22/50/77/97. Record the owning repair handoff: PR2314 merged and installed
+at `fa7d487f3`; the 02:32:34 UTC observation found no main/worker process.
+Fresh-process activation and live semantic qualification remain pending. Link the existing scheduler
+roadmap for manual takeover, YUMORI metadata and shared-router follow-ons.
+Record LM Link disable acknowledgement and 36 passive no-connector samples over
+36 seconds separately from model HTTP availability. Documentation only; no
+source window fix or live reply claim, and no unknown delivery/scheduling
+reservation is released.
+
+## 2026-11-07 — Route emoji questions to reviewed contextual replies
+
+012's live test exposed a hard-coded "consciousness evolution" answer in the
+legacy agentic branch. Emoji-plus-question handling now reuses the existing
+ModelReplyRequest, receiving-context verification and bounded reviewed generator
+before legacy acknowledgments. The exact question and reviewed carrier survive;
+unavailable/rejected generation cannot become a canned success. Existing role,
+rate/diversity, slash-command and bare-emoji behavior is preserved. Whole-message
+quiz matching avoids consuming questions or falling through after an empty quiz.
+WSP 00/5/22/50/77/84/97. This is source work; live semantic delivery is unverified.
+
+## 2026-11-07 — Capture received text before reply processing
+
+WSP00/11/22/50/77/84/97. The trailing capture call skipped filtered messages,
+commands and processing/generation failures. Move it after message-ID deduplication
+and before downstream decisions, preserving the current store and moderator roles.
+Do not change ban/timeout handling, posting guards or cleanup ownership.
+The companion comment-worker change explicitly closes unrelated inherited handles
+when Selenium starts a Chrome/Edge service. A controlled Windows reproduction
+showed default inheritance withholding EOF after worker exit, and close_fds=True
+allowing EOF while the fixture service remained alive. This is mechanism evidence;
+source tests and live runtime recovery are reported separately.
+The initial API batch also used to discard every historical text item. Retain
+available text with a capture-only marker; core stores it before returning,
+without replaying commands, donation responses or ordinary reply triggers.
+
+## 2026-11-05 — Persistent scoped comment-quality halt
+
+WSP00/11/22/50/62/77/84/97. Extend the existing STOP owner with one closed,
+content-free comments-quality incident. Unknown/manual/malformed/read-failed
+STOP remains global; legacy no-argument checks still see any STOP. Anchor
+relative/default paths to the checkout, preserve absolute overrides, exclusively
+create under the existing runtime lock, reject duplicate JSON keys and expose
+only an explicit exact matching compare-and-clear. Keep unknown delivery claims.
+
+Recognized invalid/rejected/unreviewed reply output now halts the direct processor,
+DAE, child runners, coordinator retry/channel paths and comments supervisor.
+Reserved exit78 carries the halt even without saved STOP or usable child JSON.
+Existing parent instances retain the typed halt and preserve unfinished
+checkpoints; completion telemetry distinguishes halted work. After an active
+comment task settles, a halted inbox wait can yield to the existing live handoff
+without calling the inbox clear. Live-chat sending uses its explicit scope;
+private context/status intake cannot reset the incident.
+
+Recovery settles old comment owners, clears only the exact recognized current
+incident through the owner API, then starts fresh comment owners. No automatic
+TTL, context reset, provider route or new persistent store was added. Qualified
+private-file/synthetic controls pass68 with zero failures/errors/skips/denied
+effects. Existing101 lifecycle/handoff controls also pass, retaining all original
+assertions and exact child-program admission; see tests/TestModLog for boundaries.
+No live browser, model/provider, daemon or public reply was exercised.
+
+## 2026-11-05 — Bounded pipe framing and honest handoff phases
+
+WSP00/11/22/50/62/77/84/97. A controlled Windows source-runner probe reproduced
+two mechanisms: inherited descendant pipe handles, and an oversized readline
+failure that left the old process waiter/cleanup pending after direct-child
+exit. They do not establish the cause of the current live incident.
+
+Reuse the rotation owner's fixed-chunk read pattern within the existing engagement
+runner, with bounded physical-line framing and whole-oversized-line rejection.
+Preserve later valid JSON, split UTF-8, normal EOF and scheduling fairness.
+Surface completed reader/wait failures as a constant non-cancellation error,
+retaining failed ownership; preserve the generic ownership await. Fixed phase
+codes distinguish setup, settlement, child exit and reader completion.
+Inherited pipe ownership still waits for actual EOF; no family kill, watchdog,
+posting change, model route or additional lifecycle manager was introduced.
+
+The existing81 controls plus20 new controls pass101 with fixed minimal parent/
+child environments, exact local fixture-program admission and zero denied
+effects. All controlled children settle; no active daemon/browser/model/provider
+or public action was exercised. See tests/TestModLog for qualified RED and
+retained harness failures. Source/test receipts bind base181 and exact bytes;
+merge, installed runtime diagnosis and live delivery remain separate gates.
+
+## 2026-11-01 — Shared YouTube model orchestration
+
+WSP00/10/11/22/50/62/77/84/97. Replace consumer-owned provider chains with
+`AIGateway.call_youtube_task` for assessment, writer and exact final review.
+Reuse local general-role/native residency, signed selection/runtime binding,
+Fusion approval-only redaction and existing provider transport. Keep NVIDIA
+Nemotron's topology proposer evaluation-only; discovery does not promote models.
+Configured invalid routing never silently falls back. OpenRouter uses exact
+approved non-xAI text models with zero-price/no-data-collection restrictions.
+Remove direct xAI clients, preserve reviewed live-chat text even without themes,
+rebind command adapters on channel changes, and separate review cancellation
+from the async caller's already-completed generation token. Preserve all posting
+and manifest/history owners. Lazy bridge exports avoid webhook/env startup when
+importing routing/security utilities. See video_comments/LLM_INTEGRATION.md.
+Qualification is offline; no daemon/model/public action or credential read.
+
+## 2026-11-01 — Queue-owned private video directives
+
+Extend the existing operator inbox with bounded `set_video_policy` and
+`clear_video_policy`; preserve context/legacy receipts and share the existing
+lock, pre-effect uncertainty claim and atomic writes. Synchronous private-only
+intake gives metadata/scheduling/Shorts writers fresh scoped fields before their
+effect guard; corrupt/busy/unknown state blocks explicitly. Per-field scope
+supersession, absolute bounded deadlines, digest-bound snapshots, private
+observations and durable upload reservations remain queue-owned. Private context
+activation is independent of public send/dry-run gates; public writers retain
+their gates. See `docs/VIDEO_POLICY_INTERFACE.md`. WSP11/22/50/62/84/97.
+This is offline file/API qualification, with no public/model/browser actions.
+
+## 2026-10-29 — Select General readiness for language/DOM startup
+
+- Existing Phase-2 dependency call passes exact `LM_STUDIO_NATIVE_MODEL_KEY`,
+  otherwise unchanged `QWEN_MODEL_ID` General default. Removed the misleading
+  UI-TARS-ready log from a General startup check. DOM actions remain available;
+  explicit vision readiness is separate. Existing caller file does not grow.
+- Two isolated executions of the actual Phase-2 AST node prove configured native
+  key/default forwarding without importing/starting the DAE. Included in the
+  launcher's49 startup cases within94 actual-source offline checks; not a full
+  main.py or live-runtime qualification.
+- WSP11/22/50/62/84/97; no model, browser, service or scheduler action.
+
+
+## 2026-10-29 — Bounded local fallback for private livechat themes
+
+WSP00/10/11/22/50/77/84/97. Retain reviewed Grok success and reuse the existing
+general-language generator after unavailable/empty/failed/rejected themed output.
+The explicit livechat surface permits LM Studio HTTP only; comments keep their
+default scoped/legacy reader and serialized provider behavior. Bind author,
+receiving channel and stream identity, including the existing generator cache.
+Review the exact final mention within 200 characters and carry a deep full native
+theme snapshot into the existing sender's post-delay guard.
+
+Both existing eligible caller sites use a ten-second threaded await and cancellation
+event. Busy livechat generation/review locks reject immediately. Expired/changed
+themes and late results fail closed; cancellation prevents subsequent stages but
+cannot kill an active provider call. Themed mode survives theme clearing during
+the await, preventing an unreviewed fallback. Deterministic selectors pass 104
+semantic/history cases (12 subtests), original context 53, adjacent queue/context
+116 and separate stdlib inspection 15. These are distinct fixture/source scopes,
+not public delivery or cloud-account repair. Independent review and actual local
+model QA remain separate acceptance evidence in the repair handoff. Subsequent
+review reproduced malformed native source/handle fields bypassing normalization;
+both entry points now reject them before providers, with six reproducing controls.
+The refreshed selection is 88 semantic + 16 history cases.
+
+## 2026-10-29 — Private activation and inspected livechat themes
+
+WSP00/10/11/22/50/84/97. The existing queue receives atomic producer appends under
+its ledger lock; acknowledgements/state remain queue-owned. Private set_context
+does not require a public sender, while existing automation/dry-run gates remain.
+Themed livechat drafts use bounded language review and preserve exact text/theme
+through the existing sender, which rechecks after delays immediately before API
+submission. Existing engagement/cooldown decisions precede generation, and review
+failure cannot fall back to template banter. Source and fixture verification do
+not prove real live delivery or model-role admission.
+
+## 2026-10-29 — Private chat manifest and inspected replies (draft candidate)
+
+WSP 00/15/22/50/84/96/97. Extend existing queue, context reader, generator, Skillz processor and executor; no parallel scheduler or command inbox. `set_context` now activates private context without a public send; `announce` retains explicit publishing. Live-chat and stored-comment language routes consume theme context before generation. The signature hook no longer appends operator wording. Source command identity is carried into comment evidence, and an expired/replaced theme rejects an old draft.
+
+General-language routes reject GUI/audio/embedding model names, including explicit UI-TARS selections. Keyword-only stance assertions become unknown. A separate language-review call evaluates the final candidate; failed/malformed review blocks posting. Top-level posting binds the original row and rechecks identity before submission, requires exact entered text and new creator-reply readback, captures a screenshot and optionally verifies through UI-TARS. Global submit fallbacks are removed. Uncertain outcomes halt the session; unqualified nested submission is blocked.
+
+15 bounded stdlib cases pass; materialized Python sources parse. This is a draft source checkpoint, not signed model-role admission, independent verifier approval, deployment, native RSI or live YouTube evidence. See `modules/communication/video_comments/docs/CHAT_MANIFEST_REPAIR_20261029.md` for exact remaining gates, including full-runtime manifest regeneration, durable uncertainty across restarts and live-selector qualification.
+
 
 ## 2026-10-23 - PR841 owned live-session handoff
 

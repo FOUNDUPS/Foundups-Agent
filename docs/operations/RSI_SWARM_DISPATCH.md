@@ -1,3 +1,470 @@
+## Native OpenClaw Vote qualification — 2026-11-01
+
+Source `d65a7257f10ab25d604cb965a69f89cf25da01ad`; WSP00/15/48/50/97/99.
+Continue the existing provider-qualification prerequisite **15/P1
+(C3/I4/D4/Impact4)** under protected native19/P0. This is supervised resident
+runtime qualification, not signed WRE author admission. R15 remains the first
+admitted improvement target. No new scheduler, router or memory owner was added.
+
+**Observed execution:** isolated OpenClaw2026.10.9/Node24.22.2 executed three
+local `qwen3.5-4b` author jobs through LM Studio and two OpenRouter
+`qwen/qwen3-coder` author jobs plus one separate-context advisory review.
+These are actual native CLI/model runs, not Codex subagents or simulated workers.
+Installed gateway2026.7.1-2 and its production profile remain unchanged; the
+candidate runtime is not promoted. The historical Hermes checkpoint below had
+zero model calls; this later checkpoint must not rewrite that history.
+
+The task was the existing Vote `_validate_request` cycle-year check: allow None
+or an exact integer1900–2100, reject bool/other types without conversion, preserve
+query/state/office behavior and existing error text. The Git-blob (LF) source SHA256 was
+`27fd06b5c5143cf125bb1c30d54a9906c108bfc4832542d173ff54053ddfd79f`.
+The author received only the bounded function/specification. The existing WSP99
+encoder/decoder and artifact-map validator were reused. No repository write or
+hidden-test mount was available to the author.
+
+| Invocation | Observed result | Reported input/output tokens |
+| --- | --- | --- |
+| Local1 | Non-JSON output; seven assistant turns and six attempted tool calls | 25,136 / 2,794 |
+| Local2 | Tool discovery disabled; one turn, still invalid output format | 2,319 / 1,296 |
+| Local3 | Canonical M2M; JSON/Python parse, frozen AST scope gate rejects; two turns including an output-limit retry | 4,719 / 2,444 |
+| OpenRouter author | One turn; original25 checks pass, supplemental exact-type check fails | 2,229 / 339 |
+| OpenRouter repair | One turn; identical candidate bytes, same rejection | 2,638 / 339 |
+| OpenRouter reviewer | One turn; advisory rejection without a concrete counterexample, misses the exact-type defect; review not accepted | 2,512 / 162 |
+
+The frozen25-case checker SHA256 is
+`0ced70b3e9a08f82c033ff9d216ddc756fd0959c21241ca84917fc05be496c38`.
+Baseline16 pass/9 fail; paid candidate25 pass/0 fail. Source review then exposed
+an omitted case: an `int` subclass with value2024 is accepted despite the original
+exact-int requirement. A separate no-network process reproduced that failure.
+The original25 cases were not altered or relabeled as sufficient. Both decoded paid author
+UTF-8 payloads (LF) have SHA256
+`29a4f5829b33b4674d01455a7ffd9124b5c082eb3493a03bb26efc241d4e98a0`.
+**Zero of five author jobs produced an accepted improvement.** The paid repair
+was not silently corrected by the coordinator. Vote production source is unchanged.
+
+The author container used the pinned existing image
+`sha256:c42aca9d0efd20283ccd61e798d6ec557acf1c0238e017c5b39184a030d891c2`,
+UID1000, read-only root/input/runtime mounts, dropped capabilities, NoNewPrivs,
+96 PIDs,2GiB,two CPUs and temporary writable storage. It had bridge networking:
+this is filesystem/process confinement, **not OS-enforced egress isolation**.
+The paid container received only the selected provider key by environment name;
+inspection receipts omit Config.Env. No repository, Docker socket or verification
+suite was mounted. Separate deterministic verification ran with network disabled,
+read-only candidate/checker mounts,32 PIDs,256MiB,one CPU and a15-second limit.
+This is separate execution feedback, not independently controlled signing or
+promotion authority. The model reviewer was the same family and had no authority.
+
+**Budget and request accounting:**012 superseded local-only with permission to
+spend; the coordinator imposed $0.10 total and three paid invocations. The complete
+reservation was $0.076152 using16,384 context/1,800 output and provider price caps.
+The configured OpenRouter route allowed only Venice, disabled fallback and
+required parameters/data-collection denial. Native output reported provider-billed
+costs $0.00128865 + $0.00143180 + $0.00112220 = **$0.00384265**. This is provider
+usage reported by OpenClaw, not an independently reconciled invoice. Paid outputs
+report one assistant turn each; no retry appeared. Catalog/endpoint discovery was
+unauthenticated read-only. Local electricity/hardware and coordinator compute cost
+were not measured. Accepted-result cost is undefined with zero accepted artifacts;
+there is no demonstrated savings claim or model promotion.
+
+**Reusable findings, not retained RSI:** tool denial alone left discovery overhead
+in the first candidate run; disabling toolSearch/codeMode removed that observed
+loop in the next invocation. OpenClaw provider retries live in session
+`.openclaw/settings.json`, under `retry.provider.maxRetries`, not openclaw.json.
+With maxRetries0, actual native CLI probes against a fake provider made exactly
+one HTTP request for both503 and output-limit responses. The latter still exited0,
+so CLI success is not artifact acceptance. The generic test URL did not forward
+OpenRouter provider controls. Exact-URL interception failed at the DNS guard;
+production request fields were source/doc-reviewed, not packet-capture verified.
+No guard was weakened. See [retry settings](https://docs.openclaw.ai/concepts/retry)
+and [provider routing](https://openrouter.ai/docs/guides/routing/provider-selection).
+
+**Audit corrections:** initial manifest call_limit1 described a native invocation,
+not an enforced model-request cap; it did not prevent seven local turns. Apparent
+backslash escaping in displayed output initially caused an incorrect syntax
+assessment. Actual JSON decoding/AST parsing corrected it before a repair call:
+local3 fails the AST scope gate; paid source fails exact-type behavior. Raw outputs
+and the corrected checkpoint are preserved. Never inspect serialized display text
+as a substitute for executing the existing artifact decoder and verifier.
+A receipt check also caught Windows CRLF materialization: compare decoded payloads
+and pinned Git blobs for the hashes above; do not equate host-file byte hashes.
+The second local staging file has CRLF; both returned source payloads are identical.
+
+Private replay inputs, rejected artifacts, frozen and supplemental checkers,
+container states, config hashes and accounting remain under
+`O:/AgentData/RSI/scratch/openclaw-vote-native-20261101/` (`checkpoint.json`).
+No application code, provider route, skill, version pin or runtime authority was
+promoted. No autonomous next-task selection, retained benefit, G1/G2 or RSI is
+claimed. Separate native source review proved inadequate for acceptance; the
+coordinator and deterministic counterexample prevented a false positive.
+
+**Next eligible action:** preserve the exact-int counterexample in the next
+qualification suite; reject this task/model/prompt combination until a materially
+different qualified route or instruction treatment succeeds. Do not repeat the
+unchanged repair or expand to a FoundUp build. Continue the existing protected
+requester/lease-consumption composition and authenticate the current task, model,
+verifier and budget inputs. Runtime execution now has evidence; accepted worker
+improvement and the protected production admission chain remain distinct gaps.
+
+## Native Hermes API qualification — 2026-11-01
+
+Source baseline `430f9ef90ad126b76f3d90e03d1086d2e2237267`. WSP00/15/48/50/97.
+This **15/P1 (C3/I4/D4/Impact4)** provider-qualification prerequisite advances
+the existing native19/P0 dependency. Vote remains the micro fixture; R15 remains
+the first admitted improvement target. StoryTime and other active lanes are separate.
+
+The installed candidate matches upstream Hermes0.22.5 release
+`bf0203a794a07aac3ff764972ab9087baa4e4f4e`. Real authenticated HTTP calls to its
+existing handlers exposed a defect hidden by the earlier mocked API tests:
+`GET /v1/skills` returns500 because `APIServerAdapter._handle_skills` passes
+`include_editorial=True` to `find_all_skills`, which accepts only `skip_disabled`.
+The release source and current upstream source independently contain that mismatch;
+there is no verified upstream fix in this checkpoint. The official release remains
+[v0.22.5](https://github.com/NousResearch/hermes-agent/releases/tag/v0.22.5).
+
+A coordinator-authored **candidate overlay**, not an installed runtime promotion,
+removes only that unsupported keyword. It preserves the real discovery function,
+sorting, disabled-skill filtering, authentication and error handling. With an empty
+temporary home it returns200 and an empty list; with one harmless skill fixture it
+returns200 and that actual skill. It does not replace failed discovery with `[]`.
+The original candidate checkout remains clean and unchanged. The one-line patch,
+source hashes, native responses and replay commands are retained privately under
+`O:/AgentData/RSI/scratch/hermes-api-qualification/20261101-1806/`.
+
+Three disposable containers executed the baseline, repaired-empty and repaired-skill
+cases using the existing pinned `openclaw-sandbox:bookworm-slim` image. Actual
+Hermes handlers and discovery ran, but no full gateway, model, delegated worker or
+author ticket ran. Kernel/process observations: UID1000, zero effective capabilities,
+NoNewPrivs1, loopback-only interface. Docker enforced read-only root/input mounts,
+no external network,64 PIDs,768MiB,two CPUs; only the owned result directory was
+host-writable, with96MiB temporary home storage. Each HTTP listener closed and each
+container was automatically removed. No Docker socket or production credentials
+were mounted. **34 deterministic assertions passed, zero failed** across these
+three runs; this is not34 author jobs or an independent actor's outcome acceptance.
+
+Subsequent independent source/evidence review approved the exact one-line patch
+and documentation, rehashed the original/overlay, reran34 assertions and confirmed
+container absence. `independent-source-evidence-review.json` is in the same private
+evidence directory. This is source/evidence review, not native independent outcome
+verification. Failure cleanup between container creation and startup is unqualified;
+the checker imported the main checkout, whose confinement bytes matched this lane.
+
+Qualification failures are retained: the first host probe used an invalid aiohttp
+cleanup property; the corrected probe explicitly checked closed session/refused
+listener. The WSL `docker` name resolved to a legacy Windows executable and could
+not bind Linux source paths. Explicit `/usr/bin/docker -H unix:///var/run/docker.sock`
+fixed this invocation without changing shared contexts or symlinks. UID65534 could
+not traverse the candidate's private Python directories; the non-root owning UID1000
+ran with the same read-only mounts/capability/network limits. No host permissions
+were broadened. These harness corrections do not qualify general host recovery.
+
+Existing FoundUps gates remain unchanged: admitted API version0.20.4; the candidate
+reports0.22.5 and degraded health for unconfigured model/gateway. Real responses
+remain rejected with `FAIL_HERMES_RUNTIME_IDENTITY`. The existing tool-surface gate
+accepts the empty delegation-only profile and rejects the visible skill fixture.
+Browser control was disabled in the test profile; its advertised expanded API still
+needs full qualification. HTTP200 is not service health or execution authority.
+
+No matching native system service/running container was observed in the inspected
+Ubuntu24.04 service scope. This process had no authenticated-principal, authorized-
+FoundUp, resident-root or work-state bindings. An OpenRouter key was present, but no
+numeric campaign reservation was established, so **zero paid calls** were made.
+These observations do not prove authority artifacts are absent elsewhere.
+
+**Next eligible action:** qualify the reviewed candidate with the configured full
+gateway/model, API/tool/skill surface and existing
+provider event/cleanup contract before promoting a version. In parallel sequencing,
+finish the protected requester/lease-consumption connection below and resolve genuine
+current work/model/verifier/budget inputs. Do not weaken the version pin, fabricate
+authority, or count this component repair as G1/G2, activation, retention or RSI.
+
+## Vote aggregate-to-display trial — 2026-11-01
+
+Base `4c96d6b17429226248c3a82de5544262e773c41e`; owned lane
+`fix/rsi-vote-aggregate-trial-20261101`. Apply existing Vote follow-up11/P2
+(C2/I3/D3/Impact3); native19/P0 and R15 remain blocked by protected composition
+and authentic inputs. This eligible local proposal trial is not native dispatch.
+Holo's corrected voteballots bundle supplies current-workspace paths, but semantic
+freshness is UNKNOWN/index-gap true. Initial wrong module_hint returned unrelated
+hits; direct module docs and source resolved that retrieval error. No reindex.
+
+Independent tests were frozen before each repair. One existing WRE native-chat
+Qwen2.5-Coder7B Q4_K_M attempt used the previously qualified0.3.20 runtime/template,
+CPU4/context2048/output512,180s child deadline and no model tools. It returned the
+supplied block unchanged inside markdown fences: reject for both format and no
+repair. No model patch was materialized or normalized into acceptance. Runtime
+37.33s; SDK usage595 input/72 output tokens. One call, no retry, paid calls0;
+full coordinator/energy cost UNKNOWN. Different tasks and prompts prevent a
+comparative efficiency or learning claim against the prior source-item attempt.
+
+| Evidence scope | Before | After | Attribution |
+| --- | --- | --- | --- |
+| Frozen29 aggregate scorer cases |25 pass/4 fail|29 pass|Coordinator shared-policy repair|
+| Frozen47 answer/shell cases, added after review found the consumer gap |3 pass/44 fail|47 pass|Coordinator display/metadata repair|
+| Full module after two legacy fixture corrections |4 fixture failures/394 pass|398 pass|Independent final replay1.71s; overlapping scope|
+
+The existing source policy now handles both funding-source and aggregate inputs.
+It caps unsupported VERIFIED totals, preserves weaker labels/references and uses
+`aggregate_from_summary` instead of invented FEC provenance. Independent review
+caught the old display consumer reusing overall confidence after scorer tests had
+passed. Quick-answer now uses the unique typed total claim or UNKNOWN; answer and
+shell metadata cannot exceed that label or existing overall confidence. The two
+older positive-total fixtures now include explicit claims for their stated cases;
+the new acceptance assertions were not relaxed. Original frozen files/hashes and
+failed comparisons remain retained outside Git under the existing local micro
+evidence directory's `aggregate/` child. TestModLog records exact hash bindings.
+
+Worker acceptance0/1, rejected proposals1/1, native acceptances0. The independent
+reviewer ran tests and reviewed source; it did not independently instrument the
+model's reported usage. No OS-held-out isolation, native OpenClaw/Hermes execution,
+promotion, learned retention or G1–G5 completion. Private services/accounts and
+other product lanes were untouched. The documented local proposal route is useful
+for rejection evidence but has not earned autonomous repair qualification.
+
+Next system action remains exact-candidate provider/confinement qualification and
+protected admitted requester/consumer composition, followed by R15. Do not keep
+repeating this model configuration or expand FoundUp scope to avoid those gates.
+
+## Micro verification and protected native composition — 2026-11-01
+
+**Source:** main `43b3b66cce8a01f28fb08577a9db84f731e50455`; dedicated
+`fix/rsi-micro-verification-20261101` lane. WSP00/15/48/50/97. Recovery, StoryTime,
+blockchain/PF Mall, YUMORI and AutoPost lanes remain separate. This is a bounded
+RSI ownership/fixture/runtime audit, not a line-by-line audit of every module.
+Holo rejected authority `21ac8928` versus query `43b3b66c`; lexical fallback
+retains UNKNOWN freshness/index-gap labels and source-bound workspace evidence.
+No authority reset or reindex occurred. Exact module docs/tests were read;
+optional missing bridge artifacts do not become semantic evidence.
+
+### Close prior publication and repair planning drift
+
+[PR2276](https://github.com/FOUNDUPS/Foundups-Agent/pull/2276) is merged at
+`c9ac9059ed29073e885159747144071a3d310aff`, tree
+`52e12a57cff3ccaf971ca88492b9760f870683ab`. Exact-main
+[CI41004992711](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/41004992711)
+and CodeQL succeeded. Resident composition: 847 passed / one platform skip;
+provider selection: 135 passed. These distinct scopes still use controlled
+collaborators. Older "close publication" and October5 "current selection"
+instructions are historical. Drift arose because append-only checkpoints left
+an earlier actionable pointer current; root/WRE/backlog now point here.
+
+### Native connection: custody is the missing boundary
+
+The **19/P0 (C4/I5/D5/Impact5)** umbrella remains selected. Existing bridge owners:
+
+- `reddog_grant_authority_high_service.py` already constructs protected parent
+  and effect consensus. `reddog_main_resident_queue_runtime_dependency_bundle.py`
+  and `main.py` do not compose peer-grant, parent-consensus and lease-issuer inputs.
+- `reddog_authoritative_use_lease.py` requires an exact durable replay store;
+  `reddog_signer_secret_grant_durable_nonce_store.py` constructs that store with
+  an integrity secret. Ordinary-main construction would violate custody.
+- `reddog_signer_initial_handshake_grant_backend.py` admits the bounded initial
+  LOW handshake only. `reddog_signer_owner_e0_policy_v7.py` binds noninitial
+  HIGH grants to `worktree_create`; it does not authorize a new LOW peer handshake.
+- `reddog_signer_resolve_per_sign_backend.py` rejects requests without a supplied grant.
+  Public proof alone is not an in-process lease capability. Preserve the
+  post-valve issuance/revalidation ordering in `reddog_resident_queue_execution_valve_handler.py`.
+
+Independent source review rejected the initial "just wire a factory" hypothesis.
+**Next native slice:** compose authenticated request/transport and lease consumption
+inside existing protected target/requester owners, or place the effect consumer in
+an admitted protected process. First identify the exact owner/interface; do not
+create a second scheduler or move secrets into main. Acceptance requires an actual
+valid authorized effect and terminal cleanup, plus expired/revoked/replayed/cancelled
+refusal. Current owner/E0, exact work/runtime/model, distinct verifier and budget
+inputs must also be established. Do not fabricate them or broaden LOW authority.
+
+### Eligible micro qualification and retained failed attempt
+
+Native admission is blocked; a supervised proposal-only local trial remains
+eligible. WSP15 priority does not measure correctness. The existing Vote funding-
+source scorer kept VERIFIED_FACT for an indirect reference. Its older missing-
+reference test and legacy rubric stub did not cover that production branch.
+
+A separate reviewer froze 20 production/consumer cases before model inference.
+The existing WRE `execute_local_skill_inference` native-chat adapter ran one
+Qwen2.5-Coder7B Q4_K_M proposal (llama-cpp-python0.3.20, CPU four threads,
+context2048, output cap512, 180s child deadline). No tools or filesystem writes
+were delegated to the model. Worker input contained the function and invariants,
+not tests; those tests remained accessible on the same PC, so this is not OS
+held-out isolation. One call, no retry, 73.75s, SDK usage874 input +84 output tokens.
+Paid provider calls0; coordinator cost, hardware energy and total compute cost
+unknown. No savings or cost-per-accepted-result comparison is justified.
+
+| Variant under the same frozen 20 cases | Passed | Failed | Disposition |
+|---|---:|---:|---|
+| Unchanged production baseline | 16 | 4 | Indirect verified facts escape to consumer |
+| Qwen proposal in disposable copy | 13 | 7 | REJECT: leaves original defect and downgrades three valid direct types |
+| Coordinator repair | 20 | 0 | Bounded source-item repair independently reviewed |
+
+The fenced `old_string/new_string` envelope also violated requested plain `old/new`.
+Diagnostic normalization did not authorize materialization. Its exact old text
+matched the direct branch; a comment prevented matching the intended indirect one.
+Keep this failure in the existing backlog observation. Worker acceptance0/1;
+defective candidate rejected1/1; independent native outcome acceptances0.
+The coordinator's repair must not count as worker success. Full Vote replay322
+passed, including two historical rubric/adversarial stub suites; the production
+oracle and downstream consumers were also exercised directly. A later test
+strengthening asserts the previously declared exact HIGH cap and explanatory
+factor; it does not alter the recorded frozen comparison. See Vote TestModLog.
+
+A candidate lesson is to anchor edits to branch context and check positive
+controls as well as the failing case. This has not yet improved a later worker
+invocation and is not accepted RSI learning. The independently discovered aggregate
+`total_raised` provenance gap remains a separately scored Vote follow-up; do not
+claim all claim types are fixed. No public Vote activation or external data calls.
+
+### Micro → system → FoundUp → concurrent workers
+
+| Candidate | WSP15 C/I/D/Impact | Priority | Eligibility / next action |
+|---|---|---|---|
+| Protected native requester/consumer composition | 4/5/5/5 =19 | P0 | Missing protected interface and current authentic inputs; first G1+G2 proof |
+| Existing R15 test-registry workflow | 3/4/4/3 =14 | P1 | Keep fixed correctness, later-use control and rollback; depends on admitted author/verifier |
+| Vote source-item verification micro | 2/4/3/4 =13 | P1 | Selected local qualification; rejected worker, independently reviewed coordinator repair |
+| StoryTime/EDUIT tile validation | 2/3/3/4 =12 | P2 | Reserve active product lane; review records alone do not prove independent education/visual quality |
+| Trade synthetic normalization/bar fixtures | 2/3/3/3 =11 | P2 | Existing no-network/no-wallet simulation owner; never use profitability as this oracle |
+| AmIBot/detect_ai locked-verdict scoring | 2/2/2/3 =9 | P3 | Planning package has13 non-dispatchable orders; no chat/matching runtime established |
+
+One admitted worker and an independently controlled verifier precede parallelism.
+Then prove activation/rollback and a later controlled benefit; only then test two
+disjoint tickets, collisions, cancellation and recovery. Keep tickets as the
+scope/authority/accounting unit; bounded teams can execute inside them. A new
+FoundUp or swarm framework is not required to prove the smallest loop.
+
+### PC, upstream and cloud decision
+
+Observed PC: i5-10400 (6 cores/12 threads),79.9GiB RAM, RTX2060/6GiB. Earlier LM
+Studio Gemma occupied about3.46GB; do not evict shared models. Serial CPU inference
+plus deterministic tests is feasible (the trial above ran); concurrent model
+capacity is not benchmarked. Start with one author and separate verification.
+
+The earlier micro trial used Windows OpenClaw2026.5.2, WSL OpenClaw2026.7.1-2
+and Hermes0.20.4. It did not upgrade them or use Ollama. Its unavailable Ollama
+server and Docker engine observations are superseded by the host repair below.
+
+#### Host repair and isolated upgrade qualification — 2026-11-01
+
+012 authorized local startup, repair and stable-version updates. This host
+maintenance does not supply native work-order, model, evaluator or promotion
+authority. Release observations are dated, not an automatic update policy.
+
+| Runtime | Observed result | Remaining boundary |
+| --- | --- | --- |
+| [Ollama0.40.13](https://github.com/ollama/ollama/releases/tag/v0.40.13) | Latest stable; normal app starts server11434; two bounded CPU inference checks returned `OK`, including after restart | Health checks, not worker-quality or RSI evidence |
+| [WSL3.0.3](https://github.com/microsoft/WSL/releases/tag/3.0.3) | Latest stable; kernel6.18.54.1; Ubuntu-24.04 reaches Docker Engine29.9.2 | WSL alone is not a worker sandbox |
+| [Docker Desktop4.97.0](https://docs.docker.com/desktop/release-notes/#4970) | Upgraded from4.76.0; official checksum and publisher signature checked; Linux engine responds from Windows and Ubuntu-24.04 | Existing sandbox image is the August21 build, not a newly qualified/latest image |
+| [llmster0.0.27-1](https://lmstudio.ai/install.ps1) | Upgraded from0.0.21-2 while no models/clients were active; API1234 responds; direct hidden launch avoids observed detached-launch console windows | Observe later startup; do not claim automatic recovery or model-quality qualification |
+| [OpenClaw2026.10.9](https://github.com/openclaw/openclaw/releases/tag/v2026.10.9) | Isolated CLI starts with checksum-verified Node24.22.2; sandbox command is available | Existing routed installation unchanged; matched Gateway/profile and actual governed adapter execution remain unqualified |
+| [Hermes0.22.5](https://github.com/NousResearch/hermes-agent/releases/tag/v0.22.5) | Isolated source `bf0203a794a07aac3ff764972ab9087baa4e4f4e`, PM-managed Python3.14.9; API version import and13 selected upstream API tests pass | FoundUps health gate still requires0.20.4 and rejects0.22.5; do not loosen the pin without adapter/confinement qualification |
+
+Ollama's profile-directory junction caused Windows untrusted-mount-point errors.
+Preserve the original junction as a recovery reference; use a normal profile
+configuration directory with byte-identical existing identity files. Model data
+and the existing external `OLLAMA_MODELS` setting remain in place. No replacement
+identity was generated. Its app, rather than a temporary `serve` process, now owns
+the server.
+
+Docker4.76 failed while initializing its stale inference socket. The verified
+update restored startup without a factory reset. Correct the existing WSL
+integration list to include the actual `Ubuntu-24.04` distribution; the prior
+`Ubuntu` entry did not make Docker available there. Account sign-in was confirmed
+separately and does not confer WRE execution authority.
+
+One disposable container per caller (Windows, then WSL) used the existing image
+`sha256:c42aca9d0efd20283ccd61e798d6ec557acf1c0238e017c5b39184a030d891c2`.
+Both checks verified UID65534, loopback-only networking, zero effective
+capabilities, `NoNewPrivs=1`, rejected writes under `/tmp`, and automatic removal.
+Launch limits were read-only root, no network, no host mounts,32 PIDs,128MiB and
+one CPU. The two pre-existing stopped containers remained. This is a host
+sandbox smoke test, not OpenClaw/Hermes dispatch, independent outcome acceptance
+or a general isolation/security certification.
+
+The old llmster updater stalled. Its owned process was stopped; the official,
+checksum/signature-verified bootstrap installed the candidate. Detached CLI
+startup then exposed Node/LM Link console windows. Stopping that owned daemon
+removed the windows; direct `Start-Process -WindowStyle Hidden` of the installed
+daemon (using its existing launch record) restored the API without the detached
+CLI wake-up. Do not close unrelated terminals or change global terminal settings.
+
+Hermes qualification first rejected an undeclared `api` extra and an incorrect
+test interpreter/missing optional dependencies. Preserve those failures. The
+corrected upstream PM environment used `web,messaging`, its separate test Python,
+and `scripts/run_tests.sh tests/gateway/test_api_server.py -k 'health or capabilities or auth or toolsets or skills' -q`
+with file retries disabled:13 passed,0 failed. No provider job or credentials
+were used. Candidate installs are retained under the host's
+`~/.local/share/foundups/runtime-candidates/20261101`; local maintenance logs and
+recovery state are in `C:/tmp/rsi-runtime-repair-20261101/`, outside Git.
+
+Independent read-only review at11:23 JST confirmed both Docker callers, current
+Ollama/LM Studio responses, the13-test log, and zero WindowsTerminal/OpenConsole
+processes after direct hidden launch. It did not replay the earlier repairs or
+authenticate their historical measurements. Source/evidence review is separate
+from independent acceptance of a worker-produced improvement.
+
+Next: qualify the existing provider adapters against these exact candidate
+versions and the intended sandbox image before changing routed deployments.
+Keep the protected installed runtime, signed admission and R15/G1-G4 gates intact.
+No paid model calls, independent retained improvement or native author success
+are established by this maintenance.
+
+[Grok Bot](https://x.ai/bot) documents persistent cloud computing and parallel bots,
+but its bots share a user's machine; this is not proof of one server per bot or
+of FoundUps cost/quality. Adopt durable ticket state and restartability, not a new
+hosting layer. [OpenClaw sandboxing](https://docs.openclaw.ai/gateway/sandboxing)
+and [Hermes security](https://hermes-agent.nousresearch.com/docs/user-guide/security)
+provide relevant isolation options; neither a worktree nor separate prompt proves
+process/filesystem/network/credential confinement. Qualify the actual adapter.
+[Karpathy AutoResearch](https://github.com/karpathy/autoresearch) supplies a fixed-
+evaluator, bounded-experiment pattern. Existing WRE AutoResearch/evaluator owners
+already cover configuration experiments; live commit/promotion remains unproved.
+
+Cloud becomes justified by measured queue latency, required uptime, stronger
+per-tenant isolation or capacity beyond this PC. First record local accepted
+throughput, retries, false acceptance, verification cost and recovery. No cloud
+purchase, 24/7 service or thousand-worker scaling claim is warranted by this run.
+
+## Resident assurance connection — 2026-10-30
+
+WSP97 source reconciliation at `7d6a292bcb28e5cbadd1dffdac1a795d3da7e31e`:
+Challenge/Build/Verify/Accept/Improve maps to existing R06/R14, R07–R08/R18,
+R09–R10/R19, R11–R13 and R15/R17/R23 owners. Do not create replacement queues,
+state machines, evaluation stores or roadmaps. Native G1+G2 precedes parallelism.
+
+The eligible **14/P1 (C2/I4/D4/Impact4)** slice connects main's resident startup
+to AgentDB's existing independent-assurance store. The signed OpenClaw binding
+already did this. The socket integration test injected the absent dependency,
+masking main's omission; it now requires the production binding and checks the
+durable reservation at completion. AgentDB initialization belongs only in enabled
+runtime composition; it is not a read-only readiness probe or new authority.
+
+Local Windows caller regression: baseline **2 failed / 2 passed / 1 skipped**;
+repair **4 passed / 1 skipped**. Connected admission, reservation, recovery and
+verifier-finalization suites: **62 passed / 1 skipped** (overlaps those four).
+The AF_UNIX composition requires Linux and is explicitly selected in hosted CI.
+Its signer, workers, model, authority and execution collaborators remain fixtures;
+passing it cannot establish native OpenClaw/Hermes operation or G1+G2 closure.
+
+Follow-on integration exposed a real receipt seam: the held-out producer hashed
+v2 identity/evidence fields but omitted them from serialization. Preserve its
+existing ID seed and the exact historical wire shape while carrying current
+fields through Memex reconstruction. The inherited socket fixture also falsely
+assumed G3 activation readiness. Its revised contract uses the real sink,
+requires completed verification/assurance and proves activation refusal with
+no outcome signing or retained-memory write. R11-B's accepted-memory transaction
+remains unimplemented; this checkpoint does not manufacture that capability.
+
+After exact-source review and publication, next remains the **19/P0** native
+admission umbrella: authenticated peer-grant, parent-consensus and external
+lease-issuer caller composition plus current owner/work/model/budget inputs.
+Keep the existing selection/replay/generation refusals and post-valve issuance
+ordering. G3 activation/rollback, G4 later controlled benefit and G5 bounded
+continuation still require operational evidence. No paid model calls, new
+credentials, runtime grants, live deployments or compute-saving claim in this slice.
+The October25 scoped input observations below remain historical, not a new host scan.
+
+## Risk-based verification integration handoff — 2026-10-28
+
+See [WRE verification ownership, evidence boundaries and Prometheus M2M execution packet](WRE_RISK_BASED_VERIFICATION_HANDOFF_20261028.md). Existing test-impact projection and differential execution are separate from authenticated worker completion and RSI promotion. This cross-reference does not activate a new worker or claim end-to-end integration.
+
 ## Current owner input handoff — 2026-10-25
 
 [#2181 closure](https://github.com/FOUNDUPS/Foundups-Agent/pull/2181#issuecomment-6357450863)

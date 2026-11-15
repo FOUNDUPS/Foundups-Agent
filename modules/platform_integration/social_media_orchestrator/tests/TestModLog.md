@@ -1,3 +1,38 @@
+## 2026-10-29: Current reconciliation local validation
+
+Existing Python manifest suite: eight passed after the measured 330 KiB
+Windows byte-bound amendment. Existing Node compatibility contract, preflight
+and async commands all pass, including actual LF/CRLF, exact byte maximum/+1
+and 1477/1478 member controls. Canonical registry check is current at 1792
+files / 260 quarantines. The original failing byte-bound result is retained;
+no compiler assertion, Node preflight assertion, source hash or runtime-member
+check was removed. Hosted checks and resulting-main/Holo proof remain required.
+This is local packaging evidence, not installed service or provider acceptance.
+
+## 2026-10-29: Reconcile existing editorial-package PR #2238
+
+WSP 11/22/50/71/84/97. Preserve the original compiler/strict content route while
+integrating main45aa97ba, including the newer preflight and Ollama owners. This
+is bounded compilation of caller-supplied, unverified sources, with proposed
+dates only; it grants no publication authority or live operation.
+
+The actual integrated package imports pass the original ten compiler methods
+and thirteen current adapter methods: 23 methods / 72 subtests. Production
+leaf replacements: none. Central DAE registration is isolated; Windows asyncio
+setup alone permits loopback fixture creation (16 events). Application imports
+and execution have a denied network/process/private-file/storage-write guard;
+zero denied-effect attempts occurred. These are local offline contracts, not a
+live campaign, installed runtime or independent human/agent review. Preserve
+the repaired, quarantined legacy content scaffold and every original compiler
+assertion; only its introductory replacement claim is corrected. Historical
+October 27 totals and verifier claims below remain dated source records.
+
+## 2026-10-27: Source-backed editorial-package contracts
+
+- Retrieved existing TestModLog/README and actual content scaffold before test authoring. The old tests/test_content/content_orchestrator.py was invalid Python with two empty assertions; replace with test_content/test_content_orchestrator.py covering source preservation, identity/rules truth boundaries, revision binding, deterministic priorities/deduplication, overlength draft withholding, timezone/overflow, malformed fields/URLs/JSON and denied common file/process/network effects through the real campaign dispatcher.
+- Reuse test_social_campaign_adapter.py plus existing AntifaFM/petition/publication/drafter fixtures for connected regression. No duplicate provider or scheduler tests created.107 tests +131 subtests passed locally on Python3.12.14; campaign_brief+campaign_planner coverage99.54% (162 statements, one unreachable-after-DNS-filter IP diagnostic line uncovered). No module-wide coverage claim.
+- Independent verifier separately exercised145 wrong-type/shape mutations, scope/calendar and malformed JSON cases, common denied effects and actual command routing. Found ID/locale mismatch, decoded surrogate serialization and ambiguous length labeling; fixed and rechecked. No live provider/model/browser/account or resident installation qualified.
+
 ## 2026-10-18: AntifaFM listener context and verified X pilot
 
 - New bounded contract: default preview cannot reach configuration, credentials,

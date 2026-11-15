@@ -1,5 +1,11 @@
 # YouTube DAE operator command plane — Phase 1
 
+> Historical Phase-1 boundary. The current 2026-11-01 contract is
+> [private video policies](../VIDEO_POLICY_INTERFACE.md): six actions, synchronous
+> private intake before writers, bounded absolute deadlines and private context
+> activation independent of public send gates. The dated evidence below remains
+> unchanged; its four-action and private-activation gate descriptions are superseded.
+
 ## Current contract, 2026-10-22
 
 Owner: existing `OperatorCommandQueue` → `AutoModeratorDAE.run()` → existing

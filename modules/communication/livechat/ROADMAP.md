@@ -1,3 +1,18 @@
+## Conversation stewardship qualification — 2026-11-07
+
+The first source layer uses quiet candidate selection, session/native-ID context and
+shared assessment/write/review. Qualify a fresh default DAE against observed chat:
+useful direct answer, already-answered question, relevant problem report, ordinary
+stakeholder eligibility and quiet idle periods. Record independent visible delivery,
+not API success alone. Do not repeat unknown posts for testing.
+
+Remaining work: alternate router-mode preservation of native fields; explicit managing-
+moderator/delegate mapping; durable capture-error receipts and cross-restart deduplication;
+measured cadence tuning; consent/retention rules before cross-session digital twins;
+registered/admitted WRE observe/diagnose executor before autonomous repair claims.
+Apply WSP 15 to approved repairs; preserve scheduler takeover, YUMORI metadata, GPU
+stability and wider AI-router migration boundaries in the existing repair work ledger.
+
 # Livechat Module - Roadmap
 
 ## 2026-10-23 confirmed-handoff checkpoint

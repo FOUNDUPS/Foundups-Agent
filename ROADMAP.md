@@ -12,6 +12,186 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
+The [Vote release accounting and Launch Pad](modules/foundups/voteballots/docs/RELEASE_ACCOUNTING.md)
+track the public Vote, Oversight and Coalition release and the remaining
+candidate/evidence and runtime gates.
+
+## WRE Git lifecycle and PC convergence — P0
+
+Prioritize shared GitHub-to-PC completion before further HPC feature work.
+WSP 15 allocation scores are complexity 3, importance 5, deferability 5 and
+impact 5. The existing WRE and Codex startup paths share a deterministic
+reconciliation pass. A tracked change closes after verified main and a
+matching PC checkout. Current runtime work is tracked in the
+[WRE lifecycle interface](modules/infrastructure/wre_core/INTERFACE.md#git-lifecycle-reconciliation)
+and [PR backlog issue](https://github.com/FOUNDUPS/Foundups-Agent/issues/2122).
+
+## Micro verification and protected native composition — 2026-11-01
+
+The [native OpenClaw trial](docs/operations/RSI_SWARM_DISPATCH.md#native-openclaw-vote-qualification--2026-11-01)
+now establishes actual isolated local/OpenRouter model execution. Five author jobs
+produced no accepted candidate; a separate advisory review was also inadequate.
+The paid candidate passed25 frozen checks but failed an added exact-type check
+required by the original specification; its repair was byte-identical. Three
+paid calls reported $0.00384265. No production change or runtime promotion; the
+protected admission19/P0 and R15 gates remain open. This supersedes any inference
+that resident model execution itself is still untested, not the earlier receipts.
+
+The [native Hermes qualification](docs/operations/RSI_SWARM_DISPATCH.md#native-hermes-api-qualification--2026-11-01)
+reproduces an upstream skill-discovery500 and tests a one-line candidate repair
+in three confined containers (34 assertions). No author/model call or installed
+promotion occurred. Complete full-gateway/provider qualification and protected
+admission before expanding Vote; the existing19/P0 and R15 gates remain selected.
+
+The [aggregate-to-display follow-up](docs/operations/RSI_SWARM_DISPATCH.md#vote-aggregate-to-display-trial--2026-11-01)
+extends the existing Vote fixture after the host repair. The local proposal was
+rejected; a separately attributed coordinator repair connects aggregate evidence
+to the displayed confidence. Keep R15 and protected native admission as the next
+system gates; more supervised product repairs do not close G1–G5.
+
+Reconciled main `43b3b66cce8a01f28fb08577a9db84f731e50455`. The resident assurance
+connection below is published: [PR2276](https://github.com/FOUNDUPS/Foundups-Agent/pull/2276)
+merged at `c9ac9059ed29073e885159747144071a3d310aff`; its exact-main CI and CodeQL
+passed. Do not repeat that repair or mistake its controlled fixtures for G1.
+
+The **19/P0** native dependency is protected requester/lease-consumption
+composition plus authentic current inputs, not three ordinary constructor calls.
+The HIGH service already verifies proofs; ordinary main must not receive the
+integrity secrets required by replay stores. Preserve the initial LOW boundary.
+[Dispatch evidence and next acceptance gates](docs/operations/RSI_SWARM_DISPATCH.md#micro-verification-and-protected-native-composition--2026-11-01)
+own this correction, runtime inventory, fixture ranking and local/cloud decision.
+
+One eligible **13/P1** Vote micro qualification ran the existing local Qwen
+adapter against a real production defect. Independent frozen tests rejected its
+wrong-branch proposal (7 failures versus baseline 4); the separately attributed
+coordinator repair passed 322 module tests. No native author, OS confinement,
+promotion or learned later-use benefit is proved. R15's first admitted target
+remains the existing test-registry work procedure, not a replacement product build.
+
+## Blockchain simulator authority — 2026-10-31
+
+Blockchain planning follows the [WSP26 simulator-first contract](WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract)
+and [2026-10-31 reconciliation](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md).
+Publish reviewed source separately from deployment: unresolved economic conflicts,
+unfunded settlement and absent independent signing controls block activation.
+The existing simulator must validate any economic enhancement before chain parity.
+
+### Current blockchain security sequence — 2026-11-01
+
+#### P3 delivered; micro-UPS preview verified — 2026-11-05
+
+[PR2300](https://github.com/FOUNDUPS/Foundups-Agent/pull/2300)/main 95516e81 closed
+with 23 PR/21 main checks and scoped PC/runtime/preservation verification.
+The [P4 class-C preview](docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p4-prospective-micro-ups-allocation-v1)
+is VERIFIED_SIMULATED: 360 focused/1,404 broad, independent 15/native JS and legacy
+trace pass; scopes overlap. Source/package/protected delivery remains separately tracked.
+Next: staker/import and exact atom source/book/receipt migration before shared pending
+reservations/durable settlement. B05, identity/PoB, custody, dependency/Holo and chain
+gates stay; native balances and existing receipt formats are not reinterpreted.
+
+#### Restricted native UPS transfer qualified locally — 2026-11-02
+
+The [19/P0 class-C version](docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p3-exact-native-transfer-v1)
+qualifies one synthetic source/pool tail: focused 337/broad 1,324 plus legacy trace parity,
+with overlapping scopes; default legacy stays. Central record separates delivery gates.
+Next: select canonical UPS units/scale, rounding/residual rights and migration before
+B05 general durable funded settlement. F_i policy, signer/pilot, Holo and chain holds stay.
+Earlier PR2297/main d65 guard-pending notes are historical, not current implementation state.
+
+#### Current retrieval-security checkpoint — 2026-11-01
+
+PR2291 delivered the [stored-settings guard](holo_index/INTERFACE.md#stored-chroma-settings-admission--2026-11-01)
+at `424e6863b19c9353a296e0cc837e3f30eaa428fd`: 23 PR/21 main checks pass,
+with 28 C/O file bindings and separate pathname/evidence preservation verified.
+The [dated checkpoint](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#allocation-delivery-and-stored-chroma-security-hold--2026-11-01)
+supersedes publication-pending prose; upstream alerts, exact runtime/current-store
+qualification and explicit maintenance release remain open. The controller is held.
+
+B09 delivered at `430f9ef90ad126b76f3d90e03d1086d2e2237267`: 23 PR/21 main
+checks, 17 C/O source bindings, 27,258 immediate untracked pathnames preserved,
+and 375 evidence files copied/verified. This is not an untracked-content audit.
+B11-S1 delivered through PR2294 at `4ecd01ba464f5269006afb03d6500e42a212288b`:
+23 PR/21 main checks, 22 PC bindings and 501 frozen evidence files independently
+verified. This partial same-ID control does not establish funded settlement/full B11.
+B03-P1 delivered through PR2296 at `1787ea8a1122bc55ee7f07082ee7499de6bfd226`:
+23 PR/21 main checks, 29 PC bindings/187 evidence files independently verified.
+The [perimeter](docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p1-perimeter-v1)
+remains SPECIFIED_NOT_IMPLEMENTED, arithmetic NOT_SELECTED/source-transfer code HOLD.
+Next candidate: 17/P0 class B four-site pool credit refusal, focused 232 pass
+(192 original + 40 desired; RED 14 pass/26 fail); broad 1,276/controlled trace parity pass.
+Independent source/IDs/ASTs, five held-outs and package eight Python/three Node pass.
+Security/publication pending; no whole-state, funded or native-effect confinement claim.
+Partial rounding/hurdle/receipt/underflow and funding are excluded; B05/B08/full B11
+and global D, persistent Holo, live-chain and deployment holds remain.
+
+#### Historical allocation source checkpoint — prepublication, 2026-11-01
+
+The following source-publication assertions record an older prepublication
+checkpoint superseded above; economic and activation gates remain open.
+
+PR2288 merged d927; subsequent Vote PR2289 leaves the blockchain source and
+1,481-member runtime closure unchanged at de6917. Exact new-main source checks
+pass 21/21, and PC/control bindings pass separately. Reserve source delivery is
+complete after separate C/O CURRENT with no index gap queries; installed/native closure is
+still unverified and lexical bundle freshness remains UNKNOWN.
+Historical d927's failed dependency-maintenance job remains an open separate
+follow-up; no sealed quote or test receipt is relabeled.
+
+The **18/P0 class-B** candidate implements numeric admission and precommit
+preparation in the four existing wallet/human/engine/MetaGPT allocation entrypoints.
+The 171 frozen cases plus 25 independent held-outs passed: 196 cases. The 311
+original regressions passed with exact prior case IDs. Zero errors, skips or guard
+denials were recorded; 174 simulator/FAM Python source snapshots remained stable.
+Independent source/AST/budget review reports no material findings within the
+frozen native-state contract.
+Fresh controlled de baseline/candidate 240-tick traces match raw bytes under the
+finite profile. Broad execution passes 1,190, including the derived promoted
+173-case subset; 25 external held-outs are outside it. Package eight Python/three
+Node and registry 1,800/260 pass, same 1,481 members and unchanged caps. Fresh
+security/publication/candidate-main/PC/Holo remain pending; delivered-de acceptance
+does not qualify this candidate. Preserve accepted arithmetic
+and lookup/insufficient-funding behavior. B03 C/D, B05 funded accounting, custody
+and chain activation remain open; the older quote-pending notes are historical.
+
+Current [concurrent-main reconciliation](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#concurrent-main-quote-reconciliation--2026-11-01)
+preserves PR2287 YouTube work alongside the unchanged quote source. The b0b+b3e
+merge overlay passes 1,019 simulator cases, one controlled trace and package
+eight Python/three Node checks with 1,481 runtime paths and registry 1,800/260.
+Earlier 4c96/1,478 evidence is sealed, not relabeled. Byte caps remain unchanged;
+35 bytes of CRLF manifest headroom require separate future resource admission.
+Publication, fresh security, resulting-main and PC/Holo gates remain separate.
+
+[The current sprint and ordered roadmap](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#reserve-quote-observation-and-b02-delivery--2026-11-01)
+record B01 delivered through PR2281 at 24cc (24 PR/22 main checks) and B02 through
+PR2285 at `fb58cd530d7b6887ce6218af282cb6ee7382ded5` (23 PR/21 main checks).
+Primary-PC source/preservation and exact-source Holo qualification passed
+separately; lexical bundles are not semantic freshness proof. B02's 57 independent
+and 930 broader cases overlap; its controlled process trace is qualified, while
+seed-only reproducibility and durable/funded settlement remain unproved.
+
+The next existing-owner prerequisite is a **16/P0 class A reserve observation**:
+an opt-in 11-field rational view with host-serialized capture and non-authoritative
+content/context identity. Independent 113, promoted 96 and broader 1,019 cases pass
+in overlapping scopes. Fresh controlled reference/candidate traces match; that
+finite profile does not prove seed-only portability. Package checks pass eight
+Python cases and three Node entrypoints; protected publication remains pending.
+No default consumer or economic rule changes. B03's 19/P0 class
+C/D units/issuance decision stays open.
+The [AI threat update](docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#ai-exposed-financial-attack-surfaces)
+retains authentic funding, independent signer and recovery gates. The scoped
+19-entry catalog is metadata without issuance evidence, not an exhaustive project
+inventory. No planning packet grants live TestNet or production authority.
+
+## Resident assurance connection — 2026-10-30
+
+Source audit at `7d6a292bcb28e5cbadd1dffdac1a795d3da7e31e` supports
+Challenge → Build → Verify → Accept → Improve through existing R06–R19 owners.
+The selected **14/P1 (C2/I4/D4/Impact4)** repair connects main's enabled resident
+startup to the existing AgentDB assurance store; its integration test previously
+supplied that missing dependency itself. The **19/P0** authenticated native
+worker umbrella remains open. See the [current connection and evidence limits](docs/operations/RSI_SWARM_DISPATCH.md#resident-assurance-connection--2026-10-30).
+Recovery, PC synchronization and unrelated PRs remain in their separate lanes.
+
 ## Current RSI input gate — 2026-10-25
 
 [#2181](https://github.com/FOUNDUPS/Foundups-Agent/pull/2181) source publication is complete:

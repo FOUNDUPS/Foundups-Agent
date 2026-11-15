@@ -1,9 +1,41 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1773,
-  "quarantined_tests": 273,
+  "total_tests": 1842,
+  "quarantined_tests": 260,
   "tests": [
+    {
+      "id": "test::.github::scripts::tests::test_ci_merge_policy",
+      "path": ".github/scripts/tests/test_ci_merge_policy.py",
+      "owner": ".github",
+      "suite_class": "unit",
+      "shard_id": "github-unit",
+      "capabilities": [
+        "import_path_mutation",
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Regression coverage for changed WSP mirror and catalog checks."
+    },
+    {
+      "id": "test::.github::scripts::tests::test_ci_merge_scope",
+      "path": ".github/scripts/tests/test_ci_merge_scope.py",
+      "owner": ".github",
+      "suite_class": "unit",
+      "shard_id": "github-unit",
+      "capabilities": [
+        "import_path_mutation",
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Exercise the CI classifier against real Git commit and tree objects."
+    },
     {
       "id": "test::WSP_agentic::tests::test_0102_awakening_with_pqn_verification",
       "path": "WSP_agentic/tests/test_0102_awakening_with_pqn_verification.py",
@@ -2207,106 +2239,106 @@
       "id": "test::modules::ai_intelligence::0102_orchestrator::tests::test_conversation_manager",
       "path": "modules/ai_intelligence/0102_orchestrator/tests/test_conversation_manager.py",
       "owner": "modules/ai_intelligence/0102_orchestrator",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-0102-orchestrator-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-ai-intelligence-0102-orchestrator-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for conversation_manager; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::ai_intelligence::0102_orchestrator::tests::test_learning_engine",
       "path": "modules/ai_intelligence/0102_orchestrator/tests/test_learning_engine.py",
       "owner": "modules/ai_intelligence/0102_orchestrator",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-0102-orchestrator-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-ai-intelligence-0102-orchestrator-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for learning_engine; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::ai_intelligence::0102_orchestrator::tests::test_memory_core",
       "path": "modules/ai_intelligence/0102_orchestrator/tests/test_memory_core.py",
       "owner": "modules/ai_intelligence/0102_orchestrator",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-0102-orchestrator-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-ai-intelligence-0102-orchestrator-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for memory_core; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::ai_intelligence::0102_orchestrator::tests::test_notification_engine",
       "path": "modules/ai_intelligence/0102_orchestrator/tests/test_notification_engine.py",
       "owner": "modules/ai_intelligence/0102_orchestrator",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-0102-orchestrator-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-ai-intelligence-0102-orchestrator-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for notification_engine; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::ai_intelligence::0102_orchestrator::tests::test_personality_engine",
       "path": "modules/ai_intelligence/0102_orchestrator/tests/test_personality_engine.py",
       "owner": "modules/ai_intelligence/0102_orchestrator",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-0102-orchestrator-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-ai-intelligence-0102-orchestrator-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for personality_engine; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::ai_intelligence::0102_orchestrator::tests::test_session_controller",
       "path": "modules/ai_intelligence/0102_orchestrator/tests/test_session_controller.py",
       "owner": "modules/ai_intelligence/0102_orchestrator",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-0102-orchestrator-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-ai-intelligence-0102-orchestrator-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for session_controller; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::ai_intelligence::0102_orchestrator::tests::test_zero_one_zero_two",
       "path": "modules/ai_intelligence/0102_orchestrator/tests/test_zero_one_zero_two.py",
       "owner": "modules/ai_intelligence/0102_orchestrator",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-0102-orchestrator-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-ai-intelligence-0102-orchestrator-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for zero_one_zero_two; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::ai_intelligence::agent_permissions::tests::test_agent_permission_manager",
@@ -3018,6 +3050,32 @@
       "description": "Authenticated durable provenance contracts for topology proposer calls."
     },
     {
+      "id": "test::modules::ai_intelligence::ai_gateway::tests::test_youtube_model_composition",
+      "path": "modules/ai_intelligence/ai_gateway/tests/test_youtube_model_composition.py",
+      "owner": "modules/ai_intelligence/ai_gateway",
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline YouTube consumer composition through complete production definitions.\n\nThe sibling routing module owns the synthetic credential-free fixture. This\nselection adds no model/network/browser effects and requires the guarded child."
+    },
+    {
+      "id": "test::modules::ai_intelligence::ai_gateway::tests::test_youtube_model_routing",
+      "path": "modules/ai_intelligence/ai_gateway/tests/test_youtube_model_routing.py",
+      "owner": "modules/ai_intelligence/ai_gateway",
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Independent offline controls for the exact YouTube Gateway consumer.\n\nImports and all collaborators are constructed inside fixtures. Execute only in\nthe owner's credential-free, network/effect-guarded child. No installed service,\nproduction credential, model load, or public action is part of this contract."
+    },
+    {
       "id": "test::modules::ai_intelligence::ai_overseer::src::test_gate_manual",
       "path": "modules/ai_intelligence/ai_overseer/src/test_gate_manual.py",
       "owner": "modules/ai_intelligence/ai_overseer",
@@ -3385,6 +3443,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": ""
+    },
+    {
+      "id": "test::modules::ai_intelligence::ai_overseer::tests::test_preflight_model_boundary",
+      "path": "modules/ai_intelligence/ai_overseer/tests/test_preflight_model_boundary.py",
+      "owner": "modules/ai_intelligence/ai_overseer",
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-ai-overseer-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Exercise real startup/constructor bodies with all runtime effects replaced.\n\nAST loading follows the existing preflight test boundary: importing main itself\nloads environment files and CLI services unrelated to these deterministic gates."
     },
     {
       "id": "test::modules::ai_intelligence::ai_overseer::tests::test_preflight_resolution",
@@ -3767,31 +3838,31 @@
       "id": "test::modules::ai_intelligence::livestream_coding_agent::tests::test_session_orchestrator",
       "path": "modules/ai_intelligence/livestream_coding_agent/tests/test_session_orchestrator.py",
       "owner": "modules/ai_intelligence/livestream_coding_agent",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-livestream-coding-agent-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-ai-intelligence-livestream-coding-agent-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for session_orchestrator; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::ai_intelligence::menu_handler::tests::test_menu_handler",
       "path": "modules/ai_intelligence/menu_handler/tests/test_menu_handler.py",
       "owner": "modules/ai_intelligence/menu_handler",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-menu-handler-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-ai-intelligence-menu-handler-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for menu_handler; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::ai_intelligence::multi_agent_system::tests::test_social_orchestrator",
@@ -3826,31 +3897,31 @@
       "id": "test::modules::ai_intelligence::post_meeting_feedback::tests::test_post_meeting_feedback",
       "path": "modules/ai_intelligence/post_meeting_feedback/tests/test_post_meeting_feedback.py",
       "owner": "modules/ai_intelligence/post_meeting_feedback",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-post-meeting-feedback-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-ai-intelligence-post-meeting-feedback-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for post_meeting_feedback; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::ai_intelligence::post_meeting_summarizer::tests::test_post_meeting_summarizer",
       "path": "modules/ai_intelligence/post_meeting_summarizer/tests/test_post_meeting_summarizer.py",
       "owner": "modules/ai_intelligence/post_meeting_summarizer",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-post-meeting-summarizer-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-ai-intelligence-post-meeting-summarizer-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for post_meeting_summarizer; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::ai_intelligence::pqn::tests::test_launch_runtime",
@@ -4083,121 +4154,121 @@
       "id": "test::modules::ai_intelligence::rESP_o1o2::tests::test_anomaly_detector",
       "path": "modules/ai_intelligence/rESP_o1o2/tests/test_anomaly_detector.py",
       "owner": "modules/ai_intelligence/rESP_o1o2",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-resp-o1o2-operational",
-      "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-resp-o1o2-unit",
+      "capabilities": [
+        "import_path_mutation"
       ],
-      "description": ""
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Smoke test for src.anomaly_detector."
     },
     {
       "id": "test::modules::ai_intelligence::rESP_o1o2::tests::test_biocognitive_monitoring_system",
       "path": "modules/ai_intelligence/rESP_o1o2/tests/test_biocognitive_monitoring_system.py",
       "owner": "modules/ai_intelligence/rESP_o1o2",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-resp-o1o2-operational",
-      "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-resp-o1o2-unit",
+      "capabilities": [
+        "import_path_mutation"
       ],
-      "description": ""
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Smoke test for src.biocognitive_monitoring_system."
     },
     {
       "id": "test::modules::ai_intelligence::rESP_o1o2::tests::test_experiment_logger",
       "path": "modules/ai_intelligence/rESP_o1o2/tests/test_experiment_logger.py",
       "owner": "modules/ai_intelligence/rESP_o1o2",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-resp-o1o2-operational",
-      "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-resp-o1o2-unit",
+      "capabilities": [
+        "import_path_mutation"
       ],
-      "description": ""
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Smoke test for src.experiment_logger."
     },
     {
       "id": "test::modules::ai_intelligence::rESP_o1o2::tests::test_integrated_patent_demonstration",
       "path": "modules/ai_intelligence/rESP_o1o2/tests/test_integrated_patent_demonstration.py",
       "owner": "modules/ai_intelligence/rESP_o1o2",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-resp-o1o2-operational",
-      "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-resp-o1o2-unit",
+      "capabilities": [
+        "import_path_mutation"
       ],
-      "description": ""
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Smoke test for src.integrated_patent_demonstration."
     },
     {
       "id": "test::modules::ai_intelligence::rESP_o1o2::tests::test_llm_connector",
       "path": "modules/ai_intelligence/rESP_o1o2/tests/test_llm_connector.py",
       "owner": "modules/ai_intelligence/rESP_o1o2",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-resp-o1o2-operational",
-      "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-resp-o1o2-unit",
+      "capabilities": [
+        "import_path_mutation"
       ],
-      "description": ""
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Smoke test for src.llm_connector."
     },
     {
       "id": "test::modules::ai_intelligence::rESP_o1o2::tests::test_quantum_cognitive_controller",
       "path": "modules/ai_intelligence/rESP_o1o2/tests/test_quantum_cognitive_controller.py",
       "owner": "modules/ai_intelligence/rESP_o1o2",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-resp-o1o2-operational",
-      "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-resp-o1o2-unit",
+      "capabilities": [
+        "import_path_mutation"
       ],
-      "description": ""
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Smoke test for src.quantum_cognitive_controller."
     },
     {
       "id": "test::modules::ai_intelligence::rESP_o1o2::tests::test_quantum_cognitive_engine",
       "path": "modules/ai_intelligence/rESP_o1o2/tests/test_quantum_cognitive_engine.py",
       "owner": "modules/ai_intelligence/rESP_o1o2",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-resp-o1o2-operational",
-      "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-resp-o1o2-unit",
+      "capabilities": [
+        "import_path_mutation"
       ],
-      "description": ""
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Smoke test for src.quantum_cognitive_engine."
     },
     {
       "id": "test::modules::ai_intelligence::rESP_o1o2::tests::test_quantum_cryptography_system",
       "path": "modules/ai_intelligence/rESP_o1o2/tests/test_quantum_cryptography_system.py",
       "owner": "modules/ai_intelligence/rESP_o1o2",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-resp-o1o2-operational",
-      "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-resp-o1o2-unit",
+      "capabilities": [
+        "import_path_mutation"
       ],
-      "description": ""
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Smoke test for src.quantum_cryptography_system."
     },
     {
       "id": "test::modules::ai_intelligence::rESP_o1o2::tests::test_rESP_basic",
@@ -4244,61 +4315,61 @@
       "id": "test::modules::ai_intelligence::rESP_o1o2::tests::test_rESP_patent_integration",
       "path": "modules/ai_intelligence/rESP_o1o2/tests/test_rESP_patent_integration.py",
       "owner": "modules/ai_intelligence/rESP_o1o2",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-resp-o1o2-operational",
-      "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
+      "suite_class": "integration",
+      "shard_id": "modules-ai-intelligence-resp-o1o2-integration",
+      "capabilities": [
+        "import_path_mutation"
       ],
-      "description": ""
+      "execution_type": "integration",
+      "collectable": true,
+      "timeout_s": 600,
+      "quarantine_reasons": [],
+      "description": "Smoke test for src.rESP_patent_integration."
     },
     {
       "id": "test::modules::ai_intelligence::rESP_o1o2::tests::test_rESP_patent_system",
       "path": "modules/ai_intelligence/rESP_o1o2/tests/test_rESP_patent_system.py",
       "owner": "modules/ai_intelligence/rESP_o1o2",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-resp-o1o2-operational",
-      "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-resp-o1o2-unit",
+      "capabilities": [
+        "import_path_mutation"
       ],
-      "description": ""
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Smoke test for src.rESP_patent_system."
     },
     {
       "id": "test::modules::ai_intelligence::rESP_o1o2::tests::test_rESP_trigger_engine",
       "path": "modules/ai_intelligence/rESP_o1o2/tests/test_rESP_trigger_engine.py",
       "owner": "modules/ai_intelligence/rESP_o1o2",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-resp-o1o2-operational",
-      "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-resp-o1o2-unit",
+      "capabilities": [
+        "import_path_mutation"
       ],
-      "description": ""
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Smoke test for src.rESP_trigger_engine."
     },
     {
       "id": "test::modules::ai_intelligence::rESP_o1o2::tests::test_voice_interface",
       "path": "modules/ai_intelligence/rESP_o1o2/tests/test_voice_interface.py",
       "owner": "modules/ai_intelligence/rESP_o1o2",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-resp-o1o2-operational",
-      "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-resp-o1o2-unit",
+      "capabilities": [
+        "import_path_mutation"
       ],
-      "description": ""
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Smoke test for src.voice_interface."
     },
     {
       "id": "test::modules::ai_intelligence::ric_dae::tests::test_governance",
@@ -4394,6 +4465,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for AI Intelligence Core module.\n\nWSP Compliance: WSP 5 (Testing Standards), WSP 6 (Test Validation)"
+    },
+    {
+      "id": "test::modules::ai_intelligence::training_system::tests::test_training_menu_admission",
+      "path": "modules/ai_intelligence/training_system/tests/test_training_menu_admission.py",
+      "owner": "modules/ai_intelligence/training_system",
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-training-system-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Opening or refusing the menu must not load corpus, models or pattern memory."
     },
     {
       "id": "test::modules::ai_intelligence::training_system::tests::test_utf8_import_boundary",
@@ -4708,31 +4792,31 @@
       "id": "test::modules::communication::auto_meeting_orchestrator::tests::test_code_review_orchestrator",
       "path": "modules/communication/auto_meeting_orchestrator/tests/test_code_review_orchestrator.py",
       "owner": "modules/communication/auto_meeting_orchestrator",
-      "suite_class": "operational",
-      "shard_id": "modules-communication-auto-meeting-orchestrator-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-communication-auto-meeting-orchestrator-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for code_review_orchestrator; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::communication::auto_meeting_orchestrator::tests::test_heartbeat_service",
       "path": "modules/communication/auto_meeting_orchestrator/tests/test_heartbeat_service.py",
       "owner": "modules/communication/auto_meeting_orchestrator",
-      "suite_class": "operational",
-      "shard_id": "modules-communication-auto-meeting-orchestrator-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-communication-auto-meeting-orchestrator-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for heartbeat_service; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::communication::auto_meeting_orchestrator::tests::test_orchestrator",
@@ -4811,31 +4895,31 @@
       "id": "test::modules::communication::consent_engine::tests::test_consent_engine",
       "path": "modules/communication/consent_engine/tests/test_consent_engine.py",
       "owner": "modules/communication/consent_engine",
-      "suite_class": "operational",
-      "shard_id": "modules-communication-consent-engine-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-communication-consent-engine-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for consent_engine; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::communication::intent_manager::tests::test_intent_manager",
       "path": "modules/communication/intent_manager/tests/test_intent_manager.py",
       "owner": "modules/communication/intent_manager",
-      "suite_class": "operational",
-      "shard_id": "modules-communication-intent-manager-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-communication-intent-manager-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for intent_manager; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::communication::liberty_alert::tests::test_models",
@@ -5788,14 +5872,12 @@
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
       "shard_id": "modules-communication-livechat-unit-part-01",
-      "capabilities": [
-        "import_path_mutation"
-      ],
+      "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
-      "description": "Test AntiMa Fallacy Detection System\nTests the enhanced Grok fact-check with logical fallacy detection"
+      "description": "Legacy fact-check adapter now queues shared reviewed language work."
     },
     {
       "id": "test::modules::communication::livechat::tests::test_antima_savage",
@@ -5803,14 +5885,12 @@
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
       "shard_id": "modules-communication-livechat-unit-part-01",
-      "capabilities": [
-        "import_path_mutation"
-      ],
+      "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
-      "description": "Test Savage AntiMa Trolling Responses\nTests that responses are cutting and brutal against MAGA trolls"
+      "description": "Political names do not grant unreviewed provider replies or forced slogans."
     },
     {
       "id": "test::modules::communication::livechat::tests::test_automatic_throttling",
@@ -5871,6 +5951,19 @@
       "description": "Tests for PHASE 2 (VIDEO INDEXING) gating in AutoModeratorDAE._browser_engagement_loop.\n\nSlice: EDGE_LOOP_INDEXING_PHASE1\nWSP refs: WSP 5 (coverage), WSP 6 (audit), WSP 84 (reuse run_video_indexing_cycle).\n\nContext\n-------\nThe per-browser engagement loop runs:\n    PHASE 1 (comments) -> PHASE 2 (video indexing) -> PHASE 3 (scheduling) -> PHASE 4 (LinkedIn)\n\nBefore this slice, PHASE 2 was gated Chrome-only:\n\n    if browser_name == \"chrome\" and os.getenv(\"YT_VIDEO_INDEXING_ENABLED\", ...):\n\nSo the E"
     },
     {
+      "id": "test::modules::communication::livechat::tests::test_capture_before_processing",
+      "path": "modules/communication/livechat/tests/test_capture_before_processing.py",
+      "owner": "modules/communication/livechat",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-livechat-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline receive-path regression tests; no browser, provider or model imports."
+    },
+    {
       "id": "test::modules::communication::livechat::tests::test_channel_operations",
       "path": "modules/communication/livechat/tests/test_channel_operations.py",
       "owner": "modules/communication/livechat",
@@ -5929,6 +6022,19 @@
       "description": "Test suite for chat_sender\nWSP 5 compliant test coverage"
     },
     {
+      "id": "test::modules::communication::livechat::tests::test_comment_quality_stop",
+      "path": "modules/communication/livechat/tests/test_comment_quality_stop.py",
+      "owner": "modules/communication/livechat",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-livechat-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Private-file controls for the existing STOP owner's scoped quality incident.\n\nNo runtime STOP, provider, model or browser is used. Run through the fixed\ncredential-free owner guard; this qualifies cooperating writers, not OS CAS\nagainst arbitrary out-of-band manual replacement."
+    },
+    {
       "id": "test::modules::communication::livechat::tests::test_comprehensive_system_monitor",
       "path": "modules/communication/livechat/tests/test_comprehensive_system_monitor.py",
       "owner": "modules/communication/livechat",
@@ -5957,6 +6063,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Test the enhanced consciousness response system"
+    },
+    {
+      "id": "test::modules::communication::livechat::tests::test_conversation_stewardship",
+      "path": "modules/communication/livechat/tests/test_conversation_stewardship.py",
+      "owner": "modules/communication/livechat",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-livechat-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline controls for quiet conversation selection and identity-scoped history."
     },
     {
       "id": "test::modules::communication::livechat::tests::test_cycle_watchdog",
@@ -6002,6 +6121,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Test runner for all YouTube ecosystem components"
+    },
+    {
+      "id": "test::modules::communication::livechat::tests::test_emoji_question_routing",
+      "path": "modules/communication/livechat/tests/test_emoji_question_routing.py",
+      "owner": "modules/communication/livechat",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-livechat-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline actual-method controls for emoji questions and reviewed reply identity."
     },
     {
       "id": "test::modules::communication::livechat::tests::test_emoji_responses",
@@ -6182,7 +6314,7 @@
       "path": "modules/communication/livechat/tests/test_livechat.py",
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
-      "shard_id": "modules-communication-livechat-unit-part-01",
+      "shard_id": "modules-communication-livechat-unit-part-02",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -6197,7 +6329,7 @@
       "path": "modules/communication/livechat/tests/test_livechat_auth_handling.py",
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
-      "shard_id": "modules-communication-livechat-unit-part-01",
+      "shard_id": "modules-communication-livechat-unit-part-02",
       "capabilities": [
         "network"
       ],
@@ -6212,7 +6344,7 @@
       "path": "modules/communication/livechat/tests/test_livechat_emoji_triggers.py",
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
-      "shard_id": "modules-communication-livechat-unit-part-01",
+      "shard_id": "modules-communication-livechat-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -6225,7 +6357,7 @@
       "path": "modules/communication/livechat/tests/test_livechat_facade.py",
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
-      "shard_id": "modules-communication-livechat-unit-part-01",
+      "shard_id": "modules-communication-livechat-unit-part-02",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -6524,6 +6656,47 @@
       "description": "Offline contracts using real queue/locks, disposable files and fake senders."
     },
     {
+      "id": "test::modules::communication::livechat::tests::test_operator_manifest_cli",
+      "path": "modules/communication/livechat/tests/test_operator_manifest_cli.py",
+      "owner": "modules/communication/livechat",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-livechat-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Credential-free local producer contracts; no daemon or public effects."
+    },
+    {
+      "id": "test::modules::communication::livechat::tests::test_operator_recorded_stream_schedule",
+      "path": "modules/communication/livechat/tests/test_operator_recorded_stream_schedule.py",
+      "owner": "modules/communication/livechat",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-livechat-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Recorded-source intake only, using real queue owners and disposable files."
+    },
+    {
+      "id": "test::modules::communication::livechat::tests::test_operator_stream_schedule",
+      "path": "modules/communication/livechat/tests/test_operator_stream_schedule.py",
+      "owner": "modules/communication/livechat",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-livechat-unit-part-02",
+      "capabilities": [
+        "network"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Disposable manifest contracts and actual launcher/DAE AST, with no services."
+    },
+    {
       "id": "test::modules::communication::livechat::tests::test_orchestrator",
       "path": "modules/communication/livechat/tests/test_orchestrator.py",
       "owner": "modules/communication/livechat",
@@ -6645,7 +6818,7 @@
       "path": "modules/communication/livechat/tests/test_self_reply_prevention.py",
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
-      "shard_id": "modules-communication-livechat-unit-part-02",
+      "shard_id": "modules-communication-livechat-unit-part-03",
       "capabilities": [
         "import_path_mutation",
         "logging_configuration"
@@ -6661,7 +6834,7 @@
       "path": "modules/communication/livechat/tests/test_session_logging.py",
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
-      "shard_id": "modules-communication-livechat-unit-part-02",
+      "shard_id": "modules-communication-livechat-unit-part-03",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -6676,7 +6849,7 @@
       "path": "modules/communication/livechat/tests/test_single_instance.py",
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
-      "shard_id": "modules-communication-livechat-unit-part-02",
+      "shard_id": "modules-communication-livechat-unit-part-03",
       "capabilities": [
         "import_path_mutation",
         "logging_configuration"
@@ -6692,7 +6865,7 @@
       "path": "modules/communication/livechat/tests/test_slash_commands.py",
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
-      "shard_id": "modules-communication-livechat-unit-part-02",
+      "shard_id": "modules-communication-livechat-unit-part-03",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -6707,7 +6880,7 @@
       "path": "modules/communication/livechat/tests/test_social_media_posting.py",
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
-      "shard_id": "modules-communication-livechat-unit-part-02",
+      "shard_id": "modules-communication-livechat-unit-part-03",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -6722,7 +6895,7 @@
       "path": "modules/communication/livechat/tests/test_stream_detection_no_chatid.py",
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
-      "shard_id": "modules-communication-livechat-unit-part-02",
+      "shard_id": "modules-communication-livechat-unit-part-03",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -6737,7 +6910,7 @@
       "path": "modules/communication/livechat/tests/test_surgical_migration_live.py",
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
-      "shard_id": "modules-communication-livechat-unit-part-02",
+      "shard_id": "modules-communication-livechat-unit-part-03",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -6761,6 +6934,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Test for UnifiedMessageRouter - WSP 5/6 Testing Compliance\nTests the enhanced message routing architecture without breaking existing functionality."
+    },
+    {
+      "id": "test::modules::communication::livechat::tests::test_video_policy",
+      "path": "modules/communication/livechat/tests/test_video_policy.py",
+      "owner": "modules/communication/livechat",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-livechat-unit-part-03",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline private queue contracts; native IDs and disposable queue files only."
     },
     {
       "id": "test::modules::communication::livechat::tests::test_youtube_dae",
@@ -7792,6 +7978,22 @@
       "description": "Tests for OpenClaw memory queries (P0: openclaw_memory_queries)."
     },
     {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_openclaw_ollama_contract",
+      "path": "modules/communication/moltbot_bridge/tests/test_openclaw_ollama_contract.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-03",
+      "capabilities": [
+        "network",
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Frozen timeout/default contract; real helper code with fake daemon and transport.\n\nLoad the helper package without executing the production src/__init__ daemon\nimports. No live model, provider, network or process startup is acceptance here."
+    },
+    {
       "id": "test::modules::communication::moltbot_bridge::tests::test_openclaw_permission_fail_closed",
       "path": "modules/communication/moltbot_bridge/tests/test_openclaw_permission_fail_closed.py",
       "owner": "modules/communication/moltbot_bridge",
@@ -7803,6 +8005,22 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Fail-closed permission regressions for mutating OpenClaw intents."
+    },
+    {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_openclaw_preflight_boundary",
+      "path": "modules/communication/moltbot_bridge/tests/test_openclaw_preflight_boundary.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-03",
+      "capabilities": [
+        "network",
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Frozen denial boundary on the real process helper with synthetic collaborators."
     },
     {
       "id": "test::modules::communication::moltbot_bridge::tests::test_openclaw_resident_launch",
@@ -8153,7 +8371,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_lease_contract_security.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-03",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-04",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -8166,7 +8384,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_issue.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-03",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-04",
       "capabilities": [
         "network"
       ],
@@ -8590,7 +8808,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_conversation_scope_tamper_and_rotation.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-04",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-05",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -8618,7 +8836,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_conversation_work_promotion.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-04",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-05",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9036,7 +9254,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_execution_valve_queue_use_time_binding.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-05",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-06",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9049,7 +9267,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_execution_valve_runtime_artifact_locking.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-05",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-06",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9495,7 +9713,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_holoindex_direct_query_boundary.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-06",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9508,7 +9726,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_holoindex_first_external_research_grounding_adapter.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-06",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9987,7 +10205,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_main_resident_architect_client_migration.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10000,7 +10218,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_main_resident_pattern_memory_profile.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10441,7 +10659,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_parent_consensus_domains.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10454,7 +10672,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_parent_consensus_signer.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10932,7 +11150,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_scope_binding.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10945,7 +11163,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_resident_cycle_grounding_v2.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11558,7 +11776,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_runtime_artifact_manifest_authority_freshness.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11571,7 +11789,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_runtime_json_read.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
       "capabilities": [
         "process"
       ],
@@ -12007,7 +12225,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_mutual_peer_handshake.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
       "capabilities": [
         "network"
       ],
@@ -12022,7 +12240,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_owner_controlled_e0_admission.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12529,7 +12747,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_sqlite_monotonic_authority_store.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12557,7 +12775,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_start_operations_holo_repair.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -13022,7 +13240,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_wre_worktree_create.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-14",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -13035,7 +13253,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_wsp15_allocation_receipt.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-14",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -13124,6 +13342,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for social campaign adapter command parsing and routing."
+    },
+    {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_supervisor_model_startup",
+      "path": "modules/communication/moltbot_bridge/tests/test_supervisor_model_startup.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-14",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Execute the real supervisor startup method without services or model effects."
     },
     {
       "id": "test::modules::communication::moltbot_bridge::tests::test_webhook_receiver_auth",
@@ -13656,6 +13887,23 @@
       "description": "OOPS Page Account Switch Tests\n==============================\n\nTests for the direct OOPS page account switching flow.\n\nThis file also serves as UI-TARS training data documentation:\n- Expected DOM elements on OOPS page\n- Account picker structure after clicking \"Switch account\"\n- Success/failure verification criteria\n\nWSP Compliance:\n- WSP 5: Test Coverage\n- WSP 27: DAE Architecture (Action -> Verify)"
     },
     {
+      "id": "test::modules::communication::video_comments::tests::test_chat_manifest_inspection",
+      "path": "modules/communication/video_comments/tests/test_chat_manifest_inspection.py",
+      "owner": "modules/communication/video_comments",
+      "suite_class": "operational",
+      "shard_id": "modules-communication-video-comments-operational",
+      "capabilities": [
+        "network"
+      ],
+      "execution_type": "operational",
+      "collectable": false,
+      "timeout_s": 900,
+      "quarantine_reasons": [
+        "module_scope_local_function_invocation"
+      ],
+      "description": "Bounded stdlib regression selection; no package startup, model or browser.\n\nCompile complete production definitions with explicit collaborators. Queue files\nare real temporary files; its lock is stubbed here (existing queue tests own lock\nqualification). Provider and browser results are fixtures, not live receipts.\nRun: python -B -m unittest discover -s modules/communication/video_comments/tests\n     -p test_chat_manifest_inspection.py -v"
+    },
+    {
       "id": "test::modules::communication::video_comments::tests::test_classifier_pipeline",
       "path": "modules/communication/video_comments/tests/test_classifier_pipeline.py",
       "owner": "modules/communication/video_comments",
@@ -13684,6 +13932,34 @@
       "description": "Local broadcast/context reader contracts; every state file is temporary."
     },
     {
+      "id": "test::modules::communication::video_comments::tests::test_driver_handle_inheritance",
+      "path": "modules/communication/video_comments/tests/test_driver_handle_inheritance.py",
+      "owner": "modules/communication/video_comments",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
+      "capabilities": [
+        "browser"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Exercise both actual connect branches without starting a browser or model."
+    },
+    {
+      "id": "test::modules::communication::video_comments::tests::test_inbox_completion_evidence",
+      "path": "modules/communication/video_comments/tests/test_inbox_completion_evidence.py",
+      "owner": "modules/communication/video_comments",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline completion evidence through the complete engagement owner definition."
+    },
+    {
       "id": "test::modules::communication::video_comments::tests::test_like_single_comment",
       "path": "modules/communication/video_comments/tests/test_like_single_comment.py",
       "owner": "modules/communication/video_comments",
@@ -13705,15 +13981,12 @@
       "owner": "modules/communication/video_comments",
       "suite_class": "integration",
       "shard_id": "modules-communication-video-comments-integration",
-      "capabilities": [
-        "import_path_mutation",
-        "logging_configuration"
-      ],
+      "capabilities": [],
       "execution_type": "integration",
       "collectable": true,
       "timeout_s": 600,
       "quarantine_reasons": [],
-      "description": "WSP-Compliant Test Suite for LLM Comment Integration\nFollowing WSP FMAS (Fail, Mock, Assert, Success) testing protocol"
+      "description": "Legacy public generation API now delegates to the shared reviewed owner.\n\nRetires direct-provider/forced-template expectations. No service constructors,\ncredentials, network, browser or public effects belong in this selection."
     },
     {
       "id": "test::modules::communication::video_comments::tests::test_move2japan_access",
@@ -13752,7 +14025,7 @@
       "path": "modules/communication/video_comments/tests/test_post_comment.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit-part-01",
+      "shard_id": "modules-communication-video-comments-unit-part-02",
       "capabilities": [
         "import_path_mutation",
         "logging_configuration"
@@ -13767,25 +14040,92 @@
       "id": "test::modules::communication::video_comments::tests::test_reply_context_pipeline",
       "path": "modules/communication/video_comments/tests/test_reply_context_pipeline.py",
       "owner": "modules/communication/video_comments",
-      "suite_class": "operational",
-      "shard_id": "modules-communication-video-comments-operational",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-video-comments-unit-part-02",
       "capabilities": [
         "process"
       ],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "module_scope_local_function_invocation"
-      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
       "description": "Exact-source behavioral tests; package imports/constructors/live providers excluded.\n\nThe private loader compiles complete production definitions with denied optional\ncollaborators. No Selenium, profile store, model, network, or posting is started.\nDOM checks run the actual extraction JavaScript against synthetic rows in Node."
+    },
+    {
+      "id": "test::modules::communication::video_comments::tests::test_reply_editor_input",
+      "path": "modules/communication/video_comments/tests/test_reply_editor_input.py",
+      "owner": "modules/communication/video_comments",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-video-comments-unit-part-02",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Actual entry-script behavior for native textarea and contenteditable inputs.\n\nThe textarea fixture deliberately separates dirty value from default text, as\nobserved in Studio's current native reply form. No real browser or posting."
+    },
+    {
+      "id": "test::modules::communication::video_comments::tests::test_reply_memory_readiness",
+      "path": "modules/communication/video_comments/tests/test_reply_memory_readiness.py",
+      "owner": "modules/communication/video_comments",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-video-comments-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline ready-only reply memory controls through complete owner definitions."
+    },
+    {
+      "id": "test::modules::communication::video_comments::tests::test_reply_quality_safety",
+      "path": "modules/communication/video_comments/tests/test_reply_quality_safety.py",
+      "owner": "modules/communication/video_comments",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-video-comments-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline quality-stop controls through complete production definitions.\n\nOnly explicit synthetic collaborators are used. Run with the owner's minimal\nenvironment/effect guard, never inherited credentials or module constructors."
+    },
+    {
+      "id": "test::modules::communication::video_comments::tests::test_reply_semantic_assessment",
+      "path": "modules/communication/video_comments/tests/test_reply_semantic_assessment.py",
+      "owner": "modules/communication/video_comments",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-video-comments-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline meaning/review contracts. Fixture judgments are not live model evidence."
+    },
+    {
+      "id": "test::modules::communication::video_comments::tests::test_reply_submission_history",
+      "path": "modules/communication/video_comments/tests/test_reply_submission_history.py",
+      "owner": "modules/communication/video_comments",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-video-comments-unit-part-02",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline durable SQLite and exact-source browser-script contracts.\n\nNo Selenium package startup, credentials, model, browser or network is used.\nJavaScript runs in Node against an explicit synthetic DOM; it is not live proof."
     },
     {
       "id": "test::modules::communication::video_comments::tests::test_reply_to_comment",
       "path": "modules/communication/video_comments/tests/test_reply_to_comment.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit-part-01",
+      "shard_id": "modules-communication-video-comments-unit-part-02",
       "capabilities": [
         "import_path_mutation",
         "logging_configuration"
@@ -13795,6 +14135,34 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Test replying to an existing comment on Move2Japan video"
+    },
+    {
+      "id": "test::modules::communication::video_comments::tests::test_reply_visual_evidence",
+      "path": "modules/communication/video_comments/tests/test_reply_visual_evidence.py",
+      "owner": "modules/communication/video_comments",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-video-comments-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Separate exact delivery evidence from optional visual locator observations."
+    },
+    {
+      "id": "test::modules::communication::video_comments::tests::test_studio_row_identity",
+      "path": "modules/communication/video_comments/tests/test_studio_row_identity.py",
+      "owner": "modules/communication/video_comments",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-video-comments-unit-part-02",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Exact-source Studio identity scripts against one bounded, effect-free DOM.\n\nThis is synthetic selector/ownership qualification, not a browser or delivery\nclaim. Existing history/unknown-outcome and legacy fixture tests remain owners."
     },
     {
       "id": "test::modules::communication::video_comments::tests::test_ytr1_runtime_hardening",
@@ -13815,15 +14183,13 @@
       "id": "test::modules::communication::voice_command_ingestion::tests::test_batch_transcriber",
       "path": "modules/communication/voice_command_ingestion/tests/test_batch_transcriber.py",
       "owner": "modules/communication/voice_command_ingestion",
-      "suite_class": "operational",
-      "shard_id": "modules-communication-voice-command-ingestion-operational",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-voice-command-ingestion-unit",
       "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
-      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
       "description": ""
     },
     {
@@ -14004,6 +14370,19 @@
       "description": "Offline transport and pipeline tests; no live model-quality claim."
     },
     {
+      "id": "test::modules::communication::youtube_shorts::tests::test_operator_upload_policy",
+      "path": "modules/communication/youtube_shorts/tests/test_operator_upload_policy.py",
+      "owner": "modules/communication/youtube_shorts",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-youtube-shorts-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline uploader/DAE definitions with fake media, service and generators."
+    },
+    {
       "id": "test::modules::communication::youtube_shorts::tests::test_promo_generation",
       "path": "modules/communication/youtube_shorts/tests/test_promo_generation.py",
       "owner": "modules/communication/youtube_shorts",
@@ -14126,46 +14505,46 @@
       "id": "test::modules::development::cursor_multi_agent_bridge::tests::test_agent_coordinator",
       "path": "modules/development/cursor_multi_agent_bridge/tests/test_agent_coordinator.py",
       "owner": "modules/development/cursor_multi_agent_bridge",
-      "suite_class": "operational",
-      "shard_id": "modules-development-cursor-multi-agent-bridge-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-development-cursor-multi-agent-bridge-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for agent_coordinator; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::development::cursor_multi_agent_bridge::tests::test_api_integration_manager",
       "path": "modules/development/cursor_multi_agent_bridge/tests/test_api_integration_manager.py",
       "owner": "modules/development/cursor_multi_agent_bridge",
-      "suite_class": "operational",
-      "shard_id": "modules-development-cursor-multi-agent-bridge-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-development-cursor-multi-agent-bridge-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for api_integration_manager; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::development::cursor_multi_agent_bridge::tests::test_basic_cursor_bridge",
       "path": "modules/development/cursor_multi_agent_bridge/tests/test_basic_cursor_bridge.py",
       "owner": "modules/development/cursor_multi_agent_bridge",
-      "suite_class": "operational",
-      "shard_id": "modules-development-cursor-multi-agent-bridge-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-development-cursor-multi-agent-bridge-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for basic_cursor_bridge; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::development::cursor_multi_agent_bridge::tests::test_bridge_integration",
@@ -14184,16 +14563,16 @@
       "id": "test::modules::development::cursor_multi_agent_bridge::tests::test_claude_code_integration",
       "path": "modules/development/cursor_multi_agent_bridge/tests/test_claude_code_integration.py",
       "owner": "modules/development/cursor_multi_agent_bridge",
-      "suite_class": "operational",
-      "shard_id": "modules-development-cursor-multi-agent-bridge-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-development-cursor-multi-agent-bridge-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for claude_code_integration; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::development::cursor_multi_agent_bridge::tests::test_cursor_integration",
@@ -14212,61 +14591,61 @@
       "id": "test::modules::development::cursor_multi_agent_bridge::tests::test_cursor_subagent_integration",
       "path": "modules/development/cursor_multi_agent_bridge/tests/test_cursor_subagent_integration.py",
       "owner": "modules/development/cursor_multi_agent_bridge",
-      "suite_class": "operational",
-      "shard_id": "modules-development-cursor-multi-agent-bridge-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-development-cursor-multi-agent-bridge-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for cursor_subagent_integration; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::development::cursor_multi_agent_bridge::tests::test_cursor_wsp_bridge",
       "path": "modules/development/cursor_multi_agent_bridge/tests/test_cursor_wsp_bridge.py",
       "owner": "modules/development/cursor_multi_agent_bridge",
-      "suite_class": "operational",
-      "shard_id": "modules-development-cursor-multi-agent-bridge-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-development-cursor-multi-agent-bridge-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for cursor_wsp_bridge; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::development::cursor_multi_agent_bridge::tests::test_demo_subagents",
       "path": "modules/development/cursor_multi_agent_bridge/tests/test_demo_subagents.py",
       "owner": "modules/development/cursor_multi_agent_bridge",
-      "suite_class": "operational",
-      "shard_id": "modules-development-cursor-multi-agent-bridge-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-development-cursor-multi-agent-bridge-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for demo_subagents; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::development::cursor_multi_agent_bridge::tests::test_exceptions",
       "path": "modules/development/cursor_multi_agent_bridge/tests/test_exceptions.py",
       "owner": "modules/development/cursor_multi_agent_bridge",
-      "suite_class": "operational",
-      "shard_id": "modules-development-cursor-multi-agent-bridge-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-development-cursor-multi-agent-bridge-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for exceptions; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::development::cursor_multi_agent_bridge::tests::test_extension_command",
@@ -14302,16 +14681,16 @@
       "id": "test::modules::development::cursor_multi_agent_bridge::tests::test_live_subagents",
       "path": "modules/development/cursor_multi_agent_bridge/tests/test_live_subagents.py",
       "owner": "modules/development/cursor_multi_agent_bridge",
-      "suite_class": "operational",
-      "shard_id": "modules-development-cursor-multi-agent-bridge-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-development-cursor-multi-agent-bridge-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for live_subagents; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::development::cursor_multi_agent_bridge::tests::test_memory_architecture",
@@ -14332,16 +14711,16 @@
       "id": "test::modules::development::cursor_multi_agent_bridge::tests::test_prometheus_integration",
       "path": "modules/development/cursor_multi_agent_bridge/tests/test_prometheus_integration.py",
       "owner": "modules/development/cursor_multi_agent_bridge",
-      "suite_class": "operational",
-      "shard_id": "modules-development-cursor-multi-agent-bridge-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-development-cursor-multi-agent-bridge-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for prometheus_integration; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::development::cursor_multi_agent_bridge::tests::test_protocol_compliance",
@@ -14377,16 +14756,16 @@
       "id": "test::modules::development::cursor_multi_agent_bridge::tests::test_simple_demo_012",
       "path": "modules/development/cursor_multi_agent_bridge/tests/test_simple_demo_012.py",
       "owner": "modules/development/cursor_multi_agent_bridge",
-      "suite_class": "operational",
-      "shard_id": "modules-development-cursor-multi-agent-bridge-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-development-cursor-multi-agent-bridge-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for simple_demo_012; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::development::cursor_multi_agent_bridge::tests::test_stress_coordination",
@@ -14407,16 +14786,16 @@
       "id": "test::modules::development::cursor_multi_agent_bridge::tests::test_visible_demo_012",
       "path": "modules/development/cursor_multi_agent_bridge/tests/test_visible_demo_012.py",
       "owner": "modules/development/cursor_multi_agent_bridge",
-      "suite_class": "operational",
-      "shard_id": "modules-development-cursor-multi-agent-bridge-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-development-cursor-multi-agent-bridge-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for visible_demo_012; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::development::cursor_multi_agent_bridge::tests::test_wsp54_basic",
@@ -14453,106 +14832,106 @@
       "id": "test::modules::development::cursor_multi_agent_bridge::tests::test_wsp_21_prometheus_agent",
       "path": "modules/development/cursor_multi_agent_bridge/tests/test_wsp_21_prometheus_agent.py",
       "owner": "modules/development/cursor_multi_agent_bridge",
-      "suite_class": "operational",
-      "shard_id": "modules-development-cursor-multi-agent-bridge-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-development-cursor-multi-agent-bridge-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for wsp_21_prometheus_agent; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::development::cursor_multi_agent_bridge::tests::test_wsp_agent_audit",
       "path": "modules/development/cursor_multi_agent_bridge/tests/test_wsp_agent_audit.py",
       "owner": "modules/development/cursor_multi_agent_bridge",
-      "suite_class": "operational",
-      "shard_id": "modules-development-cursor-multi-agent-bridge-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-development-cursor-multi-agent-bridge-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for wsp_agent_audit; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::development::cursor_multi_agent_bridge::tests::test_wsp_guided_development",
       "path": "modules/development/cursor_multi_agent_bridge/tests/test_wsp_guided_development.py",
       "owner": "modules/development/cursor_multi_agent_bridge",
-      "suite_class": "operational",
-      "shard_id": "modules-development-cursor-multi-agent-bridge-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-development-cursor-multi-agent-bridge-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for wsp_guided_development; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::development::cursor_multi_agent_bridge::tests::test_wsp_sub_agents",
       "path": "modules/development/cursor_multi_agent_bridge/tests/test_wsp_sub_agents.py",
       "owner": "modules/development/cursor_multi_agent_bridge",
-      "suite_class": "operational",
-      "shard_id": "modules-development-cursor-multi-agent-bridge-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-development-cursor-multi-agent-bridge-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for wsp_sub_agents; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::development::cursor_multi_agent_bridge::tests::test_wsp_validator",
       "path": "modules/development/cursor_multi_agent_bridge/tests/test_wsp_validator.py",
       "owner": "modules/development/cursor_multi_agent_bridge",
-      "suite_class": "operational",
-      "shard_id": "modules-development-cursor-multi-agent-bridge-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-development-cursor-multi-agent-bridge-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for wsp_validator; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::development::ide_foundups::tests::test_agent_coordinator",
       "path": "modules/development/ide_foundups/tests/test_agent_coordinator.py",
       "owner": "modules/development/ide_foundups",
-      "suite_class": "operational",
-      "shard_id": "modules-development-ide-foundups-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-development-ide-foundups-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for agent_coordinator; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::development::ide_foundups::tests::test_bridge_protocol",
       "path": "modules/development/ide_foundups/tests/test_bridge_protocol.py",
       "owner": "modules/development/ide_foundups",
-      "suite_class": "operational",
-      "shard_id": "modules-development-ide-foundups-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-development-ide-foundups-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for bridge_protocol; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::development::ide_foundups::tests::test_extension_activation",
@@ -14571,16 +14950,16 @@
       "id": "test::modules::development::ide_foundups::tests::test_extension_core",
       "path": "modules/development/ide_foundups/tests/test_extension_core.py",
       "owner": "modules/development/ide_foundups",
-      "suite_class": "operational",
-      "shard_id": "modules-development-ide-foundups-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-development-ide-foundups-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for extension_core; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::development::ide_foundups::tests::test_wre_bridge",
@@ -15077,15 +15456,13 @@
       "id": "test::modules::foundups::agent_market::tests::test_permissions",
       "path": "modules/foundups/agent_market/tests/test_permissions.py",
       "owner": "modules/foundups/agent_market",
-      "suite_class": "operational",
-      "shard_id": "modules-foundups-agent-market-operational",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-agent-market-unit",
       "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
-      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
       "description": ""
     },
     {
@@ -15131,15 +15508,13 @@
       "id": "test::modules::foundups::agent_market::tests::test_schemas",
       "path": "modules/foundups/agent_market/tests/test_schemas.py",
       "owner": "modules/foundups/agent_market",
-      "suite_class": "operational",
-      "shard_id": "modules-foundups-agent-market-operational",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-agent-market-unit",
       "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
-      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
       "description": ""
     },
     {
@@ -15167,6 +15542,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": ""
+    },
+    {
+      "id": "test::modules::foundups::agent_market::tests::test_testnet_transfer_intents",
+      "path": "modules/foundups/agent_market/tests/test_testnet_transfer_intents.py",
+      "owner": "modules/foundups/agent_market",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-agent-market-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Probe admission with synthetic public fixtures; no transport or settlement."
     },
     {
       "id": "test::modules::foundups::agent_market::tests::test_verification_transaction",
@@ -15299,6 +15687,22 @@
       "description": "Pure offline migration-inventory acceptance; no Firebase or browser runtime."
     },
     {
+      "id": "test::modules::foundups::hornet_hunter::tests::test_public_build",
+      "path": "modules/foundups/hornet_hunter/tests/test_public_build.py",
+      "owner": "modules/foundups/hornet_hunter",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-hornet-hunter-unit",
+      "capabilities": [
+        "network",
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": ""
+    },
+    {
       "id": "test::modules::foundups::kids_episodes::tests::test_gemini_story_adapters",
       "path": "modules/foundups/kids_episodes/tests/test_gemini_story_adapters.py",
       "owner": "modules/foundups/kids_episodes",
@@ -15353,6 +15757,19 @@
         "module_scope_local_function_invocation"
       ],
       "description": "Real local FFmpeg story assembly with explicitly synthetic provider/review seams.\n\nNo model, credentials, network, live admission, pedagogical approval or publishing\nis exercised. The synthetic reviewer tests the callback contract, not education."
+    },
+    {
+      "id": "test::modules::foundups::kids_episodes::tests::test_tile_batch",
+      "path": "modules/foundups/kids_episodes/tests/test_tile_batch.py",
+      "owner": "modules/foundups/kids_episodes",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-kids-episodes-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Planning/record structure only; no live runtime or media quality proof."
     },
     {
       "id": "test::modules::foundups::kids_episodes::tests::test_work_order_adapter",
@@ -15844,6 +16261,19 @@
       "description": "Channel Partner Pool tests for genesis registration and distribution mechanics."
     },
     {
+      "id": "test::modules::foundups::simulator::tests::test_circuit_breaker",
+      "path": "modules/foundups/simulator/tests/test_circuit_breaker.py",
+      "owner": "modules/foundups/simulator",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-simulator-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Adversarial checks of the existing simulator breaker, not chain authority."
+    },
+    {
       "id": "test::modules::foundups::simulator::tests::test_compute_graph",
       "path": "modules/foundups/simulator/tests/test_compute_graph.py",
       "owner": "modules/foundups/simulator",
@@ -16039,6 +16469,21 @@
       "description": "Unit tests for market stress and scenario confidence modeling."
     },
     {
+      "id": "test::modules::foundups::simulator::tests::test_observable_swarm_telemetry",
+      "path": "modules/foundups/simulator/tests/test_observable_swarm_telemetry.py",
+      "owner": "modules/foundups/simulator",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-simulator-unit-part-01",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Tests for Observable Swarm Orchestration vertical slice (WSP 97 / WSP 110).\n\nVerifies:\n- Strictly read-only SQLite telemetry provider (`?mode=ro` + `PRAGMA query_only = ON`)\n  across AgentDB and PatternMemory tables, preserving SHA-256 DB invariance.\n- Complete 8-state canonical mapping (`spawn`, `claim`, `progress`, `complete`,\n  `fail`, `cancel`, `stale`, `unknown`).\n- Honest unknown/stale reporting for missing stores, expired leases/TTLs, and\n  missing completion `_effect_evidence`.\n- Path an"
+    },
+    {
       "id": "test::modules::foundups::simulator::tests::test_operational_profit_proxy_flow",
       "path": "modules/foundups/simulator/tests/test_operational_profit_proxy_flow.py",
       "owner": "modules/foundups/simulator",
@@ -16121,7 +16566,7 @@
       "path": "modules/foundups/simulator/tests/test_staker_hurdle_state.py",
       "owner": "modules/foundups/simulator",
       "suite_class": "unit",
-      "shard_id": "modules-foundups-simulator-unit-part-01",
+      "shard_id": "modules-foundups-simulator-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -16134,7 +16579,7 @@
       "path": "modules/foundups/simulator/tests/test_state_contracts.py",
       "owner": "modules/foundups/simulator",
       "suite_class": "unit",
-      "shard_id": "modules-foundups-simulator-unit-part-01",
+      "shard_id": "modules-foundups-simulator-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -16258,6 +16703,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for unified sustainability calculator.\n\nIncludes ROC-first validation suite (2026-03-28):\n- ROC boundary tests (negative, zero, positive)\n- Gate combination matrix (ROC \u00d7 ROI)\n- Invariant assertions\n- FAM/pAVS baseline pinning"
+    },
+    {
+      "id": "test::modules::foundups::simulator::tests::test_wallet_policy",
+      "path": "modules/foundups/simulator/tests/test_wallet_policy.py",
+      "owner": "modules/foundups/simulator",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-simulator-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Agent budget policies are detached host inputs, not mutable caller grants."
     },
     {
       "id": "test::modules::foundups::simulator::tests::test_weighted_stake_allocation",
@@ -16582,6 +17040,36 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Funding Summary unit tests.\n\nTests for VOTE_POC_FUNDING_SUMMARY_PHASE1.\n\nTest Boundaries:\n- NO_LIVE_API_REQUIRED_FOR_TESTS\n- NO_API_KEY_REQUIRED_FOR_TESTS\n- NO_NETWORK_CALLS_IN_TESTS\n- TRAIL_TERMINATION_MARKER_REQUIRED\n- SOURCE_REFERENCES_PRESERVED\n- NO_QUICK_ANSWER_GENERATION\n- NO_PERSUASION_LANGUAGE\n- NO_DARK_MONEY_AS_VERIFIED_FACT\n- NO_CANDIDATE_RECOMMENDATION\n\nUses mock FEC adapter from VOTE_POC_FEC_ADAPTER_PHASE1 (PR #707).\nUses entity resolution from VOTE_POC_ENTITY_RESOLUTION_PHASE1 (PR #"
+    },
+    {
+      "id": "test::modules::foundups::voteballots::tests::test_oversight_public_release",
+      "path": "modules/foundups/voteballots/tests/test_oversight_public_release.py",
+      "owner": "modules/foundups/voteballots",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-voteballots-unit",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Exercise the public release projection against the preserved site."
+    },
+    {
+      "id": "test::modules::foundups::voteballots::tests::test_public_evidence",
+      "path": "modules/foundups/voteballots/tests/test_public_evidence.py",
+      "owner": "modules/foundups/voteballots",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-voteballots-unit",
+      "capabilities": [
+        "network"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Check the static Vote evidence page without using the mock FEC adapter.\n\nRun pytest for the offline contract. To also verify every displayed amount\nagainst the original electronic filings, run from the repository root:\n\npython -B -m modules.foundups.voteballots.tests.test_public_evidence"
     },
     {
       "id": "test::modules::foundups::voteballots::tests::test_quick_answer",
@@ -16961,16 +17449,16 @@
       "id": "test::modules::infrastructure::browser_actions::tests::test_final_autonomous_gemini",
       "path": "modules/infrastructure/browser_actions/tests/test_final_autonomous_gemini.py",
       "owner": "modules/infrastructure/browser_actions",
-      "suite_class": "operational",
-      "shard_id": "modules-infrastructure-browser-actions-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-infrastructure-browser-actions-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "manual_test_program"
       ],
-      "description": ""
+      "description": "Manual Chrome/Gemini YouTube heart probe; never automated test evidence.\n\nImporting this module performs no browser, model, or platform action. Running\nthe program explicitly retains the historical live heart-click behavior; that\nworkflow has not been validated by the import-safety regression."
     },
     {
       "id": "test::modules::infrastructure::browser_actions::tests::test_gemini_js_click",
@@ -17043,7 +17531,20 @@
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
-      "description": "Regression tests for Connect WRE CLI status command."
+      "description": "Exercise the actual readiness command without unrelated CLI startup effects."
+    },
+    {
+      "id": "test::modules::infrastructure::cli::tests::test_console_prompt",
+      "path": "modules/infrastructure/cli/tests/test_console_prompt.py",
+      "owner": "modules/infrastructure/cli",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-cli-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Real prompt utility, synthetic input and private logging sinks only."
     },
     {
       "id": "test::modules::infrastructure::cli::tests::test_follow_wsp_menu",
@@ -17458,13 +17959,27 @@
       "suite_class": "unit",
       "shard_id": "modules-infrastructure-dependency-launcher-unit",
       "capabilities": [
-        "import_path_mutation"
+        "import_path_mutation",
+        "network"
       ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Non-destructive browser-attach recovery tests (NO_KILL contract, Phase 1).\n\nSlice: BROWSER_ATTACH_RECOVERY_NO_KILL_PHASE1\n\nConfirmed problem (012 live-observed): when the operator-prepared Chrome/Edge on\nthe debug port is UP (DevTools /json/version works) but has NO discoverable page\ntarget (/json page-list empty -> Selenium raises \"unable to discover open pages\"),\nthe old code ran `taskkill /F /IM chrome.exe` and relaunched, DESTROYING the\noperator's prepared session.\n\nThese tests are MOCK ONLY"
+    },
+    {
+      "id": "test::modules::infrastructure::dependency_launcher::tests::test_llmster_startup_fallback",
+      "path": "modules/infrastructure/dependency_launcher/tests/test_llmster_startup_fallback.py",
+      "owner": "modules/infrastructure/dependency_launcher",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-dependency-launcher-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline startup/caller controls; no real process, network or model actions."
     },
     {
       "id": "test::modules::infrastructure::dependency_launcher::tests::test_runtime_compatibility_evidence_supplier",
@@ -17564,6 +18079,110 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "MCP Bridge Test Mapping Utility.\n\nMaps modules and files to their test coverage.\n\nProvides:\n- Module-to-test file mapping\n- Test coverage detection\n- Coverage gap identification\n\nWSP References:\n- WSP 5: Test Coverage Protocol\n- WSP 49: Module Structure (tests/ directory standard)"
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_draft_auth",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_draft_auth.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [
+        "network"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Private draft MCP authorization with a synthetic introspection provider."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_draft_gmail",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_draft_gmail.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [
+        "network"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Synthetic checks for the Gmail provider endpoint and response boundary."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_draft_google_oauth",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_draft_google_oauth.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "operational",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-operational",
+      "capabilities": [
+        "network"
+      ],
+      "execution_type": "operational",
+      "collectable": false,
+      "timeout_s": 900,
+      "quarantine_reasons": [
+        "module_scope_local_function_invocation"
+      ],
+      "description": ""
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_draft_mime",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_draft_mime.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": ""
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_draft_runtime",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_draft_runtime.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [
+        "network",
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Exercise the real loopback transport in a separately running process."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_draft_server",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_draft_server.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Synthetic provider and real Streamable HTTP transport contract tests."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_git_inventory_oauth",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_git_inventory_oauth.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [
+        "network"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Private OAuth discovery, scope enforcement and tool inventory."
     },
     {
       "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_holo_query_bundle_public",
@@ -17927,7 +18546,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_base_runtime_contract.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -17940,7 +18559,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_base_runtime_edges.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -17953,7 +18572,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_base_runtime_scale.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -17966,7 +18585,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_candidate_acceptance.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
       "capabilities": [
         "network"
       ],
@@ -17981,7 +18600,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_candidate_acceptance_integrity.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -17994,7 +18613,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_candidate_acceptance_lifecycle.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -18391,7 +19010,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_packaging.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -18404,7 +19023,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_packaging_source.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -18430,7 +19049,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_packaging_wheel.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -18456,7 +19075,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_process.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -18482,7 +19101,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_scale.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -18495,7 +19114,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_source.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -18758,6 +19377,22 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "YTR3 - Undetected Browser Anti-Detection Test Harness\n\nTests UndetectedBrowserManager with mocked undetected_chromedriver.\nNo live browser, no Chrome process, deterministic.\n\nWSP 97: Mocks external systems (undetected_chromedriver), tests production code."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_selenium::tests::test_youtube_verification",
+      "path": "modules/infrastructure/foundups_selenium/tests/test_youtube_verification.py",
+      "owner": "modules/infrastructure/foundups_selenium",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-selenium-unit",
+      "capabilities": [
+        "browser",
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline verification handoff acceptance: fake clocks/drivers, no browser/model."
     },
     {
       "id": "test::modules::infrastructure::foundups_vision::tests::test_account_switch",
@@ -19178,16 +19813,16 @@
       "id": "test::modules::infrastructure::shared_utilities::audit_logger::tests::test_audit_logger",
       "path": "modules/infrastructure/shared_utilities/audit_logger/tests/test_audit_logger.py",
       "owner": "modules/infrastructure/shared_utilities",
-      "suite_class": "operational",
-      "shard_id": "modules-infrastructure-shared-utilities-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-infrastructure-shared-utilities-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for audit_logger; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::infrastructure::shared_utilities::block_orchestrator::tests::test_block_independence",
@@ -19208,61 +19843,61 @@
       "id": "test::modules::infrastructure::shared_utilities::block_orchestrator::tests::test_block_orchestrator",
       "path": "modules/infrastructure/shared_utilities/block_orchestrator/tests/test_block_orchestrator.py",
       "owner": "modules/infrastructure/shared_utilities",
-      "suite_class": "operational",
-      "shard_id": "modules-infrastructure-shared-utilities-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-infrastructure-shared-utilities-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for block_orchestrator; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::infrastructure::shared_utilities::llm_client::tests::test_client",
       "path": "modules/infrastructure/shared_utilities/llm_client/tests/test_client.py",
       "owner": "modules/infrastructure/shared_utilities",
-      "suite_class": "operational",
-      "shard_id": "modules-infrastructure-shared-utilities-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-infrastructure-shared-utilities-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for client; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::infrastructure::shared_utilities::log_monitor::tests::test_log_monitor_agent",
       "path": "modules/infrastructure/shared_utilities/log_monitor/tests/test_log_monitor_agent.py",
       "owner": "modules/infrastructure/shared_utilities",
-      "suite_class": "operational",
-      "shard_id": "modules-infrastructure-shared-utilities-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-infrastructure-shared-utilities-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for log_monitor_agent; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::infrastructure::shared_utilities::models::tests::test_chat_message",
       "path": "modules/infrastructure/shared_utilities/models/tests/test_chat_message.py",
       "owner": "modules/infrastructure/shared_utilities",
-      "suite_class": "operational",
-      "shard_id": "modules-infrastructure-shared-utilities-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-infrastructure-shared-utilities-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for chat_message; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::infrastructure::shared_utilities::tests::navigation::test_navigation_schema",
@@ -19373,6 +20008,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for centralized local model routing."
+    },
+    {
+      "id": "test::modules::infrastructure::shared_utilities::tests::test_local_model_startup_selection",
+      "path": "modules/infrastructure/shared_utilities/tests/test_local_model_startup_selection.py",
+      "owner": "modules/infrastructure/shared_utilities",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-shared-utilities-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline role selection and exact native initialization; no model/service use."
     },
     {
       "id": "test::modules::infrastructure::shared_utilities::tests::test_mode_detection",
@@ -19745,6 +20393,19 @@
       "description": "Finite self-audit scan status contracts with inert effects and explicit clocks."
     },
     {
+      "id": "test::modules::infrastructure::wre_core::tests::test_dashboard_evidence",
+      "path": "modules/infrastructure/wre_core/tests/test_dashboard_evidence.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Readiness distinguishes missing evidence, measured failure and admission."
+    },
+    {
       "id": "test::modules::infrastructure::wre_core::tests::test_dashboard_snapshot_export",
       "path": "modules/infrastructure/wre_core/tests/test_dashboard_snapshot_export.py",
       "owner": "modules/infrastructure/wre_core",
@@ -19981,24 +20642,86 @@
       "description": "Adversarial tests for immutable create-scaffold route snapshots."
     },
     {
+      "id": "test::modules::infrastructure::wre_core::tests::test_git_lifecycle",
+      "path": "modules/infrastructure/wre_core/tests/test_git_lifecycle.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-01",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Test resumable GitHub-to-PC completion through the WRE lifecycle owner."
+    },
+    {
+      "id": "test::modules::infrastructure::wre_core::tests::test_git_lifecycle_github",
+      "path": "modules/infrastructure/wre_core/tests/test_git_lifecycle_github.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "operational",
+      "shard_id": "modules-infrastructure-wre-core-operational",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "operational",
+      "collectable": false,
+      "timeout_s": 900,
+      "quarantine_reasons": [
+        "module_scope_local_function_invocation"
+      ],
+      "description": "Exercise lifecycle inventory with deterministic Git and GitHub responses."
+    },
+    {
+      "id": "test::modules::infrastructure::wre_core::tests::test_git_lifecycle_inventory",
+      "path": "modules/infrastructure/wre_core/tests/test_git_lifecycle_inventory.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-02",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Regression checks for the read-only PC Git inventory receipt."
+    },
+    {
+      "id": "test::modules::infrastructure::wre_core::tests::test_git_lifecycle_pc",
+      "path": "modules/infrastructure/wre_core/tests/test_git_lifecycle_pc.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-02",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Exercise PC main synchronization against disposable Git repositories."
+    },
+    {
       "id": "test::modules::infrastructure::wre_core::tests::test_git_main_merge_sentinel",
       "path": "modules/infrastructure/wre_core/tests/test_git_main_merge_sentinel.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-01",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
-      "description": "Tests for git main-merge sentinel startup safety."
+      "description": "Tests for the legacy startup interface to Git lifecycle reconciliation."
     },
     {
       "id": "test::modules::infrastructure::wre_core::tests::test_hermes_delegate_import_path",
       "path": "modules/infrastructure/wre_core/tests/test_hermes_delegate_import_path.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-01",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-02",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -20315,6 +21038,19 @@
       "description": "Semantic-first HoloIndex contract for WRE memory preflight."
     },
     {
+      "id": "test::modules::infrastructure::wre_core::tests::test_metrics_ingest_v2_schema",
+      "path": "modules/infrastructure/wre_core/tests/test_metrics_ingest_v2_schema.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Regression tests for MetricsIngestorV2 schema and rollback triggers."
+    },
+    {
       "id": "test::modules::infrastructure::wre_core::tests::test_openclaw_voteballots_dryrun_proof",
       "path": "modules/infrastructure/wre_core/tests/test_openclaw_voteballots_dryrun_proof.py",
       "owner": "modules/infrastructure/wre_core",
@@ -20442,7 +21178,7 @@
       "path": "modules/infrastructure/wre_core/tests/test_reddog_verified_outcome_ratchet.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-02",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -20455,7 +21191,7 @@
       "path": "modules/infrastructure/wre_core/tests/test_route_foundup_job_live_mode_gate.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-02",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -20468,7 +21204,7 @@
       "path": "modules/infrastructure/wre_core/tests/test_security_analysis_assistant.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-02",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -20481,7 +21217,7 @@
       "path": "modules/infrastructure/wre_core/tests/test_security_control_hooks.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-02",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -20494,7 +21230,7 @@
       "path": "modules/infrastructure/wre_core/tests/test_security_pattern_memory.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-02",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -20897,7 +21633,7 @@
       "path": "modules/infrastructure/wre_core/tests/test_wre_test_shard_collection_runtime.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-04",
       "capabilities": [
         "process"
       ],
@@ -20912,7 +21648,7 @@
       "path": "modules/infrastructure/wre_core/tests/test_wre_worker_git_cwd_guard.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-04",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -20925,7 +21661,7 @@
       "path": "modules/infrastructure/wre_core/wre_gateway/tests/test_dae_gateway_policyflags_guards.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-04",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -20940,7 +21676,7 @@
       "path": "modules/infrastructure/wre_core/wre_master_orchestrator/tests/test_ironclaw_worker_plugin.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-04",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -20953,13 +21689,29 @@
       "path": "modules/infrastructure/wre_core/wre_master_orchestrator/tests/test_wre_master_orchestrator.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-04",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for WRE Master Orchestrator\n\nWSP Compliance: WSP 5 (Test Coverage), WSP 96 (WRE Skills), WSP 77 (Agent Coordination)"
+    },
+    {
+      "id": "test::modules::infrastructure::wsp_core::tests::test_wsp_compliance_checker",
+      "path": "modules/infrastructure/wsp_core/tests/test_wsp_compliance_checker.py",
+      "owner": "modules/infrastructure/wsp_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wsp-core-unit",
+      "capabilities": [
+        "import_path_mutation",
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline tracked-inventory and no-write contracts for WSPComplianceChecker."
     },
     {
       "id": "test::modules::infrastructure::wsp_framework_dae::tests::test_wsp_governance",
@@ -21109,6 +21861,22 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Acoustic Lab - Test Suite for Web Application\n\nTests the Flask web application endpoints and functionality."
+    },
+    {
+      "id": "test::modules::platform_integration::algorand::tests::test_unsigned_asa_probe",
+      "path": "modules/platform_integration/algorand/tests/test_unsigned_asa_probe.py",
+      "owner": "modules/platform_integration/algorand",
+      "suite_class": "unit",
+      "shard_id": "modules-platform-integration-algorand-unit",
+      "capabilities": [
+        "network",
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Unsigned probe format contracts; execute only in the admitted SDK profile.\n\nGolden packets use a separate stdlib-only MessagePack/SHA512-256 derivation.\nSynthetic public addresses have no asserted private-key or ledger identity."
     },
     {
       "id": "test::modules::platform_integration::antifafm_broadcaster::tests::test_boot_layer_rotator",
@@ -21322,16 +22090,16 @@
       "id": "test::modules::platform_integration::github_integration::tests::test_github_automation",
       "path": "modules/platform_integration/github_integration/tests/test_github_automation.py",
       "owner": "modules/platform_integration/github_integration",
-      "suite_class": "operational",
-      "shard_id": "modules-platform-integration-github-integration-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-platform-integration-github-integration-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for github_automation; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::platform_integration::github_integration::tests::test_github_integration",
@@ -21368,16 +22136,16 @@
       "id": "test::modules::platform_integration::github_integration::tests::test_wre_integration",
       "path": "modules/platform_integration/github_integration/tests/test_wre_integration.py",
       "owner": "modules/platform_integration/github_integration",
-      "suite_class": "operational",
-      "shard_id": "modules-platform-integration-github-integration-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-platform-integration-github-integration-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for wre_integration; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::platform_integration::github_integration::tests::test_wsp_automation",
@@ -21873,16 +22641,16 @@
       "id": "test::modules::platform_integration::linkedin_scheduler::tests::test_api_demo",
       "path": "modules/platform_integration/linkedin_scheduler/tests/test_api_demo.py",
       "owner": "modules/platform_integration/linkedin_scheduler",
-      "suite_class": "operational",
-      "shard_id": "modules-platform-integration-linkedin-scheduler-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-platform-integration-linkedin-scheduler-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for api_demo; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::platform_integration::linkedin_scheduler::tests::test_api_integration",
@@ -21905,16 +22673,16 @@
       "id": "test::modules::platform_integration::linkedin_scheduler::tests::test_api_test",
       "path": "modules/platform_integration/linkedin_scheduler/tests/test_api_test.py",
       "owner": "modules/platform_integration/linkedin_scheduler",
-      "suite_class": "operational",
-      "shard_id": "modules-platform-integration-linkedin-scheduler-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-platform-integration-linkedin-scheduler-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for api_test; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::platform_integration::linkedin_scheduler::tests::test_environment_creds",
@@ -21935,76 +22703,76 @@
       "id": "test::modules::platform_integration::linkedin_scheduler::tests::test_linkedin_scheduler",
       "path": "modules/platform_integration/linkedin_scheduler/tests/test_linkedin_scheduler.py",
       "owner": "modules/platform_integration/linkedin_scheduler",
-      "suite_class": "operational",
-      "shard_id": "modules-platform-integration-linkedin-scheduler-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-platform-integration-linkedin-scheduler-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for linkedin_scheduler; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::platform_integration::linkedin_scheduler::tests::test_poc_validation",
       "path": "modules/platform_integration/linkedin_scheduler/tests/test_poc_validation.py",
       "owner": "modules/platform_integration/linkedin_scheduler",
-      "suite_class": "operational",
-      "shard_id": "modules-platform-integration-linkedin-scheduler-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-platform-integration-linkedin-scheduler-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for poc_validation; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::platform_integration::linkedin_scheduler::tests::test_quick_test",
       "path": "modules/platform_integration/linkedin_scheduler/tests/test_quick_test.py",
       "owner": "modules/platform_integration/linkedin_scheduler",
-      "suite_class": "operational",
-      "shard_id": "modules-platform-integration-linkedin-scheduler-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-platform-integration-linkedin-scheduler-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for quick_test; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::platform_integration::remote_builder::tests::test_build_api",
       "path": "modules/platform_integration/remote_builder/tests/test_build_api.py",
       "owner": "modules/platform_integration/remote_builder",
-      "suite_class": "operational",
-      "shard_id": "modules-platform-integration-remote-builder-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-platform-integration-remote-builder-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for build_api; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::platform_integration::remote_builder::tests::test_remote_builder",
       "path": "modules/platform_integration/remote_builder/tests/test_remote_builder.py",
       "owner": "modules/platform_integration/remote_builder",
-      "suite_class": "operational",
-      "shard_id": "modules-platform-integration-remote-builder-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-platform-integration-remote-builder-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for remote_builder; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::platform_integration::session_launcher::tests::test_session_launcher",
@@ -22169,6 +22937,19 @@
         "module_scope_process_stream_mutation"
       ],
       "description": "Test that the system correctly detects and fixes duplicate attempts when users cancel posts.\nThis simulates the scenario where a user manually cancels a post because it was already posted."
+    },
+    {
+      "id": "test::modules::platform_integration::social_media_orchestrator::tests::test_content::test_content_orchestrator",
+      "path": "modules/platform_integration/social_media_orchestrator/tests/test_content/test_content_orchestrator.py",
+      "owner": "modules/platform_integration/social_media_orchestrator",
+      "suite_class": "unit",
+      "shard_id": "modules-platform-integration-social-media-orchestrator-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline editorial package contracts; the separate legacy scaffold is retained."
     },
     {
       "id": "test::modules::platform_integration::social_media_orchestrator::tests::test_copilot_validation",
@@ -22505,6 +23286,19 @@
       "description": "Test Orchestrator Integration - Verify posting through orchestrator works\nFollowing WSP 84: Test existing orchestrator before refactoring livechat"
     },
     {
+      "id": "test::modules::platform_integration::social_media_orchestrator::tests::test_petition_campaign",
+      "path": "modules/platform_integration/social_media_orchestrator/tests/test_petition_campaign.py",
+      "owner": "modules/platform_integration/social_media_orchestrator",
+      "suite_class": "unit",
+      "shard_id": "modules-platform-integration-social-media-orchestrator-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Petition intake boundaries: no provider effects or inferred launch authority."
+    },
+    {
       "id": "test::modules::platform_integration::social_media_orchestrator::tests::test_post_safety_monitor",
       "path": "modules/platform_integration/social_media_orchestrator/tests/test_post_safety_monitor.py",
       "owner": "modules/platform_integration/social_media_orchestrator",
@@ -22575,16 +23369,16 @@
       "id": "test::modules::platform_integration::social_media_orchestrator::tests::test_social_media_orchestrator",
       "path": "modules/platform_integration/social_media_orchestrator/tests/test_social_media_orchestrator.py",
       "owner": "modules/platform_integration/social_media_orchestrator",
-      "suite_class": "operational",
-      "shard_id": "modules-platform-integration-social-media-orchestrator-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-platform-integration-social-media-orchestrator-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for social_media_orchestrator; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::platform_integration::social_media_orchestrator::tests::test_system_coexistence",
@@ -22948,16 +23742,16 @@
       "id": "test::modules::platform_integration::utilities::oauth_management::tests::test_oauth_manager",
       "path": "modules/platform_integration/utilities/oauth_management/tests/test_oauth_manager.py",
       "owner": "modules/platform_integration/utilities",
-      "suite_class": "operational",
-      "shard_id": "modules-platform-integration-utilities-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-platform-integration-utilities-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for oauth_manager; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::platform_integration::utilities::oauth_management::tests::test_oauth_rotation_validation",
@@ -23071,16 +23865,16 @@
       "id": "test::modules::platform_integration::x_twitter::tests::test_x_twitter_dae",
       "path": "modules/platform_integration/x_twitter/tests/test_x_twitter_dae.py",
       "owner": "modules/platform_integration/x_twitter",
-      "suite_class": "operational",
-      "shard_id": "modules-platform-integration-x-twitter-operational",
+      "suite_class": "manual",
+      "shard_id": "modules-platform-integration-x-twitter-manual",
       "capabilities": [],
-      "execution_type": "operational",
+      "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "unimplemented_test_scaffold"
       ],
-      "description": ""
+      "description": "Test scaffold for x_twitter_dae; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
     },
     {
       "id": "test::modules::platform_integration::youtube_api_operations::tests::test_circuit_breaker_integration",
@@ -23499,7 +24293,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_audio_label_observe_log.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23508,11 +24302,24 @@
       "description": "Scheduler OBSERVE-MODE audio_label log tests.\n\nSlice: SHORTS_MUSIC_LABEL_OBSERVE_PHASE1   Worker-Lane: MUSIC-OBSERVE\n\nWSP refs: WSP 5 (coverage), WSP 6 (audit), WSP 84 (reuse load_index_json).\n\nCONTRACT under test (OBSERVE-ONLY -- never gates scheduling):\n  - When the index artifact carries an acoustic audio_label sibling,\n    _observe_audio_label_log emits a [MUSIC-OBSERVE] log with the label +\n    content_category. (NON-VACUOUS: asserts the actual log content.)\n  - When NO audio_label is prese"
     },
     {
+      "id": "test::modules::platform_integration::youtube_shorts_scheduler::tests::test_calendar_reservations",
+      "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_calendar_reservations.py",
+      "owner": "modules/platform_integration/youtube_shorts_scheduler",
+      "suite_class": "unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Exact calendar and durable reservation controls with synthetic local state."
+    },
+    {
       "id": "test::modules::platform_integration::youtube_shorts_scheduler::tests::test_full_chain",
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_full_chain.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23525,7 +24332,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_index_metadata_decoupling.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23538,7 +24345,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_launch_import.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [
         "process"
       ],
@@ -23553,7 +24360,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_layer0_entry.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation"
@@ -23569,7 +24376,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_layer1_filter.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [
         "browser",
         "logging_configuration"
@@ -23585,7 +24392,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_layer2_edit.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [
         "browser",
         "logging_configuration",
@@ -23602,7 +24409,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_layer3_schedule.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [
         "browser",
         "logging_configuration",
@@ -23619,7 +24426,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_layer4_schedule_audit.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [
         "browser",
         "logging_configuration"
@@ -23635,7 +24442,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_live_schedule_signal_priority.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23648,7 +24455,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_long_form_scheduling_enable.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23661,7 +24468,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_long_form_tz_peak_window.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23674,7 +24481,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_metadata_evidence.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23687,7 +24494,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_oops_recovery.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [
         "browser",
         "logging_configuration"
@@ -23703,7 +24510,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_peak_window.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23712,11 +24519,24 @@
       "description": "Unit tests for US-ET peak slots + per-channel Studio-tz conversion.\n\nSlice: SHORTS_SCHEDULE_US_PEAK_WINDOW_PHASE1\n\nModel under test\n----------------\nALL shorts target the US audience, so peak publish times are defined ONCE in\nUS-Eastern (ET): morning ~08:00, lunch ~12:00, evening ~20:00. The scheduler\ntypes a BARE time string that YouTube Studio interprets in each channel's own\naccount timezone, so an ET target must be converted to the channel-local\nwall-clock (DST-aware) before typing.\n\nThese t"
     },
     {
+      "id": "test::modules::platform_integration::youtube_shorts_scheduler::tests::test_presave_audit",
+      "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_presave_audit.py",
+      "owner": "modules/platform_integration/youtube_shorts_scheduler",
+      "suite_class": "unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Actual save/preparation owners against synthetic drafts; no browser/model calls."
+    },
+    {
       "id": "test::modules::platform_integration::youtube_shorts_scheduler::tests::test_remote_cli",
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_remote_cli.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [
         "process"
       ],
@@ -23731,7 +24551,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_reschedule_applier.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23744,7 +24564,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_reschedule_planner.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23757,7 +24577,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_schedule_audit_breadcrumb.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -23772,7 +24592,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_schedule_include_private.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23785,7 +24605,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_schedule_rotation_fairness.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23794,11 +24614,24 @@
       "description": "Schedule rotation fairness tests (Phase 1).\n\nSlice: SHORTS_SCHEDULE_ROTATION_FAIRNESS_PHASE1\n\nProves run_multi_channel_scheduler ROTATES ~3 days of content per channel per\npass instead of DRAINING the first channel's entire backlog (up to the 60-day\nwindow / ~180 videos) before ever touching the next channel.\n\nTHE BUG (origin/main, launch.py): the per-channel call was\n    scheduler.run_scheduling_cycle(max_videos=max_per_channel)\nwith max_per_channel defaulting to 9999 (and the DAE passing\nYT_SH"
     },
     {
+      "id": "test::modules::platform_integration::youtube_shorts_scheduler::tests::test_scheduled_inventory",
+      "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_scheduled_inventory.py",
+      "owner": "modules/platform_integration/youtube_shorts_scheduler",
+      "suite_class": "unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Qualified schedule reads and absence-based consumers; no live browser effects."
+    },
+    {
       "id": "test::modules::platform_integration::youtube_shorts_scheduler::tests::test_scheduler",
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_scheduler.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23811,7 +24644,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_shorts_live_schedule_signal.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23824,7 +24657,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_shorts_priority_wiring.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23837,7 +24670,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_shorts_skillz_domain_registration.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23846,11 +24679,27 @@
       "description": "Auto-fire registration tests for the shorts scheduling SKILLz.\n\nSlice: SHORTS_SKILLZ_AUTONOMOUS_REGISTRATION_PHASE1\n\nWhat these pin (mock-only, no daemon, no browser, no live models)\n----------------------------------------------------------------\nThe WRE skill-trigger discovers + fires skills whose SKILLz.md frontmatter carries\n`domain: youtube` (SkillTriggerMixin domain-discovery, skill_trigger.py:91-115; the\nmatch is `skill.metadata.get(\"domain\") == self._trigger_domain`). So a scheduling\nSKI"
     },
     {
+      "id": "test::modules::platform_integration::youtube_shorts_scheduler::tests::test_stream_schedule_calendar",
+      "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_stream_schedule_calendar.py",
+      "owner": "modules/platform_integration/youtube_shorts_scheduler",
+      "suite_class": "unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
+      "capabilities": [
+        "browser",
+        "network"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Frozen stream selection and mandatory calendar boundaries with synthetic DOMs."
+    },
+    {
       "id": "test::modules::platform_integration::youtube_shorts_scheduler::tests::test_unified_shorts_videos_priority",
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_unified_shorts_videos_priority.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23859,11 +24708,54 @@
       "description": "Unit tests for YOUTUBE_ROTATION_UNIFIED_SHORTS_VIDEOS_SIGNAL_PHASE1.\n\nSlice: YOUTUBE_ROTATION_UNIFIED_SHORTS_VIDEOS_SIGNAL_PHASE1\n\nWhat is wired\n-------------\n1. read_live_schedule_signal (shorts_live_schedule_signal/executor.py) now accepts\n   content_type (\"short\" | \"upload\"). Validates at entry; invalid -> fail closed.\n   DOM scan logic (HAS_SCHEDULE filter + row scrape) is REUSED unchanged (WSP 84).\n\n2. build_live_count_fn (what_should_i_schedule/executor.py) now accepts\n   content_type. Thr"
     },
     {
+      "id": "test::modules::platform_integration::youtube_shorts_scheduler::tests::test_video_policy_consumers",
+      "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_video_policy_consumers.py",
+      "owner": "modules/platform_integration/youtube_shorts_scheduler",
+      "suite_class": "unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
+      "capabilities": [
+        "browser"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline actual-save-owner controls; no browser, providers or credentials."
+    },
+    {
+      "id": "test::modules::platform_integration::youtube_shorts_scheduler::tests::test_video_policy_inline",
+      "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_video_policy_inline.py",
+      "owner": "modules/platform_integration/youtube_shorts_scheduler",
+      "suite_class": "unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline inline button scope/gate checks with actual CPS methods."
+    },
+    {
+      "id": "test::modules::platform_integration::youtube_shorts_scheduler::tests::test_video_policy_save_readback",
+      "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_video_policy_save_readback.py",
+      "owner": "modules/platform_integration/youtube_shorts_scheduler",
+      "suite_class": "unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-02",
+      "capabilities": [
+        "browser"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Real private queue claims and guarded reload with synthetic DOM only."
+    },
+    {
       "id": "test::modules::platform_integration::youtube_shorts_scheduler::tests::test_visibility_filter_complete",
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_visibility_filter_complete.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-02",
       "capabilities": [
         "browser"
       ],
@@ -23878,7 +24770,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_visibility_filter_enforcement.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -23891,7 +24783,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_visibility_natural_click.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-02",
       "capabilities": [
         "browser"
       ],
@@ -23906,7 +24798,7 @@
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_what_should_i_schedule.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
       "suite_class": "unit",
-      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -24554,6 +25446,19 @@
       "description": ""
     },
     {
+      "id": "test::tests::test_legacy_test_source_safety",
+      "path": "tests/test_legacy_test_source_safety.py",
+      "owner": "repository",
+      "suite_class": "unit",
+      "shard_id": "repository-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Bounded import regressions; never import parent application packages."
+    },
+    {
       "id": "test::tests::test_main_ironclaw_preflight",
       "path": "tests/test_main_ironclaw_preflight.py",
       "owner": "repository",
@@ -24636,6 +25541,19 @@
       "description": "Platform-independent tests for WSP 97 repository path confinement."
     },
     {
+      "id": "test::tests::test_wsp_compliance_guardian",
+      "path": "tests/test_wsp_compliance_guardian.py",
+      "owner": "repository",
+      "suite_class": "unit",
+      "shard_id": "repository-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Bounded scaffold-generator regressions; no production module import."
+    },
+    {
       "id": "test::tools::_archive::test_runner",
       "path": "tools/_archive/test_runner.py",
       "owner": "tools",
@@ -24680,6 +25598,22 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": ""
+    },
+    {
+      "id": "test::tools::modular_audit::tests::test_external_audit",
+      "path": "tools/modular_audit/tests/test_external_audit.py",
+      "owner": "tools",
+      "suite_class": "unit",
+      "shard_id": "tools-unit",
+      "capabilities": [
+        "import_path_mutation",
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Synthetic JSON only; no external audit process or network request."
     },
     {
       "id": "test::tools::modular_audit::tests::test_fmas_mode2",
@@ -24786,6 +25720,38 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": ""
+    },
+    {
+      "id": "test::tools::modular_audit::tests::test_secret_scan",
+      "path": "tools/modular_audit/tests/test_secret_scan.py",
+      "owner": "tools",
+      "suite_class": "unit",
+      "shard_id": "tools-unit",
+      "capabilities": [
+        "import_path_mutation",
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Synthetic-only acceptance tests for FMAS scan scope and honest summaries."
+    },
+    {
+      "id": "test::tools::modular_audit::tests::test_tracked_audit",
+      "path": "tools/modular_audit/tests/test_tracked_audit.py",
+      "owner": "tools",
+      "suite_class": "unit",
+      "shard_id": "tools-unit",
+      "capabilities": [
+        "import_path_mutation",
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Synthetic metadata/INI boundaries only; never runs Bandit."
     },
     {
       "id": "test::tools::shared::tests::test_pagination",

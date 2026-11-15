@@ -1,3 +1,88 @@
+## 2026-11-10 — Selected CI metadata fixtures
+
+Four existing scheduling positives now use a complete synthetic Studio calendar,
+private canonical tracker and manifest paths, and a strict DOM double that exposes
+the scheduling instance fields. They retain the original metadata assertions and
+verify that the Save double reaches durable reservation and clears the cycle guard.
+All 14 metadata-decoupling cases passed under the existing offline effect guard
+with zero failures, errors, skips or effect denials. WSP22/50/97.
+
+## 2026-11-10 — Stream batch and calendar boundaries
+
+The sealed calendar suite passed154:49 queue/DAE/launcher,71 selection/picker/Save
+boundaries,34 exact-slot/persistence cases. Zero failures, errors, skips, effect
+denials or model imports. The existing inventory102, directives114 and rotation35
+case inventories remain unchanged and passed after fixture migration. Attachment35
+and access11 controls passed; peak-window13 passed. Fixtures never publish.
+New cases cover exact-title selection, incomplete inventory, scope/driver changes,
+reserved versus attempted Save, contradictory timezone observations, committed
+picker mismatches, ambiguous Done/Save controls and supervisor handoff retention.
+Source and UI semantics remain separately qualified. WSP11/22/50/77/84/97.
+
+## 2026-11-10 — Scheduling draft audit
+
+The focused four-file selection passed98. Protected directives replay executed114
+cases with zero test issues; its fixed case manifest was updated from101 after
+adding13 configuration cases, preserving all earlier names. Invalid audience
+configuration cannot select/claim/save; environment policy enables no channel
+roles. Registry true/false/absent/malformed answers survive save/load unchanged.
+Source controls do not establish native selector or saved-state live qualification.
+WSP11/22/50/84/97.
+
+## 2026-11-05 — Visible native schedule readiness
+
+Added six cases to `test_video_policy_consumers.py` without changing the existing
+assertions. One native `PUBLISH_FROM_PRIVATE` readiness case failed before the
+source correction (65 other cases passed). The final four-file consumer replay
+passed66, with zero failures/errors/skips/denied effects. Named-dialog and legacy
+positives remain; hidden/stale/absent native controls remain unready. No audience
+answer, public Save or live selector qualification is inferred from these tests.
+
+## 2026-11-01 — Final policy consumer qualification
+
+60 new focused controls passed, zero failures/errors/skips/captured streams:
+detail19, durable save/reload16, inline9, Shorts16. Actual queue claims persist
+across new navigation/queue instances. Useful metadata Save→clean same-tab fresh
+document→exact readback settles applied; no-op refresh stays unknown. Slot-write
+claims cannot be settled by metadata-only proof. Tests preserve foreign drafts,
+stop late pauses/STOP/caps before clicks and refuse unrelated popup targets.
+
+Adjacent185 passed (existing selected147 + metadata23 + publisher15), with
+original assertions retained. Shared fake DOM fixtures explicitly model cycle and
+authoritative detail APIs, strict spec_set remains, and only synthetic identity
+literals changed to valid native shapes. Browser/provider/model/auth effects were
+not exercised. Private source/XML/guard hashes are retained by the task owner;
+publication, resulting-main checks and installed runtime qualification are
+separate gates under WSP97.
+
+## 2026-10-29 — Scheduled-inventory and audit-consumer controls
+
+Added actual-source scheduled inventory and sink controls, plus explicit
+partial/failed post-audit receipts. Existing breadcrumb fixtures previously set
+`dry_run=True`, bypassing the very post-audit gate they asserted. They now keep
+scheduling/tracker collaborators fake and enable the actual audit consumer gate;
+all original negative/positive breadcrumb and auto-heal assertions remain.
+Final S1 bounded actual-source selection passed102:86 inventory/consumer,
+9 existing visibility,7 post-audit breadcrumb; zero failures/errors/skips.
+Review-driven controls cover numeric identity, malformed expected channel,
+later-page progress, forged complete repair receipts and useful qualified
+positive repair inputs. Both native channel locations and explicit Scheduled
+date-cell/tooltip contracts are handled; installed selectors remain unqualified.
+Final independent sink review found that an optional comparison parameter could
+let `None` reach reset before iteration failed. The actual reset sink now rejects
+non-lists first; None/tuple controls preserve in-memory dictionaries and disk
+bytes. Prior97/99-case XML is retained as superseded evidence, not added to102.
+Three adjacent-reader controls reject Title/search chips containing visibility
+words while preserving explicit Visibility and bare Has schedule labels.
+
+Guarded tests use a fixed minimal child environment; no inherited credentials,
+environment-bearing mock assertions, host registry writes or real effects.
+Initial guard-only attempts rejected pytest's null-device write and Windows
+asyncio's socketpair; allow only the null device and use a private no-I/O timer
+loop. The host standard-library interpreter lacked pytz under disabled user-site
+imports; reuse the existing repository `.venv` without installing dependencies.
+These setup failures are not runtime defects or passing test evidence.
+
 ## 2026-10-25 — Move2Japan per-channel cadence
 
 ## 2026-10-26 — Hosted metadata fixture correction
@@ -325,3 +410,22 @@ YouTube, no credentials. ASCII-only.
   base (this slice touches only `scheduler.py` and `index_weave.py`).
 
 ---
+# 2026-11-10 — Pre-save audit regression controls
+
+Added actual-owner tests for metadata completeness, audience selection/readback,
+kids/unknown-channel policy, late draft/identity changes, missing analysis and
+detail scheduling handoff. Updated old inline positive expectation: a popup with
+no description or audience now refuses before claim/click. Existing durable
+unknown-save tests use future explicit slots and observed Audience fixtures.
+These are offline controls, not live audience or scheduling qualification.
+
+## 2026-11-10 — Frozen-request Unlisted URL and strict re-entry
+
+The sealed calendar selection passes 233 cases, all 215 previous names retained,
+with zero failures/errors/skips or denied effects. Eighteen additions exercise the
+actual URL builder plus strict inventory, explicit-empty reads after row timeout,
+wrong/missing filters, channel/title/pagination changes, late STOP, verification
+handoff, and selection limited to previously frozen IDs. Frozen re-entry never
+calls the legacy page-size/filter/scrape/model fallback helpers. The native run
+that motivated this repair stopped at the old filter before selection or Save;
+this offline result does not establish a repaired live schedule. WSP22/50/77/97.

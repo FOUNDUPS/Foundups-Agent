@@ -2,6 +2,14 @@
 
 This log tracks changes specific to the **idle_automation** module in the **infrastructure** enterprise domain.
 
+### 2026-10-29 — Record the overdue self-research exemption boundary
+
+Add only expires_on=2026-09-30 to the existing self_research_refresh.py
+temporary exemption, derived from its unchanged 2026-Q3 review date under
+separately merged WSP62 section 5.1.3. Every other parsed field and type is
+unchanged. Exact-base audit accepts this bounded metadata completion; the
+entry remains EXEMPTION_EXPIRED. No renewal or runtime change. WSP 22/50/62/97.
+
 ### 2026-10-07 — Preserve internal-audit measurement status
 
 WSP 00/5/11/15/22/48/50/97. Selected14/P1 (C2/I4/D4/impact4).

@@ -40,9 +40,15 @@ import threading
 import time
 import urllib.parse
 import urllib.request
+import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Optional, Set, Tuple
+
+from modules.infrastructure.foundups_mcp_bridge.src.mcp_server import (
+    GIT_INVENTORY_ENV,
+    GIT_INVENTORY_TOOL,
+)
 
 # === UTF-8 ENFORCEMENT (WSP 90) ===
 if __name__ == "__main__" and sys.platform.startswith("win"):
@@ -57,6 +63,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8128
+GIT_INVENTORY_READINESS_SECONDS = 35.0
 
 REQUIRED_CANARY_TOOLS: Set[str] = {"holo_query_bundle"}
 
@@ -104,6 +111,7 @@ class MCPRuntimeHandle:
     thread: Optional[threading.Thread] = None  # thread for in_process
     proc: Optional[subprocess.Popen] = None  # Popen for subprocess
     readiness: Dict[str, Any] = field(default_factory=dict)
+    git_inventory_enabled: bool = False
 
     def is_alive(self) -> bool:
         """Check if underlying server thread or subprocess is currently active."""
@@ -123,6 +131,7 @@ class MCPLaunchOptions:
     port: int
     token: str
     auth_enforced: bool
+    git_inventory_enabled: bool = False
 
 
 _state_lock = threading.RLock()
@@ -305,7 +314,9 @@ def _terminate_runtime(handle: Optional[MCPRuntimeHandle], timeout_sec: float = 
     return True, "stopped"
 
 
-def _mcp_call_payload_ok(call_result: Any) -> bool:
+def _mcp_call_payloads(call_result: Any) -> list[Any]:
+    if getattr(call_result, "isError", False):
+        return []
     candidates = [getattr(call_result, "structuredContent", None)]
     for item in getattr(call_result, "content", ()):
         text = getattr(item, "text", None)
@@ -315,7 +326,11 @@ def _mcp_call_payload_ok(call_result: Any) -> bool:
             candidates.append(json.loads(text))
         except json.JSONDecodeError:
             pass
-    return any(_mcp_bundle_response_ok(value) for value in candidates)
+    return candidates
+
+
+def _mcp_call_payload_ok(call_result: Any) -> bool:
+    return any(map(_mcp_bundle_response_ok, _mcp_call_payloads(call_result)))
 
 
 def _mcp_bundle_response_ok(value: Any) -> bool:
@@ -347,12 +362,18 @@ def _mcp_bundle_response_ok(value: Any) -> bool:
     return len(encoded) == byte_count
 
 
-def _remote_tool_names_exact(names: set[str]) -> bool:
-    """Require the direct client to observe exactly the canonical surface."""
-    return names == REQUIRED_CANARY_TOOLS and not (FORBIDDEN_CANARY_TOOLS & names)
+def _expected_canary_tools(enable_git_inventory: bool) -> set[str]:
+    return REQUIRED_CANARY_TOOLS | ({GIT_INVENTORY_TOOL} if enable_git_inventory else set())
 
 
-async def _verify_streamable_http(url: str, headers: Dict[str, str], timeout: float):
+def _remote_tool_names_exact(names: set[str], enable_git_inventory: bool = False) -> bool:
+    """Require the direct client to observe exactly the selected surface."""
+    return names == _expected_canary_tools(enable_git_inventory) and not (FORBIDDEN_CANARY_TOOLS & names)
+
+
+async def _verify_streamable_http(
+    url: str, headers: Dict[str, str], timeout: float, *, enable_git_inventory: bool = False,
+):
     from mcp import ClientSession
     from mcp.client.streamable_http import streamablehttp_client
 
@@ -363,7 +384,11 @@ async def _verify_streamable_http(url: str, headers: Dict[str, str], timeout: fl
             await session.initialize()
             listed = await session.list_tools()
             names = {tool.name for tool in listed.tools}
-            if not _remote_tool_names_exact(names):
+            if (
+                getattr(listed, "nextCursor", None) is not None
+                or len(names) != len(listed.tools)
+                or not _remote_tool_names_exact(names, enable_git_inventory)
+            ):
                 raise ValueError("MCP tool boundary mismatch")
             called = await session.call_tool("holo_query_bundle", {
                 "query": "WSP memory bundle", "limit": 1,
@@ -371,21 +396,34 @@ async def _verify_streamable_http(url: str, headers: Dict[str, str], timeout: fl
             })
             if not _mcp_call_payload_ok(called):
                 raise ValueError("MCP safe tool call invalid")
+            if enable_git_inventory:
+                from modules.infrastructure.wre_core.src.git_lifecycle_inventory import (
+                    verify_git_inventory_receipt,
+                )
+
+                request_id = f"mcp-readiness-{uuid.uuid4().hex}"
+                inventory = await session.call_tool(GIT_INVENTORY_TOOL, {"request_id": request_id})
+                if not any(verify_git_inventory_receipt(value, request_id)
+                           for value in _mcp_call_payloads(inventory)):
+                    raise ValueError("MCP Git inventory receipt invalid")
             return names
 
 
 def _verify_readiness_subprocess(
     repo_root: Path, host: str, port: int, token: str, timeout: float,
+    *, enable_git_inventory: bool = False,
 ) -> Dict[str, Any]:
     interpreter = _get_mcp_env_python(repo_root)
     if not _mcp_python_capable(interpreter):
         return {"verified": False, "error": "mcp_capable_python_missing"}
     executable, env = _mcp_child_env(repo_root, interpreter, token)
     env["PYTHONWARNINGS"] = "ignore"
+    arguments = ["--host", host, "--port", str(port), "--timeout", str(timeout)]
+    if enable_git_inventory:
+        arguments.append("--enable-git-inventory")
     command = _mcp_module_command(
         executable, env,
-        "modules.infrastructure.foundups_mcp_bridge.scripts.readiness_once",
-        ["--host", host, "--port", str(port), "--timeout", str(timeout)],
+        "modules.infrastructure.foundups_mcp_bridge.scripts.readiness_once", arguments,
     )
     try:
         result = subprocess.run(
@@ -402,15 +440,12 @@ def _verify_readiness_subprocess(
         value = json.loads(result.stdout.strip().splitlines()[-1])
     except (IndexError, json.JSONDecodeError):
         return {"verified": False, "error": "mcp_readiness_response_invalid"}
-    return value if _readiness_schema_valid(value) else {
+    return value if _readiness_schema_valid(value, enable_git_inventory) else {
         "verified": False, "error": "mcp_readiness_response_invalid"}
 
 
-def _readiness_schema_valid(value: Any) -> bool:
-    from modules.infrastructure.foundups_mcp_bridge.src.mcp_server import (
-        REMOTE_READ_ONLY_ALLOWLIST,
-    )
-    expected = sorted(REMOTE_READ_ONLY_ALLOWLIST)
+def _readiness_schema_valid(value: Any, enable_git_inventory: bool = False) -> bool:
+    expected = sorted(_expected_canary_tools(enable_git_inventory))
     latency = value.get("latency_ms") if isinstance(value, dict) else None
     return bool(
         isinstance(value, dict)
@@ -466,23 +501,33 @@ def _exception_http_status(error: BaseException) -> Optional[int]:
 def verify_mcp_readiness(
     host: str, port: int, auth_token: Optional[str] = None,
     timeout_sec: float = 15.0, repo_root: Optional[Path] = None,
+    *, enable_git_inventory: bool = False,
 ) -> Dict[str, Any]:
     """Verify Streamable HTTP initialize/list/safe-call against canonical `/mcp`."""
+    if enable_git_inventory and not (auth_token and auth_token.strip()):
+        return {"verified": False, "error": "git_inventory_requires_auth"}
     try:
         import mcp  # noqa: F401
     except ImportError:
         return _verify_readiness_subprocess(
             Path(repo_root or _get_repo_root()).resolve(), host, port,
             str(auth_token or ""), timeout_sec,
+            enable_git_inventory=enable_git_inventory,
         )
     started, deadline, error = time.time(), time.time() + timeout_sec, ""
     headers = {"Authorization": f"Bearer {auth_token}"} if auth_token else {}
     while time.time() < deadline:
         try:
-            names = asyncio.run(_verify_streamable_http(
+            remaining = deadline - time.time()
+            request_timeout = 30.0 if enable_git_inventory else 8.0
+            canary = _verify_streamable_http(
                 f"http://{host}:{port}/mcp", headers,
-                max(1.0, min(8.0, deadline - time.time())),
-            ))
+                max(1.0, min(request_timeout, remaining)),
+                enable_git_inventory=enable_git_inventory,
+            )
+            if enable_git_inventory:
+                canary = asyncio.wait_for(canary, timeout=max(0.001, remaining))
+            names = asyncio.run(canary)
             return {
                 "verified": True, "tools_count": len(names),
                 "tool_names": sorted(names),
@@ -512,13 +557,16 @@ def _resolve_launch_options(
         error = "auth_token_required_for_remote_exposure"
         logger.error("[MCP-BRIDGE] Auth enabled without a local token; refusing start")
         return None, {"status": "error", "error": error}
+    inventory_enabled = os.getenv(GIT_INVENTORY_ENV) == "1"
+    if inventory_enabled and not (auth_enforced and token.strip()):
+        return None, {"status": "error", "error": "git_inventory_requires_auth"}
     return MCPLaunchOptions(
         root=root, host=bind_host, port=bind_port,
-        token=token, auth_enforced=auth_enforced,
+        token=token, auth_enforced=auth_enforced, git_inventory_enabled=inventory_enabled,
     ), None
 
 
-def _existing_runtime_result() -> Optional[Dict[str, Any]]:
+def _existing_runtime_result(enable_git_inventory: bool = False) -> Optional[Dict[str, Any]]:
     """Return the one canonical already-running receipt when present."""
     global _active_runtime
     with _state_lock:
@@ -531,6 +579,10 @@ def _existing_runtime_result() -> Optional[Dict[str, Any]]:
             if _active_runtime is handle:
                 _active_runtime = None
             return None
+        if handle.git_inventory_enabled != enable_git_inventory:
+            return {"status": "error", "error": "mcp_runtime_profile_mismatch"}
+        if enable_git_inventory and not _readiness_schema_valid(handle.readiness, True):
+            return {"status": "error", "error": "mcp_runtime_readiness_pending"}
         logger.warning("[MCP-BRIDGE] MCP server is already running")
         return {
             "status": "running", "already_running": True,
@@ -582,6 +634,8 @@ def _http_subprocess_spec(
     env["FOUNDUPS_MCP_HOST"] = options.host
     env["FOUNDUPS_MCP_PORT"] = str(options.port)
     env["FOUNDUPS_MCP_REQUIRE_AUTH"] = "1" if options.auth_enforced else "0"
+    if options.git_inventory_enabled:
+        env[GIT_INVENTORY_ENV] = "1"
     command = _mcp_module_command(
         executable, env,
         "modules.infrastructure.foundups_mcp_bridge.src.mcp_server",
@@ -639,12 +693,14 @@ def _launch_http_subprocess(
     handle = MCPRuntimeHandle(
         mode="subprocess", host=options.host, port=options.port,
         started_at=time.time(), lock=lock, proc=proc,
+        git_inventory_enabled=options.git_inventory_enabled,
     )
     with _state_lock:
         _active_runtime = handle
     canary = verify_mcp_readiness(
         host=options.host, port=options.port, auth_token=options.token,
-        timeout_sec=15.0, repo_root=options.root,
+        timeout_sec=GIT_INVENTORY_READINESS_SECONDS if options.git_inventory_enabled else 15.0,
+        repo_root=options.root, enable_git_inventory=options.git_inventory_enabled,
     )
     if not canary.get("verified"):
         return _readiness_failure(handle, canary)
@@ -671,7 +727,7 @@ def run_mcp_bridge_http(
     if error is not None:
         return error
     assert options is not None
-    existing = _existing_runtime_result()
+    existing = _existing_runtime_result(options.git_inventory_enabled)
     if existing is not None:
         return existing
     print(

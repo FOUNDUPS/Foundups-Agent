@@ -103,6 +103,15 @@ python -m modules.infrastructure.wre_core.skillz.security_scan.executor trivy --
 
 ## Truthful Reporting
 
+Build/launch callers must apply WSP 71 Section 5.6 and WSP 91 Section 3.0:
+bind required coverage to exact source/artifact, dependencies and launch scope;
+verify ownership, monitored heartbeat, deadline/lease and stop/cleanup controls.
+This skill supplies scanner evidence, not execution authority or complete
+security acceptance. Missing, partial, failed or stale required coverage blocks
+the affected build/launch even if findings are empty. Reuse still-valid evidence
+and approved scanner destinations. Prototype/manual status remains unchanged;
+do not auto-promote this skill or start a service to satisfy this instruction.
+
 - Missing CLI tools reported as `tool_available: false`, not failure
 - No scan results fabricated
 - Policy decisions reflect actual findings

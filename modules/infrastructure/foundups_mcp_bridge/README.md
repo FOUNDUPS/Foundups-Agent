@@ -4,6 +4,25 @@ Private, read-only MCP bridge for AI-assisted architectural execution.
 
 **Version**: 1.4.0 (perception + recall + state compression)
 
+## Private draft sender PoC
+
+A separate loopback MCP process can inspect one approved Gmail draft and
+preview a From-only correction. A commit requires a scoped caller and a
+one-shot private approval. The [admission and proof runbook](docs/PRIVATE_DRAFT_MCP.md)
+covers the dedicated runtime, OAuth, tunnel, and ChatGPT registration.
+
+## PC Git inventory
+
+The existing loopback bridge can also expose `get_git_inventory` in its
+authenticated HTTP profile. It reads the selected PC worktree, all registered
+worktree HEADs, and local and live GitHub branch tips for `FOUNDUPS/Foundups-Agent`.
+The result includes a caller-provided request ID, observation time, and a
+SHA-256 digest. Worktree paths and changed filenames stay on the PC. The tool
+has no Git write or WRE dispatch capability.
+
+Use the [inventory interface](INTERFACE.md#pc-git-inventory) for the receipt and
+private deployment contract.
+
 ## MCP runtime compatibility
 
 The HTTP launcher requires the exact quartet in `requirements.txt`: FastMCP
@@ -1062,7 +1081,7 @@ for STOP conditions, commands, and RED/GREEN evidence.
 ## Streamable HTTP migration status
 
 The former SSE surface is retired. The canonical local endpoint is exact
-Streamable HTTP `/mcp`, loopback-only, with one bounded read-only tool.
+Streamable HTTP `/mcp`, loopback-only, with one bounded read-only tool by default.
 `run_mcp_bridge_sse` and `stop_mcp_bridge_sse` remain deprecated name aliases
 for the same HTTP runtime and lock; they do not expose an SSE route. Public
 HTTPS plus OAuth 2.1 authorization belongs to an external tunnel/control plane

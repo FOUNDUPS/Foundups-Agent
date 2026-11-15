@@ -29,19 +29,6 @@ exemptions:
     remediation: "modules/communication/moltbot_bridge/ROADMAP.md#create-foundup-job-contract-wsp62-decomposition"
     no_growth_ceiling: {file_lines: 796, functions: {}}
 
-  - file: "INTERFACE.md"
-    reason: >-
-      Legacy module interface registry. The independent-assurance public
-      contract records the required yield, separate author/verifier claims,
-      revocation, bounded renewal, and proposal signer-policy runtime
-      boundaries; splitting the historical registry remains separate
-      documentation-maintenance work.
-    threshold_override: 1517
-    temporary: true
-    review_date: "2026-Q3"
-    reviewer: "0102 Technical Architect"
-    remediation: "modules/communication/moltbot_bridge/ROADMAP.md#2026-07-18-reddog--holoindex-truth-boundary-follow-ups"
-
   - file: "src/reddog_transport_neutral_grounding_service.py"
     reason: >-
       Existing transport integration boundary spanning request validation,
@@ -53,6 +40,7 @@ exemptions:
     function_threshold_override: 180
     functions: ["ground_transport_work_focus"]
     temporary: true
+    expires_on: "2026-09-30"
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
     remediation: "modules/communication/moltbot_bridge/ROADMAP.md#2026-07-18-reddog--holoindex-truth-boundary-follow-ups"
@@ -239,6 +227,7 @@ exemptions:
     function_threshold_override: 66
     functions: ["_try_wre_dispatch"]
     temporary: true
+    expires_on: "2026-09-30"
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
     remediation: "modules/communication/moltbot_bridge/ROADMAP.md#2026-07-18-reddog--holoindex-truth-boundary-follow-ups"
@@ -274,6 +263,7 @@ exemptions:
       registry would break the canonical module-level exemption lookup.
     threshold_override: 475
     temporary: true
+    expires_on: "2026-09-30"
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
     remediation: "modules/communication/moltbot_bridge/ROADMAP.md#reddog-provider-call-evidence-follow-ups"
@@ -343,16 +333,6 @@ exemptions:
     remediation: "modules/communication/moltbot_bridge/ROADMAP.md#2026-07-18-reddog--holoindex-truth-boundary-follow-ups"
     no_growth_ceiling: {file_lines: 470, functions: {execute_reddog_readonly_audit_task: 85}}
 
-  - file: "tests/test_foundup_brain_current_state.py"
-    reason: "Legacy snapshot fixture builder retained for cross-field parity."
-    threshold_override: 675
-    function_threshold_override: 100
-    functions: ["_snapshot"]
-    temporary: true
-    review_date: "2026-Q3"
-    reviewer: "0102 Technical Architect"
-    remediation: "modules/communication/moltbot_bridge/ROADMAP.md#2026-07-18-reddog--holoindex-truth-boundary-follow-ups"
-
   - <<: *reddog_security_repair
     file: "tests/test_reddog_backend_architect_determination_runtime.py"
     reason: "Legacy architect-input fixture and suite awaiting fixture extraction."
@@ -407,6 +387,7 @@ exemptions:
     function_threshold_override: 65
     functions: ["_valid_plan"]
     temporary: true
+    expires_on: "2026-09-30"
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
     remediation: "modules/communication/moltbot_bridge/ROADMAP.md#2026-07-18-reddog--holoindex-truth-boundary-follow-ups"

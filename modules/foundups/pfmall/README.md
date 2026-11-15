@@ -3,6 +3,10 @@
 **Status**: Implemented platform shell with bounded read surfaces; resident RedDog integration is not implemented here.
 **Entity type**: Platform layer, not a FoundUp and not an OpenClaw instance.
 
+## Canonical naming and composition
+
+**Play FoundUps Mall** (p.fMALL) is the PWA app store/discovery shell; **Play FoundUps** is the user's interaction with an individual FoundUp. The Mall is not itself a FoundUp. Manifest-declared FoundUps should compose shared navigation, mobile gestures, accessible controls and governed service interfaces while retaining their own skins, routes and scoped data. This is a target for universal composition, not a claim that every current FoundUp shares one installed origin or backend. See [master architecture](../docs/FOUNDUPS_MASTER_ARCHITECTURE.md).
+
 ## Purpose
 
 p.fMALL is the discovery and interaction shell for FoundUps and media. This

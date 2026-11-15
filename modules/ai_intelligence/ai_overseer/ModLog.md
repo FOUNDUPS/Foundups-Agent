@@ -3360,3 +3360,21 @@ Nine test-first cases cover order, copies, defaults and transport representation
 Retained clean RED 596P/5F and old-pin 600P/1F; independent review approved rebaseline.
 Final four-owner selection: 601P, no skips or instrumented network/process/write attempts.
 All existing bytes of this log, including its NUL byte, are preserved as a prefix.
+## 2026-11-05: Model-free startup inspection and current WSP allocation
+
+Main's preflight factory now selects the existing overseer's explicit
+`initialize_models=False` constructor mode. This skips eager refactoring model
+and AutoGate construction while retaining deterministic security/WSP monitors
+and default operational initialization. The WSP sentinel derives the next
+available number from current files and indexed reservations instead of a stale
+literal 99. Missing, malformed, duplicate and occupied declarations still fail.
+Independent index controls plus constructor/factory regressions reproduced eight
+failures before repair and pass 19 cases afterward in a credential-free child
+with real external effects denied. This does not establish live model quality
+or resolve absent runtime authority. WSP00/11/22/50/77/97.
+
+The proposal capability is checked before constructing the model orchestrator.
+Four additional controls reproduced three failures before repair; the combined
+selection passes 23 cases, with no skips, errors or denied effects. Exception
+diagnostics retain only the exception class. An absent proposal capability
+remains unavailable without starting models for an unsupported operation.

@@ -12,6 +12,15 @@ This log tracks changes specific to the **stream_resolver** module in the **plat
 
 ## MODLOG ENTRIES
 
+### 2026-10-29 — Periodic monitor import syntax repair
+
+Use the existing numeric package name through importlib.import_module inside
+the lazy initialization path. The former dotted import was invalid Python.
+Byte-source parsing and target-file/class existence checks pass. No stream,
+browser, model or API action was run. The referenced class has no activate
+method in this snapshot; activation remains unqualified and needs a separate
+owner review. Preserve the concurrent YouTube runtime lane. WSP 22/50/84/97.
+
 
 ### 2026-10-23 - PR782 quota gate and offline regression qualification
 

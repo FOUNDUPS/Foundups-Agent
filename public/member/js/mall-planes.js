@@ -42,9 +42,10 @@
   var SOURCE_TYPE_CTA = {
     github_repo:      { label: 'View Repo',    icon: '\u2197', urlField: 'external_url' },
     external_app:     { label: 'Open App',      icon: '\u2197', urlField: 'external_url' },
+    internal_app:     { label: 'Open App',      icon: '\u2197', urlField: 'external_url' },
     internal_service: { label: 'Open Service',  icon: '\u2197', urlField: 'external_url' }
   };
-  var NON_VIDEO_SOURCE_TYPES = { github_repo: true, external_app: true, internal_service: true };
+  var NON_VIDEO_SOURCE_TYPES = { github_repo: true, external_app: true, internal_app: true, internal_service: true };
 
   // ---- open / close ----
   function openFoundUp(index) {
@@ -147,11 +148,22 @@
     var primaryCtaHtml = '';
     var secondaryLinkHtml = '';
     var ctaDef = SOURCE_TYPE_CTA[item.source_type];
+    var memberProjection = window.mallVideoProjection?.memberPath(item.foundup_id);
+    var ctaUrl = '';
+    if (isNonVideo && ctaDef) {
+      ctaUrl = item[ctaDef.urlField] || '';
+      if (!ctaUrl && item.source_type === 'internal_app') {
+        ctaUrl = item.entry_url || item.routing_prefix || ('/member/foundup.html?id=' + encodeURIComponent(item.foundup_id));
+      }
+    }
 
-    if (isNonVideo && ctaDef && item[ctaDef.urlField]) {
+    if (memberProjection) {
+      primaryCtaHtml = '<a href="' + esc(memberProjection) + '" class="fv-primary-cta">Browse Shorts</a>';
+    } else if (isNonVideo && ctaDef && ctaUrl) {
       // Non-video: primary CTA is the source action (View Repo, Open App, Open Service)
+      var isExternalTarget = /^https?:\/\//i.test(ctaUrl);
       primaryCtaHtml =
-        '<a href="' + esc(item[ctaDef.urlField]) + '" target="_blank" rel="noopener noreferrer" class="fv-primary-cta">' +
+        '<a href="' + esc(ctaUrl) + '"' + (isExternalTarget ? ' target="_blank" rel="noopener noreferrer"' : '') + ' class="fv-primary-cta">' +
           esc(ctaDef.label) + ' ' + ctaDef.icon +
         '</a>';
       // Secondary: demoted entry-page link

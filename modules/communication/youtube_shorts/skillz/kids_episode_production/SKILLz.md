@@ -1,6 +1,6 @@
 ---
 name: kids_episode_production
-version: 0.2.2
+version: 0.2.4
 intent_type: GENERATION
 promotion_state: prototype
 ---
@@ -14,6 +14,18 @@ Use FOUNDUPS/Foundups-Agent as the implementation authority. Read AGENTS.md, WSP
 ## Story direction before production
 
 Read `references/story-direction.md` before scripting or revising an educational event. Apply its ordered physics, continuity, education and art/readability audits to each preview. Use the fast creative loop and milestone integration rules; record unverified listening separately.
+
+## Viewer and game repair
+
+Also apply the candidate [interactive experience review](../../../../foundups/eduit/skillz/interactive_experience_review/SKILLz.md)
+for audience, timing, points and interface changes. Game duration is independent
+of the film export; the latest creator-approved slow-round contract supersedes
+the older fixed 15-second game invariant. Keep existing media unchanged unless
+explicitly rerendered. This link does not activate a worker or prove transfer.
+
+For Storytime screenshot, layout, PWA, gesture or whiteboard feedback, read
+[viewer iteration](references/viewer-iteration.md) and the current EDUIT module
+docs before changing code. Apply its locked-invariant and evidence checks.
 
 ## Story-first production
 

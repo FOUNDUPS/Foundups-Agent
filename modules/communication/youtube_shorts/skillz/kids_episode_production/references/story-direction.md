@@ -75,9 +75,9 @@ and dependent passes; do not repeat unrelated repository suites per preview.
 ### Language-ready learning events
 
 Keep event identity, timing, action anchor and sound reference separate from
-locale text, font and optional spoken audio. English is the current prototype;
-Portuguese, Spanish, Japanese and Chinese are future reviewed locale variants,
-not shipped capabilities. Onomatopoeia is language-specific: do not assume a
+locale text, font and optional spoken audio. English is the video prototype. Game display variants for English, Japanese,
+Portuguese and Spanish are implemented; native-language and spoken-audio review
+remain separate. Chinese and translated videos are future work. Onomatopoeia is language-specific: do not assume a
 literal translation or the same spelling represents the natural local sound.
 Test glyph coverage, line length and readability; use a defined English fallback
 rather than claiming unsupported languages work. Reuse the existing episode
@@ -167,3 +167,7 @@ scene. A game's alternative survivors do not rewrite the film's authored outcome
 Review captured feedback visually: sanitization must preserve safe local character
 references. Keep child-facing play free of creator prose; use explicit review mode.
 These are candidate improvements; next actual episode remains the transfer test.
+
+For viewer/PWA feedback use [viewer iteration](viewer-iteration.md). Preserve
+stylized depth: the approved parents-above/babies-below composition is not a
+floating-body error solely because screen coordinates differ.

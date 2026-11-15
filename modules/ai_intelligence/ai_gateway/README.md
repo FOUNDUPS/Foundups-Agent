@@ -1,5 +1,16 @@
 # AI Gateway Module
 
+## YouTube task routing
+
+`call_youtube_task` owns stage/surface-specific routing for original-comment
+assessment, writing and exact final review. It uses the existing local general
+incumbent or an exact current signed production binding; it never uses the generic
+social/Grok fallback chain. The central registry nominates three observed free
+Gemma/Nemotron models for `youtube_reply` evaluation only. Discovery, catalog
+membership and NVIDIA shadow proposals do not promote them. See
+`modules/communication/video_comments/LLM_INTEGRATION.md` for configuration,
+privacy/cost boundaries, cancellation and evidence limits.
+
 **Module Purpose**: Unified AI service access with intelligent routing, fallback, and load balancing across multiple AI providers.
 
 **WSP Compliance Status**: [OK] WSP 49 (Module Structure), WSP 3 (Enterprise Domain), WSP 27 (DAE Architecture)

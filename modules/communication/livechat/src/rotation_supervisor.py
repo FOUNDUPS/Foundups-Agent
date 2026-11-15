@@ -97,6 +97,7 @@ class TaskState(Enum):
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
+    HALTED = "halted"
     TIMEOUT = "timeout"
     FAILED = "failed"
     KILLED = "killed"
@@ -152,6 +153,7 @@ class RotationResult:
     total_scheduled: int
     failed_channels: List[str]
     elapsed_seconds: float
+    halted: bool = False
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -161,6 +163,7 @@ class RotationResult:
             "total_scheduled": self.total_scheduled,
             "failed_channels": self.failed_channels,
             "elapsed_seconds": round(self.elapsed_seconds, 1),
+            "halted": self.halted,
         }
 
 
@@ -313,7 +316,7 @@ class RotationSupervisor:
         try:
             heartbeat = await self._spawn_task(channel, operation, max_items)
             state = heartbeat.state
-            if state != TaskState.FAILED:
+            if state not in (TaskState.FAILED, TaskState.HALTED):
                 state = await self._monitor_task(heartbeat)
             return heartbeat, state
         finally:
@@ -355,6 +358,10 @@ class RotationSupervisor:
 
     async def _dispatch_channel(self, channel, operation, max_items):
         """Admit one owned invocation without replacing unresolved channel work."""
+        from modules.communication.livechat.src.automation_gates import comment_stop_result
+        if operation == OperationType.COMMENTS and comment_stop_result():
+            heartbeat = TaskHeartbeat('comments-halted', channel, operation, state=TaskState.HALTED)
+            return heartbeat, TaskState.HALTED
         channel_id = self._resolve_channel_id(channel)
         prior = self._owned_tasks.get(channel_id)
         if prior is not None:
@@ -481,6 +488,9 @@ class RotationSupervisor:
         max_items: int = 10,
     ) -> TaskHeartbeat:
         """Spawn a CLI task and return heartbeat tracker."""
+        from modules.communication.livechat.src.automation_gates import comment_stop_result
+        if operation == OperationType.COMMENTS and comment_stop_result():
+            return TaskHeartbeat('comments-halted', channel, operation, state=TaskState.HALTED)
         cmd, task_id, heartbeat_file = self._build_task_command(channel, operation, max_items)
 
         heartbeat = TaskHeartbeat(
@@ -567,7 +577,12 @@ class RotationSupervisor:
             # Check if process completed
             if process.returncode is not None:
                 elapsed = time.time() - start_time
-                if process.returncode == 0:
+                from modules.communication.livechat.src.automation_gates import COMMENTS_HALTED_EXIT_CODE, comment_stop_result
+                if heartbeat.operation == OperationType.COMMENTS and (
+                        process.returncode == COMMENTS_HALTED_EXIT_CODE or comment_stop_result()):
+                    heartbeat.state = TaskState.HALTED
+                    heartbeat.error = 'comments_halted'
+                elif process.returncode == 0:
                     heartbeat.state = TaskState.COMPLETED
                     logger.info(f"[SUPERVISOR] Task completed: {heartbeat.channel} ({elapsed:.1f}s)")
                 else:
@@ -666,6 +681,8 @@ class RotationSupervisor:
         channels_processed = []
         failed_channels = []
         deferred_channels = []
+        from modules.communication.livechat.src.automation_gates import comment_stop_result
+        comments_halted = operation == OperationType.COMMENTS and bool(comment_stop_result())
         total_comments = 0
         total_scheduled = 0
 
@@ -678,6 +695,10 @@ class RotationSupervisor:
         logger.info("=" * 60)
 
         for idx, channel in enumerate(channels, 1):
+            from modules.communication.livechat.src.automation_gates import comment_stop_result
+            if comments_halted or (operation == OperationType.COMMENTS and comment_stop_result()):
+                comments_halted = True
+                break
             # G5: Cycle watchdog - check if cycle has exceeded max duration
             elapsed_hours = (time.time() - rotation_start) / 3600
             if elapsed_hours > MAX_CYCLE_DURATION_HOURS:
@@ -714,6 +735,10 @@ class RotationSupervisor:
                 deferred_channels.append(channel)
                 continue
             heartbeat, final_state = outcome
+            if final_state == TaskState.HALTED:
+                comments_halted = True
+                logger.warning('[ROTATION] Comments halted; preserving unfinished checkpoint')
+                break
 
             if heartbeat.state == TaskState.FAILED:
                 failed_channels.append(channel)
@@ -760,6 +785,7 @@ class RotationSupervisor:
             total_scheduled=total_scheduled,
             failed_channels=failed_channels,
             elapsed_seconds=elapsed,
+            halted=comments_halted,
         )
 
         logger.info("")
@@ -776,13 +802,13 @@ class RotationSupervisor:
 
         self._finish_rotation_checkpoint(
             operation, cycle_started_at, previously_processed | set(channels_processed),
-            complete=not deferred_channels and not failed_channels and len(channels_processed) == len(channels),
+            complete=not comments_halted and not deferred_channels and not failed_channels and len(channels_processed) == len(channels),
         )
         self._record_rotation_complete(operation, len(channels), result)
         return result
 
     def _record_rotation_complete(self, operation, channel_count, result):
-        """Report the completed cycle using its settled channel results."""
+        """Report the typed cycle outcome using its settled channel results."""
         # G3: Record rotation success for all processed channels
         # This tracks "when was this channel last part of a successful rotation cycle"
         for channel in result.channels_processed:
@@ -794,8 +820,8 @@ class RotationSupervisor:
             telemetry = get_breadcrumb_telemetry()
             telemetry.store_breadcrumb(
                 source_dae="rotation_supervisor",
-                event_type="rotation_complete",
-                message=f"{self.browser.upper()} rotation complete: {len(result.channels_processed)}/{channel_count} channels",
+                event_type="rotation_halted" if result.halted else "rotation_complete",
+                message=f"{self.browser.upper()} rotation {'halted' if result.halted else 'complete'}: {len(result.channels_processed)}/{channel_count} channels",
                 phase=operation.value.upper(),
                 metadata=result.to_dict(),
             )

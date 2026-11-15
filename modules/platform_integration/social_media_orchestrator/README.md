@@ -1,5 +1,13 @@
 # Social Media Orchestrator
 
+## Source-backed editorial packages — 2026-10-27
+
+`content_orchestrator.prepare_campaign(brief)` and the existing SOCIAL campaign
+route now prepare FoundUp-scoped, source-preserving X/LinkedIn drafts and dated
+calendar proposals. No publication or scheduler effects are performed. See the
+[contract/example](docs/CONTENT_CAMPAIGN.md) and
+[Soro comparison and remaining build sequence](docs/audits/SORO_SOCIAL_DAE_AUDIT_20261027.md).
+
 **Domain**: platform_integration  
 **Classification**: Social Media Orchestration Service  
 **WSP Compliance**: WSP 3, WSP 11, WSP 22, WSP 49
@@ -20,6 +28,20 @@ Digital Twin's local model, with explicit draft/skip/review outcomes and no mock
 fallback. Replies are draft-only. The prototype starts no service or schedule.
 See [the host runbook](docs/ANTIFAFM_CAMPAIGN.md) and
 [the API contract](INTERFACE.md#antifafm-campaign-pilot).
+
+## Supervised petitions
+
+The existing [campaign owner](skillz/foundup_campaign_operator/SKILLz.md) includes
+a [petition workflow](skillz/foundup_campaign_operator/references/petition-workflow.md),
+discoverable as `launch-petition` through Claude/Codex and OpenClaw workspace skills.
+It covers evidence, human authentication, platform drafts, consent, email and
+distribution receipts. The [petition intake route](docs/PETITION_CAMPAIGN.md)
+returns effect-free preview/plans for an existing Change.org or Action Network
+public link. Conversation entry supports "RedDog, let's launch a petition ...".
+No petition account/publication executor or resident cadence is registered.
+Keep campaign-specific copy and personal-trauma evidence in the approved private
+campaign record. The [session audit](docs/audits/PETITION_SESSION_AUDIT_20261027.md)
+separates merged instruction groundwork, planning and unfinished live integration.
 
 ## FoundUp pitch package
 

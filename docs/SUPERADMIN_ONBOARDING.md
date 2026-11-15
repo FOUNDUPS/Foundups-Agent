@@ -1,5 +1,11 @@
 # Foundups Superadmin Onboarding
 
+> Historical runbook, preserved on 2026-10-29. Its bootstrap, branch, staging
+> and startup-gate commands predate current controls and are not current
+> operating instructions. Follow [CLAUDE.md](../CLAUDE.md) for qualified
+> runtimes, isolated work, exact-main Holo retrieval and permission gates.
+
+
 ## Purpose
 This runbook gets a new superadmin from zero to operational on `FOUNDUPS/Foundups-Agent` without leaking secrets.
 
@@ -146,14 +152,14 @@ Keep these off during first bootstrap if environment is incomplete, then enable 
 Before contributing code, learn pAVS terminology:
 
 **Required Reading**:
-- [docs/vocabulary/IDENTITY.md](docs/vocabulary/IDENTITY.md) - 012, 0102, 0201 state model
-- [docs/vocabulary/ECONOMICS.md](docs/vocabulary/ECONOMICS.md) - F_i, UPS, CABR token flow
-- [docs/vocabulary/TECHNICAL.md](docs/vocabulary/TECHNICAL.md) - WSP, WRE, HoloIndex
+- [docs/vocabulary/IDENTITY.md](vocabulary/IDENTITY.md) - 012, 0102, 0201 state model
+- [docs/vocabulary/ECONOMICS.md](vocabulary/ECONOMICS.md) - F_i, UPS, CABR token flow
+- [docs/vocabulary/TECHNICAL.md](vocabulary/TECHNICAL.md) - WSP, WRE, HoloIndex
 
 **Quick Reference**:
-- [docs/vocabulary/README.md](docs/vocabulary/README.md) - Full vocabulary index
-- [docs/vocabulary/REGULATORY.md](docs/vocabulary/REGULATORY.md) - "Distribution ratio" not "ROI"
-- [docs/vocabulary/AGENTS.md](docs/vocabulary/AGENTS.md) - Qwen, Gemma, Opus tiers
+- [docs/vocabulary/README.md](vocabulary/README.md) - Full vocabulary index
+- [docs/vocabulary/REGULATORY.md](vocabulary/REGULATORY.md) - "Distribution ratio" not "ROI"
+- [docs/vocabulary/AGENTS.md](vocabulary/AGENTS.md) - Qwen, Gemma, Opus tiers
 
 **HoloIndex Search**:
 ```powershell

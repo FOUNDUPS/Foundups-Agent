@@ -121,7 +121,7 @@ class CommentProcessor:
         "unknown": "❓",
     }
 
-    CONTEXTUAL_PROVIDERS = frozenset({"lm_studio", "qwen", "grok"})
+    CONTEXTUAL_PROVIDERS = frozenset({"lm_studio", "openrouter"})
     CONTEXTUAL_SKILLS = frozenset({"skill_1", "skill_1_sub", "skill_2", "skill_3"})
     CONTEXTUAL_STRATEGIES = frozenset({
         "skill_0:grok_greeting", "skill_0:contextual_mockery",
@@ -529,6 +529,29 @@ class CommentProcessor:
         except Exception as e:
             return self._UIActionState(found=False, disabled=True, pressed=False, notes=f"ui_state_exception:{e}")
 
+    def _existing_comments_halt(self, results=None):
+        from modules.communication.livechat.src.automation_gates import comment_stop_result
+        halted = comment_stop_result()
+        if halted is None:
+            return None
+        if results is not None:
+            results.update(halted)
+            return results
+        return halted
+
+    def _latch_quality_halt(self, results, reason):
+        from modules.communication.livechat.src.automation_gates import latch_comment_quality_stop
+        try:
+            saved = latch_comment_quality_stop(reason)
+        except Exception:
+            saved = {'persisted': False, 'created': False, 'incident': None}
+        incident = saved.get('incident') or {}
+        results.update(state='halted', halted_for_reply_quality=True, quality_halt_reason=reason,
+                       quality_stop_persisted=saved.get('persisted') is True,
+                       quality_stop_created=saved.get('created') is True,
+                       quality_stop_incident_id=incident.get('incident_id'))
+        return results
+
     async def click_element_dom(self, comment_idx: int, element_type: str) -> bool:
         """
         Phase 2: Agentic - Robust DOM click execution with Shadow DOM piercing.
@@ -541,6 +564,8 @@ class CommentProcessor:
         - Uses Deep Shadow DOM Querying to find elements hidden in Shadow Roots
         - Fallback: execute_script() with recursive traversal
         """
+        if self._existing_comments_halt():
+            return False
         from selenium.webdriver.common.by import By
         from selenium.common.exceptions import NoSuchElementException
 
@@ -805,6 +830,9 @@ class CommentProcessor:
             'commenter_type': 'unknown',
             'errors': [],
         }
+        halted = self._existing_comments_halt(results)
+        if halted is not None:
+            return halted
 
         action_plan = {
             "like": {"requested": bool(do_like), "intended": bool(do_like), "attempted": False, "success": False, "path": "skipped", "reason": None},
@@ -912,8 +940,14 @@ class CommentProcessor:
         # Anti-Detection (WSP 49): Random action order + probabilistic execution
         # Build action queue with requested actions
         action_queue = []
+        halted = self._existing_comments_halt(results)
+        if halted is not None:
+            return halted
         if do_like:
             action_queue.append('like')
+        halted = self._existing_comments_halt(results)
+        if halted is not None:
+            return halted
         if do_heart:
             action_queue.append('heart')
         # Reply will be added to queue later after intelligent reply generation
@@ -1023,6 +1057,9 @@ class CommentProcessor:
         action_plan["like"]["success"] = bool(results.get("like"))
 
         # 2. HEART
+        halted = self._existing_comments_halt(results)
+        if halted is not None:
+            return halted
         if do_heart:
             action_plan["heart"]["intended"] = True
 
@@ -1120,6 +1157,9 @@ class CommentProcessor:
         action_plan["heart"]["success"] = bool(results.get("heart"))
 
         # 3. REPLY
+        halted = self._existing_comments_halt(results)
+        if halted is not None:
+            return halted
         if do_reply:
             action_plan["reply"]["intended"] = True
             logger.info(f"  [REPLY-START] Entering reply section (do_reply=True)")
@@ -1216,6 +1256,13 @@ class CommentProcessor:
                 logger.info("[HARD-THINK] Layer 2: Invoking Intelligent Reply Generator...")
                 
                 actual_reply_text, reply_source = await self._await_reply_generation(comment_data)
+                halted = self._existing_comments_halt(results)
+                if halted is not None:
+                    return halted
+                if comment_data.get('_reply_rejection_reason') == 'invalid_reply_text':
+                    results['errors'].append('invalid_reply_text')
+                    action_plan['reply']['reason'] = 'invalid_reply_text'
+                    return self._latch_quality_halt(results, 'invalid_reply_text')
                 allow_generic = os.getenv("YT_ALLOW_GENERIC_REPLY_FALLBACK", "false").strip().lower() in {"1", "true", "yes", "on"}
                 if actual_reply_text and not allow_generic and not self.is_contextual_reply_source(reply_source):
                     logger.warning("[CONTEXT-GATE] Skipping non-contextual reply from source=%s", reply_source)
@@ -1271,7 +1318,10 @@ class CommentProcessor:
                 # Check if already signed (contains "0102" signature)
                 already_signed = "0102" in actual_reply_text
 
-                if already_signed:
+                if (comment_data.get('_generation_context') or {}).get('assessment'):
+                    # The assessed route reviews the writer's exact answer; no unrelated suffix.
+                    reply_text_to_post = actual_reply_text
+                elif already_signed:
                     # Reply already has signature from IntelligentReplyGenerator
                     reply_text_to_post = actual_reply_text
                     if self.action_debug:
@@ -1291,8 +1341,55 @@ class CommentProcessor:
                     tag = "[AI]" if used_intelligent else "[TMPL]"
                     reply_text_to_post = f"{tag} {reply_text_to_post}"
 
+                # Inspect the final text, including any suffixes, before submission.
+                comment_data['_target_channel_id'] = self.target_channel_id
+                review = await self._inspect_reply(comment_data, reply_text_to_post)
+                halted = self._existing_comments_halt(results)
+                if halted is not None:
+                    return halted
+                results['reply_review'] = review
+                if review.get('approved') is not True:
+                    reason = review.get('reason', 'review_rejected')
+                    results['errors'].append(reason)
+                    action_plan['reply']['reason'] = 'review_rejected'
+                    if reason in {'review_rejected', 'review_unavailable_or_invalid'}:
+                        return self._latch_quality_halt(results, reason)
+                    return results
+
+                comment_data['_reply_review'] = dict(review)
+
                 logger.info(f"  [REPLY] Executing reply via execute_reply()...")
-                reply_ok = await self.reply_executor.execute_reply(comment_idx, reply_text_to_post)
+                comment_data['_target_channel_id'] = self.target_channel_id
+                reply_ok = await self.reply_executor.execute_reply(
+                    comment_idx, reply_text_to_post, expected_comment=comment_data,
+                    pre_submit_guard=lambda: get_reply_generator().reply_theme_is_current(
+                        comment_data.get('_reply_theme')))
+                results['reply_submission_status'] = self.reply_executor.last_submission_status
+                if reply_ok:
+                    # The executor already committed exact new creator-reply readback.
+                    # Optional visual evidence cannot erase delivery or authorize a retry.
+                    results['delivery_verified'] = True
+                    try:
+                        await self._inspect_posted_reply(comment_idx, reply_text_to_post, results)
+                    except Exception as exc:
+                        results['reply_visual_observation'] = {
+                            'status': 'unavailable', 'authoritative': False, 'text_verified': False,
+                            'model_image_binding': 'unknown',
+                        }
+                        logger.warning('[REPLY-INSPECT] Observation unavailable: %s', type(exc).__name__)
+                    attempt_id = getattr(self.reply_executor, 'last_attempt_id', None)
+                    history = getattr(self.reply_executor, 'history_store', None)
+                    if attempt_id and history:
+                        try:
+                            history.append_reply_evidence(attempt_id, {
+                                'delivery_verified': True,
+                                'visual_observation': results.get('reply_visual_observation'),
+                                'screenshot_path': results.get('reply_inspection_screenshot'),
+                                'screenshot_sha256': results.get('reply_inspection_sha256')})
+                            results['reply_evidence_status'] = 'appended'
+                        except Exception as exc:
+                            results['reply_evidence_status'] = 'append_unavailable'
+                            logger.warning('[REPLY-INSPECT] Optional evidence unavailable: %s', type(exc).__name__)
 
                 results['reply'] = bool(reply_ok)
                 # Training Mode: Capture reply text for transcript (Task 3)
@@ -1300,6 +1397,8 @@ class CommentProcessor:
                     results['reply_text_posted'] = reply_text_to_post
                     results['reply_source'] = 'bot'  # vs '012_manual' for training
                     results['llm_source'] = reply_source
+                    results['theme_source_command_id'] = (comment_data.get('_reply_theme') or {}).get('source_command_id')
+                    results['delivery_verified'] = True
                     logger.info(f"  [REPLY] LLM source: {reply_source}")
                 self.stats['replies'] += 1 if results['reply'] else 0
                 logger.info(f"  [REPLY] {'OK' if results['reply'] else 'FAIL'}")
@@ -1380,6 +1479,8 @@ class CommentProcessor:
 
     async def _await_reply_generation(self, comment_data):
         """Bound the await and invalidate queued work without pretending to kill threads."""
+        if self._existing_comments_halt():
+            return None, 'comments_stopped'
         hb_stop = asyncio.Event()
         hb_task = asyncio.create_task(self._thinking_heartbeat("Layer 2 (Intelligence)", hb_stop))
         generation_cancel = Event()
@@ -1389,12 +1490,15 @@ class CommentProcessor:
                                   with_source=True, cancel_event=generation_cancel),
                 timeout=10.0,
             )
+            comment_data['_reply_theme'] = getattr(generation, 'theme', None)
+            comment_data['_generation_context'] = getattr(generation, 'context', None)
+            comment_data['_reply_rejection_reason'] = getattr(generation, 'rejection_reason', None)
             return generation.text, generation.source
         except asyncio.TimeoutError:
             logger.warning("[HARD-THINK] Layer 2 TIMEOUT (10s) - skipping this generation")
             return None, "unknown"
         except Exception as exc:
-            logger.error("[HARD-THINK] Layer 2 ERROR: %s", exc)
+            logger.error("[HARD-THINK] Layer 2 ERROR: %s", type(exc).__name__)
             return None, "unknown"
         finally:
             generation_cancel.set()
@@ -1402,17 +1506,70 @@ class CommentProcessor:
             if not hb_task.done():
                 await hb_task
 
+    async def _inspect_posted_reply(self, comment_idx, reply_text, results):
+        """Retain private visual observations, never a language/delivery verdict.
+
+        UI-TARS.verify is a coordinate locator. Its confidence is not evidence of
+        exact text, meaning, or ownership. The bridge takes its own image, so the
+        screenshot saved here must not be described as the model's exact input.
+        """
+        observation = {
+            'status': 'not_requested', 'authoritative': False, 'text_verified': False,
+            'model_image_binding': 'not_inspected',
+        }
+        results['reply_visual_observation'] = observation
+        try:
+            snapshot = self.driver.get_screenshot_as_png()
+            from uuid import uuid4
+            path = self._snap_dir / f'{self.session_id}_c{comment_idx}_{uuid4().hex}_reply_posted.png'
+            path.write_bytes(snapshot)
+            results['reply_inspection_screenshot'] = str(path)
+            import hashlib
+            results['reply_inspection_sha256'] = hashlib.sha256(snapshot).hexdigest()
+        except Exception as exc:
+            observation['status'] = 'screenshot_unavailable'
+            logger.warning('[REPLY-INSPECT] Screenshot unavailable: %s', type(exc).__name__)
+            return observation
+        if not self.use_vision:
+            return observation
+        observation['status'] = 'unavailable'
+        if not self.ui_tars_bridge:
+            return observation
+        observation['model_image_binding'] = 'unbound_recapture'
+        try:
+            result = await self.ui_tars_bridge.verify(
+                description='posted creator reply matching this exact text: ' + json.dumps(reply_text),
+                driver=self.driver, timeout=15)
+            if result.success is True:
+                observation['status'] = 'locator_returned'
+        except Exception as exc:
+            logger.warning('[REPLY-INSPECT] Visual locator unavailable: %s', type(exc).__name__)
+        return observation
+
+    async def _inspect_reply(self, comment_data, reply_text):
+        review_cancel = Event()
+        try:
+            return await asyncio.wait_for(asyncio.to_thread(
+                get_reply_generator().inspect_reply, dict(comment_data), reply_text,
+                cancel_event=review_cancel), timeout=5)
+        except Exception as exc:
+            logger.warning('[REPLY-INSPECT] No approval: %s', type(exc).__name__)
+            return {'approved': False, 'reason': 'review_unavailable'}
+        finally:
+            review_cancel.set()
+
     def _generate_intelligent_reply(self, comment_data: Dict[str, Any], *, with_source=False, cancel_event=None):
         """
         Synchronous wrapper for generating intelligent reply.
         Used within to_thread to prevent blocking the event loop.
         """
-        if not INTELLIGENT_REPLIES_AVAILABLE:
+        if self._existing_comments_halt() or not INTELLIGENT_REPLIES_AVAILABLE:
             return None
 
         generator = get_reply_generator()
         generate = generator.generate_reply_with_source if with_source else generator.generate_reply
-        receipt_args = {"cancel_event": cancel_event} if with_source else {}
+        receipt_args = {"cancel_event": cancel_event, "semantic_context": {
+            **comment_data, 'receiving_channel_id': self.target_channel_id}} if with_source else {}
         return generate(
             **receipt_args,
             author_name=comment_data.get('author_name', ''),
@@ -1485,6 +1642,8 @@ class CommentProcessor:
         logger.info(f"  [VISION-ACTION] Executing vision-click for {action_name}...")
         
         for attempt in range(1, max_retries + 1):
+            if self._existing_comments_halt():
+                return False
             try:
                 # Execute vision-based click
                 result = await self.ui_tars_bridge.click(
@@ -1514,3 +1673,4 @@ class CommentProcessor:
                 logger.error(f"  [VISION-ACTION] ❌ Vision error on attempt {attempt}: {e}")
                 
         return False
+

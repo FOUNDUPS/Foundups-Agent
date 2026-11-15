@@ -1,4 +1,27 @@
+## Editorial package compiler — 2026-10-27
+
+The original PR added tests/test_content/test_content_orchestrator.py for the compiler. Current-main reconciliation retains the separately repaired legacy content_orchestrator.py scaffold and its explicit quarantine; these new cases do not qualify that older formatting surface. Run it alongside the existing connected campaign selection below. To measure only the two new compiler leaves, enable pytest_cov and pass --cov=modules.platform_integration.social_media_orchestrator.src.content.campaign_brief --cov=modules.platform_integration.social_media_orchestrator.src.content.campaign_planner --cov-fail-under=90. The original 2026-10-27 record reports 107 tests +131 subtests with 99.54% compiler coverage; that historical result is not current-main validation. These are offline source/contract checks, not voice quality, installed runtime, CMS or live delivery evidence.
+
 # Social Media Orchestrator Tests
+
+## Petition intake and campaign routing — 2026-10-27
+
+Run the offline selection with no host provider configuration:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -B -m pytest -q -c /dev/null --noconftest --import-mode=importlib -o pythonpath=. -p no:cacheprovider modules/platform_integration/social_media_orchestrator/tests/test_petition_campaign.py modules/communication/moltbot_bridge/tests/test_social_campaign_adapter.py
+```
+
+Checks cover canonical/tracking-stable identity; short links remaining unresolved;
+untrusted/login/confusable/traversal URLs; unsupported authority/execution flags;
+denied environment/file/provider/process access; conversational routing; strict
+malformed commands; and preservation of the existing research provider mapping.
+Plans remain unverified and disabled. These are offline source contracts, not a
+browser login, model-generated campaign, installed runtime or live publication.
+The connected CI selection adds the new petition fixture to the existing
+AntifaFM/drafter/router/projection fixtures. That selection plus the existing
+manifest fixture passed121 tests and76 subtests locally. It does not add an
+installed-host or real-account witness.
 
 ## AntifaFM campaign and publication — 2026-10-18
 

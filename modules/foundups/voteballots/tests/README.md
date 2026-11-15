@@ -23,6 +23,12 @@ This is an anti-vibecoding requirement: the test inventory exists so workers do 
 
 ## Current Active Test Surface
 
+November1 aggregate-to-display follow-up:398 module tests pass. The existing
+integration and quick-answer suites contain separately frozen29/47-case oracles;
+quick-answer cases exercise shell metadata/readiness too. TestModLog distinguishes
+the failed local proposal, coordinator repairs, original baselines and two legacy
+fixture corrections. Historical303/322 counts below retain their original scope.
+
 See `TestModLog.md` for the canonical file-by-file inventory and reuse guidance.
 
 Current test files include:
@@ -37,6 +43,13 @@ Current test files include:
 - `test_unit_confidence_scoring.py`
 
 The canonical VOTE PoC closure snapshot records **303 passing tests** on 2026-05-25 for the implementation-complete six-slice chain. That historical result is evidence, not a claim that the suite was rerun for later docs-only work.
+
+
+November1 production-provenance repair:322 module tests passed, including the
+new independent20-case source/consumer oracle; exact frozen and strengthened
+versions are recorded in TestModLog. CI's existing WRE verification job runs this
+suite and uploads `vote-verification-results.xml`. Legacy rubric tests remain
+precedent, not evidence that every production claim satisfies direct-source rules.
 
 ---
 

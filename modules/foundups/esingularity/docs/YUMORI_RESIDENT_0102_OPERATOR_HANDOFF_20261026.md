@@ -27,6 +27,55 @@ YUMORI／eSingularity 連絡調整
 
 **No invented organization title, contract, Japanese subsidiary, partnership, City endorsement, or signed human approval.** Adapt from fresh CRM/provider evidence and recipient requirements. Existing Sent correspondence stays historically unchanged. A new identity policy never retroactively reauthorizes a prior draft or an unattended SEND.
 
+## Zero-touch launch requirement — principal correction 2026-10-26
+
+012 does **not** want a task-selection submenu, repetitive approvals, or to manually
+select the next action. The target experience is one explicit launch of FoundUps
+followed by continuous, self-directed YUMORI operation within a preapproved,
+bounded policy. The agent decides which safe action advances the mission, using
+current evidence, rather than waiting for numbered instructions.
+
+- Reuse `main.py`'s existing `--headless` and OpenClaw supervisor control plane.
+  Do not infer that current `--headless` runs a YUMORI-specific cycle: a real
+  resident YUMORI FoundUpJob consumer must first be connected and verified.
+- On an explicit operator launch, select the existing YUMORI FoundUp scope
+  `esingularity_001`, restore canonical memory/provider state, then autonomously
+  rank and work on partner discovery, response triage, Japanese drafts and
+  feasibility evidence. Do not require a task-selection menu or pretend a CLI
+  option is a scheduler.
+- Use **existing authorized Gmail/Google OAuth and LinkedIn account adapters**
+  in the local runtime only when actual credentials, scopes and provider readback
+  are verified. ChatGPT-connected app sessions do **not** magically transfer to
+  local OpenClaw/Hermes. No password export, raw token copying, or invented
+  connection.
+- Existing `OpenRouter`/Fusion and GLM provider paths must pass their own
+  runtime, budget, redaction and provenance gates before model invocation.
+  Never promote a dormant client stub into a live service.
+- Routine A0/A1/A2 reads, research, ranking, and drafts should progress
+  autonomously within configured limits. Outbound autonomous A3 Gmail,
+  LinkedIn or browser actions remain **HOLD** until the shared authenticated
+  service-owned sender boundary (#1779) and channel-specific preflight,
+  duplicate, revocation, and independent review gates pass.
+- Escalate to 012 only for genuinely missing authentication, a meaningful
+  physical meeting, a legal/financial commitment, or a policy exception;
+  no periodic menu clicking or routine editorial approval. Human commitments
+  are not delegated.
+- Start in a **single-cycle read-only proof**; compare against a fresh provider
+  snapshot and memory identities. Then admit bounded continuous read-only
+  operation, and separately qualify one external effect. Automatic startup
+  is not the same as permission to send.
+- Proposed ~0.5 MW Hanyu first-phase capacity is a **scenario for demand,
+  grid, site and financial qualification**, not a confirmed capacity,
+  operator commitment, or funded plan. Check canonical FIN and economic model
+  before repeating any capacity, revenue or cost figure.
+
+**Acceptance:** after a single explicit start, a new unseen cycle recovers
+the actual previous provider watermark and Memex/Brain/Breadcrumb state,
+identifies the operator blocker, chooses among alternatives, completes a
+safe qualified task, persists its own receipts, and resumes after restart
+without duplicate contact or fabricated outcome. Until demonstrated,
+the implementation remains not production-ready.
+
 ## Runtime decision: OpenClaw supervisor; Hermes optional bounded worker
 
 Use **existing Red Dog/OpenClaw resident execution and WRE/FoundUpJob control plane** as the candidate host. Hermes is a replaceable sandboxed worker for research, translation, evidence extraction and draft proposals, not a second sovereign controller. GLM/OpenRouter is an optional leaf model behind a redaction and budget boundary. Do not start a second YUMORI daemon, duplicate scheduler, second Gmail poller, second CRM, second Moshpit, or independent memory database. TinyFish is optional metered browser access, not the always-on engine.

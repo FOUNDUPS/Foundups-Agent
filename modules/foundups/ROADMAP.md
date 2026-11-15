@@ -1,6 +1,13 @@
 # FoundUps Domain Roadmap
 
 ## Purpose
+
+Blockchain work follows [WSP26's simulator-first contract](../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md#12-simulator-first-change-contract)
+and the [current reconciliation gates](../../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md).
+Publish reviewed source separately from economic activation. Test and review
+economic changes in the simulator, update governing docs/mirrors, then prove chain
+parity. Discovery, claims and FX venues remain downstream of these contracts.
+
 Keep FoundUps delivery coherent across sessions and agents by using an Occam-first
 layered plan from PoC to MVP.
 
@@ -11,6 +18,10 @@ implementation sources of truth:
 - `modules/foundups/agent/ROADMAP.md`
 - [p.fMALL roadmap](pfmall/ROADMAP.md) — discovery/presentation and the proposed
   shared mobile creator live-studio integration sequence.
+- [Vote roadmap](voteballots/ROADMAP.md) and
+  [launch checklist](voteballots/docs/RELEASE_ACCOUNTING.md#launch-pad) — public
+  Vote, Oversight and Coalition pages, with the candidate/evidence app gated
+  separately.
 - [AutoPost roadmap](https://github.com/FOUNDUPS/autopost/blob/main/ROADMAP.md#phase-4b--autopost-live-mode-planned)
   — external camera/publishing product and proposed Live mode.
 - `modules/foundups/docs/FOUNDUPS_PAVS_IRONCLAW_AGENT_BUILDER_DIGITAL_TWIN_ROADMAP.md`

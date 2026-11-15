@@ -1,5 +1,14 @@
 # AI Gateway Module Roadmap
 
+## YouTube consumer integration (2026-11-01)
+
+- Shared assessment/writer/review routing and exact source receipts are wired.
+- Free Gemma/Nemotron task candidates feed the existing evaluation/catalog owner.
+- Shadow Nemotron proposal, held-out benchmark, signed promotion and runtime
+  binding remain separate production gates; no candidate is auto-promoted.
+- Actual model quality, trusted production bindings and live daemon/public
+  behavior remain unverified by the offline consumer qualification.
+
 ## Current Status: [OK] MVP Complete
 - Basic fallback functionality implemented
 - Multi-provider support (OpenAI, Anthropic, Grok, Gemini)

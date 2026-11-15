@@ -45,3 +45,12 @@ Full-story assembly returns `assembled_unreviewed` until independent checks incl
 ## OpenRouter storyboard-to-video composition
 
 Use the existing YouTube owner `src/openrouter_storyboard.py`: `OpenRouterStoryboard` consumes AI Gateway configuration and approved raster references; `StoryboardVideoShot` fits this controller's `generate_shot` callback by reviewing one generated frame before calling the admitted image-to-video generator. See the YouTube INTERFACE and docs/OPENROUTER_STORYBOARDS.md. Little Shrew plans and duration rules are unchanged. No runtime activation is implied.
+
+
+## Five composite tiles: planning only — 2026-10-28
+`src/tile_batch.py:prepare_tile_batch` creates an ordered five-tile build/review
+DAG plus series-join review. `check_review_record` checks complete, artifact-bound
+local evidence fields; it authenticates neither evidence nor independent actors.
+See [EDUIT RSI contract](../eduit/docs/TILE_PRODUCTION_RSI.md) for criteria,
+correction lineage, existing runtime owners and blocked integration gates.
+No executor, queue, scheduler, promotion or new FoundUp registration is installed.

@@ -4,6 +4,7 @@ import json
 import sys
 import types
 from unittest.mock import Mock
+from types import SimpleNamespace
 
 import pytest
 
@@ -105,7 +106,11 @@ async def test_scheduler_missing_evidence_never_edits(tmp_path, monkeypatch):
     monkeypatch.setenv("VIDEO_INDEXER_ARTIFACT_PATH", str(tmp_path))
     scheduler = object.__new__(YouTubeShortsScheduler)
     scheduler.channel_key = "move2japan"
+    scheduler.channel_id = "UC" + "a" * 22
     scheduler.dom = Mock()
+    scheduler.dom._policy_edit.return_value = SimpleNamespace(
+        channel_id=scheduler.channel_id, video_id="clip",
+        original={"title": "Football", "description": "Existing body"})
     scheduler.dom.get_current_description.return_value = "Existing body"
     assert await scheduler._update_video_metadata(video_id="clip", original_title="Football", date_str="date", time_str="time")
     scheduler.dom.edit_title.assert_not_called()
