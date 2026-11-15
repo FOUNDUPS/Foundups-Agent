@@ -132,6 +132,79 @@ def _safe_json_dict(raw: Any) -> Dict[str, Any]:
         return {}
 
 
+def _scalar_redacted_or_none(value: Any, max_len: int = 64) -> Optional[str]:
+    if value is None or isinstance(value, bool):
+        return None
+    if not isinstance(value, (str, int, float)):
+        return None
+    cleaned = redact_sensitive_text(value, max_len)
+    return cleaned or None
+
+
+def _add_dependency(
+    dependencies: List[Dict[str, str]],
+    seen_edges: set[Tuple[str, str, str]],
+    from_id: Any,
+    to_id: Any,
+    relation: str,
+) -> None:
+    clean_from = _scalar_redacted_or_none(from_id, 64)
+    clean_to = _scalar_redacted_or_none(to_id, 64)
+    if not clean_from or not clean_to or clean_from == clean_to:
+        return
+    edge_key = (clean_from, clean_to, relation)
+    if edge_key not in seen_edges:
+        seen_edges.add(edge_key)
+        dependencies.append(
+            {
+                "from": clean_from,
+                "to": clean_to,
+                "relation": relation,
+            }
+        )
+
+
+def _extract_context_lineage(
+    context_obj: Dict[str, Any],
+    res_row: Optional[sqlite3.Row] = None,
+) -> Tuple[Optional[str], Optional[str], Optional[str], List[str]]:
+    """Extract parent_work_id, work_order_id, swarm_lane, and depends_on IDs."""
+    parent_work_id = _scalar_redacted_or_none(context_obj.get("parent_task_id"), 64)
+
+    raw_work_order = context_obj.get("work_order_id")
+    if not raw_work_order:
+        dispatch_rcpt = context_obj.get("signed_authority_worker_dispatch_receipt")
+        if isinstance(dispatch_rcpt, dict):
+            intents = dispatch_rcpt.get("dispatch_intents")
+            if isinstance(intents, list) and intents and isinstance(intents[0], dict):
+                raw_work_order = intents[0].get("work_order_id")
+    if (
+        not raw_work_order
+        and res_row is not None
+        and "work_order_id" in res_row.keys()
+        and res_row["work_order_id"]
+    ):
+        raw_work_order = res_row["work_order_id"]
+    work_order_id = _scalar_redacted_or_none(raw_work_order, 64)
+
+    swarm_lane = _scalar_redacted_or_none(context_obj.get("swarm_lane"), 64)
+
+    raw_deps = context_obj.get("depends_on")
+    dep_ids: List[str] = []
+    if isinstance(raw_deps, str):
+        for part in raw_deps.split(","):
+            cleaned = _scalar_redacted_or_none(part.strip(), 64)
+            if cleaned:
+                dep_ids.append(cleaned)
+    elif isinstance(raw_deps, (list, tuple, set)):
+        for item in raw_deps:
+            cleaned = _scalar_redacted_or_none(item, 64)
+            if cleaned:
+                dep_ids.append(cleaned)
+
+    return parent_work_id, work_order_id, swarm_lane, dep_ids
+
+
 def _check_effect_evidence(
     context_obj: Dict[str, Any],
     reservation: Optional[sqlite3.Row] = None,
@@ -277,6 +350,7 @@ def build_work_telemetry_payload(
     errors: List[str] = []
     work_units: List[WorkUnitFrame] = []
     dependencies: List[Dict[str, str]] = []
+    seen_edges: set[Tuple[str, str, str]] = set()
     agent_map: Dict[str, Dict[str, Any]] = {}
     outcomes: List[Dict[str, Any]] = []
     timestamps: List[datetime] = []
@@ -313,12 +387,12 @@ def build_work_telemetry_payload(
                     if author_tid and author_tid not in res_by_author_task:
                         res_by_author_task[author_tid] = rrow
                     if author_tid and verifier_tid:
-                        dependencies.append(
-                            {
-                                "from": author_tid,
-                                "to": verifier_tid,
-                                "relation": "independent_assurance",
-                            }
+                        _add_dependency(
+                            dependencies,
+                            seen_edges,
+                            author_tid,
+                            verifier_tid,
+                            "independent_assurance",
                         )
                     if not author_tid:
                         standalone_reservations.append(rrow)
@@ -331,9 +405,13 @@ def build_work_telemetry_payload(
             ).fetchall()
 
             for trow in task_rows:
-                tid = str(trow["task_id"])
-                lease_row = leases_by_task.get(tid)
-                res_row = res_by_author_task.get(tid)
+                tid = redact_sensitive_text(trow["task_id"], 64) or str(trow["task_id"])
+                raw_tid = str(trow["task_id"])
+                lease_row = leases_by_task.get(raw_tid)
+                res_row = res_by_author_task.get(raw_tid)
+                context_obj = _safe_json_dict(
+                    trow["context"] if "context" in trow.keys() else None
+                )
                 (
                     canonical_state,
                     effect_evidence,
@@ -342,6 +420,29 @@ def build_work_telemetry_payload(
                     updated_at,
                     expires_at,
                 ) = _classify_task_state(trow, lease_row, res_row, now_dt, safe_ttl)
+
+                (
+                    parent_work_id,
+                    work_order_id,
+                    swarm_lane,
+                    dep_ids,
+                ) = _extract_context_lineage(context_obj, res_row)
+
+                lease_exp_raw = (
+                    lease_row["lease_expires_at"]
+                    if (lease_row is not None and "lease_expires_at" in lease_row.keys())
+                    else None
+                )
+                lease_exp_dt = _parse_iso_ts(lease_exp_raw)
+                lease_row_active = lease_row is not None and (
+                    lease_exp_dt is None or lease_exp_dt >= now_dt
+                )
+                ctx_lease_active = context_obj.get("lease_active") is True
+                lease_active = bool(
+                    (lease_row_active or ctx_lease_active)
+                    and canonical_state in {"claim", "progress"}
+                    and not is_stale
+                )
 
                 owner_agent = (
                     (lease_row["assigned_to"] if lease_row is not None else None)
@@ -367,6 +468,10 @@ def build_work_telemetry_payload(
                     effect_evidence=effect_evidence,
                     stale=is_stale,
                     unknown_reason=unknown_reason,
+                    parent_work_id=parent_work_id,
+                    work_order_id=work_order_id,
+                    swarm_lane=swarm_lane,
+                    lease_active=lease_active,
                 )
                 work_units.append(unit)
 
@@ -374,14 +479,19 @@ def build_work_telemetry_payload(
                 if upd_dt is not None:
                     timestamps.append(upd_dt)
 
+                for dep_id in dep_ids:
+                    _add_dependency(dependencies, seen_edges, dep_id, tid, "depends_on")
+                if parent_work_id:
+                    _add_dependency(dependencies, seen_edges, parent_work_id, tid, "parent_task")
+
                 origin_id = trow["origin_continuity_id"] if "origin_continuity_id" in trow.keys() else None
                 if origin_id:
-                    dependencies.append(
-                        {
-                            "from": redact_sensitive_text(origin_id, 64),
-                            "to": tid,
-                            "relation": "origin_continuity",
-                        }
+                    _add_dependency(
+                        dependencies,
+                        seen_edges,
+                        origin_id,
+                        tid,
+                        "origin_continuity",
                     )
 
                 if unit.owner_agent:
@@ -409,7 +519,7 @@ def build_work_telemetry_payload(
                     ventry["unit_count"] += 1
 
             for rrow in standalone_reservations:
-                rid = str(rrow["reservation_id"])
+                rid = redact_sensitive_text(rrow["reservation_id"], 64) or str(rrow["reservation_id"])
                 res_status = str(rrow["status"] or "").strip().lower()
                 term_status = str(rrow["terminal_status"] or "").strip().lower() if "terminal_status" in rrow.keys() else ""
                 has_ev, ev_reason = _check_effect_evidence({}, rrow)
@@ -432,6 +542,11 @@ def build_work_telemetry_payload(
                     or (rrow["reserved_at"] if "reserved_at" in rrow.keys() else None)
                 )
                 v_agent = rrow["verifier_principal_id"] if "verifier_principal_id" in rrow.keys() else None
+                res_wo = (
+                    _scalar_redacted_or_none(rrow["work_order_id"], 64)
+                    if ("work_order_id" in rrow.keys() and rrow["work_order_id"])
+                    else None
+                )
                 work_units.append(
                     WorkUnitFrame(
                         work_id=rid,
@@ -446,6 +561,8 @@ def build_work_telemetry_payload(
                         effect_evidence=has_ev,
                         stale=(cstate == "stale"),
                         unknown_reason=ev_reason,
+                        work_order_id=res_wo,
+                        lease_active=(cstate == "claim"),
                     )
                 )
                 upd_dt = _parse_iso_ts(upd_val)
@@ -551,6 +668,8 @@ def build_work_telemetry_payload(
         "canonical_states": list(CANONICAL_WORK_STATES),
         "counts_by_state": snapshot.counts_by_state,
         "total_work_units": len(snapshot.work_units),
+        "active_lease_count": sum(1 for u in snapshot.work_units if u.lease_active),
+        "swarm_lanes": sorted({u.swarm_lane for u in snapshot.work_units if u.swarm_lane}),
         "work_units": [
             {
                 "work_id": u.work_id,
@@ -565,6 +684,10 @@ def build_work_telemetry_payload(
                 "effect_evidence": u.effect_evidence,
                 "stale": u.stale,
                 "unknown_reason": u.unknown_reason,
+                "parent_work_id": u.parent_work_id,
+                "work_order_id": u.work_order_id,
+                "swarm_lane": u.swarm_lane,
+                "lease_active": u.lease_active,
             }
             for u in snapshot.work_units
         ],

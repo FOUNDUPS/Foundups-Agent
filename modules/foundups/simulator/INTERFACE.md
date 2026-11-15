@@ -1,5 +1,13 @@
 # INTERFACE - FoundUps Simulator
 
+## Observable Swarm Orchestration telemetry interface — 2026-11-15
+
+**Read-only observation bridge (`observation_only=True`, `authority="none"`, `FRAME_SCHEMA_VERSION = "1.0.0"`).**
+`adapters/work_telemetry_provider.py` opens SQLite databases via `?mode=ro` plus `PRAGMA query_only = ON`, maps `agents_autonomous_tasks`, `agents_signed_worker_execution_leases`, `agents_independent_assurance_reservations`, and `skill_outcomes` onto the frozen eight canonical states (`spawn`, `claim`, `progress`, `complete`, `fail`, `cancel`, `stale`, `unknown`), and redacts filesystem paths and secret tokens via `redact_sensitive_text(..., max_length)`.
+`WorkUnitFrame` carries `parent_work_id: Optional[str] = None`, `work_order_id: Optional[str] = None`, `swarm_lane: Optional[str] = None`, and `lease_active: bool = False` extracted from `agents_autonomous_tasks.context` JSON and signed worker execution leases.
+`build_work_telemetry_payload()` emits deduplicated `dependencies` edges (`depends_on`, `parent_task`, `origin_continuity`, `independent_assurance` with 64-char redacted endpoints), `active_lease_count`, and `swarm_lanes`.
+`public/js/foundup-cube.js` (`workTelemetrySync` / `getWorkTelemetrySummary()`) surfaces `dependenciesCount`, `activeLeaseCount`, `verifierCount`, `verifiers`, and `lanes` in the HUD (`DEPS`, `LEASES`, `LANES`, `VERIF`) and ticker while keeping Firestore writes and interactive promotions disabled (`observationOnly=true`, `authority='none'`).
+
 ## Prospective micro-UPS interface — 2026-11-05
 
 **VERIFIED_SIMULATED bounded preview.** The [P4 contract](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p4-prospective-micro-ups-allocation-v1)
