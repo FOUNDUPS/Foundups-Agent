@@ -1,5 +1,8 @@
 # ROADMAP - FoundUps Simulator
 
+## 2026-11-15 — Observable Swarm Orchestration vertical slice
+- Added read-only telemetry bridge (`adapters/work_telemetry_provider.py`), `WorkUnitFrame`/`WorkTelemetrySnapshot` schema additions (`frame_schema.py`), GET-only `/api/work-telemetry` and `work_telemetry_sync` SSE contract (`sse_server.py`), and `FoundupCube` `observationOnly` / non-monotonic `filledBlocks` / TTL stale rendering (`public/js/foundup-cube.js`).
+
 ## 2026-11-05 — P3 delivered; micro-UPS preview verified
 
 P3 [PR2300](https://github.com/FOUNDUPS/Foundups-Agent/pull/2300)/main 95516e81
