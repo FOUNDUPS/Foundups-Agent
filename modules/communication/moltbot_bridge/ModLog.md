@@ -1,16 +1,3 @@
-## 2026-11-15 - Browser outcome verification guidance
-
-Extend the existing managed `foundups-wsp` workspace skill: discover available
-browser/vision access and authorized read-only delegation before declaring a
-visibility gap; retain URL/time/environment/assertion evidence and distinguish
-DOM checks, captured images and observed visual results. Missing or unrun checks
-remain UNVERIFIED. Preserve browser ownership, auth/permission gates and uncertain
-UI effects; verification failure grants no replay authority. Refresh only this
-skill's hash through the existing manifest owner, retaining all other entries.
-This is repository guidance, not proof of installed use, live vision wiring or
-production RSI. WSP22/50/71/95/97; offline manifest integrity is checked separately
-from scanner, CI and runtime acceptance.
-
 ## 2026-11-05 — Lightweight supervisor advisory analysis
 
 The background supervisor was acquiring a second native model owner while main
@@ -13480,3 +13467,16 @@ openclaw onboard
 - Reused the existing raw determination read, typed plan snapshot and candidate-lineage validator. Omitted input selects the declared plan; explicit None/empty retains lower-supplier semantics. Freeze legacy absence too before later receipt callbacks; wrappers remain rejected and execution scope is never inferred. WSP00/15/22/50/62/84/97/99.
 - Nonplain ancestors reject before methods/copy. Independent review first exposed copy coercion; two red regressions precede the repair. Final638 connected tests pass; independent43 overlapping tests and69 boundary cases/191assertions qualify exact source. Existing legacy bytes remain unchanged.
 - Source220→215, public function111 unchanged; tests383 and interface1592. No new module, skill, main.py read or effect authority. Existing manifest membership/pins remain unchanged;8 packaging tests,15 fast groups and registry1651/269 pass. Exact artifacts and PR closure: root backlog current_observation.
+
+## 2026-11-15 - Browser outcome verification guidance
+
+Extend the existing managed `foundups-wsp` workspace skill: discover available
+browser/vision access and authorized read-only delegation before declaring a
+visibility gap; retain URL/time/environment/assertion evidence and distinguish
+DOM checks, captured images and observed visual results. Missing or unrun checks
+remain UNVERIFIED. Preserve browser ownership, auth/permission gates and uncertain
+UI effects; verification failure grants no replay authority. Refresh only this
+skill's hash through the existing manifest owner, retaining all other entries.
+This is repository guidance, not proof of installed use, live vision wiring or
+production RSI. WSP22/50/71/95/97; offline manifest integrity is checked separately
+from scanner, CI and runtime acceptance.

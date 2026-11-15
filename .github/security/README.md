@@ -1,3 +1,17 @@
+## Visual verification guidance documentation review - 2026-11-15
+
+PR #2403 head `441009c9c` failed security job132951848778 on one
+`generic-api-key` Markdown-prose finding in the existing bridge ModLog.
+Author and independent verifier confirmed the flagged line is identical to
+base `e62e9eb` line4029 and already has an exact prior approved binding.
+The new log entry now follows the unchanged base bytes, retaining that line's
+location. Its changed whole-file digest still requires one renewed binding.
+Append exactly that independently recomputed current-file/rule/line record;
+preserve all 4,500 earlier records (4,501 total), rules, fingerprint formula,
+scan coverage and failure handling. No credential or unknown finding is approved.
+The failed run is retained; fresh final-tree and introduced-history checks remain
+required. The scoped source test suite does not substitute for those scans.
+
 ## WRE/RSI bounded improvement and rollback backend manifest review — 2026-11-15
 
 The backend manifest refreshes one WRE recursive improvement source checksum

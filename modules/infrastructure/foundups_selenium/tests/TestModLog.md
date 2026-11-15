@@ -29,6 +29,21 @@ the sandbox; the unchanged bounded rerun outside it passed 40. One inherited
 `datetime.utcnow` warning occurred in the 118 selection. These are source tests,
 not live browser/model, deployed site, installed Red Dog or production RSI proof.
 
+First-head hosted CI then exposed the manual caller's eager scheduler import
+(`pytz` absent in the bounded CI environment). Defer the actual DOM constructor
+import and add a fourth native import-guard control, without adding dependencies.
+The final local runner/caller/security selection passes 81 of 82; its one
+unchanged deployment-shell test selects unavailable Windows WSL Bash through an
+intentionally empty child environment. Initial cp932 read failures disappear
+under UTF-8. This host limitation remains explicit; hosted Linux security-gate
+regressions had passed before the separate tree scan's reviewed-prose binding
+failure. No test or scanner gate is disabled. Fresh corrected-head CI is required.
+
+Independent source review confirms the bridge ModLog finding is unchanged,
+previously approved Markdown prose. Append one exact whole-file/rule/line binding
+through the existing security ledger; all 4,500 old records and scanning rules
+are retained. Full-tree/history scanner acceptance remains a hosted check.
+
 ### 2026-11-10 — Match attachment doubles to the CDP owner
 
 The actual Chrome/Edge attachment fixture now supplies a Selenium-style command

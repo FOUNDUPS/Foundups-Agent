@@ -12,6 +12,14 @@ Focused execution after the CLI correction: three tests passed with the explicit
 asyncio plugin and no pytest warnings. An inherited pyreadline console teardown
 message followed the successful test result. No live browser/model operation was run.
 
+Hosted collection then exposed an eager `YouTubeStudioDOM` import through the
+scheduler parent and absent `pytz`. A deferred constructor keeps the production
+owner for manual use. The added fourth test clears cached owner/model modules
+and applies a native import finder that rejects the scheduler parent, `pytz`,
+UI-TARS and local model packages during actual harness import. Constructor use
+reaches that guard; no owning package is stubbed. All four focused tests pass
+locally with no pytest warnings; corrected hosted acceptance is still required.
+
 ## 2026-11-10 — Selected CI metadata fixtures
 
 Four existing scheduling positives now use a complete synthetic Studio calendar,

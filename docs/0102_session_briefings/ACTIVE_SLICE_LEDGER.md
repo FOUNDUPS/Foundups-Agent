@@ -22,9 +22,14 @@ registry/import-safety selection71; prior adjacent selection118 (overlapping);
 CI contracts40; canonical registry/projection and managed skill manifest/safety
 scan passed. Exact-base negative controls expose both false passes. Sandbox
 asyncio/Bash runtime blocks and bounded outside-sandbox reruns are retained in
-TestModLog. Draft publication and exact-head hosted CI remain pending;
-installed/live vision and measured RSI transfer are unrun. Retain this lane for
-review; no merge or deployment is authorized in this assignment.
+TestModLog. Draft [PR #2403](https://github.com/FOUNDUPS/Foundups-Agent/pull/2403)
+is published. First-head hosted CI exposed bounded-runner dependency collection
+and one changed-whole-file binding for already reviewed ModLog prose. Defer the
+manual DOM import and add a fourth import guard; independently review and renew
+only that exact security binding, preserving all existing records/rules/gates.
+Fresh corrective-head hosted CI remains required. Installed/live vision and
+measured RSI transfer are unrun. Retain this clean owned lane for draft review;
+no merge or deployment is authorized in this assignment.
 
 ## Vote public release and next gates — 2026-11-07
 

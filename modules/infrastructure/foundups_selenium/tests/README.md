@@ -17,7 +17,7 @@ python -B -m pytest -q --tb=short --noconftest --import-mode=importlib -p no:cac
 
 Use a bounded supervisor/watchdog. Repository pytest configuration may require
 the installed asyncio plugin; a clean temporary config also works for this
-synchronous test module. The Shorts `test_layer3_schedule.py` includes three offline
+synchronous test module. The Shorts `test_layer3_schedule.py` includes four offline
 caller controls; its manual `--wre-tars` entry remains a live browser harness and
 must not be launched as offline validation.
 

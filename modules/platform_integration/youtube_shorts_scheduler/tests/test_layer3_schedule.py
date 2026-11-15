@@ -25,8 +25,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
-# Production DOM layer (single source of truth)
-from modules.platform_integration.youtube_shorts_scheduler.src.dom_automation import YouTubeStudioDOM
+def _create_studio_dom(driver):
+    """Load the production DOM owner only when a manual path needs it."""
+    from modules.platform_integration.youtube_shorts_scheduler.src.dom_automation import YouTubeStudioDOM
+    return YouTubeStudioDOM(driver)
 
 def _ascii_safe(text) -> str:
     """
@@ -685,7 +687,7 @@ def set_schedule_date_time(driver, date_str, time_str):
     - Uses human_behavior for natural mouse movements
     """
     try:
-        dom = YouTubeStudioDOM(driver)
+        dom = _create_studio_dom(driver)
         logger.info(f"[LAYER 3] Setting schedule inputs (production DOM): {date_str} @ {time_str}")
 
         # Ensure dialog + schedule section are open
@@ -780,7 +782,7 @@ def main():
             raise SystemExit(1)
 
         # Validate by reading back the visible date trigger text and time input value.
-        dom = YouTubeStudioDOM(driver)
+        dom = _create_studio_dom(driver)
         date_text = driver.execute_script(
             "const el=document.querySelector(arguments[0]); return el? (el.textContent||'').trim(): null;",
             dom.selectors.DATE_TRIGGER_CSS,
@@ -874,7 +876,7 @@ def run_with_visual_verification():
 
     # Coordinate localization cannot assert field values. Reuse the DOM selectors
     # already used by main() for an explicit, read-only input-value assertion.
-    dom = YouTubeStudioDOM(driver)
+    dom = _create_studio_dom(driver)
 
     def verify_schedule_inputs():
         date_text = driver.execute_script(
@@ -929,7 +931,7 @@ def test_visual_harness_stops_after_failed_step(monkeypatch):
     monkeypatch.setitem(globals(), "click_visibility_status", lambda _driver: actions.append("visibility"))
     monkeypatch.setitem(globals(), "select_schedule_option", lambda _driver: actions.append("schedule"))
     monkeypatch.setitem(globals(), "set_schedule_date_time", lambda *_args: actions.append("date"))
-    monkeypatch.setitem(globals(), "YouTubeStudioDOM", lambda _driver: SimpleNamespace(selectors=None))
+    monkeypatch.setitem(globals(), "_create_studio_dom", lambda _driver: SimpleNamespace(selectors=None))
 
     for fail_at in (1, 2, 3):
         actions.clear()
@@ -961,7 +963,7 @@ def test_visual_harness_uses_dom_for_exact_schedule_values(monkeypatch):
     monkeypatch.setitem(globals(), "navigate_to_first_unlisted_video", lambda _driver: True)
     monkeypatch.setitem(globals(), "click_visibility_status", lambda _driver: None)
     monkeypatch.setitem(globals(), "select_schedule_option", lambda _driver: None)
-    monkeypatch.setitem(globals(), "YouTubeStudioDOM", lambda _driver: SimpleNamespace(selectors=selectors))
+    monkeypatch.setitem(globals(), "_create_studio_dom", lambda _driver: SimpleNamespace(selectors=selectors))
 
     for case in ("matching", "wrong_date", "wrong_time", "missing"):
         calls = []
@@ -1004,6 +1006,45 @@ def test_visual_harness_exit_status_requires_nonempty_verified_summary():
         {"total_steps": True, "passed": True, "failed": 0},
     ):
         assert _visual_summary_exit_code(summary) == 1
+
+
+def test_visual_harness_collection_defers_scheduler_and_model_imports(monkeypatch):
+    """Import the actual harness with the scheduler parent and pytz unavailable."""
+    import importlib.abc
+    import importlib.util
+    import sys
+    import pytest
+
+    blocked_prefixes = (
+        "modules.platform_integration.youtube_shorts_scheduler.src",
+        "modules.infrastructure.foundups_vision",
+        "pytz", "torch", "llama_cpp",
+    )
+
+    def blocked(name):
+        return any(name == prefix or name.startswith(prefix + ".") for prefix in blocked_prefixes)
+
+    class DenyRuntimeImports(importlib.abc.MetaPathFinder):
+        def find_spec(self, fullname, path=None, target=None):
+            if blocked(fullname):
+                raise AssertionError("bounded import attempted: " + fullname)
+            return None
+
+    # Remove real cached modules rather than replacing the owning package with a
+    # stub: a future eager import must reach the native parent-package guard.
+    for name in tuple(sys.modules):
+        if blocked(name):
+            monkeypatch.delitem(sys.modules, name)
+    monkeypatch.setattr(sys, "meta_path", [DenyRuntimeImports(), *sys.meta_path])
+    spec = importlib.util.spec_from_file_location("_layer3_offline_import_check", __file__)
+    harness = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(harness)
+    assert callable(harness.run_with_visual_verification)
+    assert not any(blocked(name) for name in sys.modules)
+    # Construction remains delegated to the actual owner; the guard stops it
+    # before any real browser or scheduler dependency can load.
+    with pytest.raises(AssertionError, match="youtube_shorts_scheduler.src"):
+        harness._create_studio_dom(object())
 
 
 if __name__ == "__main__":
