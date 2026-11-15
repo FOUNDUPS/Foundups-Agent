@@ -9,11 +9,11 @@
   "archive": {
     "filename": "THA-media-archive-20261115.zip",
     "library_file_id": "libfile_fde3_f-9d6b6626442c8191b77250b2b254f87c_27d9423a76cc819181c9f7085c661d80",
-    "sha256": "623d4769e388306d153c55080ce1e1bbc27779cf26f51aa8b623d115461e6ac1",
-    "bytes": 70216789,
-    "unique_images": 55,
-    "generated_originals": 30,
-    "source_files_before_dedup": 64,
+    "sha256": "1fb855004365aff680f0ec155e13ef4e8bcb0fdd7974fb5cfcd3783dcfca645e",
+    "bytes": 72285362,
+    "unique_images": 56,
+    "generated_originals": 31,
+    "source_files_before_dedup": 65,
     "integrity": "ZIP CRC and all archived image SHA-256 hashes verified"
   },
   "assets": [
@@ -288,8 +288,8 @@
       "filename": "exec-9418d8cd-5371-4ed8-ae14-0f3842d0c288.png",
       "archive_path": "images/exec-9418d8cd-5371-4ed8-ae14-0f3842d0c288.png",
       "category": "generated-original",
-      "role": "THA wide cover with lower copy and dog",
-      "review_status": "new-cover-review-candidate",
+      "role": "THA cover with copy detached from portraits",
+      "review_status": "rejected-copy-proximity",
       "sha256": "6161f5b0eace2db343ea534ace0c996a579fbd7be7e4b2cca433fc2584e84d67",
       "bytes": 2220628,
       "width": 1734,
@@ -369,6 +369,20 @@
     },
     {
       "asset_id": "THA-026",
+      "filename": "exec-ada66e4a-be1d-413d-bf00-57e0169c2d9f.png",
+      "archive_path": "images/exec-ada66e4a-be1d-413d-bf00-57e0169c2d9f.png",
+      "category": "generated-original",
+      "role": "THA cover with portrait-aligned narrative copy",
+      "review_status": "new-cover-review-candidate",
+      "sha256": "9d591cfe8f98c161719a6bd1a5ce44babedb68bd832fef93fd61df55364de27f",
+      "bytes": 2142837,
+      "width": 1734,
+      "height": 907,
+      "format": "PNG",
+      "publish_approved": false
+    },
+    {
+      "asset_id": "THA-027",
       "filename": "exec-c0885406-77cc-48fb-a424-0efb74d06057.png",
       "archive_path": "images/exec-c0885406-77cc-48fb-a424-0efb74d06057.png",
       "category": "generated-original",
@@ -382,7 +396,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-027",
+      "asset_id": "THA-028",
       "filename": "exec-d07e7102-2856-4a9f-82f7-def632123e13.png",
       "archive_path": "images/exec-d07e7102-2856-4a9f-82f7-def632123e13.png",
       "category": "generated-original",
@@ -396,7 +410,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-028",
+      "asset_id": "THA-029",
       "filename": "exec-eca7ff74-1158-41b9-ba0a-da156d7fae57.png",
       "archive_path": "images/exec-eca7ff74-1158-41b9-ba0a-da156d7fae57.png",
       "category": "generated-original",
@@ -410,7 +424,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-029",
+      "asset_id": "THA-030",
       "filename": "exec-f47ac779-f894-4c79-8698-367bcf4b27b4.png",
       "archive_path": "images/exec-f47ac779-f894-4c79-8698-367bcf4b27b4.png",
       "category": "generated-original",
@@ -424,7 +438,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-030",
+      "asset_id": "THA-031",
       "filename": "exec-fc5f3622-7ad6-4dbc-8cb5-0af86e4da976.png",
       "archive_path": "images/exec-fc5f3622-7ad6-4dbc-8cb5-0af86e4da976.png",
       "category": "generated-original",
@@ -438,7 +452,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-031",
+      "asset_id": "THA-032",
       "filename": "huang-affair-performance-audit-v2.png",
       "archive_path": "images/huang-affair-performance-audit-v2.png",
       "category": "review-derivative",
@@ -452,7 +466,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-032",
+      "asset_id": "THA-033",
       "filename": "huang-affair-seven-state-performance-v2.png",
       "archive_path": "images/huang-affair-seven-state-performance-v2.png",
       "category": "review-derivative",
@@ -466,7 +480,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-033",
+      "asset_id": "THA-034",
       "filename": "alice-01.png",
       "archive_path": "images/alice-01.png",
       "category": "review-derivative",
@@ -480,7 +494,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-034",
+      "asset_id": "THA-035",
       "filename": "alice-02.png",
       "archive_path": "images/alice-02.png",
       "category": "review-derivative",
@@ -494,7 +508,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-035",
+      "asset_id": "THA-036",
       "filename": "alice-03.png",
       "archive_path": "images/alice-03.png",
       "category": "review-derivative",
@@ -508,7 +522,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-036",
+      "asset_id": "THA-037",
       "filename": "alice-04.png",
       "archive_path": "images/alice-04.png",
       "category": "review-derivative",
@@ -522,7 +536,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-037",
+      "asset_id": "THA-038",
       "filename": "alice-05.png",
       "archive_path": "images/alice-05.png",
       "category": "review-derivative",
@@ -536,7 +550,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-038",
+      "asset_id": "THA-039",
       "filename": "alice-06.png",
       "archive_path": "images/alice-06.png",
       "category": "review-derivative",
@@ -550,7 +564,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-039",
+      "asset_id": "THA-040",
       "filename": "alice-07.png",
       "archive_path": "images/alice-07.png",
       "category": "review-derivative",
@@ -564,7 +578,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-040",
+      "asset_id": "THA-041",
       "filename": "crop-state-01-selection.png",
       "archive_path": "images/crop-state-01-selection.png",
       "category": "review-derivative",
@@ -578,7 +592,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-041",
+      "asset_id": "THA-042",
       "filename": "crop-state-02-school.png",
       "archive_path": "images/crop-state-02-school.png",
       "category": "review-derivative",
@@ -592,7 +606,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-042",
+      "asset_id": "THA-043",
       "filename": "crop-state-03-university.png",
       "archive_path": "images/crop-state-03-university.png",
       "category": "review-derivative",
@@ -606,7 +620,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-043",
+      "asset_id": "THA-044",
       "filename": "crop-state-04-credential.png",
       "archive_path": "images/crop-state-04-credential.png",
       "category": "review-derivative",
@@ -620,7 +634,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-044",
+      "asset_id": "THA-045",
       "filename": "crop-state-05-hexi.png",
       "archive_path": "images/crop-state-05-hexi.png",
       "category": "review-derivative",
@@ -634,7 +648,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-045",
+      "asset_id": "THA-046",
       "filename": "crop-state-06-compute.png",
       "archive_path": "images/crop-state-06-compute.png",
       "category": "review-derivative",
@@ -648,7 +662,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-046",
+      "asset_id": "THA-047",
       "filename": "crop-state-07-affair.png",
       "archive_path": "images/crop-state-07-affair.png",
       "category": "review-derivative",
@@ -662,7 +676,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-047",
+      "asset_id": "THA-048",
       "filename": "jensen-01.png",
       "archive_path": "images/jensen-01.png",
       "category": "review-derivative",
@@ -676,7 +690,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-048",
+      "asset_id": "THA-049",
       "filename": "jensen-02.png",
       "archive_path": "images/jensen-02.png",
       "category": "review-derivative",
@@ -690,7 +704,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-049",
+      "asset_id": "THA-050",
       "filename": "jensen-03.png",
       "archive_path": "images/jensen-03.png",
       "category": "review-derivative",
@@ -704,7 +718,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-050",
+      "asset_id": "THA-051",
       "filename": "jensen-04.png",
       "archive_path": "images/jensen-04.png",
       "category": "review-derivative",
@@ -718,7 +732,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-051",
+      "asset_id": "THA-052",
       "filename": "jensen-05.png",
       "archive_path": "images/jensen-05.png",
       "category": "review-derivative",
@@ -732,7 +746,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-052",
+      "asset_id": "THA-053",
       "filename": "jensen-06.png",
       "archive_path": "images/jensen-06.png",
       "category": "review-derivative",
@@ -746,7 +760,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-053",
+      "asset_id": "THA-054",
       "filename": "jensen-07.png",
       "archive_path": "images/jensen-07.png",
       "category": "review-derivative",
@@ -760,7 +774,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-054",
+      "asset_id": "THA-055",
       "filename": "state-01-selection.jpeg",
       "archive_path": "images/state-01-selection.jpeg",
       "category": "review-derivative",
@@ -774,7 +788,7 @@
       "publish_approved": false
     },
     {
-      "asset_id": "THA-055",
+      "asset_id": "THA-056",
       "filename": "IMG_0226(1).jpeg",
       "archive_path": "images/IMG_0226(1).jpeg",
       "category": "supplied-reference",

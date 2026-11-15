@@ -3,10 +3,11 @@
 ## 2026-11-15 — THA media preservation and editorial cover
 
 - Adopted THA as the working abbreviation without renaming or duplicating the existing FoundUp module.
-- Recovered all 30 generated originals available in this conversation workspace; archived 55 unique cataloged images from 64 source paths with checksums, dimensions, role/status, duplicate aliases, and a browsable index. The canonical dog reference is additionally retained under `brand/`.
+- Recovered all 31 generated originals available in this conversation workspace; archived 56 unique cataloged images from 65 source paths with checksums, dimensions, role/status, duplicate aliases, and a browsable index. The canonical dog reference is additionally retained under `brand/`.
 - Preserved original bytes, old/rejected variants, selected supplied endpoints, the current prompt, and a historical documentation snapshot in a private archive. Added `media/catalog.json` and recovery instructions to the codebase; no unpublished image binaries or research bodies entered public code.
 - Created and visually inspected the wide LinkedIn/Substack cover candidate from 012's selected image, including a 390-pixel thumbnail check. Genre questions and explicit fictional-series labeling replace unsourced accusations. No platform rendering or publishing claim.
 - Revised the cover after 012's review: lower staggered side questions, canonical dog-only mark at lower left, no bottom concept-art label, and an aspirational Netflix/HBO pitch invitation rather than a distribution announcement. Both cover versions and prompts remain preserved.
+- 012 rejected the second cover's spacing. Corrected proximity and hierarchy by moving larger questions directly below their respective portraits, with the left block lower. Retained the failed edge-placement version and added the new candidate and exact art-direction prompt; no acceptance claim.
 - Corrected the V2 full-phone-board description: the crop removed faces and is rejected; independent V2 plates remain candidates with a Jensen gaze reversal and scale/background continuity defects.
 - Reconciled prior documentation-only work onto the existing remote draft branch while preserving its Site-source changes. Current landing documentation is a design contract, not proof that the deployed PWA implements it.
 - WSP 50/97 evidence boundary: local lexical inspection only; semantic freshness and native detector compliance not claimed. No Site edits, deployment, GIF creation, membership changes, or public post.

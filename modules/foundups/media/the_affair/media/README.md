@@ -6,16 +6,18 @@
 
 `catalog.json` binds every recovered image to a private archive by immutable file ID, filename, SHA-256, dimensions, role, and review status. Retrieve **THA-media-archive-20261115.zip** using the Library ID in that catalog, verify its archive hash, and extract it. Open `THA-media/index.html` to browse the originals. `THA-media/manifest.json` additionally maps duplicate prior filenames to their preserved image bytes.
 
-- 30 generated originals recovered from this conversation workspace.
-- 55 unique cataloged images including supplied references and review derivatives, plus the canonical dog reference under `brand/` in the archive.
-- 64 local source paths were reconciled; identical files are stored once.
+- 31 generated originals recovered from this conversation workspace.
+- 56 unique cataloged images including supplied references and review derivatives, plus the canonical dog reference under `brand/` in the archive.
+- 65 local source paths were reconciled; identical files are stored once.
 - ZIP CRC and every image SHA-256 verified after archive construction.
 - No claim that inaccessible work in other conversations was recovered.
 - Private masters remain outside the public repository. This catalog grants no access and is not a publish approval.
 
 ## Wide editorial cover — 2026-11-15
 
-Current file: `exec-9418d8cd-5371-4ed8-ae14-0f3842d0c288.png`. Initial layout `exec-a195d333-77e9-4f89-a451-9afa8b5fea90.png` is retained as superseded.
+Current file: `exec-ada66e4a-be1d-413d-bf00-57e0169c2d9f.png`. Initial layout `exec-a195d333-77e9-4f89-a451-9afa8b5fea90.png` is superseded. Revision `exec-9418d8cd-5371-4ed8-ae14-0f3842d0c288.png` is rejected for detached edge placement. All three remain preserved.
+
+Art-direction correction: larger side questions are now aligned directly below their corresponding adult portraits, not stranded at the canvas edges. The left block remains lower. Keep proximity and visual hierarchy in future variants. Exact correction prompt: `cover-20261115-artdirection-prompt.txt`. This new candidate has been visually inspected, not approved by 012 or published.
 
 Source: 012's selected `IMG_0226(1).jpeg`. The wide reformat preserves the adult eye-contact endpoint, the childhood-memory montage, mountains, cottage, city and server corridor. The title is stacked between the adults. The two side questions are lowered and staggered, left lower than right. The lower-left dog uses the existing private Site copy of canonical `public/logo-dog.png` as the image-edit reference; no wordmark is added. Exact prompts: `cover-20261115-prompt.txt` and `cover-20261115-revision-prompt.txt`.
 
