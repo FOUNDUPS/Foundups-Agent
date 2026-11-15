@@ -21,7 +21,13 @@ records provider and layout constraints, reproduction and regression evidence.
 - `build_foundup_tile(manifest, overlay) -> FoundUpTile`
 - `FoundUpManifest`, `FoundUpTile`, `FoundUpStateOverlay`
 - `RouteKind`, `RouteTarget`, `ShellCatalog`, `ShellConfig`, `PfmallShell`
-- `VALID_READINESS`
+- `VALID_READINESS`, `VALID_CATEGORIES` (`media`, `ai-education`, `ai-research`, `startup`, `community`, `marketplace`, `games`, `science`, `thought-leadership`, `infrastructure`)
+
+`load_manifest(source)` validates required identity, tier, lifecycle, category,
+readiness, and WSP 104 `routing_prefix` / `data_namespace` rules, coalescing
+explicit JSON `null` values on optional string/list/dict fields to safe empty
+defaults so valid manifests never expose `None` on typed string/collection
+attributes.
 
 The package also exports the read-adapter surface:
 

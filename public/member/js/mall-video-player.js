@@ -517,6 +517,17 @@
         closeButton.hidden = false;
         closeButton.setAttribute('aria-label', 'Close player');
         setPinchTarget(topBar);
+        if (memberQueueDock && memberQueueDock.input.value.trim() && matchesQuery) {
+          var initialQuery = memberQueueDock.input.value.trim().slice(0, 300);
+          var matchingIndices = currentQueue.reduce(function(acc, video, idx) {
+            if (matchesQuery(video, initialQuery)) acc.push(idx);
+            return acc;
+          }, []);
+          if (matchingIndices.length) {
+            railQuery = initialQuery;
+            filteredIndices = matchingIndices;
+          }
+        }
         renderRail();
       } else {
         setTheater(resumeOpts?.theater === true);
@@ -1332,8 +1343,12 @@
     setTheater: setTheater,
     isTheater: function() { return theater; },
     getQueueQuery: function() {
-      var input = (memberQueueDock && !memberQueueDock.element.hidden) ? memberQueueDock.input : queueSearch;
+      var input = (memberQueueDock && (!memberQueueDock.element.hidden || returnScroll)) ? memberQueueDock.input : queueSearch;
       return input?.value.trim().slice(0, 300) || '';
+    },
+    getCurrentVideoId: function() {
+      var video = currentIndex >= 0 ? currentQueue[currentIndex] : null;
+      return video ? (video.video_id || video.videoId || video.id || null) : null;
     },
     getPlaybackSnapshot: getPlaybackSnapshot,
 

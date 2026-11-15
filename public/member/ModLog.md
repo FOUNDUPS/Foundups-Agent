@@ -1,5 +1,16 @@
 # Member Area Module Change Log
 
+## 2026-11-16 · Build v19 catalog truth, HPC tile routing, and activeVideo continuity
+
+- **Catalog Truth & Schema Normalization (`mall-video-catalog.json`)**:
+  - Added `esingularity_001` (`source_type: "external_app"`, `external_url: "https://esingularity.ai/"`, `category: "community"`, `tier: "F0_DAE"`, `lifecycle_stage: "proto"`, `launch_readiness: "ready"`, `creator_id: "012"`, `"012-lane"` tag, `video_count: 0`, `videos: []`).
+  - Reconciled `holoindex_prod_01` (`tier: "F3_INFRA"`, `launch_readiness: "conditional"`, `category: "infrastructure"`), `gotjunk_001` (`creator_id: "012"`, `creator_display: "UnDaoDu (012)"`, `"012-lane"` tag, `external_url: "https://gotjunk-56566376153.us-west1.run.app/"` without `entry_url` per Cloud Run `X-Frame-Options: SAMEORIGIN` guardrail), and `autopost` (`external_url: "https://foundup-japan-ai-autopost-camera-56566376153.us-west1.run.app/"`).
+  - Normalized every video entry to integer `duration_seconds >= 0` and `YYYY-MM-DDTHH:MM:SSZ` timestamps.
+- **Non-Video CTA Parity & Themes (`index.html`, `foundup.html`, `css/mall-tile-field.css`, `js/mall-tile-field.js`)**: Added `'internal_app'` (`Open App`) to `OVERLAY_SOURCE_TYPE_CTA` / `OVERLAY_NON_VIDEO_TYPES` in `index.html` and `SOURCE_TYPE_CTA` / `NON_VIDEO_SOURCE_TYPES` in `foundup.html`; added `.mall-tile.theme-esingularity_001` and `'infrastructure': 'cat-infrastructure'` theme mapping.
+- **HPC Tile Routing & Scoped Desktop Playback (`js/mall-tile-field.js`, `js/mall-video-player.js`)**: Clicking or activating the `hpc` tile in ordinary `/member/` saves Mall state via `mallStateRestore.save()` and navigates to `/member/?foundup=hpc` (`mallVideoProjection.memberPath('hpc')`) instead of dead-ending on a zero-video lane. `openDesktopVideo` inherits active `query`/`tag` scope into `queueQuery` and selects the first matching video; `mallVideoPlayer` exposes `getCurrentVideoId()` and reads `memberQueueDock.input` during inline `returnScroll` mode.
+- **Ordinary Mall `activeVideo` Continuity (`js/mall-state-restore.js`, `js/mall-tile-field.js`)**: Persisted and restored optional `activeVideo: { foundupId, videoId, queueQuery }` (`autoplay: false` on reload) in `pfmall_mall_state_v1` (`localStorage`) strictly for ordinary `/member/`, keeping HPC's tab-local `pfmall_video_scope_hpc_v1` (`sessionStorage`) isolated.
+- **Shell Generation & Media Placeholders (`member-sw.js`, `js/mall-video-projection.js`, `media/**`)**: Advanced `mallBuild` to `'v19'` and `CACHE_NAME` to `'pfmall-member-v19'`; tracked `.gitkeep` markers for `public/media/thumbs/` and `public/member/media/{posters,thumbs}/`. WSP 22, 49, 50, 97, and 104 apply.
+
 ## 2026-11-15 · Build v18 discovery pills, internal_app action routing, and concierge alignment
 
 - **Discovery Filter Pills (`js/mall-tile-field.js`, `css/mall-tile-field.css`)**: Added dynamic `Videos`, `Apps`, and `HPC` (`/member/?foundup=hpc`) discovery pills inside `#mallProjection` without modifying `public/member/index.html`, backed by `filterBySourceGroup('videos' | 'apps')`, `localStorage` `fieldScope` persistence via `mall-state-restore.js`, and compact <=380px chip layout rules preserving 44px touch height with zero horizontal overflow.

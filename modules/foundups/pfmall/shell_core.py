@@ -69,8 +69,8 @@ VALID_CATEGORIES = frozenset({
     # Catalog-emergent categories (from mall-video-catalog.json)
     "travel", "music", "startup",
     "thought-leadership", "ai-education", "ai-research",
-    # Civic/democracy category (voteballots FoundUp)
-    "civic",
+    # Civic/democracy category (voteballots FoundUp) and core infra (holoindex)
+    "civic", "infrastructure",
 })
 
 SHELL_ROUTES = frozenset({
@@ -402,15 +402,15 @@ def load_manifest(source: Union[Path, dict]) -> Optional[FoundUpManifest]:
         icon_url=data.get("icon_url", ""),
         tier=data.get("tier", "F0_DAE"),
         lifecycle_stage=data.get("lifecycle_stage", "incubating"),
-        entry_url=data.get("entry_url", ""),
-        routing_prefix=data.get("routing_prefix", ""),
-        required_subscription_tier=data.get("required_subscription_tier", "free"),
-        capabilities=data.get("capabilities", []),
-        agent_routes=data.get("agent_routes", []),
-        cabr_contract=data.get("cabr_contract", {}),
-        owner_id=data.get("owner_id", ""),
-        token_symbol=data.get("token_symbol", ""),
-        data_namespace=data.get("data_namespace", ""),
+        entry_url=data.get("entry_url") or "",
+        routing_prefix=data.get("routing_prefix") or "",
+        required_subscription_tier=data.get("required_subscription_tier") or "free",
+        capabilities=data.get("capabilities") or [],
+        agent_routes=data.get("agent_routes") or [],
+        cabr_contract=data.get("cabr_contract") or {},
+        owner_id=data.get("owner_id") or "",
+        token_symbol=data.get("token_symbol") or "",
+        data_namespace=data.get("data_namespace") or "",
         holo_collections=data.get("holo_collections", []),
         category=data.get("category", "uncategorized"),
         is_invite_only=data.get("is_invite_only", True),

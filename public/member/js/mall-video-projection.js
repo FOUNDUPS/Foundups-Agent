@@ -6,7 +6,7 @@
   const publicScopes = new Set(dedicatedHosts.values());
   const memberPaths = new Set(['/member', '/member/', '/member/index.html']);
   // Keep this display label aligned with the shell cache generation.
-  const mallBuild = 'v18';
+  const mallBuild = 'v19';
   const buildLabel = `<small class="mall-build-label">Build ${mallBuild}</small>`;
 
   function hostScope(location) {

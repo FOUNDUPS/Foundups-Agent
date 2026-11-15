@@ -442,9 +442,10 @@
     const OVERLAY_SOURCE_TYPE_CTA = {
       github_repo:      { label: 'View Repo',    icon: '\u2197', urlField: 'external_url' },
       external_app:     { label: 'Open App',      icon: '\u2197', urlField: 'external_url' },
+      internal_app:     { label: 'Open App',      icon: '\u2197', urlField: 'external_url' },
       internal_service: { label: 'Open Service',  icon: '\u2197', urlField: 'external_url' },
     };
-    const OVERLAY_NON_VIDEO_TYPES = new Set(['github_repo', 'external_app', 'internal_service']);
+    const OVERLAY_NON_VIDEO_TYPES = new Set(['github_repo', 'external_app', 'internal_app', 'internal_service']);
 
     let currentClerkUser = null;
     let mallCatalog = [];
