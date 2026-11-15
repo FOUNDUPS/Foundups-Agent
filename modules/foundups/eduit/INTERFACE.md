@@ -1,5 +1,167 @@
 # EDUIT interfaces
 
+## Clean compact and fullscreen picture — word-space-27
+
+`mountMoviePresentation` adds boolean `inline` (default false); director opts in
+with true. With opt-in, `setExpanded(false)` loads and displays the same verified
+recording in the compact surface. Expanded status stays false, and the renderer
+receives `scenePresentation(width,height,false)` for canonical compact geometry.
+Expansion/collapse redraws retained media time with the correct geometry; no
+second clock, player or game is created. Existing callers without inline retain
+the previous collapse/teardown behavior. Invalid inline values throw TypeError.
+Status includes the inline flag. Native MP4 is hidden only after verified scene
+readiness and remains the fallback on load/hash/renderer failure. Below/scene
+placement applies to both sizes; native fallback retains its baked word.
+
+The outside caption fits actual width/height with a240px maximum,48px phone and
+56px tablet final floor, while preserving far<near<contact. Short-landscape
+fullscreen retains its existing compact sidebar bounds. Menu changes still pause
+and never autoresume. The same revision-keyed narration singleton serves book
+and movie. [Layout contract](docs/SINGLE_WORD_PRESENTATION.md).
+
+## Outcome-bound SQUISH — 2026-11-02
+
+The existing engine actor status is authority. `gameWorld` emits the54–56s
+`game-squish` only if at least one `state.actors` entry is `lost`. The rescued
+branch has only its original THUMP, then no action cue during compressed hold.
+No all-safe state, including defensive all-safe/outcome-unset state, may squish.
+Practice never loses actors and cannot generate that cue. The successful replay
+revision is `same-engine-rescue-3`; accepted by narration/presentation loaders.
+Old revisions remain readable for compatibility but are not the current film.
+The original15s Foley source still contains the loss segment; the controller
+plays it only when the outcome-bound world supplies the loss cue.
+
+## Single teaching-word profile — 2026-11-02
+
+`mountMoviePresentation` accepts `wordPlacement` (`below` or `scene`, default
+`below`), `captionAvailable` (boolean), and `onChange(status)`. It returns
+`setWordPlacement(value)`, `setCaptionAvailable(boolean)` and `status()` in
+addition to existing lifecycle methods. Invalid values fail closed. Status
+reports requested/effective placement, caption availability, expanded/ready/failed.
+No arbitrary style/script URLs or model dispatch is accepted. Setters redraw the
+retained movie frame without writing transport time or game state. Only a valid
+revision2 cue sheet enables the separate word; absent captions, failed renderer
+or compact/native playback retain the original picture word. The grown-up menu
+pauses playback and persists the allowlisted choice locally under
+`eduit.movie-word-placement.v1`; it does not resume automatically.
+Director and storybook share exactly one revision-keyed narration module URL.
+See [presentation contract](docs/SINGLE_WORD_PRESENTATION.md).
+
+## Two-action story popup — 2026-11-02
+
+Only `#storybook-play` and `#intro-close` are child actions:88px minimum targets,
+64px glyphs and accessible Play/Pause/Resume/Close names. One Play runs every
+page; Pause retains it, Resume repeats its phrase. Surface taps can start the
+whole book; swipes/arrows no longer navigate or interrupt. Previous/Next/Watch
+nodes are retired. `#intro-skip` stays hidden for unenhanced fallback compatibility.
+Open focuses Play; X/Escape cancel without movie start. Existing play/pause/status
+API and single completion handoff/browser-denial fallback stay intact.
+Viewport updates still pause gameplay; video excludes only measured scrollbar
+reflow with unchanged layout/height/offsets and matching changed client widths.
+Unknown geometry, offsets and rotation keep prior pause rules.
+
+## Sound cues / renderer generation — 2026-11-01
+
+Revision2 stays25s/750frames with new authored demo holds and a rerendered MP4.
+Action captions reserve time without overlapping the next cue; voice no longer
+ducks Foley. `foleyVolume(cue)` restores each event's intended level and reset
+clears retained sound/offset. Generation-addressed renderer copies and derived
+same-origin imports replace the old fetched-source-only binding. Draw has no
+static renderer fallback. [Exact contract and limits](docs/SOUND_CUE_REPAIR.md).
+
+## Responsive movie picture — 2026-11-01
+
+`mountMoviePresentation({video,panel,surface})` returns `setExpanded(boolean)`,
+`ready()` and `dispose()`. Only expanded video gets recorded scene frames;
+requestVideoFrameCallback supplies presented media time, with currentTime/rAF
+fallback. Pause, seek, resize, repeat and foreground render the retained media
+position. No play(), time assignment, game input or independent clock is used.
+Collapsed/disposed/hidden views cancel frame work. Failure keeps native MP4.
+`export_movie_presentation.mjs <asset-dir>` verifies existing film provenance,
+all source hashes and actual MP4 bytes, derives750 frames through the existing
+replay owner and proves canonical SVG equality before writing bounded sidecars.
+The loader validates shape/cast/text/numbers and frame/movie/fetched-source
+hashes. Fetched source hashes do not prove the identity of already executed
+modules after an arbitrary mixed-version update; current renderer sources are
+unchanged. Future renderer revisions need independently reviewed generation
+binding. Manifest identity and installation scope remain unchanged.
+
+## Word/picture activation and pictograms — 2026-11-01
+
+The existing `.storybook-page` click starts all five pages from0 when paused.
+Taps during playback do not interrupt it; the native primary button remains the
+keyboard/screen-reader equivalent. Deliberate swipe/arrows pause for manual
+preview; a cancelled pointer, drag or multitouch cannot become a start click.
+An explicit primary Pause/Play resumes the retained page, repeating its phrase;
+manual navigation and close/open clear that resume intent. Surface activation
+always requests the whole story. Background/visibility changes still pause.
+
+Stable button IDs retain accessible names; visible controls are ▶/Ⅱ, arrows,
+⏭, × and 🎬. The gentle start hint points to ▶ rather than Next. Teaching words
+remain large lesson content. The existing single video handoff remains; a denied
+browser play exposes its existing explicit fallback. UI-TARS verify-only model
+location, real CUA press and observed all-page/video outcome are separate proof.
+
+## Preschool book presentation — 2026-11-01
+
+Preschool-20 retains stable dialog/button IDs and story scheduler. The native
+book fills available safe-area bounds. Primary labels are24px, teaching words
+at least48px on short landscape phones/52px portrait and96px tablet. Last page
+moves #storybook-watch into .intro-actions, hides redundant #intro-skip and keeps
+#intro-close; accessible Play video name remains while visible text is ▶ Video.
+Play story always restarts the full book; no autoplay/video/game clock changes.
+Unavailable voice gets a separate landscape grid row, never over the words.
+Manifest id/start_url/scope stay stable; no device-zoom guesses or frame busting.
+
+## App menu and expanded scene — 2026-11-01
+
+`#game-options` / `#video-options` open the same native `#options` dialog. Existing
+wheel/language instances mount in #menu-character-panel/#menu-music-panel/
+#menu-language-panel; section buttons #menu-characters/#menu-music/#menu-language.
+`#close-options` Done and Escape return focus without resuming. Native dialog
+focus containment; >=64px menu/choice/language targets; advanced controls remain
+under #menu-advanced. No duplicate state, arbitrary media or new permissions.
+
+`storytimeReview.setPresentation({expanded:boolean})` changes only framing.
+`scenePresentation(width,height,expanded)` maps original960x540 coordinates into
+an extended sky/soil viewBox. Art, hit targets and score share that mapping;
+`freeze().svg` remains canonical960x540 for normalized feedback. Enter/exit,
+marking and resume explicitly synchronize presentation. Whole-leg movement and
+sky-open footprint use the same scene owner; no detached animated strip.
+
+An observed cross-origin masked wrapper gets #open-full-app, a user-activated
+_top link to the app's own current route. No automatic frame escape or open
+redirect. Passing direct-origin checks does not certify eduit.org forwarding.
+
+
+## Whole-story playback and film revision — 2026-11-01
+
+`window.storytimeStorybook.play()` begins the whole story at plate0, or pauses
+active playback. Opening alone never speaks. Skip/Close cancel without starting
+video; completed playback closes once and starts the movie at0, with explicit
+Play fallback on browser denial. Each new page visit's first video Play enters
+the book unless explicitly dismissed. No child session records are transmitted.
+`replay-timeline.json` revision same-engine-rescue-1 provides bounded event times
+for movie action captions/voice; invalid/unavailable metadata leaves these off.
+`storytime_replay.mjs` is offline input recording, not another game engine. Film
+states use engine.advance/actorPose/gameWorld/scene. Runtime Foley references the
+fixed15s game-foley.wav, not the replacement25s movie. Video remains original MAMMA
+appearance, independent of cosmetic choices in the game. Re-render after source
+changes; retain source/asset digests. Native device audio is a separate gate.
+
+
+## Character/music sleeve — 2026-11-01
+
+Existing `setAppearance` remains the only game-art mutation seam. Shorts-owned
+`choice-wheel.mjs::mountChoiceWheel` handles allowlisted cosmetic choices;
+`music-picker.mjs::mountMusicPicker` controls separate local background audio.
+`window.storytimeMusic.status()` exposes selected/armed/pending/playing/message
+for local review, not an analytics or dispatch API. Music Off defaults, explicit
+Play only, quiet loop, no arbitrary source/child traces. Cue trace repair samples
+live media time and labels callbacks versus acoustic evidence; original authored
+offsets and English fallback remain. See choices contract and existing timing
+review; full learning engine/worker admission are not implied.
+
 > **Canonical 2026-10-28 handoff:** [Storytime conversation audit and Prometheus M2M handoff](docs/STORYTIME_RSI_CONVERSATION_AUDIT_AND_HANDOFF.md) is the current decision register. It supersedes conflicting historical statements below about video+game-only tiles, Earn Stars buttons, forced three-round quizzes, and autonomous runtime status. Existing site work is owned by a separate session; this PR documentation change must not overwrite that session's UI work.
 ## EDUIT vision / Storytime Evolution map — 2026-10-28
 

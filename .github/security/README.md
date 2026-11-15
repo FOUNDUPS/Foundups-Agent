@@ -1,3 +1,18 @@
+## Storytime, Kids Episode, and UI-TARS coordinate-profile metadata review — 2026-11-16
+
+The backend manifest refreshes one runtime source checksum
+(`modules/infrastructure/foundups_vision/src/ui_tars_bridge.py`) on top of
+`247e12ce6e` and retains all 1,487 runtime members. Verification against base
+`247e12ce6e` confirmed 39 unchanged public source-path/SHA rows (`37`
+`generic-api-key` and `2` `discord-api-token`) matching committed source bytes
+and exact prior approvals. The new whole-manifest digest
+`7eaaa7ff69df31414b4e73069879112edd65823e8b1dc26a1e57d3b01b482bd8` (canonical
+payload SHA256 `1465fd02b74ed36b45895de1a90e7a62b20b25730ca34f8ccfda179878ca0c42`)
+requires 39 renewed bindings, preserving all 4,540 earlier entries and other
+fields (`4,579` total). Scanner rules, exclusions, fingerprint formula, and scan
+coverage stay the same. Fresh full-tree and introduced-history checks remain
+required.
+
 ## Wave 4 WRE/RSI, pfMALL, and member shell metadata review — 2026-11-16
 
 The backend manifest refreshes three runtime source checksums
