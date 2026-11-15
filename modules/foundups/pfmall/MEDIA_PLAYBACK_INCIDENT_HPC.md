@@ -32,6 +32,11 @@ physical iPhone installed-PWA check when available. An unavailable environment
 is NOT_VERIFIED. The requested 20+ million Americans caption is UNVERIFIED and
 outside this repair's public copy.
 
+## 2026-11-15 — Build v18 discovery filters and inline continuity follow-up
+
+- Shared `#mallProjection` pill bar now receives dynamic JS discovery filters (`Videos`, `Apps`, and `/member/?foundup=hpc` `HPC` link) without modifying `public/member/index.html` (Clerk finding fingerprint intact).
+- Added `internal_app` handling (`GotJunk`, `Open App`) across `mall-planes.js` and `mall-tile-field.js`, synced docked `queueQuery` + desktop inline `ended` auto-advance in `mall-video-player.js`, aligned Red Dog concierge categories with live catalog entries, and bumped member shell cache generation to `pfmall-member-v18` / `Build v18`.
+
 ## Reproduction and disposition · 2026-11-11 UTC
 
 Live baseline at 03:39–03:44 UTC: `https://hpc.foundups.com/` returned HTTPS

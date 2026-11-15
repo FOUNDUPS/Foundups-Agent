@@ -1,5 +1,13 @@
 # Member Area Module Change Log
 
+## 2026-11-15 · Build v18 discovery pills, internal_app action routing, and concierge alignment
+
+- **Discovery Filter Pills (`js/mall-tile-field.js`, `css/mall-tile-field.css`)**: Added dynamic `Videos`, `Apps`, and `HPC` (`/member/?foundup=hpc`) discovery pills inside `#mallProjection` without modifying `public/member/index.html`, backed by `filterBySourceGroup('videos' | 'apps')`, `localStorage` `fieldScope` persistence via `mall-state-restore.js`, and compact <=380px chip layout rules preserving 44px touch height with zero horizontal overflow.
+- **`internal_app` Source Action (`js/mall-planes.js`, `js/mall-tile-field.js`)**: Added `internal_app` (`Open App`) to `NON_VIDEO_SOURCE_TYPES`, `SOURCE_TYPE_CTA`, and `sourceTypeActions` with `routing_prefix` / `entry_url` / `external_url` resolution so internal app FoundUps such as GotJunk render an honest primary `Open App` CTA in quick-view.
+- **Inline Queue Continuity (`js/mall-video-player.js`, `js/mall-tile-field.js`)**: Preserved docked `queueQuery` across inline/desktop handoff, read docked search input in `getQueueQuery()`, and allowed `ended` auto-advance in desktop member inline slots (`returnScroll`).
+- **Red Dog Concierge Categories (`js/account-concierge.js`)**: Added live catalog categories (`media`, `ai-education`, `ai-research`, `thought-leadership`) and wired `setCategory()` to `filterByCategory()` while preserving legacy sort-projection compatibility.
+- **Shell Generation (`member-sw.js`, `js/mall-video-projection.js`)**: Advanced cache/build identifier from `pfmall-member-v17` / `v17` to `pfmall-member-v18` / `v18`.
+
 ## 2026-11-14 · Visible Mall build
 
 The scoped video header and shared options show the loaded build. Build

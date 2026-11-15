@@ -1337,6 +1337,7 @@
       var sourceTypeActions = {
         'github_repo': 'View Repo',
         'external_app': 'Open App',
+        'internal_app': 'Open App',
         'internal_service': 'Open Service'
       };
       var sourceAction = !hasVideos && item.source_type && sourceTypeActions[item.source_type];
@@ -2007,6 +2008,7 @@
     player.openDesktopVideo(lane.foundup_id || lane.id, lane.videos, videoIndex, {
       returnFocusTo: tile,
       matchesQuery: matchesScopedVideo,
+      queueQuery: currentFieldScope?.type === 'query' ? (currentFieldScope.query || '') : '',
       autoplay: canAutoplayFromTile(tile),
       muted: !immersive,
       inlineMount: immersive ? null : function() {
@@ -2734,24 +2736,74 @@
    * Update projection chip active states
    */
   function updateProjectionChips() {
-    var chips = document.querySelectorAll('.mall-projection-chip');
+    var activeGroup = currentFieldScope && currentFieldScope.type === 'source_group'
+      ? currentFieldScope.query : null;
+    var chips = document.querySelectorAll('.mall-projection-chip[data-projection]');
     chips.forEach(function(chip) {
       var proj = chip.dataset.projection;
-      chip.classList.toggle('active', proj === currentProjection);
+      var active = activeGroup ? false : (proj === currentProjection);
+      chip.classList.toggle('active', active);
+    });
+    var groupChips = document.querySelectorAll('.mall-projection-chip[data-scope-group]');
+    groupChips.forEach(function(chip) {
+      chip.classList.toggle('active', chip.dataset.scopeGroup === activeGroup);
     });
   }
 
   /**
-   * Bind projection chip click handlers
+   * Bind projection chip click handlers and progressive Build v18 discovery pills
    */
   function bindProjectionChips() {
-    var chips = document.querySelectorAll('.mall-projection-chip');
+    var nav = document.getElementById('mallProjection');
+    if (nav && !fixedVideoField && groupDefinitions === null && !nav.dataset.discoveryFiltersBound) {
+      nav.dataset.discoveryFiltersBound = '1';
+      [
+        { group: 'videos', label: 'Videos' },
+        { group: 'apps', label: 'Apps' }
+      ].forEach(function(spec) {
+        if (nav.querySelector('[data-scope-group="' + spec.group + '"]')) return;
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'mall-projection-chip mall-filter-chip';
+        btn.dataset.scopeGroup = spec.group;
+        btn.textContent = spec.label;
+        btn.addEventListener('click', function() {
+          if (currentFieldScope && currentFieldScope.type === 'source_group' &&
+              currentFieldScope.query === spec.group) {
+            clearFieldScope();
+          } else {
+            filterBySourceGroup(spec.group);
+          }
+          window.mallStateRestore?.save?.();
+        });
+        nav.appendChild(btn);
+      });
+      if (!nav.querySelector('[data-hpc-shortcut]')) {
+        var hpcLink = document.createElement('a');
+        hpcLink.className = 'mall-projection-chip mall-filter-chip';
+        hpcLink.href = '/member/?foundup=hpc';
+        hpcLink.dataset.hpcShortcut = '1';
+        hpcLink.textContent = 'HPC';
+        hpcLink.addEventListener('click', function() {
+          window.mallStateRestore?.save?.();
+        });
+        nav.appendChild(hpcLink);
+      }
+    }
+    var chips = document.querySelectorAll('.mall-projection-chip[data-projection]');
     chips.forEach(function(chip) {
+      if (chip.dataset.projectionBound) return;
+      chip.dataset.projectionBound = '1';
       chip.addEventListener('click', function() {
         var proj = chip.dataset.projection || 'default';
-        setProjection(proj);
+        if (proj === 'default' && currentFieldScope !== null) {
+          clearFieldScope();
+        } else {
+          setProjection(proj);
+        }
       });
     });
+    updateProjectionChips();
   }
 
   // ========== Field Scope System ==========
@@ -2767,6 +2819,21 @@
     // Legacy string support
     if (scope === 'personal') {
       scope = { type: 'personal' };
+    }
+
+    if (scope.type === 'source_group' && scope.query) {
+      var groupKey = String(scope.query).toLowerCase();
+      if (groupKey === 'videos') {
+        return sortScopedResults(fullCatalog.filter(function(item) {
+          return ((item.videos && item.videos.length) || item.video_count || 0) > 0;
+        }));
+      }
+      if (groupKey === 'apps') {
+        return sortScopedResults(fullCatalog.filter(function(item) {
+          return ['github_repo', 'external_app', 'internal_app', 'internal_service'].indexOf(item.source_type) !== -1;
+        }));
+      }
+      return fullCatalog.slice();
     }
 
     if (scope.type === 'query' && typeof scope.query === 'string') {
@@ -2904,6 +2971,18 @@
   }
 
   /**
+   * Filter by content source group ('videos' | 'apps')
+   * @param {string} group - Source group identifier
+   */
+  function filterBySourceGroup(group) {
+    if (!group || !String(group).trim()) {
+      clearFieldScope();
+      return;
+    }
+    setFieldScope({ type: 'source_group', query: String(group).trim().toLowerCase() });
+  }
+
+  /**
    * Clear field scope (show all lanes)
    */
   function clearFieldScope() {
@@ -2997,6 +3076,7 @@
     searchByCreator: searchByCreator,
     filterByCategory: filterByCategory,
     filterByTag: filterByTag,
+    filterBySourceGroup: filterBySourceGroup,
 
     // Intelligent Grid Loading (PFM11B)
     getTileLoadState: getTileLoadState,

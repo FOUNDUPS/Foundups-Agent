@@ -58,6 +58,8 @@ device evidence. Existing
 presentation messages and player-open events confer no publishing authority or
 proof of live playback.
 
+- **Build v18 (2026-11-15)**: Progressive `#mallProjection` discovery pills (`Videos`, `Apps`, `HPC` via JS without modifying `index.html`), `internal_app` quick-view CTA (`GotJunk`), `localStorage` `source_group` persistence, desktop inline `queueQuery` + `ended` auto-advance, and Red Dog concierge category filtering.
+
 ## Historical Layer Plan
 
 Retained for lineage. Use the current contracts above for implementation truth.
