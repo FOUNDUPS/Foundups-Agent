@@ -1,5 +1,15 @@
 # AI Gateway Tests
 
+## Independent repair verifier controls — 2026-11-16
+
+`test_independent_repair_verifier.py` covers 5 offline contract cases for Issue
+#1522: `VerifierContextFirewall.project_evidence_packet` pure allowlist
+projection and `<scratchpad>` / `<thought>` persuasive-narrative stripping,
+`TypeError` rejection of unallowed builder kwargs, `ModelIndependencePolicy.evaluate_independence`
+rejection of self-grading and same-family high-risk assignments plus cross-family
+acceptance, and `IndependentVerifierReceipt` canonical SHA-256 integrity sealing
+and tamper rejection.
+
 ## Native incumbent identity controls — 2026-11-02
 
 Seven additional held-out cases in `test_youtube_model_routing.py` distinguish

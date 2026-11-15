@@ -94,6 +94,7 @@ def _isolated_engine(tmp_path: Path) -> RecursiveLearningEngine:
         "solutions_generated": 0,
         "improvements_applied": 0,
         "tokens_saved": None,
+        "total_tokens_saved": 0,
         "token_reduction_measured": False,
         "learning_velocity": 0.1,
     }
@@ -604,3 +605,367 @@ async def test_bounded_rsi_cycle_end_to_end_apply_and_rollback(
     assert improvement.metrics["rollback_available"] is False
     assert engine.metrics["improvements_applied"] == 0
     assert await engine.rollback_improvement(improvement) is False
+
+
+@pytest.mark.asyncio
+async def test_apply_improvement_unmeasured_preserves_none_tokens_saved(tmp_path: Path):
+    engine = _isolated_engine(tmp_path)
+    before_text = "alpha\n"
+    after_text = "beta\n"
+    imp = Improvement(
+        improvement_id="imp-unmeasured-1",
+        pattern_id="pat-1",
+        solution_id="sol-1",
+        target="modules/x/y/README.md",
+        change_type="update",
+        before_state=before_text,
+        after_state=after_text,
+    )
+
+    applied = await engine.apply_improvement(
+        imp,
+        verification_evidence=_synthetic_valid_evidence(),
+        target_applicator=lambda b, a: (a, lambda: b),
+        measurement_evidence=None,
+    )
+
+    assert applied is True
+    assert imp.tokens_saved is None
+    assert imp.metrics["token_reduction_measured"] is False
+    assert engine.metrics["tokens_saved"] is None
+    assert engine.metrics["total_tokens_saved"] == 0
+
+
+@pytest.mark.asyncio
+async def test_apply_and_rollback_measured_benefit_tracks_and_subtracts_tokens_saved(
+    tmp_path: Path,
+):
+    engine = _isolated_engine(tmp_path)
+    engine.metrics.pop("total_tokens_saved", None)  # verify safe default initialization
+
+    file_one = tmp_path / "one.md"
+    before_one = "state: baseline-1\n"
+    after_one = "state: improved-1\n"
+    file_one.write_text(before_one, encoding="utf-8")
+
+    def _make_file_applicator(path: Path):
+        def _apply(before_state: str, desired_after_state: str):
+            path.write_text(desired_after_state, encoding="utf-8")
+
+            def _rollback() -> str:
+                path.write_text(before_state, encoding="utf-8")
+                return path.read_text(encoding="utf-8")
+
+            return path.read_text(encoding="utf-8"), _rollback
+
+        return _apply
+
+    imp1 = Improvement(
+        improvement_id="imp-measured-1",
+        pattern_id="pat-1",
+        solution_id="sol-1",
+        target=str(file_one),
+        change_type="update",
+        before_state=before_one,
+        after_state=after_one,
+    )
+    before_one_hex = hashlib.sha256(before_one.encode("utf-8")).hexdigest()
+    after_one_hex = hashlib.sha256(after_one.encode("utf-8")).hexdigest()
+
+    applied_one = await engine.apply_improvement(
+        imp1,
+        verification_evidence=_synthetic_valid_evidence(),
+        target_applicator=_make_file_applicator(file_one),
+        measurement_evidence={
+            "measurement_receipt_id": "meas-rcpt-001",
+            "evaluator_id": "worker:bench-evaluator-1",
+            "work_order_id": "wo-rsi-test-1",
+            "baseline_tokens": 1200,
+            "candidate_tokens": 750,
+            "before_state_digest": f"sha256:{before_one_hex}",
+            "after_state_digest": f"sha256:{after_one_hex}",
+            "baseline_latency_ms": 420.5,
+            "candidate_latency_ms": 310.0,
+        },
+    )
+
+    assert applied_one is True
+    assert imp1.applied is True
+    assert imp1.tokens_saved == 450
+    assert imp1.metrics["token_reduction_measured"] is True
+    assert imp1.metrics["measurement_receipt_id"] == "meas-rcpt-001"
+    assert imp1.metrics["evaluator_id"] == "worker:bench-evaluator-1"
+    assert imp1.metrics["baseline_tokens"] == 1200
+    assert imp1.metrics["candidate_tokens"] == 750
+    assert imp1.metrics["baseline_latency_ms"] == 420.5
+    assert imp1.metrics["candidate_latency_ms"] == 310.0
+    assert imp1.metrics["latency_ms_saved"] == pytest.approx(110.5)
+    assert engine.metrics["total_tokens_saved"] == 450
+
+    persisted_one = json.loads(
+        (
+            engine.memory_root
+            / "improvements"
+            / imp1.change_type
+            / f"{imp1.improvement_id}.json"
+        ).read_text(encoding="utf-8")
+    )
+    restored_imp1 = Improvement.from_dict(persisted_one)
+    assert restored_imp1.tokens_saved == 450
+    assert restored_imp1.metrics["token_reduction_measured"] is True
+
+    file_two = tmp_path / "two.md"
+    before_two = "state: baseline-2\n"
+    after_two = "state: improved-2\n"
+    file_two.write_text(before_two, encoding="utf-8")
+    imp2 = Improvement(
+        improvement_id="imp-measured-2",
+        pattern_id="pat-2",
+        solution_id="sol-2",
+        target=str(file_two),
+        change_type="update",
+        before_state=before_two,
+        after_state=after_two,
+    )
+    before_two_hex = hashlib.sha256(before_two.encode("utf-8")).hexdigest()
+    after_two_hex = hashlib.sha256(after_two.encode("utf-8")).hexdigest()
+
+    applied_two = await engine.apply_improvement(
+        imp2,
+        verification_evidence=_synthetic_valid_evidence(),
+        target_applicator=_make_file_applicator(file_two),
+        measurement_evidence={
+            "measurement_receipt_id": "meas-rcpt-002",
+            "evaluator_id": "worker:bench-evaluator-2",
+            "work_order_id": "wo-rsi-test-1",
+            "baseline_tokens": 500,
+            "candidate_tokens": 300,
+            "before_state_digest": before_two_hex,
+            "after_state_digest": after_two_hex,
+        },
+    )
+    assert applied_two is True
+    assert imp2.tokens_saved == 200
+    assert engine.metrics["total_tokens_saved"] == 650
+
+    rolled_one = await engine.rollback_improvement(imp1)
+    assert rolled_one is True
+    assert engine.metrics["total_tokens_saved"] == 200
+    assert imp1.metrics["rolled_back_tokens_saved"] == 450
+    assert imp1.tokens_saved is None
+    assert imp1.metrics["token_reduction_measured"] is False
+
+    # Verify clamp >= 0 if aggregate counter was lower than rolled-back delta
+    engine.metrics["total_tokens_saved"] = 50
+    rolled_two = await engine.rollback_improvement(imp2)
+    assert rolled_two is True
+    assert engine.metrics["total_tokens_saved"] == 0
+    assert imp2.metrics["rolled_back_tokens_saved"] == 200
+    assert imp2.tokens_saved is None
+    assert imp2.metrics["token_reduction_measured"] is False
+
+
+@pytest.mark.asyncio
+async def test_apply_improvement_rejects_self_authored_or_regressive_measurement_fail_closed(
+    tmp_path: Path,
+):
+    engine = _isolated_engine(tmp_path)
+    calls = 0
+
+    def _never_called_applicator(before_state: str, after_state: str):
+        nonlocal calls
+        calls += 1
+        return after_state, lambda: before_state
+
+    invalid_cases = [
+        (
+            "self-authored-exact",
+            {
+                "measurement_receipt_id": "meas-bad-1",
+                "evaluator_id": "worker:author-1",
+                "work_order_id": "wo-rsi-test-1",
+                "baseline_tokens": 500,
+                "candidate_tokens": 400,
+            },
+        ),
+        (
+            "self-authored-padded",
+            {
+                "measurement_receipt_id": "meas-bad-2",
+                "evaluator_id": "  worker:author-1  ",
+                "work_order_id": "wo-rsi-test-1",
+                "baseline_tokens": 500,
+                "candidate_tokens": 400,
+            },
+        ),
+        (
+            "regressive-tokens",
+            {
+                "measurement_receipt_id": "meas-bad-3",
+                "evaluator_id": "worker:evaluator-1",
+                "work_order_id": "wo-rsi-test-1",
+                "baseline_tokens": 500,
+                "candidate_tokens": 501,
+            },
+        ),
+        (
+            "bool-tokens",
+            {
+                "measurement_receipt_id": "meas-bad-4",
+                "evaluator_id": "worker:evaluator-1",
+                "work_order_id": "wo-rsi-test-1",
+                "baseline_tokens": True,
+                "candidate_tokens": False,
+            },
+        ),
+        (
+            "negative-tokens",
+            {
+                "measurement_receipt_id": "meas-bad-5",
+                "evaluator_id": "worker:evaluator-1",
+                "work_order_id": "wo-rsi-test-1",
+                "baseline_tokens": 100,
+                "candidate_tokens": -1,
+            },
+        ),
+        ("non-mapping", ["not", "a", "mapping"]),
+    ]
+
+    for label, bad_measurement in invalid_cases:
+        imp = Improvement(
+            improvement_id=f"imp-meas-reject-{label}",
+            pattern_id="pat-1",
+            solution_id="sol-1",
+            target="modules/x/y/README.md",
+            change_type="update",
+            before_state="before",
+            after_state="after",
+        )
+        result = await engine.apply_improvement(
+            imp,
+            verification_evidence=_synthetic_valid_evidence(),
+            target_applicator=_never_called_applicator,
+            measurement_evidence=bad_measurement,  # type: ignore[arg-type]
+        )
+        assert result is False, label
+        assert calls == 0, label
+        assert imp.applied is False, label
+        assert imp.applied_at is None, label
+        assert imp.tokens_saved is None, label
+        assert imp.metrics["token_reduction_measured"] is False, label
+        assert imp.metrics["application_status"] == "blocked_measurement_rejected", label
+
+    assert engine.metrics["improvements_applied"] == 0
+    assert engine.metrics["total_tokens_saved"] == 0
+
+
+@pytest.mark.asyncio
+async def test_apply_improvement_rejects_mismatched_work_order_or_digests_and_rolls_back(
+    tmp_path: Path,
+):
+    engine = _isolated_engine(tmp_path)
+    target_file = tmp_path / "digest_guarded.md"
+    before_text = "line: before\n"
+    after_text = "line: expected-after\n"
+    target_file.write_text(before_text, encoding="utf-8")
+
+    before_hex = hashlib.sha256(before_text.encode("utf-8")).hexdigest()
+    after_hex = hashlib.sha256(after_text.encode("utf-8")).hexdigest()
+    wrong_hex = "f" * 64
+
+    calls = 0
+
+    def _counting_applicator(before_state: str, desired_after_state: str):
+        nonlocal calls
+        calls += 1
+        target_file.write_text(desired_after_state, encoding="utf-8")
+        return target_file.read_text(encoding="utf-8"), lambda: before_state
+
+    for label, overrides in [
+        ("work-order-mismatch", {"work_order_id": "wo-other-999"}),
+        ("before-digest-mismatch", {"before_state_digest": f"sha256:{wrong_hex}"}),
+        ("after-digest-mismatch-pre", {"after_state_digest": f"sha256:{wrong_hex}"}),
+    ]:
+        imp = Improvement(
+            improvement_id=f"imp-digest-{label}",
+            pattern_id="pat-1",
+            solution_id="sol-1",
+            target=str(target_file),
+            change_type="update",
+            before_state=before_text,
+            after_state=after_text,
+        )
+        measurement = {
+            "measurement_receipt_id": f"meas-{label}",
+            "evaluator_id": "worker:evaluator-1",
+            "work_order_id": "wo-rsi-test-1",
+            "baseline_tokens": 300,
+            "candidate_tokens": 200,
+            "before_state_digest": f"sha256:{before_hex}",
+            "after_state_digest": f"sha256:{after_hex}",
+            **overrides,
+        }
+        assert (
+            await engine.apply_improvement(
+                imp,
+                verification_evidence=_synthetic_valid_evidence(),
+                target_applicator=_counting_applicator,
+                measurement_evidence=measurement,
+            )
+            is False
+        )
+        assert calls == 0, label
+        assert target_file.read_text(encoding="utf-8") == before_text
+        assert imp.applied is False
+        assert imp.metrics["application_status"] == "blocked_measurement_rejected"
+
+    # Post-applicator digest mismatch: applicator mutates target to unexpected text,
+    # engine must invoke rollback_fn() and reject fail-closed.
+    rollback_invoked = False
+
+    def _divergent_applicator(before_state: str, _desired_after_state: str):
+        target_file.write_text("line: unexpected-mutation\n", encoding="utf-8")
+
+        def _rollback() -> str:
+            nonlocal rollback_invoked
+            rollback_invoked = True
+            target_file.write_text(before_state, encoding="utf-8")
+            return target_file.read_text(encoding="utf-8")
+
+        return target_file.read_text(encoding="utf-8"), _rollback
+
+    imp_post = Improvement(
+        improvement_id="imp-digest-post-divergent",
+        pattern_id="pat-1",
+        solution_id="sol-1",
+        target=str(target_file),
+        change_type="update",
+        before_state=before_text,
+        after_state=after_text,
+    )
+    assert (
+        await engine.apply_improvement(
+            imp_post,
+            verification_evidence=_synthetic_valid_evidence(),
+            target_applicator=_divergent_applicator,
+            measurement_evidence={
+                "measurement_receipt_id": "meas-post-divergent",
+                "evaluator_id": "worker:evaluator-1",
+                "work_order_id": "wo-rsi-test-1",
+                "baseline_tokens": 300,
+                "candidate_tokens": 200,
+                "before_state_digest": f"sha256:{before_hex}",
+                "after_state_digest": f"sha256:{after_hex}",
+            },
+        )
+        is False
+    )
+    assert rollback_invoked is True
+    assert target_file.read_text(encoding="utf-8") == before_text
+    assert imp_post.applied is False
+    assert imp_post.applied_at is None
+    assert imp_post.tokens_saved is None
+    assert imp_post.metrics["token_reduction_measured"] is False
+    assert imp_post.metrics["application_status"] == "blocked_measurement_rejected"
+    assert engine.metrics["improvements_applied"] == 0
+    assert engine.metrics["total_tokens_saved"] == 0

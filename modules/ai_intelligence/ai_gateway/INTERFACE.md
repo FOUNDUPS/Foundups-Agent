@@ -809,6 +809,59 @@ persist telemetry, mutate extension runtime defaults, dispatch workers, write
 PatternMemory, or re-index HoloIndex. It supplies a receipt artifact only; later
 resident runtime code must explicitly consume that receipt.
 
+#### Independent Repair Verifier (`src/independent_repair_verifier.py`)
+
+```python
+VerifierContextFirewall.project_evidence_packet(
+    *,
+    pain: str,
+    desired_outcome: str,
+    baseline_receipt_id: str,
+    candidate_diff: str,
+    changed_files: Sequence[str],
+    before_measurements: Mapping[str, Any] | None = None,
+    after_measurements: Mapping[str, Any] | None = None,
+    required_tests: Sequence[str] = (),
+    test_results: Mapping[str, Any] | None = None,
+    research_evidence: Sequence[str] = (),
+    prior_failed_hypotheses: Sequence[str] = (),
+    wsp_constraints: Sequence[str] = (),
+    mutation_budget_consumed: Mapping[str, Any] | None = None,
+) -> VerifierEvidencePacket
+
+ModelIndependencePolicy.evaluate_independence(
+    builder_identity: str,
+    verifier_identity: str,
+    risk_tier: str = "STANDARD",
+) -> tuple[bool, IndependenceTier, str]
+
+IndependentVerifierReceipt.create(
+    *,
+    receipt_id: str,
+    operation_id: str,
+    disposition: VerifierDisposition,  # ACCEPT | REJECT | NEEDS_MORE_EVIDENCE | ESCALATE
+    verifier_identity: str,
+    builder_identity: str,
+    independence_tier: IndependenceTier,
+    evidence_summary: str,
+    counterexample: CounterexampleReceipt | None = None,
+    missing_evidence: str = "",
+    evaluated_at: str | None = None,
+) -> IndependentVerifierReceipt
+```
+
+`VerifierContextFirewall.project_evidence_packet(...)` is a pure keyword-only
+allowlist projection boundary (`ALLOWED_FIELDS`) for scientific self-healing
+repair verification (Issue #1522). Embedded persuasive tags/phrases are stripped
+via `sanitize_field(...)`, and any unexpected keyword argument (such as builder
+reasoning traces, chat transcripts, or scratchpad fields) raises `TypeError` at
+the boundary. `ModelIndependencePolicy.evaluate_independence(...)` rejects empty
+or identical normalized builder/verifier identities and requires
+`DIFFERENT_MODEL_FAMILY` for high/critical/governance risk tiers.
+`IndependentVerifierReceipt` seals canonical SHA-256 `receipt_digest` verified by
+`verify_integrity()`. This boundary performs no provider calls, shell execution,
+or PatternMemory mutation.
+
 ## Configuration
 
 ### Environment Variables

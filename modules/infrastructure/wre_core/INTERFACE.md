@@ -1,3 +1,62 @@
+## Scientific repair operation, baseline verifier & canary orchestrator — 2026-11-16
+
+`src/repair_operation_contract.py` defines `ScientificRepairOperation`,
+`RepairOperationState` (`OBSERVED`, `REPRODUCING`, `NON_REPRODUCIBLE`,
+`REPRODUCED`, `BASELINED`, `RESEARCHING`, `HYPOTHESIS_DEFINED`,
+`ADMISSION_PENDING`, `ADMITTED`, `SANDBOX_PREPARING`, `EXPERIMENTING`,
+`DETERMINISTIC_VERIFY`, `INDEPENDENT_VERIFY`, `FUSION_REVIEW`, `ACCEPTED`,
+`REVERTED`, `ABANDONED`, `ESCALATED`, `LEARNED`), `VALID_STATE_TRANSITIONS`,
+`BaselineReceipt` (`verify_integrity()`), `ResearchQuarantineArtifact`,
+`CounterexampleReceipt`, and `ExperimentBudget`:
+
+- `ScientificRepairOperation.transition_to(new_state, reason="")` enforces
+  `VALID_STATE_TRANSITIONS` fail-closed (raising `ValueError` on illegal jumps)
+  and appends every visited state to `state_history` (serialized in `to_dict()`).
+- `record_counterexample(...)` appends structured objections and increments
+  `consumed_iterations` against `budget_exhausted()`.
+
+`src/repair_baseline_verifier.py` exposes
+`attempt_failure_reproduction(*, repo_root, failure_id, reproduction_command, failing_invariant, relevant_tests=(), timeout_seconds=60.0, authority_declaration="TIER_1_INTERNAL_MODULE") -> tuple[bool, BaselineReceipt | None, NonReproducibleClassification | None, str]`,
+parsing string commands via `shlex.split` and executing with `shell=False`.
+Exit code `0` (`ALREADY_RESOLVED`) or missing `failing_invariant` (`OBSERVER_DEFECT`)
+returns `reproduced=False` without sealing a `BaselineReceipt`.
+
+`src/scientific_repair_canary_orchestrator.py` exposes
+`ScientificRepairCanaryOrchestrator(repo_root, *, builder_model="qwen-coder-7b", verifier_model="gemma-270m", scaffold="openclaw", pattern_memory=None)`
+and `run_autonomous_repair_cycle(...) -> tuple[ScientificRepairOperation, CanaryExecutionReceipt]`,
+composing reproduction -> baseline -> quarantined research -> hypothesis ->
+`ExperimentBudget` admission -> sandbox patch -> deterministic verification ->
+`ModelIndependencePolicy.evaluate_independence` ->
+`VerifierContextFirewall.project_evidence_packet` -> `IndependentVerifierReceipt` ->
+`PatternMemory.store_outcome` (`SkillOutcome`), while leaving protected 19/P0
+custody gates (`promote_variation`, `RedDogDirector.advance_to_execution`,
+`RedDogVerifiedPatternMemorySink`) untouched.
+
+## Fail-closed `measurement_evidence` in `RecursiveLearningEngine` — 2026-11-16
+
+`recursive_improvement/src/learning.py` extends
+`RecursiveLearningEngine.apply_improvement(improvement, *, verification_evidence=None, target_applicator=None, measurement_evidence=None) -> bool`
+and `rollback_improvement(improvement) -> bool`:
+
+- Omitted `measurement_evidence` preserves `improvement.tokens_saved = None` and
+  `improvement.metrics["token_reduction_measured"] = False`.
+- Provided `measurement_evidence` validates fail-closed **before** calling
+  `target_applicator` (requiring a `Mapping` with non-empty
+  `measurement_receipt_id`, non-self-authored `evaluator_id != worker_id`,
+  matching `work_order_id`, non-negative non-bool integer `baseline_tokens` and
+  `candidate_tokens` with `candidate_tokens <= baseline_tokens`, and optional
+  `before_state_digest` / `after_state_digest` SHA-256 verification, plus
+  post-applicator `after_digest` verification with automatic `rollback_fn()` on
+  mismatch). Any failure records `application_status = "blocked_measurement_rejected"`
+  and returns `False` without retaining target mutation.
+- Valid measured apply records `improvement.tokens_saved = baseline_tokens - candidate_tokens`,
+  `token_reduction_measured = True`, receipt/evaluator/token/latency metadata,
+  and increments `engine.metrics["total_tokens_saved"]`.
+- `rollback_improvement()` subtracts measured `improvement.tokens_saved` from
+  `engine.metrics["total_tokens_saved"]` (clamped `>= 0`), records
+  `rolled_back_tokens_saved`, and resets `tokens_saved = None` and
+  `token_reduction_measured = False`.
+
 ## Readiness evidence and admission — 2026-11-06
 
 `PatternMemory(db_path=None, *, read_only=False)` retains writable defaults.
