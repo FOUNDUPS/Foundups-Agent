@@ -434,6 +434,7 @@ STREAMABLE_EVENT_TYPES = {
     # State sync for DRIVEN_MODE
     "state_sync",
     "phase_command",
+    "work_telemetry_sync",
     # Synthetic user simulation
     "synthetic_user_adopted",
     "synthetic_user_rejected",
@@ -647,6 +648,14 @@ data: {"event_id": "...", "event_type": "...", "payload": {...}, ...}
 - `event: heartbeat` - Sent every 15 seconds for connection keepalive
 - `event: error` - Sent on internal server error
 
+#### GET /api/work-telemetry
+Read-only observed work telemetry snapshot for Observable Swarm Orchestration (`observation_only=true`, `authority="none"`). Reads live `AgentDB` and `PatternMemory` SQLite tables via `?mode=ro` + `PRAGMA query_only = ON`, normalizes units into `CANONICAL_WORK_STATES`, redacts paths/secrets, and reports honest `unknown`/`stale` freshness. Mutating HTTP verbs return `405 Method Not Allowed`.
+
+**Request:**
+- Method: `GET`
+- Query parameters (optional): `limit` (`1..200`), `ttl_seconds` (`>=0`)
+- Member gate headers (when enabled): `x-invite-key` + `x-member-role` (`observer_012`)
+
 #### GET /api/health
 Health check endpoint for Cloud Run readiness probes.
 
@@ -672,6 +681,7 @@ Root endpoint with API info.
     "version": "1.0.0",
     "endpoints": {
         "/api/sim-events": "SSE stream of simulator events",
+        "/api/work-telemetry": "Read-only observed work telemetry snapshot (GET only, no authority)",
         "/api/health": "Health check"
     }
 }

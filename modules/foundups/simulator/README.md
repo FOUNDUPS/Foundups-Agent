@@ -349,6 +349,7 @@ curl -N http://localhost:8080/api/sim-events
 
 **Endpoints:**
 - `GET /api/sim-events` - SSE stream of normalized events
+- `GET /api/work-telemetry` - Read-only observed swarm/work telemetry snapshot (`observation_only=true`, `authority="none"`, `mode=ro` SQLite)
 - `GET /api/health` - Health check with mode status
 - `GET /` - API info
 

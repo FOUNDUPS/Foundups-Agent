@@ -1,3 +1,6 @@
+## 2026-11-15 — Observable Swarm Orchestration telemetry tests
+- Added `modules/foundups/simulator/tests/test_observable_swarm_telemetry.py` covering `work_telemetry_provider.py`, `/api/work-telemetry`, `frame_schema.py`, and `public/js/foundup-cube.js` via Node VM.
+
 ## 2026-11-05 — P4 RED, import repair and verified preview
 
 P4 is VERIFIED_SIMULATED. Fresh 280 baseline passes; frozen v1 RED has 79 missing-API
