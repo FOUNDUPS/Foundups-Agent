@@ -1,3 +1,19 @@
+## Wave 4 WRE/RSI and pfMALL backend manifest metadata review — 2026-11-16
+
+The backend manifest refreshes three runtime source checksums
+(`modules/foundups/pfmall/shell_core.py`,
+`modules/infrastructure/wre_core/recursive_improvement/src/core.py`, and
+`modules/infrastructure/wre_core/recursive_improvement/src/learning.py`) and
+retains all 1,487 runtime members. Verification against base `e62e9ebaf5`
+confirmed 39 unchanged public source-path/SHA rows with exact prior approvals.
+The new whole-manifest digest
+`373f8a1ccec6ef434cde98958355683e448f1374d6e74d259da5d06d7cc0f6ca` (canonical
+payload SHA256 `568e8b402a77316b0b1952d26d7d8080f749d14dbe06fb2a8ee28a17cdc96d6e`)
+requires 39 renewed bindings, preserving all 4,500 earlier entries and other
+fields (`4,539` total). Scanner rules, exclusions, fingerprint formula, and scan
+coverage stay the same. Fresh full-tree and introduced-history checks remain
+required.
+
 ## WRE/RSI bounded improvement and rollback backend manifest review — 2026-11-15
 
 The backend manifest refreshes one WRE recursive improvement source checksum

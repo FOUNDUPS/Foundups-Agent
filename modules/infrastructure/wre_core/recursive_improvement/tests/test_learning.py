@@ -270,12 +270,46 @@ async def test_bounded_rsi_cycle_end_to_end_apply_and_rollback(
 ):
     assert (REPO_ROOT / "modules").is_dir()
 
-    # Ensure isolated git worktrees locate the active interpreter's skill-scanner binary.
+    # Ensure isolated git worktrees locate the active interpreter's skill-scanner binary,
+    # or fall back to live manifest verification on hosted CI runners where the dev-only
+    # cisco-ai-skill-scanner CLI is omitted from requirements.txt.
     if shutil.which("skill-scanner") is None:
         exe_name = "skill-scanner.exe" if sys.platform.startswith("win") else "skill-scanner"
         candidate_scanner = Path(sys.executable).resolve().parent / exe_name
         if candidate_scanner.is_file():
             monkeypatch.setenv("OPENCLAW_SKILL_SCANNER_BIN", str(candidate_scanner))
+        else:
+            from modules.communication.moltbot_bridge.src.skill_safety_guard import (
+                SkillScanResult,
+            )
+            from modules.infrastructure.wre_core.src import (
+                skill_runtime_admission as admission_mod,
+            )
+            from modules.infrastructure.wre_core.src.skill_manifest_guard import (
+                verify_skill_manifest,
+            )
+
+            def _manifest_verified_ci_scan(*, skills_dir: Path, **_kwargs) -> SkillScanResult:
+                manifest = verify_skill_manifest(
+                    skills_dir=skills_dir,
+                    manifest_path=skills_dir / "SKILL_MANIFEST.json",
+                    required=True,
+                )
+                return SkillScanResult(
+                    available=True,
+                    passed=manifest.passed,
+                    exit_code=0 if manifest.passed else 3,
+                    skills_dir=str(skills_dir),
+                    report_path=None,
+                    message="skills passed safety scan" if manifest.passed else manifest.message,
+                    manifest_available=manifest.available,
+                    manifest_passed=manifest.passed,
+                    manifest_path=manifest.manifest_path,
+                    manifest_message=manifest.message,
+                )
+
+            monkeypatch.setattr(admission_mod, "SKILL_SCANNER_AVAILABLE", True)
+            monkeypatch.setattr(admission_mod, "run_skill_scan", _manifest_verified_ci_scan)
 
     # 1. Observe -> Propose -> Direct (remains dry-run and fail-closed on execution).
     director = RedDogDirector()
