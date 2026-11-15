@@ -263,6 +263,27 @@ Every retained branch still requires full-diff assessment before retirement.
 shape. Enablement and enforcement apply to observation coverage. The legacy
 `merged` field is false because promotion is handled by its own authority.
 
+`get_git_inventory(repo_root, request_id, *, section=None, offset=0,
+runner=run_command)` emits read-only `foundups_git_inventory.v1` receipts capped
+at `262144` bytes (`_MAX_RECEIPT`) with `20`-row pages (`_PAGE_SIZE`). Valid
+`section` values are `None`, `"summary"`, `"branches"`, `"worktrees"`, and
+`"stashes"` (`offset=0` is required when `section` is `None` or `"summary"`).
+Local observation captures branches, worktrees, and SHA-only `refs/stash`
+reflog entries (`[{"sha": ...}]` via `rev-list --walk-reflogs refs/stash`, never
+stash messages, subjects, or filenames) before and after GitHub `ls-remote`,
+blocking with `"pc_state_changed_during_observation"` if any local branch,
+worktree, status, or stash changes during observation. After stability checks, it
+probes local `github_main` commit presence via `git cat-file -t` (without
+failing when absent) to emit `github_main_present_on_pc`, `pc_backlog_summary`
+(`local_head_count`, `attached_worktree_branch_count`,
+`merged_into_github_main_count`, `unmerged_unattached_head_count`,
+`stash_count`), `worktree_summary` (`total`, `attached`, `detached`, `bare`,
+`locked`, `prunable`), and paged `stash_count`.
+`verify_git_inventory_receipt(result, request_id, *, now=None)` enforces
+request ID, age (`-5` to `120` seconds), canonical `sha256`, SHA-only
+`stashes`, `github_main_present_on_pc`, `pc_backlog_summary`, and
+`worktree_summary`.
+
 # WRE Core Interface
 
 ## Advisory AutoResearcher startup display

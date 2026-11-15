@@ -14,6 +14,14 @@ The October28 verification classification/CI observations below remain scoped
 historical evidence; their performance experiment remains queued, not the next
 native execution requirement. Preserve mandatory checks and current owners.
 
+## PC Git inventory observability — 2026-11-15
+
+`git_lifecycle_inventory.py` extends `foundups_git_inventory.v1` with SHA-only
+stash pagination (`section="stashes"`), `github_main_present_on_pc`,
+`pc_backlog_summary`, and `worktree_summary` while keeping `branches` row shape,
+`branch_comparison` keys, 20-row pagination, and the 256 KiB receipt cap
+backwards-compatible.
+
 ## Current verification integration — 2026-10-28
 
 Source baseline: `4afb9284d32e9af24f578fda91063114263d5a39`.

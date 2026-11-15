@@ -3,6 +3,11 @@
 The WRE CI job exercises GitHub pagination and App-bound check proof, the
 persisted PR completion condition, the compatibility sentinel and disposable
 Git worktrees. The PC suite covers dirty, ignored, stale and diverged state.
+`test_git_lifecycle_inventory.py` also verifies read-only PC inventory receipts,
+SHA-only `stashes` pagination without message or filename leakage, concurrent
+stash mutation blocking, `github_main_present_on_pc` True/False
+`pc_backlog_summary` and `worktree_summary` counts, and receipt integrity
+rejection for malformed or tampered stashes and summaries.
 
 ## Readiness evidence — 2026-11-06
 

@@ -1,3 +1,8 @@
+## 2026-11-15 — PC Git inventory stashes, backlog summary, and worktree summary
+
+- **Git lifecycle inventory (`src/git_lifecycle_inventory.py`)**: Added `_read_stashes()` (SHA-only `refs/stash` + `rev-list --walk-reflogs refs/stash`, privacy-bounded with no stash messages or filenames), included stashes in `_observe()` pre/post `ls-remote` stability checks (`pc_state_changed_during_observation`), added local `github_main` `cat-file -t` presence check (`github_main_present_on_pc`), `pc_backlog_summary`, `worktree_summary`, `section="stashes"` pagination with `stash_count`, and strict `verify_git_inventory_receipt()` validation while preserving `_SCHEMA`, `_MAX_RECEIPT`, `_PAGE_SIZE`, `branches` row shape, and `branch_comparison` keys.
+- **Tests (`tests/test_git_lifecycle_inventory.py`)**: Added coverage for stash pagination and privacy non-leakage, malformed/oversized stash reflogs, concurrent stash mutation blocking, `github_main_present_on_pc` True/False backlog and worktree summaries, and tampered stash/summary verification rejection.
+
 ## 2026-11-15 — Fix MetricsIngestorV2 ai_0102_approvals index schema mismatch
 
 - **metrics_ingest_v2 (`skillz/metrics_ingest_v2.py`)**: Aligned `idx_approval_skill` creation index target from obsolete `human_approvals(skill_id)` to existing table `ai_0102_approvals(skill_id)` so fresh SQLite databases initialize cleanly alongside `WRESkillsRegistryV2`.
