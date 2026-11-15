@@ -1,6 +1,6 @@
 # AI Gateway Tests
 
-## Native incumbent identity controls — 2026-11-02
+## Native incumbent identity controls ? 2026-11-02
 
 Seven additional held-out cases in `test_youtube_model_routing.py` distinguish
 the prepared General display alias from its exact native inventory key across
@@ -9,7 +9,7 @@ keep a signed local binding independent of the incumbent override. This makes
 50 routing plus 20 composition cases. Authored before the bounded production
 fix; no execution or installed-model qualification is claimed at this freeze.
 
-## YouTube consumer routing contract — 2026-11-01
+## YouTube consumer routing contract ? 2026-11-01
 
 The independent selection is 43 cases in `test_youtube_model_routing.py` and
 20 in `test_youtube_model_composition.py` (63 total). Both files stay within
@@ -22,7 +22,7 @@ non-echo. The real query composition uses the existing deterministic signed
 test verifier; it does not configure production trust or prove real model quality.
 Run only in the owner's minimal-environment/effect-guarded child. All transport,
 residency and provider results are synthetic; temporary artifacts stay outside Git.
-Held-out composition also exercises actual processor await → final review,
+Held-out composition also exercises actual processor await �� final review,
 independent review cancellation, persona refresh and target/requester role
 separation through complete production definitions with explicit collaborators.
 Target identity comes from explicit captured row IDs; display-name map keys,
@@ -147,3 +147,21 @@ python -m pytest -q modules/ai_intelligence/ai_gateway/tests
 Record material test changes in `TestModLog.md` and behavioral changes in the
 module `ModLog.md`. See WSP 00, WSP 15, WSP 22, WSP 49, WSP 50, WSP 62, and
 WSP 97.
+
+## Offline audio timing fixtures
+
+`test_model_audio_timing_benchmark.py` uses standard-library unittest and synthetic
+responses. The 27 test methods cover malformed timing, strict JSON, gaps and
+adjacent overlaps, identity substitution, real existing-harness SKIPPED behavior,
+and shared/uncertain/concurrent request-count enforcement. It does not call a
+provider or read audio, lyrics, credentials or environment provider settings.
+Run only after exact source/runtime review through the existing bounded runner
+using -I -S -B, a minimal environment and owned temporary outputs. Integration
+checks use the actual harness; valid structure never becomes accepted quality.
+
+Live smoke evidence is separate from these fixtures. Two saved authorized STT
+responses passed the same validator and stayed SKIPPED in an offline harness
+replay. Diagnostic SRT round trips preserved each supplied word and timestamp
+within millisecond representation. This does not validate performed-word truth,
+alignment, playback usability or production acceptance; zero-duration cues are
+retained and reported. The private responses are not public test fixtures.
