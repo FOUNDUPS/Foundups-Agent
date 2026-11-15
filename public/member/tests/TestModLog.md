@@ -1,3 +1,10 @@
+## 2026-11-16 — Build v19 truth gates, activeVideo continuity, and test reconciliation
+
+- Updated `mall_product_state_vm.mjs` (23 passed: `pfmall-member-v19` cache migration, ordinary `/member/` `activeVideo` persistence/validation, and HPC `sessionStorage` isolation) and `test_mall_product_state.py`.
+- Extended `mall_property_listing_vm.mjs` with VM behavioral assertions for ordinary `/member/` `hpc` tile routing to `/member/?foundup=hpc`, `openDesktopVideo` `queueQuery` inheritance, and `restoreActiveVideo` (`autoplay: false`).
+- Reconciled `mall_scoped_video_browser.py` (`Build v19`), `test_non_video_action_surfaces.py` (`internal_app`), and `test_navigation_planes.py` (`foundup_id`-based `Enter FoundUp` handoff and concierge-first gesture hint contract).
+- Full member verification: `pytest -q -p no:cacheprovider public/member/tests` (`1531 passed, 0 failed`) and all 6 Node VM suites (`EXIT=0`).
+
 ## 2026-11-15 — Build v18 discovery filters, internal_app quick-view, and viewport verification
 
 - Updated `mall_product_state_vm.mjs` (22 passed including `pfmall-member-v18` cache upgrade and `localStorage` `source_group` round-trip), `mall_scoped_video_browser.py` (`Build v18`), and `test_non_video_quickview_actions.py` (`internal_app`).

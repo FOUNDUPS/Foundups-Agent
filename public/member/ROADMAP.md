@@ -3,6 +3,12 @@
 **Module**: `public/member/`
 **Approach**: Occam's Layered (build/test one layer at a time)
 
+## Build v19 Mall Truth & Continuity — 2026-11-16
+
+- Reconciled `mall-video-catalog.json` (16 entries) with `foundup_registry.json` and `foundup_manifest.json` contracts: added `esingularity_001`, aligned `holoindex_prod_01` (`F3_INFRA` / `conditional` / `infrastructure`), `gotjunk_001` (`012` creator + `external_url`), and `autopost` (`external_url`), and normalized video `duration_seconds` and `YYYY-MM-DDTHH:MM:SSZ` timestamps.
+- Unified `internal_app` (`Open App`) CTA parity across `index.html`, `foundup.html`, and `mall-planes.js`.
+- Closed Phase 3 continuity gaps under `Build v19` / `pfmall-member-v19`: ordinary `/member/` `hpc` tile navigation to `/member/?foundup=hpc`, desktop inline `queueQuery` inheritance in `openDesktopVideo`, and reload-safe `activeVideo` (`{ foundupId, videoId, queueQuery }`) persistence in `pfmall_mall_state_v1` without altering HPC's tab-local `sessionStorage` boundary.
+
 ## FX1 Public Directory — 2026-10-25
 
 - Implemented locally: homepage FX link to the existing `/f/` public directory,

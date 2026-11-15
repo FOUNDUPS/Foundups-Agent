@@ -531,9 +531,10 @@
     const SOURCE_TYPE_CTA = {
       github_repo:      { label: 'View Repo',    icon: '\u2197', urlField: 'external_url' },
       external_app:     { label: 'Open App',     icon: '\u2197', urlField: 'external_url' },
+      internal_app:     { label: 'Open App',     icon: '\u2197', urlField: 'external_url' },
       internal_service: { label: 'Open Service', icon: '\u2197', urlField: 'external_url' },
     };
-    const NON_VIDEO_SOURCE_TYPES = new Set(['github_repo', 'external_app', 'internal_service']);
+    const NON_VIDEO_SOURCE_TYPES = new Set(['github_repo', 'external_app', 'internal_app', 'internal_service']);
     const READINESS_LABELS = {
       ready: 'Ready',
       conditional: 'Conditional',
