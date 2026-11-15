@@ -1,3 +1,17 @@
+## WRE/RSI bounded improvement and rollback backend manifest review — 2026-11-15
+
+The backend manifest refreshes one WRE recursive improvement source checksum
+(`modules/infrastructure/wre_core/recursive_improvement/src/learning.py`) and
+retains all 1,487 runtime members. Verification against base `6013f2a6a3`
+confirmed 39 unchanged public source-path/SHA rows with exact prior approvals.
+The new whole-manifest digest
+`c141b5cb237501eebee6fd7c37fa837fa24b83a8dfcef663aa6863678fc7d7aa` (canonical
+payload SHA256 `879a60654aeaea1235e396c1a6a61d8598c3b071e938f223ed469335b0804196`)
+requires 39 renewed bindings, preserving all 4,461 earlier entries and other
+fields (`4,500` total). Scanner rules, exclusions, fingerprint formula, and scan
+coverage stay the same. Fresh full-tree and introduced-history checks remain
+required.
+
 ## WRE parent-bound recall backend manifest metadata review — 2026-11-15
 
 The backend manifest refreshes two WRE source checksums (`pattern_memory.py` and

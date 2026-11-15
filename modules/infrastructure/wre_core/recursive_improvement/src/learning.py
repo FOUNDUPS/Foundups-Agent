@@ -9,7 +9,7 @@ import logging
 import os
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple
 import datetime
 import traceback
 import re
@@ -97,6 +97,7 @@ class RecursiveLearningEngine:
         
         # Restore quantum state if available
         self.quantum_state = self._restore_quantum_state("default_session")
+        self._rollback_handlers: Dict[str, Tuple[Callable[[], str], str, str]] = {}
         self._configure_auto_save()
 
     def _configure_auto_save(self) -> None:
@@ -653,25 +654,219 @@ class RecursiveLearningEngine:
         """Apply solution to state (simplified)"""
         return f"{state} + {solution.implementation}"
     
-    async def apply_improvement(self, improvement: Improvement) -> bool:
-        """
-        Preserve an improvement proposal without claiming artifact application.
+    def _get_rollback_handlers(self) -> Dict[str, Tuple[Callable[[], str], str, str]]:
+        """Lazily initialize per-instance rollback handlers (safe with __new__)."""
+        handlers = getattr(self, "_rollback_handlers", None)
+        if handlers is None:
+            handlers = {}
+            setattr(self, "_rollback_handlers", handlers)
+        return handlers
 
-        The compatibility method remains fail closed until an authenticated
-        executor can return durable effect evidence.
+    @staticmethod
+    def _evidence_field(obj: Any, name: str, default: Any = None) -> Any:
+        if isinstance(obj, Mapping):
+            return obj.get(name, default)
+        return getattr(obj, name, default)
+
+    @staticmethod
+    def _is_nonempty_str(value: Any) -> bool:
+        return isinstance(value, str) and bool(value.strip())
+
+    @classmethod
+    def _validate_verification_evidence(
+        cls, verification_evidence: Optional[Mapping[str, Any]]
+    ) -> Optional[Tuple[str, str, str]]:
+        """Validate verifier, ratchet, and held-out gate receipts fail-closed."""
+        if not isinstance(verification_evidence, Mapping):
+            return None
+
+        verification_result = verification_evidence.get("verification_result")
+        ratchet_result = verification_evidence.get("ratchet_result")
+        held_out_gate_result = verification_evidence.get("held_out_gate_result")
+        if verification_result is None or ratchet_result is None or held_out_gate_result is None:
+            return None
+
+        if cls._evidence_field(verification_result, "accepted") is not True:
+            return None
+        if cls._evidence_field(verification_result, "decision") != "AUTONOMOUS_SLICE_VERIFIER_ACCEPT":
+            return None
+        v_receipt = cls._evidence_field(verification_result, "receipt")
+        if v_receipt is None:
+            return None
+        v_receipt_id = cls._evidence_field(v_receipt, "receipt_id")
+        v_work_order_id = cls._evidence_field(v_receipt, "work_order_id")
+        v_worker_id = cls._evidence_field(v_receipt, "worker_id")
+        v_verifier_id = cls._evidence_field(v_receipt, "verifier_id")
+        v_head_sha = cls._evidence_field(v_receipt, "head_sha")
+        if not (
+            cls._is_nonempty_str(v_receipt_id)
+            and cls._is_nonempty_str(v_work_order_id)
+            and cls._is_nonempty_str(v_worker_id)
+            and cls._is_nonempty_str(v_verifier_id)
+            and v_verifier_id.strip() != v_worker_id.strip()
+            and isinstance(v_head_sha, str)
+            and bool(re.fullmatch(r"[0-9a-fA-F]{40}", v_head_sha))
+        ):
+            return None
+
+        if cls._evidence_field(ratchet_result, "accepted") is not True:
+            return None
+        if cls._evidence_field(ratchet_result, "decision") != "OUTCOME_RATCHET_RECORDED":
+            return None
+        r_receipt = cls._evidence_field(ratchet_result, "receipt")
+        if r_receipt is None:
+            return None
+        r_ratchet_id = cls._evidence_field(r_receipt, "ratchet_id")
+        r_verifier_receipt_id = cls._evidence_field(r_receipt, "verifier_receipt_id")
+        r_work_order_id = cls._evidence_field(r_receipt, "work_order_id")
+        if not (
+            cls._is_nonempty_str(r_ratchet_id)
+            and r_verifier_receipt_id == v_receipt_id
+            and r_work_order_id == v_work_order_id
+        ):
+            return None
+
+        if cls._evidence_field(held_out_gate_result, "accepted") is not True:
+            return None
+        if (
+            cls._evidence_field(held_out_gate_result, "decision")
+            != "HELD_OUT_RECURSIVE_IMPROVEMENT_REGRESSION_GATE_ACCEPT"
+        ):
+            return None
+        g_receipt = cls._evidence_field(held_out_gate_result, "receipt")
+        if g_receipt is None:
+            return None
+        g_gate_id = cls._evidence_field(g_receipt, "gate_id")
+        g_ratchet_id = cls._evidence_field(g_receipt, "ratchet_id")
+        g_verifier_receipt_id = cls._evidence_field(g_receipt, "verifier_receipt_id")
+        g_admission_allowed = cls._evidence_field(g_receipt, "pattern_memory_admission_allowed")
+        if not (
+            cls._is_nonempty_str(g_gate_id)
+            and g_ratchet_id == r_ratchet_id
+            and g_verifier_receipt_id == v_receipt_id
+            and g_admission_allowed is True
+        ):
+            return None
+
+        return v_receipt_id, r_ratchet_id, g_gate_id
+
+    async def apply_improvement(
+        self,
+        improvement: Improvement,
+        *,
+        verification_evidence: Optional[Mapping[str, Any]] = None,
+        target_applicator: Optional[Callable[[str, str], Tuple[str, Callable[[], str]]]] = None,
+    ) -> bool:
+        """
+        Apply an improvement only when backed by verified non-self-authored
+        ratchet + held-out gate evidence and a reversible target applicator.
+
+        Legacy zero-evidence calls remain fail closed (`blocked_unimplemented`).
         """
         try:
-            improvement.applied = False
-            improvement.applied_at = None
-            improvement.metrics["application_status"] = "blocked_unimplemented"
-            
-            # Save updated improvement
+            if verification_evidence is None and target_applicator is None:
+                improvement.applied = False
+                improvement.applied_at = None
+                improvement.metrics["application_status"] = "blocked_unimplemented"
+                save_improvement(self.memory_root, improvement)
+                return False
+
+            evidence_ids = self._validate_verification_evidence(verification_evidence)
+            if (
+                evidence_ids is None
+                or not callable(target_applicator)
+                or not isinstance(improvement.before_state, str)
+            ):
+                improvement.applied = False
+                improvement.applied_at = None
+                improvement.metrics["application_status"] = "blocked_verification_rejected"
+                save_improvement(self.memory_root, improvement)
+                return False
+
+            before_digest = hashlib.sha256(improvement.before_state.encode("utf-8")).hexdigest()
+            applied_result = target_applicator(improvement.before_state, improvement.after_state)
+            if not isinstance(applied_result, tuple) or len(applied_result) != 2:
+                improvement.applied = False
+                improvement.applied_at = None
+                improvement.metrics["application_status"] = "blocked_verification_rejected"
+                save_improvement(self.memory_root, improvement)
+                return False
+
+            applied_state, rollback_fn = applied_result
+            if not isinstance(applied_state, str) or not callable(rollback_fn):
+                improvement.applied = False
+                improvement.applied_at = None
+                improvement.metrics["application_status"] = "blocked_verification_rejected"
+                save_improvement(self.memory_root, improvement)
+                return False
+
+            after_digest = hashlib.sha256(applied_state.encode("utf-8")).hexdigest()
+            if after_digest == before_digest:
+                improvement.applied = False
+                improvement.applied_at = None
+                improvement.metrics["application_status"] = "blocked_verification_rejected"
+                save_improvement(self.memory_root, improvement)
+                return False
+
+            verifier_receipt_id, ratchet_id, gate_id = evidence_ids
+            self._get_rollback_handlers()[improvement.improvement_id] = (
+                rollback_fn,
+                before_digest,
+                improvement.before_state,
+            )
+            improvement.applied = True
+            improvement.applied_at = datetime.datetime.now(datetime.timezone.utc).isoformat()
+            improvement.after_state = applied_state
+            improvement.rollback_available = True
+            improvement.metrics["application_status"] = "applied_verified"
+            improvement.metrics["verifier_receipt_id"] = verifier_receipt_id
+            improvement.metrics["ratchet_id"] = ratchet_id
+            improvement.metrics["gate_id"] = gate_id
+            improvement.metrics["before_state_digest"] = f"sha256:{before_digest}"
+            improvement.metrics["after_state_digest"] = f"sha256:{after_digest}"
+            improvement.metrics["rollback_available"] = True
+            self.metrics["improvements_applied"] = int(self.metrics.get("improvements_applied", 0)) + 1
+
             save_improvement(self.memory_root, improvement)
-            
-            return False
-            
+            return True
+
         except Exception as e:
             # Even failures are learning opportunities!
+            await self.process_error(e, {"improvement_id": improvement.improvement_id})
+            return False
+
+    async def rollback_improvement(self, improvement: Improvement) -> bool:
+        """Roll back an applied improvement and verify restored state digest."""
+        handlers = self._get_rollback_handlers()
+        entry = handlers.get(improvement.improvement_id)
+        if entry is None:
+            return False
+
+        rollback_fn, before_digest, _ = entry
+        try:
+            restored_state = rollback_fn()
+            if not isinstance(restored_state, str):
+                return False
+            restored_digest = hashlib.sha256(restored_state.encode("utf-8")).hexdigest()
+            if restored_digest != before_digest:
+                return False
+
+            improvement.applied = False
+            improvement.after_state = restored_state
+            improvement.rollback_available = False
+            improvement.metrics["application_status"] = "rolled_back"
+            improvement.metrics["rolled_back_at"] = datetime.datetime.now(
+                datetime.timezone.utc
+            ).isoformat()
+            improvement.metrics["rollback_verified"] = True
+            improvement.metrics["rollback_available"] = False
+            self.metrics["improvements_applied"] = max(
+                0, int(self.metrics.get("improvements_applied", 0)) - 1
+            )
+            handlers.pop(improvement.improvement_id, None)
+            save_improvement(self.memory_root, improvement)
+            return True
+        except Exception as e:
             await self.process_error(e, {"improvement_id": improvement.improvement_id})
             return False
     

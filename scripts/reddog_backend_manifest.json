@@ -2784,7 +2784,7 @@
     "modules/infrastructure/wre_core/__init__.py": "79b0984199b2119f468645f3ed3f59e6615f8dab61279990c27fa6d21ffcd5d7",
     "modules/infrastructure/wre_core/recursive_improvement/__init__.py": "c10991ff332ee77847e831cc98bdb312bf662162bddb3d4eb93e1c0a41316bcd",
     "modules/infrastructure/wre_core/recursive_improvement/src/core.py": "c676843815c86999365eb89eae5e1eb5306c441eb5e68f5bde2e80ad4a6ad5b9",
-    "modules/infrastructure/wre_core/recursive_improvement/src/learning.py": "f4516669b253a15a94d54147f2db58237107b0d5588ae21bd39ecf8eb46d0628",
+    "modules/infrastructure/wre_core/recursive_improvement/src/learning.py": "b1ae929b4d3a84bd01d92fd79f09dd13fdca31db5167ed9ed9c60fcf310a6d8d",
     "modules/infrastructure/wre_core/recursive_improvement/src/memory_preflight.py": "7465e5d4e33d23e3ee4716f45a642bc228f3e340b2636feca1ea962edd4b7633",
     "modules/infrastructure/wre_core/recursive_improvement/src/persistence.py": "58de0a624b5f5ffea986d096a398100ac7a5432325fdf998c60ec3794d15c747",
     "modules/infrastructure/wre_core/recursive_improvement/src/utils.py": "8d2a2d74c1a04bbe297ab64a4bdd178c48a6cdd36e51e0588ea423ca5a97bcdf",
