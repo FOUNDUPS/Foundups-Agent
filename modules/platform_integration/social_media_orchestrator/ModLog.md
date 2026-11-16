@@ -1,3 +1,13 @@
+## 2026-11-16 — Repair generated backend publication-helper binding
+
+Hosted CI exposed the omitted generated import-closure/hash refresh. The existing
+generator now binds the one added helper, updated planner checksum and both
+digest pins; the exact count boundary advances1487→1488, rejecting1489. Existing
+332KiB manifest,2MiB file and32MiB total caps stay fixed. Eight Python manifest/
+index tests and existing Node compatibility/preflight/async/package checks pass;
+independent packaging review passes. Original hosted failure retained; new-head
+hosted qualification remains required. See tests/TestModLog for measured evidence.
+
 ## 2026-11-16 — Publication receipt reconciliation in existing SOCIAL content route
 
 WSP11/22/50/84/97/99; module concatenation gate. Existing content ingress gains

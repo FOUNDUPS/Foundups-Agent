@@ -62,7 +62,8 @@ function assertManifestContract() {
     'modules/communication/moltbot_bridge/src/openclaw_dae.py',
     'modules/foundups/src/foundup_registry_loader.py',
     'modules/platform_integration/linkedin_agent/src/linkedin_agent.py',
-    'modules/platform_integration/social_media_orchestrator/src/petition_campaign.py'
+    'modules/platform_integration/social_media_orchestrator/src/petition_campaign.py',
+    'modules/platform_integration/social_media_orchestrator/src/content/publication_reconciliation.py'
   ]) {
     assert(manifest.required_runtime_files.includes(sentinel), sentinel);
   }
@@ -282,13 +283,13 @@ function assertRuntimeFileCountBoundary() {
     candidate.required_runtime_files.push(member);
     candidate.required_runtime_sha256[member] = '0'.repeat(64);
   };
-  while (candidate.required_runtime_files.length < 1487) {
+  while (candidate.required_runtime_files.length < 1488) {
     addMember(candidate.required_runtime_files.length);
   }
-  assert.strictEqual(candidate.required_runtime_files.length, 1487);
-  assert.deepStrictEqual(validator.validateManifest(candidate), []);
-  addMember(1487);
   assert.strictEqual(candidate.required_runtime_files.length, 1488);
+  assert.deepStrictEqual(validator.validateManifest(candidate), []);
+  addMember(1488);
+  assert.strictEqual(candidate.required_runtime_files.length, 1489);
   assert.deepStrictEqual(validator.validateManifest(candidate), [
     'backend_runtime_file_contract_mismatch'
   ]);

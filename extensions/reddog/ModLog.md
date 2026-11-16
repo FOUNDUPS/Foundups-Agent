@@ -1,3 +1,26 @@
+## 2026-11-16 — Publication reconciliation dependency binding repair
+
+The first PR2414 hosted Python job correctly rejected a stale generated backend
+manifest and staged-index checksum after the new content helper/import. Refresh
+the existing generator output: exactly one added runtime member,
+`social_media_orchestrator/src/content/publication_reconciliation.py`, no removals,
+and only `campaign_planner.py` changes an existing source digest. Both canonical
+pins are `a511d3efb70cf88f1f15700db6128f4bd97487469d1879d729267abf6bca031b`.
+The exact count boundary accepts1488 and rejects1489; all existing assertions,
+schema/API/graph and byte caps remain enforced. Measured manifest336692 LF /
+339741 CRLF bytes fits332KiB (339968); runtime20567270 bytes / maxfile184403 fits
+32MiB / 2MiB. No installed activation or provider/memory claim.
+
+Local validation: all eight existing Python generator/index cases pass in102.51s;
+Node compatibility contract, preflight (including imported async/query owners),
+async, package-manifest and package-surface commands pass. The Windows sandbox
+denied preflight's temporary junction setup; the same unmodified fixture passes
+outside that boundary. Package surface remains70files/979415bytes under1MiB.
+Independent read-only packaging review recomputed the digest and exact added/
+changed membership and found no blocker. Hosted checks must qualify the new head;
+the original failed run is retained, with no unchanged rerun or check bypass.
+WSP11/22/50/84/97; no generator/validator algorithm or publication code changed.
+
 ## 2026-11-16 — Reconcile Storytime and UI-TARS runtime checksums onto Wave 4 main
 
 Regenerate the 1,487-member backend manifest on top of `247e12ce6e` for the
