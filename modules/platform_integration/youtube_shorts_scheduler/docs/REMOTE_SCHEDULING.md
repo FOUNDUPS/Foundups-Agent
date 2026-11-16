@@ -343,3 +343,17 @@ requests. Source-day scope and publication-day scope remain separate.
 
 Evidence boundary: this update changes operating guidance only. No video,
 resident worker, schedule, account setting or runtime policy is changed by it.
+
+### Current bounded Move2Japan override (012, 2026-11-16)
+
+For the current recent-Shorts batch only, new release slots begin November 17,
+2026 in Asia/Tokyo. Leave November 16 and every existing scheduled item intact.
+Use the permitted JST intervals [00:00,15:00) and [20:00,24:00); exclude
+[15:00,20:00). This explicit window supersedes earlier around-the-clock or
+inferred U.S.-peak-hour windows for this batch. Vary the minutes while preserving
+requested approximate cadence, topic priority and collision checks. Record the
+full JST date/time, UTC instant and date-specific U.S. audience equivalent.
+The known-live exclusion still applies; the window is not permission to release
+during a known active stream. Held content remains held until its applicable
+approval/evidence is resolved. This does not enable a channel-wide policy or
+permit moving existing schedules. Reconcile operator edits before any writes.
