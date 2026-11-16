@@ -872,19 +872,13 @@ def verify_member_phone(page, context, supports_cdp):
                       "queue_search_portrait_and_landscape": True}))
 
 
-def verify_member_entry(browser_type):
-    browser = browser_type.launch()
-    context = browser.new_context(viewport={"width": 1440, "height": 900}, service_workers="block",
-                                  reduced_motion="reduce")
-    context.add_init_script(provider)
-    account = None
-    requested = []
-
+def member_fixture_route(account_lookup, requested):
+    """Reuse modeled Clerk/Firestore admission; never real account auth."""
     def route_member(route):
         url = urlsplit(route.request.url)
         requested.append(url.path)
         if url.hostname and url.hostname.endswith(".clerk.accounts.dev") and url.path.endswith("/clerk.browser.js"):
-            account_data = json.dumps(account)
+            account_data = json.dumps(account_lookup())
             body = f"""window.fixtureMemberAccount = {account_data};
                 window.Clerk = {{user: window.fixtureMemberAccount && {{id:'fixture-member'}}, load: async () => {{}}}};"""
         elif url.hostname == "www.gstatic.com" and url.path.endswith("/firebase-app.js"):
@@ -904,6 +898,19 @@ def verify_member_entry(browser_type):
             return route_local(route)
         route.fulfill(status=200, content_type="text/javascript", body=body,
                       headers={"Access-Control-Allow-Origin": "*"})
+
+    return route_member
+
+
+def verify_member_entry(browser_type):
+    browser = browser_type.launch()
+    context = browser.new_context(viewport={"width": 1440, "height": 900}, service_workers="block",
+                                  reduced_motion="reduce")
+    context.add_init_script(provider)
+    account = None
+    requested = []
+
+    route_member = member_fixture_route(lambda: account, requested)
 
     context.route("**/*", route_member)
     page = context.new_page()
@@ -1375,6 +1382,124 @@ def verify_floating_and_wikitube_gestures(browser_type):
         "pinch_transitions_and_jitter_guard": True,
         "wikitube_sequential_and_bounded_recovery": True
     }, sort_keys=True))
+
+
+def verify_filtered_player_and_admitted_entry(browser_type):
+    """Combined player/card state and real entry bytes with mocked admission.
+
+    Clerk/Firestore use the existing fixture helper; this is not a real sign-in
+    or proof that YouTube recognizes an authenticated Google session.
+    """
+    records=json.loads((public/'member/mall-video-catalog.json').read_text(encoding='utf-8'))
+    by_id={item['foundup_id']:item for item in records}
+    account=None
+    requested=[]
+    browser=browser_type.launch()
+    context=browser.new_context(viewport={'width':390,'height':844},is_mobile=True,
+        has_touch=True,service_workers='block',reduced_motion='reduce')
+    observed={}
+    try:
+        context.add_init_script(provider)
+        context.add_init_script('window.IntersectionObserver=undefined')
+        context.route('**/*',member_fixture_route(lambda:account,requested))
+        page=context.new_page()
+        page.set_default_timeout(7000)
+        page.goto('https://play.foundups.com/member/',wait_until='domcontentloaded')
+        field=page.locator('#mallTileField')
+        player=page.locator('#videoPlayerFullscreen')
+        expect(field.locator('.mall-tile')).to_have_count(6)
+
+        for identifier,canonical in [('undaodu',None),('antifafm','antifafm_001')]:
+            page.evaluate("records=>{window.mallTileField.searchCatalog('');window.mallTileField.updateCatalog(records)}",
+                [by_id[identifier],by_id['magadoom_001']])
+            field.locator('.mall-tile[data-foundup-id="'+identifier+'"]').tap(position={'x':20,'y':20})
+            first_video=by_id[identifier]['videos'][0]['video_id']
+            try:
+                page.wait_for_function("['playing','manual-play'].includes(window.mallVideoPlayer.getPlaybackSnapshot()?.state)")
+                # Ordinary small source portraits currently cue for explicit Play;
+                # this oracle qualifies entry identity and Escape, not one-tap.
+                if page.evaluate('window.mallVideoPlayer.getPlaybackSnapshot().state')=='manual-play':
+                    player.get_by_role('button',name='Play video',exact=True).tap()
+                expect_playing_id(page,first_video)
+            except Exception as exc:
+                actual=page.evaluate("""() => {const p=document.querySelector('#videoPlayerFullscreen'),s=p?.querySelector('.video-player-stage'),f=s?.querySelector('iframe');return {snapshot:window.mallVideoPlayer.getPlaybackSnapshot(),current:window.mallVideoPlayer.getCurrentVideoId(),frame:f?.src,stage:s?.getBoundingClientRect().toJSON(),player:p?.getBoundingClientRect().toJSON(),trace:window.fixturePlayback}}""")
+                raise AssertionError({'case':'initial public source playback fixture','id':identifier,'expected':first_video,'actual':actual}) from exc
+            page.evaluate('window.filteredEntryFrame=document.querySelector("#videoPlayerFullscreen iframe")')
+            page.evaluate('window.mallVideoPlayer.tuck()')
+            page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state==='paused'")
+            page.evaluate("window.mallTileField.searchCatalog('MAGADOOM')")
+            assert page.evaluate("id=>!window.mallTileField.getCatalog().some(x=>(x.foundup_id||x.id)===id)",identifier)
+            assert page.evaluate('window.mallVideoPlayer.isOpen()&&window.mallVideoPlayer.isTucked()')
+            page.evaluate('window.mallVideoPlayer.openWikiTube()')
+            expect(player).to_have_attribute('aria-label','WikiTube video player')
+            enter=player.locator('[data-action="enter"]')
+            if canonical is None: expect(enter).to_be_hidden()
+            else: expect(enter).to_be_visible()
+            page.evaluate('window.mallVideoPlayer.collapseToFloating();window.mallVideoPlayer.openWikiTube();window.mallVideoPlayer.collapseToFloating()')
+            assert page.evaluate('window.filteredEntryFrame===document.querySelector("#videoPlayerFullscreen iframe")')
+            assert page.evaluate('window.mallVideoPlayer.getFoundUpId()')==identifier
+            assert page.evaluate('window.mallVideoPlayer.getCurrentVideoId()')==first_video
+            if canonical is None:
+                expect(enter).to_be_hidden()
+                page.wait_for_function("['playing','manual-play','paused'].includes(window.mallVideoPlayer.getPlaybackSnapshot()?.state)")
+                if page.evaluate('window.mallVideoPlayer.getPlaybackSnapshot().state')!='playing':
+                    player.get_by_role('button',name='Play video',exact=True).tap()
+                expect_playing_id(page,first_video)
+                other=field.locator('.mall-tile[data-foundup-id="magadoom_001"]')
+                other.locator('.mall-card-flip').tap()
+                expect(other.locator('.mall-card-back')).to_be_visible()
+                before=page.evaluate('window.mallVideoPlayer.getPlaybackSnapshot().positionSeconds')
+                page.keyboard.press('Escape')
+                expect(other.locator('.mall-card-back')).to_be_hidden()
+                expect(other.locator('.mall-card-flip')).to_be_focused()
+                assert page.evaluate('window.mallVideoPlayer.isOpen()&&window.filteredEntryFrame===document.querySelector("#videoPlayerFullscreen iframe")')
+                page.wait_for_function('before=>window.mallVideoPlayer.getPlaybackSnapshot()?.state==="playing"&&window.mallVideoPlayer.getPlaybackSnapshot().positionSeconds>before+.1',arg=before)
+                page.keyboard.press('Escape')
+                expect(player).to_be_hidden()
+                observed['live_player_escape_closes_about_first_then_player']=True
+            else:
+                expect(enter).to_be_visible()
+                enter.click()
+                page.wait_for_url('https://foundups.com/?signin=required')
+                stored=json.loads(page.evaluate("sessionStorage.getItem('pfmall_product_return_v1')"))
+                assert stored['filters']=={'enter':canonical}
+                account={'username':'fixture','inviteValidated':True}
+                page.goto('https://foundups.com/member/',wait_until='domcontentloaded')
+                page.wait_for_url('https://foundups.com/member/foundup.html?id='+canonical)
+                expect(page.locator('.entry-hero-name')).to_have_text(by_id[identifier].get('name') or by_id[identifier]['title'])
+                expect(page.locator('.entry-not-found')).to_have_count(0)
+                expect(page.locator('.entry-detail-row').filter(has_text='Target Route').locator('.entry-detail-value')).to_have_text('/f/'+canonical)
+                assert page.evaluate("sessionStorage.getItem('pfmall_product_return_v1')") is None
+                observed['filtered_alias_reaches_full_admitted_entry_title']=True
+        observed['filtered_source_and_alias_keep_explicit_identity_across_modes']=True
+
+        # The second alias and unfinished cards traverse the actual index gate
+        # and real foundup.html; only account/provider services are fixtures.
+        entries=[('science_swarm','science_swarm_hub'),('voteballots','voteballots'),
+                 ('trade','trade'),('magadoom_001','magadoom_001')]
+        for identifier,canonical in entries:
+            page.goto('https://foundups.com/member/?enter='+canonical,wait_until='domcontentloaded')
+            page.wait_for_url('https://foundups.com/member/foundup.html?id='+canonical)
+            item=by_id[identifier]
+            expect(page.locator('.entry-hero-name')).to_have_text(item.get('name') or item['title'])
+            expect(page.locator('.entry-not-found')).to_have_count(0)
+            expect(page.locator('.entry-detail-row').filter(has_text='Target Route').locator('.entry-detail-value')).to_have_text('/f/'+canonical)
+            if identifier!='science_swarm':
+                expect(page.locator('.entry-readiness-copy')).to_have_text(item['entry_copy'])
+                expect(page.locator('.entry-readiness-label')).to_have_text('Discoverable Only')
+                expect(page.get_by_role('link',name=re.compile('^Open App',re.I))).to_have_count(0)
+                page.locator('#entryRedDog').click()
+                expect(page.get_by_role('button',name=re.compile('^Open App',re.I))).to_have_count(0)
+                expect(page.locator('#entryRecsBody')).not_to_contain_text('Open App')
+                page.keyboard.press('Escape')
+                expect(page.locator('#conciergeSheet')).not_to_have_class(re.compile(r'\bopen\b'))
+        observed['second_alias_and_three_unfinished_admitted_entry_truth']=True
+    finally:
+        context.close()
+        browser.close()
+    print(json.dumps({'engine':browser_type.name,'filtered_player_and_entry':observed,
+        'account_and_provider':'existing controlled fixtures','real_signin':'UNEXECUTED',
+        'physical_iPhone':'UNEXECUTED'},sort_keys=True))
 
 
 def verify_hidden_playback_policy(browser_type):
@@ -1928,6 +2053,11 @@ if __name__ == "__main__":
             for engine in (p.chromium,p.webkit):
                 verify_public_discovery_cards(engine)
                 verify_public_entity_slice(engine)
+        raise SystemExit(0)
+    if sys.argv[1:] == ["--entry-regressions"]:
+        with sync_playwright() as p:
+            for engine in (p.chromium,p.webkit):
+                verify_filtered_player_and_admitted_entry(engine)
         raise SystemExit(0)
     main()
     verify_diagnostics()

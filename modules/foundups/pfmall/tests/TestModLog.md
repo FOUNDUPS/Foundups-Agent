@@ -24,7 +24,7 @@ scoped catalog was regenerated; strict rebuild equality was not waived.
 
 FoundUps House is explicitly a discoverable PROJECT CANDIDATE, not a registered
 House entity or listing. Public planning provenance is the pinned existing
-[opportunity model](../docs/PFMALL_OPPORTUNITY_INSTANCE_MODEL.md). No first-house
+[opportunity model](../../docs/PFMALL_OPPORTUNITY_INSTANCE_MODEL.md). No first-house
 record ID, address, location, availability or public disclosure permission was
 verified. Do not alias it to Move2Japan or a Fukui source listing. The intended
 find-houses/Join-to-add-House flow is described, with Join/submission integration
@@ -37,7 +37,7 @@ checks pass. The new offline page exporter has 28 passed / one native junction
 test skipped; deterministic redirect-resolution rejection passes. It extends
 the existing refresh owner without API/auth calls. Network paging assets and
 scoped TV/pinch integration are the NEXT slice, not qualified by these results.
-See [before/after matrix](../docs/PFMALL_V22_REGRESSION_MATRIX.md).
+See [before/after matrix](../../docs/PFMALL_V22_REGRESSION_MATRIX.md).
 
 No production deployment or merge; physical Safari/PWA remains unexecuted as
 a structured feature matrix. Exact-source push/preview/CI receipts are separate.
@@ -71,7 +71,7 @@ taxonomy, rotation and exact far-scroll restoration. Targeted pytest: 209 pass;
 direct Node state/cache VM: 24 pass (overlaps its pytest wrapper). These are
 source/fixture results, not real YouTube or physical iPhone acceptance.
 
-See [before/after regression matrix](../docs/PFMALL_V22_REGRESSION_MATRIX.md)
+See [before/after regression matrix](../../docs/PFMALL_V22_REGRESSION_MATRIX.md)
 for preserved routes, actions, gestures and explicit acceptance changes.
 Native integration, remote push/PR/checks and fresh preview parity are separate
 receipts. Physical Safari/PWA on Wi-Fi/cellular remains unexecuted as a structured
@@ -310,3 +310,30 @@ browser layout, deployment, authentication-provider, asset or market evidence.
 - Safety: catalog truth gates and VerificationGapGuard protected-action rules.
 
 See `README.md` in this directory for the file-level inventory and commands.
+
+## 2026-11-16 - Combined card/player and admitted-entry preservation
+
+Independent source review identified two interactions absent from isolated new-card
+checks: filtered-out retained players lost null/canonical entry identity, and the
+player's document Escape capture displaced the inner About dismissal. The source
+now caches explicit entry identity for the active lane and yields to active card
+backs. Raw video/lane identity remains stable; unknown public entry fails closed.
+
+The admitted entry page resolves canonical aliases and displays their canonical
+fallback route. Explicit-null records do not invent a namespace. Unfinished app
+information links and concierge actions no longer claim Open App; existing View
+Repo behavior is preserved. Entry/root/router projection asset queries align with
+v22. The synthetic gateway growth counter is retired in favor of neutral discovery
+copy; no actual FoundUp count is chosen while classification continues.
+
+Controlled Chromium/WebKit combined regressions pass through both alias admission
+fixtures and real entry HTML, retained source/alias mode changes, About-first Escape
+and second-Escape player dismissal. Post-fix player-policy runs pass on both engines;
+84 entry/Red Dog static checks pass. Authentication/provider/device behavior remains
+fixture-qualified only. The existing test registry was regenerated for the refresh
+safety test's process capability, with no quarantine increase (1845 files/260
+quarantined). Backend manifest check passes for 1487 runtime files.
+
+These corrections preserve the current source checkpoint before scoped TV/network
+paging, rather than asserting that pending work is complete. No merge or production
+deployment is authorized. See PFMALL_V22_REGRESSION_MATRIX.md and coordinator receipts.

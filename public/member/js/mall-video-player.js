@@ -76,6 +76,7 @@
   var isOpen = false;
   var currentQueue = [];
   var currentFoundUpId = null;
+  var currentEntryIdentity;
   var currentIndex = -1;
   var chromeTimer = null;
   var railTimer = null;
@@ -580,6 +581,8 @@
     // Keyboard: dismiss innermost control before shell Escape handler
     document.addEventListener('keydown', function (e) {
       if (e.key !== 'Escape' || !isOpen || e.isComposing) return;
+      var cardBack = e.target?.closest?.('.mall-card-back');
+      if (cardBack && !cardBack.hidden && !cardBack.inert) return;
       if (memberQueueDock?.dialog.open) {
         e.preventDefault();
         e.stopPropagation();
@@ -634,9 +637,14 @@
     var item = window.mallTileField?.getCatalog?.().find(function (entry) {
       return (entry.foundup_id || entry.id) === currentFoundUpId;
     });
-    if (item && window.mallVideoProjection?.canonicalEntryId) return window.mallVideoProjection.canonicalEntryId(item);
-    return item && Object.prototype.hasOwnProperty.call(item, 'canonical_foundup_id')
-      ? item.canonical_foundup_id : currentFoundUpId;
+    if (item) {
+      currentEntryIdentity = window.mallVideoProjection?.canonicalEntryId
+        ? window.mallVideoProjection.canonicalEntryId(item)
+        : (Object.prototype.hasOwnProperty.call(item, 'canonical_foundup_id') ? item.canonical_foundup_id : currentFoundUpId);
+    }
+    // A filtered-out active lane retains its explicit null or canonical alias.
+    if (currentEntryIdentity !== undefined) return currentEntryIdentity;
+    return window.mallVideoProjection?.isOpenMallHost?.(window.location) ? null : currentFoundUpId;
   }
 
   function syncTopBarButtons() {
@@ -872,6 +880,7 @@
   function open(foundupId, queue, startIndex, resumeOpts) {
     if (!queue || !queue.length) return;
     ensureDOM();
+    if (foundupId !== currentFoundUpId) currentEntryIdentity = undefined;
 
     var targetIndex = Math.max(0, Math.min(startIndex || 0, queue.length - 1));
     var wantTheater = resumeOpts?.theater === true;
@@ -1041,6 +1050,7 @@
 
     currentQueue = [];
     currentFoundUpId = null;
+    currentEntryIdentity = undefined;
     currentIndex = -1;
 
     var afterClose = onClose;
@@ -1980,6 +1990,7 @@
   function handleKeydown(e) {
     if (!isOpen || theater) return;
     if (e.defaultPrevented || e.isComposing || e.target?.closest?.('dialog[open]')) return;
+    if (e.target?.closest?.('.mall-card-back')) return;
     if (e.key !== 'Escape' && (inline || e.target?.closest?.('button, a, input, textarea, select'))) return;
 
     switch (e.key) {

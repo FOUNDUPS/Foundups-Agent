@@ -25175,7 +25175,9 @@
       "owner": "public",
       "suite_class": "unit",
       "shard_id": "public-unit",
-      "capabilities": [],
+      "capabilities": [
+        "process"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,

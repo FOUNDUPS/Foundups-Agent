@@ -561,3 +561,30 @@ calls, OAuth expansion, ingestion/index/cache mutation or complete-channel claim
 is made here. Current per-video metadata has no popularity values, so present
 Catalog order only. The current viewport slice addresses bounded delivery and
 queue continuation independently of full-channel acquisition completeness.
+
+## 2026-11-16 - Combined card/player and admitted-entry preservation
+
+Independent source review identified two interactions absent from isolated new-card
+checks: filtered-out retained players lost null/canonical entry identity, and the
+player's document Escape capture displaced the inner About dismissal. The source
+now caches explicit entry identity for the active lane and yields to active card
+backs. Raw video/lane identity remains stable; unknown public entry fails closed.
+
+The admitted entry page resolves canonical aliases and displays their canonical
+fallback route. Explicit-null records do not invent a namespace. Unfinished app
+information links and concierge actions no longer claim Open App; existing View
+Repo behavior is preserved. Entry/root/router projection asset queries align with
+v22. The synthetic gateway growth counter is retired in favor of neutral discovery
+copy; no actual FoundUp count is chosen while classification continues.
+
+Controlled Chromium/WebKit combined regressions pass through both alias admission
+fixtures and real entry HTML, retained source/alias mode changes, About-first Escape
+and second-Escape player dismissal. Post-fix player-policy runs pass on both engines;
+84 entry/Red Dog static checks pass. Authentication/provider/device behavior remains
+fixture-qualified only. The existing test registry was regenerated for the refresh
+safety test's process capability, with no quarantine increase (1845 files/260
+quarantined). Backend manifest check passes for 1487 runtime files.
+
+These corrections preserve the current source checkpoint before scoped TV/network
+paging, rather than asserting that pending work is complete. No merge or production
+deployment is authorized. See PFMALL_V22_REGRESSION_MATRIX.md and coordinator receipts.
