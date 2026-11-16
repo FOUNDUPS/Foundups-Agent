@@ -308,3 +308,86 @@ Current qualification: selected-ID scheduling and read-only preflight exist.
 The historical `publish_daily_clips` source and automatic today-window discovery
 remain unqualified here. These instructions define a bounded operator/handoff
 contract, not a newly deployed watcher or analytics-driven optimization loop.
+
+## 012 live-aware audience timing correction (2026-11-16)
+
+This correction overrides earlier all-hours/on-the-hour examples for subsequent
+requests. Source-day scope and publication-day scope remain separate.
+
+- Do not release Shorts while 012 is actively live on the target channel. Read
+  the channel's actual Live-now status before allocating slots and before any
+  authorized application. A currently active stream has no assumed end time.
+  Existing upcoming slots are conflicts to report, not permission to silently
+  move them. A future slot alone cannot guarantee that no stream will be live;
+  an unattended guarantee requires a qualified existing live-aware owner and
+  pre-release check. Do not claim that guard is deployed from these instructions.
+- Target the requested U.S. audience window, not the PC's clock. Record a named
+  audience timezone (for example America/New_York), release date and UTC instant;
+  convert to the actually displayed Studio timezone, commonly Asia/Tokyo.
+  Compute offsets for each release date, including DST and date rollover; never
+  reuse a fixed U.S./Japan offset. If audience analytics are unavailable, label
+  the selected window an operator assumption, not a measured optimum.
+- Use varied minute offsets and roughly the requested spacing rather than fixed
+  on-the-hour releases. This is editorial pacing, not evasion of platform checks.
+  Check existing releases first; preserve topic ordering, minimum spacing and
+  the explicit audience window. Do not add overnight coverage unless the latest
+  direction requests it. Latest explicit corrections supersede older cadence.
+- When 012 is editing or rescheduling in Studio, stop browser writes and yield
+  the shared tab, including any open unsaved dialog. Do not cancel, save, reload
+  or overwrite that work. Reconcile actual saved state after control is returned.
+- For schedule-only work, use the existing Content-table visibility popup route
+  above rather than opening each video detail page. Content evidence still must
+  exist; list titles alone do not qualify a clip or release held allegations.
+  Verify each saved ID/date/time/timezone independently. A visible control is
+  not evidence that its Save path has been tested in the current session.
+
+Evidence boundary: this update changes operating guidance only. No video,
+resident worker, schedule, account setting or runtime policy is changed by it.
+
+### Current bounded Move2Japan override (012, 2026-11-16)
+
+Latest voice correction supersedes the earlier 15:00-20:00 exclusion and the
+two-hour Hasan-first cadence for this recent-Shorts batch. New slots begin with
+the overnight window starting November 17, 2026 at 20:00 Asia/Tokyo and ending
+November 18 at 04:00. Do not infer authorization for additional nights from
+this bounded window. No scheduling outside that window. Use approximately one
+video every four hours with topic variety, not constant Hasan. Vary minutes only
+within the window and without overriding cadence, collisions or existing slots;
+do not force an extra release at the closing boundary.
+
+Leave November 16 and every existing scheduled item intact. Reconcile current
+operator edits and duplicate IDs before any writes. Record each full JST date,
+UTC instant and date-specific U.S. audience equivalent; overnight slots cross
+a calendar date. The known-live exclusion still applies: this window does not
+authorize release during a known active stream. Held content remains held until
+its applicable approval/evidence is resolved. This is a bounded batch override,
+not a channel-wide runtime policy or permission to move existing schedules.
+
+### Operator demonstration: alternating positions in an Unlisted list
+
+012 demonstrated the intended selection heuristic: alternate top/bottom candidates
+to obtain topic variety rather than exhaust one repeated-title group. Treat row
+position as a navigation aid, not topic evidence, lineage or expanded scope.
+Bind every action to the exact video ID, verified content and authorized source
+window; older bottom rows outside the accepted batch remain excluded.
+
+After a saved visibility change, an item may disappear from the Unlisted-filtered
+list. Reacquire remaining rows because positions change. Disappearance alone is
+not a schedule receipt: independently locate the same ID in scheduled content
+and read its persisted date, time and timezone. Noninteractive observation of
+an operator's list does not prove unseen clicks, saved times or actual topics.
+
+Observed UI qualification (2026-11-16 operator demonstration): newly Scheduled
+rows can remain visible temporarily under the Unlisted filter while the operator
+alternates top and bottom groups. Do not assume immediate disappearance or use
+an unchanged row position as identity. That observation verified visible status
+and date only, not an exact saved time or full playback/content audit.
+
+Current native implementation qualification (source audit 2026-11-16): the
+operator's demonstrated manual list-page workflow is not yet the native writer's
+qualified execution path. `ContentPageScheduler.schedule_video_from_row` routes
+to the detail owner for fresh metadata/Audience checks; `video_policy.submit_inline`
+fails closed with `presave_audit:detail_editor_required`. Do not remove that gate
+to implement the preference above. `schedule_all_visible` delegates frozen IDs
+to the existing calendar/claim owner. Native list-page continuation needs its
+own gate-preserving implementation and tests before live qualification.
