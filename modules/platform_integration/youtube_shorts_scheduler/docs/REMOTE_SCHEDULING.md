@@ -346,14 +346,19 @@ resident worker, schedule, account setting or runtime policy is changed by it.
 
 ### Current bounded Move2Japan override (012, 2026-11-16)
 
-For the current recent-Shorts batch only, new release slots begin November 17,
-2026 in Asia/Tokyo. Leave November 16 and every existing scheduled item intact.
-Use the permitted JST intervals [00:00,15:00) and [20:00,24:00); exclude
-[15:00,20:00). This explicit window supersedes earlier around-the-clock or
-inferred U.S.-peak-hour windows for this batch. Vary the minutes while preserving
-requested approximate cadence, topic priority and collision checks. Record the
-full JST date/time, UTC instant and date-specific U.S. audience equivalent.
-The known-live exclusion still applies; the window is not permission to release
-during a known active stream. Held content remains held until its applicable
-approval/evidence is resolved. This does not enable a channel-wide policy or
-permit moving existing schedules. Reconcile operator edits before any writes.
+Latest voice correction supersedes the earlier 15:00-20:00 exclusion and the
+two-hour Hasan-first cadence for this recent-Shorts batch. New slots begin with
+the overnight window starting November 17, 2026 at 20:00 Asia/Tokyo and ending
+November 18 at 04:00; subsequent applicable windows use the same 20:00-04:00
+JST overnight bounds. No scheduling outside that window. Use approximately one
+video every four hours with topic variety, not constant Hasan. Vary minutes only
+within the window and without overriding cadence, collisions or existing slots;
+do not force an extra release at the closing boundary.
+
+Leave November 16 and every existing scheduled item intact. Reconcile current
+operator edits and duplicate IDs before any writes. Record each full JST date,
+UTC instant and date-specific U.S. audience equivalent; overnight slots cross
+a calendar date. The known-live exclusion still applies: this window does not
+authorize release during a known active stream. Held content remains held until
+its applicable approval/evidence is resolved. This is a bounded batch override,
+not a channel-wide runtime policy or permission to move existing schedules.
