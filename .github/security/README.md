@@ -1,3 +1,19 @@
+## JHR reconciliation helper source metadata review — 2026-11-16
+
+PR2414's regenerated backend manifest adds exactly one publication reconciler
+and updates the planner checksum. Hosted job133347432000 reports39 current-tree
+metadata findings (37 generic-api-key,2 discord-api-token), zero introduced-history
+findings. Every flagged complete path/SHA row is byte-identical to its reviewed
+b0b81bf5 row and was independently source-rehashed at exact1fea63dc; no credential
+literal is approved. The new entire-manifest Git-byte SHA256 is
+`1edde361ddea9165c8b31b39d0e3a672bac55324fd7f2ceb57faf0abde4df80f`.
+
+Independent per-finding review approved only39 exact whole-file/rule/line
+bindings, preserving all4579 prior entries/order and other fields (4618 total).
+See [per-finding evidence](reviewed-jhr-manifest-evidence.json). Scanner rules,
+exclusions, fingerprint formula and complete-tree/introduced-history coverage
+remain unchanged; scanner errors remain blocking. Fresh hosted scans required.
+
 ## Storytime, Kids Episode, and UI-TARS coordinate-profile metadata review — 2026-11-16
 
 The backend manifest refreshes one runtime source checksum

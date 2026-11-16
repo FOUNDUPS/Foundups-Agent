@@ -1,3 +1,13 @@
+## 2026-11-16 — Exact generated-manifest security metadata re-review
+
+The replacement head's scanner reported39 manifest metadata rows after the
+whole-file digest changed. Each row matches prior reviewed bytes and actual
+immutable source SHA256; independent review approved only39 exact new bindings,
+preserving4579 entries/order (4618 total). No scanner policy, exclusions, raw
+credentials or fingerprint algorithm changed. Public per-row proof is in
+`.github/security/reviewed-jhr-manifest-evidence.json`; fresh tree/history/hosted
+checks remain required. Original failed security result retained. Existing exact-fingerprint/scanner-error contracts:10 passed (43 unrelated deselected); actual fresh scans remain required.
+
 ## 2026-11-16 — Publication reconciliation dependency binding repair
 
 The first PR2414 hosted Python job correctly rejected a stale generated backend
