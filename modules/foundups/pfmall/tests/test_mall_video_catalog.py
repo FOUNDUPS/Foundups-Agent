@@ -190,11 +190,30 @@ class TestFoundUpEntryShape:
             "github_repo", "external_app", "internal_app", "internal_service",
         }
         for entry in catalog:
+            if entry["source_type"] == "project_candidate":
+                assert entry["discovery_kind"] == "candidate"
+                assert entry["canonical_foundup_id"] is None
+                assert entry["launch_readiness"] == "planning_only"
+                assert entry["videos"] == [] and entry["video_count"] == 0
+                continue
             assert entry["source_type"] in valid_types, f"Invalid source_type: {entry['source_type']}"
 
     def test_status_values(self, catalog: list[dict]):
         valid_statuses = {"active", "placeholder", "archived", "pending"}
         for entry in catalog:
+            if entry["status"] == "incubating":
+                assert entry["source_type"] == "internal_app"
+                assert entry["canonical_foundup_id"] == entry["foundup_id"]
+                assert entry["lifecycle_stage"] == "incubating"
+                assert entry["launch_readiness"] == "discoverable_only"
+                assert entry["videos"] == [] and entry["video_count"] == 0
+                continue
+            if entry["status"] == "specified":
+                assert entry["source_type"] == "project_candidate"
+                assert entry["canonical_foundup_id"] is None
+                assert entry["lifecycle_stage"] == "Specified"
+                assert entry["launch_readiness"] == "planning_only"
+                continue
             assert entry["status"] in valid_statuses, f"Invalid status: {entry['status']}"
 
     def test_tags_is_list(self, catalog: list[dict]):
@@ -367,9 +386,16 @@ class TestNonVideoFoundUps:
     NON_VIDEO_SOURCE_TYPES = {"github_repo", "external_app", "internal_app", "internal_service"}
 
     def test_external_url_present_for_non_video_types(self, catalog: list[dict]):
-        """Non-video source types must have external_url."""
+        """Launched destinations need URLs; unfinished apps retain a gated door."""
         for entry in catalog:
             if entry["source_type"] in self.NON_VIDEO_SOURCE_TYPES:
+                if entry["source_type"] == "internal_app" and entry.get("launch_readiness") == "discoverable_only":
+                    assert entry["canonical_foundup_id"] == entry["foundup_id"]
+                    assert entry["routing_prefix"] == "/f/" + entry["canonical_foundup_id"]
+                    assert entry["entry_copy"].strip(), "Unfinished app must explain its limits"
+                    assert entry["entry_url"] == ""
+                    assert entry["videos"] == [] and entry["video_count"] == 0
+                    continue
                 assert "external_url" in entry and entry["external_url"], (
                     f"Missing external_url in {entry['foundup_id']} "
                     f"(source_type={entry['source_type']})"
@@ -384,6 +410,36 @@ class TestNonVideoFoundUps:
                     f"external_url must be https in {entry['foundup_id']}: {url}"
                 )
 
+
+class TestDiscoveryCardIdentity:
+    """Explicit identities prevent creator lanes and plans becoming fake FoundUps."""
+
+    def test_canonical_identity_maps_registered_foundups_only(self, catalog):
+        registry_path = CATALOG_PATH.parents[2] / "modules/foundups/foundup_registry.json"
+        registered = {item["foundup_id"] for item in json.loads(registry_path.read_text(encoding="utf-8"))["entities"]}
+        for item in catalog:
+            assert "canonical_foundup_id" in item
+            canonical = item["canonical_foundup_id"]
+            assert canonical is None or canonical in registered
+        by_id = {item["foundup_id"]: item for item in catalog}
+        assert by_id["antifafm"]["canonical_foundup_id"] == "antifafm_001"
+        assert by_id["science_swarm"]["canonical_foundup_id"] == "science_swarm_hub"
+        for identifier in ("undaodu", "foundups_main", "linkedin_012", "linkedin_esingularity", "linkedin_tsingularity", "linkedin_foundups"):
+            assert by_id[identifier]["canonical_foundup_id"] is None
+
+    def test_house_is_planning_only_without_member_admission(self, catalog):
+        house = next(item for item in catalog if item["foundup_id"] == "foundups_house_project")
+        assert house["canonical_foundup_id"] is None
+        assert house["discovery_kind"] == "candidate"
+        assert house["source_type"] == "project_candidate"
+        assert house["launch_readiness"] == "planning_only"
+        assert house["entry_url"] == ""
+        assert not house.get("routing_prefix") and not house.get("data_namespace")
+        assert house["videos"] == [] and house["video_count"] == 0
+        assert house["public_plan_url"] == (
+            "https://github.com/FOUNDUPS/Foundups-Agent/blob/72a3182c70974f0523be91d5ce4bd32808d824bc/"
+            "modules/foundups/docs/PFMALL_OPPORTUNITY_INSTANCE_MODEL.md"
+        )
 
 class TestDerivedLanes:
     """Test derived lane conditional fields."""

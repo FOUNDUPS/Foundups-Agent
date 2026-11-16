@@ -1,5 +1,47 @@
 # p.fMALL Roadmap
 
+## 2026-11-16 - Discovery cards and explicit canonical/source separation
+
+Implemented the three explicitly requested already-public registry projects:
+Vote/Ballots (`voteballots`), Trade (`trade`) and MAGADOOM (`magadoom_001`).
+Their declared unfinished/internal-PoC status remains visible; entry uses the
+existing canonical Member Portal/sign-in/invite-code doorway. No new gate,
+registry visibility promotion, launched-product claim or private namespace.
+
+The supplied catalog now has 20 CARD RECORDS: 13 map to existing canonical
+IDs, six are creator/source channels, and FoundUps House is one project
+candidate with null canonical identity. This is not a finalized count of
+FoundUps. Personal LinkedIn channels remain sources; aliases `antifafm` and
+`science_swarm` retain stable lane/video IDs while entry maps to
+`antifafm_001` and `science_swarm_hub`. The source and candidate views do not
+offer a fabricated FoundUp entry. The 144 target remains capacity only.
+
+Existing portrait cards now have accessible About/Back faces, escaped pitch
+metadata, stage and truthful participation links, with keyboard/touch/Escape
+focus restoration. Catalog metadata required by existing filters is preserved.
+The refresh projection retains HPC's validated canonical ID and the derived
+scoped catalog was regenerated; strict rebuild equality was not waived.
+
+FoundUps House is explicitly a discoverable PROJECT CANDIDATE, not a registered
+House entity or listing. Public planning provenance is the pinned existing
+[opportunity model](../docs/PFMALL_OPPORTUNITY_INSTANCE_MODEL.md). No first-house
+record ID, address, location, availability or public disclosure permission was
+verified. Do not alias it to Move2Japan or a Fukui source listing. The intended
+find-houses/Join-to-add-House flow is described, with Join/submission integration
+unavailable. Existing generic admission does not create a house. Recover 012's
+first-House owner record and approved public projection before offering it.
+
+Validation: independent controlled Chromium/WebKit discovery-card and shared
+header/entity groups pass; 127 catalog/tile pytest cases and 24 Node state/cache
+checks pass. The new offline page exporter has 28 passed / one native junction
+test skipped; deterministic redirect-resolution rejection passes. It extends
+the existing refresh owner without API/auth calls. Network paging assets and
+scoped TV/pinch integration are the NEXT slice, not qualified by these results.
+See [before/after matrix](../docs/PFMALL_V22_REGRESSION_MATRIX.md).
+
+No production deployment or merge; physical Safari/PWA remains unexecuted as
+a structured feature matrix. Exact-source push/preview/CI receipts are separate.
+
 ## 2026-11-16 - Build v22 direct continuation and policy qualification
 
 012 explicitly authorized the existing v21 continuation through tests, push,
@@ -496,3 +538,31 @@ link its canonical records instead of duplicating them. Existing Carbon video
 lane `6afaa791-cdfc-8191-9da3-cb1f22384019` has a physical Escape stop and
 unconfirmed native state; resolve it before any new Carbon swarm. This section
 records deferred acceptance, not completed artifact ingestion or publication.
+
+
+## Ingestion completeness versus viewport delivery - verified research boundary
+
+At base `72a3182c70974f0523be91d5ce4bd32808d824bc`, unchanged
+`channel_puller.py` blob `b5098b7ee1fea2a47bcd828fa8c01a22ae1e5f8b`
+implements `fetch_channel_videos()` using `search.list(channelId,type=video,
+order=date,maxResults=50,pageToken)` without the ownership filters. The existing
+refresh utility imports and calls it for delta/full acquisition; scheduler/CLI
+paths also produce reviewed ingest deltas. Continuation tokens remain local
+to the call, and returned records omit video popularity statistics.
+
+Google documents a 500-video maximum for that query without the relevant owner
+filters: [official search.list](https://developers.google.com/youtube/data/reference/rest/v3/search/list).
+This is an applicable completeness limitation of that utility, NOT established
+proof that it populated/truncated the present catalog (Move2Japan already has
+594 approved records). Browser boot and offline viewport-page generation read
+the committed reviewed catalog and do not invoke that API path.
+
+For a future separately qualified ingestion slice, reuse the existing scoped
+audit's channels.contentDetails uploads-playlist lookup and playlistItems
+pagination before creating another pipeline. Persist resumable progress and
+refresh verified video statistics separately if popularity is offered; preserve
+existing review deltas, indexing/cache ownership and provider limits. No API
+calls, OAuth expansion, ingestion/index/cache mutation or complete-channel claim
+is made here. Current per-video metadata has no popularity values, so present
+Catalog order only. The current viewport slice addresses bounded delivery and
+queue continuation independently of full-channel acquisition completeness.

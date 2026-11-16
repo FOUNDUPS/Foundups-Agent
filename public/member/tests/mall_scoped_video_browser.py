@@ -1572,15 +1572,223 @@ def verify_hidden_playback_policy(browser_type):
         "provider":"controlled YT API fixture","physical_iPhone":"UNEXECUTED"},sort_keys=True))
 
 
+def verify_public_discovery_cards(browser_type):
+    """Card identity, accessible About, canonical entry and planning-only House.
+
+    All destination documents are route fixtures, not live portal/plan checks.
+    Synthetic hostile/missing metadata is never added to the catalog on disk.
+    """
+    records=json.loads((public/'member/mall-video-catalog.json').read_text(encoding='utf-8'))
+    by_id={item['foundup_id']:item for item in records}
+    approved={'voteballots','trade','magadoom_001'}
+    assert len(records)==20 and approved<=by_id.keys()
+    for identifier in approved:
+        item=by_id[identifier]
+        assert item['canonical_foundup_id']==identifier
+        assert item['lifecycle_stage']=='incubating' and item['launch_readiness']=='discoverable_only'
+        assert item['videos']==[] and item['video_count']==0 and item['entry_url']==''
+    house=by_id['foundups_house_project']
+    plan='https://github.com/FOUNDUPS/Foundups-Agent/blob/72a3182c70974f0523be91d5ce4bd32808d824bc/modules/foundups/docs/PFMALL_OPPORTUNITY_INSTANCE_MODEL.md'
+    assert house['canonical_foundup_id'] is None and house['discovery_kind']=='candidate'
+    assert house['lifecycle_stage']=='Specified' and house['launch_readiness']=='planning_only'
+    assert house['public_plan_url']==plan and house['videos']==[]
+    destinations=[]
+    def routes(route):
+        url=urlsplit(route.request.url)
+        if url.hostname=='foundups.com' and url.path=='/member/' and url.query.startswith('enter='):
+            destinations.append(route.request.url)
+            route.fulfill(status=200,content_type='text/html',body='<h1>Member Portal destination fixture</h1>')
+        elif route.request.url==plan:
+            destinations.append(route.request.url)
+            route.fulfill(status=200,content_type='text/html',body='<h1>Public plan destination fixture</h1>')
+        else: route_local(route)
+    browser=browser_type.launch()
+    context=browser.new_context(viewport={'width':390,'height':844},is_mobile=True,
+        has_touch=True,service_workers='block',reduced_motion='reduce')
+    observed={}
+    try:
+        context.add_init_script(provider)
+        context.add_init_script('window.IntersectionObserver=undefined')
+        context.route('**/*',routes)
+        page=context.new_page()
+        page.set_default_timeout(6000)
+        page.goto('https://play.foundups.com/member/',wait_until='domcontentloaded')
+        field=page.locator('#mallTileField')
+        expect(field.locator('.mall-tile')).to_have_count(6)
+        for _ in range(3): page.get_by_role('button',name='Load more cards',exact=True).click()
+        expect(field.locator('.mall-tile')).to_have_count(20)
+        expect(field.locator('[data-catalog-kind="foundup"]')).to_have_count(13)
+        expect(field.locator('[data-catalog-kind="source"]')).to_have_count(6)
+        expect(field.locator('[data-catalog-kind="candidate"]')).to_have_count(1)
+        expect(field.locator('[data-catalog-kind="source"] .mall-card-enter')).to_have_count(0)
+        assert page.evaluate('window.fixturePlayback.created===0&&window.fixturePlayback.plays===0')
+
+        def card(identifier): return field.locator('.mall-tile[data-foundup-id="'+identifier+'"]')
+        def assert_front(tile):
+            expect(tile.locator('.mall-card-front')).to_be_visible()
+            expect(tile.locator('.mall-card-back')).to_be_hidden()
+            assert tile.locator('.mall-card-back').evaluate('el=>el.inert')
+            assert not tile.locator('.mall-card-front').evaluate('el=>el.inert')
+            expect(tile.locator('.mall-card-flip')).to_have_attribute('aria-expanded','false')
+        for identifier in sorted(approved):
+            tile=card(identifier)
+            assert_front(tile)
+            flip=tile.locator('.mall-card-flip')
+            flip.press('Enter')
+            back=tile.locator('.mall-card-back')
+            expect(back).to_be_visible()
+            expect(tile.locator('.mall-card-flip-back')).to_be_focused()
+            assert tile.locator('.mall-card-front').evaluate('el=>el.inert')
+            expect(flip).to_have_attribute('aria-expanded','true')
+            assert flip.get_attribute('aria-controls')==back.get_attribute('id')
+            expect(back.locator('.mall-card-stage')).to_contain_text('incubating')
+            expect(back.locator('.mall-card-stage')).to_contain_text('discoverable only')
+            expect(back).to_contain_text(by_id[identifier]['entry_copy'])
+            expect(back.locator('.mall-card-enter')).to_have_attribute('data-canonical-foundup-id',identifier)
+            # Hidden front and flipped tile border must never bubble into play.
+            tile.evaluate("el=>{el.focus();el.dispatchEvent(new MouseEvent('click',{bubbles:true}));}")
+            page.keyboard.press('Enter')
+            expect(back).to_be_visible()
+            page.keyboard.press('Escape')
+            assert_front(tile)
+            expect(flip).to_be_focused()
+            # WebKit does not mark programmatic focus following our synthetic
+            # border-focus probe as keyboard-visible. Establish real Tab input;
+            # do not change native keyboard preferences or fake the CSS state.
+            page.keyboard.press('Tab')
+            page.keyboard.press('Shift+Tab')
+            expect(flip).to_be_focused()
+            assert flip.evaluate("el=>el.matches(':focus-visible')")
+            assert flip.bounding_box()['width']>=44 and flip.bounding_box()['height']>=44
+            flip.press('Space')
+            expect(back).to_be_visible()
+            assert tile.locator('.mall-card-flip-back').bounding_box()['height']>=44
+            tile.locator('.mall-card-flip-back').tap()
+            assert_front(tile)
+            expect(flip).to_be_focused()
+        assert page.evaluate('window.fixturePlayback.created===0&&window.fixturePlayback.plays===0')
+        observed['approved_three_about_keyboard_touch_escape_no_play']=True
+
+        # House is a project plan, with no fake join, listing, or portal doorway.
+        tile=card('foundups_house_project')
+        for activation in ('tap','Enter','Space'):
+            if activation=='tap': tile.tap(position={'x':15,'y':20})
+            else: tile.focus();page.keyboard.press(activation)
+            back=tile.locator('.mall-card-back')
+            expect(back).to_be_visible()
+            expect(back.locator('.mall-card-kind')).to_contain_text('canonical registration unverified')
+            expect(back.locator('.mall-card-stage')).to_contain_text('Specified')
+            expect(back.locator('.mall-card-stage')).to_contain_text('planning only')
+            expect(back.locator('.mall-card-enter')).to_have_count(0)
+            expect(back.get_by_role('button',name=re.compile('Join',re.I))).to_have_count(0)
+            expect(back.locator('.mall-card-plan')).to_have_attribute('href',plan)
+            page.keyboard.press('Escape')
+            assert_front(tile)
+        tile.locator('.mall-card-flip').tap()
+        link=tile.locator('.mall-card-plan')
+        expect(link).to_have_attribute('target','_blank')
+        assert {'noopener','noreferrer'}<=set(link.get_attribute('rel').split())
+        with page.expect_popup() as event: link.click()
+        popup=event.value
+        try:
+            popup.wait_for_load_state('domcontentloaded')
+            assert popup.url==plan and popup.evaluate('window.opener===null')
+        finally: popup.close()
+        page.keyboard.press('Escape')
+        assert page.url=='https://play.foundups.com/member/'
+        assert page.evaluate('window.fixturePlayback.created===0&&window.fixturePlayback.plays===0')
+        observed['house_planning_only_portrait_keys_and_pinned_plan_fixture']=True
+
+        # Quick-view and player cannot fabricate a FoundUp doorway for a source.
+        page.evaluate("window.mallPlanes.openFoundUpById('undaodu')")
+        view=page.locator('#foundupViewPlane')
+        expect(view.locator('a[href*="?enter="]')).to_have_count(0)
+        expect(view).to_contain_text('not a separate FoundUp')
+        page.evaluate('window.mallPlanes.closeView()')
+        page.evaluate("window.mallPlanes.openFoundUpById('foundups_house_project')")
+        expect(view.locator('a[href*="?enter="]')).to_have_count(0)
+        expect(view).to_contain_text('Join / submissions are not available')
+        expect(view.locator('a.fv-primary-cta')).to_have_attribute('href',plan)
+        page.evaluate('window.mallPlanes.closeView()')
+        page.evaluate('records=>window.mallTileField.updateCatalog(records)',[by_id['undaodu']])
+        field.locator('.mall-tile').first.tap(position={'x':15,'y':20})
+        expect(page.locator('#videoPlayerFullscreen')).to_be_visible()
+        expect(page.locator('#videoPlayerFullscreen [data-action="enter"]')).to_be_hidden()
+        page.locator('#videoPlayerFullscreen').get_by_role('button',name='Close player',exact=True).tap()
+        observed['source_quickview_and_player_have_no_canonical_entry']=True
+
+        # Real browser navigations, each fulfilled with an explicit local fixture.
+        for identifier,canonical in [('antifafm','antifafm_001'),('science_swarm','science_swarm_hub')]:
+            page.evaluate('records=>window.mallTileField.updateCatalog(records)',[by_id[identifier]])
+            tile=field.locator('.mall-tile')
+            tile.locator('.mall-card-flip').tap()
+            tile.locator('.mall-card-enter').click()
+            expect(page).to_have_url('https://foundups.com/member/?enter='+canonical)
+            expect(page.get_by_role('heading')).to_have_text('Member Portal destination fixture')
+            page.go_back(wait_until='domcontentloaded')
+            expect(page).to_have_url('https://play.foundups.com/member/')
+            expect(field.locator('.mall-tile').first).to_be_visible()
+        observed['canonical_alias_member_portal_navigation_and_browser_back']=True
+
+        # Hostile/missing copy must remain text, with truthful fallback labels.
+        hostile=deepcopy(house)
+        hostile.update(foundup_id='metadata_fixture',title='<img src=x onerror="window.fixtureInjected=1">',
+            tagline='<script>window.fixtureInjected=2</script>',description='<svg onload="window.fixtureInjected=3">',
+            entry_copy='A & B <button>Join</button>',public_plan_url='javascript:alert(1)')
+        page.evaluate('records=>window.mallTileField.updateCatalog(records)',[hostile])
+        tile=field.locator('.mall-tile')
+        tile.locator('.mall-card-flip').tap()
+        expect(tile.locator('h3')).to_have_text(hostile['title'])
+        expect(tile.locator('.mall-card-pitch')).to_contain_text(hostile['tagline'])
+        expect(tile.locator('img,script,svg')).to_have_count(0)
+        expect(tile.locator('.mall-card-plan,.mall-card-enter')).to_have_count(0)
+        assert page.evaluate('window.fixtureInjected===undefined')
+        missing=deepcopy(hostile)
+        missing.update(tagline='',one_sentence_pitch='',description='')
+        page.evaluate('records=>window.mallTileField.updateCatalog(records)',[missing])
+        tile=field.locator('.mall-tile')
+        tile.locator('.mall-card-flip').tap()
+        expect(tile.locator('.mall-card-pitch')).to_contain_text('No public pitch provided.')
+        expect(tile.locator('.mall-card-back')).to_contain_text('No public description provided.')
+        observed['escaped_metadata_missing_copy_and_unapproved_plan_url']=True
+
+        # Legacy player-absent rendering retains canonical alias admission only.
+        page.evaluate('records=>{window.mallVideoPlayer=null;window.mallTileField.updateCatalog(records)}',
+            [by_id['antifafm'],by_id['undaodu'],house])
+        expect(card('antifafm').locator('.mall-tile-enter')).to_have_count(1)
+        expect(card('undaodu').locator('.mall-tile-enter,.mall-card-enter')).to_have_count(0)
+        tile=card('foundups_house_project')
+        tile.focus();page.keyboard.press('Enter')
+        expect(tile.locator('.mall-card-back')).to_be_visible()
+        page.keyboard.press('Escape')
+        tile.focus();page.keyboard.press('Space')
+        expect(tile.locator('.mall-card-back')).to_be_visible()
+        page.keyboard.press('Escape')
+        card('antifafm').locator('.mall-tile-enter').click()
+        expect(page).to_have_url('https://foundups.com/member/?enter=antifafm_001')
+        observed['legacy_source_and_house_guards_and_alias_entry']=True
+    finally:
+        context.close()
+        browser.close()
+    print(json.dumps({'engine':browser_type.name,'discovery_cards':observed,
+        'catalog_records':20,'canonical_foundups':13,'sources':6,'project_candidates':1,
+        'destinations':destinations,'live_destinations_verified':False,'physical_iPhone':'UNEXECUTED'},sort_keys=True))
+
+
 def verify_public_entity_slice(browser_type):
-    """Public16 + synthetic144 capacity regression; never a live-inventory claim.
+    """Mixed public catalog + synthetic144 capacity; no FoundUp-count claim.
 
     Reuses route_local/provider. This selection does not run the focused
     player-policy suite or qualify real provider/account/physical-device behavior.
     """
     real = json.loads((public / "member/mall-video-catalog.json").read_text(encoding="utf-8"))
     expected_ids = {item["foundup_id"] for item in real}
-    assert len(real) == len(expected_ids) == 16
+    assert len(real) == len(expected_ids) == 20
+    expected_kinds={item['foundup_id']:('foundup' if item.get('canonical_foundup_id') else
+        'candidate' if item.get('discovery_kind')=='candidate' else 'source') for item in real}
+    assert list(expected_kinds.values()).count('foundup')==13
+    assert list(expected_kinds.values()).count('source')==6
+    assert list(expected_kinds.values()).count('candidate')==1
     requested_images = []
 
     def route_entity(route):
@@ -1609,20 +1817,20 @@ def verify_public_entity_slice(browser_type):
                 expect(field.locator(".mall-tile").first).to_be_visible()
                 if disable_io:
                     expect(field.locator(".mall-tile")).to_have_count(6)
-                    page.get_by_role("button",name="Load more FoundUps",exact=True).click()
+                    page.get_by_role("button",name="Load more cards",exact=True).click()
                     expect(field.locator(".mall-tile")).to_have_count(12)
                 for _ in range(4):
                     count = field.locator(".mall-tile").count()
                     if count == len(real): break
                     if disable_io:
-                        page.get_by_role("button",name="Load more FoundUps",exact=True).click()
+                        page.get_by_role("button",name="Load more cards",exact=True).click()
                     else:
                         field.evaluate("el=>{el.parentElement.scrollTop=el.parentElement.scrollHeight}")
                         page.wait_for_function("n=>document.querySelectorAll('#mallTileField .mall-tile').length>n",arg=count)
                 actual = field.locator(".mall-tile").evaluate_all("els=>els.map(x=>({id:x.dataset.foundupId,type:x.dataset.tileType,name:x.querySelector('.mall-tile-name').textContent.trim()}))")
-                assert len(actual) == len({x["id"] for x in actual}) == 16
+                assert len(actual) == len({x["id"] for x in actual}) == 20
                 assert {x["id"] for x in actual} == expected_ids
-                assert all(x["type"] == "foundup" for x in actual)
+                assert all(x["type"] == expected_kinds[x['id']] for x in actual)
                 names = {x["foundup_id"]:x.get("name",x.get("title","")) for x in real}
                 assert all(x["name"] == names[x["id"]] for x in actual)
                 for width,height in ((320,700),(390,844),(844,390),(1366,900)):
@@ -1644,7 +1852,7 @@ def verify_public_entity_slice(browser_type):
                 player=page.get_by_role("region",name="Floating video player",exact=True)
                 expect(player).to_be_visible()
                 page.evaluate("window.entityAppendFrame=document.querySelector('#videoPlayerFullscreen iframe')")
-                page.get_by_role("button",name="Load more FoundUps",exact=True).click()
+                page.get_by_role("button",name="Load more cards",exact=True).click()
                 assert page.evaluate("window.mallVideoPlayer.isOpen()&&window.entityAppendFrame===document.querySelector('#videoPlayerFullscreen iframe')")
                 player.get_by_role("button",name="Close player",exact=True).click()
 
@@ -1653,7 +1861,7 @@ def verify_public_entity_slice(browser_type):
                 capacity=[]
                 for i in range(144):
                     item=deepcopy(template)
-                    item.update(foundup_id=f"capacity_fixture_{i:03}",title=f"Capacity fixture {i:03}",name=f"Capacity fixture {i:03}",
+                    item.update(foundup_id=f"capacity_fixture_{i:03}",canonical_foundup_id=f"capacity_fixture_{i:03}",title=f"Capacity fixture {i:03}",name=f"Capacity fixture {i:03}",
                         videos=[],video_count=0,true_video_count=0,channel_avatar_url=f"/__entity_fixture__/{i:03}.svg",poster_url=f"/__entity_fixture__/{i:03}.svg")
                     capacity.append(item)
                 capacity[-1].update(videos=[deepcopy(videos[0])],video_count=1,true_video_count=1)
@@ -1698,7 +1906,7 @@ def verify_public_entity_slice(browser_type):
                 context.close()
     finally:
         browser.close()
-    print(json.dumps({"engine":browser_type.name,"public_entity_real_records":16,"synthetic_capacity_fixture":144,"native_io_and_manual_fallback":True,"far_state_and_both_collapse_branches":True,"single_click_and_append_continuity":True,"canonical_member_portal_url":True,"physical_iPhone":"UNEXECUTED"},sort_keys=True))
+    print(json.dumps({"engine":browser_type.name,"catalog_records":20,"canonical_foundups":13,"source_cards":6,"project_candidates":1,"synthetic_capacity_fixture":144,"native_io_and_manual_fallback":True,"far_state_and_both_collapse_branches":True,"single_click_and_append_continuity":True,"canonical_member_portal_url":True,"physical_iPhone":"UNEXECUTED"},sort_keys=True))
 
 
 if __name__ == "__main__":
@@ -1714,6 +1922,12 @@ if __name__ == "__main__":
             for engine in (p.chromium,p.webkit):
                 verify_hidden_playback_policy(engine)
                 verify_floating_and_wikitube_gestures(engine)
+        raise SystemExit(0)
+    if sys.argv[1:] == ["--discovery-cards"]:
+        with sync_playwright() as p:
+            for engine in (p.chromium,p.webkit):
+                verify_public_discovery_cards(engine)
+                verify_public_entity_slice(engine)
         raise SystemExit(0)
     main()
     verify_diagnostics()

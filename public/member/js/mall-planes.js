@@ -148,9 +148,12 @@
     var primaryCtaHtml = '';
     var secondaryLinkHtml = '';
     var ctaDef = SOURCE_TYPE_CTA[item.source_type];
-    var memberProjection = window.mallVideoProjection?.memberPath(item.foundup_id);
+    var entryId = window.mallVideoProjection?.canonicalEntryId
+      ? window.mallVideoProjection.canonicalEntryId(item)
+      : (Object.prototype.hasOwnProperty.call(item, 'canonical_foundup_id') ? item.canonical_foundup_id : item.foundup_id);
+    var memberProjection = entryId && window.mallVideoProjection?.memberPath(entryId);
     var openMall = !!window.mallVideoProjection?.isOpenMallHost?.(window.location);
-    var portalEntryUrl = openMall ? window.mallVideoProjection.memberPortalUrl(item.foundup_id) : '';
+    var portalEntryUrl = openMall && entryId ? window.mallVideoProjection.memberPortalUrl(entryId) : '';
     var ctaUrl = '';
     if (isNonVideo && ctaDef) {
       ctaUrl = item[ctaDef.urlField] || '';
@@ -159,7 +162,23 @@
       }
     }
 
-    if (openMall) {
+    if (!entryId) {
+      var candidate = item.discovery_kind === 'candidate';
+      sourceContext = '<p class="fv-source-context">' +
+        (candidate ? 'Project candidate \u00b7 Planning' : 'Source channel \u00b7 not a separate FoundUp') + '</p>';
+      var publicSource = '';
+      try {
+        var sourceValue = item.public_plan_url || item.external_url || item.source_url || '';
+        var target = new URL(sourceValue, window.location.origin);
+        if (target.protocol === 'https:' && !target.username && !target.password &&
+            sourceValue) publicSource = target.href;
+      } catch (e) { /* Unverified source has no link. */ }
+      if (publicSource) {
+        primaryCtaHtml = '<a class="fv-primary-cta" href="' + esc(publicSource) +
+          '" target="_blank" rel="noopener noreferrer">' + (candidate ? 'View project plan' : 'Open source') + '</a>';
+      }
+      if (candidate) secondaryLinkHtml = '<p class="fv-source-context">Join / submissions are not available here yet.</p>';
+    } else if (openMall) {
       if (memberProjection) {
         primaryCtaHtml = '<a href="' + esc(memberProjection) + '" class="fv-primary-cta">Browse Shorts</a>';
         secondaryLinkHtml = '<a href="' + esc(portalEntryUrl) + '" class="fv-secondary-link">Enter FoundUp via Member Portal \u2197</a>';
@@ -167,7 +186,7 @@
         primaryCtaHtml =
           '<a href="' + esc(portalEntryUrl) + '" class="fv-primary-cta">Enter FoundUp \u00b7 Member Portal \u2197</a>';
         secondaryLinkHtml =
-          '<a href="/f/' + encodeURIComponent(item.foundup_id) + '" class="fv-secondary-link">Public Overview</a>';
+          '<a href="/f/' + encodeURIComponent(entryId) + '" class="fv-secondary-link">Public Overview</a>';
       }
     } else if (memberProjection) {
       primaryCtaHtml = '<a href="' + esc(memberProjection) + '" class="fv-primary-cta">Browse Shorts</a>';
@@ -180,11 +199,11 @@
         '</a>';
       // Secondary: demoted entry-page link
       secondaryLinkHtml =
-        '<a href="/member/foundup.html?id=' + encodeURIComponent(item.foundup_id) + '" class="fv-secondary-link">More about ' + esc(displayName) + '</a>';
+        '<a href="/member/foundup.html?id=' + encodeURIComponent(entryId) + '" class="fv-secondary-link">More about ' + esc(displayName) + '</a>';
     } else {
       // Video-backed: primary CTA is entry page
       primaryCtaHtml =
-        '<a href="/member/foundup.html?id=' + encodeURIComponent(item.foundup_id) + '" class="fv-primary-cta">Open FoundUp</a>';
+        '<a href="/member/foundup.html?id=' + encodeURIComponent(entryId) + '" class="fv-primary-cta">Open FoundUp</a>';
     }
 
     body.innerHTML =

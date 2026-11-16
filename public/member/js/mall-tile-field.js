@@ -1266,6 +1266,53 @@
       groupDefinitions === null && layoutMode === 'grid';
   }
 
+  // Catalog mappings are explicit registry evidence. A channel/profile ID is not
+  // a FoundUp identity merely because it can be formatted as a route.
+  function canonicalFoundUpId(item) {
+    var identifier = item && item.canonical_foundup_id;
+    return typeof identifier === 'string' && /^[a-z0-9][a-z0-9_-]{0,63}$/i.test(identifier) &&
+      !['__proto__', 'constructor', 'prototype'].includes(identifier) ? identifier : null;
+  }
+
+  function renderCardBack(item, index, canonical) {
+    var name = item.name || item.title || 'Untitled source';
+    var candidate = item.discovery_kind === 'candidate';
+    var sourceLabel = item.source_type === 'linkedin_profile' ? 'Source profile' : 'Source channel';
+    var kind = canonical ? 'FoundUp' : sourceLabel + ' · not a canonical FoundUp';
+    var pitch = item.one_sentence_pitch || item.tagline || 'No public pitch provided.';
+    var description = item.description || 'No public description provided.';
+    if (candidate) kind = 'Project candidate · canonical registration unverified';
+    var stage = canonical || candidate ? 'Stage: ' + (item.lifecycle_stage || 'not supplied') +
+      ' · ' + (item.launch_readiness || 'readiness not supplied').replace(/_/g, ' ') : '';
+    return '<section class="mall-card-back" id="mall-card-about-' + index + '" role="group" aria-label="' +
+      escapeAttr('About ' + name) + '" hidden inert>' +
+      '<button type="button" class="mall-card-flip-back">Back to portrait</button>' +
+      '<h3>' + escapeHtml(name) + '</h3>' +
+      '<p class="mall-card-kind">' + escapeHtml(kind) + '</p>' +
+      '<p class="mall-card-pitch"><strong>Pitch</strong> ' + escapeHtml(pitch) + '</p>' +
+      '<p>' + escapeHtml(description) + '</p>' +
+      (stage ? '<p class="mall-card-stage">' + escapeHtml(stage) + '</p>' : '') +
+      (item.entry_copy ? '<p>' + escapeHtml(item.entry_copy) + '</p>' : '') +
+      (candidate && item.public_plan_url === 'https://github.com/FOUNDUPS/Foundups-Agent/blob/72a3182c70974f0523be91d5ce4bd32808d824bc/modules/foundups/docs/PFMALL_OPPORTUNITY_INSTANCE_MODEL.md'
+        ? '<a class="mall-card-plan" href="' + escapeAttr(item.public_plan_url) + '" target="_blank" rel="noopener noreferrer">Read public plan (new tab)</a>' : '') +
+      (canonical ? '<button type="button" class="mall-card-enter" data-canonical-foundup-id="' +
+        escapeAttr(canonical) + '">Enter FoundUp · Member Portal</button>' : '') +
+      '</section>';
+  }
+
+  function setCardFlipped(tile, flipped) {
+    var front = tile.querySelector('.mall-card-front');
+    var back = tile.querySelector('.mall-card-back');
+    if (!front || !back) return;
+    tile.classList.toggle('is-card-flipped', flipped);
+    tile.tabIndex = flipped ? -1 : 0;
+    front.hidden = front.inert = flipped;
+    back.hidden = back.inert = !flipped;
+    var trigger = front.querySelector('.mall-card-flip');
+    trigger.setAttribute('aria-expanded', String(flipped));
+    (flipped ? back.querySelector('.mall-card-flip-back') : trigger).focus({ preventScroll: true });
+  }
+
   function renderTiles(appendThrough, keepSlot) {
     var entityGrid = isEntityGrid();
     var incremental = fixedVideoField || entityGrid;
@@ -1325,7 +1372,10 @@
       var posterUrl = item.channel_avatar_url || item.poster_url || '';
       var posterStyle = posterUrl ? 'background-image: url(' + escapeAttr(posterUrl) + ')' : '';
       var tileType = isAvatarTile ? 'avatar' : 'video';
-      if (entityGrid) tileType = 'foundup';
+      var canonical = canonicalFoundUpId(item);
+      var candidate = item.discovery_kind === 'candidate';
+      var sourceLabel = item.source_type === 'linkedin_profile' ? 'Source profile' : 'Source channel';
+      if (entityGrid) tileType = canonical ? 'foundup' : candidate ? 'candidate' : 'source';
 
       // Determine if tile has videos (includes expanded video tiles with video_data)
       var hasVideos = item.videos?.length || item.video_data || (!memberPlayer && item.video_count);
@@ -1346,7 +1396,7 @@
 
       // Enter FoundUp button (bottom-left, visible during preview) — video tiles only
       // Uses stable foundup_id for WSP 104 canonical routing
-      var enterFoundupBtn = inlineControls ? '<button class="mall-tile-enter" aria-label="Enter FoundUp" title="Enter FoundUp"><svg viewBox="0 0 24 24"><path d="M15 3h6v6M14 10l6.1-6.1M9 21H3v-6M10 14l-6.1 6.1"/></svg></button>' : '';
+      var enterFoundupBtn = inlineControls && (!entityPortraitField || canonicalFoundUpId(mallCatalog[expandedFoundUp ?? index])) ? '<button class="mall-tile-enter" aria-label="Enter FoundUp" title="Enter FoundUp"><svg viewBox="0 0 24 24"><path d="M15 3h6v6M14 10l6.1-6.1M9 21H3v-6M10 14l-6.1 6.1"/></svg></button>' : '';
 
       // Inline preview container (YouTube iframe or HTML5 video goes here) — video tiles only
       var previewContainer = inlineControls ? '<div class="mall-tile-preview"><div class="mall-tile-preview-stage"></div></div>' : '';
@@ -1362,16 +1412,20 @@
         'internal_app': 'Open App',
         'internal_service': 'Open Service'
       };
-      var sourceAction = !hasVideos && item.source_type && sourceTypeActions[item.source_type];
+      var sourceAction = !entityGrid && !hasVideos && item.source_type && sourceTypeActions[item.source_type];
       var sourceActionBadge = sourceAction ? '<span class="mall-tile-action-badge">' + sourceAction + '</span>' : '';
 
       // Non-video tile class modifier
       var tileClass = 'mall-tile theme-' + theme + (hasVideos ? '' : ' non-video');
 
       var videoId = fixedVideoField ? ' data-video-id="' + escapeAttr(item.video_data?.video_id || '') + '"' : '';
-      return '<article class="' + tileClass + '" data-index="' + index + '"' + videoId + ' data-foundup-id="' + escapeAttr(item.foundup_id || item.id || '') + '" data-tile-type="' + tileType + '" tabindex="0" aria-label="' + escapeAttr(item.name || item.title || '') + '" style="' + posterStyle + '">' +
+      var classification = entityGrid ? ' data-catalog-kind="' + (canonical ? 'foundup' : candidate ? 'candidate' : 'source') +
+        '" data-canonical-foundup-id="' + escapeAttr(canonical || '') + '"' : '';
+      return '<article class="' + tileClass + '" data-index="' + index + '"' + videoId + classification + ' data-foundup-id="' + escapeAttr(item.foundup_id || item.id || '') + '" data-tile-type="' + tileType + '" tabindex="0" aria-label="' + escapeAttr(item.name || item.title || '') + '" style="' + posterStyle + '">' +
+        (entityGrid ? '<div class="mall-card-front">' : '') +
         previewContainer +
-        (fixedVideoField ? '' : '<span class="mall-tile-badge ' + badgeClass + '">' + escapeHtml(readiness.replace('_', ' ')) + '</span>') +
+        (fixedVideoField ? '' : '<span class="mall-tile-badge ' + badgeClass + '">' +
+          escapeHtml(entityGrid ? (canonical ? 'FoundUp' : candidate ? 'Project candidate' : sourceLabel) : readiness.replace('_', ' ')) + '</span>') +
         queueBadge +
         sourceActionBadge +
         playIndicator +
@@ -1383,6 +1437,9 @@
           '<span class="mall-tile-hero">' + escapeHtml(item.hero_label || '') + '</span>' +
           '<p class="mall-tile-name">' + escapeHtml(item.name || item.title || '') + '</p>' +
         '</div>' +
+        (entityGrid ? '<button type="button" class="mall-card-flip" aria-expanded="false" aria-controls="mall-card-about-' +
+          index + '" aria-label="' + escapeAttr('About ' + (item.name || item.title || 'this source')) + '">About</button></div>' +
+          renderCardBack(item, index, canonical) : '') +
       '</article>';
     });
 
@@ -1483,7 +1540,7 @@
     if ((entityGrid ? entityRenderedCount : fixedRenderedCount) < total) {
       var more = document.createElement('button');
       more.type = 'button';
-      more.textContent = entityGrid ? 'Load more FoundUps' : 'Load more videos';
+      more.textContent = entityGrid ? 'Load more cards' : 'Load more videos';
       var load = function() {
         if (tail.isConnected) renderTiles((entityGrid ? entityRenderedCount : fixedRenderedCount) + FIXED_VIDEO_BATCH);
       };
@@ -1496,7 +1553,7 @@
         fixedTailObserver.observe(tail);
       }
     } else {
-      tail.textContent = entityGrid ? 'End of FoundUps' : 'End of collection';
+      tail.textContent = entityGrid ? 'End of catalog' : 'End of collection';
     }
     tileField.appendChild(tail);
   }
@@ -1638,6 +1695,8 @@
       // Tap selects playback or quick view according to the active layout.
       // FoundUp entry is explicit via fullscreen "Enter FoundUp" button
       tile.addEventListener('click', function(e) {
+        if (tile.classList.contains('is-card-flipped')) return;
+        if (e.target.closest('.mall-card-front[hidden], .mall-card-back, .mall-card-flip')) return;
         // Ignore tap if guard is active (just finished dragging)
         if (tapGuardActive) return;
         if (groupDefinitions !== null && tileField.closest('[inert]')) return;
@@ -1649,6 +1708,14 @@
 
       // Keyboard support
       tile.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && tile.classList.contains('is-card-flipped')) {
+          e.preventDefault();
+          e.stopPropagation();
+          setCardFlipped(tile, false);
+          return;
+        }
+        if (tile.classList.contains('is-card-flipped') ||
+            (e.target !== tile && e.target.closest('.mall-card-flip, .mall-card-back'))) return;
         var index = Number(tile.dataset.index || 0);
         var memberPlayer = usesMemberVideoPlayer();
         if ((fixedVideoField || memberPlayer) && e.target !== tile) return;
@@ -1662,7 +1729,7 @@
         } else if (e.key === 'Enter') {
           e.preventDefault();
           // Match the pointer path in the shared video presentations.
-          if (fixedVideoField || memberPlayer) togglePlay(index);
+          if (fixedVideoField || memberPlayer || (isEntityGrid() && mallCatalog[index]?.discovery_kind === 'candidate')) togglePlay(index);
           else openFullscreenFromTile(index);
         }
       });
@@ -1671,10 +1738,28 @@
         tile.addEventListener('focus', function() { rememberActiveTile(tile); });
       }
 
+      var flip = tile.querySelector('.mall-card-flip');
+      var flipBack = tile.querySelector('.mall-card-flip-back');
+      if (flip && flipBack) {
+        flip.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (!tapGuardActive) setCardFlipped(tile, true);
+        });
+        flipBack.addEventListener('click', function(e) {
+          e.stopPropagation();
+          setCardFlipped(tile, false);
+        });
+        tile.querySelector('.mall-card-enter')?.addEventListener('click', function(e) {
+          e.stopPropagation();
+          navigateToFoundUp(e.currentTarget.dataset.canonicalFoundupId);
+        });
+      }
+
       // Pinch support via gesture engine (if available)
       if (window.gestureZone) {
         window.gestureZone(tile, {
           onPinchOut: function() {
+            if (tile.classList.contains('is-card-flipped')) return;
             var index = Number(tile.dataset.index || 0);
             if (fixedVideoField || expandedFoundUp !== null) {
               openFullscreenFromTile(index);
@@ -1687,6 +1772,7 @@
             expandFoundUp(index);
           },
           onPinchIn: function() {
+            if (tile.classList.contains('is-card-flipped')) return;
             if (expandedFoundUp !== null) {
               collapseFoundUp();
             }
@@ -1747,6 +1833,7 @@
           // In Mall mode, use stable foundup_id from data attribute
           foundupId = tile.dataset.foundupId;
         }
+        if (entityPortraitField) foundupId = canonicalFoundUpId(mallCatalog[expandedFoundUp ?? index]);
 
         if (foundupId) {
           navigateToFoundUp(foundupId);
@@ -1809,6 +1896,11 @@
 
     // Non-video tiles: enter dedicated member video projection (e.g. HPC) or open quick-view
     if (!hasVideos) {
+      if (isEntityGrid() && item?.discovery_kind === 'candidate') {
+        var candidateTile = getTileElement(index);
+        if (candidateTile) setCardFlipped(candidateTile, true);
+        return;
+      }
       var foundupId = item && (item.foundup_id || item.id);
       var memberProjection = foundupId && !fixedVideoField && window.mallVideoProjection?.memberPath?.(foundupId);
       if (memberProjection) {

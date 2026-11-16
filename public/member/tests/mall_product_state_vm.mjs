@@ -583,6 +583,16 @@ await check('play.foundups.com resolves open Mall discovery and gates FoundUp en
   assert.equal(route.resolveMemberEntry(new URL('https://foundups.com/member/?enter=gotjunk_001')), 'gotjunk_001');
   assert.equal(route.resolveMemberEntry(new URL('https://play.foundups.com/member/?enter=gotjunk_001')), null);
   assert.equal(route.resolveMemberEntry(new URL('https://foundups.com/member/?enter=__proto__')), null);
+  assert.equal(route.canonicalEntryId({ foundup_id: 'antifafm', canonical_foundup_id: 'antifafm_001' }), 'antifafm_001');
+  assert.equal(route.canonicalEntryId({ foundup_id: 'science_swarm', canonical_foundup_id: 'science_swarm_hub' }), 'science_swarm_hub');
+  assert.equal(route.canonicalEntryId({ foundup_id: 'undaodu', canonical_foundup_id: null }), null);
+  assert.equal(route.canonicalEntryId({ foundup_id: 'foundups_house_project', canonical_foundup_id: null, discovery_kind: 'candidate' }), null);
+  assert.equal(route.canonicalEntryId({ foundup_id: 'legacy_identity' }), 'legacy_identity');
+  assert.equal(route.canonicalEntryId({ id: 'legacy_id' }), 'legacy_id');
+  for (const invalid of ['', '../evil', '__proto__', 'constructor', 'prototype', undefined, {}, 42]) {
+    assert.equal(route.canonicalEntryId({ foundup_id: 'must_not_fallback', canonical_foundup_id: invalid }), null);
+  }
+  assert.equal(route.canonicalEntryId(null), null);
 
   const entryHandoff = stateRuntime(ORIGIN + '/member/?enter=gotjunk_001');
   assert.equal(entryHandoff.api.rememberMemberVideoReturn(), true);

@@ -76,6 +76,15 @@
       : MEMBER_PORTAL_ORIGIN + '/member/';
   }
 
+  function canonicalEntryId(item) {
+    if (!item || typeof item !== 'object') return null;
+    // Explicit null marks a source/project card without a FoundUp doorway.
+    // Older projections retain their existing identity; format is not admission.
+    const id = Object.prototype.hasOwnProperty.call(item, 'canonical_foundup_id')
+      ? item.canonical_foundup_id : item.foundup_id || item.id;
+    return validFoundUpId(id);
+  }
+
   function scopedRedDogPath(scope) {
     return publicScopes.has(scope) ? '/f/' + encodeURIComponent(scope) + '#red-dog' : null;
   }
@@ -692,6 +701,7 @@
     memberPath,
     memberEntryPath,
     memberPortalUrl,
+    canonicalEntryId,
     discoveryPath,
     mount,
     createMemberDock,

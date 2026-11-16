@@ -630,6 +630,15 @@
     container.removeAttribute('aria-modal');
   }
 
+  function currentEntryId() {
+    var item = window.mallTileField?.getCatalog?.().find(function (entry) {
+      return (entry.foundup_id || entry.id) === currentFoundUpId;
+    });
+    if (item && window.mallVideoProjection?.canonicalEntryId) return window.mallVideoProjection.canonicalEntryId(item);
+    return item && Object.prototype.hasOwnProperty.call(item, 'canonical_foundup_id')
+      ? item.canonical_foundup_id : currentFoundUpId;
+  }
+
   function syncTopBarButtons() {
     var backBtn = topBar.querySelector('[data-action="back"]');
     var expandBtn = topBar.querySelector('[data-action="expand"]');
@@ -638,6 +647,7 @@
     var prevBtn = topBar.querySelector('[data-action="prev"]');
     var nextBtn = topBar.querySelector('[data-action="next"]');
     var hasMultiQueue = currentQueue.length > 1;
+    topBar.querySelector('[data-action="enter"]').hidden = scopedPlayer || !currentEntryId();
 
     if (theater) {
       backBtn.hidden = true;
@@ -1914,11 +1924,12 @@
       case 'enter':
         // Enter FoundUp: on open landing (play.foundups.com), pass through the foundups.com Member Portal;
         // inside admitted Mall, navigate to canonical /f/{foundup_id} route (WSP 104).
-        if (currentFoundUpId && !scopedPlayer) {
+        var entryId = currentEntryId();
+        if (entryId && !scopedPlayer) {
           var openMall = window.mallVideoProjection?.isOpenMallHost?.(window.location);
           var destination = openMall
-            ? window.mallVideoProjection.memberPortalUrl(currentFoundUpId)
-            : '/f/' + encodeURIComponent(currentFoundUpId);
+            ? window.mallVideoProjection.memberPortalUrl(entryId)
+            : '/f/' + encodeURIComponent(entryId);
           if (openMall) window.mallStateRestore?.save?.();
           close();
           if (openMall && typeof window.location?.assign === 'function') {
