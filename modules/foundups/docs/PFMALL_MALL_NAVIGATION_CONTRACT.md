@@ -1,5 +1,29 @@
 # p.fMALL Navigation Contract
 
+## 2026-11-16 acceptance update on native v21 (candidate, unreleased)
+
+The latest 012 acceptance supersedes selected-row phone placement below:
+one visible top-anchored player with independently scrolling grid beneath;
+preserve selection, close/Back and single-instance queue transitions.
+Pause when fully hidden/dismissed. Native v21's fully offscreen audio and
+tucked visibility bypass are release blockers, not accepted navigation.
+Retain YouTube minimum dimensions, unobscured controls and qualified
+visible-player autoplay. See [HPC roadmap](../hpc/ROADMAP.md).
+
+Public Play uses the same shell and the existing member-entry gate. Its
+candidate top-level portrait grid has centered real FoundUp names and
+six-item observer/manual incremental append. Current catalog: 16 records;
+144 is the product target, not current inventory or a video classification.
+Retain quick view, FoundUp entry, query/reset and scroll/expanded return.
+Ordinary member category rows, grouped products and expanded video fields
+retain their existing contracts. Incremental append is not virtualization
+or server metadata pagination. See [Mall roadmap](../pfmall/ROADMAP.md).
+
+The whole HPC left banner with build above remains separate from the right
+Voice CTA. Vote and Contact Congress each have one whole-banner return link
+to HPC and a distinct Red Dog Mall link in draft PR #2411; no deployed state
+is implied. Shared floating Red Dog/search changes remain deferred.
+
 **Version**: 2.0.0
 **Date**: 2026-04-03
 **Status**: Runtime Contract
@@ -96,7 +120,7 @@ X axis = category / cluster / similarity band
 | Gesture | Mall Action | Status |
 |---------|-------------|--------|
 | swipe | Navigate: snapped field motion (default) or glide (override) | RUNTIME |
-| tap or click video tile | On wide desktop entry and in the HPC phone grid, open the shared player at the selected tile. Other category rows use their existing inline preview. A lane starts at its first clip. An expanded tile selects its own clip. | RUNTIME |
+| tap or click video tile | In the current v21 candidate, open one visible top-anchored shared player with the grid beneath. Earlier selected-row phone placement is superseded; hidden playback is blocked from release. Other category rows retain their existing preview behavior. A lane starts at its first clip. An expanded tile selects its own clip. | RUNTIME |
 | tap or click non-video tile | Open the FoundUp quick view or the property listing detail. | RUNTIME |
 | hover tile on desktop | Show available tile controls. | RUNTIME |
 | Expand button | Open the shared full player for the selected video or lane. | RUNTIME |

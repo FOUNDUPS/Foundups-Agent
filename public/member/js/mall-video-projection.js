@@ -551,7 +551,7 @@
         document.body.appendChild(notice);
       }
 
-      window.mallTileField?.initialize(catalog);
+      window.mallTileField?.initialize(catalog, { entityPortraitField: true });
       window.mallStateRestore?.restore?.();
 
       const creator = new URLSearchParams(window.location.search).getAll('creator');

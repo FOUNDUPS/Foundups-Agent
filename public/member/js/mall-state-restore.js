@@ -32,6 +32,12 @@
   var RETURN_TTL_MS = 15 * 60 * 1000;
   var FILTER_KEYS = ['q', 'country', 'prefecture', 'city', 'locality', 'max', 'land', 'sort', 'group', 'large', 'tour'];
   var SCROLL_DEBOUNCE_MS = 300;
+
+  function browseWrapper() {
+    // The property template also contains a wrapper; retain the active Mall's position.
+    return document.querySelector('#mallTileField')?.parentElement ||
+      document.querySelector('.mall-tile-field-wrapper');
+  }
   var scrollTimer = null;
   var initialized = false;
 
@@ -170,7 +176,7 @@
     var tf = window.mallTileField;
     if (!tf) return selectedProduct ? null : state;
 
-    var wrapper = document.querySelector('.mall-tile-field-wrapper');
+    var wrapper = browseWrapper();
     if (selectedVideoScope) {
       return tf.getVideoGridState?.() ||
         (wrapper ? { scrollTop: wrapper.scrollTop, scrollLeft: wrapper.scrollLeft } : null);
@@ -289,7 +295,7 @@
       var scope = selectedVideoScope;
       requestAnimationFrame(function() {
         if (selectedVideoScope !== scope || tf.restoreVideoGridState?.(state)) return;
-        var wrapper = document.querySelector('.mall-tile-field-wrapper');
+        var wrapper = browseWrapper();
         if (wrapper) {
           wrapper.scrollTop = state.scrollTop;
           wrapper.scrollLeft = state.scrollLeft;
@@ -325,7 +331,8 @@
       requestAnimationFrame(function() {
         // A product selection can occur before this deferred video restoration.
         if (selectedProduct) return;
-        var wrapper = document.querySelector('.mall-tile-field-wrapper');
+        if (tf.restoreBrowsePosition?.(state.scrollTop || 0, state.scrollLeft || 0)) return;
+        var wrapper = browseWrapper();
         if (wrapper) {
           if (state.scrollTop) wrapper.scrollTop = state.scrollTop;
           if (state.scrollLeft) wrapper.scrollLeft = state.scrollLeft;
@@ -394,7 +401,7 @@
     });
 
     // Save on scroll (debounced)
-    var wrapper = document.querySelector('.mall-tile-field-wrapper');
+    var wrapper = browseWrapper();
     if (wrapper) {
       wrapper.addEventListener('scroll', function() {
         clearTimeout(scrollTimer);

@@ -1358,7 +1358,143 @@ def verify_floating_and_wikitube_gestures(browser_type):
     }, sort_keys=True))
 
 
+def verify_public_entity_slice(browser_type):
+    """Public16 + synthetic144 capacity regression; never a live-inventory claim.
+
+    Reuses route_local/provider. This selection does not run the legacy
+    floating/tuck suite or qualify real provider/account/physical-device behavior.
+    """
+    real = json.loads((public / "member/mall-video-catalog.json").read_text(encoding="utf-8"))
+    expected_ids = {item["foundup_id"] for item in real}
+    assert len(real) == len(expected_ids) == 16
+    requested_images = []
+
+    def route_entity(route):
+        url = urlsplit(route.request.url)
+        if url.hostname == "play.foundups.com" and url.path.startswith("/__entity_fixture__/"):
+            requested_images.append(url.path)
+            route.fulfill(status=200, content_type="image/svg+xml", body="<svg xmlns='http://www.w3.org/2000/svg' width='32' height='48'><rect width='32' height='48' fill='#a11f38'/></svg>")
+        else:
+            route_local(route)
+
+    browser = browser_type.launch()
+    try:
+        for disable_io in (False, True):
+            context = browser.new_context(viewport={"width":390,"height":844},
+                is_mobile=True,has_touch=True,service_workers="block",reduced_motion="reduce")
+            try:
+                context.add_init_script(provider)
+                if disable_io:
+                    context.add_init_script("window.IntersectionObserver = undefined")
+                context.route("**/*", route_entity)
+                page = context.new_page()
+                page.set_default_timeout(7000)
+                page.goto("https://play.foundups.com/member/",wait_until="domcontentloaded")
+                field = page.locator("#mallTileField")
+                expect(field).to_have_class(re.compile(r"mall-entity-portrait-grid"))
+                expect(field.locator(".mall-tile").first).to_be_visible()
+                if disable_io:
+                    expect(field.locator(".mall-tile")).to_have_count(6)
+                    page.get_by_role("button",name="Load more FoundUps",exact=True).click()
+                    expect(field.locator(".mall-tile")).to_have_count(12)
+                for _ in range(4):
+                    count = field.locator(".mall-tile").count()
+                    if count == len(real): break
+                    if disable_io:
+                        page.get_by_role("button",name="Load more FoundUps",exact=True).click()
+                    else:
+                        field.evaluate("el=>{el.parentElement.scrollTop=el.parentElement.scrollHeight}")
+                        page.wait_for_function("n=>document.querySelectorAll('#mallTileField .mall-tile').length>n",arg=count)
+                actual = field.locator(".mall-tile").evaluate_all("els=>els.map(x=>({id:x.dataset.foundupId,type:x.dataset.tileType,name:x.querySelector('.mall-tile-name').textContent.trim()}))")
+                assert len(actual) == len({x["id"] for x in actual}) == 16
+                assert {x["id"] for x in actual} == expected_ids
+                assert all(x["type"] == "foundup" for x in actual)
+                names = {x["foundup_id"]:x.get("name",x.get("title","")) for x in real}
+                assert all(x["name"] == names[x["id"]] for x in actual)
+                for width,height in ((320,700),(390,844),(844,390),(1366,900)):
+                    page.set_viewport_size({"width":width,"height":height})
+                    geometry=field.evaluate("el=>{const r=el.querySelector('.mall-tile').getBoundingClientRect();return {ratio:r.width/r.height,centered:[...el.querySelectorAll('.mall-tile-name')].every(x=>getComputedStyle(x).textAlign==='center'),overflow:document.documentElement.scrollWidth>innerWidth+1}}")
+                    assert abs(geometry["ratio"]-9/16)<.03 and geometry["centered"] and not geometry["overflow"],geometry
+                page.set_viewport_size({"width":390,"height":844})
+                assert page.evaluate("window.mallTileField.setLayoutMode('rows')===false")
+                page.evaluate("window.mallTileField.searchCatalog('GotJunk')")
+                expect(field.locator(".mall-tile")).to_have_count(1)
+                field.locator(".mall-tile").click()
+                expect(page.locator("#foundupViewPlane .fv-primary-cta")).to_have_attribute("href","https://foundups.com/member/?enter=gotjunk_001")
+                page.evaluate("window.mallPlanes.closeView();window.mallTileField.searchCatalog('')")
+                if not disable_io: continue
+                expect(field.locator(".mall-tile")).to_have_count(6)
+
+                # Appending must not close or replace the already active player.
+                field.locator(".mall-tile").first.click()
+                player=page.get_by_role("region",name="Floating video player",exact=True)
+                expect(player).to_be_visible()
+                page.evaluate("window.entityAppendFrame=document.querySelector('#videoPlayerFullscreen iframe')")
+                page.get_by_role("button",name="Load more FoundUps",exact=True).click()
+                assert page.evaluate("window.mallVideoPlayer.isOpen()&&window.entityAppendFrame===document.querySelector('#videoPlayerFullscreen iframe')")
+                player.get_by_role("button",name="Close player",exact=True).click()
+
+                # Explicitly synthetic local-image capacity input, not new FoundUps.
+                template=deepcopy(next(x for x in real if x["foundup_id"]=="gotjunk_001"))
+                capacity=[]
+                for i in range(144):
+                    item=deepcopy(template)
+                    item.update(foundup_id=f"capacity_fixture_{i:03}",title=f"Capacity fixture {i:03}",name=f"Capacity fixture {i:03}",
+                        videos=[],video_count=0,true_video_count=0,channel_avatar_url=f"/__entity_fixture__/{i:03}.svg",poster_url=f"/__entity_fixture__/{i:03}.svg")
+                    capacity.append(item)
+                capacity[-1].update(videos=[deepcopy(videos[0])],video_count=1,true_video_count=1)
+                page.evaluate("records=>{window.entityCapacityFixture=records;window.mallTileField.updateCatalog(records)}",capacity)
+                expect(field.locator(".mall-tile")).to_have_count(6)
+                assert "/__entity_fixture__/143.svg" not in requested_images
+                page.evaluate("window.mallTileField.togglePlay(143)")
+                expect(field.locator('.mall-tile[data-index="143"]')).to_have_count(1)
+                expect(player).to_be_visible()
+                player.get_by_role("button",name="Close player",exact=True).click()
+                field.evaluate("el=>{el.parentElement.scrollTop=el.parentElement.scrollHeight-el.parentElement.clientHeight-120}")
+                page.wait_for_function("document.querySelector('#mallTileField').parentElement.scrollTop>1000")
+                saved=page.evaluate("()=>{window.mallStateRestore.save();return window.mallStateRestore.peek().scrollTop}")
+                assert saved>1000,saved
+                # Model initialization's same-stack catalog -> restore order;
+                # yielding here lets the already-bound autosave replace saved state.
+                reset = page.evaluate("()=>{window.mallTileField.updateCatalog(window.entityCapacityFixture);const count=document.querySelectorAll('#mallTileField .mall-tile').length;return {count,restored:window.mallStateRestore.restore()}}")
+                assert reset["count"] == 6 and reset["restored"], reset
+                page.wait_for_function("top=>Math.abs(document.querySelector('#mallTileField').parentElement.scrollTop-top)<=2",arg=saved)
+                for motion in ("reduce","no-preference"):
+                    page.emulate_media(reduced_motion=motion)
+                    page.evaluate("top=>window.mallTileField.restoreBrowsePosition(top,0)",saved)
+                    page.wait_for_function("top=>Math.abs(document.querySelector('#mallTileField').parentElement.scrollTop-top)<=2",arg=saved)
+                    before=page.evaluate("document.querySelector('#mallTileField').parentElement.scrollTop")
+                    page.evaluate("window.mallTileField.expandFoundUp(143)")
+                    assert page.evaluate("window.mallTileField.isExpanded()")
+                    page.wait_for_function("!document.querySelector('#mallTileField').classList.contains('transitioning')")
+                    page.evaluate("window.mallTileField.collapseFoundUp()")
+                    try:
+                        page.wait_for_function("top=>Math.abs(document.querySelector('#mallTileField').parentElement.scrollTop-top)<=2",arg=before)
+                    except Exception as exc:
+                        details=page.evaluate("()=>{const w=document.querySelector('#mallTileField').parentElement,s=getComputedStyle(w);return {top:w.scrollTop,max:w.scrollHeight-w.clientHeight,snap:s.scrollSnapType,behavior:s.scrollBehavior,count:document.querySelectorAll('#mallTileField .mall-tile').length,expanded:window.mallTileField.isExpanded()}}")
+                        raise AssertionError({"case":"far collapse return","motion":motion,"expected":before,"actual":details}) from exc
+                    expect(field.locator('.mall-tile[data-index="143"]')).to_have_count(1)
+                    page.wait_for_function("!document.querySelector('#mallTileField').classList.contains('transitioning')")
+                    page.evaluate("()=>{const fn=window.entityOriginalOpen||window.mallVideoPlayer.openDesktopVideo;window.entityOriginalOpen=fn;window.entityOpenCalls=0;window.mallVideoPlayer.openDesktopVideo=function(...args){window.entityOpenCalls++;return fn.apply(this,args)}}")
+                    field.locator('.mall-tile[data-index="143"]').click()
+                    expect(player).to_be_visible()
+                    assert page.evaluate("window.entityOpenCalls===1"),page.evaluate("window.entityOpenCalls")
+                    player.get_by_role("button",name="Close player",exact=True).click()
+            finally:
+                context.close()
+    finally:
+        browser.close()
+    print(json.dumps({"engine":browser_type.name,"public_entity_real_records":16,"synthetic_capacity_fixture":144,"native_io_and_manual_fallback":True,"far_state_and_both_collapse_branches":True,"single_click_and_append_continuity":True,"canonical_member_portal_url":True,"physical_iPhone":"UNEXECUTED"},sort_keys=True))
+
+
 if __name__ == "__main__":
+    import sys
+    if sys.argv[1:] == ["--header-entities"]:
+        with sync_playwright() as p:
+            for engine in (p.chromium,p.webkit):
+                verify_hpc_banner_header(engine)
+                verify_public_entity_slice(engine)
+        raise SystemExit(0)
     main()
     verify_diagnostics()
     with sync_playwright() as p:

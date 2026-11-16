@@ -1,5 +1,22 @@
 # Member Area Module Change Log
 
+## 2026-11-16 - Candidate: whole HPC banner and public entity batching
+
+Two bounded source slices extend native Build v21 in an isolated detached
+checkout. Whole wide artwork replaces only the left HPC header, with build
+directly above and Voice CTA unchanged. Banner is included in shell assets;
+cache/build generation promotion remains with the release owner.
+
+Public Play opts into centered-name portrait FoundUp cards and existing
+six-item observer/manual append with state restoration. Metadata remains
+16 actual entries; 144-entry capacity tests are synthetic only. Existing
+member gate and ordinary/grouped/video modes remain regression guards.
+See [Mall roadmap](../../modules/foundups/pfmall/ROADMAP.md) and
+[ModLog](../../modules/foundups/pfmall/ModLog.md) for exact validation states.
+Native v21 hidden playback/tucked autoplay remains an unresolved release
+blocker; historical v20 descriptions below record implementation, not
+approval of hidden audio. No deployment or physical-device pass is claimed.
+
 ## 2026-11-16 · Build v21 open Mall landing (`play.foundups.com`) and `foundups.com` Member Portal handoff
 
 - **Open Guest p.fMALL Landing on `play.foundups.com` (`js/mall-video-projection.js`, `index.html`, `../index.html`)**:

@@ -1,5 +1,43 @@
 # p.fMALL Roadmap
 
+## 2026-11-16 - Bounded public portrait/entity loading sprint
+
+FITS_POC for public discovery; CHANGES_POC_ACCEPTANCE for portrait entity
+layout and the separately specified visible top-floating player. Start with
+the [HPC banner and Vote reconciliation](../hpc/ROADMAP.md), then the small
+public grid candidate. Do not rewrite the shell or create a parallel page.
+
+- `play.foundups.com` remains the intended public Mall; browsing is public,
+  then FoundUp entry uses the existing `foundups.com` Clerk + invite-code
+  admission and return path. No account authority comes from the grid.
+- Reuse HPC-style portrait tiles with the real FoundUp name centered. The
+  source catalog currently contains 16 records. 144 is the product capacity
+  target, not present inventory, 144 invented entities or 144 videos.
+- The candidate opts only the public top-level entity grid into the
+  existing six-item IntersectionObserver / manual Load More mechanism.
+  Append DOM and thumbnail requests near the viewport; preserve stable IDs,
+  search/reset, saved scroll and expanded-lane return. Ordinary category
+  rows, grouped products and expanded video fields retain their own modes.
+- This is incremental append, not full virtualization. The existing small
+  metadata catalog is still fetched once; generic `loadTileContent()` alone
+  is only a quality-state hook. Do not claim server catalog pagination or
+  measured live performance from its presence.
+- Evaluate later adaptive batches with viewport demand, actual render time,
+  DOM/request/byte counts and device/data-saving signals. Network ping alone
+  does not establish usable capacity. 144-entry automated capacity fixtures
+  must remain test-only, with bounded local thumbnails and no admission.
+- Keep roadmap, ModLog, source revision and test receipts together. Native
+  owner integration, cache-generation promotion, independent exact-head
+  review and authorized release remain separate from a local candidate.
+
+Release blocker: native v21 fully hides the tucked YouTube player while
+audio continues and `canStartYouTube()` bypasses visibility when tucked.
+The existing player owner must pause fully hidden/dismissed playback and
+remove that bypass before release. See [HPC acceptance](../hpc/ROADMAP.md).
+Public player/search/queue changes and tests of other creators follow as
+separate focused slices; broader shared Red Dog and bottom search remain
+roadmap work. Physical iPhone Safari/PWA and network gates remain explicit.
+
 ## Manifest & Catalog Truth Reconciliation (Build v19) — 2026-11-16
 
 - Repaired all four previously invalid `foundup_manifest.json` declarations (`detect_ai`, `eduit`, `shield`, `holoindex_prod_01`), added `"infrastructure"` to `VALID_CATEGORIES`, and hardened null-coalescing in `load_manifest()` so `PfmallShell().boot()` loads 12/12 workspace manifests with zero warnings.

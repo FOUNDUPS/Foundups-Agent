@@ -1,5 +1,44 @@
 # p.fMALL Test ModLog
 
+## 2026-11-16 - Bounded header and public entity-grid candidates
+
+Base: native Build v21 `1b5b77323325b855faf25d4a04ba3e671462084e`.
+Executed against isolated continuation source; native branch untouched.
+
+- `python -m pytest -q -p no:cacheprovider` on `test_mall_tile_field.py`,
+  `test_tile_keyboard_a11y.py`, `test_mall_product_state.py`,
+  `test_public_discovery_concierge.py`, `test_refresh_catalog_safety.py`
+  and `pfmall/tests/test_mall_video_player.py`: **209 passed**.
+- Direct `node public/member/tests/mall_product_state_vm.mjs`: **24 passed**.
+  This overlaps the pytest wrapper; do not sum it as 24 additional unique cases.
+- Independent controlled Chromium/WebKit: **93 header checks, 51 entity
+  checks, zero failures**. Header evidence includes 320/390/844/1366 layouts,
+  actual whole-art aspect ratio, build above, Voice navigation, player/header
+  clearance and rotation. Entity evidence includes native observer loading,
+  manual six-item fallback, actual 16 IDs/names, portrait geometry, search/reset,
+  modeled entry gate, same iframe while appending, deferred local image requests,
+  saved scroll above 1000px and far-index return under both motion preferences.
+- Existing `mall_scoped_video_browser.py --header-entities` is the permanent
+  focused runner; it retains the exact restoration oracle and excludes the
+  legacy full tuck/audio acceptance. The default legacy invocation does not
+  run the new entity function.
+- Independent source review: `/root/reuse_hpc_assets`; production bindings and
+  controlled QA receipts are retained with the coordinator's candidate receipt.
+
+All 144-record inputs are synthetic local test fixtures; production metadata
+remains 16 records. Request counts and render timings are fixture measurements,
+not live performance or adaptive-capacity guarantees. This is incremental
+append, not virtualization or server metadata pagination. Network/provider,
+account and destination routes are controlled; service workers are blocked in
+browser contexts. The separate Node worker checks do not prove an installed
+iPhone PWA. Physical Safari/PWA Wi-Fi/cellular receipts remain incomplete.
+
+Historical v20/v21 tests below are not approval of fully hidden YouTube audio.
+The current player's full-offscreen tuck and tucked visibility bypass remain
+unfixed release blockers. Native owner acceptance/integration, build/cache
+generation, independent exact-head release checks and deployment are separate.
+No new production release or hosted preview is claimed here. WSP 22/50/97 apply.
+
 ## 2026-11-16 — Build v21 open Mall (`play.foundups.com`) & `foundups.com` Member Portal handoff tests
 
 - Extended `test_mall_video_player.py` (`+2` tests) verifying `['play.foundups.com', 'mall']`, `MEMBER_PORTAL_ORIGIN = 'https://foundups.com'`, `isOpenMallHost`, `resolveMemberEntry`, and `memberPortalUrl` contracts across `mall-video-projection.js` and `mall-video-player.js`, alongside gateway checks in `test_gateway_roc_shell.py` and `test_gateway_terms_gate.py`.

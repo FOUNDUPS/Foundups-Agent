@@ -18,6 +18,36 @@
   --field-rows: 5;
 }
 
+/* Public FoundUp entities reuse the portrait field without becoming video tiles. */
+[data-mall-open-landing="play"] .mall-shell {
+  height: 100dvh;
+  box-sizing: border-box;
+}
+[data-mall-open-landing="play"] .mall-main { overflow: hidden; }
+[data-mall-open-landing="play"] .mall-main > .mall-tile-field-wrapper {
+  min-height: 0;
+  overflow-x: hidden;
+}
+
+.mall-tile-field.mall-entity-portrait-grid {
+  grid-template-rows: none;
+  grid-auto-rows: auto;
+  align-content: start;
+  height: auto;
+  min-height: 0;
+}
+
+.mall-tile-field.mall-entity-portrait-grid[data-density] > .mall-tile { aspect-ratio: 9 / 16; }
+.mall-entity-portrait-grid .mall-tile-inner {
+  inset: 0;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.mall-entity-portrait-grid .mall-tile-name { margin: 0; text-align: center; }
+.mall-entity-portrait-grid :is(.mall-tile-token, .mall-tile-hero) { display: none; }
+.mall-entity-portrait-grid > .mall-video-grid-tail { grid-column: 1 / -1; }
+
 /* ========== Projection Controls ========== */
 
 .mall-projection {

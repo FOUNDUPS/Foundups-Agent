@@ -1,5 +1,33 @@
 ## 2026-11-16 · Build v21 open Mall landing (`play.foundups.com`) and `foundups.com` Member Portal handoff
 
+## 2026-11-16 - Small sprint source candidates on existing v21
+
+Reused exact native v21 base `1b5b77323325b855faf25d4a04ba3e671462084e`
+in an isolated detached checkout; native owner worktree/branch untouched.
+The header candidate reuses whole satire artwork on the left, build above,
+preserving the independent right Voice CTA. Vote/Contact return navigation
+remains separate draft PR #2411 at `5c7c22554be86b9ec1c8cbcd3cb5b5c12e85098d`.
+
+The public entity-grid candidate adds portrait cards with centered real
+FoundUp names and incremental six-item DOM/thumbnail append through the
+existing observer/fallback. It retains actual 16-entry metadata and the
+existing public browse -> member admission flow. 144 is a capacity target;
+synthetic tests do not admit entities. Existing ordinary/grouped and video
+field modes remain separate. See [roadmap](ROADMAP.md) for scope and gates.
+
+Validation: 209 targeted pytest cases and 24 direct Node state/cache checks
+pass. Independent controlled Chromium/WebKit receipts contain 93 header and
+51 entity checks, with zero failures. The existing browser fixture adds
+`--header-entities` for focused repeatable regressions. Public scrolling is
+bounded in its existing shell, saves the active field (not the hidden property
+template), materializes far rows and restores instantly before FLIP geometry;
+append preserves the player and binds each new tile once. See
+[tests/TestModLog.md](tests/TestModLog.md) for scope and qualification limits.
+Independent source review found no remaining blocker in these scoped changes.
+The existing hidden-player/audio and tucked-autoplay defects remain release blockers.
+No source integration into native ownership, push, merge or deployment is
+claimed by the detached candidate. WSP 22, 49, 50 and 97 apply.
+
 - **Open p.fMALL Discovery Host & Member Portal Gate (`public/member/js/mall-video-projection.js`, `public/member/js/mall-state-restore.js`, `public/member/js/mall-planes.js`, `public/member/js/mall-tile-field.js`, `public/member/js/mall-video-player.js`, `public/member/index.html`, `public/member/foundup.html`, `public/index.html`)**:
   - Enabled `play.foundups.com` as the unauthenticated open p.fMALL discovery landing across all catalog FoundUps (matching `hpc.foundups.com`'s zero-Clerk/zero-Firestore guest boot), while gating every FoundUp entry path (`Enter FoundUp` on tiles, floating/WikiTube player, quick-view cards, `foundup.html`, and `/f/{id}/app`) through `https://foundups.com/member/?enter={foundup_id}` -> Clerk sign-in + invite validation + `@username` claim -> `/member/foundup.html?id={foundup_id}`.
   - Updated `FOUNDUPS_MASTER_ARCHITECTURE.md`, `PFMALL_ROUTING_DISCOVERY_MODEL.md`, `README.md`, `INTERFACE.md`, and `ROADMAP.md`, and advanced shell cache generation to `Build v21` / `pfmall-member-v21`. WSP 22, 49, 50, 97, and 104 apply.

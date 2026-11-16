@@ -74,6 +74,8 @@
   var densityManuallySet = false; // Whether user has manually overridden density
   var expandedFoundUp = null; // Index of expanded FoundUp, or null
   var fixedVideoField = false; // Public projection starts and stays inside one lane.
+  var entityPortraitField = false; // Opt-in public FoundUp grid; never an expanded video lane.
+  var entityRenderedCount = 0;
   var FIXED_VIDEO_COLUMNS = 3;
   var FIXED_VIDEO_BATCH = 6;
   var fixedRenderedCount = 0;
@@ -684,6 +686,8 @@
     originalOrder = mallCatalog.slice();  // Preserve original order
     currentFieldScope = null;  // Reset scope on init
     fixedVideoField = options?.fixedVideoField === true && mallCatalog.length === 1;
+    entityPortraitField = options?.entityPortraitField === true && !fixedVideoField;
+    if (entityPortraitField) layoutMode = 'grid';
     scopedTheaterRequested = false;
     scopedTheaterState = null;
     if (fixedVideoField) {
@@ -760,6 +764,10 @@
     currentFieldScope = null;
     currentProjection = 'default';
     tileLoadStates = {};
+    if (options && Object.prototype.hasOwnProperty.call(options, 'entityPortraitField')) {
+      entityPortraitField = options.entityPortraitField === true;
+      if (entityPortraitField) layoutMode = 'grid';
+    }
     configureGroups(options);
     if (window.mallPlanes && typeof window.mallPlanes.setCatalog === 'function') {
       window.mallPlanes.setCatalog(mallCatalog);
@@ -1253,19 +1261,27 @@
       '</div></article>';
   }
 
+  function isEntityGrid() {
+    return entityPortraitField && !fixedVideoField && expandedFoundUp === null &&
+      groupDefinitions === null && layoutMode === 'grid';
+  }
+
   function renderTiles(appendThrough, keepSlot) {
-    if (desktopInlineTile && !window.mallVideoPlayer?.isTucked?.()) {
+    var entityGrid = isEntityGrid();
+    var incremental = fixedVideoField || entityGrid;
+    var append = incremental && Number.isInteger(appendThrough);
+    if (!append && desktopInlineTile && !window.mallVideoPlayer?.isTucked?.()) {
       window.mallVideoPlayer.close({ restore: false });
     }
     var groupedFocus = captureGroupState();
     captureRowOffsets();
     var itemsToRender = expandedFoundUp !== null ? getExpandedVideos() : mallCatalog;
-    var append = fixedVideoField && Number.isInteger(appendThrough);
+    if (!append) fixedTailObserver?.disconnect();
     if (fixedVideoField && !append) scopedRenderedIndices = scopedVisibleIndices();
     var indices = fixedVideoField ? scopedRenderedIndices : null;
     if (indices) itemsToRender = indices.map(function(index) { return itemsToRender[index]; });
-    var start = append ? fixedRenderedCount : 0;
-    var end = fixedVideoField
+    var start = append ? (entityGrid ? entityRenderedCount : fixedRenderedCount) : 0;
+    var end = incremental
       ? Math.min(itemsToRender.length, append ? appendThrough : FIXED_VIDEO_BATCH)
       : itemsToRender.length;
     if (append && end <= start) return;
@@ -1274,11 +1290,13 @@
     var desktopGrid = memberPlayer && desktopPosterBrowsing && layoutMode === 'grid';
     visibleGroups = grouped ? resolveGroups() : [];
     tileField.setAttribute('data-layout', grouped ? 'grouped' : layoutMode);
+    tileField.classList.toggle('mall-entity-portrait-grid', entityGrid);
     tileFieldWrapper.classList.toggle('mall-field-grouped-wrapper', grouped);
     tileFieldWrapper.classList.toggle('browse-rows', !grouped && layoutMode === 'rows');
     tileFieldWrapper.classList.toggle('desktop-poster-grid', desktopGrid);
 
     if ((!grouped && !itemsToRender.length) || (grouped && !visibleGroups.length)) {
+      if (entityGrid) entityRenderedCount = 0;
       if (tileObserver) tileObserver.disconnect();
       tileLoadStates = {};
       tileField.classList.remove('expanded-mode');
@@ -1307,6 +1325,7 @@
       var posterUrl = item.channel_avatar_url || item.poster_url || '';
       var posterStyle = posterUrl ? 'background-image: url(' + escapeAttr(posterUrl) + ')' : '';
       var tileType = isAvatarTile ? 'avatar' : 'video';
+      if (entityGrid) tileType = 'foundup';
 
       // Determine if tile has videos (includes expanded video tiles with video_data)
       var hasVideos = item.videos?.length || item.video_data || (!memberPlayer && item.video_count);
@@ -1432,9 +1451,10 @@
       tileLoadStates = {};
       initTileObserver();
     }
-    if (fixedVideoField) {
-      fixedRenderedCount = end;
-      renderFixedTail(itemsToRender.length);
+    if (incremental) {
+      if (entityGrid) entityRenderedCount = end;
+      else fixedRenderedCount = end;
+      renderFixedTail(itemsToRender.length, entityGrid);
     }
 
     // Detect thumbnail load and remove shimmer
@@ -1456,16 +1476,16 @@
     });
   }
 
-  function renderFixedTail(total) {
+  function renderFixedTail(total, entityGrid) {
     if (fixedTailObserver) fixedTailObserver.disconnect();
     var tail = document.createElement('div');
     tail.className = 'mall-video-grid-tail';
-    if (fixedRenderedCount < total) {
+    if ((entityGrid ? entityRenderedCount : fixedRenderedCount) < total) {
       var more = document.createElement('button');
       more.type = 'button';
-      more.textContent = 'Load more videos';
+      more.textContent = entityGrid ? 'Load more FoundUps' : 'Load more videos';
       var load = function() {
-        if (tail.isConnected) renderTiles(fixedRenderedCount + FIXED_VIDEO_BATCH);
+        if (tail.isConnected) renderTiles((entityGrid ? entityRenderedCount : fixedRenderedCount) + FIXED_VIDEO_BATCH);
       };
       more.addEventListener('click', load);
       tail.appendChild(more);
@@ -1476,7 +1496,7 @@
         fixedTailObserver.observe(tail);
       }
     } else {
-      tail.textContent = 'End of collection';
+      tail.textContent = entityGrid ? 'End of FoundUps' : 'End of collection';
     }
     tileField.appendChild(tail);
   }
@@ -2221,7 +2241,23 @@
     if (!tileField) return null;
     var numericIndex = Number(index);
     if (!Number.isInteger(numericIndex) || numericIndex < 0) return null;
+    if (isEntityGrid() && numericIndex < mallCatalog.length && numericIndex >= entityRenderedCount) {
+      renderTiles(Math.ceil((numericIndex + 1) / FIXED_VIDEO_BATCH) * FIXED_VIDEO_BATCH);
+    }
     return tileField.querySelector('.mall-tile[data-index="' + numericIndex + '"]');
+  }
+
+  /** Materialize only the batches needed to restore a public-grid scroll position. */
+  function restoreBrowsePosition(top, left) {
+    if (!isEntityGrid() || !tileFieldWrapper || !Number.isFinite(top) || top < 0) return false;
+    while (entityRenderedCount < mallCatalog.length &&
+        tileFieldWrapper.scrollHeight - tileFieldWrapper.clientHeight < top) {
+      renderTiles(entityRenderedCount + FIXED_VIDEO_BATCH);
+    }
+    // Restoration must settle before a FLIP transition measures its target.
+    var scrollLeft = Number.isFinite(left) && left >= 0 ? left : tileFieldWrapper.scrollLeft;
+    tileFieldWrapper.scrollTo({ top: top, left: scrollLeft, behavior: 'instant' });
+    return true;
   }
 
   /**
@@ -2380,8 +2416,9 @@
       expandedFoundUp = null;
       playingIndex = null;
       renderTiles();
-      tileFieldWrapper.scrollTop = browseScrollTop;
       bindInteractions();
+      if (isEntityGrid() && sourceIndex !== null) getTileElement(sourceIndex);
+      if (!restoreBrowsePosition(browseScrollTop, 0)) tileFieldWrapper.scrollTop = browseScrollTop;
 
       // Find target tile position
       var targetTile = getTileElement(sourceIndex);
@@ -2426,8 +2463,9 @@
         expandedFoundUp = null;
         playingIndex = null;
         renderTiles();
-        tileFieldWrapper.scrollTop = browseScrollTop;
         bindInteractions();
+        if (isEntityGrid() && sourceIndex !== null) getTileElement(sourceIndex);
+        if (!restoreBrowsePosition(browseScrollTop, 0)) tileFieldWrapper.scrollTop = browseScrollTop;
         tileField.classList.remove('transitioning');
         expandSourceIndex = null;
         expandSourceVisual = null;
@@ -2455,6 +2493,7 @@
 
   function setLayoutMode(mode) {
     if (mode !== 'rows' && mode !== 'grid') return false;
+    if (entityPortraitField && mode !== 'grid') return false;
     // A product adapter owns its geographic projection. Category/grid controls
     // cannot silently replace that declaration or report an unapplied change.
     if (groupDefinitions !== null) return false;
@@ -3179,6 +3218,7 @@
     getLayoutMode: function() { return groupDefinitions !== null ? 'grouped' : layoutMode; },
     getRowOffsets: captureRowOffsets,
     restoreRowOffsets: restoreRowOffsets,
+    restoreBrowsePosition: restoreBrowsePosition,
     searchCatalog: searchCatalog,
 
     // Core
