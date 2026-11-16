@@ -445,7 +445,7 @@
   display: none;
 }
 
-/* Tucked state: keeps >=200x200 iframe rendered so audio continues uninterrupted */
+/* Tucked state is fully hidden; the player controller pauses media before hiding. */
 .video-player-fullscreen.video-player-floating.is-tucked {
   transform: translateX(calc(100% + 2.5rem));
   opacity: 0.01;

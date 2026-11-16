@@ -35,7 +35,8 @@ provider = """(() => {
   if (window.top !== window) return;
   const trace = window.fixturePlayback = {
     created: 0, destroyed: 0, pause: 0, plays: 0, events: [],
-    error: null, errorsByVideo: {}, loadedIds: [], block: false, hang: false, mutes: 0
+    error: null, errorsByVideo: {}, loadedIds: [], playedIds: [], cuedIds: [],
+    block: false, hang: false, holdReady: false, mutes: 0
   };
   window.addEventListener('mallVideoPlayback', e => trace.events.push(e.detail));
   window.YT = {
@@ -69,6 +70,7 @@ provider = """(() => {
       this.loadVideoById = vid => {
         currentVid = vid;
         trace.loadedIds.push(vid);
+        trace.playedIds.push(vid);
         frame.dataset.loadedVideoId = vid;
         elapsed = 0;
         startedAt = null;
@@ -83,6 +85,7 @@ provider = """(() => {
       this.cueVideoById = vid => {
         currentVid = vid;
         trace.loadedIds.push(vid);
+        trace.cuedIds.push(vid);
         frame.dataset.loadedVideoId = vid;
         elapsed = 0;
         startedAt = null;
@@ -105,13 +108,17 @@ provider = """(() => {
       this.mute = () => { muted = true; trace.mutes++; };
       this.unMute = () => { muted = false; };
       this.isMuted = () => muted;
+      // Deliberately adversarial provider events: these are controlled fixture
+      // events, never evidence of real YouTube or device visibility behavior.
+      trace.forcePlaying = () => this.playVideo();
+      trace.forceError = code => emit('onError', code);
       trace.finishCurrent = () => {
         elapsed = this.getCurrentTime();
         startedAt = null;
         state = 0;
         emit('onStateChange', state);
       };
-      setTimeout(() => {
+      const deliverReady = () => {
         if (dead || trace.hang) return;
         const err = checkError(currentVid);
         if (err !== null && err !== undefined) emit('onError', err);
@@ -120,7 +127,9 @@ provider = """(() => {
           const requested = new URL(frame.src).searchParams.get('autoplay') === '1' || options.playerVars?.autoplay === 1;
           if (requested && state !== 1) this.playVideo();
         }
-      }, 50);
+      };
+      trace.deliverReady = deliverReady;
+      setTimeout(() => { if (!trace.holdReady) deliverReady(); }, 50);
     }
   };
 })();"""
@@ -180,7 +189,7 @@ def expect_hpc_banner_header(page):
     expect(image).to_have_attribute("height", "353")
     expect(image).to_be_visible()
     page.wait_for_function("document.querySelector('.mall-hpc-banner-image')?.naturalWidth === 1280")
-    expect(build).to_have_text("Build v21")
+    expect(build).to_have_text("Build v22")
     image_box, build_box, header_box = image.bounding_box(), build.bounding_box(), header.bounding_box()
     assert abs(image_box["width"] / image_box["height"] - 1280 / 353) < .03
     assert abs(build_box["x"] - image_box["x"]) <= 1
@@ -235,7 +244,7 @@ def main():
         expect(page.locator("#videoScopeTitle")).to_have_text("HPC")
         expect(page.locator("#videoScopeHeader #videoScopeTopic")).to_have_text("#SchumerOUT")
         build = page.locator("#videoScopeHeader .mall-build-label")
-        expect(build).to_have_text("Build v21")
+        expect(build).to_have_text("Build v22")
         expect(build).to_be_visible()
         expect(page.locator("#videoScopeHeader #videoScopeVoice")).to_have_attribute("href", "https://vote.mtrout.com/contact")
         expect(page.locator("#videoScopeInfo")).to_be_hidden()
@@ -426,7 +435,7 @@ def main():
         expect(page.locator(".mall-video-grid-empty")).to_have_text("No videos match your search.")
         more.tap()
         menu = page.get_by_role("dialog", name="More options")
-        expect(menu.get_by_text("Build v21", exact=True)).to_be_visible()
+        expect(menu.get_by_text("Build v22", exact=True)).to_be_visible()
         assert menu.bounding_box()["x"] <= more.bounding_box()["x"] + 1
         assert menu.bounding_box()["y"] + menu.bounding_box()["height"] < dock.bounding_box()["y"]
         expect(menu.get_by_role("combobox", name="Browser AI")).to_be_disabled()
@@ -595,7 +604,7 @@ def verify_member_poster_grid(page):
     player.get_by_role("button", name="Search options").click()
     options = player.get_by_role("dialog", name="Search options")
     expect(options.get_by_role("combobox", name="Browser AI")).to_be_disabled()
-    expect(options.get_by_text("Build v21", exact=True)).to_be_visible()
+    expect(options.get_by_text("Build v22", exact=True)).to_be_visible()
     page.keyboard.press("Escape")
     expect(options).not_to_be_visible()
     expect(player).to_be_visible()
@@ -1190,179 +1199,384 @@ def dispatch_swipe(locator, dx, dy=4):
 
 def verify_floating_and_wikitube_gestures(browser_type):
     browser = browser_type.launch()
-    context = browser.new_context(
-        viewport={"width": 375, "height": 812},
-        is_mobile=True,
-        has_touch=True,
-        user_agent="Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1",
-        service_workers="block",
-        reduced_motion="reduce"
-    )
-    context.add_init_script(provider)
-    context.route("**/*", route_local)
-    page = context.new_page()
-    page.set_default_timeout(10000)
-    page.goto("https://hpc.foundups.com/member/", wait_until="domcontentloaded")
-    page.evaluate("window.__pfmallWikiTubeSkipDelayMs = 40")
+    try:
+        context = browser.new_context(
+            viewport={"width": 375, "height": 812},
+            is_mobile=True,
+            has_touch=True,
+            user_agent="Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1",
+            service_workers="block",
+            reduced_motion="reduce"
+        )
+        context.add_init_script(provider)
+        context.route("**/*", route_local)
+        page = context.new_page()
+        page.set_default_timeout(10000)
+        page.goto("https://hpc.foundups.com/member/", wait_until="domcontentloaded")
+        page.evaluate("window.__pfmallWikiTubeSkipDelayMs = 40")
 
-    # 1. 375px iPhone one-tap playback & top-anchored floating position
-    tile0_box = video(page, 0).bounding_box()
-    assert tile0_box["width"] >= 120 and tile0_box["height"] >= 70, tile0_box
-    video(page, 0).tap(position={"x": 30, "y": 80})
-    expect_playing(page, 0)
-    player = page.locator("#videoPlayerFullscreen")
-    expect(player).to_have_attribute("aria-label", "Floating video player")
-    top_anchor_y = player.bounding_box()["y"]
-    assert top_anchor_y < 100, top_anchor_y
+        # 1. 375px iPhone one-tap playback & top-anchored floating position
+        tile0_box = video(page, 0).bounding_box()
+        assert tile0_box["width"] >= 120 and tile0_box["height"] >= 70, tile0_box
+        video(page, 0).tap(position={"x": 30, "y": 80})
+        expect_playing(page, 0)
+        player = page.locator("#videoPlayerFullscreen")
+        expect(player).to_have_attribute("aria-label", "Floating video player")
+        top_anchor_y = player.bounding_box()["y"]
+        header_box = page.locator("#videoScopeHeader").bounding_box()
+        assert top_anchor_y >= header_box["y"] + header_box["height"], (top_anchor_y, header_box)
 
-    # 2. Grid scrolls freely beneath floating player; lower clicked tile opens at SAME top anchor
-    wrapper = page.locator(".mall-tile-field-wrapper")
-    wrapper.evaluate("el => el.scrollTop = 520")
-    page.wait_for_function("document.querySelector('.mall-tile-field-wrapper').scrollTop >= 400")
-    assert abs(player.bounding_box()["y"] - top_anchor_y) <= 1
-    lower_tile = video(page, 11)
-    lower_tile.scroll_into_view_if_needed()
-    lower_tile_y = lower_tile.bounding_box()["y"]
-    assert lower_tile_y > 150
-    page.evaluate("window.floatingFrameRef = document.querySelector('#videoPlayerFullscreen iframe')")
-    lower_tile.tap(position={"x": 30, "y": 80})
-    expect_playing(page, 11)
-    assert abs(player.bounding_box()["y"] - top_anchor_y) <= 1
-    assert page.evaluate("window.floatingFrameRef === document.querySelector('#videoPlayerFullscreen iframe')")
-    assert page.evaluate("window.fixturePlayback.created") == 1
+        # 2. Grid scrolls freely beneath floating player; lower clicked tile opens at SAME top anchor
+        wrapper = page.locator(".mall-tile-field-wrapper")
+        wrapper.evaluate("el => el.scrollTop = 520")
+        page.wait_for_function("document.querySelector('.mall-tile-field-wrapper').scrollTop >= 400")
+        assert abs(player.bounding_box()["y"] - top_anchor_y) <= 1
+        lower_tile = video(page, 11)
+        lower_tile.scroll_into_view_if_needed()
+        lower_tile_y = lower_tile.bounding_box()["y"]
+        assert lower_tile_y > 150
+        page.evaluate("window.floatingFrameRef = document.querySelector('#videoPlayerFullscreen iframe')")
+        lower_tile.tap(position={"x": 30, "y": 80})
+        expect_playing(page, 11)
+        assert abs(player.bounding_box()["y"] - top_anchor_y) <= 1
+        assert page.evaluate("window.floatingFrameRef === document.querySelector('#videoPlayerFullscreen iframe')")
+        assert page.evaluate("window.fixturePlayback.created") == 1
 
-    # 3. Swipe-right tuck + audio/time continuity + edge-handle swipe-left & button restore
-    pos_before_tuck = page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot().positionSeconds")
-    dispatch_swipe(player.locator(".video-player-top-bar"), 95, 4)
-    assert page.evaluate("window.mallVideoPlayer.isTucked() === true")
-    handle = page.locator(".video-player-tuck-handle")
-    expect(handle).to_be_visible()
-    handle_box = handle.bounding_box()
-    assert handle_box["x"] + handle_box["width"] >= 370, handle_box
-    assert page.evaluate("document.documentElement.style.getPropertyValue('--floating-player-clearance')") == "0px"
-    page.wait_for_function("prev => window.mallVideoPlayer.getPlaybackSnapshot().positionSeconds > prev + 0.1", arg=pos_before_tuck)
-    wrapper.evaluate("el => el.scrollTop = 200")
-    assert page.evaluate("window.mallVideoPlayer.isTucked() === true && window.mallVideoPlayer.getPlaybackSnapshot().state === 'playing'")
-    # Swipe-left on edge handle restores player
-    dispatch_swipe(handle, -45, 2)
-    assert page.evaluate("window.mallVideoPlayer.isTucked() === false")
-    expect(handle).to_be_hidden()
-    assert page.evaluate("window.floatingFrameRef === document.querySelector('#videoPlayerFullscreen iframe')")
-    # Accessible Tuck button + tap on Restore handle
-    player.get_by_role("button", name="Tuck player", exact=True).tap()
-    assert page.evaluate("window.mallVideoPlayer.isTucked() === true")
-    expect(handle).to_be_visible()
-    handle.tap()
-    assert page.evaluate("window.mallVideoPlayer.isTucked() === false")
-    expect_playing(page, 11)
+        # 3. Hidden tuck must pause; restoring is visible and paused until explicit Play.
+        dispatch_swipe(player.locator(".video-player-top-bar"), 95, 4)
+        assert page.evaluate("window.mallVideoPlayer.isTucked() === true")
+        handle = page.locator(".video-player-tuck-handle")
+        expect(handle).to_be_visible()
+        handle_box = handle.bounding_box()
+        assert handle_box["x"] + handle_box["width"] >= 370, handle_box
+        assert page.evaluate("document.documentElement.style.getPropertyValue('--floating-player-clearance')") == "0px"
+        page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot().state === 'paused'")
+        pos_tucked = page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot().positionSeconds")
+        page.wait_for_timeout(160)
+        assert abs(page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot().positionSeconds") - pos_tucked) <= .02
+        wrapper.evaluate("el => el.scrollTop = 200")
+        assert page.evaluate("window.mallVideoPlayer.isTucked() === true && window.mallVideoPlayer.getPlaybackSnapshot().state === 'paused'")
+        # Swipe-left on edge handle restores player
+        dispatch_swipe(handle, -45, 2)
+        assert page.evaluate("window.mallVideoPlayer.isTucked() === false")
+        expect(handle).to_be_hidden()
+        assert page.evaluate("window.floatingFrameRef === document.querySelector('#videoPlayerFullscreen iframe')")
+        assert page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot().state === 'paused'")
+        player.get_by_role("button", name="Play video", exact=True).tap()
+        expect_playing(page, 11)
+        # Accessible Tuck button + tap on Restore handle
+        player.get_by_role("button", name="Tuck player", exact=True).tap()
+        assert page.evaluate("window.mallVideoPlayer.isTucked() === true")
+        expect(handle).to_be_visible()
+        handle.tap()
+        assert page.evaluate("window.mallVideoPlayer.isTucked() === false")
+        assert page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot().state === 'paused'")
+        player.get_by_role("button", name="Play video", exact=True).tap()
+        expect_playing(page, 11)
 
-    # 4. Gesture disambiguation: tiny 2-finger jitter (<26px delta) must NOT trigger pinch
-    dispatch_pinch(player.locator(".video-player-top-bar"), 45, 53)
-    assert page.evaluate("window.mallVideoPlayer.isFloating() === true && window.mallVideoPlayer.isOpen() === true")
-    page.wait_for_timeout(100)
+        # 4. Gesture disambiguation: tiny 2-finger jitter (<26px delta) must NOT trigger pinch
+        dispatch_pinch(player.locator(".video-player-top-bar"), 45, 53)
+        assert page.evaluate("window.mallVideoPlayer.isFloating() === true && window.mallVideoPlayer.isOpen() === true")
+        page.wait_for_timeout(100)
 
-    # 5. Autoplay-blocked truth + Pinch-out into WikiTube immediately attempts playback
-    player.get_by_role("button", name="Close player", exact=True).tap()
-    expect(player).to_be_hidden()
-    page.evaluate("window.fixturePlayback.block = true")
-    video(page, 1).tap(position={"x": 30, "y": 80})
-    page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state === 'autoplay-blocked'")
-    expect(player.get_by_role("button", name="Play video", exact=True)).to_be_visible()
-    page.evaluate("window.fixturePlayback.block = false")
-    dispatch_pinch(player.locator(".video-player-top-bar"), 40, 105)
-    expect(player).to_have_attribute("aria-label", "WikiTube video player")
-    expect_playing(page, 1)
-    assert page.evaluate("window.mallVideoPlayer.getCurrentIndex()") == 1
-    assert page.evaluate("window.mallVideoPlayer.getQueueLength()") == fixture_total
+        # 5. Autoplay-blocked truth + Pinch-out into WikiTube immediately attempts playback
+        player.get_by_role("button", name="Close player", exact=True).tap()
+        expect(player).to_be_hidden()
+        page.evaluate("window.fixturePlayback.block = true")
+        video(page, 1).tap(position={"x": 30, "y": 80})
+        page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state === 'autoplay-blocked'")
+        expect(player.get_by_role("button", name="Play video", exact=True)).to_be_visible()
+        page.evaluate("window.fixturePlayback.block = false")
+        dispatch_pinch(player.locator(".video-player-top-bar"), 40, 105)
+        expect(player).to_have_attribute("aria-label", "WikiTube video player")
+        expect_playing(page, 1)
+        assert page.evaluate("window.mallVideoPlayer.getCurrentIndex()") == 1
+        assert page.evaluate("window.mallVideoPlayer.getQueueLength()") == fixture_total
 
-    # Horizontal swipe on WikiTube queue rail must NOT dismiss or exit WikiTube
-    dispatch_swipe(player.locator(".video-player-queue-track"), -120, 3)
-    assert page.evaluate("window.mallVideoPlayer.isWikiTube() === true")
+        # Horizontal swipe on WikiTube queue rail must NOT dismiss or exit WikiTube
+        dispatch_swipe(player.locator(".video-player-queue-track"), -120, 3)
+        assert page.evaluate("window.mallVideoPlayer.isWikiTube() === true")
 
-    # Accessible Floating player button minimizes WikiTube back to floating
-    player.get_by_role("button", name="Floating player", exact=True).tap()
-    expect(player).to_have_attribute("aria-label", "Floating video player")
-    expect_playing(page, 1)
+        # Accessible Floating player button minimizes WikiTube back to floating
+        player.get_by_role("button", name="Floating player", exact=True).tap()
+        expect(player).to_have_attribute("aria-label", "Floating video player")
+        expect_playing(page, 1)
 
-    # Pinch-out back to WikiTube, then Pinch-in on WikiTube returns directly to grid
-    dispatch_pinch(player.locator(".video-player-top-bar"), 40, 105)
-    expect(player).to_have_attribute("aria-label", "WikiTube video player")
-    page.wait_for_timeout(100)
-    dispatch_pinch(player.locator(".video-player-top-bar"), 120, 48)
-    expect(player).to_be_hidden()
-    assert page.evaluate("window.mallVideoPlayer.isOpen() === false")
-    expect(player.locator("iframe")).to_have_count(0)
+        # Pinch-out back to WikiTube, then Pinch-in on WikiTube returns directly to grid
+        dispatch_pinch(player.locator(".video-player-top-bar"), 40, 105)
+        expect(player).to_have_attribute("aria-label", "WikiTube video player")
+        page.wait_for_timeout(100)
+        dispatch_pinch(player.locator(".video-player-top-bar"), 120, 48)
+        expect(player).to_be_hidden()
+        assert page.evaluate("window.mallVideoPlayer.isOpen() === false")
+        expect(player.locator("iframe")).to_have_count(0)
 
-    # Pinch-in on Floating player closes to grid
-    wrapper.evaluate("el => el.scrollTop = 0")
-    video(page, 2).tap(position={"x": 30, "y": 80})
-    expect_playing(page, 2)
-    page.wait_for_timeout(100)
-    dispatch_pinch(player.locator(".video-player-top-bar"), 120, 48)
-    expect(player).to_be_hidden()
+        # Pinch-in on Floating player closes to grid
+        wrapper.evaluate("el => el.scrollTop = 0")
+        video(page, 2).tap(position={"x": 30, "y": 80})
+        expect_playing(page, 2)
+        page.wait_for_timeout(100)
+        dispatch_pinch(player.locator(".video-player-top-bar"), 120, 48)
+        expect(player).to_be_hidden()
 
-    # 6. WikiTube sequential auto-advance + bounded error skip & halt recovery (zero infinite loops)
-    video(page, 0).tap(position={"x": 30, "y": 80})
-    expect_playing(page, 0)
-    player.get_by_role("button", name="Open WikiTube", exact=True).tap()
-    expect(player).to_have_attribute("aria-label", "WikiTube video player")
-    page.evaluate("window.wikitubeFrameRef = document.querySelector('#videoPlayerFullscreen iframe')")
-    page.evaluate("window.fixturePlayback.finishCurrent()")
-    expect_playing(page, 1)
-    assert page.evaluate("window.wikitubeFrameRef === document.querySelector('#videoPlayerFullscreen iframe')")
+        # 6. WikiTube sequential auto-advance + bounded error skip & halt recovery (zero infinite loops)
+        video(page, 0).tap(position={"x": 30, "y": 80})
+        expect_playing(page, 0)
+        player.get_by_role("button", name="Open WikiTube", exact=True).tap()
+        expect(player).to_have_attribute("aria-label", "WikiTube video player")
+        page.evaluate("window.wikitubeFrameRef = document.querySelector('#videoPlayerFullscreen iframe')")
+        page.evaluate("window.fixturePlayback.finishCurrent()")
+        expect_playing(page, 1)
+        assert page.evaluate("window.wikitubeFrameRef === document.querySelector('#videoPlayerFullscreen iframe')")
 
-    #Unavailable (100) at index 2 and Restricted (150) at index 3 skip cleanly to playable index 4
-    page.evaluate("""() => {
-      window.fixturePlayback.errorsByVideo = { HPC00000002: 100, HPC00000003: 150 };
-    }""")
-    page.evaluate("window.fixturePlayback.finishCurrent()")
-    expect_playing(page, 4)
-    failed = page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot().failedIndices")
-    assert 2 in failed and 3 in failed, failed
+        #Unavailable (100) at index 2 and Restricted (150) at index 3 skip cleanly to playable index 4
+        page.evaluate("""() => {
+          window.fixturePlayback.errorsByVideo = { HPC00000002: 100, HPC00000003: 150 };
+        }""")
+        page.evaluate("window.fixturePlayback.finishCurrent()")
+        expect_playing(page, 4)
+        failed = page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot().failedIndices")
+        assert 2 in failed and 3 in failed, failed
 
-    # All remaining videos failing halts cleanly after MAX_CONSECUTIVE_AUTO_SKIPS (5)
-    page.evaluate("window.fixturePlayback.errorsByVideo = {}; window.fixturePlayback.error = 150;")
-    page.evaluate("window.fixturePlayback.finishCurrent()")
-    page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.queueHalted === true")
-    halted_snap = page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot()")
-    assert halted_snap["state"] == "embedding-disabled" and halted_snap["queueIndex"] == 10, halted_snap
-    expect(player.locator(".video-player-status")).to_contain_text("Queue stopped")
+        # All remaining videos failing halts cleanly after MAX_CONSECUTIVE_AUTO_SKIPS (5)
+        page.evaluate("window.fixturePlayback.errorsByVideo = {}; window.fixturePlayback.error = 150;")
+        page.evaluate("window.fixturePlayback.finishCurrent()")
+        page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.queueHalted === true")
+        halted_snap = page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot()")
+        assert halted_snap["state"] == "embedding-disabled" and halted_snap["queueIndex"] == 10, halted_snap
+        expect(player.locator(".video-player-status")).to_contain_text("Queue stopped")
 
-    # Autoplay-blocked in WikiTube halts immediately and surfaces Play video (never auto-skips)
-    page.evaluate("window.fixturePlayback.error = null; window.fixturePlayback.block = true;")
-    player.locator('.video-player-queue-item[data-index="12"]').tap()
-    page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state === 'autoplay-blocked'")
-    blocked_snap = page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot()")
-    assert blocked_snap["queueIndex"] == 12 and blocked_snap["queueHalted"] is True, blocked_snap
-    expect(player.get_by_role("button", name="Play video", exact=True)).to_be_visible()
-    page.evaluate("window.fixturePlayback.block = false")
-    player.get_by_role("button", name="Play video", exact=True).tap()
-    expect_playing(page, 12)
+        # Autoplay-blocked in WikiTube halts immediately and surfaces Play video (never auto-skips)
+        page.evaluate("window.fixturePlayback.error = null; window.fixturePlayback.block = true;")
+        player.locator('.video-player-queue-item[data-index="12"]').tap()
+        page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state === 'autoplay-blocked'")
+        blocked_snap = page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot()")
+        assert blocked_snap["queueIndex"] == 12 and blocked_snap["queueHalted"] is True, blocked_snap
+        expect(player.get_by_role("button", name="Play video", exact=True)).to_be_visible()
+        page.evaluate("window.fixturePlayback.block = false")
+        player.get_by_role("button", name="Play video", exact=True).tap()
+        expect_playing(page, 12)
 
-    # Orientation rotation (portrait 375x812 -> landscape 844x390 -> portrait) keeps playback & stage >= 200px
-    page.set_viewport_size({"width": 844, "height": 390})
-    assert min(player.locator(".video-player-stage").bounding_box()["width"],
-               player.locator(".video-player-stage").bounding_box()["height"]) >= 200
-    expect_playing(page, 12)
-    page.set_viewport_size({"width": 375, "height": 812})
-    player.get_by_role("button", name="Back", exact=True).tap()
-    expect(player).to_be_hidden()
-    browser.close()
+        # Orientation rotation (portrait 375x812 -> landscape 844x390 -> portrait) keeps playback & stage >= 200px
+        page.set_viewport_size({"width": 844, "height": 390})
+        assert min(player.locator(".video-player-stage").bounding_box()["width"],
+                   player.locator(".video-player-stage").bounding_box()["height"]) >= 200
+        expect_playing(page, 12)
+        page.set_viewport_size({"width": 375, "height": 812})
+        player.get_by_role("button", name="Back", exact=True).tap()
+        expect(player).to_be_hidden()
+    finally:
+        browser.close()
     print(json.dumps({
         "engine": browser_type.name,
         "one_tap_375px_autoplay": True,
         "top_anchored_floating_scroll": True,
-        "swipe_tuck_and_edge_restore": True,
+        "swipe_tuck_pauses_and_explicit_visible_restore": True,
         "pinch_transitions_and_jitter_guard": True,
         "wikitube_sequential_and_bounded_recovery": True
     }, sort_keys=True))
 
 
+def verify_hidden_playback_policy(browser_type):
+    """Real shell + adversarial provider fixtures; no real/device playback claim.
+
+    Geometry edits and document.hidden overrides below are explicitly synthetic
+    inputs. Media-time advancement is supplied by the existing YT API fixture.
+    """
+    browser = browser_type.launch()
+    context = browser.new_context(viewport={"width":390,"height":844},
+        is_mobile=True, has_touch=True, service_workers="block", reduced_motion="reduce")
+    observed = {}
+    try:
+        context.add_init_script(provider)
+        context.route("**/*", route_local)
+        page = context.new_page()
+        page.set_default_timeout(6000)
+        page.goto("https://hpc.foundups.com/member/", wait_until="domcontentloaded")
+        player = page.locator("#videoPlayerFullscreen")
+        video(page, 0).tap(position={"x":30,"y":80})
+        expect_playing(page, 0)
+        page.evaluate("window.policyFrame = document.querySelector('#videoPlayerFullscreen iframe')")
+
+        def stable_paused():
+            page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state === 'paused'")
+            before = page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot().positionSeconds")
+            page.wait_for_timeout(130)
+            after = page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot().positionSeconds")
+            assert abs(after-before) <= .02, (before,after)
+
+        def manual_play(index):
+            player.get_by_role("button",name="Play video",exact=True).tap()
+            expect_playing(page,index)
+
+        def visible_geometry():
+            return page.evaluate("""() => {
+              const p=document.querySelector('#videoPlayerFullscreen'),s=p.querySelector('.video-player-stage'),f=p.querySelector('iframe');
+              const r=f.getBoundingClientRect(),v=Math.max(0,Math.min(r.right,innerWidth)-Math.max(r.left,0))*Math.max(0,Math.min(r.bottom,innerHeight)-Math.max(r.top,0));
+              const overlap=[...p.querySelectorAll('.video-player-top-bar button,.video-player-top-bar a,.video-player-manual-play')].filter(e=>!e.hidden&&e.getClientRects().length).filter(e=>{const b=e.getBoundingClientRect();return Math.min(r.right,b.right)>Math.max(r.left,b.left)&&Math.min(r.bottom,b.bottom)>Math.max(r.top,b.top)});
+              return {width:r.width,height:r.height,visibleRatio:v/(r.width*r.height),overlappingControls:overlap.length};
+            }""")
+
+        geometry=visible_geometry()
+        assert min(geometry["width"],geometry["height"])>=200 and geometry["visibleRatio"]>.5,geometry
+        assert geometry["overlappingControls"]==0,geometry
+        observed["visible_iframe_and_external_controls"]=geometry
+
+        # Reverses the old hidden-audio acceptance. Tuck does not destroy/reload.
+        page.evaluate("window.mallVideoPlayer.tuck()")
+        stable_paused()
+        plays=page.evaluate("window.fixturePlayback.plays")
+        page.evaluate("window.mallVideoPlayer.next()")
+        page.wait_for_function("window.mallVideoPlayer.getCurrentIndex()===1")
+        page.wait_for_timeout(70)
+        assert page.evaluate("window.fixturePlayback.plays")==plays
+        assert page.evaluate("window.fixturePlayback.cuedIds.at(-1)")==videos[1]["video_id"]
+        assert page.evaluate("window.fixturePlayback.playedIds.includes('HPC00000001')") is False
+        page.evaluate("window.fixturePlayback.finishCurrent();window.fixturePlayback.forceError(150)")
+        page.wait_for_timeout(80)
+        assert page.evaluate("window.mallVideoPlayer.getCurrentIndex()===1")
+        assert page.evaluate("window.fixturePlayback.plays")==plays
+        page.evaluate("window.fixturePlayback.forcePlaying()")
+        stable_paused()
+        plays=page.evaluate("window.fixturePlayback.plays")
+        page.locator('.video-player-tuck-handle').tap()
+        page.wait_for_timeout(100)
+        stable_paused()
+        assert page.evaluate("window.fixturePlayback.plays")==plays
+        manual_play(1)
+        assert page.evaluate("window.policyFrame===document.querySelector('#videoPlayerFullscreen iframe')")
+        observed["tuck_cancels_hidden_play_and_queue_intent"]=True
+        observed["restore_requires_visible_manual_play_same_iframe"]=True
+
+        # Synthetic background wake-up cannot restart a hidden or restored page.
+        page.evaluate("Object.defineProperty(document,'hidden',{value:true,configurable:true});document.dispatchEvent(new Event('visibilitychange'))")
+        stable_paused()
+        page.evaluate("window.fixturePlayback.forcePlaying()")
+        stable_paused()
+        plays=page.evaluate("window.fixturePlayback.plays")
+        page.evaluate("delete document.hidden;document.dispatchEvent(new Event('visibilitychange'))")
+        stable_paused()
+        assert page.evaluate("window.fixturePlayback.plays")==plays
+        manual_play(1)
+        observed["synthetic_document_hidden_late_play_pause"]=True
+
+        # Scripted starts require >=200 each dimension and strictly >half visible.
+        # Ongoing playback may remain partially visible; only fully hidden pauses.
+        for case,changes in [
+            ("width199", "s.style.setProperty('width','199px','important')"),
+            ("height199", "s.style.setProperty('min-height','0','important');s.style.setProperty('height','199px','important')"),
+            ("half_visible", "p.style.setProperty('transform',`translateX(${innerWidth-r.left-r.width/2}px)`,'important')"),
+            ("display_none", "p.style.setProperty('display','none','important')"),
+            ("fully_offscreen", "p.style.setProperty('transform','translateX(200vw)','important')"),
+        ]:
+            page.evaluate("window.mallVideoPlayer.tuck();window.mallVideoPlayer.untuck()")
+            stable_paused()
+            page.evaluate("""() => { const p=document.querySelector('#videoPlayerFullscreen'),s=p.querySelector('.video-player-stage');window.policyOriginalStyles={p:p.style.cssText,s:s.style.cssText}; }""")
+            page.evaluate("() => { const p=document.querySelector('#videoPlayerFullscreen'),s=p.querySelector('.video-player-stage'),r=s.getBoundingClientRect();p.style.setProperty('transition','none','important');"+changes+";window.dispatchEvent(new Event('resize')); }")
+            page.wait_for_timeout(100)
+            actual=visible_geometry()
+            if case=="width199": assert actual["width"]<200,actual
+            if case=="height199": assert actual["height"]<200,actual
+            if case=="half_visible": assert 0<actual["visibleRatio"]<=.501,actual
+            if case in ("display_none","fully_offscreen"): assert actual["visibleRatio"]==0 or actual["width"]==0,actual
+            plays=page.evaluate("window.fixturePlayback.plays")
+            player.locator('.video-player-manual-play').evaluate("el=>el.click()")
+            page.wait_for_timeout(80)
+            assert page.evaluate("window.fixturePlayback.plays")==plays,(case,actual)
+            assert page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot().state")!="playing",(case,actual)
+            page.evaluate("""() => { const p=document.querySelector('#videoPlayerFullscreen'),s=p.querySelector('.video-player-stage');p.style.cssText=window.policyOriginalStyles.p;s.style.cssText=window.policyOriginalStyles.s;window.dispatchEvent(new Event('resize')); }""")
+            page.wait_for_timeout(100)
+            manual_play(1)
+            observed["synthetic_start_guard_"+case]=True
+
+        # Real IntersectionObserver/resize observation of an offscreen stage.
+        page.evaluate("document.querySelector('#videoPlayerFullscreen').style.setProperty('transform','translateX(200vw)','important');window.dispatchEvent(new Event('resize'))")
+        stable_paused()
+        page.evaluate("document.querySelector('#videoPlayerFullscreen').style.removeProperty('transform');window.dispatchEvent(new Event('resize'))")
+        stable_paused()
+        manual_play(1)
+        observed["fully_offscreen_event_driven_pause"]=True
+
+        # A provider refusal may have armed a delayed WikiTube skip before the
+        # page becomes hidden. Backgrounding cancels that pending intention.
+        player.get_by_role('button',name='Open WikiTube',exact=True).tap()
+        expect_playing(page,1)
+        before_recovery=page.evaluate("""() => {
+          window.__pfmallWikiTubeSkipDelayMs=250;
+          window.fixturePlayback.forceError(150);
+          const pending=window.mallVideoPlayer.getPlaybackSnapshot();
+          const loaded=window.fixturePlayback.loadedIds.length;
+          Object.defineProperty(document,'hidden',{value:true,configurable:true});
+          document.dispatchEvent(new Event('visibilitychange'));
+          return {pending,loaded};
+        }""")
+        assert before_recovery['pending']['state']=='embedding-disabled',before_recovery
+        assert before_recovery['pending']['queueHalted'] is False,before_recovery
+        stable_paused()
+        page.wait_for_timeout(350)
+        assert page.evaluate('window.mallVideoPlayer.getCurrentIndex()')==1
+        assert page.evaluate('window.fixturePlayback.loadedIds.length')==before_recovery['loaded']
+        page.evaluate('window.fixturePlayback.forceError(100);window.fixturePlayback.finishCurrent()')
+        page.wait_for_timeout(300)
+        assert page.evaluate('window.mallVideoPlayer.getCurrentIndex()')==1
+        assert page.evaluate('window.fixturePlayback.loadedIds.length')==before_recovery['loaded']
+        page.evaluate("delete document.hidden;document.dispatchEvent(new Event('visibilitychange'))")
+        stable_paused()
+        manual_play(1)
+        player.get_by_role('button',name='Floating player',exact=True).tap()
+        observed['synthetic_background_cancels_pending_wikitube_recovery']=True
+        observed['late_hidden_wikitube_error_and_ended_do_not_advance']=True
+
+        # onReady and provider-autoplay can arrive after a user has tucked.
+        player.get_by_role('button',name='Close player',exact=True).tap()
+        page.evaluate("window.fixturePlayback.holdReady=true")
+        video(page,2).tap(position={"x":30,"y":80})
+        page.wait_for_function("window.fixturePlayback.created===2")
+        page.evaluate("window.mallVideoPlayer.tuck();window.fixturePlayback.deliverReady()")
+        stable_paused()
+        page.locator('.video-player-tuck-handle').tap()
+        stable_paused()
+        manual_play(2)
+        observed["late_ready_and_provider_autoplay_cannot_play_tucked"]=True
+
+        # Stale callback delivery after dismissal may not recreate or navigate.
+        player.get_by_role('button',name='Close player',exact=True).tap()
+        events=page.evaluate("window.fixturePlayback.events.length")
+        page.evaluate("window.fixturePlayback.forcePlaying();window.fixturePlayback.finishCurrent();window.fixturePlayback.forceError(150);window.fixturePlayback.deliverReady()")
+        page.wait_for_timeout(120)
+        expect(player).to_be_hidden()
+        expect(player.locator('iframe')).to_have_count(0)
+        assert page.evaluate("!window.mallVideoPlayer.isOpen()")
+        assert page.evaluate("window.fixturePlayback.events.length")==events
+        observed["dismissal_rejects_stale_provider_callbacks"]=True
+
+        # Provider failures stay distinct; error150 is embedding refusal, not a
+        # manufactured assertion that a bot/login challenge has been solved.
+        page.evaluate("window.fixturePlayback.holdReady=false")
+        errors={2:"configuration",5:"playback-error",100:"unavailable",
+                101:"embedding-disabled",150:"embedding-disabled",
+                153:"client-identification",999:"provider-unknown"}
+        for code,state in errors.items():
+            page.evaluate("code=>window.fixturePlayback.error=code",code)
+            video(page,0).tap(position={"x":30,"y":80})
+            page.wait_for_function("expected=>window.mallVideoPlayer.getPlaybackSnapshot()?.state===expected",arg=state)
+            snapshot=page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot()")
+            assert snapshot["code"]==code,snapshot
+            expect(player.locator('.video-player-source')).to_have_attribute('href',videos[0]['source_url'])
+            player.get_by_role('button',name='Close player',exact=True).tap()
+        observed['provider_error_classification']=errors
+    finally:
+        context.close()
+        browser.close()
+    print(json.dumps({"engine":browser_type.name,"player_policy":observed,
+        "provider":"controlled YT API fixture","physical_iPhone":"UNEXECUTED"},sort_keys=True))
+
+
 def verify_public_entity_slice(browser_type):
     """Public16 + synthetic144 capacity regression; never a live-inventory claim.
 
-    Reuses route_local/provider. This selection does not run the legacy
-    floating/tuck suite or qualify real provider/account/physical-device behavior.
+    Reuses route_local/provider. This selection does not run the focused
+    player-policy suite or qualify real provider/account/physical-device behavior.
     """
     real = json.loads((public / "member/mall-video-catalog.json").read_text(encoding="utf-8"))
     expected_ids = {item["foundup_id"] for item in real}
@@ -1494,6 +1708,12 @@ if __name__ == "__main__":
             for engine in (p.chromium,p.webkit):
                 verify_hpc_banner_header(engine)
                 verify_public_entity_slice(engine)
+        raise SystemExit(0)
+    if sys.argv[1:] == ["--player-policy"]:
+        with sync_playwright() as p:
+            for engine in (p.chromium,p.webkit):
+                verify_hidden_playback_policy(engine)
+                verify_floating_and_wikitube_gestures(engine)
         raise SystemExit(0)
     main()
     verify_diagnostics()

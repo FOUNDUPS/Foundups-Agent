@@ -1,5 +1,41 @@
 # p.fMALL Test ModLog
 
+## 2026-11-16 - Build v22 direct continuation and policy qualification
+
+012 explicitly authorized the existing v21 continuation through tests, push,
+draft PR and isolated preview. WSP 110 section 2.1 principal handoff records
+previous owner `pfmall-truth-author`, accepting direct Codex continuation,
+expected native head `1b5b77323325b855faf25d4a04ba3e671462084e`, and preserved
+header/entity commits `fe9e9afe4fd94e23ce027e7ae125ced075b53ba6` and
+`bfcd7d0de721288260fafcadc9fd71bcc1bb0485`. No exclusive lease or native-agent
+ACK is invented. Recheck head and all working state before ff-only native
+integration and use a guarded same-branch push. No production deploy or merge.
+
+The v21 hidden-player release defect described below is repaired in the v22
+source candidate: tuck/dismiss/document hide pause playback and cancel loading,
+start and recovery timers. Closed/tucked/hidden/offscreen stages cannot start;
+late READY/PLAYING/ENDED/error/recovery callbacks enforce that boundary. Untuck
+keeps the same iframe paused for explicit visible Play. Scripted playback
+retains the 200 x 200 stage and more-than-half-visible gate; continuous partial
+visibility is not redefined as a universal 50-percent pause rule. One stage
+observer reuses the central pause helper; chrome timers remain separate.
+Generic third-party iframe and opacity-only hiding are outside this YouTube fix.
+
+Build label, shell cache and versioned assets move together to v22. Existing
+browser fixtures now reject hidden audio rather than certifying it. Controlled
+Chromium/WebKit player-policy and header/entity runners pass, including pending
+WikiTube recovery cancellation, same-frame manual return, provider error
+taxonomy, rotation and exact far-scroll restoration. Targeted pytest: 209 pass;
+direct Node state/cache VM: 24 pass (overlaps its pytest wrapper). These are
+source/fixture results, not real YouTube or physical iPhone acceptance.
+
+See [before/after regression matrix](../docs/PFMALL_V22_REGRESSION_MATRIX.md)
+for preserved routes, actions, gestures and explicit acceptance changes.
+Native integration, remote push/PR/checks and fresh preview parity are separate
+receipts. Physical Safari/PWA on Wi-Fi/cellular remains unexecuted as a structured
+matrix. Principal-reported VPN-off playback is retained without invented numeric
+telemetry. WSP 22, 50, 71, 91, 97 and 110 apply.
+
 ## 2026-11-16 - Bounded header and public entity-grid candidates
 
 Base: native Build v21 `1b5b77323325b855faf25d4a04ba3e671462084e`.

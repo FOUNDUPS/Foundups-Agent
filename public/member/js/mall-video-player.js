@@ -7,7 +7,7 @@
  *
  * Modes:
  *   - Floating (.video-player-floating): top-anchored card over scrolling grid; swipe-right (or Tuck button)
- *     tucks to screen edge with visible restore handle while audio continues; pinch-in closes to grid;
+ *     pauses when tucked to the screen edge; the visible restore handle returns a paused player;
  *     pinch-out opens WikiTube.
  *   - WikiTube (.video-player-wikitube): fullscreen sequential queue player with bounded skip/halt recovery
  *     for unavailable/restricted videos and pinch-in return to grid.
@@ -299,9 +299,32 @@
 
   function pausePlayback() {
     autoplayRequested = false;
-    clearTimeout(autoSkipTimer);
+    clearPlaybackTimers();
     try { ytPlayer?.pauseVideo?.(); } catch (e) { /* provider not ready */ }
     stage?.querySelector('video')?.pause();
+  }
+
+  function displayedMediaArea() {
+    if (!isOpen || tucked || document.hidden || !stage?.isConnected ||
+        !container.classList.contains('open')) return null;
+    var style = window.getComputedStyle(container);
+    if (style.display === 'none' || style.visibility === 'hidden') return null;
+    var rect = stage.getBoundingClientRect();
+    var bounds = container.classList.contains('video-player-queue-docked') && mediaPanel.getBoundingClientRect();
+    var width = Math.max(0, Math.min(rect.right, window.innerWidth, bounds?.right ?? Infinity) -
+      Math.max(rect.left, 0, bounds?.left ?? 0));
+    var height = Math.max(0, Math.min(rect.bottom, window.innerHeight, bounds?.bottom ?? Infinity) -
+      Math.max(rect.top, 0, bounds?.top ?? 0));
+    return { rect: rect, area: width * height };
+  }
+
+  function isPlaybackDisplayed() {
+    var view = displayedMediaArea();
+    return !!view && view.rect.width >= 200 && view.rect.height >= 200 && view.area > 0;
+  }
+
+  function pauseHiddenPlayback() {
+    if (isOpen && !isPlaybackDisplayed()) pausePlayback();
   }
 
   function normalizeResumeSeconds(sec, durationSec) {
@@ -544,8 +567,15 @@
     bindTuckHandleGestures();
 
     window.addEventListener('resize', function () {
-      if (isOpen) syncFloatingGeometry();
+      if (isOpen) {
+        syncFloatingGeometry();
+        pauseHiddenPlayback();
+      }
     });
+    // One event-driven media visibility observer; chrome/rail timers stay separate.
+    if (typeof IntersectionObserver !== 'undefined') {
+      new IntersectionObserver(pauseHiddenPlayback, { threshold: [0, 0.5] }).observe(stage);
+    }
 
     // Keyboard: dismiss innermost control before shell Escape handler
     document.addEventListener('keydown', function (e) {
@@ -784,6 +814,7 @@
   function tuck() {
     if (!isOpen || !floating || tucked) return false;
     tucked = true;
+    pausePlayback();
     container.classList.add('is-tucked');
     tuckHandle.hidden = false;
     updateTuckHandleLabel();
@@ -967,6 +998,7 @@
     var restore = options?.restore !== false;
 
     flushCurrentPlaybackPosition();
+    pausePlayback();
     pendingResumeSeconds = null;
 
     isOpen = false;
@@ -1092,6 +1124,7 @@
   }
 
   function handleVideoEnded() {
+    if (!isPlaybackDisplayed()) { pausePlayback(); return; }
     consecutiveAutoSkips = 0;
     var seq = activeSequence();
     var pos = seq.indexOf(currentIndex);
@@ -1114,6 +1147,12 @@
 
   function scheduleWikiTubeRecovery(baseMessage, errorState, code) {
     failedQueueIndices.add(currentIndex);
+    if (!isPlaybackDisplayed()) {
+      pausePlayback();
+      queueHalted = true;
+      reportYouTube(errorState, baseMessage, code);
+      return;
+    }
     if (!wikitube) {
       reportYouTube(errorState, baseMessage, code);
       return;
@@ -1135,6 +1174,7 @@
       autoSkipTimer = setTimeout(function () {
         autoSkipTimer = null;
         if (!isOpen || !wikitube || renderGeneration !== expectedGen) return;
+        if (!isPlaybackDisplayed()) { pausePlayback(); return; }
         autoplayRequested = true;
         goToVideo(nextCandidate, { fromAutoAdvance: true, preserveFailures: true });
       }, getAutoSkipDelayMs());
@@ -1145,16 +1185,9 @@
   }
 
   function canStartYouTube() {
-    if (document.hidden) return false;
-    var rect = stage.getBoundingClientRect();
-    if (rect.width < 200 || rect.height < 200) return false;
-    if (tucked) return true;
-    var bounds = container.classList.contains('video-player-queue-docked') && mediaPanel.getBoundingClientRect();
-    var width = Math.max(0, Math.min(rect.right, window.innerWidth, bounds?.right ?? Infinity) -
-      Math.max(rect.left, 0, bounds?.left ?? 0));
-    var height = Math.max(0, Math.min(rect.bottom, window.innerHeight, bounds?.bottom ?? Infinity) -
-      Math.max(rect.top, 0, bounds?.top ?? 0));
-    return width * height > rect.width * rect.height / 2;
+    var view = displayedMediaArea();
+    return !!view && view.rect.width >= 200 && view.rect.height >= 200 &&
+      view.area > view.rect.width * view.rect.height / 2;
   }
 
   var YOUTUBE_ERRORS = {
@@ -1196,6 +1229,8 @@
     requestYouTubePlay = function () {
       if (!isOpen || generation !== renderGeneration) return;
       if (!canStartYouTube()) {
+        autoplayRequested = false;
+        clearPlaybackTimers();
         reportYouTube('manual-play', 'Bring the video into view before playing.');
         return;
       }
@@ -1298,6 +1333,8 @@
             requestYouTubePlay = function () {
               if (!current()) return;
               if (!canStartYouTube()) {
+                autoplayRequested = false;
+                clearPlaybackTimers();
                 reportYouTube('manual-play', 'Bring the video into view before playing.');
                 return;
               }
@@ -1314,6 +1351,11 @@
             var alreadyPlaying = false;
             try { alreadyPlaying = ev.target.getPlayerState?.() === 1; } catch (e) { /* ignore */ }
             if (alreadyPlaying) {
+              if (!isPlaybackDisplayed()) {
+                pausePlayback();
+                reportYouTube('paused', 'Playback paused while the player is hidden.', undefined, 2);
+                return;
+              }
               consecutiveAutoSkips = 0;
               queueHalted = false;
               reportYouTube('playing', '', undefined, 1);
@@ -1327,6 +1369,11 @@
             if (!current()) return;
             var state = ev.data;
             if (state === 1) {
+              if (!isPlaybackDisplayed()) {
+                pausePlayback();
+                reportYouTube('paused', 'Playback paused while the player is hidden.', undefined, 2);
+                return;
+              }
               clearPlaybackTimers();
               consecutiveAutoSkips = 0;
               queueHalted = false;
@@ -1337,6 +1384,11 @@
               clearPlaybackTimers();
               reportYouTube('paused', 'Playback paused.', undefined, 2);
             } else if (state === 0) {
+              if (!isPlaybackDisplayed()) {
+                pausePlayback();
+                reportYouTube('paused', 'Playback paused while the player is hidden.', undefined, 2);
+                return;
+              }
               clearPlaybackTimers();
               reportYouTube('ended', '', undefined, 0);
               handleVideoEnded();
@@ -1412,6 +1464,7 @@
       var ve = stage.querySelector('video');
       if (ve) {
         ve.addEventListener('playing', function () {
+          if (!isPlaybackDisplayed()) { pausePlayback(); return; }
           consecutiveAutoSkips = 0;
           queueHalted = false;
           reportHTML5('playing', '');

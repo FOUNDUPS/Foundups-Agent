@@ -1,5 +1,41 @@
 # p.fMALL Roadmap
 
+## 2026-11-16 - Build v22 direct continuation and policy qualification
+
+012 explicitly authorized the existing v21 continuation through tests, push,
+draft PR and isolated preview. WSP 110 section 2.1 principal handoff records
+previous owner `pfmall-truth-author`, accepting direct Codex continuation,
+expected native head `1b5b77323325b855faf25d4a04ba3e671462084e`, and preserved
+header/entity commits `fe9e9afe4fd94e23ce027e7ae125ced075b53ba6` and
+`bfcd7d0de721288260fafcadc9fd71bcc1bb0485`. No exclusive lease or native-agent
+ACK is invented. Recheck head and all working state before ff-only native
+integration and use a guarded same-branch push. No production deploy or merge.
+
+The v21 hidden-player release defect described below is repaired in the v22
+source candidate: tuck/dismiss/document hide pause playback and cancel loading,
+start and recovery timers. Closed/tucked/hidden/offscreen stages cannot start;
+late READY/PLAYING/ENDED/error/recovery callbacks enforce that boundary. Untuck
+keeps the same iframe paused for explicit visible Play. Scripted playback
+retains the 200 x 200 stage and more-than-half-visible gate; continuous partial
+visibility is not redefined as a universal 50-percent pause rule. One stage
+observer reuses the central pause helper; chrome timers remain separate.
+Generic third-party iframe and opacity-only hiding are outside this YouTube fix.
+
+Build label, shell cache and versioned assets move together to v22. Existing
+browser fixtures now reject hidden audio rather than certifying it. Controlled
+Chromium/WebKit player-policy and header/entity runners pass, including pending
+WikiTube recovery cancellation, same-frame manual return, provider error
+taxonomy, rotation and exact far-scroll restoration. Targeted pytest: 209 pass;
+direct Node state/cache VM: 24 pass (overlaps its pytest wrapper). These are
+source/fixture results, not real YouTube or physical iPhone acceptance.
+
+See [before/after regression matrix](../docs/PFMALL_V22_REGRESSION_MATRIX.md)
+for preserved routes, actions, gestures and explicit acceptance changes.
+Native integration, remote push/PR/checks and fresh preview parity are separate
+receipts. Physical Safari/PWA on Wi-Fi/cellular remains unexecuted as a structured
+matrix. Principal-reported VPN-off playback is retained without invented numeric
+telemetry. WSP 22, 50, 71, 91, 97 and 110 apply.
+
 ## 2026-11-16 - Bounded public portrait/entity loading sprint
 
 FITS_POC for public discovery; CHANGES_POC_ACCEPTANCE for portrait entity
@@ -402,3 +438,61 @@ The regression fixture checks the shared phone and desktop compositions.
 Physical Safari, Home Screen playback and keyboard behavior, and live
 invited admission remain separate release gates. Roll back the shared
 dock, tile presentation and matching service-worker generation together.
+
+
+## Discovery-first follow-up - current 012 direction; count remains unresolved
+
+Do not equate video/source lanes with independently constituted FoundUps.
+Canonical typed registry records, public project cards, creator/source channels,
+components and artifacts are distinct. Personal LinkedIn channels do not add
+FoundUps. Keep 144 as target capacity and use truthful stage labels; final
+classification may follow public discovery. No hidden record is exposed by
+this direction. Approved current additions are the existing public records
+Vote (`voteballots`), Trade (`trade`) and MAGADOOM (`magadoom_001`). Preserve
+the existing Member Portal/sign-in/code doorway and unfinished-stage disclosure.
+Investigate Vote/Ballots/Voice/Action/linked HPC relationships rather than minting
+five entities. EDUIT is the confirmed spelling.
+
+012 also explicitly requests a discoverable FoundUps House project. The existing
+opportunity model describes it but does not register or implement it; no first
+House public record or publisher endpoint has been verified. Do not alias it
+to Move2Japan or a Fukui listing. A candidate card can explain the intended
+find-houses/Join-to-add-House experience with canonical identity unresolved,
+no address/availability/private details and no functional Join claim. Recover
+012's first-House owner record and approved public projection before listing it.
+
+Publishing is 012's FoundUp concept for a shared automated publishing/social
+engine serving THA, Books of Un/Dao/Du, papers and future cartoons. Investigate
+and reuse existing publishing/AutoPost owners before claiming capability or
+registering outputs as separate entities. Foundups-Earth is a repository-backed
+foundation/extraction candidate; its alias to 'Geo World' is unproved. Do not
+confuse it with GEOZE or publish that alias as established.
+
+Next coherent interaction slice: selecting a video-backed project replaces the
+all-Mall field with that project's videos and scoped sequential queue. Reuse
+the current field/player/theater and gesture owners: phone player floats above
+the grid; desktop retains theater/rail; pinch out enters the selected view and
+pinch in/accessible Back returns to Mall with state. Preserve browser zoom and
+native YouTube controls. Popular sorting requires actual recorded metrics;
+otherwise label the order honestly. Bounded viewport NETWORK fetching as well
+as DOM rendering is required: current complete nested video-catalog download
+does not satisfy that new acceptance. Qualify queue continuation across pages.
+
+Deferred opus/investor artifact discovery uses this Mall, not a second archive,
+site, swarm or new public category system. First inventory and permission-classify
+existing ventures, components, papers, publications and demos separately from
+parent FoundUp and lifecycle. Each record needs canonical source/revision,
+provenance, verified public URL or private/unverified access, approval/publication
+status, owner and verification time; deduplicate aliases and editions. Use a
+public allowlist only: no raw Brain/Memex, private drafts or contacts.
+
+Second project only verified public metadata into existing portrait cards and
+loaded-catalog search. Later authenticated retrieval requires tenant isolation,
+revocation and negative tests. Authenticated resident RedDog ingress is not
+implemented; public HoloIndex is distinct from internal retrieval infrastructure.
+Do not claim deployed voice search or memory access. The existing JHR owner
+`6afafaaa-ffd4-8191-9609-617214655009` owns publication archive/orchestration;
+link its canonical records instead of duplicating them. Existing Carbon video
+lane `6afaa791-cdfc-8191-9da3-cb1f22384019` has a physical Escape stop and
+unconfirmed native state; resolve it before any new Carbon swarm. This section
+records deferred acceptance, not completed artifact ingestion or publication.

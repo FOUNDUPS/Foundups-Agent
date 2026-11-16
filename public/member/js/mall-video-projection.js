@@ -14,7 +14,7 @@
   const publicScopes = new Set(['hpc']);
   const memberPaths = new Set(['/member', '/member/', '/member/index.html']);
   // Keep this display label aligned with the shell cache generation.
-  const mallBuild = 'v21';
+  const mallBuild = 'v22';
   const buildLabel = `<small class="mall-build-label">Build ${mallBuild}</small>`;
 
   function hostScope(location) {
