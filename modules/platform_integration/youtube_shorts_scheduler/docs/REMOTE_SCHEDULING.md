@@ -349,8 +349,8 @@ resident worker, schedule, account setting or runtime policy is changed by it.
 Latest voice correction supersedes the earlier 15:00-20:00 exclusion and the
 two-hour Hasan-first cadence for this recent-Shorts batch. New slots begin with
 the overnight window starting November 17, 2026 at 20:00 Asia/Tokyo and ending
-November 18 at 04:00; subsequent applicable windows use the same 20:00-04:00
-JST overnight bounds. No scheduling outside that window. Use approximately one
+November 18 at 04:00. Do not infer authorization for additional nights from
+this bounded window. No scheduling outside that window. Use approximately one
 video every four hours with topic variety, not constant Hasan. Vary minutes only
 within the window and without overriding cadence, collisions or existing slots;
 do not force an extra release at the closing boundary.
@@ -362,3 +362,17 @@ a calendar date. The known-live exclusion still applies: this window does not
 authorize release during a known active stream. Held content remains held until
 its applicable approval/evidence is resolved. This is a bounded batch override,
 not a channel-wide runtime policy or permission to move existing schedules.
+
+### Operator demonstration: alternating positions in an Unlisted list
+
+012 demonstrated the intended selection heuristic: alternate top/bottom candidates
+to obtain topic variety rather than exhaust one repeated-title group. Treat row
+position as a navigation aid, not topic evidence, lineage or expanded scope.
+Bind every action to the exact video ID, verified content and authorized source
+window; older bottom rows outside the accepted batch remain excluded.
+
+After a saved visibility change, an item may disappear from the Unlisted-filtered
+list. Reacquire remaining rows because positions change. Disappearance alone is
+not a schedule receipt: independently locate the same ID in scheduled content
+and read its persisted date, time and timezone. Noninteractive observation of
+an operator's list does not prove unseen clicks, saved times or actual topics.
