@@ -1,6 +1,7 @@
 """Behavioral storage and worker-cache boundaries for a product in the Mall shell."""
 import shutil
 import subprocess
+import re
 from pathlib import Path
 
 import pytest
@@ -10,6 +11,6 @@ import pytest
 def test_mall_product_state_and_service_worker_runtime():
     """Execute actual owners with adversarial storage, routes and public responses."""
     script = Path(__file__).with_name("mall_product_state_vm.mjs")
-    result = subprocess.run(["node", str(script)], capture_output=True, text=True, timeout=30)
+    result = subprocess.run(["node", str(script)], capture_output=True, text=True, encoding="utf-8", timeout=30)
     assert result.returncode == 0, result.stdout + result.stderr
-    assert "Mall product state and service worker runtime: 24 passed." in result.stdout
+    assert re.search(r"^Mall product state and service worker runtime: [1-9]\d* passed\.$", result.stdout, re.MULTILINE), result.stdout + result.stderr

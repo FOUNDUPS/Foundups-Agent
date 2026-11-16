@@ -2,6 +2,12 @@
 
 ## v23 source qualification checkpoint
 
+Root-shell preservation repair: obsolete root caches now retire within their
+numeric namespace (v2); the absent legacy sign-in opener is optional. Existing
+Member state and player sources are retained. The added cache/gateway controls
+pass 29 VM cases; 201 affected pytest cases pass, including that wrapper. Local
+source evidence does not clear the separate publication or physical-device gates.
+
 The combined implementation now passes 278 targeted pytest cases (one native
 junction case skipped), 15 pager and 26 cache/state Node scenarios, 92 public
 TV assertions across Chromium/WebKit, 18 delayed-queue/gesture cases, four HPC

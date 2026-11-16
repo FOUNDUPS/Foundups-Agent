@@ -11,6 +11,8 @@ import { runInNewContext } from 'node:vm';
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const stateSource = readFileSync(join(root, 'js/mall-state-restore.js'), 'utf8');
 const swSource = readFileSync(join(root, 'member-sw.js'), 'utf8');
+const rootSwSource = readFileSync(join(root, '..', 'sw.js'), 'utf8');
+const gatewayHtml = readFileSync(join(root, '..', 'index.html'), 'utf8');
 const videoProjectionSource = readFileSync(join(root, 'js/mall-video-projection.js'), 'utf8');
 const VIDEO_KEY = 'pfmall_mall_state_v1';
 const PRODUCT_KEY = 'pfmall_product_move2japan_state_v1';
@@ -326,7 +328,7 @@ await check('deferred video restoration cannot overwrite a newly selected geogra
 
 // Browser-owned cache/fetch interfaces are bounded in memory; the listeners
 // under test execute the actual service-worker source above.
-function swRuntime() {
+function swRuntime(source = swSource) {
   const handlers = new Map(), stores = new Map(), deleted = [], precached = [], calls = [];
   const keyOf = key => new URL(typeof key === 'string' ? key : key.url, ORIGIN).href;
   const caches = {
@@ -367,7 +369,7 @@ function swRuntime() {
       return Promise.resolve().then(() => network(request, options));
     }
   };
-  runInNewContext(swSource, context);
+  runInNewContext(source, context);
   return {
     caches, stores, deleted, precached, calls,
     setNetwork: callback => { network = callback; },
@@ -665,6 +667,111 @@ await check('play.foundups.com resolves open Mall discovery and gates FoundUp en
   assert.equal(entryHandoff.api.consumeProductReturn(), null);
   entryHandoff.session.set(RETURN_KEY, JSON.stringify({ product_id: 'enter', created_at: 1000000, filters: { enter: '../evil' } }));
   assert.equal(entryHandoff.api.consumeProductReturn(), null);
+});
+
+await check('root activation retires only obsolete numeric root caches and preserves foreign sentinel bytes', async () => {
+  const current = rootSwSource.match(/const CACHE_NAME = ['"]([^'"]+)['"]/)?.[1];
+  assert.match(current || '', /^foundups-root-v\d+$/);
+  const h = swRuntime(rootSwSource);
+  const survivors = [current, 'pfmall-member-v23', 'pfmall-posters-v1', 'pfmall-properties-v1',
+    'other-app-cache', 'foundups-root-vX', 'foundups-root-v1-extra', 'foundups-root', 'FOUNDUPS-root-v1'];
+  const sentinel = new Uint8Array([0, 255, 10, 34, 92, 127]);
+  const key = '/__cache_owner_fixture__/sentinel';
+  for (const name of survivors) {
+    const cache = await h.caches.open(name);
+    await cache.put(key, new Response(sentinel));
+  }
+  const obsolete = ['foundups-root-v0', 'foundups-root-v1', 'foundups-root-v3', 'foundups-root-v27']
+    .filter(name => name !== current);
+  for (const name of obsolete) await h.caches.open(name);
+  await h.event('activate');
+  // Ownership and bytes are the regression: checking v2 first would mask the
+  // baseline's destructive deletion of other applications' cache namespaces.
+  for (const name of survivors) {
+    assert.equal(h.stores.has(name), true, 'root activation deleted foreign/current cache: ' + name);
+    const response = await (await h.caches.open(name)).match(key);
+    assert.ok(response, 'missing sentinel in ' + name);
+    assert.deepEqual(new Uint8Array(await response.arrayBuffer()), sentinel, 'changed bytes in ' + name);
+  }
+  assert.deepEqual(h.deleted.slice().sort(), obsolete.slice().sort());
+  assert.equal(h.calls.length, 0, 'activation must not make network calls');
+  assert.equal(current, 'foundups-root-v2', 'the repaired root worker must promote its generation');
+});
+
+function gatewaySignInRuntime(showButton) {
+  const start = gatewayHtml.indexOf('const showSignInModalBtn =');
+  const panel = gatewayHtml.indexOf('Panel toggle', start);
+  const end = gatewayHtml.lastIndexOf('\n', panel);
+  assert.ok(start > 0 && end > start && end - start < 30000, 'bounded actual sign-in section missing');
+  const source = gatewayHtml.slice(start, end);
+  const nodes = new Map(), calls = [], bindings = [];
+  const trace = { auth: 0, network: 0 };
+  function node(id) {
+    const listeners = new Map();
+    const element = {
+      id, style: { display: 'initial' },
+      addEventListener(kind, fn) {
+        (listeners.get(kind) || listeners.set(kind, []).get(kind)).push(fn);
+        bindings.push({ id, kind, fn });
+      },
+      emit(kind, event = {}) {
+        const e = { target: element, preventDefault() { calls.push(['prevent', id]); }, ...event };
+        for (const fn of listeners.get(kind) || []) fn(e);
+      }
+    };
+    nodes.set(id, element);
+    return element;
+  }
+  for (const id of ['closeSignInModal', 'signInGoogle', 'signInLinkedIn', 'signInError', 'backToDisclaimer']) node(id);
+  if (showButton) node('showSignInModal');
+  const disclaimerModal = node('disclaimerModal'), signInModal = node('signInModal');
+  const forbiddenAuth = () => { trace.auth++; throw new Error('Auth must not execute in this listener-binding fixture'); };
+  const context = {
+    document: { getElementById: id => nodes.get(id) || null }, disclaimerModal, signInModal,
+    openModal: element => { calls.push(['open', element.id]); element.style.display = 'block'; },
+    closeModal: element => { calls.push(['close', element.id]); element.style.display = 'none'; },
+    signInWithPopup: forbiddenAuth, getDoc: forbiddenAuth, doc: forbiddenAuth,
+    navigateToMember: forbiddenAuth, auth: { signOut: forbiddenAuth }, db: {}, googleProvider: {}, linkedinProvider: {},
+    fetch: () => { trace.network++; throw new Error('Network forbidden'); }
+  };
+  runInNewContext(source, context);
+  return { nodes, calls, bindings, trace };
+}
+
+function verifyGatewayBindings(showButton) {
+  for (const id of ['closeSignInModal', 'backToDisclaimer', 'signInGoogle', 'signInLinkedIn',
+    'signInError', 'signInModal', 'disclaimerModal']) {
+    assert.match(gatewayHtml, new RegExp(`\\bid\\s*=\\s*["']${id}["']`),
+      'fixture required node must exist in actual gateway HTML: ' + id);
+  }
+  const h = gatewaySignInRuntime(showButton);
+  for (const id of ['closeSignInModal', 'backToDisclaimer', 'signInGoogle', 'signInLinkedIn']) {
+    assert.equal(h.bindings.filter(x => x.id === id && x.kind === 'click').length, 1,
+      'later listener must still bind: ' + id);
+  }
+  h.nodes.get('closeSignInModal').emit('click');
+  assert.equal(h.nodes.get('signInModal').style.display, 'none');
+  h.nodes.get('backToDisclaimer').emit('click');
+  assert.equal(h.nodes.get('disclaimerModal').style.display, 'block');
+  assert.equal(h.nodes.get('signInModal').style.display, 'none');
+  if (showButton) {
+    h.nodes.get('showSignInModal').emit('click');
+    assert.equal(h.nodes.get('disclaimerModal').style.display, 'none');
+    assert.equal(h.nodes.get('signInModal').style.display, 'block');
+    assert.equal(h.bindings.filter(x => x.id === 'showSignInModal' && x.kind === 'click').length, 1);
+  }
+  assert.equal(h.trace.auth, 0, 'listener initialization/Close/Back must not authenticate');
+  assert.equal(h.trace.network, 0);
+}
+
+await check('gateway actual sign-in section binds later controls when optional show button is absent', () => {
+  assert.doesNotMatch(gatewayHtml, /\bid\s*=\s*['"]showSignInModal['"]/,
+    'the absent-button fixture must represent the current actual HTML');
+  verifyGatewayBindings(false);
+});
+
+await check('gateway present-button positive control opens sign-in and preserves later listeners without auth', () => {
+  verifyGatewayBindings(true);
 });
 
 console.log('Mall product state and service worker runtime: ' + checks + ' passed.');

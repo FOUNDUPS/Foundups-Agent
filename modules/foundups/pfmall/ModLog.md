@@ -1,3 +1,23 @@
+## 2026-11-16 - v23 root cache ownership and optional gateway opener
+
+Confirmed against clean `1b2551b69babd6e5d0eadcccaf033087c4f1520d` after the
+read-only PR #2196 reuse audit. Root-worker activation could delete Mall and
+other owners' caches, and the absent legacy sign-in opener stopped subsequent
+listener initialization. This is a focused repair, not a merge of #2196.
+
+`public/sw.js` now uses root generation v2 and retires only obsolete numeric
+`foundups-root-vN` entries. Foreign cache names and sentinel bytes survive.
+The gateway guards only the optional opener; existing Close, Back, Google and
+LinkedIn handlers remain. Routes, admission policy, user storage and member
+worker/player sources are unchanged.
+
+Regression controls reproduced foreign-cache deletion first, then the actual
+missing-button TypeError after the SW repair. Final VM: 29 passed; affected
+existing gateway/PWA/state pytest: 201 passed (includes the VM wrapper).
+Independent source review accepted the narrow repair. These are local controlled
+checks, not live authentication, physical PWA or production verification.
+No #2196 security disposition, merge, preview or production publication follows.
+
 ## 2026-11-16 - Build v23 bounded public TV continuation
 
 Preserved native v22 commit `155a89c281c06d84776a7f5f6ea718bd382f0395`
