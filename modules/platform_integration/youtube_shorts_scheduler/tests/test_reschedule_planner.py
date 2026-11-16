@@ -20,6 +20,7 @@ These tests are mock-only (no browser, no daemon, no live models) and NON-VACUOU
 """
 
 from datetime import datetime
+from copy import deepcopy
 from unittest.mock import patch
 
 import pytest
@@ -29,6 +30,7 @@ from modules.platform_integration.youtube_shorts_scheduler.src.reschedule_planne
     find_over_cap_days,
     plan_all_channels,
     plan_channel_reschedule,
+    plan_bounded_unlisted_batch,
 )
 from modules.platform_integration.youtube_shorts_scheduler.src.schedule_tracker import (
     HARD_CAP_PER_DAY,
@@ -45,6 +47,250 @@ FIXED_TODAY = datetime(2026, 1, 1)
 # A New York channel (identity ET conversion) and a Tokyo channel (offset).
 NY_TZ = "America/New_York"
 TOKYO_TZ = "Asia/Tokyo"
+
+
+# Bounded unlisted preview: synthetic observations only, never a writer input.
+_CHANNEL = "UC" + "a" * 22
+
+
+def _at(value):
+    return datetime.fromisoformat(value)
+
+
+def _clip(number, topic="topic-a", **changes):
+    return dict(channel_id=_CHANNEL, video_id=f"v{number:010d}",
+                visibility="unlisted", source_at=_at("2026-11-16T11:00:00+09:00"),
+                topic=topic, evidence_ref=f"fixture:transcript:{number}",
+                content_verified=True, held=False, **changes)
+
+
+def _preview_inputs():
+    clips = [_clip(1), _clip(2), _clip(3, "topic-b"), _clip(4, "topic-b")]
+    return dict(channel_id=_CHANNEL, candidates=clips,
+                allowed_video_ids=[r["video_id"] for r in clips],
+                source_start=_at("2026-11-15T00:00:00+09:00"),
+                source_end=_at("2026-11-17T00:00:00+09:00"),
+                windows=[(_at("2026-11-18T20:00:00+09:00"), _at("2026-11-19T04:00:00+09:00")),
+                         (_at("2026-11-19T20:00:00+09:00"), _at("2026-11-20T04:00:00+09:00"))],
+                timezone=TOKYO_TZ, occupied=[], inventory_complete=True,
+                observed_at=_at("2026-11-16T12:00:00+09:00"),
+                now=_at("2026-11-16T12:00:10+09:00"), live_state="not_live",
+                operator_editing=False)
+
+
+def test_bounded_preview_top_bottom_topics_offsets_and_no_mutation():
+    args = _preview_inputs()
+    original = deepcopy(args)
+    result = plan_bounded_unlisted_batch(**args)
+    assert args == original
+    assert result == plan_bounded_unlisted_batch(**args)
+    assert result["status"] == "preview_only"
+    assert result["effects_disabled"] is True
+    assert result["execution_authorized"] is False
+    assert result["scheduling_verified"] is False
+    assert [r["video_id"] for r in result["planned"]] == [f"v{n:010d}" for n in (1, 4, 2, 3)]
+    assert [r["publish_at_studio"] for r in result["planned"]] == [
+        "2026-11-18T20:07:00+09:00", "2026-11-19T00:19:00+09:00",
+        "2026-11-19T20:31:00+09:00", "2026-11-20T00:31:00+09:00"]
+    assert result["planned"][0]["publish_at_audience"] == "2026-11-18T06:07:00-05:00"
+    assert not result["unplaced"]
+
+
+def test_bounded_preview_only_explicit_window_no_closing_release():
+    args = _preview_inputs()
+    args["windows"] = args["windows"][:1]
+    result = plan_bounded_unlisted_batch(**args)
+    assert len(result["planned"]) == 2
+    assert len(result["unplaced"]) == 2
+    assert all(_at(r["publish_at_studio"]) < args["windows"][0][1] for r in result["planned"])
+
+
+def test_bounded_preview_exclusions_and_identical_duplicate():
+    args = _preview_inputs()
+    args["candidates"][0]["held"] = True
+    args["candidates"][1]["visibility"] = "scheduled"
+    args["candidates"][2]["content_verified"] = False
+    args["candidates"].append(dict(args["candidates"][3]))
+    args["allowed_video_ids"].append("missing0001")
+    result = plan_bounded_unlisted_batch(**args)
+    assert [r["video_id"] for r in result["planned"]] == ["v0000000004"]
+    assert {r["reason"] for r in result["excluded"]} == {
+        "held", "already_scheduled_or_reserved", "content_evidence_missing", "candidate_missing"}
+
+
+@pytest.mark.parametrize("change,reason", [
+    ({"live_state": "live"}, "live_state_not_clear"),
+    ({"live_state": "unknown"}, "live_state_not_clear"),
+    ({"operator_editing": True}, "operator_editing"),
+    ({"inventory_complete": False}, "inventory_incomplete"),
+    ({"observed_at": _at("2026-11-16T11:58:00+09:00")}, "observations_stale_or_future"),
+    ({"observed_at": _at("2026-11-16T12:01:00+09:00")}, "observations_stale_or_future"),
+])
+def test_bounded_preview_observation_blocks(change, reason):
+    args = _preview_inputs()
+    args.update(change)
+    result = plan_bounded_unlisted_batch(**args)
+    assert result["status"] == "blocked" and result["reason"] == reason
+    assert not result["planned"] and result["effects_disabled"]
+
+
+@pytest.mark.parametrize("change", [
+    {"minimum_spacing_minutes": True}, {"minimum_spacing_minutes": 239},
+    {"minute_offsets": [True, 19]}, {"minute_offsets": [[], 19]},
+    {"minute_offsets": [7, 7]}, {"minute_offsets": [-1, 19]},
+    {"max_per_day": True}, {"channel_id": "move2japan"},
+    {"timezone": "not/a/timezone"}, {"now": datetime(2026, 11, 16)},
+    {"inventory_complete": 1}, {"windows": []}, {"live_state": "maybe"},
+])
+def test_bounded_preview_rejects_malformed_inputs(change):
+    args = _preview_inputs()
+    args.update(change)
+    with pytest.raises(ValueError, match="bounded_preview:"):
+        plan_bounded_unlisted_batch(**args)
+
+
+def test_bounded_preview_conflicting_duplicate_fails_closed():
+    args = _preview_inputs()
+    other = dict(args["candidates"][0], held=True)
+    args["candidates"].append(other)
+    with pytest.raises(ValueError, match="candidate_conflict"):
+        plan_bounded_unlisted_batch(**args)
+
+
+@pytest.mark.parametrize("field,value,reason", [
+    ("visibility", "private", "not_unlisted"),
+    ("source_at", _at("2026-11-14T00:00:00+09:00"), "outside_source_window"),
+    ("source_at", _at("2026-11-17T00:00:00+09:00"), "source_in_future"),
+    ("evidence_ref", "", "content_evidence_missing"),
+    ("topic", "", "content_evidence_missing"),
+])
+def test_bounded_preview_content_and_source_exclusions(field, value, reason):
+    args = _preview_inputs()
+    args["candidates"][0][field] = value
+    result = plan_bounded_unlisted_batch(**args)
+    assert {"video_id": "v0000000001", "reason": reason} in result["excluded"]
+
+
+def test_bounded_preview_reserved_id_and_instant_collisions():
+    args = _preview_inputs()
+    args["occupied"] = [dict(channel_id=_CHANNEL, video_id="v0000000001",
+                             publish_at=_at("2026-11-18T20:00:00+09:00"), status="unknown")]
+    result = plan_bounded_unlisted_batch(**args)
+    assert {"video_id": "v0000000001", "reason": "already_scheduled_or_reserved"} in result["excluded"]
+    assert result["planned"][0]["publish_at_studio"] == "2026-11-19T00:19:00+09:00"
+
+
+def test_bounded_preview_retains_daily_cap_across_midnight():
+    args = _preview_inputs()
+    args["max_per_day"] = 1
+    args["occupied"] = [dict(channel_id=_CHANNEL, video_id="existing001",
+                             publish_at=_at("2026-11-18T01:00:00+09:00"), status="scheduled")]
+    result = plan_bounded_unlisted_batch(**args)
+    dates = [r["publish_at_studio"][:10] for r in result["planned"]]
+    assert "2026-11-18" not in dates
+    assert len(dates) == len(set(dates)) == 2
+
+
+def test_bounded_preview_dst_audience_conversion_is_date_specific():
+    args = _preview_inputs()
+    args["windows"] = [(_at("2026-10-31T20:00:00+09:00"), _at("2026-11-01T04:00:00+09:00")),
+                       (_at("2026-11-02T20:00:00+09:00"), _at("2026-11-03T04:00:00+09:00"))]
+    args["now"] = args["observed_at"] = _at("2026-10-30T12:00:00+09:00")
+    args["source_start"] = _at("2026-10-29T00:00:00+09:00")
+    args["source_end"] = _at("2026-10-31T00:00:00+09:00")
+    for row in args["candidates"]:
+        row["source_at"] = _at("2026-10-30T11:00:00+09:00")
+    result = plan_bounded_unlisted_batch(**args)
+    assert result["planned"][0]["publish_at_audience"].endswith("-04:00")
+    assert result["planned"][-1]["publish_at_audience"].endswith("-05:00")
+
+
+def test_bounded_preview_unordered_windows_rejected():
+    args = _preview_inputs()
+    args["windows"].reverse()
+    with pytest.raises(ValueError, match="window_bounds_invalid"):
+        plan_bounded_unlisted_batch(**args)
+
+
+@pytest.mark.parametrize("mutation", ["foreign", "bad_boolean", "missing_field", "unknown_field"])
+def test_bounded_preview_candidate_schema_and_scope_fail_closed(mutation):
+    args = _preview_inputs()
+    row = args["candidates"][0]
+    if mutation == "foreign":
+        row["channel_id"] = "UC" + "b" * 22
+    elif mutation == "bad_boolean":
+        row["content_verified"] = 1
+    elif mutation == "missing_field":
+        del row["held"]
+    else:
+        row["title"] = "A title is not evidence"
+    with pytest.raises(ValueError, match="bounded_preview:candidate_"):
+        plan_bounded_unlisted_batch(**args)
+
+
+def test_bounded_preview_occupied_conflict_and_missing_instant_refused():
+    args = _preview_inputs()
+    row = dict(channel_id=_CHANNEL, video_id="existing001",
+               publish_at=_at("2026-11-18T01:00:00+09:00"), status="reserved")
+    args["occupied"] = [row, dict(row, publish_at=_at("2026-11-18T02:00:00+09:00"))]
+    with pytest.raises(ValueError, match="occupied_conflict"):
+        plan_bounded_unlisted_batch(**args)
+    args["occupied"] = [dict(row, publish_at=None)]
+    with pytest.raises(ValueError, match="aware_datetime_required"):
+        plan_bounded_unlisted_batch(**args)
+
+
+def test_bounded_preview_empty_authorization_and_zero_cap_do_not_plan():
+    args = _preview_inputs()
+    args["allowed_video_ids"] = []
+    result = plan_bounded_unlisted_batch(**args)
+    assert not result["planned"]
+    assert {r["reason"] for r in result["excluded"]} == {"outside_allowed_ids"}
+    args = _preview_inputs()
+    result = plan_bounded_unlisted_batch(**args, max_per_day=0)
+    assert not result["planned"] and len(result["unplaced"]) == 4
+    assert plan_bounded_unlisted_batch(**args, max_per_day=100)["daily_cap"] == HARD_CAP_PER_DAY
+
+
+def test_bounded_preview_rejects_dst_fold_wall_window():
+    args = _preview_inputs()
+    args["timezone"] = "America/New_York"
+    args["now"] = args["observed_at"] = _at("2026-10-30T12:00:00+00:00")
+    args["windows"] = [(_at("2026-11-01T01:00:00-04:00"), _at("2026-11-01T04:00:00-05:00"))]
+    with pytest.raises(ValueError, match="window_wall_time_ambiguous"):
+        plan_bounded_unlisted_batch(**args)
+
+
+def test_bounded_preview_skips_fold_candidates_and_keeps_elapsed_spacing():
+    args = _preview_inputs()
+    args["timezone"] = "America/New_York"
+    args["now"] = args["observed_at"] = _at("2026-10-30T12:00:00+00:00")
+    args["source_start"] = _at("2026-10-29T00:00:00+00:00")
+    args["source_end"] = _at("2026-10-31T00:00:00+00:00")
+    for row in args["candidates"]:
+        row["source_at"] = _at("2026-10-30T11:00:00+00:00")
+    args["windows"] = [(_at("2026-10-31T21:00:00-04:00"), _at("2026-11-01T07:00:00-05:00"))]
+    result = plan_bounded_unlisted_batch(**args)
+    assert len(result["planned"]) == 2  # 01:19 fold is deliberately not offered
+    slots = [_at(r["publish_at_utc"]) for r in result["planned"]]
+    assert (slots[1] - slots[0]).total_seconds() >= 240 * 60
+
+
+def test_bounded_preview_has_no_file_network_or_reservation_effects(monkeypatch):
+    import builtins
+    import socket
+    import pytz
+    from modules.platform_integration.youtube_shorts_scheduler.src.schedule_tracker import ScheduleTracker
+    # Load bundled timezone data before sealing effects, even in isolated runs.
+    pytz.timezone(TOKYO_TZ)
+    pytz.timezone(NY_TZ)
+    def forbidden(*args, **kwargs):
+        raise AssertionError("preview attempted external effect")
+    monkeypatch.setattr(builtins, "open", forbidden)
+    monkeypatch.setattr(socket, "socket", forbidden)
+    monkeypatch.setattr(ScheduleTracker, "reserve_slot", forbidden)
+    monkeypatch.setattr(ScheduleTracker, "save", forbidden)
+    assert plan_bounded_unlisted_batch(**_preview_inputs())["effects_disabled"]
 
 
 def _date(d: datetime) -> str:
