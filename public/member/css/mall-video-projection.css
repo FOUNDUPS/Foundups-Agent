@@ -58,6 +58,60 @@
   border-radius: 0.65rem;
 }
 
+[data-mall-video-scope="hpc"] .mall-hpc-banner {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  min-width: 0;
+  max-width: 24rem;
+}
+
+[data-mall-video-scope="hpc"] .mall-hpc-banner-link {
+  display: block;
+  order: 0;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  opacity: 1;
+}
+
+.mall-hpc-banner-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1280 / 353;
+  border-radius: 0.4rem;
+}
+
+.mall-hpc-banner > .mall-build-label {
+  font-size: 0.7rem;
+  line-height: 1.2;
+}
+
+.mall-hpc-banner-metadata {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  [data-mall-video-scope="hpc"] .mall-hpc-banner {
+    max-width: 12rem;
+  }
+
+  /* Keep the compact floating player below this measured banner and Voice CTA. */
+  [data-mall-video-scope="hpc"] .video-player-fullscreen.video-player-floating {
+    top: var(--floating-top, 0.5rem);
+  }
+}
+
 [data-mall-video-scope] #redDogAnchor {
   right: max(0.65rem, var(--safe-right));
   bottom: calc(0.5rem + var(--safe-bottom));

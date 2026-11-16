@@ -98,7 +98,7 @@
   }
 
   // Select install metadata in the head, before the public catalog loads.
-  const hpcTitle = 'Hasan Piker Coalition';
+  const hpcTitle = 'HPC';
   const hpcPortrait = '/member/hpc-icon-192.png';
   const playLocation = window.location;
   if (playLocation?.hostname === 'play.foundups.com' && playLocation.pathname === '/') {
@@ -597,7 +597,6 @@
     field.setAttribute('aria-label', 'Shorts');
     const home = document.querySelector('.mall-header .mall-brand-minimal');
     home.href = isOpenMallHost(window.location) ? '/member/' : OPEN_MALL_ORIGIN + '/';
-    if (scope === 'hpc') home.querySelector('img').src = hpcPortrait;
     home.setAttribute('aria-label', 'Return to Play FoundUps Mall');
     home.addEventListener('click', function () { window.mallStateRestore.save(); });
 
@@ -613,17 +612,35 @@
         throw new Error('Invalid civic resource destination');
       }
 
-      document.title = projection.lane.title;
-      element('videoScopeTitle').textContent = projection.lane.title;
+      document.title = scope === 'hpc' ? hpcTitle : projection.lane.title;
+      const title = element('videoScopeTitle');
+      title.textContent = scope === 'hpc' ? hpcTitle : projection.lane.title;
       const identity = element('videoScopeIdentity');
       const topic = element('videoScopeTopic');
       identity.textContent = projection.identity;
       topic.textContent = projection.topic;
       const topicLine = document.createElement('div');
       topicLine.className = 'mall-video-scope-topic-line';
-      topicLine.innerHTML = buildLabel;
+      if (scope !== 'hpc') topicLine.innerHTML = buildLabel;
       topicLine.prepend(topic);
       identity.after(topicLine);
+      if (scope === 'hpc') {
+        // Reuse the existing left identity and navigation target. The build stays
+        // in normal flow above the full banner, inside the measured header.
+        const banner = identity.parentElement;
+        banner.classList.add('mall-hpc-banner');
+        for (const metadata of [title, identity, topicLine]) {
+          metadata.classList.add('mall-hpc-banner-metadata');
+        }
+        banner.insertAdjacentHTML('afterbegin', buildLabel);
+        const image = home.querySelector('img');
+        image.src = '/member/hpc-banner.webp';
+        image.width = 1280;
+        image.height = 353;
+        image.classList.replace('mall-brand-logo-sm', 'mall-hpc-banner-image');
+        home.classList.add('mall-hpc-banner-link');
+        banner.appendChild(home);
+      }
       element('videoScopeCredit').textContent = projection.credit + ' Shorts · Commentary and satire';
       field.setAttribute('aria-describedby', 'videoScopeCredit');
       element('videoScopeDisclosureText').textContent = projection.disclosure;

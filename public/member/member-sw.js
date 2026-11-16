@@ -21,6 +21,7 @@ const SHELL_ASSETS = [
   '/member/',
   '/member/manifest.json',
   '/member/hpc.webmanifest',
+  '/member/hpc-banner.webp',
   '/member/hpc-icon-180.png',
   '/member/hpc-icon-192.png',
   '/member/hpc-icon-512.png',

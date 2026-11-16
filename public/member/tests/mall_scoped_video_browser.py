@@ -167,6 +167,61 @@ def video(page, index):
 def expect_position(page, offset):
     page.wait_for_function("(expected) => Math.abs(document.querySelector('.mall-tile-field-wrapper').scrollTop - expected) <= 2", arg=offset, timeout=4000)
 
+def expect_hpc_banner_header(page):
+    """The full artwork and real-flow build replace only the left identity."""
+    header = page.locator("#videoScopeHeader")
+    image = header.locator(".mall-hpc-banner-image")
+    build = header.locator(".mall-build-label")
+    expect(header.locator("#videoScopeTitle")).to_have_text("HPC")
+    expect(header.locator(".mall-brand-logo-sm")).to_have_count(0)
+    expect(image).to_have_count(1)
+    expect(image).to_have_attribute("src", "/member/hpc-banner.webp")
+    expect(image).to_have_attribute("width", "1280")
+    expect(image).to_have_attribute("height", "353")
+    expect(image).to_be_visible()
+    page.wait_for_function("document.querySelector('.mall-hpc-banner-image')?.naturalWidth === 1280")
+    expect(build).to_have_text("Build v21")
+    image_box, build_box, header_box = image.bounding_box(), build.bounding_box(), header.bounding_box()
+    assert abs(image_box["width"] / image_box["height"] - 1280 / 353) < .03
+    assert abs(build_box["x"] - image_box["x"]) <= 1
+    assert build_box["y"] + build_box["height"] <= image_box["y"] + 1
+    assert build_box["y"] >= header_box["y"] - 1
+    assert image_box["y"] + image_box["height"] <= header_box["y"] + header_box["height"] + 1
+    phone_voice = header.locator("#videoScopeVoice")
+    if phone_voice.count():
+        voice_box = phone_voice.bounding_box()
+        assert image_box["x"] + image_box["width"] <= voice_box["x"] - 1
+        assert voice_box["x"] + voice_box["width"] <= page.viewport_size["width"]
+        assert voice_box["height"] >= 44
+    return {"banner": image_box, "build": build_box, "header": header_box}
+
+
+def verify_hpc_banner_header(browser_type):
+    """Bounded header geometry checks; provider playback remains a fixture."""
+    browser = browser_type.launch()
+    observed = {}
+    try:
+        for width, height in [(320, 640), (390, 844), (844, 390), (1366, 900), (1440, 900)]:
+            phone = width < 900
+            context = browser.new_context(viewport={"width": width, "height": height},
+                is_mobile=phone, has_touch=phone, service_workers="block", reduced_motion="reduce")
+            try:
+                context.add_init_script(provider)
+                context.route("**/*", route_local)
+                page = context.new_page()
+                page.set_default_timeout(8000)
+                page.goto("https://hpc.foundups.com/member/", wait_until="domcontentloaded")
+                observed[f"{width}x{height}"] = expect_hpc_banner_header(page)
+                expect(page.locator("#videoScopeVoice")).to_have_attribute("href", "https://vote.mtrout.com/contact")
+                expect(page.locator("#videoScopeDisclosureText")).to_contain_text("not affiliated")
+                assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+            finally:
+                context.close()
+    finally:
+        browser.close()
+    print(json.dumps({"engine": browser_type.name, "hpc_header": observed}, sort_keys=True))
+
+
 def main():
     observed = {}
     with sync_playwright() as p:
@@ -177,15 +232,15 @@ def main():
         page = context.new_page()
         page.set_default_timeout(8000)
         page.goto("https://hpc.foundups.com/member/", wait_until="domcontentloaded")
-        expect(page.locator("#videoScopeTitle")).to_have_text("Hasan Piker Coalition")
+        expect(page.locator("#videoScopeTitle")).to_have_text("HPC")
         expect(page.locator("#videoScopeHeader #videoScopeTopic")).to_have_text("#SchumerOUT")
         build = page.locator("#videoScopeHeader .mall-build-label")
         expect(build).to_have_text("Build v21")
         expect(build).to_be_visible()
         expect(page.locator("#videoScopeHeader #videoScopeVoice")).to_have_attribute("href", "https://vote.mtrout.com/contact")
         expect(page.locator("#videoScopeInfo")).to_be_hidden()
-        expect(page).to_have_title("Hasan Piker Coalition")
-        expect(page.locator('meta[name="apple-mobile-web-app-title"]')).to_have_attribute("content", "Hasan Piker Coalition")
+        expect(page).to_have_title("HPC")
+        expect(page.locator('meta[name="apple-mobile-web-app-title"]')).to_have_attribute("content", "HPC")
         expect(page.locator('link[rel="apple-touch-icon"]')).to_have_attribute("href", "/member/hpc-icon-180.png")
         session = context.new_cdp_session(page)
         manifest = session.send("Page.getAppManifest")
@@ -195,10 +250,8 @@ def main():
         assert data["id"] == data["start_url"] == "/member/?foundup=hpc"
         mall_link = page.get_by_role("link", name="Return to Play FoundUps Mall")
         expect(mall_link).to_have_attribute("href", "https://play.foundups.com/")
-        expect(mall_link.locator("img")).to_have_attribute("src", "/member/hpc-icon-192.png")
-        logo = mall_link.bounding_box()
-        title = page.locator("#videoScopeTitle").bounding_box()
-        assert logo["x"] < title["x"] and title["y"] < logo["y"] + logo["height"]
+        expect(mall_link.locator("img")).to_have_attribute("src", "/member/hpc-banner.webp")
+        observed["header_390"] = expect_hpc_banner_header(page)
         expect(page.locator(".mall-tile-play-indicator")).to_have_count(0)
         layout = info(page)
         assert 6 <= len(layout["tiles"]) < fixture_total
@@ -308,7 +361,7 @@ def main():
             page.locator("#videoScopeVoice").tap()
         expect(page.get_by_role("heading", name="Contact Congress fixture")).to_be_visible()
         page.go_back(wait_until="domcontentloaded")
-        expect(page.locator("#videoScopeTitle")).to_have_text("Hasan Piker Coalition")
+        expect(page.locator("#videoScopeTitle")).to_have_text("HPC")
         expect_position(page, saved_offset)
         assert page.evaluate("mallTileField.getVideoGridState().anchorVideoId") == saved_anchor
         observed["voice_return_position"] = {"offset":saved_offset,"anchor":saved_anchor}
@@ -320,6 +373,7 @@ def main():
         assert abs(oriented["width"] - oriented["contentWidth"]) <= 1
         assert page.locator("#videoScopeHeader").bounding_box()["y"] >= 0
         assert page.locator("#videoScopeVoice").bounding_box()["y"] < 390
+        observed["header_844_landscape"] = expect_hpc_banner_header(page)
         video(page, 4).tap(position={"x":25,"y":90})
         expect_playing(page, 4)
         expect(video(page, 4)).to_have_attribute("aria-current", "true")
@@ -334,6 +388,7 @@ def main():
         voice = page.locator("#videoScopeVoice").bounding_box()
         assert voice["x"] + voice["width"] <= 320
         assert build.bounding_box()["x"] + build.bounding_box()["width"] <= voice["x"]
+        observed["header_320"] = expect_hpc_banner_header(page)
         more = dock.get_by_role("button", name="More options")
         search = dock.get_by_role("textbox", name="Search videos")
         red_dog = dock.get_by_role("link", name="Red Dog")
@@ -400,7 +455,7 @@ def verify_diagnostics():
         page = context.new_page()
         page.set_default_timeout(7000)
         page.goto("https://hpc.foundups.com/member/", wait_until="domcontentloaded")
-        expect(page.locator("#videoScopeTitle")).to_have_text("Hasan Piker Coalition")
+        expect(page.locator("#videoScopeTitle")).to_have_text("HPC")
         player = page.locator("#videoPlayerFullscreen")
         observed = {}
         diagnostics = [(2,"configuration"), (5,"playback-error"), (100,"unavailable"), (101,"embedding-disabled"),
@@ -947,6 +1002,7 @@ def verify_desktop(browser_type):
     page.set_default_timeout(8000)
     page.goto("https://hpc.foundups.com/member/", wait_until="domcontentloaded")
     expect(page.locator("#videoScopeHeader .mall-build-label")).to_be_visible()
+    expect_hpc_banner_header(page)
     player = page.get_by_role("region", name="Video theater")
     search = player.get_by_role("searchbox", name="Search videos")
     search_form = player.get_by_role("search")
@@ -1306,6 +1362,8 @@ if __name__ == "__main__":
     main()
     verify_diagnostics()
     with sync_playwright() as p:
+        verify_hpc_banner_header(p.chromium)
+        verify_hpc_banner_header(p.webkit)
         verify_desktop(p.chromium)
         verify_member_entry(p.chromium)
         verify_floating_and_wikitube_gestures(p.chromium)

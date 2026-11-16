@@ -1,5 +1,16 @@
 # HPC ModLog
 
+## 2026-11-16 - Whole left banner candidate and changed player acceptance
+
+Reconciled H1 with 012's top-anchored visible-player acceptance and small
+sprint sequence. Existing v21 left identity now reuses the whole wide
+Hasan satire artwork with the build label above it; Voice CTA unchanged.
+Source, test and release states are recorded in the shared
+[Mall ModLog](../pfmall/ModLog.md) and [roadmap](ROADMAP.md).
+Vote return-navigation implementation remains draft PR #2411, not deployed.
+Native player hidden playback remains a separately owned release blocker;
+this header change does not repair or qualify it. WSP 22, 50 and 97 apply.
+
 ## 2026-11-13 · Public host and invited member entry
 
 012 confirmed the guest entrance at `hpc.foundups.com`. The registry sends

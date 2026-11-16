@@ -1,5 +1,52 @@
 # HPC roadmap
 
+## 2026-11-16 small-sprint reconciliation (candidate on native Build v21)
+
+CHANGES_POC_ACCEPTANCE: 012 now requests one visible, top-anchored shared
+player with the grid scrolling beneath it. This supersedes H1's earlier
+selected-row placement. Preserve one media instance, selection, queue,
+close/Back restoration and both phone and desktop browsing. Full offscreen
+tuck with continuing audio is a release blocker, not accepted behavior.
+
+The first bounded source candidate reuses the whole supplied wide satire
+artwork in the existing left HPC header, keeps Build v21 directly above it,
+and leaves the separate right Voice / Contact Congress control unchanged.
+It reuses the existing repository artwork (`hpc-banner.webp`), concise HPC
+semantics, Mall return link and independent-site disclosure. The new asset
+is declared in the shell precache; release generation and deployed parity
+still require the existing release owner. This is not a new deployed build.
+
+Vote and Contact Congress return links are implemented separately in draft
+PR [#2411](https://github.com/FOUNDUPS/Foundups-Agent/pull/2411), head
+`5c7c22554be86b9ec1c8cbcd3cb5b5c12e85098d`: the entire top HPC banner
+returns to `https://hpc.foundups.com`; distinct Red Dog links return to
+`https://play.foundups.com`. The draft is unmerged in this reconciliation.
+Its 129 Node / 132 controlled Chromium-WebKit checks do not prove production
+or physical iPhone navigation. Keep that PR separate from Mall/player work.
+
+Continue with one public Mall entity/loading slice, then other creators'
+qualified video tests, shared player repair and WikiTube search/sequential
+playback. The wider design remains under discussion. See the
+[Mall roadmap](../pfmall/ROADMAP.md), [navigation contract](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md)
+and [shared incident](../pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md).
+
+Release blocker on source `1b5b77323325b855faf25d4a04ba3e671462084e`:
+`mall-video-player.js` `tuck()` does not pause, `canStartYouTube()` returns
+true when tucked, and the matching CSS moves the whole player offscreen.
+The existing player owner must pause fully hidden/dismissed playback and
+remove the visibility bypass. Displayed player minimum 200 x 200 and
+unobscured native controls remain required; scripted autoplay requires more
+than half the player visible. The visible stage's minimum height does not
+qualify the hidden state. Sources: [YouTube policies](https://developers.google.com/youtube/terms/developer-policies)
+and [required minimum functionality](https://developers.google.com/youtube/terms/required-minimum-functionality).
+
+Physical Safari and installed-PWA Wi-Fi/cellular receipts remain incomplete.
+012's VPN-on challenge and VPN-off playback/Wi-Fi continuation are principal
+reports, not independently captured player telemetry or proof that Clerk
+authentication fixes YouTube session state. Keep provider challenges,
+embedding restrictions and app defects separate. No production deployment
+or release approval is claimed by this candidate.
+
 | Stage | Status | Dependencies | Acceptance criteria and evidence |
 | --- | --- | --- | --- |
 | 0 · Genesis | Existing implementation | WSP 109, Vote ID, registry and manifest validators | Eight intake artifacts, valid genesis envelope, canonical `hpc` registry and `/f/hpc` namespace. Evidence in [intake](docs/intake/INTAKE_SOURCE.md) and [ModLog](ModLog.md). |
@@ -33,7 +80,7 @@ Use the existing [strategic diligence skill](../../ai_intelligence/ai_overseer/s
 | PC / monitor | Centered main video above a continuous horizontal thumbnail strip. Search sits **between the main video and the bottom tiles**. The main player is not forced browser fullscreen. | Desktop screenshots and browser interaction tests must show this composition; oversized three-column posters or an extra player inserted below a selected row do not satisfy it. |
 | Desktop startup / queue | Request playback of the first eligible clip on entry, then advance through the queue. Preserve one active player and deliberate sound controls. | Test actual provider state and advancing time. Where the browser blocks startup, show a truthful user-activation recovery; never claim guaranteed audible autoplay. No duplicate or hidden players. |
 | Search | Center a compact search bar beneath the desktop video. Typing filters the scoped queue. Submit plays the next match or the first available match. The phone search submits a grid filter and offers local dictation where available. | Search uses existing HPC catalog metadata. Test stable IDs, selection, no results, return state and the phone keyboard. Cross-FoundUp discovery remains a later permissioned expansion. |
-| Phone | Compact three-column portrait grid, fixed header, thumb-accessible bottom controls, vertical browsing through eligible clips. The selected tile becomes the shared player across its original row and nearby tiles reflow. Close restores the tile, scroll and focus. | Check the original row top, all three columns, one iframe, provider minimum size, explicit expand or supported pinch, and return. |
+| Phone | Compact three-column portrait grid, fixed header, thumb-accessible bottom controls, vertical browsing through eligible clips. Selection opens the one visible top-anchored shared player; the grid scrolls beneath it. Close restores browsing position and focus. | Check header/player clearance, all three columns, one iframe, provider minimum size and visibility, explicit expand or supported pinch, and return. Fully hidden playback is a release blocker. |
 | Breakpoint / rotation | Change presentation without duplicating the media session or losing video identity, queue, query and browsing position. | Test desktop, phone portrait/landscape, resizing and keyboard access independently. Do not classify all large tablets by pointer alone without testing. |
 | Entry and membership | Guests browse on `hpc.foundups.com`. `foundups.com/members` leads to the existing member gate. Admitted members can select HPC from the Mall or return to the same selection after sign-in. | Guest, uninvited and admitted browser cases. The `/f/hpc` landing links to the dedicated host. `/f/hpc/app` retains its protected handoff. |
 | Shared-regression guard | Preserve ordinary Mall channel expansion, other FoundUp projections, guest/member boundaries, provider diagnostics, save/history and return navigation. | Reuse the existing tests and fixtures for the shared grid, player and account boot. |
