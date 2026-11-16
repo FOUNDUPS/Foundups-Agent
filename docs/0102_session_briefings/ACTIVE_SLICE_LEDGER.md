@@ -1,3 +1,38 @@
+## Execution/delegation guidance follow-up - 2026-11-16
+
+Owner: same delegated 0102 worker and existing PR #2403/worktree; origin
+internal_handoff from 012. Reconciled clean head `3d1a6283cbc8d70860328172cb435c992213689a`
+with current main `87787840233c8660b1612873bfe99a027f68c772`. Main has no changes
+to foundups-wsp or its workspace manifest; no competing exact-path owner was
+found in the bounded PR/session check. Canonical operations Skillz, role binding
+and read-only Start Operations profile are unchanged at these revisions.
+
+WSP15 C1/I3/D3/Impact3 = 10/P2; docs/prompt plane. Reuse existing skill and local
+continuity file; one editor and an independent read-only verifier, no live team
+dispatch/provider/browser work. Scope: concise architect discretion, qualified
+execution/team choice, existing owner/session inspection, bounded handoff and
+return receipts. Preserve visual repair, runtime admission, security and user
+holds. Acceptance: manifest/projection/scanner integrity, unchanged operations
+and visual regressions, independent decision review and exact save readback.
+Canonical operations/runtime files are outside this write scope. The local skill
+is a repository pointer, not another authority or cross-host installation.
+
+Validated locally: 73 offline regressions passed; one directory-link case is
+skipped because this Windows host cannot create directory links. The strict
+workspace manifest verifies all 10 files with only the foundups-wsp digest
+changed; existing safety scanner and Codex projection checks pass. The existing
+personal continuity file was updated in place with expected-original-hash and
+exact readback checks (saved SHA256
+`6e12027074346cc9a543fcd899ac0e31c34c9a9006b392abb717ad1380e67273`);
+the skill validator passes. Independent review accepts all links, role/admission
+boundaries and six offline decision scenarios. Canonical operations, runtime
+profile and visual repair bytes remain unchanged from the prior accepted head.
+These are source/guidance checks, not worker admission or runtime activation.
+
+PR #2403 is currently unmergeable against newer main; no merge/rebase or runtime
+activation is part of this follow-up. Preserve the draft and report that
+pre-existing convergence limitation separately from local validation.
+
 ## Visual verification evidence correction — 2026-11-15
 
 Owner: delegated 0102 worker, origin internal_handoff from 012's Red Dog task.

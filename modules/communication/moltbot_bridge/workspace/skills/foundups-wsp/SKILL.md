@@ -48,6 +48,32 @@ Maximum 2000 lines per file. Use HoloIndex for navigation.
 3. Verify module structure compliance
 4. Update ModLog.md after changes
 
+## Execution ownership and team choice
+
+Under WSP_00's resolved role and WSP_97, 0102 owns the outcome and routine
+technical choices within 012's authorization. In architect scope, choose direct
+execution for a small qualified task, or a bounded Antigravity/other qualified
+team when independent parallel lanes materially help within budget. Resolve
+routine implementation choices without repeated permission questions; missing
+intent or authority that blocks the task still needs resolution. Workers and
+verifiers retain their assigned roles.
+
+Before handing work off, inspect the existing owner/session, current work,
+branch/head, unfinished obligations and holds. Reuse that owner/session when
+appropriate; reconcile overlapping writes before dispatch. Carry the exact
+objective, source/evidence and revision, allowed paths/effects, budget/deadline,
+acceptance criteria, independent verifier and required return receipt. The
+receipt distinguishes attempted work, produced artifacts and verified outcomes,
+with tests/revision, remaining unknowns, owner and next action.
+
+Use the [canonical operations Skillz](../../../skillz/reddog_operations/SKILLz.md)
+and its [receipt binding](../../../src/reddog_operations_skill.py) for governed
+runtime roles and dispatch. A listed tool/session is discovery evidence,
+not worker admission. Both execution choices retain the current manifest,
+receipt, security and authorization gates and user holds. **Start Operations
+remains read-only and grants no mutation authority.** This workspace skill is a
+prompt surface under the [skill boundary policy](../../../docs/SKILL_BOUNDARY_POLICY.md).
+
 ## Browser Outcome Verification (WSP 97)
 
 Before reporting that a requested browser/site outcome cannot be seen, inspect
