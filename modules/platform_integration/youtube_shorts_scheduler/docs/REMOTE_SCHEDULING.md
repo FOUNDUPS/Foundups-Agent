@@ -308,3 +308,38 @@ Current qualification: selected-ID scheduling and read-only preflight exist.
 The historical `publish_daily_clips` source and automatic today-window discovery
 remain unqualified here. These instructions define a bounded operator/handoff
 contract, not a newly deployed watcher or analytics-driven optimization loop.
+
+## 012 live-aware audience timing correction (2026-11-16)
+
+This correction overrides earlier all-hours/on-the-hour examples for subsequent
+requests. Source-day scope and publication-day scope remain separate.
+
+- Do not release Shorts while 012 is actively live on the target channel. Read
+  the channel's actual Live-now status before allocating slots and before any
+  authorized application. A currently active stream has no assumed end time.
+  Existing upcoming slots are conflicts to report, not permission to silently
+  move them. A future slot alone cannot guarantee that no stream will be live;
+  an unattended guarantee requires a qualified existing live-aware owner and
+  pre-release check. Do not claim that guard is deployed from these instructions.
+- Target the requested U.S. audience window, not the PC's clock. Record a named
+  audience timezone (for example America/New_York), release date and UTC instant;
+  convert to the actually displayed Studio timezone, commonly Asia/Tokyo.
+  Compute offsets for each release date, including DST and date rollover; never
+  reuse a fixed U.S./Japan offset. If audience analytics are unavailable, label
+  the selected window an operator assumption, not a measured optimum.
+- Use varied minute offsets and roughly the requested spacing rather than fixed
+  on-the-hour releases. This is editorial pacing, not evasion of platform checks.
+  Check existing releases first; preserve topic ordering, minimum spacing and
+  the explicit audience window. Do not add overnight coverage unless the latest
+  direction requests it. Latest explicit corrections supersede older cadence.
+- When 012 is editing or rescheduling in Studio, stop browser writes and yield
+  the shared tab, including any open unsaved dialog. Do not cancel, save, reload
+  or overwrite that work. Reconcile actual saved state after control is returned.
+- For schedule-only work, use the existing Content-table visibility popup route
+  above rather than opening each video detail page. Content evidence still must
+  exist; list titles alone do not qualify a clip or release held allegations.
+  Verify each saved ID/date/time/timezone independently. A visible control is
+  not evidence that its Save path has been tested in the current session.
+
+Evidence boundary: this update changes operating guidance only. No video,
+resident worker, schedule, account setting or runtime policy is changed by it.
