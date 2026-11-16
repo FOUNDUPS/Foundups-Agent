@@ -16,3 +16,7 @@
 ## Phase 3
 - AI_overseer autonomous queue (generate -> schedule -> index).
 - Telemetry + retry loop for failed builds.
+
+## Proposed cross-module video identity and reward experiment (2026-11-16)
+
+For LEGO-style and music-video outputs, reuse the existing Shorts production owner and its [video provenance/RSI/reward PoC](../youtube_shorts/docs/VIDEO_PROVENANCE_RSI_REWARDS_POC.md). Sequence: exact-copy/hash fixture -> signed provenance manifest -> watermark red-team benchmark -> WRE research qualification -> agent authority and gifted collectible policy -> isolated geometry research. Assembly remains here; do not create a second signing or NFT service. This is unimplemented research, not a Phase 0 completion claim.
