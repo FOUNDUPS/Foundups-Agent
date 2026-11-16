@@ -1,8 +1,8 @@
 # p.fMALL Navigation Contract
 
-**Version**: 2.0.0
-**Date**: 2026-04-03
-**Status**: Runtime Contract
+**Version**: 2.1.0
+**Date**: 2026-11-16
+**Status**: Runtime baseline with explicitly pending HPC acceptance changes
 
 ---
 
@@ -96,7 +96,7 @@ X axis = category / cluster / similarity band
 | Gesture | Mall Action | Status |
 |---------|-------------|--------|
 | swipe | Navigate: snapped field motion (default) or glide (override) | RUNTIME |
-| tap or click video tile | On wide desktop entry and in the HPC phone grid, open the shared player at the selected tile. Other category rows use their existing inline preview. A lane starts at its first clip. An expanded tile selects its own clip. | RUNTIME |
+| tap or click video tile | Inspected wide desktop and HPC phone runtime opens the shared player at the selected tile; ordinary category rows retain inline preview and lane/clip identity. The HPC phone target in section 4.7 instead uses one top-anchored player above the scrolling grid. | RUNTIME baseline; HPC target SPECIFIED |
 | tap or click non-video tile | Open the FoundUp quick view or the property listing detail. | RUNTIME |
 | hover tile on desktop | Show available tile controls. | RUNTIME |
 | Expand button | Open the shared full player for the selected video or lane. | RUNTIME |
@@ -189,6 +189,26 @@ shared roadmap.
 [Desktop poster browsing PoC](../pfmall/ROADMAP.md#desktop-poster-browsing-poc)
 
 ---
+
+### 4.7 HPC, Vote and Contact Congress return navigation — 012 request 2026-11-16
+
+**CHANGES_POC_ACCEPTANCE / SPECIFIED, not a runtime or live-navigation claim.** The latest entire-banner request supersedes an icon-only return target. Preserve the existing PWA/tile architecture and existing Vote/Contact pages, with no parallel shell or new Voice tenant. The existing Mall implementation owner coordinates the Vote source and its existing Sites mirror.
+
+| Surface/control | Required destination or behavior | Current source at `72a3182c` |
+| --- | --- | --- |
+| HPC -> Vote / Contact Congress | Reach the existing Vote landing and Contact Congress resource; retain `https://vote.mtrout.com/contact` for the existing Voice CTA. Qualify the intended Vote host/alias independently. | Contact CTA exists; do not infer a separately admitted Voice runtime. |
+| Vote landing: entire top HPC banner | One accessible link to `https://hpc.foundups.com`, including banner text, padding and small top-corner animated Hasan icon in the same target. | `modules/foundups/voteballots/web/index.html` has no HPC banner. |
+| Call Your Congressperson: entire top HPC banner | The same single-link HPC return behavior, preserving contact forms and existing navigation. | `modules/foundups/voteballots/web/contact.html` has no HPC banner. |
+| Adjacent-surface Red Dog navigation icon | Reuse the existing Red Dog identity and link to `https://play.foundups.com`. Do not repurpose the portrait as Mall identity. | HPC scoped dog currently links to `/f/hpc#red-dog`; its portrait header currently links to `https://foundups.com/member/`. |
+| HPC phone video selection | One deliberate tile tap requests playback in the existing shared, top-anchored floating player. The grid scrolls independently below; retain WikiTube transitions/queue and close/back/query/scroll/focus recovery. | Current selected-tile placement remains implementation evidence; this new target is not implemented by this contract. |
+
+Use concise **HPC** branding. Reuse the existing `public/member/hpc-icon-{180,192,512}.png` portrait and `public/logo-dog.png` Red Dog asset. 012's existing illustrated poster is the character reference for a satirical crown-of-thorns/optional-halo adaptation; the inspected portrait has neither. Materialize the supplied reference images through the supported Library route, verify local bytes and inspect pixels before image-dependent work. Keep the small portrait artwork to the recognizable face rather than the whole poster, and preserve independent/non-affiliation framing with no implied Hasan or organizational endorsement. Host approved copies on the adjacent page's existing origin without weakening its image CSP.
+
+The entire banner is **one link** with one meaningful accessible name and visible focus, no nested anchor or competing clickable portrait. Provide at least a 44 CSS px touch target and avoid obscuring page navigation. A subtle wiggle must have a static `prefers-reduced-motion` fallback and stop when the document is hidden. Keep application controls outside the YouTube player rectangle and leave native YouTube controls unobscured.
+
+Acceptance: exercise HPC -> Vote -> banner -> HPC and HPC -> Contact Congress -> banner -> HPC, separately on both pages; activate text, padding and portrait areas, plus keyboard Enter. Verify the distinct Red Dog -> Mall destination, page fit, focus, reduced-motion/visibility behavior, form/install controls, admission and return state. Reuse existing tests. Source, preview route/asset parity, actual phone navigation/playback and production deployment are separate gates. A saved direction or a working href alone is not completion.
+
+Deferred, not part of this immediate return-link slice: the larger shared floating Red Dog and bottom FoundUps search dock across existing surfaces. Reuse current navigation/state/search owners and do not duplicate the dock. `https://play.foundups.com` is the intended public Mall entry with its existing access policy; **144 FoundUps is a product target, not a claimed current inventory**. The ordinary Mall's internal concierge keeps its existing semantics. No production deployment is authorized by this change.
 
 ## 5. AI Projection vs User Navigation
 
