@@ -54,6 +54,7 @@ PUBLIC_DISCOVERY_METADATA_FIELDS = (
     "tier", "lifecycle_stage", "launch_readiness", "entry_copy", "discovery_kind",
     "public_plan_url", "public_poc_url", "external_url", "routing_prefix",
     "topic_family", "related_lanes", "parent_channels", "derivation_method",
+    "outcome", "solution", "pain", "linkedin_url",
 )
 PUBLIC_DISCOVERY_VIDEO_FIELDS = (
     "video_id", "title", "thumbnail_url", "embed_url", "source_url", "timestamp",
@@ -64,6 +65,7 @@ _DISCOVERY_RESERVED_IDS = {"__proto__", "constructor", "prototype"}
 _DISCOVERY_URL_FIELDS = {
     "poster_url", "channel_avatar_url", "public_plan_url", "public_poc_url",
     "external_url", "routing_prefix", "thumbnail_url", "embed_url", "source_url",
+    "linkedin_url",
 }
 _DISCOVERY_LIST_FIELDS = {"tags", "related_lanes", "parent_channels"}
 _DISCOVERY_ASSET_PATH = re.compile(

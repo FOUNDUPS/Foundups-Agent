@@ -82,6 +82,26 @@
   var fixedVideoField = false; // Public projection starts and stays inside one lane.
   var entityPortraitField = false; // Opt-in public FoundUp grid; never an expanded video lane.
   var entityRenderedCount = 0;
+  var catalogPager = null;
+  var catalogLoad = null;
+  var catalogEpoch = 0;
+  var catalogRefreshPending = false;
+  var catalogError = '';
+  var videoPager = null;
+  var videoRecord = null;
+  var videoLoad = null;
+  var selectionController = null;
+  var selectionEpoch = 0;
+  var pendingEntityId = null;
+  var pendingSelection = null;
+  var selectedControls = null;
+  var selectedLogo = null;
+  var selectedLogoOriginal = null;
+  var discoveryError = '';
+  var selectedNotice = '';
+  var selectedVideoIndex = 0;
+  var catalogLifetimeBound = false;
+
   var FIXED_VIDEO_COLUMNS = 3;
   var FIXED_VIDEO_BATCH = 6;
   var PHONE_PATCH_BATCH = 9;
@@ -185,7 +205,7 @@
   }
 
   function activePatchBatchSize() {
-    return fixedVideoField || isEntityGrid() ? FIXED_VIDEO_BATCH : PHONE_PATCH_BATCH;
+    return fixedVideoField || entityPortraitField ? FIXED_VIDEO_BATCH : PHONE_PATCH_BATCH;
   }
 
   function hydrateTilePoster(tile) {
@@ -739,12 +759,19 @@
       updateCatalog(catalog, options);
       return;
     }
-    fullCatalog = catalog || [];
+    fullCatalog = Array.isArray(catalog) ? catalog.slice() : [];
     mallCatalog = fullCatalog.slice();
     originalOrder = mallCatalog.slice();  // Preserve original order
     currentFieldScope = null;  // Reset scope on init
     fixedVideoField = options?.fixedVideoField === true && mallCatalog.length === 1;
     entityPortraitField = options?.entityPortraitField === true && !fixedVideoField;
+    replaceCatalogPager(options?.catalogPager);
+    if (!catalogLifetimeBound) {
+      catalogLifetimeBound = true;
+      window.addEventListener('pagehide', function(event) {
+        if (!event.persisted) { catalogPager?.close(); videoPager?.close(); selectionController?.abort(); }
+      });
+    }
     if (entityPortraitField) layoutMode = 'grid';
     scopedTheaterRequested = false;
     scopedTheaterState = null;
@@ -811,6 +838,8 @@
       return;
     }
     stopInlinePreview();
+    cancelEntitySelection();
+    replaceCatalogPager(options?.catalogPager);
     if (window.mallPlanes && typeof window.mallPlanes.closeView === 'function') {
       window.mallPlanes.closeView();
     }
@@ -1273,6 +1302,7 @@
    * Create collapse hint element (shown when in expanded mode)
    */
   function createCollapseHint() {
+    if (entityPortraitField) return;
     collapseHint = document.createElement('div');
     collapseHint.className = 'mall-tile-field-collapse-hint';
     collapseHint.textContent = 'Pinch in to collapse';
@@ -1324,6 +1354,264 @@
       groupDefinitions === null && layoutMode === 'grid';
   }
 
+  function isSelectedEntityScope() {
+    return entityPortraitField && !fixedVideoField && expandedFoundUp !== null;
+  }
+
+  function selectedDesktop() {
+    return window.matchMedia?.('(min-width: 900px) and (hover: hover) and (pointer: fine)').matches === true;
+  }
+
+  function replaceCatalogPager(session) {
+    if (catalogPager === (session || null)) return;
+    catalogPager?.close();
+    catalogPager = session || null;
+    catalogLoad = null;
+    catalogRefreshPending = false;
+    catalogError = '';
+    catalogEpoch++;
+  }
+
+  function syncSelectedControls() {
+    if (!entityPortraitField) return;
+    var selected = isSelectedEntityScope();
+    var visible = selected || pendingEntityId !== null;
+    var header = document.querySelector('.mall-header');
+    var logo = header?.querySelector('.mall-brand-minimal');
+    if (logo && logo !== selectedLogo) {
+      selectedLogo = logo;
+      selectedLogoOriginal = { href: logo.getAttribute('href'), label: logo.getAttribute('aria-label') };
+      logo.addEventListener('click', function(event) {
+        if (entityPortraitField && (isSelectedEntityScope() || pendingEntityId !== null)) {
+          event.preventDefault();
+          returnEntityToMall();
+        }
+      });
+    }
+    if (logo) {
+      if (visible) {
+        logo.setAttribute('href', 'https://play.foundups.com/');
+        logo.setAttribute('aria-label', 'Return to Play Mall');
+      } else {
+        ['href', 'aria-label'].forEach(function(attribute) {
+          var value = attribute === 'href' ? selectedLogoOriginal.href : selectedLogoOriginal.label;
+          if (value === null) logo.removeAttribute(attribute);
+          else logo.setAttribute(attribute, value);
+        });
+      }
+    }
+    if (!selectedControls && header) {
+      selectedControls = document.createElement('div');
+      selectedControls.className = 'mall-selected-controls';
+      selectedControls.innerHTML = '<button type="button" data-selected-back>Back to Mall</button>' +
+        '<span class="mall-selected-label" role="status"></span>' +
+        '<button type="button" data-selected-watch>Watch</button>';
+      header.appendChild(selectedControls);
+      selectedControls.querySelector('[data-selected-back]').addEventListener('click', returnEntityToMall);
+      selectedControls.querySelector('[data-selected-watch]').addEventListener('click', function() {
+        var player = window.mallVideoPlayer;
+        var index = player?.isOpen?.() ? player.getCurrentIndex() : selectedVideoIndex;
+        openDesktopVideo(index, false, { autoplay: true });
+      });
+    }
+    if (selectedControls) {
+      selectedControls.hidden = !visible;
+      header.classList.toggle('mall-selected-header', visible);
+      var item = selected ? mallCatalog[expandedFoundUp] : fullCatalog.find(function(record) {
+        return record.foundup_id === pendingEntityId;
+      });
+      selectedControls.querySelector('.mall-selected-label').textContent = pendingEntityId
+        ? 'Loading ' + (item?.name || item?.title || 'videos') + '…'
+        : (item?.name || item?.title || 'Videos') + ' · Catalog order' + selectedNotice;
+      selectedControls.querySelector('[data-selected-watch]').hidden = !selected || pendingEntityId !== null;
+    }
+    tileFieldWrapper?.classList.toggle('mall-selected-video-wrapper', selected);
+    if (collapseHint) collapseHint.hidden = true;
+    window.mallVideoPlayer?.syncFloatingGeometry?.();
+  }
+
+  function cancelEntitySelection() {
+    var owned = isSelectedEntityScope() || pendingEntityId !== null;
+    selectionEpoch++;
+    selectionController?.abort();
+    selectionController = null;
+    videoPager?.close();
+    videoPager = null;
+    videoLoad = null;
+    if (videoRecord) videoRecord.videos = [];
+    videoRecord = null;
+    pendingEntityId = null;
+    pendingSelection = null;
+    selectedNotice = '';
+    selectedVideoIndex = 0;
+    discoveryError = '';
+    if (owned) window.mallVideoPlayer?.close?.({ restore: false });
+  }
+
+  function returnEntityToMall() {
+    var sourceId = mallCatalog[expandedFoundUp ?? expandSourceIndex]?.foundup_id;
+    if (isSelectedEntityScope()) collapseFoundUp();
+    else cancelEntitySelection();
+    syncSelectedControls();
+    var source = mallCatalog.findIndex(function(item) { return item.foundup_id === sourceId; });
+    var tile = source < 0 ? null : getTileElement(source);
+    tile?.focus({ preventScroll: true });
+    window.mallStateRestore?.save?.();
+  }
+
+  async function loadCatalogPage() {
+    if (!catalogPager?.hasMore) return [];
+    if (catalogLoad) return catalogLoad;
+    var session = catalogPager;
+    var epoch = catalogEpoch;
+    catalogLoad = (async function() {
+      try {
+        var batch = await session.loadNext();
+        if (session !== catalogPager || epoch !== catalogEpoch) return [];
+        catalogError = '';
+        batch.forEach(function(item) {
+          if (!fullCatalog.some(function(existing) { return existing.foundup_id === item.foundup_id; })) fullCatalog.push(item);
+        });
+        window.mallPlanes?.setCatalog?.(fullCatalog);
+        if (isSelectedEntityScope()) catalogRefreshPending = true;
+        else {
+          catalogRefreshPending = false;
+          var canAppend = currentFieldScope === null && currentProjection === 'default';
+          mallCatalog = filterByScope(currentFieldScope);
+          originalOrder = mallCatalog.slice();
+          mallCatalog = sortByProjection(currentProjection);
+          if (canAppend) renderTiles(entityRenderedCount + FIXED_VIDEO_BATCH);
+          else { renderTiles(); bindInteractions(); }
+        }
+        return batch;
+      } catch (error) {
+        if (session === catalogPager && error.name !== 'AbortError') {
+          catalogError = 'Could not load the next cards. Use Load more cards to retry.';
+          if (!isSelectedEntityScope()) {
+            tileField.querySelector('.mall-video-grid-tail')?.remove();
+            renderFixedTail(mallCatalog.length, true, FIXED_VIDEO_BATCH);
+          }
+        }
+        return [];
+      } finally { if (session === catalogPager && epoch === catalogEpoch) catalogLoad = null; }
+    })();
+    return catalogLoad;
+  }
+
+  async function loadSelectedPage() {
+    if (!isSelectedEntityScope() || !videoPager?.hasMore) return [];
+    if (videoLoad) return videoLoad;
+    var session = videoPager;
+    var epoch = selectionEpoch;
+    var lane = mallCatalog[expandedFoundUp];
+    videoLoad = (async function() {
+      try {
+        var batch = await session.loadNext();
+        if (session !== videoPager || epoch !== selectionEpoch || !isSelectedEntityScope()) return [];
+        discoveryError = '';
+        var additions = batch.filter(function(video) {
+          return !lane.videos.some(function(existing) { return existing.video_id === video.video_id; });
+        });
+        lane.videos.push.apply(lane.videos, additions);
+        renderTiles(fixedRenderedCount + FIXED_VIDEO_BATCH);
+        window.mallVideoPlayer?.refreshQueue?.();
+        return additions;
+      } catch (error) {
+        if (session === videoPager && error.name !== 'AbortError') {
+          discoveryError = 'Could not load the next videos. Use Load more videos to retry.';
+          tileField.querySelector('.mall-video-grid-tail')?.remove();
+          renderFixedTail(lane.videos.length, false, FIXED_VIDEO_BATCH);
+        }
+        return [];
+      } finally { if (session === videoPager && epoch === selectionEpoch) videoLoad = null; }
+    })();
+    return videoLoad;
+  }
+
+  async function openEntityVideos(index, options) {
+    var record = mallCatalog[index];
+    if (!entityPortraitField || !record || isPropertyListing(record)) return false;
+    if (isSelectedEntityScope() && expandedFoundUp === index) {
+      return openDesktopVideo(0, options?.immersive === true, { autoplay: options?.autoplay !== false });
+    }
+    if (pendingEntityId === record.foundup_id && pendingSelection) return pendingSelection;
+    if (!record.videos?.length && !record.video_pages?.catalog) {
+      if (pendingEntityId === record.foundup_id) {
+        cancelEntitySelection();
+        syncSelectedControls();
+      }
+      return false;
+    }
+    if (isSelectedEntityScope()) collapseFoundUp();
+    cancelEntitySelection();
+    var epoch = selectionEpoch;
+    var controller = new AbortController();
+    selectionController = controller;
+    pendingEntityId = record.foundup_id;
+    discoveryError = '';
+    syncSelectedControls();
+    pendingSelection = (async function() {
+      try {
+        if (record.video_pages?.catalog) {
+          var session = await window.mallDiscoveryPager.openVideos(record, 'catalog', { signal: controller.signal });
+          if (controller.signal.aborted || epoch !== selectionEpoch) { session.close(); return false; }
+          videoPager = session;
+          videoRecord = record;
+          record.videos = session.items.slice();
+        }
+        if (controller.signal.aborted || epoch !== selectionEpoch || !record.videos?.length) return false;
+        index = mallCatalog.findIndex(function(item) { return item.foundup_id === record.foundup_id; });
+        if (index < 0) { cancelEntitySelection(); syncSelectedControls(); return false; }
+        pendingEntityId = null;
+        expandFoundUp(index);
+        tileFieldWrapper.scrollTop = 0;
+        var selectedIndex = options?.videoId ? record.videos.findIndex(function(video) {
+          return video.video_id === options.videoId;
+        }) : 0;
+        if (selectedIndex < 0) {
+          selectedIndex = 0;
+          selectedNotice = ' · Previous video is outside the loaded page; showing its first video.';
+        }
+        selectedVideoIndex = selectedIndex;
+        syncSelectedControls();
+        openDesktopVideo(selectedIndex, options?.immersive === true, { autoplay: options?.autoplay !== false, queueQuery: options?.queueQuery });
+        window.mallStateRestore?.save?.();
+        return true;
+      } catch (error) {
+        if (epoch === selectionEpoch && error.name !== 'AbortError') {
+          pendingEntityId = null;
+          discoveryError = 'Could not load videos. Select the card to retry.';
+          syncSelectedControls();
+          renderTiles(); bindInteractions();
+        }
+        return false;
+      } finally { if (epoch === selectionEpoch) pendingSelection = null; }
+    })();
+    return pendingSelection;
+  }
+
+  async function openEntityById(foundupId, options) {
+    if (!entityPortraitField || typeof foundupId !== 'string') return false;
+    var missing = !fullCatalog.some(function(item) { return item.foundup_id === foundupId; });
+    if (missing) {
+      if (isSelectedEntityScope()) collapseFoundUp();
+      else cancelEntitySelection();
+      pendingEntityId = foundupId;
+      syncSelectedControls();
+    }
+    var intent = selectionEpoch;
+    var catalogIntent = catalogEpoch;
+    while (!fullCatalog.some(function(item) { return item.foundup_id === foundupId; }) && catalogPager?.hasMore) {
+      var batch = await loadCatalogPage();
+      if (selectionEpoch !== intent || catalogEpoch !== catalogIntent) return false;
+      if (!batch.length) { pendingEntityId = null; syncSelectedControls(); return false; }
+    }
+    if (selectionEpoch !== intent || catalogEpoch !== catalogIntent) return false;
+    var index = mallCatalog.findIndex(function(item) { return item.foundup_id === foundupId; });
+    if (index < 0) { pendingEntityId = null; syncSelectedControls(); return false; }
+    return openEntityVideos(index, options);
+  }
+
   // Catalog mappings are explicit registry evidence. A channel/profile ID is not
   // a FoundUp identity merely because it can be formatted as a route.
   function canonicalFoundUpId(item) {
@@ -1358,7 +1646,7 @@
       (item.entry_copy ? '<p>' + escapeHtml(item.entry_copy) + '</p>' : '') +
       (candidate && item.public_plan_url === 'https://github.com/FOUNDUPS/Foundups-Agent/blob/72a3182c70974f0523be91d5ce4bd32808d824bc/modules/foundups/docs/PFMALL_OPPORTUNITY_INSTANCE_MODEL.md'
         ? '<a class="mall-card-plan" href="' + escapeAttr(item.public_plan_url) + '" target="_blank" rel="noopener noreferrer">Read public plan (new tab)</a>' : '') +
-      (item.videos?.length ? '<button type="button" class="mall-tile-osp-play">Play queue</button>' : '') +
+      ((item.videos?.length || item.video_pages?.catalog) ? '<button type="button" class="mall-tile-osp-play">Play queue</button>' : '') +
       (canonical ? '<button type="button" class="mall-card-enter" data-canonical-foundup-id="' +
         escapeAttr(canonical) + '">Enter FoundUp · Member Portal</button>' : '') +
       '</section>';
@@ -1386,12 +1674,13 @@
 
   function renderTiles(appendThrough, keepSlot) {
     var entityGrid = isEntityGrid();
-    var incremental = fixedVideoField || entityGrid || usesProgressivePatchGrid();
+    var incremental = fixedVideoField || entityGrid || isSelectedEntityScope() || usesProgressivePatchGrid();
     var batchSize = activePatchBatchSize();
     var append = incremental && Number.isInteger(appendThrough);
     if (!append && desktopInlineTile && !window.mallVideoPlayer?.isTucked?.()) {
       window.mallVideoPlayer.close({ restore: false });
     }
+    syncSelectedControls();
     var groupedFocus = captureGroupState();
     captureRowOffsets();
     var itemsToRender = expandedFoundUp !== null ? getExpandedVideos() : mallCatalog;
@@ -1427,7 +1716,8 @@
         tileField.innerHTML = '<p class="mall-video-grid-empty" role="status">No videos match your search.</p>';
         return;
       }
-      tileField.innerHTML = '<div class="mall-tile-field-empty"><span class="mall-tile-field-empty-icon">&#x1F6D2;</span><span>No results match these filters</span></div>';
+      tileField.innerHTML = '<div class="mall-tile-field-empty"><span class="mall-tile-field-empty-icon">&#x1F6D2;</span><span>' + (catalogPager ? 'No loaded cards match these filters.' : 'No results match these filters') + '</span></div>';
+      if (entityGrid && catalogPager?.hasMore) renderFixedTail(0, true, FIXED_VIDEO_BATCH);
       if (grouped) restoreGroupState(groupedFocus);
       return;
     }
@@ -1455,7 +1745,7 @@
       if (entityGrid) tileType = canonical ? 'foundup' : candidate ? 'candidate' : 'source';
 
       // Determine if tile has videos (includes expanded video tiles with video_data)
-      var hasVideos = item.videos?.length || item.video_data || (!memberPlayer && item.video_count);
+      var hasVideos = item.videos?.length || item.video_data || (entityPortraitField && item.video_pages?.catalog && item.video_count) || (!memberPlayer && item.video_count);
       var inlineControls = hasVideos && !fixedVideoField && !memberPlayer;
 
       // Queue count (true_video_count preferred, then video_count, then videos array length)
@@ -1495,7 +1785,7 @@
       // Non-video tile class modifier
       var tileClass = 'mall-tile theme-' + theme + (hasVideos ? '' : ' non-video');
 
-      var videoId = fixedVideoField ? ' data-video-id="' + escapeAttr(item.video_data?.video_id || '') + '"' : '';
+      var videoId = (fixedVideoField || isSelectedEntityScope()) ? ' data-video-id="' + escapeAttr(item.video_data?.video_id || '') + '"' : '';
       var classification = entityGrid ? ' data-catalog-kind="' + (canonical ? 'foundup' : candidate ? 'candidate' : 'source') +
         '" data-canonical-foundup-id="' + escapeAttr(canonical || '') + '"' : '';
       return '<article class="' + tileClass + '" data-index="' + index + '"' + videoId + posterDataAttr + classification + ' data-foundup-id="' + escapeAttr(item.foundup_id || item.id || '') + '" data-tile-type="' + tileType + '" tabindex="0" aria-label="' + escapeAttr(item.name || item.title || '') + '" style="' + posterStyle + '">' +
@@ -1598,26 +1888,44 @@
 
   function renderFixedTail(total, entityGrid, batchSize) {
     var step = batchSize || FIXED_VIDEO_BATCH;
-    if (fixedTailObserver) fixedTailObserver.disconnect();
+    var fieldError = entityGrid ? (catalogError || discoveryError) : discoveryError;
+    fixedTailObserver?.disconnect();
     var tail = document.createElement('div');
     tail.className = 'mall-video-grid-tail';
-    if ((entityGrid ? entityRenderedCount : fixedRenderedCount) < total) {
+    var rendered = entityGrid ? entityRenderedCount : fixedRenderedCount;
+    var session = entityGrid ? catalogPager : (isSelectedEntityScope() ? videoPager : null);
+    if (rendered < total || session?.hasMore) {
       var more = document.createElement('button');
       more.type = 'button';
       more.textContent = entityGrid ? 'Load more cards' : 'Load more videos';
-      var load = function() {
-        if (tail.isConnected) renderTiles((entityGrid ? entityRenderedCount : fixedRenderedCount) + step);
+      var load = async function() {
+        if (!tail.isConnected || more.disabled) return;
+        more.disabled = true;
+        more.setAttribute('aria-busy', 'true');
+        if (rendered < total) renderTiles(rendered + step);
+        else if (entityGrid) await loadCatalogPage();
+        else await loadSelectedPage();
+        if (tail.isConnected) {
+          more.disabled = false;
+          more.removeAttribute('aria-busy');
+        }
       };
       more.addEventListener('click', load);
       tail.appendChild(more);
       if (typeof IntersectionObserver !== 'undefined') {
         fixedTailObserver = new IntersectionObserver(function(entries) {
-          if (entries.some(function(entry) { return entry.isIntersecting; })) load();
-        }, { root: tileFieldWrapper, rootMargin: '160px 0px' });
+          // Paged startup stays at six; scrolling or the explicit button admits
+          // the next small page. Intersection alone never drains a collection.
+          if (!fieldError && (!session || tileFieldWrapper.scrollTop > 0) && entries.some(function(entry) { return entry.isIntersecting; })) load();
+        }, { root: tileFieldWrapper, rootMargin: '120px 0px' });
         fixedTailObserver.observe(tail);
       }
-    } else {
-      tail.textContent = entityGrid ? 'End of catalog' : 'End of collection';
+    } else tail.textContent = entityGrid ? 'End of catalog' : 'End of collection';
+    if (fieldError) {
+      var error = document.createElement('p');
+      error.setAttribute('role', 'status');
+      error.textContent = fieldError;
+      tail.appendChild(error);
     }
     tileField.appendChild(tail);
   }
@@ -1923,7 +2231,8 @@
               togglePlay(index);
               return;
             }
-            expandFoundUp(index);
+            if (entityPortraitField) openEntityVideos(index);
+            else expandFoundUp(index);
           },
           onPinchIn: function() {
             if (tile.classList.contains('is-card-flipped')) return;
@@ -2049,7 +2358,7 @@
       return;
     }
     var memberPlayer = usesMemberVideoPlayer();
-    var hasVideos = item && (item.videos?.length || item.video_data || (!memberPlayer && item.video_count));
+    var hasVideos = item && (item.videos?.length || item.video_data || (entityPortraitField && item.video_pages?.catalog && item.video_count) || (!memberPlayer && item.video_count));
 
     // Non-video tiles: enter dedicated member video projection (e.g. HPC) or open quick-view
     if (!hasVideos) {
@@ -2074,6 +2383,11 @@
       if (foundupId && window.mallPlanes && typeof window.mallPlanes.openFoundUpById === 'function') {
         window.mallPlanes.openFoundUpById(foundupId);
       }
+      return;
+    }
+
+    if (entityPortraitField && expandedFoundUp === null && hasVideos) {
+      openEntityVideos(index);
       return;
     }
 
@@ -2189,7 +2503,10 @@
 
     if (player.isOpen() && player.getFoundUpId() === lane.foundup_id) {
       if (player.getCurrentIndex() === index) {
-        if (immersive) player.openWikiTube ? player.openWikiTube() : player.expandInline();
+        if (immersive) {
+        if (player.isTheater?.()) player.setTheater(false, tile);
+        player.openWikiTube ? player.openWikiTube() : player.expandInline();
+      }
         else if (player.isTucked?.()) player.untuck();
         else if (autoplay && player.getPlaybackSnapshot?.()?.state !== 'playing') {
           player.selectVideo?.(index, { autoplay: true, returnTile: tile });
@@ -2278,6 +2595,10 @@
       togglePlay(index);
       return;
     }
+    if (entityPortraitField && expandedFoundUp === null && mallCatalog[index]?.video_count > 0) {
+      openEntityVideos(index, { immersive: true });
+      return;
+    }
     if (!window.mallVideoPlayer) return;
     if (usesMemberVideoPlayer()) {
       openDesktopVideo(index, true);
@@ -2347,9 +2668,15 @@
     if (!tile || !lane?.videos?.[videoIndex]) return false;
     var targetFoundUpId = lane.foundup_id || lane.id;
     var autoplay = opts?.autoplay !== undefined ? opts.autoplay : canAutoplayFromTile(tile);
+    var selectedScope = isSelectedEntityScope();
+    var scopeEpoch = selectionEpoch;
+    var wantTheater = !immersive && selectedScope && selectedDesktop();
 
     if (desktopInlineTile === tile && opts?.videoIndex === undefined && player.isOpen() && player.getFoundUpId?.() === targetFoundUpId) {
-      if (immersive) player.openWikiTube ? player.openWikiTube() : player.expandInline();
+      if (immersive) {
+        if (player.isTheater?.()) player.setTheater(false, tile);
+        player.openWikiTube ? player.openWikiTube() : player.expandInline();
+      }
       else if (player.isTucked?.()) player.untuck();
       else if (autoplay && player.getPlaybackSnapshot?.()?.state !== 'playing') {
         player.selectVideo?.(player.getCurrentIndex(), { autoplay: true, returnTile: tile });
@@ -2367,7 +2694,13 @@
     tileFieldWrapper.classList.add('member-inline-open');
 
     player.openDesktopVideo(targetFoundUpId, lane.videos, videoIndex, {
-      floating: !immersive,
+      floating: !immersive && !wantTheater,
+      theater: wantTheater,
+      onQueueEnd: selectedScope ? async function() {
+        var batch = await loadSelectedPage();
+        return selectionEpoch === scopeEpoch && batch.length > 0;
+      } : undefined,
+      onPinchReturn: selectedScope ? returnEntityToMall : undefined,
       returnFocusTo: tile,
       matchesQuery: matchesScopedVideo,
       query: activeQueueQuery,
@@ -2375,6 +2708,7 @@
       autoplay: autoplay,
       muted: opts?.muted === true,
       onSelectChange: function(nextIdx) {
+        if (selectedScope) selectedVideoIndex = nextIdx;
         if (expandedFoundUp !== null) {
           tileField.querySelector('.mall-tile[aria-current]')?.removeAttribute('aria-current');
           var nextTile = getTileElement(nextIdx);
@@ -2437,6 +2771,7 @@
     var videoId = activeVideo.videoId;
     var queueQuery = typeof activeVideo.queueQuery === 'string' ? activeVideo.queueQuery.slice(0, 300) : '';
     if (!foundupId || !videoId) return false;
+    if (entityPortraitField && catalogPager) return openEntityById(foundupId, { autoplay: false, videoId: videoId, queueQuery: queueQuery });
     var laneIndex = mallCatalog.findIndex(function(item) {
       return (item.foundup_id || item.id) === foundupId;
     });
@@ -2493,7 +2828,7 @@
     if (isEntityGrid() && numericIndex < mallCatalog.length && numericIndex >= entityRenderedCount) {
       renderTiles(Math.ceil((numericIndex + 1) / FIXED_VIDEO_BATCH) * FIXED_VIDEO_BATCH);
     }
-    if (!isEntityGrid() && usesProgressivePatchGrid() && numericIndex < getExpandedVideos().length && numericIndex >= fixedRenderedCount) {
+    if (!isEntityGrid() && (isSelectedEntityScope() || usesProgressivePatchGrid()) && numericIndex < getExpandedVideos().length && numericIndex >= fixedRenderedCount) {
       renderTiles(Math.ceil((numericIndex + 1) / activePatchBatchSize()) * activePatchBatchSize());
     }
     return tileField.querySelector('.mall-tile[data-index="' + numericIndex + '"]');
@@ -2644,6 +2979,7 @@
    */
   function collapseFoundUp() {
     if (expandedFoundUp === null || fixedVideoField) return;
+    if (entityPortraitField) cancelEntitySelection();
     stopInlinePreview();
 
     // Hide collapse hint first
@@ -2652,6 +2988,15 @@
     }
 
     var sourceIndex = expandSourceIndex;
+    if (entityPortraitField && catalogRefreshPending) {
+      var sourceId = mallCatalog[sourceIndex]?.foundup_id;
+      mallCatalog = filterByScope(currentFieldScope);
+      originalOrder = mallCatalog.slice();
+      mallCatalog = sortByProjection(currentProjection);
+      sourceIndex = mallCatalog.findIndex(function(item) { return item.foundup_id === sourceId; });
+      expandSourceIndex = sourceIndex;
+      catalogRefreshPending = false;
+    }
     var expandedRect = tileField.getBoundingClientRect();
     var reducedMotion = prefersReducedMotion();
 
@@ -2757,6 +3102,7 @@
 
   // Projection changes invalidate index-based media state.
   function resetMediaScope() {
+    if (entityPortraitField) cancelEntitySelection();
     stopInlinePreview();
     expandedFoundUp = null;
     expandSourceIndex = null;
@@ -2764,14 +3110,20 @@
   }
 
   // Bounded local catalog search, not semantic ranking or a conversation runtime.
-  function searchCatalog(query) {
+  async function searchCatalog(query) {
     // Geographic filters belong to the registered domain adapter, including
     // clearing a query. Preserve its form, URL and catalog as one state owner.
     if (groupDefinitions !== null) return false;
     if (typeof query !== 'string') return;
     query = query.trim().slice(0, 300);
     if (!query) { clearFieldScope(); return; }
-    setFieldScope({ type: 'query', query: query });
+    var scope = { type: 'query', query: query };
+    setFieldScope(scope);
+    // An explicit search may inspect small metadata pages, never other queues.
+    while (catalogPager?.hasMore && currentFieldScope === scope && !isSelectedEntityScope()) {
+      if (!(await loadCatalogPage()).length) break;
+    }
+    window.mallStateRestore?.save?.();
   }
 
   function matchesCatalogQuery(item, query) {
@@ -2783,7 +3135,7 @@
       return word && !['hey', 'please', 'show', 'me', 'find', 'browse', 'on', 'in', 'about', 'the', 'some'].includes(word);
     });
     var wantsVideos = words.some(function(word) { return word === 'videos' || word === 'video'; });
-    if (wantsVideos && !(item.videos && item.videos.length)) return false;
+    if (wantsVideos && !(item.videos?.length || item.video_count)) return false;
     words = words.filter(function(word) { return word !== 'videos' && word !== 'video'; });
     var clothingTerms = 'clothes clothing apparel fashion';
     var aliases = { houses: 'house housing homes property real-estate', house: 'house housing homes property real-estate',
@@ -2999,6 +3351,9 @@
       return;
     }
     autoSelectDensity();
+    if (isSelectedEntityScope() && window.mallVideoPlayer?.isOpen?.() && !window.mallVideoPlayer.isWikiTube?.()) {
+      window.mallVideoPlayer.setTheater?.(selectedDesktop());
+    }
     if (desktopInlineTile || window.mallVideoPlayer?.isOpen?.()) {
       window.mallVideoPlayer?.syncFloatingGeometry?.();
     }
@@ -3300,7 +3655,7 @@
     if (scope.type === 'personal') {
       // Filter to 012 lanes only
       var personal = fullCatalog.filter(function(item) {
-        return item.creator === '012';
+        return item.creator === '012' || item.tags?.includes('012-lane');
       });
       return sortScopedResults(personal);
     }
@@ -3476,6 +3831,8 @@
     // Core
     initialize: initialize,
     updateCatalog: updateCatalog,
+    openEntityById: openEntityById,
+    getLoadedCatalog: function() { return fullCatalog.slice(); },
     getGeographicState: getGeographicState,
     restoreGeographicState: restoreGeographicState,
     getVideoGridState: getVideoGridState,

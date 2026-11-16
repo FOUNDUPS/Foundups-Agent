@@ -162,6 +162,17 @@
       }
     }
 
+    if (isNonVideo && ctaDef && item.source_type !== 'github_repo' &&
+        ['discoverable_only', 'incubating', 'specified', 'planning_only'].some(function (status) {
+          return (item.launch_readiness || item.lifecycle_stage || item.status) === status;
+        })) {
+      ctaDef = Object.assign({}, ctaDef, { label: 'View project information' });
+      try {
+        var publicInfo = new URL(ctaUrl);
+        if (publicInfo.protocol !== 'https:' || !publicInfo.hostname || publicInfo.username || publicInfo.password) ctaUrl = '';
+      } catch (e) { ctaUrl = ''; }
+    }
+
     if (!entryId) {
       var candidate = item.discovery_kind === 'candidate';
       sourceContext = '<p class="fv-source-context">' +
@@ -186,7 +197,7 @@
         primaryCtaHtml =
           '<a href="' + esc(portalEntryUrl) + '" class="fv-primary-cta">Enter FoundUp \u00b7 Member Portal \u2197</a>';
         secondaryLinkHtml =
-          '<a href="/f/' + encodeURIComponent(entryId) + '" class="fv-secondary-link">Public Overview</a>';
+          '<a href="/f/" class="fv-secondary-link">Public directory</a>';
       }
     } else if (memberProjection) {
       primaryCtaHtml = '<a href="' + esc(memberProjection) + '" class="fv-primary-cta">Browse Shorts</a>';

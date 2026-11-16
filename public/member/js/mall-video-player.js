@@ -64,6 +64,10 @@
   var muteOnStart = false;
   var onClose = null;
   var onSelectChange = null;
+  var onQueueEnd = null;
+  var onPinchReturn = null;
+  var queueContinuation = null;
+  var playbackIntentEpoch = 0;
   var autoplayRequested = true;
   var previousOverflow = null;
   var inertElements = [];
@@ -299,6 +303,7 @@
   }
 
   function pausePlayback() {
+    playbackIntentEpoch++;
     autoplayRequested = false;
     clearPlaybackTimers();
     try { ytPlayer?.pauseVideo?.(); } catch (e) { /* provider not ready */ }
@@ -896,6 +901,8 @@
       }
       if (resumeOpts?.onClose) onClose = resumeOpts.onClose;
       if (resumeOpts?.onSelectChange) onSelectChange = resumeOpts.onSelectChange;
+      onQueueEnd = resumeOpts?.onQueueEnd || null;
+      onPinchReturn = resumeOpts?.onPinchReturn || null;
       autoplayRequested = resumeOpts?.autoplay !== false;
       muteOnStart = wantTheater || resumeOpts?.muted === true;
       failedQueueIndices.clear();
@@ -937,6 +944,8 @@
 
     onClose = resumeOpts?.onClose || null;
     onSelectChange = resumeOpts?.onSelectChange || null;
+    onQueueEnd = resumeOpts?.onQueueEnd || null;
+    onPinchReturn = resumeOpts?.onPinchReturn || null;
     autoplayRequested = resumeOpts?.autoplay !== false;
     muteOnStart = wantTheater || resumeOpts?.muted === true;
     matchesQuery = resumeOpts?.matchesQuery ||
@@ -1056,6 +1065,9 @@
     var afterClose = onClose;
     onClose = null;
     onSelectChange = null;
+    onQueueEnd = null;
+    onPinchReturn = null;
+    queueContinuation = null;
     if (afterClose) afterClose(restore);
 
     if (returnTile) {
@@ -1119,6 +1131,53 @@
     }));
   }
 
+  // A scoped data owner may append one bounded page at a loaded queue boundary.
+  // Closing, pausing, hiding or changing selection invalidates deferred playback.
+  function continueQueue(explicit) {
+    if (!onQueueEnd || filteredIndices || queueContinuation || !canStartYouTube()) return false;
+    var owner = currentFoundUpId;
+    var queue = currentQueue;
+    var index = currentIndex;
+    var generation = renderGeneration;
+    var intent = playbackIntentEpoch;
+    var load = onQueueEnd;
+    var task = Promise.resolve().then(function () { return load(); });
+    queueContinuation = task;
+    task.then(function (added) {
+      if (!added || !isOpen || currentFoundUpId !== owner || currentQueue !== queue ||
+          currentIndex !== index || renderGeneration !== generation ||
+          playbackIntentEpoch !== intent || filteredIndices || !canStartYouTube()) return;
+      var next = index + 1;
+      if (next >= currentQueue.length) return;
+      refreshQueue();
+      autoplayRequested = true;
+      goToVideo(next, { explicitUserSelect: explicit, fromAutoAdvance: !explicit, preserveFailures: !explicit });
+      showHint('Next');
+    }).catch(function () {
+      if (isOpen && currentFoundUpId === owner) showHint('Could not load more videos. Try Next again.');
+    }).finally(function () {
+      if (queueContinuation === task) queueContinuation = null;
+    });
+    return true;
+  }
+
+  function refreshQueue() {
+    if (!isOpen) return;
+    if (railQuery && matchesQuery) {
+      filteredIndices = currentQueue.reduce(function (indices, video, index) {
+        if (matchesQuery(video, railQuery)) indices.push(index);
+        return indices;
+      }, []);
+    }
+    renderRail();
+    updateRailSelection();
+  }
+
+  function pinchReturn() {
+    if (onPinchReturn && onPinchReturn() !== false) return;
+    close();
+  }
+
   function nextVideo() {
     var seq = activeSequence();
     var pos = seq.indexOf(currentIndex);
@@ -1127,7 +1186,7 @@
       autoplayRequested = true;
       goToVideo(next, { explicitUserSelect: true });
       showHint('Next');
-    } else {
+    } else if (!continueQueue(true)) {
       showHint('End of queue');
     }
   }
@@ -1157,7 +1216,7 @@
         return;
       }
     }
-    showHint('End of queue');
+    if (!continueQueue(false)) showHint('End of queue');
   }
 
   function getAutoSkipDelayMs() {
@@ -1401,6 +1460,8 @@
               reportYouTube('playing', '', undefined, 1);
               resetChromeTimer();
             } else if (state === 2 && requestYouTubePlay) {
+              playbackIntentEpoch++;
+              autoplayRequested = false;
               clearPlaybackTimers();
               reportYouTube('paused', 'Playback paused.', undefined, 2);
             } else if (state === 0) {
@@ -1490,7 +1551,11 @@
           reportHTML5('playing', '');
         });
         ve.addEventListener('pause', function () {
-          if (!ve.ended) reportHTML5('paused', 'Playback paused.');
+          if (!ve.ended) {
+            playbackIntentEpoch++;
+            autoplayRequested = false;
+            reportHTML5('paused', 'Playback paused.');
+          }
         });
         ve.addEventListener('ended', function () {
           reportHTML5('ended', '');
@@ -1544,6 +1609,7 @@
     if (memberQueueDock && !memberQueueDock.element.hidden) input = memberQueueDock.input;
     var query = input ? input.value.trim().slice(0, 300) : '';
     if (query === railQuery) return;
+    playbackIntentEpoch++;
     railQuery = query;
     filteredIndices = query && matchesQuery ? currentQueue.reduce(function (indices, video, index) {
       if (matchesQuery(video, query)) indices.push(index);
@@ -1671,7 +1737,7 @@
   }
 
   function isInteractiveInputTarget(target) {
-    return !!target?.closest?.('input, textarea, select, dialog[open]');
+    return !!target?.closest?.('input, textarea, select, button, a, iframe, video, dialog[open], .video-player-stage');
   }
 
   function isHorizontalScrollTarget(target) {
@@ -1712,6 +1778,7 @@
 
     container.addEventListener('touchmove', function (e) {
       if (!isOpen || theater || tucked) return;
+      if (isInteractiveInputTarget(e.target)) return;
 
       if (e.touches.length === 2) {
         if (!pinchActive) {
@@ -1736,7 +1803,7 @@
           openWikiTube();
         } else if ((floating || wikitube) && scale <= PINCH_IN_RATIO && -delta >= PINCH_MIN_DELTA_PX) {
           pinchConsumed = true;
-          close();
+          pinchReturn();
         }
         return;
       }
@@ -1782,7 +1849,7 @@
         openWikiTube();
       } else if ((floating || wikitube) && e.scale <= PINCH_IN_RATIO) {
         pinchConsumed = true;
-        close();
+        pinchReturn();
       }
     });
     container.addEventListener('gestureend', function () {
@@ -1810,11 +1877,14 @@
     container.addEventListener('wheel', function (e) {
       if (!isOpen || theater || tucked) return;
       if (!e.ctrlKey && !e.metaKey) return;
+      // App navigation is confined to noninteractive player chrome. Leave
+      // provider controls and ordinary browser zoom gestures alone.
+      if (isInteractiveInputTarget(e.target) || !e.target?.closest?.('.video-player-top-bar')) return;
       e.preventDefault();
       if (e.deltaY < 0 && floating) {
         openWikiTube();
       } else if (e.deltaY > 0 && (floating || wikitube)) {
-        close();
+        pinchReturn();
       }
     }, { passive: false });
   }
@@ -2184,6 +2254,7 @@
     openDesktopVideo: open,
     open: open,
     selectVideo: selectVideo,
+    refreshQueue: refreshQueue,
     close: close,
     expandInline: expandInline,
     openWikiTube: openWikiTube,

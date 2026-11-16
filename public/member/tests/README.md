@@ -4,7 +4,36 @@ Read [TestModLog.md](TestModLog.md) before extending a fixture. It records the
 existing suites, historical results and their limits; those results are not a
 fresh test run.
 
-### Scoped video
+## Current v23 qualification
+
+The public Mall uses the existing six-item discovery pager and shared player.
+Selecting a video-backed card replaces the all-Mall field with that source's
+video grid. Portrait floats above the field; compact landscape retains the
+floating stage with a clear browsing region beside it. Back to Mall and the
+selected-scope logo restore browsing; the ordinary logo retains Member Portal.
+Only Catalog order is offered because per-video popularity is unavailable.
+
+Use the existing Python 3.12 Playwright runtime without installing dependencies:
+
+- `node public/member/tests/mall_discovery_pager_vm.mjs`: bounded requests,
+  schema/cursor/generation checks, retry, cancellation and no cross-lane fetches.
+- `node public/member/tests/mall_product_state_vm.mjs`: cache generation,
+  requested-only public pages, offline failures and unrelated cache preservation.
+- `python -B public/member/tests/mall_public_tv_browser.py`: actual public boot,
+  selected-only TV, network batches, queue and navigation/rotation regressions.
+- `python -B public/member/tests/mall_queue_callbacks_browser.py`: delayed queue
+  completion versus native Pause, query, hide, tuck, close and new selection;
+  provider-control/browser-zoom and explicit chrome gesture boundaries.
+- `mall_scoped_video_browser.py --player-policy`, `--header-only`,
+  `--discovery-cards`, `--entry-regressions`: retained HPC, header, cards,
+  entry gates, controls and state. The default legacy runner remains separate.
+
+Source hashes and final commit bindings belong in each run receipt; a command
+listed here is not a pass. Local routes, provider events and account state are
+controlled fixtures. Real YouTube playback and physical Safari/PWA on Wi-Fi and
+cellular remain separate. A physical browser must show advancing media time.
+
+### Scoped video (historical full-suite coverage)
 
 Run `python -B public/member/tests/mall_scoped_video_browser.py` with the
 existing Python Playwright Chromium and WebKit test runtime. It serves the real
@@ -22,7 +51,7 @@ guest discovery on `play.foundups.com`, `Enter FoundUp` handoff through the
 `foundups.com` Member Portal (`?enter={foundup_id}` -> sign-in -> invite gate ->
 admitted FoundUp entry), scoped HPC sign-in return, admitted theater, and the
 public discovery link.
-`node public/member/tests/mall_product_state_vm.mjs` covers v22 installation,
+`node public/member/tests/mall_product_state_vm.mjs` covers v23 installation,
 obsolete Mall cache retirement and scoped offline behavior. Real YouTube time
 progression and physical-device gates are separate in the
 [incident](../../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md).

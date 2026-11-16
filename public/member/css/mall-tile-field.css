@@ -1749,3 +1749,56 @@
 .mall-tile-osp-kicker.osp-outcome { color: #00e5d0; }
 .mall-tile-osp-kicker.osp-solution { color: #a78bfa; }
 .mall-tile-osp-kicker.osp-pain { color: #ff8c5a; }
+
+/* Public selected-lane controls stay in the header measured by the shared player. */
+.mall-header.mall-selected-header { flex-wrap: wrap; gap: .35rem; }
+.mall-selected-controls {
+  flex: 1 0 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+.mall-selected-controls[hidden] { display: none; }
+.mall-selected-controls button {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: .35rem .5rem;
+  color: #fff;
+  background: #241d35;
+  border: 1px solid #9e91b8;
+  border-radius: .4rem;
+  font: inherit;
+  font-size: .75rem;
+  cursor: pointer;
+}
+.mall-selected-controls button:focus-visible { outline: 2px solid #cbb4ff; outline-offset: 2px; }
+.mall-selected-label { flex: 1 1 0; min-width: 0; font-size: .72rem; overflow-wrap: anywhere; }
+.mall-selected-video-wrapper .mall-tile-field {
+  grid-template-rows: none;
+  grid-auto-rows: auto;
+  align-content: start;
+  height: auto;
+  min-height: 0;
+}
+.mall-selected-video-wrapper .mall-tile-field > .mall-tile { aspect-ratio: 9 / 16; }
+.mall-selected-video-wrapper .mall-video-grid-tail { grid-column: 1 / -1; }
+
+/* Portrait floats above the selected grid. Compact landscape keeps the existing
+   right-side 200px-minimum player and reserves a separate left browsing column,
+   including header/sort controls, instead of placing tiles under that player. */
+@media (orientation: landscape) and (max-height: 500px) {
+  [data-mall-open-landing="play"] .mall-shell {
+    --selected-landscape-reserve: calc(min(312px, 48vw) + max(.5rem, env(safe-area-inset-right, 0px)) + .5rem);
+  }
+  [data-mall-open-landing="play"] .mall-header.mall-selected-header,
+  [data-mall-open-landing="play"] .mall-selected-header + .mall-main > #mallProjection,
+  [data-mall-open-landing="play"] .mall-selected-video-wrapper {
+    width: calc(100% - var(--selected-landscape-reserve));
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  [data-mall-open-landing="play"] .mall-selected-video-wrapper .mall-tile-field {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+  }
+}

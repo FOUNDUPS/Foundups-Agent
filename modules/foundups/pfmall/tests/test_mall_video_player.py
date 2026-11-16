@@ -237,7 +237,7 @@ class TestQueueConstraint:
             elif in_open_func and 'function ' in line:
                 in_open_func = False
 
-            if 'currentFoundUpId =' in line:
+            if re.search(r'\bcurrentFoundUpId\s*=(?!=)', line):
                 foundup_assignments.append((in_open_func, line.strip()))
 
         # All foundupId assignments should be in open() or close()

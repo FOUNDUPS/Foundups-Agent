@@ -402,20 +402,22 @@ await check('install reloads only explicit public shell and product assets', asy
     assert.equal(request.credentials, 'omit');
     return url.pathname + url.search;
   });
-  for (const path of ['/member/js/mall-tile-field.js?v=22', '/member/js/mall-video-player.js?v=22', '/member/js/mall-video-projection.js?v=22', '/member/js/mall-state-restore.js?v=22', '/member/js/mall-planes.js?v=22', '/logo-foundups.svg', '/member/hpc.webmanifest', '/member/hpc-icon-180.png', '/member/hpc-icon-192.png', '/member/hpc-icon-512.png', '/move2japan/property-search.js', '/move2japan/move2japan.css']) {
+  for (const path of ['/member/js/mall-tile-field.js?v=23', '/member/js/mall-video-player.js?v=23', '/member/js/mall-video-projection.js?v=23', '/member/js/mall-state-restore.js?v=23', '/member/js/mall-planes.js?v=23', '/member/js/mall-discovery-pager.js?v=23', '/logo-foundups.svg', '/member/hpc-banner.webp', '/member/hpc.webmanifest', '/member/hpc-icon-180.png', '/member/hpc-icon-192.png', '/member/hpc-icon-512.png', '/move2japan/property-search.js', '/move2japan/move2japan.css']) {
     assert.equal(installed.includes(path), true, 'missing precached asset: ' + path);
   }
   assert.equal(installed.includes('/move2japan/properties.json'), false);
   assert.equal(installed.includes('/member/js/mall-video-projection.js'), false);
-  assert.equal(h.stores.has('pfmall-member-v22'), true);
+  assert.equal(installed.some(path => path.startsWith('/member/discovery/')), false,
+    'install must not fetch the metadata/video page graph');
+  assert.equal(h.stores.has('pfmall-member-v23'), true);
   const build = videoProjectionSource.match(/const mallBuild = '(v\d+)';/)?.[1];
-  assert.equal('pfmall-member-' + build, 'pfmall-member-v22');
+  assert.equal('pfmall-member-' + build, 'pfmall-member-v23');
 });
 
 await check('activation retires only obsolete caches owned by this Mall', async () => {
   const h = swRuntime();
-  const obsoleteVersions = Array.from({ length: 20 }, (_, index) => `pfmall-member-v${index + 2}`);
-  for (const name of [...obsoleteVersions, 'pfmall-member-v22', 'pfmall-properties-v1',
+  const obsoleteVersions = Array.from({ length: 21 }, (_, index) => `pfmall-member-v${index + 2}`);
+  for (const name of [...obsoleteVersions, 'pfmall-member-v23', 'pfmall-properties-v1',
     'pfmall-posters-v1', 'gotjunk-offline-v1', 'other-app-cache']) {
     await h.caches.open(name);
   }
@@ -423,7 +425,8 @@ await check('activation retires only obsolete caches owned by this Mall', async 
   assert.deepEqual(h.deleted.sort(), obsoleteVersions.sort());
   assert.equal(h.stores.has('pfmall-member-v20'), false);
   assert.equal(h.stores.has('pfmall-member-v21'), false);
-  assert.equal(h.stores.has('pfmall-member-v22'), true);
+  assert.equal(h.stores.has('pfmall-member-v22'), false);
+  assert.equal(h.stores.has('pfmall-member-v23'), true);
   assert.equal(h.stores.has('gotjunk-offline-v1'), true);
   assert.equal(h.stores.has('other-app-cache'), true);
 });
@@ -459,7 +462,7 @@ await check('product navigation shares one static member shell without query cac
   assert.equal(online.response.status, 200);
   assert.equal(h.calls.at(-1).request, '/member/');
   assert.equal(h.calls.at(-1).options.credentials, 'omit');
-  const cache = await h.caches.open('pfmall-member-v22');
+  const cache = await h.caches.open('pfmall-member-v23');
   assert.equal((await cache.keys()).some(key => {
     const url = new URL(key.url);
     return url.pathname === '/member/' && !!url.search;
@@ -488,11 +491,11 @@ await check('private routes, query assets, foreign origins and non-GET remain un
 
 await check('declared static assets keep cache-first behavior and video fallback stays explicit', async () => {
   const h = swRuntime();
-  const first = await h.request('/member/js/mall-tile-field.js?v=22');
+  const first = await h.request('/member/js/mall-tile-field.js?v=23');
   const body = await first.response.text();
   assert.equal(h.calls.length, 1);
   h.setNetwork(async () => { throw new Error('offline'); });
-  const cached = await h.request('/member/js/mall-tile-field.js?v=22');
+  const cached = await h.request('/member/js/mall-tile-field.js?v=23');
   assert.equal(await cached.response.text(), body);
   assert.equal(h.calls.length, 1);
   const video = await h.request('/member/mall-video-catalog.json');
@@ -514,6 +517,66 @@ await check('scoped catalog has a separate cache key and no fallback to the memb
   uncached.setNetwork(async () => { throw new Error('offline'); });
   assert.equal((await uncached.request(scoped)).response.status, 503);
   assert.equal((await h.request('/member/js/mall-tile-field.js?v=unrecognized')).intercepted, false);
+});
+
+await check('public discovery caches only requested generation-bound pages and retains exact offline bytes', async () => {
+  const h = swRuntime();
+  const generation = 'a'.repeat(64);
+  const root = '/member/discovery/catalog.json';
+  const selected = `/member/discovery/${generation}/videos/move2japan/catalog/0000.json`;
+  const unread = `/member/discovery/${generation}/videos/move2japan/catalog/0001.json`;
+  const newer = `/member/discovery/${'b'.repeat(64)}/videos/move2japan/catalog/0000.json`;
+  const raw = new Map([
+    [root, JSON.stringify({ schema_version: 1, generation, kind: 'catalog', items: [{ foundup_id: 'move2japan' }] })],
+    [selected, JSON.stringify({ schema_version: 1, generation, kind: 'videos', record_id: 'move2japan', items: [{ video_id: 'fixture0001', title: 'Controlled page bytes' }] })]
+  ]);
+  h.setNetwork(async request => {
+    const path = new URL(typeof request === 'string' ? request : request.url, ORIGIN).pathname;
+    assert.equal(raw.has(path), true, 'no unrelated page may be fetched');
+    return new Response(raw.get(path), { headers: { 'Content-Type': 'application/json' } });
+  });
+  for (const path of [root, selected]) {
+    const result = await h.request(path);
+    assert.equal(result.intercepted, true);
+    assert.equal(await result.response.text(), raw.get(path));
+    assert.deepEqual(h.calls.at(-1).options, { cache: 'no-cache', credentials: 'omit' });
+  }
+  assert.equal(h.calls.length, 2, 'requesting two pages must not prefetch successors');
+  const cache = await h.caches.open('pfmall-member-v23');
+  assert.deepEqual((await cache.keys()).map(x => new URL(x.url).pathname).sort(), [root, selected].sort());
+  h.setNetwork(async () => { throw new Error('offline fixture'); });
+  for (const path of [root, selected]) {
+    assert.equal(await (await h.request(path)).response.text(), raw.get(path));
+  }
+  for (const path of [unread, newer]) {
+    const result = await h.request(path);
+    assert.equal(result.response.status, 503);
+    assert.equal(result.response.headers.get('X-Offline-Fallback'), '1');
+    assert.deepEqual(await result.response.json(), { error: 'public_discovery_page_unavailable' });
+    assert.equal(await cache.match(path), undefined, 'a failure must not become catalog data');
+  }
+});
+
+await check('public discovery rejects hosting fallbacks and leaves queries/private or foreign requests unintercepted', async () => {
+  const h = swRuntime();
+  const root = '/member/discovery/catalog.json';
+  // An old raw catalog must never substitute for an unread bounded page.
+  h.setNetwork(async () => new Response('[]', { headers: { 'Content-Type': 'application/json' } }));
+  await h.request('/member/mall-video-catalog.json');
+  h.setNetwork(async () => new Response('<html>Hosting fallback</html>', { headers: { 'Content-Type': 'text/html' } }));
+  const html = await h.request(root);
+  assert.equal(html.response.status, 503);
+  assert.notEqual(await html.response.text(), '[]');
+  const cache = await h.caches.open('pfmall-member-v23');
+  assert.equal(await cache.match(root), undefined);
+  h.setNetwork(async () => { throw new Error('offline fixture'); });
+  assert.equal((await h.request(root)).response.status, 503);
+  for (const path of [root + '?private=1', 'https://foreign.test' + root,
+    '/member/discovery/invalid/catalog/0000.json',
+    `/member/discovery/${'a'.repeat(64)}/videos/unsafe%2fidentity/catalog/0000.json`]) {
+    assert.equal((await h.request(path)).intercepted, false, path);
+  }
+  assert.equal((await h.request(root, { method: 'POST' })).intercepted, false);
 });
 
 await check('normal Mall round-trips source_group fieldScope in localStorage', () => {

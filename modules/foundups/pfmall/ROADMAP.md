@@ -1,46 +1,80 @@
 # p.fMALL Roadmap
 
-## 2026-11-16 - Discovery cards and explicit canonical/source separation
+## v23 source qualification checkpoint
 
-Implemented the three explicitly requested already-public registry projects:
-Vote/Ballots (`voteballots`), Trade (`trade`) and MAGADOOM (`magadoom_001`).
-Their declared unfinished/internal-PoC status remains visible; entry uses the
-existing canonical Member Portal/sign-in/invite-code doorway. No new gate,
-registry visibility promotion, launched-product claim or private namespace.
+The combined implementation now passes 278 targeted pytest cases (one native
+junction case skipped), 15 pager and 26 cache/state Node scenarios, 92 public
+TV assertions across Chromium/WebKit, 18 delayed-queue/gesture cases, four HPC
+policy groups, four card/entity/OSP groups including 144-card far restoration,
+and two entry groups. Suites overlap; do not sum these as unique tests. Source
+hashes are in the run receipts. Push, draft PR, preview parity and hosted CI
+are separate release receipts; physical Safari/PWA remains a human gate.
 
-The supplied catalog now has 20 CARD RECORDS: 13 map to existing canonical
-IDs, six are creator/source channels, and FoundUps House is one project
-candidate with null canonical identity. This is not a finalized count of
-FoundUps. Personal LinkedIn channels remain sources; aliases `antifafm` and
-`science_swarm` retain stable lane/video IDs while entry maps to
-`antifafm_001` and `science_swarm_hub`. The source and candidate views do not
-offer a fabricated FoundUp entry. The 144 target remains capacity only.
 
-Existing portrait cards now have accessible About/Back faces, escaped pitch
-metadata, stage and truthful participation links, with keyboard/touch/Escape
-focus restoration. Catalog metadata required by existing filters is preserved.
-The refresh projection retains HPC's validated canonical ID and the derived
-scoped catalog was regenerated; strict rebuild equality was not waived.
+## 2026-11-16 - Current native/local reconciliation; combined qualification pending
 
-FoundUps House is explicitly a discoverable PROJECT CANDIDATE, not a registered
-House entity or listing. Public planning provenance is the pinned existing
-[opportunity model](../docs/PFMALL_OPPORTUNITY_INSTANCE_MODEL.md). No first-house
-record ID, address, location, availability or public disclosure permission was
-verified. Do not alias it to Move2Japan or a Fukui source listing. The intended
-find-houses/Join-to-add-House flow is described, with Join/submission integration
-unavailable. Existing generic admission does not create a house. Recover 012's
-first-House owner record and approved public projection before offering it.
+This current reconciliation supersedes conflicting counts, uncommitted-slice
+descriptions and hidden-audio expectations in the dated history below. Preserve
+local commits `fe9e9afe4fd94e23ce027e7ae125ced075b53ba6`,
+`bfcd7d0de721288260fafcadc9fd71bcc1bb0485`,
+`ae13094dece4d8f88bf8b4d903a0148d9f035979`,
+`fec27dfd7878c32ff76a7886b54f339c9230263d` and
+`773e9a23deb7ea9400fa0e2450f0dcd390e4092e`. Native source advanced separately
+to `155a89c281c06d84776a7f5f6ea718bd382f0395`; its owner reports a published
+Build v22 preview, with delivered-asset/service-worker parity still unverified.
+Merge checkpoint `a12414e0b478aa40de7e7c8ad64561fd2b3c78b8` retains parents
+`773e9a2...` and `155a89c...`. TV/pinch and pager changes continue in the working
+tree; Build v23 is intended, pending final combined-source tests and parity.
 
-Validation: independent controlled Chromium/WebKit discovery-card and shared
-header/entity groups pass; 127 catalog/tile pytest cases and 24 Node state/cache
-checks pass. The new offline page exporter has 28 passed / one native junction
-test skipped; deterministic redirect-resolution rejection passes. It extends
-the existing refresh owner without API/auth calls. Network paging assets and
-scoped TV/pinch integration are the NEXT slice, not qualified by these results.
-See [before/after matrix](../docs/PFMALL_V22_REGRESSION_MATRIX.md).
+The combined catalog has **17 metadata records: 14 canonical mappings, two
+source records and one House project candidate** (native 16 plus retained
+House candidate). This is not a finalized FoundUp count. Earlier 16-record
+fixtures and the intermediate 20-card source are historical. The 144 target
+remains capacity only. Preserve stable source/video IDs, approved canonical
+aliases and truthful readiness. Vote/Ballots (`voteballots`), Trade (`trade`),
+MAGADOOM (`magadoom_001`) and native `kids_episodes` reconciliation do not claim
+launched applications. Canonical entry retains the existing Member Portal,
+sign-in/invite-code doorway; sources and candidates have no fabricated entry.
 
-No production deployment or merge; physical Safari/PWA remains unexecuted as
-a structured feature matrix. Exact-source push/preview/CI receipts are separate.
+Retain the whole HPC banner/build/Voice behavior, native FoundUps logo/LN badge,
+accessible OSP/About/Back card faces and dismissal/focus restoration, phone
+portrait patch-loading, one shared visible player, hidden/tucked pause and late
+provider-event guards. Scoped-TV/pinch, bounded network metadata/video paging,
+generated-page parity and their combined state/cache integration are in progress,
+not qualified by earlier selected browser, pytest or Node passes. Keep the
+actual before/after obligations and new acceptance in the
+[regression matrix](../docs/PFMALL_V22_REGRESSION_MATRIX.md); extend existing
+test owners and bind final results to the exact combined head.
+
+FoundUps House remains a discoverable PROJECT CANDIDATE with null canonical
+identity and the pinned [public opportunity model](../docs/PFMALL_OPPORTUNITY_INSTANCE_MODEL.md).
+No first-House public record or disclosure permission was verified. Do not add
+address, location or availability, alias it to Move2Japan, or claim working
+Join/add-House publishing. Recover the existing owner's approved public record;
+generic account admission does not create a house.
+
+The verified refresh -> channel-puller -> YouTube `search.list`/500-related
+limitation is an investigation lead, not a diagnosis of the current catalog.
+Inspect the actual selected source, endpoint, arguments and pagination evidence
+before changing it. The registry blob `c69d0c4eb8e2e2afdcadd251dd7b81927f92d5db`
+is unchanged between base `72a3182...` and native `155a89c...`; its 14 public
+entries among 21 typed records is a different classification from this metadata
+catalog and does not finalize ecosystem inventory.
+
+Separate read-only Opus audit `fc022313-7249-4b5d-a400-8a45b76624d6` has a launch
+receipt, actual `Orchestrator(Carbon)` selection, a three-worker maximum and a
+20-minute initial phase. Launch is not an inventory result or verified native
+worker dispatch. Mall continuation owner `6afa1ef7-5690-8191-8b7e-4e268558d037`
+retains implementation; JHR owner `6afafaaa-ffd4-8191-9609-617214655009` retains
+research/publication. The launch receipt's parent relay packets are prepared;
+delivery/acknowledgment and JHR's current canonical publication revision are not
+verified here. See the matrix for source revisions and hold boundaries.
+
+Final combined QA, preview parity, push/draft-PR/CI and production delivery are
+separate gates. No production deployment or main merge is established here.
+Structured physical iPhone Safari/installed-PWA QA remains incomplete; retain
+012's reported VPN-on challenge and VPN-off playback without inventing numeric
+media-time telemetry or attributing provider authentication to Clerk.
 
 ## 2026-11-16 - Build v22 direct continuation and policy qualification
 

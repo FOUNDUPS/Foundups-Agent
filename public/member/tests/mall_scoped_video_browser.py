@@ -173,6 +173,19 @@ def info(page):
 def video(page, index):
     return page.locator(f'.mall-tile[data-video-id="{videos[index]["video_id"]}"]')
 
+
+def materialize_public_cards(page, total):
+    """Use the real tail control; await each bounded metadata/DOM append."""
+    field=page.locator('#mallTileField')
+    expect(field.locator('.mall-tile').first).to_be_visible()
+    for _ in range((total+5)//6+1):
+        count=field.locator('.mall-tile').count()
+        assert count<=total,count
+        if count==total: return
+        page.get_by_role('button',name='Load more cards',exact=True).click()
+        page.wait_for_function('n=>document.querySelectorAll("#mallTileField .mall-tile").length>n',arg=count)
+    raise AssertionError({'case':'bounded catalog append','expected':total,'actual':field.locator('.mall-tile').count()})
+
 def expect_position(page, offset):
     page.wait_for_function("(expected) => Math.abs(document.querySelector('.mall-tile-field-wrapper').scrollTop - expected) <= 2", arg=offset, timeout=4000)
 
@@ -189,7 +202,7 @@ def expect_hpc_banner_header(page):
     expect(image).to_have_attribute("height", "353")
     expect(image).to_be_visible()
     page.wait_for_function("document.querySelector('.mall-hpc-banner-image')?.naturalWidth === 1280")
-    expect(build).to_have_text("Build v22")
+    expect(build).to_have_text("Build v23")
     image_box, build_box, header_box = image.bounding_box(), build.bounding_box(), header.bounding_box()
     assert abs(image_box["width"] / image_box["height"] - 1280 / 353) < .03
     assert abs(build_box["x"] - image_box["x"]) <= 1
@@ -244,7 +257,7 @@ def main():
         expect(page.locator("#videoScopeTitle")).to_have_text("HPC")
         expect(page.locator("#videoScopeHeader #videoScopeTopic")).to_have_text("#SchumerOUT")
         build = page.locator("#videoScopeHeader .mall-build-label")
-        expect(build).to_have_text("Build v22")
+        expect(build).to_have_text("Build v23")
         expect(build).to_be_visible()
         expect(page.locator("#videoScopeHeader #videoScopeVoice")).to_have_attribute("href", "https://vote.mtrout.com/contact")
         expect(page.locator("#videoScopeInfo")).to_be_hidden()
@@ -435,7 +448,7 @@ def main():
         expect(page.locator(".mall-video-grid-empty")).to_have_text("No videos match your search.")
         more.tap()
         menu = page.get_by_role("dialog", name="More options")
-        expect(menu.get_by_text("Build v22", exact=True)).to_be_visible()
+        expect(menu.get_by_text("Build v23", exact=True)).to_be_visible()
         assert menu.bounding_box()["x"] <= more.bounding_box()["x"] + 1
         assert menu.bounding_box()["y"] + menu.bounding_box()["height"] < dock.bounding_box()["y"]
         expect(menu.get_by_role("combobox", name="Browser AI")).to_be_disabled()
@@ -604,7 +617,7 @@ def verify_member_poster_grid(page):
     player.get_by_role("button", name="Search options").click()
     options = player.get_by_role("dialog", name="Search options")
     expect(options.get_by_role("combobox", name="Browser AI")).to_be_disabled()
-    expect(options.get_by_text("Build v22", exact=True)).to_be_visible()
+    expect(options.get_by_text("Build v23", exact=True)).to_be_visible()
     page.keyboard.press("Escape")
     expect(options).not_to_be_visible()
     expect(player).to_be_visible()
@@ -957,9 +970,7 @@ def verify_member_entry(browser_type):
     expect(page.locator(".mall-brand-minimal img")).to_have_attribute("src", "/logo-foundups.svg")
     expect(page.locator("a.mall-brand-ln")).to_have_attribute("href", "https://www.linkedin.com/company/foundups/")
     expect(page.locator('#mallTileField .mall-tile[data-foundup-id^="linkedin_"]')).to_have_count(0)
-    page.evaluate("indices=>indices.forEach(i=>window.mallTileField.getTileElement(i))",
-        [next(i for i,x in enumerate(ordinary_catalog) if x['foundup_id']==fid)
-         for fid in ('voteballots','trade','magadoom_001','kids_episodes')])
+    materialize_public_cards(page,len(ordinary_catalog))
     for identifier in ('voteballots','trade','magadoom_001','kids_episodes'):
         expect(page.locator('#mallTileField .mall-tile[data-foundup-id="'+identifier+'"]')).to_have_count(1)
 
@@ -1434,10 +1445,12 @@ def verify_floating_and_wikitube_gestures(browser_type):
 
 
 def verify_filtered_player_and_admitted_entry(browser_type):
-    """Combined player/card state and real entry bytes with mocked admission.
+    """API integration state plus real entry bytes with mocked admission.
 
     Clerk/Firestore use the existing fixture helper; this is not a real sign-in
-    or proof that YouTube recognizes an authenticated Google session.
+    or proof that YouTube recognizes an authenticated Google session. Normal
+    TV tap/pinch is qualified separately; this adversarial API sequence keeps
+    the Mall grid visible beside the player to preserve the filter/Escape cases.
     """
     records=json.loads((public/'member/mall-video-catalog.json').read_text(encoding='utf-8'))
     by_id={item['foundup_id']:item for item in records}
@@ -1457,11 +1470,27 @@ def verify_filtered_player_and_admitted_entry(browser_type):
         field=page.locator('#mallTileField')
         player=page.locator('#videoPlayerFullscreen')
         expect(field.locator('.mall-tile')).to_have_count(6)
+        materialize_public_cards(page,len(records))
+
+        # Bounded public metadata quick-view must retain the admitted doorway
+        # without describing the unfinished Vote application as a launched app.
+        page.evaluate("window.mallPlanes.openFoundUpById('voteballots')")
+        view=page.locator('#foundupViewPlane')
+        expect(view.locator('a.fv-primary-cta')).not_to_contain_text('Open App')
+        expect(view.locator('a.fv-primary-cta')).to_have_attribute('href','https://foundups.com/member/?enter=voteballots')
+        page.evaluate('window.mallPlanes.closeView()')
 
         for identifier,canonical in [('undaodu',None),('antifafm','antifafm_001')]:
-            page.evaluate("records=>{window.mallTileField.searchCatalog('');window.mallTileField.updateCatalog(records)}",
-                [by_id[identifier],by_id['magadoom_001']])
-            field.locator('.mall-tile[data-foundup-id="'+identifier+'"]').tap(position={'x':20,'y':20})
+            page.evaluate("""async id=>{
+              await window.mallTileField.searchCatalog('');
+              const record=window.mallTileField.getCatalog().find(item=>item.foundup_id===id);
+              if(!record?.video_pages?.catalog) throw new Error('Real bounded source metadata missing');
+              const session=await window.mallDiscoveryPager.openVideos(record,'catalog');
+              const queue=session.items.slice();session.close();
+              if(queue.length!==6) throw new Error('Expected only one six-video page');
+              window.mallVideoPlayer.open(id,queue,0,{floating:true,autoplay:true,
+                returnFocusTo:document.querySelector('#mallTileField [data-foundup-id="'+id+'"]')});
+            }""",identifier)
             first_video=by_id[identifier]['videos'][0]['video_id']
             try:
                 page.wait_for_function("['playing','manual-play'].includes(window.mallVideoPlayer.getPlaybackSnapshot()?.state)")
@@ -1543,6 +1572,16 @@ def verify_filtered_player_and_admitted_entry(browser_type):
                 page.keyboard.press('Escape')
                 expect(page.locator('#conciergeSheet')).not_to_have_class(re.compile(r'\bopen\b'))
         observed['second_alias_and_three_unfinished_admitted_entry_truth']=True
+        # The admitted ordinary Mall uses the raw catalog; the source action
+        # must use readiness there as well as in bounded public metadata.
+        page.goto('https://foundups.com/member/',wait_until='domcontentloaded')
+        expect(page.locator('#mallTileField .mall-tile').first).to_be_visible()
+        page.evaluate("window.mallPlanes.openFoundUpById('voteballots')")
+        view=page.locator('#foundupViewPlane')
+        expect(view.locator('a.fv-primary-cta')).to_contain_text('View project information')
+        expect(view.locator('a.fv-primary-cta')).to_have_attribute('href',by_id['voteballots']['external_url'])
+        expect(view.get_by_role('link',name=re.compile('^Open App',re.I))).to_have_count(0)
+        observed['vote_quickview_metadata_and_admitted_raw_catalog_no_false_app']=True
     finally:
         context.close()
         browser.close()
@@ -1791,13 +1830,34 @@ def verify_public_discovery_cards(browser_type):
         page.goto('https://play.foundups.com/member/',wait_until='domcontentloaded')
         field=page.locator('#mallTileField')
         expect(field.locator('.mall-tile')).to_have_count(6)
-        for _ in range(3): page.get_by_role('button',name='Load more cards',exact=True).click()
+        materialize_public_cards(page,len(records))
         expect(field.locator('.mall-tile')).to_have_count(17)
         expect(field.locator('[data-catalog-kind="foundup"]')).to_have_count(14)
         expect(field.locator('[data-catalog-kind="source"]')).to_have_count(2)
         expect(field.locator('[data-catalog-kind="candidate"]')).to_have_count(1)
         expect(field.locator('[data-catalog-kind="source"] .mall-card-enter')).to_have_count(0)
         assert page.evaluate('window.fixturePlayback.created===0&&window.fixturePlayback.plays===0')
+        expect(page.locator('.mall-brand-minimal img')).to_have_attribute('src','/logo-foundups.svg')
+        expect(page.locator('a.mall-brand-ln')).to_have_attribute('href','https://www.linkedin.com/company/foundups/')
+
+        # Native press-hold is retained on the single accessible About face.
+        # These are synthetic gesture events, not physical touchscreen proof.
+        held=field.locator('.mall-tile[data-foundup-id="move2japan"]')
+        held.scroll_into_view_if_needed()
+        held.evaluate("""el=>{const e=new Event('touchstart',{bubbles:true,cancelable:true});Object.defineProperty(e,'touches',{value:[{clientX:60,clientY:60}]});el.dispatchEvent(e)}""")
+        expect(held).to_have_class(re.compile(r'\bis-card-flipped\b'))
+        held.evaluate("""el=>{const e=new Event('touchend',{bubbles:true,cancelable:true});Object.defineProperty(e,'touches',{value:[]});el.dispatchEvent(e);el.dispatchEvent(new MouseEvent('click',{bubbles:true}))}""")
+        expect(held.locator('.mall-card-back')).to_have_count(1)
+        expect(held.locator('.mall-tile-osp-back')).to_have_count(0)
+        for label in ('Outcome','Solution','Pain'):
+            expect(held.locator('.mall-tile-osp-kicker',has_text=label)).to_have_count(1)
+        assert page.evaluate('window.fixturePlayback.created===0&&window.fixturePlayback.plays===0')
+        held.locator('.mall-card-flip-back').tap()
+        expect(held.locator('.mall-card-front')).to_be_visible()
+        held.evaluate("""el=>{const e=new Event('touchstart',{bubbles:true,cancelable:true});Object.defineProperty(e,'touches',{value:[{clientX:60,clientY:60}]});el.dispatchEvent(e);el.dispatchEvent(new Event('touchcancel',{bubbles:true}))}""")
+        page.wait_for_timeout(520)
+        expect(held.locator('.mall-card-front')).to_be_visible()
+        observed['native_touch_hold_osp_single_face_cancel_no_play']=True
 
         def card(identifier): return field.locator('.mall-tile[data-foundup-id="'+identifier+'"]')
         def assert_front(tile):
@@ -1943,6 +2003,30 @@ def verify_public_discovery_cards(browser_type):
         card('antifafm').locator('.mall-tile-enter').click()
         expect(page).to_have_url('https://foundups.com/member/?enter=antifafm_001')
         observed['legacy_source_and_house_guards_and_alias_entry']=True
+        # Separate fine-pointer context preserves native hover without stealing
+        # focus; the mobile context above does not stand in for mouse policy.
+        desktop=browser.new_context(viewport={'width':1366,'height':900},service_workers='block',reduced_motion='reduce')
+        try:
+            desktop.add_init_script(provider)
+            desktop.add_init_script('window.IntersectionObserver=undefined')
+            desktop.route('**/*',routes)
+            d=desktop.new_page();d.set_default_timeout(6000)
+            d.goto('https://play.foundups.com/member/',wait_until='domcontentloaded')
+            materialize_public_cards(d,len(records))
+            hovered=d.locator('#mallTileField .mall-tile[data-foundup-id="gotjunk_001"]')
+            hovered.scroll_into_view_if_needed()
+            d.locator('body').evaluate('el=>{el.tabIndex=-1;el.focus();window.hoverFocusBefore=document.activeElement}')
+            hovered.dispatch_event('pointerenter',{'pointerType':'mouse'})
+            expect(hovered).to_have_class(re.compile(r'\bis-card-flipped\b'))
+            assert d.evaluate('document.activeElement===window.hoverFocusBefore')
+            expect(hovered.locator('.mall-card-back')).to_have_count(1)
+            for label in ('Outcome','Solution','Pain'):
+                expect(hovered.locator('.mall-tile-osp-kicker',has_text=label)).to_have_count(1)
+            hovered.dispatch_event('pointerleave',{'pointerType':'mouse'})
+            expect(hovered.locator('.mall-card-front')).to_be_visible()
+            assert d.evaluate('window.fixturePlayback.created===0&&window.fixturePlayback.plays===0')
+        finally: desktop.close()
+        observed['native_desktop_hover_osp_no_focus_theft']=True
     finally:
         context.close()
         browser.close()
@@ -1966,6 +2050,7 @@ def verify_public_entity_slice(browser_type):
     assert list(expected_kinds.values()).count('source')==2
     assert list(expected_kinds.values()).count('candidate')==1
     requested_images = []
+    capacity_diagnostics = []
 
     def route_entity(route):
         url = urlsplit(route.request.url)
@@ -2000,8 +2085,16 @@ def verify_public_entity_slice(browser_type):
                     if count == len(real): break
                     if disable_io:
                         page.get_by_role("button",name="Load more cards",exact=True).click()
+                        page.wait_for_function("n=>document.querySelectorAll('#mallTileField .mall-tile').length>n",arg=count)
                     else:
-                        field.evaluate("el=>{el.parentElement.scrollTop=el.parentElement.scrollHeight}")
+                        maximum=field.evaluate('el=>el.parentElement.scrollHeight-el.parentElement.clientHeight')
+                        if maximum<=1:
+                            # Six initial metadata cards may not fill a tall
+                            # viewport. Explicit More makes scrolling possible;
+                            # an idle intersection must not drain remote pages.
+                            page.get_by_role('button',name='Load more cards',exact=True).click()
+                        else:
+                            field.evaluate("el=>{el.parentElement.scrollTop=el.parentElement.scrollHeight}")
                         page.wait_for_function("n=>document.querySelectorAll('#mallTileField .mall-tile').length>n",arg=count)
                 actual = field.locator(".mall-tile").evaluate_all("els=>els.map(x=>({id:x.dataset.foundupId,type:x.dataset.tileType,name:x.querySelector('.mall-tile-name').textContent.trim()}))")
                 assert len(actual) == len({x["id"] for x in actual}) == 17
@@ -2023,8 +2116,14 @@ def verify_public_entity_slice(browser_type):
                 if not disable_io: continue
                 expect(field.locator(".mall-tile")).to_have_count(6)
 
-                # Appending must not close or replace the already active player.
-                field.locator(".mall-tile").first.click()
+                # API integration: keep the ordinary entity field behind one
+                # real bounded queue. Normal selected-TV append is separate.
+                page.evaluate("""async()=>{
+                  const record=window.mallTileField.getCatalog().find(x=>x.foundup_id==='move2japan');
+                  const session=await window.mallDiscoveryPager.openVideos(record,'catalog');
+                  const queue=session.items.slice();session.close();
+                  window.mallVideoPlayer.open(record.foundup_id,queue,0,{floating:true,autoplay:true});
+                }""")
                 player=page.get_by_role("region",name="Floating video player",exact=True)
                 expect(player).to_be_visible()
                 page.evaluate("window.entityAppendFrame=document.querySelector('#videoPlayerFullscreen iframe')")
@@ -2044,19 +2143,23 @@ def verify_public_entity_slice(browser_type):
                 page.evaluate("records=>{window.entityCapacityFixture=records;window.mallTileField.updateCatalog(records)}",capacity)
                 expect(field.locator(".mall-tile")).to_have_count(6)
                 assert "/__entity_fixture__/143.svg" not in requested_images
-                page.evaluate("window.mallTileField.togglePlay(143)")
+                materialize_public_cards(page,144)
                 expect(field.locator('.mall-tile[data-index="143"]')).to_have_count(1)
-                expect(player).to_be_visible()
-                player.get_by_role("button",name="Close player",exact=True).click()
                 field.evaluate("el=>{el.parentElement.scrollTop=el.parentElement.scrollHeight-el.parentElement.clientHeight-120}")
                 page.wait_for_function("document.querySelector('#mallTileField').parentElement.scrollTop>1000")
-                saved=page.evaluate("()=>{window.mallStateRestore.save();return window.mallStateRestore.peek().scrollTop}")
+                saved_state=page.evaluate("()=>{window.mallStateRestore.save();return window.mallStateRestore.peek()}")
+                saved=saved_state['scrollTop']
+                before_restore=page.evaluate("""()=>{const f=document.querySelector('#mallTileField'),w=f.parentElement,s=getComputedStyle(w);return {top:w.scrollTop,max:w.scrollHeight-w.clientHeight,height:w.clientHeight,dom:f.querySelectorAll('.mall-tile').length,loaded:window.mallTileField.getLoadedCatalog().length,scope:window.mallTileField.getFieldScope(),expanded:window.mallTileField.isExpanded(),activeVideo:window.mallTileField.getActiveVideo(),snap:s.scrollSnapType,behavior:s.scrollBehavior,paddingTop:s.paddingTop,scrollPaddingTop:s.scrollPaddingTop,clearance:document.documentElement.style.getPropertyValue('--floating-player-clearance'),wrapper:w.getBoundingClientRect().toJSON(),header:document.querySelector('.mall-header')?.getBoundingClientRect().toJSON()}}""")
                 assert saved>1000,saved
                 # Model initialization's same-stack catalog -> restore order;
                 # yielding here lets the already-bound autosave replace saved state.
                 reset = page.evaluate("()=>{window.mallTileField.updateCatalog(window.entityCapacityFixture);const count=document.querySelectorAll('#mallTileField .mall-tile').length;return {count,restored:window.mallStateRestore.restore()}}")
                 assert reset["count"] == 6 and reset["restored"], reset
-                page.wait_for_function("top=>Math.abs(document.querySelector('#mallTileField').parentElement.scrollTop-top)<=2",arg=saved)
+                try:
+                    page.wait_for_function("top=>Math.abs(document.querySelector('#mallTileField').parentElement.scrollTop-top)<=2",arg=saved)
+                except Exception as exc:
+                    actual=page.evaluate("""()=>{const f=document.querySelector('#mallTileField'),w=f.parentElement,s=getComputedStyle(w);return {top:w.scrollTop,max:w.scrollHeight-w.clientHeight,height:w.clientHeight,dom:f.querySelectorAll('.mall-tile').length,loaded:window.mallTileField.getLoadedCatalog().length,catalog:window.mallTileField.getCatalog().length,scope:window.mallTileField.getFieldScope(),expanded:window.mallTileField.isExpanded(),activeVideo:window.mallTileField.getActiveVideo(),snap:s.scrollSnapType,behavior:s.scrollBehavior,paddingTop:s.paddingTop,scrollPaddingTop:s.scrollPaddingTop,clearance:document.documentElement.style.getPropertyValue('--floating-player-clearance'),wrapper:w.getBoundingClientRect().toJSON(),header:document.querySelector('.mall-header')?.getBoundingClientRect().toJSON(),savedNow:window.mallStateRestore.peek()}}""")
+                    raise AssertionError({'case':'144 synthetic ordinary browse restore','savedState':saved_state,'before':before_restore,'reset':reset,'actual':actual}) from exc
                 for motion in ("reduce","no-preference"):
                     page.emulate_media(reduced_motion=motion)
                     page.evaluate("top=>window.mallTileField.restoreBrowsePosition(top,0)",saved)
@@ -2073,16 +2176,34 @@ def verify_public_entity_slice(browser_type):
                         raise AssertionError({"case":"far collapse return","motion":motion,"expected":before,"actual":details}) from exc
                     expect(field.locator('.mall-tile[data-index="143"]')).to_have_count(1)
                     page.wait_for_function("!document.querySelector('#mallTileField').classList.contains('transitioning')")
-                    page.evaluate("()=>{const fn=window.entityOriginalOpen||window.mallVideoPlayer.openDesktopVideo;window.entityOriginalOpen=fn;window.entityOpenCalls=0;window.mallVideoPlayer.openDesktopVideo=function(...args){window.entityOpenCalls++;return fn.apply(this,args)}}")
+                    field.locator('.mall-tile[data-index="143"]').scroll_into_view_if_needed()
+                    selected_browse_before=page.evaluate("()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve(document.querySelector('#mallTileField').parentElement.scrollTop))))")
+                    page.evaluate("""()=>{
+                      const player=window.mallVideoPlayer;
+                      window.entityOriginalOpenMethods ||= {open:player.open,openDesktopVideo:player.openDesktopVideo};
+                      window.entityOpenCalls=0;
+                      for(const method of ['open','openDesktopVideo']) player[method]=function(...args){
+                        window.entityOpenCalls++;return window.entityOriginalOpenMethods[method].apply(this,args);
+                      };
+                    }""")
                     field.locator('.mall-tile[data-index="143"]').click()
                     expect(player).to_be_visible()
                     assert page.evaluate("window.entityOpenCalls===1"),page.evaluate("window.entityOpenCalls")
                     player.get_by_role("button",name="Close player",exact=True).click()
+                    # Close intentionally leaves the selected TV + Watch view.
+                    # Back to Mall, rather than Close, restores ordinary browse.
+                    closed=page.evaluate("""top=>{const f=document.querySelector('#mallTileField'),w=f.parentElement,s=getComputedStyle(w);return {top:w.scrollTop,max:w.scrollHeight-w.clientHeight,height:w.clientHeight,dom:f.querySelectorAll('.mall-tile').length,loaded:window.mallTileField.getLoadedCatalog().length,scope:window.mallTileField.getFieldScope(),expanded:window.mallTileField.isExpanded(),activeVideo:window.mallTileField.getActiveVideo(),restoreReturned:window.mallTileField.restoreBrowsePosition(top,0),snap:s.scrollSnapType,behavior:s.scrollBehavior,wrapper:w.getBoundingClientRect().toJSON()}}""",saved)
+                    assert closed['expanded'] and closed['restoreReturned'] is False,closed
+                    page.locator('.mall-selected-controls [data-selected-back]').click()
+                    page.wait_for_function('!window.mallTileField.isExpanded()')
+                    page.wait_for_function("top=>Math.abs(document.querySelector('#mallTileField').parentElement.scrollTop-top)<=2",arg=selected_browse_before)
+                    returned=page.evaluate("""()=>{const f=document.querySelector('#mallTileField'),w=f.parentElement;return {top:w.scrollTop,max:w.scrollHeight-w.clientHeight,dom:f.querySelectorAll('.mall-tile').length,loaded:window.mallTileField.getLoadedCatalog().length,scope:window.mallTileField.getFieldScope(),expanded:window.mallTileField.isExpanded(),activeVideo:window.mallTileField.getActiveVideo()}}""")
+                    capacity_diagnostics.append({'motion':motion,'savedState':saved_state,'beforeInitialRestore':before_restore,'initialRestoreReturn':reset['restored'],'afterClose':closed,'expectedBackTop':selected_browse_before,'afterBack':returned})
             finally:
                 context.close()
     finally:
         browser.close()
-    print(json.dumps({"engine":browser_type.name,"catalog_records":17,"canonical_foundups":14,"source_cards":2,"project_candidates":1,"synthetic_capacity_fixture":144,"native_io_and_manual_fallback":True,"far_state_and_both_collapse_branches":True,"single_click_and_append_continuity":True,"canonical_member_portal_url":True,"physical_iPhone":"UNEXECUTED"},sort_keys=True))
+    print(json.dumps({"engine":browser_type.name,"catalog_records":17,"canonical_foundups":14,"source_cards":2,"project_candidates":1,"synthetic_capacity_fixture":144,"native_io_and_manual_fallback":True,"far_state_and_both_collapse_branches":True,"single_click_and_append_continuity":True,"capacity_return_diagnostics":capacity_diagnostics,"canonical_member_portal_url":True,"physical_iPhone":"UNEXECUTED"},sort_keys=True))
 
 
 if __name__ == "__main__":
@@ -2092,6 +2213,11 @@ if __name__ == "__main__":
             for engine in (p.chromium,p.webkit):
                 verify_hpc_banner_header(engine)
                 verify_public_entity_slice(engine)
+        raise SystemExit(0)
+    if sys.argv[1:] == ["--header-only"]:
+        with sync_playwright() as p:
+            for engine in (p.chromium,p.webkit):
+                verify_hpc_banner_header(engine)
         raise SystemExit(0)
     if sys.argv[1:] == ["--player-policy"]:
         with sync_playwright() as p:
@@ -2109,6 +2235,10 @@ if __name__ == "__main__":
         with sync_playwright() as p:
             for engine in (p.chromium,p.webkit):
                 verify_filtered_player_and_admitted_entry(engine)
+        raise SystemExit(0)
+    if sys.argv[1:] == ["--entity-diagnostic"]:
+        with sync_playwright() as p:
+            verify_public_entity_slice(p.chromium)
         raise SystemExit(0)
     main()
     verify_diagnostics()

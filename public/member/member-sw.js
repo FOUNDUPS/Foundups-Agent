@@ -9,7 +9,7 @@
 // Auth flows (Clerk, Firebase) are NEVER cached.
 // Catalog is network-first with cache fallback.
 
-const CACHE_NAME = 'pfmall-member-v22';
+const CACHE_NAME = 'pfmall-member-v23';
 const POSTER_CACHE_NAME = 'pfmall-posters-v1';
 const PROPERTY_CACHE_NAME = 'pfmall-properties-v1';
 const MAX_POSTER_ENTRIES = 60;
@@ -28,18 +28,19 @@ const SHELL_ASSETS = [
   '/member/css/member.css',
   '/member/css/account-concierge.css',
   '/member/css/mall-planes.css',
-  '/member/css/mall-tile-field.css?v=22',
-  '/member/css/mall-video-player.css?v=22',
-  '/member/css/mall-video-projection.css?v=22',
-  '/member/js/gesture-engine.js?v=22',
+  '/member/css/mall-tile-field.css?v=23',
+  '/member/css/mall-video-player.css?v=23',
+  '/member/css/mall-video-projection.css?v=23',
+  '/member/js/gesture-engine.js?v=23',
   '/member/js/shell-bridge-interceptor.js',
-  '/member/js/mall-planes.js?v=22',
-  '/member/js/mall-tile-field.js?v=22',
-  '/member/js/mall-video-player.js?v=22',
-  '/member/js/mall-video-projection.js?v=22',
+  '/member/js/mall-planes.js?v=23',
+  '/member/js/mall-discovery-pager.js?v=23',
+  '/member/js/mall-tile-field.js?v=23',
+  '/member/js/mall-video-player.js?v=23',
+  '/member/js/mall-video-projection.js?v=23',
   '/member/js/account-concierge.js',
   '/member/js/red-dog-concierge.js',
-  '/member/js/mall-state-restore.js?v=22',
+  '/member/js/mall-state-restore.js?v=23',
   '/move2japan/property-search.js',
   '/move2japan/move2japan.css',
   '/logo-dog.png',
@@ -170,6 +171,17 @@ self.addEventListener('fetch', function(event) {
       // No fabricated empty catalog or fresh timestamp. Cached source bytes,
       // including observed_on, are returned unchanged when available.
       return new Response('{"error":"public_property_catalog_unavailable"}', {
+        status: 503, headers: { 'Content-Type': 'application/json', 'X-Offline-Fallback': '1' }
+      });
+    }));
+    return;
+  }
+
+  // Cache only requested public bounded pages. Never prefetch all videos.
+  // Generation-bound cursors reject mixed cached generations in the pager.
+  if (!url.search && /^\/member\/discovery\/(?:catalog\.json|[a-f0-9]{64}\/(?:catalog|videos\/[a-z0-9][a-z0-9_-]{0,63}\/catalog)\/\d{4}\.json)$/.test(url.pathname)) {
+    event.respondWith(networkFirst(event.request, CACHE_NAME, url.pathname, 'json', function() {
+      return new Response('{"error":"public_discovery_page_unavailable"}', {
         status: 503, headers: { 'Content-Type': 'application/json', 'X-Offline-Fallback': '1' }
       });
     }));

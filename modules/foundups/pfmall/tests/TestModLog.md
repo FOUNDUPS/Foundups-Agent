@@ -1,5 +1,46 @@
 # p.fMALL Test ModLog
 
+## 2026-11-16 - Build v23 bounded public TV continuation
+
+Preserved native v22 commit `155a89c281c06d84776a7f5f6ea718bd382f0395`
+and the tested continuation through `773e9a23deb7ea9400fa0e2450f0dcd390e4092e`
+in feature-integration checkpoint `a12414e0b478aa40de7e7c8ad64561fd2b3c78b8`.
+This is not a main/PR merge. Native logo/LinkedIn/OSP and Kids metadata remain;
+whole left HPC banner, build above, Voice CTA and hidden-player pause remain.
+
+Public browse now requests six allowlisted metadata records (11,449 bytes),
+then six-item pages on demand. Selecting a video-backed card enters only that
+source's videos through the existing tile, shared player and WikiTube owners.
+The offline refresh owner produces 206 derived pages for 17 metadata cards and
+1,205 existing video records; no ingestion/API, registry visibility, sign-in
+policy or public-directory projection changed. Four LinkedIn pseudo-cards
+remain retired; 14 canonical mappings, two sources and one House candidate are
+not a finalized entity count. 144 is capacity. House Join and first-house public
+record remain unverified; no private property details or functional Join claim.
+
+Shared queue continuation appends one page at the loaded boundary; Pause,
+hide/tuck, close, query and selection changes invalidate delayed playback.
+Fully hidden YouTube playback pauses; native controls and browser zoom outside
+explicit app gesture targets remain available. Portrait floats above the grid;
+compact landscape preserves the player with a clear left browsing/header region.
+Selected logo/Back return to Mall and restore ordinary Member Portal semantics.
+Only Catalog order is offered; actual popularity statistics are unavailable.
+
+Current controlled evidence: 278 targeted pytest passed, one native-junction test
+skipped (simulated redirect guard passes); pager 15 Node scenarios; cache/state 26
+Node scenarios; 18 delayed-queue/gesture cases across Chromium/WebKit; scoped HPC
+policy 4 groups across both engines. These suites overlap and are not a unique
+aggregate total. The public TV/network suite passes 92 assertions in Chromium/WebKit; retained
+card/entity/OSP and 144-capacity restoration pass four groups, entry passes two
+groups, with controlled accounts/providers. Final commit/push/preview parity and
+hosted CI are separate release receipts. Physical Safari/PWA Wi-Fi and
+cellular remain unexecuted as a structured matrix; prior VPN-off playback is
+principal-reported, not independently captured time telemetry. No production
+publication, account/security change, merge or stopped native UI resumption.
+
+See `modules/foundups/docs/PFMALL_V22_REGRESSION_MATRIX.md` and the current
+Mall roadmap for source ownership, retained actions and deferred artifact audit.
+
 ## 2026-11-16 - Discovery cards and explicit canonical/source separation
 
 Implemented the three explicitly requested already-public registry projects:

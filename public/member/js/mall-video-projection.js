@@ -14,7 +14,7 @@
   const publicScopes = new Set(['hpc']);
   const memberPaths = new Set(['/member', '/member/', '/member/index.html']);
   // Keep this display label aligned with the shell cache generation.
-  const mallBuild = 'v22';
+  const mallBuild = 'v23';
   const buildLabel = `<small class="mall-build-label">Build ${mallBuild}</small>`;
 
   function hostScope(location) {
@@ -548,29 +548,18 @@
     }
 
     try {
-      const response = await fetch('/member/mall-video-catalog.json', { cache: 'no-store', credentials: 'omit' });
-      if (!response.ok) throw new Error('Mall catalog unavailable');
-      const catalog = await response.json();
-
-      if (Array.isArray(catalog) && catalog.length === 0 && response.headers.get('X-Offline-Fallback') === '1') {
-        const notice = document.createElement('div');
-        notice.id = 'offlineNotice';
-        notice.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;padding:0.6rem 1rem;background:#1a1a2e;color:#9e9baf;text-align:center;font-size:0.85rem;border-bottom:1px solid rgba(124,92,252,0.2);';
-        notice.textContent = 'You\u2019re offline \u2014 some content may be unavailable.';
-        document.body.appendChild(notice);
-      }
-
-      window.mallTileField?.initialize(catalog, { entityPortraitField: true });
+      const catalogPager = await window.mallDiscoveryPager.openCatalog();
+      const catalog = catalogPager.items;
+      window.mallTileField?.initialize(catalog, { entityPortraitField: true, catalogPager });
       window.mallStateRestore?.restore?.();
 
       const creator = new URLSearchParams(window.location.search).getAll('creator');
       if (creator.length === 1 && creator[0] === 'move2japan') {
-        const creatorIndex = catalog.findIndex((item) => item.foundup_id === 'move2japan');
-        if (creatorIndex !== -1) window.mallTileField?.expandFoundUp(creatorIndex);
+        await window.mallTileField?.openEntityById?.('move2japan');
       }
 
       window.mallPlanesSync = function () {};
-      window.mallPlanes?.setCatalog(catalog);
+      window.mallPlanes?.setCatalog(window.mallTileField?.getLoadedCatalog?.() || catalog);
       window.mallStateRestore?.bindAutoSave?.();
 
       element('overlayScrim')?.addEventListener('click', () => {
@@ -697,6 +686,7 @@
   }
 
   window.mallVideoProjection = {
+    mallBuild,
     hostScope,
     isOpenMallHost,
     resolve,
