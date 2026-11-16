@@ -44,12 +44,22 @@
   margin-bottom: 0.45rem;
 }
 
+[data-mall-video-scope] .mall-brand-cluster {
+  order: -1;
+  flex: 0 0 auto;
+}
+
+[data-mall-video-scope] .mall-brand-ln {
+  display: none;
+}
+
 [data-mall-video-scope] .mall-brand-minimal {
   order: -1;
   flex: 0 0 auto;
   min-width: 44px;
   min-height: 44px;
   justify-content: center;
+  opacity: 1;
 }
 
 [data-mall-video-scope="hpc"] .mall-brand-logo-sm {

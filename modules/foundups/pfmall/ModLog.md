@@ -1,3 +1,10 @@
+## 2026-11-16 · Build v22 canonical catalog reconciliation, `"trading"` category, OSP tile flip, and phone patch-loading
+
+- **Catalog & Category Truth (`shell_core.py`, `scripts/refresh_mall_catalog.py`, `public/member/mall-video-catalog.json`, `public/index.html`)**:
+  - Added `"trading"` to `VALID_CATEGORIES` in `shell_core.py`, preserved narrative fields (`outcome`, `solution`, `pain`) in `project_public_video_lanes()`, removed redundant zero-video `linkedin_*` tiles from `mall-video-catalog.json`, added discoverable canonical registry FoundUps (`voteballots`, `trade`, `magadoom_001`, `kids_episodes`), populated WSP 109 `outcome`/`solution`/`pain` across all 16 catalog FoundUps, and grounded `foundups.com` `#foundupTicker` in real catalog count.
+- **Brand Chrome, Tile Flip & Phone Patch-Load (`public/member/index.html`, `public/member/js/mall-tile-field.js`, `public/member/css/mall-tile-field.css`, `public/member/js/mall-planes.js`, `public/member/member-sw.js`)**:
+  - Switched top-left Mall brand to `/logo-foundups.svg` + FoundUPS LinkedIn link (`a.mall-brand-ln`), added desktop hover-hold (`650ms`) and phone press-hold (`450ms`) OSP tile turn-over, and enabled phone progressive grid batching (`PHONE_PATCH_BATCH = 9`) + `IntersectionObserver` deferred poster hydration under `Build v22` / `pfmall-member-v22`. WSP 22, 49, 50, 97, 104, and 109 apply.
+
 ## 2026-11-16 · Build v21 open Mall landing (`play.foundups.com`) and `foundups.com` Member Portal handoff
 
 ## 2026-11-16 - Discovery cards and explicit canonical/source separation

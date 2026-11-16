@@ -65,7 +65,13 @@
     'thought-leadership': 'cat-thought-leadership',
     'ai-education': 'cat-ai-education',
     'ai-research': 'cat-ai-research',
-    'infrastructure': 'cat-infrastructure'
+    'infrastructure': 'cat-infrastructure',
+    'civic': 'cat-civic',
+    'trading': 'cat-trading',
+    'games': 'cat-games',
+    'community': 'cat-community',
+    'science': 'cat-science',
+    'marketplace': 'cat-marketplace'
   };
 
   // Video Mall runtime state
@@ -78,6 +84,10 @@
   var entityRenderedCount = 0;
   var FIXED_VIDEO_COLUMNS = 3;
   var FIXED_VIDEO_BATCH = 6;
+  var PHONE_PATCH_BATCH = 9;
+  var HOVER_FLIP_DELAY_MS = 650;
+  var HOLD_FLIP_DELAY_MS = 450;
+  var activeFlippedTile = null;
   var fixedRenderedCount = 0;
   var fixedTailObserver = null;
   var fixedBrowsePosition = null;
@@ -162,12 +172,61 @@
     observeTiles(tileField ? tileField.querySelectorAll('.mall-tile') : []);
   }
 
+  function isPhonePatchViewport() {
+    if (!loadPolicy.enableViewportLazyLoad || typeof IntersectionObserver === 'undefined') return false;
+    if (desktopPosterBrowsing) return false;
+    return !!(window.matchMedia && window.matchMedia('(max-width: 899px), (pointer: coarse)').matches);
+  }
+
+  function usesProgressivePatchGrid() {
+    if (fixedVideoField) return true;
+    if (!isPhonePatchViewport() || groupDefinitions !== null) return false;
+    return expandedFoundUp !== null || layoutMode === 'grid';
+  }
+
+  function activePatchBatchSize() {
+    return fixedVideoField || isEntityGrid() ? FIXED_VIDEO_BATCH : PHONE_PATCH_BATCH;
+  }
+
+  function hydrateTilePoster(tile) {
+    if (!tile) return;
+    var deferredUrl = tile.dataset.posterUrl || '';
+    if (deferredUrl && (!tile.style.backgroundImage || tile.style.backgroundImage === 'none')) {
+      tile.style.backgroundImage = 'url(' + deferredUrl.replace(/["\\]/g, '\\$&') + ')';
+    }
+    var bgImage = tile.style.backgroundImage;
+    if (bgImage && bgImage !== 'none') {
+      var urlMatch = bgImage.match(/url\(["']?([^"')]+)["']?\)/);
+      if (urlMatch && urlMatch[1]) {
+        if (typeof Image !== 'undefined') {
+          var img = new Image();
+          img.onload = function() { tile.classList.add('thumb-loaded'); };
+          img.onerror = function() { tile.classList.add('thumb-loaded'); };
+          img.src = urlMatch[1];
+        } else {
+          tile.classList.add('thumb-loaded');
+        }
+        return;
+      }
+    }
+    tile.classList.add('thumb-loaded');
+  }
+
+  function setTileFlipped(tile, flipped, options) {
+    if (!tile) return false;
+    var next = typeof flipped === 'boolean' ? flipped : !tile.classList.contains('is-card-flipped');
+    return setCardFlipped(tile, next, options);
+  }
+
   function observeTiles(tiles) {
     tiles.forEach(function(tile) {
       var index = Number(tile.dataset.index);
       tile.dataset.tileIndex = index;
-      tileLoadStates[index] = tileObserver ? 'pending' : 'loaded';
-      if (tileObserver) tileObserver.observe(tile);
+      var alreadyHydrated = !tile.dataset.posterUrl || (tile.style.backgroundImage && tile.style.backgroundImage !== 'none');
+      tileLoadStates[index] = tileObserver ? (alreadyHydrated ? 'loaded' : 'pending') : 'loaded';
+      if (alreadyHydrated) hydrateTilePoster(tile);
+      else if (tileObserver) tileObserver.observe(tile);
+      else hydrateTilePoster(tile);
     });
   }
 
@@ -186,9 +245,10 @@
         var currentState = tileLoadStates[index];
         if (currentState === 'pending') {
           tileLoadStates[index] = 'visible';
-          // Trigger load (upgrade thumbnail, etc.)
+          // Trigger load (hydrate deferred poster thumbnail)
           loadTileContent(index, tile);
         }
+        if (tileObserver) tileObserver.unobserve(tile);
       }
       // Note: We don't downgrade state when leaving viewport
     });
@@ -204,10 +264,7 @@
       return;
     }
     tileLoadStates[index] = 'loading';
-
-    // Tile content loading is handled by existing renderTiles logic
-    // This hook is for future thumbnail quality upgrade
-    // For now, mark as loaded since tiles are pre-rendered
+    hydrateTilePoster(tile);
     tileLoadStates[index] = 'loaded';
   }
 
@@ -219,6 +276,7 @@
     tiles.forEach(function(tile, index) {
       index = Number(tile.dataset.index);
       tile.dataset.tileIndex = index;
+      hydrateTilePoster(tile);
       tileLoadStates[index] = 'loaded';
     });
   }
@@ -1281,6 +1339,10 @@
     var kind = canonical ? 'FoundUp' : sourceLabel + ' · not a canonical FoundUp';
     var pitch = item.one_sentence_pitch || item.tagline || 'No public pitch provided.';
     var description = item.description || 'No public description provided.';
+    var osp = ['outcome', 'solution', 'pain'].filter(function(key) { return item[key]; }).map(function(key) {
+      return '<div class="mall-tile-osp-row"><span class="mall-tile-osp-kicker osp-' + key + '">' +
+        key.charAt(0).toUpperCase() + key.slice(1) + '</span><p>' + escapeHtml(item[key]) + '</p></div>';
+    }).join('');
     if (candidate) kind = 'Project candidate · canonical registration unverified';
     var stage = canonical || candidate ? 'Stage: ' + (item.lifecycle_stage || 'not supplied') +
       ' · ' + (item.launch_readiness || 'readiness not supplied').replace(/_/g, ' ') : '';
@@ -1291,31 +1353,41 @@
       '<p class="mall-card-kind">' + escapeHtml(kind) + '</p>' +
       '<p class="mall-card-pitch"><strong>Pitch</strong> ' + escapeHtml(pitch) + '</p>' +
       '<p>' + escapeHtml(description) + '</p>' +
+      osp +
       (stage ? '<p class="mall-card-stage">' + escapeHtml(stage) + '</p>' : '') +
       (item.entry_copy ? '<p>' + escapeHtml(item.entry_copy) + '</p>' : '') +
       (candidate && item.public_plan_url === 'https://github.com/FOUNDUPS/Foundups-Agent/blob/72a3182c70974f0523be91d5ce4bd32808d824bc/modules/foundups/docs/PFMALL_OPPORTUNITY_INSTANCE_MODEL.md'
         ? '<a class="mall-card-plan" href="' + escapeAttr(item.public_plan_url) + '" target="_blank" rel="noopener noreferrer">Read public plan (new tab)</a>' : '') +
+      (item.videos?.length ? '<button type="button" class="mall-tile-osp-play">Play queue</button>' : '') +
       (canonical ? '<button type="button" class="mall-card-enter" data-canonical-foundup-id="' +
         escapeAttr(canonical) + '">Enter FoundUp · Member Portal</button>' : '') +
       '</section>';
   }
 
-  function setCardFlipped(tile, flipped) {
+  function setCardFlipped(tile, flipped, options) {
     var front = tile.querySelector('.mall-card-front');
     var back = tile.querySelector('.mall-card-back');
-    if (!front || !back) return;
+    if (!front || !back) return false;
+    if (flipped && activeFlippedTile && activeFlippedTile !== tile) {
+      setCardFlipped(activeFlippedTile, false, { focus: false });
+    }
     tile.classList.toggle('is-card-flipped', flipped);
     tile.tabIndex = flipped ? -1 : 0;
     front.hidden = front.inert = flipped;
     back.hidden = back.inert = !flipped;
     var trigger = front.querySelector('.mall-card-flip');
     trigger.setAttribute('aria-expanded', String(flipped));
-    (flipped ? back.querySelector('.mall-card-flip-back') : trigger).focus({ preventScroll: true });
+    activeFlippedTile = flipped ? tile : (activeFlippedTile === tile ? null : activeFlippedTile);
+    if (options?.focus !== false) {
+      (flipped ? back.querySelector('.mall-card-flip-back') : trigger).focus({ preventScroll: true });
+    }
+    return flipped;
   }
 
   function renderTiles(appendThrough, keepSlot) {
     var entityGrid = isEntityGrid();
-    var incremental = fixedVideoField || entityGrid;
+    var incremental = fixedVideoField || entityGrid || usesProgressivePatchGrid();
+    var batchSize = activePatchBatchSize();
     var append = incremental && Number.isInteger(appendThrough);
     if (!append && desktopInlineTile && !window.mallVideoPlayer?.isTucked?.()) {
       window.mallVideoPlayer.close({ restore: false });
@@ -1329,9 +1401,11 @@
     if (indices) itemsToRender = indices.map(function(index) { return itemsToRender[index]; });
     var start = append ? (entityGrid ? entityRenderedCount : fixedRenderedCount) : 0;
     var end = incremental
-      ? Math.min(itemsToRender.length, append ? appendThrough : FIXED_VIDEO_BATCH)
+      ? Math.min(itemsToRender.length, append ? appendThrough : batchSize)
       : itemsToRender.length;
     if (append && end <= start) return;
+    if (!append) activeFlippedTile = null;
+    var phoneLazyPosters = isPhonePatchViewport();
     var grouped = groupDefinitions !== null && expandedFoundUp === null;
     var memberPlayer = usesMemberVideoPlayer();
     var desktopGrid = memberPlayer && desktopPosterBrowsing && layoutMode === 'grid';
@@ -1345,11 +1419,11 @@
     if ((!grouped && !itemsToRender.length) || (grouped && !visibleGroups.length)) {
       if (entityGrid) entityRenderedCount = 0;
       if (tileObserver) tileObserver.disconnect();
+      if (fixedTailObserver) fixedTailObserver.disconnect();
+      fixedRenderedCount = 0;
       tileLoadStates = {};
       tileField.classList.remove('expanded-mode');
       if (indices) {
-        fixedTailObserver?.disconnect();
-        fixedRenderedCount = 0;
         tileField.innerHTML = '<p class="mall-video-grid-empty" role="status">No videos match your search.</p>';
         return;
       }
@@ -1358,8 +1432,8 @@
       return;
     }
 
-    var tileMarkup = itemsToRender.slice(start, end).map(function(item, index) {
-      index += start;
+    var tileMarkup = itemsToRender.slice(start, end).map(function(item, localIdx) {
+      var index = localIdx + start;
       if (indices) index = indices[index];
       if (isPropertyListing(item)) return renderPropertyTile(item, index);
       var theme = escapeAttr(item.theme || item.foundup_id || CATEGORY_THEME[item.category] || 'default');
@@ -1370,10 +1444,13 @@
       // Track tile type for CSS background-size: avatar uses contain, video uses cover
       var isAvatarTile = !!item.channel_avatar_url && !item.video_data;
       var posterUrl = item.channel_avatar_url || item.poster_url || '';
-      var posterStyle = posterUrl ? 'background-image: url(' + escapeAttr(posterUrl) + ')' : '';
+      var deferPoster = phoneLazyPosters && !append && index >= loadPolicy.loadBatchSize && !!posterUrl;
+      var posterStyle = (posterUrl && !deferPoster) ? 'background-image: url(' + escapeAttr(posterUrl) + ')' : '';
+      var posterDataAttr = posterUrl ? ' data-poster-url="' + escapeAttr(posterUrl) + '"' : '';
       var tileType = isAvatarTile ? 'avatar' : 'video';
       var canonical = canonicalFoundUpId(item);
       var candidate = item.discovery_kind === 'candidate';
+      var cardBack = !fixedVideoField && expandedFoundUp === null;
       var sourceLabel = item.source_type === 'linkedin_profile' ? 'Source profile' : 'Source channel';
       if (entityGrid) tileType = canonical ? 'foundup' : candidate ? 'candidate' : 'source';
 
@@ -1421,8 +1498,8 @@
       var videoId = fixedVideoField ? ' data-video-id="' + escapeAttr(item.video_data?.video_id || '') + '"' : '';
       var classification = entityGrid ? ' data-catalog-kind="' + (canonical ? 'foundup' : candidate ? 'candidate' : 'source') +
         '" data-canonical-foundup-id="' + escapeAttr(canonical || '') + '"' : '';
-      return '<article class="' + tileClass + '" data-index="' + index + '"' + videoId + classification + ' data-foundup-id="' + escapeAttr(item.foundup_id || item.id || '') + '" data-tile-type="' + tileType + '" tabindex="0" aria-label="' + escapeAttr(item.name || item.title || '') + '" style="' + posterStyle + '">' +
-        (entityGrid ? '<div class="mall-card-front">' : '') +
+      return '<article class="' + tileClass + '" data-index="' + index + '"' + videoId + posterDataAttr + classification + ' data-foundup-id="' + escapeAttr(item.foundup_id || item.id || '') + '" data-tile-type="' + tileType + '" tabindex="0" aria-label="' + escapeAttr(item.name || item.title || '') + '" style="' + posterStyle + '">' +
+        (cardBack ? '<div class="mall-card-front">' : '') +
         previewContainer +
         (fixedVideoField ? '' : '<span class="mall-tile-badge ' + badgeClass + '">' +
           escapeHtml(entityGrid ? (canonical ? 'FoundUp' : candidate ? 'Project candidate' : sourceLabel) : readiness.replace('_', ' ')) + '</span>') +
@@ -1437,7 +1514,7 @@
           '<span class="mall-tile-hero">' + escapeHtml(item.hero_label || '') + '</span>' +
           '<p class="mall-tile-name">' + escapeHtml(item.name || item.title || '') + '</p>' +
         '</div>' +
-        (entityGrid ? '<button type="button" class="mall-card-flip" aria-expanded="false" aria-controls="mall-card-about-' +
+        (cardBack ? '<button type="button" class="mall-card-flip" aria-expanded="false" aria-controls="mall-card-about-' +
           index + '" aria-label="' + escapeAttr('About ' + (item.name || item.title || 'this source')) + '">About</button></div>' +
           renderCardBack(item, index, canonical) : '') +
       '</article>';
@@ -1447,6 +1524,8 @@
       tileField.querySelector('.mall-video-grid-tail')?.remove();
       tileField.insertAdjacentHTML('beforeend', tileMarkup.join(''));
     } else if (grouped) {
+      if (fixedTailObserver) fixedTailObserver.disconnect();
+      fixedRenderedCount = 0;
       tileField.innerHTML = visibleGroups.map(function(group, groupIndex) {
         var headingId = 'mallGroupHeading-' + groupIndex;
         var trackId = 'mallGroupTrack-' + groupIndex;
@@ -1465,6 +1544,8 @@
       bindGroupedRows();
       restoreGroupState(groupedFocus);
     } else if (layoutMode === 'rows' && expandedFoundUp === null) {
+      if (fixedTailObserver) fixedTailObserver.disconnect();
+      fixedRenderedCount = 0;
       var groups = new Map();
       itemsToRender.forEach(function(item, index) {
         var key = item.category || 'Other';
@@ -1511,29 +1592,12 @@
     if (incremental) {
       if (entityGrid) entityRenderedCount = end;
       else fixedRenderedCount = end;
-      renderFixedTail(itemsToRender.length, entityGrid);
+      renderFixedTail(itemsToRender.length, entityGrid, batchSize);
     }
-
-    // Detect thumbnail load and remove shimmer
-    tiles.forEach(function(tile) {
-      var bgImage = tile.style.backgroundImage;
-      if (bgImage && bgImage !== 'none') {
-        var urlMatch = bgImage.match(/url\(["']?([^"')]+)["']?\)/);
-        if (urlMatch && urlMatch[1]) {
-          var img = new Image();
-          img.onload = function() { tile.classList.add('thumb-loaded'); };
-          img.onerror = function() { tile.classList.add('thumb-loaded'); }; // Stop shimmer on error too
-          img.src = urlMatch[1];
-        } else {
-          tile.classList.add('thumb-loaded');
-        }
-      } else {
-        tile.classList.add('thumb-loaded'); // No image = no shimmer needed
-      }
-    });
   }
 
-  function renderFixedTail(total, entityGrid) {
+  function renderFixedTail(total, entityGrid, batchSize) {
+    var step = batchSize || FIXED_VIDEO_BATCH;
     if (fixedTailObserver) fixedTailObserver.disconnect();
     var tail = document.createElement('div');
     tail.className = 'mall-video-grid-tail';
@@ -1542,14 +1606,14 @@
       more.type = 'button';
       more.textContent = entityGrid ? 'Load more cards' : 'Load more videos';
       var load = function() {
-        if (tail.isConnected) renderTiles((entityGrid ? entityRenderedCount : fixedRenderedCount) + FIXED_VIDEO_BATCH);
+        if (tail.isConnected) renderTiles((entityGrid ? entityRenderedCount : fixedRenderedCount) + step);
       };
       more.addEventListener('click', load);
       tail.appendChild(more);
       if (typeof IntersectionObserver !== 'undefined') {
         fixedTailObserver = new IntersectionObserver(function(entries) {
           if (entries.some(function(entry) { return entry.isIntersecting; })) load();
-        }, { root: tileFieldWrapper, rootMargin: '120px 0px' });
+        }, { root: tileFieldWrapper, rootMargin: '160px 0px' });
         fixedTailObserver.observe(tail);
       }
     } else {
@@ -1692,14 +1756,93 @@
     var tiles = batch || tileField.querySelectorAll('.mall-tile');
 
     tiles.forEach(function(tile) {
+      var hasOspBack = !!tile.querySelector('.mall-card-back');
+      var hoverTimer = null;
+      var holdTimer = null;
+      var holdTriggered = false;
+      var holdStartX = 0;
+      var holdStartY = 0;
+
+      if (hasOspBack) {
+        tile.addEventListener('pointerenter', function(e) {
+          if (e.pointerType !== 'mouse') return;
+          clearTimeout(hoverTimer);
+          hoverTimer = setTimeout(function() {
+            if (!tapGuardActive && tile.isConnected && !tile.contains(document.activeElement) &&
+                !activeFlippedTile?.contains(document.activeElement)) {
+              setTileFlipped(tile, true, { focus: false });
+            }
+          }, HOVER_FLIP_DELAY_MS);
+        });
+        tile.addEventListener('pointerleave', function(e) {
+          if (e.pointerType !== 'mouse') return;
+          clearTimeout(hoverTimer);
+          hoverTimer = null;
+          if (tile.classList.contains('is-card-flipped') && !tile.contains(document.activeElement)) setTileFlipped(tile, false, { focus: false });
+        });
+        tile.addEventListener('touchstart', function(e) {
+          if (!e.touches || e.touches.length !== 1) {
+            clearTimeout(holdTimer);
+            holdTimer = null;
+            return;
+          }
+          if (e.target && e.target.closest && e.target.closest('button, a')) return;
+          holdStartX = e.touches[0].clientX;
+          holdStartY = e.touches[0].clientY;
+          holdTriggered = false;
+          clearTimeout(holdTimer);
+          holdTimer = setTimeout(function() {
+            holdTimer = null;
+            if (!tile.isConnected) return;
+            holdTriggered = true;
+            tapGuardActive = true;
+            setTileFlipped(tile, !tile.classList.contains('is-card-flipped'));
+          }, HOLD_FLIP_DELAY_MS);
+        }, { passive: true });
+        tile.addEventListener('touchmove', function(e) {
+          if (!holdTimer) return;
+          if (!e.touches || e.touches.length !== 1) {
+            clearTimeout(holdTimer);
+            holdTimer = null;
+            return;
+          }
+          var dx = e.touches[0].clientX - holdStartX;
+          var dy = e.touches[0].clientY - holdStartY;
+          if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+            clearTimeout(holdTimer);
+            holdTimer = null;
+          }
+        }, { passive: true });
+        tile.addEventListener('touchend', function() {
+          if (holdTimer) {
+            clearTimeout(holdTimer);
+            holdTimer = null;
+          }
+          if (holdTriggered) {
+            holdTriggered = false;
+            setTimeout(function() { tapGuardActive = false; }, 220);
+          }
+        }, { passive: true });
+        tile.addEventListener('touchcancel', function() {
+          if (holdTimer) {
+            clearTimeout(holdTimer);
+            holdTimer = null;
+          }
+          if (holdTriggered) tapGuardActive = false;
+          holdTriggered = false;
+        }, { passive: true });
+      }
+
       // Tap selects playback or quick view according to the active layout.
       // FoundUp entry is explicit via fullscreen "Enter FoundUp" button
       tile.addEventListener('click', function(e) {
+        clearTimeout(hoverTimer);
         if (tile.classList.contains('is-card-flipped')) return;
         if (e.target.closest('.mall-card-front[hidden], .mall-card-back, .mall-card-flip')) return;
         // Ignore tap if guard is active (just finished dragging)
         if (tapGuardActive) return;
         if (groupDefinitions !== null && tileField.closest('[inert]')) return;
+
 
         var index = Number(tile.dataset.index || 0);
         if (groupDefinitions !== null) rememberActiveTile(tile);
@@ -1718,6 +1861,11 @@
             (e.target !== tile && e.target.closest('.mall-card-flip, .mall-card-back'))) return;
         var index = Number(tile.dataset.index || 0);
         var memberPlayer = usesMemberVideoPlayer();
+        if ((e.key === 'i' || e.key === 'f') && e.target === tile && hasOspBack) {
+          e.preventDefault();
+          setTileFlipped(tile);
+          return;
+        }
         if ((fixedVideoField || memberPlayer) && e.target !== tile) return;
         if (groupDefinitions !== null && tileField.closest('[inert]')) return;
         if (groupDefinitions !== null && /^Arrow(Left|Right|Up|Down)$/.test(e.key)) {
@@ -1748,6 +1896,12 @@
         flipBack.addEventListener('click', function(e) {
           e.stopPropagation();
           setCardFlipped(tile, false);
+        });
+        tile.querySelector('.mall-tile-osp-play')?.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (tapGuardActive) return;
+          setCardFlipped(tile, false);
+          togglePlay(Number(tile.dataset.index || 0));
         });
         tile.querySelector('.mall-card-enter')?.addEventListener('click', function(e) {
           e.stopPropagation();
@@ -1845,7 +1999,10 @@
     if (escapeBound) return;
     escapeBound = true;
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && expandedFoundUp !== null && !fixedVideoField) {
+      if (e.key === 'Escape' && activeFlippedTile) {
+        e.stopPropagation();
+        setTileFlipped(activeFlippedTile, false);
+      } else if (e.key === 'Escape' && expandedFoundUp !== null && !fixedVideoField) {
         e.stopPropagation();
         collapseFoundUp();
       } else if (e.key === 'Escape' && playingIndex !== null) {
@@ -2335,6 +2492,9 @@
     if (!Number.isInteger(numericIndex) || numericIndex < 0) return null;
     if (isEntityGrid() && numericIndex < mallCatalog.length && numericIndex >= entityRenderedCount) {
       renderTiles(Math.ceil((numericIndex + 1) / FIXED_VIDEO_BATCH) * FIXED_VIDEO_BATCH);
+    }
+    if (!isEntityGrid() && usesProgressivePatchGrid() && numericIndex < getExpandedVideos().length && numericIndex >= fixedRenderedCount) {
+      renderTiles(Math.ceil((numericIndex + 1) / activePatchBatchSize()) * activePatchBatchSize());
     }
     return tileField.querySelector('.mall-tile[data-index="' + numericIndex + '"]');
   }
@@ -3383,6 +3543,12 @@
     getTileLoadStates: getTileLoadStates,
     getLoadPolicy: getLoadPolicy,
     isViewportLoadingActive: isViewportLoadingActive,
+    isPhonePatchViewport: isPhonePatchViewport,
+    flipTile: function(foundupId, flipped) {
+      if (!tileField) return false;
+      var tile = tileField.querySelector('.mall-tile[data-foundup-id="' + String(foundupId || '').replace(/["\\]/g, '') + '"]');
+      return setTileFlipped(tile, flipped);
+    },
 
     // Debug helpers
     debugTiles: function() {

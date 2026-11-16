@@ -424,8 +424,19 @@ class TestDiscoveryCardIdentity:
         by_id = {item["foundup_id"]: item for item in catalog}
         assert by_id["antifafm"]["canonical_foundup_id"] == "antifafm_001"
         assert by_id["science_swarm"]["canonical_foundup_id"] == "science_swarm_hub"
-        for identifier in ("undaodu", "foundups_main", "linkedin_012", "linkedin_esingularity", "linkedin_tsingularity", "linkedin_foundups"):
+        assert len(catalog) == 17
+        assert sum(item["canonical_foundup_id"] is not None for item in catalog) == 14
+        assert by_id["kids_episodes"]["canonical_foundup_id"] == "kids_episodes"
+        for identifier in ("undaodu", "foundups_main"):
             assert by_id[identifier]["canonical_foundup_id"] is None
+        assert not any(identifier.startswith("linkedin_") for identifier in by_id)
+        approved_linkedin = {
+            "undaodu": "https://www.linkedin.com/in/openstartup/",
+            "foundups_main": "https://www.linkedin.com/company/foundups/",
+            "esingularity_001": "https://www.linkedin.com/company/esingularity/",
+        }
+        assert {identifier: item["linkedin_url"] for identifier, item in by_id.items()
+                if item.get("linkedin_url")} == approved_linkedin
 
     def test_house_is_planning_only_without_member_admission(self, catalog):
         house = next(item for item in catalog if item["foundup_id"] == "foundups_house_project")

@@ -173,8 +173,15 @@ landing for all FoundUps. Entering a FoundUp from `play.foundups.com` passes
 through `https://foundups.com/member/?enter={foundup_id}`, redirecting
 signed-out visitors to `https://foundups.com/?signin=required` (which opens the
 eligibility/sign-in modal) and resuming FoundUp entry after admission.
-Storage and service worker registrations are origin-local (`pfmall-member-v21`
-/ `Build v21`).
+Storage and service worker registrations are origin-local (`pfmall-member-v22`
+/ `Build v22`). Top-left `.mall-brand-cluster` renders `/logo-foundups.svg` +
+`.mall-brand-ln` (`FoundUPS on LinkedIn`), while Red Dog (`/logo-dog.png`) owns
+the bottom-right concierge/search anchor. Mall FoundUp tiles support hover-hold
+(`650ms`), touch press-and-hold (`450ms`), and `.mall-tile-flip-btn` / `i` / `f`
+to turn over and reveal WSP 109 `Outcome · Solution · Pain` (`mallTileField.flipTile(foundupId, flipped)`),
+and phone viewports (`mallTileField.isPhonePatchViewport()`) progressively
+patch-load grid/expanded DOM batches (`PHONE_PATCH_BATCH = 9`) and viewport
+poster images via `IntersectionObserver`.
 
 The ordinary Mall dock searches the loaded catalog. Tap or swipe up on its
 plus button for an anchored options panel and the public AutoPost link.

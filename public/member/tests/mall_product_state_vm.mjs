@@ -402,7 +402,7 @@ await check('install reloads only explicit public shell and product assets', asy
     assert.equal(request.credentials, 'omit');
     return url.pathname + url.search;
   });
-  for (const path of ['/member/js/mall-tile-field.js?v=22', '/member/js/mall-video-player.js?v=22', '/member/js/mall-video-projection.js?v=22', '/member/js/mall-state-restore.js?v=22', '/member/js/mall-planes.js?v=22', '/member/hpc.webmanifest', '/member/hpc-icon-180.png', '/member/hpc-icon-192.png', '/member/hpc-icon-512.png', '/move2japan/property-search.js', '/move2japan/move2japan.css']) {
+  for (const path of ['/member/js/mall-tile-field.js?v=22', '/member/js/mall-video-player.js?v=22', '/member/js/mall-video-projection.js?v=22', '/member/js/mall-state-restore.js?v=22', '/member/js/mall-planes.js?v=22', '/logo-foundups.svg', '/member/hpc.webmanifest', '/member/hpc-icon-180.png', '/member/hpc-icon-192.png', '/member/hpc-icon-512.png', '/move2japan/property-search.js', '/move2japan/move2japan.css']) {
     assert.equal(installed.includes(path), true, 'missing precached asset: ' + path);
   }
   assert.equal(installed.includes('/move2japan/properties.json'), false);

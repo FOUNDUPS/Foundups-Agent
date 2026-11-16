@@ -345,7 +345,18 @@ def project_public_video_lanes(catalog: list, repo_root: Path = REPO_ROOT) -> tu
             "videos": videos,
         }
         # The global Mall offers discovery. Playback belongs to the fixed public field.
-        lanes[foundup_id] = {**lane, "videos": [], "video_count": 0, "public_poc_url": entry["poc_url"]}
+        narrative_fields = {
+            k: previous[k]
+            for k in ("outcome", "solution", "pain")
+            if previous and k in previous
+        }
+        lanes[foundup_id] = {
+            **lane,
+            "videos": [],
+            "video_count": 0,
+            "public_poc_url": entry["poc_url"],
+            **narrative_fields,
+        }
         scoped[foundup_id] = {
             "lane": lane,
             "identity": config["identity"],

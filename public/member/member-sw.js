@@ -43,6 +43,7 @@ const SHELL_ASSETS = [
   '/move2japan/property-search.js',
   '/move2japan/move2japan.css',
   '/logo-dog.png',
+  '/logo-foundups.svg',
   '/favicon-32x32.png',
 ];
 

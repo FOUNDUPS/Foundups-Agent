@@ -648,7 +648,11 @@
         image.height = 353;
         image.classList.replace('mall-brand-logo-sm', 'mall-hpc-banner-image');
         home.classList.add('mall-hpc-banner-link');
+        const brandCluster = home.closest('.mall-brand-cluster');
         banner.appendChild(home);
+        // The ordinary Mall keeps its logo and LinkedIn cluster. HPC uses the
+        // moved banner link, so retire the now-hidden sibling badge and wrapper.
+        brandCluster?.remove();
       }
       element('videoScopeCredit').textContent = projection.credit + ' Shorts · Commentary and satire';
       field.setAttribute('aria-describedby', 'videoScopeCredit');

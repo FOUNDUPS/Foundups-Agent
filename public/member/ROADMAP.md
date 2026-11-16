@@ -3,6 +3,11 @@
 **Module**: `public/member/`
 **Approach**: Occam's Layered (build/test one layer at a time)
 
+## Build v22 Brand Chrome, Canonical Catalog, OSP Tile Flip & Phone Patch-Load — 2026-11-16
+
+- Updated top-left `.mall-brand-cluster` to `/logo-foundups.svg` + FoundUPS LinkedIn link while keeping Red Dog in the bottom-right anchor; consolidated redundant `linkedin_*` pseudo-tiles into header/About/`linkedin_url` links, reconciled `voteballots`, `trade`, `magadoom_001`, and `kids_episodes` from `foundup_registry.json`, and grounded `foundups.com` `#foundupTicker` in real catalog count.
+- Added WSP 109 `Outcome · Solution · Pain` card backs with desktop hover-hold (`650ms`), mobile press-and-hold (`450ms`), and keyboard/button flip controls, plus phone viewport DOM patch-loading (`PHONE_PATCH_BATCH = 9`) and `IntersectionObserver` deferred poster hydration under `Build v22` / `pfmall-member-v22`.
+
 ## Build v21 Open Mall Landing (`play.foundups.com`) & Member Portal Gate (`foundups.com`) — 2026-11-16
 
 - Configured `play.foundups.com` (`dedicatedHosts.get('play.foundups.com') === 'mall'`) as the open guest p.fMALL discovery landing for all catalog FoundUps without Clerk SDK or Firestore admission reads, mirroring `hpc.foundups.com` across the full Mall catalog while supporting `?foundup=hpc` and `?foundup=move2japan` public projections.

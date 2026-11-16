@@ -63,7 +63,7 @@
   max-width: calc(100% - .6rem);
   padding: .25rem .45rem;
 }
-.mall-card-flip, .mall-card-flip-back, .mall-card-enter {
+.mall-card-flip, .mall-card-flip-back, .mall-card-enter, .mall-tile-osp-play {
   border: 1px solid #9e91b8;
   border-radius: .35rem;
   background: #201a30;
@@ -93,7 +93,7 @@
 .mall-card-back h3, .mall-card-back p { margin: 0; }
 .mall-card-back h3 { font-size: .85rem; }
 .mall-card-kind, .mall-card-stage { color: #cdc1df; }
-.mall-card-flip-back, .mall-card-enter {
+.mall-card-flip-back, .mall-card-enter, .mall-tile-osp-play {
   flex: 0 0 auto;
   min-width: 44px;
   min-height: 44px;
@@ -1327,9 +1327,48 @@
   background-color: #140e2a;
 }
 
-.mall-tile.theme-cat-infrastructure {
+.mall-tile.theme-cat-infrastructure,
+.mall-tile.theme-holoindex_prod_01 {
   background: linear-gradient(145deg, rgba(12, 28, 44, 0.96), rgba(28, 68, 104, 0.72) 60%, rgba(8, 16, 26, 0.98));
   background-color: #0c1c2c;
+}
+
+.mall-tile.theme-voteballots,
+.mall-tile.theme-cat-civic {
+  background: linear-gradient(145deg, rgba(16, 28, 56, 0.96), rgba(38, 66, 128, 0.72) 60%, rgba(8, 14, 30, 0.98));
+  background-color: #101c38;
+}
+
+.mall-tile.theme-trade,
+.mall-tile.theme-cat-trading {
+  background: linear-gradient(145deg, rgba(12, 42, 36, 0.96), rgba(22, 92, 78, 0.72) 60%, rgba(6, 20, 18, 0.98));
+  background-color: #0c2a24;
+}
+
+.mall-tile.theme-kids_episodes {
+  background: linear-gradient(145deg, rgba(46, 22, 54, 0.96), rgba(102, 48, 118, 0.72) 60%, rgba(22, 10, 28, 0.98));
+  background-color: #2e1636;
+}
+
+.mall-tile.theme-cat-games {
+  background: linear-gradient(145deg, rgba(52, 16, 24, 0.96), rgba(112, 32, 48, 0.72) 60%, rgba(24, 8, 12, 0.98));
+  background-color: #341018;
+}
+
+.mall-tile.theme-cat-community {
+  background: linear-gradient(145deg, rgba(40, 28, 10, 0.96), rgba(100, 70, 22, 0.72) 60%, rgba(20, 14, 6, 0.98));
+  background-color: #281c0a;
+}
+
+.mall-tile.theme-cat-science,
+.mall-tile.theme-science_swarm {
+  background: linear-gradient(145deg, rgba(14, 34, 52, 0.96), rgba(32, 78, 114, 0.72) 60%, rgba(8, 18, 28, 0.98));
+  background-color: #0e2234;
+}
+
+.mall-tile.theme-cat-marketplace {
+  background: linear-gradient(145deg, rgba(22, 40, 28, 0.96), rgba(44, 86, 58, 0.72) 60%, rgba(10, 20, 14, 0.98));
+  background-color: #16281c;
 }
 
 .mall-tile.theme-default {
@@ -1685,3 +1724,28 @@
 @media (prefers-reduced-motion: reduce) {
   .mall-tile-field-wrapper, .mall-category-track { scroll-behavior: auto; }
 }
+
+/* Existing OSP content shares the accessible card backface. */
+.mall-tile-osp-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
+}
+
+.mall-tile-osp-row p {
+  margin: 0;
+  font-size: 0.66rem;
+  line-height: 1.28;
+  color: rgba(236, 234, 245, 0.88);
+}
+
+.mall-tile-osp-kicker {
+  font-size: 0.56rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.mall-tile-osp-kicker.osp-outcome { color: #00e5d0; }
+.mall-tile-osp-kicker.osp-solution { color: #a78bfa; }
+.mall-tile-osp-kicker.osp-pain { color: #ff8c5a; }

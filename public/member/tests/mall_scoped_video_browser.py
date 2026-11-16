@@ -864,6 +864,32 @@ def verify_member_phone(page, context, supports_cdp):
     assert page.evaluate("fixtureSpeech.starts === 4 && fixtureSpeech.stops === 3")
     expect(anchor.get_by_role("button", name="Open Red Dog")).to_be_visible()
 
+    # Phone patch-load (mounts only visible screenful patches out of 594 clips) & touch press-hold OSP flip
+    page.evaluate("mallTileField.searchCatalog(''); mallTileField.expandFoundUp(0)")
+    patched_count = field.locator(".mall-tile").count()
+    assert 9 <= patched_count < len(clips), f"Expected phone patch-load < {len(clips)}, got {patched_count}"
+    expect(field.get_by_role("button", name="Load more videos")).to_be_attached()
+    page.evaluate("mallTileField.collapseFoundUp()")
+    first_tile = field.locator('.mall-tile[data-foundup-id="move2japan"]')
+    first_tile.scroll_into_view_if_needed()
+    first_tile.evaluate("""el => {
+      const ev = new Event('touchstart', { bubbles: true, cancelable: true });
+      Object.defineProperty(ev, 'touches', { value: [{ clientX: 60, clientY: 60 }] });
+      el.dispatchEvent(ev);
+    }""")
+    page.wait_for_timeout(520)
+    first_tile.evaluate("""el => {
+      const ev = new Event('touchend', { bubbles: true, cancelable: true });
+      Object.defineProperty(ev, 'touches', { value: [] });
+      el.dispatchEvent(ev);
+    }""")
+    expect(first_tile).to_have_class(re.compile(r"\bis-card-flipped\b"))
+    expect(first_tile.locator(".mall-card-back")).to_have_count(1)
+    for label in ("Outcome", "Solution", "Pain"):
+        expect(first_tile.locator(".mall-tile-osp-kicker",has_text=label)).to_have_count(1)
+    first_tile.locator(".mall-card-flip-back").tap()
+    expect(first_tile).not_to_have_class(re.compile(r"\bis-card-flipped\b"))
+
     print(json.dumps({"member_phone_inline_and_immersive": True,
                       "horizontal_touch_scroll": supports_cdp,
                       "foreground_dictation_hold_and_stop": True,
@@ -921,9 +947,32 @@ def verify_member_entry(browser_type):
     page.goto("https://play.foundups.com/", wait_until="domcontentloaded")
     page.wait_for_url("https://play.foundups.com/member/")
     expect(page.get_by_role("textbox", name="Search the Mall")).to_be_visible()
-    expect(page.locator("#mallTileField .mall-tile")).to_have_count(len(ordinary_catalog))
+    # Native viewport observation may append a screenful. Entry tests do not
+    # require every catalog record to be mounted before the first interaction.
+    expect(page.locator("#mallTileField .mall-tile").first).to_be_visible()
+    initial_count=page.locator("#mallTileField .mall-tile").count()
+    assert 6<=initial_count<=len(ordinary_catalog),initial_count
     assert not any("clerk" in path or "firebase" in path for path in requested), requested
     expect(page.locator("#mallUserHandle")).to_have_text("Member Portal ↗")
+    expect(page.locator(".mall-brand-minimal img")).to_have_attribute("src", "/logo-foundups.svg")
+    expect(page.locator("a.mall-brand-ln")).to_have_attribute("href", "https://www.linkedin.com/company/foundups/")
+    expect(page.locator('#mallTileField .mall-tile[data-foundup-id^="linkedin_"]')).to_have_count(0)
+    page.evaluate("indices=>indices.forEach(i=>window.mallTileField.getTileElement(i))",
+        [next(i for i,x in enumerate(ordinary_catalog) if x['foundup_id']==fid)
+         for fid in ('voteballots','trade','magadoom_001','kids_episodes')])
+    for identifier in ('voteballots','trade','magadoom_001','kids_episodes'):
+        expect(page.locator('#mallTileField .mall-tile[data-foundup-id="'+identifier+'"]')).to_have_count(1)
+
+    # Desktop mouse hover-and-hold flips tile to reveal Outcome, Solution, Pain
+    gotjunk_tile = page.locator('#mallTileField .mall-tile[data-foundup-id="gotjunk_001"]')
+    gotjunk_tile.dispatch_event("pointerenter", {"pointerType": "mouse"})
+    page.wait_for_timeout(720)
+    expect(gotjunk_tile).to_have_class(re.compile(r"\bis-card-flipped\b"))
+    expect(gotjunk_tile.locator(".mall-card-back")).to_have_count(1)
+    for label in ("Outcome", "Solution", "Pain"):
+        expect(gotjunk_tile.locator(".mall-tile-osp-kicker",has_text=label)).to_have_count(1)
+    gotjunk_tile.dispatch_event("pointerleave", {"pointerType": "mouse"})
+    expect(gotjunk_tile).not_to_have_class(re.compile(r"\bis-card-flipped\b"))
 
     # Non-video FoundUp quick-view on play.foundups.com routes Enter FoundUp through foundups.com Member Portal
     page.locator('#mallTileField .mall-tile[data-foundup-id="gotjunk_001"]').click()
@@ -1706,12 +1755,14 @@ def verify_public_discovery_cards(browser_type):
     records=json.loads((public/'member/mall-video-catalog.json').read_text(encoding='utf-8'))
     by_id={item['foundup_id']:item for item in records}
     approved={'voteballots','trade','magadoom_001'}
-    assert len(records)==20 and approved<=by_id.keys()
+    assert len(records)==17 and approved<=by_id.keys()
+    assert by_id['kids_episodes']['canonical_foundup_id']=='kids_episodes'
+    assert not any(identifier.startswith('linkedin_') for identifier in by_id)
     for identifier in approved:
         item=by_id[identifier]
         assert item['canonical_foundup_id']==identifier
         assert item['lifecycle_stage']=='incubating' and item['launch_readiness']=='discoverable_only'
-        assert item['videos']==[] and item['video_count']==0 and item['entry_url']==''
+        assert item['videos']==[] and item['video_count']==0 and not item.get('entry_url')
     house=by_id['foundups_house_project']
     plan='https://github.com/FOUNDUPS/Foundups-Agent/blob/72a3182c70974f0523be91d5ce4bd32808d824bc/modules/foundups/docs/PFMALL_OPPORTUNITY_INSTANCE_MODEL.md'
     assert house['canonical_foundup_id'] is None and house['discovery_kind']=='candidate'
@@ -1741,9 +1792,9 @@ def verify_public_discovery_cards(browser_type):
         field=page.locator('#mallTileField')
         expect(field.locator('.mall-tile')).to_have_count(6)
         for _ in range(3): page.get_by_role('button',name='Load more cards',exact=True).click()
-        expect(field.locator('.mall-tile')).to_have_count(20)
-        expect(field.locator('[data-catalog-kind="foundup"]')).to_have_count(13)
-        expect(field.locator('[data-catalog-kind="source"]')).to_have_count(6)
+        expect(field.locator('.mall-tile')).to_have_count(17)
+        expect(field.locator('[data-catalog-kind="foundup"]')).to_have_count(14)
+        expect(field.locator('[data-catalog-kind="source"]')).to_have_count(2)
         expect(field.locator('[data-catalog-kind="candidate"]')).to_have_count(1)
         expect(field.locator('[data-catalog-kind="source"] .mall-card-enter')).to_have_count(0)
         assert page.evaluate('window.fixturePlayback.created===0&&window.fixturePlayback.plays===0')
@@ -1896,7 +1947,7 @@ def verify_public_discovery_cards(browser_type):
         context.close()
         browser.close()
     print(json.dumps({'engine':browser_type.name,'discovery_cards':observed,
-        'catalog_records':20,'canonical_foundups':13,'sources':6,'project_candidates':1,
+        'catalog_records':17,'canonical_foundups':14,'sources':2,'project_candidates':1,
         'destinations':destinations,'live_destinations_verified':False,'physical_iPhone':'UNEXECUTED'},sort_keys=True))
 
 
@@ -1908,11 +1959,11 @@ def verify_public_entity_slice(browser_type):
     """
     real = json.loads((public / "member/mall-video-catalog.json").read_text(encoding="utf-8"))
     expected_ids = {item["foundup_id"] for item in real}
-    assert len(real) == len(expected_ids) == 20
+    assert len(real) == len(expected_ids) == 17
     expected_kinds={item['foundup_id']:('foundup' if item.get('canonical_foundup_id') else
         'candidate' if item.get('discovery_kind')=='candidate' else 'source') for item in real}
-    assert list(expected_kinds.values()).count('foundup')==13
-    assert list(expected_kinds.values()).count('source')==6
+    assert list(expected_kinds.values()).count('foundup')==14
+    assert list(expected_kinds.values()).count('source')==2
     assert list(expected_kinds.values()).count('candidate')==1
     requested_images = []
 
@@ -1953,7 +2004,7 @@ def verify_public_entity_slice(browser_type):
                         field.evaluate("el=>{el.parentElement.scrollTop=el.parentElement.scrollHeight}")
                         page.wait_for_function("n=>document.querySelectorAll('#mallTileField .mall-tile').length>n",arg=count)
                 actual = field.locator(".mall-tile").evaluate_all("els=>els.map(x=>({id:x.dataset.foundupId,type:x.dataset.tileType,name:x.querySelector('.mall-tile-name').textContent.trim()}))")
-                assert len(actual) == len({x["id"] for x in actual}) == 20
+                assert len(actual) == len({x["id"] for x in actual}) == 17
                 assert {x["id"] for x in actual} == expected_ids
                 assert all(x["type"] == expected_kinds[x['id']] for x in actual)
                 names = {x["foundup_id"]:x.get("name",x.get("title","")) for x in real}
@@ -2031,7 +2082,7 @@ def verify_public_entity_slice(browser_type):
                 context.close()
     finally:
         browser.close()
-    print(json.dumps({"engine":browser_type.name,"catalog_records":20,"canonical_foundups":13,"source_cards":6,"project_candidates":1,"synthetic_capacity_fixture":144,"native_io_and_manual_fallback":True,"far_state_and_both_collapse_branches":True,"single_click_and_append_continuity":True,"canonical_member_portal_url":True,"physical_iPhone":"UNEXECUTED"},sort_keys=True))
+    print(json.dumps({"engine":browser_type.name,"catalog_records":17,"canonical_foundups":14,"source_cards":2,"project_candidates":1,"synthetic_capacity_fixture":144,"native_io_and_manual_fallback":True,"far_state_and_both_collapse_branches":True,"single_click_and_append_continuity":True,"canonical_member_portal_url":True,"physical_iPhone":"UNEXECUTED"},sort_keys=True))
 
 
 if __name__ == "__main__":
