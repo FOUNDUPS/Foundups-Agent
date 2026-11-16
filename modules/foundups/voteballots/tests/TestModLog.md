@@ -2,6 +2,33 @@
 
 <!-- WSP 22: anti-vibecoding test inventory. NEWEST entries at TOP. -->
 
+## [2026-11-16] — Whole HPC banner return and distinct Play Mall link
+
+- Extended existing `test_public_sw.mjs`: both pages retain one native whole-banner
+  HPC anchor and separate Mall anchor without nested controls; portrait motion
+  starts only while visible; v10 caches the four exact same-origin assets and
+  excludes both external destinations. Existing contact and coalition suites
+  remain unchanged. Combined Node result: **129 passed, 0 failed**.
+- Independent headless Chromium/WebKit fixture: **132 checks passed, 0 failed**
+  in 16.137 seconds. Both pages exercised actual text/image/padding navigation
+  to controlled destination routes, keyboard Enter, Mall navigation and history
+  return; 320/390/844/1366px layouts, local images, comfortable targets, existing
+  navigation/contact controls, JavaScript-disabled links and reduced motion.
+  Hidden-page motion stopping used an explicitly synthetic visibility event.
+- Browser fixture preserved the candidate CSP and blocked unrelated network.
+  Controlled HPC/Mall destination pages verify requested navigation URLs, not
+  real destination rendering, DNS/TLS, deployment, installed PWA or physical iPhone.
+  Native full Tab traversal remains unqualified; focused-link Enter was tested.
+- First browser harness iteration reported 82 passes/4 failures: two baseline
+  duplicate-CTA count assumptions and WebKit Tab-link focus policy assumptions.
+  Exact prior-page preservation was independently verified; the harness corrected
+  those assumptions without relaxing banner, destination, touch/layout or CSP gates.
+  An initial Node fixture omitted the unchanged Oversight worker; restoring that
+  source dependency yielded the complete 129-pass run.
+- Independent source review found no blocker and verified both page originals
+  unchanged outside new navigation/imports; service worker changed only v9 -> v10
+  plus four exact local assets. No native owner worktree edits or production deploy.
+
 ## [2026-11-13] — Vote cover editorial and phone layout
 
 Extend the worker fixture to cover v8 retirement. Exercise the six panels,

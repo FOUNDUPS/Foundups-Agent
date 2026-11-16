@@ -17,6 +17,28 @@ FoundUps server members. Offline shell caching remains same-origin. The issue
 briefs show dated sources, including the archived CPI release for the grocery
 and gasoline price check.
 
+## HPC and Mall return links
+
+The existing cover and Contact Congress page share one top HPC banner link to
+`https://hpc.foundups.com`. Its text, padding and existing satirical portrait
+are one native anchor. The separate existing Red Dog icon links to
+`https://play.foundups.com`; neither link depends on JavaScript or visitor login.
+Independent/non-affiliation disclosures and the existing page contents remain.
+
+`hpc-navigation.css` supplies the comfortable touch targets and reduced-motion
+fallback. `hpc-navigation.js` enables the subtle portrait wiggle only while the
+document is visible, without timers, tracking or account/session state.
+Deploy these two files and the exact canonical image copies
+`icons/hpc-portrait.png` (from `public/member/hpc-icon-192.png`) and
+`icons/red-dog.png` (from `public/logo-dog.png`) with the existing pages.
+The v10 worker adds only these four same-origin assets to its exact shell
+allowlist and retires the prior cache. It never caches the external destinations.
+
+The existing portrait has no crown of thorns or halo. That requested adaptation
+remains separate until the supplied image references can be materialized and
+inspected. Functional navigation reuses the existing asset without weakening CSP.
+Source/fixture navigation tests are not a production deployment or phone receipt.
+
 ## Source and deployment
 
 The public evidence and contact slices add two static pages plus their local
@@ -73,7 +95,7 @@ All assets are local, the content policy is self-only, and the install control
 appears only when the browser offers installation. The service worker registers
 relative to this directory and caches only exact, same-origin public shell
 paths. It does not cache API requests, external links, query variants or writes.
-The v8 worker precaches the cover, local comic assets, and the canonical
+The v10 worker precaches the cover, local comic assets, and the canonical
 `/guide`, `/coalition`, `/evidence` and `/contact` routes. Legacy HTML
 navigation has a canonical offline fallback. The cover transfers previous
 root fragments to the original section on `/guide`. The manifest keeps its
