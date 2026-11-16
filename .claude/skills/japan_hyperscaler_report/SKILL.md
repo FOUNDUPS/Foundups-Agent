@@ -1,3 +1,7 @@
+---
+name: japan-hyperscaler-report
+description: Audit, research, develop and archive Japan Hyperscaler Report issues through the existing Red Dog JHR lane, with website-first Japanese LinkedIn distribution, separately approved English Substack editions and Reddit research.
+---
 # Japan Hyperscaler Report Skill
 
 ## Identity
@@ -13,6 +17,46 @@ For public series names, website report links and movement calls to action, read
 ## Objective
 
 Research Japan's hyperscale data-center expansion and publish only when a verified development materially changes the picture for Japan, Chiba/Inzai, Fukui, or the distributed COG DC thesis.
+
+## Red Dog orchestration and durable archive
+
+Use the existing JHR owner; do not create another newsletter operator or issue
+database. Read [the archive and workflow](../../../modules/foundups/esingularity/jhr/README.md)
+and its `manifest.json` before assigning issue numbers or selecting a manuscript.
+Treat the manifest as a dated evidence index, not live platform state or runtime
+authority. A publication audit does not authorize posting or manuscript rewriting.
+
+Resolve the requested mode: **audit**, **research/develop**, **revise**, **archive**,
+or an explicitly authorized **publish/schedule** operation. Reuse the stable master
+and issue Doc from authorized private continuity; read the whole relevant issue
+and current master before editing. Preserve accepted text, citations, native
+structure and revision history. Keep unapproved drafts separate from historical
+published issues; a draft's presence does not prove delivery.
+
+Carry a bounded work packet: issue identity, mode, owner, source/revision,
+evidence cutoff and coverage, exact approval scope, destinations/languages,
+acceptance checks and next actor. Return observed artifacts, platform receipts,
+verification time, unresolved gaps and the next action. Use WSP 00/97; use WSP 99
+for machine handoffs and WSP 110 draft guidance for the repository lifecycle.
+
+Channel roles:
+
+- **Website:** canonical public issue; verify the actual issue content and anchor.
+- **LinkedIn:** Japanese distribution through `linkedin_jhr_newsletter`, after
+  verified website publication. Preserve existing bilingual historical editions.
+- **Substack:** English edition, separately prepared from the approved issue.
+  Verify the actual account/publication, current draft/archive/schedule and exact
+  approved translation. Setup is not publication authority or proof of readiness.
+- **Reddit:** research and discussion channel. Read original threads and community
+  rules; treat claims as leads and verify underlying sources. Do not automatically
+  cross-post, comment, message, or turn private community content into an article.
+
+Keep the explicit **website -> LinkedIn** sequence unless 012 changes it. Substack
+setup or research must not silently replace the canonical source or reorder this
+audit. Every outward action needs its exact manuscript/destination approval and
+platform verification; a skill invocation or approved architecture is insufficient.
+Reconcile uncertain submissions before retrying. This skill update installs no
+dispatcher, subscription service, credentials, scheduled task or posting daemon.
 
 ## Research order
 

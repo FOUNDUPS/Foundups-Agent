@@ -1,0 +1,425 @@
+{
+  "schema_version": "jhr_archive.v1",
+  "series": "Japan Hyperscaler Report",
+  "archive_owner": "modules/foundups/esingularity/jhr",
+  "audit_base_sha": "72a3182c70974f0523be91d5ce4bd32808d824bc",
+  "verified_at": "2026-11-16T12:55:58Z",
+  "observation_window": "2026-11-16T12:44Z/2026-11-16T12:55:58Z",
+  "publication_order": [
+    "website",
+    "linkedin"
+  ],
+  "scope": "Historical/publication archive and instruction-only skill setup. No publishing, scheduling or deployment.",
+  "source_doc_policy": "Issue-specific source pointers are included under the explicit archive-manifest request. No master-log text, private approvals or correspondence is reproduced.",
+  "status_contract": {
+    "VERIFIED_LIVE": "Exact issue read from the public platform during the observation window. Not proof of unchanged revision or initial publication time.",
+    "UNVERIFIED": "Evidence insufficient for full delivery state; inspect public_observation and coverage limits.",
+    "NOT_FOUND_IN_CHECKED_SCOPE": "Absent only from the inspected page/list/search. Never a global nonpublication claim."
+  },
+  "issues": [
+    {
+      "issue_number": "001",
+      "issue_key": "JHR-001",
+      "title": "日本は「次の印西」を全国につくろうとしているのか",
+      "language": [
+        "ja",
+        "en"
+      ],
+      "source_doc": null,
+      "source_doc_status": "NOT_FOUND_IN_CHECKED_SCOPE",
+      "repository_path": "modules/foundups/esingularity/jhr/reports/JHR_001_2026-09_JAPAN_HYPERSCALER_REPORT.md",
+      "repository_content_role": "EXISTING_REPORT",
+      "canonical_url": "https://esingularity.ai/reports/jhr#jhr-001",
+      "canonical_url_status": "VERIFIED_LIVE",
+      "linkedin_url": "https://www.linkedin.com/pulse/hyperscalers-have-arrived-japan-foundups-hb8tc",
+      "publication_status": {
+        "website": "VERIFIED_LIVE",
+        "linkedin": "VERIFIED_LIVE"
+      },
+      "verified_at": "2026-11-16T12:55:58Z",
+      "verified_at_precision": "second",
+      "evidence": [
+        "website-20261116",
+        "linkedin-20261116",
+        "mail-20261116",
+        "website-direct-20261116",
+        "mail-supplementary-20261116"
+      ],
+      "website": {
+        "status": "VERIFIED_LIVE",
+        "public_observation": "PRESENT",
+        "published_date": "2026-09-10",
+        "published_date_precision": "date",
+        "observed_revision_date": "2026-09-12",
+        "revision_status": "ADDENDUM_DATE_VISIBLE",
+        "first_publication_at": null,
+        "content_equivalence_to_repository": "UNVERIFIED",
+        "verified_at": "2026-11-16T12:55:58Z"
+      },
+      "linkedin": {
+        "status": "VERIFIED_LIVE",
+        "public_observation": "PRESENT",
+        "series_url": "https://www.linkedin.com/newsletters/7505133867079536640/",
+        "publisher": "FOUNDUPS®",
+        "title": "Hyperscalers Have Arrived in Japan",
+        "language": [
+          "ja",
+          "en"
+        ],
+        "published_at": "2026-09-14T06:05:33Z",
+        "modified_at": null,
+        "revision_status": "UNVERIFIED",
+        "draft_status": "UNVERIFIED",
+        "scheduled_status": "UNVERIFIED",
+        "verified_at": "2026-11-16T12:49Z",
+        "verified_at_precision": "minute"
+      },
+      "repository_snapshot": {
+        "commit": "72a3182c70974f0523be91d5ce4bd32808d824bc",
+        "blob_sha": "2e227be53af3cf06cab96a6339db2187af4ecd3d",
+        "git_content_sha256": "da6e9a2b7672952e4823e852467f2a8e338bc35df140c7772f60a607d09c78b6",
+        "url": "https://github.com/FOUNDUPS/Foundups-Agent/blob/72a3182c70974f0523be91d5ce4bd32808d824bc/modules/foundups/esingularity/jhr/reports/JHR_001_2026-09_JAPAN_HYPERSCALER_REPORT.md"
+      }
+    },
+    {
+      "issue_number": "002",
+      "issue_key": "JHR-002",
+      "title": "なぜ福井に「AI交番」が必要なのか",
+      "language": [
+        "ja",
+        "en"
+      ],
+      "source_doc": null,
+      "source_doc_status": "NOT_FOUND_IN_CHECKED_SCOPE",
+      "repository_path": "modules/foundups/esingularity/frontend/app/reports/jhr/layout.tsx",
+      "repository_content_role": "RENDERED_SOURCE_SINGLE_OWNER",
+      "canonical_url": "https://esingularity.ai/reports/jhr#jhr-002",
+      "canonical_url_status": "VERIFIED_LIVE",
+      "linkedin_url": "https://www.linkedin.com/pulse/ai%E4%B8%BB%E6%A8%A9%E3%82%92%E5%9C%B0%E5%9F%9F%E3%81%B8-why-fukui-needs-ai-k%C5%8Dban-foundups-kwkjc",
+      "publication_status": {
+        "website": "VERIFIED_LIVE",
+        "linkedin": "VERIFIED_LIVE"
+      },
+      "verified_at": "2026-11-16T12:55:58Z",
+      "verified_at_precision": "second",
+      "evidence": [
+        "website-20261116",
+        "linkedin-20261116",
+        "mail-20261116",
+        "website-direct-20261116",
+        "mail-supplementary-20261116"
+      ],
+      "website": {
+        "status": "VERIFIED_LIVE",
+        "public_observation": "PRESENT",
+        "published_date": "2026-09-14",
+        "published_date_precision": "date",
+        "observed_revision_date": null,
+        "revision_status": "UNVERIFIED",
+        "first_publication_at": null,
+        "content_equivalence_to_repository": "UNVERIFIED",
+        "verified_at": "2026-11-16T12:55:58Z"
+      },
+      "linkedin": {
+        "status": "VERIFIED_LIVE",
+        "public_observation": "PRESENT",
+        "series_url": "https://www.linkedin.com/newsletters/7505133867079536640/",
+        "publisher": "FOUNDUPS®",
+        "title": "AI主権を、地域へ — Why Fukui Needs an AI Kōban",
+        "language": [
+          "ja",
+          "en"
+        ],
+        "published_at": "2026-09-16T00:02:24Z",
+        "modified_at": null,
+        "revision_status": "UNVERIFIED",
+        "draft_status": "UNVERIFIED",
+        "scheduled_status": "UNVERIFIED",
+        "verified_at": "2026-11-16T12:49Z",
+        "verified_at_precision": "minute"
+      },
+      "repository_snapshot": {
+        "commit": "72a3182c70974f0523be91d5ce4bd32808d824bc",
+        "blob_sha": "b32b22162deed6f08b227e120d943bb8e8418663",
+        "git_content_sha256": "5c175ca1a978a3d49527b290235c155113a08b62c95914cfe1eea4a10919b590",
+        "url": "https://github.com/FOUNDUPS/Foundups-Agent/blob/72a3182c70974f0523be91d5ce4bd32808d824bc/modules/foundups/esingularity/frontend/app/reports/jhr/layout.tsx"
+      }
+    },
+    {
+      "issue_number": "003",
+      "issue_key": "JHR-003",
+      "title": "誰が日本の「AI田んぼ」を持つのか｜ハイパースケーラー・チャンピオン・AI交番",
+      "language": [
+        "ja"
+      ],
+      "source_doc": "https://docs.google.com/document/d/1657oj_dSzBwl1VuRx67oLLyc76gxHXTwIgJM5KLQ2PA/edit",
+      "source_doc_status": "EXISTING_AUTHORITATIVE_WORKING_MANUSCRIPT",
+      "repository_path": "modules/foundups/esingularity/jhr/reports/JHR_003_2026-09_AI_RICE_FIELDS_AI_KOBAN.md",
+      "repository_content_role": "EXISTING_REPORT",
+      "canonical_url": "https://esingularity.ai/reports/jhr#jhr-003",
+      "canonical_url_status": "HISTORICAL_EXPECTED_ANCHOR_NOT_FOUND_NOW",
+      "linkedin_url": "https://jp.linkedin.com/pulse/%E8%AA%B0%E3%81%8C%E6%97%A5%E6%9C%AC%E3%81%AEai%E7%94%B0%E3%82%93%E3%81%BC%E3%82%92%E6%8C%81%E3%81%A4%E3%81%AE%E3%81%8B%E3%83%8F%E3%82%A4%E3%83%91%E3%83%BC%E3%82%B9%E3%82%B1%E3%83%BC%E3%83%A9%E3%83%BC%E3%83%81%E3%83%A3%E3%83%B3%E3%83%94%E3%82%AA%E3%83%B3ai%E4%BA%A4%E7%95%AA-foundups-grs1c",
+      "publication_status": {
+        "website": "UNVERIFIED",
+        "linkedin": "VERIFIED_LIVE"
+      },
+      "verified_at": "2026-11-16T12:55:58Z",
+      "verified_at_precision": "second",
+      "evidence": [
+        "website-20261116",
+        "linkedin-20261116",
+        "mail-20261116",
+        "manuscript-003-20261116",
+        "website-direct-20261116",
+        "mail-supplementary-20261116"
+      ],
+      "website": {
+        "status": "UNVERIFIED",
+        "public_observation": "NOT_FOUND_IN_CHECKED_SCOPE",
+        "published_date": null,
+        "published_date_precision": null,
+        "observed_revision_date": null,
+        "revision_status": "UNVERIFIED",
+        "first_publication_at": null,
+        "content_equivalence_to_repository": "UNVERIFIED",
+        "verified_at": "2026-11-16T12:55:58Z"
+      },
+      "linkedin": {
+        "status": "VERIFIED_LIVE",
+        "public_observation": "PRESENT",
+        "series_url": "https://www.linkedin.com/newsletters/7505133867079536640/",
+        "publisher": "FOUNDUPS®",
+        "title": "誰が日本の「AI田んぼ」を持つのか｜ハイパースケーラー・チャンピオン・AI交番",
+        "language": [
+          "ja",
+          "en"
+        ],
+        "published_at": "2026-09-29T03:20:52Z",
+        "modified_at": null,
+        "revision_status": "UNVERIFIED",
+        "draft_status": "UNVERIFIED",
+        "scheduled_status": "UNVERIFIED",
+        "verified_at": "2026-11-16T12:49Z",
+        "verified_at_precision": "minute"
+      },
+      "repository_snapshot": {
+        "commit": "72a3182c70974f0523be91d5ce4bd32808d824bc",
+        "blob_sha": "9bf5905581663d33c8b631d32799627387b6ece9",
+        "git_content_sha256": "2588d20203a71eab4888b4c429a7858bc2ecb4e719278f088d506521bf183942",
+        "url": "https://github.com/FOUNDUPS/Foundups-Agent/blob/72a3182c70974f0523be91d5ce4bd32808d824bc/modules/foundups/esingularity/jhr/reports/JHR_003_2026-09_AI_RICE_FIELDS_AI_KOBAN.md"
+      },
+      "conflict": "Historical master records website live as reported by 012; current served archive omits #003 although repository includes it and LinkedIn article is live. Cause and exact historical website publication time remain UNVERIFIED."
+    },
+    {
+      "issue_number": "004",
+      "issue_key": "JHR-004",
+      "title": "計算資源で温泉を守り、地域を再生し、日本を変えられるか",
+      "language": [
+        "ja"
+      ],
+      "source_doc": "https://docs.google.com/document/d/1GRSggv2-YAx2KqROciyVw5g3gueAThwMxSMUx1po8iw/edit",
+      "source_doc_status": "EXISTING_AUTHORITATIVE_WORKING_MANUSCRIPT",
+      "repository_path": "modules/foundups/esingularity/jhr/drafts/JHR_004.md",
+      "repository_content_role": "DRAFT_POINTER_ONLY",
+      "canonical_url": null,
+      "canonical_url_status": "UNASSIGNED",
+      "linkedin_url": null,
+      "publication_status": {
+        "website": "UNVERIFIED",
+        "linkedin": "UNVERIFIED"
+      },
+      "verified_at": "2026-11-16T12:55:58Z",
+      "verified_at_precision": "second",
+      "evidence": [
+        "website-20261116",
+        "linkedin-20261116",
+        "mail-20261116",
+        "manuscript-004-20261116",
+        "website-direct-20261116",
+        "mail-supplementary-20261116"
+      ],
+      "website": {
+        "status": "UNVERIFIED",
+        "public_observation": "NOT_FOUND_IN_CHECKED_SCOPE",
+        "published_date": null,
+        "published_date_precision": null,
+        "observed_revision_date": null,
+        "revision_status": "UNVERIFIED",
+        "first_publication_at": null,
+        "content_equivalence_to_repository": "UNVERIFIED",
+        "verified_at": "2026-11-16T12:55:58Z"
+      },
+      "linkedin": {
+        "status": "UNVERIFIED",
+        "public_observation": "NOT_FOUND_IN_CHECKED_SCOPE",
+        "series_url": "https://www.linkedin.com/newsletters/7505133867079536640/",
+        "publisher": "FOUNDUPS®",
+        "title": null,
+        "language": null,
+        "published_at": null,
+        "modified_at": null,
+        "revision_status": "UNVERIFIED",
+        "draft_status": "UNVERIFIED",
+        "scheduled_status": "UNVERIFIED",
+        "verified_at": "2026-11-16T12:49Z",
+        "verified_at_precision": "minute"
+      },
+      "editorial_status": "DRAFTED_V2",
+      "approval_status": "UNAPPROVED",
+      "source_revision_label": "2026-11-15 v2",
+      "previous_title": "日本の次の計算需要｜農業・教育・仕事を支えるAI交番の経済学",
+      "source_modified_at": "2026-11-15T20:42:03.675Z"
+    }
+  ],
+  "historical_proposals": [
+    {
+      "identity": "legacy-proposal-2026-09-17",
+      "status": "PRESERVED_REFERENCE_NOT_CANONICAL_ISSUE",
+      "pr": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1774",
+      "head_sha": "c914bc6640d3322003ce89258b353f8950b66e0c",
+      "source_url": "https://github.com/FOUNDUPS/Foundups-Agent/blob/c914bc6640d3322003ce89258b353f8950b66e0c/modules/foundups/esingularity/frontend/app/reports/jhr/Jhr003.tsx",
+      "note": "Distinct AI-sovereignty proposal used #003 before the current rice-field issue. Preserve by immutable source reference; do not merge as duplicate #003, renumber, or infer approval/publication."
+    },
+    {
+      "identity": "historical-jhr002-source-stack",
+      "status": "PRESERVED_REFERENCE",
+      "pr": "https://github.com/FOUNDUPS/Foundups-Agent/pull/1729",
+      "head_sha": "724f465bd35ac1be5e9a91f41d0721da383c67d8",
+      "note": "Historical #002 stack also contains unrelated surface repairs. #002 remains owned by the current layout; no wholesale merge or PR closure in this slice."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "website-20261116",
+      "kind": "LIVE_PUBLIC_READ",
+      "url": "https://esingularity.ai/reports/jhr",
+      "observed_at": "2026-11-16T12:48Z",
+      "time_precision": "minute",
+      "method": "Independent verifier direct HTTP GET, full HTML (HTTP 200); public sitemap inspected.",
+      "result": {
+        "issue_anchors": [
+          "jhr-002",
+          "jhr-001"
+        ],
+        "missing_issue_anchors": [
+          "jhr-003",
+          "jhr-004"
+        ],
+        "metadata_issue": "001"
+      },
+      "limits": "Absence applies to the served archive, not all URLs or historical deployments. First-publication timestamps and current revision equality with repository are unverified."
+    },
+    {
+      "id": "linkedin-20261116",
+      "kind": "LIVE_PUBLIC_READ",
+      "url": "https://www.linkedin.com/newsletters/7505133867079536640/",
+      "observed_at": "2026-11-16T12:49Z",
+      "time_precision": "minute",
+      "method": "Independent verifier fresh public Tinyfish extraction (ttl=0) of series and all three linked individual articles.",
+      "result": {
+        "publisher": "FOUNDUPS®",
+        "series_id": "7505133867079536640",
+        "edition_count_in_checked_list": 3,
+        "article_issue_matches": [
+          "001",
+          "002",
+          "003"
+        ],
+        "004": "NOT_FOUND_IN_CHECKED_SCOPE"
+      },
+      "limits": "Individual article direct CLI requests returned 403; extraction succeeded via public rendered retrieval. Modification times, authenticated drafts and schedule were unavailable. Public absence does not prove global nonpublication."
+    },
+    {
+      "id": "mail-20261116",
+      "kind": "PRIVATE_RECEIPT_REVIEW_SUMMARY",
+      "observed_at": "2026-11-16T12:48:32Z",
+      "method": "Read-only Gmail searches across all folders and Sent; phrase/anchor result pages exhausted. No mailbox changes.",
+      "result": "Historical Sent correspondence explicitly cites the #002 title and canonical anchor. Inbound replies quote that reference. No #004 publication receipt recovered. GitHub CI notices were excluded as delivery proof.",
+      "limits": "Minimal aggregate only; message IDs, recipients, private bodies and correspondence remain in authorized private records. Absence is not nonpublication proof."
+    },
+    {
+      "id": "manuscript-004-20261116",
+      "kind": "NATIVE_SOURCE_READ",
+      "url": "https://docs.google.com/document/d/1GRSggv2-YAx2KqROciyVw5g3gueAThwMxSMUx1po8iw/edit",
+      "observed_at": "2026-11-16",
+      "time_precision": "date",
+      "source_modified_at": "2026-11-15T20:42:03.675Z",
+      "result": "Native body title is the compute/onsen v2. It explicitly says DRAFTED, unapproved and unpublished; v1 retained below a historical-version heading. Drive filename still uses the old title.",
+      "limits": "Editorial source state is not independently verified external delivery state. No approval or publication inferred."
+    },
+    {
+      "id": "manuscript-003-20261116",
+      "kind": "NATIVE_SOURCE_READ",
+      "url": "https://docs.google.com/document/d/1657oj_dSzBwl1VuRx67oLLyc76gxHXTwIgJM5KLQ2PA/edit",
+      "observed_at": "2026-11-16",
+      "time_precision": "date",
+      "result": "Entire existing Doc read. Body identifies approved Japanese web v8 on 2026-09-28; repository report contains separately dated 2026-09-30 corrections. Preserve both as their own revisions.",
+      "limits": "Source approval annotation does not certify live website state or equality of all platform revisions."
+    },
+    {
+      "id": "website-supplementary-20261116",
+      "kind": "PARENT_INDEPENDENT_LIVE_READ",
+      "url": "https://esingularity.ai/reports/jhr",
+      "observed_at": "2026-11-16T12:44:55Z",
+      "sha256": "1b15acbb2595be8909558ebec491091c7d383c6a277e3cad09aa708d3769b078",
+      "result": "Parent reports identical HTTP200 body for canonical and no-cache/cache-busted fetch; #002/#001 only. x-vinext-cache HIT; x-nextjs-cache HIT; s-maxage=31536000.",
+      "limits": "Supplementary parent receipt, raw file not available in this PC workspace. Possible cache/deployment discrepancy is an inference, not a demonstrated root cause."
+    },
+    {
+      "id": "website-direct-20261116",
+      "kind": "LIVE_PUBLIC_READ",
+      "url": "https://esingularity.ai/reports/jhr",
+      "observed_at": "2026-11-16T12:55:58Z",
+      "method": "Archive owner direct Python urllib no-cache HTTP GET, full HTML; homepage and sitemap also read. No browser state used.",
+      "http_status": 200,
+      "sha256": "70c184f44be394f917e73c72f8e2ed1cee0248b879338ccaf82864d6916390ac",
+      "headers": {
+        "Cache-Control": "no-store, must-revalidate",
+        "X-Vinext-Cache": "MISS",
+        "x-nextjs-cache": "MISS"
+      },
+      "issue_anchors": [
+        "jhr-002",
+        "jhr-001"
+      ],
+      "homepage": {
+        "url": "https://esingularity.ai/",
+        "http_status": 200,
+        "observed_at": "2026-11-16T12:55:56Z",
+        "sha256": "c21db8f5fdb50380d0fe0ea69a3c389e0fa45c0933de959ffe2f17bd9414964a",
+        "jhr_links": [
+          "/reports/jhr",
+          "/reports/jhr#jhr-002",
+          "/reports/jhr#latest",
+          "/reports/jhr#land-area"
+        ]
+      },
+      "sitemap": {
+        "url": "https://esingularity.ai/sitemap.xml",
+        "http_status": 200,
+        "observed_at": "2026-11-16T12:55:58Z",
+        "sha256": "34a588deee7768bcbe7f0897f760a68121b543186fb867c58223478e6c6209cc",
+        "locations": [
+          "https://esingularity.ai/",
+          "https://esingularity.ai/future",
+          "https://esingularity.ai/reports/jhr"
+        ]
+      },
+      "limits": "No #003/#004 in served archive or separate issue routes in sitemap. Not proof of global or historical nonpublication. Cache MISS in this read means stale cache alone is not established as the cause. Different response hashes do not identify a source revision."
+    },
+    {
+      "id": "mail-supplementary-20261116",
+      "kind": "PARENT_PRIVATE_RECEIPT_REVIEW_SUMMARY",
+      "observed_at": "2026-11-16",
+      "time_precision": "date",
+      "queries": [
+        "in:anywhere {\"Japan Hyperscaler\" \"JHR #004\" \"JHR 004\" \"AI主権を\" \"誰が日本の\"}",
+        "in:anywhere from:linkedin.com {hyperscaler \"AI主権\" \"AI Kōban\" \"計算資源\" \"AI田んぼ\"}",
+        "in:anywhere {\"JHR #004\" \"JHR 004\" \"日本の次の計算需要\" \"計算資源で温泉\"}"
+      ],
+      "method": "Supplementary parent read-only connected Gmail all-folder searches, including Sent and archived/trash. Exact queries supplied by parent; not attributed to the independent worker timestamp.",
+      "result": "21 general phrase matches, zero LinkedIn-origin matches and zero #004 old/v2-title matches in these three queries; no platform publication receipt identified.",
+      "limits": "No mail changes. Bounded negative searches do not establish nonpublication. No private correspondence reproduced."
+    }
+  ]
+}
