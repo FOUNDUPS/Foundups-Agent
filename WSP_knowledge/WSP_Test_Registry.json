@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1842,
+  "total_tests": 1846,
   "quarantined_tests": 260,
   "tests": [
     {
@@ -2371,6 +2371,19 @@
       "description": "Unit Tests for Confidence Tracker\n\nTests decay-based confidence algorithm with time-weighted scoring,\nfailure multiplier, and JSONL audit trail.\n\nWSP Compliance:\n- WSP 5 (Test Coverage): Comprehensive unit tests\n- WSP 6 (Test Audit): Documents test coverage"
     },
     {
+      "id": "test::modules::ai_intelligence::ai_gateway::tests::test_independent_repair_verifier",
+      "path": "modules/ai_intelligence/ai_gateway/tests/test_independent_repair_verifier.py",
+      "owner": "modules/ai_intelligence/ai_gateway",
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Tests for Independent Repair Verifier & Context Firewall.\n\nGoverned by WSP_00, WSP_50, WSP_80, WSP_97 (Issue #1522 / Slice 2)."
+    },
+    {
       "id": "test::modules::ai_intelligence::ai_gateway::tests::test_kimi_k3_request_truth",
       "path": "modules/ai_intelligence/ai_gateway/tests/test_kimi_k3_request_truth.py",
       "owner": "modules/ai_intelligence/ai_gateway",
@@ -2382,6 +2395,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Request-truth contract tests for the exact OpenRouter Kimi K3 route."
+    },
+    {
+      "id": "test::modules::ai_intelligence::ai_gateway::tests::test_model_audio_timing_benchmark",
+      "path": "modules/ai_intelligence/ai_gateway/tests/test_model_audio_timing_benchmark.py",
+      "owner": "modules/ai_intelligence/ai_gateway",
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Synthetic stdlib fixtures; no providers, audio, reference lyrics or files."
     },
     {
       "id": "test::modules::ai_intelligence::ai_gateway::tests::test_model_autoresearch_authenticated_promotion_authority",
@@ -2814,7 +2840,7 @@
       "path": "modules/ai_intelligence/ai_gateway/tests/test_model_panel_signed_evidence.py",
       "owner": "modules/ai_intelligence/ai_gateway",
       "suite_class": "unit",
-      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-01",
+      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -2827,7 +2853,7 @@
       "path": "modules/ai_intelligence/ai_gateway/tests/test_model_promotion_gate.py",
       "owner": "modules/ai_intelligence/ai_gateway",
       "suite_class": "unit",
-      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-01",
+      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -15922,7 +15948,9 @@
       "owner": "modules/foundups/pfmall",
       "suite_class": "unit",
       "shard_id": "modules-foundups-pfmall-unit",
-      "capabilities": [],
+      "capabilities": [
+        "process"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
@@ -19430,7 +19458,9 @@
       "owner": "modules/infrastructure/foundups_vision",
       "suite_class": "unit",
       "shard_id": "modules-infrastructure-foundups-vision-unit",
-      "capabilities": [],
+      "capabilities": [
+        "network"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
@@ -21185,6 +21215,19 @@
       "description": "Tests for REDDOG_VERIFIED_OUTCOME_RATCHET_PHASE1."
     },
     {
+      "id": "test::modules::infrastructure::wre_core::tests::test_repair_operation_contract",
+      "path": "modules/infrastructure/wre_core/tests/test_repair_operation_contract.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Tests for Scientific Autonomous Self-Healing Operation Contract.\n\nGoverned by WSP_00, WSP_50, WSP_97 (Issue #1522 / Slice 1)."
+    },
+    {
       "id": "test::modules::infrastructure::wre_core::tests::test_route_foundup_job_live_mode_gate",
       "path": "modules/infrastructure/wre_core/tests/test_route_foundup_job_live_mode_gate.py",
       "owner": "modules/infrastructure/wre_core",
@@ -21196,6 +21239,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for route_foundup_job() live-mode security-gate discriminator + raw-dict sanitization.\n\nSlice: FOUNDUP_JOB_ROUTER_ROUTE_GATE_LIVE_MODE_DISCRIMINATOR_PHASE1 (narrow completion of #753)\n\nProves at the ROUTING seam (route_foundup_job, NOT validate_foundup_job_envelope):\n  1. Object job with DEFAULT PolicyFlags (dry_run_mode=True) ROUTES safely.\n  2. Object job with dry_run_mode=True still ROUTES (dry-run object path is never gated).\n  3. Raw-dict policy_flags with FORGED security_gate_passed="
+    },
+    {
+      "id": "test::modules::infrastructure::wre_core::tests::test_scientific_repair_canary_e2e",
+      "path": "modules/infrastructure/wre_core/tests/test_scientific_repair_canary_e2e.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "integration",
+      "shard_id": "modules-infrastructure-wre-core-integration",
+      "capabilities": [],
+      "execution_type": "integration",
+      "collectable": true,
+      "timeout_s": 600,
+      "quarantine_reasons": [],
+      "description": "End-to-End Test Suite for Scientific Autonomous Self-Healing Canary (Slice 3).\n\nGoverned by WSP_00, WSP_15, WSP_50, WSP_80, WSP_97, WSP_109 (Issue #1522)."
     },
     {
       "id": "test::modules::infrastructure::wre_core::tests::test_security_analysis_assistant",
@@ -21618,7 +21674,7 @@
       "path": "modules/infrastructure/wre_core/tests/test_wre_test_scope_coverage.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-04",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,

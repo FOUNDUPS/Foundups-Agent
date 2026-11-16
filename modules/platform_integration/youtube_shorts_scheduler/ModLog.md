@@ -1,5 +1,28 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-11-16 - Live-aware audience timing correction
+
+Latest 012 correction: avoid releases during active livestreams, use named U.S.
+audience timezones with date-specific DST/Studio conversion, vary minute offsets,
+and yield shared Studio controls while 012 edits. Updated the existing remote
+runbook only; source-day selection, evidence holds and independent saved-state
+readback remain required. Future no-live guarantees require qualified runtime
+checks; this documentation does not deploy them. WSP 22/50/84/97. Validation:
+diff/contract checks and independent document review; no video effects.
+
+## 2026-11-16 - Conversational scheduling policy reconciliation
+
+Extended the existing skill routing contract and remote runbook, rather than
+adding a publisher or duplicate skill. Latest explicit cadence and overnight
+instructions override earlier batch directions without silently changing channel
+configuration. Added live inventory reconciliation, mixed-stream topic evidence,
+verified Studio Ask availability, alternating priority-topic slots, distinct
+evidence/approval holds and independent persisted readback. Private clip receipts
+remain outside source control. Documentation only; no video effects, runtime
+activation, native allocator changes or model training from this update.
+WSP 22/50/84/95/97. Validation is scoped to document diff and contract/link checks;
+no application test or deployment pass is claimed.
+
 ## 2026-11-10 — Native inventory diagnosis without scheduling effects
 
 The direct Unlisted route reached the existing collector but returned incomplete

@@ -1,5 +1,20 @@
 # p.fMALL Roadmap
 
+## Manifest & Catalog Truth Reconciliation (Build v19) — 2026-11-16
+
+- Repaired all four previously invalid `foundup_manifest.json` declarations (`detect_ai`, `eduit`, `shield`, `holoindex_prod_01`), added `"infrastructure"` to `VALID_CATEGORIES`, and hardened null-coalescing in `load_manifest()` so `PfmallShell().boot()` loads 12/12 workspace manifests with zero warnings.
+- Registered `eduit` in `foundup_registry.json`, unified `autopost` URLs, added `esingularity_001` to `mall-video-catalog.json`, reconciled `gotjunk_001` and `holoindex_prod_01`, normalized video durations/timestamps, and reconciled all 752 `pfmall` and 1531 `public/member` Python test cases plus 6 Node VM suites under `Build v19` (`pfmall-member-v19`).
+
+## Real HTTP serving qualification — 2026-10-26
+
+Allocate a minimal optional Uvicorn profile and three test-first actual-process
+loopback cases around the existing factory/verifier. No custom launcher. Preserve
+all814 ASGI/mapper cases; pin and inspect the separately resolved inventory before
+promotion. Resource flags and process cleanup do not prove OS limits or graceful
+shutdown. Next qualify a minimal Linux container with real import/static closure,
+then cloud policy/limits, actual member identity and browser wiring. The six existing
+Node functions and shared ignored source remain outside this serving change.
+
 ## Isolated proposal host bootstrap candidate — 2026-10-26
 
 The source candidate supplies a separate ASGI factory around the existing draft

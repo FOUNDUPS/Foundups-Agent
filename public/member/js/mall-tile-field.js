@@ -64,7 +64,8 @@
     'media': 'cat-media',
     'thought-leadership': 'cat-thought-leadership',
     'ai-education': 'cat-ai-education',
-    'ai-research': 'cat-ai-research'
+    'ai-research': 'cat-ai-research',
+    'infrastructure': 'cat-infrastructure'
   };
 
   // Video Mall runtime state
@@ -1784,10 +1785,20 @@
     var memberPlayer = usesMemberVideoPlayer();
     var hasVideos = item && (item.videos?.length || item.video_data || (!memberPlayer && item.video_count));
 
-    // Non-video tiles: open quick-view instead of trying inline preview
+    // Non-video tiles: enter dedicated member video projection (e.g. HPC) or open quick-view
     if (!hasVideos) {
       if (desktopInlineTile) window.mallVideoPlayer.close();
       var foundupId = item && (item.foundup_id || item.id);
+      var memberProjection = foundupId && !fixedVideoField && window.mallVideoProjection?.memberPath?.(foundupId);
+      if (memberProjection) {
+        window.mallStateRestore?.save?.();
+        if (typeof window.location?.assign === 'function') {
+          window.location.assign(memberProjection);
+        } else if (window.location) {
+          window.location.href = memberProjection;
+        }
+        return;
+      }
       if (foundupId && window.mallPlanes && typeof window.mallPlanes.openFoundUpById === 'function') {
         window.mallPlanes.openFoundUpById(foundupId);
       }
@@ -1979,27 +1990,65 @@
       var parentItem = mallCatalog[expandedFoundUp];
       if (!parentItem || !parentItem.videos || !parentItem.videos.length) return;
       var foundupId = parentItem.foundup_id || parentItem.id || '';
-      window.mallVideoPlayer.open(foundupId, parentItem.videos, index);
+      var activeQuery = activeScopeQuery();
+      window.mallVideoPlayer.open(foundupId, parentItem.videos, index, activeQuery ? {
+        query: activeQuery,
+        queueQuery: activeQuery,
+        matchesQuery: matchesScopedVideo
+      } : undefined);
     } else {
-      // Mall mode: tiles are FoundUps — open queue at first video
+      // Mall mode: tiles are FoundUps — open queue at first video (or enter member projection)
       var item = mallCatalog[index];
       if (!item) return;
       var foundupId = item.foundup_id || item.id || '';
       var queue = item.videos || [];
-      if (!queue.length) return; // No videos to play
-      window.mallVideoPlayer.open(foundupId, queue, 0);
+      if (!queue.length) {
+        if (foundupId && window.mallVideoProjection?.memberPath?.(foundupId)) {
+          togglePlay(index);
+        }
+        return;
+      }
+      var activeMallQuery = activeScopeQuery();
+      var startIdx = 0;
+      if (activeMallQuery) {
+        var matchedIdx = queue.findIndex(function(video) { return matchesScopedVideo(video, activeMallQuery); });
+        if (matchedIdx >= 0) startIdx = matchedIdx;
+      }
+      window.mallVideoPlayer.open(foundupId, queue, startIdx, activeMallQuery ? {
+        query: activeMallQuery,
+        queueQuery: activeMallQuery,
+        matchesQuery: matchesScopedVideo
+      } : undefined);
     }
   }
 
-  function openDesktopVideo(index, immersive) {
+  function activeScopeQuery() {
+    if (!currentFieldScope || typeof currentFieldScope.query !== 'string') return '';
+    return (currentFieldScope.type === 'query' || currentFieldScope.type === 'tag')
+      ? currentFieldScope.query.trim().slice(0, 300)
+      : '';
+  }
+
+  function openDesktopVideo(index, immersive, opts) {
     var player = window.mallVideoPlayer;
     var tile = getTileElement(index);
     var lane = mallCatalog[expandedFoundUp ?? index];
-    var videoIndex = expandedFoundUp === null ? 0 : index;
-    if (!tile || !lane?.videos?.[videoIndex]) return;
-    if (desktopInlineTile === tile) {
+    var activeQueueQuery = typeof opts?.queueQuery === 'string'
+      ? opts.queueQuery.trim().slice(0, 300)
+      : activeScopeQuery();
+    var videoIndex = Number.isInteger(opts?.videoIndex) && opts.videoIndex >= 0
+      ? opts.videoIndex
+      : (expandedFoundUp === null ? 0 : index);
+    if (expandedFoundUp === null && opts?.videoIndex === undefined && activeQueueQuery && Array.isArray(lane?.videos)) {
+      var firstMatch = lane.videos.findIndex(function(video) {
+        return matchesScopedVideo(video, activeQueueQuery);
+      });
+      if (firstMatch >= 0) videoIndex = firstMatch;
+    }
+    if (!tile || !lane?.videos?.[videoIndex]) return false;
+    if (desktopInlineTile === tile && opts?.videoIndex === undefined) {
       if (immersive) player.expandInline();
-      return;
+      return true;
     }
     stopInlinePreview();
     player.close({ restore: false });
@@ -2008,8 +2057,9 @@
     player.openDesktopVideo(lane.foundup_id || lane.id, lane.videos, videoIndex, {
       returnFocusTo: tile,
       matchesQuery: matchesScopedVideo,
-      queueQuery: currentFieldScope?.type === 'query' ? (currentFieldScope.query || '') : '',
-      autoplay: canAutoplayFromTile(tile),
+      query: activeQueueQuery,
+      queueQuery: activeQueueQuery,
+      autoplay: opts?.autoplay !== undefined ? opts.autoplay : canAutoplayFromTile(tile),
       muted: !immersive,
       inlineMount: immersive ? null : function() {
         slot = document.createElement('div');
@@ -2037,6 +2087,80 @@
         desktopInlineTile = null;
       }
     });
+    return true;
+  }
+
+  function getActiveVideo() {
+    if (fixedVideoField || groupDefinitions !== null) return null;
+    var player = window.mallVideoPlayer;
+    if (player && typeof player.isOpen === 'function' && player.isOpen()) {
+      var foundupId = player.getFoundUpId?.();
+      var videoId = player.getCurrentVideoId?.();
+      if (!videoId && foundupId) {
+        var lane = mallCatalog.find(function(item) { return (item.foundup_id || item.id) === foundupId; }) ||
+          fullCatalog.find(function(item) { return (item.foundup_id || item.id) === foundupId; });
+        var idx = player.getCurrentIndex?.() ?? -1;
+        var v = lane?.videos?.[idx];
+        videoId = v ? (v.video_id || v.videoId || v.id || null) : null;
+      }
+      if (foundupId && videoId) {
+        return {
+          foundupId: foundupId,
+          videoId: videoId,
+          queueQuery: (player.getQueueQuery?.() || activeScopeQuery()).slice(0, 300)
+        };
+      }
+    }
+    if (playingIndex !== null) {
+      var activeLane = expandedFoundUp !== null ? mallCatalog[expandedFoundUp] : mallCatalog[playingIndex];
+      var activeFid = activeLane && (activeLane.foundup_id || activeLane.id);
+      var vIdx = expandedFoundUp !== null ? playingIndex : laneVideoIndex;
+      var pv = activeLane?.videos?.[vIdx];
+      var pvId = pv ? (pv.video_id || pv.videoId || pv.id || null) : null;
+      if (activeFid && pvId) {
+        return {
+          foundupId: activeFid,
+          videoId: pvId,
+          queueQuery: activeScopeQuery()
+        };
+      }
+    }
+    return null;
+  }
+
+  function restoreActiveVideo(activeVideo) {
+    if (fixedVideoField || groupDefinitions !== null || !activeVideo || typeof activeVideo !== 'object') return false;
+    var foundupId = activeVideo.foundupId;
+    var videoId = activeVideo.videoId;
+    var queueQuery = typeof activeVideo.queueQuery === 'string' ? activeVideo.queueQuery.slice(0, 300) : '';
+    if (!foundupId || !videoId) return false;
+    var laneIndex = mallCatalog.findIndex(function(item) {
+      return (item.foundup_id || item.id) === foundupId;
+    });
+    if (laneIndex < 0) return false;
+    var lane = mallCatalog[laneIndex];
+    if (!Array.isArray(lane?.videos) || !lane.videos.length) return false;
+    var videoIndex = lane.videos.findIndex(function(video) {
+      return (video.video_id || video.videoId || video.id) === videoId;
+    });
+    if (videoIndex < 0) return false;
+    if (usesMemberVideoPlayer()) {
+      return openDesktopVideo(laneIndex, false, {
+        videoIndex: videoIndex,
+        queueQuery: queueQuery,
+        autoplay: false
+      });
+    }
+    if (window.mallVideoPlayer && typeof window.mallVideoPlayer.open === 'function') {
+      window.mallVideoPlayer.open(foundupId, lane.videos, videoIndex, {
+        query: queueQuery,
+        queueQuery: queueQuery,
+        matchesQuery: matchesScopedVideo,
+        autoplay: false
+      });
+      return true;
+    }
+    return false;
   }
 
   function canAutoplayFromTile(tile) {
@@ -3032,6 +3156,8 @@
     // Video runtime
     togglePlay: togglePlay,
     getPlayingIndex: getPlayingIndex,
+    getActiveVideo: getActiveVideo,
+    restoreActiveVideo: restoreActiveVideo,
     expandFoundUp: expandFoundUp,
     collapseFoundUp: collapseFoundUp,
     isExpanded: isExpanded,

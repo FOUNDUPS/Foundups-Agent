@@ -1,5 +1,15 @@
 # AI Gateway TestModLog
 
+## 2026-11-16 — Independent repair verifier firewall & policy controls
+
+Added `test_independent_repair_verifier.py` (5 passed) verifying
+`ModelIndependencePolicy.evaluate_independence` anti-self-grading and high-risk
+cross-family enforcement, `VerifierContextFirewall.project_evidence_packet`
+pure keyword-only allowlist projection, persuasive-tag stripping, and `TypeError`
+rejection of unallowed builder context kwargs, plus `IndependentVerifierReceipt`
+canonical SHA-256 `verify_integrity()` tamper detection for Issue #1522.
+WSP 11/22/49/50/97.
+
 ## 2026-11-02 — Preserve the prepared General model's native identity
 
 The prepared PC uses a display alias distinct from its native inventory key.

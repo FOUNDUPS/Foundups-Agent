@@ -28,12 +28,18 @@ end-to-end orchestration engine.
 
 ## Scheduling policy and execution boundaries
 
-Resolve policy from existing `peak_window.py` / `schedule_tracker.py` owners,
-not hardcoded caps in individual skills. Move2Japan's requested cadence is every
-two hours, 08:00–22:00 America/New_York (eight slots); other channels retain their
-own defaults. Treat both date and time as timezone-aware, including DST and Japan
-calendar rollover. Do not apply clock-only conversions where target dates are
-ambiguous. Explicit lower limits still constrain the batch.
+Resolve default policy from existing `peak_window.py` / `schedule_tracker.py`
+owners, not hardcoded caps in individual skills. The historical Move2Japan
+08:00-22:00 America/New_York window is a default, not a restriction on a later
+explicit request. Freeze the latest authorized channel, source window, cadence,
+topic priorities and overnight policy before execution. A later correction
+supersedes conflicting earlier directions for that batch; it does not silently
+change persistent channel configuration or release safety gates. Follow the
+[conversational cadence contract](../docs/REMOTE_SCHEDULING.md#conversational-cadence-and-topic-mixing)
+for all-hours alternating topics and evidence-limited inventory. Treat both date
+and time as timezone-aware, including DST and Japan calendar rollover. Do not
+apply clock-only conversions where target dates are ambiguous. Explicit lower
+limits still constrain the batch.
 
 `reschedule_apply` requires its existing environment gate plus a connected live
 driver. It moves already scheduled videos; it is not a public-video republisher.

@@ -15,6 +15,7 @@ on:
       - 'modules/foundups/pfmall/http_api.py'
       - 'modules/foundups/pfmall/intake_host.py'
       - 'modules/foundups/pfmall/requirements.txt'
+      - 'modules/foundups/pfmall/requirements-server.txt'
       - 'modules/foundups/pfmall/tests/test_http_api.py'
       - 'modules/foundups/pfmall/tests/test_clerk_proposal_intake.py'
       - '.github/ISSUE_TEMPLATE/foundup-project-nomination.yml'
@@ -29,6 +30,7 @@ on:
       - 'modules/foundups/pfmall/http_api.py'
       - 'modules/foundups/pfmall/intake_host.py'
       - 'modules/foundups/pfmall/requirements.txt'
+      - 'modules/foundups/pfmall/requirements-server.txt'
       - 'modules/foundups/pfmall/tests/test_http_api.py'
       - 'modules/foundups/pfmall/tests/test_clerk_proposal_intake.py'
       - '.github/ISSUE_TEMPLATE/foundup-project-nomination.yml'
@@ -86,7 +88,7 @@ jobs:
       - name: Install the bounded test runner
         run: |
           python -m pip --isolated --disable-pip-version-check install --only-binary=:all: --report "$RUNNER_TEMP/nomination-installer-pip.json" pip==26.2.2
-          python -m pip --isolated --disable-pip-version-check install --only-binary=:all: --report "$RUNNER_TEMP/nomination-pip.json" -r modules/foundups/pfmall/requirements.txt pytest==9.0.3 httpx==0.28.1
+          python -m pip --isolated --disable-pip-version-check install --only-binary=:all: --report "$RUNNER_TEMP/nomination-pip.json" -r modules/foundups/pfmall/requirements-server.txt pytest==9.0.3 httpx==0.28.1
           python -c 'import importlib.metadata as m,json; print(json.dumps(sorted([{"name": d.metadata["Name"], "version": d.version} for d in m.distributions()], key=lambda d: d["name"].lower())))' > "$RUNNER_TEMP/nomination-installed.json"
       - name: Verify nomination and unchanged intake contracts
         env:

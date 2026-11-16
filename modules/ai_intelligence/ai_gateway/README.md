@@ -625,6 +625,23 @@ selection, benchmark, promotion, signed-evidence, policy and trusted-key JSON
 inputs, then writes the runtime-binding receipt path for later resident runtime
 consumption. It remains disabled unless explicitly configured.
 
+## Independent Repair Verifier Firewall
+
+`src/independent_repair_verifier.py` enforces model independence and builder
+context isolation for scientific self-healing verification (Issue #1522):
+
+- `VerifierContextFirewall.project_evidence_packet(...)` exposes a pure
+  keyword-only allowlist (`ALLOWED_FIELDS`) over observable pain, desired
+  outcome, `baseline_receipt_id`, `candidate_diff`, `changed_files`,
+  before/after measurements, tests/results, quarantined research summaries,
+  prior failed hypotheses, WSP constraints, and consumed mutation budget,
+  sanitizing persuasive tags/phrases into an immutable `VerifierEvidencePacket`.
+  Unallowed builder chat or scratchpad kwargs fail closed with `TypeError`.
+- `ModelIndependencePolicy.evaluate_independence(...)` rejects missing or
+  identical normalized `builder_identity` / `verifier_identity` pairs, enforces
+  `DIFFERENT_MODEL_FAMILY` on high/critical/governance tiers, and pairs with
+  SHA-256-sealed `IndependentVerifierReceipt`.
+
 **Usage Examples**:
 ```python
 from modules.ai_intelligence.ai_gateway import AIGateway

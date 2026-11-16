@@ -33,7 +33,10 @@ service.
 
 On Windows, server and readiness children use the direct base interpreter for
 process ownership and explicitly process the selected virtual environment's
-site-packages startup hooks. This preserves dependencies such as PyWin32 that
+site-packages startup hooks (`_mcp_runtime_python` in `scripts/launch.py` walks
+chained `pyvenv.cfg` hierarchies with a resolved-path cycle guard while retaining
+the outer environment's `Lib/site-packages`, returning `(candidate, None)` cleanly
+on invalid or cyclic chains; PR #2402). This preserves dependencies such as PyWin32 that
 `PYTHONPATH` alone cannot initialize. The capability probe suppresses bytecode
 explicitly with `-B`, including when Python's isolated mode ignores environment
 settings. See [test setup and scope](tests/README.md#mcp-runtime-compatibility)

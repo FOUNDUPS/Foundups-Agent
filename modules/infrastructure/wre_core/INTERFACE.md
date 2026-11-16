@@ -1,3 +1,62 @@
+## Scientific repair operation, baseline verifier & canary orchestrator — 2026-11-16
+
+`src/repair_operation_contract.py` defines `ScientificRepairOperation`,
+`RepairOperationState` (`OBSERVED`, `REPRODUCING`, `NON_REPRODUCIBLE`,
+`REPRODUCED`, `BASELINED`, `RESEARCHING`, `HYPOTHESIS_DEFINED`,
+`ADMISSION_PENDING`, `ADMITTED`, `SANDBOX_PREPARING`, `EXPERIMENTING`,
+`DETERMINISTIC_VERIFY`, `INDEPENDENT_VERIFY`, `FUSION_REVIEW`, `ACCEPTED`,
+`REVERTED`, `ABANDONED`, `ESCALATED`, `LEARNED`), `VALID_STATE_TRANSITIONS`,
+`BaselineReceipt` (`verify_integrity()`), `ResearchQuarantineArtifact`,
+`CounterexampleReceipt`, and `ExperimentBudget`:
+
+- `ScientificRepairOperation.transition_to(new_state, reason="")` enforces
+  `VALID_STATE_TRANSITIONS` fail-closed (raising `ValueError` on illegal jumps)
+  and appends every visited state to `state_history` (serialized in `to_dict()`).
+- `record_counterexample(...)` appends structured objections and increments
+  `consumed_iterations` against `budget_exhausted()`.
+
+`src/repair_baseline_verifier.py` exposes
+`attempt_failure_reproduction(*, repo_root, failure_id, reproduction_command, failing_invariant, relevant_tests=(), timeout_seconds=60.0, authority_declaration="TIER_1_INTERNAL_MODULE") -> tuple[bool, BaselineReceipt | None, NonReproducibleClassification | None, str]`,
+parsing string commands via `shlex.split` and executing with `shell=False`.
+Exit code `0` (`ALREADY_RESOLVED`) or missing `failing_invariant` (`OBSERVER_DEFECT`)
+returns `reproduced=False` without sealing a `BaselineReceipt`.
+
+`src/scientific_repair_canary_orchestrator.py` exposes
+`ScientificRepairCanaryOrchestrator(repo_root, *, builder_model="qwen-coder-7b", verifier_model="gemma-270m", scaffold="openclaw", pattern_memory=None)`
+and `run_autonomous_repair_cycle(...) -> tuple[ScientificRepairOperation, CanaryExecutionReceipt]`,
+composing reproduction -> baseline -> quarantined research -> hypothesis ->
+`ExperimentBudget` admission -> sandbox patch -> deterministic verification ->
+`ModelIndependencePolicy.evaluate_independence` ->
+`VerifierContextFirewall.project_evidence_packet` -> `IndependentVerifierReceipt` ->
+`PatternMemory.store_outcome` (`SkillOutcome`), while leaving protected 19/P0
+custody gates (`promote_variation`, `RedDogDirector.advance_to_execution`,
+`RedDogVerifiedPatternMemorySink`) untouched.
+
+## Fail-closed `measurement_evidence` in `RecursiveLearningEngine` — 2026-11-16
+
+`recursive_improvement/src/learning.py` extends
+`RecursiveLearningEngine.apply_improvement(improvement, *, verification_evidence=None, target_applicator=None, measurement_evidence=None) -> bool`
+and `rollback_improvement(improvement) -> bool`:
+
+- Omitted `measurement_evidence` preserves `improvement.tokens_saved = None` and
+  `improvement.metrics["token_reduction_measured"] = False`.
+- Provided `measurement_evidence` validates fail-closed **before** calling
+  `target_applicator` (requiring a `Mapping` with non-empty
+  `measurement_receipt_id`, non-self-authored `evaluator_id != worker_id`,
+  matching `work_order_id`, non-negative non-bool integer `baseline_tokens` and
+  `candidate_tokens` with `candidate_tokens <= baseline_tokens`, and optional
+  `before_state_digest` / `after_state_digest` SHA-256 verification, plus
+  post-applicator `after_digest` verification with automatic `rollback_fn()` on
+  mismatch). Any failure records `application_status = "blocked_measurement_rejected"`
+  and returns `False` without retaining target mutation.
+- Valid measured apply records `improvement.tokens_saved = baseline_tokens - candidate_tokens`,
+  `token_reduction_measured = True`, receipt/evaluator/token/latency metadata,
+  and increments `engine.metrics["total_tokens_saved"]`.
+- `rollback_improvement()` subtracts measured `improvement.tokens_saved` from
+  `engine.metrics["total_tokens_saved"]` (clamped `>= 0`), records
+  `rolled_back_tokens_saved`, and resets `tokens_saved = None` and
+  `token_reduction_measured = False`.
+
 ## Readiness evidence and admission — 2026-11-06
 
 `PatternMemory(db_path=None, *, read_only=False)` retains writable defaults.
@@ -262,6 +321,27 @@ Every retained branch still requires full-diff assessment before retirement.
 `run_main_merge_sentinel(repo_root, force=False)` keeps the legacy result
 shape. Enablement and enforcement apply to observation coverage. The legacy
 `merged` field is false because promotion is handled by its own authority.
+
+`get_git_inventory(repo_root, request_id, *, section=None, offset=0,
+runner=run_command)` emits read-only `foundups_git_inventory.v1` receipts capped
+at `262144` bytes (`_MAX_RECEIPT`) with `20`-row pages (`_PAGE_SIZE`). Valid
+`section` values are `None`, `"summary"`, `"branches"`, `"worktrees"`, and
+`"stashes"` (`offset=0` is required when `section` is `None` or `"summary"`).
+Local observation captures branches, worktrees, and SHA-only `refs/stash`
+reflog entries (`[{"sha": ...}]` via `rev-list --walk-reflogs refs/stash`, never
+stash messages, subjects, or filenames) before and after GitHub `ls-remote`,
+blocking with `"pc_state_changed_during_observation"` if any local branch,
+worktree, status, or stash changes during observation. After stability checks, it
+probes local `github_main` commit presence via `git cat-file -t` (without
+failing when absent) to emit `github_main_present_on_pc`, `pc_backlog_summary`
+(`local_head_count`, `attached_worktree_branch_count`,
+`merged_into_github_main_count`, `unmerged_unattached_head_count`,
+`stash_count`), `worktree_summary` (`total`, `attached`, `detached`, `bare`,
+`locked`, `prunable`), and paged `stash_count`.
+`verify_git_inventory_receipt(result, request_id, *, now=None)` enforces
+request ID, age (`-5` to `120` seconds), canonical `sha256`, SHA-only
+`stashes`, `github_main_present_on_pc`, `pc_backlog_summary`, and
+`worktree_summary`.
 
 # WRE Core Interface
 

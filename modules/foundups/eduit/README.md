@@ -1,5 +1,75 @@
 # EDUIT — Education Using Information Technology
 
+**word-space-27** uses a clean picture plus a separate teaching-word area in
+both the smaller page player and fullscreen. The word centers in the brown area
+below the picture; short landscape keeps the existing side region. Its font fits
+the actual space and distant/near/landing THUMPs grow progressively. Grown-up
+controls retain **Outside picture** / **On picture** for both sizes. The26 film,
+soundtrack and outcome-bound SQUISH rule remain unchanged.
+
+**safe-sounds-26** corrects the sound meaning: SQUISH is reserved for a mammal
+caught in the timed collapse. An all-safe rescue, including practice, has no
+SQUISH word, narration or Foley. The successful demo film is rebuilt as
+`same-engine-rescue-3`; its foot still lands and lifts. This supersedes23's
+incorrect use of SQUISH for an empty compressed burrow.
+
+**single-word-25** defaults to one teaching word outside the expanded movie,
+centered between the picture and controls. Grown-up controls offer **Outside
+picture** / **On picture**; both reuse the existing renderer and movie clock.
+Compact/native fallback retains its baked film word and hides the extra caption.
+The film, sound cues, game and two-action storybook remain unchanged.
+See [word presentation](docs/SINGLE_WORD_PRESENTATION.md).
+
+**simple-story-24** has two big popup actions: ▶/Ⅱ and ×. One Play runs all five
+cards, then the movie; no arrows, Skip or manual swipe turns. Closing the modal
+cannot stop the handoff through scrollbar reflow. See
+[simple story contract](docs/SIMPLE_STORY_PLAYBACK.md).
+
+**sound-cues-23** rebuilds the25s movie with five longer SNIFF demonstrations,
+progressively larger/louder THUMPs and the missing SQUISH after landing. Action
+voice keeps Foley audible; audio resets cannot leak a prior-round sound.
+See [sound cue repair](docs/SOUND_CUE_REPAIR.md) for timing, evidence and limits.
+
+**connected-leg-22** adds a continuous expanded movie picture: the entire foot
+enters the upper sky, reaches the original contact and exits through the top.
+The existing movie is still the sole sound/playback clock. Its recorded engine
+frames go through the same scene renderer as the game; no second game runs.
+Missing or mismatched presentation data retains the native movie. See
+[movie presentation](docs/MOVIE_PRESENTATION.md) for binding and review limits.
+
+Historical storybook interaction, **tap-story-21** (controls superseded by24): tap the teaching words/picture
+or ▶ to run the complete story without repeated Next presses. Incidental taps
+while listening leave it running; explicit Ⅱ pauses and ▶ resumes that page.
+The child controls are pictograms with screen-reader names. Manual arrows remain
+available; starting after manual navigation runs the complete story from page1.
+
+Retained preschool presentation: nearly full-screen teaching
+words and64px actions. On short screens decoration
+gives way to words; final Video replaces redundant Skip beside Close. The same
+five-page narration/video sequence and game remain. Native Home Screen launch
+through eduit.org still requires separate domain verification; use the direct
+Sites origin for an unframed review. See [deployment procedure](DEPLOYMENT.md).
+
+Retained app-presentation build, **app-scene-18**: open the three-line **Storytime
+menu** beside player controls for large Characters, Music and Language choices.
+Fullscreen uses one continuous sky/game scene; the whole leg enters and leaves
+the top. Settings pause without restarting the round or starting music. The
+existing build/review skills now include these app-specific acceptance checks.
+
+
+Latest preview correction, **whole-story-16**: Auto play reads all five story
+plates before starting the video once. The25s demonstration now records the
+same game mechanics as the playable panel; the original Foley is kept separately.
+Use the direct Sites URL for phone review: eduit.org currently embeds it in a
+viewport-less forwarding frame, which is a separate hosting defect.
+
+
+Latest local sleeve work: [character/music choices](docs/CHARACTER_MUSIC_CHOICES.md)
+adds visible swipeable choices over the existing game. Two original appearances,
+two attributed CC BY music tracks and Off; no automatic sound or engine changes.
+Latest012 direction authorizes Sites review publication and verified GitHub
+pushes. This preview is separate from full learning/RSI acceptance.
+
 > **Canonical 2026-10-28 handoff:** [Storytime conversation audit and Prometheus M2M handoff](docs/STORYTIME_RSI_CONVERSATION_AUDIT_AND_HANDOFF.md) is the current decision register. It supersedes conflicting historical statements below about video+game-only tiles, Earn Stars buttons, forced three-round quizzes, and autonomous runtime status. Existing site work is owned by a separate session; this PR documentation change must not overwrite that session's UI work.
 ## EDUIT vision / Storytime Evolution map — 2026-10-28
 

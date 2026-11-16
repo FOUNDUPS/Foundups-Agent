@@ -1,5 +1,16 @@
 # AI Gateway Module Change Log
 
+## 2026-11-16 — Independent repair verifier firewall and model-independence policy
+
+Integrated `src/independent_repair_verifier.py` and `tests/test_independent_repair_verifier.py`
+for scientific self-healing repair verification (Issue #1522). `VerifierContextFirewall.project_evidence_packet`
+enforces a pure keyword-only allowlist over bounded repair reproduction/diff/regression
+evidence and emits an immutable SHA-256-digested `VerifierEvidencePacket` while rejecting
+builder reasoning/chat kwargs at the call boundary. `ModelIndependencePolicy` blocks
+normalized builder/verifier model collisions (`self_grading_prohibited`) and pairs with
+`IndependentVerifierReceipt`. Five offline unit tests pass; no provider calls or
+PatternMemory custody changes. WSP 11/22/49/50/77/97.
+
 ## 2026-11-02 — Preserve the prepared General model's native identity
 
 The prepared PC uses a display alias distinct from its native inventory key.

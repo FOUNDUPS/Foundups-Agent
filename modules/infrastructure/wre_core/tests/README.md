@@ -1,8 +1,37 @@
+## Scientific repair & measured RSI regressions — 2026-11-16
+
+- `test_repair_operation_contract.py` (8 cases): `ScientificRepairOperation`
+  `state_history` progression, fail-closed rejection when failure is not
+  reproduced (`before_exit_code == 0`), regression-suite failure blocking,
+  self-grading verifier rejection, promotion refusal before independent
+  verification, and `attempt_failure_reproduction` (`shell=False`) non-zero vs
+  zero exit classification.
+- `test_scientific_repair_canary_e2e.py` (4 cases): end-to-end canary pass with
+  SQLite `PatternMemory` outcome persistence, un-reproduced phantom bug rejection,
+  regression-breaking patch rollback, and self-grading builder/verifier model
+  rejection.
+- `recursive_improvement/tests/test_learning.py` (8 cases): legacy fail-closed
+  `blocked_unimplemented`, self-verified/rejected-gate `blocked_verification_rejected`,
+  bounded RSI end-to-end apply/rollback with 19/P0 custody preservation,
+  unmeasured `None` preservation, valid receipt-backed `measurement_evidence` +
+  `total_tokens_saved` + rollback subtraction, self-authored/regressive/bool/negative
+  rejection (`blocked_measurement_rejected`), and `work_order_id` / state-digest
+  mismatch rejection (pre-applicator and post-applicator rollback).
+- `test_git_lifecycle.py` (7 cases): all 9 `branch_dispositions` stages including
+  `COMPLETE` merged PR retirement assessment (`BRANCH_MERGED_PR_RETAINED`),
+  exact `sha == head_sha` reuse protection, `PROTECTED_BRANCH`, partial PR
+  observation, and clean bundle verification.
+
 ## Git lifecycle reconciliation — 2026-11-11
 
 The WRE CI job exercises GitHub pagination and App-bound check proof, the
 persisted PR completion condition, the compatibility sentinel and disposable
 Git worktrees. The PC suite covers dirty, ignored, stale and diverged state.
+`test_git_lifecycle_inventory.py` also verifies read-only PC inventory receipts,
+SHA-only `stashes` pagination without message or filename leakage, concurrent
+stash mutation blocking, `github_main_present_on_pc` True/False
+`pc_backlog_summary` and `worktree_summary` counts, and receipt integrity
+rejection for malformed or tampered stashes and summaries.
 
 ## Readiness evidence — 2026-11-06
 

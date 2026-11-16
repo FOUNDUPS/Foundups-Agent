@@ -724,4 +724,63 @@ for (const query of [
 sb.mallTileField.searchCatalog('');
 assert.equal(tiles().length, clothingCatalog.length, 'empty query still resets the loaded catalog');
 assert.equal(listenerCounts(), listenersBefore, 'request normalization adds no listeners');
+
+// HPC tile click in ordinary Mall saves state and routes to /member/?foundup=hpc;
+// desktop video playback inherits active query and round-trips activeVideo.
+let stateSaveCount = 0;
+const assignedUrls = [];
+const desktopOpenCalls = [];
+sb.mallStateRestore = { save: () => { stateSaveCount++; } };
+sb.mallVideoProjection = { memberPath: id => id === 'hpc' ? '/member/?foundup=hpc' : null };
+sb.location.assign = url => assignedUrls.push(url);
+wrapper.getBoundingClientRect = () => ({ top: 0, left: 0, width: 1100, height: 800 });
+sb.getComputedStyle = element => ({ backgroundColor: element.style.backgroundColor || '', gridTemplateColumns: '180px 180px 180px' });
+sb.mallVideoPlayer = {
+  open: (...args) => fullscreenCalls.push(args),
+  openDesktopVideo: (...args) => desktopOpenCalls.push(args),
+  close: () => {},
+  isOpen: () => desktopOpenCalls.length > 0,
+  getFoundUpId: () => desktopOpenCalls.at(-1)?.[0] || null,
+  getCurrentVideoId: () => {
+    const last = desktopOpenCalls.at(-1);
+    return last ? last[1][last[2]]?.video_id || null : null;
+  },
+  getQueueQuery: () => desktopOpenCalls.at(-1)?.[3]?.queueQuery || ''
+};
+const v19Catalog = [
+  { foundup_id: 'hpc', name: 'Hasan Piker Coalition', category: 'media', video_count: 0, videos: [] },
+  {
+    foundup_id: 'move2japan', name: 'Move2Japan', category: 'travel', video_count: 2,
+    videos: [
+      { video_id: 'm2j_v1', title: 'Tokyo intro', source_label: 'Move2Japan', embed_url: 'https://www.youtube.com/embed/aaaaaaaaaaa' },
+      { video_id: 'm2j_v2', title: 'Fukui onsen guide', source_label: 'Move2Japan', embed_url: 'https://www.youtube.com/embed/bbbbbbbbbbb' }
+    ]
+  }
+];
+sb.mallTileField.updateCatalog(v19Catalog);
+tiles()[0].fire('click');
+assert.equal(stateSaveCount, 1, 'HPC tile click saves ordinary Mall state before routing');
+assert.deepEqual(assignedUrls, ['/member/?foundup=hpc'], 'HPC tile routes to scoped member projection');
+
+sb.mallTileField.searchCatalog('onsen');
+const m2jTile = tiles().find(t => t.dataset.foundupId === 'move2japan');
+m2jTile.getBoundingClientRect = () => ({ top: 20, left: 0, width: 180, height: 320 });
+m2jTile.before = () => {};
+m2jTile.fire('click');
+assert.equal(desktopOpenCalls.length, 1);
+assert.equal(desktopOpenCalls[0][0], 'move2japan');
+assert.equal(desktopOpenCalls[0][2], 1, 'starts at first video matching active search query');
+assert.equal(desktopOpenCalls[0][3].queueQuery, 'onsen', 'openDesktopVideo inherits active search query');
+assert.deepEqual({ ...sb.mallTileField.getActiveVideo() }, {
+  foundupId: 'move2japan', videoId: 'm2j_v2', queueQuery: 'onsen'
+});
+sb.mallTileField.searchCatalog('');
+desktopOpenCalls.length = 0;
+tiles().forEach(t => { t.getBoundingClientRect = () => ({ top: 20, left: 0, width: 180, height: 320 }); t.before = () => {}; });
+assert.equal(sb.mallTileField.restoreActiveVideo({ foundupId: 'move2japan', videoId: 'm2j_v2', queueQuery: 'onsen' }), true);
+assert.equal(desktopOpenCalls.length, 1);
+assert.equal(desktopOpenCalls[0][2], 1);
+assert.equal(desktopOpenCalls[0][3].queueQuery, 'onsen');
+assert.equal(desktopOpenCalls[0][3].autoplay, false, 'reload continuity restores video without forced autoplay');
+
 console.log('Mall property runtime: geographic/category projections, queries, both drag axes, stable indexes, restore, density, source facts, focus, URLs, and video compatibility passed.');

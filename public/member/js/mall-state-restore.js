@@ -198,6 +198,14 @@
       state.scrollLeft = wrapper.scrollLeft;
     }
 
+    // Active video playback continuity (ordinary Mall only; never touches HPC sessionStorage)
+    if (typeof tf.getActiveVideo === 'function') {
+      var activeVideo = tf.getActiveVideo();
+      if (activeVideo) {
+        state.activeVideo = activeVideo;
+      }
+    }
+
     return state;
   }
 
@@ -239,6 +247,17 @@
     // Reject if scroll values are non-numeric
     if (state.scrollTop !== undefined && typeof state.scrollTop !== 'number') return false;
     if (state.scrollLeft !== undefined && typeof state.scrollLeft !== 'number') return false;
+    // Validate optional activeVideo shape for ordinary Mall reload continuity
+    if (state.activeVideo !== undefined && state.activeVideo !== null) {
+      var av = state.activeVideo;
+      if (typeof av !== 'object' || Array.isArray(av) ||
+          Object.keys(av).some(function(key) { return ['foundupId', 'videoId', 'queueQuery'].indexOf(key) === -1; }) ||
+          typeof av.foundupId !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(av.foundupId) ||
+          typeof av.videoId !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(av.videoId) ||
+          (av.queueQuery !== undefined && (typeof av.queueQuery !== 'string' || av.queueQuery.length > 300))) {
+        return false;
+      }
+    }
     return true;
   }
 
@@ -304,6 +323,15 @@
           if (state.scrollTop) wrapper.scrollTop = state.scrollTop;
           if (state.scrollLeft) wrapper.scrollLeft = state.scrollLeft;
         }
+      });
+      restored = true;
+    }
+
+    // Restore active video playback (ordinary Mall only; deferred to next frame)
+    if (state.activeVideo && typeof tf.restoreActiveVideo === 'function') {
+      requestAnimationFrame(function() {
+        if (selectedProduct || selectedVideoScope) return;
+        tf.restoreActiveVideo(state.activeVideo);
       });
       restored = true;
     }
@@ -380,6 +408,14 @@
       if (document.visibilityState === 'hidden') {
         save();
       }
+    });
+
+    // Save on active video playback lifecycle in ordinary Mall (never in HPC/product)
+    ['videoPlayerOpen', 'videoPlayerNavigate', 'videoPlayerClose'].forEach(function(eventName) {
+      window.addEventListener(eventName, function() {
+        if (selectedVideoScope || selectedProduct) return;
+        setTimeout(save, 50);
+      });
     });
 
     // Save on beforeunload (navigation away)
