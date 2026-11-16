@@ -181,3 +181,7 @@ cut, then the existing hosting owner must deploy it before Refresh can show it.
 This is a read-only creator-review surface, not a new renderer, public editing
 API, separate PWA, authentication system or WRE worker. Voice and whiteboard
 capture remain deferred. A local build is not evidence of public deployment.
+
+## Proposed video provenance / cryptographic RSI PoC (2026-11-16)
+
+See [staged video provenance, agent identity and gifted collectible research](docs/VIDEO_PROVENANCE_RSI_REWARDS_POC.md). This is a **proposal only**: first prove a signed media manifest on a real LEGO-style video, then adversarial watermark benchmarking, governed WRE research, independently authorized DAE signatures, unclaimed-return reward policy, and isolated experimental geometry. No NFT minting, new signing authority, or autonomous worker is active.
