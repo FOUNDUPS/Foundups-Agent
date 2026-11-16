@@ -1228,9 +1228,48 @@
   background-color: #140e2a;
 }
 
-.mall-tile.theme-cat-infrastructure {
+.mall-tile.theme-cat-infrastructure,
+.mall-tile.theme-holoindex_prod_01 {
   background: linear-gradient(145deg, rgba(12, 28, 44, 0.96), rgba(28, 68, 104, 0.72) 60%, rgba(8, 16, 26, 0.98));
   background-color: #0c1c2c;
+}
+
+.mall-tile.theme-voteballots,
+.mall-tile.theme-cat-civic {
+  background: linear-gradient(145deg, rgba(16, 28, 56, 0.96), rgba(38, 66, 128, 0.72) 60%, rgba(8, 14, 30, 0.98));
+  background-color: #101c38;
+}
+
+.mall-tile.theme-trade,
+.mall-tile.theme-cat-trading {
+  background: linear-gradient(145deg, rgba(12, 42, 36, 0.96), rgba(22, 92, 78, 0.72) 60%, rgba(6, 20, 18, 0.98));
+  background-color: #0c2a24;
+}
+
+.mall-tile.theme-kids_episodes {
+  background: linear-gradient(145deg, rgba(46, 22, 54, 0.96), rgba(102, 48, 118, 0.72) 60%, rgba(22, 10, 28, 0.98));
+  background-color: #2e1636;
+}
+
+.mall-tile.theme-cat-games {
+  background: linear-gradient(145deg, rgba(52, 16, 24, 0.96), rgba(112, 32, 48, 0.72) 60%, rgba(24, 8, 12, 0.98));
+  background-color: #341018;
+}
+
+.mall-tile.theme-cat-community {
+  background: linear-gradient(145deg, rgba(40, 28, 10, 0.96), rgba(100, 70, 22, 0.72) 60%, rgba(20, 14, 6, 0.98));
+  background-color: #281c0a;
+}
+
+.mall-tile.theme-cat-science,
+.mall-tile.theme-science_swarm {
+  background: linear-gradient(145deg, rgba(14, 34, 52, 0.96), rgba(32, 78, 114, 0.72) 60%, rgba(8, 18, 28, 0.98));
+  background-color: #0e2234;
+}
+
+.mall-tile.theme-cat-marketplace {
+  background: linear-gradient(145deg, rgba(22, 40, 28, 0.96), rgba(44, 86, 58, 0.72) 60%, rgba(10, 20, 14, 0.98));
+  background-color: #16281c;
 }
 
 .mall-tile.theme-default {
@@ -1585,4 +1624,179 @@
 .motion-glide .mall-category-track, .is-dragging .mall-category-track { scroll-snap-type: none; }
 @media (prefers-reduced-motion: reduce) {
   .mall-tile-field-wrapper, .mall-category-track { scroll-behavior: auto; }
+}
+
+/* ========== Tile Turn-Over: Outcome · Solution · Pain (WSP 109) ========== */
+
+.mall-tile-flip-btn {
+  position: absolute;
+  bottom: 0.45rem;
+  right: 0.45rem;
+  z-index: 4;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(10, 10, 20, 0.68);
+  color: rgba(240, 238, 248, 0.85);
+  font-size: 0.72rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.75;
+  transition: opacity 0.15s ease, background 0.15s ease, transform 0.2s ease;
+}
+
+.mall-tile:hover .mall-tile-flip-btn,
+.mall-tile:focus-within .mall-tile-flip-btn,
+.mall-tile-flip-btn:focus-visible {
+  opacity: 1;
+  background: rgba(124, 92, 252, 0.45);
+}
+
+.mall-tile-flip-btn:focus-visible {
+  outline: 2px solid rgba(141, 113, 255, 0.9);
+  outline-offset: 2px;
+}
+
+.mall-tile > :not(.mall-tile-osp-back) {
+  transition: transform 0.22s ease, opacity 0.16s ease;
+}
+
+.mall-tile.is-flipped > :not(.mall-tile-osp-back) {
+  opacity: 0;
+  pointer-events: none;
+  transform: perspective(800px) rotateY(88deg);
+}
+
+.mall-tile-osp-back {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+  padding: 0.45rem 0.5rem;
+  border-radius: inherit;
+  background: linear-gradient(165deg, rgba(12, 12, 24, 0.97), rgba(8, 8, 16, 0.98));
+  backdrop-filter: blur(8px);
+  color: #eceaf5;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: perspective(800px) rotateY(-88deg);
+  transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s ease, visibility 0s linear 0.26s;
+}
+
+.mall-tile.is-flipped .mall-tile-osp-back {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: perspective(800px) rotateY(0deg);
+  transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.16s ease, visibility 0s;
+}
+
+.mall-tile-osp-head {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.22rem;
+}
+
+.mall-tile-osp-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.74rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #fff;
+}
+
+.mall-tile-osp-stage {
+  flex: 0 0 auto;
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.1rem 0.32rem;
+  border-radius: 999px;
+  background: rgba(124, 92, 252, 0.22);
+  color: #cbbaff;
+}
+
+.mall-tile-osp-close {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e4e2ec;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.mall-tile-osp-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
+}
+
+.mall-tile-osp-row p {
+  margin: 0;
+  font-size: 0.66rem;
+  line-height: 1.28;
+  color: rgba(236, 234, 245, 0.88);
+}
+
+.mall-tile-osp-kicker {
+  font-size: 0.56rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.mall-tile-osp-kicker.osp-outcome { color: #00e5d0; }
+.mall-tile-osp-kicker.osp-solution { color: #a78bfa; }
+.mall-tile-osp-kicker.osp-pain { color: #ff8c5a; }
+
+.mall-tile-osp-actions {
+  margin-top: auto;
+  padding-top: 0.22rem;
+  display: flex;
+  gap: 0.3rem;
+}
+
+.mall-tile-osp-actions button {
+  flex: 1 1 auto;
+  padding: 0.26rem 0.4rem;
+  border-radius: 6px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.mall-tile-osp-actions .mall-tile-osp-enter {
+  background: rgba(0, 212, 170, 0.18);
+  border-color: rgba(0, 212, 170, 0.45);
+  color: #00e5d0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mall-tile > :not(.mall-tile-osp-back),
+  .mall-tile-osp-back {
+    transition: none;
+    transform: none !important;
+  }
 }

@@ -65,7 +65,13 @@
     'thought-leadership': 'cat-thought-leadership',
     'ai-education': 'cat-ai-education',
     'ai-research': 'cat-ai-research',
-    'infrastructure': 'cat-infrastructure'
+    'infrastructure': 'cat-infrastructure',
+    'civic': 'cat-civic',
+    'trading': 'cat-trading',
+    'games': 'cat-games',
+    'community': 'cat-community',
+    'science': 'cat-science',
+    'marketplace': 'cat-marketplace'
   };
 
   // Video Mall runtime state
@@ -76,6 +82,10 @@
   var fixedVideoField = false; // Public projection starts and stays inside one lane.
   var FIXED_VIDEO_COLUMNS = 3;
   var FIXED_VIDEO_BATCH = 6;
+  var PHONE_PATCH_BATCH = 9;
+  var HOVER_FLIP_DELAY_MS = 650;
+  var HOLD_FLIP_DELAY_MS = 450;
+  var activeFlippedTile = null;
   var fixedRenderedCount = 0;
   var fixedTailObserver = null;
   var fixedBrowsePosition = null;
@@ -160,12 +170,71 @@
     observeTiles(tileField ? tileField.querySelectorAll('.mall-tile') : []);
   }
 
+  function isPhonePatchViewport() {
+    if (!loadPolicy.enableViewportLazyLoad || typeof IntersectionObserver === 'undefined') return false;
+    if (desktopPosterBrowsing) return false;
+    return !!(window.matchMedia && window.matchMedia('(max-width: 899px), (pointer: coarse)').matches);
+  }
+
+  function usesProgressivePatchGrid() {
+    if (fixedVideoField) return true;
+    if (!isPhonePatchViewport() || groupDefinitions !== null) return false;
+    return expandedFoundUp !== null || layoutMode === 'grid';
+  }
+
+  function activePatchBatchSize() {
+    return fixedVideoField ? FIXED_VIDEO_BATCH : PHONE_PATCH_BATCH;
+  }
+
+  function hydrateTilePoster(tile) {
+    if (!tile) return;
+    var deferredUrl = tile.dataset.posterUrl || '';
+    if (deferredUrl && (!tile.style.backgroundImage || tile.style.backgroundImage === 'none')) {
+      tile.style.backgroundImage = 'url(' + deferredUrl.replace(/["\\]/g, '\\$&') + ')';
+    }
+    var bgImage = tile.style.backgroundImage;
+    if (bgImage && bgImage !== 'none') {
+      var urlMatch = bgImage.match(/url\(["']?([^"')]+)["']?\)/);
+      if (urlMatch && urlMatch[1]) {
+        if (typeof Image !== 'undefined') {
+          var img = new Image();
+          img.onload = function() { tile.classList.add('thumb-loaded'); };
+          img.onerror = function() { tile.classList.add('thumb-loaded'); };
+          img.src = urlMatch[1];
+        } else {
+          tile.classList.add('thumb-loaded');
+        }
+        return;
+      }
+    }
+    tile.classList.add('thumb-loaded');
+  }
+
+  function setTileFlipped(tile, flipped) {
+    if (!tile) return false;
+    var back = tile.querySelector('.mall-tile-osp-back');
+    if (!back) return false;
+    var next = typeof flipped === 'boolean' ? flipped : !tile.classList.contains('is-flipped');
+    if (next && activeFlippedTile && activeFlippedTile !== tile) {
+      setTileFlipped(activeFlippedTile, false);
+    }
+    tile.classList.toggle('is-flipped', next);
+    back.setAttribute('aria-hidden', next ? 'false' : 'true');
+    var trigger = tile.querySelector('.mall-tile-flip-btn');
+    if (trigger) trigger.setAttribute('aria-expanded', next ? 'true' : 'false');
+    activeFlippedTile = next ? tile : (activeFlippedTile === tile ? null : activeFlippedTile);
+    return next;
+  }
+
   function observeTiles(tiles) {
     tiles.forEach(function(tile) {
       var index = Number(tile.dataset.index);
       tile.dataset.tileIndex = index;
-      tileLoadStates[index] = tileObserver ? 'pending' : 'loaded';
-      if (tileObserver) tileObserver.observe(tile);
+      var alreadyHydrated = !tile.dataset.posterUrl || (tile.style.backgroundImage && tile.style.backgroundImage !== 'none');
+      tileLoadStates[index] = tileObserver ? (alreadyHydrated ? 'loaded' : 'pending') : 'loaded';
+      if (alreadyHydrated) hydrateTilePoster(tile);
+      else if (tileObserver) tileObserver.observe(tile);
+      else hydrateTilePoster(tile);
     });
   }
 
@@ -184,9 +253,10 @@
         var currentState = tileLoadStates[index];
         if (currentState === 'pending') {
           tileLoadStates[index] = 'visible';
-          // Trigger load (upgrade thumbnail, etc.)
+          // Trigger load (hydrate deferred poster thumbnail)
           loadTileContent(index, tile);
         }
+        if (tileObserver) tileObserver.unobserve(tile);
       }
       // Note: We don't downgrade state when leaving viewport
     });
@@ -202,10 +272,7 @@
       return;
     }
     tileLoadStates[index] = 'loading';
-
-    // Tile content loading is handled by existing renderTiles logic
-    // This hook is for future thumbnail quality upgrade
-    // For now, mark as loaded since tiles are pre-rendered
+    hydrateTilePoster(tile);
     tileLoadStates[index] = 'loaded';
   }
 
@@ -217,6 +284,7 @@
     tiles.forEach(function(tile, index) {
       index = Number(tile.dataset.index);
       tile.dataset.tileIndex = index;
+      hydrateTilePoster(tile);
       tileLoadStates[index] = 'loaded';
     });
   }
@@ -1253,6 +1321,34 @@
       '</div></article>';
   }
 
+  function buildTileOspMarkup(item, hasVideos) {
+    if (fixedVideoField || expandedFoundUp !== null || isPropertyListing(item) || item.video_data) return '';
+    var outcomeText = item.outcome || item.public_summary || item.tagline || item.description || '';
+    var stageLabel = (item.lifecycle_stage || item.status || 'incubating').replace(/_/g, ' ');
+    var solutionText = item.solution || (item.description ? stageLabel + ': ' + item.description : '');
+    var painText = item.pain || (item.tagline && item.description ? item.tagline : '');
+    if (!outcomeText && !solutionText && !painText) return '';
+    var titleText = item.name || item.title || item.entity || item.foundup_id || '';
+    var playAction = hasVideos
+      ? '<button type="button" class="mall-tile-osp-play" aria-label="Play queue">\u25b6 Play</button>'
+      : '';
+    return '<button type="button" class="mall-tile-flip-btn" aria-label="Flip tile for Outcome, Solution, Pain" aria-expanded="false" title="Outcome \u00b7 Solution \u00b7 Pain">\u21c4</button>' +
+      '<div class="mall-tile-osp-back" aria-hidden="true">' +
+        '<div class="mall-tile-osp-head">' +
+          '<strong class="mall-tile-osp-title">' + escapeHtml(titleText) + '</strong>' +
+          '<span class="mall-tile-osp-stage">' + escapeHtml(stageLabel) + '</span>' +
+          '<button type="button" class="mall-tile-osp-close" aria-label="Flip tile back" title="Flip back">\u21ba</button>' +
+        '</div>' +
+        (outcomeText ? '<div class="mall-tile-osp-row"><span class="mall-tile-osp-kicker osp-outcome">Outcome</span><p>' + escapeHtml(outcomeText) + '</p></div>' : '') +
+        (solutionText ? '<div class="mall-tile-osp-row"><span class="mall-tile-osp-kicker osp-solution">Solution</span><p>' + escapeHtml(solutionText) + '</p></div>' : '') +
+        (painText ? '<div class="mall-tile-osp-row"><span class="mall-tile-osp-kicker osp-pain">Pain</span><p>' + escapeHtml(painText) + '</p></div>' : '') +
+        '<div class="mall-tile-osp-actions">' +
+          playAction +
+          '<button type="button" class="mall-tile-osp-enter" aria-label="Enter FoundUp">Enter \u2197</button>' +
+        '</div>' +
+      '</div>';
+  }
+
   function renderTiles(appendThrough, keepSlot) {
     if (desktopInlineTile && !window.mallVideoPlayer?.isTucked?.()) {
       window.mallVideoPlayer.close({ restore: false });
@@ -1260,15 +1356,19 @@
     var groupedFocus = captureGroupState();
     captureRowOffsets();
     var itemsToRender = expandedFoundUp !== null ? getExpandedVideos() : mallCatalog;
-    var append = fixedVideoField && Number.isInteger(appendThrough);
+    var patchGrid = usesProgressivePatchGrid();
+    var batchSize = activePatchBatchSize();
+    var append = patchGrid && Number.isInteger(appendThrough);
     if (fixedVideoField && !append) scopedRenderedIndices = scopedVisibleIndices();
     var indices = fixedVideoField ? scopedRenderedIndices : null;
     if (indices) itemsToRender = indices.map(function(index) { return itemsToRender[index]; });
     var start = append ? fixedRenderedCount : 0;
-    var end = fixedVideoField
-      ? Math.min(itemsToRender.length, append ? appendThrough : FIXED_VIDEO_BATCH)
+    var end = patchGrid
+      ? Math.min(itemsToRender.length, append ? appendThrough : batchSize)
       : itemsToRender.length;
     if (append && end <= start) return;
+    if (!append) activeFlippedTile = null;
+    var phoneLazyPosters = isPhonePatchViewport();
     var grouped = groupDefinitions !== null && expandedFoundUp === null;
     var memberPlayer = usesMemberVideoPlayer();
     var desktopGrid = memberPlayer && desktopPosterBrowsing && layoutMode === 'grid';
@@ -1280,11 +1380,11 @@
 
     if ((!grouped && !itemsToRender.length) || (grouped && !visibleGroups.length)) {
       if (tileObserver) tileObserver.disconnect();
+      if (fixedTailObserver) fixedTailObserver.disconnect();
+      fixedRenderedCount = 0;
       tileLoadStates = {};
       tileField.classList.remove('expanded-mode');
       if (indices) {
-        fixedTailObserver?.disconnect();
-        fixedRenderedCount = 0;
         tileField.innerHTML = '<p class="mall-video-grid-empty" role="status">No videos match your search.</p>';
         return;
       }
@@ -1293,8 +1393,8 @@
       return;
     }
 
-    var tileMarkup = itemsToRender.slice(start, end).map(function(item, index) {
-      index += start;
+    var tileMarkup = itemsToRender.slice(start, end).map(function(item, localIdx) {
+      var index = localIdx + start;
       if (indices) index = indices[index];
       if (isPropertyListing(item)) return renderPropertyTile(item, index);
       var theme = escapeAttr(item.theme || item.foundup_id || CATEGORY_THEME[item.category] || 'default');
@@ -1305,7 +1405,9 @@
       // Track tile type for CSS background-size: avatar uses contain, video uses cover
       var isAvatarTile = !!item.channel_avatar_url && !item.video_data;
       var posterUrl = item.channel_avatar_url || item.poster_url || '';
-      var posterStyle = posterUrl ? 'background-image: url(' + escapeAttr(posterUrl) + ')' : '';
+      var deferPoster = phoneLazyPosters && !append && index >= loadPolicy.loadBatchSize && !!posterUrl;
+      var posterStyle = (posterUrl && !deferPoster) ? 'background-image: url(' + escapeAttr(posterUrl) + ')' : '';
+      var posterDataAttr = posterUrl ? ' data-poster-url="' + escapeAttr(posterUrl) + '"' : '';
       var tileType = isAvatarTile ? 'avatar' : 'video';
 
       // Determine if tile has videos (includes expanded video tiles with video_data)
@@ -1350,7 +1452,8 @@
       var tileClass = 'mall-tile theme-' + theme + (hasVideos ? '' : ' non-video');
 
       var videoId = fixedVideoField ? ' data-video-id="' + escapeAttr(item.video_data?.video_id || '') + '"' : '';
-      return '<article class="' + tileClass + '" data-index="' + index + '"' + videoId + ' data-foundup-id="' + escapeAttr(item.foundup_id || item.id || '') + '" data-tile-type="' + tileType + '" tabindex="0" aria-label="' + escapeAttr(item.name || item.title || '') + '" style="' + posterStyle + '">' +
+      var ospMarkup = buildTileOspMarkup(item, hasVideos);
+      return '<article class="' + tileClass + '" data-index="' + index + '"' + videoId + posterDataAttr + ' data-foundup-id="' + escapeAttr(item.foundup_id || item.id || '') + '" data-tile-type="' + tileType + '" tabindex="0" aria-label="' + escapeAttr(item.name || item.title || '') + '" style="' + posterStyle + '">' +
         previewContainer +
         (fixedVideoField ? '' : '<span class="mall-tile-badge ' + badgeClass + '">' + escapeHtml(readiness.replace('_', ' ')) + '</span>') +
         queueBadge +
@@ -1364,6 +1467,7 @@
           '<span class="mall-tile-hero">' + escapeHtml(item.hero_label || '') + '</span>' +
           '<p class="mall-tile-name">' + escapeHtml(item.name || item.title || '') + '</p>' +
         '</div>' +
+        ospMarkup +
       '</article>';
     });
 
@@ -1371,6 +1475,8 @@
       tileField.querySelector('.mall-video-grid-tail')?.remove();
       tileField.insertAdjacentHTML('beforeend', tileMarkup.join(''));
     } else if (grouped) {
+      if (fixedTailObserver) fixedTailObserver.disconnect();
+      fixedRenderedCount = 0;
       tileField.innerHTML = visibleGroups.map(function(group, groupIndex) {
         var headingId = 'mallGroupHeading-' + groupIndex;
         var trackId = 'mallGroupTrack-' + groupIndex;
@@ -1389,6 +1495,8 @@
       bindGroupedRows();
       restoreGroupState(groupedFocus);
     } else if (layoutMode === 'rows' && expandedFoundUp === null) {
+      if (fixedTailObserver) fixedTailObserver.disconnect();
+      fixedRenderedCount = 0;
       var groups = new Map();
       itemsToRender.forEach(function(item, index) {
         var key = item.category || 'Other';
@@ -1432,47 +1540,31 @@
       tileLoadStates = {};
       initTileObserver();
     }
-    if (fixedVideoField) {
+    if (patchGrid) {
       fixedRenderedCount = end;
-      renderFixedTail(itemsToRender.length);
+      renderFixedTail(itemsToRender.length, batchSize);
     }
-
-    // Detect thumbnail load and remove shimmer
-    tiles.forEach(function(tile) {
-      var bgImage = tile.style.backgroundImage;
-      if (bgImage && bgImage !== 'none') {
-        var urlMatch = bgImage.match(/url\(["']?([^"')]+)["']?\)/);
-        if (urlMatch && urlMatch[1]) {
-          var img = new Image();
-          img.onload = function() { tile.classList.add('thumb-loaded'); };
-          img.onerror = function() { tile.classList.add('thumb-loaded'); }; // Stop shimmer on error too
-          img.src = urlMatch[1];
-        } else {
-          tile.classList.add('thumb-loaded');
-        }
-      } else {
-        tile.classList.add('thumb-loaded'); // No image = no shimmer needed
-      }
-    });
   }
 
-  function renderFixedTail(total) {
+  function renderFixedTail(total, batchSize) {
+    var step = batchSize || FIXED_VIDEO_BATCH;
     if (fixedTailObserver) fixedTailObserver.disconnect();
+    if (!fixedVideoField && fixedRenderedCount >= total) return;
     var tail = document.createElement('div');
     tail.className = 'mall-video-grid-tail';
     if (fixedRenderedCount < total) {
       var more = document.createElement('button');
       more.type = 'button';
-      more.textContent = 'Load more videos';
+      more.textContent = (fixedVideoField || expandedFoundUp !== null) ? 'Load more videos' : 'Load more FoundUps';
       var load = function() {
-        if (tail.isConnected) renderTiles(fixedRenderedCount + FIXED_VIDEO_BATCH);
+        if (tail.isConnected) renderTiles(fixedRenderedCount + step);
       };
       more.addEventListener('click', load);
       tail.appendChild(more);
       if (typeof IntersectionObserver !== 'undefined') {
         fixedTailObserver = new IntersectionObserver(function(entries) {
           if (entries.some(function(entry) { return entry.isIntersecting; })) load();
-        }, { root: tileFieldWrapper, rootMargin: '120px 0px' });
+        }, { root: tileFieldWrapper, rootMargin: '160px 0px' });
         fixedTailObserver.observe(tail);
       }
     } else {
@@ -1615,12 +1707,91 @@
     var tiles = batch || tileField.querySelectorAll('.mall-tile');
 
     tiles.forEach(function(tile) {
+      var hasOspBack = !!tile.querySelector('.mall-tile-osp-back');
+      var hoverTimer = null;
+      var holdTimer = null;
+      var holdTriggered = false;
+      var holdStartX = 0;
+      var holdStartY = 0;
+
+      if (hasOspBack) {
+        tile.addEventListener('pointerenter', function(e) {
+          if (e.pointerType !== 'mouse') return;
+          clearTimeout(hoverTimer);
+          hoverTimer = setTimeout(function() {
+            if (!tapGuardActive) setTileFlipped(tile, true);
+          }, HOVER_FLIP_DELAY_MS);
+        });
+        tile.addEventListener('pointerleave', function(e) {
+          if (e.pointerType !== 'mouse') return;
+          clearTimeout(hoverTimer);
+          hoverTimer = null;
+          if (tile.classList.contains('is-flipped')) setTileFlipped(tile, false);
+        });
+        tile.addEventListener('touchstart', function(e) {
+          if (!e.touches || e.touches.length !== 1) {
+            clearTimeout(holdTimer);
+            holdTimer = null;
+            return;
+          }
+          if (e.target && e.target.closest && e.target.closest('button, a')) return;
+          holdStartX = e.touches[0].clientX;
+          holdStartY = e.touches[0].clientY;
+          holdTriggered = false;
+          clearTimeout(holdTimer);
+          holdTimer = setTimeout(function() {
+            holdTimer = null;
+            holdTriggered = true;
+            tapGuardActive = true;
+            setTileFlipped(tile, !tile.classList.contains('is-flipped'));
+          }, HOLD_FLIP_DELAY_MS);
+        }, { passive: true });
+        tile.addEventListener('touchmove', function(e) {
+          if (!holdTimer) return;
+          if (!e.touches || e.touches.length !== 1) {
+            clearTimeout(holdTimer);
+            holdTimer = null;
+            return;
+          }
+          var dx = e.touches[0].clientX - holdStartX;
+          var dy = e.touches[0].clientY - holdStartY;
+          if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+            clearTimeout(holdTimer);
+            holdTimer = null;
+          }
+        }, { passive: true });
+        tile.addEventListener('touchend', function() {
+          if (holdTimer) {
+            clearTimeout(holdTimer);
+            holdTimer = null;
+          }
+          if (holdTriggered) {
+            holdTriggered = false;
+            setTimeout(function() { tapGuardActive = false; }, 220);
+          }
+        }, { passive: true });
+        tile.addEventListener('touchcancel', function() {
+          if (holdTimer) {
+            clearTimeout(holdTimer);
+            holdTimer = null;
+          }
+          holdTriggered = false;
+        }, { passive: true });
+      }
+
       // Tap selects playback or quick view according to the active layout.
       // FoundUp entry is explicit via fullscreen "Enter FoundUp" button
       tile.addEventListener('click', function(e) {
-        // Ignore tap if guard is active (just finished dragging)
+        clearTimeout(hoverTimer);
+        // Ignore tap if guard is active (just finished dragging or long-pressing)
         if (tapGuardActive) return;
         if (groupDefinitions !== null && tileField.closest('[inert]')) return;
+        if (tile.classList.contains('is-flipped')) {
+          if (!e.target || !e.target.closest || !e.target.closest('.mall-tile-osp-play, .mall-tile-osp-enter, .mall-tile-flip-btn')) {
+            setTileFlipped(tile, false);
+            return;
+          }
+        }
 
         var index = Number(tile.dataset.index || 0);
         if (groupDefinitions !== null) rememberActiveTile(tile);
@@ -1631,6 +1802,11 @@
       tile.addEventListener('keydown', function(e) {
         var index = Number(tile.dataset.index || 0);
         var memberPlayer = usesMemberVideoPlayer();
+        if ((e.key === 'i' || e.key === 'f') && e.target === tile && hasOspBack) {
+          e.preventDefault();
+          setTileFlipped(tile);
+          return;
+        }
         if ((fixedVideoField || memberPlayer) && e.target !== tile) return;
         if (groupDefinitions !== null && tileField.closest('[inert]')) return;
         if (groupDefinitions !== null && /^Arrow(Left|Right|Up|Down)$/.test(e.key)) {
@@ -1734,11 +1910,66 @@
       });
     });
 
+    // OSP flip controls (front trigger, back close, back play, back enter)
+    var flipBtns = batch ? batch.flatMap(function(tile) {
+      return Array.from(tile.querySelectorAll('.mall-tile-flip-btn'));
+    }) : tileField.querySelectorAll('.mall-tile-flip-btn');
+    flipBtns.forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (tapGuardActive) return;
+        var tile = btn.closest('.mall-tile');
+        if (tile) setTileFlipped(tile);
+      });
+    });
+
+    var ospCloseBtns = batch ? batch.flatMap(function(tile) {
+      return Array.from(tile.querySelectorAll('.mall-tile-osp-close'));
+    }) : tileField.querySelectorAll('.mall-tile-osp-close');
+    ospCloseBtns.forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var tile = btn.closest('.mall-tile');
+        if (tile) setTileFlipped(tile, false);
+      });
+    });
+
+    var ospPlayBtns = batch ? batch.flatMap(function(tile) {
+      return Array.from(tile.querySelectorAll('.mall-tile-osp-play'));
+    }) : tileField.querySelectorAll('.mall-tile-osp-play');
+    ospPlayBtns.forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var tile = btn.closest('.mall-tile');
+        if (!tile) return;
+        var index = Number(tile.dataset.index || 0);
+        setTileFlipped(tile, false);
+        togglePlay(index);
+      });
+    });
+
+    var ospEnterBtns = batch ? batch.flatMap(function(tile) {
+      return Array.from(tile.querySelectorAll('.mall-tile-osp-enter'));
+    }) : tileField.querySelectorAll('.mall-tile-osp-enter');
+    ospEnterBtns.forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var tile = btn.closest('.mall-tile');
+        if (!tile) return;
+        var foundupId = tile.dataset.foundupId;
+        setTileFlipped(tile, false);
+        if (foundupId) navigateToFoundUp(foundupId);
+      });
+    });
+
     // Bind once: rerendering rows must not accumulate document listeners.
     if (escapeBound) return;
     escapeBound = true;
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && expandedFoundUp !== null && !fixedVideoField) {
+      if (e.key === 'Escape' && activeFlippedTile) {
+        e.stopPropagation();
+        setTileFlipped(activeFlippedTile, false);
+      } else if (e.key === 'Escape' && expandedFoundUp !== null && !fixedVideoField) {
         e.stopPropagation();
         collapseFoundUp();
       } else if (e.key === 'Escape' && playingIndex !== null) {
@@ -3251,6 +3482,12 @@
     getTileLoadStates: getTileLoadStates,
     getLoadPolicy: getLoadPolicy,
     isViewportLoadingActive: isViewportLoadingActive,
+    isPhonePatchViewport: isPhonePatchViewport,
+    flipTile: function(foundupId, flipped) {
+      if (!tileField) return false;
+      var tile = tileField.querySelector('.mall-tile[data-foundup-id="' + String(foundupId || '').replace(/["\\]/g, '') + '"]');
+      return setTileFlipped(tile, flipped);
+    },
 
     // Debug helpers
     debugTiles: function() {

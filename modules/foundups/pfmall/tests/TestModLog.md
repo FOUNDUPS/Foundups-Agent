@@ -1,5 +1,9 @@
 # p.fMALL Test ModLog
 
+## 2026-11-16 — Build v22 catalog truth gate, OSP narrative, and phone patch-load verification
+
+- Verified reconciled 16-entry `mall-video-catalog.json` (`voteballots`, `trade`, `magadoom_001`, `kids_episodes` + WSP 109 `outcome`/`solution`/`pain` + `"trading"` in `VALID_CATEGORIES` + idempotent `project_public_video_lanes`) across `test_mall_video_catalog.py`, `test_catalog_foundup_truth_gate.py`, and `test_projector.py`, plus full `pytest` (`2,290 passed, 0 failed`), all 6 Node VM suites, and Chromium + WebKit `mall_scoped_video_browser.py` (`Build v22`).
+
 ## 2026-11-16 — Build v21 open Mall (`play.foundups.com`) & `foundups.com` Member Portal handoff tests
 
 - Extended `test_mall_video_player.py` (`+2` tests) verifying `['play.foundups.com', 'mall']`, `MEMBER_PORTAL_ORIGIN = 'https://foundups.com'`, `isOpenMallHost`, `resolveMemberEntry`, and `memberPortalUrl` contracts across `mall-video-projection.js` and `mall-video-player.js`, alongside gateway checks in `test_gateway_roc_shell.py` and `test_gateway_terms_gate.py`.

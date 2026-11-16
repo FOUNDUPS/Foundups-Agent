@@ -1,5 +1,9 @@
 # p.fMALL Roadmap
 
+## Canonical Catalog, OSP Tile Flip & Phone Patch-Load (Build v22) — 2026-11-16
+
+- Added `"trading"` to `VALID_CATEGORIES`, consolidated `linkedin_*` pseudo-tiles into header/About/`linkedin_url` links, reconciled `voteballots`, `trade`, `magadoom_001`, and `kids_episodes` from `foundup_registry.json`, grounded `foundups.com` `#foundupTicker` in real catalog length, added WSP 109 `Outcome · Solution · Pain` tile turn-over on hover-hold / long-press, and enabled phone viewport DOM + poster patch-loading under `Build v22` (`pfmall-member-v22`).
+
 ## Manifest & Catalog Truth Reconciliation (Build v19) — 2026-11-16
 
 - Repaired all four previously invalid `foundup_manifest.json` declarations (`detect_ai`, `eduit`, `shield`, `holoindex_prod_01`), added `"infrastructure"` to `VALID_CATEGORIES`, and hardened null-coalescing in `load_manifest()` so `PfmallShell().boot()` loads 12/12 workspace manifests with zero warnings.

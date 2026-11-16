@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <script src="/member/js/mall-video-projection.js?v=21"></script>
+  <script src="/member/js/mall-video-projection.js?v=22"></script>
   <script>
     if (window.mallVideoProjection?.hostScope(window.location)) window.location.replace('/member/');
   </script>
@@ -1477,7 +1477,7 @@
       <div class="steps">
         <div class="step reveal">
           <div class="step-num">00</div>
-          <h3>Browse <span id="foundupTicker" style="font-family:var(--mono);color:var(--cyan);font-size:0.85em;">15</span> FoundUPS</h3>
+          <h3>Browse <span id="foundupTicker" style="font-family:var(--mono);color:var(--cyan);font-size:0.85em;">16</span> FoundUPS</h3>
           <p>Add your FoundUPS (coming soon).</p>
         </div>
         <div class="step reveal">
@@ -2304,50 +2304,23 @@
     // === BUILD CANVAS moved to external module: public/js/foundup-cube.js ===
     // Auto-initializes on #buildCanvas.
 
-    // === FoundUP Ticker — realistic deterministic growth ===
-    // Model: builders(t) * ~1 FoundUP/week, builders grow ~1/month
-    // Deterministic: same number for every visitor, no backend.
-    // State is computed from start date — always increasing, never resets.
+    // === FoundUP Ticker — truthful catalog count (WSP 97) ===
+    // Grounded in /member/mall-video-catalog.json rather than synthetic PRNG growth.
     (function () {
       const el = document.getElementById('foundupTicker');
       if (!el) return;
 
-      const DAY_MS = 86400000;
-      const START = Date.UTC(2026, 3, 1, 0, 0);  // April 1 2026 00:00 UTC
-      const N0 = 15;                              // FoundUPS that exist today
+      const FALLBACK_CATALOG_COUNT = 16;
+      el.textContent = FALLBACK_CATALOG_COUNT.toLocaleString();
 
-      // Mulberry32 — deterministic PRNG
-      function mulberry32(seed) {
-        return function () {
-          seed |= 0; seed = seed + 0x6D2B79F5 | 0;
-          let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
-          t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
-          return ((t ^ t >>> 14) >>> 0) / 4294967296;
-        };
-      }
-
-      function getCount() {
-        const now = Date.now();
-        const days = Math.max(0, Math.floor((now - START) / DAY_MS));
-        let total = N0;
-
-        for (let d = 0; d < days; d++) {
-          // Builders: starts at 1 (012), +1 per month slowly
-          const builders = 1 + Math.floor(d / 30);
-          // Each builder adds ~1 FoundUP per week = ~1/7 chance per day
-          const chance = builders / 7;
-          const rng = mulberry32(d * 7919 + 42);
-          if (rng() < chance) total += 1;
-        }
-        return total;
-      }
-
-      el.textContent = getCount().toLocaleString();
-
-      // Re-check once per hour (catches day boundary)
-      setInterval(() => {
-        el.textContent = getCount().toLocaleString();
-      }, 3600000);
+      fetch('/member/mall-video-catalog.json', { credentials: 'omit' })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((items) => {
+          if (Array.isArray(items) && items.length > 0) {
+            el.textContent = items.length.toLocaleString();
+          }
+        })
+        .catch(() => {});
     })();
 
     // === ROC Canvas — network visualization ===

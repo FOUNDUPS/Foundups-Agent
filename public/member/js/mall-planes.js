@@ -187,6 +187,21 @@
         '<a href="/member/foundup.html?id=' + encodeURIComponent(item.foundup_id) + '" class="fv-primary-cta">Open FoundUp</a>';
     }
 
+    var linkedinUrl = propertySourceUrl(item.linkedin_url);
+    if (linkedinUrl) {
+      secondaryLinkHtml = (secondaryLinkHtml ? secondaryLinkHtml + ' \u00b7 ' : '') +
+        '<a href="' + esc(linkedinUrl) + '" target="_blank" rel="noopener noreferrer" class="fv-secondary-link">LinkedIn \u2197</a>';
+    }
+
+    var ospHtml = '';
+    if (item.outcome || item.solution || item.pain) {
+      ospHtml = '<div class="fv-osp">' +
+        (item.outcome ? '<div class="fv-osp-item"><span class="fv-osp-label fv-osp-outcome">Outcome</span><p>' + esc(item.outcome) + '</p></div>' : '') +
+        (item.solution ? '<div class="fv-osp-item"><span class="fv-osp-label fv-osp-solution">Solution</span><p>' + esc(item.solution) + '</p></div>' : '') +
+        (item.pain ? '<div class="fv-osp-item"><span class="fv-osp-label fv-osp-pain">Pain</span><p>' + esc(item.pain) + '</p></div>' : '') +
+      '</div>';
+    }
+
     body.innerHTML =
       '<div class="fv-hero theme-' + esc(item.theme || item.foundup_id || 'default') + '">' +
         '<div class="fv-token">' + esc(displayToken) + '</div>' +
@@ -198,6 +213,7 @@
       '</div>' +
       sourceContext +
       '<p class="fv-tagline">' + esc(displayTagline) + esc(videoHint) + '</p>' +
+      ospHtml +
       '<div class="fv-actions">' +
         primaryCtaHtml +
       '</div>' +

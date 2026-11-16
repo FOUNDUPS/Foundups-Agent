@@ -1,5 +1,19 @@
 # Member Area Module Change Log
 
+## 2026-11-16 · Build v22 FoundUps top-left brand + LN link, canonical catalog reconciliation, OSP tile flip, and phone patch-loading
+
+- **Top-Left FoundUps Brand + LinkedIn Badge (`index.html`, `css/member.css`, `css/mall-video-projection.css`, `member-sw.js`)**:
+  - Replaced the duplicate top-left Red Dog icon in `.mall-brand-minimal` with `/logo-foundups.svg` inside `.mall-brand-cluster`, keeping Red Dog (`/logo-dog.png`) as the bottom-right concierge/search trigger (`#redDogBtn`, `.mall-search-dog`) while preserving `hpcPortrait` on scoped `[data-mall-video-scope="hpc"]`.
+  - Added `.mall-brand-ln` (`https://www.linkedin.com/company/foundups/`) beside the top-left FoundUps logo (hidden on `[data-mall-video-scope]`) and official FoundUPS / UnDaoDu (`012`) LinkedIn links in Red Dog's `[data-reddog-concierge]` About section.
+- **Canonical Catalog Truth & LN Consolidation (`mall-video-catalog.json`, `../index.html`, `../../scripts/refresh_mall_catalog.py`)**:
+  - Consolidated the four zero-video `linkedin_profile` pseudo-tiles (`linkedin_012`, `linkedin_esingularity`, `linkedin_tsingularity`, `linkedin_foundups`) out of the tile grid (`linkedin_url` retained on `esingularity_001`, `foundups_main`, and `undaodu`) and added the four discoverable canonical registry FoundUps (`voteballots`, `trade`, `magadoom_001`, `kids_episodes`).
+  - Grounded `#foundupTicker` on `foundups.com` (`public/index.html`) in `/member/mall-video-catalog.json` count instead of synthetic `mulberry32` PRNG growth.
+- **Tile Hover-Hold / Long-Press Flip for Outcome · Solution · Pain (`js/mall-tile-field.js`, `css/mall-tile-field.css`, `js/mall-planes.js`, `css/mall-planes.css`)**:
+  - Populated WSP 109 `outcome`, `solution` (with stage posture), and `pain` fields across all catalog FoundUps and rendered `.mall-tile-osp-back` + accessible `.mall-tile-flip-btn` (`i`/`f` keyboard shortcut and `Escape` dismiss).
+  - Desktop mouse hover-and-hold (`650ms`) and single-finger touch press-and-hold (`450ms`, movement `< 10px`, `tapGuardActive` click suppression) smoothly flip tiles to reveal Outcome, Solution, and Pain (`▶ Play`, `Enter ↗`, and `↺` flip-back controls).
+- **Phone Viewport Patch-Loading (`js/mall-tile-field.js`, `member-sw.js`)**:
+  - Extended progressive grid batching (`PHONE_PATCH_BATCH = 9` + `IntersectionObserver` tail append) to phone grid and expanded video lanes (`594`-clip `move2japan`, etc.), and wired `loadTileContent()` to hydrate `data-poster-url` thumbnails only as tiles enter `viewportMarginPx` (`200px`). Advanced shell generation to `Build v22` / `pfmall-member-v22`. WSP 22, 49, 50, 97, 104, and 109 apply.
+
 ## 2026-11-16 · Build v21 open Mall landing (`play.foundups.com`) and `foundups.com` Member Portal handoff
 
 - **Open Guest p.fMALL Landing on `play.foundups.com` (`js/mall-video-projection.js`, `index.html`, `../index.html`)**:

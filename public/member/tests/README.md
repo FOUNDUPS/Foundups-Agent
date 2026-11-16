@@ -22,7 +22,7 @@ guest discovery on `play.foundups.com`, `Enter FoundUp` handoff through the
 `foundups.com` Member Portal (`?enter={foundup_id}` -> sign-in -> invite gate ->
 admitted FoundUp entry), scoped HPC sign-in return, admitted theater, and the
 public discovery link.
-`node public/member/tests/mall_product_state_vm.mjs` covers v21 installation,
+`node public/member/tests/mall_product_state_vm.mjs` covers v22 installation,
 obsolete Mall cache retirement and scoped offline behavior. Real YouTube time
 progression and physical-device gates are separate in the
 [incident](../../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md).

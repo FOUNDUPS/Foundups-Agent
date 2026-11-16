@@ -17,9 +17,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="/move2japan/move2japan.css">
-  <link rel="stylesheet" href="/member/css/mall-video-projection.css?v=21">
+  <link rel="stylesheet" href="/member/css/mall-video-projection.css?v=22">
 
-  <script src="/member/js/mall-video-projection.js?v=21"></script>
+  <script src="/member/js/mall-video-projection.js?v=22"></script>
   <!-- Clerk Authentication SDK -->
   <template id="memberClerkSdk">
   <script
@@ -95,8 +95,8 @@
   <link rel="stylesheet" href="css/member.css">
   <link rel="stylesheet" href="css/account-concierge.css">
   <link rel="stylesheet" href="css/mall-planes.css">
-  <link rel="stylesheet" href="css/mall-tile-field.css?v=21">
-  <link rel="stylesheet" href="css/mall-video-player.css?v=21">
+  <link rel="stylesheet" href="css/mall-tile-field.css?v=22">
+  <link rel="stylesheet" href="css/mall-video-player.css?v=22">
 </head>
 <body>
   <!-- Loading state (shown while checking auth) -->
@@ -262,8 +262,12 @@
       <div class="account-section-label">Red Dog</div>
       <div class="reddog-concierge-guidance">
         <p class="reddog-guidance-item">Welcome to the p.fMALL. I keep track of your FoundUps and help you find your way around.</p>
-        <p class="reddog-guidance-item">Tap a tile to play its video queue. Use the Enter button to visit a FoundUp. Pinch to expand.</p>
+        <p class="reddog-guidance-item">Tap a tile to play its video queue. Hover-hold or press-and-hold any tile to flip it for Outcome, Solution &amp; Pain. Use the Enter button to visit a FoundUp. Pinch to expand.</p>
         <p class="reddog-guidance-item">Swipe down from the top or tap my button to open this panel. Swipe up to close.</p>
+        <div class="reddog-about-links">
+          <a href="https://www.linkedin.com/company/foundups/" target="_blank" rel="noopener noreferrer" class="reddog-about-link">FoundUPS LinkedIn &#x2197;</a>
+          <a href="https://www.linkedin.com/in/openstartup/" target="_blank" rel="noopener noreferrer" class="reddog-about-link">UnDaoDu (012) LinkedIn &#x2197;</a>
+        </div>
       </div>
     </div>
   </aside>
@@ -287,9 +291,14 @@
           </div>
           <button id="videoScopeInfo" type="button" aria-label="About this FoundUp" aria-haspopup="dialog">i</button>
         </div>
-        <a href="/" class="mall-brand-minimal" aria-label="FoundUPS home">
-          <img src="/logo-dog.png" alt="" class="mall-brand-logo-sm">
-        </a>
+        <div class="mall-brand-cluster">
+          <a href="/" class="mall-brand-minimal" aria-label="FoundUPS home">
+            <img src="/logo-foundups.svg" alt="" class="mall-brand-logo-sm">
+          </a>
+          <a href="https://www.linkedin.com/company/foundups/" target="_blank" rel="noopener noreferrer" class="mall-brand-ln" aria-label="FoundUPS on LinkedIn" title="FoundUPS on LinkedIn">
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M19 3A2 2 0 0 1 21 5v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77Z"/></svg>
+          </a>
+        </div>
         <div class="mall-self-anchor">
           <span id="mallUserHandle" class="mall-user-handle">@member</span>
           <button id="mallAvatarTrigger" class="mall-avatar-trigger" aria-label="Open account">
@@ -1323,15 +1332,15 @@
   </div>
 
   <script src="/move2japan/property-search.js"></script>
-  <script src="js/gesture-engine.js?v=21"></script>
+  <script src="js/gesture-engine.js?v=22"></script>
   <script src="js/gesture-hints.js"></script>
   <script src="js/shell-bridge-interceptor.js"></script>
-  <script src="js/mall-planes.js?v=21"></script>
-  <script src="js/mall-tile-field.js?v=21"></script>
-  <script src="js/mall-video-player.js?v=21"></script>
+  <script src="js/mall-planes.js?v=22"></script>
+  <script src="js/mall-tile-field.js?v=22"></script>
+  <script src="js/mall-video-player.js?v=22"></script>
   <script src="js/account-concierge.js"></script>
   <script src="js/red-dog-concierge.js"></script>
-  <script src="js/mall-state-restore.js?v=21"></script>
+  <script src="js/mall-state-restore.js?v=22"></script>
 
   <script id="productDiscoveryBoot">
     const publicVideoScope = window.mallVideoProjection?.hostScope(window.location) &&

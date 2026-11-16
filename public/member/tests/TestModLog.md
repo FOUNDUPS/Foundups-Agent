@@ -1,3 +1,8 @@
+## 2026-11-16 — Build v22 brand chrome, canonical catalog, OSP tile flip, and phone patch-load verification
+
+- Updated `mall_product_state_vm.mjs` (`24 passed`, `pfmall-member-v22` + `/logo-foundups.svg` precache + obsolete `v21` retirement), `test_mall_tile_field.py` (`?v=22`), and `mall_scoped_video_browser.py` (`Build v22`).
+- Extended `mall_scoped_video_browser.py` across Chromium + WebKit to verify `/logo-foundups.svg` + `a.mall-brand-ln` (`https://www.linkedin.com/company/foundups/`) in top-left chrome, removal of `linkedin_*` pseudo-tiles, presence of reconciled registry FoundUps (`voteballots`, `trade`, `magadoom_001`, `kids_episodes`), desktop mouse hover-hold (`pointerenter` -> `.is-flipped` Outcome/Solution/Pain -> `pointerleave` unflip), mobile touch press-hold OSP flip, and phone viewport DOM patch-loading on expanded `move2japan` (`9 <= rendered < 594` + `Load more videos`).
+
 ## 2026-11-16 — Build v21 open Mall (`play.foundups.com`) & `foundups.com` Member Portal handoff verification
 
 - Extended `mall_product_state_vm.mjs` (`24 passed`), `member_product_boot_vm.mjs` (`28 passed`), `test_mall_product_state.py`, `test_localhost_dev_harness.py`, `test_mall_tile_field.py`, and `mall_scoped_video_browser.py` for `Build v21` / `pfmall-member-v21`.

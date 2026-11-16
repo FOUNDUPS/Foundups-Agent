@@ -180,7 +180,7 @@ def main():
         expect(page.locator("#videoScopeTitle")).to_have_text("Hasan Piker Coalition")
         expect(page.locator("#videoScopeHeader #videoScopeTopic")).to_have_text("#SchumerOUT")
         build = page.locator("#videoScopeHeader .mall-build-label")
-        expect(build).to_have_text("Build v21")
+        expect(build).to_have_text("Build v22")
         expect(build).to_be_visible()
         expect(page.locator("#videoScopeHeader #videoScopeVoice")).to_have_attribute("href", "https://vote.mtrout.com/contact")
         expect(page.locator("#videoScopeInfo")).to_be_hidden()
@@ -371,7 +371,7 @@ def main():
         expect(page.locator(".mall-video-grid-empty")).to_have_text("No videos match your search.")
         more.tap()
         menu = page.get_by_role("dialog", name="More options")
-        expect(menu.get_by_text("Build v21", exact=True)).to_be_visible()
+        expect(menu.get_by_text("Build v22", exact=True)).to_be_visible()
         assert menu.bounding_box()["x"] <= more.bounding_box()["x"] + 1
         assert menu.bounding_box()["y"] + menu.bounding_box()["height"] < dock.bounding_box()["y"]
         expect(menu.get_by_role("combobox", name="Browser AI")).to_be_disabled()
@@ -540,7 +540,7 @@ def verify_member_poster_grid(page):
     player.get_by_role("button", name="Search options").click()
     options = player.get_by_role("dialog", name="Search options")
     expect(options.get_by_role("combobox", name="Browser AI")).to_be_disabled()
-    expect(options.get_by_text("Build v21", exact=True)).to_be_visible()
+    expect(options.get_by_text("Build v22", exact=True)).to_be_visible()
     page.keyboard.press("Escape")
     expect(options).not_to_be_visible()
     expect(player).to_be_visible()
@@ -800,6 +800,32 @@ def verify_member_phone(page, context, supports_cdp):
     assert page.evaluate("fixtureSpeech.starts === 4 && fixtureSpeech.stops === 3")
     expect(anchor.get_by_role("button", name="Open Red Dog")).to_be_visible()
 
+    # Phone patch-load (mounts only visible screenful patches out of 594 clips) & touch press-hold OSP flip
+    page.evaluate("mallTileField.searchCatalog(''); mallTileField.expandFoundUp(0)")
+    patched_count = field.locator(".mall-tile").count()
+    assert 9 <= patched_count < len(clips), f"Expected phone patch-load < {len(clips)}, got {patched_count}"
+    expect(field.get_by_role("button", name="Load more videos")).to_be_attached()
+    page.evaluate("mallTileField.collapseFoundUp()")
+    first_tile = field.locator('.mall-tile[data-foundup-id="move2japan"]')
+    first_tile.scroll_into_view_if_needed()
+    first_tile.evaluate("""el => {
+      const ev = new Event('touchstart', { bubbles: true, cancelable: true });
+      Object.defineProperty(ev, 'touches', { value: [{ clientX: 60, clientY: 60 }] });
+      el.dispatchEvent(ev);
+    }""")
+    page.wait_for_timeout(520)
+    first_tile.evaluate("""el => {
+      const ev = new Event('touchend', { bubbles: true, cancelable: true });
+      Object.defineProperty(ev, 'touches', { value: [] });
+      el.dispatchEvent(ev);
+    }""")
+    expect(first_tile).to_have_class(re.compile(r"\bis-flipped\b"))
+    expect(first_tile.locator(".mall-tile-osp-back")).to_contain_text("Outcome")
+    expect(first_tile.locator(".mall-tile-osp-back")).to_contain_text("Solution")
+    expect(first_tile.locator(".mall-tile-osp-back")).to_contain_text("Pain")
+    first_tile.locator(".mall-tile-osp-close").tap()
+    expect(first_tile).not_to_have_class(re.compile(r"\bis-flipped\b"))
+
     print(json.dumps({"member_phone_inline_and_immersive": True,
                       "horizontal_touch_scroll": supports_cdp,
                       "foreground_dictation_hold_and_stop": True,
@@ -853,6 +879,21 @@ def verify_member_entry(browser_type):
     expect(page.locator("#mallTileField .mall-tile")).to_have_count(len(ordinary_catalog))
     assert not any("clerk" in path or "firebase" in path for path in requested), requested
     expect(page.locator("#mallUserHandle")).to_have_text("Member Portal ↗")
+    expect(page.locator(".mall-brand-minimal img")).to_have_attribute("src", "/logo-foundups.svg")
+    expect(page.locator("a.mall-brand-ln")).to_have_attribute("href", "https://www.linkedin.com/company/foundups/")
+    expect(page.locator('#mallTileField .mall-tile[data-foundup-id^="linkedin_"]')).to_have_count(0)
+    expect(page.locator('#mallTileField .mall-tile[data-foundup-id="voteballots"]')).to_have_count(1)
+
+    # Desktop mouse hover-and-hold flips tile to reveal Outcome, Solution, Pain
+    gotjunk_tile = page.locator('#mallTileField .mall-tile[data-foundup-id="gotjunk_001"]')
+    gotjunk_tile.dispatch_event("pointerenter", {"pointerType": "mouse"})
+    page.wait_for_timeout(720)
+    expect(gotjunk_tile).to_have_class(re.compile(r"\bis-flipped\b"))
+    expect(gotjunk_tile.locator(".mall-tile-osp-back")).to_contain_text("Outcome")
+    expect(gotjunk_tile.locator(".mall-tile-osp-back")).to_contain_text("Solution")
+    expect(gotjunk_tile.locator(".mall-tile-osp-back")).to_contain_text("Pain")
+    gotjunk_tile.dispatch_event("pointerleave", {"pointerType": "mouse"})
+    expect(gotjunk_tile).not_to_have_class(re.compile(r"\bis-flipped\b"))
 
     # Non-video FoundUp quick-view on play.foundups.com routes Enter FoundUp through foundups.com Member Portal
     page.locator('#mallTileField .mall-tile[data-foundup-id="gotjunk_001"]').click()
