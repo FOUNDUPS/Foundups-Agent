@@ -712,3 +712,18 @@ This source layer adds no live STT transport. The smoke transaction was a bounde
 operator-directed adapter, not automatic WRE admission or production promotion.
 The existing harness remains the shared evaluation owner for future audio and
 comment task families; each needs its own frozen references and scorer contract.
+
+For multiple offline observations, register by full identity:
+
+```python
+verifier = build_timing_verifier(
+    {case.task_id: case for case in cases},
+    {observation.lookup_key: observation for observation in observations},
+)
+```
+
+`lookup_key` binds case, candidate topology and response digest. Identical response
+bytes may belong to different cases or candidates. Legacy output-digest keys remain
+supported; a digest-only dictionary can already have discarded repeated outputs
+before this API is called. Duplicate full identities are rejected. This changes
+registration safety, not transcription quality or the SKIPPED acceptance boundary.

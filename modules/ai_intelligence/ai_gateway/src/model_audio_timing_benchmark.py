@@ -172,6 +172,11 @@ class TimingObservation:
     def output_digest(self) -> str:
         return "sha256:" + hashlib.sha256(self.response_bytes).hexdigest()
 
+    @property
+    def lookup_key(self) -> tuple[str, str, str]:
+        """Separate identical response bytes belonging to different identities."""
+        return (self.case_digest, self.candidate_topology_digest, self.output_digest)
+
 
 def _strict_payload(raw: bytes):
     def reject_constant(value):
@@ -189,26 +194,39 @@ def _strict_payload(raw: bytes):
                       object_pairs_hook=unique_pairs)
 
 
-def build_timing_verifier(cases: dict[str, TimingCase], observations: dict[str, TimingObservation]):
+def build_timing_verifier(
+    cases: dict[str, TimingCase],
+    observations: dict[str | tuple[str, str, str], TimingObservation],
+):
     """Use the existing BenchmarkVerifier seam; valid format remains SKIPPED.
 
     Callers retain structural reports separately. This adapter does not judge
     lyrics/alignment or authenticate supplied responses, cases or model identity.
+    Key observations by lookup_key when collecting multiple samples. Legacy
+    output-digest keys remain supported, but entries lost while constructing a
+    digest-only dict cannot be recovered. Duplicate full identities are rejected.
     """
     from .model_combination_benchmark_harness import ModelBenchmarkVerifierResult
     from .model_intelligence_outcomes import VerifierDecision
 
-    frozen_cases, frozen_observations = dict(cases), dict(observations)
+    frozen_cases, frozen_observations = dict(cases), {}
     for key, value in frozen_cases.items():
         if type(value) is not TimingCase or key != value.task_id:
             raise ValueError("case_lookup_invalid")
-    for key, value in frozen_observations.items():
-        if type(value) is not TimingObservation or key != value.output_digest:
+    for key, value in dict(observations).items():
+        if type(value) is not TimingObservation:
             raise ValueError("observation_lookup_invalid")
+        if not ((type(key) is str and key == value.output_digest)
+                or (type(key) is tuple and key == value.lookup_key)):
+            raise ValueError("observation_lookup_invalid")
+        if value.lookup_key in frozen_observations:
+            raise ValueError("observation_lookup_duplicate")
+        frozen_observations[value.lookup_key] = value
 
     def verify(task, candidate, output):
         case = frozen_cases.get(task.task_id)
-        observation = frozen_observations.get(output.output_digest)
+        observation = frozen_observations.get((case.digest, candidate.topology_digest,
+                                               output.output_digest)) if case is not None else None
         reason, report = "timing_identity_mismatch", None
         if (case is not None and observation is not None
                 and task.task_family == TASK_FAMILY

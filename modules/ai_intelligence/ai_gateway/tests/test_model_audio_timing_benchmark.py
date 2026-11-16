@@ -147,6 +147,77 @@ class HarnessIntegrationTests(unittest.TestCase):
         self.assertEqual(receipt.benchmark_evidence_receipts[0].accepted_count, 0)
         self.assertIsNone(receipt.samples[0].metrics.cost_estimate_usd)
 
+    def shared_response_run(self, cases, candidates):
+        raw = json.dumps({"words": [word()]}).encode()
+        observations = [TimingObservation(case.digest, candidate.topology_digest, raw)
+                        for case in cases for candidate in candidates]
+        # A byte digest is deliberately shared; registration must retain identity.
+        self.assertEqual(len({item.output_digest for item in observations}), 1)
+        tasks = [ModelBenchmarkTask(case.task_id, TASK_FAMILY, case.digest,
+                 self.task.expected_output_digest, CONTRACT_DIGEST) for case in cases]
+        output = ModelBenchmarkTaskOutput(observations[0].output_digest, "shared-response")
+        return run_model_combination_benchmark(
+            tasks=tasks, candidates=candidates, runner=lambda *_: output,
+            verifier=build_timing_verifier({case.task_id: case for case in cases}, {
+                (item.case_digest, item.candidate_topology_digest, item.output_digest): item
+                for item in observations}),
+            verifier_digest=CONTRACT_DIGEST, held_out_split_id="shared-response-fixtures")
+
+    def test_identical_outputs_across_candidates_do_not_overwrite(self):
+        other = build_model_benchmark_candidate((ModelBenchmarkRoleAssignment(
+            "principal", "fixture/other-model", "fixture"),))
+        for candidates in ((self.candidate, other), (other, self.candidate)):
+            with self.subTest(order=[item.candidate_id for item in candidates]):
+                receipt = self.shared_response_run((self.case,), candidates)
+                self.assertEqual(len(receipt.samples), 2)
+                self.assertEqual(len({s.verifier_receipt_id for s in receipt.samples}), 2)
+                for sample in receipt.samples:
+                    self.assertEqual(sample.decision, VerifierDecision.SKIPPED)
+                    self.assertFalse(sample.accepted)
+                    self.assertIn("transcription_accuracy_unmeasured", sample.rejection_reasons)
+
+    def test_identical_outputs_across_cases_do_not_overwrite(self):
+        other = TimingCase("other-song", digest("other-audio"), self.case.preprocessing_digest,
+                           self.case.agent_config_digest, 20)
+        for cases in ((self.case, other), (other, self.case)):
+            with self.subTest(order=[item.task_id for item in cases]):
+                receipt = self.shared_response_run(cases, (self.candidate,))
+                self.assertEqual(len(receipt.samples), 2)
+                self.assertEqual(len({s.verifier_receipt_id for s in receipt.samples}), 2)
+                for sample in receipt.samples:
+                    self.assertEqual(sample.decision, VerifierDecision.SKIPPED)
+                    self.assertFalse(sample.accepted)
+                    self.assertIn("transcription_accuracy_unmeasured", sample.rejection_reasons)
+
+    def test_shared_output_is_checked_against_each_cases_bounds(self):
+        shorter = TimingCase("short-song", digest("short-audio"), self.case.preprocessing_digest,
+                             self.case.agent_config_digest, 1.5)
+        receipt = self.shared_response_run((self.case, shorter), (self.candidate,))
+        samples = {sample.task_id: sample for sample in receipt.samples}
+        self.assertEqual(samples[self.case.task_id].decision, VerifierDecision.SKIPPED)
+        self.assertEqual(samples[shorter.task_id].decision, VerifierDecision.REJECT)
+        self.assertIn("word_timestamps_invalid", samples[shorter.task_id].rejection_reasons)
+        self.assertTrue(all(not sample.accepted for sample in receipt.samples))
+
+    def test_duplicate_full_identity_registration_is_rejected(self):
+        observation = TimingObservation(self.case.digest, self.candidate.topology_digest, b'{}')
+        compound_key = (self.case.digest, self.candidate.topology_digest, observation.output_digest)
+        with self.assertRaisesRegex(ValueError, "observation_lookup_duplicate"):
+            build_timing_verifier({self.case.task_id: self.case}, {
+                observation.output_digest: observation, compound_key: observation})
+
+    def test_different_outputs_for_same_identity_remain_selectable(self):
+        observations = [TimingObservation(self.case.digest, self.candidate.topology_digest, raw)
+                        for raw in (json.dumps({"words": [word()]}).encode(), b'{"words":[]}')]
+        verifier = build_timing_verifier({self.case.task_id: self.case},
+                                         {item.output_digest: item for item in observations})
+        results = [verifier(self.task, self.candidate, ModelBenchmarkTaskOutput(
+            item.output_digest, "fixture-receipt")) for item in observations]
+        self.assertEqual([item.decision for item in results],
+                         [VerifierDecision.SKIPPED, VerifierDecision.REJECT])
+        self.assertIn("word_timestamps_invalid", results[1].rejection_reasons)
+        self.assertTrue(all(not item.evidence_correct for item in results))
+
     def test_invalid_structure_is_rejected(self):
         decision, _, _ = self.verify_bytes(b'{"text":"fixture"}')
         self.assertEqual(decision.decision, VerifierDecision.REJECT)
@@ -179,8 +250,15 @@ class HarnessIntegrationTests(unittest.TestCase):
 
     def test_wrong_output_lookup_digest_rejects_before_harness(self):
         observation = TimingObservation(self.case.digest, self.candidate.topology_digest, b'{}')
-        with self.assertRaisesRegex(ValueError, "observation_lookup_invalid"):
-            build_timing_verifier({self.case.task_id: self.case}, {digest("substitution"): observation})
+        invalid_keys = (digest("substitution"),
+                        (digest("other-case"), self.candidate.topology_digest, observation.output_digest),
+                        (self.case.digest, "other-topology", observation.output_digest),
+                        (self.case.digest, self.candidate.topology_digest, digest("other-output")),
+                        (self.case.digest, observation.output_digest))
+        for key in invalid_keys:
+            with self.subTest(key=key):
+                with self.assertRaisesRegex(ValueError, "observation_lookup_invalid"):
+                    build_timing_verifier({self.case.task_id: self.case}, {key: observation})
 
     def test_wrong_task_or_contract_rejects(self):
         _, verifier, output = self.verify_bytes(b'{}')

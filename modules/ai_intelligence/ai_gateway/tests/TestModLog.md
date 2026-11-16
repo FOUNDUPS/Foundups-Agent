@@ -1,6 +1,18 @@
 # AI Gateway TestModLog
 
-## 2026-11-16 — Independent repair verifier firewall & policy controls
+## 2026-11-16 - Audio observation identity collision regressions
+
+Freeze five added offline cases before the adapter fix: identical bytes across
+candidates and cases in both registration orders, per-case duration bounds,
+duplicate legacy/compound aliases and different output bytes for one identity.
+Extend malformed-key controls to changed case, topology, output and tuple length.
+Original27 plus5 gives32 test methods. The unchanged adapter produced5 subtest
+errors and1 assertion failure; the outer red-run summary had incorrectly expected
+3 errors, so its nonzero result and raw log are retained. No regression was relaxed.
+The repaired adapter passes all32 methods with zero errors, failures or skips through the existing bounded runner. No provider calls.
+WSP11/22/50/97.
+
+## 2026-11-16 ? Independent repair verifier firewall & policy controls
 
 Added `test_independent_repair_verifier.py` (5 passed) verifying
 `ModelIndependencePolicy.evaluate_independence` anti-self-grading and high-risk
@@ -10,7 +22,7 @@ rejection of unallowed builder context kwargs, plus `IndependentVerifierReceipt`
 canonical SHA-256 `verify_integrity()` tamper detection for Issue #1522.
 WSP 11/22/49/50/97.
 
-## 2026-11-02 — Preserve the prepared General model's native identity
+## 2026-11-02 ? Preserve the prepared General model's native identity
 
 The prepared PC uses a display alias distinct from its native inventory key.
 The shared local incumbent now honors existing `LM_STUDIO_NATIVE_MODEL_KEY`,
@@ -28,7 +40,7 @@ it does not prove installed residency or live model quality. The existing CI
 selector now pins all 88 exact case names. WSP11/22/50/62/77/84/97.
 
 
-## 2026-11-02 — Held-out native General key controls
+## 2026-11-02 ? Held-out native General key controls
 
 WSP00/11/22/50/77/84/97. Added seven controls before the incumbent-key repair:
 the prepared Gemma display/path/native-key pair must produce an exact native
@@ -40,7 +52,7 @@ residency, and the existing signed helper gains optional provider/model inputs.
 Existing test bodies are unchanged. No tests, service, model or provider calls
 were executed by the independent author; execution belongs to the guarded owner.
 
-## 2026-11-01 — Current guarded model-routing qualification
+## 2026-11-01 ? Current guarded model-routing qualification
 
 Fresh credential-free Windows runs: 63 independently authored routing/composition
 cases; 18 migrated legacy adapter cases (81 combined fixed selector); 165 retained
@@ -57,7 +69,7 @@ No tests were quarantined or skipped to obtain this result. Production provider
 qualification, signed promotion, daemon startup and public delivery remain
 separate/unverified. Packaging/security and hosted checks have their own receipts.
 
-## [2026-11-01] — Independent YouTube routing acceptance controls
+## [2026-11-01] ? Independent YouTube routing acceptance controls
 
 WSP00/11/22/50/77/84/97. Added the distinct YouTube consumer test surface after
 inventorying existing configured-caller, K3 and signed runtime-binding suites.

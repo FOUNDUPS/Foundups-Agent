@@ -1,6 +1,18 @@
 # AI Gateway Module Change Log
 
-## 2026-11-16 — Independent repair verifier firewall and model-independence policy
+## 2026-11-16 - Preserve distinct audio observations with identical output bytes
+
+Independent review of PR2399 found response-digest-only lookup discarded case or
+candidate identity. Add `TimingObservation.lookup_key` and use full
+case/candidate/output keys internally; validate compound and legacy keys and reject
+duplicate full-identity aliases. Preserve response byte digests, existing task and
+contract checks, legacy unique-output callers and unmeasured SKIPPED quality.
+Five new synthetic tests cover candidate/case collisions, per-case duration bounds,
+duplicate aliases and different outputs for one identity. No provider transport,
+new dependency or inference request. All32 offline cases pass through the existing qualified bounded runner; zero additional inference. Exact execution receipts remain private.
+WSP11/22/50/77/97.
+
+## 2026-11-16 ? Independent repair verifier firewall and model-independence policy
 
 Integrated `src/independent_repair_verifier.py` and `tests/test_independent_repair_verifier.py`
 for scientific self-healing repair verification (Issue #1522). `VerifierContextFirewall.project_evidence_packet`
@@ -11,7 +23,7 @@ normalized builder/verifier model collisions (`self_grading_prohibited`) and pai
 `IndependentVerifierReceipt`. Five offline unit tests pass; no provider calls or
 PatternMemory custody changes. WSP 11/22/49/50/77/97.
 
-## 2026-11-02 — Preserve the prepared General model's native identity
+## 2026-11-02 ? Preserve the prepared General model's native identity
 
 The prepared PC uses a display alias distinct from its native inventory key.
 The shared local incumbent now honors existing `LM_STUDIO_NATIVE_MODEL_KEY`,
@@ -29,7 +41,7 @@ it does not prove installed residency or live model quality. The existing CI
 selector now pins all 88 exact case names. WSP11/22/50/62/77/84/97.
 
 
-## 2026-11-01 — Shared YouTube model orchestration
+## 2026-11-01 ? Shared YouTube model orchestration
 
 WSP00/10/11/22/50/62/77/84/97. Replace consumer-owned provider chains with
 `AIGateway.call_youtube_task` for assessment, writer and exact final review.
