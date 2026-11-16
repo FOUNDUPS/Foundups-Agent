@@ -1412,6 +1412,16 @@ jobs:
         run: |
           python modules/infrastructure/wre_core/scripts/generate_test_registry.py --check
 
+      - name: Verify offline audio timing benchmark contract
+        if: steps.audit-scope.outputs.lane != 'docs'
+        env:
+          PYTHONUTF8: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTHON_DOTENV_DISABLED: '1'
+        run: >-
+          python -B -m unittest
+          modules.ai_intelligence.ai_gateway.tests.test_model_audio_timing_benchmark
+
       - name: Verify scaffold and test-source import safety
         if: steps.audit-scope.outputs.lane != 'docs'
         env:
