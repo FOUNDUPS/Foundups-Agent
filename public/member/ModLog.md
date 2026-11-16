@@ -1,5 +1,20 @@
 # Member Area Module Change Log
 
+## 2026-11-16 · Build v20 top-anchored floating player, edge tuck/restore, pinch gestures, and WikiTube sequential recovery
+
+- **Unified Top-Anchored Floating Player (`js/mall-video-player.js`, `js/mall-tile-field.js`, `css/mall-video-player.css`, `css/mall-video-projection.css`, `css/mall-tile-field.css`)**:
+  - Replaced in-row `.mall-inline-player-slot` DOM reparenting with a single permanently mounted `#videoPlayerFullscreen` in `document.body` across Floating (`.video-player-floating`), Tucked (`.video-player-floating.is-tucked`), WikiTube (`.video-player-wikitube`), and Desktop Theater (`.video-player-theater`), preserving the live YouTube `<iframe>` / `<video>`, playback position, audio, and queue across transitions.
+  - Every selected tile opens at the same top-anchored floating position (`--floating-top`) with dynamic `--floating-player-clearance` and `scroll-padding-top` so grid content scrolls freely underneath while clicked tiles remain visible with `aria-current="true"`.
+  - Adjusted `<=420px` 3-column field padding/gaps so `375px` portrait phone tiles render at `>= 120px` width for one-tap YouTube RMF autoplay eligibility, warm `YT.Player` reuse via `loadVideoById` / `cueVideoById` (`ytActiveGeneration` tracking), and truthful `Play video` fallback (`autoplay-blocked` / `manual-play`) when blocked.
+- **Swipe-Right Edge Tuck & Restore (`js/mall-video-player.js`, `css/mall-video-player.css`)**:
+  - Added horizontal swipe-right (`dx >= 48px`) and accessible `Tuck player` (`[data-action="tuck"]`) button on the floating player to dock it off the right viewport edge while audio, playback time, and queue continue uninterrupted; added visible `.video-player-tuck-handle` (`Restore player`) supporting tap and swipe-left restore.
+- **Intentional Pinch Gestures & Accessible Alternatives (`js/mall-video-player.js`)**:
+  - Added disambiguated 2-finger pinch (`PINCH_OUT_RATIO = 1.25`, `PINCH_IN_RATIO = 0.78`, `PINCH_MIN_DELTA_PX = 26`, `PINCH_MIN_START_PX = 20`), iOS `gesturechange`, and `Ctrl+Wheel` support alongside accessible `Open WikiTube` (`[data-action="expand"]`), `Floating player` (`[data-action="float"]`), `Close player` / `Back` (`[data-action="back"]`), and `Previous` / `Next` buttons: pinch-out on floating opens WikiTube and immediately attempts playback; pinch-in on floating or WikiTube closes to the grid without conflicting with `.video-player-queue-track` or `.mall-category-track` scrolling.
+- **WikiTube Sequential Playback & Bounded Failure Recovery (`js/mall-video-player.js`)**:
+  - Sequential auto-advance (`handleVideoEnded`) skips previously failed indices (`failedQueueIndices`) and `scheduleWikiTubeRecovery` advances past unavailable (`100`) or restricted (`101`, `150`) clips up to `MAX_CONSECUTIVE_AUTO_SKIPS = 5` before halting cleanly (`queueHalted = true`), preventing infinite loops while never auto-skipping browser `onAutoplayBlocked`.
+- **Shell Generation & Cache Freshness (`member-sw.js`, `js/mall-video-projection.js`, `index.html`, `firebase.json`)**:
+  - Advanced `mallBuild` to `'v20'`, `CACHE_NAME` to `'pfmall-member-v20'`, `?v=20` asset URLs with `updateViaCache: 'none'`, and `Cache-Control: no-cache` HTML/SW hosting headers. WSP 22, 49, 50, 97, and 104 apply.
+
 ## 2026-11-16 · Build v19 catalog truth, HPC tile routing, and activeVideo continuity
 
 - **Catalog Truth & Schema Normalization (`mall-video-catalog.json`)**:

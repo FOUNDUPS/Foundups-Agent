@@ -12,14 +12,23 @@ The dedicated HPC hostname selects a fixed guest video field from
 redirect to `/member/`. On FoundUps, `?foundup=hpc` selects the same
 field after the existing sign-in, invitation and username checks. The
 same-tab sign-in handoff retains the registered scope for up to 15 minutes
-and consumes it once after admission. Touch and narrow views use
-three portrait columns with six-item vertical batches. Tap or Enter replaces
-the selected thumbnail with the shared player across its original row.
-Neighboring thumbnails reflow around it. The corner control and pinch-out
-on a thumbnail or the player toolbar open immersive playback. Expansion
-retains the provider iframe.
-Close, Escape, Back or pinch-in on the surrounding chrome restores the grid
-anchor and focus.
+and consumes it once after admission. Touch and narrow views use three portrait columns with six-item vertical
+batches. Tap or Enter opens or switches the selected clip in the single
+top-anchored floating player (`#videoPlayerFullscreen.video-player-floating`)
+above the grid while keeping the selected tile visible (`aria-current="true"`)
+and allowing the grid to scroll underneath (`--floating-player-clearance`).
+Swiping the floating player right (or activating `Tuck player`) tucks it to
+the right viewport edge while audio and queue state continue; tapping or
+swiping left on `.video-player-tuck-handle` (`Restore player`) restores it.
+The corner control, `Open WikiTube`, or pinch-out on a thumbnail or the
+floating player chrome opens sequential WikiTube playback (`WikiTube video player`)
+and immediately attempts playback while retaining the live provider iframe.
+`Floating player` minimizes WikiTube back to the floating player; Close,
+Escape, Back, or pinch-in on floating or WikiTube chrome closes the player
+and restores grid anchor and focus. WikiTube advances sequentially on clip
+end and bounds consecutive auto-skips (`MAX_CONSECUTIVE_AUTO_SKIPS = 5`) across
+unavailable (`100`) or restricted (`101`, `150`) clips (`queueHalted = true`),
+halting immediately with `Play video` when autoplay is blocked.
 
 A viewport of at least 900 CSS px with a fine primary pointer and hover opens
 the shared theater. It displays the main player, then scoped video search, then

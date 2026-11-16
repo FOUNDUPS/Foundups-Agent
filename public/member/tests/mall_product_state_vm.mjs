@@ -402,27 +402,27 @@ await check('install reloads only explicit public shell and product assets', asy
     assert.equal(request.credentials, 'omit');
     return url.pathname + url.search;
   });
-  for (const path of ['/member/js/mall-tile-field.js?v=6', '/member/js/mall-video-projection.js?v=12', '/member/js/mall-state-restore.js?v=12', '/member/js/mall-planes.js?v=12', '/member/hpc.webmanifest', '/member/hpc-icon-180.png', '/member/hpc-icon-192.png', '/member/hpc-icon-512.png', '/move2japan/property-search.js', '/move2japan/move2japan.css']) {
-    assert.equal(installed.includes(path), true);
+  for (const path of ['/member/js/mall-tile-field.js?v=20', '/member/js/mall-video-player.js?v=20', '/member/js/mall-video-projection.js?v=20', '/member/js/mall-state-restore.js?v=12', '/member/js/mall-planes.js?v=12', '/member/hpc.webmanifest', '/member/hpc-icon-180.png', '/member/hpc-icon-192.png', '/member/hpc-icon-512.png', '/move2japan/property-search.js', '/move2japan/move2japan.css']) {
+    assert.equal(installed.includes(path), true, 'missing precached asset: ' + path);
   }
   assert.equal(installed.includes('/move2japan/properties.json'), false);
   assert.equal(installed.includes('/member/js/mall-video-projection.js'), false);
-  assert.equal(h.stores.has('pfmall-member-v19'), true);
+  assert.equal(h.stores.has('pfmall-member-v20'), true);
   const build = videoProjectionSource.match(/const mallBuild = '(v\d+)';/)?.[1];
-  assert.equal('pfmall-member-' + build, 'pfmall-member-v19');
+  assert.equal('pfmall-member-' + build, 'pfmall-member-v20');
 });
 
 await check('activation retires only obsolete caches owned by this Mall', async () => {
   const h = swRuntime();
-  const obsoleteVersions = Array.from({ length: 17 }, (_, index) => `pfmall-member-v${index + 2}`);
-  for (const name of [...obsoleteVersions, 'pfmall-member-v19', 'pfmall-properties-v1',
+  const obsoleteVersions = Array.from({ length: 18 }, (_, index) => `pfmall-member-v${index + 2}`);
+  for (const name of [...obsoleteVersions, 'pfmall-member-v20', 'pfmall-properties-v1',
     'pfmall-posters-v1', 'gotjunk-offline-v1', 'other-app-cache']) {
     await h.caches.open(name);
   }
   await h.event('activate');
   assert.deepEqual(h.deleted.sort(), obsoleteVersions.sort());
-  assert.equal(h.stores.has('pfmall-member-v18'), false);
-  assert.equal(h.stores.has('pfmall-member-v19'), true);
+  assert.equal(h.stores.has('pfmall-member-v19'), false);
+  assert.equal(h.stores.has('pfmall-member-v20'), true);
   assert.equal(h.stores.has('gotjunk-offline-v1'), true);
   assert.equal(h.stores.has('other-app-cache'), true);
 });
@@ -458,7 +458,7 @@ await check('product navigation shares one static member shell without query cac
   assert.equal(online.response.status, 200);
   assert.equal(h.calls.at(-1).request, '/member/');
   assert.equal(h.calls.at(-1).options.credentials, 'omit');
-  const cache = await h.caches.open('pfmall-member-v19');
+  const cache = await h.caches.open('pfmall-member-v20');
   assert.equal((await cache.keys()).some(key => {
     const url = new URL(key.url);
     return url.pathname === '/member/' && !!url.search;
@@ -487,11 +487,11 @@ await check('private routes, query assets, foreign origins and non-GET remain un
 
 await check('declared static assets keep cache-first behavior and video fallback stays explicit', async () => {
   const h = swRuntime();
-  const first = await h.request('/member/js/mall-tile-field.js?v=6');
+  const first = await h.request('/member/js/mall-tile-field.js?v=20');
   const body = await first.response.text();
   assert.equal(h.calls.length, 1);
   h.setNetwork(async () => { throw new Error('offline'); });
-  const cached = await h.request('/member/js/mall-tile-field.js?v=6');
+  const cached = await h.request('/member/js/mall-tile-field.js?v=20');
   assert.equal(await cached.response.text(), body);
   assert.equal(h.calls.length, 1);
   const video = await h.request('/member/mall-video-catalog.json');

@@ -1,3 +1,8 @@
+## 2026-11-16 · Build v20 floating player, edge tuck/restore, pinch gestures, and WikiTube recovery
+
+- **Unified Shared Player Lifecycle (`public/member/js/mall-video-player.js`, `public/member/js/mall-tile-field.js`)**: Consolidated phone/member inline playback into a single top-anchored floating player (`#videoPlayerFullscreen.video-player-floating`) mounted in `document.body` so switching between Floating, Tucked, WikiTube, and Desktop Theater never reparents or reloads the live media `<iframe>` / `<video>`. Added warm `YT.Player` `loadVideoById` / `cueVideoById` reuse, `375px` portrait `>= 120px` tile width compliance, and truthful `Play video` (`autoplay-blocked` / `manual-play`) fallback.
+- **Gestures & Bounded Sequential Queue (`public/member/js/mall-video-player.js`, `public/member/css/mall-video-player.css`)**: Added swipe-right edge tuck with continuous audio + `.video-player-tuck-handle` swipe-left/tap restore, intentional 2-finger pinch-out (`-> WikiTube`) and pinch-in (`-> Grid`) disambiguated from scroll tracks with accessible button controls, and bounded WikiTube error skipping (`100` unavailable, `101`/`150` restricted, `MAX_CONSECUTIVE_AUTO_SKIPS = 5`, `queueHalted = true`) under `Build v20` / `pfmall-member-v20`. WSP 22, 49, 50, 97, and 104 apply.
+
 ## 2026-11-16 · Manifest schema closure, infrastructure category, and Build v19 catalog reconciliation
 
 - **Manifest Discovery & Boot Closure (`shell_core.py`, `modules/foundups/{detect_ai,eduit,shield,holoindex_prod_01}/foundup_manifest.json`)**:

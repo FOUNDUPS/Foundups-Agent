@@ -1,5 +1,10 @@
 # p.fMALL Test ModLog
 
+## 2026-11-16 — Build v20 floating player, tuck/restore, pinch gestures, and bounded WikiTube recovery tests
+
+- Added `TestFloatingAndWikiTubeBuildV20` (`5` tests) to `test_mall_video_player.py` verifying `.video-player-floating` / `.is-tucked` / `.video-player-tuck-handle` / `.video-player-wikitube` CSS contracts, public API methods (`selectVideo`, `openWikiTube`, `collapseToFloating`, `tuck`, `untuck`, `isTucked`, `isFloating`, `isWikiTube`, `syncFloatingGeometry`), accessible gesture alternatives, `reuseYouTubeInstance` (`loadVideoById` / `cueVideoById`) + `PLAY_START_GUARD_MS`, and bounded WikiTube sequential recovery (`MAX_CONSECUTIVE_AUTO_SKIPS`, `failedQueueIndices`, `queueHalted`).
+- Verification: combined `pytest -q -p no:cacheprovider public/member/tests modules/foundups/pfmall/tests` -> `2,288 passed, 0 failed`, plus Chromium + WebKit `mall_scoped_video_browser.py` (`EXIT=0`).
+
 ## 2026-11-16 — Manifest boot, catalog truth gate, and PWA hardening test reconciliation
 
 - Repaired `REPO_ROOT` resolution (`parents[4]`) and `gotjunk_001` `entry_url` expectation in `test_shell_core.py`, verifying `PfmallShell().boot()` loads all 12 manifests with zero invalid-manifest warnings.

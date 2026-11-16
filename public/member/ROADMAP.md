@@ -3,6 +3,11 @@
 **Module**: `public/member/`
 **Approach**: Occam's Layered (build/test one layer at a time)
 
+## Build v20 Floating Player, Tuck/Restore & WikiTube Gestures — 2026-11-16
+
+- Replaced row-replacing `.mall-inline-player-slot` playback with a single top-anchored floating player (`#videoPlayerFullscreen.video-player-floating`) permanently mounted in `document.body`, keeping the grid scrolling smoothly underneath while preserving `<iframe>` / `<video>`, playback time, audio, and queue across Floating, Tucked, WikiTube, and Desktop Theater modes.
+- Added swipe-right edge tuck + `.video-player-tuck-handle` tap/swipe-left restore, disambiguated 2-finger pinch-in / pinch-out transitions with accessible button alternatives (`Tuck player`, `Restore player`, `Open WikiTube`, `Floating player`, `Close player` / `Back`), `375px` phone tile width `>= 120px` RMF compliance, warm `loadVideoById` YouTube reuse, truthful `Play video` fallback when blocked, and bounded WikiTube sequential error recovery (`MAX_CONSECUTIVE_AUTO_SKIPS = 5`, `queueHalted = true`) under `Build v20` / `pfmall-member-v20`. Physical iPhone preview verification and production Hosting promotion remain separate gates.
+
 ## Build v19 Mall Truth & Continuity — 2026-11-16
 
 - Reconciled `mall-video-catalog.json` (16 entries) with `foundup_registry.json` and `foundup_manifest.json` contracts: added `esingularity_001`, aligned `holoindex_prod_01` (`F3_INFRA` / `conditional` / `infrastructure`), `gotjunk_001` (`012` creator + `external_url`), and `autopost` (`external_url`), and normalized video `duration_seconds` and `YYYY-MM-DDTHH:MM:SSZ` timestamps.

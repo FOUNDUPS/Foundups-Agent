@@ -148,6 +148,7 @@
 .mall-tile-field-wrapper {
   flex: 1;
   overflow: auto;
+  scroll-padding-top: var(--floating-player-clearance, 0px);
   scroll-snap-type: both mandatory;
   scroll-behavior: smooth;
   overscroll-behavior: contain;
@@ -257,7 +258,7 @@
   grid-auto-rows: auto;
   grid-auto-flow: row;
   gap: var(--tile-gap, 0.2rem);
-  padding: 0;
+  padding: var(--floating-player-clearance, 0px) 0 0;
   min-height: 100%;
   /* Content fade transition for expand/collapse */
   transition: opacity 120ms ease-out;
@@ -491,9 +492,10 @@
   100% { transform: scale(1); }
 }
 
-.mall-tile.is-inspecting {
-  border-color: rgba(255, 255, 255, 0.3);
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
+.mall-tile.is-inspecting,
+.mall-tile[aria-current="true"] {
+  border-color: rgba(169, 139, 255, 0.72);
+  box-shadow: 0 0 0 2px rgba(169, 139, 255, 0.35);
 }
 
 /* ========== Tile Content ========== */

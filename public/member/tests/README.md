@@ -7,18 +7,20 @@ fresh test run.
 ### Scoped video
 
 Run `python -B public/member/tests/mall_scoped_video_browser.py` with the
-existing Python Playwright and Chromium test runtime. It serves the real
+existing Python Playwright Chromium and WebKit test runtime. It serves the real
 shell from local files with a 31-video fixture and controlled provider events.
-The test covers vertical batching, playback in the selected tile's row,
-one active inline iframe, immersive
-promotion, Back and Escape, deep Vote return, orientation, diagnostics and
+The test covers vertical batching, top-anchored floating playback over a
+scrolling grid, swipe-right edge tuck and edge-handle restore, intentional
+pinch-in/pinch-out transitions with accessible button alternatives, one active
+provider iframe across switches and WikiTube sequential advancement, bounded
+error recovery, Back and Escape, deep Vote return, orientation, diagnostics and
 manual Play at 320 px. The desktop cases cover first-video startup,
 filtered queue advancement, keyboard selection, breakpoint continuity and
 civic-resource return. The phone cases check the selected install manifest,
 options, scoped search, fixture dictation and Red Dog return. The member
 case uses controlled Clerk and Firestore responses to check sign-in return,
 invitation denial, admitted theater and the public discovery link.
-`node public/member/tests/mall_product_state_vm.mjs` covers v16 installation,
+`node public/member/tests/mall_product_state_vm.mjs` covers v20 installation,
 obsolete Mall cache retirement and scoped offline behavior. Real YouTube time
 progression and physical-device gates are separate in the
 [incident](../../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md).

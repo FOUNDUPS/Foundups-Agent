@@ -17,9 +17,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="/move2japan/move2japan.css">
-  <link rel="stylesheet" href="/member/css/mall-video-projection.css">
+  <link rel="stylesheet" href="/member/css/mall-video-projection.css?v=20">
 
-  <script src="/member/js/mall-video-projection.js?v=12"></script>
+  <script src="/member/js/mall-video-projection.js?v=20"></script>
   <!-- Clerk Authentication SDK -->
   <template id="memberClerkSdk">
   <script
@@ -95,8 +95,8 @@
   <link rel="stylesheet" href="css/member.css">
   <link rel="stylesheet" href="css/account-concierge.css">
   <link rel="stylesheet" href="css/mall-planes.css">
-  <link rel="stylesheet" href="css/mall-tile-field.css">
-  <link rel="stylesheet" href="css/mall-video-player.css?v=6">
+  <link rel="stylesheet" href="css/mall-tile-field.css?v=20">
+  <link rel="stylesheet" href="css/mall-video-player.css?v=20">
 </head>
 <body>
   <!-- Loading state (shown while checking auth) -->
@@ -1315,12 +1315,12 @@
   </div>
 
   <script src="/move2japan/property-search.js"></script>
-  <script src="js/gesture-engine.js"></script>
+  <script src="js/gesture-engine.js?v=20"></script>
   <script src="js/gesture-hints.js"></script>
   <script src="js/shell-bridge-interceptor.js"></script>
   <script src="js/mall-planes.js?v=12"></script>
-  <script src="js/mall-tile-field.js?v=6"></script>
-  <script src="js/mall-video-player.js?v=6"></script>
+  <script src="js/mall-tile-field.js?v=20"></script>
+  <script src="js/mall-video-player.js?v=20"></script>
   <script src="js/account-concierge.js"></script>
   <script src="js/red-dog-concierge.js"></script>
   <script src="js/mall-state-restore.js?v=12"></script>
@@ -1339,7 +1339,7 @@
   <!-- Member Service Worker registration -->
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/member/member-sw.js', { scope: '/member/' })
+      navigator.serviceWorker.register('/member/member-sw.js', { scope: '/member/', updateViaCache: 'none' })
         .then(function(reg) { console.log('[SW] Member service worker registered:', reg.scope); })
         .catch(function(err) { console.warn('[SW] Member service worker registration failed:', err); });
     }
