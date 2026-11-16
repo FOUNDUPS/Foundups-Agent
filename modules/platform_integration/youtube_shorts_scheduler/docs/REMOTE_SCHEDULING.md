@@ -233,6 +233,56 @@ Use the explicit "today" override rather than the default last-hour window.
    page for authorized metadata edits. Independently read back saved ID, title,
    body and slot as applicable before counting completion.
 
+### Conversational cadence and topic mixing
+
+This is a bounded operator contract composed through the existing scheduling
+skills, not a new dispatcher or a persistent policy change.
+
+1. Reconcile the latest explicit request before allocating slots: channel,
+   source-day bounds, selected IDs, priority topic, spacing, timezone and whether
+   overnight publication is included. Preserve corrections in the private
+   checkpoint. Do not revive an earlier daytime-only window after an all-hours
+   correction, or expand a recent-two-day request into historical backlog.
+2. Inspect live scheduled inventory across the relevant Videos, Shorts and Live
+   surfaces before writes. Record filters, pagination and observation time.
+   Existing releases occupy slots; a stale tracker or an unlisted count is not
+   proof of an empty calendar. Preserve existing schedules unless moving them
+   was explicitly authorized. Reconcile again on resume or conflicting evidence.
+3. Classify exact clips from content, not inherited stream titles. One stream
+   can intentionally cover several subjects. A repeated title or mismatched
+   description is an inspection lead, not proof of a defect. Verify authenticated
+   Studio Ask/Gemini access and exact-ID content availability before relying on
+   it. Retain timestamped output and label model-generated summaries as semantic
+   evidence, not direct listening or verbatim transcripts. An inaccessible clip
+   remains unresolved even if neighboring clips were successfully analyzed.
+4. For an explicit priority-topic-every-two-hours request, allocate that topic
+   at two-hour intervals and eligible other topics in intervening hourly gaps,
+   including overnight only when requested. For example, priority at 12/14/16
+   and others at 13/15 is an allocation pattern, not a fixed timezone or daily
+   default. Fit around existing releases and record any resulting cadence gap.
+   Do not duplicate clips, invent inventory or use unrelated backlog to fill it.
+5. Keep source dates separate from release dates. Read Studio's actual timezone,
+   convert the full release date/time with DST-aware zones, and report the
+   bounded first/last slot and unfilled gaps. If the selected native allocator
+   cannot represent the request, do not silently fall back to its default:
+   use an already-authorized qualified operator surface or report the limitation.
+6. Schedule-only preserves metadata. Authorized enhancement requires matched
+   clip evidence through the existing enhancement owner, not a template rewrite.
+   Hold unsupported personal allegations or other consequential material for
+   specifically applicable approval; a broad scheduling request does not supply
+   approval for a new allegation. Keep evidence-missing and approval-held IDs
+   distinct and leave their state unchanged.
+7. Count completion only after settled Save and independent persisted readback
+   of exact channel/video/date/time/timezone, plus changed metadata when relevant.
+   The detail dialog's Done only stages a change. Reload/reopen without resaving
+   matching results. Persist the receipt in the existing private checkpoint;
+   if recording fails after Save, reconcile the record, never replay the batch.
+
+Report saved schedules separately from actual publication and delivery. A
+verified bounded batch does not establish a resident watcher, native worker
+qualification, PatternMemory ingestion or model training. The existing security,
+pre-save audit, account-verification and approval gates remain in force.
+
 ### Bounded scanning and checkpoint contract
 
 A chat statement such as "while I am live" does not install an always-on worker.
