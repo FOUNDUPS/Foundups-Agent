@@ -187,7 +187,7 @@ class TestFoundUpEntryShape:
         valid_types = {
             "youtube_channel", "linkedin_profile", "x_profile",
             "tiktok_profile", "instagram_profile", "derived",
-            "github_repo", "external_app", "internal_service",
+            "github_repo", "external_app", "internal_app", "internal_service",
         }
         for entry in catalog:
             assert entry["source_type"] in valid_types, f"Invalid source_type: {entry['source_type']}"
@@ -325,7 +325,7 @@ class TestProjectionMetadata:
         """topic_family must be one of defined values."""
         valid_families = {
             "life", "consciousness", "startup", "resistance",
-            "ai-education", "science", "media",
+            "ai-education", "science", "media", "commerce", "infrastructure",
         }
         for entry in catalog:
             assert entry["topic_family"] in valid_families, (
@@ -362,9 +362,9 @@ class TestProjectionMetadata:
 
 
 class TestNonVideoFoundUps:
-    """Test non-video FoundUp types (github_repo, external_app, internal_service)."""
+    """Test non-video FoundUp types (github_repo, external_app, internal_app, internal_service)."""
 
-    NON_VIDEO_SOURCE_TYPES = {"github_repo", "external_app", "internal_service"}
+    NON_VIDEO_SOURCE_TYPES = {"github_repo", "external_app", "internal_app", "internal_service"}
 
     def test_external_url_present_for_non_video_types(self, catalog: list[dict]):
         """Non-video source types must have external_url."""

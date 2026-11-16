@@ -9,6 +9,13 @@
 - Actual model quality, trusted production bindings and live daemon/public
   behavior remain unverified by the offline consumer qualification.
 
+## Scientific repair verifier isolation (2026-11-16)
+
+- [x] Pure allowlist `VerifierContextFirewall.project_evidence_packet`,
+  immutable `VerifierEvidencePacket` SHA-256 digesting, `ModelIndependencePolicy`
+  anti-self-grading enforcement, and `IndependentVerifierReceipt` audit records
+  (Issue #1522; 5 offline contract tests in `test_independent_repair_verifier.py`).
+
 ## Current Status: [OK] MVP Complete
 - Basic fallback functionality implemented
 - Multi-provider support (OpenAI, Anthropic, Grok, Gemini)

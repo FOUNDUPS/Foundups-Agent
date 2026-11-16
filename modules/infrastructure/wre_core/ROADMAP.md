@@ -1,3 +1,21 @@
+## Scientific self-healing canary & fail-closed measured benefit — 2026-11-16
+
+- [x] Reconcile `branch_dispositions` (`MAIN_BRANCH`, `PROTECTED_BRANCH`,
+  `BRANCH_OPEN_PR`, `BRANCH_OPEN_PR_HEAD_MOVED`, `BRANCH_MERGED_PR_RETAINED`
+  including `COMPLETE` PR retirement assessment, `BRANCH_CLOSED_PR_UNMERGED`,
+  `BRANCH_PR_OBSERVATION_INCOMPLETE`, `BRANCH_PR_HEAD_MISMATCH`,
+  `BRANCH_UNTRACKED` with exact `sha == head_sha` reuse protection) in
+  `src/git_lifecycle.py` and `tests/test_git_lifecycle.py` (7 passed).
+- [x] Integrate Issue #1522 `ScientificRepairOperation` (`state_history`),
+  `attempt_failure_reproduction` (`shell=False`), and
+  `ScientificRepairCanaryOrchestrator` paired with AI Gateway's
+  `VerifierContextFirewall` + `ModelIndependencePolicy` while keeping all 19/P0
+  native PatternMemory custody gates fail-closed (`test_repair_operation_contract.py`
+  8 passed, `test_scientific_repair_canary_e2e.py` 4 passed).
+- [x] Wire fail-closed `measurement_evidence` validation and `rollback_improvement`
+  `total_tokens_saved` subtraction in `RecursiveLearningEngine`
+  (`recursive_improvement/tests/test_learning.py` 8 passed).
+
 ## Current RSI selection — 2026-11-01
 
 Follow the [canonical dispatch checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#micro-verification-and-protected-native-composition--2026-11-01).

@@ -1,5 +1,5 @@
 ## 2026-11-15 — Observable Swarm Orchestration telemetry tests
-- Added `modules/foundups/simulator/tests/test_observable_swarm_telemetry.py` covering `work_telemetry_provider.py`, `/api/work-telemetry`, `frame_schema.py`, and `public/js/foundup-cube.js` via Node VM.
+- Added and expanded `modules/foundups/simulator/tests/test_observable_swarm_telemetry.py` (`11 passed, 0 skipped`) covering `work_telemetry_provider.py` (including context lineage `parent_task_id` / `depends_on` / `work_order_id` / `swarm_lane`, `lease_active`, and 64-char endpoint redaction/deduplication), deterministic clean-checkout seeded SQLite SHA-256 invariance + sidecar (`-wal`/`-shm`/`-journal`) checks, conditional live Sprint 4/5 DB SHA-256 invariance, `/api/work-telemetry`, `frame_schema.py`, and `public/js/foundup-cube.js` HUD/ticker assertions via Node VM.
 
 ## 2026-11-05 — P4 RED, import repair and verified preview
 

@@ -27,8 +27,13 @@ dependency closure or permission to run maintenance.
 
 ## MCP runtime compatibility
 
-The `mcp-runtime-compatibility` Windows CI job selects the existing launcher,
-HTTP server and query-candidate-binding suites. It installs the module's exact
+The `mcp-runtime-compatibility` Windows CI job selects the 60-case launcher,
+HTTP server, Git inventory OAuth, and query-candidate-binding suites
+(`test_mcp_launcher_http.py`, `test_mcp_server_sse.py`,
+`test_git_inventory_oauth.py`, and
+`test_reddog_holoindex_query_runtime_candidate_binding.py`), including 2-level
+chained `pyvenv.cfg` base-interpreter resolution and cyclic chain fallback in
+`_mcp_runtime_python` (PR #2402). It installs the module's exact
 quartet in a disposable venv, supplies private HOME/TEMP, and requires every
 selected case to pass without skips. The existing directory-alias helper can
 use a junction when Windows symlink privilege is unavailable; that tests the

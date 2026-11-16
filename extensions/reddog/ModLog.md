@@ -1,3 +1,20 @@
+## 2026-11-16 — Reconcile Storytime and UI-TARS runtime checksums onto Wave 4 main
+
+Regenerate the 1,487-member backend manifest on top of `247e12ce6e` for the
+reconciled `foundups_vision/src/ui_tars_bridge.py` coordinate-profile leaf and
+refresh both canonical digest pins (`1465fd02b74ed36b45895de1a90e7a62b20b25730ca34f8ccfda179878ca0c42`).
+Runtime membership remains 1,487 and all existing manifest, member, and
+aggregate byte caps stay unchanged. WSP 11, 22, and 97.
+
+## 2026-11-16 — Bind Wave 4 WRE/RSI and pfMALL runtime checksums
+
+Regenerate the backend manifest for the updated `pfmall/shell_core.py` and WRE
+recursive improvement (`core.py`, `learning.py`) source checksums and refresh
+both canonical digest pins (`568e8b402a77316b0b1952d26d7d8080f749d14dbe06fb2a8ee28a17cdc96d6e`).
+Runtime membership remains 1,487 and the contract still rejects 1,488; both
+line-ending variants fit the existing 332 KiB manifest cap and the 2 MiB
+per-source / 32 MiB aggregate limits stay unchanged. WSP 11, 22, and 97.
+
 ## 2026-11-10 — Bind the stream Shorts scheduling owner
 
 Regenerate the backend manifest with the stream schedule queue owner and refresh
@@ -20,6 +37,15 @@ repair. Refresh both digest pins together; runtime membership remains 1485 and
 resource limits are unchanged. The first hosted run correctly rejected stale
 hashes. This update binds source packaging, not native worker admission or live
 training. WSP 5/11/22/50/97.
+
+## 2026-11-01 — Bind reviewed UI-TARS runtime bytes
+
+Regenerate the existing1481-member backend manifest after the UI-TARS leaf repair
+and refresh its existing compatibility/test digest pins. Canonical b18b3987...
+is independently predicted from the single normalized-leaf delta. Membership,
+API/schema, limits, bridge hashes and semantic assertions remain unchanged.
+This is repository binding maintenance, not an installed extension/backend update.
+All8 generator/index cases and3 existing Node compatibility/preflight/recovery owners pass.
 
 ## 2026-11-01 — Bind private YouTube operator directives
 

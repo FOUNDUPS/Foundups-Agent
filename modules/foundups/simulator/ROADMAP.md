@@ -2,6 +2,7 @@
 
 ## 2026-11-15 — Observable Swarm Orchestration vertical slice
 - Added read-only telemetry bridge (`adapters/work_telemetry_provider.py`), `WorkUnitFrame`/`WorkTelemetrySnapshot` schema additions (`frame_schema.py`), GET-only `/api/work-telemetry` and `work_telemetry_sync` SSE contract (`sse_server.py`), and `FoundupCube` `observationOnly` / non-monotonic `filledBlocks` / TTL stale rendering (`public/js/foundup-cube.js`).
+- Extended lineage/lease telemetry (`parent_work_id`, `work_order_id`, `swarm_lane`, `lease_active`, deduplicated redacted `depends_on`/`parent_task` edges, `active_lease_count`, `swarm_lanes`), `FoundupCube` HUD/ticker summary (`DEPS`, `LEASES`, `LANES`, `VERIF`), and zero-skip seeded + live SQLite SHA-256 invariance tests (`11/11 passed, 0 skipped`).
 
 ## 2026-11-05 — P3 delivered; micro-UPS preview verified
 

@@ -101,6 +101,16 @@ at most 256 KiB with exact encoded-byte telemetry.
 Builds a loopback-only FastMCP Streamable HTTP application at `/mcp`; non-loopback hosts reject.
 Optional bearer auth is local/dev defense, not ChatGPT OAuth; external exposure has no live receipt here.
 
+### `_mcp_runtime_python(candidate: Path) -> Tuple[Path, Optional[Path]]` (`scripts/launch.py`)
+
+Resolves the direct non-venv Windows base interpreter and outer `Lib/site-packages`
+for MCP server and readiness children (PR #2402). On Windows, retains the outer
+environment's `Lib/site-packages` directory while walking chained `pyvenv.cfg`
+files (`base.parent.parent / "pyvenv.cfg"` or `base.parent / "pyvenv.cfg"`) with
+a resolved-path `visited` cycle guard until reaching the real non-venv base
+executable. Invalid, broken, or cyclic `pyvenv.cfg` chains fail closed to
+`(candidate, None)` without unbounded recursion.
+
 ### `materialize_query_replica(...) -> QueryReplicaResult`
 
 Creates one immutable `holoindex_query_replica.v1` generation under a new `StoreProof` from exact bindings, limits, and sorted `model`/`snapshots` manifests.

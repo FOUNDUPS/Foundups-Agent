@@ -1,3 +1,36 @@
+## PR #2403 convergence and qualified merge - 2026-11-16
+
+012 now authorizes reconciliation of the existing PR, independent exact-head
+review, applicable hosted checks and qualified merge/main readback under the
+existing workflow. This supersedes the earlier draft-only scope for this work;
+it grants no runtime activation or bypass of current authorization gates.
+Owner remains the same 0102 worker/worktree. WSP15 C2/I4/D4/Impact3 = 13/P1.
+
+Inputs: owned head `137c7b60e08ea12892126b9bddf374f32eb49353`, main
+`87787840233c8660b1612873bfe99a027f68c772`, common base `e62e9ebaf5`.
+Four paths overlap; automatic CI composition retains main plus the PR's offline
+step. Resolve the three conflicts by preserving both security-note prefixes,
+all 4,579 main security records plus the one owned binding (4,580 total), and
+regenerating the canonical test registry (1,846 entries; 260 quarantined).
+Independent review must verify all main-only and PR-only paths, actual resulting
+head, tests and gates before merge. Original shared checkout and other sessions
+remain outside the write scope. Recovery is the preserved parent commits and a
+scoped revert, not a reset of another lane or a replay of UI actions.
+
+The incoming UI-TARS bridge remains unchanged: driver handoff is compatible,
+verification is localization-only, and the runner retains legacy_1000 rather
+than claiming admission of the new coordinate profile. Installed Red Dog wiring,
+live browser/model checks and measured RSI transfer remain unverified.
+
+Combined local validation passes 122 offline cases with one Windows
+directory-link skip; 40 CI composition contracts, registry and projection checks
+pass. Independent staged-tree inspection preserves all 158 main-only paths and
+all 15 unchanged PR-only paths, with only this ledger's new receipt intentionally
+extended. Security-note composition, all 4,580 review records, all 1,846 registry
+rows and the canonical read-only/gate files are verified. Exact committed-head
+review and hosted checks remain the next gates; no merge or activation is yet
+claimed by this prepublication receipt.
+
 ## Execution/delegation guidance follow-up - 2026-11-16
 
 Owner: same delegated 0102 worker and existing PR #2403/worktree; origin

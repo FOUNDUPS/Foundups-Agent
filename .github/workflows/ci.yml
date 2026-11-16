@@ -1479,6 +1479,42 @@ jobs:
             modules/foundups/pfmall/tests/test_listing_discovery.py \
             modules/foundups/gotjunk/tests/test_migration_inventory.py
 
+      - name: Run pfMALL truth gates, member shell VM, simulator telemetry, and stream resolver contracts
+        if: steps.audit-scope.outputs.lane != 'docs'
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTHON_DOTENV_DISABLED: '1'
+          PYTHONUTF8: '1'
+          TMP: ${{ runner.temp }}
+          TEMP: ${{ runner.temp }}
+        run: |
+          set -euo pipefail
+          node --version
+          python -B -m pytest -q -c /dev/null --noconftest \
+            -o pythonpath=. -o asyncio_mode=auto \
+            -p no:cacheprovider -p pytest_asyncio.plugin \
+            --basetemp="$RUNNER_TEMP/pfmall-member-truth-pytest" \
+            modules/foundups/pfmall/tests/test_catalog_foundup_truth_gate.py \
+            modules/foundups/pfmall/tests/test_mall_video_catalog.py \
+            modules/foundups/pfmall/tests/test_shell_core.py \
+            modules/foundups/pfmall/tests/test_member_foundup_entry.py \
+            modules/foundups/pfmall/tests/test_member_pwa_hardening.py \
+            modules/foundups/pfmall/tests/test_member_red_dog_concierge.py \
+            modules/foundups/pfmall/tests/test_video_mall_media_delivery.py \
+            public/member/tests \
+            modules/foundups/simulator/tests/test_observable_swarm_telemetry.py \
+            modules/platform_integration/stream_resolver/tests/test_stream_resolver.py
+          for vm_suite in \
+            public/member/tests/mall_product_state_vm.mjs \
+            public/member/tests/mall_property_listing_vm.mjs \
+            public/member/tests/member_product_boot_vm.mjs \
+            public/member/tests/pfmall_control_dispatcher_vm.mjs \
+            public/member/tests/public_discovery_concierge_vm.mjs \
+            public/member/tests/shell_bridge_interceptor_vm.mjs; do
+            node "$vm_suite"
+          done
+
       - name: Run LinkedIn offline activity contracts
         if: steps.audit-scope.outputs.lane != 'docs'
         run: python -I -B modules/platform_integration/linkedin_agent/tests/test_activity_skill_contracts.py -v
@@ -2690,7 +2726,8 @@ jobs:
           TMP: ${{ runner.temp }}
           TEMP: ${{ runner.temp }}
         run: |
-          python -B -m pytest -q --tb=short --noconftest -o pythonpath=. -p no:cacheprovider \
+          python -B -m pytest -q --tb=short --noconftest -o pythonpath=. \
+            -p no:cacheprovider -p pytest_asyncio.plugin \
             --basetemp="$RUNNER_TEMP/rsi-measurement-pytest" \
             modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py \
             modules/infrastructure/wre_core/tests/test_wre_research_evaluator_inputs.py \
@@ -2704,7 +2741,11 @@ jobs:
             modules/infrastructure/idle_automation/tests/test_self_research_refresh.py \
             modules/infrastructure/wre_core/tests/test_daemon_self_audit_scan_status.py \
             modules/infrastructure/wre_core/tests/test_daemon_self_audit_loop.py \
-            modules/infrastructure/wre_core/tests/test_daemon_self_audit_diagnostic_outcomes.py
+            modules/infrastructure/wre_core/tests/test_daemon_self_audit_diagnostic_outcomes.py \
+            modules/ai_intelligence/ai_gateway/tests/test_independent_repair_verifier.py \
+            modules/infrastructure/wre_core/tests/test_repair_operation_contract.py \
+            modules/infrastructure/wre_core/tests/test_scientific_repair_canary_e2e.py \
+            modules/infrastructure/wre_core/recursive_improvement/tests/test_learning.py
 
       - name: Run WRE merge sentinel prerequisite tests
         if: steps.audit-scope.outputs.lane != 'docs'
