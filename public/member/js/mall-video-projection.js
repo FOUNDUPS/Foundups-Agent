@@ -1,31 +1,79 @@
 (function () {
   'use strict';
 
-  // Only a dedicated host can start a guest projection.
-  const dedicatedHosts = new Map([['hpc.foundups.com', 'hpc']]);
-  const publicScopes = new Set(dedicatedHosts.values());
+  // Dedicated public hosts start guest discovery without member account reads.
+  // hpc.foundups.com mounts the single-FoundUp HPC Shorts projection;
+  // play.foundups.com mounts the open p.fMALL discovery landing for all FoundUps,
+  // while entering any FoundUp passes through the foundups.com Member Portal.
+  const MEMBER_PORTAL_ORIGIN = 'https://foundups.com';
+  const OPEN_MALL_ORIGIN = 'https://play.foundups.com';
+  const dedicatedHosts = new Map([
+    ['hpc.foundups.com', 'hpc'],
+    ['play.foundups.com', 'mall']
+  ]);
+  const publicScopes = new Set(['hpc']);
   const memberPaths = new Set(['/member', '/member/', '/member/index.html']);
   // Keep this display label aligned with the shell cache generation.
-  const mallBuild = 'v20';
+  const mallBuild = 'v21';
   const buildLabel = `<small class="mall-build-label">Build ${mallBuild}</small>`;
 
   function hostScope(location) {
-    return dedicatedHosts.get(location.hostname) || null;
+    return dedicatedHosts.get(location?.hostname) || null;
+  }
+
+  function isOpenMallHost(location) {
+    return hostScope(location) === 'mall';
+  }
+
+  function validFoundUpId(value) {
+    return typeof value === 'string' &&
+      /^[a-z0-9][a-z0-9_-]{0,63}$/i.test(value) &&
+      value !== '__proto__' &&
+      value !== 'constructor' &&
+      value !== 'prototype'
+      ? value
+      : null;
   }
 
   function resolve(location) {
-    return memberPaths.has(location.pathname) ? hostScope(location) : null;
+    if (!location || !memberPaths.has(location.pathname)) return null;
+    const scope = hostScope(location);
+    if (scope === 'mall') {
+      const requested = new URLSearchParams(location.search).getAll('foundup');
+      if (requested.length === 1 && requested[0] === 'move2japan') return null;
+      if (requested.length === 1 && publicScopes.has(requested[0])) return requested[0];
+      return 'mall';
+    }
+    return scope;
   }
 
   // Member boot uses this presentation selection after checking admission.
   function resolveMember(location) {
-    if (!memberPaths.has(location.pathname) || hostScope(location)) return null;
+    if (!location || !memberPaths.has(location.pathname) || hostScope(location)) return null;
     const requested = new URLSearchParams(location.search).getAll('foundup');
     return requested.length === 1 && publicScopes.has(requested[0]) ? requested[0] : null;
   }
 
+  function resolveMemberEntry(location) {
+    if (!location || !memberPaths.has(location.pathname) || hostScope(location)) return null;
+    const requested = new URLSearchParams(location.search).getAll('enter');
+    return requested.length === 1 ? validFoundUpId(requested[0]) : null;
+  }
+
   function memberPath(foundupId) {
     return publicScopes.has(foundupId) ? '/member/?foundup=' + foundupId : null;
+  }
+
+  function memberEntryPath(foundupId) {
+    const clean = validFoundUpId(foundupId);
+    return clean ? '/member/foundup.html?id=' + encodeURIComponent(clean) : null;
+  }
+
+  function memberPortalUrl(foundupId) {
+    const clean = validFoundUpId(foundupId);
+    return clean
+      ? MEMBER_PORTAL_ORIGIN + '/member/?enter=' + encodeURIComponent(clean)
+      : MEMBER_PORTAL_ORIGIN + '/member/';
   }
 
   function scopedRedDogPath(scope) {
@@ -41,7 +89,7 @@
 
   function discoveryPath(foundupId, pocUrl) {
     for (const [host, scope] of dedicatedHosts) {
-      if (foundupId !== scope) continue;
+      if (!publicScopes.has(scope) || foundupId !== scope) continue;
       const url = 'https://' + host + '/';
       // Recognize a cached discovery card from before the host split.
       if (pocUrl === url || pocUrl === 'https://foundups.com' + memberPath(scope)) return url;
@@ -53,8 +101,7 @@
   const hpcTitle = 'Hasan Piker Coalition';
   const hpcPortrait = '/member/hpc-icon-192.png';
   const playLocation = window.location;
-  if (playLocation?.hostname === 'play.foundups.com' && playLocation.pathname === '/' &&
-      !new URLSearchParams(playLocation.search).has('signin')) {
+  if (playLocation?.hostname === 'play.foundups.com' && playLocation.pathname === '/') {
     playLocation.replace('/member/' + playLocation.search + playLocation.hash);
   }
   if (typeof document !== 'undefined' && window.location && resolve(window.location) === 'hpc') {
@@ -440,7 +487,107 @@
     };
   }
 
+  async function mountOpenMall() {
+    const element = (id) => document.getElementById(id);
+    const field = element('mallTileField');
+    document.documentElement.dataset.mallOpenLanding = 'play';
+    document.title = 'Play FoundUps Mall | FoundUPS';
+    element('gestureHints')?.remove();
+    element('loadingState').style.display = 'none';
+    element('memberArea').style.display = 'block';
+
+    const home = document.querySelector('.mall-header .mall-brand-minimal');
+    if (home) {
+      home.href = MEMBER_PORTAL_ORIGIN + '/';
+      home.setAttribute('aria-label', 'FoundUPS Member Portal');
+      home.addEventListener('click', () => window.mallStateRestore?.save?.());
+    }
+
+    const handle = element('mallUserHandle');
+    const avatarTrigger = element('mallAvatarTrigger');
+    const selfAnchor = document.querySelector('.mall-self-anchor');
+    if (handle) handle.textContent = 'Member Portal \u2197';
+    if (avatarTrigger) {
+      avatarTrigger.setAttribute('aria-label', 'Sign in at FoundUPS Member Portal');
+      avatarTrigger.title = 'Sign in at FoundUPS Member Portal';
+    }
+    if (selfAnchor) {
+      selfAnchor.classList.add('open-mall-portal-cta');
+      selfAnchor.addEventListener('click', (event) => {
+        event.preventDefault();
+        window.mallStateRestore?.save?.();
+        window.location.assign(memberPortalUrl());
+      });
+    }
+
+    const plane = element('accountPlane');
+    if (plane) {
+      for (const selector of ['[data-reddog-identity]', '[data-reddog-foundups]', '[data-reddog-invites]', '[data-reddog-options]']) {
+        const section = plane.querySelector(selector);
+        if (section) section.hidden = true;
+      }
+      const greeting = plane.querySelector('[data-reddog-greeting]');
+      if (greeting) greeting.textContent = 'Open Mall guide \u00b7 Member Portal on FoundUps.com';
+      const concierge = plane.querySelector('[data-reddog-concierge]');
+      if (concierge && !concierge.querySelector('.open-mall-portal-link')) {
+        const portalLink = document.createElement('a');
+        portalLink.className = 'm2j-account open-mall-portal-link';
+        portalLink.href = memberPortalUrl();
+        portalLink.textContent = 'Sign in at FoundUps.com to Enter FoundUps \u2197';
+        concierge.prepend(portalLink);
+      }
+    }
+
+    try {
+      const response = await fetch('/member/mall-video-catalog.json', { cache: 'no-store', credentials: 'omit' });
+      if (!response.ok) throw new Error('Mall catalog unavailable');
+      const catalog = await response.json();
+
+      if (Array.isArray(catalog) && catalog.length === 0 && response.headers.get('X-Offline-Fallback') === '1') {
+        const notice = document.createElement('div');
+        notice.id = 'offlineNotice';
+        notice.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;padding:0.6rem 1rem;background:#1a1a2e;color:#9e9baf;text-align:center;font-size:0.85rem;border-bottom:1px solid rgba(124,92,252,0.2);';
+        notice.textContent = 'You\u2019re offline \u2014 some content may be unavailable.';
+        document.body.appendChild(notice);
+      }
+
+      window.mallTileField?.initialize(catalog);
+      window.mallStateRestore?.restore?.();
+
+      const creator = new URLSearchParams(window.location.search).getAll('creator');
+      if (creator.length === 1 && creator[0] === 'move2japan') {
+        const creatorIndex = catalog.findIndex((item) => item.foundup_id === 'move2japan');
+        if (creatorIndex !== -1) window.mallTileField?.expandFoundUp(creatorIndex);
+      }
+
+      window.mallPlanesSync = function () {};
+      window.mallPlanes?.setCatalog(catalog);
+      window.mallStateRestore?.bindAutoSave?.();
+
+      element('overlayScrim')?.addEventListener('click', () => {
+        window.redDog?.close?.();
+        window.mallPlanes?.closeView?.();
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+        if (window.mallTileField?.isExpanded?.()) {
+          window.mallTileField.collapseFoundUp();
+          return;
+        }
+        window.redDog?.close?.();
+        window.mallPlanes?.closeView?.();
+      });
+    } catch (error) {
+      console.warn('[Mall] Open Mall catalog unavailable:', error);
+      field.textContent = 'Play FoundUps Mall is unavailable right now. Reload the page to try again.';
+    }
+  }
+
   async function mount(scope) {
+    if (scope === 'mall') {
+      await mountOpenMall();
+      return;
+    }
     const element = (id) => document.getElementById(id);
     const field = element('mallTileField');
     document.documentElement.dataset.mallVideoScope = scope;
@@ -449,7 +596,7 @@
     element('memberArea').style.display = 'block';
     field.setAttribute('aria-label', 'Shorts');
     const home = document.querySelector('.mall-header .mall-brand-minimal');
-    home.href = 'https://foundups.com/member/';
+    home.href = isOpenMallHost(window.location) ? '/member/' : OPEN_MALL_ORIGIN + '/';
     if (scope === 'hpc') home.querySelector('img').src = hpcPortrait;
     home.setAttribute('aria-label', 'Return to Play FoundUps Mall');
     home.addEventListener('click', function () { window.mallStateRestore.save(); });
@@ -519,5 +666,19 @@
     }
   }
 
-  window.mallVideoProjection = { hostScope, resolve, resolveMember, memberPath, discoveryPath, mount, createMemberDock, mountMemberDock, openScopedRedDog };
+  window.mallVideoProjection = {
+    hostScope,
+    isOpenMallHost,
+    resolve,
+    resolveMember,
+    resolveMemberEntry,
+    memberPath,
+    memberEntryPath,
+    memberPortalUrl,
+    discoveryPath,
+    mount,
+    createMemberDock,
+    mountMemberDock,
+    openScopedRedDog
+  };
 })();

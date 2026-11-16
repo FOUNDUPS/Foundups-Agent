@@ -1859,11 +1859,20 @@
         nextVideo();
         break;
       case 'enter':
-        // Enter FoundUp: navigate to canonical /f/{foundup_id} route (WSP 104)
+        // Enter FoundUp: on open landing (play.foundups.com), pass through the foundups.com Member Portal;
+        // inside admitted Mall, navigate to canonical /f/{foundup_id} route (WSP 104).
         if (currentFoundUpId && !scopedPlayer) {
-          var destination = '/f/' + encodeURIComponent(currentFoundUpId);
+          var openMall = window.mallVideoProjection?.isOpenMallHost?.(window.location);
+          var destination = openMall
+            ? window.mallVideoProjection.memberPortalUrl(currentFoundUpId)
+            : '/f/' + encodeURIComponent(currentFoundUpId);
+          if (openMall) window.mallStateRestore?.save?.();
           close();
-          window.location.href = destination;
+          if (openMall && typeof window.location?.assign === 'function') {
+            window.location.assign(destination);
+          } else {
+            window.location.href = destination;
+          }
         }
         break;
       case 'save':

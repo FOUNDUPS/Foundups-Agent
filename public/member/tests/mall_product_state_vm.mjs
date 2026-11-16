@@ -402,27 +402,27 @@ await check('install reloads only explicit public shell and product assets', asy
     assert.equal(request.credentials, 'omit');
     return url.pathname + url.search;
   });
-  for (const path of ['/member/js/mall-tile-field.js?v=20', '/member/js/mall-video-player.js?v=20', '/member/js/mall-video-projection.js?v=20', '/member/js/mall-state-restore.js?v=12', '/member/js/mall-planes.js?v=12', '/member/hpc.webmanifest', '/member/hpc-icon-180.png', '/member/hpc-icon-192.png', '/member/hpc-icon-512.png', '/move2japan/property-search.js', '/move2japan/move2japan.css']) {
+  for (const path of ['/member/js/mall-tile-field.js?v=21', '/member/js/mall-video-player.js?v=21', '/member/js/mall-video-projection.js?v=21', '/member/js/mall-state-restore.js?v=21', '/member/js/mall-planes.js?v=21', '/member/hpc.webmanifest', '/member/hpc-icon-180.png', '/member/hpc-icon-192.png', '/member/hpc-icon-512.png', '/move2japan/property-search.js', '/move2japan/move2japan.css']) {
     assert.equal(installed.includes(path), true, 'missing precached asset: ' + path);
   }
   assert.equal(installed.includes('/move2japan/properties.json'), false);
   assert.equal(installed.includes('/member/js/mall-video-projection.js'), false);
-  assert.equal(h.stores.has('pfmall-member-v20'), true);
+  assert.equal(h.stores.has('pfmall-member-v21'), true);
   const build = videoProjectionSource.match(/const mallBuild = '(v\d+)';/)?.[1];
-  assert.equal('pfmall-member-' + build, 'pfmall-member-v20');
+  assert.equal('pfmall-member-' + build, 'pfmall-member-v21');
 });
 
 await check('activation retires only obsolete caches owned by this Mall', async () => {
   const h = swRuntime();
-  const obsoleteVersions = Array.from({ length: 18 }, (_, index) => `pfmall-member-v${index + 2}`);
-  for (const name of [...obsoleteVersions, 'pfmall-member-v20', 'pfmall-properties-v1',
+  const obsoleteVersions = Array.from({ length: 19 }, (_, index) => `pfmall-member-v${index + 2}`);
+  for (const name of [...obsoleteVersions, 'pfmall-member-v21', 'pfmall-properties-v1',
     'pfmall-posters-v1', 'gotjunk-offline-v1', 'other-app-cache']) {
     await h.caches.open(name);
   }
   await h.event('activate');
   assert.deepEqual(h.deleted.sort(), obsoleteVersions.sort());
-  assert.equal(h.stores.has('pfmall-member-v19'), false);
-  assert.equal(h.stores.has('pfmall-member-v20'), true);
+  assert.equal(h.stores.has('pfmall-member-v20'), false);
+  assert.equal(h.stores.has('pfmall-member-v21'), true);
   assert.equal(h.stores.has('gotjunk-offline-v1'), true);
   assert.equal(h.stores.has('other-app-cache'), true);
 });
@@ -458,7 +458,7 @@ await check('product navigation shares one static member shell without query cac
   assert.equal(online.response.status, 200);
   assert.equal(h.calls.at(-1).request, '/member/');
   assert.equal(h.calls.at(-1).options.credentials, 'omit');
-  const cache = await h.caches.open('pfmall-member-v20');
+  const cache = await h.caches.open('pfmall-member-v21');
   assert.equal((await cache.keys()).some(key => {
     const url = new URL(key.url);
     return url.pathname === '/member/' && !!url.search;
@@ -487,11 +487,11 @@ await check('private routes, query assets, foreign origins and non-GET remain un
 
 await check('declared static assets keep cache-first behavior and video fallback stays explicit', async () => {
   const h = swRuntime();
-  const first = await h.request('/member/js/mall-tile-field.js?v=20');
+  const first = await h.request('/member/js/mall-tile-field.js?v=21');
   const body = await first.response.text();
   assert.equal(h.calls.length, 1);
   h.setNetwork(async () => { throw new Error('offline'); });
-  const cached = await h.request('/member/js/mall-tile-field.js?v=20');
+  const cached = await h.request('/member/js/mall-tile-field.js?v=21');
   assert.equal(await cached.response.text(), body);
   assert.equal(h.calls.length, 1);
   const video = await h.request('/member/mall-video-catalog.json');
@@ -564,6 +564,33 @@ await check('ordinary Mall persists and restores activeVideo without touching HP
   }));
   assert.equal(hpc.api.restore(), false);
   assert.equal(hpc.session.has('pfmall_video_scope_hpc_v1'), false);
+});
+
+await check('play.foundups.com resolves open Mall discovery and gates FoundUp entry through foundups.com Member Portal', () => {
+  const window = {};
+  runInNewContext(videoProjectionSource, { window, URLSearchParams });
+  const route = window.mallVideoProjection;
+  assert.equal(route.hostScope(new URL('https://play.foundups.com/')), 'mall');
+  assert.equal(route.isOpenMallHost(new URL('https://play.foundups.com/member/')), true);
+  assert.equal(route.isOpenMallHost(new URL('https://foundups.com/member/')), false);
+  assert.equal(route.resolve(new URL('https://play.foundups.com/member/')), 'mall');
+  assert.equal(route.resolve(new URL('https://play.foundups.com/member/?foundup=hpc')), 'hpc');
+  assert.equal(route.resolve(new URL('https://play.foundups.com/member/?foundup=move2japan')), null);
+  assert.equal(route.resolveMember(new URL('https://play.foundups.com/member/?foundup=hpc')), null);
+  assert.equal(route.memberPortalUrl('gotjunk_001'), 'https://foundups.com/member/?enter=gotjunk_001');
+  assert.equal(route.memberPortalUrl('../evil'), 'https://foundups.com/member/');
+  assert.equal(route.resolveMemberEntry(new URL('https://foundups.com/member/?enter=gotjunk_001')), 'gotjunk_001');
+  assert.equal(route.resolveMemberEntry(new URL('https://play.foundups.com/member/?enter=gotjunk_001')), null);
+  assert.equal(route.resolveMemberEntry(new URL('https://foundups.com/member/?enter=__proto__')), null);
+
+  const entryHandoff = stateRuntime(ORIGIN + '/member/?enter=gotjunk_001');
+  assert.equal(entryHandoff.api.rememberMemberVideoReturn(), true);
+  const record = JSON.parse(entryHandoff.session.get(RETURN_KEY));
+  assert.deepEqual(record, { product_id: 'enter', created_at: 1000000, filters: { enter: 'gotjunk_001' } });
+  assert.equal(entryHandoff.api.consumeProductReturn(), '/member/foundup.html?id=gotjunk_001');
+  assert.equal(entryHandoff.api.consumeProductReturn(), null);
+  entryHandoff.session.set(RETURN_KEY, JSON.stringify({ product_id: 'enter', created_at: 1000000, filters: { enter: '../evil' } }));
+  assert.equal(entryHandoff.api.consumeProductReturn(), null);
 });
 
 console.log('Mall product state and service worker runtime: ' + checks + ' passed.');

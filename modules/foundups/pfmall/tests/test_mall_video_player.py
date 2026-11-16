@@ -522,3 +522,18 @@ class TestFloatingAndWikiTubeBuildV20:
         assert "queueHalted" in js_content
         assert "function scheduleWikiTubeRecovery" in js_content
 
+    def test_open_mall_foundup_entry_routes_through_member_portal(self, js_content):
+        """Player Enter FoundUp routes through memberPortalUrl on open Mall host."""
+        assert "isOpenMallHost" in js_content
+        assert "memberPortalUrl" in js_content
+
+    def test_projection_defines_play_open_mall_and_member_portal_handoff(self):
+        """mall-video-projection.js defines play.foundups.com open Mall and foundups.com Member Portal helpers."""
+        proj = (MEMBER_DIR / "js" / "mall-video-projection.js").read_text(encoding="utf-8")
+        assert "['play.foundups.com', 'mall']" in proj
+        assert "const MEMBER_PORTAL_ORIGIN = 'https://foundups.com';" in proj
+        assert "function isOpenMallHost" in proj
+        assert "function resolveMemberEntry" in proj
+        assert "function memberPortalUrl" in proj
+
+

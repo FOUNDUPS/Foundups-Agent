@@ -5,14 +5,22 @@
 
 ## Public Interface
 
-### Public video projection
+### Public video projection & open Mall landing
 
-The dedicated HPC hostname selects a fixed guest video field from
-`mall-public-video-catalog.json`. FoundUps `/members` and `/members/`
-redirect to `/member/`. On FoundUps, `?foundup=hpc` selects the same
-field after the existing sign-in, invitation and username checks. The
-same-tab sign-in handoff retains the registered scope for up to 15 minutes
-and consumes it once after admission. Touch and narrow views use three portrait columns with six-item vertical
+`play.foundups.com` mounts the open guest **Play FoundUps Mall** (`p.fMALL`)
+discovery landing across all catalog FoundUps without Clerk or Firestore
+account reads, while the dedicated `hpc.foundups.com` hostname mounts a fixed
+single-FoundUp guest video field from `mall-public-video-catalog.json` (its
+header brand link returns to `https://play.foundups.com/`). Entering any
+FoundUp from `play.foundups.com` (`Enter FoundUp` on tiles, floating/WikiTube
+player, quick-view cards, or direct `/member/foundup.html` / `/f/{id}/app`
+routes) requires membership and passes through the `foundups.com` Member Portal
+(`https://foundups.com/member/?enter={foundup_id}`). FoundUps `/members` and
+`/members/` redirect to `/member/`. On `foundups.com`, `?foundup=hpc` and
+`?enter={foundup_id}` enforce the existing Clerk sign-in, invitation, and
+`@username` checks; the same-tab sign-in handoff (`pfmall_product_return_v1`)
+retains the requested member destination for up to 15 minutes and consumes it
+once after admission. Touch and narrow views use three portrait columns with six-item vertical
 batches. Tap or Enter opens or switches the selected clip in the single
 top-anchored floating player (`#videoPlayerFullscreen.video-player-floating`)
 above the grid while keeping the selected tile visible (`aria-current="true"`)
@@ -158,10 +166,15 @@ fallback. Auth, account, dynamic and cross-origin requests are not cached.
 
 ### Runtime Surface
 
-`/member/` is the admitted-user p.fMALL shell hosted from Firebase static assets.
-The root of `play.foundups.com` sends visitors to that shell on the same
-origin. The sign-in return page stays at the root with `signin=required`.
-Storage and service worker registrations are origin-local.
+`/member/` on `foundups.com` is the Clerk/invite/username-admitted Member
+Portal shell hosted from Firebase static assets, while `play.foundups.com`
+opens `/member/` directly as the unauthenticated open p.fMALL discovery
+landing for all FoundUps. Entering a FoundUp from `play.foundups.com` passes
+through `https://foundups.com/member/?enter={foundup_id}`, redirecting
+signed-out visitors to `https://foundups.com/?signin=required` (which opens the
+eligibility/sign-in modal) and resuming FoundUp entry after admission.
+Storage and service worker registrations are origin-local (`pfmall-member-v21`
+/ `Build v21`).
 
 The ordinary Mall dock searches the loaded catalog. Tap or swipe up on its
 plus button for an anchored options panel and the public AutoPost link.

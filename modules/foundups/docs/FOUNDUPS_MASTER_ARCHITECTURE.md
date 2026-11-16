@@ -1,8 +1,8 @@
 # FoundUps Master Architecture
 
-**Version**: 1.1.1
+**Version**: 1.1.2
 
-**Updated**: 2026-10-23 (document map; lifecycle unchanged)
+**Updated**: 2026-11-16 (open p.fMALL host `play.foundups.com` + `foundups.com` Member Portal gate)
 
 **Status**: Canonical lifecycle and surface contract
 
@@ -54,6 +54,16 @@ governance, privileged data, and protected work require current entitlement.
 p.fMALL is the mall: a shared Progressive Web App shell for media, FoundUp
 catalog discovery, navigation, and bounded presentation controls.
 
+- **Open landing (`play.foundups.com`)**: `play.foundups.com` mounts the open
+  guest p.fMALL discovery surface across all catalog FoundUps (just as
+  `hpc.foundups.com` mounts the dedicated single-FoundUp HPC Shorts projection)
+  without Clerk or Firestore admission reads.
+- **Member Portal handoff (`foundups.com`)**: Entering a FoundUp from
+  `play.foundups.com` (`Enter FoundUp` on tiles, floating/WikiTube video
+  player, quick-view cards, or direct entry routes) requires membership and
+  passes through the `foundups.com` Member Portal (`https://foundups.com/member/?enter={foundup_id}`
+  -> Clerk sign-in + invite validation + `@username` claim -> admitted FoundUp
+  entry).
 - No wallet is needed for public discovery.
 - A visible `Enter FoundUp` affordance is required; gestures are enhancements,
   not the only path.

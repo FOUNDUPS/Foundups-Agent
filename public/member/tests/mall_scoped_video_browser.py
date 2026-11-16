@@ -180,7 +180,7 @@ def main():
         expect(page.locator("#videoScopeTitle")).to_have_text("Hasan Piker Coalition")
         expect(page.locator("#videoScopeHeader #videoScopeTopic")).to_have_text("#SchumerOUT")
         build = page.locator("#videoScopeHeader .mall-build-label")
-        expect(build).to_have_text("Build v20")
+        expect(build).to_have_text("Build v21")
         expect(build).to_be_visible()
         expect(page.locator("#videoScopeHeader #videoScopeVoice")).to_have_attribute("href", "https://vote.mtrout.com/contact")
         expect(page.locator("#videoScopeInfo")).to_be_hidden()
@@ -194,7 +194,7 @@ def main():
         assert (data["name"], data["short_name"], data["display"]) == ("Hasan Piker Coalition", "HPC", "standalone")
         assert data["id"] == data["start_url"] == "/member/?foundup=hpc"
         mall_link = page.get_by_role("link", name="Return to Play FoundUps Mall")
-        expect(mall_link).to_have_attribute("href", "https://foundups.com/member/")
+        expect(mall_link).to_have_attribute("href", "https://play.foundups.com/")
         expect(mall_link.locator("img")).to_have_attribute("src", "/member/hpc-icon-192.png")
         logo = mall_link.bounding_box()
         title = page.locator("#videoScopeTitle").bounding_box()
@@ -371,7 +371,7 @@ def main():
         expect(page.locator(".mall-video-grid-empty")).to_have_text("No videos match your search.")
         more.tap()
         menu = page.get_by_role("dialog", name="More options")
-        expect(menu.get_by_text("Build v20", exact=True)).to_be_visible()
+        expect(menu.get_by_text("Build v21", exact=True)).to_be_visible()
         assert menu.bounding_box()["x"] <= more.bounding_box()["x"] + 1
         assert menu.bounding_box()["y"] + menu.bounding_box()["height"] < dock.bounding_box()["y"]
         expect(menu.get_by_role("combobox", name="Browser AI")).to_be_disabled()
@@ -540,7 +540,7 @@ def verify_member_poster_grid(page):
     player.get_by_role("button", name="Search options").click()
     options = player.get_by_role("dialog", name="Search options")
     expect(options.get_by_role("combobox", name="Browser AI")).to_be_disabled()
-    expect(options.get_by_text("Build v20", exact=True)).to_be_visible()
+    expect(options.get_by_text("Build v21", exact=True)).to_be_visible()
     page.keyboard.press("Escape")
     expect(options).not_to_be_visible()
     expect(player).to_be_visible()
@@ -844,10 +844,57 @@ def verify_member_entry(browser_type):
     context.route("**/*", route_member)
     page = context.new_page()
     page.set_default_timeout(10000)
+
+    # 1. play.foundups.com is the open discovery landing for ALL FoundUps (zero Clerk/Firestore gate)
+    ordinary_catalog = json.loads((public / "member/mall-video-catalog.json").read_text(encoding="utf-8"))
     page.goto("https://play.foundups.com/", wait_until="domcontentloaded")
-    page.wait_for_url("https://play.foundups.com/?signin=required")
-    assert "/member/" in requested
-    assert not any(path.endswith("catalog.json") for path in requested)
+    page.wait_for_url("https://play.foundups.com/member/")
+    expect(page.get_by_role("textbox", name="Search the Mall")).to_be_visible()
+    expect(page.locator("#mallTileField .mall-tile")).to_have_count(len(ordinary_catalog))
+    assert not any("clerk" in path or "firebase" in path for path in requested), requested
+    expect(page.locator("#mallUserHandle")).to_have_text("Member Portal ↗")
+
+    # Non-video FoundUp quick-view on play.foundups.com routes Enter FoundUp through foundups.com Member Portal
+    page.locator('#mallTileField .mall-tile[data-foundup-id="gotjunk_001"]').click()
+    expect(page.locator("#foundupViewPlane")).to_have_class("foundup-view-plane open")
+    portal_cta = page.locator("#foundupViewPlane .fv-primary-cta")
+    expect(portal_cta).to_contain_text("Enter FoundUp · Member Portal")
+    expect(portal_cta).to_have_attribute("href", "https://foundups.com/member/?enter=gotjunk_001")
+    portal_cta.click()
+    page.wait_for_url("https://foundups.com/?signin=required")
+    assert json.loads(page.evaluate("sessionStorage.getItem('pfmall_product_return_v1')"))["filters"] == {"enter": "gotjunk_001"}
+
+    # Uninvited account on foundups.com stops at #inviteGate without consuming FoundUp entry return
+    account = {"username": "fixture"}
+    page.goto("https://foundups.com/member/", wait_until="domcontentloaded")
+    expect(page.locator("#inviteGate")).to_be_visible()
+    assert page.evaluate("sessionStorage.getItem('pfmall_product_return_v1')")
+
+    # Admitted member on foundups.com completes FoundUp entry handoff to /member/foundup.html?id=gotjunk_001
+    account = {"username": "fixture", "inviteValidated": True}
+    page.goto("https://foundups.com/member/", wait_until="domcontentloaded")
+    page.wait_for_url("https://foundups.com/member/foundup.html?id=gotjunk_001")
+    expect(page.locator(".entry-hero-name")).to_have_text("GotJunk")
+    assert page.evaluate("sessionStorage.getItem('pfmall_product_return_v1')") is None
+
+    # Video player Enter FoundUp on play.foundups.com also passes through foundups.com Member Portal
+    account = None
+    page.goto("https://play.foundups.com/member/", wait_until="domcontentloaded")
+    page.locator('#mallTileField .mall-tile[data-foundup-id="move2japan"]').click()
+    floating = page.get_by_role("region", name="Floating video player")
+    expect(floating).to_be_visible()
+    floating.get_by_role("button", name="Enter FoundUp").click()
+    page.wait_for_url("https://foundups.com/?signin=required")
+    assert json.loads(page.evaluate("sessionStorage.getItem('pfmall_product_return_v1')"))["filters"] == {"enter": "move2japan"}
+    page.evaluate("sessionStorage.removeItem('pfmall_product_return_v1')")
+
+    # Direct play.foundups.com/member/foundup.html?id=... also redirects through foundups.com Member Portal
+    page.goto("https://play.foundups.com/member/foundup.html?id=autopost", wait_until="domcontentloaded")
+    page.wait_for_url("https://foundups.com/?signin=required")
+    page.evaluate("sessionStorage.removeItem('pfmall_product_return_v1')")
+
+    # 2. Scoped ?foundup=hpc on foundups.com retains its member admission + sign-in return contract
+    requested.clear()
     scoped = "https://foundups.com/member/?foundup=hpc"
     page.goto(scoped, wait_until="domcontentloaded")
     page.wait_for_url("https://foundups.com/?signin=required")
@@ -861,9 +908,6 @@ def verify_member_entry(browser_type):
     assert not any(path.endswith("catalog.json") for path in requested)
 
     account = {"username": "fixture", "inviteValidated": True}
-    page.goto("https://play.foundups.com/", wait_until="domcontentloaded")
-    page.wait_for_url("https://play.foundups.com/member/")
-    expect(page.get_by_role("textbox", name="Search the Mall")).to_be_visible()
     requested.clear()
     page.goto("https://foundups.com/member/", wait_until="domcontentloaded")
     page.wait_for_url(scoped)

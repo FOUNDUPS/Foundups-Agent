@@ -103,11 +103,13 @@
     } catch (e) { return false; }
   }
 
-  /** Remember a requested member video view through the normal sign-in redirect. */
+  /** Remember a requested member video or FoundUp entry view through sign-in redirect. */
   function rememberMemberVideoReturn() {
     try {
       var scope = window.mallVideoProjection?.resolveMember(window.location);
-      return !!scope && storeProductReturn(scope, {});
+      if (scope) return storeProductReturn(scope, {});
+      var entryId = window.mallVideoProjection?.resolveMemberEntry?.(window.location);
+      return !!entryId && storeProductReturn('enter', { enter: entryId });
     } catch (e) { return false; }
   }
 
@@ -122,6 +124,11 @@
           Object.keys(record).some(function(key) { return ['product_id', 'created_at', 'filters'].indexOf(key) === -1; }) ||
           !Number.isFinite(record.created_at) || Date.now() < record.created_at || Date.now() - record.created_at > RETURN_TTL_MS ||
           !record.filters || typeof record.filters !== 'object' || Array.isArray(record.filters)) return null;
+      if (record.product_id === 'enter') {
+        var filterKeys = Object.keys(record.filters);
+        if (filterKeys.length !== 1 || filterKeys[0] !== 'enter') return null;
+        return window.mallVideoProjection?.memberEntryPath?.(record.filters.enter) || null;
+      }
       if (record.product_id !== 'move2japan') {
         if (Object.keys(record.filters).length) return null;
         return window.mallVideoProjection?.memberPath(record.product_id) || null;

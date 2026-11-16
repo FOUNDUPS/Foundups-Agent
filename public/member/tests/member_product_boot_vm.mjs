@@ -353,4 +353,43 @@ await check('the explicit videos entry expands the existing Move2Japan channel i
   assert.equal(h.state.planes.length, 1);
 });
 
+await check('play.foundups.com mounts the open Mall landing without Clerk or Firestore account reads', async () => {
+  const h = harness({ url: 'https://play.foundups.com/member/', bootVideo: true, noClerk: true });
+  await flush();
+  assert.deepEqual(h.state.videoMounts, ['mall']);
+  assert.deepEqual(h.state.imports, []);
+  assert.deepEqual(h.state.reads, []);
+  assert.equal(h.state.consumes, 0);
+});
+
+await check('FoundUp entry handoff through foundups.com requires Clerk, invite, and username before opening FoundUp', async () => {
+  const entryUrl = 'https://foundups.com/member/?enter=gotjunk_001';
+  const signedOut = harness({ url: entryUrl });
+  await flush();
+  assert.equal(signedOut.win.location.href, 'https://foundups.com/?signin=required');
+  assert.equal(signedOut.state.returns, 1);
+  assert.equal(signedOut.state.consumes, 0);
+
+  for (const [data, gate] of [[{ username: 'alpha' }, 'inviteGate'], [admitted(''), 'usernameModal']]) {
+    const gated = harness({ url: entryUrl, user: user('A'), data });
+    await flush();
+    assert.equal(gated.nodes.get(gate)?.style.display, 'flex');
+    assert.equal(gated.state.consumes, 0);
+    assert.deepEqual(gated.state.redirects, []);
+  }
+
+  const directAdmitted = harness({ url: entryUrl, user: user('A'), data: admitted('alpha') });
+  await flush();
+  assert.deepEqual(directAdmitted.state.redirects, ['/member/foundup.html?id=gotjunk_001']);
+
+  const returnAdmitted = harness({
+    url: 'https://foundups.com/member/',
+    user: user('A'),
+    data: admitted('alpha'),
+    productReturn: '/member/foundup.html?id=gotjunk_001'
+  });
+  await flush();
+  assert.deepEqual(returnAdmitted.state.redirects, ['/member/foundup.html?id=gotjunk_001']);
+});
+
 console.log(`${passed} actual member boot checks passed`);

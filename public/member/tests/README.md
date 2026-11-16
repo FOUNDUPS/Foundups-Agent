@@ -17,10 +17,12 @@ error recovery, Back and Escape, deep Vote return, orientation, diagnostics and
 manual Play at 320 px. The desktop cases cover first-video startup,
 filtered queue advancement, keyboard selection, breakpoint continuity and
 civic-resource return. The phone cases check the selected install manifest,
-options, scoped search, fixture dictation and Red Dog return. The member
-case uses controlled Clerk and Firestore responses to check sign-in return,
-invitation denial, admitted theater and the public discovery link.
-`node public/member/tests/mall_product_state_vm.mjs` covers v20 installation,
+options, scoped search, fixture dictation and Red Dog return. The member case uses controlled Clerk and Firestore responses to check open
+guest discovery on `play.foundups.com`, `Enter FoundUp` handoff through the
+`foundups.com` Member Portal (`?enter={foundup_id}` -> sign-in -> invite gate ->
+admitted FoundUp entry), scoped HPC sign-in return, admitted theater, and the
+public discovery link.
+`node public/member/tests/mall_product_state_vm.mjs` covers v21 installation,
 obsolete Mall cache retirement and scoped offline behavior. Real YouTube time
 progression and physical-device gates are separate in the
 [incident](../../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md).

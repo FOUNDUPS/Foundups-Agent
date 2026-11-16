@@ -2757,6 +2757,13 @@
     if (!foundupId) return;
     // Stop any active preview before navigation
     stopInlinePreview();
+    if (window.mallVideoProjection?.isOpenMallHost?.(window.location)) {
+      window.mallStateRestore?.save?.();
+      var portalUrl = window.mallVideoProjection.memberPortalUrl(foundupId);
+      if (typeof window.location?.assign === 'function') window.location.assign(portalUrl);
+      else window.location.href = portalUrl;
+      return;
+    }
     // Navigate to canonical route (WSP 104)
     window.location.href = '/f/' + encodeURIComponent(foundupId);
   }

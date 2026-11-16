@@ -1,3 +1,9 @@
+## 2026-11-16 · Build v21 open Mall landing (`play.foundups.com`) and `foundups.com` Member Portal handoff
+
+- **Open p.fMALL Discovery Host & Member Portal Gate (`public/member/js/mall-video-projection.js`, `public/member/js/mall-state-restore.js`, `public/member/js/mall-planes.js`, `public/member/js/mall-tile-field.js`, `public/member/js/mall-video-player.js`, `public/member/index.html`, `public/member/foundup.html`, `public/index.html`)**:
+  - Enabled `play.foundups.com` as the unauthenticated open p.fMALL discovery landing across all catalog FoundUps (matching `hpc.foundups.com`'s zero-Clerk/zero-Firestore guest boot), while gating every FoundUp entry path (`Enter FoundUp` on tiles, floating/WikiTube player, quick-view cards, `foundup.html`, and `/f/{id}/app`) through `https://foundups.com/member/?enter={foundup_id}` -> Clerk sign-in + invite validation + `@username` claim -> `/member/foundup.html?id={foundup_id}`.
+  - Updated `FOUNDUPS_MASTER_ARCHITECTURE.md`, `PFMALL_ROUTING_DISCOVERY_MODEL.md`, `README.md`, `INTERFACE.md`, and `ROADMAP.md`, and advanced shell cache generation to `Build v21` / `pfmall-member-v21`. WSP 22, 49, 50, 97, and 104 apply.
+
 ## 2026-11-16 · Build v20 floating player, edge tuck/restore, pinch gestures, and WikiTube recovery
 
 - **Unified Shared Player Lifecycle (`public/member/js/mall-video-player.js`, `public/member/js/mall-tile-field.js`)**: Consolidated phone/member inline playback into a single top-anchored floating player (`#videoPlayerFullscreen.video-player-floating`) mounted in `document.body` so switching between Floating, Tucked, WikiTube, and Desktop Theater never reparents or reloads the live media `<iframe>` / `<video>`. Added warm `YT.Player` `loadVideoById` / `cueVideoById` reuse, `375px` portrait `>= 120px` tile width compliance, and truthful `Play video` (`autoplay-blocked` / `manual-play`) fallback.

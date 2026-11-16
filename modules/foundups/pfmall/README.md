@@ -46,8 +46,13 @@ execution, or FoundUp business logic.
   not load content.
 - `verification_gap_guard.py` allows advisory anomaly surfacing and blocks AI
   finality for protected decisions.
-- `public/member/` is the Clerk-admitted member PWA. Its detailed
-  browser contract remains in `public/member/INTERFACE.md`.
+- `public/member/` powers both the Clerk-admitted member PWA on `foundups.com/member/`
+  and the open guest p.fMALL landing on `play.foundups.com` (plus dedicated
+  single-FoundUp guest Shorts on `hpc.foundups.com`). Visitors browse and play
+  catalog media openly on `play.foundups.com`, while entering any FoundUp
+  requires membership and passes through the `foundups.com` Member Portal
+  (`https://foundups.com/member/?enter={foundup_id}`). Detailed browser
+  contracts remain in `public/member/INTERFACE.md`.
 
 ## Optional real HTTP serving profile
 

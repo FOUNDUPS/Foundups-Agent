@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <script src="/member/js/mall-video-projection.js"></script>
+  <script src="/member/js/mall-video-projection.js?v=21"></script>
   <script>
     if (window.mallVideoProjection?.hostScope(window.location)) window.location.replace('/member/');
   </script>
@@ -72,7 +72,8 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap"
     rel="stylesheet">
 
-  <!-- Clerk Authentication SDK -->
+  <!-- Clerk Authentication SDK (mounted only on non-dedicated Member Portal origins) -->
+  <template id="gatewayClerkSdk">
   <script
     async
     crossorigin="anonymous"
@@ -80,6 +81,12 @@
     src="https://supreme-oyster-20.clerk.accounts.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
     type="text/javascript"
   ></script>
+  </template>
+  <script>
+    if (!window.mallVideoProjection?.hostScope(window.location)) {
+      document.head.appendChild(document.getElementById('gatewayClerkSdk').content.cloneNode(true));
+    }
+  </script>
   <script>
     // FoundUPS Clerk Theme - Dark premium aesthetic
     window.FOUNDUPS_CLERK_APPEARANCE = {
@@ -1427,6 +1434,7 @@
       </a>
     </div>
     <div class="nav-right">
+      <a href="https://play.foundups.com/" class="btn-ghost" aria-label="Play FoundUps Mall — Open Discovery" style="padding:5px 10px;font-size:0.7rem;">Play</a>
       <a href="/f/" class="btn-ghost" aria-label="FX — FoundUps Exchange" style="padding:5px 10px;font-size:0.7rem;">FX</a>
       <a href="#how" class="btn-ghost" style="padding:5px 10px;font-size:0.7rem;">How</a>
       <a href="#roc" class="btn-ghost" style="padding:5px 10px;font-size:0.7rem;">ROC</a>
@@ -1699,6 +1707,15 @@
       if (window.Clerk.user) {
         enterBtn.textContent = 'ENTER';
         enterBtn.title = 'Enter the Mall';
+      }
+
+      if (new URLSearchParams(window.location.search).get('signin') === 'required') {
+        await window.Clerk.load({ appearance: window.FOUNDUPS_CLERK_APPEARANCE });
+        if (window.Clerk.user) {
+          navigateToMember('Continuing to FoundUPS Mall...');
+        } else {
+          openModal(disclaimerModal);
+        }
       }
 
       // Listen for Clerk auth state changes

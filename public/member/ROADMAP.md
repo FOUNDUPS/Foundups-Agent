@@ -3,6 +3,11 @@
 **Module**: `public/member/`
 **Approach**: Occam's Layered (build/test one layer at a time)
 
+## Build v21 Open Mall Landing (`play.foundups.com`) & Member Portal Gate (`foundups.com`) — 2026-11-16
+
+- Configured `play.foundups.com` (`dedicatedHosts.get('play.foundups.com') === 'mall'`) as the open guest p.fMALL discovery landing for all catalog FoundUps without Clerk SDK or Firestore admission reads, mirroring `hpc.foundups.com` across the full Mall catalog while supporting `?foundup=hpc` and `?foundup=move2japan` public projections.
+- Enforced membership gating across all FoundUp entry paths from `play.foundups.com` (`mall-tile-field.js` `navigateToFoundUp`, `mall-video-player.js` `Enter FoundUp`, `mall-planes.js` quick-view `Enter FoundUp · Member Portal ↗`, `foundup.html`, and `/f/{id}/app`) via `https://foundups.com/member/?enter={foundup_id}` + `pfmall_product_return_v1` single-use 15-minute return continuity into `/member/foundup.html?id={foundup_id}` after Clerk + invite + `@username` admission under `Build v21` / `pfmall-member-v21`.
+
 ## Build v20 Floating Player, Tuck/Restore & WikiTube Gestures — 2026-11-16
 
 - Replaced row-replacing `.mall-inline-player-slot` playback with a single top-anchored floating player (`#videoPlayerFullscreen.video-player-floating`) permanently mounted in `document.body`, keeping the grid scrolling smoothly underneath while preserving `<iframe>` / `<video>`, playback time, audio, and queue across Floating, Tucked, WikiTube, and Desktop Theater modes.

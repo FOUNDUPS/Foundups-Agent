@@ -313,7 +313,7 @@ This extends the invited Mall on `f0804bd35` and retains the HPC scope.
 | --- | --- | --- |
 | PoC dock | 14/P1 (C3, I4, D3, Impact4) | Use the existing catalog and queue matching. Check search without reloading active media, local dictation fallback, menu dismissal, Red Dog and AutoPost handoff, and no overlap with provider controls. |
 | PoC tile playback | 15/P1 (C4, I4, D3, Impact4) | Play in the selected desktop tile using the shared player. Keep the separate full-view action, one iframe, provider dimensions, and original-card return. Use fixture and real-provider evidence. |
-| Play entry | 13/P1 (C3, I4, D3, Impact3) | Bind `play.foundups.com` to the existing Hosting site. Root opens the admitted Mall and the existing sign-in return remains available. Qualify DNS, TLS, signed-out and invited paths independently. |
+| Play entry | 13/P1 (C3, I4, D3, Impact3) | Bind `play.foundups.com` to the existing Hosting site as the open guest p.fMALL discovery landing for all FoundUps (mirroring `hpc.foundups.com` without auth gates for browsing/playback). Entering any FoundUp passes through the `foundups.com` Member Portal (`https://foundups.com/member/?enter={foundup_id}` -> Clerk + invite + `@username`). Qualify DNS, TLS, open guest browse, and member portal handoff independently. |
 | PFWD-2/3 | Later stage | Device model selection needs an admitted runtime and measured device support. Plan mode and plugins need an authorized Red Dog contract. AutoPost keeps capture and private attachment ownership. |
 
 The options menu opens the deployed AutoPost app listed on its

@@ -149,6 +149,8 @@
     var secondaryLinkHtml = '';
     var ctaDef = SOURCE_TYPE_CTA[item.source_type];
     var memberProjection = window.mallVideoProjection?.memberPath(item.foundup_id);
+    var openMall = !!window.mallVideoProjection?.isOpenMallHost?.(window.location);
+    var portalEntryUrl = openMall ? window.mallVideoProjection.memberPortalUrl(item.foundup_id) : '';
     var ctaUrl = '';
     if (isNonVideo && ctaDef) {
       ctaUrl = item[ctaDef.urlField] || '';
@@ -157,7 +159,17 @@
       }
     }
 
-    if (memberProjection) {
+    if (openMall) {
+      if (memberProjection) {
+        primaryCtaHtml = '<a href="' + esc(memberProjection) + '" class="fv-primary-cta">Browse Shorts</a>';
+        secondaryLinkHtml = '<a href="' + esc(portalEntryUrl) + '" class="fv-secondary-link">Enter FoundUp via Member Portal \u2197</a>';
+      } else {
+        primaryCtaHtml =
+          '<a href="' + esc(portalEntryUrl) + '" class="fv-primary-cta">Enter FoundUp \u00b7 Member Portal \u2197</a>';
+        secondaryLinkHtml =
+          '<a href="/f/' + encodeURIComponent(item.foundup_id) + '" class="fv-secondary-link">Public Overview</a>';
+      }
+    } else if (memberProjection) {
       primaryCtaHtml = '<a href="' + esc(memberProjection) + '" class="fv-primary-cta">Browse Shorts</a>';
     } else if (isNonVideo && ctaDef && ctaUrl) {
       // Non-video: primary CTA is the source action (View Repo, Open App, Open Service)

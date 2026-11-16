@@ -439,7 +439,7 @@
   height: clamp(200px, 54vw, 228px);
 }
 
-.video-player-floating [data-action="enter"],
+.video-player-floating [data-action="save"],
 .video-player-floating [data-action="share"],
 .video-player-floating [data-action="more"] {
   display: none;

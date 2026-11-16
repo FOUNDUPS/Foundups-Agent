@@ -1,3 +1,9 @@
+## 2026-11-16 — Build v21 open Mall (`play.foundups.com`) & `foundups.com` Member Portal handoff verification
+
+- Extended `mall_product_state_vm.mjs` (`24 passed`), `member_product_boot_vm.mjs` (`28 passed`), `test_mall_product_state.py`, `test_localhost_dev_harness.py`, `test_mall_tile_field.py`, and `mall_scoped_video_browser.py` for `Build v21` / `pfmall-member-v21`.
+- Verified open guest p.fMALL discovery on `https://play.foundups.com/` -> `/member/` (all 16 catalog FoundUps rendered with zero Clerk SDK or Firebase/Firestore imports), non-video quick-view `Enter FoundUp · Member Portal ↗` (`gotjunk_001`), Floating Player `Enter FoundUp` (`move2japan`), and direct `/member/foundup.html?id=autopost` routing through `https://foundups.com/member/?enter={foundup_id}` -> `https://foundups.com/?signin=required` (`pfmall_product_return_v1`) -> `#inviteGate` -> admitted `/member/foundup.html?id={foundup_id}`.
+- Full verification: `C:\Python312\python.exe -B public/member/tests/mall_scoped_video_browser.py` (`EXIT=0`, Chromium + WebKit green), all 6 Node VM suites (`EXIT=0`), and combined `pytest` (`2,290 passed, 0 failed`).
+
 ## 2026-11-16 — Build v20 floating player, edge tuck/restore, pinch transitions, and Chromium + WebKit verification
 
 - Updated `mall_scoped_video_browser.py`, `mall_product_state_vm.mjs`, and `test_mall_tile_field.py` for `Build v20` / `pfmall-member-v20` (`?v=20` shell assets, top-anchored `Floating video player`, `WikiTube video player`, and warm `YT.Player` `loadVideoById` / `cueVideoById` reuse).

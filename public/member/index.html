@@ -17,9 +17,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="/move2japan/move2japan.css">
-  <link rel="stylesheet" href="/member/css/mall-video-projection.css?v=20">
+  <link rel="stylesheet" href="/member/css/mall-video-projection.css?v=21">
 
-  <script src="/member/js/mall-video-projection.js?v=20"></script>
+  <script src="/member/js/mall-video-projection.js?v=21"></script>
   <!-- Clerk Authentication SDK -->
   <template id="memberClerkSdk">
   <script
@@ -33,10 +33,10 @@
   <script>
     // Normalize the dedicated host before any other product prepares the shell.
     const dedicatedVideoHost = window.mallVideoProjection?.hostScope(window.location);
-    if (dedicatedVideoHost && window.location.search) {
+    if (dedicatedVideoHost === 'hpc' && window.location.search) {
       window.history.replaceState(window.history.state, '', window.location.pathname + window.location.hash);
     }
-    if (!dedicatedVideoHost || !window.mallVideoProjection.resolve(window.location)) {
+    if (!dedicatedVideoHost) {
       document.head.appendChild(document.getElementById('memberClerkSdk').content.cloneNode(true));
     }
   </script>
@@ -95,8 +95,8 @@
   <link rel="stylesheet" href="css/member.css">
   <link rel="stylesheet" href="css/account-concierge.css">
   <link rel="stylesheet" href="css/mall-planes.css">
-  <link rel="stylesheet" href="css/mall-tile-field.css?v=20">
-  <link rel="stylesheet" href="css/mall-video-player.css?v=20">
+  <link rel="stylesheet" href="css/mall-tile-field.css?v=21">
+  <link rel="stylesheet" href="css/mall-video-player.css?v=21">
 </head>
 <body>
   <!-- Loading state (shown while checking auth) -->
@@ -619,10 +619,18 @@
     async function initializeMall(clerkUserId, userData, clerkUser) {
       // The existing account gate consumes this only after actual admission.
       const memberVideoScope = window.mallVideoProjection?.resolveMember?.(window.location);
+      const memberEntryId = window.mallVideoProjection?.resolveMemberEntry?.(window.location);
       const productReturn = window.mallStateRestore?.consumeProductReturn();
       if (memberVideoScope) {
         await window.mallVideoProjection.mount(memberVideoScope);
         return;
+      }
+      if (memberEntryId) {
+        const entryDest = window.mallVideoProjection?.memberEntryPath?.(memberEntryId);
+        if (entryDest) {
+          window.location.replace(entryDest);
+          return;
+        }
       }
       if (productReturn) {
         window.location.replace(productReturn);
@@ -1315,15 +1323,15 @@
   </div>
 
   <script src="/move2japan/property-search.js"></script>
-  <script src="js/gesture-engine.js?v=20"></script>
+  <script src="js/gesture-engine.js?v=21"></script>
   <script src="js/gesture-hints.js"></script>
   <script src="js/shell-bridge-interceptor.js"></script>
-  <script src="js/mall-planes.js?v=12"></script>
-  <script src="js/mall-tile-field.js?v=20"></script>
-  <script src="js/mall-video-player.js?v=20"></script>
+  <script src="js/mall-planes.js?v=21"></script>
+  <script src="js/mall-tile-field.js?v=21"></script>
+  <script src="js/mall-video-player.js?v=21"></script>
   <script src="js/account-concierge.js"></script>
   <script src="js/red-dog-concierge.js"></script>
-  <script src="js/mall-state-restore.js?v=12"></script>
+  <script src="js/mall-state-restore.js?v=21"></script>
 
   <script id="productDiscoveryBoot">
     const publicVideoScope = window.mallVideoProjection?.hostScope(window.location) &&

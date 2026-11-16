@@ -155,9 +155,17 @@ called by catalog reads or Holo queries.
 
 ## Browser/member interface
 
-The dedicated `hpc.foundups.com` host enters the shared browser shell as a
-guest. On FoundUps, `/members` redirects to `/member/` and the HPC query
-mounts its projection after member admission. The public video catalog
+`play.foundups.com` enters the shared browser shell as the open guest p.fMALL
+discovery landing across all catalog FoundUps without Clerk or Firestore
+account reads, while `hpc.foundups.com` enters as a single-FoundUp guest video
+projection (returning to `play.foundups.com`). Entering any FoundUp from
+`play.foundups.com` (`Enter FoundUp` on tiles, floating/WikiTube player,
+quick-view cards, or direct `/member/foundup.html` / `/f/{id}/app` paths)
+passes through the `foundups.com` Member Portal
+(`https://foundups.com/member/?enter={foundup_id}`), enforcing Clerk sign-in,
+invite validation, and `@username` claim before opening the admitted FoundUp
+entry view. On `foundups.com`, `/members` redirects to `/member/` and the HPC
+query mounts its projection after member admission. The public video catalog
 contains the reviewed lane and the aggregate catalog contains its discovery
 card. WSP 104 app handoff and server checks own capability authorization.
 See [HPC's interface](../hpc/INTERFACE.md).

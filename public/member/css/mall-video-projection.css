@@ -7,6 +7,20 @@
   gap: 0.65rem;
 }
 
+.open-mall-portal-cta {
+  cursor: pointer;
+}
+
+.open-mall-portal-cta .mall-user-handle {
+  color: #d7c7ff;
+  font-weight: 600;
+}
+
+.open-mall-portal-link {
+  display: inline-flex;
+  margin-bottom: 0.75rem;
+}
+
 [data-mall-video-scope] :is(.mall-self-anchor, #mallProjection, #redDogAnchor > :not(#videoScopeActions),
     #accountPlane, #accountPlaneScrim, #gestureHints) {
   display: none !important;

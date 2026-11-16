@@ -1,5 +1,15 @@
 # Member Area Module Change Log
 
+## 2026-11-16 · Build v21 open Mall landing (`play.foundups.com`) and `foundups.com` Member Portal handoff
+
+- **Open Guest p.fMALL Landing on `play.foundups.com` (`js/mall-video-projection.js`, `index.html`, `../index.html`)**:
+  - Registered `play.foundups.com -> 'mall'` in `dedicatedHosts` (`isOpenMallHost`) so visiting `play.foundups.com/` enters `/member/` directly as an open guest discovery Mall across all catalog FoundUps (with zero Clerk SDK or Firebase/Firestore auth imports), while `hpc.foundups.com` returns to `https://play.foundups.com/` and `foundups.com` links to **Play** (`https://play.foundups.com/`) in top navigation.
+  - Configured guest header (`Member Portal ↗`) and guest Red Dog concierge (`Sign in at FoundUps.com to Enter FoundUps ↗`) on `play.foundups.com` while hiding private member-only identity/invite/account sections.
+- **FoundUp Entry Membership Gate via `foundups.com` (`js/mall-tile-field.js`, `js/mall-video-player.js`, `js/mall-planes.js`, `js/mall-state-restore.js`, `foundup.html`, `../index.html`)**:
+  - Routed every FoundUp entry action on `play.foundups.com` (tile `Enter FoundUp`, floating/WikiTube player `Enter FoundUp`, quick-view `Enter FoundUp · Member Portal ↗`, direct `/member/foundup.html?id=...`, and `/f/{id}/app`) through `https://foundups.com/member/?enter={foundup_id}`.
+  - Added `resolveMemberEntry`, `memberEntryPath`, and `memberPortalUrl` plus bounded `pfmall_product_return_v1` (`product_id: 'enter'`) continuity in `mall-state-restore.js`, auto-opening `#disclaimerModal` on `foundups.com/?signin=required` and completing entry to `/member/foundup.html?id={foundup_id}` strictly after Clerk sign-in, invite validation, and `@username` claim.
+- **Shell Generation (`member-sw.js`, `js/mall-video-projection.js`, `index.html`)**: Advanced `mallBuild` to `'v21'` and `CACHE_NAME` to `'pfmall-member-v21'` (`?v=21`). WSP 22, 49, 50, 97, and 104 apply.
+
 ## 2026-11-16 · Build v20 top-anchored floating player, edge tuck/restore, pinch gestures, and WikiTube sequential recovery
 
 - **Unified Top-Anchored Floating Player (`js/mall-video-player.js`, `js/mall-tile-field.js`, `css/mall-video-player.css`, `css/mall-video-projection.css`, `css/mall-tile-field.css`)**:
