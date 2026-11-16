@@ -376,3 +376,9 @@ list. Reacquire remaining rows because positions change. Disappearance alone is
 not a schedule receipt: independently locate the same ID in scheduled content
 and read its persisted date, time and timezone. Noninteractive observation of
 an operator's list does not prove unseen clicks, saved times or actual topics.
+
+Observed UI qualification (2026-11-16 operator demonstration): newly Scheduled
+rows can remain visible temporarily under the Unlisted filter while the operator
+alternates top and bottom groups. Do not assume immediate disappearance or use
+an unchanged row position as identity. That observation verified visible status
+and date only, not an exact saved time or full playback/content audit.
