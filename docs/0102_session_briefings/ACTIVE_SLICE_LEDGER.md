@@ -31,6 +31,13 @@ rows and the canonical read-only/gate files are verified. Exact committed-head
 review and hosted checks remain the next gates; no merge or activation is yet
 claimed by this prepublication receipt.
 
+Main advanced during publication to cac0129ad6ce1a92fdc4548f852ba30f1cc8ba9e
+(PR #2407, three scheduler documentation paths). A second normal merge
+preserves its remote scheduling/runbook bytes and composes both ModLog
+entries under the existing heading. The accepted e329db6 visual/code/CI,
+registry, security and skill bytes remain unchanged. Independent review
+and current-head hosted gates must qualify this final composition.
+
 ## Execution/delegation guidance follow-up - 2026-11-16
 
 Owner: same delegated 0102 worker and existing PR #2403/worktree; origin

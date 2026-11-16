@@ -1,5 +1,18 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-11-16 - Conversational scheduling policy reconciliation
+
+Extended the existing skill routing contract and remote runbook, rather than
+adding a publisher or duplicate skill. Latest explicit cadence and overnight
+instructions override earlier batch directions without silently changing channel
+configuration. Added live inventory reconciliation, mixed-stream topic evidence,
+verified Studio Ask availability, alternating priority-topic slots, distinct
+evidence/approval holds and independent persisted readback. Private clip receipts
+remain outside source control. Documentation only; no video effects, runtime
+activation, native allocator changes or model training from this update.
+WSP 22/50/84/95/97. Validation is scoped to document diff and contract/link checks;
+no application test or deployment pass is claimed.
+
 ## 2026-11-15 - Stop the manual visual harness after unverified outcomes
 
 The existing Layer 3 `--wre-tars` caller now returns its summary immediately after
