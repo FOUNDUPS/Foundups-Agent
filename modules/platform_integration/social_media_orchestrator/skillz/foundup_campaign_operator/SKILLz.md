@@ -1,7 +1,7 @@
 ---
 name: foundup_campaign_operator
-description: Prepare and launch evidence-backed petitions with human authentication handoff, or operate the bounded AntifaFM campaign through the existing social interfaces.
-version: 0.3.0
+description: Reconcile multi-publication receipt handoffs in dry-run mode, prepare evidence-backed petitions, or operate the bounded AntifaFM campaign through existing social interfaces.
+version: 0.4.0
 author: 0102
 agents: [qwen]
 primary_agent: qwen
@@ -72,3 +72,17 @@ entry. Native executor admission is a separate future integration.
 `UnifiedXInterface` owns API publication and its durable receipt.
 OpenClaw/WRE retains permission, cadence, stop, and runtime-admission ownership.
 This skill starts no scheduler and creates no external account.
+
+## Publication coordination branch — 2026-11-16
+
+For JHR or other multi-publication handoffs, use the existing content route with
+`action=reconcile dry_run=true packet='<inline JSON>'`; read the
+[publication receipt contract](../../docs/CONTENT_CAMPAIGN.md#publication-reconciliation--2026-11-16).
+It checks supplied stage bindings, preserves old open work and returns proposed
+memory/next actions only. The source-specific owner selects editorial scope and
+website-first order. Keep source approval, immutable archive, deployed build,
+exact live issue, each channel approval/readback and social amplification separate.
+Known permalinks mean readback/no repost; unknown submissions mean readback only.
+This Pub DAE coordination role does not inherit an AntifaFM grant, promote this
+prototype, install a daemon or qualify Substack/Reddit publication. Brain/Memex
+persistence requires a real governed write acknowledgement and readback.

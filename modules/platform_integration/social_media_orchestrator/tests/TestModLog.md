@@ -1,3 +1,33 @@
+## 2026-11-16: Publication reconciliation and existing route validation
+
+Extended the existing content fixture after inspecting its README/TestModLog;
+no parallel test owner or quarantined scaffold replacement. The immutable
+b0b81bf5 route rejects the new reconcile action (source-bound characterization).
+The initial sandbox run stalled in Windows asyncio fallback_socketpair accept;
+owned runs were terminated. A bounded offline run outside that loopback boundary
+found four test-harness TypeErrors from a helper parameter collision; renamed the
+helper parameter without removing an assertion. Final real content plus existing
+SOCIAL adapter selection: **36 passed,119 subtests passed** in1.30s. Application
+environment/file/network/subprocess effects are denied in the route fixtures.
+
+Coverage includes merged/saved versus exact live issue, wrong host/anchor/issue/
+revision/hash and stale/future observations, archive/build commit binding,
+platform/locale/destination/source-scoped approvals, delivery artifact/identity,
+private queues unknown, known permalink no-repost, stale unknown-send readback
+only, old open-work preservation, requested editions before amplification,
+strict malformed JSON/authority rejection, detached memory receipts/age/owner and
+changed provenance changing the review revision. No host/provider/model call,
+publication or memory write is qualified by these fixtures.
+
+A supplied current JHR #003 packet returns BLOCKED_OPEN_WORK, website release
+gaps, READBACK_EXISTING_NO_REPOST and PROPOSED_NOT_WRITTEN; it admits no effect.
+Static archive validation passes four unique issues, three immutable manuscript
+owners and23 local links. Canonical skill/projection parity, Skill Creator quick
+validation, registry check (1845files/260quarantines) and git diff --check pass.
+Independent code and documentation reviews have no blocking findings after
+receipt/approval/amplification fixes. Hosted checks and main acceptance remain
+separate PR gates. No Brain/Memex sink acknowledgement or live delivery claimed.
+
 ## 2026-10-29: Current reconciliation local validation
 
 Existing Python manifest suite: eight passed after the measured 330 KiB

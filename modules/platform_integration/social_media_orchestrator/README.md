@@ -1,5 +1,13 @@
 # Social Media Orchestrator
 
+## Publication receipt reconciliation — 2026-11-16
+
+The existing SOCIAL content route accepts `action=reconcile dry_run=true` for
+bounded supplied-evidence stage reconciliation. It preserves open releases,
+binds source/archive/build/live/channel receipts and emits review plus proposed
+memory only. See the [contract](docs/CONTENT_CAMPAIGN.md#publication-reconciliation--2026-11-16).
+No publisher, scheduler, service or memory sink is activated by this extension.
+
 ## Source-backed editorial packages — 2026-10-27
 
 `content_orchestrator.prepare_campaign(brief)` and the existing SOCIAL campaign
@@ -230,4 +238,3 @@ For detailed technical architecture documentation:
 - main.py now registers social_media as a broker-managed runtime with a real stop hook.
 - stop social media dae maps to stop_social_media_dae() instead of returning stop_unsupported.
 - The cadence wait is interruptible, so stop requests do not sit behind the full sleep interval.
-

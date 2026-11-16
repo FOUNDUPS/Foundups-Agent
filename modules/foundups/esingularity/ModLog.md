@@ -1,3 +1,15 @@
+## 2026-11-16 — Recover JHR release blocker and harden existing publication handoff
+
+Reconciled the relevant YUMORI history, existing issue2126 and read-only Sites
+metadata. Older records already separated merged code, blocked deployment and
+unverified #003 live readback; preserve that obligation and LinkedIn's existing
+edition. Added sanitized failure analysis/manifest open work; hardened JHR and
+website skills to read both ledgers, bind stage receipts, retain old blockers and
+require actual governed memory acknowledgements. The existing SOCIAL owner now
+provides a dry-run receipt reconciler. No manuscripts, frontend, deployment,
+mailbox, public post or running service changed. See JHR audit supplement and
+social content contract for evidence, limits and remaining owner work.
+
 ## 2026-11-16 — JHR durable archive and Red Dog channel workflow
 
 - Index #001–004 in `jhr/manifest.json` with immutable existing source bindings,

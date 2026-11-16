@@ -137,3 +137,47 @@ Prefer official maps, aerial/satellite context, planning maps, grid diagrams, an
 ## Runtime
 
 Use `modules/foundups/esingularity/jhr/scripts/launch.py` for one assessment cycle. The research retriever is injected by orchestration. Publication remains fail-closed until the adapter is verified.
+
+## Publication failure prevention and Pub DAE coordination
+
+Before a publication handoff, reconcile the entire current JHR master **and the
+relevant YUMORI moshpit/website release history**, including old unresolved work,
+issue2126 and current Sites source/version/deployment state. Retrieve the stable
+private ledgers through authorized continuity; never copy unrelated private text
+to Git. A recent-message window or summary is insufficient to close an older
+release blocker. If a required ledger cannot be read, preserve that coverage gap.
+
+Carry independent editorial, approval, archive, build/deployment, exact live
+website, derived-edition and amplification states. Bind the manuscript revision
+and SHA256, archive commit, Sites build-source commit, exact issue URL/body,
+platform/locale/destination approval, provider permalink and readback time.
+Source merged, Sites saved, deployment succeeded and exact issue live are
+different observations. Preserve conflicts and all open owner/next-action work
+until its actual receipt is recovered. Existing LinkedIn #003 requires readback,
+never a new post to compensate for its website gap. #004 remains a draft until
+012 approves its exact current manuscript and destinations.
+
+Use the existing SOCIAL command `social campaign content action=reconcile
+dry_run=true packet='<inline JSON>'` and its
+[receipt contract](../../../modules/platform_integration/social_media_orchestrator/docs/CONTENT_CAMPAIGN.md#publication-reconciliation--2026-11-16)
+to expose missing handoffs. This implemented helper consumes supplied evidence
+only and emits no publication grant or memory write. Do not claim its matching
+hashes authenticate a receipt, or feed its proposed projection into a verified
+outcome sink without the existing authenticity owner.
+
+Pub DAE is this coordination role across existing owners. Research/Reddit
+discussion leads -> approved manuscript -> repository archive -> website release
+and exact live verification -> Japanese LinkedIn and separately approved English
+Substack -> approved social amplification through the existing SOCIAL DAE.
+Any Reddit submission is a separately approved community-specific artifact,
+after rules/account/schedule/duplicate checks; no automatic cross-posting is
+installed. Preserve the current website -> LinkedIn requirement. Preparation,
+translation, setup and workflow approval never authorize external placement.
+
+After each authorized stage, record a minimal receipt newest-first beneath each
+relevant master's fixed instructions: issue/revision/hash, exact destination,
+observed stage/result/time, source receipt, owner/blocker/next action and PR/main.
+Read back the insertion and preserve native formatting/history. A Brain/Memex
+write additionally requires the governed sink acknowledgement and scoped
+readback. Without those, report ingestion NOT_ATTEMPTED or UNVERIFIED. Keep the
+open-work packet explicit so later editorial success cannot erase a release gap.

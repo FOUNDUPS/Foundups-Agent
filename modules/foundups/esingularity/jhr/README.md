@@ -120,3 +120,20 @@ The runtime is designed to be called from FoundUps startup/orchestration without
 `data/japan_ai_infrastructure_flows.json` is the official-source seed for YUMORI's Japan infrastructure dependency analysis. It records directed asset, compute, technology, network, government-program and heat-reuse relationships. Unknown monetary amounts remain `null`; the ledger is deliberately incomplete and must not be represented as a market-wide map.
 
 The calculation lives in `../src/yumori_economic_model.py`. JHR owns evidence/provenance; the YUMORI Economic Model owns project calculations. Neither surface converts a relationship into YUMORI revenue, committed financing, or a public market-score claim.
+
+## Open release work and multi-publication reconciliation
+
+The [failure-analysis supplement](PUBLICATION_AUDIT_20261116.md#follow-on-failure-analysis-existing-release-obligation-2026-11-16)
+connects the already recorded YUMORI/issue2126 release blocker with current Sites
+metadata and the missing #003 served page. Its exact cause of historical
+deployment divergence remains unresolved. Preserve #003's live LinkedIn edition;
+do not repost it. Before any next handoff, read both relevant private ledgers and
+carry older open obligations forward with owner, evidence and next action.
+
+The existing SOCIAL content route now implements dry-run publication receipt
+reconciliation; see its
+[contract](../../../platform_integration/social_media_orchestrator/docs/CONTENT_CAMPAIGN.md#publication-reconciliation--2026-11-16).
+It emits supplied-evidence review and proposed memory only. Pub DAE is a
+coordination role across current owners, not an installed publication service.
+An actual Brain/Memex write, automatic cadence and provider-qualified execution
+remain separately unproven. No current #004 destination is approved here.
