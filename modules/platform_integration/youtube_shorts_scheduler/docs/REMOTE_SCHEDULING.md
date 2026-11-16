@@ -382,3 +382,12 @@ rows can remain visible temporarily under the Unlisted filter while the operator
 alternates top and bottom groups. Do not assume immediate disappearance or use
 an unchanged row position as identity. That observation verified visible status
 and date only, not an exact saved time or full playback/content audit.
+
+Current native implementation qualification (source audit 2026-11-16): the
+operator's demonstrated manual list-page workflow is not yet the native writer's
+qualified execution path. `ContentPageScheduler.schedule_video_from_row` routes
+to the detail owner for fresh metadata/Audience checks; `video_policy.submit_inline`
+fails closed with `presave_audit:detail_editor_required`. Do not remove that gate
+to implement the preference above. `schedule_all_visible` delegates frozen IDs
+to the existing calendar/claim owner. Native list-page continuation needs its
+own gate-preserving implementation and tests before live qualification.
