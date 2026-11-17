@@ -1,5 +1,10 @@
 # Social Media Orchestrator
 
+The [reusable editorial review cycle](docs/EDITORIAL_REVIEW.md) adds bounded
+source/audience/writing/image review and an existing-harness benchmark task
+projection. Discover it through `review-publishing`. This local prototype does
+not execute critics, schedule posts, publish or demonstrate transferable RSI.
+
 ## Publication receipt reconciliation — 2026-11-16
 
 The existing SOCIAL content route accepts `action=reconcile dry_run=true` for

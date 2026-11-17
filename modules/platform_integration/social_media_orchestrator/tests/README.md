@@ -1,3 +1,10 @@
+## Editorial review prototype
+
+Run `python -B -m unittest modules.platform_integration.social_media_orchestrator.tests.test_content.test_editorial_review`
+for synthetic revision, review and benchmark-input contracts. No model/provider
+is exercised. Run with the existing compiler/projection selection in CI as well.
+See docs/EDITORIAL_REVIEW.md and the dated TestModLog for measured results.
+
 ## Publication reconciliation — 2026-11-16
 
 The existing content fixture also tests the implemented effect-free receipt

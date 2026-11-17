@@ -7,6 +7,16 @@
 
 ## Public API
 
+### Bounded editorial review (local prototype)
+
+`src/content/editorial_review.py:evaluate_editorial_cycle(brief, topic_id, rounds)`
+reuses the campaign compiler and binds supplied grounding, audience, writing and
+image reviews to exact revisions/rubric. Up to three rounds; no provider effects.
+`editorial_benchmark_task(..., golden=...)` projects a separately frozen expected
+digest into the existing AI Gateway benchmark task, not a benchmark result.
+See [contract and integration boundaries](docs/EDITORIAL_REVIEW.md). Existing
+SOCIAL routes, production skill admission and publication remain unchanged.
+
 ### Local pitch-package instruction entry (prototype)
 
 `skillz/foundup_pitch_package/SKILLz.md` produces a versioned brief, narration/storyboard
