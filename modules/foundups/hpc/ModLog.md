@@ -1,5 +1,22 @@
 # HPC ModLog
 
+## 2026-11-17 · Dream Team campaign source reconciliation
+
+012 supplied nine fictional basketball draft cards, press-wire satire, D.U.P.
+vocabulary and a three-lane worker plan. Extend existing README, INTERFACE,
+ROADMAP and intake SKILLS_MAP; no competing files or runtime implementation.
+Link the actual current Progressive Media sheet, older 18-entry workbook and
+existing outreach workflow. Current sheet has 33 populated rows including one
+explicit Zeteo alias; the named four-tab master and 34-outlet claim remain
+unverified. Preserve all nine card IDs and distinguish requested design,
+fictional casting, planned dispatch and published/admitted behavior.
+
+Scope is documentation only; WSP 15/22/50/97. Existing #2376/#2411/#2405/#2394
+lanes remain untouched. No native bootstrap/HoloIndex/WRE, local tests, live
+site check, sender change, external outreach or deployment is claimed. Check
+exact PR head and main separately. Missing workbook identity remains an
+explicit blocker; existing content and historical acceptance gates survive.
+
 ## 2026-11-13 · Public host and invited member entry
 
 012 confirmed the guest entrance at `hpc.foundups.com`. The registry sends
