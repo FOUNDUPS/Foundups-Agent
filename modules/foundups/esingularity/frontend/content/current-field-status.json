@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
   "visible": true,
-  "updatedAt": "2026-09-20T12:42:16+09:00",
-  "expiresAt": "2026-09-25T23:59:59+09:00",
+  "updatedAt": "2026-11-18T07:04:12+09:00",
+  "expiresAt": "2026-11-25T07:04:12+09:00",
   "label": {
-    "ja": "9/25 反対票を｜電話で声を",
-    "en": "SEP 25 · VOTE NO · CALL",
-    "pt": "25 SET · VOTE NÃO · LIGUE"
+    "ja": "企業・団体の皆さまへ",
+    "en": "BUSINESSES & ORGANIZATIONS",
+    "pt": "EMPRESAS E ORGANIZAÇÕES"
   },
   "message": {
-    "ja": "9月25日の福井市議会本会議採決で、旧すかっとランド九頭竜の解体準備予算に「反対票を」と伝えてください。福井市議会事務局：0776-20-5506（平日8:30〜17:15）。送信済み要請と連絡方法はYUMORI.meへ。",
-    "en": "Before the September 25 Fukui City Council vote, ask council members to VOTE NO on demolition-preparation funding for the former Sukatto Land Kuzuryu. Fukui City Council Secretariat: 0776-20-5506 (weekdays, 8:30 a.m.–5:15 p.m. JST). Read the submitted request and contact options on YUMORI.me.",
-    "pt": "Antes da votação de 25 de setembro na Câmara Municipal de Fukui, peça aos vereadores que VOTEM NÃO ao orçamento de preparação da demolição do antigo Sukatto Land Kuzuryu. Secretaria da Câmara: 0776-20-5506 (dias úteis, 8h30–17h15, horário do Japão). Leia o pedido enviado e as formas de contato na YUMORI.me."
+    "ja": "今後10年、AI・計算資源をどう使いますか？YUMORI.meは、地域主体のAI交番構想について、利用・顧客紹介や販売・技術・運営の協業に関心のある企業・団体を募集しています。需要と実現条件を確認する準備段階です。構想を見る。",
+    "en": "What will your AI and computing needs be over the next 10 years? YUMORI.me seeks organizations interested in using, referring or reselling, or helping deliver community-led AI-Koban computing. Demand and feasibility are still being assessed. Explore the proposal.",
+    "pt": "Quais serão suas necessidades de IA e computação nos próximos 10 anos? A YUMORI.me busca organizações interessadas em usar, indicar ou revender serviços, ou ajudar a desenvolver e operar a computação comunitária AI-Koban. A demanda e a viabilidade ainda estão em avaliação. Conheça a proposta."
   },
-  "href": "https://yumori.me/vote-no#contact"
+  "href": "https://esingularity.ai/"
 }
