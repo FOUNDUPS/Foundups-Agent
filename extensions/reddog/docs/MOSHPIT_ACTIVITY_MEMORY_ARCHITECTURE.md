@@ -188,40 +188,53 @@ Implementation remains a planned slice in [the RedDog roadmap](../ROADMAP.md#mos
 
 ## RedDog layers, Moshpit actions, search and AutoPost convergence (2026-11-17; proposed)
 
-Status: `SPECIFIED_NOT_IMPLEMENTED` for the unified mobile conversation UX, action menu, cross-surface search and automatic capture-to-Moshpit path. This section consolidates 012/0102/RedDog/Little Dog dialogue; it is a product requirement, not a deployment or tool-access claim.
+Status: `SPECIFIED_NOT_IMPLEMENTED` for the unified mobile conversation UX, action menu, cross-surface search, Muzzle/sticky controls and automatic capture-to-Moshpit path. This section consolidates 012/0102/RedDog/Little Dog dialogue; it is a product requirement, not a deployment or tool-access claim.
 
 ### Layers and source of truth
 
-- RedDog is the fast, persistent interaction/attention layer; 0102 is the deeper principal-scoped cognition and governed orchestration layer. Interaction effort may be Instant, Think or Deep, with optional Auto routing; this changes compute/response behavior, **not** identity, permission or storage authority.
-- AutoPost is the locally permissioned camera/perception surface. It may propose structured, evidence-linked capture context, but must not auto-publish, identify people conclusively or authorize disclosure. Lick remains the consent-aware encounter handshake and never grants blanket access.
+- RedDog is the fast, persistent interaction/attention layer; 0102 is the deeper principal-scoped cognition and governed orchestration layer. Interaction effort defaults initially to **Instant**, with **Think** and **Deep** levels plus optional **Auto** routing (preferred only after routing verification); changing effort modifies compute/response behavior, **not** identity, permission or storage authority.
+- **Little Dog**, **Dog**, and **Big Dog** aliases are customizable presentation only, never identity, model, permission, or authority proof.
+- **Discussion, discovery, and execution are distinct modes.** Discussion is not automatic decision-making, memory certification, or worker authorization.
+- AutoPost (`FOUNDUPS/autopost`) is the externally owned, locally permissioned camera/perception surface. Do not copy another camera stack into `Foundups-Agent`. Local AI may propose structured, evidence-linked capture context, but must not auto-publish, assert identity, or authorize disclosure. Lick remains the consent-aware encounter handshake and never grants blanket access.
 - Principal Activity Ledger (PAL) captures eligible local activity once; Breadcrumbs preserve evidence; Brain/Memex consolidates state; Moshpit renders selected material project events and recoverable discussion sources. Do not create a second store or treat every chat utterance as a project event.
-- DAEmon emits sanitized diagnostics (load time, capture/inference state, latency, error and recovery) with private evidence kept outside public Git. Diagnostic observations are not automatically project accomplishments.
+- Durable joinable Work/task handoff must reuse existing Work/task owners with real returned IDs/links, traceable status, and day-based recall evidence. Spoken acknowledgment, dispatch, run-ended, and verified completion are separate states. `docs/0102_session_briefings/work_ledger.schema.json` and `work_ledger.example.json` are historical/candidate specs only; `reddog_work_ledger_source_projection_supply.py` stamps projection time rather than a verified daily history join.
+- DAEmon emits sanitized diagnostics (model load duration, capture/inference latency, media/network errors, failed actions, retries, recovery, and 012 corrections) using existing DAEmon owners with private evidence kept outside public Git. Diagnostic observations are not automatically project accomplishments.
 
 ### Context actions, archive and deletion
 
 On a conversation message, Markdown block, artifact or Moshpit title, a long-press (touch) or equivalent context action (mouse/keyboard) should expose concise text-labeled actions, without decorative emoji: **Pin / Unpin, Audit, Store, Archive, Delete**. Show only actions applicable and authorized for that object.
 
-- **Pin** keeps a stable reference to a source, not a duplicate. The bottom pin tray navigates back to the original; it is not the same as storing evidence or recording a completed outcome.
+- **Pin / Unpin** keeps a stable reference to an original message/Markdown/artifact identity and revision, not a duplicate. The bottom thumb pin tray navigates back to the original while preserving the reading anchor and rechecking access and source lifecycle; it is not the same as storing evidence or recording a completed outcome.
 - **Audit** requests an evidence/provenance/status check; it does not itself mark the content verified.
-- **Store** proposes/adopts a governed Breadcrumb, PAL event or Brain/Memex update according to materiality and source authority. Never silently turn brainstorming into canonical project truth.
+- **Store** proposes/adopts a governed Breadcrumb, PAL event or Brain/Memex update according to materiality and source authority. Never silently promote brainstorming (`PROPOSED`/`INFERRED`) into canonical `OBSERVED` project truth.
 - **Archive** removes a conversation/title from the active Moshpit browsing surface while preserving authorized history and references; it is not deletion. Exact archive ownership and retention policy require implementation audit.
 - **Delete** is a separately confirmed, scoped operation with source/reference lifecycle handling and an explicit receipt; never infer deletion of canonical evidence, backups, remote copies or audit logs from hiding a title. Destructive authority and retention policy must be resolved first.
-- Titles can be archived/deleted independently of project facts. Pinned references to archived or deleted sources must retain honest inaccessible/deleted states, not silently redirect.
-- No context action automatically creates a GitHub commit, sends email, publishes content, grants work authority or invokes a worker.
+- Titles can be archived/deleted independently of project facts. Pinned references to archived, deleted, revoked, expired, or superseded sources must retain honest inaccessible/deleted/superseded states and withhold revoked excerpts, never silently retarget.
+- No context action automatically creates a GitHub commit, sends email, publishes content, triggers wallet/token execution, grants work authority or invokes a worker.
 
-### Search and navigation
+### Ordering, search and navigation
 
-- Search must state its scope: current conversation/thread, pinned sources, current FoundUp/project Moshpit, or permitted cross-FoundUp discovery. Default to the active context; do not silently search all private projects.
+- Search must state its scope: current conversation/thread, pinned sources, current FoundUp/project Moshpit, or explicitly selected and authorized cross-FoundUp discovery. Default to the active context; do not silently search all private projects.
 - Search matches messages, Markdown blocks, artifact references, relevant Breadcrumbs and project status through existing authorized query/projection owners. Results should preserve provenance, stable source navigation and the reading anchor; use bounded pagination and avoid loading entire history.
-- Conversation messages remain newest near the composer; project Moshpit events remain newest-first by JST day. Do not conflate their ordering.
-- RedDog's shared search-bar `+` may expose listening, reasoning effort, model diagnostics, autoplay and DAEmon. Those controls belong to the interaction shell; they must not crowd the contextual message-action menu or imply capabilities are active before testing.
+- **Three-surface ordering contract (never conflate into one global sort):**
+  1. **Generic RedDog conversation history**: oldest above, newest near the composer; live replies arriving while reading history preserve the scroll/reading anchor and offer return-to-latest.
+  2. **AutoPost white conversational Moshpit**: swipe upward from an appropriate camera surface (kept separate from the upward-drag recording lock and `+` menu gesture) while retaining the live camera view and capture controls without unmounting or restarting its stream/controller; **latest items appear at the TOP and older below**.
+  3. **Project activity/audit Moshpit**: reverse-chronological newest-first by JST (`Asia/Tokyo`) day, growing upward.
+- RedDog's shared search-bar `+` may expose listening (`Auto Listen`, `Push to Talk`, `Off`), **Muzzle**, reasoning effort (`Instant`, `Think`, `Deep`, `Auto`), available local/browser/cloud models with truthful capability/loading state, sticky recording toggle, autoplay, and DAEmon diagnostics. Controls belong to the interaction shell; unavailable items stay visibly disabled (`Planned`), never presented as operational.
 
-### Mobile control placement and governed media handoff
+### Mobile control placement, Muzzle, sticky capture and governed media handoff
 
-- Keep the existing bottom conversation composer/search and thumb-reachable RedDog entry as one shared control surface. The separate pin tray is opened from one nearby pin affordance; do not create a permanently expanded second toolbar. The `+` controls reasoning/listening/models/DAEmon, while per-message long-press owns Pin/Audit/Store/Archive/Delete.
-- Treat microphone input, speaker/TTS output, and camera entry as independently testable controls. The RedDog voice affordance must not be confused with dictation-only search; the camera launches the existing AutoPost owner and returns to the same conversation/project context. Verify actual device permissions, recording indicators, stop/cancel, output routing, keyboard safe areas, and configurable placement on phone before claiming live integration.
-- In a Moshpit, a captured photo/video can be **suggested** for attachment to the active project with a visible destination, preview, consent/retention status, provenance and explicit correction/confirmation. Automatic preparation or local classification is not automatic sharing, upload, public publication or canonical memory admission. Preserve offline/pending state and truthful failures.
-- Moshpit conversation titles are navigational objects. Their archive/delete actions must not erase the underlying verified project event, source transcript or canonical artifact. Search and pin navigation must work across active and authorized archived titles without crossing project/principal disclosure boundaries.
+- Keep the bottom translucent dock shared across Mall, AutoPost, and other FoundUps (not camera-only search). The Mall camera icon beside RedDog opens existing AutoPost, preserving originating FoundUp, navigation position, and authorized conversation context so return restores the prior experience.
+- In AutoPost, place the shared translucent bar below the iris/shutter, with `+` and RedDog replacing the microphone launcher while microphone input mute remains separately available. The separate pin tray opens from one nearby pin affordance; per-message long-press owns **Pin / Unpin, Audit, Store, Archive, Delete**.
+- RedDog placement (`left` or `right`) is explicitly switchable in settings. 012 prefers **left**; do not infer a universal default from handedness.
+- **Muzzle vs microphone mute:**
+  - **Muzzle** is RedDog output mute: it silences RedDog audible output while generation/work continues, and listening continues when microphone input remains enabled.
+  - Microphone input mute and **Muzzle** are independent of each other, and neither control is YouTube-player mute, preview mute, video-recording microphone settings, or cancellation of ongoing work.
+  - Muzzle state must be visible to 012 and provided to the agent (avoiding unnecessary vocal filler; a barking-dog icon is a candidate only, not an implemented requirement asset).
+  - **Open product decisions (must stay explicit until decided by 012):** (a) whether substantive responses are queued or surfaced separately while muzzled; (b) whether RedDog microphone mute also affects AutoPost video-recording audio.
+- **AutoPost capture controls and sticky recording:** tap iris for photo; hold records video. With sticky off, release stops. Optional **sticky recording** in `+` settings makes release continue until the next tap stops. Preserve existing upward-drag recording lock, viewport camera-flip behavior, and capture settings; stopping video recording must not trigger a photograph.
+- **Media attachment & security boundary:** captures share into the selected authorized conversation as references to original media with explicit `local`, `transferring`, `attached`, and `failed` states, bounded retries, and deduplication. Sharing into a conversation preserves original bytes, capture identity, and recording segments and never publishes publicly; multi-segment assembly and cross-origin transfer are **not** implemented merely by exporting local IndexedDB IDs.
+- **Principal-isolation guardrail (`gotjunk_messages` / `gotjunk_blobs`):** in `modules/foundups/gotjunk/firestore.rules`, `gotjunk_messages` and `gotjunk_blobs` have `allow read: if true` (public read). Never route private principal conversations, pins, Moshpit history, or camera captures into those public collections; extend principal-scoped existing owners (`PrincipalActivityLedger`, `AgentDB`, authenticated adapter boundaries).
 - Keep a separate, compact RedDog Work/task handoff for substantial implementation: record scope, status, PR/receipt and next action through existing work owners; do not promote conversational Moshpit messages directly to autonomous execution.
 
 ### AutoPost-to-Moshpit flow
@@ -239,7 +252,7 @@ A filmed phone debugging session may suggest a debugging tag and an evidence-lin
 
 ### Soft-proto acceptance and drift gates
 
-Reconcile the existing Wave-inspired GotJunk message controls, RedDog conversation owner, PAL adapter, Moshpit projection and AutoPost capture/DAEmon owners before coding. Verify a phone-sized soft-proto for: long-press menu; pin and jump; audit/store distinction; archive versus delete; scoped search; reading-anchor persistence; newest-first project projection; captured evidence with corrected project classification; consent denial; reload/reconnect; and cross-principal access denial. Each implemented slice must carry tests, a status receipt and roadmap reconciliation. Do not label a menu stub, source-only PoC or a document as a deployed feature.
+Reconcile existing GotJunk Wave message types/stores (excluding public-read Firestore rules), RedDog conversation owner, PAL adapter, Moshpit projection, `work_ledger` candidates, and AutoPost capture/DAEmon owners before coding. Verify a phone-sized soft-proto and physical-phone test matrix for: long-press menu; pin and jump; audit/store distinction; archive versus delete; scoped search; reading-anchor persistence; three-surface ordering separation; Muzzle and mic-mute independence; sticky recording stop-without-photo; captured evidence with corrected project classification; consent/permission denial; reload/reconnect; and cross-principal access denial. Each implemented slice must carry tests, a status receipt and roadmap reconciliation. Do not label a menu stub, source-only PoC or a document as a deployed feature.
 
 ## Retrieval Contract for RedDog
 
