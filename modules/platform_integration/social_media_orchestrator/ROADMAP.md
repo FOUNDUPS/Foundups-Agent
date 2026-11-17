@@ -1,3 +1,11 @@
+## Bounded editorial review layer - 2026-11-18
+
+Local review/refinement contracts and existing-harness benchmark-task projection
+are implemented; see docs/EDITORIAL_REVIEW.md. Actual critic execution, independent
+held-out editorial quality, authenticated platform placement/queue, analytics and
+admitted transferable learning remain separate gates. Keep Substack transport
+DRAFT_OR_HANDOFF_ONLY and preserve existing publication reconciliation.
+
 ## Indexed editorial / Substack / Mall handoff assessment — 2026-11-15
 
 Extend the same community/newsletter instruction in PR2394; no new orchestrator,

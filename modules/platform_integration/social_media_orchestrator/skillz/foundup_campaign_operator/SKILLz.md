@@ -1,7 +1,7 @@
 ---
 name: foundup_campaign_operator
 description: Coordinate reusable community/newsletter preparation, reconcile multi-publication receipt handoffs in dry-run mode, prepare evidence-backed petitions, or operate the bounded AntifaFM campaign through existing social interfaces.
-version: 0.4.0
+version: 0.5.0
 author: 0102
 agents: [qwen]
 primary_agent: qwen
@@ -12,6 +12,23 @@ category: workflow
 evals: []
 ---
 # FoundUp Campaign Operator
+
+For reusable article/illustrated-series auditing, follow the
+[editorial review cycle](../../docs/EDITORIAL_REVIEW.md). Generate, obtain
+separate grounding/audience/writing/actual-image reviews on the exact revision,
+repair specific findings and re-review, at most three rounds before escalating
+missing evidence or disagreement. Preserve failed rounds. Use existing approved
+Gemini/session or OpenRouter gateway/admission owners for real model feedback;
+never invent availability, cost, model execution, image inspection or analytics.
+Project independently frozen held-out expectations into the existing benchmark
+harness. This remains prototype instruction and deterministic local scaffolding,
+not production registry admission, provider execution or demonstrated RSI.
+
+Inspect native rendered formatting, captions, links and phone/desktop crops.
+Exact consequential-copy/destination approval precedes publication. Proposed
+dates are not scheduled posts; use the actual platform's private queue/readback.
+Reconcile real publication receipts and source-bound performance observations
+through existing WRE/outcome owners, not a new database or self-issued promotion.
 
 For Reddit communities, Substack publications, or coordinated website/community/
 newsletter requests, follow [the community/newsletter workflow](references/community-newsletter-workflow.md).
