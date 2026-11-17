@@ -1,7 +1,7 @@
 ---
 name: linkedin_jhr_newsletter
 description: Research, significance-gate, draft, maintain and publish the Japan Hyperscaler Report LinkedIn newsletter from the canonical eSingularity JHR evidence lane
-version: 1.4.0
+version: 1.4.1
 author: 0102
 agents: [qwen]
 intent_type: CONTENT_GENERATION
@@ -107,3 +107,14 @@ Track the shared newsletter stages. Route exact approved content through
 matching queue entry and live permalink independently. Record provenance, report
 number, publication state and next monitored signal in the established JHR/project
 continuity surface. `NO_REPORT` is a complete researched outcome, not a failure.
+
+## Carry forward open website releases — 2026-11-16
+
+Read the relevant JHR and YUMORI release receipts, including unresolved issue2126
+work, before choosing the next edition. Preserve known LinkedIn permalinks even
+if the website is behind: reconcile the existing edition read-only, never repost
+it to repair a missing site issue. Private drafts/schedule unavailable means
+coverage unknown. Carry edition artifact hash, source revision/hash, verified
+publisher/series/destination, exact approval scope and provider readback into the
+existing SOCIAL content reconciliation packet. A prepared packet is not a grant,
+and a Docs/Git receipt is not an acknowledged Brain/Memex write.

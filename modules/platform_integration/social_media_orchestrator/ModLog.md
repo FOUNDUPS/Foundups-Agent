@@ -1,3 +1,78 @@
+## 2026-11-16 — Repair generated backend publication-helper binding
+
+Hosted CI exposed the omitted generated import-closure/hash refresh. The existing
+generator now binds the one added helper, updated planner checksum and both
+digest pins; the exact count boundary advances1487→1488, rejecting1489. Existing
+332KiB manifest,2MiB file and32MiB total caps stay fixed. Eight Python manifest/
+index tests and existing Node compatibility/preflight/async/package checks pass;
+independent packaging review passes. Original hosted failure retained; new-head
+hosted qualification remains required. See tests/TestModLog for measured evidence.
+
+## 2026-11-16 — Publication receipt reconciliation in existing SOCIAL content route
+
+WSP11/22/50/84/97/99; module concatenation gate. Existing content ingress gains
+explicit dry-run reconciliation of supplied source approval, archive/build,
+exact live issue, channel approval/delivery and unresolved work. No new daemon,
+store, registry promotion, model/provider call or execution grant. Pub DAE is a
+coordination role; output memory remains proposed/not written. Contract and
+existing fixture are extended together; source-specific release issue2126 stays
+with the website owner. Local/hosted validation is recorded in tests/TestModLog;
+no provider or memory acceptance is claimed.
+
+## 2026-11-15: Assess index-to-Drive, Substack cadence and Play FoundUps handoffs
+
+Continue the same PR2394 instruction owner after 012's requested integration;
+do not duplicate the campaign operator or touch the preserved PC staged lane.
+Source audit at main43f0eb918cdf928be64667fda582f93cf9ab58c6 found full saved
+Gemini provenance but lossy helper/DB projections, no verified automatic Drive
+exporter, and no qualified Substack scheduler. Reuse the private issue brief,
+native Doc revision/readback, source-linked derivatives and existing platform
+owners. Keep summaries retrieval-only; no verbatim/training/publication inference.
+
+Record two-or-three posts/day as a cap, not a target. Conservative proposals
+use at most two until an explicit applicable publication policy is resolved;
+live account/timezone/queued/published/in-flight inspection is still unavailable.
+Web, email, Notes and imports retain separate authority/receipts. No live queue
+reconciliation or cap enforcement is claimed by this instruction.
+
+Link existing Mall public-registry/video projector, schema and delivery owners.
+Review public-safe values; never expose private Drive/raw manifests or assets
+through /member/media or catalogs. The inspected video scopes are HPC-only.
+No producer/exporter/provider/catalog/runtime code, data or service changed.
+Current review is source/instruction evidence only; earlier head83283353 checks
+do not validate this continuation. Require fresh exact-head hosted checks and
+independent review. Draft-to-ready remains blocked by the recorded approval
+review; this scope update is not approval for that transition or a merge.
+WSP00/11/15/22/50/95/97/99/110; same bounded documentation concern.
+
+## 2026-11-15 JST: Recover reusable social/newsletter instruction and source handoffs
+
+Reconcile the four preserved staged files from the isolated
+docs/social-community-newsletter-20261114 lane (base 0be2ae582020eab66b3aa8a1ab2deef802bebfeb)
+against main 28c1bf1f38f4dab3d24918227d68e40604688f9a. The original three tracked
+file blobs still match main; the staged reference is absent there. Preserve the
+PC checkout/index and original patch. Continue as one instruction-only concern,
+not a replacement orchestrator, skill, queue, database or provider executor.
+
+Retain campaign-operator v0.4.0/prototype and the recovered Reddit/Substack
+workflow. Link existing newsletter/ROC, issue-brief, research and video-index
+owners; reuse foundup_id and existing editorial/delivery vocabulary. Develop one
+manuscript collaboratively, then track audience-specific, source-revision-bound
+derivatives with separate approvals and receipts across qualified channels. Private
+manuscripts/source bindings stay outside public Git and social_content_brief.v1.
+Keep facts/commentary/fiction, summaries/transcripts, approval and delivery proof
+distinct. Require independent destination readback and original-action
+reconciliation across message retries. No new publication or production grant.
+
+The recovered lane reports WSP00/strict-tracker completion and a lexical Holo
+bundle with UNKNOWN freshness/index gap at its historical base. This connector
+continuation did not re-execute bootstrap, Holo or Python tests: no execution
+environment is available. Source retrieval, instruction/link validation and
+independent review are recorded separately from hosted exact-head/main checks.
+No platform posts, subscriber imports, account changes or runtime launches.
+WSP 00/11/15/22/50/95/97/99/110; WSP15 C2/I4/D4/Impact4=14/P1 planning estimate,
+not a signed runtime allocation. No runtime or existing test contracts changed.
+
 ## Recover pitch instruction interface navigation — 2026-10-31
 
 Restore the preserved interface entry using main's existing v0.1.3 pitch owner

@@ -126,3 +126,18 @@ If dispatched through Red Dog/WRE, retain its signed work-order, allowed-path, v
 - `cc7de15` / PR #1691 mounted the same ticker on YUMORI.me and added both-consumer assertions. Reuse those checks rather than inventing a parallel ticker system.
 
 These are historical evidence, not current HEAD or deployment receipts. Re-read current source before each edit.
+
+## JHR reconciliation of older open releases — 2026-11-16
+
+For JHR, inspect the relevant YUMORI and JHR private continuity ledgers plus the
+existing issue2126 release obligation, including older unresolved entries.
+Compare the actual Sites project, saved source/version, deployment receipt and
+exact current live issue. Version saved, build/source merged and deployment
+SUCCESS cannot substitute for matching issue/body/assets/metadata readback.
+Preserve concurrent unpublished site work and both homepages before preparing a
+release. A site correction does not authorize reposting an already live LinkedIn
+edition. Feed the source/archive/build/live distinctions into the existing
+`social campaign content action=reconcile dry_run=true` receipt contract at
+`modules/platform_integration/social_media_orchestrator/docs/CONTENT_CAMPAIGN.md`.
+The helper is supplied-evidence review only; this skill still owns actual source,
+build/deploy qualification, authorization and independent live verification.

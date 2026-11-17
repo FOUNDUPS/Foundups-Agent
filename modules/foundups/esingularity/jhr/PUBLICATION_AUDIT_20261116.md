@@ -120,3 +120,78 @@ equality, unrecovered #001/#002 Docs and authenticated #004 draft/schedule cover
 Resolve through their existing owners before future publication; English Substack
 setup and Reddit research confer no publication authority. No runtime test,
 subscriber export or unrelated system repair is required to validate this archive.
+
+## Follow-on failure analysis: existing release obligation, 2026-11-16
+
+This section supplements the earlier observation window; it does not rewrite
+those public observations. The subsequent task explicitly includes publication
+orchestration hardening. No deployment, publication or mailbox operation occurred.
+
+The entire authorized YUMORI continuity ledger was retrieved, including the
+relevant September 17/29/30, October16, November1 and November16 entries.
+The decisive release obligation was already recorded publicly in
+[issue2126](https://github.com/FOUNDUPS/Foundups-Agent/issues/2126) and its
+[October16 receipt](https://github.com/FOUNDUPS/Foundups-Agent/issues/2126#issuecomment-6212822600):
+`CODE_MERGED / PRODUCTION_NOT_PUBLISHED`, pending source reconciliation, build,
+Sites release and exact #003 live readback. The ledger also explicitly recorded
+`SITES_DEPLOY_BLOCKED / WEBSITE_LIVE_VERIFIED=false`. It did not certify a live
+#003 website release. Its September29 live claim was attributed to 012 and
+already qualified by incomplete independent retrieval. September29's successful
+finance-page deployment is a different change; September30 source corrections
+are not production receipts. Later YUMORI saves are not JHR releases.
+
+Read-only Sites metadata at approximately13:20UTC independently showed saved
+versions61 and62 with no deployment binding. Version62 source is
+`4b0d31b14ee459bba7ee5dd44eee6e2aeea4ef89`; version61 source is
+`b2e16f05612763df9ccf5ba1d0ff9ed89a66a0dc`. The newest listed version with a
+deployment was60, source `a9855c23ee025e2a1bb245edd7b44cb720cfe2cc`;
+that deployment reports SUCCESS, updated2026-10-10T21:48:21.047671Z.
+The site's active custom URL is `https://esingularity.ai`. These metadata do not
+bind the currently served issue to a build, exclude rollbacks, or prove that
+#003 was never deployed. No signed asset URLs, private correspondence or raw
+continuity ledger are copied into Git.
+
+Supported failure: a known unclosed website release/readback obligation was not
+carried into the initial JHR audit context and later editorial handoffs. The
+initial audit read the JHR master but missed the relevant YUMORI blocker. The
+website can be behind the repository even while the LinkedIn #003 edition is
+live. Whether #003 never reached that site or a later release replaced it remains
+unresolved. Cache alone is not an established cause. Preserve the existing
+LinkedIn permalink and reconcile it read-only; do not repost #003.
+
+### Memory and orchestration limits
+
+Repository inspection does not establish that Brain or Memex lost a stored
+receipt. The current breadcrumb query selects a bounded recent set before topic
+filtering; old open work can fall outside that retrieval window. Its moshpit
+projection does not authenticate and ingest the live Google Docs ledger.
+Brain preflight and continuity snapshots are not deployment verification. An
+archive or Doc write is not an acknowledged Brain/Memex write. The existing
+authenticity-gated memory sink must retain its authority checks; fabricated
+`verified_outcomes` would conceal the failure.
+
+Corrective work extends the existing SOCIAL `content` route with explicit
+`action=reconcile dry_run=true`: approved manuscript/hash -> immutable archive
+commit -> deployed build-source commit -> exact website issue/revision/readback
+-> individually scoped derived-edition approval/readback -> amplification review.
+An old open obligation survives newer successful stages. Known permalinks and
+uncertain submissions require readback, never a fresh write. A supplied evidence
+chain remains unverified and cannot grant execution. See the existing
+[content contract](../../../platform_integration/social_media_orchestrator/docs/CONTENT_CAMPAIGN.md#publication-reconciliation--2026-11-16).
+
+"Pub DAE" is a coordination responsibility within the existing JHR, website,
+LinkedIn and SOCIAL owners, not a newly installed daemon, scheduler, registry or
+receipt database. The current JHR cycle only drafts metadata. The durable
+PublicationStore currently owns X/AntifaFM receipts, not generic Sites/LinkedIn
+publication history. English Substack and Reddit have no qualified automatic
+publisher in this slice. Reddit remains research/discussion; any proposed
+community post needs separate rules, destination and exact-copy approval.
+
+Remaining existing owner obligation: issue2126 must reconcile the current Sites
+source against approved #003 and other held site work, then obtain release
+authority, qualify the build and read back the actual issue/body/assets/metadata
+and both homepages. Publication/deployment remains outside this audit's scope.
+Brain/Memex ingestion, authenticated private draft coverage and a production
+cadence/admission bridge remain explicitly unproven. New code returns a proposed
+memory packet with preserved blockers, receipt references, next actions and
+`PROPOSED_NOT_WRITTEN / NOT_ADMITTED`; no sink write is claimed.

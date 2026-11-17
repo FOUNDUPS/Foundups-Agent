@@ -171,7 +171,8 @@
         "mail-20261116",
         "manuscript-003-20261116",
         "website-direct-20261116",
-        "mail-supplementary-20261116"
+        "mail-supplementary-20261116",
+        "release-history-reconciliation-20261116"
       ],
       "website": {
         "status": "UNVERIFIED",
@@ -208,7 +209,16 @@
         "git_content_sha256": "2588d20203a71eab4888b4c429a7858bc2ecb4e719278f088d506521bf183942",
         "url": "https://github.com/FOUNDUPS/Foundups-Agent/blob/72a3182c70974f0523be91d5ce4bd32808d824bc/modules/foundups/esingularity/jhr/reports/JHR_003_2026-09_AI_RICE_FIELDS_AI_KOBAN.md"
       },
-      "conflict": "Historical master records website live as reported by 012; current served archive omits #003 although repository includes it and LinkedIn article is live. Cause and exact historical website publication time remain UNVERIFIED."
+      "conflict": "Historical master records website live as reported by 012; current served archive omits #003 although repository includes it and LinkedIn article is live. Cause and exact historical website publication time remain UNVERIFIED.",
+      "open_work": [
+        {
+          "code": "sites_release_blocked",
+          "owner": "esingularity_001 website owner",
+          "status": "OPEN_LIVE_VERIFICATION_REQUIRED",
+          "evidence": "release-history-reconciliation-20261116",
+          "next_action": "Reconcile approved #003 with current Sites source and held site work; qualify authorized release and exact issue readback. Preserve existing LinkedIn edition; no repost."
+        }
+      ]
     },
     {
       "issue_number": "004",
@@ -420,6 +430,34 @@
       "method": "Supplementary parent read-only connected Gmail all-folder searches, including Sent and archived/trash. Exact queries supplied by parent; not attributed to the independent worker timestamp.",
       "result": "21 general phrase matches, zero LinkedIn-origin matches and zero #004 old/v2-title matches in these three queries; no platform publication receipt identified.",
       "limits": "No mail changes. Bounded negative searches do not establish nonpublication. No private correspondence reproduced."
+    },
+    {
+      "id": "release-history-reconciliation-20261116",
+      "kind": "READ_ONLY_RELEASE_HISTORY_RECONCILIATION",
+      "observed_at": "2026-11-16T13:20Z",
+      "time_precision": "minute",
+      "public_receipt": "https://github.com/FOUNDUPS/Foundups-Agent/issues/2126#issuecomment-6212822600",
+      "method": "Relevant authorized YUMORI ledger history read in full; current Sites project/version/domain/deployment metadata independently inspected read-only.",
+      "result": "October16 already recorded CODE_MERGED / PRODUCTION_NOT_PUBLISHED and exact-issue live verification outstanding. Sites versions61/62 are saved with no deployment binding; newest listed version with a deployment is60, whose deployment reports SUCCESS updated2026-10-10T21:48:21.047671Z.",
+      "saved_sources": {
+        "61": "b2e16f05612763df9ccf5ba1d0ff9ed89a66a0dc",
+        "62": "4b0d31b14ee459bba7ee5dd44eee6e2aeea4ef89"
+      },
+      "version_60_source": "a9855c23ee025e2a1bb245edd7b44cb720cfe2cc",
+      "limits": "Saved versions and a deployment receipt do not identify the active served build or prove #003 never deployed. No private ledger text, signed asset URLs, credentials or correspondence reproduced. Brain/Memex ingestion not established."
     }
-  ]
+  ],
+  "continuity_contract": {
+    "retrieval": "JHR master plus relevant YUMORI release ledger and older unresolved issue2126 work",
+    "receipt_chain": [
+      "source_approval",
+      "immutable_archive",
+      "build_source_and_deployment",
+      "exact_live_website",
+      "derived_edition_approval_and_readback",
+      "amplification_review"
+    ],
+    "memory_ingestion": "NOT_ESTABLISHED; require governed sink acknowledgement and scoped readback",
+    "runtime_reconciler": "social campaign content action=reconcile dry_run=true; SUPPLIED_UNVERIFIED, no effects or grant"
+  }
 }
