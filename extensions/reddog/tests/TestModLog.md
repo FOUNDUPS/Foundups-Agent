@@ -1,3 +1,10 @@
+## 2026-11-18 — Reconcile PR #1792 registered brand-context fixture copy and YUMORI.me grounding check
+
+- Updated `test_foundup_work_grounding.js::writeFixture()` so existing `entity.brand_context_path`
+  files are copied into the temporary fixture repository, and added the real `YUMORI.me -> esingularity_001`
+  child-brand grounding assertion alongside synthetic `alpha_brand/harbor_me` controls without modifying
+  production resolver code.
+
 ## 2026-11-16 — Exact generated-manifest security metadata re-review
 
 The replacement head's scanner reported39 manifest metadata rows after the

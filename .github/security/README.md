@@ -1,3 +1,19 @@
+## PR1792 main-reconciled manifest and ModLog metadata re-review — 2026-11-18
+
+PR1792 regenerated `scripts/reddog_backend_manifest.json` after updating
+`modules/communication/moltbot_bridge/skillz/reddog_operations/SKILLz.md` and
+`modules/infrastructure/wre_core/skillz/skills_registry_v2.json` within the
+existing 1,494-member closure (canonical payload SHA256
+`cb7f5970b56ed261b92e4df2775ab30961da80187b351833f356f5ad7bb55aa4`, entire
+LF file SHA256 `f53dce84909e22cdf559db0c7ffdaf55c9763cf68b8ee5915d9902928f082146`).
+The 39 unchanged flagged public source-path/SHA256 rows (`37` `generic-api-key`
+and `2` `discord-api-token` matches) plus the unchanged `generic-api-key`
+prose line `4035` in `modules/communication/moltbot_bridge/ModLog.md` (LF SHA256
+`2ff21d608383ec975b21d2e84961da112ad5f166b6fa231b3375e59863a643e4`, binding
+`1c2cd2bba3a0ec1cb38cb244dd57a9edac1c148bef01274a5faa6be5bd4e74b1`) were
+recomputed and appended while preserving all 4,659 prior entries (`4,699` total).
+No Gitleaks rule, exclusion, fingerprint formula, or failure gate changed.
+
 ## PR2178 main-reconciled manifest and ModLog metadata re-review — 2026-11-18
 
 PR2178 regenerated `scripts/reddog_backend_manifest.json` after four read-only

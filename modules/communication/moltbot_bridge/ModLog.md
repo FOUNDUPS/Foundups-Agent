@@ -2571,6 +2571,12 @@ Final-head/main checks and owned closure remain bound to the canonical backlog p
 - Current-main validation: 524 passes/five filesystem failures/one platform skip; all 64 serial cases pass/one skip using a short external temp root. Eight manifest tests, 15 fast groups and registry 1651/269 pass. The 1400-member closure retains every member; four runtime hashes and existing digest pins change. Original test/review failures, stale digest assertion and a packaging write/test overlap are preserved in the existing backlog observation.
 - Next 18/P0: qualify the receipt-to-seed provenance/consistency contract before forwarding. AmIBot registration remains in draft PR1751 (detect_ai); protected eSingularity CI still fails. No live build, public route, provider/runtime update or retained-improvement claim.
 
+## 2026-09-19: FoundUp branding becomes grounded identity data
+
+- Updated RedDog Operations so named-FoundUp work loads optional registry `brand_context_path` before Skillz selection.
+- Child brand inheritance is explicitly identity-only and cannot widen token, routing, credential, finance, safe-mutation, or governance authority.
+- The existing registered-FoundUp target verifier now fails closed on stale, forged, schema-invalid, wrong-parent, or invented-child brand context. WSP 00/15/22/50/95/97.
+
 ## 2026-09-18: Fail closed on sent-only recipient evidence
 
 - Hardened the existing RedDog recipient preflight rather than creating a YUMORI-specific duplicate. Route evidence now carries an explicit verification bit; current but unverified address history returns `UNVERIFIED_ROUTE` and blocks the whole transaction.

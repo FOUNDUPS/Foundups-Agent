@@ -23,6 +23,15 @@ evals:
 
 # YUMORI.me Funding / PPP Intelligence
 
+## FoundUp brand context
+
+Brand identity is not owned by this Skillz. Before applying it, use the
+registry-grounded `brand_context_path`; for this module that is
+`modules/foundups/esingularity/brand_context.json`. Use the active parent/child
+brand supplied by grounding. Do not redefine canonical spelling, aliases,
+domains, or brand copy here. Brand inheritance is identity-only and grants no
+execution, token, routing, financial, credential, or governance authority.
+
 ## Purpose
 
 Maintain one evidence-backed funding and PPP intelligence lane for YUMORI.me / former Sukatto Land Kuzuryu. The skill converts changing national, Fukui Prefecture and Fukui City programs into accurate project evidence without turning a live program into a false funding commitment.
@@ -33,6 +42,7 @@ Run this workflow when any of the following occurs:
 
 - a grant, subsidy, GX, data-center, energy-efficiency, heat-reuse, regional-infrastructure, PPP/PFI or public-asset reuse program opens, closes or materially changes;
 - 012 asks what public funding/support could apply to YUMORI.me;
+- a City/Prefecture/council communication will mention grants, subsidy, PPP/PFI or public funding;
 - document 03, document 05 or the financial model is being updated on funding;
 - a ministry, implementing body, Fukui City or Fukui Prefecture gives an eligibility answer;
 - an internal review/preparation date is due or 012 asks to retain opportunities for a future fiscal year.
