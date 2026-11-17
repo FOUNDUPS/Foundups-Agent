@@ -1,3 +1,15 @@
+## 2026-11-18 - Canonical registry correction after hosted failure
+
+CI44186084958/test134403133146 correctly stopped at stale test registry before
+campaign tests ran. Recovered exact 11daee701 into an isolated cloud checkout
+following host disconnect. Ran existing generate_test_registry.py --write then
+--check:1848 tests,260 quarantined,current. Diff is one added collectable unit
+fixture and total1847->1848; no classification, quarantine or gate changed.
+Linux stdlib editorial/compiler/verified-X suite:55 passed in0.672s, including
+both tests that failed on Windows. Full cloud pytest was unavailable (pytest
+not installed), not passed. Existing hosted workflow will validate the new head.
+No implementation bytes changed; preserve original failure and review receipts.
+
 ## 2026-11-18 - Editorial revision contract tests
 
 Source baseline 20a7044c018fcd4a033226db644360cd9b216242; owned feature lane
