@@ -1,3 +1,24 @@
+## 2026-11-16 — JHR durable archive and Red Dog channel workflow
+
+- Index #001–004 in `jhr/manifest.json` with immutable existing source bindings,
+  platform-specific delivery evidence, languages, dates and explicit unknowns.
+  Keep #002 in its current reader owner and existing report manuscripts in place;
+  keep #004 as a draft pointer to the same native Doc. No editorial rewrite,
+  duplicated manuscript, new issue, public posting or website deployment.
+- Current website exposes #001/#002; public LinkedIn independently exposes
+  #001/#002/#003. Preserve the #003 historical website claim/current-source/live
+  discrepancy. #004 is DRAFTED v2 and unapproved in its source; both public
+  platforms were checked, while authenticated draft/schedule state is unverified.
+- Extend the existing canonical JHR skill and Codex projection for Red Dog modes,
+  website-first Japanese LinkedIn, separately approved English Substack and Reddit
+  research/discussion. Existing publisher, approval and uncertain-delivery gates
+  remain. This is instruction-level setup, not an installed autonomous publisher.
+- Read-only Gmail review corroborates historical #002 link sharing; no #004
+  publication receipt recovered. Keep private correspondence outside Git.
+- Validation and exact-head/main outcomes are recorded in the focused PR; the
+  dated `jhr/PUBLICATION_AUDIT_20261116.md` and manifest retain scope and gaps.
+  WSP00/10/15/22/34/50/84/97/99; WSP110 read as draft guidance.
+
 ## 2026-11-15 — Align React 19.3.1 dependency cohort (PR #2351 resolution)
 
 - Dependabot PR #2351 (`53fb430ae893`) bumped only `react-server-dom-webpack` from `19.2.8` to `19.3.1` while leaving `react` and `react-dom` pinned at `19.2.8`, causing `Validate eSingularity` `npm ci` to fail with `ERESOLVE` (`react-server-dom-webpack@19.3.1` requires peer `react@"^19.3.1"` and `react-dom@"^19.3.1"`).
