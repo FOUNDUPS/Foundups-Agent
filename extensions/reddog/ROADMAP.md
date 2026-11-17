@@ -461,6 +461,16 @@ Status: `SPECIFIED_NOT_IMPLEMENTED`. Canonical requirement:
 
 This is part of the existing Moshpit/RedDog roadmap, not a parallel Wave project.
 
+### Next bounded slices: actions, search and AutoPost convergence (2026-11-17)
+
+Canonical contract: [Moshpit RedDog layers, actions, search and AutoPost convergence](docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md#reddog-layers-moshpit-actions-search-and-autopost-convergence-2026-11-17-proposed).
+
+- **Reconcile first:** inspect existing Wave message UI, RedDog thread/history owner, PAL, Breadcrumb/Brain-Memex projection, AutoPost capture/DAEmon and current PRs; classify actual runtime readiness before allocating a sprint.
+- **Soft-proto navigation:** contextual long-press/mouse/keyboard actions `Pin/Unpin`, `Audit`, `Store`, `Archive`, `Delete`; source-preserving references, scoped search, reading-anchor and deletion/retention safeguards. Archive is not deletion; pin is not storage; audit is not approval.
+- **Capture integration:** permissioned AutoPost evidence -> editable project/intent proposal -> governed PAL/Breadcrumb admission -> authorized Moshpit projection. Lick remains separate from disclosure/execution authority.
+- **Testing:** phone-sized and physical-device acceptance, cross-principal denial, reconnect, revoked/deleted sources, corrected classification and audit receipts. Do not implement all slices in one PR; use WSP_15, WSP_97 and soft-proto promotion gates.
+
+
 ## WSP_15 Priorities
 
 | Work Item | Complexity | Importance | Deferability | Impact | MPS | Priority | Notes |
