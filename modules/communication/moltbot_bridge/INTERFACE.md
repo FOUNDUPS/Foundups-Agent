@@ -446,6 +446,25 @@ continue to resolve. Follow each contract link for its complete text.
 
 [Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-102).
 
+### Scheduled read-only FoundUp resident reconcile
+
+`src/reddog_resident_memory_context.py` owns reusable bounded projection of Brain,
+Breadcrumb and workspace-memory inputs that were previously trapped behind `main.py`.
+`main.py` now delegates those reads to this owner; it retains its existing external
+surface.
+
+`src/reddog_resident_foundup_memex_config.py` derives the existing
+`OperationalMemexSnapshotSupplyConfig` from the canonical FoundUp registry, registered
+manifest and exact module ROADMAP digest. It creates no memory store and does not
+synthesize principal Memex.
+
+`src/reddog_scheduled_resident_reconcile.py` consumes an already-claimed daily cadence
+window plus authenticated principal/FoundUp scope. It grounds the configured work focus,
+loads current model bindings, supplies Brain/Breadcrumb/workspace/FoundUp-Memex context
+to `RedDogResidentArchitectClient(transport="api")`, and accepts only the client's
+complete read-only/no-effect result. It has no Gmail/LinkedIn mutation, shell, repository,
+Holo reindex, Hermes execution, worktree, PR or merge authority.
+
 ### OpenClaw Supervisor Contract
 
 [Read this contract](docs/interfaces/AUTH_AND_OPERATIONS.md#contract-103).

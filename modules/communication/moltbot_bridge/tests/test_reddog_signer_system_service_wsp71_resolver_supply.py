@@ -156,7 +156,7 @@ def test_executable_gate_rejects_missing_symlink_and_writable_binary(
 
 @pytest.mark.skipif(not target.sys.platform.startswith("linux"), reason="Linux only")
 def test_executable_gate_accepts_root_owned_linux_binary() -> None:
-    target._require_root_owned_executable(Path("/usr/bin/env"))
+    target._require_root_owned_executable(Path("/usr/bin/env").resolve())
 
 
 def test_supply_module_has_no_secret_persistence_or_shell_surface() -> None:
