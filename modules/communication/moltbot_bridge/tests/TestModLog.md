@@ -3,6 +3,8 @@
 - Reconciled the 2026-10-23 resident memory reuse and FoundUp Memex configuration
   tests (`test_reddog_resident_architect_client.py`) onto current `main` while
   preserving all existing tests and historical entries below.
+- Updated `test_reddog_signer_system_service_wsp71_resolver_supply.py::test_executable_gate_accepts_root_owned_linux_binary`
+  to resolve `Path("/usr/bin/env").resolve()` so the positive root-owned executable control handles Ubuntu 26.04's `/usr/bin/env` coreutils symlink without weakening symlink rejection in `reddog_signer_system_service_wsp71_resolver_supply.py`.
 
 ## 2026-10-23 — Resident memory reuse and FoundUp Memex configuration
 
