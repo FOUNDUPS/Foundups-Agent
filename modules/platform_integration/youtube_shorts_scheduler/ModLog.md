@@ -1,5 +1,15 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-11-16 - Live-aware audience timing correction
+
+Latest 012 correction: avoid releases during active livestreams, use named U.S.
+audience timezones with date-specific DST/Studio conversion, vary minute offsets,
+and yield shared Studio controls while 012 edits. Updated the existing remote
+runbook only; source-day selection, evidence holds and independent saved-state
+readback remain required. Future no-live guarantees require qualified runtime
+checks; this documentation does not deploy them. WSP 22/50/84/97. Validation:
+diff/contract checks and independent document review; no video effects.
+
 ## 2026-11-16 - Conversational scheduling policy reconciliation
 
 Extended the existing skill routing contract and remote runbook, rather than

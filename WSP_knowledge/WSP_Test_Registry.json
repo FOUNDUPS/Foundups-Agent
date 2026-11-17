@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1846,
+  "total_tests": 1847,
   "quarantined_tests": 260,
   "tests": [
     {
@@ -2397,6 +2397,19 @@
       "description": "Request-truth contract tests for the exact OpenRouter Kimi K3 route."
     },
     {
+      "id": "test::modules::ai_intelligence::ai_gateway::tests::test_model_audio_timing_benchmark",
+      "path": "modules/ai_intelligence/ai_gateway/tests/test_model_audio_timing_benchmark.py",
+      "owner": "modules/ai_intelligence/ai_gateway",
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Synthetic stdlib fixtures; no providers, audio, reference lyrics or files."
+    },
+    {
       "id": "test::modules::ai_intelligence::ai_gateway::tests::test_model_autoresearch_authenticated_promotion_authority",
       "path": "modules/ai_intelligence/ai_gateway/tests/test_model_autoresearch_authenticated_promotion_authority.py",
       "owner": "modules/ai_intelligence/ai_gateway",
@@ -2827,7 +2840,7 @@
       "path": "modules/ai_intelligence/ai_gateway/tests/test_model_panel_signed_evidence.py",
       "owner": "modules/ai_intelligence/ai_gateway",
       "suite_class": "unit",
-      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-01",
+      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
