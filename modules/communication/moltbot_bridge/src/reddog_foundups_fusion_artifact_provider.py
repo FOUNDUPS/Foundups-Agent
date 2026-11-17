@@ -64,7 +64,7 @@ class FoundupsFusionArtifactGenerationRunner:
         topology = _topology(verified or {})
         if not topology:
             return _reject(FAIL_MODEL_RUNTIME_BINDING_RECEIPT, started)
-        if not validate_provider_m2m_prompt(verified, prompt, gate.redacted_prompt):
+        if not validate_provider_m2m_prompt(verified, prompt, gate.redacted_prompt, context):
             return _reject(FAIL_M2M_PROMPT_BINDING, started)
         api_key = os.getenv("OPENROUTER_API_KEY")
         if not api_key:

@@ -1,0 +1,116 @@
+{
+  "$schema": "https://foundups.org/schemas/foundup-manifest/v1.json",
+  "foundup_id": "move2japan",
+  "name": "Move2Japan",
+  "version": "0.3.0",
+  "description": "English discovery of source-listed Japanese homes inside the existing Foundups Mall shell. Public housing POC only; account-linked publishing and paid services remain future stages.",
+  "tagline": "Find Japanese homes in English",
+  "tier": "F0_DAE",
+  "lifecycle_stage": "incubating",
+  "entry_url": "https://foundups.com/member/?foundup=move2japan",
+  "routing_prefix": "/f/move2japan",
+  "icon_url": null,
+  "required_subscription_tier": "free",
+  "is_invite_only": false,
+  "capabilities": [
+    "public_house_discovery",
+    "geographic_filters",
+    "source_attribution"
+  ],
+  "agent_routes": [],
+  "holo_collections": [],
+  "data_namespace": "idb_move2japan",
+  "cabr_contract": {
+    "v1_gate": "not_applicable",
+    "v2_proof": "not_applicable",
+    "v3_score_min": 0
+  },
+  "owner_id": "012",
+  "token_status": "TOKEN_DEFERRED",
+  "token_symbol": null,
+  "category": "travel",
+  "launch_readiness": "discoverable_only",
+  "created_at": "2026-10-18T22:09:42Z",
+  "notes": "Declarative public discovery registration only. The existing shell owns account admission, navigation and public snapshot caching. /f/move2japan/app remains protected and has no publisher interior. No new IndexedDB runtime, paid entitlement, token, CABR work or agent route is activated. Production deployment is a separate gate.",
+  "build_contract": {
+    "contract_version": "0.1.0",
+    "foundup_id": "move2japan",
+    "module_path": "modules/foundups/move2japan",
+    "owner_lane": "WRE",
+    "status": "BASELINE_DECLARATIVE_ONLY",
+    "build": {
+      "mode": "no_build",
+      "command": null,
+      "notes": "Public assets run inside the existing Mall shell. This declaration enables no autonomous build or deploy."
+    },
+    "test": {
+      "command": [
+        "python",
+        "-m",
+        "pytest",
+        "modules/foundups/move2japan/tests"
+      ],
+      "required": true,
+      "notes": "Existing module test owner; known BC0 classifier baseline must remain visible. This command is declarative and is not executed by the manifest."
+    },
+    "dry_run": {
+      "required": true,
+      "default": true,
+      "command": null,
+      "notes": "Execution remains gated; dry-run is required before any future non-read-only work."
+    },
+    "safe_mutation_surface": [
+      "modules/foundups/move2japan/**"
+    ],
+    "forbidden_paths": [
+      ".env",
+      ".env.*",
+      "main.py",
+      "**/*_dae.py",
+      "**/vendor/**",
+      "**/wallet/**",
+      "**/token/**",
+      "**/reward/**",
+      "**/payout/**",
+      "**/cabr/**",
+      "**/blockchain/**",
+      "**/credentials*",
+      "**/secrets*"
+    ],
+    "required_gates": [
+      "genesis_gate",
+      "manifest_gate",
+      "dry_run_gate",
+      "test_gate",
+      "destructive_action_guard_d0_d6",
+      "typed_exec_boundary",
+      "no_live_launch",
+      "policy_required_sovereign_valve_for_non_dry_run"
+    ],
+    "evidence_output": {
+      "path": "modules/foundups/move2japan/evidence/",
+      "redaction_required": true,
+      "notes": "Future evidence location declaration only; no autonomous worker is activated."
+    },
+    "readiness": {
+      "manifest_ready": false,
+      "build_ready": false,
+      "autonomous_execution_ready": false,
+      "reason": "Public discovery registration is not runtime execution authority; publisher, paid and agent gates remain pending."
+    }
+  },
+  "execution_routing": {
+    "orchestrator": "openclaw",
+    "executor": "hermes",
+    "auditor": "ai_overseer",
+    "wre_coordinator": true,
+    "external_agent_allowed": false,
+    "external_agent_contract_required": true,
+    "declarative_only": true,
+    "can_self_authorize": false,
+    "build_plan_source": "modules/foundups/agent/src/build_plan_generator.py",
+    "job_contract_source": "modules/communication/moltbot_bridge/src/foundup_job_contract.py",
+    "notes": "Declaration only; OpenClaw -> FoundUpJob -> WRE -> Hermes remains the execution boundary."
+  },
+  "signature": ""
+}

@@ -324,32 +324,39 @@ class SelfResearchRefresher:
         )
 
         audit = DaemonSelfAuditLoop(self.repo_root)
-        opened = audit.scan_once()
+        scan_status = audit.scan_once_with_status()
         state_path = audit.state_path
-        state: Dict[str, Any] = {}
-        if state_path.exists():
-            try:
-                state = json.loads(state_path.read_text(encoding="utf-8"))
-            except Exception:
-                state = {}
-
-        signature_stats = state.get("signature_stats", {}) or {}
         top_signatures = []
-        for signature, raw in signature_stats.items():
-            top_signatures.append(
-                {
-                    "signature": signature,
-                    "count": int(raw.get("count", 0)),
-                    "recommended_fix": raw.get("recommended_fix", ""),
-                    "last_fix_result": raw.get("last_fix_result", ""),
-                    "last_seen": raw.get("last_seen"),
-                }
-            )
-        top_signatures.sort(key=lambda item: item["count"], reverse=True)
+        signature_count = None
+        history_status = "absent"
+        try:
+            if state_path.exists():
+                state = json.loads(state_path.read_text(encoding="utf-8"))
+                signature_stats = state.get("signature_stats", {}) or {}
+                for signature, raw in signature_stats.items():
+                    top_signatures.append(
+                        {
+                            "signature": signature,
+                            "count": int(raw.get("count", 0)),
+                            "recommended_fix": raw.get("recommended_fix", ""),
+                            "last_fix_result": raw.get("last_fix_result", ""),
+                            "last_seen": raw.get("last_seen"),
+                        }
+                    )
+                top_signatures.sort(key=lambda item: item["count"], reverse=True)
+                signature_count = len(signature_stats)
+                history_status = "available"
+        except (OSError, ValueError, TypeError, AttributeError, OverflowError):
+            # Historical data must not suppress this attempt's diagnostic.
+            top_signatures = []
+            signature_count = None
+            history_status = "unavailable"
         return {
             "checked_on": utc_now_iso(),
-            "events_opened": opened,
-            "signature_count": len(signature_stats),
+            "events_opened": scan_status["event_count"],
+            "scan_status": scan_status,
+            "history_status": history_status,
+            "signature_count": signature_count,
             "top_signatures": top_signatures[:5],
         }
 

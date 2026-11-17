@@ -49,6 +49,14 @@ class SignerRuntimeAtomicProvisioningContext:
     runtime_profile: str | None = None
     owner_config_path: str | None = None
 
+    def manifest_runtime_profile(self) -> str | None:
+        """Resolve recovery profile from current authenticated enrollment, if any."""
+        values = self.authority_boundary.require(self.authority)
+        initial = values.get("initial_manifest")
+        if initial is not None:
+            return initial.get("runtime_profile")
+        return self.runtime_profile
+
     def require_signing_context(self) -> RuntimeArtifactManifestSigningContext:
         values = self.authority_boundary.require(self.authority)
         if (

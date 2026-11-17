@@ -1,4 +1,31 @@
+## 2026-10-23 — Scheduled resident FoundUp reconciliation canary
+
+- Reused the already-registered `test_schedule_evaluator.py` and
+  `test_caller_wiring.py`; no new tracked test file or manual
+  canonical-registry edit was introduced.
+- Parser coverage makes `resident_reconcile` daily-only and both supported aliases
+  resolve to one canonical schedule ID. Caller-wiring coverage proves the extracted
+  resident adapter is default-off and, when explicitly enabled, forwards the exact
+  durable claim while the legacy scheduled-integration file remains unchanged.
+- FoundUp scope, Brain/Breadcrumb/workspace-memory inputs, FoundUp Memex composition,
+  stable request identity and zero-effect resident-client behavior are covered in the
+  existing RedDog resident-client test owner.
+- No provider account, Gmail, LinkedIn, shell, repository mutation, HoloIndex reindex,
+  worktree, PR or merge is exercised by these tests. A real YUMORI resident cycle remains
+  a later host/runtime receipt.
+
 # Idle Automation Test Module Log
+
+## 2026-10-07 — Self-audit report consumption
+
+Six frozen regressions failed before repair; final connected140passed in3.92s.
+Independent source review found history overflow (reproduced1fail/2pass), now
+isolated by the seventh regression. Covers real empty/bounded/partial/failed
+scanners, malformed historical shapes and nonfinite count. CI includes consumer
+and three producer suites. No test invokes a live worker or external API.
+Separate live report persistence retained scan coverage and historical signatures.
+Evidence: outputs/rsi-permission-evidence-20261006/internal-audit-status-*.xml.
+
 
 **Module**: `modules/infrastructure/idle_automation`
 **Framework**: pytest

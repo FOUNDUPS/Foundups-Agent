@@ -110,9 +110,9 @@ class TestFoundUpHandoff:
     """Verify FoundUp handoff plane is coherent."""
 
     def test_open_link_exists(self):
-        """View plane has Open FoundUp link."""
+        """View plane has Open FoundUp primary CTA."""
         js = _read("js/mall-planes.js")
-        assert "fv-open-link" in js
+        assert "fv-primary-cta" in js
         assert "Open FoundUp" in js
 
     def test_transitional_route_used(self):
@@ -190,7 +190,7 @@ class TestGestureHints:
         html = _read("index.html")
         assert "Swipe sideways to browse" in html
         assert "Swipe down from top" in html
-        assert "Tap to play/pause" in html
+        assert "Tap to play queue, Enter button to visit" in html
 
     def test_dismiss_text_present(self):
         html = _read("index.html")

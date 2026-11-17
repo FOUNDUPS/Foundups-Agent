@@ -54,7 +54,7 @@ Apply the WSP 97 loop: research → inspect the exact change → inspect adjacen
 | --- | --- | --- | --- |
 | eSingularity.ai (also reached through YUMORI.info) | Explain the Fukui onsen reuse proposal: facility, COG DC, learning and regional revitalization | Understand the proposal and evidence, then participate through YUMORI.me | `frontend/app/page.tsx` and its necessary dependencies |
 | YUMORI.me / www | Build the wider YUMORI.me movement and preparatory committee through the WHY / WHAT / HOW case | Become a YUMORI.me, join the committee and reach supporting information | `frontend/app/yumori/page.tsx` and its necessary dependencies |
-| Shared ticker | Carry one current campaign announcement across both sites | Find the confirmed action, place, time and destination | Shared component and `current-field-status.ts`; verify both consumers |
+| Shared ticker | Carry one current campaign announcement across both sites | Find the confirmed action, place, time and destination | Shared component and multilingual `current-field-status.json`; verify both consumers |
 
 “Apply the website skill” applies the workflow to the site named in the request or established by the active task. It does not mean redesign both sites. State the target, requested outcome and bounded edit scope briefly before editing. If the target truly cannot be resolved from the request and visible context, ask one short question before a page-specific mutation.
 
@@ -73,7 +73,7 @@ Choose the actual labels and grouping from the current redesign brief and source
 | eSingularity.ai project homepage | `frontend/app/page.tsx` |
 | YUMORI.me / www movement homepage | `frontend/app/yumori/page.tsx`, selected by host-restricted rewrite in `frontend/next.config.ts` |
 | Shared ticker | `frontend/components/CampaignTicker.tsx`, rendered exactly once per homepage; the second scrolling set inside it is intentional |
-| Shared announcement | `frontend/content/current-field-status.ts`; never copy event text into either page |
+| Shared announcement | `frontend/content/current-field-status.json`; never copy event text into either page |
 | Project information alias | YUMORI.info externally redirects to eSingularity.ai; do not repurpose its forwarding |
 | Publication | One existing Sites project declared in `frontend/.openai/hosting.json` |
 
@@ -83,7 +83,21 @@ The project page mounts `<CampaignTicker />`; the movement page mounts `<Campaig
 
 Both pages retain their separate purposes and join actions. Preserve JHR access, current signup/LINE destinations, Japanese-first language behavior, assets and relevant public claim boundaries from INTERFACE. A shared component does not authorize replacing the movement page with the project page. Explicit requested changes may evolve these contracts; update their owning documentation and checks together rather than silently removing them.
 
-For announcement-only edits, use `.claude/skills/esingularity-ticker/SKILL.md` (Codex projection: `.agents/skills/esingularity-ticker/SKILL.md`). Keep event date, location, end time and link consistent; do not renew an expired invitation unless 012 confirms it. The current ticker has no automatic expiry: flag stale LIVE copy during a website review rather than inventing a new appearance.
+For announcement-only edits, use `.claude/skills/esingularity-ticker/SKILL.md` (Codex projection: `.agents/skills/esingularity-ticker/SKILL.md`). Keep event date, location, end time and link consistent; do not renew an expired invitation unless 012 confirms it. The live payload contains Japanese, English and Portuguese together and expires automatically; hidden, expired or invalid data falls back to the durable campaign action.
+
+## JHR website-first publishing handoff — 2026-10-13
+
+For **Japan Hyperscaler Report (JHR)** article/issue work, `eSingularity.ai` is the canonical **public** publisher and source for downstream LinkedIn newsletter editions. The source files live under `modules/foundups/esingularity/jhr/`; the rendered JHR website reader currently lives in `frontend/app/reports/jhr/layout.tsx` and `frontend/app/reports/jhr/page.tsx`, with issue anchors such as `/reports/jhr#jhr-003`. A repository research file or Google Doc is a working/evidence artifact, **not** the verified published website edition.
+
+Apply this sequence only to a **new approved JHR issue or a material issue correction**, not every change to a homepage, ticker, CSS, metadata or unrelated article:
+
+1. Run the JHR evidence/significance gate and update the existing JHR repository report and rendered website issue together. Preserve issue number, source citations, Japanese-first copy, claims and previous editions. Do not regenerate a new issue for a correction.
+2. Verify source/build/regression checks, complete the existing authorized Git/hosting release, and independently open the **canonical public JHR URL and exact issue anchor**. Record the source revision/commit, deployment receipt, public URL, issue key and verified live date/content. A branch, PR merge, preview, build or submitted deploy alone is **not** `WEBSITE_LIVE_VERIFIED`.
+3. Only after `WEBSITE_LIVE_VERIFIED`, hand off the immutable **website publication receipt** to `modules/platform_integration/linkedin_agent/skillz/linkedin_jhr_newsletter/SKILLz.md` and `linkedin_publishing`. The LinkedIn edition is a derived distribution adaptation of that published article, not a separately authoritative manuscript. Use the exact site issue URL as its primary backlink.
+4. Before any LinkedIn publishing, verify the current LinkedIn publisher/series, existing edition/draft/schedule and the exact action's authorization. Match subject, factual assertions, issue/source revision and links to the live site. Do not cross-post unrelated website changes or silently reissue an already distributed edition. A material site correction may require an **approved edit to the existing edition**, not an automatic new edition.
+5. Publish/schedule via the existing authorized LinkedIn execution route **only after** its own checks; read back the resulting draft/schedule/permalink. Return the LinkedIn receipt to the existing JHR/LinkedIn continuity surface. If inaccessible or uncertain, record `LINKEDIN_BLOCKED` or `SUBMITTED_UNVERIFIED`; keep the site issue live without claiming LinkedIn publication and never blind-retry.
+
+Minimal handoff fields: `issue_key`, `canonical_website_url`, `website_source_revision`, `website_release_receipt`, `website_live_verified_at`, `website_content_identity` (hash or equivalent verified revision), `linkedin_publisher`, `linkedin_series`, `approval_scope`, `duplicate_check`, `linkedin_delivery_state`, `linkedin_permalink`. Reuse existing receipts/continuity, not a new publication database or autonomous posting service. This is an instruction-level dependency contract until a governed running dispatcher is independently verified. **Never claim automatic cross-posting or an actual LinkedIn publication from a skill edit alone.**
 
 ## Verification and publication
 
@@ -120,3 +134,18 @@ If dispatched through Red Dog/WRE, retain its signed work-order, allowed-path, v
 - `cc7de15` / PR #1691 mounted the same ticker on YUMORI.me and added both-consumer assertions. Reuse those checks rather than inventing a parallel ticker system.
 
 These are historical evidence, not current HEAD or deployment receipts. Re-read current source before each edit.
+
+## JHR reconciliation of older open releases — 2026-11-16
+
+For JHR, inspect the relevant YUMORI and JHR private continuity ledgers plus the
+existing issue2126 release obligation, including older unresolved entries.
+Compare the actual Sites project, saved source/version, deployment receipt and
+exact current live issue. Version saved, build/source merged and deployment
+SUCCESS cannot substitute for matching issue/body/assets/metadata readback.
+Preserve concurrent unpublished site work and both homepages before preparing a
+release. A site correction does not authorize reposting an already live LinkedIn
+edition. Feed the source/archive/build/live distinctions into the existing
+`social campaign content action=reconcile dry_run=true` receipt contract at
+`modules/platform_integration/social_media_orchestrator/docs/CONTENT_CAMPAIGN.md`.
+The helper is supplied-evidence review only; this skill still owns actual source,
+build/deploy qualification, authorization and independent live verification.

@@ -1,3 +1,33 @@
+## Optional ready-only video search — 2026-11-05
+
+Existing `VideoContentIndex.search()` accepts keyword-only
+`allow_cold_init=True, cancel_event=None`. A bounded optional consumer can set
+the flag false to require an already-loaded embedding model before any count
+or search. It never falls back to a zero embedding or starts a cold model in
+that mode. Cancellation gates subsequent count/encode/query/result phases;
+an active native operation is not forcibly interrupted. Legacy defaults and
+explicit indexing owners are unchanged. This adds no warmup, cache, model
+selection or generation-freshness authority.
+
+## Stored-settings local guard; maintenance hold — 2026-11-01
+
+Existing Holo owners validate persisted raw settings before callback-capable SDK
+use under the [API contract](INTERFACE.md#stored-chroma-settings-admission--2026-11-01). [Test history](tests/TestModLog.md#stored-settings-local-qualification--2026-11-01) records scoped local and
+literal scratch-native acceptance, failed attempts and explicit corrections.
+The [checkpoint](../docs/architecture/FOUNDUPS_BLOCKCHAIN_RECONCILIATION_SECURITY_20261031.md#allocation-delivery-and-stored-chroma-security-hold--2026-11-01) separates this application guard from open upstream
+advisories, complete runtime closure and new-source delivery. No persistent
+controller, dependency upgrade or new CURRENT result is released here.
+
+## Qualified native-chat proposal option
+
+The existing WRE-to-Qwen caller now has an explicit, default-off native-chat
+configuration. Use a trusted `local_proposal_mode="native_chat"` plus an exact
+`local_native_chat_profile` only after qualifying the runtime/model/template.
+See [the interface](INTERFACE.md#opt-in-local-native-chat-proposals) for the
+profile and errors. The default raw route is unchanged; generated text is a
+proposal, never action success. Portable/installed-source checks have passed;
+an actual-model caller trial, native admission and retained benefit are separate.
+
 # HoloIndex - Brain Surgeon Level Code Intelligence System
 
 ## R03 entry checkpoint — 2026-09-13

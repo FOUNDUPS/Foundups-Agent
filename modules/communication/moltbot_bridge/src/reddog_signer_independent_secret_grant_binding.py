@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict
+from pathlib import Path
 from typing import Any, Mapping
 
 from modules.communication.moltbot_bridge.src.reddog_signer_resolve_per_sign_backend import (
@@ -13,10 +14,30 @@ from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_authori
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_durable_nonce_store import (
     DurableSignerSecretGrantNonceStore,
+    SignerGrantReplayStoreConfig,
+    signer_grant_replay_store_instance_digest,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     constant_time_compare,
 )
+
+
+def require_owner_bound_replay_store(
+    policy: Mapping[str, Any], replay_store: DurableSignerSecretGrantNonceStore,
+    *, repo_root: Path,
+) -> None:
+    """Reject a genuine store belonging to a different selected owner."""
+    if type(replay_store) is not DurableSignerSecretGrantNonceStore:
+        raise ValueError("secret_grant_replay_store_invalid")
+    config = replay_store._config
+    if type(config) is not SignerGrantReplayStoreConfig or any((
+        config.repo_root.resolve() != repo_root.resolve(),
+        config.nonce_root.resolve() != Path(policy["replay_root"]).resolve(),
+        config.nonce_path.resolve() != Path(policy["replay_path"]).resolve(),
+        not constant_time_compare(config.replay_store_id, policy["replay_store_id"]),
+        not constant_time_compare(config.durability_receipt_id, policy["replay_store_durability_receipt_id"]),
+    )):
+        raise ValueError("secret_grant_replay_store_owner_mismatch")
 
 
 def resolve_secret_grant_target_binding(
@@ -27,6 +48,22 @@ def resolve_secret_grant_target_binding(
 
     if type(replay_store) is not DurableSignerSecretGrantNonceStore:
         raise ValueError("secret_grant_replay_store_invalid")
+    return _target_binding_from_config(policy, replay_store._config)
+
+
+def resolve_secret_grant_target_binding_from_config(policy, config):
+    """Derive public target identity without opening its private writable state."""
+    if type(config) is not SignerGrantReplayStoreConfig or any((
+        config.nonce_root.resolve() != Path(policy["replay_root"]).resolve(),
+        config.nonce_path.resolve() != Path(policy["replay_path"]).resolve(),
+        config.replay_store_id != policy["replay_store_id"],
+        config.durability_receipt_id != policy["replay_store_durability_receipt_id"],
+    )):
+        raise ValueError("secret_grant_target_store_binding_invalid")
+    return _target_binding_from_config(policy, config)
+
+
+def _target_binding_from_config(policy, config):
     return ResolvePerSignBinding(
         issuer_principal_id=str(policy["grant_authority_principal_id"]),
         issuer_principal_provider=str(policy["grant_authority_principal_provider"]),
@@ -41,10 +78,10 @@ def resolve_secret_grant_target_binding(
         signer_generation_id=str(policy["target_signer_generation_id"]),
         signer_public_key=str(policy["target_signer_public_key"]),
         signer_key_fingerprint=str(policy["target_signer_key_fingerprint"]),
-        replay_store_binding_digest=replay_store.replay_store_binding_digest,
-        replay_store_id=replay_store.replay_store_id,
-        replay_store_durability_receipt_id=replay_store.durability_receipt_id,
-        replay_store_instance_digest=replay_store.replay_store_instance_digest,
+        replay_store_binding_digest=config.replay_store_binding_digest,
+        replay_store_id=config.replay_store_id,
+        replay_store_durability_receipt_id=config.durability_receipt_id,
+        replay_store_instance_digest=signer_grant_replay_store_instance_digest(config),
     )
 
 
@@ -58,9 +95,39 @@ def build_secret_grant_authority_policy(
     authority_public_key: str,
     authority_key_epoch: str,
     requester_principal_id: str,
+    issuer_rate_binding: object = None,
 ) -> SignerSecretGrantAuthorityPolicy:
     """Bind an injected grant client to signed E0 authority and rate policy."""
 
+    _require_grant_client_identity(owner_policy, binding,
+        authority_principal_id, authority_principal_provider, authority_public_key,
+        authority_key_epoch, requester_principal_id)
+    if issuer_rate_binding is None and (
+        replay_store.replay_store_id != binding.replay_store_id
+        or replay_store.durability_receipt_id != binding.replay_store_durability_receipt_id
+    ):
+        raise ValueError("secret_grant_authority_binding_invalid")
+    result = SignerSecretGrantAuthorityPolicy(
+        **asdict(binding),
+        issuer_key_epoch=str(owner_policy["grant_authority_key_epoch"]),
+        requester_principal_id=requester_principal_id,
+        allowed_operations=tuple(owner_policy["allowed_operations"]),
+        allowed_authority_tiers=tuple(owner_policy["allowed_authority_tiers"]),
+        consensus_required_tiers=tuple(owner_policy["consensus_required_tiers"]),
+        rate_limit_window_seconds=int(owner_policy["rate_limit_window_seconds"]),
+        rate_limit_max_requests=int(owner_policy["rate_limit_max_requests"]),
+        issuer_rate_binding=issuer_rate_binding,
+    )
+    if issuer_rate_binding is not None:
+        from .reddog_signer_secret_grant_authority_policy import secret_grant_policy_rejected
+        if secret_grant_policy_rejected(result):
+            raise ValueError("secret_grant_rate_binding_invalid")
+    return result
+
+
+def _require_grant_client_identity(owner_policy, binding, authority_principal_id,
+                                   authority_principal_provider, authority_public_key,
+                                   authority_key_epoch, requester_principal_id):
     expected = (
         (authority_principal_id, owner_policy["grant_authority_principal_id"]),
         (authority_principal_provider, owner_policy["grant_authority_principal_provider"]),
@@ -70,27 +137,18 @@ def build_secret_grant_authority_policy(
             requester_principal_id,
             owner_policy["grant_requester_principal_id"],
         ),
-        (replay_store.replay_store_id, owner_policy["replay_store_id"]),
+        (binding.replay_store_id, owner_policy["replay_store_id"]),
         (
-            replay_store.durability_receipt_id,
+            binding.replay_store_durability_receipt_id,
             owner_policy["replay_store_durability_receipt_id"],
         ),
     )
     if any(not constant_time_compare(str(left), str(right)) for left, right in expected):
         raise ValueError("secret_grant_authority_binding_invalid")
-    return SignerSecretGrantAuthorityPolicy(
-        **asdict(binding),
-        issuer_key_epoch=str(owner_policy["grant_authority_key_epoch"]),
-        requester_principal_id=requester_principal_id,
-        allowed_operations=tuple(owner_policy["allowed_operations"]),
-        allowed_authority_tiers=tuple(owner_policy["allowed_authority_tiers"]),
-        consensus_required_tiers=tuple(owner_policy["consensus_required_tiers"]),
-        rate_limit_window_seconds=int(owner_policy["rate_limit_window_seconds"]),
-        rate_limit_max_requests=int(owner_policy["rate_limit_max_requests"]),
-    )
 
 
 __all__ = [
+    "require_owner_bound_replay_store",
     "build_secret_grant_authority_policy",
     "resolve_secret_grant_target_binding",
 ]

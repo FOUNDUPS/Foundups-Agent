@@ -272,7 +272,7 @@ def _determination(
         "report_bundle_id": "sha256:report-bundle",
         "report_count": 5,
         "audit_report_digests": ["sha256:report-1"],
-        "model_result_digest": "sha256:model-result",
+        "model_result_digest": "sha256:" + ("c" * 64),
         "model_receipt_id": "model-receipt-1",
         "model_selection_receipt_id": None,
         "model_selection_digest": None,

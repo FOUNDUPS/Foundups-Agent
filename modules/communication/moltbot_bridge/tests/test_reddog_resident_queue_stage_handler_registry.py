@@ -124,6 +124,7 @@ def test_registry_registers_all_stages_when_every_dependency_is_injected(tmp_pat
         repo_root=tmp_path,
         valve_environment=GovernedExecutionValveEnvironment(values={}),
         governed_use_time_authority_resolver=dummy,
+        worktree_lease_issuer=dummy,
         worktree_runner=dummy,
         generic_writer_dryrun_result={"accepted": True},
         governed_shell_dryrun_result={"accepted": True},
@@ -142,6 +143,7 @@ def test_registry_registers_all_stages_when_every_dependency_is_injected(tmp_pat
     )
 
     assert registry.registered_stage_keys == ALL_STAGE_KEYS
+    assert registry.handlers["execution_valve"].worktree_lease_issuer is dummy
     assert registry.registered_stage_count == len(ALL_STAGE_KEYS)
     assert registry.missing_stage_reasons == {}
 

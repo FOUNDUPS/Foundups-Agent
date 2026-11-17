@@ -1,5 +1,15 @@
 # LinkedIn Agent Interface Documentation
 
+The [research contract](skillz/linkedin_newsletters/references/research-verification.md) extends editorial instructions with source admission, Docs revision/read-back and private session records. Existing video-index and Digital Twin interfaces remain unchanged; this does not wire automatic data capture or training.
+
+
+The [editorial work packet](skillz/linkedin_newsletters/references/editorial-workflow.md) is an instruction contract: request/mode, scope, continuity, evidence, target, authority, acceptance and return receipt. It is not a new Python API or runtime dispatcher.
+
+
+## Human-directed activity routing
+
+The existing `skillz/linkedin_engagement/SKILLz.md` is the instruction entrypoint for [full or scoped LinkedIn operations](docs/LINKEDIN_ACTIVITY_ROUTING.md). Child skills describe workflows; they do not add Python APIs or certify the legacy APIs below. The wrapper now enforces outer default/true for write actions; direct-like dry-run returns a target preview before browser import/construction. [Exact result and limits](docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-dry-run-repair--2026-09-22) distinguish preview success from a posted result. Engagement-session truthy dry-run also returns configuration before browser access; see the [session fields and limits](docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-session-preview--2026-09-22). Messaging simulation, connection policy/history and broader live-action guards remain readiness gaps. A successful mock result is never a sent-message receipt.
+
 **WSP 11 Compliance**: Public API Definition and Interface Specifications
 
 ---
@@ -13,6 +23,10 @@
 **WSP Compliance:** WSP 1, WSP 3, WSP 11, WSP 30, WSP 42, WSP 53
 
 ### Related Skills
+- **LinkedIn Newsletter Router** (`modules/platform_integration/linkedin_agent/skillz/linkedin_newsletters/`)
+  - Routes a full audit or named publication without merging editorial identities
+  - Dedicated children: `linkedin_foundups_newsletter`, `linkedin_roc_newsletter`, `linkedin_jhr_newsletter`
+  - Instruction contracts only; live publisher/series verification and exact publication authority still apply
 - **LinkedIn Company Poster** (`modules/ai_intelligence/ai_overseer/skillz/linkedin_company_poster/`)
   - CLI posting to FoundUps company page (1263645)
   - Signature: `0102🦞 #FoundUps #pAVS #0102`

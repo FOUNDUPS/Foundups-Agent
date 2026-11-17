@@ -1,4 +1,4 @@
-﻿"""Domain exceptions for FoundUps Agent Market.
+"""Domain exceptions for FoundUps Agent Market.
 
 WSP References:
 - WSP 50: Error handling with domain exceptions

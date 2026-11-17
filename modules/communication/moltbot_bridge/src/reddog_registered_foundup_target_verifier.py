@@ -5,6 +5,8 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import stat
+import unicodedata
 from pathlib import Path, PurePosixPath
 from typing import Any, Mapping, Optional, Sequence
 
@@ -20,7 +22,7 @@ def _digest(value: Any) -> str:
     if isinstance(value, bytes):
         raw = value
     else:
-        raw = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode()
+        raw = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
     return f"sha256:{hashlib.sha256(raw).hexdigest()}"
 
 def _mapping(value: Any) -> Mapping[str, Any]:
@@ -31,21 +33,55 @@ def _path(root: Path, relative: Any) -> Optional[Path]:
     pure = PurePosixPath(text)
     if not text or pure.is_absolute() or ".." in pure.parts or ":" in text:
         return None
-    target = (root / Path(*pure.parts)).resolve()
-    try:
-        target.relative_to(root)
-    except ValueError:
+    source_path = pure.suffix.lower() in {
+        ".c", ".cc", ".cpp", ".cs", ".go", ".h", ".hpp", ".java", ".js", ".jsx",
+        ".md", ".mjs", ".py", ".rs", ".rst", ".ts", ".tsx",
+    }
+    if any(_private_component(part, source_path) for part in pure.parts):
         return None
-    return target if target.is_file() and not target.is_symlink() else None
+    target = root
+    try:
+        for part in pure.parts:
+            target = target / part
+            if target.is_symlink() or getattr(target.lstat(), "st_file_attributes", 0) & stat.FILE_ATTRIBUTE_REPARSE_POINT:
+                return None
+        resolved = target.resolve()
+        resolved.relative_to(root)
+        return resolved if resolved.is_file() and resolved.stat().st_nlink == 1 else None
+    except (OSError, ValueError):
+        return None
+
+
+def _private_component(part: str, source_path: bool) -> bool:
+    # Same public-read exclusions as target_read_path_policy.js, without config I/O.
+    value = part.lower().rstrip(" .")
+    if value != part.lower() or value in {".git", ".ssh", ".gnupg", ".aws", ".azure", ".gcloud", "node_modules", "__pycache__", ".venv"}:
+        return True
+    blocked = (".env", ".netrc", ".npmrc", ".pypirc", ".git-credentials", ".dockerconfigjson")
+    if any(value == name or value.startswith(name + ".") for name in blocked):
+        return True
+    if re.search(r"(?:^|[._-])(?:secrets?|credentials?|api[_-]?keys?|private[_-]?keys?|signing[_-]?keys?|service[_-]?accounts?)(?=[._-]|$)|^tokens?(?:[._-](?:data|store|cache|secret|vault))?$", value):
+        return True
+    if not source_path and (any(marker in value for marker in ("secret", "credential", "token"))
+                            or re.search(r"(?:^|[._-])auth(?=[._-]|$)", value)):
+        return True
+    return bool(re.search(r"(?:^|\.)(?:pem|key|p12|pfx|jks|keystore|vsix)(?:\.|$)", value)
+                or re.match(r"^id_(?:rsa|dsa|ecdsa|ed25519)(?:\.pub)?(?:[._-]|$)", value)
+                or re.match(r"^(?:con|prn|aux|nul|com[1-9¹²³]|lpt[1-9¹²³])(?:\.|$)", value))
+
 
 
 def _receipt_integrity(receipt: Mapping[str, Any]) -> bool:
     payload = {key: value for key, value in receipt.items() if key != "receipt_id"}
+    try:
+        payload_digest = _digest(payload)
+    except UnicodeError:
+        return False
     return (
         receipt.get("schema_version") == RECEIPT_SCHEMA
         and receipt.get("passed") is True
         and receipt.get("grants_authority") is False
-        and receipt.get("receipt_id") == _digest(payload)
+        and receipt.get("receipt_id") == payload_digest
     )
 
 
@@ -159,17 +195,25 @@ def _verify_brand_context(
 ) -> None:
     entities = [item for item in registry.get("entities", []) if item.get("foundup_id") == target.get("foundup_id")]
     entity = entities[0] if len(entities) == 1 else {}
-    declared = str(entity.get("brand_context_path") or "")
-    receipt_path = str(target.get("brand_context_path") or "")
+    declared = entity.get("brand_context_path")
+    receipt_path = target.get("brand_context_path")
+    if declared is not None and (not isinstance(declared, str) or not declared):
+        reasons.append("registered_foundup_target_brand_context_invalid")
+        return
     if declared != receipt_path:
         reasons.append("registered_foundup_target_brand_path_mismatch")
         return
     if not declared:
+        expected = {"brand_foundup_id": entity.get("foundup_id"), "canonical_brand": entity.get("display_name")}
+        if any(key in target and target[key] != value for key, value in expected.items()):
+            reasons.append("registered_foundup_target_brand_selection_mismatch")
         return
     context_file, schema_file = _path(root, declared), _path(root, BRAND_SCHEMA_PATH)
     try:
-        context = json.loads(context_file.read_bytes()) if context_file else {}
-        schema = json.loads(schema_file.read_bytes()) if schema_file else {}
+        if not context_file or not schema_file:
+            raise ValueError("brand_context_missing")
+        context = json.loads(context_file.read_bytes())
+        schema = json.loads(schema_file.read_bytes())
         Draft202012Validator(schema).validate(context)
     except Exception:
         reasons.append("registered_foundup_target_brand_context_invalid")
@@ -179,12 +223,37 @@ def _verify_brand_context(
         return
     brand_id = str(target.get("brand_foundup_id") or "")
     canonical = str(target.get("canonical_brand") or "")
-    expected = {str(context.get("foundup_id")): str(context.get("canonical_brand") or "")}
-    for child in context.get("child_foundups", []):
-        if isinstance(child, Mapping):
-            expected[str(child.get("foundup_id") or "")] = str(child.get("canonical_brand") or "")
-    if brand_id not in expected or expected.get(brand_id) != canonical:
+    try:
+        expected, aliases = _brand_identities(context, entity)
+    except ValueError:
+        reasons.append("registered_foundup_target_brand_identity_ambiguous")
+        return
+    if (brand_id not in expected or expected.get(brand_id) != canonical
+            or aliases.get(target.get("matched_reference")) != brand_id):
         reasons.append("registered_foundup_target_brand_selection_mismatch")
+
+
+def _brand_identities(context: Mapping[str, Any], entity: Mapping[str, Any]) -> tuple[dict[str, str], dict[str, str]]:
+    identities, aliases = {}, {}
+    for brand in [context, *context.get("child_foundups", [])]:
+        identity = brand["foundup_id"]
+        if identity in identities:
+            raise ValueError("duplicate_brand_identity")
+        identities[identity] = brand["canonical_brand"]
+        values = [identity, brand["canonical_brand"], *brand.get("aliases", [])]
+        if identity == entity["foundup_id"]:
+            values += [entity.get("display_name"), entity.get("token_symbol"), PurePosixPath(entity.get("module_path") or "").name]
+        for value in values:
+            if not value:
+                continue
+            alias = unicodedata.normalize("NFKC", value).lower()
+            alias = re.sub(r"[_-]+", " ", alias)
+            alias = re.sub(r"[^a-z0-9\u3040-\u30ff\u3400-\u9fff.]+", " ", alias)
+            alias = " ".join(alias.split())
+            if not alias or (alias in aliases and aliases[alias] != identity):
+                raise ValueError("ambiguous_brand_alias")
+            aliases[alias] = identity
+    return identities, aliases
 
 
 def _verify_manifest(root: Path, target: Mapping[str, Any], reasons: list[str]) -> None:

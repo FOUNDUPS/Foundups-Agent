@@ -12,8 +12,152 @@ import pytest
 from pathlib import Path
 from datetime import datetime
 import uuid
+import hashlib
+import json
+from types import SimpleNamespace
 
 from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory
+
+
+def test_runner_feedback_and_candidates_retain_exact_parent_after_reopen(monkeypatch, tmp_path):
+    """Real storage binds two revisions without trusting executor-supplied lineage."""
+    from modules.infrastructure.wre_core.tests.test_wre_execution_truth import _minimal_orchestrator
+
+    orchestrator = _minimal_orchestrator(monkeypatch, tmp_path)
+    db_path = tmp_path / "lineage.db"
+    memory = PatternMemory(db_path=db_path)
+    orchestrator.sqlite_memory = memory
+    source = ["# Skill\nfirst revision"]
+    orchestrator.skills_loader = SimpleNamespace(load_skill=lambda *_: source[0])
+    monkeypatch.setattr(orchestrator.libido_monitor, "validate_step_fidelity", lambda **_: 0.2)
+    supplied = {"success": False, "output": "failed", "steps_completed": 0,
+                "_skill_binding": {"execution_id": "forged", "loaded_skill_sha256": "forged"}}
+    monkeypatch.setattr(orchestrator, "_try_executor_dispatch", lambda *_: supplied)
+    monkeypatch.setattr(orchestrator, "_generate_variation_with_qwen", lambda *_: "# candidate")
+    expected = {}
+    try:
+        for text in ("# Skill\nfirst revision", "# Skill\nsecond revision 日本語"):
+            source[0] = text
+            result = orchestrator._execute_skill_once("lineage_skill", "qwen", {"_skill_binding": "forged"})
+            assert result["success"] is False and result["variation_created"] is True
+            expected[result["execution_id"]] = "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest()
+    finally:
+        memory.close()
+    reopened = PatternMemory(db_path=db_path)
+    try:
+        rows = reopened.conn.execute("SELECT * FROM skill_outcomes").fetchall()
+        assert len(rows) == 2
+        for row in rows:
+            binding = json.loads(row["output_result"])["_skill_binding"]
+            assert binding == {"schema_version": "wre_skill_execution_binding.v1",
+                               "execution_id": row["execution_id"],
+                               "loaded_skill_sha256": expected[row["execution_id"]],
+                               "scanner_admission_fingerprint": "f" * 64}
+            assert row["success"] == 0 and row["outcome_quality"] == 0.0
+        variants = reopened.conn.execute("SELECT * FROM skill_variations").fetchall()
+        assert {row["parent_version"] for row in variants} == set(expected.values())
+        assert all(row["promoted"] == 0 and row["test_status"] == "testing" for row in variants)
+        assert {event["execution_id"] for event in reopened.get_evolution_history("lineage_skill")} == set(expected)
+    finally:
+        reopened.close()
+    assert supplied["_skill_binding"]["execution_id"] == "forged"  # no mutation of producer object
+
+
+def test_evolve_skill_recalls_only_loaded_parent_version(monkeypatch, tmp_path):
+    """evolve_skill passes loaded_skill_digest to pattern recall so foreign revisions cannot leak."""
+    from modules.infrastructure.wre_core.src.pattern_memory import SkillOutcome
+    from modules.infrastructure.wre_core.src.skill_execution_truth import (
+        bind_skill_execution_result,
+        loaded_skill_digest,
+    )
+    from modules.infrastructure.wre_core.tests.test_wre_execution_truth import _minimal_orchestrator
+
+    orchestrator = _minimal_orchestrator(monkeypatch, tmp_path)
+    memory = PatternMemory(db_path=tmp_path / "parent_recall.db")
+    orchestrator.sqlite_memory = memory
+    v1_text = "# Skill v1\nlegacy instruction"
+    v2_text = "# Skill v2\ncurrent instruction"
+    fp = "b" * 64
+    try:
+        for i in range(6):
+            memory.store_outcome(SkillOutcome(
+                execution_id=f"v1_old_fail_{i}",
+                skill_name="bounded_evo_skill",
+                agent="qwen",
+                timestamp=datetime.now().isoformat(),
+                input_context=json.dumps({}),
+                output_result=json.dumps(bind_skill_execution_result(
+                    {"output": "old failure"}, skill_content=v1_text,
+                    execution_id=f"v1_old_fail_{i}", admission_fingerprint=fp,
+                )),
+                success=False,
+                pattern_fidelity=0.10,
+                outcome_quality=0.0,
+                execution_time_ms=50,
+                step_count=1,
+            ))
+            memory.store_outcome(SkillOutcome(
+                execution_id=f"v1_old_ok_{i}",
+                skill_name="bounded_evo_skill",
+                agent="qwen",
+                timestamp=datetime.now().isoformat(),
+                input_context=json.dumps({}),
+                output_result=json.dumps(bind_skill_execution_result(
+                    {"output": "old success"}, skill_content=v1_text,
+                    execution_id=f"v1_old_ok_{i}", admission_fingerprint=fp,
+                )),
+                success=True,
+                pattern_fidelity=0.99,
+                outcome_quality=0.99,
+                execution_time_ms=50,
+                step_count=1,
+            ))
+        memory.store_outcome(SkillOutcome(
+            execution_id="v2_curr_fail",
+            skill_name="bounded_evo_skill",
+            agent="qwen",
+            timestamp=datetime.now().isoformat(),
+            input_context=json.dumps({}),
+            output_result=json.dumps(bind_skill_execution_result(
+                {"output": "current failure"}, skill_content=v2_text,
+                execution_id="v2_curr_fail", admission_fingerprint=fp,
+            )),
+            success=False,
+            pattern_fidelity=0.60,
+            outcome_quality=0.0,
+            execution_time_ms=50,
+            step_count=1,
+        ))
+
+        captured = {}
+
+        def _capture_reflection(**kwargs):
+            captured["failures"] = kwargs["failure_patterns"]
+            captured["successes"] = kwargs["success_patterns"]
+            return "mock reflection prompt"
+
+        monkeypatch.setattr(orchestrator, "_build_reflection_prompt", _capture_reflection)
+        monkeypatch.setattr(orchestrator, "_generate_variation_with_qwen", lambda *_: "# v2 candidate")
+
+        created = orchestrator.evolve_skill(
+            skill_name="bounded_evo_skill",
+            agent="qwen",
+            skill_content=v2_text,
+            failed_output={"output": "curr"},
+            input_context={"task": "verify"},
+            current_fidelity=0.60,
+            execution_id="exec_now",
+        )
+        assert created is True
+        assert [r["execution_id"] for r in captured["failures"]] == ["v2_curr_fail"]
+        assert captured["successes"] == []
+        row = memory.conn.execute(
+            "SELECT parent_version FROM skill_variations WHERE skill_name = ?",
+            ("bounded_evo_skill",),
+        ).fetchone()
+        assert row["parent_version"] == loaded_skill_digest(v2_text)
+    finally:
+        memory.close()
 
 
 class TestLearningEventsContinuitySchema:

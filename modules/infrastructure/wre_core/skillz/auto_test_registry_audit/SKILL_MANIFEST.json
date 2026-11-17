@@ -3,7 +3,11 @@
   "files": [
     {
       "path": "SKILLz.md",
-      "sha256": "64855a943eea31224ff47c9f3a1bcd0d4365f0aaf8d56f8998430bbe728e2094"
+      "sha256": "a8cc17b6145efb9aa78be534ea492ab40465f86d208a8776a7045a8a32603ba8"
+    },
+    {
+      "path": "executor.py",
+      "sha256": "85e54c084597e42da014b96089dd51da4a7854c1c6df6daebc276e73813030be"
     }
   ]
 }

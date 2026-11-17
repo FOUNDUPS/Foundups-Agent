@@ -35,7 +35,7 @@ def test_studio_ask_persists_json():
 
             assert data["video_id"] == "vid123"
             assert data["channel"] == "undaodu"
-            assert data["transcript_source"] == "gemini"
+            assert data["transcript_source"] == "gemini_summary"
             assert "gemini_summary" in data
             assert data["audio"]["segments"]
     finally:

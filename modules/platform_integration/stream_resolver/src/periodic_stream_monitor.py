@@ -168,7 +168,10 @@ class PeriodicStreamMonitor:
 
         try:
             # Import 0102 orchestrator
-            from modules.ai_intelligence.0102_orchestrator.src.zero_one_zero_two import ZeroOneZeroTwo
+            from importlib import import_module
+            ZeroOneZeroTwo = import_module(
+                "modules.ai_intelligence.0102_orchestrator.src.zero_one_zero_two"
+            ).ZeroOneZeroTwo
 
             orchestrator = ZeroOneZeroTwo()
 

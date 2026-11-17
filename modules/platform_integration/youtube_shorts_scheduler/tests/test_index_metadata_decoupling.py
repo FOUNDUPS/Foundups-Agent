@@ -31,6 +31,7 @@ ANTI-VACUITY (ADDENDUM C/D):
 import json
 from pathlib import Path
 from unittest.mock import MagicMock
+from types import SimpleNamespace
 
 import pytest
 
@@ -51,7 +52,17 @@ from modules.platform_integration.youtube_shorts_scheduler.src.index_weave impor
 # Shared harness (strict, anti-vacuity)
 # ---------------------------------------------------------------------------
 
-def _make_strict_dom():
+@pytest.fixture(autouse=True)
+def no_browser_waits(monkeypatch, tmp_path):
+    from modules.platform_integration.youtube_shorts_scheduler.src import schedule_tracker
+
+    async def settled(_seconds):
+        return None
+    monkeypatch.setattr("asyncio.sleep", settled)
+    monkeypatch.setattr(schedule_tracker, 'TRACKER_DIR', tmp_path / 'calendar')
+
+
+def _make_strict_dom(video_id, channel_id, *, calendar=False):
     """
     Strict spec_set DOM double based on the REAL YouTubeStudioDOM interface.
 
@@ -59,12 +70,27 @@ def _make_strict_dom():
     which dom_automation.py does NOT define) raise AttributeError on access. This
     is what proves the refactored indexing path never touches save_video.
     """
-    dom = MagicMock(spec_set=YouTubeStudioDOM)
+    spec = YouTubeStudioDOM
+    if calendar:
+        # The live scheduler assigns these instance fields before calling Save.
+        spec = object.__new__(YouTubeStudioDOM)
+        spec.driver = None
+        spec._policy_calendar_required = False
+        spec._policy_before_schedule_submit = None
+        spec._policy_on_schedule_submitting = None
+    dom = MagicMock(spec_set=spec)
     dom.check_driver_health.return_value = True
     dom.navigate_to_video.return_value = None
-    dom.get_unlisted_videos.return_value = [{"video_id": "vid1", "title": "Original Title"}]
+    dom.get_unlisted_videos.return_value = [{"video_id": "aaaaaaaaaaa", "title": "Original Title"}]
     dom.read_edit_page_visibility.return_value = "unlisted"
     dom.get_current_description.return_value = ""
+    session = SimpleNamespace(channel_id=channel_id, video_id=video_id,
+                              original={"title": "Original Title", "description": ""})
+    dom._policy_edit.return_value = session
+    def begin(channel_id, current_video_id, *, allow_metadata=True):
+        assert channel_id == session.channel_id and current_video_id == session.video_id
+        return session
+    dom.begin_policy_edit.side_effect = begin
     dom.edit_title.return_value = None
     dom.edit_description.return_value = None
     dom.schedule_video.return_value = True
@@ -81,12 +107,55 @@ def _make_driver():
     return driver
 
 
-def _make_scheduler():
+def _make_scheduler(video_id="aaaaaaaaaaa", *, calendar=False):
     """Connected scheduler with a strict DOM double; dry_run=False (live path)."""
     scheduler = YouTubeShortsScheduler("move2japan", dry_run=False)
+    # Date rollover has separate calendar coverage.
+    scheduler.channel_tz = "America/New_York"
     scheduler.driver = _make_driver()
-    scheduler.dom = _make_strict_dom()
+    scheduler.dom = _make_strict_dom(video_id, scheduler.channel_id, calendar=calendar)
     return scheduler
+
+
+@pytest.fixture
+def scheduling_calendar(tmp_path, monkeypatch):
+    from modules.platform_integration.youtube_shorts_scheduler.src import scheduler as owner
+    from modules.platform_integration.youtube_shorts_scheduler.src.content_page_scheduler import ContentPageScheduler
+    from modules.platform_integration.youtube_shorts_scheduler.src.schedule_inventory import SCHEDULED_PAGE_SCRIPT
+
+    channel_id = 'UC' + 'a' * 22
+    config = {**owner.get_channel_config('move2japan'), 'id': channel_id}
+    monkeypatch.setattr(owner, 'get_channel_config', lambda _: config)
+    monkeypatch.setattr(ContentPageScheduler, 'navigate_to_scheduled', lambda *_: True)
+    for variable, name in (
+        ('YT_012_MANIFEST_FILE', 'inbox.json'),
+        ('YT_012_MANIFEST_ACK_FILE', 'ack.json'),
+        ('YT_012_MANIFEST_STATE_FILE', 'state.json'),
+    ):
+        monkeypatch.setenv(variable, str(tmp_path / name))
+    scheduler = _make_scheduler(calendar=True)
+    dom = scheduler.dom
+    dom.driver = scheduler.driver
+    page = {'channel_id': channel_id, 'url': f'https://studio.youtube.com/channel/{channel_id}/videos/short',
+            'chip_texts': ['Visibility: Has schedule'], 'search_text': '', 'loading': False,
+            'empty': True, 'previous_page': False, 'next_page': False, 'rows': []}
+    scheduler.driver.execute_script.side_effect = lambda script, *_: page if script == SCHEDULED_PAGE_SCRIPT else 'not_found'
+    dom.read_scheduled_inventory.side_effect = lambda channel: YouTubeStudioDOM.read_scheduled_inventory(dom, channel)
+
+    def submit(_date, _time):
+        # Browser Save stays fake. Exercise the scheduler-owned durable reservation.
+        session = dom._policy_edit()
+        dom._policy_before_schedule_submit(session)
+        dom._policy_on_schedule_submitting(session)
+        return True
+
+    dom.schedule_video.side_effect = submit
+    dom.schedule_editor_clean_after_submit.return_value = True
+    yield scheduler
+    dom.read_scheduled_inventory.assert_called_once_with(channel_id)
+    assert scheduler.tracker._read_state()['reservations']['aaaaaaaaaaa']['outcome'] == 'unknown'
+    assert not scheduler.tracker.calendar_ready
+    assert dom._policy_before_schedule_submit is dom._policy_on_schedule_submitting is None
 
 
 def _write_artifact(tmp_path, monkeypatch, channel_key, video_id):
@@ -97,9 +166,14 @@ def _write_artifact(tmp_path, monkeypatch, channel_key, video_id):
         "title": "Original Title",
         "indexed_at": "2026-06-16T00:00:00Z",
         "indexer": "studio_ask",
-        "audio": {"segments": [{"start": 0, "end": 5, "text": "hi"}], "transcript_summary": "calm talk"},
+        "transcript_source": "gemini_summary",
+        "audio": {"segments": [{"start": 0, "end": 5, "text": "hi"}], "transcript_summary": "Breathe and be present."},
         "visual": {"description": "", "keyframes": []},
         "metadata": {
+            "retrieval_eligible": True,
+            "provenance": {"provider": "youtube_studio_ask", "identity_verified": True,
+                           "requested_video_id": video_id, "response_video_id": video_id,
+                           "response_sha256": "test_digest"},
             "duration": "0:30",
             "topics": ["Mindfulness", "Zen"],
             "speakers": [],
@@ -125,7 +199,7 @@ async def test_control1_indexing_does_not_call_edit_title(tmp_path, monkeypatch)
     await scheduler.run_indexing_cycle(max_videos=1, video_type="shorts")
 
     # Reachability: the per-video loop body executed.
-    scheduler.dom.navigate_to_video.assert_called_with("vid1")
+    scheduler.dom.navigate_to_video.assert_called_with("aaaaaaaaaaa")
     # Sink assertion on the DOUBLE's call_count (not log text / results dict).
     assert scheduler.dom.edit_title.call_count == 0
 
@@ -140,7 +214,7 @@ async def test_control2_indexing_does_not_call_edit_description(tmp_path, monkey
 
     await scheduler.run_indexing_cycle(max_videos=1, video_type="shorts")
 
-    scheduler.dom.navigate_to_video.assert_called_with("vid1")
+    scheduler.dom.navigate_to_video.assert_called_with("aaaaaaaaaaa")
     assert scheduler.dom.edit_description.call_count == 0
 
 
@@ -161,7 +235,7 @@ async def test_control3_indexing_does_not_call_schedule_video(tmp_path, monkeypa
 
     await scheduler.run_indexing_cycle(max_videos=1, video_type="shorts")
 
-    scheduler.dom.navigate_to_video.assert_called_with("vid1")
+    scheduler.dom.navigate_to_video.assert_called_with("aaaaaaaaaaa")
     assert scheduler.dom.schedule_video.call_count == 0
 
 
@@ -212,8 +286,8 @@ async def test_control4_indexing_does_not_access_save_video(tmp_path, monkeypatc
 
     results = await scheduler.run_indexing_cycle(max_videos=1, video_type="shorts")
 
-    # (a) REACHABILITY: the per-video loop body executed for vid1.
-    scheduler.dom.navigate_to_video.assert_called_with("vid1")
+    # (a) REACHABILITY: the per-video loop body executed for aaaaaaaaaaa.
+    scheduler.dom.navigate_to_video.assert_called_with("aaaaaaaaaaa")
 
     # (b) NON-VACUOUS DETECTION: a swallowed save_video AttributeError would land
     # in results["errors"]; on the clean read-only path there are no errors and
@@ -280,8 +354,8 @@ async def test_control4_detection_channel_surfaces_save_video(tmp_path, monkeypa
 
     results = await scheduler.run_indexing_cycle(max_videos=1, video_type="shorts")
 
-    # Reachability: the loop body executed for vid1.
-    scheduler.dom.navigate_to_video.assert_called_with("vid1")
+    # Reachability: the loop body executed for aaaaaaaaaaa.
+    scheduler.dom.navigate_to_video.assert_called_with("aaaaaaaaaaa")
 
     # The swallowed save_video AttributeError SURFACES via results["errors"].
     assert any(
@@ -306,7 +380,7 @@ async def test_control5_read_path_does_not_call_ensure_index_json(tmp_path, monk
     never invoked. On the OLD code ensure_index_json fired at scheduler.py:901.
     """
     channel_key = "move2japan"
-    video_id = "vid1"
+    video_id = "aaaaaaaaaaa"
     _write_artifact(tmp_path, monkeypatch, channel_key, video_id)
 
     ensure_spy = MagicMock(side_effect=AssertionError("ensure_index_json must NOT be called on read path"))
@@ -332,7 +406,7 @@ async def test_control5_read_path_does_not_call_ensure_index_json(tmp_path, monk
     # The read path used the artifact (load_index_json invoked) ...
     assert load_spy.call_count >= 1
     # ... and a live write still fired on the scheduling path (artifact present).
-    assert scheduler.dom.edit_title.call_count >= 1
+    scheduler.dom.edit_title.assert_not_called()  # title enrichment remains opt-in
     assert scheduler.dom.edit_description.call_count >= 1
 
 
@@ -368,7 +442,7 @@ async def test_control6_read_path_no_gemini(tmp_path, monkeypatch):
     )
 
     channel_key = "move2japan"
-    video_id = "vid1"
+    video_id = "aaaaaaaaaaa"
     _write_artifact(tmp_path, monkeypatch, channel_key, video_id)
 
     scheduler = _make_scheduler()
@@ -388,24 +462,26 @@ async def test_control6_read_path_no_gemini(tmp_path, monkeypatch):
 # CONTROL 7 - EXPLICIT scheduling path STILL writes (positive regression anchor)
 # ---------------------------------------------------------------------------
 
-async def test_control7_scheduling_path_still_writes(tmp_path, monkeypatch):
+async def test_control7_scheduling_path_still_writes(tmp_path, monkeypatch, scheduling_calendar):
     """
-    MUST PASS on BOTH old and refactored code. If the refactor breaks this, the
-    decoupling changed observable scheduling behavior -> STOP/NEEDS_012.
+    The explicit scheduling path still reaches the metadata sinks when its
+    calendar and durable reservation are qualified.
 
     read_edit_page_visibility -> 'unlisted' (else the video is skipped before
     schedule_video is reached). Asserts the live-write sinks fire on the explicit
     scheduling path, and pairs with Control 3 to prove schedule_video is wired.
     """
     monkeypatch.setenv("VIDEO_INDEXER_ARTIFACT_PATH", str(tmp_path))
-    scheduler = _make_scheduler()
+    _write_artifact(tmp_path, monkeypatch, "move2japan", "aaaaaaaaaaa")
+    monkeypatch.setenv("YT_SCHEDULER_INDEX_INFORM_TITLE", "true")
+    scheduler = scheduling_calendar
 
     await scheduler.run_scheduling_cycle(max_videos=1, update_metadata=True)
 
     # Reachability: per-video body executed.
-    scheduler.dom.navigate_to_video.assert_called_with("vid1")
+    scheduler.dom.navigate_to_video.assert_called_with("aaaaaaaaaaa")
     # Live writes fired on the explicit scheduling path.
-    assert scheduler.dom.edit_title.call_count >= 1
+    scheduler.dom.edit_title.assert_called_once_with("Breathe and be present.")
     assert scheduler.dom.edit_description.call_count >= 1
     assert scheduler.dom.schedule_video.call_count == 1
     args, _ = scheduler.dom.schedule_video.call_args
@@ -427,7 +503,7 @@ def test_pure_builder_present_artifact_is_read_only(tmp_path, monkeypatch):
     import types
 
     channel_key = "move2japan"
-    video_id = "vid1"
+    video_id = "aaaaaaaaaaa"
     _write_artifact(tmp_path, monkeypatch, channel_key, video_id)
 
     ensure_spy = MagicMock(side_effect=AssertionError("ensure_index_json must NOT be called"))
@@ -468,8 +544,8 @@ def test_pure_builder_present_artifact_is_read_only(tmp_path, monkeypatch):
     assert ctx.used_index is True
     # Description context proves the builder actually ran (not a no-op).
     assert "Base description body." in ctx.new_description
-    assert "0102 DIGITAL TWIN INDEX v1" in ctx.new_description
-    assert "#" in ctx.new_description  # topic hashtags woven in
+    assert "M2M_CONTEXT" in ctx.new_description
+    assert "audio_summary" in ctx.new_description  # provenance, not title-derived tags
     assert ensure_spy.call_count == 0
     assert save_spy.call_count == 0
     assert stub_spy.call_count == 0
@@ -534,10 +610,10 @@ def test_pure_builder_missing_artifact_returns_none(tmp_path, monkeypatch):
 # ["Mindfulness", "Zen"] from _write_artifact). TEST A asserts NONE of these leak
 # into the description when the artifact is ABSENT.
 _INDEX_DERIVED_HASHTAGS = ("#Mindfulness", "#Zen")
-_TWIN_MARKER = "0102 DIGITAL TWIN INDEX"
+_TWIN_MARKER = "M2M_CONTEXT"
 
 
-async def test_scheduling_path_missing_artifact_writes_base_content(tmp_path, monkeypatch):
+async def test_scheduling_path_missing_artifact_writes_base_content(tmp_path, monkeypatch, scheduling_calendar):
     """
     TEST A - scheduling path + MISSING artifact.
 
@@ -557,7 +633,7 @@ async def test_scheduling_path_missing_artifact_writes_base_content(tmp_path, mo
         scheduler as scheduler_module,
     )
 
-    # Empty artifact dir -> artifact ABSENT for vid1.
+    # Empty artifact dir -> artifact ABSENT for aaaaaaaaaaa.
     monkeypatch.setenv("VIDEO_INDEXER_ARTIFACT_PATH", str(tmp_path))
     monkeypatch.setenv("YT_SCHEDULER_INDEX_WEAVE_ENABLED", "true")
     monkeypatch.setenv("YT_SCHEDULER_INDEX_ENHANCE_DESCRIPTION", "true")
@@ -606,42 +682,25 @@ async def test_scheduling_path_missing_artifact_writes_base_content(tmp_path, mo
         fake_mod,
     )
 
-    scheduler = _make_scheduler()
+    scheduler = scheduling_calendar
 
     await scheduler.run_scheduling_cycle(max_videos=1, update_metadata=True)
 
     # REACHABILITY (before any content/sink claim): the per-video write body ran.
-    scheduler.dom.navigate_to_video.assert_called_with("vid1")
+    scheduler.dom.navigate_to_video.assert_called_with("aaaaaaaaaaa")
 
     # The explicit scheduling write STILL fires.
-    assert scheduler.dom.edit_title.call_count >= 1
-    assert scheduler.dom.edit_description.call_count >= 1
+    scheduler.dom.edit_title.assert_not_called()
+    scheduler.dom.edit_description.assert_not_called()
     assert scheduler.dom.schedule_video.call_count == 1
 
-    # The description argument is BASE content (no enhancement injected).
-    desc_args, _ = scheduler.dom.edit_description.call_args
-    written_description = desc_args[0]
-    assert _TWIN_MARKER not in written_description, (
-        "base description must NOT contain the digital-twin block when no artifact exists"
-    )
-    for tag in _INDEX_DERIVED_HASHTAGS:
-        assert tag not in written_description, (
-            f"base description must NOT contain index-derived hashtag {tag} with no artifact"
-        )
-    # Equals the (pinned) channel base description exactly: no woven context,
-    # hashtags, or twin block were appended.
-    assert written_description == _BASE_SENTINEL
-
-    # NO scheduler-owned indexing: bound save_index_json never fired (side_effect
-    # would have raised), GeminiVideoAnalyzer never constructed, and NO artifact
-    # file was created on disk during the run.
     assert save_spy.call_count == 0
     assert constructed["count"] == 0
-    artifact_path = Path(tmp_path) / "move2japan" / "vid1.json"
+    artifact_path = Path(tmp_path) / "move2japan" / "aaaaaaaaaaa.json"
     assert not artifact_path.exists(), "missing-artifact scheduling path must NOT create an artifact"
 
 
-async def test_scheduling_path_present_artifact_weaves_index_context(tmp_path, monkeypatch):
+async def test_scheduling_path_present_artifact_weaves_index_context(tmp_path, monkeypatch, scheduling_calendar):
     """
     TEST B - scheduling path + PRESENT artifact.
 
@@ -658,19 +717,19 @@ async def test_scheduling_path_present_artifact_weaves_index_context(tmp_path, m
     harness yields schedule_video.call_count == 0.
     """
     channel_key = "move2japan"
-    video_id = "vid1"
+    video_id = "aaaaaaaaaaa"
     artifact_path = _write_artifact(tmp_path, monkeypatch, channel_key, video_id)
     assert artifact_path.exists()  # precondition: artifact present
 
     monkeypatch.setenv("YT_SCHEDULER_INDEX_WEAVE_ENABLED", "true")
     monkeypatch.setenv("YT_SCHEDULER_INDEX_ENHANCE_DESCRIPTION", "true")
 
-    scheduler = _make_scheduler()
+    scheduler = scheduling_calendar
 
     await scheduler.run_scheduling_cycle(max_videos=1, update_metadata=True)
 
     # REACHABILITY (before any content/sink claim): the per-video write body ran.
-    scheduler.dom.navigate_to_video.assert_called_with("vid1")
+    scheduler.dom.navigate_to_video.assert_called_with("aaaaaaaaaaa")
 
     # schedule_video fired exactly once on the explicit scheduling path.
     assert scheduler.dom.schedule_video.call_count == 1
@@ -684,10 +743,8 @@ async def test_scheduling_path_present_artifact_weaves_index_context(tmp_path, m
         "human-facing index context must be injected into the description"
     )
     # (ii) at least one woven index hashtag present,
-    assert any(tag in written_description for tag in _INDEX_DERIVED_HASHTAGS), (
-        "woven index hashtags must appear in the enhanced description"
-    )
-    # (iii) the digital-twin block present.
+    assert all(tag not in written_description for tag in _INDEX_DERIVED_HASHTAGS)
+
     assert _TWIN_MARKER in written_description, (
         "digital-twin index block must appear in the enhanced description"
     )
@@ -697,11 +754,11 @@ async def test_scheduling_path_present_artifact_weaves_index_context(tmp_path, m
     # schedules (pairs with Control 3/7).
     read_scheduler = _make_scheduler()
     await read_scheduler.run_indexing_cycle(max_videos=1, video_type="shorts")
-    read_scheduler.dom.navigate_to_video.assert_called_with("vid1")
+    read_scheduler.dom.navigate_to_video.assert_called_with("aaaaaaaaaaa")
     assert read_scheduler.dom.schedule_video.call_count == 0
 
 
-async def test_scheduling_path_present_artifact_disabled_skips_enhancement(tmp_path, monkeypatch):
+async def test_scheduling_path_present_artifact_disabled_skips_enhancement(tmp_path, monkeypatch, scheduling_calendar):
     """
     TEST B (env-gate complement) - PRESENT artifact but enhancement DISABLED.
 
@@ -712,24 +769,19 @@ async def test_scheduling_path_present_artifact_disabled_skips_enhancement(tmp_p
     PRESENT/ENABLED assertion in TEST B non-vacuous.
     """
     channel_key = "move2japan"
-    video_id = "vid1"
+    video_id = "aaaaaaaaaaa"
     artifact_path = _write_artifact(tmp_path, monkeypatch, channel_key, video_id)
     assert artifact_path.exists()
 
     monkeypatch.setenv("YT_SCHEDULER_INDEX_WEAVE_ENABLED", "false")
 
-    scheduler = _make_scheduler()
+    scheduler = scheduling_calendar
 
     await scheduler.run_scheduling_cycle(max_videos=1, update_metadata=True)
 
-    scheduler.dom.navigate_to_video.assert_called_with("vid1")
+    scheduler.dom.navigate_to_video.assert_called_with("aaaaaaaaaaa")
     assert scheduler.dom.schedule_video.call_count == 1
-    assert scheduler.dom.edit_description.call_count >= 1
-    desc_args, _ = scheduler.dom.edit_description.call_args
-    written_description = desc_args[0]
-    assert _TWIN_MARKER not in written_description, (
-        "twin block must be ABSENT when YT_SCHEDULER_INDEX_WEAVE_ENABLED=false"
-    )
+    scheduler.dom.edit_description.assert_not_called()
 
 
 async def test_update_metadata_logs_index_context_marker(tmp_path, monkeypatch, caplog):
@@ -742,12 +794,12 @@ async def test_update_metadata_logs_index_context_marker(tmp_path, monkeypatch, 
     import logging
 
     # present (artifact written, weave enabled by default)
-    _write_artifact(tmp_path, monkeypatch, "move2japan", "vid1")
+    _write_artifact(tmp_path, monkeypatch, "move2japan", "aaaaaaaaaaa")
     monkeypatch.setenv("YT_SCHEDULER_INDEX_WEAVE_ENABLED", "true")
     scheduler = _make_scheduler()
     with caplog.at_level(logging.INFO):
         await scheduler._update_video_metadata(
-            video_id="vid1",
+            video_id="aaaaaaaaaaa",
             original_title="Original Title",
             date_str="Jun 20, 2026",
             time_str="5:00 PM",
@@ -759,15 +811,15 @@ async def test_update_metadata_logs_index_context_marker(tmp_path, monkeypatch, 
     empty_dir = tmp_path / "empty"
     empty_dir.mkdir()
     monkeypatch.setenv("VIDEO_INDEXER_ARTIFACT_PATH", str(empty_dir))
-    scheduler_missing = _make_scheduler()
+    scheduler_missing = _make_scheduler(video_id="bbbbbbbbbbb")
     with caplog.at_level(logging.INFO):
         await scheduler_missing._update_video_metadata(
-            video_id="vid_absent",
+            video_id="bbbbbbbbbbb",
             original_title="Original Title",
             date_str="Jun 20, 2026",
             time_str="5:00 PM",
         )
-    assert "index_context=missing" in caplog.text
+    assert "index_context=missing_or_ineligible" in caplog.text
 
     # disabled (weave env switch off)
     caplog.clear()
@@ -775,7 +827,7 @@ async def test_update_metadata_logs_index_context_marker(tmp_path, monkeypatch, 
     scheduler_disabled = _make_scheduler()
     with caplog.at_level(logging.INFO):
         await scheduler_disabled._update_video_metadata(
-            video_id="vid1",
+            video_id="aaaaaaaaaaa",
             original_title="Original Title",
             date_str="Jun 20, 2026",
             time_str="5:00 PM",

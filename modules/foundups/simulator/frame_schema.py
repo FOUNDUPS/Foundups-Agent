@@ -6,7 +6,7 @@ Animation must consume snapshots only and never mutate simulator state.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, List, Mapping
+from typing import Dict, List, Mapping, Optional
 
 
 @dataclass(frozen=True)
@@ -50,6 +50,57 @@ class MetricsFrame:
     allocation_fi_total: float
 
 
+CANONICAL_WORK_STATES = (
+    "spawn",
+    "claim",
+    "progress",
+    "complete",
+    "fail",
+    "cancel",
+    "stale",
+    "unknown",
+)
+
+
+@dataclass(frozen=True)
+class WorkUnitFrame:
+    """Read-only observed state of a single FoundUps work unit."""
+
+    work_id: str
+    title: str
+    canonical_state: str
+    raw_status: str
+    source_table: str
+    owner_agent: str | None = None
+    verifier_agent: str | None = None
+    updated_at: str | None = None
+    expires_at: str | None = None
+    effect_evidence: bool = True
+    stale: bool = False
+    unknown_reason: str | None = None
+    parent_work_id: Optional[str] = None
+    work_order_id: Optional[str] = None
+    swarm_lane: Optional[str] = None
+    lease_active: bool = False
+
+
+@dataclass(frozen=True)
+class WorkTelemetrySnapshot:
+    """Bounded read-only telemetry snapshot for observable swarm rendering."""
+
+    source_mode: str
+    freshness: str
+    observed_at: str
+    ttl_seconds: float
+    counts_by_state: dict[str, int]
+    work_units: list[WorkUnitFrame]
+    observation_only: bool = True
+    authority: str = "none"
+    age_seconds: float | None = None
+    latest_event_at: str | None = None
+    errors: list[str] | None = None
+
+
 @dataclass(frozen=True)
 class SystemStateFrame:
     tick: int
@@ -59,6 +110,7 @@ class SystemStateFrame:
     pools: PoolFrame
     metrics: MetricsFrame
     recent_events: List[str]
+    work_telemetry: WorkTelemetrySnapshot | None = None
 
 
 FRAME_SCHEMA_VERSION = "1.0.0"

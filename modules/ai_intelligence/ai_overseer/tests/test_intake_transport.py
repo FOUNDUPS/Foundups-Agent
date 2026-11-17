@@ -195,6 +195,34 @@ def test_clean_body_maps_to_proposal_fields():
     assert "Kei trucks" in env["description"]
 
 
+@pytest.mark.parametrize("form", ["mapping", "text", "bytes"])
+def test_transport_reference_urls_preserved_and_detached(form):
+    body = _clean_body_dict()
+    refs = ["https://example.com/second", "http://example.com/first",
+            "https://example.com/second"]
+    body["reference_urls"] = refs
+    expected = list(refs)
+    encoded = body if form == "mapping" else json.dumps(body)
+    if form == "bytes":
+        encoded = encoded.encode("utf-8")
+    spy = SpyProvider()
+    result = _call(headers={"Authorization": f"Bearer {_session_token()}"},
+                   body=encoded, _provider=spy)
+    assert result.status == "created"
+    assert len(spy.calls) == 1
+    assert result.envelope["prior_art"] == expected
+    assert result.envelope["prior_art"] is not refs
+    assert refs == expected
+    assert result.envelope["requested_by"] == "alice"
+    assert result.envelope["lifecycle_stage"] == "idea"
+    assert result.envelope["binding_state"] == "unbound"
+    assert result.envelope["external_repo_requested"] is False
+    refs.pop()
+    assert result.envelope["prior_art"] == expected
+    result.envelope["prior_art"].append("https://example.com/output-only")
+    assert refs == expected[:-1]
+
+
 def test_envelope_requested_by_is_verified_handle_not_body_requester_handle():
     body = _clean_body_dict()
     body["requester_handle"] = "attacker_claimed_handle"
