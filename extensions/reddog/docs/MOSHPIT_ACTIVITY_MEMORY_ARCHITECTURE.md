@@ -125,6 +125,67 @@ RESEARCH / PRE-LAUNCH FOUNDATION
 
 The oldest/origin material remains at the bottom. New material is prepended. This ordering is a **view rule**, not a storage rule.
 
+## Conversation navigation and pins (specified, not implemented)
+
+012's RedDog conversation is also a Moshpit working surface: useful messages,
+Markdown blocks and artifacts should remain easy to find as discussion moves
+between topics. This navigation view complements the project activity projection;
+it does not turn every conversational utterance into an activity event.
+
+| View or interaction | Required behavior |
+|---|---|
+| Conversation history | Latest messages sit near the bottom/composer. Scrolling upward reveals older history. |
+| Project activity/audit projection | Retain the existing newest-day/newest-event-first view, including its JST conversion. |
+| Pin a source | Pin/unpin a message, Markdown block or artifact from its contextual action. |
+| Open pins | One thumb-reachable pin icon near the existing bottom conversation controls opens the scoped pin tray. |
+| Select a pin | Navigate to and highlight the original source, loading only its required history range if necessary. |
+| Continue browsing | Preserve the reading anchor during history loading, live replies, pin-tray navigation and return. |
+
+Conversation ordering is a presentation rule, independent of storage order or the
+activity renderer. New replies must not force a reader back to the bottom while
+they are examining history. Provide a return-to-latest action when appropriate.
+The pin tray must respect the phone safe area and composer, with equivalent
+keyboard/mouse access and accessible labels/focus; it is not another permanent
+toolbar or a second conversation surface.
+
+### Pin references and lifecycle
+
+Persist a pin as a reference through the existing principal-scoped conversation /
+Breadcrumb / Brain-Memex owners. Resolve the actual owner before implementing;
+do not create a separate Moshpit database or use browser storage as authority.
+The reference must bind principal, FoundUp/project, session/thread, stable source
+message/block/artifact identity, creator and pin timestamp. Bind an artifact
+revision when a specific version is intended. A display label/excerpt is a
+projection, not a replacement copy of canonical content.
+
+Re-pinning the same source must not create duplicates. Unpinning removes only the
+pin reference. Reload/reconnect should recover authorized pins from their owner.
+Deleted, expired, inaccessible or superseded sources need explicit states; never
+silently retarget a pin to different content. Recheck access at resolution and
+rendering, and withhold excerpts when access has been revoked. A pin does not
+change disclosure, establish approval/completion, or automatically inject its
+content into a model's context.
+
+### Wave reuse and smallest prototype
+
+Inspect the existing Google Wave-inspired GotJunk message owners under
+`modules/foundups/gotjunk/frontend/src/message/` and
+`modules/foundups/gotjunk/frontend/components/MessageThreadPanel.tsx` for stable
+message identity, persistence, synchronization, permissions and history rendering.
+They are reuse candidates, not evidence that RedDog already integrates Wave or
+supports pins. Reconcile their message order and scrolling behavior before reuse.
+
+First verify a bounded soft-proto: pin one message and one Markdown/artifact
+reference, open the bottom pin tray, jump into older paged history, then return
+without losing reading position. Exercise new replies while reading, duplicate
+pins, unpin, reload, changed/deleted sources and cross-principal denial. Preserve
+the separate activity ordering. Phone-sized preview, keyboard/mouse checks and
+physical-phone acceptance precede any claim of a working phone feature.
+
+This section records a product requirement from the conversation prototype.
+The current host chat does not gain a pin button from this documentation edit.
+Implementation remains a planned slice in [the RedDog roadmap](../ROADMAP.md#moshpit-conversation-navigation-and-pins-planned).
+
 ## Retrieval Contract for RedDog
 
 RedDog must be able to answer compactly when 012 asks variants of:
