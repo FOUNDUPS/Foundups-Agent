@@ -1,3 +1,23 @@
+## 2026-11-17 — Reconcile PR #1642 Moshpit principal-significance gate and 0102-delegated attribution
+
+- Reconciled PR #1642 unique Moshpit specification deltas into the canonical
+  `docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md`, `ROADMAP.md`, and `HOLOINDEX.md`
+  owners on top of `origin/main` while omitting the 3 obsolete underscored
+  `MOSH_PIT_*` paths banned by canonical naming rules and preserving all PR #2419
+  conversation/pin/ordering/Muzzle/AutoPost/DAEmon contracts.
+- Added the deterministic principal-significance inclusion gate (`include` /
+  `exclude` / `needs_resolution`) for project Moshpit activity events while keeping
+  recoverable conversation history and pinned sources explicitly separate.
+- Added `0102-delegated` consequential-result attribution, `EVIDENCED` truth
+  classification, candidate-event resolution fields, updated daily reconciliation
+  questions, and the 14 focused implementation acceptance test cases.
+- Explicitly preserved Contacts/native Docs and read-only Memex emitter
+  boundaries, corrected stale HoloIndex guidance to use only the governed
+  `WSP_00` / WRE / CI maintenance owner, and affirmed no memory write, outbound
+  send, or worker/runtime admission from documentation acceptance.
+
+WSP references: WSP_00, WSP_15, WSP_22, WSP_50, WSP_97.
+
 ## 2026-11-17 - Specify Moshpit pins and conversation navigation
 
 - Added a planned message/Markdown/artifact pin contract to the existing Moshpit

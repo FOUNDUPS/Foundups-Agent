@@ -25,7 +25,7 @@ Local retrieval manifest for the RedDog extension thin-client lane.
 - `docs/CONTACT_MEMORY_ARCHITECTURE.md` - principal-scoped relationship memory: encrypted capture, entity/event graph, semantic retrieval, provenance, AutoPost ingest, Breadcrumb/Brain/Memex projection linkage, and Lick encounter/identity linkage
 - `docs/CONTACT_COMMUNICATION_ACTION_PROTOCOL.md` - manual pre-compose identity/context policy; index-first discovery does not outrank current Contacts or fresh provider routing. Existing Python V3 sender, Contacts and native Docs owners retain authority; JS compatibility stays BLOCK. Contact Memory automation remains specified, not implemented.
 - `docs/contact_research/FUKUI_CITY_COUNCIL_PUBLIC_CONTACTS_2026-09-11.md` - alpha evidence seed for all 31 sitting Fukui City councilors: city-listed phones, verified public political emails/social hubs, purpose labels, provenance, confidence, unresolved contacts and identity-collision warnings
-- `docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md` - Moshpit as a reverse-chronological projection over Breadcrumbs + Brain/Memex; actor attribution, open-loop recall, Git evidence, STT normalization, disclosure views, and RedDog status/history retrieval contract
+- `docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md` - Moshpit as a reverse-chronological projection over Breadcrumbs + Brain/Memex; principal-significance inclusion gate (`include` / `exclude` / `needs_resolution`), `0102-delegated` attribution, `EVIDENCED` truth class, 14 implementation acceptance cases, open-loop recall, Git evidence, STT normalization, disclosure views, and RedDog status/history retrieval contract
 - `docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md#conversation-navigation-and-pins-specified-not-implemented` - planned conversation pin/unpin, bottom pin tray, stable source jumps, older-history-up scrolling and reading-anchor preservation; inspect existing Wave message owners before reuse
 - `docs/MEMEX_PROJECTION_EMITTER_ARCHITECTURE.md` - secure read-only projection/emitter layer for RedDog/founder views; principal+FoundUp+disclosure authorization, deterministic JSON/Markdown rendering, sink isolation, and threat model
 - `docs/prompts/WSP97_M2M_MEMEX_EMITTER_IMPLEMENTATION_PROMPT.md` - implementation work order: WSP_00 intake, WSP 97/HoloIndex ownership discovery, bounded M2M slices, fail-closed security tests, no parallel memory store, no external mutation authority
@@ -73,6 +73,7 @@ Target composition:
 
 ```text
 Breadcrumb history + Brain/Memex current/open state + relevant evidence
+-> principal-significance inclusion gate (012 continuity)
 -> authorized Memex Projection Emitter
 -> project-scoped Moshpit / compact status projection
 -> RedDog / founder view

@@ -339,14 +339,61 @@ The operational spine is:
 -> next/open action retained
 ```
 
-External events enter only when they caused, constrained, validated, or materially changed our work. The Moshpit is not a history of the City, NVIDIA, an investor, or another organization.
+External events enter only when they caused, constrained, validated, rejected, or materially changed our work. The Moshpit is not a history of the City, NVIDIA, an investor, or another organization.
 
 Examples:
 
 - `012: met Sano; presented reuse concept.`
+- `012 + 0102: strengthened Document 03 with investment, financing and 60-day FS logic; became primary economic support document.`
+- `0102-delegated: sent approved technical-review outreach; Aoki reply closed expert lead.`
 - `0102: eSingularity PWA moved into canonical FoundUps module; PR #1608.`
 - `012 + 0102: Japan/NVIDIA compute-infrastructure research changed viability assessment; active collateral work began.`
 - `PC: quorum established; second meeting scheduled.`
+
+### Principal-significance inclusion gate (include / exclude / needs_resolution)
+
+This deterministic inclusion gate governs **project Moshpit activity/audit events**, while **recoverable RedDog conversation history (`conversation.message`) and pinned sources (`pin.item`) remain separate** so a conversational turn or pinned source does not need to be certified project truth.
+
+- **`include`** when **at least one** canonical test holds:
+  1. **`012` physical-world action** — meeting, protest, visit, call, encounter, field test, presentation, inspection, signing, payment, or travel for project execution.
+  2. **`012` decision** — approved/rejected strategy, changed direction, selected plan, created commitment, or assigned delegated work.
+  3. **`012 + 0102` joint work** — materially changed a document, model, financial plan, architecture, campaign, artifact, stakeholder position, or implementation direction.
+  4. **External response to our action** — reply, approval, rejection, commitment, contradiction, funding/technical evidence, or stakeholder change that materially changes next action.
+  5. **Consequential `0102-delegated` result** — `0102` completed an authorized action or artifact that materially changed principal or project state, even when `012` was not actively present during execution.
+  6. **Milestone / state transition** — project moved from idea to outreach, draft to submitted, contact to committee member, hypothesis to validated/rejected, or open loop to closed.
+- **`exclude`** (retain in technical Breadcrumbs/logs rather than the project Moshpit):
+  - internal `0102` searches and reasoning steps;
+  - formatting-only document edits;
+  - tool retries and plumbing;
+  - failed queries with no consequence;
+  - routine code iterations with no project-state change;
+  - every-utterance logging.
+- **`needs_resolution`**: hold for concise `012` clarification rather than guessing or promoting inference to fact when actor/contact identity is ambiguous, causation would otherwise be overstated, sensitive disclosure class is uncertain, or event time materially matters and cannot be bounded.
+
+Candidate project-Moshpit events should be capable of resolving to:
+
+```text
+event_id
+event_time | approximate_time | date_only
+principal_id = 012
+actor = 012 | 012 + 0102 | 0102-delegated | PC | external
+foundup_id / project_scope
+action
+counterparty_or_place
+state_change
+status = completed | open | blocked | proposed | superseded
+truth_class = observed | reported_by_012 | evidenced | inferred | proposed
+evidence_refs[]
+contact_refs[]
+artifact_refs[]
+open_loop_refs[]
+disclosure_class
+supersedes_event_id?
+```
+
+The compact human project-Moshpit line renders as:
+
+`Date/time -> 012 action/decision -> counterpart/place -> resulting state change -> evidence/status`
 
 ## Event / Truth Classification
 
@@ -354,6 +401,7 @@ Useful projections must preserve the distinction between:
 
 - **OBSERVED** — directly evidenced event/result;
 - **REPORTED_BY_012** — 012's contemporaneous account;
+- **EVIDENCED** — supported by durable external or artifact evidence;
 - **INFERRED** — derived relationship/significance;
 - **PROPOSED** — future action or strategy, not accomplished fact.
 
@@ -363,13 +411,17 @@ Example: `zazen protest occurred` and `decision was postponed` can coexist as hi
 
 Actor labels are provenance, not ownership partitions:
 
-- **012** — principal's physical-world execution;
-- **0102** — digital-twin research, documentation, architecture, coding, analysis, artifacts;
-- **012 + 0102** — genuinely joint decision/discovery/work product;
+- **012** — principal's physical-world execution (acted, spoke, decided, approved, witnessed);
+- **0102** — digital-twin research, documentation, architecture, coding, analysis, artifacts (remains in broad Breadcrumbs unless passing the principal-significance gate);
+- **012 + 0102** — genuinely joint decision/discovery/work product where `012` directed or shaped a material project-state change;
+- **0102-delegated** — authorized `0102` execution completed without `012` present whose **result** materially changed principal or project state (log the consequential result, not internal searches/retries);
 - **PC** — formal committee action after organizational authority exists;
 - **External** — included only when its action materially changed ours.
 
-The founding-operation convention remains **our work**.
+The founding-operation convention remains **our work** while preserving exact actor provenance:
+
+- `GOOD`: `0102-delegated sent the approved university technical-review outreach; Aoki replied outside expertise, closing that expert lead.`
+- `BAD`: `0102 searched 14 websites, retried Gmail search twice, and reformatted six paragraphs.`
 
 ## STT / Alias Normalization
 
@@ -407,15 +459,16 @@ Do not turn the Moshpit into a complete repository changelog.
 
 A bounded curator/logging worker can reconcile candidate Breadcrumbs asynchronously and at a daily boundary. It should ask:
 
-1. What materially happened?
-2. Is it already represented by another receipt?
-3. What evidence supports it?
-4. Which actor owns execution provenance?
-5. Which FoundUp/project does it belong to?
-6. Is the time exact, approximate, or unknown?
-7. Is the item completed, open, blocked, or proposed?
-8. Does Brain/Memex already retain the associated open loop?
-9. Is human resolution required for identity, causation, or disclosure ambiguity?
+1. What did `012` materially do or decide?
+2. What joint `012 + 0102` work changed project state?
+3. What consequential `0102-delegated` results changed principal or project state?
+4. What external responses changed next action?
+5. What milestones or open loops changed state?
+6. Which candidate items are merely machine-internal activity (searches, retries, plumbing, formatting) and remain excluded from project Moshpit?
+7. Is the item already represented by another receipt?
+8. What evidence supports it (`OBSERVED`, `REPORTED_BY_012`, `EVIDENCED`, `INFERRED`, `PROPOSED`)?
+9. Which actor (`012`, `012 + 0102`, `0102-delegated`, `PC`, `External`) owns execution provenance, and which FoundUp/project does it belong to?
+10. Is the time exact, approximate, or unknown, is the item completed/open/blocked/proposed/superseded, does Brain/Memex already retain the associated open loop, and is `needs_resolution` required for identity, causation, or disclosure ambiguity?
 
 The worker creates/curates Breadcrumb evidence and Brain/Memex candidates; it does not maintain a second historical database.
 
@@ -432,12 +485,13 @@ Redaction is a projection policy, not a mutation of canonical evidence.
 
 ## Google Doc Projection
 
-A living Google Doc is appropriate as a convenient stakeholder/human Moshpit view for YUMORI. It should be generated from approved Breadcrumb/Brain/Memex state and should not become the sole canonical memory store.
+A living Google Doc is appropriate as a convenient stakeholder/human Moshpit view for YUMORI. It should be generated from approved Moshpit-qualified Breadcrumb/Brain/Memex state and should not become the sole canonical memory store.
 
 Target:
 
 ```text
 Breadcrumbs + Brain/Memex
+-> principal-significance inclusion gate
 -> Moshpit projection
 -> disclosure filter
 -> prepend/sync living Google Doc
@@ -460,16 +514,38 @@ This machinery normally stays beneath the RedDog attention boundary. Surface it 
 
 ## Implementation Direction
 
-Do not build a separate Moshpit store. Extend existing surfaces in this order:
+Do not build a separate Moshpit store. Reuse existing memory, contact, and projection owners (`modules/communication/moltbot_bridge/src/openclaw_memory_queries.py`, `foundup_memex_current_state.py`, `foundup_brain_current_state.py`, `CONTACT_MEMORY_ARCHITECTURE.md`, `CONTACT_COMMUNICATION_ACTION_PROTOCOL.md`, and `MEMEX_PROJECTION_EMITTER_ARCHITECTURE.md`) without overriding Contacts/native Docs authority or read-only Memex emitter boundaries. Extend existing surfaces in this order:
 
-1. define a project/FoundUp-aware Breadcrumb event contract;
-2. ensure relevant 012/0102/PC events can enter that trail with provenance;
-3. ensure Brain/Memex can consolidate completion/open-loop state from those receipts;
-4. extend existing `query_past_work()` + `query_unresolved_work()` retrieval to emit a unified project activity projection;
-5. add Git/PR/artifact receipt matching;
-6. add the reverse-chronological Moshpit renderer;
-7. add optional governed Google Doc synchronization;
-8. keep RedDog output concise by default and expand full history only on request.
+1. define/extend the project/FoundUp-aware Breadcrumb event contract;
+2. ensure relevant `012`, `012 + 0102`, `0102-delegated`, `PC`, and qualifying external events enter with provenance;
+3. implement the deterministic principal-significance inclusion gate (`include` / `exclude` / `needs_resolution`) for project Moshpit events while keeping recoverable conversation history and pinned sources separate;
+4. ensure Brain/Memex consolidates completion/open-loop state from those receipts;
+5. extend existing `query_past_work()` + `query_unresolved_work()` retrieval to emit a unified project activity projection;
+6. add Git/PR/artifact receipt matching;
+7. add the reverse-chronological project Moshpit renderer;
+8. add optional governed Google Doc synchronization without making Google Docs canonical storage or granting automatic write authority;
+9. keep RedDog output concise by default and expand full history only on request.
+
+### Implementation acceptance cases and governance boundaries
+
+Status of runtime gate and unified renderer: `SPECIFIED_NOT_IMPLEMENTED`. Accepting this specification grants **no** memory write, communication send, or worker/runtime admission. During discovery or implementation, **never reindex or repair stale HoloIndex inline during a query or feature slice; preserve freshness/index-gap diagnostics and route index maintenance through the governed `WSP_00` / WRE / CI maintenance owner.**
+
+Focused implementation acceptance test cases required before claiming runtime completion:
+
+1. `012` field action -> `include`;
+2. `012` decision -> `include`;
+3. `012 + 0102` document or financial-model milestone -> `include`;
+4. consequential `0102-delegated` result -> `include` (result only, not internal retries);
+5. `0102` internal search or tool retry -> `exclude`;
+6. formatting-only document edit -> `exclude`;
+7. external reply changing next action -> `include`;
+8. unsupported causation -> marked `inferred` / `needs_resolution`, never promoted to fact;
+9. duplicate receipts -> deduplicated into one Moshpit event;
+10. contact-memory and Moshpit share one underlying event without overriding Contact authority or read-only Memex emitter boundaries;
+11. principal or disclosure mismatch -> fail closed;
+12. reverse-chronological project-Moshpit renderer ordering preserved independently of conversation ordering;
+13. open-loop retrieval combines Brain/Memex state;
+14. STT alias normalization preserves original source text.
 
 ## Non-Goals / Safety
 
@@ -477,6 +553,7 @@ Do not build a separate Moshpit store. Extend existing surfaces in this order:
 - no automatic public posting;
 - no silent sensitive-identity inference;
 - no conversion of every utterance into a historical event;
+- no generic `0102` background activity promoted into project Moshpit without passing the principal-significance gate;
 - no destruction of source text during normalization;
 - no causal claim without evidence;
 - no principal-boundary leakage;

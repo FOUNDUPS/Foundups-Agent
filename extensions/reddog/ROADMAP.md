@@ -458,6 +458,13 @@ Status: `SPECIFIED_NOT_IMPLEMENTED`. Canonical requirement:
   reconciliation. Verify pin persistence/isolation, source lifecycle, pagination,
   focus and scroll behavior in isolated soft-proto; desktop and physical-phone
   acceptance are outstanding. A documented requirement is not runtime readiness.
+- Reconcile project-Moshpit activity filtering through the canonical
+  [principal-significance inclusion gate](docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md#principal-significance-inclusion-gate-include--exclude--needs_resolution)
+  (`include` / `exclude` / `needs_resolution`), `0102-delegated` consequential-result
+  attribution, `EVIDENCED` truth class, and 14 acceptance cases while keeping
+  recoverable conversation history and pinned sources separate, preserving Contact
+  and read-only Memex emitter boundaries, and routing stale HoloIndex updates
+  strictly through the governed `WSP_00` / WRE / CI maintenance owner.
 
 This is part of the existing Moshpit/RedDog roadmap, not a parallel Wave project.
 
